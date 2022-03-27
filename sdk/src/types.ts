@@ -6,6 +6,8 @@ import {
   typedData,
   AddTransactionResponse,
   Signature,
+  Invocation,
+  EstimateFeeResponse as StarknetEstimateFeeResponse,
 } from "starknet";
 import { BigNumberish } from "starknet/dist/utils/number";
 
@@ -54,6 +56,18 @@ export interface DeployContractRequest extends RawRequest {
 export interface DeployContractResponse extends RawResponse {
   method: "deploy-contract";
   result?: AddTransactionResponse;
+}
+
+export interface EstimateFeeRequest extends RawRequest {
+  method: "estimate-fee";
+  params: {
+    invocation: Invocation;
+  };
+}
+
+export interface EstimateFeeResponse extends RawResponse {
+  method: "estimate-fee";
+  result?: StarknetEstimateFeeResponse;
 }
 
 export interface ExecuteRequest extends RawRequest {
@@ -140,6 +154,7 @@ export type Request =
   | ProbeRequest
   | ConnectRequest
   | DeployContractRequest
+  | EstimateFeeRequest
   | ExecuteRequest
   | SignMessageRequest
   | HashMessageRequest
@@ -156,6 +171,7 @@ export type Response =
   | RawResponse
   | ProbeResponse
   | DeployContractResponse
+  | EstimateFeeResponse
   | ConnectResponse
   | SignMessageResponse
   | HashMessageResponse

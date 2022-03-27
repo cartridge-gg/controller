@@ -9,10 +9,13 @@ import {
   typedData,
   number,
   Provider,
+  Invocation,
+  EstimateFeeResponse as StarknetEstimateFeeResponse,
 } from "starknet";
 import { Messenger } from "./messenger";
 import {
   DeployContractResponse,
+  EstimateFeeResponse,
   ExecuteResponse,
   GetNonceResponse,
   HashMessageResponse,
@@ -50,6 +53,34 @@ export class Account extends Provider implements AccountInterface {
       params: {
         payload,
         abi,
+      },
+    });
+
+    if (response.error) {
+      throw new Error(response.error as string);
+    }
+
+    return response.result;
+  }
+
+  /**
+   * Estimate Fee for a method on starknet
+   *
+   * @param invocation the invocation object containing:
+   * - contractAddress - the address of the contract
+   * - entrypoint - the entrypoint of the contract
+   * - calldata - (defaults to []) the calldata
+   * - signature - (defaults to []) the signature
+   *
+   * @returns response from addTransaction
+   */
+  async estimateFee(
+    invocation: Invocation
+  ): Promise<StarknetEstimateFeeResponse> {
+    const response = await this.messenger.send<EstimateFeeResponse>({
+      method: "deploy-contract",
+      params: {
+        invocation,
       },
     });
 
