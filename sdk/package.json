@@ -5,12 +5,10 @@
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
-  "license": "MIT",
-  "private": true,
+  "private": false,
   "scripts": {
     "build": "rimraf ./dist && BASE_URL=https://cartridge.gg ORIGIN=https://cartridge.gg rollup -c",
     "dev": "BASE_URL=http://localhost:3000 ORIGIN='*' rollup -c -w",
-    "prepublishOnly": "yarn test",
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
     "test:watch": "jest --watchAll",
     "test": "jest --ci --runInBand"
