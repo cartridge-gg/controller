@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext"]
+  },
+  "include": ["src"]
+}
