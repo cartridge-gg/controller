@@ -20,6 +20,9 @@ export type Scope = {
 
 export interface ProbeRequest extends RawRequest {
   method: "probe";
+  params: {
+    scopes?: Scope[];
+  };
 }
 
 export interface ProbeResponse extends RawRequest {
