@@ -79,12 +79,14 @@ export interface ExecuteRequest extends RawRequest {
     transactions: Call | Call[];
     abis?: Abi[];
     transactionsDetail?: InvocationsDetails;
+    wait?: boolean;
   };
 }
 
 export interface ExecuteResponse extends RawResponse {
   method: "execute";
   result?: AddTransactionResponse;
+  scopes?: Scope[];
 }
 
 export interface SignMessageRequest extends RawRequest {

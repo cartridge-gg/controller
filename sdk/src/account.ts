@@ -19,6 +19,9 @@ import {
   ExecuteResponse,
   GetNonceResponse,
   HashMessageResponse,
+  ProbeRequest,
+  ProbeResponse,
+  Scope,
   SignMessageResponse,
   VerifyMessageHashResponse,
   VerifyMessageResponse,
@@ -108,12 +111,38 @@ export class Account extends Provider implements AccountInterface {
     abis?: Abi[],
     transactionsDetail?: InvocationsDetails
   ): Promise<AddTransactionResponse> {
-    const response = await this.messenger.send<ExecuteResponse>({
+    let response = await this.messenger.send<ExecuteResponse>({
       method: "execute",
       params: {
         transactions,
         abis,
         transactionsDetail,
+      },
+    });
+
+    if (response.result) {
+      return response.result;
+    }
+
+    if (response.error && response.error !== "missing scopes") {
+      throw new Error(response.error as string);
+    }
+
+    window.open(
+      `process.env.BASE_URL/wallet/approve?origin=${encodeURIComponent(
+        window.origin
+      )}&scopes=${encodeURIComponent(JSON.stringify(response.scopes))}`,
+      "_blank",
+      "height=600,width=400"
+    );
+
+    response = await this.messenger.send<ExecuteResponse>({
+      method: "execute",
+      params: {
+        transactions,
+        abis,
+        transactionsDetail,
+        wait: true,
       },
     });
 
