@@ -1,6 +1,7 @@
+import cuid from "cuid";
 import { Account } from "./account";
 import { Messenger } from "./messenger";
-import { ConnectResponse, ProbeResponse, Scope } from "./types";
+import { ConnectRequest, ConnectResponse, ProbeResponse, Scope } from "./types";
 
 export class Cartridge {
   private selector = "cartridge-messenger";
@@ -41,10 +42,12 @@ export class Cartridge {
       return new Account(prob.result.address, this.messenger);
     }
 
+    const id = cuid();
+
     window.open(
       `process.env.BASE_URL/wallet/connect?origin=${encodeURIComponent(
         window.origin
-      )}&scopes=${encodeURIComponent(JSON.stringify(this.scopes))}`,
+      )}&id=${id}`,
       "_blank",
       "height=600,width=400"
     );
@@ -52,9 +55,10 @@ export class Cartridge {
     const response = await this.messenger.send<ConnectResponse>({
       method: "connect",
       params: {
+        id,
         scopes: this.scopes,
       },
-    });
+    } as ConnectRequest);
 
     return new Account(response.result.address, this.messenger);
   }

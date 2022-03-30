@@ -35,6 +35,7 @@ export interface ProbeResponse extends RawRequest {
 export interface ConnectRequest extends RawRequest {
   method: "connect";
   params: {
+    id: string;
     scopes: Scope[];
   };
 }
@@ -76,10 +77,10 @@ export interface EstimateFeeResponse extends RawResponse {
 export interface ExecuteRequest extends RawRequest {
   method: "execute";
   params: {
+    id?: string;
     transactions: Call | Call[];
     abis?: Abi[];
     transactionsDetail?: InvocationsDetails;
-    wait?: boolean;
   };
 }
 

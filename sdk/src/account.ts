@@ -1,3 +1,4 @@
+import cuid from "cuid";
 import {
   AccountInterface,
   DeployContractPayload,
@@ -16,6 +17,7 @@ import { Messenger } from "./messenger";
 import {
   DeployContractResponse,
   EstimateFeeResponse,
+  ExecuteRequest,
   ExecuteResponse,
   GetNonceResponse,
   HashMessageResponse,
@@ -128,10 +130,12 @@ export class Account extends Provider implements AccountInterface {
       throw new Error(response.error as string);
     }
 
+    const id = cuid();
+
     window.open(
       `process.env.BASE_URL/wallet/approve?origin=${encodeURIComponent(
         window.origin
-      )}&scopes=${encodeURIComponent(JSON.stringify(response.scopes))}`,
+      )}&id=${id}`,
       "_blank",
       "height=600,width=400"
     );
@@ -139,12 +143,12 @@ export class Account extends Provider implements AccountInterface {
     response = await this.messenger.send<ExecuteResponse>({
       method: "execute",
       params: {
+        id,
         transactions,
         abis,
         transactionsDetail,
-        wait: true,
       },
-    });
+    } as ExecuteRequest);
 
     if (response.error) {
       throw new Error(response.error as string);
