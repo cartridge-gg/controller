@@ -5,7 +5,6 @@
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
-  "private": false,
   "scripts": {
     "build": "rimraf ./dist && BASE_URL=https://cartridge.gg ORIGIN=https://cartridge.gg rollup -c",
     "dev": "BASE_URL=http://localhost:3000 ORIGIN='*' rollup -c -w",
@@ -47,6 +46,7 @@
     "moduleNameMapper": {}
   },
   "dependencies": {
+    "cuid": "^2.1.8",
     "starknet": "^3.5.1"
   }
 }

@@ -1,14 +1,14 @@
 import { Request, Response } from "./types";
+import * as cuid from "cuid";
 
 type Message<T = Request | Response> = {
-  id?: number;
+  id?: string;
   type: "request" | "response";
   target: string;
   payload: T;
 };
 
 export class Messenger {
-  private nonce = 0;
   private target: Window;
   private onRequestHandler: (
     request: Request,
@@ -61,7 +61,7 @@ export class Messenger {
   }
 
   send<T = Response>(request: Request): Promise<T> {
-    const id = this.nonce;
+    const id = cuid();
     if (!this.target) {
       throw new Error("read only");
     }
@@ -78,7 +78,6 @@ export class Messenger {
       },
       "process.env.ORIGIN"
     );
-    this.nonce++;
 
     return new Promise((resolve, reject) => {
       const handler = ({ data }: MessageEvent<Message<T>>) => {
