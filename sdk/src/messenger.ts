@@ -1,5 +1,5 @@
 import { Request, Response } from "./types";
-import * as cuid from "cuid";
+import cuid from "cuid";
 
 type Message<T = Request | Response> = {
   id?: string;
