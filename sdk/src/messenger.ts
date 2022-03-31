@@ -1,7 +1,7 @@
 import { Request, Response } from "./types";
 import cuid from "cuid";
 
-type Message<T = Request | Response> = {
+export type Message<T = Request | Response> = {
   id?: string;
   type: "request" | "response";
   target: string;

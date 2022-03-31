@@ -52,6 +52,7 @@ export interface ConnectResponse extends RawRequest {
 export interface DeployContractRequest extends RawRequest {
   method: "deploy-contract";
   params: {
+    id: string;
     payload: DeployContractPayload;
     abi?: Abi;
   };
@@ -93,6 +94,7 @@ export interface ExecuteResponse extends RawResponse {
 export interface SignMessageRequest extends RawRequest {
   method: "sign-message";
   params: {
+    id: string;
     typedData: typedData.TypedData;
   };
 }

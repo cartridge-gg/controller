@@ -1,6 +1,6 @@
 import cuid from "cuid";
 import { Account } from "./account";
-import { Messenger } from "./messenger";
+import { Message, Messenger } from "./messenger";
 import { ConnectRequest, ConnectResponse, ProbeResponse, Scope } from "./types";
 
 export class Cartridge {
@@ -47,7 +47,7 @@ export class Cartridge {
     window.open(
       `process.env.BASE_URL/wallet/connect?origin=${encodeURIComponent(
         window.origin
-      )}&id=${id}`,
+      )}&id=${id}&scopes=${encodeURIComponent(JSON.stringify(this.scopes))}`,
       "_blank",
       "height=600,width=400"
     );
@@ -64,5 +64,5 @@ export class Cartridge {
   }
 }
 
-export { Messenger };
+export { Message, Messenger };
 export * from "./types";

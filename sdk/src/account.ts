@@ -21,9 +21,6 @@ import {
   ExecuteResponse,
   GetNonceResponse,
   HashMessageResponse,
-  ProbeRequest,
-  ProbeResponse,
-  Scope,
   SignMessageResponse,
   VerifyMessageHashResponse,
   VerifyMessageResponse,
@@ -53,9 +50,20 @@ export class Account extends Provider implements AccountInterface {
     payload: DeployContractPayload,
     abi?: Abi
   ): Promise<AddTransactionResponse> {
+    const id = cuid();
+
+    window.open(
+      `process.env.BASE_URL/wallet/deploy?origin=${encodeURIComponent(
+        window.origin
+      )}&id=${id}`,
+      "_blank",
+      "height=600,width=400"
+    );
+
     const response = await this.messenger.send<DeployContractResponse>({
       method: "deploy-contract",
       params: {
+        id,
         payload,
         abi,
       },
@@ -135,7 +143,9 @@ export class Account extends Provider implements AccountInterface {
     window.open(
       `process.env.BASE_URL/wallet/approve?origin=${encodeURIComponent(
         window.origin
-      )}&id=${id}`,
+      )}&id=${id}&scopes=${encodeURIComponent(
+        JSON.stringify(response.scopes)
+      )}`,
       "_blank",
       "height=600,width=400"
     );
@@ -166,9 +176,22 @@ export class Account extends Provider implements AccountInterface {
    * @throws {Error} if the JSON object is not a valid JSON
    */
   async signMessage(typedData: typedData.TypedData): Promise<Signature> {
+    const id = cuid();
+
+    window.open(
+      `process.env.BASE_URL/wallet/sign?origin=${encodeURIComponent(
+        window.origin
+      )}&id=${id}&message=${encodeURIComponent(
+        JSON.stringify(typedData.message)
+      )}`,
+      "_blank",
+      "height=600,width=400"
+    );
+
     const response = await this.messenger.send<SignMessageResponse>({
       method: "sign-message",
       params: {
+        id,
         typedData,
       },
     });
