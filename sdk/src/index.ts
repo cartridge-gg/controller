@@ -7,29 +7,46 @@ export class Cartridge {
   private selector = "cartridge-messenger";
   private messenger?: Messenger;
   private scopes: Scope[] = [];
+  private baseUrl: string = "https://cartridge.gg";
+  private targetOrigin: string = "https://cartridge.gg";
 
-  target = "process.env.BASE_URL/wallet/iframe";
-
-  constructor(scopes?: Scope[]) {
+  constructor(
+    scopes?: Scope[],
+    options?: {
+      baseUrl?: string;
+      targetOrigin?: string;
+    }
+  ) {
     if (scopes) {
       this.scopes = scopes;
+    }
+
+    if (options?.baseUrl) {
+      this.baseUrl = options.baseUrl;
+    }
+
+    if (options?.targetOrigin) {
+      this.targetOrigin = options.targetOrigin;
     }
 
     if (typeof document !== "undefined" && !this.messenger) {
       let iframe = document.getElementById(this.selector) as HTMLIFrameElement;
       if (!!iframe) {
         if (!this.messenger) {
-          this.messenger = new Messenger(iframe.contentWindow);
+          this.messenger = new Messenger(
+            iframe.contentWindow,
+            this.targetOrigin
+          );
         }
         return;
       }
 
       iframe = document.createElement("iframe");
       iframe.id = this.selector;
-      iframe.src = this.target;
+      iframe.src = `${this.baseUrl}/wallet/iframe`;
       iframe.style.setProperty("display", "none");
       document.body.appendChild(iframe);
-      this.messenger = new Messenger(iframe.contentWindow);
+      this.messenger = new Messenger(iframe.contentWindow, this.targetOrigin);
     }
   }
 
@@ -45,7 +62,7 @@ export class Cartridge {
     const id = cuid();
 
     window.open(
-      `process.env.BASE_URL/wallet/connect?origin=${encodeURIComponent(
+      `${this.baseUrl}/wallet/connect?origin=${encodeURIComponent(
         window.origin
       )}&id=${id}&scopes=${encodeURIComponent(JSON.stringify(this.scopes))}`,
       "_blank",

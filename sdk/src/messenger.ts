@@ -10,13 +10,16 @@ export type Message<T = Request | Response> = {
 
 export class Messenger {
   private target: Window;
+  private origin: string;
   private onRequestHandler: (
     request: Request,
     respond: (response: Response) => void
   ) => void;
 
-  constructor(target?: Window) {
+  constructor(target?: Window, origin: string = "https://cartridge.gg") {
     this.target = target;
+    this.origin = origin;
+
     if (
       typeof document !== "undefined" &&
       document.body.getAttribute("cartridge") !== "true"
@@ -76,7 +79,7 @@ export class Messenger {
           ...request,
         },
       },
-      "process.env.ORIGIN"
+      this.origin
     );
 
     return new Promise((resolve, reject) => {

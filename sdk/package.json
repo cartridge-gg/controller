@@ -6,8 +6,8 @@
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "rimraf ./dist && BASE_URL=https://cartridge.gg ORIGIN=https://cartridge.gg rollup -c",
-    "dev": "BASE_URL=http://localhost:3000 ORIGIN='*' rollup -c -w",
+    "build": "rimraf ./dist && rollup -c",
+    "dev": "rollup -c -w",
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
     "test:watch": "jest --watchAll",
     "test": "jest --ci --runInBand"

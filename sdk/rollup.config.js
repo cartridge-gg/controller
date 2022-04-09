@@ -22,8 +22,6 @@ export default {
   plugins: [
     replace({
       preventAssignment: true,
-      "process.env.BASE_URL": process.env.BASE_URL,
-      "process.env.ORIGIN": process.env.ORIGIN,
     }),
     typescript({
       typescript: require("typescript"),

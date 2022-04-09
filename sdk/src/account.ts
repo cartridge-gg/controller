@@ -28,12 +28,23 @@ import {
 
 export class Account extends Provider implements AccountInterface {
   address: string;
-  messenger: Messenger;
+  private messenger: Messenger;
+  private uri: string = "https://cartridge.gg";
 
-  constructor(address: string, messenger: Messenger) {
+  constructor(
+    address: string,
+    messenger: Messenger,
+    options?: {
+      uri?: string;
+    }
+  ) {
     super();
     this.address = address;
     this.messenger = messenger;
+
+    if (options?.uri) {
+      this.uri = options.uri;
+    }
   }
 
   /**
@@ -53,7 +64,7 @@ export class Account extends Provider implements AccountInterface {
     const id = cuid();
 
     window.open(
-      `process.env.BASE_URL/wallet/deploy?origin=${encodeURIComponent(
+      `${this.baseUrl}/wallet/deploy?origin=${encodeURIComponent(
         window.origin
       )}&id=${id}`,
       "_blank",
@@ -141,7 +152,7 @@ export class Account extends Provider implements AccountInterface {
     const id = cuid();
 
     window.open(
-      `process.env.BASE_URL/wallet/approve?origin=${encodeURIComponent(
+      `${this.uri}/wallet/approve?origin=${encodeURIComponent(
         window.origin
       )}&id=${id}&scopes=${encodeURIComponent(
         JSON.stringify(response.scopes)
@@ -179,7 +190,7 @@ export class Account extends Provider implements AccountInterface {
     const id = cuid();
 
     window.open(
-      `process.env.BASE_URL/wallet/sign?origin=${encodeURIComponent(
+      `${this.baseUrl}/wallet/sign?origin=${encodeURIComponent(
         window.origin
       )}&id=${id}&message=${encodeURIComponent(
         JSON.stringify(typedData.message)
