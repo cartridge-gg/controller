@@ -1,4 +1,5 @@
 import cuid from "cuid";
+import { AccountInterface } from "starknet";
 import { Account } from "./account";
 import { Message, Messenger } from "./messenger";
 import { ConnectRequest, ConnectResponse, ProbeResponse, Scope } from "./types";
@@ -9,6 +10,7 @@ export class Cartridge {
   private scopes: Scope[] = [];
   private baseUrl: string = "https://cartridge.gg";
   private targetOrigin: string = "https://cartridge.gg";
+  private account: AccountInterface
 
   constructor(
     scopes?: Scope[],
@@ -38,15 +40,24 @@ export class Cartridge {
             this.targetOrigin
           );
         }
-        return;
+      } else {
+        iframe = document.createElement("iframe");
+        iframe.id = this.selector;
+        iframe.src = `${this.baseUrl}/wallet/iframe`;
+        iframe.style.setProperty("display", "none");
+        document.body.appendChild(iframe);
+        this.messenger = new Messenger(iframe.contentWindow, this.targetOrigin);
       }
+    }
+  }
 
-      iframe = document.createElement("iframe");
-      iframe.id = this.selector;
-      iframe.src = `${this.baseUrl}/wallet/iframe`;
-      iframe.style.setProperty("display", "none");
-      document.body.appendChild(iframe);
-      this.messenger = new Messenger(iframe.contentWindow, this.targetOrigin);
+  async eager() {
+    const prob = await this.messenger.send<ProbeResponse>({
+      method: "probe",
+    });
+
+    if (prob.result?.address) {
+      return new Account(prob.result.address, this.messenger);
     }
   }
 
