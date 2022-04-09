@@ -10,7 +10,8 @@ export class Cartridge {
   private scopes: Scope[] = [];
   private baseUrl: string = "https://cartridge.gg";
   private targetOrigin: string = "https://cartridge.gg";
-  private account: AccountInterface
+  private loading = true
+  private ready_: Promise<boolean>
 
   constructor(
     scopes?: Scope[],
@@ -47,11 +48,22 @@ export class Cartridge {
         iframe.style.setProperty("display", "none");
         document.body.appendChild(iframe);
         this.messenger = new Messenger(iframe.contentWindow, this.targetOrigin);
+        this.ready_ = new Promise((resolve, reject) => {
+          iframe.onload = () => {
+            this.loading = false
+            resolve(true)
+          }
+        })
       }
     }
   }
 
-  async eager() {
+  async ready() {
+    if (!this.loading) return Promise.resolve(true)
+    return this.ready_
+  }
+
+  async probe() {
     const prob = await this.messenger.send<ProbeResponse>({
       method: "probe",
     });
