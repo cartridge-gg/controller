@@ -1,5 +1,4 @@
 import cuid from "cuid";
-import { AccountInterface } from "starknet";
 import { Account } from "./account";
 import { Message, Messenger } from "./messenger";
 import { ConnectRequest, ConnectResponse, ProbeResponse, Scope } from "./types";
@@ -48,13 +47,20 @@ export class Cartridge {
         iframe.style.setProperty("display", "none");
         document.body.appendChild(iframe);
         this.messenger = new Messenger(iframe.contentWindow, this.targetOrigin);
-        this.ready_ = new Promise((resolve, reject) => {
-          iframe.onload = () => {
-            this.loading = false
-            resolve(true)
-          }
-        })
       }
+
+      if (iframe.contentDocument.readyState == 'complete') {
+        this.loading = false
+        this.ready_ = Promise.resolve(true)
+        return
+      }
+
+      this.ready_ = new Promise((resolve, reject) => {
+        iframe.onload = () => {
+          this.loading = false
+          resolve(true)
+        }
+      })
     }
   }
 
@@ -69,7 +75,7 @@ export class Cartridge {
     });
 
     if (prob.result?.address) {
-      return new Account(prob.result.address, this.messenger);
+      return new Account(prob.result.address, this.messenger, { uri: this.baseUrl });
     }
   }
 
@@ -79,7 +85,7 @@ export class Cartridge {
     });
 
     if (prob.result?.address) {
-      return new Account(prob.result.address, this.messenger);
+      return new Account(prob.result.address, this.messenger, { uri: this.baseUrl });
     }
 
     const id = cuid();
@@ -100,7 +106,7 @@ export class Cartridge {
       },
     } as ConnectRequest);
 
-    return new Account(response.result.address, this.messenger);
+    return new Account(response.result.address, this.messenger, { uri: this.baseUrl });
   }
 }
 
