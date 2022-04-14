@@ -11,10 +11,16 @@ export type Message<T = Request | Response> = {
 export class Messenger {
   private target: Window;
   private origin: string;
-  private onRequestHandler: (
-    request: Request,
-    respond: (response: Response) => void
-  ) => void;
+  private pending: MessageEvent<Message<Request>>[] = []
+
+  private defaultHandler = (e: MessageEvent<Message<Request>>) => {
+    if (
+      e.data.target === "cartridge" &&
+      e.data.type === "request"
+    ) {
+      this.pending.push(e)
+    }
+  }
 
   constructor(target?: Window, origin: string = "https://cartridge.gg") {
     this.target = target;
@@ -24,43 +30,57 @@ export class Messenger {
       typeof document !== "undefined" &&
       document.body.getAttribute("cartridge") !== "true"
     ) {
-      window.addEventListener(
-        "message",
-        ({
-          origin,
-          source,
-          data: { id, type, target, payload },
-        }: MessageEvent<Message<Request>>) => {
-          if (
-            target === "cartridge" &&
-            type === "request" &&
-            this.onRequestHandler
-          ) {
-            this.onRequestHandler(payload as Request, (response: Response) => {
-              source.postMessage(
-                {
-                  id,
-                  target: "cartridge",
-                  type: "response",
-                  payload: {
-                    origin: window.origin,
-                    ...response,
-                  },
-                },
-                { targetOrigin: origin }
-              );
-            });
-          }
-        }
-      );
       document.body.setAttribute("cartridge", "true");
     }
+
+    window.addEventListener("message", this.defaultHandler)
   }
 
   onRequest(
     cb: (request: Request, reply: <T = Response>(response: T) => void) => void
   ) {
-    this.onRequestHandler = cb;
+    window.removeEventListener("message", this.defaultHandler)
+
+    const onResponse = ({
+      origin,
+      source,
+      data: { id },
+    }: MessageEvent<Message<Request>>) => (response: Response) => {
+      source.postMessage(
+        {
+          id,
+          target: "cartridge",
+          type: "response",
+          payload: {
+            origin: window.origin,
+            ...response,
+          },
+        },
+        { targetOrigin: origin }
+      );
+    }
+
+    for (let i = 0; i < this.pending.length; i++) {
+      const {
+        data: { payload },
+      } = this.pending[i]
+      cb(payload as Request, onResponse(this.pending[i]));
+    }
+
+    window.addEventListener(
+      "message",
+      (e: MessageEvent<Message<Request>>) => {
+        const {
+          data: { type, target, payload },
+        } = e
+        if (
+          target === "cartridge" &&
+          type === "request"
+        ) {
+          cb(payload as Request, onResponse(e));
+        }
+      }
+    );
   }
 
   send<T = Response>(request: Request): Promise<T> {
@@ -93,7 +113,6 @@ export class Messenger {
           window.removeEventListener("message", handler);
         }
       };
-
       window.addEventListener("message", handler);
     });
   }

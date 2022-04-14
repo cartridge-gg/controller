@@ -2,6 +2,7 @@ import cuid from "cuid";
 import { Account } from "./account";
 import { Message, Messenger } from "./messenger";
 import { ConnectRequest, ConnectResponse, ProbeResponse, Scope } from "./types";
+import qs from 'query-string';
 
 export class Cartridge {
   private selector = "cartridge-messenger";
@@ -31,6 +32,15 @@ export class Cartridge {
       this.targetOrigin = options.targetOrigin;
     }
 
+    this.ready_ = new Promise((resolve, reject) => {
+      window.addEventListener("message", (e) => {
+        if (e.data.target === "cartridge" && e.data.payload.method === "ready") {
+          this.loading = false
+          resolve(true)
+        }
+      });
+    })
+
     if (typeof document !== "undefined" && !this.messenger) {
       let iframe = document.getElementById(this.selector) as HTMLIFrameElement;
       if (!!iframe) {
@@ -48,19 +58,6 @@ export class Cartridge {
         document.body.appendChild(iframe);
         this.messenger = new Messenger(iframe.contentWindow, this.targetOrigin);
       }
-
-      if (iframe.contentDocument.readyState == 'complete') {
-        this.loading = false
-        this.ready_ = Promise.resolve(true)
-        return
-      }
-
-      this.ready_ = new Promise((resolve, reject) => {
-        iframe.onload = () => {
-          this.loading = false
-          resolve(true)
-        }
-      })
     }
   }
 
@@ -91,9 +88,11 @@ export class Cartridge {
     const id = cuid();
 
     window.open(
-      `${this.baseUrl}/wallet/connect?origin=${encodeURIComponent(
-        window.origin
-      )}&id=${id}&scopes=${encodeURIComponent(JSON.stringify(this.scopes))}`,
+      `${this.baseUrl}/wallet/connect?${qs.stringify({
+        id,
+        origin: window.origin,
+        scopes: JSON.stringify(this.scopes),
+      })}`,
       "_blank",
       "height=600,width=400"
     );

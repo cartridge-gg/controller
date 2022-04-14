@@ -13,6 +13,8 @@ import {
   Invocation,
   EstimateFeeResponse as StarknetEstimateFeeResponse,
 } from "starknet";
+import qs from 'query-string';
+
 import { Messenger } from "./messenger";
 import {
   DeployContractResponse,
@@ -150,13 +152,14 @@ export class Account extends Provider implements AccountInterface {
     }
 
     const id = cuid();
+    const calls = Array.isArray(transactions) ? transactions : [transactions];
 
     window.open(
-      `${this.uri}/wallet/approve?origin=${encodeURIComponent(
-        window.origin
-      )}&id=${id}&scopes=${encodeURIComponent(
-        JSON.stringify(response.scopes)
-      )}`,
+      `${this.uri}/wallet/execute?${qs.stringify({
+        id,
+        origin: window.origin,
+        calls: JSON.stringify(calls),
+      })}`,
       "_blank",
       "height=600,width=400"
     );
@@ -190,11 +193,11 @@ export class Account extends Provider implements AccountInterface {
     const id = cuid();
 
     window.open(
-      `${this.baseUrl}/wallet/sign?origin=${encodeURIComponent(
-        window.origin
-      )}&id=${id}&message=${encodeURIComponent(
-        JSON.stringify(typedData.message)
-      )}`,
+      `${this.baseUrl}/wallet/sign?${qs.stringify({
+        id,
+        origin: window.origin,
+        message: JSON.stringify(typedData.message),
+      })}`,
       "_blank",
       "height=600,width=400"
     );
