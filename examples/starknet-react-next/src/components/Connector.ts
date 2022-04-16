@@ -9,7 +9,7 @@ export class CartridgeConnector extends Connector {
 
   constructor() {
     super({ options: undefined });
-    this.cartridge = new Cartridge(undefined, { baseUrl: "http://localhost:3000", targetOrigin: "*" });
+    this.cartridge = new Cartridge(undefined, { url: "http://localhost:3000", origin: "*" });
   }
 
   static ready(): boolean {

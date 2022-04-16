@@ -8,28 +8,28 @@ export class Cartridge {
   private selector = "cartridge-messenger";
   private messenger?: Messenger;
   private scopes: Scope[] = [];
-  private baseUrl: string = "https://cartridge.gg";
-  private targetOrigin: string = "https://cartridge.gg";
+  private url: string = "https://cartridge.gg";
+  private origin: string = "https://cartridge.gg";
   private loading = true
   private ready_: Promise<boolean>
 
   constructor(
     scopes?: Scope[],
     options?: {
-      baseUrl?: string;
-      targetOrigin?: string;
+      url?: string;
+      origin?: string;
     }
   ) {
     if (scopes) {
       this.scopes = scopes;
     }
 
-    if (options?.baseUrl) {
-      this.baseUrl = options.baseUrl;
+    if (options?.url) {
+      this.url = options.url;
     }
 
-    if (options?.targetOrigin) {
-      this.targetOrigin = options.targetOrigin;
+    if (options?.origin) {
+      this.origin = options.origin;
     }
 
     this.ready_ = new Promise((resolve, reject) => {
@@ -47,16 +47,16 @@ export class Cartridge {
         if (!this.messenger) {
           this.messenger = new Messenger(
             iframe.contentWindow,
-            this.targetOrigin
+            this.origin
           );
         }
       } else {
         iframe = document.createElement("iframe");
         iframe.id = this.selector;
-        iframe.src = `${this.baseUrl}/wallet/iframe`;
+        iframe.src = `${this.url}/wallet/iframe`;
         iframe.style.setProperty("display", "none");
         document.body.appendChild(iframe);
-        this.messenger = new Messenger(iframe.contentWindow, this.targetOrigin);
+        this.messenger = new Messenger(iframe.contentWindow, this.origin);
       }
     }
   }
@@ -72,7 +72,7 @@ export class Cartridge {
     });
 
     if (prob.result?.address) {
-      return new Account(prob.result.address, this.messenger, { uri: this.baseUrl });
+      return new Account(prob.result.address, this.messenger, { url: this.url });
     }
   }
 
@@ -82,13 +82,13 @@ export class Cartridge {
     });
 
     if (prob.result?.address) {
-      return new Account(prob.result.address, this.messenger, { uri: this.baseUrl });
+      return new Account(prob.result.address, this.messenger, { url: this.url });
     }
 
     const id = cuid();
 
     window.open(
-      `${this.baseUrl}/wallet/connect?${qs.stringify({
+      `${this.url}/wallet/connect?${qs.stringify({
         id,
         origin: window.origin,
         scopes: JSON.stringify(this.scopes),
@@ -105,7 +105,7 @@ export class Cartridge {
       },
     } as ConnectRequest);
 
-    return new Account(response.result.address, this.messenger, { uri: this.baseUrl });
+    return new Account(response.result.address, this.messenger, { url: this.url });
   }
 }
 
