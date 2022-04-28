@@ -66,7 +66,7 @@ export class Account extends Provider implements AccountInterface {
     const id = cuid();
 
     window.open(
-      `${this.url}/wallet/deploy?origin=${encodeURIComponent(
+      `${this.url}/deploy?origin=${encodeURIComponent(
         window.origin
       )}&id=${id}`,
       "_blank",
@@ -155,7 +155,7 @@ export class Account extends Provider implements AccountInterface {
     const calls = Array.isArray(transactions) ? transactions : [transactions];
 
     window.open(
-      `${this.url}/wallet/execute?${qs.stringify({
+      `${this.url}/execute?${qs.stringify({
         id,
         origin: window.origin,
         calls: JSON.stringify(calls),
@@ -193,7 +193,7 @@ export class Account extends Provider implements AccountInterface {
     const id = cuid();
 
     window.open(
-      `${this.url}/wallet/sign?${qs.stringify({
+      `${this.url}/sign?${qs.stringify({
         id,
         origin: window.origin,
         message: JSON.stringify(typedData.message),

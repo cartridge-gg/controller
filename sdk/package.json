@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/sdk",
-  "version": "1.0.19",
+  "version": "1.0.22",
   "description": "Cartridge SDK",
   "main": "dist/index.js",
   "module": "dist/index.es.js",

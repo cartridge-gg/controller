@@ -32,14 +32,16 @@ export class Cartridge {
       this.origin = options.origin;
     }
 
-    this.ready_ = new Promise((resolve, reject) => {
-      window.addEventListener("message", (e) => {
-        if (e.data.target === "cartridge" && e.data.payload.method === "ready") {
-          this.loading = false
-          resolve(true)
-        }
-      });
-    })
+    if (typeof document !== "undefined") {
+      this.ready_ = new Promise((resolve, reject) => {
+        window.addEventListener("message", (e) => {
+          if (e.data.target === "cartridge" && e.data.payload.method === "ready") {
+            this.loading = false
+            resolve(true)
+          }
+        });
+      })
+    }
 
     if (typeof document !== "undefined" && !this.messenger) {
       let iframe = document.getElementById(this.selector) as HTMLIFrameElement;
@@ -53,7 +55,7 @@ export class Cartridge {
       } else {
         iframe = document.createElement("iframe");
         iframe.id = this.selector;
-        iframe.src = `${this.url}/wallet/iframe`;
+        iframe.src = `${this.url}/iframe`;
         iframe.style.setProperty("display", "none");
         document.body.appendChild(iframe);
         this.messenger = new Messenger(iframe.contentWindow, this.origin);
@@ -88,7 +90,7 @@ export class Cartridge {
     const id = cuid();
 
     window.open(
-      `${this.url}/wallet/connect?${qs.stringify({
+      `${this.url}/connect?${qs.stringify({
         id,
         origin: window.origin,
         scopes: JSON.stringify(this.scopes),
