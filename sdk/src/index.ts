@@ -96,7 +96,7 @@ export class Cartridge {
         scopes: JSON.stringify(this.scopes),
       })}`,
       "_blank",
-      "height=600,width=400"
+      "height=650,width=400"
     );
 
     const response = await this.messenger.send<ConnectResponse>({

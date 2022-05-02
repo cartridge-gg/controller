@@ -70,7 +70,7 @@ export class Account extends Provider implements AccountInterface {
         window.origin
       )}&id=${id}`,
       "_blank",
-      "height=600,width=400"
+      "height=650,width=400"
     );
 
     const response = await this.messenger.send<DeployContractResponse>({
@@ -161,7 +161,7 @@ export class Account extends Provider implements AccountInterface {
         calls: JSON.stringify(calls),
       })}`,
       "_blank",
-      "height=600,width=400"
+      "height=650,width=400"
     );
 
     response = await this.messenger.send<ExecuteResponse>({
@@ -199,7 +199,7 @@ export class Account extends Provider implements AccountInterface {
         message: JSON.stringify(typedData.message),
       })}`,
       "_blank",
-      "height=600,width=400"
+      "height=650,width=400"
     );
 
     const response = await this.messenger.send<SignMessageResponse>({
