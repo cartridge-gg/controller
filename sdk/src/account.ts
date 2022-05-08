@@ -17,6 +17,7 @@ import qs from 'query-string';
 
 import { Messenger } from "./messenger";
 import {
+  Scope,
   DeployContractResponse,
   EstimateFeeResponse,
   ExecuteRequest,
@@ -32,9 +33,11 @@ export class Account extends Provider implements AccountInterface {
   address: string;
   private messenger: Messenger;
   private url: string = "https://cartridge.gg";
+  private _scopes: Scope[] = [];
 
   constructor(
     address: string,
+    scopes: Scope[] = [],
     messenger: Messenger,
     options?: {
       url?: string;
@@ -43,6 +46,7 @@ export class Account extends Provider implements AccountInterface {
     super();
     this.address = address;
     this.messenger = messenger;
+    this._scopes = scopes;
 
     if (options?.url) {
       this.url = options.url;
@@ -104,7 +108,7 @@ export class Account extends Provider implements AccountInterface {
     invocation: Invocation
   ): Promise<StarknetEstimateFeeResponse> {
     const response = await this.messenger.send<EstimateFeeResponse>({
-      method: "deploy-contract",
+      method: "estimate-fee",
       params: {
         invocation,
       },

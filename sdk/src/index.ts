@@ -2,7 +2,8 @@ import cuid from "cuid";
 import { Account } from "./account";
 import { Message, Messenger } from "./messenger";
 import { ConnectRequest, ConnectResponse, ProbeResponse, Scope } from "./types";
-import qs from 'query-string';
+import qs from "query-string";
+import { AccountInterface } from "starknet";
 
 export class Cartridge {
   private selector = "cartridge-messenger";
@@ -10,8 +11,9 @@ export class Cartridge {
   private scopes: Scope[] = [];
   private url: string = "https://cartridge.gg";
   private origin: string = "https://cartridge.gg";
-  private loading = true
-  private ready_: Promise<boolean>
+  private loading = true;
+  private ready_: Promise<boolean>;
+  private account: AccountInterface;
 
   constructor(
     scopes?: Scope[],
@@ -34,23 +36,24 @@ export class Cartridge {
 
     if (typeof document !== "undefined") {
       this.ready_ = new Promise((resolve, reject) => {
-        window.addEventListener("message", (e) => {
-          if (e.data.target === "cartridge" && e.data.payload.method === "ready") {
-            this.loading = false
-            resolve(true)
+        window.addEventListener("message", async (e) => {
+          if (
+            e.data.target === "cartridge" &&
+            e.data.payload.method === "ready"
+          ) {
+            await this.probe();
+            this.loading = false;
+            resolve(true);
           }
         });
-      })
+      });
     }
 
     if (typeof document !== "undefined" && !this.messenger) {
       let iframe = document.getElementById(this.selector) as HTMLIFrameElement;
       if (!!iframe) {
         if (!this.messenger) {
-          this.messenger = new Messenger(
-            iframe.contentWindow,
-            this.origin
-          );
+          this.messenger = new Messenger(iframe.contentWindow, this.origin);
         }
       } else {
         iframe = document.createElement("iframe");
@@ -64,8 +67,8 @@ export class Cartridge {
   }
 
   async ready() {
-    if (!this.loading) return Promise.resolve(true)
-    return this.ready_
+    if (!this.loading) return Promise.resolve(true);
+    return this.ready_;
   }
 
   async probe() {
@@ -74,20 +77,25 @@ export class Cartridge {
     });
 
     if (prob.result?.address) {
-      return new Account(prob.result.address, this.messenger, { url: this.url });
+      this.account = new Account(
+        prob.result.address,
+        prob.result.scopes,
+        this.messenger,
+        {
+          url: this.url,
+        }
+      );
+
+      return this.account;
     }
   }
 
   async connect() {
-    const prob = await this.messenger.send<ProbeResponse>({
-      method: "probe",
-    });
-
-    if (prob.result?.address) {
-      return new Account(prob.result.address, this.messenger, { url: this.url });
-    }
-
     const id = cuid();
+
+    if (this.account) {
+      return this.account;
+    }
 
     window.open(
       `${this.url}/connect?${qs.stringify({
@@ -107,7 +115,16 @@ export class Cartridge {
       },
     } as ConnectRequest);
 
-    return new Account(response.result.address, this.messenger, { url: this.url });
+    this.account = new Account(
+      response.result.address,
+      response.result.scopes,
+      this.messenger,
+      {
+        url: this.url,
+      }
+    );
+
+    return this.account;
   }
 }
 

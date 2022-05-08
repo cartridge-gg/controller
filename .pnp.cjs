@@ -681,6 +681,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/jest", "npm:26.0.24"],\
             ["@types/node", "npm:17.0.23"],\
             ["cuid", "npm:2.1.8"],\
+            ["fast-deep-equal", "npm:3.1.3"],\
             ["jest", "npm:26.6.3"],\
             ["query-string", "npm:7.1.1"],\
             ["rimraf", "npm:3.0.2"],\
