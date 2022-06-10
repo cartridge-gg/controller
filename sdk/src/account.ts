@@ -11,7 +11,6 @@ import {
   number,
   Provider,
   Invocation,
-  EstimateFeeResponse as StarknetEstimateFeeResponse,
   SignerInterface,
 } from "starknet";
 import { EstimateFee } from "starknet/types/account"
