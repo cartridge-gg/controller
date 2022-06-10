@@ -7,9 +7,9 @@ import {
   AddTransactionResponse,
   Signature,
   Invocation,
-  EstimateFeeResponse as StarknetEstimateFeeResponse,
 } from "starknet";
 import { BigNumberish } from "starknet/dist/utils/number";
+import { EstimateFee } from "starknet/types/account"
 
 export type Scopes = { [origin: string]: Scope[] };
 
@@ -70,7 +70,7 @@ export interface EstimateFeeRequest extends RawRequest {
 
 export interface EstimateFeeResponse extends RawResponse {
   method: "estimate-fee";
-  result?: StarknetEstimateFeeResponse;
+  result?: EstimateFee;
 }
 
 export interface ExecuteRequest extends RawRequest {
@@ -89,10 +89,26 @@ export interface ExecuteResponse extends RawResponse {
   scopes?: Scope[];
 }
 
+export interface SignTransactionRequest extends RawRequest {
+  method: "sign-transaction";
+  params: {
+    id: string;
+    transactions: Call | Call[];
+    abis?: Abi[];
+    transactionsDetail?: InvocationsDetails;
+  };
+}
+
+export interface SignTransactionResponse extends RawResponse {
+  method: "sign-transaction";
+  result?: Signature;
+}
+
 export interface SignMessageRequest extends RawRequest {
   method: "sign-message";
   params: {
     id: string;
+    account?: string;
     typedData: typedData.TypedData;
   };
 }

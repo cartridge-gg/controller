@@ -12,7 +12,10 @@ import {
   Provider,
   Invocation,
   EstimateFeeResponse as StarknetEstimateFeeResponse,
+  SignerInterface,
 } from "starknet";
+import { EstimateFee } from "starknet/types/account"
+
 import qs from 'query-string';
 
 import { Messenger } from "./messenger";
@@ -28,12 +31,15 @@ import {
   VerifyMessageHashResponse,
   VerifyMessageResponse,
 } from "./types";
+import { Signer } from "./signer";
 
 export class Account extends Provider implements AccountInterface {
   address: string;
   private messenger: Messenger;
   private url: string = "https://cartridge.gg";
   private _scopes: Scope[] = [];
+
+  public signer: SignerInterface;
 
   constructor(
     address: string,
@@ -47,6 +53,7 @@ export class Account extends Provider implements AccountInterface {
     this.address = address;
     this.messenger = messenger;
     this._scopes = scopes;
+    this.signer = new Signer(messenger, options)
 
     if (options?.url) {
       this.url = options.url;
@@ -106,7 +113,7 @@ export class Account extends Provider implements AccountInterface {
    */
   async estimateFee(
     invocation: Invocation
-  ): Promise<StarknetEstimateFeeResponse> {
+  ): Promise<EstimateFee> {
     const response = await this.messenger.send<EstimateFeeResponse>({
       method: "estimate-fee",
       params: {
