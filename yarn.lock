@@ -440,7 +440,7 @@ __metadata:
     rimraf: ^3.0.2
     rollup: ^2.61.1
     rollup-plugin-typescript2: ^0.30.0
-    starknet: ^3.5.1
+    starknet: ^3.12.3
     ts-jest: ^26.5.1
     ts-node: ^10.4.0
     tslib: ^2.3.1
@@ -832,7 +832,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethersproject/bytes@npm:^5.6.0":
+"@ethersproject/bytes@npm:^5.6.0, @ethersproject/bytes@npm:^5.6.1":
   version: 5.6.1
   resolution: "@ethersproject/bytes@npm:5.6.1"
   dependencies:
@@ -3089,6 +3089,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cross-fetch@npm:^3.1.5":
+  version: 3.1.5
+  resolution: "cross-fetch@npm:3.1.5"
+  dependencies:
+    node-fetch: 2.6.7
+  checksum: f6b8c6ee3ef993ace6277fd789c71b6acf1b504fd5f5c7128df4ef2f125a429e29cd62dc8c127523f04a5f2fa4771ed80e3f3d9695617f441425045f505cf3bb
+  languageName: node
+  linkType: hard
+
 "cross-spawn@npm:7.0.3, cross-spawn@npm:^7.0.0, cross-spawn@npm:^7.0.2":
   version: 7.0.3
   resolution: "cross-spawn@npm:7.0.3"
@@ -4116,6 +4125,13 @@ __metadata:
   dependencies:
     bser: 2.1.1
   checksum: 8510230778ab3a51c27dffb1b76ef2c24fab672a42742d3c0a45c2e9d1e5f20210b1fbca33486088da4a9a3958bde96b5aec0a63aac9894b4e9df65c88b2cbd6
+  languageName: node
+  linkType: hard
+
+"fetch-intercept@npm:^2.4.0":
+  version: 2.4.0
+  resolution: "fetch-intercept@npm:2.4.0"
+  checksum: f89c9b40fdc4695e065b55c27f1f93dacb1a1dcdb36d19267d6b1671304598d144c407a22d33d96e82a05df3f0578020a57760a8dd57f0b851715e0fa1c965c5
   languageName: node
   linkType: hard
 
@@ -6621,7 +6637,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-fetch@npm:^2.5.0":
+"node-fetch@npm:2.6.7, node-fetch@npm:^2.5.0":
   version: 2.6.7
   resolution: "node-fetch@npm:2.6.7"
   dependencies:
@@ -8204,7 +8220,26 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"starknet@npm:^3.5, starknet@npm:^3.5.1":
+"starknet@npm:^3.12.3":
+  version: 3.12.3
+  resolution: "starknet@npm:3.12.3"
+  dependencies:
+    "@ethersproject/bytes": ^5.6.1
+    bn.js: ^5.2.0
+    cross-fetch: ^3.1.5
+    elliptic: ^6.5.4
+    ethereum-cryptography: ^0.2.0
+    fetch-intercept: ^2.4.0
+    hash.js: ^1.1.7
+    json-bigint: ^1.0.0
+    minimalistic-assert: ^1.0.1
+    pako: ^2.0.4
+    url-join: ^4.0.1
+  checksum: ee2a98948e7c5ca20ca58e43cad64cc531679915a41f40ae740752d082ac3f5d412329cfd448a6b05e1b157bbdfc4f7e63ec658d50e12822ea666dc7a983a7e7
+  languageName: node
+  linkType: hard
+
+"starknet@npm:^3.5":
   version: 3.7.0
   resolution: "starknet@npm:3.7.0"
   dependencies:

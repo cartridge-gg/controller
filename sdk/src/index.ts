@@ -59,7 +59,16 @@ export class Cartridge {
         iframe = document.createElement("iframe");
         iframe.id = this.selector;
         iframe.src = `${this.url}/iframe`;
-        iframe.style.setProperty("display", "none");
+        iframe.style.opacity = "0";
+        iframe.style.height = "0";
+        iframe.style.width = "0";
+        iframe.sandbox.add("allow-scripts")
+        iframe.sandbox.add("allow-same-origin")
+
+        if (!!document.hasStorageAccess) {
+          iframe.sandbox.add("allow-storage-access-by-user-activation")
+        }
+
         document.body.appendChild(iframe);
         this.messenger = new Messenger(iframe.contentWindow, this.origin);
       }
@@ -95,6 +104,13 @@ export class Cartridge {
 
     if (this.account) {
       return this.account;
+    }
+
+    if (!!document.hasStorageAccess) {
+      const ok = await document.hasStorageAccess()
+      if (!ok) {
+        await document.requestStorageAccess()
+      }
     }
 
     window.open(

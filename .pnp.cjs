@@ -687,7 +687,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["rimraf", "npm:3.0.2"],\
             ["rollup", "npm:2.70.1"],\
             ["rollup-plugin-typescript2", "virtual:7be187700e932f37ac4ebe9000300ba5bfd7190c7c0afd0122296981a2098c38d4f147c46bbdb446641c55e5dba4187132de4e2449faef1aedc89e82f4ed39d6#npm:0.30.0"],\
-            ["starknet", "npm:3.7.0"],\
+            ["starknet", "npm:3.12.3"],\
             ["ts-jest", "virtual:7be187700e932f37ac4ebe9000300ba5bfd7190c7c0afd0122296981a2098c38d4f147c46bbdb446641c55e5dba4187132de4e2449faef1aedc89e82f4ed39d6#npm:26.5.6"],\
             ["ts-node", "virtual:7be187700e932f37ac4ebe9000300ba5bfd7190c7c0afd0122296981a2098c38d4f147c46bbdb446641c55e5dba4187132de4e2449faef1aedc89e82f4ed39d6#npm:10.7.0"],\
             ["tslib", "npm:2.3.1"],\
@@ -3765,6 +3765,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["cross-fetch", [\
+        ["npm:3.1.5", {\
+          "packageLocation": "./.yarn/cache/cross-fetch-npm-3.1.5-e414995db9-f6b8c6ee3e.zip/node_modules/cross-fetch/",\
+          "packageDependencies": [\
+            ["cross-fetch", "npm:3.1.5"],\
+            ["node-fetch", "virtual:1ad8cdd598b996476be1c6089c020c528b0ba46008745c12b0da227ecc3ccf69100e1d6ef858b95530514901a0bb94850e0785ff0476108021fcd743e5895070#npm:2.6.7"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["cross-spawn", [\
         ["npm:5.1.0", {\
           "packageLocation": "./.yarn/cache/cross-spawn-npm-5.1.0-a3e220603e-726939c995.zip/node_modules/cross-spawn/",\
@@ -5046,6 +5056,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["fb-watchman", "npm:2.0.1"],\
             ["bser", "npm:2.1.1"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["fetch-intercept", [\
+        ["npm:2.4.0", {\
+          "packageLocation": "./.yarn/cache/fetch-intercept-npm-2.4.0-b6b047cd65-f89c9b40fd.zip/node_modules/fetch-intercept/",\
+          "packageDependencies": [\
+            ["fetch-intercept", "npm:2.4.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -9558,6 +9577,24 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["starknet", [\
+        ["npm:3.12.3", {\
+          "packageLocation": "./.yarn/cache/starknet-npm-3.12.3-3d451302f7-ee2a98948e.zip/node_modules/starknet/",\
+          "packageDependencies": [\
+            ["starknet", "npm:3.12.3"],\
+            ["@ethersproject/bytes", "npm:5.6.1"],\
+            ["bn.js", "npm:5.2.0"],\
+            ["cross-fetch", "npm:3.1.5"],\
+            ["elliptic", "npm:6.5.4"],\
+            ["ethereum-cryptography", "npm:0.2.5"],\
+            ["fetch-intercept", "npm:2.4.0"],\
+            ["hash.js", "npm:1.1.7"],\
+            ["json-bigint", "npm:1.0.0"],\
+            ["minimalistic-assert", "npm:1.0.1"],\
+            ["pako", "npm:2.0.4"],\
+            ["url-join", "npm:4.0.1"]\
+          ],\
+          "linkType": "HARD"\
+        }],\
         ["npm:3.7.0", {\
           "packageLocation": "./.yarn/cache/starknet-npm-3.7.0-acabfb8492-92bde000bb.zip/node_modules/starknet/",\
           "packageDependencies": [\
