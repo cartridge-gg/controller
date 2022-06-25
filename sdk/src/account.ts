@@ -206,7 +206,7 @@ export class Account extends Provider implements AccountInterface {
       `${this.url}/sign?${qs.stringify({
         id,
         origin: window.origin,
-        message: JSON.stringify(typedData.message),
+        typedData: JSON.stringify(typedData),
       })}`,
       "_blank",
       "height=650,width=400"
