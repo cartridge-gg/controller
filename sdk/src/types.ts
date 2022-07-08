@@ -22,7 +22,7 @@ export interface ProbeRequest extends RawRequest {
   method: "probe";
 }
 
-export interface ProbeResponse extends RawRequest {
+export interface ProbeResponse extends RawResponse {
   method: "probe";
   result?: {
     address?: string;
@@ -38,7 +38,7 @@ export interface ConnectRequest extends RawRequest {
   };
 }
 
-export interface ConnectResponse extends RawRequest {
+export interface ConnectResponse extends RawResponse {
   method: "connect";
   result?: {
     success: boolean;
