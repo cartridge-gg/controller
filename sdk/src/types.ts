@@ -11,7 +11,12 @@ import {
 import { BigNumberish } from "starknet/dist/utils/number";
 import { EstimateFee } from "starknet/types/account"
 
-export type Scopes = { [origin: string]: Scope[] };
+export type Approvals = {
+  [origin: string]: {
+    scopes: Scope[];
+    maxFee: BigNumberish;
+  };
+};
 
 export type Scope = {
   target: string;
