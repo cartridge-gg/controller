@@ -1,4 +1,11 @@
-import { Abi, Invocation, InvocationsSignerDetails, SignerInterface, Signature, typedData } from "starknet";
+import {
+    Abi,
+    Invocation,
+    InvocationsSignerDetails,
+    SignerInterface,
+    Signature,
+    typedData
+} from "starknet";
 import qs from 'query-string';
 import cuid from "cuid";
 

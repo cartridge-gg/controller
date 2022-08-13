@@ -680,6 +680,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@rollup/plugin-replace", "virtual:7be187700e932f37ac4ebe9000300ba5bfd7190c7c0afd0122296981a2098c38d4f147c46bbdb446641c55e5dba4187132de4e2449faef1aedc89e82f4ed39d6#npm:4.0.0"],\
             ["@types/jest", "npm:26.0.24"],\
             ["@types/node", "npm:17.0.23"],\
+            ["base64url", "npm:3.0.1"],\
             ["cuid", "npm:2.1.8"],\
             ["fast-deep-equal", "npm:3.1.3"],\
             ["jest", "npm:26.6.3"],\
@@ -687,7 +688,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["rimraf", "npm:3.0.2"],\
             ["rollup", "npm:2.70.1"],\
             ["rollup-plugin-typescript2", "virtual:7be187700e932f37ac4ebe9000300ba5bfd7190c7c0afd0122296981a2098c38d4f147c46bbdb446641c55e5dba4187132de4e2449faef1aedc89e82f4ed39d6#npm:0.30.0"],\
-            ["starknet", "npm:3.12.3"],\
+            ["starknet", "npm:3.18.2"],\
             ["ts-jest", "virtual:7be187700e932f37ac4ebe9000300ba5bfd7190c7c0afd0122296981a2098c38d4f147c46bbdb446641c55e5dba4187132de4e2449faef1aedc89e82f4ed39d6#npm:26.5.6"],\
             ["ts-node", "virtual:7be187700e932f37ac4ebe9000300ba5bfd7190c7c0afd0122296981a2098c38d4f147c46bbdb446641c55e5dba4187132de4e2449faef1aedc89e82f4ed39d6#npm:10.7.0"],\
             ["tslib", "npm:2.3.1"],\
@@ -1779,6 +1780,13 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@noble/hashes", "npm:0.5.9"]\
           ],\
           "linkType": "HARD"\
+        }],\
+        ["npm:1.1.2", {\
+          "packageLocation": "./.yarn/cache/@noble-hashes-npm-1.1.2-dbc15bb44d-3c2a8cb7c2.zip/node_modules/@noble/hashes/",\
+          "packageDependencies": [\
+            ["@noble/hashes", "npm:1.1.2"]\
+          ],\
+          "linkType": "HARD"\
         }]\
       ]],\
       ["@noble/secp256k1", [\
@@ -1786,6 +1794,13 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/@noble-secp256k1-npm-1.5.5-118729bac9-8a144e8469.zip/node_modules/@noble/secp256k1/",\
           "packageDependencies": [\
             ["@noble/secp256k1", "npm:1.5.5"]\
+          ],\
+          "linkType": "HARD"\
+        }],\
+        ["npm:1.6.3", {\
+          "packageLocation": "./.yarn/cache/@noble-secp256k1-npm-1.6.3-d06f711103-16eb324253.zip/node_modules/@noble/secp256k1/",\
+          "packageDependencies": [\
+            ["@noble/secp256k1", "npm:1.6.3"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -1906,6 +1921,38 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/@rushstack-eslint-patch-npm-1.1.1-d0a042e5ca-6a4641eb95.zip/node_modules/@rushstack/eslint-patch/",\
           "packageDependencies": [\
             ["@rushstack/eslint-patch", "npm:1.1.1"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@scure/base", [\
+        ["npm:1.1.1", {\
+          "packageLocation": "./.yarn/cache/@scure-base-npm-1.1.1-67ec4c3f95-b4fc810b49.zip/node_modules/@scure/base/",\
+          "packageDependencies": [\
+            ["@scure/base", "npm:1.1.1"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@scure/bip32", [\
+        ["npm:1.1.0", {\
+          "packageLocation": "./.yarn/cache/@scure-bip32-npm-1.1.0-99716ab8b2-e6102ab903.zip/node_modules/@scure/bip32/",\
+          "packageDependencies": [\
+            ["@scure/bip32", "npm:1.1.0"],\
+            ["@noble/hashes", "npm:1.1.2"],\
+            ["@noble/secp256k1", "npm:1.6.3"],\
+            ["@scure/base", "npm:1.1.1"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@scure/bip39", [\
+        ["npm:1.1.0", {\
+          "packageLocation": "./.yarn/cache/@scure-bip39-npm-1.1.0-b324fc574e-c4361406f0.zip/node_modules/@scure/bip39/",\
+          "packageDependencies": [\
+            ["@scure/bip39", "npm:1.1.0"],\
+            ["@noble/hashes", "npm:1.1.2"],\
+            ["@scure/base", "npm:1.1.1"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -3148,6 +3195,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["base64url", [\
+        ["npm:3.0.1", {\
+          "packageLocation": "./.yarn/cache/base64url-npm-3.0.1-4c171c4917-a77b2a3a52.zip/node_modules/base64url/",\
+          "packageDependencies": [\
+            ["base64url", "npm:3.0.1"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["better-path-resolve", [\
         ["npm:1.0.0", {\
           "packageLocation": "./.yarn/cache/better-path-resolve-npm-1.0.0-ea479f476b-5392dbe04e.zip/node_modules/better-path-resolve/",\
@@ -3179,6 +3235,13 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/bn.js-npm-5.2.0-11748c0b07-6117170393.zip/node_modules/bn.js/",\
           "packageDependencies": [\
             ["bn.js", "npm:5.2.0"]\
+          ],\
+          "linkType": "HARD"\
+        }],\
+        ["npm:5.2.1", {\
+          "packageLocation": "./.yarn/cache/bn.js-npm-5.2.1-dc952b1965-3dd8c8d380.zip/node_modules/bn.js/",\
+          "packageDependencies": [\
+            ["bn.js", "npm:5.2.1"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -4850,6 +4913,17 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["micro-base", "npm:0.10.2"]\
           ],\
           "linkType": "HARD"\
+        }],\
+        ["npm:1.1.2", {\
+          "packageLocation": "./.yarn/cache/ethereum-cryptography-npm-1.1.2-c16cfd7e8a-0ef55f141a.zip/node_modules/ethereum-cryptography/",\
+          "packageDependencies": [\
+            ["ethereum-cryptography", "npm:1.1.2"],\
+            ["@noble/hashes", "npm:1.1.2"],\
+            ["@noble/secp256k1", "npm:1.6.3"],\
+            ["@scure/bip32", "npm:1.1.0"],\
+            ["@scure/bip39", "npm:1.1.0"]\
+          ],\
+          "linkType": "HARD"\
         }]\
       ]],\
       ["events", [\
@@ -5056,15 +5130,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["fb-watchman", "npm:2.0.1"],\
             ["bser", "npm:2.1.1"]\
-          ],\
-          "linkType": "HARD"\
-        }]\
-      ]],\
-      ["fetch-intercept", [\
-        ["npm:2.4.0", {\
-          "packageLocation": "./.yarn/cache/fetch-intercept-npm-2.4.0-b6b047cd65-f89c9b40fd.zip/node_modules/fetch-intercept/",\
-          "packageDependencies": [\
-            ["fetch-intercept", "npm:2.4.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -9577,20 +9642,20 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["starknet", [\
-        ["npm:3.12.3", {\
-          "packageLocation": "./.yarn/cache/starknet-npm-3.12.3-3d451302f7-ee2a98948e.zip/node_modules/starknet/",\
+        ["npm:3.18.2", {\
+          "packageLocation": "./.yarn/cache/starknet-npm-3.18.2-268d5cda4c-3d85274d6b.zip/node_modules/starknet/",\
           "packageDependencies": [\
-            ["starknet", "npm:3.12.3"],\
+            ["starknet", "npm:3.18.2"],\
             ["@ethersproject/bytes", "npm:5.6.1"],\
-            ["bn.js", "npm:5.2.0"],\
+            ["bn.js", "npm:5.2.1"],\
             ["cross-fetch", "npm:3.1.5"],\
             ["elliptic", "npm:6.5.4"],\
-            ["ethereum-cryptography", "npm:0.2.5"],\
-            ["fetch-intercept", "npm:2.4.0"],\
+            ["ethereum-cryptography", "npm:1.1.2"],\
             ["hash.js", "npm:1.1.7"],\
             ["json-bigint", "npm:1.0.0"],\
             ["minimalistic-assert", "npm:1.0.1"],\
             ["pako", "npm:2.0.4"],\
+            ["ts-custom-error", "npm:3.2.0"],\
             ["url-join", "npm:4.0.1"]\
           ],\
           "linkType": "HARD"\
@@ -10107,6 +10172,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/trim-newlines-npm-3.0.1-22f1f216de-b530f3fadf.zip/node_modules/trim-newlines/",\
           "packageDependencies": [\
             ["trim-newlines", "npm:3.0.1"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["ts-custom-error", [\
+        ["npm:3.2.0", {\
+          "packageLocation": "./.yarn/cache/ts-custom-error-npm-3.2.0-7ef8105f26-b1d2016de8.zip/node_modules/ts-custom-error/",\
+          "packageDependencies": [\
+            ["ts-custom-error", "npm:3.2.0"]\
           ],\
           "linkType": "HARD"\
         }]\
