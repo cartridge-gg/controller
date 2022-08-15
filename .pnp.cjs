@@ -688,7 +688,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["rimraf", "npm:3.0.2"],\
             ["rollup", "npm:2.70.1"],\
             ["rollup-plugin-typescript2", "virtual:7be187700e932f37ac4ebe9000300ba5bfd7190c7c0afd0122296981a2098c38d4f147c46bbdb446641c55e5dba4187132de4e2449faef1aedc89e82f4ed39d6#npm:0.30.0"],\
-            ["starknet", "npm:3.18.2"],\
+            ["starknet", "npm:4.3.0"],\
             ["ts-jest", "virtual:7be187700e932f37ac4ebe9000300ba5bfd7190c7c0afd0122296981a2098c38d4f147c46bbdb446641c55e5dba4187132de4e2449faef1aedc89e82f4ed39d6#npm:26.5.6"],\
             ["ts-node", "virtual:7be187700e932f37ac4ebe9000300ba5bfd7190c7c0afd0122296981a2098c38d4f147c46bbdb446641c55e5dba4187132de4e2449faef1aedc89e82f4ed39d6#npm:10.7.0"],\
             ["tslib", "npm:2.3.1"],\
@@ -3828,16 +3828,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
-      ["cross-fetch", [\
-        ["npm:3.1.5", {\
-          "packageLocation": "./.yarn/cache/cross-fetch-npm-3.1.5-e414995db9-f6b8c6ee3e.zip/node_modules/cross-fetch/",\
-          "packageDependencies": [\
-            ["cross-fetch", "npm:3.1.5"],\
-            ["node-fetch", "virtual:1ad8cdd598b996476be1c6089c020c528b0ba46008745c12b0da227ecc3ccf69100e1d6ef858b95530514901a0bb94850e0785ff0476108021fcd743e5895070#npm:2.6.7"]\
-          ],\
-          "linkType": "HARD"\
-        }]\
-      ]],\
       ["cross-spawn", [\
         ["npm:5.1.0", {\
           "packageLocation": "./.yarn/cache/cross-spawn-npm-5.1.0-a3e220603e-726939c995.zip/node_modules/cross-spawn/",\
@@ -6390,6 +6380,17 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/isobject-npm-3.0.1-8145901fd2-db85c4c970.zip/node_modules/isobject/",\
           "packageDependencies": [\
             ["isobject", "npm:3.0.1"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["isomorphic-fetch", [\
+        ["npm:3.0.0", {\
+          "packageLocation": "./.yarn/cache/isomorphic-fetch-npm-3.0.0-bce711adff-e5ab79a56c.zip/node_modules/isomorphic-fetch/",\
+          "packageDependencies": [\
+            ["isomorphic-fetch", "npm:3.0.0"],\
+            ["node-fetch", "virtual:1ad8cdd598b996476be1c6089c020c528b0ba46008745c12b0da227ecc3ccf69100e1d6ef858b95530514901a0bb94850e0785ff0476108021fcd743e5895070#npm:2.6.7"],\
+            ["whatwg-fetch", "npm:3.6.2"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -9642,24 +9643,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["starknet", [\
-        ["npm:3.18.2", {\
-          "packageLocation": "./.yarn/cache/starknet-npm-3.18.2-268d5cda4c-3d85274d6b.zip/node_modules/starknet/",\
-          "packageDependencies": [\
-            ["starknet", "npm:3.18.2"],\
-            ["@ethersproject/bytes", "npm:5.6.1"],\
-            ["bn.js", "npm:5.2.1"],\
-            ["cross-fetch", "npm:3.1.5"],\
-            ["elliptic", "npm:6.5.4"],\
-            ["ethereum-cryptography", "npm:1.1.2"],\
-            ["hash.js", "npm:1.1.7"],\
-            ["json-bigint", "npm:1.0.0"],\
-            ["minimalistic-assert", "npm:1.0.1"],\
-            ["pako", "npm:2.0.4"],\
-            ["ts-custom-error", "npm:3.2.0"],\
-            ["url-join", "npm:4.0.1"]\
-          ],\
-          "linkType": "HARD"\
-        }],\
         ["npm:3.7.0", {\
           "packageLocation": "./.yarn/cache/starknet-npm-3.7.0-acabfb8492-92bde000bb.zip/node_modules/starknet/",\
           "packageDependencies": [\
@@ -9676,6 +9659,24 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["minimalistic-assert", "npm:1.0.1"],\
             ["pako", "npm:2.0.4"],\
             ["superstruct", "npm:0.15.4"],\
+            ["url-join", "npm:4.0.1"]\
+          ],\
+          "linkType": "HARD"\
+        }],\
+        ["npm:4.3.0", {\
+          "packageLocation": "./.yarn/cache/starknet-npm-4.3.0-eca5536478-fd435ef107.zip/node_modules/starknet/",\
+          "packageDependencies": [\
+            ["starknet", "npm:4.3.0"],\
+            ["@ethersproject/bytes", "npm:5.6.1"],\
+            ["bn.js", "npm:5.2.1"],\
+            ["elliptic", "npm:6.5.4"],\
+            ["ethereum-cryptography", "npm:1.1.2"],\
+            ["hash.js", "npm:1.1.7"],\
+            ["isomorphic-fetch", "npm:3.0.0"],\
+            ["json-bigint", "npm:1.0.0"],\
+            ["minimalistic-assert", "npm:1.0.1"],\
+            ["pako", "npm:2.0.4"],\
+            ["ts-custom-error", "npm:3.2.0"],\
             ["url-join", "npm:4.0.1"]\
           ],\
           "linkType": "HARD"\
@@ -10702,6 +10703,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["whatwg-encoding", "npm:1.0.5"],\
             ["iconv-lite", "npm:0.4.24"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["whatwg-fetch", [\
+        ["npm:3.6.2", {\
+          "packageLocation": "./.yarn/cache/whatwg-fetch-npm-3.6.2-4bdf324792-ee976b7249.zip/node_modules/whatwg-fetch/",\
+          "packageDependencies": [\
+            ["whatwg-fetch", "npm:3.6.2"]\
           ],\
           "linkType": "HARD"\
         }]\

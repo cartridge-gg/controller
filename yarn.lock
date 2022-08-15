@@ -441,7 +441,7 @@ __metadata:
     rimraf: ^3.0.2
     rollup: ^2.61.1
     rollup-plugin-typescript2: ^0.30.0
-    starknet: 3.18.2
+    starknet: 4.3.0
     ts-jest: ^26.5.1
     ts-node: ^10.4.0
     tslib: ^2.3.1
@@ -3146,15 +3146,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cross-fetch@npm:^3.1.5":
-  version: 3.1.5
-  resolution: "cross-fetch@npm:3.1.5"
-  dependencies:
-    node-fetch: 2.6.7
-  checksum: f6b8c6ee3ef993ace6277fd789c71b6acf1b504fd5f5c7128df4ef2f125a429e29cd62dc8c127523f04a5f2fa4771ed80e3f3d9695617f441425045f505cf3bb
-  languageName: node
-  linkType: hard
-
 "cross-spawn@npm:7.0.3, cross-spawn@npm:^7.0.0, cross-spawn@npm:^7.0.2":
   version: 7.0.3
   resolution: "cross-spawn@npm:7.0.3"
@@ -5324,6 +5315,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"isomorphic-fetch@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "isomorphic-fetch@npm:3.0.0"
+  dependencies:
+    node-fetch: ^2.6.1
+    whatwg-fetch: ^3.4.1
+  checksum: e5ab79a56ce5af6ddd21265f59312ad9a4bc5a72cebc98b54797b42cb30441d5c5f8d17c5cd84a99e18101c8af6f90c081ecb8d12fd79e332be1778d58486d75
+  languageName: node
+  linkType: hard
+
 "istanbul-lib-coverage@npm:^3.0.0, istanbul-lib-coverage@npm:^3.2.0":
   version: 3.2.0
   resolution: "istanbul-lib-coverage@npm:3.2.0"
@@ -6699,7 +6700,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-fetch@npm:2.6.7, node-fetch@npm:^2.5.0":
+"node-fetch@npm:^2.5.0, node-fetch@npm:^2.6.1":
   version: 2.6.7
   resolution: "node-fetch@npm:2.6.7"
   dependencies:
@@ -8282,22 +8283,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"starknet@npm:3.18.2":
-  version: 3.18.2
-  resolution: "starknet@npm:3.18.2"
+"starknet@npm:4.3.0":
+  version: 4.3.0
+  resolution: "starknet@npm:4.3.0"
   dependencies:
     "@ethersproject/bytes": ^5.6.1
     bn.js: ^5.2.1
-    cross-fetch: ^3.1.5
     elliptic: ^6.5.4
     ethereum-cryptography: ^1.0.3
     hash.js: ^1.1.7
+    isomorphic-fetch: ^3.0.0
     json-bigint: ^1.0.0
     minimalistic-assert: ^1.0.1
     pako: ^2.0.4
     ts-custom-error: ^3.2.0
     url-join: ^4.0.1
-  checksum: 3d85274d6bf0706707334fa3e9c08c168c1906528a6dfcf084b38762e49ce94300f7516510246324673d1cc7542300807e6ee2354f1718f4a890379d5c30f736
+  checksum: fd435ef1078fe7cf6f92bd66c63da7fb8346d2843a8e9d5af88e3ab5c0b172865cf0646516e3363e4b2d77986c32f8b5233e4c70e0f4c1d9d7b20a5d577afed3
   languageName: node
   linkType: hard
 
@@ -9191,6 +9192,13 @@ __metadata:
   dependencies:
     iconv-lite: 0.4.24
   checksum: 5be4efe111dce29ddee3448d3915477fcc3b28f991d9cf1300b4e50d6d189010d47bca2f51140a844cf9b726e8f066f4aee72a04d687bfe4f2ee2767b2f5b1e6
+  languageName: node
+  linkType: hard
+
+"whatwg-fetch@npm:^3.4.1":
+  version: 3.6.2
+  resolution: "whatwg-fetch@npm:3.6.2"
+  checksum: ee976b7249e7791edb0d0a62cd806b29006ad7ec3a3d89145921ad8c00a3a67e4be8f3fb3ec6bc7b58498724fd568d11aeeeea1f7827e7e1e5eae6c8a275afed
   languageName: node
   linkType: hard
 

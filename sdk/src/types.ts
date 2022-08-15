@@ -1,10 +1,11 @@
 import {
   DeployContractPayload,
+  DeployContractResponse as StarknetDeployContractResponse,
   Abi,
   Call,
   InvocationsDetails,
   typedData,
-  AddTransactionResponse,
+  InvokeFunctionResponse,
   Signature,
   Invocation,
 } from "starknet";
@@ -63,7 +64,7 @@ export interface DeployContractRequest extends RawRequest {
 
 export interface DeployContractResponse extends RawResponse {
   method: "deploy-contract";
-  result?: AddTransactionResponse;
+  result?: StarknetDeployContractResponse;
 }
 
 export interface EstimateFeeRequest extends RawRequest {
@@ -90,7 +91,7 @@ export interface ExecuteRequest extends RawRequest {
 
 export interface ExecuteResponse extends RawResponse {
   method: "execute";
-  result?: AddTransactionResponse;
+  result?: InvokeFunctionResponse;
   scopes?: Scope[];
 }
 

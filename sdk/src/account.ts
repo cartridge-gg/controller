@@ -4,7 +4,7 @@ import {
   DeployContractPayload,
   Abi,
   Call,
-  AddTransactionResponse,
+  DeployContractResponse as StarknetDeployContractResponse,
   InvocationsDetails,
   Signature,
   typedData,
@@ -12,6 +12,7 @@ import {
   Provider,
   Invocation,
   SignerInterface,
+  InvokeFunctionResponse,
 } from "starknet";
 import { EstimateFee } from "starknet/types/account"
 
@@ -72,7 +73,7 @@ export class Account extends Provider implements AccountInterface {
   async deployContract(
     payload: DeployContractPayload,
     abi?: Abi
-  ): Promise<AddTransactionResponse> {
+  ): Promise<StarknetDeployContractResponse> {
     const id = cuid();
 
     window.open(
@@ -143,7 +144,7 @@ export class Account extends Provider implements AccountInterface {
     transactions: Call | Call[],
     abis?: Abi[],
     transactionsDetail?: InvocationsDetails
-  ): Promise<AddTransactionResponse> {
+  ): Promise<InvokeFunctionResponse> {
     let response = await this.messenger.send<ExecuteResponse>({
       method: "execute",
       params: {
