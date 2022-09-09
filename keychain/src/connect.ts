@@ -1,12 +1,12 @@
-import { Controller } from "utils/wallet";
-import { Message, ConnectRequest } from "@cartridge/controller";
+import Controller from "src/utils/account";
+import { Message, ConnectRequest, ConnectResponse } from "@cartridge/controller";
 
 const INTERNVAL = 100;
 
 // Three minutes
 const TIMEOUT = 1000 * 60 * 3;
 
-export async function connect(from: string, message: Message<ConnectRequest>) {
+export async function connect(from: string, message: Message<ConnectRequest>): Promise<ConnectResponse> {
   return new Promise((resolve, reject) => {
     let elapsed = -100;
     const checkApproval = async () => {

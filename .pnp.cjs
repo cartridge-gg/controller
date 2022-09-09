@@ -697,6 +697,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@cartridge/connector", "workspace:connector"],\
             ["@cartridge/controller", "workspace:controller"],\
             ["@rollup/plugin-replace", "virtual:984e5d2d525af242e5040e5501df095fd5393a9cc9296f267d0afb685846d21a2160106a0fd3adb3131f9966f0b626be27938b2601cefec33b69d678bec6585a#npm:4.0.0"],\
+            ["@starknet-react/core", "virtual:377a16a1446dc016fb99716852165b918a9bf325c8d3e40e7ca1a2f1f086a431ce169280b0c828a73fd5e24aa4b338f6293a04ab89281d812c544aabc1052a56#npm:0.13.4"],\
             ["@types/jest", "npm:26.0.24"],\
             ["@types/node", "npm:17.0.23"],\
             ["jest", "npm:26.6.3"],\
@@ -2214,30 +2215,52 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["@starknet-react/core", [\
-        ["npm:0.6.3", {\
-          "packageLocation": "./.yarn/cache/@starknet-react-core-npm-0.6.3-bca469a644-05a36607ff.zip/node_modules/@starknet-react/core/",\
+        ["npm:0.13.4", {\
+          "packageLocation": "./.yarn/cache/@starknet-react-core-npm-0.13.4-f8b9526be6-8f52103349.zip/node_modules/@starknet-react/core/",\
           "packageDependencies": [\
-            ["@starknet-react/core", "npm:0.6.3"]\
+            ["@starknet-react/core", "npm:0.13.4"]\
           ],\
           "linkType": "SOFT"\
         }],\
-        ["virtual:1b8014525e2900383c3c044102c7ff1befe0e008dc1879605eac988b07e5205da0756ad66f5bd55b1e495672350a66b248dfefef176b2fb2a43e4aa7e60c0784#npm:0.6.3", {\
-          "packageLocation": "./.yarn/__virtual__/@starknet-react-core-virtual-813bba2561/0/cache/@starknet-react-core-npm-0.6.3-bca469a644-05a36607ff.zip/node_modules/@starknet-react/core/",\
+        ["virtual:1b8014525e2900383c3c044102c7ff1befe0e008dc1879605eac988b07e5205da0756ad66f5bd55b1e495672350a66b248dfefef176b2fb2a43e4aa7e60c0784#npm:0.13.4", {\
+          "packageLocation": "./.yarn/__virtual__/@starknet-react-core-virtual-abd6894b57/0/cache/@starknet-react-core-npm-0.13.4-f8b9526be6-8f52103349.zip/node_modules/@starknet-react/core/",\
           "packageDependencies": [\
-            ["@starknet-react/core", "virtual:1b8014525e2900383c3c044102c7ff1befe0e008dc1879605eac988b07e5205da0756ad66f5bd55b1e495672350a66b248dfefef176b2fb2a43e4aa7e60c0784#npm:0.6.3"],\
-            ["@argent/get-starknet", "virtual:1b8014525e2900383c3c044102c7ff1befe0e008dc1879605eac988b07e5205da0756ad66f5bd55b1e495672350a66b248dfefef176b2fb2a43e4aa7e60c0784#npm:3.0.1"],\
-            ["@types/argent__get-starknet", null],\
+            ["@starknet-react/core", "virtual:1b8014525e2900383c3c044102c7ff1befe0e008dc1879605eac988b07e5205da0756ad66f5bd55b1e495672350a66b248dfefef176b2fb2a43e4aa7e60c0784#npm:0.13.4"],\
+            ["@types/get-starknet", null],\
             ["@types/react", "npm:17.0.39"],\
             ["@types/starknet", null],\
+            ["get-starknet", null],\
             ["immutable", "npm:4.0.0"],\
             ["react", "npm:17.0.2"],\
             ["starknet", "npm:3.7.0"]\
           ],\
           "packagePeers": [\
-            "@argent/get-starknet",\
-            "@types/argent__get-starknet",\
+            "@types/get-starknet",\
             "@types/react",\
             "@types/starknet",\
+            "get-starknet",\
+            "react",\
+            "starknet"\
+          ],\
+          "linkType": "HARD"\
+        }],\
+        ["virtual:377a16a1446dc016fb99716852165b918a9bf325c8d3e40e7ca1a2f1f086a431ce169280b0c828a73fd5e24aa4b338f6293a04ab89281d812c544aabc1052a56#npm:0.13.4", {\
+          "packageLocation": "./.yarn/__virtual__/@starknet-react-core-virtual-b021447431/0/cache/@starknet-react-core-npm-0.13.4-f8b9526be6-8f52103349.zip/node_modules/@starknet-react/core/",\
+          "packageDependencies": [\
+            ["@starknet-react/core", "virtual:377a16a1446dc016fb99716852165b918a9bf325c8d3e40e7ca1a2f1f086a431ce169280b0c828a73fd5e24aa4b338f6293a04ab89281d812c544aabc1052a56#npm:0.13.4"],\
+            ["@types/get-starknet", null],\
+            ["@types/react", null],\
+            ["@types/starknet", null],\
+            ["get-starknet", null],\
+            ["immutable", "npm:4.0.0"],\
+            ["react", null],\
+            ["starknet", "npm:4.3.0"]\
+          ],\
+          "packagePeers": [\
+            "@types/get-starknet",\
+            "@types/react",\
+            "@types/starknet",\
+            "get-starknet",\
             "react",\
             "starknet"\
           ],\
@@ -10738,7 +10761,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["starknet-react-next", "workspace:examples/starknet-react-next"],\
             ["@argent/get-starknet", "virtual:1b8014525e2900383c3c044102c7ff1befe0e008dc1879605eac988b07e5205da0756ad66f5bd55b1e495672350a66b248dfefef176b2fb2a43e4aa7e60c0784#npm:3.0.1"],\
             ["@cartridge/controller", "workspace:controller"],\
-            ["@starknet-react/core", "virtual:1b8014525e2900383c3c044102c7ff1befe0e008dc1879605eac988b07e5205da0756ad66f5bd55b1e495672350a66b248dfefef176b2fb2a43e4aa7e60c0784#npm:0.6.3"],\
+            ["@starknet-react/core", "virtual:1b8014525e2900383c3c044102c7ff1befe0e008dc1879605eac988b07e5205da0756ad66f5bd55b1e495672350a66b248dfefef176b2fb2a43e4aa7e60c0784#npm:0.13.4"],\
             ["@types/node", "npm:17.0.17"],\
             ["@types/react", "npm:17.0.39"],\
             ["eslint", "npm:8.9.0"],\

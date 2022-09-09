@@ -441,6 +441,7 @@ __metadata:
   dependencies:
     "@cartridge/controller": "workspace:^"
     "@rollup/plugin-replace": ^4.0.0
+    "@starknet-react/core": ^0.13.4
     "@types/jest": ^26.0.18
     "@types/node": ^17.0.23
     jest: ^26.6.3
@@ -1803,16 +1804,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@starknet-react/core@npm:^0.6.0":
-  version: 0.6.3
-  resolution: "@starknet-react/core@npm:0.6.3"
+"@starknet-react/core@npm:^0.13.4":
+  version: 0.13.4
+  resolution: "@starknet-react/core@npm:0.13.4"
   dependencies:
     immutable: ^4.0.0
   peerDependencies:
-    "@argent/get-starknet": ^3.0
-    react: ^16.8 || ^17.0
-    starknet: ^3.5
-  checksum: 05a36607fffc8b0e24d2ed478ab38c5b84a9379dcc87449715b7680931710ed1d864d0d103e3dc5b06a0787db5f55425e82096a3da80185c2ef2cf58ffdc16d3
+    get-starknet: ^1.4
+    react: ^17.0 || ^18.0
+    starknet: ^3.10
+  checksum: 8f5210334955121e6f5a714e96898dfa852758bb49d4b5a6df48546d57d94130e2b0e7c2108d836454162ab57632b31470d8d33f006bf32a1724b68c7dc03fba
   languageName: node
   linkType: hard
 
@@ -9153,7 +9154,7 @@ __metadata:
   dependencies:
     "@argent/get-starknet": ^3.0.1
     "@cartridge/controller": "workspace:^"
-    "@starknet-react/core": ^0.6.0
+    "@starknet-react/core": ^0.13.4
     "@types/node": 17.0.17
     "@types/react": 17.0.39
     eslint: 8.9.0

@@ -5,7 +5,7 @@ import {
     useEffect,
     useState,
 } from "react";
-import Controller from "utils/account";
+import Controller from "src/utils/account";
 import { KeyPair } from "starknet";
 import { AccountId } from "caip";
 
@@ -130,14 +130,14 @@ export function ControllerProvider({
 
     return (
         <ControllerContext.Provider
-        value= {{
-        controllerState,
-            controller,
-            create,
-            register,
-        }
-}
-children = { children }
-    />
+            value={{
+                controllerState,
+                controller,
+                create,
+                register,
+            }
+            }
+            children={children}
+        />
     );
-  }
+}

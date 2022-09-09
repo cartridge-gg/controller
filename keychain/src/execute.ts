@@ -1,4 +1,3 @@
-import { Controller, diff } from "utils/wallet";
 import { Scope, ExecuteResponse } from "@cartridge/controller";
 import {
   Call,
@@ -7,6 +6,8 @@ import {
   InvokeFunctionResponse,
 } from "starknet";
 import { toBN } from "starknet/dist/utils/number";
+
+import Controller, { diff } from "src/utils/account";
 
 export type ExecuteResponsePayload = {
   result?: InvokeFunctionResponse;
@@ -25,10 +26,10 @@ export async function execute(
 
   const scopes = calls.map(
     (txn) =>
-      ({
-        target: txn.contractAddress,
-        method: txn.entrypoint,
-      } as Scope),
+    ({
+      target: txn.contractAddress,
+      method: txn.entrypoint,
+    } as Scope),
   );
 
   try {
@@ -49,7 +50,7 @@ export async function execute(
       };
     }
 
-    if (!transactionsDetail.maxFee) {
+    if (transactionsDetail && !transactionsDetail.maxFee) {
       transactionsDetail.maxFee = (
         await controller.estimateFee(calls)
       ).suggestedMaxFee;
@@ -57,7 +58,7 @@ export async function execute(
 
     if (
       approvals.maxFee &&
-      transactionsDetail.maxFee.gt(toBN(approvals.maxFee))
+      transactionsDetail?.maxFee.gt(toBN(approvals.maxFee))
     ) {
       return {
         method: "execute",

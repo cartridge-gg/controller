@@ -1,4 +1,4 @@
-import { Controller } from "utils/wallet";
+import Controller from "src/utils/account";
 
 import {
   DeployContractRequest,
@@ -30,7 +30,7 @@ export const onSDKMessage = async (
 ): Promise<Response> => {
   const { origin: from, method } = message.payload;
   if (!from) {
-    return;
+    throw new Error("no `from` defined")
   }
 
   if (method === "connect") {
@@ -139,4 +139,6 @@ export const onSDKMessage = async (
       return nonce(controller, message as Message<GetNonceRequest>);
     }
   }
+
+  throw new Error("unknown method: " + method)
 };

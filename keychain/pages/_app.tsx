@@ -1,8 +1,12 @@
-import '../styles/globals.css'
 import type { AppProps } from 'next/app'
 
-function MyApp({ Component, pageProps }: AppProps) {
+if (typeof window !== "undefined") {
+  (window.XMLHttpRequest as any) = undefined;
+  (window.fetch as any) = undefined;
+}
+
+function Keychain({ Component, pageProps }: AppProps) {
   return <Component {...pageProps} />
 }
 
-export default MyApp
+export default Keychain

@@ -1,4 +1,4 @@
-import { Controller } from "utils/wallet";
+import Controller from "src/utils/account";
 import {
   Message,
   DeployContractResponse,

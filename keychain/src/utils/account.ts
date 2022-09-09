@@ -9,8 +9,8 @@ import { BigNumberish } from "starknet/utils/number";
 import { Scope, Approvals } from "@cartridge/controller";
 import equal from "fast-deep-equal";
 
-import Storage from "utils/storage";
-import { ControllerState } from "hooks/controller";
+import Storage from "src/utils/storage";
+import { ControllerState } from "src/hooks/controller";
 import { DeviceSigner } from "./signer";
 
 export default class Controller extends Account {
