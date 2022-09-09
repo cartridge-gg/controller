@@ -5,9 +5,11 @@
   "scripts": {
     "build": "yarn sdk build",
     "release": "yarn build && yarn changeset publish",
+    "keychain": "yarn workspace @cartridge/keychain",
     "sdk": "yarn workspace @cartridge/sdk"
   },
   "workspaces": [
+    "keychain",
     "sdk",
     "examples/starknet-react-next"
   ],
