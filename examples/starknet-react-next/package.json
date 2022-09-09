@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@argent/get-starknet": "^3.0.1",
-    "@cartridge/sdk": "workspace:^",
-    "@starknet-react/core": "^0.6.0",
+    "@cartridge/controller": "workspace:^",
+    "@starknet-react/core": "^0.13.4",
     "next": "12.0.10",
     "react": "17.0.2",
     "react-dom": "17.0.2",
