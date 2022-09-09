@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import { useEffect } from "react";
-import { Messenger, Message, Request } from "@cartridge/sdk";
+import { Messenger, Message, Request } from "@cartridge/controller";
 import cuid from "cuid";
 import { onSDKMessage } from "core/sdk";
 import { BroadcastChannel, createLeaderElection } from "broadcast-channel";

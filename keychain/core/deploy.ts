@@ -3,7 +3,7 @@ import {
   Message,
   DeployContractResponse,
   DeployContractRequest,
-} from "@cartridge/sdk";
+} from "@cartridge/controller";
 
 // TODO: Authenticate
 export async function deploy(

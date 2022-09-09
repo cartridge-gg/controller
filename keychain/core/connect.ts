@@ -1,5 +1,5 @@
 import { Controller } from "utils/wallet";
-import { Message, ConnectRequest } from "@cartridge/sdk";
+import { Message, ConnectRequest } from "@cartridge/controller";
 
 const INTERNVAL = 100;
 

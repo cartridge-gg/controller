@@ -3,7 +3,7 @@ import {
   Message,
   VerifyMessageResponse,
   VerifyMessageRequest,
-} from "@cartridge/sdk";
+} from "@cartridge/controller";
 
 export async function verify(
   controller: Controller,

@@ -1,5 +1,5 @@
 import { Controller, diff } from "utils/wallet";
-import { Scope, ExecuteResponse } from "@cartridge/sdk";
+import { Scope, ExecuteResponse } from "@cartridge/controller";
 import {
   Call,
   Abi,

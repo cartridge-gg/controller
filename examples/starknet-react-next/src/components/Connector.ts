@@ -1,5 +1,5 @@
 import { Connector } from "@starknet-react/core";
-import { Cartridge } from "@cartridge/sdk";
+import { Cartridge } from "@cartridge/controller";
 
 export class CartridgeConnector extends Connector {
   readonly id = "cartridge";

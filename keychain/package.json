@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@cartridge/sdk": "workspace:^",
+    "@cartridge/controller": "workspace:^",
     "broadcast-channel": "^4.11.0",
     "caip": "^1.1.0",
     "cuid": "^2.1.8",

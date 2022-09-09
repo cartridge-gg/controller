@@ -1,7 +1,7 @@
 {
-  "name": "@cartridge/sdk",
+  "name": "@cartridge/controller",
   "version": "1.0.36",
-  "description": "Cartridge SDK",
+  "description": "Cartridge Controller",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",

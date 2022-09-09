@@ -1,5 +1,5 @@
 ---
-"@cartridge/sdk": patch
+"@cartridge/controller": patch
 ---
 
 txn approval

@@ -1,5 +1,5 @@
 import { Controller } from "utils/wallet";
-import { Message, GetNonceResponse, GetNonceRequest } from "@cartridge/sdk";
+import { Message, GetNonceResponse, GetNonceRequest } from "@cartridge/controller";
 
 export async function nonce(
   controller: Controller,

@@ -6,7 +6,7 @@ import {
     number,
 } from "starknet";
 import { BigNumberish } from "starknet/utils/number";
-import { Scope, Approvals } from "@cartridge/sdk";
+import { Scope, Approvals } from "@cartridge/controller";
 import equal from "fast-deep-equal";
 
 import Storage from "utils/storage";

@@ -3,7 +3,7 @@ import {
   Message,
   HashMessageResponse,
   HashMessageRequest,
-} from "@cartridge/sdk";
+} from "@cartridge/controller";
 
 export async function hash(
   controller: Controller,

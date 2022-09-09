@@ -3,7 +3,7 @@ import {
   Message,
   SignMessageResponse,
   SignMessageRequest,
-} from "@cartridge/sdk";
+} from "@cartridge/controller";
 
 export async function sign(
   controller: Controller,

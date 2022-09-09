@@ -3,7 +3,7 @@ import {
   Message,
   VerifyMessageHashResponse,
   VerifyMessageHashRequest,
-} from "@cartridge/sdk";
+} from "@cartridge/controller";
 
 export async function verifyHash(
   controller: Controller,

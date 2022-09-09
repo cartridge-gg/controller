@@ -13,7 +13,7 @@ import {
   GetNonceRequest,
   ProbeRequest,
   SignMessageRequest,
-} from "@cartridge/sdk";
+} from "@cartridge/controller";
 
 import { execute } from "./execute";
 import { connect } from "./connect";
