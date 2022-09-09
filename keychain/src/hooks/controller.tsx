@@ -135,9 +135,7 @@ export function ControllerProvider({
                 controller,
                 create,
                 register,
-            }
-            }
-            children={children}
-        />
+            }}
+        >{children}</ControllerContext.Provider>
     );
 }
