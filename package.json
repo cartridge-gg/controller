@@ -3,17 +3,19 @@
   "packageManager": "yarn@3.2.0",
   "private": true,
   "scripts": {
-    "build": "yarn controller build && yarn connector build",
+    "build": "yarn controller build && yarn connector build && yarn ui build",
     "release": "yarn build && yarn changeset publish",
     "keychain": "yarn workspace @cartridge/keychain",
     "controller": "yarn workspace @cartridge/controller",
     "connector": "yarn workspace @cartridge/connector",
+    "ui": "yarn workspace @cartridge/ui",
     "test": ""
   },
   "workspaces": [
     "keychain",
     "controller",
     "connector",
+    "ui",
     "examples/starknet-react-next"
   ],
   "devDependencies": {
