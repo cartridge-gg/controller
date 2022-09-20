@@ -95,14 +95,8 @@ export function ControllerProvider({
             controller.cache();
             controller.approve(
                 "https://cartridge.gg/",
-                [
-                    {
-                        method: "incrementCounter",
-                        target:
-                            "0x036486801b8f42e950824cba55b2df8cccb0af2497992f807a7e1d9abd2c6ba1",
-                    },
-                ],
-                "1000000000000000",
+                [],
+                "0",
             );
             setController(controller);
             setControllerState(ControllerState.DEPLOYING);
@@ -121,6 +115,11 @@ export function ControllerProvider({
                 transaction,
             );
             controller.cache();
+            controller.approve(
+                "https://cartridge.gg/",
+                [],
+                "0",
+            );
             setController(controller);
             setControllerState(ControllerState.READY);
             return controller;

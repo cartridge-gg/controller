@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "TARGET_ORIGIN=\"*\" next dev",
+    "build": "TARGET_ORIGIN=\"https://x.cartridge.gg/\" next build",
     "start": "next start",
     "lint": "next lint"
   },
@@ -15,7 +15,7 @@
     "cuid": "^2.1.8",
     "fast-deep-equal": "^3.1.3",
     "js-cookie": "^3.0.1",
-    "next": "12.2.5",
+    "next": "^12.3.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "starknet": "4.3.0"
