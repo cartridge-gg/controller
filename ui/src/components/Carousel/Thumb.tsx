@@ -1,8 +1,6 @@
 import React from "react";
-import { Circle, Flex } from "@chakra-ui/react";
+import { Box, Flex } from "@chakra-ui/react";
 import Image from "next/future/image";
-
-import PlayIcon from "../icons/Play";
 
 const Thumb = ({
   uri,
@@ -33,9 +31,16 @@ const Thumb = ({
       transition="all 0.2s ease"
     >
       {ext === "mp4" ? (
-        <Circle size="50px" bgColor="whiteAlpha.200">
-          <PlayIcon />
-        </Circle>
+        <Box
+          as="video"
+          top="0"
+          left="0"
+          h="full"
+          w="full"
+          src={uri + "#t=" + 3}
+          preload="metadata"
+          objectFit="cover"
+        />
       ) : (
         <Image
           src={uri}

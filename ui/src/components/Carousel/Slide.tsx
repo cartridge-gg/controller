@@ -21,7 +21,7 @@ const Video = ({
   poster?: string;
   frame?: number;
 }) => {
-  const vidRef = useRef<any>(null);
+  const vidRef = useRef<HTMLVideoElement>(null);
   const [controls, setControls] = useState(false);
   return (
     <>
@@ -37,7 +37,7 @@ const Video = ({
         poster={poster}
         objectFit="cover"
         controls={controls}
-        ref={vidRef}
+        ref={vidRef as any}
       />
       {!controls && (
         <Circle
@@ -46,6 +46,11 @@ const Video = ({
           bgColor="whiteAlpha.200"
           zIndex="overlay"
           onClick={() => {
+            if (!vidRef.current) {
+              return
+            }
+
+            vidRef.current.currentTime = 0;
             vidRef.current.play();
             setControls(true);
           }}
@@ -53,7 +58,7 @@ const Video = ({
             bgColor: "whiteAlpha.300",
           }}
         >
-          <PlayIcon transform="scale(2)" />
+          <PlayIcon fill="white" transform="scale(2)" />
         </Circle>
       )}
     </>
