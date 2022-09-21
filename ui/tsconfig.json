@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "composite": true,
     "target": "es5",
     "module": "esnext",
     "jsx": "react-jsx",
@@ -14,6 +15,10 @@
     "forceConsistentCasingInFileNames": true,
     "declaration": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

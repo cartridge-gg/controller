@@ -4,7 +4,7 @@
             "path": "./controller"
         },
         {
-            "path": "./keychain"
+            "path": "./ui"
         }
     ]
 }

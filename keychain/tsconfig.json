@@ -28,6 +28,9 @@
       ],
       "@cartridge/controller": [
         "../../controller/src"
+      ],
+      "@cartridge/ui/*": [
+        "../../ui/src/*"
       ]
     },
   },
@@ -42,6 +45,9 @@
   "references": [
     {
       "path": "../controller"
+    },
+    {
+      "path": "../ui"
     }
   ]
 }

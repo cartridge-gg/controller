@@ -2,14 +2,12 @@ import { css } from "@emotion/react";
 import { Box, Button, Flex, FormControl } from "@chakra-ui/react";
 import { Formik, Form, Field, FieldInputProps } from "formik";
 import { Scope } from "@cartridge/controller";
-import { useRouter } from "next/router";
 
-import Triangle from "@cartridge/ui/lib/components/icons/Triangle";
-import { Header, HeaderType } from "@cartridge/ui/lib/components/Header";
+import Triangle from "@cartridge/ui/components/icons/Triangle";
+import { Header, HeaderType } from "@cartridge/ui/components/Header";
 
 import Banner from "components/Banner";
 import { Call, MaxFee } from "./Call";
-import Storage from "utils/storage";
 import { useMemo } from "react";
 import Controller from "utils/account";
 

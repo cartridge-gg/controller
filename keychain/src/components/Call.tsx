@@ -3,9 +3,9 @@ import { FieldInputProps } from "formik";
 import { formatEther } from "ethers/lib/utils";
 import { Scope } from "@cartridge/controller";
 
-import Transfer from "@cartridge/ui/lib/components/icons/Transfer";
-import GasPump from "@cartridge/ui/lib/components/icons/GasPump";
-import { formatAddress } from "@cartridge/ui/lib/components/Address";
+import Transfer from "@cartridge/ui/components/icons/Transfer";
+import GasPump from "@cartridge/ui/components/icons/GasPump";
+import { formatAddress } from "@cartridge/ui/components/Address";
 
 import { VoyagerUrl } from "utils/url";
 

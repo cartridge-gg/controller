@@ -1,7 +1,7 @@
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { Spacer, Link, Flex, Button, Container } from "@chakra-ui/react";
-import { Logo } from "@cartridge/ui/lib/components/brand/Logo";
+import { Logo } from "@cartridge/ui/components/brand/Logo";
 
 import Banner from "components/Banner";
 

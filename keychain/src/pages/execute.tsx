@@ -2,7 +2,7 @@ import type { NextPage } from "next";
 import { useCallback, useEffect, useMemo } from "react";
 import { Flex } from "@chakra-ui/react";
 
-import { Header } from "@cartridge/ui/lib/components/Header";
+import { Header } from "@cartridge/ui/components/Header";
 import { useExecuteParams } from "hooks/account";
 import Approval from "components/Approval";
 import Controller from "utils/account";

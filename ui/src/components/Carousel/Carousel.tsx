@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Box, Flex, SimpleGrid } from "@chakra-ui/react";
 import useEmblaCarousel from "embla-carousel-react";
 
@@ -20,7 +20,7 @@ export const Carousel = ({
   const scrollPrev = useCallback(() => embla && embla.scrollPrev(), [embla]);
   const scrollNext = useCallback(() => embla && embla.scrollNext(), [embla]);
   const scrollTo = useCallback(
-    (index) => embla && embla.scrollTo(index),
+    (index: number) => embla && embla.scrollTo(index),
     [embla],
   );
 

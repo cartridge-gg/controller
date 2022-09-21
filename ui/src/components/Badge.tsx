@@ -1,4 +1,4 @@
-import React from "react";
+import { ReactNode, CSSProperties } from "react";
 import { Flex, forwardRef } from "@chakra-ui/react";
 import { css } from "@emotion/react";
 
@@ -7,7 +7,7 @@ export const Badge = forwardRef(
     {
       children,
       style,
-    }: { children: React.ReactNode; style?: React.CSSProperties },
+    }: { children: ReactNode; style?: CSSProperties },
     ref,
   ) => (
     <Flex

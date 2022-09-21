@@ -5,8 +5,8 @@ import { Box, Flex, Spacer, Text, Image } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { TypedData } from "starknet/utils/typedData";
 import { decodeShortString } from "starknet/utils/shortString";
-import { Header, HeaderType } from "@cartridge/ui/lib/components/Header";
-import PencilIcon from "@cartridge/ui/lib/components/icons/Pencil";
+import { Header, HeaderType } from "@cartridge/ui/components/Header";
+import PencilIcon from "@cartridge/ui/components/icons/Pencil";
 
 import Storage from "utils/storage";
 

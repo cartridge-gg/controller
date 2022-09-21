@@ -1,8 +1,0 @@
-#!/bin/bash
-#
-# This script should be run in the developer runtime: bin/shell web/bin/lint
-set -euxo pipefail
-
-pushd $(dirname "$0")/..
-
-yarn lint

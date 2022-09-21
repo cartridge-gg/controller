@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, useColorModeValue } from "@chakra-ui/react";
 
 export function Triangle(props: any) {

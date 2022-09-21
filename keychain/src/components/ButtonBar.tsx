@@ -1,6 +1,6 @@
 import { Flex, Button, Box } from "@chakra-ui/react";
 import { css } from "@emotion/react";
-import ClockIcon from "@cartridge/ui/lib/components/icons/Clock";
+import ClockIcon from "@cartridge/ui/components/icons/Clock";
 
 export type ButtonBarProps = {
   onSubmit?: () => void;

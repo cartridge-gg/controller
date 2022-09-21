@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import { Flex } from "@chakra-ui/react";
 
 import Approval from "components/Approval";
-import { Header } from "@cartridge/ui/lib/components/Header";
+import { Header } from "@cartridge/ui/components/Header";
 import { useRequests } from "hooks/account";
 import { useUrlScopes } from "hooks/scope";
 import Controller from "utils/account";
