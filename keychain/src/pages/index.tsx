@@ -5,11 +5,19 @@ import cuid from "cuid";
 import { Messenger, Message, Request } from "@cartridge/controller";
 
 import { onSDKMessage } from "../handlers";
+import { useRouter } from "next/router";
 
 const Index: NextPage = () => {
+  const router = useRouter();
+
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
+    }
+
+    if (window.self !== window.top) {
+      router.replace("/welcome");
+      return
     }
 
     const messenger = new Messenger(undefined, process.env.TARGET_ORIGIN);

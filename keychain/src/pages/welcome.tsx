@@ -32,7 +32,7 @@ const Welcome: NextPage = () => {
         </Flex>
         <Flex direction="column" gap="14px" w="full">
           <Link
-            href={`/login${router.query.redirect_uri
+            href={`https://cartridge.gg/login${router.query.redirect_uri
               ? `?redirect_uri=${encodeURIComponent(
                 router.query.redirect_uri as string,
               )}`
@@ -43,7 +43,7 @@ const Welcome: NextPage = () => {
               Login
             </Button>
           </Link>
-          <Link href={"/create"}>
+          <Link href={"https://cartridge.gg/create"}>
             <Button variant="secondary800" w="full">
               Create Account
             </Button>
