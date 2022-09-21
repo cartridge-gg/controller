@@ -25,6 +25,7 @@ const ChainDropdown = () => {
           w="16px"
           h="16px"
           src="https://controller.cartridge.gg/starknet-icon.png"
+          alt="Chain icon"
         />
       }
     />
