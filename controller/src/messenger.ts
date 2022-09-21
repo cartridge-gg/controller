@@ -9,7 +9,7 @@ export type Message<T = Request | Response> = {
 };
 
 export class Messenger {
-  private target: Window;
+  private target: Window | null;
   private origin: string;
   private pending: MessageEvent<Message<Request>>[] = []
 
@@ -22,7 +22,7 @@ export class Messenger {
     }
   }
 
-  constructor(target?: Window, origin: string = "https://cartridge.gg") {
+  constructor(target: Window | null, origin: string = "https://cartridge.gg") {
     this.target = target;
     this.origin = origin;
 
@@ -37,7 +37,7 @@ export class Messenger {
   }
 
   onRequest(
-    cb: (request: Request, reply: <T = Response>(response: T) => void) => void
+    cb: (request: Request, reply: (response: Response) => void) => void
   ) {
     window.removeEventListener("message", this.defaultHandler)
 
@@ -46,6 +46,10 @@ export class Messenger {
       source,
       data: { id },
     }: MessageEvent<Message<Request>>) => (response: Response) => {
+      if (!source) {
+        return
+      }
+
       source.postMessage(
         {
           id,

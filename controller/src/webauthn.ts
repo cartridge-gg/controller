@@ -25,7 +25,7 @@ function split(n: BigNumberish): { x: BigNumberish; y: BigNumberish; z: BigNumbe
   return { x, y, z };
 }
 
-function convertUint8ArrayToWordArray(u8Array) {
+function convertUint8ArrayToWordArray(u8Array: Uint8Array) {
   var words = [],
     i = 0,
     len = u8Array.length;

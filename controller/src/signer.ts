@@ -73,7 +73,7 @@ export class Signer implements SignerInterface {
             throw new Error(response.error as string);
         }
 
-        return response.result;
+        return response.result!;
     }
 
     /**
@@ -120,6 +120,6 @@ export class Signer implements SignerInterface {
             throw new Error(response.error as string);
         }
 
-        return response.result;
+        return response.result!;
     }
 }

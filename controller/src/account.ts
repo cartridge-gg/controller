@@ -97,7 +97,7 @@ export class Account extends Provider implements AccountInterface {
       throw new Error(response.error as string);
     }
 
-    return response.result;
+    return response.result!;
   }
 
   /**
@@ -125,7 +125,7 @@ export class Account extends Provider implements AccountInterface {
       throw new Error(response.error as string);
     }
 
-    return response.result;
+    return response.result!;
   }
 
   /**
@@ -189,7 +189,7 @@ export class Account extends Provider implements AccountInterface {
       throw new Error(response.error as string);
     }
 
-    return response.result;
+    return response.result!;
   }
 
   /**
@@ -225,7 +225,7 @@ export class Account extends Provider implements AccountInterface {
       throw new Error(response.error as string);
     }
 
-    return response.result;
+    return response.result!;
   }
 
   /**
@@ -248,7 +248,7 @@ export class Account extends Provider implements AccountInterface {
       throw new Error(response.error as string);
     }
 
-    return response.result;
+    return response.result!;
   }
 
   /**
@@ -275,7 +275,7 @@ export class Account extends Provider implements AccountInterface {
       throw new Error(response.error as string);
     }
 
-    return response.result;
+    return response.result!;
   }
 
   /**
@@ -303,7 +303,7 @@ export class Account extends Provider implements AccountInterface {
       throw new Error(response.error as string);
     }
 
-    return response.result;
+    return response.result!;
   }
 
   async getNonce(): Promise<string> {
@@ -315,6 +315,6 @@ export class Account extends Provider implements AccountInterface {
       throw new Error(response.error as string);
     }
 
-    return response.result;
+    return response.result!;
   }
 }

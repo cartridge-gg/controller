@@ -1,4 +1,4 @@
-import Controller from "src/utils/account";
+import Controller from "utils/account";
 import {
   Message,
   VerifyMessageHashResponse,

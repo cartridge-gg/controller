@@ -1,19 +1,16 @@
 {
   "name": "@cartridge/controller",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Cartridge Controller",
-  "main": "dist/index.js",
-  "module": "dist/index.es.js",
-  "types": "dist/index.d.ts",
+  "main": "lib",
+  "types": "lib",
+  "type": "module",
   "scripts": {
-    "build": "rimraf ./dist && rollup -c",
-    "dev": "rollup -c -w",
-    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
-    "test:watch": "jest --watchAll",
-    "test": "jest --ci --runInBand"
+    "build": "tsc",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\""
   },
   "files": [
-    "dist"
+    "lib"
   ],
   "devDependencies": {
     "@rollup/plugin-replace": "^4.0.0",
@@ -26,24 +23,7 @@
     "ts-jest": "^26.5.1",
     "ts-node": "^10.4.0",
     "tslib": "^2.3.1",
-    "typescript": "^4.5.4"
-  },
-  "jest": {
-    "setupFiles": [],
-    "moduleFileExtensions": [
-      "ts",
-      "js",
-      "json"
-    ],
-    "roots": [
-      "src",
-      "tests"
-    ],
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest"
-    },
-    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
-    "moduleNameMapper": {}
+    "typescript": "4.8.2"
   },
   "dependencies": {
     "base64url": "^3.0.1",

@@ -12,8 +12,8 @@ export class Cartridge {
   private url: string = "https://cartridge.gg";
   private origin: string = "https://cartridge.gg";
   private loading = true;
-  private ready_: Promise<boolean>;
-  private account: AccountInterface;
+  private ready_: Promise<boolean> | undefined;
+  private account: AccountInterface | undefined;
 
   constructor(
     scopes?: Scope[],
@@ -81,11 +81,11 @@ export class Cartridge {
   }
 
   async probe() {
-    const prob = await this.messenger.send<ProbeResponse>({
+    const prob = await this.messenger?.send<ProbeResponse>({
       method: "probe",
     });
 
-    if (prob.result?.address) {
+    if (this.messenger && prob?.result?.address) {
       this.account = new Account(
         prob.result.address,
         prob.result.scopes,
@@ -123,7 +123,7 @@ export class Cartridge {
       "height=650,width=400"
     );
 
-    const response = await this.messenger.send<ConnectResponse>({
+    const response = await this.messenger?.send<ConnectResponse>({
       method: "connect",
       params: {
         id,
@@ -131,8 +131,13 @@ export class Cartridge {
       },
     } as ConnectRequest);
 
+    if (!this.messenger || !response || response.error || !response.result) {
+      console.error("not ready for connect")
+      return
+    }
+
     this.account = new Account(
-      response.result.address,
+      response.result.address!,
       response.result.scopes,
       this.messenger,
       {
@@ -144,5 +149,6 @@ export class Cartridge {
   }
 }
 
-export { Message, Messenger };
+export type { Message };
+export { Messenger };
 export * from "./types";

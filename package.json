@@ -12,8 +12,8 @@
     "test": ""
   },
   "workspaces": [
-    "keychain",
     "controller",
+    "keychain",
     "connector",
     "ui",
     "examples/starknet-react-next"

@@ -1,4 +1,4 @@
-import Controller from "src/utils/account";
+import Controller from "utils/account";
 import { Message, ConnectRequest, ConnectResponse } from "@cartridge/controller";
 
 const INTERNVAL = 100;

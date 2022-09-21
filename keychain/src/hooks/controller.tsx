@@ -5,7 +5,7 @@ import {
     useEffect,
     useState,
 } from "react";
-import Controller from "src/utils/account";
+import Controller from "utils/account";
 import { KeyPair } from "starknet";
 import { AccountId } from "caip";
 

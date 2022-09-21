@@ -7,7 +7,7 @@ import {
 } from "starknet";
 import { toBN } from "starknet/dist/utils/number";
 
-import Controller, { diff } from "src/utils/account";
+import Controller, { diff } from "utils/account";
 
 export type ExecuteResponsePayload = {
   result?: InvokeFunctionResponse;

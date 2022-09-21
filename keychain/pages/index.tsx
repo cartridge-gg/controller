@@ -4,7 +4,7 @@ import cuid from "cuid";
 
 import { Messenger, Message, Request } from "@cartridge/controller";
 
-import { onSDKMessage } from "src";
+import { onSDKMessage } from "core";
 
 const Index: NextPage = () => {
   useEffect(() => {
