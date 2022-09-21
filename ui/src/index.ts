@@ -8,3 +8,5 @@ export { AnglesDown } from "./components/icons/AnglesDown";
 export { Discord } from "./components/icons/Discord";
 export { Favorite } from "./components/icons/Favorite";
 export { Twitter } from "./components/icons/Twitter";
+
+export * as Components from "./components";

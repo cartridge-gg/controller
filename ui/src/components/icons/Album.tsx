@@ -1,4 +1,3 @@
-import React from "react";
 import { Icon, useStyleConfig } from "@chakra-ui/react";
 
 const Album = (props: any) => {
