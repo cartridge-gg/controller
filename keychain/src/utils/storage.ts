@@ -6,7 +6,7 @@ const isSafari =
 
 const Storage = {
   get: (key: string): any => {
-    if (!isSafari) {
+    if (!isSafari && typeof window != "undefined") {
       const value = window.localStorage.getItem(key)
       if (!value) {
         return null
@@ -24,7 +24,7 @@ const Storage = {
     return JSON.parse(existing);
   },
   set: (key: string, value: any) => {
-    if (!isSafari) {
+    if (!isSafari && typeof window != "undefined") {
       window.localStorage.setItem(key, JSON.stringify(value));
       return;
     }
@@ -32,7 +32,7 @@ const Storage = {
     Cookies.set(key, JSON.stringify(value), { secure: true });
   },
   remove: (key: string) => {
-    if (!isSafari) {
+    if (!isSafari && typeof window != "undefined") {
       window.localStorage.removeItem(key);
       return;
     }

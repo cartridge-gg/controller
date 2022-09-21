@@ -10,12 +10,10 @@ import { Scope, Approvals } from "@cartridge/controller";
 import equal from "fast-deep-equal";
 
 import Storage from "utils/storage";
-import { ControllerState } from "hooks/controller";
 import { DeviceSigner } from "./signer";
 
 export default class Controller extends Account {
     public accountId: string;
-    public transaction: string;
     protected publicKey: string;
     protected keypair: KeyPair;
 
@@ -23,40 +21,12 @@ export default class Controller extends Account {
         accountId: string,
         keypair: KeyPair,
         address: string,
-        transaction: string,
     ) {
         super(defaultProvider, address, keypair);
         this.signer = new DeviceSigner(keypair);
         this.accountId = accountId;
         this.keypair = keypair;
         this.publicKey = ec.getStarkKey(keypair);
-        this.transaction = transaction;
-    }
-
-    async checkDeployment(): Promise<ControllerState> {
-        const controller = Storage.get("controller");
-        let state: ControllerState = ControllerState.DEPLOYING;
-
-        if (controller.transaction) {
-            const { status } = await this.getTransactionReceipt(
-                controller.transaction,
-            );
-            switch (status) {
-                case "ACCEPTED_ON_L2":
-                case "ACCEPTED_ON_L1":
-                    state = ControllerState.READY;
-                    break;
-                default:
-                    state = ControllerState.DEPLOYING;
-            }
-        } else {
-            state =
-                (await this.getCode(this.address)).bytecode.length > 0
-                    ? ControllerState.READY
-                    : ControllerState.DEPLOYING;
-        }
-
-        return state;
     }
 
     cache() {
@@ -65,7 +35,6 @@ export default class Controller extends Account {
             privateKey: number.toHex(this.keypair.priv),
             publicKey: this.publicKey,
             address: this.address,
-            transaction: this.transaction,
         });
     }
 
@@ -111,15 +80,15 @@ export default class Controller extends Account {
         return raw as Approvals;
     }
 
-    static async fromStore() {
+    static fromStore() {
         const controller = Storage.get("controller");
         if (!controller) {
             return null;
         }
 
-        const { accountId, privateKey, address, transaction } = controller;
+        const { accountId, privateKey, address } = controller;
         const keypair = ec.getKeyPair(privateKey);
-        return new Controller(accountId, keypair, address, transaction);
+        return new Controller(accountId, keypair, address);
     }
 }
 

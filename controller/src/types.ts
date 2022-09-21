@@ -171,6 +171,21 @@ export interface GetNonceResponse extends RawResponse {
   result?: string;
 }
 
+export interface RegisterRequest extends RawRequest {
+  method: "register";
+  params: {
+    username: string;
+    address: string;
+  };
+}
+
+export interface RegisterResponse extends RawResponse {
+  method: "register";
+  result: {
+    publicKey: string;
+  };
+}
+
 export type RawRequest = {
   origin?: string;
   method: string;
@@ -188,7 +203,8 @@ export type Request =
   | HashMessageRequest
   | VerifyMessageHashRequest
   | VerifyMessageRequest
-  | GetNonceRequest;
+  | GetNonceRequest
+  | RegisterRequest;
 
 export type RawResponse = {
   result?: any;
@@ -205,4 +221,5 @@ export type Response =
   | HashMessageResponse
   | VerifyMessageHashResponse
   | VerifyMessageResponse
-  | GetNonceResponse;
+  | GetNonceResponse
+  | RegisterResponse;
