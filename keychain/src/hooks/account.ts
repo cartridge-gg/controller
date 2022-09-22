@@ -8,6 +8,7 @@ export function useRequests() {
 
   const url = useMemo(() => {
     const { origin } = router.query;
+    console.log(origin)
     if (!origin) {
       return;
     }
@@ -21,6 +22,7 @@ export function useRequests() {
     requests = JSON.parse(scopes as string);
   }
 
+  console.log(url)
   return { id: id as string | undefined, url, requests };
 }
 

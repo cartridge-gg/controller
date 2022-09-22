@@ -29,7 +29,7 @@ const Storage = {
       return;
     }
 
-    Cookies.set(key, JSON.stringify(value), { secure: true });
+    Cookies.set(key, JSON.stringify(value), { secure: true, sameSite: 'strict' });
   },
   remove: (key: string) => {
     if (!isSafari && typeof window != "undefined") {

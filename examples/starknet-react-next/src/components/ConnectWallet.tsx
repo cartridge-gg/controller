@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useStarknet } from "@starknet-react/core";
 
-import { CartridgeConnector } from "./Connector";
+import { CartridgeConnector } from "@cartridge/connector";
 
 export function ConnectWallet() {
   const { account, connect } = useStarknet();

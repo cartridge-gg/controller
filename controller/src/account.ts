@@ -4,6 +4,8 @@ import {
   DeployContractPayload,
   Abi,
   Call,
+  EstimateFeeDetails,
+  EstimateFeeResponse as StarknetEstimateFeeResponse,
   DeployContractResponse as StarknetDeployContractResponse,
   InvocationsDetails,
   Signature,
@@ -14,7 +16,6 @@ import {
   SignerInterface,
   InvokeFunctionResponse,
 } from "starknet";
-import { EstimateFee } from "starknet/types/account"
 
 import qs from 'query-string';
 
@@ -111,13 +112,22 @@ export class Account extends Provider implements AccountInterface {
    *
    * @returns response from addTransaction
    */
-  async estimateFee(
-    invocation: Invocation
-  ): Promise<EstimateFee> {
+  /**
+     * Estimate Fee for a method on starknet
+     *
+     * @param invocation the invocation object containing:
+     * - contractAddress - the address of the contract
+     * - entrypoint - the entrypoint of the contract
+     * - calldata - (defaults to []) the calldata
+     * - signature - (defaults to []) the signature
+     *
+     * @returns response from addTransaction
+     */
+  async estimateFee(calls: Call | Call[], estimateFeeDetails?: EstimateFeeDetails): Promise<StarknetEstimateFeeResponse> {
     const response = await this.messenger.send<EstimateFeeResponse>({
       method: "estimate-fee",
       params: {
-        invocation,
+        calls,
       },
     });
 

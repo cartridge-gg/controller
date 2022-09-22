@@ -54,7 +54,7 @@ async function getValidScopes(
   methods: string[],
   target: string,
 ): Promise<Scope[]> {
-  return
+  return methods.map(method => ({ method, target }))
   // const validSelectors = await fetchSelectors(target);
 
   // // filters out invalid methods and duplicates

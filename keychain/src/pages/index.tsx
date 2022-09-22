@@ -1,4 +1,5 @@
 import type { NextPage } from "next";
+import dynamic from 'next/dynamic'
 import { useEffect } from "react";
 import cuid from "cuid";
 
@@ -15,7 +16,7 @@ const Index: NextPage = () => {
       return;
     }
 
-    if (window.self !== window.top) {
+    if (window.self === window.top) {
       router.replace("/welcome");
       return;
     }
@@ -44,4 +45,4 @@ const Index: NextPage = () => {
   return <></>;
 };
 
-export default Index;
+export default dynamic(() => Promise.resolve(Index), { ssr: false });

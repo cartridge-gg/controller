@@ -1,25 +1,53 @@
 {
   "compilerOptions": {
+    "baseUrl": "./src",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "declaration": true,
     "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "strict": false,
+    "jsx": "preserve",
+    "jsxImportSource": "@emotion/react",
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
+    "incremental": true,
     "esModuleInterop": true,
-    "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
-    "url": ".",
+    "downlevelIteration": true,
+    "noEmit": true,
     "paths": {
-      "~/*": ["./src/*"]
+      "~/*": [
+        "./*"
+      ],
+      "@cartridge/controller": [
+        "../../../controller/src"
+      ],
+      "@cartridge/connector": [
+        "../../../connector/src"
+      ],
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules"],
-  "references": [{ "path": "../../controller" }]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ],
+  "references": [
+    {
+      "path": "../../controller"
+    },
+    {
+      "path": "../../connector"
+    }
+  ]
 }

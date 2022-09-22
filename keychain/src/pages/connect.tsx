@@ -1,4 +1,5 @@
 import type { NextPage } from "next";
+import dynamic from 'next/dynamic'
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import { Flex } from "@chakra-ui/react";
@@ -47,16 +48,14 @@ const Connect: NextPage = () => {
 
   return (
     <>
-      <Header
-        address={controller.address}
-      />
-      <Flex m={4} flex={1} flexDirection="column">
+      <Header address={controller.address} />
+      <Flex height="calc(100vh - 70px)">
         <Approval
           action="APPROVE"
           title="APPROVE GAME"
           message={
             <>
-              <strong>{url.href}</strong>
+              <strong>{url ? url.href : "unkown"}</strong>
               {validScopes.length > 0
                 ? " is requesting permission to submit transactions on your behalf"
                 : " is requesting access to your account"}
@@ -79,4 +78,4 @@ const Connect: NextPage = () => {
   );
 };
 
-export default Connect;
+export default dynamic(() => Promise.resolve(Connect), { ssr: false });

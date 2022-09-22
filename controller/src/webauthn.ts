@@ -1,5 +1,6 @@
 import {
   Abi,
+  Call,
   Invocation,
   InvocationsSignerDetails,
   Signature,
@@ -139,7 +140,7 @@ export class WebauthnSigner implements SignerInterface {
   }
 
   public hashTransaction(
-    transactions: Invocation[],
+    transactions: Call[],
     transactionsDetail: InvocationsSignerDetails,
     abis?: Abi[],
   ): string {
@@ -155,22 +156,22 @@ export class WebauthnSigner implements SignerInterface {
       transactionsDetail.nonce,
     );
 
-    return hash.calculcateTransactionHash(
+    return hash.calculateTransactionHash(
       transactionsDetail.walletAddress,
       transactionsDetail.version,
-      hash.getSelectorFromName("__execute__"),
-      calldata,
+      [hash.getSelectorFromName("__execute__")].concat(calldata),
       transactionsDetail.maxFee,
       transactionsDetail.chainId,
+      transactionsDetail.nonce,
     );
   }
 
   public async signTransaction(
-    transactions: Invocation[],
+    calls: Call[],
     transactionsDetail: InvocationsSignerDetails,
     abis?: Abi[],
   ): Promise<Signature> {
-    if (abis && abis.length !== transactions.length) {
+    if (abis && abis.length !== calls.length) {
       throw new Error(
         "ABI must be provided for each transaction or no transaction",
       );
@@ -178,17 +179,17 @@ export class WebauthnSigner implements SignerInterface {
     // now use abi to display decoded data somewhere, but as this signer is headless, we can't do that
 
     const calldata = transaction.fromCallsToExecuteCalldataWithNonce(
-      transactions,
+      calls,
       transactionsDetail.nonce,
     );
 
-    const msgHash = hash.calculcateTransactionHash(
+    const msgHash = hash.calculateTransactionHash(
       transactionsDetail.walletAddress,
       transactionsDetail.version,
-      hash.getSelectorFromName("__execute__"),
-      calldata,
+      [hash.getSelectorFromName("__execute__")].concat(calldata),
       transactionsDetail.maxFee,
       transactionsDetail.chainId,
+      transactionsDetail.nonce,
     );
 
     const assertion = await this.sign(msgHash);
