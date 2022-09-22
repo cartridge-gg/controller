@@ -133,7 +133,7 @@ export class Cartridge {
 
     if (!this.messenger || !response || response.error || !response.result) {
       console.error("not ready for connect")
-      return
+      return null;
     }
 
     this.account = new Account(

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import type { NextPage } from "next";
+import dynamic from 'next/dynamic'
 import { css } from "@emotion/react";
 import { Box, Flex, Spacer, Text, Image } from "@chakra-ui/react";
 import { useRouter } from "next/router";
@@ -8,26 +9,10 @@ import { decodeShortString } from "starknet/utils/shortString";
 import { Header, HeaderType } from "@cartridge/ui/components/Header";
 import PencilIcon from "@cartridge/ui/components/icons/Pencil";
 
-import Storage from "utils/storage";
-
 import Banner from "components/Banner";
 import ButtonBar from "components/ButtonBar";
 import Details from "components/Details";
 import Controller from "utils/account";
-
-const SubmitButtonText = () => {
-  return (
-    <>
-      <Box mr="3">SIGN</Box>
-      <PencilIcon
-        css={css`
-          width: 16px;
-          height: 16px;
-        `}
-      />
-    </>
-  );
-};
 
 const DetailsHeader = (data: {
   media?: Array<{ uri: string }>;
@@ -181,7 +166,7 @@ const Sign: NextPage = () => {
             }}
             isSubmitting={false}
           >
-            {SubmitButtonText()}
+            <Box mr="3">SIGN</Box>
           </ButtonBar>
         </Flex>
       </Flex>
@@ -189,4 +174,4 @@ const Sign: NextPage = () => {
   );
 };
 
-export default Sign;
+export default dynamic(() => Promise.resolve(Sign), { ssr: false });

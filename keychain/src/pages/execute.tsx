@@ -1,4 +1,5 @@
 import type { NextPage } from "next";
+import dynamic from 'next/dynamic'
 import { useCallback, useEffect, useMemo } from "react";
 import { Flex } from "@chakra-ui/react";
 
@@ -8,7 +9,7 @@ import Approval from "components/Approval";
 import Controller from "utils/account";
 import { useRouter } from "next/router";
 
-const Page: NextPage = () => {
+const Execute: NextPage = () => {
   const { id, url, calls } = useExecuteParams();
   const controller = useMemo(() => Controller.fromStore(), [])
   const router = useRouter();
@@ -66,4 +67,4 @@ const Page: NextPage = () => {
   );
 };
 
-export default Page;
+export default dynamic(() => Promise.resolve(Execute), { ssr: false });

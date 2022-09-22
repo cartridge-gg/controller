@@ -1,10 +1,10 @@
 import { Connector } from "@starknet-react/core";
-import { Cartridge, Scope } from "@cartridge/controller";
+import { Cartridge, Scope } from "@cartridge/controller/src";
 import { AccountInterface } from "starknet";
 
 export class CartridgeConnector extends Connector {
     private cartridge: Cartridge;
-    private _account?: AccountInterface;
+    private _account: AccountInterface | null;
 
     constructor(
         scopes?: Scope[],
@@ -14,6 +14,7 @@ export class CartridgeConnector extends Connector {
         },
     ) {
         super({ options });
+        this._account = null;
         this.cartridge = new Cartridge(scopes, options);
     }
 
@@ -39,8 +40,12 @@ export class CartridgeConnector extends Connector {
         return false;
     }
 
-    async connect() {
+    async connect(): Promise<AccountInterface> {
         this._account = await this.cartridge.connect();
+        if (!this._account) {
+            throw new Error("account not found")
+        }
+
         return this._account;
     }
 
@@ -49,8 +54,6 @@ export class CartridgeConnector extends Connector {
     }
 
     account() {
-        return this._account
-            ? Promise.resolve(this._account)
-            : Promise.reject(this._account);
+        return Promise.resolve(this._account);
     }
 }

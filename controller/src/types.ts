@@ -70,7 +70,7 @@ export interface DeployContractResponse extends RawResponse {
 export interface EstimateFeeRequest extends RawRequest {
   method: "estimate-fee";
   params: {
-    invocation: Invocation;
+    calls: Call | Call[];
   };
 }
 

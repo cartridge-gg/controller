@@ -4,12 +4,9 @@ import { Formik, Form, Field, FieldInputProps } from "formik";
 import { Scope } from "@cartridge/controller";
 
 import Triangle from "@cartridge/ui/components/icons/Triangle";
-import { Header, HeaderType } from "@cartridge/ui/components/Header";
 
 import Banner from "components/Banner";
 import { Call, MaxFee } from "./Call";
-import { useMemo } from "react";
-import Controller from "utils/account";
 
 type ApprovalFormProps = {
   action: string;
@@ -95,11 +92,11 @@ const ApprovalForm = ({
             )}
           </Box>
           <Box
-            margin={2}
             display="flex"
             flexDirection={["column-reverse", "row"]}
             justifyContent={["center", "flex-end"]}
             gap={4}
+            mt={3}
           >
             {onCancel && (
               <Button
@@ -141,39 +138,25 @@ const Approval = ({
   message: React.ReactNode;
   title: string;
 }) => {
-  const controller = useMemo(() => Controller.fromStore(), [])
   return (
-    <Flex
-      position={"fixed"}
-      direction={"column"}
-      top={0}
-      left={0}
-      right={0}
-      bottom={0}
-    >
-      <Header
-        type={HeaderType.Controller}
-        address={controller.address}
-      />
-      <Flex m={4} flex={1} flexDirection="column">
-        <Banner title={title} variant="secondary">
-          <Box mt={2} fontSize={13}>
-            {message}
-          </Box>
-        </Banner>
-        <Box mt={4} flex={1}>
-          <ApprovalForm
-            action={action}
-            scopes={scopes}
-            invalidScopes={invalidScopes}
-            isLoading={isLoading}
-            maxFee={maxFee}
-            setMaxFee={setMaxFee}
-            onSubmit={onSubmit}
-            onCancel={onCancel}
-          />
+    <Flex m={4} flex={1} flexDirection="column">
+      <Banner title={title} variant="secondary">
+        <Box mt={2} fontSize={13}>
+          {message}
         </Box>
-      </Flex>
+      </Banner>
+      <Box mt={4} flex={1}>
+        <ApprovalForm
+          action={action}
+          scopes={scopes}
+          invalidScopes={invalidScopes}
+          isLoading={isLoading}
+          maxFee={maxFee}
+          setMaxFee={setMaxFee}
+          onSubmit={onSubmit}
+          onCancel={onCancel}
+        />
+      </Box>
     </Flex>
   );
 };
