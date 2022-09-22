@@ -7,13 +7,15 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "format": "prettier ./src --write"
+    "format": "prettier ./src --write",
+    "postinstall": "tsc"
   },
   "files": [
     "lib",
+    "src",
     "README.md"
   ],
-  "dependencies": {
+  "peerDependencies": {
     "@chakra-ui/react": "^2.3.3",
     "@chakra-ui/theme": "^2.1.12",
     "@chakra-ui/theme-tools": "^2.0.11",
@@ -21,16 +23,13 @@
     "@emotion/styled": "^11",
     "embla-carousel-react": "^7.0.0",
     "framer-motion": "^6",
-    "next": "12.3.0",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "react-query": "^3.34.20"
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
   },
   "devDependencies": {
-    "@types/node": "18.7.14",
-    "@types/react": "18.0.20",
+    "@types/node": "^18.0.0",
+    "@types/react": "^18.0.0",
     "eslint": "8.9.0",
-    "eslint-config-next": "12.0.10",
     "eslint-config-prettier": "^8.5.0",
     "prettier": "2.6.2",
     "tslib": "^2.3.1",
