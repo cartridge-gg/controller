@@ -17,10 +17,10 @@ const Index: NextPage = () => {
 
     if (window.self !== window.top) {
       router.replace("/welcome");
-      return
+      return;
     }
 
-    const messenger = new Messenger(undefined, process.env.TARGET_ORIGIN);
+    const messenger = new Messenger(null, "*");
     messenger.onRequest((msg, reply) => {
       const id = cuid();
       onSDKMessage({
@@ -37,7 +37,7 @@ const Index: NextPage = () => {
           method: "ready",
         },
       },
-      { targetOrigin: process.env.TARGET_ORIGIN },
+      { targetOrigin: "*" },
     );
   });
 

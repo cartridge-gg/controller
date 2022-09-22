@@ -2,10 +2,10 @@
 const nextConfig = {
   productionBrowserSourceMaps: true,
   reactStrictMode: true,
+  swcMinify: false,
   experimental: {
     externalDir: true,
   },
-  // swcMinify: true,
 }
 
 module.exports = nextConfig
