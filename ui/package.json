@@ -19,7 +19,6 @@
     "@chakra-ui/theme-tools": "^2.0.11",
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
-    "embla-carousel-react": "^7.0.0",
     "framer-motion": "^6",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
