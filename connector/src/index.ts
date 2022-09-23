@@ -45,7 +45,6 @@ export class CartridgeConnector extends Connector {
         if (!this._account) {
             throw new Error("account not found")
         }
-
         return this._account;
     }
 

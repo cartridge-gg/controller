@@ -1,5 +1,5 @@
 import cuid from "cuid";
-import { Account } from "./account";
+import { CartridgeAccount as Account } from "./account";
 import { Message, Messenger } from "./messenger";
 import { ConnectRequest, ConnectResponse, ProbeResponse, Scope } from "./types";
 import qs from "query-string";
@@ -9,8 +9,7 @@ export class Cartridge {
   private selector = "cartridge-messenger";
   private messenger?: Messenger;
   private scopes: Scope[] = [];
-  private url: string = "https://cartridge.gg";
-  private origin: string = "https://cartridge.gg";
+  private url: string = "https://x.cartridge.gg";
   private loading = true;
   private ready_: Promise<boolean> | undefined;
   private account: AccountInterface | undefined;
@@ -28,10 +27,6 @@ export class Cartridge {
 
     if (options?.url) {
       this.url = options.url;
-    }
-
-    if (options?.origin) {
-      this.origin = options.origin;
     }
 
     if (typeof document !== "undefined") {
@@ -53,12 +48,12 @@ export class Cartridge {
       let iframe = document.getElementById(this.selector) as HTMLIFrameElement;
       if (!!iframe) {
         if (!this.messenger) {
-          this.messenger = new Messenger(iframe.contentWindow, this.origin);
+          this.messenger = new Messenger(iframe.contentWindow, this.url);
         }
       } else {
         iframe = document.createElement("iframe");
         iframe.id = this.selector;
-        iframe.src = `${this.url}/iframe`;
+        iframe.src = `${this.url}`;
         iframe.style.opacity = "0";
         iframe.style.height = "0";
         iframe.style.width = "0";
@@ -70,7 +65,7 @@ export class Cartridge {
         }
 
         document.body.appendChild(iframe);
-        this.messenger = new Messenger(iframe.contentWindow, this.origin);
+        this.messenger = new Messenger(iframe.contentWindow, this.url);
       }
     }
   }

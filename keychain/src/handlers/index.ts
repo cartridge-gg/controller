@@ -3,14 +3,10 @@ import Controller from "utils/account";
 import {
   DeployContractRequest,
   ExecuteRequest,
-  HashMessageRequest,
   Request,
   Response,
-  VerifyMessageHashRequest,
-  VerifyMessageRequest,
   Message,
   ConnectRequest,
-  GetNonceRequest,
   ProbeRequest,
   SignMessageRequest,
 } from "@cartridge/controller";
@@ -18,12 +14,8 @@ import {
 import { execute } from "./execute";
 import { connect } from "./connect";
 import { deploy } from "./deploy";
-import { hash } from "./hash";
 import { probe } from "./probe";
 import { sign } from "./sign";
-import { nonce } from "./nonce";
-import { verify } from "./verify";
-import { verifyHash } from "./verify-hash";
 
 export const onSDKMessage = async (
   message: Message<Request>,
@@ -37,7 +29,7 @@ export const onSDKMessage = async (
     return connect(from, message as Message<ConnectRequest>);
   }
 
-  const controller = await Controller.fromStore();
+  const controller = Controller.fromStore();
   if (!controller) {
     return {
       method,
@@ -45,7 +37,7 @@ export const onSDKMessage = async (
     } as Response;
   }
 
-  const approvals = await controller.approval(from);
+  const approvals = controller.approval(from);
   if (!approvals) {
     return {
       method,
@@ -64,7 +56,7 @@ export const onSDKMessage = async (
 
     case "execute": {
       const {
-        params: { id: executeId, transactions, abis, transactionsDetail },
+        params: { id: executeId, calls, abis, transactionsDetail },
       } = message.payload as ExecuteRequest;
 
       // When `executeId` is not defined, don't wait for approvals.
@@ -74,7 +66,7 @@ export const onSDKMessage = async (
         return execute(
           from,
           controller,
-          transactions,
+          calls,
           abis,
           transactionsDetail,
         );
@@ -88,7 +80,7 @@ export const onSDKMessage = async (
             await execute(
               from,
               controller,
-              transactions,
+              calls,
               abis,
               transactionsDetail,
             ),
@@ -114,29 +106,6 @@ export const onSDKMessage = async (
           }
         };
       });
-    }
-
-    // Public
-    case "hash-message": {
-      return hash(controller, message as Message<HashMessageRequest>);
-    }
-
-    // Public
-    case "verify-message": {
-      return verify(controller, message as Message<VerifyMessageRequest>);
-    }
-
-    // Public
-    case "verify-message-hash": {
-      return verifyHash(
-        controller,
-        message as Message<VerifyMessageHashRequest>,
-      );
-    }
-
-    // Public
-    case "get-nonce": {
-      return nonce(controller, message as Message<GetNonceRequest>);
     }
   }
 

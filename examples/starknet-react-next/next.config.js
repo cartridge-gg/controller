@@ -6,6 +6,9 @@ const nextConfig = {
   experimental: {
     externalDir: true,
   },
+  env: {
+    XFRAME_URL: process.env.XFRAME_URL
+  }
 }
 
 module.exports = nextConfig

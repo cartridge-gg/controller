@@ -1,20 +1,17 @@
 import cuid from "cuid";
 import {
-  AccountInterface,
+  Account,
   DeployContractPayload,
   Abi,
   Call,
   EstimateFeeDetails,
-  EstimateFeeResponse as StarknetEstimateFeeResponse,
+  EstimateFee,
   DeployContractResponse as StarknetDeployContractResponse,
   InvocationsDetails,
   Signature,
   typedData,
-  number,
-  Provider,
-  Invocation,
-  SignerInterface,
   InvokeFunctionResponse,
+  defaultProvider,
 } from "starknet";
 
 import qs from 'query-string';
@@ -26,21 +23,17 @@ import {
   EstimateFeeResponse,
   ExecuteRequest,
   ExecuteResponse,
-  GetNonceResponse,
-  HashMessageResponse,
   SignMessageResponse,
-  VerifyMessageHashResponse,
-  VerifyMessageResponse,
+  EstimateFeeRequest,
 } from "./types";
 import { Signer } from "./signer";
+import { toBN } from "starknet/utils/number";
 
-export class Account extends Provider implements AccountInterface {
+export class CartridgeAccount extends Account {
   address: string;
   private messenger: Messenger;
-  private url: string = "https://cartridge.gg";
+  private url: string = "https://x.cartridge.gg";
   private _scopes: Scope[] = [];
-
-  public signer: SignerInterface;
 
   constructor(
     address: string,
@@ -50,11 +43,10 @@ export class Account extends Provider implements AccountInterface {
       url?: string;
     }
   ) {
-    super();
+    super(defaultProvider, address, new Signer(messenger, options));
     this.address = address;
     this.messenger = messenger;
     this._scopes = scopes;
-    this.signer = new Signer(messenger, options)
 
     if (options?.url) {
       this.url = options.url;
@@ -102,20 +94,9 @@ export class Account extends Provider implements AccountInterface {
   }
 
   /**
-   * Estimate Fee for a method on starknet
-   *
-   * @param invocation the invocation object containing:
-   * - contractAddress - the address of the contract
-   * - entrypoint - the entrypoint of the contract
-   * - calldata - (defaults to []) the calldata
-   * - signature - (defaults to []) the signature
-   *
-   * @returns response from addTransaction
-   */
-  /**
      * Estimate Fee for a method on starknet
      *
-     * @param invocation the invocation object containing:
+     * @param calls the invocation object containing:
      * - contractAddress - the address of the contract
      * - entrypoint - the entrypoint of the contract
      * - calldata - (defaults to []) the calldata
@@ -123,13 +104,17 @@ export class Account extends Provider implements AccountInterface {
      *
      * @returns response from addTransaction
      */
-  async estimateFee(calls: Call | Call[], estimateFeeDetails?: EstimateFeeDetails): Promise<StarknetEstimateFeeResponse> {
+  async estimateFee(calls: Call | Call[], { nonce: providedNonce, blockIdentifier }: EstimateFeeDetails = {}): Promise<EstimateFee> {
+    const nonce = toBN(providedNonce ?? (await this.getNonce()));
+
     const response = await this.messenger.send<EstimateFeeResponse>({
       method: "estimate-fee",
       params: {
         calls,
+        nonce,
+        blockIdentifier,
       },
-    });
+    } as EstimateFeeRequest);
 
     if (response.error) {
       throw new Error(response.error as string);
@@ -141,24 +126,24 @@ export class Account extends Provider implements AccountInterface {
   /**
    * Invoke execute function in account contract
    *
-   * @param transactions the invocation object or an array of them, containing:
+   * @param calls the invocation object or an array of them, containing:
    * - contractAddress - the address of the contract
    * - entrypoint - the entrypoint of the contract
    * - calldata - (defaults to []) the calldata
    * - signature - (defaults to []) the signature
-   * @param abi (optional) the abi of the contract for better displaying
+   * @param abis (optional) the abi of the contract for better displaying
    *
    * @returns response from addTransaction
    */
   async execute(
-    transactions: Call | Call[],
+    calls: Call | Call[],
     abis?: Abi[],
     transactionsDetail?: InvocationsDetails
   ): Promise<InvokeFunctionResponse> {
     let response = await this.messenger.send<ExecuteResponse>({
       method: "execute",
       params: {
-        transactions,
+        calls,
         abis,
         transactionsDetail,
       },
@@ -173,7 +158,6 @@ export class Account extends Provider implements AccountInterface {
     }
 
     const id = cuid();
-    const calls = Array.isArray(transactions) ? transactions : [transactions];
 
     window.open(
       `${this.url}/execute?${qs.stringify({
@@ -189,7 +173,7 @@ export class Account extends Provider implements AccountInterface {
       method: "execute",
       params: {
         id,
-        transactions,
+        calls,
         abis,
         transactionsDetail,
       },
@@ -229,96 +213,6 @@ export class Account extends Provider implements AccountInterface {
         id,
         typedData,
       },
-    });
-
-    if (response.error) {
-      throw new Error(response.error as string);
-    }
-
-    return response.result!;
-  }
-
-  /**
-   * Hash a JSON object with pederson hash and return the hash
-   * This adds a message prefix so it cant be interchanged with transactions
-   *
-   * @param json - JSON object to be hashed
-   * @returns the hash of the JSON object
-   * @throws {Error} if the JSON object is not a valid JSON
-   */
-  async hashMessage(typedData: typedData.TypedData): Promise<string> {
-    const response = await this.messenger.send<HashMessageResponse>({
-      method: "hash-message",
-      params: {
-        typedData,
-      },
-    });
-
-    if (response.error) {
-      throw new Error(response.error as string);
-    }
-
-    return response.result!;
-  }
-
-  /**
-   * Verify a signature of a JSON object
-   *
-   * @param json - JSON object to be verified
-   * @param signature - signature of the JSON object
-   * @returns true if the signature is valid, false otherwise
-   * @throws {Error} if the JSON object is not a valid JSON or the signature is not a valid signature
-   */
-  async verifyMessage(
-    typedData: typedData.TypedData,
-    signature: Signature
-  ): Promise<boolean> {
-    const response = await this.messenger.send<VerifyMessageResponse>({
-      method: "verify-message",
-      params: {
-        typedData,
-        signature,
-      },
-    });
-
-    if (response.error) {
-      throw new Error(response.error as string);
-    }
-
-    return response.result!;
-  }
-
-  /**
-   * Verify a signature of a given hash
-   * @warning This method is not recommended, use verifyMessage instead
-   *
-   * @param hash - hash to be verified
-   * @param signature - signature of the hash
-   * @returns true if the signature is valid, false otherwise
-   * @throws {Error} if the signature is not a valid signature
-   */
-  async verifyMessageHash(
-    hash: number.BigNumberish,
-    signature: Signature
-  ): Promise<boolean> {
-    const response = await this.messenger.send<VerifyMessageHashResponse>({
-      method: "verify-message-hash",
-      params: {
-        hash,
-        signature,
-      },
-    });
-
-    if (response.error) {
-      throw new Error(response.error as string);
-    }
-
-    return response.result!;
-  }
-
-  async getNonce(): Promise<string> {
-    const response = await this.messenger.send<GetNonceResponse>({
-      method: "get-nonce",
     });
 
     if (response.error) {

@@ -7,9 +7,9 @@ import {
   typedData,
   InvokeFunctionResponse,
   Signature,
-  Invocation,
 } from "starknet";
 import { BigNumberish } from "starknet/dist/utils/number";
+import { BlockIdentifier } from "starknet/provider/utils";
 import { EstimateFee } from "starknet/types/account"
 
 export type Approvals = {
@@ -71,6 +71,8 @@ export interface EstimateFeeRequest extends RawRequest {
   method: "estimate-fee";
   params: {
     calls: Call | Call[];
+    nonce: BigNumberish;
+    blockIdentifier?: BlockIdentifier;
   };
 }
 
@@ -83,7 +85,7 @@ export interface ExecuteRequest extends RawRequest {
   method: "execute";
   params: {
     id?: string;
-    transactions: Call | Call[];
+    calls: Call | Call[];
     abis?: Abi[];
     transactionsDetail?: InvocationsDetails;
   };
@@ -99,7 +101,7 @@ export interface SignTransactionRequest extends RawRequest {
   method: "sign-transaction";
   params: {
     id: string;
-    transactions: Call | Call[];
+    calls: Call | Call[];
     abis?: Abi[];
     transactionsDetail?: InvocationsDetails;
   };
@@ -122,53 +124,6 @@ export interface SignMessageRequest extends RawRequest {
 export interface SignMessageResponse extends RawResponse {
   method: "sign-message";
   result?: Signature;
-}
-
-export interface HashMessageRequest extends RawRequest {
-  method: "hash-message";
-  params: {
-    typedData: typedData.TypedData;
-  };
-}
-
-export interface HashMessageResponse extends RawResponse {
-  method: "hash-message";
-  result?: string;
-}
-
-export interface VerifyMessageRequest extends RawRequest {
-  method: "verify-message";
-  params: {
-    typedData: typedData.TypedData;
-    signature: Signature;
-  };
-}
-
-export interface VerifyMessageResponse extends RawResponse {
-  method: "verify-message";
-  result?: boolean;
-}
-
-export interface VerifyMessageHashRequest extends RawRequest {
-  method: "verify-message-hash";
-  params: {
-    hash: BigNumberish;
-    signature: Signature;
-  };
-}
-
-export interface VerifyMessageHashResponse extends RawResponse {
-  method: "verify-message-hash";
-  result?: boolean;
-}
-
-export interface GetNonceRequest extends RawRequest {
-  method: "get-nonce";
-}
-
-export interface GetNonceResponse extends RawResponse {
-  method: "get-nonce";
-  result?: string;
 }
 
 export interface RegisterRequest extends RawRequest {
@@ -200,10 +155,6 @@ export type Request =
   | EstimateFeeRequest
   | ExecuteRequest
   | SignMessageRequest
-  | HashMessageRequest
-  | VerifyMessageHashRequest
-  | VerifyMessageRequest
-  | GetNonceRequest
   | RegisterRequest;
 
 export type RawResponse = {
@@ -218,8 +169,4 @@ export type Response =
   | EstimateFeeResponse
   | ConnectResponse
   | SignMessageResponse
-  | HashMessageResponse
-  | VerifyMessageHashResponse
-  | VerifyMessageResponse
-  | GetNonceResponse
   | RegisterResponse;

@@ -22,7 +22,7 @@ export class Messenger {
     }
   }
 
-  constructor(target: Window | null, origin: string = "https://cartridge.gg") {
+  constructor(target: Window | null, origin: string = "https://x.cartridge.gg") {
     this.target = target;
     this.origin = origin;
 

@@ -1,6 +1,6 @@
 import {
     Abi,
-    Invocation,
+    Call,
     InvocationsSignerDetails,
     Signature,
     KeyPair,
@@ -14,12 +14,12 @@ export class DeviceSigner extends Signer {
     }
 
     public async signTransaction(
-        transactions: Invocation[],
+        calls: Call[],
         transactionsDetail: InvocationsSignerDetails,
         abis?: Abi[],
     ): Promise<Signature> {
         const sig = await super.signTransaction(
-            transactions,
+            calls,
             transactionsDetail,
             abis,
         );
