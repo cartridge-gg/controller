@@ -497,7 +497,6 @@ __metadata:
     "@types/react-dom": ^18.0.6
     caip: ^1.1.0
     cuid: ^2.1.8
-    embla-carousel-react: ^7.0.0
     eslint: ^8.23.0
     eslint-config-next: ^12.2.5
     ethers: ^5.5.4
@@ -510,7 +509,6 @@ __metadata:
     react-dom: 18.2.0
     starknet: 4.3.0
     typescript: ^4.8.2
-    usehooks-ts: ^2.5.2
   languageName: unknown
   linkType: soft
 
@@ -5275,24 +5273,6 @@ __metadata:
     minimalistic-assert: ^1.0.1
     minimalistic-crypto-utils: ^1.0.1
   checksum: d56d21fd04e97869f7ffcc92e18903b9f67f2d4637a23c860492fbbff5a3155fd9ca0184ce0c865dd6eb2487d234ce9551335c021c376cd2d3b7cb749c7d10f4
-  languageName: node
-  linkType: hard
-
-"embla-carousel-react@npm:^7.0.0":
-  version: 7.0.3
-  resolution: "embla-carousel-react@npm:7.0.3"
-  dependencies:
-    embla-carousel: 7.0.3
-  peerDependencies:
-    react: ^18.1.0
-  checksum: 88304bb8b154d452f96f6f63b323aa6a7f94653c702c214f7705719e2436c23601c627cc0b92c48882e9af62d28cc18d8df6b0ba49211299c8f1e2cc27446d5e
-  languageName: node
-  linkType: hard
-
-"embla-carousel@npm:7.0.3":
-  version: 7.0.3
-  resolution: "embla-carousel@npm:7.0.3"
-  checksum: d7ca57e41d6e55a6da09252f8b74f53d9a8d3555c3c968cb593d3fe4dde894f2f1a82b9f10b444bed542d330e06728808846b602aeb324f8047ae4562bdb5f71
   languageName: node
   linkType: hard
 
@@ -11290,15 +11270,6 @@ __metadata:
   version: 3.1.1
   resolution: "use@npm:3.1.1"
   checksum: 08a130289f5238fcbf8f59a18951286a6e660d17acccc9d58d9b69dfa0ee19aa038e8f95721b00b432c36d1629a9e32a464bf2e7e0ae6a244c42ddb30bdd8b33
-  languageName: node
-  linkType: hard
-
-"usehooks-ts@npm:^2.5.2":
-  version: 2.7.0
-  resolution: "usehooks-ts@npm:2.7.0"
-  peerDependencies:
-    react: ^16.9.0 || ^17.0.0
-  checksum: fa7c77b6edec8f3e064dd54bb676c3abcec652c7c4ee9e8970fb89f27761459084fd95b1db32a1cdcb85494e110b654ffa5dae5538cbfc803c61702d6575b156
   languageName: node
   linkType: hard
 
