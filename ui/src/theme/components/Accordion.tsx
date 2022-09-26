@@ -5,7 +5,7 @@ export const Accordion: ComponentMultiStyleConfig = {
   baseStyle: {
     container: {
       border: "0",
-      paddingBottom: "10px",
+      pb: "10px",
     },
     panel: {
       padding: "12px",
@@ -28,10 +28,34 @@ export const Accordion: ComponentMultiStyleConfig = {
         boxShadow: "none",
       },
     },
+    icon: {
+      _hover: {
+        transform: "rotate(-90deg)"
+      },
+      _expanded: {
+        transform: "rotate(90deg)"
+      }
+    }
   },
   variants: {
     access: {},
     inventory: {},
     tokens: {},
+    bridge: {
+      container: {
+        pb: "0",
+        mt: "1px",
+      },
+      panel: {
+        borderRadius: "0"
+      },
+      button: {
+        borderRadius: "0px",
+        bgColor: "gray.800",
+        _expanded: {
+          bgColor: "gray.800"
+        }
+      }
+    }
   },
 };
