@@ -5,7 +5,7 @@ import { Badge } from "../components/Badge";
 
 export function formatAddress(address: string, chars: number = 4): string {
   return `${address.substring(0, 2 + chars)}...${address.substring(
-    address.length - chars,
+    address.length - chars
   )}`;
 }
 
@@ -48,7 +48,7 @@ const Icon = () => (
 export const Address = forwardRef(
   (
     { children, style }: { children: string; style?: React.CSSProperties },
-    ref,
+    ref
   ) => (
     <Badge style={style}>
       <Flex alignItems="center">
@@ -56,5 +56,5 @@ export const Address = forwardRef(
         <span ref={ref}>{formatAddress(children)}</span>
       </Flex>
     </Badge>
-  ),
+  )
 );
