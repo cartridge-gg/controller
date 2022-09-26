@@ -54,12 +54,6 @@ const config = {
         },
         items: [
           {
-            type: 'doc',
-            docId: 'intro',
-            position: 'left',
-            label: 'Tutorial',
-          },
-          {
             href: 'https://github.com/cartridge-gg/cartridge',
             label: 'GitHub',
             position: 'right',
@@ -73,8 +67,12 @@ const config = {
             title: 'Docs',
             items: [
               {
-                label: 'Tutorial',
-                to: '/docs/intro',
+                label: 'Controller',
+                to: '/controller/getting-started',
+              },
+              {
+                label: 'Quests',
+                to: '/quests/getting-started',
               },
             ],
           },
