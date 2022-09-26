@@ -48,14 +48,14 @@ export const Accordion: ComponentMultiStyleConfig = {
         borderRadius: "0",
         bgColor: "gray.700",
         _expanded: {
-          bgColor: "gray.700"
+          bgColor: "gray.700",
         },
         _disabled: {
           opacity: "1",
           bgColor: "gray.700",
-          cursor: "auto"
-        }
-      }
-    }
+          cursor: "auto",
+        },
+      },
+    },
   },
 };

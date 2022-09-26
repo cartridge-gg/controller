@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  Text,
-  Spacer,
-  HStack,
-} from "@chakra-ui/react";
+import { Text, Spacer, HStack } from "@chakra-ui/react";
 import { Dropdown, Item } from "./Dropdown";
 import { HeaderType } from "../Header";
 import { AvatarA } from "../icons/Avatars";
