@@ -39,10 +39,11 @@ export const Accordion: ComponentMultiStyleConfig = {
         mt: "1px",
       },
       panel: {
-        borderRadius: "0"
+        padding: "0 16px 16px 16px",
+        borderRadius: "0",
       },
       button: {
-        borderRadius: "0px",
+        borderRadius: "0",
         bgColor: "gray.800",
         _expanded: {
           bgColor: "gray.800"
