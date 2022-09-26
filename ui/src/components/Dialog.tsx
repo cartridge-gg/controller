@@ -1,4 +1,4 @@
-import React from "react";
+import { StyleProps } from "@chakra-ui/react";
 import {
   Text,
 } from "@chakra-ui/react";
@@ -9,11 +9,12 @@ export const Dialog = ({
   title,
   description,
   arrowPlacement,
+  ...rest
 }: {
   title?: string;
   description?: string
   arrowPlacement?: string
-}) => {
+} & StyleProps) => {
   return (
     <Card
       px="70px"
@@ -21,6 +22,7 @@ export const Dialog = ({
       bg="gray.700"
       align="center"
       position="relative"
+      {...rest}
     >
       <Arrow color="gray.700" placement={arrowPlacement} />
       <Text
