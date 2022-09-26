@@ -28,14 +28,6 @@ export const Accordion: ComponentMultiStyleConfig = {
         boxShadow: "none",
       },
     },
-    icon: {
-      _hover: {
-        transform: "rotate(-90deg)"
-      },
-      _expanded: {
-        transform: "rotate(90deg)"
-      }
-    }
   },
   variants: {
     access: {},
