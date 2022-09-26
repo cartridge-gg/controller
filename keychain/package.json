@@ -24,9 +24,9 @@
     "framer-motion": "^6",
     "js-cookie": "^3.0.1",
     "next": "^12.3.0",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "starknet": "4.3.0"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "starknet": "^4.3.0"
   },
   "devDependencies": {
     "@types/js-cookie": "^3.0.2",
