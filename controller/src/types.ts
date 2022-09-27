@@ -129,7 +129,6 @@ export interface SignMessageResponse extends RawResponse {
 export interface RegisterRequest extends RawRequest {
   method: "register";
   params: {
-    username: string;
     address: string;
   };
 }

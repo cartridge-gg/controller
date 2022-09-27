@@ -40,6 +40,10 @@ export class CartridgeConnector extends Connector {
         return false;
     }
 
+    async register(username: string, password: string) {
+        return this.cartridge.register(username, password);
+    }
+
     async connect(): Promise<AccountInterface> {
         this._account = await this.cartridge.connect();
         if (!this._account) {

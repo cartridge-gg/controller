@@ -13,25 +13,21 @@ import Storage from "utils/storage";
 import { DeviceSigner } from "./signer";
 
 export default class Controller extends Account {
-    public accountId: string;
     protected publicKey: string;
     protected keypair: KeyPair;
 
     constructor(
-        accountId: string,
         keypair: KeyPair,
         address: string,
     ) {
         super(defaultProvider, address, keypair);
         this.signer = new DeviceSigner(keypair);
-        this.accountId = accountId;
         this.keypair = keypair;
         this.publicKey = ec.getStarkKey(keypair);
     }
 
     cache() {
         return Storage.set("controller", {
-            accountId: this.accountId,
             privateKey: number.toHex(this.keypair.priv),
             publicKey: this.publicKey,
             address: this.address,
@@ -86,9 +82,9 @@ export default class Controller extends Account {
             return null;
         }
 
-        const { accountId, privateKey, address } = controller;
+        const { privateKey, address } = controller;
         const keypair = ec.getKeyPair(privateKey);
-        return new Controller(accountId, keypair, address);
+        return new Controller(keypair, address);
     }
 }
 

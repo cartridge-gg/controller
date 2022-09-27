@@ -6,8 +6,7 @@ import {
 } from "@cartridge/controller";
 import Controller from "utils/account";
 
-export async function deploy(
-  controller: Controller,
+export async function register(
   message: Message<RegisterRequest>,
 ) {
   const keypair = ec.genKeyPair();
@@ -15,11 +14,10 @@ export async function deploy(
 
   try {
     const {
-      params: { username, address },
+      params: { address },
     } = message.payload as RegisterRequest;
 
     const controller = new Controller(
-      username,
       keypair,
       address,
     );

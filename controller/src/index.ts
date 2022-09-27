@@ -1,7 +1,7 @@
 import cuid from "cuid";
 import { CartridgeAccount as Account } from "./account";
 import { Message, Messenger } from "./messenger";
-import { ConnectRequest, ConnectResponse, ProbeResponse, Scope } from "./types";
+import { ConnectRequest, ConnectResponse, ProbeResponse, RegisterRequest, RegisterResponse, Scope } from "./types";
 import qs from "query-string";
 import { AccountInterface } from "starknet";
 
@@ -76,14 +76,14 @@ export class Cartridge {
   }
 
   async probe() {
-    const prob = await this.messenger?.send<ProbeResponse>({
+    const probe = await this.messenger?.send<ProbeResponse>({
       method: "probe",
     });
 
-    if (this.messenger && prob?.result?.address) {
+    if (this.messenger && probe?.result?.address) {
       this.account = new Account(
-        prob.result.address,
-        prob.result.scopes,
+        probe.result.address,
+        probe.result.scopes,
         this.messenger,
         {
           url: this.url,
@@ -92,6 +92,22 @@ export class Cartridge {
 
       return this.account;
     }
+  }
+
+  // Register a new device key.
+  async register(address: string) {
+    const register = await this.messenger?.send<RegisterResponse>({
+      method: "register",
+      params: {
+        address
+      }
+    } as RegisterRequest);
+
+    if (!register || register.error) {
+      throw new Error("registration error")
+    }
+
+    return register.result
   }
 
   async connect() {
