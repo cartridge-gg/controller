@@ -1,7 +1,7 @@
 import type { AppProps } from 'next/app'
 import NextHead from 'next/head'
 import { StarknetProvider } from '@starknet-react/core'
-import { CartridgeConnector } from '~/../../../connector/src'
+import CartridgeConnector from '~/../../../connector/src'
 
 const connectors = [new CartridgeConnector(null, { url: process.env.XFRAME_URL })]
 

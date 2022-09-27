@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/connector",
-  "version": "1.0.36",
+  "version": "1.0.37",
   "description": "Cartridge Controler Connector",
   "main": "lib",
   "types": "lib",

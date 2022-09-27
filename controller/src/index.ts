@@ -5,7 +5,7 @@ import { ConnectRequest, ConnectResponse, ProbeResponse, RegisterRequest, Regist
 import qs from "query-string";
 import { AccountInterface } from "starknet";
 
-export class Cartridge {
+class Controller {
   private selector = "cartridge-messenger";
   private messenger?: Messenger;
   private scopes: Scope[] = [];
@@ -160,6 +160,7 @@ export class Cartridge {
   }
 }
 
+export default Controller;
 export type { Message };
 export { Messenger };
 export * from "./types";
