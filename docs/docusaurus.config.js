@@ -42,7 +42,6 @@ const config = {
       }),
     ],
   ],
-
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
@@ -68,11 +67,11 @@ const config = {
             items: [
               {
                 label: 'Controller',
-                to: '/controller/getting-started',
+                to: '/controller',
               },
               {
                 label: 'Quests',
-                to: '/quests/getting-started',
+                to: '/quests',
               },
             ],
           },

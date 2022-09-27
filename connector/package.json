@@ -1,12 +1,13 @@
 {
   "name": "@cartridge/connector",
-  "version": "1.0.37",
+  "version": "0.1.40",
   "description": "Cartridge Controler Connector",
   "main": "lib",
   "types": "lib",
   "type": "module",
   "scripts": {
     "build": "tsc",
+    "prepublish": "yarn build",
     "dev": "tsc --watch",
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
     "test:watch": "jest --watchAll",
@@ -25,7 +26,7 @@
     "typescript": "^4.5.4"
   },
   "dependencies": {
-    "@cartridge/controller": "workspace:^",
+    "@cartridge/controller": "^0.1.40",
     "@starknet-react/core": "^0.13.4",
     "starknet": "^4.3.0"
   }

@@ -1,5 +1,5 @@
 import { Connector } from "@starknet-react/core";
-import Controller, { Scope } from "@cartridge/controller/src";
+import Controller, { Scope } from "@cartridge/controller";
 import { AccountInterface } from "starknet";
 
 class ControllerConnector extends Connector {

@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": "./src",
+    "outDir": "lib",
     "lib": [
       "dom",
       "dom.iterable",
@@ -20,23 +21,12 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "downlevelIteration": true,
-    "noEmit": true,
-    "paths": {
-      "@cartridge/controller": [
-        "../controller/src"
-      ],
-    }
+    "downlevelIteration": true
   },
   "include": [
     "src/**/*"
   ],
   "exclude": [
     "node_modules"
-  ],
-  "references": [
-    {
-      "path": "../controller"
-    },
   ]
 }
