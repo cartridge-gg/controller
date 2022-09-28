@@ -1,6 +1,7 @@
 import { Connector } from "@starknet-react/core";
 import Controller, { Scope } from "@cartridge/controller";
 import { AccountInterface } from "starknet";
+import { BigNumberish } from "starknet/utils/number";
 
 class ControllerConnector extends Connector {
     private controller: Controller;
@@ -40,8 +41,8 @@ class ControllerConnector extends Connector {
         return false;
     }
 
-    async register(address: string) {
-        return this.controller.register(address);
+    async register(username: string, credential: { x: BigNumberish, y: BigNumberish }) {
+        return this.controller.register(username, credential);
     }
 
     async connect(): Promise<AccountInterface> {

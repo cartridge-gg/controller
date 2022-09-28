@@ -1,6 +1,7 @@
 import cuid from "cuid";
 import qs from "query-string";
 import { AccountInterface } from "starknet";
+import { BigNumberish } from "starknet/utils/number";
 
 import Account from "./account";
 import Messenger, { Message } from "./messenger";
@@ -96,11 +97,12 @@ class Controller {
   }
 
   // Register a new device key.
-  async register(address: string) {
+  async register(username: string, credential: { x: BigNumberish, y: BigNumberish }) {
     const register = await this.messenger?.send<RegisterResponse>({
       method: "register",
       params: {
-        address
+        username,
+        credential
       }
     } as RegisterRequest);
 

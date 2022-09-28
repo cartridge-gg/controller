@@ -129,14 +129,15 @@ export interface SignMessageResponse extends RawResponse {
 export interface RegisterRequest extends RawRequest {
   method: "register";
   params: {
-    address: string;
+    username: string;
+    credential: { x: BigNumberish, y: BigNumberish };
   };
 }
 
 export interface RegisterResponse extends RawResponse {
   method: "register";
   result: {
-    publicKey: string;
+    address: string;
   };
 }
 
