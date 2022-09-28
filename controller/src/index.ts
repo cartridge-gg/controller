@@ -1,9 +1,10 @@
 import cuid from "cuid";
-import { CartridgeAccount as Account } from "./account";
-import { Message, Messenger } from "./messenger";
-import { ConnectRequest, ConnectResponse, ProbeResponse, RegisterRequest, RegisterResponse, Scope } from "./types";
 import qs from "query-string";
 import { AccountInterface } from "starknet";
+
+import Account from "./account";
+import Messenger, { Message } from "./messenger";
+import { ConnectRequest, ConnectResponse, ProbeResponse, RegisterRequest, RegisterResponse, Scope } from "./types";
 
 class Controller {
   private selector = "cartridge-messenger";

@@ -9,7 +9,7 @@ import {
 import qs from 'query-string';
 import cuid from "cuid";
 
-import { Messenger } from "./messenger";
+import Messenger from "./messenger";
 import {
     SignMessageResponse,
     SignTransactionResponse,

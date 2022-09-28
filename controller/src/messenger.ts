@@ -1,5 +1,6 @@
-import { Request, Response } from "./types";
 import cuid from "cuid";
+
+import { Request, Response } from "./types";
 
 export type Message<T = Request | Response> = {
   id?: string;
@@ -8,7 +9,7 @@ export type Message<T = Request | Response> = {
   payload: T;
 };
 
-export class Messenger {
+class Messenger {
   private target: Window | null;
   private origin: string;
   private pending: MessageEvent<Message<Request>>[] = []
@@ -121,3 +122,5 @@ export class Messenger {
     });
   }
 }
+
+export default Messenger;

@@ -8,11 +8,10 @@
       "esnext"
     ],
     "declaration": true,
-    "target": "es5",
-    "module": "esnext",
+    "target": "ES6",
+    "module": "commonjs",
     "strict": false,
     "jsx": "preserve",
-    "jsxImportSource": "@emotion/react",
     "allowJs": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,

@@ -1,10 +1,9 @@
 {
   "name": "@cartridge/controller",
-  "version": "0.1.40",
+  "version": "0.1.48",
   "description": "Cartridge Controller",
-  "main": "lib",
-  "types": "lib",
-  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",

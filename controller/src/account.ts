@@ -13,10 +13,10 @@ import {
   InvokeFunctionResponse,
   defaultProvider,
 } from "starknet";
-
+import { toBN } from "starknet/utils/number";
 import qs from 'query-string';
 
-import { Messenger } from "./messenger";
+import Messenger from "./messenger";
 import {
   Scope,
   DeployContractResponse,
@@ -27,9 +27,8 @@ import {
   EstimateFeeRequest,
 } from "./types";
 import { Signer } from "./signer";
-import { toBN } from "starknet/utils/number";
 
-export class CartridgeAccount extends Account {
+class CartridgeAccount extends Account {
   address: string;
   private messenger: Messenger;
   private url: string = "https://x.cartridge.gg";
@@ -222,3 +221,5 @@ export class CartridgeAccount extends Account {
     return response.result!;
   }
 }
+
+export default CartridgeAccount;
