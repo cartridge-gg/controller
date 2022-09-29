@@ -130,7 +130,7 @@ export interface RegisterRequest extends RawRequest {
   method: "register";
   params: {
     username: string;
-    credential: { x: BigNumberish, y: BigNumberish };
+    credential: { x: string, y: string };
   };
 }
 

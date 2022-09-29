@@ -25,8 +25,8 @@ export async function register(
       params: { username, credential },
     } = message.payload as RegisterRequest;
 
-    const { x: x0, y: x1, z: x2 } = split(credential.x)
-    const { x: y0, y: y1, z: y2 } = split(credential.x)
+    const { x: x0, y: x1, z: x2 } = split(toBN(credential.x))
+    const { x: y0, y: y1, z: y2 } = split(toBN(credential.y))
 
     const address = calculateContractAddressFromHash(
       encodeShortString(username),
@@ -72,7 +72,7 @@ export async function register(
   }
 }
 
-const BASE = number.toBN(2).pow(86);
+const BASE = number.toBN(2).pow(toBN(86));
 
 function split(n: BigNumberish): { x: BigNumberish; y: BigNumberish; z: BigNumberish } {
   const x = n.mod(BASE);

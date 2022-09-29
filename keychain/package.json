@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "TARGET_ORIGIN=\"*\" next dev",
+    "dev": "TARGET_ORIGIN=\"*\" next dev -p 3001",
     "build": "TARGET_ORIGIN=\"https://x.cartridge.gg/\" next build",
     "start": "next start",
     "lint": "next lint"

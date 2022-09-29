@@ -8,6 +8,7 @@ import {
   Message,
   ConnectRequest,
   ProbeRequest,
+  RegisterRequest,
   SignMessageRequest,
 } from "@cartridge/controller";
 
@@ -15,6 +16,7 @@ import { execute } from "./execute";
 import { connect } from "./connect";
 import { deploy } from "./deploy";
 import { probe } from "./probe";
+import { register } from "./register";
 import { sign } from "./sign";
 
 export const onSDKMessage = async (
@@ -27,6 +29,8 @@ export const onSDKMessage = async (
 
   if (method === "connect") {
     return connect(from, message as Message<ConnectRequest>);
+  } else if (method === "register") {
+    return register(message as Message<RegisterRequest>);
   }
 
   const controller = Controller.fromStore();

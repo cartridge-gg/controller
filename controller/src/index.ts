@@ -97,7 +97,7 @@ class Controller {
   }
 
   // Register a new device key.
-  async register(username: string, credential: { x: BigNumberish, y: BigNumberish }) {
+  async register(username: string, credential: { x: string, y: string }) {
     const register = await this.messenger?.send<RegisterResponse>({
       method: "register",
       params: {

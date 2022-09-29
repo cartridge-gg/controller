@@ -41,7 +41,7 @@ class ControllerConnector extends Connector {
         return false;
     }
 
-    async register(username: string, credential: { x: BigNumberish, y: BigNumberish }) {
+    async register(username: string, credential: { x: string, y: string }) {
         return this.controller.register(username, credential);
     }
 
