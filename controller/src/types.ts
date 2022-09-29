@@ -138,6 +138,7 @@ export interface RegisterResponse extends RawResponse {
   method: "register";
   result: {
     address: string;
+    deviceKey: string;
   };
 }
 

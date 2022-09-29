@@ -62,7 +62,7 @@ export async function register(
 
     return {
       method: "register",
-      result: { address },
+      result: { address, deviceKey },
     } as RegisterResponse;
   } catch (error) {
     return {
