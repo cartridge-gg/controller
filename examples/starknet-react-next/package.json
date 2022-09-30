@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.2",
   "scripts": {
-    "dev": "XFRAME_URL=\"http://localhost:3000\" next dev",
+    "dev": "XFRAME_URL=\"http://localhost:3001\" next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -15,7 +15,7 @@
     "next": "^12.0.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "starknet": "^4.3.0"
+    "starknet": "^4.4.2"
   },
   "devDependencies": {
     "@types/node": "^18.7.14",

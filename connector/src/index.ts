@@ -32,13 +32,7 @@ class ControllerConnector extends Connector {
     }
 
     async ready() {
-        const ready = await this.controller.ready();
-        if (ready) {
-            const account = await this.controller.probe();
-            return !!account;
-        }
-
-        return false;
+        return await this.controller.ready();
     }
 
     async register(username: string, credential: { x: string, y: string }) {

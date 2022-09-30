@@ -1,12 +1,13 @@
 import type { NextPage } from "next";
 import dynamic from 'next/dynamic'
 import { useEffect } from "react";
-import cuid from "cuid";
 
-import { Messenger, Message, Request } from "@cartridge/controller";
-
-import { onSDKMessage } from "../handlers";
 import { useRouter } from "next/router";
+import { connectToParent } from '@cartridge/penpal';
+
+import connect from "../methods/connect";
+import execute from "../methods/execute";
+import Controller from "utils/account";
 
 const Index: NextPage = () => {
   const router = useRouter();
@@ -21,25 +22,27 @@ const Index: NextPage = () => {
       return;
     }
 
-    const messenger = new Messenger(null, "*");
-    messenger.onRequest((msg, reply) => {
-      const id = cuid();
-      onSDKMessage({
-        id,
-        payload: msg,
-      } as Message<Request>).then(reply);
-    });
+    connectToParent({
+      debug: true,
+      methods: {
+        connect,
+        execute,
+        estimateFee,
+        probe: (origin: string) => async () => {
+          const controller = Controller.fromStore();
+          if (!controller) {
+            throw new Error("no controller");
+          }
 
-    window.parent.postMessage(
-      {
-        target: "cartridge",
-        type: "broadcast",
-        payload: {
-          method: "ready",
-        },
+          const approvals = await controller.approval(origin);
+          if (!controller || !approvals) {
+            throw new Error("not connected")
+          }
+
+          return { address: controller.address, scopes: approvals.scopes };
+        }
       },
-      { targetOrigin: "*" },
-    );
+    });
   });
 
   return <></>;

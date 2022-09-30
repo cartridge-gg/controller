@@ -7,10 +7,12 @@ import {
   typedData,
   InvokeFunctionResponse,
   Signature,
+  InvocationsSignerDetails,
+  EstimateFeeDetails,
+  EstimateFee,
 } from "starknet";
 import { BigNumberish } from "starknet/dist/utils/number";
 import { BlockIdentifier } from "starknet/provider/utils";
-import { EstimateFee } from "starknet/types/account"
 
 export type Approvals = {
   [origin: string]: {
@@ -74,11 +76,6 @@ export interface EstimateFeeRequest extends RawRequest {
     nonce: BigNumberish;
     blockIdentifier?: BlockIdentifier;
   };
-}
-
-export interface EstimateFeeResponse extends RawResponse {
-  method: "estimate-fee";
-  result?: EstimateFee;
 }
 
 export interface ExecuteRequest extends RawRequest {
@@ -167,7 +164,23 @@ export type Response =
   | RawResponse
   | ProbeResponse
   | DeployContractResponse
-  | EstimateFeeResponse
   | ConnectResponse
   | SignMessageResponse
   | RegisterResponse;
+
+export interface Keychain {
+  probe(): { address: string, scopes: Scope[] };
+  connect(scopes: Scope[]): {
+    address: string;
+    scopes: Scope[];
+  };
+  estimateFee(calls: Call | Call[], estimateFeeDetails?: EstimateFeeDetails): Promise<EstimateFee>;
+  execute(calls: Call | Call[], abis?: Abi[], transactionsDetail?: InvocationsDetails, sync?: boolean): Promise<InvokeFunctionResponse>;
+
+  signMessage(typedData: typedData.TypedData, account: string): Promise<Signature>;
+  signTransaction(
+    transactions: Call[],
+    transactionsDetail: InvocationsSignerDetails,
+    abis?: Abi[]
+  ): Promise<Signature>;
+}
