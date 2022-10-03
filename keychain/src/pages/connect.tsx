@@ -15,7 +15,7 @@ const DEFAULT_MAX_FEE = "1000000000000000"; // 0.001 ETH
 const Connect: NextPage = () => {
   const [maxFee, setMaxFee] = useState(DEFAULT_MAX_FEE);
   const { validScopes, invalidScopes, isValidating } = useUrlScopes();
-  const { url } = useRequests();
+  const { origin } = useRequests();
   const controller = useMemo(() => Controller.fromStore(), []);
   const router = useRouter();
 
@@ -30,7 +30,7 @@ const Connect: NextPage = () => {
     async (values, actions) => {
       try {
         const approvals = validScopes.filter((_, i) => values[i]);
-        await controller.approve(url.href, approvals, maxFee);
+        controller.approve(origin, approvals, maxFee);
         if (window.opener) {
           window.close();
         }
@@ -39,7 +39,7 @@ const Connect: NextPage = () => {
       }
       actions.setSubmitting(false);
     },
-    [url, validScopes, controller, maxFee],
+    [origin, validScopes, controller, maxFee],
   );
 
   if (!controller) {
@@ -51,11 +51,11 @@ const Connect: NextPage = () => {
       <Header address={controller.address} />
       <Flex height="calc(100vh - 70px)">
         <Approval
-          action="APPROVE"
-          title="APPROVE GAME"
+          action="CONNECT"
+          title="CONNECT GAME"
           message={
             <>
-              <strong>{url ? url.href : "unkown"}</strong>
+              <strong>{origin}</strong>
               {validScopes.length > 0
                 ? " is requesting permission to submit transactions on your behalf"
                 : " is requesting access to your account"}

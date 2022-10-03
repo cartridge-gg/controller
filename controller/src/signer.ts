@@ -1,28 +1,25 @@
 import {
     Abi,
-    Invocation,
     InvocationsSignerDetails,
     SignerInterface,
     Signature,
-    typedData
+    typedData,
+    Call
 } from "starknet";
 import qs from 'query-string';
 import cuid from "cuid";
 
-import Messenger from "./messenger";
-import {
-    SignMessageResponse,
-    SignTransactionResponse,
-} from "./types";
+import { Keychain } from "./types";
+import { AsyncMethodReturns } from "@cartridge/penpal";
 
 export class Signer implements SignerInterface {
-    private messenger: Messenger;
+    private keychain: AsyncMethodReturns<Keychain>;
     private url: string = "https://cartridge.gg";
 
-    constructor(messenger: Messenger, options?: {
+    constructor(keychain: AsyncMethodReturns<Keychain>, options?: {
         url?: string;
     }) {
-        this.messenger = messenger;
+        this.keychain = keychain;
 
         if (options?.url) {
             this.url = options.url;
@@ -60,20 +57,7 @@ export class Signer implements SignerInterface {
             "height=650,width=400"
         );
 
-        const response = await this.messenger.send<SignMessageResponse>({
-            method: "sign-message",
-            params: {
-                id,
-                account,
-                typedData,
-            },
-        });
-
-        if (response.error) {
-            throw new Error(response.error as string);
-        }
-
-        return response.result!;
+        return this.keychain.signMessage(typedData, account);
     }
 
     /**
@@ -89,16 +73,12 @@ export class Signer implements SignerInterface {
      * @returns signature
      */
     public async signTransaction(
-        transactions: Invocation[],
+        calls: Call[],
         transactionsDetail: InvocationsSignerDetails,
         abis?: Abi[]
     ): Promise<Signature> {
-        const id = cuid()
-        const calls = Array.isArray(transactions) ? transactions : [transactions];
-
         window.open(
             `${this.url}/sign?${qs.stringify({
-                id,
                 origin: window.origin,
                 calls: JSON.stringify(calls),
             })}`,
@@ -106,20 +86,6 @@ export class Signer implements SignerInterface {
             "height=650,width=400"
         );
 
-        const response = await this.messenger.send<SignTransactionResponse>({
-            method: "sign-transaction",
-            params: {
-                id,
-                transactions,
-                abis,
-                transactionsDetail,
-            },
-        });
-
-        if (response.error) {
-            throw new Error(response.error as string);
-        }
-
-        return response.result!;
+        return this.keychain.signTransaction(calls, transactionsDetail, abis);
     }
 }

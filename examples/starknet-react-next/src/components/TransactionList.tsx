@@ -1,16 +1,16 @@
-import { Transaction, useStarknetTransactionManager } from '@starknet-react/core'
-import React from 'react'
+import { ManagedTransaction, useTransactionManager } from '@starknet-react/core'
 
-function TransactionItem({ transaction }: { transaction: Transaction }) {
+function TransactionItem({ transaction }: { transaction: ManagedTransaction<any> }) {
   return (
     <span>
-      {transaction.transactionHash} - {transaction.status}
+      {JSON.stringify(transaction)}
+      {/* {transaction.transactionHash} - {transaction.status} */}
     </span>
   )
 }
 
 export function TransactionList() {
-  const { transactions } = useStarknetTransactionManager()
+  const { transactions } = useTransactionManager()
   return (
     <ul>
       {transactions.map((transaction, index) => (

@@ -5,47 +5,40 @@ import {
   Abi,
   Call,
   EstimateFeeDetails,
-  EstimateFee,
   DeployContractResponse as StarknetDeployContractResponse,
   InvocationsDetails,
   Signature,
   typedData,
   InvokeFunctionResponse,
   defaultProvider,
+  EstimateFee,
 } from "starknet";
-import { toBN } from "starknet/utils/number";
 import qs from 'query-string';
 
-import Messenger from "./messenger";
 import {
   Scope,
-  DeployContractResponse,
-  EstimateFeeResponse,
-  ExecuteRequest,
-  ExecuteResponse,
-  SignMessageResponse,
-  EstimateFeeRequest,
+  Keychain,
 } from "./types";
 import { Signer } from "./signer";
+import { AsyncMethodReturns } from "@cartridge/penpal";
+import { StarknetChainId } from "starknet/constants";
 
 class CartridgeAccount extends Account {
   address: string;
-  private messenger: Messenger;
+  private keychain: AsyncMethodReturns<Keychain>;
   private url: string = "https://x.cartridge.gg";
-  private _scopes: Scope[] = [];
 
   constructor(
     address: string,
     scopes: Scope[] = [],
-    messenger: Messenger,
+    keychain: AsyncMethodReturns<Keychain>,
     options?: {
       url?: string;
     }
   ) {
-    super(defaultProvider, address, new Signer(messenger, options));
+    super(defaultProvider, address, new Signer(keychain, options));
     this.address = address;
-    this.messenger = messenger;
-    this._scopes = scopes;
+    this.keychain = keychain;
 
     if (options?.url) {
       this.url = options.url;
@@ -76,20 +69,22 @@ class CartridgeAccount extends Account {
       "height=650,width=400"
     );
 
-    const response = await this.messenger.send<DeployContractResponse>({
-      method: "deploy-contract",
-      params: {
-        id,
-        payload,
-        abi,
-      },
-    });
+    throw new Error("unimplemented");
 
-    if (response.error) {
-      throw new Error(response.error as string);
-    }
+    // const response = await this.messenger.send<DeployContractResponse>({
+    //   method: "deploy-contract",
+    //   params: {
+    //     id,
+    //     payload,
+    //     abi,
+    //   },
+    // });
 
-    return response.result!;
+    // if (response.error) {
+    //   throw new Error(response.error as string);
+    // }
+
+    // return response.result!;
   }
 
   /**
@@ -103,23 +98,8 @@ class CartridgeAccount extends Account {
      *
      * @returns response from addTransaction
      */
-  async estimateFee(calls: Call | Call[], { nonce: providedNonce, blockIdentifier }: EstimateFeeDetails = {}): Promise<EstimateFee> {
-    const nonce = toBN(providedNonce ?? (await this.getNonce()));
-
-    const response = await this.messenger.send<EstimateFeeResponse>({
-      method: "estimate-fee",
-      params: {
-        calls,
-        nonce,
-        blockIdentifier,
-      },
-    } as EstimateFeeRequest);
-
-    if (response.error) {
-      throw new Error(response.error as string);
-    }
-
-    return response.result!;
+  async estimateFee(calls: Call | Call[], details?: EstimateFeeDetails): Promise<EstimateFee> {
+    return this.keychain.estimateFee(calls, details)
   }
 
   /**
@@ -139,50 +119,50 @@ class CartridgeAccount extends Account {
     abis?: Abi[],
     transactionsDetail?: InvocationsDetails
   ): Promise<InvokeFunctionResponse> {
-    let response = await this.messenger.send<ExecuteResponse>({
-      method: "execute",
-      params: {
-        calls,
-        abis,
-        transactionsDetail,
-      },
-    });
-
-    if (response.result) {
-      return response.result;
+    if (!transactionsDetail) {
+      transactionsDetail = {}
     }
 
-    if (response.error && response.error !== "missing scopes") {
-      throw new Error(response.error as string);
+    if (!transactionsDetail.nonce) {
+      transactionsDetail.nonce = 0 //await this.getNonce();
     }
 
-    const id = cuid();
+    if (!transactionsDetail.version) {
+      transactionsDetail.version = 1;
+    }
+
+    if (!transactionsDetail.maxFee) {
+      try {
+        transactionsDetail.maxFee = "100" // (await this.estimateFee(calls, { nonce: transactionsDetail.nonce })).suggestedMaxFee
+      } catch (e) {
+        console.error(e)
+        throw e
+      }
+    }
+
+    try {
+      return await this.keychain.execute(calls, abis, transactionsDetail)
+    } catch (e) {
+      if ((e as Error).message !== "missing scopes") {
+        console.error(e)
+        throw e
+      }
+    }
 
     window.open(
       `${this.url}/execute?${qs.stringify({
-        id,
         origin: window.origin,
         calls: JSON.stringify(calls),
+        nonce: transactionsDetail.nonce,
+        version: transactionsDetail.version,
+        maxFee: transactionsDetail.maxFee,
+        chainId: StarknetChainId.TESTNET,
       })}`,
       "_blank",
       "height=650,width=400"
     );
 
-    response = await this.messenger.send<ExecuteResponse>({
-      method: "execute",
-      params: {
-        id,
-        calls,
-        abis,
-        transactionsDetail,
-      },
-    } as ExecuteRequest);
-
-    if (response.error) {
-      throw new Error(response.error as string);
-    }
-
-    return response.result!;
+    return this.keychain.execute(calls, abis, transactionsDetail, true);
   }
 
   /**
@@ -194,31 +174,15 @@ class CartridgeAccount extends Account {
    * @throws {Error} if the JSON object is not a valid JSON
    */
   async signMessage(typedData: typedData.TypedData): Promise<Signature> {
-    const id = cuid();
-
     window.open(
       `${this.url}/sign?${qs.stringify({
-        id,
-        origin: window.origin,
         typedData: JSON.stringify(typedData),
       })}`,
       "_blank",
       "height=650,width=400"
     );
 
-    const response = await this.messenger.send<SignMessageResponse>({
-      method: "sign-message",
-      params: {
-        id,
-        typedData,
-      },
-    });
-
-    if (response.error) {
-      throw new Error(response.error as string);
-    }
-
-    return response.result!;
+    return this.keychain.signMessage(typedData, this.address);
   }
 }
 

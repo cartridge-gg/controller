@@ -34,8 +34,8 @@ export default class Controller extends Account {
         });
     }
 
-    async approve(origin: string, scopes: Scope[], maxFee?: BigNumberish) {
-        const value: Approvals = {
+    approve(origin: string, scopes: Scope[], maxFee?: BigNumberish) {
+        const value: { [origin: string]: Approvals } = {
             [origin]: {
                 scopes,
                 maxFee,
@@ -45,30 +45,28 @@ export default class Controller extends Account {
         if (raw) {
             value[origin] = { scopes, maxFee };
         }
-
+        console.log(origin)
         Storage.set("approvals", value);
     }
 
-    async unapprove(origin: string) {
+    unapprove(origin: string) {
         const approvals = Storage.get("approvals");
         delete approvals[origin];
-
         Storage.set("approvals", approvals);
     }
 
-    async approval(
+    approval(
         origin: string,
-    ): Promise<{ scopes: Scope[]; maxFee: BigNumberish } | undefined> {
-        const approvals = await this.approvals();
+    ): { scopes: Scope[]; maxFee: BigNumberish } | undefined {
+        const approvals = this.approvals();
         if (!approvals) {
             return;
         }
 
-        const url = new URL(origin);
-        return approvals[url.href];
+        return approvals[origin];
     }
 
-    async approvals(): Promise<Approvals | undefined> {
+    approvals(): Approvals | undefined {
         const raw = Storage.get("approvals");
         if (!raw) {
             return;

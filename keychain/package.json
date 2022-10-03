@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@cartridge/controller": "workspace:^",
+    "@cartridge/penpal": "^6.2.3",
     "@cartridge/ui": "workspace:^",
     "@chakra-ui/react": "^2.3.3",
     "@chakra-ui/theme": "^2.1.12",
@@ -26,7 +27,7 @@
     "next": "^12.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "starknet": "^4.3.0"
+    "starknet": "^4.7.0"
   },
   "devDependencies": {
     "@types/js-cookie": "^3.0.2",

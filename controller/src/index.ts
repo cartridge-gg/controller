@@ -1,15 +1,14 @@
-import cuid from "cuid";
 import qs from "query-string";
 import { AccountInterface } from "starknet";
-import { BigNumberish } from "starknet/utils/number";
+import { AsyncMethodReturns, CallSender, Connection, connectToChild } from '@cartridge/penpal';
 
 import Account from "./account";
-import Messenger, { Message } from "./messenger";
-import { ConnectRequest, ConnectResponse, ProbeResponse, RegisterRequest, RegisterResponse, Scope } from "./types";
+import { Keychain, Scope } from "./types";
 
 class Controller {
   private selector = "cartridge-messenger";
-  private messenger?: Messenger;
+  private connection?: Connection<Keychain>;
+  private keychain?: AsyncMethodReturns<Keychain>;
   private scopes: Scope[] = [];
   private url: string = "https://x.cartridge.gg";
   private loading = true;
@@ -31,94 +30,97 @@ class Controller {
       this.url = options.url;
     }
 
-    if (typeof document !== "undefined") {
-      this.ready_ = new Promise((resolve, reject) => {
-        window.addEventListener("message", async (e) => {
-          if (
-            e.data.target === "cartridge" &&
-            e.data.payload.method === "ready"
-          ) {
-            await this.probe();
-            this.loading = false;
-            resolve(true);
-          }
-        });
+    if (typeof document === "undefined") {
+      console.log("no doc")
+      return
+    }
+
+    const iframe = document.createElement("iframe");
+    iframe.id = this.selector;
+    iframe.src = this.url;
+    iframe.style.opacity = "0";
+    iframe.style.height = "0";
+    iframe.style.width = "0";
+    iframe.sandbox.add("allow-scripts")
+    iframe.sandbox.add("allow-same-origin")
+
+    if (!!document.hasStorageAccess) {
+      iframe.sandbox.add("allow-storage-access-by-user-activation")
+    }
+
+    if (
+      document.readyState === 'complete' ||
+      document.readyState === 'interactive'
+    ) {
+      document.body.appendChild(iframe);
+    } else {
+      document.addEventListener('DOMContentLoaded', () => {
+        document.body.appendChild(iframe);
       });
     }
 
-    if (typeof document !== "undefined" && !this.messenger) {
-      let iframe = document.getElementById(this.selector) as HTMLIFrameElement;
-      if (!!iframe) {
-        if (!this.messenger) {
-          this.messenger = new Messenger(iframe.contentWindow, this.url);
-        }
-      } else {
-        iframe = document.createElement("iframe");
-        iframe.id = this.selector;
-        iframe.src = `${this.url}`;
-        iframe.style.opacity = "0";
-        iframe.style.height = "0";
-        iframe.style.width = "0";
-        iframe.sandbox.add("allow-scripts")
-        iframe.sandbox.add("allow-same-origin")
+    this.connection = connectToChild<Keychain>({
+      iframe,
+      debug: true,
+    })
 
-        if (!!document.hasStorageAccess) {
-          iframe.sandbox.add("allow-storage-access-by-user-activation")
-        }
-
-        document.body.appendChild(iframe);
-        this.messenger = new Messenger(iframe.contentWindow, this.url);
-      }
-    }
+    this.connection.promise.then((keychain) =>
+      this.keychain = keychain
+    ).then(() => this.probe())
   }
 
   async ready() {
-    if (!this.loading) return Promise.resolve(true);
-    return this.ready_;
+    return this.connection?.promise.then(() => this.probe()).then((res) => !!res, () => false)
   }
 
   async probe() {
-    const probe = await this.messenger?.send<ProbeResponse>({
-      method: "probe",
-    });
+    if (!this.keychain) {
+      console.error("not ready for connect")
+      return null;
+    }
 
-    if (this.messenger && probe?.result?.address) {
+    try {
+      const { address, scopes } = await this.keychain.probe();
       this.account = new Account(
-        probe.result.address,
-        probe.result.scopes,
-        this.messenger,
+        address,
+        scopes,
+        this.keychain,
         {
           url: this.url,
         }
       );
-
-      return this.account;
+    } catch (e) {
+      console.error(e)
     }
+
+    return !!this.account;
   }
 
   // Register a new device key.
   async register(username: string, credential: { x: string, y: string }) {
-    const register = await this.messenger?.send<RegisterResponse>({
-      method: "register",
-      params: {
-        username,
-        credential
-      }
-    } as RegisterRequest);
-
-    if (!register || register.error) {
-      throw new Error("registration error")
+    if (!this.keychain) {
+      console.error("not ready for connect")
+      return null;
     }
 
-    return register.result
+    try {
+      return await this.keychain.register(username, credential)
+    } catch (e) {
+      console.error(e)
+    }
   }
 
   async connect() {
-    const id = cuid();
-
     if (this.account) {
       return this.account;
     }
+
+    if (!this.keychain) {
+      console.error("not ready for connect")
+      return null;
+    }
+
+    console.log("connect")
 
     if (!!document.hasStorageAccess) {
       const ok = await document.hasStorageAccess()
@@ -129,7 +131,6 @@ class Controller {
 
     window.open(
       `${this.url}/connect?${qs.stringify({
-        id,
         origin: window.origin,
         scopes: JSON.stringify(this.scopes),
       })}`,
@@ -137,23 +138,12 @@ class Controller {
       "height=650,width=400"
     );
 
-    const response = await this.messenger?.send<ConnectResponse>({
-      method: "connect",
-      params: {
-        id,
-        scopes: this.scopes,
-      },
-    } as ConnectRequest);
-
-    if (!this.messenger || !response || response.error || !response.result) {
-      console.error("not ready for connect")
-      return null;
-    }
+    const response = await this.keychain.connect(this.scopes);
 
     this.account = new Account(
-      response.result.address!,
-      response.result.scopes,
-      this.messenger,
+      response.address,
+      response.scopes,
+      this.keychain,
       {
         url: this.url,
       }
@@ -161,9 +151,24 @@ class Controller {
 
     return this.account;
   }
+
+  async disconnect() {
+    if (!this.keychain) {
+      console.error("not ready for connect")
+      return null;
+    }
+
+    if (!!document.hasStorageAccess) {
+      const ok = await document.hasStorageAccess()
+      if (!ok) {
+        await document.requestStorageAccess()
+      }
+    }
+
+    return await this.keychain.disconnect();
+  }
 }
 
 export default Controller;
-export type { Message };
-export { Messenger };
 export * from "./types";
+export * from "./errors";

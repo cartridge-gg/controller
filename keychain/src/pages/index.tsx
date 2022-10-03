@@ -1,12 +1,39 @@
 import type { NextPage } from "next";
 import dynamic from 'next/dynamic'
 import { useEffect } from "react";
-import cuid from "cuid";
 
-import { Messenger, Message, Request } from "@cartridge/controller";
-
-import { onSDKMessage } from "../handlers";
 import { useRouter } from "next/router";
+import { connectToParent } from '@cartridge/penpal';
+
+import connect from "../methods/connect";
+import execute from "../methods/execute";
+import estimateFee from "../methods/estimate_fee";
+import register from "../methods/register";
+
+import Controller from "utils/account";
+import { normalize as normalizeOrigin } from "utils/url";
+import { Approvals } from "@cartridge/controller";
+
+
+function normalize(fn: (origin: string) => Function): (origin: string) => Function {
+  return (origin: string) => fn(normalizeOrigin(origin))
+}
+
+function validate(fn: (controller: Controller, approvals: Approvals, origin: string) => Function): (origin: string) => Function {
+  return (origin: string) => {
+    const controller = Controller.fromStore();
+    if (!controller) {
+      throw new Error("no controller");
+    }
+
+    const approvals = controller.approval(origin);
+    if (!approvals) {
+      throw new Error("not connected")
+    }
+
+    return fn(controller, approvals, origin)
+  }
+}
 
 const Index: NextPage = () => {
   const router = useRouter();
@@ -21,25 +48,17 @@ const Index: NextPage = () => {
       return;
     }
 
-    const messenger = new Messenger(null, "*");
-    messenger.onRequest((msg, reply) => {
-      const id = cuid();
-      onSDKMessage({
-        id,
-        payload: msg,
-      } as Message<Request>).then(reply);
-    });
-
-    window.parent.postMessage(
-      {
-        target: "cartridge",
-        type: "broadcast",
-        payload: {
-          method: "ready",
-        },
+    connectToParent({
+      debug: true,
+      methods: {
+        connect: normalize(connect),
+        disconnect: normalize(validate((controller: Controller, _approvals: Approvals, origin: string) => () => controller.unapprove(origin))),
+        execute: normalize(validate(execute)),
+        estimateFee: normalize(validate(estimateFee)),
+        register: normalize(register),
+        probe: normalize(validate((controller: Controller, approvals: Approvals) => () => ({ address: controller.address, scopes: approvals.scopes }))),
       },
-      { targetOrigin: "*" },
-    );
+    });
   });
 
   return <></>;
