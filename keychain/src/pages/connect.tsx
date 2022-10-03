@@ -51,8 +51,8 @@ const Connect: NextPage = () => {
       <Header address={controller.address} />
       <Flex height="calc(100vh - 70px)">
         <Approval
-          action="APPROVE"
-          title="APPROVE GAME"
+          action="CONNECT"
+          title="CONNECT GAME"
           message={
             <>
               <strong>{origin}</strong>

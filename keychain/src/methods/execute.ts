@@ -65,7 +65,7 @@ function pollForTransaction(hash: string) {
       }
 
       const txn = Storage.get(hash);
-      if (!txn) {
+      if (txn) {
         Storage.remove(hash)
         clearInterval(timeout);
         return resolve("");
