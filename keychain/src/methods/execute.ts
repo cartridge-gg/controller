@@ -1,4 +1,4 @@
-import { Scope, MissingScopes } from "@cartridge/controller";
+import { Scope, MissingScopes, Approvals } from "@cartridge/controller";
 import {
   Call,
   Abi,
@@ -13,7 +13,7 @@ import { fromCallsToExecuteCalldata } from "starknet/utils/transaction";
 import Controller, { diff } from "utils/account";
 import Storage from "utils/storage";
 
-const execute = (origin: string) => async (transactions: Call | Call[], abis?: Abi[], transactionsDetail?: InvocationsDetails, sync?: boolean): Promise<InvokeFunctionResponse> => {
+const execute = (controller: Controller, approvals: Approvals) => async (transactions: Call | Call[], abis?: Abi[], transactionsDetail?: InvocationsDetails, sync?: boolean): Promise<InvokeFunctionResponse> => {
   const calls = Array.isArray(transactions) ? transactions : [transactions];
 
   const scopes = calls.map(
@@ -23,16 +23,6 @@ const execute = (origin: string) => async (transactions: Call | Call[], abis?: A
       method: txn.entrypoint,
     } as Scope),
   );
-
-  const controller = Controller.fromStore();
-  if (!controller) {
-    throw new Error("no controller");
-  }
-
-  const approvals = await controller.approval(origin);
-  if (!controller || !approvals) {
-    throw new Error("not connected")
-  }
 
   if (sync) {
     const calldata = fromCallsToExecuteCalldata(calls)

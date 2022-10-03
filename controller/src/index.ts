@@ -70,7 +70,7 @@ class Controller {
   }
 
   async ready() {
-    return this.connection?.promise.then(() => this.probe()).then(() => true)
+    return this.connection?.promise.then(() => this.probe()).then((res) => !!res, () => false)
   }
 
   async probe() {
@@ -120,6 +120,8 @@ class Controller {
       return null;
     }
 
+    console.log("connect")
+
     if (!!document.hasStorageAccess) {
       const ok = await document.hasStorageAccess()
       if (!ok) {
@@ -148,6 +150,22 @@ class Controller {
     );
 
     return this.account;
+  }
+
+  async disconnect() {
+    if (!this.keychain) {
+      console.error("not ready for connect")
+      return null;
+    }
+
+    if (!!document.hasStorageAccess) {
+      const ok = await document.hasStorageAccess()
+      if (!ok) {
+        await document.requestStorageAccess()
+      }
+    }
+
+    return await this.keychain.disconnect();
   }
 }
 

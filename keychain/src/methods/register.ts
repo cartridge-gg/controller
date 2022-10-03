@@ -9,10 +9,10 @@ const ACCOUNT_CLASS = "0x21a58754bd7658d29f70e1e5dbebf84ae393a5ef704c4f5a763cc8a
 const CONTROLLER_CLASS = "0x10baeb4233aae14d72f1c2f60d8c46be61436fb06631c835df93b3a9f566351";
 const ACCOUNT_ADDRESS = "0x07d7bbf672edd77578b8864c3e2900ac9194698220adb1b1ecdc45f9222ca291";
 
-async function register(
+const register = () => async (
   username: string,
   credential: { x: string, y: string },
-) {
+) => {
   const keypair = ec.genKeyPair();
   const deviceKey = ec.getStarkKey(keypair);
   const { x: x0, y: x1, z: x2 } = split(toBN(credential.x))

@@ -1,19 +1,19 @@
 import { useMemo } from "react";
 import { Scope } from "@cartridge/controller";
 import { useRouter } from "next/router";
-import { AccountInterface, Call } from "starknet";
+import { normalize as normalizeOrigin } from "utils/url";
 
 export function useRequests() {
   const router = useRouter();
 
-  const url = useMemo(() => {
+  const origin = useMemo(() => {
     const { origin } = router.query;
-    console.log(origin)
+
     if (!origin) {
       return;
     }
-    const url = new URL(origin as string);
-    return url;
+
+    return normalizeOrigin(origin as string);
   }, [router.query]);
 
   let requests: Scope[] = [];
@@ -22,6 +22,5 @@ export function useRequests() {
     requests = JSON.parse(scopes as string);
   }
 
-  console.log(url)
-  return { id: id as string | undefined, url, requests };
+  return { id: id as string | undefined, origin, requests };
 }

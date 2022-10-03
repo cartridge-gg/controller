@@ -14,10 +14,8 @@ import {
 import { BigNumberish } from "starknet/dist/utils/number";
 
 export type Approvals = {
-  [origin: string]: {
-    scopes: Scope[];
-    maxFee: BigNumberish;
-  };
+  scopes: Scope[];
+  maxFee: BigNumberish;
 };
 
 export type Scope = {
@@ -31,6 +29,7 @@ export interface Keychain {
     address: string;
     scopes: Scope[];
   };
+  disconnect(): void;
   estimateFee(calls: Call | Call[], estimateFeeDetails?: EstimateFeeDetails): Promise<EstimateFee>;
   execute(calls: Call | Call[], abis?: Abi[], transactionsDetail?: InvocationsDetails, sync?: boolean): Promise<InvokeFunctionResponse>;
   register(username: string, credential: { x: string, y: string }): Promise<{ address: string, deviceKey: string }>;
