@@ -98,19 +98,16 @@ class Controller {
 
   // Register a new device key.
   async register(username: string, credential: { x: string, y: string }) {
-    // const register = await this.messenger?.send<RegisterResponse>({
-    //   method: "register",
-    //   params: {
-    //     username,
-    //     credential
-    //   }
-    // } as RegisterRequest);
+    if (!this.keychain) {
+      console.error("not ready for connect")
+      return null;
+    }
 
-    // if (!register || register.error) {
-    //   throw new Error("registration error")
-    // }
-
-    // return register.result
+    try {
+      return await this.keychain.register(username, credential)
+    } catch (e) {
+      console.error(e)
+    }
   }
 
   async connect() {

@@ -17,19 +17,16 @@ import qs from 'query-string';
 
 import {
   Scope,
-  DeployContractResponse,
   Keychain,
 } from "./types";
 import { Signer } from "./signer";
 import { AsyncMethodReturns } from "@cartridge/penpal";
-import { MissingScopes } from "./errors";
 import { StarknetChainId } from "starknet/constants";
 
 class CartridgeAccount extends Account {
   address: string;
   private keychain: AsyncMethodReturns<Keychain>;
   private url: string = "https://x.cartridge.gg";
-  private _scopes: Scope[] = [];
 
   constructor(
     address: string,
@@ -42,7 +39,6 @@ class CartridgeAccount extends Account {
     super(defaultProvider, address, new Signer(keychain, options));
     this.address = address;
     this.keychain = keychain;
-    this._scopes = scopes;
 
     if (options?.url) {
       this.url = options.url;
@@ -123,13 +119,12 @@ class CartridgeAccount extends Account {
     abis?: Abi[],
     transactionsDetail?: InvocationsDetails
   ): Promise<InvokeFunctionResponse> {
-    console.log("execute")
     if (!transactionsDetail) {
       transactionsDetail = {}
     }
 
     if (!transactionsDetail.nonce) {
-      transactionsDetail.nonce = 1 //await this.getNonce();
+      transactionsDetail.nonce = 0 //await this.getNonce();
     }
 
     if (!transactionsDetail.version) {
@@ -138,7 +133,7 @@ class CartridgeAccount extends Account {
 
     if (!transactionsDetail.maxFee) {
       try {
-        transactionsDetail.maxFee = await this.estimateFee(calls, { nonce: transactionsDetail.nonce })
+        transactionsDetail.maxFee = "100" // (await this.estimateFee(calls, { nonce: transactionsDetail.nonce })).suggestedMaxFee
       } catch (e) {
         console.error(e)
         throw e

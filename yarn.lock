@@ -1923,7 +1923,7 @@ __metadata:
   resolution: "@cartridge/connector@workspace:connector"
   dependencies:
     "@cartridge/controller": "workspace:^"
-    "@starknet-react/core": ^0.13.4
+    "@starknet-react/core": ^0.14.0
     "@types/jest": ^26.0.18
     "@types/node": ^17.0.23
     jest: ^26.6.3
@@ -5341,16 +5341,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@starknet-react/core@npm:^0.13.4":
-  version: 0.13.4
-  resolution: "@starknet-react/core@npm:0.13.4"
+"@starknet-react/core@npm:^0.14.0":
+  version: 0.14.0
+  resolution: "@starknet-react/core@npm:0.14.0"
   dependencies:
+    "@tanstack/react-query": ^4.3.4
     immutable: ^4.0.0
   peerDependencies:
-    get-starknet: ^1.4
     react: ^17.0 || ^18.0
-    starknet: ^3.10
-  checksum: 8f5210334955121e6f5a714e96898dfa852758bb49d4b5a6df48546d57d94130e2b0e7c2108d836454162ab57632b31470d8d33f006bf32a1724b68c7dc03fba
+    starknet: ^4.0
+  checksum: 2dcab09012ab68763f95d47ba50bd756af7156b1760033b2f1f066864f72c3d537ef483446e6852d5bd65a584592083746ddbac6cb20173a422db7f098bd3778
   languageName: node
   linkType: hard
 
@@ -5532,6 +5532,32 @@ __metadata:
   dependencies:
     defer-to-connect: ^2.0.0
   checksum: c29df3bcec6fc3bdec2b17981d89d9c9fc9bd7d0c9bcfe92821dc533f4440bc890ccde79971838b4ceed1921d456973c4180d7175ee1d0023ad0562240a58d95
+  languageName: node
+  linkType: hard
+
+"@tanstack/query-core@npm:4.8.0":
+  version: 4.8.0
+  resolution: "@tanstack/query-core@npm:4.8.0"
+  checksum: 1410cc255d24a1d83b7ed644834ad27458da272c37bf5732c954aaa02fa8fc41b96abeca25903af95b139b353fb8738d68259ad771ef1d1dbde166b7c0514135
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query@npm:^4.3.4":
+  version: 4.8.0
+  resolution: "@tanstack/react-query@npm:4.8.0"
+  dependencies:
+    "@tanstack/query-core": 4.8.0
+    use-sync-external-store: ^1.2.0
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+    react-native: "*"
+  peerDependenciesMeta:
+    react-dom:
+      optional: true
+    react-native:
+      optional: true
+  checksum: e2075ae91760d3a81774d5f405d30074c20811e35439828c5f6e3bb4426c554a1cbe332d095ad4d45bd699a48af94412178f331ddcbb210f4b0c2d346e41ae00
   languageName: node
   linkType: hard
 
@@ -17464,7 +17490,7 @@ __metadata:
   dependencies:
     "@cartridge/connector": "workspace:^"
     "@cartridge/controller": "workspace:^"
-    "@starknet-react/core": ^0.13.4
+    "@starknet-react/core": ^0.14.0
     "@types/node": ^18.7.14
     "@types/react": ^18.0.20
     "@types/react-dom": ^18.0.6
@@ -18874,7 +18900,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"use-sync-external-store@npm:1.2.0":
+"use-sync-external-store@npm:1.2.0, use-sync-external-store@npm:^1.2.0":
   version: 1.2.0
   resolution: "use-sync-external-store@npm:1.2.0"
   peerDependencies:

@@ -7,6 +7,9 @@ import { connectToParent } from '@cartridge/penpal';
 
 import connect from "../methods/connect";
 import execute from "../methods/execute";
+import estimateFee from "../methods/estimate_fee";
+import register from "../methods/register";
+
 import Controller from "utils/account";
 
 const Index: NextPage = () => {
@@ -28,6 +31,7 @@ const Index: NextPage = () => {
         connect,
         execute,
         estimateFee,
+        register,
         probe: (origin: string) => async () => {
           const controller = Controller.fromStore();
           if (!controller) {
@@ -40,7 +44,7 @@ const Index: NextPage = () => {
           }
 
           return { address: controller.address, scopes: approvals.scopes };
-        }
+        },
       },
     });
   });

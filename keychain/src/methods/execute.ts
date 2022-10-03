@@ -37,7 +37,9 @@ const execute = (origin: string) => async (transactions: Call | Call[], abis?: A
   if (sync) {
     const calldata = fromCallsToExecuteCalldata(calls)
     const hash = calculateTransactionHash(controller.address, transactionsDetail.version, calldata, transactionsDetail.maxFee, StarknetChainId.TESTNET, transactionsDetail.nonce);
+    console.log("poll for transaction")
     await pollForTransaction(hash)
+    console.log("done polling")
   } else {
     const missing = diff(scopes, approvals.scopes);
     if (missing.length > 0) {
@@ -47,7 +49,7 @@ const execute = (origin: string) => async (transactions: Call | Call[], abis?: A
 
   if (
     approvals.maxFee &&
-    transactionsDetail?.maxFee.gt(toBN(approvals.maxFee))
+    transactionsDetail && toBN(transactionsDetail.maxFee).gt(toBN(approvals.maxFee))
   ) {
     throw new Error("transaction fees exceed pre-approved limit")
   }
@@ -62,11 +64,7 @@ const INTERNVAL = 100;
 
 function pollForTransaction(hash: string) {
   return new Promise((resolve, reject) => {
-    const controller = Controller.fromStore();
-    if (!controller) {
-      return reject("no controller");
-    }
-
+    console.log("polling");
     let elapsed = -100;
     const checkApproval = async () => {
       elapsed += 100;

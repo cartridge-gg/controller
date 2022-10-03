@@ -26,9 +26,25 @@ const Execute: NextPage = () => {
     return url;
   }, [router.query]);
 
-  const { version, maxFee, nonce } = router.query;
-  const calls: Call[] = JSON.parse(router.query.calls as string);
-  const chainId = router.query.chainId as StarknetChainId;
+  const params = useMemo(() => {
+    if (!controller.address || !router.query.chainId || !router.query.calls || !router.query.version || !router.query.maxFee || !router.query.nonce) {
+      return null
+    }
+
+    const { version, maxFee, nonce, chainId } = router.query as {
+      chainId: StarknetChainId,
+      version: string,
+      maxFee: string,
+      nonce: string,
+    }
+    const calls: Call | Call[] = JSON.parse(router.query.calls as string)
+    const transactions = Array.isArray(calls) ? calls : [calls];
+
+    const calldata = fromCallsToExecuteCalldata(transactions)
+    const hash = calculateTransactionHash(controller.address, version, calldata, maxFee, chainId, nonce);
+
+    return { hash, calls: transactions, maxFee, nonce }
+  }, [controller.address, router.query])
 
   useEffect(() => {
     if (!controller) {
@@ -37,18 +53,15 @@ const Execute: NextPage = () => {
     }
   }, [router, controller])
 
-  const calldata = fromCallsToExecuteCalldata(calls)
-  const hash = calculateTransactionHash(controller.address, version, calldata, maxFee, chainId, nonce);
-
   const submit = useCallback(
     async (_, actions) => {
-      if (!hash) {
+      if (!params.hash) {
         return;
       }
 
       // We set the transaction hash which the keychain instance
       // polls for.
-      Storage.set(hash, true)
+      Storage.set(params.hash, true)
 
       if (window.opener) {
         window.close();
@@ -56,11 +69,13 @@ const Execute: NextPage = () => {
 
       actions.setSubmitting(false);
     },
-    [hash],
+    [params],
   );
 
-  if (!url || !hash || !controller) {
-    return <></>;
+  if (!url || !params || !controller) {
+    return <>
+      <Header address={controller.address} />
+    </>;
   }
 
   return (
@@ -72,7 +87,7 @@ const Execute: NextPage = () => {
           title="Execute Transactions"
           message={`${url.href} is requesting to execute the following transactions`}
           onSubmit={submit}
-          scopes={calls.map((call) => ({
+          scopes={params.calls.map((call) => ({
             target: call.contractAddress,
             method: call.entrypoint,
           }))}
