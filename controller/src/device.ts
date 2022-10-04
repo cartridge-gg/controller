@@ -1,4 +1,3 @@
-import cuid from "cuid";
 import {
   Account,
   DeployContractPayload,

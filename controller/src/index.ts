@@ -1,9 +1,18 @@
 import qs from "query-string";
-import { AccountInterface } from "starknet";
+import { AccountInterface, Call, number } from "starknet";
 import { AsyncMethodReturns, Connection, connectToChild } from '@cartridge/penpal';
 
 import DeviceAccount from "./device";
 import { Keychain, Scope } from "./types";
+import { BigNumberish, toBN } from "starknet/utils/number";
+import { calculateContractAddressFromHash, getSelectorFromName } from "starknet/utils/hash";
+import { encodeShortString } from "starknet/utils/shortString";
+import WebauthnAccount from "./webauthn";
+
+const PROXY_CLASS = "0x793a374a266432184f68b29546d14fedfdcbe6346bc51bd34ad730e6ff914f3";
+const ACCOUNT_CLASS = "0x21a58754bd7658d29f70e1e5dbebf84ae393a5ef704c4f5a763cc8a61cb3414";
+const CONTROLLER_CLASS = "0x10baeb4233aae14d72f1c2f60d8c46be61436fb06631c835df93b3a9f566351";
+const ACCOUNT_ADDRESS = "0x07d7bbf672edd77578b8864c3e2900ac9194698220adb1b1ecdc45f9222ca291";
 
 class Controller {
   private selector = "cartridge-messenger";
@@ -99,11 +108,51 @@ class Controller {
       return null;
     }
 
-    try {
-      return await this.keychain.register(username, credential)
-    } catch (e) {
-      console.error(e)
+    const { x: x0, y: x1, z: x2 } = split(toBN(credential.x))
+    const { x: y0, y: y1, z: y2 } = split(toBN(credential.y))
+
+    const deviceKey = await this.keychain.provision();
+    const address = calculateContractAddressFromHash(
+      encodeShortString(username),
+      toBN(PROXY_CLASS),
+      [
+        toBN(ACCOUNT_CLASS),
+        getSelectorFromName("initialize"),
+        "9",
+        toBN(CONTROLLER_CLASS),
+        "7",
+        x0,
+        x1,
+        x2,
+        y0,
+        y1,
+        y2,
+        toBN(deviceKey),
+        "12",
+      ],
+      toBN(ACCOUNT_ADDRESS),
+    )
+
+    return { address, deviceKey }
+  }
+
+  async login(address: string, credentialId: string, pub: string) {
+    if (!this.keychain) {
+      console.error("not ready for connect")
+      return null;
     }
+
+    const account = new WebauthnAccount(address, credentialId, pub);
+    const deviceKey = await this.keychain.provision();
+    const calls: Call[] = [
+      {
+        contractAddress: address,
+        entrypoint: "add_device_key",
+        calldata: [deviceKey],
+      },
+    ];
+
+    await account.execute(calls)
   }
 
   async connect() {
@@ -161,6 +210,16 @@ class Controller {
     return await this.keychain.disconnect();
   }
 }
+
+const BASE = number.toBN(2).pow(toBN(86));
+
+export function split(n: BigNumberish): { x: BigNumberish; y: BigNumberish; z: BigNumberish } {
+  const x = n.mod(BASE);
+  const y = n.div(BASE).mod(BASE);
+  const z = n.div(BASE).div(BASE);
+  return { x, y, z };
+}
+
 
 export * from "./types";
 export * from "./errors";

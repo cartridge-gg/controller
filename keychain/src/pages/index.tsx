@@ -8,12 +8,11 @@ import { connectToParent } from '@cartridge/penpal';
 import connect from "../methods/connect";
 import execute from "../methods/execute";
 import estimateFee from "../methods/estimate_fee";
-import register from "../methods/register";
+import provision from "../methods/provision";
 
 import Controller from "utils/account";
 import { normalize as normalizeOrigin } from "utils/url";
 import { Approvals } from "@cartridge/controller";
-
 
 function normalize(fn: (origin: string) => Function): (origin: string) => Function {
   return (origin: string) => fn(normalizeOrigin(origin))
@@ -55,7 +54,7 @@ const Index: NextPage = () => {
         disconnect: normalize(validate((controller: Controller, _approvals: Approvals, origin: string) => () => controller.unapprove(origin))),
         execute: normalize(validate(execute)),
         estimateFee: normalize(validate(estimateFee)),
-        register: normalize(register),
+        provision: normalize(provision),
         probe: normalize(validate((controller: Controller, approvals: Approvals) => () => ({ address: controller.address, scopes: approvals.scopes }))),
       },
     });

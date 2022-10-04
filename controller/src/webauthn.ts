@@ -12,20 +12,11 @@ import {
   defaultProvider
 } from "starknet";
 import base64url from "base64url";
-import { BigNumberish } from "starknet/utils/number";
-
-const BASE = number.toBN(2).pow(86);
+import { split } from ".";
 
 type Assertion = PublicKeyCredential & {
   response: AuthenticatorAssertionResponse;
 };
-
-function split(n: BigNumberish): { x: BigNumberish; y: BigNumberish; z: BigNumberish } {
-  const x = n.mod(BASE);
-  const y = n.div(BASE).mod(BASE);
-  const z = n.div(BASE).div(BASE);
-  return { x, y, z };
-}
 
 function convertUint8ArrayToWordArray(u8Array: Uint8Array) {
   var words = [],

@@ -30,7 +30,7 @@ export interface Keychain {
   disconnect(): void;
   estimateFee(calls: Call | Call[], estimateFeeDetails?: EstimateFeeDetails): Promise<EstimateFee>;
   execute(calls: Call | Call[], abis?: Abi[], transactionsDetail?: InvocationsDetails, sync?: boolean): Promise<InvokeFunctionResponse>;
-  register(username: string, credential: { x: string, y: string }): Promise<{ address: string, deviceKey: string }>;
+  provision(): Promise<string>;
 
   signMessage(typedData: typedData.TypedData, account: string): Promise<Signature>;
   signTransaction(

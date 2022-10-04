@@ -7,7 +7,6 @@ import {
     Call
 } from "starknet";
 import qs from 'query-string';
-import cuid from "cuid";
 
 import { Keychain } from "./types";
 import { AsyncMethodReturns } from "@cartridge/penpal";
@@ -45,11 +44,8 @@ export class Signer implements SignerInterface {
      * @throws {Error} if the JSON object is not a valid JSON
      */
     public async signMessage(typedData: typedData.TypedData, account: string): Promise<Signature> {
-        const id = cuid()
-
         window.open(
             `${this.url}/sign?${qs.stringify({
-                id,
                 origin: window.origin,
                 message: JSON.stringify(typedData.message),
             })}`,
