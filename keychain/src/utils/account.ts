@@ -45,7 +45,6 @@ export default class Controller extends Account {
         if (raw) {
             value[origin] = { scopes, maxFee };
         }
-        console.log(origin)
         Storage.set("approvals", value);
     }
 

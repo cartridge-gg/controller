@@ -31,7 +31,6 @@ class Controller {
     }
 
     if (typeof document === "undefined") {
-      console.log("no doc")
       return
     }
 
@@ -119,8 +118,6 @@ class Controller {
       console.error("not ready for connect")
       return null;
     }
-
-    console.log("connect")
 
     if (!!document.hasStorageAccess) {
       const ok = await document.hasStorageAccess()

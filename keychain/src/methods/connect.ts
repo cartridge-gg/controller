@@ -26,7 +26,6 @@ const connect = (origin: string) => (scopes: Scope[]): Promise<{
         return reject("timeout");
       }
 
-      console.log(origin)
       const approval = controller.approval(origin);
       if (approval) {
         clearInterval(timeout);

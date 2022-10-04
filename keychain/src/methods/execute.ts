@@ -27,9 +27,7 @@ const execute = (controller: Controller, approvals: Approvals) => async (transac
   if (sync) {
     const calldata = fromCallsToExecuteCalldata(calls)
     const hash = calculateTransactionHash(controller.address, transactionsDetail.version, calldata, transactionsDetail.maxFee, StarknetChainId.TESTNET, transactionsDetail.nonce);
-    console.log("poll for transaction")
     await pollForTransaction(hash)
-    console.log("done polling")
   } else {
     const missing = diff(scopes, approvals.scopes);
     if (missing.length > 0) {
@@ -54,7 +52,6 @@ const INTERNVAL = 100;
 
 function pollForTransaction(hash: string) {
   return new Promise((resolve, reject) => {
-    console.log("polling");
     let elapsed = -100;
     const checkApproval = async () => {
       elapsed += 100;
