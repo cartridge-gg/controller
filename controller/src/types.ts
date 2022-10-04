@@ -1,6 +1,4 @@
 import {
-  DeployContractPayload,
-  DeployContractResponse as StarknetDeployContractResponse,
   Abi,
   Call,
   InvocationsDetails,
@@ -11,7 +9,7 @@ import {
   EstimateFeeDetails,
   EstimateFee,
 } from "starknet";
-import { BigNumberish } from "starknet/dist/utils/number";
+import { BigNumberish } from "starknet/utils/number";
 
 export type Approvals = {
   scopes: Scope[];

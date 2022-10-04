@@ -1,8 +1,8 @@
 import qs from "query-string";
 import { AccountInterface } from "starknet";
-import { AsyncMethodReturns, CallSender, Connection, connectToChild } from '@cartridge/penpal';
+import { AsyncMethodReturns, Connection, connectToChild } from '@cartridge/penpal';
 
-import Account from "./account";
+import DeviceAccount from "./device";
 import { Keychain, Scope } from "./types";
 
 class Controller {
@@ -11,8 +11,6 @@ class Controller {
   private keychain?: AsyncMethodReturns<Keychain>;
   private scopes: Scope[] = [];
   private url: string = "https://x.cartridge.gg";
-  private loading = true;
-  private ready_: Promise<boolean> | undefined;
   private account: AccountInterface | undefined;
 
   constructor(
@@ -79,10 +77,9 @@ class Controller {
     }
 
     try {
-      const { address, scopes } = await this.keychain.probe();
-      this.account = new Account(
+      const { address } = await this.keychain.probe();
+      this.account = new DeviceAccount(
         address,
-        scopes,
         this.keychain,
         {
           url: this.url,
@@ -137,9 +134,8 @@ class Controller {
 
     const response = await this.keychain.connect(this.scopes);
 
-    this.account = new Account(
+    this.account = new DeviceAccount(
       response.address,
-      response.scopes,
       this.keychain,
       {
         url: this.url,
@@ -166,6 +162,7 @@ class Controller {
   }
 }
 
-export default Controller;
 export * from "./types";
 export * from "./errors";
+export * from "./webauthn";
+export default Controller;

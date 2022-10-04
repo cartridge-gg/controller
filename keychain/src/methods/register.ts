@@ -12,32 +12,35 @@ const ACCOUNT_ADDRESS = "0x07d7bbf672edd77578b8864c3e2900ac9194698220adb1b1ecdc4
 const register = () => async (
   username: string,
   credential: { x: string, y: string },
+  address?: string
 ) => {
   const keypair = ec.genKeyPair();
   const deviceKey = ec.getStarkKey(keypair);
   const { x: x0, y: x1, z: x2 } = split(toBN(credential.x))
   const { x: y0, y: y1, z: y2 } = split(toBN(credential.y))
 
-  const address = calculateContractAddressFromHash(
-    encodeShortString(username),
-    toBN(PROXY_CLASS),
-    [
-      toBN(ACCOUNT_CLASS),
-      getSelectorFromName("initialize"),
-      "9",
-      toBN(CONTROLLER_CLASS),
-      "7",
-      x0,
-      x1,
-      x2,
-      y0,
-      y1,
-      y2,
-      toBN(deviceKey),
-      "12",
-    ],
-    toBN(ACCOUNT_ADDRESS),
-  )
+  if (!address) {
+    address = calculateContractAddressFromHash(
+      encodeShortString(username),
+      toBN(PROXY_CLASS),
+      [
+        toBN(ACCOUNT_CLASS),
+        getSelectorFromName("initialize"),
+        "9",
+        toBN(CONTROLLER_CLASS),
+        "7",
+        x0,
+        x1,
+        x2,
+        y0,
+        y1,
+        y2,
+        toBN(deviceKey),
+        "12",
+      ],
+      toBN(ACCOUNT_ADDRESS),
+    )
+  }
 
   const controller = new Controller(
     keypair,

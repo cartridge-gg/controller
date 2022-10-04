@@ -16,21 +16,19 @@ import {
 import qs from 'query-string';
 
 import {
-  Scope,
   Keychain,
 } from "./types";
 import { Signer } from "./signer";
 import { AsyncMethodReturns } from "@cartridge/penpal";
 import { StarknetChainId } from "starknet/constants";
 
-class CartridgeAccount extends Account {
+class DeviceAccount extends Account {
   address: string;
   private keychain: AsyncMethodReturns<Keychain>;
   private url: string = "https://x.cartridge.gg";
 
   constructor(
     address: string,
-    scopes: Scope[] = [],
     keychain: AsyncMethodReturns<Keychain>,
     options?: {
       url?: string;
@@ -59,32 +57,7 @@ class CartridgeAccount extends Account {
     payload: DeployContractPayload,
     abi?: Abi
   ): Promise<StarknetDeployContractResponse> {
-    const id = cuid();
-
-    window.open(
-      `${this.url}/deploy?origin=${encodeURIComponent(
-        window.origin
-      )}&id=${id}`,
-      "_blank",
-      "height=650,width=400"
-    );
-
     throw new Error("unimplemented");
-
-    // const response = await this.messenger.send<DeployContractResponse>({
-    //   method: "deploy-contract",
-    //   params: {
-    //     id,
-    //     payload,
-    //     abi,
-    //   },
-    // });
-
-    // if (response.error) {
-    //   throw new Error(response.error as string);
-    // }
-
-    // return response.result!;
   }
 
   /**
@@ -186,4 +159,4 @@ class CartridgeAccount extends Account {
   }
 }
 
-export default CartridgeAccount;
+export default DeviceAccount;

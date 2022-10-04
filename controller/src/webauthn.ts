@@ -7,7 +7,9 @@ import {
   transaction,
   hash,
   typedData,
-  number
+  number,
+  Account,
+  defaultProvider
 } from "starknet";
 import base64url from "base64url";
 import { BigNumberish } from "starknet/utils/number";
@@ -204,3 +206,13 @@ export class WebauthnSigner implements SignerInterface {
     return this.formatAssertion(assertion);
   }
 }
+
+class WebauthnAccount extends Account {
+  constructor(
+    address: string, credentialId: string, publicKey: string
+  ) {
+    super(defaultProvider, address, new WebauthnSigner(credentialId, publicKey));
+  }
+}
+
+export default WebauthnAccount;
