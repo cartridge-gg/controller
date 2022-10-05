@@ -9,6 +9,7 @@ import connect from "../methods/connect";
 import execute from "../methods/execute";
 import estimateFee from "../methods/estimate_fee";
 import provision from "../methods/provision";
+import register from "../methods/register";
 
 import Controller from "utils/account";
 import { normalize as normalizeOrigin } from "utils/url";
@@ -55,6 +56,7 @@ const Index: NextPage = () => {
         execute: normalize(validate(execute)),
         estimateFee: normalize(validate(estimateFee)),
         provision: normalize(provision),
+        register: normalize(register),
         probe: normalize(validate((controller: Controller, approvals: Approvals) => () => ({ address: controller.address, scopes: approvals.scopes }))),
       },
     });

@@ -26,10 +26,10 @@ export class Signer implements SignerInterface {
     }
 
     /**
-   * Method to get the public key of the signer
-   *
-   * @returns public key of signer as hex string with 0x prefix
-   */
+     * Method to get the public key of the signer
+     *
+     * @returns public key of signer as hex string with 0x prefix
+     */
     public getPubKey(): Promise<string> {
         return Promise.resolve("")
     }
