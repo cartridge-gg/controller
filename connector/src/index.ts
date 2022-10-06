@@ -38,6 +38,10 @@ class ControllerConnector extends Connector {
         return this.controller.register(username, credential);
     }
 
+    async provision(address: string) {
+        return this.controller.provision(address);
+    }
+
     async connect(): Promise<AccountInterface> {
         this._account = await this.controller.connect();
         if (!this._account) {
