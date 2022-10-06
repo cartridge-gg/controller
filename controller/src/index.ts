@@ -120,7 +120,7 @@ class Controller {
       },
     ];
 
-    await account.execute(calls)
+    return await account.execute(calls)
   }
 
   async provision(address: string) {

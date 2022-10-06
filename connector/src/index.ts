@@ -1,6 +1,6 @@
 import { Connector } from "@starknet-react/core";
 import Controller, { Scope } from "@cartridge/controller";
-import { AccountInterface } from "starknet";
+import { AccountInterface, InvokeFunctionResponse } from "starknet";
 
 class ControllerConnector extends Connector {
     private controller: Controller;
@@ -36,6 +36,10 @@ class ControllerConnector extends Connector {
 
     async register(username: string, credential: { x: string, y: string }) {
         return this.controller.register(username, credential);
+    }
+
+    async login(address: string, credentialId: string): Promise<InvokeFunctionResponse | null> {
+        return await this.controller.login(address, credentialId);
     }
 
     async provision(address: string) {
