@@ -42,10 +42,12 @@ function convertUint8ArrayToWordArray(u8Array: Uint8Array) {
 export class WebauthnSigner implements SignerInterface {
   private credentialId: string;
   private publicKey: string;
+  private rpId: string;
 
-  constructor(credentialId: string, publicKey: string) {
+  constructor(credentialId: string, publicKey: string, rpId: string = "cartridge.gg") {
     this.credentialId = credentialId;
     this.publicKey = publicKey;
+    this.rpId = rpId;
   }
 
   public async getPubKey(): Promise<string> {
@@ -61,7 +63,7 @@ export class WebauthnSigner implements SignerInterface {
       publicKey: {
         challenge,
         timeout: 60000,
-        rpId: "cartridge.gg",
+        rpId: this.rpId,
         allowCredentials: [
           {
             type: "public-key",
@@ -200,9 +202,9 @@ export class WebauthnSigner implements SignerInterface {
 
 class WebauthnAccount extends Account {
   constructor(
-    address: string, credentialId: string, publicKey: string
+    address: string, credentialId: string, publicKey: string, rpId?: string
   ) {
-    super(defaultProvider, address, new WebauthnSigner(credentialId, publicKey));
+    super(defaultProvider, address, new WebauthnSigner(credentialId, publicKey, rpId));
   }
 }
 

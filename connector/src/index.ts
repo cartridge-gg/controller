@@ -38,8 +38,8 @@ class ControllerConnector extends Connector {
         return this.controller.register(username, credential);
     }
 
-    async login(address: string, credentialId: string): Promise<InvokeFunctionResponse | null> {
-        return await this.controller.login(address, credentialId);
+    async login(address: string, credentialId: string, rpId?: string): Promise<InvokeFunctionResponse | null> {
+        return await this.controller.login(address, credentialId, rpId);
     }
 
     async provision(address: string) {

@@ -104,14 +104,14 @@ class Controller {
     return await this.keychain.register(username, credential);
   }
 
-  async login(address: string, credentialId: string) {
+  async login(address: string, credentialId: string, rpId?: string) {
     if (!this.keychain) {
       console.error("not ready for connect")
       return null;
     }
 
     const deviceKey = await this.keychain.provision(address);
-    const account = new WebauthnAccount(address, credentialId, deviceKey);
+    const account = new WebauthnAccount(address, credentialId, deviceKey, rpId);
     const calls: Call[] = [
       {
         contractAddress: address,
