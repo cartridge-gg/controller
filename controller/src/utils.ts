@@ -1,11 +1,11 @@
 import equal from "fast-deep-equal";
 
-import { Scope } from "./types";
+import { Policy } from "./types";
 
-export function diff(a: Scope[], b: Scope[]): Scope[] {
+export function diff(a: Policy[], b: Policy[]): Policy[] {
     return a.reduce(
-        (prev, scope) =>
-            b.some((approval) => equal(approval, scope)) ? prev : [...prev, scope],
-        [] as Scope[],
+        (prev, policyA) =>
+            b.some((policyB) => equal(policyB, policyA)) ? prev : [...prev, policyA],
+        [] as Policy[],
     );
 }

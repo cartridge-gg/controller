@@ -1,59 +1,59 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { Scope } from "@cartridge/controller";
+import { Policy } from "@cartridge/controller";
 import { diff } from "utils/account";
 import { defaultProvider } from "starknet";
 import { getSelectorFromName } from "starknet/dist/utils/hash";
 import { StarknetChainId } from "starknet/dist/constants";
 // import { SelectorsDocument } from "generated/graphql";
 
-export function useUrlScopes(): {
+export function useUrlPolicys(): {
   isValidating: boolean;
-  validScopes: Scope[];
-  invalidScopes: Scope[];
+  validPolicys: Policy[];
+  invalidPolicys: Policy[];
 } {
   const router = useRouter();
   const [isValidating, setIsValidating] = useState(true);
-  const [validScopes, setValidScopes] = useState<Scope[]>([]);
-  const [invalidScopes, setInvalidScopes] = useState<Scope[]>([]);
+  const [validPolicys, setValidPolicys] = useState<Policy[]>([]);
+  const [invalidPolicys, setInvalidPolicys] = useState<Policy[]>([]);
 
   useEffect(() => {
-    const { scopes } = router.query;
-    if (!router.isReady || !scopes) {
+    const { policies } = router.query;
+    if (!router.isReady || !policies) {
       return;
     }
     setIsValidating(true);
-    const requests = JSON.parse(scopes as string);
+    const requests = JSON.parse(policies as string);
     const requestDict = {};
 
-    requests.forEach((scope) => {
-      requestDict[scope.target] = requestDict[scope.target] || [];
-      requestDict[scope.target].push(scope.method);
+    requests.forEach((policy) => {
+      requestDict[policy.target] = requestDict[policy.target] || [];
+      requestDict[policy.target].push(policy.method);
     });
 
     const promises = [];
     Object.keys(requestDict).forEach((target) => {
-      promises.push(getValidScopes(requestDict[target], target));
+      promises.push(getValidPolicys(requestDict[target], target));
     });
 
     Promise.all(promises)
-      .then((scopes) => {
-        scopes = scopes.flat();
-        setValidScopes(scopes);
-        setInvalidScopes(diff(requests, scopes));
+      .then((policies) => {
+        policies = policies.flat();
+        setValidPolicys(policies);
+        setInvalidPolicys(diff(requests, policies));
       })
       .finally(() => {
         setIsValidating(false);
       });
   }, [router.isReady, router.query]);
 
-  return { isValidating, validScopes, invalidScopes };
+  return { isValidating, validPolicys, invalidPolicys };
 }
 
-async function getValidScopes(
+async function getValidPolicys(
   methods: string[],
   target: string,
-): Promise<Scope[]> {
+): Promise<Policy[]> {
   return methods.map(method => ({ method, target }))
   // const validSelectors = await fetchSelectors(target);
 
@@ -64,7 +64,7 @@ async function getValidScopes(
   //     arr.indexOf(method) === index,
   // );
 
-  // return validMethods.map((method) => ({ method, target } as Scope));
+  // return validMethods.map((method) => ({ method, target } as Policy));
 }
 
 // async function fetchSelectors(address: string): Promise<string[]> {
@@ -85,5 +85,5 @@ async function getValidScopes(
 //   });
 
 //   const json = await res.json();
-//   return json.data.contract.scopes.edges.map(({ node }) => node.selector);
+//   return json.data.contract.policies.edges.map(({ node }) => node.selector);
 // }

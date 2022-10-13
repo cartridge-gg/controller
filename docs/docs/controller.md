@@ -42,7 +42,7 @@ const connector = new CartridgeConnector()
 
 ## Preapproving interactions
 
-Catridge Controller supports requesting preapproval for a set of `scopes`. When a scope is preapproved, games can perform the interaction seamlessly without requesting approval from the player each time. Scopes are requested during connection. Executing transactions follows the same pattern and controller will take care of requesting player approval only when necessary.
+Catridge Controller supports requesting preapproval for a set of `policies`. When a policy is preapproved, games can perform the interaction seamlessly without requesting approval from the player each time. Policys are requested during connection. Executing transactions follows the same pattern and controller will take care of requesting player approval only when necessary.
 
 ```ts
 // Using the controller directly.

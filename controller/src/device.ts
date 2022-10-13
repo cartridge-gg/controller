@@ -115,7 +115,7 @@ class DeviceAccount extends Account {
     try {
       return await this.keychain.execute(calls, abis, transactionsDetail)
     } catch (e) {
-      if ((e as Error).message !== "missing scopes") {
+      if ((e as Error).message !== "missing policies") {
         console.error(e)
         throw e
       }

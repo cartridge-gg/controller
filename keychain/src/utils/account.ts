@@ -6,7 +6,7 @@ import {
     number,
 } from "starknet";
 import { BigNumberish } from "starknet/utils/number";
-import { Scope, Approvals } from "@cartridge/controller";
+import { Policy, Session } from "@cartridge/controller";
 import equal from "fast-deep-equal";
 
 import Storage from "utils/storage";
@@ -34,43 +34,21 @@ export default class Controller extends Account {
         });
     }
 
-    approve(origin: string, scopes: Scope[], maxFee?: BigNumberish) {
-        const value: { [origin: string]: Approvals } = {
-            [origin]: {
-                scopes,
-                maxFee,
-            },
-        };
-        const raw = Storage.get("approvals");
-        if (raw) {
-            value[origin] = { scopes, maxFee };
-        }
-        Storage.set("approvals", value);
+    approve(origin: string, policies: Policy[], maxFee?: BigNumberish) {
+        Storage.set(`@session/${origin}`, {
+            policies,
+            maxFee,
+        });
     }
 
-    unapprove(origin: string) {
-        const approvals = Storage.get("approvals");
-        delete approvals[origin];
-        Storage.set("approvals", approvals);
+    revoke(origin: string) {
+        Storage.set(`@session/${origin}`, undefined);
     }
 
-    approval(
+    session(
         origin: string,
-    ): { scopes: Scope[]; maxFee: BigNumberish } | undefined {
-        const approvals = this.approvals();
-        if (!approvals) {
-            return;
-        }
-
-        return approvals[origin];
-    }
-
-    approvals(): Approvals | undefined {
-        const raw = Storage.get("approvals");
-        if (!raw) {
-            return;
-        }
-        return raw as Approvals;
+    ): Session | undefined {
+        return Storage.get(`@session/${origin}`);
     }
 
     static fromStore() {
@@ -85,10 +63,10 @@ export default class Controller extends Account {
     }
 }
 
-export function diff(a: Scope[], b: Scope[]): Scope[] {
+export function diff(a: Policy[], b: Policy[]): Policy[] {
     return a.reduce(
-        (prev, scope) =>
-            b.some((approval) => equal(approval, scope)) ? prev : [...prev, scope],
-        [] as Scope[],
+        (prev, policy) =>
+            b.some((approval) => equal(approval, policy)) ? prev : [...prev, policy],
+        [] as Policy[],
     );
 }

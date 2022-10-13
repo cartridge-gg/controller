@@ -1,4 +1,4 @@
-import { Approvals } from "@cartridge/controller";
+import { Session } from "@cartridge/controller";
 import {
   Call,
   EstimateFee,
