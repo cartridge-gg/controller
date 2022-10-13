@@ -3,7 +3,7 @@ import { AccountInterface, Call, number } from "starknet";
 import { AsyncMethodReturns, Connection, connectToChild } from '@cartridge/penpal';
 
 import DeviceAccount from "./device";
-import { Keychain, Scope } from "./types";
+import { Session, Keychain, Policy } from "./types";
 import { BigNumberish, toBN } from "starknet/utils/number";
 import WebauthnAccount from "./webauthn";
 
@@ -11,19 +11,19 @@ class Controller {
   private selector = "cartridge-messenger";
   private connection?: Connection<Keychain>;
   private keychain?: AsyncMethodReturns<Keychain>;
-  private scopes: Scope[] = [];
+  private policies: Policy[] = [];
   private url: string = "https://x.cartridge.gg";
   private account: AccountInterface | undefined;
 
   constructor(
-    scopes?: Scope[],
+    policies?: Policy[],
     options?: {
       url?: string;
       origin?: string;
     }
   ) {
-    if (scopes) {
-      this.scopes = scopes;
+    if (policies) {
+      this.policies = policies;
     }
 
     if (options?.url) {
@@ -152,13 +152,13 @@ class Controller {
     window.open(
       `${this.url}/connect?${qs.stringify({
         origin: window.origin,
-        scopes: JSON.stringify(this.scopes),
+        policies: JSON.stringify(this.policies),
       })}`,
       "_blank",
       "height=650,width=400"
     );
 
-    const response = await this.keychain.connect(this.scopes);
+    const response = await this.keychain.connect(this.policies);
 
     this.account = new DeviceAccount(
       response.address,
@@ -173,7 +173,7 @@ class Controller {
 
   async disconnect() {
     if (!this.keychain) {
-      console.error("not ready for connect")
+      console.error("not ready for disconnect")
       return null;
     }
 
@@ -185,6 +185,24 @@ class Controller {
     }
 
     return await this.keychain.disconnect();
+  }
+
+  revoke(origin: string, policy: Policy[]) {
+    if (!this.keychain) {
+      console.error("not ready for disconnect")
+      return null;
+    }
+
+    return this.keychain.revoke(origin);
+  }
+
+  async approvals(origin: string): Promise<Session | undefined> {
+    if (!this.keychain) {
+      console.error("not ready for disconnect")
+      return;
+    }
+
+    return this.keychain.approvals(origin)
   }
 }
 

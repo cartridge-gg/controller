@@ -1,5 +1,5 @@
 import { Connector } from "@starknet-react/core";
-import Controller, { Scope } from "@cartridge/controller";
+import Controller, { Policy } from "@cartridge/controller";
 import { AccountInterface, InvokeFunctionResponse } from "starknet";
 
 class ControllerConnector extends Connector {
@@ -7,7 +7,7 @@ class ControllerConnector extends Connector {
     private _account: AccountInterface | null;
 
     constructor(
-        scopes?: Scope[],
+        policies?: Policy[],
         options?: {
             url?: string;
             origin?: string;
@@ -15,7 +15,7 @@ class ControllerConnector extends Connector {
     ) {
         super({ options });
         this._account = null;
-        this.controller = new Controller(scopes, options);
+        this.controller = new Controller(policies, options);
     }
 
     id() {

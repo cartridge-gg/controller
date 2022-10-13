@@ -87,7 +87,7 @@ const Execute: NextPage = () => {
           title="Execute Transactions"
           message={`${url.href} is requesting to execute the following transactions`}
           onSubmit={submit}
-          scopes={params.calls.map((call) => ({
+          policies={params.calls.map((call) => ({
             target: call.contractAddress,
             method: call.entrypoint,
           }))}

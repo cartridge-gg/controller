@@ -1,7 +1,7 @@
 import { Box, Flex, Tag, Switch, Text, HStack, Link } from "@chakra-ui/react";
 import { FieldInputProps } from "formik";
 import { formatEther } from "ethers/lib/utils";
-import { Scope } from "@cartridge/controller";
+import { Policy } from "@cartridge/controller";
 
 import Transfer from "@cartridge/ui/components/icons/Transfer";
 import GasPump from "@cartridge/ui/components/icons/GasPump";
@@ -9,35 +9,35 @@ import { formatAddress } from "@cartridge/ui/components/Address";
 
 import { VoyagerUrl } from "utils/url";
 
-function formatName(scope: Scope) {
-  if (scope.method) {
-    return `Execute ${scope.method}`;
+function formatName(policy: Policy) {
+  if (policy.method) {
+    return `Execute ${policy.method}`;
   }
 
-  return `Execute ${formatAddress(scope.target, 6)}`;
+  return `Execute ${formatAddress(policy.target, 6)}`;
 }
 
-function formatDescription(scope: Scope) {
-  if (scope.method) {
-    return `Execute ${scope.method} on ${formatAddress(scope.target, 6)}`;
+function formatDescription(policy: Policy) {
+  if (policy.method) {
+    return `Execute ${policy.method} on ${formatAddress(policy.target, 6)}`;
   }
 
-  return `Execute code on ${formatAddress(scope.target, 6)}`;
+  return `Execute code on ${formatAddress(policy.target, 6)}`;
 }
 
 export const Call = ({
-  scope,
+  policy,
   toggable = true,
   errMsg,
   ...rest
 }: {
-  scope: Scope;
+  policy: Policy;
   toggable?: boolean;
   errMsg?: string;
 } & FieldInputProps<boolean>) => {
   const title = (
     <HStack>
-      <Text>{formatName(scope)}</Text>
+      <Text>{formatName(policy)}</Text>
       {errMsg && (
         <Tag colorScheme="red" size="sm">
           {errMsg}
@@ -46,8 +46,8 @@ export const Call = ({
     </HStack>
   );
   const description = (
-    <Link href={VoyagerUrl.contract(scope.target)} target="_blank">
-      {formatDescription(scope)}
+    <Link href={VoyagerUrl.contract(policy.target)} target="_blank">
+      {formatDescription(policy)}
     </Link>
   );
 

@@ -1,4 +1,4 @@
-import { Scope } from "@cartridge/controller";
+import { Policy } from "@cartridge/controller";
 
 import Controller from "utils/account";
 
@@ -7,9 +7,9 @@ const INTERNVAL = 100;
 // Three minutes
 const TIMEOUT = 1000 * 60 * 3;
 
-const connect = (origin: string) => (scopes: Scope[]): Promise<{
+const connect = (origin: string) => (policies: Policy[]): Promise<{
   address: string;
-  scopes: Scope[];
+  policies: Policy[];
 }> => {
   return new Promise((resolve, reject) => {
     const controller = Controller.fromStore();
@@ -26,17 +26,17 @@ const connect = (origin: string) => (scopes: Scope[]): Promise<{
         return reject("timeout");
       }
 
-      const approval = controller.approval(origin);
-      if (approval) {
+      const session = controller.session(origin);
+      if (session) {
         clearInterval(timeout);
         return resolve({
-          scopes: approval.scopes,
+          policies: session.policies,
           address: controller.address,
         });
       }
     };
 
-    // Poll for approval
+    // Poll for session
     const timeout = setInterval(checkApproval, INTERNVAL);
 
     // Call on leading edge

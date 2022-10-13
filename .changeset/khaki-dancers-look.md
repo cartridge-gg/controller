@@ -2,4 +2,4 @@
 "@cartridge/controller": patch
 ---
 
-probe scopes
+probe policies

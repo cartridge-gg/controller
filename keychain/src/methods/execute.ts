@@ -1,4 +1,4 @@
-import { Scope, MissingScopes, Approvals } from "@cartridge/controller";
+import { Policy, MissingPolicys, Session } from "@cartridge/controller";
 import {
   Call,
   Abi,
@@ -13,15 +13,15 @@ import { fromCallsToExecuteCalldata } from "starknet/utils/transaction";
 import Controller, { diff } from "utils/account";
 import Storage from "utils/storage";
 
-const execute = (controller: Controller, approvals: Approvals) => async (transactions: Call | Call[], abis?: Abi[], transactionsDetail?: InvocationsDetails, sync?: boolean): Promise<InvokeFunctionResponse> => {
+const execute = (controller: Controller, session: Session) => async (transactions: Call | Call[], abis?: Abi[], transactionsDetail?: InvocationsDetails, sync?: boolean): Promise<InvokeFunctionResponse> => {
   const calls = Array.isArray(transactions) ? transactions : [transactions];
 
-  const scopes = calls.map(
+  const policies = calls.map(
     (txn) =>
     ({
       target: txn.contractAddress,
       method: txn.entrypoint,
-    } as Scope),
+    } as Policy),
   );
 
   if (sync) {
@@ -29,15 +29,15 @@ const execute = (controller: Controller, approvals: Approvals) => async (transac
     const hash = calculateTransactionHash(controller.address, transactionsDetail.version, calldata, transactionsDetail.maxFee, StarknetChainId.TESTNET, transactionsDetail.nonce);
     await pollForTransaction(hash)
   } else {
-    const missing = diff(scopes, approvals.scopes);
+    const missing = diff(policies, session.policies);
     if (missing.length > 0) {
-      throw new MissingScopes(missing);
+      throw new MissingPolicys(missing);
     }
   }
 
   if (
-    approvals.maxFee &&
-    transactionsDetail && toBN(transactionsDetail.maxFee).gt(toBN(approvals.maxFee))
+    session.maxFee &&
+    transactionsDetail && toBN(transactionsDetail.maxFee).gt(toBN(session.maxFee))
   ) {
     throw new Error("transaction fees exceed pre-approved limit")
   }

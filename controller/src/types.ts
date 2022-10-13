@@ -11,23 +11,27 @@ import {
 } from "starknet";
 import { BigNumberish } from "starknet/utils/number";
 
-export type Approvals = {
-  scopes: Scope[];
+export type Session = {
+  policies: Policy[];
   maxFee: BigNumberish;
 };
 
-export type Scope = {
+export type Policy = {
   target: string;
   method?: string;
 };
 
 export interface Keychain {
-  probe(): { address: string, scopes: Scope[] };
-  connect(scopes: Scope[]): {
+  probe(): { address: string, policies: Policy[] };
+  connect(policies: Policy[]): {
     address: string;
-    scopes: Scope[];
+    policies: Policy[];
   };
   disconnect(): void;
+
+  revoke(origin: string): void;
+  approvals(origin: string): Promise<Session | undefined>;
+
   estimateFee(calls: Call | Call[], estimateFeeDetails?: EstimateFeeDetails): Promise<EstimateFee>;
   execute(calls: Call | Call[], abis?: Abi[], transactionsDetail?: InvocationsDetails, sync?: boolean): Promise<InvokeFunctionResponse>;
   provision(address: string): Promise<string>;

@@ -1,7 +1,7 @@
 import { css } from "@emotion/react";
 import { Box, Button, Flex, FormControl } from "@chakra-ui/react";
 import { Formik, Form, Field, FieldInputProps } from "formik";
-import { Scope } from "@cartridge/controller";
+import { Policy } from "@cartridge/controller";
 
 import Triangle from "@cartridge/ui/components/icons/Triangle";
 
@@ -10,8 +10,8 @@ import { Call, MaxFee } from "./Call";
 
 type ApprovalFormProps = {
   action: string;
-  scopes: Scope[];
-  invalidScopes?: Scope[];
+  policies: Policy[];
+  invalidPolicys?: Policy[];
   isLoading?: boolean;
   maxFee?: string;
   setMaxFee?: (maxFee: string) => void;
@@ -20,18 +20,18 @@ type ApprovalFormProps = {
 };
 
 const CallFields = ({
-  scopes,
+  policies,
   errMsg,
 }: {
-  scopes: Scope[];
+  policies: Policy[];
   errMsg?: string;
 }) => (
   <>
-    {scopes.map((scope, i) => (
+    {policies.map((policy, i) => (
       <Field name={i} key={i}>
         {({ field }: { field: FieldInputProps<boolean> }) => (
           <FormControl>
-            <Call {...field} scope={scope} errMsg={errMsg} />
+            <Call {...field} policy={policy} errMsg={errMsg} />
           </FormControl>
         )}
       </Field>
@@ -41,15 +41,15 @@ const CallFields = ({
 
 const ApprovalForm = ({
   action,
-  scopes,
-  invalidScopes,
+  policies,
+  invalidPolicys,
   maxFee,
   isLoading,
   setMaxFee,
   onSubmit,
   onCancel,
 }: ApprovalFormProps) => {
-  const initialValues = scopes.reduce(
+  const initialValues = policies.reduce(
     (prev, _, i) => ({ ...prev, [i]: true }),
     {},
   );
@@ -72,7 +72,7 @@ const ApprovalForm = ({
           <Box flex={1} bgColor="#1A201C" borderRadius={16} m={"0 2 2 2"} p={8}>
             {!isLoading && (
               <>
-                <CallFields scopes={scopes} />
+                <CallFields policies={policies} />
                 {maxFee && (
                   <Field>
                     {({ field }: { field: FieldInputProps<boolean> }) => (
@@ -82,9 +82,9 @@ const ApprovalForm = ({
                     )}
                   </Field>
                 )}
-                {invalidScopes && (
+                {invalidPolicys && (
                   <CallFields
-                    scopes={invalidScopes}
+                    policies={invalidPolicys}
                     errMsg={"Invalid Method Requested"}
                   />
                 )}
@@ -127,8 +127,8 @@ const Approval = ({
   title,
   action,
   message,
-  scopes,
-  invalidScopes,
+  policies,
+  invalidPolicys,
   maxFee,
   isLoading = false,
   setMaxFee,
@@ -148,8 +148,8 @@ const Approval = ({
       <Box mt={4} flex={1}>
         <ApprovalForm
           action={action}
-          scopes={scopes}
-          invalidScopes={invalidScopes}
+          policies={policies}
+          invalidPolicys={invalidPolicys}
           isLoading={isLoading}
           maxFee={maxFee}
           setMaxFee={setMaxFee}
