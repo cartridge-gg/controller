@@ -1,11 +1,14 @@
 import qs from "query-string";
-import { AccountInterface, Call, number } from "starknet";
+import { AccountInterface, Call, InvocationsSignerDetails, number } from "starknet";
 import { AsyncMethodReturns, Connection, connectToChild } from '@cartridge/penpal';
 
 import DeviceAccount from "./device";
 import { Session, Keychain, Policy } from "./types";
-import { BigNumberish, toBN } from "starknet/utils/number";
-import WebauthnAccount from "./webauthn";
+import { BigNumberish, toBN } from "starknet/dist/utils/number";
+import WebauthnAccount, { formatAssertion } from "./webauthn";
+import { ZERO } from "starknet/dist/constants";
+import { calculateTransactionHash, transactionVersion } from "starknet/dist/utils/hash";
+import { fromCallsToExecuteCalldata } from "starknet/dist/utils/transaction";
 
 class Controller {
   private selector = "cartridge-messenger";
@@ -104,14 +107,17 @@ class Controller {
     return await this.keychain.register(username, credential);
   }
 
-  async login(address: string, credentialId: string, rpId?: string) {
+  async login(address: string, credentialId: string, options: {
+    rpId?: string
+    hashExt?: string
+  }) {
     if (!this.keychain) {
       console.error("not ready for connect")
       return null;
     }
 
     const deviceKey = await this.keychain.provision(address);
-    const account = new WebauthnAccount(address, credentialId, deviceKey, rpId);
+    const account = new WebauthnAccount(address, credentialId, deviceKey, options);
     const calls: Call[] = [
       {
         contractAddress: address,
@@ -120,7 +126,39 @@ class Controller {
       },
     ];
 
-    return await account.execute(calls)
+    const nonce = await account.getNonce();
+    let maxFee: BigNumberish = ZERO;
+    const { suggestedMaxFee } = await account.estimateInvokeFee(calls, { nonce });
+    maxFee = suggestedMaxFee.toString();
+
+    const version = toBN(transactionVersion);
+    const chainId = await account.getChainId();
+
+    const calldata = fromCallsToExecuteCalldata(calls);
+    let msgHash = calculateTransactionHash(
+      account.address,
+      version,
+      calldata,
+      maxFee,
+      chainId,
+      nonce
+    );
+
+    if (options.hashExt) {
+      msgHash += options.hashExt
+    }
+
+    const assertion = await account.signer.sign(msgHash)
+    const signature = formatAssertion(assertion)
+
+    return account.invokeFunction(
+      { contractAddress: account.address, calldata, signature },
+      {
+        nonce,
+        maxFee,
+        version,
+      }
+    );
   }
 
   async provision(address: string) {

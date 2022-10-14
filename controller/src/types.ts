@@ -8,8 +8,10 @@ import {
   InvocationsSignerDetails,
   EstimateFeeDetails,
   EstimateFee,
+  DeclareSignerDetails,
+  DeclareContractPayload,
 } from "starknet";
-import { BigNumberish } from "starknet/utils/number";
+import { BigNumberish } from "starknet/dist/utils/number";
 
 export type Session = {
   policies: Policy[];
@@ -32,7 +34,8 @@ export interface Keychain {
   revoke(origin: string): void;
   approvals(origin: string): Promise<Session | undefined>;
 
-  estimateFee(calls: Call | Call[], estimateFeeDetails?: EstimateFeeDetails): Promise<EstimateFee>;
+  estimateDeclareFee(payload: DeclareContractPayload, details?: EstimateFeeDetails): Promise<EstimateFee>
+  estimateInvokeFee(calls: Call | Call[], estimateFeeDetails?: EstimateFeeDetails): Promise<EstimateFee>;
   execute(calls: Call | Call[], abis?: Abi[], transactionsDetail?: InvocationsDetails, sync?: boolean): Promise<InvokeFunctionResponse>;
   provision(address: string): Promise<string>;
   register(username: string, credential: { x: string, y: string }): Promise<{ address: string, deviceKey: string }>;
@@ -42,5 +45,9 @@ export interface Keychain {
     transactions: Call[],
     transactionsDetail: InvocationsSignerDetails,
     abis?: Abi[]
+  ): Promise<Signature>;
+  signDeclareTransaction(
+    // contractClass: ContractClass,  // Should be used once class hash is present in ContractClass
+    details: DeclareSignerDetails
   ): Promise<Signature>;
 }

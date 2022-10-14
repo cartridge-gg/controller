@@ -9,10 +9,12 @@ import {
   typedData,
   number,
   Account,
-  defaultProvider
+  defaultProvider,
+  DeclareSignerDetails
 } from "starknet";
 import base64url from "base64url";
 import { split } from ".";
+import { calculateDeclareTransactionHash } from "starknet/dist/utils/hash";
 
 type Assertion = PublicKeyCredential & {
   response: AuthenticatorAssertionResponse;
@@ -77,62 +79,6 @@ export class WebauthnSigner implements SignerInterface {
     };
   }
 
-  formatAssertion(assertion: Assertion): Signature {
-    var authenticatorDataBytes = new Uint8Array(
-      assertion.response.authenticatorData,
-    );
-
-    let authenticatorDataRem = 4 - (authenticatorDataBytes.length % 4);
-    if (authenticatorDataRem == 4) {
-      authenticatorDataRem = 0;
-    }
-    const authenticatorDataWords = convertUint8ArrayToWordArray(
-      authenticatorDataBytes,
-    ).words;
-
-    var clientDataJSONBytes = new Uint8Array(assertion.response.clientDataJSON);
-    let clientDataJSONRem = 4 - (clientDataJSONBytes.length % 4);
-    if (clientDataJSONRem == 4) {
-      clientDataJSONRem = 0;
-    }
-    const clientDataWords =
-      convertUint8ArrayToWordArray(clientDataJSONBytes).words;
-
-    // Convert signature from ASN.1 sequence to "raw" format
-    const usignature = new Uint8Array(assertion.response.signature);
-    const rStart = usignature[4] === 0 ? 5 : 4;
-    const rEnd = rStart + 32;
-    const sStart = usignature[rEnd + 2] === 0 ? rEnd + 3 : rEnd + 2;
-
-    const r = number.toBN(
-      "0x" + Buffer.from(usignature.slice(rStart, rEnd)).toString("hex"),
-    );
-    const s = number.toBN(
-      "0x" + Buffer.from(usignature.slice(sStart)).toString("hex"),
-    );
-
-    const { x: r0, y: r1, z: r2 } = split(r);
-    const { x: s0, y: s1, z: s2 } = split(s);
-
-    return [
-      "0",
-      r0.toString(),
-      r1.toString(),
-      r2.toString(),
-      s0.toString(),
-      s1.toString(),
-      s2.toString(),
-      "9",
-      "0",
-      `${clientDataWords.length}`,
-      `${clientDataJSONRem}`,
-      ...clientDataWords.map((word) => `${word}`),
-      `${authenticatorDataWords.length}`,
-      `${authenticatorDataRem}`,
-      ...authenticatorDataWords.map((word) => `${word}`),
-    ];
-  }
-
   public hashTransaction(
     transactions: Call[],
     transactionsDetail: InvocationsSignerDetails,
@@ -187,7 +133,7 @@ export class WebauthnSigner implements SignerInterface {
     );
 
     const assertion = await this.sign(msgHash);
-    return this.formatAssertion(assertion);
+    return formatAssertion(assertion);
   }
 
   public async signMessage(
@@ -196,16 +142,93 @@ export class WebauthnSigner implements SignerInterface {
   ): Promise<Signature> {
     const msgHash = typedData.getMessageHash(td, accountAddress);
     const assertion = await this.sign(msgHash);
-    return this.formatAssertion(assertion);
+    return formatAssertion(assertion);
+  }
+
+  public async signDeclareTransaction(
+    // contractClass: ContractClass,  // Should be used once class hash is present in ContractClass
+    { classHash, senderAddress, chainId, maxFee, version, nonce }: DeclareSignerDetails
+  ) {
+    const msgHash = calculateDeclareTransactionHash(
+      classHash,
+      senderAddress,
+      version,
+      maxFee,
+      chainId,
+      nonce
+    );
+
+    const assertion = await this.sign(msgHash);
+    return formatAssertion(assertion);
   }
 }
 
 class WebauthnAccount extends Account {
+  public signer: WebauthnSigner;
   constructor(
-    address: string, credentialId: string, publicKey: string, rpId?: string
-  ) {
-    super(defaultProvider, address, new WebauthnSigner(credentialId, publicKey, rpId));
+    address: string, credentialId: string, publicKey: string, options: {
+      rpId?: string
+    }) {
+    const signer = new WebauthnSigner(credentialId, publicKey, options.rpId);
+    super(defaultProvider, address, signer);
+    this.signer = signer;
   }
+}
+
+export function formatAssertion(assertion: Assertion): Signature {
+  var authenticatorDataBytes = new Uint8Array(
+    assertion.response.authenticatorData,
+  );
+
+  let authenticatorDataRem = 4 - (authenticatorDataBytes.length % 4);
+  if (authenticatorDataRem == 4) {
+    authenticatorDataRem = 0;
+  }
+  const authenticatorDataWords = convertUint8ArrayToWordArray(
+    authenticatorDataBytes,
+  ).words;
+
+  var clientDataJSONBytes = new Uint8Array(assertion.response.clientDataJSON);
+  let clientDataJSONRem = 4 - (clientDataJSONBytes.length % 4);
+  if (clientDataJSONRem == 4) {
+    clientDataJSONRem = 0;
+  }
+  const clientDataWords =
+    convertUint8ArrayToWordArray(clientDataJSONBytes).words;
+
+  // Convert signature from ASN.1 sequence to "raw" format
+  const usignature = new Uint8Array(assertion.response.signature);
+  const rStart = usignature[4] === 0 ? 5 : 4;
+  const rEnd = rStart + 32;
+  const sStart = usignature[rEnd + 2] === 0 ? rEnd + 3 : rEnd + 2;
+
+  const r = number.toBN(
+    "0x" + Buffer.from(usignature.slice(rStart, rEnd)).toString("hex"),
+  );
+  const s = number.toBN(
+    "0x" + Buffer.from(usignature.slice(sStart)).toString("hex"),
+  );
+
+  const { x: r0, y: r1, z: r2 } = split(r);
+  const { x: s0, y: s1, z: s2 } = split(s);
+
+  return [
+    "0",
+    r0.toString(),
+    r1.toString(),
+    r2.toString(),
+    s0.toString(),
+    s1.toString(),
+    s2.toString(),
+    "9",
+    "0",
+    `${clientDataWords.length}`,
+    `${clientDataJSONRem}`,
+    ...clientDataWords.map((word) => `${word}`),
+    `${authenticatorDataWords.length}`,
+    `${authenticatorDataRem}`,
+    ...authenticatorDataWords.map((word) => `${word}`),
+  ];
 }
 
 export default WebauthnAccount;

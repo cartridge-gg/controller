@@ -4,12 +4,14 @@ import {
     SignerInterface,
     Signature,
     typedData,
-    Call
+    Call,
+    DeclareSignerDetails
 } from "starknet";
 import qs from 'query-string';
 
 import { Keychain } from "./types";
 import { AsyncMethodReturns } from "@cartridge/penpal";
+import { calculateDeclareTransactionHash } from "starknet/dist/utils/hash";
 
 export class Signer implements SignerInterface {
     private keychain: AsyncMethodReturns<Keychain>;
@@ -83,5 +85,12 @@ export class Signer implements SignerInterface {
         );
 
         return this.keychain.signTransaction(calls, transactionsDetail, abis);
+    }
+
+    public async signDeclareTransaction(
+        // contractClass: ContractClass,  // Should be used once class hash is present in ContractClass
+        details: DeclareSignerDetails
+    ) {
+        return this.keychain.signDeclareTransaction(details);
     }
 }

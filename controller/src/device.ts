@@ -11,6 +11,7 @@ import {
   InvokeFunctionResponse,
   defaultProvider,
   EstimateFee,
+  DeclareContractPayload,
 } from "starknet";
 import qs from 'query-string';
 
@@ -19,7 +20,7 @@ import {
 } from "./types";
 import { Signer } from "./signer";
 import { AsyncMethodReturns } from "@cartridge/penpal";
-import { StarknetChainId } from "starknet/constants";
+import { StarknetChainId } from "starknet/dist/constants";
 
 class DeviceAccount extends Account {
   address: string;
@@ -70,8 +71,12 @@ class DeviceAccount extends Account {
      *
      * @returns response from addTransaction
      */
-  async estimateFee(calls: Call | Call[], details?: EstimateFeeDetails): Promise<EstimateFee> {
-    return this.keychain.estimateFee(calls, details)
+  async estimateInvokeFee(calls: Call | Call[], details?: EstimateFeeDetails): Promise<EstimateFee> {
+    return this.keychain.estimateInvokeFee(calls, details)
+  }
+
+  async estimateDeclareFee(payload: DeclareContractPayload, details?: EstimateFeeDetails): Promise<EstimateFee> {
+    return this.keychain.estimateDeclareFee(payload, details)
   }
 
   /**

@@ -7,9 +7,10 @@ import { connectToParent } from '@cartridge/penpal';
 
 import connect from "../methods/connect";
 import execute from "../methods/execute";
-import estimateFee from "../methods/estimate_fee";
+import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
 import provision from "../methods/provision";
 import register from "../methods/register";
+import { signMessage, signTransaction, signDeclareTransaction } from "../methods/sign";
 import { revoke, session, sessions } from "../methods/sessions";
 
 import Controller from "utils/account";
@@ -55,11 +56,15 @@ const Index: NextPage = () => {
         connect: normalize(connect),
         disconnect: normalize(validate((controller: Controller, _session: Session, origin: string) => () => controller.revoke(origin))),
         execute: normalize(validate(execute)),
-        estimateFee: normalize(validate(estimateFee)),
+        estimateDeclareFee: normalize(validate(estimateDeclareFee)),
+        estimateInvokeFee: normalize(validate(estimateInvokeFee)),
         provision: normalize(provision),
         register: normalize(register),
         probe: normalize(validate((controller: Controller, session: Session) => () => ({ address: controller.address, policies: session.policies }))),
         revoke: normalize(revoke),
+        signMessage: normalize(validate(signMessage)),
+        signTransaction: normalize(validate(signTransaction)),
+        signDeclareTransaction: normalize(validate(signDeclareTransaction)),
         session: normalize(session),
         sessions: normalize(sessions),
       },
