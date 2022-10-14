@@ -151,7 +151,7 @@ class Controller {
     const assertion = await account.signer.sign(msgHash)
     const signature = formatAssertion(assertion)
 
-    return account.invokeFunction(
+    const receipt = await account.invokeFunction(
       { contractAddress: account.address, calldata, signature },
       {
         nonce,
@@ -159,6 +159,8 @@ class Controller {
         version,
       }
     );
+
+    return { assertion, receipt }
   }
 
   async provision(address: string) {

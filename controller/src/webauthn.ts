@@ -16,7 +16,7 @@ import base64url from "base64url";
 import { split } from ".";
 import { calculateDeclareTransactionHash } from "starknet/dist/utils/hash";
 
-type Assertion = PublicKeyCredential & {
+export type Assertion = PublicKeyCredential & {
   response: AuthenticatorAssertionResponse;
 };
 
