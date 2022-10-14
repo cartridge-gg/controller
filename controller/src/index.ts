@@ -1,12 +1,11 @@
 import qs from "query-string";
-import { AccountInterface, Call, InvocationsSignerDetails, number } from "starknet";
+import { AccountInterface, Call, number } from "starknet";
 import { AsyncMethodReturns, Connection, connectToChild } from '@cartridge/penpal';
 
 import DeviceAccount from "./device";
 import { Session, Keychain, Policy } from "./types";
 import { BigNumberish, toBN } from "starknet/dist/utils/number";
 import WebauthnAccount, { formatAssertion } from "./webauthn";
-import { ZERO } from "starknet/dist/constants";
 import { calculateTransactionHash, transactionVersion } from "starknet/dist/utils/hash";
 import { fromCallsToExecuteCalldata } from "starknet/dist/utils/transaction";
 
@@ -127,9 +126,8 @@ class Controller {
     ];
 
     const nonce = await account.getNonce();
-    let maxFee: BigNumberish = ZERO;
     const { suggestedMaxFee } = await account.estimateInvokeFee(calls, { nonce });
-    maxFee = suggestedMaxFee.toString();
+    const maxFee = suggestedMaxFee.toString();
 
     const version = toBN(transactionVersion);
     const chainId = await account.getChainId();
