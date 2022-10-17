@@ -13,7 +13,7 @@ const provision = () => async (
   );
   controller.cache();
   controller.approve(
-    "https://cartridge.gg/",
+    "https://cartridge.gg",
     [],
     "0",
   );
