@@ -41,7 +41,7 @@ class ControllerConnector extends Connector {
 
     async login(address: string, credentialId: string, options: {
         rpId?: string
-        hashExt?: string
+        challengeExt?: Buffer
     }): Promise<{ assertion: Assertion, receipt: InvokeFunctionResponse } | null> {
         return await this.controller.login(address, credentialId, options);
     }

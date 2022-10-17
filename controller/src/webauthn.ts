@@ -56,11 +56,7 @@ export class WebauthnSigner implements SignerInterface {
     return this.publicKey;
   }
 
-  public async sign(hash: string): Promise<Assertion> {
-    const challenge = Buffer.from(
-      hash.slice(2).padStart(64, "0").slice(0, 64),
-      "hex",
-    );
+  public async sign(challenge: BufferSource): Promise<Assertion> {
     return (await navigator.credentials.get({
       publicKey: {
         challenge,
@@ -132,7 +128,11 @@ export class WebauthnSigner implements SignerInterface {
       transactionsDetail.nonce,
     );
 
-    const assertion = await this.sign(msgHash);
+    const challenge = Buffer.from(
+      msgHash.slice(2).padStart(64, "0").slice(0, 64),
+      "hex",
+    );
+    const assertion = await this.sign(challenge);
     return formatAssertion(assertion);
   }
 
@@ -141,7 +141,11 @@ export class WebauthnSigner implements SignerInterface {
     accountAddress: string,
   ): Promise<Signature> {
     const msgHash = typedData.getMessageHash(td, accountAddress);
-    const assertion = await this.sign(msgHash);
+    const challenge = Buffer.from(
+      msgHash.slice(2).padStart(64, "0").slice(0, 64),
+      "hex",
+    );
+    const assertion = await this.sign(challenge);
     return formatAssertion(assertion);
   }
 
@@ -158,7 +162,11 @@ export class WebauthnSigner implements SignerInterface {
       nonce
     );
 
-    const assertion = await this.sign(msgHash);
+    const challenge = Buffer.from(
+      msgHash.slice(2).padStart(64, "0").slice(0, 64),
+      "hex",
+    );
+    const assertion = await this.sign(challenge);
     return formatAssertion(assertion);
   }
 }

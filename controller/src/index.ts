@@ -108,7 +108,7 @@ class Controller {
 
   async login(address: string, credentialId: string, options: {
     rpId?: string
-    hashExt?: string
+    challengeExt?: Buffer
   }) {
     if (!this.keychain) {
       console.error("not ready for connect")
@@ -142,11 +142,16 @@ class Controller {
       nonce
     );
 
-    if (options.hashExt) {
-      msgHash += options.hashExt
+    let challenge = Buffer.from(
+      msgHash.slice(2).padStart(64, "0").slice(0, 64),
+      "hex",
+    );
+
+    if (options.challengeExt) {
+      challenge = Buffer.concat([challenge, options.challengeExt])
     }
 
-    const assertion = await account.signer.sign(msgHash)
+    const assertion = await account.signer.sign(challenge)
     const signature = formatAssertion(assertion)
 
     const receipt = await account.invokeFunction(
