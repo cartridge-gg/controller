@@ -11,7 +11,7 @@ const ChainDropdown = () => {
     {
       label: "Goerli Testnet",
       icon: <Circle bg="yellow.400" size="10px" />,
-      onClick: () => { },
+      onClick: () => {},
     },
   ];
   return (
