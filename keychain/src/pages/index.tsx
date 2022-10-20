@@ -50,7 +50,7 @@ const Index: NextPage = () => {
       return;
     }
 
-    connectToParent({
+    const connection = connectToParent({
       debug: true,
       methods: {
         connect: normalize(connect),
@@ -69,7 +69,12 @@ const Index: NextPage = () => {
         sessions: normalize(sessions),
       },
     });
-  });
+
+    return () => {
+      connection.destroy();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return <></>;
 };
