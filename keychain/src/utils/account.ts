@@ -34,6 +34,10 @@ export default class Controller extends Account {
         });
     }
 
+    delete() {
+        return Storage.clear();
+    }
+
     approve(origin: string, policies: Policy[], maxFee?: BigNumberish) {
         Storage.set(`@session/${origin}`, {
             policies,

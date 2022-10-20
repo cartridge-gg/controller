@@ -10,6 +10,7 @@ import execute from "../methods/execute";
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
 import provision from "../methods/provision";
 import register from "../methods/register";
+import logout from "../methods/logout";
 import { signMessage, signTransaction, signDeclareTransaction } from "../methods/sign";
 import { revoke, session, sessions } from "../methods/sessions";
 
@@ -60,6 +61,7 @@ const Index: NextPage = () => {
         estimateInvokeFee: normalize(validate(estimateInvokeFee)),
         provision: normalize(provision),
         register: normalize(register),
+        logout: normalize(logout),
         probe: normalize(validate((controller: Controller, session: Session) => () => ({ address: controller.address, policies: session.policies }))),
         revoke: normalize(revoke),
         signMessage: normalize(validate(signMessage)),
@@ -73,7 +75,7 @@ const Index: NextPage = () => {
     return () => {
       connection.destroy();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return <></>;
