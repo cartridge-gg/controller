@@ -39,6 +39,15 @@ const Storage = {
 
     Cookies.remove(key);
   },
+  clear: () => {
+    if (!isSafari && typeof window != "undefined") {
+      window.localStorage.clear();
+      return;
+    }
+
+    const cookies = Cookies.get()
+    Object.keys(cookies).forEach(key => Cookies.remove(key));
+  }
 };
 
 export default Storage;

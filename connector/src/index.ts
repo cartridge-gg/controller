@@ -43,7 +43,7 @@ class ControllerConnector extends Connector {
         rpId?: string
         challengeExt?: Buffer
     }): Promise<{ assertion: Assertion, receipt: InvokeFunctionResponse } | null> {
-        return await this.controller.login(address, credentialId, options);
+        return this.controller.login(address, credentialId, options);
     }
 
     async provision(address: string) {

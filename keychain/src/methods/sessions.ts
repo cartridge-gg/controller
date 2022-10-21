@@ -30,7 +30,7 @@ const sessions = (origin: string) => () => {
     throw new Error("no controller");
   }
 
-  if (!Storage.get(`@manage-sessions/${origin}`)) {
+  if (!Storage.get(`@admin/${origin}`)) {
     throw new Error("unauthorized")
   }
 

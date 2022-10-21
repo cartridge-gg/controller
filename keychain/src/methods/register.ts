@@ -34,8 +34,7 @@ const register = () => async (
       y0,
       y1,
       y2,
-      toBN(deviceKey),
-      "12",
+      toBN(deviceKey)
     ],
     toBN(ACCOUNT_ADDRESS),
   )
