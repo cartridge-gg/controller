@@ -166,6 +166,15 @@ class Controller {
     return { assertion, receipt }
   }
 
+  async logout() {
+    if (!this.keychain) {
+      console.error("not ready for connect")
+      return null;
+    }
+
+    return this.keychain.logout();
+  }
+
   async provision(address: string) {
     if (!this.keychain) {
       console.error("not ready for connect")

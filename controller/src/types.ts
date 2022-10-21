@@ -39,6 +39,7 @@ export interface Keychain {
   execute(calls: Call | Call[], abis?: Abi[], transactionsDetail?: InvocationsDetails, sync?: boolean): Promise<InvokeFunctionResponse>;
   provision(address: string): Promise<string>;
   register(username: string, credential: { x: string, y: string }): Promise<{ address: string, deviceKey: string }>;
+  logout(): Promise<void>;
 
   signMessage(typedData: typedData.TypedData, account: string): Promise<Signature>;
   signTransaction(

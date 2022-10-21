@@ -46,6 +46,10 @@ class ControllerConnector extends Connector {
         return this.controller.login(address, credentialId, options);
     }
 
+    async logout() {
+        return this.controller.logout();
+    }
+
     async provision(address: string) {
         return this.controller.provision(address);
     }
