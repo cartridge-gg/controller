@@ -40,6 +40,10 @@ export interface Keychain {
   provision(address: string): Promise<string>;
   register(username: string, credential: { x: string, y: string }): Promise<{ address: string, deviceKey: string }>;
   logout(): Promise<void>;
+  session(): Promise<Session>;
+  sessions(): Promise<{
+    [key: string]: Session;
+  }>;
 
   signMessage(typedData: typedData.TypedData, account: string): Promise<Signature>;
   signTransaction(

@@ -4,7 +4,7 @@ import { AccountInterface, InvokeFunctionResponse } from "starknet";
 import type { Assertion } from "@cartridge/controller/lib/webauthn";
 
 class ControllerConnector extends Connector {
-    private controller: Controller;
+    public controller: Controller;
     private _account: AccountInterface | null;
 
     constructor(
@@ -44,10 +44,6 @@ class ControllerConnector extends Connector {
         challengeExt?: Buffer
     }): Promise<{ assertion: Assertion, receipt: InvokeFunctionResponse } | null> {
         return this.controller.login(address, credentialId, options);
-    }
-
-    async logout() {
-        return this.controller.logout();
     }
 
     async provision(address: string) {

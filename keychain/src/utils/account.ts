@@ -55,6 +55,13 @@ export default class Controller extends Account {
         return Storage.get(`@session/${origin}`);
     }
 
+    sessions(): { [key: string]: Session } | undefined {
+        return Storage.keys().filter(k => k.startsWith("@session/")).reduce((prev, key) => {
+            prev[key.slice(9)] = Storage.get(key);
+            return prev;
+        }, {} as { [key: string]: Session });
+    }
+
     static fromStore() {
         const controller = Storage.get("controller");
         if (!controller) {

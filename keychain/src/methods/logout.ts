@@ -11,7 +11,7 @@ const logout = (origin: string) => () => {
     throw new Error("unauthorized")
   }
 
-  return controller.session(origin)
+  return Storage.clear();
 }
 
 export default logout

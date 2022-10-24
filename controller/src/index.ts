@@ -12,7 +12,7 @@ import { fromCallsToExecuteCalldata } from "starknet/dist/utils/transaction";
 class Controller {
   private selector = "cartridge-messenger";
   private connection?: Connection<Keychain>;
-  private keychain?: AsyncMethodReturns<Keychain>;
+  public keychain?: AsyncMethodReturns<Keychain>;
   private policies: Policy[] = [];
   private url: string = "https://x.cartridge.gg";
   private account: AccountInterface | undefined;
@@ -164,15 +164,6 @@ class Controller {
     );
 
     return { assertion, receipt }
-  }
-
-  async logout() {
-    if (!this.keychain) {
-      console.error("not ready for connect")
-      return null;
-    }
-
-    return this.keychain.logout();
   }
 
   async provision(address: string) {

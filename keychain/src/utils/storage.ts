@@ -5,6 +5,13 @@ const isSafari =
   /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
 const Storage = {
+  keys: (): string[] => {
+    if (!isSafari && typeof window != "undefined") {
+      return Object.keys(window.localStorage);
+    }
+
+    return Object.keys(Cookies.get());
+  },
   get: (key: string): any => {
     if (!isSafari && typeof window != "undefined") {
       const value = window.localStorage.getItem(key)

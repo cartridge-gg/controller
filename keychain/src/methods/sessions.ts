@@ -34,7 +34,7 @@ const sessions = (origin: string) => () => {
     throw new Error("unauthorized")
   }
 
-  return controller.session(origin)
+  return controller.sessions()
 }
 
 export { session, sessions, revoke }
