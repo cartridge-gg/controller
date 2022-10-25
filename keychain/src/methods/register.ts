@@ -6,8 +6,8 @@ import { encodeShortString } from "starknet/utils/shortString";
 import Controller from "utils/account";
 
 const PROXY_CLASS = "0x793a374a266432184f68b29546d14fedfdcbe6346bc51bd34ad730e6ff914f3";
-const ACCOUNT_CLASS = "0x21a58754bd7658d29f70e1e5dbebf84ae393a5ef704c4f5a763cc8a61cb3414";
-const CONTROLLER_CLASS = "0x10baeb4233aae14d72f1c2f60d8c46be61436fb06631c835df93b3a9f566351";
+const ACCOUNT_CLASS = "0x00c06f5ddc49aed455e5034e2bbbc01f089cc1e71e63601359dce8bd36315d60";
+const CONTROLLER_CLASS = "0x0409fed9d01f3fcd836f4481a94abe8d2095caa8ccdc407dc13514a831d04be2";
 const ACCOUNT_ADDRESS = "0x041a78e741e5af2fec34b695679bc6891742439f7afb8484ecd7766661ad02bf";
 
 const register = () => async (
