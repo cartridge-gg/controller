@@ -1,13 +1,10 @@
 import qs from "query-string";
-import { AccountInterface, Call, number } from "starknet";
+import { AccountInterface, number } from "starknet";
 import { AsyncMethodReturns, Connection, connectToChild } from '@cartridge/penpal';
 
 import DeviceAccount from "./device";
 import { Session, Keychain, Policy } from "./types";
 import { BigNumberish, toBN } from "starknet/dist/utils/number";
-import WebauthnAccount, { formatAssertion } from "./webauthn";
-import { calculateTransactionHash, transactionVersion } from "starknet/dist/utils/hash";
-import { fromCallsToExecuteCalldata } from "starknet/dist/utils/transaction";
 
 class Controller {
   private selector = "cartridge-messenger";
@@ -115,55 +112,7 @@ class Controller {
       return null;
     }
 
-    const deviceKey = await this.keychain.provision(address);
-    const account = new WebauthnAccount(address, credentialId, deviceKey, options);
-    const calls: Call[] = [
-      {
-        contractAddress: address,
-        entrypoint: "add_device_key",
-        calldata: [deviceKey],
-      },
-    ];
-
-    const nonce = await account.getNonce();
-    const { suggestedMaxFee } = await account.estimateInvokeFee(calls, { nonce });
-    const maxFee = suggestedMaxFee.toString();
-
-    const version = toBN(transactionVersion);
-    const chainId = await account.getChainId();
-
-    const calldata = fromCallsToExecuteCalldata(calls);
-    let msgHash = calculateTransactionHash(
-      account.address,
-      version,
-      calldata,
-      maxFee,
-      chainId,
-      nonce
-    );
-
-    let challenge = Buffer.from(
-      msgHash.slice(2).padStart(64, "0").slice(0, 64),
-      "hex",
-    );
-
-    if (options.challengeExt) {
-      challenge = Buffer.concat([challenge, options.challengeExt])
-    }
-
-    const assertion = await account.signer.sign(challenge)
-    const signature = formatAssertion(assertion)
-
-    const receipt = await account.invokeFunction(
-      { contractAddress: account.address, calldata, signature },
-      {
-        nonce,
-        maxFee,
-        version,
-      }
-    );
-
-    return { assertion, receipt }
+    return this.keychain.login(address, credentialId, options);
   }
 
   async provision(address: string) {
@@ -258,8 +207,6 @@ export function split(n: BigNumberish): { x: BigNumberish; y: BigNumberish; z: B
   return { x, y, z };
 }
 
-
 export * from "./types";
 export * from "./errors";
-export * from "./webauthn";
 export default Controller;

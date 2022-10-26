@@ -26,7 +26,7 @@
     "next": "^12.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "starknet": "https://github.com/0xs34n/starknet.js#develop"
+    "starknet": "^4.9.0"
   },
   "devDependencies": {
     "@types/js-cookie": "^3.0.2",

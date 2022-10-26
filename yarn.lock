@@ -1922,12 +1922,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@cartridge/connector@workspace:connector"
   dependencies:
-    "@cartridge/controller": 0.1.64
+    "@cartridge/controller": 0.1.72
     "@starknet-react/core": ^0.14.0
     "@types/jest": ^26.0.18
     "@types/node": ^17.0.23
     jest: ^26.6.3
-    starknet: "https://github.com/0xs34n/starknet.js#develop"
+    starknet: ^4.9.0
     ts-jest: ^26.5.1
     ts-node: ^10.4.0
     tslib: ^2.3.1
@@ -1935,7 +1935,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@cartridge/controller@0.1.64, @cartridge/controller@workspace:^, @cartridge/controller@workspace:controller":
+"@cartridge/controller@0.1.72, @cartridge/controller@workspace:^, @cartridge/controller@workspace:controller":
   version: 0.0.0-use.local
   resolution: "@cartridge/controller@workspace:controller"
   dependencies:
@@ -1946,7 +1946,7 @@ __metadata:
     fast-deep-equal: ^3.1.3
     jest: ^26.6.3
     query-string: ^7.1.1
-    starknet: "https://github.com/0xs34n/starknet.js#develop"
+    starknet: ^4.9.0
     ts-jest: ^26.5.1
     ts-node: ^10.4.0
     tslib: ^2.3.1
@@ -1998,7 +1998,7 @@ __metadata:
     next: ^12.3.0
     react: ^18.2.0
     react-dom: ^18.2.0
-    starknet: ^4.8.0
+    starknet: ^4.9.0
     typescript: ^4.8.2
   languageName: unknown
   linkType: soft
@@ -17495,25 +17495,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"starknet@https://github.com/0xs34n/starknet.js#develop":
-  version: 4.8.0
-  resolution: "starknet@https://github.com/0xs34n/starknet.js.git#commit=4b0979418e27f7f5678a0f72a6fd04f98e1c88ba"
-  dependencies:
-    "@ethersproject/bytes": ^5.6.1
-    bn.js: ^5.2.1
-    elliptic: ^6.5.4
-    ethereum-cryptography: ^1.0.3
-    hash.js: ^1.1.7
-    isomorphic-fetch: ^3.0.0
-    json-bigint: ^1.0.0
-    minimalistic-assert: ^1.0.1
-    pako: ^2.0.4
-    ts-custom-error: ^3.2.0
-    url-join: ^4.0.1
-  checksum: c28a0eefec52e2e9681589c5808a94adf783bba335b5d507b302dce22b8c62bb656ee1eefbec7fb13fd120cc5495f0dddfd6211b2e48b63592a4f18a2d58d323
-  languageName: node
-  linkType: hard
-
 "starknet@npm:^4.4.2":
   version: 4.7.0
   resolution: "starknet@npm:4.7.0"
@@ -17533,9 +17514,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"starknet@npm:^4.8.0":
-  version: 4.8.0
-  resolution: "starknet@npm:4.8.0"
+"starknet@npm:^4.9.0":
+  version: 4.9.0
+  resolution: "starknet@npm:4.9.0"
   dependencies:
     "@ethersproject/bytes": ^5.6.1
     bn.js: ^5.2.1
@@ -17548,7 +17529,7 @@ __metadata:
     pako: ^2.0.4
     ts-custom-error: ^3.2.0
     url-join: ^4.0.1
-  checksum: 8ee02341e3be6385823eeb55fe76a73b823344f8261b2f2149094c8e812752c88c01e77ac2c9638938993bf63ef2d6dd92e097a07e866f9acc1f9431bb451392
+  checksum: 9f088bfa816c02dbd0d72c556891fc85db94359c06083e2a21a1387a3d99e0fe8160d58680fd642e501272fc588f99ca88289afc7e0565e076a7b4e7648a0d5f
   languageName: node
   linkType: hard
 

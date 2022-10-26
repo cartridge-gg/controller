@@ -10,6 +10,7 @@ import execute from "../methods/execute";
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
 import provision from "../methods/provision";
 import register from "../methods/register";
+import login from "../methods/login";
 import logout from "../methods/logout";
 import { signMessage, signTransaction, signDeclareTransaction } from "../methods/sign";
 import { revoke, session, sessions } from "../methods/sessions";
@@ -61,6 +62,7 @@ const Index: NextPage = () => {
         estimateInvokeFee: normalize(validate(estimateInvokeFee)),
         provision: normalize(provision),
         register: normalize(register),
+        login: normalize(login),
         logout: normalize(logout),
         probe: normalize(validate((controller: Controller, session: Session) => () => ({ address: controller.address, policies: session.policies }))),
         revoke: normalize(revoke),

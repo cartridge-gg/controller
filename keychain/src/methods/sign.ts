@@ -1,5 +1,5 @@
 import Controller from "utils/account";
-import { Abi, Call, DeclareSignerDetails, InvocationsSignerDetails, Signature } from "starknet";
+import { Abi, Call, DeclareSignerDetails, DeployAccountSignerDetails, InvocationsSignerDetails, Signature } from "starknet";
 import { TypedData } from "starknet/utils/typedData";
 import { Session } from "@cartridge/controller";
 
@@ -16,10 +16,15 @@ const signTransaction = (controller: Controller, session: Session) => async (
 }
 
 const signDeclareTransaction = (controller: Controller, session: Session) => async (
-  // contractClass: ContractClass,  // Should be used once class hash is present in ContractClass
   details: DeclareSignerDetails
 ): Promise<Signature> => {
   return controller.signer.signDeclareTransaction(details);
 }
 
-export { signMessage, signTransaction, signDeclareTransaction }
+const signDeployAccountTransaction = (controller: Controller, session: Session) => async (
+  transaction: DeployAccountSignerDetails
+): Promise<Signature> => {
+  return controller.signer.signDeployAccountTransaction(transaction);
+}
+
+export { signMessage, signTransaction, signDeployAccountTransaction, signDeclareTransaction }
