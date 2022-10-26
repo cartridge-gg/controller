@@ -7,8 +7,8 @@ import Controller from "utils/account";
 
 const PROXY_CLASS = "0x793a374a266432184f68b29546d14fedfdcbe6346bc51bd34ad730e6ff914f3";
 const ACCOUNT_CLASS = "0x00c06f5ddc49aed455e5034e2bbbc01f089cc1e71e63601359dce8bd36315d60";
-const CONTROLLER_CLASS = "0x0409fed9d01f3fcd836f4481a94abe8d2095caa8ccdc407dc13514a831d04be2";
-const ACCOUNT_ADDRESS = "0x041a78e741e5af2fec34b695679bc6891742439f7afb8484ecd7766661ad02bf";
+const CONTROLLER_CLASS = "0x077007d85dd2466b2b29e626bac27ee017d7586f62511f4585dd596f33337ccf";
+const UDC_ADDRESS = "0x041a78e741e5af2fec34b695679bc6891742439f7afb8484ecd7766661ad02bf";
 
 const register = () => async (
   username: string, credential: { x: string, y: string }
@@ -36,7 +36,7 @@ const register = () => async (
       y2,
       toBN(deviceKey)
     ],
-    toBN(ACCOUNT_ADDRESS),
+    toBN(UDC_ADDRESS),
   )
 
   const controller = new Controller(
