@@ -5,6 +5,9 @@ import WebauthnAccount, { formatAssertion } from "../utils/webauthn";
 import { toBN } from "starknet/dist/utils/number";
 import { calculateTransactionHash, transactionVersion } from "starknet/dist/utils/hash";
 import { fromCallsToExecuteCalldata } from "starknet/dist/utils/transaction";
+import { getSelector } from "starknet/utils/hash";
+
+const CONTROLLER_CLASS = "0x077007d85dd2466b2b29e626bac27ee017d7586f62511f4585dd596f33337ccf";
 
 const login = () => async (address: string, credentialId: string, options: {
   rpId?: string
@@ -16,8 +19,8 @@ const login = () => async (address: string, credentialId: string, options: {
   const calls: Call[] = [
     {
       contractAddress: address,
-      entrypoint: "add_device_key",
-      calldata: [deviceKey],
+      entrypoint: "executeOnPlugin",
+      calldata: [CONTROLLER_CLASS, getSelector("add_device_key"), 1, deviceKey],
     },
   ];
 

@@ -72,33 +72,6 @@ export class WebauthnSigner implements SignerInterface {
     };
   }
 
-  public hashTransaction(
-    transactions: Call[],
-    transactionsDetail: InvocationsSignerDetails,
-    abis?: Abi[],
-  ): string {
-    if (abis && abis.length !== transactions.length) {
-      throw new Error(
-        "ABI must be provided for each transaction or no transaction",
-      );
-    }
-    // now use abi to display decoded data somewhere, but as this signer is headless, we can't do that
-
-    const calldata = transaction.fromCallsToExecuteCalldataWithNonce(
-      transactions,
-      transactionsDetail.nonce,
-    );
-
-    return hash.calculateTransactionHash(
-      transactionsDetail.walletAddress,
-      transactionsDetail.version,
-      [hash.getSelectorFromName("__execute__")].concat(calldata),
-      transactionsDetail.maxFee,
-      transactionsDetail.chainId,
-      transactionsDetail.nonce,
-    );
-  }
-
   public async signTransaction(
     calls: Call[],
     transactionsDetail: InvocationsSignerDetails,
@@ -111,15 +84,14 @@ export class WebauthnSigner implements SignerInterface {
     }
     // now use abi to display decoded data somewhere, but as this signer is headless, we can't do that
 
-    const calldata = transaction.fromCallsToExecuteCalldataWithNonce(
+    const calldata = transaction.fromCallsToExecuteCalldata(
       calls,
-      transactionsDetail.nonce,
     );
 
     const msgHash = hash.calculateTransactionHash(
       transactionsDetail.walletAddress,
       transactionsDetail.version,
-      [hash.getSelectorFromName("__execute__")].concat(calldata),
+      calldata,
       transactionsDetail.maxFee,
       transactionsDetail.chainId,
       transactionsDetail.nonce,
