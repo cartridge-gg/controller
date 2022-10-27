@@ -1,7 +1,6 @@
 import { Connector } from "@starknet-react/core";
-import Controller, { Policy } from "@cartridge/controller";
+import Controller, { Assertion, Policy } from "@cartridge/controller";
 import { AccountInterface, InvokeFunctionResponse } from "starknet";
-import type { Assertion } from "@cartridge/controller/lib/webauthn";
 
 class ControllerConnector extends Connector {
     public controller: Controller;
@@ -42,7 +41,7 @@ class ControllerConnector extends Connector {
     async login(address: string, credentialId: string, options: {
         rpId?: string
         challengeExt?: Buffer
-    }): Promise<{ assertion: Assertion, receipt: InvokeFunctionResponse } | null> {
+    }): Promise<{ assertion: Assertion, transactionHash: string } | null> {
         return this.controller.login(address, credentialId, options);
     }
 

@@ -1,6 +1,7 @@
 import {
   Abi,
   Call,
+  DeployAccountSignerDetails,
   InvocationsSignerDetails,
   Signature,
   SignerInterface,
@@ -13,12 +14,8 @@ import {
   DeclareSignerDetails
 } from "starknet";
 import base64url from "base64url";
-import { split } from ".";
+import { Assertion, split } from "@cartridge/controller";
 import { calculateDeclareTransactionHash } from "starknet/dist/utils/hash";
-
-export type Assertion = PublicKeyCredential & {
-  response: AuthenticatorAssertionResponse;
-};
 
 function convertUint8ArrayToWordArray(u8Array: Uint8Array) {
   var words = [],
@@ -168,6 +165,10 @@ export class WebauthnSigner implements SignerInterface {
     );
     const assertion = await this.sign(challenge);
     return formatAssertion(assertion);
+  }
+
+  public async signDeployAccountTransaction(transaction: DeployAccountSignerDetails): Promise<Signature> {
+    return;
   }
 }
 

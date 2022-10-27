@@ -6,7 +6,7 @@ import {
   InvokeFunctionResponse,
 } from "starknet";
 import { StarknetChainId } from "starknet/constants";
-import { toBN } from "starknet/dist/utils/number";
+import { toBN } from "starknet/utils/number";
 import { calculateTransactionHash } from "starknet/utils/hash";
 import { fromCallsToExecuteCalldata } from "starknet/utils/transaction";
 

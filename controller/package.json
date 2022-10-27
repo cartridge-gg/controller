@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/controller",
-  "version": "0.1.71",
+  "version": "0.1.72",
   "description": "Cartridge Controller",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -26,6 +26,6 @@
     "base64url": "^3.0.1",
     "fast-deep-equal": "^3.1.3",
     "query-string": "^7.1.1",
-    "starknet": "https://github.com/0xs34n/starknet.js#develop"
+    "starknet": "^4.9.0"
   }
 }

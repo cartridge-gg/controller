@@ -5,7 +5,7 @@ import {
     KeyPair,
     number,
 } from "starknet";
-import { BigNumberish } from "starknet/utils/number";
+import { BigNumberish } from "starknet/dist/utils/number";
 import { Policy, Session } from "@cartridge/controller";
 import equal from "fast-deep-equal";
 

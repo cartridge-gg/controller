@@ -1,8 +1,8 @@
 import { split } from "@cartridge/controller";
 import { ec } from "starknet";
-import { calculateContractAddressFromHash, getSelectorFromName } from "starknet/utils/hash";
-import { toBN } from "starknet/utils/number";
-import { encodeShortString } from "starknet/utils/shortString";
+import { encodeShortString } from "starknet/dist/utils/shortString";
+import { calculateContractAddressFromHash, getSelectorFromName } from "starknet/dist/utils/hash";
+import { toBN } from "starknet/dist/utils/number";
 import Controller from "utils/account";
 
 const PROXY_CLASS = "0x793a374a266432184f68b29546d14fedfdcbe6346bc51bd34ad730e6ff914f3";

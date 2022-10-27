@@ -10,8 +10,13 @@ import {
   EstimateFee,
   DeclareSignerDetails,
   DeclareContractPayload,
+  DeployAccountSignerDetails,
 } from "starknet";
 import { BigNumberish } from "starknet/dist/utils/number";
+
+export type Assertion = PublicKeyCredential & {
+  response: AuthenticatorAssertionResponse;
+};
 
 export type Session = {
   policies: Policy[];
@@ -39,6 +44,10 @@ export interface Keychain {
   execute(calls: Call | Call[], abis?: Abi[], transactionsDetail?: InvocationsDetails, sync?: boolean): Promise<InvokeFunctionResponse>;
   provision(address: string): Promise<string>;
   register(username: string, credential: { x: string, y: string }): Promise<{ address: string, deviceKey: string }>;
+  login(address: string, credentialId: string, options: {
+    rpId?: string
+    challengeExt?: Buffer
+  }): Promise<{ assertion: Assertion, transactionHash: string }>
   logout(): Promise<void>;
   session(): Promise<Session>;
   sessions(): Promise<{
@@ -55,4 +64,5 @@ export interface Keychain {
     // contractClass: ContractClass,  // Should be used once class hash is present in ContractClass
     details: DeclareSignerDetails
   ): Promise<Signature>;
+  signDeployAccountTransaction(transaction: DeployAccountSignerDetails): Promise<Signature>;
 }
