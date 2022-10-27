@@ -1,5 +1,6 @@
 import { ec } from "starknet";
 import Controller from "utils/account";
+import Storage from "utils/storage";
 
 const provision = () => async (
   address: string
@@ -17,6 +18,7 @@ const provision = () => async (
     [],
     "0",
   );
+  Storage.set("@admin/https://cartridge.gg", {})
 
   return deviceKey;
 }

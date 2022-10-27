@@ -69,6 +69,7 @@ const login = () => async (address: string, credentialId: string, options: {
     [],
     "0",
   );
+  Storage.set("@admin/https://cartridge.gg", {})
 
   return { assertion, transactionHash: receipt.transaction_hash }
 }

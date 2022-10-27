@@ -4,6 +4,7 @@ import { encodeShortString } from "starknet/dist/utils/shortString";
 import { calculateContractAddressFromHash, getSelectorFromName } from "starknet/dist/utils/hash";
 import { toBN } from "starknet/dist/utils/number";
 import Controller from "utils/account";
+import Storage from "utils/storage";
 
 const PROXY_CLASS = "0x793a374a266432184f68b29546d14fedfdcbe6346bc51bd34ad730e6ff914f3";
 const ACCOUNT_CLASS = "0x00c06f5ddc49aed455e5034e2bbbc01f089cc1e71e63601359dce8bd36315d60";
@@ -49,6 +50,7 @@ const register = () => async (
     [],
     "0",
   );
+  Storage.set("@admin/https://cartridge.gg", {})
 
   return { address, deviceKey };
 }
