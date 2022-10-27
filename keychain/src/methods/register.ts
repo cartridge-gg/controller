@@ -37,7 +37,7 @@ const register = () => async (
       y2,
       toBN(deviceKey)
     ],
-    toBN(UDC_ADDRESS),
+    "0",
   )
 
   const controller = new Controller(
