@@ -41,6 +41,7 @@ class Controller {
     iframe.style.width = "0";
     iframe.sandbox.add("allow-scripts")
     iframe.sandbox.add("allow-same-origin")
+    iframe.allow = "publickey-credentials-get *"
 
     if (!!document.hasStorageAccess) {
       iframe.sandbox.add("allow-storage-access-by-user-activation")
