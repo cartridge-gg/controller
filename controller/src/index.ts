@@ -60,7 +60,6 @@ class Controller {
 
     this.connection = connectToChild<Keychain>({
       iframe,
-      debug: true,
     })
 
     this.connection.promise.then((keychain) =>

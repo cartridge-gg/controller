@@ -53,7 +53,6 @@ const Index: NextPage = () => {
     }
 
     const connection = connectToParent({
-      debug: true,
       methods: {
         connect: normalize(connect),
         disconnect: normalize(validate((controller: Controller, _session: Session, origin: string) => () => controller.revoke(origin))),
