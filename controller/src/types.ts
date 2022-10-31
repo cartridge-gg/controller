@@ -14,8 +14,16 @@ import {
 } from "starknet";
 import { BigNumberish } from "starknet/dist/utils/number";
 
-export type Assertion = PublicKeyCredential & {
-  response: AuthenticatorAssertionResponse;
+export type Assertion = {
+  id: string;
+  type: string;
+  rawId: string;
+  clientExtensionResults: AuthenticationExtensionsClientOutputs;
+  response: {
+    authenticatorData: string;
+    clientDataJSON: string;
+    signature: string;
+  }
 };
 
 export type Session = {

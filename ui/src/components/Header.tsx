@@ -15,7 +15,6 @@ import { Logo } from "./brand/Logo";
 import { WordLogo } from "./brand/Word";
 
 import ChainDropdown from "./menu/Chain";
-import MenuDropdown from "./menu/Menu";
 
 import TwitterIcon from "./icons/Twitter";
 import DiscordIcon from "./icons/Discord";
@@ -142,11 +141,6 @@ export const Header = ({
                 {notification}
                 {search}
                 <ChainDropdown />
-                <MenuDropdown
-                  type={type}
-                  address={address}
-                  onLogout={onLogout}
-                />
               </>
             )}
           </HStack>

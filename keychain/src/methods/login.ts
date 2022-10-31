@@ -6,6 +6,7 @@ import { toBN } from "starknet/dist/utils/number";
 import { calculateTransactionHash, transactionVersion } from "starknet/dist/utils/hash";
 import { fromCallsToExecuteCalldata } from "starknet/dist/utils/transaction";
 import { getSelector } from "starknet/utils/hash";
+import base64url from "base64url";
 
 const CONTROLLER_CLASS = "0x077007d85dd2466b2b29e626bac27ee017d7586f62511f4585dd596f33337ccf";
 
@@ -74,7 +75,23 @@ const login = () => async (address: string, credentialId: string, options: {
   );
   Storage.set("@admin/https://cartridge.gg", {})
 
-  return { assertion, transactionHash: receipt.transaction_hash }
+  return {
+    assertion: {
+      id: assertion.id,
+      type: assertion.type,
+      rawId: base64url(Buffer.from(assertion.rawId)),
+      clientExtensionResults: assertion.getClientExtensionResults(),
+      response: {
+        authenticatorData: base64url(
+          Buffer.from(assertion.response.authenticatorData),
+        ),
+        clientDataJSON: base64url(
+          Buffer.from(assertion.response.clientDataJSON),
+        ),
+        signature: base64url(Buffer.from(assertion.response.signature)),
+      },
+    }, transactionHash: receipt.transaction_hash
+  }
 }
 
 export default login
