@@ -14,8 +14,12 @@ import {
   DeclareSignerDetails
 } from "starknet";
 import base64url from "base64url";
-import { Assertion, split } from "@cartridge/controller";
+import { split } from "@cartridge/controller";
 import { calculateDeclareTransactionHash } from "starknet/dist/utils/hash";
+
+type RawAssertion = PublicKeyCredential & {
+  response: AuthenticatorAssertionResponse;
+};
 
 function convertUint8ArrayToWordArray(u8Array: Uint8Array) {
   var words = [],
@@ -53,7 +57,7 @@ export class WebauthnSigner implements SignerInterface {
     return this.publicKey;
   }
 
-  public async sign(challenge: BufferSource): Promise<Assertion> {
+  public async sign(challenge: BufferSource): Promise<RawAssertion> {
     return (await navigator.credentials.get({
       publicKey: {
         challenge,
@@ -156,7 +160,7 @@ class WebauthnAccount extends Account {
   }
 }
 
-export function formatAssertion(assertion: Assertion): Signature {
+export function formatAssertion(assertion: RawAssertion): Signature {
   var authenticatorDataBytes = new Uint8Array(
     assertion.response.authenticatorData,
   );
