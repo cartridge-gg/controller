@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic'
 import { useCallback, useEffect, useMemo } from "react";
 import { Flex } from "@chakra-ui/react";
 
-import { Header } from "@cartridge/ui/components/Header";
+import { Header } from "components/Header";
 import Approval from "components/Approval";
 import Controller from "utils/account";
 import { useRouter } from "next/router";
@@ -48,7 +48,7 @@ const Execute: NextPage = () => {
 
   useEffect(() => {
     if (!controller) {
-      router.replace("/welcome");
+      router.replace(`${process.env.NEXT_PUBLIC_SITE_URL}/welcome`);
       return
     }
   }, [router, controller])

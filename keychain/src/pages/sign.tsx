@@ -5,7 +5,7 @@ import { Box, Flex, Spacer, Text, Image } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { TypedData } from "starknet/utils/typedData";
 import { decodeShortString } from "starknet/utils/shortString";
-import { Header, HeaderType } from "@cartridge/ui/components/Header";
+import { Header } from "components/Header";
 
 import Banner from "components/Banner";
 import ButtonBar from "components/ButtonBar";
@@ -92,7 +92,7 @@ const Sign: NextPage = () => {
 
   useEffect(() => {
     if (!controller) {
-      router.replace("/welcome");
+      router.replace(`${process.env.NEXT_PUBLIC_SITE_URL}/welcome`);
       return
     }
   }, [router, controller])
@@ -134,10 +134,7 @@ const Sign: NextPage = () => {
   return (
     <Box h="100vh">
       <Flex flexDirection="column" h="100%">
-        <Header
-          type={HeaderType.Controller}
-          address={controller.address}
-        />
+        <Header address={controller.address} />
         <Flex flexDirection="column" p={["3.5", "6"]} flex="1">
           <Banner title="Signature Request">
             <></>

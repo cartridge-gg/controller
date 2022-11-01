@@ -48,7 +48,7 @@ const Index: NextPage = () => {
     }
 
     if (window.self === window.top) {
-      router.replace("/welcome");
+      router.replace(`${process.env.NEXT_PUBLIC_SITE_URL}/welcome`);
       return;
     }
 

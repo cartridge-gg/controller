@@ -1,0 +1,14 @@
+@font-face {
+    font-family: "LD_Mono";
+    font-style: normal;
+    font-weight: normal;
+    src: local("LD_Mono"), url("../public/fonts/LD_Mono/LD_Mono-Regular.otf");
+}
+
+@font-face {
+    font-family: "IBM Plex Sans";
+    font-style: normal;
+    font-weight: 400;
+    src: local("IBM Plex Sans"),
+        url("../public/fonts/IBM-Plex-Sans/IBMPlexSans-Regular.otf");
+}
