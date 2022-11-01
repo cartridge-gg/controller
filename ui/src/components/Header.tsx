@@ -14,11 +14,6 @@ import {
 import { Logo } from "./brand/Logo";
 import { WordLogo } from "./brand/Word";
 
-import ChainDropdown from "./menu/Chain";
-
-import TwitterIcon from "./icons/Twitter";
-import DiscordIcon from "./icons/Discord";
-
 export enum HeaderType {
   Arcade,
   Controller,
@@ -35,23 +30,6 @@ export type HeaderProps = {
   onConnect?: () => void;
   onLogout?: () => void;
 };
-
-function parse(type: HeaderType) {
-  switch (type) {
-    case HeaderType.Arcade:
-      return {
-        title: "Arcade",
-        // link: "https://controller.cartridge.gg",
-      };
-    case HeaderType.Controller:
-      return {
-        title: "Controller",
-        link: "https://cartridge.gg/",
-      };
-    case HeaderType.Registration:
-      return {};
-  }
-}
 
 const Container = ({
   height,
@@ -80,75 +58,6 @@ const Container = ({
     <Box h={height} />
   </>
 );
-
-export const Header = ({
-  type = HeaderType.Controller,
-  address,
-  search,
-  registration,
-  notification,
-  showSocial = false,
-  onConnect,
-  onLogout,
-}: HeaderProps) => {
-  const isMobile = useBreakpointValue([true, false]);
-  const { title, link } = parse(type);
-  return (
-    <Container height="64px">
-      {type === HeaderType.Registration ? (
-        registration
-      ) : (
-        <HStack w="full">
-          <HStack spacing="0">
-            <Link href="https://cartridge.gg/">
-              <Logo fill="brand" w="24px" mr="15px" />
-            </Link>
-            {!isMobile && (
-              <Link href={link}>
-                <Button
-                  _before={{
-                    w: "1px",
-                    h: "20px",
-                    left: "-1px",
-                    content: "''",
-                    display: "block",
-                    position: "absolute",
-                    background: "gray.600",
-                  }}
-                  variant="special"
-                >
-                  {title}
-                </Button>
-              </Link>
-            )}
-          </HStack>
-          <Spacer />
-          <HStack spacing="10px">
-            {showSocial && !address && (
-              <HStack spacing="20px">
-                <Link href="https://twitter.com/cartridge_gg" isExternal>
-                  <TwitterIcon color="brand" w="20px" h="20px" />
-                </Link>
-                <Link href="https://discord.gg/axTz7Zm4gk" isExternal>
-                  <DiscordIcon color="brand" w="20px" h="20px" />
-                </Link>
-              </HStack>
-            )}
-            {!address ? (
-              onConnect && <Button onClick={onConnect}>Connect</Button>
-            ) : (
-              <>
-                {notification}
-                {search}
-                <ChainDropdown />
-              </>
-            )}
-          </HStack>
-        </HStack>
-      )}
-    </Container>
-  );
-};
 
 export const SimpleHeader = () => {
   return (
