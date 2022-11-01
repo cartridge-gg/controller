@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import { Flex } from "@chakra-ui/react";
 
 import Approval from "components/Approval";
-import { Header } from "@cartridge/ui/components/Header";
+import { Header } from "components/Header";
 import { useRequests } from "hooks/account";
 import { useUrlPolicys } from "hooks/policy";
 import Controller from "utils/account";
@@ -21,7 +21,7 @@ const Connect: NextPage = () => {
 
   useEffect(() => {
     if (!controller) {
-      router.replace("/welcome");
+      router.replace(`${process.env.NEXT_PUBLIC_SITE_URL}/welcome`);
       return
     }
   }, [router, controller])

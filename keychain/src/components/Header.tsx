@@ -11,25 +11,9 @@ import {
   StyleProps,
 } from "@chakra-ui/react";
 
-import { Logo } from "./brand/Logo";
-import { WordLogo } from "./brand/Word";
+import { Logo } from "../../../ui/src/components/brand/Logo";
 
-export enum HeaderType {
-  Arcade,
-  Controller,
-  Registration,
-}
-
-export type HeaderProps = {
-  type?: HeaderType;
-  address?: string;
-  search?: React.ReactElement;
-  registration?: React.ReactElement;
-  notification?: React.ReactElement;
-  showSocial?: boolean;
-  onConnect?: () => void;
-  onLogout?: () => void;
-};
+import ChainDropdown from "../../../ui/src/components/menu/Chain";
 
 const Container = ({
   height,
@@ -59,13 +43,23 @@ const Container = ({
   </>
 );
 
-export const SimpleHeader = () => {
+export const Header = ({ address, onLogout }: {
+  address?: string;
+  onLogout?: () => void;
+}) => {
   return (
-    <Container height="64px" borderBottom="1px solid" borderColor="gray.900">
-      <Link href="/" variant="transparent">
-        <Logo fill="brand" h="18px" m="12px" />
-        <WordLogo h="18px" />
-      </Link>
-    </Container>
+    <Container height="64px">
+      <HStack w="full">
+        <HStack spacing="0">
+          <Link href={process.env.NEXT_PUBLIC_SITE_URL}>
+            <Logo fill="brand" w="24px" mr="15px" />
+          </Link>
+        </HStack>
+        <Spacer />
+        <HStack spacing="10px">
+          <ChainDropdown />
+        </HStack>
+      </HStack>
+    </Container >
   );
 };
