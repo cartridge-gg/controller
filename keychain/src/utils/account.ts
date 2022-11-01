@@ -46,7 +46,7 @@ export default class Controller extends Account {
     }
 
     revoke(origin: string) {
-        Storage.set(`@session/${origin}`, undefined);
+        Storage.remove(`@session/${origin}`);
     }
 
     session(

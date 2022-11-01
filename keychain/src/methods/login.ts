@@ -7,6 +7,8 @@ import { calculateTransactionHash, transactionVersion } from "starknet/dist/util
 import { fromCallsToExecuteCalldata } from "starknet/dist/utils/transaction";
 import { getSelector } from "starknet/utils/hash";
 import base64url from "base64url";
+import { ZERO } from "starknet/constants";
+import { estimatedFeeToMaxFee } from "starknet/dist/utils/stark";
 
 const CONTROLLER_CLASS = "0x077007d85dd2466b2b29e626bac27ee017d7586f62511f4585dd596f33337ccf";
 
@@ -26,18 +28,43 @@ const login = () => async (address: string, credentialId: string, options: {
   ];
 
   const nonce = await account.getNonce();
-  const { suggestedMaxFee } = await account.estimateInvokeFee(calls, { nonce });
-  const maxFee = suggestedMaxFee.toString();
-
   const version = toBN(transactionVersion);
   const chainId = await account.getChainId();
 
   const calldata = fromCallsToExecuteCalldata(calls);
+
+  const estimateMsgHash = calculateTransactionHash(
+    account.address,
+    version,
+    calldata,
+    ZERO,
+    chainId,
+    nonce
+  );
+
+  let estimateChallenge = Buffer.from(
+    estimateMsgHash.slice(2).padStart(64, "0").slice(0, 64),
+    "hex",
+  );
+
+  if (options.challengeExt) {
+    estimateChallenge = Buffer.concat([estimateChallenge, options.challengeExt])
+  }
+
+  const estimateAssertion = await account.signer.sign(estimateChallenge);
+
+  const response = await account.getInvokeEstimateFee(
+    { contractAddress: account.address, calldata, signature: formatAssertion(estimateAssertion) },
+    { version, nonce },
+  );
+
+  const suggestedMaxFee = estimatedFeeToMaxFee(response.overall_fee);
+
   let msgHash = calculateTransactionHash(
     account.address,
     version,
     calldata,
-    maxFee,
+    suggestedMaxFee,
     chainId,
     nonce
   );
@@ -58,7 +85,7 @@ const login = () => async (address: string, credentialId: string, options: {
     { contractAddress: account.address, calldata, signature },
     {
       nonce,
-      maxFee,
+      maxFee: suggestedMaxFee,
       version,
     }
   );
