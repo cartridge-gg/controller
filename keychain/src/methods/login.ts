@@ -10,7 +10,7 @@ import base64url from "base64url";
 import { ZERO } from "starknet/constants";
 import { estimatedFeeToMaxFee } from "starknet/dist/utils/stark";
 
-const CONTROLLER_CLASS = "0x077007d85dd2466b2b29e626bac27ee017d7586f62511f4585dd596f33337ccf";
+export const CONTROLLER_CLASS = "0x077007d85dd2466b2b29e626bac27ee017d7586f62511f4585dd596f33337ccf";
 
 const login = () => async (address: string, credentialId: string, options: {
   rpId?: string
