@@ -1,5 +1,5 @@
 import type { NextPage } from "next";
-import dynamic from 'next/dynamic'
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import { Flex } from "@chakra-ui/react";
@@ -22,9 +22,9 @@ const Connect: NextPage = () => {
   useEffect(() => {
     if (!controller) {
       router.replace(`${process.env.NEXT_PUBLIC_SITE_URL}/welcome`);
-      return
+      return;
     }
-  }, [router, controller])
+  }, [router, controller]);
 
   const approve = useCallback(
     async (values, actions) => {
@@ -43,7 +43,7 @@ const Connect: NextPage = () => {
   );
 
   if (!controller) {
-    return <></>
+    return <></>;
   }
 
   return (

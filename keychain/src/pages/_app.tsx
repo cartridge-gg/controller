@@ -1,4 +1,4 @@
-import type { AppProps } from 'next/app'
+import type { AppProps } from "next/app";
 import { CartridgeUIProvider } from "@cartridge/ui/theme/Provider";
 
 import "../style.css";
@@ -8,7 +8,7 @@ function Keychain({ Component, pageProps }: AppProps) {
     <CartridgeUIProvider>
       <Component {...pageProps} />
     </CartridgeUIProvider>
-  )
+  );
 }
 
-export default Keychain
+export default Keychain;

@@ -6,7 +6,8 @@
     "dev": "TARGET_ORIGIN=\"*\" next dev -p 3001",
     "build": "TARGET_ORIGIN=\"https://x.cartridge.gg/\" next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "format": "prettier ./src --write"
   },
   "dependencies": {
     "@cartridge/controller": "workspace:^",
@@ -35,6 +36,7 @@
     "@types/react-dom": "^18.0.6",
     "eslint": "^8.23.0",
     "eslint-config-next": "^12.2.5",
+    "prettier": "^2.7.1",
     "typescript": "^4.8.2"
   }
 }

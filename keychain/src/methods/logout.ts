@@ -8,10 +8,10 @@ const logout = (origin: string) => () => {
   }
 
   if (!Storage.get(`@admin/${origin}`)) {
-    throw new Error("unauthorized")
+    throw new Error("unauthorized");
   }
 
   return Storage.clear();
-}
+};
 
-export default logout
+export default logout;

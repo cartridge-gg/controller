@@ -43,7 +43,10 @@ const Container = ({
   </>
 );
 
-export const Header = ({ address, onLogout }: {
+export const Header = ({
+  address,
+  onLogout,
+}: {
   address?: string;
   onLogout?: () => void;
 }) => {
@@ -60,6 +63,6 @@ export const Header = ({ address, onLogout }: {
           <ChainDropdown />
         </HStack>
       </HStack>
-    </Container >
+    </Container>
   );
 };

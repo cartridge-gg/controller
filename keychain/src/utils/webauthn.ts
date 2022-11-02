@@ -11,7 +11,7 @@ import {
   number,
   Account,
   defaultProvider,
-  DeclareSignerDetails
+  DeclareSignerDetails,
 } from "starknet";
 import base64url from "base64url";
 import { split } from "@cartridge/controller";
@@ -32,7 +32,7 @@ function convertUint8ArrayToWordArray(u8Array: Uint8Array) {
         (u8Array[i++] << 16) |
         (u8Array[i++] << 8) |
         u8Array[i++]) >>>
-      0,
+        0,
     );
   }
 
@@ -47,7 +47,11 @@ export class WebauthnSigner implements SignerInterface {
   private publicKey: string;
   private rpId: string;
 
-  constructor(credentialId: string, publicKey: string, rpId: string = "cartridge.gg") {
+  constructor(
+    credentialId: string,
+    publicKey: string,
+    rpId: string = "cartridge.gg",
+  ) {
     this.credentialId = credentialId;
     this.publicKey = publicKey;
     this.rpId = rpId;
@@ -88,9 +92,7 @@ export class WebauthnSigner implements SignerInterface {
     }
     // now use abi to display decoded data somewhere, but as this signer is headless, we can't do that
 
-    const calldata = transaction.fromCallsToExecuteCalldata(
-      calls,
-    );
+    const calldata = transaction.fromCallsToExecuteCalldata(calls);
 
     const msgHash = hash.calculateTransactionHash(
       transactionsDetail.walletAddress,
@@ -124,7 +126,14 @@ export class WebauthnSigner implements SignerInterface {
 
   public async signDeclareTransaction(
     // contractClass: ContractClass,  // Should be used once class hash is present in ContractClass
-    { classHash, senderAddress, chainId, maxFee, version, nonce }: DeclareSignerDetails
+    {
+      classHash,
+      senderAddress,
+      chainId,
+      maxFee,
+      version,
+      nonce,
+    }: DeclareSignerDetails,
   ) {
     const msgHash = calculateDeclareTransactionHash(
       classHash,
@@ -132,7 +141,7 @@ export class WebauthnSigner implements SignerInterface {
       version,
       maxFee,
       chainId,
-      nonce
+      nonce,
     );
 
     const challenge = Buffer.from(
@@ -143,7 +152,9 @@ export class WebauthnSigner implements SignerInterface {
     return formatAssertion(assertion);
   }
 
-  public async signDeployAccountTransaction(transaction: DeployAccountSignerDetails): Promise<Signature> {
+  public async signDeployAccountTransaction(
+    transaction: DeployAccountSignerDetails,
+  ): Promise<Signature> {
     return;
   }
 }
@@ -151,9 +162,13 @@ export class WebauthnSigner implements SignerInterface {
 class WebauthnAccount extends Account {
   public signer: WebauthnSigner;
   constructor(
-    address: string, credentialId: string, publicKey: string, options: {
-      rpId?: string
-    }) {
+    address: string,
+    credentialId: string,
+    publicKey: string,
+    options: {
+      rpId?: string;
+    },
+  ) {
     const signer = new WebauthnSigner(credentialId, publicKey, options.rpId);
     super(defaultProvider, address, signer);
     this.signer = signer;

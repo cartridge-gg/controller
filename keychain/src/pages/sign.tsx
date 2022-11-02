@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import type { NextPage } from "next";
-import dynamic from 'next/dynamic'
+import dynamic from "next/dynamic";
 import { Box, Flex, Spacer, Text, Image } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { TypedData } from "starknet/utils/typedData";
@@ -82,7 +82,7 @@ const MessageContent = (message: object) => {
 };
 
 const Sign: NextPage = () => {
-  const controller = useMemo(() => Controller.fromStore(), [])
+  const controller = useMemo(() => Controller.fromStore(), []);
   const [nonce, setNonce] = useState("...");
   const [messageData, setMessageData] = useState({});
   const router = useRouter();
@@ -93,9 +93,9 @@ const Sign: NextPage = () => {
   useEffect(() => {
     if (!controller) {
       router.replace(`${process.env.NEXT_PUBLIC_SITE_URL}/welcome`);
-      return
+      return;
     }
-  }, [router, controller])
+  }, [router, controller]);
 
   useEffect(() => {
     if (!typedData) return;
@@ -128,7 +128,7 @@ const Sign: NextPage = () => {
   }, [typedData]);
 
   if (!controller) {
-    return <></>
+    return <></>;
   }
 
   return (

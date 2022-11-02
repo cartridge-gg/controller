@@ -1,9 +1,9 @@
 import type { NextPage } from "next";
-import dynamic from 'next/dynamic'
+import dynamic from "next/dynamic";
 import { useEffect } from "react";
 
 import { useRouter } from "next/router";
-import { connectToParent } from '@cartridge/penpal';
+import { connectToParent } from "@cartridge/penpal";
 
 import connect from "../methods/connect";
 import execute from "../methods/execute";
@@ -12,18 +12,26 @@ import provision from "../methods/provision";
 import register from "../methods/register";
 import login from "../methods/login";
 import logout from "../methods/logout";
-import { signMessage, signTransaction, signDeclareTransaction } from "../methods/sign";
+import {
+  signMessage,
+  signTransaction,
+  signDeclareTransaction,
+} from "../methods/sign";
 import { revoke, session, sessions } from "../methods/sessions";
 
 import Controller from "utils/account";
 import { normalize as normalizeOrigin } from "utils/url";
 import { Session } from "@cartridge/controller";
 
-function normalize(fn: (origin: string) => Function): (origin: string) => Function {
-  return (origin: string) => fn(normalizeOrigin(origin))
+function normalize(
+  fn: (origin: string) => Function,
+): (origin: string) => Function {
+  return (origin: string) => fn(normalizeOrigin(origin));
 }
 
-function validate(fn: (controller: Controller, session: Session, origin: string) => Function): (origin: string) => Function {
+function validate(
+  fn: (controller: Controller, session: Session, origin: string) => Function,
+): (origin: string) => Function {
   return (origin: string) => {
     const controller = Controller.fromStore();
     if (!controller) {
@@ -32,11 +40,11 @@ function validate(fn: (controller: Controller, session: Session, origin: string)
 
     const session = controller.session(origin);
     if (!session) {
-      throw new Error("not connected")
+      throw new Error("not connected");
     }
 
-    return fn(controller, session, origin)
-  }
+    return fn(controller, session, origin);
+  };
 }
 
 const Index: NextPage = () => {
@@ -55,7 +63,12 @@ const Index: NextPage = () => {
     const connection = connectToParent({
       methods: {
         connect: normalize(connect),
-        disconnect: normalize(validate((controller: Controller, _session: Session, origin: string) => () => controller.revoke(origin))),
+        disconnect: normalize(
+          validate(
+            (controller: Controller, _session: Session, origin: string) => () =>
+              controller.revoke(origin),
+          ),
+        ),
         execute: normalize(validate(execute)),
         estimateDeclareFee: normalize(validate(estimateDeclareFee)),
         estimateInvokeFee: normalize(validate(estimateInvokeFee)),
@@ -63,7 +76,12 @@ const Index: NextPage = () => {
         register: normalize(register),
         login: normalize(login),
         logout: normalize(logout),
-        probe: normalize(validate((controller: Controller, session: Session) => () => ({ address: controller.address, policies: session.policies }))),
+        probe: normalize(
+          validate((controller: Controller, session: Session) => () => ({
+            address: controller.address,
+            policies: session.policies,
+          })),
+        ),
         revoke: normalize(revoke),
         signMessage: normalize(validate(signMessage)),
         signTransaction: normalize(validate(signTransaction)),
@@ -75,7 +93,7 @@ const Index: NextPage = () => {
 
     return () => {
       connection.destroy();
-    }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
