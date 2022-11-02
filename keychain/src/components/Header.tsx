@@ -43,12 +43,15 @@ const Container = ({
   </>
 );
 
-export const Header = ({ address, onLogout }: {
+export const Header = ({
+  address,
+  onLogout,
+}: {
   address?: string;
   onLogout?: () => void;
 }) => {
   return (
-    <Container height="64px">
+    <Container height="50px">
       <HStack w="full">
         <HStack spacing="0">
           <Link href={process.env.NEXT_PUBLIC_SITE_URL}>
@@ -60,6 +63,6 @@ export const Header = ({ address, onLogout }: {
           <ChainDropdown />
         </HStack>
       </HStack>
-    </Container >
+    </Container>
   );
 };

@@ -1,14 +1,12 @@
 import { css } from "@emotion/react";
-import { Box, Button, Flex, FormControl } from "@chakra-ui/react";
+import { Box, Button, Divider, Flex, FormControl } from "@chakra-ui/react";
 import { Formik, Form, Field, FieldInputProps } from "formik";
 import { Policy } from "@cartridge/controller";
-
-import Triangle from "@cartridge/ui/components/icons/Triangle";
 
 import Banner from "components/Banner";
 import { Call, MaxFee } from "./Call";
 
-type ApprovalFormProps = {
+type SessionFormProps = {
   action: string;
   policies: Policy[];
   invalidPolicys?: Policy[];
@@ -28,18 +26,20 @@ const CallFields = ({
 }) => (
   <>
     {policies.map((policy, i) => (
-      <Field name={i} key={i}>
-        {({ field }: { field: FieldInputProps<boolean> }) => (
-          <FormControl>
-            <Call {...field} policy={policy} errMsg={errMsg} />
-          </FormControl>
-        )}
-      </Field>
+      <Box bgColor="gray.700" p="16px" borderRadius="8px">
+        <Field name={i} key={i}>
+          {({ field }: { field: FieldInputProps<boolean> }) => (
+            <FormControl>
+              <Call {...field} policy={policy} errMsg={errMsg} />
+            </FormControl>
+          )}
+        </Field>
+      </Box>
     ))}
   </>
 );
 
-const ApprovalForm = ({
+const SessionForm = ({
   action,
   policies,
   invalidPolicys,
@@ -48,10 +48,10 @@ const ApprovalForm = ({
   setMaxFee,
   onSubmit,
   onCancel,
-}: ApprovalFormProps) => {
+}: SessionFormProps) => {
   const initialValues = policies.reduce(
     (prev, _, i) => ({ ...prev, [i]: true }),
-    {},
+    {}
   );
 
   return (
@@ -68,19 +68,20 @@ const ApprovalForm = ({
             height: 100%;
           `}
         >
-          <Triangle alignSelf="center" backgroundColor="#1A201C" />
-          <Box flex={1} bgColor="#1A201C" borderRadius={16} m={"0 2 2 2"} p={8}>
+          <Flex flex={1} direction="column" gap="12px">
             {!isLoading && (
               <>
                 <CallFields policies={policies} />
                 {maxFee && (
-                  <Field>
-                    {({ field }: { field: FieldInputProps<boolean> }) => (
-                      <FormControl>
-                        <MaxFee maxFee={maxFee} {...field} />
-                      </FormControl>
-                    )}
-                  </Field>
+                  <Box bgColor="gray.700" p="16px" borderRadius="8px">
+                    <Field>
+                      {({ field }: { field: FieldInputProps<boolean> }) => (
+                        <FormControl>
+                          <MaxFee maxFee={maxFee} {...field} />
+                        </FormControl>
+                      )}
+                    </Field>
+                  </Box>
                 )}
                 {invalidPolicys && (
                   <CallFields
@@ -90,19 +91,22 @@ const ApprovalForm = ({
                 )}
               </>
             )}
-          </Box>
-          <Box
-            display="flex"
-            flexDirection={["column-reverse", "row"]}
-            justifyContent={["center", "flex-end"]}
-            gap={4}
-            mt={3}
+          </Flex>
+          <Flex
+            position="fixed"
+            bottom="0"
+            right="0"
+            w="100%"
+            p="16px"
+            gap="10px"
+            bgColor="gray.900"
+            justify="flex-end"
           >
             {onCancel && (
               <Button
                 variant="secondary600"
                 size="lg"
-                w={["100%", "200px"]}
+                w={["100%", "100%", "200px"]}
                 onClick={onCancel}
               >
                 CANCEL
@@ -111,19 +115,19 @@ const ApprovalForm = ({
             <Button
               size="lg"
               isLoading={props.isSubmitting || isLoading}
-              w={["100%", "200px"]}
+              w={["100%", "100%", "200px"]}
               type="submit"
             >
               {action}
             </Button>
-          </Box>
+          </Flex>
         </Form>
       )}
     </Formik>
   );
 };
 
-const Approval = ({
+const Session = ({
   title,
   action,
   message,
@@ -134,31 +138,33 @@ const Approval = ({
   setMaxFee,
   onSubmit,
   onCancel,
-}: ApprovalFormProps & {
+}: SessionFormProps & {
   message: React.ReactNode;
   title: string;
 }) => {
   return (
-    <Flex m={4} flex={1} flexDirection="column">
-      <Banner title={title} variant="secondary">
-        <Box mt={2} fontSize={13}>
-          {message}
-        </Box>
+    <Flex m={4} flex={1} flexDirection="column" gap="10px">
+      <Banner
+        pb="20px"
+        title={title}
+        variant="secondary"
+        borderBottom="1px solid"
+        borderColor="gray.700"
+      >
+        {message}
       </Banner>
-      <Box mt={4} flex={1}>
-        <ApprovalForm
-          action={action}
-          policies={policies}
-          invalidPolicys={invalidPolicys}
-          isLoading={isLoading}
-          maxFee={maxFee}
-          setMaxFee={setMaxFee}
-          onSubmit={onSubmit}
-          onCancel={onCancel}
-        />
-      </Box>
+      <SessionForm
+        action={action}
+        policies={policies}
+        invalidPolicys={invalidPolicys}
+        isLoading={isLoading}
+        maxFee={maxFee}
+        setMaxFee={setMaxFee}
+        onSubmit={onSubmit}
+        onCancel={onCancel}
+      />
     </Flex>
   );
 };
 
-export default Approval;
+export default Session;

@@ -14,10 +14,10 @@ const Banner = ({
   const styles = useStyleConfig("Banner", { variant });
   return (
     <Box __css={styles} textAlign={"center"} {...rest}>
-      <Heading fontSize={16} textStyle="heading">
+      <Heading fontSize="14px" textStyle="heading">
         {title}
       </Heading>
-      <Box mt={3} fontSize={13} color="#888">
+      <Box mt={3} fontSize="12px" color="#888">
         {children}
       </Box>
     </Box>
