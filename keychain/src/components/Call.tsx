@@ -1,13 +1,21 @@
-import { Box, Flex, Tag, Switch, Text, HStack, Link } from "@chakra-ui/react";
+import {
+  Box,
+  Flex,
+  Tag,
+  Switch,
+  Text,
+  HStack,
+  Link,
+  Input,
+  Spacer,
+  VStack,
+} from "@chakra-ui/react";
 import { FieldInputProps } from "formik";
 import { formatEther } from "ethers/lib/utils";
 import { Policy } from "@cartridge/controller";
-
-import Transfer from "@cartridge/ui/components/icons/Transfer";
-import GasPump from "@cartridge/ui/components/icons/GasPump";
 import { formatAddress } from "@cartridge/ui/components/Address";
-
 import { VoyagerUrl } from "utils/url";
+import EthereumIcon from "@cartridge/ui/components/icons/Ethereum";
 
 function formatName(policy: Policy) {
   if (policy.method) {
@@ -54,7 +62,6 @@ export const Call = ({
   return (
     <Base
       title={title}
-      icon={<Transfer />}
       description={description}
       toggable={toggable}
       errMsg={errMsg}
@@ -63,61 +70,68 @@ export const Call = ({
   );
 };
 
-// TODO: need design for gas fee to also be input field
 export const MaxFee = ({
   maxFee,
   ...rest
 }: {
   maxFee: string;
 } & FieldInputProps<boolean>) => {
-  const title = `Max gas spend ${formatEther(maxFee)} ETH`;
+  const eth = formatEther(maxFee);
+  const title = `Max gas spend ${eth} ETH`;
   const description = "Game can spend no more than this amount of gas";
   return (
-    <Base
-      title={title}
-      icon={<GasPump />}
-      description={description}
-      toggable={false}
-      {...rest}
-    />
+    <>
+      <Base
+        title={title}
+        description={description}
+        toggable={false}
+        {...rest}
+      />
+      <HStack pt="14px">
+        <HStack position="relative" maxWidth="30%">
+          <Input type="number" value={eth} pl="30px"></Input>
+          <EthereumIcon position="absolute" boxSize="14px" color="gray.200" />
+        </HStack>
+        <Spacer />
+        <Text></Text>
+      </HStack>
+    </>
   );
 };
 
 const Base = ({
   title,
-  icon,
   description,
   toggable = true,
   disable = false,
   errMsg,
   ...rest
 }: {
-  icon: React.ReactElement;
   title: React.ReactElement | string;
   description?: React.ReactElement | string;
   disable?: boolean;
   errMsg?: string;
   toggable?: boolean;
 } & FieldInputProps<boolean>) => (
-  <Flex pb={5}>
-    <Box mr={2}>{icon}</Box>
-    <Box>
-      {title}
-      <Box color="#808080" fontSize={12} mt={2.5} mr={2.5}>
+  <Flex>
+    <VStack align="flex-start" spacing="12px">
+      <Text variant="ibm-upper-bold" fontSize="11px">
+        {title}
+      </Text>
+      <Text fontSize="12px" color="gray.200">
         {description}
-      </Box>
-    </Box>
+      </Text>
+    </VStack>
+    <Spacer />
     {toggable && (
-      <Box ml="auto">
-        <Switch
-          disabled={disable || !!errMsg}
-          size="lg"
-          name={rest.name}
-          isChecked={errMsg ? false : rest.value}
-          onBlur={rest.onBlur}
-          onChange={rest.onChange}
-        />
-      </Box>
+      <Switch
+        disabled={disable || !!errMsg}
+        size="lg"
+        name={rest.name}
+        isChecked={errMsg ? false : rest.value}
+        onBlur={rest.onBlur}
+        onChange={rest.onChange}
+      />
     )}
   </Flex>
 );

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import { Flex } from "@chakra-ui/react";
 
-import Approval from "components/Approval";
+import Session from "components/Session";
 import { Header } from "components/Header";
 import { useRequests } from "hooks/account";
 import { useUrlPolicys } from "hooks/policy";
@@ -50,9 +50,12 @@ const Connect: NextPage = () => {
     <>
       <Header address={controller.address} />
       <Flex height="calc(100vh - 70px)">
-        <Approval
-          action="CONNECT"
-          title="CONNECT GAME"
+        <Session
+          action={
+            "CONFIRM" +
+            (validPolicys.length > 0 && ` [${validPolicys.length + 1}]`)
+          }
+          title="SESSION DETAILS"
           message={
             <>
               <strong>{origin}</strong>

@@ -51,7 +51,7 @@ export const Header = ({
   onLogout?: () => void;
 }) => {
   return (
-    <Container height="64px">
+    <Container height="50px">
       <HStack w="full">
         <HStack spacing="0">
           <Link href={process.env.NEXT_PUBLIC_SITE_URL}>

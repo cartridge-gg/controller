@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo } from "react";
 import { Flex } from "@chakra-ui/react";
 
 import { Header } from "components/Header";
-import Approval from "components/Approval";
+import Approval from "components/Session";
 import Controller from "utils/account";
 import { useRouter } from "next/router";
 import { calculateTransactionHash } from "starknet/utils/hash";
