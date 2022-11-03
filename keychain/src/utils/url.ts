@@ -16,13 +16,13 @@ export const VoyagerUrl = {
 };
 
 const DEFAULT_PORT_BY_PROTOCOL: { [index: string]: string } = {
-  'http:': '80',
-  'https:': '443',
+  "http:": "80",
+  "https:": "443",
 };
 
 const URL_REGEX = /^(https?:)?\/\/([^/:]+)?(:(\d+))?/;
 
-const opaqueOriginSchemes = ['file:', 'data:'];
+const opaqueOriginSchemes = ["file:", "data:"];
 
 /**
  * Converts a src value into an origin.
@@ -32,7 +32,7 @@ export const normalize = (src: string): string => {
     // The origin of the child document is an opaque origin and its
     // serialization is "null"
     // https://html.spec.whatwg.org/multipage/origin.html#origin
-    return 'null';
+    return "null";
   }
 
   // Note that if src is undefined, then srcdoc is being used instead of src
@@ -63,6 +63,6 @@ export const normalize = (src: string): string => {
   // or it won't match the message's event.origin.
 
   const portSuffix =
-    port && port !== DEFAULT_PORT_BY_PROTOCOL[protocol] ? `:${port}` : '';
+    port && port !== DEFAULT_PORT_BY_PROTOCOL[protocol] ? `:${port}` : "";
   return `${protocol}//${hostname}${portSuffix}`;
 };

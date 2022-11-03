@@ -15,7 +15,7 @@ import {
   EstimateFeeDetails,
   EstimateFee,
   InvocationsDetails,
-  InvokeFunctionResponse
+  InvokeFunctionResponse,
 } from "starknet";
 import base64url from "base64url";
 import { split } from "@cartridge/controller";
@@ -41,7 +41,7 @@ function convertUint8ArrayToWordArray(u8Array: Uint8Array) {
         (u8Array[i++] << 16) |
         (u8Array[i++] << 8) |
         u8Array[i++]) >>>
-      0,
+        0,
     );
   }
 
@@ -56,7 +56,11 @@ export class WebauthnSigner implements SignerInterface {
   private publicKey: string;
   private rpId: string;
 
-  constructor(credentialId: string, publicKey: string, rpId: string = "cartridge.gg") {
+  constructor(
+    credentialId: string,
+    publicKey: string,
+    rpId: string = "cartridge.gg",
+  ) {
     this.credentialId = credentialId;
     this.publicKey = publicKey;
     this.rpId = rpId;
@@ -88,7 +92,7 @@ export class WebauthnSigner implements SignerInterface {
   public async signTransaction(
     calls: Call[],
     transactionsDetail: InvocationsSignerDetails & {
-      ext?: Buffer
+      ext?: Buffer;
     },
     abis?: Abi[],
   ): Promise<Signature> {
@@ -99,9 +103,7 @@ export class WebauthnSigner implements SignerInterface {
     }
     // now use abi to display decoded data somewhere, but as this signer is headless, we can't do that
 
-    const calldata = transaction.fromCallsToExecuteCalldata(
-      calls,
-    );
+    const calldata = transaction.fromCallsToExecuteCalldata(calls);
 
     const msgHash = hash.calculateTransactionHash(
       transactionsDetail.walletAddress,
@@ -118,7 +120,7 @@ export class WebauthnSigner implements SignerInterface {
     );
 
     if (transactionsDetail.ext) {
-      challenge = Buffer.concat([challenge, transactionsDetail.ext])
+      challenge = Buffer.concat([challenge, transactionsDetail.ext]);
     }
 
     const assertion = await this.sign(challenge);
@@ -138,16 +140,21 @@ export class WebauthnSigner implements SignerInterface {
     return formatAssertion(assertion);
   }
 
-  public async signDeclareTransaction(
-    { classHash, senderAddress, chainId, maxFee, version, nonce }: DeclareSignerDetails
-  ) {
+  public async signDeclareTransaction({
+    classHash,
+    senderAddress,
+    chainId,
+    maxFee,
+    version,
+    nonce,
+  }: DeclareSignerDetails) {
     const msgHash = calculateDeclareTransactionHash(
       classHash,
       senderAddress,
       version,
       maxFee,
       chainId,
-      nonce
+      nonce,
     );
 
     const challenge = Buffer.from(
@@ -159,7 +166,9 @@ export class WebauthnSigner implements SignerInterface {
     return formatAssertion(assertion);
   }
 
-  public async signDeployAccountTransaction(transaction: DeployAccountSignerDetails): Promise<Signature> {
+  public async signDeployAccountTransaction(
+    transaction: DeployAccountSignerDetails,
+  ): Promise<Signature> {
     return;
   }
 }
@@ -167,15 +176,26 @@ export class WebauthnSigner implements SignerInterface {
 class WebauthnAccount extends Account {
   public signer: WebauthnSigner;
   constructor(
-    address: string, credentialId: string, publicKey: string, options: {
-      rpId?: string
-    }) {
+    address: string,
+    credentialId: string,
+    publicKey: string,
+    options: {
+      rpId?: string;
+    },
+  ) {
     const signer = new WebauthnSigner(credentialId, publicKey, options.rpId);
     super(defaultProvider, address, signer);
     this.signer = signer;
   }
 
-  async estimateInvokeFee(calls: Call[], { nonce: providedNonce, blockIdentifier, ext }: EstimateFeeDetails & { ext?: Buffer } = {}): Promise<EstimateFee> {
+  async estimateInvokeFee(
+    calls: Call[],
+    {
+      nonce: providedNonce,
+      blockIdentifier,
+      ext,
+    }: EstimateFeeDetails & { ext?: Buffer } = {},
+  ): Promise<EstimateFee> {
     const transactions = Array.isArray(calls) ? calls : [calls];
     const nonce = toBN(providedNonce ?? (await this.getNonce()));
     const version = toBN(transactionVersion);
@@ -187,16 +207,19 @@ class WebauthnAccount extends Account {
       maxFee: ZERO,
       version,
       chainId,
-      ext
+      ext,
     };
 
-    const signature = await this.signer.signTransaction(transactions, signerDetails);
+    const signature = await this.signer.signTransaction(
+      transactions,
+      signerDetails,
+    );
 
     const calldata = fromCallsToExecuteCalldata(transactions);
     const response = await super.getInvokeEstimateFee(
       { contractAddress: this.address, calldata, signature },
       { version, nonce },
-      blockIdentifier
+      blockIdentifier,
     );
 
     const suggestedMaxFee = estimatedFeeToMaxFee(response.overall_fee);
@@ -207,12 +230,19 @@ class WebauthnAccount extends Account {
     };
   }
 
-  async execute(calls: Call[], abis?: Abi[] | undefined, transactionsDetail?: InvocationsDetails & { ext?: Buffer }): Promise<InvokeFunctionResponse> {
+  async execute(
+    calls: Call[],
+    abis?: Abi[] | undefined,
+    transactionsDetail?: InvocationsDetails & { ext?: Buffer },
+  ): Promise<InvokeFunctionResponse> {
     const transactions = Array.isArray(calls) ? calls : [calls];
     const nonce = toBN(transactionsDetail.nonce ?? (await this.getNonce()));
     const maxFee =
       transactionsDetail.maxFee ??
-      (await this.getSuggestedMaxFee({ type: 'INVOKE', payload: calls }, transactionsDetail));
+      (await this.getSuggestedMaxFee(
+        { type: "INVOKE", payload: calls },
+        transactionsDetail,
+      ));
     const version = toBN(transactionVersion);
     const chainId = await this.getChainId();
 
@@ -224,7 +254,11 @@ class WebauthnAccount extends Account {
       chainId,
     };
 
-    const signature = await this.signer.signTransaction(transactions, signerDetails, abis);
+    const signature = await this.signer.signTransaction(
+      transactions,
+      signerDetails,
+      abis,
+    );
 
     const calldata = fromCallsToExecuteCalldata(transactions);
 
@@ -234,7 +268,7 @@ class WebauthnAccount extends Account {
         nonce,
         maxFee,
         version,
-      }
+      },
     );
   }
 }

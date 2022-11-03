@@ -96,7 +96,7 @@ export const Arrow = ({
 
 const arrowStyles = (
   placement: string,
-  size: number
+  size: number,
 ): StyleProps | undefined => {
   switch (placement) {
     case "bottom":

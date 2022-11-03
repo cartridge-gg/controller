@@ -14,9 +14,9 @@ const Storage = {
   },
   get: (key: string): any => {
     if (!isSafari && typeof window != "undefined") {
-      const value = window.localStorage.getItem(key)
+      const value = window.localStorage.getItem(key);
       if (!value) {
-        return null
+        return null;
       }
 
       return JSON.parse(value);
@@ -36,7 +36,10 @@ const Storage = {
       return;
     }
 
-    Cookies.set(key, JSON.stringify(value), { secure: true, sameSite: 'strict' });
+    Cookies.set(key, JSON.stringify(value), {
+      secure: true,
+      sameSite: "strict",
+    });
   },
   remove: (key: string) => {
     if (!isSafari && typeof window != "undefined") {
@@ -52,9 +55,9 @@ const Storage = {
       return;
     }
 
-    const cookies = Cookies.get()
-    Object.keys(cookies).forEach(key => Cookies.remove(key));
-  }
+    const cookies = Cookies.get();
+    Object.keys(cookies).forEach((key) => Cookies.remove(key));
+  },
 };
 
 export default Storage;

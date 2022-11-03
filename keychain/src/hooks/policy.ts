@@ -54,7 +54,7 @@ async function getValidPolicys(
   methods: string[],
   target: string,
 ): Promise<Policy[]> {
-  return methods.map(method => ({ method, target }))
+  return methods.map((method) => ({ method, target }));
   // const validSelectors = await fetchSelectors(target);
 
   // // filters out invalid methods and duplicates
