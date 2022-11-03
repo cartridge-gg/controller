@@ -26,8 +26,8 @@ const CallFields = ({
 }) => (
   <>
     {policies.map((policy, i) => (
-      <Box bgColor="gray.700" p="16px" borderRadius="8px">
-        <Field name={i} key={i}>
+      <Box key={i} bgColor="gray.700" p="16px" borderRadius="8px">
+        <Field name={i}>
           {({ field }: { field: FieldInputProps<boolean> }) => (
             <FormControl>
               <Call {...field} policy={policy} errMsg={errMsg} />
