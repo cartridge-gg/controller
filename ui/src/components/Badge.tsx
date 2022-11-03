@@ -5,7 +5,7 @@ import { css } from "@emotion/react";
 export const Badge = forwardRef(
   (
     { children, style }: { children: ReactNode; style?: CSSProperties },
-    ref
+    ref,
   ) => (
     <Flex
       css={css`
@@ -22,5 +22,5 @@ export const Badge = forwardRef(
     >
       <span ref={ref}>{children}</span>
     </Flex>
-  )
+  ),
 );

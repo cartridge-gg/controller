@@ -39,7 +39,7 @@ const Connect: NextPage = () => {
       }
       actions.setSubmitting(false);
     },
-    [origin, validPolicys, controller, maxFee]
+    [origin, validPolicys, controller, maxFee],
   );
 
   if (!controller) {

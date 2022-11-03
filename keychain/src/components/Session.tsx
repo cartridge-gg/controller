@@ -51,7 +51,7 @@ const SessionForm = ({
 }: SessionFormProps) => {
   const initialValues = policies.reduce(
     (prev, _, i) => ({ ...prev, [i]: true }),
-    {}
+    {},
   );
 
   return (

@@ -9,11 +9,11 @@ const revoke = () => (origin: string) => {
 
   const session = controller.session(origin);
   if (!controller || !session) {
-    throw new Error("not connected")
+    throw new Error("not connected");
   }
 
   controller.revoke(origin);
-}
+};
 
 const session = (origin: string) => () => {
   const controller = Controller.fromStore();
@@ -21,8 +21,8 @@ const session = (origin: string) => () => {
     throw new Error("no controller");
   }
 
-  return controller.session(origin)
-}
+  return controller.session(origin);
+};
 
 const sessions = (origin: string) => () => {
   const controller = Controller.fromStore();
@@ -31,10 +31,10 @@ const sessions = (origin: string) => () => {
   }
 
   if (!Storage.get(`@admin/${origin}`)) {
-    throw new Error("unauthorized")
+    throw new Error("unauthorized");
   }
 
-  return controller.sessions()
-}
+  return controller.sessions();
+};
 
-export { session, sessions, revoke }
+export { session, sessions, revoke };

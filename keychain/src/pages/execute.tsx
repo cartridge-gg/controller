@@ -54,7 +54,7 @@ const Execute: NextPage = () => {
       calldata,
       maxFee,
       chainId,
-      nonce
+      nonce,
     );
 
     return { hash, calls: transactions, maxFee, nonce };
@@ -83,7 +83,7 @@ const Execute: NextPage = () => {
 
       actions.setSubmitting(false);
     },
-    [params]
+    [params],
   );
 
   if (!url || !params || !controller) {

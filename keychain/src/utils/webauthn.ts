@@ -11,11 +11,20 @@ import {
   number,
   Account,
   defaultProvider,
-  DeclareSignerDetails
+  DeclareSignerDetails,
+  EstimateFeeDetails,
+  EstimateFee,
+  InvocationsDetails,
+  InvokeFunctionResponse,
 } from "starknet";
 import base64url from "base64url";
 import { split } from "@cartridge/controller";
 import { calculateDeclareTransactionHash } from "starknet/dist/utils/hash";
+import { toBN } from "starknet/utils/number";
+import { transactionVersion } from "starknet/utils/hash";
+import { ZERO } from "starknet/constants";
+import { fromCallsToExecuteCalldata } from "starknet/utils/transaction";
+import { estimatedFeeToMaxFee } from "starknet/dist/utils/stark";
 
 type RawAssertion = PublicKeyCredential & {
   response: AuthenticatorAssertionResponse;
@@ -32,7 +41,7 @@ function convertUint8ArrayToWordArray(u8Array: Uint8Array) {
         (u8Array[i++] << 16) |
         (u8Array[i++] << 8) |
         u8Array[i++]) >>>
-      0,
+        0,
     );
   }
 
@@ -47,7 +56,11 @@ export class WebauthnSigner implements SignerInterface {
   private publicKey: string;
   private rpId: string;
 
-  constructor(credentialId: string, publicKey: string, rpId: string = "cartridge.gg") {
+  constructor(
+    credentialId: string,
+    publicKey: string,
+    rpId: string = "cartridge.gg",
+  ) {
     this.credentialId = credentialId;
     this.publicKey = publicKey;
     this.rpId = rpId;
@@ -78,7 +91,9 @@ export class WebauthnSigner implements SignerInterface {
 
   public async signTransaction(
     calls: Call[],
-    transactionsDetail: InvocationsSignerDetails,
+    transactionsDetail: InvocationsSignerDetails & {
+      ext?: Buffer;
+    },
     abis?: Abi[],
   ): Promise<Signature> {
     if (abis && abis.length !== calls.length) {
@@ -88,9 +103,7 @@ export class WebauthnSigner implements SignerInterface {
     }
     // now use abi to display decoded data somewhere, but as this signer is headless, we can't do that
 
-    const calldata = transaction.fromCallsToExecuteCalldata(
-      calls,
-    );
+    const calldata = transaction.fromCallsToExecuteCalldata(calls);
 
     const msgHash = hash.calculateTransactionHash(
       transactionsDetail.walletAddress,
@@ -101,10 +114,15 @@ export class WebauthnSigner implements SignerInterface {
       transactionsDetail.nonce,
     );
 
-    const challenge = Buffer.from(
+    let challenge = Buffer.from(
       msgHash.slice(2).padStart(64, "0").slice(0, 64),
       "hex",
     );
+
+    if (transactionsDetail.ext) {
+      challenge = Buffer.concat([challenge, transactionsDetail.ext]);
+    }
+
     const assertion = await this.sign(challenge);
     return formatAssertion(assertion);
   }
@@ -122,28 +140,35 @@ export class WebauthnSigner implements SignerInterface {
     return formatAssertion(assertion);
   }
 
-  public async signDeclareTransaction(
-    // contractClass: ContractClass,  // Should be used once class hash is present in ContractClass
-    { classHash, senderAddress, chainId, maxFee, version, nonce }: DeclareSignerDetails
-  ) {
+  public async signDeclareTransaction({
+    classHash,
+    senderAddress,
+    chainId,
+    maxFee,
+    version,
+    nonce,
+  }: DeclareSignerDetails) {
     const msgHash = calculateDeclareTransactionHash(
       classHash,
       senderAddress,
       version,
       maxFee,
       chainId,
-      nonce
+      nonce,
     );
 
     const challenge = Buffer.from(
       msgHash.slice(2).padStart(64, "0").slice(0, 64),
       "hex",
     );
+
     const assertion = await this.sign(challenge);
     return formatAssertion(assertion);
   }
 
-  public async signDeployAccountTransaction(transaction: DeployAccountSignerDetails): Promise<Signature> {
+  public async signDeployAccountTransaction(
+    transaction: DeployAccountSignerDetails,
+  ): Promise<Signature> {
     return;
   }
 }
@@ -151,12 +176,100 @@ export class WebauthnSigner implements SignerInterface {
 class WebauthnAccount extends Account {
   public signer: WebauthnSigner;
   constructor(
-    address: string, credentialId: string, publicKey: string, options: {
-      rpId?: string
-    }) {
+    address: string,
+    credentialId: string,
+    publicKey: string,
+    options: {
+      rpId?: string;
+    },
+  ) {
     const signer = new WebauthnSigner(credentialId, publicKey, options.rpId);
     super(defaultProvider, address, signer);
     this.signer = signer;
+  }
+
+  async estimateInvokeFee(
+    calls: Call[],
+    {
+      nonce: providedNonce,
+      blockIdentifier,
+      ext,
+    }: EstimateFeeDetails & { ext?: Buffer } = {},
+  ): Promise<EstimateFee> {
+    const transactions = Array.isArray(calls) ? calls : [calls];
+    const nonce = toBN(providedNonce ?? (await this.getNonce()));
+    const version = toBN(transactionVersion);
+    const chainId = await this.getChainId();
+
+    const signerDetails = {
+      walletAddress: this.address,
+      nonce,
+      maxFee: ZERO,
+      version,
+      chainId,
+      ext,
+    };
+
+    const signature = await this.signer.signTransaction(
+      transactions,
+      signerDetails,
+    );
+
+    const calldata = fromCallsToExecuteCalldata(transactions);
+    const response = await super.getInvokeEstimateFee(
+      { contractAddress: this.address, calldata, signature },
+      { version, nonce },
+      blockIdentifier,
+    );
+
+    const suggestedMaxFee = estimatedFeeToMaxFee(response.overall_fee);
+
+    return {
+      ...response,
+      suggestedMaxFee,
+    };
+  }
+
+  async execute(
+    calls: Call[],
+    abis?: Abi[] | undefined,
+    transactionsDetail?: InvocationsDetails & { ext?: Buffer },
+  ): Promise<InvokeFunctionResponse> {
+    const transactions = Array.isArray(calls) ? calls : [calls];
+    const nonce = toBN(transactionsDetail.nonce ?? (await this.getNonce()));
+    const maxFee =
+      transactionsDetail.maxFee ??
+      (await this.getSuggestedMaxFee(
+        { type: "INVOKE", payload: calls },
+        transactionsDetail,
+      ));
+    const version = toBN(transactionVersion);
+    const chainId = await this.getChainId();
+
+    const signerDetails: InvocationsSignerDetails = {
+      walletAddress: this.address,
+      nonce,
+      maxFee,
+      version,
+      chainId,
+    };
+
+    const signature = await this.signer.signTransaction(
+      transactions,
+      signerDetails,
+      abis,
+    );
+
+    const calldata = fromCallsToExecuteCalldata(transactions);
+
+    return this.invokeFunction(
+      { contractAddress: this.address, calldata, signature },
+      {
+        nonce,
+        maxFee,
+        version,
+      },
+    );
   }
 }
 
