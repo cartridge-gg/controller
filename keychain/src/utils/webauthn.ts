@@ -119,9 +119,9 @@ export class WebauthnSigner implements SignerInterface {
       "hex",
     );
 
-    if (transactionsDetail.ext) {
-      challenge = Buffer.concat([challenge, transactionsDetail.ext]);
-    }
+    // if (transactionsDetail.ext) {
+    //   challenge = Buffer.concat([challenge, transactionsDetail.ext]);
+    // }
 
     const assertion = await this.sign(challenge);
     return formatAssertion(assertion);
