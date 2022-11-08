@@ -21,9 +21,10 @@ Quests can have a one-to-many relationship to other quests. Child quests need to
 func quest_progress(
   id: felt,
   player: felt,
-  metadata_len: felt,
+  metadataURI_len: felt,
   metadataURI: felt*
-) -> ()
+) {
+}
 ```
 
 #### Metadata URI
@@ -117,7 +118,7 @@ First create the quest for each task:
 quest_progress.emit(
   id=1,
   player=0,
-  metadata_len=4,
+  metadataURI_len=4,
   metadataURI=json('{
     "title": "Destroy a Stalchild",
     "description": "They come out at night in Hyrule Field"
@@ -126,7 +127,7 @@ quest_progress.emit(
 quest_progress.emit(
   id=2,
   player=0,
-  metadata_len=4,
+  metadataURI_len=4,
   metadataURI=json('{
     "title": "Destroy a Stalfo",
     "description": "They come out at night in Hyrule Field"
@@ -135,7 +136,7 @@ quest_progress.emit(
 quest_progress.emit(
   id=3,
   player=0,
-  metadata_len=4,
+  metadataURI_len=4,
   metadataURI=json('{
     "title": "Destroy a Deku Baba",
     "description": "They can be found throughout Hyrule"
@@ -149,7 +150,7 @@ Now we can use those quests as completion criteria:
 quest_progress.emit(
   id=4,
   player=0,
-  metadata_len=7,
+  metadataURI_len=7,
   metadataURI=json('{
     "title": "Monster Hunting",
     "description": "
