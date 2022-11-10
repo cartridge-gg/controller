@@ -10,13 +10,11 @@ import Controller from "utils/account";
 import Storage from "utils/storage";
 
 const PROXY_CLASS =
-  "0x793a374a266432184f68b29546d14fedfdcbe6346bc51bd34ad730e6ff914f3";
+  "0x046ea2fdb36fb5fba24050ba137957f0107ad51b32da9300b3b302da952ecb4c";
 const ACCOUNT_CLASS =
-  "0x00c06f5ddc49aed455e5034e2bbbc01f089cc1e71e63601359dce8bd36315d60";
+  "0x001c343436d77e564b39f88c13f77e9e45da188022a73e64580262b6ee1064a2";
 const CONTROLLER_CLASS =
-  "0x077007d85dd2466b2b29e626bac27ee017d7586f62511f4585dd596f33337ccf";
-const UDC_ADDRESS =
-  "0x041a78e741e5af2fec34b695679bc6891742439f7afb8484ecd7766661ad02bf";
+  "0x0286a2ea79ee08506efcbc330efd2ae34e2f22b79ecd2fb9b86ce26d6a1dbece";
 
 const register =
   () => async (username: string, credential: { x: string; y: string }) => {
