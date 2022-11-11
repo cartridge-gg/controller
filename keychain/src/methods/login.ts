@@ -14,7 +14,7 @@ import { ZERO } from "starknet/constants";
 import { estimatedFeeToMaxFee } from "starknet/dist/utils/stark";
 
 export const CONTROLLER_CLASS =
-  "0x077007d85dd2466b2b29e626bac27ee017d7586f62511f4585dd596f33337ccf";
+  "0x0286a2ea79ee08506efcbc330efd2ae34e2f22b79ecd2fb9b86ce26d6a1dbece";
 
 const login =
   () =>
