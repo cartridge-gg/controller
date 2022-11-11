@@ -2,10 +2,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Policy } from "@cartridge/controller";
 import { diff } from "utils/account";
-import { defaultProvider } from "starknet";
-import { getSelectorFromName } from "starknet/dist/utils/hash";
-import { StarknetChainId } from "starknet/dist/constants";
-// import { SelectorsDocument } from "generated/graphql";
 
 export function useUrlPolicys(): {
   isValidating: boolean;

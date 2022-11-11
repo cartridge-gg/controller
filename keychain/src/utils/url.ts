@@ -2,13 +2,13 @@ import { defaultProvider } from "starknet";
 import { StarknetChainId } from "starknet/dist/constants";
 
 const testnet =
-  defaultProvider.chainId === StarknetChainId.TESTNET ? "goerli." : "";
-const baseUrl = `https://${testnet}voyager.online`;
+  defaultProvider.chainId === StarknetChainId.TESTNET ? "testnet." : "";
+const baseUrl = `https://${testnet}starkscan.co/`;
 
-export const VoyagerUrl = {
+export const StarkscanUrl = {
   transaction: (address: string) => `${baseUrl}/tx/${address}`,
-  contract: (address: string, page: string = "transactions") =>
-    `${baseUrl}/contract/${address}#${page}`,
+  contract: (address: string) =>
+    `${baseUrl}/contract/${address}`,
   message: (address: string) => `${baseUrl}/message/${address}`,
   block: (address: string) => `${baseUrl}/block/${address}`,
   event: (address: string) => `${baseUrl}/event/${address}`,

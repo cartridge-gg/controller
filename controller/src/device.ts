@@ -94,7 +94,9 @@ class DeviceAccount extends Account {
   async execute(
     calls: Call | Call[],
     abis?: Abi[],
-    transactionsDetail?: InvocationsDetails
+    transactionsDetail?: InvocationsDetails & {
+      chainId?: StarknetChainId,
+    }
   ): Promise<InvokeFunctionResponse> {
     if (!transactionsDetail) {
       transactionsDetail = {}
@@ -133,7 +135,7 @@ class DeviceAccount extends Account {
         nonce: transactionsDetail.nonce,
         version: transactionsDetail.version,
         maxFee: transactionsDetail.maxFee,
-        chainId: StarknetChainId.TESTNET,
+        chainId: transactionsDetail.chainId ? transactionsDetail.chainId : StarknetChainId.TESTNET,
       })}`,
       "_blank",
       "height=650,width=400"

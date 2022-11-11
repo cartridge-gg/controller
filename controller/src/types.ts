@@ -12,6 +12,7 @@ import {
   DeclareContractPayload,
   DeployAccountSignerDetails,
 } from "starknet";
+import { StarknetChainId } from "starknet/dist/constants";
 import { BigNumberish } from "starknet/dist/utils/number";
 
 export type Assertion = {
@@ -49,7 +50,9 @@ export interface Keychain {
 
   estimateDeclareFee(payload: DeclareContractPayload, details?: EstimateFeeDetails): Promise<EstimateFee>
   estimateInvokeFee(calls: Call | Call[], estimateFeeDetails?: EstimateFeeDetails): Promise<EstimateFee>;
-  execute(calls: Call | Call[], abis?: Abi[], transactionsDetail?: InvocationsDetails, sync?: boolean): Promise<InvokeFunctionResponse>;
+  execute(calls: Call | Call[], abis?: Abi[], transactionsDetail?: InvocationsDetails & {
+    chainId?: StarknetChainId,
+  }, sync?: boolean): Promise<InvokeFunctionResponse>;
   provision(address: string): Promise<string>;
   register(username: string, credential: { x: string, y: string }): Promise<{ address: string, deviceKey: string }>;
   login(address: string, credentialId: string, options: {
