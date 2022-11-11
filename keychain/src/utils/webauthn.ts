@@ -25,6 +25,7 @@ import { transactionVersion } from "starknet/utils/hash";
 import { ZERO } from "starknet/constants";
 import { fromCallsToExecuteCalldata } from "starknet/utils/transaction";
 import { estimatedFeeToMaxFee } from "starknet/dist/utils/stark";
+import { CONTROLLER_CLASS } from "./constants";
 
 type RawAssertion = PublicKeyCredential & {
   response: AuthenticatorAssertionResponse;
@@ -41,7 +42,7 @@ function convertUint8ArrayToWordArray(u8Array: Uint8Array) {
         (u8Array[i++] << 16) |
         (u8Array[i++] << 8) |
         u8Array[i++]) >>>
-        0,
+      0,
     );
   }
 
@@ -311,7 +312,7 @@ export function formatAssertion(assertion: RawAssertion): Signature {
   const { x: s0, y: s1, z: s2 } = split(s);
 
   return [
-    "3364130956791496674817841690353332031228403084330511699766716352059223014607",
+    toBN(CONTROLLER_CLASS).toString(),
     "0",
     r0.toString(),
     r1.toString(),

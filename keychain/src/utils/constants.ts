@@ -1,0 +1,6 @@
+export const PROXY_CLASS =
+    "0x046ea2fdb36fb5fba24050ba137957f0107ad51b32da9300b3b302da952ecb4c";
+export const ACCOUNT_CLASS =
+    "0x001c343436d77e564b39f88c13f77e9e45da188022a73e64580262b6ee1064a2";
+export const CONTROLLER_CLASS =
+    "0x0286a2ea79ee08506efcbc330efd2ae34e2f22b79ecd2fb9b86ce26d6a1dbece";

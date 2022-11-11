@@ -12,9 +12,7 @@ import { getSelector } from "starknet/utils/hash";
 import base64url from "base64url";
 import { ZERO } from "starknet/constants";
 import { estimatedFeeToMaxFee } from "starknet/dist/utils/stark";
-
-export const CONTROLLER_CLASS =
-  "0x0286a2ea79ee08506efcbc330efd2ae34e2f22b79ecd2fb9b86ce26d6a1dbece";
+import { CONTROLLER_CLASS } from "utils/constants";
 
 const login =
   () =>
