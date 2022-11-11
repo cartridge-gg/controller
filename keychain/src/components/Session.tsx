@@ -15,14 +15,17 @@ type SessionFormProps = {
   setMaxFee?: (maxFee: string) => void;
   onSubmit: (values: any, actions: any) => Promise<void>;
   onCancel?: () => void;
+  toggable?: boolean
 };
 
 const CallFields = ({
   policies,
   errMsg,
+  toggable,
 }: {
   policies: Policy[];
   errMsg?: string;
+  toggable?: boolean
 }) => (
   <>
     {policies.map((policy, i) => (
@@ -30,7 +33,7 @@ const CallFields = ({
         <Field name={i}>
           {({ field }: { field: FieldInputProps<boolean> }) => (
             <FormControl>
-              <Call {...field} policy={policy} errMsg={errMsg} />
+              <Call {...field} policy={policy} toggable={toggable} errMsg={errMsg} />
             </FormControl>
           )}
         </Field>
@@ -48,6 +51,7 @@ const SessionForm = ({
   setMaxFee,
   onSubmit,
   onCancel,
+  toggable,
 }: SessionFormProps) => {
   const initialValues = policies.reduce(
     (prev, _, i) => ({ ...prev, [i]: true }),
@@ -71,7 +75,7 @@ const SessionForm = ({
           <Flex flex={1} direction="column" gap="12px">
             {!isLoading && (
               <>
-                <CallFields policies={policies} />
+                <CallFields policies={policies} toggable={toggable} />
                 {maxFee && (
                   <Box bgColor="gray.700" p="16px" borderRadius="8px">
                     <Field>
@@ -87,6 +91,7 @@ const SessionForm = ({
                   <CallFields
                     policies={invalidPolicys}
                     errMsg={"Invalid Method Requested"}
+                    toggable={toggable}
                   />
                 )}
               </>
@@ -136,6 +141,7 @@ const Session = ({
   maxFee,
   isLoading = false,
   setMaxFee,
+  toggable,
   onSubmit,
   onCancel,
 }: SessionFormProps & {
@@ -158,6 +164,7 @@ const Session = ({
         policies={policies}
         invalidPolicys={invalidPolicys}
         isLoading={isLoading}
+        toggable={toggable}
         maxFee={maxFee}
         setMaxFee={setMaxFee}
         onSubmit={onSubmit}

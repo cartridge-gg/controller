@@ -14,7 +14,7 @@ import { FieldInputProps } from "formik";
 import { formatEther } from "ethers/lib/utils";
 import { Policy } from "@cartridge/controller";
 import { formatAddress } from "@cartridge/ui/components/Address";
-import { VoyagerUrl } from "utils/url";
+import { StarkscanUrl } from "utils/url";
 import EthereumIcon from "@cartridge/ui/components/icons/Ethereum";
 
 function formatName(policy: Policy) {
@@ -54,7 +54,7 @@ export const Call = ({
     </HStack>
   );
   const description = (
-    <Link href={VoyagerUrl.contract(policy.target)} target="_blank">
+    <Link href={StarkscanUrl.contract(policy.target)} target="_blank">
       {formatDescription(policy)}
     </Link>
   );

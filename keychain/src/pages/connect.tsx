@@ -10,10 +10,8 @@ import { useRequests } from "hooks/account";
 import { useUrlPolicys } from "hooks/policy";
 import Controller from "utils/account";
 
-const DEFAULT_MAX_FEE = "1000000000000000"; // 0.001 ETH
-
 const Connect: NextPage = () => {
-  const [maxFee, setMaxFee] = useState(DEFAULT_MAX_FEE);
+  const [maxFee, setMaxFee] = useState(null);
   const { validPolicys, invalidPolicys, isValidating } = useUrlPolicys();
   const { origin } = useRequests();
   const controller = useMemo(() => Controller.fromStore(), []);
@@ -53,7 +51,7 @@ const Connect: NextPage = () => {
         <Session
           action={
             "CONFIRM" +
-            (validPolicys.length > 0 && ` [${validPolicys.length + 1}]`)
+            (validPolicys.length > 0 ? ` [${validPolicys.length + 1}]` : "")
           }
           title="SESSION DETAILS"
           message={
@@ -61,7 +59,7 @@ const Connect: NextPage = () => {
               <strong>{origin}</strong>
               {validPolicys.length > 0
                 ? " is requesting permission to submit transactions on your behalf"
-                : " is requesting access to your account"}
+                : " is requesting to connect to your account"}
             </>
           }
           onCancel={() => {

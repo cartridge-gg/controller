@@ -88,9 +88,7 @@ const Execute: NextPage = () => {
 
   if (!url || !params || !controller) {
     return (
-      <>
-        <Header address={controller.address} />
-      </>
+      <Header address={controller.address} />
     );
   }
 
@@ -103,6 +101,7 @@ const Execute: NextPage = () => {
           title="Execute Transactions"
           message={`${url.href} is requesting to execute the following transactions`}
           onSubmit={submit}
+          toggable={false}
           policies={params.calls.map((call) => ({
             target: call.contractAddress,
             method: call.entrypoint,
