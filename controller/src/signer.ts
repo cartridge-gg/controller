@@ -1,19 +1,13 @@
 import {
-    Abi,
-    InvocationsSignerDetails,
-    SignerInterface,
     Signature,
     typedData,
-    Call,
-    DeclareSignerDetails,
-    DeployAccountSignerDetails
 } from "starknet";
 import qs from 'query-string';
 
 import { Keychain } from "./types";
 import { AsyncMethodReturns } from "@cartridge/penpal";
 
-export class Signer implements SignerInterface {
+export class Signer {
     private keychain: AsyncMethodReturns<Keychain>;
     private url: string = "https://cartridge.gg";
 
@@ -56,42 +50,5 @@ export class Signer implements SignerInterface {
         );
 
         return this.keychain.signMessage(typedData, account);
-    }
-
-    /**
-     * Signs a transaction with the starknet private key and returns the signature
-     *
-     * @param invocation the invocation object containing:
-     * - contractAddress - the address of the contract
-     * - entrypoint - the entrypoint of the contract
-     * - calldata - (defaults to []) the calldata
-     * - signature - (defaults to []) the signature
-     * @param abi (optional) the abi of the contract for better displaying
-     *
-     * @returns signature
-     */
-    public async signTransaction(
-        calls: Call[],
-        transactionsDetail: InvocationsSignerDetails,
-        abis?: Abi[]
-    ): Promise<Signature> {
-        window.open(
-            `${this.url}/sign?${qs.stringify({
-                origin: window.origin,
-                calls: JSON.stringify(calls),
-            })}`,
-            "_blank",
-            "height=650,width=400"
-        );
-
-        return this.keychain.signTransaction(calls, transactionsDetail, abis);
-    }
-
-    public async signDeclareTransaction(details: DeclareSignerDetails) {
-        return this.keychain.signDeclareTransaction(details);
-    }
-
-    public async signDeployAccountTransaction(transaction: DeployAccountSignerDetails): Promise<Signature> {
-        return this.keychain.signDeployAccountTransaction(transaction);
     }
 }
