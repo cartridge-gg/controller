@@ -66,14 +66,4 @@ export interface Keychain {
   }>;
 
   signMessage(typedData: typedData.TypedData, account: string): Promise<Signature>;
-  signTransaction(
-    transactions: Call[],
-    transactionsDetail: InvocationsSignerDetails,
-    abis?: Abi[]
-  ): Promise<Signature>;
-  signDeclareTransaction(
-    // contractClass: ContractClass,  // Should be used once class hash is present in ContractClass
-    details: DeclareSignerDetails
-  ): Promise<Signature>;
-  signDeployAccountTransaction(transaction: DeployAccountSignerDetails): Promise<Signature>;
 }

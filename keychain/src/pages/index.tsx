@@ -12,11 +12,7 @@ import provision from "../methods/provision";
 import register from "../methods/register";
 import login from "../methods/login";
 import logout from "../methods/logout";
-import {
-  signMessage,
-  signTransaction,
-  signDeclareTransaction,
-} from "../methods/sign";
+import { signMessage } from "../methods/sign";
 import { revoke, session, sessions } from "../methods/sessions";
 
 import Controller from "utils/account";
@@ -84,8 +80,6 @@ const Index: NextPage = () => {
         ),
         revoke: normalize(revoke),
         signMessage: normalize(validate(signMessage)),
-        signTransaction: normalize(validate(signTransaction)),
-        signDeclareTransaction: normalize(validate(signDeclareTransaction)),
         session: normalize(session),
         sessions: normalize(sessions),
       },
