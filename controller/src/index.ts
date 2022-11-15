@@ -12,7 +12,8 @@ class Controller {
   public keychain?: AsyncMethodReturns<Keychain>;
   private policies: Policy[] = [];
   private url: string = "https://x.cartridge.gg";
-  private account: AccountInterface | undefined;
+
+  public account: AccountInterface | undefined;
 
   constructor(
     policies?: Policy[],
@@ -209,4 +210,5 @@ export function split(n: BigNumberish): { x: BigNumberish; y: BigNumberish; z: B
 
 export * from "./types";
 export * from "./errors";
+export { injectController } from "./inject";
 export default Controller;
