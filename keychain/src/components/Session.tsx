@@ -1,10 +1,13 @@
 import { css } from "@emotion/react";
-import { Box, Button, Divider, Flex, FormControl } from "@chakra-ui/react";
+import { Box, Button, Divider, Flex, FormControl, HStack, Text, Image } from "@chakra-ui/react";
 import { Formik, Form, Field, FieldInputProps } from "formik";
 import { Policy } from "@cartridge/controller";
 
 import Banner from "components/Banner";
 import { Call, MaxFee } from "./Call";
+import Controller from "utils/account";
+import { StarknetChainId } from "starknet/constants";
+import StarknetIcon from "@cartridge/ui/components/icons/Starknet";
 
 type SessionFormProps = {
   action: string;
@@ -148,6 +151,8 @@ const Session = ({
   message: React.ReactNode;
   title: string;
 }) => {
+  const controller = Controller.fromStore();
+
   return (
     <Flex m={4} flex={1} flexDirection="column" gap="10px">
       <Banner
@@ -158,6 +163,18 @@ const Session = ({
         borderColor="gray.700"
       >
         {message}
+        <Flex justify="center" mt="12px">
+            <HStack h="24px" p="0 12px" borderRadius="12px" backgroundColor="whiteAlpha.200">
+            <StarknetIcon h="9px" w="9px" />
+            <Text
+              fontSize="10px"
+              fontWeight="bold"
+              letterSpacing="0.08em"
+            >
+              {controller.chainId === StarknetChainId.MAINNET ? "MAINNET" : "TESTNET"}
+            </Text>
+          </HStack>
+        </Flex>
       </Banner>
       <SessionForm
         action={action}
