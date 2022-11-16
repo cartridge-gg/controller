@@ -164,8 +164,8 @@ const Session = ({
       >
         {message}
         <Flex justify="center" mt="12px">
-            <HStack h="24px" p="0 12px" borderRadius="12px" backgroundColor="whiteAlpha.200">
-            <StarknetIcon h="9px" w="9px" />
+          <HStack h="24px" p="0 12px" borderRadius="12px" backgroundColor="whiteAlpha.200">
+            <StarknetIcon h="9px" w="9px" color="white" />
             <Text
               fontSize="10px"
               fontWeight="bold"
