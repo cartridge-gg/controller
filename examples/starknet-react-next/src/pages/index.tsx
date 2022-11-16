@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import { toBN } from 'starknet/dist/utils/number'
 import { ConnectWallet } from '~/components/ConnectWallet'
 import { IncrementCounter } from '~/components/IncrementCounter'
+import { SignMessage } from '~/components/SignMessage'
 import { TransactionList } from '~/components/TransactionList'
 import { useCounterContract } from '~/hooks/counter'
 
@@ -27,6 +28,7 @@ const Home: NextPage = () => {
     <div>
       <h2>Wallet</h2>
       <ConnectWallet />
+      <SignMessage />
       <h2>Counter Contract</h2>
       <p>Address: {counter?.address}</p>
       <p>Value: {counterValue}</p>
