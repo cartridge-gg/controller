@@ -1,6 +1,5 @@
 import { AccountInterface, defaultProvider, ProviderInterface } from "starknet";
 import Controller from ".";
-import { Policy } from "./types";
 
 export type EventType = "accountsChanged" | "networkChanged";
 
