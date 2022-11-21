@@ -51,16 +51,16 @@ const login =
 
       const calldata = fromCallsToExecuteCalldata(calls);
 
-      const estimateMsgHash = calculateTransactionHash(
-        account.address,
-        version,
-        calldata,
-        ZERO,
-        chainId,
-        nonce,
-      );
+      // const estimateMsgHash = calculateTransactionHash(
+      //   account.address,
+      //   version,
+      //   calldata,
+      //   ZERO,
+      //   chainId,
+      //   nonce,
+      // );
 
-      let estimateChallenge = Uint8Array.from(estimateMsgHash.slice(2).padStart(64, "0").slice(0, 64).match(/.{1,2}/g).map((byte) => parseInt(byte, 16)));
+      // let estimateChallenge = Uint8Array.from(estimateMsgHash.slice(2).padStart(64, "0").slice(0, 64).match(/.{1,2}/g).map((byte) => parseInt(byte, 16)));
 
       // if (options.challengeExt) {
       //   estimateChallenge = Buffer.concat([
@@ -69,18 +69,19 @@ const login =
       //   ]);
       // }
 
-      const estimateAssertion = await account.signer.sign(estimateChallenge);
+      // const estimateAssertion = await account.signer.sign(estimateChallenge);
 
-      const response = await account.getInvokeEstimateFee(
-        {
-          contractAddress: account.address,
-          calldata,
-          signature: formatAssertion(estimateAssertion),
-        },
-        { version, nonce },
-      );
+      // const response = await account.getInvokeEstimateFee(
+      //   {
+      //     contractAddress: account.address,
+      //     calldata,
+      //     signature: formatAssertion(estimateAssertion),
+      //   },
+      //   { version, nonce },
+      // );
 
-      const suggestedMaxFee = estimatedFeeToMaxFee(response.overall_fee);
+      // const suggestedMaxFee = estimatedFeeToMaxFee(1000000);
+      const suggestedMaxFee = 1000000;
 
       let msgHash = calculateTransactionHash(
         account.address,
@@ -100,14 +101,13 @@ const login =
       const assertion = await account.signer.sign(challenge);
       const signature = formatAssertion(assertion);
 
-      const receipt = await account.invokeFunction(
+      Storage.set("@transaction/set_device_key", [
         { contractAddress: account.address, calldata, signature },
         {
           nonce,
           maxFee: suggestedMaxFee,
           version,
-        },
-      );
+        }])
 
       const controller = new Controller(keypair, address);
       controller.cache();
@@ -130,7 +130,6 @@ const login =
             signature: base64url(Buffer.from(assertion.response.signature)),
           },
         },
-        transactionHash: receipt.transaction_hash,
       };
     };
 
