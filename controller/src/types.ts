@@ -58,7 +58,7 @@ export interface Keychain {
   login(address: string, credentialId: string, options: {
     rpId?: string
     challengeExt?: Buffer
-  }): Promise<{ assertion: Assertion, transactionHash: string }>
+  }): Promise<{ assertion: Assertion }>
   logout(): Promise<void>;
   session(): Promise<Session>;
   sessions(): Promise<{
