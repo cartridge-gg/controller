@@ -1,0 +1,53 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "declaration": true,
+    "target": "es5",
+    "module": "esnext",
+    "strict": false,
+    "jsx": "preserve",
+    "jsxImportSource": "@emotion/react",
+    "allowJs": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "incremental": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "downlevelIteration": true,
+    "noEmit": true,
+    "paths": {
+      "~/*": [
+        "./*"
+      ],
+      "@cartridge/controller": [
+        "../../../controller/src"
+      ],
+      "@cartridge/connector": [
+        "../../../connector/src"
+      ],
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ],
+  "references": [
+    {
+      "path": "../../controller"
+    },
+    {
+      "path": "../../connector"
+    }
+  ]
+}

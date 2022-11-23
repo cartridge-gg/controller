@@ -13,7 +13,7 @@ class Controller {
   private policies: Policy[] = [];
   private url: string = "https://x.cartridge.gg";
 
-  public account: AccountInterface | undefined;
+  public account?: AccountInterface;
 
   constructor(
     policies?: Policy[],
@@ -132,7 +132,7 @@ class Controller {
 
     if (!this.keychain) {
       console.error("not ready for connect")
-      return null;
+      return;
     }
 
     if (!!document.hasStorageAccess) {
@@ -153,6 +153,7 @@ class Controller {
 
     const response = await this.keychain.connect(this.policies);
 
+    console.log(response.address)
     this.account = new DeviceAccount(
       response.address,
       this.keychain,
