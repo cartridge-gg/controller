@@ -17,7 +17,8 @@
     "connector",
     "ui",
     "docs",
-    "examples/starknet-react-next"
+    "examples/starknet-react-next",
+    "examples/get-starknet"
   ],
   "devDependencies": {
     "@changesets/changelog-github": "^0.4.2",
