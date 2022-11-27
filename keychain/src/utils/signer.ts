@@ -7,6 +7,8 @@ import {
   Signer,
   typedData,
 } from "starknet";
+import { toBN } from "starknet/utils/number";
+import { CONTROLLER_CLASS } from "./constants";
 
 export class DeviceSigner extends Signer {
   constructor(keyPair: KeyPair) {
@@ -19,8 +21,9 @@ export class DeviceSigner extends Signer {
     abis?: Abi[],
   ): Promise<Signature> {
     const sig = await super.signTransaction(calls, transactionsDetail, abis);
+
     const pub = await this.getPubKey();
-    return [pub, ...(sig as string[])];
+    return [toBN(CONTROLLER_CLASS).toString(), "1", pub, ...(sig as string[])];
   }
 
   public async signMessage(
@@ -29,6 +32,6 @@ export class DeviceSigner extends Signer {
   ): Promise<Signature> {
     const sig = await super.signMessage(typedData, accountAddress);
     const pub = await this.getPubKey();
-    return [pub, ...(sig as string[])];
+    return [toBN(CONTROLLER_CLASS).toString(), "1", pub, ...(sig as string[])];
   }
 }

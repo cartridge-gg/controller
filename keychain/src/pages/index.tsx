@@ -19,15 +19,15 @@ import Controller from "utils/account";
 import { normalize as normalizeOrigin } from "utils/url";
 import { Session } from "@cartridge/controller";
 
-function normalize(
-  fn: (origin: string) => Function,
-): (origin: string) => Function {
+export function normalize<T = Function>(
+  fn: (origin: string) => T,
+): (origin: string) => T {
   return (origin: string) => fn(normalizeOrigin(origin));
 }
 
-function validate(
-  fn: (controller: Controller, session: Session, origin: string) => Function,
-): (origin: string) => Function {
+export function validate<T = Function>(
+  fn: (controller: Controller, session: Session, origin: string) => T,
+): (origin: string) => T {
   return (origin: string) => {
     const controller = Controller.fromStore();
     if (!controller) {

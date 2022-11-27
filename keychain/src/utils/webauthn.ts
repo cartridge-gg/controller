@@ -27,7 +27,7 @@ import { fromCallsToExecuteCalldata } from "starknet/utils/transaction";
 import { estimatedFeeToMaxFee } from "starknet/dist/utils/stark";
 import { CONTROLLER_CLASS } from "./constants";
 
-type RawAssertion = PublicKeyCredential & {
+export type RawAssertion = PublicKeyCredential & {
   response: AuthenticatorAssertionResponse;
 };
 
@@ -76,7 +76,6 @@ export class WebauthnSigner implements SignerInterface {
       publicKey: {
         challenge,
         timeout: 60000,
-        rpId: this.rpId,
         allowCredentials: [
           {
             type: "public-key",
@@ -180,11 +179,11 @@ class WebauthnAccount extends Account {
     address: string,
     credentialId: string,
     publicKey: string,
-    options: {
+    options?: {
       rpId?: string;
     },
   ) {
-    const signer = new WebauthnSigner(credentialId, publicKey, options.rpId);
+    const signer = new WebauthnSigner(credentialId, publicKey, options ? options.rpId : undefined);
     super(defaultProvider, address, signer);
     this.signer = signer;
   }

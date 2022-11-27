@@ -33,6 +33,21 @@ const execute =
         } as Policy),
       );
 
+      // if (!transactionsDetail.nonce) {
+      //   transactionsDetail.nonce = await this.getNonce();
+      // }
+
+      transactionsDetail.version = 1;
+
+      // if (!transactionsDetail.maxFee) {
+      //   try {
+      //     transactionsDetail.maxFee = (await this.estimateInvokeFee(calls, { nonce: transactionsDetail.nonce })).suggestedMaxFee
+      //   } catch (e) {
+      //     console.error(e)
+      //     throw e
+      //   }
+      // }
+
       if (sync) {
         const calldata = fromCallsToExecuteCalldata(calls);
         const hash = calculateTransactionHash(

@@ -102,23 +102,6 @@ class DeviceAccount extends Account {
       transactionsDetail = {}
     }
 
-    if (!transactionsDetail.nonce) {
-      transactionsDetail.nonce = 0 //await this.getNonce();
-    }
-
-    if (!transactionsDetail.version) {
-      transactionsDetail.version = 1;
-    }
-
-    if (!transactionsDetail.maxFee) {
-      try {
-        transactionsDetail.maxFee = "100" // (await this.estimateFee(calls, { nonce: transactionsDetail.nonce })).suggestedMaxFee
-      } catch (e) {
-        console.error(e)
-        throw e
-      }
-    }
-
     try {
       return await this.keychain.execute(calls, abis, transactionsDetail)
     } catch (e) {
@@ -130,15 +113,12 @@ class DeviceAccount extends Account {
 
     window.open(
       `${this.url}/execute?${qs.stringify({
+        ...transactionsDetail,
         origin: window.origin,
         calls: JSON.stringify(calls),
-        nonce: transactionsDetail.nonce,
-        version: transactionsDetail.version,
-        maxFee: transactionsDetail.maxFee,
-        chainId: transactionsDetail.chainId ? transactionsDetail.chainId : StarknetChainId.TESTNET,
       })}`,
       "_blank",
-      "height=650,width=400"
+      "height=650,width=450"
     );
 
     return this.keychain.execute(calls, abis, transactionsDetail, true);
@@ -158,7 +138,7 @@ class DeviceAccount extends Account {
         typedData: JSON.stringify(typedData),
       })}`,
       "_blank",
-      "height=650,width=400"
+      "height=650,width=450"
     );
 
     return this.keychain.signMessage(typedData, this.address);

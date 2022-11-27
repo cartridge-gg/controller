@@ -153,7 +153,6 @@ class Controller {
 
     const response = await this.keychain.connect(this.policies);
 
-    console.log(response.address)
     this.account = new DeviceAccount(
       response.address,
       this.keychain,

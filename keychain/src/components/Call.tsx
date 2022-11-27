@@ -9,8 +9,9 @@ import {
   Input,
   Spacer,
   VStack,
+  FormControl,
 } from "@chakra-ui/react";
-import { FieldInputProps } from "formik";
+import { Field, FieldInputProps } from "formik";
 import { formatEther } from "ethers/lib/utils";
 import { Policy } from "@cartridge/controller";
 import { formatAddress } from "@cartridge/ui/components/Address";
@@ -33,22 +34,43 @@ function formatDescription(policy: Policy) {
   return `Execute code on ${formatAddress(policy.target, 6)}`;
 }
 
-export const Call = ({
+export const Call = ({ policy, notice }: { policy: Policy, notice?: string }) => {
+  const title = (
+    <HStack>
+      <Text>{formatName(policy)}</Text>
+      {notice && (
+        <Tag colorScheme="red" size="sm">
+          {notice}
+        </Tag>
+      )}
+    </HStack>
+  );
+
+  const description = (
+    <Link href={StarkscanUrl.contract(policy.target)} target="_blank">
+      {formatDescription(policy)}
+    </Link>
+  );
+
+  return (
+    <Base title={title} description={description} />
+  )
+}
+
+export const CallToggle = ({
   policy,
-  toggable = true,
-  errMsg,
+  notice,
   ...rest
 }: {
   policy: Policy;
-  toggable?: boolean;
-  errMsg?: string;
+  notice?: string;
 } & FieldInputProps<boolean>) => {
   const title = (
     <HStack>
       <Text>{formatName(policy)}</Text>
-      {errMsg && (
+      {notice && (
         <Tag colorScheme="red" size="sm">
-          {errMsg}
+          {notice}
         </Tag>
       )}
     </HStack>
@@ -60,11 +82,10 @@ export const Call = ({
   );
 
   return (
-    <Base
+    <Switchable
       title={title}
       description={description}
-      toggable={toggable}
-      errMsg={errMsg}
+      errMsg={notice}
       {...rest}
     />
   );
@@ -81,7 +102,7 @@ export const MaxFee = ({
   const description = "Game can spend no more than this amount of gas";
   return (
     <>
-      <Base
+      <Switchable
         title={title}
         description={description}
         toggable={false}
@@ -99,7 +120,7 @@ export const MaxFee = ({
   );
 };
 
-const Base = ({
+const Switchable = ({
   title,
   description,
   toggable = true,
@@ -114,24 +135,34 @@ const Base = ({
   toggable?: boolean;
 } & FieldInputProps<boolean>) => (
   <Flex>
-    <VStack align="flex-start" spacing="12px">
-      <Text variant="ibm-upper-bold" fontSize="11px">
-        {title}
-      </Text>
-      <Text fontSize="12px" color="gray.200">
-        {description}
-      </Text>
-    </VStack>
+    <Base title={title} description={description} />
     <Spacer />
-    {toggable && (
-      <Switch
-        disabled={disable || !!errMsg}
-        size="lg"
-        name={rest.name}
-        isChecked={errMsg ? false : rest.value}
-        onBlur={rest.onBlur}
-        onChange={rest.onChange}
-      />
-    )}
+    <Switch
+      disabled={disable || !!errMsg}
+      size="lg"
+      name={rest.name}
+      isChecked={errMsg ? false : rest.value}
+      onBlur={rest.onBlur}
+      onChange={rest.onChange}
+    />
   </Flex>
+)
+
+const Base = ({
+  title,
+  description,
+}: {
+  title: React.ReactElement | string;
+  description?: React.ReactElement | string;
+  disable?: boolean;
+  errMsg?: string;
+}) => (
+  <VStack align="flex-start" spacing="8px" bgColor="gray.700" p="16px" borderRadius="8px">
+    <Text variant="ibm-upper-bold" fontSize="11px">
+      {title}
+    </Text>
+    <Text fontSize="12px" color="gray.200">
+      {description}
+    </Text>
+  </VStack>
 );
