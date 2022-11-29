@@ -14,20 +14,20 @@ import { StarknetChainId, ZERO } from "starknet/constants";
 import { estimatedFeeToMaxFee } from "starknet/dist/utils/stark";
 import { CONTROLLER_CLASS } from "utils/constants";
 
-const registerDevice = () => {
-  const calls: Call[] = [
-    {
-      contractAddress: address,
-      entrypoint: "executeOnPlugin",
-      calldata: [
-        CONTROLLER_CLASS,
-        getSelector("add_device_key"),
-        1,
-        deviceKey,
-      ],
-    },
-  ];
-}
+// const registerDevice = () => {
+//   const calls: Call[] = [
+//     {
+//       contractAddress: address,
+//       entrypoint: "executeOnPlugin",
+//       calldata: [
+//         CONTROLLER_CLASS,
+//         getSelector("add_device_key"),
+//         1,
+//         deviceKey,
+//       ],
+//     },
+//   ];
+// }
 
 const login =
   () =>
@@ -43,12 +43,12 @@ const login =
       const user = await fetchUser(username);
 
       const controller = new Controller(defaultProvider, keypair, address, user.data.account.credential.id, options);
-      const { assertion, call } = await controller.getRegisterCall(StarknetChainId.MAINNET);
+      const { assertion, invoke } = await controller.getRegisterCall(StarknetChainId.MAINNET);
 
       controller.cache();
       controller.approve("https://cartridge.gg", [], "0");
       Storage.set("@admin/https://cartridge.gg", {});
-      Storage.set(`@register/${StarknetChainId.MAINNET}/set_device_key`, call);
+      Storage.set(`@register/${StarknetChainId.MAINNET}/set_device_key`, invoke);
 
       return {
         assertion: {

@@ -1,5 +1,5 @@
 import { split } from "@cartridge/controller";
-import { ec } from "starknet";
+import { ec, Provider } from "starknet";
 import { encodeShortString } from "starknet/dist/utils/shortString";
 import {
   calculateContractAddressFromHash,
@@ -10,9 +10,8 @@ import Controller from "utils/account";
 import Storage from "utils/storage";
 import { ACCOUNT_CLASS, CONTROLLER_CLASS, PROXY_CLASS } from "utils/constants";
 
-
 const register =
-  () => async (username: string, credential: { x: string; y: string }) => {
+  () => async (username: string, credentialId: string, credential: { x: string; y: string }) => {
     const keypair = ec.genKeyPair();
     const deviceKey = ec.getStarkKey(keypair);
 
@@ -39,7 +38,8 @@ const register =
       "0",
     );
 
-    const controller = new Controller(keypair, address);
+    const provider = new Provider({ sequencer: { network: "goerli-alpha" } });
+    const controller = new Controller(provider, keypair, address, credentialId);
     controller.cache();
     controller.approve("https://cartridge.gg", [], "0");
     Storage.set("@admin/https://cartridge.gg", {});

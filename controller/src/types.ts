@@ -53,8 +53,8 @@ export interface Keychain {
   execute(calls: Call | Call[], abis?: Abi[], transactionsDetail?: InvocationsDetails & {
     chainId?: StarknetChainId,
   }, sync?: boolean): Promise<InvokeFunctionResponse>;
-  provision(address: string): Promise<string>;
-  register(username: string, credential: { x: string, y: string }): Promise<{ address: string, deviceKey: string }>;
+  provision(address: string, credentialId: string): Promise<string>;
+  register(username: string, credentialId: string, credential: { x: string, y: string }): Promise<{ address: string, deviceKey: string }>;
   login(address: string, credentialId: string, options: {
     rpId?: string
     challengeExt?: Buffer

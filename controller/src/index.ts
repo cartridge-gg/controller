@@ -95,13 +95,13 @@ class Controller {
   }
 
   // Register a new device key.
-  async register(username: string, credential: { x: string, y: string }) {
+  async register(username: string, credentialId: string, credential: { x: string, y: string }) {
     if (!this.keychain) {
       console.error("not ready for connect")
       return null;
     }
 
-    return await this.keychain.register(username, credential);
+    return await this.keychain.register(username, credentialId, credential);
   }
 
   async login(address: string, credentialId: string, options: {
@@ -116,13 +116,13 @@ class Controller {
     return this.keychain.login(address, credentialId, options);
   }
 
-  async provision(address: string) {
+  async provision(address: string, credentialId: string) {
     if (!this.keychain) {
       console.error("not ready for connect")
       return null;
     }
 
-    return this.keychain.provision(address);
+    return this.keychain.provision(address, credentialId);
   }
 
   async connect() {
