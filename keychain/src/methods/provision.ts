@@ -8,9 +8,7 @@ const provision = () => async (address: string, credentialId: string) => {
 
   const provider = new Provider({ sequencer: { network: "goerli-alpha" } });
   const controller = new Controller(provider, keypair, address, credentialId);
-  controller.cache();
-  controller.approve("https://cartridge.gg", [], "0");
-  Storage.set("@admin/https://cartridge.gg", {});
+  controller.store();
 
   return deviceKey;
 };

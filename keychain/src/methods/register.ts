@@ -7,7 +7,6 @@ import {
 } from "starknet/dist/utils/hash";
 import { toBN } from "starknet/dist/utils/number";
 import Controller from "utils/account";
-import Storage from "utils/storage";
 import { ACCOUNT_CLASS, CONTROLLER_CLASS, PROXY_CLASS } from "utils/constants";
 
 const register =
@@ -40,9 +39,7 @@ const register =
 
     const provider = new Provider({ sequencer: { network: "goerli-alpha" } });
     const controller = new Controller(provider, keypair, address, credentialId);
-    controller.cache();
-    controller.approve("https://cartridge.gg", [], "0");
-    Storage.set("@admin/https://cartridge.gg", {});
+    controller.store();
 
     return { address, deviceKey };
   };

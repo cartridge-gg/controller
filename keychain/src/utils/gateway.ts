@@ -1,10 +1,11 @@
 import { StarknetChainId } from "starknet/constants";
+import { toHex } from "starknet/utils/number";
 import { InvocationWithDetails } from "./account";
 import { GATEWAY_GOERLI, GATEWAY_MAINNET } from "./constants";
 
 export async function estimateFeeBulk(chainId: StarknetChainId, invocations: InvocationWithDetails[]) {
     const uri = chainId === StarknetChainId.MAINNET ? GATEWAY_MAINNET : GATEWAY_GOERLI;
-    const res = await fetch(uri, {
+    const res = await fetch(uri + "/estimate_fee_bulk", {
         method: "POST",
         headers: {
             "content-type": "application/json",
@@ -15,7 +16,7 @@ export async function estimateFeeBulk(chainId: StarknetChainId, invocations: Inv
             contract_address: invoke.invocation.contractAddress,
             calldata: invoke.invocation.calldata,
             signature: invoke.invocation.signature,
-            max_fee: invoke.details.maxFee,
+            max_fee: toHex(invoke.details.maxFee),
             nonce: invoke.details.nonce,
         }))),
     });

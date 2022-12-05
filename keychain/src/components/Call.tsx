@@ -37,7 +37,7 @@ function formatDescription(policy: Policy) {
 export const Call = ({ policy, notice }: { policy: Policy, notice?: string }) => {
   const title = (
     <HStack>
-      <Text>{formatName(policy)}</Text>
+      <Text variant="ibm-upper-bold">{formatName(policy)}</Text>
       {notice && (
         <Tag colorScheme="red" size="sm">
           {notice}
@@ -158,9 +158,9 @@ const Base = ({
   errMsg?: string;
 }) => (
   <VStack align="flex-start" spacing="8px" bgColor="gray.700" p="16px" borderRadius="8px">
-    <Text variant="ibm-upper-bold" fontSize="11px">
+    <Box fontSize="11px">
       {title}
-    </Text>
+    </Box>
     <Text fontSize="12px" color="gray.200">
       {description}
     </Text>

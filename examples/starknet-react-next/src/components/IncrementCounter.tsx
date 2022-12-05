@@ -1,9 +1,9 @@
-import { useStarknet, useStarknetInvoke } from '@starknet-react/core'
 import React from 'react'
+import { useAccount, useStarknetInvoke } from '@starknet-react/core'
 import { useCounterContract } from '~/hooks/counter'
 
 export function IncrementCounter() {
-  const { account } = useStarknet()
+  const { account } = useAccount()
   const { contract: counter } = useCounterContract()
   const { invoke } = useStarknetInvoke({ contract: counter, method: 'incrementCounter' })
 

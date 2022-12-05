@@ -33,21 +33,15 @@ const login =
   () =>
     async (
       address: string,
-      username: string,
+      credentialId: string,
       options: {
         rpId?: string;
         challengeExt?: Buffer;
       },
     ) => {
       const keypair = ec.genKeyPair();
-      const user = await fetchUser(username);
-
-      const controller = new Controller(defaultProvider, keypair, address, user.data.account.credential.id, options);
-      const { assertion, invoke } = await controller.getRegisterCall(StarknetChainId.MAINNET);
-
-      controller.cache();
-      controller.approve("https://cartridge.gg", [], "0");
-      Storage.set("@admin/https://cartridge.gg", {});
+      const controller = new Controller(defaultProvider, keypair, address, credentialId, options);
+      const { assertion, invoke } = await controller.signAddDeviceKey(StarknetChainId.TESTNET);
       Storage.set(`@register/${StarknetChainId.MAINNET}/set_device_key`, invoke);
 
       return {

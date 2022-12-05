@@ -2,7 +2,7 @@ import type { NextPage } from "next";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Flex, HStack, Spinner, Text, VStack } from "@chakra-ui/react";
-import { StarknetChainId } from "starknet/constants";
+import { StarknetChainId, ZERO } from "starknet/constants";
 
 import { Header } from "components/Header";
 import Controller, { RegisterData } from "utils/account";
@@ -15,7 +15,11 @@ import { Call } from "components/Call";
 import Footer from "components/Footer";
 import InfoIcon from "@cartridge/ui/components/icons/Info";
 import { normalize, validate } from "pages";
-import { BigNumberish } from "starknet/utils/number";
+import { BigNumberish, toBN, toHex } from "starknet/utils/number";
+import { estimateFeeBulk } from "utils/gateway";
+import { transactionVersion } from "starknet/utils/hash";
+import { fromCallsToExecuteCalldata } from "starknet/utils/transaction";
+import { BigNumber } from "ethers";
 
 const Unlock = ({ chainId, onSubmit }: { chainId: StarknetChainId, onSubmit: () => void }) => (
   <Flex m={4} flex={1} flexDirection="column">
@@ -84,8 +88,9 @@ const Fees = ({ fees }: { fees?: EstimateFee }) => (
 
 const Execute: NextPage = () => {
   const [registerData, setRegisterData] = useState<RegisterData>();
-  const [nonce, setNonce] = useState<BigNumberish>();
+  const [nonce, setNonce] = useState<BigNumber>();
   const [fees, setFees] = useState<EstimateFee>();
+  const [error, setError] = useState<Error>();
   const controller = useMemo(() => Controller.fromStore(), []);
   const router = useRouter();
 
@@ -119,7 +124,7 @@ const Execute: NextPage = () => {
     const calls: StarknetCall | StarknetCall[] = JSON.parse(router.query.calls as string);
     const transactions = Array.isArray(calls) ? calls : [calls];
 
-    return { calls: transactions, maxFee, chainId: chainId ? chainId : StarknetChainId.MAINNET };
+    return { calls: transactions, maxFee, chainId: chainId ? chainId : StarknetChainId.TESTNET };
   }, [controller.address, router.query]);
 
   // Get the nonce
@@ -128,8 +133,8 @@ const Execute: NextPage = () => {
       return;
     }
 
-    controller.getNonce().then(n => {
-      setNonce(n);
+    controller.getNonce().then((n: BigNumberish) => {
+      setNonce(toBN(n));
     })
   }, [controller, setNonce])
 
@@ -139,23 +144,50 @@ const Execute: NextPage = () => {
       return;
     }
 
-    if (!controller.isRegistered(params.chainId) && !registerData) {
-      return;
+    async function register() {
+      if (!controller.isRegistered(params.chainId) && !registerData) {
+        return;
+      } else if (!controller.isRegistered(params.chainId) && registerData) {
+        try {
+          const nextNonce = toHex(nonce.add(toBN(1)))
+          const signerDetails = {
+            walletAddress: controller.address,
+            nonce: nextNonce,
+            maxFee: ZERO,
+            version: transactionVersion,
+            chainId: params.chainId,
+          };
+
+          const signature = await controller.signer.signTransaction(params.calls, signerDetails);
+          const calldata = fromCallsToExecuteCalldata(params.calls);
+
+          const estimate = await estimateFeeBulk(params.chainId, [registerData.invoke, {
+            invocation: { contractAddress: controller.address, calldata, signature },
+            details: { version: transactionVersion, nonce: nextNonce, maxFee: ZERO },
+          }])
+          setFees(estimate)
+        } catch (e) {
+          console.error(e)
+          setError(e)
+          return;
+        }
+      }
     }
 
-    controller.estimateInvokeFee(params.calls, { nonce, chainId: params.chainId })
-    // .then(estimate => setFees(estimate));
-  }, [controller, nonce, params, registerData])
+    register();
+  }, [controller, nonce, params, registerData, setError])
 
   useEffect(() => {
     if (!controller) {
-      router.replace(`${process.env.NEXT_PUBLIC_SITE_URL}/welcome`);
+      router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/welcome`);
       return;
     }
   }, [router, controller]);
 
   const onRegister = useCallback(async () => {
-    controller.getRegisterCall(params.chainId).then(data => setRegisterData(data))
+    const data = await controller.signAddDeviceKey(params.chainId)
+    Storage.set(`@register/${params.chainId}/set_device_key`, data)
+    setRegisterData(data)
   }, [controller, params])
 
   const onSubmit = useCallback(
