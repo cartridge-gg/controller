@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Policy } from "@cartridge/controller";
-import { diff } from "utils/account";
+import { diff } from "utils/controller";
 
 export function useUrlPolicys(): {
   isValidating: boolean;

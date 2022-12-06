@@ -1,4 +1,4 @@
-import { ec, Account, KeyPair, number, ProviderInterface, RpcProvider, Provider, Call, AllowArray, EstimateFeeDetails, EstimateFee, Invocation, InvocationsDetails } from "starknet";
+import { ec, Account, KeyPair, number, RpcProvider, Provider, Call, Invocation, InvocationsDetails, SignerInterface } from "starknet";
 import { BigNumberish } from "starknet/dist/utils/number";
 import { Policy, Session } from "@cartridge/controller";
 import equal from "fast-deep-equal";
@@ -11,7 +11,6 @@ import { CONTROLLER_CLASS } from "./constants";
 import { calculateTransactionHash, getSelector, transactionVersion } from "starknet/utils/hash";
 import { toBN } from "starknet/utils/number";
 import { fromCallsToExecuteCalldata } from "starknet/utils/transaction";
-import { estimateFeeBulk } from "./gateway";
 
 const VERSION = "0.0.1"
 
@@ -24,42 +23,29 @@ export type RegisterData = {
   invoke: InvocationWithDetails;
 }
 
-export async function fetchUser(address: string) {
-  const res = await fetch(process.env.NEXT_PUBLIC_API_URL, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-    },
-    body: `{"query":"query {
-        accounts(where: {contractAddress: \\"${address}\\"}) {
-          edges {
-            node {
-              id
-              credential {
-                id
-            }
-        }
-      }
-    }
-  }"}`,
-  });
-  return res.json();
-}
-
-export default class Controller extends Account {
+export default class Controller {
+  public address: string;
+  public signer: SignerInterface;
   protected publicKey: string;
   protected keypair: KeyPair;
   protected webauthn: WebauthnAccount;
   protected credentialId: string;
+  protected accounts: { [key in StarknetChainId]: Account }
 
-  constructor(provider: ProviderInterface, keypair: KeyPair, address: string, credentialId: string, options?: {
+  constructor(keypair: KeyPair, address: string, credentialId: string, options?: {
     rpId?: string;
   }) {
-    super(provider, address, keypair);
+    this.address = address;
     this.signer = new DeviceSigner(keypair);
     this.keypair = keypair;
     this.publicKey = ec.getStarkKey(keypair);
     this.credentialId = credentialId;
+
+    const goerli = new RpcProvider({ nodeUrl: process.env.NEXT_PUBLIC_RPC_GOERLI })
+    this.accounts[StarknetChainId.TESTNET] = new Account(goerli, address, keypair);
+
+    const mainnet = new RpcProvider({ nodeUrl: process.env.NEXT_PUBLIC_RPC_MAINNET })
+    this.accounts[StarknetChainId.MAINNET] = new Account(mainnet, address, keypair);
 
     this.webauthn = new WebauthnAccount(
       address,
@@ -78,19 +64,9 @@ export default class Controller extends Account {
     return register === true;
   }
 
-  // async estimateInvokeFee(calls: AllowArray<Call>, details: EstimateFeeDetails & {
-  //   chainId: StarknetChainId
-  // }): Promise<EstimateFee> {
-  //   const register = Storage.get(`@register/${details.chainId}/set_device_key`) as RegisterData
-  //   if (register) {
-  //     const estimate = await estimateFeeBulk(details.chainId, [register.invoke])
-  //     debugger
-  //   }
-
-  //   this.estimateInvokeFee(calls, details);
-
-  //   return;
-  // }
+  account(chainId: StarknetChainId) {
+    return this.accounts[chainId];
+  }
 
   async signAddDeviceKey(chainId: StarknetChainId): Promise<RegisterData> {
     const calls: Call[] = [
@@ -106,7 +82,7 @@ export default class Controller extends Account {
       },
     ];
 
-    const nonce = await this.getNonce();
+    const nonce = await this.accounts[chainId].getNonce();
     const version = toBN(transactionVersion);
     const calldata = fromCallsToExecuteCalldata(calls);
 

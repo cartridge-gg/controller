@@ -5,7 +5,7 @@ import { Flex, HStack, Spinner, Text, VStack } from "@chakra-ui/react";
 import { StarknetChainId, ZERO } from "starknet/constants";
 
 import { Header } from "components/Header";
-import Controller, { RegisterData } from "utils/account";
+import Controller, { RegisterData } from "utils/controller";
 import { useRouter } from "next/router";
 import { Call as StarknetCall, EstimateFee, EstimateFeeResponse } from "starknet";
 import Storage from "utils/storage";
@@ -20,7 +20,7 @@ import { estimateFeeBulk } from "utils/gateway";
 import { transactionVersion } from "starknet/utils/hash";
 import { fromCallsToExecuteCalldata } from "starknet/utils/transaction";
 import { BigNumber } from "ethers";
-import { formatEther, formatUnits } from "ethers/lib/utils";
+import { formatUnits } from "ethers/lib/utils";
 
 async function fetchEthPrice() {
   const res = await fetch(process.env.NEXT_PUBLIC_API_URL, {
@@ -138,12 +138,6 @@ const Execute: NextPage = () => {
     return url;
   }, [router.query]);
 
-  const execute = useCallback((calls: StarknetCall[],) => normalize(validate((controller) => {
-    return async () => {
-      return await controller.execute(calls, []);
-    }
-  })), [])
-
   const params = useMemo(() => {
     if (
       !controller.address ||
@@ -162,16 +156,22 @@ const Execute: NextPage = () => {
     return { calls: transactions, maxFee, chainId: chainId ? chainId : StarknetChainId.TESTNET };
   }, [controller.address, router.query]);
 
+  const execute = useCallback((calls: StarknetCall[],) => normalize(validate((controller) => {
+    return async () => {
+      return await controller.account(params.chainId).execute(calls, []);
+    }
+  })), [params])
+
   // Get the nonce
   useEffect(() => {
-    if (!controller) {
+    if (!controller || !params) {
       return;
     }
 
-    controller.getNonce().then((n: BigNumberish) => {
+    controller.account(params.chainId).getNonce().then((n: BigNumberish) => {
       setNonce(toBN(n));
     })
-  }, [controller, setNonce])
+  }, [controller, params, setNonce])
 
   // Estimate fees
   useEffect(() => {

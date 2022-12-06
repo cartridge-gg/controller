@@ -8,7 +8,7 @@ import Session from "components/Session";
 import { Header } from "components/Header";
 import { useRequests } from "hooks/account";
 import { useUrlPolicys } from "hooks/policy";
-import Controller from "utils/account";
+import Controller from "utils/controller";
 import Banner from "components/Banner";
 
 const Connect: NextPage = () => {

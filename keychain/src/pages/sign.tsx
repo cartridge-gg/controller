@@ -10,7 +10,7 @@ import { Header } from "components/Header";
 import Banner from "components/Banner";
 import ButtonBar from "components/ButtonBar";
 import Details from "components/Details";
-import Controller from "utils/account";
+import Controller from "utils/controller";
 
 const DetailsHeader = (data: {
   media?: Array<{ uri: string }>;

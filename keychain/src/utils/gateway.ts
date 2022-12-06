@@ -1,6 +1,6 @@
 import { StarknetChainId } from "starknet/constants";
 import { toHex } from "starknet/utils/number";
-import { InvocationWithDetails } from "./account";
+import { InvocationWithDetails } from "./controller";
 import { GATEWAY_GOERLI, GATEWAY_MAINNET } from "./constants";
 
 export async function estimateFeeBulk(chainId: StarknetChainId, invocations: InvocationWithDetails[]) {

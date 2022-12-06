@@ -12,6 +12,7 @@ import {
   defaultProvider,
   EstimateFee,
   DeclareContractPayload,
+  RpcProvider,
 } from "starknet";
 import qs from 'query-string';
 
@@ -28,13 +29,14 @@ class DeviceAccount extends Account {
   private url: string = "https://x.cartridge.gg";
 
   constructor(
+    provider: RpcProvider,
     address: string,
     keychain: AsyncMethodReturns<Keychain>,
     options?: {
       url?: string;
     }
   ) {
-    super(defaultProvider, address, new Signer(keychain, options));
+    super(provider, address, new Signer(keychain, options));
     this.address = address;
     this.keychain = keychain;
 
@@ -72,11 +74,11 @@ class DeviceAccount extends Account {
      * @returns response from addTransaction
      */
   async estimateInvokeFee(calls: Call | Call[], details?: EstimateFeeDetails): Promise<EstimateFee> {
-    return this.keychain.estimateInvokeFee(calls, details)
+    return this.keychain.estimateInvokeFee(calls, { ...details, chainId: this.chainId })
   }
 
   async estimateDeclareFee(payload: DeclareContractPayload, details?: EstimateFeeDetails): Promise<EstimateFee> {
-    return this.keychain.estimateDeclareFee(payload, details)
+    return this.keychain.estimateDeclareFee(payload, { ...details, chainId: this.chainId })
   }
 
   /**

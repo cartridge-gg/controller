@@ -10,7 +10,7 @@ import { toBN } from "starknet/utils/number";
 import { calculateTransactionHash } from "starknet/utils/hash";
 import { fromCallsToExecuteCalldata } from "starknet/utils/transaction";
 
-import Controller, { diff } from "utils/account";
+import Controller, { diff } from "utils/controller";
 import Storage from "utils/storage";
 
 const execute =
@@ -37,6 +37,7 @@ const execute =
       //   transactionsDetail.nonce = await this.getNonce();
       // }
 
+      transactionsDetail.chainId = transactionsDetail.chainId ? transactionsDetail.chainId : StarknetChainId.TESTNET
       transactionsDetail.version = 1;
 
       // if (!transactionsDetail.maxFee) {
@@ -55,7 +56,7 @@ const execute =
           transactionsDetail.version,
           calldata,
           transactionsDetail.maxFee,
-          transactionsDetail.chainId ? transactionsDetail.chainId : StarknetChainId.TESTNET,
+          transactionsDetail.chainId,
           transactionsDetail.nonce,
         );
         await pollForTransaction(hash);
@@ -74,7 +75,7 @@ const execute =
         throw new Error("transaction fees exceed pre-approved limit");
       }
 
-      return await controller.execute(calls, abis, transactionsDetail);
+      return await controller.account(transactionsDetail.chainId).execute(calls, abis, transactionsDetail);
     };
 
 // Three minutes

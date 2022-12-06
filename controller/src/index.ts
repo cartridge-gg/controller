@@ -1,10 +1,16 @@
 import qs from "query-string";
-import { AccountInterface, number } from "starknet";
+import { AccountInterface, number, RpcProvider } from "starknet";
 import { AsyncMethodReturns, Connection, connectToChild } from '@cartridge/penpal';
 
 import DeviceAccount from "./device";
 import { Session, Keychain, Policy } from "./types";
 import { BigNumberish, toBN } from "starknet/dist/utils/number";
+import { StarknetChainId } from "starknet/dist/constants";
+
+const providers = {
+  [StarknetChainId.TESTNET]: new RpcProvider({ nodeUrl: process.env.NEXT_PUBLIC_RPC_GOERLI! }),
+  [StarknetChainId.MAINNET]: new RpcProvider({ nodeUrl: process.env.NEXT_PUBLIC_RPC_MAINNET! }),
+}
 
 class Controller {
   private selector = "cartridge-messenger";
@@ -12,8 +18,8 @@ class Controller {
   public keychain?: AsyncMethodReturns<Keychain>;
   private policies: Policy[] = [];
   private url: string = "https://x.cartridge.gg";
-
-  public account?: AccountInterface;
+  public chainId: StarknetChainId = StarknetChainId.TESTNET;
+  public accounts?: { [key in StarknetChainId]: AccountInterface };
 
   constructor(
     policies?: Policy[],
@@ -68,6 +74,13 @@ class Controller {
     ).then(() => this.probe())
   }
 
+  get account() {
+    if (!this.accounts) {
+      return;
+    }
+    return this.accounts[this.chainId]
+  }
+
   async ready() {
     return this.connection?.promise.then(() => this.probe()).then((res) => !!res, () => false)
   }
@@ -80,18 +93,38 @@ class Controller {
 
     try {
       const { address } = await this.keychain.probe();
-      this.account = new DeviceAccount(
-        address,
-        this.keychain,
-        {
-          url: this.url,
-        }
-      );
+      this.accounts = {
+        [StarknetChainId.MAINNET]: new DeviceAccount(
+          providers[StarknetChainId.MAINNET],
+          address,
+          this.keychain,
+          {
+            url: this.url,
+          }
+        ),
+        [StarknetChainId.TESTNET]: new DeviceAccount(
+          providers[StarknetChainId.TESTNET],
+          address,
+          this.keychain,
+          {
+            url: this.url,
+          }
+        )
+      }
     } catch (e) {
       console.error(e)
+      return;
     }
 
-    return !!this.account;
+    return !!this.accounts[this.chainId];
+  }
+
+  async switchChain(chainId: StarknetChainId) {
+    if (this.chainId === chainId) {
+      return;
+    }
+
+    this.chainId = chainId;
   }
 
   // Register a new device key.
@@ -126,8 +159,8 @@ class Controller {
   }
 
   async connect() {
-    if (this.account) {
-      return this.account;
+    if (this.accounts) {
+      return this.accounts[this.chainId];
     }
 
     if (!this.keychain) {
@@ -153,15 +186,26 @@ class Controller {
 
     const response = await this.keychain.connect(this.policies);
 
-    this.account = new DeviceAccount(
-      response.address,
-      this.keychain,
-      {
-        url: this.url,
-      }
-    );
+    this.accounts = {
+      [StarknetChainId.MAINNET]: new DeviceAccount(
+        providers[StarknetChainId.MAINNET],
+        response.address,
+        this.keychain,
+        {
+          url: this.url,
+        }
+      ),
+      [StarknetChainId.TESTNET]: new DeviceAccount(
+        providers[StarknetChainId.TESTNET],
+        response.address,
+        this.keychain,
+        {
+          url: this.url,
+        }
+      )
+    }
 
-    return this.account;
+    return this.accounts[this.chainId];
   }
 
   async disconnect() {

@@ -1,6 +1,6 @@
 import { Policy } from "@cartridge/controller";
 
-import Controller from "utils/account";
+import Controller from "utils/controller";
 
 const INTERNVAL = 100;
 

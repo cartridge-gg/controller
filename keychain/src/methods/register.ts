@@ -6,7 +6,7 @@ import {
   getSelectorFromName,
 } from "starknet/dist/utils/hash";
 import { toBN } from "starknet/dist/utils/number";
-import Controller from "utils/account";
+import Controller from "utils/controller";
 import { ACCOUNT_CLASS, CONTROLLER_CLASS, PROXY_CLASS } from "utils/constants";
 
 const register =
@@ -37,8 +37,7 @@ const register =
       "0",
     );
 
-    const provider = new Provider({ sequencer: { network: "goerli-alpha" } });
-    const controller = new Controller(provider, keypair, address, credentialId);
+    const controller = new Controller(keypair, address, credentialId);
     controller.store();
 
     return { address, deviceKey };

@@ -1,13 +1,10 @@
-import { ec, Provider } from "starknet";
-import Controller from "utils/account";
-import Storage from "utils/storage";
+import { ec } from "starknet";
+import Controller from "utils/controller";
 
 const provision = () => async (address: string, credentialId: string) => {
   const keypair = ec.genKeyPair();
   const deviceKey = ec.getStarkKey(keypair);
-
-  const provider = new Provider({ sequencer: { network: "goerli-alpha" } });
-  const controller = new Controller(provider, keypair, address, credentialId);
+  const controller = new Controller(keypair, address, credentialId);
   controller.store();
 
   return deviceKey;

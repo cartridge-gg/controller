@@ -74,7 +74,6 @@ export class InjectedController implements IStarknetWindowObject {
     public isConnected: boolean = false;
     public account?: AccountInterface | undefined;
     public selectedAddress?: string;
-
     public subscriptions: WalletEvents[] = []
 
     private controller: Controller;

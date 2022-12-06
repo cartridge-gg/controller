@@ -48,8 +48,12 @@ export interface Keychain {
   revoke(origin: string): void;
   approvals(origin: string): Promise<Session | undefined>;
 
-  estimateDeclareFee(payload: DeclareContractPayload, details?: EstimateFeeDetails): Promise<EstimateFee>
-  estimateInvokeFee(calls: Call | Call[], estimateFeeDetails?: EstimateFeeDetails): Promise<EstimateFee>;
+  estimateDeclareFee(payload: DeclareContractPayload, details?: EstimateFeeDetails & {
+    chainId: StarknetChainId
+  }): Promise<EstimateFee>
+  estimateInvokeFee(calls: Call | Call[], estimateFeeDetails?: EstimateFeeDetails & {
+    chainId: StarknetChainId
+  }): Promise<EstimateFee>;
   execute(calls: Call | Call[], abis?: Abi[], transactionsDetail?: InvocationsDetails & {
     chainId?: StarknetChainId,
   }, sync?: boolean): Promise<InvokeFunctionResponse>;

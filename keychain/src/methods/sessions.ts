@@ -1,4 +1,4 @@
-import Controller from "utils/account";
+import Controller from "utils/controller";
 import Storage from "utils/storage";
 
 const revoke = () => (origin: string) => {

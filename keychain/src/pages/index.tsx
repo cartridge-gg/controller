@@ -15,7 +15,7 @@ import logout from "../methods/logout";
 import { signMessage } from "../methods/sign";
 import { revoke, session, sessions } from "../methods/sessions";
 
-import Controller from "utils/account";
+import Controller from "utils/controller";
 import { normalize as normalizeOrigin } from "utils/url";
 import { Session } from "@cartridge/controller";
 
