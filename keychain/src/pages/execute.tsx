@@ -7,7 +7,7 @@ import { StarknetChainId, ZERO } from "starknet/constants";
 import { Header } from "components/Header";
 import Controller, { RegisterData } from "utils/account";
 import { useRouter } from "next/router";
-import { Call as StarknetCall, EstimateFee } from "starknet";
+import { Call as StarknetCall, EstimateFee, EstimateFeeResponse } from "starknet";
 import Storage from "utils/storage";
 import Banner from "components/Banner";
 import Network from "components/Network";
@@ -20,6 +20,18 @@ import { estimateFeeBulk } from "utils/gateway";
 import { transactionVersion } from "starknet/utils/hash";
 import { fromCallsToExecuteCalldata } from "starknet/utils/transaction";
 import { BigNumber } from "ethers";
+import { formatEther, formatUnits } from "ethers/lib/utils";
+
+async function fetchEthPrice() {
+  const res = await fetch(process.env.NEXT_PUBLIC_API_URL, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: `{"query":"query { price(quote: ETH, base: USD) { amount }}"}`
+  });
+  return res.json();
+}
 
 const Unlock = ({ chainId, onSubmit }: { chainId: StarknetChainId, onSubmit: () => void }) => (
   <Flex m={4} flex={1} flexDirection="column">
@@ -60,31 +72,54 @@ const Unlock = ({ chainId, onSubmit }: { chainId: StarknetChainId, onSubmit: () 
   </Flex>
 )
 
-const Fees = ({ fees }: { fees?: EstimateFee }) => (
-  <HStack
-    alignItems="center"
-    spacing="12px"
-    bgColor="gray.700"
-    py="11px"
-    px="15px"
-    borderRadius="8px"
-    justifyContent="space-between">
-    <HStack>
-      <Text textTransform="uppercase" fontSize={11} fontWeight={700} color="gray.100">
-        Network Fees
-      </Text>
-      <InfoIcon />
+const Fees = ({ fees }: { fees?: EstimateFee }) => {
+  const [usdFee, setUsdFee] = useState<{
+    fee: string,
+    max: string,
+  }>();
+  useEffect(() => {
+    if (!fees) {
+      return;
+    }
+
+    async function compute() {
+      const { data } = await fetchEthPrice()
+      const usdeth = toBN(data.price.amount * 100);
+      const fee = fees.overall_fee.mul(usdeth).toString();
+      setUsdFee({
+        fee: formatUnits(fee, 20),
+        max: formatUnits(fee, 20),
+      });
+    }
+    compute();
+  }, [fees])
+
+  return (
+    <HStack
+      alignItems="center"
+      spacing="12px"
+      bgColor="gray.700"
+      py="11px"
+      px="15px"
+      borderRadius="8px"
+      justifyContent="space-between">
+      <HStack>
+        <Text textTransform="uppercase" fontSize={11} fontWeight={700} color="gray.100">
+          Network Fees
+        </Text>
+        <InfoIcon />
+      </HStack>
+      <VStack alignItems="flex-end">
+        {
+          usdFee ? <>
+            <Text fontSize={13}>~${usdFee.fee}</Text>
+            <Text fontSize={11} color="gray.200" mt="1px !important">Max: ~${usdFee.max}</Text>
+          </> : <Spinner />
+        }
+      </VStack>
     </HStack>
-    <VStack alignItems="flex-end">
-      {
-        fees ? <>
-          <Text fontSize={13}>~${fees.overall_fee}</Text>
-          <Text fontSize={11} color="gray.200" mt="1px !important">Max: ~$${fees.suggestedMaxFee}</Text>
-        </> : <Spinner />
-      }
-    </VStack>
-  </HStack>
-)
+  )
+}
 
 const Execute: NextPage = () => {
   const [registerData, setRegisterData] = useState<RegisterData>();
@@ -161,11 +196,24 @@ const Execute: NextPage = () => {
           const signature = await controller.signer.signTransaction(params.calls, signerDetails);
           const calldata = fromCallsToExecuteCalldata(params.calls);
 
-          const estimate = await estimateFeeBulk(params.chainId, [registerData.invoke, {
+          const estimates = (await estimateFeeBulk(params.chainId, [registerData.invoke, {
             invocation: { contractAddress: controller.address, calldata, signature },
             details: { version: transactionVersion, nonce: nextNonce, maxFee: ZERO },
-          }])
-          setFees(estimate)
+          }])) as EstimateFeeResponse[]
+          setFees(estimates.reduce<EstimateFee>((prev, estimate) => {
+            const overall_fee = prev.overall_fee.add(toBN(estimate.overall_fee));
+            return {
+              overall_fee: overall_fee,
+              gas_consumed: prev.gas_consumed.add(toBN(estimate.gas_consumed)),
+              gas_price: prev.gas_price.add(toBN(estimate.gas_price)),
+              suggestedMaxFee: overall_fee,
+            }
+          }, {
+            overall_fee: toBN(0),
+            gas_consumed: toBN(0),
+            gas_price: toBN(0),
+            suggestedMaxFee: toBN(0),
+          }))
         } catch (e) {
           console.error(e)
           setError(e)
@@ -175,7 +223,7 @@ const Execute: NextPage = () => {
     }
 
     register();
-  }, [controller, nonce, params, registerData, setError])
+  }, [controller, nonce, params, registerData, setError, setFees])
 
   useEffect(() => {
     if (!controller) {
