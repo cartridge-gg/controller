@@ -8,8 +8,8 @@ import { BigNumberish, toBN } from "starknet/dist/utils/number";
 import { StarknetChainId } from "starknet/dist/constants";
 
 const providers = {
-  [StarknetChainId.TESTNET]: new RpcProvider({ nodeUrl: process.env.NEXT_PUBLIC_RPC_GOERLI! }),
-  [StarknetChainId.MAINNET]: new RpcProvider({ nodeUrl: process.env.NEXT_PUBLIC_RPC_MAINNET! }),
+  [StarknetChainId.TESTNET]: new RpcProvider({ nodeUrl: "http://localhost:5050/rpc" }),
+  [StarknetChainId.MAINNET]: new RpcProvider({ nodeUrl: "http://localhost:5050/rpc" }),
 }
 
 class Controller {

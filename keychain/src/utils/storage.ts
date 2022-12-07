@@ -41,6 +41,13 @@ const Storage = {
       sameSite: "strict",
     });
   },
+  update: (key: string, value: any) => {
+    const existing = Storage.get(key);
+    if (existing) {
+      return Storage.set(key, { ...existing, ...value });
+    }
+    Storage.set(key, value);
+  },
   remove: (key: string) => {
     if (!isSafari && typeof window != "undefined") {
       window.localStorage.removeItem(key);

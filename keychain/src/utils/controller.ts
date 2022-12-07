@@ -1,4 +1,4 @@
-import { ec, Account, KeyPair, number, RpcProvider, Provider, Call, Invocation, InvocationsDetails, SignerInterface } from "starknet";
+import { ec, KeyPair, number, RpcProvider, Call, Invocation, InvocationsDetails, SignerInterface } from "starknet";
 import { BigNumberish } from "starknet/dist/utils/number";
 import { Policy, Session } from "@cartridge/controller";
 import equal from "fast-deep-equal";
@@ -11,8 +11,9 @@ import { CONTROLLER_CLASS } from "./constants";
 import { calculateTransactionHash, getSelector, transactionVersion } from "starknet/utils/hash";
 import { toBN } from "starknet/utils/number";
 import { fromCallsToExecuteCalldata } from "starknet/utils/transaction";
+import Account from "./account";
 
-const VERSION = "0.0.1"
+const VERSION = "0.0.2"
 
 export type InvocationWithDetails = {
   invocation: Invocation, details: InvocationsDetails
@@ -42,10 +43,11 @@ export default class Controller {
     this.credentialId = credentialId;
 
     const goerli = new RpcProvider({ nodeUrl: process.env.NEXT_PUBLIC_RPC_GOERLI })
-    this.accounts[StarknetChainId.TESTNET] = new Account(goerli, address, keypair);
-
     const mainnet = new RpcProvider({ nodeUrl: process.env.NEXT_PUBLIC_RPC_MAINNET })
-    this.accounts[StarknetChainId.MAINNET] = new Account(mainnet, address, keypair);
+    this.accounts = {
+      [StarknetChainId.TESTNET]: new Account(goerli, address, this.signer),
+      [StarknetChainId.MAINNET]: new Account(mainnet, address, this.signer),
+    };
 
     this.webauthn = new WebauthnAccount(
       address,
@@ -158,14 +160,17 @@ export default class Controller {
 
     const controller = Storage.get("controller");
     if (!controller) {
-      return null;
+      return;
+    }
+
+    if (version === "0.0.1") {
+      Storage.set(`@deployment/${StarknetChainId.MAINNET}`, {});
+      Storage.set(`@deployment/${StarknetChainId.TESTNET}`, {});
     }
 
     const { credentialId, privateKey, address } = controller;
     const keypair = ec.getKeyPair(privateKey);
-    // const provider = new RpcProvider({ nodeUrl: RPC_GOERL });
-    const provider = new Provider({ sequencer: { network: "goerli-alpha" } });
-    return new Controller(provider, keypair, address, credentialId);
+    return new Controller(keypair, address, credentialId);
   }
 }
 

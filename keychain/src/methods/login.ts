@@ -17,7 +17,7 @@ const login =
       const keypair = ec.genKeyPair();
       const controller = new Controller(keypair, address, credentialId, options);
       const { assertion, invoke } = await controller.signAddDeviceKey(StarknetChainId.TESTNET);
-      Storage.set(`@register/${StarknetChainId.MAINNET}/set_device_key`, invoke);
+      Storage.set(`@register/${StarknetChainId.TESTNET}/set_device_key`, invoke);
 
       return {
         assertion: {

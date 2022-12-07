@@ -258,7 +258,7 @@ const Execute: NextPage = () => {
     );
   }
 
-  if (!controller.isRegistered(params.chainId) && !registerData) {
+  if (!controller.account(params.chainId).registered && !controller.isRegistered(params.chainId) && !registerData) {
     return (
       <>
         <Header address={controller.address} />
