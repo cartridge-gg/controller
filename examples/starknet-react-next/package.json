@@ -11,11 +11,11 @@
   "dependencies": {
     "@cartridge/connector": "workspace:^",
     "@cartridge/controller": "workspace:^",
-    "@starknet-react/core": "^0.14.0",
+    "@starknet-react/core": "^0.14.8",
     "next": "^12.0.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "starknet": "^4.4.2"
+    "starknet": "^4.15.1"
   },
   "devDependencies": {
     "@types/node": "^18.7.14",

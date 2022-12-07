@@ -2,12 +2,11 @@ import type { NextPage } from "next";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Flex, HStack, Spinner, Text, VStack } from "@chakra-ui/react";
-import { StarknetChainId, ZERO } from "starknet/constants";
 
 import { Header } from "components/Header";
 import Controller, { RegisterData } from "utils/controller";
 import { useRouter } from "next/router";
-import { Call as StarknetCall, EstimateFee, EstimateFeeResponse } from "starknet";
+import { constants, hash, number, transaction, Call as StarknetCall, EstimateFee, EstimateFeeResponse } from "starknet";
 import Storage from "utils/storage";
 import Banner from "components/Banner";
 import Network from "components/Network";
@@ -15,10 +14,7 @@ import { Call } from "components/Call";
 import Footer from "components/Footer";
 import InfoIcon from "@cartridge/ui/components/icons/Info";
 import { normalize, validate } from "pages";
-import { BigNumberish, toBN, toHex } from "starknet/utils/number";
 import { estimateFeeBulk } from "utils/gateway";
-import { transactionVersion } from "starknet/utils/hash";
-import { fromCallsToExecuteCalldata } from "starknet/utils/transaction";
 import { BigNumber } from "ethers";
 import { formatUnits } from "ethers/lib/utils";
 
@@ -33,7 +29,7 @@ async function fetchEthPrice() {
   return res.json();
 }
 
-const Unlock = ({ chainId, onSubmit }: { chainId: StarknetChainId, onSubmit: () => void }) => (
+const Unlock = ({ chainId, onSubmit }: { chainId: constants.StarknetChainId, onSubmit: () => void }) => (
   <Flex m={4} flex={1} flexDirection="column">
     <Banner
       pb="20px"
@@ -83,12 +79,13 @@ const Fees = ({ fees }: { fees?: EstimateFee }) => {
     }
 
     async function compute() {
+      let dollarUSLocale = Intl.NumberFormat('en-US');
       const { data } = await fetchEthPrice()
-      const usdeth = toBN(data.price.amount * 100);
+      const usdeth = number.toBN(data.price.amount * 100);
       const fee = fees.overall_fee.mul(usdeth).toString();
       setUsdFee({
-        fee: formatUnits(fee, 20),
-        max: formatUnits(fee, 20),
+        fee: dollarUSLocale.format(parseFloat(formatUnits(fee, 20))),
+        max: dollarUSLocale.format(parseFloat(formatUnits(fee, 20))),
       });
     }
     compute();
@@ -147,13 +144,13 @@ const Execute: NextPage = () => {
     }
 
     const { maxFee, chainId } = router.query as {
-      chainId?: StarknetChainId;
+      chainId?: constants.StarknetChainId;
       maxFee?: string;
     };
     const calls: StarknetCall | StarknetCall[] = JSON.parse(router.query.calls as string);
     const transactions = Array.isArray(calls) ? calls : [calls];
 
-    return { calls: transactions, maxFee, chainId: chainId ? chainId : StarknetChainId.TESTNET };
+    return { calls: transactions, maxFee, chainId: chainId ? chainId : constants.StarknetChainId.TESTNET };
   }, [controller.address, router.query]);
 
   const execute = useCallback((calls: StarknetCall[],) => normalize(validate((controller) => {
@@ -168,8 +165,8 @@ const Execute: NextPage = () => {
       return;
     }
 
-    controller.account(params.chainId).getNonce().then((n: BigNumberish) => {
-      setNonce(toBN(n));
+    controller.account(params.chainId).getNonce().then((n: number.BigNumberish) => {
+      setNonce(number.toBN(n));
     })
   }, [controller, params, setNonce])
 
@@ -183,39 +180,38 @@ const Execute: NextPage = () => {
       const account = controller.account(params.chainId);
       if (account.registered) {
         const fees = await account.estimateInvokeFee(params.calls, { nonce });
-        console.log(fees)
         setFees(fees)
       } else if (!account.registered && registerData) {
         try {
-          const nextNonce = toHex(nonce.add(toBN(1)))
+          const nextNonce = number.toHex(nonce.add(number.toBN(1)))
           const signerDetails = {
             walletAddress: controller.address,
             nonce: nextNonce,
-            maxFee: ZERO,
-            version: transactionVersion,
+            maxFee: constants.ZERO,
+            version: hash.transactionVersion,
             chainId: params.chainId,
           };
 
           const signature = await controller.signer.signTransaction(params.calls, signerDetails);
-          const calldata = fromCallsToExecuteCalldata(params.calls);
+          const calldata = transaction.fromCallsToExecuteCalldata(params.calls);
 
           const estimates = (await estimateFeeBulk(params.chainId, [registerData.invoke, {
             invocation: { contractAddress: controller.address, calldata, signature },
-            details: { version: transactionVersion, nonce: nextNonce, maxFee: ZERO },
+            details: { version: hash.transactionVersion, nonce: nextNonce, maxFee: constants.ZERO },
           }])) as EstimateFeeResponse[]
           setFees(estimates.reduce<EstimateFee>((prev, estimate) => {
-            const overall_fee = prev.overall_fee.add(toBN(estimate.overall_fee));
+            const overall_fee = prev.overall_fee.add(number.toBN(estimate.overall_fee));
             return {
               overall_fee: overall_fee,
-              gas_consumed: prev.gas_consumed.add(toBN(estimate.gas_consumed)),
-              gas_price: prev.gas_price.add(toBN(estimate.gas_price)),
+              gas_consumed: prev.gas_consumed.add(number.toBN(estimate.gas_consumed)),
+              gas_price: prev.gas_price.add(number.toBN(estimate.gas_price)),
               suggestedMaxFee: overall_fee,
             }
           }, {
-            overall_fee: toBN(0),
-            gas_consumed: toBN(0),
-            gas_price: toBN(0),
-            suggestedMaxFee: toBN(0),
+            overall_fee: number.toBN(0),
+            gas_consumed: number.toBN(0),
+            gas_price: number.toBN(0),
+            suggestedMaxFee: number.toBN(0),
           }))
         } catch (e) {
           console.error(e)

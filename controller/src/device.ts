@@ -9,7 +9,6 @@ import {
   Signature,
   typedData,
   InvokeFunctionResponse,
-  defaultProvider,
   EstimateFee,
   DeclareContractPayload,
   RpcProvider,
@@ -21,7 +20,7 @@ import {
 } from "./types";
 import { Signer } from "./signer";
 import { AsyncMethodReturns } from "@cartridge/penpal";
-import { StarknetChainId } from "starknet/dist/constants";
+import { StarknetChainId } from "starknet/src/constants";
 
 class DeviceAccount extends Account {
   address: string;
@@ -43,23 +42,6 @@ class DeviceAccount extends Account {
     if (options?.url) {
       this.url = options.url;
     }
-  }
-
-  /**
-   * Deploys a given compiled contract (json) to starknet
-   *
-   * @param payload payload to be deployed containing:
-   * - compiled contract code
-   * - constructor calldata
-   * - address salt
-   * @param abi the abi of the contract
-   * @returns a confirmation of sending a transaction on the starknet contract
-   */
-  async deployContract(
-    payload: DeployContractPayload,
-    abi?: Abi
-  ): Promise<StarknetDeployContractResponse> {
-    throw new Error("unimplemented");
   }
 
   /**

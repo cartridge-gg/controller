@@ -1,7 +1,7 @@
 import { useStarknetCall } from '@starknet-react/core'
 import type { NextPage } from 'next'
 import { useMemo } from 'react'
-import { toBN } from 'starknet/dist/utils/number'
+import { number } from 'starknet'
 import { ConnectWallet } from '~/components/ConnectWallet'
 import { IncrementCounter } from '~/components/IncrementCounter'
 import { SignMessage } from '~/components/SignMessage'
@@ -19,7 +19,7 @@ const Home: NextPage = () => {
 
   const counterValue = useMemo(() => {
     if (counterResult && counterResult.length > 0) {
-      const value = toBN(counterResult[0])
+      const value = number.toBN(counterResult[0])
       return value.toString(10)
     }
   }, [counterResult])

@@ -1,8 +1,7 @@
-import { defaultProvider } from "starknet";
-import { StarknetChainId } from "starknet/dist/constants";
+import { constants, defaultProvider } from "starknet";
 
 const testnet =
-  defaultProvider.chainId === StarknetChainId.TESTNET ? "testnet." : "";
+  defaultProvider.chainId === constants.StarknetChainId.TESTNET ? "testnet." : "";
 const baseUrl = `https://${testnet}starkscan.co/`;
 
 export const StarkscanUrl = {

@@ -1,14 +1,14 @@
 import { Policy, MissingPolicys, Session } from "@cartridge/controller";
 import {
+  constants,
+  hash,
+  number,
+  transaction,
   Call,
   Abi,
   InvocationsDetails,
   InvokeFunctionResponse,
 } from "starknet";
-import { StarknetChainId } from "starknet/constants";
-import { toBN } from "starknet/utils/number";
-import { calculateTransactionHash } from "starknet/utils/hash";
-import { fromCallsToExecuteCalldata } from "starknet/utils/transaction";
 
 import Controller, { diff } from "utils/controller";
 import Storage from "utils/storage";
@@ -19,7 +19,7 @@ const execute =
       transactions: Call | Call[],
       abis?: Abi[],
       transactionsDetail?: InvocationsDetails & {
-        chainId?: StarknetChainId,
+        chainId?: constants.StarknetChainId,
       },
       sync?: boolean,
     ): Promise<InvokeFunctionResponse> => {
@@ -37,7 +37,7 @@ const execute =
       //   transactionsDetail.nonce = await this.getNonce();
       // }
 
-      transactionsDetail.chainId = transactionsDetail.chainId ? transactionsDetail.chainId : StarknetChainId.TESTNET
+      transactionsDetail.chainId = transactionsDetail.chainId ? transactionsDetail.chainId : constants.StarknetChainId.TESTNET
       transactionsDetail.version = 1;
 
       // if (!transactionsDetail.maxFee) {
@@ -50,8 +50,8 @@ const execute =
       // }
 
       if (sync) {
-        const calldata = fromCallsToExecuteCalldata(calls);
-        const hash = calculateTransactionHash(
+        const calldata = transaction.fromCallsToExecuteCalldata(calls);
+        const h = hash.calculateTransactionHash(
           controller.address,
           transactionsDetail.version,
           calldata,
@@ -59,7 +59,7 @@ const execute =
           transactionsDetail.chainId,
           transactionsDetail.nonce,
         );
-        await pollForTransaction(hash);
+        await pollForTransaction(h);
       } else {
         const missing = diff(policies, session.policies);
         if (missing.length > 0) {
@@ -70,7 +70,7 @@ const execute =
       if (
         session.maxFee &&
         transactionsDetail &&
-        toBN(transactionsDetail.maxFee).gt(toBN(session.maxFee))
+        number.toBN(transactionsDetail.maxFee).gt(number.toBN(session.maxFee))
       ) {
         throw new Error("transaction fees exceed pre-approved limit");
       }

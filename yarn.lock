@@ -2422,11 +2422,11 @@ __metadata:
   resolution: "@cartridge/connector@workspace:connector"
   dependencies:
     "@cartridge/controller": 0.2.3
-    "@starknet-react/core": ^0.14.0
+    "@starknet-react/core": ^0.14.8
     "@types/jest": ^26.0.18
     "@types/node": ^17.0.23
     jest: ^26.6.3
-    starknet: ^4.9.0
+    starknet: ^4.15.1
     ts-jest: ^26.5.1
     ts-node: ^10.4.0
     tslib: ^2.3.1
@@ -2445,7 +2445,7 @@ __metadata:
     fast-deep-equal: ^3.1.3
     jest: ^26.6.3
     query-string: ^7.1.1
-    starknet: ^4.9.0
+    starknet: ^4.15.1
     ts-jest: ^26.5.1
     ts-node: ^10.4.0
     tslib: ^2.3.1
@@ -2498,7 +2498,7 @@ __metadata:
     prettier: ^2.7.1
     react: ^18.2.0
     react-dom: ^18.2.0
-    starknet: ^4.9.0
+    starknet: ^4.15.1
     typescript: ^4.8.2
   languageName: unknown
   linkType: soft
@@ -6420,16 +6420,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@starknet-react/core@npm:^0.14.0":
-  version: 0.14.0
-  resolution: "@starknet-react/core@npm:0.14.0"
+"@starknet-react/core@npm:^0.14.8":
+  version: 0.14.8
+  resolution: "@starknet-react/core@npm:0.14.8"
   dependencies:
     "@tanstack/react-query": ^4.3.4
     immutable: ^4.0.0
   peerDependencies:
     react: ^17.0 || ^18.0
-    starknet: ^4.0
-  checksum: 2dcab09012ab68763f95d47ba50bd756af7156b1760033b2f1f066864f72c3d537ef483446e6852d5bd65a584592083746ddbac6cb20173a422db7f098bd3778
+    starknet: "*"
+  checksum: 1d9b128bcfdf8b94d3578cd0a2debb975a758f9133ddff2bd93649fa4ede8705272454073b071eabb5560ea4a2eb774fef9ccb31ca23d0531f9c9bded38203b5
   languageName: node
   linkType: hard
 
@@ -21534,7 +21534,7 @@ __metadata:
   dependencies:
     "@cartridge/connector": "workspace:^"
     "@cartridge/controller": "workspace:^"
-    "@starknet-react/core": ^0.14.0
+    "@starknet-react/core": ^0.14.8
     "@types/node": ^18.7.14
     "@types/react": ^18.0.20
     "@types/react-dom": ^18.0.6
@@ -21543,14 +21543,14 @@ __metadata:
     next: ^12.0.10
     react: ^18.2.0
     react-dom: ^18.2.0
-    starknet: ^4.4.2
+    starknet: ^4.15.1
     typescript: ^4.8.2
   languageName: unknown
   linkType: soft
 
-"starknet@npm:^4.4.2":
-  version: 4.7.0
-  resolution: "starknet@npm:4.7.0"
+"starknet@npm:^4.15.1":
+  version: 4.15.1
+  resolution: "starknet@npm:4.15.1"
   dependencies:
     "@ethersproject/bytes": ^5.6.1
     bn.js: ^5.2.1
@@ -21561,28 +21561,9 @@ __metadata:
     json-bigint: ^1.0.0
     minimalistic-assert: ^1.0.1
     pako: ^2.0.4
-    ts-custom-error: ^3.2.0
+    ts-custom-error: ^3.3.1
     url-join: ^4.0.1
-  checksum: 974f71a838bb8252ba2ef16be2af6124d47c0733c9af2ae446778ef4c59594f9e9baf22e8a1504793be5dca188a122a22a106bc8bbcd29a04715be00637d30f7
-  languageName: node
-  linkType: hard
-
-"starknet@npm:^4.9.0":
-  version: 4.9.0
-  resolution: "starknet@npm:4.9.0"
-  dependencies:
-    "@ethersproject/bytes": ^5.6.1
-    bn.js: ^5.2.1
-    elliptic: ^6.5.4
-    ethereum-cryptography: ^1.0.3
-    hash.js: ^1.1.7
-    isomorphic-fetch: ^3.0.0
-    json-bigint: ^1.0.0
-    minimalistic-assert: ^1.0.1
-    pako: ^2.0.4
-    ts-custom-error: ^3.2.0
-    url-join: ^4.0.1
-  checksum: 9f088bfa816c02dbd0d72c556891fc85db94359c06083e2a21a1387a3d99e0fe8160d58680fd642e501272fc588f99ca88289afc7e0565e076a7b4e7648a0d5f
+  checksum: b7a94a1fd2b045587260fc4374086f4407c96b2dae182947434ee740499b5b1373e25d402ab11e6a3e947235ce54d2d459bec86565c0206dd9086ddc41c65fd7
   languageName: node
   linkType: hard
 
@@ -22454,10 +22435,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-custom-error@npm:^3.2.0":
-  version: 3.2.0
-  resolution: "ts-custom-error@npm:3.2.0"
-  checksum: b1d2016de891cecea46a70c4adbaf1e6f7c6178994f72070ee3c218cc1a9e2b12c3011defb8385f15dc03ddfafd8d88ef2c9217e23700fb6e537755f33b9c801
+"ts-custom-error@npm:^3.3.1":
+  version: 3.3.1
+  resolution: "ts-custom-error@npm:3.3.1"
+  checksum: 50a1e825fced68d70049bd8d282379a635e43aa023a370fa8e736b12a6edba7f18a2d731fa194ac35303a8b625be56e121bdb31d8a0318250d1a8b277059fce3
   languageName: node
   linkType: hard
 

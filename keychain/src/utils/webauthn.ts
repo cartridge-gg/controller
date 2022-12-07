@@ -1,30 +1,25 @@
 import {
+  constants,
+  hash,
+  number,
+  stark,
+  transaction,
+  typedData,
   Abi,
   Call,
   DeployAccountSignerDetails,
   InvocationsSignerDetails,
   Signature,
   SignerInterface,
-  transaction,
-  hash,
-  typedData,
-  number,
   Account,
   DeclareSignerDetails,
   EstimateFeeDetails,
   EstimateFee,
   InvocationsDetails,
   InvokeFunctionResponse,
-  RpcProvider,
 } from "starknet";
 import base64url from "base64url";
 import { split } from "@cartridge/controller";
-import { calculateDeclareTransactionHash } from "starknet/dist/utils/hash";
-import { toBN } from "starknet/utils/number";
-import { transactionVersion } from "starknet/utils/hash";
-import { ZERO } from "starknet/constants";
-import { fromCallsToExecuteCalldata } from "starknet/utils/transaction";
-import { estimatedFeeToMaxFee } from "starknet/dist/utils/stark";
 import { CONTROLLER_CLASS } from "./constants";
 
 export type RawAssertion = PublicKeyCredential & {
@@ -148,7 +143,7 @@ export class WebauthnSigner implements SignerInterface {
     version,
     nonce,
   }: DeclareSignerDetails) {
-    const msgHash = calculateDeclareTransactionHash(
+    const msgHash = hash.calculateDeclareTransactionHash(
       classHash,
       senderAddress,
       version,
@@ -198,14 +193,14 @@ class WebauthnAccount extends Account {
     }: EstimateFeeDetails & { ext?: Buffer } = {},
   ): Promise<EstimateFee> {
     const transactions = Array.isArray(calls) ? calls : [calls];
-    const nonce = toBN(providedNonce ?? (await this.getNonce()));
-    const version = toBN(transactionVersion);
+    const nonce = number.toBN(providedNonce ?? (await this.getNonce()));
+    const version = number.toBN(hash.transactionVersion);
     const chainId = await this.getChainId();
 
     const signerDetails = {
       walletAddress: this.address,
       nonce,
-      maxFee: ZERO,
+      maxFee: constants.ZERO,
       version,
       chainId,
       ext,
@@ -216,14 +211,14 @@ class WebauthnAccount extends Account {
       signerDetails,
     );
 
-    const calldata = fromCallsToExecuteCalldata(transactions);
+    const calldata = transaction.fromCallsToExecuteCalldata(transactions);
     const response = await super.getInvokeEstimateFee(
       { contractAddress: this.address, calldata, signature },
       { version, nonce },
       blockIdentifier,
     );
 
-    const suggestedMaxFee = estimatedFeeToMaxFee(response.overall_fee);
+    const suggestedMaxFee = stark.estimatedFeeToMaxFee(response.overall_fee);
 
     return {
       ...response,
@@ -237,14 +232,14 @@ class WebauthnAccount extends Account {
     transactionsDetail?: InvocationsDetails & { ext?: Buffer },
   ): Promise<InvokeFunctionResponse> {
     const transactions = Array.isArray(calls) ? calls : [calls];
-    const nonce = toBN(transactionsDetail.nonce ?? (await this.getNonce()));
+    const nonce = number.toBN(transactionsDetail.nonce ?? (await this.getNonce()));
     const maxFee =
       transactionsDetail.maxFee ??
       (await this.getSuggestedMaxFee(
         { type: "INVOKE", payload: calls },
         transactionsDetail,
       ));
-    const version = toBN(transactionVersion);
+    const version = number.toBN(hash.transactionVersion);
     const chainId = await this.getChainId();
 
     const signerDetails: InvocationsSignerDetails = {
@@ -261,7 +256,7 @@ class WebauthnAccount extends Account {
       abis,
     );
 
-    const calldata = fromCallsToExecuteCalldata(transactions);
+    const calldata = transaction.fromCallsToExecuteCalldata(transactions);
 
     return this.invokeFunction(
       { contractAddress: this.address, calldata, signature },
@@ -312,7 +307,7 @@ export function formatAssertion(assertion: RawAssertion): Signature {
   const { x: s0, y: s1, z: s2 } = split(s);
 
   return [
-    toBN(CONTROLLER_CLASS).toString(),
+    number.toBN(CONTROLLER_CLASS).toString(),
     "0",
     r0.toString(),
     r1.toString(),

@@ -1,17 +1,14 @@
-import { ec, KeyPair, number, RpcProvider, Call, Invocation, InvocationsDetails, SignerInterface } from "starknet";
-import { BigNumberish } from "starknet/dist/utils/number";
-import { Policy, Session } from "@cartridge/controller";
+import { constants, ec, KeyPair, hash, number, transaction, Call, Invocation, InvocationsDetails, SignerInterface } from "starknet";
 import equal from "fast-deep-equal";
 
+import { Policy, Session } from "@cartridge/controller";
+
 import Storage from "utils/storage";
-import { DeviceSigner } from "./signer";
-import { StarknetChainId } from "starknet/constants";
-import WebauthnAccount, { formatAssertion, RawAssertion } from "./webauthn";
-import { CONTROLLER_CLASS } from "./constants";
-import { calculateTransactionHash, getSelector, transactionVersion } from "starknet/utils/hash";
-import { toBN } from "starknet/utils/number";
-import { fromCallsToExecuteCalldata } from "starknet/utils/transaction";
+
 import Account from "./account";
+import { CONTROLLER_CLASS } from "./constants";
+import { DeviceSigner } from "./signer";
+import WebauthnAccount, { formatAssertion, RawAssertion } from "./webauthn";
 
 const VERSION = "0.0.2"
 
@@ -30,8 +27,8 @@ export default class Controller {
   protected publicKey: string;
   protected keypair: KeyPair;
   protected credentialId: string;
-  protected webauthn: { [key in StarknetChainId]: WebauthnAccount };
-  protected accounts: { [key in StarknetChainId]: Account }
+  protected webauthn: { [key in constants.StarknetChainId]: WebauthnAccount };
+  protected accounts: { [key in constants.StarknetChainId]: Account }
 
   constructor(keypair: KeyPair, address: string, credentialId: string, options?: {
     rpId?: string;
@@ -43,19 +40,27 @@ export default class Controller {
     this.credentialId = credentialId;
 
     this.accounts = {
-      [StarknetChainId.TESTNET]: new Account(StarknetChainId.TESTNET, process.env.NEXT_PUBLIC_RPC_GOERLI, address, this.signer),
-      [StarknetChainId.MAINNET]: new Account(StarknetChainId.MAINNET, process.env.NEXT_PUBLIC_RPC_MAINNET, address, this.signer),
+      [constants.StarknetChainId.TESTNET]: new Account(constants.StarknetChainId.TESTNET, process.env.NEXT_PUBLIC_RPC_GOERLI, address, this.signer),
+      [constants.StarknetChainId.TESTNET2]: new Account(constants.StarknetChainId.TESTNET2, process.env.NEXT_PUBLIC_RPC_GOERLI, address, this.signer),
+      [constants.StarknetChainId.MAINNET]: new Account(constants.StarknetChainId.MAINNET, process.env.NEXT_PUBLIC_RPC_MAINNET, address, this.signer),
     };
 
     this.webauthn = {
-      [StarknetChainId.TESTNET]: new WebauthnAccount(
+      [constants.StarknetChainId.TESTNET]: new WebauthnAccount(
         process.env.NEXT_PUBLIC_RPC_GOERLI,
         address,
         credentialId,
         this.publicKey,
         options,
       ),
-      [StarknetChainId.MAINNET]: new WebauthnAccount(
+      [constants.StarknetChainId.TESTNET2]: new WebauthnAccount(
+        process.env.NEXT_PUBLIC_RPC_GOERLI,
+        address,
+        credentialId,
+        this.publicKey,
+        options,
+      ),
+      [constants.StarknetChainId.MAINNET]: new WebauthnAccount(
         process.env.NEXT_PUBLIC_RPC_MAINNET,
         address,
         credentialId,
@@ -69,18 +74,18 @@ export default class Controller {
     this.store();
   }
 
-  account(chainId: StarknetChainId) {
+  account(chainId: constants.StarknetChainId) {
     return this.accounts[chainId];
   }
 
-  async signAddDeviceKey(chainId: StarknetChainId): Promise<RegisterData> {
+  async signAddDeviceKey(chainId: constants.StarknetChainId): Promise<RegisterData> {
     const calls: Call[] = [
       {
         contractAddress: this.address,
         entrypoint: "executeOnPlugin",
         calldata: [
           CONTROLLER_CLASS,
-          getSelector("add_device_key"),
+          hash.getSelector("add_device_key"),
           1,
           this.publicKey,
         ],
@@ -88,12 +93,12 @@ export default class Controller {
     ];
 
     const nonce = await this.accounts[chainId].getNonce();
-    const version = toBN(transactionVersion);
-    const calldata = fromCallsToExecuteCalldata(calls);
+    const version = number.toBN(hash.transactionVersion);
+    const calldata = transaction.fromCallsToExecuteCalldata(calls);
 
-    const suggestedMaxFee = toBN(1000000);
+    const suggestedMaxFee = number.toBN(1000000);
 
-    let msgHash = calculateTransactionHash(
+    let msgHash = hash.calculateTransactionHash(
       this.address,
       version,
       calldata,
@@ -121,7 +126,7 @@ export default class Controller {
     return Storage.clear();
   }
 
-  approve(origin: string, policies: Policy[], maxFee?: BigNumberish) {
+  approve(origin: string, policies: Policy[], maxFee?: number.BigNumberish) {
     Storage.set(`@session/${origin}`, {
       policies,
       maxFee,
@@ -167,8 +172,8 @@ export default class Controller {
     }
 
     if (version === "0.0.1") {
-      Storage.set(`@deployment/${StarknetChainId.MAINNET}`, {});
-      Storage.set(`@deployment/${StarknetChainId.TESTNET}`, {});
+      Storage.set(`@deployment/${constants.StarknetChainId.MAINNET}`, {});
+      Storage.set(`@deployment/${constants.StarknetChainId.TESTNET}`, {});
     }
 
     const { credentialId, privateKey, address } = controller;

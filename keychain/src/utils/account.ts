@@ -1,7 +1,5 @@
-import { Account as BaseAccount, RpcProvider, SignerInterface } from "starknet"
-import { StarknetChainId } from "starknet/constants";
-import { getSelector } from "starknet/utils/hash";
-import { BigNumberish } from "starknet/utils/number";
+import { constants, hash, number, Account as BaseAccount, RpcProvider, SignerInterface } from "starknet"
+
 import { CONTROLLER_CLASS } from "./constants";
 import Storage from "./storage";
 
@@ -10,7 +8,7 @@ class Account extends BaseAccount {
     deployed: boolean = false;
     registered: boolean = false;
 
-    constructor(chainId: StarknetChainId, nodeUrl: string, address: string, signer: SignerInterface) {
+    constructor(chainId: constants.StarknetChainId, nodeUrl: string, address: string, signer: SignerInterface) {
         super({ rpc: { nodeUrl } }, address, signer);
         this.rpc = new RpcProvider({ nodeUrl });
         const state = Storage.get(`@deployment/${chainId}`)
@@ -23,7 +21,7 @@ class Account extends BaseAccount {
         this.registered = state.registered;
     }
 
-    async sync(chainId: StarknetChainId) {
+    async sync(chainId: constants.StarknetChainId) {
         Storage.update(`@deployment/${chainId}`, {
             syncing: true,
         });
@@ -36,7 +34,7 @@ class Account extends BaseAccount {
             })
             this.deployed = true;
 
-            const nonce = await this.rpc.getNonce(this.address, "latest");
+            const nonce = await this.rpc.getNonceForAddress(this.address, "latest");
             Storage.update(`@deployment/${chainId}`, {
                 nonce,
             })
@@ -46,7 +44,7 @@ class Account extends BaseAccount {
                 contractAddress: this.address,
                 entrypoint: "executeOnPlugin",
                 calldata: [
-                    CONTROLLER_CLASS, getSelector("is_public_key"), "0x1", pub,
+                    CONTROLLER_CLASS, hash.getSelector("is_public_key"), "0x1", pub,
                 ],
             }, "latest");
             this.registered = res.result[1] === "0x01";
@@ -62,7 +60,7 @@ class Account extends BaseAccount {
         });
     }
 
-    async getNonce(blockIdentifier?: any): Promise<BigNumberish> {
+    async getNonce(blockIdentifier?: any): Promise<number.BigNumberish> {
         if (blockIdentifier && blockIdentifier !== "latest") {
             return super.getNonce(blockIdentifier);
         }

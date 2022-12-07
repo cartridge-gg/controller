@@ -3,13 +3,13 @@ import type { NextPage } from "next";
 import dynamic from "next/dynamic";
 import { Box, Flex, Spacer, Text, Image } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import { TypedData } from "starknet/utils/typedData";
-import { decodeShortString } from "starknet/utils/shortString";
-import { Header } from "components/Header";
+import { TypedData } from "starknet/src/utils/typedData";
+import { decodeShortString } from "starknet/src/utils/shortString";
 
 import Banner from "components/Banner";
 import ButtonBar from "components/ButtonBar";
 import Details from "components/Details";
+import { Header } from "components/Header";
 import Controller from "utils/controller";
 
 const DetailsHeader = (data: {

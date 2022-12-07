@@ -1,15 +1,14 @@
 import qs from "query-string";
-import { AccountInterface, number, RpcProvider } from "starknet";
+import { AccountInterface, constants, number, RpcProvider } from "starknet";
 import { AsyncMethodReturns, Connection, connectToChild } from '@cartridge/penpal';
 
 import DeviceAccount from "./device";
 import { Session, Keychain, Policy } from "./types";
-import { BigNumberish, toBN } from "starknet/dist/utils/number";
-import { StarknetChainId } from "starknet/dist/constants";
 
 const providers = {
-  [StarknetChainId.TESTNET]: new RpcProvider({ nodeUrl: "http://localhost:5050/rpc" }),
-  [StarknetChainId.MAINNET]: new RpcProvider({ nodeUrl: "http://localhost:5050/rpc" }),
+  [constants.StarknetChainId.TESTNET]: new RpcProvider({ nodeUrl: "http://localhost:5050/rpc" }),
+  [constants.StarknetChainId.TESTNET2]: new RpcProvider({ nodeUrl: "http://localhost:5050/rpc" }),
+  [constants.StarknetChainId.MAINNET]: new RpcProvider({ nodeUrl: "http://localhost:5050/rpc" }),
 }
 
 class Controller {
@@ -18,8 +17,8 @@ class Controller {
   public keychain?: AsyncMethodReturns<Keychain>;
   private policies: Policy[] = [];
   private url: string = "https://x.cartridge.gg";
-  public chainId: StarknetChainId = StarknetChainId.TESTNET;
-  public accounts?: { [key in StarknetChainId]: AccountInterface };
+  public chainId: constants.StarknetChainId = constants.StarknetChainId.TESTNET;
+  public accounts?: { [key in constants.StarknetChainId]: AccountInterface };
 
   constructor(
     policies?: Policy[],
@@ -94,16 +93,24 @@ class Controller {
     try {
       const { address } = await this.keychain.probe();
       this.accounts = {
-        [StarknetChainId.MAINNET]: new DeviceAccount(
-          providers[StarknetChainId.MAINNET],
+        [constants.StarknetChainId.MAINNET]: new DeviceAccount(
+          providers[constants.StarknetChainId.MAINNET],
           address,
           this.keychain,
           {
             url: this.url,
           }
         ),
-        [StarknetChainId.TESTNET]: new DeviceAccount(
-          providers[StarknetChainId.TESTNET],
+        [constants.StarknetChainId.TESTNET]: new DeviceAccount(
+          providers[constants.StarknetChainId.TESTNET],
+          address,
+          this.keychain,
+          {
+            url: this.url,
+          }
+        ),
+        [constants.StarknetChainId.TESTNET2]: new DeviceAccount(
+          providers[constants.StarknetChainId.TESTNET2],
           address,
           this.keychain,
           {
@@ -119,7 +126,7 @@ class Controller {
     return !!this.accounts[this.chainId];
   }
 
-  async switchChain(chainId: StarknetChainId) {
+  async switchChain(chainId: constants.StarknetChainId) {
     if (this.chainId === chainId) {
       return;
     }
@@ -187,16 +194,24 @@ class Controller {
     const response = await this.keychain.connect(this.policies);
 
     this.accounts = {
-      [StarknetChainId.MAINNET]: new DeviceAccount(
-        providers[StarknetChainId.MAINNET],
+      [constants.StarknetChainId.MAINNET]: new DeviceAccount(
+        providers[constants.StarknetChainId.MAINNET],
         response.address,
         this.keychain,
         {
           url: this.url,
         }
       ),
-      [StarknetChainId.TESTNET]: new DeviceAccount(
-        providers[StarknetChainId.TESTNET],
+      [constants.StarknetChainId.TESTNET]: new DeviceAccount(
+        providers[constants.StarknetChainId.TESTNET],
+        response.address,
+        this.keychain,
+        {
+          url: this.url,
+        }
+      ),
+      [constants.StarknetChainId.TESTNET2]: new DeviceAccount(
+        providers[constants.StarknetChainId.TESTNET2],
         response.address,
         this.keychain,
         {
@@ -243,9 +258,9 @@ class Controller {
   }
 }
 
-const BASE = number.toBN(2).pow(toBN(86));
+const BASE = number.toBN(2).pow(number.toBN(86));
 
-export function split(n: BigNumberish): { x: BigNumberish; y: BigNumberish; z: BigNumberish } {
+export function split(n: number.BigNumberish): { x: number.BigNumberish; y: number.BigNumberish; z: number.BigNumberish } {
   const x = n.mod(BASE);
   const y = n.div(BASE).mod(BASE);
   const z = n.div(BASE).div(BASE);

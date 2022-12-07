@@ -1,8 +1,8 @@
 import { HStack, Text } from "@chakra-ui/react";
-import { StarknetChainId } from "starknet/constants";
+import { constants } from "starknet";
 import StarknetIcon from "@cartridge/ui/components/icons/Starknet";
 
-const Network = ({ chainId }: { chainId: StarknetChainId }) => {
+const Network = ({ chainId }: { chainId: constants.StarknetChainId }) => {
     return (
         <HStack h="24px" p="0 12px" borderRadius="12px" backgroundColor="whiteAlpha.200">
             <StarknetIcon h="9px" w="9px" color="white" />
@@ -11,7 +11,7 @@ const Network = ({ chainId }: { chainId: StarknetChainId }) => {
                 fontWeight="bold"
                 letterSpacing="0.08em"
             >
-                {chainId === StarknetChainId.MAINNET ? "MAINNET" : "TESTNET"}
+                {chainId === constants.StarknetChainId.MAINNET ? "MAINNET" : "TESTNET"}
             </Text>
         </HStack>
     )

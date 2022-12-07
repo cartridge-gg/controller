@@ -12,8 +12,8 @@ import {
   DeclareContractPayload,
   DeployAccountSignerDetails,
 } from "starknet";
-import { StarknetChainId } from "starknet/dist/constants";
-import { BigNumberish } from "starknet/dist/utils/number";
+import { StarknetChainId } from "starknet/src/constants";
+import { BigNumberish } from "starknet/src/utils/number";
 
 export type Assertion = {
   id: string;

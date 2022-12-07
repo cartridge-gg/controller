@@ -4,7 +4,7 @@ import {
   EstimateFee,
   EstimateFeeDetails,
 } from "starknet";
-import { StarknetChainId } from "starknet/constants";
+import { StarknetChainId } from "starknet/src/constants";
 
 import Controller from "utils/controller";
 

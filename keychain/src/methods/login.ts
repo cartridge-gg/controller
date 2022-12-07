@@ -1,8 +1,7 @@
 import Storage from "utils/storage";
 import Controller from "utils/controller";
-import { ec } from "starknet";
+import { constants, ec } from "starknet";
 import base64url from "base64url";
-import { StarknetChainId } from "starknet/constants";
 
 const login =
   () =>
@@ -16,8 +15,8 @@ const login =
     ) => {
       const keypair = ec.genKeyPair();
       const controller = new Controller(keypair, address, credentialId, options);
-      const { assertion, invoke } = await controller.signAddDeviceKey(StarknetChainId.TESTNET);
-      Storage.set(`@register/${StarknetChainId.TESTNET}/set_device_key`, invoke);
+      const { assertion, invoke } = await controller.signAddDeviceKey(constants.StarknetChainId.TESTNET);
+      Storage.set(`@register/${constants.StarknetChainId.TESTNET}/set_device_key`, invoke);
 
       return {
         assertion: {
