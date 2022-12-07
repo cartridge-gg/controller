@@ -1,4 +1,4 @@
-import { AccountInterface, defaultProvider, ProviderInterface } from "starknet";
+import { AccountInterface, ProviderInterface } from "starknet";
 import Controller from ".";
 
 export type EventType = "accountsChanged" | "networkChanged";

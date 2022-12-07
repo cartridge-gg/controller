@@ -1,5 +1,5 @@
 import { split } from "@cartridge/controller";
-import { ec, Provider } from "starknet";
+import { ec } from "starknet";
 import { encodeShortString } from "starknet/dist/utils/shortString";
 import {
   calculateContractAddressFromHash,
@@ -8,8 +8,6 @@ import {
 import { toBN } from "starknet/dist/utils/number";
 import Controller from "utils/controller";
 import { ACCOUNT_CLASS, CONTROLLER_CLASS, PROXY_CLASS } from "utils/constants";
-import { StarknetChainId } from "starknet/constants";
-import Storage from "utils/storage";
 
 const register =
   () => async (username: string, credentialId: string, credential: { x: string; y: string }) => {

@@ -1,4 +1,5 @@
 import { Account as BaseAccount, RpcProvider, SignerInterface } from "starknet"
+import { StarknetChainId } from "starknet/constants";
 import { getSelector } from "starknet/utils/hash";
 import { BigNumberish } from "starknet/utils/number";
 import { CONTROLLER_CLASS } from "./constants";
@@ -9,19 +10,20 @@ class Account extends BaseAccount {
     deployed: boolean = false;
     registered: boolean = false;
 
-    constructor(rpc: RpcProvider, address: string, signer: SignerInterface) {
-        super(rpc, address, signer);
-        this.rpc = rpc;
-        this.sync();
-    }
-
-    async sync() {
-        const chainId = await this.rpc.getChainId();
-
-        const existing = Storage.get(`@deployment/${chainId}`);
-        if (existing && existing.syncing !== undefined) {
+    constructor(chainId: StarknetChainId, nodeUrl: string, address: string, signer: SignerInterface) {
+        super({ rpc: { nodeUrl } }, address, signer);
+        this.rpc = new RpcProvider({ nodeUrl });
+        const state = Storage.get(`@deployment/${chainId}`)
+        if (!state || state.syncing === undefined) {
+            this.sync(chainId);
             return;
         }
+
+        this.deployed = state.deployed;
+        this.registered = state.registered;
+    }
+
+    async sync(chainId: StarknetChainId) {
         Storage.update(`@deployment/${chainId}`, {
             syncing: true,
         });
@@ -30,6 +32,7 @@ class Account extends BaseAccount {
             const classHash = await this.rpc.getClassHashAt("latest", this.address)
             Storage.update(`@deployment/${chainId}`, {
                 classHash,
+                deployed: true,
             })
             this.deployed = true;
 
@@ -46,12 +49,11 @@ class Account extends BaseAccount {
                     CONTROLLER_CLASS, getSelector("is_public_key"), "0x1", pub,
                 ],
             }, "latest");
-            this.registered = res[1] === "0x1";
+            this.registered = res.result[1] === "0x01";
             Storage.update(`@deployment/${chainId}`, {
                 registered: this.registered,
             })
         } catch (e) {
-            console.error(e)
             /* no-op */
         }
 

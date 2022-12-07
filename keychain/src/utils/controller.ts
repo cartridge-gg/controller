@@ -29,8 +29,8 @@ export default class Controller {
   public signer: SignerInterface;
   protected publicKey: string;
   protected keypair: KeyPair;
-  protected webauthn: WebauthnAccount;
   protected credentialId: string;
+  protected webauthn: { [key in StarknetChainId]: WebauthnAccount };
   protected accounts: { [key in StarknetChainId]: Account }
 
   constructor(keypair: KeyPair, address: string, credentialId: string, options?: {
@@ -42,28 +42,31 @@ export default class Controller {
     this.publicKey = ec.getStarkKey(keypair);
     this.credentialId = credentialId;
 
-    const goerli = new RpcProvider({ nodeUrl: process.env.NEXT_PUBLIC_RPC_GOERLI })
-    const mainnet = new RpcProvider({ nodeUrl: process.env.NEXT_PUBLIC_RPC_MAINNET })
     this.accounts = {
-      [StarknetChainId.TESTNET]: new Account(goerli, address, this.signer),
-      [StarknetChainId.MAINNET]: new Account(mainnet, address, this.signer),
+      [StarknetChainId.TESTNET]: new Account(StarknetChainId.TESTNET, process.env.NEXT_PUBLIC_RPC_GOERLI, address, this.signer),
+      [StarknetChainId.MAINNET]: new Account(StarknetChainId.MAINNET, process.env.NEXT_PUBLIC_RPC_MAINNET, address, this.signer),
     };
 
-    this.webauthn = new WebauthnAccount(
-      address,
-      credentialId,
-      this.publicKey,
-      options,
-    );
+    this.webauthn = {
+      [StarknetChainId.TESTNET]: new WebauthnAccount(
+        process.env.NEXT_PUBLIC_RPC_GOERLI,
+        address,
+        credentialId,
+        this.publicKey,
+        options,
+      ),
+      [StarknetChainId.MAINNET]: new WebauthnAccount(
+        process.env.NEXT_PUBLIC_RPC_MAINNET,
+        address,
+        credentialId,
+        this.publicKey,
+        options,
+      ),
+    }
 
     this.approve(process.env.NEXT_PUBLIC_ADMIN_URL, [], "0");
     Storage.set(`@admin/${process.env.NEXT_PUBLIC_ADMIN_URL}`, {});
     this.store();
-  }
-
-  isRegistered(chainId: StarknetChainId) {
-    const register = Storage.get(`@register/${chainId}/set_device_key`)
-    return register === true;
   }
 
   account(chainId: StarknetChainId) {
@@ -100,7 +103,7 @@ export default class Controller {
     );
 
     let challenge = Uint8Array.from(msgHash.slice(2).padStart(64, "0").slice(0, 64).match(/.{1,2}/g).map((byte) => parseInt(byte, 16)));
-    const assertion = await this.webauthn.signer.sign(challenge);
+    const assertion = await this.webauthn[chainId].signer.sign(challenge);
     const signature = formatAssertion(assertion);
     return {
       assertion, invoke: {

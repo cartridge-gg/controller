@@ -180,9 +180,12 @@ const Execute: NextPage = () => {
     }
 
     async function register() {
-      if (!controller.isRegistered(params.chainId) && !registerData) {
-        return;
-      } else if (!controller.isRegistered(params.chainId) && registerData) {
+      const account = controller.account(params.chainId);
+      if (account.registered) {
+        const fees = await account.estimateInvokeFee(params.calls, { nonce });
+        console.log(fees)
+        setFees(fees)
+      } else if (!account.registered && registerData) {
         try {
           const nextNonce = toHex(nonce.add(toBN(1)))
           const signerDetails = {
@@ -257,8 +260,7 @@ const Execute: NextPage = () => {
       <Header address={controller.address} />
     );
   }
-
-  if (!controller.account(params.chainId).registered && !controller.isRegistered(params.chainId) && !registerData) {
+  if (!controller.account(params.chainId).registered && !registerData) {
     return (
       <>
         <Header address={controller.address} />

@@ -10,12 +10,12 @@ import {
   typedData,
   number,
   Account,
-  defaultProvider,
   DeclareSignerDetails,
   EstimateFeeDetails,
   EstimateFee,
   InvocationsDetails,
   InvokeFunctionResponse,
+  RpcProvider,
 } from "starknet";
 import base64url from "base64url";
 import { split } from "@cartridge/controller";
@@ -176,6 +176,7 @@ export class WebauthnSigner implements SignerInterface {
 class WebauthnAccount extends Account {
   public signer: WebauthnSigner;
   constructor(
+    nodeUrl: string,
     address: string,
     credentialId: string,
     publicKey: string,
@@ -184,7 +185,7 @@ class WebauthnAccount extends Account {
     },
   ) {
     const signer = new WebauthnSigner(credentialId, publicKey, options ? options.rpId : undefined);
-    super(defaultProvider, address, signer);
+    super({ rpc: { nodeUrl } }, address, signer);
     this.signer = signer;
   }
 
