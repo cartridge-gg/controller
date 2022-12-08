@@ -5,7 +5,12 @@ import Controller from "utils/controller";
 import { ACCOUNT_CLASS, CONTROLLER_CLASS, PROXY_CLASS } from "utils/constants";
 
 const register =
-  () => async (username: string, credentialId: string, credential: { x: string; y: string }) => {
+  () =>
+  async (
+    username: string,
+    credentialId: string,
+    credential: { x: string; y: string },
+  ) => {
     const keypair = ec.genKeyPair();
     const deviceKey = ec.getStarkKey(keypair);
 

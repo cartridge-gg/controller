@@ -15,73 +15,83 @@ import Storage from "utils/storage";
 
 const execute =
   (controller: Controller, session: Session) =>
-    async (
-      transactions: Call | Call[],
-      abis?: Abi[],
-      transactionsDetail?: InvocationsDetails & {
-        chainId?: constants.StarknetChainId,
-      },
-      sync?: boolean,
-    ): Promise<InvokeFunctionResponse> => {
-      transactionsDetail.chainId = transactionsDetail.chainId ? transactionsDetail.chainId : constants.StarknetChainId.TESTNET
+  async (
+    transactions: Call | Call[],
+    abis?: Abi[],
+    transactionsDetail?: InvocationsDetails & {
+      chainId?: constants.StarknetChainId;
+    },
+    sync?: boolean,
+  ): Promise<InvokeFunctionResponse> => {
+    transactionsDetail.chainId = transactionsDetail.chainId
+      ? transactionsDetail.chainId
+      : constants.StarknetChainId.TESTNET;
 
-      if (!controller.account(transactionsDetail.chainId).registered) {
-        throw new Error("not registered")
-      }
+    if (!controller.account(transactionsDetail.chainId).registered) {
+      throw new Error("not registered");
+    }
 
-      const calls = Array.isArray(transactions) ? transactions : [transactions];
+    const calls = Array.isArray(transactions) ? transactions : [transactions];
 
-      const policies = calls.map(
-        (txn) =>
+    const policies = calls.map(
+      (txn) =>
         ({
           target: txn.contractAddress,
           method: txn.entrypoint,
         } as Policy),
+    );
+
+    if (!transactionsDetail.nonce) {
+      transactionsDetail.nonce = await controller
+        .account(transactionsDetail.chainId)
+        .getNonce();
+    }
+
+    transactionsDetail.version = hash.transactionVersion;
+
+    if (!transactionsDetail.maxFee) {
+      try {
+        transactionsDetail.maxFee = (
+          await controller
+            .account(transactionsDetail.chainId)
+            .estimateInvokeFee(calls, { nonce: transactionsDetail.nonce })
+        ).suggestedMaxFee;
+      } catch (e) {
+        console.error(e);
+        throw e;
+      }
+    }
+
+    if (sync) {
+      const calldata = transaction.fromCallsToExecuteCalldata(calls);
+      const h = hash.calculateTransactionHash(
+        controller.address,
+        transactionsDetail.version,
+        calldata,
+        transactionsDetail.maxFee,
+        transactionsDetail.chainId,
+        transactionsDetail.nonce,
       );
-
-      if (!transactionsDetail.nonce) {
-        transactionsDetail.nonce = await controller.account(transactionsDetail.chainId).getNonce();
+      await pollForTransaction(h);
+    } else {
+      const missing = diff(policies, session.policies);
+      if (missing.length > 0) {
+        throw new MissingPolicys(missing);
       }
+    }
 
-      transactionsDetail.version = hash.transactionVersion;
+    if (
+      session.maxFee &&
+      transactionsDetail &&
+      number.toBN(transactionsDetail.maxFee).gt(number.toBN(session.maxFee))
+    ) {
+      throw new Error("transaction fees exceed pre-approved limit");
+    }
 
-      if (!transactionsDetail.maxFee) {
-        try {
-          transactionsDetail.maxFee = (await controller.account(transactionsDetail.chainId).estimateInvokeFee(calls, { nonce: transactionsDetail.nonce })).suggestedMaxFee
-        } catch (e) {
-          console.error(e)
-          throw e
-        }
-      }
-
-      if (sync) {
-        const calldata = transaction.fromCallsToExecuteCalldata(calls);
-        const h = hash.calculateTransactionHash(
-          controller.address,
-          transactionsDetail.version,
-          calldata,
-          transactionsDetail.maxFee,
-          transactionsDetail.chainId,
-          transactionsDetail.nonce,
-        );
-        await pollForTransaction(h);
-      } else {
-        const missing = diff(policies, session.policies);
-        if (missing.length > 0) {
-          throw new MissingPolicys(missing);
-        }
-      }
-
-      if (
-        session.maxFee &&
-        transactionsDetail &&
-        number.toBN(transactionsDetail.maxFee).gt(number.toBN(session.maxFee))
-      ) {
-        throw new Error("transaction fees exceed pre-approved limit");
-      }
-
-      return await controller.account(transactionsDetail.chainId).execute(calls, abis, transactionsDetail);
-    };
+    return await controller
+      .account(transactionsDetail.chainId)
+      .execute(calls, abis, transactionsDetail);
+  };
 
 // Three minutes
 const TIMEOUT = 1000 * 60 * 3;

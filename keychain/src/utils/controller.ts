@@ -1,4 +1,16 @@
-import { constants, ec, KeyPair, hash, number, transaction, Call, Invocation, InvocationsDetails, SignerInterface, stark } from "starknet";
+import {
+  constants,
+  ec,
+  KeyPair,
+  hash,
+  number,
+  transaction,
+  Call,
+  Invocation,
+  InvocationsDetails,
+  SignerInterface,
+  stark,
+} from "starknet";
 import equal from "fast-deep-equal";
 
 import { Policy, Session } from "@cartridge/controller";
@@ -11,16 +23,17 @@ import { DeviceSigner } from "./signer";
 import WebauthnAccount, { formatAssertion, RawAssertion } from "./webauthn";
 import { getGasPrice } from "./gateway";
 
-const VERSION = "0.0.2"
+const VERSION = "0.0.2";
 
 export type InvocationWithDetails = {
-  invocation: Invocation, details: InvocationsDetails
-}
+  invocation: Invocation;
+  details: InvocationsDetails;
+};
 
 export type RegisterData = {
   assertion: RawAssertion;
   invoke: InvocationWithDetails;
-}
+};
 
 export default class Controller {
   public address: string;
@@ -29,11 +42,16 @@ export default class Controller {
   protected keypair: KeyPair;
   protected credentialId: string;
   protected webauthn: { [key in constants.StarknetChainId]: WebauthnAccount };
-  protected accounts: { [key in constants.StarknetChainId]: Account }
+  protected accounts: { [key in constants.StarknetChainId]: Account };
 
-  constructor(keypair: KeyPair, address: string, credentialId: string, options?: {
-    rpId?: string;
-  }) {
+  constructor(
+    keypair: KeyPair,
+    address: string,
+    credentialId: string,
+    options?: {
+      rpId?: string;
+    },
+  ) {
     this.address = address;
     this.signer = new DeviceSigner(keypair);
     this.keypair = keypair;
@@ -41,9 +59,24 @@ export default class Controller {
     this.credentialId = credentialId;
 
     this.accounts = {
-      [constants.StarknetChainId.TESTNET]: new Account(constants.StarknetChainId.TESTNET, process.env.NEXT_PUBLIC_RPC_GOERLI, address, this.signer),
-      [constants.StarknetChainId.TESTNET2]: new Account(constants.StarknetChainId.TESTNET2, process.env.NEXT_PUBLIC_RPC_GOERLI, address, this.signer),
-      [constants.StarknetChainId.MAINNET]: new Account(constants.StarknetChainId.MAINNET, process.env.NEXT_PUBLIC_RPC_MAINNET, address, this.signer),
+      [constants.StarknetChainId.TESTNET]: new Account(
+        constants.StarknetChainId.TESTNET,
+        process.env.NEXT_PUBLIC_RPC_GOERLI,
+        address,
+        this.signer,
+      ),
+      [constants.StarknetChainId.TESTNET2]: new Account(
+        constants.StarknetChainId.TESTNET2,
+        process.env.NEXT_PUBLIC_RPC_GOERLI,
+        address,
+        this.signer,
+      ),
+      [constants.StarknetChainId.MAINNET]: new Account(
+        constants.StarknetChainId.MAINNET,
+        process.env.NEXT_PUBLIC_RPC_MAINNET,
+        address,
+        this.signer,
+      ),
     };
 
     this.webauthn = {
@@ -68,7 +101,7 @@ export default class Controller {
         this.publicKey,
         options,
       ),
-    }
+    };
 
     this.approve(process.env.NEXT_PUBLIC_ADMIN_URL, [], "0");
     Storage.set(`@admin/${process.env.NEXT_PUBLIC_ADMIN_URL}`, {});
@@ -79,7 +112,9 @@ export default class Controller {
     return this.accounts[chainId];
   }
 
-  async signAddDeviceKey(chainId: constants.StarknetChainId): Promise<RegisterData> {
+  async signAddDeviceKey(
+    chainId: constants.StarknetChainId,
+  ): Promise<RegisterData> {
     const calls: Call[] = [
       {
         contractAddress: this.address,
@@ -99,7 +134,7 @@ export default class Controller {
 
     const gas = 28000;
     const gasPrice = await getGasPrice(chainId);
-    const fee = number.toBN(gasPrice).mul(number.toBN(gas))
+    const fee = number.toBN(gasPrice).mul(number.toBN(gas));
     const suggestedMaxFee = stark.estimatedFeeToMaxFee(fee);
 
     let msgHash = hash.calculateTransactionHash(
@@ -111,19 +146,27 @@ export default class Controller {
       nonce,
     );
 
-    let challenge = Uint8Array.from(msgHash.slice(2).padStart(64, "0").slice(0, 64).match(/.{1,2}/g).map((byte) => parseInt(byte, 16)));
+    let challenge = Uint8Array.from(
+      msgHash
+        .slice(2)
+        .padStart(64, "0")
+        .slice(0, 64)
+        .match(/.{1,2}/g)
+        .map((byte) => parseInt(byte, 16)),
+    );
     const assertion = await this.webauthn[chainId].signer.sign(challenge);
     const signature = formatAssertion(assertion);
     return {
-      assertion, invoke: {
+      assertion,
+      invoke: {
         invocation: { contractAddress: this.address, calldata, signature },
         details: {
           nonce,
           maxFee: suggestedMaxFee,
           version,
-        }
-      }
-    }
+        },
+      },
+    };
   }
 
   delete() {

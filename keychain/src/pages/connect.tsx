@@ -13,14 +13,19 @@ import Controller from "utils/controller";
 
 const Connect: NextPage = () => {
   const [maxFee, setMaxFee] = useState(null);
-  const { chainId, validPolicys, invalidPolicys, isValidating } = useUrlPolicys();
+  const { chainId, validPolicys, invalidPolicys, isValidating } =
+    useUrlPolicys();
   const { origin } = useRequests();
   const controller = useMemo(() => Controller.fromStore(), []);
   const router = useRouter();
 
   useEffect(() => {
     if (!controller) {
-      router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/welcome?redirect_uri=${encodeURIComponent(window.location.href)}`);
+      router.replace(
+        `${
+          process.env.NEXT_PUBLIC_ADMIN_URL
+        }/welcome?redirect_uri=${encodeURIComponent(window.location.href)}`,
+      );
       return;
     }
   }, [router, controller]);

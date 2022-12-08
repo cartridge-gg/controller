@@ -1,14 +1,15 @@
 import { constants, defaultProvider } from "starknet";
 
 const testnet =
-  defaultProvider.chainId === constants.StarknetChainId.TESTNET ? "testnet." : "";
+  defaultProvider.chainId === constants.StarknetChainId.TESTNET
+    ? "testnet."
+    : "";
 const baseUrl = `https://${testnet}starkscan.co/`;
 
 export const StarkscanUrl = {
   [constants.StarknetChainId.MAINNET]: {
     transaction: (hash: string) => `https://starkscan.co/tx/${hash}`,
-    contract: (address: string) =>
-      `https://starkscan.co/contract/${address}`,
+    contract: (address: string) => `https://starkscan.co/contract/${address}`,
     message: (address: string) => `https://starkscan.co/message/${address}`,
     block: (id: string) => `https://starkscan.co/block/${id}`,
     event: (address: string) => `https://starkscan.co/event/${address}`,
@@ -18,7 +19,8 @@ export const StarkscanUrl = {
     transaction: (hash: string) => `https://testnet.starkscan.co/tx/${hash}`,
     contract: (address: string) =>
       `https://testnet.starkscan.co/contract/${address}`,
-    message: (address: string) => `https://testnet.starkscan.co/message/${address}`,
+    message: (address: string) =>
+      `https://testnet.starkscan.co/message/${address}`,
     block: (id: string) => `https://testnet.starkscan.co/block/${id}`,
     event: (address: string) => `https://testnet.starkscan.co/event/${address}`,
     class: (address: string) => `https://testnet.starkscan.co/class/${address}`,
@@ -27,10 +29,13 @@ export const StarkscanUrl = {
     transaction: (hash: string) => `https://testnet-2.starkscan.co/tx/${hash}`,
     contract: (address: string) =>
       `https://testnet-2.starkscan.co/contract/${address}`,
-    message: (address: string) => `https://testnet-2.starkscan.co/message/${address}`,
+    message: (address: string) =>
+      `https://testnet-2.starkscan.co/message/${address}`,
     block: (id: string) => `https://testnet-2.starkscan.co/block/${id}`,
-    event: (address: string) => `https://testnet-2.starkscan.co/event/${address}`,
-    class: (address: string) => `https://testnet-2.starkscan.co/class/${address}`,
+    event: (address: string) =>
+      `https://testnet-2.starkscan.co/event/${address}`,
+    class: (address: string) =>
+      `https://testnet-2.starkscan.co/class/${address}`,
   },
 };
 

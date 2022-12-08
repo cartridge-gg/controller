@@ -23,7 +23,7 @@ export function useUrlPolicys(): {
     if (!router.isReady || !policies) {
       return;
     }
-    setChainId(chainId ? chainId as constants.StarknetChainId : undefined);
+    setChainId(chainId ? (chainId as constants.StarknetChainId) : undefined);
     setIsValidating(true);
     const requests = JSON.parse(policies as string) as Policy[];
     const requestDict = {};

@@ -17,7 +17,7 @@ type SessionProps = {
   setMaxFee?: (maxFee: string) => void;
   onSubmit: (values: any, actions: any) => Promise<void>;
   onCancel?: () => void;
-  toggable?: boolean
+  toggable?: boolean;
 };
 
 const CallFields = ({
@@ -34,7 +34,12 @@ const CallFields = ({
       <Field key={i} name={i}>
         {({ field }: { field: FieldInputProps<boolean> }) => (
           <FormControl>
-            <CallToggle {...field} chainId={chainId} policy={policy} notice={notice} />
+            <CallToggle
+              {...field}
+              chainId={chainId}
+              policy={policy}
+              notice={notice}
+            />
           </FormControl>
         )}
       </Field>
@@ -68,10 +73,10 @@ const Session = ({
         {(props) => (
           <Form
             css={css`
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-          `}
+              display: flex;
+              flex-direction: column;
+              height: 100%;
+            `}
           >
             <Flex flex={1} direction="column" gap="12px">
               {!isLoading && (
@@ -96,7 +101,11 @@ const Session = ({
                 </>
               )}
             </Flex>
-            <Footer isLoading={props.isSubmitting || isLoading} onCancel={onCancel} action={action} />
+            <Footer
+              isLoading={props.isSubmitting || isLoading}
+              onCancel={onCancel}
+              action={action}
+            />
           </Form>
         )}
       </Formik>

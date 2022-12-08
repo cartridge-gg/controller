@@ -37,7 +37,7 @@ function convertUint8ArrayToWordArray(u8Array: Uint8Array) {
         (u8Array[i++] << 16) |
         (u8Array[i++] << 8) |
         u8Array[i++]) >>>
-      0,
+        0,
     );
   }
 
@@ -179,7 +179,11 @@ class WebauthnAccount extends Account {
       rpId?: string;
     },
   ) {
-    const signer = new WebauthnSigner(credentialId, publicKey, options ? options.rpId : undefined);
+    const signer = new WebauthnSigner(
+      credentialId,
+      publicKey,
+      options ? options.rpId : undefined,
+    );
     super({ rpc: { nodeUrl } }, address, signer);
     this.signer = signer;
   }
@@ -232,7 +236,9 @@ class WebauthnAccount extends Account {
     transactionsDetail?: InvocationsDetails & { ext?: Buffer },
   ): Promise<InvokeFunctionResponse> {
     const transactions = Array.isArray(calls) ? calls : [calls];
-    const nonce = number.toBN(transactionsDetail.nonce ?? (await this.getNonce()));
+    const nonce = number.toBN(
+      transactionsDetail.nonce ?? (await this.getNonce()),
+    );
     const maxFee =
       transactionsDetail.maxFee ??
       (await this.getSuggestedMaxFee(

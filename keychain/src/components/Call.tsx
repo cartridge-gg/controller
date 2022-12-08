@@ -34,7 +34,15 @@ function formatDescription(policy: Policy) {
   return `Execute code on ${formatAddress(policy.target, 6)}`;
 }
 
-export const Call = ({ chainId, policy, notice }: { chainId: constants.StarknetChainId, policy: Policy, notice?: string }) => {
+export const Call = ({
+  chainId,
+  policy,
+  notice,
+}: {
+  chainId: constants.StarknetChainId;
+  policy: Policy;
+  notice?: string;
+}) => {
   const title = (
     <HStack>
       <Text variant="ibm-upper-bold">{formatName(policy)}</Text>
@@ -52,10 +60,8 @@ export const Call = ({ chainId, policy, notice }: { chainId: constants.StarknetC
     </Link>
   );
 
-  return (
-    <Base title={title} description={description} />
-  )
-}
+  return <Base title={title} description={description} />;
+};
 
 export const CallToggle = ({
   chainId,
@@ -63,7 +69,7 @@ export const CallToggle = ({
   notice,
   ...rest
 }: {
-  chainId: constants.StarknetChainId,
+  chainId: constants.StarknetChainId;
   policy: Policy;
   notice?: string;
 } & FieldInputProps<boolean>) => {
@@ -148,7 +154,7 @@ const Switchable = ({
       onChange={rest.onChange}
     />
   </Flex>
-)
+);
 
 const Base = ({
   title,
@@ -159,10 +165,14 @@ const Base = ({
   disable?: boolean;
   errMsg?: string;
 }) => (
-  <VStack align="flex-start" spacing="8px" bgColor="gray.700" p="16px" borderRadius="8px">
-    <Box fontSize="11px">
-      {title}
-    </Box>
+  <VStack
+    align="flex-start"
+    spacing="8px"
+    bgColor="gray.700"
+    p="16px"
+    borderRadius="8px"
+  >
+    <Box fontSize="11px">{title}</Box>
     <Text fontSize="12px" color="gray.200">
       {description}
     </Text>

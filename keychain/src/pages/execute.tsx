@@ -6,7 +6,16 @@ import { Flex, HStack, Spinner, Text, VStack } from "@chakra-ui/react";
 import { Header } from "components/Header";
 import Controller, { RegisterData } from "utils/controller";
 import { useRouter } from "next/router";
-import { constants, hash, number, transaction, Call as StarknetCall, EstimateFee, EstimateFeeResponse, stark } from "starknet";
+import {
+  constants,
+  hash,
+  number,
+  transaction,
+  Call as StarknetCall,
+  EstimateFee,
+  EstimateFeeResponse,
+  stark,
+} from "starknet";
 import Storage from "utils/storage";
 import Banner from "components/Banner";
 import Network from "components/Network";
@@ -24,12 +33,18 @@ async function fetchEthPrice() {
     headers: {
       "content-type": "application/json",
     },
-    body: `{"query":"query { price(quote: ETH, base: USD) { amount }}"}`
+    body: `{"query":"query { price(quote: ETH, base: USD) { amount }}"}`,
   });
   return res.json();
 }
 
-const Unlock = ({ chainId, onSubmit }: { chainId: constants.StarknetChainId, onSubmit: () => void }) => (
+const Unlock = ({
+  chainId,
+  onSubmit,
+}: {
+  chainId: constants.StarknetChainId;
+  onSubmit: () => void;
+}) => (
   <Flex m={4} flex={1} flexDirection="column">
     <Banner
       pb="20px"
@@ -38,7 +53,8 @@ const Unlock = ({ chainId, onSubmit }: { chainId: constants.StarknetChainId, onS
       borderBottom="1px solid"
       borderColor="gray.700"
     >
-      It looks like this is your first time using this device with this chain. You will need to register it before you can execute transactions.
+      It looks like this is your first time using this device with this chain.
+      You will need to register it before you can execute transactions.
       <Flex justify="center" mt="12px">
         <Network chainId={chainId} />
       </Flex>
@@ -51,27 +67,37 @@ const Unlock = ({ chainId, onSubmit }: { chainId: constants.StarknetChainId, onS
         py="11px"
         px="15px"
         borderRadius="8px"
-        justifyContent="space-between">
+        justifyContent="space-between"
+      >
         <HStack>
-          <Text textTransform="uppercase" fontSize={11} fontWeight={700} color="gray.100">
+          <Text
+            textTransform="uppercase"
+            fontSize={11}
+            fontWeight={700}
+            color="gray.100"
+          >
             Register Device
           </Text>
           <InfoIcon />
         </HStack>
       </HStack>
-      <Footer onSubmit={onSubmit} onCancel={() => {
-        if (window.opener) {
-          window.close()
-        }
-      }} action="Register"></Footer>
+      <Footer
+        onSubmit={onSubmit}
+        onCancel={() => {
+          if (window.opener) {
+            window.close();
+          }
+        }}
+        action="Register"
+      ></Footer>
     </Flex>
   </Flex>
-)
+);
 
 const Fees = ({ fees }: { fees?: EstimateFee }) => {
   const [usdFee, setUsdFee] = useState<{
-    fee: string,
-    max: string,
+    fee: string;
+    max: string;
   }>();
   useEffect(() => {
     if (!fees) {
@@ -79,8 +105,8 @@ const Fees = ({ fees }: { fees?: EstimateFee }) => {
     }
 
     async function compute() {
-      let dollarUSLocale = Intl.NumberFormat('en-US');
-      const { data } = await fetchEthPrice()
+      let dollarUSLocale = Intl.NumberFormat("en-US");
+      const { data } = await fetchEthPrice();
       const usdeth = number.toBN(data.price.amount * 100);
       const fee = fees.overall_fee.mul(usdeth).toString();
       setUsdFee({
@@ -89,7 +115,7 @@ const Fees = ({ fees }: { fees?: EstimateFee }) => {
       });
     }
     compute();
-  }, [fees])
+  }, [fees]);
 
   return (
     <HStack
@@ -99,24 +125,34 @@ const Fees = ({ fees }: { fees?: EstimateFee }) => {
       py="11px"
       px="15px"
       borderRadius="8px"
-      justifyContent="space-between">
+      justifyContent="space-between"
+    >
       <HStack>
-        <Text textTransform="uppercase" fontSize={11} fontWeight={700} color="gray.100">
+        <Text
+          textTransform="uppercase"
+          fontSize={11}
+          fontWeight={700}
+          color="gray.100"
+        >
           Network Fees
         </Text>
         <InfoIcon />
       </HStack>
       <VStack alignItems="flex-end">
-        {
-          usdFee ? <>
+        {usdFee ? (
+          <>
             <Text fontSize={13}>~${usdFee.fee}</Text>
-            <Text fontSize={11} color="gray.200" mt="1px !important">Max: ~${usdFee.max}</Text>
-          </> : <Spinner />
-        }
+            <Text fontSize={11} color="gray.200" mt="1px !important">
+              Max: ~${usdFee.max}
+            </Text>
+          </>
+        ) : (
+          <Spinner />
+        )}
       </VStack>
     </HStack>
-  )
-}
+  );
+};
 
 const Execute: NextPage = () => {
   const [registerData, setRegisterData] = useState<RegisterData>();
@@ -136,10 +172,7 @@ const Execute: NextPage = () => {
   }, [router.query]);
 
   const params = useMemo(() => {
-    if (
-      !controller.address ||
-      !router.query.calls
-    ) {
+    if (!controller.address || !router.query.calls) {
       return null;
     }
 
@@ -147,17 +180,29 @@ const Execute: NextPage = () => {
       chainId?: constants.StarknetChainId;
       maxFee?: string;
     };
-    const calls: StarknetCall | StarknetCall[] = JSON.parse(router.query.calls as string);
+    const calls: StarknetCall | StarknetCall[] = JSON.parse(
+      router.query.calls as string,
+    );
     const transactions = Array.isArray(calls) ? calls : [calls];
 
-    return { calls: transactions, maxFee, chainId: chainId ? chainId : constants.StarknetChainId.TESTNET };
+    return {
+      calls: transactions,
+      maxFee,
+      chainId: chainId ? chainId : constants.StarknetChainId.TESTNET,
+    };
   }, [controller.address, router.query]);
 
-  const execute = useCallback((calls: StarknetCall[],) => normalize(validate((controller) => {
-    return async () => {
-      return await controller.account(params.chainId).execute(calls);
-    }
-  })), [params])
+  const execute = useCallback(
+    (calls: StarknetCall[]) =>
+      normalize(
+        validate((controller) => {
+          return async () => {
+            return await controller.account(params.chainId).execute(calls);
+          };
+        }),
+      ),
+    [params],
+  );
 
   // Get the nonce
   useEffect(() => {
@@ -165,10 +210,13 @@ const Execute: NextPage = () => {
       return;
     }
 
-    controller.account(params.chainId).getNonce().then((n: number.BigNumberish) => {
-      setNonce(number.toBN(n));
-    })
-  }, [controller, params, setNonce])
+    controller
+      .account(params.chainId)
+      .getNonce()
+      .then((n: number.BigNumberish) => {
+        setNonce(number.toBN(n));
+      });
+  }, [controller, params, setNonce]);
 
   // Estimate fees
   useEffect(() => {
@@ -180,10 +228,10 @@ const Execute: NextPage = () => {
       const account = controller.account(params.chainId);
       if (account.registered) {
         const fees = await account.estimateInvokeFee(params.calls, { nonce });
-        setFees(fees)
+        setFees(fees);
       } else if (!account.registered && registerData) {
         try {
-          const nextNonce = number.toHex(nonce.add(number.toBN(1)))
+          const nextNonce = number.toHex(nonce.add(number.toBN(1)));
           const signerDetails = {
             walletAddress: controller.address,
             nonce: nextNonce,
@@ -192,72 +240,92 @@ const Execute: NextPage = () => {
             chainId: params.chainId,
           };
 
-          const signature = await controller.signer.signTransaction(params.calls, signerDetails);
+          const signature = await controller.signer.signTransaction(
+            params.calls,
+            signerDetails,
+          );
           const calldata = transaction.fromCallsToExecuteCalldata(params.calls);
 
-          const estimates = (await estimateFeeBulk(params.chainId, [registerData.invoke, {
-            invocation: { contractAddress: controller.address, calldata, signature },
-            details: { version: hash.transactionVersion, nonce: nextNonce, maxFee: constants.ZERO },
-          }])) as EstimateFeeResponse[]
-          const fees = estimates.reduce<EstimateFee>((prev, estimate) => {
-            const overall_fee = prev.overall_fee.add(number.toBN(estimate.overall_fee));
-            return {
-              overall_fee: overall_fee,
-              gas_consumed: prev.gas_consumed.add(number.toBN(estimate.gas_consumed)),
-              gas_price: prev.gas_price.add(number.toBN(estimate.gas_price)),
-              suggestedMaxFee: overall_fee,
-            }
-          }, {
-            overall_fee: number.toBN(0),
-            gas_consumed: number.toBN(0),
-            gas_price: number.toBN(0),
-            suggestedMaxFee: number.toBN(0),
-          })
+          const estimates = (await estimateFeeBulk(params.chainId, [
+            registerData.invoke,
+            {
+              invocation: {
+                contractAddress: controller.address,
+                calldata,
+                signature,
+              },
+              details: {
+                version: hash.transactionVersion,
+                nonce: nextNonce,
+                maxFee: constants.ZERO,
+              },
+            },
+          ])) as EstimateFeeResponse[];
+          const fees = estimates.reduce<EstimateFee>(
+            (prev, estimate) => {
+              const overall_fee = prev.overall_fee.add(
+                number.toBN(estimate.overall_fee),
+              );
+              return {
+                overall_fee: overall_fee,
+                gas_consumed: prev.gas_consumed.add(
+                  number.toBN(estimate.gas_consumed),
+                ),
+                gas_price: prev.gas_price.add(number.toBN(estimate.gas_price)),
+                suggestedMaxFee: overall_fee,
+              };
+            },
+            {
+              overall_fee: number.toBN(0),
+              gas_consumed: number.toBN(0),
+              gas_price: number.toBN(0),
+              suggestedMaxFee: number.toBN(0),
+            },
+          );
 
-          fees.suggestedMaxFee = stark.estimatedFeeToMaxFee(fees.overall_fee)
+          fees.suggestedMaxFee = stark.estimatedFeeToMaxFee(fees.overall_fee);
           setFees(fees);
         } catch (e) {
-          console.error(e)
-          setError(e)
+          console.error(e);
+          setError(e);
           return;
         }
       }
     }
 
     register();
-  }, [controller, nonce, params, registerData, setError, setFees])
+  }, [controller, nonce, params, registerData, setError, setFees]);
 
   useEffect(() => {
     if (!controller) {
-      router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/welcome?redirect_uri=${encodeURIComponent(window.location.href)}`);
+      router.replace(
+        `${
+          process.env.NEXT_PUBLIC_ADMIN_URL
+        }/welcome?redirect_uri=${encodeURIComponent(window.location.href)}`,
+      );
       return;
     }
   }, [router, controller]);
 
   const onRegister = useCallback(async () => {
-    const data = await controller.signAddDeviceKey(params.chainId)
-    Storage.set(`@register/${params.chainId}/set_device_key`, data)
-    setRegisterData(data)
-  }, [controller, params])
+    const data = await controller.signAddDeviceKey(params.chainId);
+    Storage.set(`@register/${params.chainId}/set_device_key`, data);
+    setRegisterData(data);
+  }, [controller, params]);
 
-  const onSubmit = useCallback(
-    async () => {
-      const res = await execute(params.calls)(url.href)();
-      // We set the transaction hash which the keychain instance
-      // polls for.
-      Storage.set(`@transaction/${res.transaction_hash}`, true);
+  const onSubmit = useCallback(async () => {
+    const res = await execute(params.calls)(url.href)();
+    // We set the transaction hash which the keychain instance
+    // polls for.
+    Storage.set(`@transaction/${res.transaction_hash}`, true);
 
-      if (window.opener) {
-        window.close();
-      }
-    },
-    [execute, params, url],
-  );
+    if (window.opener) {
+      window.close();
+    }
+  }, [execute, params, url]);
 
   if (!url || !params || !controller) {
-    return (
-      <Header address={controller.address} />
-    );
+    return <Header address={controller.address} />;
   }
   if (!controller.account(params.chainId).registered && !registerData) {
     return (
@@ -265,7 +333,7 @@ const Execute: NextPage = () => {
         <Header address={controller.address} />
         <Unlock chainId={params.chainId} onSubmit={onRegister} />
       </>
-    )
+    );
   }
 
   return (
@@ -285,17 +353,28 @@ const Execute: NextPage = () => {
           </Flex>
         </Banner>
         <Flex my={2} flex={1} flexDirection="column" gap="10px">
-          {
-            params.calls.map((call, i) => <Call key={i} chainId={params.chainId} policy={{
-              target: call.contractAddress,
-              method: call.entrypoint,
-            }} />)
-          }
-          <Footer isDisabled={!fees} onSubmit={onSubmit} onCancel={() => {
-            if (window.opener) {
-              window.close()
-            }
-          }} action="Confirm"><Fees fees={fees} /></Footer>
+          {params.calls.map((call, i) => (
+            <Call
+              key={i}
+              chainId={params.chainId}
+              policy={{
+                target: call.contractAddress,
+                method: call.entrypoint,
+              }}
+            />
+          ))}
+          <Footer
+            isDisabled={!fees}
+            onSubmit={onSubmit}
+            onCancel={() => {
+              if (window.opener) {
+                window.close();
+              }
+            }}
+            action="Confirm"
+          >
+            <Fees fees={fees} />
+          </Footer>
         </Flex>
       </Flex>
     </>
