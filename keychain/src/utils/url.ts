@@ -7,8 +7,7 @@ const baseUrl = `https://${testnet}starkscan.co/`;
 
 export const StarkscanUrl = {
   transaction: (address: string) => `${baseUrl}/tx/${address}`,
-  contract: (address: string) =>
-    `${baseUrl}/contract/${address}`,
+  contract: (address: string) => `${baseUrl}/contract/${address}`,
   message: (address: string) => `${baseUrl}/message/${address}`,
   block: (address: string) => `${baseUrl}/block/${address}`,
   event: (address: string) => `${baseUrl}/event/${address}`,

@@ -87,9 +87,7 @@ const Execute: NextPage = () => {
   );
 
   if (!url || !params || !controller) {
-    return (
-      <Header address={controller.address} />
-    );
+    return <Header address={controller.address} />;
   }
 
   return (

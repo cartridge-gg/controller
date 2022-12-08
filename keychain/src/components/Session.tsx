@@ -1,5 +1,14 @@
 import { css } from "@emotion/react";
-import { Box, Button, Divider, Flex, FormControl, HStack, Text, Image } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Divider,
+  Flex,
+  FormControl,
+  HStack,
+  Text,
+  Image,
+} from "@chakra-ui/react";
 import { Formik, Form, Field, FieldInputProps } from "formik";
 import { Policy } from "@cartridge/controller";
 
@@ -18,7 +27,7 @@ type SessionFormProps = {
   setMaxFee?: (maxFee: string) => void;
   onSubmit: (values: any, actions: any) => Promise<void>;
   onCancel?: () => void;
-  toggable?: boolean
+  toggable?: boolean;
 };
 
 const CallFields = ({
@@ -28,7 +37,7 @@ const CallFields = ({
 }: {
   policies: Policy[];
   errMsg?: string;
-  toggable?: boolean
+  toggable?: boolean;
 }) => (
   <>
     {policies.map((policy, i) => (
@@ -36,7 +45,12 @@ const CallFields = ({
         <Field name={i}>
           {({ field }: { field: FieldInputProps<boolean> }) => (
             <FormControl>
-              <Call {...field} policy={policy} toggable={toggable} errMsg={errMsg} />
+              <Call
+                {...field}
+                policy={policy}
+                toggable={toggable}
+                errMsg={errMsg}
+              />
             </FormControl>
           )}
         </Field>
@@ -164,14 +178,17 @@ const Session = ({
       >
         {message}
         <Flex justify="center" mt="12px">
-          <HStack h="24px" p="0 12px" borderRadius="12px" backgroundColor="whiteAlpha.200">
+          <HStack
+            h="24px"
+            p="0 12px"
+            borderRadius="12px"
+            backgroundColor="whiteAlpha.200"
+          >
             <StarknetIcon h="9px" w="9px" color="white" />
-            <Text
-              fontSize="10px"
-              fontWeight="bold"
-              letterSpacing="0.08em"
-            >
-              {controller.chainId === StarknetChainId.MAINNET ? "MAINNET" : "TESTNET"}
+            <Text fontSize="10px" fontWeight="bold" letterSpacing="0.08em">
+              {controller.chainId === StarknetChainId.MAINNET
+                ? "MAINNET"
+                : "TESTNET"}
             </Text>
           </HStack>
         </Flex>

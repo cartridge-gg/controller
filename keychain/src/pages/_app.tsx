@@ -5,7 +5,7 @@ import "../style.css";
 import { useEffect } from "react";
 import Storage from "utils/storage";
 
-const VERSION = "0.0.1"
+const VERSION = "0.0.1";
 
 function Keychain({ Component, pageProps }: AppProps) {
   useEffect(() => {
@@ -16,7 +16,7 @@ function Keychain({ Component, pageProps }: AppProps) {
 
     Storage.clear();
     Storage.set("version", VERSION);
-  }, [])
+  }, []);
 
   return (
     <CartridgeUIProvider>

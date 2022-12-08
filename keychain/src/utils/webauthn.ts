@@ -42,7 +42,7 @@ function convertUint8ArrayToWordArray(u8Array: Uint8Array) {
         (u8Array[i++] << 16) |
         (u8Array[i++] << 8) |
         u8Array[i++]) >>>
-      0,
+        0,
     );
   }
 

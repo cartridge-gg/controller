@@ -10,7 +10,6 @@ import Controller from "utils/account";
 import Storage from "utils/storage";
 import { ACCOUNT_CLASS, CONTROLLER_CLASS, PROXY_CLASS } from "utils/constants";
 
-
 const register =
   () => async (username: string, credential: { x: string; y: string }) => {
     const keypair = ec.genKeyPair();
