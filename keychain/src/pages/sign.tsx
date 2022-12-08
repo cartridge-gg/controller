@@ -92,7 +92,10 @@ const Sign: NextPage = () => {
 
   useEffect(() => {
     if (!controller) {
-      router.replace(`${process.env.NEXT_PUBLIC_SITE_URL}/welcome`);
+      router.replace({
+        pathname: `${process.env.NEXT_PUBLIC_SITE_URL}/login`,
+        query: `redirect=${encodeURIComponent(window.location.href)}`,
+      });
       return;
     }
   }, [router, controller]);
