@@ -1,96 +1,97 @@
 import {
-  constants,
-  hash,
-  number,
-  Account as BaseAccount,
-  RpcProvider,
-  SignerInterface,
+    constants,
+    hash,
+    number,
+    Account as BaseAccount,
+    RpcProvider,
+    SignerInterface,
 } from "starknet";
 
 import { CONTROLLER_CLASS } from "./constants";
 import Storage from "./storage";
 
 class Account extends BaseAccount {
-  private rpc: RpcProvider;
-  deployed: boolean = false;
-  registered: boolean = false;
+    private rpc: RpcProvider;
+    private selector: string;
+    deployed: boolean = false;
+    registered: boolean = false;
 
-  constructor(
-    chainId: constants.StarknetChainId,
-    nodeUrl: string,
-    address: string,
-    signer: SignerInterface,
-  ) {
-    super({ rpc: { nodeUrl } }, address, signer);
-    this.rpc = new RpcProvider({ nodeUrl });
-    const state = Storage.get(`@deployment/${chainId}`);
-    if (!state || !state.syncing) {
-      this.sync(chainId);
-      return;
+    constructor(
+        chainId: constants.StarknetChainId,
+        nodeUrl: string,
+        address: string,
+        signer: SignerInterface,
+    ) {
+        super({ rpc: { nodeUrl } }, address, signer);
+        this.rpc = new RpcProvider({ nodeUrl });
+        this.selector = `@deployment/${chainId}`
+        const state = Storage.get(this.selector);
+        if (!state || !state.syncing) {
+            this.sync(chainId);
+            return;
+        }
+
+        this.deployed = state.deployed;
+        this.registered = state.registered;
     }
 
-    this.deployed = state.deployed;
-    this.registered = state.registered;
-  }
+    async sync(chainId: constants.StarknetChainId) {
+        Storage.update(this.selector, {
+            syncing: true,
+        });
 
-  async sync(chainId: constants.StarknetChainId) {
-    Storage.update(`@deployment/${chainId}`, {
-      syncing: true,
-    });
+        try {
+            const classHash = await this.rpc.getClassHashAt(this.address, "latest");
+            Storage.update(this.selector, {
+                classHash,
+                deployed: true,
+            });
+            this.deployed = true;
 
-    try {
-      const classHash = await this.rpc.getClassHashAt(this.address, "latest");
-      Storage.update(`@deployment/${chainId}`, {
-        classHash,
-        deployed: true,
-      });
-      this.deployed = true;
+            const nonce = await this.rpc.getNonceForAddress(this.address, "latest");
+            Storage.update(this.selector, {
+                nonce,
+            });
 
-      const nonce = await this.rpc.getNonceForAddress(this.address, "latest");
-      Storage.update(`@deployment/${chainId}`, {
-        nonce,
-      });
+            const pub = await this.signer.getPubKey();
+            const res = await this.rpc.callContract(
+                {
+                    contractAddress: this.address,
+                    entrypoint: "executeOnPlugin",
+                    calldata: [
+                        CONTROLLER_CLASS,
+                        hash.getSelector("is_public_key"),
+                        "0x1",
+                        pub,
+                    ],
+                },
+                "latest",
+            );
+            this.registered = res.result[1] === "0x01";
+            Storage.update(this.selector, {
+                registered: this.registered,
+            });
+        } catch (e) {
+            /* no-op */
+        }
 
-      const pub = await this.signer.getPubKey();
-      const res = await this.rpc.callContract(
-        {
-          contractAddress: this.address,
-          entrypoint: "executeOnPlugin",
-          calldata: [
-            CONTROLLER_CLASS,
-            hash.getSelector("is_public_key"),
-            "0x1",
-            pub,
-          ],
-        },
-        "latest",
-      );
-      this.registered = res.result[1] === "0x01";
-      Storage.update(`@deployment/${chainId}`, {
-        registered: this.registered,
-      });
-    } catch (e) {
-      /* no-op */
+        Storage.update(this.selector, {
+            syncing: false,
+        });
     }
 
-    Storage.update(`@deployment/${chainId}`, {
-      syncing: false,
-    });
-  }
+    async getNonce(blockIdentifier?: any): Promise<number.BigNumberish> {
+        if (blockIdentifier && (blockIdentifier !== "latest" || blockIdentifier !== "pending")) {
+            return super.getNonce(blockIdentifier);
+        }
 
-  async getNonce(blockIdentifier?: any): Promise<number.BigNumberish> {
-    if (blockIdentifier && blockIdentifier !== "latest") {
-      return super.getNonce(blockIdentifier);
+        const deployment = Storage.get(this.selector);
+        if (!deployment || !deployment.nonce) {
+            return "0x0";
+        }
+
+        return deployment.nonce;
     }
-
-    const deployment = Storage.get(`@deployment/${this.rpc.chainId}`);
-
-    if (!deployment || !deployment.nonce) {
-      return "0x0";
-    }
-
-    return deployment.nonce;
-  }
 }
 
 export default Account;
