@@ -6,7 +6,7 @@ import { Flex, HStack, Spinner, Text, VStack } from "@chakra-ui/react";
 import { Header } from "components/Header";
 import Controller, { RegisterData } from "utils/controller";
 import { useRouter } from "next/router";
-import { constants, hash, number, transaction, Call as StarknetCall, EstimateFee, EstimateFeeResponse } from "starknet";
+import { constants, hash, number, transaction, Call as StarknetCall, EstimateFee, EstimateFeeResponse, stark } from "starknet";
 import Storage from "utils/storage";
 import Banner from "components/Banner";
 import Network from "components/Network";
@@ -199,7 +199,7 @@ const Execute: NextPage = () => {
             invocation: { contractAddress: controller.address, calldata, signature },
             details: { version: hash.transactionVersion, nonce: nextNonce, maxFee: constants.ZERO },
           }])) as EstimateFeeResponse[]
-          setFees(estimates.reduce<EstimateFee>((prev, estimate) => {
+          const fees = estimates.reduce<EstimateFee>((prev, estimate) => {
             const overall_fee = prev.overall_fee.add(number.toBN(estimate.overall_fee));
             return {
               overall_fee: overall_fee,
@@ -212,7 +212,10 @@ const Execute: NextPage = () => {
             gas_consumed: number.toBN(0),
             gas_price: number.toBN(0),
             suggestedMaxFee: number.toBN(0),
-          }))
+          })
+
+          fees.suggestedMaxFee = stark.estimatedFeeToMaxFee(fees.overall_fee)
+          setFees(fees);
         } catch (e) {
           console.error(e)
           setError(e)
@@ -226,7 +229,7 @@ const Execute: NextPage = () => {
 
   useEffect(() => {
     if (!controller) {
-      router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/welcome`);
+      router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/welcome?redirect_uri=${encodeURIComponent(window.location.href)}`);
       return;
     }
   }, [router, controller]);

@@ -87,7 +87,8 @@ class DeviceAccount extends Account {
     try {
       return await this.keychain.execute(calls, abis, transactionsDetail)
     } catch (e) {
-      if ((e as Error).message !== "missing policies") {
+      console.log((e as Error).message)
+      if ((e as Error).message !== "missing policies" && (e as Error).message !== "not registered") {
         console.error(e)
         throw e
       }

@@ -23,6 +23,12 @@ const execute =
       },
       sync?: boolean,
     ): Promise<InvokeFunctionResponse> => {
+      transactionsDetail.chainId = transactionsDetail.chainId ? transactionsDetail.chainId : constants.StarknetChainId.TESTNET
+
+      if (!controller.account(transactionsDetail.chainId).registered) {
+        throw new Error("not registered")
+      }
+
       const calls = Array.isArray(transactions) ? transactions : [transactions];
 
       const policies = calls.map(
@@ -33,22 +39,20 @@ const execute =
         } as Policy),
       );
 
-      transactionsDetail.chainId = transactionsDetail.chainId ? transactionsDetail.chainId : constants.StarknetChainId.TESTNET
-
       if (!transactionsDetail.nonce) {
         transactionsDetail.nonce = await controller.account(transactionsDetail.chainId).getNonce();
       }
 
-      transactionsDetail.version = 1;
+      transactionsDetail.version = hash.transactionVersion;
 
-      // if (!transactionsDetail.maxFee) {
-      //   try {
-      //     transactionsDetail.maxFee = (await this.estimateInvokeFee(calls, { nonce: transactionsDetail.nonce })).suggestedMaxFee
-      //   } catch (e) {
-      //     console.error(e)
-      //     throw e
-      //   }
-      // }
+      if (!transactionsDetail.maxFee) {
+        try {
+          transactionsDetail.maxFee = (await controller.account(transactionsDetail.chainId).estimateInvokeFee(calls, { nonce: transactionsDetail.nonce })).suggestedMaxFee
+        } catch (e) {
+          console.error(e)
+          throw e
+        }
+      }
 
       if (sync) {
         const calldata = transaction.fromCallsToExecuteCalldata(calls);
@@ -81,7 +85,7 @@ const execute =
 
 // Three minutes
 const TIMEOUT = 1000 * 60 * 3;
-const INTERNVAL = 100;
+const INTERVAL = 100;
 
 function pollForTransaction(hash: string) {
   return new Promise((resolve, reject) => {
@@ -103,7 +107,7 @@ function pollForTransaction(hash: string) {
     };
 
     // Poll for approval
-    const timeout = setInterval(checkApproval, INTERNVAL);
+    const timeout = setInterval(checkApproval, INTERVAL);
 
     // Call on leading edge
     checkApproval();

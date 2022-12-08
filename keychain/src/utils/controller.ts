@@ -1,4 +1,4 @@
-import { constants, ec, KeyPair, hash, number, transaction, Call, Invocation, InvocationsDetails, SignerInterface } from "starknet";
+import { constants, ec, KeyPair, hash, number, transaction, Call, Invocation, InvocationsDetails, SignerInterface, stark } from "starknet";
 import equal from "fast-deep-equal";
 
 import { Policy, Session } from "@cartridge/controller";
@@ -9,6 +9,7 @@ import Account from "./account";
 import { CONTROLLER_CLASS } from "./constants";
 import { DeviceSigner } from "./signer";
 import WebauthnAccount, { formatAssertion, RawAssertion } from "./webauthn";
+import { getGasPrice } from "./gateway";
 
 const VERSION = "0.0.2"
 
@@ -96,7 +97,10 @@ export default class Controller {
     const version = number.toBN(hash.transactionVersion);
     const calldata = transaction.fromCallsToExecuteCalldata(calls);
 
-    const suggestedMaxFee = number.toBN(1000000);
+    const gas = 28000;
+    const gasPrice = await getGasPrice(chainId);
+    const fee = number.toBN(gasPrice).mul(number.toBN(gas))
+    const suggestedMaxFee = stark.estimatedFeeToMaxFee(fee);
 
     let msgHash = hash.calculateTransactionHash(
       this.address,
