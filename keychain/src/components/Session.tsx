@@ -5,8 +5,10 @@ import { Policy } from "@cartridge/controller";
 
 import { CallToggle, MaxFee } from "./Call";
 import Footer from "./Footer";
+import { constants } from "starknet";
 
 type SessionProps = {
+  chainId: constants.StarknetChainId;
   action: string;
   policies: Policy[];
   invalidPolicys?: Policy[];
@@ -19,9 +21,11 @@ type SessionProps = {
 };
 
 const CallFields = ({
+  chainId,
   policies,
   notice,
 }: {
+  chainId: constants.StarknetChainId;
   policies: Policy[];
   notice?: string;
 }) => (
@@ -30,7 +34,7 @@ const CallFields = ({
       <Field key={i} name={i}>
         {({ field }: { field: FieldInputProps<boolean> }) => (
           <FormControl>
-            <CallToggle {...field} policy={policy} notice={notice} />
+            <CallToggle {...field} chainId={chainId} policy={policy} notice={notice} />
           </FormControl>
         )}
       </Field>
@@ -39,6 +43,7 @@ const CallFields = ({
 );
 
 const Session = ({
+  chainId,
   action,
   policies,
   invalidPolicys,
@@ -71,7 +76,7 @@ const Session = ({
             <Flex flex={1} direction="column" gap="12px">
               {!isLoading && (
                 <>
-                  <CallFields policies={policies} />
+                  <CallFields chainId={chainId} policies={policies} />
                   {maxFee && (
                     <Field>
                       {({ field }: { field: FieldInputProps<boolean> }) => (
@@ -83,6 +88,7 @@ const Session = ({
                   )}
                   {invalidPolicys && (
                     <CallFields
+                      chainId={chainId}
                       policies={invalidPolicys}
                       notice={"Invalid Method Requested"}
                     />

@@ -5,13 +5,33 @@ const testnet =
 const baseUrl = `https://${testnet}starkscan.co/`;
 
 export const StarkscanUrl = {
-  transaction: (address: string) => `${baseUrl}/tx/${address}`,
-  contract: (address: string) =>
-    `${baseUrl}/contract/${address}`,
-  message: (address: string) => `${baseUrl}/message/${address}`,
-  block: (address: string) => `${baseUrl}/block/${address}`,
-  event: (address: string) => `${baseUrl}/event/${address}`,
-  class: (address: string) => `${baseUrl}/class/${address}`,
+  [constants.StarknetChainId.MAINNET]: {
+    transaction: (hash: string) => `https://starkscan.co/tx/${hash}`,
+    contract: (address: string) =>
+      `https://starkscan.co/contract/${address}`,
+    message: (address: string) => `https://starkscan.co/message/${address}`,
+    block: (id: string) => `https://starkscan.co/block/${id}`,
+    event: (address: string) => `https://starkscan.co/event/${address}`,
+    class: (address: string) => `https://starkscan.co/class/${address}`,
+  },
+  [constants.StarknetChainId.TESTNET]: {
+    transaction: (hash: string) => `https://testnet.starkscan.co/tx/${hash}`,
+    contract: (address: string) =>
+      `https://testnet.starkscan.co/contract/${address}`,
+    message: (address: string) => `https://testnet.starkscan.co/message/${address}`,
+    block: (id: string) => `https://testnet.starkscan.co/block/${id}`,
+    event: (address: string) => `https://testnet.starkscan.co/event/${address}`,
+    class: (address: string) => `https://testnet.starkscan.co/class/${address}`,
+  },
+  [constants.StarknetChainId.TESTNET2]: {
+    transaction: (hash: string) => `https://testnet-2.starkscan.co/tx/${hash}`,
+    contract: (address: string) =>
+      `https://testnet-2.starkscan.co/contract/${address}`,
+    message: (address: string) => `https://testnet-2.starkscan.co/message/${address}`,
+    block: (id: string) => `https://testnet-2.starkscan.co/block/${id}`,
+    event: (address: string) => `https://testnet-2.starkscan.co/event/${address}`,
+    class: (address: string) => `https://testnet-2.starkscan.co/class/${address}`,
+  },
 };
 
 const DEFAULT_PORT_BY_PROTOCOL: { [index: string]: string } = {

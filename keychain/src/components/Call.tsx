@@ -9,14 +9,14 @@ import {
   Input,
   Spacer,
   VStack,
-  FormControl,
 } from "@chakra-ui/react";
-import { Field, FieldInputProps } from "formik";
+import { FieldInputProps } from "formik";
 import { formatEther } from "ethers/lib/utils";
 import { Policy } from "@cartridge/controller";
 import { formatAddress } from "@cartridge/ui/components/Address";
 import { StarkscanUrl } from "utils/url";
 import EthereumIcon from "@cartridge/ui/components/icons/Ethereum";
+import { constants } from "starknet";
 
 function formatName(policy: Policy) {
   if (policy.method) {
@@ -34,7 +34,7 @@ function formatDescription(policy: Policy) {
   return `Execute code on ${formatAddress(policy.target, 6)}`;
 }
 
-export const Call = ({ policy, notice }: { policy: Policy, notice?: string }) => {
+export const Call = ({ chainId, policy, notice }: { chainId: constants.StarknetChainId, policy: Policy, notice?: string }) => {
   const title = (
     <HStack>
       <Text variant="ibm-upper-bold">{formatName(policy)}</Text>
@@ -47,7 +47,7 @@ export const Call = ({ policy, notice }: { policy: Policy, notice?: string }) =>
   );
 
   const description = (
-    <Link href={StarkscanUrl.contract(policy.target)} target="_blank">
+    <Link href={StarkscanUrl[chainId].contract(policy.target)} target="_blank">
       {formatDescription(policy)}
     </Link>
   );
@@ -58,10 +58,12 @@ export const Call = ({ policy, notice }: { policy: Policy, notice?: string }) =>
 }
 
 export const CallToggle = ({
+  chainId,
   policy,
   notice,
   ...rest
 }: {
+  chainId: constants.StarknetChainId,
   policy: Policy;
   notice?: string;
 } & FieldInputProps<boolean>) => {
@@ -76,7 +78,7 @@ export const CallToggle = ({
     </HStack>
   );
   const description = (
-    <Link href={StarkscanUrl.contract(policy.target)} target="_blank">
+    <Link href={StarkscanUrl[chainId].contract(policy.target)} target="_blank">
       {formatDescription(policy)}
     </Link>
   );

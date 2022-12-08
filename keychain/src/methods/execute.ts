@@ -33,11 +33,12 @@ const execute =
         } as Policy),
       );
 
-      // if (!transactionsDetail.nonce) {
-      //   transactionsDetail.nonce = await this.getNonce();
-      // }
-
       transactionsDetail.chainId = transactionsDetail.chainId ? transactionsDetail.chainId : constants.StarknetChainId.TESTNET
+
+      if (!transactionsDetail.nonce) {
+        transactionsDetail.nonce = await controller.account(transactionsDetail.chainId).getNonce();
+      }
+
       transactionsDetail.version = 1;
 
       // if (!transactionsDetail.maxFee) {

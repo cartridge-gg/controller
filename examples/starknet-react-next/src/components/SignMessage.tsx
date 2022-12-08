@@ -1,8 +1,8 @@
 import { useSignTypedData } from "@starknet-react/core";
-import { TypedData } from "starknet/utils/typedData";
+import { typedData } from "starknet";
 
 export function SignMessage() {
-  const message: TypedData = {
+  const message: typedData.TypedData = {
     types: {
       StarkNetDomain: [
         { name: 'name', type: 'felt' },

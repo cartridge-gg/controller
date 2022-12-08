@@ -3,8 +3,8 @@ import type { NextPage } from "next";
 import dynamic from "next/dynamic";
 import { Box, Flex, Spacer, Text, Image } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import { TypedData } from "starknet/src/utils/typedData";
-import { decodeShortString } from "starknet/src/utils/shortString";
+
+import { typedData as snTypedData, shortString } from "starknet";
 
 import Banner from "components/Banner";
 import ButtonBar from "components/ButtonBar";
@@ -99,7 +99,7 @@ const Sign: NextPage = () => {
 
   useEffect(() => {
     if (!typedData) return;
-    const msgData: TypedData = JSON.parse(typedData as string);
+    const msgData: snTypedData.TypedData = JSON.parse(typedData as string);
     const primaryTypeData = msgData.types[msgData.primaryType];
 
     // Recursively decodes all nested `felt*` types
@@ -111,7 +111,7 @@ const Sign: NextPage = () => {
       for (const typeMember of messageType) {
         if (typeMember.type === "felt*") {
           const stringArray: Array<string> = initial[typeMember.name].map(
-            (hex: string) => decodeShortString(hex),
+            (hex: string) => shortString.decodeShortString(hex),
           );
           initial[typeMember.name] = stringArray.join("");
         } else if (typeMember.type !== "felt" && typeMember.type !== "string") {

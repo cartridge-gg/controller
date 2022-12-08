@@ -155,7 +155,7 @@ const Execute: NextPage = () => {
 
   const execute = useCallback((calls: StarknetCall[],) => normalize(validate((controller) => {
     return async () => {
-      return await controller.account(params.chainId).execute(calls, []);
+      return await controller.account(params.chainId).execute(calls);
     }
   })), [params])
 
@@ -283,7 +283,7 @@ const Execute: NextPage = () => {
         </Banner>
         <Flex my={2} flex={1} flexDirection="column" gap="10px">
           {
-            params.calls.map((call, i) => <Call key={i} policy={{
+            params.calls.map((call, i) => <Call key={i} chainId={params.chainId} policy={{
               target: call.contractAddress,
               method: call.entrypoint,
             }} />)

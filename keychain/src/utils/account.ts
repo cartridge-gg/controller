@@ -12,7 +12,7 @@ class Account extends BaseAccount {
         super({ rpc: { nodeUrl } }, address, signer);
         this.rpc = new RpcProvider({ nodeUrl });
         const state = Storage.get(`@deployment/${chainId}`)
-        if (!state || state.syncing === undefined) {
+        if (!state || !state.syncing) {
             this.sync(chainId);
             return;
         }
@@ -27,7 +27,7 @@ class Account extends BaseAccount {
         });
 
         try {
-            const classHash = await this.rpc.getClassHashAt("latest", this.address)
+            const classHash = await this.rpc.getClassHashAt(this.address, "latest");
             Storage.update(`@deployment/${chainId}`, {
                 classHash,
                 deployed: true,

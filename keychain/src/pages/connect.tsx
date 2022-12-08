@@ -4,16 +4,16 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import { Flex } from "@chakra-ui/react";
 
-import Session from "components/Session";
+import Banner from "components/Banner";
 import { Header } from "components/Header";
+import Session from "components/Session";
 import { useRequests } from "hooks/account";
 import { useUrlPolicys } from "hooks/policy";
 import Controller from "utils/controller";
-import Banner from "components/Banner";
 
 const Connect: NextPage = () => {
   const [maxFee, setMaxFee] = useState(null);
-  const { validPolicys, invalidPolicys, isValidating } = useUrlPolicys();
+  const { chainId, validPolicys, invalidPolicys, isValidating } = useUrlPolicys();
   const { origin } = useRequests();
   const controller = useMemo(() => Controller.fromStore(), []);
   const router = useRouter();
@@ -66,6 +66,7 @@ const Connect: NextPage = () => {
           }
         </Banner>
         <Session
+          chainId={chainId}
           action={
             "CONFIRM" +
             (validPolicys.length > 0 ? ` [${validPolicys.length + 1}]` : "")

@@ -1,10 +1,9 @@
 import {
+  constants,
   Account,
-  DeployContractPayload,
   Abi,
   Call,
   EstimateFeeDetails,
-  DeployContractResponse as StarknetDeployContractResponse,
   InvocationsDetails,
   Signature,
   typedData,
@@ -20,7 +19,6 @@ import {
 } from "./types";
 import { Signer } from "./signer";
 import { AsyncMethodReturns } from "@cartridge/penpal";
-import { StarknetChainId } from "starknet/src/constants";
 
 class DeviceAccount extends Account {
   address: string;
@@ -79,7 +77,7 @@ class DeviceAccount extends Account {
     calls: Call | Call[],
     abis?: Abi[],
     transactionsDetail?: InvocationsDetails & {
-      chainId?: StarknetChainId,
+      chainId?: constants.StarknetChainId,
     }
   ): Promise<InvokeFunctionResponse> {
     if (!transactionsDetail) {

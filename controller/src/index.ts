@@ -5,7 +5,7 @@ import { AsyncMethodReturns, Connection, connectToChild } from '@cartridge/penpa
 import DeviceAccount from "./device";
 import { Session, Keychain, Policy } from "./types";
 
-const providers = {
+export const providers = {
   [constants.StarknetChainId.TESTNET]: new RpcProvider({ nodeUrl: "http://localhost:5050/rpc" }),
   [constants.StarknetChainId.TESTNET2]: new RpcProvider({ nodeUrl: "http://localhost:5050/rpc" }),
   [constants.StarknetChainId.MAINNET]: new RpcProvider({ nodeUrl: "http://localhost:5050/rpc" }),
@@ -188,7 +188,7 @@ class Controller {
         policies: JSON.stringify(this.policies),
       })}`,
       "_blank",
-      "height=650,width=400"
+      "height=650,width=450"
     );
 
     const response = await this.keychain.connect(this.policies);

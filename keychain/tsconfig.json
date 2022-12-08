@@ -24,7 +24,7 @@
     "noEmit": true,
     "paths": {
       "core": [
-        "../src",
+        "../src"
       ],
       "@cartridge/controller": [
         "../../controller/src"
@@ -32,7 +32,7 @@
       "@cartridge/ui/*": [
         "../../ui/src/*"
       ]
-    },
+    }
   },
   "include": [
     "next-env.d.ts",

@@ -1,10 +1,10 @@
 import {
+  constants,
   Call,
   DeclareContractPayload,
   EstimateFee,
   EstimateFeeDetails,
 } from "starknet";
-import { StarknetChainId } from "starknet/src/constants";
 
 import Controller from "utils/controller";
 
@@ -13,7 +13,7 @@ const estimateInvokeFee =
     async (
       transactions: Call | Call[],
       details?: EstimateFeeDetails & {
-        chainId: StarknetChainId
+        chainId: constants.StarknetChainId
       },
     ): Promise<EstimateFee> => {
       const calls = Array.isArray(transactions) ? transactions : [transactions];
@@ -25,7 +25,7 @@ const estimateDeclareFee =
     async (
       payload: DeclareContractPayload,
       details?: EstimateFeeDetails & {
-        chainId: StarknetChainId
+        chainId: constants.StarknetChainId
       },
     ): Promise<EstimateFee> => {
       return await controller.account(details.chainId).estimateDeclareFee(payload, details);
