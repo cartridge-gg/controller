@@ -22,6 +22,7 @@ import { CONTROLLER_CLASS } from "./constants";
 import { DeviceSigner } from "./signer";
 import WebauthnAccount, { formatAssertion, RawAssertion } from "./webauthn";
 import { getGasPrice } from "./gateway";
+import selectors from "./selectors";
 
 const VERSION = "0.0.2";
 
@@ -104,7 +105,10 @@ export default class Controller {
     };
 
     this.approve(process.env.NEXT_PUBLIC_ADMIN_URL, [], "0");
-    Storage.set(`@admin/${process.env.NEXT_PUBLIC_ADMIN_URL}`, {});
+    Storage.set(
+      selectors["0.0.2"].admin(process.env.NEXT_PUBLIC_ADMIN_URL),
+      {},
+    );
     this.store();
   }
 
@@ -174,23 +178,23 @@ export default class Controller {
   }
 
   approve(origin: string, policies: Policy[], maxFee?: number.BigNumberish) {
-    Storage.set(`@session/${origin}`, {
+    Storage.set(selectors["0.0.2"].session(origin), {
       policies,
       maxFee,
     });
   }
 
   revoke(origin: string) {
-    Storage.remove(`@session/${origin}`);
+    Storage.remove(selectors["0.0.2"].session(origin));
   }
 
   session(origin: string): Session | undefined {
-    return Storage.get(`@session/${origin}`);
+    return Storage.get(selectors["0.0.2"].session(origin));
   }
 
   sessions(): { [key: string]: Session } | undefined {
     return Storage.keys()
-      .filter((k) => k.startsWith("@session/"))
+      .filter((k) => k.startsWith(selectors["0.0.2"].session("")))
       .reduce((prev, key) => {
         prev[key.slice(9)] = Storage.get(key);
         return prev;
@@ -219,8 +223,18 @@ export default class Controller {
     }
 
     if (version === "0.0.1") {
-      Storage.set(`@deployment/${constants.StarknetChainId.MAINNET}`, {});
-      Storage.set(`@deployment/${constants.StarknetChainId.TESTNET}`, {});
+      Storage.set(
+        selectors["0.0.2"].deployment(constants.StarknetChainId.MAINNET),
+        {},
+      );
+      Storage.set(
+        selectors["0.0.2"].deployment(constants.StarknetChainId.TESTNET),
+        {},
+      );
+      Storage.set(
+        selectors["0.0.2"].deployment(constants.StarknetChainId.TESTNET2),
+        {},
+      );
     }
 
     const { credentialId, privateKey, address } = controller;

@@ -2,6 +2,7 @@ import Storage from "utils/storage";
 import Controller from "utils/controller";
 import { constants, ec } from "starknet";
 import base64url from "base64url";
+import selectors from "utils/selectors";
 
 const login =
   () =>
@@ -19,7 +20,7 @@ const login =
       constants.StarknetChainId.TESTNET,
     );
     Storage.set(
-      `@register/${constants.StarknetChainId.TESTNET}/set_device_key`,
+      selectors["0.0.2"].register(constants.StarknetChainId.TESTNET),
       invoke,
     );
 
