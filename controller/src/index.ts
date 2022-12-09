@@ -1,10 +1,15 @@
 import qs from "query-string";
-import { AccountInterface, number } from "starknet";
+import { AccountInterface, constants, number, RpcProvider } from "starknet";
 import { AsyncMethodReturns, Connection, connectToChild } from '@cartridge/penpal';
 
 import DeviceAccount from "./device";
 import { Session, Keychain, Policy } from "./types";
-import { BigNumberish, toBN } from "starknet/dist/utils/number";
+
+export const providers = {
+  [constants.StarknetChainId.TESTNET]: new RpcProvider({ nodeUrl: "http://localhost:5050/rpc" }),
+  [constants.StarknetChainId.TESTNET2]: new RpcProvider({ nodeUrl: "http://localhost:5050/rpc" }),
+  [constants.StarknetChainId.MAINNET]: new RpcProvider({ nodeUrl: "http://localhost:5050/rpc" }),
+}
 
 class Controller {
   private selector = "cartridge-messenger";
@@ -12,8 +17,8 @@ class Controller {
   public keychain?: AsyncMethodReturns<Keychain>;
   private policies: Policy[] = [];
   private url: string = "https://x.cartridge.gg";
-
-  public account?: AccountInterface;
+  public chainId: constants.StarknetChainId = constants.StarknetChainId.TESTNET;
+  public accounts?: { [key in constants.StarknetChainId]: AccountInterface };
 
   constructor(
     policies?: Policy[],
@@ -68,6 +73,13 @@ class Controller {
     ).then(() => this.probe())
   }
 
+  get account() {
+    if (!this.accounts) {
+      return;
+    }
+    return this.accounts[this.chainId]
+  }
+
   async ready() {
     return this.connection?.promise.then(() => this.probe()).then((res) => !!res, () => false)
   }
@@ -80,28 +92,56 @@ class Controller {
 
     try {
       const { address } = await this.keychain.probe();
-      this.account = new DeviceAccount(
-        address,
-        this.keychain,
-        {
-          url: this.url,
-        }
-      );
+      this.accounts = {
+        [constants.StarknetChainId.MAINNET]: new DeviceAccount(
+          providers[constants.StarknetChainId.MAINNET],
+          address,
+          this.keychain,
+          {
+            url: this.url,
+          }
+        ),
+        [constants.StarknetChainId.TESTNET]: new DeviceAccount(
+          providers[constants.StarknetChainId.TESTNET],
+          address,
+          this.keychain,
+          {
+            url: this.url,
+          }
+        ),
+        [constants.StarknetChainId.TESTNET2]: new DeviceAccount(
+          providers[constants.StarknetChainId.TESTNET2],
+          address,
+          this.keychain,
+          {
+            url: this.url,
+          }
+        )
+      }
     } catch (e) {
       console.error(e)
+      return;
     }
 
-    return !!this.account;
+    return !!this.accounts[this.chainId];
+  }
+
+  async switchChain(chainId: constants.StarknetChainId) {
+    if (this.chainId === chainId) {
+      return;
+    }
+
+    this.chainId = chainId;
   }
 
   // Register a new device key.
-  async register(username: string, credential: { x: string, y: string }) {
+  async register(username: string, credentialId: string, credential: { x: string, y: string }) {
     if (!this.keychain) {
       console.error("not ready for connect")
       return null;
     }
 
-    return await this.keychain.register(username, credential);
+    return await this.keychain.register(username, credentialId, credential);
   }
 
   async login(address: string, credentialId: string, options: {
@@ -116,18 +156,18 @@ class Controller {
     return this.keychain.login(address, credentialId, options);
   }
 
-  async provision(address: string) {
+  async provision(address: string, credentialId: string) {
     if (!this.keychain) {
       console.error("not ready for connect")
       return null;
     }
 
-    return this.keychain.provision(address);
+    return this.keychain.provision(address, credentialId);
   }
 
   async connect() {
-    if (this.account) {
-      return this.account;
+    if (this.accounts) {
+      return this.accounts[this.chainId];
     }
 
     if (!this.keychain) {
@@ -148,21 +188,39 @@ class Controller {
         policies: JSON.stringify(this.policies),
       })}`,
       "_blank",
-      "height=650,width=400"
+      "height=650,width=450"
     );
 
     const response = await this.keychain.connect(this.policies);
 
-    console.log(response.address)
-    this.account = new DeviceAccount(
-      response.address,
-      this.keychain,
-      {
-        url: this.url,
-      }
-    );
+    this.accounts = {
+      [constants.StarknetChainId.MAINNET]: new DeviceAccount(
+        providers[constants.StarknetChainId.MAINNET],
+        response.address,
+        this.keychain,
+        {
+          url: this.url,
+        }
+      ),
+      [constants.StarknetChainId.TESTNET]: new DeviceAccount(
+        providers[constants.StarknetChainId.TESTNET],
+        response.address,
+        this.keychain,
+        {
+          url: this.url,
+        }
+      ),
+      [constants.StarknetChainId.TESTNET2]: new DeviceAccount(
+        providers[constants.StarknetChainId.TESTNET2],
+        response.address,
+        this.keychain,
+        {
+          url: this.url,
+        }
+      )
+    }
 
-    return this.account;
+    return this.accounts[this.chainId];
   }
 
   async disconnect() {
@@ -200,9 +258,9 @@ class Controller {
   }
 }
 
-const BASE = number.toBN(2).pow(toBN(86));
+const BASE = number.toBN(2).pow(number.toBN(86));
 
-export function split(n: BigNumberish): { x: BigNumberish; y: BigNumberish; z: BigNumberish } {
+export function split(n: number.BigNumberish): { x: number.BigNumberish; y: number.BigNumberish; z: number.BigNumberish } {
   const x = n.mod(BASE);
   const y = n.div(BASE).mod(BASE);
   const z = n.div(BASE).div(BASE);

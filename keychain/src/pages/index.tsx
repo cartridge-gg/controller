@@ -15,19 +15,19 @@ import logout from "../methods/logout";
 import { signMessage } from "../methods/sign";
 import { revoke, session, sessions } from "../methods/sessions";
 
-import Controller from "utils/account";
+import Controller from "utils/controller";
 import { normalize as normalizeOrigin } from "utils/url";
 import { Session } from "@cartridge/controller";
 
-function normalize(
-  fn: (origin: string) => Function,
-): (origin: string) => Function {
+export function normalize<T = Function>(
+  fn: (origin: string) => T,
+): (origin: string) => T {
   return (origin: string) => fn(normalizeOrigin(origin));
 }
 
-function validate(
-  fn: (controller: Controller, session: Session, origin: string) => Function,
-): (origin: string) => Function {
+export function validate<T = Function>(
+  fn: (controller: Controller, session: Session, origin: string) => T,
+): (origin: string) => T {
   return (origin: string) => {
     const controller = Controller.fromStore();
     if (!controller) {
@@ -52,7 +52,7 @@ const Index: NextPage = () => {
     }
 
     if (window.self === window.top) {
-      router.replace(`${process.env.NEXT_PUBLIC_SITE_URL}/welcome`);
+      router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/welcome`);
       return;
     }
 

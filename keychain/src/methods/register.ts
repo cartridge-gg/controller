@@ -1,32 +1,30 @@
 import { split } from "@cartridge/controller";
-import { ec } from "starknet";
-import { encodeShortString } from "starknet/dist/utils/shortString";
-import {
-  calculateContractAddressFromHash,
-  getSelectorFromName,
-} from "starknet/dist/utils/hash";
-import { toBN } from "starknet/dist/utils/number";
-import Controller from "utils/account";
-import Storage from "utils/storage";
+import { ec, hash, number, shortString } from "starknet";
+
+import Controller from "utils/controller";
 import { ACCOUNT_CLASS, CONTROLLER_CLASS, PROXY_CLASS } from "utils/constants";
 
-
 const register =
-  () => async (username: string, credential: { x: string; y: string }) => {
+  () =>
+  async (
+    username: string,
+    credentialId: string,
+    credential: { x: string; y: string },
+  ) => {
     const keypair = ec.genKeyPair();
     const deviceKey = ec.getStarkKey(keypair);
 
-    const { x: x0, y: x1, z: x2 } = split(toBN(credential.x));
-    const { x: y0, y: y1, z: y2 } = split(toBN(credential.y));
+    const { x: x0, y: x1, z: x2 } = split(number.toBN(credential.x));
+    const { x: y0, y: y1, z: y2 } = split(number.toBN(credential.y));
 
-    const address = calculateContractAddressFromHash(
-      encodeShortString(username),
-      toBN(PROXY_CLASS),
+    const address = hash.calculateContractAddressFromHash(
+      shortString.encodeShortString(username),
+      number.toBN(PROXY_CLASS),
       [
-        toBN(ACCOUNT_CLASS),
-        getSelectorFromName("initialize"),
+        number.toBN(ACCOUNT_CLASS),
+        hash.getSelectorFromName("initialize"),
         "9",
-        toBN(CONTROLLER_CLASS),
+        number.toBN(CONTROLLER_CLASS),
         "7",
         x0,
         x1,
@@ -34,15 +32,13 @@ const register =
         y0,
         y1,
         y2,
-        toBN(deviceKey),
+        number.toBN(deviceKey),
       ],
       "0",
     );
 
-    const controller = new Controller(keypair, address);
-    controller.cache();
-    controller.approve("https://cartridge.gg", [], "0");
-    Storage.set("@admin/https://cartridge.gg", {});
+    const controller = new Controller(keypair, address, credentialId);
+    controller.store();
 
     return { address, deviceKey };
   };

@@ -1,5 +1,5 @@
 import Storage from "utils/storage";
-import Controller from "utils/account";
+import Controller from "utils/controller";
 
 const logout = (origin: string) => () => {
   const controller = Controller.fromStore();

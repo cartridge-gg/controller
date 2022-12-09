@@ -1,74 +1,97 @@
-import { ec, Account, defaultProvider, KeyPair, number } from "starknet";
-import { BigNumberish } from "starknet/dist/utils/number";
-import { Policy, Session } from "@cartridge/controller";
-import equal from "fast-deep-equal";
+import {
+    constants,
+    hash,
+    number,
+    Account as BaseAccount,
+    RpcProvider,
+    SignerInterface,
+} from "starknet";
 
-import Storage from "utils/storage";
-import { DeviceSigner } from "./signer";
+import { CONTROLLER_CLASS } from "./constants";
+import Storage from "./storage";
 
-export default class Controller extends Account {
-  protected publicKey: string;
-  protected keypair: KeyPair;
+class Account extends BaseAccount {
+    private rpc: RpcProvider;
+    private selector: string;
+    deployed: boolean = false;
+    registered: boolean = false;
 
-  constructor(keypair: KeyPair, address: string) {
-    super(defaultProvider, address, keypair);
-    this.signer = new DeviceSigner(keypair);
-    this.keypair = keypair;
-    this.publicKey = ec.getStarkKey(keypair);
-  }
+    constructor(
+        chainId: constants.StarknetChainId,
+        nodeUrl: string,
+        address: string,
+        signer: SignerInterface,
+    ) {
+        super({ rpc: { nodeUrl } }, address, signer);
+        this.rpc = new RpcProvider({ nodeUrl });
+        this.selector = `@deployment/${chainId}`
+        const state = Storage.get(this.selector);
+        if (!state || !state.syncing) {
+            this.sync(chainId);
+            return;
+        }
 
-  cache() {
-    return Storage.set("controller", {
-      privateKey: number.toHex(this.keypair.priv),
-      publicKey: this.publicKey,
-      address: this.address,
-    });
-  }
-
-  delete() {
-    return Storage.clear();
-  }
-
-  approve(origin: string, policies: Policy[], maxFee?: BigNumberish) {
-    Storage.set(`@session/${origin}`, {
-      policies,
-      maxFee,
-    });
-  }
-
-  revoke(origin: string) {
-    Storage.remove(`@session/${origin}`);
-  }
-
-  session(origin: string): Session | undefined {
-    return Storage.get(`@session/${origin}`);
-  }
-
-  sessions(): { [key: string]: Session } | undefined {
-    return Storage.keys()
-      .filter((k) => k.startsWith("@session/"))
-      .reduce((prev, key) => {
-        prev[key.slice(9)] = Storage.get(key);
-        return prev;
-      }, {} as { [key: string]: Session });
-  }
-
-  static fromStore() {
-    const controller = Storage.get("controller");
-    if (!controller) {
-      return null;
+        this.deployed = state.deployed;
+        this.registered = state.registered;
     }
 
-    const { privateKey, address } = controller;
-    const keypair = ec.getKeyPair(privateKey);
-    return new Controller(keypair, address);
-  }
+    async sync(chainId: constants.StarknetChainId) {
+        Storage.update(this.selector, {
+            syncing: true,
+        });
+
+        try {
+            const classHash = await this.rpc.getClassHashAt(this.address, "latest");
+            Storage.update(this.selector, {
+                classHash,
+                deployed: true,
+            });
+            this.deployed = true;
+
+            const nonce = await this.rpc.getNonceForAddress(this.address, "latest");
+            Storage.update(this.selector, {
+                nonce,
+            });
+
+            const pub = await this.signer.getPubKey();
+            const res = await this.rpc.callContract(
+                {
+                    contractAddress: this.address,
+                    entrypoint: "executeOnPlugin",
+                    calldata: [
+                        CONTROLLER_CLASS,
+                        hash.getSelector("is_public_key"),
+                        "0x1",
+                        pub,
+                    ],
+                },
+                "latest",
+            );
+            this.registered = res.result[1] === "0x01";
+            Storage.update(this.selector, {
+                registered: this.registered,
+            });
+        } catch (e) {
+            /* no-op */
+        }
+
+        Storage.update(this.selector, {
+            syncing: false,
+        });
+    }
+
+    async getNonce(blockIdentifier?: any): Promise<number.BigNumberish> {
+        if (blockIdentifier && (blockIdentifier !== "latest" || blockIdentifier !== "pending")) {
+            return super.getNonce(blockIdentifier);
+        }
+
+        const deployment = Storage.get(this.selector);
+        if (!deployment || !deployment.nonce) {
+            return "0x0";
+        }
+
+        return deployment.nonce;
+    }
 }
 
-export function diff(a: Policy[], b: Policy[]): Policy[] {
-  return a.reduce(
-    (prev, policy) =>
-      b.some((approval) => equal(approval, policy)) ? prev : [...prev, policy],
-    [] as Policy[],
-  );
-}
+export default Account;

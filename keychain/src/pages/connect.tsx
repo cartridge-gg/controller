@@ -4,22 +4,28 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import { Flex } from "@chakra-ui/react";
 
-import Session from "components/Session";
+import Banner from "components/Banner";
 import { Header } from "components/Header";
+import Session from "components/Session";
 import { useRequests } from "hooks/account";
 import { useUrlPolicys } from "hooks/policy";
-import Controller from "utils/account";
+import Controller from "utils/controller";
 
 const Connect: NextPage = () => {
   const [maxFee, setMaxFee] = useState(null);
-  const { validPolicys, invalidPolicys, isValidating } = useUrlPolicys();
+  const { chainId, validPolicys, invalidPolicys, isValidating } =
+    useUrlPolicys();
   const { origin } = useRequests();
   const controller = useMemo(() => Controller.fromStore(), []);
   const router = useRouter();
 
   useEffect(() => {
     if (!controller) {
-      router.replace(`${process.env.NEXT_PUBLIC_SITE_URL}/welcome`);
+      router.replace(
+        `${
+          process.env.NEXT_PUBLIC_ADMIN_URL
+        }/welcome?redirect_uri=${encodeURIComponent(window.location.href)}`,
+      );
       return;
     }
   }, [router, controller]);
@@ -47,20 +53,28 @@ const Connect: NextPage = () => {
   return (
     <>
       <Header address={controller.address} />
-      <Flex height="calc(100vh - 70px)">
-        <Session
-          action={
-            "CONFIRM" +
-            (validPolicys.length > 0 ? ` [${validPolicys.length + 1}]` : "")
-          }
-          title="SESSION DETAILS"
-          message={
+      <Flex m={4} flex={1} flexDirection="column">
+        <Banner
+          pb="20px"
+          title="Session Details"
+          variant="secondary"
+          borderBottom="1px solid"
+          borderColor="gray.700"
+        >
+          {
             <>
               <strong>{origin}</strong>
               {validPolicys.length > 0
                 ? " is requesting permission to submit transactions on your behalf"
                 : " is requesting to connect to your account"}
             </>
+          }
+        </Banner>
+        <Session
+          chainId={chainId}
+          action={
+            "CONFIRM" +
+            (validPolicys.length > 0 ? ` [${validPolicys.length + 1}]` : "")
           }
           onCancel={() => {
             if (window.opener) {

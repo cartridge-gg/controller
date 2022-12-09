@@ -1,15 +1,11 @@
 import { ec } from "starknet";
-import Controller from "utils/account";
-import Storage from "utils/storage";
+import Controller from "utils/controller";
 
-const provision = () => async (address: string) => {
+const provision = () => async (address: string, credentialId: string) => {
   const keypair = ec.genKeyPair();
   const deviceKey = ec.getStarkKey(keypair);
-
-  const controller = new Controller(keypair, address);
-  controller.cache();
-  controller.approve("https://cartridge.gg", [], "0");
-  Storage.set("@admin/https://cartridge.gg", {});
+  const controller = new Controller(keypair, address, credentialId);
+  controller.store();
 
   return deviceKey;
 };

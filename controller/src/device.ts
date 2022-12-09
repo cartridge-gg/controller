@@ -1,17 +1,16 @@
 import {
+  constants,
   Account,
-  DeployContractPayload,
   Abi,
   Call,
   EstimateFeeDetails,
-  DeployContractResponse as StarknetDeployContractResponse,
   InvocationsDetails,
   Signature,
   typedData,
   InvokeFunctionResponse,
-  defaultProvider,
   EstimateFee,
   DeclareContractPayload,
+  RpcProvider,
 } from "starknet";
 import qs from 'query-string';
 
@@ -20,7 +19,6 @@ import {
 } from "./types";
 import { Signer } from "./signer";
 import { AsyncMethodReturns } from "@cartridge/penpal";
-import { StarknetChainId } from "starknet/dist/constants";
 
 class DeviceAccount extends Account {
   address: string;
@@ -28,36 +26,20 @@ class DeviceAccount extends Account {
   private url: string = "https://x.cartridge.gg";
 
   constructor(
+    provider: RpcProvider,
     address: string,
     keychain: AsyncMethodReturns<Keychain>,
     options?: {
       url?: string;
     }
   ) {
-    super(defaultProvider, address, new Signer(keychain, options));
+    super(provider, address, new Signer(keychain, options));
     this.address = address;
     this.keychain = keychain;
 
     if (options?.url) {
       this.url = options.url;
     }
-  }
-
-  /**
-   * Deploys a given compiled contract (json) to starknet
-   *
-   * @param payload payload to be deployed containing:
-   * - compiled contract code
-   * - constructor calldata
-   * - address salt
-   * @param abi the abi of the contract
-   * @returns a confirmation of sending a transaction on the starknet contract
-   */
-  async deployContract(
-    payload: DeployContractPayload,
-    abi?: Abi
-  ): Promise<StarknetDeployContractResponse> {
-    throw new Error("unimplemented");
   }
 
   /**
@@ -72,11 +54,11 @@ class DeviceAccount extends Account {
      * @returns response from addTransaction
      */
   async estimateInvokeFee(calls: Call | Call[], details?: EstimateFeeDetails): Promise<EstimateFee> {
-    return this.keychain.estimateInvokeFee(calls, details)
+    return this.keychain.estimateInvokeFee(calls, { ...details, chainId: this.chainId })
   }
 
   async estimateDeclareFee(payload: DeclareContractPayload, details?: EstimateFeeDetails): Promise<EstimateFee> {
-    return this.keychain.estimateDeclareFee(payload, details)
+    return this.keychain.estimateDeclareFee(payload, { ...details, chainId: this.chainId })
   }
 
   /**
@@ -95,34 +77,18 @@ class DeviceAccount extends Account {
     calls: Call | Call[],
     abis?: Abi[],
     transactionsDetail?: InvocationsDetails & {
-      chainId?: StarknetChainId,
+      chainId?: constants.StarknetChainId,
     }
   ): Promise<InvokeFunctionResponse> {
     if (!transactionsDetail) {
       transactionsDetail = {}
     }
 
-    if (!transactionsDetail.nonce) {
-      transactionsDetail.nonce = 0 //await this.getNonce();
-    }
-
-    if (!transactionsDetail.version) {
-      transactionsDetail.version = 1;
-    }
-
-    if (!transactionsDetail.maxFee) {
-      try {
-        transactionsDetail.maxFee = "100" // (await this.estimateFee(calls, { nonce: transactionsDetail.nonce })).suggestedMaxFee
-      } catch (e) {
-        console.error(e)
-        throw e
-      }
-    }
-
     try {
       return await this.keychain.execute(calls, abis, transactionsDetail)
     } catch (e) {
-      if ((e as Error).message !== "missing policies") {
+      console.log((e as Error).message)
+      if ((e as Error).message !== "missing policies" && (e as Error).message !== "not registered") {
         console.error(e)
         throw e
       }
@@ -130,15 +96,12 @@ class DeviceAccount extends Account {
 
     window.open(
       `${this.url}/execute?${qs.stringify({
+        ...transactionsDetail,
         origin: window.origin,
         calls: JSON.stringify(calls),
-        nonce: transactionsDetail.nonce,
-        version: transactionsDetail.version,
-        maxFee: transactionsDetail.maxFee,
-        chainId: transactionsDetail.chainId ? transactionsDetail.chainId : StarknetChainId.TESTNET,
       })}`,
       "_blank",
-      "height=650,width=400"
+      "height=650,width=450"
     );
 
     return this.keychain.execute(calls, abis, transactionsDetail, true);
@@ -158,7 +121,7 @@ class DeviceAccount extends Account {
         typedData: JSON.stringify(typedData),
       })}`,
       "_blank",
-      "height=650,width=400"
+      "height=650,width=450"
     );
 
     return this.keychain.signMessage(typedData, this.address);

@@ -1,6 +1,6 @@
 import { Connector } from "@starknet-react/core";
 import Controller, { Assertion, Policy } from "@cartridge/controller";
-import { AccountInterface, InvokeFunctionResponse } from "starknet";
+import { AccountInterface } from "starknet";
 
 class ControllerConnector extends Connector {
     public controller: Controller;
@@ -34,8 +34,8 @@ class ControllerConnector extends Connector {
         return await this.controller.ready()
     }
 
-    async register(username: string, credential: { x: string, y: string }) {
-        return this.controller.register(username, credential);
+    async register(username: string, credentialId: string, credential: { x: string, y: string }) {
+        return this.controller.register(username, credentialId, credential);
     }
 
     async login(address: string, credentialId: string, options: {
@@ -45,8 +45,8 @@ class ControllerConnector extends Connector {
         return this.controller.login(address, credentialId, options);
     }
 
-    async provision(address: string) {
-        return this.controller.provision(address);
+    async provision(address: string, credentialId: string) {
+        return this.controller.provision(address, credentialId);
     }
 
     async connect(): Promise<AccountInterface> {

@@ -3,14 +3,14 @@ import type { NextPage } from "next";
 import dynamic from "next/dynamic";
 import { Box, Flex, Spacer, Text, Image } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import { TypedData } from "starknet/utils/typedData";
-import { decodeShortString } from "starknet/utils/shortString";
-import { Header } from "components/Header";
+
+import { typedData as snTypedData, shortString } from "starknet";
 
 import Banner from "components/Banner";
 import ButtonBar from "components/ButtonBar";
 import Details from "components/Details";
-import Controller from "utils/account";
+import { Header } from "components/Header";
+import Controller from "utils/controller";
 
 const DetailsHeader = (data: {
   media?: Array<{ uri: string }>;
@@ -92,14 +92,18 @@ const Sign: NextPage = () => {
 
   useEffect(() => {
     if (!controller) {
-      router.replace(`${process.env.NEXT_PUBLIC_SITE_URL}/welcome`);
+      router.replace(
+        `${
+          process.env.NEXT_PUBLIC_ADMIN_URL
+        }/welcome?redirect_uri=${encodeURIComponent(window.location.href)}`,
+      );
       return;
     }
   }, [router, controller]);
 
   useEffect(() => {
     if (!typedData) return;
-    const msgData: TypedData = JSON.parse(typedData as string);
+    const msgData: snTypedData.TypedData = JSON.parse(typedData as string);
     const primaryTypeData = msgData.types[msgData.primaryType];
 
     // Recursively decodes all nested `felt*` types
@@ -111,7 +115,7 @@ const Sign: NextPage = () => {
       for (const typeMember of messageType) {
         if (typeMember.type === "felt*") {
           const stringArray: Array<string> = initial[typeMember.name].map(
-            (hex: string) => decodeShortString(hex),
+            (hex: string) => shortString.decodeShortString(hex),
           );
           initial[typeMember.name] = stringArray.join("");
         } else if (typeMember.type !== "felt" && typeMember.type !== "string") {

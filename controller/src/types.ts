@@ -1,19 +1,16 @@
 import {
+  constants,
+  number,
   Abi,
   Call,
   InvocationsDetails,
   typedData,
   InvokeFunctionResponse,
   Signature,
-  InvocationsSignerDetails,
   EstimateFeeDetails,
   EstimateFee,
-  DeclareSignerDetails,
   DeclareContractPayload,
-  DeployAccountSignerDetails,
 } from "starknet";
-import { StarknetChainId } from "starknet/dist/constants";
-import { BigNumberish } from "starknet/dist/utils/number";
 
 export type Assertion = {
   id: string;
@@ -28,8 +25,9 @@ export type Assertion = {
 };
 
 export type Session = {
+  chainId: constants.StarknetChainId;
   policies: Policy[];
-  maxFee: BigNumberish;
+  maxFee: number.BigNumberish;
 };
 
 export type Policy = {
@@ -48,13 +46,17 @@ export interface Keychain {
   revoke(origin: string): void;
   approvals(origin: string): Promise<Session | undefined>;
 
-  estimateDeclareFee(payload: DeclareContractPayload, details?: EstimateFeeDetails): Promise<EstimateFee>
-  estimateInvokeFee(calls: Call | Call[], estimateFeeDetails?: EstimateFeeDetails): Promise<EstimateFee>;
+  estimateDeclareFee(payload: DeclareContractPayload, details?: EstimateFeeDetails & {
+    chainId: constants.StarknetChainId
+  }): Promise<EstimateFee>
+  estimateInvokeFee(calls: Call | Call[], estimateFeeDetails?: EstimateFeeDetails & {
+    chainId: constants.StarknetChainId
+  }): Promise<EstimateFee>;
   execute(calls: Call | Call[], abis?: Abi[], transactionsDetail?: InvocationsDetails & {
-    chainId?: StarknetChainId,
+    chainId?: constants.StarknetChainId,
   }, sync?: boolean): Promise<InvokeFunctionResponse>;
-  provision(address: string): Promise<string>;
-  register(username: string, credential: { x: string, y: string }): Promise<{ address: string, deviceKey: string }>;
+  provision(address: string, credentialId: string): Promise<string>;
+  register(username: string, credentialId: string, credential: { x: string, y: string }): Promise<{ address: string, deviceKey: string }>;
   login(address: string, credentialId: string, options: {
     rpId?: string
     challengeExt?: Buffer
