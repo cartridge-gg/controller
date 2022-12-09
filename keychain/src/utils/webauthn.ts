@@ -71,6 +71,7 @@ export class WebauthnSigner implements SignerInterface {
       publicKey: {
         challenge,
         timeout: 60000,
+        rpId: this.rpId,
         allowCredentials: [
           {
             type: "public-key",
