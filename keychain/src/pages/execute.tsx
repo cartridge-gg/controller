@@ -94,8 +94,8 @@ const Unlock = ({
   </Flex>
 );
 
-const Fees = ({ fees }: { fees?: EstimateFee }) => {
-  const [usdFee, setUsdFee] = useState<{
+const Fees = ({ chainId, fees }: { chainId: constants.StarknetChainId, fees?: EstimateFee }) => {
+  const [formattedFee, setFormattedFee] = useState<{
     fee: string;
     max: string;
   }>();
@@ -105,17 +105,26 @@ const Fees = ({ fees }: { fees?: EstimateFee }) => {
     }
 
     async function compute() {
-      let dollarUSLocale = Intl.NumberFormat("en-US");
-      const { data } = await fetchEthPrice();
-      const usdeth = number.toBN(data.price.amount * 100);
-      const fee = fees.overall_fee.mul(usdeth).toString();
-      setUsdFee({
-        fee: dollarUSLocale.format(parseFloat(formatUnits(fee, 20))),
-        max: dollarUSLocale.format(parseFloat(formatUnits(fee, 20))),
+      if (chainId === constants.StarknetChainId.MAINNET) {
+        let dollarUSLocale = Intl.NumberFormat("en-US");
+        const { data } = await fetchEthPrice();
+        const usdeth = number.toBN(data.price.amount * 100);
+        const overallFee = fees.overall_fee.mul(usdeth).toString();
+        const suggestedMaxFee = fees.suggestedMaxFee.mul(usdeth).toString();
+        setFormattedFee({
+          fee: dollarUSLocale.format(parseFloat(formatUnits(overallFee, 20))),
+          max: dollarUSLocale.format(parseFloat(formatUnits(suggestedMaxFee, 20))),
+        });
+        return;
+      }
+
+      setFormattedFee({
+        fee: parseFloat(formatUnits(fees.overall_fee, 18)).toFixed(5),
+        max: parseFloat(formatUnits(fees.suggestedMaxFee, 18)).toFixed(5),
       });
     }
     compute();
-  }, [fees]);
+  }, [chainId, fees]);
 
   return (
     <HStack
@@ -139,11 +148,11 @@ const Fees = ({ fees }: { fees?: EstimateFee }) => {
         <InfoIcon />
       </HStack>
       <VStack alignItems="flex-end">
-        {usdFee ? (
+        {formattedFee ? (
           <>
-            <Text fontSize={13}>~${usdFee.fee}</Text>
+            <Text fontSize={13}>~${formattedFee.fee}</Text>
             <Text fontSize={11} color="gray.200" mt="1px !important">
-              Max: ~${usdFee.max}
+              Max: ~${formattedFee.max}
             </Text>
           </>
         ) : (
@@ -299,8 +308,7 @@ const Execute: NextPage = () => {
   useEffect(() => {
     if (!controller) {
       router.replace(
-        `${
-          process.env.NEXT_PUBLIC_ADMIN_URL
+        `${process.env.NEXT_PUBLIC_ADMIN_URL
         }/welcome?redirect_uri=${encodeURIComponent(window.location.href)}`,
       );
       return;
@@ -373,7 +381,7 @@ const Execute: NextPage = () => {
             }}
             action="Confirm"
           >
-            <Fees fees={fees} />
+            <Fees chainId={params.chainId} fees={fees} />
           </Footer>
         </Flex>
       </Flex>
