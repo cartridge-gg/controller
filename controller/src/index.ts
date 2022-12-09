@@ -6,9 +6,9 @@ import DeviceAccount from "./device";
 import { Session, Keychain, Policy } from "./types";
 
 export const providers = {
-  [constants.StarknetChainId.TESTNET]: new RpcProvider({ nodeUrl: "http://localhost:5050/rpc" }),
-  [constants.StarknetChainId.TESTNET2]: new RpcProvider({ nodeUrl: "http://localhost:5050/rpc" }),
-  [constants.StarknetChainId.MAINNET]: new RpcProvider({ nodeUrl: "http://localhost:5050/rpc" }),
+  [constants.StarknetChainId.TESTNET]: new RpcProvider({ nodeUrl: "https://starknet-goerli2.cartridge.gg/rpc/v0.2" }),
+  [constants.StarknetChainId.TESTNET2]: new RpcProvider({ nodeUrl: "https://starknet-goerli2.cartridge.gg/rpc/v0.2" }),
+  [constants.StarknetChainId.MAINNET]: new RpcProvider({ nodeUrl: "https://starknet.cartridge.gg/rpc/v0.2" }),
 }
 
 class Controller {
