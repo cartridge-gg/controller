@@ -26,6 +26,7 @@ import { normalize, validate } from "pages";
 import { estimateFeeBulk } from "utils/gateway";
 import { BigNumber } from "ethers";
 import { formatUnits } from "ethers/lib/utils";
+import selectors from "utils/selectors";
 
 async function fetchEthPrice() {
   const res = await fetch(process.env.NEXT_PUBLIC_API_URL, {
@@ -326,7 +327,7 @@ const Execute: NextPage = () => {
 
   const onRegister = useCallback(async () => {
     const data = await controller.signAddDeviceKey(params.chainId);
-    Storage.set(`@register/${params.chainId}/set_device_key`, data);
+    Storage.set(selectors["0.0.2"].register(params.chainId), data);
     setRegisterData(data);
   }, [controller, params]);
 
@@ -334,7 +335,7 @@ const Execute: NextPage = () => {
     const res = await execute(params.calls)(url.href)();
     // We set the transaction hash which the keychain instance
     // polls for.
-    Storage.set(`@transaction/${res.transaction_hash}`, true);
+    Storage.set(selectors["0.0.2"].transaction(res.transaction_hash), true);
 
     if (window.opener) {
       window.close();

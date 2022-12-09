@@ -1,4 +1,5 @@
 import Controller from "utils/controller";
+import selectors from "utils/selectors";
 import Storage from "utils/storage";
 
 const revoke = () => (origin: string) => {
@@ -30,7 +31,7 @@ const sessions = (origin: string) => () => {
     throw new Error("no controller");
   }
 
-  if (!Storage.get(`@admin/${origin}`)) {
+  if (!Storage.get(selectors["0.0.2"].admin(origin))) {
     throw new Error("unauthorized");
   }
 

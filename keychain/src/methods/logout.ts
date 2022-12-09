@@ -1,5 +1,6 @@
 import Storage from "utils/storage";
 import Controller from "utils/controller";
+import selectors from "utils/selectors";
 
 const logout = (origin: string) => () => {
   const controller = Controller.fromStore();
@@ -7,7 +8,7 @@ const logout = (origin: string) => () => {
     throw new Error("no controller");
   }
 
-  if (!Storage.get(`@admin/${origin}`)) {
+  if (!Storage.get(selectors["0.0.2"].admin(origin))) {
     throw new Error("unauthorized");
   }
 
