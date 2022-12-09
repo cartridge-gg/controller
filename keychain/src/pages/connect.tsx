@@ -24,7 +24,7 @@ const Connect: NextPage = () => {
       router.replace(
         `${
           process.env.NEXT_PUBLIC_ADMIN_URL
-        }/welcome?redirect_uri=${encodeURIComponent(window.location.href)}`,
+        }/login?redirect_uri=${encodeURIComponent(window.location.href)}`,
       );
       return;
     }

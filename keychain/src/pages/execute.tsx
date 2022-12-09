@@ -94,7 +94,13 @@ const Unlock = ({
   </Flex>
 );
 
-const Fees = ({ chainId, fees }: { chainId: constants.StarknetChainId, fees?: EstimateFee }) => {
+const Fees = ({
+  chainId,
+  fees,
+}: {
+  chainId: constants.StarknetChainId;
+  fees?: EstimateFee;
+}) => {
   const [formattedFee, setFormattedFee] = useState<{
     fee: string;
     max: string;
@@ -113,7 +119,9 @@ const Fees = ({ chainId, fees }: { chainId: constants.StarknetChainId, fees?: Es
         const suggestedMaxFee = fees.suggestedMaxFee.mul(usdeth).toString();
         setFormattedFee({
           fee: dollarUSLocale.format(parseFloat(formatUnits(overallFee, 20))),
-          max: dollarUSLocale.format(parseFloat(formatUnits(suggestedMaxFee, 20))),
+          max: dollarUSLocale.format(
+            parseFloat(formatUnits(suggestedMaxFee, 20)),
+          ),
         });
         return;
       }
@@ -308,8 +316,9 @@ const Execute: NextPage = () => {
   useEffect(() => {
     if (!controller) {
       router.replace(
-        `${process.env.NEXT_PUBLIC_ADMIN_URL
-        }/welcome?redirect_uri=${encodeURIComponent(window.location.href)}`,
+        `${
+          process.env.NEXT_PUBLIC_ADMIN_URL
+        }/login?redirect_uri=${encodeURIComponent(window.location.href)}`,
       );
       return;
     }
