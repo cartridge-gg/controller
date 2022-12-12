@@ -210,6 +210,7 @@ export default class Controller {
   }
 
   store() {
+    Storage.set("version", VERSION);
     return Storage.set(selectors[VERSION].account(this.address), {
       privateKey: number.toHex(this.keypair.priv),
       publicKey: this.publicKey,
