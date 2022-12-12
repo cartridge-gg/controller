@@ -106,7 +106,7 @@ export default class Controller {
 
     this.approve(process.env.NEXT_PUBLIC_ADMIN_URL, [], "0");
     Storage.set(
-      selectors["0.0.2"].admin(process.env.NEXT_PUBLIC_ADMIN_URL),
+      selectors["0.0.3"].admin(this.address, process.env.NEXT_PUBLIC_ADMIN_URL),
       {},
     );
     this.store();
@@ -178,23 +178,23 @@ export default class Controller {
   }
 
   approve(origin: string, policies: Policy[], maxFee?: number.BigNumberish) {
-    Storage.set(selectors["0.0.2"].session(origin), {
+    Storage.set(selectors["0.0.3"].session(this.address, origin), {
       policies,
       maxFee,
     });
   }
 
   revoke(origin: string) {
-    Storage.remove(selectors["0.0.2"].session(origin));
+    Storage.remove(selectors["0.0.3"].session(this.address, origin));
   }
 
   session(origin: string): Session | undefined {
-    return Storage.get(selectors["0.0.2"].session(origin));
+    return Storage.get(selectors["0.0.3"].session(this.address, origin));
   }
 
   sessions(): { [key: string]: Session } | undefined {
     return Storage.keys()
-      .filter((k) => k.startsWith(selectors["0.0.2"].session("")))
+      .filter((k) => k.startsWith(selectors["0.0.3"].session(this.address, "")))
       .reduce((prev, key) => {
         prev[key.slice(9)] = Storage.get(key);
         return prev;
@@ -222,22 +222,66 @@ export default class Controller {
       return;
     }
 
-    if (version === "0.0.1") {
+    const { credentialId, privateKey, address } = controller;
+    if (version === "0.0.2") {
       Storage.set(
-        selectors["0.0.2"].deployment(constants.StarknetChainId.MAINNET),
-        {},
+        selectors["0.0.3"].account(address),
+        Storage.get(selectors["0.0.2"].account()),
       );
+
       Storage.set(
-        selectors["0.0.2"].deployment(constants.StarknetChainId.TESTNET),
-        {},
+        selectors["0.0.3"].deployment(
+          address,
+          constants.StarknetChainId.MAINNET,
+        ),
+        Storage.get(
+          selectors["0.0.2"].deployment(constants.StarknetChainId.MAINNET),
+        ),
       );
+
       Storage.set(
-        selectors["0.0.2"].deployment(constants.StarknetChainId.TESTNET2),
-        {},
+        selectors["0.0.3"].deployment(
+          address,
+          constants.StarknetChainId.TESTNET,
+        ),
+        Storage.get(
+          selectors["0.0.2"].deployment(constants.StarknetChainId.TESTNET),
+        ),
       );
+
+      Storage.set(
+        selectors["0.0.3"].deployment(
+          address,
+          constants.StarknetChainId.TESTNET2,
+        ),
+        Storage.get(
+          selectors["0.0.2"].deployment(constants.StarknetChainId.TESTNET2),
+        ),
+      );
+
+      Storage.keys()
+        .filter((k) => k.startsWith(selectors["0.0.2"].admin("")))
+        .forEach((k) => {
+          const origin = k.split("/")[1];
+          Storage.set(
+            selectors["0.0.3"].admin(address, origin),
+            Storage.get(selectors["0.0.2"].admin(origin)),
+          );
+        });
+
+      Storage.keys()
+        .filter((k) => k.startsWith(selectors["0.0.2"].session("")))
+        .forEach((k) => {
+          const origin = k.split("/")[1];
+          Storage.set(
+            selectors["0.0.3"].session(address, origin),
+            Storage.get(selectors["0.0.2"].session(origin)),
+          );
+        });
+
+      Storage.set("version", "0.0.3");
     }
 
-    const { credentialId, privateKey, address } = controller;
     const keypair = ec.getKeyPair(privateKey);
     return new Controller(keypair, address, credentialId);
   }

@@ -8,7 +8,7 @@ const logout = (origin: string) => () => {
     throw new Error("no controller");
   }
 
-  if (!Storage.get(selectors["0.0.2"].admin(origin))) {
+  if (!Storage.get(selectors["0.0.3"].admin(controller.address, origin))) {
     throw new Error("unauthorized");
   }
 

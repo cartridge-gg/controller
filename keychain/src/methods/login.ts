@@ -20,7 +20,7 @@ const login =
       constants.StarknetChainId.TESTNET,
     );
     Storage.set(
-      selectors["0.0.2"].register(constants.StarknetChainId.TESTNET),
+      selectors["0.0.3"].register(address, constants.StarknetChainId.TESTNET),
       invoke,
     );
 
