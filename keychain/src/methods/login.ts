@@ -1,5 +1,5 @@
 import Storage from "utils/storage";
-import Controller from "utils/controller";
+import Controller, { VERSION } from "utils/controller";
 import { constants, ec } from "starknet";
 import base64url from "base64url";
 import selectors from "utils/selectors";
@@ -20,7 +20,7 @@ const login =
       constants.StarknetChainId.TESTNET,
     );
     Storage.set(
-      selectors["0.0.3"].register(address, constants.StarknetChainId.TESTNET),
+      selectors[VERSION].register(address, constants.StarknetChainId.TESTNET),
       invoke,
     );
 

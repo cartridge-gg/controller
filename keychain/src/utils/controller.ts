@@ -23,8 +23,9 @@ import { DeviceSigner } from "./signer";
 import WebauthnAccount, { formatAssertion, RawAssertion } from "./webauthn";
 import { getGasPrice } from "./gateway";
 import selectors from "./selectors";
+import migrations from "./migrations";
 
-const VERSION = "0.0.2";
+export const VERSION = "0.0.3";
 
 export type InvocationWithDetails = {
   invocation: Invocation;
@@ -34,6 +35,13 @@ export type InvocationWithDetails = {
 export type RegisterData = {
   assertion: RawAssertion;
   invoke: InvocationWithDetails;
+};
+
+type SerializedController = {
+  credentialId: string,
+  privateKey: string,
+  publicKey: string,
+  address: string,
 };
 
 export default class Controller {
@@ -106,7 +114,7 @@ export default class Controller {
 
     this.approve(process.env.NEXT_PUBLIC_ADMIN_URL, [], "0");
     Storage.set(
-      selectors["0.0.3"].admin(this.address, process.env.NEXT_PUBLIC_ADMIN_URL),
+      selectors[VERSION].admin(this.address, process.env.NEXT_PUBLIC_ADMIN_URL),
       {},
     );
     this.store();
@@ -178,23 +186,23 @@ export default class Controller {
   }
 
   approve(origin: string, policies: Policy[], maxFee?: number.BigNumberish) {
-    Storage.set(selectors["0.0.3"].session(this.address, origin), {
+    Storage.set(selectors[VERSION].session(this.address, origin), {
       policies,
       maxFee,
     });
   }
 
   revoke(origin: string) {
-    Storage.remove(selectors["0.0.3"].session(this.address, origin));
+    Storage.remove(selectors[VERSION].session(this.address, origin));
   }
 
   session(origin: string): Session | undefined {
-    return Storage.get(selectors["0.0.3"].session(this.address, origin));
+    return Storage.get(selectors[VERSION].session(this.address, origin));
   }
 
   sessions(): { [key: string]: Session } | undefined {
     return Storage.keys()
-      .filter((k) => k.startsWith(selectors["0.0.3"].session(this.address, "")))
+      .filter((k) => k.startsWith(selectors[VERSION].session(this.address, "")))
       .reduce((prev, key) => {
         prev[key.slice(9)] = Storage.get(key);
         return prev;
@@ -202,8 +210,7 @@ export default class Controller {
   }
 
   store() {
-    Storage.set("version", VERSION);
-    return Storage.set("controller", {
+    return Storage.set(selectors[VERSION].account(this.address), {
       privateKey: number.toHex(this.keypair.priv),
       publicKey: this.publicKey,
       address: this.address,
@@ -217,69 +224,22 @@ export default class Controller {
       return;
     }
 
-    const controller = Storage.get("controller");
+    let controller: SerializedController;
+    if (version === "0.0.2") {
+      controller = Storage.get(selectors["0.0.2"].account());
+    } else if (version === "0.0.3") {
+      const active = Storage.get(selectors["0.0.3"].active());
+      controller = Storage.get(selectors["0.0.3"].account(active));
+    }
+
     if (!controller) {
       return;
     }
 
     const { credentialId, privateKey, address } = controller;
-    if (version === "0.0.2") {
-      Storage.set(
-        selectors["0.0.3"].account(address),
-        Storage.get(selectors["0.0.2"].account()),
-      );
 
-      Storage.set(
-        selectors["0.0.3"].deployment(
-          address,
-          constants.StarknetChainId.MAINNET,
-        ),
-        Storage.get(
-          selectors["0.0.2"].deployment(constants.StarknetChainId.MAINNET),
-        ),
-      );
-
-      Storage.set(
-        selectors["0.0.3"].deployment(
-          address,
-          constants.StarknetChainId.TESTNET,
-        ),
-        Storage.get(
-          selectors["0.0.2"].deployment(constants.StarknetChainId.TESTNET),
-        ),
-      );
-
-      Storage.set(
-        selectors["0.0.3"].deployment(
-          address,
-          constants.StarknetChainId.TESTNET2,
-        ),
-        Storage.get(
-          selectors["0.0.2"].deployment(constants.StarknetChainId.TESTNET2),
-        ),
-      );
-
-      Storage.keys()
-        .filter((k) => k.startsWith(selectors["0.0.2"].admin("")))
-        .forEach((k) => {
-          const origin = k.split("/")[1];
-          Storage.set(
-            selectors["0.0.3"].admin(address, origin),
-            Storage.get(selectors["0.0.2"].admin(origin)),
-          );
-        });
-
-      Storage.keys()
-        .filter((k) => k.startsWith(selectors["0.0.2"].session("")))
-        .forEach((k) => {
-          const origin = k.split("/")[1];
-          Storage.set(
-            selectors["0.0.3"].session(address, origin),
-            Storage.get(selectors["0.0.2"].session(origin)),
-          );
-        });
-
-      Storage.set("version", "0.0.3");
+    if (version !== VERSION) {
+      migrations[version][VERSION](address);
     }
 
     const keypair = ec.getKeyPair(privateKey);

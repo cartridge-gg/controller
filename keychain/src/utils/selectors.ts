@@ -12,6 +12,7 @@ const selectors = {
       `@register/${chainId}/set_device_key`,
   },
   ["0.0.3"]: {
+    active: () => `active`,
     account: (address: string) => `@account/${address}`,
     deployment: (address: string, chainId: constants.StarknetChainId) =>
       `@deployment/${address}/${chainId}`,

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Flex, HStack, Spinner, Text, VStack } from "@chakra-ui/react";
 
 import { Header } from "components/Header";
-import Controller, { RegisterData } from "utils/controller";
+import Controller, { RegisterData, VERSION } from "utils/controller";
 import { useRouter } from "next/router";
 import {
   constants,
@@ -328,7 +328,7 @@ const Execute: NextPage = () => {
   const onRegister = useCallback(async () => {
     const data = await controller.signAddDeviceKey(params.chainId);
     Storage.set(
-      selectors["0.0.3"].register(controller.address, params.chainId),
+      selectors[VERSION].register(controller.address, params.chainId),
       data,
     );
     setRegisterData(data);
@@ -339,7 +339,7 @@ const Execute: NextPage = () => {
     // We set the transaction hash which the keychain instance
     // polls for.
     Storage.set(
-      selectors["0.0.3"].transaction(controller.address, res.transaction_hash),
+      selectors[VERSION].transaction(controller.address, res.transaction_hash),
       true,
     );
 
