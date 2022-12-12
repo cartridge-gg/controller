@@ -128,8 +128,8 @@ const Fees = ({
       }
 
       setFormattedFee({
-        fee: parseFloat(formatUnits(fees.overall_fee, 18)).toFixed(5),
-        max: parseFloat(formatUnits(fees.suggestedMaxFee, 18)).toFixed(5),
+        fee: parseFloat(formatUnits(fees.overall_fee.toString(), 18)).toFixed(5),
+        max: parseFloat(formatUnits(fees.suggestedMaxFee.toString(), 18)).toFixed(5),
       });
     }
     compute();
