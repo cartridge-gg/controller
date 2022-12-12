@@ -3,6 +3,8 @@ import { ec, hash, number, shortString } from "starknet";
 
 import Controller from "utils/controller";
 import { ACCOUNT_CLASS, CONTROLLER_CLASS, PROXY_CLASS } from "utils/constants";
+import Storage from "utils/storage";
+import selectors from "utils/selectors";
 
 const register =
   () =>
@@ -39,6 +41,7 @@ const register =
 
     const controller = new Controller(keypair, address, credentialId);
     controller.store();
+    Storage.set(selectors["0.0.3"].active(), address);
 
     return { address, deviceKey };
   };

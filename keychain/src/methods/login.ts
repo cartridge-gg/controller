@@ -23,6 +23,7 @@ const login =
       selectors[VERSION].register(address, constants.StarknetChainId.TESTNET),
       invoke,
     );
+    Storage.set(selectors["0.0.3"].active(), address);
 
     return {
       assertion: {
