@@ -7,7 +7,9 @@
     "build": "TARGET_ORIGIN=\"https://x.cartridge.gg/\" next build",
     "start": "next start",
     "lint": "next lint",
-    "format": "prettier ./src --write"
+    "format": "prettier ./src --write",
+    "test": "jest --watch",
+    "test:ci": "jest --ci"
   },
   "dependencies": {
     "@cartridge/controller": "workspace:^",
@@ -30,12 +32,16 @@
     "starknet": "^4.15.1"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
     "@types/js-cookie": "^3.0.2",
     "@types/node": "^18.7.14",
     "@types/react": "^18.0.20",
     "@types/react-dom": "^18.0.6",
     "eslint": "^8.23.0",
     "eslint-config-next": "^12.2.5",
+    "jest": "^29.3.1",
+    "jest-environment-jsdom": "^29.3.1",
     "prettier": "^2.7.1",
     "typescript": "^4.8.2"
   }

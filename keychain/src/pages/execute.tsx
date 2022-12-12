@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Flex, HStack, Spinner, Text, VStack } from "@chakra-ui/react";
 
 import { Header } from "components/Header";
-import Controller, { RegisterData } from "utils/controller";
+import Controller, { RegisterData, VERSION } from "utils/controller";
 import { useRouter } from "next/router";
 import {
   constants,
@@ -327,7 +327,10 @@ const Execute: NextPage = () => {
 
   const onRegister = useCallback(async () => {
     const data = await controller.signAddDeviceKey(params.chainId);
-    Storage.set(selectors["0.0.2"].register(params.chainId), data);
+    Storage.set(
+      selectors[VERSION].register(controller.address, params.chainId),
+      data,
+    );
     setRegisterData(data);
   }, [controller, params]);
 
@@ -335,12 +338,15 @@ const Execute: NextPage = () => {
     const res = await execute(params.calls)(url.href)();
     // We set the transaction hash which the keychain instance
     // polls for.
-    Storage.set(selectors["0.0.2"].transaction(res.transaction_hash), true);
+    Storage.set(
+      selectors[VERSION].transaction(controller.address, res.transaction_hash),
+      true,
+    );
 
     if (window.opener) {
       window.close();
     }
-  }, [execute, params, url]);
+  }, [controller, execute, params, url]);
 
   if (!url || !params || !controller) {
     return <Header address={controller.address} />;

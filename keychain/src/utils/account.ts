@@ -25,7 +25,7 @@ class Account extends BaseAccount {
   ) {
     super({ rpc: { nodeUrl } }, address, signer);
     this.rpc = new RpcProvider({ nodeUrl });
-    this.selector = selectors["0.0.2"].deployment(chainId);
+    this.selector = selectors["0.0.3"].deployment(address, chainId);
     const state = Storage.get(this.selector);
     if (!state || !state.syncing) {
       this.sync();
