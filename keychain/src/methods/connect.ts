@@ -16,11 +16,6 @@ const connect =
     policies: Policy[];
   }> => {
     return new Promise((resolve, reject) => {
-      const controller = Controller.fromStore();
-      if (!controller) {
-        return reject("no controller");
-      }
-
       let elapsed = -100;
       const checkApproval = async () => {
         elapsed += 100;
@@ -28,6 +23,11 @@ const connect =
         if (elapsed > TIMEOUT) {
           clearInterval(timeout);
           return reject("timeout");
+        }
+
+        const controller = Controller.fromStore();
+        if (!controller) {
+          return;
         }
 
         const session = controller.session(origin);
