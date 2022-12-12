@@ -119,17 +119,20 @@ const Fees = ({
         const overallFee = fees.overall_fee.mul(usdeth).toString();
         const suggestedMaxFee = fees.suggestedMaxFee.mul(usdeth).toString();
         setFormattedFee({
-          fee: dollarUSLocale.format(parseFloat(formatUnits(overallFee, 20))),
-          max: dollarUSLocale.format(
+          fee: `~${dollarUSLocale.format(parseFloat(formatUnits(overallFee, 20)))}`,
+          max: `~${dollarUSLocale.format(
             parseFloat(formatUnits(suggestedMaxFee, 20)),
-          ),
+          )}`,
         });
         return;
       }
 
-      setFormattedFee({
-        fee: parseFloat(formatUnits(fees.overall_fee.toString(), 18)).toFixed(5),
-        max: parseFloat(formatUnits(fees.suggestedMaxFee.toString(), 18)).toFixed(5),
+      setFormattedFee(fees.suggestedMaxFee.gt(number.toBN(10000000000000)) ? {
+        fee: `~{parseFloat(formatUnits(fees.overall_fee.toString(), 18)).toFixed(5)} eth`,
+        max: `~{parseFloat(formatUnits(fees.suggestedMaxFee.toString(), 18)).toFixed(5)} eth`,
+      } : {
+        fee: "<0.00001 eth",
+        max: "<0.00001 eth",
       });
     }
     compute();
@@ -159,9 +162,9 @@ const Fees = ({
       <VStack alignItems="flex-end">
         {formattedFee ? (
           <>
-            <Text fontSize={13}>~${formattedFee.fee}</Text>
+            <Text fontSize={13}>{formattedFee.fee}</Text>
             <Text fontSize={11} color="gray.200" mt="1px !important">
-              Max: ~${formattedFee.max}
+              Max: {formattedFee.max}
             </Text>
           </>
         ) : (
@@ -317,8 +320,7 @@ const Execute: NextPage = () => {
   useEffect(() => {
     if (!controller) {
       router.replace(
-        `${
-          process.env.NEXT_PUBLIC_ADMIN_URL
+        `${process.env.NEXT_PUBLIC_ADMIN_URL
         }/login?redirect_uri=${encodeURIComponent(window.location.href)}`,
       );
       return;
