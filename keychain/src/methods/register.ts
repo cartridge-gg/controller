@@ -46,21 +46,24 @@ const register =
     return { address, deviceKey, keypair };
   };
 
-const saveDeploy =
-  (origin: string) => async (address: string, hash: string) => {
-    const controller = Controller.fromStore();
-    if (!controller) {
-      throw new Error("no controller");
-    }
+//const saveDeploy = (origin: string) => (hash: string) => {
+const saveDeploy = () => (hash: string) => {
+  const controller = Controller.fromStore();
+  if (!controller) {
+    throw new Error("no controller");
+  }
 
-    if (!Storage.get(selectors["0.0.3"].admin(address, origin))) {
-      throw new Error("unauthorized");
-    }
+  // if (!Storage.get(selectors["0.0.3"].admin(controller.address, origin))) {
+  //   throw new Error("unauthorized");
+  // }
 
-    Storage.update(
-      selectors["0.0.3"].deployment(address, constants.StarknetChainId.TESTNET),
-      { deployTx: hash },
-    );
-  };
+  Storage.update(
+    selectors["0.0.3"].deployment(
+      controller.address,
+      constants.StarknetChainId.TESTNET,
+    ),
+    { deployTx: hash },
+  );
+};
 
 export { register, saveDeploy };
