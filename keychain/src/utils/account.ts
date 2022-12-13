@@ -5,6 +5,7 @@ import {
   Account as BaseAccount,
   RpcProvider,
   SignerInterface,
+  GetTransactionReceiptResponse,
 } from "starknet";
 
 import { CONTROLLER_CLASS } from "./constants";
@@ -15,6 +16,7 @@ class Account extends BaseAccount {
   private rpc: RpcProvider;
   private selector: string;
   deployed: boolean = false;
+  deploying: boolean = false;
   registered: boolean = false;
 
   constructor(
@@ -42,12 +44,38 @@ class Account extends BaseAccount {
     });
 
     try {
-      const classHash = await this.rpc.getClassHashAt(this.address, "latest");
-      Storage.update(this.selector, {
-        classHash,
-        deployed: true,
-      });
-      this.deployed = true;
+      const state = Storage.get(this.selector);
+      if (!state.deployed) {
+        const deployTx = Storage.get(this.selector).deployTx;
+        if (deployTx) {
+          const receipt = (await this.rpc.getTransactionReceipt(
+            deployTx,
+          )) as GetTransactionReceiptResponse;
+          switch (receipt.status) {
+            case "ACCEPTED_ON_L1":
+            case "ACCEPTED_ON_L2":
+              this.deploying = false;
+              this.deployed = true;
+              break;
+            case "RECEIVED":
+            case "PENDING":
+              this.deploying = true;
+              this.deployed = false;
+              throw new Error("Deploying");
+            default: // rejected, not_received
+              this.deploying = false;
+              this.deployed = false;
+              throw new Error("Not deployed");
+          }
+        }
+
+        const classHash = await this.rpc.getClassHashAt(this.address, "latest");
+        Storage.update(this.selector, {
+          classHash,
+          deployed: true,
+        });
+        this.deployed = true;
+      }
 
       const nonce = await this.rpc.getNonceForAddress(this.address, "latest");
       Storage.update(this.selector, {
