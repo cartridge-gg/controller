@@ -25,7 +25,7 @@ import ConnectIcon from "../../../ui/src/components/icons/Connect";
 
 const Connect: NextPage = () => {
   const [maxFee, setMaxFee] = useState(null);
-  const [registerionRequired, setRegisterionRequired] = useState(false);
+  const [registrationRequired, setRegistrationRequired] = useState(false);
   const { chainId, validPolicys, invalidPolicys, isValidating } =
     useUrlPolicys();
   const controller = useMemo(() => Controller.fromStore(), []);
@@ -43,14 +43,14 @@ const Connect: NextPage = () => {
 
     const account = controller.account(chainId);
     if (!account?.registered) {
-      setRegisterionRequired(true);
+      setRegistrationRequired(true);
     }
   }, [router, controller, chainId]);
 
   const connect = useCallback(
     async (values, actions) => {
       try {
-        if (registerionRequired) {
+        if (registrationRequired) {
           const data = await controller.signAddDeviceKey(chainId);
           Storage.set(
             selectors[VERSION].register(controller.address, chainId),
@@ -68,7 +68,7 @@ const Connect: NextPage = () => {
       }
       actions.setSubmitting(false);
     },
-    [origin, validPolicys, controller, maxFee, chainId],
+    [validPolicys, controller, maxFee, chainId, registrationRequired],
   );
 
   if (!controller) {
@@ -91,7 +91,7 @@ const Connect: NextPage = () => {
               {origin} is requesting to connect to your Cartridge Controller
             </Text>
           </VStack>
-          {registerionRequired && (
+          {registrationRequired && (
             <VStack
               w="full"
               mt="30px"

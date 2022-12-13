@@ -170,7 +170,7 @@ const Execute: NextPage = () => {
       maxFee,
       chainId,
     };
-  }, [controller.address, router.query]);
+  }, [controller, router.query]);
 
   const execute = useCallback(
     (calls: StarknetCall[]) =>
