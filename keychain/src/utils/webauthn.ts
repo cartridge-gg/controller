@@ -55,7 +55,7 @@ export class WebauthnSigner implements SignerInterface {
   constructor(
     credentialId: string,
     publicKey: string,
-    rpId: string = "cartridge.gg",
+    rpId: string = process.env.NEXT_PUBLIC_RP_ID,
   ) {
     this.credentialId = credentialId;
     this.publicKey = publicKey;
