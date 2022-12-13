@@ -38,10 +38,10 @@ export type RegisterData = {
 };
 
 type SerializedController = {
-  credentialId: string,
-  privateKey: string,
-  publicKey: string,
-  address: string,
+  credentialId: string;
+  privateKey: string;
+  publicKey: string;
+  address: string;
 };
 
 export default class Controller {

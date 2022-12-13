@@ -119,7 +119,9 @@ const Fees = ({
         const overallFee = fees.overall_fee.mul(usdeth).toString();
         const suggestedMaxFee = fees.suggestedMaxFee.mul(usdeth).toString();
         setFormattedFee({
-          fee: `~${dollarUSLocale.format(parseFloat(formatUnits(overallFee, 20)))}`,
+          fee: `~${dollarUSLocale.format(
+            parseFloat(formatUnits(overallFee, 20)),
+          )}`,
           max: `~${dollarUSLocale.format(
             parseFloat(formatUnits(suggestedMaxFee, 20)),
           )}`,
@@ -127,13 +129,17 @@ const Fees = ({
         return;
       }
 
-      setFormattedFee(fees.suggestedMaxFee.gt(number.toBN(10000000000000)) ? {
-        fee: `~{parseFloat(formatUnits(fees.overall_fee.toString(), 18)).toFixed(5)} eth`,
-        max: `~{parseFloat(formatUnits(fees.suggestedMaxFee.toString(), 18)).toFixed(5)} eth`,
-      } : {
-        fee: "<0.00001 eth",
-        max: "<0.00001 eth",
-      });
+      setFormattedFee(
+        fees.suggestedMaxFee.gt(number.toBN(10000000000000))
+          ? {
+              fee: `~{parseFloat(formatUnits(fees.overall_fee.toString(), 18)).toFixed(5)} eth`,
+              max: `~{parseFloat(formatUnits(fees.suggestedMaxFee.toString(), 18)).toFixed(5)} eth`,
+            }
+          : {
+              fee: "<0.00001 eth",
+              max: "<0.00001 eth",
+            },
+      );
     }
     compute();
   }, [chainId, fees]);
@@ -320,7 +326,8 @@ const Execute: NextPage = () => {
   useEffect(() => {
     if (!controller) {
       router.replace(
-        `${process.env.NEXT_PUBLIC_ADMIN_URL
+        `${
+          process.env.NEXT_PUBLIC_ADMIN_URL
         }/login?redirect_uri=${encodeURIComponent(window.location.href)}`,
       );
       return;
