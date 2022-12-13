@@ -7,7 +7,12 @@ import Storage from "utils/storage";
 import selectors from "utils/selectors";
 
 const register =
-  () => async (username: string, credential: { x: string; y: string }) => {
+  () =>
+  async (
+    username: string,
+    credentialId: string,
+    credential: { x: string; y: string },
+  ) => {
     const keypair = ec.genKeyPair();
     const deviceKey = ec.getStarkKey(keypair);
 
@@ -34,23 +39,28 @@ const register =
       "0",
     );
 
+    const controller = new Controller(keypair, address, credentialId);
+    controller.store();
+    Storage.set(selectors["0.0.3"].active(), address);
+
     return { address, deviceKey, keypair };
   };
 
-const finalize = (
-  address: string,
-  hash: string,
-  keypair: KeyPair,
-  credentialId: string,
-) => {
-  Storage.set(selectors["0.0.3"].active(), address);
-  Storage.set(
-    selectors["0.0.3"].deployment(address, constants.StarknetChainId.TESTNET),
-    { deployTx: hash },
-  );
+const saveDeploy =
+  (origin: string) => async (address: string, hash: string) => {
+    const controller = Controller.fromStore();
+    if (!controller) {
+      throw new Error("no controller");
+    }
 
-  const controller = new Controller(keypair, address, credentialId);
-  controller.store();
-};
+    if (!Storage.get(selectors["0.0.3"].admin(address, origin))) {
+      throw new Error("unauthorized");
+    }
 
-export { register, finalize };
+    Storage.update(
+      selectors["0.0.3"].deployment(address, constants.StarknetChainId.TESTNET),
+      { deployTx: hash },
+    );
+  };
+
+export { register, saveDeploy };
