@@ -5,6 +5,9 @@ import {
   Account as BaseAccount,
   RpcProvider,
   SignerInterface,
+  Call,
+  EstimateFeeDetails,
+  EstimateFee,
 } from "starknet";
 
 import { CONTROLLER_CLASS } from "./constants";
@@ -79,6 +82,16 @@ class Account extends BaseAccount {
     Storage.update(this.selector, {
       syncing: false,
     });
+  }
+
+  async estimateInvokeFee(
+    calls: Call[],
+    details: EstimateFeeDetails = {},
+  ): Promise<EstimateFee> {
+    details.blockIdentifier = details.blockIdentifier
+      ? details.blockIdentifier
+      : "latest";
+    return super.estimateInvokeFee(calls, details);
   }
 
   async getNonce(blockIdentifier?: any): Promise<number.BigNumberish> {

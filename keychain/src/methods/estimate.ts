@@ -17,6 +17,7 @@ const estimateInvokeFee =
     },
   ): Promise<EstimateFee> => {
     const calls = Array.isArray(transactions) ? transactions : [transactions];
+    details.blockIdentifier ? details.blockIdentifier : "latest";
     return await controller
       .account(details.chainId)
       .estimateInvokeFee(calls, details);
