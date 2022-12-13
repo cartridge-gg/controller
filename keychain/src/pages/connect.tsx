@@ -2,20 +2,32 @@ import type { NextPage } from "next";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
-import { Flex } from "@chakra-ui/react";
+import {
+  Circle,
+  VStack,
+  HStack,
+  Flex,
+  Text,
+  Box,
+  Container,
+} from "@chakra-ui/react";
 
 import Banner from "components/Banner";
 import { Header } from "components/Header";
 import Session from "components/Session";
 import { useRequests } from "hooks/account";
 import { useUrlPolicys } from "hooks/policy";
-import Controller from "utils/controller";
+import { constants } from "starknet";
+import Storage from "utils/storage";
+import selectors from "utils/selectors";
+import Controller, { RegisterData, VERSION } from "utils/controller";
+import ConnectIcon from "../../../ui/src/components/icons/Connect";
 
 const Connect: NextPage = () => {
   const [maxFee, setMaxFee] = useState(null);
+  const [registerionRequired, setRegisterionRequired] = useState(false);
   const { chainId, validPolicys, invalidPolicys, isValidating } =
     useUrlPolicys();
-  const { origin } = useRequests();
   const controller = useMemo(() => Controller.fromStore(), []);
   const router = useRouter();
 
@@ -28,11 +40,24 @@ const Connect: NextPage = () => {
       );
       return;
     }
-  }, [router, controller]);
 
-  const approve = useCallback(
+    const account = controller.account(chainId);
+    if (!account?.registered) {
+      setRegisterionRequired(true);
+    }
+  }, [router, controller, chainId]);
+
+  const connect = useCallback(
     async (values, actions) => {
       try {
+        if (registerionRequired) {
+          const data = await controller.signAddDeviceKey(chainId);
+          Storage.set(
+            selectors[VERSION].register(controller.address, chainId),
+            data,
+          );
+        }
+
         const approvals = validPolicys.filter((_, i) => values[i]);
         controller.approve(origin, approvals, maxFee);
         if (window.opener) {
@@ -43,7 +68,7 @@ const Connect: NextPage = () => {
       }
       actions.setSubmitting(false);
     },
-    [origin, validPolicys, controller, maxFee],
+    [origin, validPolicys, controller, maxFee, chainId],
   );
 
   if (!controller) {
@@ -53,42 +78,70 @@ const Connect: NextPage = () => {
   return (
     <>
       <Header address={controller.address} />
-      <Flex m={4} flex={1} flexDirection="column">
-        <Banner
-          pb="20px"
-          title="Session Details"
-          variant="secondary"
-          borderBottom="1px solid"
-          borderColor="gray.700"
-        >
-          {
-            <>
-              <strong>{origin}</strong>
-              {validPolicys.length > 0
-                ? " is requesting permission to submit transactions on your behalf"
-                : " is requesting to connect to your account"}
-            </>
-          }
-        </Banner>
-        <Session
-          chainId={chainId}
-          action={
-            "CONFIRM" +
-            (validPolicys.length > 0 ? ` [${validPolicys.length + 1}]` : "")
-          }
-          onCancel={() => {
-            if (window.opener) {
-              window.close();
-            }
-          }}
-          onSubmit={approve}
-          policies={validPolicys}
-          invalidPolicys={invalidPolicys}
-          isLoading={isValidating}
-          maxFee={maxFee}
-          setMaxFee={setMaxFee}
-        />
-      </Flex>
+      <Container w={["full", "full", "400px"]} centerContent>
+        <Flex w="full" m={4} flexDirection="column">
+          <VStack gap="12px">
+            <Circle bgColor="gray.700" size="48px">
+              <ConnectIcon boxSize="20px" />
+            </Circle>
+            <Text fontSize="17px" fontWeight="bold">
+              Connect Controller
+            </Text>
+            <Text fontSize="13px" color="gray.200" align="center">
+              {origin} is requesting to connect to your Cartridge Controller
+            </Text>
+          </VStack>
+          {registerionRequired && (
+            <VStack
+              w="full"
+              mt="30px"
+              overflow="hidden"
+              borderRadius="6px"
+              spacing="1px"
+            >
+              <VStack bgColor="gray.700" w="full" p="12px" align="flex-start">
+                <Text variant="ibm-upper-bold" fontSize="10px">
+                  Register New device
+                </Text>
+                <Text fontSize="11px" color="gray.200">
+                  Allow this device to execute transactions
+                </Text>
+              </VStack>
+              <Flex m="0" w="full" gap="1px">
+                <HStack flex="1" bgColor="gray.600" py="7px" px="12px">
+                  <Text fontSize="13px">My device</Text>
+                </HStack>
+                <HStack bgColor="gray.600" py="7px" px="12px">
+                  <Text
+                    fontSize="10px"
+                    variant="ibm-upper-bold"
+                    color="gray.200"
+                  >
+                    {chainId === constants.StarknetChainId.MAINNET
+                      ? "mainnet"
+                      : "testnet"}
+                  </Text>
+                </HStack>
+              </Flex>
+            </VStack>
+          )}
+          <Session
+            chainId={chainId}
+            action={"CONNECT"}
+            onCancel={() => {
+              if (window.opener) {
+                window.close();
+              }
+            }}
+            onSubmit={connect}
+            policies={validPolicys}
+            invalidPolicys={invalidPolicys}
+            isLoading={isValidating}
+            maxFee={maxFee}
+            setMaxFee={setMaxFee}
+          />
+        </Flex>
+      </Container>
     </>
   );
 };

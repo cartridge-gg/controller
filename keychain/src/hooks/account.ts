@@ -22,5 +22,9 @@ export function useRequests() {
     requests = JSON.parse(policies as string);
   }
 
-  return { id: id as string | undefined, origin, requests };
+  return {
+    id: id as string | undefined,
+    origin,
+    requests,
+  };
 }
