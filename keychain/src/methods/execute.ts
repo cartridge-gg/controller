@@ -49,19 +49,6 @@ const execute =
 
     transactionsDetail.version = hash.transactionVersion;
 
-    if (!transactionsDetail.maxFee) {
-      try {
-        transactionsDetail.maxFee = (
-          await controller
-            .account(transactionsDetail.chainId)
-            .estimateInvokeFee(calls, { nonce: transactionsDetail.nonce })
-        ).suggestedMaxFee;
-      } catch (e) {
-        console.error(e);
-        throw e;
-      }
-    }
-
     if (sync) {
       const calldata = transaction.fromCallsToExecuteCalldata(calls);
       const h = hash.calculateTransactionHash(
@@ -77,6 +64,19 @@ const execute =
       const missing = diff(policies, session.policies);
       if (missing.length > 0) {
         throw new MissingPolicys(missing);
+      }
+    }
+
+    if (!transactionsDetail.maxFee) {
+      try {
+        transactionsDetail.maxFee = (
+          await controller
+            .account(transactionsDetail.chainId)
+            .estimateInvokeFee(calls, { nonce: transactionsDetail.nonce })
+        ).suggestedMaxFee;
+      } catch (e) {
+        console.error(e);
+        throw e;
       }
     }
 
