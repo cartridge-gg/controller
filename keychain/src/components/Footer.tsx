@@ -29,7 +29,7 @@ const Footer = ({
   >
     <Spacer borderBottom="1px solid" borderColor="gray.700" />
     {children}
-    <Flex gap="10px">
+    <Flex gap="10px" justify="flex-end">
       {onCancel && (
         <Button
           variant="secondary600"
@@ -42,7 +42,7 @@ const Footer = ({
       )}
       <Button
         size="lg"
-        disabled={isDisabled}
+        disabled={isDisabled || isLoading}
         isLoading={isLoading}
         w={["100%", "100%", "200px"]}
         type={onSubmit ? "button" : "submit"}

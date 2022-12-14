@@ -208,7 +208,8 @@ const Execute: NextPage = () => {
   useEffect(() => {
     if (!controller) {
       router.replace(
-        `${process.env.NEXT_PUBLIC_ADMIN_URL
+        `${
+          process.env.NEXT_PUBLIC_ADMIN_URL
         }/login?redirect_uri=${encodeURIComponent(window.location.href)}`,
       );
       return;
@@ -250,10 +251,12 @@ const Execute: NextPage = () => {
   }, [controller, execute, nonce, params, url]);
 
   if (error) {
-    return <>
-      <Header address={controller.address} />
-      <div>{error.message}</div>
-    </>
+    return (
+      <>
+        <Header address={controller.address} />
+        <div>{error.message}</div>
+      </>
+    );
   }
 
   if (!url || !params || !controller) {

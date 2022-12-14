@@ -1,8 +1,6 @@
 import {
-  Box,
   Flex,
   Tag,
-  Switch,
   Text,
   HStack,
   Link,
@@ -16,23 +14,9 @@ import { Policy } from "@cartridge/controller";
 import { formatAddress } from "@cartridge/ui/components/Address";
 import { StarkscanUrl } from "utils/url";
 import EthereumIcon from "@cartridge/ui/components/icons/Ethereum";
+import CodeIcon from "@cartridge/ui/components/icons/Code";
+import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import { constants } from "starknet";
-
-function formatName(policy: Policy) {
-  if (policy.method) {
-    return `Execute ${policy.method}`;
-  }
-
-  return `Execute ${formatAddress(policy.target, 6)}`;
-}
-
-function formatDescription(policy: Policy) {
-  if (policy.method) {
-    return `Execute ${policy.method} on ${formatAddress(policy.target, 6)}`;
-  }
-
-  return `Execute code on ${formatAddress(policy.target, 6)}`;
-}
 
 export const Call = ({
   chainId,
@@ -45,7 +29,7 @@ export const Call = ({
 }) => {
   const title = (
     <HStack>
-      <Text variant="ibm-upper-bold">{formatName(policy)}</Text>
+      <Text variant="ibm-upper-bold">{policy.method}</Text>
       {notice && (
         <Tag colorScheme="red" size="sm">
           {notice}
@@ -56,7 +40,7 @@ export const Call = ({
 
   const description = (
     <Link href={StarkscanUrl[chainId].contract(policy.target)} target="_blank">
-      {formatDescription(policy)}
+      {policy.target}
     </Link>
   );
 
@@ -75,7 +59,7 @@ export const CallToggle = ({
 } & FieldInputProps<boolean>) => {
   const title = (
     <HStack>
-      <Text>{formatName(policy)}</Text>
+      <Text>{policy.method}</Text>
       {notice && (
         <Tag colorScheme="red" size="sm">
           {notice}
@@ -85,7 +69,7 @@ export const CallToggle = ({
   );
   const description = (
     <Link href={StarkscanUrl[chainId].contract(policy.target)} target="_blank">
-      {formatDescription(policy)}
+      {formatAddress(policy.target)}
     </Link>
   );
 
@@ -144,15 +128,6 @@ const Switchable = ({
 } & FieldInputProps<boolean>) => (
   <Flex>
     <Base title={title} description={description} />
-    <Spacer />
-    <Switch
-      disabled={disable || !!errMsg}
-      size="lg"
-      name={rest.name}
-      isChecked={errMsg ? false : rest.value}
-      onBlur={rest.onBlur}
-      onChange={rest.onChange}
-    />
   </Flex>
 );
 
@@ -165,16 +140,12 @@ const Base = ({
   disable?: boolean;
   errMsg?: string;
 }) => (
-  <VStack
-    align="flex-start"
-    spacing="8px"
-    bgColor="gray.700"
-    p="16px"
-    borderRadius="8px"
-  >
-    <Box fontSize="11px">{title}</Box>
-    <Text fontSize="12px" color="gray.200">
-      {description}
+  <HStack w="full" bgColor="gray.600" py="7px" px="12px">
+    <CodeIcon boxSize="18px" />
+    <Text fontSize="13px" textTransform="capitalize">
+      {title}
     </Text>
-  </VStack>
+    <Spacer />
+    <InfoIcon color="gray.200" boxSize="12px" />
+  </HStack>
 );
