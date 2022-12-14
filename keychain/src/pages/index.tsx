@@ -9,7 +9,7 @@ import connect from "../methods/connect";
 import execute from "../methods/execute";
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
 import provision from "../methods/provision";
-import register from "../methods/register";
+import { register, saveDeploy } from "../methods/register";
 import login from "../methods/login";
 import logout from "../methods/logout";
 import { signMessage } from "../methods/sign";
@@ -82,6 +82,7 @@ const Index: NextPage = () => {
         signMessage: normalize(validate(signMessage)),
         session: normalize(session),
         sessions: normalize(sessions),
+        saveDeploy: normalize(saveDeploy),
       },
     });
 

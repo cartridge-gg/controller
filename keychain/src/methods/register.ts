@@ -46,4 +46,9 @@ const register =
     return { address, deviceKey };
   };
 
-export default register;
+const saveDeploy = (origin: string) => () => {
+  console.log(origin);
+  return;
+};
+
+export { register, saveDeploy };

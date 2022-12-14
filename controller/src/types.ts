@@ -21,7 +21,7 @@ export type Assertion = {
     authenticatorData: string;
     clientDataJSON: string;
     signature: string;
-  }
+  };
 };
 
 export type Session = {
@@ -36,7 +36,7 @@ export type Policy = {
 };
 
 export interface Keychain {
-  probe(): { address: string, policies: Policy[] };
+  probe(): { address: string; policies: Policy[] };
   connect(policies: Policy[]): {
     address: string;
     policies: Policy[];
@@ -46,26 +46,49 @@ export interface Keychain {
   revoke(origin: string): void;
   approvals(origin: string): Promise<Session | undefined>;
 
-  estimateDeclareFee(payload: DeclareContractPayload, details?: EstimateFeeDetails & {
-    chainId: constants.StarknetChainId
-  }): Promise<EstimateFee>
-  estimateInvokeFee(calls: Call | Call[], estimateFeeDetails?: EstimateFeeDetails & {
-    chainId: constants.StarknetChainId
-  }): Promise<EstimateFee>;
-  execute(calls: Call | Call[], abis?: Abi[], transactionsDetail?: InvocationsDetails & {
-    chainId?: constants.StarknetChainId,
-  }, sync?: boolean): Promise<InvokeFunctionResponse>;
+  estimateDeclareFee(
+    payload: DeclareContractPayload,
+    details?: EstimateFeeDetails & {
+      chainId: constants.StarknetChainId;
+    }
+  ): Promise<EstimateFee>;
+  estimateInvokeFee(
+    calls: Call | Call[],
+    estimateFeeDetails?: EstimateFeeDetails & {
+      chainId: constants.StarknetChainId;
+    }
+  ): Promise<EstimateFee>;
+  execute(
+    calls: Call | Call[],
+    abis?: Abi[],
+    transactionsDetail?: InvocationsDetails & {
+      chainId?: constants.StarknetChainId;
+    },
+    sync?: boolean
+  ): Promise<InvokeFunctionResponse>;
   provision(address: string, credentialId: string): Promise<string>;
-  register(username: string, credentialId: string, credential: { x: string, y: string }): Promise<{ address: string, deviceKey: string }>;
-  login(address: string, credentialId: string, options: {
-    rpId?: string
-    challengeExt?: Buffer
-  }): Promise<{ assertion: Assertion }>
+  register(
+    username: string,
+    credentialId: string,
+    credential: { x: string; y: string }
+  ): Promise<{ address: string; deviceKey: string }>;
+  saveDeploy(): void;
+  login(
+    address: string,
+    credentialId: string,
+    options: {
+      rpId?: string;
+      challengeExt?: Buffer;
+    }
+  ): Promise<{ assertion: Assertion }>;
   logout(): Promise<void>;
   session(): Promise<Session>;
   sessions(): Promise<{
     [key: string]: Session;
   }>;
 
-  signMessage(typedData: typedData.TypedData, account: string): Promise<Signature>;
+  signMessage(
+    typedData: typedData.TypedData,
+    account: string
+  ): Promise<Signature>;
 }
