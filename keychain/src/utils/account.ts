@@ -19,6 +19,7 @@ class Account extends BaseAccount {
   private rpc: RpcProvider;
   private selector: string;
   deployed: boolean = false;
+  deploying: boolean = false;
   registered: boolean = false;
 
   constructor(
@@ -46,6 +47,8 @@ class Account extends BaseAccount {
     });
 
     try {
+      this.deploying = await this.isDeploying();
+
       const classHash = await this.rpc.getClassHashAt(this.address, "latest");
       Storage.update(this.selector, {
         classHash,
@@ -87,7 +90,7 @@ class Account extends BaseAccount {
 
   async isDeploying(): Promise<boolean> {
     const deployTx = Storage.get(this.selector).deployTx;
-    if (!this.deployed && deployTx) {
+    if (deployTx && !this.deployed) {
       const receipt = (await this.rpc.getTransactionReceipt(
         deployTx,
       )) as GetTransactionReceiptResponse;
