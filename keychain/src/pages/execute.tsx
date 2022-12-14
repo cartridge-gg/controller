@@ -119,10 +119,10 @@ const Fees = ({
         const overallFee = fees.base.mul(usdeth).toString();
         const suggestedMaxFee = fees.max.mul(usdeth).toString();
         setFormattedFee({
-          base: `~${dollarUSLocale.format(
+          base: `~$${dollarUSLocale.format(
             parseFloat(formatUnits(overallFee, 20)),
           )}`,
-          max: `~${dollarUSLocale.format(
+          max: `~$${dollarUSLocale.format(
             parseFloat(formatUnits(suggestedMaxFee, 20)),
           )}`,
         });
@@ -132,17 +132,17 @@ const Fees = ({
       setFormattedFee(
         fees.max.gt(number.toBN(10000000000000))
           ? {
-              base: `~${parseFloat(
-                formatUnits(fees.base.toString(), 18),
-              ).toFixed(5)} eth`,
-              max: `~${parseFloat(formatUnits(fees.max.toString(), 18)).toFixed(
-                5,
-              )} eth`,
-            }
+            base: `~${parseFloat(
+              formatUnits(fees.base.toString(), 18),
+            ).toFixed(5)} eth`,
+            max: `~${parseFloat(formatUnits(fees.max.toString(), 18)).toFixed(
+              5,
+            )} eth`,
+          }
           : {
-              base: "<0.00001 eth",
-              max: "<0.00001 eth",
-            },
+            base: "<0.00001 eth",
+            max: "<0.00001 eth",
+          },
       );
     }
     compute();
@@ -229,15 +229,39 @@ const Execute: NextPage = () => {
   }, [controller.address, router.query]);
 
   const execute = useCallback(
-    (calls: StarknetCall[]) =>
-      normalize(
+    (calls: StarknetCall[]) => {
+      const account = controller.account(params.chainId);
+      return normalize(
         validate((controller) => {
           return async () => {
-            return await controller.account(params.chainId).execute(calls);
+            if (account.registered) {
+              return await controller
+                .account(params.chainId)
+                .execute(calls, null, {
+                  maxFee: fees.max,
+                  nonce,
+                  version: hash.transactionVersion,
+                });
+            }
+
+            return await Promise.all([
+              controller
+                .account(params.chainId)
+                .invokeFunction(registerData.invoke.invocation, {
+                  ...registerData.invoke.details,
+                  nonce: registerData.invoke.details.nonce!,
+                }),
+              controller.account(params.chainId).execute(calls, null, {
+                maxFee: fees.max,
+                nonce: nonce.add(number.toBN(1)),
+                version: hash.transactionVersion,
+              }),
+            ]);
           };
         }),
-      ),
-    [params],
+      );
+    },
+    [controller, fees, nonce, params, registerData],
   );
 
   // Get the nonce
@@ -341,8 +365,7 @@ const Execute: NextPage = () => {
   useEffect(() => {
     if (!controller) {
       router.replace(
-        `${
-          process.env.NEXT_PUBLIC_ADMIN_URL
+        `${process.env.NEXT_PUBLIC_ADMIN_URL
         }/login?redirect_uri=${encodeURIComponent(window.location.href)}`,
       );
       return;
@@ -359,7 +382,7 @@ const Execute: NextPage = () => {
   }, [controller, params]);
 
   const onSubmit = useCallback(async () => {
-    const res = await execute(params.calls)(url.href)();
+    await execute(params.calls)(url.href)();
     // We set the transaction hash which the keychain instance
     // polls for. We use a manually computed hash to identify
     // the transaction since the keychain estimate fee might be differen.
