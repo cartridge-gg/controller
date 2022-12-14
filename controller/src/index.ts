@@ -163,13 +163,13 @@ class Controller {
     return await this.keychain.register(username, credentialId, credential);
   }
 
-  saveDeploy() {
+  saveDeploy(hash: string) {
     if (!this.keychain) {
       console.error("not ready for connect");
       return null;
     }
 
-    return this.keychain.saveDeploy();
+    return this.keychain.saveDeploy(hash);
   }
 
   async login(

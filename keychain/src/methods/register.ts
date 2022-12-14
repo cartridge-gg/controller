@@ -46,8 +46,8 @@ const register =
     return { address, deviceKey };
   };
 
-const saveDeploy = (origin: string) => () => {
-  console.log(origin);
+const saveDeploy = () => (hash: string) => {
+  console.log(hash);
   return;
 };
 
