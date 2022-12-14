@@ -46,11 +46,6 @@ class Account extends BaseAccount {
 
     this.deployed = state.deployed;
     this.registered = state.registered;
-
-    if (!state || Date.now() - state.syncing > 5000) {
-      this.sync();
-      return;
-    }
   }
 
   async sync() {

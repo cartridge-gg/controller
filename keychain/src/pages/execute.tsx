@@ -39,6 +39,62 @@ async function fetchEthPrice() {
   return res.json();
 }
 
+const Unlock = ({
+  chainId,
+  onSubmit,
+}: {
+  chainId: constants.StarknetChainId;
+  onSubmit: () => void;
+}) => (
+  <Flex m={4} flex={1} flexDirection="column">
+    <Banner
+      pb="20px"
+      title="Register Device"
+      variant="secondary"
+      borderBottom="1px solid"
+      borderColor="gray.700"
+    >
+      It looks like this is your first time using this device with this chain.
+      You will need to register it before you can execute transactions.
+      <Flex justify="center" mt="12px">
+        <Network chainId={chainId} />
+      </Flex>
+    </Banner>
+    <Flex my={2} flex={1} flexDirection="column" gap="10px">
+      <HStack
+        alignItems="center"
+        spacing="12px"
+        bgColor="gray.700"
+        py="11px"
+        px="15px"
+        borderRadius="8px"
+        justifyContent="space-between"
+      >
+        <HStack>
+          <Text
+            textTransform="uppercase"
+            fontSize={11}
+            fontWeight={700}
+            color="gray.100"
+          >
+            Register Device
+          </Text>
+          <InfoIcon />
+        </HStack>
+      </HStack>
+      <Footer
+        onSubmit={onSubmit}
+        onCancel={() => {
+          if (window.opener) {
+            window.close();
+          }
+        }}
+        action="Register"
+      ></Footer>
+    </Flex>
+  </Flex>
+);
+
 const Fees = ({
   chainId,
   fees,
@@ -154,32 +210,23 @@ const Execute: NextPage = () => {
       return null;
     }
 
-    const { maxFee, chainId = constants.StarknetChainId.TESTNET } =
-      router.query as {
-        chainId?: constants.StarknetChainId;
-        maxFee?: string;
-      };
+    const { maxFee, chainId } = router.query as {
+      chainId?: constants.StarknetChainId;
+      maxFee?: string;
+    };
     const calls: StarknetCall | StarknetCall[] = JSON.parse(
       router.query.calls as string,
     );
     const transactions = Array.isArray(calls) ? calls : [calls];
     const calldata = transaction.fromCallsToExecuteCalldata(transactions);
 
-    const account = controller.account(chainId);
-    if (!account?.registered) {
-      const data: RegisterData = Storage.get(
-        selectors[VERSION].register(controller.address, chainId),
-      );
-      setRegisterData(data);
-    }
-
     return {
       calls: transactions,
       calldata,
       maxFee,
-      chainId,
+      chainId: chainId ? chainId : constants.StarknetChainId.TESTNET,
     };
-  }, [controller, router.query]);
+  }, [controller.address, router.query]);
 
   const execute = useCallback(
     (calls: StarknetCall[]) => {
@@ -326,6 +373,15 @@ const Execute: NextPage = () => {
     }
   }, [router, controller]);
 
+  const onRegister = useCallback(async () => {
+    const data = await controller.signAddDeviceKey(params.chainId);
+    Storage.set(
+      selectors[VERSION].register(controller.address, params.chainId),
+      data,
+    );
+    setRegisterData(data);
+  }, [controller, params]);
+
   const onSubmit = useCallback(async () => {
     await execute(params.calls)(url.href)();
     // We set the transaction hash which the keychain instance
@@ -353,6 +409,15 @@ const Execute: NextPage = () => {
 
   if (!url || !params || !controller) {
     return <Header address={controller.address} />;
+  }
+
+  if (!controller.account(params.chainId).registered && !registerData) {
+    return (
+      <>
+        <Header address={controller.address} />
+        <Unlock chainId={params.chainId} onSubmit={onRegister} />
+      </>
+    );
   }
 
   return (
