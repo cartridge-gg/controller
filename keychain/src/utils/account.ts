@@ -33,6 +33,10 @@ class Account extends BaseAccount {
     this.rpc = new RpcProvider({ nodeUrl });
     this.selector = selectors["0.0.3"].deployment(address, chainId);
     const state = Storage.get(this.selector);
+
+    this.deployed = state.deployed;
+    this.registered = state.registered;
+
     if (!state || (Date.now() - state.syncing) > 5000) {
       this.sync();
       return;

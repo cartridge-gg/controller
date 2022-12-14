@@ -409,6 +409,7 @@ const Execute: NextPage = () => {
   if (!url || !params || !controller) {
     return <Header address={controller.address} />;
   }
+
   if (!controller.account(params.chainId).registered && !registerData) {
     return (
       <>
