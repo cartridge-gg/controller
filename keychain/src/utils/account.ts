@@ -91,12 +91,8 @@ class Account extends BaseAccount {
       const receipt = (await this.rpc.getTransactionReceipt(
         deployTx,
       )) as GetTransactionReceiptResponse;
-      switch (receipt.status) {
-        case "RECEIVED":
-        case "PENDING":
-          return true;
-        default:
-          return false;
+      if (receipt.status === "RECEIVED" || receipt.status === "PENDING") {
+        return true;
       }
     }
     return false;
