@@ -1,7 +1,7 @@
 import type { NextPage } from "next";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Flex, HStack, Spinner, Text, VStack } from "@chakra-ui/react";
+import { Flex } from "@chakra-ui/react";
 
 import { Header } from "components/Header";
 import Controller, { RegisterData, VERSION } from "utils/controller";
@@ -21,169 +21,12 @@ import Banner from "components/Banner";
 import Network from "components/Network";
 import { Call } from "components/Call";
 import Footer from "components/Footer";
-import InfoIcon from "@cartridge/ui/components/icons/Info";
 import { normalize, validate } from "pages";
 import { estimateFeeBulk } from "utils/gateway";
 import { BigNumber } from "ethers";
-import { formatUnits } from "ethers/lib/utils";
 import selectors from "utils/selectors";
-
-async function fetchEthPrice() {
-  const res = await fetch(process.env.NEXT_PUBLIC_API_URL, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-    },
-    body: `{"query":"query { price(quote: ETH, base: USD) { amount }}"}`,
-  });
-  return res.json();
-}
-
-const Unlock = ({
-  chainId,
-  onSubmit,
-}: {
-  chainId: constants.StarknetChainId;
-  onSubmit: () => void;
-}) => (
-  <Flex m={4} flex={1} flexDirection="column">
-    <Banner
-      pb="20px"
-      title="Register Device"
-      variant="secondary"
-      borderBottom="1px solid"
-      borderColor="gray.700"
-    >
-      It looks like this is your first time using this device with this chain.
-      You will need to register it before you can execute transactions.
-      <Flex justify="center" mt="12px">
-        <Network chainId={chainId} />
-      </Flex>
-    </Banner>
-    <Flex my={2} flex={1} flexDirection="column" gap="10px">
-      <HStack
-        alignItems="center"
-        spacing="12px"
-        bgColor="gray.700"
-        py="11px"
-        px="15px"
-        borderRadius="8px"
-        justifyContent="space-between"
-      >
-        <HStack>
-          <Text
-            textTransform="uppercase"
-            fontSize={11}
-            fontWeight={700}
-            color="gray.100"
-          >
-            Register Device
-          </Text>
-          <InfoIcon />
-        </HStack>
-      </HStack>
-      <Footer
-        onSubmit={onSubmit}
-        onCancel={() => {
-          if (window.opener) {
-            window.close();
-          }
-        }}
-        action="Register"
-      ></Footer>
-    </Flex>
-  </Flex>
-);
-
-const Fees = ({
-  chainId,
-  fees,
-}: {
-  chainId: constants.StarknetChainId;
-  fees?: { base: number.BigNumberish; max: number.BigNumberish };
-}) => {
-  const [formattedFee, setFormattedFee] = useState<{
-    base: string;
-    max: string;
-  }>();
-  useEffect(() => {
-    if (!fees) {
-      return;
-    }
-
-    async function compute() {
-      if (chainId === constants.StarknetChainId.MAINNET) {
-        let dollarUSLocale = Intl.NumberFormat("en-US");
-        const { data } = await fetchEthPrice();
-        const usdeth = number.toBN(data.price.amount * 100);
-        const overallFee = fees.base.mul(usdeth).toString();
-        const suggestedMaxFee = fees.max.mul(usdeth).toString();
-        setFormattedFee({
-          base: `~$${dollarUSLocale.format(
-            parseFloat(formatUnits(overallFee, 20)),
-          )}`,
-          max: `~$${dollarUSLocale.format(
-            parseFloat(formatUnits(suggestedMaxFee, 20)),
-          )}`,
-        });
-        return;
-      }
-
-      setFormattedFee(
-        fees.max.gt(number.toBN(10000000000000))
-          ? {
-            base: `~${parseFloat(
-              formatUnits(fees.base.toString(), 18),
-            ).toFixed(5)} eth`,
-            max: `~${parseFloat(formatUnits(fees.max.toString(), 18)).toFixed(
-              5,
-            )} eth`,
-          }
-          : {
-            base: "<0.00001 eth",
-            max: "<0.00001 eth",
-          },
-      );
-    }
-    compute();
-  }, [chainId, fees]);
-
-  return (
-    <HStack
-      alignItems="center"
-      spacing="12px"
-      bgColor="gray.700"
-      py="11px"
-      px="15px"
-      borderRadius="8px"
-      justifyContent="space-between"
-    >
-      <HStack>
-        <Text
-          textTransform="uppercase"
-          fontSize={11}
-          fontWeight={700}
-          color="gray.100"
-        >
-          Network Fees
-        </Text>
-        <InfoIcon />
-      </HStack>
-      <VStack alignItems="flex-end">
-        {formattedFee ? (
-          <>
-            <Text fontSize={13}>{formattedFee.base}</Text>
-            <Text fontSize={11} color="gray.200" mt="1px !important">
-              Max: {formattedFee.max}
-            </Text>
-          </>
-        ) : (
-          <Spinner />
-        )}
-      </VStack>
-    </HStack>
-  );
-};
+import Register from "components/Register";
+import Fees from "components/Fees";
 
 const Execute: NextPage = () => {
   const [registerData, setRegisterData] = useState<RegisterData>();
@@ -406,6 +249,13 @@ const Execute: NextPage = () => {
     }
   }, [controller, execute, nonce, params, url]);
 
+  if (error) {
+    return <>
+      <Header address={controller.address} />
+      <div>{error.message}</div>
+    </>
+  }
+
   if (!url || !params || !controller) {
     return <Header address={controller.address} />;
   }
@@ -414,7 +264,7 @@ const Execute: NextPage = () => {
     return (
       <>
         <Header address={controller.address} />
-        <Unlock chainId={params.chainId} onSubmit={onRegister} />
+        <Register chainId={params.chainId} onSubmit={onRegister} />
       </>
     );
   }
