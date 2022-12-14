@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { Flex, FormControl } from "@chakra-ui/react";
+import { Flex, Text, VStack, FormControl } from "@chakra-ui/react";
 import { Formik, Form, Field, FieldInputProps } from "formik";
 import { Policy } from "@cartridge/controller";
 
@@ -64,7 +64,7 @@ const Session = ({
   );
 
   return (
-    <Flex m={4} flex={1} flexDirection="column" gap="10px">
+    <Flex flex={1} flexDirection="column" gap="10px">
       <Formik
         enableReinitialize={true}
         initialValues={initialValues}
@@ -75,10 +75,22 @@ const Session = ({
             css={css`
               display: flex;
               flex-direction: column;
-              height: 100%;
             `}
           >
-            <Flex flex={1} direction="column" gap="12px">
+            <Flex
+              direction="column"
+              gap="1px"
+              borderRadius="6px"
+              overflow="hidden"
+            >
+              <VStack align="flex-start" p="12px" bgColor="gray.700">
+                <Text variant="ibm-upper-bold" color="gray.200" fontSize="10px">
+                  Actions
+                </Text>
+                <Text fontSize="11px" color="gray.200">
+                  Allow controller to execute following actions on your behalf
+                </Text>
+              </VStack>
               {!isLoading && (
                 <>
                   <CallFields chainId={chainId} policies={policies} />

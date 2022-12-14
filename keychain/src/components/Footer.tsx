@@ -42,7 +42,7 @@ const Footer = ({
       )}
       <Button
         size="lg"
-        disabled={isDisabled}
+        disabled={isDisabled || isLoading}
         isLoading={isLoading}
         w={["100%", "100%", "200px"]}
         type={onSubmit ? "button" : "submit"}

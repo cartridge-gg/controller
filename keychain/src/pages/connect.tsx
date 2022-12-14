@@ -8,23 +8,26 @@ import {
   HStack,
   Flex,
   Text,
+  Spacer,
   Box,
   Container,
 } from "@chakra-ui/react";
 
-import Banner from "components/Banner";
 import { Header } from "components/Header";
 import Session from "components/Session";
-import { useRequests } from "hooks/account";
 import { useUrlPolicys } from "hooks/policy";
 import { constants } from "starknet";
 import Storage from "utils/storage";
 import selectors from "utils/selectors";
-import Controller, { RegisterData, VERSION } from "utils/controller";
-import ConnectIcon from "../../../ui/src/components/icons/Connect";
+import Controller, { VERSION } from "utils/controller";
+import FingerprintIcon from "@cartridge/ui/components/icons/Fingerprint";
+import InfoIcon from "@cartridge/ui/src/components/icons/Info";
+import StarknetIcon from "@cartridge/ui/components/icons/Starknet";
+import LaptopIcon from "@cartridge/ui/components/icons/Laptop";
 
 const Connect: NextPage = () => {
   const [maxFee, setMaxFee] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [registrationRequired, setRegistrationRequired] = useState(false);
   const { chainId, validPolicys, invalidPolicys, isValidating } =
     useUrlPolicys();
@@ -42,8 +45,12 @@ const Connect: NextPage = () => {
     }
 
     const account = controller.account(chainId);
-    if (!account?.registered) {
-      setRegistrationRequired(true);
+    if (account) {
+      const { registered, deploying } = account;
+      if (!registered && !deploying) {
+        setRegistrationRequired(true);
+        return;
+      }
     }
   }, [router, controller, chainId]);
 
@@ -79,17 +86,25 @@ const Connect: NextPage = () => {
     <>
       <Header address={controller.address} />
       <Container w={["full", "full", "400px"]} centerContent>
-        <Flex w="full" m={4} flexDirection="column">
-          <VStack gap="12px">
+        <Flex w="full" m={4} flexDirection="column" gap="18px">
+          <VStack gap="5px">
             <Circle bgColor="gray.700" size="48px">
-              <ConnectIcon boxSize="20px" />
+              <FingerprintIcon boxSize="30px" />
             </Circle>
             <Text fontSize="17px" fontWeight="bold">
-              Connect Controller
+              Create Session
             </Text>
             <Text fontSize="13px" color="gray.200" align="center">
               {origin} is requesting to connect to your Cartridge Controller
             </Text>
+            <HStack py="7px" px="12px" bgColor="gray.700" borderRadius="full">
+              <StarknetIcon boxSize="14px" />
+              <Text fontSize="10px" variant="ibm-upper-bold">
+                {chainId === constants.StarknetChainId.MAINNET
+                  ? "mainnet"
+                  : "testnet"}
+              </Text>
+            </HStack>
           </VStack>
           {registrationRequired && (
             <VStack
@@ -100,34 +115,24 @@ const Connect: NextPage = () => {
               spacing="1px"
             >
               <VStack bgColor="gray.700" w="full" p="12px" align="flex-start">
-                <Text variant="ibm-upper-bold" fontSize="10px">
+                <Text variant="ibm-upper-bold" fontSize="10px" color="gray.200">
                   Register New device
                 </Text>
                 <Text fontSize="11px" color="gray.200">
-                  Allow this device to execute transactions
+                  Authorize your controller to perform actions on this device
                 </Text>
               </VStack>
-              <Flex m="0" w="full" gap="1px">
-                <HStack flex="1" bgColor="gray.600" py="7px" px="12px">
-                  <Text fontSize="13px">My device</Text>
-                </HStack>
-                <HStack bgColor="gray.600" py="7px" px="12px">
-                  <Text
-                    fontSize="10px"
-                    variant="ibm-upper-bold"
-                    color="gray.200"
-                  >
-                    {chainId === constants.StarknetChainId.MAINNET
-                      ? "mainnet"
-                      : "testnet"}
-                  </Text>
-                </HStack>
-              </Flex>
+              <HStack bgColor="gray.600" py="7px" px="12px" w="full">
+                <LaptopIcon boxSize="18px" />
+                <Text fontSize="13px">New Device</Text>
+                <Spacer />
+                <InfoIcon color="gray.200" boxSize="12px" />
+              </HStack>
             </VStack>
           )}
           <Session
             chainId={chainId}
-            action={"CONNECT"}
+            action={"CREATE"}
             onCancel={() => {
               if (window.opener) {
                 window.close();
@@ -136,7 +141,7 @@ const Connect: NextPage = () => {
             onSubmit={connect}
             policies={validPolicys}
             invalidPolicys={invalidPolicys}
-            isLoading={isValidating}
+            isLoading={isValidating || isLoading}
             maxFee={maxFee}
             setMaxFee={setMaxFee}
           />
