@@ -15,6 +15,7 @@ import {
 
 import { Header } from "components/Header";
 import Session from "components/Session";
+import { useRequests } from "hooks/account";
 import { useUrlPolicys } from "hooks/policy";
 import { constants } from "starknet";
 import Storage from "utils/storage";
@@ -30,6 +31,7 @@ const Connect: NextPage = () => {
   const [registrationRequired, setRegistrationRequired] = useState(false);
   const { chainId, validPolicys, invalidPolicys, isValidating } =
     useUrlPolicys();
+  const { origin } = useRequests();
   const controller = useMemo(() => Controller.fromStore(), []);
   const account = controller?.account(chainId);
   const router = useRouter();
