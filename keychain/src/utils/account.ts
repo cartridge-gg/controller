@@ -34,6 +34,16 @@ class Account extends BaseAccount {
     this.selector = selectors["0.0.3"].deployment(address, chainId);
     const state = Storage.get(this.selector);
 
+    if (state) {
+      this.deployed = state.deployed;
+      this.registered = state.registered;
+    }
+
+    if (!state || Date.now() - state.syncing > 5000) {
+      this.sync();
+      return;
+    }
+
     this.deployed = state.deployed;
     this.registered = state.registered;
 
