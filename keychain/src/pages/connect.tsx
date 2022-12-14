@@ -27,11 +27,11 @@ import LaptopIcon from "@cartridge/ui/components/icons/Laptop";
 
 const Connect: NextPage = () => {
   const [maxFee, setMaxFee] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [registrationRequired, setRegistrationRequired] = useState(false);
   const { chainId, validPolicys, invalidPolicys, isValidating } =
     useUrlPolicys();
   const controller = useMemo(() => Controller.fromStore(), []);
+  const account = controller?.account(chainId);
   const router = useRouter();
 
   useEffect(() => {
@@ -44,15 +44,13 @@ const Connect: NextPage = () => {
       return;
     }
 
-    const account = controller.account(chainId);
     if (account) {
-      const { registered, deploying } = account;
-      if (!registered && !deploying) {
+      if (!account.deploymentTx()) {
         setRegistrationRequired(true);
         return;
       }
     }
-  }, [router, controller, chainId]);
+  }, [router, controller, account]);
 
   const connect = useCallback(
     async (values, actions) => {
@@ -141,7 +139,7 @@ const Connect: NextPage = () => {
             onSubmit={connect}
             policies={validPolicys}
             invalidPolicys={invalidPolicys}
-            isLoading={isValidating || isLoading}
+            isLoading={isValidating}
             maxFee={maxFee}
             setMaxFee={setMaxFee}
           />
