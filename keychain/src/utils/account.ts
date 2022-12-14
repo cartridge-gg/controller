@@ -5,6 +5,7 @@ import {
   Account as BaseAccount,
   RpcProvider,
   SignerInterface,
+  GetTransactionReceiptResponse,
   Call,
   EstimateFeeDetails,
   EstimateFee,
@@ -18,6 +19,7 @@ class Account extends BaseAccount {
   private rpc: RpcProvider;
   private selector: string;
   deployed: boolean = false;
+  deploying: boolean = false;
   registered: boolean = false;
 
   constructor(
@@ -45,6 +47,8 @@ class Account extends BaseAccount {
     });
 
     try {
+      this.deploying = await this.isDeploying();
+
       const classHash = await this.rpc.getClassHashAt(this.address, "latest");
       Storage.update(this.selector, {
         classHash,
@@ -82,6 +86,19 @@ class Account extends BaseAccount {
     Storage.update(this.selector, {
       syncing: false,
     });
+  }
+
+  async isDeploying(): Promise<boolean> {
+    const deployTx = Storage.get(this.selector).deployTx;
+    if (deployTx && !this.deployed) {
+      const receipt = (await this.rpc.getTransactionReceipt(
+        deployTx,
+      )) as GetTransactionReceiptResponse;
+      if (receipt.status === "RECEIVED" || receipt.status === "PENDING") {
+        return true;
+      }
+    }
+    return false;
   }
 
   async estimateInvokeFee(
