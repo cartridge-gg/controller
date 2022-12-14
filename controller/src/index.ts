@@ -1,15 +1,25 @@
 import qs from "query-string";
 import { AccountInterface, constants, number, RpcProvider } from "starknet";
-import { AsyncMethodReturns, Connection, connectToChild } from '@cartridge/penpal';
+import {
+  AsyncMethodReturns,
+  Connection,
+  connectToChild,
+} from "@cartridge/penpal";
 
 import DeviceAccount from "./device";
 import { Session, Keychain, Policy } from "./types";
 
 export const providers = {
-  [constants.StarknetChainId.TESTNET]: new RpcProvider({ nodeUrl: "https://starknet-goerli2.cartridge.gg/rpc/v0.2" }),
-  [constants.StarknetChainId.TESTNET2]: new RpcProvider({ nodeUrl: "https://starknet-goerli2.cartridge.gg/rpc/v0.2" }),
-  [constants.StarknetChainId.MAINNET]: new RpcProvider({ nodeUrl: "https://starknet.cartridge.gg/rpc/v0.2" }),
-}
+  [constants.StarknetChainId.TESTNET]: new RpcProvider({
+    nodeUrl: "https://starknet-goerli2.cartridge.gg/rpc/v0.2",
+  }),
+  [constants.StarknetChainId.TESTNET2]: new RpcProvider({
+    nodeUrl: "https://starknet-goerli2.cartridge.gg/rpc/v0.2",
+  }),
+  [constants.StarknetChainId.MAINNET]: new RpcProvider({
+    nodeUrl: "https://starknet.cartridge.gg/rpc/v0.2",
+  }),
+};
 
 class Controller {
   private selector = "cartridge-messenger";
@@ -36,7 +46,7 @@ class Controller {
     }
 
     if (typeof document === "undefined") {
-      return
+      return;
     }
 
     const iframe = document.createElement("iframe");
@@ -45,48 +55,53 @@ class Controller {
     iframe.style.opacity = "0";
     iframe.style.height = "0";
     iframe.style.width = "0";
-    iframe.sandbox.add("allow-scripts")
-    iframe.sandbox.add("allow-same-origin")
-    iframe.allow = "publickey-credentials-get *"
+    iframe.sandbox.add("allow-scripts");
+    iframe.sandbox.add("allow-same-origin");
+    iframe.allow = "publickey-credentials-get *";
 
     if (!!document.hasStorageAccess) {
-      iframe.sandbox.add("allow-storage-access-by-user-activation")
+      iframe.sandbox.add("allow-storage-access-by-user-activation");
     }
 
     if (
-      document.readyState === 'complete' ||
-      document.readyState === 'interactive'
+      document.readyState === "complete" ||
+      document.readyState === "interactive"
     ) {
       document.body.appendChild(iframe);
     } else {
-      document.addEventListener('DOMContentLoaded', () => {
+      document.addEventListener("DOMContentLoaded", () => {
         document.body.appendChild(iframe);
       });
     }
 
     this.connection = connectToChild<Keychain>({
       iframe,
-    })
+    });
 
-    this.connection.promise.then((keychain) =>
-      this.keychain = keychain
-    ).then(() => this.probe())
+    this.connection.promise
+      .then((keychain) => (this.keychain = keychain))
+      .then(() => this.probe());
   }
 
   get account() {
     if (!this.accounts) {
       return;
     }
-    return this.accounts[this.chainId]
+    return this.accounts[this.chainId];
   }
 
   async ready() {
-    return this.connection?.promise.then(() => this.probe()).then((res) => !!res, () => false)
+    return this.connection?.promise
+      .then(() => this.probe())
+      .then(
+        (res) => !!res,
+        () => false
+      );
   }
 
   async probe() {
     if (!this.keychain) {
-      console.error("not ready for connect")
+      console.error("not ready for connect");
       return null;
     }
 
@@ -116,10 +131,10 @@ class Controller {
           {
             url: this.url,
           }
-        )
-      }
+        ),
+      };
     } catch (e) {
-      console.error(e)
+      console.error(e);
       return;
     }
 
@@ -135,21 +150,38 @@ class Controller {
   }
 
   // Register a new device key.
-  async register(username: string, credentialId: string, credential: { x: string, y: string }) {
+  async register(
+    username: string,
+    credentialId: string,
+    credential: { x: string; y: string }
+  ) {
     if (!this.keychain) {
-      console.error("not ready for connect")
+      console.error("not ready for connect");
       return null;
     }
 
     return await this.keychain.register(username, credentialId, credential);
   }
 
-  async login(address: string, credentialId: string, options: {
-    rpId?: string
-    challengeExt?: Buffer
-  }) {
+  saveDeploy(hash: string) {
     if (!this.keychain) {
-      console.error("not ready for connect")
+      console.error("not ready for connect");
+      return null;
+    }
+
+    return this.keychain.saveDeploy(hash);
+  }
+
+  async login(
+    address: string,
+    credentialId: string,
+    options: {
+      rpId?: string;
+      challengeExt?: Buffer;
+    }
+  ) {
+    if (!this.keychain) {
+      console.error("not ready for connect");
       return null;
     }
 
@@ -158,7 +190,7 @@ class Controller {
 
   async provision(address: string, credentialId: string) {
     if (!this.keychain) {
-      console.error("not ready for connect")
+      console.error("not ready for connect");
       return null;
     }
 
@@ -171,14 +203,14 @@ class Controller {
     }
 
     if (!this.keychain) {
-      console.error("not ready for connect")
+      console.error("not ready for connect");
       return;
     }
 
     if (!!document.hasStorageAccess) {
-      const ok = await document.hasStorageAccess()
+      const ok = await document.hasStorageAccess();
       if (!ok) {
-        await document.requestStorageAccess()
+        await document.requestStorageAccess();
       }
     }
 
@@ -217,22 +249,22 @@ class Controller {
         {
           url: this.url,
         }
-      )
-    }
+      ),
+    };
 
     return this.accounts[this.chainId];
   }
 
   async disconnect() {
     if (!this.keychain) {
-      console.error("not ready for disconnect")
+      console.error("not ready for disconnect");
       return null;
     }
 
     if (!!document.hasStorageAccess) {
-      const ok = await document.hasStorageAccess()
+      const ok = await document.hasStorageAccess();
       if (!ok) {
-        await document.requestStorageAccess()
+        await document.requestStorageAccess();
       }
     }
 
@@ -241,7 +273,7 @@ class Controller {
 
   revoke(origin: string, policy: Policy[]) {
     if (!this.keychain) {
-      console.error("not ready for disconnect")
+      console.error("not ready for disconnect");
       return null;
     }
 
@@ -250,17 +282,21 @@ class Controller {
 
   async approvals(origin: string): Promise<Session | undefined> {
     if (!this.keychain) {
-      console.error("not ready for disconnect")
+      console.error("not ready for disconnect");
       return;
     }
 
-    return this.keychain.approvals(origin)
+    return this.keychain.approvals(origin);
   }
 }
 
 const BASE = number.toBN(2).pow(number.toBN(86));
 
-export function split(n: number.BigNumberish): { x: number.BigNumberish; y: number.BigNumberish; z: number.BigNumberish } {
+export function split(n: number.BigNumberish): {
+  x: number.BigNumberish;
+  y: number.BigNumberish;
+  z: number.BigNumberish;
+} {
   const x = n.mod(BASE);
   const y = n.div(BASE).mod(BASE);
   const z = n.div(BASE).div(BASE);

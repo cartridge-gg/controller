@@ -44,10 +44,10 @@ const Fees = ({
   fees,
 }: {
   chainId: constants.StarknetChainId;
-  fees?: EstimateFee;
+  fees?: { base: number.BigNumberish; max: number.BigNumberish };
 }) => {
   const [formattedFee, setFormattedFee] = useState<{
-    fee: string;
+    base: string;
     max: string;
   }>();
   useEffect(() => {
@@ -60,13 +60,13 @@ const Fees = ({
         let dollarUSLocale = Intl.NumberFormat("en-US");
         const { data } = await fetchEthPrice();
         const usdeth = number.toBN(data.price.amount * 100);
-        const overallFee = fees.overall_fee.mul(usdeth).toString();
-        const suggestedMaxFee = fees.suggestedMaxFee.mul(usdeth).toString();
+        const overallFee = fees.base.mul(usdeth).toString();
+        const suggestedMaxFee = fees.max.mul(usdeth).toString();
         setFormattedFee({
-          fee: `~${dollarUSLocale.format(
+          base: `~$${dollarUSLocale.format(
             parseFloat(formatUnits(overallFee, 20)),
           )}`,
-          max: `~${dollarUSLocale.format(
+          max: `~$${dollarUSLocale.format(
             parseFloat(formatUnits(suggestedMaxFee, 20)),
           )}`,
         });
@@ -74,15 +74,19 @@ const Fees = ({
       }
 
       setFormattedFee(
-        fees.suggestedMaxFee.gt(number.toBN(10000000000000))
+        fees.max.gt(number.toBN(10000000000000))
           ? {
-              fee: `~{parseFloat(formatUnits(fees.overall_fee.toString(), 18)).toFixed(5)} eth`,
-              max: `~{parseFloat(formatUnits(fees.suggestedMaxFee.toString(), 18)).toFixed(5)} eth`,
-            }
+            base: `~${parseFloat(
+              formatUnits(fees.base.toString(), 18),
+            ).toFixed(5)} eth`,
+            max: `~${parseFloat(formatUnits(fees.max.toString(), 18)).toFixed(
+              5,
+            )} eth`,
+          }
           : {
-              fee: "<0.00001 eth",
-              max: "<0.00001 eth",
-            },
+            base: "<0.00001 eth",
+            max: "<0.00001 eth",
+          },
       );
     }
     compute();
@@ -112,7 +116,7 @@ const Fees = ({
       <VStack alignItems="flex-end">
         {formattedFee ? (
           <>
-            <Text fontSize={13}>{formattedFee.fee}</Text>
+            <Text fontSize={13}>{formattedFee.base}</Text>
             <Text fontSize={11} color="gray.200" mt="1px !important">
               Max: {formattedFee.max}
             </Text>
@@ -128,7 +132,10 @@ const Fees = ({
 const Execute: NextPage = () => {
   const [registerData, setRegisterData] = useState<RegisterData>();
   const [nonce, setNonce] = useState<BigNumber>();
-  const [fees, setFees] = useState<EstimateFee>();
+  const [fees, setFees] = useState<{
+    base: number.BigNumberish;
+    max: number.BigNumberish;
+  }>();
   const [error, setError] = useState<Error>();
   const controller = useMemo(() => Controller.fromStore(), []);
   const router = useRouter();
@@ -156,6 +163,7 @@ const Execute: NextPage = () => {
       router.query.calls as string,
     );
     const transactions = Array.isArray(calls) ? calls : [calls];
+    const calldata = transaction.fromCallsToExecuteCalldata(transactions);
 
     const account = controller.account(chainId);
     if (!account?.registered) {
@@ -167,21 +175,46 @@ const Execute: NextPage = () => {
 
     return {
       calls: transactions,
+      calldata,
       maxFee,
       chainId,
     };
   }, [controller, router.query]);
 
   const execute = useCallback(
-    (calls: StarknetCall[]) =>
-      normalize(
+    (calls: StarknetCall[]) => {
+      const account = controller.account(params.chainId);
+      return normalize(
         validate((controller) => {
           return async () => {
-            return await controller.account(params.chainId).execute(calls);
+            if (account.registered) {
+              return await controller
+                .account(params.chainId)
+                .execute(calls, null, {
+                  maxFee: fees.max,
+                  nonce,
+                  version: hash.transactionVersion,
+                });
+            }
+
+            return await Promise.all([
+              controller
+                .account(params.chainId)
+                .invokeFunction(registerData.invoke.invocation, {
+                  ...registerData.invoke.details,
+                  nonce: registerData.invoke.details.nonce!,
+                }),
+              controller.account(params.chainId).execute(calls, null, {
+                maxFee: fees.max,
+                nonce: nonce.add(number.toBN(1)),
+                version: hash.transactionVersion,
+              }),
+            ]);
           };
         }),
-      ),
-    [params],
+      );
+    },
+    [controller, fees, nonce, params, registerData],
   );
 
   // Get the nonce
@@ -207,8 +240,15 @@ const Execute: NextPage = () => {
     async function register() {
       const account = controller.account(params.chainId);
       if (account.registered) {
+        if (params.maxFee) {
+          setFees({
+            base: number.toBN(params.maxFee),
+            max: number.toBN(params.maxFee),
+          });
+          return;
+        }
         const fees = await account.estimateInvokeFee(params.calls, { nonce });
-        setFees(fees);
+        setFees({ base: fees.overall_fee, max: fees.suggestedMaxFee });
       } else if (!account.registered && registerData) {
         try {
           const nextNonce = number.toHex(nonce.add(number.toBN(1)));
@@ -224,14 +264,13 @@ const Execute: NextPage = () => {
             params.calls,
             signerDetails,
           );
-          const calldata = transaction.fromCallsToExecuteCalldata(params.calls);
 
           const estimates = (await estimateFeeBulk(params.chainId, [
             registerData.invoke,
             {
               invocation: {
                 contractAddress: controller.address,
-                calldata,
+                calldata: params.calldata,
                 signature,
               },
               details: {
@@ -264,7 +303,7 @@ const Execute: NextPage = () => {
           );
 
           fees.suggestedMaxFee = stark.estimatedFeeToMaxFee(fees.overall_fee);
-          setFees(fees);
+          setFees({ base: fees.overall_fee, max: fees.suggestedMaxFee });
         } catch (e) {
           console.error(e);
           setError(e);
@@ -279,8 +318,7 @@ const Execute: NextPage = () => {
   useEffect(() => {
     if (!controller) {
       router.replace(
-        `${
-          process.env.NEXT_PUBLIC_ADMIN_URL
+        `${process.env.NEXT_PUBLIC_ADMIN_URL
         }/login?redirect_uri=${encodeURIComponent(window.location.href)}`,
       );
       return;
@@ -288,18 +326,29 @@ const Execute: NextPage = () => {
   }, [router, controller]);
 
   const onSubmit = useCallback(async () => {
-    const res = await execute(params.calls)(url.href)();
+    await execute(params.calls)(url.href)();
     // We set the transaction hash which the keychain instance
-    // polls for.
+    // polls for. We use a manually computed hash to identify
+    // the transaction since the keychain estimate fee might be differen.
     Storage.set(
-      selectors[VERSION].transaction(controller.address, res.transaction_hash),
+      selectors[VERSION].transaction(
+        controller.address,
+        hash.calculateTransactionHash(
+          controller.address,
+          hash.transactionVersion,
+          params.calldata,
+          params.maxFee,
+          params.chainId,
+          nonce,
+        ),
+      ),
       true,
     );
 
     if (window.opener) {
       window.close();
     }
-  }, [controller, execute, params, url]);
+  }, [controller, execute, nonce, params, url]);
 
   if (!url || !params || !controller) {
     return <Header address={controller.address} />;

@@ -1,3 +1,4 @@
+import { time } from "console";
 import {
   constants,
   hash,
@@ -5,6 +6,10 @@ import {
   Account as BaseAccount,
   RpcProvider,
   SignerInterface,
+  GetTransactionReceiptResponse,
+  Call,
+  EstimateFeeDetails,
+  EstimateFee,
 } from "starknet";
 
 import { CONTROLLER_CLASS } from "./constants";
@@ -15,6 +20,7 @@ class Account extends BaseAccount {
   private rpc: RpcProvider;
   private selector: string;
   deployed: boolean = false;
+  deploying: boolean = false;
   registered: boolean = false;
 
   constructor(
@@ -27,7 +33,7 @@ class Account extends BaseAccount {
     this.rpc = new RpcProvider({ nodeUrl });
     this.selector = selectors["0.0.3"].deployment(address, chainId);
     const state = Storage.get(this.selector);
-    if (!state || !state.syncing) {
+    if (!state || (Date.now() - state.syncing) > 5000) {
       this.sync();
       return;
     }
@@ -38,10 +44,12 @@ class Account extends BaseAccount {
 
   async sync() {
     Storage.update(this.selector, {
-      syncing: true,
+      syncing: Date.now(),
     });
 
     try {
+      this.deploying = await this.isDeploying();
+
       const classHash = await this.rpc.getClassHashAt(this.address, "latest");
       Storage.update(this.selector, {
         classHash,
@@ -68,17 +76,37 @@ class Account extends BaseAccount {
         },
         "latest",
       );
-      this.registered = res.result[1] === "0x01";
+
+      this.registered = number.toBN(res.result[1]).eq(number.toBN(1));
       Storage.update(this.selector, {
         registered: this.registered,
       });
     } catch (e) {
       /* no-op */
     }
+  }
 
-    Storage.update(this.selector, {
-      syncing: false,
-    });
+  async isDeploying(): Promise<boolean> {
+    const deployTx = Storage.get(this.selector).deployTx;
+    if (deployTx && !this.deployed) {
+      const receipt = (await this.rpc.getTransactionReceipt(
+        deployTx,
+      )) as GetTransactionReceiptResponse;
+      if (receipt.status === "RECEIVED" || receipt.status === "PENDING") {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  async estimateInvokeFee(
+    calls: Call[],
+    details: EstimateFeeDetails = {},
+  ): Promise<EstimateFee> {
+    details.blockIdentifier = details.blockIdentifier
+      ? details.blockIdentifier
+      : "latest";
+    return super.estimateInvokeFee(calls, details);
   }
 
   async getNonce(blockIdentifier?: any): Promise<number.BigNumberish> {
