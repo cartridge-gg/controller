@@ -5,6 +5,7 @@ import {
   Account as BaseAccount,
   RpcProvider,
   SignerInterface,
+  GetTransactionReceiptResponse,
 } from "starknet";
 
 import { CONTROLLER_CLASS } from "./constants";
@@ -79,6 +80,23 @@ class Account extends BaseAccount {
     Storage.update(this.selector, {
       syncing: false,
     });
+  }
+
+  async isDeploying(): Promise<boolean> {
+    const deployTx = Storage.get(this.selector).deployTx;
+    if (!this.deployed && deployTx) {
+      const receipt = (await this.rpc.getTransactionReceipt(
+        deployTx,
+      )) as GetTransactionReceiptResponse;
+      switch (receipt.status) {
+        case "RECEIVED":
+        case "PENDING":
+          return true;
+        default:
+          return false;
+      }
+    }
+    return false;
   }
 
   async getNonce(blockIdentifier?: any): Promise<number.BigNumberish> {

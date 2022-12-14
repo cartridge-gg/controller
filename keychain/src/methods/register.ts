@@ -1,5 +1,5 @@
 import { split } from "@cartridge/controller";
-import { ec, hash, number, shortString } from "starknet";
+import { ec, hash, number, shortString, constants } from "starknet";
 
 import Controller from "utils/controller";
 import { ACCOUNT_CLASS, CONTROLLER_CLASS, PROXY_CLASS } from "utils/constants";
@@ -47,7 +47,22 @@ const register =
   };
 
 const saveDeploy = () => (hash: string) => {
-  console.log(hash);
+  const controller = Controller.fromStore();
+  if (!controller) {
+    throw new Error("no controller");
+  }
+
+  // if (!Storage.get(selectors["0.0.3"].admin(controller.address, origin))) {
+  //   throw new Error("unauthorized");
+  // }
+
+  Storage.update(
+    selectors["0.0.3"].deployment(
+      controller.address,
+      constants.StarknetChainId.TESTNET,
+    ),
+    { deployTx: hash },
+  );
   return;
 };
 
