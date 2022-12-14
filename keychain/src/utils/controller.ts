@@ -18,12 +18,12 @@ import { Policy, Session } from "@cartridge/controller";
 import Storage from "utils/storage";
 
 import Account from "./account";
-import { CONTROLLER_CLASS } from "./constants";
 import { DeviceSigner } from "./signer";
 import WebauthnAccount, { formatAssertion, RawAssertion } from "./webauthn";
 import { getGasPrice } from "./gateway";
 import selectors from "./selectors";
 import migrations from "./migrations";
+import { CLASS_HASHES } from "./hashes";
 
 export const VERSION = "0.0.3";
 
@@ -132,7 +132,7 @@ export default class Controller {
         contractAddress: this.address,
         entrypoint: "executeOnPlugin",
         calldata: [
-          CONTROLLER_CLASS,
+          CLASS_HASHES["0.0.1"].controller,
           hash.getSelector("add_device_key"),
           1,
           this.publicKey,

@@ -2,9 +2,9 @@ import { split } from "@cartridge/controller";
 import { ec, hash, number, shortString, constants } from "starknet";
 
 import Controller from "utils/controller";
-import { ACCOUNT_CLASS, CONTROLLER_CLASS, PROXY_CLASS } from "utils/constants";
 import Storage from "utils/storage";
 import selectors from "utils/selectors";
+import { CLASS_HASHES, PROXY_CLASS } from "utils/hashes";
 
 const register =
   () =>
@@ -23,10 +23,10 @@ const register =
       shortString.encodeShortString(username),
       number.toBN(PROXY_CLASS),
       [
-        number.toBN(ACCOUNT_CLASS),
+        number.toBN(CLASS_HASHES["0.0.1"].account),
         hash.getSelectorFromName("initialize"),
         "9",
-        number.toBN(CONTROLLER_CLASS),
+        number.toBN(CLASS_HASHES["0.0.1"].controller),
         "7",
         x0,
         x1,

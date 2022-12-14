@@ -1,8 +1,6 @@
 import { Flex, HStack, Text } from "@chakra-ui/react";
 
-import {
-  constants,
-} from "starknet";
+import { constants } from "starknet";
 import Banner from "components/Banner";
 import Network from "components/Network";
 import Footer from "components/Footer";
