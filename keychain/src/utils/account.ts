@@ -21,6 +21,7 @@ class Account extends BaseAccount {
   private selector: string;
   deployed: boolean = false;
   registered: boolean = false;
+  pending: boolean = true;
 
   constructor(
     chainId: constants.StarknetChainId,
@@ -36,6 +37,7 @@ class Account extends BaseAccount {
     if (state) {
       this.deployed = state.deployed;
       this.registered = state.registered;
+      this.pending = !state.deployed;
     }
 
     if (!state || Date.now() - state.syncing > 5000) {
@@ -50,6 +52,10 @@ class Account extends BaseAccount {
     });
 
     try {
+      if (!this.deployed) {
+        this.pending = await this.checkPending();
+      }
+
       const classHash = await this.rpc.getClassHashAt(this.address, "latest");
       Storage.update(this.selector, {
         classHash,
@@ -86,7 +92,20 @@ class Account extends BaseAccount {
     }
   }
 
-  deploymentTx(): Promise<string> {
+  async checkPending(): Promise<boolean> {
+    const deployTx = Storage.get(this.selector).deployTx;
+    if (deployTx) {
+      const receipt = (await this.rpc.getTransactionReceipt(
+        deployTx,
+      )) as GetTransactionReceiptResponse;
+      if (receipt.status === "PENDING" || receipt.status === "RECEIVED") {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  deploymentTx(): string {
     return Storage.get(this.selector).deployTx;
   }
 

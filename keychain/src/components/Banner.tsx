@@ -1,27 +1,47 @@
-import React from "react";
-import { Box, Heading, useStyleConfig, StyleProps } from "@chakra-ui/react";
+import { ReactNode } from "react";
+import { VStack, HStack, Text, Circle, StyleProps } from "@chakra-ui/react";
+import StarknetIcon from "@cartridge/ui/components/icons/Starknet";
+import { constants } from "starknet";
 
-const Banner = ({
-  title,
-  variant,
-  children,
-  ...rest
-}: StyleProps & {
+export interface BannerProps {
   title: string;
-  variant?: any;
-  children: React.ReactNode;
-}) => {
-  const styles = useStyleConfig("Banner", { variant });
+  description?: string;
+  icon?: ReactNode;
+  chainId?: constants.StarknetChainId;
+}
+
+export const Banner = ({
+  title,
+  description,
+  icon,
+  chainId,
+  ...rest
+}: BannerProps & StyleProps) => {
   return (
-    <Box __css={styles} textAlign={"center"} {...rest}>
-      <Heading fontSize="14px" textStyle="heading">
+    <VStack gap="5px" {...rest}>
+      {icon && (
+        <Circle bgColor="gray.700" size="48px">
+          {icon}
+        </Circle>
+      )}
+      <Text fontSize="17px" fontWeight="bold">
         {title}
-      </Heading>
-      <Box mt={3} fontSize="12px" color="#888">
-        {children}
-      </Box>
-    </Box>
+      </Text>
+      {description && (
+        <Text fontSize="13px" color="gray.200" align="center" pb="18px">
+          {description}
+        </Text>
+      )}
+      {chainId && (
+        <HStack py="7px" px="12px" bgColor="gray.700" borderRadius="full">
+          <StarknetIcon boxSize="14px" />
+          <Text fontSize="10px" variant="ibm-upper-bold">
+            {chainId === constants.StarknetChainId.MAINNET
+              ? "mainnet"
+              : "testnet"}
+          </Text>
+        </HStack>
+      )}
+    </VStack>
   );
 };
-
-export default Banner;

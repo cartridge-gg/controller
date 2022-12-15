@@ -21,10 +21,11 @@ import { constants } from "starknet";
 import Storage from "utils/storage";
 import selectors from "utils/selectors";
 import Controller, { VERSION } from "utils/controller";
-import FingerprintIcon from "@cartridge/ui/components/icons/Fingerprint";
+import PlugIcon from "@cartridge/ui/components/icons/Plug";
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
-import StarknetIcon from "@cartridge/ui/components/icons/Starknet";
 import LaptopIcon from "@cartridge/ui/components/icons/Laptop";
+
+import { Banner } from "components/Banner";
 
 const Connect: NextPage = () => {
   const [maxFee, setMaxFee] = useState(null);
@@ -47,7 +48,7 @@ const Connect: NextPage = () => {
     }
 
     if (account) {
-      if (!account.deploymentTx()) {
+      if (!account.registered && !account.pending) {
         setRegistrationRequired(true);
         return;
       }
@@ -67,6 +68,16 @@ const Connect: NextPage = () => {
 
         const approvals = validPolicys.filter((_, i) => values[i]);
         controller.approve(origin, approvals, maxFee);
+
+        // show pending screen if controller still being deployed
+        if (account.pending) {
+          const txn = { name: "Register Device", hash: account.deploymentTx() };
+          router.push(
+            `/pending?txns=${encodeURIComponent(JSON.stringify([txn]))}`,
+          );
+          return;
+        }
+
         if (window.opener) {
           window.close();
         }
@@ -75,7 +86,7 @@ const Connect: NextPage = () => {
       }
       actions.setSubmitting(false);
     },
-    [validPolicys, controller, maxFee, chainId, registrationRequired],
+    [validPolicys, controller, maxFee, chainId, registrationRequired, account],
   );
 
   if (!controller) {
@@ -87,25 +98,12 @@ const Connect: NextPage = () => {
       <Header address={controller.address} />
       <Container w={["full", "full", "400px"]} centerContent>
         <Flex w="full" m={4} flexDirection="column" gap="18px">
-          <VStack gap="5px">
-            <Circle bgColor="gray.700" size="48px">
-              <FingerprintIcon boxSize="30px" />
-            </Circle>
-            <Text fontSize="17px" fontWeight="bold">
-              Create Session
-            </Text>
-            <Text fontSize="13px" color="gray.200" align="center">
-              {origin} is requesting to connect to your Cartridge Controller
-            </Text>
-            <HStack py="7px" px="12px" bgColor="gray.700" borderRadius="full">
-              <StarknetIcon boxSize="14px" />
-              <Text fontSize="10px" variant="ibm-upper-bold">
-                {chainId === constants.StarknetChainId.MAINNET
-                  ? "mainnet"
-                  : "testnet"}
-              </Text>
-            </HStack>
-          </VStack>
+          <Banner
+            title="Create Session"
+            description={`${origin} is requesting to connect to your Cartridge Controller`}
+            icon={<PlugIcon boxSize="30px" />}
+            chainId={chainId}
+          />
           {registrationRequired && (
             <VStack
               w="full"

@@ -116,7 +116,7 @@ const Session = ({
             <Footer
               isLoading={props.isSubmitting || isLoading}
               onCancel={onCancel}
-              action={action}
+              confirmText={action}
             />
           </Form>
         )}
