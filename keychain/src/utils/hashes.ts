@@ -10,4 +10,12 @@ export const CLASS_HASHES = {
     legacyController:
       "0x58e648a242085d5ff1e8f92a6b91057826639a82b23798998d40b61a27bca85",
   },
+  ["latest"]: {
+    account:
+      "0x627850d612539b1258f64f8d76b0392944bb2886ed891b93e2bff9223317a91",
+    controller:
+      "0x6bcb2ecc68f478bd0546c451a0820ce19e2d562e3cfcb5906eede15aa81cc42",
+    legacyController:
+      "0x58e648a242085d5ff1e8f92a6b91057826639a82b23798998d40b61a27bca85",
+  },
 };

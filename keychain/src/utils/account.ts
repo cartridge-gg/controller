@@ -1,4 +1,3 @@
-import { time } from "console";
 import {
   constants,
   hash,
@@ -6,7 +5,6 @@ import {
   Account as BaseAccount,
   RpcProvider,
   SignerInterface,
-  GetTransactionReceiptResponse,
   Call,
   EstimateFeeDetails,
   EstimateFee,
@@ -21,6 +19,7 @@ class Account extends BaseAccount {
   private selector: string;
   deployed: boolean = false;
   registered: boolean = false;
+  updated: boolean = true;
 
   constructor(
     chainId: constants.StarknetChainId,
@@ -56,6 +55,10 @@ class Account extends BaseAccount {
         deployed: true,
       });
       this.deployed = true;
+
+      if (classHash !== CLASS_HASHES["latest"].account) {
+        this.updated = false;
+      }
 
       const nonce = await this.rpc.getNonceForAddress(this.address, "latest");
       Storage.update(this.selector, {
