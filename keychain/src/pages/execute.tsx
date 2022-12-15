@@ -263,7 +263,7 @@ const Execute: NextPage = () => {
     return <Header address={controller.address} />;
   }
 
-  if (!controller.account(params.chainId).registered && !registerData) {
+  if (!controller.account(params.chainId).deploymentTx() && !registerData) {
     return (
       <>
         <Header address={controller.address} />

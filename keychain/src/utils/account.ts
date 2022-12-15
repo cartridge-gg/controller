@@ -42,9 +42,6 @@ class Account extends BaseAccount {
       this.sync();
       return;
     }
-
-    this.deployed = state.deployed;
-    this.registered = state.registered;
   }
 
   async sync() {

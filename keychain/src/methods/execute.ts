@@ -63,6 +63,7 @@ const execute =
     } else {
       const missing = diff(policies, session.policies);
       if (missing.length > 0) {
+        console.error({ requested: policies, approved: session.policies });
         throw new MissingPolicys(missing);
       }
     }
