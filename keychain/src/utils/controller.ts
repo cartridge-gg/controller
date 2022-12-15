@@ -76,7 +76,7 @@ export default class Controller {
       ),
       [constants.StarknetChainId.TESTNET2]: new Account(
         constants.StarknetChainId.TESTNET2,
-        process.env.NEXT_PUBLIC_RPC_GOERLI,
+        process.env.NEXT_PUBLIC_RPC_GOERLI2,
         address,
         this.signer,
       ),
