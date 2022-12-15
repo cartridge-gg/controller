@@ -8,8 +8,7 @@ import {
   Signer,
   typedData,
 } from "starknet";
-
-import { CONTROLLER_CLASS } from "./constants";
+import { CLASS_HASHES } from "./hashes";
 
 export class DeviceSigner extends Signer {
   constructor(keyPair: KeyPair) {
@@ -24,7 +23,7 @@ export class DeviceSigner extends Signer {
     const sig = await super.signTransaction(calls, transactionsDetail, abis);
     const pub = await this.getPubKey();
     return [
-      number.toBN(CONTROLLER_CLASS).toString(),
+      number.toBN(CLASS_HASHES["0.0.1"].controller).toString(),
       number.toBN(pub).toString(),
       ...(sig as string[]),
     ];
@@ -37,7 +36,7 @@ export class DeviceSigner extends Signer {
     const sig = await super.signMessage(typedData, accountAddress);
     const pub = await this.getPubKey();
     return [
-      number.toBN(CONTROLLER_CLASS).toString(),
+      number.toBN(CLASS_HASHES["0.0.1"].controller).toString(),
       number.toBN(pub).toString(),
       ...(sig as string[]),
     ];
