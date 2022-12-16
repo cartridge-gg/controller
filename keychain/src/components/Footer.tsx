@@ -2,18 +2,24 @@ import { Button, Flex, Spacer } from "@chakra-ui/react";
 import { ReactNode } from "react";
 
 const Footer = ({
-  action,
   children,
+  confirmText = "Confirm",
+  cancelText = "Cancel",
+  showCancel = true,
+  showConfirm = true,
   isDisabled = false,
   isLoading = false,
-  onSubmit,
+  onConfirm,
   onCancel,
 }: {
-  action: string;
+  confirmText?: string;
+  cancelText?: string;
+  showCancel?: boolean;
+  showConfirm?: boolean;
   children?: ReactNode;
   isDisabled?: boolean;
   isLoading?: boolean;
-  onSubmit?: () => void;
+  onConfirm?: () => void;
   onCancel?: () => void;
 }) => (
   <Flex
@@ -30,26 +36,28 @@ const Footer = ({
     <Spacer borderBottom="1px solid" borderColor="gray.700" />
     {children}
     <Flex gap="10px" justify="flex-end">
-      {onCancel && (
+      {showCancel && (
         <Button
           variant="secondary600"
           size="lg"
           w={["100%", "100%", "200px"]}
           onClick={onCancel}
         >
-          CANCEL
+          {cancelText}
         </Button>
       )}
-      <Button
-        size="lg"
-        disabled={isDisabled || isLoading}
-        isLoading={isLoading}
-        w={["100%", "100%", "200px"]}
-        type={onSubmit ? "button" : "submit"}
-        onClick={onSubmit}
-      >
-        {action}
-      </Button>
+      {showConfirm && (
+        <Button
+          size="lg"
+          disabled={isDisabled || isLoading}
+          isLoading={isLoading}
+          w={["100%", "100%", "200px"]}
+          type={onConfirm ? "button" : "submit"}
+          onClick={onConfirm}
+        >
+          {confirmText}
+        </Button>
+      )}
     </Flex>
   </Flex>
 );

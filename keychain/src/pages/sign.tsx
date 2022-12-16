@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 
 import { typedData as snTypedData, shortString } from "starknet";
 
-import Banner from "components/Banner";
+import { Banner } from "components/Banner";
 import ButtonBar from "components/ButtonBar";
 import Details from "components/Details";
 import { Header } from "components/Header";
@@ -140,9 +140,7 @@ const Sign: NextPage = () => {
       <Flex flexDirection="column" h="100%">
         <Header address={controller.address} />
         <Flex flexDirection="column" p={["3.5", "6"]} flex="1">
-          <Banner title="Signature Request">
-            <></>
-          </Banner>
+          <Banner title="Signature Request"></Banner>
           <Details header={DetailsHeader(headerData)}>
             {MessageContent(messageData)}
             {DetailsTransaction({

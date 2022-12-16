@@ -17,7 +17,7 @@ import {
   stark,
 } from "starknet";
 import Storage from "utils/storage";
-import Banner from "components/Banner";
+import { Banner } from "components/Banner";
 import Network from "components/Network";
 import { Call } from "components/Call";
 import Footer from "components/Footer";
@@ -27,6 +27,7 @@ import { BigNumber } from "ethers";
 import selectors from "utils/selectors";
 import Register from "components/Register";
 import Fees from "components/Fees";
+import JoystickIcon from "@cartridge/ui/components/icons/Joystick";
 
 const Execute: NextPage = () => {
   const [registerData, setRegisterData] = useState<RegisterData>();
@@ -214,7 +215,21 @@ const Execute: NextPage = () => {
       );
       return;
     }
-  }, [router, controller]);
+
+    if (params) {
+      // show pending screen if controller still being deployed
+      if (controller.account(params.chainId).pending) {
+        const hash = Storage.get(
+          selectors[VERSION].deployment(controller.address, params.chainId),
+        ).deployTx;
+
+        const txn = { name: "Register Device", hash };
+        router.push(
+          `/pending?txns=${encodeURIComponent(JSON.stringify([txn]))}`,
+        );
+      }
+    }
+  }, [router, controller, params]);
 
   const onRegister = useCallback(async () => {
     const data = await controller.signAddDeviceKey(params.chainId);
@@ -263,7 +278,10 @@ const Execute: NextPage = () => {
     return <Header address={controller.address} />;
   }
 
-  if (!controller.account(params.chainId).deploymentTx() && !registerData) {
+  if (
+    !controller.account(params.chainId).registered &&
+    !controller.account(params.chainId).pending
+  ) {
     return (
       <>
         <Header address={controller.address} />
@@ -277,17 +295,12 @@ const Execute: NextPage = () => {
       <Header address={controller.address} />
       <Flex m={4} flex={1} flexDirection="column">
         <Banner
-          pb="20px"
           title="Execute Transactions"
-          variant="secondary"
-          borderBottom="1px solid"
-          borderColor="gray.700"
-        >
-          {`${url.href} is requesting to execute the following transactions`}
-          <Flex justify="center" mt="12px">
-            <Network chainId={params.chainId} />
-          </Flex>
-        </Banner>
+          description={`${url.href} is requesting to execute the following transactions`}
+          icon={<JoystickIcon boxSize="30px" />}
+          chainId={params.chainId}
+          pb="20px"
+        />
         <Flex my={2} flex={1} flexDirection="column" gap="10px">
           {params.calls.map((call, i) => (
             <Call
@@ -301,13 +314,12 @@ const Execute: NextPage = () => {
           ))}
           <Footer
             isDisabled={!fees}
-            onSubmit={onSubmit}
+            onConfirm={onSubmit}
             onCancel={() => {
               if (window.opener) {
                 window.close();
               }
             }}
-            action="Confirm"
           >
             <Fees chainId={params.chainId} fees={fees} />
           </Footer>
