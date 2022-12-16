@@ -109,10 +109,6 @@ class Account extends BaseAccount {
     return false;
   }
 
-  deploymentTx(): string {
-    return Storage.get(this.selector).deployTx;
-  }
-
   async estimateInvokeFee(
     calls: Call[],
     details: EstimateFeeDetails = {},

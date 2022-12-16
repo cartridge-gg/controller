@@ -30,25 +30,23 @@ export const Transaction = ({
 
   useEffect(() => {
     if (chainId) {
+      let result: TransactionState = "pending";
       controller
         .account(chainId)
-        .waitForTransaction(hash)
-        .then((receipt) => {
-          if (
-            receipt.status === "ACCEPTED_ON_L1" ||
-            receipt.status === "ACCEPTED_ON_L2"
-          ) {
-            finalized("success");
-            setState("success");
-          }
+        .waitForTransaction(hash, null, ["ACCEPTED_ON_L1", "ACCEPTED_ON_L2"])
+        .then(() => {
+          result = "success";
         })
         .catch((e) => {
-          finalized("error");
-          setState("error");
+          result = "error";
           console.error(e);
+        })
+        .finally(() => {
+          setState(result);
+          if (finalized) finalized(result);
         });
     }
-  }, [controller, hash, chainId]);
+  }, [controller, hash, chainId, finalized]);
   return (
     <HStack w="full" borderRadius="4px" bgColor="gray.700" p="12px">
       <HStack spacing="12px" color={color}>

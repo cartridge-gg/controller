@@ -217,9 +217,12 @@ const Execute: NextPage = () => {
     }
 
     if (params) {
-      // if account still pending deployment, redirect to pending
+      // show pending screen if controller still being deployed
       if (controller.account(params.chainId).pending) {
-        const hash = controller.account(params.chainId).deploymentTx();
+        const hash = Storage.get(
+          selectors[VERSION].deployment(controller.address, params.chainId),
+        ).deployTx;
+
         const txn = { name: "Register Device", hash };
         router.push(
           `/pending?txns=${encodeURIComponent(JSON.stringify([txn]))}`,

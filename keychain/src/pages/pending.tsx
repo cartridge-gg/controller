@@ -12,7 +12,7 @@ import Footer from "components/Footer";
 import { Transaction, TransactionState } from "components/Transaction";
 
 const Pending: NextPage = () => {
-  const [tnxResults, setTxnResults] = useState<TransactionState[]>([]);
+  const [txnResults, setTxnResults] = useState<TransactionState[]>([]);
   const [title, setTitle] = useState("Pending...");
   const [description, setDescription] = useState("This may take a second");
 
@@ -20,8 +20,8 @@ const Pending: NextPage = () => {
   const { chainId, txns } = useUrlTxns();
 
   useEffect(() => {
-    if (tnxResults.length > 0 && tnxResults.length === txns.length) {
-      const errors = tnxResults.filter((state) => state === "error");
+    if (txnResults.length > 0 && txnResults.length === txns.length) {
+      const errors = txnResults.filter((state) => state === "error");
       if (errors.length > 0) {
         setTitle("Error");
         setDescription("Something went wrong");
@@ -31,7 +31,9 @@ const Pending: NextPage = () => {
       setTitle("Success!");
       setDescription("Your transaction was successful");
     }
-  }, [tnxResults, txns]);
+
+    //pending
+  }, [txnResults, txns]);
 
   return (
     <>
@@ -51,9 +53,7 @@ const Pending: NextPage = () => {
             chainId={chainId}
             hash={txn.hash}
             finalized={(state: TransactionState) => {
-              let newResults = [...tnxResults];
-              newResults.push(state);
-              setTxnResults(newResults);
+              setTxnResults([...txnResults, state]);
             }}
           />
         ))}

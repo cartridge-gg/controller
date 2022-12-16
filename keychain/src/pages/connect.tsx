@@ -29,7 +29,7 @@ import { Banner } from "components/Banner";
 
 const Connect: NextPage = () => {
   const [maxFee, setMaxFee] = useState(null);
-  const [registrationRequired, setRegistrationRequired] = useState(false);
+  const [registerDevice, setRegisterDevice] = useState(false);
   const { chainId, validPolicys, invalidPolicys, isValidating } =
     useUrlPolicys();
   const { origin } = useRequests();
@@ -49,7 +49,7 @@ const Connect: NextPage = () => {
 
     if (account) {
       if (!account.registered && !account.pending) {
-        setRegistrationRequired(true);
+        setRegisterDevice(true);
         return;
       }
     }
@@ -58,24 +58,28 @@ const Connect: NextPage = () => {
   const connect = useCallback(
     async (values, actions) => {
       try {
-        if (registrationRequired) {
-          const data = await controller.signAddDeviceKey(chainId);
-          Storage.set(
-            selectors[VERSION].register(controller.address, chainId),
-            data,
-          );
-        }
-
         const approvals = validPolicys.filter((_, i) => values[i]);
         controller.approve(origin, approvals, maxFee);
 
         // show pending screen if controller still being deployed
         if (account.pending) {
-          const txn = { name: "Register Device", hash: account.deploymentTx() };
+          const hash = Storage.get(
+            selectors[VERSION].deployment(controller.address, chainId),
+          ).deployTx;
+
+          const txn = { name: "Register Device", hash };
           router.push(
             `/pending?txns=${encodeURIComponent(JSON.stringify([txn]))}`,
           );
           return;
+        }
+
+        if (registerDevice) {
+          const data = await controller.signAddDeviceKey(chainId);
+          Storage.set(
+            selectors[VERSION].register(controller.address, chainId),
+            data,
+          );
         }
 
         if (window.opener) {
@@ -87,12 +91,13 @@ const Connect: NextPage = () => {
       actions.setSubmitting(false);
     },
     [
+      router,
       origin,
       validPolicys,
       controller,
       maxFee,
       chainId,
-      registrationRequired,
+      registerDevice,
       account,
     ],
   );
@@ -112,7 +117,7 @@ const Connect: NextPage = () => {
             icon={<PlugIcon boxSize="30px" />}
             chainId={chainId}
           />
-          {registrationRequired && (
+          {registerDevice && (
             <VStack
               w="full"
               mt="30px"
