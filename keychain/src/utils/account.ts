@@ -1,4 +1,3 @@
-import { time } from "console";
 import {
   constants,
   hash,
@@ -6,13 +5,13 @@ import {
   Account as BaseAccount,
   RpcProvider,
   SignerInterface,
-  GetTransactionReceiptResponse,
   Call,
   EstimateFeeDetails,
   EstimateFee,
+  GetTransactionReceiptResponse,
 } from "starknet";
+import { CLASS_HASHES } from "./hashes";
 
-import { CONTROLLER_CLASS } from "./constants";
 import selectors from "./selectors";
 import Storage from "./storage";
 
@@ -21,6 +20,7 @@ class Account extends BaseAccount {
   private selector: string;
   deployed: boolean = false;
   registered: boolean = false;
+  updated: boolean = true;
   pending: boolean = true;
 
   constructor(
@@ -63,6 +63,10 @@ class Account extends BaseAccount {
       });
       this.deployed = true;
 
+      if (classHash !== CLASS_HASHES["latest"].account) {
+        this.updated = false;
+      }
+
       const nonce = await this.rpc.getNonceForAddress(this.address, "latest");
       Storage.update(this.selector, {
         nonce,
@@ -74,7 +78,7 @@ class Account extends BaseAccount {
           contractAddress: this.address,
           entrypoint: "executeOnPlugin",
           calldata: [
-            CONTROLLER_CLASS,
+            CLASS_HASHES["0.0.1"].controller,
             hash.getSelector("is_public_key"),
             "0x1",
             pub,

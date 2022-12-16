@@ -2,7 +2,7 @@ import Controller from "utils/controller";
 import { constants, number, typedData, Signature } from "starknet";
 
 import { Session } from "@cartridge/controller";
-import { CONTROLLER_CLASS } from "utils/constants";
+import { CLASS_HASHES } from "utils/hashes";
 
 const signMessage =
   (controller: Controller, session: Session) =>
@@ -10,7 +10,7 @@ const signMessage =
     const sig = await controller
       .account(constants.StarknetChainId.MAINNET)
       .signMessage(td);
-    sig.unshift(number.toBN(CONTROLLER_CLASS).toString());
+    sig.unshift(number.toBN(CLASS_HASHES["0.0.1"].controller).toString());
     return sig;
   };
 

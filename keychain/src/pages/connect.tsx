@@ -86,7 +86,15 @@ const Connect: NextPage = () => {
       }
       actions.setSubmitting(false);
     },
-    [validPolicys, controller, maxFee, chainId, registrationRequired, account],
+    [
+      origin,
+      validPolicys,
+      controller,
+      maxFee,
+      chainId,
+      registrationRequired,
+      account,
+    ],
   );
 
   if (!controller) {
