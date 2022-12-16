@@ -33,7 +33,7 @@ export const Transaction = ({
       let result: TransactionState = "pending";
       controller
         .account(chainId)
-        .waitForTransaction(hash, null, ["ACCEPTED_ON_L1", "ACCEPTED_ON_L2"])
+        .waitForTransaction(hash, 10000, ["ACCEPTED_ON_L1", "ACCEPTED_ON_L2"])
         .then(() => {
           result = "success";
         })
