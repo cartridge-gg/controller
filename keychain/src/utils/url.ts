@@ -8,17 +8,17 @@ const BASE_URL = {
 
 export const StarkscanUrl = (chainId: constants.StarknetChainId) => ({
   transaction: (hash: string, fragment?: string) =>
-    `${BASE_URL[chainId]}/tx/${hash}#${fragment}`,
+    `${BASE_URL[chainId]}/tx/${hash}${fragment ? `#${fragment}` : ""}`,
   contract: (address: string, fragment?: string) =>
-    `${BASE_URL[chainId]}/contract/${address}#${fragment}`,
+    `${BASE_URL[chainId]}/contract/${address}${fragment ? `#${fragment}` : ""}`,
   message: (address: string, fragment?: string) =>
-    `${BASE_URL[chainId]}/message/${address}#${fragment}`,
+    `${BASE_URL[chainId]}/message/${address}${fragment ? `#${fragment}` : ""}`,
   block: (id: string, fragment?: string) =>
-    `${BASE_URL[chainId]}/block/${id}#${fragment}`,
+    `${BASE_URL[chainId]}/block/${id}${fragment ? `#${fragment}` : ""}`,
   event: (address: string, fragment?: string) =>
-    `${BASE_URL[chainId]}/event/${address}#${fragment}`,
+    `${BASE_URL[chainId]}/event/${address}${fragment ? `#${fragment}` : ""}`,
   class: (address: string, fragment?: string) =>
-    `${BASE_URL[chainId]}/class/${address}#${fragment}`,
+    `${BASE_URL[chainId]}/class/${address}${fragment ? `#${fragment}` : ""}`,
 });
 
 const DEFAULT_PORT_BY_PROTOCOL: { [index: string]: string } = {

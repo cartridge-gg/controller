@@ -61,19 +61,6 @@ const Connect: NextPage = () => {
         const approvals = validPolicys.filter((_, i) => values[i]);
         controller.approve(origin, approvals, maxFee);
 
-        // show pending screen if controller still being deployed
-        if (account.pending) {
-          const hash = Storage.get(
-            selectors[VERSION].deployment(controller.address, chainId),
-          ).deployTx;
-
-          const txn = { name: "Register Device", hash };
-          router.push(
-            `/pending?txns=${encodeURIComponent(JSON.stringify([txn]))}`,
-          );
-          return;
-        }
-
         if (registerDevice) {
           const data = await controller.signAddDeviceKey(chainId);
           Storage.set(
