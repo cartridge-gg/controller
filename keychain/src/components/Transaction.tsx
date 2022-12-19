@@ -68,7 +68,7 @@ export const Transaction = ({
           </Text>
         </HStack>
         <Divider orientation="vertical" bgColor="gray.500" h="30px" />
-        <Link href={StarkscanUrl[chainId].transaction(hash)} isExternal>
+        <Link href={StarkscanUrl(chainId).transaction(hash)} isExternal>
           <LinkIcon boxSize="12px" color="blue.400" />
         </Link>
       </HStack>

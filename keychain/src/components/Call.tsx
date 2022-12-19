@@ -40,7 +40,7 @@ export const Call = ({
   );
 
   const description = (
-    <Link href={StarkscanUrl[chainId].contract(policy.target)} target="_blank">
+    <Link href={StarkscanUrl(chainId).contract(policy.target)} target="_blank">
       {policy.target}
     </Link>
   );
