@@ -1,37 +1,25 @@
 import { constants } from "starknet";
 
-export const StarkscanUrl = {
-  [constants.StarknetChainId.MAINNET]: {
-    transaction: (hash: string) => `https://starkscan.co/tx/${hash}`,
-    contract: (address: string) => `https://starkscan.co/contract/${address}`,
-    message: (address: string) => `https://starkscan.co/message/${address}`,
-    block: (id: string) => `https://starkscan.co/block/${id}`,
-    event: (address: string) => `https://starkscan.co/event/${address}`,
-    class: (address: string) => `https://starkscan.co/class/${address}`,
-  },
-  [constants.StarknetChainId.TESTNET]: {
-    transaction: (hash: string) => `https://testnet.starkscan.co/tx/${hash}`,
-    contract: (address: string) =>
-      `https://testnet.starkscan.co/contract/${address}`,
-    message: (address: string) =>
-      `https://testnet.starkscan.co/message/${address}`,
-    block: (id: string) => `https://testnet.starkscan.co/block/${id}`,
-    event: (address: string) => `https://testnet.starkscan.co/event/${address}`,
-    class: (address: string) => `https://testnet.starkscan.co/class/${address}`,
-  },
-  [constants.StarknetChainId.TESTNET2]: {
-    transaction: (hash: string) => `https://testnet-2.starkscan.co/tx/${hash}`,
-    contract: (address: string) =>
-      `https://testnet-2.starkscan.co/contract/${address}`,
-    message: (address: string) =>
-      `https://testnet-2.starkscan.co/message/${address}`,
-    block: (id: string) => `https://testnet-2.starkscan.co/block/${id}`,
-    event: (address: string) =>
-      `https://testnet-2.starkscan.co/event/${address}`,
-    class: (address: string) =>
-      `https://testnet-2.starkscan.co/class/${address}`,
-  },
+const BASE_URL = {
+  [constants.StarknetChainId.MAINNET]: "https://starkscan.co",
+  [constants.StarknetChainId.TESTNET]: "https://testnet.starkscan.co",
+  [constants.StarknetChainId.TESTNET2]: "https://testnet-2.starkscan.co",
 };
+
+export const StarkscanUrl = (chainId: constants.StarknetChainId) => ({
+  transaction: (hash: string, fragment?: string) =>
+    `${BASE_URL[chainId]}/tx/${hash}#${fragment}`,
+  contract: (address: string, fragment?: string) =>
+    `${BASE_URL[chainId]}/contract/${address}#${fragment}`,
+  message: (address: string, fragment?: string) =>
+    `${BASE_URL[chainId]}/message/${address}#${fragment}`,
+  block: (id: string, fragment?: string) =>
+    `${BASE_URL[chainId]}/block/${id}#${fragment}`,
+  event: (address: string, fragment?: string) =>
+    `${BASE_URL[chainId]}/event/${address}#${fragment}`,
+  class: (address: string, fragment?: string) =>
+    `${BASE_URL[chainId]}/class/${address}#${fragment}`,
+});
 
 const DEFAULT_PORT_BY_PROTOCOL: { [index: string]: string } = {
   "http:": "80",

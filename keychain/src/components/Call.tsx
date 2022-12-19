@@ -7,6 +7,7 @@ import {
   Input,
   Spacer,
   VStack,
+  Tooltip,
 } from "@chakra-ui/react";
 import { FieldInputProps } from "formik";
 import { formatEther } from "ethers/lib/utils";
@@ -57,29 +58,22 @@ export const CallToggle = ({
   policy: Policy;
   notice?: string;
 } & FieldInputProps<boolean>) => {
-  const title = (
-    <HStack>
-      <Text>{policy.method}</Text>
-      {notice && (
-        <Tag colorScheme="red" size="sm">
-          {notice}
-        </Tag>
-      )}
-    </HStack>
-  );
-  const description = (
-    <Link href={StarkscanUrl[chainId].contract(policy.target)} target="_blank">
-      {formatAddress(policy.target)}
-    </Link>
-  );
-
   return (
-    <Switchable
-      title={title}
-      description={description}
-      errMsg={notice}
-      {...rest}
-    />
+    <HStack w="full" bgColor="gray.600" py="7px" px="12px">
+      <CodeIcon boxSize="18px" />
+      <Text fontSize="13px" textTransform="capitalize">
+        {policy.method}
+      </Text>
+      <Spacer />
+      <Tooltip label={`View on Starkscan`} placement="left" hasArrow>
+        <Link
+          href={StarkscanUrl(chainId).contract(policy.target, "write-contract")}
+          isExternal
+        >
+          <InfoIcon color="gray.200" boxSize="12px" />
+        </Link>
+      </Tooltip>
+    </HStack>
   );
 };
 
