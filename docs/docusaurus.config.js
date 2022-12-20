@@ -53,6 +53,18 @@ const config = {
         },
         items: [
           {
+            type: "docSidebar",
+            position: "left",
+            sidebarId: "controller",
+            label: "Controller",
+          },
+          {
+            type: "docSidebar",
+            position: "left",
+            sidebarId: "quests",
+            label: "Quests",
+          },
+          {
             href: 'https://github.com/cartridge-gg/cartridge',
             label: 'GitHub',
             position: 'right',
@@ -67,11 +79,11 @@ const config = {
             items: [
               {
                 label: 'Controller',
-                to: '/controller',
+                to: '/controller/getting-started',
               },
               {
                 label: 'Quests',
-                to: '/quests',
+                to: '/quests/getting-started',
               },
             ],
           },
@@ -98,7 +110,7 @@ const config = {
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} Cartridge Gaming Company. Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} Cartridge Gaming Company.`,
       },
       prism: {
         theme: lightCodeTheme,

@@ -1,10 +1,8 @@
 ---
-title: Controller
-sidebar_position: 2
-slug: /controller
+title: Getting Started
+sidebar_position: 0
+slug: /controller/getting-started
 ---
-
-# Cartridge Controller
 
 Cartridge Controller is a gaming specific smart contract wallet plugin that enables seamless player onboarding and game interactions while maintaining compatibility with other wallets that implement the plugin account architecture (e.g. Argent).
 
