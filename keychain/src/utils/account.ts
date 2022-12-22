@@ -1,3 +1,4 @@
+import { BigNumber } from "ethers";
 import {
   constants,
   hash,
@@ -9,6 +10,9 @@ import {
   EstimateFeeDetails,
   EstimateFee,
   GetTransactionReceiptResponse,
+  Invocation,
+  InvocationsDetailsWithNonce,
+  InvokeFunctionResponse,
 } from "starknet";
 import { CLASS_HASHES } from "./hashes";
 
@@ -75,10 +79,12 @@ class Account extends BaseAccount {
         this.updated = false;
       }
 
-      const nonce = await this.rpc.getNonceForAddress(this.address, "latest");
-      Storage.update(this.selector, {
-        nonce,
-      });
+      if (!Storage.get(this.selector).nonce) {
+        const nonce = await this.rpc.getNonceForAddress(this.address, "latest");
+        Storage.update(this.selector, {
+          nonce,
+        });
+      }
 
       const pub = await this.signer.getPubKey();
       const res = await this.rpc.callContract(
@@ -128,6 +134,18 @@ class Account extends BaseAccount {
     }
 
     return deployment.nonce;
+  }
+
+  async invokeFunction(
+    functionInvocation: Invocation,
+    details: InvocationsDetailsWithNonce,
+  ): Promise<InvokeFunctionResponse> {
+    const nonce = Storage.get(this.selector).nonce || "0x0";
+    const newNonce = BigNumber.from(nonce).add(1);
+    Storage.update(this.selector, {
+      nonce: newNonce.toHexString(),
+    });
+    return super.invokeFunction(functionInvocation, details);
   }
 }
 
