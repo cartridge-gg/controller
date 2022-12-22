@@ -11,7 +11,7 @@ import { Session, Keychain, Policy } from "./types";
 
 export const providers = {
   [constants.StarknetChainId.TESTNET]: new RpcProvider({
-    nodeUrl: "https://starknet-goerli2.cartridge.gg/rpc/v0.2",
+    nodeUrl: "https://starknet-goerli.cartridge.gg/rpc/v0.2",
   }),
   [constants.StarknetChainId.TESTNET2]: new RpcProvider({
     nodeUrl: "https://starknet-goerli2.cartridge.gg/rpc/v0.2",
