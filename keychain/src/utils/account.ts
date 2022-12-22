@@ -21,7 +21,6 @@ class Account extends BaseAccount {
   deployed: boolean = false;
   registered: boolean = false;
   updated: boolean = true;
-  pending: boolean = true;
 
   constructor(
     chainId: constants.StarknetChainId,
@@ -35,9 +34,8 @@ class Account extends BaseAccount {
     const state = Storage.get(this.selector);
 
     if (state) {
-      this.deployed = state.deployed;
-      this.registered = state.registered;
-      this.pending = !state.deployed;
+      this.deployed = !!state.deployed;
+      this.registered = !!state.registered;
     }
 
     if (!state || Date.now() - state.syncing > 5000) {
@@ -53,15 +51,25 @@ class Account extends BaseAccount {
 
     try {
       if (!this.deployed) {
-        this.pending = await this.checkPending();
+        const deployTx = Storage.get(this.selector).deployTx;
+        if (!deployTx) {
+          return;
+        }
+
+        await this.rpc.waitForTransaction(deployTx, 8000, [
+          "ACCEPTED_ON_L1",
+          "ACCEPTED_ON_L2",
+        ]);
+        Storage.update(this.selector, {
+          deployed: true,
+        });
+        this.deployed = true;
       }
 
       const classHash = await this.rpc.getClassHashAt(this.address, "latest");
       Storage.update(this.selector, {
         classHash,
-        deployed: true,
       });
-      this.deployed = true;
 
       if (classHash !== CLASS_HASHES["latest"].account) {
         this.updated = false;
@@ -94,19 +102,6 @@ class Account extends BaseAccount {
     } catch (e) {
       /* no-op */
     }
-  }
-
-  async checkPending(): Promise<boolean> {
-    const deployTx = Storage.get(this.selector).deployTx;
-    if (deployTx) {
-      const receipt = (await this.rpc.getTransactionReceipt(
-        deployTx,
-      )) as GetTransactionReceiptResponse;
-      if (receipt.status === "PENDING" || receipt.status === "RECEIVED") {
-        return true;
-      }
-    }
-    return false;
   }
 
   async estimateInvokeFee(

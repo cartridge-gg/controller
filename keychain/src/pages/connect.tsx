@@ -48,7 +48,7 @@ const Connect: NextPage = () => {
     }
 
     if (account) {
-      if (!account.registered && !account.pending) {
+      if (account.deployed && !account.registered) {
         setRegisterDevice(true);
         return;
       }
