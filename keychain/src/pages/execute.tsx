@@ -217,13 +217,13 @@ const Execute: NextPage = () => {
     }
 
     if (params) {
-      // show pending screen if controller still being deployed
-      if (controller.account(params.chainId).pending) {
+      // not deployed, show pending tx
+      if (!controller.account(params.chainId).deployed) {
         const hash = Storage.get(
           selectors[VERSION].deployment(controller.address, params.chainId),
         ).deployTx;
 
-        const txn = { name: "Register Device", hash };
+        const txn = { name: "Account Deployment", hash };
         router.push(
           `/pending?txns=${encodeURIComponent(JSON.stringify([txn]))}`,
         );
@@ -278,10 +278,8 @@ const Execute: NextPage = () => {
     return <Header address={controller.address} />;
   }
 
-  if (
-    !controller.account(params.chainId).registered &&
-    !controller.account(params.chainId).pending
-  ) {
+  const { deployed, registered } = controller.account(params.chainId);
+  if (deployed && !registered) {
     return (
       <>
         <Header address={controller.address} />
