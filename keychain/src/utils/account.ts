@@ -1,4 +1,3 @@
-import { BigNumber } from "ethers";
 import {
   constants,
   hash,
@@ -9,7 +8,6 @@ import {
   Call,
   EstimateFeeDetails,
   EstimateFee,
-  GetTransactionReceiptResponse,
   Invocation,
   InvocationsDetailsWithNonce,
   InvokeFunctionResponse,
@@ -113,7 +111,19 @@ class Account extends BaseAccount {
     details.blockIdentifier = details.blockIdentifier
       ? details.blockIdentifier
       : "latest";
-    return super.estimateInvokeFee(calls, details);
+
+    // if estimate fee fails due to invalid nonce
+    // grab latest, update local and try again
+    try {
+      const result = await super.estimateInvokeFee(calls, details);
+      return result;
+    } catch (e) {
+      details.nonce = await super.getNonce();
+      Storage.update(this.selector, {
+        nonce: number.toHex(details.nonce),
+      });
+      return super.estimateInvokeFee(calls, details);
+    }
   }
 
   async getNonce(blockIdentifier?: any): Promise<number.BigNumberish> {
@@ -128,7 +138,6 @@ class Account extends BaseAccount {
     if (!deployment || !deployment.nonce) {
       return "0x0";
     }
-
     return deployment.nonce;
   }
 
@@ -136,11 +145,13 @@ class Account extends BaseAccount {
     functionInvocation: Invocation,
     details: InvocationsDetailsWithNonce,
   ): Promise<InvokeFunctionResponse> {
-    const nonce = Storage.get(this.selector).nonce || "0x0";
-    const newNonce = BigNumber.from(nonce).add(1);
+    // increment local storage nonce
+    const nonce = number.toBN(Storage.get(this.selector).nonce || "0x0");
+    const nextNonce = nonce.add(number.toBN(1));
     Storage.update(this.selector, {
-      nonce: newNonce.toHexString(),
+      nonce: number.toHex(nextNonce),
     });
+
     return super.invokeFunction(functionInvocation, details);
   }
 }
