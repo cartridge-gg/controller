@@ -110,21 +110,21 @@ class Account extends BaseAccount {
     return super.estimateInvokeFee(calls, details);
   }
 
-  async getNonce(blockIdentifier?: any): Promise<number.BigNumberish> {
-    if (
-      blockIdentifier &&
-      (blockIdentifier !== "latest" || blockIdentifier !== "pending")
-    ) {
-      return super.getNonce(blockIdentifier);
-    }
+  // async getNonce(blockIdentifier?: any): Promise<number.BigNumberish> {
+  //   if (
+  //     blockIdentifier &&
+  //     (blockIdentifier !== "latest" || blockIdentifier !== "pending")
+  //   ) {
+  //     return super.getNonce(blockIdentifier);
+  //   }
 
-    const deployment = Storage.get(this.selector);
-    if (!deployment || !deployment.nonce) {
-      return "0x0";
-    }
+  //   const deployment = Storage.get(this.selector);
+  //   if (!deployment || !deployment.nonce) {
+  //     return "0x0";
+  //   }
 
-    return deployment.nonce;
-  }
+  //   return deployment.nonce;
+  // }
 }
 
 export default Account;
