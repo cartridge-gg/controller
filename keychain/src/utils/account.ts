@@ -52,24 +52,20 @@ class Account extends BaseAccount {
     try {
       if (!this.deployed) {
         const deployTx = Storage.get(this.selector).deployTx;
-        if (!deployTx) {
-          return;
+        if (deployTx) {
+          await this.rpc.waitForTransaction(deployTx, 8000, [
+            "ACCEPTED_ON_L1",
+            "ACCEPTED_ON_L2",
+          ]);
         }
-
-        await this.rpc.waitForTransaction(deployTx, 8000, [
-          "ACCEPTED_ON_L1",
-          "ACCEPTED_ON_L2",
-        ]);
-        Storage.update(this.selector, {
-          deployed: true,
-        });
-        this.deployed = true;
       }
 
       const classHash = await this.rpc.getClassHashAt(this.address, "latest");
       Storage.update(this.selector, {
         classHash,
+        deployed: true,
       });
+      this.deployed = true;
 
       if (classHash !== CLASS_HASHES["latest"].account) {
         this.updated = false;
