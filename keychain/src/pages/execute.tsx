@@ -37,6 +37,7 @@ const Execute: NextPage = () => {
     max: number.BigNumberish;
   }>();
   const [error, setError] = useState<Error>();
+  const [isLoading, setLoading] = useState<boolean>(false);
   const controller = useMemo(() => Controller.fromStore(), []);
   const router = useRouter();
 
@@ -232,15 +233,18 @@ const Execute: NextPage = () => {
   }, [router, controller, params]);
 
   const onRegister = useCallback(async () => {
+    setLoading(true);
     const data = await controller.signAddDeviceKey(params.chainId);
     Storage.set(
       selectors[VERSION].register(controller.address, params.chainId),
       data,
     );
     setRegisterData(data);
+    setLoading(false);
   }, [controller, params]);
 
   const onSubmit = useCallback(async () => {
+    setLoading(true);
     await execute(params.calls)(url.href)();
     // We set the transaction hash which the keychain instance
     // polls for. We use a manually computed hash to identify
@@ -259,7 +263,7 @@ const Execute: NextPage = () => {
       ),
       true,
     );
-
+    setLoading(false);
     if (window.opener) {
       window.close();
     }
@@ -283,7 +287,11 @@ const Execute: NextPage = () => {
     return (
       <>
         <Header address={controller.address} />
-        <Register chainId={params.chainId} onSubmit={onRegister} />
+        <Register
+          chainId={params.chainId}
+          onSubmit={onRegister}
+          isLoading={isLoading}
+        />
       </>
     );
   }
@@ -311,6 +319,7 @@ const Execute: NextPage = () => {
             />
           ))}
           <Footer
+            isLoading={isLoading}
             isDisabled={!fees}
             onConfirm={onSubmit}
             onCancel={() => {
