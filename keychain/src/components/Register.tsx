@@ -8,8 +8,10 @@ import InfoIcon from "@cartridge/ui/components/icons/Info";
 
 const Register = ({
   chainId,
+  isLoading,
   onSubmit,
 }: {
+  isLoading: boolean;
   chainId: constants.StarknetChainId;
   onSubmit: () => void;
 }) => (
@@ -45,6 +47,7 @@ const Register = ({
         </HStack>
       </HStack>
       <Footer
+        isLoading={isLoading}
         onConfirm={onSubmit}
         onCancel={() => {
           if (window.opener) {
