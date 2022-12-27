@@ -8,6 +8,7 @@
     "keychain": "yarn workspace @cartridge/keychain",
     "controller": "yarn workspace @cartridge/controller",
     "connector": "yarn workspace @cartridge/connector",
+    "docs": "yarn workspace @cartridge/docs",
     "ui": "yarn workspace @cartridge/ui",
     "test": "yarn keychain test",
     "test:ci": "yarn keychain test:ci"
