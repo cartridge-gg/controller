@@ -1,28 +1,33 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/router";
 import { constants } from "starknet";
 
 import { Policy } from "@cartridge/controller";
 
 import { diff } from "utils/controller";
+import { normalize as normalizeOrigin } from "utils/url";
 
 export function useUrlPolicys(): {
   chainId?: constants.StarknetChainId;
   isValidating: boolean;
   validPolicys: Policy[];
   invalidPolicys: Policy[];
+  origin: string;
 } {
   const router = useRouter();
+  const [origin, setOrigin] = useState<string>();
   const [chainId, setChainId] = useState<constants.StarknetChainId>();
   const [isValidating, setIsValidating] = useState(true);
   const [validPolicys, setValidPolicys] = useState<Policy[]>([]);
   const [invalidPolicys, setInvalidPolicys] = useState<Policy[]>([]);
 
   useEffect(() => {
-    const { chainId, policies } = router.query;
-    if (!router.isReady || !policies) {
+    const { chainId, policies, origin } = router.query;
+    if (!router.isReady || !policies || !origin) {
       return;
     }
+
+    setOrigin(normalizeOrigin(origin as string));
     setChainId(
       chainId
         ? (chainId as constants.StarknetChainId)
@@ -53,7 +58,7 @@ export function useUrlPolicys(): {
       });
   }, [router.isReady, router.query]);
 
-  return { isValidating, chainId, validPolicys, invalidPolicys };
+  return { isValidating, chainId, validPolicys, invalidPolicys, origin };
 }
 
 async function getValidPolicys(

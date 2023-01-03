@@ -4,7 +4,7 @@ import { Flex, Container } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
 import Controller from "utils/controller";
 import { useUrlTxns } from "hooks/transaction";
-import TimerIcon from "@cartridge/ui/components/icons/Timer";
+import TimerIcon from "@cartridge/ui/src/components/icons/Timer";
 
 import { Header } from "components/Header";
 import { Banner } from "components/Banner";

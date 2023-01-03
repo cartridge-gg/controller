@@ -1,4 +1,5 @@
-import React from "react";
+import React, { ReactNode } from "react";
+import NextLink from "next/link";
 import {
   Box,
   Link,
@@ -11,9 +12,9 @@ import {
   StyleProps,
 } from "@chakra-ui/react";
 
-import { Logo } from "../../../ui/src/components/brand/Logo";
+import { Logo } from "@cartridge/ui/src/components/brand/Logo";
 
-import ChainDropdown from "../../../ui/src/components/menu/Chain";
+import ChainDropdown from "@cartridge/ui/src/components/menu/Chain";
 
 const Container = ({
   height,
@@ -54,7 +55,7 @@ export const Header = ({
     <Container height="50px">
       <HStack w="full">
         <HStack spacing="0">
-          <Link href={process.env.NEXT_PUBLIC_SITE_URL}>
+          <Link href={process.env.NEXT_PUBLIC_ADMIN_URL}>
             <Logo fill="brand" w="24px" mr="15px" />
           </Link>
         </HStack>
@@ -62,6 +63,24 @@ export const Header = ({
         <HStack spacing="10px">
           <ChainDropdown />
         </HStack>
+      </HStack>
+    </Container>
+  );
+};
+
+export const SignupHeader = ({ children }: { children: ReactNode }) => {
+  return (
+    <Container height="64px">
+      <HStack w="full" h="64px">
+        <NextLink href="/">
+          <Link>
+            <Logo fill="brand" w="24px" mx="15px" />
+          </Link>
+        </NextLink>
+        <Spacer />
+        {children}
+        <Spacer />
+        <HStack spacing="10px"></HStack>
       </HStack>
     </Container>
   );

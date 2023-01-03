@@ -94,7 +94,7 @@ const Sign: NextPage = () => {
     if (!controller) {
       router.replace(
         `${
-          process.env.NEXT_PUBLIC_ADMIN_URL
+          process.env.NEXT_PUBLIC_SITE_URL
         }/login?redirect_uri=${encodeURIComponent(window.location.href)}`,
       );
       return;

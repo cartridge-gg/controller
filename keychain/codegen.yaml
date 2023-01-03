@@ -1,0 +1,18 @@
+overwrite: true
+schema: ${NEXT_PUBLIC_API_URL:https://api.cartridge.gg/query}
+documents: "src/**/*.graphql"
+generates:
+  src/generated/graphql.ts:
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+      - "typescript-react-query"
+    config:
+      addInfiniteQuery: true
+      exposeQueryKeys: true
+      fetcher:
+        func: hooks/fetcher#useFetchData
+        isReactHook: true
+  src/generated/introspection.ts:
+    plugins:
+      - fragment-matcher

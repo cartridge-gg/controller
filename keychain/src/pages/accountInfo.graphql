@@ -1,0 +1,9 @@
+query AccountInfo($address: String!) {
+  accounts(where: { contractAddress: $address }, first: 1) {
+    edges {
+      node {
+        id
+      }
+    }
+  }
+}

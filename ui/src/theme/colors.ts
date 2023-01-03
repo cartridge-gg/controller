@@ -1,4 +1,4 @@
-export default {
+const colors = {
   brand: "#FBCB4A",
   yellow: {
     200: "#FDE092",
@@ -36,6 +36,7 @@ export default {
     200: "#808080",
     300: "#7A857A",
     400: "#3B3F3C",
+    450: "#242824",
     500: "#373C38",
     600: "#2A2F2A",
     700: "#1E221F",
@@ -61,3 +62,5 @@ export default {
   black: "#000",
   transparent: "transparent",
 };
+
+export default colors;
