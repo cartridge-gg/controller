@@ -37,8 +37,7 @@ export const createCredentials = async (
     beginRegistration.publicKey.challenge as unknown as string,
   );
 
-  beginRegistration.publicKey.rp.id =
-    process.env.NEXT_PUBLIC_CARTRIDGE_SDK_RPID;
+  beginRegistration.publicKey.rp.id = process.env.NEXT_PUBLIC_RP_ID;
   const credentials = (await navigator.credentials.create(
     beginRegistration,
   )) as PublicKeyCredential & {
