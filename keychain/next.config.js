@@ -6,6 +6,9 @@ const nextConfig = {
   experimental: {
     externalDir: true,
   },
-}
+  images: {
+    domains: ["static.cartridge.gg", "static.localhost"],
+  },
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

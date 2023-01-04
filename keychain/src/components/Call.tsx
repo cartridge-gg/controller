@@ -14,8 +14,8 @@ import { formatEther } from "ethers/lib/utils";
 import { Policy } from "@cartridge/controller";
 import { formatAddress } from "@cartridge/ui/components/Address";
 import { StarkscanUrl } from "utils/url";
-import EthereumIcon from "@cartridge/ui/components/icons/Ethereum";
-import CodeIcon from "@cartridge/ui/components/icons/Code";
+import EthereumIcon from "@cartridge/ui/src/components/icons/Ethereum";
+import CodeIcon from "@cartridge/ui/src/components/icons/Code";
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import { constants } from "starknet";
 

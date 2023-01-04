@@ -27,7 +27,7 @@ import { BigNumber } from "ethers";
 import selectors from "utils/selectors";
 import Register from "components/Register";
 import Fees from "components/Fees";
-import JoystickIcon from "@cartridge/ui/components/icons/Joystick";
+import JoystickIcon from "@cartridge/ui/src/components/icons/Joystick";
 
 const Execute: NextPage = () => {
   const [registerData, setRegisterData] = useState<RegisterData>();
@@ -211,7 +211,7 @@ const Execute: NextPage = () => {
     if (!controller) {
       router.replace(
         `${
-          process.env.NEXT_PUBLIC_ADMIN_URL
+          process.env.NEXT_PUBLIC_SITE_URL
         }/login?redirect_uri=${encodeURIComponent(window.location.href)}`,
       );
       return;

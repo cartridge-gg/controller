@@ -15,24 +15,21 @@ import {
 
 import { Header } from "components/Header";
 import Session from "components/Session";
-import { useRequests } from "hooks/account";
 import { useUrlPolicys } from "hooks/policy";
-import { constants } from "starknet";
 import Storage from "utils/storage";
 import selectors from "utils/selectors";
 import Controller, { VERSION } from "utils/controller";
-import PlugIcon from "@cartridge/ui/components/icons/Plug";
+import PlugIcon from "@cartridge/ui/src/components/icons/Plug";
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
-import LaptopIcon from "@cartridge/ui/components/icons/Laptop";
+import LaptopIcon from "@cartridge/ui/src/components/icons/Laptop";
 
 import { Banner } from "components/Banner";
 
 const Connect: NextPage = () => {
   const [maxFee, setMaxFee] = useState(null);
   const [registerDevice, setRegisterDevice] = useState(false);
-  const { chainId, validPolicys, invalidPolicys, isValidating } =
+  const { origin, chainId, validPolicys, invalidPolicys, isValidating } =
     useUrlPolicys();
-  const { origin } = useRequests();
   const controller = useMemo(() => Controller.fromStore(), []);
   const account = controller?.account(chainId);
   const router = useRouter();
@@ -41,7 +38,7 @@ const Connect: NextPage = () => {
     if (!controller) {
       router.replace(
         `${
-          process.env.NEXT_PUBLIC_ADMIN_URL
+          process.env.NEXT_PUBLIC_SITE_URL
         }/login?redirect_uri=${encodeURIComponent(window.location.href)}`,
       );
       return;
@@ -77,16 +74,7 @@ const Connect: NextPage = () => {
       }
       actions.setSubmitting(false);
     },
-    [
-      router,
-      origin,
-      validPolicys,
-      controller,
-      maxFee,
-      chainId,
-      registerDevice,
-      account,
-    ],
+    [origin, validPolicys, controller, maxFee, chainId, registerDevice],
   );
 
   if (!controller) {

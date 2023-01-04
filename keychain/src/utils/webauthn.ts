@@ -18,6 +18,7 @@ import {
   InvocationsDetails,
   InvokeFunctionResponse,
 } from "starknet";
+import cbor from "cbor";
 import base64url from "base64url";
 import { split } from "@cartridge/controller";
 import { CLASS_HASHES } from "./hashes";
@@ -331,6 +332,93 @@ export function formatAssertion(assertion: RawAssertion): Signature {
     `${authenticatorDataRem}`,
     ...authenticatorDataWords.map((word) => `${word}`),
   ];
+}
+
+export function parseAuthenticatorData(data) {
+  const d =
+    data instanceof ArrayBuffer
+      ? new DataView(data)
+      : new DataView(data.buffer, data.byteOffset, data.byteLength);
+  let p = 0;
+
+  const result: any = {};
+
+  result.rpIdHash = "";
+  for (const end = p + 32; p < end; ++p) {
+    result.rpIdHash += d.getUint8(p).toString(16);
+  }
+
+  const flags = d.getUint8(p++);
+  result.flags = {
+    userPresent: (flags & 0x01) !== 0,
+    reserved1: (flags & 0x02) !== 0,
+    userVerified: (flags & 0x04) !== 0,
+    reserved2: ((flags & 0x38) >>> 3).toString(16),
+    attestedCredentialData: (flags & 0x40) !== 0,
+    extensionDataIncluded: (flags & 0x80) !== 0,
+  };
+
+  result.signCount = d.getUint32(p, false);
+  p += 4;
+
+  if (result.flags.attestedCredentialData) {
+    const atCredData: any = {};
+    result.attestedCredentialData = atCredData;
+
+    atCredData.aaguid = "";
+    for (const end = p + 16; p < end; ++p) {
+      atCredData.aaguid += d.getUint8(p).toString(16);
+    }
+
+    atCredData.credentialIdLength = d.getUint16(p, false);
+    p += 2;
+
+    atCredData.credentialId = "";
+    for (const end = p + atCredData.credentialIdLength; p < end; ++p) {
+      atCredData.credentialId += d.getUint8(p).toString(16);
+    }
+
+    try {
+      const encodedCred = Buffer.from(d.buffer, d.byteOffset + p);
+      atCredData.credentialPublicKey = cbor.decodeAllSync(encodedCred)[0];
+    } catch (e) {
+      console.error("Failed to decode CBOR data: ", e);
+
+      atCredData.credentialPublicKey = `Decode error: ${e.toString()}`;
+    }
+  }
+
+  if (result.flags.extensionDataIncluded) {
+    // TODO
+  }
+
+  return result;
+}
+
+export function parseAttestationObject(data) {
+  const buffer =
+    data instanceof ArrayBuffer
+      ? Buffer.from(data)
+      : Buffer.from(data.buffer, data.byteOffset, data.byteLength);
+
+  try {
+    const decoded = cbor.decodeAllSync(buffer)[0];
+    if (decoded.authData) {
+      decoded.authData = parseAuthenticatorData(decoded.authData);
+    }
+
+    const publicKeyCbor =
+      decoded.authData.attestedCredentialData.credentialPublicKey;
+
+    const x = number.toBN("0x" + publicKeyCbor.get(-2).toString("hex"));
+    const y = number.toBN("0x" + publicKeyCbor.get(-3).toString("hex"));
+
+    return { ...decoded, pub: { x, y } };
+  } catch (e) {
+    const msg = "Failed to decode attestationObject, unknown attestation type?";
+    console.error(msg);
+    return msg;
+  }
 }
 
 export default WebauthnAccount;

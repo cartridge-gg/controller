@@ -12,7 +12,7 @@ export const Modal: ComponentMultiStyleConfig = {
   ],
   baseStyle: {
     dialog: {
-      background: "gray.700",
+      background: "gray.800",
       pt: "42px",
     },
     closeButton: {
@@ -21,12 +21,8 @@ export const Modal: ComponentMultiStyleConfig = {
         boxShadow: "none",
       },
     },
-    body: {
-      pb: "12px",
-    },
     footer: {
-      pt: "0",
-      pb: "24px",
+      p: "16px",
     },
   },
 };

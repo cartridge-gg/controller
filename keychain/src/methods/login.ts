@@ -19,6 +19,7 @@ const login =
     const { assertion, invoke } = await controller.signAddDeviceKey(
       constants.StarknetChainId.TESTNET,
     );
+
     Storage.set(
       selectors[VERSION].register(address, constants.StarknetChainId.TESTNET),
       invoke,
