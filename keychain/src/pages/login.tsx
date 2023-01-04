@@ -77,7 +77,7 @@ const Login: NextPage = () => {
         return;
       }
 
-      router.replace(`${process.env.NEXT_PUBLIC_SITE_URL}/profile/${address}`);
+      router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile/${address}`);
     } catch (err) {
       console.error(err);
       setIsLoggingIn(false);
