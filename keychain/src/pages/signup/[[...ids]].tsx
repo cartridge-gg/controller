@@ -88,6 +88,9 @@ const CreateWallet: NextPage = () => {
 
   const onConfirm = useCallback(
     async (username: string, credentials: Credentials) => {
+      // https://webkit.org/blog/11545/updates-to-the-storage-access-api/
+      document.cookie = "visited=true; path=/;";
+
       setUsername(username);
       setCredentials(credentials);
 
