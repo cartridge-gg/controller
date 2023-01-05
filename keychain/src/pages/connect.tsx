@@ -37,9 +37,7 @@ const Connect: NextPage = () => {
   useEffect(() => {
     if (!controller) {
       router.replace(
-        `${
-          process.env.NEXT_PUBLIC_SITE_URL
-        }/login?redirect_uri=${encodeURIComponent(window.location.href)}`,
+        `/login?redirect_uri=${encodeURIComponent(window.location.href)}`,
       );
       return;
     }

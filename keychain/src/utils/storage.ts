@@ -2,7 +2,9 @@ import Cookies from "js-cookie";
 
 const isSafari =
   typeof navigator !== "undefined" &&
-  /^((?!chrome|android|crios).)*safari/i.test(navigator.userAgent);
+  /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+console.log(isSafari);
 
 const Storage = {
   keys: (): string[] => {
@@ -38,7 +40,7 @@ const Storage = {
 
     Cookies.set(key, JSON.stringify(value), {
       secure: true,
-      sameSite: "strict",
+      sameSite: "none",
     });
   },
   update: (key: string, value: any) => {
