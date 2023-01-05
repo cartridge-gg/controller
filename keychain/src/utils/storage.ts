@@ -2,7 +2,7 @@ import Cookies from "js-cookie";
 
 const isSafari =
   typeof navigator !== "undefined" &&
-  /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  /^((?!chrome|android|crios).)*safari/i.test(navigator.userAgent);
 
 const Storage = {
   keys: (): string[] => {
