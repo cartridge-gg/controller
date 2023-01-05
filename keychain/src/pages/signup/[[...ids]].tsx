@@ -181,7 +181,7 @@ const CreateWallet: NextPage = () => {
         obscuredWidth="0px"
         position="absolute"
       />
-      <Flex top="0" w="full" position="absolute" justify="center" zIndex="-1">
+      <Flex top="-100px" w="full" position="fixed" justify="center" zIndex="-1">
         <ControllerImage opacity="0.45" fill="whiteAlpha.50" />
       </Flex>
       <Container
@@ -195,7 +195,6 @@ const CreateWallet: NextPage = () => {
         centerContent
       >
         <Dialog regState={regState} username={username} />
-        <Spacer maxH={["30px", "50px"]} />
         <SimpleGrid
           w="full"
           columns={[1, 1, starterPackData ? 2 : 1]}
@@ -313,6 +312,7 @@ const Dialog = ({
       title={title}
       description={description}
       width={["full", "340px"]}
+      mb={["30px", "50px"]}
     />
   );
 };

@@ -1,4 +1,5 @@
 export const WHITELIST_SITES = [
+  "http://127.0.0.1",
   "http://localhost",
   "https://mu-mu.netlify.app",
   "https://mumu-onboarding.netlify.app",

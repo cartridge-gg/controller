@@ -126,7 +126,7 @@ const Login: NextPage = () => {
   return (
     <>
       <Header />
-      <Flex top="0" w="full" position="absolute" justify="center" zIndex="-1">
+      <Flex top="-100px" w="full" position="fixed" justify="center" zIndex="-1">
         <ControllerImage opacity="0.45" fill="whiteAlpha.50" />
       </Flex>
       <Container
@@ -144,8 +144,8 @@ const Login: NextPage = () => {
             width={["full", "340px"]}
             title="Let's plug in!"
             description="Enter your username"
+            mb={["30px", "50px"]}
           />
-          <Spacer maxH={["30px", "50px"]} />
           <Formik initialValues={{ name: "", password: "" }} onSubmit={onLogin}>
             {(props) => (
               <Form
