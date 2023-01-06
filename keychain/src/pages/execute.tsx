@@ -109,20 +109,6 @@ const Execute: NextPage = () => {
     [controller, fees, nonce, params, registerData],
   );
 
-  // Get the nonce
-  useEffect(() => {
-    if (!controller || !params) {
-      return;
-    }
-
-    controller
-      .account(params.chainId)
-      .getNonce()
-      .then((n: number.BigNumberish) => {
-        setNonce(number.toBN(n));
-      });
-  }, [controller, params, setNonce]);
-
   // Estimate fees
   useEffect(() => {
     if (!controller || !nonce || !params.calls) {
@@ -172,6 +158,7 @@ const Execute: NextPage = () => {
               },
             },
           ])) as EstimateFeeResponse[];
+
           const fees = estimates.reduce<EstimateFee>(
             (prev, estimate) => {
               const overall_fee = prev.overall_fee.add(
@@ -217,35 +204,84 @@ const Execute: NextPage = () => {
       return;
     }
 
-    if (params) {
-      // not deployed, show pending tx
-      if (!controller.account(params.chainId).deployed) {
-        const hash = Storage.get(
-          selectors[VERSION].deployment(controller.address, params.chainId),
-        ).deployTx;
+    if (!params) {
+      return;
+    }
 
-        const txn = { name: "Account Deployment", hash };
+    // not deployed
+    if (!controller.account(params.chainId).deployed) {
+      const hash = Storage.get(
+        selectors[VERSION].deployment(controller.address, params.chainId),
+      ).deployTx;
+
+      router.push(
+        `/pending?txns=${encodeURIComponent(
+          JSON.stringify([{ name: "Account Deployment", hash }]),
+        )}`,
+      );
+      return;
+    }
+
+    // not registered
+    if (!controller.account(params.chainId).registered) {
+      const hash = Storage.get(
+        selectors[VERSION].deployment(controller.address, params.chainId),
+      ).registerTx;
+
+      if (hash) {
         router.push(
-          `/pending?txns=${encodeURIComponent(JSON.stringify([txn]))}`,
+          `/pending?txns=${encodeURIComponent(
+            JSON.stringify([{ name: "Account Registration", hash }]),
+          )}`,
         );
+        return;
+      }
+
+      const regData = Storage.get(
+        selectors[VERSION].register(controller.address, params.chainId),
+      );
+      if (regData) {
+        setRegisterData(regData);
       }
     }
+
+    // get nonce
+    controller
+      .account(params.chainId)
+      .getNonce()
+      .then((n: number.BigNumberish) => {
+        setNonce(number.toBN(n));
+      });
   }, [router, controller, params]);
 
   const onRegister = useCallback(async () => {
     setLoading(true);
-    const data = await controller.signAddDeviceKey(params.chainId);
-    Storage.set(
-      selectors[VERSION].register(controller.address, params.chainId),
-      data,
+    const txn = await controller
+      .account(params.chainId)
+      .invokeFunction(registerData.invoke.invocation, {
+        ...registerData.invoke.details,
+        nonce: registerData.invoke.details.nonce!,
+      });
+
+    Storage.update(
+      selectors[VERSION].deployment(controller.address, params.chainId),
+      { registerTx: txn.transaction_hash },
     );
-    setRegisterData(data);
-    setLoading(false);
-  }, [controller, params]);
+
+    router.push(
+      `/pending?txns=${encodeURIComponent(
+        JSON.stringify([{ name: "Account Registration", hash }]),
+      )}`,
+    );
+  }, [controller, params, registerData]);
 
   const onSubmit = useCallback(async () => {
     setLoading(true);
-    await execute(params.calls)(url.href)();
+    await controller.account(params.chainId).execute(params.calls, null, {
+      maxFee: fees.max,
+      nonce,
+      version: hash.transactionVersion,
+    });
     // We set the transaction hash which the keychain instance
     // polls for. We use a manually computed hash to identify
     // the transaction since the keychain estimate fee might be differen.
