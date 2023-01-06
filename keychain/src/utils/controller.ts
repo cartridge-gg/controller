@@ -147,7 +147,7 @@ export default class Controller {
     const gas = 28000;
     const gasPrice = await getGasPrice(chainId);
     const fee = number.toBN(gasPrice).mul(number.toBN(gas));
-    const suggestedMaxFee = stark.estimatedFeeToMaxFee(fee);
+    const suggestedMaxFee = number.toHex(stark.estimatedFeeToMaxFee(fee));
 
     let msgHash = hash.calculateTransactionHash(
       this.address,

@@ -50,15 +50,20 @@ class Account extends BaseAccount {
     });
 
     try {
-      if (!this.deployed) {
-        const deployTx = Storage.get(this.selector).deployTx;
-        if (deployTx) {
-          await this.rpc.waitForTransaction(deployTx, 8000, [
-            "ACCEPTED_ON_L1",
-            "ACCEPTED_ON_L2",
-          ]);
-        }
-      }
+      const { deployTx, registerTx } = Storage.get(this.selector);
+      !this.deployed &&
+        deployTx &&
+        (await this.rpc.waitForTransaction(deployTx, 8000, [
+          "ACCEPTED_ON_L1",
+          "ACCEPTED_ON_L2",
+        ]));
+
+      !this.registered &&
+        registerTx &&
+        (await this.rpc.waitForTransaction(registerTx, 8000, [
+          "ACCEPTED_ON_L1",
+          "ACCEPTED_ON_L2",
+        ]));
 
       const classHash = await this.rpc.getClassHashAt(this.address, "latest");
       Storage.update(this.selector, {
