@@ -61,7 +61,7 @@ const saveDeploy = (origin: string) => (hash: string) => {
       controller.address,
       constants.StarknetChainId.TESTNET,
     ),
-    { deployTx: hash },
+    { txnHash: hash },
   );
   return;
 };

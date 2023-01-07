@@ -37,9 +37,7 @@ const Connect: NextPage = () => {
   useEffect(() => {
     if (!controller) {
       router.replace(
-        `${
-          process.env.NEXT_PUBLIC_SITE_URL
-        }/login?redirect_uri=${encodeURIComponent(window.location.href)}`,
+        `/login?redirect_uri=${encodeURIComponent(window.location.href)}`,
       );
       return;
     }
@@ -57,14 +55,6 @@ const Connect: NextPage = () => {
       try {
         const approvals = validPolicys.filter((_, i) => values[i]);
         controller.approve(origin, approvals, maxFee);
-
-        if (registerDevice) {
-          const data = await controller.signAddDeviceKey(chainId);
-          Storage.set(
-            selectors[VERSION].register(controller.address, chainId),
-            data,
-          );
-        }
 
         if (window.opener) {
           window.close();

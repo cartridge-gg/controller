@@ -52,7 +52,7 @@ const Index: NextPage = () => {
     }
 
     if (window.self === window.top) {
-      router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/welcome`);
+      router.replace("/login");
       return;
     }
 

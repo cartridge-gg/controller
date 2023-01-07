@@ -109,20 +109,6 @@ const Execute: NextPage = () => {
     [controller, fees, nonce, params, registerData],
   );
 
-  // Get the nonce
-  useEffect(() => {
-    if (!controller || !params) {
-      return;
-    }
-
-    controller
-      .account(params.chainId)
-      .getNonce()
-      .then((n: number.BigNumberish) => {
-        setNonce(number.toBN(n));
-      });
-  }, [controller, params, setNonce]);
-
   // Estimate fees
   useEffect(() => {
     if (!controller || !nonce || !params.calls) {
@@ -172,6 +158,7 @@ const Execute: NextPage = () => {
               },
             },
           ])) as EstimateFeeResponse[];
+
           const fees = estimates.reduce<EstimateFee>(
             (prev, estimate) => {
               const overall_fee = prev.overall_fee.add(
@@ -210,42 +197,89 @@ const Execute: NextPage = () => {
   useEffect(() => {
     if (!controller) {
       router.replace(
-        `${
-          process.env.NEXT_PUBLIC_SITE_URL
-        }/login?redirect_uri=${encodeURIComponent(window.location.href)}`,
+        `/login?redirect_uri=${encodeURIComponent(window.location.href)}`,
       );
       return;
     }
 
-    if (params) {
-      // not deployed, show pending tx
-      if (!controller.account(params.chainId).deployed) {
-        const hash = Storage.get(
-          selectors[VERSION].deployment(controller.address, params.chainId),
-        ).deployTx;
+    if (!params) {
+      return;
+    }
 
-        const txn = { name: "Account Deployment", hash };
+    const hash = Storage.get(
+      selectors[VERSION].deployment(controller.address, params.chainId),
+    ).txnHash;
+
+    // not deployed
+    if (!controller.account(params.chainId).deployed) {
+      router.push(
+        `/pending?txns=${encodeURIComponent(
+          JSON.stringify([{ name: "Account Deployment", hash }]),
+        )}`,
+      );
+      return;
+    }
+
+    // not registered
+    if (!controller.account(params.chainId).registered) {
+      if (hash) {
         router.push(
-          `/pending?txns=${encodeURIComponent(JSON.stringify([txn]))}`,
+          `/pending?txns=${encodeURIComponent(
+            JSON.stringify([{ name: "Device Registration", hash }]),
+          )}`,
         );
+        return;
+      }
+
+      const regData = Storage.get(
+        selectors[VERSION].register(controller.address, params.chainId),
+      );
+      if (regData) {
+        setRegisterData(regData);
       }
     }
+
+    // get nonce
+    controller
+      .account(params.chainId)
+      .getNonce()
+      .then((n: number.BigNumberish) => {
+        setNonce(number.toBN(n));
+      });
   }, [router, controller, params]);
 
   const onRegister = useCallback(async () => {
     setLoading(true);
-    const data = await controller.signAddDeviceKey(params.chainId);
-    Storage.set(
-      selectors[VERSION].register(controller.address, params.chainId),
-      data,
+    const txn = await controller
+      .account(params.chainId)
+      .invokeFunction(registerData.invoke.invocation, {
+        ...registerData.invoke.details,
+        nonce: registerData.invoke.details.nonce!,
+      });
+
+    Storage.update(
+      selectors[VERSION].deployment(controller.address, params.chainId),
+      { txnHash: txn.transaction_hash },
     );
-    setRegisterData(data);
-    setLoading(false);
-  }, [controller, params]);
+
+    controller.account(params.chainId).sync();
+
+    router.push(
+      `/pending?txns=${encodeURIComponent(
+        JSON.stringify([
+          { name: "Device Registration", hash: txn.transaction_hash },
+        ]),
+      )}`,
+    );
+  }, [controller, params, registerData]);
 
   const onSubmit = useCallback(async () => {
     setLoading(true);
-    await execute(params.calls)(url.href)();
+    await controller.account(params.chainId).execute(params.calls, null, {
+      maxFee: fees.max,
+      nonce,
+      version: hash.transactionVersion,
+    });
     // We set the transaction hash which the keychain instance
     // polls for. We use a manually computed hash to identify
     // the transaction since the keychain estimate fee might be differen.
