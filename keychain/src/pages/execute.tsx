@@ -206,12 +206,12 @@ const Execute: NextPage = () => {
       return;
     }
 
+    const hash = Storage.get(
+      selectors[VERSION].deployment(controller.address, params.chainId),
+    ).txnHash;
+
     // not deployed
     if (!controller.account(params.chainId).deployed) {
-      const hash = Storage.get(
-        selectors[VERSION].deployment(controller.address, params.chainId),
-      ).deployTx;
-
       router.push(
         `/pending?txns=${encodeURIComponent(
           JSON.stringify([{ name: "Account Deployment", hash }]),
@@ -222,10 +222,6 @@ const Execute: NextPage = () => {
 
     // not registered
     if (!controller.account(params.chainId).registered) {
-      const hash = Storage.get(
-        selectors[VERSION].deployment(controller.address, params.chainId),
-      ).registerTx;
-
       if (hash) {
         router.push(
           `/pending?txns=${encodeURIComponent(
@@ -263,8 +259,10 @@ const Execute: NextPage = () => {
 
     Storage.update(
       selectors[VERSION].deployment(controller.address, params.chainId),
-      { registerTx: txn.transaction_hash },
+      { txnHash: txn.transaction_hash },
     );
+
+    controller.account(params.chainId).sync();
 
     router.push(
       `/pending?txns=${encodeURIComponent(
