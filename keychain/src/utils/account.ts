@@ -8,7 +8,6 @@ import {
   Call,
   EstimateFeeDetails,
   EstimateFee,
-  GetTransactionReceiptResponse,
 } from "starknet";
 import { CLASS_HASHES } from "./hashes";
 
