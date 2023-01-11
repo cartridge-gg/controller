@@ -22,97 +22,28 @@ import { useRouter } from "next/router";
 import { beginLogin } from "hooks/account";
 import login from "methods/login";
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
-import { Web3AuthCore } from "@web3auth/core";
-import {
-    CHAIN_NAMESPACES,
-    SafeEventEmitterProvider,
-    WALLET_ADAPTERS,
-} from "@web3auth/base";
-import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
-import Discord from "./icons/Discord";
-import MetaMask from "./icons/Metamask";
-import Twitter from "./icons/Twitter";
 import NextLink from "next/link";
-
-const clientId = "BKpRo2vJuxbHH3giMVQfdts2l1P3D51AB5hIZ_-HNfkfisVV94Q4aQcZbjXjduwZW8j6n1TlBaEl6Q1nOQXRCG0";
-
-const SocialLogins = () => {
-    const [web3auth, setWeb3auth] = useState<Web3AuthCore | null>(null);
-    const [provider, setProvider] = useState<SafeEventEmitterProvider | null>(
-        null
-    );
-
-    useEffect(() => {
-        const init = async () => {
-            try {
-                const web3auth = new Web3AuthCore({
-                    clientId,
-                    chainConfig: {
-                        chainNamespace: CHAIN_NAMESPACES.OTHER,
-                    },
-                    web3AuthNetwork: "cyan"
-                });
-
-                const openloginAdapter = new OpenloginAdapter();
-                web3auth.configureAdapter(openloginAdapter);
-                setWeb3auth(web3auth);
-
-                await web3auth.init();
-                if (web3auth.provider) {
-                    setProvider(web3auth.provider);
-                }
-            } catch (error) {
-                console.error(error);
-            }
-        };
-
-        init();
-    }, []);
-
-    const login = async (loginProvider: "discord" | "twitter" | "metamask") => {
-        if (!web3auth) {
-            console.error("web3auth not initialized yet");
-            return;
-        }
-        const web3authProvider = await web3auth.connectTo(
-            WALLET_ADAPTERS.OPENLOGIN,
-            { loginProvider }
-        );
-        setProvider(web3authProvider);
-    };
-
-    return (
-        <HStack gap="12px">
-            <Button flex={1} variant="secondary700" onClick={async () => {
-                login("discord");
-            }}><Discord height="18px" width="18px" /></Button>
-            <Button flex={1} variant="secondary700" onClick={async () => {
-                login("twitter");
-            }}><Twitter height="18px" width="18px" /></Button>
-            <Button flex={1} variant="secondary700" onClick={async () => {
-                login("metamask");
-            }}><MetaMask height="18px" width="18px" /></Button>
-        </HStack>
-    )
-}
+import { useDebounce } from "hooks/debounce";
+import Web3Auth from "./Web3Auth";
 
 export const Login = () => {
-    const [name, setName] = useState<string>();
-    const { error, refetch } = useAccountQuery({ id: name }, { enabled: false });
+    const [name, setName] = useState("");
     const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
     const [unsupported, setUnsupported] = useState<boolean>(false);
+    const { debouncedValue: debouncedName } = useDebounce(name, 100);
+    const { error, refetch } = useAccountQuery({ id: debouncedName }, { enabled: false });
 
     const { event: log } = useAnalytics();
     const router = useRouter();
 
     const { redirect_uri } = router.query as { redirect_uri: string };
 
-    // useEffect(() => {
-    //     if (debouncedName.length === 0) {
-    //         return;
-    //     }
-    //     refetch();
-    // }, [refetch, debouncedName])
+    useEffect(() => {
+        if (debouncedName.length === 0) {
+            return;
+        }
+        refetch();
+    }, [refetch, debouncedName])
 
     const onLogin = useCallback(async () => {
         log({ type: "webauthn_login" });
@@ -148,7 +79,7 @@ export const Login = () => {
             log({
                 type: "webauthn_login_error",
                 payload: {
-                    error: `Error: ${err?.message} User Agent: ${navigator.userAgent}`,
+                    error: err?.message,
                 },
             });
         }
@@ -190,7 +121,7 @@ export const Login = () => {
                                         <Tooltip
                                             variant="error"
                                             mt="10px"
-                                            placement="bottom"
+                                            placement="top"
                                             isOpen={!!error}
                                             hasArrow
                                             label={
@@ -223,7 +154,7 @@ export const Login = () => {
                                 <Text mx="18px" fontFamily="IBM Plex Sans" fontSize="12px" color="whiteAlpha.600" fontWeight="600">or</Text>
                                 <Divider borderColor="whiteAlpha.500" />
                             </HStack>
-                            <SocialLogins />
+                            <Web3Auth onAuth={() => { }} />
                             <HStack as="strong" justify="center" fontSize="13px">
                                 <Text color="whiteAlpha.600">
                                     {"Don't have a controller?"}
@@ -231,7 +162,7 @@ export const Login = () => {
                                 <NextLink
                                     href={{ pathname: "https://cartridge.gg/signup", query: router.query }}
                                 >
-                                    <Link variant="traditional">Sign up</Link>
+                                    <Link variant="traditional">Create Account</Link>
                                 </NextLink>
                             </HStack>
                         </Form>
