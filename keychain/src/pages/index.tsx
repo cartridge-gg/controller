@@ -18,6 +18,8 @@ import { revoke, session, sessions } from "../methods/sessions";
 import Controller from "utils/controller";
 import { normalize as normalizeOrigin } from "utils/url";
 import { Session } from "@cartridge/controller";
+import { Login } from "components/Login";
+import { Container } from "@chakra-ui/react";
 
 export function normalize<T = Function>(
   fn: (origin: string) => T,
@@ -44,15 +46,12 @@ export function validate<T = Function>(
 }
 
 const Index: NextPage = () => {
-  const router = useRouter();
-
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
     }
 
     if (window.self === window.top) {
-      router.replace("/login");
       return;
     }
 
@@ -92,7 +91,11 @@ const Index: NextPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return <></>;
+  return (
+    <Container display="flex" alignItems="center" justifyContent="center" position="fixed" left={0} right={0} top={0} bottom={0}>
+      <Login />
+    </Container>
+  );
 };
 
 export default dynamic(() => Promise.resolve(Index), { ssr: false });

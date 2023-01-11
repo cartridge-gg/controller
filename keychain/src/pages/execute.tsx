@@ -28,18 +28,21 @@ import selectors from "utils/selectors";
 import Register from "components/Register";
 import Fees from "components/Fees";
 import JoystickIcon from "@cartridge/ui/src/components/icons/Joystick";
+import BN from "bn.js";
+import { useControllerModal } from "hooks/modal";
 
 const Execute: NextPage = () => {
   const [registerData, setRegisterData] = useState<RegisterData>();
-  const [nonce, setNonce] = useState<BigNumber>();
+  const [nonce, setNonce] = useState<BN>();
   const [fees, setFees] = useState<{
-    base: number.BigNumberish;
-    max: number.BigNumberish;
+    base: BN;
+    max: BN;
   }>();
   const [error, setError] = useState<Error>();
   const [isLoading, setLoading] = useState<boolean>(false);
   const controller = useMemo(() => Controller.fromStore(), []);
   const router = useRouter();
+  const { confirm, cancel } = useControllerModal();
 
   const url = useMemo(() => {
     const { origin } = router.query;
@@ -243,7 +246,7 @@ const Execute: NextPage = () => {
     controller
       .account(params.chainId)
       .getNonce()
-      .then((n: number.BigNumberish) => {
+      .then((n: BN) => {
         setNonce(number.toBN(n));
       });
   }, [router, controller, params]);
@@ -298,9 +301,7 @@ const Execute: NextPage = () => {
       true,
     );
     setLoading(false);
-    if (window.opener) {
-      window.close();
-    }
+    confirm();
   }, [controller, execute, nonce, params, url]);
 
   if (error) {
@@ -325,6 +326,7 @@ const Execute: NextPage = () => {
           chainId={params.chainId}
           onSubmit={onRegister}
           isLoading={isLoading}
+          onCancel={cancel}
         />
       </>
     );
@@ -356,11 +358,7 @@ const Execute: NextPage = () => {
             isLoading={isLoading}
             isDisabled={!fees}
             onConfirm={onSubmit}
-            onCancel={() => {
-              if (window.opener) {
-                window.close();
-              }
-            }}
+            onCancel={cancel}
           >
             <Fees chainId={params.chainId} fees={fees} />
           </Footer>

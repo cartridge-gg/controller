@@ -55,9 +55,7 @@ export const Header = ({
     <Container height="50px">
       <HStack w="full">
         <HStack spacing="0">
-          <Link href={process.env.NEXT_PUBLIC_ADMIN_URL}>
-            <Logo fill="brand" w="24px" mr="15px" />
-          </Link>
+          <Logo fill="brand" w="24px" mr="15px" />
         </HStack>
         <Spacer />
         <HStack spacing="10px">

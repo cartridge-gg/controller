@@ -2,7 +2,7 @@ import { Policy } from "@cartridge/controller";
 
 import Controller from "utils/controller";
 
-const INTERNVAL = 100;
+const INTERNVAL = 1000;
 
 // Three minutes
 const TIMEOUT = 1000 * 60 * 3;

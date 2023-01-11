@@ -22,8 +22,8 @@ import Controller, { VERSION } from "utils/controller";
 import PlugIcon from "@cartridge/ui/src/components/icons/Plug";
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import LaptopIcon from "@cartridge/ui/src/components/icons/Laptop";
-
 import { Banner } from "components/Banner";
+import { useControllerModal } from "hooks/modal";
 
 const Connect: NextPage = () => {
   const [maxFee, setMaxFee] = useState(null);
@@ -33,6 +33,7 @@ const Connect: NextPage = () => {
   const controller = useMemo(() => Controller.fromStore(), []);
   const account = controller?.account(chainId);
   const router = useRouter();
+  const { confirm, cancel } = useControllerModal();
 
   useEffect(() => {
     if (!controller) {
@@ -55,10 +56,7 @@ const Connect: NextPage = () => {
       try {
         const approvals = validPolicys.filter((_, i) => values[i]);
         controller.approve(origin, approvals, maxFee);
-
-        if (window.opener) {
-          window.close();
-        }
+        confirm();
       } catch (e) {
         console.error(e);
       }
@@ -110,9 +108,7 @@ const Connect: NextPage = () => {
             chainId={chainId}
             action={"CREATE"}
             onCancel={() => {
-              if (window.opener) {
-                window.close();
-              }
+              cancel();
             }}
             onSubmit={connect}
             policies={validPolicys}

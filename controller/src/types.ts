@@ -92,3 +92,8 @@ export interface Keychain {
     account: string
   ): Promise<Signature>;
 }
+
+export interface ModalMethods {
+  onConfirm(): void;
+  onCancel(): void;
+}

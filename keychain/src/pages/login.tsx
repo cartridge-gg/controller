@@ -10,7 +10,6 @@ import {
   Input,
   InputProps,
   Tooltip,
-  Spacer,
   Circle,
   Container,
   VStack,
@@ -37,9 +36,11 @@ import { useRouter } from "next/router";
 import { useAnalytics } from "hooks/analytics";
 import Unsupported from "components/signup/Unsupported";
 import { isWhitelisted } from "utils/whitelist";
+import { useControllerModal } from "hooks/modal";
 
 const Login: NextPage = () => {
   const [name, setName] = useState<string>();
+  const [isEmbedded, setIsEmbedded] = useState<boolean>(false);
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
   const [unsupported, setUnsupported] = useState<boolean>(false);
   const [showSignup, setShowSignup] = useState<boolean>(true);
@@ -49,6 +50,7 @@ const Login: NextPage = () => {
   const { redirect_uri } = router.query as { redirect_uri: string };
   const { event: analyticsEvent } = useAnalytics();
   const { error, refetch } = useAccountQuery({ id: name }, { enabled: false });
+  const { cancel } = useControllerModal();
 
   const onLogin = useCallback(async () => {
     analyticsEvent({ type: "webauthn_login" });
@@ -105,10 +107,14 @@ const Login: NextPage = () => {
         `iOS ${iosVersion[1]} does not support passkeys. Upgrade to iOS 16 to continue`,
       );
     }
+
+    if (window.top !== window.self) {
+      setIsEmbedded(true);
+    }
   }, []);
 
   const onCancel = () => {
-    router.push("/");
+    cancel();
     analyticsEvent({ type: "login_cancel" });
   };
 
@@ -222,8 +228,11 @@ const Login: NextPage = () => {
                     </Text>
                     <NextLink
                       href={{ pathname: "/signup", query: router.query }}
+                      passHref={isEmbedded}
                     >
-                      <Link variant="traditional">Sign up</Link>
+                      <Link variant="traditional" isExternal={isEmbedded}>
+                        Sign up
+                      </Link>
                     </NextLink>
                   </HStack>
                 )}

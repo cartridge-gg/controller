@@ -4,6 +4,7 @@ import { HStack, Spinner, Text, VStack } from "@chakra-ui/react";
 import { constants, number } from "starknet";
 import InfoIcon from "@cartridge/ui/components/icons/Info";
 import { formatUnits } from "ethers/lib/utils";
+import BN from "bn.js";
 
 async function fetchEthPrice() {
   const res = await fetch(process.env.NEXT_PUBLIC_API_URL, {
@@ -21,7 +22,7 @@ const Fees = ({
   fees,
 }: {
   chainId: constants.StarknetChainId;
-  fees?: { base: number.BigNumberish; max: number.BigNumberish };
+  fees?: { base: BN; max: BN };
 }) => {
   const [formattedFee, setFormattedFee] = useState<{
     base: string;
@@ -53,17 +54,17 @@ const Fees = ({
       setFormattedFee(
         fees.max.gt(number.toBN(10000000000000))
           ? {
-              base: `~${parseFloat(
-                formatUnits(fees.base.toString(), 18),
-              ).toFixed(5)} eth`,
-              max: `~${parseFloat(formatUnits(fees.max.toString(), 18)).toFixed(
-                5,
-              )} eth`,
-            }
+            base: `~${parseFloat(
+              formatUnits(fees.base.toString(), 18),
+            ).toFixed(5)} eth`,
+            max: `~${parseFloat(formatUnits(fees.max.toString(), 18)).toFixed(
+              5,
+            )} eth`,
+          }
           : {
-              base: "<0.00001 eth",
-              max: "<0.00001 eth",
-            },
+            base: "<0.00001 eth",
+            max: "<0.00001 eth",
+          },
       );
     }
     compute();

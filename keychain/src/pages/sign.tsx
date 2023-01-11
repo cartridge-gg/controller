@@ -11,6 +11,7 @@ import ButtonBar from "components/ButtonBar";
 import Details from "components/Details";
 import { Header } from "components/Header";
 import Controller from "utils/controller";
+import { useControllerModal } from "hooks/modal";
 
 const DetailsHeader = (data: {
   media?: Array<{ uri: string }>;
@@ -86,6 +87,7 @@ const Sign: NextPage = () => {
   const [nonce, setNonce] = useState("...");
   const [messageData, setMessageData] = useState({});
   const router = useRouter();
+  const { confirm, cancel } = useControllerModal();
 
   const { id, origin, typedData } = router.query;
   const headerData = { icon: <></>, name: origin as string };
@@ -152,12 +154,12 @@ const Sign: NextPage = () => {
             onSubmit={() => {
               const bc = new BroadcastChannel(id as string);
               bc.postMessage({});
-              window.close();
+              confirm();
             }}
             onCancel={() => {
               const bc = new BroadcastChannel(id as string);
               bc.postMessage({ error: "User cancelled" });
-              window.close();
+              cancel();
             }}
             isSubmitting={false}
           >
