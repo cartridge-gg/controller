@@ -93,7 +93,7 @@ export interface Keychain {
   ): Promise<Signature>;
 }
 
-export interface ModalResponse {
+export interface ModalMethods {
   onConfirm(): void;
   onCancel(): void;
 }

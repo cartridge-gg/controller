@@ -10,10 +10,12 @@ const Register = ({
   chainId,
   isLoading,
   onSubmit,
+  onCancel,
 }: {
   isLoading: boolean;
   chainId: constants.StarknetChainId;
   onSubmit: () => void;
+  onCancel: () => void;
 }) => (
   <Flex m={4} flex={1} flexDirection="column">
     <Banner
@@ -49,11 +51,7 @@ const Register = ({
       <Footer
         isLoading={isLoading}
         onConfirm={onSubmit}
-        onCancel={() => {
-          if (window.opener) {
-            window.close();
-          }
-        }}
+        onCancel={onCancel}
         confirmText="Register"
       ></Footer>
     </Flex>

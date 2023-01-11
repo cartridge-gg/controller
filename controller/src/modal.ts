@@ -1,5 +1,5 @@
 import { connectToChild } from "@cartridge/penpal";
-import { ModalResponse } from "./types";
+import { ModalMethods } from "./types";
 
 export interface Modal {
   open: (src: string) => void;
@@ -38,8 +38,9 @@ export const createModal = () => {
   document.body.appendChild(container);
 
   function open(src: string) {
+    container.style.display = "flex";
     iframe.src = src;
-    connectToChild<ModalResponse>({
+    connectToChild<ModalMethods>({
       iframe,
       methods: {
         onCancel: () => {
@@ -50,12 +51,11 @@ export const createModal = () => {
         },
       },
     });
-    container.style.display = "flex";
   }
 
   function close() {
-    iframe.src = "about:blank";
     container.style.display = "none";
+    iframe.src = "about:blank";
   }
 
   return {

@@ -22,14 +22,8 @@ import Controller, { VERSION } from "utils/controller";
 import PlugIcon from "@cartridge/ui/src/components/icons/Plug";
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import LaptopIcon from "@cartridge/ui/src/components/icons/Laptop";
-
 import { Banner } from "components/Banner";
-import {
-  connectToParent,
-  AsyncMethodReturns,
-  Connection,
-} from "@cartridge/penpal";
-import { ModalResponse } from "@cartridge/controller";
+import { useControllerModal } from "hooks/modal";
 
 const Connect: NextPage = () => {
   const [maxFee, setMaxFee] = useState(null);
@@ -39,19 +33,7 @@ const Connect: NextPage = () => {
   const controller = useMemo(() => Controller.fromStore(), []);
   const account = controller?.account(chainId);
   const router = useRouter();
-
-  const [modalConn, setModalConn] =
-    useState<AsyncMethodReturns<ModalResponse>>();
-
-  useEffect(() => {
-    const connection: Connection<ModalResponse> = connectToParent();
-    connection.promise.then((modal) => {
-      setModalConn(modal);
-    });
-    return () => {
-      connection.destroy();
-    };
-  }, []);
+  const { confirm, cancel } = useControllerModal();
 
   useEffect(() => {
     if (!controller) {
@@ -74,21 +56,13 @@ const Connect: NextPage = () => {
       try {
         const approvals = validPolicys.filter((_, i) => values[i]);
         controller.approve(origin, approvals, maxFee);
-        modalConn?.onConfirm();
+        confirm();
       } catch (e) {
         console.error(e);
       }
       actions.setSubmitting(false);
     },
-    [
-      origin,
-      validPolicys,
-      controller,
-      maxFee,
-      chainId,
-      registerDevice,
-      modalConn,
-    ],
+    [origin, validPolicys, controller, maxFee, chainId, registerDevice],
   );
 
   if (!controller) {
@@ -134,7 +108,7 @@ const Connect: NextPage = () => {
             chainId={chainId}
             action={"CREATE"}
             onCancel={() => {
-              modalConn?.onCancel();
+              cancel();
             }}
             onSubmit={connect}
             policies={validPolicys}

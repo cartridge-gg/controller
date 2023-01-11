@@ -11,13 +11,7 @@ import ButtonBar from "components/ButtonBar";
 import Details from "components/Details";
 import { Header } from "components/Header";
 import Controller from "utils/controller";
-
-import {
-  connectToParent,
-  AsyncMethodReturns,
-  Connection,
-} from "@cartridge/penpal";
-import { ModalResponse } from "@cartridge/controller";
+import { useControllerModal } from "hooks/modal";
 
 const DetailsHeader = (data: {
   media?: Array<{ uri: string }>;
@@ -93,6 +87,7 @@ const Sign: NextPage = () => {
   const [nonce, setNonce] = useState("...");
   const [messageData, setMessageData] = useState({});
   const router = useRouter();
+  const { confirm, cancel } = useControllerModal();
 
   const { id, origin, typedData } = router.query;
   const headerData = { icon: <></>, name: origin as string };
@@ -105,19 +100,6 @@ const Sign: NextPage = () => {
       return;
     }
   }, [router, controller]);
-
-  const [modalConn, setModalConn] =
-    useState<AsyncMethodReturns<ModalResponse>>();
-
-  useEffect(() => {
-    const connection: Connection<ModalResponse> = connectToParent();
-    connection.promise.then((modal) => {
-      setModalConn(modal);
-    });
-    return () => {
-      connection.destroy();
-    };
-  }, []);
 
   useEffect(() => {
     if (!typedData) return;
@@ -172,12 +154,12 @@ const Sign: NextPage = () => {
             onSubmit={() => {
               const bc = new BroadcastChannel(id as string);
               bc.postMessage({});
-              modalConn?.onConfirm();
+              confirm();
             }}
             onCancel={() => {
               const bc = new BroadcastChannel(id as string);
               bc.postMessage({ error: "User cancelled" });
-              modalConn?.onCancel();
+              cancel();
             }}
             isSubmitting={false}
           >

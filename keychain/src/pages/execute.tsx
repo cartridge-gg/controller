@@ -29,13 +29,7 @@ import Register from "components/Register";
 import Fees from "components/Fees";
 import JoystickIcon from "@cartridge/ui/src/components/icons/Joystick";
 import BN from "bn.js";
-
-import {
-  connectToParent,
-  AsyncMethodReturns,
-  Connection,
-} from "@cartridge/penpal";
-import { ModalResponse } from "@cartridge/controller";
+import { useControllerModal } from "hooks/modal";
 
 const Execute: NextPage = () => {
   const [registerData, setRegisterData] = useState<RegisterData>();
@@ -48,6 +42,7 @@ const Execute: NextPage = () => {
   const [isLoading, setLoading] = useState<boolean>(false);
   const controller = useMemo(() => Controller.fromStore(), []);
   const router = useRouter();
+  const { confirm, cancel } = useControllerModal();
 
   const url = useMemo(() => {
     const { origin } = router.query;
@@ -80,19 +75,6 @@ const Execute: NextPage = () => {
       chainId: chainId ? chainId : constants.StarknetChainId.TESTNET,
     };
   }, [controller.address, router.query]);
-
-  const [modalConn, setModalConn] =
-    useState<AsyncMethodReturns<ModalResponse>>();
-
-  useEffect(() => {
-    const connection: Connection<ModalResponse> = connectToParent();
-    connection.promise.then((modal) => {
-      setModalConn(modal);
-    });
-    return () => {
-      connection.destroy();
-    };
-  }, []);
 
   const execute = useCallback(
     (calls: StarknetCall[]) => {
@@ -319,7 +301,7 @@ const Execute: NextPage = () => {
       true,
     );
     setLoading(false);
-    modalConn?.onConfirm();
+    confirm();
   }, [controller, execute, nonce, params, url]);
 
   if (error) {
@@ -344,6 +326,7 @@ const Execute: NextPage = () => {
           chainId={params.chainId}
           onSubmit={onRegister}
           isLoading={isLoading}
+          onCancel={cancel}
         />
       </>
     );
@@ -375,9 +358,7 @@ const Execute: NextPage = () => {
             isLoading={isLoading}
             isDisabled={!fees}
             onConfirm={onSubmit}
-            onCancel={() => {
-              modalConn?.onCancel();
-            }}
+            onCancel={cancel}
           >
             <Fees chainId={params.chainId} fees={fees} />
           </Footer>

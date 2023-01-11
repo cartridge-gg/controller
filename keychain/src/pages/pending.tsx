@@ -10,13 +10,7 @@ import { Header } from "components/Header";
 import { Banner } from "components/Banner";
 import Footer from "components/Footer";
 import { Transaction, TransactionState } from "components/Transaction";
-
-import {
-  connectToParent,
-  AsyncMethodReturns,
-  Connection,
-} from "@cartridge/penpal";
-import { ModalResponse } from "@cartridge/controller";
+import { useControllerModal } from "hooks/modal";
 
 const Pending: NextPage = () => {
   const [txnResults, setTxnResults] = useState<TransactionState[]>([]);
@@ -25,6 +19,7 @@ const Pending: NextPage = () => {
 
   const controller = useMemo(() => Controller.fromStore(), []);
   const { chainId, txns } = useUrlTxns();
+  const { cancel } = useControllerModal();
 
   useEffect(() => {
     if (txnResults.length > 0 && txnResults.length === txns.length) {
@@ -41,19 +36,6 @@ const Pending: NextPage = () => {
 
     //pending
   }, [txnResults, txns]);
-
-  const [modalConn, setModalConn] =
-    useState<AsyncMethodReturns<ModalResponse>>();
-
-  useEffect(() => {
-    const connection: Connection<ModalResponse> = connectToParent();
-    connection.promise.then((modal) => {
-      setModalConn(modal);
-    });
-    return () => {
-      connection.destroy();
-    };
-  }, []);
 
   return (
     <>
@@ -77,13 +59,7 @@ const Pending: NextPage = () => {
             }}
           />
         ))}
-        <Footer
-          showConfirm={false}
-          cancelText="Close"
-          onCancel={() => {
-            modalConn?.onCancel();
-          }}
-        />
+        <Footer showConfirm={false} cancelText="Close" onCancel={cancel} />
       </Container>
     </>
   );

@@ -36,13 +36,7 @@ import { useRouter } from "next/router";
 import { useAnalytics } from "hooks/analytics";
 import Unsupported from "components/signup/Unsupported";
 import { isWhitelisted } from "utils/whitelist";
-
-import {
-  connectToParent,
-  AsyncMethodReturns,
-  Connection,
-} from "@cartridge/penpal";
-import { ModalResponse } from "@cartridge/controller";
+import { useControllerModal } from "hooks/modal";
 
 const Login: NextPage = () => {
   const [name, setName] = useState<string>();
@@ -55,19 +49,7 @@ const Login: NextPage = () => {
   const { redirect_uri } = router.query as { redirect_uri: string };
   const { event: analyticsEvent } = useAnalytics();
   const { error, refetch } = useAccountQuery({ id: name }, { enabled: false });
-
-  const [modalConn, setModalConn] =
-    useState<AsyncMethodReturns<ModalResponse>>();
-
-  useEffect(() => {
-    const connection: Connection<ModalResponse> = connectToParent();
-    connection.promise.then((modal) => {
-      setModalConn(modal);
-    });
-    return () => {
-      connection.destroy();
-    };
-  }, []);
+  const { confirm, cancel } = useControllerModal();
 
   const onLogin = useCallback(async () => {
     analyticsEvent({ type: "webauthn_login" });
@@ -127,7 +109,7 @@ const Login: NextPage = () => {
   }, []);
 
   const onCancel = () => {
-    modalConn?.onCancel();
+    cancel();
     analyticsEvent({ type: "login_cancel" });
   };
 
