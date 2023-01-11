@@ -10,7 +10,6 @@ import {
   Input,
   InputProps,
   Tooltip,
-  Spacer,
   Circle,
   Container,
   VStack,

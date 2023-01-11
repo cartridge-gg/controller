@@ -28,6 +28,7 @@ import selectors from "utils/selectors";
 import Register from "components/Register";
 import Fees from "components/Fees";
 import JoystickIcon from "@cartridge/ui/src/components/icons/Joystick";
+import BN from "bn.js";
 
 import {
   connectToParent,
@@ -38,7 +39,7 @@ import { ModalResponse } from "@cartridge/controller";
 
 const Execute: NextPage = () => {
   const [registerData, setRegisterData] = useState<RegisterData>();
-  const [nonce, setNonce] = useState<BigNumber>();
+  const [nonce, setNonce] = useState<BN>();
   const [fees, setFees] = useState<{
     base: number.BigNumberish;
     max: number.BigNumberish;
