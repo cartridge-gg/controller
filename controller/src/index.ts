@@ -222,11 +222,11 @@ class Controller {
       }
     }
 
-    this.modal?.open(
-      `${this.url}/connect?${qs.stringify({
-        origin: window.origin,
-        policies: JSON.stringify(this.policies),
-      })}`
+    this.modal?.open("/"
+      // `${this.url}/connect?${qs.stringify({
+      //   origin: window.origin,
+      //   policies: JSON.stringify(this.policies),
+      // })}`
     );
 
     const response = await this.keychain.connect(this.policies);

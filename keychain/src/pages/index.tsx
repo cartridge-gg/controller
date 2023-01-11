@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import dynamic from "next/dynamic";
-import { useEffect } from "react";
+import { ReactNode, useEffect } from "react";
 
 import { useRouter } from "next/router";
 import { connectToParent } from "@cartridge/penpal";
@@ -19,7 +19,8 @@ import Controller from "utils/controller";
 import { normalize as normalizeOrigin } from "utils/url";
 import { Session } from "@cartridge/controller";
 import { Login } from "components/Login";
-import { Container } from "@chakra-ui/react";
+import { Container as ChakraContainer } from "@chakra-ui/react";
+import Connect from "components/connect";
 
 export function normalize<T = Function>(
   fn: (origin: string) => T,
@@ -45,6 +46,9 @@ export function validate<T = Function>(
   };
 }
 
+const Container = ({ children }: { children: ReactNode }) =>
+  <ChakraContainer display="flex" alignItems="center" justifyContent="center" position="fixed" left={0} right={0} top={0} bottom={0}>{children}</ChakraContainer>
+
 const Index: NextPage = () => {
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -56,6 +60,7 @@ const Index: NextPage = () => {
     }
 
     const connection = connectToParent({
+      parentOrigin: window.parent.origin,
       methods: {
         connect: normalize(connect),
         disconnect: normalize(
@@ -91,8 +96,52 @@ const Index: NextPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  if (window.self === window.top) {
+    return <></>;
+  }
+
+  // No controller, send to login
+  const controller = Controller.fromStore();
+  if (!controller) {
+    return (
+      <Container>
+        <Login />
+      </Container>
+    );
+  }
+
+  // No session, send to Connect
+  const session_ = controller.session(normalizeOrigin(window.parent.origin));
+  if (!session_) {
+    return (
+      <Container>
+        {/* <Connect /> */}
+      </Container>
+    );
+  }
+
+  // const { deployed, registered } = controller.account(chainId);
+  // if (deployed && !registered) {
+  //   return (
+  //     <Container>
+  //       {/* <Header address={controller.address} /> */}
+  //       <Register
+  //         chainId={chainId}
+  //         onSubmit={onRegister}
+  //         isLoading={isLoading}
+  //         onCancel={cancel}
+  //       />
+  //     </Container>
+  //   );
+  // }
+
+
+  // if (!controller) {
+  //   return <Header address={controller.address} />;
+  // }
+
   return (
-    <Container display="flex" alignItems="center" justifyContent="center" position="fixed" left={0} right={0} top={0} bottom={0}>
+    <Container>
       {/* <Login /> */}
     </Container>
   );

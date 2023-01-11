@@ -1,11 +1,8 @@
-import type { NextPage } from "next";
-import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Flex } from "@chakra-ui/react";
 
 import { Header } from "components/Header";
 import Controller, { RegisterData, VERSION } from "utils/controller";
-import { useRouter } from "next/router";
 import {
   constants,
   hash,
@@ -18,12 +15,10 @@ import {
 } from "starknet";
 import Storage from "utils/storage";
 import { Banner } from "components/Banner";
-import Network from "components/Network";
 import { Call } from "components/Call";
 import Footer from "components/Footer";
 import { normalize, validate } from "pages";
 import { estimateFeeBulk } from "utils/gateway";
-import { BigNumber } from "ethers";
 import selectors from "utils/selectors";
 import Register from "components/Register";
 import Fees from "components/Fees";
@@ -31,7 +26,12 @@ import JoystickIcon from "@cartridge/ui/src/components/icons/Joystick";
 import BN from "bn.js";
 import { useControllerModal } from "hooks/modal";
 
-const Execute: NextPage = () => {
+const Execute = ({ url, calls, chainId, maxFee }: {
+  url: URL,
+  calls: StarknetCall[],
+  chainId?: constants.StarknetChainId;
+  maxFee?: string
+}) => {
   const [registerData, setRegisterData] = useState<RegisterData>();
   const [nonce, setNonce] = useState<BN>();
   const [fees, setFees] = useState<{
@@ -41,50 +41,19 @@ const Execute: NextPage = () => {
   const [error, setError] = useState<Error>();
   const [isLoading, setLoading] = useState<boolean>(false);
   const controller = useMemo(() => Controller.fromStore(), []);
-  const router = useRouter();
   const { confirm, cancel } = useControllerModal();
 
-  const url = useMemo(() => {
-    const { origin } = router.query;
-    if (!origin) {
-      return;
-    }
-    const url = new URL(origin as string);
-    return url;
-  }, [router.query]);
-
-  const params = useMemo(() => {
-    if (!controller.address || !router.query.calls) {
-      return null;
-    }
-
-    const { maxFee, chainId } = router.query as {
-      chainId?: constants.StarknetChainId;
-      maxFee?: string;
-    };
-    const calls: StarknetCall | StarknetCall[] = JSON.parse(
-      router.query.calls as string,
-    );
-    const transactions = Array.isArray(calls) ? calls : [calls];
-    const calldata = transaction.fromCallsToExecuteCalldata(transactions);
-
-    return {
-      calls: transactions,
-      calldata,
-      maxFee,
-      chainId: chainId ? chainId : constants.StarknetChainId.TESTNET,
-    };
-  }, [controller.address, router.query]);
+  const calldata = useMemo(() => transaction.fromCallsToExecuteCalldata(calls), [calls]);
 
   const execute = useCallback(
     (calls: StarknetCall[]) => {
-      const account = controller.account(params.chainId);
+      const account = controller.account(chainId);
       return normalize(
         validate((controller) => {
           return async () => {
             if (account.registered) {
               return await controller
-                .account(params.chainId)
+                .account(chainId)
                 .execute(calls, null, {
                   maxFee: fees.max,
                   nonce,
@@ -94,12 +63,12 @@ const Execute: NextPage = () => {
 
             return await Promise.all([
               controller
-                .account(params.chainId)
+                .account(chainId)
                 .invokeFunction(registerData.invoke.invocation, {
                   ...registerData.invoke.details,
                   nonce: registerData.invoke.details.nonce!,
                 }),
-              controller.account(params.chainId).execute(calls, null, {
+              controller.account(chainId).execute(calls, null, {
                 maxFee: fees.max,
                 nonce: nonce.add(number.toBN(1)),
                 version: hash.transactionVersion,
@@ -109,26 +78,26 @@ const Execute: NextPage = () => {
         }),
       );
     },
-    [controller, fees, nonce, params, registerData],
+    [controller, chainId, fees, nonce, registerData],
   );
 
   // Estimate fees
   useEffect(() => {
-    if (!controller || !nonce || !params.calls) {
+    if (!controller || !nonce || !calls) {
       return;
     }
 
     async function register() {
-      const account = controller.account(params.chainId);
+      const account = controller.account(chainId);
       if (account.registered) {
-        if (params.maxFee) {
+        if (maxFee) {
           setFees({
-            base: number.toBN(params.maxFee),
-            max: number.toBN(params.maxFee),
+            base: number.toBN(maxFee),
+            max: number.toBN(maxFee),
           });
           return;
         }
-        const fees = await account.estimateInvokeFee(params.calls, { nonce });
+        const fees = await account.estimateInvokeFee(calls, { nonce });
         setFees({ base: fees.overall_fee, max: fees.suggestedMaxFee });
       } else if (!account.registered && registerData) {
         try {
@@ -138,20 +107,20 @@ const Execute: NextPage = () => {
             nonce: nextNonce,
             maxFee: constants.ZERO,
             version: hash.transactionVersion,
-            chainId: params.chainId,
+            chainId: chainId,
           };
 
           const signature = await controller.signer.signTransaction(
-            params.calls,
+            calls,
             signerDetails,
           );
 
-          const estimates = (await estimateFeeBulk(params.chainId, [
+          const estimates = (await estimateFeeBulk(chainId, [
             registerData.invoke,
             {
               invocation: {
                 contractAddress: controller.address,
-                calldata: params.calldata,
+                calldata: calldata,
                 signature,
               },
               details: {
@@ -195,90 +164,71 @@ const Execute: NextPage = () => {
     }
 
     register();
-  }, [controller, nonce, params, registerData, setError, setFees]);
+  }, [controller, nonce, registerData, setError, setFees, calldata, calls, chainId, maxFee]);
 
   useEffect(() => {
-    if (!controller) {
-      router.replace(
-        `/login?redirect_uri=${encodeURIComponent(window.location.href)}`,
-      );
-      return;
-    }
-
-    if (!params) {
-      return;
-    }
-
     const hash = Storage.get(
-      selectors[VERSION].deployment(controller.address, params.chainId),
+      selectors[VERSION].deployment(controller.address, chainId),
     ).txnHash;
 
     // not deployed
-    if (!controller.account(params.chainId).deployed) {
-      router.push(
-        `/pending?txns=${encodeURIComponent(
-          JSON.stringify([{ name: "Account Deployment", hash }]),
-        )}`,
-      );
-      return;
-    }
+    // if (!controller.account(chainId).deployed) {
+    //   router.push(
+    //     `/pending?txns=${encodeURIComponent(
+    //       JSON.stringify([{ name: "Account Deployment", hash }]),
+    //     )}`,
+    //   );
+    //   return;
+    // }
 
     // not registered
-    if (!controller.account(params.chainId).registered) {
-      if (hash) {
-        router.push(
-          `/pending?txns=${encodeURIComponent(
-            JSON.stringify([{ name: "Device Registration", hash }]),
-          )}`,
-        );
-        return;
-      }
+    // if (!controller.account(chainId).registered) {
+    //   if (hash) {
+    //     router.push(
+    //       `/pending?txns=${encodeURIComponent(
+    //         JSON.stringify([{ name: "Device Registration", hash }]),
+    //       )}`,
+    //     );
+    //     return;
+    //   }
 
-      const regData = Storage.get(
-        selectors[VERSION].register(controller.address, params.chainId),
-      );
-      if (regData) {
-        setRegisterData(regData);
-      }
-    }
+    //   const regData = Storage.get(
+    //     selectors[VERSION].register(controller.address, chainId),
+    //   );
+    //   if (regData) {
+    //     setRegisterData(regData);
+    //   }
+    // }
 
     // get nonce
     controller
-      .account(params.chainId)
+      .account(chainId)
       .getNonce()
       .then((n: BN) => {
         setNonce(number.toBN(n));
       });
-  }, [router, controller, params]);
+  }, [chainId, controller]);
 
   const onRegister = useCallback(async () => {
     setLoading(true);
     const txn = await controller
-      .account(params.chainId)
+      .account(chainId)
       .invokeFunction(registerData.invoke.invocation, {
         ...registerData.invoke.details,
         nonce: registerData.invoke.details.nonce!,
       });
 
     Storage.update(
-      selectors[VERSION].deployment(controller.address, params.chainId),
+      selectors[VERSION].deployment(controller.address, chainId),
       { txnHash: txn.transaction_hash },
     );
 
-    controller.account(params.chainId).sync();
-
-    router.push(
-      `/pending?txns=${encodeURIComponent(
-        JSON.stringify([
-          { name: "Device Registration", hash: txn.transaction_hash },
-        ]),
-      )}`,
-    );
-  }, [controller, params, registerData]);
+    controller.account(chainId).sync();
+  }, [chainId, controller, registerData]);
 
   const onSubmit = useCallback(async () => {
     setLoading(true);
-    await controller.account(params.chainId).execute(params.calls, null, {
+    await controller.account(chainId).execute(calls, null, {
       maxFee: fees.max,
       nonce,
       version: hash.transactionVersion,
@@ -292,9 +242,9 @@ const Execute: NextPage = () => {
         hash.calculateTransactionHash(
           controller.address,
           hash.transactionVersion,
-          params.calldata,
-          params.maxFee,
-          params.chainId,
+          calldata,
+          maxFee,
+          chainId,
           nonce,
         ),
       ),
@@ -302,32 +252,13 @@ const Execute: NextPage = () => {
     );
     setLoading(false);
     confirm();
-  }, [controller, execute, nonce, params, url]);
+  }, [controller, nonce, calldata, calls, chainId, confirm, fees.max, maxFee]);
 
   if (error) {
     return (
       <>
         <Header address={controller.address} />
         <div>{error.message}</div>
-      </>
-    );
-  }
-
-  if (!url || !params || !controller) {
-    return <Header address={controller.address} />;
-  }
-
-  const { deployed, registered } = controller.account(params.chainId);
-  if (deployed && !registered) {
-    return (
-      <>
-        <Header address={controller.address} />
-        <Register
-          chainId={params.chainId}
-          onSubmit={onRegister}
-          isLoading={isLoading}
-          onCancel={cancel}
-        />
       </>
     );
   }
@@ -340,14 +271,14 @@ const Execute: NextPage = () => {
           title="Execute Transactions"
           description={`${url.href} is requesting to execute the following transactions`}
           icon={<JoystickIcon boxSize="30px" />}
-          chainId={params.chainId}
+          chainId={chainId}
           pb="20px"
         />
         <Flex my={2} flex={1} flexDirection="column" gap="10px">
-          {params.calls.map((call, i) => (
+          {calls.map((call, i) => (
             <Call
               key={i}
-              chainId={params.chainId}
+              chainId={chainId}
               policy={{
                 target: call.contractAddress,
                 method: call.entrypoint,
@@ -360,7 +291,7 @@ const Execute: NextPage = () => {
             onConfirm={onSubmit}
             onCancel={cancel}
           >
-            <Fees chainId={params.chainId} fees={fees} />
+            <Fees chainId={chainId} fees={fees} />
           </Footer>
         </Flex>
       </Flex>
@@ -368,4 +299,4 @@ const Execute: NextPage = () => {
   );
 };
 
-export default dynamic(() => Promise.resolve(Execute), { ssr: false });
+export default Execute;

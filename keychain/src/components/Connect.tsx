@@ -1,55 +1,51 @@
-import type { NextPage } from "next";
-import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/router";
 import {
-  Circle,
   VStack,
   HStack,
   Flex,
   Text,
   Spacer,
-  Box,
   Container,
 } from "@chakra-ui/react";
 
 import { Header } from "components/Header";
 import Session from "components/Session";
-import { useUrlPolicys } from "hooks/policy";
-import Storage from "utils/storage";
-import selectors from "utils/selectors";
-import Controller, { VERSION } from "utils/controller";
+import Controller from "utils/controller";
 import PlugIcon from "@cartridge/ui/src/components/icons/Plug";
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import LaptopIcon from "@cartridge/ui/src/components/icons/Laptop";
 import { Banner } from "components/Banner";
 import { useControllerModal } from "hooks/modal";
+import { constants } from "starknet";
+import { Policy } from "@cartridge/controller";
 
-const Connect: NextPage = () => {
+const Connect = ({
+  chainId,
+  isValidating,
+  validPolicys,
+  invalidPolicys,
+  origin
+}: {
+  chainId?: constants.StarknetChainId;
+  isValidating: boolean;
+  validPolicys: Policy[];
+  invalidPolicys: Policy[];
+  origin: string;
+}) => {
   const [maxFee, setMaxFee] = useState(null);
   const [registerDevice, setRegisterDevice] = useState(false);
-  const { origin, chainId, validPolicys, invalidPolicys, isValidating } =
-    useUrlPolicys();
   const controller = useMemo(() => Controller.fromStore(), []);
   const account = controller?.account(chainId);
-  const router = useRouter();
   const { confirm, cancel } = useControllerModal();
 
   useEffect(() => {
-    if (!controller) {
-      router.replace(
-        `/login?redirect_uri=${encodeURIComponent(window.location.href)}`,
-      );
-      return;
-    }
-
     if (account) {
       if (account.deployed && !account.registered) {
         setRegisterDevice(true);
         return;
       }
     }
-  }, [router, controller, account]);
+  }, [controller, account]);
 
   const connect = useCallback(
     async (values, actions) => {
@@ -62,12 +58,8 @@ const Connect: NextPage = () => {
       }
       actions.setSubmitting(false);
     },
-    [origin, validPolicys, controller, maxFee, chainId, registerDevice],
+    [confirm, origin, validPolicys, controller, maxFee],
   );
-
-  if (!controller) {
-    return <></>;
-  }
 
   return (
     <>
@@ -123,4 +115,4 @@ const Connect: NextPage = () => {
   );
 };
 
-export default dynamic(() => Promise.resolve(Connect), { ssr: false });
+export default Connect;
