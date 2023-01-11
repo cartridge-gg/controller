@@ -27,7 +27,7 @@ export async function estimateFeeBulk(
         contract_address: invoke.invocation.contractAddress,
         calldata: invoke.invocation.calldata,
         signature: invoke.invocation.signature,
-        max_fee: number.toHex(invoke.details.maxFee),
+        max_fee: number.toHex(number.toBN(invoke.details.maxFee)),
         nonce: invoke.details.nonce,
       })),
     ),

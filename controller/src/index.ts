@@ -9,6 +9,7 @@ import {
 import DeviceAccount from "./device";
 import { Session, Keychain, Policy } from "./types";
 import { createModal, Modal } from "./modal";
+import BN from "bn.js";
 
 export const providers = {
   [constants.StarknetChainId.TESTNET]: new RpcProvider({
@@ -300,10 +301,10 @@ class Controller {
 
 const BASE = number.toBN(2).pow(number.toBN(86));
 
-export function split(n: number.BigNumberish): {
-  x: number.BigNumberish;
-  y: number.BigNumberish;
-  z: number.BigNumberish;
+export function split(n: BN): {
+  x: BN;
+  y: BN;
+  z: BN;
 } {
   const x = n.mod(BASE);
   const y = n.div(BASE).mod(BASE);
