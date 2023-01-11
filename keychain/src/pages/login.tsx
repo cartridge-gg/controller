@@ -40,6 +40,7 @@ import { useControllerModal } from "hooks/modal";
 
 const Login: NextPage = () => {
   const [name, setName] = useState<string>();
+  const [isEmbedded, setIsEmbedded] = useState<boolean>(false);
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
   const [unsupported, setUnsupported] = useState<boolean>(false);
   const [showSignup, setShowSignup] = useState<boolean>(true);
@@ -49,7 +50,7 @@ const Login: NextPage = () => {
   const { redirect_uri } = router.query as { redirect_uri: string };
   const { event: analyticsEvent } = useAnalytics();
   const { error, refetch } = useAccountQuery({ id: name }, { enabled: false });
-  const { confirm, cancel } = useControllerModal();
+  const { cancel } = useControllerModal();
 
   const onLogin = useCallback(async () => {
     analyticsEvent({ type: "webauthn_login" });
@@ -105,6 +106,10 @@ const Login: NextPage = () => {
       setUnsupportedMessage(
         `iOS ${iosVersion[1]} does not support passkeys. Upgrade to iOS 16 to continue`,
       );
+    }
+
+    if (window.top !== window.self) {
+      setIsEmbedded(true);
     }
   }, []);
 
@@ -221,13 +226,14 @@ const Login: NextPage = () => {
                     <Text color="whiteAlpha.600">
                       {"Don't have a controller?"}
                     </Text>
-                    <Link
-                      variant="traditional"
-                      href="https://cartridge.gg/signup"
-                      isExternal
+                    <NextLink
+                      href={{ pathname: "/signup", query: router.query }}
+                      passHref={isEmbedded}
                     >
-                      Sign up
-                    </Link>
+                      <Link variant="traditional" isExternal={isEmbedded}>
+                        Sign up
+                      </Link>
+                    </NextLink>
                   </HStack>
                 )}
               </Form>

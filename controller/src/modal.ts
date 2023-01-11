@@ -6,7 +6,7 @@ export interface Modal {
   close: () => void;
 }
 
-export const createModal = () => {
+export const createModal = (): Modal => {
   const iframe = document.createElement("iframe");
   iframe.id = "cartridge-modal";
   iframe.style.minHeight = "600px";

@@ -55,9 +55,7 @@ export const Header = ({
     <Container height="50px">
       <HStack w="full">
         <HStack spacing="0">
-          <Link href={process.env.NEXT_PUBLIC_ADMIN_URL}>
-            <Logo fill="brand" w="24px" mr="15px" />
-          </Link>
+          <Logo fill="brand" w="24px" mr="15px" />
         </HStack>
         <Spacer />
         <HStack spacing="10px">
@@ -72,7 +70,11 @@ export const SignupHeader = ({ children }: { children: ReactNode }) => {
   return (
     <Container height="64px">
       <HStack w="full" h="64px">
-        <Logo fill="brand" w="24px" mx="15px" />
+        <NextLink href="/">
+          <Link>
+            <Logo fill="brand" w="24px" mx="15px" />
+          </Link>
+        </NextLink>
         <Spacer />
         {children}
         <Spacer />
