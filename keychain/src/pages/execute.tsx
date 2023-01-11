@@ -29,6 +29,13 @@ import Register from "components/Register";
 import Fees from "components/Fees";
 import JoystickIcon from "@cartridge/ui/src/components/icons/Joystick";
 
+import {
+  connectToParent,
+  AsyncMethodReturns,
+  Connection,
+} from "@cartridge/penpal";
+import { ModalResponse } from "@cartridge/controller";
+
 const Execute: NextPage = () => {
   const [registerData, setRegisterData] = useState<RegisterData>();
   const [nonce, setNonce] = useState<BigNumber>();
@@ -72,6 +79,19 @@ const Execute: NextPage = () => {
       chainId: chainId ? chainId : constants.StarknetChainId.TESTNET,
     };
   }, [controller.address, router.query]);
+
+  const [modalConn, setModalConn] =
+    useState<AsyncMethodReturns<ModalResponse>>();
+
+  useEffect(() => {
+    const connection: Connection<ModalResponse> = connectToParent();
+    connection.promise.then((modal) => {
+      setModalConn(modal);
+    });
+    return () => {
+      connection.destroy();
+    };
+  }, []);
 
   const execute = useCallback(
     (calls: StarknetCall[]) => {
@@ -298,9 +318,7 @@ const Execute: NextPage = () => {
       true,
     );
     setLoading(false);
-    if (window.opener) {
-      window.close();
-    }
+    modalConn?.onConfirm();
   }, [controller, execute, nonce, params, url]);
 
   if (error) {
@@ -357,9 +375,7 @@ const Execute: NextPage = () => {
             isDisabled={!fees}
             onConfirm={onSubmit}
             onCancel={() => {
-              if (window.opener) {
-                window.close();
-              }
+              modalConn?.onCancel();
             }}
           >
             <Fees chainId={params.chainId} fees={fees} />

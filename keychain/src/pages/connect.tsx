@@ -24,6 +24,12 @@ import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import LaptopIcon from "@cartridge/ui/src/components/icons/Laptop";
 
 import { Banner } from "components/Banner";
+import {
+  connectToParent,
+  AsyncMethodReturns,
+  Connection,
+} from "@cartridge/penpal";
+import { ModalResponse } from "@cartridge/controller";
 
 const Connect: NextPage = () => {
   const [maxFee, setMaxFee] = useState(null);
@@ -33,6 +39,19 @@ const Connect: NextPage = () => {
   const controller = useMemo(() => Controller.fromStore(), []);
   const account = controller?.account(chainId);
   const router = useRouter();
+
+  const [modalConn, setModalConn] =
+    useState<AsyncMethodReturns<ModalResponse>>();
+
+  useEffect(() => {
+    const connection: Connection<ModalResponse> = connectToParent();
+    connection.promise.then((modal) => {
+      setModalConn(modal);
+    });
+    return () => {
+      connection.destroy();
+    };
+  }, []);
 
   useEffect(() => {
     if (!controller) {
@@ -55,16 +74,21 @@ const Connect: NextPage = () => {
       try {
         const approvals = validPolicys.filter((_, i) => values[i]);
         controller.approve(origin, approvals, maxFee);
-
-        if (window.opener) {
-          window.close();
-        }
+        modalConn?.onConfirm();
       } catch (e) {
         console.error(e);
       }
       actions.setSubmitting(false);
     },
-    [origin, validPolicys, controller, maxFee, chainId, registerDevice],
+    [
+      origin,
+      validPolicys,
+      controller,
+      maxFee,
+      chainId,
+      registerDevice,
+      modalConn,
+    ],
   );
 
   if (!controller) {
@@ -110,9 +134,7 @@ const Connect: NextPage = () => {
             chainId={chainId}
             action={"CREATE"}
             onCancel={() => {
-              if (window.opener) {
-                window.close();
-              }
+              modalConn?.onCancel();
             }}
             onSubmit={connect}
             policies={validPolicys}

@@ -38,6 +38,13 @@ import { useAnalytics } from "hooks/analytics";
 import Unsupported from "components/signup/Unsupported";
 import { isWhitelisted } from "utils/whitelist";
 
+import {
+  connectToParent,
+  AsyncMethodReturns,
+  Connection,
+} from "@cartridge/penpal";
+import { ModalResponse } from "@cartridge/controller";
+
 const Login: NextPage = () => {
   const [name, setName] = useState<string>();
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
@@ -49,6 +56,19 @@ const Login: NextPage = () => {
   const { redirect_uri } = router.query as { redirect_uri: string };
   const { event: analyticsEvent } = useAnalytics();
   const { error, refetch } = useAccountQuery({ id: name }, { enabled: false });
+
+  const [modalConn, setModalConn] =
+    useState<AsyncMethodReturns<ModalResponse>>();
+
+  useEffect(() => {
+    const connection: Connection<ModalResponse> = connectToParent();
+    connection.promise.then((modal) => {
+      setModalConn(modal);
+    });
+    return () => {
+      connection.destroy();
+    };
+  }, []);
 
   const onLogin = useCallback(async () => {
     analyticsEvent({ type: "webauthn_login" });
@@ -108,7 +128,7 @@ const Login: NextPage = () => {
   }, []);
 
   const onCancel = () => {
-    router.push("/");
+    modalConn?.onCancel();
     analyticsEvent({ type: "login_cancel" });
   };
 
@@ -220,11 +240,13 @@ const Login: NextPage = () => {
                     <Text color="whiteAlpha.600">
                       {"Don't have a controller?"}
                     </Text>
-                    <NextLink
-                      href={{ pathname: "/signup", query: router.query }}
+                    <Link
+                      variant="traditional"
+                      href="https://cartridge.gg/signup"
+                      isExternal
                     >
-                      <Link variant="traditional">Sign up</Link>
-                    </NextLink>
+                      Sign up
+                    </Link>
                   </HStack>
                 )}
               </Form>

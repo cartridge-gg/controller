@@ -8,6 +8,7 @@ import {
 
 import DeviceAccount from "./device";
 import { Session, Keychain, Policy } from "./types";
+import { createModal, Modal } from "./modal";
 
 export const providers = {
   [constants.StarknetChainId.TESTNET]: new RpcProvider({
@@ -29,6 +30,7 @@ class Controller {
   private url: string = "https://x.cartridge.gg";
   public chainId: constants.StarknetChainId = constants.StarknetChainId.TESTNET;
   public accounts?: { [key in constants.StarknetChainId]: AccountInterface };
+  private modal?: Modal;
 
   constructor(
     policies?: Policy[],
@@ -81,6 +83,8 @@ class Controller {
     this.connection.promise
       .then((keychain) => (this.keychain = keychain))
       .then(() => this.probe());
+
+    this.modal = createModal();
   }
 
   get account() {
@@ -112,6 +116,7 @@ class Controller {
           providers[constants.StarknetChainId.MAINNET],
           address,
           this.keychain,
+          this.modal,
           {
             url: this.url,
           }
@@ -120,6 +125,7 @@ class Controller {
           providers[constants.StarknetChainId.TESTNET],
           address,
           this.keychain,
+          this.modal,
           {
             url: this.url,
           }
@@ -128,6 +134,7 @@ class Controller {
           providers[constants.StarknetChainId.TESTNET2],
           address,
           this.keychain,
+          this.modal,
           {
             url: this.url,
           }
@@ -214,13 +221,11 @@ class Controller {
       }
     }
 
-    window.open(
+    this.modal?.open(
       `${this.url}/connect?${qs.stringify({
         origin: window.origin,
         policies: JSON.stringify(this.policies),
-      })}`,
-      "_blank",
-      "height=650,width=450"
+      })}`
     );
 
     const response = await this.keychain.connect(this.policies);
@@ -230,6 +235,7 @@ class Controller {
         providers[constants.StarknetChainId.MAINNET],
         response.address,
         this.keychain,
+        this.modal,
         {
           url: this.url,
         }
@@ -238,6 +244,7 @@ class Controller {
         providers[constants.StarknetChainId.TESTNET],
         response.address,
         this.keychain,
+        this.modal,
         {
           url: this.url,
         }
@@ -246,6 +253,7 @@ class Controller {
         providers[constants.StarknetChainId.TESTNET2],
         response.address,
         this.keychain,
+        this.modal,
         {
           url: this.url,
         }

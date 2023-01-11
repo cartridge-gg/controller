@@ -12,6 +12,13 @@ import Details from "components/Details";
 import { Header } from "components/Header";
 import Controller from "utils/controller";
 
+import {
+  connectToParent,
+  AsyncMethodReturns,
+  Connection,
+} from "@cartridge/penpal";
+import { ModalResponse } from "@cartridge/controller";
+
 const DetailsHeader = (data: {
   media?: Array<{ uri: string }>;
   name: string;
@@ -99,6 +106,19 @@ const Sign: NextPage = () => {
     }
   }, [router, controller]);
 
+  const [modalConn, setModalConn] =
+    useState<AsyncMethodReturns<ModalResponse>>();
+
+  useEffect(() => {
+    const connection: Connection<ModalResponse> = connectToParent();
+    connection.promise.then((modal) => {
+      setModalConn(modal);
+    });
+    return () => {
+      connection.destroy();
+    };
+  }, []);
+
   useEffect(() => {
     if (!typedData) return;
     const msgData: snTypedData.TypedData = JSON.parse(typedData as string);
@@ -152,12 +172,12 @@ const Sign: NextPage = () => {
             onSubmit={() => {
               const bc = new BroadcastChannel(id as string);
               bc.postMessage({});
-              window.close();
+              modalConn?.onConfirm();
             }}
             onCancel={() => {
               const bc = new BroadcastChannel(id as string);
               bc.postMessage({ error: "User cancelled" });
-              window.close();
+              modalConn?.onCancel();
             }}
             isSubmitting={false}
           >

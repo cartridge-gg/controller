@@ -11,6 +11,13 @@ import { Banner } from "components/Banner";
 import Footer from "components/Footer";
 import { Transaction, TransactionState } from "components/Transaction";
 
+import {
+  connectToParent,
+  AsyncMethodReturns,
+  Connection,
+} from "@cartridge/penpal";
+import { ModalResponse } from "@cartridge/controller";
+
 const Pending: NextPage = () => {
   const [txnResults, setTxnResults] = useState<TransactionState[]>([]);
   const [title, setTitle] = useState("Pending...");
@@ -34,6 +41,19 @@ const Pending: NextPage = () => {
 
     //pending
   }, [txnResults, txns]);
+
+  const [modalConn, setModalConn] =
+    useState<AsyncMethodReturns<ModalResponse>>();
+
+  useEffect(() => {
+    const connection: Connection<ModalResponse> = connectToParent();
+    connection.promise.then((modal) => {
+      setModalConn(modal);
+    });
+    return () => {
+      connection.destroy();
+    };
+  }, []);
 
   return (
     <>
@@ -61,9 +81,7 @@ const Pending: NextPage = () => {
           showConfirm={false}
           cancelText="Close"
           onCancel={() => {
-            if (window.opener) {
-              window.close();
-            }
+            modalConn?.onCancel();
           }}
         />
       </Container>

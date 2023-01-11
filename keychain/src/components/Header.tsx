@@ -72,11 +72,7 @@ export const SignupHeader = ({ children }: { children: ReactNode }) => {
   return (
     <Container height="64px">
       <HStack w="full" h="64px">
-        <NextLink href="/">
-          <Link>
-            <Logo fill="brand" w="24px" mx="15px" />
-          </Link>
-        </NextLink>
+        <Logo fill="brand" w="24px" mx="15px" />
         <Spacer />
         {children}
         <Spacer />

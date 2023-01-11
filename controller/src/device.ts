@@ -12,23 +12,24 @@ import {
   DeclareContractPayload,
   RpcProvider,
 } from "starknet";
-import qs from 'query-string';
+import qs from "query-string";
 
-import {
-  Keychain,
-} from "./types";
+import { Keychain } from "./types";
 import { Signer } from "./signer";
 import { AsyncMethodReturns } from "@cartridge/penpal";
+import { Modal } from "./modal";
 
 class DeviceAccount extends Account {
   address: string;
   private keychain: AsyncMethodReturns<Keychain>;
   private url: string = "https://x.cartridge.gg";
+  private modal?: Modal;
 
   constructor(
     provider: RpcProvider,
     address: string,
     keychain: AsyncMethodReturns<Keychain>,
+    modal?: Modal,
     options?: {
       url?: string;
     }
@@ -36,6 +37,7 @@ class DeviceAccount extends Account {
     super(provider, address, new Signer(keychain, options));
     this.address = address;
     this.keychain = keychain;
+    this.modal = modal;
 
     if (options?.url) {
       this.url = options.url;
@@ -43,22 +45,34 @@ class DeviceAccount extends Account {
   }
 
   /**
-     * Estimate Fee for a method on starknet
-     *
-     * @param calls the invocation object containing:
-     * - contractAddress - the address of the contract
-     * - entrypoint - the entrypoint of the contract
-     * - calldata - (defaults to []) the calldata
-     * - signature - (defaults to []) the signature
-     *
-     * @returns response from addTransaction
-     */
-  async estimateInvokeFee(calls: Call | Call[], details?: EstimateFeeDetails): Promise<EstimateFee> {
-    return this.keychain.estimateInvokeFee(calls, { ...details, chainId: this.chainId })
+   * Estimate Fee for a method on starknet
+   *
+   * @param calls the invocation object containing:
+   * - contractAddress - the address of the contract
+   * - entrypoint - the entrypoint of the contract
+   * - calldata - (defaults to []) the calldata
+   * - signature - (defaults to []) the signature
+   *
+   * @returns response from addTransaction
+   */
+  async estimateInvokeFee(
+    calls: Call | Call[],
+    details?: EstimateFeeDetails
+  ): Promise<EstimateFee> {
+    return this.keychain.estimateInvokeFee(calls, {
+      ...details,
+      chainId: this.chainId,
+    });
   }
 
-  async estimateDeclareFee(payload: DeclareContractPayload, details?: EstimateFeeDetails): Promise<EstimateFee> {
-    return this.keychain.estimateDeclareFee(payload, { ...details, chainId: this.chainId })
+  async estimateDeclareFee(
+    payload: DeclareContractPayload,
+    details?: EstimateFeeDetails
+  ): Promise<EstimateFee> {
+    return this.keychain.estimateDeclareFee(payload, {
+      ...details,
+      chainId: this.chainId,
+    });
   }
 
   /**
@@ -77,31 +91,32 @@ class DeviceAccount extends Account {
     calls: Call | Call[],
     abis?: Abi[],
     transactionsDetail?: InvocationsDetails & {
-      chainId?: constants.StarknetChainId,
+      chainId?: constants.StarknetChainId;
     }
   ): Promise<InvokeFunctionResponse> {
     if (!transactionsDetail) {
-      transactionsDetail = {}
+      transactionsDetail = {};
     }
 
     try {
-      return await this.keychain.execute(calls, abis, transactionsDetail)
+      return await this.keychain.execute(calls, abis, transactionsDetail);
     } catch (e) {
-      console.log((e as Error).message)
-      if ((e as Error).message !== "missing policies" && (e as Error).message !== "not registered") {
-        console.error(e)
-        throw e
+      console.log((e as Error).message);
+      if (
+        (e as Error).message !== "missing policies" &&
+        (e as Error).message !== "not registered"
+      ) {
+        console.error(e);
+        throw e;
       }
     }
 
-    window.open(
+    this.modal?.open(
       `${this.url}/execute?${qs.stringify({
         ...transactionsDetail,
         origin: window.origin,
         calls: JSON.stringify(calls),
-      })}`,
-      "_blank",
-      "height=650,width=450"
+      })}`
     );
 
     return this.keychain.execute(calls, abis, transactionsDetail, true);
@@ -116,12 +131,10 @@ class DeviceAccount extends Account {
    * @throws {Error} if the JSON object is not a valid JSON
    */
   async signMessage(typedData: typedData.TypedData): Promise<Signature> {
-    window.open(
+    this.modal?.open(
       `${this.url}/sign?${qs.stringify({
         typedData: JSON.stringify(typedData),
-      })}`,
-      "_blank",
-      "height=650,width=450"
+      })}`
     );
 
     return this.keychain.signMessage(typedData, this.address);
