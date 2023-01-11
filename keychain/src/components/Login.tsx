@@ -38,8 +38,6 @@ export const Login = () => {
 
     const { redirect_uri } = router.query as { redirect_uri: string };
 
-    console.log(error)
-
     useEffect(() => {
         if (debouncedName.length === 0) {
             return;
