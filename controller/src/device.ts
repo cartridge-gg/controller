@@ -12,7 +12,6 @@ import {
   DeclareContractPayload,
   RpcProvider,
 } from "starknet";
-import qs from "query-string";
 
 import { Keychain } from "./types";
 import { Signer } from "./signer";
@@ -22,26 +21,18 @@ import { Modal } from "./modal";
 class DeviceAccount extends Account {
   address: string;
   private keychain: AsyncMethodReturns<Keychain>;
-  private url: string = "https://x.cartridge.gg";
-  private modal?: Modal;
+  private modal: Modal;
 
   constructor(
     provider: RpcProvider,
     address: string,
     keychain: AsyncMethodReturns<Keychain>,
-    modal?: Modal,
-    options?: {
-      url?: string;
-    }
+    modal: Modal,
   ) {
-    super(provider, address, new Signer(keychain, options));
+    super(provider, address, new Signer(keychain, modal));
     this.address = address;
     this.keychain = keychain;
     this.modal = modal;
-
-    if (options?.url) {
-      this.url = options.url;
-    }
   }
 
   /**
@@ -99,27 +90,19 @@ class DeviceAccount extends Account {
     }
 
     try {
-      return await this.keychain.execute(calls, abis, transactionsDetail);
-    } catch (e) {
-      console.log((e as Error).message);
-      if (
-        (e as Error).message !== "missing policies" &&
-        (e as Error).message !== "not registered"
-      ) {
-        console.error(e);
-        throw e;
+      const { res, needSync } = await this.keychain.execute(calls, abis, transactionsDetail);
+      if (needSync) {
+        this.modal.open();
+        const { res } = await this.keychain.execute(calls, abis, transactionsDetail, true);
+        this.modal.close();
+        return res;
       }
+
+      return res;
+    } catch (e) {
+      console.error(e);
+      throw e;
     }
-
-    this.modal?.open();
-    //   `${this.url}/execute?${qs.stringify({
-    //     ...transactionsDetail,
-    //     origin: window.origin,
-    //     calls: JSON.stringify(calls),
-    //   })}`
-    // );
-
-    return this.keychain.execute(calls, abis, transactionsDetail, true);
   }
 
   /**
@@ -131,8 +114,10 @@ class DeviceAccount extends Account {
    * @throws {Error} if the JSON object is not a valid JSON
    */
   async signMessage(typedData: typedData.TypedData): Promise<Signature> {
-    this.modal?.open();
-    return this.keychain.signMessage(typedData, this.address);
+    this.modal.open();
+    const res = await this.keychain.signMessage(typedData, this.address);
+    this.modal.close();
+    return res;
   }
 }
 

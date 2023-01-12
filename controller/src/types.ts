@@ -65,7 +65,7 @@ export interface Keychain {
       chainId?: constants.StarknetChainId;
     },
     sync?: boolean
-  ): Promise<InvokeFunctionResponse>;
+  ): Promise<{ res: InvokeFunctionResponse, needSync: boolean }>;
   provision(address: string, credentialId: string): Promise<string>;
   register(
     username: string,

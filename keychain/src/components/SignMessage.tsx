@@ -152,9 +152,7 @@ const SignMessage = ({
           const sig = await controller
             .account(constants.StarknetChainId.MAINNET)
             .signMessage(typedData);
-          sig.unshift(
-            number.toBN(CLASS_HASHES["0.0.1"].controller).toString(),
-          );
+          sig.unshift(number.toBN(CLASS_HASHES["0.0.1"].controller).toString());
           onSign(sig);
         }}
         onCancel={onCancel}

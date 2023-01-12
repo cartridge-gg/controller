@@ -6,19 +6,14 @@ import qs from 'query-string';
 
 import { Keychain } from "./types";
 import { AsyncMethodReturns } from "@cartridge/penpal";
+import { Modal } from "./modal";
 
 export class Signer {
     private keychain: AsyncMethodReturns<Keychain>;
-    private url: string = "https://cartridge.gg";
-
-    constructor(keychain: AsyncMethodReturns<Keychain>, options?: {
-        url?: string;
-    }) {
+    modal: Modal;
+    constructor(keychain: AsyncMethodReturns<Keychain>, modal: Modal) {
         this.keychain = keychain;
-
-        if (options?.url) {
-            this.url = options.url;
-        }
+        this.modal = modal;
     }
 
     /**
@@ -40,15 +35,9 @@ export class Signer {
      * @throws {Error} if the JSON object is not a valid JSON
      */
     public async signMessage(typedData: typedData.TypedData, account: string): Promise<Signature> {
-        window.open(
-            `${this.url}/sign?${qs.stringify({
-                origin: window.origin,
-                message: JSON.stringify(typedData.message),
-            })}`,
-            "_blank",
-            "height=650,width=400"
-        );
-
-        return this.keychain.signMessage(typedData, account);
+        this.modal.open();
+        const res = await this.keychain.signMessage(typedData, account);
+        this.modal.close();
+        return res;
     }
 }

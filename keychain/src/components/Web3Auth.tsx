@@ -5,12 +5,12 @@ import { CHAIN_NAMESPACES, WALLET_ADAPTERS } from "@web3auth/base";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import Discord from "./icons/Discord";
 import MetaMask from "./icons/Metamask";
-import { ec, number } from "starknet";
+import { ec, number, KeyPair } from "starknet";
 
 const clientId =
   "BKpRo2vJuxbHH3giMVQfdts2l1P3D51AB5hIZ_-HNfkfisVV94Q4aQcZbjXjduwZW8j6n1TlBaEl6Q1nOQXRCG0";
 
-const Web3Auth = ({ onAuth }: { onAuth: () => void }) => {
+const Web3Auth = ({ onAuth }: { onAuth: (keyPair: KeyPair) => void }) => {
   const [web3auth, setWeb3auth] = useState<Web3AuthCore | null>(null);
 
   useEffect(() => {

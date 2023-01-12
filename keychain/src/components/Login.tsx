@@ -25,6 +25,7 @@ import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import NextLink from "next/link";
 import { useDebounce } from "hooks/debounce";
 import Web3Auth from "./Web3Auth";
+import { KeyPair } from "starknet";
 
 export const Login = () => {
   const [name, setName] = useState("");
@@ -181,7 +182,7 @@ export const Login = () => {
                 </Text>
                 <Divider borderColor="whiteAlpha.500" />
               </HStack>
-              <Web3Auth onAuth={() => {}} />
+              <Web3Auth onAuth={(keyPair: KeyPair) => {}} />
               <HStack as="strong" justify="center" fontSize="13px">
                 <Text color="whiteAlpha.600">{"Don't have a controller?"}</Text>
                 <NextLink

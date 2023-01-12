@@ -91,7 +91,7 @@ class Controller {
   }
 
   async probe() {
-    if (!this.keychain) {
+    if (!this.keychain || !this.modal) {
       console.error("not ready for connect");
       return null;
     }
@@ -103,28 +103,19 @@ class Controller {
           providers[constants.StarknetChainId.MAINNET],
           address,
           this.keychain,
-          this.modal,
-          {
-            url: this.url,
-          }
+          this.modal
         ),
         [constants.StarknetChainId.TESTNET]: new DeviceAccount(
           providers[constants.StarknetChainId.TESTNET],
           address,
           this.keychain,
-          this.modal,
-          {
-            url: this.url,
-          }
+          this.modal
         ),
         [constants.StarknetChainId.TESTNET2]: new DeviceAccount(
           providers[constants.StarknetChainId.TESTNET2],
           address,
           this.keychain,
-          this.modal,
-          {
-            url: this.url,
-          }
+          this.modal
         ),
       };
     } catch (e) {
@@ -196,7 +187,7 @@ class Controller {
       return this.accounts[this.chainId];
     }
 
-    if (!this.keychain) {
+    if (!this.keychain || !this.modal) {
       console.error("not ready for connect");
       return;
     }
@@ -218,28 +209,19 @@ class Controller {
           providers[constants.StarknetChainId.MAINNET],
           response.address,
           this.keychain,
-          this.modal,
-          {
-            url: this.url,
-          }
+          this.modal
         ),
         [constants.StarknetChainId.TESTNET]: new DeviceAccount(
           providers[constants.StarknetChainId.TESTNET],
           response.address,
           this.keychain,
-          this.modal,
-          {
-            url: this.url,
-          }
+          this.modal
         ),
         [constants.StarknetChainId.TESTNET2]: new DeviceAccount(
           providers[constants.StarknetChainId.TESTNET2],
           response.address,
           this.keychain,
-          this.modal,
-          {
-            url: this.url,
-          }
+          this.modal
         ),
       };
       this.modal?.close();

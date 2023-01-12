@@ -1,6 +1,3 @@
-import { connectToChild } from "@cartridge/penpal";
-import { ModalMethods } from "./types";
-
 export interface Modal {
   element: HTMLDivElement
   open: () => void;
@@ -37,7 +34,6 @@ export const createModal = (src: string): Modal => {
   container.style.justifyContent = "center";
   container.style.display = "none";
   container.appendChild(iframe);
-
 
   function open() {
     container.style.display = "flex";
