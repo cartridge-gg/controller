@@ -1,16 +1,19 @@
-import React, { useEffect, useMemo, useState } from "react";
-import type { NextPage } from "next";
-import dynamic from "next/dynamic";
+import React, { useEffect, useState } from "react";
 import { Box, Flex, Spacer, Text, Image } from "@chakra-ui/react";
-import { useRouter } from "next/router";
 
-import { typedData as snTypedData, shortString } from "starknet";
+import {
+  typedData as td,
+  shortString,
+  constants,
+  number,
+  Signature,
+} from "starknet";
 
 import { Banner } from "components/Banner";
 import ButtonBar from "components/ButtonBar";
 import Details from "components/Details";
-import { Header } from "components/Header";
 import Controller from "utils/controller";
+import { CLASS_HASHES } from "utils/hashes";
 
 const DetailsHeader = (data: {
   media?: Array<{ uri: string }>;
@@ -81,28 +84,27 @@ const MessageContent = (message: object) => {
   );
 };
 
-const Sign: NextPage = () => {
-  const controller = useMemo(() => Controller.fromStore(), []);
+const SignMessage = ({
+  controller,
+  origin,
+  typedData,
+  onSign,
+  onCancel,
+}: {
+  controller: Controller;
+  origin: string;
+  typedData: td.TypedData;
+  onSign: (sig: Signature) => void;
+  onCancel: () => void;
+}) => {
   const [nonce, setNonce] = useState("...");
   const [messageData, setMessageData] = useState({});
-  const router = useRouter();
 
-  const { id, origin, typedData } = router.query;
   const headerData = { icon: <></>, name: origin as string };
 
   useEffect(() => {
-    if (!controller) {
-      router.replace(
-        `/login?redirect_uri=${encodeURIComponent(window.location.href)}`,
-      );
-      return;
-    }
-  }, [router, controller]);
-
-  useEffect(() => {
     if (!typedData) return;
-    const msgData: snTypedData.TypedData = JSON.parse(typedData as string);
-    const primaryTypeData = msgData.types[msgData.primaryType];
+    const primaryTypeData = typedData.types[typedData.primaryType];
 
     // Recursively decodes all nested `felt*` types
     // to their ASCII equivalents
@@ -119,14 +121,14 @@ const Sign: NextPage = () => {
         } else if (typeMember.type !== "felt" && typeMember.type !== "string") {
           convertFeltArraysToString(
             initial[typeMember.name],
-            msgData.types[typeMember.type],
+            typedData.types[typeMember.type],
           );
         }
       }
     };
 
-    convertFeltArraysToString(msgData.message, primaryTypeData);
-    setMessageData(msgData);
+    convertFeltArraysToString(typedData.message, primaryTypeData);
+    setMessageData(typedData);
   }, [typedData]);
 
   if (!controller) {
@@ -134,38 +136,34 @@ const Sign: NextPage = () => {
   }
 
   return (
-    <Box h="100vh">
-      <Flex flexDirection="column" h="100%">
-        <Header address={controller.address} />
-        <Flex flexDirection="column" p={["3.5", "6"]} flex="1">
-          <Banner title="Signature Request"></Banner>
-          <Details header={DetailsHeader(headerData)}>
-            {MessageContent(messageData)}
-            {DetailsTransaction({
-              "WALLET ADDRESS": controller.address,
-              NONCE: nonce,
-            })}
-          </Details>
-          <Spacer />
-          <ButtonBar
-            expiresIn="1 DAY"
-            onSubmit={() => {
-              const bc = new BroadcastChannel(id as string);
-              bc.postMessage({});
-              confirm();
-            }}
-            onCancel={() => {
-              const bc = new BroadcastChannel(id as string);
-              bc.postMessage({ error: "User cancelled" });
-            }}
-            isSubmitting={false}
-          >
-            <Box mr="3">SIGN</Box>
-          </ButtonBar>
-        </Flex>
-      </Flex>
-    </Box>
+    <Flex flexDirection="column" p={["3.5", "6"]} flex="1">
+      <Banner title="Signature Request"></Banner>
+      <Details header={DetailsHeader(headerData)}>
+        {MessageContent(messageData)}
+        {DetailsTransaction({
+          "WALLET ADDRESS": controller.address,
+          NONCE: nonce,
+        })}
+      </Details>
+      <Spacer />
+      <ButtonBar
+        // expiresIn="1 DAY"
+        onSubmit={async () => {
+          const sig = await controller
+            .account(constants.StarknetChainId.MAINNET)
+            .signMessage(typedData);
+          sig.unshift(
+            number.toBN(CLASS_HASHES["0.0.1"].controller).toString(),
+          );
+          onSign(sig);
+        }}
+        onCancel={onCancel}
+        isSubmitting={false}
+      >
+        <Box mr="3">SIGN</Box>
+      </ButtonBar>
+    </Flex>
   );
 };
 
-export default dynamic(() => Promise.resolve(Sign), { ssr: false });
+export default SignMessage;

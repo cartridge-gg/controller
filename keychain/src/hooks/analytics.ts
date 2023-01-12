@@ -4,15 +4,15 @@ import { useCallback } from "react";
 
 export interface AnalyticsEvent {
   type:
-  | "page_view"
-  | "webauthn_create"
-  | "webauthn_create_error"
-  | "webauthn_login"
-  | "webauthn_login_error"
-  | "signup_cancel"
-  | "login_cancel"
-  | "quest_claim"
-  | "logout";
+    | "page_view"
+    | "webauthn_create"
+    | "webauthn_create_error"
+    | "webauthn_login"
+    | "webauthn_login_error"
+    | "signup_cancel"
+    | "login_cancel"
+    | "quest_claim"
+    | "logout";
   payload?: object;
 }
 

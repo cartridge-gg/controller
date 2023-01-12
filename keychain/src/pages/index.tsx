@@ -18,7 +18,10 @@ import { normalize as normalizeOrigin } from "utils/url";
 import { Policy, Session } from "@cartridge/controller";
 import Connect from "components/Connect";
 import { Login } from "components/Login";
-import { Container as ChakraContainer } from "@chakra-ui/react";
+import { Box, Container as ChakraContainer } from "@chakra-ui/react";
+import { Header } from "components/Header";
+import { Signature, typedData } from "starknet";
+import SignMessage from "components/SignMessage";
 
 export function normalize<T = Function>(
   fn: (origin: string) => T,
@@ -44,19 +47,48 @@ export function validate<T = Function>(
   };
 }
 
-const Container = ({ children }: { children: ReactNode }) =>
-  <ChakraContainer display="flex" alignItems="center" justifyContent="center" position="fixed" left={0} right={0} top={0} bottom={0}>{children}</ChakraContainer>
+const Container = ({ children }: { children: ReactNode }) => (
+  <ChakraContainer
+    display="flex"
+    alignItems="center"
+    justifyContent="center"
+    position="fixed"
+    left={0}
+    right={0}
+    top={0}
+    bottom={0}
+  >
+    <Header />
+    <Box position="fixed" left={0} right={0} bottom={0} top="50px" overflowX="scroll">
+      {children}
+    </Box>
+  </ChakraContainer>
+);
 
-type Context = {
-  origin: string;
-  payload: Connect;
-  resolve: ({ address, policies }: { address: string, policies: Policy[] }) => void;
-  reject: (reason?: unknown) => void;
-}
+type Context = Connect | SignMessage;
 
 type Connect = {
+  origin: string;
+  type: "connect";
   policies: Policy[];
-}
+  resolve: ({
+    address,
+    policies,
+  }: {
+    address: string;
+    policies: Policy[];
+  }) => void;
+  reject: (reason?: unknown) => void;
+};
+
+type SignMessage = {
+  origin: string;
+  type: "sign-message";
+  typedData: typedData.TypedData;
+  account: string;
+  resolve: (signature: Signature) => void;
+  reject: (reason?: unknown) => void;
+};
 
 const Index: NextPage = () => {
   const [context, setContext] = useState<Context>();
@@ -71,9 +103,15 @@ const Index: NextPage = () => {
 
     const connection = connectToParent({
       methods: {
-        connect: normalize(() => async (policies: Policy[]) => {
+        connect: normalize((origin: string) => async (policies: Policy[]) => {
           return await new Promise((resolve, reject) => {
-            setContext({ origin, payload: { policies }, resolve, reject })
+            setContext({
+              type: "connect",
+              origin,
+              policies,
+              resolve,
+              reject,
+            } as Connect);
           });
         }),
         disconnect: normalize(
@@ -96,7 +134,23 @@ const Index: NextPage = () => {
           })),
         ),
         revoke: normalize(revoke),
-        signMessage: normalize(validate(signMessage)),
+        signMessage: normalize(
+          validate(
+            (controller: Controller, session: Session) =>
+              async (typedData: typedData.TypedData, account: string) => {
+                return await new Promise((resolve, reject) => {
+                  setContext({
+                    type: "sign-message",
+                    origin,
+                    typedData,
+                    account,
+                    resolve,
+                    reject,
+                  } as SignMessage);
+                });
+              },
+          ),
+        ),
         session: normalize(session),
         sessions: normalize(sessions),
         saveDeploy: normalize(saveDeploy),
@@ -127,22 +181,53 @@ const Index: NextPage = () => {
     return <></>;
   }
 
-  // No session, send to Connect
-  const session_ = controller.session(context.origin);
-  if (!session_) {
+  if (context.type === "connect") {
+    const ctx = context as Connect;
     return (
       <Container>
         <Connect
           controller={controller}
-          origin={origin}
-          policys={context.payload.policies}
-          onConnect={({ address, policies }: { address: string, policies: Policy[] }) => {
-            context.resolve({ address, policies })
+          origin={ctx.origin}
+          policys={
+            ctx.type === "connect" ? (ctx as Connect).policies : []
+          }
+          onConnect={({
+            address,
+            policies,
+          }: {
+            address: string;
+            policies: Policy[];
+          }) => {
+            ctx.resolve({ address, policies });
           }}
-          onCancel={() => context.reject()}
+          onCancel={() => ctx.reject()}
         />
       </Container>
     );
+  }
+
+  // No session, gate access to methods below
+  const sesh = controller.session(context.origin);
+  if (!sesh) {
+    return <div>nah</div>;
+  }
+
+  switch (context.type) {
+    case "sign-message":
+      const ctx: SignMessage = context as SignMessage;
+      return (
+        <Container>
+          <SignMessage
+            controller={controller}
+            origin={ctx.origin}
+            typedData={ctx.typedData}
+            onSign={(sig) => context.resolve(sig)}
+            onCancel={() => context.reject()}
+          />
+        </Container>
+      );
+    default:
+      break;
   }
 
   // const { deployed, registered } = controller.account(chainId);
@@ -160,16 +245,11 @@ const Index: NextPage = () => {
   //   );
   // }
 
-
   // if (!controller) {
   //   return <Header address={controller.address} />;
   // }
 
-  return (
-    <Container>
-      {/* <Login /> */}
-    </Container>
-  );
+  return <Container>Here</Container>;
 };
 
 export default dynamic(() => Promise.resolve(Index), { ssr: false });

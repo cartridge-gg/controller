@@ -29,7 +29,10 @@ const Connect = ({
   chainId?: constants.StarknetChainId;
   policys: Policy[];
   origin: string;
-  onConnect: ({ address, policies }: {
+  onConnect: ({
+    address,
+    policies,
+  }: {
     address: string;
     policies: Policy[];
   }) => void;

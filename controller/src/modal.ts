@@ -38,6 +38,7 @@ export const createModal = (src: string): Modal => {
   container.style.display = "none";
   container.appendChild(iframe);
 
+
   function open() {
     container.style.display = "flex";
   }
@@ -45,6 +46,8 @@ export const createModal = (src: string): Modal => {
   function close() {
     container.style.display = "none";
   }
+
+  container.onclick = () => close();
 
   return {
     element: container,

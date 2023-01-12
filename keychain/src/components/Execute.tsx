@@ -25,11 +25,16 @@ import Fees from "components/Fees";
 import JoystickIcon from "@cartridge/ui/src/components/icons/Joystick";
 import BN from "bn.js";
 
-const Execute = ({ url, calls, chainId, maxFee }: {
-  url: URL,
-  calls: StarknetCall[],
+const Execute = ({
+  url,
+  calls,
+  chainId,
+  maxFee,
+}: {
+  url: URL;
+  calls: StarknetCall[];
   chainId?: constants.StarknetChainId;
-  maxFee?: string
+  maxFee?: string;
 }) => {
   const [registerData, setRegisterData] = useState<RegisterData>();
   const [nonce, setNonce] = useState<BN>();
@@ -41,7 +46,10 @@ const Execute = ({ url, calls, chainId, maxFee }: {
   const [isLoading, setLoading] = useState<boolean>(false);
   const controller = useMemo(() => Controller.fromStore(), []);
 
-  const calldata = useMemo(() => transaction.fromCallsToExecuteCalldata(calls), [calls]);
+  const calldata = useMemo(
+    () => transaction.fromCallsToExecuteCalldata(calls),
+    [calls],
+  );
 
   const execute = useCallback(
     (calls: StarknetCall[]) => {
@@ -50,13 +58,11 @@ const Execute = ({ url, calls, chainId, maxFee }: {
         validate((controller) => {
           return async () => {
             if (account.registered) {
-              return await controller
-                .account(chainId)
-                .execute(calls, null, {
-                  maxFee: fees.max,
-                  nonce,
-                  version: hash.transactionVersion,
-                });
+              return await controller.account(chainId).execute(calls, null, {
+                maxFee: fees.max,
+                nonce,
+                version: hash.transactionVersion,
+              });
             }
 
             return await Promise.all([
@@ -162,7 +168,17 @@ const Execute = ({ url, calls, chainId, maxFee }: {
     }
 
     register();
-  }, [controller, nonce, registerData, setError, setFees, calldata, calls, chainId, maxFee]);
+  }, [
+    controller,
+    nonce,
+    registerData,
+    setError,
+    setFees,
+    calldata,
+    calls,
+    chainId,
+    maxFee,
+  ]);
 
   useEffect(() => {
     const hash = Storage.get(
@@ -216,10 +232,9 @@ const Execute = ({ url, calls, chainId, maxFee }: {
         nonce: registerData.invoke.details.nonce!,
       });
 
-    Storage.update(
-      selectors[VERSION].deployment(controller.address, chainId),
-      { txnHash: txn.transaction_hash },
-    );
+    Storage.update(selectors[VERSION].deployment(controller.address, chainId), {
+      txnHash: txn.transaction_hash,
+    });
 
     controller.account(chainId).sync();
   }, [chainId, controller, registerData]);
@@ -287,7 +302,7 @@ const Execute = ({ url, calls, chainId, maxFee }: {
             isLoading={isLoading}
             isDisabled={!fees}
             onConfirm={onSubmit}
-            onCancel={() => { }}
+            onCancel={() => {}}
           >
             <Fees chainId={chainId} fees={fees} />
           </Footer>

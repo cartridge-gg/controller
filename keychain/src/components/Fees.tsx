@@ -54,17 +54,17 @@ const Fees = ({
       setFormattedFee(
         fees.max.gt(number.toBN(10000000000000))
           ? {
-            base: `~${parseFloat(
-              formatUnits(fees.base.toString(), 18),
-            ).toFixed(5)} eth`,
-            max: `~${parseFloat(formatUnits(fees.max.toString(), 18)).toFixed(
-              5,
-            )} eth`,
-          }
+              base: `~${parseFloat(
+                formatUnits(fees.base.toString(), 18),
+              ).toFixed(5)} eth`,
+              max: `~${parseFloat(formatUnits(fees.max.toString(), 18)).toFixed(
+                5,
+              )} eth`,
+            }
           : {
-            base: "<0.00001 eth",
-            max: "<0.00001 eth",
-          },
+              base: "<0.00001 eth",
+              max: "<0.00001 eth",
+            },
       );
     }
     compute();

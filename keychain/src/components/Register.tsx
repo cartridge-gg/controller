@@ -15,7 +15,7 @@ const Register = ({
   onSubmit,
   onCancel,
 }: {
-  controller: Controller,
+  controller: Controller;
   chainId: constants.StarknetChainId;
   onSubmit: () => void;
   onCancel: () => void;
@@ -31,10 +31,9 @@ const Register = ({
         nonce: registerData.invoke.details.nonce!,
       });
 
-    Storage.update(
-      selectors[VERSION].deployment(controller.address, chainId),
-      { txnHash: txn.transaction_hash },
-    );
+    Storage.update(selectors[VERSION].deployment(controller.address, chainId), {
+      txnHash: txn.transaction_hash,
+    });
 
     controller.account(chainId).sync();
   }, [chainId, controller, registerData]);
@@ -80,6 +79,6 @@ const Register = ({
       </Flex>
     </Flex>
   );
-}
+};
 
 export default Register;

@@ -132,11 +132,6 @@ class DeviceAccount extends Account {
    */
   async signMessage(typedData: typedData.TypedData): Promise<Signature> {
     this.modal?.open();
-    //   `${this.url}/sign?${qs.stringify({
-    //     typedData: JSON.stringify(typedData),
-    //   })}`
-    // );
-
     return this.keychain.signMessage(typedData, this.address);
   }
 }
