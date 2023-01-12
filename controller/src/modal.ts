@@ -8,6 +8,7 @@ export interface Modal {
 
 export const createModal = (): Modal => {
   const iframe = document.createElement("iframe");
+  iframe.src = "http://localhost:3001";
   iframe.id = "cartridge-modal";
   iframe.style.minHeight = "600px";
   iframe.style.minWidth = "400px";
@@ -39,7 +40,7 @@ export const createModal = (): Modal => {
 
   function open(src: string) {
     container.style.display = "flex";
-    iframe.src = src;
+    // iframe.src = src;
     connectToChild<ModalMethods>({
       iframe,
       methods: {

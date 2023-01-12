@@ -20,22 +20,24 @@ import { constants } from "starknet";
 import { Policy } from "@cartridge/controller";
 
 const Connect = ({
+  controller,
   chainId,
-  isValidating,
-  validPolicys,
-  invalidPolicys,
-  origin
+  policys,
+  origin,
+  onConnect,
 }: {
+  controller: Controller;
   chainId?: constants.StarknetChainId;
-  isValidating: boolean;
-  validPolicys: Policy[];
-  invalidPolicys: Policy[];
+  policys: Policy[];
   origin: string;
+  onConnect: ({ address, policies }: {
+    address: string;
+    policies: Policy[];
+  }) => void;
 }) => {
   const [maxFee, setMaxFee] = useState(null);
   const [registerDevice, setRegisterDevice] = useState(false);
-  const controller = useMemo(() => Controller.fromStore(), []);
-  const account = controller?.account(chainId);
+  const account = controller.account(chainId);
   const { confirm, cancel } = useControllerModal();
 
   useEffect(() => {
@@ -50,15 +52,16 @@ const Connect = ({
   const connect = useCallback(
     async (values, actions) => {
       try {
-        const approvals = validPolicys.filter((_, i) => values[i]);
+        const approvals = policys.filter((_, i) => values[i]);
         controller.approve(origin, approvals, maxFee);
+        onConnect({ address: controller.address, policies: approvals });
         confirm();
       } catch (e) {
         console.error(e);
       }
       actions.setSubmitting(false);
     },
-    [confirm, origin, validPolicys, controller, maxFee],
+    [confirm, origin, policys, controller, maxFee],
   );
 
   return (
@@ -103,9 +106,9 @@ const Connect = ({
               cancel();
             }}
             onSubmit={connect}
-            policies={validPolicys}
-            invalidPolicys={invalidPolicys}
-            isLoading={isValidating}
+            policies={policys}
+            invalidPolicys={[]}
+            isLoading={false}
             maxFee={maxFee}
             setMaxFee={setMaxFee}
           />

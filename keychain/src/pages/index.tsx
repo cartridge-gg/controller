@@ -1,11 +1,9 @@
 import type { NextPage } from "next";
 import dynamic from "next/dynamic";
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
-import { useRouter } from "next/router";
 import { connectToParent } from "@cartridge/penpal";
 
-import connect from "../methods/connect";
 import execute from "../methods/execute";
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
 import provision from "../methods/provision";
@@ -17,10 +15,10 @@ import { revoke, session, sessions } from "../methods/sessions";
 
 import Controller from "utils/controller";
 import { normalize as normalizeOrigin } from "utils/url";
-import { Session } from "@cartridge/controller";
+import { Policy, Session } from "@cartridge/controller";
+import Connect from "components/Connect";
 import { Login } from "components/Login";
 import { Container as ChakraContainer } from "@chakra-ui/react";
-import Connect from "components/connect";
 
 export function normalize<T = Function>(
   fn: (origin: string) => T,
@@ -49,7 +47,19 @@ export function validate<T = Function>(
 const Container = ({ children }: { children: ReactNode }) =>
   <ChakraContainer display="flex" alignItems="center" justifyContent="center" position="fixed" left={0} right={0} top={0} bottom={0}>{children}</ChakraContainer>
 
+type Context = {
+  origin: string;
+  payload: Connect;
+  resolve: ({ address, policies }: { address: string, policies: Policy[] }) => void;
+  reject: (reason?: unknown) => void;
+}
+
+type Connect = {
+  policies: Policy[];
+}
+
 const Index: NextPage = () => {
+  const [context, setContext] = useState<Context>();
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
@@ -60,9 +70,12 @@ const Index: NextPage = () => {
     }
 
     const connection = connectToParent({
-      parentOrigin: window.parent.origin,
       methods: {
-        connect: normalize(connect),
+        connect: normalize(() => async (policies: Policy[]) => {
+          return await new Promise((resolve, reject) => {
+            setContext({ origin, payload: { policies }, resolve, reject })
+          });
+        }),
         disconnect: normalize(
           validate(
             (controller: Controller, _session: Session, origin: string) => () =>
@@ -94,11 +107,12 @@ const Index: NextPage = () => {
       connection.destroy();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [setContext]);
 
   if (window.self === window.top) {
     return <></>;
   }
+
 
   // No controller, send to login
   const controller = Controller.fromStore();
@@ -111,11 +125,18 @@ const Index: NextPage = () => {
   }
 
   // No session, send to Connect
-  const session_ = controller.session(normalizeOrigin(window.parent.origin));
+  const session_ = controller.session(context.origin);
   if (!session_) {
     return (
       <Container>
-        {/* <Connect /> */}
+        <Connect
+          controller={controller}
+          origin={origin}
+          policys={context.payload.policies}
+          onConnect={({ address, policies }: { address: string, policies: Policy[] }) => {
+            context.resolve({ address, policies })
+          }}
+        />
       </Container>
     );
   }
