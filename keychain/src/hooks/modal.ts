@@ -22,9 +22,7 @@ export const useControllerModal = () => {
   }, []);
 
   const confirm = useCallback(() => {
-    if (modalConn) {
-      modalConn.onConfirm();
-    }
+    modalConn?.onConfirm();
 
     if (window.opener) {
       window.close();
@@ -32,9 +30,7 @@ export const useControllerModal = () => {
   }, [modalConn]);
 
   const cancel = useCallback(() => {
-    if (modalConn) {
-      modalConn.onCancel();
-    }
+    modalConn?.onCancel();
 
     if (window.opener) {
       window.close();

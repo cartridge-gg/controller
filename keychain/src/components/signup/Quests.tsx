@@ -26,20 +26,15 @@ import {
   useStarterPackQuery,
 } from "generated/graphql";
 import { Loading } from "components/Loading";
+import useSound from "use-sound";
 
 interface QuestsProps {
   username: string;
   gameId: string;
   starterpackId: string;
-  playSound: () => void;
 }
 
-export const Quests = ({
-  username,
-  gameId,
-  starterpackId,
-  playSound,
-}: QuestsProps) => {
+export const Quests = ({ username, gameId, starterpackId }: QuestsProps) => {
   const isMobile = useBreakpointValue([true, false, false]);
 
   const [checkingQuests, setCheckingQuests] = useState(false);
@@ -56,6 +51,10 @@ export const Quests = ({
 
   const { mutateAsync: checkTwitterQuests } = useCheckTwitterQuestsMutation();
   const { mutateAsync: checkDiscordQuests } = useCheckDiscordQuestsMutation();
+
+  const [playSound] = useSound(
+    "https://static.cartridge.gg/sounds/startup.mp3",
+  );
 
   const checkQuests = useCallback(() => {
     setCheckingQuests(true);

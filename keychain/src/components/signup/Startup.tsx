@@ -3,14 +3,13 @@ import { Flex, Box } from "@chakra-ui/react";
 
 import startupAnimation from "../../lottie/startup.json";
 import { useEffect } from "react";
+import useSound from "use-sound";
 
-export const Ready = ({
-  playSound,
-  onComplete,
-}: {
-  playSound: () => void;
-  onComplete: () => void;
-}) => {
+export const Startup = ({ onComplete }: { onComplete: () => void }) => {
+  const [playSound] = useSound(
+    "https://static.cartridge.gg/sounds/startup.mp3",
+  );
+
   const { View: StartupAnimation, play: playAnimation } = useLottie({
     animationData: startupAnimation,
     loop: false,

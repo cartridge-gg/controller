@@ -9,7 +9,7 @@ import connect from "../methods/connect";
 import execute from "../methods/execute";
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
 import provision from "../methods/provision";
-import { register, saveDeploy } from "../methods/register";
+import { register } from "../methods/register";
 import login from "../methods/login";
 import logout from "../methods/logout";
 import { signMessage } from "../methods/sign";
@@ -81,7 +81,6 @@ const Index: NextPage = () => {
         signMessage: normalize(validate(signMessage)),
         session: normalize(session),
         sessions: normalize(sessions),
-        saveDeploy: normalize(saveDeploy),
       },
     });
 
@@ -92,7 +91,16 @@ const Index: NextPage = () => {
   }, []);
 
   return (
-    <Container display="flex" alignItems="center" justifyContent="center" position="fixed" left={0} right={0} top={0} bottom={0}>
+    <Container
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      position="fixed"
+      left={0}
+      right={0}
+      top={0}
+      bottom={0}
+    >
       <Login />
     </Container>
   );

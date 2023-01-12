@@ -76,7 +76,7 @@ export const onCreateFinalize = async (
   deviceKey: string,
   credentials: Credentials,
 ) => {
-  return await client.request(FinalizeRegistrationDocument, {
+  const result = await client.request(FinalizeRegistrationDocument, {
     credentials: JSON.stringify({
       id: credentials.id,
       rawId: base64url(Buffer.from(credentials.rawId)),
@@ -92,6 +92,9 @@ export const onCreateFinalize = async (
     }),
     signer: deviceKey,
   });
+
+  return result.finalizeRegistration.contracts.edges[0].node.deployTransaction
+    .transactionHash;
 };
 
 // await client.request(FinalizeLoginDocument, {

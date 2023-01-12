@@ -22,8 +22,12 @@ export function useUrlPolicys(): {
   const [invalidPolicys, setInvalidPolicys] = useState<Policy[]>([]);
 
   useEffect(() => {
+    if (!router.isReady) {
+      return;
+    }
+
     const { chainId, policies, origin } = router.query;
-    if (!router.isReady || !policies || !origin) {
+    if (!policies || !origin) {
       return;
     }
 
@@ -33,6 +37,7 @@ export function useUrlPolicys(): {
         ? (chainId as constants.StarknetChainId)
         : constants.StarknetChainId.TESTNET,
     );
+
     setIsValidating(true);
     const requests = JSON.parse(policies as string) as Policy[];
     const requestDict = {};
@@ -56,7 +61,7 @@ export function useUrlPolicys(): {
       .finally(() => {
         setIsValidating(false);
       });
-  }, [router.isReady, router.query]);
+  }, [router]);
 
   return { isValidating, chainId, validPolicys, invalidPolicys, origin };
 }

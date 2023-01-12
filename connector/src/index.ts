@@ -42,10 +42,6 @@ class ControllerConnector extends Connector {
     return this.controller.register(username, credentialId, credential);
   }
 
-  async saveDeploy(hash: string) {
-    return this.controller.saveDeploy(hash);
-  }
-
   async login(
     address: string,
     credentialId: string,
