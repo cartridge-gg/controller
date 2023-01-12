@@ -111,13 +111,13 @@ class DeviceAccount extends Account {
       }
     }
 
-    this.modal?.open(
-      `${this.url}/execute?${qs.stringify({
-        ...transactionsDetail,
-        origin: window.origin,
-        calls: JSON.stringify(calls),
-      })}`
-    );
+    this.modal?.open();
+    //   `${this.url}/execute?${qs.stringify({
+    //     ...transactionsDetail,
+    //     origin: window.origin,
+    //     calls: JSON.stringify(calls),
+    //   })}`
+    // );
 
     return this.keychain.execute(calls, abis, transactionsDetail, true);
   }
@@ -131,11 +131,11 @@ class DeviceAccount extends Account {
    * @throws {Error} if the JSON object is not a valid JSON
    */
   async signMessage(typedData: typedData.TypedData): Promise<Signature> {
-    this.modal?.open(
-      `${this.url}/sign?${qs.stringify({
-        typedData: JSON.stringify(typedData),
-      })}`
-    );
+    this.modal?.open();
+    //   `${this.url}/sign?${qs.stringify({
+    //     typedData: JSON.stringify(typedData),
+    //   })}`
+    // );
 
     return this.keychain.signMessage(typedData, this.address);
   }

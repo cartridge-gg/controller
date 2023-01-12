@@ -52,40 +52,26 @@ class Controller {
       return;
     }
 
-    const iframe = document.createElement("iframe");
-    iframe.id = this.selector;
-    iframe.src = this.url;
-    iframe.style.opacity = "0";
-    iframe.style.height = "0";
-    iframe.style.width = "0";
-    iframe.sandbox.add("allow-scripts");
-    iframe.sandbox.add("allow-same-origin");
-    iframe.allow = "publickey-credentials-get *";
-
-    if (!!document.hasStorageAccess) {
-      iframe.sandbox.add("allow-storage-access-by-user-activation");
-    }
+    this.modal = createModal(this.url);
 
     if (
       document.readyState === "complete" ||
       document.readyState === "interactive"
     ) {
-      document.body.appendChild(iframe);
+      document.body.appendChild(this.modal.element);
     } else {
       document.addEventListener("DOMContentLoaded", () => {
-        document.body.appendChild(iframe);
+        document.body.appendChild(this.modal!.element);
       });
     }
 
     this.connection = connectToChild<Keychain>({
-      iframe,
+      iframe: this.modal.element.children[0] as HTMLIFrameElement,
     });
 
     this.connection.promise
       .then((keychain) => (this.keychain = keychain))
       .then(() => this.probe());
-
-    this.modal = createModal();
   }
 
   get account() {
@@ -222,12 +208,7 @@ class Controller {
       }
     }
 
-    this.modal?.open("/"
-      // `${this.url}/connect?${qs.stringify({
-      //   origin: window.origin,
-      //   policies: JSON.stringify(this.policies),
-      // })}`
-    );
+    this.modal?.open();
 
     const response = await this.keychain.connect(this.policies);
 

@@ -69,6 +69,7 @@ const Index: NextPage = () => {
       return;
     }
 
+    console.log("connect")
     const connection = connectToParent({
       methods: {
         connect: normalize(() => async (policies: Policy[]) => {
@@ -124,9 +125,17 @@ const Index: NextPage = () => {
     );
   }
 
+  if (!context?.origin) {
+    return <></>;
+  }
+
+  console.log(context)
+
   // No session, send to Connect
   const session_ = controller.session(context.origin);
+  console.log(session_)
   if (!session_) {
+    console.log("Render connect")
     return (
       <Container>
         <Connect

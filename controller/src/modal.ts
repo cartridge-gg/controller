@@ -2,13 +2,14 @@ import { connectToChild } from "@cartridge/penpal";
 import { ModalMethods } from "./types";
 
 export interface Modal {
-  open: (src: string) => void;
+  element: HTMLDivElement
+  open: () => void;
   close: () => void;
 }
 
-export const createModal = (): Modal => {
+export const createModal = (src: string): Modal => {
   const iframe = document.createElement("iframe");
-  iframe.src = "http://localhost:3001";
+  iframe.src = src;
   iframe.id = "cartridge-modal";
   iframe.style.minHeight = "600px";
   iframe.style.minWidth = "400px";
@@ -36,30 +37,17 @@ export const createModal = (): Modal => {
   container.style.justifyContent = "center";
   container.style.display = "none";
   container.appendChild(iframe);
-  document.body.appendChild(container);
 
-  function open(src: string) {
+  function open() {
     container.style.display = "flex";
-    // iframe.src = src;
-    connectToChild<ModalMethods>({
-      iframe,
-      methods: {
-        onCancel: () => {
-          close();
-        },
-        onConfirm: () => {
-          close();
-        },
-      },
-    });
   }
 
   function close() {
     container.style.display = "none";
-    iframe.src = "about:blank";
   }
 
   return {
+    element: container,
     open,
     close,
   };
