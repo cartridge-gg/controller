@@ -107,6 +107,13 @@ export const Login = () => {
 
     const { redirect_uri } = router.query as { redirect_uri: string };
 
+    // useEffect(() => {
+    //     if (debouncedName.length === 0) {
+    //         return;
+    //     }
+    //     refetch();
+    // }, [refetch, debouncedName])
+
     const onLogin = useCallback(async () => {
         log({ type: "webauthn_login" });
         setIsLoggingIn(true);
