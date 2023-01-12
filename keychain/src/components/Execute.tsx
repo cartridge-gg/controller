@@ -24,7 +24,6 @@ import Register from "components/Register";
 import Fees from "components/Fees";
 import JoystickIcon from "@cartridge/ui/src/components/icons/Joystick";
 import BN from "bn.js";
-import { useControllerModal } from "hooks/modal";
 
 const Execute = ({ url, calls, chainId, maxFee }: {
   url: URL,
@@ -41,7 +40,6 @@ const Execute = ({ url, calls, chainId, maxFee }: {
   const [error, setError] = useState<Error>();
   const [isLoading, setLoading] = useState<boolean>(false);
   const controller = useMemo(() => Controller.fromStore(), []);
-  const { confirm, cancel } = useControllerModal();
 
   const calldata = useMemo(() => transaction.fromCallsToExecuteCalldata(calls), [calls]);
 
@@ -252,7 +250,7 @@ const Execute = ({ url, calls, chainId, maxFee }: {
     );
     setLoading(false);
     confirm();
-  }, [controller, nonce, calldata, calls, chainId, confirm, fees.max, maxFee]);
+  }, [controller, nonce, calldata, calls, chainId, fees.max, maxFee]);
 
   if (error) {
     return (
@@ -289,7 +287,7 @@ const Execute = ({ url, calls, chainId, maxFee }: {
             isLoading={isLoading}
             isDisabled={!fees}
             onConfirm={onSubmit}
-            onCancel={cancel}
+            onCancel={() => { }}
           >
             <Fees chainId={chainId} fees={fees} />
           </Footer>

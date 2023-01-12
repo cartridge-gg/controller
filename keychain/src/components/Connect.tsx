@@ -8,14 +8,12 @@ import {
   Container,
 } from "@chakra-ui/react";
 
-import { Header } from "components/Header";
 import Session from "components/Session";
 import Controller from "utils/controller";
 import PlugIcon from "@cartridge/ui/src/components/icons/Plug";
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import LaptopIcon from "@cartridge/ui/src/components/icons/Laptop";
 import { Banner } from "components/Banner";
-import { useControllerModal } from "hooks/modal";
 import { constants } from "starknet";
 import { Policy } from "@cartridge/controller";
 
@@ -25,6 +23,7 @@ const Connect = ({
   policys,
   origin,
   onConnect,
+  onCancel,
 }: {
   controller: Controller;
   chainId?: constants.StarknetChainId;
@@ -34,11 +33,11 @@ const Connect = ({
     address: string;
     policies: Policy[];
   }) => void;
+  onCancel: () => void;
 }) => {
   const [maxFee, setMaxFee] = useState(null);
   const [registerDevice, setRegisterDevice] = useState(false);
   const account = controller.account(chainId);
-  const { confirm, cancel } = useControllerModal();
 
   useEffect(() => {
     if (account) {
@@ -55,13 +54,12 @@ const Connect = ({
         const approvals = policys.filter((_, i) => values[i]);
         controller.approve(origin, approvals, maxFee);
         onConnect({ address: controller.address, policies: approvals });
-        confirm();
       } catch (e) {
         console.error(e);
       }
       actions.setSubmitting(false);
     },
-    [confirm, origin, onConnect, policys, controller, maxFee],
+    [origin, onConnect, policys, controller, maxFee],
   );
 
   return (
@@ -100,9 +98,7 @@ const Connect = ({
         <Session
           chainId={chainId}
           action={"CREATE"}
-          onCancel={() => {
-            cancel();
-          }}
+          onCancel={onCancel}
           onSubmit={connect}
           policies={policys}
           invalidPolicys={[]}

@@ -210,39 +210,43 @@ class Controller {
 
     this.modal?.open();
 
-    const response = await this.keychain.connect(this.policies);
+    try {
+      const response = await this.keychain.connect(this.policies);
 
-    this.accounts = {
-      [constants.StarknetChainId.MAINNET]: new DeviceAccount(
-        providers[constants.StarknetChainId.MAINNET],
-        response.address,
-        this.keychain,
-        this.modal,
-        {
-          url: this.url,
-        }
-      ),
-      [constants.StarknetChainId.TESTNET]: new DeviceAccount(
-        providers[constants.StarknetChainId.TESTNET],
-        response.address,
-        this.keychain,
-        this.modal,
-        {
-          url: this.url,
-        }
-      ),
-      [constants.StarknetChainId.TESTNET2]: new DeviceAccount(
-        providers[constants.StarknetChainId.TESTNET2],
-        response.address,
-        this.keychain,
-        this.modal,
-        {
-          url: this.url,
-        }
-      ),
-    };
-
-    return this.accounts[this.chainId];
+      this.accounts = {
+        [constants.StarknetChainId.MAINNET]: new DeviceAccount(
+          providers[constants.StarknetChainId.MAINNET],
+          response.address,
+          this.keychain,
+          this.modal,
+          {
+            url: this.url,
+          }
+        ),
+        [constants.StarknetChainId.TESTNET]: new DeviceAccount(
+          providers[constants.StarknetChainId.TESTNET],
+          response.address,
+          this.keychain,
+          this.modal,
+          {
+            url: this.url,
+          }
+        ),
+        [constants.StarknetChainId.TESTNET2]: new DeviceAccount(
+          providers[constants.StarknetChainId.TESTNET2],
+          response.address,
+          this.keychain,
+          this.modal,
+          {
+            url: this.url,
+          }
+        ),
+      };
+      this.modal?.close();
+      return this.accounts[this.chainId];
+    } catch (e) {
+      this.modal?.close();
+    }
   }
 
   async disconnect() {
