@@ -4,7 +4,7 @@ import { StarknetProvider } from '@starknet-react/core'
 import CartridgeConnector from '~/../../../connector/src'
 import { RpcProvider } from 'starknet'
 
-const url = process.env.VERCEL_ENV === "preview" ? `https://keychain-git-${process.env.VERCEL_GIT_COMMIT_REF}.preview.cartridge.gg` : process.env.XFRAME_URL;
+const url = process.env.NEXT_PUBLIC_VERCEL_ENV === "preview" ? `https://keychain-git-${process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF}.preview.cartridge.gg` : process.env.XFRAME_URL;
 console.log(url)
 const connectors = [new CartridgeConnector(null, { url })]
 

@@ -1,7 +1,9 @@
-import { useSignTypedData } from "@starknet-react/core";
+import { useAccount, useSignTypedData } from "@starknet-react/core";
 import { typedData } from "starknet";
 
 export function SignMessage() {
+  const { account } = useAccount();
+
   const message: typedData.TypedData = {
     types: {
       StarkNetDomain: [
@@ -38,6 +40,10 @@ export function SignMessage() {
     },
   };
   const { signTypedData, data } = useSignTypedData(message);
+
+  if (!account) {
+    return null;
+  }
 
   return (
     <div css={{marginTop: "10px"}}>
