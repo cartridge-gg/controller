@@ -222,7 +222,8 @@ const Login: NextPage = () => {
 
 const SignupLink = ({ show }: { show: boolean }) => {
   const router = useRouter();
-  const isEmbedded = true;
+  const isEmbedded = 
+    typeof window !== "undefined" && window.top !== window.self;;
 
   const onClick = () => {
     if (isEmbedded) {
