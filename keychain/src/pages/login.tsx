@@ -39,10 +39,8 @@ import { isWhitelisted } from "utils/whitelist";
 
 const Login: NextPage = () => {
   const [name, setName] = useState<string>();
-  const [isEmbedded, setIsEmbedded] = useState<boolean>(false);
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
   const [unsupported, setUnsupported] = useState<boolean>(false);
-  const [showSignup, setShowSignup] = useState<boolean>(true);
   const [unsupportedMessage, setUnsupportedMessage] = useState<string>();
 
   const router = useRouter();
@@ -90,11 +88,6 @@ const Login: NextPage = () => {
     }
   }, [name, router, redirect_uri, refetch, analyticsEvent]);
 
-  // show signup for white listed sites
-  useEffect(() => {
-    setShowSignup(isWhitelisted(redirect_uri));
-  }, [redirect_uri]);
-
   useEffect(() => {
     const userAgent = window.navigator.userAgent;
 
@@ -104,10 +97,6 @@ const Login: NextPage = () => {
       setUnsupportedMessage(
         `iOS ${iosVersion[1]} does not support passkeys. Upgrade to iOS 16 to continue`,
       );
-    }
-
-    if (window.top !== window.self) {
-      setIsEmbedded(true);
     }
   }, []);
 
@@ -218,27 +207,45 @@ const Login: NextPage = () => {
                     Log in
                   </Button>
                 </ButtonsContainer>
-                {showSignup && (
-                  <HStack as="strong" justify="center" fontSize="13px">
-                    <Text color="whiteAlpha.600">
-                      {"Don't have a controller?"}
-                    </Text>
-                    <NextLink
-                      href={{ pathname: "/signup", query: router.query }}
-                      passHref={isEmbedded}
-                    >
-                      <Link variant="traditional" isExternal={isEmbedded}>
-                        Sign up
-                      </Link>
-                    </NextLink>
-                  </HStack>
-                )}
+                <SignupLink show={isWhitelisted(redirect_uri)} />
               </Form>
             )}
           </Formik>
         </Flex>
       </Container>
     </>
+  );
+};
+
+const SignupLink = ({ show }: { show: boolean }) => {
+  const router = useRouter();
+  const isEmbedded = 
+    typeof window !== "undefined" && window.top !== window.self;;
+
+  const onClick = () => {
+    if (isEmbedded) {
+      router.push({ pathname: "/signup/continue", query: router.query });
+      setTimeout(() => {
+        window.open(
+          process.env.NEXT_PUBLIC_SITE_URL + "/signup?close=true",
+          "_blank",
+          "height=650,width=450",
+        );
+      }, 1000);
+      return;
+    }
+    router.push({ pathname: "/signup", query: router.query });
+  };
+
+  if (!show) return <></>;
+
+  return (
+    <HStack as="strong" justify="center" fontSize="13px">
+      <Text color="whiteAlpha.600">{"Don't have a controller?"}</Text>
+      <Link variant="traditional" onClick={onClick}>
+        Sign up
+      </Link>
+    </HStack>
   );
 };
 
