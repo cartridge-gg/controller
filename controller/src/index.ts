@@ -198,11 +198,10 @@ class Controller {
       }
     }
 
-    this.modal?.open();
+    this.modal.open();
 
     try {
       const response = await this.keychain.connect(this.policies);
-
       this.accounts = {
         [constants.StarknetChainId.MAINNET]: new DeviceAccount(
           providers[constants.StarknetChainId.MAINNET],
@@ -223,10 +222,10 @@ class Controller {
           this.modal
         ),
       };
-      this.modal?.close();
+      this.modal.close();
       return this.accounts[this.chainId];
     } catch (e) {
-      this.modal?.close();
+      this.modal.close();
     }
   }
 

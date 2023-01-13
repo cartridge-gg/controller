@@ -106,7 +106,13 @@ type Execute = {
   transactionsDetail?: InvocationsDetails & {
     chainId?: constants.StarknetChainId;
   };
-  resolve: ({ res, needSync }: { res?: InvokeFunctionResponse, needSync?: boolean }) => void;
+  resolve: ({
+    res,
+    needSync,
+  }: {
+    res?: InvokeFunctionResponse;
+    needSync?: boolean;
+  }) => void;
   reject: (reason?: unknown) => void;
 };
 
@@ -124,6 +130,7 @@ const Index: NextPage = () => {
     constants.StarknetChainId.MAINNET,
   );
   const [context, setContext] = useState<Context>();
+  const [controller, setController] = useState<Controller>();
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -266,18 +273,13 @@ const Index: NextPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setContext]);
 
+  useEffect(() => {
+    const controller = Controller.fromStore();
+    setController(controller);
+  }, [setController]);
+
   if (window.self === window.top) {
     return <></>;
-  }
-
-  // No controller, send to login
-  const controller = Controller.fromStore();
-  if (!controller) {
-    return (
-      <Container>
-        <Login />
-      </Container>
-    );
   }
 
   if (!context?.origin) {
@@ -286,6 +288,19 @@ const Index: NextPage = () => {
 
   if (context.type === "connect") {
     const ctx = context as Connect;
+
+    // No controller, send to login
+    if (!controller) {
+      return (
+        <Container>
+          <Login onLogin={() => {
+            const controller = Controller.fromStore();
+            setController(controller);
+          }} onCancel={() => ctx.reject()} />
+        </Container>
+      );
+    }
+
     return (
       <Container>
         <Connect
@@ -316,6 +331,10 @@ const Index: NextPage = () => {
         />
       </Container>
     );
+  }
+
+  if (!controller) {
+    return <></>;
   }
 
   // No session, gate access to methods below

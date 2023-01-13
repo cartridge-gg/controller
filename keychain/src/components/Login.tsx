@@ -27,7 +27,13 @@ import { useDebounce } from "hooks/debounce";
 import Web3Auth from "./Web3Auth";
 import { KeyPair } from "starknet";
 
-export const Login = () => {
+export const Login = ({
+  onLogin,
+  onCancel,
+}: {
+  onLogin: () => void;
+  onCancel: () => void;
+}) => {
   const [name, setName] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
   const [unsupported, setUnsupported] = useState<boolean>(false);
@@ -38,9 +44,6 @@ export const Login = () => {
   );
 
   const { event: log } = useAnalytics();
-  const router = useRouter();
-
-  const { redirect_uri } = router.query as { redirect_uri: string };
 
   useEffect(() => {
     if (debouncedName.length === 0) {
@@ -49,7 +52,7 @@ export const Login = () => {
     refetch();
   }, [refetch, debouncedName]);
 
-  const onLogin = useCallback(async () => {
+  const onSubmit = useCallback(async () => {
     log({ type: "webauthn_login" });
     setIsLoggingIn(true);
 
@@ -70,13 +73,6 @@ export const Login = () => {
           beginLoginData.beginLogin.publicKey.challenge,
         ),
       });
-
-      if (redirect_uri) {
-        router.replace(decodeURIComponent(redirect_uri));
-        return;
-      }
-
-      router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile/${address}`);
     } catch (err) {
       console.error(err);
       setIsLoggingIn(false);
@@ -87,7 +83,7 @@ export const Login = () => {
         },
       });
     }
-  }, [name, router, redirect_uri, refetch, log]);
+  }, [name, refetch, log]);
 
   return (
     <Container
@@ -112,7 +108,7 @@ export const Login = () => {
             Connect your Controller
           </Text>
         </Flex>
-        <Formik initialValues={{ name: "" }} onSubmit={onLogin}>
+        <Formik initialValues={{ name: "" }} onSubmit={onSubmit}>
           {(props) => (
             <Form
               css={css`
