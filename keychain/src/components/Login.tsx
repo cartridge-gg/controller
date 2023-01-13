@@ -24,12 +24,14 @@ import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import NextLink from "next/link";
 import { useDebounce } from "hooks/debounce";
 import Web3Auth from "./Web3Auth";
-import { KeyPair } from "starknet";
+import { constants, KeyPair } from "starknet";
 
 export const Login = ({
+  chainId,
   onLogin,
   onCancel,
 }: {
+  chainId: constants.StarknetChainId;
   onLogin: () => void;
   onCancel: () => void;
 }) => {
@@ -66,7 +68,7 @@ export const Login = ({
 
       const { data: beginLoginData } = await beginLogin(name);
 
-      await login()(address, credentialId, {
+      await login()(address, chainId, credentialId, {
         rpId: process.env.NEXT_PUBLIC_RP_ID,
         challengeExt: base64url.toBuffer(
           beginLoginData.beginLogin.publicKey.challenge,

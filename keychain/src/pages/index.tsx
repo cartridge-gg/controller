@@ -285,21 +285,25 @@ const Index: NextPage = () => {
     return <></>;
   }
 
-  if (context.type === "connect") {
-    const ctx = context as Connect;
-
-    // No controller, send to login
-    if (!controller) {
-      return (
-        <Container>
-          <Login onLogin={() => {
+  // No controller, send to login
+  if (!controller) {
+    return (
+      <Container>
+        <Login
+          chainId={chainId}
+          onLogin={() => {
             const controller = Controller.fromStore();
             setController(controller);
-          }} onCancel={() => ctx.reject()} />
-        </Container>
-      );
-    }
+          }}
+          onCancel={() => context.reject()}
+        />
+      </Container>
+    );
+  }
 
+  const sesh = controller.session(context.origin);
+  if (context.type === "connect" || !sesh) {
+    const ctx = context as Connect;
     return (
       <Container>
         <Connect
@@ -314,7 +318,8 @@ const Index: NextPage = () => {
             address: string;
             policies: Policy[];
           }) => {
-            if (!controller.account(chainId).registered) {
+            const pendingRegister = Storage.get(selectors[VERSION].register(controller.address, chainId))
+            if (!controller.account(chainId).registered && !pendingRegister) {
               const { assertion, invoke } = await controller.signAddDeviceKey(
                 chainId,
               );
@@ -334,12 +339,6 @@ const Index: NextPage = () => {
 
   if (!controller) {
     return <></>;
-  }
-
-  // No session, gate access to methods below
-  const sesh = controller.session(context.origin);
-  if (!sesh) {
-    return <div>nah</div>;
   }
 
   if (context.type === "sign-message") {

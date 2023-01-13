@@ -36,6 +36,7 @@ import { useRouter } from "next/router";
 import { useAnalytics } from "hooks/analytics";
 import Unsupported from "components/signup/Unsupported";
 import { isWhitelisted } from "utils/whitelist";
+import { constants } from "starknet";
 
 const Login: NextPage = () => {
   const [name, setName] = useState<string>();
@@ -63,7 +64,7 @@ const Login: NextPage = () => {
 
       const { data: beginLoginData } = await beginLogin(name);
 
-      await login()(address, credentialId, {
+      await login()(address, constants.StarknetChainId.MAINNET, credentialId, {
         rpId: process.env.NEXT_PUBLIC_RP_ID,
         challengeExt: base64url.toBuffer(
           beginLoginData.beginLogin.publicKey.challenge,
@@ -219,8 +220,8 @@ const Login: NextPage = () => {
 
 const SignupLink = ({ show }: { show: boolean }) => {
   const router = useRouter();
-  const isEmbedded = 
-    typeof window !== "undefined" && window.top !== window.self;;
+  const isEmbedded =
+    typeof window !== "undefined" && window.top !== window.self;
 
   const onClick = () => {
     if (isEmbedded) {
