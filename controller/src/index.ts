@@ -24,7 +24,6 @@ export const providers = {
 };
 
 class Controller {
-  private selector = "cartridge-messenger";
   private connection?: Connection<Keychain>;
   public keychain?: AsyncMethodReturns<Keychain>;
   private policies: Policy[] = [];
