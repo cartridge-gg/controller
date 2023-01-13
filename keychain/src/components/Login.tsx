@@ -18,7 +18,6 @@ import {
 import { useAccountQuery } from "generated/graphql";
 import base64url from "base64url";
 import { useAnalytics } from "hooks/analytics";
-import { useRouter } from "next/router";
 import { beginLogin } from "hooks/account";
 import login from "methods/login";
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
@@ -73,6 +72,8 @@ export const Login = ({
           beginLoginData.beginLogin.publicKey.challenge,
         ),
       });
+
+      onLogin();
     } catch (err) {
       console.error(err);
       setIsLoggingIn(false);
@@ -83,7 +84,7 @@ export const Login = ({
         },
       });
     }
-  }, [name, refetch, log]);
+  }, [name, onLogin, refetch, log]);
 
   return (
     <Container
