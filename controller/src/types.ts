@@ -72,7 +72,6 @@ export interface Keychain {
     credentialId: string,
     credential: { x: string; y: string }
   ): Promise<{ address: string; deviceKey: string }>;
-  saveDeploy(hash: string): void;
   login(
     address: string,
     credentialId: string,

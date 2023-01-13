@@ -27,29 +27,19 @@ const register =
     );
     const controller = new Controller(keypair, address, credentialId);
     controller.store();
-    Storage.set(selectors["0.0.3"].active(), address);
 
     return { address, deviceKey };
   };
 
-const saveDeploy = (origin: string) => (hash: string) => {
-  const controller = Controller.fromStore();
-  if (!controller) {
-    throw new Error("no controller");
-  }
+const setActive = (address: string, hash?: string) => {
+  Storage.set(selectors["0.0.3"].active(), address);
 
-  if (!Storage.get(selectors["0.0.3"].admin(controller.address, origin))) {
-    throw new Error("unauthorized");
+  if (hash) {
+    Storage.update(
+      selectors["0.0.3"].deployment(address, constants.StarknetChainId.TESTNET),
+      { txnHash: hash },
+    );
   }
-
-  Storage.update(
-    selectors["0.0.3"].deployment(
-      controller.address,
-      constants.StarknetChainId.TESTNET,
-    ),
-    { txnHash: hash },
-  );
-  return;
 };
 
 const computeAddress = (
@@ -78,4 +68,4 @@ const computeAddress = (
     "0",
   );
 
-export { computeAddress, register, saveDeploy };
+export { computeAddress, register, setActive };

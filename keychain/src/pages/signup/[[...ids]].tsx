@@ -1,7 +1,6 @@
 import { useMemo, useCallback, useEffect, useState } from "react";
 import type { NextPage } from "next";
 import { motion } from "framer-motion";
-import useSound from "use-sound";
 import {
   Box,
   Flex,
@@ -25,7 +24,7 @@ import {
   L2Connect,
   Quests,
   Pending,
-  Ready,
+  Startup,
   Form as UsernameForm,
 } from "components/signup";
 
@@ -42,7 +41,7 @@ import { parseAttestationObject } from "utils/webauthn";
 import { addAddressPadding, number } from "starknet";
 import { remoteSvgIcon } from "utils/svg";
 
-import { register, saveDeploy } from "methods/register";
+import { register, setActive } from "methods/register";
 
 enum RegistrationState {
   CREATE_USERNAME,
@@ -62,10 +61,6 @@ const CreateWallet: NextPage = () => {
   const [credentials, setCredentials] = useState<Credentials>();
   const [regState, setRegState] = useState<RegistrationState>(
     RegistrationState.CREATE_USERNAME,
-  );
-
-  const [playSound] = useSound(
-    "https://static.cartridge.gg/sounds/startup.mp3",
   );
 
   const { ids } = router.query as {
@@ -107,12 +102,9 @@ const CreateWallet: NextPage = () => {
         },
       );
 
-      const result = await onCreateFinalize(deviceKey, credentials);
+      const hash = await onCreateFinalize(deviceKey, credentials);
 
-      const hash =
-        result.finalizeRegistration.contracts.edges[0].node.deployTransaction
-          .transactionHash;
-      await saveDeploy(process.env.NEXT_PUBLIC_ADMIN_URL)(hash);
+      setActive(address, hash);
 
       // const deployResult = await deployMainnetAccount({
       //   id: username,
@@ -124,6 +116,19 @@ const CreateWallet: NextPage = () => {
     },
     [],
   );
+
+  const onComplete = useCallback(async () => {
+    const { close, redirect_uri } = router.query;
+    if (close) {
+      return window.close();
+    }
+
+    if (redirect_uri) {
+      return router.replace(decodeURIComponent(redirect_uri as string));
+    }
+
+    router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);
+  }, [router]);
 
   useEffect(() => {
     if (starterPackData) {
@@ -248,7 +253,6 @@ const CreateWallet: NextPage = () => {
                 username={username}
                 gameId={gameId}
                 starterpackId={starterPackData?.game?.starterPack?.id}
-                playSound={playSound}
               />
             )}
           {regState == RegistrationState.PENDING && (
@@ -270,17 +274,7 @@ const CreateWallet: NextPage = () => {
         </SimpleGrid>
       </Container>
       {regState == RegistrationState.READY && (
-        <Ready
-          playSound={playSound}
-          onComplete={() => {
-            const { redirect_uri } = router.query;
-            if (redirect_uri) {
-              router.replace(decodeURIComponent(redirect_uri as string));
-            } else {
-              router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);
-            }
-          }}
-        />
+        <Startup onComplete={onComplete} />
       )}
     </>
   );

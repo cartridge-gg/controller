@@ -28,7 +28,7 @@ import Storage from "utils/storage";
 
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
 import provision from "../methods/provision";
-import { register, saveDeploy } from "../methods/register";
+import { register } from "../methods/register";
 import login from "../methods/login";
 import logout from "../methods/logout";
 import { revoke, session, sessions } from "../methods/sessions";
@@ -256,7 +256,6 @@ const Index: NextPage = () => {
         ),
         session: normalize(session),
         sessions: normalize(sessions),
-        saveDeploy: normalize(saveDeploy),
       },
     });
 
