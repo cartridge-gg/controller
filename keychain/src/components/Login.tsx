@@ -86,7 +86,7 @@ export const Login = ({
         },
       });
     }
-  }, [name, onLogin, refetch, log]);
+  }, [chainId, name, onLogin, refetch, log]);
 
   return (
     <Container

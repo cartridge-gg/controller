@@ -28,13 +28,13 @@ const Home: NextPage = () => {
     <div>
       <h2>Wallet</h2>
       <ConnectWallet />
-      <SignMessage />
       <h2>Counter Contract</h2>
       <p>Address: {counter?.address}</p>
       <p>Value: {counterValue}</p>
       <IncrementCounter />
       <h2>Recent Transactions</h2>
       <TransactionList />
+      <SignMessage />
     </div>
   )
 }

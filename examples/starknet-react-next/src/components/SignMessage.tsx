@@ -1,10 +1,14 @@
-import { useAccount, useSignTypedData } from "@starknet-react/core";
+import { useAccount, useContract, useSignTypedData, useStarknetCall } from "@starknet-react/core";
+import { useState } from "react";
 import { typedData } from "starknet";
 
 export function SignMessage() {
-  const { account } = useAccount();
+  const { address, account } = useAccount();
+  const { contract } = useContract({
+    address,
+  })
 
-  const message: typedData.TypedData = {
+  const defaultMessage: typedData.TypedData = {
     types: {
       StarkNetDomain: [
         { name: 'name', type: 'felt' },
@@ -39,16 +43,35 @@ export function SignMessage() {
       contents: 'Hello, Bob!',
     },
   };
-  const { signTypedData, data } = useSignTypedData(message);
+  const [message, setMessage] = useState(defaultMessage);
+  const { signTypedData, data: signature } = useSignTypedData(message);
+
+  const msgHash = typedData.getMessageHash(message, address);
+  const { data, loading, error, refresh: validateSignature } = useStarknetCall({
+    contract,
+    method: "isValidSignature",
+    args: signature ? [msgHash, signature.length, signature] : [],
+    options: { watch: false, }
+  });
 
   if (!account) {
     return null;
   }
 
   return (
-    <div css={{marginTop: "10px"}}>
-      <button onClick={signTypedData}>Sign Message</button>
-      {data && <p>Data: {data}</p>}
+    <div css={{ marginTop: "10px" }}>
+      <h2>Sign Message</h2>
+      <textarea style={{ height: "200px", width: "500px" }} value={JSON.stringify(message, null, 2)} onChange={
+        (e) => setMessage(JSON.parse(e.target.value))
+      } />
+      <div>
+        <button onClick={signTypedData}>Sign Message</button>
+        {signature && <button style={{ paddingLeft: "8px" }} onClick={() => {
+          debugger
+          validateSignature()
+        }}>Validate Signature</button>}
+      </div>
+      {signature && <div>Signature: {JSON.stringify(signature, null, 2)}</div>}
     </div>
   );
 }

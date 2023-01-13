@@ -74,11 +74,8 @@ const MessageContent = (message: object) => {
         </Text>
       </strong>
       <Text mb="4" textColor="#808080">
-        This request will not trigger a blockchain transaction or cost any gas
+        This request will not create a blockchain transaction or cost any gas
         fees.
-      </Text>
-      <Text mb="4" textColor="#808080">
-        Your authentication status will reset after 24 hours.
       </Text>
     </Box>
   );
@@ -140,19 +137,13 @@ const SignMessage = ({
       <Banner title="Signature Request"></Banner>
       <Details header={DetailsHeader(headerData)}>
         {MessageContent(messageData)}
-        {DetailsTransaction({
-          "WALLET ADDRESS": controller.address,
-          NONCE: nonce,
-        })}
       </Details>
       <Spacer />
       <ButtonBar
-        // expiresIn="1 DAY"
         onSubmit={async () => {
           const sig = await controller
             .account(constants.StarknetChainId.MAINNET)
             .signMessage(typedData);
-          sig.unshift(number.toBN(CLASS_HASHES["0.0.1"].controller).toString());
           onSign(sig);
         }}
         onCancel={onCancel}
