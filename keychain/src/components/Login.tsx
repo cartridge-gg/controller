@@ -184,7 +184,6 @@ export const Login = ({
                 <NextLink
                   href={{
                     pathname: "https://cartridge.gg/signup",
-                    query: router.query,
                   }}
                 >
                   <Link variant="traditional">Create Account</Link>

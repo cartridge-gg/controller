@@ -5,13 +5,11 @@ import { Text, Container } from "@chakra-ui/react";
 import Footer from "components/Footer";
 import { motion } from "framer-motion";
 import { Header } from "components/Header";
-import { useControllerModal } from "hooks/modal";
 import { useInterval } from "usehooks-ts";
 import Controller from "utils/controller";
 
 const Continue: NextPage = () => {
   const router = useRouter();
-  const { cancel } = useControllerModal();
   const [controller, setController] = useState<Controller>();
 
   useInterval(
@@ -42,7 +40,7 @@ const Continue: NextPage = () => {
         centerContent
       >
         <Text>Please continue with signup in the new window.</Text>
-        <Footer showConfirm={false} cancelText="Close" onCancel={cancel} />
+        <Footer showConfirm={false} cancelText="Close" onCancel={() => {}} />
       </Container>
     </>
   );
