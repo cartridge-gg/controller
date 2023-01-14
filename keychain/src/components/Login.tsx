@@ -1,6 +1,7 @@
 import Fingerprint from "./icons/Fingerprint";
 import { Formik, Form, Field, FormikState } from "formik";
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import { css } from "@emotion/react";
 import {
   Button,
@@ -25,6 +26,7 @@ import NextLink from "next/link";
 import { useDebounce } from "hooks/debounce";
 import Web3Auth from "./Web3Auth";
 import { constants, KeyPair } from "starknet";
+import Footer from "components/Footer";
 
 export const Login = ({
   chainId,
@@ -36,6 +38,7 @@ export const Login = ({
   onCancel: () => void;
 }) => {
   const [name, setName] = useState("");
+  const [popupSignup, setPopupSignup] = useState<boolean>(false);
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
   const [unsupported, setUnsupported] = useState<boolean>(false);
   const { debouncedValue: debouncedName } = useDebounce(name, 100);
@@ -87,6 +90,24 @@ export const Login = ({
       });
     }
   }, [chainId, name, onLogin, refetch, log]);
+
+  if(popupSignup) {
+    return (
+      <Container
+      w={["full", "400px"]}
+      h="calc(100vh - 74px)"
+      pt="100px"
+      centerContent
+    >
+      <Text>Please continue with signup in the new window.</Text>
+      <Footer showConfirm={false} cancelText="Close" onCancel={() => {
+        onCancel();
+        // hack.. there's a delay before modal disappears, penpal latency?
+        setTimeout(() => setPopupSignup(false), 500)
+       }} />
+    </Container>
+    )
+  }
 
   return (
     <Container
@@ -182,20 +203,42 @@ export const Login = ({
                 <Divider borderColor="whiteAlpha.500" />
               </HStack>
               <Web3Auth onAuth={(keyPair: KeyPair) => {}} />
-              <HStack as="strong" justify="center" fontSize="13px">
-                <Text color="whiteAlpha.600">{"Don't have a controller?"}</Text>
-                <NextLink
-                  href={{
-                    pathname: "https://cartridge.gg/signup",
-                  }}
-                >
-                  <Link variant="traditional">Create Account</Link>
-                </NextLink>
-              </HStack>
+              <SignupLink onPopup={()=>setPopupSignup(true)}/>
             </Form>
           )}
         </Formik>
       </VStack>
     </Container>
+  );
+};
+
+
+const SignupLink = ({onPopup} : {onPopup : ()=> void}) => {
+  const router = useRouter();
+  const isEmbedded =
+    typeof window !== "undefined" && window.top !== window.self;
+
+  const onClick = useCallback(() => {
+    if (isEmbedded) {
+      onPopup();
+
+      window.open(
+        process.env.NEXT_PUBLIC_SITE_URL + "/signup?close=true",
+        "_blank",
+        "height=650,width=450",
+      );
+      return;
+    }
+
+    router.push({ pathname: "/signup", query: router.query });
+  }, [router, isEmbedded]);
+
+  return (
+    <HStack as="strong" justify="center" fontSize="13px">
+      <Text color="whiteAlpha.600">{"Don't have a controller?"}</Text>
+      <Link variant="traditional" onClick={onClick}>
+        Sign up
+      </Link>
+    </HStack>
   );
 };

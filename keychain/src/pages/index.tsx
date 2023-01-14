@@ -1,6 +1,7 @@
 import type { NextPage } from "next";
 import dynamic from "next/dynamic";
 import { ReactNode, useEffect, useState } from "react";
+import {useRouter} from "next/router";
 
 import { connectToParent } from "@cartridge/penpal";
 
@@ -25,6 +26,7 @@ import SignMessage from "components/SignMessage";
 import Execute from "components/Execute";
 import selectors from "utils/selectors";
 import Storage from "utils/storage";
+import { useInterval } from "usehooks-ts";
 
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
 import provision from "../methods/provision";
@@ -75,7 +77,6 @@ const Container = ({ children }: { children: ReactNode }) => (
       right={0}
       bottom={0}
       top="50px"
-      overflowX="scroll"
     >
       {children}
     </Box>
@@ -131,6 +132,7 @@ const Index: NextPage = () => {
   );
   const [context, setContext] = useState<Context>();
   const [controller, setController] = useState<Controller>();
+  const router = useRouter();
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -272,10 +274,9 @@ const Index: NextPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setContext]);
 
-  useEffect(() => {
-    const controller = Controller.fromStore();
-    setController(controller);
-  }, [setController]);
+  useInterval(()=>{
+    setController(Controller.fromStore());
+  }, controller ? null : 1000);
 
   if (window.self === window.top) {
     return <></>;
