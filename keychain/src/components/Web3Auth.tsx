@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button, HStack } from "@chakra-ui/react";
+import { Button, Divider, HStack, Text } from "@chakra-ui/react";
 import { Web3AuthCore } from "@web3auth/core";
 import { CHAIN_NAMESPACES, WALLET_ADAPTERS } from "@web3auth/base";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
@@ -66,29 +66,44 @@ const Web3Auth = ({ onAuth }: { onAuth: (keyPair: KeyPair) => void }) => {
   };
 
   return (
-    <HStack gap="12px">
-      <Button
-        flex={1}
-        variant="secondary700"
-        onClick={async () => {
-          login("discord");
-        }}
-      >
-        <Discord height="18px" width="18px" mr="8px" />
-      </Button>
-      {/* <Button flex={1} variant="secondary700" onClick={async () => {
+    <>
+      <HStack>
+        <Divider borderColor="whiteAlpha.500" />
+        <Text
+          mx="18px"
+          fontFamily="IBM Plex Sans"
+          fontSize="12px"
+          color="whiteAlpha.600"
+          fontWeight="600"
+        >
+          or
+        </Text>
+        <Divider borderColor="whiteAlpha.500" />
+      </HStack>
+      <HStack gap="12px">
+        <Button
+          flex={1}
+          variant="secondary700"
+          onClick={async () => {
+            login("discord");
+          }}
+        >
+          <Discord height="18px" width="18px" mr="8px" />
+        </Button>
+        {/* <Button flex={1} variant="secondary700" onClick={async () => {
                 login("twitter");
             }}><Twitter height="18px" width="18px" /></Button> */}
-      <Button
-        flex={1}
-        variant="secondary700"
-        onClick={async () => {
-          login("metamask");
-        }}
-      >
-        <MetaMask height="18px" width="18px" />
-      </Button>
-    </HStack>
+        <Button
+          flex={1}
+          variant="secondary700"
+          onClick={async () => {
+            login("metamask");
+          }}
+        >
+          <MetaMask height="18px" width="18px" />
+        </Button>
+      </HStack>
+    </>
   );
 };
 

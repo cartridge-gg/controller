@@ -193,19 +193,6 @@ export const Login = ({
               >
                 Connect Controller
               </Button>
-              <HStack>
-                <Divider borderColor="whiteAlpha.500" />
-                <Text
-                  mx="18px"
-                  fontFamily="IBM Plex Sans"
-                  fontSize="12px"
-                  color="whiteAlpha.600"
-                  fontWeight="600"
-                >
-                  or
-                </Text>
-                <Divider borderColor="whiteAlpha.500" />
-              </HStack>
               {/* <Web3Auth onAuth={(keyPair: KeyPair) => {}} /> */}
               <SignupLink onPopup={() => setPopupSignup(true)} />
             </Form>
