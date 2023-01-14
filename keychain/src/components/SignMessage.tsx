@@ -7,13 +7,13 @@ import {
   constants,
   number,
   Signature,
+  hash,
 } from "starknet";
 
 import { Banner } from "components/Banner";
 import ButtonBar from "components/ButtonBar";
 import Details from "components/Details";
 import Controller from "utils/controller";
-import { CLASS_HASHES } from "utils/hashes";
 
 const DetailsHeader = (data: {
   media?: Array<{ uri: string }>;
@@ -92,9 +92,8 @@ const SignMessage = ({
   origin: string;
   typedData: td.TypedData;
   onSign: (sig: Signature) => void;
-  onCancel: () => void;
+  onCancel: (reason?: string) => void;
 }) => {
-  const [nonce, setNonce] = useState("...");
   const [messageData, setMessageData] = useState({});
 
   const headerData = { icon: <></>, name: origin as string };
@@ -128,6 +127,11 @@ const SignMessage = ({
     setMessageData(typedData);
   }, [typedData]);
 
+  if (!typedData.domain.chainId) {
+    onCancel("Chain ID not specified in typed data domain");
+    return <></>;
+  }
+
   if (!controller) {
     return <></>;
   }
@@ -142,7 +146,7 @@ const SignMessage = ({
       <ButtonBar
         onSubmit={async () => {
           const sig = await controller
-            .account(constants.StarknetChainId.MAINNET)
+            .account(parseChainId(typedData.domain.chainId))
             .signMessage(typedData);
           onSign(sig);
         }}
@@ -154,5 +158,17 @@ const SignMessage = ({
     </Flex>
   );
 };
+
+function parseChainId(chainId: string | number) {
+  if (typeof chainId === "number") {
+    return constants.StarknetChainId[chainId.toString(16)];
+  } else if (typeof chainId === "string") {
+    if (chainId.startsWith("0x")) {
+      return constants.StarknetChainId[chainId];
+    } else {
+      return constants.StarknetChainId[shortString.encodeShortString(chainId)];
+    }
+  }
+}
 
 export default SignMessage;

@@ -206,7 +206,7 @@ export const Login = ({
                 </Text>
                 <Divider borderColor="whiteAlpha.500" />
               </HStack>
-              <Web3Auth onAuth={(keyPair: KeyPair) => {}} />
+              {/* <Web3Auth onAuth={(keyPair: KeyPair) => {}} /> */}
               <SignupLink onPopup={() => setPopupSignup(true)} />
             </Form>
           )}
@@ -234,7 +234,7 @@ const SignupLink = ({ onPopup }: { onPopup: () => void }) => {
     }
 
     router.push({ pathname: "/signup", query: router.query });
-  }, [router, isEmbedded]);
+  }, [router, isEmbedded, onPopup]);
 
   return (
     <HStack as="strong" justify="center" fontSize="13px">

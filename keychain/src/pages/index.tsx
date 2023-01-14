@@ -350,7 +350,7 @@ const Index: NextPage = () => {
           origin={ctx.origin}
           typedData={ctx.typedData}
           onSign={(sig) => context.resolve(sig)}
-          onCancel={() => context.reject()}
+          onCancel={(reason?: string) => context.reject(reason)}
         />
       </Container>
     );

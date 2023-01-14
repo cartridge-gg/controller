@@ -47,12 +47,6 @@ export function SignMessage() {
   const { signTypedData, data: signature } = useSignTypedData(message);
 
   const msgHash = typedData.getMessageHash(message, address);
-  const { data, loading, error, refresh: validateSignature } = useStarknetCall({
-    contract,
-    method: "isValidSignature",
-    args: signature ? [msgHash, signature.length, signature] : [],
-    options: { watch: false, }
-  });
 
   if (!account) {
     return null;
@@ -66,9 +60,12 @@ export function SignMessage() {
       } />
       <div>
         <button onClick={signTypedData}>Sign Message</button>
-        {signature && <button style={{ paddingLeft: "8px" }} onClick={() => {
-          debugger
-          validateSignature()
+        {signature && <button style={{ paddingLeft: "8px" }} onClick={async () => {
+          const res = await account.callContract({
+            contractAddress: address,
+            entrypoint: "isValidSignature",
+            calldata: [msgHash, signature.length, ...signature],
+          }, "latest")
         }}>Validate Signature</button>}
       </div>
       {signature && <div>Signature: {JSON.stringify(signature, null, 2)}</div>}
