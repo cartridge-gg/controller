@@ -1,7 +1,7 @@
 import type { NextPage } from "next";
 import dynamic from "next/dynamic";
 import { ReactNode, useEffect, useState } from "react";
-import {useRouter} from "next/router";
+import { useRouter } from "next/router";
 
 import { connectToParent } from "@cartridge/penpal";
 
@@ -71,13 +71,7 @@ const Container = ({ children }: { children: ReactNode }) => (
     bottom={0}
   >
     <Header />
-    <Box
-      position="fixed"
-      left={0}
-      right={0}
-      bottom={0}
-      top="50px"
-    >
+    <Box position="fixed" left={0} right={0} bottom={0} top="50px">
       {children}
     </Box>
   </ChakraContainer>
@@ -200,10 +194,10 @@ const Index: NextPage = () => {
                   : [transactions];
                 const policies = calls.map(
                   (txn) =>
-                  ({
-                    target: txn.contractAddress,
-                    method: txn.entrypoint,
-                  } as Policy),
+                    ({
+                      target: txn.contractAddress,
+                      method: txn.entrypoint,
+                    } as Policy),
                 );
 
                 const missing = diff(policies, session.policies);
@@ -274,9 +268,12 @@ const Index: NextPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setContext]);
 
-  useInterval(()=>{
-    setController(Controller.fromStore());
-  }, controller ? null : 1000);
+  useInterval(
+    () => {
+      setController(Controller.fromStore());
+    },
+    controller ? null : 1000,
+  );
 
   if (window.self === window.top) {
     return <></>;
@@ -319,7 +316,9 @@ const Index: NextPage = () => {
             address: string;
             policies: Policy[];
           }) => {
-            const pendingRegister = Storage.get(selectors[VERSION].register(controller.address, chainId))
+            const pendingRegister = Storage.get(
+              selectors[VERSION].register(controller.address, chainId),
+            );
             if (!controller.account(chainId).registered && !pendingRegister) {
               const { assertion, invoke } = await controller.signAddDeviceKey(
                 chainId,

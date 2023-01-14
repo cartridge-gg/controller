@@ -91,22 +91,26 @@ export const Login = ({
     }
   }, [chainId, name, onLogin, refetch, log]);
 
-  if(popupSignup) {
+  if (popupSignup) {
     return (
       <Container
-      w={["full", "400px"]}
-      h="calc(100vh - 74px)"
-      pt="100px"
-      centerContent
-    >
-      <Text>Please continue with signup in the new window.</Text>
-      <Footer showConfirm={false} cancelText="Close" onCancel={() => {
-        onCancel();
-        // hack.. there's a delay before modal disappears, penpal latency?
-        setTimeout(() => setPopupSignup(false), 500)
-       }} />
-    </Container>
-    )
+        w={["full", "400px"]}
+        h="calc(100vh - 74px)"
+        pt="100px"
+        centerContent
+      >
+        <Text>Please continue with signup in the new window.</Text>
+        <Footer
+          showConfirm={false}
+          cancelText="Close"
+          onCancel={() => {
+            onCancel();
+            // hack.. there's a delay before modal disappears, penpal latency?
+            setTimeout(() => setPopupSignup(false), 500);
+          }}
+        />
+      </Container>
+    );
   }
 
   return (
@@ -203,7 +207,7 @@ export const Login = ({
                 <Divider borderColor="whiteAlpha.500" />
               </HStack>
               <Web3Auth onAuth={(keyPair: KeyPair) => {}} />
-              <SignupLink onPopup={()=>setPopupSignup(true)}/>
+              <SignupLink onPopup={() => setPopupSignup(true)} />
             </Form>
           )}
         </Formik>
@@ -212,8 +216,7 @@ export const Login = ({
   );
 };
 
-
-const SignupLink = ({onPopup} : {onPopup : ()=> void}) => {
+const SignupLink = ({ onPopup }: { onPopup: () => void }) => {
   const router = useRouter();
   const isEmbedded =
     typeof window !== "undefined" && window.top !== window.self;
