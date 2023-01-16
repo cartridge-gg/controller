@@ -117,7 +117,8 @@ export const Quests = ({ username, gameId, starterpackId }: QuestsProps) => {
     playSound();
     deployMainnetAccount({
       id: username,
-      starterpackId,
+      chainId: "starknet:SN_MAIN",
+      starterpackIds: [starterpackId],
     }).then((res) =>
       router.replace(
         redirect_uri
