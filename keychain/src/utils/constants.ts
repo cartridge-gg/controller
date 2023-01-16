@@ -1,3 +1,5 @@
+import { constants } from "starknet";
+
 export const GATEWAY_MAINNET = process.env.NEXT_PUBLIC_GATEWAY_MAINNET;
 export const GATEWAY_GOERLI = process.env.NEXT_PUBLIC_GATEWAY_GOERLI;
 export const GATEWAY_GOERLI2 = process.env.NEXT_PUBLIC_GATEWAY_GOERLI2;
@@ -23,3 +25,9 @@ export const CONTRACT_UPGRADE_IMPLEMENTATION =
 
 // L1 Contract
 export const CONTRACT_NFF_BRIDGE = "0xbd701502203B21307BEa2d4078E69dd0c9C0703C";
+
+export const NamedChainId = {
+  [constants.StarknetChainId.MAINNET]: "SN_MAIN",
+  [constants.StarknetChainId.TESTNET]: "SN_GOERLI",
+  [constants.StarknetChainId.TESTNET2]: "SN_GOERLI2",
+}

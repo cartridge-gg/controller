@@ -37,7 +37,7 @@ const setActive = (address: string, hash?: string) => {
   if (hash) {
     Storage.update(
       selectors["0.0.3"].deployment(address, constants.StarknetChainId.TESTNET),
-      { txnHash: hash },
+      { registerTxnHash: hash },
     );
   }
 };

@@ -32,7 +32,7 @@ const Register = ({
       });
 
     Storage.update(selectors[VERSION].deployment(controller.address, chainId), {
-      txnHash: txn.transaction_hash,
+      registerTxnHash: txn.transaction_hash,
     });
 
     controller.account(chainId).sync();
