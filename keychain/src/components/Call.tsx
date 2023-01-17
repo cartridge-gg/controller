@@ -1,12 +1,11 @@
 import {
+  Box,
   Flex,
-  Tag,
   Text,
   HStack,
   Link,
   Input,
   Spacer,
-  VStack,
   Tooltip,
   SystemProps,
 } from "@chakra-ui/react";
@@ -51,9 +50,9 @@ export const CallToggle = ({
   return (
     <HStack w="full" bgColor="gray.600" py="7px" px="12px">
       <CodeIcon boxSize="18px" />
-      <Text fontSize="13px" textTransform="capitalize">
+      <Box fontSize="13px" textTransform="capitalize">
         {policy.method}
-      </Text>
+      </Box>
       <Spacer />
       <Tooltip label={`View on Starkscan`} placement="left" hasArrow>
         <Link

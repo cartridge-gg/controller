@@ -5,8 +5,15 @@ import { ReactNode, useEffect, useState } from "react";
 import { connectToParent } from "@cartridge/penpal";
 
 import Controller, { diff, VERSION } from "utils/controller";
-import { normalize as normalizeOrigin } from "utils/url";
-import { Policy, Session } from "@cartridge/controller";
+import {
+  ConnectReply,
+  Error,
+  ResponseCodes,
+  ExecuteReply,
+  Policy,
+  Session,
+  ProbeReply,
+} from "@cartridge/controller";
 import Connect from "components/Connect";
 import { Login } from "components/Login";
 import { Box, Container as ChakraContainer } from "@chakra-ui/react";
@@ -33,30 +40,8 @@ import { register } from "../methods/register";
 import login from "../methods/login";
 import logout from "../methods/logout";
 import { revoke, session, sessions } from "../methods/sessions";
-
-export function normalize<T = Function>(
-  fn: (origin: string) => T,
-): (origin: string) => T {
-  return (origin: string) => fn(normalizeOrigin(origin));
-}
-
-export function validate<T = Function>(
-  fn: (controller: Controller, session: Session, origin: string) => T,
-): (origin: string) => T {
-  return (origin: string) => {
-    const controller = Controller.fromStore();
-    if (!controller) {
-      throw new Error("no controller");
-    }
-
-    const session = controller.session(origin);
-    if (!session) {
-      throw new Error("not connected");
-    }
-
-    return fn(controller, session, origin);
-  };
-}
+import { Status } from "utils/account";
+import { normalize, validate } from "../methods";
 
 const Container = ({ children }: { children: ReactNode }) => (
   <ChakraContainer
@@ -82,13 +67,7 @@ type Connect = {
   origin: string;
   type: "connect";
   policies: Policy[];
-  resolve: ({
-    address,
-    policies,
-  }: {
-    address: string;
-    policies: Policy[];
-  }) => void;
+  resolve: (res: ConnectReply) => void;
   reject: (reason?: unknown) => void;
 };
 
@@ -100,13 +79,7 @@ type Execute = {
   transactionsDetail?: InvocationsDetails & {
     chainId?: constants.StarknetChainId;
   };
-  resolve: ({
-    res,
-    needSync,
-  }: {
-    res?: InvokeFunctionResponse;
-    needSync?: boolean;
-  }) => void;
+  resolve: (res: ExecuteReply) => void;
   reject: (reason?: unknown) => void;
 };
 
@@ -137,21 +110,27 @@ const Index: NextPage = () => {
 
     const connection = connectToParent({
       methods: {
-        connect: normalize((origin: string) => async (policies: Policy[]) => {
-          return await new Promise((resolve, reject) => {
-            setContext({
-              type: "connect",
-              origin,
-              policies,
-              resolve,
-              reject,
-            } as Connect);
-          });
-        }),
+        connect: normalize(
+          (origin: string) =>
+            async (policies: Policy[]): Promise<ConnectReply> => {
+              return await new Promise((resolve, reject) => {
+                setContext({
+                  type: "connect",
+                  origin,
+                  policies,
+                  resolve,
+                  reject,
+                } as Connect);
+              });
+            },
+        ),
         disconnect: normalize(
           validate(
-            (controller: Controller, _session: Session, origin: string) => () =>
-              controller.revoke(origin),
+            async (controller: Controller, _session: Session, origin: string) =>
+              async () => {
+                controller.revoke(origin);
+                return;
+              },
           ),
         ),
         execute: normalize(
@@ -164,7 +143,7 @@ const Index: NextPage = () => {
                   chainId?: constants.StarknetChainId;
                 },
                 sync?: boolean,
-              ) => {
+              ): Promise<ExecuteReply | Error> => {
                 const cId = transactionsDetail?.chainId
                   ? transactionsDetail.chainId
                   : chainId;
@@ -184,7 +163,10 @@ const Index: NextPage = () => {
 
                 const account = controller.account(cId);
                 if (!account.registered || !account.deployed) {
-                  return Promise.resolve({ needSync: true });
+                  return Promise.resolve({
+                    code: ResponseCodes.NOT_ALLOWED,
+                    message: "Account not registered or deployed.",
+                  });
                 }
 
                 const calls = Array.isArray(transactions)
@@ -200,7 +182,10 @@ const Index: NextPage = () => {
 
                 const missing = diff(policies, session.policies);
                 if (missing.length > 0) {
-                  return Promise.resolve({ needSync: true });
+                  return Promise.resolve({
+                    code: ResponseCodes.NOT_ALLOWED,
+                    message: `Missing policies: ${JSON.stringify(missing)}`,
+                  });
                 }
 
                 if (!transactionsDetail.maxFee) {
@@ -218,10 +203,21 @@ const Index: NextPage = () => {
                     .toBN(transactionsDetail.maxFee)
                     .gt(number.toBN(session.maxFee))
                 ) {
-                  return Promise.resolve({ needSync: true });
+                  return Promise.resolve({
+                    code: ResponseCodes.NOT_ALLOWED,
+                    message: `Max fee exceeded: ${transactionsDetail.maxFee.toString()} > ${session.maxFee.toString()}`,
+                  });
                 }
 
-                return account.execute(calls, abis, transactionsDetail);
+                const res = await account.execute(
+                  calls,
+                  abis,
+                  transactionsDetail,
+                );
+                return {
+                  code: ResponseCodes.SUCCESS,
+                  ...res,
+                };
               },
           ),
         ),
@@ -232,27 +228,29 @@ const Index: NextPage = () => {
         login: normalize(login),
         logout: normalize(logout),
         probe: normalize(
-          validate((controller: Controller, session: Session) => () => ({
-            address: controller.address,
-            policies: session.policies,
-          })),
+          validate(
+            (controller: Controller, session: Session) => (): ProbeReply => ({
+              code: ResponseCodes.SUCCESS,
+              address: controller.address,
+              policies: session.policies,
+            }),
+          ),
         ),
         revoke: normalize(revoke),
         signMessage: normalize(
           validate(
-            (controller: Controller, session: Session) =>
-              async (typedData: typedData.TypedData, account: string) => {
-                return await new Promise((resolve, reject) => {
-                  setContext({
-                    type: "sign-message",
-                    origin,
-                    typedData,
-                    account,
-                    resolve,
-                    reject,
-                  } as SignMessage);
-                });
-              },
+            () => async (typedData: typedData.TypedData, account: string) => {
+              return await new Promise((resolve, reject) => {
+                setContext({
+                  type: "sign-message",
+                  origin,
+                  typedData,
+                  account,
+                  resolve,
+                  reject,
+                } as SignMessage);
+              });
+            },
           ),
         ),
         session: normalize(session),
@@ -325,7 +323,7 @@ const Index: NextPage = () => {
               );
             }
 
-            ctx.resolve({ address, policies });
+            ctx.resolve({ code: ResponseCodes.SUCCESS, address, policies });
           }}
           onCancel={() => ctx.reject()}
         />
@@ -356,9 +354,9 @@ const Index: NextPage = () => {
     const ctx = context as Execute;
     const account = controller.account(chainId);
 
-    if (!account.deployed) {
+    if (account.status === Status.COUNTERFACTUAL) {
       return <div>Deploy</div>;
-    } else if (!account.registered) {
+    } else if (account.status === Status.DEPLOYED) {
       return <div>Register</div>;
     }
 
