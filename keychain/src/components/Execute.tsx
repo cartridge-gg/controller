@@ -17,7 +17,6 @@ import {
 import { Banner } from "components/Banner";
 import { Call } from "components/Call";
 import Footer from "components/Footer";
-import { normalize, validate } from "pages";
 import { estimateFeeBulk } from "utils/gateway";
 import Fees from "components/Fees";
 import JoystickIcon from "@cartridge/ui/src/components/icons/Joystick";
@@ -65,37 +64,6 @@ const Execute = ({
       calldata: transaction.fromCallsToExecuteCalldata(calls),
     };
   }, [transactions]);
-
-  const execute = useCallback(
-    (calls: StarknetCall[]) => {
-      return normalize(
-        validate((controller) => {
-          return async () => {
-            if (account.registered) {
-              return await account.execute(calls, null, {
-                maxFee: fees.max,
-                nonce,
-                version: hash.transactionVersion,
-              });
-            }
-
-            return await Promise.all([
-              account.invokeFunction(registerData.invoke.invocation, {
-                ...registerData.invoke.details,
-                nonce: registerData.invoke.details.nonce!,
-              }),
-              account.execute(calls, null, {
-                maxFee: fees.max,
-                nonce: nonce.add(number.toBN(1)),
-                version: hash.transactionVersion,
-              }),
-            ]);
-          };
-        }),
-      );
-    },
-    [account, fees, nonce, registerData],
-  );
 
   // Estimate fees
   useEffect(() => {
