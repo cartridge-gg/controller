@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Flex } from "@chakra-ui/react";
 
-import Controller, { RegisterData } from "utils/controller";
+import Controller, { RegisterData, VERSION } from "utils/controller";
 import {
   Abi,
   constants,
@@ -21,6 +21,8 @@ import { estimateFeeBulk } from "utils/gateway";
 import Fees from "components/Fees";
 import JoystickIcon from "@cartridge/ui/src/components/icons/Joystick";
 import BN from "bn.js";
+import selectors from "utils/selectors";
+import Storage from "utils/storage";
 
 const Execute = ({
   origin,
@@ -37,7 +39,6 @@ const Execute = ({
   };
   abis?: Abi[];
 }) => {
-  const [registerData, setRegisterData] = useState<RegisterData>();
   const [nonce, setNonce] = useState<BN>();
   const [fees, setFees] = useState<{
     base: BN;
@@ -49,7 +50,7 @@ const Execute = ({
   const chainId = transactionsDetail?.chainId
     ? transactionsDetail.chainId
     : constants.StarknetChainId.MAINNET;
-  const account = controller.account(chainId)
+  const account = controller.account(chainId);
   const { calls, calldata } = useMemo(() => {
     const calls = Array.isArray(transactions) ? transactions : [transactions];
     return {
@@ -64,87 +65,99 @@ const Execute = ({
       return;
     }
 
-    async function register() {
-      if (account.registered) {
-        if (transactionsDetail.maxFee) {
-          setFees({
-            base: number.toBN(transactionsDetail.maxFee),
-            max: number.toBN(transactionsDetail.maxFee),
-          });
-          return;
-        }
-        const fees = await account.estimateInvokeFee(calls, { nonce });
+    if (account.registered && transactionsDetail.maxFee) {
+      setFees({
+        base: number.toBN(transactionsDetail.maxFee),
+        max: number.toBN(transactionsDetail.maxFee),
+      });
+      return;
+    }
+
+    if (account.registered) {
+      account.estimateInvokeFee(calls, { nonce }).then((fees) => {
         setFees({ base: fees.overall_fee, max: fees.suggestedMaxFee });
-      } else if (!account.registered && registerData) {
-        try {
-          const nextNonce = number.toHex(nonce.add(number.toBN(1)));
-          const signerDetails = {
-            walletAddress: controller.address,
-            nonce: nextNonce,
-            maxFee: constants.ZERO,
-            version: hash.transactionVersion,
-            chainId: chainId,
-          };
+      });
+      return;
+    }
 
-          const signature = await controller.signer.signTransaction(
-            calls,
-            signerDetails,
-          );
+    async function estimate() {
+      const pendingRegister = Storage.get(
+        selectors[VERSION].register(controller.address, chainId),
+      );
+      try {
+        const nextNonce = number.toHex(nonce.add(number.toBN(1)));
+        const signerDetails = {
+          walletAddress: controller.address,
+          nonce: nextNonce,
+          maxFee: constants.ZERO,
+          version: hash.transactionVersion,
+          chainId: chainId,
+        };
 
-          const estimates = (await estimateFeeBulk(chainId, [
-            registerData.invoke,
-            {
-              invocation: {
-                contractAddress: controller.address,
-                calldata: calldata,
-                signature,
-              },
-              details: {
-                version: hash.transactionVersion,
-                nonce: nextNonce,
-                maxFee: constants.ZERO,
-              },
+        const signature = await controller.signer.signTransaction(
+          calls,
+          signerDetails,
+        );
+
+        let estimates = await estimateFeeBulk(chainId, [
+          pendingRegister.invoke,
+          {
+            invocation: {
+              contractAddress: controller.address,
+              calldata: calldata,
+              signature,
             },
-          ])) as EstimateFeeResponse[];
-
-          const fees = estimates.reduce<EstimateFee>(
-            (prev, estimate) => {
-              const overall_fee = prev.overall_fee.add(
-                number.toBN(estimate.overall_fee),
-              );
-              return {
-                overall_fee: overall_fee,
-                gas_consumed: prev.gas_consumed.add(
-                  number.toBN(estimate.gas_consumed),
-                ),
-                gas_price: prev.gas_price.add(number.toBN(estimate.gas_price)),
-                suggestedMaxFee: overall_fee,
-              };
+            details: {
+              version: hash.transactionVersion,
+              nonce: nextNonce,
+              maxFee: constants.ZERO,
             },
-            {
-              overall_fee: number.toBN(0),
-              gas_consumed: number.toBN(0),
-              gas_price: number.toBN(0),
-              suggestedMaxFee: number.toBN(0),
-            },
-          );
+          },
+        ]);
 
-          fees.suggestedMaxFee = stark.estimatedFeeToMaxFee(fees.overall_fee);
-          setFees({ base: fees.overall_fee, max: fees.suggestedMaxFee });
-        } catch (e) {
-          console.error(e);
-          setError(e);
+        if (estimates.code) {
+          setError(estimates.message);
           return;
         }
+
+        const estimates2 = estimates as EstimateFeeResponse[];
+        const fees = estimates2.reduce<EstimateFee>(
+          (prev, estimate) => {
+            const overall_fee = prev.overall_fee.add(
+              number.toBN(estimate.overall_fee),
+            );
+            return {
+              overall_fee: overall_fee,
+              gas_consumed: prev.gas_consumed.add(
+                number.toBN(estimate.gas_consumed),
+              ),
+              gas_price: prev.gas_price.add(number.toBN(estimate.gas_price)),
+              suggestedMaxFee: overall_fee,
+            };
+          },
+          {
+            overall_fee: number.toBN(0),
+            gas_consumed: number.toBN(0),
+            gas_price: number.toBN(0),
+            suggestedMaxFee: number.toBN(0),
+          },
+        );
+
+        fees.suggestedMaxFee = stark.estimatedFeeToMaxFee(fees.overall_fee);
+        setFees({ base: fees.overall_fee, max: fees.suggestedMaxFee });
+      } catch (e) {
+        debugger;
+        console.error(e);
+        setError(e);
+        return;
       }
     }
 
-    register();
+    estimate();
   }, [
     account,
     controller,
     nonce,
-    registerData,
     setError,
     setFees,
     calldata,
@@ -199,7 +212,7 @@ const Execute = ({
           isLoading={isLoading}
           isDisabled={!fees}
           onConfirm={onSubmit}
-          onCancel={() => { }}
+          onCancel={() => {}}
         >
           <Fees chainId={chainId} fees={fees} />
         </Footer>

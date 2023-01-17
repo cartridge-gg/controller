@@ -174,10 +174,10 @@ const Index: NextPage = () => {
                   : [transactions];
                 const policies = calls.map(
                   (txn) =>
-                  ({
-                    target: txn.contractAddress,
-                    method: txn.entrypoint,
-                  } as Policy),
+                    ({
+                      target: txn.contractAddress,
+                      method: txn.entrypoint,
+                    } as Policy),
                 );
 
                 const missing = diff(policies, session.policies);
@@ -228,11 +228,13 @@ const Index: NextPage = () => {
         login: normalize(login),
         logout: normalize(logout),
         probe: normalize(
-          validate((controller: Controller, session: Session) => (): ProbeReply => ({
-            code: ResponseCodes.SUCCESS,
-            address: controller.address,
-            policies: session.policies,
-          })),
+          validate(
+            (controller: Controller, session: Session) => (): ProbeReply => ({
+              code: ResponseCodes.SUCCESS,
+              address: controller.address,
+              policies: session.policies,
+            }),
+          ),
         ),
         revoke: normalize(revoke),
         signMessage: normalize(
