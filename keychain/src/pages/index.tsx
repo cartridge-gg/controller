@@ -1,7 +1,6 @@
 import type { NextPage } from "next";
 import dynamic from "next/dynamic";
 import { ReactNode, useEffect, useState } from "react";
-import { useRouter } from "next/router";
 
 import { connectToParent } from "@cartridge/penpal";
 
@@ -122,11 +121,10 @@ type SignMessage = {
 
 const Index: NextPage = () => {
   const [chainId, setChainId] = useState<constants.StarknetChainId>(
-    constants.StarknetChainId.MAINNET,
+    constants.StarknetChainId.TESTNET,
   );
   const [context, setContext] = useState<Context>();
   const [controller, setController] = useState<Controller>();
-  const router = useRouter();
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -270,9 +268,10 @@ const Index: NextPage = () => {
 
   useInterval(
     () => {
-      setController(Controller.fromStore());
+      const controller = Controller.fromStore();
+      setController(controller);
     },
-    controller ? null : 1000,
+    controller ? null : 500,
   );
 
   if (window.self === window.top) {
@@ -289,10 +288,7 @@ const Index: NextPage = () => {
       <Container>
         <Login
           chainId={chainId}
-          onLogin={() => {
-            const controller = Controller.fromStore();
-            setController(controller);
-          }}
+          onLogin={() => {}}
           onCancel={() => context.reject()}
         />
       </Container>

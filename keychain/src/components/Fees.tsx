@@ -73,34 +73,28 @@ const Fees = ({
   return (
     <HStack
       alignItems="center"
-      spacing="12px"
       bgColor="gray.700"
-      py="11px"
-      px="15px"
-      borderRadius="8px"
+      py="12px"
+      px="18px"
+      borderRadius="6px"
       justifyContent="space-between"
     >
-      <HStack>
-        <Text
-          textTransform="uppercase"
-          fontSize={11}
-          fontWeight={700}
-          color="gray.100"
-        >
+      <HStack color="gray.200">
+        <Text variant="ibm-upper-bold" fontSize={10} color="inherit">
           Network Fees
         </Text>
-        <InfoIcon />
+        <InfoIcon boxSize="12px" />
       </HStack>
-      <VStack alignItems="flex-end">
+      <VStack alignItems="flex-end" spacing="1px">
         {formattedFee ? (
           <>
             <Text fontSize={13}>{formattedFee.base}</Text>
-            <Text fontSize={11} color="gray.200" mt="1px !important">
+            <Text fontSize={11} color="gray.200">
               Max: {formattedFee.max}
             </Text>
           </>
         ) : (
-          <Spinner />
+          <Spinner size="sm" />
         )}
       </VStack>
     </HStack>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Flex } from "@chakra-ui/react";
+import { Flex, Text, VStack } from "@chakra-ui/react";
 
 import Controller, { RegisterData } from "utils/controller";
 import {
@@ -17,10 +17,11 @@ import {
 import { Banner } from "components/Banner";
 import { Call } from "components/Call";
 import Footer from "components/Footer";
+import { Error } from "components/Error";
 import { normalize, validate } from "pages";
 import { estimateFeeBulk } from "utils/gateway";
 import Fees from "components/Fees";
-import JoystickIcon from "@cartridge/ui/src/components/icons/Joystick";
+import TransactionIcon from "./icons/Transaction";
 import BN from "bn.js";
 
 const Execute = ({
@@ -48,16 +49,14 @@ const Execute = ({
   const [isLoading, setLoading] = useState<boolean>(false);
 
   const chainId = useMemo(
-    () =>
-      transactionsDetail
-        ? transactionsDetail.chainId
-        : constants.StarknetChainId.MAINNET,
+    () => transactionsDetail?.chainId || constants.StarknetChainId.TESTNET,
     [transactionsDetail],
   );
   const account = useMemo(
     () => controller.account(chainId),
     [controller, chainId],
   );
+
   const { calls, calldata } = useMemo(() => {
     const calls = Array.isArray(transactions) ? transactions : [transactions];
     return {
@@ -104,18 +103,18 @@ const Execute = ({
     }
 
     async function register() {
-      if (account.registered) {
-        if (transactionsDetail.maxFee) {
-          setFees({
-            base: number.toBN(transactionsDetail.maxFee),
-            max: number.toBN(transactionsDetail.maxFee),
-          });
-          return;
-        }
-        const fees = await account.estimateInvokeFee(calls, { nonce });
-        setFees({ base: fees.overall_fee, max: fees.suggestedMaxFee });
-      } else if (!account.registered && registerData) {
-        try {
+      try {
+        if (account.registered) {
+          if (transactionsDetail.maxFee) {
+            setFees({
+              base: number.toBN(transactionsDetail.maxFee),
+              max: number.toBN(transactionsDetail.maxFee),
+            });
+            return;
+          }
+          const fees = await account.estimateInvokeFee(calls, { nonce });
+          setFees({ base: fees.overall_fee, max: fees.suggestedMaxFee });
+        } else if (!account.registered && registerData) {
           const nextNonce = number.toHex(nonce.add(number.toBN(1)));
           const signerDetails = {
             walletAddress: controller.address,
@@ -170,11 +169,11 @@ const Execute = ({
 
           fees.suggestedMaxFee = stark.estimatedFeeToMaxFee(fees.overall_fee);
           setFees({ base: fees.overall_fee, max: fees.suggestedMaxFee });
-        } catch (e) {
-          console.error(e);
-          setError(e);
-          return;
         }
+      } catch (e) {
+        console.log(e);
+        setError(e);
+        return;
       }
     }
 
@@ -193,9 +192,11 @@ const Execute = ({
   ]);
 
   useEffect(() => {
-    account.getNonce().then((n: BN) => {
-      setNonce(number.toBN(n));
-    });
+    if (account) {
+      account.getNonce().then((n: BN) => {
+        setNonce(number.toBN(n));
+      });
+    }
   }, [account]);
 
   const onSubmit = useCallback(async () => {
@@ -205,42 +206,58 @@ const Execute = ({
       nonce,
       version: hash.transactionVersion,
     });
-
     setLoading(false);
-    confirm();
-  }, [account, nonce, calls, fees.max]);
-
-  if (error) {
-    return <div>{error.message}</div>;
-  }
+  }, [account, nonce, calls, fees]);
 
   return (
-    <Flex m={4} flex={1} flexDirection="column">
+    <Flex m={4} direction="column">
       <Banner
-        title="Execute Transactions"
-        description={`${origin} is requesting to execute the following transactions`}
-        icon={<JoystickIcon boxSize="30px" />}
+        title="Submit Transaction"
+        icon={<TransactionIcon boxSize="30px" />}
         chainId={chainId}
         pb="20px"
       />
-      <Flex my={2} flex={1} flexDirection="column" gap="10px">
-        {calls.map((call, i) => (
-          <Call
-            key={i}
-            chainId={chainId}
-            policy={{
-              target: call.contractAddress,
-              method: call.entrypoint,
-            }}
-          />
-        ))}
+      <Flex direction="column" gap="10px">
+        <Flex direction="column" height="230px" overflowY="auto">
+          <VStack spacing="1px">
+            <VStack
+              w="full"
+              p="12px"
+              align="flex-start"
+              bgColor="gray.700"
+              borderRadius="6px 6px 0 0"
+            >
+              <Text variant="ibm-upper-bold" fontSize="10px" color="gray.200">
+                Actions
+              </Text>
+              <Text fontSize="11px" color="gray.200">
+                Execute the following actions
+              </Text>
+            </VStack>
+            <VStack w="full">
+              {calls.map((call, i) => (
+                <Call
+                  key={i}
+                  chainId={chainId}
+                  policy={{
+                    target: call.contractAddress,
+                    method: call.entrypoint,
+                  }}
+                  _last={{ borderRadius: "0 0 6px 6px" }}
+                />
+              ))}
+            </VStack>
+          </VStack>
+        </Flex>
         <Footer
           isLoading={isLoading}
           isDisabled={!fees}
+          confirmText="Submit"
           onConfirm={onSubmit}
           onCancel={() => {}}
         >
-          <Fees chainId={chainId} fees={fees} />
+          {!error && <Fees chainId={chainId} fees={fees} />}
+          <Error error={error} />
         </Footer>
       </Flex>
     </Flex>

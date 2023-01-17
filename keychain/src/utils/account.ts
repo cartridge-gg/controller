@@ -84,7 +84,6 @@ class Account extends BaseAccount {
             "ACCEPTED_ON_L1",
             "ACCEPTED_ON_L2",
           ]).then(() => this.sync());
-          return;
         }
 
         const contract = await this.getContract();
@@ -93,10 +92,10 @@ class Account extends BaseAccount {
           return;
         }
 
-        if (contract.status !== "ACCEPTED_ON_L1" || contract.status !== "ACCEPTED_ON_L2") {
-          this.status = Status.DEPLOYING;
-          return;
-        }
+        // if (contract.status !== "ACCEPTED_ON_L1" || contract.status !== "ACCEPTED_ON_L2") {
+        //   this.status = Status.DEPLOYING;
+        //   return;
+        // }
       }
 
       const classHash = await this.rpc.getClassHashAt(this.address, "latest");
