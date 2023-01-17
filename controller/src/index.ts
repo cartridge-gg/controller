@@ -7,7 +7,7 @@ import {
 } from "@cartridge/penpal";
 
 import DeviceAccount from "./device";
-import { Session, Keychain, Policy } from "./types";
+import { Session, Keychain, Policy, ResponseCodes, ConnectReply, ProbeReply } from "./types";
 import { createModal, Modal } from "./modal";
 import BN from "bn.js";
 
@@ -96,7 +96,12 @@ class Controller {
     }
 
     try {
-      const { address } = await this.keychain.probe();
+      const res = await this.keychain.probe();
+      if (res.code !== ResponseCodes.SUCCESS) {
+        return;
+      }
+
+      const { address } = res as ProbeReply;
       this.accounts = {
         [constants.StarknetChainId.MAINNET]: new DeviceAccount(
           providers[constants.StarknetChainId.MAINNET],
@@ -192,7 +197,12 @@ class Controller {
     this.modal.open();
 
     try {
-      const response = await this.keychain.connect(this.policies);
+      let response = await this.keychain.connect(this.policies);
+      if (response.code !== ResponseCodes.SUCCESS) {
+        throw new Error(response.message);
+      }
+
+      response = response as ConnectReply;
       this.accounts = {
         [constants.StarknetChainId.MAINNET]: new DeviceAccount(
           providers[constants.StarknetChainId.MAINNET],
@@ -216,6 +226,7 @@ class Controller {
       this.modal.close();
       return this.accounts[this.chainId];
     } catch (e) {
+      console.log(e);
       this.modal.close();
     }
   }

@@ -30,4 +30,4 @@ export const NamedChainId = {
   [constants.StarknetChainId.MAINNET]: "SN_MAIN",
   [constants.StarknetChainId.TESTNET]: "SN_GOERLI",
   [constants.StarknetChainId.TESTNET2]: "SN_GOERLI2",
-}
+};

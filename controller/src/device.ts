@@ -13,7 +13,7 @@ import {
   RpcProvider,
 } from "starknet";
 
-import { Keychain } from "./types";
+import { Keychain, ResponseCodes } from "./types";
 import { Signer } from "./signer";
 import { AsyncMethodReturns } from "@cartridge/penpal";
 import { Modal } from "./modal";
@@ -90,15 +90,15 @@ class DeviceAccount extends Account {
     }
 
     try {
-      const { res, needSync } = await this.keychain.execute(calls, abis, transactionsDetail);
-      if (needSync) {
-        this.modal.open();
-        const { res } = await this.keychain.execute(calls, abis, transactionsDetail, true);
-        this.modal.close();
-        return res;
+      const res = await this.keychain.execute(calls, abis, transactionsDetail);
+      if (res.code === ResponseCodes.SUCCESS) {
+        return res as InvokeFunctionResponse;
       }
 
-      return res;
+      this.modal.open();
+      const res2 = await this.keychain.execute(calls, abis, transactionsDetail, true);
+      this.modal.close();
+      return res2 as InvokeFunctionResponse;
     } catch (e) {
       console.error(e);
       throw e;

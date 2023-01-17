@@ -1,4 +1,7 @@
-import { AccountContractDocument, useAccountContractQuery } from "generated/graphql";
+import {
+  AccountContractDocument,
+  useAccountContractQuery,
+} from "generated/graphql";
 import {
   constants,
   hash,
@@ -17,7 +20,7 @@ import selectors from "./selectors";
 import Storage from "./storage";
 import { NamedChainId } from "./constants";
 
-enum Status {
+export enum Status {
   UNKNOWN = "UNKNOWN",
   COUNTERFACTUAL = "COUNTERFACTUAL",
   DEPLOYING = "DEPLOYING",
@@ -60,7 +63,9 @@ class Account extends BaseAccount {
 
   async getContract() {
     try {
-      return await client.request(AccountContractDocument, { id: `starknet:${NamedChainId[this._chainId]}:${this.address}` });
+      return await client.request(AccountContractDocument, {
+        id: `starknet:${NamedChainId[this._chainId]}:${this.address}`,
+      });
     } catch (e) {
       if (e.message.includes("not found")) {
         return null;
@@ -80,10 +85,9 @@ class Account extends BaseAccount {
         const txn = Storage.get(this.selector).registerTxnHash;
         if (txn) {
           this.status = Status.REGISTERING;
-          this.rpc.waitForTransaction(txn, 1000, [
-            "ACCEPTED_ON_L1",
-            "ACCEPTED_ON_L2",
-          ]).then(() => this.sync());
+          this.rpc
+            .waitForTransaction(txn, 1000, ["ACCEPTED_ON_L1", "ACCEPTED_ON_L2"])
+            .then(() => this.sync());
           return;
         }
 
@@ -93,7 +97,10 @@ class Account extends BaseAccount {
           return;
         }
 
-        if (contract.status !== "ACCEPTED_ON_L1" || contract.status !== "ACCEPTED_ON_L2") {
+        if (
+          contract.status !== "ACCEPTED_ON_L1" ||
+          contract.status !== "ACCEPTED_ON_L2"
+        ) {
           this.status = Status.DEPLOYING;
           return;
         }
@@ -103,8 +110,10 @@ class Account extends BaseAccount {
       Storage.update(this.selector, {
         classHash,
         deployed: true,
+        status: Status.DEPLOYED,
       });
       this.deployed = true;
+      this.status = Status.DEPLOYED;
 
       if (classHash !== CLASS_HASHES["latest"].account) {
         this.updated = false;
