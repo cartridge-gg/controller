@@ -8,6 +8,7 @@ import {
   Spacer,
   VStack,
   Tooltip,
+  Box,
 } from "@chakra-ui/react";
 import { FieldInputProps } from "formik";
 import { formatEther } from "ethers/lib/utils";
@@ -30,7 +31,7 @@ export const Call = ({
 }) => {
   const title = (
     <HStack>
-      <Text variant="ibm-upper-bold">{policy.method}</Text>
+      <Box>{policy.method}</Box>
       {notice && (
         <Tag colorScheme="red" size="sm">
           {notice}
@@ -61,9 +62,9 @@ export const CallToggle = ({
   return (
     <HStack w="full" bgColor="gray.600" py="7px" px="12px">
       <CodeIcon boxSize="18px" />
-      <Text fontSize="13px" textTransform="capitalize">
+      <Box fontSize="13px" textTransform="capitalize">
         {policy.method}
-      </Text>
+      </Box>
       <Spacer />
       <Tooltip label={`View on Starkscan`} placement="left" hasArrow>
         <Link

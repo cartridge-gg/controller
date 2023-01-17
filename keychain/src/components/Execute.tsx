@@ -46,17 +46,10 @@ const Execute = ({
   const [error, setError] = useState<Error>();
   const [isLoading, setLoading] = useState<boolean>(false);
 
-  const chainId = useMemo(
-    () =>
-      transactionsDetail
-        ? transactionsDetail.chainId
-        : constants.StarknetChainId.MAINNET,
-    [transactionsDetail],
-  );
-  const account = useMemo(
-    () => controller.account(chainId),
-    [controller, chainId],
-  );
+  const chainId = transactionsDetail?.chainId
+    ? transactionsDetail.chainId
+    : constants.StarknetChainId.MAINNET;
+  const account = controller.account(chainId)
   const { calls, calldata } = useMemo(() => {
     const calls = Array.isArray(transactions) ? transactions : [transactions];
     return {
@@ -176,7 +169,7 @@ const Execute = ({
 
     setLoading(false);
     confirm();
-  }, [account, nonce, calls, fees.max]);
+  }, [account, nonce, calls, fees]);
 
   if (error) {
     return <div>{error.message}</div>;
@@ -206,7 +199,7 @@ const Execute = ({
           isLoading={isLoading}
           isDisabled={!fees}
           onConfirm={onSubmit}
-          onCancel={() => {}}
+          onCancel={() => { }}
         >
           <Fees chainId={chainId} fees={fees} />
         </Footer>

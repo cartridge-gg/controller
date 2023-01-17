@@ -12,6 +12,7 @@ import {
   ExecuteReply,
   Policy,
   Session,
+  ProbeReply,
 } from "@cartridge/controller";
 import Connect from "components/Connect";
 import { Login } from "components/Login";
@@ -173,10 +174,10 @@ const Index: NextPage = () => {
                   : [transactions];
                 const policies = calls.map(
                   (txn) =>
-                    ({
-                      target: txn.contractAddress,
-                      method: txn.entrypoint,
-                    } as Policy),
+                  ({
+                    target: txn.contractAddress,
+                    method: txn.entrypoint,
+                  } as Policy),
                 );
 
                 const missing = diff(policies, session.policies);
@@ -227,7 +228,8 @@ const Index: NextPage = () => {
         login: normalize(login),
         logout: normalize(logout),
         probe: normalize(
-          validate((controller: Controller, session: Session) => () => ({
+          validate((controller: Controller, session: Session) => (): ProbeReply => ({
+            code: ResponseCodes.SUCCESS,
             address: controller.address,
             policies: session.policies,
           })),
