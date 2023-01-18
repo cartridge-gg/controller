@@ -1,10 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Formik, Form, Field, FormikState } from "formik";
 import { css } from "@emotion/react";
 import {
-  Box,
   Button,
-  Flex,
   Input,
   InputProps,
   Tooltip,
@@ -12,17 +10,60 @@ import {
   VStack,
   HStack,
   Text,
-  Container,
   Link,
   Divider,
+  InputGroup,
+  InputRightElement,
+  Spinner,
 } from "@chakra-ui/react";
 
+import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import JoystickIcon from "@cartridge/ui/components/icons/Joystick";
 import LockIcon from "@cartridge/ui/components/icons/Lock";
 import ArrowIcon from "@cartridge/ui/components/icons/Arrow";
 import { Logo } from "@cartridge/ui/components/icons/brand/Logo";
+import { useDebounce } from "hooks/debounce";
+import { useAccountQuery } from "generated/graphql";
+import { json } from "stream/consumers";
+import Check from "components/icons/Check";
+import Warning from "components/icons/Warning";
+import Fingerprint from "components/icons/Fingerprint";
+import Web3Auth from "components/Web3Auth";
 
 export const Signup = ({ onLogin }: { onLogin: () => void }) => {
+  const [name, setName] = useState("");
+  const [nameError, setNameError] = useState("");
+  const [canContinue, setCanContinue] = useState(false);
+  const { debouncedValue: debouncedName } = useDebounce(name, 500);
+  const { error, refetch, isFetching } = useAccountQuery(
+    { id: debouncedName },
+    { enabled: false, retry: false },
+  );
+
+  useEffect(() => {
+    if (debouncedName.length === 0) {
+      return;
+    }
+    refetch();
+  }, [refetch, debouncedName]);
+
+  useEffect(() => {
+    if (error) {
+      const err = JSON.parse((error as Error).message)
+
+      if (err.length > 0 && err[0].message === "ent: account not found") {
+        setNameError("");
+        setCanContinue(true);
+      } else {
+        setNameError("An error occured.");
+        setCanContinue(false);
+      }
+    } else if (!isFetching && debouncedName.length > 0) {
+      setNameError("This account already exists.");
+      setCanContinue(false);
+    }
+  }, [debouncedName, isFetching, error]);
+
   return (
     <VStack flex="1" gap="18px" padding="36px">
       <HStack spacing="14px" pt="36px">
@@ -35,10 +76,10 @@ export const Signup = ({ onLogin }: { onLogin: () => void }) => {
         </Circle>
       </HStack>
       <Text fontWeight="bold" fontSize="17px">
-        Create New Controller
+        Create a new Controller
       </Text>
-
-      <Formik initialValues={{ name: "" }} onSubmit={() => {}}>
+      <Text fontSize="12px" mt="-8px !important" color="whiteAlpha.600" textAlign="center">Your Controller will be used for interacting with the game.</Text>
+      <Formik initialValues={{ name: "" }} onSubmit={() => { }}>
         {(props) => (
           <Form
             css={css`
@@ -57,13 +98,36 @@ export const Signup = ({ onLogin }: { onLogin: () => void }) => {
                 field: InputProps;
                 form: FormikState<{ name: string }>;
               }) => (
-                <Input
-                  {...field}
-                  h="36px"
-                  onChange={(e) => {}}
-                  placeholder="Username"
-                  autoComplete="off"
-                />
+                <Tooltip
+                  variant="error"
+                  mt="10px"
+                  placement="top"
+                  isOpen={!!nameError}
+                  hasArrow
+                  label={
+                    <>
+                      <InfoIcon fill="whiteAlpha.600" mr="5px" />{nameError}
+                    </>
+                  }
+                >
+                  <InputGroup>
+                    <Input
+                      {...field}
+                      h="36px"
+                      onChange={(e) => {
+                        setName(e.target.value);
+                        setCanContinue(false);
+                        setNameError("");
+                        props.handleChange(e);
+                      }}
+                      isInvalid
+                      borderColor={canContinue ? "green.400" : nameError ? "red.400" : "gray.700"}
+                      errorBorderColor='crimson'
+                      placeholder="Username"
+                      autoComplete="off"
+                    />
+                  </InputGroup>
+                </Tooltip>
               )}
             </Field>
 
@@ -75,27 +139,34 @@ export const Signup = ({ onLogin }: { onLogin: () => void }) => {
                 Log In
               </Link>
             </HStack>
-            <VStack
-              position="fixed"
-              bottom="0"
-              right="0"
-              w="full"
-              p="36px"
-              gap="24px"
-            >
-              <Divider borderColor="gray.600" />
-              {/* <HStack>
-                <LockIcon />
-                <Text fontSize="12px" color="whiteAlpha.600">
-                  By continuing you are agreeing to Cartridge's Terms of Service
-                  and Privacy Policy
-                </Text>
-              </HStack> */}
-              <Button w="full" gap="10px">
-                Continue <ArrowIcon />
-              </Button>
-              {/* <Button>Continue with Discord</Button> */}
-            </VStack>
+            {canContinue &&
+              <VStack
+                position="fixed"
+                bottom="0"
+                right="0"
+                w="full"
+                p="36px"
+                gap="24px"
+                borderTop="500px solid rgba(0, 0, 0, .5)"
+              >
+                <HStack>
+                  <LockIcon />
+                  <Text fontSize="12px" color="whiteAlpha.600">
+                    By continuing you are agreeing to Cartridge&apos;s Terms of Service
+                    and Privacy Policy
+                  </Text>
+                </HStack>
+                <VStack w="full" gap="12px">
+                  <Button w="full" gap="10px">
+                    <Fingerprint height="16px" width="16px" css={css`
+                  > path {
+                    fill: black;
+                  }
+                `} /> Continue
+                  </Button>
+                  <Web3Auth onAuth={() => { }} />
+                </VStack>
+              </VStack>}
           </Form>
         )}
       </Formik>
