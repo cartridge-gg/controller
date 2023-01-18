@@ -75,9 +75,12 @@ const Execute = ({
     }
 
     if (account.registered) {
-      account.estimateInvokeFee(calls, { nonce }).then((fees) => {
-        setFees({ base: fees.overall_fee, max: fees.suggestedMaxFee });
-      });
+      account
+        .estimateInvokeFee(calls, { nonce })
+        .then((fees) => {
+          setFees({ base: fees.overall_fee, max: fees.suggestedMaxFee });
+        })
+        .catch((e) => setError(e));
       return;
     }
 

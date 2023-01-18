@@ -80,6 +80,7 @@ export const Accordion: ComponentMultiStyleConfig = {
         padding: "12px 18px 12px 18px",
         bgColor: "red.200",
         borderRadius: "0 0 6px 6px",
+        overflowX: "auto",
       },
     },
   },
