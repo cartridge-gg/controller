@@ -22,7 +22,6 @@ import { useAnalytics } from "hooks/analytics";
 import { beginLogin } from "hooks/account";
 import login from "methods/login";
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
-import NextLink from "next/link";
 import { useDebounce } from "hooks/debounce";
 import Web3Auth from "./Web3Auth";
 import { constants, KeyPair } from "starknet";
@@ -30,10 +29,12 @@ import Footer from "components/Footer";
 
 export const Login = ({
   chainId,
+  onSignup,
   onLogin,
   onCancel,
 }: {
   chainId: constants.StarknetChainId;
+  onSignup: () => void;
   onLogin: () => void;
   onCancel: () => void;
 }) => {
@@ -194,7 +195,14 @@ export const Login = ({
                 Connect Controller
               </Button>
               {/* <Web3Auth onAuth={(keyPair: KeyPair) => {}} /> */}
-              <SignupLink onPopup={() => setPopupSignup(true)} />
+              <HStack justify="center">
+                <Text fontSize="12px" color="whiteAlpha.600">
+                  Need a controller?
+                </Text>
+                <Link variant="outline" fontSize="11px" onClick={onSignup}>
+                  Create Controller
+                </Link>
+              </HStack>
             </Form>
           )}
         </Formik>
@@ -203,32 +211,32 @@ export const Login = ({
   );
 };
 
-const SignupLink = ({ onPopup }: { onPopup: () => void }) => {
-  const router = useRouter();
-  const isEmbedded =
-    typeof window !== "undefined" && window.top !== window.self;
+// const SignupLink = ({ onPopup }: { onPopup: () => void }) => {
+//   const router = useRouter();
+//   const isEmbedded =
+//     typeof window !== "undefined" && window.top !== window.self;
 
-  const onClick = useCallback(() => {
-    if (isEmbedded) {
-      onPopup();
+//   const onClick = useCallback(() => {
+//     if (isEmbedded) {
+//       onPopup();
 
-      window.open(
-        process.env.NEXT_PUBLIC_SITE_URL + "/signup?close=true",
-        "_blank",
-        "height=650,width=450",
-      );
-      return;
-    }
+//       window.open(
+//         process.env.NEXT_PUBLIC_SITE_URL + "/signup?close=true",
+//         "_blank",
+//         "height=650,width=450",
+//       );
+//       return;
+//     }
 
-    router.push({ pathname: "/signup", query: router.query });
-  }, [router, isEmbedded, onPopup]);
+//     router.push({ pathname: "/signup", query: router.query });
+//   }, [router, isEmbedded, onPopup]);
 
-  return (
-    <HStack as="strong" justify="center" fontSize="13px">
-      <Text color="whiteAlpha.600">{"Don't have a controller?"}</Text>
-      <Link variant="traditional" onClick={onClick}>
-        Sign up
-      </Link>
-    </HStack>
-  );
-};
+//   return (
+//     <HStack as="strong" justify="center" fontSize="13px">
+//       <Text color="whiteAlpha.600">{"Don't have a controller?"}</Text>
+//       <Link variant="traditional" onClick={onClick}>
+//         Sign up
+//       </Link>
+//     </HStack>
+//   );
+// };

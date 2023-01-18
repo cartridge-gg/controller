@@ -16,6 +16,7 @@ import {
 } from "@cartridge/controller";
 import Connect from "components/Connect";
 import { Login } from "components/Login";
+import { Signup } from "components/signup";
 import { Box, Container as ChakraContainer } from "@chakra-ui/react";
 import { Header } from "components/Header";
 import {
@@ -98,6 +99,7 @@ const Index: NextPage = () => {
   );
   const [context, setContext] = useState<Context>();
   const [controller, setController] = useState<Controller>();
+  const [signup, setSignup] = useState<boolean>(true);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -289,11 +291,16 @@ const Index: NextPage = () => {
   if (!controller) {
     return (
       <Container>
-        <Login
-          chainId={chainId}
-          onLogin={() => {}}
-          onCancel={() => context.reject()}
-        />
+        {signup ? (
+          <Signup onLogin={() => setSignup(false)} />
+        ) : (
+          <Login
+            chainId={chainId}
+            onSignup={() => setSignup(true)}
+            onLogin={() => {}}
+            onCancel={() => context.reject()}
+          />
+        )}
       </Container>
     );
   }
@@ -334,10 +341,6 @@ const Index: NextPage = () => {
         />
       </Container>
     );
-  }
-
-  if (!controller) {
-    return <></>;
   }
 
   if (context.type === "sign-message") {
