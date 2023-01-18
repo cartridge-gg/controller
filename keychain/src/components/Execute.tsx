@@ -24,7 +24,11 @@ import TransactionIcon from "./icons/Transaction";
 import BN from "bn.js";
 import selectors from "utils/selectors";
 import Storage from "utils/storage";
-import { ExecuteReply, ResponseCodes } from "@cartridge/controller";
+import {
+  Error as ErrorReply,
+  ExecuteReply,
+  ResponseCodes,
+} from "@cartridge/controller";
 
 const Execute = ({
   origin,
@@ -43,7 +47,7 @@ const Execute = ({
   };
   abis?: Abi[];
   onExecute: (res: ExecuteReply) => void;
-  onCancel: (reason?: unknown) => void;
+  onCancel: (error: ErrorReply) => void;
 }) => {
   const [nonce, setNonce] = useState<BN>();
   const [fees, setFees] = useState<{
@@ -241,7 +245,12 @@ const Execute = ({
           isDisabled={!fees}
           confirmText="Submit"
           onConfirm={onSubmit}
-          onCancel={onCancel}
+          onCancel={() => {
+            onCancel({
+              code: ResponseCodes.CANCELED,
+              message: "Canceled",
+            });
+          }}
         >
           {!error && <Fees chainId={chainId} fees={fees} />}
           <Error error={error} />
