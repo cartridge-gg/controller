@@ -24,6 +24,8 @@ import { getGasPrice } from "./gateway";
 import selectors from "./selectors";
 import migrations from "./migrations";
 import { CLASS_HASHES } from "./hashes";
+import { AccountInfoDocument } from "generated/graphql";
+import { client } from "./graphql";
 
 export const VERSION = "0.0.3";
 
@@ -118,6 +120,23 @@ export default class Controller {
       {},
     );
     this.store();
+  }
+
+  async getUser() {
+    const res = await client.request(AccountInfoDocument, {
+      id: this.address,
+    });
+
+    const account = res.accounts?.edges?.[0]?.node;
+    if (!account) {
+      throw new Error("User not found");
+    }
+
+    return {
+      address: this.address,
+      name: account.id,
+      profileUri: `https://cartridge.gg/profile/${this.address}`,
+    };
   }
 
   account(chainId: constants.StarknetChainId) {
