@@ -13,10 +13,9 @@ import {
   RpcProvider,
 } from "starknet";
 
-import { Keychain, ResponseCodes } from "./types";
+import { Keychain, ResponseCodes, Modal } from "./types";
 import { Signer } from "./signer";
 import { AsyncMethodReturns } from "@cartridge/penpal";
-import { Modal } from "./modal";
 
 class DeviceAccount extends Account {
   address: string;
@@ -27,7 +26,7 @@ class DeviceAccount extends Account {
     provider: RpcProvider,
     address: string,
     keychain: AsyncMethodReturns<Keychain>,
-    modal: Modal,
+    modal: Modal
   ) {
     super(provider, address, new Signer(keychain, modal));
     this.address = address;
@@ -96,7 +95,12 @@ class DeviceAccount extends Account {
       }
 
       this.modal.open();
-      const res2 = await this.keychain.execute(calls, abis, transactionsDetail, true);
+      const res2 = await this.keychain.execute(
+        calls,
+        abis,
+        transactionsDetail,
+        true
+      );
       this.modal.close();
       return res2 as InvokeFunctionResponse;
     } catch (e) {

@@ -44,29 +44,30 @@ export enum ResponseCodes {
 export type Error = {
   code: ResponseCodes;
   message: string;
-}
+};
 
 export type ConnectReply = {
   code: ResponseCodes.SUCCESS;
   address: string;
   policies: Policy[];
-}
+};
 
 export type ExecuteReply = InvokeFunctionResponse & {
   code: ResponseCodes.SUCCESS;
-}
+};
 
 export type ProbeReply = {
   code: ResponseCodes.SUCCESS;
   address: string;
   policies: Policy[];
-}
+};
 
 export interface Keychain {
   probe(): Promise<ProbeReply | Error>;
   connect(policies: Policy[]): Promise<ConnectReply | Error>;
   disconnect(): void;
 
+  reset(): void;
   revoke(origin: string): void;
   approvals(origin: string): Promise<Session | undefined>;
 
@@ -116,7 +117,8 @@ export interface Keychain {
   ): Promise<Signature>;
 }
 
-export interface ModalMethods {
-  onConfirm(): void;
-  onCancel(): void;
+export interface Modal {
+  element: HTMLDivElement;
+  open: () => void;
+  close: () => void;
 }
