@@ -2,13 +2,10 @@ import { useMemo, useCallback, useEffect, useState } from "react";
 import type { NextPage } from "next";
 import { motion } from "framer-motion";
 import {
-  Box,
   Flex,
-  Spacer,
   Divider,
   SimpleGrid,
   Container,
-  StyleProps,
 } from "@chakra-ui/react";
 import {
   useAccountInfoQuery,
@@ -36,9 +33,8 @@ import ControllerImage from "@cartridge/ui/src/components/icons/ControllerBig";
 import BannerImage from "components/signup/Banner";
 import { StepsBar, Step } from "components/StepsBar";
 import { Credentials, onCreateFinalize } from "hooks/account";
-import { useQuests } from "hooks/quests";
 import { parseAttestationObject } from "utils/webauthn";
-import { addAddressPadding, number } from "starknet";
+import { addAddressPadding } from "starknet";
 import { remoteSvgIcon } from "utils/svg";
 
 import { register, setActive } from "methods/register";

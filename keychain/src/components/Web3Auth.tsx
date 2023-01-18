@@ -67,7 +67,7 @@ const Web3Auth = ({ onAuth }: { onAuth: (keyPair: KeyPair) => void }) => {
 
   return (
     <>
-      <HStack>
+      {/* <HStack>
         <Divider borderColor="whiteAlpha.500" />
         <Text
           mx="18px"
@@ -79,8 +79,8 @@ const Web3Auth = ({ onAuth }: { onAuth: (keyPair: KeyPair) => void }) => {
           or
         </Text>
         <Divider borderColor="whiteAlpha.500" />
-      </HStack>
-      <HStack gap="12px">
+      </HStack> */}
+      <HStack width="100%">
         <Button
           flex={1}
           variant="secondary700"
@@ -88,12 +88,12 @@ const Web3Auth = ({ onAuth }: { onAuth: (keyPair: KeyPair) => void }) => {
             login("discord");
           }}
         >
-          <Discord height="18px" width="18px" mr="8px" />
+          <Discord height="16px" width="16px" mr="8px" />Connect with Discord
         </Button>
         {/* <Button flex={1} variant="secondary700" onClick={async () => {
                 login("twitter");
             }}><Twitter height="18px" width="18px" /></Button> */}
-        <Button
+        {/* <Button
           flex={1}
           variant="secondary700"
           onClick={async () => {
@@ -101,7 +101,7 @@ const Web3Auth = ({ onAuth }: { onAuth: (keyPair: KeyPair) => void }) => {
           }}
         >
           <MetaMask height="18px" width="18px" />
-        </Button>
+        </Button> */}
       </HStack>
     </>
   );
