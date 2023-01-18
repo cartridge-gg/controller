@@ -49,7 +49,7 @@ export const Signup = ({ onLogin }: { onLogin: () => void }) => {
 
   useEffect(() => {
     if (error) {
-      const err = JSON.parse((error as Error).message)
+      const err = JSON.parse((error as Error).message);
 
       if (err.length > 0 && err[0].message === "ent: account not found") {
         setNameError("");
@@ -78,8 +78,15 @@ export const Signup = ({ onLogin }: { onLogin: () => void }) => {
       <Text fontWeight="bold" fontSize="17px">
         Create a new Controller
       </Text>
-      <Text fontSize="12px" mt="-8px !important" color="whiteAlpha.600" textAlign="center">Your Controller will be used for interacting with the game.</Text>
-      <Formik initialValues={{ name: "" }} onSubmit={() => { }}>
+      <Text
+        fontSize="12px"
+        mt="-8px !important"
+        color="whiteAlpha.600"
+        textAlign="center"
+      >
+        Your Controller will be used for interacting with the game.
+      </Text>
+      <Formik initialValues={{ name: "" }} onSubmit={() => {}}>
         {(props) => (
           <Form
             css={css`
@@ -106,7 +113,8 @@ export const Signup = ({ onLogin }: { onLogin: () => void }) => {
                   hasArrow
                   label={
                     <>
-                      <InfoIcon fill="whiteAlpha.600" mr="5px" />{nameError}
+                      <InfoIcon fill="whiteAlpha.600" mr="5px" />
+                      {nameError}
                     </>
                   }
                 >
@@ -121,8 +129,14 @@ export const Signup = ({ onLogin }: { onLogin: () => void }) => {
                         props.handleChange(e);
                       }}
                       isInvalid
-                      borderColor={canContinue ? "green.400" : nameError ? "red.400" : "gray.700"}
-                      errorBorderColor='crimson'
+                      borderColor={
+                        canContinue
+                          ? "green.400"
+                          : nameError
+                          ? "red.400"
+                          : "gray.700"
+                      }
+                      errorBorderColor="crimson"
                       placeholder="Username"
                       autoComplete="off"
                     />
@@ -139,7 +153,7 @@ export const Signup = ({ onLogin }: { onLogin: () => void }) => {
                 Log In
               </Link>
             </HStack>
-            {canContinue &&
+            {canContinue && (
               <VStack
                 position="fixed"
                 bottom="0"
@@ -152,21 +166,27 @@ export const Signup = ({ onLogin }: { onLogin: () => void }) => {
                 <HStack>
                   <LockIcon />
                   <Text fontSize="12px" color="whiteAlpha.600">
-                    By continuing you are agreeing to Cartridge&apos;s Terms of Service
-                    and Privacy Policy
+                    By continuing you are agreeing to Cartridge&apos;s Terms of
+                    Service and Privacy Policy
                   </Text>
                 </HStack>
                 <VStack w="full" gap="12px">
                   <Button w="full" gap="10px">
-                    <Fingerprint height="16px" width="16px" css={css`
-                  > path {
-                    fill: black;
-                  }
-                `} /> Continue
+                    <Fingerprint
+                      height="16px"
+                      width="16px"
+                      css={css`
+                        > path {
+                          fill: black;
+                        }
+                      `}
+                    />{" "}
+                    Continue
                   </Button>
-                  <Web3Auth onAuth={() => { }} />
+                  <Web3Auth onAuth={() => {}} />
                 </VStack>
-              </VStack>}
+              </VStack>
+            )}
           </Form>
         )}
       </Formik>

@@ -15,7 +15,7 @@ import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import LaptopIcon from "@cartridge/ui/src/components/icons/Laptop";
 import { Banner } from "components/Banner";
 import { constants } from "starknet";
-import { Policy } from "@cartridge/controller";
+import { Error, Policy, ResponseCodes } from "@cartridge/controller";
 
 const Connect = ({
   controller,
@@ -36,7 +36,7 @@ const Connect = ({
     address: string;
     policies: Policy[];
   }) => void;
-  onCancel: () => void;
+  onCancel: (error: Error) => void;
 }) => {
   const [maxFee, setMaxFee] = useState(null);
   const [registerDevice, setRegisterDevice] = useState(false);
@@ -95,7 +95,9 @@ const Connect = ({
         <Session
           chainId={chainId}
           action={"CREATE"}
-          onCancel={onCancel}
+          onCancel={() => {
+            onCancel({ code: ResponseCodes.CANCELED, message: "Canceled" });
+          }}
           onSubmit={connect}
           policies={policys}
           invalidPolicys={[]}
