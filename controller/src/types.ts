@@ -39,6 +39,7 @@ export enum ResponseCodes {
   SUCCESS = "SUCCESS",
   NOT_CONNECTED = "NOT_CONNECTED",
   NOT_ALLOWED = "NOT_ALLOWED",
+  CANCELED = "CANCELED",
 }
 
 export type Error = {
@@ -114,7 +115,7 @@ export interface Keychain {
   signMessage(
     typedData: typedData.TypedData,
     account: string
-  ): Promise<Signature>;
+  ): Promise<Signature | Error>;
 }
 
 export interface Modal {

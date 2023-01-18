@@ -101,12 +101,11 @@ class DeviceAccount extends Account {
         transactionsDetail,
         true
       );
+      this.modal.close();
       return res2 as InvokeFunctionResponse;
     } catch (e) {
       console.error(e);
       throw e;
-    } finally {
-      this.modal.close();
     }
   }
 
@@ -119,10 +118,15 @@ class DeviceAccount extends Account {
    * @throws {Error} if the JSON object is not a valid JSON
    */
   async signMessage(typedData: typedData.TypedData): Promise<Signature> {
-    this.modal.open();
-    const res = await this.keychain.signMessage(typedData, this.address);
-    this.modal.close();
-    return res;
+    try {
+      this.modal.open();
+      const res = await this.keychain.signMessage(typedData, this.address);
+      this.modal.close();
+      return res as Signature;
+    } catch (e) {
+      console.error(e);
+      throw e;
+    }
   }
 }
 

@@ -88,22 +88,22 @@ class Account extends BaseAccount {
           this.rpc
             .waitForTransaction(txn, 1000, ["ACCEPTED_ON_L1", "ACCEPTED_ON_L2"])
             .then(() => this.sync());
-          return;
+          //return;
         }
 
-        const contract = await this.getContract();
-        if (!contract) {
-          this.status = Status.COUNTERFACTUAL;
-          return;
-        }
+        // const contract = await this.getContract();
+        // if (!contract) {
+        //   this.status = Status.COUNTERFACTUAL;
+        //   return;
+        // }
 
-        if (
-          contract.status !== "ACCEPTED_ON_L1" ||
-          contract.status !== "ACCEPTED_ON_L2"
-        ) {
-          this.status = Status.DEPLOYING;
-          return;
-        }
+        // if (
+        //   contract.status !== "ACCEPTED_ON_L1" ||
+        //   contract.status !== "ACCEPTED_ON_L2"
+        // ) {
+        //   this.status = Status.DEPLOYING;
+        //   return;
+        // }
       }
 
       const classHash = await this.rpc.getClassHashAt(this.address, "latest");

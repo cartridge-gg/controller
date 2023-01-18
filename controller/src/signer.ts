@@ -37,6 +37,6 @@ export class Signer {
     this.modal.open();
     const res = await this.keychain.signMessage(typedData, account);
     this.modal.close();
-    return res;
+    return res as Signature;
   }
 }

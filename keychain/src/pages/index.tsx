@@ -68,7 +68,7 @@ type Connect = {
   origin: string;
   type: "connect";
   policies: Policy[];
-  resolve: (res: ConnectReply) => void;
+  resolve: (res: ConnectReply | Error) => void;
   reject: (reason?: unknown) => void;
 };
 
@@ -80,7 +80,7 @@ type Execute = {
   transactionsDetail?: InvocationsDetails & {
     chainId?: constants.StarknetChainId;
   };
-  resolve: (res: ExecuteReply) => void;
+  resolve: (res: ExecuteReply | Error) => void;
   reject: (reason?: unknown) => void;
 };
 
@@ -89,7 +89,7 @@ type SignMessage = {
   type: "sign-message";
   typedData: typedData.TypedData;
   account: string;
-  resolve: (signature: Signature) => void;
+  resolve: (signature: Signature | Error) => void;
   reject: (reason?: unknown) => void;
 };
 
@@ -241,18 +241,19 @@ const Index: NextPage = () => {
         revoke: normalize(revoke),
         signMessage: normalize(
           validate(
-            () => async (typedData: typedData.TypedData, account: string) => {
-              return await new Promise((resolve, reject) => {
-                setContext({
-                  type: "sign-message",
-                  origin,
-                  typedData,
-                  account,
-                  resolve,
-                  reject,
-                } as SignMessage);
-              });
-            },
+            (_controller: Controller, _session: Session, origin: string) =>
+              async (typedData: typedData.TypedData, account: string) => {
+                return await new Promise((resolve, reject) => {
+                  setContext({
+                    type: "sign-message",
+                    origin,
+                    typedData,
+                    account,
+                    resolve,
+                    reject,
+                  } as SignMessage);
+                });
+              },
           ),
         ),
         session: normalize(session),
@@ -337,7 +338,7 @@ const Index: NextPage = () => {
 
             ctx.resolve({ code: ResponseCodes.SUCCESS, address, policies });
           }}
-          onCancel={() => ctx.reject()}
+          onCancel={(error: Error) => ctx.resolve(error)}
         />
       </Container>
     );
@@ -348,11 +349,12 @@ const Index: NextPage = () => {
     return (
       <Container>
         <SignMessage
+          chainId={chainId}
           controller={controller}
           origin={ctx.origin}
           typedData={ctx.typedData}
-          onSign={(sig) => context.resolve(sig)}
-          onCancel={(reason?: string) => ctx.reject(reason)}
+          onSign={(sig: Signature) => context.resolve(sig)}
+          onCancel={(error: Error) => ctx.resolve(error)}
         />
       </Container>
     );
@@ -364,8 +366,6 @@ const Index: NextPage = () => {
 
     if (account.status === Status.COUNTERFACTUAL) {
       return <div>Deploy</div>;
-    } else if (account.status === Status.DEPLOYED) {
-      return <div>Register</div>;
     }
 
     return (
@@ -374,7 +374,7 @@ const Index: NextPage = () => {
           {...ctx}
           controller={controller}
           onExecute={(res: ExecuteReply) => ctx.resolve(res)}
-          onCancel={() => ctx.reject()}
+          onCancel={(error: Error) => ctx.resolve(error)}
         />
       </Container>
     );
