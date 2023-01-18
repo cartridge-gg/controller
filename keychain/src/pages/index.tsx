@@ -349,7 +349,7 @@ const Index: NextPage = () => {
           origin={ctx.origin}
           typedData={ctx.typedData}
           onSign={(sig) => context.resolve(sig)}
-          onCancel={(reason?: string) => context.reject(reason)}
+          onCancel={(reason?: string) => ctx.reject(reason)}
         />
       </Container>
     );
@@ -367,7 +367,12 @@ const Index: NextPage = () => {
 
     return (
       <Container>
-        <Execute controller={controller} {...ctx} />
+        <Execute
+          {...ctx}
+          controller={controller}
+          onExecute={(res: ExecuteReply) => ctx.resolve(res)}
+          onCancel={() => ctx.reject()}
+        />
       </Container>
     );
   }

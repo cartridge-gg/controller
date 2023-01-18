@@ -24,6 +24,7 @@ import TransactionIcon from "./icons/Transaction";
 import BN from "bn.js";
 import selectors from "utils/selectors";
 import Storage from "utils/storage";
+import { ExecuteReply, ResponseCodes } from "@cartridge/controller";
 
 const Execute = ({
   origin,
@@ -31,6 +32,8 @@ const Execute = ({
   transactions,
   transactionsDetail,
   abis,
+  onExecute,
+  onCancel,
 }: {
   origin: string;
   controller: Controller;
@@ -39,6 +42,8 @@ const Execute = ({
     chainId?: constants.StarknetChainId;
   };
   abis?: Abi[];
+  onExecute: (res: ExecuteReply) => void;
+  onCancel: (reason?: unknown) => void;
 }) => {
   const [nonce, setNonce] = useState<BN>();
   const [fees, setFees] = useState<{
@@ -150,7 +155,7 @@ const Execute = ({
         fees.suggestedMaxFee = stark.estimatedFeeToMaxFee(fees.overall_fee);
         setFees({ base: fees.overall_fee, max: fees.suggestedMaxFee });
       } catch (e) {
-        debugger;
+        //debugger;
         console.error(e);
         setError(e);
         return;
@@ -180,12 +185,15 @@ const Execute = ({
 
   const onSubmit = useCallback(async () => {
     setLoading(true);
-    await account.execute(calls, null, {
+    const response = await account.execute(calls, null, {
       maxFee: fees.max,
       nonce,
       version: hash.transactionVersion,
     });
-    setLoading(false);
+    onExecute({
+      transaction_hash: response.transaction_hash,
+      code: ResponseCodes.SUCCESS,
+    });
   }, [account, nonce, calls, fees]);
 
   return (
@@ -233,7 +241,7 @@ const Execute = ({
           isDisabled={!fees}
           confirmText="Submit"
           onConfirm={onSubmit}
-          onCancel={() => {}}
+          onCancel={onCancel}
         >
           {!error && <Fees chainId={chainId} fees={fees} />}
           <Error error={error} />

@@ -101,11 +101,12 @@ class DeviceAccount extends Account {
         transactionsDetail,
         true
       );
-      this.modal.close();
       return res2 as InvokeFunctionResponse;
     } catch (e) {
       console.error(e);
       throw e;
+    } finally {
+      this.modal.close();
     }
   }
 
