@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Flex, Text, VStack } from "@chakra-ui/react";
 
-import Controller, { RegisterData, VERSION } from "utils/controller";
+import Controller, { VERSION } from "utils/controller";
 import {
   Abi,
   constants,
