@@ -198,7 +198,7 @@ const Execute = ({
       transaction_hash: response.transaction_hash,
       code: ResponseCodes.SUCCESS,
     });
-  }, [account, nonce, calls, fees]);
+  }, [account, nonce, calls, fees, onExecute]);
 
   return (
     <Flex m={4} direction="column">
