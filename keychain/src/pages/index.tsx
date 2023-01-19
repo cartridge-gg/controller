@@ -260,11 +260,7 @@ const Index: NextPage = () => {
         ),
         session: normalize(session),
         sessions: normalize(sessions),
-        reset: normalize(
-          validate(() => async () => {
-            setContext(undefined);
-          }),
-        ),
+        reset: normalize(() => () => setContext(undefined)),
       },
     });
 
