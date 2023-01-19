@@ -2,6 +2,8 @@ import { useEffect, useState, ReactNode, useCallback } from "react";
 import { useRouter } from "next/router";
 import type { NextPage } from "next";
 import { Circle, Container, VStack, Text, Link } from "@chakra-ui/react";
+import { split } from "@cartridge/controller";
+import { number } from "starknet";
 import { Header } from "components/Header";
 import {
   AuthFingerprintImage,
@@ -13,12 +15,12 @@ import Footer from "components/Footer";
 import Unsupported from "components/signup/Unsupported";
 import { Credentials, onCreateBegin, onCreateFinalize } from "hooks/account";
 import { parseAttestationObject } from "utils/webauthn";
-import { register, setActive } from "methods/register";
+import { computeAddress, setActive } from "methods/register";
 import { Startup } from "components/signup";
 
 const Authenticate: NextPage = () => {
   const router = useRouter();
-  const { name } = router.query as { name: string };
+  const { name, pubkey } = router.query as { name: string; pubkey: string };
   const [isAuth, setIsAuth] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error>();
@@ -36,17 +38,8 @@ const Authenticate: NextPage = () => {
         const credentials: Credentials = await onCreateBegin(
           decodeURIComponent(name),
         );
-        const {
-          pub: { x, y },
-        } = parseAttestationObject(credentials.response.attestationObject);
+        await onCreateFinalize(pubkey, credentials);
 
-        const { address, deviceKey } = await register()(name, credentials.id, {
-          x: x.toString(),
-          y: y.toString(),
-        });
-
-        const hash = await onCreateFinalize(deviceKey, credentials);
-        setActive(address, hash);
         setIsAuth(true);
       } catch (e) {
         console.error(e);
@@ -55,7 +48,7 @@ const Authenticate: NextPage = () => {
       }
     }
     auth();
-  }, [name]);
+  }, [name, pubkey]);
 
   useEffect(() => {
     const userAgent = window.navigator.userAgent;
@@ -78,7 +71,7 @@ const Authenticate: NextPage = () => {
     return <Unsupported message={unsupportedMessage} />;
   }
 
-  if (!name) {
+  if (!name || !pubkey) {
     return <></>;
   }
 

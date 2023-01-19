@@ -36,12 +36,12 @@ import Controller from "utils/controller";
 
 export const Login = ({
   chainId,
-  onSignup,
+  showSignup,
   onLogin,
   onCancel,
 }: {
   chainId: constants.StarknetChainId;
-  onSignup: () => void;
+  showSignup: () => void;
   onLogin: (controller: Controller) => void;
   onCancel: () => void;
 }) => {
@@ -181,7 +181,7 @@ export const Login = ({
               <Text fontSize="12px" color="whiteAlpha.600" fontWeight="bold">
                 Need a controller?
               </Text>
-              <Link variant="outline" fontSize="11px" onClick={onSignup}>
+              <Link variant="outline" fontSize="11px" onClick={showSignup}>
                 Create Controller
               </Link>
             </HStack>
@@ -197,12 +197,23 @@ export const Login = ({
                         of Service and Privacy Policy
                       </Text>
                     </HStack>
-                    {data?.account.type === "webauthn" && <Button w="full" isLoading={isLoggingIn} onClick={onSubmit}>
-                      Connect
-                    </Button>}
-                    {data?.account.type === "discord" && <Web3Auth username={debouncedName} onAuth={(controller) => {
-                        onLogin(controller);
-                    }} />}
+                    {data?.account.type === "webauthn" && (
+                      <Button
+                        w="full"
+                        isLoading={isLoggingIn}
+                        onClick={onSubmit}
+                      >
+                        Connect
+                      </Button>
+                    )}
+                    {data?.account.type === "discord" && (
+                      <Web3Auth
+                        username={debouncedName}
+                        onAuth={(controller) => {
+                          onLogin(controller);
+                        }}
+                      />
+                    )}
                   </VStack>
                 </DrawerBody>
               </DrawerContent>

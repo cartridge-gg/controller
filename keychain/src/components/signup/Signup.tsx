@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Formik, Form, Field, FormikState } from "formik";
 import { css } from "@emotion/react";
 import { motion } from "framer-motion";
@@ -19,23 +19,37 @@ import {
   DrawerContent,
   useDisclosure,
 } from "@chakra-ui/react";
+import {
+  BeginRegistrationDocument,
+  FinalizeRegistrationDocument,
+  useAccountQuery,
+} from "generated/graphql";
+import { useDebounce } from "hooks/debounce";
+import { ec, KeyPair } from "starknet";
 
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import JoystickIcon from "@cartridge/ui/components/icons/Joystick";
 import LockIcon from "@cartridge/ui/components/icons/Lock";
 import { Logo } from "@cartridge/ui/components/icons/brand/Logo";
-import { useDebounce } from "hooks/debounce";
-import { BeginRegistrationDocument, FinalizeRegistrationDocument, useAccountQuery } from "generated/graphql";
 import Fingerprint from "components/icons/Fingerprint";
 import Web3Auth from "components/Web3Auth";
 import Continue from "components/signup/Continue";
 import { client } from "utils/graphql";
 import Controller from "utils/controller";
+import { useInterval } from "usehooks-ts";
+import { setActive } from "methods/register";
 
-export const Signup = ({ onLogin, onSignup }: { onLogin: () => void, onSignup: (controller: Controller) => void }) => {
+export const Signup = ({
+  showLogin,
+  onSignup,
+}: {
+  showLogin: () => void;
+  onSignup: (controller: Controller) => void;
+}) => {
   const [name, setName] = useState("");
+  const [keypair, setKeypair] = useState<KeyPair>();
   const [nameError, setNameError] = useState("");
-  const [overlay, showOverlay] = useState<boolean>(false);
+  const [isRegistering, setIsRegistering] = useState<boolean>(false);
   const [canContinue, setCanContinue] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { debouncedValue: debouncedName } = useDebounce(name, 500);
@@ -69,7 +83,45 @@ export const Signup = ({ onLogin, onSignup }: { onLogin: () => void, onSignup: (
     }
   }, [debouncedName, isFetching, error, onOpen]);
 
-  if (overlay) {
+  useInterval(
+    async () => {
+      const result = await refetch();
+
+      if (result.data) {
+        const {
+          account: {
+            credential: { id: credentialId },
+            contractAddress: address,
+          },
+        } = result.data;
+
+        const controller = new Controller(keypair, address, credentialId);
+        controller.store();
+
+        setActive(address);
+        onSignup(controller);
+      }
+    },
+    isRegistering ? 5000 : null,
+  );
+
+  const onContinue = useCallback(async () => {
+    const keypair = ec.genKeyPair();
+    const deviceKey = ec.getStarkKey(keypair);
+
+    setKeypair(keypair);
+    setIsRegistering(true);
+
+    window.open(
+      `/authenticate?name=${encodeURIComponent(
+        debouncedName,
+      )}&pubkey=${encodeURIComponent(deviceKey)}`,
+      "_blank",
+      "height=640,width=480",
+    );
+  }, [debouncedName]);
+
+  if (isRegistering) {
     return <Continue />;
   }
 
@@ -101,7 +153,7 @@ export const Signup = ({ onLogin, onSignup }: { onLogin: () => void, onSignup: (
       >
         Your Controller will be used for interacting with the game.
       </Text>
-      <Formik initialValues={{ name: "" }} onSubmit={() => { }}>
+      <Formik initialValues={{ name: "" }} onSubmit={() => {}}>
         {(props) => (
           <Form
             css={css`
@@ -148,8 +200,8 @@ export const Signup = ({ onLogin, onSignup }: { onLogin: () => void, onSignup: (
                         canContinue
                           ? "green.400"
                           : nameError
-                            ? "red.400"
-                            : "gray.600"
+                          ? "red.400"
+                          : "gray.600"
                       }
                       errorBorderColor="crimson"
                       placeholder="Username"
@@ -164,7 +216,7 @@ export const Signup = ({ onLogin, onSignup }: { onLogin: () => void, onSignup: (
               <Text fontSize="12px" color="whiteAlpha.600" fontWeight="bold">
                 Already have a controller?
               </Text>
-              <Link variant="outline" fontSize="11px" onClick={onLogin}>
+              <Link variant="outline" fontSize="11px" onClick={showLogin}>
                 Log In
               </Link>
             </HStack>
@@ -181,20 +233,7 @@ export const Signup = ({ onLogin, onSignup }: { onLogin: () => void, onSignup: (
                       </Text>
                     </HStack>
                     <VStack w="full" gap="12px">
-                      <Button
-                        w="full"
-                        gap="10px"
-                        onClick={() => {
-                          window.open(
-                            `/authenticate?name=${encodeURIComponent(
-                              debouncedName,
-                            )}`,
-                            "_blank",
-                            "height=650,width=400",
-                          );
-                          showOverlay(true);
-                        }}
-                      >
+                      <Button w="full" gap="10px" onClick={() => onContinue()}>
                         <Fingerprint
                           height="16px"
                           width="16px"
@@ -206,16 +245,19 @@ export const Signup = ({ onLogin, onSignup }: { onLogin: () => void, onSignup: (
                         />
                         Continue
                       </Button>
-                      <Web3Auth username={debouncedName} onAuth={async (controller) => {
-                        await client.request(BeginRegistrationDocument, {
-                          id: debouncedName,
-                        });
-                        await client.request(FinalizeRegistrationDocument, {
-                          credentials: "discord",
-                          signer: controller.publicKey,
-                        });
-                        onSignup(controller);
-                      }} />
+                      <Web3Auth
+                        username={debouncedName}
+                        onAuth={async (controller) => {
+                          await client.request(BeginRegistrationDocument, {
+                            id: debouncedName,
+                          });
+                          await client.request(FinalizeRegistrationDocument, {
+                            credentials: "discord",
+                            signer: controller.publicKey,
+                          });
+                          onSignup(controller);
+                        }}
+                      />
                     </VStack>
                   </VStack>
                 </DrawerBody>
