@@ -3841,7 +3841,7 @@ export type AccountQueryVariables = Exact<{
 }>;
 
 
-export type AccountQuery = { __typename?: 'Query', account?: { __typename?: 'Account', id: string, contractAddress?: string | null, credential: { __typename?: 'Credential', id: string, publicKey: string }, contracts: { __typename?: 'ContractConnection', edges?: Array<{ __typename?: 'ContractEdge', node?: { __typename?: 'Contract', id: string } | null } | null> | null } } | null };
+export type AccountQuery = { __typename?: 'Query', account?: { __typename?: 'Account', id: string, type: AccountType, contractAddress?: string | null, credential: { __typename?: 'Credential', id: string, publicKey: string }, contracts: { __typename?: 'ContractConnection', edges?: Array<{ __typename?: 'ContractEdge', node?: { __typename?: 'Contract', id: string } | null } | null> | null } } | null };
 
 export type ContractTypeQueryVariables = Exact<{
   id: Scalars['ID'];
@@ -4134,6 +4134,7 @@ export const AccountDocument = `
     query Account($id: ID!) {
   account(id: $id) {
     id
+    type
     credential {
       id
       publicKey

@@ -243,10 +243,10 @@ class Controller {
           this.modal
         ),
       };
-      this.modal.close();
       return this.accounts[this.chainId];
     } catch (e) {
       console.log(e);
+    } finally {
       this.modal.close();
     }
   }

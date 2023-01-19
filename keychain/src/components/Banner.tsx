@@ -28,7 +28,7 @@ export const Banner = ({
         {title}
       </Text>
       {description && (
-        <Text fontSize="13px" color="gray.200" align="center" pb="18px">
+        <Text fontSize="13px" color="gray.200" align="center" pb="12px">
           {description}
         </Text>
       )}

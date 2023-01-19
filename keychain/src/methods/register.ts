@@ -1,5 +1,5 @@
 import { split } from "@cartridge/controller";
-import { ec, hash, number, shortString, constants } from "starknet";
+import { ec, hash, number, shortString, constants, KeyPair } from "starknet";
 
 import Controller from "utils/controller";
 import Storage from "utils/storage";

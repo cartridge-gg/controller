@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Flex, Text, VStack } from "@chakra-ui/react";
+import { Text, VStack } from "@chakra-ui/react";
 
 import Controller, { VERSION } from "utils/controller";
 import {
@@ -24,10 +24,16 @@ import TransactionIcon from "./icons/Transaction";
 import BN from "bn.js";
 import selectors from "utils/selectors";
 import Storage from "utils/storage";
-import { ExecuteReply, ResponseCodes } from "@cartridge/controller";
+import {
+  Error as ErrorReply,
+  ExecuteReply,
+  ResponseCodes,
+} from "@cartridge/controller";
+import { motion } from "framer-motion";
 
 const Execute = ({
   origin,
+  chainId,
   controller,
   transactions,
   transactionsDetail,
@@ -36,14 +42,13 @@ const Execute = ({
   onCancel,
 }: {
   origin: string;
+  chainId: constants.StarknetChainId,
   controller: Controller;
   transactions: StarknetCall | StarknetCall[];
-  transactionsDetail?: InvocationsDetails & {
-    chainId?: constants.StarknetChainId;
-  };
+  transactionsDetail?: InvocationsDetails;
   abis?: Abi[];
   onExecute: (res: ExecuteReply) => void;
-  onCancel: (reason?: unknown) => void;
+  onCancel: (error: ErrorReply) => void;
 }) => {
   const [nonce, setNonce] = useState<BN>();
   const [fees, setFees] = useState<{
@@ -53,9 +58,6 @@ const Execute = ({
   const [error, setError] = useState<Error>();
   const [isLoading, setLoading] = useState<boolean>(false);
 
-  const chainId = transactionsDetail?.chainId
-    ? transactionsDetail.chainId
-    : constants.StarknetChainId.MAINNET;
   const account = controller.account(chainId);
   const { calls, calldata } = useMemo(() => {
     const calls = Array.isArray(transactions) ? transactions : [transactions];
@@ -176,11 +178,9 @@ const Execute = ({
   ]);
 
   useEffect(() => {
-    if (account) {
-      account.getNonce().then((n: BN) => {
-        setNonce(number.toBN(n));
-      });
-    }
+    account.getNonce().then((n: BN) => {
+      setNonce(number.toBN(n));
+    });
   }, [account]);
 
   const onSubmit = useCallback(async () => {
@@ -194,60 +194,69 @@ const Execute = ({
       transaction_hash: response.transaction_hash,
       code: ResponseCodes.SUCCESS,
     });
-  }, [account, nonce, calls, fees]);
+  }, [account, nonce, calls, fees, onExecute]);
 
   return (
-    <Flex m={4} direction="column">
+    <VStack
+      as={motion.div}
+      animate={{ opacity: 1 }}
+      initial={{ opacity: 0 }}
+      w="400px"
+      p="12px"
+    >
       <Banner
         title="Submit Transaction"
         icon={<TransactionIcon boxSize="30px" />}
         chainId={chainId}
         pb="20px"
       />
-      <Flex direction="column" gap="10px">
-        <Flex direction="column" height="230px" overflowY="auto">
-          <VStack spacing="1px">
-            <VStack
-              w="full"
-              p="12px"
-              align="flex-start"
-              bgColor="gray.700"
-              borderRadius="6px 6px 0 0"
-            >
-              <Text variant="ibm-upper-bold" fontSize="10px" color="gray.200">
-                Actions
-              </Text>
-              <Text fontSize="11px" color="gray.200">
-                Execute the following actions
-              </Text>
-            </VStack>
-            <VStack w="full">
-              {calls.map((call, i) => (
-                <Call
-                  key={i}
-                  chainId={chainId}
-                  policy={{
-                    target: call.contractAddress,
-                    method: call.entrypoint,
-                  }}
-                  _last={{ borderRadius: "0 0 6px 6px" }}
-                />
-              ))}
-            </VStack>
+      <VStack height="180px" overflowY="auto" w="full">
+        <VStack spacing="1px" w="full">
+          <VStack
+            w="full"
+            p="12px"
+            align="flex-start"
+            bgColor="gray.700"
+            borderRadius="6px 6px 0 0"
+          >
+            <Text variant="ibm-upper-bold" fontSize="10px" color="gray.200">
+              Actions
+            </Text>
+            <Text fontSize="11px" color="gray.200">
+              Execute the following actions
+            </Text>
           </VStack>
-        </Flex>
+          <VStack w="full">
+            {calls.map((call, i) => (
+              <Call
+                key={i}
+                chainId={chainId}
+                policy={{
+                  target: call.contractAddress,
+                  method: call.entrypoint,
+                }}
+                _last={{ borderRadius: "0 0 6px 6px" }}
+              />
+            ))}
+          </VStack>
+        </VStack>
         <Footer
           isLoading={isLoading}
           isDisabled={!fees}
           confirmText="Submit"
           onConfirm={onSubmit}
-          onCancel={onCancel}
+          onCancel={() => {
+            onCancel({
+              code: ResponseCodes.CANCELED,
+              message: "Canceled",
+            });
+          }}
         >
           {!error && <Fees chainId={chainId} fees={fees} />}
           <Error error={error} />
         </Footer>
-      </Flex>
-    </Flex>
+      </VStack>
+    </VStack>
   );
 };
 

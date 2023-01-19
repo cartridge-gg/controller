@@ -85,26 +85,35 @@ class Account extends BaseAccount {
 
     try {
       if (!this.deployed || !this.registered) {
-        const txn = Storage.get(this.selector).registerTxnHash;
-        if (txn) {
+        const registerTxnHash = Storage.get(this.selector).registerTxnHashHash;
+        if (registerTxnHash) {
           this.status = Status.REGISTERING;
           this.rpc
-            .waitForTransaction(txn, 1000, ["ACCEPTED_ON_L1", "ACCEPTED_ON_L2"])
+            .waitForTransaction(registerTxnHash, 1000, ["ACCEPTED_ON_L1", "ACCEPTED_ON_L2"])
             .then(() => this.sync());
           return;
         }
 
-        const contract = await this.getContract();
-        if (!contract) {
+        const data = await this.getContract();
+        if (!data?.contract?.deployTransaction?.id) {
           this.status = Status.COUNTERFACTUAL;
           return;
         }
 
-        if (
-          contract.status !== "ACCEPTED_ON_L1" ||
-          contract.status !== "ACCEPTED_ON_L2"
-        ) {
+        const deployTxnHash = data.contract.deployTransaction.id.split("/")[1];
+        const deployTxnReceipt = await this.rpc.getTransactionReceipt(deployTxnHash);
+
+        // Pending txn so poll for inclusion.
+        if (!('status' in deployTxnReceipt)) {
           this.status = Status.DEPLOYING;
+          this.rpc
+            .waitForTransaction(deployTxnHash, 1000, ["ACCEPTED_ON_L1", "ACCEPTED_ON_L2"])
+            .then(() => this.sync());
+          return
+        }
+
+        if (deployTxnReceipt.status === "REJECTED") {
+          this.status = Status.COUNTERFACTUAL;
           return;
         }
       }
@@ -148,6 +157,7 @@ class Account extends BaseAccount {
       });
     } catch (e) {
       /* no-op */
+      console.log(e);
     }
   }
 

@@ -23,6 +23,7 @@ import {
   Abi,
   Call,
   constants,
+  ec,
   InvocationsDetails,
   InvokeFunctionResponse,
   number,
@@ -37,28 +38,25 @@ import { useInterval } from "usehooks-ts";
 
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
 import provision from "../methods/provision";
-import { register } from "../methods/register";
+import { computeAddress, register } from "../methods/register";
 import login from "../methods/login";
 import logout from "../methods/logout";
 import { revoke, session, sessions } from "../methods/sessions";
 import { Status } from "utils/account";
 import { normalize, validate } from "../methods";
+import web3auth from "utils/web3auth";
 
 const Container = ({ children }: { children: ReactNode }) => (
   <ChakraContainer
-    display="flex"
-    alignItems="center"
-    justifyContent="center"
     position="fixed"
     left={0}
     right={0}
     top={0}
     bottom={0}
+    centerContent
   >
     <Header />
-    <Box position="fixed" left={0} right={0} bottom={0} top="50px">
-      {children}
-    </Box>
+    <Box>{children}</Box>
   </ChakraContainer>
 );
 
@@ -68,7 +66,7 @@ type Connect = {
   origin: string;
   type: "connect";
   policies: Policy[];
-  resolve: (res: ConnectReply) => void;
+  resolve: (res: ConnectReply | Error) => void;
   reject: (reason?: unknown) => void;
 };
 
@@ -80,7 +78,7 @@ type Execute = {
   transactionsDetail?: InvocationsDetails & {
     chainId?: constants.StarknetChainId;
   };
-  resolve: (res: ExecuteReply) => void;
+  resolve: (res: ExecuteReply | Error) => void;
   reject: (reason?: unknown) => void;
 };
 
@@ -89,7 +87,7 @@ type SignMessage = {
   type: "sign-message";
   typedData: typedData.TypedData;
   account: string;
-  resolve: (signature: Signature) => void;
+  resolve: (signature: Signature | Error) => void;
   reject: (reason?: unknown) => void;
 };
 
@@ -97,9 +95,13 @@ const Index: NextPage = () => {
   const [chainId, setChainId] = useState<constants.StarknetChainId>(
     constants.StarknetChainId.TESTNET,
   );
-  const [context, setContext] = useState<Context>();
   const [controller, setController] = useState<Controller>();
-  const [signup, setSignup] = useState<boolean>(true);
+  const [context, setContext] = useState<Context>();
+  const [showSignup, setShowSignup] = useState<boolean>(false);
+
+  useEffect(() => {
+    setController(Controller.fromStore());
+  }, [setController]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -128,7 +130,7 @@ const Index: NextPage = () => {
         ),
         disconnect: normalize(
           validate(
-            async (controller: Controller, _session: Session, origin: string) =>
+            (controller: Controller, _session: Session, origin: string) =>
               async () => {
                 controller.revoke(origin);
                 return;
@@ -241,18 +243,19 @@ const Index: NextPage = () => {
         revoke: normalize(revoke),
         signMessage: normalize(
           validate(
-            () => async (typedData: typedData.TypedData, account: string) => {
-              return await new Promise((resolve, reject) => {
-                setContext({
-                  type: "sign-message",
-                  origin,
-                  typedData,
-                  account,
-                  resolve,
-                  reject,
-                } as SignMessage);
-              });
-            },
+            (_: Controller, _session: Session, origin: string) =>
+              async (typedData: typedData.TypedData, account: string) => {
+                return await new Promise((resolve, reject) => {
+                  setContext({
+                    type: "sign-message",
+                    origin,
+                    typedData,
+                    account,
+                    resolve,
+                    reject,
+                  } as SignMessage);
+                });
+              },
           ),
         ),
         session: normalize(session),
@@ -271,14 +274,6 @@ const Index: NextPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setContext]);
 
-  useInterval(
-    () => {
-      const controller = Controller.fromStore();
-      setController(controller);
-    },
-    controller ? null : 500,
-  );
-
   if (window.self === window.top) {
     return <></>;
   }
@@ -291,19 +286,24 @@ const Index: NextPage = () => {
   if (!controller) {
     return (
       <Container>
-        {signup ? (
-          <Signup onLogin={() => setSignup(false)} />
+        {showSignup ? (
+          <Signup
+            showLogin={() => setShowSignup(false)}
+            onSignup={(c) => setController(c)}
+          />
         ) : (
           <Login
             chainId={chainId}
-            onSignup={() => setSignup(true)}
-            onLogin={() => {}}
+            showSignup={() => setShowSignup(true)}
+            onLogin={(c) => setController(c)}
             onCancel={() => context.reject()}
           />
         )}
       </Container>
     );
   }
+
+  const account = controller.account(chainId);
 
   const sesh = controller.session(context.origin);
   if (context.type === "connect" || !sesh) {
@@ -322,10 +322,18 @@ const Index: NextPage = () => {
             address: string;
             policies: Policy[];
           }) => {
+            if (account.status === Status.COUNTERFACTUAL) {
+              // TODO: Deploy?
+              ctx.resolve({ code: ResponseCodes.SUCCESS, address, policies });
+              return;
+            }
+
+            // This device needs to be registered, so do a webauthn signature request
+            // for the register transaction during the connect flow.
             const pendingRegister = Storage.get(
               selectors[VERSION].register(controller.address, chainId),
             );
-            if (!controller.account(chainId).registered && !pendingRegister) {
+            if (!account.registered && !pendingRegister) {
               const { assertion, invoke } = await controller.signAddDeviceKey(
                 chainId,
               );
@@ -337,7 +345,7 @@ const Index: NextPage = () => {
 
             ctx.resolve({ code: ResponseCodes.SUCCESS, address, policies });
           }}
-          onCancel={() => ctx.reject()}
+          onCancel={(error: Error) => ctx.resolve(error)}
         />
       </Container>
     );
@@ -348,11 +356,12 @@ const Index: NextPage = () => {
     return (
       <Container>
         <SignMessage
+          chainId={chainId}
           controller={controller}
           origin={ctx.origin}
           typedData={ctx.typedData}
-          onSign={(sig) => context.resolve(sig)}
-          onCancel={(reason?: string) => ctx.reject(reason)}
+          onSign={(sig: Signature) => context.resolve(sig)}
+          onCancel={(error: Error) => ctx.resolve(error)}
         />
       </Container>
     );
@@ -360,27 +369,27 @@ const Index: NextPage = () => {
 
   if (context.type === "execute") {
     const ctx = context as Execute;
-    const account = controller.account(chainId);
+    const _chainId = ctx.transactionsDetail?.chainId ?? chainId;
+    const account = controller.account(_chainId);
 
     if (account.status === Status.COUNTERFACTUAL) {
       return <div>Deploy</div>;
-    } else if (account.status === Status.DEPLOYED) {
-      return <div>Register</div>;
     }
 
     return (
       <Container>
         <Execute
           {...ctx}
+          chainId={_chainId}
           controller={controller}
           onExecute={(res: ExecuteReply) => ctx.resolve(res)}
-          onCancel={() => ctx.reject()}
+          onCancel={(error: Error) => ctx.resolve(error)}
         />
       </Container>
     );
   }
 
-  return <Container>Here</Container>;
+  return <Container>*Waves*</Container>;
 };
 
 export default dynamic(() => Promise.resolve(Index), { ssr: false });

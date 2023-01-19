@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Formik, Form, Field, FormikState } from "formik";
 import { css } from "@emotion/react";
+import { motion } from "framer-motion";
 import {
   Button,
   Input,
@@ -11,29 +12,46 @@ import {
   HStack,
   Text,
   Link,
-  Divider,
   InputGroup,
-  InputRightElement,
-  Spinner,
+  Drawer,
+  DrawerBody,
+  DrawerOverlay,
+  DrawerContent,
+  useDisclosure,
 } from "@chakra-ui/react";
+import {
+  BeginRegistrationDocument,
+  FinalizeRegistrationDocument,
+  useAccountQuery,
+} from "generated/graphql";
+import { useDebounce } from "hooks/debounce";
+import { ec, KeyPair } from "starknet";
 
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import JoystickIcon from "@cartridge/ui/components/icons/Joystick";
 import LockIcon from "@cartridge/ui/components/icons/Lock";
-import ArrowIcon from "@cartridge/ui/components/icons/Arrow";
 import { Logo } from "@cartridge/ui/components/icons/brand/Logo";
-import { useDebounce } from "hooks/debounce";
-import { useAccountQuery } from "generated/graphql";
-import { json } from "stream/consumers";
-import Check from "components/icons/Check";
-import Warning from "components/icons/Warning";
 import Fingerprint from "components/icons/Fingerprint";
 import Web3Auth from "components/Web3Auth";
+import Continue from "components/signup/Continue";
+import { client } from "utils/graphql";
+import Controller from "utils/controller";
+import { useInterval } from "usehooks-ts";
+import { setActive } from "methods/register";
 
-export const Signup = ({ onLogin }: { onLogin: () => void }) => {
+export const Signup = ({
+  showLogin,
+  onSignup,
+}: {
+  showLogin: () => void;
+  onSignup: (controller: Controller) => void;
+}) => {
   const [name, setName] = useState("");
+  const [keypair, setKeypair] = useState<KeyPair>();
   const [nameError, setNameError] = useState("");
+  const [isRegistering, setIsRegistering] = useState<boolean>(false);
   const [canContinue, setCanContinue] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const { debouncedValue: debouncedName } = useDebounce(name, 500);
   const { error, refetch, isFetching } = useAccountQuery(
     { id: debouncedName },
@@ -49,11 +67,12 @@ export const Signup = ({ onLogin }: { onLogin: () => void }) => {
 
   useEffect(() => {
     if (error) {
-      const err = JSON.parse((error as Error).message)
+      const err = JSON.parse((error as Error).message);
 
       if (err.length > 0 && err[0].message === "ent: account not found") {
         setNameError("");
         setCanContinue(true);
+        onOpen();
       } else {
         setNameError("An error occured.");
         setCanContinue(false);
@@ -62,10 +81,58 @@ export const Signup = ({ onLogin }: { onLogin: () => void }) => {
       setNameError("This account already exists.");
       setCanContinue(false);
     }
-  }, [debouncedName, isFetching, error]);
+  }, [debouncedName, isFetching, error, onOpen]);
+
+  useInterval(
+    async () => {
+      const result = await refetch();
+
+      if (result.data) {
+        const {
+          account: {
+            credential: { id: credentialId },
+            contractAddress: address,
+          },
+        } = result.data;
+
+        const controller = new Controller(keypair, address, credentialId);
+        controller.store();
+
+        setActive(address);
+        onSignup(controller);
+      }
+    },
+    isRegistering ? 5000 : null,
+  );
+
+  const onContinue = useCallback(async () => {
+    const keypair = ec.genKeyPair();
+    const deviceKey = ec.getStarkKey(keypair);
+
+    setKeypair(keypair);
+    setIsRegistering(true);
+
+    window.open(
+      `/authenticate?name=${encodeURIComponent(
+        debouncedName,
+      )}&pubkey=${encodeURIComponent(deviceKey)}`,
+      "_blank",
+      "height=640,width=480",
+    );
+  }, [debouncedName]);
+
+  if (isRegistering) {
+    return <Continue />;
+  }
 
   return (
-    <VStack flex="1" gap="18px" padding="36px">
+    <VStack
+      as={motion.div}
+      animate={{ opacity: 1 }}
+      initial={{ opacity: 0 }}
+      gap="18px"
+      padding="12px"
+    >
       <HStack spacing="14px" pt="36px">
         <Circle size="48px" bgColor="gray.700">
           <JoystickIcon boxSize="30px" />
@@ -76,10 +143,17 @@ export const Signup = ({ onLogin }: { onLogin: () => void }) => {
         </Circle>
       </HStack>
       <Text fontWeight="bold" fontSize="17px">
-        Create a new Controller
+        Create your Controller
       </Text>
-      <Text fontSize="12px" mt="-8px !important" color="whiteAlpha.600" textAlign="center">Your Controller will be used for interacting with the game.</Text>
-      <Formik initialValues={{ name: "" }} onSubmit={() => { }}>
+      <Text
+        fontSize="12px"
+        mt="-8px !important"
+        color="whiteAlpha.600"
+        textAlign="center"
+      >
+        Your Controller will be used for interacting with the game.
+      </Text>
+      <Formik initialValues={{ name: "" }} onSubmit={() => {}}>
         {(props) => (
           <Form
             css={css`
@@ -106,14 +180,15 @@ export const Signup = ({ onLogin }: { onLogin: () => void }) => {
                   hasArrow
                   label={
                     <>
-                      <InfoIcon fill="whiteAlpha.600" mr="5px" />{nameError}
+                      <InfoIcon fill="whiteAlpha.600" mr="5px" />
+                      {nameError}
                     </>
                   }
                 >
                   <InputGroup>
                     <Input
                       {...field}
-                      h="36px"
+                      h="42px"
                       onChange={(e) => {
                         setName(e.target.value);
                         setCanContinue(false);
@@ -121,8 +196,14 @@ export const Signup = ({ onLogin }: { onLogin: () => void }) => {
                         props.handleChange(e);
                       }}
                       isInvalid
-                      borderColor={canContinue ? "green.400" : nameError ? "red.400" : "gray.700"}
-                      errorBorderColor='crimson'
+                      borderColor={
+                        canContinue
+                          ? "green.400"
+                          : nameError
+                          ? "red.400"
+                          : "gray.600"
+                      }
+                      errorBorderColor="crimson"
                       placeholder="Username"
                       autoComplete="off"
                     />
@@ -135,38 +216,53 @@ export const Signup = ({ onLogin }: { onLogin: () => void }) => {
               <Text fontSize="12px" color="whiteAlpha.600" fontWeight="bold">
                 Already have a controller?
               </Text>
-              <Link variant="outline" fontSize="11px" onClick={onLogin}>
+              <Link variant="outline" fontSize="11px" onClick={showLogin}>
                 Log In
               </Link>
             </HStack>
-            {canContinue &&
-              <VStack
-                position="fixed"
-                bottom="0"
-                right="0"
-                w="full"
-                p="36px"
-                gap="24px"
-                borderTop="500px solid rgba(0, 0, 0, .5)"
-              >
-                <HStack>
-                  <LockIcon />
-                  <Text fontSize="12px" color="whiteAlpha.600">
-                    By continuing you are agreeing to Cartridge&apos;s Terms of Service
-                    and Privacy Policy
-                  </Text>
-                </HStack>
-                <VStack w="full" gap="12px">
-                  <Button w="full" gap="10px">
-                    <Fingerprint height="16px" width="16px" css={css`
-                  > path {
-                    fill: black;
-                  }
-                `} /> Continue
-                  </Button>
-                  <Web3Auth onAuth={() => { }} />
-                </VStack>
-              </VStack>}
+            <Drawer placement="bottom" onClose={onClose} isOpen={isOpen}>
+              <DrawerOverlay />
+              <DrawerContent>
+                <DrawerBody p="36px">
+                  <VStack gap="24px">
+                    <HStack>
+                      <LockIcon />
+                      <Text fontSize="12px" color="whiteAlpha.600">
+                        By continuing you are agreeing to Cartridge&apos;s Terms
+                        of Service and Privacy Policy
+                      </Text>
+                    </HStack>
+                    <VStack w="full" gap="12px">
+                      <Button w="full" gap="10px" onClick={() => onContinue()}>
+                        <Fingerprint
+                          height="16px"
+                          width="16px"
+                          css={css`
+                            > path {
+                              fill: black;
+                            }
+                          `}
+                        />
+                        Continue
+                      </Button>
+                      <Web3Auth
+                        username={debouncedName}
+                        onAuth={async (controller) => {
+                          await client.request(BeginRegistrationDocument, {
+                            id: debouncedName,
+                          });
+                          await client.request(FinalizeRegistrationDocument, {
+                            credentials: "discord",
+                            signer: controller.publicKey,
+                          });
+                          onSignup(controller);
+                        }}
+                      />
+                    </VStack>
+                  </VStack>
+                </DrawerBody>
+              </DrawerContent>
+            </Drawer>
           </Form>
         )}
       </Formik>
