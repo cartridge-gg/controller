@@ -324,6 +324,8 @@ const Index: NextPage = () => {
               return;
             }
 
+            // This device needs to be registered, so do a webauthn signature request
+            // for the register transaction during the connect flow.
             const pendingRegister = Storage.get(
               selectors[VERSION].register(controller.address, chainId),
             );

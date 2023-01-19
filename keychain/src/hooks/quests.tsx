@@ -11,7 +11,6 @@ import {
   useCheckDiscordQuestsMutation,
   useCheckTwitterQuestsMutation,
 } from "generated/graphql";
-import { AccountId } from "caip";
 import Controller from "utils/controller";
 import { addAddressPadding } from "starknet";
 
