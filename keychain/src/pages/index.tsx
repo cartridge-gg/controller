@@ -292,7 +292,7 @@ const Index: NextPage = () => {
           <Login
             chainId={chainId}
             onSignup={() => setSignup(true)}
-            onLogin={() => { }}
+            onLogin={(c) => setController(c)}
             onCancel={() => context.reject()}
           />
         )}
