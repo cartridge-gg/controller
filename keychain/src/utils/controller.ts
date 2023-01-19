@@ -49,7 +49,7 @@ type SerializedController = {
 export default class Controller {
   public address: string;
   public signer: SignerInterface;
-  protected publicKey: string;
+  public publicKey: string;
   protected keypair: KeyPair;
   protected credentialId: string;
   protected webauthn: { [key in constants.StarknetChainId]: WebauthnAccount };
@@ -119,6 +119,7 @@ export default class Controller {
       selectors[VERSION].admin(this.address, process.env.NEXT_PUBLIC_ADMIN_URL),
       {},
     );
+    Storage.set(selectors["0.0.3"].active(), address);
     this.store();
   }
 

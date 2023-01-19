@@ -23,18 +23,16 @@ import {
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import JoystickIcon from "@cartridge/ui/components/icons/Joystick";
 import LockIcon from "@cartridge/ui/components/icons/Lock";
-import ArrowIcon from "@cartridge/ui/components/icons/Arrow";
 import { Logo } from "@cartridge/ui/components/icons/brand/Logo";
 import { useDebounce } from "hooks/debounce";
-import { useAccountQuery } from "generated/graphql";
-import { json } from "stream/consumers";
-import Check from "components/icons/Check";
-import Warning from "components/icons/Warning";
+import { BeginRegistrationDocument, FinalizeRegistrationDocument, useAccountQuery } from "generated/graphql";
 import Fingerprint from "components/icons/Fingerprint";
 import Web3Auth from "components/Web3Auth";
 import Continue from "components/signup/Continue";
+import { client } from "utils/graphql";
+import Controller from "utils/controller";
 
-export const Signup = ({ onLogin }: { onLogin: () => void }) => {
+export const Signup = ({ onLogin, onSignup }: { onLogin: () => void, onSignup: (controller: Controller) => void }) => {
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState("");
   const [overlay, showOverlay] = useState<boolean>(false);
@@ -93,7 +91,7 @@ export const Signup = ({ onLogin }: { onLogin: () => void }) => {
         </Circle>
       </HStack>
       <Text fontWeight="bold" fontSize="17px">
-        Create a new Controller
+        Create your Controller
       </Text>
       <Text
         fontSize="12px"
@@ -103,7 +101,7 @@ export const Signup = ({ onLogin }: { onLogin: () => void }) => {
       >
         Your Controller will be used for interacting with the game.
       </Text>
-      <Formik initialValues={{ name: "" }} onSubmit={() => {}}>
+      <Formik initialValues={{ name: "" }} onSubmit={() => { }}>
         {(props) => (
           <Form
             css={css`
@@ -150,8 +148,8 @@ export const Signup = ({ onLogin }: { onLogin: () => void }) => {
                         canContinue
                           ? "green.400"
                           : nameError
-                          ? "red.400"
-                          : "gray.600"
+                            ? "red.400"
+                            : "gray.600"
                       }
                       errorBorderColor="crimson"
                       placeholder="Username"
@@ -208,7 +206,16 @@ export const Signup = ({ onLogin }: { onLogin: () => void }) => {
                         />
                         Continue
                       </Button>
-                      <Web3Auth onAuth={() => {}} />
+                      <Web3Auth username={debouncedName} onAuth={async (controller) => {
+                        await client.request(BeginRegistrationDocument, {
+                          id: debouncedName,
+                        });
+                        await client.request(FinalizeRegistrationDocument, {
+                          credentials: "discord",
+                          signer: controller.publicKey,
+                        });
+                        onSignup(controller);
+                      }} />
                     </VStack>
                   </VStack>
                 </DrawerBody>

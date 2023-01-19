@@ -23,6 +23,7 @@ import {
   Abi,
   Call,
   constants,
+  ec,
   InvocationsDetails,
   InvokeFunctionResponse,
   number,
@@ -37,12 +38,13 @@ import { useInterval } from "usehooks-ts";
 
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
 import provision from "../methods/provision";
-import { register } from "../methods/register";
+import { computeAddress, register } from "../methods/register";
 import login from "../methods/login";
 import logout from "../methods/logout";
 import { revoke, session, sessions } from "../methods/sessions";
 import { Status } from "utils/account";
 import { normalize, validate } from "../methods";
+import web3auth from "utils/web3auth";
 
 const Container = ({ children }: { children: ReactNode }) => (
   <ChakraContainer
@@ -93,9 +95,13 @@ const Index: NextPage = () => {
   const [chainId, setChainId] = useState<constants.StarknetChainId>(
     constants.StarknetChainId.TESTNET,
   );
-  const [context, setContext] = useState<Context>();
   const [controller, setController] = useState<Controller>();
+  const [context, setContext] = useState<Context>();
   const [signup, setSignup] = useState<boolean>(false);
+
+  useEffect(() => {
+    setController(Controller.fromStore());
+  }, [setController]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -124,7 +130,7 @@ const Index: NextPage = () => {
         ),
         disconnect: normalize(
           validate(
-            async (controller: Controller, _session: Session, origin: string) =>
+            (controller: Controller, _session: Session, origin: string) =>
               async () => {
                 controller.revoke(origin);
                 return;
@@ -172,10 +178,10 @@ const Index: NextPage = () => {
                   : [transactions];
                 const policies = calls.map(
                   (txn) =>
-                    ({
-                      target: txn.contractAddress,
-                      method: txn.entrypoint,
-                    } as Policy),
+                  ({
+                    target: txn.contractAddress,
+                    method: txn.entrypoint,
+                  } as Policy),
                 );
 
                 const missing = diff(policies, session.policies);
@@ -237,7 +243,7 @@ const Index: NextPage = () => {
         revoke: normalize(revoke),
         signMessage: normalize(
           validate(
-            (_controller: Controller, _session: Session, origin: string) =>
+            (_: Controller, _session: Session, origin: string) =>
               async (typedData: typedData.TypedData, account: string) => {
                 return await new Promise((resolve, reject) => {
                   setContext({
@@ -268,14 +274,6 @@ const Index: NextPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setContext]);
 
-  useInterval(
-    () => {
-      const controller = Controller.fromStore();
-      setController(controller);
-    },
-    controller ? null : 500,
-  );
-
   if (window.self === window.top) {
     return <></>;
   }
@@ -289,18 +287,20 @@ const Index: NextPage = () => {
     return (
       <Container>
         {signup ? (
-          <Signup onLogin={() => setSignup(false)} />
+          <Signup onLogin={() => setSignup(false)} onSignup={(c) => setController(c)} />
         ) : (
           <Login
             chainId={chainId}
             onSignup={() => setSignup(true)}
-            onLogin={() => {}}
+            onLogin={() => { }}
             onCancel={() => context.reject()}
           />
         )}
       </Container>
     );
   }
+
+  const account = controller.account(chainId);
 
   const sesh = controller.session(context.origin);
   if (context.type === "connect" || !sesh) {
@@ -319,10 +319,15 @@ const Index: NextPage = () => {
             address: string;
             policies: Policy[];
           }) => {
+            if (account.status === Status.COUNTERFACTUAL) {
+              // TODO: Deploy?
+              return;
+            }
+
             const pendingRegister = Storage.get(
               selectors[VERSION].register(controller.address, chainId),
             );
-            if (!controller.account(chainId).registered && !pendingRegister) {
+            if (!account.registered && !pendingRegister) {
               const { assertion, invoke } = await controller.signAddDeviceKey(
                 chainId,
               );
