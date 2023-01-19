@@ -145,7 +145,7 @@ class Account extends BaseAccount {
       });
     } catch (e) {
       /* no-op */
-      console.log(e)
+      console.log(e);
     }
   }
 

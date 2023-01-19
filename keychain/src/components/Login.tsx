@@ -36,12 +36,12 @@ import LockIcon from "@cartridge/ui/components/icons/Lock";
 
 export const Login = ({
   chainId,
-  onSignup,
+  showSignup,
   onLogin,
   onCancel,
 }: {
   chainId: constants.StarknetChainId;
-  onSignup: () => void;
+  showSignup: () => void;
   onLogin: () => void;
   onCancel: () => void;
 }) => {
@@ -182,7 +182,7 @@ export const Login = ({
               <Text fontSize="12px" color="whiteAlpha.600" fontWeight="bold">
                 Need a controller?
               </Text>
-              <Link variant="outline" fontSize="11px" onClick={onSignup}>
+              <Link variant="outline" fontSize="11px" onClick={showSignup}>
                 Create Controller
               </Link>
             </HStack>

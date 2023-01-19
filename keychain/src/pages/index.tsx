@@ -97,7 +97,7 @@ const Index: NextPage = () => {
   );
   const [controller, setController] = useState<Controller>();
   const [context, setContext] = useState<Context>();
-  const [signup, setSignup] = useState<boolean>(false);
+  const [showSignup, setShowSignup] = useState<boolean>(false);
 
   useEffect(() => {
     setController(Controller.fromStore());
@@ -178,10 +178,10 @@ const Index: NextPage = () => {
                   : [transactions];
                 const policies = calls.map(
                   (txn) =>
-                  ({
-                    target: txn.contractAddress,
-                    method: txn.entrypoint,
-                  } as Policy),
+                    ({
+                      target: txn.contractAddress,
+                      method: txn.entrypoint,
+                    } as Policy),
                 );
 
                 const missing = diff(policies, session.policies);
@@ -286,13 +286,16 @@ const Index: NextPage = () => {
   if (!controller) {
     return (
       <Container>
-        {signup ? (
-          <Signup onLogin={() => setSignup(false)} onSignup={(c) => setController(c)} />
+        {showSignup ? (
+          <Signup
+            showLogin={() => setShowSignup(false)}
+            onSignup={(c) => setController(c)}
+          />
         ) : (
           <Login
             chainId={chainId}
-            onSignup={() => setSignup(true)}
-            onLogin={() => { }}
+            showSignup={() => setShowSignup(true)}
+            onLogin={() => {}}
             onCancel={() => context.reject()}
           />
         )}
