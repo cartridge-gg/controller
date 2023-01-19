@@ -2,7 +2,6 @@ import { CLASS_HASHES } from "@cartridge/controller/src/constants";
 import { ec } from "starknet";
 import {
   AccountContractDocument,
-  useAccountContractQuery,
 } from "generated/graphql";
 import {
   constants,
