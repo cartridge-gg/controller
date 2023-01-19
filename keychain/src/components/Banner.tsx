@@ -33,7 +33,7 @@ export const Banner = ({
         </Text>
       )}
       {chainId && (
-        <HStack py="7px" px="12px" bgColor="gray.700" borderRadius="full">
+        <HStack color="white" py="7px" px="12px" bgColor="gray.700" borderRadius="full">
           <StarknetIcon boxSize="14px" />
           <Text fontSize="10px" variant="ibm-upper-bold">
             {chainId === constants.StarknetChainId.MAINNET
