@@ -6,11 +6,13 @@ import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import Discord from "./icons/Discord";
 import MetaMask from "./icons/Metamask";
 import { ec, number, KeyPair } from "starknet";
+import { computeAddress } from "methods/register";
+import Controller from "utils/controller";
 
 const clientId =
   "BKpRo2vJuxbHH3giMVQfdts2l1P3D51AB5hIZ_-HNfkfisVV94Q4aQcZbjXjduwZW8j6n1TlBaEl6Q1nOQXRCG0";
 
-const Web3Auth = ({ onAuth }: { onAuth: (keyPair: KeyPair) => void }) => {
+const Web3Auth = ({ username, onAuth }: { username: string, onAuth: (controller: Controller) => void }) => {
   const [web3auth, setWeb3auth] = useState<Web3AuthCore | null>(null);
 
   useEffect(() => {
@@ -60,9 +62,14 @@ const Web3Auth = ({ onAuth }: { onAuth: (keyPair: KeyPair) => void }) => {
       method: "private_key",
     });
     const keyPair = ec.getKeyPair(number.toBN(privateKey, "hex"));
-    onAuth(keyPair);
-    // const address = computeAddress();
-    // new Controller(keyPair, "", loginProvider);
+    const address = computeAddress(
+      username,
+      { x0: number.toBN(0), x1: number.toBN(0), x2: number.toBN(0) },
+      { y0: number.toBN(0), y1: number.toBN(0), y2: number.toBN(0) },
+      ec.getStarkKey(keyPair),
+    );
+    const controller = new Controller(keyPair, address, loginProvider);
+    onAuth(controller);
   };
 
   return (
@@ -88,7 +95,7 @@ const Web3Auth = ({ onAuth }: { onAuth: (keyPair: KeyPair) => void }) => {
             login("discord");
           }}
         >
-          <Discord height="16px" width="16px" mr="8px" />Connect with Discord
+          <Discord height="16px" width="16px" mr="12px" mt="1px" />Connect with Discord
         </Button>
         {/* <Button flex={1} variant="secondary700" onClick={async () => {
                 login("twitter");
