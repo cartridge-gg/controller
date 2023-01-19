@@ -23,7 +23,7 @@ import WebauthnAccount, { formatAssertion, RawAssertion } from "./webauthn";
 import { getGasPrice } from "./gateway";
 import selectors from "./selectors";
 import migrations from "./migrations";
-import { CLASS_HASHES } from "./hashes";
+import { CLASS_HASHES } from "@cartridge/controller/src/constants";
 import { AccountInfoDocument } from "generated/graphql";
 import { client } from "./graphql";
 

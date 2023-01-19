@@ -1,24 +1,27 @@
+import { CLASS_HASHES } from "@cartridge/controller/src/constants";
+import { ec } from "starknet";
 import {
   AccountContractDocument,
-  useAccountContractQuery,
 } from "generated/graphql";
 import {
   constants,
   hash,
   number,
+  transaction,
   Account as BaseAccount,
   RpcProvider,
   SignerInterface,
   Call,
   EstimateFeeDetails,
   EstimateFee,
+  GetTransactionReceiptResponse,
+  Signature,
 } from "starknet";
-import { CLASS_HASHES } from "./hashes";
 import { client } from "utils/graphql";
 
 import selectors from "./selectors";
 import Storage from "./storage";
-import { NamedChainId } from "./constants";
+import { NamedChainId } from "@cartridge/controller/src/constants";
 
 export enum Status {
   UNKNOWN = "UNKNOWN",
@@ -166,6 +169,15 @@ class Account extends BaseAccount {
       ? details.blockIdentifier
       : "latest";
     return super.estimateInvokeFee(calls, details);
+  }
+
+  async verifyMessageHash(hash: string | number | import("bn.js"), signature: Signature): Promise<boolean> {
+    if (number.toBN(signature[0]).cmp(number.toBN(0)) === 0) {
+      const keyPair = ec.getKeyPairFromPublicKey(signature[0]);
+      return ec.verify(keyPair, number.toBN(hash).toString(), signature);
+    }
+
+    super.verifyMessageHash(hash, signature);
   }
 
   // async getNonce(blockIdentifier?: any): Promise<number.BigNumberish> {

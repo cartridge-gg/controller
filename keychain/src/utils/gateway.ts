@@ -5,7 +5,7 @@ import {
   GATEWAY_MAINNET,
   ETH_RPC_MAINNET,
   ETH_RPC_GOERLI,
-} from "./constants";
+} from "@cartridge/controller/src/constants";
 
 export async function estimateFeeBulk(
   chainId: constants.StarknetChainId,

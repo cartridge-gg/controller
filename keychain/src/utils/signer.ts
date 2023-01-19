@@ -8,7 +8,7 @@ import {
   Signer,
   typedData,
 } from "starknet";
-import { CLASS_HASHES } from "./hashes";
+import { CLASS_HASHES } from "@cartridge/controller/src/constants";
 
 export class DeviceSigner extends Signer {
   constructor(keyPair: KeyPair) {
