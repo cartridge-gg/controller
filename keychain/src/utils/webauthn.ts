@@ -21,7 +21,7 @@ import {
 import cbor from "cbor";
 import base64url from "base64url";
 import { split } from "@cartridge/controller";
-import { CLASS_HASHES } from "./hashes";
+import { CLASS_HASHES } from "@cartridge/controller/src/constants";
 
 export type RawAssertion = PublicKeyCredential & {
   response: AuthenticatorAssertionResponse;
