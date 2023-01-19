@@ -108,6 +108,11 @@ class Account extends BaseAccount {
             .then(() => this.sync());
           return
         }
+
+        if (deployTxnReceipt.status === "REJECTED") {
+          this.status = Status.COUNTERFACTUAL;
+          return;
+        }
       }
 
       const classHash = await this.rpc.getClassHashAt(this.address, "latest");
