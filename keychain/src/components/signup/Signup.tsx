@@ -52,7 +52,7 @@ export const Signup = ({
   const [isRegistering, setIsRegistering] = useState<boolean>(false);
   const [canContinue, setCanContinue] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { debouncedValue: debouncedName } = useDebounce(name, 500);
+  const { debouncedValue: debouncedName } = useDebounce(name, 1500);
   const { error, refetch, isFetching } = useAccountQuery(
     { id: debouncedName },
     { enabled: false, retry: false },

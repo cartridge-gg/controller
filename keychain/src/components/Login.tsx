@@ -47,9 +47,8 @@ export const Login = ({
 }) => {
   const [name, setName] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
-  const [unsupported, setUnsupported] = useState<boolean>(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { debouncedValue: debouncedName } = useDebounce(name, 500);
+  const { debouncedValue: debouncedName } = useDebounce(name, 1500);
   const { error, refetch, data } = useAccountQuery(
     { id: debouncedName },
     { enabled: false, retry: false },
