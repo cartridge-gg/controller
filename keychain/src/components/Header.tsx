@@ -44,17 +44,27 @@ const Container = ({
 
 export const Header = ({
   address,
+  muted = false,
   onLogout,
 }: {
   address?: string;
+  muted?: boolean;
   onLogout?: () => void;
 }) => {
   if (!address) {
+    const fill = muted ? "gray.200" : "brand";
+    const background = muted
+      ? {
+          bgColor: "gray.400",
+          borderBottom: "1px solid",
+          borderColor: "gray.600",
+        }
+      : {};
     return (
-      <Container height="50px">
+      <Container height="50px" {...background}>
         <HStack spacing="0">
-          <Logo fill="brand" w="24px" mr="15px" />
-          <WordLogo fill="brand" h="18px" />
+          <Logo fill={fill} w="24px" mr="15px" />
+          <WordLogo fill={fill} h="18px" />
         </HStack>
       </Container>
     );
