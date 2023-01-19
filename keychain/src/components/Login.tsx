@@ -46,7 +46,6 @@ export const Login = ({
   onCancel: () => void;
 }) => {
   const [name, setName] = useState("");
-  const [popupSignup, setPopupSignup] = useState<boolean>(false);
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
   const [unsupported, setUnsupported] = useState<boolean>(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -105,34 +104,12 @@ export const Login = ({
     }
   }, [chainId, name, data, onLogin, log]);
 
-  if (popupSignup) {
-    return (
-      <Container
-        w={["full", "400px"]}
-        h="calc(100vh - 74px)"
-        pt="100px"
-        centerContent
-      >
-        <Text>Please continue with signup in the new window.</Text>
-        <Footer
-          showConfirm={false}
-          cancelText="Close"
-          onCancel={() => {
-            onCancel();
-            // hack.. there's a delay before modal disappears, penpal latency?
-            setTimeout(() => setPopupSignup(false), 500);
-          }}
-        />
-      </Container>
-    );
-  }
-
   return (
     <VStack
       as={motion.div}
       animate={{ opacity: 1 }}
       initial={{ opacity: 0 }}
-      p="36px"
+      p="12px"
       gap="18px"
     >
       <HStack spacing="14px" pt="36px">

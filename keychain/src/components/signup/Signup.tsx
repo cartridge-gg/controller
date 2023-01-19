@@ -32,10 +32,12 @@ import Check from "components/icons/Check";
 import Warning from "components/icons/Warning";
 import Fingerprint from "components/icons/Fingerprint";
 import Web3Auth from "components/Web3Auth";
+import Continue from "components/signup/Continue";
 
 export const Signup = ({ onLogin }: { onLogin: () => void }) => {
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState("");
+  const [overlay, showOverlay] = useState<boolean>(false);
   const [canContinue, setCanContinue] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { debouncedValue: debouncedName } = useDebounce(name, 500);
@@ -69,14 +71,17 @@ export const Signup = ({ onLogin }: { onLogin: () => void }) => {
     }
   }, [debouncedName, isFetching, error, onOpen]);
 
+  if (overlay) {
+    return <Continue />;
+  }
+
   return (
     <VStack
       as={motion.div}
       animate={{ opacity: 1 }}
       initial={{ opacity: 0 }}
-      flex="1"
       gap="18px"
-      padding="36px"
+      padding="12px"
     >
       <HStack spacing="14px" pt="36px">
         <Circle size="48px" bgColor="gray.700">
@@ -178,7 +183,20 @@ export const Signup = ({ onLogin }: { onLogin: () => void }) => {
                       </Text>
                     </HStack>
                     <VStack w="full" gap="12px">
-                      <Button w="full" gap="10px">
+                      <Button
+                        w="full"
+                        gap="10px"
+                        onClick={() => {
+                          window.open(
+                            `/authenticate?name=${encodeURIComponent(
+                              debouncedName,
+                            )}`,
+                            "_blank",
+                            "height=650,width=400",
+                          );
+                          showOverlay(true);
+                        }}
+                      >
                         <Fingerprint
                           height="16px"
                           width="16px"
