@@ -1,6 +1,7 @@
 import { constants } from "starknet";
 import { AccountInterface, ProviderInterface } from "starknet";
 import Controller, { providers } from ".";
+import { Policy } from "./types";
 
 export type EventType = "accountsChanged" | "networkChanged";
 
@@ -79,8 +80,12 @@ export class InjectedController implements IStarknetWindowObject {
 
     private controller: Controller;
 
-    constructor() {
-        this.controller = new Controller();
+    constructor(policies?: Policy[],
+        options?: {
+            url?: string;
+            origin?: string;
+        }) {
+        this.controller = new Controller(policies, options);
         this.controller.ready().then(isConnected => {
             this.isConnected = !!isConnected;
             if (this.controller.account) {
@@ -100,7 +105,7 @@ export class InjectedController implements IStarknetWindowObject {
         if (!this.account) {
             return [];
         }
-        
+
         this.provider = providers[this.controller.chainId];
         this.isConnected = true;
         return [this.account.address];
@@ -144,8 +149,12 @@ export class InjectedController implements IStarknetWindowObject {
     }
 }
 
-function injectController() {
-    (window as any).starknet_cartridge = new InjectedController();
+function injectController(policies?: Policy[],
+    options?: {
+        url?: string;
+        origin?: string;
+    }) {
+    (window as any).starknet_cartridge = new InjectedController(policies, options);
 }
 
 export { injectController };
