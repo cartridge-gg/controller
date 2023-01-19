@@ -4,7 +4,10 @@ import { getStarknet } from "get-starknet"
 import { injectController } from '@cartridge/controller';
 import { AccountInterface } from "starknet";
 
-injectController();
+injectController(undefined, {
+  url: "https://cartridge-starknet-react-next-git-removenextrouting.preview.cartridge.gg/"
+});
+
 const Main = () => {
   const sn = useMemo(getStarknet, []);
   const [account, setAccount] = useState<AccountInterface>()

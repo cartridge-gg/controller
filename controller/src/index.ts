@@ -27,8 +27,7 @@ import {
 import BN from "bn.js";
 import { client, computeAddress } from "./utils";
 import { AccountDocument } from "./generated/graphql";
-import cbor from "cbor";
-import { assert } from "console";
+import cbor from "cbor-x";
 import { CLASS_HASHES } from "@cartridge/controller/src/constants";
 
 export const providers = {
@@ -327,7 +326,7 @@ class Controller {
         return false;
       }
 
-      const pubKeyCbor = cbor.decodeAllSync(
+      const pubKeyCbor = cbor.decode(
         number.toBN(account.credential.publicKey).toBuffer()
       )[0];
       const x = number.toBN("0x" + pubKeyCbor.get(-2).toString("hex"));

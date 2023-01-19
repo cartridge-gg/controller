@@ -45,9 +45,6 @@
   "references": [
     {
       "path": "../../controller"
-    },
-    {
-      "path": "../../connector"
     }
   ]
 }
