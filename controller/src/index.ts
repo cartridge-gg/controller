@@ -1,5 +1,5 @@
 import qs from "query-string";
-import { AccountInterface, constants, number, RpcProvider } from "starknet";
+import { ec, AccountInterface, constants, hash, number, RpcProvider, Signature } from "starknet";
 import {
   AsyncMethodReturns,
   Connection,
@@ -10,6 +10,10 @@ import DeviceAccount from "./device";
 import { Session, Keychain, Policy } from "./types";
 import { createModal, Modal } from "./modal";
 import BN from "bn.js";
+import { CLASS_HASHES, client, computeAddress } from "./utils";
+import { AccountDocument } from "./generated/graphql";
+import cbor from "cbor";
+import { assert } from "console";
 
 export const providers = {
   [constants.StarknetChainId.TESTNET]: new RpcProvider({
@@ -287,6 +291,54 @@ class Controller {
     }
 
     return this.keychain.approvals(origin);
+  }
+
+  async verifyMessageHash(
+    messageHash: number.BigNumberish,
+    signature: Signature
+  ) {
+    const isDeployed = !!this.account?.getClassHashAt(this.account.address, "latest");
+
+    if (isDeployed) {
+      const res = await this.account?.callContract({
+        contractAddress: this.account.address,
+        entrypoint: "executeOnPlugin",
+        calldata: [
+          CLASS_HASHES["0.0.1"].controller,
+          hash.getSelector("is_public_key"),
+          "0x1",
+          signature[0],
+        ]
+      });
+
+      const isRegistered = res?.result[0] === "0x1";
+      if (isRegistered) {
+        const keyPair = ec.getKeyPairFromPublicKey(signature[0]);
+        return ec.verify(keyPair, number.toBN(messageHash).toString(), signature);
+      } else {
+        // validate register txn and signature
+      }
+    } else {
+      const res = await client.request(AccountDocument, {
+        address: this.account?.address,
+      });
+
+      const account = res?.accounts?.edges?.[0]?.node;
+      if (!account) {
+        return false;
+      }
+
+      const pubKeyCbor = cbor.decodeAllSync(number.toBN(account.credential.publicKey).toBuffer())[0];
+      const x = number.toBN("0x" + pubKeyCbor.get(-2).toString("hex"));
+      const y = number.toBN("0x" + pubKeyCbor.get(-3).toString("hex"));
+      const { x: x0, y: x1, z: x2 } = split(x);
+      const { x: y0, y: y1, z: y2 } = split(y);
+      const address = computeAddress(account.id, {x0, x1, x2}, {y0, y1, y2}, signature[0]);
+      assert(address === this.account?.address, "invalid public key");
+
+      const keyPair = ec.getKeyPairFromPublicKey(signature[0]);
+      return ec.verify(keyPair, number.toBN(messageHash).toString(), signature);
+    }
   }
 }
 
