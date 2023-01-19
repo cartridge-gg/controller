@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Flex, Text, VStack } from "@chakra-ui/react";
+import { Text, VStack } from "@chakra-ui/react";
 
 import Controller, { VERSION } from "utils/controller";
 import {
@@ -181,11 +181,9 @@ const Execute = ({
   ]);
 
   useEffect(() => {
-    if (account) {
-      account.getNonce().then((n: BN) => {
-        setNonce(number.toBN(n));
-      });
-    }
+    account.getNonce().then((n: BN) => {
+      setNonce(number.toBN(n));
+    });
   }, [account]);
 
   const onSubmit = useCallback(async () => {

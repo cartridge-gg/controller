@@ -321,6 +321,7 @@ const Index: NextPage = () => {
           }) => {
             if (account.status === Status.COUNTERFACTUAL) {
               // TODO: Deploy?
+              ctx.resolve({ code: ResponseCodes.SUCCESS, address, policies });
               return;
             }
 
@@ -365,7 +366,7 @@ const Index: NextPage = () => {
 
   if (context.type === "execute") {
     const ctx = context as Execute;
-    const account = controller.account(chainId);
+    const account = controller.account(ctx.transactionsDetail?.chainId ?? chainId);
 
     if (account.status === Status.COUNTERFACTUAL) {
       return <div>Deploy</div>;
@@ -383,7 +384,7 @@ const Index: NextPage = () => {
     );
   }
 
-  return <Container>Here</Container>;
+  return <Container>*Waves*</Container>;
 };
 
 export default dynamic(() => Promise.resolve(Index), { ssr: false });
