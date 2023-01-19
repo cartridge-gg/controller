@@ -1,7 +1,9 @@
+import { ec } from "starknet";
 import {
   constants,
   hash,
   number,
+  transaction,
   Account as BaseAccount,
   RpcProvider,
   SignerInterface,
@@ -9,6 +11,7 @@ import {
   EstimateFeeDetails,
   EstimateFee,
   GetTransactionReceiptResponse,
+  Signature,
 } from "starknet";
 import { CLASS_HASHES } from "./hashes";
 
@@ -108,6 +111,15 @@ class Account extends BaseAccount {
       ? details.blockIdentifier
       : "latest";
     return super.estimateInvokeFee(calls, details);
+  }
+
+  async verifyMessageHash(hash: string | number | import("bn.js"), signature: Signature): Promise<boolean> {
+    if (!this.deployed && !this.registered) {
+      const keyPair = ec.getKeyPairFromPublicKey(await this.signer.getPubKey());
+      return ec.verify(keyPair, number.toBN(hash).toString(), signature);
+    }
+
+    super.verifyMessageHash(hash, signature);
   }
 
   // async getNonce(blockIdentifier?: any): Promise<number.BigNumberish> {
