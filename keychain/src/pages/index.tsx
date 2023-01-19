@@ -295,7 +295,7 @@ const Index: NextPage = () => {
           <Login
             chainId={chainId}
             showSignup={() => setShowSignup(true)}
-            onLogin={() => {}}
+            onLogin={(c) => setController(c)}
             onCancel={() => context.reject()}
           />
         )}
@@ -324,9 +324,12 @@ const Index: NextPage = () => {
           }) => {
             if (account.status === Status.COUNTERFACTUAL) {
               // TODO: Deploy?
+              ctx.resolve({ code: ResponseCodes.SUCCESS, address, policies });
               return;
             }
 
+            // This device needs to be registered, so do a webauthn signature request
+            // for the register transaction during the connect flow.
             const pendingRegister = Storage.get(
               selectors[VERSION].register(controller.address, chainId),
             );
@@ -366,7 +369,9 @@ const Index: NextPage = () => {
 
   if (context.type === "execute") {
     const ctx = context as Execute;
-    const account = controller.account(chainId);
+    const account = controller.account(
+      ctx.transactionsDetail?.chainId ?? chainId,
+    );
 
     if (account.status === Status.COUNTERFACTUAL) {
       return <div>Deploy</div>;
@@ -384,7 +389,7 @@ const Index: NextPage = () => {
     );
   }
 
-  return <Container>Here</Container>;
+  return <Container>*Waves*</Container>;
 };
 
 export default dynamic(() => Promise.resolve(Index), { ssr: false });

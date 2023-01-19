@@ -29,10 +29,10 @@ import login from "methods/login";
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import { useDebounce } from "hooks/debounce";
 import Web3Auth from "./Web3Auth";
-import { constants, KeyPair } from "starknet";
-import Footer from "components/Footer";
+import { constants } from "starknet";
 import { motion } from "framer-motion";
 import LockIcon from "@cartridge/ui/components/icons/Lock";
+import Controller from "utils/controller";
 
 export const Login = ({
   chainId,
@@ -42,7 +42,7 @@ export const Login = ({
 }: {
   chainId: constants.StarknetChainId;
   showSignup: () => void;
-  onLogin: () => void;
+  onLogin: (controller: Controller) => void;
   onCancel: () => void;
 }) => {
   const [name, setName] = useState("");
@@ -84,14 +84,14 @@ export const Login = ({
 
       const { data: beginLoginData } = await beginLogin(name);
 
-      await login()(address, chainId, credentialId, {
+      const { controller } = await login()(address, chainId, credentialId, {
         rpId: process.env.NEXT_PUBLIC_RP_ID,
         challengeExt: base64url.toBuffer(
           beginLoginData.beginLogin.publicKey.challenge,
         ),
       });
 
-      onLogin();
+      onLogin(controller);
     } catch (err) {
       console.error(err);
       setIsLoggingIn(false);
@@ -177,7 +177,6 @@ export const Login = ({
                 </Flex>
               )}
             </Field>
-            {/* <Web3Auth onAuth={(keyPair: KeyPair) => {}} /> */}
             <HStack justify="center">
               <Text fontSize="12px" color="whiteAlpha.600" fontWeight="bold">
                 Need a controller?
@@ -198,9 +197,23 @@ export const Login = ({
                         of Service and Privacy Policy
                       </Text>
                     </HStack>
-                    <Button w="full" isLoading={isLoggingIn} onClick={onSubmit}>
-                      Connect
-                    </Button>
+                    {data?.account.type === "webauthn" && (
+                      <Button
+                        w="full"
+                        isLoading={isLoggingIn}
+                        onClick={onSubmit}
+                      >
+                        Connect
+                      </Button>
+                    )}
+                    {data?.account.type === "discord" && (
+                      <Web3Auth
+                        username={debouncedName}
+                        onAuth={(controller) => {
+                          onLogin(controller);
+                        }}
+                      />
+                    )}
                   </VStack>
                 </DrawerBody>
               </DrawerContent>
