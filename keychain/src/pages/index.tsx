@@ -99,7 +99,7 @@ const Index: NextPage = () => {
   );
   const [context, setContext] = useState<Context>();
   const [controller, setController] = useState<Controller>();
-  const [signup, setSignup] = useState<boolean>(true);
+  const [signup, setSignup] = useState<boolean>(false);
 
   useEffect(() => {
     if (typeof window === "undefined") {

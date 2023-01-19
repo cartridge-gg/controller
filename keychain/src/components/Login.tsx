@@ -14,7 +14,12 @@ import {
   Text,
   Container,
   Link,
-  Divider,
+  Circle,
+  Drawer,
+  DrawerBody,
+  DrawerOverlay,
+  DrawerContent,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { useAccountQuery } from "generated/graphql";
 import base64url from "base64url";
@@ -26,6 +31,8 @@ import { useDebounce } from "hooks/debounce";
 import Web3Auth from "./Web3Auth";
 import { constants, KeyPair } from "starknet";
 import Footer from "components/Footer";
+import { motion } from "framer-motion";
+import LockIcon from "@cartridge/ui/components/icons/Lock";
 
 export const Login = ({
   chainId,
@@ -42,10 +49,11 @@ export const Login = ({
   const [popupSignup, setPopupSignup] = useState<boolean>(false);
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
   const [unsupported, setUnsupported] = useState<boolean>(false);
-  const { debouncedValue: debouncedName } = useDebounce(name, 100);
-  const { error, refetch } = useAccountQuery(
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { debouncedValue: debouncedName } = useDebounce(name, 500);
+  const { error, refetch, data } = useAccountQuery(
     { id: debouncedName },
-    { enabled: false },
+    { enabled: false, retry: false },
   );
 
   const { event: log } = useAnalytics();
@@ -57,18 +65,23 @@ export const Login = ({
     refetch();
   }, [refetch, debouncedName]);
 
+  useEffect(() => {
+    if (data) {
+      onOpen();
+    }
+  }, [data]);
+
   const onSubmit = useCallback(async () => {
     log({ type: "webauthn_login" });
     setIsLoggingIn(true);
 
     try {
-      const result = await refetch();
       const {
         account: {
           credential: { id: credentialId },
           contractAddress: address,
         },
-      } = result.data;
+      } = data;
 
       const { data: beginLoginData } = await beginLogin(name);
 
@@ -90,7 +103,7 @@ export const Login = ({
         },
       });
     }
-  }, [chainId, name, onLogin, refetch, log]);
+  }, [chainId, name, data, onLogin, refetch, log]);
 
   if (popupSignup) {
     return (
@@ -115,128 +128,109 @@ export const Login = ({
   }
 
   return (
-    <Container
-      maxWidth="432px"
-      maxHeight="432px"
-      bg="gray.900"
-      borderRadius="8px"
-      overflow="hidden"
+    <VStack
+      as={motion.div}
+      animate={{ opacity: 1 }}
+      initial={{ opacity: 0 }}
+      p="36px"
+      gap="18px"
     >
-      <VStack flex="1" p="36px" gap="24px">
-        <Flex flexDirection="column" alignItems="center">
-          <Fingerprint width="48px" height="48px" />
-          <Text
-            mt="16px"
+      <HStack spacing="14px" pt="36px">
+        <Circle size="48px" bgColor="gray.700">
+          <Fingerprint boxSize="30px" />
+        </Circle>
+      </HStack>
+      <Text fontWeight="bold" fontSize="17px">
+        Connect your Controller
+      </Text>
+      <Text
+        fontSize="12px"
+        mt="-8px !important"
+        color="whiteAlpha.600"
+        textAlign="center"
+      >
+        Your Controller will be used for interacting with the game.
+      </Text>
+      <Formik initialValues={{ name: "" }} onSubmit={() => {}}>
+        {(props) => (
+          <Form
             css={css`
-              font-family: "IBM Plex Sans";
-              font-style: normal;
-              font-weight: 600;
-              font-size: 17px;
+              display: flex;
+              flex-direction: column;
+              flex: 1;
+              width: 100%;
+              margin-top: 0px !important;
+              gap: 24px;
             `}
           >
-            Connect your Controller
-          </Text>
-        </Flex>
-        <Formik initialValues={{ name: "" }} onSubmit={onSubmit}>
-          {(props) => (
-            <Form
-              css={css`
-                display: flex;
-                flex-direction: column;
-                flex: 1;
-                width: 100%;
-                margin-top: 0px !important;
-                gap: 24px;
-              `}
-            >
-              <Field name="name">
-                {({
-                  field,
-                  form,
-                }: {
-                  field: InputProps;
-                  form: FormikState<{ name: string }>;
-                }) => (
-                  <Flex flex="1" align="center" bg="gray.700">
-                    <Tooltip
-                      variant="error"
-                      mt="10px"
-                      placement="top"
-                      isOpen={!!error}
-                      hasArrow
-                      label={
-                        <>
-                          <InfoIcon fill="whiteAlpha.600" mr="5px" /> This
-                          account does not exist
-                        </>
-                      }
-                    >
-                      <Input
-                        {...field}
-                        borderColor={error && "red.400"}
-                        onChange={(e) => {
-                          setName(e.target.value);
-                          props.handleChange(e);
-                        }}
-                        placeholder="Username"
-                        autoComplete="off"
-                        h="42px"
-                      />
-                    </Tooltip>
-                  </Flex>
-                )}
-              </Field>
-              <Button
-                flex="1"
-                lineHeight="40px"
-                type="submit"
-                isLoading={false}
-              >
-                Connect Controller
-              </Button>
-              {/* <Web3Auth onAuth={(keyPair: KeyPair) => {}} /> */}
-              <HStack justify="center">
-                <Text fontSize="12px" color="whiteAlpha.600">
-                  Need a controller?
-                </Text>
-                <Link variant="outline" fontSize="11px" onClick={onSignup}>
-                  Create Controller
-                </Link>
-              </HStack>
-            </Form>
-          )}
-        </Formik>
-      </VStack>
-    </Container>
+            <Field name="name">
+              {({
+                field,
+                form,
+              }: {
+                field: InputProps;
+                form: FormikState<{ name: string }>;
+              }) => (
+                <Flex flex="1" align="center">
+                  <Tooltip
+                    variant="error"
+                    mt="10px"
+                    placement="top"
+                    isOpen={!!error}
+                    hasArrow
+                    label={
+                      <>
+                        <InfoIcon fill="whiteAlpha.600" mr="5px" /> This account
+                        does not exist
+                      </>
+                    }
+                  >
+                    <Input
+                      {...field}
+                      borderColor={error && "red.400"}
+                      onChange={(e) => {
+                        setName(e.target.value);
+                        props.handleChange(e);
+                      }}
+                      placeholder="Username"
+                      autoComplete="off"
+                      h="42px"
+                    />
+                  </Tooltip>
+                </Flex>
+              )}
+            </Field>
+            {/* <Web3Auth onAuth={(keyPair: KeyPair) => {}} /> */}
+            <HStack justify="center">
+              <Text fontSize="12px" color="whiteAlpha.600" fontWeight="bold">
+                Need a controller?
+              </Text>
+              <Link variant="outline" fontSize="11px" onClick={onSignup}>
+                Create Controller
+              </Link>
+            </HStack>
+            <Drawer placement="bottom" onClose={onClose} isOpen={isOpen}>
+              <DrawerOverlay />
+              <DrawerContent>
+                <DrawerBody p="36px">
+                  <VStack gap="24px">
+                    <HStack>
+                      <LockIcon />
+                      <Text fontSize="12px" color="whiteAlpha.600">
+                        By continuing you are agreeing to Cartridge&apos;s Terms
+                        of Service and Privacy Policy
+                      </Text>
+                    </HStack>
+                    <Button w="full" isLoading={isLoggingIn} onClick={onSubmit}>
+                      Connect
+                    </Button>
+                  </VStack>
+                </DrawerBody>
+              </DrawerContent>
+            </Drawer>
+          </Form>
+        )}
+      </Formik>
+    </VStack>
   );
 };
-
-// const SignupLink = ({ onPopup }: { onPopup: () => void }) => {
-//   const router = useRouter();
-//   const isEmbedded =
-//     typeof window !== "undefined" && window.top !== window.self;
-
-//   const onClick = useCallback(() => {
-//     if (isEmbedded) {
-//       onPopup();
-
-//       window.open(
-//         process.env.NEXT_PUBLIC_SITE_URL + "/signup?close=true",
-//         "_blank",
-//         "height=650,width=450",
-//       );
-//       return;
-//     }
-
-//     router.push({ pathname: "/signup", query: router.query });
-//   }, [router, isEmbedded, onPopup]);
-
-//   return (
-//     <HStack as="strong" justify="center" fontSize="13px">
-//       <Text color="whiteAlpha.600">{"Don't have a controller?"}</Text>
-//       <Link variant="traditional" onClick={onClick}>
-//         Sign up
-//       </Link>
-//     </HStack>
-//   );
-// };

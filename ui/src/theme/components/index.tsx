@@ -5,6 +5,7 @@ export * from "./Banner";
 export * from "./Button";
 export * from "./Switch";
 export * from "./Select";
+export * from "./Drawer";
 export * from "./Input";
 export * from "./Modal";
 export * from "./Table";
