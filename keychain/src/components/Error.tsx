@@ -9,10 +9,10 @@ import {
   AccordionItem,
   AccordionButton,
   AccordionPanel,
+  AccordionIcon,
   Spacer,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 
 export const Error = ({ error }: { error: Error }) => {
   return (
@@ -33,7 +33,7 @@ export const Error = ({ error }: { error: Error }) => {
                 Error Expected
               </Text>
               <Spacer />
-              <InfoIcon boxSize="12px" />
+              <AccordionIcon boxSize="14px" />
             </AccordionButton>
             <AccordionPanel borderTop="1px solid" borderColor="blackAlpha.200">
               <VStack align="flex-start">
