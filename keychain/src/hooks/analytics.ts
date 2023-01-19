@@ -44,6 +44,7 @@ const log = async (type: string, payload: object) => {
     },
     body: JSON.stringify({
       type,
+      userAgent: navigator.userAgent,
       ...payload,
     }),
   });

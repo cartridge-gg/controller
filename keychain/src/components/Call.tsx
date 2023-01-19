@@ -1,13 +1,13 @@
 import {
+  Box,
   Flex,
-  Tag,
   Text,
   HStack,
   Link,
   Input,
   Spacer,
-  VStack,
   Tooltip,
+  SystemProps,
 } from "@chakra-ui/react";
 import { FieldInputProps } from "formik";
 import { formatEther } from "ethers/lib/utils";
@@ -22,30 +22,19 @@ import { constants } from "starknet";
 export const Call = ({
   chainId,
   policy,
-  notice,
+  ...rest
 }: {
   chainId: constants.StarknetChainId;
   policy: Policy;
-  notice?: string;
-}) => {
-  const title = (
-    <HStack>
-      <Text variant="ibm-upper-bold">{policy.method}</Text>
-      {notice && (
-        <Tag colorScheme="red" size="sm">
-          {notice}
-        </Tag>
-      )}
+} & SystemProps) => {
+  return (
+    <HStack w="full" bgColor="gray.700" py="7px" px="12px" {...rest}>
+      <CodeIcon boxSize="18px" />
+      <Text fontSize="13px">{policy.method}</Text>
+      <Spacer />
+      <InfoIcon color="gray.200" boxSize="12px" />
     </HStack>
   );
-
-  const description = (
-    <Link href={StarkscanUrl(chainId).contract(policy.target)} target="_blank">
-      {policy.target}
-    </Link>
-  );
-
-  return <Base title={title} description={description} />;
 };
 
 export const CallToggle = ({
@@ -61,9 +50,9 @@ export const CallToggle = ({
   return (
     <HStack w="full" bgColor="gray.600" py="7px" px="12px">
       <CodeIcon boxSize="18px" />
-      <Text fontSize="13px" textTransform="capitalize">
+      <Box fontSize="13px" textTransform="capitalize">
         {policy.method}
-      </Text>
+      </Box>
       <Spacer />
       <Tooltip label={`View on Starkscan`} placement="left" hasArrow>
         <Link
@@ -134,11 +123,9 @@ const Base = ({
   disable?: boolean;
   errMsg?: string;
 }) => (
-  <HStack w="full" bgColor="gray.600" py="7px" px="12px">
+  <HStack w="full" bgColor="gray.700" py="7px" px="12px">
     <CodeIcon boxSize="18px" />
-    <Text fontSize="13px" textTransform="capitalize">
-      {title}
-    </Text>
+    {title}
     <Spacer />
     <InfoIcon color="gray.200" boxSize="12px" />
   </HStack>

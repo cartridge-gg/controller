@@ -27,6 +27,7 @@ export type Scalars = {
   Int: number;
   Float: number;
   BigInt: any;
+  ChainID: any;
   Cursor: any;
   Felt: any;
   JSON: any;
@@ -2010,8 +2011,9 @@ export type MutationCreateStarterpackArgs = {
 };
 
 export type MutationDeployAccountArgs = {
+  chainId: Scalars["ChainID"];
   id: Scalars["ID"];
-  starterpackId: Scalars["ID"];
+  starterpackIds?: InputMaybe<Array<Scalars["ID"]>>;
 };
 
 export type MutationFinalizeLoginArgs = {
@@ -3656,7 +3658,8 @@ export type FinalizeRegistrationMutation = {
 
 export type DeployMainnetAccountMutationVariables = Exact<{
   id: Scalars["ID"];
-  starterpackId: Scalars["ID"];
+  chainId: Scalars["ChainID"];
+  starterpackIds?: InputMaybe<Array<Scalars["ID"]> | Scalars["ID"]>;
 }>;
 
 export type DeployMainnetAccountMutation = {
@@ -3772,6 +3775,26 @@ export type StarterPackQuery = {
           } | null;
         } | null;
       }> | null;
+    } | null;
+  } | null;
+};
+
+export type AccountContractQueryVariables = Exact<{
+  id: Scalars["ID"];
+}>;
+
+export type AccountContractQuery = {
+  __typename?: "Query";
+  contract?: {
+    __typename?: "Contract";
+    id: string;
+    deployTransaction?: {
+      __typename?: "Transaction";
+      id: string;
+      receipt?: {
+        __typename?: "TransactionReceipt";
+        status: TransactionReceiptStatus;
+      } | null;
     } | null;
   } | null;
 };
@@ -4126,8 +4149,8 @@ export const useFinalizeRegistrationMutation = <
     options,
   );
 export const DeployMainnetAccountDocument = `
-    mutation DeployMainnetAccount($id: ID!, $starterpackId: ID!) {
-  deployAccount(id: $id, starterpackId: $starterpackId) {
+    mutation DeployMainnetAccount($id: ID!, $chainId: ChainID!, $starterpackIds: [ID!]) {
+  deployAccount(id: $id, chainId: $chainId, starterpackIds: $starterpackIds) {
     id
     deployTransaction {
       transactionHash
@@ -4366,3 +4389,56 @@ useInfiniteStarterPackQuery.getKey = (variables: StarterPackQueryVariables) => [
   "StarterPack.infinite",
   variables,
 ];
+export const AccountContractDocument = `
+    query AccountContract($id: ID!) {
+  contract(id: $id) {
+    id
+    deployTransaction {
+      id
+      receipt {
+        status
+      }
+    }
+  }
+}
+    `;
+export const useAccountContractQuery = <
+  TData = AccountContractQuery,
+  TError = unknown,
+>(
+  variables: AccountContractQueryVariables,
+  options?: UseQueryOptions<AccountContractQuery, TError, TData>,
+) =>
+  useQuery<AccountContractQuery, TError, TData>(
+    ["AccountContract", variables],
+    useFetchData<AccountContractQuery, AccountContractQueryVariables>(
+      AccountContractDocument,
+    ).bind(null, variables),
+    options,
+  );
+
+useAccountContractQuery.getKey = (variables: AccountContractQueryVariables) => [
+  "AccountContract",
+  variables,
+];
+export const useInfiniteAccountContractQuery = <
+  TData = AccountContractQuery,
+  TError = unknown,
+>(
+  variables: AccountContractQueryVariables,
+  options?: UseInfiniteQueryOptions<AccountContractQuery, TError, TData>,
+) => {
+  const query = useFetchData<
+    AccountContractQuery,
+    AccountContractQueryVariables
+  >(AccountContractDocument);
+  return useInfiniteQuery<AccountContractQuery, TError, TData>(
+    ["AccountContract.infinite", variables],
+    (metaData) => query({ ...variables, ...(metaData.pageParam ?? {}) }),
+    options,
+  );
+};
+
+useInfiniteAccountContractQuery.getKey = (
+  variables: AccountContractQueryVariables,
+) => ["AccountContract.infinite", variables];

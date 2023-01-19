@@ -1,6 +1,10 @@
 import { CLASS_HASHES } from "@cartridge/controller/src/constants";
 import { ec } from "starknet";
 import {
+  AccountContractDocument,
+  useAccountContractQuery,
+} from "generated/graphql";
+import {
   constants,
   hash,
   number,
@@ -14,16 +18,29 @@ import {
   GetTransactionReceiptResponse,
   Signature,
 } from "starknet";
+import { client } from "utils/graphql";
 
 import selectors from "./selectors";
 import Storage from "./storage";
+import { NamedChainId } from "@cartridge/controller/src/constants";
+
+export enum Status {
+  UNKNOWN = "UNKNOWN",
+  COUNTERFACTUAL = "COUNTERFACTUAL",
+  DEPLOYING = "DEPLOYING",
+  DEPLOYED = "DEPLOYED",
+  REGISTERING = "REGISTERING",
+  REGISTERED = "REGISTERED",
+}
 
 class Account extends BaseAccount {
   private rpc: RpcProvider;
   private selector: string;
+  _chainId: constants.StarknetChainId;
   deployed: boolean = false;
   registered: boolean = false;
   updated: boolean = true;
+  status: Status = Status.UNKNOWN;
 
   constructor(
     chainId: constants.StarknetChainId,
@@ -34,6 +51,7 @@ class Account extends BaseAccount {
     super({ rpc: { nodeUrl } }, address, signer);
     this.rpc = new RpcProvider({ nodeUrl });
     this.selector = selectors["0.0.3"].deployment(address, chainId);
+    this._chainId = chainId;
     const state = Storage.get(this.selector);
 
     if (state) {
@@ -47,6 +65,20 @@ class Account extends BaseAccount {
     }
   }
 
+  async getContract() {
+    try {
+      return await client.request(AccountContractDocument, {
+        id: `starknet:${NamedChainId[this._chainId]}:${this.address}`,
+      });
+    } catch (e) {
+      if (e.message.includes("not found")) {
+        return null;
+      }
+
+      throw e;
+    }
+  }
+
   async sync() {
     Storage.update(this.selector, {
       syncing: Date.now(),
@@ -54,12 +86,27 @@ class Account extends BaseAccount {
 
     try {
       if (!this.deployed || !this.registered) {
-        const txn = Storage.get(this.selector).txnHash;
+        const txn = Storage.get(this.selector).registerTxnHash;
         if (txn) {
-          await this.rpc.waitForTransaction(txn, 8000, [
-            "ACCEPTED_ON_L1",
-            "ACCEPTED_ON_L2",
-          ]);
+          this.status = Status.REGISTERING;
+          this.rpc
+            .waitForTransaction(txn, 1000, ["ACCEPTED_ON_L1", "ACCEPTED_ON_L2"])
+            .then(() => this.sync());
+          return;
+        }
+
+        const contract = await this.getContract();
+        if (!contract) {
+          this.status = Status.COUNTERFACTUAL;
+          return;
+        }
+
+        if (
+          contract.status !== "ACCEPTED_ON_L1" ||
+          contract.status !== "ACCEPTED_ON_L2"
+        ) {
+          this.status = Status.DEPLOYING;
+          return;
         }
       }
 
@@ -67,8 +114,10 @@ class Account extends BaseAccount {
       Storage.update(this.selector, {
         classHash,
         deployed: true,
+        status: Status.DEPLOYED,
       });
       this.deployed = true;
+      this.status = Status.DEPLOYED;
 
       if (classHash !== CLASS_HASHES["latest"].account) {
         this.updated = false;

@@ -19,8 +19,12 @@ mutation FinalizeRegistration($credentials: String!, $signer: String!) {
   }
 }
 
-mutation DeployMainnetAccount($id: ID!, $starterpackId: ID!) {
-  deployAccount(id: $id, starterpackId: $starterpackId) {
+mutation DeployMainnetAccount(
+  $id: ID!
+  $chainId: ChainID!
+  $starterpackIds: [ID!]
+) {
+  deployAccount(id: $id, chainId: $chainId, starterpackIds: $starterpackIds) {
     id
     deployTransaction {
       transactionHash

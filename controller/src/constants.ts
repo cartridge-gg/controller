@@ -1,3 +1,5 @@
+import { constants } from "starknet";
+
 export const GATEWAY_MAINNET = process.env.NEXT_PUBLIC_GATEWAY_MAINNET;
 export const GATEWAY_GOERLI = process.env.NEXT_PUBLIC_GATEWAY_GOERLI;
 export const GATEWAY_GOERLI2 = process.env.NEXT_PUBLIC_GATEWAY_GOERLI2;
@@ -44,4 +46,10 @@ export const CLASS_HASHES = {
     legacyController:
       "0x58e648a242085d5ff1e8f92a6b91057826639a82b23798998d40b61a27bca85",
   },
+};
+
+export const NamedChainId = {
+  [constants.StarknetChainId.MAINNET]: "SN_MAIN",
+  [constants.StarknetChainId.TESTNET]: "SN_GOERLI",
+  [constants.StarknetChainId.TESTNET2]: "SN_GOERLI2",
 };

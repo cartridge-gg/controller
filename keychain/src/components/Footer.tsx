@@ -33,7 +33,6 @@ const Footer = ({
     flexDirection="column"
     gap="12px"
   >
-    <Spacer borderBottom="1px solid" borderColor="gray.700" />
     {children}
     <Flex gap="10px" justify="flex-end">
       {showCancel && (

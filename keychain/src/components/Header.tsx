@@ -4,16 +4,14 @@ import {
   Box,
   Link,
   Flex,
-  Button,
   Spacer,
   HStack,
   Container as ChakraContainer,
-  useBreakpointValue,
   StyleProps,
 } from "@chakra-ui/react";
 
 import { Logo } from "@cartridge/ui/src/components/brand/Logo";
-
+import { WordLogo } from "@cartridge/ui/src/components/brand/Word";
 import ChainDropdown from "@cartridge/ui/src/components/menu/Chain";
 
 const Container = ({
@@ -51,6 +49,17 @@ export const Header = ({
   address?: string;
   onLogout?: () => void;
 }) => {
+  if (!address) {
+    return (
+      <Container height="50px">
+        <HStack spacing="0">
+          <Logo fill="brand" w="24px" mr="15px" />
+          <WordLogo fill="brand" h="18px" />
+        </HStack>
+      </Container>
+    );
+  }
+
   return (
     <Container height="50px">
       <HStack w="full">
