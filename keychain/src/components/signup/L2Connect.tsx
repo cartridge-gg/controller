@@ -32,15 +32,12 @@ import { Logo } from "@cartridge/ui/src/components/icons/brand/Logo";
 import { useRouter } from "next/router";
 import { formatAddress } from "utils/contracts";
 import { useAbi } from "hooks/abi";
-import {
-  CONTRACT_CONTROLLER_CLASS,
-  CONTRACT_UPGRADE_IMPLEMENTATION,
-} from "utils/constants";
 import { Credentials, onCreateFinalize } from "hooks/account";
 import { parseAttestationObject } from "utils/webauthn";
 import { split } from "@cartridge/controller";
 import provision from "methods/provision";
 import { register } from "methods/register";
+import { CONTRACT_CONTROLLER_CLASS, CONTRACT_UPGRADE_IMPLEMENTATION } from "@cartridge/controller/src/constants";
 
 export type L2ConnectProps = {
   username: string;

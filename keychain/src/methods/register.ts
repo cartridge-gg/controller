@@ -4,7 +4,7 @@ import { ec, hash, number, shortString, constants } from "starknet";
 import Controller from "utils/controller";
 import Storage from "utils/storage";
 import selectors from "utils/selectors";
-import { CLASS_HASHES, PROXY_CLASS } from "utils/hashes";
+import { CLASS_HASHES, PROXY_CLASS } from "@cartridge/controller/src/constants";
 
 const register =
   () =>

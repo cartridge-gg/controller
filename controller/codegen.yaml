@@ -8,11 +8,7 @@ generates:
       - "typescript-operations"
       - "typescript-react-query"
     config:
-      addInfiniteQuery: true
       exposeQueryKeys: true
-      fetcher:
-        func: hooks/fetcher#useFetchData
-        isReactHook: true
   src/generated/introspection.ts:
     plugins:
       - fragment-matcher

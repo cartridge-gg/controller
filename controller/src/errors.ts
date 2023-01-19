@@ -1,14 +1,14 @@
 import { Policy } from "./types";
 
 export class MissingPolicys extends Error {
-    missing: Policy[];
+  missing: Policy[];
 
-    constructor(missing: Policy[]) {
-        super("missing policies");
+  constructor(missing: Policy[]) {
+    super("missing policies");
 
-        this.missing = missing;
+    this.missing = missing;
 
-        // because we are extending a built-in class
-        Object.setPrototypeOf(this, MissingPolicys.prototype);
-    }
+    // because we are extending a built-in class
+    Object.setPrototypeOf(this, MissingPolicys.prototype);
+  }
 }

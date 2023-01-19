@@ -1,10 +1,29 @@
-import { useQuery, useInfiniteQuery, UseQueryOptions, UseInfiniteQueryOptions, QueryFunctionContext } from 'react-query';
-import { useFetchData } from 'hooks/fetcher';
+import { useQuery, UseQueryOptions } from 'react-query';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+
+function fetcher<TData, TVariables>(endpoint: string, requestInit: RequestInit, query: string, variables?: TVariables) {
+  return async (): Promise<TData> => {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      ...requestInit,
+      body: JSON.stringify({ query, variables }),
+    });
+
+    const json = await res.json();
+
+    if (json.errors) {
+      const { message } = json.errors[0];
+
+      throw new Error(message);
+    }
+
+    return json.data;
+  }
+}
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -3789,32 +3808,15 @@ export const useAccountQuery = <
       TData = AccountQuery,
       TError = unknown
     >(
+      dataSource: { endpoint: string, fetchParams?: RequestInit },
       variables: AccountQueryVariables,
       options?: UseQueryOptions<AccountQuery, TError, TData>
     ) =>
     useQuery<AccountQuery, TError, TData>(
       ['Account', variables],
-      useFetchData<AccountQuery, AccountQueryVariables>(AccountDocument).bind(null, variables),
+      fetcher<AccountQuery, AccountQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, AccountDocument, variables),
       options
     );
 
 useAccountQuery.getKey = (variables: AccountQueryVariables) => ['Account', variables];
-;
-
-export const useInfiniteAccountQuery = <
-      TData = AccountQuery,
-      TError = unknown
-    >(
-      variables: AccountQueryVariables,
-      options?: UseInfiniteQueryOptions<AccountQuery, TError, TData>
-    ) =>{
-    const query = useFetchData<AccountQuery, AccountQueryVariables>(AccountDocument)
-    return useInfiniteQuery<AccountQuery, TError, TData>(
-      ['Account.infinite', variables],
-      (metaData) => query({...variables, ...(metaData.pageParam ?? {})}),
-      options
-    )};
-
-
-useInfiniteAccountQuery.getKey = (variables: AccountQueryVariables) => ['Account.infinite', variables];
 ;

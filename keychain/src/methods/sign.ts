@@ -1,8 +1,8 @@
 import Controller from "utils/controller";
 import { constants, number, typedData, Signature } from "starknet";
 
-import { Session } from "@cartridge/controller";
-import { CLASS_HASHES } from "utils/hashes";
+import { Session } from "@cartridge/controller/";
+import { CLASS_HASHES } from "@cartridge/controller/src/constants";
 
 const signMessage =
   (controller: Controller, session: Session) =>

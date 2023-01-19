@@ -1,3 +1,4 @@
+import { CLASS_HASHES } from "@cartridge/controller/src/constants";
 import { ec } from "starknet";
 import {
   constants,
@@ -13,7 +14,6 @@ import {
   GetTransactionReceiptResponse,
   Signature,
 } from "starknet";
-import { CLASS_HASHES } from "./hashes";
 
 import selectors from "./selectors";
 import Storage from "./storage";
@@ -114,8 +114,8 @@ class Account extends BaseAccount {
   }
 
   async verifyMessageHash(hash: string | number | import("bn.js"), signature: Signature): Promise<boolean> {
-    if (!this.deployed && !this.registered) {
-      const keyPair = ec.getKeyPairFromPublicKey(await this.signer.getPubKey());
+    if (number.toBN(signature[0]).cmp(number.toBN(0)) === 0) {
+      const keyPair = ec.getKeyPairFromPublicKey(signature[0]);
       return ec.verify(keyPair, number.toBN(hash).toString(), signature);
     }
 
