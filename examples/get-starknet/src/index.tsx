@@ -5,7 +5,7 @@ import { injectController } from '@cartridge/controller';
 import { AccountInterface } from "starknet";
 
 injectController(undefined, {
-  url: "https://cartridge-starknet-react-next-git-removenextrouting.preview.cartridge.gg/"
+  url: "https://keychain-git-removenextrouting.preview.cartridge.gg/"
 });
 
 const Main = () => {
@@ -32,7 +32,9 @@ const Main = () => {
 
   return (
     <div>
-      {!account && <button onClick={() => sn.enable({ showModal: true })}>connect</button>}
+      {!account && <button onClick={() => {
+        sn.enable({ showModal: true })
+      }}>connect</button>}
       {account && <button onClick={onIncrement}>increment counter</button>}
     </div>
   )

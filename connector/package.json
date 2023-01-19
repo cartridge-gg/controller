@@ -27,6 +27,6 @@
   "dependencies": {
     "@cartridge/controller": "0.3.0",
     "@starknet-react/core": "^0.14.8",
-    "starknet": "^4.15.1"
+    "starknet": "^4.17.1"
   }
 }

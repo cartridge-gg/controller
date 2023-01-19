@@ -7,7 +7,7 @@
       "esnext"
     ],
     "composite": true,
-    "target": "ES6",
+    "target": "es5",
     "module": "commonjs",
     "sourceMap": true,
     "outDir": "lib",
@@ -17,10 +17,12 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "declaration": true
+    "declaration": true,
+    "isolatedModules": true,
+    "downlevelIteration": true
   },
   "include": [
-    "src/**/*"
+    "**/*"
   ],
   "exclude": [
     "node_modules"
