@@ -38,6 +38,7 @@ import { client } from "utils/graphql";
 import Controller from "utils/controller";
 import { useInterval } from "usehooks-ts";
 import { setActive } from "methods/register";
+import Content from "../Content";
 
 export const Signup = ({
   showLogin,
@@ -126,13 +127,7 @@ export const Signup = ({
   }
 
   return (
-    <VStack
-      as={motion.div}
-      animate={{ opacity: 1 }}
-      initial={{ opacity: 0 }}
-      gap="18px"
-      padding="12px"
-    >
+    <Content gap="18px">
       <HStack spacing="14px" pt="36px">
         <Circle size="48px" bgColor="gray.700">
           <JoystickIcon boxSize="30px" />
@@ -164,6 +159,7 @@ export const Signup = ({
               margin-top: 0px !important;
               gap: 24px;
             `}
+            spellCheck={false}
           >
             <Field name="name">
               {({
@@ -266,7 +262,7 @@ export const Signup = ({
           </Form>
         )}
       </Formik>
-    </VStack>
+    </Content>
   );
 };
 

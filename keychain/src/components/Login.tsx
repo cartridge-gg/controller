@@ -33,6 +33,7 @@ import { constants } from "starknet";
 import { motion } from "framer-motion";
 import LockIcon from "@cartridge/ui/components/icons/Lock";
 import Controller from "utils/controller";
+import Content from "./Content";
 
 export const Login = ({
   chainId,
@@ -104,13 +105,7 @@ export const Login = ({
   }, [chainId, name, data, onLogin, log]);
 
   return (
-    <VStack
-      as={motion.div}
-      animate={{ opacity: 1 }}
-      initial={{ opacity: 0 }}
-      p="12px"
-      gap="18px"
-    >
+    <Content gap="18px">
       <HStack spacing="14px" pt="36px">
         <Circle size="48px" bgColor="gray.700">
           <Fingerprint boxSize="30px" />
@@ -138,6 +133,7 @@ export const Login = ({
               margin-top: 0px !important;
               gap: 24px;
             `}
+            spellCheck={false}
           >
             <Field name="name">
               {({
@@ -220,6 +216,6 @@ export const Login = ({
           </Form>
         )}
       </Formik>
-    </VStack>
+    </Content>
   );
 };

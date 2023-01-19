@@ -27,7 +27,7 @@ const Footer = ({
     bottom="0"
     right="0"
     w="100%"
-    p="16px"
+    p="18px 36px 36px 36px"
     bgColor="gray.900"
     justify="flex-end"
     flexDirection="column"
@@ -38,7 +38,7 @@ const Footer = ({
       {showCancel && (
         <Button
           variant="secondary600"
-          size="lg"
+          size="md"
           w={["100%", "100%", "200px"]}
           onClick={onCancel}
         >
@@ -47,7 +47,7 @@ const Footer = ({
       )}
       {showConfirm && (
         <Button
-          size="lg"
+          size="md"
           disabled={isDisabled || isLoading}
           isLoading={isLoading}
           w={["100%", "100%", "200px"]}

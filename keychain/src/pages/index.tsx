@@ -17,7 +17,7 @@ import {
 import Connect from "components/Connect";
 import { Login } from "components/Login";
 import { Signup } from "components/signup";
-import { Box, Container as ChakraContainer } from "@chakra-ui/react";
+import { VStack, Container as ChakraContainer } from "@chakra-ui/react";
 import { Header } from "components/Header";
 import {
   Abi,
@@ -35,7 +35,7 @@ import Execute from "components/Execute";
 import selectors from "utils/selectors";
 import Storage from "utils/storage";
 import { useInterval } from "usehooks-ts";
-
+import { motion } from "framer-motion";
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
 import provision from "../methods/provision";
 import { computeAddress, register } from "../methods/register";
@@ -47,16 +47,9 @@ import { normalize, validate } from "../methods";
 import web3auth from "utils/web3auth";
 
 const Container = ({ children }: { children: ReactNode }) => (
-  <ChakraContainer
-    position="fixed"
-    left={0}
-    right={0}
-    top={0}
-    bottom={0}
-    centerContent
-  >
+  <ChakraContainer p="36px" position="fixed">
     <Header />
-    <Box>{children}</Box>
+    {children}
   </ChakraContainer>
 );
 

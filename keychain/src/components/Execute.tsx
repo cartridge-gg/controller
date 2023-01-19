@@ -30,6 +30,7 @@ import {
   ResponseCodes,
 } from "@cartridge/controller";
 import { motion } from "framer-motion";
+import Content from "./Content";
 
 const Execute = ({
   origin,
@@ -42,7 +43,7 @@ const Execute = ({
   onCancel,
 }: {
   origin: string;
-  chainId: constants.StarknetChainId,
+  chainId: constants.StarknetChainId;
   controller: Controller;
   transactions: StarknetCall | StarknetCall[];
   transactionsDetail?: InvocationsDetails;
@@ -197,66 +198,58 @@ const Execute = ({
   }, [account, nonce, calls, fees, onExecute]);
 
   return (
-    <VStack
-      as={motion.div}
-      animate={{ opacity: 1 }}
-      initial={{ opacity: 0 }}
-      w="400px"
-      p="12px"
-    >
+    <Content>
       <Banner
         title="Submit Transaction"
         icon={<TransactionIcon boxSize="30px" />}
         chainId={chainId}
         pb="20px"
       />
-      <VStack height="180px" overflowY="auto" w="full">
-        <VStack spacing="1px" w="full">
-          <VStack
-            w="full"
-            p="12px"
-            align="flex-start"
-            bgColor="gray.700"
-            borderRadius="6px 6px 0 0"
-          >
-            <Text variant="ibm-upper-bold" fontSize="10px" color="gray.200">
-              Actions
-            </Text>
-            <Text fontSize="11px" color="gray.200">
-              Execute the following actions
-            </Text>
-          </VStack>
-          <VStack w="full">
-            {calls.map((call, i) => (
-              <Call
-                key={i}
-                chainId={chainId}
-                policy={{
-                  target: call.contractAddress,
-                  method: call.entrypoint,
-                }}
-                _last={{ borderRadius: "0 0 6px 6px" }}
-              />
-            ))}
-          </VStack>
-        </VStack>
-        <Footer
-          isLoading={isLoading}
-          isDisabled={!fees}
-          confirmText="Submit"
-          onConfirm={onSubmit}
-          onCancel={() => {
-            onCancel({
-              code: ResponseCodes.CANCELED,
-              message: "Canceled",
-            });
-          }}
+      <VStack spacing="1px" w="full">
+        <VStack
+          w="full"
+          p="12px"
+          align="flex-start"
+          bgColor="gray.700"
+          borderRadius="6px 6px 0 0"
         >
-          {!error && <Fees chainId={chainId} fees={fees} />}
-          <Error error={error} />
-        </Footer>
+          <Text variant="ibm-upper-bold" fontSize="10px" color="gray.200">
+            Actions
+          </Text>
+          <Text fontSize="11px" color="gray.200">
+            Execute the following actions
+          </Text>
+        </VStack>
+        <VStack w="full">
+          {calls.map((call, i) => (
+            <Call
+              key={i}
+              chainId={chainId}
+              policy={{
+                target: call.contractAddress,
+                method: call.entrypoint,
+              }}
+              _last={{ borderRadius: "0 0 6px 6px" }}
+            />
+          ))}
+        </VStack>
       </VStack>
-    </VStack>
+      <Footer
+        isLoading={isLoading}
+        isDisabled={!fees}
+        confirmText="Submit"
+        onConfirm={onSubmit}
+        onCancel={() => {
+          onCancel({
+            code: ResponseCodes.CANCELED,
+            message: "Canceled",
+          });
+        }}
+      >
+        {!error && <Fees chainId={chainId} fees={fees} />}
+        <Error error={error} />
+      </Footer>
+    </Content>
   );
 };
 
