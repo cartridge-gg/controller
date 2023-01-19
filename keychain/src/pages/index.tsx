@@ -369,9 +369,8 @@ const Index: NextPage = () => {
 
   if (context.type === "execute") {
     const ctx = context as Execute;
-    const account = controller.account(
-      ctx.transactionsDetail?.chainId ?? chainId,
-    );
+    const _chainId = ctx.transactionsDetail?.chainId ?? chainId;
+    const account = controller.account(_chainId);
 
     if (account.status === Status.COUNTERFACTUAL) {
       return <div>Deploy</div>;
@@ -381,6 +380,7 @@ const Index: NextPage = () => {
       <Container>
         <Execute
           {...ctx}
+          chainId={_chainId}
           controller={controller}
           onExecute={(res: ExecuteReply) => ctx.resolve(res)}
           onCancel={(error: Error) => ctx.resolve(error)}

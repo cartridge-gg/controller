@@ -33,6 +33,7 @@ import { motion } from "framer-motion";
 
 const Execute = ({
   origin,
+  chainId,
   controller,
   transactions,
   transactionsDetail,
@@ -41,11 +42,10 @@ const Execute = ({
   onCancel,
 }: {
   origin: string;
+  chainId: constants.StarknetChainId,
   controller: Controller;
   transactions: StarknetCall | StarknetCall[];
-  transactionsDetail?: InvocationsDetails & {
-    chainId?: constants.StarknetChainId;
-  };
+  transactionsDetail?: InvocationsDetails;
   abis?: Abi[];
   onExecute: (res: ExecuteReply) => void;
   onCancel: (error: ErrorReply) => void;
@@ -58,9 +58,6 @@ const Execute = ({
   const [error, setError] = useState<Error>();
   const [isLoading, setLoading] = useState<boolean>(false);
 
-  const chainId = transactionsDetail?.chainId
-    ? transactionsDetail.chainId
-    : constants.StarknetChainId.MAINNET;
   const account = controller.account(chainId);
   const { calls, calldata } = useMemo(() => {
     const calls = Array.isArray(transactions) ? transactions : [transactions];
