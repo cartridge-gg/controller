@@ -72,6 +72,10 @@ export const Signup = ({
   }, [refetch, debouncedName]);
 
   useEffect(() => {
+    if (isFetching) {
+      return;
+    }
+
     if (error) {
       if ((error as Error).message === "ent: account not found") {
         setNameError("");
@@ -83,7 +87,7 @@ export const Signup = ({
         setNameError("An error occured.");
         setCanContinue(false);
       }
-    } else if (!isFetching && debouncedName.length > 0) {
+    } else if (debouncedName.length > 0) {
       setNameError("This account already exists.");
       setCanContinue(false);
     }
@@ -102,7 +106,7 @@ export const Signup = ({
         } = result.data;
 
         const controller = new Controller(keypair, address, credentialId);
-        deployAccount({ id: debouncedName, chainId: "starknet:SN_GOERLI" })
+        deployAccount({ id: debouncedName, chainId: "starknet:SN_GOERLI" });
         onSignup(controller);
       }
     },
@@ -206,8 +210,8 @@ export const Signup = ({
                         canContinue
                           ? "green.400"
                           : nameError
-                            ? "red.400"
-                            : "gray.600"
+                          ? "red.400"
+                          : "gray.600"
                       }
                       errorBorderColor="crimson"
                       placeholder="Username"
