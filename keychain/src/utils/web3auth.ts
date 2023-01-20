@@ -25,5 +25,5 @@ const openloginAdapter = new OpenloginAdapter({
     },
 });
 web3auth.configureAdapter(openloginAdapter);
-
+web3auth.init();
 export default web3auth;
