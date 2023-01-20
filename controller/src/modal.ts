@@ -1,36 +1,8 @@
-import { css } from "@emotion/css";
-
-const iframeCss = css`
-  min-height: 600px;
-  min-width: 400px;
-  border: none;
-  border-radius: 8px;
-  @media only screen and (max-width: 600px) {
-    width: 100%;
-    height: 100%;
-    border-radius: 0;
-  }
-`;
-
-const containerCss = css`
-  height: 100%;
-  width: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  zindex: 10000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: none;
-`;
-
 export const createModal = (src: string, onClose?: () => void) => {
   const iframe = document.createElement("iframe");
   iframe.src = src;
   iframe.id = "cartridge-modal";
-  iframe.className = iframeCss;
+  iframe.style.border = "none";
   iframe.sandbox.add("allow-forms");
   iframe.sandbox.add("allow-popups");
   iframe.sandbox.add("allow-scripts");
@@ -41,7 +13,17 @@ export const createModal = (src: string, onClose?: () => void) => {
   }
 
   const container = document.createElement("div");
-  container.className = containerCss;
+  container.style.position = "fixed";
+  container.style.height = "100%";
+  container.style.width = "100%";
+  container.style.top = "0";
+  container.style.left = "0";
+  container.style.zIndex = "10000";
+  container.style.backgroundColor = "rgba(0,0,0,0.5)";
+  container.style.display = "flex";
+  container.style.alignItems = "center";
+  container.style.justifyContent = "center";
+  container.style.display = "none";
   container.appendChild(iframe);
 
   const open = () => {
@@ -58,9 +40,25 @@ export const createModal = (src: string, onClose?: () => void) => {
 
   container.onclick = () => close();
 
+  resize(iframe);
+  window.addEventListener("resize", () => resize(iframe));
+
   return {
     element: container,
     open,
     close,
   };
+};
+
+const resize = (el: HTMLElement) => {
+  if (window.innerWidth < 600) {
+    el.style.height = "100%";
+    el.style.width = "100%";
+    el.style.borderRadius = "0";
+    return;
+  }
+
+  el.style.height = "600px";
+  el.style.width = "400px";
+  el.style.borderRadius = "8px";
 };

@@ -23,7 +23,6 @@
   },
   "dependencies": {
     "@cartridge/penpal": "^6.2.3",
-    "@emotion/css": "^11.10.5",
     "base64url": "^3.0.1",
     "bn.js": "^5.2.1",
     "cbor-x": "^1.5.0",
