@@ -1,0 +1,51 @@
+query Transactions($contractId: ID!) {
+  transactions(where: { contractID: $contractId }) {
+    edges {
+      node {
+        block {
+          blockNumber
+          timestamp
+        }
+        transactionHash
+        entryPointSelector
+        calldata
+        contract {
+          id
+          name
+          game {
+            id
+            priority
+            icon {
+              uri
+            }
+          }
+        }
+        metadata {
+          __typename
+          ... on ContractDeploy {
+            type
+          }
+          ... on FungibleTransfer {
+            from
+            to
+            amount
+          }
+          ... on NonFungibleTransfer {
+            from
+            to
+            tokenId
+            amount
+          }
+          ... on AccountUpgrade {
+            implementation
+          }
+          ... on Mint {
+            to
+            tokenId
+            amount
+          }
+        }
+      }
+    }
+  }
+}

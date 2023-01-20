@@ -3857,6 +3857,13 @@ export type StarterPackQueryVariables = Exact<{
 
 export type StarterPackQuery = { __typename?: 'Query', game?: { __typename?: 'Game', id: string, name: string, description: string, socials: { __typename?: 'Socials', discord?: string | null, twitter?: string | null, website?: string | null }, icon?: { __typename?: 'File', uri: string } | null, profilePicture?: { __typename?: 'File', uri: string, alt?: string | null } | null, banner?: { __typename?: 'File', uri: string, alt?: string | null } | null, starterPack?: { __typename?: 'StarterPack', id: string, name?: string | null, description?: string | null, issuance?: number | null, maxIssuance?: number | null, starterPackFungibles?: Array<{ __typename?: 'StarterPackContract', amount?: any | null, contract: { __typename?: 'Contract', id: string, name?: string | null, description?: string | null, priority: number } }> | null, starterPackTokens?: Array<{ __typename?: 'StarterPackToken', amount?: any | null, token: { __typename?: 'Token', tokenID: any, contract: { __typename?: 'Contract', priority: number }, metadata?: { __typename?: 'Metadata', name?: string | null, description?: string | null } | null, thumbnail?: { __typename?: 'File', uri: string } | null } }> | null, prerequisitesQuests?: Array<{ __typename?: 'Quest', id: string, title: string, parent?: { __typename?: 'Quest', id: string } | null, metadata?: { __typename?: 'QuestMetadata', callToAction?: { __typename?: 'QuestCallToAction', text?: string | null, url?: string | null } | null } | null }> | null } | null } | null };
 
+export type TransactionsQueryVariables = Exact<{
+  contractId: Scalars['ID'];
+}>;
+
+
+export type TransactionsQuery = { __typename?: 'Query', transactions?: { __typename?: 'TransactionConnection', edges?: Array<{ __typename?: 'TransactionEdge', node?: { __typename?: 'Transaction', transactionHash: string, entryPointSelector?: string | null, calldata?: Array<string> | null, block?: { __typename?: 'Block', blockNumber: any, timestamp: any } | null, contract: { __typename?: 'Contract', id: string, name?: string | null, game?: { __typename?: 'Game', id: string, priority: number, icon?: { __typename?: 'File', uri: string } | null } | null }, metadata?: { __typename: 'AccountUpgrade', implementation: string } | { __typename: 'ContractDeploy', type: ContractType } | { __typename: 'FungibleTransfer', from: string, to: string, amount: any } | { __typename: 'Mint', to: string, tokenId: any, amount: any } | { __typename: 'NonFungibleTransfer', from: string, to: string, tokenId: any, amount: any } | null } | null } | null> | null } | null };
+
 export type AccountContractQueryVariables = Exact<{
   id: Scalars['ID'];
 }>;
@@ -4327,6 +4334,93 @@ export const useInfiniteStarterPackQuery = <
 
 
 useInfiniteStarterPackQuery.getKey = (variables: StarterPackQueryVariables) => ['StarterPack.infinite', variables];
+;
+
+export const TransactionsDocument = `
+    query Transactions($contractId: ID!) {
+  transactions(where: {contractID: $contractId}) {
+    edges {
+      node {
+        block {
+          blockNumber
+          timestamp
+        }
+        transactionHash
+        entryPointSelector
+        calldata
+        contract {
+          id
+          name
+          game {
+            id
+            priority
+            icon {
+              uri
+            }
+          }
+        }
+        metadata {
+          __typename
+          ... on ContractDeploy {
+            type
+          }
+          ... on FungibleTransfer {
+            from
+            to
+            amount
+          }
+          ... on NonFungibleTransfer {
+            from
+            to
+            tokenId
+            amount
+          }
+          ... on AccountUpgrade {
+            implementation
+          }
+          ... on Mint {
+            to
+            tokenId
+            amount
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export const useTransactionsQuery = <
+      TData = TransactionsQuery,
+      TError = unknown
+    >(
+      variables: TransactionsQueryVariables,
+      options?: UseQueryOptions<TransactionsQuery, TError, TData>
+    ) =>
+    useQuery<TransactionsQuery, TError, TData>(
+      ['Transactions', variables],
+      useFetchData<TransactionsQuery, TransactionsQueryVariables>(TransactionsDocument).bind(null, variables),
+      options
+    );
+
+useTransactionsQuery.getKey = (variables: TransactionsQueryVariables) => ['Transactions', variables];
+;
+
+export const useInfiniteTransactionsQuery = <
+      TData = TransactionsQuery,
+      TError = unknown
+    >(
+      variables: TransactionsQueryVariables,
+      options?: UseInfiniteQueryOptions<TransactionsQuery, TError, TData>
+    ) =>{
+    const query = useFetchData<TransactionsQuery, TransactionsQueryVariables>(TransactionsDocument)
+    return useInfiniteQuery<TransactionsQuery, TError, TData>(
+      ['Transactions.infinite', variables],
+      (metaData) => query({...variables, ...(metaData.pageParam ?? {})}),
+      options
+    )};
+
+
+useInfiniteTransactionsQuery.getKey = (variables: TransactionsQueryVariables) => ['Transactions.infinite', variables];
 ;
 
 export const AccountContractDocument = `
