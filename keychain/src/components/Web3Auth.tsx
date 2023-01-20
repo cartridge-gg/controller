@@ -1,54 +1,12 @@
-import { useEffect, useState } from "react";
-import { Button, Divider, HStack, Text } from "@chakra-ui/react";
-import { Web3AuthCore } from "@web3auth/core";
-import { CHAIN_NAMESPACES, WALLET_ADAPTERS } from "@web3auth/base";
-import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
+import { Button, HStack } from "@chakra-ui/react";
+import { WALLET_ADAPTERS } from "@web3auth/base";
 import Discord from "./icons/Discord";
-import MetaMask from "./icons/Metamask";
-import { ec, number, KeyPair } from "starknet";
+import { ec, number } from "starknet";
 import { computeAddress } from "methods/register";
 import Controller from "utils/controller";
-
-const clientId =
-  "BKpRo2vJuxbHH3giMVQfdts2l1P3D51AB5hIZ_-HNfkfisVV94Q4aQcZbjXjduwZW8j6n1TlBaEl6Q1nOQXRCG0";
+import web3auth from "utils/web3auth";
 
 const Web3Auth = ({ username, onAuth }: { username: string, onAuth: (controller: Controller) => void }) => {
-  const [web3auth, setWeb3auth] = useState<Web3AuthCore | null>(null);
-
-  useEffect(() => {
-    const init = async () => {
-      try {
-        const web3auth = new Web3AuthCore({
-          clientId,
-          chainConfig: {
-            chainNamespace: CHAIN_NAMESPACES.OTHER,
-          },
-          web3AuthNetwork: "cyan",
-        });
-
-        const openloginAdapter = new OpenloginAdapter({
-          adapterSettings: {
-            loginConfig: {
-              discord: {
-                verifier: "cartridge-discord",
-                typeOfLogin: "discord",
-                clientId: "993873951828754434",
-              },
-            },
-          },
-        });
-        web3auth.configureAdapter(openloginAdapter);
-        setWeb3auth(web3auth);
-
-        await web3auth.init();
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    init();
-  }, []);
-
   const login = async (loginProvider: "discord" | "twitter" | "metamask") => {
     if (!web3auth) {
       console.error("web3auth not initialized yet");

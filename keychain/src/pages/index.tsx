@@ -23,9 +23,7 @@ import {
   Abi,
   Call,
   constants,
-  ec,
   InvocationsDetails,
-  InvokeFunctionResponse,
   number,
   Signature,
   typedData,
@@ -34,17 +32,14 @@ import SignMessage from "components/SignMessage";
 import Execute from "components/Execute";
 import selectors from "utils/selectors";
 import Storage from "utils/storage";
-import { useInterval } from "usehooks-ts";
-import { motion } from "framer-motion";
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
 import provision from "../methods/provision";
-import { computeAddress, register } from "../methods/register";
+import { register } from "../methods/register";
 import login from "../methods/login";
 import logout from "../methods/logout";
 import { revoke, session, sessions } from "../methods/sessions";
 import { Status } from "utils/account";
 import { normalize, validate } from "../methods";
-import web3auth from "utils/web3auth";
 
 const Container = ({ children }: { children: ReactNode }) => (
   <ChakraContainer p="36px" position="fixed">
