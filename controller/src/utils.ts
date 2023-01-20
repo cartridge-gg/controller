@@ -1,15 +1,9 @@
 import equal from "fast-deep-equal";
 import { Policy } from "./types";
-import { GraphQLClient } from "graphql-request";
 import { ec, number, hash, shortString, Signature, Provider, addAddressPadding } from "starknet";
 import BN from "bn.js";
 import { PROXY_CLASS, CLASS_HASHES } from "./constants";
-import { AccountDocument } from "./generated/graphql";
 import { decode } from "cbor-x";
-
-export const ENDPOINT = process.env.NEXT_PUBLIC_API_URL!;
-
-export const client = new GraphQLClient(ENDPOINT, { credentials: "include" });
 
 export function diff(a: Policy[], b: Policy[]): Policy[] {
   return a.reduce(
@@ -89,8 +83,6 @@ export const verifyMessageHash = async (
   } else {
     const res = await (await fetch("https://api.cartridge.gg/query", {
       "headers": {
-        "accept": "application/json",
-        "accept-language": "fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7",
         "content-type": "application/json",
       },
       "body": `{\"query\":\"query Account($address: String!) {\\n  accounts(where: { contractAddress: $address }) {\\n    edges {\\n      node {\\n        id\\n        credential {\\n          id\\n          publicKey\\n        }\\n      }\\n    }\\n  }\\n}\\n\",\"variables\":{\"address\":\"${addAddressPadding(address)}\"},\"operationName\":\"Account\"}`,
@@ -133,8 +125,6 @@ export const getAccounts = async (addresses: string[]) => {
 
   const res = await (await fetch("https://api.cartridge.gg/query", {
     "headers": {
-      "accept": "application/json",
-      "accept-language": "fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7",
       "content-type": "application/json",
     },
     "body": `{\"query\":\"query AccountInfo($addresses: [AccountWhereInput!]!) {\\n  accounts(where: { or: $addresses}) {\\n    edges {\\n      node {\\n        id\\n  contractAddress\\n      }\\n    }\\n  }\\n}\",\"variables\":{\"addresses\":${JSON.stringify(query)}},\"operationName\":\"AccountInfo\"}`,
