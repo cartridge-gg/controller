@@ -10,7 +10,7 @@ import {
 import {
   useAccountInfoQuery,
   useStarterPackQuery,
-  useDeployMainnetAccountMutation,
+  useDeployAccountMutation,
 } from "generated/graphql";
 import { SignupHeader, Header } from "components/Header";
 import { Dialog as CartridgeDialog } from "@cartridge/ui/src/components/Dialog";
@@ -75,7 +75,7 @@ const CreateWallet: NextPage = () => {
   );
 
   const { mutateAsync: deployMainnetAccount, isLoading: loadingDeploy } =
-    useDeployMainnetAccountMutation();
+    useDeployAccountMutation();
 
   const onConfirm = useCallback(
     async (username: string, credentials: Credentials) => {
@@ -98,7 +98,7 @@ const CreateWallet: NextPage = () => {
         },
       );
 
-      const hash = await onCreateFinalize(deviceKey, credentials);
+      await onCreateFinalize(deviceKey, credentials);
 
       // const deployResult = await deployMainnetAccount({
       //   id: username,
