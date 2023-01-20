@@ -102,16 +102,14 @@ const CreateWallet: NextPage = () => {
         },
       );
 
-      const hash = await onCreateFinalize(deviceKey, credentials);
-
-      setActive(address, hash);
+      await onCreateFinalize(deviceKey, credentials);
 
       const deployResult = await deployAccount({
         id: username,
         chainId: "starknet:SN_GOERLI",
       });
-
-      setDeployTx(deployResult.deployAccount.deployTransaction.transactionHash);
+      
+      setActive(address, deployResult.deployAccount.deployTransaction.transactionHash);
       setRegState(RegistrationState.READY);
     },
     [deployAccount],
