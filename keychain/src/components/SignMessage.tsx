@@ -97,7 +97,10 @@ const SignMessage = ({
 
       <Footer
         onConfirm={async () => {
-          const sig = await controller.account(chainId).signMessage(typedData);
+          const account = controller.account(chainId);
+          const sig = await (account.registered
+            ? account.signMessage(typedData)
+            : controller.webauthnAccount(chainId).signMessage(typedData));
           onSign(sig);
         }}
         onCancel={() => {

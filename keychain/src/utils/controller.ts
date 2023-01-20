@@ -140,6 +140,10 @@ export default class Controller {
     };
   }
 
+  webauthnAccount(chainId: constants.StarknetChainId) {
+    return this.webauthn[chainId];
+  }
+
   account(chainId: constants.StarknetChainId) {
     return this.accounts[chainId];
   }
