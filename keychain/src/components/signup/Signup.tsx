@@ -18,6 +18,7 @@ import {
   DrawerOverlay,
   DrawerContent,
   useDisclosure,
+  InputRightElement,
 } from "@chakra-ui/react";
 import {
   BeginRegistrationDocument,
@@ -28,6 +29,7 @@ import { useDebounce } from "hooks/debounce";
 import { ec, KeyPair } from "starknet";
 
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
+import ReturnIcon from "@cartridge/ui/src/components/icons/Return";
 import JoystickIcon from "@cartridge/ui/components/icons/Joystick";
 import LockIcon from "@cartridge/ui/components/icons/Lock";
 import { Logo } from "@cartridge/ui/components/icons/brand/Logo";
@@ -52,6 +54,7 @@ export const Signup = ({
   const [nameError, setNameError] = useState("");
   const [isRegistering, setIsRegistering] = useState<boolean>(false);
   const [canContinue, setCanContinue] = useState(false);
+  const [dismissed, setDismissed] = useState<boolean>(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { debouncedValue: debouncedName } = useDebounce(name, 1500);
   const { error, refetch, isFetching } = useAccountQuery(
@@ -73,7 +76,9 @@ export const Signup = ({
       if (err.length > 0 && err[0].message === "ent: account not found") {
         setNameError("");
         setCanContinue(true);
-        onOpen();
+        if (!dismissed) {
+          onOpen();
+        }
       } else {
         setNameError("An error occured.");
         setCanContinue(false);
@@ -82,7 +87,7 @@ export const Signup = ({
       setNameError("This account already exists.");
       setCanContinue(false);
     }
-  }, [debouncedName, isFetching, error, onOpen]);
+  }, [debouncedName, isFetching, error, dismissed, onOpen]);
 
   useInterval(
     async () => {
@@ -148,7 +153,14 @@ export const Signup = ({
       >
         Your Controller will be used for interacting with the game.
       </Text>
-      <Formik initialValues={{ name: "" }} onSubmit={() => {}}>
+      <Formik
+        initialValues={{ name: "" }}
+        onSubmit={() => {
+          if (canContinue) {
+            onOpen();
+          }
+        }}
+      >
         {(props) => (
           <Form
             css={css`
@@ -172,7 +184,7 @@ export const Signup = ({
                   variant="error"
                   mt="10px"
                   placement="top"
-                  isOpen={!!nameError}
+                  isOpen={!!nameError && !isFetching}
                   hasArrow
                   label={
                     <>
@@ -202,7 +214,26 @@ export const Signup = ({
                       errorBorderColor="crimson"
                       placeholder="Username"
                       autoComplete="off"
+                      onBlur={() => {
+                        if (canContinue) {
+                          onOpen();
+                        }
+                      }}
                     />
+                    {canContinue && (
+                      <InputRightElement
+                        h="full"
+                        mr="5px"
+                        cursor="pointer"
+                        onClick={() => {
+                          if (canContinue) {
+                            onOpen();
+                          }
+                        }}
+                      >
+                        <ReturnIcon boxSize="20px" fill="green.400" />
+                      </InputRightElement>
+                    )}
                   </InputGroup>
                 </Tooltip>
               )}
@@ -216,7 +247,14 @@ export const Signup = ({
                 Log In
               </Link>
             </HStack>
-            <Drawer placement="bottom" onClose={onClose} isOpen={isOpen}>
+            <Drawer
+              placement="bottom"
+              onClose={() => {
+                setDismissed(true);
+                onClose();
+              }}
+              isOpen={isOpen}
+            >
               <DrawerOverlay />
               <DrawerContent>
                 <DrawerBody p="36px">
