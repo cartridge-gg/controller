@@ -98,7 +98,7 @@ const CreateWallet: NextPage = () => {
         },
       );
 
-      const hash = await onCreateFinalize(deviceKey, credentials);
+      await onCreateFinalize(deviceKey, credentials);
 
       // const deployResult = await deployMainnetAccount({
       //   id: username,

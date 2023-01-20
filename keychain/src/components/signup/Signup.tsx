@@ -23,6 +23,7 @@ import {
   BeginRegistrationDocument,
   FinalizeRegistrationDocument,
   useAccountQuery,
+  useDeployAccountMutation,
 } from "generated/graphql";
 import { useDebounce } from "hooks/debounce";
 import { ec, KeyPair } from "starknet";
@@ -59,6 +60,9 @@ export const Signup = ({
     { id: debouncedName },
     { enabled: false, retry: false },
   );
+
+  const { mutateAsync: deployAccount, isLoading: isDeploying } =
+    useDeployAccountMutation();
 
   useEffect(() => {
     if (debouncedName.length === 0) {
@@ -98,6 +102,7 @@ export const Signup = ({
         } = result.data;
 
         const controller = new Controller(keypair, address, credentialId);
+        deployAccount({ id: debouncedName, chainId: "starknet:SN_GOERLI" })
         onSignup(controller);
       }
     },
@@ -201,8 +206,8 @@ export const Signup = ({
                         canContinue
                           ? "green.400"
                           : nameError
-                          ? "red.400"
-                          : "gray.600"
+                            ? "red.400"
+                            : "gray.600"
                       }
                       errorBorderColor="crimson"
                       placeholder="Username"

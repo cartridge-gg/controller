@@ -113,7 +113,7 @@ export const Quests = ({ username, gameId, starterpackId }: QuestsProps) => {
     playSound();
     deployAccount({
       id: username,
-      chainId: "SN_MAIN",
+      chainId: "starknet:SN_MAIN",
       starterpackIds: [starterpackId],
     }).then((res) =>
       router.replace(
