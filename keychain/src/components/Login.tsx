@@ -90,7 +90,6 @@ export const Login = ({
 
       onLogin(controller);
     } catch (err) {
-      console.error(err);
       setIsLoggingIn(false);
       log({
         type: "webauthn_login_error",

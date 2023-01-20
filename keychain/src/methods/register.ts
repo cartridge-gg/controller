@@ -1,9 +1,7 @@
 import { split } from "@cartridge/controller";
-import { ec, hash, number, shortString, constants, KeyPair } from "starknet";
+import { ec, hash, number, shortString } from "starknet";
 
 import Controller from "utils/controller";
-import Storage from "utils/storage";
-import selectors from "utils/selectors";
 import { CLASS_HASHES, PROXY_CLASS } from "@cartridge/controller/src/constants";
 import BN from "bn.js";
 
@@ -31,17 +29,6 @@ const register =
     return { address, deviceKey };
   };
 
-const setActive = (address: string, hash?: string) => {
-  Storage.set(selectors["0.0.3"].active(), address);
-
-  if (hash) {
-    Storage.update(
-      selectors["0.0.3"].deployment(address, constants.StarknetChainId.TESTNET),
-      { registerTxnHash: hash },
-    );
-  }
-};
-
 const computeAddress = (
   username: string,
   { x0, x1, x2 }: { x0: BN; x1: BN; x2: BN },
@@ -68,4 +55,4 @@ const computeAddress = (
     "0",
   );
 
-export { computeAddress, register, setActive };
+export { computeAddress, register };

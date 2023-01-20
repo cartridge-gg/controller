@@ -2,8 +2,6 @@ import { useEffect, useState, ReactNode, useCallback } from "react";
 import { useRouter } from "next/router";
 import type { NextPage } from "next";
 import { Circle, Container, VStack, Text, Link } from "@chakra-ui/react";
-import { split } from "@cartridge/controller";
-import { number } from "starknet";
 import { Header } from "components/Header";
 import {
   AuthFingerprintImage,
@@ -14,8 +12,6 @@ import FingerprintIcon from "@cartridge/ui/components/icons/auth/Fingerprint";
 import Footer from "components/Footer";
 import Unsupported from "components/signup/Unsupported";
 import { Credentials, onCreateBegin, onCreateFinalize } from "hooks/account";
-import { parseAttestationObject } from "utils/webauthn";
-import { computeAddress, setActive } from "methods/register";
 import { Startup } from "components/signup";
 
 const Authenticate: NextPage = () => {
