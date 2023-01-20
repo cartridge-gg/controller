@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { css } from "@emotion/react";
-import { Flex, Box, Spacer, Text, VStack } from "@chakra-ui/react";
+import { Box, Spacer, Text, VStack } from "@chakra-ui/react";
 
 import { typedData as td, shortString, constants, Signature } from "starknet";
 

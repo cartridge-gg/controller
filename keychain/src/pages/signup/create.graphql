@@ -19,7 +19,7 @@ mutation FinalizeRegistration($credentials: String!, $signer: String!) {
   }
 }
 
-mutation DeployMainnetAccount(
+mutation DeployAccount(
   $id: ID!
   $chainId: ChainID!
   $starterpackIds: [ID!]
