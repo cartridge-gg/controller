@@ -1,4 +1,3 @@
-import qs from "query-string";
 import {
   ec,
   AccountInterface,
@@ -27,8 +26,7 @@ import {
 import BN from "bn.js";
 import { client, computeAddress } from "./utils";
 import { AccountDocument } from "./generated/graphql";
-import cbor from "cbor";
-import { assert } from "console";
+import { decode } from "cbor-x";
 import { CLASS_HASHES } from "@cartridge/controller/src/constants";
 
 export const providers = {
@@ -327,11 +325,11 @@ class Controller {
         return false;
       }
 
-      const pubKeyCbor = cbor.decodeAllSync(
+      const pubKeyCbor = decode(
         number.toBN(account.credential.publicKey).toBuffer()
       )[0];
-      const x = number.toBN("0x" + pubKeyCbor.get(-2).toString("hex"));
-      const y = number.toBN("0x" + pubKeyCbor.get(-3).toString("hex"));
+      const x = number.toBN("0x" + pubKeyCbor[-2].toString("hex"));
+      const y = number.toBN("0x" + pubKeyCbor[-3].toString("hex"));
       const { x: x0, y: x1, z: x2 } = split(x);
       const { x: y0, y: y1, z: y2 } = split(y);
       const address = computeAddress(
