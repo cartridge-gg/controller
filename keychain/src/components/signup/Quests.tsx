@@ -22,7 +22,7 @@ import {
   useAccountQuestsQuery,
   useCheckDiscordQuestsMutation,
   useCheckTwitterQuestsMutation,
-  useDeployMainnetAccountMutation,
+  useDeployAccountMutation,
   useStarterPackQuery,
 } from "generated/graphql";
 import { Loading } from "components/Loading";
@@ -111,13 +111,14 @@ export const Quests = ({ username, gameId, starterpackId }: QuestsProps) => {
   );
 
   const { mutateAsync: deployMainnetAccount, isLoading } =
-    useDeployMainnetAccountMutation();
+    useDeployAccountMutation();
 
   const onComplete = useCallback(async () => {
     playSound();
     deployMainnetAccount({
       id: username,
-      starterpackId,
+      chainId: "starknet:SN_MAIN",
+      starterpackIds: [starterpackId],
     }).then((res) =>
       router.replace(
         redirect_uri

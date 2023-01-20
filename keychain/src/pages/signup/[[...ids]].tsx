@@ -13,7 +13,7 @@ import {
 import {
   useAccountInfoQuery,
   useStarterPackQuery,
-  useDeployMainnetAccountMutation,
+  useDeployAccountMutation,
 } from "generated/graphql";
 import { SignupHeader, Header } from "components/Header";
 import { Dialog as CartridgeDialog } from "@cartridge/ui/src/components/Dialog";
@@ -78,8 +78,8 @@ const CreateWallet: NextPage = () => {
     { enabled: !!controller?.address },
   );
 
-  const { mutateAsync: deployMainnetAccount, isLoading: loadingDeploy } =
-    useDeployMainnetAccountMutation();
+  const { mutateAsync: deployAccount, isLoading: loadingDeploy } =
+    useDeployAccountMutation();
 
   const onConfirm = useCallback(
     async (username: string, credentials: Credentials) => {
@@ -106,15 +106,15 @@ const CreateWallet: NextPage = () => {
 
       setActive(address, hash);
 
-      // const deployResult = await deployMainnetAccount({
-      //   id: username,
-      //   starterpackId: data?.game?.starterPack?.id,
-      // });
+      const deployResult = await deployAccount({
+        id: username,
+        chainId: "starknet:SN_GOERLI",
+      });
 
-      // setDeployTx(deployResult.deployAccount.deployTransaction.transactionHash);
+      setDeployTx(deployResult.deployAccount.deployTransaction.transactionHash);
       setRegState(RegistrationState.READY);
     },
-    [],
+    [deployAccount],
   );
 
   const onComplete = useCallback(async () => {
@@ -248,7 +248,7 @@ const CreateWallet: NextPage = () => {
           )}
           {regState == RegistrationState.QUESTS &&
             starterPackData?.game?.starterPack?.prerequisitesQuests?.length >
-              0 && (
+            0 && (
               <Quests
                 username={username}
                 gameId={gameId}
