@@ -14,11 +14,8 @@
     "lib"
   ],
   "devDependencies": {
-    "@graphql-codegen/cli": "^2.16.4",
     "@types/jest": "^26.0.18",
     "@types/node": "^17.0.23",
-    "graphql": "^16.3.0",
-    "graphql-request": "^5.0.0",
     "jest": "^26.6.3",
     "ts-jest": "^26.5.1",
     "ts-node": "^10.4.0",

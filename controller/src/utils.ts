@@ -1,7 +1,7 @@
 import equal from "fast-deep-equal";
 import { Policy } from "./types";
 import { GraphQLClient } from "graphql-request";
-import { ec, number, hash, shortString, Signature, Provider } from "starknet";
+import { ec, number, hash, shortString, Signature, Provider, addAddressPadding } from "starknet";
 import BN from "bn.js";
 import { PROXY_CLASS, CLASS_HASHES } from "./constants";
 import { AccountDocument } from "./generated/graphql";
@@ -87,9 +87,17 @@ export const verifyMessageHash = async (
       return res?.result[0] === "0x1";
     }
   } else {
-    const res = await client.request(AccountDocument, {
-      address,
-    });
+    const res = await (await fetch("https://api.cartridge.gg/query", {
+      "headers": {
+        "accept": "application/json",
+        "accept-language": "fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7",
+        "content-type": "application/json",
+      },
+      "body": `{\"query\":\"query Account($address: String!) {\\n  accounts(where: { contractAddress: $address }) {\\n    edges {\\n      node {\\n        id\\n        credential {\\n          id\\n          publicKey\\n        }\\n      }\\n    }\\n  }\\n}\\n\",\"variables\":{\"address\":\"${addAddressPadding(address)}\"},\"operationName\":\"Account\"}`,
+      "method": "POST",
+      "mode": "cors",
+      "credentials": "omit",
+    })).json();
 
     const account = res?.accounts?.edges?.[0]?.node;
     if (!account) {
@@ -116,6 +124,34 @@ export const verifyMessageHash = async (
     const keyPair = ec.getKeyPairFromPublicKey(signature[0]);
     return ec.verify(keyPair, number.toBN(messageHash).toString(), signature);
   }
+};
+
+export const getAccounts = async (addresses: string[]) => {
+  const query = addresses.map(addr => ({
+    contractAddress: addAddressPadding(addr),
+  }))
+
+  const res = await (await fetch("https://api.cartridge.gg/query", {
+    "headers": {
+      "accept": "application/json",
+      "accept-language": "fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7",
+      "content-type": "application/json",
+    },
+    "body": `{\"query\":\"query AccountInfo($addresses: [AccountWhereInput!]!) {\\n  accounts(where: { or: $addresses}) {\\n    edges {\\n      node {\\n        id\\n  contractAddress\\n      }\\n    }\\n  }\\n}\",\"variables\":{\"addresses\":${JSON.stringify(query)}},\"operationName\":\"AccountInfo\"}`,
+    "method": "POST",
+    "mode": "cors",
+    "credentials": "omit"
+  })).json();
+
+  if (res.errors) {
+    throw new Error(res.errors[0].message);
+  }
+
+  return res.accounts.edges.map((edge: any) => ({
+    id: edge.node.id,
+    name: edge.node.id,
+    profile_uri: `https://cartridge.gg/profile/${edge.node.contractAddress}`,
+  }));
 };
 
 const BASE = number.toBN(2).pow(number.toBN(86));
