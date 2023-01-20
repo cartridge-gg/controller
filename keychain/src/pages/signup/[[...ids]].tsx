@@ -37,7 +37,7 @@ import { parseAttestationObject } from "utils/webauthn";
 import { addAddressPadding } from "starknet";
 import { remoteSvgIcon } from "utils/svg";
 
-import { register, setActive } from "methods/register";
+import { register } from "methods/register";
 
 enum RegistrationState {
   CREATE_USERNAME,
@@ -99,8 +99,6 @@ const CreateWallet: NextPage = () => {
       );
 
       const hash = await onCreateFinalize(deviceKey, credentials);
-
-      setActive(address, hash);
 
       // const deployResult = await deployMainnetAccount({
       //   id: username,
@@ -244,7 +242,7 @@ const CreateWallet: NextPage = () => {
           )}
           {regState == RegistrationState.QUESTS &&
             starterPackData?.game?.starterPack?.prerequisitesQuests?.length >
-              0 && (
+            0 && (
               <Quests
                 username={username}
                 gameId={gameId}

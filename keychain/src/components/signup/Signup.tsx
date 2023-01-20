@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { Formik, Form, Field, FormikState } from "formik";
 import { css } from "@emotion/react";
-import { motion } from "framer-motion";
 import {
   Button,
   Input,
@@ -39,7 +38,6 @@ import Continue from "components/signup/Continue";
 import { client } from "utils/graphql";
 import Controller from "utils/controller";
 import { useInterval } from "usehooks-ts";
-import { setActive } from "methods/register";
 import Content from "../Content";
 
 export const Signup = ({
@@ -71,9 +69,7 @@ export const Signup = ({
 
   useEffect(() => {
     if (error) {
-      const err = JSON.parse((error as Error).message);
-
-      if (err.length > 0 && err[0].message === "ent: account not found") {
+      if ((error as Error).message === "ent: account not found") {
         setNameError("");
         setCanContinue(true);
         if (!dismissed) {
@@ -102,13 +98,10 @@ export const Signup = ({
         } = result.data;
 
         const controller = new Controller(keypair, address, credentialId);
-        controller.store();
-
-        setActive(address);
         onSignup(controller);
       }
     },
-    isRegistering ? 5000 : null,
+    isRegistering ? 500 : null,
   );
 
   const onContinue = useCallback(async () => {

@@ -1,7 +1,6 @@
 import Fingerprint from "./icons/Fingerprint";
 import { Formik, Form, Field, FormikState } from "formik";
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/router";
 import { css } from "@emotion/react";
 import {
   Button,
@@ -12,7 +11,6 @@ import {
   VStack,
   HStack,
   Text,
-  Container,
   Link,
   Circle,
   Drawer,
@@ -30,7 +28,6 @@ import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import { useDebounce } from "hooks/debounce";
 import Web3Auth from "./Web3Auth";
 import { constants } from "starknet";
-import { motion } from "framer-motion";
 import LockIcon from "@cartridge/ui/components/icons/Lock";
 import Controller from "utils/controller";
 import Content from "./Content";
@@ -93,7 +90,6 @@ export const Login = ({
 
       onLogin(controller);
     } catch (err) {
-      console.error(err);
       setIsLoggingIn(false);
       log({
         type: "webauthn_login_error",
