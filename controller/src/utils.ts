@@ -1,6 +1,6 @@
 import equal from "fast-deep-equal";
 import { Policy } from "./types";
-import { ec, number, hash, shortString, Signature, Provider, addAddressPadding } from "starknet";
+import { ec, number, hash, shortString, Signature, Provider, addAddressPadding, ProviderInterface } from "starknet";
 import BN from "bn.js";
 import { PROXY_CLASS, CLASS_HASHES } from "./constants";
 import { decode } from "cbor-x";
@@ -41,7 +41,7 @@ export const computeAddress = (
 
 
 export const verifyMessageHash = async (
-  provider: Provider,
+  provider: ProviderInterface,
   address: string,
   messageHash: number.BigNumberish,
   signature: Signature
