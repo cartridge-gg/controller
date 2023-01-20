@@ -36,7 +36,7 @@ import { useRouter } from "next/router";
 import { useAnalytics } from "hooks/analytics";
 import Unsupported from "components/signup/Unsupported";
 import { isWhitelisted } from "utils/whitelist";
-import { useControllerModal } from "hooks/modal";
+import { constants } from "starknet";
 
 const Login: NextPage = () => {
   const [name, setName] = useState<string>();
@@ -48,7 +48,6 @@ const Login: NextPage = () => {
   const { redirect_uri } = router.query as { redirect_uri: string };
   const { event: analyticsEvent } = useAnalytics();
   const { error, refetch } = useAccountQuery({ id: name }, { enabled: false });
-  const { cancel } = useControllerModal();
 
   const onLogin = useCallback(async () => {
     analyticsEvent({ type: "webauthn_login" });
@@ -65,7 +64,7 @@ const Login: NextPage = () => {
 
       const { data: beginLoginData } = await beginLogin(name);
 
-      await login()(address, credentialId, {
+      await login()(address, constants.StarknetChainId.MAINNET, credentialId, {
         rpId: process.env.NEXT_PUBLIC_RP_ID,
         challengeExt: base64url.toBuffer(
           beginLoginData.beginLogin.publicKey.challenge,
@@ -103,7 +102,6 @@ const Login: NextPage = () => {
   }, []);
 
   const onCancel = () => {
-    cancel();
     analyticsEvent({ type: "login_cancel" });
   };
 
@@ -222,8 +220,8 @@ const Login: NextPage = () => {
 
 const SignupLink = ({ show }: { show: boolean }) => {
   const router = useRouter();
-  const isEmbedded = 
-    typeof window !== "undefined" && window.top !== window.self;;
+  const isEmbedded =
+    typeof window !== "undefined" && window.top !== window.self;
 
   const onClick = () => {
     if (isEmbedded) {

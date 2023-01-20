@@ -29,9 +29,6 @@
       "@cartridge/controller": [
         "../../../controller/src"
       ],
-      "@cartridge/connector": [
-        "../../../connector/src"
-      ],
     }
   },
   "include": [
@@ -45,9 +42,6 @@
   "references": [
     {
       "path": "../../controller"
-    },
-    {
-      "path": "../../connector"
     }
   ]
 }

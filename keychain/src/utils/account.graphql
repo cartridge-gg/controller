@@ -1,0 +1,11 @@
+query AccountContract($id: ID!) {
+  contract(id: $id) {
+    id
+    deployTransaction {
+      id
+      receipt {
+        status
+      }
+    }
+  }
+}

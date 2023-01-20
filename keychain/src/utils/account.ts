@@ -1,7 +1,13 @@
+import { CLASS_HASHES } from "@cartridge/controller/src/constants";
+import { ec } from "starknet";
+import {
+  AccountContractDocument,
+} from "generated/graphql";
 import {
   constants,
   hash,
   number,
+  transaction,
   Account as BaseAccount,
   RpcProvider,
   SignerInterface,
@@ -9,18 +15,31 @@ import {
   EstimateFeeDetails,
   EstimateFee,
   GetTransactionReceiptResponse,
+  Signature,
 } from "starknet";
-import { CLASS_HASHES } from "./hashes";
+import { client } from "utils/graphql";
 
 import selectors from "./selectors";
 import Storage from "./storage";
+import { NamedChainId } from "@cartridge/controller/src/constants";
+
+export enum Status {
+  UNKNOWN = "UNKNOWN",
+  COUNTERFACTUAL = "COUNTERFACTUAL",
+  DEPLOYING = "DEPLOYING",
+  DEPLOYED = "DEPLOYED",
+  REGISTERING = "REGISTERING",
+  REGISTERED = "REGISTERED",
+}
 
 class Account extends BaseAccount {
   private rpc: RpcProvider;
   private selector: string;
+  _chainId: constants.StarknetChainId;
   deployed: boolean = false;
   registered: boolean = false;
   updated: boolean = true;
+  status: Status = Status.UNKNOWN;
 
   constructor(
     chainId: constants.StarknetChainId,
@@ -31,6 +50,7 @@ class Account extends BaseAccount {
     super({ rpc: { nodeUrl } }, address, signer);
     this.rpc = new RpcProvider({ nodeUrl });
     this.selector = selectors["0.0.3"].deployment(address, chainId);
+    this._chainId = chainId;
     const state = Storage.get(this.selector);
 
     if (state) {
@@ -44,6 +64,20 @@ class Account extends BaseAccount {
     }
   }
 
+  async getContract() {
+    try {
+      return await client.request(AccountContractDocument, {
+        id: `starknet:${NamedChainId[this._chainId]}:${this.address}`,
+      });
+    } catch (e) {
+      if (e.message.includes("not found")) {
+        return null;
+      }
+
+      throw e;
+    }
+  }
+
   async sync() {
     Storage.update(this.selector, {
       syncing: Date.now(),
@@ -51,12 +85,36 @@ class Account extends BaseAccount {
 
     try {
       if (!this.deployed || !this.registered) {
-        const txn = Storage.get(this.selector).txnHash;
-        if (txn) {
-          await this.rpc.waitForTransaction(txn, 8000, [
-            "ACCEPTED_ON_L1",
-            "ACCEPTED_ON_L2",
-          ]);
+        const registerTxnHash = Storage.get(this.selector).registerTxnHashHash;
+        if (registerTxnHash) {
+          this.status = Status.REGISTERING;
+          this.rpc
+            .waitForTransaction(registerTxnHash, 1000, ["ACCEPTED_ON_L1", "ACCEPTED_ON_L2"])
+            .then(() => this.sync());
+          return;
+        }
+
+        const data = await this.getContract();
+        if (!data?.contract?.deployTransaction?.id) {
+          this.status = Status.COUNTERFACTUAL;
+          return;
+        }
+
+        const deployTxnHash = data.contract.deployTransaction.id.split("/")[1];
+        const deployTxnReceipt = await this.rpc.getTransactionReceipt(deployTxnHash);
+
+        // Pending txn so poll for inclusion.
+        if (!('status' in deployTxnReceipt)) {
+          this.status = Status.DEPLOYING;
+          this.rpc
+            .waitForTransaction(deployTxnHash, 1000, ["ACCEPTED_ON_L1", "ACCEPTED_ON_L2"])
+            .then(() => this.sync());
+          return
+        }
+
+        if (deployTxnReceipt.status === "REJECTED") {
+          this.status = Status.COUNTERFACTUAL;
+          return;
         }
       }
 
@@ -64,8 +122,10 @@ class Account extends BaseAccount {
       Storage.update(this.selector, {
         classHash,
         deployed: true,
+        status: Status.DEPLOYED,
       });
       this.deployed = true;
+      this.status = Status.DEPLOYED;
 
       if (classHash !== CLASS_HASHES["latest"].account) {
         this.updated = false;
@@ -97,6 +157,7 @@ class Account extends BaseAccount {
       });
     } catch (e) {
       /* no-op */
+      console.log(e);
     }
   }
 
@@ -108,6 +169,15 @@ class Account extends BaseAccount {
       ? details.blockIdentifier
       : "latest";
     return super.estimateInvokeFee(calls, details);
+  }
+
+  async verifyMessageHash(hash: string | number | import("bn.js"), signature: Signature): Promise<boolean> {
+    if (number.toBN(signature[0]).cmp(number.toBN(0)) === 0) {
+      const keyPair = ec.getKeyPairFromPublicKey(signature[0]);
+      return ec.verify(keyPair, number.toBN(hash).toString(), signature);
+    }
+
+    super.verifyMessageHash(hash, signature);
   }
 
   // async getNonce(blockIdentifier?: any): Promise<number.BigNumberish> {

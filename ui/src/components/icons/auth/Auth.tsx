@@ -3,6 +3,7 @@ import Fingerprint from "./Fingerprint";
 import QrCode from "./QrCode";
 import FaceID from "./FaceID";
 import Lorem from "./Lorem";
+import Sparkle from "../SparkleOutline";
 import { ReactNode } from "react";
 
 export const AuthFingerprintImage = () => (
@@ -15,6 +16,10 @@ export const AuthQrCodeImage = () => (
 
 export const AuthFaceIdImage = () => (
   <Window icon={<FaceID boxSize="26px" />} />
+);
+
+export const AuthSparkleImage = () => (
+  <Window icon={<Sparkle boxSize="26px" />} />
 );
 
 const Window = ({ icon }: { icon: ReactNode }) => {

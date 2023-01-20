@@ -23,7 +23,9 @@ import WebauthnAccount, { formatAssertion, RawAssertion } from "./webauthn";
 import { getGasPrice } from "./gateway";
 import selectors from "./selectors";
 import migrations from "./migrations";
-import { CLASS_HASHES } from "./hashes";
+import { CLASS_HASHES } from "@cartridge/controller/src/constants";
+import { AccountInfoDocument } from "generated/graphql";
+import { client } from "./graphql";
 
 export const VERSION = "0.0.3";
 
@@ -47,7 +49,7 @@ type SerializedController = {
 export default class Controller {
   public address: string;
   public signer: SignerInterface;
-  protected publicKey: string;
+  public publicKey: string;
   protected keypair: KeyPair;
   protected credentialId: string;
   protected webauthn: { [key in constants.StarknetChainId]: WebauthnAccount };
@@ -117,7 +119,29 @@ export default class Controller {
       selectors[VERSION].admin(this.address, process.env.NEXT_PUBLIC_ADMIN_URL),
       {},
     );
+    Storage.set(selectors["0.0.3"].active(), address);
     this.store();
+  }
+
+  async getUser() {
+    const res = await client.request(AccountInfoDocument, {
+      id: this.address,
+    });
+
+    const account = res.accounts?.edges?.[0]?.node;
+    if (!account) {
+      throw new Error("User not found");
+    }
+
+    return {
+      address: this.address,
+      name: account.id,
+      profileUri: `https://cartridge.gg/profile/${this.address}`,
+    };
+  }
+
+  webauthnAccount(chainId: constants.StarknetChainId) {
+    return this.webauthn[chainId];
   }
 
   account(chainId: constants.StarknetChainId) {

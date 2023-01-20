@@ -9,12 +9,12 @@ export const Input: ComponentStyleConfig = {
         border: "1px solid",
         fontSize: "14px",
         borderColor: "whiteAlpha.200",
-        bgColor: "gray.600",
+        bgColor: "gray.700",
         _focus: {
-          bgColor: "gray.500",
+          bgColor: "gray.600",
         },
         _hover: {
-          bgColor: "gray.500",
+          bgColor: "gray.600",
         },
       },
     }),

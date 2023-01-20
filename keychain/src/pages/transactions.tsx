@@ -19,7 +19,6 @@ const Transactions: NextPage = () => {
 
   const controller = useMemo(() => Controller.fromStore(), []);
   const { chainId, txns } = useUrlTxns();
-  const { cancel } = useControllerModal();
 
   return (
     <>

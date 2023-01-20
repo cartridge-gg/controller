@@ -1,13 +1,20 @@
-export interface PossibleTypesResultData {
-  possibleTypes: {
-    [key: string]: string[];
-  };
-}
-const result: PossibleTypesResultData = {
-  possibleTypes: {
-    Attribute: ["NumberAttribute", "StringAttribute"],
-    ContractMetadata: ["ERC20Metadata", "ERC721Metadata"],
-    Node: [
+
+      export interface PossibleTypesResultData {
+        possibleTypes: {
+          [key: string]: string[]
+        }
+      }
+      const result: PossibleTypesResultData = {
+  "possibleTypes": {
+    "Attribute": [
+      "NumberAttribute",
+      "StringAttribute"
+    ],
+    "ContractMetadata": [
+      "ERC20Metadata",
+      "ERC721Metadata"
+    ],
+    "Node": [
       "Account",
       "AccountQuest",
       "AccountStarterPack",
@@ -22,6 +29,7 @@ const result: PossibleTypesResultData = {
       "File",
       "Game",
       "Quest",
+      "QuestEvent",
       "Scope",
       "StarterPack",
       "StarterPackContract",
@@ -29,15 +37,16 @@ const result: PossibleTypesResultData = {
       "Token",
       "Transaction",
       "TransactionReceipt",
-      "TwitterQuest",
+      "TwitterQuest"
     ],
-    TransactionMetadata: [
+    "TransactionMetadata": [
       "AccountUpgrade",
       "ContractDeploy",
       "FungibleTransfer",
       "Mint",
-      "NonFungibleTransfer",
-    ],
-  },
+      "NonFungibleTransfer"
+    ]
+  }
 };
-export default result;
+      export default result;
+    
