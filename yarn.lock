@@ -2890,6 +2890,7 @@ __metadata:
     graphql-request: ^5.0.0
     jest: ^26.6.3
     query-string: ^7.1.1
+    react-query: ^3.39.2
     starknet: ^4.17.1
     ts-jest: ^26.5.1
     ts-node: ^10.4.0

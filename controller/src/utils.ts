@@ -3,7 +3,7 @@ import { Policy } from "./types";
 import { GraphQLClient } from "graphql-request";
 import { ec, number, hash, shortString, Signature, Provider } from "starknet";
 import BN from "bn.js";
-import { PROXY_CLASS, CLASS_HASHES } from "@cartridge/controller/src/constants";
+import { PROXY_CLASS, CLASS_HASHES } from "./constants";
 import { AccountDocument } from "./generated/graphql";
 import { decode } from "cbor-x";
 
