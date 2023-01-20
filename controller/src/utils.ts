@@ -78,7 +78,13 @@ export const verifyMessageHash = async (
         signature
       );
     } else {
-      // validate register txn and signature
+      const res = await provider.callContract({
+        contractAddress: address,
+        entrypoint: "isValidSignature",
+        calldata: [messageHash, signature.length, ...signature],
+      }, "latest");
+
+      return res?.result[0] === "0x1";
     }
   } else {
     const res = await client.request(AccountDocument, {
