@@ -1,6 +1,6 @@
 import { Connector } from "@starknet-react/core";
 import Controller, { Assertion, Policy } from "@cartridge/controller";
-import { AccountInterface } from "starknet";
+import { AccountInterface, InvokeFunctionResponse } from "starknet";
 
 class ControllerConnector extends Connector {
   public controller: Controller;
@@ -71,6 +71,10 @@ class ControllerConnector extends Connector {
 
   account() {
     return Promise.resolve(this._account);
+  }
+
+  async issueStarterPack(id: string): Promise<InvokeFunctionResponse> {
+    return this.controller.issueStarterPack(id);
   }
 }
 

@@ -192,6 +192,30 @@ class Controller {
     return this.keychain.provision(address, credentialId);
   }
 
+  async issueStarterPack(id: string) {
+    if (!this.keychain || !this.modal) {
+      console.error("not ready for connect");
+      return;
+    }
+
+    this.modal.open();
+
+    try {
+      if (!this.account) {
+        let response = await this.keychain.connect(this.policies);
+        if (response.code !== ResponseCodes.SUCCESS) {
+          throw new Error(response.message);
+        }
+      }
+
+      return await this.keychain.issueStarterPack(id);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      this.modal.close();
+    }
+  }
+
   async connect() {
     if (this.accounts) {
       return this.accounts[this.chainId];
