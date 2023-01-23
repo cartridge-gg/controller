@@ -74,7 +74,7 @@ const CreateWallet: NextPage = () => {
     { enabled: !!controller?.address },
   );
 
-  const { mutateAsync: deployMainnetAccount, isLoading: loadingDeploy } =
+  const { mutateAsync: deployAccount, isLoading: loadingDeploy } =
     useDeployAccountMutation();
 
   const onConfirm = useCallback(
@@ -99,13 +99,6 @@ const CreateWallet: NextPage = () => {
       );
 
       await onCreateFinalize(deviceKey, credentials);
-
-      // const deployResult = await deployMainnetAccount({
-      //   id: username,
-      //   starterpackId: data?.game?.starterPack?.id,
-      // });
-
-      // setDeployTx(deployResult.deployAccount.deployTransaction.transactionHash);
       setRegState(RegistrationState.READY);
     },
     [],
