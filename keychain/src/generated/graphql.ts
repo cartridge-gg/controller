@@ -3827,14 +3827,14 @@ export type FinalizeRegistrationMutationVariables = Exact<{
 
 export type FinalizeRegistrationMutation = { __typename?: 'Mutation', finalizeRegistration: { __typename?: 'Account', id: string, contractAddress?: string | null, contracts: { __typename?: 'ContractConnection', edges?: Array<{ __typename?: 'ContractEdge', node?: { __typename?: 'Contract', id: string, deployTransaction?: { __typename?: 'Transaction', transactionHash: string } | null } | null } | null> | null } } };
 
-export type DeployMainnetAccountMutationVariables = Exact<{
+export type DeployAccountMutationVariables = Exact<{
   id: Scalars['ID'];
   chainId: Scalars['ChainID'];
   starterpackIds?: InputMaybe<Array<Scalars['ID']> | Scalars['ID']>;
 }>;
 
 
-export type DeployMainnetAccountMutation = { __typename?: 'Mutation', deployAccount: { __typename?: 'Contract', id: string, deployTransaction?: { __typename?: 'Transaction', transactionHash: string } | null } };
+export type DeployAccountMutation = { __typename?: 'Mutation', deployAccount: { __typename?: 'Contract', id: string, deployTransaction?: { __typename?: 'Transaction', transactionHash: string } | null } };
 
 export type AccountQueryVariables = Exact<{
   id: Scalars['ID'];
@@ -4118,8 +4118,8 @@ export const useFinalizeRegistrationMutation = <
       useFetchData<FinalizeRegistrationMutation, FinalizeRegistrationMutationVariables>(FinalizeRegistrationDocument),
       options
     );
-export const DeployMainnetAccountDocument = `
-    mutation DeployMainnetAccount($id: ID!, $chainId: ChainID!, $starterpackIds: [ID!]) {
+export const DeployAccountDocument = `
+    mutation DeployAccount($id: ID!, $chainId: ChainID!, $starterpackIds: [ID!]) {
   deployAccount(id: $id, chainId: $chainId, starterpackIds: $starterpackIds) {
     id
     deployTransaction {
@@ -4128,13 +4128,13 @@ export const DeployMainnetAccountDocument = `
   }
 }
     `;
-export const useDeployMainnetAccountMutation = <
+export const useDeployAccountMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<DeployMainnetAccountMutation, TError, DeployMainnetAccountMutationVariables, TContext>) =>
-    useMutation<DeployMainnetAccountMutation, TError, DeployMainnetAccountMutationVariables, TContext>(
-      ['DeployMainnetAccount'],
-      useFetchData<DeployMainnetAccountMutation, DeployMainnetAccountMutationVariables>(DeployMainnetAccountDocument),
+    >(options?: UseMutationOptions<DeployAccountMutation, TError, DeployAccountMutationVariables, TContext>) =>
+    useMutation<DeployAccountMutation, TError, DeployAccountMutationVariables, TContext>(
+      ['DeployAccount'],
+      useFetchData<DeployAccountMutation, DeployAccountMutationVariables>(DeployAccountDocument),
       options
     );
 export const AccountDocument = `

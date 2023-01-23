@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Text, VStack } from "@chakra-ui/react";
 
-import Controller, { VERSION } from "utils/controller";
+import Controller, { RegisterData, VERSION } from "utils/controller";
 import {
   Abi,
   constants,
@@ -186,6 +186,33 @@ const Execute = ({
 
   const onSubmit = useCallback(async () => {
     setLoading(true);
+
+    if (!account.registered) {
+      const pendingRegister = Storage.get(
+        selectors[VERSION].register(controller.address, chainId),
+      ) as RegisterData;
+
+      const responses = await Promise.all([
+        controller
+          .account(chainId)
+          .invokeFunction(pendingRegister.invoke.invocation, {
+            ...pendingRegister.invoke.details,
+            nonce: pendingRegister.invoke.details.nonce!,
+          }),
+        controller.account(chainId).execute(calls, null, {
+          maxFee: fees.max,
+          nonce: nonce.add(number.toBN(1)),
+          version: hash.transactionVersion,
+        }),
+      ]);
+      Storage.remove(selectors[VERSION].register(controller.address, chainId));
+      onExecute({
+        transaction_hash: responses[1].transaction_hash,
+        code: ResponseCodes.SUCCESS,
+      })
+      return;
+    }
+
     const response = await account.execute(calls, null, {
       maxFee: fees.max,
       nonce,
@@ -195,7 +222,7 @@ const Execute = ({
       transaction_hash: response.transaction_hash,
       code: ResponseCodes.SUCCESS,
     });
-  }, [account, nonce, calls, fees, onExecute]);
+  }, [account, chainId, controller, nonce, calls, fees, onExecute]);
 
   return (
     <Content>

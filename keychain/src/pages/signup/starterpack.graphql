@@ -67,6 +67,6 @@ query StarterPack($id: ID!) {
   }
 }
 
-# mutation ClaimStarterpack($accountId: ID!, $starterpackId: ID!) {
-#   claimStarterpack(accountId: $accountId, starterpackId: $starterpackId)
-# }
+mutation ClaimStarterpack($id: ID!, $account: ID!) {
+  claimStarterpack(starterpackId: $id, account: $account)
+}

@@ -23,9 +23,11 @@ import {
   BeginRegistrationDocument,
   FinalizeRegistrationDocument,
   useAccountQuery,
+  useDeployAccountMutation,
 } from "generated/graphql";
 import { useDebounce } from "hooks/debounce";
 import { ec, KeyPair } from "starknet";
+import { PopupCenter } from "utils/url";
 
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import ReturnIcon from "@cartridge/ui/src/components/icons/Return";
@@ -37,7 +39,6 @@ import Web3Auth from "components/Web3Auth";
 import Continue from "components/signup/Continue";
 import { client } from "utils/graphql";
 import Controller from "utils/controller";
-import { useInterval } from "usehooks-ts";
 import Content from "../Content";
 
 export const Signup = ({
@@ -55,10 +56,22 @@ export const Signup = ({
   const [dismissed, setDismissed] = useState<boolean>(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { debouncedValue: debouncedName } = useDebounce(name, 1500);
-  const { error, refetch, isFetching } = useAccountQuery(
+  const {
+    error,
+    refetch,
+    isFetching,
+    data: accountData,
+  } = useAccountQuery(
     { id: debouncedName },
-    { enabled: false, retry: false },
+    {
+      enabled: isRegistering,
+      retry: isRegistering,
+      refetchInterval: 1000,
+    },
   );
+
+  const { mutateAsync: deployAccount, isLoading: isDeploying } =
+    useDeployAccountMutation();
 
   useEffect(() => {
     if (debouncedName.length === 0) {
@@ -68,6 +81,10 @@ export const Signup = ({
   }, [refetch, debouncedName]);
 
   useEffect(() => {
+    if (isRegistering || isFetching) {
+      return;
+    }
+
     if (error) {
       if ((error as Error).message === "ent: account not found") {
         setNameError("");
@@ -79,30 +96,37 @@ export const Signup = ({
         setNameError("An error occured.");
         setCanContinue(false);
       }
-    } else if (!isFetching && debouncedName.length > 0) {
+    } else if (debouncedName.length > 0) {
       setNameError("This account already exists.");
       setCanContinue(false);
     }
-  }, [debouncedName, isFetching, error, dismissed, onOpen]);
+  }, [debouncedName, isFetching, error, dismissed, isRegistering, onOpen]);
 
-  useInterval(
-    async () => {
-      const result = await refetch();
+  useEffect(() => {
+    if (accountData && isRegistering) {
+      deployAccount({
+        id: debouncedName,
+        chainId: "starknet:SN_GOERLI",
+      });
 
-      if (result.data) {
-        const {
-          account: {
-            credential: { id: credentialId },
-            contractAddress: address,
-          },
-        } = result.data;
+      const {
+        account: {
+          credential: { id: credentialId },
+          contractAddress: address,
+        },
+      } = accountData;
 
-        const controller = new Controller(keypair, address, credentialId);
-        onSignup(controller);
-      }
-    },
-    isRegistering ? 500 : null,
-  );
+      const controller = new Controller(keypair, address, credentialId);
+      onSignup(controller);
+    }
+  }, [
+    accountData,
+    isRegistering,
+    debouncedName,
+    keypair,
+    onSignup,
+    deployAccount,
+  ]);
 
   const onContinue = useCallback(async () => {
     const keypair = ec.genKeyPair();
@@ -111,12 +135,13 @@ export const Signup = ({
     setKeypair(keypair);
     setIsRegistering(true);
 
-    window.open(
+    PopupCenter(
       `/authenticate?name=${encodeURIComponent(
         debouncedName,
       )}&pubkey=${encodeURIComponent(deviceKey)}`,
-      "_blank",
-      "height=640,width=480",
+      "Cartridge Signup",
+      480,
+      640,
     );
   }, [debouncedName]);
 

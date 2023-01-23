@@ -116,6 +116,8 @@ export interface Keychain {
     typedData: typedData.TypedData,
     account: string
   ): Promise<Signature | Error>;
+
+  issueStarterPack(id: string): Promise<InvokeFunctionResponse>;
 }
 
 export interface Modal {
