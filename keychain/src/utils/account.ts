@@ -83,6 +83,8 @@ class Account extends BaseAccount {
       syncing: Date.now(),
     });
 
+    console.log("syncing")
+
     try {
       if (!this.deployed || !this.registered) {
         const registerTxnHash = Storage.get(this.selector).registerTxnHashHash;
