@@ -17,12 +17,7 @@ const login =
   ) => {
     const keypair = ec.genKeyPair();
     const controller = new Controller(keypair, address, credentialId, options);
-    const { assertion, invoke } = await controller.signAddDeviceKey(chainId);
-
-    Storage.set(selectors[VERSION].register(address, chainId), {
-      assertion,
-      invoke,
-    });
+    const { assertion } = await controller.account(chainId).register();
     Storage.set(selectors["0.0.3"].active(), address);
 
     return {
