@@ -17,6 +17,7 @@ export interface TransactionProps {
   chainId: constants.StarknetChainId;
   finalized?: (TransactionState) => void;
   showChainId?: boolean;
+  initialState?: TransactionState;
 }
 
 export const Transaction = ({
@@ -25,13 +26,14 @@ export const Transaction = ({
   hash,
   finalized,
   showChainId,
+  initialState,
 }: TransactionProps) => {
-  const [state, setState] = useState<TransactionState>("pending");
+  const [state, setState] = useState<TransactionState>(initialState ?? "pending");
   const { color, icon } = useMemo(() => getColorIcon(state), [state]);
   const controller = useMemo(() => Controller.fromStore(), []);
 
   useEffect(() => {
-    if (chainId) {
+    if (!initialState && chainId) {
       let result: TransactionState = "pending";
       controller
         .account(chainId)

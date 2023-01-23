@@ -3857,6 +3857,14 @@ export type StarterPackQueryVariables = Exact<{
 
 export type StarterPackQuery = { __typename?: 'Query', game?: { __typename?: 'Game', id: string, name: string, description: string, socials: { __typename?: 'Socials', discord?: string | null, twitter?: string | null, website?: string | null }, icon?: { __typename?: 'File', uri: string } | null, profilePicture?: { __typename?: 'File', uri: string, alt?: string | null } | null, banner?: { __typename?: 'File', uri: string, alt?: string | null } | null, starterPack?: { __typename?: 'StarterPack', id: string, name?: string | null, description?: string | null, issuance?: number | null, maxIssuance?: number | null, starterPackFungibles?: Array<{ __typename?: 'StarterPackContract', amount?: any | null, contract: { __typename?: 'Contract', id: string, name?: string | null, description?: string | null, priority: number } }> | null, starterPackTokens?: Array<{ __typename?: 'StarterPackToken', amount?: any | null, token: { __typename?: 'Token', tokenID: any, contract: { __typename?: 'Contract', priority: number }, metadata?: { __typename?: 'Metadata', name?: string | null, description?: string | null } | null, thumbnail?: { __typename?: 'File', uri: string } | null } }> | null, prerequisitesQuests?: Array<{ __typename?: 'Quest', id: string, title: string, parent?: { __typename?: 'Quest', id: string } | null, metadata?: { __typename?: 'QuestMetadata', callToAction?: { __typename?: 'QuestCallToAction', text?: string | null, url?: string | null } | null } | null }> | null } | null } | null };
 
+export type ClaimStarterpackMutationVariables = Exact<{
+  id: Scalars['ID'];
+  account: Scalars['ID'];
+}>;
+
+
+export type ClaimStarterpackMutation = { __typename?: 'Mutation', claimStarterpack?: string | null };
+
 export type TransactionsQueryVariables = Exact<{
   contractId: Scalars['ID'];
 }>;
@@ -4336,6 +4344,20 @@ export const useInfiniteStarterPackQuery = <
 useInfiniteStarterPackQuery.getKey = (variables: StarterPackQueryVariables) => ['StarterPack.infinite', variables];
 ;
 
+export const ClaimStarterpackDocument = `
+    mutation ClaimStarterpack($id: ID!, $account: ID!) {
+  claimStarterpack(starterpackId: $id, account: $account)
+}
+    `;
+export const useClaimStarterpackMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<ClaimStarterpackMutation, TError, ClaimStarterpackMutationVariables, TContext>) =>
+    useMutation<ClaimStarterpackMutation, TError, ClaimStarterpackMutationVariables, TContext>(
+      ['ClaimStarterpack'],
+      useFetchData<ClaimStarterpackMutation, ClaimStarterpackMutationVariables>(ClaimStarterpackDocument),
+      options
+    );
 export const TransactionsDocument = `
     query Transactions($contractId: ID!) {
   transactions(where: {contractID: $contractId}) {

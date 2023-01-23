@@ -3,9 +3,7 @@ import dynamic from "next/dynamic";
 import { Flex, Container, Box, Text, Divider, VStack } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
 import Controller from "utils/controller";
-import { useUrlTxns } from "hooks/transaction";
 import TimerIcon from "@cartridge/ui/src/components/icons/Timer";
-
 import { Header } from "components/Header";
 import { Banner } from "components/Banner";
 import Footer from "components/Footer";
@@ -13,26 +11,38 @@ import { Transaction, TransactionState } from "components/Transaction";
 import { constants } from "starknet";
 import Starknet from "@cartridge/ui/components/icons/Starknet";
 import { FungibleTransfer, Mint, NonFungibleTransfer, useTransactionsQuery } from "generated/graphql";
+import { usePendingTransactions } from "hooks/pending";
+import { useRouter } from "next/router";
 
 const Transactions: NextPage = () => {
-  const [txnResults, setTxnResults] = useState<TransactionState[]>([]);
+  const router = useRouter();
+  const chainId = router.query.chainId ?? "SN_GOERLI" ;
 
   const controller = useMemo(() => Controller.fromStore(), []);
-  const { chainId, txns } = useUrlTxns();
+  const { pendingTransactions, finalizedTransactions, add } = usePendingTransactions();
 
   const { data, error } = useTransactionsQuery({
-    contractId: `starknet:${chainId === constants.StarknetChainId.MAINNET ? "SN_MAIN" : "SN_GOERLI"}:${controller.address}`,
+    contractId: `starknet:${chainId}:${controller.address}`,
   });
 
   const transactions: {[key: string]: ((typeof data)["transactions"]["edges"][0]["node"])[]} = useMemo(() => {
     if (!data) return [];
 
-    let dates = {};
+    let txns = {};
     data.transactions.edges.forEach(edge => {
-      dates[edge.node.block.timestamp] = [...(dates[edge.node.block.timestamp] || []), edge.node];
+      if (!txns[edge.node.block.timestamp]) txns[edge.node.block.timestamp] = {};
+      txns[edge.node.block.timestamp][edge.node.transactionHash] = edge.node;
     })
-    return dates;
-  }, [data])
+    return txns;
+  }, [data]);
+
+  useEffect(() => {
+    add({
+      label: "Mint",
+      hash: "0x074b284b780ec171f85ef118fb754705dd3a81df2c918d2577d7d82d4fdba8b3",
+      chainId: chainId === "SN_MAIN" ? constants.StarknetChainId.MAINNET : constants.StarknetChainId.TESTNET,
+    })
+  }, []);
 
   return (
     <>
@@ -41,18 +51,26 @@ const Transactions: NextPage = () => {
         <Flex w="full" m={4} flexDirection="column" gap="18px">
           <Banner
             title={"Transactions"}
-            chainId={chainId}
+            chainId={chainId === "SN_MAIN" ? constants.StarknetChainId.MAINNET : constants.StarknetChainId.TESTNET}
             icon={<TimerIcon boxSize="30px" />}
           />
         </Flex>
         <Divider borderColor="gray.800" w="full" />
         <VStack mt="24px" w="full" align="start" spacing="18px">
-        {txns.length > 0 && (
+        {pendingTransactions.length > 0 && (
             <VStack w="full" align="start" spacing="12px"> 
               <Text fontSize="12px" color="gray.200" variant="ibm-upper-bold">
                 Pending...
               </Text>
-              {txns.map((txn, i) => <Transaction key={i} chainId={chainId} name={txn.name} hash={txn.hash}/>)}
+              {pendingTransactions.map((txn, i) => <Transaction key={i} chainId={txn.chainId} name={txn.label} hash={txn.hash}/>)}
+            </VStack>
+          )}
+          {finalizedTransactions.length > 0 && (
+            <VStack w="full" align="start" spacing="12px"> 
+              <Text fontSize="12px" color="gray.200" variant="ibm-upper-bold">
+                Finalized
+              </Text>
+              {finalizedTransactions.map((txn, i) => <Transaction key={i} chainId={txn.chainId} name={txn.label} hash={txn.hash} initialState={txn.state}/>)}
             </VStack>
           )}
           {Object.keys(transactions).map((date, i) => (
@@ -60,8 +78,8 @@ const Transactions: NextPage = () => {
               <Text fontSize="12px" color="gray.200" variant="ibm-upper-bold">
                 {new Date(date).toLocaleDateString()}
               </Text>
-              {transactions[date].map((txn, i) => {
-                const x = txn.metadata.__typename
+              {Object.keys(transactions[date]).map((txn: any, i) => {
+                txn = transactions[date][txn];
                 const names = {
                   "AccountUpgrade": "Account Upgrade",
                   "ContractDeploy": "Deploy",
@@ -79,7 +97,7 @@ const Transactions: NextPage = () => {
                   })()
                 }
 
-                return <Transaction key={i} chainId={chainId} name={names[txn.metadata.__typename]} hash={txn.transactionHash}/>;
+                return <Transaction key={i} chainId={chainId === "SN_MAIN" ? constants.StarknetChainId.MAINNET : constants.StarknetChainId.TESTNET} name={names[txn.metadata.__typename]} hash={txn.transactionHash} initialState="success" />
               })}
               </VStack>
           ))}

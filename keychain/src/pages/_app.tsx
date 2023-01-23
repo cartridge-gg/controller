@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { CartridgeUIProvider } from "@cartridge/ui/theme/Provider";
 
 import "../style.css";
+import { PendingProvider } from "hooks/pending";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,7 +32,9 @@ function Keychain({ Component, pageProps }: AppProps) {
       </NextHead>
       <CartridgeUIProvider>
         <QueryClientProvider client={queryClient}>
-          <Component {...pageProps} />
+          <PendingProvider>
+            <Component {...pageProps} />
+          </PendingProvider>
         </QueryClientProvider>
       </CartridgeUIProvider>
     </>
