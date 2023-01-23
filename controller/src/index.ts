@@ -1,9 +1,7 @@
 import {
   AccountInterface,
   constants,
-  number,
   RpcProvider,
-  Signature,
 } from "starknet";
 import {
   AsyncMethodReturns,
@@ -21,7 +19,6 @@ import {
   ProbeReply,
   Modal,
 } from "./types";
-import { verifyMessageHash } from "./utils";
 import { createModal } from "./modal";
 
 export const providers = {

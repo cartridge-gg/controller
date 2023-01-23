@@ -17,7 +17,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       connectors={connectors}
       defaultProvider={
         new RpcProvider({
-          nodeUrl: "https://starknet-goerli.cartridge.gg/rpc/v0.2",
+          nodeUrl: process.env.NEXT_PUBLIC_RPC_GOERLI,
         })
       }
     >

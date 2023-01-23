@@ -192,7 +192,7 @@ const Execute = ({
         selectors[VERSION].register(controller.address, chainId),
       ) as RegisterData;
 
-      return await Promise.all([
+      const responses = await Promise.all([
         controller
           .account(chainId)
           .invokeFunction(pendingRegister.invoke.invocation, {
@@ -205,6 +205,11 @@ const Execute = ({
           version: hash.transactionVersion,
         }),
       ]);
+      onExecute({
+        transaction_hash: responses[1].transaction_hash,
+        code: ResponseCodes.SUCCESS,
+      })
+      return
     }
 
     const response = await account.execute(calls, null, {
@@ -216,7 +221,7 @@ const Execute = ({
       transaction_hash: response.transaction_hash,
       code: ResponseCodes.SUCCESS,
     });
-  }, [account, nonce, calls, fees, onExecute]);
+  }, [account, chainId, controller, nonce, calls, fees, onExecute]);
 
   return (
     <Content>
