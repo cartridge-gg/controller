@@ -205,11 +205,12 @@ const Execute = ({
           version: hash.transactionVersion,
         }),
       ]);
+      Storage.remove(selectors[VERSION].register(controller.address, chainId));
       onExecute({
         transaction_hash: responses[1].transaction_hash,
         code: ResponseCodes.SUCCESS,
       })
-      return
+      return;
     }
 
     const response = await account.execute(calls, null, {
