@@ -350,17 +350,8 @@ const Index: NextPage = () => {
 
             // This device needs to be registered, so do a webauthn signature request
             // for the register transaction during the connect flow.
-            const pendingRegister = Storage.get(
-              selectors[VERSION].register(controller.address, chainId),
-            );
-            if (account.status !== Status.REGISTERED && !pendingRegister) {
-              const { assertion, invoke } = await controller.signAddDeviceKey(
-                chainId,
-              );
-              Storage.set(
-                selectors[VERSION].register(controller.address, chainId),
-                { assertion, invoke },
-              );
+            if (account.status === Status.DEPLOYED) {
+              await account.register();
             }
 
             ctx.resolve({ code: ResponseCodes.SUCCESS, address, policies });

@@ -52,7 +52,6 @@ export default class Controller {
   public publicKey: string;
   protected keypair: KeyPair;
   protected credentialId: string;
-  protected webauthn: { [key in constants.StarknetChainId]: WebauthnAccount };
   protected accounts: { [key in constants.StarknetChainId]: Account };
 
   constructor(
@@ -75,42 +74,39 @@ export default class Controller {
         process.env.NEXT_PUBLIC_RPC_GOERLI,
         address,
         this.signer,
+        new WebauthnAccount(
+          process.env.NEXT_PUBLIC_RPC_GOERLI,
+          address,
+          credentialId,
+          this.publicKey,
+          options,
+        )
       ),
       [constants.StarknetChainId.TESTNET2]: new Account(
         constants.StarknetChainId.TESTNET2,
         process.env.NEXT_PUBLIC_RPC_GOERLI,
         address,
         this.signer,
+        new WebauthnAccount(
+          process.env.NEXT_PUBLIC_RPC_GOERLI,
+          address,
+          credentialId,
+          this.publicKey,
+          options,
+        )
       ),
       [constants.StarknetChainId.MAINNET]: new Account(
         constants.StarknetChainId.MAINNET,
         process.env.NEXT_PUBLIC_RPC_MAINNET,
         address,
         this.signer,
-      ),
-    };
-
-    this.webauthn = {
-      [constants.StarknetChainId.TESTNET]: new WebauthnAccount(
-        process.env.NEXT_PUBLIC_RPC_GOERLI,
-        address,
-        credentialId,
-        this.publicKey,
-        options,
-      ),
-      [constants.StarknetChainId.TESTNET2]: new WebauthnAccount(
-        process.env.NEXT_PUBLIC_RPC_GOERLI,
-        address,
-        credentialId,
-        this.publicKey,
-        options,
-      ),
-      [constants.StarknetChainId.MAINNET]: new WebauthnAccount(
-        process.env.NEXT_PUBLIC_RPC_MAINNET,
-        address,
-        credentialId,
-        this.publicKey,
-        options,
+        new WebauthnAccount(
+          process.env.NEXT_PUBLIC_RPC_MAINNET,
+          address,
+          credentialId,
+          this.publicKey,
+          options,
+        )
       ),
     };
 
@@ -140,69 +136,8 @@ export default class Controller {
     };
   }
 
-  webauthnAccount(chainId: constants.StarknetChainId) {
-    return this.webauthn[chainId];
-  }
-
   account(chainId: constants.StarknetChainId) {
     return this.accounts[chainId];
-  }
-
-  async signAddDeviceKey(
-    chainId: constants.StarknetChainId,
-  ): Promise<RegisterData> {
-    const calls: Call[] = [
-      {
-        contractAddress: this.address,
-        entrypoint: "executeOnPlugin",
-        calldata: [
-          CLASS_HASHES["0.0.1"].controller,
-          hash.getSelector("add_device_key"),
-          1,
-          this.publicKey,
-        ],
-      },
-    ];
-
-    const nonce = await this.accounts[chainId].getNonce();
-    const version = number.toBN(hash.transactionVersion);
-    const calldata = transaction.fromCallsToExecuteCalldata(calls);
-
-    const gas = 28000;
-    const gasPrice = await getGasPrice(chainId);
-    const fee = number.toBN(gasPrice).mul(number.toBN(gas));
-    const suggestedMaxFee = number.toHex(stark.estimatedFeeToMaxFee(fee));
-
-    let msgHash = hash.calculateTransactionHash(
-      this.address,
-      version,
-      calldata,
-      suggestedMaxFee,
-      chainId,
-      nonce,
-    );
-
-    let challenge = Uint8Array.from(
-      msgHash
-        .slice(2)
-        .padStart(64, "0")
-        .slice(0, 64)
-        .match(/.{1,2}/g)
-        .map((byte) => parseInt(byte, 16)),
-    );
-    const assertion = await this.webauthn[chainId].signer.sign(challenge);
-    const signature = formatAssertion(assertion);
-    return {
-      assertion,
-      invoke: {
-        invocation: { contractAddress: this.address, calldata, signature },
-        details: {
-          nonce,
-          maxFee: suggestedMaxFee,
-          version,
-        },
-      },
-    };
   }
 
   delete() {
