@@ -38,15 +38,12 @@ import Web3Auth from "components/Web3Auth";
 import Continue from "components/signup/Continue";
 import { client } from "utils/graphql";
 import Controller from "utils/controller";
-import { useInterval } from "usehooks-ts";
 import Content from "../Content";
 
 export const Signup = ({
-  starterPackId,
   showLogin,
   onSignup,
 }: {
-  starterPackId?: string;
   showLogin: () => void;
   onSignup: (controller: Controller) => void;
 }) => {
@@ -58,9 +55,18 @@ export const Signup = ({
   const [dismissed, setDismissed] = useState<boolean>(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { debouncedValue: debouncedName } = useDebounce(name, 1500);
-  const { error, refetch, isFetching } = useAccountQuery(
+  const {
+    error,
+    refetch,
+    isFetching,
+    data: accountData,
+  } = useAccountQuery(
     { id: debouncedName },
-    { enabled: false, retry: false },
+    {
+      enabled: isRegistering,
+      retry: isRegistering,
+      refetchInterval: 1000,
+    },
   );
 
   const { mutateAsync: deployAccount, isLoading: isDeploying } =
@@ -74,7 +80,7 @@ export const Signup = ({
   }, [refetch, debouncedName]);
 
   useEffect(() => {
-    if (isFetching) {
+    if (isRegistering || isFetching) {
       return;
     }
 
@@ -93,27 +99,33 @@ export const Signup = ({
       setNameError("This account already exists.");
       setCanContinue(false);
     }
-  }, [debouncedName, isFetching, error, dismissed, onOpen]);
+  }, [debouncedName, isFetching, error, dismissed, isRegistering, onOpen]);
 
-  useInterval(
-    async () => {
-      const result = await refetch();
+  useEffect(() => {
+    if (accountData && isRegistering) {
+      deployAccount({
+        id: debouncedName,
+        chainId: "starknet:SN_GOERLI",
+      });
 
-      if (result.data) {
-        const {
-          account: {
-            credential: { id: credentialId },
-            contractAddress: address,
-          },
-        } = result.data;
+      const {
+        account: {
+          credential: { id: credentialId },
+          contractAddress: address,
+        },
+      } = accountData;
 
-        const controller = new Controller(keypair, address, credentialId);
-        deployAccount({ id: debouncedName, chainId: "starknet:SN_GOERLI" });
-        onSignup(controller);
-      }
-    },
-    isRegistering ? 500 : null,
-  );
+      const controller = new Controller(keypair, address, credentialId);
+      onSignup(controller);
+    }
+  }, [
+    accountData,
+    isRegistering,
+    debouncedName,
+    keypair,
+    onSignup,
+    deployAccount,
+  ]);
 
   const onContinue = useCallback(async () => {
     const keypair = ec.genKeyPair();
@@ -122,12 +134,17 @@ export const Signup = ({
     setKeypair(keypair);
     setIsRegistering(true);
 
+    const height = 640;
+    const width = 480;
+
     window.open(
       `/authenticate?name=${encodeURIComponent(
         debouncedName,
       )}&pubkey=${encodeURIComponent(deviceKey)}`,
       "_blank",
-      "height=640,width=480",
+      `height=${height},width=${width},top=${
+        window.screenY + (window.outerHeight - width) / 2
+      },left=${window.screenX + (window.outerWidth - height) / 2}`,
     );
   }, [debouncedName]);
 
