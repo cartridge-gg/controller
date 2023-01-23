@@ -201,6 +201,12 @@ class Account extends BaseAccount {
         }),
       ]);
       Storage.remove(selectors[VERSION].register(this.address, this._chainId));
+
+      this.status = Status.REGISTERED;
+      Storage.update(this.selector, {
+        status: Status.REGISTERED,
+      });
+
       return responses[1];
     }
 
