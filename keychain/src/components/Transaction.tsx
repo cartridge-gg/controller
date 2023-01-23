@@ -28,7 +28,9 @@ export const Transaction = ({
   showChainId,
   initialState,
 }: TransactionProps) => {
-  const [state, setState] = useState<TransactionState>(initialState ?? "pending");
+  const [state, setState] = useState<TransactionState>(
+    initialState ?? "pending",
+  );
   const { color, icon } = useMemo(() => getColorIcon(state), [state]);
   const controller = useMemo(() => Controller.fromStore(), []);
 

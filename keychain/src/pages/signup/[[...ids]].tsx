@@ -1,12 +1,7 @@
 import { useMemo, useCallback, useEffect, useState } from "react";
 import type { NextPage } from "next";
 import { motion } from "framer-motion";
-import {
-  Flex,
-  Divider,
-  SimpleGrid,
-  Container,
-} from "@chakra-ui/react";
+import { Flex, Divider, SimpleGrid, Container } from "@chakra-ui/react";
 import {
   useAccountInfoQuery,
   useStarterPackQuery,
@@ -235,7 +230,7 @@ const CreateWallet: NextPage = () => {
           )}
           {regState == RegistrationState.QUESTS &&
             starterPackData?.game?.starterPack?.prerequisitesQuests?.length >
-            0 && (
+              0 && (
               <Quests
                 username={username}
                 gameId={gameId}

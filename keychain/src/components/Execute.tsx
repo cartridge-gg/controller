@@ -209,7 +209,7 @@ const Execute = ({
       onExecute({
         transaction_hash: responses[1].transaction_hash,
         code: ResponseCodes.SUCCESS,
-      })
+      });
       return;
     }
 

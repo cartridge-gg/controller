@@ -1,4 +1,10 @@
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import { ChainId } from "caip";
 import CheckmarkIcon from "components/icons/Checkmark";
 import { constants, shortString } from "starknet";
@@ -13,7 +19,6 @@ import Toast from "components/Toast";
 import TransactionIcon from "components/icons/Transaction";
 import WarningIcon from "components/icons/Warning";
 import TimerIcon from "@cartridge/ui/components/icons/Timer";
-
 
 export interface PendingTransaction {
   hash: string;
@@ -49,10 +54,9 @@ export function PendingProvider({
   const toast = useToast({
     position: "top-right",
     duration: 3000,
-    render: (props) => <Toast 
-      icon={<TransactionIcon w="28px" h="28px" />}
-      {...props as any}
-    />
+    render: (props) => (
+      <Toast icon={<TransactionIcon w="28px" h="28px" />} {...(props as any)} />
+    ),
   });
 
   // const provider = new RpcProvider({
@@ -81,10 +85,7 @@ export function PendingProvider({
 
   const onFailed = useCallback(
     (tx: PendingTransaction) => {
-      setFinalizedTransactions((prev) => [
-        ...prev,
-        { ...tx, state: "error" },
-      ]);
+      setFinalizedTransactions((prev) => [...prev, { ...tx, state: "error" }]);
 
       toast({
         title: "Transaction failed",
@@ -108,11 +109,15 @@ export function PendingProvider({
       });
       setPendingTransactions((prev) => [...prev, tx]);
 
-      controller.account(tx.chainId).waitForTransaction(tx.hash).then(() => {
-        onConfirmed(tx);
-      }).catch(() => {
-        onFailed(tx);
-      });
+      controller
+        .account(tx.chainId)
+        .waitForTransaction(tx.hash)
+        .then(() => {
+          onConfirmed(tx);
+        })
+        .catch(() => {
+          onFailed(tx);
+        });
     },
     [account, onConfirmed],
   );

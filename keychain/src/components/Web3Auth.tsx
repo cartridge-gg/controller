@@ -6,7 +6,13 @@ import { computeAddress } from "methods/register";
 import Controller from "utils/controller";
 import web3auth from "utils/web3auth";
 
-const Web3Auth = ({ username, onAuth }: { username: string, onAuth: (controller: Controller) => void }) => {
+const Web3Auth = ({
+  username,
+  onAuth,
+}: {
+  username: string;
+  onAuth: (controller: Controller) => void;
+}) => {
   const login = async (loginProvider: "discord" | "twitter" | "metamask") => {
     if (!web3auth) {
       console.error("web3auth not initialized yet");
@@ -53,7 +59,8 @@ const Web3Auth = ({ username, onAuth }: { username: string, onAuth: (controller:
             login("discord");
           }}
         >
-          <Discord height="16px" width="16px" mr="12px" mt="1px" />Connect with Discord
+          <Discord height="16px" width="16px" mr="12px" mt="1px" />
+          Connect with Discord
         </Button>
         {/* <Button flex={1} variant="secondary700" onClick={async () => {
                 login("twitter");
