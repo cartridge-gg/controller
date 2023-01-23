@@ -27,6 +27,7 @@ import {
 } from "generated/graphql";
 import { useDebounce } from "hooks/debounce";
 import { ec, KeyPair } from "starknet";
+import { PopupCenter } from "utils/url";
 
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import ReturnIcon from "@cartridge/ui/src/components/icons/Return";
@@ -134,17 +135,13 @@ export const Signup = ({
     setKeypair(keypair);
     setIsRegistering(true);
 
-    const height = 640;
-    const width = 480;
-
-    window.open(
+    PopupCenter(
       `/authenticate?name=${encodeURIComponent(
         debouncedName,
       )}&pubkey=${encodeURIComponent(deviceKey)}`,
-      "_blank",
-      `height=${height},width=${width},top=${
-        window.screenY + (window.outerHeight - width) / 2
-      },left=${window.screenX + (window.outerWidth - height) / 2}`,
+      "Cartridge Signup",
+      480,
+      640,
     );
   }, [debouncedName]);
 
