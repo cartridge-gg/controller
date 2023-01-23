@@ -1,9 +1,7 @@
 import type { NextPage } from "next";
 import dynamic from "next/dynamic";
 import { ReactNode, useEffect, useState } from "react";
-
 import { connectToParent } from "@cartridge/penpal";
-
 import Controller, { diff, VERSION } from "utils/controller";
 import {
   ConnectReply,
@@ -17,7 +15,7 @@ import {
 import Connect from "components/Connect";
 import { Login } from "components/Login";
 import { Signup } from "components/signup";
-import { VStack, Container as ChakraContainer } from "@chakra-ui/react";
+import { Container as ChakraContainer } from "@chakra-ui/react";
 import { Header } from "components/Header";
 import {
   Abi,
@@ -30,6 +28,7 @@ import {
 } from "starknet";
 import SignMessage from "components/SignMessage";
 import Execute from "components/Execute";
+import { StarterPackEmbedded as StarterPack } from "components/signup/StarterPack";
 import selectors from "utils/selectors";
 import Storage from "utils/storage";
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
@@ -48,12 +47,13 @@ const Container = ({ children }: { children: ReactNode }) => (
   </ChakraContainer>
 );
 
-type Context = Connect | Execute | SignMessage;
+type Context = Connect | Execute | SignMessage | StarterPack;
 
 type Connect = {
   origin: string;
   type: "connect";
   policies: Policy[];
+  starterPackId?: string;
   resolve: (res: ConnectReply | Error) => void;
   reject: (reason?: unknown) => void;
 };
@@ -76,6 +76,14 @@ type SignMessage = {
   typedData: typedData.TypedData;
   account: string;
   resolve: (signature: Signature | Error) => void;
+  reject: (reason?: unknown) => void;
+};
+
+type StarterPack = {
+  origin: string;
+  type: "starterpack";
+  starterPackId: string;
+  resolve: (res: ExecuteReply | Error) => void;
   reject: (reason?: unknown) => void;
 };
 
@@ -104,12 +112,16 @@ const Index: NextPage = () => {
       methods: {
         connect: normalize(
           (origin: string) =>
-            async (policies: Policy[]): Promise<ConnectReply> => {
+            async (
+              policies: Policy[],
+              starterPackId: string,
+            ): Promise<ConnectReply> => {
               return await new Promise((resolve, reject) => {
                 setContext({
                   type: "connect",
                   origin,
                   policies,
+                  starterPackId,
                   resolve,
                   reject,
                 } as Connect);
@@ -249,6 +261,19 @@ const Index: NextPage = () => {
         session: normalize(session),
         sessions: normalize(sessions),
         reset: normalize(() => () => setContext(undefined)),
+        issueStarterPack: normalize(
+          (origin: string) => async (starterPackId: string) => {
+            return await new Promise((resolve, reject) => {
+              setContext({
+                type: "starterpack",
+                origin,
+                starterPackId,
+                resolve,
+                reject,
+              } as StarterPack);
+            });
+          },
+        ),
       },
     });
 
@@ -288,10 +313,21 @@ const Index: NextPage = () => {
   }
 
   const account = controller.account(chainId);
-
   const sesh = controller.session(context.origin);
+
   if (context.type === "connect" || !sesh) {
     const ctx = context as Connect;
+
+    // if no mismatch with existing policies then return success
+    if (sesh && diff(sesh.policies, ctx.policies).length === 0) {
+      ctx.resolve({
+        code: ResponseCodes.SUCCESS,
+        address: controller.address,
+        policies: ctx.policies,
+      });
+      return <></>;
+    }
+
     return (
       <Container>
         <Connect
@@ -329,6 +365,21 @@ const Index: NextPage = () => {
 
             ctx.resolve({ code: ResponseCodes.SUCCESS, address, policies });
           }}
+          onCancel={(error: Error) => ctx.resolve(error)}
+        />
+      </Container>
+    );
+  }
+
+  if (context.type === "starterpack") {
+    const ctx = context as StarterPack;
+    return (
+      <Container>
+        <StarterPack
+          chainId={chainId}
+          controller={controller}
+          starterPackId={ctx.starterPackId}
+          onClaim={(res: ExecuteReply) => ctx.resolve(res)}
           onCancel={(error: Error) => ctx.resolve(error)}
         />
       </Container>

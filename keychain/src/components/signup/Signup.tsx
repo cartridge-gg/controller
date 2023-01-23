@@ -42,9 +42,11 @@ import { useInterval } from "usehooks-ts";
 import Content from "../Content";
 
 export const Signup = ({
+  starterPackId,
   showLogin,
   onSignup,
 }: {
+  starterPackId?: string;
   showLogin: () => void;
   onSignup: (controller: Controller) => void;
 }) => {
@@ -108,6 +110,7 @@ export const Signup = ({
         const controller = new Controller(keypair, address, credentialId);
         deployAccount({ id: debouncedName, chainId: "starknet:SN_GOERLI" });
         onSignup(controller);
+        console.log(starterPackId);
       }
     },
     isRegistering ? 500 : null,
