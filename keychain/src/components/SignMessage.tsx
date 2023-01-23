@@ -9,6 +9,7 @@ import { Banner } from "components/Banner";
 import Controller from "utils/controller";
 import Footer from "./Footer";
 import { Error, ResponseCodes } from "@cartridge/controller";
+import { Status } from "utils/account";
 
 const SignMessage = ({
   controller,
@@ -98,9 +99,7 @@ const SignMessage = ({
       <Footer
         onConfirm={async () => {
           const account = controller.account(chainId);
-          const sig = await (account.registered || !account.deployed
-            ? account.signMessage(typedData)
-            : controller.webauthnAccount(chainId).signMessage(typedData));
+          const sig = await account.signMessage(typedData);
           onSign(sig);
         }}
         onCancel={() => {

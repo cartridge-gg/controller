@@ -17,6 +17,7 @@ import { Banner } from "components/Banner";
 import { constants } from "starknet";
 import { Error, Policy, ResponseCodes } from "@cartridge/controller";
 import { motion } from "framer-motion";
+import { Status } from "utils/account";
 
 const Connect = ({
   controller,
@@ -40,17 +41,6 @@ const Connect = ({
   onCancel: (error: Error) => void;
 }) => {
   const [maxFee, setMaxFee] = useState(null);
-  const [registerDevice, setRegisterDevice] = useState(false);
-  const account = controller.account(chainId);
-
-  useEffect(() => {
-    if (account) {
-      if (account.deployed && !account.registered) {
-        setRegisterDevice(true);
-        return;
-      }
-    }
-  }, [controller, account]);
 
   const connect = useCallback(
     async (values, actions) => {
