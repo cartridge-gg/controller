@@ -166,7 +166,7 @@ const Index: NextPage = () => {
                 }
 
                 const account = controller.account(cId);
-                if (!account.registered || !account.deployed) {
+                if (account.status === Status.COUNTERFACTUAL) {
                   return Promise.resolve({
                     code: ResponseCodes.NOT_ALLOWED,
                     message: "Account not registered or deployed.",
@@ -178,10 +178,10 @@ const Index: NextPage = () => {
                   : [transactions];
                 const policies = calls.map(
                   (txn) =>
-                    ({
-                      target: txn.contractAddress,
-                      method: txn.entrypoint,
-                    } as Policy),
+                  ({
+                    target: txn.contractAddress,
+                    method: txn.entrypoint,
+                  } as Policy),
                 );
 
                 const missing = diff(policies, session.policies);
@@ -353,7 +353,7 @@ const Index: NextPage = () => {
             const pendingRegister = Storage.get(
               selectors[VERSION].register(controller.address, chainId),
             );
-            if (!account.registered && !pendingRegister) {
+            if (account.status !== Status.REGISTERED && !pendingRegister) {
               const { assertion, invoke } = await controller.signAddDeviceKey(
                 chainId,
               );

@@ -7,14 +7,12 @@ import {
   constants,
   hash,
   number,
-  transaction,
   Account as BaseAccount,
   RpcProvider,
   SignerInterface,
   Call,
   EstimateFeeDetails,
   EstimateFee,
-  GetTransactionReceiptResponse,
   Signature,
 } from "starknet";
 import { client } from "utils/graphql";
@@ -36,10 +34,8 @@ class Account extends BaseAccount {
   private rpc: RpcProvider;
   private selector: string;
   _chainId: constants.StarknetChainId;
-  deployed: boolean = false;
-  registered: boolean = false;
   updated: boolean = true;
-  status: Status = Status.UNKNOWN;
+  status: Status = Status.COUNTERFACTUAL;
 
   constructor(
     chainId: constants.StarknetChainId,
@@ -52,11 +48,6 @@ class Account extends BaseAccount {
     this.selector = selectors["0.0.3"].deployment(address, chainId);
     this._chainId = chainId;
     const state = Storage.get(this.selector);
-
-    if (state) {
-      this.deployed = !!state.deployed;
-      this.registered = !!state.registered;
-    }
 
     if (!state || Date.now() - state.syncing > 5000) {
       this.sync();
@@ -86,10 +77,13 @@ class Account extends BaseAccount {
     console.log("syncing")
 
     try {
-      if (!this.deployed || !this.registered) {
+      if (this.status === Status.COUNTERFACTUAL) {
         const registerTxnHash = Storage.get(this.selector).registerTxnHashHash;
         if (registerTxnHash) {
           this.status = Status.REGISTERING;
+          Storage.update(this.selector, {
+            status: Status.REGISTERING,
+          });
           this.rpc
             .waitForTransaction(registerTxnHash, 1000, ["ACCEPTED_ON_L1", "ACCEPTED_ON_L2"])
             .then(() => this.sync());
@@ -99,6 +93,9 @@ class Account extends BaseAccount {
         const data = await this.getContract();
         if (!data?.contract?.deployTransaction?.id) {
           this.status = Status.COUNTERFACTUAL;
+          Storage.update(this.selector, {
+            status: Status.DEPLOYING,
+          });
           return;
         }
 
@@ -108,6 +105,9 @@ class Account extends BaseAccount {
         // Pending txn so poll for inclusion.
         if (!('status' in deployTxnReceipt)) {
           this.status = Status.DEPLOYING;
+          Storage.update(this.selector, {
+            status: Status.DEPLOYING,
+          });
           this.rpc
             .waitForTransaction(deployTxnHash, 1000, ["ACCEPTED_ON_L1", "ACCEPTED_ON_L2"])
             .then(() => this.sync());
@@ -115,6 +115,9 @@ class Account extends BaseAccount {
         }
 
         if (deployTxnReceipt.status === "REJECTED") {
+          Storage.update(this.selector, {
+            status: Status.COUNTERFACTUAL,
+          });
           this.status = Status.COUNTERFACTUAL;
           return;
         }
@@ -123,10 +126,8 @@ class Account extends BaseAccount {
       const classHash = await this.rpc.getClassHashAt(this.address, "latest");
       Storage.update(this.selector, {
         classHash,
-        deployed: true,
         status: Status.DEPLOYED,
       });
-      this.deployed = true;
       this.status = Status.DEPLOYED;
 
       if (classHash !== CLASS_HASHES["latest"].account) {
@@ -153,10 +154,12 @@ class Account extends BaseAccount {
         "latest",
       );
 
-      this.registered = number.toBN(res.result[1]).eq(number.toBN(1));
-      Storage.update(this.selector, {
-        registered: this.registered,
-      });
+      if (number.toBN(res.result[1]).eq(number.toBN(1))) {
+        Storage.update(this.selector, {
+          status: Status.REGISTERED,
+        });
+        this.status = Status.REGISTERED;
+      }
     } catch (e) {
       /* no-op */
       console.log(e);

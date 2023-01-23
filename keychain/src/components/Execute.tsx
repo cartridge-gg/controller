@@ -29,8 +29,8 @@ import {
   ExecuteReply,
   ResponseCodes,
 } from "@cartridge/controller";
-import { motion } from "framer-motion";
 import Content from "./Content";
+import { Status } from "utils/account";
 
 const Execute = ({
   origin,
@@ -74,7 +74,7 @@ const Execute = ({
       return;
     }
 
-    if (account.registered && transactionsDetail.maxFee) {
+    if (account.status === Status.REGISTERED && transactionsDetail.maxFee) {
       setFees({
         base: number.toBN(transactionsDetail.maxFee),
         max: number.toBN(transactionsDetail.maxFee),
@@ -82,7 +82,7 @@ const Execute = ({
       return;
     }
 
-    if (account.registered) {
+    if (account.status === Status.REGISTERED) {
       account
         .estimateInvokeFee(calls, { nonce })
         .then((fees) => {
@@ -187,7 +187,7 @@ const Execute = ({
   const onSubmit = useCallback(async () => {
     setLoading(true);
 
-    if (!account.registered) {
+    if (account.status !== Status.REGISTERED) {
       const pendingRegister = Storage.get(
         selectors[VERSION].register(controller.address, chainId),
       ) as RegisterData;
