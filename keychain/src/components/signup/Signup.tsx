@@ -21,12 +21,12 @@ import {
 } from "@chakra-ui/react";
 import {
   BeginRegistrationDocument,
+  DeployAccountDocument,
   FinalizeRegistrationDocument,
   useAccountQuery,
-  useDeployAccountMutation,
 } from "generated/graphql";
 import { useDebounce } from "hooks/debounce";
-import { ec, KeyPair } from "starknet";
+import { constants, ec, KeyPair } from "starknet";
 import { PopupCenter } from "utils/url";
 
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
@@ -39,8 +39,9 @@ import Web3Auth from "components/Web3Auth";
 import Continue from "components/signup/Continue";
 import { client } from "utils/graphql";
 import Controller from "utils/controller";
-import Container from "../Container";
+import Container from "components/Container";
 import { Header } from "components/Header";
+import { Status } from "utils/account";
 
 export const Signup = ({
   showLogin,
@@ -73,9 +74,6 @@ export const Signup = ({
     },
   );
 
-  const { mutateAsync: deployAccount, isLoading: isDeploying } =
-    useDeployAccountMutation();
-
   useEffect(() => {
     if (debouncedName.length === 0) {
       return;
@@ -107,11 +105,6 @@ export const Signup = ({
 
   useEffect(() => {
     if (accountData && isRegistering) {
-      deployAccount({
-        id: debouncedName,
-        chainId: "starknet:SN_GOERLI",
-      });
-
       const {
         account: {
           credential: { id: credentialId },
@@ -121,15 +114,19 @@ export const Signup = ({
 
       const controller = new Controller(keypair, address, credentialId);
       onSignup(controller);
+
+      controller.account(constants.StarknetChainId.TESTNET).status =
+        Status.DEPLOYING;
+      client
+        .request(DeployAccountDocument, {
+          id: debouncedName,
+          chainId: "starknet:SN_GOERLI",
+        })
+        .then(() => {
+          controller.account(constants.StarknetChainId.TESTNET).sync();
+        });
     }
-  }, [
-    accountData,
-    isRegistering,
-    debouncedName,
-    keypair,
-    onSignup,
-    deployAccount,
-  ]);
+  }, [accountData, isRegistering, debouncedName, keypair, onSignup]);
 
   const onContinue = useCallback(async () => {
     const keypair = ec.genKeyPair();
@@ -312,6 +309,19 @@ export const Signup = ({
                             signer: controller.publicKey,
                           });
                           onSignup(controller);
+                          controller.account(
+                            constants.StarknetChainId.TESTNET,
+                          ).status = Status.DEPLOYING;
+                          client
+                            .request(DeployAccountDocument, {
+                              id: debouncedName,
+                              chainId: "starknet:SN_GOERLI",
+                            })
+                            .then(() => {
+                              controller
+                                .account(constants.StarknetChainId.TESTNET)
+                                .sync();
+                            });
                         }}
                       />
                     </VStack>
