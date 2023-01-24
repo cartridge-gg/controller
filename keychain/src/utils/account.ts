@@ -152,6 +152,10 @@ class Account extends BaseAccount {
         }
       }
 
+      if (this.status === Status.PENDING_REGISTER) {
+        return;
+      }
+
       const classHash = await this.rpc.getClassHashAt(this.address, "pending");
       Storage.update(this.selector, {
         classHash,
