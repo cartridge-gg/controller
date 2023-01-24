@@ -36,7 +36,7 @@ const Container = ({
       align="center"
       justify="center"
       flexShrink={0}
-      bg="gray.800"
+      bg="gray.700"
       {...rest}
     >
       <ChakraContainer centerContent>{children}</ChakraContainer>
@@ -76,7 +76,7 @@ export const Header = ({
           <Button
             h="30px"
             w="42px"
-            variant="secondary600"
+            variant="secondary450"
             visibility={!!onClose ? "visible" : "hidden"}
             onClick={onClose}
           >
