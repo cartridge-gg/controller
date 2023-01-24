@@ -39,15 +39,18 @@ import Web3Auth from "components/Web3Auth";
 import Continue from "components/signup/Continue";
 import { client } from "utils/graphql";
 import Controller from "utils/controller";
-import Content from "../Content";
+import Container from "components/Container";
+import { Header } from "components/Header";
 import { Status } from "utils/account";
 
 export const Signup = ({
   showLogin,
   onSignup,
+  onCancel,
 }: {
   showLogin: () => void;
   onSignup: (controller: Controller) => void;
+  onCancel?: () => void;
 }) => {
   const [name, setName] = useState("");
   const [keypair, setKeypair] = useState<KeyPair>();
@@ -112,21 +115,18 @@ export const Signup = ({
       const controller = new Controller(keypair, address, credentialId);
       onSignup(controller);
 
-      controller.account(constants.StarknetChainId.TESTNET).status = Status.DEPLOYING;
-      client.request(DeployAccountDocument, {
-        id: debouncedName,
-        chainId: "starknet:SN_GOERLI",
-      }).then(() => {
-        controller.account(constants.StarknetChainId.TESTNET).sync();
-      })
+      controller.account(constants.StarknetChainId.TESTNET).status =
+        Status.DEPLOYING;
+      client
+        .request(DeployAccountDocument, {
+          id: debouncedName,
+          chainId: "starknet:SN_GOERLI",
+        })
+        .then(() => {
+          controller.account(constants.StarknetChainId.TESTNET).sync();
+        });
     }
-  }, [
-    accountData,
-    isRegistering,
-    debouncedName,
-    keypair,
-    onSignup,
-  ]);
+  }, [accountData, isRegistering, debouncedName, keypair, onSignup]);
 
   const onContinue = useCallback(async () => {
     const keypair = ec.genKeyPair();
@@ -150,7 +150,8 @@ export const Signup = ({
   }
 
   return (
-    <Content gap="18px">
+    <Container gap="18px">
+      <Header onClose={onCancel} />
       <HStack spacing="14px" pt="36px">
         <Circle size="48px" bgColor="gray.700">
           <JoystickIcon boxSize="30px" />
@@ -226,8 +227,8 @@ export const Signup = ({
                         canContinue
                           ? "green.400"
                           : nameError
-                            ? "red.400"
-                            : "gray.600"
+                          ? "red.400"
+                          : "gray.600"
                       }
                       errorBorderColor="crimson"
                       placeholder="Username"
@@ -308,13 +309,19 @@ export const Signup = ({
                             signer: controller.publicKey,
                           });
                           onSignup(controller);
-                          controller.account(constants.StarknetChainId.TESTNET).status = Status.DEPLOYING;
-                          client.request(DeployAccountDocument, {
-                            id: debouncedName,
-                            chainId: "starknet:SN_GOERLI",
-                          }).then(() => {
-                            controller.account(constants.StarknetChainId.TESTNET).sync();
-                          })
+                          controller.account(
+                            constants.StarknetChainId.TESTNET,
+                          ).status = Status.DEPLOYING;
+                          client
+                            .request(DeployAccountDocument, {
+                              id: debouncedName,
+                              chainId: "starknet:SN_GOERLI",
+                            })
+                            .then(() => {
+                              controller
+                                .account(constants.StarknetChainId.TESTNET)
+                                .sync();
+                            });
                         }}
                       />
                     </VStack>
@@ -325,7 +332,7 @@ export const Signup = ({
           </Form>
         )}
       </Formik>
-    </Content>
+    </Container>
   );
 };
 

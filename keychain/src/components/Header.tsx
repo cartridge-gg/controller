@@ -4,15 +4,18 @@ import {
   Box,
   Link,
   Flex,
+  Button,
   Spacer,
   HStack,
   Container as ChakraContainer,
   StyleProps,
+  Text,
 } from "@chakra-ui/react";
 
 import { Logo } from "@cartridge/ui/src/components/brand/Logo";
 import { WordLogo } from "@cartridge/ui/src/components/brand/Word";
 import ChainDropdown from "@cartridge/ui/src/components/menu/Chain";
+import TimesIcon from "@cartridge/ui/src/components/icons/Times";
 
 const Container = ({
   height,
@@ -33,7 +36,7 @@ const Container = ({
       align="center"
       justify="center"
       flexShrink={0}
-      bg="gray.800"
+      bg="gray.700"
       {...rest}
     >
       <ChakraContainer centerContent>{children}</ChakraContainer>
@@ -46,10 +49,12 @@ export const Header = ({
   address,
   muted = false,
   onLogout,
+  onClose,
 }: {
   address?: string;
   muted?: boolean;
   onLogout?: () => void;
+  onClose?: () => void;
 }) => {
   if (!address) {
     const fill = muted ? "gray.200" : "brand";
@@ -61,10 +66,22 @@ export const Header = ({
         }
       : {};
     return (
-      <Container height="50px" {...background}>
-        <HStack spacing="0">
-          <Logo fill={fill} w="24px" mr="15px" />
-          <WordLogo fill={fill} h="18px" />
+      <Container height="54px" {...background}>
+        <HStack w="full" justify="space-between">
+          <Spacer maxW="42px" />
+          <HStack spacing="0">
+            <Logo fill={fill} w="24px" mr="15px" />
+            <WordLogo fill={fill} h="18px" />
+          </HStack>
+          <Button
+            h="30px"
+            w="42px"
+            variant="secondary450"
+            visibility={!!onClose ? "visible" : "hidden"}
+            onClick={onClose}
+          >
+            <TimesIcon boxSize="18px" />
+          </Button>
         </HStack>
       </Container>
     );

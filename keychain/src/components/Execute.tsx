@@ -21,8 +21,9 @@ import {
   ExecuteReply,
   ResponseCodes,
 } from "@cartridge/controller";
-import Content from "./Content";
+import Container from "./Container";
 import { Status } from "utils/account";
+import { Header } from "./Header";
 
 const Execute = ({
   origin,
@@ -97,7 +98,8 @@ const Execute = ({
   }, [account, calls, fees, onExecute]);
 
   return (
-    <Content>
+    <Container>
+      <Header />
       <Banner
         title="Submit Transaction"
         icon={<TransactionIcon boxSize="30px" />}
@@ -148,7 +150,7 @@ const Execute = ({
         {!error && <Fees chainId={chainId} fees={fees} />}
         <Error error={error} />
       </Footer>
-    </Content>
+    </Container>
   );
 };
 

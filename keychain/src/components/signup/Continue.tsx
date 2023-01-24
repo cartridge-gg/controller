@@ -3,11 +3,10 @@ import { Text, VStack, Container, Link } from "@chakra-ui/react";
 import { Header } from "components/Header";
 import { AuthSparkleImage } from "@cartridge/ui/components/icons/auth";
 import { motion } from "framer-motion";
-import Content from "components/Content";
 
 const Continue = () => {
   return (
-    <Content
+    <Container
       w="full"
       h="100%"
       position="fixed"
@@ -31,7 +30,7 @@ const Continue = () => {
           Read More
         </Link>
       </VStack>
-    </Content>
+    </Container>
   );
 };
 

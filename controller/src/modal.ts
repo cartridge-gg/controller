@@ -63,6 +63,6 @@ const resize = (el: HTMLElement) => {
   }
 
   el.style.height = "600px";
-  el.style.width = "400px";
+  el.style.width = "432px";
   el.style.borderRadius = "8px";
 };
