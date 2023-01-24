@@ -23,11 +23,14 @@ export const createModal = (src: string, onClose?: () => void) => {
   container.style.display = "flex";
   container.style.alignItems = "center";
   container.style.justifyContent = "center";
-  container.style.display = "none";
+  container.style.visibility = "hidden";
+  container.style.opacity = "0";
+  container.style.transition = "opacity 0.2s ease";
   container.appendChild(iframe);
 
   const open = () => {
-    container.style.display = "flex";
+    container.style.visibility = "visible";
+    container.style.opacity = "1";
   };
 
   const close = () => {
@@ -35,7 +38,8 @@ export const createModal = (src: string, onClose?: () => void) => {
       onClose();
     }
 
-    container.style.display = "none";
+    container.style.visibility = "hidden";
+    container.style.opacity = "0";
   };
 
   container.onclick = () => close();

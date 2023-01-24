@@ -241,9 +241,7 @@ export const StarterPackEmbedded = ({
             account: accountData.accounts.edges?.[0]?.node.id,
           });
         }}
-        onCancel={() => {
-          onCancel({ code: ResponseCodes.CANCELED, message: "Canceled" });
-        }}
+        showCancel={false}
       />
     </Content>
   );
