@@ -1,6 +1,6 @@
 import type { AppProps } from "next/app";
 import NextHead from "next/head";
-import { InjectedConnector, StarknetProvider } from "@starknet-react/core";
+import { StarknetProvider } from "@starknet-react/core";
 import CartridgeConnector from "~/../../../connector/src";
 import { RpcProvider } from "starknet";
 

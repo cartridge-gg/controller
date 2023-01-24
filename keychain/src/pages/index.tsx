@@ -396,7 +396,7 @@ const Index: NextPage = () => {
         chainId={_chainId}
         controller={controller}
         onExecute={(res: ExecuteReply) => ctx.resolve(res)}
-        onCancel={(error: Error) => ctx.reject(error)}
+        onCancel={(error: Error) => ctx.resolve(error)}
       />
     );
   }

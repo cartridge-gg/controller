@@ -19,13 +19,7 @@ export function IncrementCounter() {
 
   return (
     <div>
-      <button onClick={() => {
-        try {
-          execute();
-        } catch (err) {
-          console.error(err);
-        }
-      }}>Increment Counter by 1</button>
+      <button onClick={() => execute()}>Increment Counter by 1</button>
     </div>
   );
 }
