@@ -47,7 +47,6 @@ class Account extends BaseAccount {
   private selector: string;
   _chainId: constants.StarknetChainId;
   updated: boolean = true;
-  status: Status = Status.COUNTERFACTUAL;
   webauthn: WebauthnAccount;
 
   constructor(
@@ -64,14 +63,25 @@ class Account extends BaseAccount {
     this.webauthn = webauthn;
 
     const state = Storage.get(this.selector);
-    if (state?.status) {
-      this.status = state.status;
-    }
-
     if (!state || Date.now() - state.syncing > 5000) {
       this.sync();
       return;
     }
+  }
+
+  get status() {
+    const state = Storage.get(this.selector);
+    if (!state || !state.status) {
+      return Status.COUNTERFACTUAL;
+    }
+
+    return state.status;
+  }
+
+  set status(status: Status) {
+    Storage.update(this.selector, {
+      status,
+    });
   }
 
   async getContract() {
@@ -100,9 +110,6 @@ class Account extends BaseAccount {
         const registerTxnHash = Storage.get(this.selector).registerTxnHashHash;
         if (registerTxnHash) {
           this.status = Status.REGISTERING;
-          Storage.update(this.selector, {
-            status: Status.REGISTERING,
-          });
           this.rpc
             .waitForTransaction(registerTxnHash, 1000, [
               "ACCEPTED_ON_L1",
@@ -115,9 +122,6 @@ class Account extends BaseAccount {
         const data = await this.getContract();
         if (!data?.contract?.deployTransaction?.id) {
           this.status = Status.COUNTERFACTUAL;
-          Storage.update(this.selector, {
-            status: Status.COUNTERFACTUAL,
-          });
           return;
         }
 
@@ -130,9 +134,6 @@ class Account extends BaseAccount {
         if (!("status" in deployTxnReceipt)) {
           console.log("waiting for deploy txn");
           this.status = Status.DEPLOYING;
-          Storage.update(this.selector, {
-            status: Status.DEPLOYING,
-          });
           this.rpc
             .waitForTransaction(deployTxnHash, 1000, [
               "ACCEPTED_ON_L1",
@@ -143,9 +144,6 @@ class Account extends BaseAccount {
         }
 
         if (deployTxnReceipt.status === "REJECTED") {
-          Storage.update(this.selector, {
-            status: Status.COUNTERFACTUAL,
-          });
           this.status = Status.COUNTERFACTUAL;
           return;
         }
@@ -158,7 +156,6 @@ class Account extends BaseAccount {
       const classHash = await this.rpc.getClassHashAt(this.address, "pending");
       Storage.update(this.selector, {
         classHash,
-        status: Status.DEPLOYED,
       });
       this.status = Status.DEPLOYED;
 
@@ -182,9 +179,6 @@ class Account extends BaseAccount {
       );
 
       if (number.toBN(res.result[1]).eq(number.toBN(1))) {
-        Storage.update(this.selector, {
-          status: Status.REGISTERED,
-        });
         this.status = Status.REGISTERED;
       }
     } catch (e) {

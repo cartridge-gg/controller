@@ -21,12 +21,12 @@ import {
 } from "@chakra-ui/react";
 import {
   BeginRegistrationDocument,
+  DeployAccountDocument,
   FinalizeRegistrationDocument,
   useAccountQuery,
-  useDeployAccountMutation,
 } from "generated/graphql";
 import { useDebounce } from "hooks/debounce";
-import { ec, KeyPair } from "starknet";
+import { constants, ec, KeyPair } from "starknet";
 import { PopupCenter } from "utils/url";
 
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
@@ -40,6 +40,7 @@ import Continue from "components/signup/Continue";
 import { client } from "utils/graphql";
 import Controller from "utils/controller";
 import Content from "../Content";
+import { Status } from "utils/account";
 
 export const Signup = ({
   showLogin,
@@ -69,9 +70,6 @@ export const Signup = ({
       refetchInterval: 1000,
     },
   );
-
-  const { mutateAsync: deployAccount, isLoading: isDeploying } =
-    useDeployAccountMutation();
 
   useEffect(() => {
     if (debouncedName.length === 0) {
@@ -104,11 +102,6 @@ export const Signup = ({
 
   useEffect(() => {
     if (accountData && isRegistering) {
-      deployAccount({
-        id: debouncedName,
-        chainId: "starknet:SN_GOERLI",
-      });
-
       const {
         account: {
           credential: { id: credentialId },
@@ -118,6 +111,14 @@ export const Signup = ({
 
       const controller = new Controller(keypair, address, credentialId);
       onSignup(controller);
+
+      controller.account(constants.StarknetChainId.TESTNET).status = Status.DEPLOYING;
+      client.request(DeployAccountDocument, {
+        id: debouncedName,
+        chainId: "starknet:SN_GOERLI",
+      }).then(() => {
+        controller.account(constants.StarknetChainId.TESTNET).sync();
+      })
     }
   }, [
     accountData,
@@ -125,7 +126,6 @@ export const Signup = ({
     debouncedName,
     keypair,
     onSignup,
-    deployAccount,
   ]);
 
   const onContinue = useCallback(async () => {
@@ -226,8 +226,8 @@ export const Signup = ({
                         canContinue
                           ? "green.400"
                           : nameError
-                          ? "red.400"
-                          : "gray.600"
+                            ? "red.400"
+                            : "gray.600"
                       }
                       errorBorderColor="crimson"
                       placeholder="Username"
