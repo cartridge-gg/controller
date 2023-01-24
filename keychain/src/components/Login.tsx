@@ -188,15 +188,15 @@ export const Login = ({
                       <Text fontSize="12px" color="whiteAlpha.600">
                         By continuing you are agreeing to Cartridge&apos;s{" "}
                         <Link
-                          textDecorationLine="underline"
+                          textDecoration="underline"
                           href="https://cartridgegg.notion.site/Cartridge-Terms-of-Use-a7e65445041449c1a75aed697b2f6e62"
                           isExternal
                         >
                           Terms of Service
-                        </Link>
+                        </Link>{" "}
                         and{" "}
                         <Link
-                          textDecorationLine="underline"
+                          textDecoration="underline"
                           href="https://cartridgegg.notion.site/Cartridge-Privacy-Policy-747901652aa34c6fb354c7d91930d66c"
                           isExternal
                         >
