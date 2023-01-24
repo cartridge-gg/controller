@@ -117,6 +117,8 @@ class Account extends BaseAccount {
           Storage.update(this.selector, {
             status: Status.COUNTERFACTUAL,
           });
+          // async deployed, poll for contract
+          setTimeout(() => this.sync(), 5000);
           return;
         }
 
