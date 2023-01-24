@@ -30,7 +30,8 @@ import Web3Auth from "./Web3Auth";
 import { constants } from "starknet";
 import LockIcon from "@cartridge/ui/components/icons/Lock";
 import Controller from "utils/controller";
-import Content from "./Content";
+import Container from "./Container";
+import { Header } from "./Header";
 
 export const Login = ({
   chainId,
@@ -101,7 +102,8 @@ export const Login = ({
   }, [chainId, name, data, onLogin, log]);
 
   return (
-    <Content gap="18px">
+    <Container gap="18px">
+      <Header onClose={onCancel} />
       <HStack spacing="14px" pt="36px">
         <Circle size="48px" bgColor="gray.700">
           <Fingerprint boxSize="30px" />
@@ -212,6 +214,6 @@ export const Login = ({
           </Form>
         )}
       </Formik>
-    </Content>
+    </Container>
   );
 };

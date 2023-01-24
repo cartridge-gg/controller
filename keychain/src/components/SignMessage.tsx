@@ -4,12 +4,13 @@ import { Box, Spacer, Text, VStack } from "@chakra-ui/react";
 
 import { typedData as td, shortString, constants, Signature } from "starknet";
 
-import Content from "./Content";
+import Container from "./Container";
 import { Banner } from "components/Banner";
 import Controller from "utils/controller";
 import Footer from "./Footer";
 import { Error, ResponseCodes } from "@cartridge/controller";
 import { Status } from "utils/account";
+import { Header } from "./Header";
 
 const SignMessage = ({
   controller,
@@ -58,7 +59,8 @@ const SignMessage = ({
   }, [typedData]);
 
   return (
-    <Content>
+    <Container>
+      <Header />
       <Box
         h="500px"
         w="full%"
@@ -111,7 +113,7 @@ const SignMessage = ({
         confirmText="SIGN"
         cancelText="REJECT"
       />
-    </Content>
+    </Container>
   );
 };
 

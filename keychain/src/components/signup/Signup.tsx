@@ -39,14 +39,17 @@ import Web3Auth from "components/Web3Auth";
 import Continue from "components/signup/Continue";
 import { client } from "utils/graphql";
 import Controller from "utils/controller";
-import Content from "../Content";
+import Container from "../Container";
+import { Header } from "components/Header";
 
 export const Signup = ({
   showLogin,
   onSignup,
+  onCancel,
 }: {
   showLogin: () => void;
   onSignup: (controller: Controller) => void;
+  onCancel?: () => void;
 }) => {
   const [name, setName] = useState("");
   const [keypair, setKeypair] = useState<KeyPair>();
@@ -150,7 +153,8 @@ export const Signup = ({
   }
 
   return (
-    <Content gap="18px">
+    <Container gap="18px">
+      <Header onClose={onCancel} />
       <HStack spacing="14px" pt="36px">
         <Circle size="48px" bgColor="gray.700">
           <JoystickIcon boxSize="30px" />
@@ -318,7 +322,7 @@ export const Signup = ({
           </Form>
         )}
       </Formik>
-    </Content>
+    </Container>
   );
 };
 

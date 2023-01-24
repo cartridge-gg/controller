@@ -18,7 +18,7 @@ import {
   useClaimStarterpackMutation,
 } from "generated/graphql";
 import Controller from "utils/controller";
-import Content from "../Content";
+import Container from "../Container";
 import Footer from "../Footer";
 import { Banner } from "../Banner";
 import { remoteSvgIcon } from "utils/svg";
@@ -29,6 +29,7 @@ import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import CoinIcon from "@cartridge/ui/src/components/icons/Coin";
 import { StarterPackCarousel } from "components/carousel/StarterPack";
 import OlmecIcon from "@cartridge/ui/src/components/icons/Olmec";
+import { Header } from "components/Header";
 
 export type StarterItemProps = {
   name: string;
@@ -213,14 +214,15 @@ export const StarterPackEmbedded = ({
 
   if (claimError) {
     return (
-      <Content>
+      <Container>
         <Text>{`${claimError}`}</Text>
-      </Content>
+      </Container>
     );
   }
 
   return (
-    <Content>
+    <Container>
+      <Header />
       <Banner
         icon={remoteSvgIcon(starterData?.game.icon.uri, "30px", "white")}
         title={starterData?.game.starterPack.name}
@@ -243,6 +245,6 @@ export const StarterPackEmbedded = ({
         }}
         showCancel={false}
       />
-    </Content>
+    </Container>
   );
 };

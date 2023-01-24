@@ -40,13 +40,6 @@ import { revoke, session, sessions } from "../methods/sessions";
 import { Status } from "utils/account";
 import { normalize, validate } from "../methods";
 
-const Container = ({ children }: { children: ReactNode }) => (
-  <ChakraContainer p="36px" position="fixed">
-    <Header />
-    {children}
-  </ChakraContainer>
-);
-
 type Context = Connect | Execute | SignMessage | StarterPack;
 
 type Connect = {
@@ -178,10 +171,10 @@ const Index: NextPage = () => {
                   : [transactions];
                 const policies = calls.map(
                   (txn) =>
-                  ({
-                    target: txn.contractAddress,
-                    method: txn.entrypoint,
-                  } as Policy),
+                    ({
+                      target: txn.contractAddress,
+                      method: txn.entrypoint,
+                    } as Policy),
                 );
 
                 const missing = diff(policies, session.policies);
@@ -294,11 +287,12 @@ const Index: NextPage = () => {
   // No controller, send to login
   if (!controller) {
     return (
-      <Container>
+      <>
         {showSignup ? (
           <Signup
             showLogin={() => setShowSignup(false)}
             onSignup={(c) => setController(c)}
+            onCancel={() => context.reject()}
           />
         ) : (
           <Login
@@ -308,7 +302,7 @@ const Index: NextPage = () => {
             onCancel={() => context.reject()}
           />
         )}
-      </Container>
+      </>
     );
   }
 
@@ -329,67 +323,61 @@ const Index: NextPage = () => {
     }
 
     return (
-      <Container>
-        <Connect
-          chainId={chainId}
-          controller={controller}
-          origin={ctx.origin}
-          policys={ctx.type === "connect" ? (ctx as Connect).policies : []}
-          onConnect={async ({
-            address,
-            policies,
-          }: {
-            address: string;
-            policies: Policy[];
-          }) => {
-            if (account.status === Status.COUNTERFACTUAL) {
-              // TODO: Deploy?
-              ctx.resolve({ code: ResponseCodes.SUCCESS, address, policies });
-              return;
-            }
-
-            // This device needs to be registered, so do a webauthn signature request
-            // for the register transaction during the connect flow.
-            if (account.status === Status.DEPLOYED) {
-              await account.register();
-            }
-
+      <Connect
+        chainId={chainId}
+        controller={controller}
+        origin={ctx.origin}
+        policys={ctx.type === "connect" ? (ctx as Connect).policies : []}
+        onConnect={async ({
+          address,
+          policies,
+        }: {
+          address: string;
+          policies: Policy[];
+        }) => {
+          if (account.status === Status.COUNTERFACTUAL) {
+            // TODO: Deploy?
             ctx.resolve({ code: ResponseCodes.SUCCESS, address, policies });
-          }}
-          onCancel={(error: Error) => ctx.resolve(error)}
-        />
-      </Container>
+            return;
+          }
+
+          // This device needs to be registered, so do a webauthn signature request
+          // for the register transaction during the connect flow.
+          if (account.status === Status.DEPLOYED) {
+            await account.register();
+          }
+
+          ctx.resolve({ code: ResponseCodes.SUCCESS, address, policies });
+        }}
+        onCancel={(error: Error) => ctx.resolve(error)}
+      />
     );
   }
 
   if (context.type === "starterpack") {
     const ctx = context as StarterPack;
     return (
-      <Container>
-        <StarterPack
-          chainId={chainId}
-          controller={controller}
-          starterPackId={ctx.starterPackId}
-          onClaim={(res: ExecuteReply) => ctx.resolve(res)}
-          onCancel={(error: Error) => ctx.resolve(error)}
-        />
-      </Container>
+      <StarterPack
+        chainId={chainId}
+        controller={controller}
+        starterPackId={ctx.starterPackId}
+        onClaim={(res: ExecuteReply) => ctx.resolve(res)}
+        onCancel={(error: Error) => ctx.resolve(error)}
+      />
     );
   }
 
   if (context.type === "sign-message") {
     const ctx = context as SignMessage;
     return (
-      <Container>
-        <SignMessage
-          chainId={chainId}
-          controller={controller}
-          origin={ctx.origin}
-          typedData={ctx.typedData}
-          onSign={(sig: Signature) => context.resolve(sig)}
-          onCancel={(error: Error) => ctx.resolve(error)}
-        />
-      </Container>
+      <SignMessage
+        chainId={chainId}
+        controller={controller}
+        origin={ctx.origin}
+        typedData={ctx.typedData}
+        onSign={(sig: Signature) => context.resolve(sig)}
+        onCancel={(error: Error) => ctx.resolve(error)}
+      />
     );
   }
 
@@ -403,19 +391,17 @@ const Index: NextPage = () => {
     }
 
     return (
-      <Container>
-        <Execute
-          {...ctx}
-          chainId={_chainId}
-          controller={controller}
-          onExecute={(res: ExecuteReply) => ctx.resolve(res)}
-          onCancel={(error: Error) => ctx.resolve(error)}
-        />
-      </Container>
+      <Execute
+        {...ctx}
+        chainId={_chainId}
+        controller={controller}
+        onExecute={(res: ExecuteReply) => ctx.resolve(res)}
+        onCancel={(error: Error) => ctx.resolve(error)}
+      />
     );
   }
 
-  return <Container>*Waves*</Container>;
+  return <>*Waves*</>;
 };
 
 export default dynamic(() => Promise.resolve(Index), { ssr: false });

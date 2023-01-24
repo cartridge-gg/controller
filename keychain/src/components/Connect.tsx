@@ -1,13 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  VStack,
-  HStack,
-  Flex,
-  Text,
-  Spacer,
-  Container,
-} from "@chakra-ui/react";
+import { VStack, HStack, Flex, Text, Spacer } from "@chakra-ui/react";
 
+import Container from "./Container";
+import { Header } from "./Header";
 import Session from "components/Session";
 import Controller from "utils/controller";
 import PlugIcon from "@cartridge/ui/src/components/icons/Plug";
@@ -57,13 +52,8 @@ const Connect = ({
   );
 
   return (
-    <VStack
-      as={motion.div}
-      animate={{ opacity: 1 }}
-      initial={{ opacity: 0 }}
-      p="12px"
-      gap="18px"
-    >
+    <Container>
+      <Header />
       <Banner
         title="Create Session"
         description={`${origin} is requesting to connect to your Cartridge Controller`}
@@ -101,7 +91,7 @@ const Connect = ({
         maxFee={maxFee}
         setMaxFee={setMaxFee}
       />
-    </VStack>
+    </Container>
   );
 };
 
