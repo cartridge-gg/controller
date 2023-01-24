@@ -198,6 +198,7 @@ class Account extends BaseAccount {
     abis?: Abi[],
     transactionsDetail?: InvocationsDetails,
   ): Promise<InvokeFunctionResponse> {
+    console.log("account-execute");
     if (this.status === Status.COUNTERFACTUAL) {
       throw new Error("Account is not deployed");
     }
@@ -242,19 +243,23 @@ class Account extends BaseAccount {
     details.blockIdentifier = details.blockIdentifier
       ? details.blockIdentifier
       : "pending";
-
+    console.log("account-estimate");
+    console.log(this);
     if (this.status === Status.COUNTERFACTUAL) {
       throw new Error("Account is not deployed");
     }
 
     const nonce = details.nonce ? details.nonce : await this.getNonce();
+    console.log(nonce);
 
     if (this.status === Status.PENDING_REGISTER) {
+      console.log("pending");
       const pendingRegister = Storage.get(
         selectors[VERSION].register(this.address, this._chainId),
       );
 
       const nextNonce = number.toHex(number.toBN(nonce).add(number.toBN(1)));
+      console.log(nextNonce);
       const signerDetails = {
         walletAddress: this.address,
         nonce: nextNonce,
@@ -330,7 +335,7 @@ class Account extends BaseAccount {
 
   async signMessage(typedData: typedData.TypedData): Promise<Signature> {
     return await (this.status === Status.REGISTERED ||
-      this.status === Status.COUNTERFACTUAL
+    this.status === Status.COUNTERFACTUAL
       ? super.signMessage(typedData)
       : this.webauthn.signMessage(typedData));
   }

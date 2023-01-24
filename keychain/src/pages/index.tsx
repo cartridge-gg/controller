@@ -148,6 +148,7 @@ const Index: NextPage = () => {
                 },
                 sync?: boolean,
               ): Promise<ExecuteReply | Error> => {
+                console.log("keychain-execute");
                 const cId = transactionsDetail?.chainId
                   ? transactionsDetail.chainId
                   : chainId;
@@ -178,10 +179,10 @@ const Index: NextPage = () => {
                   : [transactions];
                 const policies = calls.map(
                   (txn) =>
-                  ({
-                    target: txn.contractAddress,
-                    method: txn.entrypoint,
-                  } as Policy),
+                    ({
+                      target: txn.contractAddress,
+                      method: txn.entrypoint,
+                    } as Policy),
                 );
 
                 const missing = diff(policies, session.policies);
@@ -394,6 +395,7 @@ const Index: NextPage = () => {
   }
 
   if (context.type === "execute") {
+    console.log("modal-execute");
     const ctx = context as Execute;
     const _chainId = ctx.transactionsDetail?.chainId ?? chainId;
     const account = controller.account(_chainId);
