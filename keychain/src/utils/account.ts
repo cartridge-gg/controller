@@ -1,8 +1,14 @@
 import { CLASS_HASHES } from "@cartridge/controller/src/constants";
-import { Abi, AllowArray, ec, EstimateFeeResponse, InvocationsDetails, InvokeFunctionResponse, typedData } from "starknet";
 import {
-  AccountContractDocument,
-} from "generated/graphql";
+  Abi,
+  AllowArray,
+  ec,
+  EstimateFeeResponse,
+  InvocationsDetails,
+  InvokeFunctionResponse,
+  typedData,
+} from "starknet";
+import { AccountContractDocument } from "generated/graphql";
 import {
   constants,
   hash,
@@ -15,7 +21,7 @@ import {
   EstimateFee,
   Signature,
   transaction,
-  stark
+  stark,
 } from "starknet";
 import { client } from "utils/graphql";
 
@@ -49,7 +55,7 @@ class Account extends BaseAccount {
     nodeUrl: string,
     address: string,
     signer: SignerInterface,
-    webauthn: WebauthnAccount
+    webauthn: WebauthnAccount,
   ) {
     super({ rpc: { nodeUrl } }, address, signer);
     this.rpc = new RpcProvider({ nodeUrl });
@@ -63,6 +69,8 @@ class Account extends BaseAccount {
       this.sync();
       return;
     }
+
+    this.status = state.status;
   }
 
   async getContract() {
@@ -84,7 +92,7 @@ class Account extends BaseAccount {
       syncing: Date.now(),
     });
 
-    console.log("syncing")
+    console.log("syncing");
 
     try {
       if (this.status === Status.COUNTERFACTUAL) {
@@ -95,7 +103,10 @@ class Account extends BaseAccount {
             status: Status.REGISTERING,
           });
           this.rpc
-            .waitForTransaction(registerTxnHash, 1000, ["ACCEPTED_ON_L1", "ACCEPTED_ON_L2"])
+            .waitForTransaction(registerTxnHash, 1000, [
+              "ACCEPTED_ON_L1",
+              "ACCEPTED_ON_L2",
+            ])
             .then(() => this.sync());
           return;
         }
@@ -110,18 +121,24 @@ class Account extends BaseAccount {
         }
 
         const deployTxnHash = data.contract.deployTransaction.id.split("/")[1];
-        const deployTxnReceipt = await this.rpc.getTransactionReceipt(deployTxnHash);
+        const deployTxnReceipt = await this.rpc.getTransactionReceipt(
+          deployTxnHash,
+        );
 
         // Pending txn so poll for inclusion.
-        if (!('status' in deployTxnReceipt)) {
+        if (!("status" in deployTxnReceipt)) {
+          console.log("waiting for deploy txn");
           this.status = Status.DEPLOYING;
           Storage.update(this.selector, {
             status: Status.DEPLOYING,
           });
           this.rpc
-            .waitForTransaction(deployTxnHash, 1000, ["ACCEPTED_ON_L1", "ACCEPTED_ON_L2"])
+            .waitForTransaction(deployTxnHash, 1000, [
+              "ACCEPTED_ON_L1",
+              "ACCEPTED_ON_L2",
+            ])
             .then(() => this.sync());
-          return
+          return;
         }
 
         if (deployTxnReceipt.status === "REJECTED") {
@@ -176,7 +193,11 @@ class Account extends BaseAccount {
     }
   }
 
-  async execute(calls: AllowArray<Call>, abis?: Abi[], transactionsDetail?: InvocationsDetails): Promise<InvokeFunctionResponse> {
+  async execute(
+    calls: AllowArray<Call>,
+    abis?: Abi[],
+    transactionsDetail?: InvocationsDetails,
+  ): Promise<InvokeFunctionResponse> {
     if (this.status === Status.COUNTERFACTUAL) {
       throw new Error("Account is not deployed");
     }
@@ -186,14 +207,15 @@ class Account extends BaseAccount {
         selectors[VERSION].register(this.address, this._chainId),
       ) as RegisterData;
 
-      const nonce = transactionsDetail.nonce ? transactionsDetail.nonce : await this.getNonce();
+      const nonce = transactionsDetail.nonce
+        ? transactionsDetail.nonce
+        : await this.getNonce();
 
       const responses = await Promise.all([
-        this
-          .invokeFunction(pendingRegister.invoke.invocation, {
-            ...pendingRegister.invoke.details,
-            nonce: pendingRegister.invoke.details.nonce!,
-          }),
+        this.invokeFunction(pendingRegister.invoke.invocation, {
+          ...pendingRegister.invoke.details,
+          nonce: pendingRegister.invoke.details.nonce!,
+        }),
         super.execute(calls, null, {
           maxFee: transactionsDetail.maxFee,
           nonce: number.toBN(nonce).add(number.toBN(1)),
@@ -241,10 +263,7 @@ class Account extends BaseAccount {
         chainId: this._chainId,
       };
 
-      const signature = await this.signer.signTransaction(
-        calls,
-        signerDetails,
-      );
+      const signature = await this.signer.signTransaction(calls, signerDetails);
 
       let estimates = await estimateFeeBulk(this._chainId, [
         pendingRegister.invoke,
@@ -297,7 +316,10 @@ class Account extends BaseAccount {
     return super.estimateInvokeFee(calls, details);
   }
 
-  async verifyMessageHash(hash: string | number | import("bn.js"), signature: Signature): Promise<boolean> {
+  async verifyMessageHash(
+    hash: string | number | import("bn.js"),
+    signature: Signature,
+  ): Promise<boolean> {
     if (number.toBN(signature[0]).cmp(number.toBN(0)) === 0) {
       const keyPair = ec.getKeyPairFromPublicKey(signature[0]);
       return ec.verify(keyPair, number.toBN(hash).toString(), signature);
@@ -307,7 +329,8 @@ class Account extends BaseAccount {
   }
 
   async signMessage(typedData: typedData.TypedData): Promise<Signature> {
-    return await (this.status === Status.REGISTERED || this.status === Status.COUNTERFACTUAL
+    return await (this.status === Status.REGISTERED ||
+    this.status === Status.COUNTERFACTUAL
       ? super.signMessage(typedData)
       : this.webauthn.signMessage(typedData));
   }
@@ -363,12 +386,12 @@ class Account extends BaseAccount {
         maxFee: suggestedMaxFee,
         version,
       },
-    }
+    };
 
-    Storage.set(
-      selectors[VERSION].register(this.address, this._chainId),
-      { assertion, invoke },
-    );
+    Storage.set(selectors[VERSION].register(this.address, this._chainId), {
+      assertion,
+      invoke,
+    });
 
     this.status = Status.PENDING_REGISTER;
     Storage.update(this.selector, {
