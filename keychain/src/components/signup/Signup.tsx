@@ -308,6 +308,13 @@ export const Signup = ({
                             signer: controller.publicKey,
                           });
                           onSignup(controller);
+                          controller.account(constants.StarknetChainId.TESTNET).status = Status.DEPLOYING;
+                          client.request(DeployAccountDocument, {
+                            id: debouncedName,
+                            chainId: "starknet:SN_GOERLI",
+                          }).then(() => {
+                            controller.account(constants.StarknetChainId.TESTNET).sync();
+                          })
                         }}
                       />
                     </VStack>
