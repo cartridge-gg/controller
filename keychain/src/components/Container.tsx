@@ -10,6 +10,7 @@ const Container = ({
     <VStack
       p="36px"
       w={["full", "full", "400px"]}
+      position="fixed"
       as={motion.div}
       animate={{ opacity: 1 }}
       initial={{ opacity: 0 }}
