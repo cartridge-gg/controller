@@ -102,6 +102,11 @@ class DeviceAccount extends Account {
         true
       );
       this.modal.close();
+
+      if (res2.code !== ResponseCodes.SUCCESS) {
+        throw new Error(res2.message);
+      }
+
       return res2 as InvokeFunctionResponse;
     } catch (e) {
       console.error(e);
