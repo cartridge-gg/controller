@@ -186,8 +186,22 @@ export const Login = ({
                     <HStack>
                       <LockIcon />
                       <Text fontSize="12px" color="whiteAlpha.600">
-                        By continuing you are agreeing to Cartridge&apos;s Terms
-                        of Service and Privacy Policy
+                        By continuing you are agreeing to Cartridge&apos;s{" "}
+                        <Link
+                          textDecorationLine="underline"
+                          href="https://cartridgegg.notion.site/Cartridge-Terms-of-Use-a7e65445041449c1a75aed697b2f6e62"
+                          isExternal
+                        >
+                          Terms of Service
+                        </Link>
+                        and{" "}
+                        <Link
+                          textDecorationLine="underline"
+                          href="https://cartridgegg.notion.site/Cartridge-Privacy-Policy-747901652aa34c6fb354c7d91930d66c"
+                          isExternal
+                        >
+                          Privacy Policy
+                        </Link>
                       </Text>
                     </HStack>
                     {data?.account.type === "webauthn" && (
