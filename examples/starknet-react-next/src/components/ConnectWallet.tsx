@@ -22,7 +22,7 @@ export function ConnectWallet() {
         <button
           onClick={async () => {
             const txnHash = await controllerConnector.issueStarterPack(
-              "non-fungible-football"
+              "influence"
             );
             if (!address) {
               connect(controllerConnector);
