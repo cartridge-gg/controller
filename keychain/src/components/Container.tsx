@@ -8,7 +8,7 @@ const Container = ({
 }: { children: ReactNode } & StyleProps) => {
   return (
     <VStack
-      p="36px"
+      p="0 36px 36px 36px"
       w={["full", "full", "400px"]}
       position="fixed"
       as={motion.div}

@@ -62,15 +62,14 @@ const SignMessage = ({
     <Container>
       <Header />
       <Box
-        h="500px"
-        w="full%"
+        h="430px"
+        w="full"
         css={css`
           overflow-y: auto;
           ::-webkit-scrollbar {
             display: none;
           }
           -ms-overflow-style: none;
-          scrollbar-width: none;
         `}
       >
         <Banner
@@ -95,7 +94,6 @@ const SignMessage = ({
             {JSON.stringify(messageData, null, 2)}
           </Text>
         </VStack>
-        <Spacer minHeight="80px" />
       </Box>
 
       <Footer
