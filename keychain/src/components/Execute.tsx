@@ -121,7 +121,7 @@ const Execute = ({
             Execute the following actions
           </Text>
         </VStack>
-        <VStack w="full">
+        <VStack w="full" spacing="1px">
           {calls.map((call, i) => (
             <Call
               key={i}

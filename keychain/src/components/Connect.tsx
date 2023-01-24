@@ -54,56 +54,44 @@ const Connect = ({
   return (
     <Container>
       <Header />
-      <Box
-        h="430px"
-        w="full"
-        css={css`
-          overflow-y: auto;
-          ::-webkit-scrollbar {
-            display: none;
-          }
-          -ms-overflow-style: none;
-        `}
-      >
-        <Banner
-          title="Create Session"
-          description={`${origin} is requesting to connect to your Cartridge Controller`}
-          icon={<PlugIcon boxSize="30px" />}
-          chainId={chainId}
-          py="20px"
-        />
-        {false && (
-          <VStack w="full" overflow="hidden" borderRadius="6px" spacing="1px">
-            <VStack bgColor="gray.700" w="full" p="12px" align="flex-start">
-              <Text variant="ibm-upper-bold" fontSize="10px" color="gray.200">
-                Register Session
-              </Text>
-              <Text fontSize="11px" color="gray.200">
-                Authorize your controller to perform actions from this
-                application.
-              </Text>
-            </VStack>
-            <HStack bgColor="gray.600" py="7px" px="12px" w="full">
-              <LaptopIcon boxSize="18px" />
-              <Text fontSize="13px">Register Session</Text>
-              <Spacer />
-            </HStack>
+      <Banner
+        title="Create Session"
+        description={`${origin} is requesting to connect to your Cartridge Controller`}
+        icon={<PlugIcon boxSize="30px" />}
+        chainId={chainId}
+        py="20px"
+      />
+      {false && (
+        <VStack w="full" overflow="hidden" borderRadius="6px" spacing="1px">
+          <VStack bgColor="gray.700" w="full" p="12px" align="flex-start">
+            <Text variant="ibm-upper-bold" fontSize="10px" color="gray.200">
+              Register Session
+            </Text>
+            <Text fontSize="11px" color="gray.200">
+              Authorize your controller to perform actions from this
+              application.
+            </Text>
           </VStack>
-        )}
-        <Session
-          chainId={chainId}
-          action={"CREATE"}
-          onCancel={() => {
-            onCancel({ code: ResponseCodes.CANCELED, message: "Canceled" });
-          }}
-          onSubmit={connect}
-          policies={policys}
-          invalidPolicys={[]}
-          isLoading={false}
-          maxFee={maxFee}
-          setMaxFee={setMaxFee}
-        />
-      </Box>
+          <HStack bgColor="gray.600" py="7px" px="12px" w="full">
+            <LaptopIcon boxSize="18px" />
+            <Text fontSize="13px">Register Session</Text>
+            <Spacer />
+          </HStack>
+        </VStack>
+      )}
+      <Session
+        chainId={chainId}
+        action={"CREATE"}
+        onCancel={() => {
+          onCancel({ code: ResponseCodes.CANCELED, message: "Canceled" });
+        }}
+        onSubmit={connect}
+        policies={policys}
+        invalidPolicys={[]}
+        isLoading={false}
+        maxFee={maxFee}
+        setMaxFee={setMaxFee}
+      />
     </Container>
   );
 };

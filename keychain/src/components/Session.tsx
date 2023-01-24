@@ -64,7 +64,7 @@ const Session = ({
   );
 
   return (
-    <Flex flex={1} flexDirection="column" gap="10px">
+    <Flex w="full" flexDirection="column" gap="10px">
       <Formik
         enableReinitialize={true}
         initialValues={initialValues}

@@ -61,40 +61,23 @@ const SignMessage = ({
   return (
     <Container>
       <Header />
-      <Box
-        h="430px"
-        w="full"
-        css={css`
-          overflow-y: auto;
-          ::-webkit-scrollbar {
-            display: none;
-          }
-          -ms-overflow-style: none;
-        `}
-      >
-        <Banner
-          title="Signature Request"
-          description={`${origin} is asking you to sign a message`}
-          chainId={chainId}
-          py="20px"
-        />
-        <VStack
-          p="12px"
-          bgColor="gray.600"
-          borderRadius="5px"
-          align="flex-start"
+      <Banner
+        title="Signature Request"
+        description={`${origin} is asking you to sign a message`}
+        chainId={chainId}
+        py="20px"
+      />
+      <VStack p="12px" bgColor="gray.600" borderRadius="5px" align="flex-start">
+        <Text
+          as="pre"
+          fontSize="11px"
+          color="gray.200"
+          whiteSpace="pre-wrap"
+          wordBreak="break-all"
         >
-          <Text
-            as="pre"
-            fontSize="11px"
-            color="gray.200"
-            whiteSpace="pre-wrap"
-            wordBreak="break-all"
-          >
-            {JSON.stringify(messageData, null, 2)}
-          </Text>
-        </VStack>
-      </Box>
+          {JSON.stringify(messageData, null, 2)}
+        </Text>
+      </VStack>
 
       <Footer
         onConfirm={async () => {

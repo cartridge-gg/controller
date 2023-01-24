@@ -22,43 +22,46 @@ const Footer = ({
   onConfirm?: () => void;
   onCancel?: () => void;
 }) => (
-  <Flex
-    position="fixed"
-    bottom="0"
-    right="0"
-    w="100%"
-    p="18px 36px 36px 36px"
-    bgColor="gray.800"
-    justify="flex-end"
-    flexDirection="column"
-    gap="12px"
-  >
-    {children}
-    <Flex gap="10px" justify="flex-end">
-      {showCancel && (
-        <Button
-          variant="secondary600"
-          size="md"
-          w={["100%", "100%", "200px"]}
-          onClick={onCancel}
-        >
-          {cancelText}
-        </Button>
-      )}
-      {showConfirm && (
-        <Button
-          size="md"
-          disabled={isDisabled || isLoading}
-          isLoading={isLoading}
-          w={["100%", "100%", "200px"]}
-          type={onConfirm ? "button" : "submit"}
-          onClick={onConfirm}
-        >
-          {confirmText}
-        </Button>
-      )}
+  <>
+    <Spacer minH="60px" />
+    <Flex
+      position="fixed"
+      bottom="0"
+      right="0"
+      w="100%"
+      p="18px 36px 36px 36px"
+      bgColor="gray.800"
+      justify="flex-end"
+      flexDirection="column"
+      gap="12px"
+    >
+      {children}
+      <Flex gap="10px" justify="flex-end">
+        {showCancel && (
+          <Button
+            variant="secondary600"
+            size="md"
+            w={["100%", "100%", "200px"]}
+            onClick={onCancel}
+          >
+            {cancelText}
+          </Button>
+        )}
+        {showConfirm && (
+          <Button
+            size="md"
+            disabled={isDisabled || isLoading}
+            isLoading={isLoading}
+            w={["100%", "100%", "200px"]}
+            type={onConfirm ? "button" : "submit"}
+            onClick={onConfirm}
+          >
+            {confirmText}
+          </Button>
+        )}
+      </Flex>
     </Flex>
-  </Flex>
+  </>
 );
 
 export default Footer;
