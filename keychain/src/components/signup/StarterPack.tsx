@@ -237,7 +237,7 @@ export const StarterPackEmbedded = ({
         isLoading={claimLoading || starterLoading || accountLoading}
         onConfirm={() => {
           claimMutate({
-            id: starterPackId,
+            id: starterData.game?.starterPack?.id,
             account: accountData.accounts.edges?.[0]?.node.id,
           });
         }}
