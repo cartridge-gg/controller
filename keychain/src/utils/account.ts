@@ -64,13 +64,14 @@ class Account extends BaseAccount {
     this.webauthn = webauthn;
 
     const state = Storage.get(this.selector);
+    if (state?.status) {
+      this.status = state.status;
+    }
 
     if (!state || Date.now() - state.syncing > 5000) {
       this.sync();
       return;
     }
-
-    this.status = state.status;
   }
 
   async getContract() {
@@ -150,6 +151,10 @@ class Account extends BaseAccount {
         }
       }
 
+      if (this.status === Status.PENDING_REGISTER) {
+        return;
+      }
+
       const classHash = await this.rpc.getClassHashAt(this.address, "pending");
       Storage.update(this.selector, {
         classHash,
@@ -160,11 +165,6 @@ class Account extends BaseAccount {
       if (classHash !== CLASS_HASHES["latest"].account) {
         this.updated = false;
       }
-
-      const nonce = await this.rpc.getNonceForAddress(this.address, "pending");
-      Storage.update(this.selector, {
-        nonce,
-      });
 
       const pub = await this.signer.getPubKey();
       const res = await this.rpc.callContract(
@@ -330,7 +330,7 @@ class Account extends BaseAccount {
 
   async signMessage(typedData: typedData.TypedData): Promise<Signature> {
     return await (this.status === Status.REGISTERED ||
-    this.status === Status.COUNTERFACTUAL
+      this.status === Status.COUNTERFACTUAL
       ? super.signMessage(typedData)
       : this.webauthn.signMessage(typedData));
   }
