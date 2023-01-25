@@ -160,7 +160,7 @@ const Index: NextPage = () => {
                 }
 
                 const account = controller.account(cId);
-                if (account.status === Status.COUNTERFACTUAL) {
+                if (!(account.status === Status.REGISTERED || account.status === Status.REGISTERING)) {
                   return Promise.resolve({
                     code: ResponseCodes.NOT_ALLOWED,
                     message: "Account not registered or deployed.",
@@ -172,10 +172,10 @@ const Index: NextPage = () => {
                   : [transactions];
                 const policies = calls.map(
                   (txn) =>
-                    ({
-                      target: txn.contractAddress,
-                      method: txn.entrypoint,
-                    } as Policy),
+                  ({
+                    target: txn.contractAddress,
+                    method: txn.entrypoint,
+                  } as Policy),
                 );
 
                 const missing = diff(policies, session.policies);
