@@ -48,6 +48,7 @@ class Account extends BaseAccount {
   _chainId: constants.StarknetChainId;
   updated: boolean = true;
   webauthn: WebauthnAccount;
+  waitingForDeploy: boolean = false;
 
   constructor(
     chainId: constants.StarknetChainId,
@@ -133,14 +134,17 @@ class Account extends BaseAccount {
 
         // Pending txn so poll for inclusion.
         if (!("status" in deployTxnReceipt)) {
-          console.log("waiting for deploy txn");
           this.status = Status.DEPLOYING;
-          this.rpc
-            .waitForTransaction(deployTxnHash, 1000, [
-              "ACCEPTED_ON_L1",
-              "ACCEPTED_ON_L2",
-            ])
-            .then(() => this.sync());
+
+          if (!this.waitingForDeploy) {
+            this.rpc
+              .waitForTransaction(deployTxnHash, 1000, [
+                "ACCEPTED_ON_L1",
+                "ACCEPTED_ON_L2",
+              ])
+              .then(() => this.sync());
+            this.waitingForDeploy = true;
+          }
           return;
         }
 
