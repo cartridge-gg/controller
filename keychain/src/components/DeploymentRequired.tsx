@@ -4,9 +4,10 @@ import { Error as ErrorReply, ResponseCodes } from "@cartridge/controller";
 import Container from "components/Container";
 import { Header } from "components/Header";
 import { Banner } from "components/Banner";
-import SparkleColored from "@cartridge/ui/components/icons/SparkleColored";
 import { useEffect, useState } from "react";
 import { Status } from "utils/account";
+import Footer from "./Footer";
+import { Loading } from "./Loading";
 
 const DeploymentRequired = ({
   chainId,
@@ -43,10 +44,11 @@ const DeploymentRequired = ({
     <Container>
       <Header onClose={close} />
       <Banner
-        icon={<SparkleColored boxSize="30px" />}
+        icon={<Loading fill="white" />}
         title="Deploying your account"
         description="This may take a second"
       />
+      <Footer cancelText="Close" onCancel={close} showConfirm={false} />
     </Container>
   ) : (
     <>{children}</>
