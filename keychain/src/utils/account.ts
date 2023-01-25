@@ -1,18 +1,5 @@
 import { CLASS_HASHES } from "@cartridge/controller/src/constants";
 import {
-  constants,
-  hash,
-  number,
-  Account as BaseAccount,
-  RpcProvider,
-  SequencerProvider,
-  SignerInterface,
-  Call,
-  EstimateFeeDetails,
-  EstimateFee,
-  Signature,
-  transaction,
-  stark,
   Abi,
   AllowArray,
   ec,
@@ -22,6 +9,20 @@ import {
   typedData,
 } from "starknet";
 import { AccountContractDocument } from "generated/graphql";
+import {
+  constants,
+  hash,
+  number,
+  Account as BaseAccount,
+  RpcProvider,
+  SignerInterface,
+  Call,
+  EstimateFeeDetails,
+  EstimateFee,
+  Signature,
+  transaction,
+  stark,
+} from "starknet";
 import { client } from "utils/graphql";
 
 import selectors from "./selectors";
@@ -43,7 +44,6 @@ export enum Status {
 
 class Account extends BaseAccount {
   private rpc: RpcProvider;
-  private gateway: SequencerProvider;
   private selector: string;
   _chainId: constants.StarknetChainId;
   updated: boolean = true;
@@ -58,7 +58,6 @@ class Account extends BaseAccount {
   ) {
     super({ rpc: { nodeUrl } }, address, signer);
     this.rpc = new RpcProvider({ nodeUrl });
-    this.gateway = new SequencerProvider({ network: chainId === constants.StarknetChainId.MAINNET ? "mainnet-alpha" : "goerli-alpha" });
     this.selector = selectors["0.0.3"].deployment(address, chainId);
     this._chainId = chainId;
     this.webauthn = webauthn;
@@ -103,6 +102,8 @@ class Account extends BaseAccount {
     Storage.update(this.selector, {
       syncing: Date.now(),
     });
+
+    console.log("syncing");
 
     try {
       if (
@@ -197,12 +198,14 @@ class Account extends BaseAccount {
       throw new Error("Account is not deployed");
     }
 
-    transactionsDetail.nonce = transactionsDetail.nonce ?? await this.getNonce();
-
     if (this.status === Status.PENDING_REGISTER) {
       const pendingRegister = Storage.get(
         selectors[VERSION].register(this.address, this._chainId),
       ) as RegisterData;
+
+      const nonce = transactionsDetail.nonce
+        ? transactionsDetail.nonce
+        : await this.getNonce();
 
       const responses = await Promise.all([
         this.invokeFunction(pendingRegister.invoke.invocation, {
@@ -211,7 +214,7 @@ class Account extends BaseAccount {
         }),
         super.execute(calls, null, {
           maxFee: transactionsDetail.maxFee,
-          nonce: number.toBN(transactionsDetail.nonce).add(number.toBN(1)),
+          nonce: number.toBN(nonce).add(number.toBN(1)),
           version: hash.transactionVersion,
         }),
       ]);
@@ -220,36 +223,12 @@ class Account extends BaseAccount {
       this.status = Status.REGISTERED;
       Storage.update(this.selector, {
         status: Status.REGISTERED,
-        nonce: number.toBN(transactionsDetail.nonce).add(number.toBN(2))
       });
-
-      this.gateway.waitForTransaction(responses[1].transaction_hash, 1000, [
-        "ACCEPTED_ON_L1",
-        "ACCEPTED_ON_L2",
-      ]).catch(() => {
-        Storage.update(this.selector, {
-          nonce: undefined
-        });
-      })
 
       return responses[1];
     }
 
-    const res = await super.execute(calls, abis, transactionsDetail);
-    Storage.update(this.selector, {
-      nonce: number.toBN(transactionsDetail.nonce).add(number.toBN(1))
-    });
-
-    this.gateway.waitForTransaction(res.transaction_hash, 1000, [
-      "ACCEPTED_ON_L1",
-      "ACCEPTED_ON_L2",
-    ]).catch(() => {
-      Storage.update(this.selector, {
-        nonce: undefined
-      });
-    })
-
-    return res;
+    return super.execute(calls, abis, transactionsDetail);
   }
 
   async estimateInvokeFee(
@@ -421,22 +400,21 @@ class Account extends BaseAccount {
     };
   }
 
-  async getNonce(blockIdentifier?: any): Promise<number.BigNumberish> {
-    if (
-      blockIdentifier &&
-      (blockIdentifier !== "latest" || blockIdentifier !== "pending")
-    ) {
-      return super.getNonce(blockIdentifier);
-    }
+  // async getNonce(blockIdentifier?: any): Promise<number.BigNumberish> {
+  //   if (
+  //     blockIdentifier &&
+  //     (blockIdentifier !== "latest" || blockIdentifier !== "pending")
+  //   ) {
+  //     return super.getNonce(blockIdentifier);
+  //   }
 
-    const chainNonce = await super.getNonce("pending");
-    const state = Storage.get(this.selector);
-    if (!state || !state.nonce || number.toBN(chainNonce).gt(number.toBN(state.nonce))) {
-      return chainNonce;
-    }
+  //   const deployment = Storage.get(this.selector);
+  //   if (!deployment || !deployment.nonce) {
+  //     return "0x0";
+  //   }
 
-    return state.nonce;
-  }
+  //   return deployment.nonce;
+  // }
 }
 
 export default Account;
