@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import dynamic from "next/dynamic";
-import { ReactNode, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { connectToParent } from "@cartridge/penpal";
 import Controller, { diff, VERSION } from "utils/controller";
 import {
@@ -14,7 +14,8 @@ import {
 } from "@cartridge/controller";
 import Connect from "components/Connect";
 import { Login } from "components/Login";
-import { Signup, DeployingController } from "components/signup";
+import { Signup } from "components/signup";
+import { Deploying } from "components/Deploying";
 import { Container as ChakraContainer } from "@chakra-ui/react";
 import { Header } from "components/Header";
 import {
@@ -388,7 +389,7 @@ const Index: NextPage = () => {
 
     if (account.status === Status.COUNTERFACTUAL) {
       return (
-        <DeployingController
+        <Deploying
           chainId={_chainId}
           controller={controller}
           onClose={(error: Error) => ctx.resolve(error)}

@@ -9,19 +9,11 @@ import {
   Button,
   Circle,
 } from "@chakra-ui/react";
-import { Error as ErrorReply, ResponseCodes } from "@cartridge/controller";
 import { Loading } from "components/Loading";
-import { constants, defaultProvider } from "starknet";
+import { defaultProvider } from "starknet";
 import ArrowIcon from "@cartridge/ui/src/components/icons/Arrow";
 import CheckIcon from "@cartridge/ui/src/components/icons/Check";
 import useSound from "use-sound";
-import Container from "components/Container";
-import { Header } from "components/Header";
-import { Banner } from "components/Banner";
-import Footer from "components/Footer";
-import SparkleColored from "@cartridge/ui/src/components/icons/SparkleColored";
-import Controller from "utils/controller";
-
 export interface PendingProps {
   transaction: string;
   name: string;
@@ -92,34 +84,5 @@ export const PendingTxn = ({ transaction, name, gameId }: PendingProps) => {
         {redirect_uri && "Return to"} {name} <ArrowIcon />{" "}
       </Button>
     </>
-  );
-};
-
-export const DeployingController = ({
-  chainId,
-  controller,
-  onClose,
-}: {
-  chainId: constants.StarknetChainId;
-  controller: Controller;
-  onClose: (error: ErrorReply) => void;
-}) => {
-  const close = () => {
-    onClose({
-      code: ResponseCodes.CANCELED,
-      message: "Canceled",
-    });
-  };
-
-  const account = controller.account(chainId);
-  return (
-    <Container>
-      <Header onClose={close} />
-      <Banner
-        icon={<SparkleColored boxSize="30px" />}
-        title="Deploying your account"
-        description="This may take a second, try again in a bit"
-      />
-    </Container>
   );
 };

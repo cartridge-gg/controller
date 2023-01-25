@@ -80,7 +80,7 @@ export default class Controller {
           credentialId,
           this.publicKey,
           options,
-        )
+        ),
       ),
       [constants.StarknetChainId.TESTNET2]: new Account(
         constants.StarknetChainId.TESTNET2,
@@ -93,7 +93,7 @@ export default class Controller {
           credentialId,
           this.publicKey,
           options,
-        )
+        ),
       ),
       [constants.StarknetChainId.MAINNET]: new Account(
         constants.StarknetChainId.MAINNET,
@@ -106,7 +106,7 @@ export default class Controller {
           credentialId,
           this.publicKey,
           options,
-        )
+        ),
       ),
     };
 
