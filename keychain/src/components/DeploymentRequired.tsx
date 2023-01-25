@@ -5,7 +5,7 @@ import Container from "components/Container";
 import { Header } from "components/Header";
 import { Banner } from "components/Banner";
 import SparkleColored from "@cartridge/ui/components/icons/SparkleColored";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Status } from "utils/account";
 
 const DeploymentRequired = ({
@@ -27,18 +27,19 @@ const DeploymentRequired = ({
   };
 
   const account = controller.account(chainId);
+  const [status, setStatus] = useState<Status>(account.status);
 
   useEffect(() => {
     const id = setInterval(async () => {
       if (account.status !== Status.DEPLOYING) clearInterval(id);
-
       await account.sync();
+      setStatus(account.status);
     }, 3000);
 
     return () => clearInterval(id);
-  }, [account]);
+  }, [account, setStatus]);
 
-  return account.status === Status.DEPLOYING ? (
+  return status === Status.DEPLOYING ? (
     <Container>
       <Header onClose={close} />
       <Banner
