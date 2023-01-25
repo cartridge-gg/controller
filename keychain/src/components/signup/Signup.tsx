@@ -59,30 +59,21 @@ export const Signup = ({
   const [canContinue, setCanContinue] = useState(false);
   const [dismissed, setDismissed] = useState<boolean>(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { debouncedValue: debouncedName } = useDebounce(name, 1500);
+  const { debouncedValue: debouncedName, debouncing } = useDebounce(name, 1500);
   const {
     error,
-    refetch,
     isFetching,
     data: accountData,
   } = useAccountQuery(
     { id: debouncedName },
     {
-      enabled: isRegistering,
+      enabled: !!(debouncedName && debouncedName.length >= 3),
       retry: isRegistering,
-      refetchInterval: 1000,
     },
   );
 
   useEffect(() => {
-    if (debouncedName.length === 0) {
-      return;
-    }
-    refetch();
-  }, [refetch, debouncedName]);
-
-  useEffect(() => {
-    if (isRegistering || isFetching) {
+    if (debouncing) {
       return;
     }
 
@@ -97,11 +88,11 @@ export const Signup = ({
         setNameError("An error occured.");
         setCanContinue(false);
       }
-    } else if (debouncedName.length > 0) {
+    } else if (accountData?.account) {
       setNameError("This account already exists.");
       setCanContinue(false);
     }
-  }, [debouncedName, isFetching, error, dismissed, isRegistering, onOpen]);
+  }, [error, accountData]);
 
   useEffect(() => {
     if (accountData && isRegistering) {
@@ -145,6 +136,21 @@ export const Signup = ({
     );
   }, [debouncedName]);
 
+  const validate = (values: { name: string }) => {
+    setCanContinue(false);
+    setNameError(undefined);
+    if (!values.name) {
+      setNameError("Username required");
+    } else if (values.name.length < 3) {
+      setNameError("Username must be at least 3 characters");
+    } else if (values.name.split(" ").length > 1) {
+      setNameError("Username cannot contain spaces");
+    } else {
+      setName(values.name);
+    }
+    return null;
+  };
+
   if (isRegistering) {
     return <Continue />;
   }
@@ -174,6 +180,7 @@ export const Signup = ({
       </Text>
       <Formik
         initialValues={{ name: "" }}
+        validate={validate}
         onSubmit={() => {
           if (canContinue) {
             onOpen();
@@ -215,12 +222,6 @@ export const Signup = ({
                     <Input
                       {...field}
                       h="42px"
-                      onChange={(e) => {
-                        setName(e.target.value);
-                        setCanContinue(false);
-                        setNameError("");
-                        props.handleChange(e);
-                      }}
                       isInvalid
                       borderColor={
                         canContinue
@@ -232,11 +233,7 @@ export const Signup = ({
                       errorBorderColor="crimson"
                       placeholder="Username"
                       autoComplete="off"
-                      onBlur={() => {
-                        if (canContinue) {
-                          onOpen();
-                        }
-                      }}
+                      onBlur={() => {}}
                     />
                     {canContinue && (
                       <InputRightElement
