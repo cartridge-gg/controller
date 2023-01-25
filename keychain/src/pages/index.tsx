@@ -40,6 +40,7 @@ import logout from "../methods/logout";
 import { revoke, session, sessions } from "../methods/sessions";
 import { Status } from "utils/account";
 import { normalize, validate } from "../methods";
+import DeploymentRequired from "components/DeploymentRequired";
 
 type Context = Connect | Execute | SignMessage | StarterPack;
 
@@ -398,13 +399,19 @@ const Index: NextPage = () => {
     }
 
     return (
-      <Execute
-        {...ctx}
-        chainId={_chainId}
+      <DeploymentRequired
+        chainId={chainId}
         controller={controller}
-        onExecute={(res: ExecuteReply) => ctx.resolve(res)}
-        onCancel={(error: Error) => ctx.resolve(error)}
-      />
+        onClose={(error: Error) => ctx.resolve(error)}
+      >
+        <Execute
+          {...ctx}
+          chainId={_chainId}
+          controller={controller}
+          onExecute={(res: ExecuteReply) => ctx.resolve(res)}
+          onCancel={(error: Error) => ctx.resolve(error)}
+        />
+      </DeploymentRequired>
     );
   }
 
