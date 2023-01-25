@@ -5,7 +5,8 @@ import { injectController } from '@cartridge/controller';
 import { AccountInterface } from "starknet";
 
 injectController(undefined, {
-  url: "https://keychain-git-removenextrouting.preview.cartridge.gg/"
+  url: "https://keychain-git-removenextrouting.preview.cartridge.gg/",
+  starterPackId: "influence",
 });
 
 const Main = () => {
