@@ -106,7 +106,10 @@ class Account extends BaseAccount {
     console.log("syncing");
 
     try {
-      if (this.status === Status.COUNTERFACTUAL) {
+      if (
+        this.status === Status.COUNTERFACTUAL ||
+        this.status === Status.DEPLOYING
+      ) {
         const registerTxnHash = Storage.get(this.selector).registerTxnHashHash;
         if (registerTxnHash) {
           this.status = Status.REGISTERING;
@@ -121,7 +124,6 @@ class Account extends BaseAccount {
 
         const data = await this.getContract();
         if (!data?.contract?.deployTransaction?.id) {
-          this.status = Status.COUNTERFACTUAL;
           return;
         }
 
