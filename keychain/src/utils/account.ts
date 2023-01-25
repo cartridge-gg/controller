@@ -324,7 +324,7 @@ class Account extends BaseAccount {
 
   async signMessage(typedData: typedData.TypedData): Promise<Signature> {
     return await (this.status === Status.REGISTERED ||
-      this.status === Status.COUNTERFACTUAL
+    this.status === Status.COUNTERFACTUAL
       ? super.signMessage(typedData)
       : this.webauthn.signMessage(typedData));
   }

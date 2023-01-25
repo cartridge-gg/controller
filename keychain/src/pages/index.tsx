@@ -14,7 +14,7 @@ import {
 } from "@cartridge/controller";
 import Connect from "components/Connect";
 import { Login } from "components/Login";
-import { Signup } from "components/signup";
+import { Signup, DeployingController } from "components/signup";
 import { Container as ChakraContainer } from "@chakra-ui/react";
 import { Header } from "components/Header";
 import {
@@ -387,7 +387,13 @@ const Index: NextPage = () => {
     const account = controller.account(_chainId);
 
     if (account.status === Status.COUNTERFACTUAL) {
-      return <div>Deploy</div>;
+      return (
+        <DeployingController
+          chainId={_chainId}
+          controller={controller}
+          onClose={(error: Error) => ctx.resolve(error)}
+        />
+      );
     }
 
     return (
