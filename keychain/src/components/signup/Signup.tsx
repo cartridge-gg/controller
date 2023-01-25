@@ -233,7 +233,11 @@ export const Signup = ({
                       errorBorderColor="crimson"
                       placeholder="Username"
                       autoComplete="off"
-                      onBlur={() => {}}
+                      onBlur={() => {
+                        if (canContinue) {
+                          onOpen();
+                        }
+                      }}
                     />
                     {canContinue && (
                       <InputRightElement

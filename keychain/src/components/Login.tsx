@@ -130,7 +130,14 @@ export const Login = ({
       >
         Your Controller will be used for interacting with the game.
       </Text>
-      <Formik initialValues={{ name: "" }} onSubmit={() => {}}>
+      <Formik
+        initialValues={{ name: "" }}
+        onSubmit={() => {
+          if (canContinue) {
+            onOpen();
+          }
+        }}
+      >
         {(props) => (
           <Form
             css={css`
@@ -182,6 +189,11 @@ export const Login = ({
                         placeholder="Username"
                         autoComplete="off"
                         h="42px"
+                        onBlur={() => {
+                          if (canContinue) {
+                            onOpen();
+                          }
+                        }}
                       />
                       {canContinue && (
                         <InputRightElement
