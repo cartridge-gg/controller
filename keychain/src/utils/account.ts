@@ -258,14 +258,16 @@ class Account extends BaseAccount {
       throw new Error("Account is not deployed");
     }
 
-    const nonce = details.nonce ? details.nonce : await super.getNonce("latest");
+    console.log(details.nonce)
+    details.nonce = details.nonce ?? await super.getNonce("latest");
+    console.log(details.nonce)
 
     if (this.status === Status.PENDING_REGISTER) {
       const pendingRegister = Storage.get(
         selectors[VERSION].register(this.address, this._chainId),
       );
 
-      const nextNonce = number.toHex(number.toBN(nonce).add(number.toBN(1)));
+      const nextNonce = number.toHex(number.toBN(details.nonce).add(number.toBN(1)));
       const signerDetails = {
         walletAddress: this.address,
         nonce: nextNonce,
@@ -416,10 +418,7 @@ class Account extends BaseAccount {
   }
 
   async getNonce(blockIdentifier?: any): Promise<number.BigNumberish> {
-    if (
-      blockIdentifier &&
-      (blockIdentifier !== "latest" || blockIdentifier !== "pending")
-    ) {
+    if (blockIdentifier && blockIdentifier !== "pending") {
       return super.getNonce(blockIdentifier);
     }
 
