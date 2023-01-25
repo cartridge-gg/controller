@@ -32,9 +32,9 @@ const DeploymentRequired = ({
   useEffect(() => {
     const id = setInterval(async () => {
       if (account.status !== Status.DEPLOYING) clearInterval(id);
-      await account.sync();
       setStatus(account.status);
-    }, 3000);
+      await account.sync();
+    }, 2000);
 
     return () => clearInterval(id);
   }, [account, setStatus]);
