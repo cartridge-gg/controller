@@ -258,7 +258,7 @@ class Account extends BaseAccount {
       throw new Error("Account is not deployed");
     }
 
-    const nonce = details.nonce ? details.nonce : await this.getNonce("pending");
+    const nonce = details.nonce ? details.nonce : await this.getNonce("latest");
 
     if (this.status === Status.PENDING_REGISTER) {
       const pendingRegister = Storage.get(
