@@ -30,15 +30,15 @@ const DeploymentRequired = ({
 
   useEffect(() => {
     const id = setInterval(async () => {
-      if (account.status >= Status.DEPLOYED) clearInterval(id);
+      if (account.status === Status.DEPLOYED) clearInterval(id);
 
       await account.sync();
     }, 3000);
 
     return () => clearInterval(id);
-  }, []);
+  }, [account]);
 
-  return account.status < Status.DEPLOYED ? (
+  return account.status === Status.DEPLOYING ? (
     <Container>
       <Header onClose={close} />
       <Banner
