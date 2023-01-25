@@ -8,7 +8,11 @@ const url =
   process.env.NEXT_PUBLIC_VERCEL_ENV === "preview"
     ? `https://keychain-git-${process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF}.preview.cartridge.gg`
     : process.env.XFRAME_URL;
-const connectors = [new CartridgeConnector(null, { url })];
+const connectors = [
+  new CartridgeConnector([{ target: "0xdeadbeef", method: "testMethod" }], {
+    url,
+  }),
+];
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
