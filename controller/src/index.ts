@@ -41,16 +41,22 @@ class Controller {
   public chainId: constants.StarknetChainId = constants.StarknetChainId.TESTNET;
   public accounts?: { [key in constants.StarknetChainId]: AccountInterface };
   private modal?: Modal;
+  private starterPackId?: string;
 
   constructor(
     policies?: Policy[],
     options?: {
       url?: string;
       origin?: string;
+      starterPackId?: string;
     }
   ) {
     if (policies) {
       this.policies = policies;
+    }
+
+    if (options?.starterPackId) {
+      this.starterPackId = options.starterPackId;
     }
 
     if (options?.url) {
@@ -259,6 +265,11 @@ class Controller {
           this.modal
         ),
       };
+
+      if (this.starterPackId) {
+        await this.keychain.issueStarterPack(this.starterPackId)
+      }
+
       return this.accounts[this.chainId];
     } catch (e) {
       console.log(e);

@@ -87,6 +87,7 @@ export class InjectedController implements IStarknetWindowObject {
         options?: {
             url?: string;
             origin?: string;
+            starterPackId?: string;
         }) {
         this.controller = new Controller(policies, options);
         this.controller.ready().then(isConnected => {
@@ -158,6 +159,7 @@ function injectController(policies?: Policy[],
     options?: {
         url?: string;
         origin?: string;
+        starterPackId?: string;
     }) {
     (window as any).starknet_cartridge = new InjectedController(policies, options);
 }
