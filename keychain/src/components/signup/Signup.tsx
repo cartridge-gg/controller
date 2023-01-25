@@ -117,6 +117,7 @@ export const Signup = ({
 
       controller.account(constants.StarknetChainId.TESTNET).status =
         Status.DEPLOYING;
+
       client
         .request(DeployAccountDocument, {
           id: debouncedName,
