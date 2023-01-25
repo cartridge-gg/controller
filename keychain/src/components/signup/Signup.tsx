@@ -59,7 +59,7 @@ export const Signup = ({
   const [canContinue, setCanContinue] = useState(false);
   const [dismissed, setDismissed] = useState<boolean>(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { debouncedValue: debouncedName } = useDebounce(name, 1500);
+  const { debouncedValue: debouncedName, debouncing } = useDebounce(name, 1500);
   const {
     error,
     isFetching,
@@ -73,6 +73,10 @@ export const Signup = ({
   );
 
   useEffect(() => {
+    if (debouncing) {
+      return;
+    }
+
     if (error) {
       if ((error as Error).message === "ent: account not found") {
         setNameError("");
@@ -273,8 +277,22 @@ export const Signup = ({
                     <HStack>
                       <LockIcon />
                       <Text fontSize="12px" color="whiteAlpha.600">
-                        By continuing you are agreeing to Cartridge&apos;s Terms
-                        of Service and Privacy Policy
+                        By continuing you are agreeing to Cartridge&apos;s{" "}
+                        <Link
+                          textDecoration="underline"
+                          href="https://cartridgegg.notion.site/Cartridge-Terms-of-Use-a7e65445041449c1a75aed697b2f6e62"
+                          isExternal
+                        >
+                          Terms of Service
+                        </Link>{" "}
+                        and{" "}
+                        <Link
+                          textDecoration="underline"
+                          href="https://cartridgegg.notion.site/Cartridge-Privacy-Policy-747901652aa34c6fb354c7d91930d66c"
+                          isExternal
+                        >
+                          Privacy Policy
+                        </Link>
                       </Text>
                     </HStack>
                     <VStack w="full" gap="12px">

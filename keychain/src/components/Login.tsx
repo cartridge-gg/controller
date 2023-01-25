@@ -18,6 +18,8 @@ import {
   DrawerOverlay,
   DrawerContent,
   useDisclosure,
+  InputGroup,
+  InputRightElement,
 } from "@chakra-ui/react";
 import { useAccountQuery } from "generated/graphql";
 import base64url from "base64url";
@@ -29,6 +31,7 @@ import { useDebounce } from "hooks/debounce";
 import Web3Auth from "./Web3Auth";
 import { constants } from "starknet";
 import LockIcon from "@cartridge/ui/components/icons/Lock";
+import ReturnIcon from "@cartridge/ui/src/components/icons/Return";
 import Controller from "utils/controller";
 import Container from "./Container";
 import { Header } from "./Header";
@@ -45,8 +48,10 @@ export const Login = ({
   onCancel: () => void;
 }) => {
   const [name, setName] = useState("");
+  const [nameError, setNameError] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [canContinue, setCanContinue] = useState(false);
   const { debouncedValue: debouncedName } = useDebounce(name, 1500);
   const { error, refetch, data } = useAccountQuery(
     { id: debouncedName },
@@ -64,9 +69,14 @@ export const Login = ({
 
   useEffect(() => {
     if (data) {
+      setCanContinue(true);
       onOpen();
     }
-  }, [data, onOpen]);
+
+    if (error) {
+      setNameError("This account does not exist");
+    }
+  }, [error, data, onOpen]);
 
   const onSubmit = useCallback(async () => {
     log({ type: "webauthn_login" });
@@ -145,26 +155,49 @@ export const Login = ({
                     variant="error"
                     mt="10px"
                     placement="top"
-                    isOpen={!!error}
+                    isOpen={!!nameError}
                     hasArrow
                     label={
                       <>
-                        <InfoIcon fill="whiteAlpha.600" mr="5px" /> This account
-                        does not exist
+                        <InfoIcon fill="whiteAlpha.600" mr="5px" /> {nameError}
                       </>
                     }
                   >
-                    <Input
-                      {...field}
-                      borderColor={error && "red.400"}
-                      onChange={(e) => {
-                        setName(e.target.value);
-                        props.handleChange(e);
-                      }}
-                      placeholder="Username"
-                      autoComplete="off"
-                      h="42px"
-                    />
+                    <InputGroup>
+                      <Input
+                        {...field}
+                        borderColor={
+                          canContinue
+                            ? "green.400"
+                            : nameError
+                            ? "red.400"
+                            : "gray.600"
+                        }
+                        onChange={(e) => {
+                          setName(e.target.value);
+                          setNameError("");
+                          setCanContinue(false);
+                          props.handleChange(e);
+                        }}
+                        placeholder="Username"
+                        autoComplete="off"
+                        h="42px"
+                      />
+                      {canContinue && (
+                        <InputRightElement
+                          h="full"
+                          mr="5px"
+                          cursor="pointer"
+                          onClick={() => {
+                            if (canContinue) {
+                              onOpen();
+                            }
+                          }}
+                        >
+                          <ReturnIcon boxSize="20px" fill="green.400" />
+                        </InputRightElement>
+                      )}
+                    </InputGroup>
                   </Tooltip>
                 </Flex>
               )}
