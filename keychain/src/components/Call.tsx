@@ -17,6 +17,7 @@ import { StarkscanUrl } from "utils/url";
 import EthereumIcon from "@cartridge/ui/src/components/icons/Ethereum";
 import CodeIcon from "@cartridge/ui/src/components/icons/Code";
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
+import LinkIcon from "@cartridge/ui/src/components/icons/Link";
 import { constants } from "starknet";
 
 export const Call = ({
@@ -59,7 +60,7 @@ export const CallToggle = ({
           href={StarkscanUrl(chainId).contract(policy.target, "write-contract")}
           isExternal
         >
-          <InfoIcon color="gray.200" boxSize="12px" />
+          <LinkIcon color="gray.200" boxSize="12px" />
         </Link>
       </Tooltip>
     </HStack>

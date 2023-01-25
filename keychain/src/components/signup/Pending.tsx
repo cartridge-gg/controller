@@ -120,7 +120,6 @@ export const DeployingController = ({
         title="Deploying your account"
         description="This may take a second, try again in a bit"
       />
-      <Footer showConfirm={false} cancelText="Close" onCancel={close} />
     </Container>
   );
 };
