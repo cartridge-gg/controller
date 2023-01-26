@@ -92,7 +92,7 @@ export const Signup = ({
       setNameError("This account already exists.");
       setCanContinue(false);
     }
-  }, [error, accountData]);
+  }, [error, accountData, debouncing, dismissed, onOpen]);
 
   useEffect(() => {
     if (accountData && isRegistering) {
