@@ -107,7 +107,9 @@ const Fees = ({
             {approved && (
               <LineItem
                 name="Total"
-                description={`Balance: ${balance}`}
+                description={`Balance: ${Number(
+                  parseFloat(balance).toFixed(5),
+                )}`}
                 value={approved ? approved : formattedFee?.base}
               />
             )}
