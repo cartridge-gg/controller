@@ -38,7 +38,7 @@ export const Redeploy = ({
     };
 
     deploy();
-  }, []);
+  }, [controller]);
 
   return (
     <Container>

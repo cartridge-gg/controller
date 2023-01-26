@@ -1,10 +1,17 @@
 import { useEffect, useState } from "react";
-import { HStack, Spinner, Text, VStack } from "@chakra-ui/react";
+import {
+  Divider,
+  HStack,
+  Spacer,
+  Spinner,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
 
 import { constants, number } from "starknet";
-import InfoIcon from "@cartridge/ui/components/icons/Info";
 import { formatUnits } from "ethers/lib/utils";
 import BN from "bn.js";
+import { Error } from "components/Error";
 
 async function fetchEthPrice() {
   const res = await fetch(process.env.NEXT_PUBLIC_API_URL, {
@@ -18,21 +25,26 @@ async function fetchEthPrice() {
 }
 
 const Fees = ({
+  error,
   chainId,
   fees,
+  balance,
+  approved,
 }: {
+  error: Error;
   chainId: constants.StarknetChainId;
   fees?: { base: BN; max: BN };
+  balance: string;
+  approved?: string;
 }) => {
   const [formattedFee, setFormattedFee] = useState<{
     base: string;
     max: string;
   }>();
   useEffect(() => {
-    if (!fees) {
+    if (!fees || !balance) {
       return;
     }
-
     async function compute() {
       if (chainId === constants.StarknetChainId.MAINNET) {
         let dollarUSLocale = Intl.NumberFormat("en-US");
@@ -62,43 +74,85 @@ const Fees = ({
               )} eth`,
             }
           : {
-              base: "<0.00001 eth",
-              max: "<0.00001 eth",
+              base: "<0.00001",
+              max: "<0.00001",
             },
       );
     }
     compute();
-  }, [chainId, fees]);
+  }, [chainId, fees, balance, approved]);
 
   return (
-    <HStack
-      alignItems="center"
-      bgColor="gray.700"
-      py="12px"
-      px="18px"
-      borderRadius="6px"
-      justifyContent="space-between"
-    >
-      <HStack color="gray.200">
-        <Text variant="ibm-upper-bold" fontSize={10} color="inherit">
-          Network Fees
-        </Text>
-        <InfoIcon boxSize="12px" />
-      </HStack>
-      <VStack alignItems="flex-end" spacing="1px">
-        {formattedFee ? (
+    <>
+      <Error error={error} />
+      <VStack
+        overflow="hidden"
+        borderRadius="6px"
+        spacing="1px"
+        align="flex-start"
+      >
+        {formattedFee || error ? (
           <>
-            <Text fontSize={13}>{formattedFee.base}</Text>
-            <Text fontSize={11} color="gray.200">
-              Max: {formattedFee.max}
-            </Text>
+            {approved && (
+              <LineItem name="Cost" description="" value={approved} />
+            )}
+
+            <LineItem
+              name="Network Fee"
+              description={!error && `Max: ${formattedFee?.max}`}
+              value={!error ? formattedFee?.base : "..."}
+              isLoading={!formattedFee && !error}
+            />
+
+            {approved && (
+              <LineItem
+                name="Total"
+                description={`Balance: ${balance}`}
+                value={approved ? approved : formattedFee?.base}
+              />
+            )}
           </>
         ) : (
-          <Spinner size="sm" />
+          <LineItem name="Calculating Fees" isLoading={true} />
         )}
       </VStack>
-    </HStack>
+    </>
   );
 };
 
+const LineItem = ({
+  name,
+  description,
+  value,
+  isLoading = false,
+}: {
+  name: string;
+  description?: string;
+  value?: string;
+  isLoading?: boolean;
+}) => (
+  <HStack w="full" h="40px" p="18px" bgColor="gray.700" color="gray.200">
+    <Text variant="ibm-upper-bold" fontSize={10} color="inherit">
+      {name}
+    </Text>
+    <Spacer />
+    <HStack spacing="12px">
+      {isLoading ? (
+        <Spinner size="sm" />
+      ) : (
+        <>
+          {description && (
+            <>
+              <Text fontSize={11} color="inherit">
+                {description}
+              </Text>
+              <Divider orientation="vertical" borderColor="gray.600" h="16px" />
+            </>
+          )}
+          <Text fontSize={13}>{value}</Text>
+        </>
+      )}
+    </HStack>
+  </HStack>
+);
 export default Fees;

@@ -2,6 +2,7 @@ import { useStarknetCall } from "@starknet-react/core";
 import type { NextPage } from "next";
 import { useMemo } from "react";
 import { number } from "starknet";
+import { TransferEth } from "~/components/TransferEth";
 import { ConnectWallet } from "~/components/ConnectWallet";
 import { IncrementCounter } from "~/components/IncrementCounter";
 import { InvalidTxn } from "~/components/InvalidTxn";
@@ -36,10 +37,10 @@ const Home: NextPage = () => {
         <IncrementCounter />
         <InvalidTxn />
       </div>
-
+      <TransferEth />
+      <SignMessage />
       <h2>Recent Transactions</h2>
       <TransactionList />
-      <SignMessage />
     </div>
   );
 };
