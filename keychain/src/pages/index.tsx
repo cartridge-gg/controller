@@ -161,7 +161,12 @@ const Index: NextPage = () => {
                 }
 
                 const account = controller.account(cId);
-                if (!(account.status === Status.REGISTERED || account.status === Status.REGISTERING)) {
+                if (
+                  !(
+                    account.status === Status.REGISTERED ||
+                    account.status === Status.REGISTERING
+                  )
+                ) {
                   return Promise.resolve({
                     code: ResponseCodes.NOT_ALLOWED,
                     message: "Account not registered or deployed.",
@@ -173,10 +178,10 @@ const Index: NextPage = () => {
                   : [transactions];
                 const policies = calls.map(
                   (txn) =>
-                  ({
-                    target: txn.contractAddress,
-                    method: txn.entrypoint,
-                  } as Policy),
+                    ({
+                      target: txn.contractAddress,
+                      method: txn.entrypoint,
+                    } as Policy),
                 );
 
                 const missing = diff(policies, session.policies);
@@ -293,14 +298,14 @@ const Index: NextPage = () => {
         {showSignup ? (
           <Signup
             showLogin={() => setShowSignup(false)}
-            onSignup={(c) => setController(c)}
+            onController={(c) => setController(c)}
             onCancel={() => context.reject()}
           />
         ) : (
           <Login
             chainId={chainId}
             showSignup={() => setShowSignup(true)}
-            onLogin={(c) => setController(c)}
+            onController={(c) => setController(c)}
             onCancel={() => context.reject()}
           />
         )}

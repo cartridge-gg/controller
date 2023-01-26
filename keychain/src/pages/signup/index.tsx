@@ -1,16 +1,14 @@
 import { useRouter } from "next/router";
 import type { NextPage } from "next";
-import { constants } from "starknet";
 import Controller from "utils/controller";
-import { Login as LoginComponent } from "components/Login";
+import { Signup as SignupComponent } from "components/signup";
 const Login: NextPage = () => {
   const router = useRouter();
   return (
-    <LoginComponent
-      chainId={constants.StarknetChainId.TESTNET}
+    <SignupComponent
       fullPage
-      showSignup={() => {
-        router.push("/signup");
+      showLogin={() => {
+        router.push("/login");
       }}
       onComplete={() => {
         router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);

@@ -7,3 +7,4 @@ export * from "./L1Connect";
 export * from "./L2Connect";
 export * from "./StarterPack";
 export * from "./OutOfStock";
+export * from "./Authenticate";
