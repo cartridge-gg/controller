@@ -33,6 +33,7 @@ import { addAddressPadding } from "starknet";
 import { remoteSvgIcon } from "utils/svg";
 
 import { register } from "methods/register";
+import { ChainId } from "caip";
 
 enum RegistrationState {
   CREATE_USERNAME,
@@ -109,6 +110,11 @@ const CreateWallet: NextPage = () => {
       return router.replace(decodeURIComponent(redirect_uri as string));
     }
 
+    deployAccount({
+      id: username,
+      chainId: "starknet:SN_MAIN",
+      starterpackIds: ids
+    });
     router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);
   }, [router]);
 
