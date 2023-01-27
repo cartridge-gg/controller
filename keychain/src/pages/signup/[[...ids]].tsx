@@ -95,14 +95,14 @@ const CreateWallet: NextPage = () => {
       );
 
       await onCreateFinalize(deviceKey, credentials);
-      // deployAccount({
-      //   id: username,
-      //   chainId: "starknet:SN_GOERLI",
-      //   starterpackIds: [starterPackData.game.starterPack.id]
-      // });
+      deployAccount({
+        id: username,
+        chainId: "starknet:SN_GOERLI",
+        starterpackIds: [starterPackData.game.starterPack.id]
+      });
       setRegState(RegistrationState.READY);
     },
-    []
+    [deployAccount, starterPackData.game.starterPack.id]
   );
 
   const onComplete = useCallback(async () => {
