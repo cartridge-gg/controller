@@ -98,7 +98,7 @@ const CreateWallet: NextPage = () => {
       deployAccount({
         id: username,
         chainId: "starknet:SN_GOERLI",
-        starterpackIds: starterPackData?.game?.starterPack?.id
+        starterpackIds: [starterPackData.game.starterPack.id]
       });
       setRegState(RegistrationState.READY);
     },
