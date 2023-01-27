@@ -95,9 +95,14 @@ const CreateWallet: NextPage = () => {
       );
 
       await onCreateFinalize(deviceKey, credentials);
+      deployAccount({
+        id: username,
+        chainId: "starknet:SN_GOERLI",
+        starterpackIds: starterPackData?.game?.starterPack?.id
+      });
       setRegState(RegistrationState.READY);
     },
-    [],
+    [deployAccount, starterPackData]
   );
 
   const onComplete = useCallback(async () => {
@@ -110,13 +115,8 @@ const CreateWallet: NextPage = () => {
       return router.replace(decodeURIComponent(redirect_uri as string));
     }
 
-    deployAccount({
-      id: username,
-      chainId: "starknet:SN_GOERLI",
-      starterpackIds: starterPackData?.game?.starterPack?.id
-    });
     router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);
-  }, [deployAccount, router, starterPackData, username]);
+  }, [router]);
 
   useEffect(() => {
     if (starterPackData) {
