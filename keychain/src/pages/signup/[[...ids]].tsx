@@ -112,11 +112,11 @@ const CreateWallet: NextPage = () => {
 
     deployAccount({
       id: username,
-      chainId: "starknet:SN_MAIN",
+      chainId: "starknet:SN_GOERLI",
       starterpackIds: ids
     });
     router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);
-  }, [router]);
+  }, [deployAccount, ids, router, username]);
 
   useEffect(() => {
     if (starterPackData) {
