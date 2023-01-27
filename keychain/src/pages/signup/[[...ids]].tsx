@@ -113,10 +113,10 @@ const CreateWallet: NextPage = () => {
     deployAccount({
       id: username,
       chainId: "starknet:SN_GOERLI",
-      starterpackIds: ids
+      starterpackIds: starterPackData?.game?.starterPack?.id
     });
     router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);
-  }, [deployAccount, ids, router, username]);
+  }, [deployAccount, router, starterPackData, username]);
 
   useEffect(() => {
     if (starterPackData) {
