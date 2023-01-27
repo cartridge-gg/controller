@@ -40,7 +40,7 @@ import Controller from "utils/controller";
 import Container from "components/Container";
 import { Header } from "components/Header";
 import { Status } from "utils/account";
-import { Authenticate } from "./Authenticate";
+import { Authenticate as AuthModal } from "./Authenticate";
 import { DrawerWrapper } from "components/DrawerWrapper";
 
 export const Signup = ({
@@ -66,16 +66,19 @@ export const Signup = ({
   const [dismissed, setDismissed] = useState<boolean>(false);
   const isIframe =
     typeof window !== "undefined" ? window.top !== window.self : false;
+
   const {
     isOpen: isDrawerOpen,
     onOpen: onDrawerOpen,
     onClose: onDrawerClose,
   } = useDisclosure();
+
   const {
     isOpen: isAuthOpen,
     onOpen: onAuthOpen,
     onClose: onAuthClose,
   } = useDisclosure();
+
   const { debouncedValue: debouncedName, debouncing } = useDebounce(name, 1500);
   const {
     error,
@@ -86,6 +89,7 @@ export const Signup = ({
     {
       enabled: !!(debouncedName && debouncedName.length >= 3),
       retry: isRegistering,
+      retryDelay: 1000,
     },
   );
 
@@ -158,7 +162,7 @@ export const Signup = ({
         640,
       );
     }
-  }, [debouncedName]);
+  }, [debouncedName, isIframe, onAuthOpen]);
 
   const validate = (values: { name: string }) => {
     setCanContinue(false);
@@ -340,7 +344,9 @@ export const Signup = ({
                       credentials: "discord",
                       signer: controller.publicKey,
                     });
-                    onController(controller);
+                    if (onController) {
+                      onController(controller);
+                    }
                     controller.account(
                       constants.StarknetChainId.TESTNET,
                     ).status = Status.DEPLOYING;
@@ -362,16 +368,14 @@ export const Signup = ({
           </DrawerWrapper>
         </Form>
       </Formik>
-      {isRegistering && !isIframe && (
-        <Authenticate
-          isModal
-          isOpen={isAuthOpen}
-          onClose={onAuthClose}
-          name={debouncedName}
-          pubkey={ec.getStarkKey(keypair)}
-          onComplete={onComplete}
-        />
-      )}
+      <AuthModal
+        isModal
+        isOpen={isAuthOpen}
+        onClose={onAuthClose}
+        name={debouncedName}
+        pubkey={keypair ? ec.getStarkKey(keypair) : ""}
+        onComplete={onComplete}
+      />
     </Container>
   );
 };

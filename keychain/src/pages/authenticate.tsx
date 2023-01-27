@@ -8,8 +8,8 @@ const Authenticate: NextPage = () => {
   const { name, pubkey } = router.query as { name: string; pubkey: string };
   return (
     <AuthComponent
-      name={name}
-      pubkey={pubkey}
+      name={decodeURIComponent(name)}
+      pubkey={decodeURIComponent(pubkey)}
       onComplete={() => {
         if (window.opener) {
           return window.close();

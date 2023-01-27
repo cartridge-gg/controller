@@ -1,6 +1,6 @@
 import Fingerprint from "./icons/Fingerprint";
 import { Formik, Form, Field, FormikState } from "formik";
-import { useCallback, useEffect, useState } from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import { css } from "@emotion/react";
 import {
   Button,
@@ -120,7 +120,7 @@ export const Login = ({
         },
       });
     }
-  }, [chainId, name, data, onController, log]);
+  }, [chainId, name, data, onController, log, onComplete]);
 
   return (
     <Container gap="18px" position={fullPage ? "relative" : "fixed"}>

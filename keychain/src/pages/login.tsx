@@ -8,13 +8,11 @@ const Login: NextPage = () => {
   return (
     <LoginComponent
       chainId={constants.StarknetChainId.TESTNET}
+      showSignup={() => router.push("/signup")}
+      onComplete={() =>
+        router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`)
+      }
       fullPage
-      showSignup={() => {
-        router.push("/signup");
-      }}
-      onComplete={() => {
-        router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);
-      }}
     />
   );
 };

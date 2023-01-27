@@ -1,12 +1,18 @@
-import { useEffect, useState, ReactNode, useCallback } from "react";
-import { useRouter } from "next/router";
 import {
+  useEffect,
+  useState,
+  ReactNode,
+  useCallback,
+  ReactElement,
+} from "react";
+import {
+  Box,
+  Flex,
   Circle,
   Container,
   VStack,
   Text,
   Link,
-  useDisclosure,
   UseDisclosureProps,
 } from "@chakra-ui/react";
 import { Header } from "components/Header";
@@ -19,9 +25,9 @@ import FingerprintIcon from "@cartridge/ui/components/icons/auth/Fingerprint";
 import Footer from "components/Footer";
 import Unsupported from "components/signup/Unsupported";
 import { Credentials, onCreateBegin, onCreateFinalize } from "hooks/account";
-import { Startup } from "components/signup";
 import { SimpleModal } from "@cartridge/ui/src/components/modals/SimpleModal";
 import KeyNewIcon from "@cartridge/ui/src/components/icons/KeyNew";
+import { useStartup } from "hooks/startup";
 
 export const Authenticate = ({
   name,
@@ -36,11 +42,12 @@ export const Authenticate = ({
   isModal?: boolean;
   onComplete: () => void;
 } & UseDisclosureProps) => {
-  const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error>();
-  const [AuthImage, setAuthImage] = useState<ReactNode>(AuthFingerprintImage);
+  const [authImage, setAuthImage] = useState<ReactNode>(AuthFingerprintImage);
   const [unsupportedMessage, setUnsupportedMessage] = useState<string>();
+
+  const { play, StartupAnimation } = useStartup({ onComplete });
 
   const onAuth = useCallback(async () => {
     // https://webkit.org/blog/11545/updates-to-the-storage-access-api/
@@ -53,13 +60,13 @@ export const Authenticate = ({
       );
       await onCreateFinalize(pubkey, credentials);
 
-      setIsAuthorized(true);
+      play();
     } catch (e) {
       console.error(e);
       setError(e);
       setIsLoading(false);
     }
-  }, [name, pubkey]);
+  }, [play, name, pubkey]);
 
   useEffect(() => {
     const userAgent = window.navigator.userAgent;
@@ -82,55 +89,58 @@ export const Authenticate = ({
     return <Unsupported message={unsupportedMessage} />;
   }
 
-  if (!name || !pubkey) {
-    return <></>;
-  }
-
-  if (isAuthorized) {
-    return <Startup onComplete={onComplete} />;
-  }
-
-  if (isModal) {
-    return (
-      <SimpleModal
-        icon={<KeyNewIcon boxSize="40px" />}
-        onClose={onClose}
-        onConfirm={onAuth}
-        confirmText="Continue"
-        isOpen={isOpen}
-        showCloseButton={false}
-        isLoading={isLoading}
-      >
-        <VStack spacing="20px" py="10px">
-          <Text fontSize="17px" fontWeight="bold">
-            Authenticate Yourself
-          </Text>
-          <Text fontSize="14px" color="whiteAlpha.600" align="center">
-            You will now be asked to authenticate yourself.
-            <br />
-            Note: this experience varies from browser to browser.
-          </Text>
-          {AuthImage}
-          <Link
-            isExternal
-            href="https://www.yubico.com/authentication-standards/webauthn"
-            fontSize="12px"
-            variant="traditional"
-          >
-            Read about WebAuthn
-          </Link>
-        </VStack>
-      </SimpleModal>
-    );
-  }
-
   return (
-    <Container>
-      <Header />
+    <>
+      {isModal ? (
+        <SimpleModal
+          icon={<KeyNewIcon boxSize="40px" />}
+          onClose={onClose}
+          onConfirm={() => {
+            onAuth().then(() => onClose());
+          }}
+          confirmText="Continue"
+          isOpen={isOpen}
+          showCloseButton={false}
+          isLoading={isLoading}
+        >
+          <Content authImage={authImage} />
+        </SimpleModal>
+      ) : (
+        <Container>
+          <Header />
+          <Content
+            icon={
+              <Circle size="48px" bgColor="gray.700">
+                <FingerprintIcon boxSize="30px" />
+              </Circle>
+            }
+            authImage={authImage}
+          />
+          <Footer
+            confirmText="Continue"
+            showCancel={false}
+            onConfirm={onAuth}
+            isLoading={isLoading}
+          />
+        </Container>
+      )}
+
+      {StartupAnimation}
+    </>
+  );
+};
+
+const Content = ({
+  icon,
+  authImage,
+}: {
+  icon?: ReactNode;
+  authImage: ReactNode;
+}) => {
+  return (
+    <>
       <VStack spacing="20px" py="10px">
-        <Circle size="48px" bgColor="gray.700">
-          <FingerprintIcon boxSize="30px" />
-        </Circle>
+        {icon}
         <Text fontSize="17px" fontWeight="bold">
           Authenticate Yourself
         </Text>
@@ -139,7 +149,7 @@ export const Authenticate = ({
           <br />
           Note: this experience varies from browser to browser.
         </Text>
-        {AuthImage}
+        {authImage}
         <Link
           isExternal
           href="https://www.yubico.com/authentication-standards/webauthn"
@@ -149,12 +159,6 @@ export const Authenticate = ({
           Read about WebAuthn
         </Link>
       </VStack>
-      <Footer
-        confirmText="Continue"
-        showCancel={false}
-        onConfirm={onAuth}
-        isLoading={isLoading}
-      />
-    </Container>
+    </>
   );
 };

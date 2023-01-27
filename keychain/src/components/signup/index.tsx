@@ -1,6 +1,5 @@
 export * from "./Form";
 export * from "./Signup";
-export * from "./Startup";
 export * from "./Quests";
 export * from "./Pending";
 export * from "./L1Connect";
