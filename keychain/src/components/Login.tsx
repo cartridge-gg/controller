@@ -38,6 +38,7 @@ import FingerprintIcon from "./icons/Fingerprint2";
 export const Login = ({
   chainId,
   fullPage = false,
+  prefilledName = "",
   showSignup,
   onController,
   onComplete,
@@ -45,12 +46,13 @@ export const Login = ({
 }: {
   chainId: constants.StarknetChainId;
   fullPage?: boolean;
+  prefilledName?: string;
   showSignup: () => void;
   onController?: (controller: Controller) => void;
   onComplete?: () => void;
   onCancel?: () => void;
 }) => {
-  const [name, setName] = useState("");
+  const [name, setName] = useState(prefilledName);
   const [nameError, setNameError] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -140,7 +142,7 @@ export const Login = ({
         Your Controller will be used for interacting with the game.
       </Text>
       <Formik
-        initialValues={{ name: "" }}
+        initialValues={{ name }}
         onSubmit={() => {
           if (canContinue) {
             onOpen();

@@ -45,19 +45,20 @@ import { DrawerWrapper } from "components/DrawerWrapper";
 
 export const Signup = ({
   fullPage = false,
+  prefilledName = "",
   showLogin,
   onController,
   onComplete,
   onCancel,
 }: {
   fullPage?: boolean;
+  prefilledName?: string;
   showLogin: () => void;
   onController?: (controller: Controller) => void;
   onComplete?: () => void;
   onCancel?: () => void;
 }) => {
-  const router = useRouter();
-  const [name, setName] = useState("");
+  const [name, setName] = useState(prefilledName);
   const [keypair, setKeypair] = useState<KeyPair>();
   const [nameError, setNameError] = useState("");
   const [isRegistering, setIsRegistering] = useState<boolean>(false);
@@ -202,7 +203,7 @@ export const Signup = ({
         Your Controller will be used for interacting with the game.
       </Text>
       <Formik
-        initialValues={{ name: "" }}
+        initialValues={{ name }}
         validate={validate}
         onSubmit={() => {
           if (canContinue) {
