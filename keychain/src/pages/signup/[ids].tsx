@@ -32,6 +32,7 @@ import { addAddressPadding } from "starknet";
 import { remoteSvgIcon } from "utils/svg";
 
 import { register } from "methods/register";
+import { ChainId } from "caip";
 
 enum RegistrationState {
   CREATE_USERNAME,
@@ -93,9 +94,14 @@ const CreateWallet: NextPage = () => {
       );
 
       await onCreateFinalize(deviceKey, credentials);
+      deployAccount({
+        id: username,
+        chainId: "starknet:SN_GOERLI",
+        starterpackIds: [starterPackData?.game?.starterPack?.id]
+      });
       setRegState(RegistrationState.READY);
     },
-    [],
+    [deployAccount, starterPackData?.game?.starterPack?.id]
   );
 
   const onComplete = useCallback(async () => {
