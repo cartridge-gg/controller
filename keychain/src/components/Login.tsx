@@ -1,6 +1,6 @@
 import Fingerprint from "./icons/Fingerprint";
 import { Formik, Form, Field, FormikState } from "formik";
-import { useCallback, useEffect, useState } from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import { css } from "@emotion/react";
 import {
   Button,
@@ -13,10 +13,7 @@ import {
   Text,
   Link,
   Circle,
-  Drawer,
-  DrawerBody,
-  DrawerOverlay,
-  DrawerContent,
+  Spacer,
   useDisclosure,
   InputGroup,
   InputRightElement,
@@ -35,19 +32,29 @@ import ReturnIcon from "@cartridge/ui/src/components/icons/Return";
 import Controller from "utils/controller";
 import Container from "./Container";
 import { Header } from "./Header";
+import { DrawerWrapper } from "components/DrawerWrapper";
+import FingerprintIcon from "./icons/Fingerprint2";
 
 export const Login = ({
   chainId,
+  fullPage = false,
+  prefilledName = "",
+  web3AuthEnabled = true,
   showSignup,
-  onLogin,
+  onController,
+  onComplete,
   onCancel,
 }: {
   chainId: constants.StarknetChainId;
+  fullPage?: boolean;
+  prefilledName?: string;
+  web3AuthEnabled?: boolean;
   showSignup: () => void;
-  onLogin: (controller: Controller) => void;
-  onCancel: () => void;
+  onController?: (controller: Controller) => void;
+  onComplete?: () => void;
+  onCancel?: () => void;
 }) => {
-  const [name, setName] = useState("");
+  const [name, setName] = useState(prefilledName);
   const [nameError, setNameError] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -99,7 +106,13 @@ export const Login = ({
         ),
       });
 
-      onLogin(controller);
+      if (onController) {
+        onController(controller);
+      }
+
+      if (onComplete) {
+        onComplete();
+      }
     } catch (err) {
       setIsLoggingIn(false);
       log({
@@ -109,10 +122,10 @@ export const Login = ({
         },
       });
     }
-  }, [chainId, name, data, onLogin, log]);
+  }, [chainId, name, data, onController, log, onComplete]);
 
   return (
-    <Container gap="18px">
+    <Container gap="18px" position={fullPage ? "relative" : "fixed"}>
       <Header onClose={onCancel} />
       <HStack spacing="14px" pt="36px">
         <Circle size="48px" bgColor="gray.700">
@@ -131,7 +144,7 @@ export const Login = ({
         Your Controller will be used for interacting with the game.
       </Text>
       <Formik
-        initialValues={{ name: "" }}
+        initialValues={{ name }}
         onSubmit={() => {
           if (canContinue) {
             onOpen();
@@ -222,53 +235,66 @@ export const Login = ({
                 Create Controller
               </Link>
             </HStack>
-            <Drawer placement="bottom" onClose={onClose} isOpen={isOpen}>
-              <DrawerOverlay />
-              <DrawerContent>
-                <DrawerBody p="36px">
-                  <VStack gap="24px">
-                    <HStack>
-                      <LockIcon />
-                      <Text fontSize="12px" color="whiteAlpha.600">
-                        By continuing you are agreeing to Cartridge&apos;s{" "}
-                        <Link
-                          textDecoration="underline"
-                          href="https://cartridgegg.notion.site/Cartridge-Terms-of-Use-a7e65445041449c1a75aed697b2f6e62"
-                          isExternal
-                        >
-                          Terms of Service
-                        </Link>{" "}
-                        and{" "}
-                        <Link
-                          textDecoration="underline"
-                          href="https://cartridgegg.notion.site/Cartridge-Privacy-Policy-747901652aa34c6fb354c7d91930d66c"
-                          isExternal
-                        >
-                          Privacy Policy
-                        </Link>
-                      </Text>
-                    </HStack>
-                    {data?.account.type === "webauthn" && (
+            <Spacer minHeight="50px" />
+            <DrawerWrapper
+              isWrapped={!fullPage}
+              isOpen={isOpen}
+              onClose={onClose}
+            >
+              <VStack gap="24px">
+                <HStack>
+                  <LockIcon />
+                  <Text fontSize="12px" color="whiteAlpha.600">
+                    By continuing you are agreeing to Cartridge&apos;s{" "}
+                    <Link
+                      textDecoration="underline"
+                      href="https://cartridgegg.notion.site/Cartridge-Terms-of-Use-a7e65445041449c1a75aed697b2f6e62"
+                      isExternal
+                    >
+                      Terms of Service
+                    </Link>{" "}
+                    and{" "}
+                    <Link
+                      textDecoration="underline"
+                      href="https://cartridgegg.notion.site/Cartridge-Privacy-Policy-747901652aa34c6fb354c7d91930d66c"
+                      isExternal
+                    >
+                      Privacy Policy
+                    </Link>
+                  </Text>
+                </HStack>
+                {data ? (
+                  <>
+                    {data.account.type === "webauthn" && (
                       <Button
                         w="full"
+                        gap="10px"
                         isLoading={isLoggingIn}
                         onClick={onSubmit}
                       >
-                        Connect
+                        <FingerprintIcon boxSize="20px" /> Connect
                       </Button>
                     )}
-                    {data?.account.type === "discord" && (
+                    {data.account.type === "discord" && !web3AuthEnabled && (
                       <Web3Auth
                         username={debouncedName}
                         onAuth={(controller) => {
-                          onLogin(controller);
+                          onController(controller);
                         }}
                       />
                     )}
-                  </VStack>
-                </DrawerBody>
-              </DrawerContent>
-            </Drawer>
+                  </>
+                ) : (
+                  <>
+                    {(fullPage || !web3AuthEnabled) && (
+                      <Button w="full" gap="10px" disabled>
+                        <FingerprintIcon boxSize="20px" /> Connect
+                      </Button>
+                    )}
+                  </>
+                )}
+              </VStack>
+            </DrawerWrapper>
           </Form>
         )}
       </Formik>

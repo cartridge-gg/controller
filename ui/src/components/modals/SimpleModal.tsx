@@ -21,6 +21,7 @@ interface SimpleModalProps {
   children: React.ReactNode;
   confirmText?: string;
   showCloseButton?: boolean;
+  isLoading?: boolean;
   onConfirm?: () => void;
   onClose: () => void;
 }
@@ -33,6 +34,7 @@ export const SimpleModal = ({
   children,
   confirmText = "Confirm",
   showCloseButton = true,
+  isLoading = false,
   onConfirm,
   onClose,
 }: SimpleModalProps & HeadStoneProps) => {

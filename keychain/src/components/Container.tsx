@@ -1,4 +1,4 @@
-import { Flex, StyleProps } from "@chakra-ui/react";
+import { Container as ChakraContainer, StyleProps } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { ReactNode } from "react";
 import { css } from "@emotion/react";
@@ -8,17 +8,7 @@ const Container = ({
   ...rest
 }: { children: ReactNode } & StyleProps) => {
   return (
-    <Flex
-      p="36px"
-      w={["full", "full", "400px"]}
-      h="full"
-      position="fixed"
-      direction="column"
-      align="center"
-      as={motion.div}
-      animate={{ opacity: 1 }}
-      initial={{ opacity: 0 }}
-      {...rest}
+    <ChakraContainer
       css={css`
         overflow-y: auto;
         ::-webkit-scrollbar {
@@ -26,9 +16,18 @@ const Container = ({
         }
         -ms-overflow-style: none;
       `}
+      p="36px"
+      w={["full", "full", "432px"]}
+      h="full"
+      position="fixed"
+      as={motion.div}
+      animate={{ opacity: 1 }}
+      initial={{ opacity: 0 }}
+      centerContent
+      {...rest}
     >
       {children}
-    </Flex>
+    </ChakraContainer>
   );
 };
 

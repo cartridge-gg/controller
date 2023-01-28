@@ -16,7 +16,6 @@ import {
   L2Connect,
   Quests,
   PendingTxn,
-  Startup,
   Form as UsernameForm,
 } from "components/signup";
 
@@ -261,9 +260,6 @@ const CreateWallet: NextPage = () => {
           )}
         </SimpleGrid>
       </Container>
-      {regState == RegistrationState.READY && (
-        <Startup onComplete={onComplete} />
-      )}
     </>
   );
 };
