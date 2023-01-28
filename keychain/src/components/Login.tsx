@@ -39,6 +39,7 @@ export const Login = ({
   chainId,
   fullPage = false,
   prefilledName = "",
+  web3AuthEnabled = true,
   showSignup,
   onController,
   onComplete,
@@ -47,6 +48,7 @@ export const Login = ({
   chainId: constants.StarknetChainId;
   fullPage?: boolean;
   prefilledName?: string;
+  web3AuthEnabled?: boolean;
   showSignup: () => void;
   onController?: (controller: Controller) => void;
   onComplete?: () => void;
@@ -261,28 +263,35 @@ export const Login = ({
                     </Link>
                   </Text>
                 </HStack>
-                {!data && fullPage && (
-                  <Button w="full" gap="10px" disabled>
-                    <FingerprintIcon boxSize="20px" /> Connect
-                  </Button>
-                )}
-                {data?.account.type === "webauthn" && (
-                  <Button
-                    w="full"
-                    gap="10px"
-                    isLoading={isLoggingIn}
-                    onClick={onSubmit}
-                  >
-                    <FingerprintIcon boxSize="20px" /> Connect
-                  </Button>
-                )}
-                {data?.account.type === "discord" && (
-                  <Web3Auth
-                    username={debouncedName}
-                    onAuth={(controller) => {
-                      onController(controller);
-                    }}
-                  />
+                {data ? (
+                  <>
+                    {data.account.type === "webauthn" && (
+                      <Button
+                        w="full"
+                        gap="10px"
+                        isLoading={isLoggingIn}
+                        onClick={onSubmit}
+                      >
+                        <FingerprintIcon boxSize="20px" /> Connect
+                      </Button>
+                    )}
+                    {data.account.type === "discord" && !web3AuthEnabled && (
+                      <Web3Auth
+                        username={debouncedName}
+                        onAuth={(controller) => {
+                          onController(controller);
+                        }}
+                      />
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {(fullPage || !web3AuthEnabled) && (
+                      <Button w="full" gap="10px" disabled>
+                        <FingerprintIcon boxSize="20px" /> Connect
+                      </Button>
+                    )}
+                  </>
                 )}
               </VStack>
             </DrawerWrapper>

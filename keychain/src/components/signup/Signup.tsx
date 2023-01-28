@@ -46,6 +46,7 @@ import { DrawerWrapper } from "components/DrawerWrapper";
 export const Signup = ({
   fullPage = false,
   prefilledName = "",
+  web3AuthEnabled = true,
   showLogin,
   onController,
   onComplete,
@@ -53,6 +54,7 @@ export const Signup = ({
 }: {
   fullPage?: boolean;
   prefilledName?: string;
+  web3AuthEnabled?: boolean;
   showLogin: () => void;
   onController?: (controller: Controller) => void;
   onComplete?: () => void;
@@ -334,35 +336,37 @@ export const Signup = ({
                   <FingerprintIcon boxSize="20px" />
                   Continue
                 </Button>
-                <Web3Auth
-                  username={debouncedName}
-                  onAuth={async (controller) => {
-                    await client.request(BeginRegistrationDocument, {
-                      id: debouncedName,
-                    });
-                    await client.request(FinalizeRegistrationDocument, {
-                      credentials: "discord",
-                      signer: controller.publicKey,
-                    });
-                    if (onController) {
-                      onController(controller);
-                    }
-                    controller.account(
-                      constants.StarknetChainId.TESTNET,
-                    ).status = Status.DEPLOYING;
-                    client
-                      .request(DeployAccountDocument, {
+                {web3AuthEnabled && (
+                  <Web3Auth
+                    username={debouncedName}
+                    onAuth={async (controller) => {
+                      await client.request(BeginRegistrationDocument, {
                         id: debouncedName,
-                        chainId: "starknet:SN_GOERLI",
-                      })
-                      .then(() => {
-                        controller
-                          .account(constants.StarknetChainId.TESTNET)
-                          .sync();
                       });
-                  }}
-                  isDisabled={!!nameError || debouncing || name?.length === 0}
-                />
+                      await client.request(FinalizeRegistrationDocument, {
+                        credentials: "discord",
+                        signer: controller.publicKey,
+                      });
+                      if (onController) {
+                        onController(controller);
+                      }
+                      controller.account(
+                        constants.StarknetChainId.TESTNET,
+                      ).status = Status.DEPLOYING;
+                      client
+                        .request(DeployAccountDocument, {
+                          id: debouncedName,
+                          chainId: "starknet:SN_GOERLI",
+                        })
+                        .then(() => {
+                          controller
+                            .account(constants.StarknetChainId.TESTNET)
+                            .sync();
+                        });
+                    }}
+                    isDisabled={!!nameError || debouncing || name?.length === 0}
+                  />
+                )}
               </VStack>
             </VStack>
           </DrawerWrapper>
