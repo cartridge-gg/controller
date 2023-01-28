@@ -350,6 +350,7 @@ export const Signup = ({
                       if (onController) {
                         onController(controller);
                       }
+
                       controller.account(
                         constants.StarknetChainId.TESTNET,
                       ).status = Status.DEPLOYING;
@@ -363,6 +364,10 @@ export const Signup = ({
                             .account(constants.StarknetChainId.TESTNET)
                             .sync();
                         });
+
+                      if (onComplete) {
+                        onComplete();
+                      }
                     }}
                     isDisabled={!!nameError || debouncing || name?.length === 0}
                   />
