@@ -18,6 +18,7 @@ import {
   InputRightElement,
 } from "@chakra-ui/react";
 import {
+  DiscordRevokeDocument,
   BeginRegistrationDocument,
   DeployAccountDocument,
   FinalizeRegistrationDocument,
@@ -346,8 +347,11 @@ export const Signup = ({
                       await client.request(FinalizeRegistrationDocument, {
                         credentials: "discord",
                         signer: controller.publicKey,
+                      });
+                      await client.request(DiscordRevokeDocument, {
                         token: token,
                       });
+
                       if (onController) {
                         onController(controller);
                       }
