@@ -35,12 +35,12 @@ import Container from "./Container";
 import { Header } from "./Header";
 import { DrawerWrapper } from "components/DrawerWrapper";
 import FingerprintIcon from "./icons/Fingerprint2";
+import { useWhitelist } from "hooks/whitelist";
 
 export const Login = ({
   chainId,
   fullPage = false,
   prefilledName = "",
-  web3AuthEnabled = true,
   showSignup,
   onController,
   onComplete,
@@ -49,7 +49,6 @@ export const Login = ({
   chainId: constants.StarknetChainId;
   fullPage?: boolean;
   prefilledName?: string;
-  web3AuthEnabled?: boolean;
   showSignup: () => void;
   onController?: (controller: Controller) => void;
   onComplete?: () => void;
@@ -61,12 +60,12 @@ export const Login = ({
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [canContinue, setCanContinue] = useState(false);
   const { debouncedValue: debouncedName } = useDebounce(name, 1500);
+  const { signupEnabled } = useWhitelist();
+  const { event: log } = useAnalytics();
   const { error, refetch, data } = useAccountQuery(
     { id: debouncedName },
     { enabled: false, retry: false },
   );
-
-  const { event: log } = useAnalytics();
 
   useEffect(() => {
     if (debouncedName.length === 0) {
@@ -228,14 +227,16 @@ export const Login = ({
                 </Flex>
               )}
             </Field>
-            <HStack justify="center">
-              <Text fontSize="12px" color="whiteAlpha.600" fontWeight="bold">
-                Need a controller?
-              </Text>
-              <Link variant="outline" fontSize="11px" onClick={showSignup}>
-                Create Controller
-              </Link>
-            </HStack>
+            {signupEnabled && (
+              <HStack justify="center">
+                <Text fontSize="12px" color="whiteAlpha.600" fontWeight="bold">
+                  Need a controller?
+                </Text>
+                <Link variant="outline" fontSize="11px" onClick={showSignup}>
+                  Create Controller
+                </Link>
+              </HStack>
+            )}
             <Spacer minHeight="50px" />
             <DrawerWrapper
               isWrapped={!fullPage}
@@ -297,7 +298,7 @@ export const Login = ({
                   </>
                 ) : (
                   <>
-                    {(fullPage || !web3AuthEnabled) && (
+                    {fullPage && (
                       <Button w="full" gap="10px" disabled>
                         <FingerprintIcon boxSize="20px" /> Connect
                       </Button>

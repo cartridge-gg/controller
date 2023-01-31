@@ -42,11 +42,11 @@ import { Header } from "components/Header";
 import { Status } from "utils/account";
 import { Authenticate as AuthModal } from "./Authenticate";
 import { DrawerWrapper } from "components/DrawerWrapper";
+import { useWhitelist } from "hooks/whitelist";
 
 export const Signup = ({
   fullPage = false,
   prefilledName = "",
-  web3AuthEnabled = true,
   showLogin,
   onController,
   onComplete,
@@ -54,7 +54,6 @@ export const Signup = ({
 }: {
   fullPage?: boolean;
   prefilledName?: string;
-  web3AuthEnabled?: boolean;
   showLogin: () => void;
   onController?: (controller: Controller) => void;
   onComplete?: () => void;
@@ -68,6 +67,7 @@ export const Signup = ({
   const [dismissed, setDismissed] = useState<boolean>(false);
   const isIframe =
     typeof window !== "undefined" ? window.top !== window.self : false;
+  const { web3AuthEnabled } = useWhitelist();
 
   const {
     isOpen: isDrawerOpen,
