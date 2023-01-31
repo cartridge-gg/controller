@@ -18,7 +18,8 @@ import {
   InputGroup,
   InputRightElement,
 } from "@chakra-ui/react";
-import { useAccountQuery } from "generated/graphql";
+import { useAccountQuery, DiscordRevokeDocument } from "generated/graphql";
+import { client } from "utils/graphql";
 import base64url from "base64url";
 import { useAnalytics } from "hooks/analytics";
 import { beginLogin } from "hooks/account";
@@ -278,7 +279,11 @@ export const Login = ({
                     {data.account.type === "discord" && (
                       <Web3Auth
                         username={debouncedName}
-                        onAuth={(controller) => {
+                        onAuth={async (controller, token) => {
+                          await client.request(DiscordRevokeDocument, {
+                            token: token,
+                          });
+
                           if (onController) {
                             onController(controller);
                           }

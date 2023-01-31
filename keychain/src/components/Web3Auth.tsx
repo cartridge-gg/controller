@@ -13,7 +13,7 @@ const Web3Auth = ({
 }: {
   isDisabled?: boolean;
   username: string;
-  onAuth: (controller: Controller) => void;
+  onAuth: (controller: Controller, token: string) => void;
 }) => {
   const login = async (loginProvider: "discord" | "twitter" | "metamask") => {
     if (!web3auth) {
@@ -24,6 +24,7 @@ const Web3Auth = ({
       WALLET_ADAPTERS.OPENLOGIN,
       { loginProvider },
     );
+    const { oAuthAccessToken } = await web3auth.getUserInfo();
     const privateKey: string = await web3authProvider.request({
       method: "private_key",
     });
@@ -35,7 +36,7 @@ const Web3Auth = ({
       ec.getStarkKey(keyPair),
     );
     const controller = new Controller(keyPair, address, loginProvider);
-    onAuth(controller);
+    onAuth(controller, oAuthAccessToken);
   };
 
   return (
