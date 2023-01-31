@@ -275,7 +275,7 @@ export const Login = ({
                         <FingerprintIcon boxSize="20px" /> Connect
                       </Button>
                     )}
-                    {data.account.type === "discord" && web3AuthEnabled && (
+                    {data.account.type === "discord" && (
                       <Web3Auth
                         username={debouncedName}
                         onAuth={(controller) => {
