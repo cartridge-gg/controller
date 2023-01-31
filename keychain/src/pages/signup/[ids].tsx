@@ -1,15 +1,7 @@
 import { useMemo, useCallback, useEffect, useState } from "react";
 import type { NextPage } from "next";
 import { motion } from "framer-motion";
-import {
-  Box,
-  Flex,
-  Spacer,
-  Divider,
-  SimpleGrid,
-  Container,
-  StyleProps,
-} from "@chakra-ui/react";
+import { Flex, Divider, SimpleGrid, Container } from "@chakra-ui/react";
 import {
   useAccountInfoQuery,
   useStarterPackQuery,
@@ -23,8 +15,7 @@ import {
   L1Connect,
   L2Connect,
   Quests,
-  Pending,
-  Startup,
+  PendingTxn,
   Form as UsernameForm,
 } from "components/signup";
 
@@ -36,12 +27,12 @@ import ControllerImage from "@cartridge/ui/src/components/icons/ControllerBig";
 import BannerImage from "components/signup/Banner";
 import { StepsBar, Step } from "components/StepsBar";
 import { Credentials, onCreateFinalize } from "hooks/account";
-import { useQuests } from "hooks/quests";
 import { parseAttestationObject } from "utils/webauthn";
-import { addAddressPadding, number } from "starknet";
+import { addAddressPadding } from "starknet";
 import { remoteSvgIcon } from "utils/svg";
 
-import { register, setActive } from "methods/register";
+import { register } from "methods/register";
+import { ChainId } from "caip";
 
 enum RegistrationState {
   CREATE_USERNAME,
@@ -103,16 +94,14 @@ const CreateWallet: NextPage = () => {
       );
 
       await onCreateFinalize(deviceKey, credentials);
-
-      const deployResult = await deployAccount({
+      deployAccount({
         id: username,
         chainId: "starknet:SN_GOERLI",
+        starterpackIds: [starterPackData?.game?.starterPack?.id]
       });
-      
-      setActive(address, deployResult.deployAccount.deployTransaction.transactionHash);
       setRegState(RegistrationState.READY);
     },
-    [deployAccount],
+    [deployAccount, starterPackData?.game?.starterPack?.id]
   );
 
   const onComplete = useCallback(async () => {
@@ -246,7 +235,7 @@ const CreateWallet: NextPage = () => {
           )}
           {regState == RegistrationState.QUESTS &&
             starterPackData?.game?.starterPack?.prerequisitesQuests?.length >
-            0 && (
+              0 && (
               <Quests
                 username={username}
                 gameId={gameId}
@@ -254,7 +243,7 @@ const CreateWallet: NextPage = () => {
               />
             )}
           {regState == RegistrationState.PENDING && (
-            <Pending
+            <PendingTxn
               transaction={deployTx}
               name={starterPackData?.game?.name}
               gameId={starterPackData?.game?.id}
@@ -271,9 +260,6 @@ const CreateWallet: NextPage = () => {
           )}
         </SimpleGrid>
       </Container>
-      {regState == RegistrationState.READY && (
-        <Startup onComplete={onComplete} />
-      )}
     </>
   );
 };

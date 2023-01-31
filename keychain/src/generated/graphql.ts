@@ -142,6 +142,7 @@ export type AccountQuest = Node & {
   claimed: Scalars['Boolean'];
   completed: Scalars['Boolean'];
   completedAt?: Maybe<Scalars['Time']>;
+  completion?: Maybe<Array<Maybe<CompletionCriteria>>>;
   currentProgress?: Maybe<Scalars['BigInt']>;
   id: Scalars['ID'];
   progressMax?: Maybe<Scalars['BigInt']>;
@@ -978,6 +979,13 @@ export type ClassWhereInput = {
   updatedAtLTE?: InputMaybe<Scalars['Time']>;
   updatedAtNEQ?: InputMaybe<Scalars['Time']>;
   updatedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+};
+
+export type CompletionCriteria = {
+  __typename?: 'CompletionCriteria';
+  completed: Scalars['Boolean'];
+  description?: Maybe<Scalars['String']>;
+  questEvent: Scalars['ID'];
 };
 
 export type Constraint = {
@@ -1951,6 +1959,7 @@ export type Mutation = {
   createScopes: Scalars['Boolean'];
   createStarterpack?: Maybe<Scalars['ID']>;
   deployAccount: Contract;
+  discordRevoke: Scalars['Boolean'];
   finalizeLogin: Scalars['Boolean'];
   finalizeRegistration: Account;
   removeStarterpack: Scalars['Boolean'];
@@ -2046,6 +2055,11 @@ export type MutationDeployAccountArgs = {
   chainId: Scalars['ChainID'];
   id: Scalars['ID'];
   starterpackIds?: InputMaybe<Array<Scalars['ID']>>;
+};
+
+
+export type MutationDiscordRevokeArgs = {
+  token: Scalars['String'];
 };
 
 
@@ -2472,9 +2486,10 @@ export type QuestEvent = Node & {
   accumulatedValuesTarget?: Maybe<Scalars['Long']>;
   countTarget: Scalars['Long'];
   createdAt: Scalars['Time'];
-  eventSelector: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
   expectedValueTarget?: Maybe<Scalars['Long']>;
-  fieldSelector?: Maybe<Scalars['String']>;
+  fieldIndex?: Maybe<Scalars['Long']>;
+  firstKey: Scalars['String'];
   from: Contract;
   fromAddress: Scalars['ID'];
   id: Scalars['ID'];
@@ -2559,20 +2574,22 @@ export type QuestEventWhereInput = {
   createdAtLTE?: InputMaybe<Scalars['Time']>;
   createdAtNEQ?: InputMaybe<Scalars['Time']>;
   createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
-  /** event_selector field predicates */
-  eventSelector?: InputMaybe<Scalars['String']>;
-  eventSelectorContains?: InputMaybe<Scalars['String']>;
-  eventSelectorContainsFold?: InputMaybe<Scalars['String']>;
-  eventSelectorEqualFold?: InputMaybe<Scalars['String']>;
-  eventSelectorGT?: InputMaybe<Scalars['String']>;
-  eventSelectorGTE?: InputMaybe<Scalars['String']>;
-  eventSelectorHasPrefix?: InputMaybe<Scalars['String']>;
-  eventSelectorHasSuffix?: InputMaybe<Scalars['String']>;
-  eventSelectorIn?: InputMaybe<Array<Scalars['String']>>;
-  eventSelectorLT?: InputMaybe<Scalars['String']>;
-  eventSelectorLTE?: InputMaybe<Scalars['String']>;
-  eventSelectorNEQ?: InputMaybe<Scalars['String']>;
-  eventSelectorNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** description field predicates */
+  description?: InputMaybe<Scalars['String']>;
+  descriptionContains?: InputMaybe<Scalars['String']>;
+  descriptionContainsFold?: InputMaybe<Scalars['String']>;
+  descriptionEqualFold?: InputMaybe<Scalars['String']>;
+  descriptionGT?: InputMaybe<Scalars['String']>;
+  descriptionGTE?: InputMaybe<Scalars['String']>;
+  descriptionHasPrefix?: InputMaybe<Scalars['String']>;
+  descriptionHasSuffix?: InputMaybe<Scalars['String']>;
+  descriptionIn?: InputMaybe<Array<Scalars['String']>>;
+  descriptionIsNil?: InputMaybe<Scalars['Boolean']>;
+  descriptionLT?: InputMaybe<Scalars['String']>;
+  descriptionLTE?: InputMaybe<Scalars['String']>;
+  descriptionNEQ?: InputMaybe<Scalars['String']>;
+  descriptionNotIn?: InputMaybe<Array<Scalars['String']>>;
+  descriptionNotNil?: InputMaybe<Scalars['Boolean']>;
   /** expected_value_target field predicates */
   expectedValueTarget?: InputMaybe<Scalars['Long']>;
   expectedValueTargetGT?: InputMaybe<Scalars['Long']>;
@@ -2584,22 +2601,31 @@ export type QuestEventWhereInput = {
   expectedValueTargetNEQ?: InputMaybe<Scalars['Long']>;
   expectedValueTargetNotIn?: InputMaybe<Array<Scalars['Long']>>;
   expectedValueTargetNotNil?: InputMaybe<Scalars['Boolean']>;
-  /** field_selector field predicates */
-  fieldSelector?: InputMaybe<Scalars['String']>;
-  fieldSelectorContains?: InputMaybe<Scalars['String']>;
-  fieldSelectorContainsFold?: InputMaybe<Scalars['String']>;
-  fieldSelectorEqualFold?: InputMaybe<Scalars['String']>;
-  fieldSelectorGT?: InputMaybe<Scalars['String']>;
-  fieldSelectorGTE?: InputMaybe<Scalars['String']>;
-  fieldSelectorHasPrefix?: InputMaybe<Scalars['String']>;
-  fieldSelectorHasSuffix?: InputMaybe<Scalars['String']>;
-  fieldSelectorIn?: InputMaybe<Array<Scalars['String']>>;
-  fieldSelectorIsNil?: InputMaybe<Scalars['Boolean']>;
-  fieldSelectorLT?: InputMaybe<Scalars['String']>;
-  fieldSelectorLTE?: InputMaybe<Scalars['String']>;
-  fieldSelectorNEQ?: InputMaybe<Scalars['String']>;
-  fieldSelectorNotIn?: InputMaybe<Array<Scalars['String']>>;
-  fieldSelectorNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** field_index field predicates */
+  fieldIndex?: InputMaybe<Scalars['Long']>;
+  fieldIndexGT?: InputMaybe<Scalars['Long']>;
+  fieldIndexGTE?: InputMaybe<Scalars['Long']>;
+  fieldIndexIn?: InputMaybe<Array<Scalars['Long']>>;
+  fieldIndexIsNil?: InputMaybe<Scalars['Boolean']>;
+  fieldIndexLT?: InputMaybe<Scalars['Long']>;
+  fieldIndexLTE?: InputMaybe<Scalars['Long']>;
+  fieldIndexNEQ?: InputMaybe<Scalars['Long']>;
+  fieldIndexNotIn?: InputMaybe<Array<Scalars['Long']>>;
+  fieldIndexNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** first_key field predicates */
+  firstKey?: InputMaybe<Scalars['String']>;
+  firstKeyContains?: InputMaybe<Scalars['String']>;
+  firstKeyContainsFold?: InputMaybe<Scalars['String']>;
+  firstKeyEqualFold?: InputMaybe<Scalars['String']>;
+  firstKeyGT?: InputMaybe<Scalars['String']>;
+  firstKeyGTE?: InputMaybe<Scalars['String']>;
+  firstKeyHasPrefix?: InputMaybe<Scalars['String']>;
+  firstKeyHasSuffix?: InputMaybe<Scalars['String']>;
+  firstKeyIn?: InputMaybe<Array<Scalars['String']>>;
+  firstKeyLT?: InputMaybe<Scalars['String']>;
+  firstKeyLTE?: InputMaybe<Scalars['String']>;
+  firstKeyNEQ?: InputMaybe<Scalars['String']>;
+  firstKeyNotIn?: InputMaybe<Array<Scalars['String']>>;
   /** from_address field predicates */
   fromAddress?: InputMaybe<Scalars['ID']>;
   fromAddressContains?: InputMaybe<Scalars['ID']>;
@@ -2974,12 +3000,14 @@ export type StarterPack = Node & {
   fungibles?: Maybe<Array<Contract>>;
   game?: Maybe<Game>;
   id: Scalars['ID'];
-  issuance?: Maybe<Scalars['Int']>;
+  issuance: Scalars['Int'];
+  lastIssued?: Maybe<Scalars['BigInt']>;
   maxIssuance?: Maybe<Scalars['Int']>;
   name?: Maybe<Scalars['String']>;
   prerequisitesQuests?: Maybe<Array<Quest>>;
   starterPackFungibles?: Maybe<Array<StarterPackContract>>;
   starterPackTokens?: Maybe<Array<StarterPackToken>>;
+  toIssueTokens?: Maybe<Scalars['BigInt']>;
   tokens?: Maybe<Array<Token>>;
 };
 
@@ -3187,12 +3215,21 @@ export type StarterPackWhereInput = {
   issuanceGT?: InputMaybe<Scalars['Int']>;
   issuanceGTE?: InputMaybe<Scalars['Int']>;
   issuanceIn?: InputMaybe<Array<Scalars['Int']>>;
-  issuanceIsNil?: InputMaybe<Scalars['Boolean']>;
   issuanceLT?: InputMaybe<Scalars['Int']>;
   issuanceLTE?: InputMaybe<Scalars['Int']>;
   issuanceNEQ?: InputMaybe<Scalars['Int']>;
   issuanceNotIn?: InputMaybe<Array<Scalars['Int']>>;
-  issuanceNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** last_issued field predicates */
+  lastIssued?: InputMaybe<Scalars['BigInt']>;
+  lastIssuedGT?: InputMaybe<Scalars['BigInt']>;
+  lastIssuedGTE?: InputMaybe<Scalars['BigInt']>;
+  lastIssuedIn?: InputMaybe<Array<Scalars['BigInt']>>;
+  lastIssuedIsNil?: InputMaybe<Scalars['Boolean']>;
+  lastIssuedLT?: InputMaybe<Scalars['BigInt']>;
+  lastIssuedLTE?: InputMaybe<Scalars['BigInt']>;
+  lastIssuedNEQ?: InputMaybe<Scalars['BigInt']>;
+  lastIssuedNotIn?: InputMaybe<Array<Scalars['BigInt']>>;
+  lastIssuedNotNil?: InputMaybe<Scalars['Boolean']>;
   /** max_issuance field predicates */
   maxIssuance?: InputMaybe<Scalars['Int']>;
   maxIssuanceGT?: InputMaybe<Scalars['Int']>;
@@ -3812,6 +3849,13 @@ export type FinalizeLoginMutationVariables = Exact<{
 
 export type FinalizeLoginMutation = { __typename?: 'Mutation', finalizeLogin: boolean };
 
+export type DiscordRevokeMutationVariables = Exact<{
+  token: Scalars['String'];
+}>;
+
+
+export type DiscordRevokeMutation = { __typename?: 'Mutation', discordRevoke: boolean };
+
 export type BeginRegistrationMutationVariables = Exact<{
   id: Scalars['String'];
 }>;
@@ -3822,10 +3866,11 @@ export type BeginRegistrationMutation = { __typename?: 'Mutation', beginRegistra
 export type FinalizeRegistrationMutationVariables = Exact<{
   credentials: Scalars['String'];
   signer: Scalars['String'];
+  token: Scalars['String'];
 }>;
 
 
-export type FinalizeRegistrationMutation = { __typename?: 'Mutation', finalizeRegistration: { __typename?: 'Account', id: string, contractAddress?: string | null, contracts: { __typename?: 'ContractConnection', edges?: Array<{ __typename?: 'ContractEdge', node?: { __typename?: 'Contract', id: string, deployTransaction?: { __typename?: 'Transaction', transactionHash: string } | null } | null } | null> | null } } };
+export type FinalizeRegistrationMutation = { __typename?: 'Mutation', discordRevoke: boolean, finalizeRegistration: { __typename?: 'Account', id: string, contractAddress?: string | null, contracts: { __typename?: 'ContractConnection', edges?: Array<{ __typename?: 'ContractEdge', node?: { __typename?: 'Contract', id: string, deployTransaction?: { __typename?: 'Transaction', transactionHash: string } | null } | null } | null> | null } } };
 
 export type DeployAccountMutationVariables = Exact<{
   id: Scalars['ID'];
@@ -3841,7 +3886,7 @@ export type AccountQueryVariables = Exact<{
 }>;
 
 
-export type AccountQuery = { __typename?: 'Query', account?: { __typename?: 'Account', id: string, contractAddress?: string | null, credential: { __typename?: 'Credential', id: string, publicKey: string }, contracts: { __typename?: 'ContractConnection', edges?: Array<{ __typename?: 'ContractEdge', node?: { __typename?: 'Contract', id: string } | null } | null> | null } } | null };
+export type AccountQuery = { __typename?: 'Query', account?: { __typename?: 'Account', id: string, type: AccountType, contractAddress?: string | null, credential: { __typename?: 'Credential', id: string, publicKey: string }, contracts: { __typename?: 'ContractConnection', edges?: Array<{ __typename?: 'ContractEdge', node?: { __typename?: 'Contract', id: string } | null } | null> | null } } | null };
 
 export type ContractTypeQueryVariables = Exact<{
   id: Scalars['ID'];
@@ -3855,7 +3900,22 @@ export type StarterPackQueryVariables = Exact<{
 }>;
 
 
-export type StarterPackQuery = { __typename?: 'Query', game?: { __typename?: 'Game', id: string, name: string, description: string, socials: { __typename?: 'Socials', discord?: string | null, twitter?: string | null, website?: string | null }, icon?: { __typename?: 'File', uri: string } | null, profilePicture?: { __typename?: 'File', uri: string, alt?: string | null } | null, banner?: { __typename?: 'File', uri: string, alt?: string | null } | null, starterPack?: { __typename?: 'StarterPack', id: string, name?: string | null, description?: string | null, issuance?: number | null, maxIssuance?: number | null, starterPackFungibles?: Array<{ __typename?: 'StarterPackContract', amount?: any | null, contract: { __typename?: 'Contract', id: string, name?: string | null, description?: string | null, priority: number } }> | null, starterPackTokens?: Array<{ __typename?: 'StarterPackToken', amount?: any | null, token: { __typename?: 'Token', tokenID: any, contract: { __typename?: 'Contract', priority: number }, metadata?: { __typename?: 'Metadata', name?: string | null, description?: string | null } | null, thumbnail?: { __typename?: 'File', uri: string } | null } }> | null, prerequisitesQuests?: Array<{ __typename?: 'Quest', id: string, title: string, parent?: { __typename?: 'Quest', id: string } | null, metadata?: { __typename?: 'QuestMetadata', callToAction?: { __typename?: 'QuestCallToAction', text?: string | null, url?: string | null } | null } | null }> | null } | null } | null };
+export type StarterPackQuery = { __typename?: 'Query', game?: { __typename?: 'Game', id: string, name: string, description: string, socials: { __typename?: 'Socials', discord?: string | null, twitter?: string | null, website?: string | null }, icon?: { __typename?: 'File', uri: string } | null, profilePicture?: { __typename?: 'File', uri: string, alt?: string | null } | null, banner?: { __typename?: 'File', uri: string, alt?: string | null } | null, starterPack?: { __typename?: 'StarterPack', id: string, name?: string | null, description?: string | null, issuance: number, maxIssuance?: number | null, starterPackFungibles?: Array<{ __typename?: 'StarterPackContract', amount?: any | null, contract: { __typename?: 'Contract', id: string, name?: string | null, description?: string | null, priority: number } }> | null, starterPackTokens?: Array<{ __typename?: 'StarterPackToken', amount?: any | null, token: { __typename?: 'Token', tokenID: any, contract: { __typename?: 'Contract', priority: number }, metadata?: { __typename?: 'Metadata', name?: string | null, description?: string | null } | null, thumbnail?: { __typename?: 'File', uri: string } | null } }> | null, prerequisitesQuests?: Array<{ __typename?: 'Quest', id: string, title: string, parent?: { __typename?: 'Quest', id: string } | null, metadata?: { __typename?: 'QuestMetadata', callToAction?: { __typename?: 'QuestCallToAction', text?: string | null, url?: string | null } | null } | null }> | null } | null } | null };
+
+export type ClaimStarterpackMutationVariables = Exact<{
+  id: Scalars['ID'];
+  account: Scalars['ID'];
+}>;
+
+
+export type ClaimStarterpackMutation = { __typename?: 'Mutation', claimStarterpack?: string | null };
+
+export type AccountContractQueryVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type AccountContractQuery = { __typename?: 'Query', contract?: { __typename?: 'Contract', id: string, deployTransaction?: { __typename?: 'Transaction', id: string, receipt?: { __typename?: 'TransactionReceipt', status: TransactionReceiptStatus } | null } | null } | null };
 
 
 export const AccountInfoDocument = `
@@ -4063,6 +4123,20 @@ export const useFinalizeLoginMutation = <
       useFetchData<FinalizeLoginMutation, FinalizeLoginMutationVariables>(FinalizeLoginDocument),
       options
     );
+export const DiscordRevokeDocument = `
+    mutation DiscordRevoke($token: String!) {
+  discordRevoke(token: $token)
+}
+    `;
+export const useDiscordRevokeMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<DiscordRevokeMutation, TError, DiscordRevokeMutationVariables, TContext>) =>
+    useMutation<DiscordRevokeMutation, TError, DiscordRevokeMutationVariables, TContext>(
+      ['DiscordRevoke'],
+      useFetchData<DiscordRevokeMutation, DiscordRevokeMutationVariables>(DiscordRevokeDocument),
+      options
+    );
 export const BeginRegistrationDocument = `
     mutation BeginRegistration($id: String!) {
   beginRegistration(id: $id)
@@ -4078,7 +4152,7 @@ export const useBeginRegistrationMutation = <
       options
     );
 export const FinalizeRegistrationDocument = `
-    mutation FinalizeRegistration($credentials: String!, $signer: String!) {
+    mutation FinalizeRegistration($credentials: String!, $signer: String!, $token: String!) {
   finalizeRegistration(credentials: $credentials, signer: $signer) {
     id
     contractAddress
@@ -4093,6 +4167,7 @@ export const FinalizeRegistrationDocument = `
       }
     }
   }
+  discordRevoke(token: $token)
 }
     `;
 export const useFinalizeRegistrationMutation = <
@@ -4127,6 +4202,7 @@ export const AccountDocument = `
     query Account($id: ID!) {
   account(id: $id) {
     id
+    type
     credential {
       id
       publicKey
@@ -4319,4 +4395,65 @@ export const useInfiniteStarterPackQuery = <
 
 
 useInfiniteStarterPackQuery.getKey = (variables: StarterPackQueryVariables) => ['StarterPack.infinite', variables];
+;
+
+export const ClaimStarterpackDocument = `
+    mutation ClaimStarterpack($id: ID!, $account: ID!) {
+  claimStarterpack(starterpackId: $id, account: $account)
+}
+    `;
+export const useClaimStarterpackMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<ClaimStarterpackMutation, TError, ClaimStarterpackMutationVariables, TContext>) =>
+    useMutation<ClaimStarterpackMutation, TError, ClaimStarterpackMutationVariables, TContext>(
+      ['ClaimStarterpack'],
+      useFetchData<ClaimStarterpackMutation, ClaimStarterpackMutationVariables>(ClaimStarterpackDocument),
+      options
+    );
+export const AccountContractDocument = `
+    query AccountContract($id: ID!) {
+  contract(id: $id) {
+    id
+    deployTransaction {
+      id
+      receipt {
+        status
+      }
+    }
+  }
+}
+    `;
+export const useAccountContractQuery = <
+      TData = AccountContractQuery,
+      TError = unknown
+    >(
+      variables: AccountContractQueryVariables,
+      options?: UseQueryOptions<AccountContractQuery, TError, TData>
+    ) =>
+    useQuery<AccountContractQuery, TError, TData>(
+      ['AccountContract', variables],
+      useFetchData<AccountContractQuery, AccountContractQueryVariables>(AccountContractDocument).bind(null, variables),
+      options
+    );
+
+useAccountContractQuery.getKey = (variables: AccountContractQueryVariables) => ['AccountContract', variables];
+;
+
+export const useInfiniteAccountContractQuery = <
+      TData = AccountContractQuery,
+      TError = unknown
+    >(
+      variables: AccountContractQueryVariables,
+      options?: UseInfiniteQueryOptions<AccountContractQuery, TError, TData>
+    ) =>{
+    const query = useFetchData<AccountContractQuery, AccountContractQueryVariables>(AccountContractDocument)
+    return useInfiniteQuery<AccountContractQuery, TError, TData>(
+      ['AccountContract.infinite', variables],
+      (metaData) => query({...variables, ...(metaData.pageParam ?? {})}),
+      options
+    )};
+
+
+useInfiniteAccountContractQuery.getKey = (variables: AccountContractQueryVariables) => ['AccountContract.infinite', variables];
 ;

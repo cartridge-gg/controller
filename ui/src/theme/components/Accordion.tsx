@@ -57,5 +57,31 @@ export const Accordion: ComponentMultiStyleConfig = {
         },
       },
     },
+    error: {
+      container: {
+        pb: "0",
+      },
+      button: {
+        height: "auto",
+        paddingY: "12px",
+        paddingX: "18px",
+        bgColor: "red.200",
+        borderRadius: "6px",
+        _expanded: {
+          bgColor: "red.200",
+          borderRadius: "6px 6px 0 0",
+        },
+        _hover: {
+          bgColor: "red.200",
+        },
+        transition: "border-radius 0.2s ease",
+      },
+      panel: {
+        padding: "12px 18px 12px 18px",
+        bgColor: "red.200",
+        borderRadius: "0 0 6px 6px",
+        overflowX: "auto",
+      },
+    },
   },
 };

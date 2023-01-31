@@ -4,7 +4,11 @@ import { getStarknet } from "get-starknet"
 import { injectController } from '@cartridge/controller';
 import { AccountInterface } from "starknet";
 
-injectController();
+injectController(undefined, {
+  url: "https://keychain-git-removenextrouting.preview.cartridge.gg/",
+  starterPackId: "influence",
+});
+
 const Main = () => {
   const sn = useMemo(getStarknet, []);
   const [account, setAccount] = useState<AccountInterface>()
@@ -29,7 +33,9 @@ const Main = () => {
 
   return (
     <div>
-      {!account && <button onClick={() => sn.enable({ showModal: true })}>connect</button>}
+      {!account && <button onClick={() => {
+        sn.enable({ showModal: true })
+      }}>connect</button>}
       {account && <button onClick={onIncrement}>increment counter</button>}
     </div>
   )

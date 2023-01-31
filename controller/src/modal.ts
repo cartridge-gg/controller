@@ -1,18 +1,8 @@
-import { connectToChild } from "@cartridge/penpal";
-import { ModalMethods } from "./types";
-
-export interface Modal {
-  open: (src: string) => void;
-  close: () => void;
-}
-
-export const createModal = (): Modal => {
+export const createModal = (src: string, onClose?: () => void) => {
   const iframe = document.createElement("iframe");
+  iframe.src = src;
   iframe.id = "cartridge-modal";
-  iframe.style.minHeight = "600px";
-  iframe.style.minWidth = "400px";
   iframe.style.border = "none";
-  iframe.style.borderRadius = "8px";
   iframe.sandbox.add("allow-forms");
   iframe.sandbox.add("allow-popups");
   iframe.sandbox.add("allow-scripts");
@@ -33,33 +23,46 @@ export const createModal = (): Modal => {
   container.style.display = "flex";
   container.style.alignItems = "center";
   container.style.justifyContent = "center";
-  container.style.display = "none";
+  container.style.visibility = "hidden";
+  container.style.opacity = "0";
+  container.style.transition = "opacity 0.2s ease";
   container.appendChild(iframe);
-  document.body.appendChild(container);
 
-  function open(src: string) {
-    container.style.display = "flex";
-    iframe.src = src;
-    connectToChild<ModalMethods>({
-      iframe,
-      methods: {
-        onCancel: () => {
-          close();
-        },
-        onConfirm: () => {
-          close();
-        },
-      },
-    });
-  }
+  const open = () => {
+    container.style.visibility = "visible";
+    container.style.opacity = "1";
+  };
 
-  function close() {
-    container.style.display = "none";
-    iframe.src = "about:blank";
-  }
+  const close = () => {
+    if (onClose) {
+      onClose();
+    }
+
+    container.style.visibility = "hidden";
+    container.style.opacity = "0";
+  };
+
+  container.onclick = () => close();
+
+  resize(iframe);
+  window.addEventListener("resize", () => resize(iframe));
 
   return {
+    element: container,
     open,
     close,
   };
+};
+
+const resize = (el: HTMLElement) => {
+  if (window.innerWidth < 600) {
+    el.style.height = "100%";
+    el.style.width = "100%";
+    el.style.borderRadius = "0";
+    return;
+  }
+
+  el.style.height = "600px";
+  el.style.width = "432px";
+  el.style.borderRadius = "8px";
 };

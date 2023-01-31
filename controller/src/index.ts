@@ -1,5 +1,8 @@
-import qs from "query-string";
-import { AccountInterface, constants, number, RpcProvider } from "starknet";
+import {
+  AccountInterface,
+  constants,
+  RpcProvider,
+} from "starknet";
 import {
   AsyncMethodReturns,
   Connection,
@@ -7,9 +10,16 @@ import {
 } from "@cartridge/penpal";
 
 import DeviceAccount from "./device";
-import { Session, Keychain, Policy } from "./types";
-import { createModal, Modal } from "./modal";
-import BN from "bn.js";
+import {
+  Session,
+  Keychain,
+  Policy,
+  ResponseCodes,
+  ConnectReply,
+  ProbeReply,
+  Modal,
+} from "./types";
+import { createModal } from "./modal";
 
 export const providers = {
   [constants.StarknetChainId.TESTNET]: new RpcProvider({
@@ -24,7 +34,6 @@ export const providers = {
 };
 
 class Controller {
-  private selector = "cartridge-messenger";
   private connection?: Connection<Keychain>;
   public keychain?: AsyncMethodReturns<Keychain>;
   private policies: Policy[] = [];
@@ -32,16 +41,22 @@ class Controller {
   public chainId: constants.StarknetChainId = constants.StarknetChainId.TESTNET;
   public accounts?: { [key in constants.StarknetChainId]: AccountInterface };
   private modal?: Modal;
+  private starterPackId?: string;
 
   constructor(
     policies?: Policy[],
     options?: {
       url?: string;
       origin?: string;
+      starterPackId?: string;
     }
   ) {
     if (policies) {
       this.policies = policies;
+    }
+
+    if (options?.starterPackId) {
+      this.starterPackId = options.starterPackId;
     }
 
     if (options?.url) {
@@ -52,40 +67,28 @@ class Controller {
       return;
     }
 
-    const iframe = document.createElement("iframe");
-    iframe.id = this.selector;
-    iframe.src = this.url;
-    iframe.style.opacity = "0";
-    iframe.style.height = "0";
-    iframe.style.width = "0";
-    iframe.sandbox.add("allow-scripts");
-    iframe.sandbox.add("allow-same-origin");
-    iframe.allow = "publickey-credentials-get *";
-
-    if (!!document.hasStorageAccess) {
-      iframe.sandbox.add("allow-storage-access-by-user-activation");
-    }
+    this.modal = createModal(this.url, () => {
+      this.keychain?.reset();
+    });
 
     if (
       document.readyState === "complete" ||
       document.readyState === "interactive"
     ) {
-      document.body.appendChild(iframe);
+      document.body.appendChild(this.modal.element);
     } else {
       document.addEventListener("DOMContentLoaded", () => {
-        document.body.appendChild(iframe);
+        document.body.appendChild(this.modal!.element);
       });
     }
 
     this.connection = connectToChild<Keychain>({
-      iframe,
+      iframe: this.modal.element.children[0] as HTMLIFrameElement,
     });
 
     this.connection.promise
       .then((keychain) => (this.keychain = keychain))
       .then(() => this.probe());
-
-    this.modal = createModal();
   }
 
   get account() {
@@ -105,40 +108,36 @@ class Controller {
   }
 
   async probe() {
-    if (!this.keychain) {
+    if (!this.keychain || !this.modal) {
       console.error("not ready for connect");
       return null;
     }
 
     try {
-      const { address } = await this.keychain.probe();
+      const res = await this.keychain.probe();
+      if (res.code !== ResponseCodes.SUCCESS) {
+        return;
+      }
+
+      const { address } = res as ProbeReply;
       this.accounts = {
         [constants.StarknetChainId.MAINNET]: new DeviceAccount(
           providers[constants.StarknetChainId.MAINNET],
           address,
           this.keychain,
-          this.modal,
-          {
-            url: this.url,
-          }
+          this.modal
         ),
         [constants.StarknetChainId.TESTNET]: new DeviceAccount(
           providers[constants.StarknetChainId.TESTNET],
           address,
           this.keychain,
-          this.modal,
-          {
-            url: this.url,
-          }
+          this.modal
         ),
         [constants.StarknetChainId.TESTNET2]: new DeviceAccount(
           providers[constants.StarknetChainId.TESTNET2],
           address,
           this.keychain,
-          this.modal,
-          {
-            url: this.url,
-          }
+          this.modal
         ),
       };
     } catch (e) {
@@ -196,12 +195,36 @@ class Controller {
     return this.keychain.provision(address, credentialId);
   }
 
+  async issueStarterPack(id: string) {
+    if (!this.keychain || !this.modal) {
+      console.error("not ready for connect");
+      return;
+    }
+
+    this.modal.open();
+
+    try {
+      if (!this.account) {
+        let response = await this.keychain.connect(this.policies);
+        if (response.code !== ResponseCodes.SUCCESS) {
+          throw new Error(response.message);
+        }
+      }
+
+      return await this.keychain.issueStarterPack(id);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      this.modal.close();
+    }
+  }
+
   async connect() {
     if (this.accounts) {
       return this.accounts[this.chainId];
     }
 
-    if (!this.keychain) {
+    if (!this.keychain || !this.modal) {
       console.error("not ready for connect");
       return;
     }
@@ -213,46 +236,46 @@ class Controller {
       }
     }
 
-    this.modal?.open(
-      `${this.url}/connect?${qs.stringify({
-        origin: window.origin,
-        policies: JSON.stringify(this.policies),
-      })}`
-    );
+    this.modal.open();
 
-    const response = await this.keychain.connect(this.policies);
+    try {
+      let response = await this.keychain.connect(this.policies);
+      if (response.code !== ResponseCodes.SUCCESS) {
+        throw new Error(response.message);
+      }
 
-    this.accounts = {
-      [constants.StarknetChainId.MAINNET]: new DeviceAccount(
-        providers[constants.StarknetChainId.MAINNET],
-        response.address,
-        this.keychain,
-        this.modal,
-        {
-          url: this.url,
-        }
-      ),
-      [constants.StarknetChainId.TESTNET]: new DeviceAccount(
-        providers[constants.StarknetChainId.TESTNET],
-        response.address,
-        this.keychain,
-        this.modal,
-        {
-          url: this.url,
-        }
-      ),
-      [constants.StarknetChainId.TESTNET2]: new DeviceAccount(
-        providers[constants.StarknetChainId.TESTNET2],
-        response.address,
-        this.keychain,
-        this.modal,
-        {
-          url: this.url,
-        }
-      ),
-    };
+      response = response as ConnectReply;
+      this.accounts = {
+        [constants.StarknetChainId.MAINNET]: new DeviceAccount(
+          providers[constants.StarknetChainId.MAINNET],
+          response.address,
+          this.keychain,
+          this.modal
+        ),
+        [constants.StarknetChainId.TESTNET]: new DeviceAccount(
+          providers[constants.StarknetChainId.TESTNET],
+          response.address,
+          this.keychain,
+          this.modal
+        ),
+        [constants.StarknetChainId.TESTNET2]: new DeviceAccount(
+          providers[constants.StarknetChainId.TESTNET2],
+          response.address,
+          this.keychain,
+          this.modal
+        ),
+      };
 
-    return this.accounts[this.chainId];
+      if (this.starterPackId) {
+        await this.keychain.issueStarterPack(this.starterPackId)
+      }
+
+      return this.accounts[this.chainId];
+    } catch (e) {
+      console.log(e);
+    } finally {
+      this.modal.close();
+    }
   }
 
   async disconnect() {
@@ -290,20 +313,8 @@ class Controller {
   }
 }
 
-const BASE = number.toBN(2).pow(number.toBN(86));
-
-export function split(n: BN): {
-  x: BN;
-  y: BN;
-  z: BN;
-} {
-  const x = n.mod(BASE);
-  const y = n.div(BASE).mod(BASE);
-  const z = n.div(BASE).div(BASE);
-  return { x, y, z };
-}
-
 export * from "./types";
 export * from "./errors";
+export { computeAddress, split, verifyMessageHash } from "./utils";
 export { injectController } from "./inject";
 export default Controller;

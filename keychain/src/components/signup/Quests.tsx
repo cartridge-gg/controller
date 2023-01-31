@@ -6,16 +6,12 @@ import {
   Circle,
   Spacer,
   Button,
-  Divider,
   Alert,
   AlertIcon,
   useBreakpointValue,
 } from "@chakra-ui/react";
-import { QuestData, useQuests } from "hooks/quests";
-import router, { useRouter } from "next/router";
+import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import TwitterIcon from "@cartridge/ui/src/components/icons/Twitter";
-import DiscordIcon from "@cartridge/ui/src/components/icons/Discord";
 import CheckIcon from "@cartridge/ui/src/components/icons/Check";
 import ArrowIcon from "@cartridge/ui/src/components/icons/Arrow";
 import {
@@ -110,12 +106,12 @@ export const Quests = ({ username, gameId, starterpackId }: QuestsProps) => {
     [data, questsData],
   );
 
-  const { mutateAsync: deployMainnetAccount, isLoading } =
+  const { mutateAsync: deployAccount, isLoading } =
     useDeployAccountMutation();
 
   const onComplete = useCallback(async () => {
     playSound();
-    deployMainnetAccount({
+    deployAccount({
       id: username,
       chainId: "starknet:SN_MAIN",
       starterpackIds: [starterpackId],
@@ -127,7 +123,7 @@ export const Quests = ({ username, gameId, starterpackId }: QuestsProps) => {
       ),
     );
   }, [
-    deployMainnetAccount,
+    deployAccount,
     playSound,
     gameId,
     router,

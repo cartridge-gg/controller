@@ -35,14 +35,40 @@ export type Policy = {
   method?: string;
 };
 
+export enum ResponseCodes {
+  SUCCESS = "SUCCESS",
+  NOT_CONNECTED = "NOT_CONNECTED",
+  NOT_ALLOWED = "NOT_ALLOWED",
+  CANCELED = "CANCELED",
+}
+
+export type Error = {
+  code: ResponseCodes;
+  message: string;
+};
+
+export type ConnectReply = {
+  code: ResponseCodes.SUCCESS;
+  address: string;
+  policies: Policy[];
+};
+
+export type ExecuteReply = InvokeFunctionResponse & {
+  code: ResponseCodes.SUCCESS;
+};
+
+export type ProbeReply = {
+  code: ResponseCodes.SUCCESS;
+  address: string;
+  policies: Policy[];
+};
+
 export interface Keychain {
-  probe(): { address: string; policies: Policy[] };
-  connect(policies: Policy[]): {
-    address: string;
-    policies: Policy[];
-  };
+  probe(): Promise<ProbeReply | Error>;
+  connect(policies: Policy[]): Promise<ConnectReply | Error>;
   disconnect(): void;
 
+  reset(): void;
   revoke(origin: string): void;
   approvals(origin: string): Promise<Session | undefined>;
 
@@ -65,13 +91,13 @@ export interface Keychain {
       chainId?: constants.StarknetChainId;
     },
     sync?: boolean
-  ): Promise<InvokeFunctionResponse>;
+  ): Promise<ExecuteReply | Error>;
   provision(address: string, credentialId: string): Promise<string>;
   register(
     username: string,
     credentialId: string,
     credential: { x: string; y: string }
-  ): Promise<{ address: string; deviceKey: string }>;
+  ): Promise<{ address: string; deviceKey: string } | Error>;
   login(
     address: string,
     credentialId: string,
@@ -89,10 +115,13 @@ export interface Keychain {
   signMessage(
     typedData: typedData.TypedData,
     account: string
-  ): Promise<Signature>;
+  ): Promise<Signature | Error>;
+
+  issueStarterPack(id: string): Promise<InvokeFunctionResponse>;
 }
 
-export interface ModalMethods {
-  onConfirm(): void;
-  onCancel(): void;
+export interface Modal {
+  element: HTMLDivElement;
+  open: () => void;
+  close: () => void;
 }

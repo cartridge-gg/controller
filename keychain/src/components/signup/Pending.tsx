@@ -1,19 +1,26 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { Box, Flex, Text, Link, VStack, Button } from "@chakra-ui/react";
+import {
+  Box,
+  Flex,
+  Text,
+  Link,
+  VStack,
+  Button,
+  Circle,
+} from "@chakra-ui/react";
 import { Loading } from "components/Loading";
 import { defaultProvider } from "starknet";
 import ArrowIcon from "@cartridge/ui/src/components/icons/Arrow";
 import CheckIcon from "@cartridge/ui/src/components/icons/Check";
 import useSound from "use-sound";
-
 export interface PendingProps {
   transaction: string;
   name: string;
   gameId: string;
 }
 
-export const Pending = ({ transaction, name, gameId }: PendingProps) => {
+export const PendingTxn = ({ transaction, name, gameId }: PendingProps) => {
   const router = useRouter();
   const { redirect_uri } = router.query;
   const [pending, setPending] = useState<boolean>(true);

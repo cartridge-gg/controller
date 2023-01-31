@@ -7,7 +7,7 @@
       "esnext"
     ],
     "composite": true,
-    "target": "ES6",
+    "target": "es6",
     "module": "commonjs",
     "sourceMap": true,
     "outDir": "lib",

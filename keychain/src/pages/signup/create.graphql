@@ -2,7 +2,11 @@ mutation BeginRegistration($id: String!) {
   beginRegistration(id: $id)
 }
 
-mutation FinalizeRegistration($credentials: String!, $signer: String!) {
+mutation FinalizeRegistration(
+  $credentials: String!
+  $signer: String!
+  $token: String!
+) {
   finalizeRegistration(credentials: $credentials, signer: $signer) {
     id
     contractAddress
@@ -17,6 +21,7 @@ mutation FinalizeRegistration($credentials: String!, $signer: String!) {
       }
     }
   }
+  discordRevoke(token: $token)
 }
 
 mutation DeployAccount($id: ID!, $chainId: ChainID!, $starterpackIds: [ID!]) {
@@ -31,6 +36,7 @@ mutation DeployAccount($id: ID!, $chainId: ChainID!, $starterpackIds: [ID!]) {
 query Account($id: ID!) {
   account(id: $id) {
     id
+    type
     credential {
       id
       publicKey

@@ -8,6 +8,7 @@ const login =
   () =>
   async (
     address: string,
+    chainId: constants.StarknetChainId,
     credentialId: string,
     options: {
       rpId?: string;
@@ -16,14 +17,7 @@ const login =
   ) => {
     const keypair = ec.genKeyPair();
     const controller = new Controller(keypair, address, credentialId, options);
-    const { assertion, invoke } = await controller.signAddDeviceKey(
-      constants.StarknetChainId.TESTNET,
-    );
-
-    Storage.set(
-      selectors[VERSION].register(address, constants.StarknetChainId.TESTNET),
-      { assertion, invoke },
-    );
+    const { assertion } = await controller.account(chainId).register();
     Storage.set(selectors["0.0.3"].active(), address);
 
     return {
@@ -42,6 +36,7 @@ const login =
           signature: base64url(Buffer.from(assertion.response.signature)),
         },
       },
+      controller
     };
   };
 

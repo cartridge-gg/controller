@@ -71,6 +71,21 @@ export const Button: ComponentStyleConfig = {
         background: "gray.500",
       },
     },
+    secondary450: {
+      color: "white",
+      fontSize: "12px",
+      background: "gray.450",
+      _hover: {
+        background: "gray.400",
+      },
+      _disabled: {
+        color: "gray.200",
+        background: "gray.450",
+      },
+      _active: {
+        background: "gray.450",
+      },
+    },
     secondary600: {
       color: "white",
       fontSize: "12px",

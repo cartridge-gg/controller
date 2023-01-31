@@ -12,10 +12,24 @@ import {
   Circle,
   SystemProps,
 } from "@chakra-ui/react";
+import {
+  useAccountInfoQuery,
+  useStarterPackQuery,
+  useClaimStarterpackMutation,
+} from "generated/graphql";
+import Controller from "utils/controller";
+import Container from "../Container";
+import Footer from "../Footer";
+import { Banner } from "../Banner";
+import { remoteSvgIcon } from "utils/svg";
+
+import { Error, ExecuteReply, ResponseCodes } from "@cartridge/controller";
+import { constants, addAddressPadding } from "starknet";
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import CoinIcon from "@cartridge/ui/src/components/icons/Coin";
 import { StarterPackCarousel } from "components/carousel/StarterPack";
 import OlmecIcon from "@cartridge/ui/src/components/icons/Olmec";
+import { Header } from "components/Header";
 
 export type StarterItemProps = {
   name: string;
@@ -124,5 +138,113 @@ export const StarterPack = ({ starterpack, gameIcon }: StarterPackProps) => {
         <StarterPackCarousel nonfungibles={nonfungibles} />
       )}
     </VStack>
+  );
+};
+
+export const StarterPackEmbedded = ({
+  chainId,
+  starterPackId,
+  controller,
+  onClaim,
+  onCancel,
+}: {
+  chainId: constants.StarknetChainId;
+  starterPackId: string;
+  controller: Controller;
+  onClaim: (res: ExecuteReply) => void;
+  onCancel: (error: Error) => void;
+}) => {
+  const [nonfungibles, setNonfungibles] = useState<StarterItemProps[]>([]);
+
+  const {
+    mutate: claimMutate,
+    data: claimData,
+    error: claimError,
+    isLoading: claimLoading,
+  } = useClaimStarterpackMutation();
+
+  const {
+    data: starterData,
+    error: starterError,
+    isLoading: starterLoading,
+  } = useStarterPackQuery({
+    id: starterPackId,
+  });
+
+  const { data: accountData, isLoading: accountLoading } = useAccountInfoQuery({
+    address: addAddressPadding(controller.address),
+  });
+
+  useEffect(() => {
+    if (claimData) {
+      onClaim({
+        code: ResponseCodes.SUCCESS,
+        transaction_hash: claimData.claimStarterpack,
+      });
+    }
+  }, [claimData, onClaim]);
+
+  useEffect(() => {
+    if (starterData) {
+      let nft: StarterItemProps[] =
+        starterData.game.starterPack.starterPackTokens.map((data) => ({
+          name: data.token.metadata.name,
+          description: data.token.metadata.description,
+          icon: (
+            <Image
+              alt={data.token.metadata.name}
+              src={data.token.thumbnail.uri}
+              fill
+            />
+          ),
+          amount: data.amount,
+        })) || [];
+
+      nft.push({
+        name: "CARTRIDGE OL-MECH",
+        description:
+          "This is your digital fingerprint in the cartridge ecosystem. It will evolve as you play.",
+        icon: <OlmecIcon boxSize="38px" />,
+        amount: "1",
+      });
+
+      setNonfungibles(nft);
+    }
+  }, [setNonfungibles, starterData]);
+
+  if (claimError) {
+    return (
+      <Container>
+        <Text>{`${claimError}`}</Text>
+      </Container>
+    );
+  }
+
+  return (
+    <Container>
+      <Header />
+      <Banner
+        icon={remoteSvgIcon(starterData?.game.icon.uri, "30px", "white")}
+        title={starterData?.game.starterPack.name}
+        description="You will receive the following items"
+      />
+      <VStack w="full" borderRadius="8px" overflow="hidden">
+        {nonfungibles.length != 0 && (
+          <StarterPackCarousel nonfungibles={nonfungibles} />
+        )}
+      </VStack>
+      <Footer
+        confirmText="Claim"
+        isDisabled={!!starterError}
+        isLoading={claimLoading || starterLoading || accountLoading}
+        onConfirm={() => {
+          claimMutate({
+            id: starterData.game?.starterPack?.id,
+            account: accountData.accounts.edges?.[0]?.node.id,
+          });
+        }}
+        showCancel={false}
+      />
+    </Container>
   );
 };
