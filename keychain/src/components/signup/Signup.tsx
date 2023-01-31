@@ -339,13 +339,14 @@ export const Signup = ({
                 {web3AuthEnabled && (
                   <Web3Auth
                     username={debouncedName}
-                    onAuth={async (controller) => {
+                    onAuth={async (controller, token) => {
                       await client.request(BeginRegistrationDocument, {
                         id: debouncedName,
                       });
                       await client.request(FinalizeRegistrationDocument, {
                         credentials: "discord",
                         signer: controller.publicKey,
+                        token: token,
                       });
                       if (onController) {
                         onController(controller);

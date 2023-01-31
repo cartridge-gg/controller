@@ -1959,6 +1959,7 @@ export type Mutation = {
   createScopes: Scalars['Boolean'];
   createStarterpack?: Maybe<Scalars['ID']>;
   deployAccount: Contract;
+  discordRevoke: Scalars['Boolean'];
   finalizeLogin: Scalars['Boolean'];
   finalizeRegistration: Account;
   removeStarterpack: Scalars['Boolean'];
@@ -2054,6 +2055,11 @@ export type MutationDeployAccountArgs = {
   chainId: Scalars['ChainID'];
   id: Scalars['ID'];
   starterpackIds?: InputMaybe<Array<Scalars['ID']>>;
+};
+
+
+export type MutationDiscordRevokeArgs = {
+  token: Scalars['String'];
 };
 
 
@@ -3001,6 +3007,7 @@ export type StarterPack = Node & {
   prerequisitesQuests?: Maybe<Array<Quest>>;
   starterPackFungibles?: Maybe<Array<StarterPackContract>>;
   starterPackTokens?: Maybe<Array<StarterPackToken>>;
+  toIssueTokens?: Maybe<Scalars['BigInt']>;
   tokens?: Maybe<Array<Token>>;
 };
 
@@ -3842,6 +3849,13 @@ export type FinalizeLoginMutationVariables = Exact<{
 
 export type FinalizeLoginMutation = { __typename?: 'Mutation', finalizeLogin: boolean };
 
+export type DiscordRevokeMutationVariables = Exact<{
+  token: Scalars['String'];
+}>;
+
+
+export type DiscordRevokeMutation = { __typename?: 'Mutation', discordRevoke: boolean };
+
 export type BeginRegistrationMutationVariables = Exact<{
   id: Scalars['String'];
 }>;
@@ -3852,10 +3866,11 @@ export type BeginRegistrationMutation = { __typename?: 'Mutation', beginRegistra
 export type FinalizeRegistrationMutationVariables = Exact<{
   credentials: Scalars['String'];
   signer: Scalars['String'];
+  token: Scalars['String'];
 }>;
 
 
-export type FinalizeRegistrationMutation = { __typename?: 'Mutation', finalizeRegistration: { __typename?: 'Account', id: string, contractAddress?: string | null, contracts: { __typename?: 'ContractConnection', edges?: Array<{ __typename?: 'ContractEdge', node?: { __typename?: 'Contract', id: string, deployTransaction?: { __typename?: 'Transaction', transactionHash: string } | null } | null } | null> | null } } };
+export type FinalizeRegistrationMutation = { __typename?: 'Mutation', discordRevoke: boolean, finalizeRegistration: { __typename?: 'Account', id: string, contractAddress?: string | null, contracts: { __typename?: 'ContractConnection', edges?: Array<{ __typename?: 'ContractEdge', node?: { __typename?: 'Contract', id: string, deployTransaction?: { __typename?: 'Transaction', transactionHash: string } | null } | null } | null> | null } } };
 
 export type DeployAccountMutationVariables = Exact<{
   id: Scalars['ID'];
@@ -4108,6 +4123,20 @@ export const useFinalizeLoginMutation = <
       useFetchData<FinalizeLoginMutation, FinalizeLoginMutationVariables>(FinalizeLoginDocument),
       options
     );
+export const DiscordRevokeDocument = `
+    mutation DiscordRevoke($token: String!) {
+  discordRevoke(token: $token)
+}
+    `;
+export const useDiscordRevokeMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<DiscordRevokeMutation, TError, DiscordRevokeMutationVariables, TContext>) =>
+    useMutation<DiscordRevokeMutation, TError, DiscordRevokeMutationVariables, TContext>(
+      ['DiscordRevoke'],
+      useFetchData<DiscordRevokeMutation, DiscordRevokeMutationVariables>(DiscordRevokeDocument),
+      options
+    );
 export const BeginRegistrationDocument = `
     mutation BeginRegistration($id: String!) {
   beginRegistration(id: $id)
@@ -4123,7 +4152,7 @@ export const useBeginRegistrationMutation = <
       options
     );
 export const FinalizeRegistrationDocument = `
-    mutation FinalizeRegistration($credentials: String!, $signer: String!) {
+    mutation FinalizeRegistration($credentials: String!, $signer: String!, $token: String!) {
   finalizeRegistration(credentials: $credentials, signer: $signer) {
     id
     contractAddress
@@ -4138,6 +4167,7 @@ export const FinalizeRegistrationDocument = `
       }
     }
   }
+  discordRevoke(token: $token)
 }
     `;
 export const useFinalizeRegistrationMutation = <
