@@ -40,11 +40,8 @@
       "TwitterQuest"
     ],
     "TransactionMetadata": [
-      "AccountUpgrade",
-      "ContractDeploy",
-      "FungibleTransfer",
-      "Mint",
-      "NonFungibleTransfer"
+      "Call",
+      "MultiCall"
     ]
   }
 };
