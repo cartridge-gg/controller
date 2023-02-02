@@ -2040,6 +2040,7 @@ export type MutationCreateScopesArgs = {
 export type MutationCreateStarterpackArgs = {
   active?: InputMaybe<Scalars['Boolean']>;
   call: FunctionCallInput;
+  chainId: Scalars['ID'];
   description?: InputMaybe<Scalars['String']>;
   gameId: Scalars['ID'];
   name?: InputMaybe<Scalars['String']>;
@@ -2982,6 +2983,7 @@ export type StarterPack = Node & {
   accountStarterPack: AccountStarterPackConnection;
   accounts: AccountConnection;
   active: Scalars['Boolean'];
+  chainID: Scalars['ChainID'];
   createdAt: Scalars['Time'];
   description?: Maybe<Scalars['String']>;
   fungibles?: Maybe<Array<Contract>>;
@@ -3139,6 +3141,20 @@ export type StarterPackWhereInput = {
   active?: InputMaybe<Scalars['Boolean']>;
   activeNEQ?: InputMaybe<Scalars['Boolean']>;
   and?: InputMaybe<Array<StarterPackWhereInput>>;
+  /** chain_id field predicates */
+  chainID?: InputMaybe<Scalars['ChainID']>;
+  chainIDContains?: InputMaybe<Scalars['ChainID']>;
+  chainIDContainsFold?: InputMaybe<Scalars['ChainID']>;
+  chainIDEqualFold?: InputMaybe<Scalars['ChainID']>;
+  chainIDGT?: InputMaybe<Scalars['ChainID']>;
+  chainIDGTE?: InputMaybe<Scalars['ChainID']>;
+  chainIDHasPrefix?: InputMaybe<Scalars['ChainID']>;
+  chainIDHasSuffix?: InputMaybe<Scalars['ChainID']>;
+  chainIDIn?: InputMaybe<Array<Scalars['ChainID']>>;
+  chainIDLT?: InputMaybe<Scalars['ChainID']>;
+  chainIDLTE?: InputMaybe<Scalars['ChainID']>;
+  chainIDNEQ?: InputMaybe<Scalars['ChainID']>;
+  chainIDNotIn?: InputMaybe<Array<Scalars['ChainID']>>;
   /** created_at field predicates */
   createdAt?: InputMaybe<Scalars['Time']>;
   createdAtGT?: InputMaybe<Scalars['Time']>;
@@ -3886,7 +3902,7 @@ export type StarterPackQueryVariables = Exact<{
 }>;
 
 
-export type StarterPackQuery = { __typename?: 'Query', game?: { __typename?: 'Game', id: string, name: string, description: string, socials: { __typename?: 'Socials', discord?: string | null, twitter?: string | null, website?: string | null }, icon?: { __typename?: 'File', uri: string } | null, profilePicture?: { __typename?: 'File', uri: string, alt?: string | null } | null, banner?: { __typename?: 'File', uri: string, alt?: string | null } | null, starterPack?: { __typename?: 'StarterPack', id: string, name?: string | null, description?: string | null, issuance: number, maxIssuance?: number | null, starterPackFungibles?: Array<{ __typename?: 'StarterPackContract', amount?: any | null, contract: { __typename?: 'Contract', id: string, name?: string | null, description?: string | null, priority: number } }> | null, starterPackTokens?: Array<{ __typename?: 'StarterPackToken', amount?: any | null, token: { __typename?: 'Token', tokenID: any, contract: { __typename?: 'Contract', priority: number }, metadata?: { __typename?: 'Metadata', name?: string | null, description?: string | null } | null, thumbnail?: { __typename?: 'File', uri: string } | null } }> | null, prerequisitesQuests?: Array<{ __typename?: 'Quest', id: string, title: string, parent?: { __typename?: 'Quest', id: string } | null, metadata?: { __typename?: 'QuestMetadata', callToAction?: { __typename?: 'QuestCallToAction', text?: string | null, url?: string | null } | null } | null }> | null } | null } | null };
+export type StarterPackQuery = { __typename?: 'Query', game?: { __typename?: 'Game', id: string, name: string, description: string, socials: { __typename?: 'Socials', discord?: string | null, twitter?: string | null, website?: string | null }, icon?: { __typename?: 'File', uri: string } | null, profilePicture?: { __typename?: 'File', uri: string, alt?: string | null } | null, banner?: { __typename?: 'File', uri: string, alt?: string | null } | null, starterPack?: { __typename?: 'StarterPack', id: string, name?: string | null, description?: string | null, chainID: any, issuance: number, maxIssuance?: number | null, starterPackFungibles?: Array<{ __typename?: 'StarterPackContract', amount?: any | null, contract: { __typename?: 'Contract', id: string, name?: string | null, description?: string | null, priority: number } }> | null, starterPackTokens?: Array<{ __typename?: 'StarterPackToken', amount?: any | null, token: { __typename?: 'Token', tokenID: any, contract: { __typename?: 'Contract', priority: number }, metadata?: { __typename?: 'Metadata', name?: string | null, description?: string | null } | null, thumbnail?: { __typename?: 'File', uri: string } | null } }> | null, prerequisitesQuests?: Array<{ __typename?: 'Quest', id: string, title: string, parent?: { __typename?: 'Quest', id: string } | null, metadata?: { __typename?: 'QuestMetadata', callToAction?: { __typename?: 'QuestCallToAction', text?: string | null, url?: string | null } | null } | null }> | null } | null } | null };
 
 export type ClaimStarterpackMutationVariables = Exact<{
   id: Scalars['ID'];
@@ -4304,6 +4320,7 @@ export const StarterPackDocument = `
       id
       name
       description
+      chainID
       issuance
       maxIssuance
       starterPackFungibles {
