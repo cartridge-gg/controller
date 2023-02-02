@@ -2,7 +2,6 @@ import { constants } from "starknet";
 
 export const GATEWAY_MAINNET = process.env.NEXT_PUBLIC_GATEWAY_MAINNET;
 export const GATEWAY_GOERLI = process.env.NEXT_PUBLIC_GATEWAY_GOERLI;
-export const GATEWAY_GOERLI2 = process.env.NEXT_PUBLIC_GATEWAY_GOERLI2;
 
 export const ETH_RPC_MAINNET = process.env.NEXT_PUBLIC_ETH_RPC_MAINNET;
 export const ETH_RPC_GOERLI = process.env.NEXT_PUBLIC_ETH_RPC_GOERLI;
@@ -51,5 +50,4 @@ export const CLASS_HASHES = {
 export const NamedChainId = {
   [constants.StarknetChainId.MAINNET]: "SN_MAIN",
   [constants.StarknetChainId.TESTNET]: "SN_GOERLI",
-  [constants.StarknetChainId.TESTNET2]: "SN_GOERLI2",
 };
