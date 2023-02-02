@@ -22,7 +22,7 @@ import { useAccountQuery, DiscordRevokeDocument } from "generated/graphql";
 import { client } from "utils/graphql";
 import base64url from "base64url";
 import { useAnalytics } from "hooks/analytics";
-import { beginLogin } from "hooks/account";
+import { beginLogin, onLoginFinalize } from "hooks/account";
 import login from "methods/login";
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import { useDebounce } from "hooks/debounce";
@@ -36,6 +36,7 @@ import { Header } from "./Header";
 import { DrawerWrapper } from "components/DrawerWrapper";
 import FingerprintIcon from "./icons/Fingerprint2";
 import { useWhitelist } from "hooks/whitelist";
+import { WebauthnSigner } from "utils/webauthn";
 
 export const Login = ({
   chainId,
@@ -62,10 +63,11 @@ export const Login = ({
   const { debouncedValue: debouncedName } = useDebounce(name, 1500);
   const { signupEnabled } = useWhitelist();
   const { event: log } = useAnalytics();
-  const { error, refetch, data } = useAccountQuery(
-    { id: debouncedName },
-    { enabled: false, retry: false },
-  );
+  const {
+    error,
+    refetch,
+    data: accountData,
+  } = useAccountQuery({ id: debouncedName }, { enabled: false, retry: false });
 
   useEffect(() => {
     if (debouncedName.length === 0) {
@@ -75,7 +77,7 @@ export const Login = ({
   }, [refetch, debouncedName]);
 
   useEffect(() => {
-    if (data) {
+    if (accountData) {
       setCanContinue(true);
       onOpen();
     }
@@ -83,7 +85,7 @@ export const Login = ({
     if (error) {
       setNameError("This account does not exist");
     }
-  }, [error, data, onOpen]);
+  }, [error, accountData, onOpen]);
 
   const onSubmit = useCallback(async () => {
     log({ type: "webauthn_login" });
@@ -92,12 +94,31 @@ export const Login = ({
     try {
       const {
         account: {
-          credential: { id: credentialId },
+          credential: { id: credentialId, publicKey },
           contractAddress: address,
         },
-      } = data;
+      } = accountData;
+
+      console.log({ accountData });
 
       const { data: beginLoginData } = await beginLogin(name);
+
+      console.log(beginLoginData);
+
+      const signer: WebauthnSigner = new WebauthnSigner(
+        credentialId,
+        publicKey,
+      );
+
+      const assertion = await signer.sign(
+        Buffer.from(beginLoginData.beginLogin.publicKey.challenge),
+      );
+
+      console.log({ assertion });
+
+      const res = await onLoginFinalize(assertion);
+      console.log(res);
+      return;
 
       const { controller } = await login()(address, chainId, credentialId, {
         rpId: process.env.NEXT_PUBLIC_RP_ID,
@@ -122,7 +143,7 @@ export const Login = ({
         },
       });
     }
-  }, [chainId, name, data, onController, log, onComplete]);
+  }, [chainId, name, accountData, onController, log, onComplete]);
 
   return (
     <Container gap="18px" position={fullPage ? "relative" : "fixed"}>
@@ -265,9 +286,9 @@ export const Login = ({
                     </Link>
                   </Text>
                 </HStack>
-                {data ? (
+                {accountData ? (
                   <>
-                    {data.account.type === "webauthn" && (
+                    {accountData.account.type === "webauthn" && (
                       <Button
                         w="full"
                         gap="10px"
@@ -277,7 +298,7 @@ export const Login = ({
                         <FingerprintIcon boxSize="20px" /> Connect
                       </Button>
                     )}
-                    {data.account.type === "discord" && (
+                    {accountData.account.type === "discord" && (
                       <Web3Auth
                         username={debouncedName}
                         onAuth={async (controller, token) => {
