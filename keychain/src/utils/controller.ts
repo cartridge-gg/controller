@@ -19,11 +19,9 @@ import Storage from "utils/storage";
 
 import Account from "./account";
 import { DeviceSigner } from "./signer";
-import WebauthnAccount, { formatAssertion, RawAssertion } from "./webauthn";
-import { getGasPrice } from "./gateway";
+import WebauthnAccount, { RawAssertion } from "./webauthn";
 import selectors from "./selectors";
 import migrations from "./migrations";
-import { CLASS_HASHES } from "@cartridge/controller/src/constants";
 import { AccountInfoDocument } from "generated/graphql";
 import { client } from "./graphql";
 
@@ -46,13 +44,18 @@ type SerializedController = {
   address: string;
 };
 
+enum SupportedChainIds {
+  MAINNET = "0x534e5f4d41494e",
+  TESTNET = "0x534e5f474f45524c49",
+}
+
 export default class Controller {
   public address: string;
   public signer: SignerInterface;
   public publicKey: string;
   protected keypair: KeyPair;
   protected credentialId: string;
-  protected accounts: { [key in constants.StarknetChainId]: Account };
+  protected accounts: { [key in SupportedChainIds]: Account };
 
   constructor(
     keypair: KeyPair,
@@ -71,19 +74,6 @@ export default class Controller {
     this.accounts = {
       [constants.StarknetChainId.TESTNET]: new Account(
         constants.StarknetChainId.TESTNET,
-        process.env.NEXT_PUBLIC_RPC_GOERLI,
-        address,
-        this.signer,
-        new WebauthnAccount(
-          process.env.NEXT_PUBLIC_RPC_GOERLI,
-          address,
-          credentialId,
-          this.publicKey,
-          options,
-        ),
-      ),
-      [constants.StarknetChainId.TESTNET2]: new Account(
-        constants.StarknetChainId.TESTNET2,
         process.env.NEXT_PUBLIC_RPC_GOERLI,
         address,
         this.signer,

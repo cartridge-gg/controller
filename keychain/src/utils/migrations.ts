@@ -37,19 +37,6 @@ const migrations = {
         selectors["0.0.2"].deployment(constants.StarknetChainId.TESTNET),
       );
 
-      Storage.set(
-        selectors["0.0.3"].deployment(
-          address,
-          constants.StarknetChainId.TESTNET2,
-        ),
-        Storage.get(
-          selectors["0.0.2"].deployment(constants.StarknetChainId.TESTNET2),
-        ),
-      );
-      Storage.remove(
-        selectors["0.0.2"].deployment(constants.StarknetChainId.TESTNET2),
-      );
-
       Storage.keys()
         .filter((k) => k.startsWith(selectors["0.0.2"].admin("")))
         .forEach((k) => {

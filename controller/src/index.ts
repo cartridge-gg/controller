@@ -25,21 +25,23 @@ export const providers = {
   [constants.StarknetChainId.TESTNET]: new RpcProvider({
     nodeUrl: "https://starknet-goerli.cartridge.gg/rpc/v0.2",
   }),
-  [constants.StarknetChainId.TESTNET2]: new RpcProvider({
-    nodeUrl: "https://starknet-goerli2.cartridge.gg/rpc/v0.2",
-  }),
   [constants.StarknetChainId.MAINNET]: new RpcProvider({
     nodeUrl: "https://starknet.cartridge.gg/rpc/v0.2",
   }),
 };
+
+enum SupportedChainIds {
+  MAINNET = "0x534e5f4d41494e",
+  TESTNET = "0x534e5f474f45524c49",
+}
 
 class Controller {
   private connection?: Connection<Keychain>;
   public keychain?: AsyncMethodReturns<Keychain>;
   private policies: Policy[] = [];
   private url: string = "https://x.cartridge.gg";
-  public chainId: constants.StarknetChainId = constants.StarknetChainId.TESTNET;
-  public accounts?: { [key in constants.StarknetChainId]: AccountInterface };
+  public chainId: SupportedChainIds = SupportedChainIds.TESTNET;
+  public accounts?: { [key in SupportedChainIds]: AccountInterface };
   private modal?: Modal;
   private starterPackId?: string;
 
@@ -133,12 +135,6 @@ class Controller {
           this.keychain,
           this.modal
         ),
-        [constants.StarknetChainId.TESTNET2]: new DeviceAccount(
-          providers[constants.StarknetChainId.TESTNET2],
-          address,
-          this.keychain,
-          this.modal
-        ),
       };
     } catch (e) {
       console.error(e);
@@ -149,11 +145,12 @@ class Controller {
   }
 
   async switchChain(chainId: constants.StarknetChainId) {
-    if (this.chainId === chainId) {
+    const cid = chainId === constants.StarknetChainId.MAINNET ? SupportedChainIds.MAINNET : SupportedChainIds.TESTNET;
+    if (this.chainId === cid) {
       return;
     }
 
-    this.chainId = chainId;
+    this.chainId = cid;
   }
 
   // Register a new device key.
@@ -254,12 +251,6 @@ class Controller {
         ),
         [constants.StarknetChainId.TESTNET]: new DeviceAccount(
           providers[constants.StarknetChainId.TESTNET],
-          response.address,
-          this.keychain,
-          this.modal
-        ),
-        [constants.StarknetChainId.TESTNET2]: new DeviceAccount(
-          providers[constants.StarknetChainId.TESTNET2],
           response.address,
           this.keychain,
           this.modal
