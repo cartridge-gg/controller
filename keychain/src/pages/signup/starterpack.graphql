@@ -23,6 +23,7 @@ query StarterPack($id: ID!) {
       id
       name
       description
+      chainID
       issuance
       maxIssuance
       starterPackFungibles {

@@ -54,15 +54,14 @@ const CreateWallet: NextPage = () => {
     RegistrationState.CREATE_USERNAME,
   );
 
-  const { ids } = router.query as {
-    ids: Array<string>;
+  const { id: gameId } = router.query as {
+    id: string;
   };
-  const gameId = ids && ids[0];
   const {
     error,
     data: starterPackData,
     isLoading: loadingStarterpack,
-  } = useStarterPackQuery({ id: gameId }, { enabled: !!ids });
+  } = useStarterPackQuery({ id: gameId }, { enabled: !!gameId });
 
   const { data: accountData } = useAccountInfoQuery(
     { address: addAddressPadding(controller?.address) },
@@ -97,7 +96,12 @@ const CreateWallet: NextPage = () => {
       deployAccount({
         id: username,
         chainId: "starknet:SN_GOERLI",
-        starterpackIds: [starterPackData?.game?.starterPack?.id]
+        starterpackIds: starterPackData?.game?.starterPack?.chainID?.includes("SN_GOERLI") && [starterPackData?.game?.starterPack?.id]
+      });
+      deployAccount({
+        id: username,
+        chainId: "starknet:SN_MAIN",
+        starterpackIds: starterPackData?.game?.starterPack?.chainID?.includes("SN_MAIN") && [starterPackData?.game?.starterPack?.id]
       });
       setRegState(RegistrationState.READY);
     },
