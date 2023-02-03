@@ -238,14 +238,8 @@ export const StarterPack = ({
     <Container position={fullPage ? "relative" : "fixed"}>
       <Header />
       <BannerImage imgSrc={starterData?.game.banner.uri} obscuredWidth="0px" />
-      {/* <Banner
-        icon={remoteSvgIcon(starterData?.game.icon.uri, "30px", "white")}
-        title={starterData?.game.starterPack.name}
-        description="You will receive the following items"
-        pt="36px"
-      /> */}
 
-      <VStack spacing="18px" pt="80px" pb="24px">
+      <VStack spacing="18px" pt="36px" pb="24px">
         <HStack spacing="14px">
           <Circle size="48px" bgColor="gray.700">
             <StarterpackIcon boxSize="30px" />

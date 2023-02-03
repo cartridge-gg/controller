@@ -71,6 +71,7 @@ export const StarterPackCarousel = ({
               gap="20px"
               pr="20px"
               userSelect="none"
+              align="flex-start"
             >
               <Flex
                 align="center"
@@ -90,10 +91,6 @@ export const StarterPackCarousel = ({
               <VStack boxSize="full" align="flex-start">
                 <HStack w="full" fontWeight="bold" textTransform="uppercase">
                   <Text fontSize="11px">{item.name}</Text>
-                  <Spacer />
-                  <Text fontSize="9px" color="green.200">
-                    FREE
-                  </Text>
                 </HStack>
                 <Text fontSize="11px" color="gray.200">
                   {item.description}
