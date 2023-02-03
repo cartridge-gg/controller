@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback, ReactNode } from "react";
-import { useRouter } from "next/router";
 import { Formik, Form, Field, FormikState } from "formik";
 import { css } from "@emotion/react";
 import {
@@ -241,7 +240,7 @@ export const Signup = ({
   };
 
   if (isRegistering && isIframe) {
-    return <Continue />;
+    return <Continue position={fullPage ? "relative" : "fixed"} />;
   }
 
   return (

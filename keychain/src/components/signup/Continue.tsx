@@ -1,20 +1,11 @@
-import { useState } from "react";
-import { Text, VStack, Container, Link } from "@chakra-ui/react";
+import { Text, VStack, Link, StyleProps } from "@chakra-ui/react";
 import { Header } from "components/Header";
 import { AuthSparkleImage } from "@cartridge/ui/components/icons/auth";
-import { motion } from "framer-motion";
+import Container from "components/Container";
 
-const Continue = () => {
+const Continue = ({ ...rest }: StyleProps) => {
   return (
-    <Container
-      w="full"
-      h="100%"
-      position="fixed"
-      top="0"
-      left="0"
-      zIndex="overlay"
-      bgColor="gray.400"
-    >
+    <Container {...rest}>
       <Header muted />
       <VStack boxSize="full" pt="120px" color="gray.200" spacing="36px">
         <AuthSparkleImage />
