@@ -53,7 +53,7 @@ export const StarterPackCarousel = ({
   return (
     <>
       <Flex
-        p="12px"
+        p="18px"
         w="full"
         gap="12px"
         overflow="hidden"
@@ -102,7 +102,7 @@ export const StarterPackCarousel = ({
             </HStack>
           ))}
         </Flex>
-        <Box h="1px" bgColor="gray.800"></Box>
+        <Spacer minHeight="10px" />
         <EdgeFade percentage={3} />
         <HStack w="full" pointerEvents="none" align="flex-end" zIndex="1">
           <HStack w="full" justify="space-between">
@@ -156,12 +156,6 @@ export const StarterPackCarousel = ({
             <Text color="inherit">FREE</Text>
           </HStack>
         ))}
-        <Box h="1px" w="full" bgColor="whiteAlpha.300" />
-        <HStack w="full" fontSize="11px" fontWeight="bold">
-          <Text>{`Total [${nonfungibles.length}]`}</Text>
-          <Spacer />
-          <Text>Free</Text>
-        </HStack>
       </VStack>
     </>
   );

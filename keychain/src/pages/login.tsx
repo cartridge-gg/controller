@@ -4,15 +4,23 @@ import { constants } from "starknet";
 import { Login as LoginComponent } from "components/Login";
 const Login: NextPage = () => {
   const router = useRouter();
+  const { sp: starterPackId } = router.query as { sp: string };
   return (
     <LoginComponent
       chainId={constants.StarknetChainId.TESTNET}
       showSignup={() =>
         router.push({ pathname: "/signup", query: router.query })
       }
-      onComplete={() =>
-        router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`)
-      }
+      onComplete={() => {
+        if (starterPackId) {
+          router.replace(
+            `${process.env.NEXT_PUBLIC_ADMIN_URL}/claim/${starterPackId}`,
+          );
+          return;
+        }
+
+        router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);
+      }}
       fullPage
     />
   );
