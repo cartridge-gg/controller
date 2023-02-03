@@ -36,7 +36,7 @@ const Container = ({
       align="center"
       justify="center"
       flexShrink={0}
-      bg="gray.700"
+      bg="gray.800"
       {...rest}
     >
       <ChakraContainer centerContent>{children}</ChakraContainer>

@@ -1,6 +1,19 @@
 import { Button, Flex, Spacer } from "@chakra-ui/react";
 import { ReactNode } from "react";
 
+export interface FooterProps {
+  confirmText?: string;
+  cancelText?: string;
+  showCancel?: boolean;
+  showConfirm?: boolean;
+  children?: ReactNode;
+  isDisabled?: boolean;
+  isLoading?: boolean;
+  floatBottom?: boolean;
+  onConfirm?: () => void;
+  onCancel?: () => void;
+}
+
 const Footer = ({
   children,
   confirmText = "Confirm",
@@ -9,27 +22,18 @@ const Footer = ({
   showConfirm = true,
   isDisabled = false,
   isLoading = false,
+  floatBottom = true,
   onConfirm,
   onCancel,
-}: {
-  confirmText?: string;
-  cancelText?: string;
-  showCancel?: boolean;
-  showConfirm?: boolean;
-  children?: ReactNode;
-  isDisabled?: boolean;
-  isLoading?: boolean;
-  onConfirm?: () => void;
-  onCancel?: () => void;
-}) => (
+}: FooterProps) => (
   <>
     <Spacer minH="60px" />
     <Flex
-      position="fixed"
+      position={floatBottom ? "fixed" : "relative"}
       bottom="0"
       right="0"
       w="100%"
-      p="18px 36px 36px 36px"
+      p={floatBottom && "18px 36px 36px 36px"}
       bgColor="gray.800"
       justify="flex-end"
       flexDirection="column"
@@ -41,7 +45,7 @@ const Footer = ({
           <Button
             variant="secondary600"
             size="md"
-            w={["100%", "100%", "200px"]}
+            w={floatBottom ? ["100%", "100%", "200px"] : "100%"}
             onClick={onCancel}
           >
             {cancelText}
@@ -52,7 +56,7 @@ const Footer = ({
             size="md"
             disabled={isDisabled || isLoading}
             isLoading={isLoading}
-            w={["100%", "100%", "200px"]}
+            w={floatBottom ? ["100%", "100%", "200px"] : "100%"}
             type={onConfirm ? "button" : "submit"}
             onClick={onConfirm}
           >

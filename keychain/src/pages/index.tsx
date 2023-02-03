@@ -29,7 +29,7 @@ import {
 } from "starknet";
 import SignMessage from "components/SignMessage";
 import Execute from "components/Execute";
-import { StarterPackEmbedded as StarterPack } from "components/signup/StarterPack";
+import { StarterPack } from "components/signup/StarterPack";
 import selectors from "utils/selectors";
 import Storage from "utils/storage";
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
@@ -365,7 +365,6 @@ const Index: NextPage = () => {
     const ctx = context as StarterPack;
     return (
       <StarterPack
-        chainId={chainId}
         controller={controller}
         starterPackId={ctx.starterPackId}
         onClaim={(res: ExecuteReply) => ctx.resolve(res)}

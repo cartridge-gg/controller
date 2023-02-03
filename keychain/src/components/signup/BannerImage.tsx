@@ -1,9 +1,8 @@
 import { Box, StyleProps } from "@chakra-ui/react";
 import Image from "next/future/image";
 
-const Banner = ({
+const BannerImage = ({
   imgSrc,
-  obscuredWidth,
   ...rest
 }: {
   imgSrc?: string;
@@ -13,8 +12,7 @@ const Banner = ({
     <Box
       h="200px"
       w="full"
-      position="relative"
-      left={`calc(${obscuredWidth} / 2)`}
+      position="fixed"
       zIndex={-1}
       userSelect="none"
       overflow="hidden"
@@ -36,10 +34,10 @@ const Banner = ({
         bottom="0"
         left="0"
         position="absolute"
-        bg="linear-gradient(180deg, rgba(15,20,16,0.2) 0%, #0F1410 100%)"
+        bg="linear-gradient(180deg, rgba(15,20,16,0.2) 0%, #161A17 100%)"
       />
     </Box>
   );
 };
 
-export default Banner;
+export default BannerImage;
