@@ -70,7 +70,7 @@ export type ProbeReply = {
 
 export interface Keychain {
   probe(): Promise<ProbeReply | Error>;
-  connect(policies: Policy[]): Promise<ConnectReply | Error>;
+  connect(policies: Policy[], starterPackId?: string, chainId?: SupportedChainIds,): Promise<ConnectReply | Error>;
   disconnect(): void;
 
   reset(): void;
