@@ -1,7 +1,7 @@
 import { constants } from "starknet";
 import { AccountInterface, ProviderInterface } from "starknet";
 import Controller, { providers } from ".";
-import { Policy } from "./types";
+import { Policy, SupportedChainIds } from "./types";
 
 export type EventType = "accountsChanged" | "networkChanged";
 
@@ -88,6 +88,7 @@ export class InjectedController implements IStarknetWindowObject {
             url?: string;
             origin?: string;
             starterPackId?: string;
+            chainId?: SupportedChainIds
         }) {
         this.controller = new Controller(policies, options);
         this.controller.ready().then(isConnected => {
