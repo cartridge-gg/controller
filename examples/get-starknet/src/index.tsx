@@ -7,6 +7,7 @@ import { AccountInterface } from "starknet";
 injectController(undefined, {
   url: "https://keychain-git-removenextrouting.preview.cartridge.gg/",
   starterPackId: "influence",
+  chainId: "0x534e5f4d41494e" as any,
 });
 
 const Main = () => {

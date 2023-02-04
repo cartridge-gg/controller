@@ -161,6 +161,7 @@ function injectController(policies?: Policy[],
         url?: string;
         origin?: string;
         starterPackId?: string;
+        chainId?: SupportedChainIds,
     }) {
     (window as any).starknet_cartridge = new InjectedController(policies, options);
 }
