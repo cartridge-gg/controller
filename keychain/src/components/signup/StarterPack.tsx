@@ -199,15 +199,6 @@ export const StarterPack = ({
   );
 
   useEffect(() => {
-    if (claimData) {
-      onClaim({
-        code: ResponseCodes.SUCCESS,
-        transaction_hash: claimData.claimStarterpack,
-      });
-    }
-  }, [claimData, onClaim]);
-
-  useEffect(() => {
     if (starterData) {
       let nft: StarterItemProps[] =
         starterData.game.starterPack.starterPackTokens.map((data) => ({
@@ -246,7 +237,7 @@ export const StarterPack = ({
     <Container position={fullPage ? "relative" : "fixed"}>
       <Header />
       <BannerImage imgSrc={starterData?.game.banner.uri} obscuredWidth="0px" />
-      {claimError ? (
+      {claimError && (
         // HACK: assuming error is "already claimed"
         <>
           <VStack spacing="18px" pt="36px" pb="24px">
@@ -261,7 +252,11 @@ export const StarterPack = ({
             </Text>
           </VStack>
         </>
-      ) : (
+      )}
+
+      {claimData && (<ClaimSuccess />)}
+
+      {!claimData && !claimError && (
         <>
           <VStack spacing="18px" pt="36px" pb="24px">
             <HStack spacing="14px">
