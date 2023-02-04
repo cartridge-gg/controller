@@ -33,6 +33,7 @@ import { StarterPackCarousel } from "components/carousel/StarterPack";
 import OlmecIcon from "@cartridge/ui/src/components/icons/Olmec";
 import { Header } from "components/Header";
 import Ellipses from "./Ellipses";
+import SparkleColored from "@cartridge/ui/components/icons/SparkleColored";
 
 export type StarterItemProps = {
   name: string;
@@ -226,71 +227,81 @@ export const StarterPack = ({
     return <></>;
   }
 
-  if (claimError) {
-    return (
-      <Container>
-        <Text>{`${claimError}`}</Text>
-      </Container>
-    );
-  }
-
   return (
     <Container position={fullPage ? "relative" : "fixed"}>
       <Header />
       <BannerImage imgSrc={starterData?.game.banner.uri} obscuredWidth="0px" />
+      {claimError ? (
+        // HACK: assuming error is "already claimed"
+        <>
+          <VStack spacing="18px" pt="36px" pb="24px">
+            <Circle size="48px" bgColor="gray.700">
+              <SparkleColored boxSize="30px" />
+            </Circle>
+            <Text fontWeight="bold" fontSize="17px">
+              {"You've already claimed this Starterpack"}
+            </Text>
+            <Text fontSize="12px" color="whiteAlpha.600" textAlign="center">
+              Thanks for participating!
+            </Text>
+          </VStack>
+        </>
+      ) : (
+        <>
+          <VStack spacing="18px" pt="36px" pb="24px">
+            <HStack spacing="14px">
+              <Circle size="48px" bgColor="gray.700">
+                <StarterpackIcon boxSize="30px" />
+              </Circle>
+              <Ellipses />
+              <Circle size="48px" bgColor="gray.700">
+                {remoteSvgIcon(starterData?.game.icon.uri, "30px", "white")}
+              </Circle>
+            </HStack>
+            <Text fontWeight="bold" fontSize="17px">
+              Claim Starterpack
+            </Text>
+            <Text fontSize="12px" color="whiteAlpha.600" textAlign="center">
+              You will receive the following items.
+            </Text>
+          </VStack>
+          <VStack w="full" borderRadius="8px" overflow="hidden">
+            {nonfungibles.length != 0 && (
+              <StarterPackCarousel nonfungibles={nonfungibles} />
+            )}
+            <Spacer minHeight="10px" />
+            <Divider bgColor="gray.400" />
+            <HStack w="full" px="12px" fontSize="10px">
+              <Text
+                variant="ibm-upper-bold"
+                color={remaining > 0 ? "green.400" : "red.200"}
+              >
+                {remaining} remaining
+              </Text>
+              <Spacer />
+              <Text variant="ibm-upper-bold">FREE</Text>
+            </HStack>
+          </VStack>
+          <Footer
+            confirmText={remaining === 0 ? "OUT OF STOCK" : "CLAIM"}
+            isDisabled={!!starterError || remaining === 0}
+            isLoading={claimLoading || starterLoading || accountLoading}
+            onConfirm={() => {
+              if (controller) {
+                claimMutate({
+                  id: starterData.game?.starterPack?.id,
+                  account: accountData.accounts.edges?.[0]?.node.id,
+                });
+                return;
+              }
 
-      <VStack spacing="18px" pt="36px" pb="24px">
-        <HStack spacing="14px">
-          <Circle size="48px" bgColor="gray.700">
-            <StarterpackIcon boxSize="30px" />
-          </Circle>
-          <Ellipses />
-          <Circle size="48px" bgColor="gray.700">
-            {remoteSvgIcon(starterData?.game.icon.uri, "30px", "white")}
-          </Circle>
-        </HStack>
-        <Text fontWeight="bold" fontSize="17px">
-          Claim Starterpack
-        </Text>
-        <Text fontSize="12px" color="whiteAlpha.600" textAlign="center">
-          You will receive the following items.
-        </Text>
-      </VStack>
-      <VStack w="full" borderRadius="8px" overflow="hidden">
-        {nonfungibles.length != 0 && (
-          <StarterPackCarousel nonfungibles={nonfungibles} />
-        )}
-        <Spacer minHeight="10px" />
-        <Divider bgColor="gray.400" />
-        <HStack w="full" px="12px" fontSize="10px">
-          <Text
-            variant="ibm-upper-bold"
-            color={remaining > 0 ? "green.400" : "red.200"}
-          >
-            {remaining} remaining
-          </Text>
-          <Spacer />
-          <Text variant="ibm-upper-bold">FREE</Text>
-        </HStack>
-      </VStack>
-      <Footer
-        confirmText={remaining === 0 ? "OUT OF STOCK" : "CLAIM"}
-        isDisabled={!!starterError || remaining === 0}
-        isLoading={claimLoading || starterLoading || accountLoading}
-        onConfirm={() => {
-          if (controller) {
-            claimMutate({
-              id: starterData.game?.starterPack?.id,
-              account: accountData.accounts.edges?.[0]?.node.id,
-            });
-            return;
-          }
-
-          onClaim();
-        }}
-        showCancel={false}
-        floatBottom={!fullPage}
-      />
+              onClaim();
+            }}
+            showCancel={false}
+            floatBottom={!fullPage}
+          />
+        </>
+      )}
     </Container>
   );
 };

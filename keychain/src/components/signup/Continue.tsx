@@ -17,9 +17,6 @@ const Continue = ({ ...rest }: StyleProps) => {
             Please continue with signup in the new window
           </Text>
         </VStack>
-        <Link variant="outline" fontSize="11px">
-          Read More
-        </Link>
       </VStack>
     </Container>
   );
