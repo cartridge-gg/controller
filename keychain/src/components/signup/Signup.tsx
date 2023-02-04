@@ -77,7 +77,7 @@ export const Signup = ({
   const [dismissed, setDismissed] = useState<boolean>(false);
   const [remaining, setRemaining] = useState<number>();
   const [claimSuccess, setClaimSuccess] = useState<boolean>(false);
-  const [finalizing, setFinalizing] = useState<boolean>(false);
+
   const isIframe =
     typeof window !== "undefined" ? window.top !== window.self : false;
   const { web3AuthEnabled } = useWhitelist();
@@ -126,13 +126,6 @@ export const Signup = ({
     }
   }, [starterData]);
 
-  useEffect(() => {
-    if (accountData) {
-      console.log({ accountData });
-      setFinalizing(true);
-    }
-  }, [accountData]);
-
   // handle username input events
   useEffect(() => {
     if (debouncing) {
@@ -158,12 +151,7 @@ export const Signup = ({
 
   // handle finalizing account
   useEffect(() => {
-    if (finalizing) {
-      return;
-    }
-
     if (accountData && isRegistering) {
-      console.log("deploying");
       const {
         account: {
           credential: { id: credentialId },
