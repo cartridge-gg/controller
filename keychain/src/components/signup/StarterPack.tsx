@@ -43,20 +43,37 @@ export type StarterItemProps = {
   icon?: ReactNode;
 };
 
-export const ClaimSuccess = () =>
+export const ClaimSuccess = ({
+  img,
+  url,
+  fullPage,
+}: {
+  img: string;
+  url: string;
+  fullPage: boolean;
+}) => (
   <>
-    <VStack spacing="18px" pt="36px" pb="24px">
-      <Circle size="48px" bgColor="gray.700">
-        <SparkleColored boxSize="30px" />
-      </Circle>
-      <Text fontWeight="bold" fontSize="17px">
-        {"Your briq set is on the way!"}
-      </Text>
-      <Text fontSize="12px" color="whiteAlpha.600" textAlign="center">
-        Checkout briq.construction to play on your desktop.
-      </Text>
-    </VStack>
+    <Container position={fullPage ? "relative" : "fixed"}>
+      <Header />
+      <BannerImage imgSrc={img} obscuredWidth="0px" />
+      <VStack spacing="18px" pt="36px" pb="24px">
+        <Circle size="48px" bgColor="gray.700">
+          <SparkleColored boxSize="30px" />
+        </Circle>
+        <Text fontWeight="bold" fontSize="17px">
+          {"Your briq set is on the way!"}
+        </Text>
+        <Text fontSize="12px" color="whiteAlpha.600" textAlign="center">
+          Checkout{" "}
+          <Link href={url} variant="traditional" isExternal>
+            {url}
+          </Link>{" "}
+          to play on your desktop.
+        </Text>
+      </VStack>
+    </Container>
   </>
+);
 
 export const StarterItem = ({
   name,
@@ -233,6 +250,16 @@ export const StarterPack = ({
     return <></>;
   }
 
+  if (claimData) {
+    return (
+      <ClaimSuccess
+        img={starterData?.game.banner.uri}
+        url={"https://briq.construction"}
+        fullPage={fullPage}
+      />
+    );
+  }
+
   return (
     <Container position={fullPage ? "relative" : "fixed"}>
       <Header />
@@ -253,8 +280,6 @@ export const StarterPack = ({
           </VStack>
         </>
       )}
-
-      {claimData && (<ClaimSuccess />)}
 
       {!claimData && !claimError && (
         <>

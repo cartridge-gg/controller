@@ -50,6 +50,7 @@ import SparkleIcon from "@cartridge/ui/components/icons/SparkleOutline";
 import OlmecIcon from "@cartridge/ui/components/icons/Olmec";
 import BannerImage from "./BannerImage";
 import Ellipses from "./Ellipses";
+import { ClaimSuccess } from "./StarterPack";
 
 export const Signup = ({
   fullPage = false,
@@ -75,6 +76,7 @@ export const Signup = ({
   const [canContinue, setCanContinue] = useState(false);
   const [dismissed, setDismissed] = useState<boolean>(false);
   const [remaining, setRemaining] = useState<number>();
+  const [claimSuccess, setClaimSuccess] = useState<boolean>(false);
 
   const isIframe =
     typeof window !== "undefined" ? window.top !== window.self : false;
@@ -241,6 +243,16 @@ export const Signup = ({
 
   if (isRegistering && isIframe) {
     return <Continue position={fullPage ? "relative" : "fixed"} />;
+  }
+
+  if (claimSuccess) {
+    return (
+      <ClaimSuccess
+        img={starterData?.game.banner.uri}
+        url={"https://briq.construction"}
+        fullPage={fullPage}
+      />
+    );
   }
 
   return (
@@ -474,7 +486,14 @@ export const Signup = ({
         onClose={onAuthClose}
         name={debouncedName}
         pubkey={keypair ? ec.getStarkKey(keypair) : ""}
-        onComplete={onComplete}
+        onComplete={() => {
+          if (starterPackId) {
+            setClaimSuccess(true);
+            return;
+          }
+
+          onComplete();
+        }}
       />
     </Container>
   );
