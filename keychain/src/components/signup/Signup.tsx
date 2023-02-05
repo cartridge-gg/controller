@@ -203,11 +203,11 @@ export const Signup = ({
           contractAddress: address,
         },
       } = res.data;
-      deployAccount(address, credentialId);
+      // deployAccount(address, credentialId);
       return;
     }
     setTimeout(() => pollAccount(), 1000);
-  }, [refetch, deployAccount]);
+  }, [refetch]);
 
   useEffect(() => {
     if (isRegistering) {
