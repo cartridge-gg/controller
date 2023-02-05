@@ -17,6 +17,7 @@ import {
   useDisclosure,
   InputRightElement,
   StyleProps,
+  useInterval,
 } from "@chakra-ui/react";
 import {
   DiscordRevokeDocument,
@@ -99,12 +100,11 @@ export const Signup = ({
     error,
     isFetching,
     data: accountData,
+    refetch,
   } = useAccountQuery(
     { id: debouncedName },
     {
-      enabled: !!(debouncedName && debouncedName.length >= 3),
-      retry: isRegistering,
-      retryDelay: 1000,
+      enabled: !!(debouncedName && debouncedName.length >= 3) && !isRegistering,
     },
   );
 
@@ -149,17 +149,10 @@ export const Signup = ({
     }
   }, [error, accountData, debouncing, dismissed, onDrawerOpen]);
 
-  // handle finalizing account
-  useEffect(() => {
-    if (accountData && isRegistering) {
-      const {
-        account: {
-          credential: { id: credentialId },
-          contractAddress: address,
-        },
-      } = accountData;
-
+  const deployAccount = useCallback(
+    (address: string, credentialId: string) => {
       const controller = new Controller(keypair, address, credentialId);
+
       if (onController) {
         onController(controller);
       }
@@ -195,24 +188,37 @@ export const Signup = ({
         .then(() => {
           controller.account(constants.StarknetChainId.MAINNET).sync();
         });
+    },
+    [keypair, starterData, debouncedName, onController],
+  );
+
+  const pollAccount = useCallback(async () => {
+    const res = await refetch();
+    if (res.isSuccess) {
+      const {
+        account: {
+          credential: { id: credentialId },
+          contractAddress: address,
+        },
+      } = res.data;
+      deployAccount(address, credentialId);
+      return;
     }
-  }, [
-    accountData,
-    isRegistering,
-    debouncedName,
-    keypair,
-    starterPackId,
-    starterData,
-    onController,
-  ]);
+    setTimeout(() => pollAccount(), 1000);
+  }, [refetch, deployAccount]);
+
+  useEffect(() => {
+    if (isRegistering) {
+      pollAccount();
+    }
+  }, [isRegistering, pollAccount]);
 
   const onContinue = useCallback(async () => {
-    const keypair = ec.genKeyPair();
-    const deviceKey = ec.getStarkKey(keypair);
+    const key = ec.genKeyPair();
+    const deviceKey = ec.getStarkKey(key);
 
-    setKeypair(keypair);
+    setKeypair(key);
     setIsRegistering(true);
-    onAuthOpen();
 
     if (isIframe) {
       PopupCenter(
@@ -223,6 +229,8 @@ export const Signup = ({
         480,
         640,
       );
+    } else {
+      onAuthOpen();
     }
   }, [debouncedName, isIframe, onAuthOpen]);
 

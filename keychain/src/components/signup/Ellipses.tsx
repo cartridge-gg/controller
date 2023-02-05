@@ -14,7 +14,7 @@ const Ellipses = ({
 }) => {
   let circles: ReactNode[] = [];
   for (let i = 0; i < count; i++) {
-    circles.push(<Circle size={size} bgColor={color} />);
+    circles.push(<Circle key={i} size={size} bgColor={color} />);
   }
   return <HStack spacing={spacing}>{circles}</HStack>;
 };
