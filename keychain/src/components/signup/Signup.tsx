@@ -159,37 +159,41 @@ export const Signup = ({
         onController(controller);
       }
 
-      controller.account(constants.StarknetChainId.TESTNET).status =
-        Status.DEPLOYING;
-      client
-        .request(DeployAccountDocument, {
-          id: debouncedName,
-          chainId: "starknet:SN_GOERLI",
-          starterpackIds: starterData?.game?.starterPack?.chainID?.includes(
-            "SN_GOERLI",
-          )
-            ? [starterData?.game?.starterPack?.id]
-            : undefined,
-        })
-        .then(() => {
-          controller.account(constants.StarknetChainId.TESTNET).sync();
-        });
+      if (controller.account(constants.StarknetChainId.TESTNET).status != Status.DEPLOYING && controller.account(constants.StarknetChainId.MAINNET).status != Status.DEPLOYED && controller.account(constants.StarknetChainId.MAINNET).status != Status.REGISTERED) {
+        controller.account(constants.StarknetChainId.TESTNET).status =
+          Status.DEPLOYING;
+        client
+          .request(DeployAccountDocument, {
+            id: debouncedName,
+            chainId: "starknet:SN_GOERLI",
+            starterpackIds: starterData?.game?.starterPack?.chainID?.includes(
+              "SN_GOERLI",
+            )
+              ? [starterData?.game?.starterPack?.id]
+              : undefined,
+          })
+          .then(() => {
+            controller.account(constants.StarknetChainId.TESTNET).sync();
+          });
+      }
 
-      controller.account(constants.StarknetChainId.MAINNET).status =
-        Status.DEPLOYING;
-      client
-        .request(DeployAccountDocument, {
-          id: debouncedName,
-          chainId: "starknet:SN_MAIN",
-          starterpackIds: starterData?.game?.starterPack?.chainID?.includes(
-            "SN_MAIN",
-          )
-            ? [starterData?.game?.starterPack?.id]
-            : undefined,
-        })
-        .then(() => {
-          controller.account(constants.StarknetChainId.MAINNET).sync();
-        });
+      if (controller.account(constants.StarknetChainId.MAINNET).status != Status.DEPLOYING && controller.account(constants.StarknetChainId.MAINNET).status != Status.DEPLOYED && controller.account(constants.StarknetChainId.MAINNET).status != Status.REGISTERED) {
+        controller.account(constants.StarknetChainId.MAINNET).status =
+          Status.DEPLOYING;
+        client
+          .request(DeployAccountDocument, {
+            id: debouncedName,
+            chainId: "starknet:SN_MAIN",
+            starterpackIds: starterData?.game?.starterPack?.chainID?.includes(
+              "SN_MAIN",
+            )
+              ? [starterData?.game?.starterPack?.id]
+              : undefined,
+          })
+          .then(() => {
+            controller.account(constants.StarknetChainId.MAINNET).sync();
+          });
+      }
     },
     [keypair, starterData, debouncedName, onController],
   );
@@ -203,11 +207,11 @@ export const Signup = ({
           contractAddress: address,
         },
       } = res.data;
-      // deployAccount(address, credentialId);
+      deployAccount(address, credentialId);
       return;
     }
     setTimeout(() => pollAccount(), 1000);
-  }, [refetch]);
+  }, [refetch, deployAccount]);
 
   useEffect(() => {
     if (isRegistering) {
@@ -342,8 +346,8 @@ export const Signup = ({
                       canContinue
                         ? "green.400"
                         : nameError
-                        ? "red.400"
-                        : "gray.600"
+                          ? "red.400"
+                          : "gray.600"
                     }
                     errorBorderColor="crimson"
                     placeholder="Username"
