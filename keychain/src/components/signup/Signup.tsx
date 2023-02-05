@@ -104,7 +104,9 @@ export const Signup = ({
   } = useAccountQuery(
     { id: debouncedName },
     {
-      enabled: !!(debouncedName && debouncedName.length >= 3) && !isRegistering,
+      enabled: !!(debouncedName && debouncedName.length >= 3),
+      retry: isRegistering,
+      retryDelay: 1000,
     },
   );
 
