@@ -11,6 +11,7 @@ import {
   Policy,
   Session,
   ProbeReply,
+  SupportedChainIds,
 } from "@cartridge/controller";
 import Connect from "components/Connect";
 import { Login } from "components/Login";
@@ -29,7 +30,7 @@ import {
 } from "starknet";
 import SignMessage from "components/SignMessage";
 import Execute from "components/Execute";
-import { StarterPackEmbedded as StarterPack } from "components/signup/StarterPack";
+import { StarterPack } from "components/signup/StarterPack";
 import selectors from "utils/selectors";
 import Storage from "utils/storage";
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
@@ -109,9 +110,14 @@ const Index: NextPage = () => {
           (origin: string) =>
             async (
               policies: Policy[],
-              starterPackId: string,
+              starterPackId?: string,
+              chainId?: SupportedChainIds,
             ): Promise<ConnectReply> => {
               return await new Promise((resolve, reject) => {
+                if (chainId) {
+                  setChainId(chainId as unknown as constants.StarknetChainId);
+                }
+
                 setContext({
                   type: "connect",
                   origin,
@@ -178,10 +184,10 @@ const Index: NextPage = () => {
                   : [transactions];
                 const policies = calls.map(
                   (txn) =>
-                    ({
-                      target: txn.contractAddress,
-                      method: txn.entrypoint,
-                    } as Policy),
+                  ({
+                    target: txn.contractAddress,
+                    method: txn.entrypoint,
+                  } as Policy),
                 );
 
                 const missing = diff(policies, session.policies);
@@ -365,7 +371,6 @@ const Index: NextPage = () => {
     const ctx = context as StarterPack;
     return (
       <StarterPack
-        chainId={chainId}
         controller={controller}
         starterPackId={ctx.starterPackId}
         onClaim={(res: ExecuteReply) => ctx.resolve(res)}

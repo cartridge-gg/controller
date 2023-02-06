@@ -3,7 +3,6 @@ import { constants } from "starknet";
 const BASE_URL = {
   [constants.StarknetChainId.MAINNET]: "https://starkscan.co",
   [constants.StarknetChainId.TESTNET]: "https://testnet.starkscan.co",
-  [constants.StarknetChainId.TESTNET2]: "https://testnet-2.starkscan.co",
 };
 
 export const StarkscanUrl = (chainId: constants.StarknetChainId) => ({

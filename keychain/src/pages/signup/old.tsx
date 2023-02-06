@@ -24,7 +24,7 @@ import Controller from "utils/controller";
 import JoystickIcon from "@cartridge/ui/src/components/icons/Joystick";
 import GamepadIcon from "@cartridge/ui/src/components/icons/Gamepad";
 import ControllerImage from "@cartridge/ui/src/components/icons/ControllerBig";
-import BannerImage from "components/signup/Banner";
+import BannerImage from "components/signup/BannerImage";
 import { StepsBar, Step } from "components/StepsBar";
 import { Credentials, onCreateFinalize } from "hooks/account";
 import { parseAttestationObject } from "utils/webauthn";
@@ -35,13 +35,14 @@ import { register } from "methods/register";
 import { ChainId } from "caip";
 
 enum RegistrationState {
-  CREATE_USERNAME,
-  L1_CONNECT,
-  L2_CONNECT,
-  PENDING,
-  QUESTS,
-  READY,
-  OOS,
+  CLAIM_STARTERPACK = "CLAIM_STARTERPACK",
+  CREATE_USERNAME = "CREATE_USERNAME",
+  // L1_CONNECT,
+  // L2_CONNECT,
+  // PENDING,
+  // QUESTS,
+  READY = "READY",
+  OOS = "OOS",
 }
 
 const CreateWallet: NextPage = () => {
@@ -96,16 +97,20 @@ const CreateWallet: NextPage = () => {
       deployAccount({
         id: username,
         chainId: "starknet:SN_GOERLI",
-        starterpackIds: starterPackData?.game?.starterPack?.chainID?.includes("SN_GOERLI") && [starterPackData?.game?.starterPack?.id]
+        starterpackIds: starterPackData?.game?.starterPack?.chainID?.includes(
+          "SN_GOERLI",
+        ) && [starterPackData?.game?.starterPack?.id],
       });
       deployAccount({
         id: username,
         chainId: "starknet:SN_MAIN",
-        starterpackIds: starterPackData?.game?.starterPack?.chainID?.includes("SN_MAIN") && [starterPackData?.game?.starterPack?.id]
+        starterpackIds: starterPackData?.game?.starterPack?.chainID?.includes(
+          "SN_MAIN",
+        ) && [starterPackData?.game?.starterPack?.id],
       });
       setRegState(RegistrationState.READY);
     },
-    [deployAccount, starterPackData?.game?.starterPack?.id]
+    [deployAccount, starterPackData?.game?.starterPack?.id],
   );
 
   const onComplete = useCallback(async () => {
@@ -177,9 +182,6 @@ const CreateWallet: NextPage = () => {
         obscuredWidth="0px"
         position="absolute"
       />
-      <Flex top="-100px" w="full" position="fixed" justify="center" zIndex="-1">
-        <ControllerImage opacity="0.45" fill="whiteAlpha.50" />
-      </Flex>
       <Container
         as={motion.div}
         initial={{ opacity: 0 }}
@@ -199,16 +201,11 @@ const CreateWallet: NextPage = () => {
           {starterPackData?.game?.starterPack && (
             <Flex order={[2, 2, 1]} direction="column" gap="12px">
               <StarterPack
-                starterpack={starterPackData.game.starterPack}
-                gameIcon={remoteSvgIcon(
-                  starterPackData.game.icon.uri,
-                  "24px",
-                  "currentColor",
-                )}
+                starterPackId={starterPackData.game.starterPack.id}
               />
             </Flex>
           )}
-          {regState == RegistrationState.L1_CONNECT && (
+          {/* {regState == RegistrationState.L1_CONNECT && (
             <L1Connect username={username} credentials={credentials} />
           )}
           {regState == RegistrationState.L2_CONNECT && (
@@ -233,11 +230,11 @@ const CreateWallet: NextPage = () => {
                 }
               }}
             />
-          )}
+          )} */}
           {regState == RegistrationState.CREATE_USERNAME && (
             <UsernameForm onConfirm={onConfirm} />
           )}
-          {regState == RegistrationState.QUESTS &&
+          {/* {regState == RegistrationState.QUESTS &&
             starterPackData?.game?.starterPack?.prerequisitesQuests?.length >
               0 && (
               <Quests
@@ -252,16 +249,14 @@ const CreateWallet: NextPage = () => {
               name={starterPackData?.game?.name}
               gameId={starterPackData?.game?.id}
             />
-          )}
+          )} */}
           {regState == RegistrationState.OOS && <OutOfStock />}
 
-          {starterPackData && (
-            <Divider
-              order={1}
-              display={["block", "block", "none"]}
-              borderColor="gray.600"
-            />
-          )}
+          <Divider
+            order={1}
+            display={["block", "block", "none"]}
+            borderColor="gray.600"
+          />
         </SimpleGrid>
       </Container>
     </>

@@ -12,6 +12,7 @@ import {
   Spacer,
   HStack,
   Box,
+  ModalProps,
 } from "@chakra-ui/react";
 import { Headstone, HeadStoneProps } from "./Headstone";
 
@@ -22,8 +23,9 @@ interface SimpleModalProps {
   confirmText?: string;
   showCloseButton?: boolean;
   isLoading?: boolean;
+  dismissable?: boolean;
   onConfirm?: () => void;
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 export const SimpleModal = ({
@@ -35,9 +37,10 @@ export const SimpleModal = ({
   confirmText = "Confirm",
   showCloseButton = true,
   isLoading = false,
+  dismissable = true,
   onConfirm,
   onClose,
-}: SimpleModalProps & HeadStoneProps) => {
+}: SimpleModalProps & HeadStoneProps & ModalProps) => {
   const isMobile = useBreakpointValue([true, true, false]);
   return (
     <Modal
@@ -45,6 +48,7 @@ export const SimpleModal = ({
       onClose={onClose}
       size={["full", "full", "lg"]}
       isCentered
+      closeOnOverlayClick={dismissable}
     >
       <ModalOverlay />
       <ModalContent>
@@ -60,9 +64,11 @@ export const SimpleModal = ({
           </Flex>
         </ModalBody>
         <ModalFooter gap="16px">
-          <Button flex="1" variant="secondary600" onClick={onClose}>
-            {onConfirm ? "Cancel" : "Close"}
-          </Button>
+          {dismissable && (
+            <Button flex="1" variant="secondary600" onClick={onClose}>
+              {onConfirm ? "Cancel" : "Close"}
+            </Button>
+          )}
           {onConfirm && (
             <Button flex="1" onClick={onConfirm} isLoading={isLoading}>
               {confirmText}

@@ -43,7 +43,6 @@ export const Authenticate = ({
   onComplete: () => void;
 } & UseDisclosureProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<Error>();
   const [authImage, setAuthImage] = useState<ReactNode>(AuthFingerprintImage);
   const [unsupportedMessage, setUnsupportedMessage] = useState<string>();
 
@@ -63,8 +62,8 @@ export const Authenticate = ({
       play();
     } catch (e) {
       console.error(e);
-      setError(e);
       setIsLoading(false);
+      throw e;
     }
   }, [play, name, pubkey]);
 
@@ -102,6 +101,7 @@ export const Authenticate = ({
           isOpen={isOpen}
           showCloseButton={false}
           isLoading={isLoading}
+          dismissable={false}
         >
           <Content authImage={authImage} />
         </SimpleModal>

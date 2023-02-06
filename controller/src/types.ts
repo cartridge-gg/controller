@@ -35,6 +35,11 @@ export type Policy = {
   method?: string;
 };
 
+export enum SupportedChainIds {
+  MAINNET = "0x534e5f4d41494e",
+  TESTNET = "0x534e5f474f45524c49",
+}
+
 export enum ResponseCodes {
   SUCCESS = "SUCCESS",
   NOT_CONNECTED = "NOT_CONNECTED",
@@ -65,7 +70,7 @@ export type ProbeReply = {
 
 export interface Keychain {
   probe(): Promise<ProbeReply | Error>;
-  connect(policies: Policy[]): Promise<ConnectReply | Error>;
+  connect(policies: Policy[], starterPackId?: string, chainId?: SupportedChainIds,): Promise<ConnectReply | Error>;
   disconnect(): void;
 
   reset(): void;

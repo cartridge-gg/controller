@@ -36,7 +36,7 @@ const Container = ({
       align="center"
       justify="center"
       flexShrink={0}
-      bg="gray.700"
+      bg="gray.800"
       {...rest}
     >
       <ChakraContainer centerContent>{children}</ChakraContainer>
@@ -58,15 +58,9 @@ export const Header = ({
 }) => {
   if (!address) {
     const fill = muted ? "gray.200" : "brand";
-    const background = muted
-      ? {
-          bgColor: "gray.400",
-          borderBottom: "1px solid",
-          borderColor: "gray.600",
-        }
-      : {};
+
     return (
-      <Container height="54px" {...background}>
+      <Container height="54px">
         <HStack w="full" justify="space-between">
           <Spacer maxW="42px" />
           <HStack spacing="0">
