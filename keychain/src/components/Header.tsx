@@ -9,13 +9,15 @@ import {
   HStack,
   Container as ChakraContainer,
   StyleProps,
-  Text,
 } from "@chakra-ui/react";
 
 import { Logo } from "@cartridge/ui/src/components/brand/Logo";
 import { WordLogo } from "@cartridge/ui/src/components/brand/Word";
-import ChainDropdown from "@cartridge/ui/src/components/menu/Chain";
 import TimesIcon from "@cartridge/ui/src/components/icons/Times";
+import { useAvatar } from "hooks/avatar";
+import { Loading } from "./Loading";
+import Chain from "@cartridge/ui/src/components/menu/Chain";
+import { constants } from "starknet";
 
 const Container = ({
   height,
@@ -45,17 +47,46 @@ const Container = ({
   </>
 );
 
+export const HeaderItem = ({
+  bgColor = undefined,
+  children,
+}: {
+  bgColor?: string;
+  children: React.ReactNode;
+}) => {
+  return (
+    <HStack
+      p="6px 18px"
+      fontSize="10px"
+      lineHeight="18px"
+      minHeight="30px"
+      bgColor="gray.600"
+      borderRadius="6px"
+      userSelect="none"
+      _hover={{
+        bgColor: bgColor,
+      }}
+    >
+      {children}
+    </HStack>
+  );
+};
+
 export const Header = ({
+  chainId,
   address,
   muted = false,
   onLogout,
   onClose,
 }: {
+  chainId?: constants.StarknetChainId;
   address?: string;
   muted?: boolean;
   onLogout?: () => void;
   onClose?: () => void;
 }) => {
+  const { current, loading } = useAvatar(address, 10);
+
   if (!address) {
     const fill = muted ? "gray.200" : "brand";
 
@@ -81,6 +112,19 @@ export const Header = ({
     );
   }
 
+  let chainName = "Unknown";
+  switch (chainId) {
+    case constants.StarknetChainId.MAINNET:
+      chainName = "Mainnet";
+      break;
+    case constants.StarknetChainId.TESTNET:
+      chainName = "Testnet";
+      break;
+    case constants.StarknetChainId.TESTNET2:
+      chainName = "Testnet 2";
+      break;
+  }
+
   return (
     <Container height="50px">
       <HStack w="full">
@@ -89,7 +133,40 @@ export const Header = ({
         </HStack>
         <Spacer />
         <HStack spacing="10px">
-          <ChainDropdown />
+          <Chain name={chainName} />
+          {chainId && (
+            <Box
+              onClick={() => {
+                navigator.clipboard.writeText(address);
+              }}
+              _hover={{
+                cursor: "pointer",
+              }}
+            >
+              <HeaderItem bgColor="gray.500">
+                {loading ? (
+                  <Loading fill="white" width="12px" height="12px" />
+                ) : (
+                  <Box
+                    w="18px"
+                    h="18px"
+                    dangerouslySetInnerHTML={
+                      !!current?.svg ? { __html: current?.svg } : undefined
+                    }
+                  />
+                )}
+              </HeaderItem>
+            </Box>
+          )}
+          <Button
+            h="30px"
+            w="42px"
+            variant="secondary450"
+            visibility={!!onClose ? "visible" : "hidden"}
+            onClick={onClose}
+          >
+            <TimesIcon boxSize="18px" />
+          </Button>
         </HStack>
       </HStack>
     </Container>

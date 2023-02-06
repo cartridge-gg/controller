@@ -59,7 +59,12 @@ class Account extends BaseAccount {
   ) {
     super({ rpc: { nodeUrl } }, address, signer);
     this.rpc = new RpcProvider({ nodeUrl });
-    this.gateway = new SequencerProvider({ network: chainId === constants.StarknetChainId.MAINNET ? "mainnet-alpha" : "goerli-alpha" });
+    this.gateway = new SequencerProvider({
+      network:
+        chainId === constants.StarknetChainId.MAINNET
+          ? "mainnet-alpha"
+          : "goerli-alpha",
+    });
     this.selector = selectors["0.0.3"].deployment(address, chainId);
     this._chainId = chainId;
     this.webauthn = webauthn;
@@ -201,7 +206,8 @@ class Account extends BaseAccount {
       throw new Error("Account is not deployed");
     }
 
-    transactionsDetail.nonce = transactionsDetail.nonce ?? await this.getNonce();
+    transactionsDetail.nonce =
+      transactionsDetail.nonce ?? (await this.getNonce());
 
     if (this.status === Status.PENDING_REGISTER) {
       const pendingRegister = Storage.get(
@@ -224,30 +230,40 @@ class Account extends BaseAccount {
       this.status = Status.REGISTERED;
       Storage.update(this.selector, {
         status: Status.REGISTERED,
-        nonce: number.toBN(transactionsDetail.nonce).add(number.toBN(2)).toString(),
+        nonce: number
+          .toBN(transactionsDetail.nonce)
+          .add(number.toBN(2))
+          .toString(),
       });
 
-      this.gateway.waitForTransaction(responses[1].transaction_hash, 1000, [
-        "ACCEPTED_ON_L1",
-        "ACCEPTED_ON_L2",
-      ]).catch(() => {
-        this.resetNonce();
-      })
+      this.gateway
+        .waitForTransaction(responses[1].transaction_hash, 1000, [
+          "ACCEPTED_ON_L1",
+          "ACCEPTED_ON_L2",
+        ])
+        .catch(() => {
+          this.resetNonce();
+        });
 
       return responses[1];
     }
 
     const res = await super.execute(calls, abis, transactionsDetail);
     Storage.update(this.selector, {
-      nonce: number.toBN(transactionsDetail.nonce).add(number.toBN(1)).toString(),
+      nonce: number
+        .toBN(transactionsDetail.nonce)
+        .add(number.toBN(1))
+        .toString(),
     });
 
-    this.gateway.waitForTransaction(res.transaction_hash, 1000, [
-      "ACCEPTED_ON_L1",
-      "ACCEPTED_ON_L2",
-    ]).catch(() => {
-      this.resetNonce();
-    })
+    this.gateway
+      .waitForTransaction(res.transaction_hash, 1000, [
+        "ACCEPTED_ON_L1",
+        "ACCEPTED_ON_L2",
+      ])
+      .catch(() => {
+        this.resetNonce();
+      });
 
     return res;
   }
@@ -262,14 +278,16 @@ class Account extends BaseAccount {
       throw new Error("Account is not deployed");
     }
 
-    details.nonce = details.nonce ?? await super.getNonce("latest");
+    details.nonce = details.nonce ?? (await super.getNonce("latest"));
 
     if (this.status === Status.PENDING_REGISTER) {
       const pendingRegister = Storage.get(
         selectors[VERSION].register(this.address, this._chainId),
       );
 
-      const nextNonce = number.toHex(number.toBN(details.nonce).add(number.toBN(1)));
+      const nextNonce = number.toHex(
+        number.toBN(details.nonce).add(number.toBN(1)),
+      );
       const signerDetails = {
         walletAddress: this.address,
         nonce: nextNonce,
@@ -345,7 +363,8 @@ class Account extends BaseAccount {
 
   async signMessage(typedData: typedData.TypedData): Promise<Signature> {
     return await (this.status === Status.REGISTERED ||
-      this.status === Status.COUNTERFACTUAL || this.status === Status.DEPLOYING
+    this.status === Status.COUNTERFACTUAL ||
+    this.status === Status.DEPLOYING
       ? super.signMessage(typedData)
       : this.webauthn.signMessage(typedData));
   }
@@ -426,7 +445,11 @@ class Account extends BaseAccount {
 
     const chainNonce = await super.getNonce("pending");
     const state = Storage.get(this.selector);
-    if (!state || !state.nonce || number.toBN(chainNonce).gt(number.toBN(state.nonce))) {
+    if (
+      !state ||
+      !state.nonce ||
+      number.toBN(chainNonce).gt(number.toBN(state.nonce))
+    ) {
       return chainNonce;
     }
 

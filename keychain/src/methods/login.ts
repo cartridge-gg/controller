@@ -36,7 +36,7 @@ const login =
           signature: base64url(Buffer.from(assertion.response.signature)),
         },
       },
-      controller
+      controller,
     };
   };
 

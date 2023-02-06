@@ -15,7 +15,7 @@ import {
 } from "@cartridge/controller";
 import Connect from "components/Connect";
 import { Login } from "components/Login";
-import { Signup } from "components/signup";
+import { Quests, Signup } from "components/signup";
 import { Redeploy } from "components/Redeploy";
 import { Container as ChakraContainer } from "@chakra-ui/react";
 import { Header } from "components/Header";
