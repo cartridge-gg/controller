@@ -14,10 +14,12 @@ import {
 import { Logo } from "@cartridge/ui/src/components/brand/Logo";
 import { WordLogo } from "@cartridge/ui/src/components/brand/Word";
 import TimesIcon from "@cartridge/ui/src/components/icons/Times";
-import { useAvatar } from "hooks/avatar";
+import { useAvatar } from "../hooks/avatar";
 import { Loading } from "./Loading";
 import Chain from "@cartridge/ui/src/components/menu/Chain";
 import { constants } from "starknet";
+import { usePointsBalanceQuery } from "../generated/graphql";
+import { CONTRACT_POINTS } from "@cartridge/controller/src/constants";
 
 const Container = ({
   height,
@@ -85,7 +87,13 @@ export const Header = ({
   onLogout?: () => void;
   onClose?: () => void;
 }) => {
-  const { current, loading } = useAvatar(address, 10);
+  const chain = "starknet:SN_GOERLI";
+  const tokenAccountId = `${chain}/${chain}:${address || ""}/erc20:${CONTRACT_POINTS}`;
+  const { data, error } = usePointsBalanceQuery({
+    tokenAccountId: tokenAccountId,
+  });
+  const points = data?.balance?.balance;
+  const { current, loading } = useAvatar(address, points || 10);
 
   if (!address) {
     const fill = muted ? "gray.200" : "brand";

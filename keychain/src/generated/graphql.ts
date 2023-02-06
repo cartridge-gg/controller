@@ -3862,6 +3862,13 @@ export type CheckTwitterQuestsMutationVariables = Exact<{
 
 export type CheckTwitterQuestsMutation = { __typename?: 'Mutation', checkTwitterQuests: boolean };
 
+export type PointsBalanceQueryVariables = Exact<{
+  tokenAccountId: Scalars['ID'];
+}>;
+
+
+export type PointsBalanceQuery = { __typename?: 'Query', balance?: { __typename?: 'Balance', balance: any } | null };
+
 export type BeginRegistrationMutationVariables = Exact<{
   id: Scalars['String'];
 }>;
@@ -4121,6 +4128,47 @@ export const useCheckTwitterQuestsMutation = <
       useFetchData<CheckTwitterQuestsMutation, CheckTwitterQuestsMutationVariables>(CheckTwitterQuestsDocument),
       options
     );
+export const PointsBalanceDocument = `
+    query PointsBalance($tokenAccountId: ID!) {
+  balance(id: $tokenAccountId) {
+    balance
+  }
+}
+    `;
+export const usePointsBalanceQuery = <
+      TData = PointsBalanceQuery,
+      TError = unknown
+    >(
+      variables: PointsBalanceQueryVariables,
+      options?: UseQueryOptions<PointsBalanceQuery, TError, TData>
+    ) =>
+    useQuery<PointsBalanceQuery, TError, TData>(
+      ['PointsBalance', variables],
+      useFetchData<PointsBalanceQuery, PointsBalanceQueryVariables>(PointsBalanceDocument).bind(null, variables),
+      options
+    );
+
+usePointsBalanceQuery.getKey = (variables: PointsBalanceQueryVariables) => ['PointsBalance', variables];
+;
+
+export const useInfinitePointsBalanceQuery = <
+      TData = PointsBalanceQuery,
+      TError = unknown
+    >(
+      variables: PointsBalanceQueryVariables,
+      options?: UseInfiniteQueryOptions<PointsBalanceQuery, TError, TData>
+    ) =>{
+    const query = useFetchData<PointsBalanceQuery, PointsBalanceQueryVariables>(PointsBalanceDocument)
+    return useInfiniteQuery<PointsBalanceQuery, TError, TData>(
+      ['PointsBalance.infinite', variables],
+      (metaData) => query({...variables, ...(metaData.pageParam ?? {})}),
+      options
+    )};
+
+
+useInfinitePointsBalanceQuery.getKey = (variables: PointsBalanceQueryVariables) => ['PointsBalance.infinite', variables];
+;
+
 export const BeginRegistrationDocument = `
     mutation BeginRegistration($id: String!) {
   beginRegistration(id: $id)
