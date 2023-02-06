@@ -1,0 +1,5 @@
+query PointsBalance($tokenAccountId: ID!) {
+  balance(id: $tokenAccountId) {
+    balance
+  }
+}
