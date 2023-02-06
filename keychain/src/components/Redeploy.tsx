@@ -43,6 +43,7 @@ export const Redeploy = ({
   return (
     <Container>
       <Header
+        chainId={chainId}
         onClose={() =>
           onClose({
             code: ResponseCodes.CANCELED,

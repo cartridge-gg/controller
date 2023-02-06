@@ -53,7 +53,15 @@ const Connect = ({
 
   return (
     <Container>
-      <Header />
+      <Header
+        chainId={chainId}
+        onClose={() =>
+          onCancel({
+            code: ResponseCodes.CANCELED,
+            message: "Cancelled",
+          })
+        }
+      />
       <Banner
         title="Create Session"
         description={`${origin} is requesting to connect to your Cartridge Controller`}

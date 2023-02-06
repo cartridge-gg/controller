@@ -8,7 +8,8 @@ import Container from "./Container";
 import { Banner } from "components/Banner";
 import Controller from "utils/controller";
 import Footer from "./Footer";
-import { Error, ResponseCodes } from "@cartridge/controller";
+import { ResponseCodes } from "@cartridge/controller";
+import { Error } from "@cartridge/controller/src/types";
 import { Status } from "utils/account";
 import { Header } from "./Header";
 
@@ -60,7 +61,15 @@ const SignMessage = ({
 
   return (
     <Container>
-      <Header />
+      <Header
+        chainId={chainId}
+        onClose={() =>
+          onCancel({
+            code: ResponseCodes.CANCELED,
+            message: "Canceled",
+          })
+        }
+      />
       <Banner
         title="Signature Request"
         description={`${origin} is asking you to sign a message`}
