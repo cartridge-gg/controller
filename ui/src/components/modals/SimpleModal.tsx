@@ -64,7 +64,7 @@ export const SimpleModal = ({
             {onConfirm ? "Cancel" : "Close"}
           </Button>
           {onConfirm && (
-            <Button flex="1" onClick={onConfirm}>
+            <Button flex="1" onClick={onConfirm} isLoading={isLoading}>
               {confirmText}
             </Button>
           )}
