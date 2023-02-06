@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import NextLink from "next/link";
 import {
   Box,
@@ -7,6 +7,7 @@ import {
   Button,
   Spacer,
   HStack,
+  Text,
   Container as ChakraContainer,
   StyleProps,
 } from "@chakra-ui/react";
@@ -17,9 +18,11 @@ import TimesIcon from "@cartridge/ui/src/components/icons/Times";
 import { useAvatar } from "../hooks/avatar";
 import { Loading } from "./Loading";
 import Chain from "@cartridge/ui/src/components/menu/Chain";
-import { constants } from "starknet";
-import { usePointsBalanceQuery } from "../generated/graphql";
-import { CONTRACT_POINTS } from "@cartridge/controller/src/constants";
+import { constants, SequencerProvider, uint256 } from "starknet";
+import { useBalanceQuery } from "../generated/graphql";
+import { CONTRACT_ETH, CONTRACT_POINTS } from "@cartridge/controller/src/constants";
+import { BigNumber, utils } from "ethers";
+import Ether from "./icons/Ether";
 
 const Container = ({
   height,
@@ -59,6 +62,7 @@ export const HeaderItem = ({
   return (
     <HStack
       p="6px 18px"
+      justify="center"
       fontSize="10px"
       lineHeight="18px"
       minHeight="30px"
@@ -87,13 +91,36 @@ export const Header = ({
   onLogout?: () => void;
   onClose?: () => void;
 }) => {
-  const chain = "starknet:SN_GOERLI";
-  const tokenAccountId = `${chain}/${chain}:${address || ""}/erc20:${CONTRACT_POINTS}`;
-  const { data, error } = usePointsBalanceQuery({
-    tokenAccountId: tokenAccountId,
+  const [ethBalance, setEthBalance] = useState<string>();
+
+  const pointsChain = "starknet:SN_GOERLI";
+  const pointsTokenAccountId = `${pointsChain}/${pointsChain}:${address || ""}/erc20:${CONTRACT_POINTS}`;
+  const { data: pointsData, error: pointsError } = useBalanceQuery({
+    tokenAccountId: pointsTokenAccountId,
   });
-  const points = data?.balance?.balance;
+  const points = pointsData?.balance?.balance;
   const { current, loading } = useAvatar(address, points || 10);
+
+  useEffect(() => {
+    const provider = new SequencerProvider({
+      network: chainId === constants.StarknetChainId.MAINNET
+        ? "mainnet-alpha"
+        : "goerli-alpha",
+    });
+
+    provider.callContract({
+      contractAddress: CONTRACT_ETH,
+      entrypoint: "balanceOf",
+      calldata: [BigNumber.from(address).toString()],
+    }).then((res) => {
+      setEthBalance(
+        utils.formatEther(uint256.uint256ToBN({
+          low: res.result[0],
+          high: res.result[1],
+        }).toString())
+      );
+    });
+  }, [address, chainId]);
 
   if (!address) {
     const fill = muted ? "gray.200" : "brand";
@@ -142,6 +169,13 @@ export const Header = ({
         <Spacer />
         <HStack spacing="10px">
           <Chain name={chainName} />
+          <Box minW="90px">
+            <HeaderItem>
+              <Ether w="12px" h="12px" />
+              {!!ethBalance && <Text>{parseFloat(ethBalance).toFixed(4)}</Text>}
+              {!ethBalance && <Loading fill="white" width="12px" height="12px" />}
+            </HeaderItem>
+          </Box>
           {chainId && (
             <Box
               onClick={() => {
