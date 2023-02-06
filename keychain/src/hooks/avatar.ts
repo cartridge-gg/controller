@@ -3,7 +3,7 @@ import { defaultProvider, number, Provider, uint256 } from "starknet";
 import { CONTRACT_AVATAR } from "@cartridge/controller/src/constants";
 import dataUriToBuffer from "data-uri-to-buffer";
 
-import Storage from "utils/storage";
+import Storage from "../utils/storage";
 
 const SCALE = 10;
 const PADDING = 0;

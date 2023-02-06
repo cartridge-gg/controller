@@ -3862,12 +3862,12 @@ export type CheckTwitterQuestsMutationVariables = Exact<{
 
 export type CheckTwitterQuestsMutation = { __typename?: 'Mutation', checkTwitterQuests: boolean };
 
-export type PointsBalanceQueryVariables = Exact<{
+export type BalanceQueryVariables = Exact<{
   tokenAccountId: Scalars['ID'];
 }>;
 
 
-export type PointsBalanceQuery = { __typename?: 'Query', balance?: { __typename?: 'Balance', balance: any } | null };
+export type BalanceQuery = { __typename?: 'Query', balance?: { __typename?: 'Balance', balance: any } | null };
 
 export type BeginRegistrationMutationVariables = Exact<{
   id: Scalars['String'];
@@ -4128,45 +4128,45 @@ export const useCheckTwitterQuestsMutation = <
       useFetchData<CheckTwitterQuestsMutation, CheckTwitterQuestsMutationVariables>(CheckTwitterQuestsDocument),
       options
     );
-export const PointsBalanceDocument = `
-    query PointsBalance($tokenAccountId: ID!) {
+export const BalanceDocument = `
+    query balance($tokenAccountId: ID!) {
   balance(id: $tokenAccountId) {
     balance
   }
 }
     `;
-export const usePointsBalanceQuery = <
-      TData = PointsBalanceQuery,
+export const useBalanceQuery = <
+      TData = BalanceQuery,
       TError = unknown
     >(
-      variables: PointsBalanceQueryVariables,
-      options?: UseQueryOptions<PointsBalanceQuery, TError, TData>
+      variables: BalanceQueryVariables,
+      options?: UseQueryOptions<BalanceQuery, TError, TData>
     ) =>
-    useQuery<PointsBalanceQuery, TError, TData>(
-      ['PointsBalance', variables],
-      useFetchData<PointsBalanceQuery, PointsBalanceQueryVariables>(PointsBalanceDocument).bind(null, variables),
+    useQuery<BalanceQuery, TError, TData>(
+      ['balance', variables],
+      useFetchData<BalanceQuery, BalanceQueryVariables>(BalanceDocument).bind(null, variables),
       options
     );
 
-usePointsBalanceQuery.getKey = (variables: PointsBalanceQueryVariables) => ['PointsBalance', variables];
+useBalanceQuery.getKey = (variables: BalanceQueryVariables) => ['balance', variables];
 ;
 
-export const useInfinitePointsBalanceQuery = <
-      TData = PointsBalanceQuery,
+export const useInfiniteBalanceQuery = <
+      TData = BalanceQuery,
       TError = unknown
     >(
-      variables: PointsBalanceQueryVariables,
-      options?: UseInfiniteQueryOptions<PointsBalanceQuery, TError, TData>
+      variables: BalanceQueryVariables,
+      options?: UseInfiniteQueryOptions<BalanceQuery, TError, TData>
     ) =>{
-    const query = useFetchData<PointsBalanceQuery, PointsBalanceQueryVariables>(PointsBalanceDocument)
-    return useInfiniteQuery<PointsBalanceQuery, TError, TData>(
-      ['PointsBalance.infinite', variables],
+    const query = useFetchData<BalanceQuery, BalanceQueryVariables>(BalanceDocument)
+    return useInfiniteQuery<BalanceQuery, TError, TData>(
+      ['balance.infinite', variables],
       (metaData) => query({...variables, ...(metaData.pageParam ?? {})}),
       options
     )};
 
 
-useInfinitePointsBalanceQuery.getKey = (variables: PointsBalanceQueryVariables) => ['PointsBalance.infinite', variables];
+useInfiniteBalanceQuery.getKey = (variables: BalanceQueryVariables) => ['balance.infinite', variables];
 ;
 
 export const BeginRegistrationDocument = `
