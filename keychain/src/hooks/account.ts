@@ -2,6 +2,7 @@ import {
   BeginLoginDocument,
   BeginRegistrationDocument,
   FinalizeRegistrationDocument,
+  AccountDocument,
 } from "generated/graphql";
 
 import { client, ENDPOINT } from "utils/graphql";
@@ -156,3 +157,31 @@ export const doXHR = async (json: string): Promise<any> => {
     xhr.send(json);
   });
 };
+
+export const pollAccount = async ({
+  name,
+  onCreated,
+}: {
+  name: string;
+  onCreated: (address: string, credentialId: string) => void;
+}) => {
+  try {
+    const res = await client.request(AccountDocument, {
+      id: name,
+    });
+    const {
+      account: {
+        credential: { id: credentialId },
+        contractAddress: address,
+      },
+    } = res;
+
+    onCreated(address, credentialId);
+    return;
+  } catch (e) {
+    console.log(e);
+  }
+
+  setTimeout(() => pollAccount({ name, onCreated }), 1000);
+};
+pollAccount;
