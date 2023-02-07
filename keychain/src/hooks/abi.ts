@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useInterval } from "usehooks-ts";
-import { Abi, defaultProvider } from "starknet";
+import { Abi, constants, defaultProvider } from "starknet";
 import { getClassByHash } from "utils/rpc";
 
 const DELAY = 5000;
@@ -58,7 +58,10 @@ const fetchAbi = async (account: string): Promise<Abi> => {
     entrypoint: "get_implementation",
   });
 
-  const impl = await getClassByHash(result[0]);
+  const impl = await getClassByHash(
+    constants.StarknetChainId.TESTNET,
+    result[0],
+  );
 
   return impl.abi;
 };
