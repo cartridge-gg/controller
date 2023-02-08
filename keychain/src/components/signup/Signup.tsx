@@ -54,7 +54,6 @@ import OlmecIcon from "@cartridge/ui/components/icons/Olmec";
 import BannerImage from "./BannerImage";
 import Ellipses from "./Ellipses";
 import { ClaimSuccess } from "./StarterPack";
-import { pollAccount } from "hooks/account";
 
 export const Signup = ({
   fullPage = false,
@@ -76,6 +75,7 @@ export const Signup = ({
   const [name, setName] = useState(prefilledName);
   const [keypair, setKeypair] = useState<KeyPair>();
   const [nameError, setNameError] = useState("");
+  const [selectedName, setSelectedName] = useState<string>();
   const [isRegistering, setIsRegistering] = useState<boolean>(false);
   const [canContinue, setCanContinue] = useState(false);
   const [dismissed, setDismissed] = useState<boolean>(false);
@@ -105,9 +105,8 @@ export const Signup = ({
   } = useAccountQuery(
     { id: debouncedName },
     {
-      enabled: !!(debouncedName && debouncedName.length >= 3),
-      retry: isRegistering,
-      retryDelay: 1000,
+      enabled: !!(debouncedName && debouncedName.length >= 3) && !isRegistering,
+      retry: false,
     },
   );
 
@@ -119,13 +118,69 @@ export const Signup = ({
     {
       id: starterPackId,
     },
-    { enabled: !!starterPackId },
+    { enabled: !!starterPackId && !isRegistering },
   );
 
   const remaining = starterData
     ? starterData.game.starterPack.maxIssuance -
       starterData.game.starterPack.issuance
     : 0;
+
+  const { data: accountCreatedData } = useAccountQuery(
+    { id: selectedName },
+    {
+      enabled: isRegistering,
+      refetchInterval: (data) => (!data ? 1000 : undefined),
+      refetchIntervalInBackground: true,
+    },
+  );
+
+  useEffect(() => {
+    if (accountCreatedData) {
+      const {
+        account: {
+          credential: { id: credentialId },
+          contractAddress: address,
+        },
+      } = accountCreatedData;
+
+      const controller = new Controller(keypair, address, credentialId);
+
+      if (onController) onController(controller);
+
+      controller.account(constants.StarknetChainId.TESTNET).status =
+        Status.DEPLOYING;
+      client
+        .request(DeployAccountDocument, {
+          id: debouncedName,
+          chainId: "starknet:SN_GOERLI",
+          starterpackIds: starterData?.game?.starterPack?.chainID?.includes(
+            "SN_GOERLI",
+          )
+            ? [starterData?.game?.starterPack?.id]
+            : undefined,
+        })
+        .then(() => {
+          controller.account(constants.StarknetChainId.TESTNET).sync();
+        });
+
+      controller.account(constants.StarknetChainId.MAINNET).status =
+        Status.DEPLOYING;
+      client
+        .request(DeployAccountDocument, {
+          id: debouncedName,
+          chainId: "starknet:SN_MAIN",
+          starterpackIds: starterData?.game?.starterPack?.chainID?.includes(
+            "SN_MAIN",
+          )
+            ? [starterData?.game?.starterPack?.id]
+            : undefined,
+        })
+        .then(() => {
+          controller.account(constants.StarknetChainId.MAINNET).sync();
+        });
+    }
+  }, [accountCreatedData, keypair, onController]);
 
   // handle username input events
   useEffect(() => {
@@ -156,6 +211,7 @@ export const Signup = ({
 
     setIsRegistering(true);
     setKeypair(keypair);
+    setSelectedName(debouncedName);
 
     // due to same origin restriction, if we're in iframe, pop up a
     // window to continue webauthn registration. otherwise,
@@ -173,47 +229,6 @@ export const Signup = ({
     } else {
       onAuthOpen();
     }
-
-    pollAccount({
-      name: debouncedName,
-      onCreated: (address, credentialId) => {
-        const controller = new Controller(keypair, address, credentialId);
-
-        if (onController) onController(controller);
-
-        controller.account(constants.StarknetChainId.TESTNET).status =
-          Status.DEPLOYING;
-        client
-          .request(DeployAccountDocument, {
-            id: debouncedName,
-            chainId: "starknet:SN_GOERLI",
-            starterpackIds: starterData?.game?.starterPack?.chainID?.includes(
-              "SN_GOERLI",
-            )
-              ? [starterData?.game?.starterPack?.id]
-              : undefined,
-          })
-          .then(() => {
-            controller.account(constants.StarknetChainId.TESTNET).sync();
-          });
-
-        controller.account(constants.StarknetChainId.MAINNET).status =
-          Status.DEPLOYING;
-        client
-          .request(DeployAccountDocument, {
-            id: debouncedName,
-            chainId: "starknet:SN_MAIN",
-            starterpackIds: starterData?.game?.starterPack?.chainID?.includes(
-              "SN_MAIN",
-            )
-              ? [starterData?.game?.starterPack?.id]
-              : undefined,
-          })
-          .then(() => {
-            controller.account(constants.StarknetChainId.MAINNET).sync();
-          });
-      },
-    });
   }, [debouncedName, starterData, isIframe, onAuthOpen, onController]);
 
   const validate = (values: { name: string }) => {
