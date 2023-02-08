@@ -99,7 +99,7 @@ export const Header = ({
     tokenAccountId: pointsTokenAccountId,
   });
   const points = pointsData?.balance?.balance;
-  const { current, loading } = useAvatar(address, points || 10);
+  const { current, loading } = useAvatar(address || "", points || 10);
 
   useEffect(() => {
     const provider = new SequencerProvider({
@@ -204,6 +204,7 @@ export const Header = ({
             h="30px"
             w="42px"
             variant="secondary450"
+            bgColor="gray.600"
             visibility={!!onClose ? "visible" : "hidden"}
             onClick={onClose}
           >
