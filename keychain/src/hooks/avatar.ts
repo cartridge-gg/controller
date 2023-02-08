@@ -41,10 +41,10 @@ export const useAvatar = (
   points: number,
 ): {
   loading: boolean;
-  error: Error;
+  error?: Error;
   evolved: boolean;
   avatars: AvatarData[];
-  current: AvatarData;
+  current?: AvatarData;
   refresh: () => void;
 } => {
   const [error, setError] = useState<Error>();
@@ -152,7 +152,7 @@ const findValue = (
 ) => {
   return attr.find((a) => {
     return a.trait_type === trait;
-  }).value;
+  })?.value || "";
 };
 
 const data2Svg = ({
@@ -161,7 +161,7 @@ const data2Svg = ({
   dimension,
   fingerprint,
   crop,
-}: { crop?: number } & AttributeData): string => {
+}: { crop: number } & AttributeData): string => {
   const grid = new Array(MAX_ROWS * MAX_COLS).fill(CellType.EMPTY);
   fingerprint
     .substring(2)
@@ -215,7 +215,7 @@ const data2Svg = ({
   });
 
   // render
-  let rects = [];
+  let rects: Array<string> = [];
   grid.forEach((cell, idx) => {
     if (cell != CellType.EMPTY) {
       const x = idx % MAX_COLS;
