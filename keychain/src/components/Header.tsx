@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import NextLink from "next/link";
 import {
   Box,
@@ -7,15 +7,23 @@ import {
   Button,
   Spacer,
   HStack,
+  Text,
   Container as ChakraContainer,
   StyleProps,
-  Text,
 } from "@chakra-ui/react";
 
 import { Logo } from "@cartridge/ui/src/components/brand/Logo";
 import { WordLogo } from "@cartridge/ui/src/components/brand/Word";
-import ChainDropdown from "@cartridge/ui/src/components/menu/Chain";
 import TimesIcon from "@cartridge/ui/src/components/icons/Times";
+import { HeaderItem } from "@cartridge/ui/src/components/HeaderItem";
+import { useAvatar } from "../hooks/avatar";
+import { Loading } from "./Loading";
+import Chain from "@cartridge/ui/src/components/menu/Chain";
+import { constants, SequencerProvider, uint256 } from "starknet";
+import { useBalanceQuery } from "../generated/graphql";
+import { CONTRACT_ETH, CONTRACT_POINTS } from "@cartridge/controller/src/constants";
+import { BigNumber, utils } from "ethers";
+import Ether from "./icons/Ether";
 
 const Container = ({
   height,
@@ -46,16 +54,49 @@ const Container = ({
 );
 
 export const Header = ({
+  chainId,
   address,
   muted = false,
   onLogout,
   onClose,
 }: {
+  chainId?: constants.StarknetChainId;
   address?: string;
   muted?: boolean;
   onLogout?: () => void;
   onClose?: () => void;
 }) => {
+  const [ethBalance, setEthBalance] = useState<string>();
+
+  const pointsChain = "starknet:SN_GOERLI";
+  const pointsTokenAccountId = `${pointsChain}/${pointsChain}:${address || ""}/erc20:${CONTRACT_POINTS}`;
+  const { data: pointsData, error: pointsError } = useBalanceQuery({
+    tokenAccountId: pointsTokenAccountId,
+  });
+  const points = pointsData?.balance?.balance;
+  const { current, loading } = useAvatar(address || "", points || 10);
+
+  useEffect(() => {
+    const provider = new SequencerProvider({
+      network: chainId === constants.StarknetChainId.MAINNET
+        ? "mainnet-alpha"
+        : "goerli-alpha",
+    });
+
+    provider.callContract({
+      contractAddress: CONTRACT_ETH,
+      entrypoint: "balanceOf",
+      calldata: [BigNumber.from(address).toString()],
+    }).then((res) => {
+      setEthBalance(
+        utils.formatEther(uint256.uint256ToBN({
+          low: res.result[0],
+          high: res.result[1],
+        }).toString())
+      );
+    });
+  }, [address, chainId]);
+
   if (!address) {
     const fill = muted ? "gray.200" : "brand";
 
@@ -81,6 +122,19 @@ export const Header = ({
     );
   }
 
+  let chainName = "Unknown";
+  switch (chainId) {
+    case constants.StarknetChainId.MAINNET:
+      chainName = "Mainnet";
+      break;
+    case constants.StarknetChainId.TESTNET:
+      chainName = "Testnet";
+      break;
+    case constants.StarknetChainId.TESTNET2:
+      chainName = "Testnet 2";
+      break;
+  }
+
   return (
     <Container height="50px">
       <HStack w="full">
@@ -88,8 +142,49 @@ export const Header = ({
           <Logo fill="brand" w="24px" mr="15px" />
         </HStack>
         <Spacer />
-        <HStack spacing="10px">
-          <ChainDropdown />
+        <HStack spacing="6px">
+          <Chain name={chainName} />
+          <Box minW="90px">
+            <HeaderItem>
+              <Ether w="12px" h="12px" />
+              {!!ethBalance && <Text>{parseFloat(ethBalance).toFixed(4)}</Text>}
+              {!ethBalance && <Loading fill="white" width="12px" height="12px" />}
+            </HeaderItem>
+          </Box>
+          {chainId && (
+            <Box
+              onClick={() => {
+                navigator.clipboard.writeText(address);
+              }}
+              _hover={{
+                cursor: "pointer",
+              }}
+            >
+              <HeaderItem bgColor="gray.500">
+                {loading ? (
+                  <Loading fill="white" width="12px" height="12px" />
+                ) : (
+                  <Box
+                    w="18px"
+                    h="18px"
+                    dangerouslySetInnerHTML={
+                      !!current?.svg ? { __html: current?.svg } : undefined
+                    }
+                  />
+                )}
+              </HeaderItem>
+            </Box>
+          )}
+          <Button
+            h="30px"
+            w="42px"
+            variant="secondary450"
+            bgColor="gray.600"
+            visibility={!!onClose ? "visible" : "hidden"}
+            onClick={onClose}
+          >
+            <TimesIcon boxSize="18px" />
+          </Button>
         </HStack>
       </HStack>
     </Container>

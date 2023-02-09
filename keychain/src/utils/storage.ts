@@ -1,5 +1,5 @@
 const Storage = {
-  keys: (): string[] => {
+  keys: (): string[] | undefined => {
     if (typeof window != "undefined") {
       return Object.keys(window.localStorage);
     }

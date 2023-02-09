@@ -2944,6 +2944,7 @@ __metadata:
     bn.js: ^5.2.1
     caip: ^1.1.0
     cbor: ^8.1.0
+    data-uri-to-buffer: ^4.0.0
     embla-carousel-react: ^7.0.5
     eslint: ^8.23.0
     eslint-config-next: ^12.2.5
@@ -13607,6 +13608,13 @@ __metadata:
   version: 1.0.8
   resolution: "damerau-levenshtein@npm:1.0.8"
   checksum: d240b7757544460ae0586a341a53110ab0a61126570ef2d8c731e3eab3f0cb6e488e2609e6a69b46727635de49be20b071688698744417ff1b6c1d7ccd03e0de
+  languageName: node
+  linkType: hard
+
+"data-uri-to-buffer@npm:^4.0.0":
+  version: 4.0.1
+  resolution: "data-uri-to-buffer@npm:4.0.1"
+  checksum: 0d0790b67ffec5302f204c2ccca4494f70b4e2d940fea3d36b09f0bb2b8539c2e86690429eb1f1dc4bcc9e4df0644193073e63d9ee48ac9fce79ec1506e4aa4c
   languageName: node
   linkType: hard
 

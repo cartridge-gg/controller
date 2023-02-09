@@ -145,7 +145,16 @@ const Execute = ({
 
   return (
     <Container>
-      <Header />
+      <Header
+        chainId={chainId}
+        address={account.address}
+        onClose={() => {
+          onCancel({
+            code: ResponseCodes.CANCELED,
+            message: "Cancelled",
+          });
+        }}
+      />
       <HStack w="full" justify="flex-start" pb="20px" spacing="20px">
         <Circle bgColor="gray.700" size="48px">
           <TransactionIcon boxSize="30px" />
