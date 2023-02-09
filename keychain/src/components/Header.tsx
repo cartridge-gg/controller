@@ -167,7 +167,7 @@ export const Header = ({
           <Logo fill="brand" w="24px" mr="15px" />
         </HStack>
         <Spacer />
-        <HStack spacing="10px">
+        <HStack spacing="6px">
           <Chain name={chainName} />
           <Box minW="90px">
             <HeaderItem>

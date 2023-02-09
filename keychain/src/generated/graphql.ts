@@ -3417,6 +3417,7 @@ export type Transaction = Node & {
   calldata?: Maybe<Array<Scalars['String']>>;
   contract: Contract;
   contractID: Scalars['ID'];
+  createdAt?: Maybe<Scalars['Time']>;
   deployedContract?: Maybe<Contract>;
   entryPointSelector?: Maybe<Scalars['String']>;
   events?: Maybe<Array<Event>>;
@@ -3430,6 +3431,7 @@ export type Transaction = Node & {
   starterPackClaims?: Maybe<Array<AccountStarterPack>>;
   to?: Maybe<Array<Contract>>;
   transactionHash: Scalars['String'];
+  updatedAt: Scalars['Time'];
 };
 
 /** A connection to a list of items. */
@@ -3464,7 +3466,9 @@ export type TransactionOrder = {
 
 /** Properties by which Transaction connections can be ordered. */
 export enum TransactionOrderField {
-  Nonce = 'NONCE'
+  CreatedAt = 'CREATED_AT',
+  Nonce = 'NONCE',
+  UpdatedAt = 'UPDATED_AT'
 }
 
 export type TransactionReceipt = Node & {
@@ -3603,6 +3607,17 @@ export type TransactionWhereInput = {
   contractIDLTE?: InputMaybe<Scalars['ID']>;
   contractIDNEQ?: InputMaybe<Scalars['ID']>;
   contractIDNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars['Time']>;
+  createdAtGT?: InputMaybe<Scalars['Time']>;
+  createdAtGTE?: InputMaybe<Scalars['Time']>;
+  createdAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtIsNil?: InputMaybe<Scalars['Boolean']>;
+  createdAtLT?: InputMaybe<Scalars['Time']>;
+  createdAtLTE?: InputMaybe<Scalars['Time']>;
+  createdAtNEQ?: InputMaybe<Scalars['Time']>;
+  createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtNotNil?: InputMaybe<Scalars['Boolean']>;
   /** entry_point_selector field predicates */
   entryPointSelector?: InputMaybe<Scalars['String']>;
   entryPointSelectorContains?: InputMaybe<Scalars['String']>;
@@ -3702,6 +3717,15 @@ export type TransactionWhereInput = {
   transactionHashLTE?: InputMaybe<Scalars['String']>;
   transactionHashNEQ?: InputMaybe<Scalars['String']>;
   transactionHashNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars['Time']>;
+  updatedAtGT?: InputMaybe<Scalars['Time']>;
+  updatedAtGTE?: InputMaybe<Scalars['Time']>;
+  updatedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  updatedAtLT?: InputMaybe<Scalars['Time']>;
+  updatedAtLTE?: InputMaybe<Scalars['Time']>;
+  updatedAtNEQ?: InputMaybe<Scalars['Time']>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
 };
 
 export type TwitterQuest = Node & {
