@@ -106,8 +106,7 @@ export const Quests = ({ username, gameId, starterpackId }: QuestsProps) => {
     [data, questsData],
   );
 
-  const { mutateAsync: deployAccount, isLoading } =
-    useDeployAccountMutation();
+  const { mutateAsync: deployAccount, isLoading } = useDeployAccountMutation();
 
   const onComplete = useCallback(async () => {
     playSound();
