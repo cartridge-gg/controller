@@ -21,7 +21,10 @@ import { Loading } from "./Loading";
 import Chain from "@cartridge/ui/src/components/menu/Chain";
 import { constants, SequencerProvider, uint256 } from "starknet";
 import { useBalanceQuery } from "../generated/graphql";
-import { CONTRACT_ETH, CONTRACT_POINTS } from "@cartridge/controller/src/constants";
+import {
+  CONTRACT_ETH,
+  CONTRACT_POINTS,
+} from "@cartridge/controller/src/constants";
 import { BigNumber, utils } from "ethers";
 import Ether from "./icons/Ether";
 
@@ -69,7 +72,9 @@ export const Header = ({
   const [ethBalance, setEthBalance] = useState<string>();
 
   const pointsChain = "starknet:SN_GOERLI";
-  const pointsTokenAccountId = `${pointsChain}/${pointsChain}:${address || ""}/erc20:${CONTRACT_POINTS}`;
+  const pointsTokenAccountId = `${pointsChain}/${pointsChain}:${
+    address || ""
+  }/erc20:${CONTRACT_POINTS}`;
   const { data: pointsData, error: pointsError } = useBalanceQuery({
     tokenAccountId: pointsTokenAccountId,
   });
@@ -77,24 +82,33 @@ export const Header = ({
   const { current, loading } = useAvatar(address || "", points || 10);
 
   useEffect(() => {
-    const provider = new SequencerProvider({
-      network: chainId === constants.StarknetChainId.MAINNET
-        ? "mainnet-alpha"
-        : "goerli-alpha",
-    });
+    if (address) {
+      const provider = new SequencerProvider({
+        network:
+          chainId === constants.StarknetChainId.MAINNET
+            ? "mainnet-alpha"
+            : "goerli-alpha",
+      });
 
-    provider.callContract({
-      contractAddress: CONTRACT_ETH,
-      entrypoint: "balanceOf",
-      calldata: [BigNumber.from(address).toString()],
-    }).then((res) => {
-      setEthBalance(
-        utils.formatEther(uint256.uint256ToBN({
-          low: res.result[0],
-          high: res.result[1],
-        }).toString())
-      );
-    });
+      provider
+        .callContract({
+          contractAddress: CONTRACT_ETH,
+          entrypoint: "balanceOf",
+          calldata: [BigNumber.from(address).toString()],
+        })
+        .then((res) => {
+          setEthBalance(
+            utils.formatEther(
+              uint256
+                .uint256ToBN({
+                  low: res.result[0],
+                  high: res.result[1],
+                })
+                .toString(),
+            ),
+          );
+        });
+    }
   }, [address, chainId]);
 
   if (!address) {
@@ -148,7 +162,9 @@ export const Header = ({
             <HeaderItem>
               <Ether w="12px" h="12px" />
               {!!ethBalance && <Text>{parseFloat(ethBalance).toFixed(4)}</Text>}
-              {!ethBalance && <Loading fill="white" width="12px" height="12px" />}
+              {!ethBalance && (
+                <Loading fill="white" width="12px" height="12px" />
+              )}
             </HeaderItem>
           </Box>
           {chainId && (
