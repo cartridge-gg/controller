@@ -15,6 +15,7 @@ import {
 import { Logo } from "@cartridge/ui/src/components/brand/Logo";
 import { WordLogo } from "@cartridge/ui/src/components/brand/Word";
 import TimesIcon from "@cartridge/ui/src/components/icons/Times";
+import { HeaderItem } from "@cartridge/ui/src/components/HeaderItem";
 import { useAvatar } from "../hooks/avatar";
 import { Loading } from "./Loading";
 import Chain from "@cartridge/ui/src/components/menu/Chain";
@@ -51,32 +52,6 @@ const Container = ({
     <Box h={height} />
   </>
 );
-
-export const HeaderItem = ({
-  bgColor = undefined,
-  children,
-}: {
-  bgColor?: string;
-  children: React.ReactNode;
-}) => {
-  return (
-    <HStack
-      p="6px 18px"
-      justify="center"
-      fontSize="10px"
-      lineHeight="18px"
-      minHeight="30px"
-      bgColor="gray.600"
-      borderRadius="6px"
-      userSelect="none"
-      _hover={{
-        bgColor: bgColor,
-      }}
-    >
-      {children}
-    </HStack>
-  );
-};
 
 export const Header = ({
   chainId,
@@ -167,7 +142,7 @@ export const Header = ({
           <Logo fill="brand" w="24px" mr="15px" />
         </HStack>
         <Spacer />
-        <HStack spacing="10px">
+        <HStack spacing="6px">
           <Chain name={chainName} />
           <Box minW="90px">
             <HeaderItem>

@@ -1,5 +1,5 @@
 import { Image, Text } from "@chakra-ui/react";
-import { HeaderItem } from "@cartridge/keychain/src/components/Header";
+import { HeaderItem } from "@cartridge/ui/src/components/HeaderItem";
 
 const Chain = ({ name }: { name: string; }) => {
   return (
