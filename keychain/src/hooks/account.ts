@@ -3,7 +3,7 @@ import {
   BeginRegistrationDocument,
   FinalizeLoginDocument,
   FinalizeRegistrationDocument,
-  AccountDocument,
+  FinalizeLoginMutation,
 } from "generated/graphql";
 
 import { client, ENDPOINT } from "utils/graphql";
@@ -97,7 +97,9 @@ export const onCreateFinalize = async (
   });
 };
 
-export const onLoginFinalize = async (assertion: RawAssertion) => {
+export const onLoginFinalize = async (
+  assertion: RawAssertion,
+): Promise<FinalizeLoginMutation> => {
   return await client.request(FinalizeLoginDocument, {
     credentials: JSON.stringify({
       id: assertion.id,

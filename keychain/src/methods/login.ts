@@ -18,25 +18,25 @@ const login =
     const keypair = ec.genKeyPair();
     const controller = new Controller(keypair, address, credentialId, options);
 
-    //const { assertion } = await controller.account(chainId).register();
-    //Storage.set(selectors["0.0.3"].active(), address);
+    const { assertion } = await controller.account(chainId).register();
+    Storage.set(selectors["0.0.3"].active(), address);
 
     return {
-      // assertion: {
-      //   id: assertion.id,
-      //   type: assertion.type,
-      //   rawId: base64url(Buffer.from(assertion.rawId)),
-      //   clientExtensionResults: assertion.getClientExtensionResults(),
-      //   response: {
-      //     authenticatorData: base64url(
-      //       Buffer.from(assertion.response.authenticatorData),
-      //     ),
-      //     clientDataJSON: base64url(
-      //       Buffer.from(assertion.response.clientDataJSON),
-      //     ),
-      //     signature: base64url(Buffer.from(assertion.response.signature)),
-      //   },
-      // },
+      assertion: {
+        id: assertion.id,
+        type: assertion.type,
+        rawId: base64url(Buffer.from(assertion.rawId)),
+        clientExtensionResults: assertion.getClientExtensionResults(),
+        response: {
+          authenticatorData: base64url(
+            Buffer.from(assertion.response.authenticatorData),
+          ),
+          clientDataJSON: base64url(
+            Buffer.from(assertion.response.clientDataJSON),
+          ),
+          signature: base64url(Buffer.from(assertion.response.signature)),
+        },
+      },
       controller,
     };
   };

@@ -27,7 +27,7 @@ import login from "methods/login";
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import { useDebounce } from "hooks/debounce";
 import Web3Auth from "./Web3Auth";
-import { constants } from "starknet";
+import { constants, ec } from "starknet";
 import LockIcon from "@cartridge/ui/components/icons/Lock";
 import ReturnIcon from "@cartridge/ui/src/components/icons/Return";
 import Controller from "utils/controller";
@@ -99,33 +99,23 @@ export const Login = ({
         },
       } = accountData;
 
-      console.log({ accountData });
-
       const { data: beginLoginData } = await beginLogin(name);
-
-      console.log(beginLoginData);
-
       const signer: WebauthnSigner = new WebauthnSigner(
         credentialId,
         publicKey,
       );
 
       const assertion = await signer.sign(
-        Buffer.from(beginLoginData.beginLogin.publicKey.challenge),
+        base64url.toBuffer(beginLoginData.beginLogin.publicKey.challenge),
       );
 
-      console.log({ assertion });
-
       const res = await onLoginFinalize(assertion);
-      console.log(res);
-      return;
+      if (!res.finalizeLogin) {
+        throw Error("login failed");
+      }
 
-      const { controller } = await login()(address, chainId, credentialId, {
-        rpId: process.env.NEXT_PUBLIC_RP_ID,
-        challengeExt: base64url.toBuffer(
-          beginLoginData.beginLogin.publicKey.challenge,
-        ),
-      });
+      const keypair = ec.genKeyPair();
+      const controller = new Controller(keypair, address, credentialId);
 
       if (onController) {
         onController(controller);
@@ -211,8 +201,8 @@ export const Login = ({
                           canContinue
                             ? "green.400"
                             : nameError
-                              ? "red.400"
-                              : "gray.600"
+                            ? "red.400"
+                            : "gray.600"
                         }
                         onChange={(e) => {
                           setName(e.target.value);
