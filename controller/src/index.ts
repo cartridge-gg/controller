@@ -18,6 +18,7 @@ import {
   ConnectReply,
   ProbeReply,
   Modal,
+  SupportedChainIds,
 } from "./types";
 import { createModal } from "./modal";
 
@@ -29,11 +30,6 @@ export const providers = {
     nodeUrl: "https://starknet.cartridge.gg/rpc/v0.2",
   }),
 };
-
-enum SupportedChainIds {
-  MAINNET = "0x534e5f4d41494e",
-  TESTNET = "0x534e5f474f45524c49",
-}
 
 class Controller {
   private connection?: Connection<Keychain>;
@@ -51,10 +47,15 @@ class Controller {
       url?: string;
       origin?: string;
       starterPackId?: string;
+      chainId?: SupportedChainIds;
     }
   ) {
     if (policies) {
       this.policies = policies;
+    }
+
+    if (options?.chainId) {
+      this.chainId = options.chainId;
     }
 
     if (options?.starterPackId) {
@@ -202,7 +203,7 @@ class Controller {
 
     try {
       if (!this.account) {
-        let response = await this.keychain.connect(this.policies);
+        let response = await this.keychain.connect(this.policies, undefined, this.chainId);
         if (response.code !== ResponseCodes.SUCCESS) {
           throw new Error(response.message);
         }
@@ -236,7 +237,7 @@ class Controller {
     this.modal.open();
 
     try {
-      let response = await this.keychain.connect(this.policies);
+      let response = await this.keychain.connect(this.policies, undefined, this.chainId);
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
       }

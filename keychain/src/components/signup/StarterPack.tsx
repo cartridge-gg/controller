@@ -11,6 +11,7 @@ import {
   Spacer,
   Circle,
   SystemProps,
+  Divider,
 } from "@chakra-ui/react";
 import {
   useAccountInfoQuery,
@@ -22,14 +23,17 @@ import Container from "../Container";
 import Footer from "../Footer";
 import { Banner } from "../Banner";
 import { remoteSvgIcon } from "utils/svg";
+import BannerImage from "./BannerImage";
 
 import { Error, ExecuteReply, ResponseCodes } from "@cartridge/controller";
 import { constants, addAddressPadding } from "starknet";
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
-import CoinIcon from "@cartridge/ui/src/components/icons/Coin";
+import StarterpackIcon from "@cartridge/ui/src/components/icons/Starterpack";
 import { StarterPackCarousel } from "components/carousel/StarterPack";
 import OlmecIcon from "@cartridge/ui/src/components/icons/Olmec";
 import { Header } from "components/Header";
+import Ellipses from "./Ellipses";
+import SparkleColored from "@cartridge/ui/components/icons/SparkleColored";
 
 export type StarterItemProps = {
   name: string;
@@ -38,6 +42,38 @@ export type StarterItemProps = {
   uri?: string;
   icon?: ReactNode;
 };
+
+export const ClaimSuccess = ({
+  img,
+  url,
+  fullPage,
+}: {
+  img: string;
+  url: string;
+  fullPage: boolean;
+}) => (
+  <>
+    <Container position={fullPage ? "relative" : "fixed"}>
+      <Header />
+      <BannerImage imgSrc={img} obscuredWidth="0px" />
+      <VStack spacing="18px" pt="36px" pb="24px">
+        <Circle size="48px" bgColor="gray.700">
+          <SparkleColored boxSize="30px" />
+        </Circle>
+        <Text fontWeight="bold" fontSize="17px">
+          {"Your briq set is on the way!"}
+        </Text>
+        <Text fontSize="12px" color="whiteAlpha.600" textAlign="center">
+          Checkout{" "}
+          <Link href={url} variant="traditional" isExternal>
+            {url}
+          </Link>{" "}
+          to play on your desktop.
+        </Text>
+      </VStack>
+    </Container>
+  </>
+);
 
 export const StarterItem = ({
   name,
@@ -74,7 +110,7 @@ export type StarterPackProps = {
   gameIcon: ReactNode;
 };
 
-export const StarterPack = ({ starterpack, gameIcon }: StarterPackProps) => {
+export const StarterPackOld = ({ starterpack, gameIcon }: StarterPackProps) => {
   const [nonfungibles, setNonfungibles] = useState<StarterItemProps[]>([]);
   let remaining = starterpack.maxIssuance - starterpack.issuance;
   remaining = remaining < 0 ? 0 : remaining;
@@ -141,19 +177,20 @@ export const StarterPack = ({ starterpack, gameIcon }: StarterPackProps) => {
   );
 };
 
-export const StarterPackEmbedded = ({
-  chainId,
+export const StarterPack = ({
   starterPackId,
   controller,
+  fullPage = false,
   onClaim,
   onCancel,
 }: {
-  chainId: constants.StarknetChainId;
   starterPackId: string;
-  controller: Controller;
-  onClaim: (res: ExecuteReply) => void;
-  onCancel: (error: Error) => void;
+  controller?: Controller;
+  fullPage?: boolean;
+  onClaim?: (res?: ExecuteReply) => void;
+  onCancel?: (error: Error) => void;
 }) => {
+  const [remaining, setRemaining] = useState<number>();
   const [nonfungibles, setNonfungibles] = useState<StarterItemProps[]>([]);
 
   const {
@@ -171,18 +208,12 @@ export const StarterPackEmbedded = ({
     id: starterPackId,
   });
 
-  const { data: accountData, isLoading: accountLoading } = useAccountInfoQuery({
-    address: addAddressPadding(controller.address),
-  });
-
-  useEffect(() => {
-    if (claimData) {
-      onClaim({
-        code: ResponseCodes.SUCCESS,
-        transaction_hash: claimData.claimStarterpack,
-      });
-    }
-  }, [claimData, onClaim]);
+  const { data: accountData, isLoading: accountLoading } = useAccountInfoQuery(
+    {
+      address: addAddressPadding(controller?.address),
+    },
+    { enabled: !!controller },
+  );
 
   useEffect(() => {
     if (starterData) {
@@ -209,42 +240,103 @@ export const StarterPackEmbedded = ({
       });
 
       setNonfungibles(nft);
-    }
-  }, [setNonfungibles, starterData]);
 
-  if (claimError) {
+      const { maxIssuance, issuance } = starterData.game.starterPack;
+      setRemaining(maxIssuance - issuance);
+    }
+  }, [setNonfungibles, setRemaining, starterData]);
+
+  if (!starterData) {
+    return <></>;
+  }
+
+  if (claimData) {
     return (
-      <Container>
-        <Text>{`${claimError}`}</Text>
-      </Container>
+      <ClaimSuccess
+        img={starterData?.game.banner.uri}
+        url={"https://briq.construction"}
+        fullPage={fullPage}
+      />
     );
   }
 
   return (
-    <Container>
+    <Container position={fullPage ? "relative" : "fixed"}>
       <Header />
-      <Banner
-        icon={remoteSvgIcon(starterData?.game.icon.uri, "30px", "white")}
-        title={starterData?.game.starterPack.name}
-        description="You will receive the following items"
-      />
-      <VStack w="full" borderRadius="8px" overflow="hidden">
-        {nonfungibles.length != 0 && (
-          <StarterPackCarousel nonfungibles={nonfungibles} />
-        )}
-      </VStack>
-      <Footer
-        confirmText="Claim"
-        isDisabled={!!starterError}
-        isLoading={claimLoading || starterLoading || accountLoading}
-        onConfirm={() => {
-          claimMutate({
-            id: starterData.game?.starterPack?.id,
-            account: accountData.accounts.edges?.[0]?.node.id,
-          });
-        }}
-        showCancel={false}
-      />
+      <BannerImage imgSrc={starterData?.game.banner.uri} obscuredWidth="0px" />
+      {claimError && (
+        // HACK: assuming error is "already claimed"
+        <>
+          <VStack spacing="18px" pt="36px" pb="24px">
+            <Circle size="48px" bgColor="gray.700">
+              <SparkleColored boxSize="30px" />
+            </Circle>
+            <Text fontWeight="bold" fontSize="17px">
+              {"You've already claimed this Starterpack"}
+            </Text>
+            <Text fontSize="12px" color="whiteAlpha.600" textAlign="center">
+              Thanks for participating!
+            </Text>
+          </VStack>
+        </>
+      )}
+
+      {!claimData && !claimError && (
+        <>
+          <VStack spacing="18px" pt="36px" pb="24px">
+            <HStack spacing="14px">
+              <Circle size="48px" bgColor="gray.700">
+                <StarterpackIcon boxSize="30px" />
+              </Circle>
+              <Ellipses />
+              <Circle size="48px" bgColor="gray.700">
+                {remoteSvgIcon(starterData?.game.icon.uri, "30px", "white")}
+              </Circle>
+            </HStack>
+            <Text fontWeight="bold" fontSize="17px">
+              Claim Starterpack
+            </Text>
+            <Text fontSize="12px" color="whiteAlpha.600" textAlign="center">
+              You will receive the following items.
+            </Text>
+          </VStack>
+          <VStack w="full" borderRadius="8px" overflow="hidden">
+            {nonfungibles.length != 0 && (
+              <StarterPackCarousel nonfungibles={nonfungibles} />
+            )}
+            <Spacer minHeight="10px" />
+            <Divider bgColor="gray.400" />
+            <HStack w="full" px="12px" fontSize="10px">
+              <Text
+                variant="ibm-upper-bold"
+                color={remaining > 0 ? "green.400" : "red.200"}
+              >
+                {remaining} remaining
+              </Text>
+              <Spacer />
+              <Text variant="ibm-upper-bold">FREE</Text>
+            </HStack>
+          </VStack>
+          <Footer
+            confirmText={remaining === 0 ? "OUT OF STOCK" : "CLAIM"}
+            isDisabled={!!starterError || remaining === 0}
+            isLoading={claimLoading || starterLoading || accountLoading}
+            onConfirm={() => {
+              if (controller) {
+                claimMutate({
+                  id: starterData.game?.starterPack?.id,
+                  account: accountData.accounts.edges?.[0]?.node.id,
+                });
+                return;
+              }
+
+              onClaim();
+            }}
+            showCancel={false}
+            floatBottom={!fullPage}
+          />
+        </>
+      )}
     </Container>
   );
 };

@@ -1,8 +1,8 @@
-import { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/router";
+import { useEffect, useState, useCallback, ReactNode } from "react";
 import { Formik, Form, Field, FormikState } from "formik";
 import { css } from "@emotion/react";
 import {
+  Flex,
   Button,
   Input,
   InputProps,
@@ -16,6 +16,8 @@ import {
   InputGroup,
   useDisclosure,
   InputRightElement,
+  StyleProps,
+  useInterval,
 } from "@chakra-ui/react";
 import {
   DiscordRevokeDocument,
@@ -23,6 +25,9 @@ import {
   DeployAccountDocument,
   FinalizeRegistrationDocument,
   useAccountQuery,
+  useStarterPackQuery,
+  StarterPackQuery,
+  AccountDocument,
 } from "generated/graphql";
 import { useDebounce } from "hooks/debounce";
 import { constants, ec, KeyPair } from "starknet";
@@ -44,10 +49,16 @@ import { Status } from "utils/account";
 import { Authenticate as AuthModal } from "./Authenticate";
 import { DrawerWrapper } from "components/DrawerWrapper";
 import { useWhitelist } from "hooks/whitelist";
+import SparkleIcon from "@cartridge/ui/components/icons/SparkleOutline";
+import OlmecIcon from "@cartridge/ui/components/icons/Olmec";
+import BannerImage from "./BannerImage";
+import Ellipses from "./Ellipses";
+import { ClaimSuccess } from "./StarterPack";
 
 export const Signup = ({
   fullPage = false,
   prefilledName = "",
+  starterPackId,
   showLogin,
   onController,
   onComplete,
@@ -55,6 +66,7 @@ export const Signup = ({
 }: {
   fullPage?: boolean;
   prefilledName?: string;
+  starterPackId?: string;
   showLogin: () => void;
   onController?: (controller: Controller) => void;
   onComplete?: () => void;
@@ -63,9 +75,12 @@ export const Signup = ({
   const [name, setName] = useState(prefilledName);
   const [keypair, setKeypair] = useState<KeyPair>();
   const [nameError, setNameError] = useState("");
+  const [selectedName, setSelectedName] = useState<string>();
   const [isRegistering, setIsRegistering] = useState<boolean>(false);
   const [canContinue, setCanContinue] = useState(false);
   const [dismissed, setDismissed] = useState<boolean>(false);
+  const [claimSuccess, setClaimSuccess] = useState<boolean>(false);
+
   const isIframe =
     typeof window !== "undefined" ? window.top !== window.self : false;
   const { web3AuthEnabled } = useWhitelist();
@@ -90,11 +105,82 @@ export const Signup = ({
   } = useAccountQuery(
     { id: debouncedName },
     {
-      enabled: !!(debouncedName && debouncedName.length >= 3),
-      retry: isRegistering,
-      retryDelay: 1000,
+      enabled: !!(debouncedName && debouncedName.length >= 3) && !isRegistering,
+      retry: false,
     },
   );
+
+  const {
+    data: starterData,
+    error: starterError,
+    isLoading: starterLoading,
+  } = useStarterPackQuery(
+    {
+      id: starterPackId,
+    },
+    { enabled: !!starterPackId && !isRegistering },
+  );
+
+  const remaining = starterData
+    ? starterData.game.starterPack.maxIssuance -
+      starterData.game.starterPack.issuance
+    : 0;
+
+  const { data: accountCreatedData } = useAccountQuery(
+    { id: selectedName },
+    {
+      enabled: isRegistering,
+      refetchInterval: (data) => (!data ? 1000 : undefined),
+      refetchIntervalInBackground: true,
+    },
+  );
+
+  useEffect(() => {
+    if (accountCreatedData) {
+      const {
+        account: {
+          credential: { id: credentialId },
+          contractAddress: address,
+        },
+      } = accountCreatedData;
+
+      const controller = new Controller(keypair, address, credentialId);
+
+      if (onController) onController(controller);
+
+      controller.account(constants.StarknetChainId.TESTNET).status =
+        Status.DEPLOYING;
+      client
+        .request(DeployAccountDocument, {
+          id: debouncedName,
+          chainId: "starknet:SN_GOERLI",
+          starterpackIds: starterData?.game?.starterPack?.chainID?.includes(
+            "SN_GOERLI",
+          )
+            ? [starterData?.game?.starterPack?.id]
+            : undefined,
+        })
+        .then(() => {
+          controller.account(constants.StarknetChainId.TESTNET).sync();
+        });
+
+      controller.account(constants.StarknetChainId.MAINNET).status =
+        Status.DEPLOYING;
+      client
+        .request(DeployAccountDocument, {
+          id: debouncedName,
+          chainId: "starknet:SN_MAIN",
+          starterpackIds: starterData?.game?.starterPack?.chainID?.includes(
+            "SN_MAIN",
+          )
+            ? [starterData?.game?.starterPack?.id]
+            : undefined,
+        })
+        .then(() => {
+          controller.account(constants.StarknetChainId.MAINNET).sync();
+        });
+    }
+  }, [accountCreatedData, keypair, onController]);
 
   // handle username input events
   useEffect(() => {
@@ -119,42 +205,18 @@ export const Signup = ({
     }
   }, [error, accountData, debouncing, dismissed, onDrawerOpen]);
 
-  // handle finalizing account
-  useEffect(() => {
-    if (accountData && isRegistering) {
-      const {
-        account: {
-          credential: { id: credentialId },
-          contractAddress: address,
-        },
-      } = accountData;
-
-      const controller = new Controller(keypair, address, credentialId);
-      if (onController) {
-        onController(controller);
-      }
-
-      controller.account(constants.StarknetChainId.TESTNET).status =
-        Status.DEPLOYING;
-      client
-        .request(DeployAccountDocument, {
-          id: debouncedName,
-          chainId: "starknet:SN_GOERLI",
-        })
-        .then(() => {
-          controller.account(constants.StarknetChainId.TESTNET).sync();
-        });
-    }
-  }, [accountData, isRegistering, debouncedName, keypair, onController]);
-
   const onContinue = useCallback(async () => {
     const keypair = ec.genKeyPair();
     const deviceKey = ec.getStarkKey(keypair);
 
-    setKeypair(keypair);
     setIsRegistering(true);
-    onAuthOpen();
+    setKeypair(keypair);
+    setSelectedName(debouncedName);
 
+    // due to same origin restriction, if we're in iframe, pop up a
+    // window to continue webauthn registration. otherwise,
+    // display modal overlay. in either case, account is created in
+    // authenticate component, so we poll and then deploy
     if (isIframe) {
       PopupCenter(
         `/authenticate?name=${encodeURIComponent(
@@ -164,8 +226,10 @@ export const Signup = ({
         480,
         640,
       );
+    } else {
+      onAuthOpen();
     }
-  }, [debouncedName, isIframe, onAuthOpen]);
+  }, [debouncedName, starterData, isIframe, onAuthOpen, onController]);
 
   const validate = (values: { name: string }) => {
     setCanContinue(false);
@@ -183,12 +247,28 @@ export const Signup = ({
   };
 
   if (isRegistering && isIframe) {
-    return <Continue />;
+    return <Continue position={fullPage ? "relative" : "fixed"} />;
+  }
+
+  if (claimSuccess) {
+    return (
+      <ClaimSuccess
+        img={starterData?.game.banner.uri}
+        url={"https://briq.construction"}
+        fullPage={fullPage}
+      />
+    );
   }
 
   return (
     <Container gap="18px" position={fullPage ? "relative" : "fixed"}>
       <Header onClose={onCancel} />
+      {starterData && remaining > 0 && (
+        <BannerImage
+          imgSrc={starterData?.game.banner.uri}
+          obscuredWidth="0px"
+        />
+      )}
       <HStack spacing="14px" pt="36px">
         <Circle size="48px" bgColor="gray.700">
           <JoystickIcon boxSize="30px" />
@@ -305,8 +385,31 @@ export const Signup = ({
               onDrawerClose();
             }}
           >
-            <VStack gap="24px">
-              <HStack>
+            <VStack gap="14px" color="whiteAlpha.600" align="flex-start">
+              {starterData && remaining > 0 && (
+                <>
+                  <HStack gap="10px">
+                    {starterData.game.starterPack.starterPackTokens.map(
+                      (data, key) => (
+                        <ImageFrame
+                          key={key}
+                          bgImage={`url(${data.token.thumbnail.uri})`}
+                        />
+                      ),
+                    )}
+                    <ImageFrame>
+                      <OlmecIcon boxSize="30px" />
+                    </ImageFrame>
+                  </HStack>
+                  <HStack align="flex-start">
+                    <SparkleIcon />
+                    <Text fontSize="12px" color="whiteAlpha.600">
+                      Claim Starterpack
+                    </Text>
+                  </HStack>
+                </>
+              )}
+              <HStack align="flex-start">
                 <LockIcon />
                 <Text fontSize="12px" color="whiteAlpha.600">
                   By continuing you are agreeing to Cartridge&apos;s{" "}
@@ -332,7 +435,13 @@ export const Signup = ({
                   w="full"
                   gap="10px"
                   onClick={() => onContinue()}
-                  isDisabled={!!nameError || debouncing || name?.length === 0}
+                  isDisabled={
+                    isRegistering ||
+                    !canContinue ||
+                    !!nameError ||
+                    debouncing ||
+                    name?.length === 0
+                  }
                 >
                   <FingerprintIcon boxSize="20px" />
                   Continue
@@ -374,7 +483,13 @@ export const Signup = ({
                         onComplete();
                       }
                     }}
-                    isDisabled={!!nameError || debouncing || name?.length === 0}
+                    isDisabled={
+                      isRegistering ||
+                      !canContinue ||
+                      !!nameError ||
+                      debouncing ||
+                      name?.length === 0
+                    }
                   />
                 )}
               </VStack>
@@ -388,18 +503,40 @@ export const Signup = ({
         onClose={onAuthClose}
         name={debouncedName}
         pubkey={keypair ? ec.getStarkKey(keypair) : ""}
-        onComplete={onComplete}
+        onComplete={() => {
+          if (starterPackId) {
+            setClaimSuccess(true);
+            return;
+          }
+
+          onComplete();
+        }}
       />
     </Container>
   );
 };
 
-const Ellipses = () => {
-  return (
-    <HStack spacing="3px">
-      <Circle size="4px" bgColor="gray.400" />
-      <Circle size="4px" bgColor="gray.400" />
-      <Circle size="4px" bgColor="gray.400" />
-    </HStack>
-  );
-};
+const ImageFrame = ({
+  bgImage,
+  children,
+  ...rest
+}: {
+  bgImage?: string;
+  children?: ReactNode;
+} & StyleProps) => (
+  <Flex
+    align="center"
+    justify="center"
+    boxSize="48px"
+    border="1px solid"
+    borderColor="green.400"
+    borderRadius="6px"
+    bgPosition="center"
+    bgRepeat="no-repeat"
+    bgSize="contain"
+    bgColor="gray.600"
+    bgImage={bgImage}
+  >
+    {children}
+  </Flex>
+);

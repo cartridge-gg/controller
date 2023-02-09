@@ -3,6 +3,7 @@ import {
   BeginRegistrationDocument,
   FinalizeLoginDocument,
   FinalizeRegistrationDocument,
+  AccountDocument,
 } from "generated/graphql";
 
 import { client, ENDPOINT } from "utils/graphql";
