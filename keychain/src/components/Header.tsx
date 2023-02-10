@@ -10,6 +10,7 @@ import {
   Text,
   Container as ChakraContainer,
   StyleProps,
+  Tooltip,
 } from "@chakra-ui/react";
 
 import { Logo } from "@cartridge/ui/src/components/brand/Logo";
@@ -115,7 +116,7 @@ export const Header = ({
     const fill = muted ? "gray.200" : "brand";
 
     return (
-      <Container height="54px">
+      <Container height="54px" bgColor="gray.700">
         <HStack w="full" justify="space-between">
           <Spacer maxW="42px" />
           <HStack spacing="0">
@@ -150,7 +151,7 @@ export const Header = ({
   }
 
   return (
-    <Container height="50px">
+    <Container height="50px" bgColor="gray.700">
       <HStack w="full">
         <HStack spacing="0">
           <Logo fill="brand" w="24px" mr="15px" />
@@ -168,28 +169,30 @@ export const Header = ({
             </HeaderItem>
           </Box>
           {chainId && (
-            <Box
-              onClick={() => {
-                navigator.clipboard.writeText(address);
-              }}
-              _hover={{
-                cursor: "pointer",
-              }}
-            >
-              <HeaderItem bgColor="gray.500">
-                {loading ? (
-                  <Loading fill="white" width="12px" height="12px" />
-                ) : (
-                  <Box
-                    w="18px"
-                    h="18px"
-                    dangerouslySetInnerHTML={
-                      !!current?.svg ? { __html: current?.svg } : undefined
-                    }
-                  />
-                )}
-              </HeaderItem>
-            </Box>
+            <Tooltip label="Click to copy address" hasArrow arrowSize={15}>
+              <Box
+                onClick={() => {
+                  navigator.clipboard.writeText(address);
+                }}
+                _hover={{
+                  cursor: "pointer",
+                }}
+              >
+                <HeaderItem bgColor="gray.500">
+                  {loading ? (
+                    <Loading fill="white" width="12px" height="12px" />
+                  ) : (
+                    <Box
+                      w="18px"
+                      h="18px"
+                      dangerouslySetInnerHTML={
+                        !!current?.svg ? { __html: current?.svg } : undefined
+                      }
+                    />
+                  )}
+                </HeaderItem>
+              </Box>
+            </Tooltip>
           )}
           <Button
             h="30px"
@@ -209,7 +212,7 @@ export const Header = ({
 
 export const SignupHeader = ({ children }: { children: ReactNode }) => {
   return (
-    <Container height="64px">
+    <Container height="64px" bgColor="gray.700">
       <HStack w="full" h="64px">
         <NextLink href="/">
           <Link>
