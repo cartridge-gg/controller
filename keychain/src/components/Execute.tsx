@@ -115,12 +115,16 @@ const Execute = ({
       );
     }
 
-    account
-      .estimateInvokeFee(calls, transactionsDetail)
-      .then((fees) => {
-        setFees({ base: fees.overall_fee, max: fees.suggestedMaxFee });
-      })
-      .catch((e) => setError(e));
+    // account
+    //   .estimateInvokeFee(calls, transactionsDetail)
+    //   .then((fees) => {
+    //     setFees({ base: fees.overall_fee, max: fees.suggestedMaxFee });
+    //   })
+    //   .catch((e) => setError(e));
+    setFees({
+      base: number.toBN("1000000000000000000000000", "hex"),
+      max: number.toBN("10000000000000000000000000", "hex"),
+    });
   }, [
     account,
     controller,
@@ -137,6 +141,7 @@ const Execute = ({
     const response = await account.execute(calls, null, {
       maxFee: fees.max,
     });
+    console.log(response.transaction_hash);
     onExecute({
       transaction_hash: response.transaction_hash,
       code: ResponseCodes.SUCCESS,
