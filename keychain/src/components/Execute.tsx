@@ -22,7 +22,7 @@ import {
   ResponseCodes,
 } from "@cartridge/controller";
 import Container from "./Container";
-import { Status } from "utils/account";
+import Account, { Status } from "utils/account";
 import { Header } from "./Header";
 
 export const CONTRACT_ETH =
@@ -56,7 +56,8 @@ const Execute = ({
   const [ethBalance, setEthBalance] = useState<string>();
   const [ethApproved, setEthApproved] = useState<string>();
 
-  const account = controller.account(chainId);
+  const account: Account = controller.account(chainId);
+
   const calls = useMemo(() => {
     return Array.isArray(transactions) ? transactions : [transactions];
   }, [transactions]);
@@ -96,7 +97,7 @@ const Execute = ({
       });
       return;
     }
-
+    console.log(calls);
     const approve: StarknetCall[] = calls.filter(
       (call) =>
         call.contractAddress === CONTRACT_ETH && call.entrypoint === "approve",
@@ -116,11 +117,21 @@ const Execute = ({
     }
 
     account
-      .estimateInvokeFee(calls, transactionsDetail)
+      .estimateTest(calls, transactionsDetail)
       .then((fees) => {
-        setFees({ base: fees.overall_fee, max: fees.suggestedMaxFee });
+        console.log({ fees });
       })
-      .catch((e) => setError(e));
+      .then((e) => {
+        console.log("fucke");
+        console.log;
+      });
+
+    // account
+    //   .estimateInvokeFee(calls, transactionsDetail)
+    //   .then((fees) => {
+    //     setFees({ base: fees.overall_fee, max: fees.suggestedMaxFee });
+    //   })
+    //   .catch((e) => setError(e));
   }, [
     account,
     controller,
@@ -137,6 +148,7 @@ const Execute = ({
     const response = await account.execute(calls, null, {
       maxFee: fees.max,
     });
+
     onExecute({
       transaction_hash: response.transaction_hash,
       code: ResponseCodes.SUCCESS,

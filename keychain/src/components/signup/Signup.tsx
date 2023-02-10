@@ -164,21 +164,21 @@ export const Signup = ({
           controller.account(constants.StarknetChainId.TESTNET).sync();
         });
 
-      controller.account(constants.StarknetChainId.MAINNET).status =
-        Status.DEPLOYING;
-      client
-        .request(DeployAccountDocument, {
-          id: debouncedName,
-          chainId: "starknet:SN_MAIN",
-          starterpackIds: starterData?.game?.starterPack?.chainID?.includes(
-            "SN_MAIN",
-          )
-            ? [starterData?.game?.starterPack?.id]
-            : undefined,
-        })
-        .then(() => {
-          controller.account(constants.StarknetChainId.MAINNET).sync();
-        });
+      // controller.account(constants.StarknetChainId.MAINNET).status =
+      //   Status.DEPLOYING;
+      // client
+      //   .request(DeployAccountDocument, {
+      //     id: debouncedName,
+      //     chainId: "starknet:SN_MAIN",
+      //     starterpackIds: starterData?.game?.starterPack?.chainID?.includes(
+      //       "SN_MAIN",
+      //     )
+      //       ? [starterData?.game?.starterPack?.id]
+      //       : undefined,
+      //   })
+      //   .then(() => {
+      //     controller.account(constants.StarknetChainId.MAINNET).sync();
+      //   });
     }
   }, [accountCreatedData, keypair, onController]);
 
@@ -508,8 +508,6 @@ export const Signup = ({
             setClaimSuccess(true);
             return;
           }
-
-          onComplete();
         }}
       />
     </Container>

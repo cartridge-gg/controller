@@ -67,7 +67,10 @@ export class WebauthnSigner implements SignerInterface {
     return this.publicKey;
   }
 
-  public async sign(challenge: BufferSource): Promise<RawAssertion> {
+  public async sign(
+    challenge: BufferSource,
+    userVerification: "required" | "preferred" | "discouraged",
+  ): Promise<RawAssertion> {
     return (await navigator.credentials.get({
       publicKey: {
         challenge,
@@ -79,7 +82,7 @@ export class WebauthnSigner implements SignerInterface {
             id: base64url.toBuffer(this.credentialId),
           },
         ],
-        userVerification: "required",
+        userVerification,
       },
     })) as unknown as PublicKeyCredential & {
       response: AuthenticatorAssertionResponse;
@@ -120,7 +123,7 @@ export class WebauthnSigner implements SignerInterface {
     //   challenge = Buffer.concat([challenge, transactionsDetail.ext]);
     // }
 
-    const assertion = await this.sign(challenge);
+    const assertion = await this.sign(challenge, "discouraged");
     return formatAssertion(assertion);
   }
 
@@ -133,7 +136,7 @@ export class WebauthnSigner implements SignerInterface {
       msgHash.slice(2).padStart(64, "0").slice(0, 64),
       "hex",
     );
-    const assertion = await this.sign(challenge);
+    const assertion = await this.sign(challenge, "discouraged");
     return formatAssertion(assertion);
   }
 
@@ -159,7 +162,7 @@ export class WebauthnSigner implements SignerInterface {
       "hex",
     );
 
-    const assertion = await this.sign(challenge);
+    const assertion = await this.sign(challenge, "discouraged");
     return formatAssertion(assertion);
   }
 

@@ -268,6 +268,22 @@ class Account extends BaseAccount {
     return res;
   }
 
+  async estimateTest(
+    calls: Call[],
+    details: EstimateFeeDetails = {},
+  ): Promise<EstimateFee> {
+    const pendingRegister = Storage.get(
+      selectors[VERSION].register(this.address, this._chainId),
+    );
+    console.log(pendingRegister);
+    const res = await this.rpc.getEstimateFee(
+      pendingRegister.invoke.invocation,
+      pendingRegister.invoke.details,
+    );
+    console.log({ res });
+    return;
+  }
+
   async estimateInvokeFee(
     calls: Call[],
     details: EstimateFeeDetails = {},
@@ -410,7 +426,7 @@ class Account extends BaseAccount {
         .match(/.{1,2}/g)
         .map((byte) => parseInt(byte, 16)),
     );
-    const assertion = await this.webauthn.signer.sign(challenge);
+    const assertion = await this.webauthn.signer.sign(challenge, "discouraged");
     const signature = formatAssertion(assertion);
 
     const invoke = {

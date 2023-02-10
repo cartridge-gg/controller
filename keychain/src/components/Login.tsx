@@ -107,6 +107,7 @@ export const Login = ({
 
       const assertion = await signer.sign(
         base64url.toBuffer(beginLoginData.beginLogin.publicKey.challenge),
+        "required",
       );
 
       const res = await onLoginFinalize(assertion);

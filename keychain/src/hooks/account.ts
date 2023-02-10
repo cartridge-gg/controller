@@ -66,6 +66,7 @@ export const onCreateBegin = async (name: string): Promise<Credentials> => {
   const hasPlatformAuthenticator =
     await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
   const { data } = await beginRegistration(name);
+  console.log({ data });
   const credentials = await createCredentials(
     name,
     data.beginRegistration,
