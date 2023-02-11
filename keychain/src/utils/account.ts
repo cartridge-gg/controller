@@ -235,7 +235,7 @@ class Account extends BaseAccount {
           .add(number.toBN(2))
           .toString(),
       });
-
+      console.log({ register_hash: responses[0].transaction_hash });
       this.gateway
         .waitForTransaction(responses[1].transaction_hash, 1000, [
           "ACCEPTED_ON_L1",

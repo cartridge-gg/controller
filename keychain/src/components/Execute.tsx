@@ -89,6 +89,12 @@ const Execute = ({
       return;
     }
 
+    setFees({
+      base: number.toBN("10000000000000000000000"),
+      max: number.toBN("10000000000000000000000"),
+    });
+    return;
+
     if (account.status === Status.REGISTERED && transactionsDetail.maxFee) {
       setFees({
         base: number.toBN(transactionsDetail.maxFee),
@@ -137,6 +143,7 @@ const Execute = ({
     const response = await account.execute(calls, null, {
       maxFee: fees.max,
     });
+
     onExecute({
       transaction_hash: response.transaction_hash,
       code: ResponseCodes.SUCCESS,
