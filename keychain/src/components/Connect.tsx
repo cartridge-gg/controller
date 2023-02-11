@@ -15,23 +15,21 @@ import { motion } from "framer-motion";
 import { Status } from "utils/account";
 
 const Connect = ({
-  controller,
   chainId,
   policys,
   origin,
   onConnect,
   onCancel,
 }: {
-  controller: Controller;
   chainId: constants.StarknetChainId;
   policys: Policy[];
   origin: string;
   onConnect: ({
-    address,
     policies,
+    maxFee,
   }: {
-    address: string;
     policies: Policy[];
+    maxFee: string;
   }) => void;
   onCancel: (error: Error) => void;
 }) => {
@@ -41,14 +39,13 @@ const Connect = ({
     async (values, actions) => {
       try {
         const approvals = policys.filter((_, i) => values[i]);
-        controller.approve(origin, approvals, maxFee);
-        onConnect({ address: controller.address, policies: approvals });
+        onConnect({ policies: approvals, maxFee });
       } catch (e) {
         console.error(e);
       }
       actions.setSubmitting(false);
     },
-    [origin, onConnect, policys, controller, maxFee],
+    [origin, onConnect, policys, maxFee],
   );
 
   return (
