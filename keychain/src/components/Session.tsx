@@ -6,7 +6,7 @@ import { Policy } from "@cartridge/controller";
 import { CallToggle, MaxFee } from "./Call";
 import Footer from "./Footer";
 import { constants } from "starknet";
-
+import { useState } from "react";
 type SessionProps = {
   chainId: constants.StarknetChainId;
   action: string;
@@ -58,6 +58,7 @@ const Session = ({
   onSubmit,
   onCancel,
 }: SessionProps) => {
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const initialValues = policies.reduce(
     (prev, _, i) => ({ ...prev, [i]: true }),
     {},
@@ -68,7 +69,10 @@ const Session = ({
       <Formik
         enableReinitialize={true}
         initialValues={initialValues}
-        onSubmit={onSubmit}
+        onSubmit={(values, actions) => {
+          setIsSubmitting(true);
+          onSubmit(values, actions);
+        }}
       >
         {(props) => (
           <Form
@@ -120,7 +124,7 @@ const Session = ({
               )}
             </Flex>
             <Footer
-              isLoading={props.isSubmitting || isLoading}
+              isLoading={isSubmitting || isLoading}
               onCancel={onCancel}
               confirmText={action}
             />

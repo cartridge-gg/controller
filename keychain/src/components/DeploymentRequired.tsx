@@ -48,7 +48,7 @@ const DeploymentRequired = ({
         onClose={() =>
           onClose({
             code: ResponseCodes.CANCELED,
-            message: "Cancelled",
+            message: "Canceled",
           })
         }
       />
