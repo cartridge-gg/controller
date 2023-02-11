@@ -2996,7 +2996,7 @@ export type StarterPack = Node & {
   prerequisitesQuests?: Maybe<Array<Quest>>;
   starterPackFungibles?: Maybe<Array<StarterPackContract>>;
   starterPackTokens?: Maybe<Array<StarterPackToken>>;
-  toIssueTokens?: Maybe<Scalars['BigInt']>;
+  toIssueTokens?: Maybe<Array<Maybe<Scalars['BigInt']>>>;
   tokens?: Maybe<Array<Token>>;
 };
 
@@ -3417,6 +3417,7 @@ export type Transaction = Node & {
   calldata?: Maybe<Array<Scalars['String']>>;
   contract: Contract;
   contractID: Scalars['ID'];
+  createdAt?: Maybe<Scalars['Time']>;
   deployedContract?: Maybe<Contract>;
   entryPointSelector?: Maybe<Scalars['String']>;
   events?: Maybe<Array<Event>>;
@@ -3430,6 +3431,7 @@ export type Transaction = Node & {
   starterPackClaims?: Maybe<Array<AccountStarterPack>>;
   to?: Maybe<Array<Contract>>;
   transactionHash: Scalars['String'];
+  updatedAt: Scalars['Time'];
 };
 
 /** A connection to a list of items. */
@@ -3464,7 +3466,9 @@ export type TransactionOrder = {
 
 /** Properties by which Transaction connections can be ordered. */
 export enum TransactionOrderField {
-  Nonce = 'NONCE'
+  CreatedAt = 'CREATED_AT',
+  Nonce = 'NONCE',
+  UpdatedAt = 'UPDATED_AT'
 }
 
 export type TransactionReceipt = Node & {
@@ -3603,6 +3607,17 @@ export type TransactionWhereInput = {
   contractIDLTE?: InputMaybe<Scalars['ID']>;
   contractIDNEQ?: InputMaybe<Scalars['ID']>;
   contractIDNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars['Time']>;
+  createdAtGT?: InputMaybe<Scalars['Time']>;
+  createdAtGTE?: InputMaybe<Scalars['Time']>;
+  createdAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtIsNil?: InputMaybe<Scalars['Boolean']>;
+  createdAtLT?: InputMaybe<Scalars['Time']>;
+  createdAtLTE?: InputMaybe<Scalars['Time']>;
+  createdAtNEQ?: InputMaybe<Scalars['Time']>;
+  createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtNotNil?: InputMaybe<Scalars['Boolean']>;
   /** entry_point_selector field predicates */
   entryPointSelector?: InputMaybe<Scalars['String']>;
   entryPointSelectorContains?: InputMaybe<Scalars['String']>;
@@ -3702,6 +3717,15 @@ export type TransactionWhereInput = {
   transactionHashLTE?: InputMaybe<Scalars['String']>;
   transactionHashNEQ?: InputMaybe<Scalars['String']>;
   transactionHashNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars['Time']>;
+  updatedAtGT?: InputMaybe<Scalars['Time']>;
+  updatedAtGTE?: InputMaybe<Scalars['Time']>;
+  updatedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  updatedAtLT?: InputMaybe<Scalars['Time']>;
+  updatedAtLTE?: InputMaybe<Scalars['Time']>;
+  updatedAtNEQ?: InputMaybe<Scalars['Time']>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
 };
 
 export type TwitterQuest = Node & {
@@ -3838,26 +3862,12 @@ export type CheckTwitterQuestsMutationVariables = Exact<{
 
 export type CheckTwitterQuestsMutation = { __typename?: 'Mutation', checkTwitterQuests: boolean };
 
-export type BeginLoginMutationVariables = Exact<{
-  id: Scalars['String'];
+export type BalanceQueryVariables = Exact<{
+  tokenAccountId: Scalars['ID'];
 }>;
 
 
-export type BeginLoginMutation = { __typename?: 'Mutation', beginLogin: any };
-
-export type FinalizeLoginMutationVariables = Exact<{
-  credentials: Scalars['String'];
-}>;
-
-
-export type FinalizeLoginMutation = { __typename?: 'Mutation', finalizeLogin: boolean };
-
-export type DiscordRevokeMutationVariables = Exact<{
-  token: Scalars['String'];
-}>;
-
-
-export type DiscordRevokeMutation = { __typename?: 'Mutation', discordRevoke: boolean };
+export type BalanceQuery = { __typename?: 'Query', balance?: { __typename?: 'Balance', balance: any } | null };
 
 export type BeginRegistrationMutationVariables = Exact<{
   id: Scalars['String'];
@@ -3896,6 +3906,27 @@ export type ContractTypeQueryVariables = Exact<{
 
 
 export type ContractTypeQuery = { __typename?: 'Query', contract?: { __typename?: 'Contract', type: ContractType } | null };
+
+export type BeginLoginMutationVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type BeginLoginMutation = { __typename?: 'Mutation', beginLogin: any };
+
+export type FinalizeLoginMutationVariables = Exact<{
+  credentials: Scalars['String'];
+}>;
+
+
+export type FinalizeLoginMutation = { __typename?: 'Mutation', finalizeLogin: boolean };
+
+export type DiscordRevokeMutationVariables = Exact<{
+  token: Scalars['String'];
+}>;
+
+
+export type DiscordRevokeMutation = { __typename?: 'Mutation', discordRevoke: boolean };
 
 export type StarterPackQueryVariables = Exact<{
   id: Scalars['ID'];
@@ -4097,48 +4128,47 @@ export const useCheckTwitterQuestsMutation = <
       useFetchData<CheckTwitterQuestsMutation, CheckTwitterQuestsMutationVariables>(CheckTwitterQuestsDocument),
       options
     );
-export const BeginLoginDocument = `
-    mutation BeginLogin($id: String!) {
-  beginLogin(id: $id)
+export const BalanceDocument = `
+    query balance($tokenAccountId: ID!) {
+  balance(id: $tokenAccountId) {
+    balance
+  }
 }
     `;
-export const useBeginLoginMutation = <
-      TError = unknown,
-      TContext = unknown
-    >(options?: UseMutationOptions<BeginLoginMutation, TError, BeginLoginMutationVariables, TContext>) =>
-    useMutation<BeginLoginMutation, TError, BeginLoginMutationVariables, TContext>(
-      ['BeginLogin'],
-      useFetchData<BeginLoginMutation, BeginLoginMutationVariables>(BeginLoginDocument),
+export const useBalanceQuery = <
+      TData = BalanceQuery,
+      TError = unknown
+    >(
+      variables: BalanceQueryVariables,
+      options?: UseQueryOptions<BalanceQuery, TError, TData>
+    ) =>
+    useQuery<BalanceQuery, TError, TData>(
+      ['balance', variables],
+      useFetchData<BalanceQuery, BalanceQueryVariables>(BalanceDocument).bind(null, variables),
       options
     );
-export const FinalizeLoginDocument = `
-    mutation FinalizeLogin($credentials: String!) {
-  finalizeLogin(credentials: $credentials)
-}
-    `;
-export const useFinalizeLoginMutation = <
-      TError = unknown,
-      TContext = unknown
-    >(options?: UseMutationOptions<FinalizeLoginMutation, TError, FinalizeLoginMutationVariables, TContext>) =>
-    useMutation<FinalizeLoginMutation, TError, FinalizeLoginMutationVariables, TContext>(
-      ['FinalizeLogin'],
-      useFetchData<FinalizeLoginMutation, FinalizeLoginMutationVariables>(FinalizeLoginDocument),
+
+useBalanceQuery.getKey = (variables: BalanceQueryVariables) => ['balance', variables];
+;
+
+export const useInfiniteBalanceQuery = <
+      TData = BalanceQuery,
+      TError = unknown
+    >(
+      variables: BalanceQueryVariables,
+      options?: UseInfiniteQueryOptions<BalanceQuery, TError, TData>
+    ) =>{
+    const query = useFetchData<BalanceQuery, BalanceQueryVariables>(BalanceDocument)
+    return useInfiniteQuery<BalanceQuery, TError, TData>(
+      ['balance.infinite', variables],
+      (metaData) => query({...variables, ...(metaData.pageParam ?? {})}),
       options
-    );
-export const DiscordRevokeDocument = `
-    mutation DiscordRevoke($token: String!) {
-  discordRevoke(token: $token)
-}
-    `;
-export const useDiscordRevokeMutation = <
-      TError = unknown,
-      TContext = unknown
-    >(options?: UseMutationOptions<DiscordRevokeMutation, TError, DiscordRevokeMutationVariables, TContext>) =>
-    useMutation<DiscordRevokeMutation, TError, DiscordRevokeMutationVariables, TContext>(
-      ['DiscordRevoke'],
-      useFetchData<DiscordRevokeMutation, DiscordRevokeMutationVariables>(DiscordRevokeDocument),
-      options
-    );
+    )};
+
+
+useInfiniteBalanceQuery.getKey = (variables: BalanceQueryVariables) => ['balance.infinite', variables];
+;
+
 export const BeginRegistrationDocument = `
     mutation BeginRegistration($id: String!) {
   beginRegistration(id: $id)
@@ -4294,6 +4324,48 @@ export const useInfiniteContractTypeQuery = <
 useInfiniteContractTypeQuery.getKey = (variables: ContractTypeQueryVariables) => ['ContractType.infinite', variables];
 ;
 
+export const BeginLoginDocument = `
+    mutation BeginLogin($id: String!) {
+  beginLogin(id: $id)
+}
+    `;
+export const useBeginLoginMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<BeginLoginMutation, TError, BeginLoginMutationVariables, TContext>) =>
+    useMutation<BeginLoginMutation, TError, BeginLoginMutationVariables, TContext>(
+      ['BeginLogin'],
+      useFetchData<BeginLoginMutation, BeginLoginMutationVariables>(BeginLoginDocument),
+      options
+    );
+export const FinalizeLoginDocument = `
+    mutation FinalizeLogin($credentials: String!) {
+  finalizeLogin(credentials: $credentials)
+}
+    `;
+export const useFinalizeLoginMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<FinalizeLoginMutation, TError, FinalizeLoginMutationVariables, TContext>) =>
+    useMutation<FinalizeLoginMutation, TError, FinalizeLoginMutationVariables, TContext>(
+      ['FinalizeLogin'],
+      useFetchData<FinalizeLoginMutation, FinalizeLoginMutationVariables>(FinalizeLoginDocument),
+      options
+    );
+export const DiscordRevokeDocument = `
+    mutation DiscordRevoke($token: String!) {
+  discordRevoke(token: $token)
+}
+    `;
+export const useDiscordRevokeMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<DiscordRevokeMutation, TError, DiscordRevokeMutationVariables, TContext>) =>
+    useMutation<DiscordRevokeMutation, TError, DiscordRevokeMutationVariables, TContext>(
+      ['DiscordRevoke'],
+      useFetchData<DiscordRevokeMutation, DiscordRevokeMutationVariables>(DiscordRevokeDocument),
+      options
+    );
 export const StarterPackDocument = `
     query StarterPack($id: ID!) {
   game(id: $id) {

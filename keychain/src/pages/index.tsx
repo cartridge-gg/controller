@@ -15,7 +15,7 @@ import {
 } from "@cartridge/controller";
 import Connect from "components/Connect";
 import { Login } from "components/Login";
-import { Signup } from "components/signup";
+import { Quests, Signup } from "components/signup";
 import { Redeploy } from "components/Redeploy";
 import { Container as ChakraContainer } from "@chakra-ui/react";
 import { Header } from "components/Header";
@@ -184,10 +184,10 @@ const Index: NextPage = () => {
                   : [transactions];
                 const policies = calls.map(
                   (txn) =>
-                  ({
-                    target: txn.contractAddress,
-                    method: txn.entrypoint,
-                  } as Policy),
+                    ({
+                      target: txn.contractAddress,
+                      method: txn.entrypoint,
+                    } as Policy),
                 );
 
                 const missing = diff(policies, session.policies);
@@ -338,29 +338,46 @@ const Index: NextPage = () => {
     return (
       <Connect
         chainId={chainId}
-        controller={controller}
         origin={ctx.origin}
         policys={ctx.type === "connect" ? (ctx as Connect).policies : []}
         onConnect={async ({
-          address,
           policies,
+          maxFee,
         }: {
-          address: string;
           policies: Policy[];
+          maxFee: string;
         }) => {
           if (account.status === Status.COUNTERFACTUAL) {
             // TODO: Deploy?
-            ctx.resolve({ code: ResponseCodes.SUCCESS, address, policies });
+            ctx.resolve({
+              code: ResponseCodes.SUCCESS,
+              address: controller.address,
+              policies,
+            });
             return;
           }
 
           // This device needs to be registered, so do a webauthn signature request
           // for the register transaction during the connect flow.
           if (account.status === Status.DEPLOYED) {
-            await account.register();
+            try {
+              await account.register();
+            } catch (e) {
+              ctx.resolve({
+                code: ResponseCodes.CANCELED,
+                message: "Canceled",
+              } as Error);
+              return;
+            }
           }
 
-          ctx.resolve({ code: ResponseCodes.SUCCESS, address, policies });
+          controller.approve(ctx.origin, policies, maxFee);
+
+          ctx.resolve({
+            code: ResponseCodes.SUCCESS,
+            address: controller.address,
+            policies,
+          });
         }}
         onCancel={(error: Error) => ctx.resolve(error)}
       />

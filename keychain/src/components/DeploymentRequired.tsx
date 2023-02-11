@@ -42,7 +42,16 @@ const DeploymentRequired = ({
 
   return status === Status.DEPLOYING ? (
     <Container>
-      <Header onClose={close} />
+      <Header
+        chainId={chainId}
+        address={account.address}
+        onClose={() =>
+          onClose({
+            code: ResponseCodes.CANCELED,
+            message: "Canceled",
+          })
+        }
+      />
       <Banner
         icon={<Loading fill="white" />}
         title="Deploying your account"

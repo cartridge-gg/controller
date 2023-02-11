@@ -17,6 +17,7 @@ const login =
   ) => {
     const keypair = ec.genKeyPair();
     const controller = new Controller(keypair, address, credentialId, options);
+
     const { assertion } = await controller.account(chainId).register();
     Storage.set(selectors["0.0.3"].active(), address);
 
@@ -36,7 +37,7 @@ const login =
           signature: base64url(Buffer.from(assertion.response.signature)),
         },
       },
-      controller
+      controller,
     };
   };
 

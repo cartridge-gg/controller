@@ -1,11 +1,14 @@
 import {
   BeginLoginDocument,
   BeginRegistrationDocument,
+  FinalizeLoginDocument,
   FinalizeRegistrationDocument,
+  FinalizeLoginMutation,
 } from "generated/graphql";
 
 import { client, ENDPOINT } from "utils/graphql";
 import base64url from "base64url";
+import { RawAssertion } from "utils/webauthn";
 
 export interface CredentialDescriptor
   extends Omit<PublicKeyCredentialDescriptor, "id"> {
@@ -94,23 +97,27 @@ export const onCreateFinalize = async (
   });
 };
 
-// await client.request(FinalizeLoginDocument, {
-//   credentials: JSON.stringify({
-//     id: assertion.id,
-//     type: assertion.type,
-//     rawId: base64url(Buffer.from(assertion.rawId)),
-//     clientExtensionResults: assertion.getClientExtensionResults(),
-//     response: {
-//       authenticatorData: base64url(
-//         Buffer.from(assertion.response.authenticatorData),
-//       ),
-//       clientDataJSON: base64url(
-//         Buffer.from(assertion.response.clientDataJSON),
-//       ),
-//       signature: base64url(Buffer.from(assertion.response.signature)),
-//     },
-//   }),
-// });
+export const onLoginFinalize = async (
+  assertion: RawAssertion,
+): Promise<FinalizeLoginMutation> => {
+  return await client.request(FinalizeLoginDocument, {
+    credentials: JSON.stringify({
+      id: assertion.id,
+      type: assertion.type,
+      rawId: base64url(Buffer.from(assertion.rawId)),
+      clientExtensionResults: assertion.getClientExtensionResults(),
+      response: {
+        authenticatorData: base64url(
+          Buffer.from(assertion.response.authenticatorData),
+        ),
+        clientDataJSON: base64url(
+          Buffer.from(assertion.response.clientDataJSON),
+        ),
+        signature: base64url(Buffer.from(assertion.response.signature)),
+      },
+    }),
+  });
+};
 
 export const beginRegistration = async (name: string): Promise<any> => {
   return doXHR(

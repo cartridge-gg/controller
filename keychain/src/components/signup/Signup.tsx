@@ -26,6 +26,8 @@ import {
   FinalizeRegistrationDocument,
   useAccountQuery,
   useStarterPackQuery,
+  StarterPackQuery,
+  AccountDocument,
 } from "generated/graphql";
 import { useDebounce } from "hooks/debounce";
 import { constants, ec, KeyPair } from "starknet";
@@ -73,10 +75,10 @@ export const Signup = ({
   const [name, setName] = useState(prefilledName);
   const [keypair, setKeypair] = useState<KeyPair>();
   const [nameError, setNameError] = useState("");
+  const [selectedName, setSelectedName] = useState<string>();
   const [isRegistering, setIsRegistering] = useState<boolean>(false);
   const [canContinue, setCanContinue] = useState(false);
   const [dismissed, setDismissed] = useState<boolean>(false);
-  const [remaining, setRemaining] = useState<number>();
   const [claimSuccess, setClaimSuccess] = useState<boolean>(false);
 
   const isIframe =
@@ -100,13 +102,11 @@ export const Signup = ({
     error,
     isFetching,
     data: accountData,
-    refetch,
   } = useAccountQuery(
     { id: debouncedName },
     {
-      enabled: !!(debouncedName && debouncedName.length >= 3),
-      retry: isRegistering,
-      retryDelay: 1000,
+      enabled: !!(debouncedName && debouncedName.length >= 3) && !isRegistering,
+      retry: false,
     },
   );
 
@@ -118,46 +118,35 @@ export const Signup = ({
     {
       id: starterPackId,
     },
-    { enabled: !!starterPackId },
+    { enabled: !!starterPackId && !isRegistering },
+  );
+
+  const remaining = starterData
+    ? starterData.game.starterPack.maxIssuance -
+      starterData.game.starterPack.issuance
+    : 0;
+
+  const { data: accountCreatedData } = useAccountQuery(
+    { id: selectedName },
+    {
+      enabled: isRegistering,
+      refetchInterval: (data) => (!data ? 1000 : undefined),
+      refetchIntervalInBackground: true,
+    },
   );
 
   useEffect(() => {
-    if (starterData) {
-      const { maxIssuance, issuance } = starterData.game.starterPack;
-      setRemaining(maxIssuance - issuance);
-    }
-  }, [starterData]);
+    if (accountCreatedData) {
+      const {
+        account: {
+          credential: { id: credentialId },
+          contractAddress: address,
+        },
+      } = accountCreatedData;
 
-  // handle username input events
-  useEffect(() => {
-    if (debouncing) {
-      return;
-    }
-
-    if (error) {
-      if ((error as Error).message === "ent: account not found") {
-        setNameError("");
-        setCanContinue(true);
-        if (!dismissed) {
-          onDrawerOpen();
-        }
-      } else {
-        setNameError("An error occured.");
-        setCanContinue(false);
-      }
-    } else if (accountData?.account) {
-      setNameError("This account already exists.");
-      setCanContinue(false);
-    }
-  }, [error, accountData, debouncing, dismissed, onDrawerOpen]);
-
-  const deployAccount = useCallback(
-    (address: string, credentialId: string) => {
       const controller = new Controller(keypair, address, credentialId);
 
-      if (onController) {
-        onController(controller);
-      }
+      if (onController) onController(controller);
 
       controller.account(constants.StarknetChainId.TESTNET).status =
         Status.DEPLOYING;
@@ -190,38 +179,44 @@ export const Signup = ({
       //   .then(() => {
       //     controller.account(constants.StarknetChainId.MAINNET).sync();
       //   });
-    },
-    [keypair, starterData, debouncedName, onController],
-  );
+    }
+  }, [keypair, starterData, debouncedName, onController]);
 
-  const pollAccount = useCallback(async () => {
-    const res = await refetch();
-    if (res.isSuccess) {
-      const {
-        account: {
-          credential: { id: credentialId },
-          contractAddress: address,
-        },
-      } = res.data;
-      deployAccount(address, credentialId);
+  // handle username input events
+  useEffect(() => {
+    if (debouncing) {
       return;
     }
-    setTimeout(() => pollAccount(), 1000);
-  }, [refetch, deployAccount]);
 
-  useEffect(() => {
-    if (isRegistering) {
-      pollAccount();
+    if (error) {
+      if ((error as Error).message === "ent: account not found") {
+        setNameError("");
+        setCanContinue(true);
+        if (!dismissed) {
+          onDrawerOpen();
+        }
+      } else {
+        setNameError("An error occured.");
+        setCanContinue(false);
+      }
+    } else if (accountData?.account) {
+      setNameError("This account already exists.");
+      setCanContinue(false);
     }
-  }, [isRegistering, pollAccount]);
+  }, [error, accountData, debouncing, dismissed, onDrawerOpen]);
 
   const onContinue = useCallback(async () => {
-    const key = ec.genKeyPair();
-    const deviceKey = ec.getStarkKey(key);
+    const keypair = ec.genKeyPair();
+    const deviceKey = ec.getStarkKey(keypair);
 
-    setKeypair(key);
     setIsRegistering(true);
+    setKeypair(keypair);
+    setSelectedName(debouncedName);
 
+    // due to same origin restriction, if we're in iframe, pop up a
+    // window to continue webauthn registration. otherwise,
+    // display modal overlay. in either case, account is created in
+    // authenticate component, so we poll and then deploy
     if (isIframe) {
       PopupCenter(
         `/authenticate?name=${encodeURIComponent(
@@ -234,7 +229,7 @@ export const Signup = ({
     } else {
       onAuthOpen();
     }
-  }, [debouncedName, isIframe, onAuthOpen]);
+  }, [debouncedName, starterData, isIframe, onAuthOpen, onController]);
 
   const validate = (values: { name: string }) => {
     setCanContinue(false);
@@ -440,7 +435,13 @@ export const Signup = ({
                   w="full"
                   gap="10px"
                   onClick={() => onContinue()}
-                  isDisabled={!!nameError || debouncing || name?.length === 0}
+                  isDisabled={
+                    isRegistering ||
+                    !canContinue ||
+                    !!nameError ||
+                    debouncing ||
+                    name?.length === 0
+                  }
                 >
                   <FingerprintIcon boxSize="20px" />
                   Continue
@@ -482,7 +483,13 @@ export const Signup = ({
                         onComplete();
                       }
                     }}
-                    isDisabled={!!nameError || debouncing || name?.length === 0}
+                    isDisabled={
+                      isRegistering ||
+                      !canContinue ||
+                      !!nameError ||
+                      debouncing ||
+                      name?.length === 0
+                    }
                   />
                 )}
               </VStack>
