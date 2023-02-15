@@ -401,12 +401,12 @@ const Index: NextPage = () => {
 
   if (context.type === "quests") {
     const ctx = context as Quests;
-    console.log(ctx);
     return (
       <Quests
         gameId={ctx.gameId}
         address={controller.address}
         chainId={chainId}
+        onClose={() => ctx.resolve()}
       />
     );
   }

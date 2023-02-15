@@ -76,7 +76,7 @@ const Label = ({ children }: { children: React.ReactNode }) => (
   </Box>
 );
 
-const Quests = ({ gameId, address, chainId }: { gameId: string, address: string, chainId: constants.StarknetChainId }) => {
+const Quests = ({ gameId, address, chainId, onClose }: { gameId: string, address: string, chainId: constants.StarknetChainId, onClose: () => void }) => {
 
   const { data: accountData } = useAccountInfoQuery({ address: "0x077b1680e8f60e5a4020c9a35b193359e040b48ad8d9d98b417c66a9d6f37f96" });
   const accountId = accountData?.accounts?.edges[0]?.node.id;
@@ -109,9 +109,8 @@ const Quests = ({ gameId, address, chainId }: { gameId: string, address: string,
     <Container>
       <Header
         address={address}
-        // address="0x077b1680e8f60e5a4020c9a35b193359e040b48ad8d9d98b417c66a9d6f37f96"
         chainId={chainId}
-        onClose={() => { }}
+        onClose={onClose}
       />
       <Box w="full" h="72px" borderBottom="1px solid" borderColor="gray.700" userSelect="none">
         <HStack w="full" spacing="18px" >

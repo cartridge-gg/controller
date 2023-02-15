@@ -225,8 +225,13 @@ class Controller {
 
     this.modal.open();
 
-    console.log(this.keychain);
-    return await this.keychain.showQuests(gameId);
+    try {
+      return await this.keychain.showQuests(gameId);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      this.modal.close();
+    }
   }
 
   async connect() {
