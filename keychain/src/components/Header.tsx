@@ -28,6 +28,8 @@ import {
 } from "@cartridge/controller/src/constants";
 import { BigNumber, utils } from "ethers";
 import Ether from "./icons/Ether";
+import { Arrow } from "@cartridge/ui/components/Card";
+import ArrowIcon from "@cartridge/ui/components/icons/Arrow";
 
 const Container = ({
   height,
@@ -63,12 +65,14 @@ export const Header = ({
   muted = false,
   onLogout,
   onClose,
+  onBack,
 }: {
   chainId?: constants.StarknetChainId;
   address?: string;
   muted?: boolean;
   onLogout?: () => void;
   onClose?: () => void;
+  onBack?: () => void;
 }) => {
   const [ethBalance, setEthBalance] = useState<string>();
 
@@ -154,7 +158,17 @@ export const Header = ({
     <Container height="50px" bgColor="gray.700">
       <HStack w="full">
         <HStack spacing="0">
-          <Logo fill="brand" w="24px" mr="15px" />
+          {!!onBack ? (
+            <ArrowIcon
+              onClick={onBack}
+              transform="rotate(180deg)"
+              _hover={{
+                cursor: "pointer",
+              }}
+            />
+          ) : (
+            <Logo fill="brand" w="24px" mr="15px" />
+          )}
         </HStack>
         <Spacer />
         <HStack spacing="6px">

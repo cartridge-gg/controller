@@ -47,12 +47,17 @@ const Quests = ({ gameId, address, chainId, onClose }: { gameId: string, address
         address={address}
         chainId={chainId}
         onClose={onClose}
+        onBack={!!selectedQuestId
+          ? () => setSelectedQuestId(null)
+          : undefined
+        }
       />
       {!selectedQuestId ? (
         <QuestOverview
           pending={pendingQuests}
           completed={completedQuests}
           progression={questProgression}
+          onSelect={(id: string) => setSelectedQuestId(id)}
         />
       ) : (
         <></>

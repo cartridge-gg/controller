@@ -9,7 +9,7 @@ const Label = ({ children }: { children: React.ReactNode }) => (
   </Box>
 );
 
-const QuestsOverview = ({ pending, completed, progression }: { pending: any[], completed: any[], progression: any[] }) => {
+const QuestsOverview = ({ pending, completed, progression, onSelect }: { pending: any[], completed: any[], progression: any[], onSelect: (id: string) => void }) => {
   return (
     <>
       <Box w="full" h="72px" borderBottom="1px solid" borderColor="gray.700" userSelect="none">
@@ -24,25 +24,35 @@ const QuestsOverview = ({ pending, completed, progression }: { pending: any[], c
         <>
           <Label>Pending</Label>
           {pending?.map(({ node: q }) => (
-            <QuestCard
+            <Box
               key={q.id}
-              name={q.title}
-              state={progression.find(
-                ({ node: qp }) => qp.questID === q.id).node?.completed
-                ? QuestCardState.Claimable
-                : QuestCardState.Incomplete
-              }
-              rewards={q.rewards.edges?.map(({ node: r }) => r.id)}
-            />
+              w="full"
+              onClick={() => onSelect(q.id)}
+            >
+              <QuestCard
+                name={q.title}
+                state={progression.find(
+                  ({ node: qp }) => qp.questID === q.id).node?.completed
+                  ? QuestCardState.Claimable
+                  : QuestCardState.Incomplete
+                }
+                rewards={q.rewards.edges?.map(({ node: r }) => r.id)}
+              />
+            </Box>
           ))}
           <Label>Completed</Label>
           {completed?.map(({ node: q }) => (
-            <QuestCard
+            <Box
+              w="full"
               key={q.id}
-              name={q.title}
-              state={QuestCardState.Complete}
-              rewards={q.rewards.edges?.map(({ node: r }) => r.id)}
-            />
+              onClick={() => onSelect(q.id)}
+            >
+              <QuestCard
+                name={q.title}
+                state={QuestCardState.Complete}
+                rewards={q.rewards.edges?.map(({ node: r }) => r.id)}
+              />
+            </Box>
           ))}
         </>
       </Flex>
