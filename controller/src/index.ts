@@ -217,6 +217,18 @@ class Controller {
     }
   }
 
+  async showQuests(gameId: string) {
+    if (!this.keychain || !this.modal) {
+      console.error("not ready for connect");
+      return;
+    }
+
+    this.modal.open();
+
+    console.log(this.keychain);
+    return await this.keychain.showQuests(gameId);
+  }
+
   async connect() {
     if (this.accounts) {
       return this.accounts[this.chainId];

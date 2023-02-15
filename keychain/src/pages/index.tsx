@@ -15,7 +15,7 @@ import {
 } from "@cartridge/controller";
 import Connect from "components/Connect";
 import { Login } from "components/Login";
-import { Quests, Signup } from "components/signup";
+import { Signup } from "components/signup";
 import { Redeploy } from "components/Redeploy";
 import { Container as ChakraContainer } from "@chakra-ui/react";
 import { Header } from "components/Header";
@@ -42,8 +42,9 @@ import { revoke, session, sessions } from "../methods/sessions";
 import { Status } from "utils/account";
 import { normalize, validate } from "../methods";
 import DeploymentRequired from "components/DeploymentRequired";
+import Quests from "./quests";
 
-type Context = Connect | Execute | SignMessage | StarterPack;
+type Context = Connect | Execute | SignMessage | StarterPack | Quests;
 
 type Connect = {
   origin: string;
@@ -81,6 +82,14 @@ type StarterPack = {
   starterPackId: string;
   resolve: (res: ExecuteReply | Error) => void;
   reject: (reason?: unknown) => void;
+};
+
+type Quests = {
+  origin: string;
+  type: "quests";
+  gameId: string;
+  resolve: () => void;
+  reject: () => void;
 };
 
 const Index: NextPage = () => {
@@ -184,10 +193,10 @@ const Index: NextPage = () => {
                   : [transactions];
                 const policies = calls.map(
                   (txn) =>
-                    ({
-                      target: txn.contractAddress,
-                      method: txn.entrypoint,
-                    } as Policy),
+                  ({
+                    target: txn.contractAddress,
+                    method: txn.entrypoint,
+                  } as Policy),
                 );
 
                 const missing = diff(policies, session.policies);
@@ -280,6 +289,17 @@ const Index: NextPage = () => {
             });
           },
         ),
+        showQuests: normalize((origin: string) => async (gameId: string) => {
+          return await new Promise((resolve, reject) => {
+            setContext({
+              type: "quests",
+              origin,
+              gameId,
+              resolve,
+              reject,
+            } as Quests);
+          });
+        }),
       },
     });
 
@@ -375,6 +395,18 @@ const Index: NextPage = () => {
         starterPackId={ctx.starterPackId}
         onClaim={(res: ExecuteReply) => ctx.resolve(res)}
         onCancel={(error: Error) => ctx.resolve(error)}
+      />
+    );
+  }
+
+  if (context.type === "quests") {
+    const ctx = context as Quests;
+    console.log(ctx);
+    return (
+      <Quests
+        gameId={ctx.gameId}
+        address={controller.address}
+        chainId={chainId}
       />
     );
   }

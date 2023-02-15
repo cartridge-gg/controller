@@ -3835,6 +3835,7 @@ export type AccountInfoQuery = { __typename?: 'Query', accounts?: { __typename?:
 
 export type AccountQuestsQueryVariables = Exact<{
   accountId: Scalars['ID'];
+  gameId?: InputMaybe<Scalars['ID']>;
 }>;
 
 
@@ -3997,8 +3998,8 @@ useInfiniteAccountInfoQuery.getKey = (variables: AccountInfoQueryVariables) => [
 ;
 
 export const AccountQuestsDocument = `
-    query AccountQuests($accountId: ID!) {
-  quests {
+    query AccountQuests($accountId: ID!, $gameId: ID) {
+  quests(where: {hasGameWith: {id: $gameId}}) {
     edges {
       node {
         id

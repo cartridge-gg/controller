@@ -1,5 +1,9 @@
-query AccountQuests($accountId: ID!) {
-  quests {
+query AccountQuests($accountId: ID!, $gameId: ID) {
+  quests(where: {
+    hasGameWith: {
+      id: $gameId,
+    }
+  }) {
     edges {
       node {
         id

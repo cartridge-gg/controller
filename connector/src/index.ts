@@ -77,6 +77,10 @@ class ControllerConnector extends Connector {
   async issueStarterPack(id: string): Promise<InvokeFunctionResponse> {
     return this.controller.issueStarterPack(id);
   }
+
+  async showQuests(gameId: string): Promise<void> {
+    return this.controller.showQuests(gameId);
+  }
 }
 
 export default ControllerConnector;
