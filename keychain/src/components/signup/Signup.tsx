@@ -126,23 +126,28 @@ export const Signup = ({
       starterData.game.starterPack.issuance
     : 0;
 
-  const { data: accountCreatedData } = useAccountQuery(
+  useAccountQuery(
     { id: selectedName },
     {
       enabled: isRegistering,
-      refetchInterval: (data) => (!data ? 1000 : undefined),
       refetchIntervalInBackground: true,
+      refetchOnWindowFocus: false,
+      staleTime: 10000000,
+      cacheTime: 10000000,
+      refetchInterval: (data) => (!data ? 1000 : undefined),
+      onSuccess: (data) => deploy(data),
     },
   );
 
-  useEffect(() => {
-    if (accountCreatedData) {
+  const deploy = useCallback(
+    (data) => {
+      console.log("deploy request");
       const {
         account: {
           credential: { id: credentialId },
           contractAddress: address,
         },
-      } = accountCreatedData;
+      } = data;
 
       const controller = new Controller(keypair, address, credentialId);
 
@@ -179,8 +184,9 @@ export const Signup = ({
         .then(() => {
           controller.account(constants.StarknetChainId.MAINNET).sync();
         });
-    }
-  }, [accountCreatedData, keypair, onController]);
+    },
+    [keypair, onController],
+  );
 
   // handle username input events
   useEffect(() => {
@@ -343,6 +349,7 @@ export const Signup = ({
                     errorBorderColor="crimson"
                     placeholder="Username"
                     autoComplete="off"
+                    isDisabled={isRegistering}
                     onBlur={() => {
                       if (canContinue) {
                         onDrawerOpen();
