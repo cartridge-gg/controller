@@ -1,4 +1,12 @@
-import { Box, Button, Circle, Flex, HStack, Text, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Circle,
+  Flex,
+  HStack,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
 import { QuestState } from "pages/quests";
 import { useEffect, useState } from "react";
 import MapIcon from "@cartridge/ui/components/icons/Map";
@@ -70,10 +78,10 @@ const QuestDetails = ({
   address,
   onClaim,
 }: {
-  questsWithProgress: Array<{ quest: any, progress: any }>,
-  selectedId: string,
-  address: string,
-  onClaim: () => void,
+  questsWithProgress: Array<{ quest: any; progress: any }>;
+  selectedId: string;
+  address: string;
+  onClaim: () => void;
 }) => {
   const [quest, setQuest] = useState<any>();
   const [questState, setQuestState] = useState<QuestState>();
@@ -88,8 +96,8 @@ const QuestDetails = ({
       q.progress?.claimed
         ? QuestState.Complete
         : q.progress?.completed
-          ? QuestState.Claimable
-          : QuestState.Incomplete
+        ? QuestState.Claimable
+        : QuestState.Incomplete,
     );
   }, [questsWithProgress, selectedId]);
 
@@ -98,11 +106,7 @@ const QuestDetails = ({
   }
 
   return (
-    <Flex
-      direction="column"
-      w="full"
-      minH="515px"
-    >
+    <Flex direction="column" w="full" minH="515px">
       <Box
         overflowY="auto"
         css={{
@@ -112,31 +116,38 @@ const QuestDetails = ({
           },
         }}
       >
-        <Flex
-          direction="column"
-          py="36px"
-          gap="24px"
-        >
-          <Box w="full" minH="72px" borderBottom="1px solid" borderColor="gray.700" userSelect="none">
+        <Flex direction="column" py="36px" gap="24px">
+          <Box
+            w="full"
+            minH="72px"
+            borderBottom="1px solid"
+            borderColor="gray.700"
+            userSelect="none"
+          >
             <HStack w="full" spacing="18px">
               <Circle bgColor="gray.700" size="48px">
                 <MapIcon w="30px" h="30px" />
               </Circle>
-              <Text as="h1" fontWeight="600" fontSize="17px">{quest?.node?.title}</Text>
+              <Text as="h1" fontWeight="600" fontSize="17px">
+                {quest?.node?.title}
+              </Text>
             </HStack>
-            <HStack my="24px" color={
-              typeof questState === "undefined" || questState === QuestState.Incomplete
-                ? "whiteAlpha.800"
-                : "green.400"
-            }>
+            <HStack
+              my="24px"
+              color={
+                typeof questState === "undefined" ||
+                questState === QuestState.Incomplete
+                  ? "whiteAlpha.800"
+                  : "green.400"
+              }
+            >
               <Tag>
-                {typeof questState !== "undefined" || questState !== QuestState.Incomplete && (
-                  <Check mr="6px" />
-                )}
-                {typeof questState === "undefined" || questState === QuestState.Incomplete
+                {typeof questState !== "undefined" ||
+                  (questState !== QuestState.Incomplete && <Check mr="6px" />)}
+                {typeof questState === "undefined" ||
+                questState === QuestState.Incomplete
                   ? "incomplete"
-                  : "completed"
-                }
+                  : "completed"}
               </Tag>
             </HStack>
           </Box>
@@ -153,7 +164,9 @@ const QuestDetails = ({
             <Tag>Requirements</Tag>
             {quest.questEvents?.length &&
               quest.questEvents?.map((evt) => {
-                const eventProgress = questProgress?.completion?.find((c) => c.questEvent === evt.id);
+                const eventProgress = questProgress?.completion?.find(
+                  (c) => c.questEvent === evt.id,
+                );
                 return (
                   <HStack key={evt.id}>
                     {eventProgress?.completed ? (
@@ -163,7 +176,9 @@ const QuestDetails = ({
                     )}
                     <Text
                       fontSize="12px"
-                      color={eventProgress?.completed ? "green.400" : "gray.200"}
+                      color={
+                        eventProgress?.completed ? "green.400" : "gray.200"
+                      }
                       fontWeight="700"
                     >
                       {evt.description}
@@ -190,7 +205,10 @@ const QuestDetails = ({
           mt="24px"
           disabled={questState !== QuestState.Claimable || !address}
           onClick={() => {
-            mutateAsync({ accountId: `starknet:SN_GOERLI:${address}`, questId: selectedId })
+            mutateAsync({
+              accountId: `starknet:SN_GOERLI:${address}`,
+              questId: selectedId,
+            })
               .then((res) => {
                 onClaim();
               })

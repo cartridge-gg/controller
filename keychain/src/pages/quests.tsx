@@ -12,21 +12,37 @@ export enum QuestState {
   Complete,
 }
 
-const Quests = ({ gameId, address, chainId, onClose }: { gameId: string, address: string, chainId: constants.StarknetChainId, onClose: () => void }) => {
+const Quests = ({
+  gameId,
+  address,
+  chainId,
+  onClose,
+}: {
+  gameId: string;
+  address: string;
+  chainId: constants.StarknetChainId;
+  onClose: () => void;
+}) => {
   const [selectedQuestId, setSelectedQuestId] = useState<string>();
-  const [questsWithProgression, setQuestsWithProgression] = useState<Array<{ quest: any, progress: any }>>();
+  const [questsWithProgression, setQuestsWithProgression] =
+    useState<Array<{ quest: any; progress: any }>>();
   const { data: accountData } = useAccountInfoQuery({ address });
   const accountId = accountData?.accounts?.edges[0]?.node.id;
-  const { data: questData, refetch: refetchQuests } = useAccountQuestsQuery({ accountId, gameId }, {
-    enabled: !!accountId,
-  });
+  const { data: questData, refetch: refetchQuests } = useAccountQuestsQuery(
+    { accountId, gameId },
+    {
+      enabled: !!accountId,
+    },
+  );
   const questProgression = questData?.account?.questProgression?.edges;
   const quests = questData?.quests?.edges;
 
   useEffect(() => {
-    const qwp: Array<{ quest: any, progress: any }> = [];
+    const qwp: Array<{ quest: any; progress: any }> = [];
     quests?.forEach(({ node: q }) => {
-      const progress = questProgression.find(({ node: qp }) => qp.questID === q.id);
+      const progress = questProgression.find(
+        ({ node: qp }) => qp.questID === q.id,
+      );
       qwp.push({
         quest: q,
         progress: progress?.node ?? null,
@@ -41,10 +57,7 @@ const Quests = ({ gameId, address, chainId, onClose }: { gameId: string, address
         address={address}
         chainId={chainId}
         onClose={onClose}
-        onBack={!!selectedQuestId
-          ? () => setSelectedQuestId(null)
-          : undefined
-        }
+        onBack={!!selectedQuestId ? () => setSelectedQuestId(null) : undefined}
       />
       {!selectedQuestId ? (
         <QuestOverview
