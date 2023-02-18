@@ -37,6 +37,10 @@ query AccountQuests($accountId: ID!, $gameId: ID) {
         twitterQuests {
           id
         }
+        questEvents {
+          id
+          description
+        }
       }
     }
   }
@@ -50,6 +54,10 @@ query AccountQuests($accountId: ID!, $gameId: ID) {
           completedAt
           claimTransaction {
             transactionHash
+          }
+          completion {
+            questEvent
+            completed
           }
         }
       }

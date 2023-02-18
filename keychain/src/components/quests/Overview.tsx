@@ -1,5 +1,5 @@
 import { Box, HStack, Circle, Flex, Text } from "@chakra-ui/react";
-import { QuestCardState } from "pages/quests";
+import { QuestState } from "pages/quests";
 import MapIcon from "@cartridge/ui/components/icons/Map";
 import QuestCard from "./Card";
 
@@ -9,7 +9,7 @@ const Label = ({ children }: { children: React.ReactNode }) => (
   </Box>
 );
 
-const QuestsOverview = ({ pending, completed, progression, onSelect }: { pending: any[], completed: any[], progression: any[], onSelect: (id: string) => void }) => {
+const QuestsOverview = ({ questsWithProgression, onSelect }: { questsWithProgression: Array<{ quest: any, progress: any }>, onSelect: (id: string) => void }) => {
   return (
     <>
       <Box w="full" h="72px" borderBottom="1px solid" borderColor="gray.700" userSelect="none">
@@ -23,37 +23,44 @@ const QuestsOverview = ({ pending, completed, progression, onSelect }: { pending
       <Flex direction="column" w="full" align="start" gap="12px">
         <>
           <Label>Pending</Label>
-          {pending?.map(({ node: q }) => (
-            <Box
-              key={q.id}
-              w="full"
-              onClick={() => onSelect(q.id)}
-            >
-              <QuestCard
-                name={q.title}
-                state={progression.find(
-                  ({ node: qp }) => qp.questID === q.id).node?.completed
-                  ? QuestCardState.Claimable
-                  : QuestCardState.Incomplete
-                }
-                rewards={q.rewards.edges?.map(({ node: r }) => r.id)}
-              />
-            </Box>
-          ))}
+          {questsWithProgression?.map((qwp) => {
+            if (!qwp.progress?.claimed) {
+              return (
+                <Box
+                  key={qwp.quest.id}
+                  w="full"
+                  onClick={() => onSelect(qwp.quest.id)}
+                >
+                  <QuestCard
+                    name={qwp.quest.title}
+                    state={qwp.progress?.completed
+                      ? QuestState.Claimable
+                      : QuestState.Incomplete
+                    }
+                    rewards={qwp.quest.rewards.edges?.map((r) => r.id)}
+                  />
+                </Box>
+              );
+            }
+          })}
           <Label>Completed</Label>
-          {completed?.map(({ node: q }) => (
-            <Box
-              w="full"
-              key={q.id}
-              onClick={() => onSelect(q.id)}
-            >
-              <QuestCard
-                name={q.title}
-                state={QuestCardState.Complete}
-                rewards={q.rewards.edges?.map(({ node: r }) => r.id)}
-              />
-            </Box>
-          ))}
+          {questsWithProgression?.map((qwp) => {
+            if (qwp.progress?.claimed) {
+              return (
+                <Box
+                  w="full"
+                  key={qwp.quest.id}
+                  onClick={() => onSelect(qwp.quest.id)}
+                >
+                  <QuestCard
+                    name={qwp.quest.title}
+                    state={QuestState.Complete}
+                    rewards={qwp.quest.rewards.edges?.map((r) => r.id)}
+                  />
+                </Box>
+              );
+            }
+          })}
         </>
       </Flex>
     </>

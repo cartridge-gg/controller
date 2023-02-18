@@ -3839,7 +3839,7 @@ export type AccountQuestsQueryVariables = Exact<{
 }>;
 
 
-export type AccountQuestsQuery = { __typename?: 'Query', quests?: { __typename?: 'QuestConnection', edges?: Array<{ __typename?: 'QuestEdge', node?: { __typename?: 'Quest', id: string, title: string, description: string, points: any, game: { __typename?: 'Game', id: string }, metadata?: { __typename?: 'QuestMetadata', callToAction?: { __typename?: 'QuestCallToAction', text?: string | null, url?: string | null, redirect?: boolean | null } | null } | null, rewards: { __typename?: 'TokenConnection', edges?: Array<{ __typename?: 'TokenEdge', node?: { __typename?: 'Token', id: string } | null } | null> | null }, parent?: { __typename?: 'Quest', id: string, title: string } | null, discordGuild?: Array<{ __typename?: 'DiscordGuild', id: string }> | null, twitterQuests?: Array<{ __typename?: 'TwitterQuest', id: string }> | null } | null } | null> | null } | null, account?: { __typename?: 'Account', questProgression: { __typename?: 'AccountQuestConnection', edges?: Array<{ __typename?: 'AccountQuestEdge', node?: { __typename?: 'AccountQuest', questID: string, completed: boolean, claimed: boolean, completedAt?: any | null, claimTransaction?: { __typename?: 'Transaction', transactionHash: string } | null } | null } | null> | null } } | null };
+export type AccountQuestsQuery = { __typename?: 'Query', quests?: { __typename?: 'QuestConnection', edges?: Array<{ __typename?: 'QuestEdge', node?: { __typename?: 'Quest', id: string, title: string, description: string, points: any, game: { __typename?: 'Game', id: string }, metadata?: { __typename?: 'QuestMetadata', callToAction?: { __typename?: 'QuestCallToAction', text?: string | null, url?: string | null, redirect?: boolean | null } | null } | null, rewards: { __typename?: 'TokenConnection', edges?: Array<{ __typename?: 'TokenEdge', node?: { __typename?: 'Token', id: string } | null } | null> | null }, parent?: { __typename?: 'Quest', id: string, title: string } | null, discordGuild?: Array<{ __typename?: 'DiscordGuild', id: string }> | null, twitterQuests?: Array<{ __typename?: 'TwitterQuest', id: string }> | null, questEvents?: Array<{ __typename?: 'QuestEvent', id: string, description?: string | null }> | null } | null } | null> | null } | null, account?: { __typename?: 'Account', questProgression: { __typename?: 'AccountQuestConnection', edges?: Array<{ __typename?: 'AccountQuestEdge', node?: { __typename?: 'AccountQuest', questID: string, completed: boolean, claimed: boolean, completedAt?: any | null, claimTransaction?: { __typename?: 'Transaction', transactionHash: string } | null, completion?: Array<{ __typename?: 'CompletionCriteria', questEvent: string, completed: boolean } | null> | null } | null } | null> | null } } | null };
 
 export type ClaimQuestRewardsMutationVariables = Exact<{
   accountId: Scalars['ID'];
@@ -4033,6 +4033,10 @@ export const AccountQuestsDocument = `
         twitterQuests {
           id
         }
+        questEvents {
+          id
+          description
+        }
       }
     }
   }
@@ -4046,6 +4050,10 @@ export const AccountQuestsDocument = `
           completedAt
           claimTransaction {
             transactionHash
+          }
+          completion {
+            questEvent
+            completed
           }
         }
       }

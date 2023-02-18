@@ -1,44 +1,38 @@
 import Container from "components/Container";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Header } from "components/Header";
 import { useAccountInfoQuery, useAccountQuestsQuery } from "generated/graphql";
 import { constants } from "starknet";
 import QuestOverview from "components/quests/Overview";
+import QuestDetails from "components/quests/Details";
 
-export enum QuestCardState {
+export enum QuestState {
   Incomplete,
   Claimable,
   Complete,
 }
 
 const Quests = ({ gameId, address, chainId, onClose }: { gameId: string, address: string, chainId: constants.StarknetChainId, onClose: () => void }) => {
-
   const [selectedQuestId, setSelectedQuestId] = useState<string>();
-  const { data: accountData } = useAccountInfoQuery({ address: "0x077b1680e8f60e5a4020c9a35b193359e040b48ad8d9d98b417c66a9d6f37f96" });
+  const [questsWithProgression, setQuestsWithProgression] = useState<Array<{ quest: any, progress: any }>>();
+  const { data: accountData } = useAccountInfoQuery({ address });
   const accountId = accountData?.accounts?.edges[0]?.node.id;
-  // const accountId = "sam";
-  const { data: questData } = useAccountQuestsQuery({ accountId: accountId || "", gameId });
+  const { data: questData, refetch: refetchQuests } = useAccountQuestsQuery({ accountId, gameId }, {
+    enabled: !!accountId,
+  });
   const questProgression = questData?.account?.questProgression?.edges;
   const quests = questData?.quests?.edges;
 
-  const completedQuests = useMemo(() => {
-    const cqs = questProgression?.map(({ node: q }) => {
-      if (q.claimed) {
-        return quests.find(({ node: qq }) => q.questID === qq.id);
-      }
-    });
-    return cqs?.filter((cq) => !!cq);
-  }, [quests, questProgression]);
-
-  const pendingQuests = useMemo(() => {
-    if (quests) {
-      return quests.filter(({ node: q }) => {
-        const quest = questProgression.find(({ node: qp }) => qp.questID === q.id);
-        if (!quest.node?.claimed) {
-          return quest;
-        }
+  useEffect(() => {
+    const qwp: Array<{ quest: any, progress: any }> = [];
+    quests?.forEach(({ node: q }) => {
+      const progress = questProgression.find(({ node: qp }) => qp.questID === q.id);
+      qwp.push({
+        quest: q,
+        progress: progress?.node ?? null,
       });
-    }
+    });
+    setQuestsWithProgression(qwp);
   }, [quests, questProgression]);
 
   return (
@@ -54,13 +48,16 @@ const Quests = ({ gameId, address, chainId, onClose }: { gameId: string, address
       />
       {!selectedQuestId ? (
         <QuestOverview
-          pending={pendingQuests}
-          completed={completedQuests}
-          progression={questProgression}
+          questsWithProgression={questsWithProgression}
           onSelect={(id: string) => setSelectedQuestId(id)}
         />
       ) : (
-        <></>
+        <QuestDetails
+          questsWithProgress={questsWithProgression}
+          selectedId={selectedQuestId}
+          address={address}
+          onClaim={() => refetchQuests()}
+        />
       )}
     </Container>
   );

@@ -1,21 +1,21 @@
 import SparkleOutline from "@cartridge/ui/components/icons/SparkleOutline";
 import { HStack, Spacer, Text } from "@chakra-ui/react";
 import CircleCheck from "components/icons/CircleCheck";
-import { QuestCardState } from "pages/quests";
+import { QuestState } from "pages/quests";
 
-const QuestCard = ({ name, state, rewards }: { name: string, state: QuestCardState, rewards: Array<any> }) => {
+const QuestCard = ({ name, state, rewards }: { name: string, state: QuestState, rewards: Array<any> }) => {
   let bgColor = "gray.700";
   let color = "white";
   let check = false;
   let border = undefined;
 
   switch (state) {
-    case QuestCardState.Claimable:
+    case QuestState.Claimable:
       bgColor = "gray.600";
       color = "green.400"
       check = true;
       break;
-    case QuestCardState.Complete:
+    case QuestState.Complete:
       bgColor = "transparent";
       color = "gray.200";
       check = true;
@@ -49,10 +49,10 @@ const QuestCard = ({ name, state, rewards }: { name: string, state: QuestCardSta
       {check && <CircleCheck fontSize="18px" color="currentColor" />}
       <Text color="currentColor">{name}</Text>
       <Spacer />
-      {state !== QuestCardState.Complete && (
+      {state !== QuestState.Complete && (
         <SparkleOutline fontSize="18px" />
       )}
-      {state === QuestCardState.Complete && (
+      {state === QuestState.Complete && (
         <Text variant="ld-mono-upper" fontSize="10px" textTransform="uppercase" color="currentColor">Completed</Text>
       )}
     </HStack>
