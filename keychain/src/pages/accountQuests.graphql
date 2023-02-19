@@ -1,5 +1,5 @@
-query AccountQuests($accountId: ID!) {
-  quests {
+query AccountQuests($accountId: ID!, $gameId: ID) {
+  quests(where: { hasGameWith: { id: $gameId } }) {
     edges {
       node {
         id
@@ -33,6 +33,10 @@ query AccountQuests($accountId: ID!) {
         twitterQuests {
           id
         }
+        questEvents {
+          id
+          description
+        }
       }
     }
   }
@@ -46,6 +50,10 @@ query AccountQuests($accountId: ID!) {
           completedAt
           claimTransaction {
             transactionHash
+          }
+          completion {
+            questEvent
+            completed
           }
         }
       }

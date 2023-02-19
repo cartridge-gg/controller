@@ -150,9 +150,11 @@ const findValue = (
   attr: Array<{ trait_type: string; value: string }>,
   trait: string,
 ) => {
-  return attr.find((a) => {
-    return a.trait_type === trait;
-  })?.value || "";
+  return (
+    attr.find((a) => {
+      return a.trait_type === trait;
+    })?.value || ""
+  );
 };
 
 const data2Svg = ({

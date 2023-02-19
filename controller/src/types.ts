@@ -127,6 +127,7 @@ export interface Keychain {
   ): Promise<Signature | Error>;
 
   issueStarterPack(id: string): Promise<InvokeFunctionResponse>;
+  showQuests(gameId: string): Promise<void>;
 }
 
 export interface Modal {

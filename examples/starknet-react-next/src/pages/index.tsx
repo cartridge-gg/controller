@@ -9,6 +9,7 @@ import { InvalidTxn } from "~/components/InvalidTxn";
 import { SignMessage } from "~/components/SignMessage";
 import { TransactionList } from "~/components/TransactionList";
 import { useCounterContract } from "~/hooks/counter";
+import Quests from "~/components/Quest";
 
 const Home: NextPage = () => {
   const { contract: counter } = useCounterContract();
@@ -37,8 +38,10 @@ const Home: NextPage = () => {
         <IncrementCounter />
         <InvalidTxn />
       </div>
-      <TransferEth />
+      <h2>Quests</h2>
+      <Quests />
       <SignMessage />
+      <TransferEth />
       <h2>Recent Transactions</h2>
       <TransactionList />
     </div>
