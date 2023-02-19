@@ -5,6 +5,7 @@ import { useAccountInfoQuery, useAccountQuestsQuery } from "generated/graphql";
 import { constants } from "starknet";
 import QuestOverview from "components/quests/Overview";
 import QuestDetails from "components/quests/Details";
+import { Box, Flex, Text, useToast } from "@chakra-ui/react";
 
 export enum QuestState {
   Incomplete,
@@ -23,6 +24,7 @@ const Quests = ({
   chainId: constants.StarknetChainId;
   onClose: () => void;
 }) => {
+  const toast = useToast();
   const [selectedQuestId, setSelectedQuestId] = useState<string>();
   const [questsWithProgression, setQuestsWithProgression] =
     useState<Array<{ quest: any; progress: any }>>();
@@ -69,7 +71,35 @@ const Quests = ({
           questsWithProgress={questsWithProgression}
           selectedId={selectedQuestId}
           address={address}
-          onClaim={() => refetchQuests()}
+          onClaim={async () => {
+            const res = await refetchQuests();
+            const quest = res.data.quests?.edges?.find((q) => q.node?.id);
+            const progress = res.data.account?.questProgression.edges?.find(
+              (qp) => qp.node?.questID === quest?.node?.id,
+            );
+            if (progress.node?.claimed) {
+              toast({
+                position: "top-right",
+                title: "Quest Complete",
+                render: () => (
+                  <Flex
+                    direction="column"
+                    justify="center"
+                    position="relative"
+                    top="64px"
+                    w="360px"
+                    h="60px"
+                    bg="gray.700"
+                    p="16px 24px 16px 24px"
+                    borderRadius="8px"
+                  >
+                    <Text>Quest Complete</Text>
+                  </Flex>
+                ),
+                duration: 2000,
+              });
+            }
+          }}
         />
       )}
     </Container>
