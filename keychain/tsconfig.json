@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": "./src",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "declaration": true,
     "target": "es5",
     "module": "esnext",
@@ -23,25 +19,18 @@
     "downlevelIteration": true,
     "noEmit": true,
     "paths": {
-      "core": [
-        "../src"
-      ],
-      "@cartridge/controller": [
-        "../../controller/src"
-      ],
-      "@cartridge/ui/*": [
-        "../../ui/src/*"
-      ]
+      "core": ["../src"],
+      "@cartridge/controller": ["../../controller/src"],
+      "@cartridge/ui/*": ["../../ui/src/*"]
     }
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "src/components/ModelViewer.jsx"
   ],
-  "exclude": [
-    "node_modules"
-  ],
+  "exclude": ["node_modules"],
   "references": [
     {
       "path": "../controller"

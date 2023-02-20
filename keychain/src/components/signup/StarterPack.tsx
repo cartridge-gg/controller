@@ -21,12 +21,11 @@ import {
 import Controller from "utils/controller";
 import Container from "../Container";
 import Footer from "../Footer";
-import { Banner } from "../Banner";
 import { remoteSvgIcon } from "utils/svg";
 import BannerImage from "./BannerImage";
 
-import { Error, ExecuteReply, ResponseCodes } from "@cartridge/controller";
-import { constants, addAddressPadding } from "starknet";
+import { Error, ExecuteReply } from "@cartridge/controller";
+import { addAddressPadding } from "starknet";
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import StarterpackIcon from "@cartridge/ui/src/components/icons/Starterpack";
 import { StarterPackCarousel } from "components/carousel/StarterPack";
@@ -34,6 +33,7 @@ import OlmecIcon from "@cartridge/ui/src/components/icons/Olmec";
 import { Header } from "components/Header";
 import Ellipses from "./Ellipses";
 import SparkleColored from "@cartridge/ui/components/icons/SparkleColored";
+import { MediaViewer } from "./MediaViewer";
 
 export type StarterItemProps = {
   name: string;
@@ -44,36 +44,48 @@ export type StarterItemProps = {
 };
 
 export const ClaimSuccess = ({
-  img,
+  name,
+  banner,
+  media,
   url,
   fullPage,
 }: {
-  img: string;
+  name: string;
+  banner: string;
+  media?: string;
   url: string;
   fullPage: boolean;
-}) => (
-  <>
-    <Container position={fullPage ? "relative" : "fixed"}>
-      <Header />
-      <BannerImage imgSrc={img} obscuredWidth="0px" />
-      <VStack spacing="18px" pt="36px" pb="24px">
-        <Circle size="48px" bgColor="gray.700">
-          <SparkleColored boxSize="30px" />
-        </Circle>
-        <Text fontWeight="bold" fontSize="17px">
-          {"Your briq set is on the way!"}
-        </Text>
-        <Text fontSize="12px" color="whiteAlpha.600" textAlign="center">
-          Checkout{" "}
-          <Link href={url} variant="traditional" isExternal>
-            {url}
-          </Link>{" "}
-          to play on your desktop.
-        </Text>
-      </VStack>
-    </Container>
-  </>
-);
+}) => {
+  const domain = new URL(url);
+
+  return (
+    <>
+      <Container position={fullPage ? "relative" : "fixed"}>
+        <Header />
+        <BannerImage imgSrc={banner} obscuredWidth="0px" />
+        <VStack spacing="18px" pt={["12px", "12px", "36px"]} pb="24px">
+          {media ? (
+            <MediaViewer src={media} height="400px" width="300px" />
+          ) : (
+            <Circle size="48px" bgColor="gray.700">
+              <SparkleColored boxSize="30px" />
+            </Circle>
+          )}
+          <Text fontWeight="bold" fontSize="17px">
+            {`Your ${name} Starter Pack is on the way!`}
+          </Text>
+          <Text fontSize="12px" color="whiteAlpha.600" textAlign="center">
+            Checkout{" "}
+            <Link href={url} variant="traditional" isExternal>
+              {domain.hostname}
+            </Link>{" "}
+            to play on your desktop.
+          </Text>
+        </VStack>
+      </Container>
+    </>
+  );
+};
 
 export const StarterItem = ({
   name,
@@ -108,73 +120,6 @@ export const StarterItem = ({
 export type StarterPackProps = {
   starterpack: any;
   gameIcon: ReactNode;
-};
-
-export const StarterPackOld = ({ starterpack, gameIcon }: StarterPackProps) => {
-  const [nonfungibles, setNonfungibles] = useState<StarterItemProps[]>([]);
-  let remaining = starterpack.maxIssuance - starterpack.issuance;
-  remaining = remaining < 0 ? 0 : remaining;
-  useEffect(() => {
-    let nft: StarterItemProps[] =
-      starterpack.starterPackTokens.map((data) => ({
-        name: data.token.metadata.name,
-        description: data.token.metadata.description,
-        icon: (
-          <Image
-            alt={data.token.metadata.name}
-            src={data.token.thumbnail.uri}
-            fill
-          />
-        ),
-        amount: data.amount,
-      })) || [];
-
-    nft.push({
-      name: "CARTRIDGE OL-MECH",
-      description:
-        "This is your digital fingerprint in the cartridge ecosystem. It will evolve as you play.",
-      icon: <OlmecIcon boxSize="38px" />,
-      amount: "1",
-    });
-
-    setNonfungibles(nft);
-  }, [setNonfungibles, starterpack]);
-
-  return (
-    <VStack borderRadius="8" overflow="hidden" spacing="1px" w="full">
-      <Flex
-        w="full"
-        h="60px"
-        px="20px"
-        py="22px"
-        align="center"
-        bgColor="gray.600"
-        color="green.400"
-      >
-        <HStack>
-          {gameIcon}
-          <Text
-            as="strong"
-            variant="ld-mono-upper"
-            fontSize="12px"
-            color="inherit"
-          >
-            {starterpack.name}
-          </Text>
-        </HStack>
-
-        <Spacer />
-        <Box borderRadius="full" bgColor="whiteAlpha.200" px="12px" py="6px">
-          <Text fontSize="9px" letterSpacing="0.05em" fontWeight="bold">
-            {remaining} remaining
-          </Text>
-        </Box>
-      </Flex>
-      {nonfungibles.length != 0 && (
-        <StarterPackCarousel nonfungibles={nonfungibles} />
-      )}
-    </VStack>
-  );
 };
 
 export const StarterPack = ({
@@ -250,15 +195,22 @@ export const StarterPack = ({
     return <></>;
   }
 
-  if (claimData) {
-    return (
-      <ClaimSuccess
-        img={starterData?.game.banner.uri}
-        url={"https://briq.construction"}
-        fullPage={fullPage}
-      />
-    );
-  }
+  //if (claimData) {
+  // hardcode briq for now
+  const media =
+    starterData?.game.name === "Briq"
+      ? "https://storage.googleapis.com/c7e-prod-static/media/briq_cartridge_poap_nft_paris_1_7x16x11.glb"
+      : undefined;
+  return (
+    <ClaimSuccess
+      name={starterData?.game.name}
+      banner={starterData?.game.banner.uri}
+      url={starterData?.game.socials.website}
+      media={media}
+      fullPage={fullPage}
+    />
+  );
+  //}
 
   return (
     <Container position={fullPage ? "relative" : "fixed"}>
