@@ -83,7 +83,7 @@ export const Signup = ({
 
   const isIframe =
     typeof window !== "undefined" ? window.top !== window.self : false;
-  const { web3AuthEnabled } = useWhitelist();
+  const { signupEnabled, web3AuthEnabled } = useWhitelist();
 
   const {
     isOpen: isDrawerOpen,
@@ -251,6 +251,10 @@ export const Signup = ({
     }
     return null;
   };
+
+  if (!signupEnabled) {
+    return <></>;
+  }
 
   if (isRegistering && isIframe) {
     return <Continue position={fullPage ? "relative" : "fixed"} />;
