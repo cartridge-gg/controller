@@ -100,7 +100,6 @@ export default class Controller {
       ),
     };
 
-    this.approve(process.env.NEXT_PUBLIC_ADMIN_URL, [], "0");
     Storage.set(
       selectors[VERSION].admin(this.address, process.env.NEXT_PUBLIC_ADMIN_URL),
       {},
