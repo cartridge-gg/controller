@@ -263,8 +263,9 @@ export const Signup = ({
   if (claimSuccess) {
     return (
       <ClaimSuccess
-        img={starterData?.game.banner.uri}
-        url={"https://briq.construction"}
+        name={starterData?.game.name}
+        banner={starterData?.game.banner.uri}
+        url={starterData?.game.socials.website}
         fullPage={fullPage}
       />
     );
