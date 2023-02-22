@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Text, Circle, HStack, VStack } from "@chakra-ui/react";
+import { Text, Circle, HStack, VStack, Spacer } from "@chakra-ui/react";
 
 import Controller from "utils/controller";
 import {
@@ -24,6 +24,8 @@ import {
 import Container from "./Container";
 import { Status } from "utils/account";
 import { Header } from "./Header";
+import LowEth, { LowEthInfo } from "./LowEth";
+import BridgeEth from "./bridge/BridgeEth";
 
 export const CONTRACT_ETH =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
@@ -53,13 +55,22 @@ const Execute = ({
   }>();
   const [error, setError] = useState<Error>();
   const [isLoading, setLoading] = useState<boolean>(false);
-  const [ethBalance, setEthBalance] = useState<string>();
-  const [ethApproved, setEthApproved] = useState<string>();
+  const [ethBalance, setEthBalance] = useState<BN>();
+  const [ethApproved, setEthApproved] = useState<BN>();
+  const [lowEthInfo, setLowEthInfo] = useState<LowEthInfo>();
+  const [bridging, setBridging] = useState<boolean>(false);
 
   const account = controller.account(chainId);
   const calls = useMemo(() => {
     return Array.isArray(transactions) ? transactions : [transactions];
   }, [transactions]);
+
+  const format = (bn: BN) => {
+    return Number(utils.formatEther(bn.toString()))
+      .toFixed(5)
+      // strips trailing 0s
+      .replace(/0*$/, "$'");
+  }
 
   useEffect(() => {
     account
@@ -68,18 +79,18 @@ const Execute = ({
         entrypoint: "balanceOf",
         calldata: [BigNumber.from(controller.address).toString()],
       })
-      .then((res) =>
+      .then((res) => {
         setEthBalance(
-          utils.formatEther(
-            BigNumber.from(
-              "0x" +
-                res.result
-                  .map((r) => r.replace("0x", ""))
-                  .reverse()
-                  .join(""),
-            ),
-          ),
-        ),
+          new BN(
+            res.result.map(
+              (r) => r.replace("0x", "")
+            )
+              .reverse()
+              .join(""),
+            16,
+          )
+        )
+      }
       );
   }, [account, controller]);
 
@@ -104,14 +115,11 @@ const Execute = ({
 
     if (approve.length > 0) {
       setEthApproved(
-        utils.formatEther(
-          uint256
-            .uint256ToBN({
-              low: approve[0].calldata[1],
-              high: approve[0].calldata[2],
-            })
-            .toString(),
-        ),
+        uint256
+          .uint256ToBN({
+            low: approve[0].calldata[1],
+            high: approve[0].calldata[2],
+          })
       );
     }
 
@@ -132,6 +140,41 @@ const Execute = ({
     transactionsDetail,
   ]);
 
+  useEffect(() => {
+    if (!ethBalance || !ethApproved) {
+      return;
+    }
+    if (ethBalance.lt(ethApproved)) {
+      setLowEthInfo({
+        label: "Approved Eth",
+        balance: format(ethBalance),
+        max: format(ethApproved),
+        lowAmount: format(ethBalance.sub(ethApproved).mul(new BN("-1"))),
+        reject: () => {
+          onCancel({
+            code: ResponseCodes.CANCELED,
+            message: "Canceled",
+          });
+        },
+        onBridge: () => setBridging(true),
+      });
+    } else if (fees?.max && ethBalance.lt(ethApproved.add(fees.max))) {
+      setLowEthInfo({
+        label: "Network Fee",
+        balance: format(ethBalance),
+        max: format(ethApproved.add(fees.max)),
+        lowAmount: format(ethBalance.sub(ethApproved.add(fees.max)).mul(new BN("-1"))),
+        reject: () => {
+          onCancel({
+            code: ResponseCodes.CANCELED,
+            message: "Canceled",
+          });
+        },
+        onBridge: () => setBridging(true),
+      });
+    }
+  }, [ethBalance, ethApproved, fees?.max, onCancel]);
+
   const onSubmit = useCallback(async () => {
     setLoading(true);
     const response = await account.execute(calls, null, {
@@ -142,6 +185,24 @@ const Execute = ({
       code: ResponseCodes.SUCCESS,
     });
   }, [account, calls, fees, onExecute]);
+
+  if (bridging) {
+    return (
+      <Container>
+        <BridgeEth
+          chainId={chainId}
+          address={account.address}
+          onBack={() => setBridging(false)}
+          onClose={() => {
+            onCancel({
+              code: ResponseCodes.CANCELED,
+              message: "Canceled",
+            });
+          }}
+        />
+      </Container>
+    );
+  }
 
   return (
     <Container>
@@ -189,26 +250,33 @@ const Execute = ({
           ))}
         </VStack>
       </VStack>
-      <Footer
-        isLoading={isLoading}
-        isDisabled={!fees}
-        confirmText="Submit"
-        onConfirm={onSubmit}
-        onCancel={() => {
-          onCancel({
-            code: ResponseCodes.CANCELED,
-            message: "Canceled",
-          });
-        }}
-      >
-        <Fees
-          error={error}
-          chainId={chainId}
-          fees={fees}
-          balance={ethBalance}
-          approved={ethApproved}
-        />
-      </Footer>
+      {lowEthInfo ? (
+        <>
+          <Spacer />
+          <LowEth {...lowEthInfo} />
+        </>
+      ) : (
+        <Footer
+          isLoading={isLoading}
+          isDisabled={!fees}
+          confirmText="Submit"
+          onConfirm={onSubmit}
+          onCancel={() => {
+            onCancel({
+              code: ResponseCodes.CANCELED,
+              message: "Canceled",
+            });
+          }}
+        >
+          <Fees
+            error={error}
+            chainId={chainId}
+            fees={fees}
+            balance={ethBalance && format(ethBalance)}
+            approved={ethApproved && format(ethApproved)}
+          />
+        </Footer>
+      )}
     </Container>
   );
 };

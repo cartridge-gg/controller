@@ -43,6 +43,50 @@ export const Button: ComponentStyleConfig = {
         background: `${props.colorScheme}.400`,
       },
     }),
+    primary400: (props: StyleFunctionProps) => ({
+      fontSize: "12px",
+      color:
+        props.colorTheme === "red" ||
+        props.colorScheme === "purple" ||
+        props.colorScheme === "darkPurple"
+          ? "white"
+          : "gray.900",
+      background: `${props.colorScheme}.400`,
+      _hover: {
+        background: `${props.colorScheme}.300`,
+      },
+      ":hover:disabled": {
+        background: `${props.colorScheme}.800`,
+      },
+      _disabled: {
+        background: `${props.colorScheme}.800`,
+      },
+      _active: {
+        background: `${props.colorScheme}.400`,
+      },
+    }),
+    primaryDarken: (props: StyleFunctionProps) => ({
+      fontSize: "12px",
+      color:
+        props.colorTheme === "red" ||
+        props.colorScheme === "purple" ||
+        props.colorScheme === "darkPurple"
+          ? "white"
+          : "gray.900",
+      background: `${props.colorScheme}.200`,
+      _hover: {
+        background: `${props.colorScheme}.400`,
+      },
+      ":hover:disabled": {
+        background: `${props.colorScheme}.800`,
+      },
+      _disabled: {
+        background: `${props.colorScheme}.800`,
+      },
+      _active: {
+        background: `${props.colorScheme}.400`,
+      },
+    }),
     special: {
       fontSize: "13px",
       color: "brand",
