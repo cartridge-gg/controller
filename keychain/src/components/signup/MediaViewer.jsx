@@ -1,7 +1,10 @@
+import { Flex, Spinner } from "@chakra-ui/react";
 import Script from "next/script";
+import { useState } from "react";
 export const MediaViewer = (props) => {
   const ext = props.src?.split(".").pop();
   const { height, width, src } = props;
+  const [isLoading, setIsLoading] = useState(true);
   return (
     <>
       {ext === "glb" && (
@@ -10,17 +13,25 @@ export const MediaViewer = (props) => {
             async
             strategy="afterInteractive"
             type="module"
-            src="https://unpkg.com/@google/model-viewer@^2.1.1/dist/model-viewer.min.js"
+            src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.0.1/model-viewer.min.js"
+            onLoad={() => setIsLoading(false)}
           />
-          <model-viewer
-            camera-controls
-            src={src}
-            style={{ height: height, width: width }}
-          >
-            <div class="progress-bar hide" slot="progress-bar">
-              <div class="update-bar"></div>
-            </div>
-          </model-viewer>
+          <Flex height={height} width={width} align="center" justify="center">
+            {isLoading ? (
+              <Spinner />
+            ) : (
+              <model-viewer
+                loading="eager"
+                camera-controls
+                src={src}
+                style={{ height: height, width: width }}
+              >
+                <div class="progress-bar hide" slot="progress-bar">
+                  <div class="update-bar"></div>
+                </div>
+              </model-viewer>
+            )}
+          </Flex>
         </>
       )}
       {(ext === "jpg" || ext === "png" || ext === "gif") && (
