@@ -194,22 +194,22 @@ export const StarterPack = ({
     return <></>;
   }
 
-  if (claimData) {
-    // hardcode briq for now
-    const media =
-      starterData?.game.name === "Briq"
-        ? "https://storage.googleapis.com/c7e-prod-static/media/briq_cartridge_poap_nft_paris_1_7x16x11.glb"
-        : undefined;
-    return (
-      <ClaimSuccess
-        name={starterData?.game.name}
-        banner={starterData?.game.banner.uri}
-        url={starterData?.game.socials.website}
-        media={media}
-        fullPage={fullPage}
-      />
-    );
-  }
+  //if (claimData) {
+  // hardcode briq for now
+  const media =
+    starterData?.game.name === "Briq"
+      ? "https://storage.googleapis.com/c7e-prod-static/media/briq_cartridge_poap_nft_paris_1_7x16x11.glb"
+      : undefined;
+  return (
+    <ClaimSuccess
+      name={starterData?.game.name}
+      banner={starterData?.game.banner.uri}
+      url={starterData?.game.socials.website}
+      media={media}
+      fullPage={fullPage}
+    />
+  );
+  //}
 
   return (
     <Container position={fullPage ? "relative" : "fixed"}>
