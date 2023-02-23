@@ -56,6 +56,7 @@ export const ClaimSuccess = ({
   url: string;
   fullPage: boolean;
 }) => {
+  const domain = new URL(url);
   return (
     <>
       <Container position={fullPage ? "relative" : "fixed"}>
@@ -75,7 +76,7 @@ export const ClaimSuccess = ({
           <Text fontSize="12px" color="whiteAlpha.600" textAlign="center">
             Checkout{" "}
             <Link href={url} variant="traditional" isExternal>
-              {url}
+              {domain.hostname}
             </Link>{" "}
             to play on your desktop.
           </Text>
