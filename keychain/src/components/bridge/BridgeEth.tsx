@@ -1,17 +1,21 @@
 import Chevron from "@cartridge/ui/components/icons/Chevron";
-import { Box, Button, Circle, forwardRef, HStack, Input, Menu, MenuButton, MenuItem, MenuList, Spacer, Text, VStack } from "@chakra-ui/react";
+import { Box, Circle, forwardRef, HStack, Input, Menu, MenuButton, MenuItem, MenuList, Spacer, Text, VStack } from "@chakra-ui/react";
 import { configureChains, fetchBalance } from "@wagmi/core";
 import { alchemyProvider } from "@wagmi/core/providers/alchemy";
+import BN from "bn.js";
 import { Header } from "components/Header";
 import Check from "components/icons/Check";
 import EthereumLarge from "components/icons/EthereumLarge";
 import MetaMask from "components/icons/Metamask";
 import { useDebounce } from "hooks/debounce";
 import { useEffect, useState } from "react";
-import { constants } from "starknet";
+import { constants, uint256 } from "starknet";
 import { createClient, goerli, mainnet, WagmiConfig } from "wagmi";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import ConnectButton from "./ConnectButton";
+import EthL1BridgeABI from "./abis/EthL1Bridge.json";
+import { EthL1BridgeGoerli, EthL1BridgeMainnet } from "./constants";
+import TransferButton from "./TransferButton";
 
 const Label = ({
   color = "gray.200",
@@ -103,6 +107,7 @@ const BridgeEth = ({
   const { debouncedValue, debouncing } = useDebounce(transferAmount, 1000);
   const [transferAmountCost, setTransferAmountCost] = useState<string>();
   const [transferAmountInvalid, setTransferAmountInvalid] = useState<boolean>();
+  const [errorMessage, setErrorMessage] = useState<string>();
 
   useEffect(() => {
     if (!!ethAddress) {
@@ -155,7 +160,11 @@ const BridgeEth = ({
       return;
     } else if (debouncedValue) {
       compute();
-      setTransferAmountInvalid(!validateValue());
+      const valid = validateValue();
+      if (!valid) {
+        setErrorMessage("Insufficient ETH");
+      }
+      setTransferAmountInvalid(!valid);
     }
   }, [debouncing, debouncedValue, chainId, ethBalance]);
 
@@ -272,12 +281,42 @@ const BridgeEth = ({
         </HStack>
       </VStack>
       <Spacer />
-      <Button w="full" disabled={(
-        !!!ethAddress
-        || !!!transferAmount
-        || transferAmountInvalid
-        || debouncing
-      )}>Transfer</Button>
+      <Text color="red.200" mb="12px">{errorMessage}</Text>
+      <TransferButton
+        ethChain={
+          chainId === constants.StarknetChainId.MAINNET
+            ? mainnet
+            : goerli
+        }
+        ethContractABI={EthL1BridgeABI}
+        ethContractAddress={
+          chainId === constants.StarknetChainId.MAINNET
+            ? EthL1BridgeMainnet
+            : EthL1BridgeGoerli
+        }
+        ethContractFunctionName="deposit"
+        value={transferAmount}
+        args={[address]}
+        disabled={(
+          !!!ethAddress
+          || !!!transferAmount
+          || transferAmountInvalid
+          || debouncing
+        )}
+        onError={(error) => {
+          if (error === null) {
+            setErrorMessage(null);
+            return;
+          } else if (error.name === "ChainMismatchError") {
+            const networkName = chainId === constants.StarknetChainId.MAINNET
+              ? "mainnet"
+              : "goerli";
+            setErrorMessage(
+              `Please select the ${networkName} network in your wallet`
+            );
+          }
+        }}
+      />
     </WagmiConfig>
   );
 }
