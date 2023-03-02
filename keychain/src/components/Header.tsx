@@ -156,27 +156,41 @@ export const Header = ({
 
   return (
     <Container height="50px" bgColor="gray.700">
-      <HStack w="full">
-        <HStack spacing="0">
-          {!!onBack ? (
+      <HStack w="full" h="full">
+        {onBack ? (
+          <HStack
+            w="30px"
+            h="30px"
+            spacing="0"
+            justify="center"
+            onClick={onBack}
+            data-group
+            _hover={{
+              cursor: "pointer",
+            }}
+          >
             <ArrowIcon
-              onClick={onBack}
+              fill="whiteAlpha.700"
               transform="rotate(180deg)"
-              _hover={{
-                cursor: "pointer",
+              _groupHover={{
+                fill: "white",
               }}
             />
-          ) : (
-            <Logo fill="brand" w="24px" mr="15px" />
-          )}
-        </HStack>
+          </HStack>
+        ) : (
+          <Logo fill="brand" w="24px" mr="15px" />
+        )}
         <Spacer />
         <HStack spacing="6px">
           <Chain name={chainName} />
-          <Box minW="90px">
+          <Box minW="70px">
             <HeaderItem>
               <Ether w="12px" h="12px" />
-              {!!ethBalance && <Text>{parseFloat(ethBalance).toFixed(4)}</Text>}
+              {!!ethBalance && (
+                <Text fontWeight="700" letterSpacing="0.05em">
+                  {parseFloat(ethBalance).toFixed(3)}
+                </Text>
+              )}
               {!ethBalance && (
                 <Loading fill="white" width="12px" height="12px" />
               )}
@@ -208,16 +222,25 @@ export const Header = ({
               </Box>
             </Tooltip>
           )}
-          <Button
+          <HStack
+            w="24px"
             h="30px"
-            w="42px"
-            variant="secondary450"
-            bgColor="gray.600"
+            justify="end"
             visibility={!!onClose ? "visible" : "hidden"}
+            data-group
+            _hover={{
+              cursor: "pointer",
+            }}
             onClick={onClose}
           >
-            <TimesIcon boxSize="18px" />
-          </Button>
+            <TimesIcon
+              boxSize="18px"
+              fill="whiteAlpha.700"
+              _groupHover={{
+                fill: "white",
+              }}
+            />
+          </HStack>
         </HStack>
       </HStack>
     </Container>

@@ -1,17 +1,12 @@
 import { Image, Text } from "@chakra-ui/react";
 import { HeaderItem } from "@cartridge/ui/src/components/HeaderItem";
+import StarknetGray from "../icons/StarknetGray";
 
 const Chain = ({ name }: { name: string; }) => {
   return (
     <HeaderItem>
-      <Image
-        w="14px"
-        h="14px"
-        src="https://static.cartridge.gg/starknet-logo.png"
-        filter="saturate(0) invert(100%);"
-        alt="Chain icon"
-      />
-      <Text textTransform="uppercase" fontWeight="700">{name}</Text>
+      <StarknetGray boxSize="14px" />
+      <Text textTransform="uppercase" fontWeight="700" letterSpacing="0.05em">{name}</Text>
     </HeaderItem>
   );
 };
