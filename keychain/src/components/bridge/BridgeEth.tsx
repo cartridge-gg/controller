@@ -1,5 +1,18 @@
 import Chevron from "@cartridge/ui/components/icons/Chevron";
-import { Box, Circle, forwardRef, HStack, Input, Menu, MenuButton, MenuItem, MenuList, Spacer, Text, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  Circle,
+  forwardRef,
+  HStack,
+  Input,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Spacer,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
 import { configureChains, fetchBalance } from "@wagmi/core";
 import { alchemyProvider } from "@wagmi/core/providers/alchemy";
 import { Header } from "components/Header";
@@ -18,11 +31,14 @@ import TransferButton from "./TransferButton";
 import Transactions from "./Transactions";
 import Label from "components/Label";
 
-const SelectBox = forwardRef<{
-  leftIcon: React.ReactNode;
-  rightIcon: React.ReactNode;
-  text: string;
-}, typeof HStack>((props, ref) => (
+const SelectBox = forwardRef<
+  {
+    leftIcon: React.ReactNode;
+    rightIcon: React.ReactNode;
+    text: string;
+  },
+  typeof HStack
+>((props, ref) => (
   <HStack
     h="40px"
     p="12px 14px"
@@ -44,13 +60,16 @@ const { chains, provider } = configureChains(
   [mainnet, goerli],
   [
     alchemyProvider({
-      apiKey: process.env.NEXT_PUBLIC_ETH_RPC_MAINNET.replace(/^.+\/v2\//, "$`")
+      apiKey: process.env.NEXT_PUBLIC_ETH_RPC_MAINNET.replace(
+        /^.+\/v2\//,
+        "$`",
+      ),
     }),
     alchemyProvider({
-      apiKey: process.env.NEXT_PUBLIC_ETH_RPC_GOERLI.replace(/^.+\/v2\//, "$`")
+      apiKey: process.env.NEXT_PUBLIC_ETH_RPC_GOERLI.replace(/^.+\/v2\//, "$`"),
     }),
   ],
-)
+);
 
 const ethereumClient = createClient({
   provider,
@@ -97,17 +116,15 @@ const BridgeEth = ({
       const balance = async () => {
         return await fetchBalance({
           address: ethAddress as any,
-          chainId: chainId === constants.StarknetChainId.MAINNET
-            ? mainnet.id
-            : goerli.id
+          chainId:
+            chainId === constants.StarknetChainId.MAINNET
+              ? mainnet.id
+              : goerli.id,
         });
-      }
-      balance()
-        .then((res) => {
-          setEthBalance(
-            parseFloat(res.formatted).toFixed(4),
-          )
-        });
+      };
+      balance().then((res) => {
+        setEthBalance(parseFloat(res.formatted).toFixed(4));
+      });
     } else {
       setEthBalance(undefined);
     }
@@ -122,7 +139,7 @@ const BridgeEth = ({
         const cost = inputValue * usdeth;
         const dollarUSLocale = Intl.NumberFormat("en-US");
         setTransferAmountCost(
-          `~$${dollarUSLocale.format(parseFloat(cost.toFixed(2)))}`
+          `~$${dollarUSLocale.format(parseFloat(cost.toFixed(2)))}`,
         );
         return;
       }
@@ -193,15 +210,23 @@ const BridgeEth = ({
               <MenuButton
                 as={SelectBox}
                 leftIcon={<MetaMask />}
-                rightIcon={!!ethAddress
-                  ? <Check color="whiteAlpha.400" />
-                  : <Chevron direction="down" boxSize="7px" color="whiteAlpha.400" />
+                rightIcon={
+                  !!ethAddress ? (
+                    <Check color="whiteAlpha.400" />
+                  ) : (
+                    <Chevron
+                      direction="down"
+                      boxSize="7px"
+                      color="whiteAlpha.400"
+                    />
+                  )
                 }
-                text={!!ethAddress
-                  ? ethAddress.substring(0, 3)
-                  + "..."
-                  + ethAddress.substring(ethAddress.length - 4)
-                  : "Metamask"
+                text={
+                  !!ethAddress
+                    ? ethAddress.substring(0, 3) +
+                      "..." +
+                      ethAddress.substring(ethAddress.length - 4)
+                    : "Metamask"
                 }
                 pointerEvents={!!ethAddress ? "none" : "auto"}
               />
@@ -226,7 +251,10 @@ const BridgeEth = ({
           <Label>Transfer Amount</Label>
           <Spacer />
           <Label color="gray.400">
-            Available <Text display="inline" color="gray.200" pl="12px">{ethBalance ? ethBalance + " ETH" : "---"}</Text>
+            Available{" "}
+            <Text display="inline" color="gray.200" pl="12px">
+              {ethBalance ? ethBalance + " ETH" : "---"}
+            </Text>
           </Label>
         </HStack>
         <HStack
@@ -282,12 +310,12 @@ const BridgeEth = ({
         </HStack>
       </VStack>
       <Spacer />
-      <Text color="red.200" mb="12px">{errorMessage}</Text>
+      <Text color="red.200" mb="12px">
+        {errorMessage}
+      </Text>
       <TransferButton
         ethChain={
-          chainId === constants.StarknetChainId.MAINNET
-            ? mainnet
-            : goerli
+          chainId === constants.StarknetChainId.MAINNET ? mainnet : goerli
         }
         ethContractABI={EthL1BridgeABI}
         ethContractAddress={
@@ -298,22 +326,23 @@ const BridgeEth = ({
         ethContractFunctionName="deposit"
         value={transferAmount}
         args={[address]}
-        disabled={(
-          !!!ethAddress
-          || !!!transferAmount
-          || transferAmountInvalid
-          || debouncing
-        )}
+        disabled={
+          !!!ethAddress ||
+          !!!transferAmount ||
+          transferAmountInvalid ||
+          debouncing
+        }
         onError={(error) => {
           if (error === null) {
             setErrorMessage(null);
             return;
           } else if (error.name === "ChainMismatchError") {
-            const networkName = chainId === constants.StarknetChainId.MAINNET
-              ? "mainnet"
-              : "goerli";
+            const networkName =
+              chainId === constants.StarknetChainId.MAINNET
+                ? "mainnet"
+                : "goerli";
             setErrorMessage(
-              `Please select the ${networkName} network in your wallet`
+              `Please select the ${networkName} network in your wallet`,
             );
           }
         }}
@@ -323,6 +352,6 @@ const BridgeEth = ({
       />
     </WagmiConfig>
   );
-}
+};
 
 export default BridgeEth;

@@ -12,7 +12,7 @@ const TransferButton = ({
   args,
   disabled,
   onError,
-  onTxSubmitted
+  onTxSubmitted,
 }: {
   ethChain: Chain;
   ethContractAddress: `0x${string}`;
@@ -31,8 +31,8 @@ const TransferButton = ({
     functionName: ethContractFunctionName,
     args: args,
     overrides: {
-      value: value ? parseEther(value) : undefined
-    }
+      value: value ? parseEther(value) : undefined,
+    },
   });
   const { data, write } = useContractWrite(config);
 
@@ -49,13 +49,9 @@ const TransferButton = ({
   }, [configError, onError, data?.hash, onTxSubmitted]);
 
   return (
-    <Button
-      w="full"
-      disabled={
-        disabled || !write
-      }
-      onClick={() => write?.()}
-    >Transfer</Button>
+    <Button w="full" disabled={disabled || !write} onClick={() => write?.()}>
+      Transfer
+    </Button>
   );
 };
 

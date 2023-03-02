@@ -66,11 +66,13 @@ const Execute = ({
   }, [transactions]);
 
   const format = (bn: BN) => {
-    return Number(utils.formatEther(bn.toString()))
-      .toFixed(5)
-      // strips trailing 0s
-      .replace(/0*$/, "$'");
-  }
+    return (
+      Number(utils.formatEther(bn.toString()))
+        .toFixed(5)
+        // strips trailing 0s
+        .replace(/0*$/, "$'")
+    );
+  };
 
   useEffect(() => {
     account
@@ -82,16 +84,14 @@ const Execute = ({
       .then((res) => {
         setEthBalance(
           new BN(
-            res.result.map(
-              (r) => r.replace("0x", "")
-            )
+            res.result
+              .map((r) => r.replace("0x", ""))
               .reverse()
               .join(""),
             16,
-          )
-        )
-      }
-      );
+          ),
+        );
+      });
   }, [account, controller]);
 
   // Estimate fees
@@ -115,11 +115,10 @@ const Execute = ({
 
     if (approve.length > 0) {
       setEthApproved(
-        uint256
-          .uint256ToBN({
-            low: approve[0].calldata[1],
-            high: approve[0].calldata[2],
-          })
+        uint256.uint256ToBN({
+          low: approve[0].calldata[1],
+          high: approve[0].calldata[2],
+        }),
       );
     }
 
@@ -163,7 +162,9 @@ const Execute = ({
         label: "Network Fee",
         balance: format(ethBalance),
         max: format(ethApproved.add(fees.max)),
-        lowAmount: format(ethBalance.sub(ethApproved.add(fees.max)).mul(new BN("-1"))),
+        lowAmount: format(
+          ethBalance.sub(ethApproved.add(fees.max)).mul(new BN("-1")),
+        ),
         reject: () => {
           onCancel({
             code: ResponseCodes.CANCELED,

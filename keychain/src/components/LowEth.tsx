@@ -27,12 +27,7 @@ const LowEth = ({
       borderTop="1px solid"
       borderTopColor="gray.700"
     >
-      <HStack
-        w="full"
-        borderRadius="6px"
-        bgColor="gray.700"
-        p="12px 18px"
-      >
+      <HStack w="full" borderRadius="6px" bgColor="gray.700" p="12px 18px">
         <HStack color="gray.200" w="full">
           <Text
             color="currentColor"
@@ -80,10 +75,7 @@ const LowEth = ({
             Error Expected
           </Text>
         </HStack>
-        <Text
-          fontSize="13px"
-          color="yellow.800"
-        >
+        <Text fontSize="13px" color="yellow.800">
           You do not have enough ETH to complete the above transaction
         </Text>
         <HStack w="full">
@@ -107,6 +99,6 @@ const LowEth = ({
       </VStack>
     </VStack>
   );
-}
+};
 
 export default LowEth;

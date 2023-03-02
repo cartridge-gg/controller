@@ -11,7 +11,7 @@ import { goerli, mainnet, useWaitForTransaction } from "wagmi";
 enum CardState {
   PENDING = "PENDING",
   COMPLETE = "COMPLETE",
-};
+}
 
 const Card = ({
   state,
@@ -29,15 +29,15 @@ const Card = ({
   children: React.ReactNode;
 }) => {
   const { data } = useWaitForTransaction({
-    chainId: chainId === constants.StarknetChainId.MAINNET ? mainnet.id : goerli.id,
+    chainId:
+      chainId === constants.StarknetChainId.MAINNET ? mainnet.id : goerli.id,
     hash: ethTxnHash as `0x${string}`,
     enabled: state === CardState.PENDING,
   });
 
   useEffect(() => {
-    if (data !== undefined)
-      onConfirmed?.();
-  }, [data, onConfirmed])
+    if (data !== undefined) onConfirmed?.();
+  }, [data, onConfirmed]);
 
   return (
     <HStack
@@ -49,24 +49,22 @@ const Card = ({
       spacing="12px"
     >
       <Circle bgColor="gray.600" size="30px">
-        {state === CardState.PENDING
-          ? (<Loading width="12px" height="12px" fill="white" />)
-          : (<Check boxSize="18px" fill="green.400" />)
-        }
+        {state === CardState.PENDING ? (
+          <Loading width="12px" height="12px" fill="white" />
+        ) : (
+          <Check boxSize="18px" fill="green.400" />
+        )}
       </Circle>
       {children}
       <Spacer />
-      <Link
-        href={href}
-        isExternal
-      >
+      <Link href={href} isExternal>
         <HStack px="13px" h="full">
           <LinkIcon color="blue.400" boxSize="12px" />
         </HStack>
       </Link>
     </HStack>
   );
-}
+};
 
 const TxnTracker = ({
   address,
@@ -77,14 +75,13 @@ const TxnTracker = ({
   chainId: constants.StarknetChainId;
   ethTxnHash: string;
 }) => {
-  const [txn, setTxn] = useState<{ hash: string, state: CardState }>({
+  const [txn, setTxn] = useState<{ hash: string; state: CardState }>({
     hash: ethTxnHash,
     state: CardState.PENDING,
   });
-  const etherscanSubdomain = chainId === constants.StarknetChainId.MAINNET ? "" : "goerli.";
-  const etherscanHref = (
-    `https://${etherscanSubdomain}etherscan.io/tx/${ethTxnHash}`
-  );
+  const etherscanSubdomain =
+    chainId === constants.StarknetChainId.MAINNET ? "" : "goerli.";
+  const etherscanHref = `https://${etherscanSubdomain}etherscan.io/tx/${ethTxnHash}`;
 
   return (
     <VStack w="full" align="start" spacing="24px">
@@ -153,6 +150,6 @@ const TxnTracker = ({
       )}
     </VStack>
   );
-}
+};
 
 export default TxnTracker;
