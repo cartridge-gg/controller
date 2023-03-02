@@ -11,15 +11,13 @@ import { Error } from "@cartridge/controller/src/types";
 import { Header } from "./Header";
 import Transfer from "./icons/Transfer";
 
-const DataContainer = (
-  {
-    title,
-    children,
-  }: {
-    title: string,
-    children: React.ReactNode,
-  }
-) => {
+const DataContainer = ({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) => {
   return (
     <Flex
       direction="column"
@@ -48,7 +46,7 @@ const DataContainer = (
         },
         "> p:not(p:last-of-type)": {
           borderBottom: "1px solid var(--chakra-colors-gray-800)",
-        }
+        },
       }}
     >
       <>
@@ -57,7 +55,7 @@ const DataContainer = (
       </>
     </Flex>
   );
-}
+};
 
 const SignMessage = ({
   controller,
@@ -118,19 +116,23 @@ const SignMessage = ({
         }
       />
       <Spacer minH="36px" />
-      <Flex
-        direction="column"
-        align="start"
-        gap="18px"
-        w="full"
-      >
-        <HStack w="full" pb="24px" borderBottom="1px solid" borderColor="gray.700">
+      <Flex direction="column" align="start" gap="18px" w="full">
+        <HStack
+          w="full"
+          pb="24px"
+          borderBottom="1px solid"
+          borderColor="gray.700"
+        >
           <Circle bgColor="gray.700" size="40px">
             <Transfer color="green.400" fontSize="30px" />
           </Circle>
           <VStack align="start">
-            <Text fontSize="17px" lineHeight="20px" fontWeight="600">Signature Request</Text>
-            <Text color="gray.200" fontSize="12px" lineHeight="16px">{origin} is asking you to sign a message</Text>
+            <Text fontSize="17px" lineHeight="20px" fontWeight="600">
+              Signature Request
+            </Text>
+            <Text color="gray.200" fontSize="12px" lineHeight="16px">
+              {origin} is asking you to sign a message
+            </Text>
           </VStack>
         </HStack>
         {(() => {
@@ -143,20 +145,17 @@ const SignMessage = ({
               return Object.entries(v).map(([key, value]) => {
                 return (
                   <Text key={key}>
-                    <Text
-                      as="span"
-                      opacity="50%"
-                      textTransform="capitalize"
-                    >
+                    <Text as="span" opacity="50%" textTransform="capitalize">
                       {key}:
-                    </Text> {value}
+                    </Text>{" "}
+                    {value}
                   </Text>
-                )
-              })
+                );
+              });
             } else {
               return <Text>{v as string}</Text>;
             }
-          }
+          };
 
           return pt.map((typ) => {
             return (

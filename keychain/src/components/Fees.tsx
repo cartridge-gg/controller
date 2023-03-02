@@ -41,6 +41,7 @@ const Fees = ({
     base: string;
     max: string;
   }>();
+
   useEffect(() => {
     if (!fees || !balance) {
       return;

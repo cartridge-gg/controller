@@ -22,6 +22,7 @@
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
     "@solana/web3.js": "^1.73.0",
+    "@wagmi/core": "^0.9.7",
     "@web3auth/base": "^4.2.2",
     "@web3auth/core": "^4.2.2",
     "@web3auth/openlogin-adapter": "^4.2.2",
@@ -45,7 +46,8 @@
     "react-query": "^3.39.2",
     "starknet": "^4.17.1",
     "use-sound": "^4.0.1",
-    "usehooks-ts": "^2.9.1"
+    "usehooks-ts": "^2.9.1",
+    "wagmi": "^0.11.7"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^2.6.2",

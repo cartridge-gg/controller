@@ -1,7 +1,9 @@
+import { createMultiStyleConfigHelpers } from "@chakra-ui/react";
 import type { ComponentMultiStyleConfig } from "@chakra-ui/theme";
 
-export const Menu: ComponentMultiStyleConfig = {
-  parts: ["button", "item", "list", "divider"],
+const helpers = createMultiStyleConfigHelpers(['menu', 'item', 'list', 'divider']);
+
+export const Menu: ComponentMultiStyleConfig = helpers.defineMultiStyleConfig({
   baseStyle: {
     button: {
       paddingX: "14px",
@@ -29,4 +31,24 @@ export const Menu: ComponentMultiStyleConfig = {
       transition: "color 0.2s ease",
     },
   },
-};
+  variants: {
+    select: {
+      button: {
+        w: "full",
+        fontSize: "14px",
+        background: "none",
+        borderRadius: "0",
+        _hover: {
+          background: "none",
+        },
+      },
+      list: {
+        borderRadius: "4px",
+      },
+      item: {
+        color: "white",
+        fontWeight: "normal",
+      },
+    },
+  },
+});
