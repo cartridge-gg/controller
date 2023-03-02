@@ -12,6 +12,7 @@ const TransferButton = ({
   args,
   disabled,
   onError,
+  onTxSubmitted
 }: {
   ethChain: Chain;
   ethContractAddress: `0x${string}`;
@@ -21,6 +22,7 @@ const TransferButton = ({
   args: any[];
   disabled: boolean;
   onError: (err: any) => void;
+  onTxSubmitted: (hash: string) => void;
 }) => {
   const { config, error: configError } = usePrepareContractWrite({
     chainId: ethChain.id,
@@ -41,7 +43,10 @@ const TransferButton = ({
       // reset err message
       onError(null);
     }
-  }, [configError, onError]);
+    if (data?.hash) {
+      onTxSubmitted(data.hash);
+    }
+  }, [configError, onError, data?.hash, onTxSubmitted]);
 
   return (
     <Button

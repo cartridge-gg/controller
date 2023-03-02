@@ -2,39 +2,21 @@ import Chevron from "@cartridge/ui/components/icons/Chevron";
 import { Box, Circle, forwardRef, HStack, Input, Menu, MenuButton, MenuItem, MenuList, Spacer, Text, VStack } from "@chakra-ui/react";
 import { configureChains, fetchBalance } from "@wagmi/core";
 import { alchemyProvider } from "@wagmi/core/providers/alchemy";
-import BN from "bn.js";
 import { Header } from "components/Header";
 import Check from "components/icons/Check";
 import EthereumLarge from "components/icons/EthereumLarge";
 import MetaMask from "components/icons/Metamask";
 import { useDebounce } from "hooks/debounce";
 import { useEffect, useState } from "react";
-import { constants, uint256 } from "starknet";
+import { constants } from "starknet";
 import { createClient, goerli, mainnet, WagmiConfig } from "wagmi";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import ConnectButton from "./ConnectButton";
 import EthL1BridgeABI from "./abis/EthL1Bridge.json";
 import { EthL1BridgeGoerli, EthL1BridgeMainnet } from "./constants";
 import TransferButton from "./TransferButton";
-
-const Label = ({
-  color = "gray.200",
-  children
-}: {
-  color?: string;
-  children: React.ReactNode;
-}) => (
-  <Text
-    fontSize="10px"
-    fontWeight="700"
-    lineHeight="16px"
-    letterSpacing="0.08em"
-    textTransform="uppercase"
-    color={color}
-  >
-    {children}
-  </Text>
-);
+import Transactions from "./Transactions";
+import Label from "components/Label";
 
 const SelectBox = forwardRef<{
   leftIcon: React.ReactNode;
@@ -108,6 +90,7 @@ const BridgeEth = ({
   const [transferAmountCost, setTransferAmountCost] = useState<string>();
   const [transferAmountInvalid, setTransferAmountInvalid] = useState<boolean>();
   const [errorMessage, setErrorMessage] = useState<string>();
+  const [transferHash, setTransferHash] = useState<string>();
 
   useEffect(() => {
     if (!!ethAddress) {
@@ -167,6 +150,24 @@ const BridgeEth = ({
       setTransferAmountInvalid(!valid);
     }
   }, [debouncing, debouncedValue, chainId, ethBalance]);
+
+  if (transferHash) {
+    return (
+      <WagmiConfig client={ethereumClient}>
+        <Header
+          chainId={chainId}
+          address={address}
+          onBack={onBack}
+          onClose={onClose}
+        />
+        <Transactions
+          address={address}
+          chainId={chainId}
+          ethTxnHash={transferHash}
+        />
+      </WagmiConfig>
+    );
+  }
 
   return (
     <WagmiConfig client={ethereumClient}>
@@ -315,6 +316,9 @@ const BridgeEth = ({
               `Please select the ${networkName} network in your wallet`
             );
           }
+        }}
+        onTxSubmitted={(hash) => {
+          setTransferHash(hash);
         }}
       />
     </WagmiConfig>
