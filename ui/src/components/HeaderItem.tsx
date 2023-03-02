@@ -9,7 +9,8 @@ export const HeaderItem = ({
 }) => {
   return (
     <HStack
-      p="6px 18px"
+      p="6px 12px"
+      spacing="4px"
       justify="center"
       fontSize="10px"
       lineHeight="18px"

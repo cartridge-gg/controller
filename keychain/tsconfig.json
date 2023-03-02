@@ -29,7 +29,7 @@
     "**/*.ts",
     "**/*.tsx",
     "src/components/ModelViewer.jsx"
-  ],
+, "../ui/src/components/icons/StarknetGray.tsx"  ],
   "exclude": ["node_modules"],
   "references": [
     {
