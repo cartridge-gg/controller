@@ -233,7 +233,7 @@ class Account extends BaseAccount {
         nonce: number
           .toBN(transactionsDetail.nonce)
           .add(number.toBN(2))
-          .toString(),
+          .toString(16),
       });
 
       this.gateway
@@ -253,7 +253,7 @@ class Account extends BaseAccount {
       nonce: number
         .toBN(transactionsDetail.nonce)
         .add(number.toBN(1))
-        .toString(),
+        .toString(16),
     });
 
     this.gateway

@@ -193,10 +193,10 @@ const Index: NextPage = () => {
                   : [transactions];
                 const policies = calls.map(
                   (txn) =>
-                    ({
-                      target: txn.contractAddress,
-                      method: txn.entrypoint,
-                    } as Policy),
+                  ({
+                    target: txn.contractAddress,
+                    method: txn.entrypoint,
+                  } as Policy),
                 );
 
                 const missing = diff(policies, session.policies);
@@ -317,6 +317,48 @@ const Index: NextPage = () => {
     return <></>;
   }
 
+  const onConnect = async ({
+    context,
+    policies,
+    maxFee,
+  }: {
+    context: Context,
+    policies: Policy[];
+    maxFee: string;
+  }) => {
+    if (account.status === Status.COUNTERFACTUAL) {
+      // TODO: Deploy?
+      context.resolve({
+        code: ResponseCodes.SUCCESS,
+        address: controller.address,
+        policies,
+      } as any);
+      return;
+    }
+
+    // This device needs to be registered, so do a webauthn signature request
+    // for the register transaction during the connect flow.
+    if (account.status === Status.DEPLOYED) {
+      try {
+        await account.register();
+      } catch (e) {
+        context.resolve({
+          code: ResponseCodes.CANCELED,
+          message: "Canceled",
+        } as Error);
+        return;
+      }
+    }
+
+    controller.approve(context.origin, policies, maxFee);
+
+    context.resolve({
+      code: ResponseCodes.SUCCESS,
+      address: controller.address,
+      policies,
+    } as any);
+  }
+
   // No controller, send to login
   if (!controller) {
     return (
@@ -339,7 +381,7 @@ const Index: NextPage = () => {
     );
   }
 
-  const account = controller.account(chainId);
+  const account = controller.account((context as any).transactionsDetail?.chainId ?? chainId);
   const sesh = controller.session(context.origin);
 
   if (context.type === "connect" || !sesh) {
@@ -360,45 +402,11 @@ const Index: NextPage = () => {
         chainId={chainId}
         origin={ctx.origin}
         policys={ctx.type === "connect" ? (ctx as Connect).policies : []}
-        onConnect={async ({
-          policies,
-          maxFee,
-        }: {
-          policies: Policy[];
-          maxFee: string;
-        }) => {
-          if (account.status === Status.COUNTERFACTUAL) {
-            // TODO: Deploy?
-            ctx.resolve({
-              code: ResponseCodes.SUCCESS,
-              address: controller.address,
-              policies,
-            });
-            return;
-          }
-
-          // This device needs to be registered, so do a webauthn signature request
-          // for the register transaction during the connect flow.
-          if (account.status === Status.DEPLOYED) {
-            try {
-              await account.register();
-            } catch (e) {
-              ctx.resolve({
-                code: ResponseCodes.CANCELED,
-                message: "Canceled",
-              } as Error);
-              return;
-            }
-          }
-
-          controller.approve(ctx.origin, policies, maxFee);
-
-          ctx.resolve({
-            code: ResponseCodes.SUCCESS,
-            address: controller.address,
-            policies,
-          });
-        }}
+        onConnect={() => onConnect({
+          context: ctx,
+          policies: [],
+          maxFee: "",
+        })}
         onCancel={(error: Error) => ctx.resolve(error)}
       />
     );
@@ -446,6 +454,22 @@ const Index: NextPage = () => {
     const ctx = context as Execute;
     const _chainId = ctx.transactionsDetail?.chainId ?? chainId;
     const account = controller.account(_chainId);
+
+    if (account.status === Status.DEPLOYED) {
+      return (
+        <Connect
+          origin={ctx.origin}
+          chainId={_chainId}
+          policys={[]}
+          onConnect={() => onConnect({
+            context: ctx,
+            policies: [],
+            maxFee: "",
+          })}
+          onCancel={(error: Error) => ctx.resolve(error)}
+        />
+      );
+    }
 
     if (account.status === Status.COUNTERFACTUAL) {
       return (
