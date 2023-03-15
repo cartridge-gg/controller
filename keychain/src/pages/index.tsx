@@ -176,6 +176,7 @@ const Index: NextPage = () => {
                 }
 
                 const account = controller.account(cId);
+
                 if (
                   !(
                     account.status === Status.REGISTERED ||
@@ -193,10 +194,10 @@ const Index: NextPage = () => {
                   : [transactions];
                 const policies = calls.map(
                   (txn) =>
-                    ({
-                      target: txn.contractAddress,
-                      method: txn.entrypoint,
-                    } as Policy),
+                  ({
+                    target: txn.contractAddress,
+                    method: txn.entrypoint,
+                  } as Policy),
                 );
 
                 const missing = diff(policies, session.policies);
@@ -339,10 +340,10 @@ const Index: NextPage = () => {
     );
   }
 
-  const account = controller.account(chainId);
+  const account = controller.account((context as any).transactionsDetail?.chainId ?? chainId,);
   const sesh = controller.session(context.origin);
 
-  if (context.type === "connect" || !sesh) {
+  if (context.type === "connect" || !sesh || account.status === Status.DEPLOYED) {
     const ctx = context as Connect;
 
     // if no mismatch with existing policies then return success
