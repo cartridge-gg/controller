@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Error as ErrorReply, ResponseCodes } from "@cartridge/controller";
 import { constants, addAddressPadding } from "starknet";
 import Container from "components/Container";
