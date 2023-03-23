@@ -193,10 +193,10 @@ const Index: NextPage = () => {
                   : [transactions];
                 const policies = calls.map(
                   (txn) =>
-                  ({
-                    target: txn.contractAddress,
-                    method: txn.entrypoint,
-                  } as Policy),
+                    ({
+                      target: txn.contractAddress,
+                      method: txn.entrypoint,
+                    } as Policy),
                 );
 
                 const missing = diff(policies, session.policies);
@@ -322,7 +322,7 @@ const Index: NextPage = () => {
     policies,
     maxFee,
   }: {
-    context: Context,
+    context: Context;
     policies: Policy[];
     maxFee: string;
   }) => {
@@ -357,7 +357,7 @@ const Index: NextPage = () => {
       address: controller.address,
       policies,
     } as any);
-  }
+  };
 
   // No controller, send to login
   if (!controller) {
@@ -381,7 +381,9 @@ const Index: NextPage = () => {
     );
   }
 
-  const account = controller.account((context as any).transactionsDetail?.chainId ?? chainId);
+  const account = controller.account(
+    (context as any).transactionsDetail?.chainId ?? chainId,
+  );
   const sesh = controller.session(context.origin);
 
   if (context.type === "connect" || !sesh) {
@@ -402,11 +404,13 @@ const Index: NextPage = () => {
         chainId={chainId}
         origin={ctx.origin}
         policys={ctx.type === "connect" ? (ctx as Connect).policies : []}
-        onConnect={() => onConnect({
-          context: ctx,
-          policies: [],
-          maxFee: "",
-        })}
+        onConnect={() =>
+          onConnect({
+            context: ctx,
+            policies: [],
+            maxFee: "",
+          })
+        }
         onCancel={(error: Error) => ctx.resolve(error)}
       />
     );
@@ -461,11 +465,13 @@ const Index: NextPage = () => {
           origin={ctx.origin}
           chainId={_chainId}
           policys={[]}
-          onConnect={() => onConnect({
-            context: ctx,
-            policies: [],
-            maxFee: "",
-          })}
+          onConnect={() =>
+            onConnect({
+              context: ctx,
+              policies: [],
+              maxFee: "",
+            })
+          }
           onCancel={(error: Error) => ctx.resolve(error)}
         />
       );

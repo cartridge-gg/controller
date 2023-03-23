@@ -100,6 +100,24 @@ export const Button: ComponentStyleConfig = {
         background: "gray.700",
       },
     },
+    dark: {
+      fontSize: "12px",
+      color: "gray.200",
+      border: "1px solid",
+      borderColor: "gray.700",
+      _hover: {
+        borderColor: "gray.700",
+        backgroundColor: "gray.700",
+        color: "white",
+      },
+      ":hover:disabled": {
+        cursor: "not-allowed",
+        background: "gray.500",
+      },
+      _disabled: {
+        background: "gray.500",
+      },
+    },
     accent: {
       fontSize: "12px",
       color: "brand",

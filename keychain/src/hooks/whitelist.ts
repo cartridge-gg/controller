@@ -30,6 +30,12 @@ export const useWhitelist = (): {
         return;
       }
 
+      if (domain.hostname.endsWith("preview.cartridge.gg")) {
+        setSignupEnabled(true);
+        setWeb3AuthEnabled(true);
+        return;
+      }
+
       if (domain.hostname.endsWith("cartridge.gg")) {
         setSignupEnabled(false);
         setWeb3AuthEnabled(false);
