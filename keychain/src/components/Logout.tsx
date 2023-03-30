@@ -1,4 +1,11 @@
-import { Button, Circle, Divider, Spacer, Text, VStack } from "@chakra-ui/react";
+import {
+  Button,
+  Circle,
+  Divider,
+  Spacer,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
 import Container from "./Container";
 import { Header } from "./Header";
 import LogoutLarge from "./icons/LogoutLarge";
@@ -29,12 +36,7 @@ const Logout = ({
           <Button w="full" onClick={onConfirm}>
             Log Out
           </Button>
-          <Button
-            variant="dark"
-            w="full"
-            bgColor="gray.700"
-            onClick={onCancel}
-          >
+          <Button variant="dark" w="full" bgColor="gray.700" onClick={onCancel}>
             Cancel
           </Button>
         </VStack>

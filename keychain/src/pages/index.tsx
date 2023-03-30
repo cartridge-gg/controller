@@ -199,10 +199,10 @@ const Index: NextPage = () => {
                   : [transactions];
                 const policies = calls.map(
                   (txn) =>
-                  ({
-                    target: txn.contractAddress,
-                    method: txn.entrypoint,
-                  } as Policy),
+                    ({
+                      target: txn.contractAddress,
+                      method: txn.entrypoint,
+                    } as Policy),
                 );
 
                 const missing = diff(policies, session.policies);
@@ -385,7 +385,7 @@ const Index: NextPage = () => {
         )}
       </>
     );
-  };
+  }
 
   const onLogout = (context: Context) => {
     setContext({
@@ -444,10 +444,12 @@ const Index: NextPage = () => {
             message: "User logged out",
           });
         }}
-        onCancel={() => ctx.resolve({
-          code: ResponseCodes.CANCELED,
-          message: "User cancelled logout",
-        })}
+        onCancel={() =>
+          ctx.resolve({
+            code: ResponseCodes.CANCELED,
+            message: "User cancelled logout",
+          })
+        }
       />
     );
   }

@@ -138,10 +138,7 @@ export const Login = ({
 
   return (
     <Container gap="18px" position={fullPage ? "relative" : "fixed"}>
-      <Header
-        chainId={chainId}
-        onClose={onCancel}
-      />
+      <Header chainId={chainId} onClose={onCancel} />
       <HStack spacing="14px" pt="36px">
         <Circle size="48px" bgColor="gray.700">
           <Fingerprint boxSize="30px" />
@@ -205,8 +202,8 @@ export const Login = ({
                           canContinue
                             ? "green.400"
                             : nameError
-                              ? "red.400"
-                              : "gray.600"
+                            ? "red.400"
+                            : "gray.600"
                         }
                         onChange={(e) => {
                           setName(e.target.value);

@@ -16,6 +16,3 @@ const Wallet = (props: any) => {
 };
 
 export default Wallet;
-
-
-

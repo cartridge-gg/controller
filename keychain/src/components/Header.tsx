@@ -36,7 +36,6 @@ import ArrowIcon from "@cartridge/ui/components/icons/Arrow";
 import Chevron from "@cartridge/ui/components/icons/Chevron";
 import Copy from "@cartridge/ui/components/icons/Copy";
 import Logout from "./icons/Logout";
-import Controller from "utils/controller";
 import Wallet from "./icons/Wallet";
 
 const Container = ({
@@ -83,20 +82,16 @@ export const Header = ({
   onBack?: () => void;
 }) => {
   const [ethBalance, setEthBalance] = useState<string>();
-  const [controller, setController] = useState<Controller>();
 
   const pointsChain = "starknet:SN_GOERLI";
-  const pointsTokenAccountId = `${pointsChain}/${pointsChain}:${address || ""
-    }/erc20:${CONTRACT_POINTS}`;
+  const pointsTokenAccountId = `${pointsChain}/${pointsChain}:${
+    address || ""
+  }/erc20:${CONTRACT_POINTS}`;
   const { data: pointsData, error: pointsError } = useBalanceQuery({
     tokenAccountId: pointsTokenAccountId,
   });
   const points = pointsData?.balance?.balance;
   const { current, loading } = useAvatar(address || "", points || 10);
-
-  useEffect(() => {
-    setController(Controller.fromStore());
-  }, [setController]);
 
   useEffect(() => {
     if (address) {
@@ -215,7 +210,7 @@ export const Header = ({
                 borderRadius="6px"
                 bgColor="gray.600"
                 _hover={{
-                  bgColor: "gray.500"
+                  bgColor: "gray.500",
                 }}
               >
                 <HStack spacing="8px">
@@ -253,7 +248,9 @@ export const Header = ({
                   icon={<Logout boxSize="16px" />}
                   onClick={onLogout}
                 >
-                  <Text color="currentColor" fontWeight="400">Log Out</Text>
+                  <Text color="currentColor" fontWeight="400">
+                    Log Out
+                  </Text>
                 </MenuItem>
               </MenuList>
             </Menu>
