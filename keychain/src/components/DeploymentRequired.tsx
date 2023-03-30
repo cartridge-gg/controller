@@ -11,16 +11,19 @@ import { Loading } from "./Loading";
 import { Button, Link } from "@chakra-ui/react";
 import LinkIcon from "@cartridge/ui/components/icons/Link";
 import { NamedChainId } from "@cartridge/controller/src/constants";
+import logout from "methods/logout";
 
 const DeploymentRequired = ({
   chainId,
   controller,
   onClose,
+  onLogout,
   children,
 }: {
   chainId: constants.StarknetChainId;
   controller: Controller;
   onClose: (error: ErrorReply) => void;
+  onLogout: () => void;
   children: React.ReactNode;
 }) => {
   const close = () => {
@@ -71,6 +74,7 @@ const DeploymentRequired = ({
             message: "Canceled",
           })
         }
+        onLogout={onLogout}
       />
       <Banner
         icon={<Loading fill="white" />}

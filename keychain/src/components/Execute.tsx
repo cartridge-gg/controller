@@ -26,6 +26,7 @@ import { Status } from "utils/account";
 import { Header } from "./Header";
 import LowEth, { LowEthInfo } from "./LowEth";
 import BridgeEth from "./bridge/BridgeEth";
+import logout from "methods/logout";
 
 export const CONTRACT_ETH =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
@@ -39,6 +40,7 @@ const Execute = ({
   abis,
   onExecute,
   onCancel,
+  onLogout,
 }: {
   origin: string;
   chainId: constants.StarknetChainId;
@@ -48,6 +50,7 @@ const Execute = ({
   abis?: Abi[];
   onExecute: (res: ExecuteReply) => void;
   onCancel: (error: ErrorReply) => void;
+  onLogout: () => void;
 }) => {
   const [fees, setFees] = useState<{
     base: BN;
@@ -200,6 +203,7 @@ const Execute = ({
               message: "Canceled",
             });
           }}
+          onLogout={onLogout}
         />
       </Container>
     );
@@ -216,6 +220,7 @@ const Execute = ({
             message: "Cancelled",
           });
         }}
+        onLogout={onLogout}
       />
       <HStack w="full" justify="flex-start" pb="20px" spacing="20px">
         <Circle bgColor="gray.700" size="48px">

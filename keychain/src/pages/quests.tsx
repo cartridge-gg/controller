@@ -6,6 +6,7 @@ import { constants } from "starknet";
 import QuestOverview from "components/quests/Overview";
 import QuestDetails from "components/quests/Details";
 import { Box, Flex, Text, useToast } from "@chakra-ui/react";
+import logout from "methods/logout";
 
 export enum QuestState {
   Incomplete,
@@ -18,11 +19,15 @@ const Quests = ({
   address,
   chainId,
   onClose,
+  origin,
+  onLogout,
 }: {
   gameId: string;
   address: string;
   chainId: constants.StarknetChainId;
   onClose: () => void;
+  origin: string;
+  onLogout: () => void;
 }) => {
   const toast = useToast();
   const [selectedQuestId, setSelectedQuestId] = useState<string>();
@@ -60,6 +65,7 @@ const Quests = ({
         chainId={chainId}
         onClose={onClose}
         onBack={!!selectedQuestId ? () => setSelectedQuestId(null) : undefined}
+        onLogout={onLogout}
       />
       {!selectedQuestId ? (
         <QuestOverview

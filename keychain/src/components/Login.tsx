@@ -37,6 +37,7 @@ import { DrawerWrapper } from "components/DrawerWrapper";
 import FingerprintIcon from "./icons/Fingerprint2";
 import { useWhitelist } from "hooks/whitelist";
 import { WebauthnSigner } from "utils/webauthn";
+import logout from "methods/logout";
 
 export const Login = ({
   chainId,
@@ -137,7 +138,10 @@ export const Login = ({
 
   return (
     <Container gap="18px" position={fullPage ? "relative" : "fixed"}>
-      <Header chainId={chainId} onClose={onCancel} />
+      <Header
+        chainId={chainId}
+        onClose={onCancel}
+      />
       <HStack spacing="14px" pt="36px">
         <Circle size="48px" bgColor="gray.700">
           <Fingerprint boxSize="30px" />
@@ -201,8 +205,8 @@ export const Login = ({
                           canContinue
                             ? "green.400"
                             : nameError
-                            ? "red.400"
-                            : "gray.600"
+                              ? "red.400"
+                              : "gray.600"
                         }
                         onChange={(e) => {
                           setName(e.target.value);

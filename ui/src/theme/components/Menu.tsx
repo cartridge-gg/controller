@@ -33,21 +33,23 @@ export const Menu: ComponentMultiStyleConfig = helpers.defineMultiStyleConfig({
   },
   variants: {
     select: {
-      button: {
-        w: "full",
-        fontSize: "14px",
-        background: "none",
-        borderRadius: "0",
-        _hover: {
+      menu: {
+        button: {
+          w: "full",
+          fontSize: "14px",
           background: "none",
+          borderRadius: "0",
+          _hover: {
+            background: "none",
+          },
         },
-      },
-      list: {
-        borderRadius: "4px",
-      },
-      item: {
-        color: "white",
-        fontWeight: "normal",
+        list: {
+          borderRadius: "4px",
+        },
+        item: {
+          color: "white",
+          fontWeight: "normal",
+        },
       },
     },
   },
