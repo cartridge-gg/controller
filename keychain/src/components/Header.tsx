@@ -10,7 +10,10 @@ import {
   Text,
   Container as ChakraContainer,
   StyleProps,
-  Tooltip,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
 } from "@chakra-ui/react";
 
 import { Logo } from "@cartridge/ui/src/components/brand/Logo";
@@ -30,6 +33,10 @@ import { BigNumber, utils } from "ethers";
 import Ether from "./icons/Ether";
 import { Arrow } from "@cartridge/ui/components/Card";
 import ArrowIcon from "@cartridge/ui/components/icons/Arrow";
+import Chevron from "@cartridge/ui/components/icons/Chevron";
+import Copy from "@cartridge/ui/components/icons/Copy";
+import Logout from "./icons/Logout";
+import Wallet from "./icons/Wallet";
 
 const Container = ({
   height,
@@ -156,7 +163,7 @@ export const Header = ({
 
   return (
     <Container height="50px" bgColor="gray.700">
-      <HStack w="full" h="full">
+      <HStack w="full" h="full" position="relative">
         {onBack ? (
           <HStack
             w="30px"
@@ -197,30 +204,56 @@ export const Header = ({
             </HeaderItem>
           </Box>
           {chainId && (
-            <Tooltip label="Click to copy address" hasArrow arrowSize={15}>
-              <Box
-                onClick={() => {
-                  navigator.clipboard.writeText(address);
-                }}
+            <Menu>
+              <MenuButton
+                p="6px 12px"
+                borderRadius="6px"
+                bgColor="gray.600"
                 _hover={{
-                  cursor: "pointer",
+                  bgColor: "gray.500",
                 }}
               >
-                <HeaderItem bgColor="gray.500">
-                  {loading ? (
-                    <Loading fill="white" width="12px" height="12px" />
-                  ) : (
-                    <Box
-                      w="18px"
-                      h="18px"
-                      dangerouslySetInnerHTML={
-                        !!current?.svg ? { __html: current?.svg } : undefined
-                      }
-                    />
-                  )}
-                </HeaderItem>
-              </Box>
-            </Tooltip>
+                <HStack spacing="8px">
+                  <Box
+                    w="18px"
+                    h="18px"
+                    dangerouslySetInnerHTML={
+                      !!current?.svg ? { __html: current?.svg } : undefined
+                    }
+                  />
+                  <Chevron direction="down" boxSize="8px" color="gray.300" />
+                </HStack>
+              </MenuButton>
+              <MenuList position="absolute" top="12px" left="-130px">
+                <MenuItem
+                  color="whiteAlpha.800"
+                  icon={<Wallet boxSize="16px" />}
+                  onClick={() => {
+                    navigator.clipboard.writeText(address);
+                  }}
+                >
+                  <HStack>
+                    <Text color="currentColor" fontWeight="400">
+                      {`${address?.slice(0, 3)}...${address?.slice(
+                        address.length - 4,
+                        address.length,
+                      )}`}
+                    </Text>
+                    <Spacer />
+                    <Copy />
+                  </HStack>
+                </MenuItem>
+                <MenuItem
+                  color="whiteAlpha.800"
+                  icon={<Logout boxSize="16px" />}
+                  onClick={onLogout}
+                >
+                  <Text color="currentColor" fontWeight="400">
+                    Log Out
+                  </Text>
+                </MenuItem>
+              </MenuList>
+            </Menu>
           )}
           <HStack
             w="24px"

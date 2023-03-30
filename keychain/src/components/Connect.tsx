@@ -13,6 +13,7 @@ import { constants } from "starknet";
 import { Error, Policy, ResponseCodes } from "@cartridge/controller";
 import { motion } from "framer-motion";
 import { Status } from "utils/account";
+import logout from "methods/logout";
 
 const Connect = ({
   chainId,
@@ -20,6 +21,7 @@ const Connect = ({
   origin,
   onConnect,
   onCancel,
+  onLogout,
 }: {
   chainId: constants.StarknetChainId;
   policys: Policy[];
@@ -32,6 +34,7 @@ const Connect = ({
     maxFee: string;
   }) => void;
   onCancel: (error: Error) => void;
+  onLogout: () => void;
 }) => {
   const [maxFee, setMaxFee] = useState(null);
 
@@ -58,6 +61,7 @@ const Connect = ({
             message: "Cancelled",
           })
         }
+        onLogout={onLogout}
       />
       <Banner
         title="Create Session"

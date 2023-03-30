@@ -9,15 +9,18 @@ import { useEffect } from "react";
 import { client } from "utils/graphql";
 import { DeployAccountDocument, AccountInfoDocument } from "generated/graphql";
 import { Status } from "utils/account";
+import logout from "methods/logout";
 
 export const Redeploy = ({
   chainId,
   controller,
   onClose,
+  onLogout,
 }: {
   chainId: constants.StarknetChainId;
   controller: Controller;
   onClose: (error: ErrorReply) => void;
+  onLogout: () => void;
 }) => {
   useEffect(() => {
     const deploy = async () => {
@@ -49,6 +52,7 @@ export const Redeploy = ({
             message: "Canceled",
           })
         }
+        onLogout={onLogout}
       />
       <Banner
         icon={<SparkleColored boxSize="30px" />}

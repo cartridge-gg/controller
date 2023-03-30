@@ -30,6 +30,7 @@ import { EthL1BridgeGoerli, EthL1BridgeMainnet } from "./constants";
 import TransferButton from "./TransferButton";
 import Transactions from "./Transactions";
 import Label from "components/Label";
+import logout from "methods/logout";
 
 const SelectBox = forwardRef<
   {
@@ -96,11 +97,13 @@ const BridgeEth = ({
   address,
   onBack,
   onClose,
+  onLogout,
 }: {
   chainId: constants.StarknetChainId;
   address: string;
   onBack: () => void;
   onClose: () => void;
+  onLogout: () => void;
 }) => {
   const [ethAddress, setEthAddress] = useState<string>();
   const [ethBalance, setEthBalance] = useState<string>();
@@ -176,6 +179,7 @@ const BridgeEth = ({
           address={address}
           onBack={onBack}
           onClose={onClose}
+          onLogout={onLogout}
         />
         <Transactions
           address={address}

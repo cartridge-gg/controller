@@ -37,6 +37,7 @@ import { DrawerWrapper } from "components/DrawerWrapper";
 import FingerprintIcon from "./icons/Fingerprint2";
 import { useWhitelist } from "hooks/whitelist";
 import { WebauthnSigner } from "utils/webauthn";
+import logout from "methods/logout";
 
 export const Login = ({
   chainId,

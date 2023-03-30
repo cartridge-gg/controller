@@ -10,6 +10,7 @@ import { ResponseCodes } from "@cartridge/controller";
 import { Error } from "@cartridge/controller/src/types";
 import { Header } from "./Header";
 import Transfer from "./icons/Transfer";
+import logout from "methods/logout";
 
 const DataContainer = ({
   title,
@@ -64,6 +65,7 @@ const SignMessage = ({
   chainId,
   onSign,
   onCancel,
+  onLogout,
 }: {
   controller: Controller;
   origin: string;
@@ -71,6 +73,7 @@ const SignMessage = ({
   chainId: constants.StarknetChainId;
   onSign: (sig: Signature) => void;
   onCancel: (error: Error) => void;
+  onLogout: () => void;
 }) => {
   const [messageData, setMessageData] = useState<td.TypedData>();
 
@@ -114,6 +117,7 @@ const SignMessage = ({
             message: "Canceled",
           })
         }
+        onLogout={onLogout}
       />
       <Spacer minH="36px" />
       <Flex direction="column" align="start" gap="18px" w="full">

@@ -17,8 +17,6 @@ import Connect from "components/Connect";
 import { Login } from "components/Login";
 import { Signup } from "components/signup";
 import { Redeploy } from "components/Redeploy";
-import { Container as ChakraContainer } from "@chakra-ui/react";
-import { Header } from "components/Header";
 import {
   Abi,
   Call,
@@ -43,8 +41,9 @@ import { Status } from "utils/account";
 import { normalize, validate } from "../methods";
 import DeploymentRequired from "components/DeploymentRequired";
 import Quests from "./quests";
+import Logout from "components/Logout";
 
-type Context = Connect | Execute | SignMessage | StarterPack | Quests;
+type Context = Connect | Logout | Execute | SignMessage | StarterPack | Quests;
 
 type Connect = {
   origin: string;
@@ -52,6 +51,13 @@ type Connect = {
   policies: Policy[];
   starterPackId?: string;
   resolve: (res: ConnectReply | Error) => void;
+  reject: (reason?: unknown) => void;
+};
+
+type Logout = {
+  origin: string;
+  type: "logout";
+  resolve: (res: Error) => void;
   reject: (reason?: unknown) => void;
 };
 
@@ -381,6 +387,15 @@ const Index: NextPage = () => {
     );
   }
 
+  const onLogout = (context: Context) => {
+    setContext({
+      origin: context.origin,
+      type: "logout",
+      resolve: context.resolve,
+      reject: context.reject,
+    } as Logout);
+  };
+
   const account = controller.account(
     (context as any).transactionsDetail?.chainId ?? chainId,
   );
@@ -412,6 +427,29 @@ const Index: NextPage = () => {
           })
         }
         onCancel={(error: Error) => ctx.resolve(error)}
+        onLogout={() => onLogout(ctx)}
+      />
+    );
+  }
+
+  if (context.type === "logout") {
+    const ctx = context as Logout;
+
+    return (
+      <Logout
+        onConfirm={() => {
+          logout(ctx.origin)();
+          ctx.resolve({
+            code: ResponseCodes.NOT_CONNECTED,
+            message: "User logged out",
+          });
+        }}
+        onCancel={() =>
+          ctx.resolve({
+            code: ResponseCodes.CANCELED,
+            message: "User cancelled logout",
+          })
+        }
       />
     );
   }
@@ -436,6 +474,8 @@ const Index: NextPage = () => {
         address={controller.address}
         chainId={chainId}
         onClose={() => ctx.resolve()}
+        origin={ctx.origin}
+        onLogout={() => onLogout(ctx)}
       />
     );
   }
@@ -450,6 +490,7 @@ const Index: NextPage = () => {
         typedData={ctx.typedData}
         onSign={(sig: Signature) => context.resolve(sig)}
         onCancel={(error: Error) => ctx.resolve(error)}
+        onLogout={() => onLogout(ctx)}
       />
     );
   }
@@ -473,6 +514,7 @@ const Index: NextPage = () => {
             })
           }
           onCancel={(error: Error) => ctx.resolve(error)}
+          onLogout={() => onLogout(ctx)}
         />
       );
     }
@@ -483,6 +525,7 @@ const Index: NextPage = () => {
           chainId={_chainId}
           controller={controller}
           onClose={(error: Error) => ctx.resolve(error)}
+          onLogout={() => onLogout(ctx)}
         />
       );
     }
@@ -492,6 +535,7 @@ const Index: NextPage = () => {
         chainId={chainId}
         controller={controller}
         onClose={(error: Error) => ctx.resolve(error)}
+        onLogout={() => onLogout(ctx)}
       >
         <Execute
           {...ctx}
@@ -499,6 +543,7 @@ const Index: NextPage = () => {
           controller={controller}
           onExecute={(res: ExecuteReply) => ctx.resolve(res)}
           onCancel={(error: Error) => ctx.resolve(error)}
+          onLogout={() => onLogout(ctx)}
         />
       </DeploymentRequired>
     );
