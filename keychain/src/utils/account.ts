@@ -57,7 +57,16 @@ class Account extends BaseAccount {
     signer: SignerInterface,
     webauthn: WebauthnAccount,
   ) {
-    super({ rpc: { nodeUrl } }, address, signer);
+    super(
+      new SequencerProvider({
+        network:
+          chainId === constants.StarknetChainId.MAINNET
+            ? "mainnet-alpha"
+            : "goerli-alpha",
+      }),
+      address,
+      signer,
+    );
     this.rpc = new RpcProvider({ nodeUrl });
     this.gateway = new SequencerProvider({
       network:

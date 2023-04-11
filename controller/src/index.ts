@@ -2,6 +2,7 @@ import {
   AccountInterface,
   constants,
   RpcProvider,
+  SequencerProvider,
 } from "starknet";
 import {
   AsyncMethodReturns,
@@ -23,11 +24,11 @@ import {
 import { createModal } from "./modal";
 
 export const providers = {
-  [constants.StarknetChainId.TESTNET]: new RpcProvider({
-    nodeUrl: "https://starknet-goerli.cartridge.gg/rpc/v0.2",
+  [constants.StarknetChainId.TESTNET]: new SequencerProvider({
+    network: "goerli-alpha",
   }),
-  [constants.StarknetChainId.MAINNET]: new RpcProvider({
-    nodeUrl: "https://starknet.cartridge.gg/rpc/v0.2",
+  [constants.StarknetChainId.MAINNET]: new SequencerProvider({
+    network: "mainnet-alpha",
   }),
 };
 
