@@ -1,4 +1,3 @@
-import Info from "@cartridge/ui/components/icons/Info";
 import { Button, Circle, HStack, Spacer, Text, VStack } from "@chakra-ui/react";
 import Warning from "./icons/Warning";
 
@@ -38,7 +37,6 @@ const LowEth = ({
           >
             {label}
           </Text>
-          <Info fontSize="12px" />
         </HStack>
         <Spacer />
         <VStack w="full" align="end">
