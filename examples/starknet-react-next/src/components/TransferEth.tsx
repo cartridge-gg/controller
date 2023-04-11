@@ -8,9 +8,11 @@ const ETH_CONTRACT =
 export const TransferEth = () => {
   const [chainId, setChainId] = useState<constants.StarknetChainId>(constants.StarknetChainId.TESTNET);
   const { account } = useAccount();
+  const [accepted, setAccepted] = useState<boolean>();
 
-  const executePointOne = useCallback(() => {
-    account.execute(
+  const executePointOne = useCallback(async () => {
+    setAccepted(false);
+    const res = await account.execute(
       [
         {
           contractAddress: ETH_CONTRACT,
@@ -27,10 +29,16 @@ export const TransferEth = () => {
       {
         chainId,
       } as any
-    )
+    );
+
+    account.waitForTransaction(res.transaction_hash)
+      .then(() => setAccepted(true))
+      .catch((err) => console.error(err))
+      .finally(() => console.log("done"));
   }, [account, chainId]);
-  const executeOne = useCallback(() => {
-    account.execute(
+  const executeOne = useCallback(async () => {
+    setAccepted(false);
+    const res = await account.execute(
       [
         {
           contractAddress: ETH_CONTRACT,
@@ -47,10 +55,16 @@ export const TransferEth = () => {
       {
         chainId,
       } as any
-    )
+    );
+
+    account.waitForTransaction(res.transaction_hash)
+      .then(() => setAccepted(true))
+      .catch((err) => console.error(err))
+      .finally(() => console.log("done"));
   }, [account, chainId]);
-  const execute005 = useCallback(() => {
-    account.execute(
+  const execute005 = useCallback(async () => {
+    setAccepted(false);
+    const res = await account.execute(
       [
         {
           contractAddress: ETH_CONTRACT,
@@ -67,7 +81,11 @@ export const TransferEth = () => {
       {
         chainId,
       } as any
-    )
+    );
+    account.waitForTransaction(res.transaction_hash)
+      .then(() => setAccepted(true))
+      .catch((err) => console.error(err))
+      .finally(() => console.log("done"));
   }, [account, chainId]);
 
   if (!account) {
@@ -100,6 +118,7 @@ export const TransferEth = () => {
       <button onClick={() => execute005()}>Transfer 0.005 ETH to self</button>
       <button style={{ marginLeft: "10px" }} onClick={() => executePointOne()}>Transfer 0.1 ETH to self</button>
       <button style={{ marginLeft: "10px" }} onClick={() => executeOne()}>Transfer 1.0 ETH to self</button>
+      <p>Accepted: {accepted && accepted.toString()}</p>
     </>
   );
 };

@@ -11,6 +11,7 @@ import {
   EstimateFee,
   DeclareContractPayload,
   RpcProvider,
+  SequencerProvider,
 } from "starknet";
 
 import { Keychain, ResponseCodes, Modal } from "./types";
@@ -23,7 +24,7 @@ class DeviceAccount extends Account {
   private modal: Modal;
 
   constructor(
-    provider: RpcProvider,
+    provider: SequencerProvider,
     address: string,
     keychain: AsyncMethodReturns<Keychain>,
     modal: Modal
