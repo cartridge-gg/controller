@@ -21,7 +21,7 @@ const LowEth = ({
   return (
     <VStack
       w="full"
-      gap="18px"
+      spacing="18px"
       pt="18px"
       borderTop="1px solid"
       borderTopColor="gray.700"
@@ -70,7 +70,7 @@ const LowEth = ({
             letterSpacing="0.05em"
             textTransform="uppercase"
           >
-            Error Expected
+            Insufficient Funds
           </Text>
         </HStack>
         <Text fontSize="13px" color="yellow.800">

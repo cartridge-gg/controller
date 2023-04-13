@@ -195,7 +195,7 @@ const Execute = ({
       <Container>
         <BridgeEth
           chainId={chainId}
-          address={account.address}
+          controller={controller}
           onBack={() => setBridging(false)}
           onClose={() => {
             onCancel({
