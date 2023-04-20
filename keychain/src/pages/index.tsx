@@ -422,7 +422,7 @@ const Index: NextPage = () => {
         onConnect={() =>
           onConnect({
             context: ctx,
-            policies: [],
+            policies: ctx.type === "connect" ? (ctx as Connect).policies : [],
             maxFee: "",
           })
         }
