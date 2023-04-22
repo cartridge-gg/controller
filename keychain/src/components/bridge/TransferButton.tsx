@@ -64,7 +64,7 @@ const TransferButton = ({
     abi: EthL1BridgeABI,
     functionName: "deposit",
     args: [
-      parseEther(value ?? "0"),
+      parseEther(value?.length ? value : "0"),
       BigNumber.from(account.address),
     ],
     overrides: {
