@@ -225,8 +225,8 @@ const BridgeEth = ({
                 text={
                   !!ethAddress
                     ? ethAddress.substring(0, 3) +
-                    "..." +
-                    ethAddress.substring(ethAddress.length - 4)
+                      "..." +
+                      ethAddress.substring(ethAddress.length - 4)
                     : "Metamask"
                 }
                 pointerEvents={!!ethAddress ? "none" : "auto"}
@@ -312,12 +312,14 @@ const BridgeEth = ({
       </VStack>
       <Spacer />
       <Flex w="full" gap="10px" direction="column">
-        {errorMessage && !debouncing && <Error
-          error={{
-            name: "Wallet error",
-            message: errorMessage,
-          }}
-        />}
+        {errorMessage && !debouncing && (
+          <Error
+            error={{
+              name: "Wallet error",
+              message: errorMessage,
+            }}
+          />
+        )}
         <TransferButton
           account={controller.account(chainId)}
           value={transferAmount}
