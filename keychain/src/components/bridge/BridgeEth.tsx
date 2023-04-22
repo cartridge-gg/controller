@@ -2,6 +2,7 @@ import Chevron from "@cartridge/ui/components/icons/Chevron";
 import {
   Box,
   Circle,
+  Flex,
   forwardRef,
   HStack,
   Input,
@@ -25,12 +26,11 @@ import { constants } from "starknet";
 import { createClient, goerli, mainnet, WagmiConfig } from "wagmi";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import ConnectButton from "./ConnectButton";
-import EthL1BridgeABI from "./abis/EthL1Bridge.json";
-import { EthL1BridgeGoerli, EthL1BridgeMainnet } from "./constants";
 import TransferButton from "./TransferButton";
 import Transactions from "./Transactions";
 import Label from "components/Label";
-import logout from "methods/logout";
+import Controller from "utils/controller";
+import { Error } from "components/Error";
 
 const SelectBox = forwardRef<
   {
@@ -94,13 +94,13 @@ async function fetchEthPrice() {
 
 const BridgeEth = ({
   chainId,
-  address,
+  controller,
   onBack,
   onClose,
   onLogout,
 }: {
   chainId: constants.StarknetChainId;
-  address: string;
+  controller: Controller;
   onBack: () => void;
   onClose: () => void;
   onLogout: () => void;
@@ -164,9 +164,6 @@ const BridgeEth = ({
     } else if (debouncedValue) {
       compute();
       const valid = validateValue();
-      if (!valid) {
-        setErrorMessage("Insufficient ETH");
-      }
       setTransferAmountInvalid(!valid);
     }
   }, [debouncing, debouncedValue, chainId, ethBalance]);
@@ -176,13 +173,13 @@ const BridgeEth = ({
       <WagmiConfig client={ethereumClient}>
         <Header
           chainId={chainId}
-          address={address}
+          address={controller.address}
           onBack={onBack}
           onClose={onClose}
           onLogout={onLogout}
         />
         <Transactions
-          address={address}
+          address={controller.address}
           chainId={chainId}
           ethTxnHash={transferHash}
         />
@@ -194,7 +191,7 @@ const BridgeEth = ({
     <WagmiConfig client={ethereumClient}>
       <Header
         chainId={chainId}
-        address={address}
+        address={controller.address}
         onBack={onBack}
         onClose={onClose}
       />
@@ -314,46 +311,45 @@ const BridgeEth = ({
         </HStack>
       </VStack>
       <Spacer />
-      <Text color="red.200" mb="12px">
-        {errorMessage}
-      </Text>
-      <TransferButton
-        ethChain={
-          chainId === constants.StarknetChainId.MAINNET ? mainnet : goerli
-        }
-        ethContractABI={EthL1BridgeABI}
-        ethContractAddress={
-          chainId === constants.StarknetChainId.MAINNET
-            ? EthL1BridgeMainnet
-            : EthL1BridgeGoerli
-        }
-        ethContractFunctionName="deposit"
-        value={transferAmount}
-        args={[address]}
-        disabled={
-          !!!ethAddress ||
-          !!!transferAmount ||
-          transferAmountInvalid ||
-          debouncing
-        }
-        onError={(error) => {
-          if (error === null) {
-            setErrorMessage(null);
-            return;
-          } else if (error.name === "ChainMismatchError") {
-            const networkName =
-              chainId === constants.StarknetChainId.MAINNET
-                ? "mainnet"
-                : "goerli";
-            setErrorMessage(
-              `Please select the ${networkName} network in your wallet`,
-            );
+      <Flex w="full" gap="10px" direction="column">
+        {errorMessage && !debouncing && (
+          <Error
+            error={{
+              name: "Wallet error",
+              message: errorMessage,
+            }}
+          />
+        )}
+        <TransferButton
+          account={controller.account(chainId)}
+          value={transferAmount}
+          disabled={
+            !!!ethAddress ||
+            !!!transferAmount ||
+            transferAmountInvalid ||
+            debouncing
           }
-        }}
-        onTxSubmitted={(hash) => {
-          setTransferHash(hash);
-        }}
-      />
+          onError={(error) => {
+            if (error === null) {
+              setErrorMessage(null);
+              return;
+            } else if (error.name === "ChainMismatchError") {
+              const networkName =
+                chainId === constants.StarknetChainId.MAINNET
+                  ? "mainnet"
+                  : "goerli";
+              setErrorMessage(
+                `Please select the ${networkName} network in your wallet`,
+              );
+            } else {
+              setErrorMessage(error.message);
+            }
+          }}
+          onTxSubmitted={(hash) => {
+            setTransferHash(hash);
+          }}
+        />
+      </Flex>
     </WagmiConfig>
   );
 };

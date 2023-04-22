@@ -1,6 +1,12 @@
 [
   {
     "anonymous": false,
+    "inputs": [],
+    "name": "LogBridgeActivated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
     "inputs": [
       {
         "indexed": true,
@@ -18,6 +24,18 @@
         "indexed": true,
         "internalType": "uint256",
         "name": "l2Recipient",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "nonce",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "fee",
         "type": "uint256"
       }
     ],
@@ -227,6 +245,24 @@
         "internalType": "uint256",
         "name": "l2Recipient",
         "type": "uint256"
+      }
+    ],
+    "name": "deposit",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "l2Recipient",
+        "type": "uint256"
       },
       {
         "internalType": "uint256",
@@ -263,6 +299,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "identify",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "bytes",
@@ -273,6 +322,19 @@
     "name": "initialize",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "isActive",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -292,7 +354,7 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "testGovernor",
+        "name": "user",
         "type": "address"
       }
     ],

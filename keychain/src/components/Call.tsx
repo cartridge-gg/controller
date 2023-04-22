@@ -16,7 +16,6 @@ import { formatAddress } from "@cartridge/ui/components/Address";
 import { StarkscanUrl } from "utils/url";
 import EthereumIcon from "@cartridge/ui/src/components/icons/Ethereum";
 import CodeIcon from "@cartridge/ui/src/components/icons/Code";
-import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import LinkIcon from "@cartridge/ui/src/components/icons/Link";
 import { constants } from "starknet";
 
@@ -33,7 +32,6 @@ export const Call = ({
       <CodeIcon boxSize="18px" />
       <Text fontSize="13px">{policy.method}</Text>
       <Spacer />
-      <InfoIcon color="gray.200" boxSize="12px" />
     </HStack>
   );
 };
@@ -128,6 +126,5 @@ const Base = ({
     <CodeIcon boxSize="18px" />
     {title}
     <Spacer />
-    <InfoIcon color="gray.200" boxSize="12px" />
   </HStack>
 );

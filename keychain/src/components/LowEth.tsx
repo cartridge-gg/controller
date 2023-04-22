@@ -1,4 +1,3 @@
-import Info from "@cartridge/ui/components/icons/Info";
 import { Button, Circle, HStack, Spacer, Text, VStack } from "@chakra-ui/react";
 import Warning from "./icons/Warning";
 
@@ -22,7 +21,7 @@ const LowEth = ({
   return (
     <VStack
       w="full"
-      gap="18px"
+      spacing="18px"
       pt="18px"
       borderTop="1px solid"
       borderTopColor="gray.700"
@@ -38,7 +37,6 @@ const LowEth = ({
           >
             {label}
           </Text>
-          <Info fontSize="12px" />
         </HStack>
         <Spacer />
         <VStack w="full" align="end">
@@ -72,7 +70,7 @@ const LowEth = ({
             letterSpacing="0.05em"
             textTransform="uppercase"
           >
-            Error Expected
+            Insufficient Funds
           </Text>
         </HStack>
         <Text fontSize="13px" color="yellow.800">

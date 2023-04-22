@@ -20,6 +20,7 @@ export const Error = ({ error }: { error: Error }) => {
       {error && (
         <Accordion
           as={motion.div}
+          w="full"
           initial={{ height: 0 }}
           animate={{ height: "auto" }}
           allowToggle
