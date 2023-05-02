@@ -2947,6 +2947,7 @@ __metadata:
     "@graphql-codegen/typescript": ^2.4.8
     "@graphql-codegen/typescript-operations": ^2.3.5
     "@graphql-codegen/typescript-react-query": ^3.5.9
+    "@ramp-network/ramp-instant-sdk": ^4.0.2
     "@solana/web3.js": ^1.73.0
     "@testing-library/jest-dom": ^5.16.5
     "@testing-library/react": ^13.4.0
@@ -8078,6 +8079,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ramp-network/ramp-instant-sdk@npm:^4.0.2":
+  version: 4.0.2
+  resolution: "@ramp-network/ramp-instant-sdk@npm:4.0.2"
+  dependencies:
+    body-scroll-lock: ^3.1.5
+  checksum: d90b4ab02b704e30caa80b598f0e83a4d614036487522a2b3f78456868a4207a2a57f60a8a03b61cee827d578d2d5a29e7110d6b8fd6a6f3f805ccfed10d2e0c
+  languageName: node
+  linkType: hard
+
 "@repeaterjs/repeater@npm:3.0.4":
   version: 3.0.4
   resolution: "@repeaterjs/repeater@npm:3.0.4"
@@ -12670,6 +12680,13 @@ __metadata:
     type-is: ~1.6.18
     unpipe: 1.0.0
   checksum: 12fffdeac82fe20dddcab7074215d5156e7d02a69ae90cbe9fee1ca3efa2f28ef52097cbea76685ee0a1509c71d85abd0056a08e612c09077cad6277a644cf88
+  languageName: node
+  linkType: hard
+
+"body-scroll-lock@npm:^3.1.5":
+  version: 3.1.5
+  resolution: "body-scroll-lock@npm:3.1.5"
+  checksum: 52c25b81d6e7a87cfbdd7870363c3e20a439dbc76535b735916e2df907abbce95c0da0d2c7a2cfe88f49775d53bbc4bd09445ffda2d61b999efa3f0b1dedfc5e
   languageName: node
   linkType: hard
 

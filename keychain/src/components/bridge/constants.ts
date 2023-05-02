@@ -4,3 +4,4 @@ export const EthL2BridgeGoerli =
   "0x073314940630fd6dcda0d772d4c972c4e0a9946bef9dabf4ef84eda8ef542b82";
 export const EthL2BridgeMainnet =
   "0x073314940630fd6dcda0d772d4c972c4e0a9946bef9dabf4ef84eda8ef542b82";
+export const RampApiKey = "gm9k4uxdd344422vpzhfoyz6akj6oxjbpown9hqs";

@@ -25,8 +25,7 @@ import Container from "./Container";
 import { Status } from "utils/account";
 import { Header } from "./Header";
 import LowEth, { LowEthInfo } from "./LowEth";
-import BridgeEth from "./bridge/BridgeEth";
-import logout from "methods/logout";
+import OnRamp from "./bridge/OnRamp";
 
 export const CONTRACT_ETH =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
@@ -193,7 +192,7 @@ const Execute = ({
   if (bridging) {
     return (
       <Container>
-        <BridgeEth
+        <OnRamp
           chainId={chainId}
           controller={controller}
           onBack={() => setBridging(false)}

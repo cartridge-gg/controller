@@ -25,6 +25,15 @@ export const Input: ComponentStyleConfig = {
         color: "white",
       },
     }),
+    dark: (props: StyleFunctionProps) => ({
+      field: {
+        h: "42px",
+        bgColor: "gray.700",
+        color: "gray.200",
+        fontWeight: "400",
+        fontSize: "13px",
+      },
+    }),
   },
   defaultProps: {
     variant: "primary",
