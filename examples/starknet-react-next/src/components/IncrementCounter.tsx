@@ -1,8 +1,8 @@
-import { useAccount, useStarknetExecute } from "@starknet-react/core";
+import { useAccount, useContractWrite } from "@starknet-react/core";
 
 export function IncrementCounter() {
   const { account } = useAccount();
-  const { execute } = useStarknetExecute({
+  const { write } = useContractWrite({
     calls: [
       {
         contractAddress:
@@ -19,7 +19,7 @@ export function IncrementCounter() {
 
   return (
     <div>
-      <button onClick={() => execute()}>Increment Counter by 1</button>
+      <button onClick={() => write()}>Increment Counter by 1</button>
     </div>
   );
 }

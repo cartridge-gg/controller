@@ -1,4 +1,4 @@
-import { useAccount, useContract, useSignTypedData, useStarknetCall } from "@starknet-react/core";
+import { useAccount, useContract, useSignTypedData } from "@starknet-react/core";
 import { useState } from "react";
 import { typedData } from "starknet";
 

@@ -2878,11 +2878,11 @@ __metadata:
   resolution: "@cartridge/connector@workspace:connector"
   dependencies:
     "@cartridge/controller": 0.3.17
-    "@starknet-react/core": ^0.14.8
+    "@starknet-react/core": ^0.16.0
     "@types/jest": ^26.0.18
     "@types/node": ^17.0.23
     jest: ^26.6.3
-    starknet: ^4.17.1
+    starknet: ^4.22.0
     ts-jest: ^26.5.1
     ts-node: ^10.4.0
     tslib: ^2.3.1
@@ -2981,7 +2981,7 @@ __metadata:
     react-dom: ^18.2.0
     react-error-boundary: ^3.1.4
     react-query: ^3.39.2
-    starknet: ^4.17.1
+    starknet: ^4.22.0
     typescript: ^4.8.2
     use-sound: ^4.0.1
     usehooks-ts: ^2.9.1
@@ -8549,16 +8549,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@starknet-react/core@npm:^0.14.8":
-  version: 0.14.8
-  resolution: "@starknet-react/core@npm:0.14.8"
+"@starknet-react/core@npm:^0.16.0":
+  version: 0.16.0
+  resolution: "@starknet-react/core@npm:0.16.0"
   dependencies:
     "@tanstack/react-query": ^4.3.4
+    get-starknet-core: ^2.0.0
     immutable: ^4.0.0
   peerDependencies:
     react: ^17.0 || ^18.0
     starknet: "*"
-  checksum: 1d9b128bcfdf8b94d3578cd0a2debb975a758f9133ddff2bd93649fa4ede8705272454073b071eabb5560ea4a2eb774fef9ccb31ca23d0531f9c9bded38203b5
+  checksum: b4e042a36fd42d53f8869354baa364c9122e0709f113bde8ed7a4f0e577dbe915a232806ffcf000b3d4c8b4e2d7fc682b7599ef6f0690873b6923de5d858a7fb
   languageName: node
   linkType: hard
 
@@ -17802,6 +17803,18 @@ __metadata:
   version: 0.1.0
   resolution: "get-package-type@npm:0.1.0"
   checksum: bba0811116d11e56d702682ddef7c73ba3481f114590e705fc549f4d868972263896af313c57a25c076e3c0d567e11d919a64ba1b30c879be985fc9d44f96148
+  languageName: node
+  linkType: hard
+
+"get-starknet-core@npm:^2.0.0":
+  version: 2.1.0
+  resolution: "get-starknet-core@npm:2.1.0"
+  peerDependencies:
+    starknet: ^4.9.0
+  peerDependenciesMeta:
+    starknet:
+      optional: false
+  checksum: 2dad049045cb79baabdc74b8f583e31bfc5b780169f8ec9307b5b269557fbd9dbf5bd7fe4a8982d0a979c627d0886c4da7b4630c1fc8e0687065ee217b276fc8
   languageName: node
   linkType: hard
 
@@ -28098,7 +28111,7 @@ __metadata:
   dependencies:
     "@cartridge/connector": "workspace:^"
     "@cartridge/controller": "workspace:^"
-    "@starknet-react/core": ^0.14.8
+    "@starknet-react/core": ^0.16.0
     "@types/node": ^18.7.14
     "@types/react": ^18.0.20
     "@types/react-dom": ^18.0.6
@@ -28107,7 +28120,7 @@ __metadata:
     next: ^12.0.10
     react: ^18.2.0
     react-dom: ^18.2.0
-    starknet: ^4.17.1
+    starknet: ^4.22.0
     typescript: ^4.8.2
   languageName: unknown
   linkType: soft
@@ -28128,6 +28141,25 @@ __metadata:
     ts-custom-error: ^3.3.1
     url-join: ^4.0.1
   checksum: 659d69dc5087a2864bc2d7e4f8f6803d4891cfc4c006f44b929912a6d0511e5d2f76d41f9b9e3c0aa5fda0983f509ac05d0c68b1a6457500d1e691bef359ed96
+  languageName: node
+  linkType: hard
+
+"starknet@npm:^4.22.0":
+  version: 4.22.0
+  resolution: "starknet@npm:4.22.0"
+  dependencies:
+    "@ethersproject/bytes": ^5.6.1
+    bn.js: ^5.2.1
+    elliptic: ^6.5.4
+    ethereum-cryptography: ^1.0.3
+    hash.js: ^1.1.7
+    isomorphic-fetch: ^3.0.0
+    json-bigint: ^1.0.0
+    minimalistic-assert: ^1.0.1
+    pako: ^2.0.4
+    ts-custom-error: ^3.3.1
+    url-join: ^4.0.1
+  checksum: b30548120bca77168f5f5921e557b0b741348e8b7cbf86abd718bcea01e46ae408e51cc50a683ed2daa02041cd7804f3b75bd4d475e9e2db011d59c1f15a07de
   languageName: node
   linkType: hard
 
