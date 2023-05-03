@@ -2877,7 +2877,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@cartridge/connector@workspace:connector"
   dependencies:
-    "@cartridge/controller": 0.3.17
+    "@cartridge/controller": 0.3.18
     "@starknet-react/core": ^0.16.0
     "@types/jest": ^26.0.18
     "@types/node": ^17.0.23
@@ -2890,7 +2890,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@cartridge/controller@0.3.17, @cartridge/controller@workspace:^, @cartridge/controller@workspace:controller":
+"@cartridge/controller@0.3.18, @cartridge/controller@workspace:^, @cartridge/controller@workspace:controller":
   version: 0.0.0-use.local
   resolution: "@cartridge/controller@workspace:controller"
   dependencies:
