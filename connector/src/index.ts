@@ -1,4 +1,4 @@
-import { Connector } from "@starknet-react/core";
+import { Connector, EventHandler } from "@starknet-react/core";
 import Controller, { Assertion, Policy, SupportedChainIds } from "@cartridge/controller";
 import { AccountInterface, InvokeFunctionResponse } from "starknet";
 
@@ -80,6 +80,16 @@ class ControllerConnector extends Connector {
 
   async showQuests(gameId: string): Promise<void> {
     return this.controller.showQuests(gameId);
+  }
+
+  initEventListener(accountChangeCb: EventHandler): Promise<void> {
+    // TODO
+    return Promise.resolve();
+  } 
+
+  removeEventListener(accountChangeCb: EventHandler): Promise<void> {
+    // TODO
+    return Promise.resolve();
   }
 }
 

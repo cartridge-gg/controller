@@ -1,8 +1,8 @@
-import { useAccount, useStarknetExecute } from "@starknet-react/core";
+import { useAccount, useContractWrite } from "@starknet-react/core";
 
 export function InvalidTxn() {
   const { account } = useAccount();
-  const { execute } = useStarknetExecute({
+  const { write } = useContractWrite({
     calls: [
       {
         contractAddress:
@@ -19,7 +19,7 @@ export function InvalidTxn() {
 
   return (
     <div>
-      <button onClick={() => execute()}>Invalid Entrypoint</button>
+      <button onClick={() => write()}>Invalid Entrypoint</button>
     </div>
   );
 }

@@ -1,33 +1,37 @@
-import { useAccount, useStarknetCall, useStarknetInvoke } from '@starknet-react/core'
+import { useAccount, useContractRead, useStarknetInvoke } from '@starknet-react/core'
 import type { NextPage } from 'next'
 import { useCallback, useMemo, useState } from 'react'
 import { number, uint256 } from 'starknet'
 import { ConnectWallet } from '~/components/ConnectWallet'
 import { TransactionList } from '~/components/TransactionList'
 import { useTokenContract } from '~/hooks/token'
+import { Abi } from 'starknet'
+import Erc20Abi from '~/abi/erc20.json'
 
 function UserBalance() {
   const { account } = useAccount()
   const { contract } = useTokenContract()
 
-  const { data, loading, error } = useStarknetCall({
-    contract,
-    method: 'balanceOf',
+  const { data, isLoading, error } = useContractRead({
+    abi: Erc20Abi as Abi,
+    address: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
+    functionName: 'balanceOf',
     args: account ? [account] : undefined,
   })
 
   const content = useMemo(() => {
-    if (loading || !data?.length) {
+    if (isLoading || !data?.length) {
       return <div>Loading balance</div>
     }
 
     if (error) {
-      return <div>Error: {error}</div>
+      console.error(error);
+      return <div>Error!</div>
     }
 
     const balance = uint256.uint256ToBN(data[0])
     return <div>{balance.toString(10)}</div>
-  }, [data, loading, error])
+  }, [data, isLoading, error])
 
   return (
     <div>
