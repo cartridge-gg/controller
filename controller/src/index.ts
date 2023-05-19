@@ -2,7 +2,6 @@ import {
   AccountInterface,
   constants,
   RpcProvider,
-  SequencerProvider,
 } from "starknet";
 import {
   AsyncMethodReturns,
@@ -24,11 +23,11 @@ import {
 import { createModal } from "./modal";
 
 export const providers = {
-  [constants.StarknetChainId.TESTNET]: new SequencerProvider({
-    network: "goerli-alpha",
+  [constants.StarknetChainId.TESTNET]: new RpcProvider({
+    nodeUrl: "https://starknet-goerli.g.alchemy.com/v2/FS0Fge2Rq1dlf2IsAIC_Ecy0UBp9uq51",
   }),
-  [constants.StarknetChainId.MAINNET]: new SequencerProvider({
-    network: "mainnet-alpha",
+  [constants.StarknetChainId.MAINNET]: new RpcProvider({
+    nodeUrl: "https://starknet-mainnet.g.alchemy.com/v2/-FbmIoy3U7xEqQhuhW6wkDB2uqfu0yKi",
   }),
 };
 

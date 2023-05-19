@@ -2,7 +2,7 @@ import { Button } from "@chakra-ui/react";
 import BN from "bn.js";
 import { parseEther } from "ethers/lib/utils.js";
 import { useCallback, useEffect, useState } from "react";
-import { constants, Sequencer, SequencerProvider, uint256 } from "starknet";
+import { constants, Sequencer, uint256 } from "starknet";
 import {
   goerli,
   mainnet,
@@ -17,6 +17,7 @@ import {
 } from "./constants";
 import EthL1BridgeABI from "./abis/EthL1Bridge.json";
 import { BigNumber } from "ethers";
+import Account from "utils/account";
 
 const TransferButton = ({
   account,
@@ -25,7 +26,7 @@ const TransferButton = ({
   onError,
   onTxSubmitted,
 }: {
-  account: any;
+  account: Account;
   value: string;
   disabled: boolean;
   onError: (err: any) => void;
@@ -35,12 +36,6 @@ const TransferButton = ({
 
   const estimateL2Fee =
     useCallback(async (): Promise<Sequencer.EstimateFeeResponse> => {
-      const gateway = new SequencerProvider({
-        network:
-          account._chainId === constants.StarknetChainId.MAINNET
-            ? "mainnet-alpha"
-            : "goerli-alpha",
-      });
       const parsed = parseEther(value);
       const amount = uint256.bnToUint256(new BN(parsed.toString()));
       const from =
@@ -51,14 +46,14 @@ const TransferButton = ({
         account._chainId === constants.StarknetChainId.MAINNET
           ? EthL2BridgeMainnet
           : EthL2BridgeGoerli;
-      const res = await gateway.estimateMessageFee({
+      const res = await account.gateway.estimateMessageFee({
         from_address: from,
         to_address: to,
         entry_point_selector: "handle_deposit",
-        payload: [account.address, amount.low, amount.high],
+        payload: [account.address, amount.low.toString(), amount.high.toString()],
       });
       return res;
-    }, [account._chainId, account.address, value]);
+    }, [account._chainId, account.gateway, account.address, value]);
 
   useEffect(() => {
     if (!value) return;

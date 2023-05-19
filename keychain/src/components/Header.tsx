@@ -31,7 +31,6 @@ import {
 } from "@cartridge/controller/src/constants";
 import { BigNumber, utils } from "ethers";
 import Ether from "./icons/Ether";
-import { Arrow } from "@cartridge/ui/components/Card";
 import ArrowIcon from "@cartridge/ui/components/icons/Arrow";
 import Chevron from "@cartridge/ui/components/icons/Chevron";
 import Copy from "@cartridge/ui/components/icons/Copy";
@@ -84,9 +83,8 @@ export const Header = ({
   const [ethBalance, setEthBalance] = useState<string>();
 
   const pointsChain = "starknet:SN_GOERLI";
-  const pointsTokenAccountId = `${pointsChain}/${pointsChain}:${
-    address || ""
-  }/erc20:${CONTRACT_POINTS}`;
+  const pointsTokenAccountId = `${pointsChain}/${pointsChain}:${address || ""
+    }/erc20:${CONTRACT_POINTS}`;
   const { data: pointsData, error: pointsError } = useBalanceQuery({
     tokenAccountId: pointsTokenAccountId,
   });
