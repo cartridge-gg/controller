@@ -72,6 +72,7 @@ class Account extends BaseAccount {
 
     const state = Storage.get(this.selector);
     if (!state || Date.now() - state.syncing > 5000) {
+      console.log("sync account")
       this.sync();
       return;
     }
@@ -107,6 +108,7 @@ class Account extends BaseAccount {
   }
 
   async sync() {
+    console.log("sync")
     Storage.update(this.selector, {
       syncing: Date.now(),
     });
