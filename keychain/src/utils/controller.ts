@@ -125,7 +125,7 @@ export default class Controller {
     };
   }
 
-  account(chainId: constants.StarknetChainId) {
+  account(chainId: constants.StarknetChainId): Account {
     return this.accounts[chainId];
   }
 

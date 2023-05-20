@@ -26,8 +26,6 @@ import {
   FinalizeRegistrationDocument,
   useAccountQuery,
   useStarterPackQuery,
-  StarterPackQuery,
-  AccountDocument,
 } from "generated/graphql";
 import { useDebounce } from "hooks/debounce";
 import { constants, ec, KeyPair } from "starknet";
@@ -488,6 +486,7 @@ export const Signup = ({
                           chainId: "starknet:SN_GOERLI",
                         })
                         .then(() => {
+                          console.log("sync signup")
                           controller
                             .account(constants.StarknetChainId.TESTNET)
                             .sync();

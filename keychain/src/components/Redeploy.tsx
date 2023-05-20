@@ -9,7 +9,6 @@ import { useEffect } from "react";
 import { client } from "utils/graphql";
 import { DeployAccountDocument, AccountInfoDocument } from "generated/graphql";
 import { Status } from "utils/account";
-import logout from "methods/logout";
 
 export const Redeploy = ({
   chainId,
@@ -36,6 +35,7 @@ export const Redeploy = ({
         chainId: "starknet:SN_GOERLI",
       });
 
+      console.log("sync redeploy")
       controller.account(constants.StarknetChainId.TESTNET).sync();
     };
 

@@ -11,7 +11,6 @@ import { Loading } from "./Loading";
 import { Button, Link } from "@chakra-ui/react";
 import LinkIcon from "@cartridge/ui/components/icons/Link";
 import { NamedChainId } from "@cartridge/controller/src/constants";
-import logout from "methods/logout";
 
 const DeploymentRequired = ({
   chainId,
@@ -57,6 +56,7 @@ const DeploymentRequired = ({
     const id = setInterval(async () => {
       if (account.status !== Status.DEPLOYING) clearInterval(id);
       setStatus(account.status);
+      console.log("deployment required signup")
       await account.sync();
     }, 2000);
 

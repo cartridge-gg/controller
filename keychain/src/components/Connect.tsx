@@ -1,19 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Box, VStack, HStack, Flex, Text, Spacer } from "@chakra-ui/react";
-import { css } from "@emotion/react";
+import { useCallback, useState } from "react";
+import { VStack, HStack, Text, Spacer } from "@chakra-ui/react";
 import Container from "./Container";
 import { Header } from "./Header";
 import Session from "components/Session";
-import Controller from "utils/controller";
 import PlugIcon from "@cartridge/ui/src/components/icons/Plug";
-import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import LaptopIcon from "@cartridge/ui/src/components/icons/Laptop";
 import { Banner } from "components/Banner";
 import { constants } from "starknet";
 import { Error, Policy, ResponseCodes } from "@cartridge/controller";
-import { motion } from "framer-motion";
-import { Status } from "utils/account";
-import logout from "methods/logout";
 
 const Connect = ({
   chainId,

@@ -42,8 +42,8 @@ export enum Status {
 }
 
 class Account extends BaseAccount {
-  private rpc: RpcProvider;
-  private gateway: SequencerProvider;
+  rpc: RpcProvider;
+  gateway: SequencerProvider;
   private selector: string;
   _chainId: constants.StarknetChainId;
   updated: boolean = true;
@@ -57,16 +57,8 @@ class Account extends BaseAccount {
     signer: SignerInterface,
     webauthn: WebauthnAccount,
   ) {
-    super(
-      new SequencerProvider({
-        network:
-          chainId === constants.StarknetChainId.MAINNET
-            ? "mainnet-alpha"
-            : "goerli-alpha",
-      }),
-      address,
-      signer,
-    );
+    super({ rpc: { nodeUrl } }, address, signer);
+
     this.rpc = new RpcProvider({ nodeUrl });
     this.gateway = new SequencerProvider({
       network:
@@ -80,6 +72,7 @@ class Account extends BaseAccount {
 
     const state = Storage.get(this.selector);
     if (!state || Date.now() - state.syncing > 5000) {
+      console.log("sync account")
       this.sync();
       return;
     }
@@ -115,6 +108,7 @@ class Account extends BaseAccount {
   }
 
   async sync() {
+    console.log("sync")
     Storage.update(this.selector, {
       syncing: Date.now(),
     });
@@ -372,8 +366,8 @@ class Account extends BaseAccount {
 
   async signMessage(typedData: typedData.TypedData): Promise<Signature> {
     return await (this.status === Status.REGISTERED ||
-    this.status === Status.COUNTERFACTUAL ||
-    this.status === Status.DEPLOYING
+      this.status === Status.COUNTERFACTUAL ||
+      this.status === Status.DEPLOYING
       ? super.signMessage(typedData)
       : this.webauthn.signMessage(typedData));
   }
