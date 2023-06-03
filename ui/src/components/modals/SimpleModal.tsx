@@ -65,7 +65,7 @@ export const SimpleModal = ({
         </ModalBody>
         <ModalFooter gap="16px">
           {dismissable && (
-            <Button flex="1" variant="secondary600" onClick={onClose}>
+            <Button flex="1" variant="legacySecondary600" onClick={onClose}>
               {onConfirm ? "Cancel" : "Close"}
             </Button>
           )}

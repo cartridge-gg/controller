@@ -281,11 +281,11 @@ export const Signup = ({
         />
       )}
       <HStack spacing="14px" pt="36px">
-        <Circle size="48px" bgColor="gray.700">
+        <Circle size="48px" bgColor="legacy.gray.700">
           <JoystickIcon boxSize="30px" />
         </Circle>
         <Ellipses />
-        <Circle size="48px" bgColor="gray.700">
+        <Circle size="48px" bgColor="legacy.gray.700">
           <Logo boxSize="22px" color="brand" />
         </Circle>
       </HStack>
@@ -295,7 +295,7 @@ export const Signup = ({
       <Text
         fontSize="12px"
         mt="-8px !important"
-        color="whiteAlpha.600"
+        color="legacy.whiteAlpha.600"
         textAlign="center"
       >
         Your Controller will be used for interacting with the game.
@@ -334,7 +334,7 @@ export const Signup = ({
                 hasArrow
                 label={
                   <>
-                    <InfoIcon fill="whiteAlpha.600" mr="5px" />
+                    <InfoIcon fill="legacy.whiteAlpha.600" mr="5px" />
                     {nameError}
                   </>
                 }
@@ -346,10 +346,10 @@ export const Signup = ({
                     isInvalid
                     borderColor={
                       canContinue
-                        ? "green.400"
+                        ? "legacy.green.400"
                         : nameError
-                        ? "red.400"
-                        : "gray.600"
+                        ? "legacy.red.400"
+                        : "legacy.gray.600"
                     }
                     errorBorderColor="crimson"
                     placeholder="Username"
@@ -372,7 +372,7 @@ export const Signup = ({
                         }
                       }}
                     >
-                      <ReturnIcon boxSize="20px" fill="green.400" />
+                      <ReturnIcon boxSize="20px" fill="legacy.green.400" />
                     </InputRightElement>
                   )}
                 </InputGroup>
@@ -381,7 +381,7 @@ export const Signup = ({
           </Field>
 
           <HStack justify="center">
-            <Text fontSize="12px" color="whiteAlpha.600" fontWeight="bold">
+            <Text fontSize="12px" color="legacy.whiteAlpha.600" fontWeight="bold">
               Already have a controller?
             </Text>
             <Link variant="outline" fontSize="11px" onClick={showLogin}>
@@ -397,7 +397,7 @@ export const Signup = ({
               onDrawerClose();
             }}
           >
-            <VStack gap="14px" color="whiteAlpha.600" align="flex-start">
+            <VStack gap="14px" color="legacy.whiteAlpha.600" align="flex-start">
               {starterData && remaining > 0 && (
                 <>
                   <HStack gap="10px">
@@ -415,7 +415,7 @@ export const Signup = ({
                   </HStack>
                   <HStack align="flex-start">
                     <SparkleIcon />
-                    <Text fontSize="12px" color="whiteAlpha.600">
+                    <Text fontSize="12px" color="legacy.whiteAlpha.600">
                       Claim Starterpack
                     </Text>
                   </HStack>
@@ -423,7 +423,7 @@ export const Signup = ({
               )}
               <HStack align="flex-start">
                 <LockIcon />
-                <Text fontSize="12px" color="whiteAlpha.600">
+                <Text fontSize="12px" color="legacy.whiteAlpha.600">
                   By continuing you are agreeing to Cartridge&apos;s{" "}
                   <Link
                     textDecoration="underline"
@@ -542,12 +542,12 @@ const ImageFrame = ({
     justify="center"
     boxSize="48px"
     border="1px solid"
-    borderColor="green.400"
+    borderColor="legacy.green.400"
     borderRadius="6px"
     bgPosition="center"
     bgRepeat="no-repeat"
     bgSize="contain"
-    bgColor="gray.600"
+    bgColor="legacy.gray.600"
     bgImage={bgImage}
   >
     {children}

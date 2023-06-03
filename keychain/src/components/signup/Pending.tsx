@@ -39,7 +39,7 @@ export const PendingTxn = ({ transaction, name, gameId }: PendingProps) => {
     <>
       <Flex
         py="20px"
-        bgColor="gray.700"
+        bgColor="legacy.gray.700"
         direction="column"
         borderRadius="8px"
         align="center"
@@ -56,7 +56,7 @@ export const PendingTxn = ({ transaction, name, gameId }: PendingProps) => {
           <Text variant="ibm-upper-bold" fontSize="11px">
             Transaction {pending ? "Pending..." : "Complete!"}
           </Text>
-          <Text fontSize="12px" color="gray.200">
+          <Text fontSize="12px" color="legacy.gray.200">
             {pending ? "This may take a few minutes" : "You're ready to go!"}
           </Text>
           <Link
@@ -69,7 +69,7 @@ export const PendingTxn = ({ transaction, name, gameId }: PendingProps) => {
           </Link>
         </VStack>
       </Flex>
-      <Box h="1px" w="full" my="20px" bgColor="whiteAlpha.300" />
+      <Box h="1px" w="full" my="20px" bgColor="legacy.whiteAlpha.300" />
       <Button
         w="full"
         gap="5px"

@@ -15,7 +15,7 @@ import {
 } from "@cartridge/controller";
 import Connect from "components/Connect";
 import { Login } from "components/Login";
-import { Signup } from "components/signup";
+import { Signup, StarterPack, Auth } from "components/signup";
 import { Redeploy } from "components/Redeploy";
 import {
   Abi,
@@ -28,7 +28,6 @@ import {
 } from "starknet";
 import SignMessage from "components/SignMessage";
 import Execute from "components/Execute";
-import { StarterPack } from "components/signup/StarterPack";
 import selectors from "utils/selectors";
 import Storage from "utils/storage";
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
@@ -367,6 +366,12 @@ const Index: NextPage = () => {
 
   // No controller, send to login
   if (!controller) {
+    return (
+      <Auth
+        onController={(c) => setController(c)}
+        onCancel={() => context.reject()} />
+    );
+
     return (
       <>
         {showSignup ? (

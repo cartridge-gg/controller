@@ -24,10 +24,10 @@ const LowEth = ({
       spacing="18px"
       pt="18px"
       borderTop="1px solid"
-      borderTopColor="gray.700"
+      borderTopColor="legacy.gray.700"
     >
-      <HStack w="full" borderRadius="6px" bgColor="gray.700" p="12px 18px">
-        <HStack color="gray.200" w="full">
+      <HStack w="full" borderRadius="6px" bgColor="legacy.gray.700" p="12px 18px">
+        <HStack color="legacy.gray.200" w="full">
           <Text
             color="currentColor"
             fontSize="10px"
@@ -40,8 +40,8 @@ const LowEth = ({
         </HStack>
         <Spacer />
         <VStack w="full" align="end">
-          <Text color="red.400" fontSize="13px">{`~${lowAmount}`}</Text>
-          <HStack color="gray.200" fontSize="11px">
+          <Text color="legacy.red.400" fontSize="13px">{`~${lowAmount}`}</Text>
+          <HStack color="legacy.gray.200" fontSize="11px">
             <Text color="currentColor">{`Bal: ${balance}`}</Text>
             <Text color="currentColor">{`Max: ${max}`}</Text>
           </HStack>
@@ -58,7 +58,7 @@ const LowEth = ({
           w="full"
           minH="42px"
           borderBottom="1px solid"
-          borderBottomColor="blackAlpha.200"
+          borderBottomColor="legacy.blackAlpha.200"
         >
           <Circle size="30px" bgColor="yellow.300">
             <Warning width="13px" height="13px" color="yellow.800" />
@@ -78,7 +78,7 @@ const LowEth = ({
         </Text>
         <HStack w="full">
           <Button
-            variant="primaryDarken"
+            variant="legacyPrimaryDarken"
             colorScheme="blackAlpha"
             flexGrow="1"
             onClick={reject}
@@ -86,7 +86,7 @@ const LowEth = ({
             Reject
           </Button>
           <Button
-            variant="primary400"
+            variant="legacyPrimary400"
             colorScheme="yellow"
             flexGrow="1"
             onClick={onBridge}

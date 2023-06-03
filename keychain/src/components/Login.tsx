@@ -140,7 +140,7 @@ export const Login = ({
     <Container gap="18px" position={fullPage ? "relative" : "fixed"}>
       <Header chainId={chainId} onClose={onCancel} />
       <HStack spacing="14px" pt="36px">
-        <Circle size="48px" bgColor="gray.700">
+        <Circle size="48px" bgColor="legacy.gray.700">
           <Fingerprint boxSize="30px" />
         </Circle>
       </HStack>
@@ -150,7 +150,7 @@ export const Login = ({
       <Text
         fontSize="12px"
         mt="-8px !important"
-        color="whiteAlpha.600"
+        color="legacy.whiteAlpha.600"
         textAlign="center"
       >
         Your Controller will be used for interacting with the game.
@@ -191,7 +191,7 @@ export const Login = ({
                     hasArrow
                     label={
                       <>
-                        <InfoIcon fill="whiteAlpha.600" mr="5px" /> {nameError}
+                        <InfoIcon fill="legacy.whiteAlpha.600" mr="5px" /> {nameError}
                       </>
                     }
                   >
@@ -200,10 +200,10 @@ export const Login = ({
                         {...field}
                         borderColor={
                           canContinue
-                            ? "green.400"
+                            ? "legacy.green.400"
                             : nameError
-                            ? "red.400"
-                            : "gray.600"
+                            ? "legacy.red.400"
+                            : "legacy.gray.600"
                         }
                         onChange={(e) => {
                           setName(e.target.value);
@@ -231,7 +231,7 @@ export const Login = ({
                             }
                           }}
                         >
-                          <ReturnIcon boxSize="20px" fill="green.400" />
+                          <ReturnIcon boxSize="20px" fill="legacy.green.400" />
                         </InputRightElement>
                       )}
                     </InputGroup>
@@ -241,7 +241,7 @@ export const Login = ({
             </Field>
             {signupEnabled && (
               <HStack justify="center">
-                <Text fontSize="12px" color="whiteAlpha.600" fontWeight="bold">
+                <Text fontSize="12px" color="legacy.whiteAlpha.600" fontWeight="bold">
                   Need a controller?
                 </Text>
                 <Link variant="outline" fontSize="11px" onClick={showSignup}>
@@ -258,7 +258,7 @@ export const Login = ({
               <VStack gap="24px">
                 <HStack>
                   <LockIcon />
-                  <Text fontSize="12px" color="whiteAlpha.600">
+                  <Text fontSize="12px" color="legacy.whiteAlpha.600">
                     By continuing you are agreeing to Cartridge&apos;s{" "}
                     <Link
                       textDecoration="underline"

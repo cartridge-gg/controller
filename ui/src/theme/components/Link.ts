@@ -10,11 +10,11 @@ export const Link: ComponentStyleConfig = {
   variants: {
     traditional: {
       textDecoration: "underline",
-      color: "blue.400",
+      color: "legacy.blue.400",
     },
     more: {
       textDecoration: "underline",
-      color: "blue.500",
+      color: "legacy.blue.500",
     },
     transparent: {
       textDecoration: "none !important",
@@ -23,9 +23,9 @@ export const Link: ComponentStyleConfig = {
       paddingY: "3px",
       paddingX: "10px",
       border: "1px solid",
-      borderColor: "gray.600",
+      borderColor: "legacy.gray.600",
       borderRadius: "5px",
-      color: "blue.400",
+      color: "legacy.blue.400",
     },
   },
   defaultProps: {

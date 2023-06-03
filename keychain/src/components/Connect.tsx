@@ -66,16 +66,16 @@ const Connect = ({
       />
       {false && (
         <VStack w="full" overflow="hidden" borderRadius="6px" spacing="1px">
-          <VStack bgColor="gray.700" w="full" p="12px" align="flex-start">
-            <Text variant="ibm-upper-bold" fontSize="10px" color="gray.200">
+          <VStack bgColor="legacy.gray.700" w="full" p="12px" align="flex-start">
+            <Text variant="ibm-upper-bold" fontSize="10px" color="legacy.gray.200">
               Register Session
             </Text>
-            <Text fontSize="11px" color="gray.200">
+            <Text fontSize="11px" color="legacy.gray.200">
               Authorize your controller to perform actions from this
               application.
             </Text>
           </VStack>
-          <HStack bgColor="gray.600" py="7px" px="12px" w="full">
+          <HStack bgColor="legacy.gray.600" py="7px" px="12px" w="full">
             <LaptopIcon boxSize="18px" />
             <Text fontSize="13px">Register Session</Text>
             <Spacer />

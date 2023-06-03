@@ -145,8 +145,8 @@ export const L2Connect = ({
         py="13px"
         px="16px"
         fontSize="11px"
-        bgColor="gray.600"
-        color="whiteAlpha.400"
+        bgColor="legacy.gray.600"
+        color="legacy.whiteAlpha.400"
       >
         <StarknetIcon />
         <Text color="inherit" variant="ibm-upper-bold">
@@ -161,14 +161,14 @@ export const L2Connect = ({
               <AccordionButton
                 gap="10px"
                 fontSize="14px"
-                color={isExpanded ? "white" : "gray.200"}
+                color={isExpanded ? "white" : "legacy.gray.200"}
               >
                 <Logo height="12px" /> {"I'm new to Starknet"}
                 <Spacer />
                 <AccordionIcon />
               </AccordionButton>
               <AccordionPanel>
-                <Text fontSize="12px" color="gray.300">
+                <Text fontSize="12px" color="legacy.gray.300">
                   {"We'll get you setup with a fresh controller."}
                 </Text>
                 <Button
@@ -190,7 +190,7 @@ export const L2Connect = ({
               <AccordionButton
                 gap="10px"
                 fontSize="14px"
-                color={isExpanded ? "white" : "gray.200"}
+                color={isExpanded ? "white" : "legacy.gray.200"}
               >
                 <WalletIcon /> I have an Argent Wallet
                 <Spacer />
@@ -200,7 +200,7 @@ export const L2Connect = ({
                 <Flex direction="column" gap="15px">
                   {argent ? (
                     <>
-                      <Text color="gray.300" fontSize="12px">
+                      <Text color="legacy.gray.300" fontSize="12px">
                         Argent is the primary wallet provider on Starknet
                       </Text>
                       <Flex gap="10px">
@@ -209,7 +209,7 @@ export const L2Connect = ({
                           px="10px"
                           justify={abiLoading && "center"}
                           borderBottom="1px solid"
-                          borderColor="gray.600"
+                          borderColor="legacy.gray.600"
                           fontSize="15px"
                         >
                           {address ? (
@@ -225,7 +225,7 @@ export const L2Connect = ({
                                   <ArgentIcon
                                     height="15px"
                                     width="15px"
-                                    color="whiteAlpha.400"
+                                    color="legacy.whiteAlpha.400"
                                   />
                                   <Text>{formatAddress(address)}</Text>
                                   <Spacer />
@@ -236,7 +236,7 @@ export const L2Connect = ({
                                       );
                                     }}
                                   >
-                                    <CopyIcon color="whiteAlpha.400" />
+                                    <CopyIcon color="legacy.whiteAlpha.400" />
                                   </Link>
                                 </>
                               )}
@@ -253,13 +253,13 @@ export const L2Connect = ({
                           )}
                         </HStack>
                         <Button
-                          variant="accent"
+                          variant="legacyAccent"
                           minWidth="120px"
                           disabled={abiLoading}
                           onClick={onConnect}
-                          bgColor={address && "gray.700"}
+                          bgColor={address && "legacy.gray.700"}
                           _hover={{
-                            bgColor: address && "gray.700",
+                            bgColor: address && "legacy.gray.700",
                           }}
                           _disabled={{
                             cursor: "not-allowed",
@@ -281,7 +281,7 @@ export const L2Connect = ({
                       </Box>
                     </>
                   ) : (
-                    <Text color="gray.400" fontSize="13px">
+                    <Text color="legacy.gray.400" fontSize="13px">
                       Argent wallet not detected
                     </Text>
                   )}
@@ -306,7 +306,7 @@ const InfoCard = ({
       align="center"
       borderRadius="4px"
       border="1px solid"
-      borderColor="gray.600"
+      borderColor="legacy.gray.600"
       {...rest}
     >
       {children}
@@ -334,7 +334,7 @@ const PluginInstall = ({
   if (!supported) {
     return (
       <InfoCard fontSize="13px" flexDirection="column">
-        <Text color="gray.200">
+        <Text color="legacy.gray.200">
           You must enable plugins on your Argent wallet
         </Text>
         <Button
@@ -363,7 +363,7 @@ const PluginInstall = ({
     <>
       {isInstalling ? (
         <>
-          <InfoCard flexDirection="row" fontSize="14px" color="gray.200">
+          <InfoCard flexDirection="row" fontSize="14px" color="legacy.gray.200">
             <Text fontSize="14px" color="inherit">
               Installation in progress
             </Text>
@@ -398,7 +398,7 @@ const PluginInstall = ({
       ) : (
         <Flex align="center">
           <Button
-            variant="accent"
+            variant="legacyAccent"
             flex="4"
             gap="10px"
             minWidth="120px"
@@ -418,7 +418,7 @@ const PluginInstall = ({
               my="10px"
             >
               <Link>
-                <InfoIcon color="whiteAlpha.400" fontSize="13px" />
+                <InfoIcon color="legacy.whiteAlpha.400" fontSize="13px" />
               </Link>
             </Tooltip>
           </Flex>

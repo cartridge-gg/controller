@@ -5,7 +5,7 @@ const Ellipses = ({
   count = 3,
   size = "4px",
   spacing = "3px",
-  color = "whiteAlpha.400",
+  color = "legacy.whiteAlpha.400",
 }: {
   count?: number;
   size?: string;

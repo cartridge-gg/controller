@@ -12,11 +12,11 @@ export const Modal: ComponentMultiStyleConfig = {
   ],
   baseStyle: {
     dialog: {
-      background: "gray.800",
+      background: "legacy.gray.800",
       pt: "42px",
     },
     closeButton: {
-      color: "gray.400",
+      color: "legacy.gray.400",
       _focus: {
         boxShadow: "none",
       },

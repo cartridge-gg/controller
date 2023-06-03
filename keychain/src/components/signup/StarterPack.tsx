@@ -66,14 +66,14 @@ export const ClaimSuccess = ({
           {media ? (
             <MediaViewer src={media} height="400px" width="300px" />
           ) : (
-            <Circle size="48px" bgColor="gray.700">
+            <Circle size="48px" bgColor="legacy.gray.700">
               <SparkleColored boxSize="30px" />
             </Circle>
           )}
           <Text fontWeight="bold" fontSize="17px">
             {`Your ${name} Starter Pack is on the way!`}
           </Text>
-          <Text fontSize="12px" color="whiteAlpha.600" textAlign="center">
+          <Text fontSize="12px" color="legacy.whiteAlpha.600" textAlign="center">
             Checkout{" "}
             <Link href={url} variant="traditional" isExternal>
               {domain.hostname}
@@ -97,9 +97,9 @@ export const StarterItem = ({
     px="16px"
     py="8px"
     w="full"
-    bgColor="gray.700"
+    bgColor="legacy.gray.700"
     fontSize="14px"
-    color="gray.200"
+    color="legacy.gray.200"
     {...rest}
   >
     {icon}
@@ -219,13 +219,13 @@ export const StarterPack = ({
         // HACK: assuming error is "already claimed"
         <>
           <VStack spacing="18px" pt="36px" pb="24px">
-            <Circle size="48px" bgColor="gray.700">
+            <Circle size="48px" bgColor="legacy.gray.700">
               <SparkleColored boxSize="30px" />
             </Circle>
             <Text fontWeight="bold" fontSize="17px">
               {"You've already claimed this Starterpack"}
             </Text>
-            <Text fontSize="12px" color="whiteAlpha.600" textAlign="center">
+            <Text fontSize="12px" color="legacy.whiteAlpha.600" textAlign="center">
               Thanks for participating!
             </Text>
           </VStack>
@@ -236,18 +236,18 @@ export const StarterPack = ({
         <>
           <VStack spacing="18px" pt="36px" pb="24px">
             <HStack spacing="14px">
-              <Circle size="48px" bgColor="gray.700">
+              <Circle size="48px" bgColor="legacy.gray.700">
                 <StarterpackIcon boxSize="30px" />
               </Circle>
               <Ellipses />
-              <Circle size="48px" bgColor="gray.700">
+              <Circle size="48px" bgColor="legacy.gray.700">
                 {remoteSvgIcon(starterData?.game.icon.uri, "30px", "white")}
               </Circle>
             </HStack>
             <Text fontWeight="bold" fontSize="17px">
               Claim Starterpack
             </Text>
-            <Text fontSize="12px" color="whiteAlpha.600" textAlign="center">
+            <Text fontSize="12px" color="legacy.whiteAlpha.600" textAlign="center">
               You will receive the following items.
             </Text>
           </VStack>
@@ -256,11 +256,11 @@ export const StarterPack = ({
               <StarterPackCarousel nonfungibles={nonfungibles} />
             )}
             <Spacer minHeight="10px" />
-            <Divider bgColor="gray.400" />
+            <Divider bgColor="legacy.gray.400" />
             <HStack w="full" px="12px" fontSize="10px">
               <Text
                 variant="ibm-upper-bold"
-                color={remaining > 0 ? "green.400" : "red.200"}
+                color={remaining > 0 ? "legacy.green.400" : "legacy.red.200"}
               >
                 {remaining} remaining
               </Text>

@@ -30,22 +30,22 @@ const Window = ({ icon }: { icon: ReactNode }) => {
         w="full"
         px="10px"
         spacing="10px"
-        bgColor="gray.450"
+        bgColor="legacy.gray.450"
         borderRadius="10px 10px 0 0"
       >
-        <Circle size="6px" bgColor="gray.800" />
-        <Circle size="6px" bgColor="gray.800" />
-        <Circle size="6px" bgColor="gray.800" />
+        <Circle size="6px" bgColor="legacy.gray.800" />
+        <Circle size="6px" bgColor="legacy.gray.800" />
+        <Circle size="6px" bgColor="legacy.gray.800" />
       </HStack>
       <HStack
         w="full"
-        bgColor="gray.450"
+        bgColor="legacy.gray.450"
         padding="12px 22px 18px 22px"
         borderRadius="0 0 10px 10px"
         justify="center"
       >
         <HStack
-          bgColor="gray.500"
+          bgColor="legacy.gray.500"
           px="14px"
           py="12px"
           borderRadius="5px"

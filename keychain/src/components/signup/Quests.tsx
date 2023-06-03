@@ -149,10 +149,10 @@ export const Quests = ({ username, gameId, starterpackId }: QuestsProps) => {
               px="24px"
               py="8px"
               gap="8px"
-              bg={quest.isCompleted ? "gray.700" : "gray.600"}
+              bg={quest.isCompleted ? "legacy.gray.700" : "legacy.gray.600"}
               opacity={parentCompleted ? 1 : 0.5}
               overflow="hidden"
-              color={quest.isCompleted ? "green.400" : "white"}
+              color={quest.isCompleted ? "legacy.green.400" : "white"}
               pointerEvents={active ? "auto" : "none"}
               _before={
                 active && {
@@ -162,7 +162,7 @@ export const Quests = ({ username, gameId, starterpackId }: QuestsProps) => {
                   top: "0px",
                   w: "8px",
                   h: "100%",
-                  backgroundColor: "gray.500",
+                  backgroundColor: "legacy.gray.500",
                 }
               }
             >
@@ -172,7 +172,7 @@ export const Quests = ({ username, gameId, starterpackId }: QuestsProps) => {
                 ) : (
                   <Circle
                     size="16px"
-                    color="gray.700"
+                    color="legacy.gray.700"
                     bg="white"
                     pl="1px"
                     fontSize="9px"
@@ -221,7 +221,7 @@ export const Quests = ({ username, gameId, starterpackId }: QuestsProps) => {
                     ? "_self"
                     : "_blank"
                 }
-                variant="accent"
+                variant="legacyAccent"
                 _hover={{}}
                 hidden={quest.isCompleted}
                 _disabled={{ color: "white" }}
@@ -235,8 +235,8 @@ export const Quests = ({ username, gameId, starterpackId }: QuestsProps) => {
       </VStack>
       {error && (
         <Alert bg="transparent" status="error" mt="8px">
-          <AlertIcon w="18px" color="red.400" />
-          <Text fontSize="14px" color="red.400">
+          <AlertIcon w="18px" color="legacy.red.400" />
+          <Text fontSize="14px" color="legacy.red.400">
             {error}
           </Text>
         </Alert>
@@ -244,7 +244,7 @@ export const Quests = ({ username, gameId, starterpackId }: QuestsProps) => {
       <VStack mt="24px">
         <Button
           w="full"
-          variant="accent"
+          variant="legacyAccent"
           hidden={requiredQuests?.every((q) => q.isCompleted)}
           onClick={checkQuests}
           disabled={checkingQuests}

@@ -1,7 +1,7 @@
 import { Text } from "@chakra-ui/react";
 
 const Label = ({
-  color = "gray.200",
+  color = "legacy.gray.200",
   children,
 }: {
   color?: string;

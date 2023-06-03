@@ -50,7 +50,7 @@ const StartupAnimation = ({
       left="0"
       h="100vh"
       w="100vw"
-      bgColor="gray.900"
+      bgColor="legacy.gray.900"
       zIndex="overlay"
     >
       <Box w={["full", "full", "400px"]}>{View}</Box>

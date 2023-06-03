@@ -223,7 +223,7 @@ const Execute = ({
         onLogout={onLogout}
       />
       <HStack w="full" justify="flex-start" pb="20px" spacing="20px">
-        <Circle bgColor="gray.700" size="48px">
+        <Circle bgColor="legacy.gray.700" size="48px">
           <TransactionIcon boxSize="30px" />
         </Circle>
         <Text fontSize="17px" fontWeight="bold">
@@ -235,10 +235,10 @@ const Execute = ({
           w="full"
           p="12px"
           align="flex-start"
-          bgColor="gray.700"
+          bgColor="legacy.gray.700"
           borderRadius="6px 6px 0 0"
         >
-          <Text variant="ibm-upper-bold" fontSize="10px" color="gray.200">
+          <Text variant="ibm-upper-bold" fontSize="10px" color="legacy.gray.200">
             Actions
           </Text>
         </VStack>

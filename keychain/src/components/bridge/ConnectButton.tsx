@@ -26,9 +26,9 @@ const ConnectButton = ({
     <>
       <Button
         flexBasis="50%"
-        variant="special"
-        bgColor="gray.700"
-        color={isConnected ? "whiteAlpha.800" : undefined}
+        variant="legacySpecial"
+        bgColor="legacy.gray.700"
+        color={isConnected ? "legacy.whiteAlpha.800" : undefined}
         onClick={() => {
           if (isConnected) {
             disconnect();

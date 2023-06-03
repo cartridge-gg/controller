@@ -7,7 +7,7 @@ export const Select: ComponentStyleConfig = {
       field: {
         fontSize: "14Px",
         borderRadius: "3px",
-        background: "gray.700",
+        background: "legacy.gray.700",
       },
     },
   },

@@ -28,7 +28,7 @@ export const Call = ({
   policy: Policy;
 } & SystemProps) => {
   return (
-    <HStack w="full" bgColor="gray.700" py="7px" px="12px" {...rest}>
+    <HStack w="full" bgColor="legacy.gray.700" py="7px" px="12px" {...rest}>
       <CodeIcon boxSize="18px" />
       <Text fontSize="13px">{policy.method}</Text>
       <Spacer />
@@ -47,7 +47,7 @@ export const CallToggle = ({
   notice?: string;
 } & FieldInputProps<boolean>) => {
   return (
-    <HStack w="full" bgColor="gray.600" py="7px" px="12px">
+    <HStack w="full" bgColor="legacy.gray.600" py="7px" px="12px">
       <CodeIcon boxSize="18px" />
       <Box fontSize="13px" textTransform="capitalize">
         {policy.method}
@@ -58,7 +58,7 @@ export const CallToggle = ({
           href={StarkscanUrl(chainId).contract(policy.target, "write-contract")}
           isExternal
         >
-          <LinkIcon color="gray.200" boxSize="12px" />
+          <LinkIcon color="legacy.gray.200" boxSize="12px" />
         </Link>
       </Tooltip>
     </HStack>
@@ -85,7 +85,7 @@ export const MaxFee = ({
       <HStack pt="14px">
         <HStack position="relative" maxWidth="30%">
           <Input type="number" value={eth} pl="30px"></Input>
-          <EthereumIcon position="absolute" boxSize="14px" color="gray.200" />
+          <EthereumIcon position="absolute" boxSize="14px" color="legacy.gray.200" />
         </HStack>
         <Spacer />
         <Text></Text>
@@ -122,7 +122,7 @@ const Base = ({
   disable?: boolean;
   errMsg?: string;
 }) => (
-  <HStack w="full" bgColor="gray.700" py="7px" px="12px">
+  <HStack w="full" bgColor="legacy.gray.700" py="7px" px="12px">
     <CodeIcon boxSize="18px" />
     {title}
     <Spacer />

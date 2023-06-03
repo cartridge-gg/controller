@@ -28,7 +28,7 @@ const Step = ({
 }: { index: number; active: number } & Step) => {
   const isMobile = useBreakpointValue([true, false]);
   const isActive = index === active;
-  const bgColor = isActive ? "gray.600" : "gray.700";
+  const bgColor = isActive ? "legacy.gray.600" : "legacy.gray.700";
   return (
     <HStack
       h="inherit"
@@ -56,7 +56,7 @@ const Step = ({
         justify="center"
         fontSize="9px"
         bgColor={bgColor}
-        color={isActive ? "white" : "whiteAlpha.600"}
+        color={isActive ? "white" : "legacy.whiteAlpha.600"}
       >
         <Box fontSize="10px">{index < active ? <CheckIcon /> : icon}</Box>
         <Text

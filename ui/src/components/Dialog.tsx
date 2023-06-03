@@ -17,16 +17,16 @@ export const Dialog = ({
     <Card
       px="70px"
       py="16px"
-      bg="gray.700"
+      bg="legacy.gray.700"
       align="center"
       position="relative"
       {...rest}
     >
-      <Arrow color="gray.700" placement={arrowPlacement} />
+      <Arrow color="legacy.gray.700" placement={arrowPlacement} />
       <Text as="strong" variant="ld-mono-upper" fontSize="15px">
         {title}
       </Text>
-      <Text fontSize="13px" color="whiteAlpha.800">
+      <Text fontSize="13px" color="legacy.whiteAlpha.800">
         {description}
       </Text>
     </Card>

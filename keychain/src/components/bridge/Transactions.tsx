@@ -43,23 +43,23 @@ const Card = ({
     <HStack
       w="full"
       minH="54px"
-      bgColor="gray.700"
+      bgColor="legacy.gray.700"
       borderRadius="4px"
       p="12px"
       spacing="12px"
     >
-      <Circle bgColor="gray.600" size="30px">
+      <Circle bgColor="legacy.gray.600" size="30px">
         {state === CardState.PENDING ? (
           <Loading width="12px" height="12px" fill="white" />
         ) : (
-          <Check boxSize="18px" fill="green.400" />
+          <Check boxSize="18px" fill="legacy.green.400" />
         )}
       </Circle>
       {children}
       <Spacer />
       <Link href={href} isExternal>
         <HStack px="13px" h="full">
-          <LinkIcon color="blue.400" boxSize="12px" />
+          <LinkIcon color="legacy.blue.400" boxSize="12px" />
         </HStack>
       </Link>
     </HStack>
@@ -89,13 +89,13 @@ const TxnTracker = ({
         w="full"
         minH="72px"
         borderBottom="1px solid"
-        borderColor="gray.700"
+        borderColor="legacy.gray.700"
         justify="flex-start"
         pb="20px"
         spacing="20px"
       >
-        <Circle bgColor="gray.700" size="48px">
-          <Transfer boxSize="30px" color="green.400" />
+        <Circle bgColor="legacy.gray.700" size="48px">
+          <Transfer boxSize="30px" color="legacy.green.400" />
         </Circle>
         <Text fontSize="17px" fontWeight="bold">
           Transactions
@@ -141,7 +141,7 @@ const TxnTracker = ({
               letterSpacing="0.05em"
               fontWeight="700"
               textTransform="uppercase"
-              color="green.400"
+              color="legacy.green.400"
             >
               Eth arriving on L2
             </Text>

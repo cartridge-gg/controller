@@ -12,7 +12,7 @@ export const Drawer: ComponentMultiStyleConfig = {
   ],
   baseStyle: {
     dialog: {
-      bgColor: "gray.800",
+      bgColor: "legacy.gray.800",
     },
   },
 };

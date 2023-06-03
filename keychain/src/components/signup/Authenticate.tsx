@@ -110,7 +110,7 @@ export const Authenticate = ({
           <Header />
           <Content
             icon={
-              <Circle size="48px" bgColor="gray.700">
+              <Circle size="48px" bgColor="legacy.gray.700">
                 <FingerprintIcon boxSize="30px" />
               </Circle>
             }
@@ -144,7 +144,7 @@ const Content = ({
         <Text fontSize="17px" fontWeight="bold">
           Authenticate Yourself
         </Text>
-        <Text fontSize="12px" color="whiteAlpha.600" align="center">
+        <Text fontSize="12px" color="legacy.whiteAlpha.600" align="center">
           You will now be asked to authenticate yourself.
           <br />
           Note: this experience varies from browser to browser.

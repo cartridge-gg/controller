@@ -21,13 +21,13 @@ const Logout = ({
     <Container>
       <Header />
       <VStack pt="24px" w="full" h="full">
-        <Circle size="54px" bgColor="gray.700">
-          <LogoutLarge boxSize="36px" color="green.400" />
+        <Circle size="54px" bgColor="legacy.gray.700">
+          <LogoutLarge boxSize="36px" color="legacy.green.400" />
         </Circle>
         <Text pt="12px" fontSize="17px" fontWeight="bold">
           Log Out
         </Text>
-        <Text fontSize="13px" color="whiteAlpha.600">
+        <Text fontSize="13px" color="legacy.whiteAlpha.600">
           Are you sure?
         </Text>
         <Spacer />
@@ -36,7 +36,7 @@ const Logout = ({
           <Button w="full" onClick={onConfirm}>
             Log Out
           </Button>
-          <Button variant="dark" w="full" bgColor="gray.700" onClick={onCancel}>
+          <Button variant="dark" w="full" bgColor="legacy.gray.700" onClick={onCancel}>
             Cancel
           </Button>
         </VStack>

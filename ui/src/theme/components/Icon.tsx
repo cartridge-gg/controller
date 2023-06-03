@@ -2,7 +2,7 @@ import type { ComponentStyleConfig } from "@chakra-ui/theme";
 
 export const Icon: ComponentStyleConfig = {
   baseStyle: {
-    fill: "gray.200",
+    fill: "legacy.gray.200",
   },
   sizes: {
     lg: {

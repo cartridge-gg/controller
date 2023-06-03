@@ -17,8 +17,8 @@ export const Dot = ({ active, diff, size = 5, onClick }: DotProps) => {
   const color = active
     ? "white"
     : diff == 1
-    ? "whiteAlpha.600"
-    : "whiteAlpha.400";
+    ? "legacy.whiteAlpha.600"
+    : "legacy.whiteAlpha.400";
   return (
     <Circle
       as="button"
@@ -40,13 +40,13 @@ function navBtn(direction, onClick, enabled) {
     <Circle
       as="button"
       size="26px"
-      bgColor="whiteAlpha.300"
+      bgColor="legacy.whiteAlpha.300"
       onClick={onClick}
       opacity={enabled ? "1" : "0.3"}
       transition="opacity 0.25s ease"
       pointerEvents={enabled ? "auto" : "none"}
     >
-      <Chevron direction={direction} color="whiteAlpha.600" />
+      <Chevron direction={direction} color="legacy.whiteAlpha.600" />
     </Circle>
   );
 }

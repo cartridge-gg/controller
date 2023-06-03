@@ -20,7 +20,7 @@ export const Banner = ({
   return (
     <VStack gap="5px" {...rest}>
       {icon && (
-        <Circle bgColor="gray.700" size="48px">
+        <Circle bgColor="legacy.gray.700" size="48px">
           {icon}
         </Circle>
       )}
@@ -28,12 +28,12 @@ export const Banner = ({
         {title}
       </Text>
       {description && (
-        <Text fontSize="13px" color="gray.200" align="center" pb="12px">
+        <Text fontSize="13px" color="legacy.gray.200" align="center" pb="12px">
           {description}
         </Text>
       )}
       {chainId && (
-        <HStack py="7px" px="12px" bgColor="gray.700" borderRadius="full">
+        <HStack py="7px" px="12px" bgColor="legacy.gray.700" borderRadius="full">
           <StarknetIcon boxSize="14px" />
           <Text fontSize="10px" variant="ibm-upper-bold">
             {chainId === constants.StarknetChainId.MAINNET

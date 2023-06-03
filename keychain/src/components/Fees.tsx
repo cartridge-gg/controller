@@ -134,7 +134,7 @@ const LineItem = ({
   value?: string;
   isLoading?: boolean;
 }) => (
-  <HStack w="full" h="40px" p="18px" bgColor="gray.700" color="gray.200">
+  <HStack w="full" h="40px" p="18px" bgColor="legacy.gray.700" color="legacy.gray.200">
     <Text variant="ibm-upper-bold" fontSize={10} color="inherit">
       {name}
     </Text>
@@ -149,7 +149,7 @@ const LineItem = ({
               <Text fontSize={11} color="inherit">
                 {description}
               </Text>
-              <Divider orientation="vertical" borderColor="gray.600" h="16px" />
+              <Divider orientation="vertical" borderColor="legacy.gray.600" h="16px" />
             </>
           )}
           <Text fontSize={13}>{value}</Text>

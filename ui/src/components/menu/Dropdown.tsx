@@ -50,7 +50,7 @@ export const Dropdown = ({
               <ChevronIcon
                 w="14px"
                 ml="10px"
-                fill="gray.200"
+                fill="legacy.gray.200"
                 transform={isOpen ? "rotate(180deg)" : undefined}
                 transition="transform 0.2s"
               />
@@ -62,7 +62,7 @@ export const Dropdown = ({
                 right="-1px"
                 size="16px"
                 border="3px solid"
-                borderColor="gray.800"
+                borderColor="legacy.gray.800"
                 bgColor={badgeColor}
               />
             )}

@@ -42,22 +42,22 @@ const Web3Auth = ({
   return (
     <>
       {/* <HStack>
-        <Divider borderColor="whiteAlpha.500" />
+        <Divider borderColor="legacy.whiteAlpha.500" />
         <Text
           mx="18px"
           fontFamily="IBM Plex Sans"
           fontSize="12px"
-          color="whiteAlpha.600"
+          color="legacy.whiteAlpha.600"
           fontWeight="600"
         >
           or
         </Text>
-        <Divider borderColor="whiteAlpha.500" />
+        <Divider borderColor="legacy.whiteAlpha.500" />
       </HStack> */}
       <HStack width="100%">
         <Button
           flex={1}
-          variant="secondary700"
+          variant="legacySecondary700"
           onClick={async () => {
             login("discord");
           }}
@@ -66,12 +66,12 @@ const Web3Auth = ({
           <Discord height="16px" width="16px" mr="12px" mt="1px" />
           Connect with Discord
         </Button>
-        {/* <Button flex={1} variant="secondary700" onClick={async () => {
+        {/* <Button flex={1} variant="legacySecondary700" onClick={async () => {
                 login("twitter");
             }}><Twitter height="18px" width="18px" /></Button> */}
         {/* <Button
           flex={1}
-          variant="secondary700"
+          variant="legacySecondary700"
           onClick={async () => {
             login("metamask");
           }}

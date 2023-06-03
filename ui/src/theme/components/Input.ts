@@ -8,20 +8,20 @@ export const Input: ComponentStyleConfig = {
         h: "32px",
         border: "1px solid",
         fontSize: "14px",
-        borderColor: "whiteAlpha.200",
-        bgColor: "gray.700",
+        borderColor: "legacy.whiteAlpha.200",
+        bgColor: "legacy.gray.700",
         _focus: {
-          bgColor: "gray.600",
+          bgColor: "legacy.gray.600",
         },
         _hover: {
-          bgColor: "gray.600",
+          bgColor: "legacy.gray.600",
         },
       },
     }),
     secondary: (props: StyleFunctionProps) => ({
       field: {
         borderRadius: "3px",
-        background: "gray.700",
+        background: "legacy.gray.700",
         color: "white",
       },
     }),

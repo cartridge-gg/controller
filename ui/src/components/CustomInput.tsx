@@ -34,7 +34,7 @@ export const Input = (props: InputProps) => {
         borderRadius="0 0 4px 4px"
         borderBottom="2px solid"
         borderX="2px solid"
-        borderColor="gray.500"
+        borderColor="legacy.gray.500"
         bottom="0"
         transition="border-color 0.2s ease"
       ></Box>

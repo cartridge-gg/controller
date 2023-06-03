@@ -48,9 +48,9 @@ export const Transaction = ({
     }
   }, [controller, hash, chainId, finalized]);
   return (
-    <HStack w="full" borderRadius="4px" bgColor="gray.700" p="12px">
+    <HStack w="full" borderRadius="4px" bgColor="legacy.gray.700" p="12px">
       <HStack spacing="12px" color={color}>
-        <Circle size="30px" bgColor="gray.600">
+        <Circle size="30px" bgColor="legacy.gray.600">
           {icon}
         </Circle>
         <Text variant="ibm-upper-bold" fontSize="11px" color="inherit">
@@ -59,7 +59,7 @@ export const Transaction = ({
       </HStack>
       <Spacer />
       <HStack spacing="15px">
-        <HStack color="gray.200" spacing="5px">
+        <HStack color="legacy.gray.200" spacing="5px">
           <StarknetIcon boxSize="14px" />
           <Text color="inherit" fontSize="13px">
             {chainId === constants.StarknetChainId.MAINNET
@@ -67,9 +67,9 @@ export const Transaction = ({
               : "Testnet"}
           </Text>
         </HStack>
-        <Divider orientation="vertical" bgColor="gray.500" h="30px" />
+        <Divider orientation="vertical" bgColor="legacy.gray.500" h="30px" />
         <Link href={StarkscanUrl(chainId).transaction(hash)} isExternal>
-          <LinkIcon boxSize="12px" color="blue.400" />
+          <LinkIcon boxSize="12px" color="legacy.blue.400" />
         </Link>
       </HStack>
     </HStack>
@@ -82,8 +82,8 @@ const getColorIcon = (
   switch (state) {
     case "success":
       return {
-        color: "green.400",
-        icon: <CheckIcon boxSize="12px" color="green.400" />,
+        color: "legacy.green.400",
+        icon: <CheckIcon boxSize="12px" color="legacy.green.400" />,
       };
     case "pending":
       return {
@@ -92,7 +92,7 @@ const getColorIcon = (
       };
     case "error":
       return {
-        color: "red.400",
+        color: "legacy.red.400",
         icon: <></>,
       };
   }

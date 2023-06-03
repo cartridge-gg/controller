@@ -6,7 +6,7 @@ import QuestCard from "./Card";
 const Label = ({ children }: { children: React.ReactNode }) => (
   <Box w="full" p="0 6px 6px 6px" mt="24px">
     <Text
-      color="gray.200"
+      color="legacy.gray.200"
       fontSize="10px"
       fontWeight="700"
       lineHeight="16px"
@@ -31,11 +31,11 @@ const QuestsOverview = ({
         w="full"
         h="72px"
         borderBottom="1px solid"
-        borderColor="gray.700"
+        borderColor="legacy.gray.700"
         userSelect="none"
       >
         <HStack w="full" spacing="18px">
-          <Circle bgColor="gray.700" size="48px">
+          <Circle bgColor="legacy.gray.700" size="48px">
             <MapIcon w="30px" h="30px" />
           </Circle>
           <Text as="h1" fontWeight="600" fontSize="17px">

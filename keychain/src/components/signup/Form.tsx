@@ -149,15 +149,15 @@ export const Form = ({ onConfirm }: FormType) => {
         onSubmit={formik.handleSubmit}
       >
         <Flex gap="1px" borderRadius="8px" overflow="hidden">
-          <Box p="12px" bg="gray.700">
-            <Circle size="54px" bg="gray.600">
+          <Box p="12px" bg="legacy.gray.700">
+            <Circle size="54px" bg="legacy.gray.600">
               <PixelTargetIcon
-                color={formik.errors.name ? "red.400" : "brand"}
+                color={formik.errors.name ? "legacy.red.400" : "brand"}
                 transition="all 0.2s ease"
               />
             </Circle>
           </Box>
-          <Flex px="24px" flex="1" align="center" bg="gray.700">
+          <Flex px="24px" flex="1" align="center" bg="legacy.gray.700">
             <Tooltip
               variant="error"
               mt="10px"
@@ -166,7 +166,7 @@ export const Form = ({ onConfirm }: FormType) => {
               hasArrow
               label={
                 <HStack>
-                  <InfoIcon fill="whiteAlpha.600" />
+                  <InfoIcon fill="legacy.whiteAlpha.600" />
                   <Text>{error?.message}</Text>
                 </HStack>
               }
@@ -177,7 +177,7 @@ export const Form = ({ onConfirm }: FormType) => {
                 onChange={formik.handleChange}
                 value={formik.values.name}
                 isDisabled={formik.isSubmitting}
-                borderColor={formik.errors.name && "red.400"}
+                borderColor={formik.errors.name && "legacy.red.400"}
                 autoComplete="off"
               />
             </Tooltip>
@@ -186,7 +186,7 @@ export const Form = ({ onConfirm }: FormType) => {
         <ButtonsContainer>
           {!redirect_uri && (
             <Button
-              variant="secondary700"
+              variant="legacySecondary700"
               w="full"
               flex="1"
               onClick={onCancel}
@@ -218,7 +218,7 @@ export const Form = ({ onConfirm }: FormType) => {
           </Button>
         </ButtonsContainer>
         <HStack as="strong" justify="center" fontSize="13px">
-          <Text color="whiteAlpha.600">Already have a controller?</Text>
+          <Text color="legacy.whiteAlpha.600">Already have a controller?</Text>
           <NextLink href={{ pathname: "/login", query: router.query }}>
             <Link variant="traditional">Log In</Link>
           </NextLink>
@@ -243,7 +243,7 @@ export const Form = ({ onConfirm }: FormType) => {
           <Text fontSize="17px" fontWeight="bold">
             Authenticate Yourself
           </Text>
-          <Text fontSize="14px" color="whiteAlpha.600" align="center">
+          <Text fontSize="14px" color="legacy.whiteAlpha.600" align="center">
             You will now be asked to authenticate yourself.
             <br />
             Note: this experience varies from browser to browser.

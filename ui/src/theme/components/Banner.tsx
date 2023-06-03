@@ -7,7 +7,7 @@ export const Banner: ComponentStyleConfig = {
   variants: {
     outline: {
       border: "3px solid #333",
-      background: "yellow.400",
+      background: "legacy.yellow.400",
     },
   },
 };

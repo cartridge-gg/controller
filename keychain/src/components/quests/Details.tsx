@@ -19,7 +19,7 @@ import { useClaimQuestRewardsMutation } from "generated/graphql";
 const Tag = ({ children }: { children: React.ReactNode }) => {
   return (
     <Box
-      bgColor="whiteAlpha.100"
+      bgColor="legacy.whiteAlpha.100"
       color="currentColor"
       p="6px 12px"
       fontFamily="LD_Mono"
@@ -46,8 +46,8 @@ const Reward = ({
   return (
     <VStack w="90px" h="84px" borderRadius="6px" spacing="0" overflow="hidden">
       <VStack
-        bgColor="gray.400"
-        color="green.400"
+        bgColor="legacy.gray.400"
+        color="legacy.green.400"
         w="100%"
         flexGrow="1"
         justify="center"
@@ -63,7 +63,7 @@ const Reward = ({
         p="4px 10px"
         letterSpacing="0.08em"
         bgColor="#262A27"
-        color="green.800"
+        color="legacy.green.800"
         textAlign="center"
       >
         {amount} {name}
@@ -121,11 +121,11 @@ const QuestDetails = ({
             w="full"
             minH="72px"
             borderBottom="1px solid"
-            borderColor="gray.700"
+            borderColor="legacy.gray.700"
             userSelect="none"
           >
             <HStack w="full" spacing="18px">
-              <Circle bgColor="gray.700" size="48px">
+              <Circle bgColor="legacy.gray.700" size="48px">
                 <MapIcon w="30px" h="30px" />
               </Circle>
               <Text as="h1" fontWeight="600" fontSize="17px">
@@ -137,8 +137,8 @@ const QuestDetails = ({
               color={
                 typeof questState === "undefined" ||
                 questState === QuestState.Incomplete
-                  ? "whiteAlpha.800"
-                  : "green.400"
+                  ? "legacy.whiteAlpha.800"
+                  : "legacy.green.400"
               }
             >
               <Tag>
@@ -157,7 +157,7 @@ const QuestDetails = ({
             direction="column"
             align="start"
             gap="18px"
-            bgColor="whiteAlpha.50"
+            bgColor="legacy.whiteAlpha.50"
             borderRadius="4px"
             boxShadow="0px 69px 28px rgba(0, 0, 0, 0.01), 0px 39px 23px rgba(0, 0, 0, 0.05), 0px 17px 17px rgba(0, 0, 0, 0.09), 0px 4px 10px rgba(0, 0, 0, 0.1), 0px 0px 0px rgba(0, 0, 0, 0.1);"
           >
@@ -170,14 +170,14 @@ const QuestDetails = ({
                 return (
                   <HStack key={evt.id}>
                     {eventProgress?.completed ? (
-                      <CircleCheck color="green.400" />
+                      <CircleCheck color="legacy.green.400" />
                     ) : (
-                      <CircleIcon color="gray.200" />
+                      <CircleIcon color="legacy.gray.200" />
                     )}
                     <Text
                       fontSize="12px"
                       color={
-                        eventProgress?.completed ? "green.400" : "gray.200"
+                        eventProgress?.completed ? "legacy.green.400" : "legacy.gray.200"
                       }
                       fontWeight="700"
                     >
@@ -199,7 +199,7 @@ const QuestDetails = ({
           </Flex>
         </Flex>
       </Box>
-      <Box w="full" h="65px" borderTop="1px solid" borderColor="gray.700">
+      <Box w="full" h="65px" borderTop="1px solid" borderColor="legacy.gray.700">
         <Button
           w="full"
           mt="24px"

@@ -6,7 +6,7 @@ type HeadStoneProps = {
   bgColor?: string;
 };
 
-const Headstone = ({ color, icon, bgColor = "gray.600" }: HeadStoneProps) => (
+const Headstone = ({ color, icon, bgColor = "legacy.gray.600" }: HeadStoneProps) => (
   <Box
     top="0"
     right="50%"

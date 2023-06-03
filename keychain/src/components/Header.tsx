@@ -38,16 +38,15 @@ import Logout from "./icons/Logout";
 import Wallet from "./icons/Wallet";
 
 const Container = ({
-  height,
+  h,
   children,
   ...rest
 }: {
-  height: string;
   children: React.ReactNode;
 } & StyleProps) => (
   <>
     <Flex
-      h={height}
+      h={h}
       w="full"
       top="0"
       left="0"
@@ -56,12 +55,12 @@ const Container = ({
       align="center"
       justify="center"
       flexShrink={0}
-      bg="gray.800"
+      bg="legacy.gray.800"
       {...rest}
     >
       <ChakraContainer centerContent>{children}</ChakraContainer>
     </Flex>
-    <Box h={height} />
+    <Box h={h} />
   </>
 );
 
@@ -122,10 +121,10 @@ export const Header = ({
   }, [address, chainId]);
 
   if (!address) {
-    const fill = muted ? "gray.200" : "brand";
+    const fill = muted ? "legacy.gray.200" : "brand";
 
     return (
-      <Container height="54px" bgColor="gray.700">
+      <Container h={12} bgColor="legacy.gray.700">
         <HStack w="full" justify="space-between">
           <Spacer maxW="42px" />
           <HStack spacing="0">
@@ -135,7 +134,7 @@ export const Header = ({
           <Button
             h="30px"
             w="42px"
-            variant="secondary450"
+            variant="legacySecondary450"
             visibility={!!onClose ? "visible" : "hidden"}
             onClick={onClose}
           >
@@ -160,7 +159,7 @@ export const Header = ({
   }
 
   return (
-    <Container height="50px" bgColor="gray.700">
+    <Container height="50px" bgColor="legacy.gray.700">
       <HStack w="full" h="full" position="relative">
         {onBack ? (
           <HStack
@@ -175,7 +174,7 @@ export const Header = ({
             }}
           >
             <ArrowIcon
-              fill="whiteAlpha.700"
+              fill="legacy.whiteAlpha.700"
               transform="rotate(180deg)"
               _groupHover={{
                 fill: "white",
@@ -206,9 +205,9 @@ export const Header = ({
               <MenuButton
                 p="6px 12px"
                 borderRadius="6px"
-                bgColor="gray.600"
+                bgColor="legacy.gray.600"
                 _hover={{
-                  bgColor: "gray.500",
+                  bgColor: "legacy.gray.500",
                 }}
               >
                 <HStack spacing="8px">
@@ -219,12 +218,12 @@ export const Header = ({
                       !!current?.svg ? { __html: current?.svg } : undefined
                     }
                   />
-                  <Chevron direction="down" boxSize="8px" color="gray.300" />
+                  <Chevron direction="down" boxSize="8px" color="legacy.gray.300" />
                 </HStack>
               </MenuButton>
               <MenuList position="absolute" top="12px" left="-130px">
                 <MenuItem
-                  color="whiteAlpha.800"
+                  color="legacy.whiteAlpha.800"
                   icon={<Wallet boxSize="16px" />}
                   onClick={() => {
                     navigator.clipboard.writeText(address);
@@ -242,7 +241,7 @@ export const Header = ({
                   </HStack>
                 </MenuItem>
                 <MenuItem
-                  color="whiteAlpha.800"
+                  color="legacy.whiteAlpha.800"
                   icon={<Logout boxSize="16px" />}
                   onClick={onLogout}
                 >
@@ -266,7 +265,7 @@ export const Header = ({
           >
             <TimesIcon
               boxSize="18px"
-              fill="whiteAlpha.700"
+              fill="legacy.whiteAlpha.700"
               _groupHover={{
                 fill: "white",
               }}
@@ -280,7 +279,7 @@ export const Header = ({
 
 export const SignupHeader = ({ children }: { children: ReactNode }) => {
   return (
-    <Container height="64px" bgColor="gray.700">
+    <Container h="64px" bgColor="legacy.gray.700">
       <HStack w="full" h="64px">
         <NextLink href="/">
           <Link>

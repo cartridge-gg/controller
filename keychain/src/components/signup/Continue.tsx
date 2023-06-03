@@ -7,7 +7,7 @@ const Continue = ({ ...rest }: StyleProps) => {
   return (
     <Container {...rest}>
       <Header muted />
-      <VStack boxSize="full" pt="120px" color="gray.200" spacing="36px">
+      <VStack boxSize="full" pt="120px" color="legacy.gray.200" spacing="36px">
         <AuthSparkleImage />
         <VStack spacing="18px">
           <Text fontSize="17px" fontWeight="bold" color="inherit">

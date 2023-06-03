@@ -5,8 +5,8 @@ const $arrowBg = cssVar("popper-arrow-bg");
 
 export const Tooltip: ComponentStyleConfig = {
   baseStyle: {
-    bg: "gray.500",
-    color: "whiteAlpha.800",
+    bg: "legacy.gray.500",
+    color: "legacy.whiteAlpha.800",
     br: "4px",
     m: "5px",
     [$arrowBg.variable]: "colors.gray.500",
@@ -18,7 +18,7 @@ export const Tooltip: ComponentStyleConfig = {
       py: "10px",
       px: "40px",
       borderRadius: "4px",
-      bgColor: "red.400",
+      bgColor: "legacy.red.400",
       [$arrowBg.variable]: "colors.red.400",
     },
   },

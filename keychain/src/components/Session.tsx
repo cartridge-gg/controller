@@ -88,15 +88,15 @@ const Session = ({
               overflow="hidden"
             >
               {policies.length > 0 && (
-                <VStack align="flex-start" p="12px" bgColor="gray.700">
+                <VStack align="flex-start" p="12px" bgColor="legacy.gray.700">
                   <Text
                     variant="ibm-upper-bold"
-                    color="gray.200"
+                    color="legacy.gray.200"
                     fontSize="10px"
                   >
                     Actions
                   </Text>
-                  <Text fontSize="11px" color="gray.200">
+                  <Text fontSize="11px" color="legacy.gray.200">
                     Allow controller to execute following actions on your behalf
                   </Text>
                 </VStack>

@@ -43,7 +43,7 @@ const ButtonBar = ({
       <Flex flexDirection={["column-reverse", "row"]} alignItems="center">
         {onCancel && (
           <Button
-            variant="secondary600"
+            variant="legacySecondary600"
             size="lg"
             w={["100%", "200px"]}
             mr={["0", "3"]}

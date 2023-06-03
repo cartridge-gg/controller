@@ -95,7 +95,7 @@ const Quests = ({
                     top="64px"
                     w="360px"
                     h="60px"
-                    bg="gray.700"
+                    bg="legacy.gray.700"
                     p="16px 24px 16px 24px"
                     borderRadius="8px"
                   >

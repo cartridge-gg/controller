@@ -27,7 +27,7 @@ import { register } from "methods/register";
 export const BridgeEth = ({ amount }: { amount: string }) => {
   return (
     <VStack borderRadius="8px" overflow="hidden" spacing="1px">
-      <HStack w="full" p="12px" bgColor="gray.700" color="whiteAlpha.600">
+      <HStack w="full" p="12px" bgColor="legacy.gray.700" color="legacy.whiteAlpha.600">
         <HStack fontSize="10px">
           <GasPumpIcon />
           <Text color="inherit" variant="ibm-upper-bold">
@@ -43,12 +43,12 @@ export const BridgeEth = ({ amount }: { amount: string }) => {
         w="full"
         p="12px"
         fontSize="14px"
-        bgColor="gray.700"
-        color="whiteAlpha.600"
+        bgColor="legacy.gray.700"
+        color="legacy.whiteAlpha.600"
       >
         <HStack color="inherit" w="full">
-          <Circle size="24px" bgColor="gray.500">
-            <EthereumIcon fill="green.400" boxSize="12px" />
+          <Circle size="24px" bgColor="legacy.gray.500">
+            <EthereumIcon fill="legacy.green.400" boxSize="12px" />
           </Circle>
           <Text color="inherit">Bridge ETH</Text>
           <Tooltip
@@ -58,7 +58,7 @@ export const BridgeEth = ({ amount }: { amount: string }) => {
             mt="10px"
           >
             <Link>
-              <InfoIcon boxSize="14px" fill="whiteAlpha.500" />
+              <InfoIcon boxSize="14px" fill="legacy.whiteAlpha.500" />
             </Link>
           </Tooltip>
           <Spacer />
@@ -131,17 +131,17 @@ export const L1Connect = ({ username, credentials }: L1ConnectProps) => {
   return (
     <Flex gap="20px" direction="column">
       <Flex borderRadius="8px" direction="column" gap="1px" overflow="hidden">
-        <Flex bgColor="gray.600" p="12px">
-          <Text variant="ibm-upper-bold" fontSize="10px" color="whiteAlpha.400">
+        <Flex bgColor="legacy.gray.600" p="12px">
+          <Text variant="ibm-upper-bold" fontSize="10px" color="legacy.whiteAlpha.400">
             Funding Source
           </Text>
         </Flex>
-        <Flex p="12px" gap="10px" bgColor="gray.700" direction="column">
+        <Flex p="12px" gap="10px" bgColor="legacy.gray.700" direction="column">
           <HStack fontSize="14px">
             <WalletIcon fill="white" />
             <Text>Purchase on Ethereum mainnet</Text>
           </HStack>
-          <Text color="whiteAlpha.600" fontSize="12px">
+          <Text color="legacy.whiteAlpha.600" fontSize="12px">
             {"You'll receive your starterpack on Starknet"}
           </Text>
           <Flex gap="10px">
@@ -149,7 +149,7 @@ export const L1Connect = ({ username, credentials }: L1ConnectProps) => {
               flex="1"
               px="10px"
               borderBottom="1px solid"
-              borderColor="gray.600"
+              borderColor="legacy.gray.600"
               fontSize="15px"
             >
               {address ? (
@@ -165,7 +165,7 @@ export const L1Connect = ({ username, credentials }: L1ConnectProps) => {
               )}
             </HStack>
             <Button
-              variant="accent"
+              variant="legacyAccent"
               minWidth="120px"
               onClick={onConnect}
               isDisabled={loading || pending}

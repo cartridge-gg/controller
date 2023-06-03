@@ -8,7 +8,7 @@ const Network = ({ chainId }: { chainId: constants.StarknetChainId }) => {
       h="24px"
       p="0 12px"
       borderRadius="12px"
-      backgroundColor="whiteAlpha.200"
+      backgroundColor="legacy.whiteAlpha.200"
     >
       <StarknetIcon h="9px" w="9px" color="white" />
       <Text fontSize="10px" fontWeight="bold" letterSpacing="0.08em">

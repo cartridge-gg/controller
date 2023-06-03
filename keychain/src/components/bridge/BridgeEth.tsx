@@ -44,10 +44,10 @@ const SelectBox = forwardRef<
     h="40px"
     p="12px 14px"
     borderBottom="1px solid"
-    borderBottomColor="gray.600"
+    borderBottomColor="legacy.gray.600"
     borderRadius="4px"
     transition="all 0.2s"
-    _hover={{ cursor: "pointer", bgColor: "gray.700" }}
+    _hover={{ cursor: "pointer", bgColor: "legacy.gray.700" }}
     ref={ref}
   >
     {props.leftIcon}
@@ -196,8 +196,8 @@ const BridgeEth = ({
         onClose={onClose}
       />
       <HStack w="full" justify="flex-start" pb="20px" spacing="20px">
-        <Circle bgColor="gray.700" size="48px">
-          <EthereumLarge boxSize="30px" color="green.400" />
+        <Circle bgColor="legacy.gray.700" size="48px">
+          <EthereumLarge boxSize="30px" color="legacy.green.400" />
         </Circle>
         <Text fontSize="17px" fontWeight="bold">
           Bridge ETH
@@ -213,12 +213,12 @@ const BridgeEth = ({
                 leftIcon={<MetaMask />}
                 rightIcon={
                   !!ethAddress ? (
-                    <Check color="whiteAlpha.400" />
+                    <Check color="legacy.whiteAlpha.400" />
                   ) : (
                     <Chevron
                       direction="down"
                       boxSize="7px"
-                      color="whiteAlpha.400"
+                      color="legacy.whiteAlpha.400"
                     />
                   )
                 }
@@ -251,9 +251,9 @@ const BridgeEth = ({
         <HStack w="full">
           <Label>Transfer Amount</Label>
           <Spacer />
-          <Label color="gray.400">
+          <Label color="legacy.gray.400">
             Available{" "}
-            <Text display="inline" color="gray.200" pl="12px">
+            <Text display="inline" color="legacy.gray.200" pl="12px">
               {ethBalance ? ethBalance + " ETH" : "---"}
             </Text>
           </Label>
@@ -272,11 +272,11 @@ const BridgeEth = ({
           <HStack
             w="full"
             h="full"
-            bgColor="gray.600"
+            bgColor="legacy.gray.600"
             justify="center"
             flexBasis="54px"
           >
-            <Circle size="18px" bgColor="whiteAlpha.50">
+            <Circle size="18px" bgColor="legacy.whiteAlpha.50">
               <EthereumLarge boxSize="18px" />
             </Circle>
           </HStack>
@@ -285,7 +285,7 @@ const BridgeEth = ({
             type="number"
             variant=""
             flexGrow="1"
-            bgColor="gray.700"
+            bgColor="legacy.gray.700"
             placeholder="Enter amount"
             fontFamily="IBM Plex Sans"
             fontSize="13px"
@@ -293,7 +293,7 @@ const BridgeEth = ({
             borderRadius="0"
             border="1px solid"
             borderColor="transparent"
-            _focus={{ borderColor: "whiteAlpha.200" }}
+            _focus={{ borderColor: "legacy.whiteAlpha.200" }}
             onChange={(event) => {
               setTransferAmount(event.target.value);
             }}
@@ -303,7 +303,7 @@ const BridgeEth = ({
               position="absolute"
               right="10px"
               fontSize="13px"
-              color="gray.200"
+              color="legacy.gray.200"
             >
               {transferAmountCost}
             </Text>

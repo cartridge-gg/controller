@@ -30,7 +30,7 @@ const DataContainer = ({
           padding: "12px",
           fontSize: "13px",
           lineHeight: "16px",
-          backgroundColor: "var(--chakra-colors-gray-600)",
+          backgroundColor: "var(--chakra-colors-legacy-gray-600)",
         },
         "> p:first-of-type": {
           fontSize: "10px",
@@ -38,15 +38,15 @@ const DataContainer = ({
           letterSpacing: "0.05em",
           lineHeight: "18px",
           textTransform: "uppercase",
-          color: "var(--chakra-colors-gray-200)",
-          backgroundColor: "var(--chakra-colors-gray-700)",
+          color: "var(--chakra-colors-legacy-gray-200)",
+          backgroundColor: "var(--chakra-colors-legacy-gray-700)",
           borderRadius: "6px 6px 0 0",
         },
         "> p:last-of-type": {
           borderRadius: "0 0 6px 6px",
         },
         "> p:not(p:last-of-type)": {
-          borderBottom: "1px solid var(--chakra-colors-gray-800)",
+          borderBottom: "1px solid var(--chakra-colors-legacy-gray-800)",
         },
       }}
     >
@@ -125,16 +125,16 @@ const SignMessage = ({
           w="full"
           pb="24px"
           borderBottom="1px solid"
-          borderColor="gray.700"
+          borderColor="legacy.gray.700"
         >
-          <Circle bgColor="gray.700" size="40px">
-            <Transfer color="green.400" fontSize="30px" />
+          <Circle bgColor="legacy.gray.700" size="40px">
+            <Transfer color="legacy.green.400" fontSize="30px" />
           </Circle>
           <VStack align="start">
             <Text fontSize="17px" lineHeight="20px" fontWeight="600">
               Signature Request
             </Text>
-            <Text color="gray.200" fontSize="12px" lineHeight="16px">
+            <Text color="legacy.gray.200" fontSize="12px" lineHeight="16px">
               {origin} is asking you to sign a message
             </Text>
           </VStack>

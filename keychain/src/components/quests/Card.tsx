@@ -12,24 +12,24 @@ const QuestCard = ({
   state: QuestState;
   rewards: Array<any>;
 }) => {
-  let bgColor = "gray.700";
+  let bgColor = "legacy.gray.700";
   let color = "white";
   let check = false;
   let border = undefined;
 
   switch (state) {
     case QuestState.Claimable:
-      bgColor = "gray.600";
-      color = "green.400";
+      bgColor = "legacy.gray.600";
+      color = "legacy.green.400";
       check = true;
       break;
     case QuestState.Complete:
       bgColor = "transparent";
-      color = "gray.200";
+      color = "legacy.gray.200";
       check = true;
       border = {
         border: "1px solid",
-        borderColor: "gray.700",
+        borderColor: "legacy.gray.700",
       };
       break;
     default:

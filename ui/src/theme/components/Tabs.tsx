@@ -22,21 +22,21 @@ export const Tabs: ComponentMultiStyleConfig = {
       tab: {
         flexDirection: "column",
         justifyContent: "space-evenly",
-        color: "gray.300",
+        color: "legacy.gray.300",
         borderRadius: "8px",
         fontSize: "0.6rem",
         textTransform: "uppercase",
         _selected: {
-          color: "yellow.400",
-          backgroundColor: "gray.500",
+          color: "legacy.yellow.400",
+          backgroundColor: "legacy.gray.500",
           svg: {
-            stroke: "gray.500",
+            stroke: "legacy.gray.500",
           },
         },
         svg: {
           height: "24px",
           width: "24px",
-          stroke: "gray.700",
+          stroke: "legacy.gray.700",
         },
       },
       root: {
@@ -58,7 +58,7 @@ export const Tabs: ComponentMultiStyleConfig = {
         gap: "5px",
         width: "full",
         padding: "8px",
-        backgroundColor: "gray.700",
+        backgroundColor: "legacy.gray.700",
       },
     },
     line: {
@@ -69,7 +69,7 @@ export const Tabs: ComponentMultiStyleConfig = {
         letterSpacing: "0.01em",
         marginBottom: "-1px",
         borderBottom: "1px solid",
-        color: "gray.200",
+        color: "legacy.gray.200",
         px: "25px",
         _active: {
           color: "white",
@@ -78,7 +78,7 @@ export const Tabs: ComponentMultiStyleConfig = {
           borderBottom: "1px solid",
         },
         _selected: {
-          color: "yellow.400",
+          color: "legacy.yellow.400",
         },
         _hover: {
           color: "#fff",

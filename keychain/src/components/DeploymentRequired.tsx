@@ -91,10 +91,10 @@ const DeploymentRequired = ({
           isExternal
         >
           <Button
-            variant="dark"
+            variant="legacyDark"
             size="xs"
             fontSize="11px"
-            color="blue.400"
+            color="legacy.blue.400"
             marginTop="40px"
             rightIcon={<LinkIcon />}
           >

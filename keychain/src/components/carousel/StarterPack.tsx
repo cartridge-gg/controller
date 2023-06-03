@@ -58,7 +58,7 @@ export const StarterPackCarousel = ({
         gap="12px"
         overflow="hidden"
         direction="column"
-        bgColor="gray.700"
+        bgColor="legacy.gray.700"
         position="relative"
         ref={viewportRef}
         borderRadius="0 0 8px 8px"
@@ -79,11 +79,11 @@ export const StarterPackCarousel = ({
                 minWidth="70px"
                 minHeight="70px"
                 borderRadius="5px"
-                bgColor="gray.600"
+                bgColor="legacy.gray.600"
                 overflow="hidden"
                 position="relative"
                 border="1px solid"
-                borderColor={selectedIndex == index ? "green.100" : "gray.400"}
+                borderColor={selectedIndex == index ? "legacy.green.100" : "legacy.gray.400"}
                 transition="border-color 0.5s ease"
               >
                 {item.icon}
@@ -92,7 +92,7 @@ export const StarterPackCarousel = ({
                 <HStack w="full" fontWeight="bold" textTransform="uppercase">
                   <Text fontSize="11px">{item.name}</Text>
                 </HStack>
-                <Text fontSize="11px" color="gray.200">
+                <Text fontSize="11px" color="legacy.gray.200">
                   {item.description}
                 </Text>
               </VStack>
@@ -142,7 +142,7 @@ export const StarterPackCarousel = ({
             fontSize="10px"
             transition="color 0.5s ease"
             onClick={() => scrollTo(index)}
-            color={selectedIndex === index ? "white" : "whiteAlpha.600"}
+            color={selectedIndex === index ? "white" : "legacy.whiteAlpha.600"}
             _hover={{ cursor: selectedIndex === index ? "default" : "pointer" }}
           >
             <ChevronPixelIcon

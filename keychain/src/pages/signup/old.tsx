@@ -255,7 +255,7 @@ const CreateWallet: NextPage = () => {
           <Divider
             order={1}
             display={["block", "block", "none"]}
-            borderColor="gray.600"
+            borderColor="legacy.gray.600"
           />
         </SimpleGrid>
       </Container>
