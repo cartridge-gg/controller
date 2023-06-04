@@ -9,7 +9,7 @@ const meta: Meta<typeof Button> = {
 
 export default meta;
 
-export const Yellow = {
+export const Default = {
   args: {
     children: "Press me",
     variant: "yellow",

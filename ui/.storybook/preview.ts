@@ -15,6 +15,7 @@ const preview: Preview = {
       theme,
     },
   },
+  // Workaround: https://github.com/chakra-ui/chakra-ui/issues/6338
   decorators: [
     ChakraProviderDecorator
   ],
