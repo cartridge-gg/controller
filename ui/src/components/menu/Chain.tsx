@@ -1,5 +1,5 @@
 import { Text } from "@chakra-ui/react";
-import { HeaderItem } from "@cartridge/ui/src/components/HeaderItem";
+import { HeaderItem } from "../HeaderItem";
 import StarknetGray from "../icons/StarknetGray";
 
 const Chain = ({ name }: { name: string }) => {

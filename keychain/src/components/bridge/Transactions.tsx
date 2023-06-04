@@ -71,7 +71,7 @@ const TxnTracker = ({
   chainId,
   ethTxnHash,
 }: {
-  // address: string;
+  address: string;
   chainId: constants.StarknetChainId;
   ethTxnHash: string;
 }) => {

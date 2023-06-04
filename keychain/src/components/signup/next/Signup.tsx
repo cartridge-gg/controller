@@ -1,7 +1,7 @@
 import Joystick from "@cartridge/ui/components/icons/Joystick";
 import { Circle, Button } from "@chakra-ui/react";
 import { useState, useMemo, useCallback } from "react";
-import { PageBanner, PageContainer, BottomSheet } from "./layout";
+import { PageBanner, BottomSheet } from "./layout";
 import { Props } from "./types";
 
 export function Signup({ onLogin }: Props & { onLogin: () => void }) {
@@ -18,7 +18,7 @@ export function Signup({ onLogin }: Props & { onLogin: () => void }) {
         </Circle>
       </PageBanner>
 
-      <PageContainer></PageContainer>
+      {/* <PageContainer></PageContainer> */}
 
       <BottomSheet>
         <Button

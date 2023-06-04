@@ -10,7 +10,7 @@ const QuestCard = ({
 {
   name: string;
   state: QuestState;
-  // rewards: Array<any>;
+  rewards: Array<any>;
 }) => {
   let bgColor = "legacy.gray.700";
   let color = "white";

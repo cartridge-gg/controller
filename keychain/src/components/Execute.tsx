@@ -248,7 +248,7 @@ const Execute = ({
           {calls.map((call, i) => (
             <Call
               key={i}
-              // chainId={chainId}
+              chainId={chainId}
               policy={{
                 target: call.contractAddress,
                 method: call.entrypoint,

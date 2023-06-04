@@ -5,7 +5,7 @@ slug: /controller/starknet-react
 ---
 
 ```sh
-yarn add @cartridge/connector @cartridge/controller @starknet-react/core starknet
+pnpm add @cartridge/connector @cartridge/controller @starknet-react/core starknet
 ```
 
 ```ts

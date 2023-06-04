@@ -34,9 +34,9 @@ const PageTitle = chakra(Flex, {
   },
 });
 
-export const PageContainer = chakra(Flex, {
-  baseStyle: {},
-});
+// export const PageContainer = chakra(Flex, {
+//   baseStyle: {},
+// });
 
 // TODO: Extend `@cartridge/ui/components/modals/SimpleModal`
 export function BottomSheet({

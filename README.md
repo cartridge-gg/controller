@@ -11,14 +11,14 @@ Interaction with the `keychain` is done throught the [`controller`](controller) 
 Run keychain:
 
 ```sh
-yarn keychain dev
+pnpm keychain dev
 ```
 
 Run [starknet-react-next](examples/starknet-react-next/) example:
 
 ```sh
 cd examples/starknet-react-next
-yarn dev
+pnpm dev
 ```
 
 The simplest way to then develop with your cartridge account is to port it over from the production keychain:

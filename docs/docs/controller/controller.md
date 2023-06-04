@@ -9,7 +9,7 @@ Cartridge Controller is a gaming specific smart contract wallet plugin that enab
 Controller implements a standard account interface and can be integrated the same way as existing wallets.
 
 ```sh
-yarn add @cartridge/controller starknet
+pnpm add @cartridge/controller starknet
 ```
 
 ```ts
@@ -24,7 +24,7 @@ account.execute({ ... });
 ## Usage with `starknet-react`
 
 ```sh
-yarn add @cartridge/connector @cartridge/controller @starknet-react/core starknet
+pnpm add @cartridge/connector @cartridge/controller @starknet-react/core starknet
 ```
 
 ```ts

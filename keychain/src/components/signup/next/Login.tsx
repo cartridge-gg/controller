@@ -1,6 +1,6 @@
 import { Circle, Button, Flex } from "@chakra-ui/react";
 import Fingerprint from "@cartridge/ui/components/icons/Fingerprint";
-import { PageBanner, BottomSheet, PageContainer } from "./layout";
+import { PageBanner, BottomSheet } from "./layout";
 import { Props } from "./types";
 
 export function Login({ onSignup }: Props & { onSignup: () => void }) {
@@ -12,7 +12,7 @@ export function Login({ onSignup }: Props & { onSignup: () => void }) {
         </Circle>
       </PageBanner>
 
-      <PageContainer></PageContainer>
+      {/* <PageContainer></PageContainer> */}
 
       <BottomSheet>
         <Button
