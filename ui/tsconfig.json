@@ -15,9 +15,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
-    "paths": {
-      "@chakra-ui/system": ["./node_modules/@chakra-ui/system"]
-    }
   },
   "include": [
     "src/**/*"

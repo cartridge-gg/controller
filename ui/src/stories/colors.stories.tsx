@@ -12,7 +12,7 @@ function Colors() {
     <Flex flexDir="column">
       {Object.entries(colors)
         .filter(([colorName]) => colorName !== "legacy")
-        .map(([colorName, v], i) => (
+        .map(([colorName, v]) => (
           <Flex flexDir="column" m={2} key={colorName}>
             <Text>{colorName[0].toUpperCase() + colorName.slice(1)}</Text>
             <Flex>

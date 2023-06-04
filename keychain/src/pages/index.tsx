@@ -15,7 +15,7 @@ import {
 } from "@cartridge/controller";
 import Connect from "components/Connect";
 import { Login } from "components/Login";
-import { Signup, StarterPack, Auth } from "components/signup";
+import { Signup, StarterPack /* , Auth */ } from "components/signup";
 import { Redeploy } from "components/Redeploy";
 import {
   Abi,
@@ -364,12 +364,12 @@ const Index: NextPage = () => {
 
   // No controller, send to login
   if (!controller) {
-    return (
-      <Auth
-        onController={(c) => setController(c)}
-        onCancel={() => context.reject()}
-      />
-    );
+    // return (
+    //   <Auth
+    //     onController={(c) => setController(c)}
+    //     onCancel={() => context.reject()}
+    //   />
+    // );
 
     return (
       <>

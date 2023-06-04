@@ -45,7 +45,7 @@ const Icon = () => (
   </svg>
 );
 
-export const Address = forwardRef(
+export const Address: any = forwardRef(
   (
     { children, style }: { children: string; style?: React.CSSProperties },
     ref,
