@@ -3,9 +3,7 @@ import Fingerprint from "@cartridge/ui/components/icons/Fingerprint";
 import { PageBanner, BottomSheet, PageContainer } from "./layout";
 import { Props } from "./types";
 
-export function Login({
-  onSignup,
-}: Props & { onSignup: () => void }) {
+export function Login({ onSignup }: Props & { onSignup: () => void }) {
   return (
     <Flex flexDirection="column" flex={1}>
       <PageBanner title="Log In" description="Enter your username">
@@ -13,9 +11,9 @@ export function Login({
           <Fingerprint boxSize={8} color="green.200" />
         </Circle>
       </PageBanner>
-      
+
       <PageContainer></PageContainer>
-      
+
       <BottomSheet>
         <Button
           variant="yellow"
@@ -37,5 +35,5 @@ export function Login({
         </Button>
       </BottomSheet>
     </Flex>
-  ); 
+  );
 }

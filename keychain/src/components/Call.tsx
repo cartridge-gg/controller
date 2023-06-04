@@ -12,7 +12,6 @@ import {
 import { FieldInputProps } from "formik";
 import { formatEther } from "ethers/lib/utils";
 import { Policy } from "@cartridge/controller";
-import { formatAddress } from "@cartridge/ui/components/Address";
 import { StarkscanUrl } from "utils/url";
 import EthereumIcon from "@cartridge/ui/src/components/icons/Ethereum";
 import CodeIcon from "@cartridge/ui/src/components/icons/Code";
@@ -20,7 +19,7 @@ import LinkIcon from "@cartridge/ui/src/components/icons/Link";
 import { constants } from "starknet";
 
 export const Call = ({
-  chainId,
+  // chainId,
   policy,
   ...rest
 }: {
@@ -37,10 +36,10 @@ export const Call = ({
 };
 
 export const CallToggle = ({
+  // notice,
+  // ...rest
   chainId,
   policy,
-  notice,
-  ...rest
 }: {
   chainId: constants.StarknetChainId;
   policy: Policy;
@@ -85,7 +84,11 @@ export const MaxFee = ({
       <HStack pt="14px">
         <HStack position="relative" maxWidth="30%">
           <Input type="number" value={eth} pl="30px"></Input>
-          <EthereumIcon position="absolute" boxSize="14px" color="legacy.gray.200" />
+          <EthereumIcon
+            position="absolute"
+            boxSize="14px"
+            color="legacy.gray.200"
+          />
         </HStack>
         <Spacer />
         <Text></Text>
@@ -95,12 +98,12 @@ export const MaxFee = ({
 };
 
 const Switchable = ({
+  // toggable = true,
+  // disable = false,
+  // errMsg,
+  // ...rest
   title,
   description,
-  toggable = true,
-  disable = false,
-  errMsg,
-  ...rest
 }: {
   title: React.ReactElement | string;
   description?: React.ReactElement | string;
@@ -114,8 +117,8 @@ const Switchable = ({
 );
 
 const Base = ({
+  // description,
   title,
-  description,
 }: {
   title: React.ReactElement | string;
   description?: React.ReactElement | string;

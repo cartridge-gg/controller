@@ -1,6 +1,6 @@
 import Fingerprint from "./icons/Fingerprint";
 import { Formik, Form, Field, FormikState } from "formik";
-import { ReactNode, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { css } from "@emotion/react";
 import {
   Button,
@@ -23,7 +23,6 @@ import { client } from "utils/graphql";
 import base64url from "base64url";
 import { useAnalytics } from "hooks/analytics";
 import { beginLogin, onLoginFinalize } from "hooks/account";
-import login from "methods/login";
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import { useDebounce } from "hooks/debounce";
 import Web3Auth from "./Web3Auth";
@@ -37,7 +36,6 @@ import { DrawerWrapper } from "components/DrawerWrapper";
 import FingerprintIcon from "./icons/Fingerprint2";
 import { useWhitelist } from "hooks/whitelist";
 import { WebauthnSigner } from "utils/webauthn";
-import logout from "methods/logout";
 
 export const Login = ({
   chainId,
@@ -177,8 +175,8 @@ export const Login = ({
             <Field name="name">
               {({
                 field,
-                form,
-              }: {
+              }: /* form, */
+              {
                 field: InputProps;
                 form: FormikState<{ name: string }>;
               }) => (
@@ -191,7 +189,8 @@ export const Login = ({
                     hasArrow
                     label={
                       <>
-                        <InfoIcon fill="legacy.whiteAlpha.600" mr="5px" /> {nameError}
+                        <InfoIcon fill="legacy.whiteAlpha.600" mr="5px" />{" "}
+                        {nameError}
                       </>
                     }
                   >
@@ -241,7 +240,11 @@ export const Login = ({
             </Field>
             {signupEnabled && (
               <HStack justify="center">
-                <Text fontSize="12px" color="legacy.whiteAlpha.600" fontWeight="bold">
+                <Text
+                  fontSize="12px"
+                  color="legacy.whiteAlpha.600"
+                  fontWeight="bold"
+                >
                   Need a controller?
                 </Text>
                 <Link variant="outline" fontSize="11px" onClick={showSignup}>

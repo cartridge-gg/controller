@@ -1,10 +1,6 @@
 import {
-  Box,
-  Flex,
   Text,
-  HStack,
   VStack,
-  Divider,
   Accordion,
   AccordionItem,
   AccordionButton,
@@ -36,7 +32,10 @@ export const Error = ({ error }: { error: Error }) => {
               <Spacer />
               <AccordionIcon boxSize="14px" />
             </AccordionButton>
-            <AccordionPanel borderTop="1px solid" borderColor="legacy.blackAlpha.200">
+            <AccordionPanel
+              borderTop="1px solid"
+              borderColor="legacy.blackAlpha.200"
+            >
               <VStack align="flex-start">
                 <Text color="inherit" fontWeight="bold">
                   Error Details

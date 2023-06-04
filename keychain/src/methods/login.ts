@@ -1,5 +1,5 @@
 import Storage from "utils/storage";
-import Controller, { VERSION } from "utils/controller";
+import Controller from "utils/controller";
 import { constants, ec } from "starknet";
 import base64url from "base64url";
 import selectors from "utils/selectors";

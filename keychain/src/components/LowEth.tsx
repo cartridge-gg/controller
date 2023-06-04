@@ -26,7 +26,12 @@ const LowEth = ({
       borderTop="1px solid"
       borderTopColor="legacy.gray.700"
     >
-      <HStack w="full" borderRadius="6px" bgColor="legacy.gray.700" p="12px 18px">
+      <HStack
+        w="full"
+        borderRadius="6px"
+        bgColor="legacy.gray.700"
+        p="12px 18px"
+      >
         <HStack color="legacy.gray.200" w="full">
           <Text
             color="currentColor"

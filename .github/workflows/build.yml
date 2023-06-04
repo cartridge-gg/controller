@@ -27,5 +27,7 @@ jobs:
         run: yarn install
       - name: Run build
         run: yarn build
+      - name: Check linter
+        run: yarn lint
       - name: Run tests
         run: yarn test:ci

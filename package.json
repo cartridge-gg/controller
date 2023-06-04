@@ -10,6 +10,7 @@
     "connector": "yarn workspace @cartridge/connector",
     "docs": "yarn workspace @cartridge/docs",
     "ui": "yarn workspace @cartridge/ui",
+    "lint": "yarn keychain lint && yarn ui lint",
     "test": "yarn keychain test",
     "test:ci": "yarn keychain test:ci"
   },

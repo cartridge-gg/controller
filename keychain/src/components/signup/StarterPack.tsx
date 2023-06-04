@@ -1,9 +1,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import Image from "next/future/image";
 import {
-  Box,
   Text,
-  Flex,
   Link,
   VStack,
   HStack,
@@ -24,7 +22,7 @@ import Footer from "../Footer";
 import { remoteSvgIcon } from "utils/svg";
 import BannerImage from "./BannerImage";
 
-import { Error, ExecuteReply } from "@cartridge/controller";
+import { ExecuteReply } from "@cartridge/controller";
 import { addAddressPadding } from "starknet";
 import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import StarterpackIcon from "@cartridge/ui/src/components/icons/Starterpack";
@@ -73,7 +71,11 @@ export const ClaimSuccess = ({
           <Text fontWeight="bold" fontSize="17px">
             {`Your ${name} Starter Pack is on the way!`}
           </Text>
-          <Text fontSize="12px" color="legacy.whiteAlpha.600" textAlign="center">
+          <Text
+            fontSize="12px"
+            color="legacy.whiteAlpha.600"
+            textAlign="center"
+          >
             Checkout{" "}
             <Link href={url} variant="traditional" isExternal>
               {domain.hostname}
@@ -125,14 +127,14 @@ export const StarterPack = ({
   starterPackId,
   controller,
   fullPage = false,
+  // onCancel,
   onClaim,
-  onCancel,
 }: {
   starterPackId: string;
   controller?: Controller;
   fullPage?: boolean;
   onClaim?: (res?: ExecuteReply) => void;
-  onCancel?: (error: Error) => void;
+  // onCancel?: (error: Error) => void;
 }) => {
   const [remaining, setRemaining] = useState<number>();
   const [nonfungibles, setNonfungibles] = useState<StarterItemProps[]>([]);
@@ -161,7 +163,7 @@ export const StarterPack = ({
 
   useEffect(() => {
     if (starterData) {
-      let nft: StarterItemProps[] =
+      const nft: StarterItemProps[] =
         starterData.game.starterPack.starterPackTokens.map((data) => ({
           name: data.token.metadata.name,
           description: data.token.metadata.description,
@@ -225,7 +227,11 @@ export const StarterPack = ({
             <Text fontWeight="bold" fontSize="17px">
               {"You've already claimed this Starterpack"}
             </Text>
-            <Text fontSize="12px" color="legacy.whiteAlpha.600" textAlign="center">
+            <Text
+              fontSize="12px"
+              color="legacy.whiteAlpha.600"
+              textAlign="center"
+            >
               Thanks for participating!
             </Text>
           </VStack>
@@ -247,7 +253,11 @@ export const StarterPack = ({
             <Text fontWeight="bold" fontSize="17px">
               Claim Starterpack
             </Text>
-            <Text fontSize="12px" color="legacy.whiteAlpha.600" textAlign="center">
+            <Text
+              fontSize="12px"
+              color="legacy.whiteAlpha.600"
+              textAlign="center"
+            >
               You will receive the following items.
             </Text>
           </VStack>

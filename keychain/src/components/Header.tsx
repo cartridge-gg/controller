@@ -82,13 +82,14 @@ export const Header = ({
   const [ethBalance, setEthBalance] = useState<string>();
 
   const pointsChain = "starknet:SN_GOERLI";
-  const pointsTokenAccountId = `${pointsChain}/${pointsChain}:${address || ""
-    }/erc20:${CONTRACT_POINTS}`;
-  const { data: pointsData, error: pointsError } = useBalanceQuery({
+  const pointsTokenAccountId = `${pointsChain}/${pointsChain}:${
+    address || ""
+  }/erc20:${CONTRACT_POINTS}`;
+  const { data: pointsData /* , error: pointsError */ } = useBalanceQuery({
     tokenAccountId: pointsTokenAccountId,
   });
   const points = pointsData?.balance?.balance;
-  const { current, loading } = useAvatar(address || "", points || 10);
+  const { current /* , loading */ } = useAvatar(address || "", points || 10);
 
   useEffect(() => {
     if (address) {
@@ -135,7 +136,7 @@ export const Header = ({
             h="30px"
             w="42px"
             variant="legacySecondary450"
-            visibility={!!onClose ? "visible" : "hidden"}
+            visibility={onClose ? "visible" : "hidden"}
             onClick={onClose}
           >
             <TimesIcon boxSize="18px" />
@@ -215,10 +216,14 @@ export const Header = ({
                     w="18px"
                     h="18px"
                     dangerouslySetInnerHTML={
-                      !!current?.svg ? { __html: current?.svg } : undefined
+                      current?.svg ? { __html: current?.svg } : undefined
                     }
                   />
-                  <Chevron direction="down" boxSize="8px" color="legacy.gray.300" />
+                  <Chevron
+                    direction="down"
+                    boxSize="8px"
+                    color="legacy.gray.300"
+                  />
                 </HStack>
               </MenuButton>
               <MenuList position="absolute" top="12px" left="-130px">
@@ -256,7 +261,7 @@ export const Header = ({
             w="24px"
             h="30px"
             justify="end"
-            visibility={!!onClose ? "visible" : "hidden"}
+            visibility={onClose ? "visible" : "hidden"}
             data-group
             _hover={{
               cursor: "pointer",

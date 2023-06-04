@@ -22,8 +22,8 @@ type SessionProps = {
 
 const CallFields = ({
   chainId,
+  // notice,
   policies,
-  notice,
 }: {
   chainId: constants.StarknetChainId;
   policies: Policy[];
@@ -38,7 +38,7 @@ const CallFields = ({
               {...field}
               chainId={chainId}
               policy={policy}
-              notice={notice}
+              // notice={notice}
             />
           </FormControl>
         )}
@@ -54,7 +54,7 @@ const Session = ({
   invalidPolicys,
   maxFee,
   isLoading,
-  setMaxFee,
+  // setMaxFee,
   onSubmit,
   onCancel,
 }: SessionProps) => {
@@ -74,7 +74,7 @@ const Session = ({
           onSubmit(values, actions);
         }}
       >
-        {(props) => (
+        {() => (
           <Form
             css={css`
               display: flex;

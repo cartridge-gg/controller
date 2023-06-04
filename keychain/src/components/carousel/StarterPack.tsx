@@ -1,17 +1,5 @@
-import { useState, useEffect, useCallback, useMemo, ReactNode } from "react";
-import Image from "next/future/image";
-import {
-  Box,
-  Text,
-  Flex,
-  Link,
-  VStack,
-  HStack,
-  Tooltip,
-  Spacer,
-  Circle,
-  Divider,
-} from "@chakra-ui/react";
+import { useState, useEffect, useCallback } from "react";
+import { Text, Flex, VStack, HStack, Spacer } from "@chakra-ui/react";
 import useEmblaCarousel from "embla-carousel-react";
 import { Next, Prev, Dot } from "./Buttons";
 import { EdgeFade } from "./EdgeFade";
@@ -83,7 +71,11 @@ export const StarterPackCarousel = ({
                 overflow="hidden"
                 position="relative"
                 border="1px solid"
-                borderColor={selectedIndex == index ? "legacy.green.100" : "legacy.gray.400"}
+                borderColor={
+                  selectedIndex == index
+                    ? "legacy.green.100"
+                    : "legacy.gray.400"
+                }
                 transition="border-color 0.5s ease"
               >
                 {item.icon}

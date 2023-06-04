@@ -7,7 +7,6 @@ import {
   typedData,
   Abi,
   Call,
-  DeployAccountSignerDetails,
   InvocationsSignerDetails,
   Signature,
   SignerInterface,
@@ -28,9 +27,9 @@ export type RawAssertion = PublicKeyCredential & {
 };
 
 function convertUint8ArrayToWordArray(u8Array: Uint8Array) {
-  var words = [],
-    i = 0,
+  const words = [],
     len = u8Array.length;
+  let i = 0;
 
   while (i < len) {
     words.push(
@@ -111,7 +110,7 @@ export class WebauthnSigner implements SignerInterface {
       transactionsDetail.nonce,
     );
 
-    let challenge = Buffer.from(
+    const challenge = Buffer.from(
       msgHash.slice(2).padStart(64, "0").slice(0, 64),
       "hex",
     );
@@ -163,9 +162,7 @@ export class WebauthnSigner implements SignerInterface {
     return formatAssertion(assertion);
   }
 
-  public async signDeployAccountTransaction(
-    transaction: DeployAccountSignerDetails,
-  ): Promise<Signature> {
+  public async signDeployAccountTransaction(/* transaction: DeployAccountSignerDetails */): Promise<Signature> {
     return;
   }
 }
@@ -278,7 +275,7 @@ class WebauthnAccount extends Account {
 }
 
 export function formatAssertion(assertion: RawAssertion): Signature {
-  var authenticatorDataBytes = new Uint8Array(
+  const authenticatorDataBytes = new Uint8Array(
     assertion.response.authenticatorData,
   );
 
@@ -290,7 +287,7 @@ export function formatAssertion(assertion: RawAssertion): Signature {
     authenticatorDataBytes,
   ).words;
 
-  var clientDataJSONBytes = new Uint8Array(assertion.response.clientDataJSON);
+  const clientDataJSONBytes = new Uint8Array(assertion.response.clientDataJSON);
   let clientDataJSONRem = 4 - (clientDataJSONBytes.length % 4);
   if (clientDataJSONRem == 4) {
     clientDataJSONRem = 0;

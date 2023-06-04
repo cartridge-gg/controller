@@ -66,8 +66,17 @@ const Connect = ({
       />
       {false && (
         <VStack w="full" overflow="hidden" borderRadius="6px" spacing="1px">
-          <VStack bgColor="legacy.gray.700" w="full" p="12px" align="flex-start">
-            <Text variant="ibm-upper-bold" fontSize="10px" color="legacy.gray.200">
+          <VStack
+            bgColor="legacy.gray.700"
+            w="full"
+            p="12px"
+            align="flex-start"
+          >
+            <Text
+              variant="ibm-upper-bold"
+              fontSize="10px"
+              color="legacy.gray.200"
+            >
               Register Session
             </Text>
             <Text fontSize="11px" color="legacy.gray.200">

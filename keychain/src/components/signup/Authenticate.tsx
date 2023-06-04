@@ -1,13 +1,5 @@
+import { useEffect, useState, ReactNode, useCallback } from "react";
 import {
-  useEffect,
-  useState,
-  ReactNode,
-  useCallback,
-  ReactElement,
-} from "react";
-import {
-  Box,
-  Flex,
   Circle,
   Container,
   VStack,

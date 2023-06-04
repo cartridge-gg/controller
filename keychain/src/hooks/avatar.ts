@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { defaultProvider, number, Provider, uint256 } from "starknet";
+import { number, Provider, uint256 } from "starknet";
 import { CONTRACT_AVATAR } from "@cartridge/controller/src/constants";
 import dataUriToBuffer from "data-uri-to-buffer";
 
 import Storage from "../utils/storage";
 
-const SCALE = 10;
+// const SCALE = 10;
 const PADDING = 0;
 const MAX_ROWS = 14;
 const MAX_COLS = 7;
@@ -56,7 +56,7 @@ export const useAvatar = (
   const fetch = useCallback(() => {
     callContract(address)
       .then((data) => {
-        let cache: CacheStore = Storage.get("avatars") || {};
+        const cache: CacheStore = Storage.get("avatars") || {};
         cache[address] = { ...data, points };
         Storage.set("avatars", cache);
 
@@ -115,7 +115,7 @@ export const callContract = async (address: string): Promise<AttributeData> => {
     },
   });
 
-  let res = await provider.callContract({
+  const res = await provider.callContract({
     contractAddress: CONTRACT_AVATAR,
     entrypoint: "tokenURI",
     calldata: [number.toFelt(tokenId.low), number.toFelt(tokenId.high)],
@@ -159,8 +159,8 @@ const findValue = (
 
 const data2Svg = ({
   baseColor,
-  borderColor,
-  dimension,
+  // borderColor,
+  // dimension,
   fingerprint,
   crop,
 }: { crop: number } & AttributeData): string => {
@@ -217,7 +217,7 @@ const data2Svg = ({
   });
 
   // render
-  let rects: Array<string> = [];
+  const rects: Array<string> = [];
   grid.forEach((cell, idx) => {
     if (cell != CellType.EMPTY) {
       const x = idx % MAX_COLS;

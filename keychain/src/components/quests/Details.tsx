@@ -177,7 +177,9 @@ const QuestDetails = ({
                     <Text
                       fontSize="12px"
                       color={
-                        eventProgress?.completed ? "legacy.green.400" : "legacy.gray.200"
+                        eventProgress?.completed
+                          ? "legacy.green.400"
+                          : "legacy.gray.200"
                       }
                       fontWeight="700"
                     >
@@ -199,7 +201,12 @@ const QuestDetails = ({
           </Flex>
         </Flex>
       </Box>
-      <Box w="full" h="65px" borderTop="1px solid" borderColor="legacy.gray.700">
+      <Box
+        w="full"
+        h="65px"
+        borderTop="1px solid"
+        borderColor="legacy.gray.700"
+      >
         <Button
           w="full"
           mt="24px"
@@ -209,7 +216,7 @@ const QuestDetails = ({
               accountId: `starknet:SN_GOERLI:${address}`,
               questId: selectedId,
             })
-              .then((res) => {
+              .then(() => {
                 onClaim();
               })
               .catch((err) => console.error(err));

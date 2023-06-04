@@ -1,4 +1,3 @@
-import { ReactNode } from "react";
 import {
   Box,
   Spacer,
@@ -8,6 +7,7 @@ import {
 } from "@chakra-ui/react";
 
 export function Card(props: any) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { variant, ...rest } = props;
   const styles = useStyleConfig("Card", props);
 
@@ -18,11 +18,11 @@ export function Card(props: any) {
 export const Overlay = ({
   displayOnHover,
   name,
-  children,
-}: {
+}: // children,
+{
   displayOnHover?: boolean;
   name: string;
-  children?: ReactNode;
+  // children?: ReactNode;
 }) => (
   <Box
     top={0}

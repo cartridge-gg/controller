@@ -12,10 +12,6 @@ import { Dialog as CartridgeDialog } from "@cartridge/ui/src/components/Dialog";
 import {
   OutOfStock,
   StarterPack,
-  L1Connect,
-  L2Connect,
-  Quests,
-  PendingTxn,
   Form as UsernameForm,
 } from "components/signup";
 
@@ -23,7 +19,6 @@ import { useRouter } from "next/router";
 import Controller from "utils/controller";
 import JoystickIcon from "@cartridge/ui/src/components/icons/Joystick";
 import GamepadIcon from "@cartridge/ui/src/components/icons/Gamepad";
-import ControllerImage from "@cartridge/ui/src/components/icons/ControllerBig";
 import BannerImage from "components/signup/BannerImage";
 import { StepsBar, Step } from "components/StepsBar";
 import { Credentials, onCreateFinalize } from "hooks/account";
@@ -32,7 +27,6 @@ import { addAddressPadding } from "starknet";
 import { remoteSvgIcon } from "utils/svg";
 
 import { register } from "methods/register";
-import { ChainId } from "caip";
 
 enum RegistrationState {
   CLAIM_STARTERPACK = "CLAIM_STARTERPACK",
@@ -48,9 +42,8 @@ enum RegistrationState {
 const CreateWallet: NextPage = () => {
   const router = useRouter();
   const controller = useMemo(() => Controller.fromStore(), []);
-  const [deployTx, setDeployTx] = useState<string>();
   const [username, setUsername] = useState<string>();
-  const [credentials, setCredentials] = useState<Credentials>();
+  const [, setCredentials] = useState<Credentials>();
   const [regState, setRegState] = useState<RegistrationState>(
     RegistrationState.CREATE_USERNAME,
   );
@@ -58,19 +51,15 @@ const CreateWallet: NextPage = () => {
   const { id: gameId } = router.query as {
     id: string;
   };
-  const {
-    error,
-    data: starterPackData,
-    isLoading: loadingStarterpack,
-  } = useStarterPackQuery({ id: gameId }, { enabled: !!gameId });
+  const { data: starterPackData, isLoading: loadingStarterpack } =
+    useStarterPackQuery({ id: gameId }, { enabled: !!gameId });
 
   const { data: accountData } = useAccountInfoQuery(
     { address: addAddressPadding(controller?.address) },
     { enabled: !!controller?.address },
   );
 
-  const { mutateAsync: deployAccount, isLoading: loadingDeploy } =
-    useDeployAccountMutation();
+  const { mutateAsync: deployAccount } = useDeployAccountMutation();
 
   const onConfirm = useCallback(
     async (username: string, credentials: Credentials) => {
@@ -84,14 +73,10 @@ const CreateWallet: NextPage = () => {
         pub: { x, y },
       } = parseAttestationObject(credentials.response.attestationObject);
 
-      const { address, deviceKey } = await register()(
-        username,
-        credentials.id,
-        {
-          x: x.toString(),
-          y: y.toString(),
-        },
-      );
+      const { deviceKey } = await register()(username, credentials.id, {
+        x: x.toString(),
+        y: y.toString(),
+      });
 
       await onCreateFinalize(deviceKey, credentials);
       deployAccount({
@@ -113,18 +98,18 @@ const CreateWallet: NextPage = () => {
     [deployAccount, starterPackData?.game?.starterPack?.id],
   );
 
-  const onComplete = useCallback(async () => {
-    const { close, redirect_uri } = router.query;
-    if (close) {
-      return window.close();
-    }
+  // const onComplete = useCallback(async () => {
+  //   const { close, redirect_uri } = router.query;
+  //   if (close) {
+  //     return window.close();
+  //   }
 
-    if (redirect_uri) {
-      return router.replace(decodeURIComponent(redirect_uri as string));
-    }
+  //   if (redirect_uri) {
+  //     return router.replace(decodeURIComponent(redirect_uri as string));
+  //   }
 
-    router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);
-  }, [router]);
+  //   router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);
+  // }, [router]);
 
   useEffect(() => {
     if (starterPackData) {
@@ -144,7 +129,7 @@ const CreateWallet: NextPage = () => {
     setUsername(account.id);
   }, [accountData]);
 
-  let steps: Step[] = [];
+  const steps: Step[] = [];
   steps.push({ name: "Create Controller", icon: <JoystickIcon /> });
   if (starterPackData?.game) {
     steps.push({

@@ -10,7 +10,6 @@ import { ResponseCodes } from "@cartridge/controller";
 import { Error } from "@cartridge/controller/src/types";
 import { Header } from "./Header";
 import Transfer from "./icons/Transfer";
-import logout from "methods/logout";
 
 const DataContainer = ({
   title,

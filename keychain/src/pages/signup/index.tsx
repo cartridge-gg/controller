@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import type { NextPage } from "next";
-import { Signup as SignupComponent, StarterPack } from "components/signup";
+import { Signup as SignupComponent } from "components/signup";
 import { useMemo } from "react";
 import Controller from "utils/controller";
 

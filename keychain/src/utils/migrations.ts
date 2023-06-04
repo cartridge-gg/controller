@@ -40,7 +40,7 @@ const migrations = {
       Storage.keys()
         .filter((k) => k.startsWith(selectors["0.0.2"].admin("")))
         .forEach((k) => {
-          let [_, ...rest] = k.split("/");
+          const [, ...rest] = k.split("/");
           const origin = rest.join("/");
           Storage.set(
             selectors["0.0.3"].admin(address, origin),
@@ -52,7 +52,7 @@ const migrations = {
       Storage.keys()
         .filter((k) => k.startsWith(selectors["0.0.2"].session("")))
         .forEach((k) => {
-          let [_, ...rest] = k.split("/");
+          const [, ...rest] = k.split("/");
           const origin = rest.join("/");
           Storage.set(
             selectors["0.0.3"].session(address, origin),

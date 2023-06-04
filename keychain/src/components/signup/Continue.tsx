@@ -1,4 +1,4 @@
-import { Text, VStack, Link, StyleProps } from "@chakra-ui/react";
+import { Text, VStack, StyleProps } from "@chakra-ui/react";
 import { Header } from "components/Header";
 import { AuthSparkleImage } from "@cartridge/ui/components/icons/auth";
 import Container from "components/Container";

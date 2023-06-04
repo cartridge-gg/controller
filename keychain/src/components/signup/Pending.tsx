@@ -1,14 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import {
-  Box,
-  Flex,
-  Text,
-  Link,
-  VStack,
-  Button,
-  Circle,
-} from "@chakra-ui/react";
+import { Box, Flex, Text, Link, VStack, Button } from "@chakra-ui/react";
 import { Loading } from "components/Loading";
 import { defaultProvider } from "starknet";
 import ArrowIcon from "@cartridge/ui/src/components/icons/Arrow";

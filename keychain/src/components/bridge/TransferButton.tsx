@@ -50,7 +50,11 @@ const TransferButton = ({
         from_address: from,
         to_address: to,
         entry_point_selector: "handle_deposit",
-        payload: [account.address, amount.low.toString(), amount.high.toString()],
+        payload: [
+          account.address,
+          amount.low.toString(),
+          amount.high.toString(),
+        ],
       });
       return res;
     }, [account._chainId, account.gateway, account.address, value]);

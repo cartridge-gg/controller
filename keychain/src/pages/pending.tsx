@@ -57,7 +57,7 @@ const Pending: NextPage = () => {
             }}
           />
         ))}
-        <Footer showConfirm={false} cancelText="Close" onCancel={() => {}} />
+        <Footer showConfirm={false} cancelText="Close" />
       </Container>
     </>
   );

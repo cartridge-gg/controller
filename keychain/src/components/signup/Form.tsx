@@ -52,7 +52,7 @@ export const Form = ({ onConfirm }: FormType) => {
 
   const { debouncedValue, debouncing } = useDebounce(name, 1000);
   const {
-    error: accountError,
+    // error: accountError,
     data: existingAccount,
     isFetched,
   } = useAccountQuery(

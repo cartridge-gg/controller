@@ -1,9 +1,8 @@
 import type { ComponentStyleConfig } from "@chakra-ui/theme";
-import { mode, StyleFunctionProps } from "@chakra-ui/theme-tools";
 
 export const Switch: ComponentStyleConfig = {
   variants: {
-    default: (props: StyleFunctionProps) => ({
+    default: {
       track: {
         paddingLeft: "5px",
         borderRadius: "15px",
@@ -25,7 +24,7 @@ export const Switch: ComponentStyleConfig = {
           "--switch-thumb-x": "20px",
         },
       },
-    }),
+    },
   },
   defaultProps: {
     variant: "default",

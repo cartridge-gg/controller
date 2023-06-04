@@ -1,12 +1,11 @@
 import Container from "components/Container";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Header } from "components/Header";
 import { useAccountInfoQuery, useAccountQuestsQuery } from "generated/graphql";
 import { constants } from "starknet";
 import QuestOverview from "components/quests/Overview";
 import QuestDetails from "components/quests/Details";
-import { Box, Flex, Text, useToast } from "@chakra-ui/react";
-import logout from "methods/logout";
+import { Flex, Text, useToast } from "@chakra-ui/react";
 
 export enum QuestState {
   Incomplete,
@@ -19,14 +18,14 @@ const Quests = ({
   address,
   chainId,
   onClose,
-  origin,
+  // origin,
   onLogout,
 }: {
   gameId: string;
   address: string;
   chainId: constants.StarknetChainId;
   onClose: () => void;
-  origin: string;
+  // origin: string;
   onLogout: () => void;
 }) => {
   const toast = useToast();
@@ -64,7 +63,7 @@ const Quests = ({
         address={address}
         chainId={chainId}
         onClose={onClose}
-        onBack={!!selectedQuestId ? () => setSelectedQuestId(null) : undefined}
+        onBack={selectedQuestId ? () => setSelectedQuestId(null) : undefined}
         onLogout={onLogout}
       />
       {!selectedQuestId ? (

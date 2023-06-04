@@ -17,7 +17,6 @@ import {
   useDisclosure,
   InputRightElement,
   StyleProps,
-  useInterval,
 } from "@chakra-ui/react";
 import {
   DiscordRevokeDocument,
@@ -110,8 +109,8 @@ export const Signup = ({
 
   const {
     data: starterData,
-    error: starterError,
-    isLoading: starterLoading,
+    // error: starterError,
+    // isLoading: starterLoading,
   } = useStarterPackQuery(
     {
       id: starterPackId,
@@ -381,7 +380,11 @@ export const Signup = ({
           </Field>
 
           <HStack justify="center">
-            <Text fontSize="12px" color="legacy.whiteAlpha.600" fontWeight="bold">
+            <Text
+              fontSize="12px"
+              color="legacy.whiteAlpha.600"
+              fontWeight="bold"
+            >
               Already have a controller?
             </Text>
             <Link variant="outline" fontSize="11px" onClick={showLogin}>
@@ -486,7 +489,7 @@ export const Signup = ({
                           chainId: "starknet:SN_GOERLI",
                         })
                         .then(() => {
-                          console.log("sync signup")
+                          console.log("sync signup");
                           controller
                             .account(constants.StarknetChainId.TESTNET)
                             .sync();
@@ -531,8 +534,8 @@ export const Signup = ({
 
 const ImageFrame = ({
   bgImage,
+  // ...rest
   children,
-  ...rest
 }: {
   bgImage?: string;
   children?: ReactNode;

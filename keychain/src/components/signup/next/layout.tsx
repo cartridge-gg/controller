@@ -19,10 +19,7 @@ export function PageBanner({
           {title}
         </Text>
 
-        <Text
-          fontSize="sm"
-          color="darkGray.200"
-        >
+        <Text fontSize="sm" color="darkGray.200">
           {description}
         </Text>
       </PageTitle>
@@ -34,11 +31,11 @@ const PageTitle = chakra(Flex, {
   baseStyle: {
     flexDirection: "column",
     alignItems: "center",
-  }
+  },
 });
 
 export const PageContainer = chakra(Flex, {
-  baseStyle: {}
+  baseStyle: {},
 });
 
 // TODO: Extend `@cartridge/ui/components/modals/SimpleModal`
@@ -67,12 +64,12 @@ export function BottomSheet({
 export function Summary({
   entries,
 }: {
-  entries: { icon: string, description: string }[]
+  entries: { icon: string; description: string }[];
 }) {
   return (
     <Flex flexDirection="column">
       {entries.map((e, i) => (
-        <Flex key={i} />        
+        <Flex key={i} />
       ))}
     </Flex>
   );

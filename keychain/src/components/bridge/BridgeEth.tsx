@@ -115,7 +115,7 @@ const BridgeEth = ({
   const [transferHash, setTransferHash] = useState<string>();
 
   useEffect(() => {
-    if (!!ethAddress) {
+    if (ethAddress) {
       const balance = async () => {
         return await fetchBalance({
           address: ethAddress as any,
@@ -212,7 +212,7 @@ const BridgeEth = ({
                 as={SelectBox}
                 leftIcon={<MetaMask />}
                 rightIcon={
-                  !!ethAddress ? (
+                  ethAddress ? (
                     <Check color="legacy.whiteAlpha.400" />
                   ) : (
                     <Chevron
@@ -223,13 +223,13 @@ const BridgeEth = ({
                   )
                 }
                 text={
-                  !!ethAddress
+                  ethAddress
                     ? ethAddress.substring(0, 3) +
                       "..." +
                       ethAddress.substring(ethAddress.length - 4)
                     : "Metamask"
                 }
-                pointerEvents={!!ethAddress ? "none" : "auto"}
+                pointerEvents={ethAddress ? "none" : "auto"}
               />
               <MenuList>
                 <MenuItem>Metamask</MenuItem>
@@ -265,9 +265,9 @@ const BridgeEth = ({
           spacing="0"
           borderRadius="4px"
           overflow="clip"
-          opacity={!!ethAddress ? undefined : "0.4"}
-          pointerEvents={!!ethAddress ? "auto" : "none"}
-          _hover={!!ethAddress ? undefined : { cursor: "not-allowed" }}
+          opacity={ethAddress ? undefined : "0.4"}
+          pointerEvents={ethAddress ? "auto" : "none"}
+          _hover={ethAddress ? undefined : { cursor: "not-allowed" }}
         >
           <HStack
             w="full"
@@ -324,8 +324,8 @@ const BridgeEth = ({
           account={controller.account(chainId)}
           value={transferAmount}
           disabled={
-            !!!ethAddress ||
-            !!!transferAmount ||
+            !ethAddress ||
+            !transferAmount ||
             transferAmountInvalid ||
             debouncing
           }

@@ -46,9 +46,9 @@ class Account extends BaseAccount {
   gateway: SequencerProvider;
   private selector: string;
   _chainId: constants.StarknetChainId;
-  updated: boolean = true;
+  updated = true;
   webauthn: WebauthnAccount;
-  waitingForDeploy: boolean = false;
+  waitingForDeploy = false;
 
   constructor(
     chainId: constants.StarknetChainId,
@@ -72,7 +72,7 @@ class Account extends BaseAccount {
 
     const state = Storage.get(this.selector);
     if (!state || Date.now() - state.syncing > 5000) {
-      console.log("sync account")
+      console.log("sync account");
       this.sync();
       return;
     }
@@ -108,7 +108,7 @@ class Account extends BaseAccount {
   }
 
   async sync() {
-    console.log("sync")
+    console.log("sync");
     Storage.update(this.selector, {
       syncing: Date.now(),
     });
@@ -301,7 +301,7 @@ class Account extends BaseAccount {
 
       const signature = await this.signer.signTransaction(calls, signerDetails);
 
-      let estimates = await estimateFeeBulk(this._chainId, [
+      const estimates = await estimateFeeBulk(this._chainId, [
         pendingRegister.invoke,
         {
           invocation: {
@@ -366,8 +366,8 @@ class Account extends BaseAccount {
 
   async signMessage(typedData: typedData.TypedData): Promise<Signature> {
     return await (this.status === Status.REGISTERED ||
-      this.status === Status.COUNTERFACTUAL ||
-      this.status === Status.DEPLOYING
+    this.status === Status.COUNTERFACTUAL ||
+    this.status === Status.DEPLOYING
       ? super.signMessage(typedData)
       : this.webauthn.signMessage(typedData));
   }
@@ -396,7 +396,7 @@ class Account extends BaseAccount {
     const fee = number.toBN(gasPrice).mul(number.toBN(gas));
     const suggestedMaxFee = number.toHex(stark.estimatedFeeToMaxFee(fee));
 
-    let msgHash = hash.calculateTransactionHash(
+    const msgHash = hash.calculateTransactionHash(
       this.address,
       version,
       calldata,
@@ -405,7 +405,7 @@ class Account extends BaseAccount {
       nonce,
     );
 
-    let challenge = Uint8Array.from(
+    const challenge = Uint8Array.from(
       msgHash
         .slice(2)
         .padStart(64, "0")

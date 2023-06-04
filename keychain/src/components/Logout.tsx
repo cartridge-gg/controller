@@ -36,7 +36,12 @@ const Logout = ({
           <Button w="full" onClick={onConfirm}>
             Log Out
           </Button>
-          <Button variant="dark" w="full" bgColor="legacy.gray.700" onClick={onCancel}>
+          <Button
+            variant="dark"
+            w="full"
+            bgColor="legacy.gray.700"
+            onClick={onCancel}
+          >
             Cancel
           </Button>
         </VStack>

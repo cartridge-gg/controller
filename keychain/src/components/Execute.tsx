@@ -3,7 +3,6 @@ import { Text, Circle, HStack, VStack, Spacer } from "@chakra-ui/react";
 
 import Controller from "utils/controller";
 import {
-  Abi,
   constants,
   number,
   Call as StarknetCall,
@@ -26,28 +25,27 @@ import { Status } from "utils/account";
 import { Header } from "./Header";
 import LowEth, { LowEthInfo } from "./LowEth";
 import BridgeEth from "./bridge/BridgeEth";
-import logout from "methods/logout";
 
 export const CONTRACT_ETH =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 
 const Execute = ({
-  origin,
+  // origin,
   chainId,
   controller,
   transactions,
   transactionsDetail,
-  abis,
+  // abis,
   onExecute,
   onCancel,
   onLogout,
 }: {
-  origin: string;
+  // origin: string;
   chainId: constants.StarknetChainId;
   controller: Controller;
   transactions: StarknetCall | StarknetCall[];
   transactionsDetail?: InvocationsDetails;
-  abis?: Abi[];
+  // abis?: Abi[];
   onExecute: (res: ExecuteReply) => void;
   onCancel: (error: ErrorReply) => void;
   onLogout: () => void;
@@ -238,7 +236,11 @@ const Execute = ({
           bgColor="legacy.gray.700"
           borderRadius="6px 6px 0 0"
         >
-          <Text variant="ibm-upper-bold" fontSize="10px" color="legacy.gray.200">
+          <Text
+            variant="ibm-upper-bold"
+            fontSize="10px"
+            color="legacy.gray.200"
+          >
             Actions
           </Text>
         </VStack>
@@ -246,7 +248,7 @@ const Execute = ({
           {calls.map((call, i) => (
             <Call
               key={i}
-              chainId={chainId}
+              // chainId={chainId}
               policy={{
                 target: call.contractAddress,
                 method: call.entrypoint,

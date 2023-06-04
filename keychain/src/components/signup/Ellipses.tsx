@@ -12,7 +12,7 @@ const Ellipses = ({
   spacing?: string;
   color?: string;
 }) => {
-  let circles: ReactNode[] = [];
+  const circles: ReactNode[] = [];
   for (let i = 0; i < count; i++) {
     circles.push(<Circle key={i} size={size} bgColor={color} />);
   }

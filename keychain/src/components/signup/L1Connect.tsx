@@ -1,7 +1,6 @@
 import { useState, useCallback } from "react";
 import {
   Flex,
-  Box,
   Text,
   Link,
   Circle,
@@ -11,7 +10,6 @@ import {
   Button,
   Tooltip,
 } from "@chakra-ui/react";
-import { useRouter } from "next/router";
 import { ethers, utils } from "ethers";
 import { Credentials, onCreateFinalize } from "hooks/account";
 import { parseAttestationObject } from "utils/webauthn";
@@ -27,7 +25,12 @@ import { register } from "methods/register";
 export const BridgeEth = ({ amount }: { amount: string }) => {
   return (
     <VStack borderRadius="8px" overflow="hidden" spacing="1px">
-      <HStack w="full" p="12px" bgColor="legacy.gray.700" color="legacy.whiteAlpha.600">
+      <HStack
+        w="full"
+        p="12px"
+        bgColor="legacy.gray.700"
+        color="legacy.whiteAlpha.600"
+      >
         <HStack fontSize="10px">
           <GasPumpIcon />
           <Text color="inherit" variant="ibm-upper-bold">
@@ -78,17 +81,16 @@ export const L1Connect = ({ username, credentials }: L1ConnectProps) => {
   const [address, setAddress] = useState<string>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [pending, setPending] = useState<boolean>(false);
-  const [error, setError] = useState<Error>(null);
+  const [, setError] = useState<Error>(null);
 
-  const router = useRouter();
-  const { ids } = router.query as { ids: Array<string> };
+  // const router = useRouter();
+  // const { ids } = router.query as { ids: Array<string> };
 
   const onConnect = async () => {
     if (address) {
       return setAddress(null);
     }
     setLoading(true);
-    // @ts-ignore
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const accounts = await provider.send("eth_requestAccounts", []);
     setLoading(false);
@@ -98,7 +100,6 @@ export const L1Connect = ({ username, credentials }: L1ConnectProps) => {
   const onComplete = useCallback(async () => {
     setPending(true);
     try {
-      // @ts-ignore
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const network = await provider.getNetwork();
 
@@ -132,7 +133,11 @@ export const L1Connect = ({ username, credentials }: L1ConnectProps) => {
     <Flex gap="20px" direction="column">
       <Flex borderRadius="8px" direction="column" gap="1px" overflow="hidden">
         <Flex bgColor="legacy.gray.600" p="12px">
-          <Text variant="ibm-upper-bold" fontSize="10px" color="legacy.whiteAlpha.400">
+          <Text
+            variant="ibm-upper-bold"
+            fontSize="10px"
+            color="legacy.whiteAlpha.400"
+          >
             Funding Source
           </Text>
         </Flex>

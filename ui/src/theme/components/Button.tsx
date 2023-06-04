@@ -6,7 +6,7 @@ import { Loading } from "../../components/Loading";
 const legacyBase = {
   fontSize: "xs",
   border: "1px solid",
-}
+};
 
 // TODO: Rename to `FormButton` ?
 export const Button: ComponentStyleConfig = defineStyleConfig({

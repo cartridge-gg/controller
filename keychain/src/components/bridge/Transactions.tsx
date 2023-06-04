@@ -67,11 +67,11 @@ const Card = ({
 };
 
 const TxnTracker = ({
-  address,
+  // address,
   chainId,
   ethTxnHash,
 }: {
-  address: string;
+  // address: string;
   chainId: constants.StarknetChainId;
   ethTxnHash: string;
 }) => {

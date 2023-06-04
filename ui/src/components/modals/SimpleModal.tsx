@@ -7,11 +7,7 @@ import {
   ModalOverlay,
   ModalContent,
   ModalCloseButton,
-  UseDisclosureProps,
   useBreakpointValue,
-  Spacer,
-  HStack,
-  Box,
   ModalProps,
 } from "@chakra-ui/react";
 import { Headstone, HeadStoneProps } from "./Headstone";

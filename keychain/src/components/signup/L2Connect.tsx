@@ -61,7 +61,7 @@ export const L2Connect = ({
 
   const { account, address } = useAccount();
   const { connect, disconnect, connectors } = useConnectors();
-  const { abi, error: abiError, loading: abiLoading } = useAbi(address, true);
+  const { abi, loading: abiLoading } = useAbi(address, true);
 
   const argent = connectors.find((connector) => connector.id() === "argentX");
 
@@ -80,11 +80,11 @@ export const L2Connect = ({
     setIsInstalling(true);
 
     const {
-      pub: { x, y },
+      pub: { x /*, y */ },
     } = parseAttestationObject(credentials.response.attestationObject);
 
     const { x: x0, y: x1, z: x2 } = split(x);
-    const { x: y0, y: y1, z: y2 } = split(y);
+    // const { x: y0, y: y1, z: y2 } = split(y);
     const deviceKey = await provision()(address, credentials.id);
     const { transaction_hash } = await account.execute([
       {
@@ -341,7 +341,7 @@ const PluginInstall = ({
           w="32"
           h="8"
           onClick={async () => {
-            const { transaction_hash } = await account.execute([
+            /* const { transaction_hash } = */ await account.execute([
               {
                 contractAddress: account.address,
                 entrypoint: "upgrade",

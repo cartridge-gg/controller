@@ -3,7 +3,7 @@ import { Flex, forwardRef } from "@chakra-ui/react";
 import { css } from "@emotion/react";
 import { Badge } from "../components/Badge";
 
-export function formatAddress(address: string, chars: number = 4): string {
+export function formatAddress(address: string, chars = 4): string {
   return `${address.substring(0, 2 + chars)}...${address.substring(
     address.length - chars,
   )}`;

@@ -1,8 +1,8 @@
 import type { NextPage } from "next";
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { connectToParent } from "@cartridge/penpal";
-import Controller, { diff, VERSION } from "utils/controller";
+import Controller, { diff } from "utils/controller";
 import {
   ConnectReply,
   Error,
@@ -28,8 +28,6 @@ import {
 } from "starknet";
 import SignMessage from "components/SignMessage";
 import Execute from "components/Execute";
-import selectors from "utils/selectors";
-import Storage from "utils/storage";
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
 import provision from "../methods/provision";
 import { register } from "../methods/register";
@@ -369,7 +367,8 @@ const Index: NextPage = () => {
     return (
       <Auth
         onController={(c) => setController(c)}
-        onCancel={() => context.reject()} />
+        onCancel={() => context.reject()}
+      />
     );
 
     return (
@@ -466,7 +465,7 @@ const Index: NextPage = () => {
         controller={controller}
         starterPackId={ctx.starterPackId}
         onClaim={(res: ExecuteReply) => ctx.resolve(res)}
-        onCancel={(error: Error) => ctx.resolve(error)}
+        // onCancel={(error: Error) => ctx.resolve(error)}
       />
     );
   }
@@ -479,7 +478,7 @@ const Index: NextPage = () => {
         address={controller.address}
         chainId={chainId}
         onClose={() => ctx.resolve()}
-        origin={ctx.origin}
+        // origin={ctx.origin}
         onLogout={() => onLogout(ctx)}
       />
     );

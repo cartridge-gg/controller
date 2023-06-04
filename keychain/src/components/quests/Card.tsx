@@ -6,11 +6,11 @@ import { QuestState } from "pages/quests";
 const QuestCard = ({
   name,
   state,
-  rewards,
-}: {
+}: // rewards,
+{
   name: string;
   state: QuestState;
-  rewards: Array<any>;
+  // rewards: Array<any>;
 }) => {
   let bgColor = "legacy.gray.700";
   let color = "white";
