@@ -27,7 +27,7 @@
         "./*"
       ],
       "@cartridge/controller": [
-        "../../../controller/src"
+        "../../packages/controller/src"
       ],
     }
   },
@@ -41,7 +41,7 @@
   ],
   "references": [
     {
-      "path": "../../controller"
+      "path": "../../packages/controller"
     }
   ]
 }

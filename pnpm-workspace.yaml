@@ -1,7 +1,4 @@
 packages:
-  - connector
-  - controller
   - docs
   - examples/**
-  - keychain
-  - ui
+  - packages/**

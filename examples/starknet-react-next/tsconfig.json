@@ -44,10 +44,10 @@
   ],
   "references": [
     {
-      "path": "../../controller"
+      "path": "../../packages/controller"
     },
     {
-      "path": "../../connector"
+      "path": "../../packages/connector"
     }
   ]
 }

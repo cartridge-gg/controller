@@ -10,6 +10,7 @@
     "connector": "pnpm --filter @cartridge/connector",
     "docs": "pnpm --filter @cartridge/docs",
     "ui": "pnpm --filter @cartridge/ui",
+    "example:next": "pnpm --filter starknet-react-next",
     "lint": "pnpm keychain lint && pnpm ui lint",
     "test": "pnpm keychain test",
     "test:ci": "pnpm keychain test:ci"
