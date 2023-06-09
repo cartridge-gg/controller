@@ -11,7 +11,7 @@ const meta: Meta<typeof Buttons> = {
       control: { type: "radio" },
     },
     size: {
-      options: ["md"],
+      options: ["sm", "md"],
       control: { type: "radio" },
     },
   },
@@ -36,10 +36,10 @@ function Buttons(props: React.ComponentProps<typeof Button>) {
           <Button
             w={60}
             colorScheme={c}
-            {...props}
             onClick={() => {
               console.log("Clicked !");
             }}
+            {...props}
           />
         </VStack>
       ))}
@@ -61,7 +61,7 @@ type Story = StoryObj<typeof Button>;
 export const All: Story = {
   args: {
     variant: "solid",
-    size: "md",
+    size: "sm",
     children: "continue",
     isDisabled: false,
     isLoading: false,

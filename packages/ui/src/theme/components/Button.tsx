@@ -34,8 +34,12 @@ export const Button: ComponentStyleConfig = defineStyleConfig({
   },
   sizes: {
     sm: {
-      px: 3,
-      py: 7,
+      px: 6,
+      py: 3,
+    },
+    md: {
+      px: 6,
+      py: 3.5,
     },
   },
   defaultProps: {
