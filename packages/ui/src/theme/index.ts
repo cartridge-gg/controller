@@ -11,8 +11,8 @@ const theme = extendTheme({
   config,
   colors,
   fonts: {
-    heading: "LD_Mono",
-    body: "IBM Plex Sans",
+    heading: "LD_Mono", // TODO: Where is it used?
+    body: "Inter",
   },
   styles: {
     global: {

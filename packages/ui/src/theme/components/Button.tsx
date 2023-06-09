@@ -5,20 +5,24 @@ import { Loading } from "../../components/Loading";
 
 const legacyBase = {
   fontSize: "xs",
+  fontFamily: "LD_Mono",
   border: "1px solid",
+  fontWeight: "normal",
+  letterSpacing: "0.1em",
 };
 
-// TODO: Rename to `FormButton` ?
 export const Button: ComponentStyleConfig = defineStyleConfig({
   baseStyle: {
-    fontSize: "sm",
     outline: "none",
-    borderRadius: "4px",
-    fontFamily: "LD_Mono",
-    letterSpacing: "0.1em",
+    borderRadius: "base",
+    fontFamily: "'IBM Plex Mono'",
+    fontWeight: "semibold",
     ":hover:disabled": {
       cursor: "not-allowed",
     },
+    lineHeight: "none",
+    textTransform: "uppercase",
+    letterSpacing: "widest",
     _disabled: {
       opacity: "1",
       pointerEvents: "none",
@@ -28,7 +32,21 @@ export const Button: ComponentStyleConfig = defineStyleConfig({
       boxShadow: "none",
     },
   },
+  sizes: {
+    sm: {
+      px: 3,
+      py: 7,
+    },
+  },
+  defaultProps: {
+    variant: "legacyPrimary",
+    colorScheme: "legacy.yellow",
+    size: "sm",
+  },
   variants: {
+    // New design system ↓: https://www.figma.com/file/6ZQgwNrqpRlMg9GFbA41dv/Components?type=design&node-id=211-7721&t=42rebNqIXfsvMo4z-0
+    solid: getSolidStyle,
+    // Legacy
     legacyPrimary: (props: StyleFunctionProps) => ({
       ...legacyBase,
       color:
@@ -185,80 +203,98 @@ export const Button: ComponentStyleConfig = defineStyleConfig({
         background: "legacy.gray.700",
       },
     },
-    // New design system ↓: https://www.figma.com/file/6ZQgwNrqpRlMg9GFbA41dv/Components?type=design&node-id=211-7721&t=42rebNqIXfsvMo4z-0
-    yellow: {
-      color: "black",
-      background: "yellow.400",
-      _hover: {
-        background: "yellow.600",
-      },
-      _disabled: {
-        color: "blackAlpha.700",
-        background: "yellow.800",
-      },
-    },
-    purple: {
-      color: "white",
-      background: "yellow.400",
-      _hover: {
-        background: "yellow.600",
-      },
-      _disabled: {
-        color: "whiteAlpha.700",
-        background: "yellow.800",
-      },
-    },
-    darkGray: {
-      color: "white",
-      background: "darkGray.700",
-      _hover: {
-        background: "darkGray.600",
-      },
-      _disabled: {
-        color: "whiteAlpha.700",
-        background: "darkGray.500",
-      },
-    },
-    blueGray: {
-      color: "black",
-      background: "blueGray.200",
-      _hover: {
-        background: "blueGray.300",
-      },
-      _disabled: {
-        color: "blackAlpha.700",
-        background: "blueGray.200",
-      },
-    },
-    whiteAlpha: {
-      color: "white",
-      background: "whiteAlpha.300",
-      _hover: {
-        background: "whiteAlpha.400",
-      },
-      _disabled: {
-        color: "whiteAlpha.700",
-        background: "whiteAlpha.100",
-      },
-    },
-    blackAlpha: {
-      color: "black",
-      background: "blackAlpha.200",
-      _hover: {
-        background: "blackAlpha.300",
-      },
-      _disabled: {
-        color: "blackAlpha.700",
-        background: "blackAlpha.100",
-      },
-    },
   },
 });
 
+function getSolidStyle({ colorScheme }: StyleFunctionProps) {
+  switch (colorScheme) {
+    case "yellow":
+    default: {
+      return {
+        color: "black",
+        bg: "yellow.400",
+        _hover: {
+          bg: "yellow.600",
+        },
+        _disabled: {
+          color: "blackAlpha.700",
+          bg: "yellow.800",
+        },
+      };
+    }
+    case "purple": {
+      return {
+        color: "white",
+        bg: "purple.400",
+        _hover: {
+          bg: "purple.900",
+        },
+        _disabled: {
+          color: "whiteAlpha.700",
+          bg: "purple.100",
+        },
+      };
+    }
+    case "darkGray": {
+      return {
+        color: "white",
+        bg: "darkGray.700",
+        _hover: {
+          bg: "darkGray.600",
+        },
+        _disabled: {
+          color: "whiteAlpha.700",
+          bg: "darkGray.500",
+        },
+      };
+    }
+    case "blueGray": {
+      return {
+        color: "black",
+        bg: "blueGray.200",
+        _hover: {
+          bg: "blueGray.300",
+        },
+        _disabled: {
+          color: "blackAlpha.700",
+          bg: "blueGray.200",
+        },
+      };
+    }
+    case "whiteAlpha": {
+      return {
+        color: "white",
+        bg: "whiteAlpha.300",
+        _hover: {
+          bg: "whiteAlpha.400",
+        },
+        _disabled: {
+          color: "whiteAlpha.700",
+          bg: "whiteAlpha.100",
+        },
+      };
+    }
+    case "blackAlpha": {
+      return {
+        color: "black",
+        bg: "blackAlpha.200",
+        _hover: {
+          bg: "blackAlpha.300",
+        },
+        _disabled: {
+          color: "blackAlpha.700",
+          bg: "blackAlpha.100",
+        },
+      };
+    }
+  }
+}
+
 ChakraButton.defaultProps = {
   ...ChakraButton.defaultProps,
-  // TODO: Swap to "yello" once all components are migrated to new design system
+  // TODO: Swap to "fill" once all components are migrated to new design system
   variant: "legacyPrimary",
+  // TODO: Swap to "yello" once all components are migrated to new design system
   colorScheme: "legacy.yellow",
   spinner: <Loading />,
 };

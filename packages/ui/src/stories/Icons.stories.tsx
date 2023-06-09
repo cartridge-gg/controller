@@ -1,27 +1,22 @@
 import type { Meta } from "@storybook/react";
-
+import { Flex } from "@chakra-ui/react";
 import Fingerprint from "../components/icons/Fingerprint";
 
 const meta: Meta<typeof Fingerprint> = {
-  title: "Icons",
+  title: "Icon",
   component: Icons,
 };
 
 function Icons(props: typeof Fingerprint) {
   return (
-    <>
-      <Fingerprint {...props} m={1} />
-      <Fingerprint {...props} m={1} />
-      <Fingerprint {...props} m={1} />
-    </>
+    <Flex>
+      <Fingerprint m={1} {...props} />
+    </Flex>
   );
 }
 
 export default meta;
 
-export const List = {
-  args: {
-    // children: "Press me",
-    // variant: "yellow",
-  },
+export const All = {
+  args: {},
 };

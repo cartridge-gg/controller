@@ -2,6 +2,8 @@ import type { Preview } from "@storybook/react";
 import theme from "../src/theme"
 import { ChakraProviderDecorator } from "@chakra-ui/storybook-addon/dist/feature/decorator/ChakraProviderDecorator";
 
+import '../../keychain/src/style.css';
+
 const preview: Preview = {
   parameters: {
     actions: { argTypesRegex: "^on[A-Z].*" },

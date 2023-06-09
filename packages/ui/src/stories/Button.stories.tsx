@@ -1,17 +1,69 @@
-import type { Meta } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 
-import { Button } from "@chakra-ui/react";
+import { Button, Flex, Text, VStack } from "@chakra-ui/react";
 
-const meta: Meta<typeof Button> = {
+const meta: Meta<typeof Buttons> = {
   title: "Button",
-  component: Button,
+  component: Buttons,
+  argTypes: {
+    variant: {
+      options: ["solid"],
+      control: { type: "radio" },
+    },
+    size: {
+      options: ["md"],
+      control: { type: "radio" },
+    },
+  },
 };
 
 export default meta;
 
-export const Default = {
+function Buttons(props: React.ComponentProps<typeof Button>) {
+  return (
+    <Flex>
+      {colorSchemes.map((c) => (
+        <VStack key={c} m={1}>
+          <Text
+            m={3}
+            fontSize="md"
+            fontWeight="bold"
+            textDecor="underline"
+            textTransform="capitalize"
+          >
+            {c}
+          </Text>
+          <Button
+            w={60}
+            colorScheme={c}
+            {...props}
+            onClick={() => {
+              console.log("Clicked !");
+            }}
+          />
+        </VStack>
+      ))}
+    </Flex>
+  );
+}
+
+const colorSchemes = [
+  "yellow",
+  "purple",
+  "darkGray",
+  "blueGray",
+  "whiteAlpha",
+  "blackAlpha",
+];
+
+type Story = StoryObj<typeof Button>;
+
+export const All: Story = {
   args: {
-    children: "Press me",
-    variant: "yellow",
+    variant: "solid",
+    size: "md",
+    children: "continue",
+    isDisabled: false,
+    isLoading: false,
   },
 };

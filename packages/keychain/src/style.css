@@ -1,4 +1,78 @@
 @font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 600;
+  src: local("IBM Plex Mono"), url("../public/fonts/IBM_Plex_Mono/IBMPlexMono-SemiBold.ttf");
+}
+
+/* TODO: Do we use all of these? */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100;
+  src: local("Inter"), url("../public/fonts/Inter/Inter-Thin.ttf");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 200;
+  src: local("Inter"), url("../public/fonts/Inter/Inter-ExtraLight.ttf");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 300;
+  src: local("Inter"), url("../public/fonts/Inter/Inter-Light.ttf");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: normal;
+  src: local("Inter"), url("../public/fonts/Inter/Inter-Regular.ttf");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 500;
+  src: local("Inter"), url("../public/fonts/Inter/Inter-Medium.ttf");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 600;
+  src: local("Inter"), url("../public/fonts/Inter/Inter-SemiBold.ttf");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: bold;
+  src: local("Inter"), url("../public/fonts/Inter/Inter-Bold.ttf");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 800;
+  src: local("Inter"), url("../public/fonts/Inter/Inter-ExtraBold.ttf");
+}
+
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 900;
+  src: local("Inter"), url("../public/fonts/Inter/Inter-Black.ttf");
+}
+
+/* Legacy */
+
+@font-face {
   font-family: "LD_Mono";
   font-style: normal;
   font-weight: normal;
