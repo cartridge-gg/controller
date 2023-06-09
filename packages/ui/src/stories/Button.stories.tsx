@@ -7,7 +7,7 @@ const meta: Meta<typeof Buttons> = {
   component: Buttons,
   argTypes: {
     variant: {
-      options: ["solid"],
+      options: ["form", "label"],
       control: { type: "radio" },
     },
     size: {
@@ -34,7 +34,6 @@ function Buttons(props: React.ComponentProps<typeof Button>) {
             {c}
           </Text>
           <Button
-            w={60}
             colorScheme={c}
             onClick={() => {
               console.log("Clicked !");
@@ -60,7 +59,7 @@ type Story = StoryObj<typeof Button>;
 
 export const All: Story = {
   args: {
-    variant: "solid",
+    variant: "form",
     size: "sm",
     children: "continue",
     isDisabled: false,

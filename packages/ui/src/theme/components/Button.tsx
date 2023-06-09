@@ -33,10 +33,16 @@ export const Button: ComponentStyleConfig = defineStyleConfig({
     },
   },
   sizes: {
-    sm: {
-      px: 6,
-      py: 3,
-    },
+    sm: (p) =>
+      p.variant === "form"
+        ? {
+            px: 6,
+            py: 3,
+          }
+        : {
+            px: 4,
+            py: 2,
+          },
     md: {
       px: 6,
       py: 3.5,
@@ -49,7 +55,11 @@ export const Button: ComponentStyleConfig = defineStyleConfig({
   },
   variants: {
     // New design system ↓: https://www.figma.com/file/6ZQgwNrqpRlMg9GFbA41dv/Components?type=design&node-id=211-7721&t=42rebNqIXfsvMo4z-0
-    solid: getSolidStyle,
+    form: getColorStyle,
+    label: (p) => ({
+      ...getColorStyle(p),
+      borderRadius: p.rounded ? "full" : "base",
+    }),
     // Legacy
     legacyPrimary: (props: StyleFunctionProps) => ({
       ...legacyBase,
@@ -210,7 +220,7 @@ export const Button: ComponentStyleConfig = defineStyleConfig({
   },
 });
 
-function getSolidStyle({ colorScheme }: StyleFunctionProps) {
+function getColorStyle({ colorScheme }: StyleFunctionProps) {
   switch (colorScheme) {
     case "yellow":
     default: {
