@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { Button, Flex, Text, VStack } from "@chakra-ui/react";
+import { Button, Flex, Text, VStack, ButtonProps } from "@chakra-ui/react";
 import Copy from "../components/icons/Copy";
 import Globe from "../components/icons/Globe";
 
@@ -29,7 +29,7 @@ function Buttons({
   children,
   icon,
   ...buttonProps
-}: React.ComponentProps<typeof Button> & {
+}: ButtonProps & {
   hideChildren: boolean;
   icon: "None" | "Left" | "Right" | "Why Not Both?";
 }) {

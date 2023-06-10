@@ -14,7 +14,8 @@ function Colors() {
         .filter(([colorName]) => colorName !== "legacy")
         .map(([colorName, v]) => (
           <VStack align="left" m={2} key={colorName}>
-            <Text>{colorName[0].toUpperCase() + colorName.slice(1)}</Text>
+            {/* Heading component instead? */}
+            <Text textTransform="capitalize">{colorName}</Text>
             <HStack>
               {typeof v !== "string" ? (
                 Object.entries(v)
