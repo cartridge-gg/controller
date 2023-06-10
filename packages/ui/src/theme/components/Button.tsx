@@ -36,10 +36,18 @@ export const Button: ComponentStyleConfig = defineStyleConfig({
     sm: (p) =>
       p.variant === "form"
         ? {
+            h: 10,
             px: 6,
             py: 3,
           }
+        : p.rightIcon
+        ? {
+            h: 9,
+            p: 2,
+            pl: 4,
+          }
         : {
+            h: 9,
             px: 4,
             py: 2,
           },
@@ -57,8 +65,17 @@ export const Button: ComponentStyleConfig = defineStyleConfig({
     // New design system ↓: https://www.figma.com/file/6ZQgwNrqpRlMg9GFbA41dv/Components?type=design&node-id=211-7721&t=42rebNqIXfsvMo4z-0
     form: getColorStyle,
     label: (p) => ({
+      fontFamily: "Inter",
+      textTransform: "capitalize",
+      letterSpacing: "normal",
       ...getColorStyle(p),
-      borderRadius: p.rounded ? "full" : "base",
+    }),
+    labelRounded: (p) => ({
+      fontFamily: "Inter",
+      textTransform: "capitalize",
+      letterSpacing: "normal",
+      borderRadius: "full",
+      ...getColorStyle(p),
     }),
     // Legacy
     legacyPrimary: (props: StyleFunctionProps) => ({
