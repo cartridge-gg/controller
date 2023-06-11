@@ -2,7 +2,7 @@ import { memo } from "react";
 import { Icon, useStyleConfig } from "@chakra-ui/react";
 import { Props } from "../types";
 
-export const CheckIcon = memo(
+export const AlertIcon = memo(
   ({
     variant,
     size,
@@ -24,7 +24,7 @@ export const CheckIcon = memo(
       <Icon viewBox="0 0 24 24" __css={styles} boxSize={boxSize} {...iconProps}>
         <path
           fill="currentColor"
-          d="M8.364 18.546 4 14.182l1.454-1.454 2.91 2.91L18.546 5.453 20 6.91 8.364 18.546Z"
+          d="m12 3-9 9 9 9 9-9-9-9Zm.844 4.5v5.625h-1.688V7.5h1.688Zm-1.688 8.438V14.25h1.688v1.688h-1.688Z"
         />
       </Icon>
     );
