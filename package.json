@@ -1,27 +1,21 @@
 {
   "name": "cartridge",
-  "packageManager": "yarn@3.2.0",
+  "packageManager": "pnpm@8.5.1",
   "private": true,
   "scripts": {
-    "build": "yarn controller build && yarn connector build && yarn ui build",
-    "release": "yarn build && yarn changeset publish",
-    "keychain": "yarn workspace @cartridge/keychain",
-    "controller": "yarn workspace @cartridge/controller",
-    "connector": "yarn workspace @cartridge/connector",
-    "docs": "yarn workspace @cartridge/docs",
-    "ui": "yarn workspace @cartridge/ui",
-    "test": "yarn keychain test",
-    "test:ci": "yarn keychain test:ci"
+    "preinstall": "npx only-allow pnpm",
+    "build": "pnpm controller build && pnpm connector build && pnpm ui build",
+    "release": "pnpm build && pnpm changeset publish",
+    "keychain": "pnpm --filter @cartridge/keychain",
+    "controller": "pnpm --filter @cartridge/controller",
+    "connector": "pnpm --filter @cartridge/connector",
+    "docs": "pnpm --filter @cartridge/docs",
+    "ui": "pnpm --filter @cartridge/ui",
+    "example:next": "pnpm --filter starknet-react-next",
+    "lint": "pnpm keychain lint && pnpm ui lint",
+    "test": "pnpm keychain test",
+    "test:ci": "pnpm keychain test:ci"
   },
-  "workspaces": [
-    "controller",
-    "keychain",
-    "connector",
-    "ui",
-    "docs",
-    "examples/starknet-react-next",
-    "examples/get-starknet"
-  ],
   "devDependencies": {
     "@changesets/changelog-github": "^0.4.2",
     "@changesets/cli": "^2.20.0",
