@@ -45,16 +45,15 @@ const Icon = () => (
   </svg>
 );
 
-type AddressProps = { children: string; style?: React.CSSProperties };
-
 // Workaround
-export const Address: React.FC<AddressProps> = forwardRef(
-  ({ children, style }: AddressProps, ref) => (
-    <Badge style={style}>
-      <Flex alignItems="center">
-        <Icon />
-        <span ref={ref}>{formatAddress(children)}</span>
-      </Flex>
-    </Badge>
-  ),
-);
+export const Address: React.FC<{
+  children: string;
+  style?: React.CSSProperties;
+}> = forwardRef(({ children, style }, ref) => (
+  <Badge style={style}>
+    <Flex alignItems="center">
+      <Icon />
+      <span ref={ref}>{formatAddress(children)}</span>
+    </Flex>
+  </Badge>
+));

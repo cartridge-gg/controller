@@ -5,5 +5,5 @@ The Cartridge Keychain is a small, sandboxed web application that manages intera
 ## Development
 
 ```
-yarn keychain dev
+pnpm keychain dev
 ```

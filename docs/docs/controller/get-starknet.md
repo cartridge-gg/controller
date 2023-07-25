@@ -5,7 +5,7 @@ slug: /controller/get-starknet
 ---
 
 ```sh
-yarn add @cartridge/controller starknet
+pnpm add @cartridge/controller starknet
 ```
 
 ```ts
