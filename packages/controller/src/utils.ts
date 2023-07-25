@@ -1,6 +1,14 @@
 import equal from "fast-deep-equal";
 import { Policy } from "./types";
-import { ec, number, hash, shortString, Signature, Provider, addAddressPadding } from "starknet";
+import {
+  ec,
+  number,
+  hash,
+  shortString,
+  Signature,
+  Provider,
+  addAddressPadding,
+} from "starknet";
 import BN from "bn.js";
 import { PROXY_CLASS, CLASS_HASHES } from "./constants";
 import { decode } from "cbor-x";
@@ -39,17 +47,13 @@ export const computeAddress = (
     "0"
   );
 
-
 export const verifyMessageHash = async (
   provider: Provider,
   address: string,
   messageHash: number.BigNumberish,
   signature: Signature
 ) => {
-  const isDeployed = !!provider.getClassHashAt(
-    address,
-    "latest"
-  );
+  const isDeployed = !!provider.getClassHashAt(address, "latest");
 
   if (isDeployed) {
     const res = await provider.callContract({
@@ -66,30 +70,33 @@ export const verifyMessageHash = async (
     const isRegistered = res?.result[0] === "0x1";
     if (isRegistered) {
       const keyPair = ec.getKeyPairFromPublicKey(signature[0]);
-      return ec.verify(
-        keyPair,
-        number.toBN(messageHash).toString(),
-        signature
-      );
+      return ec.verify(keyPair, number.toBN(messageHash).toString(), signature);
     } else {
-      const res = await provider.callContract({
-        contractAddress: address,
-        entrypoint: "isValidSignature",
-        calldata: [messageHash, signature.length, ...signature],
-      }, "latest");
+      const res = await provider.callContract(
+        {
+          contractAddress: address,
+          entrypoint: "isValidSignature",
+          calldata: [messageHash, signature.length, ...signature],
+        },
+        "latest"
+      );
 
       return res?.result[0] === "0x1";
     }
   } else {
-    const res = await (await fetch("https://api.cartridge.gg/query", {
-      "headers": {
-        "content-type": "application/json",
-      },
-      "body": `{\"query\":\"query Account($address: String!) {\\n  accounts(where: { contractAddress: $address }) {\\n    edges {\\n      node {\\n        id\\n        credential {\\n          id\\n          publicKey\\n        }\\n      }\\n    }\\n  }\\n}\\n\",\"variables\":{\"address\":\"${addAddressPadding(address)}\"},\"operationName\":\"Account\"}`,
-      "method": "POST",
-      "mode": "cors",
-      "credentials": "omit",
-    })).json();
+    const res = await (
+      await fetch("https://api.cartridge.gg/query", {
+        headers: {
+          "content-type": "application/json",
+        },
+        body: `{\"query\":\"query Account($address: String!) {\\n  accounts(where: { contractAddress: $address }) {\\n    edges {\\n      node {\\n        id\\n        credential {\\n          id\\n          publicKey\\n        }\\n      }\\n    }\\n  }\\n}\\n\",\"variables\":{\"address\":\"${addAddressPadding(
+          address
+        )}\"},\"operationName\":\"Account\"}`,
+        method: "POST",
+        mode: "cors",
+        credentials: "omit",
+      })
+    ).json();
 
     const account = res?.accounts?.edges?.[0]?.node;
     if (!account) {
@@ -119,19 +126,23 @@ export const verifyMessageHash = async (
 };
 
 export const getAccounts = async (addresses: string[]) => {
-  const query = addresses.map(addr => ({
+  const query = addresses.map((addr) => ({
     contractAddress: addAddressPadding(addr),
-  }))
+  }));
 
-  const res = await (await fetch("https://api.cartridge.gg/query", {
-    "headers": {
-      "content-type": "application/json",
-    },
-    "body": `{\"query\":\"query AccountInfo($addresses: [AccountWhereInput!]!) {\\n  accounts(where: { or: $addresses}) {\\n    edges {\\n      node {\\n        id\\n  contractAddress\\n      }\\n    }\\n  }\\n}\",\"variables\":{\"addresses\":${JSON.stringify(query)}},\"operationName\":\"AccountInfo\"}`,
-    "method": "POST",
-    "mode": "cors",
-    "credentials": "omit"
-  })).json();
+  const res = await (
+    await fetch("https://api.cartridge.gg/query", {
+      headers: {
+        "content-type": "application/json",
+      },
+      body: `{\"query\":\"query AccountInfo($addresses: [AccountWhereInput!]!) {\\n  accounts(where: { or: $addresses}) {\\n    edges {\\n      node {\\n        id\\n  contractAddress\\n      }\\n    }\\n  }\\n}\",\"variables\":{\"addresses\":${JSON.stringify(
+        query
+      )}},\"operationName\":\"AccountInfo\"}`,
+      method: "POST",
+      mode: "cors",
+      credentials: "omit",
+    })
+  ).json();
 
   if (res.errors) {
     throw new Error(res.errors[0].message);

@@ -16,16 +16,10 @@ Install dependencies:
 pnpm i
 ```
 
-Run keychain:
+Run `keychain` and `starknet-reat-next`:
 
 ```sh
-pnpm keychain dev
-```
-
-Run [starknet-react-next](examples/starknet-react-next/) example:
-
-```sh
-npm example:next dev
+pnpm dev
 ```
 
 Open <http://localhost:3002> in your browser.

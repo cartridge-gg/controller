@@ -1,7 +1,12 @@
 import { createMultiStyleConfigHelpers } from "@chakra-ui/react";
 import type { ComponentMultiStyleConfig } from "@chakra-ui/theme";
 
-const helpers = createMultiStyleConfigHelpers(['menu', 'item', 'list', 'divider']);
+const helpers = createMultiStyleConfigHelpers([
+  "menu",
+  "item",
+  "list",
+  "divider",
+]);
 
 export const Menu: ComponentMultiStyleConfig = helpers.defineMultiStyleConfig({
   baseStyle: {

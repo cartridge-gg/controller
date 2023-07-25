@@ -49,10 +49,7 @@ type AddressProps = { children: string; style?: React.CSSProperties };
 
 // Workaround
 export const Address: React.FC<AddressProps> = forwardRef(
-  (
-    { children, style }: AddressProps,
-    ref,
-  ) => (
+  ({ children, style }: AddressProps, ref) => (
     <Badge style={style}>
       <Flex alignItems="center">
         <Icon />

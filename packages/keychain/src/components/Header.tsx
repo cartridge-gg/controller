@@ -83,8 +83,9 @@ export const Header = ({
   const [ethBalance, setEthBalance] = useState<string>();
 
   const pointsChain = "starknet:SN_GOERLI";
-  const pointsTokenAccountId = `${pointsChain}/${pointsChain}:${address || ""
-    }/erc20:${CONTRACT_POINTS}`;
+  const pointsTokenAccountId = `${pointsChain}/${pointsChain}:${
+    address || ""
+  }/erc20:${CONTRACT_POINTS}`;
   const { data: pointsData, error: pointsError } = useBalanceQuery({
     tokenAccountId: pointsTokenAccountId,
   });

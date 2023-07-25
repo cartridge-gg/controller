@@ -42,6 +42,7 @@ const Connect = ({
       }
       actions.setSubmitting(false);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [origin, onConnect, policys, maxFee],
   );
 

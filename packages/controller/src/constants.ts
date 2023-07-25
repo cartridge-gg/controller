@@ -1,10 +1,13 @@
 import { constants } from "starknet";
 
-export const GATEWAY_MAINNET = "https://alpha-mainnet.starknet.io/feeder_gateway";
+export const GATEWAY_MAINNET =
+  "https://alpha-mainnet.starknet.io/feeder_gateway";
 export const GATEWAY_GOERLI = "https://alpha4.starknet.io/feeder_gateway";
 
-export const ETH_RPC_MAINNET = "https://eth-mainnet.g.alchemy.com/v2/OGPRMquXP3K7oTkLrmVZpjCd1DswtYz3";
-export const ETH_RPC_GOERLI = "https://eth-goerli.g.alchemy.com/v2/RMPbO9CyB-lVmkbpXCyg8W482pZDDht_";
+export const ETH_RPC_MAINNET =
+  "https://eth-mainnet.g.alchemy.com/v2/OGPRMquXP3K7oTkLrmVZpjCd1DswtYz3";
+export const ETH_RPC_GOERLI =
+  "https://eth-goerli.g.alchemy.com/v2/RMPbO9CyB-lVmkbpXCyg8W482pZDDht_";
 
 export const CONTRACT_ETH =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";

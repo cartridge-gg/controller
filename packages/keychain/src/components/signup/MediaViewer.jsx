@@ -26,8 +26,8 @@ export const MediaViewer = (props) => {
                 src={src}
                 style={{ height: height, width: width }}
               >
-                <div class="progress-bar hide" slot="progress-bar">
-                  <div class="update-bar"></div>
+                <div className="progress-bar hide" slot="progress-bar">
+                  <div className="update-bar"></div>
                 </div>
               </model-viewer>
             )}

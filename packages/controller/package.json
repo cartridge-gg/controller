@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc --build tsconfig.json",
     "dev": "tsc --watch",
-    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\""
+    "format": "prettier --write \"src/**/*.ts\""
   },
   "files": [
     "lib"

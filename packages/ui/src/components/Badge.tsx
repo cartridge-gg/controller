@@ -3,16 +3,13 @@ import { Flex, forwardRef } from "@chakra-ui/react";
 import { css } from "@emotion/react";
 
 type BadgeProps = {
- children: ReactNode,
- style?: CSSProperties,
-}
+  children: ReactNode;
+  style?: CSSProperties;
+};
 
 // Workaround
 export const Badge: React.FC<BadgeProps> = forwardRef(
-  (
-    { children, style }: BadgeProps,
-    ref,
-  ) => (
+  ({ children, style }: BadgeProps, ref) => (
     <Flex
       css={css`
         background-color: #0f1410;

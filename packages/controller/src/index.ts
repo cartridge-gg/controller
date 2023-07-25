@@ -1,8 +1,4 @@
-import {
-  AccountInterface,
-  constants,
-  RpcProvider,
-} from "starknet";
+import { AccountInterface, constants, RpcProvider } from "starknet";
 import {
   AsyncMethodReturns,
   Connection,
@@ -24,10 +20,12 @@ import { createModal } from "./modal";
 
 export const providers = {
   [constants.StarknetChainId.TESTNET]: new RpcProvider({
-    nodeUrl: "https://starknet-goerli.g.alchemy.com/v2/FS0Fge2Rq1dlf2IsAIC_Ecy0UBp9uq51",
+    nodeUrl:
+      "https://starknet-goerli.g.alchemy.com/v2/FS0Fge2Rq1dlf2IsAIC_Ecy0UBp9uq51",
   }),
   [constants.StarknetChainId.MAINNET]: new RpcProvider({
-    nodeUrl: "https://starknet-mainnet.g.alchemy.com/v2/-FbmIoy3U7xEqQhuhW6wkDB2uqfu0yKi",
+    nodeUrl:
+      "https://starknet-mainnet.g.alchemy.com/v2/-FbmIoy3U7xEqQhuhW6wkDB2uqfu0yKi",
   }),
 };
 
@@ -146,7 +144,10 @@ class Controller {
   }
 
   async switchChain(chainId: constants.StarknetChainId) {
-    const cid = chainId === constants.StarknetChainId.MAINNET ? SupportedChainIds.MAINNET : SupportedChainIds.TESTNET;
+    const cid =
+      chainId === constants.StarknetChainId.MAINNET
+        ? SupportedChainIds.MAINNET
+        : SupportedChainIds.TESTNET;
     if (this.chainId === cid) {
       return;
     }
@@ -203,7 +204,11 @@ class Controller {
 
     try {
       if (!this.account) {
-        let response = await this.keychain.connect(this.policies, undefined, this.chainId);
+        let response = await this.keychain.connect(
+          this.policies,
+          undefined,
+          this.chainId
+        );
         if (response.code !== ResponseCodes.SUCCESS) {
           throw new Error(response.message);
         }
@@ -254,7 +259,11 @@ class Controller {
     this.modal.open();
 
     try {
-      let response = await this.keychain.connect(this.policies, undefined, this.chainId);
+      let response = await this.keychain.connect(
+        this.policies,
+        undefined,
+        this.chainId
+      );
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
       }
@@ -276,7 +285,7 @@ class Controller {
       };
 
       if (this.starterPackId) {
-        await this.keychain.issueStarterPack(this.starterPackId)
+        await this.keychain.issueStarterPack(this.starterPackId);
       }
 
       return this.accounts[this.chainId];

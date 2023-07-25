@@ -72,7 +72,7 @@ class Account extends BaseAccount {
 
     const state = Storage.get(this.selector);
     if (!state || Date.now() - state.syncing > 5000) {
-      console.log("sync account")
+      console.log("sync account");
       this.sync();
       return;
     }
@@ -108,7 +108,7 @@ class Account extends BaseAccount {
   }
 
   async sync() {
-    console.log("sync")
+    console.log("sync");
     Storage.update(this.selector, {
       syncing: Date.now(),
     });
@@ -366,8 +366,8 @@ class Account extends BaseAccount {
 
   async signMessage(typedData: typedData.TypedData): Promise<Signature> {
     return await (this.status === Status.REGISTERED ||
-      this.status === Status.COUNTERFACTUAL ||
-      this.status === Status.DEPLOYING
+    this.status === Status.COUNTERFACTUAL ||
+    this.status === Status.DEPLOYING
       ? super.signMessage(typedData)
       : this.webauthn.signMessage(typedData));
   }

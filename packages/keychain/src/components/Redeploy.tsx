@@ -35,7 +35,7 @@ export const Redeploy = ({
         chainId: "starknet:SN_GOERLI",
       });
 
-      console.log("sync redeploy")
+      console.log("sync redeploy");
       controller.account(constants.StarknetChainId.TESTNET).sync();
     };
 

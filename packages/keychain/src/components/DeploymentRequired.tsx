@@ -56,7 +56,7 @@ const DeploymentRequired = ({
     const id = setInterval(async () => {
       if (account.status !== Status.DEPLOYING) clearInterval(id);
       setStatus(account.status);
-      console.log("deployment required signup")
+      console.log("deployment required signup");
       await account.sync();
     }, 2000);
 
