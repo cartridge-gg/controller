@@ -1,0 +1,31 @@
+{
+  "name": "@cartridge/connector",
+  "version": "0.3.18",
+  "description": "Cartridge Controler Connector",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepublish": "pnpm build",
+    "dev": "tsc --watch",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "test:watch": "jest --watchAll",
+    "test": "jest --ci --runInBand"
+  },
+  "files": [
+    "lib"
+  ],
+  "devDependencies": {
+    "@types/jest": "^26.0.18",
+    "@types/node": "^17.0.23",
+    "jest": "^26.6.3",
+    "ts-jest": "^26.5.1",
+    "ts-node": "^10.4.0",
+    "tslib": "^2.3.1"
+  },
+  "dependencies": {
+    "@cartridge/controller": "workspace:^",
+    "@starknet-react/core": "^0.16.0",
+    "starknet": "^4.22.0"
+  }
+}

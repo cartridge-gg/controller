@@ -1,11 +1,11 @@
-This is an example showing how to use StarkNet React with Next.js
+# @cartridge/web 
 
 ## Getting Started
 
 First, run the development server:
 
 ```bash
-pnpm example:next dev
+pnpm ui dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.

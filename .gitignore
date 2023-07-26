@@ -138,12 +138,8 @@ dmypy.json
 node_modules/
 .next
 
-.yarn/*
-!.yarn/cache
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
-
 *.tsbuildinfo
+
+.turbo
+
+**/.pnpm-debug.log*
