@@ -7,7 +7,9 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "format": "prettier ./src --write"
+    "format": "prettier ./src --write",
+    "storybook": "storybook dev -p 6006",
+    "storybook:build": "storybook build"
   },
   "files": [
     "lib",
@@ -24,10 +26,21 @@
     "react-dom": "^18.0.0"
   },
   "devDependencies": {
-    "@types/node": "^18.0.0",
+    "@chakra-ui/storybook-addon": "^5.0.1",
+    "@storybook/addon-essentials": "^7.1.1",
+    "@storybook/blocks": "^7.1.1",
+    "@storybook/react": "^7.1.1",
+    "@storybook/react-vite": "^7.1.1",
+    "@storybook/testing-library": "^0.2.0",
+    "@types/node": "^18.7.14",
     "@types/react": "^18.0.0",
     "eslint": "8.9.0",
     "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-storybook": "^0.6.13",
+    "prop-types": "^15.8.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "storybook": "^7.1.1",
     "tslib": "^2.3.1"
   }
 }
