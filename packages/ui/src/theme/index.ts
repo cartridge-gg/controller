@@ -1,5 +1,5 @@
 import { extendTheme, type ThemeConfig } from "@chakra-ui/react";
-import colors from "./colors";
+import { colors } from "./colors";
 import * as Components from "./components";
 
 const config: ThemeConfig = {
