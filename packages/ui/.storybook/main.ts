@@ -1,5 +1,5 @@
 import { join, dirname } from "path";
-import { StorybookConfig } from "@storybook/react-vite"
+import { StorybookConfig } from "@storybook/react-vite";
 
 /**
  * This function is used to resolve the absolute path of a package.
@@ -13,7 +13,7 @@ const config: StorybookConfig = {
   stories: ["../src/**/*.mdx", "../src/**/*.stories.@(ts|tsx)"],
   addons: [
     getAbsolutePath("@storybook/addon-essentials"),
-    getAbsolutePath("@chakra-ui/storybook-addon"),
+    getAbsolutePath("storybook-dark-mode"),
   ],
   framework: {
     name: getAbsolutePath("@storybook/react-vite"),
@@ -22,7 +22,7 @@ const config: StorybookConfig = {
   docs: {
     autodocs: "tag",
   },
-  staticDirs: ['../../keychain/public']
+  staticDirs: ["../../keychain/public"],
 };
 
 export default config;
