@@ -3,5 +3,8 @@
     "next/core-web-vitals",
     "prettier",
     "plugin:storybook/recommended"
-  ]
+  ],
+  "rules": {
+    "react/no-unknown-property": ["error", { "ignore": ["css"] }]
+  }
 }

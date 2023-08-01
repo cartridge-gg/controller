@@ -68,3 +68,9 @@ export const White: Story = {
     colorScheme: "white",
   },
 };
+
+export const Loading: Story = {
+  args: {
+    isLoading: true,
+  },
+};
