@@ -73,10 +73,12 @@ export const semanticColors = {
     secondary: {
       default: "darkGray.200",
       _light: "blueGray.700",
-      accent: {
-        default: "darkGray.100",
-        _light: "blueGray.800",
-      },
+
+      // Nested semantics don't work
+      // accent: {
+      //   default: "darkGray.100",
+      //   _light: "blueGray.800",
+      // },
     },
     error: {
       default: "white",
