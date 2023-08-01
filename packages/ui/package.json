@@ -16,9 +16,10 @@
     "README.md"
   ],
   "peerDependencies": {
-    "@chakra-ui/react": "^2.8.0",
-    "@chakra-ui/theme": "^3.2.0",
-    "@chakra-ui/theme-tools": "^2.1.0",
+    "@chakra-ui/react": "^2.4.3",
+    "@chakra-ui/styled-system": "2.4.0",
+    "@chakra-ui/theme": "^2.1.12",
+    "@chakra-ui/theme-tools": "^2.0.11",
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
     "framer-motion": "^6",
@@ -26,6 +27,8 @@
     "react-dom": "^18.0.0"
   },
   "devDependencies": {
+    "@chakra-ui/storybook-addon": "^5.0.1",
+    "@chakra-ui/styled-system": "2.4.0",
     "@storybook/addon-essentials": "^7.1.1",
     "@storybook/blocks": "^7.1.1",
     "@storybook/react": "^7.1.1",
@@ -40,7 +43,6 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "storybook": "^7.1.1",
-    "storybook-dark-mode": "^3.0.1",
     "tslib": "^2.3.1"
   }
 }
