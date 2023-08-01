@@ -72,24 +72,6 @@ export const Translucent: Story = {
 };
 
 /**
- * It stays `light` regardless of the color mode.
- */
-export const Light: Story = {
-  args: {
-    colorScheme: "light",
-  },
-};
-
-/**
- * It stays `dark` regardless of the color mode.
- */
-export const Dark: Story = {
-  args: {
-    colorScheme: "dark",
-  },
-};
-
-/**
  * Show loading indicator based on `isLoading` prop.
  */
 export const Loading: Story = {

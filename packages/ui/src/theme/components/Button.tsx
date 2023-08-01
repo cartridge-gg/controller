@@ -83,22 +83,6 @@ function getColorProps({ colorScheme }: StyleFunctionProps) {
           bg: "tarnslucent.medium",
         },
       };
-    case "light":
-      return {
-        color: "black",
-        bg: "blueGray.200",
-        _hover: {
-          bg: "blueGray.300",
-        },
-      };
-    case "dark":
-      return {
-        color: "white",
-        bg: "darkGray.700",
-        _hover: {
-          bg: "darkGray.600",
-        },
-      };
     default:
       return {
         color: "text.primary",
@@ -113,7 +97,7 @@ function getColorProps({ colorScheme }: StyleFunctionProps) {
   }
 }
 
-type ColorScheme = "colorful" | "translucent" | "white" | "light" | "dark";
+type ColorScheme = "colorful" | "translucent" | "white";
 
 ChakraButton.defaultProps = {
   spinner: <Loading />,
