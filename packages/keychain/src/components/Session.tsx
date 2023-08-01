@@ -1,3 +1,5 @@
+// the workaround doesn't seem to work here
+// /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
 import { Flex, Text, VStack, FormControl } from "@chakra-ui/react";
 import { Formik, Form, Field, FieldInputProps } from "formik";
