@@ -2,7 +2,7 @@ import type { ComponentStyleConfig } from "@chakra-ui/theme";
 
 export const Text: ComponentStyleConfig = {
   baseStyle: {
-    color: "white",
+    color: "text.primary",
   },
   variants: {
     "ld-mono-upper": {

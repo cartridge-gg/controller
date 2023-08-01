@@ -19,7 +19,8 @@ const theme = extendTheme({
   styles: {
     global: {
       body: {
-        background: "gray.800",
+        color: "text.primary",
+        background: "solid.bg",
         WebkitTapHighlightColor: "transparent",
       },
     },

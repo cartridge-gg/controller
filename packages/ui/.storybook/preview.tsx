@@ -18,6 +18,13 @@ const preview: Preview = {
     darkMode: {
       current: "dark",
     },
+    backgrounds: {
+      default: "dark",
+      values: [
+        { name: "dark", value: "#161A17" }, // should match to "solid.bg"
+        { name: "light", value: "#FBFCFE" },
+      ],
+    },
   },
   decorators: [
     (Story) => (
