@@ -21,8 +21,8 @@ const meta: Meta<typeof Button> = {
     },
     colorScheme: {
       control: "select",
-      description: "Color scheme",
-      options: ["colorful", "translucent", "white"],
+      description: "Custom color scheme.",
+      options: ["colorful", "translucent", "light", "dark"],
     },
     size: {
       control: "select",
@@ -31,9 +31,11 @@ const meta: Meta<typeof Button> = {
     },
     isDisabled: {
       control: "boolean",
+      description: "Gray out a button when disabled",
     },
     isLoading: {
       control: "boolean",
+      description: "Show loading indicator.",
     },
   },
   args: {
@@ -51,24 +53,45 @@ type Story = StoryObj<typeof Button>;
 
 export const Solid: Story = {};
 
+/**
+ * When `colorScheme: "colorful"`
+ */
 export const Colorful: Story = {
   args: {
     colorScheme: "colorful",
   },
 };
 
+/**
+ * When `colorScheme: "translucent"`
+ */
 export const Translucent: Story = {
   args: {
     colorScheme: "translucent",
   },
 };
 
-export const White: Story = {
+/**
+ * It stays `light` regardless of the color mode.
+ */
+export const Light: Story = {
   args: {
-    colorScheme: "white",
+    colorScheme: "light",
   },
 };
 
+/**
+ * It stays `dark` regardless of the color mode.
+ */
+export const Dark: Story = {
+  args: {
+    colorScheme: "dark",
+  },
+};
+
+/**
+ * Show loading indicator based on `isLoading` prop.
+ */
 export const Loading: Story = {
   args: {
     isLoading: true,
