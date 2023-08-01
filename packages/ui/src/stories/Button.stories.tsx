@@ -22,7 +22,7 @@ const meta: Meta<typeof Button> = {
     colorScheme: {
       control: "select",
       description: "Custom color scheme.",
-      options: ["colorful", "translucent", "light", "dark"],
+      options: ["colorful", "translucent"],
     },
     size: {
       control: "select",

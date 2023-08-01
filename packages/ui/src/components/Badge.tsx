@@ -1,5 +1,6 @@
 import { ReactNode, CSSProperties } from "react";
 import { Flex, forwardRef } from "@chakra-ui/react";
+/** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
 
 // Workaround

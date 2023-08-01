@@ -1,4 +1,5 @@
 import { ReactNode, useEffect, useState } from "react";
+/** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
 import NextLink from "next/link";
 import { useRouter } from "next/router";

@@ -1,6 +1,7 @@
 import React from "react";
+/** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
-import { Box, useColorModeValue } from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
 
 export const Loading = ({
   fill = "text.primary",

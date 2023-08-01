@@ -1,6 +1,7 @@
 import { Container as ChakraContainer, StyleProps } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { ReactNode } from "react";
+/** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
 
 const Container = ({

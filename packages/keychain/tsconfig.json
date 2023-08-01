@@ -7,7 +7,6 @@
     "module": "esnext",
     "strict": false,
     "jsx": "preserve",
-    "jsxImportSource": "@emotion/react",
     "allowJs": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
@@ -22,7 +21,8 @@
       "core": ["../src"],
       "@cartridge/controller": ["../../controller/src"],
       "@cartridge/ui/*": ["../../ui/src/*"]
-    }
+    },
+    "types": ["@emotion/react/types/css-prop"]
   },
   "include": [
     "next-env.d.ts",

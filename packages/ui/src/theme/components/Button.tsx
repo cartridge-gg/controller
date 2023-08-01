@@ -20,7 +20,6 @@ export const Button = defineStyleConfig({
     textTransform: "uppercase",
     letterSpacing: "widest",
     _disabled: {
-      opacity: "1",
       pointerEvents: "none",
     },
     _focus: {

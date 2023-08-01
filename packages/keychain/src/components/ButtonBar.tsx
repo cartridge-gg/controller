@@ -1,4 +1,5 @@
 import { Flex, Button, Box } from "@chakra-ui/react";
+/** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
 import ClockIcon from "@cartridge/ui/components/icons/Clock";
 
