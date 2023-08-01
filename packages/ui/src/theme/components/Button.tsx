@@ -6,9 +6,9 @@ import { Loading } from "../../components/Loading";
 
 export const Button = defineStyleConfig({
   defaultProps: {
-    variant: "form-colorful",
+    variant: "solid",
   },
-  baseStyle: ({ colorScheme, colorMode }: StyleFunctionProps) => ({
+  baseStyle: {
     outline: "none",
     borderRadius: "base",
     fontFamily: "'IBM Plex Mono'",
@@ -19,8 +19,6 @@ export const Button = defineStyleConfig({
     lineHeight: "none",
     textTransform: "uppercase",
     letterSpacing: "widest",
-    // color: getColor(colorScheme as ColorType),
-    // bg: getBg(colorScheme as ColorType),
     _disabled: {
       opacity: "1",
       pointerEvents: "none",
@@ -29,7 +27,7 @@ export const Button = defineStyleConfig({
       // TODO: handle accessibility properly
       boxShadow: "none",
     },
-  }),
+  },
   sizes: {
     sm: (p) =>
       p.variant === "form"
@@ -51,33 +49,63 @@ export const Button = defineStyleConfig({
           },
     md: {
       px: 6,
+      py: 2.5,
+    },
+    lg: {
+      px: 6,
       py: 3.5,
     },
   },
   variants: {
-    "form-colorful": {
-      color: "solid.bg",
-      bg: "brand.primary",
-      _hover: {
-        bg: "brand.secondary",
-      },
-      _disabled: {
-        bg: "brand.muted",
-        opacity: 0.5,
-      },
-    },
-    "form-solid": {
-      color: "text.primary",
-      bg: "solid.primary",
-      _hover: {
-        bg: "solid.secondary",
-      },
-      _disabled: {
-        opacity: 0.25,
-      },
-    },
+    solid: getColorProps,
   },
 });
+
+function getColorProps({ colorScheme }: StyleFunctionProps) {
+  switch (colorScheme as ColorScheme) {
+    case "colorful":
+      return {
+        color: "solid.bg",
+        bg: "brand.primary",
+        _hover: {
+          bg: "brand.secondary",
+        },
+        _disabled: {
+          bg: "brand.muted",
+          opacity: 0.5,
+        },
+      };
+    case "translucent":
+      return {
+        color: "text.primary",
+        bg: "tarnslucent.soft",
+        _hover: {
+          bg: "tarnslucent.medium",
+        },
+      };
+    case "white":
+      return {
+        color: "black",
+        bg: "blueGray.200",
+        _hover: {
+          bg: "blueGray.300",
+        },
+      };
+    default:
+      return {
+        color: "text.primary",
+        bg: "solid.primary",
+        _hover: {
+          bg: "solid.secondary",
+        },
+        _disabled: {
+          opacity: 0.25,
+        },
+      };
+  }
+}
+
+type ColorScheme = "colorful" | "translucent" | "white";
 
 ChakraButton.defaultProps = {
   spinner: <Loading />,

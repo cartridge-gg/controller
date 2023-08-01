@@ -17,11 +17,31 @@ const meta: Meta<typeof Button> = {
     variant: {
       control: "select",
       description: "Variable of buttons",
-      options: ["form-colorful", "form-solid"],
+      options: ["solid"],
+    },
+    colorScheme: {
+      control: "select",
+      description: "Color scheme",
+      options: ["colorful", "translucent", "white"],
+    },
+    size: {
+      control: "select",
+      description: "Select size",
+      options: ["sm", "md", "lg"],
     },
     isDisabled: {
       control: "boolean",
     },
+    isLoading: {
+      control: "boolean",
+    },
+  },
+  args: {
+    children: "continue",
+    variant: "solid",
+    size: "md",
+    isDisabled: false,
+    isLoading: false,
   },
 };
 
@@ -29,16 +49,22 @@ export default meta;
 
 type Story = StoryObj<typeof Button>;
 
-export const FormColorful: Story = {
+export const Solid: Story = {};
+
+export const Colorful: Story = {
   args: {
-    children: "continue",
-    variant: "form-colorful",
+    colorScheme: "colorful",
   },
 };
 
-export const FormSolid: Story = {
+export const Translucent: Story = {
   args: {
-    children: "continue",
-    variant: "form-solid",
+    colorScheme: "translucent",
+  },
+};
+
+export const White: Story = {
+  args: {
+    colorScheme: "white",
   },
 };
