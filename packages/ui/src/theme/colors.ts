@@ -74,11 +74,10 @@ export const semanticColors = {
       default: "darkGray.200",
       _light: "blueGray.700",
 
-      // Nested semantics don't work
-      // accent: {
-      //   default: "darkGray.100",
-      //   _light: "blueGray.800",
-      // },
+      accent: {
+        default: "darkGray.100",
+        _light: "blueGray.800",
+      },
     },
     error: {
       default: "white",
@@ -101,10 +100,11 @@ export const semanticColors = {
     accent: {
       default: "green.200",
       _light: "purple.400",
-      highlight: {
-        default: "greew.100",
-        _light: "purple.200",
-      },
+    },
+    // Nested sematic color doesn't seem to work
+    accentHighlight: {
+      default: "green.100",
+      _light: "purple.200",
     },
     colorGradient: {
       default: "yellow.400",
