@@ -5,6 +5,8 @@ import { colors } from "../theme/colors";
 /**
  *
  * Collection of colors based on local variables from [Figma](https://www.figma.com/file/6ZQgwNrqpRlMg9GFbA41dv/Components?type=design&node-id=1%3A3070&mode=design&t=ITTcq5pR4KR2VzOu-1).
+ *
+ * Check out `Color (Senmantic Tokens)` page also for real usage of colors.
  */
 const meta: Meta<typeof Palette> = {
   title: "Color",
@@ -96,7 +98,7 @@ function Palette({ colorName }: ColorsProps) {
         Object.entries(values)
           .sort(([k1], [k2]) => (k1 < k2 ? -1 : 1))
           .map(([gradient, colorValue]) => (
-            <Item
+            <ColorSample
               key={colorName + gradient}
               colorName={colorName}
               gradient={gradient}
@@ -104,13 +106,13 @@ function Palette({ colorName }: ColorsProps) {
             />
           ))
       ) : (
-        <Item colorName={colorName} colorValue={values} />
+        <ColorSample colorName={colorName} colorValue={values} />
       )}
     </HStack>
   );
 }
 
-function Item({
+function ColorSample({
   colorName,
   gradient,
   colorValue,
