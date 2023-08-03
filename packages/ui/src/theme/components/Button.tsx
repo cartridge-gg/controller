@@ -57,6 +57,10 @@ export const Button = defineStyleConfig({
   },
   variants: {
     solid: getColorProps,
+    round: (p) => ({
+      ...getColorProps(p),
+      borderRadius: "full",
+    }),
   },
 });
 

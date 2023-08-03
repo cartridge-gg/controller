@@ -1,5 +1,6 @@
 import { Button } from "@chakra-ui/react";
 import { Meta, StoryObj } from "@storybook/react";
+import { CopyIcon, JoystickLineIcon } from "../components/icons";
 
 /**
  *
@@ -36,6 +37,20 @@ const meta: Meta<typeof Button> = {
     isLoading: {
       control: "boolean",
       description: "Show loading indicator.",
+    },
+    leftIcon: {
+      control: "select",
+      options: ["Joystick"],
+      mapping: {
+        Joystick: <JoystickLineIcon />,
+      },
+    },
+    rightIcon: {
+      control: "select",
+      options: ["Copy"],
+      mapping: {
+        Copy: <CopyIcon />,
+      },
     },
   },
   args: {
@@ -77,5 +92,21 @@ export const Translucent: Story = {
 export const Loading: Story = {
   args: {
     isLoading: true,
+  },
+};
+
+export const Round: Story = {
+  args: {
+    variant: "round",
+  },
+};
+
+export const HeaderButton: Story = {
+  args: {
+    children: "0xb5…34a5",
+    fontSize: "small",
+    variant: "round",
+    leftIcon: "Joystick",
+    rightIcon: "Copy",
   },
 };
