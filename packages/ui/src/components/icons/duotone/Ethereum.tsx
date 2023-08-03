@@ -1,33 +1,20 @@
 import { memo } from "react";
-import { Icon, useStyleConfig, useToken } from "@chakra-ui/react";
-import { DuotoneIconProps } from "../types";
+import { Icon, useToken } from "@chakra-ui/react";
+import { DuotoneIconProps } from "./types";
 
 export const EthereumDuoIcon = memo(
   ({
-    variant,
-    size,
-    boxSize = 6,
-    colorScheme,
-    orientation,
-    styleConfig,
     accent = "brand.accent",
     accentHighlight = "brand.accentHighlight",
-    ...iconProps
+    ...props
   }: DuotoneIconProps) => {
-    const styles = useStyleConfig("Icon", {
-      variant,
-      size,
-      colorScheme,
-      orientation,
-      styleConfig,
-    });
     const [accentToken, accentHighlightToken] = useToken("colors", [
       accent as string,
       accentHighlight as string,
     ]);
 
     return (
-      <Icon viewBox="0 0 30 31" __css={styles} boxSize={boxSize} {...iconProps}>
+      <Icon viewBox="0 0 30 31" {...props}>
         <path
           fill={accentHighlightToken}
           d="M14.997 4.5v8.132l6.874 3.072L14.997 4.5Z"

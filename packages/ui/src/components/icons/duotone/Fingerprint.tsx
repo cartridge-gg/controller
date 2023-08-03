@@ -1,29 +1,13 @@
 import { memo } from "react";
-import { Icon, useStyleConfig, useToken } from "@chakra-ui/react";
-import { DuotoneIconProps } from "../types";
+import { Icon, useToken } from "@chakra-ui/react";
+import { DuotoneIconProps } from "./types";
 
 export const FingerprintDuoIcon = memo(
-  ({
-    variant,
-    size,
-    boxSize = 6,
-    colorScheme,
-    orientation,
-    styleConfig,
-    accent = "brand.accent",
-    ...iconProps
-  }: DuotoneIconProps) => {
-    const styles = useStyleConfig("Icon", {
-      variant,
-      size,
-      colorScheme,
-      orientation,
-      styleConfig,
-    });
+  ({ accent = "brand.accent", ...props }: DuotoneIconProps) => {
     const accentToken = useToken("colors", accent as string);
 
     return (
-      <Icon viewBox="0 0 30 31" __css={styles} boxSize={boxSize} {...iconProps}>
+      <Icon viewBox="0 0 30 31" {...props}>
         <path
           fill={accentToken}
           d="M8.22 7.369a1.155 1.155 0 0 1-1.624-.124 1.16 1.16 0 0 1-.27-.838c.022-.303.165-.589.4-.786l1.513-1.293a11.38 11.38 0 0 1 3.612-2.08 12.107 12.107 0 0 1 4.02-.685c1.533 0 3.046.285 4.468.846a11.412 11.412 0 0 1 3.883 2.54h.005l.101.106a12.46 12.46 0 0 1 0 17.616l-2.622 2.627a4.91 4.91 0 0 1-6.938 0 4.91 4.91 0 0 1 0-6.938l2.659-2.659a2.59 2.59 0 0 0 .76-1.836 2.6 2.6 0 0 0-.76-1.84l-.005-.005a2.603 2.603 0 0 0-1.845-.759 2.6 2.6 0 0 0-1.84.76l-2.843 2.847a9.853 9.853 0 0 0-2.43 9.929c.093.29.065.607-.077.878a1.139 1.139 0 0 1-.672.566c-.295.092-.607.06-.879-.078a1.16 1.16 0 0 1-.566-.676A12.165 12.165 0 0 1 9.265 13.24l2.848-2.844a4.9 4.9 0 0 1 6.934 0l.004.005h.005a4.915 4.915 0 0 1 1.43 3.464 4.916 4.916 0 0 1-1.43 3.465h-.005l-2.66 2.66a2.62 2.62 0 0 0 0 3.685c.489.487 1.156.758 1.846.758.69 0 1.353-.271 1.84-.759l2.627-2.627a10.158 10.158 0 0 0 2.972-7.182c0-2.691-1.067-5.277-2.972-7.181l-.106-.106a9.222 9.222 0 0 0-3.1-2.03 9.87 9.87 0 0 0-3.626-.685 9.826 9.826 0 0 0-3.257.552 9.107 9.107 0 0 0-2.88 1.661L8.221 7.37Z"
