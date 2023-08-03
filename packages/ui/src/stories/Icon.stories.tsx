@@ -1,4 +1,4 @@
-import { Grid, GridItem, Text, VStack } from "@chakra-ui/react";
+import { Grid, GridItem, IconProps, Text, VStack } from "@chakra-ui/react";
 import { Meta, StoryObj } from "@storybook/react";
 import {
   brandIcons,
@@ -8,7 +8,7 @@ import {
   stateIcons,
   utilityIcons,
 } from "../components/icons/index";
-import { Props, DuotoneIconProps } from "../components/icons/types";
+import { DuotoneIconProps } from "../components/icons/duotone/types";
 
 const iconList = {
   brand: brandIcons,
@@ -30,7 +30,7 @@ const iconList = {
  * ```jsx
  *
  * <IconName
- *  boxSize={8}           // default: 6
+ *  boxSize={8}           // default: 4
  *  color="brand.primary" // default: "text.primary"
  * />
  * ```
@@ -42,7 +42,7 @@ const meta: Meta<typeof Icons> = {
   argTypes: {
     category: {
       control: "select",
-      options: ["all", ...Object.keys(iconList)],
+      options: Object.keys(iconList),
     },
     boxSize: {
       control: {
@@ -64,45 +64,63 @@ const meta: Meta<typeof Icons> = {
       description: "Duotone icons only.",
     },
   },
-  args: {
-    category: "all",
-    boxSize: 6,
-    color: "text.primary",
-    accent: "brand.accent",
-    accentHighlight: "brand.accentHighlight",
-  },
 };
 
 export default meta;
 
 type Story = StoryObj<typeof Icons>;
 
-export const All: Story = {};
+export const Brand: Story = {
+  args: {
+    category: "brand",
+  },
+};
+
+export const BrandColor: Story = {
+  args: {
+    category: "brand-color",
+  },
+};
+
+export const Directional: Story = {
+  args: {
+    category: "directional",
+  },
+};
+
+export const Duotone: Story = {
+  args: {
+    category: "duotone",
+  },
+};
+
+export const State: Story = {
+  args: {
+    category: "state",
+  },
+};
+
+export const Utility: Story = {
+  args: {
+    category: "utility",
+  },
+};
 
 function Icons({
-  category,
+  category = "state",
   boxSize,
   color,
   ...duotoneProps
 }: {
-  category: "all" | keyof typeof iconList;
+  category: keyof typeof iconList;
   boxSize: number;
   color: string;
   accent?: string;
   accentHighlight?: string;
 }) {
-  const list =
-    category === "all"
-      ? Object.values(iconList).reduce((prev, c) => ({ ...prev, ...c }), {})
-      : iconList[category];
-
   return (
     <Grid templateColumns="repeat(6, 1fr)" gap={2}>
-      {Object.entries(
-        list as { [key: string]: React.FC<Props> | React.FC<DuotoneIconProps> },
-      ).map(([name, Comp]) => {
-        const isDuotone = Comp.displayName?.includes("DuoIcon");
-
+      {Object.entries(iconList[category]).map(([name, Comp]) => {
         return (
           <GridItem key={name}>
             <VStack
@@ -112,7 +130,7 @@ function Icons({
               borderColor="text.secondary"
               borderRadius={4}
             >
-              {isDuotone ? (
+              {category === "duotone" ? (
                 <Comp m={1} boxSize={boxSize} color={color} {...duotoneProps} />
               ) : (
                 <Comp m={1} boxSize={boxSize} color={color} />

@@ -1,29 +1,13 @@
 import { memo } from "react";
-import { Icon, useStyleConfig, useToken } from "@chakra-ui/react";
-import { DuotoneIconProps } from "../types";
+import { Icon, useToken } from "@chakra-ui/react";
+import { DuotoneIconProps } from "./types";
 
 export const StarterpackDuoIcon = memo(
-  ({
-    variant,
-    size,
-    boxSize = 6,
-    colorScheme,
-    orientation,
-    styleConfig,
-    accent = "brand.accent",
-    ...iconProps
-  }: DuotoneIconProps) => {
-    const styles = useStyleConfig("Icon", {
-      variant,
-      size,
-      colorScheme,
-      orientation,
-      styleConfig,
-    });
+  ({ accent = "brand.accent", ...props }: DuotoneIconProps) => {
     const accentToken = useToken("colors", accent as string);
 
     return (
-      <Icon viewBox="0 0 30 31" __css={styles} boxSize={boxSize} {...iconProps}>
+      <Icon viewBox="0 0 30 31" {...props}>
         <path
           fill="currentColor"
           fillOpacity=".32"
