@@ -1,3 +1,5 @@
+export * from "./Provider";
+
 import { extendTheme, type ThemeConfig } from "@chakra-ui/react";
 import { colors, semanticColors } from "./colors";
 import * as Components from "./components";

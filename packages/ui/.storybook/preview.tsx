@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Preview } from "@storybook/react";
-import theme from "../src/theme";
-import { ChakraProvider, useColorMode } from "@chakra-ui/react";
+import { CartridgeUIProvider } from "../src/theme";
+import { useColorMode } from "@chakra-ui/react";
 import { useDarkMode } from "storybook-dark-mode";
 
 import "../../keychain/src/style.css";
@@ -28,11 +28,11 @@ const preview: Preview = {
   },
   decorators: [
     (Story) => (
-      <ChakraProvider theme={theme}>
+      <CartridgeUIProvider>
         <ColorModeProvider>
           <Story />
         </ColorModeProvider>
-      </ChakraProvider>
+      </CartridgeUIProvider>
     ),
   ],
 };

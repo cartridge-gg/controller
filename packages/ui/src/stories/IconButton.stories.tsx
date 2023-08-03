@@ -1,7 +1,6 @@
 import { IconButton } from "@chakra-ui/react";
 import { Meta, StoryObj } from "@storybook/react";
 import { ArrowLeftIcon, TwitterIcon } from "../components/icons";
-import theme from "../theme";
 
 /**
  *
@@ -12,12 +11,7 @@ const meta: Meta<typeof IconButton> = {
   tags: ["autodocs"],
   argTypes: {
     icon: {
-      control: "select",
-      options: ["Twitter", "ArrowLeft"],
-      mapping: {
-        Twitter: <TwitterIcon />,
-        ArrowLeft: <ArrowLeftIcon />,
-      },
+      control: "object",
     },
   },
 };
@@ -28,14 +22,14 @@ type Story = StoryObj<typeof IconButton>;
 
 export const Square: Story = {
   args: {
-    icon: "ArrowLeft",
+    icon: <ArrowLeftIcon />,
     fontSize: "2xl",
   },
 };
 
 export const Brand: Story = {
   args: {
-    icon: "Twitter",
+    icon: <TwitterIcon />,
     fontSize: "2xl",
     px: 4,
     py: 2,
@@ -45,7 +39,7 @@ export const Brand: Story = {
 export const BrandRound: Story = {
   args: {
     variant: "round",
-    icon: "Twitter",
+    icon: <TwitterIcon />,
     fontSize: "2xl",
     px: 4,
     py: 2,
@@ -55,7 +49,7 @@ export const BrandRound: Story = {
 export const Circle: Story = {
   args: {
     variant: "round",
-    icon: "ArrowLeft",
+    icon: <ArrowLeftIcon />,
     fontSize: "2xl",
   },
 };

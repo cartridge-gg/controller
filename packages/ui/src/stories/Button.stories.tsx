@@ -39,18 +39,10 @@ const meta: Meta<typeof Button> = {
       description: "Show loading indicator.",
     },
     leftIcon: {
-      control: "select",
-      options: ["Joystick"],
-      mapping: {
-        Joystick: <JoystickLineIcon />,
-      },
+      control: "object",
     },
     rightIcon: {
-      control: "select",
-      options: ["Copy"],
-      mapping: {
-        Copy: <CopyIcon />,
-      },
+      control: "object",
     },
   },
   args: {
@@ -106,7 +98,7 @@ export const HeaderButton: Story = {
     children: "0xb5…34a5",
     fontSize: "small",
     variant: "round",
-    leftIcon: "Joystick",
-    rightIcon: "Copy",
+    leftIcon: <JoystickLineIcon />,
+    rightIcon: <CopyIcon />,
   },
 };

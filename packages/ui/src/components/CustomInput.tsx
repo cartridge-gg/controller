@@ -1,17 +1,7 @@
 import React, { useState } from "react";
-import {
-  Box,
-  Input as ChakraInput,
-  InputRightElement,
-  InputProps,
-  InputGroup,
-  Button,
-} from "@chakra-ui/react";
+import { Box, Input as ChakraInput, InputProps } from "@chakra-ui/react";
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
-
-import EyeSlash from "./icons/EyeSlash";
-import Eye from "./icons/Eye";
 
 export const Input = (props: InputProps) => {
   return (
@@ -40,26 +30,5 @@ export const Input = (props: InputProps) => {
         transition="border-color 0.2s ease"
       ></Box>
     </Box>
-  );
-};
-
-export const PasswordInput = (props: InputProps) => {
-  const [show, setShow] = useState(false);
-  const handleClick = () => setShow(!show);
-  return (
-    <InputGroup size="md">
-      <Input pr="4.5rem" type={show ? "text" : "password"} {...props} />
-      <InputRightElement width="4.5rem">
-        <Button
-          h="1.5rem"
-          size="sm"
-          onClick={handleClick}
-          variant="unstyled"
-          color="#888"
-        >
-          {show ? <EyeSlash size="sm" /> : <Eye size="sm" />}
-        </Button>
-      </InputRightElement>
-    </InputGroup>
   );
 };

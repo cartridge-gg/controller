@@ -7,7 +7,7 @@ import {
   MenuItem,
   MenuList,
 } from "@chakra-ui/react";
-import ChevronIcon from "../icons/ChevronDown";
+import { WedgeDownIcon } from "../icons";
 
 export type Item = {
   label: React.ReactElement | string;
@@ -47,10 +47,10 @@ export const Dropdown = ({
           <MenuButton position="relative">
             {icon}
             {showCaret && (
-              <ChevronIcon
-                w="14px"
-                ml="10px"
-                fill="gray.200"
+              <WedgeDownIcon
+                // w="14px"
+                // ml="10px"
+                // fill="gray.200"
                 transform={isOpen ? "rotate(180deg)" : undefined}
                 transition="transform 0.2s"
               />
