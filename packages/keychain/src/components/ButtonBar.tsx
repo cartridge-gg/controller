@@ -1,7 +1,7 @@
+import { ClockSolidIcon } from "@cartridge/ui";
 import { Flex, Button, Box } from "@chakra-ui/react";
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
-import ClockIcon from "@cartridge/ui/components/icons/Clock";
 
 export type ButtonBarProps = {
   onSubmit?: () => void;
@@ -31,7 +31,7 @@ const ButtonBar = ({
           fontFamily="LD_Mono"
           alignItems="center"
         >
-          <ClockIcon
+          <ClockSolidIcon
             mr="3"
             css={css`
               width: 16px;

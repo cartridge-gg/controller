@@ -32,7 +32,7 @@ export class Signer {
    */
   public async signMessage(
     typedData: typedData.TypedData,
-    account: string
+    account: string,
   ): Promise<Signature> {
     this.modal.open();
     const res = await this.keychain.signMessage(typedData, account);

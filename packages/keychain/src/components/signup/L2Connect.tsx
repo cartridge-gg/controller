@@ -19,16 +19,7 @@ import {
 import { useConnectors, useAccount } from "@starknet-react/core";
 import { hash, number } from "starknet";
 
-import InfoIcon from "@cartridge/ui/src/components/icons/Info";
-import WalletIcon from "@cartridge/ui/src/components/icons/Wallet";
-import ConnectIcon from "@cartridge/ui/src/components/icons/Connect";
-import StarknetIcon from "@cartridge/ui/src/components/icons/Starknet";
-import ArrowIcon from "@cartridge/ui/src/components/icons/Arrow";
-import CopyIcon from "@cartridge/ui/src/components/icons/Copy";
-import ArgentIcon from "@cartridge/ui/src/components/icons/Argent";
-import ShareIcon from "@cartridge/ui/src/components/icons/Share";
 import { Loading } from "components/Loading";
-import { Logo } from "@cartridge/ui/src/components/icons/brand/Logo";
 import { useRouter } from "next/router";
 import { formatAddress } from "utils/contracts";
 import { useAbi } from "hooks/abi";
@@ -41,6 +32,16 @@ import {
   CONTRACT_CONTROLLER_CLASS,
   CONTRACT_UPGRADE_IMPLEMENTATION,
 } from "@cartridge/controller/src/constants";
+import {
+  ArgentIcon,
+  ArrowDownIcon,
+  CopyIcon,
+  ExternalIcon,
+  InfoIcon,
+  MysteryIcon,
+  StarknetIcon,
+  WalletSolidIcon,
+} from "@cartridge/ui";
 
 export type L2ConnectProps = {
   username: string;
@@ -163,7 +164,8 @@ export const L2Connect = ({
                 fontSize="14px"
                 color={isExpanded ? "white" : "gray.200"}
               >
-                <Logo height="12px" /> {"I'm new to Starknet"}
+                {/* TODO: icon <Logo height="12px" /> */}
+                <MysteryIcon height="12px" /> {"I'm new to Starknet"}
                 <Spacer />
                 <AccordionIcon />
               </AccordionButton>
@@ -178,7 +180,7 @@ export const L2Connect = ({
                   isLoading={isInstalling}
                   onClick={() => onRegister()}
                 >
-                  {"Let's go!"} <ArrowIcon />
+                  {"Let's go!"} <ArrowDownIcon />
                 </Button>
               </AccordionPanel>
             </>
@@ -192,7 +194,7 @@ export const L2Connect = ({
                 fontSize="14px"
                 color={isExpanded ? "white" : "gray.200"}
               >
-                <WalletIcon /> I have an Argent Wallet
+                <WalletSolidIcon /> I have an Argent Wallet
                 <Spacer />
                 <AccordionIcon />
               </AccordionButton>
@@ -378,7 +380,7 @@ const PluginInstall = ({
                 isExternal
                 href={`https://goerli.voyager.online/tx/${transaction}`}
               >
-                <ShareIcon height="14px" width="14px" />
+                <ExternalIcon height="14px" width="14px" />
               </Link>
             </Tooltip>
           </InfoCard>
@@ -392,7 +394,7 @@ const PluginInstall = ({
                 : router.push(`/profile/${account.address}`);
             }}
           >
-            Lets go! <ArrowIcon />
+            Lets go! <ArrowDownIcon />
           </Button>
         </>
       ) : (
@@ -405,7 +407,8 @@ const PluginInstall = ({
             disabled={isInstalling}
             onClick={onInvoke}
           >
-            <ConnectIcon />
+            {/* TODO: icon <ConnectIcon /> */}
+            <MysteryIcon />
             <Text color="inherit" variant="ld-mono-upper">
               INSTALL CONTROLLER
             </Text>

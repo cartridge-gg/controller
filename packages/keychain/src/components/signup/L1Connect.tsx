@@ -16,20 +16,23 @@ import { ethers, utils } from "ethers";
 import { Credentials, onCreateFinalize } from "hooks/account";
 import { parseAttestationObject } from "utils/webauthn";
 import { Loading } from "components/Loading";
-import WalletIcon from "@cartridge/ui/src/components/icons/Wallet";
-import GasPumpIcon from "@cartridge/ui/src/components/icons/GasPump";
-import EthereumIcon from "@cartridge/ui/src/components/icons/Ethereum";
-import InfoIcon from "@cartridge/ui/src/components/icons/Info";
-import ConnectIcon from "@cartridge/ui/src/components/icons/Connect";
 import { formatAddress } from "utils/contracts";
 import { register } from "methods/register";
+import {
+  ConnectSolidIcon,
+  EthereumIcon,
+  InfoIcon,
+  MysteryIcon,
+  WalletSolidIcon,
+} from "@cartridge/ui";
 
 export const BridgeEth = ({ amount }: { amount: string }) => {
   return (
     <VStack borderRadius="8px" overflow="hidden" spacing="1px">
       <HStack w="full" p="12px" bgColor="gray.700" color="whiteAlpha.600">
         <HStack fontSize="10px">
-          <GasPumpIcon />
+          {/* TODO: icon <GasPumpIcon /> */}
+          <MysteryIcon />
           <Text color="inherit" variant="ibm-upper-bold">
             Gas
           </Text>
@@ -138,7 +141,7 @@ export const L1Connect = ({ username, credentials }: L1ConnectProps) => {
         </Flex>
         <Flex p="12px" gap="10px" bgColor="gray.700" direction="column">
           <HStack fontSize="14px">
-            <WalletIcon fill="white" />
+            <WalletSolidIcon fill="white" />
             <Text>Purchase on Ethereum mainnet</Text>
           </HStack>
           <Text color="whiteAlpha.600" fontSize="12px">
@@ -182,7 +185,7 @@ export const L1Connect = ({ username, credentials }: L1ConnectProps) => {
         isLoading={pending}
         isDisabled={loading || !address}
       >
-        <ConnectIcon /> Complete Transaction
+        <ConnectSolidIcon /> Complete Transaction
       </Button>
     </Flex>
   );

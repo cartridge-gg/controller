@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": "./src",
+    "rootDir": ".",
     "lib": ["dom", "dom.iterable", "esnext"],
     "declaration": true,
     "target": "es5",
@@ -17,26 +18,14 @@
     "isolatedModules": true,
     "downlevelIteration": true,
     "noEmit": true,
-    "paths": {
-      "core": ["../src"],
-      "@cartridge/controller": ["../../controller/src"],
-      "@cartridge/ui/*": ["../../ui/src/*"]
-    },
     "types": ["@emotion/react/types/css-prop"]
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "src/components/ModelViewer.jsx"
-, "../ui/src/components/icons/StarknetGray.tsx"  ],
+    "src/components/ModelViewer.jsx",
+    "../ui/src/components/icons/StarknetGray.tsx"
+  ],
   "exclude": ["node_modules"],
-  "references": [
-    {
-      "path": "../controller"
-    },
-    {
-      "path": "../ui"
-    }
-  ]
 }

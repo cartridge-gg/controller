@@ -2,23 +2,24 @@ import { useContractRead } from "@starknet-react/core";
 import type { NextPage } from "next";
 import { useMemo } from "react";
 import { number } from "starknet";
-import { TransferEth } from "~/components/TransferEth";
-import { ConnectWallet } from "~/components/ConnectWallet";
-import { IncrementCounter } from "~/components/IncrementCounter";
-import { InvalidTxn } from "~/components/InvalidTxn";
-import { SignMessage } from "~/components/SignMessage";
-import { TransactionList } from "~/components/TransactionList";
-import { useCounterContract } from "~/hooks/counter";
-import Quests from "~/components/Quest";
-import { Abi } from 'starknet'
-import CounterAbi from '~/abi/counter.json'
+import { TransferEth } from "components/TransferEth";
+import { ConnectWallet } from "components/ConnectWallet";
+import { IncrementCounter } from "components/IncrementCounter";
+import { InvalidTxn } from "components/InvalidTxn";
+import { SignMessage } from "components/SignMessage";
+import { TransactionList } from "components/TransactionList";
+import { useCounterContract } from "hooks/counter";
+import Quests from "components/Quest";
+import { Abi } from "starknet";
+import CounterAbi from "abi/counter.json";
 
 const Home: NextPage = () => {
   const { contract: counter } = useCounterContract();
 
   const { data: counterResult } = useContractRead({
     abi: CounterAbi as Abi,
-    address: '0x036486801b8f42e950824cba55b2df8cccb0af2497992f807a7e1d9abd2c6ba1',
+    address:
+      "0x036486801b8f42e950824cba55b2df8cccb0af2497992f807a7e1d9abd2c6ba1",
     functionName: "counter",
     args: [],
     watch: true,

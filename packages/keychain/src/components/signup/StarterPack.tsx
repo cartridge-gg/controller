@@ -26,14 +26,11 @@ import BannerImage from "./BannerImage";
 
 import { Error, ExecuteReply } from "@cartridge/controller";
 import { addAddressPadding } from "starknet";
-import InfoIcon from "@cartridge/ui/src/components/icons/Info";
-import StarterpackIcon from "@cartridge/ui/src/components/icons/Starterpack";
 import { StarterPackCarousel } from "components/carousel/StarterPack";
-import OlmecIcon from "@cartridge/ui/src/components/icons/Olmec";
 import { Header } from "components/Header";
 import Ellipses from "./Ellipses";
-import SparkleColored from "@cartridge/ui/components/icons/SparkleColored";
 import { MediaViewer } from "./MediaViewer";
+import { InfoIcon, OlmechIcon, SparklesDuoIcon } from "@cartridge/ui";
 
 export type StarterItemProps = {
   name: string;
@@ -67,7 +64,7 @@ export const ClaimSuccess = ({
             <MediaViewer src={media} height="400px" width="300px" />
           ) : (
             <Circle size="48px" bgColor="gray.700">
-              <SparkleColored boxSize="30px" />
+              <SparklesDuoIcon boxSize="30px" />
             </Circle>
           )}
           <Text fontWeight="bold" fontSize="17px">
@@ -179,7 +176,7 @@ export const StarterPack = ({
         name: "CARTRIDGE OL-MECH",
         description:
           "This is your digital fingerprint in the cartridge ecosystem. It will evolve as you play.",
-        icon: <OlmecIcon boxSize="38px" />,
+        icon: <OlmechIcon boxSize="38px" />,
         amount: "1",
       });
 
@@ -220,7 +217,7 @@ export const StarterPack = ({
         <>
           <VStack spacing="18px" pt="36px" pb="24px">
             <Circle size="48px" bgColor="gray.700">
-              <SparkleColored boxSize="30px" />
+              <SparklesDuoIcon boxSize="30px" />
             </Circle>
             <Text fontWeight="bold" fontSize="17px">
               {"You've already claimed this Starterpack"}
@@ -237,7 +234,7 @@ export const StarterPack = ({
           <VStack spacing="18px" pt="36px" pb="24px">
             <HStack spacing="14px">
               <Circle size="48px" bgColor="gray.700">
-                <StarterpackIcon boxSize="30px" />
+                <SparklesDuoIcon boxSize="30px" />
               </Circle>
               <Ellipses />
               <Circle size="48px" bgColor="gray.700">

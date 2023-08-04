@@ -11,7 +11,6 @@
     "module": "esnext",
     "strict": false,
     "jsx": "preserve",
-    "jsxImportSource": "@emotion/react",
     "allowJs": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
@@ -22,17 +21,6 @@
     "isolatedModules": true,
     "downlevelIteration": true,
     "noEmit": true,
-    "paths": {
-      "~/*": [
-        "./*"
-      ],
-      "@cartridge/controller": [
-        "../../../controller/src"
-      ],
-      "@cartridge/connector": [
-        "../../../connector/src"
-      ],
-    }
   },
   "include": [
     "next-env.d.ts",
@@ -42,12 +30,4 @@
   "exclude": [
     "node_modules"
   ],
-  "references": [
-    {
-      "path": "../../controller"
-    },
-    {
-      "path": "../../connector"
-    }
-  ]
 }

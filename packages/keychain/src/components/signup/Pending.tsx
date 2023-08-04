@@ -11,9 +11,8 @@ import {
 } from "@chakra-ui/react";
 import { Loading } from "components/Loading";
 import { defaultProvider } from "starknet";
-import ArrowIcon from "@cartridge/ui/src/components/icons/Arrow";
-import CheckIcon from "@cartridge/ui/src/components/icons/Check";
 import useSound from "use-sound";
+import { ArrowRightIcon, CheckIcon } from "@cartridge/ui";
 export interface PendingProps {
   transaction: string;
   name: string;
@@ -81,7 +80,7 @@ export const PendingTxn = ({ transaction, name, gameId }: PendingProps) => {
           );
         }}
       >
-        {redirect_uri && "Return to"} {name} <ArrowIcon />{" "}
+        {redirect_uri && "Return to"} {name} <ArrowRightIcon />{" "}
       </Button>
     </>
   );

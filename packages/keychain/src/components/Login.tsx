@@ -1,7 +1,6 @@
 import Fingerprint from "./icons/Fingerprint";
 import { Formik, Form, Field, FormikState } from "formik";
 import { ReactNode, useCallback, useEffect, useState } from "react";
-/** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
 import {
   Button,
@@ -25,12 +24,9 @@ import base64url from "base64url";
 import { useAnalytics } from "hooks/analytics";
 import { beginLogin, onLoginFinalize } from "hooks/account";
 import login from "methods/login";
-import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import { useDebounce } from "hooks/debounce";
 import Web3Auth from "./Web3Auth";
 import { constants, ec } from "starknet";
-import LockIcon from "@cartridge/ui/components/icons/Lock";
-import ReturnIcon from "@cartridge/ui/src/components/icons/Return";
 import Controller from "utils/controller";
 import Container from "./Container";
 import { Header } from "./Header";
@@ -39,6 +35,7 @@ import FingerprintIcon from "./icons/Fingerprint2";
 import { useWhitelist } from "hooks/whitelist";
 import { WebauthnSigner } from "utils/webauthn";
 import logout from "methods/logout";
+import { InfoIcon, LockIcon } from "@cartridge/ui";
 
 export const Login = ({
   chainId,
@@ -221,20 +218,6 @@ export const Login = ({
                           }
                         }}
                       />
-                      {canContinue && (
-                        <InputRightElement
-                          h="full"
-                          mr="5px"
-                          cursor="pointer"
-                          onClick={() => {
-                            if (canContinue) {
-                              onOpen();
-                            }
-                          }}
-                        >
-                          <ReturnIcon boxSize="20px" fill="green.400" />
-                        </InputRightElement>
-                      )}
                     </InputGroup>
                   </Tooltip>
                 </Flex>

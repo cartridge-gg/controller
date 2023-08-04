@@ -1,22 +1,9 @@
-import { useState, useEffect, useCallback, useMemo, ReactNode } from "react";
-import Image from "next/future/image";
-import {
-  Box,
-  Text,
-  Flex,
-  Link,
-  VStack,
-  HStack,
-  Tooltip,
-  Spacer,
-  Circle,
-  Divider,
-} from "@chakra-ui/react";
+import { useState, useEffect, useCallback } from "react";
+import { Text, Flex, VStack, HStack, Spacer } from "@chakra-ui/react";
 import useEmblaCarousel from "embla-carousel-react";
 import { Next, Prev, Dot } from "./Buttons";
 import { EdgeFade } from "./EdgeFade";
 import { StarterItemProps } from "components/signup/StarterPack";
-import ChevronPixelIcon from "@cartridge/ui/src/components/icons/ChevronPixel";
 
 export const StarterPackCarousel = ({
   nonfungibles,
@@ -145,9 +132,9 @@ export const StarterPackCarousel = ({
             color={selectedIndex === index ? "white" : "whiteAlpha.600"}
             _hover={{ cursor: selectedIndex === index ? "default" : "pointer" }}
           >
-            <ChevronPixelIcon
+            {/** TODO: icon <ChevronPixelIcon
               fill={selectedIndex === index ? "white" : "transparent"}
-            />
+        /> */}
             <Text color="inherit">{item.name}</Text>
             <Spacer />
             <Text color="inherit">FREE</Text>

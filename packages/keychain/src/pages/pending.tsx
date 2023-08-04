@@ -4,12 +4,12 @@ import { Flex, Container } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
 import Controller from "utils/controller";
 import { useUrlTxns } from "hooks/transaction";
-import TimerIcon from "@cartridge/ui/src/components/icons/Timer";
 
 import { Header } from "components/Header";
 import { Banner } from "components/Banner";
 import Footer from "components/Footer";
 import { Transaction, TransactionState } from "components/Transaction";
+import { TimesCircleIcon } from "@cartridge/ui";
 
 const Pending: NextPage = () => {
   const [txnResults, setTxnResults] = useState<TransactionState[]>([]);
@@ -43,7 +43,7 @@ const Pending: NextPage = () => {
           <Banner
             title={title}
             description={description}
-            icon={<TimerIcon boxSize="30px" />}
+            icon={<TimesCircleIcon boxSize="30px" />}
           />
         </Flex>
         {txns.map((txn, idx) => (

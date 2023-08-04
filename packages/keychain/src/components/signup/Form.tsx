@@ -22,19 +22,19 @@ import { useAccountQuery } from "generated/graphql";
 import { useDebounce } from "hooks/debounce";
 import { useFormik } from "formik";
 
-import ArrowIcon from "@cartridge/ui/src/components/icons/Arrow";
-import PixelTargetIcon from "@cartridge/ui/src/components/icons/PixelTarget";
-import InfoIcon from "@cartridge/ui/src/components/icons/Info";
 import { Credentials, onCreateBegin } from "hooks/account";
 import { useAnalytics } from "hooks/analytics";
 import Unsupported from "./Unsupported";
 import { SimpleModal } from "@cartridge/ui/src/components/modals/SimpleModal";
-import KeyNewIcon from "@cartridge/ui/src/components/icons/KeyNew";
 import {
-  AuthFingerprintImage,
-  AuthFaceIdImage,
-  AuthQrCodeImage,
-} from "@cartridge/ui/src/components/icons/auth";
+  ArrowDownIcon,
+  FaceIDDuoIcon,
+  FingerprintDuoIcon,
+  InfoIcon,
+  MysteryIcon,
+  NewControllerDuoIcon,
+  QRCodeDuoIcon,
+} from "@cartridge/ui";
 
 export type FormType = {
   onConfirm: (name: string, credentials: Credentials) => void;
@@ -45,7 +45,8 @@ export const Form = ({ onConfirm }: FormType) => {
   const { redirect_uri } = router.query;
   const [name, setName] = useState<string>();
   const [error, setError] = useState<Error>();
-  const [AuthImage, setAuthImage] = useState<ReactNode>(AuthFingerprintImage);
+  // TODO: icon type
+  const [AuthImage, setAuthImage] = useState<any>(FingerprintDuoIcon);
   const [unsupported, setUnsupported] = useState<boolean>(false);
   const [unsupportedMessage, setUnsupportedMessage] = useState<string>();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -74,11 +75,11 @@ export const Form = ({ onConfirm }: FormType) => {
           `iOS ${iosVersion[1]} does not support passkeys. Upgrade to iOS 16 to continue`,
         );
       }
-      setAuthImage(AuthFaceIdImage);
+      setAuthImage(FaceIDDuoIcon);
     } else if (/android/i.test(userAgent)) {
-      setAuthImage(AuthQrCodeImage);
+      setAuthImage(QRCodeDuoIcon);
     } else {
-      setAuthImage(AuthFingerprintImage);
+      setAuthImage(FingerprintDuoIcon);
     }
   }, []);
 
@@ -152,7 +153,11 @@ export const Form = ({ onConfirm }: FormType) => {
         <Flex gap="1px" borderRadius="8px" overflow="hidden">
           <Box p="12px" bg="gray.700">
             <Circle size="54px" bg="gray.600">
-              <PixelTargetIcon
+              {/** TODO: icon <PixelTargetIcon
+                color={formik.errors.name ? "red.400" : "brand"}
+                transition="all 0.2s ease"
+  /> */}
+              <MysteryIcon
                 color={formik.errors.name ? "red.400" : "brand"}
                 transition="all 0.2s ease"
               />
@@ -211,7 +216,7 @@ export const Form = ({ onConfirm }: FormType) => {
           >
             {redirect_uri ? (
               <>
-                Next <ArrowIcon />
+                Next <ArrowDownIcon />
               </>
             ) : (
               "Create"
@@ -226,7 +231,7 @@ export const Form = ({ onConfirm }: FormType) => {
         </HStack>
       </form>
       <SimpleModal
-        icon={<KeyNewIcon boxSize="40px" />}
+        icon={<NewControllerDuoIcon boxSize="40px" />}
         onClose={() => {
           formik.setSubmitting(false);
           onClose();

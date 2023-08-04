@@ -52,7 +52,7 @@ export type WalletEvents =
 
 export interface IStarknetWindowObject {
   request: <T extends RpcMessage>(
-    call: Omit<T, "result">
+    call: Omit<T, "result">,
   ) => Promise<T["result"]>;
   enable: (options?: { showModal?: boolean }) => Promise<string[]>;
   isPreauthorized: () => Promise<boolean>;
@@ -90,7 +90,7 @@ export class InjectedController implements IStarknetWindowObject {
       origin?: string;
       starterPackId?: string;
       chainId?: SupportedChainIds;
-    }
+    },
   ) {
     this.controller = new Controller(policies, options);
     this.controller.ready().then((isConnected) => {
@@ -104,7 +104,7 @@ export class InjectedController implements IStarknetWindowObject {
   }
 
   request = (
-    call: Omit<RpcMessage, "result">
+    call: Omit<RpcMessage, "result">,
   ): Promise<RpcMessage["result"]> => {
     throw Error("Not implemented");
   };
@@ -151,7 +151,7 @@ export class InjectedController implements IStarknetWindowObject {
     }
 
     const idx = this.subscriptions.findIndex(
-      (userEvent) => userEvent.type === type && userEvent.handler === handler
+      (userEvent) => userEvent.type === type && userEvent.handler === handler,
     );
 
     if (idx >= 0) {
@@ -167,11 +167,11 @@ function injectController(
     origin?: string;
     starterPackId?: string;
     chainId?: SupportedChainIds;
-  }
+  },
 ) {
   (window as any).starknet_cartridge = new InjectedController(
     policies,
-    options
+    options,
   );
 }
 

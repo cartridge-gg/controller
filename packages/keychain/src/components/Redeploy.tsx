@@ -3,12 +3,12 @@ import { constants, addAddressPadding } from "starknet";
 import Container from "components/Container";
 import { Header } from "components/Header";
 import { Banner } from "components/Banner";
-import SparkleColored from "@cartridge/ui/src/components/icons/SparkleColored";
 import Controller from "utils/controller";
 import { useEffect } from "react";
 import { client } from "utils/graphql";
 import { DeployAccountDocument, AccountInfoDocument } from "generated/graphql";
 import { Status } from "utils/account";
+import { SparklesDuoIcon } from "@cartridge/ui";
 
 export const Redeploy = ({
   chainId,
@@ -55,7 +55,7 @@ export const Redeploy = ({
         onLogout={onLogout}
       />
       <Banner
-        icon={<SparkleColored boxSize="30px" />}
+        icon={<SparklesDuoIcon boxSize="30px" />}
         title="Deploying your account"
         description="This may take a second, try again in a bit"
       />

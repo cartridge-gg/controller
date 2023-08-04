@@ -1,6 +1,10 @@
-import { Circle } from "@chakra-ui/react";
-
-import Chevron from "@cartridge/ui/src/components/icons/Chevron";
+import {
+  WedgeDownIcon,
+  WedgeLeftIcon,
+  WedgeRightIcon,
+  WedgeUpIcon,
+} from "@cartridge/ui";
+import { Circle, IconProps } from "@chakra-ui/react";
 
 export type DotProps = {
   active: boolean;
@@ -35,7 +39,23 @@ export const Prev = ({ onClick, enabled }: NavProps) =>
 export const Next = ({ onClick, enabled }: NavProps) =>
   navBtn("right", onClick, enabled);
 
-function navBtn(direction, onClick, enabled) {
+function navBtn(
+  direction: "up" | "right" | "down" | "left",
+  onClick: React.MouseEventHandler<HTMLDivElement>,
+  enabled: boolean,
+) {
+  let Wedge;
+  switch (direction) {
+    case "up":
+      Wedge = WedgeUpIcon;
+    case "right":
+      Wedge = WedgeRightIcon;
+    case "down":
+      Wedge = WedgeDownIcon;
+    case "left":
+      Wedge = WedgeLeftIcon;
+  }
+
   return (
     <Circle
       as="button"
@@ -46,7 +66,7 @@ function navBtn(direction, onClick, enabled) {
       transition="opacity 0.25s ease"
       pointerEvents={enabled ? "auto" : "none"}
     >
-      <Chevron direction={direction} color="whiteAlpha.600" />
+      <Wedge color="whiteAlpha.600" />
     </Circle>
   );
 }

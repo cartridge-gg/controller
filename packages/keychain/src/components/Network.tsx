@@ -1,6 +1,6 @@
+import { StarknetIcon } from "@cartridge/ui";
 import { HStack, Text } from "@chakra-ui/react";
 import { constants } from "starknet";
-import StarknetIcon from "@cartridge/ui/components/icons/Starknet";
 
 const Network = ({ chainId }: { chainId: constants.StarknetChainId }) => {
   return (

@@ -6,7 +6,7 @@ import {
   StyleProps,
   useBreakpointValue,
 } from "@chakra-ui/react";
-import CheckIcon from "@cartridge/ui/src/components/icons/Check";
+import { CheckIcon } from "@cartridge/ui";
 
 export interface Step {
   name: string;

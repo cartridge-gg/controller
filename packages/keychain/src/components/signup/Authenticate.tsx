@@ -16,18 +16,18 @@ import {
   UseDisclosureProps,
 } from "@chakra-ui/react";
 import { Header } from "components/Header";
-import {
-  AuthFingerprintImage,
-  AuthFaceIdImage,
-  AuthQrCodeImage,
-} from "@cartridge/ui/src/components/icons/auth";
-import FingerprintIcon from "@cartridge/ui/components/icons/auth/Fingerprint";
 import Footer from "components/Footer";
 import Unsupported from "components/signup/Unsupported";
 import { Credentials, onCreateBegin, onCreateFinalize } from "hooks/account";
 import { SimpleModal } from "@cartridge/ui/src/components/modals/SimpleModal";
-import KeyNewIcon from "@cartridge/ui/src/components/icons/KeyNew";
 import { useStartup } from "hooks/startup";
+import {
+  FaceIDDuoIcon,
+  FingerprintDuoIcon,
+  FingerprintIcon,
+  NewControllerDuoIcon,
+  QRCodeDuoIcon,
+} from "@cartridge/ui";
 
 export const Authenticate = ({
   name,
@@ -42,8 +42,8 @@ export const Authenticate = ({
   isModal?: boolean;
   onComplete: () => void;
 } & UseDisclosureProps) => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [authImage, setAuthImage] = useState<ReactNode>(AuthFingerprintImage);
+  const [isLoading, setIsLoading] = useState(false);
+  const [userAgent, setUserAgent] = useState<UserAgent>("other");
   const [unsupportedMessage, setUnsupportedMessage] = useState<string>();
 
   const { play, StartupAnimation } = useStartup({ onComplete });
@@ -76,11 +76,9 @@ export const Authenticate = ({
           `iOS ${iosVersion[1]} does not support passkeys. Upgrade to iOS 16 to continue`,
         );
       }
-      setAuthImage(AuthFaceIdImage);
+      setUserAgent("ios");
     } else if (/android/i.test(userAgent)) {
-      setAuthImage(AuthQrCodeImage);
-    } else {
-      setAuthImage(AuthFingerprintImage);
+      setUserAgent("android");
     }
   }, []);
 
@@ -92,7 +90,7 @@ export const Authenticate = ({
     <>
       {isModal ? (
         <SimpleModal
-          icon={<KeyNewIcon boxSize="40px" />}
+          icon={<NewControllerDuoIcon boxSize="40px" />}
           onClose={onClose}
           onConfirm={() => {
             onAuth().then(() => onClose());
@@ -103,7 +101,7 @@ export const Authenticate = ({
           isLoading={isLoading}
           dismissable={false}
         >
-          <Content authImage={authImage} />
+          <Content userAgent={userAgent} />
         </SimpleModal>
       ) : (
         <Container>
@@ -114,7 +112,7 @@ export const Authenticate = ({
                 <FingerprintIcon boxSize="30px" />
               </Circle>
             }
-            authImage={authImage}
+            userAgent={userAgent}
           />
           <Footer
             confirmText="Continue"
@@ -130,13 +128,20 @@ export const Authenticate = ({
   );
 };
 
-const Content = ({
-  icon,
-  authImage,
-}: {
-  icon?: ReactNode;
-  authImage: ReactNode;
-}) => {
+type UserAgent = "ios" | "android" | "other";
+
+const Content = ({ icon, userAgent }: { icon?: any; userAgent: any }) => {
+  const renderIcon = useCallback(() => {
+    switch (userAgent) {
+      case "ios":
+        return <FaceIDDuoIcon />;
+      case "android":
+        return <QRCodeDuoIcon />;
+      case "other":
+        return <FingerprintDuoIcon />;
+    }
+  }, [userAgent]);
+
   return (
     <>
       <VStack spacing="20px" py="10px">
@@ -149,7 +154,7 @@ const Content = ({
           <br />
           Note: this experience varies from browser to browser.
         </Text>
-        {authImage}
+        {renderIcon}
         <Link
           isExternal
           href="https://www.yubico.com/authentication-standards/webauthn"

@@ -73,7 +73,7 @@ export interface Keychain {
   connect(
     policies: Policy[],
     starterPackId?: string,
-    chainId?: SupportedChainIds
+    chainId?: SupportedChainIds,
   ): Promise<ConnectReply | Error>;
   disconnect(): void;
 
@@ -85,13 +85,13 @@ export interface Keychain {
     payload: DeclareContractPayload,
     details?: EstimateFeeDetails & {
       chainId: constants.StarknetChainId;
-    }
+    },
   ): Promise<EstimateFee>;
   estimateInvokeFee(
     calls: Call | Call[],
     estimateFeeDetails?: EstimateFeeDetails & {
       chainId: constants.StarknetChainId;
-    }
+    },
   ): Promise<EstimateFee>;
   execute(
     calls: Call | Call[],
@@ -99,13 +99,13 @@ export interface Keychain {
     transactionsDetail?: InvocationsDetails & {
       chainId?: constants.StarknetChainId;
     },
-    sync?: boolean
+    sync?: boolean,
   ): Promise<ExecuteReply | Error>;
   provision(address: string, credentialId: string): Promise<string>;
   register(
     username: string,
     credentialId: string,
-    credential: { x: string; y: string }
+    credential: { x: string; y: string },
   ): Promise<{ address: string; deviceKey: string } | Error>;
   login(
     address: string,
@@ -113,7 +113,7 @@ export interface Keychain {
     options: {
       rpId?: string;
       challengeExt?: Buffer;
-    }
+    },
   ): Promise<{ assertion: Assertion }>;
   logout(): Promise<void>;
   session(): Promise<Session>;
@@ -123,7 +123,7 @@ export interface Keychain {
 
   signMessage(
     typedData: typedData.TypedData,
-    account: string
+    account: string,
   ): Promise<Signature | Error>;
 
   issueStarterPack(id: string): Promise<InvokeFunctionResponse>;

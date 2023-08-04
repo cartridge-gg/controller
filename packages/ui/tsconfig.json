@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "rootDir": "./src",
     "composite": true,
     "target": "es5",
@@ -8,7 +9,7 @@
     "sourceMap": true,
     "outDir": "lib",
     "strict": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -16,8 +17,12 @@
     "declaration": true,
     "types": ["@emotion/react/types/css-prop"]
   },
+  "paths": {
+    // "~*": ["./src/*"]
+    "@cartridge/ui/components": ["./src/components"]
+  },
   "include": [
-    "src/**/*"
+    "./src/**/*"
   ],
   "exclude": [
     "node_modules"

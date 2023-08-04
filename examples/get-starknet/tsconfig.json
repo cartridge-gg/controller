@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
-    "baseUrl": "./src",
+    "baseUrl": ".",
+    "rootDir": "./src",
     "lib": [
       "dom",
       "dom.iterable",
@@ -22,14 +23,6 @@
     "isolatedModules": true,
     "downlevelIteration": true,
     "noEmit": true,
-    "paths": {
-      "~/*": [
-        "./*"
-      ],
-      "@cartridge/controller": [
-        "../../../controller/src"
-      ],
-    }
   },
   "include": [
     "next-env.d.ts",
@@ -39,9 +32,4 @@
   "exclude": [
     "node_modules"
   ],
-  "references": [
-    {
-      "path": "../../controller"
-    }
-  ]
 }

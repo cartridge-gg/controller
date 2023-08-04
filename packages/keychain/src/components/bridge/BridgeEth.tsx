@@ -1,4 +1,3 @@
-import Chevron from "@cartridge/ui/components/icons/Chevron";
 import {
   Box,
   Circle,
@@ -31,6 +30,7 @@ import Transactions from "./Transactions";
 import Label from "components/Label";
 import Controller from "utils/controller";
 import { Error } from "components/Error";
+import { WedgeDownIcon } from "@cartridge/ui";
 
 const SelectBox = forwardRef<
   {
@@ -215,11 +215,7 @@ const BridgeEth = ({
                   !!ethAddress ? (
                     <Check color="whiteAlpha.400" />
                   ) : (
-                    <Chevron
-                      direction="down"
-                      boxSize="7px"
-                      color="whiteAlpha.400"
-                    />
+                    <WedgeDownIcon boxSize="7px" color="whiteAlpha.400" />
                   )
                 }
                 text={

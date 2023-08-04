@@ -1,6 +1,5 @@
 import { Box, HStack, Circle, Flex, Text } from "@chakra-ui/react";
 import { QuestState } from "pages/quests";
-import MapIcon from "@cartridge/ui/components/icons/Map";
 import QuestCard from "./Card";
 
 const Label = ({ children }: { children: React.ReactNode }) => (
@@ -36,7 +35,7 @@ const QuestsOverview = ({
       >
         <HStack w="full" spacing="18px">
           <Circle bgColor="gray.700" size="48px">
-            <MapIcon w="30px" h="30px" />
+            {/* TODO: <MapIcon w="30px" h="30px" /> */}
           </Circle>
           <Text as="h1" fontWeight="600" fontSize="17px">
             Quests

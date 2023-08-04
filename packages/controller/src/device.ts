@@ -26,7 +26,7 @@ class DeviceAccount extends Account {
     provider: RpcProvider,
     address: string,
     keychain: AsyncMethodReturns<Keychain>,
-    modal: Modal
+    modal: Modal,
   ) {
     super(provider, address, new Signer(keychain, modal));
     this.address = address;
@@ -47,7 +47,7 @@ class DeviceAccount extends Account {
    */
   async estimateInvokeFee(
     calls: Call | Call[],
-    details?: EstimateFeeDetails
+    details?: EstimateFeeDetails,
   ): Promise<EstimateFee> {
     return this.keychain.estimateInvokeFee(calls, {
       ...details,
@@ -57,7 +57,7 @@ class DeviceAccount extends Account {
 
   async estimateDeclareFee(
     payload: DeclareContractPayload,
-    details?: EstimateFeeDetails
+    details?: EstimateFeeDetails,
   ): Promise<EstimateFee> {
     return this.keychain.estimateDeclareFee(payload, {
       ...details,
@@ -82,7 +82,7 @@ class DeviceAccount extends Account {
     abis?: Abi[],
     transactionsDetail?: InvocationsDetails & {
       chainId?: constants.StarknetChainId;
-    }
+    },
   ): Promise<InvokeFunctionResponse> {
     if (!transactionsDetail) {
       transactionsDetail = {};
@@ -99,7 +99,7 @@ class DeviceAccount extends Account {
         calls,
         abis,
         transactionsDetail,
-        true
+        true,
       );
       this.modal.close();
 

@@ -1,13 +1,10 @@
 import { ReactNode, useEffect, useMemo, useState } from "react";
 import { Text, Link, HStack, Circle, Spacer, Divider } from "@chakra-ui/react";
 
-import StarknetIcon from "@cartridge/ui/components/icons/Starknet";
-import CheckIcon from "@cartridge/ui/components/icons/Check";
-import LinkIcon from "@cartridge/ui/components/icons/Link";
-import { Loading } from "@cartridge/ui/index";
 import { constants } from "starknet";
 import Controller from "utils/controller";
 import { StarkscanUrl } from "utils/url";
+import { CheckIcon, ExternalIcon, StarknetIcon, Loading } from "@cartridge/ui";
 
 export type TransactionState = "pending" | "success" | "error";
 
@@ -69,7 +66,7 @@ export const Transaction = ({
         </HStack>
         <Divider orientation="vertical" bgColor="gray.500" h="30px" />
         <Link href={StarkscanUrl(chainId).transaction(hash)} isExternal>
-          <LinkIcon boxSize="12px" color="blue.400" />
+          <ExternalIcon boxSize="12px" color="blue.400" />
         </Link>
       </HStack>
     </HStack>
