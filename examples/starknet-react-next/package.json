@@ -10,8 +10,6 @@
   },
   "dependencies": {
     "@cartridge/connector": "workspace:^",
-    "@cartridge/controller": "workspace:^",
-    "@emotion/react": "^11.11.1",
     "@starknet-react/core": "^0.16.0",
     "next": "^12.0.10",
     "react": "^18.2.0",

@@ -7,8 +7,7 @@ import {
   duotoneIcons,
   stateIcons,
   utilityIcons,
-} from "../components/icons/index";
-import { DuotoneIconProps } from "../components/icons/duotone/types";
+} from "../components/icons";
 
 const iconList = {
   brand: brandIcons,

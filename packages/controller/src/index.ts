@@ -46,7 +46,7 @@ class Controller {
       origin?: string;
       starterPackId?: string;
       chainId?: SupportedChainIds;
-    }
+    },
   ) {
     if (policies) {
       this.policies = policies;
@@ -104,7 +104,7 @@ class Controller {
       .then(() => this.probe())
       .then(
         (res) => !!res,
-        () => false
+        () => false,
       );
   }
 
@@ -126,13 +126,13 @@ class Controller {
           providers[constants.StarknetChainId.MAINNET],
           address,
           this.keychain,
-          this.modal
+          this.modal,
         ),
         [constants.StarknetChainId.TESTNET]: new DeviceAccount(
           providers[constants.StarknetChainId.TESTNET],
           address,
           this.keychain,
-          this.modal
+          this.modal,
         ),
       };
     } catch (e) {
@@ -159,7 +159,7 @@ class Controller {
   async register(
     username: string,
     credentialId: string,
-    credential: { x: string; y: string }
+    credential: { x: string; y: string },
   ) {
     if (!this.keychain) {
       console.error("not ready for connect");
@@ -175,7 +175,7 @@ class Controller {
     options: {
       rpId?: string;
       challengeExt?: Buffer;
-    }
+    },
   ) {
     if (!this.keychain) {
       console.error("not ready for connect");
@@ -207,7 +207,7 @@ class Controller {
         let response = await this.keychain.connect(
           this.policies,
           undefined,
-          this.chainId
+          this.chainId,
         );
         if (response.code !== ResponseCodes.SUCCESS) {
           throw new Error(response.message);
@@ -262,7 +262,7 @@ class Controller {
       let response = await this.keychain.connect(
         this.policies,
         undefined,
-        this.chainId
+        this.chainId,
       );
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
@@ -274,13 +274,13 @@ class Controller {
           providers[constants.StarknetChainId.MAINNET],
           response.address,
           this.keychain,
-          this.modal
+          this.modal,
         ),
         [constants.StarknetChainId.TESTNET]: new DeviceAccount(
           providers[constants.StarknetChainId.TESTNET],
           response.address,
           this.keychain,
-          this.modal
+          this.modal,
         ),
       };
 

@@ -9,12 +9,11 @@ import {
 } from "@chakra-ui/react";
 import { QuestState } from "pages/quests";
 import { useEffect, useState } from "react";
-import MapIcon from "@cartridge/ui/components/icons/Map";
 import Check from "components/icons/Check";
 import CircleCheck from "components/icons/CircleCheck";
 import CircleIcon from "components/icons/Circle";
-import SparkleOutline from "@cartridge/ui/components/icons/SparkleOutline";
 import { useClaimQuestRewardsMutation } from "generated/graphql";
+import { MysteryIcon, SparklesLineIcon } from "@cartridge/ui";
 
 const Tag = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -126,7 +125,8 @@ const QuestDetails = ({
           >
             <HStack w="full" spacing="18px">
               <Circle bgColor="gray.700" size="48px">
-                <MapIcon w="30px" h="30px" />
+                {/* TODO: icon <MapIcon w="30px" h="30px" /> */}
+                <MysteryIcon w="30px" h="30px" />
               </Circle>
               <Text as="h1" fontWeight="600" fontSize="17px">
                 {quest?.node?.title}
@@ -191,7 +191,7 @@ const QuestDetails = ({
             <Tag>Rewards</Tag>
             {quest.points && (
               <Reward
-                icon={<SparkleOutline />}
+                icon={<SparklesLineIcon />}
                 amount={quest.points}
                 name="XP"
               />

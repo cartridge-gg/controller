@@ -12,12 +12,9 @@ import {
 import { FieldInputProps } from "formik";
 import { formatEther } from "ethers/lib/utils";
 import { Policy } from "@cartridge/controller";
-import { formatAddress } from "@cartridge/ui/components/Address";
 import { StarkscanUrl } from "utils/url";
-import EthereumIcon from "@cartridge/ui/src/components/icons/Ethereum";
-import CodeIcon from "@cartridge/ui/src/components/icons/Code";
-import LinkIcon from "@cartridge/ui/src/components/icons/Link";
 import { constants } from "starknet";
+import { CodeSolidIcon, EthereumIcon, ExternalIcon } from "@cartridge/ui";
 
 export const Call = ({
   chainId,
@@ -29,7 +26,7 @@ export const Call = ({
 } & SystemProps) => {
   return (
     <HStack w="full" bgColor="gray.700" py="7px" px="12px" {...rest}>
-      <CodeIcon boxSize="18px" />
+      <CodeSolidIcon boxSize="18px" />
       <Text fontSize="13px">{policy.method}</Text>
       <Spacer />
     </HStack>
@@ -48,7 +45,7 @@ export const CallToggle = ({
 } & FieldInputProps<boolean>) => {
   return (
     <HStack w="full" bgColor="gray.600" py="7px" px="12px">
-      <CodeIcon boxSize="18px" />
+      <CodeSolidIcon boxSize="18px" />
       <Box fontSize="13px" textTransform="capitalize">
         {policy.method}
       </Box>
@@ -58,7 +55,7 @@ export const CallToggle = ({
           href={StarkscanUrl(chainId).contract(policy.target, "write-contract")}
           isExternal
         >
-          <LinkIcon color="gray.200" boxSize="12px" />
+          <ExternalIcon color="gray.200" boxSize="12px" />
         </Link>
       </Tooltip>
     </HStack>
@@ -123,7 +120,7 @@ const Base = ({
   errMsg?: string;
 }) => (
   <HStack w="full" bgColor="gray.700" py="7px" px="12px">
-    <CodeIcon boxSize="18px" />
+    <CodeSolidIcon boxSize="18px" />
     {title}
     <Spacer />
   </HStack>

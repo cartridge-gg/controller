@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { VStack, HStack, Text, Circle, StyleProps } from "@chakra-ui/react";
-import StarknetIcon from "@cartridge/ui/components/icons/Starknet";
 import { constants } from "starknet";
+import { StarknetIcon } from "@cartridge/ui";
 
 export interface BannerProps {
   title: string;

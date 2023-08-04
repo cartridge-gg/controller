@@ -2,7 +2,7 @@ import NextHead from "next/head";
 import CartridgeTheme from "@cartridge/ui/src/theme";
 import type { AppProps } from "next/app";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { CartridgeUIProvider } from "@cartridge/ui/theme/Provider";
+import { CartridgeUIProvider } from "@cartridge/ui";
 
 import "../style.css";
 

@@ -1,4 +1,3 @@
-import LinkIcon from "@cartridge/ui/components/icons/Link";
 import { Circle, HStack, Link, Spacer, Text, VStack } from "@chakra-ui/react";
 import Check from "components/icons/Check";
 import Transfer from "components/icons/Transfer";
@@ -7,6 +6,7 @@ import { Loading } from "components/Loading";
 import { useEffect, useState } from "react";
 import { constants } from "starknet";
 import { goerli, mainnet, useWaitForTransaction } from "wagmi";
+import { ExternalIcon } from "@cartridge/ui";
 
 enum CardState {
   PENDING = "PENDING",
@@ -59,7 +59,7 @@ const Card = ({
       <Spacer />
       <Link href={href} isExternal>
         <HStack px="13px" h="full">
-          <LinkIcon color="blue.400" boxSize="12px" />
+          <ExternalIcon color="blue.400" boxSize="12px" />
         </HStack>
       </Link>
     </HStack>

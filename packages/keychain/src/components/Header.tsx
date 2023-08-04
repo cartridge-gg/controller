@@ -18,7 +18,6 @@ import {
 
 import { Logo } from "@cartridge/ui/src/components/brand/Logo";
 import { WordLogo } from "@cartridge/ui/src/components/brand/Word";
-import TimesIcon from "@cartridge/ui/src/components/icons/Times";
 import { HeaderItem } from "@cartridge/ui/src/components/HeaderItem";
 import { useAvatar } from "../hooks/avatar";
 import { Loading } from "./Loading";
@@ -29,13 +28,16 @@ import {
   CONTRACT_ETH,
   CONTRACT_POINTS,
 } from "@cartridge/controller/src/constants";
-import { BigNumber, utils } from "ethers";
+import { BigNumber, utils, Wallet } from "ethers";
 import Ether from "./icons/Ether";
-import ArrowIcon from "@cartridge/ui/components/icons/Arrow";
-import Chevron from "@cartridge/ui/components/icons/Chevron";
-import Copy from "@cartridge/ui/components/icons/Copy";
-import Logout from "./icons/Logout";
-import Wallet from "./icons/Wallet";
+import {
+  ArrowUpIcon,
+  CopyIcon,
+  LogoutDuoIcon,
+  TimesIcon,
+  WalletSolidIcon,
+  WedgeDownIcon,
+} from "@cartridge/ui";
 
 const Container = ({
   height,
@@ -175,9 +177,8 @@ export const Header = ({
               cursor: "pointer",
             }}
           >
-            <ArrowIcon
+            <ArrowUpIcon
               fill="whiteAlpha.700"
-              transform="rotate(180deg)"
               _groupHover={{
                 fill: "white",
               }}
@@ -220,13 +221,17 @@ export const Header = ({
                       !!current?.svg ? { __html: current?.svg } : undefined
                     }
                   />
-                  <Chevron direction="down" boxSize="8px" color="gray.300" />
+                  <WedgeDownIcon
+                    direction="down"
+                    boxSize="8px"
+                    color="gray.300"
+                  />
                 </HStack>
               </MenuButton>
               <MenuList position="absolute" top="12px" left="-130px">
                 <MenuItem
                   color="whiteAlpha.800"
-                  icon={<Wallet boxSize="16px" />}
+                  icon={<WalletSolidIcon boxSize="16px" />}
                   onClick={() => {
                     navigator.clipboard.writeText(address);
                   }}
@@ -239,12 +244,12 @@ export const Header = ({
                       )}`}
                     </Text>
                     <Spacer />
-                    <Copy />
+                    <CopyIcon />
                   </HStack>
                 </MenuItem>
                 <MenuItem
                   color="whiteAlpha.800"
-                  icon={<Logout boxSize="16px" />}
+                  icon={<LogoutDuoIcon boxSize="16px" />}
                   onClick={onLogout}
                 >
                   <Text color="currentColor" fontWeight="400">

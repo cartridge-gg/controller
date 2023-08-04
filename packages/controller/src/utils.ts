@@ -17,7 +17,7 @@ export function diff(a: Policy[], b: Policy[]): Policy[] {
   return a.reduce(
     (prev, policyA) =>
       b.some((policyB) => equal(policyB, policyA)) ? prev : [...prev, policyA],
-    [] as Policy[]
+    [] as Policy[],
   );
 }
 
@@ -25,7 +25,7 @@ export const computeAddress = (
   username: string,
   { x0, x1, x2 }: { x0: BN; x1: BN; x2: BN },
   { y0, y1, y2 }: { y0: BN; y1: BN; y2: BN },
-  deviceKey: string
+  deviceKey: string,
 ) =>
   hash.calculateContractAddressFromHash(
     shortString.encodeShortString(username),
@@ -44,14 +44,14 @@ export const computeAddress = (
       y2,
       number.toBN(deviceKey),
     ],
-    "0"
+    "0",
   );
 
 export const verifyMessageHash = async (
   provider: Provider,
   address: string,
   messageHash: number.BigNumberish,
-  signature: Signature
+  signature: Signature,
 ) => {
   const isDeployed = !!provider.getClassHashAt(address, "latest");
 
@@ -78,7 +78,7 @@ export const verifyMessageHash = async (
           entrypoint: "isValidSignature",
           calldata: [messageHash, signature.length, ...signature],
         },
-        "latest"
+        "latest",
       );
 
       return res?.result[0] === "0x1";
@@ -90,7 +90,7 @@ export const verifyMessageHash = async (
           "content-type": "application/json",
         },
         body: `{\"query\":\"query Account($address: String!) {\\n  accounts(where: { contractAddress: $address }) {\\n    edges {\\n      node {\\n        id\\n        credential {\\n          id\\n          publicKey\\n        }\\n      }\\n    }\\n  }\\n}\\n\",\"variables\":{\"address\":\"${addAddressPadding(
-          address
+          address,
         )}\"},\"operationName\":\"Account\"}`,
         method: "POST",
         mode: "cors",
@@ -104,7 +104,7 @@ export const verifyMessageHash = async (
     }
 
     const pubKeyCbor = decode(
-      number.toBN(account.credential.publicKey).toBuffer()
+      number.toBN(account.credential.publicKey).toBuffer(),
     )[0];
     const x = number.toBN("0x" + pubKeyCbor[-2].toString("hex"));
     const y = number.toBN("0x" + pubKeyCbor[-3].toString("hex"));
@@ -114,7 +114,7 @@ export const verifyMessageHash = async (
       account.id,
       { x0, x1, x2 },
       { y0, y1, y2 },
-      signature[0]
+      signature[0],
     );
     if (computedAddress !== address) {
       throw new Error("invalid public key");
@@ -136,7 +136,7 @@ export const getAccounts = async (addresses: string[]) => {
         "content-type": "application/json",
       },
       body: `{\"query\":\"query AccountInfo($addresses: [AccountWhereInput!]!) {\\n  accounts(where: { or: $addresses}) {\\n    edges {\\n      node {\\n        id\\n  contractAddress\\n      }\\n    }\\n  }\\n}\",\"variables\":{\"addresses\":${JSON.stringify(
-        query
+        query,
       )}},\"operationName\":\"AccountInfo\"}`,
       method: "POST",
       mode: "cors",

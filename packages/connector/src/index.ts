@@ -16,7 +16,7 @@ class ControllerConnector extends Connector {
       url?: string;
       origin?: string;
       chainId?: SupportedChainIds;
-    }
+    },
   ) {
     super({ options });
     this._account = null;
@@ -42,7 +42,7 @@ class ControllerConnector extends Connector {
   async register(
     username: string,
     credentialId: string,
-    credential: { x: string; y: string }
+    credential: { x: string; y: string },
   ) {
     return this.controller.register(username, credentialId, credential);
   }
@@ -53,7 +53,7 @@ class ControllerConnector extends Connector {
     options: {
       rpId?: string;
       challengeExt?: Buffer;
-    }
+    },
   ): Promise<{ assertion: Assertion } | null> {
     return this.controller.login(address, credentialId, options);
   }

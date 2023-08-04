@@ -32,11 +32,6 @@ import { useDebounce } from "hooks/debounce";
 import { constants, ec, KeyPair } from "starknet";
 import { PopupCenter } from "utils/url";
 
-import InfoIcon from "@cartridge/ui/src/components/icons/Info";
-import ReturnIcon from "@cartridge/ui/src/components/icons/Return";
-import JoystickIcon from "@cartridge/ui/components/icons/Joystick";
-import LockIcon from "@cartridge/ui/components/icons/Lock";
-import { Logo } from "@cartridge/ui/components/icons/brand/Logo";
 import FingerprintIcon from "components/icons/Fingerprint2";
 import Web3Auth from "components/Web3Auth";
 import Continue from "components/signup/Continue";
@@ -48,11 +43,17 @@ import { Status } from "utils/account";
 import { Authenticate as AuthModal } from "./Authenticate";
 import { DrawerWrapper } from "components/DrawerWrapper";
 import { useWhitelist } from "hooks/whitelist";
-import SparkleIcon from "@cartridge/ui/components/icons/SparkleOutline";
-import OlmecIcon from "@cartridge/ui/components/icons/Olmec";
 import BannerImage from "./BannerImage";
 import Ellipses from "./Ellipses";
 import { ClaimSuccess } from "./StarterPack";
+import {
+  InfoIcon,
+  JoystickSolidIcon,
+  LockIcon,
+  MysteryIcon,
+  OlmechIcon,
+  SparklesSolidIcon,
+} from "@cartridge/ui";
 
 export const Signup = ({
   fullPage = false,
@@ -283,11 +284,12 @@ export const Signup = ({
       )}
       <HStack spacing="14px" pt="36px">
         <Circle size="48px" bgColor="gray.700">
-          <JoystickIcon boxSize="30px" />
+          <JoystickSolidIcon boxSize="30px" />
         </Circle>
         <Ellipses />
         <Circle size="48px" bgColor="gray.700">
-          <Logo boxSize="22px" color="brand" />
+          {/* TODO: icon <Logo boxSize="22px" color="brand" /> */}
+          <MysteryIcon boxSize="22px" color="brand" />
         </Circle>
       </HStack>
       <Text fontWeight="bold" fontSize="17px">
@@ -373,7 +375,8 @@ export const Signup = ({
                         }
                       }}
                     >
-                      <ReturnIcon boxSize="20px" fill="green.400" />
+                      {/* TODO: icon <ReturnIcon boxSize="20px" fill="green.400" /> */}
+                      <MysteryIcon boxSize="20px" fill="green.400" />
                     </InputRightElement>
                   )}
                 </InputGroup>
@@ -411,11 +414,11 @@ export const Signup = ({
                       ),
                     )}
                     <ImageFrame>
-                      <OlmecIcon boxSize="30px" />
+                      <OlmechIcon boxSize="30px" />
                     </ImageFrame>
                   </HStack>
                   <HStack align="flex-start">
-                    <SparkleIcon />
+                    <SparklesSolidIcon />
                     <Text fontSize="12px" color="whiteAlpha.600">
                       Claim Starterpack
                     </Text>

@@ -9,8 +9,8 @@ import { Status } from "utils/account";
 import Footer from "./Footer";
 import { Loading } from "./Loading";
 import { Button, Link } from "@chakra-ui/react";
-import LinkIcon from "@cartridge/ui/components/icons/Link";
 import { NamedChainId } from "@cartridge/controller/src/constants";
+import { ExternalIcon } from "@cartridge/ui";
 
 const DeploymentRequired = ({
   chainId,
@@ -96,7 +96,7 @@ const DeploymentRequired = ({
             fontSize="11px"
             color="blue.400"
             marginTop="40px"
-            rightIcon={<LinkIcon />}
+            rightIcon={<ExternalIcon />}
           >
             View on Starkscan
           </Button>

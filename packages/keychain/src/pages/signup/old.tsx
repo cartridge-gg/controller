@@ -21,9 +21,6 @@ import {
 
 import { useRouter } from "next/router";
 import Controller from "utils/controller";
-import JoystickIcon from "@cartridge/ui/src/components/icons/Joystick";
-import GamepadIcon from "@cartridge/ui/src/components/icons/Gamepad";
-import ControllerImage from "@cartridge/ui/src/components/icons/ControllerBig";
 import BannerImage from "components/signup/BannerImage";
 import { StepsBar, Step } from "components/StepsBar";
 import { Credentials, onCreateFinalize } from "hooks/account";
@@ -33,6 +30,7 @@ import { remoteSvgIcon } from "utils/svg";
 
 import { register } from "methods/register";
 import { ChainId } from "caip";
+import { JoystickSolidIcon } from "@cartridge/ui";
 
 enum RegistrationState {
   CLAIM_STARTERPACK = "CLAIM_STARTERPACK",
@@ -145,7 +143,7 @@ const CreateWallet: NextPage = () => {
   }, [accountData]);
 
   let steps: Step[] = [];
-  steps.push({ name: "Create Controller", icon: <JoystickIcon /> });
+  steps.push({ name: "Create Controller", icon: <JoystickSolidIcon /> });
   if (starterPackData?.game) {
     steps.push({
       name: `Play ${starterPackData.game.name}`,
@@ -156,7 +154,7 @@ const CreateWallet: NextPage = () => {
       ),
     });
   } else {
-    steps.push({ name: "Play", icon: <GamepadIcon /> });
+    steps.push({ name: "Play", icon: <JoystickSolidIcon /> });
   }
 
   if (!router.isReady || loadingStarterpack) {

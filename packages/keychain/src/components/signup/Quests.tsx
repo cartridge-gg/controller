@@ -7,13 +7,10 @@ import {
   Spacer,
   Button,
   Alert,
-  AlertIcon,
   useBreakpointValue,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import CheckIcon from "@cartridge/ui/src/components/icons/Check";
-import ArrowIcon from "@cartridge/ui/src/components/icons/Arrow";
 import {
   useAccountQuestsQuery,
   useCheckDiscordQuestsMutation,
@@ -23,6 +20,7 @@ import {
 } from "generated/graphql";
 import { Loading } from "components/Loading";
 import useSound from "use-sound";
+import { ArrowRightIcon, CheckIcon, AlertIcon } from "@cartridge/ui";
 
 interface QuestsProps {
   username: string;
@@ -261,7 +259,7 @@ export const Quests = ({ username, gameId, starterpackId }: QuestsProps) => {
             <Loading />
           ) : (
             <>
-              Complete <ArrowIcon />
+              Complete <ArrowRightIcon />
             </>
           )}
         </Button>

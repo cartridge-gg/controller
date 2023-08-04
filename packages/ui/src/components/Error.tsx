@@ -1,5 +1,6 @@
 import React from "react";
-import { AlertIcon, VStack } from "@chakra-ui/react";
+import { VStack } from "@chakra-ui/react";
+import { AlertIcon } from "./icons";
 
 const Error = (props: { message: React.ReactNode }) => {
   return (

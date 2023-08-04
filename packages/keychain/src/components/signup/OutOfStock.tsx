@@ -1,6 +1,6 @@
+import { SparklesSolidIcon } from "@cartridge/ui";
 import { Flex, Text, Link, HStack } from "@chakra-ui/react";
 import NextLink from "next/link";
-import SparkleIcon from "@cartridge/ui/src/components/icons/Sparkle";
 export const OutOfStock = () => {
   return (
     <>
@@ -13,7 +13,7 @@ export const OutOfStock = () => {
         align="center"
         justify="center"
       >
-        <SparkleIcon boxSize="27px" />
+        <SparklesSolidIcon boxSize="27px" />
         <Text fontSize="13px">Starterpack has been minted out</Text>
       </Flex>
       <HStack as="strong" justify="center" fontSize="13px" mt="24px">

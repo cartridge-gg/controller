@@ -3,11 +3,10 @@ import { VStack, HStack, Text, Spacer } from "@chakra-ui/react";
 import Container from "./Container";
 import { Header } from "./Header";
 import Session from "components/Session";
-import PlugIcon from "@cartridge/ui/src/components/icons/Plug";
-import LaptopIcon from "@cartridge/ui/src/components/icons/Laptop";
 import { Banner } from "components/Banner";
 import { constants } from "starknet";
 import { Error, Policy, ResponseCodes } from "@cartridge/controller";
+import { MysteryIcon } from "@cartridge/ui/lib";
 
 const Connect = ({
   chainId,
@@ -61,7 +60,9 @@ const Connect = ({
       <Banner
         title="Create Session"
         description={`${origin} is requesting to connect to your Cartridge Controller`}
-        icon={<PlugIcon boxSize="30px" />}
+        // TODO: icon
+        // icon={<PlugIcon boxSize="30px" />}
+        icon={<MysteryIcon boxSize="30px" />}
         chainId={chainId}
         py="20px"
       />
@@ -77,7 +78,8 @@ const Connect = ({
             </Text>
           </VStack>
           <HStack bgColor="gray.600" py="7px" px="12px" w="full">
-            <LaptopIcon boxSize="18px" />
+            {/* TODO: icon <LaptopIcon boxSize="18px" /> */}
+            <MysteryIcon boxSize="18px" />
             <Text fontSize="13px">Register Session</Text>
             <Spacer />
           </HStack>
