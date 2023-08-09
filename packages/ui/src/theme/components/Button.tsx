@@ -22,10 +22,6 @@ export const Button = defineStyleConfig({
     _disabled: {
       pointerEvents: "none",
     },
-    _focus: {
-      // TODO: handle accessibility properly
-      boxShadow: "none",
-    },
   },
   sizes: {
     sm: (p) =>

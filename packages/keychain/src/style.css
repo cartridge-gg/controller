@@ -68,3 +68,7 @@
   font-weight: 900;
   src: local("Inter"), url("../public/fonts/Inter/Inter-Black.ttf");
 }
+
+body {
+    overflow: hidden;
+}

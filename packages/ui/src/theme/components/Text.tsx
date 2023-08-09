@@ -3,6 +3,7 @@ import type { ComponentStyleConfig } from "@chakra-ui/theme";
 export const Text: ComponentStyleConfig = {
   baseStyle: {
     color: "text.primary",
+    bg: "transparent",
   },
   variants: {
     "ld-mono-upper": {

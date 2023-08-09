@@ -1,8 +1,8 @@
 import type { NextPage } from "next";
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { connectToParent } from "@cartridge/penpal";
-import Controller, { diff, VERSION } from "utils/controller";
+import Controller, { diff } from "utils/controller";
 import {
   ConnectReply,
   Error,
@@ -29,8 +29,6 @@ import {
 import SignMessage from "components/SignMessage";
 import Execute from "components/Execute";
 import { StarterPack } from "components/signup/StarterPack";
-import selectors from "utils/selectors";
-import Storage from "utils/storage";
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
 import provision from "../methods/provision";
 import { register } from "../methods/register";
@@ -42,6 +40,7 @@ import { normalize, validate } from "../methods";
 import DeploymentRequired from "components/DeploymentRequired";
 import Quests from "./quests";
 import Logout from "components/Logout";
+import { Auth } from "components/Auth";
 
 type Context = Connect | Logout | Execute | SignMessage | StarterPack | Quests;
 
@@ -367,6 +366,8 @@ const Index: NextPage = () => {
 
   // No controller, send to login
   if (!controller) {
+    return <Auth chainId={chainId} />;
+
     return (
       <>
         {showSignup ? (

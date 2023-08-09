@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useMemo, useState } from "react";
 import NextLink from "next/link";
 import {
   Box,
@@ -15,21 +15,20 @@ import {
   MenuList,
   MenuItem,
 } from "@chakra-ui/react";
-
 import { Logo } from "@cartridge/ui/src/components/brand/Logo";
 import { WordLogo } from "@cartridge/ui/src/components/brand/Word";
 import { HeaderItem } from "@cartridge/ui/src/components/HeaderItem";
-import { useAvatar } from "../hooks/avatar";
-import { Loading } from "./Loading";
 import Chain from "@cartridge/ui/src/components/menu/Chain";
-import { constants, SequencerProvider, uint256 } from "starknet";
-import { useBalanceQuery } from "../generated/graphql";
 import {
   CONTRACT_ETH,
   CONTRACT_POINTS,
 } from "@cartridge/controller/src/constants";
+import { constants, SequencerProvider, uint256 } from "starknet";
+import { Loading } from "components/Loading";
+import { useBalanceQuery } from "generated/graphql";
+import { useAvatar } from "hooks/avatar";
 import { BigNumber, utils, Wallet } from "ethers";
-import Ether from "./icons/Ether";
+import Ether from "components/icons/Ether";
 import {
   ArrowUpIcon,
   CopyIcon,
@@ -92,7 +91,7 @@ export const Header = ({
     tokenAccountId: pointsTokenAccountId,
   });
   const points = pointsData?.balance?.balance;
-  const { current, loading } = useAvatar(address || "", points || 10);
+  const { current } = useAvatar(address || "", points || 10);
 
   useEffect(() => {
     if (address) {
@@ -284,6 +283,7 @@ export const Header = ({
   );
 };
 
+// Only used in `old.tsx`
 export const SignupHeader = ({ children }: { children: ReactNode }) => {
   return (
     <Container height="64px" bgColor="gray.700">

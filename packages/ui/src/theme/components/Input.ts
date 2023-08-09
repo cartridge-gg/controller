@@ -1,32 +1,34 @@
-import type { ComponentStyleConfig } from "@chakra-ui/theme";
-import { mode, StyleFunctionProps } from "@chakra-ui/theme-tools";
+import { inputAnatomy } from "@chakra-ui/anatomy";
+import {
+  ComponentStyleConfig,
+  createMultiStyleConfigHelpers,
+} from "@chakra-ui/react";
 
-export const Input: ComponentStyleConfig = {
-  variants: {
-    primary: (props: StyleFunctionProps) => ({
-      field: {
-        h: "32px",
-        border: "1px solid",
-        fontSize: "14px",
-        borderColor: "whiteAlpha.200",
-        bgColor: "gray.700",
-        _focus: {
-          bgColor: "gray.600",
-        },
-        _hover: {
-          bgColor: "gray.600",
-        },
-      },
-    }),
-    secondary: (props: StyleFunctionProps) => ({
-      field: {
-        borderRadius: "3px",
-        background: "gray.700",
-        color: "white",
-      },
-    }),
-  },
+const { definePartsStyle, defineMultiStyleConfig } =
+  createMultiStyleConfigHelpers(inputAnatomy.keys);
+
+export const Input: ComponentStyleConfig = defineMultiStyleConfig({
   defaultProps: {
-    variant: "primary",
+    variant: "filled",
   },
-};
+  sizes: {
+    md: {
+      field: {
+        height: 12,
+      },
+    },
+  },
+  variants: {
+    filled: definePartsStyle({
+      field: {
+        bg: "solid.primary",
+        color: "text.primary",
+        borderWidth: 1,
+        borderColor: "solid.secondary",
+        _focus: {
+          borderColor: "solid.secondary",
+        },
+      },
+    }),
+  },
+});

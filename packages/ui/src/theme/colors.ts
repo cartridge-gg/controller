@@ -73,16 +73,12 @@ export const semanticColors = {
     secondary: {
       default: "darkGray.200",
       _light: "blueGray.700",
-
-      accent: {
-        default: "darkGray.100",
-        _light: "blueGray.800",
-      },
     },
-    error: {
-      default: "white",
-      _light: "white",
+    secondaryAccent: {
+      default: "darkGray.100",
+      _light: "blueGray.800",
     },
+    error: "red",
   },
   brand: {
     primary: {

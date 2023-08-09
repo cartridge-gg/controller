@@ -1,22 +1,25 @@
-import { Container as ChakraContainer, StyleProps } from "@chakra-ui/react";
+import {
+  Container as ChakraContainer,
+  VStack,
+  StyleProps,
+} from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { ReactNode } from "react";
-/** @jsxImportSource @emotion/react */
-import { css } from "@emotion/react";
+import { Header, HeaderProps } from "./Header/v2";
 
-const Container = ({
+export default function Container({
   children,
   ...rest
-}: { children: ReactNode } & StyleProps) => {
+}: { children: ReactNode } & StyleProps) {
   return (
     <ChakraContainer
-      css={css`
-        overflow-y: auto;
-        ::-webkit-scrollbar {
-          display: none;
-        }
-        -ms-overflow-style: none;
-      `}
+      overflowY="auto"
+      css={{
+        "::-webkit-scrollbar": {
+          display: "none",
+        },
+        "-ms-overflow-style": "none",
+      }}
       p="36px"
       w={["full", "full", "432px"]}
       h="full"
@@ -30,6 +33,42 @@ const Container = ({
       {children}
     </ChakraContainer>
   );
-};
+}
 
-export default Container;
+export function ContainerV2({
+  children,
+  fullPage,
+  chainId,
+  address,
+  ...rest
+}: { children: ReactNode; fullPage: boolean } & StyleProps & HeaderProps) {
+  return (
+    <ChakraContainer
+      position={fullPage ? "relative" : "fixed"}
+      w={["full", "full", "432px"]}
+      h="full"
+      as={motion.div}
+      animate={{ opacity: 1 }}
+      initial={{ opacity: 0 }}
+      centerContent
+      p={0}
+      {...rest}
+    >
+      <Header chainId={chainId} address={address} />
+      <VStack
+        w="full"
+        h="full"
+        p={4}
+        overflowY="scroll"
+        css={{
+          "::-webkit-scrollbar": {
+            display: "none",
+          },
+          "-ms-overflow-style": "none",
+        }}
+      >
+        {children}
+      </VStack>
+    </ChakraContainer>
+  );
+}
