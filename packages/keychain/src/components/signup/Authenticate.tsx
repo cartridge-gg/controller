@@ -24,11 +24,11 @@ import { useStartup } from "hooks/startup";
 import {
   FaceIDDuoIcon,
   FingerprintDuoIcon,
-  FingerprintIcon,
   NewControllerDuoIcon,
   QRCodeDuoIcon,
 } from "@cartridge/ui";
 import { ContainerV2 } from "components/Container";
+import { PortalBanner } from "components/PortalBanner";
 
 export const Authenticate = ({
   name,
@@ -106,10 +106,9 @@ export const Authenticate = ({
         </SimpleModal>
       ) : (
         <ContainerV2 fullPage={true}>
-          <Header />
           <Content
             icon={
-              <Circle size={12} bgColor="">
+              <Circle size={12} bg="solid.secondary">
                 <FingerprintDuoIcon boxSize={8} />
               </Circle>
             }
@@ -135,36 +134,25 @@ const Content = ({ icon, userAgent }: { icon?: any; userAgent: any }) => {
   const renderIcon = useCallback(() => {
     switch (userAgent) {
       case "ios":
-        return <FaceIDDuoIcon />;
+        return <FaceIDDuoIcon boxSize={6} />;
       case "android":
-        return <QRCodeDuoIcon />;
+        return <QRCodeDuoIcon boxSize={6} />;
       case "other":
-        return <FingerprintDuoIcon />;
+        return <FingerprintDuoIcon boxSize={6} />;
     }
   }, [userAgent]);
 
   return (
-    <>
-      <VStack spacing="20px" py="10px">
-        {icon}
-        <Text fontSize="17px" fontWeight="bold">
-          Authenticate Yourself
-        </Text>
-        <Text fontSize="12px" color="whiteAlpha.600" align="center">
+    <PortalBanner
+      icon={renderIcon()}
+      title="Authenticate Yourself"
+      description={
+        <>
           You will now be asked to authenticate yourself.
           <br />
           Note: this experience varies from browser to browser.
-        </Text>
-        {renderIcon}
-        <Link
-          isExternal
-          href="https://www.yubico.com/authentication-standards/webauthn"
-          fontSize="12px"
-          variant="outline"
-        >
-          Read about WebAuthn
-        </Link>
-      </VStack>
-    </>
+        </>
+      }
+    />
   );
 };

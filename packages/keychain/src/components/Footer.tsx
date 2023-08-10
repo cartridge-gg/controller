@@ -34,7 +34,7 @@ const Footer = ({
       right="0"
       w="100%"
       p={floatBottom && "18px 36px 36px 36px"}
-      bgColor="gray.800"
+      bg="solid.secondary"
       justify="flex-end"
       flexDirection="column"
       gap="12px"
@@ -43,8 +43,6 @@ const Footer = ({
       <Flex gap="10px" justify="flex-end">
         {showCancel && (
           <Button
-            variant="secondary600"
-            size="md"
             w={floatBottom ? ["100%", "100%", "200px"] : "100%"}
             onClick={onCancel}
           >
@@ -53,8 +51,8 @@ const Footer = ({
         )}
         {showConfirm && (
           <Button
-            size="md"
-            disabled={isDisabled || isLoading}
+            colorScheme="colorful"
+            isDisabled={isDisabled || isLoading}
             isLoading={isLoading}
             w={floatBottom ? ["100%", "100%", "200px"] : "100%"}
             type={onConfirm ? "button" : "submit"}

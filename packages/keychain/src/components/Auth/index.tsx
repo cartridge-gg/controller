@@ -1,20 +1,16 @@
-import { AlertIcon } from "@cartridge/ui";
+import { AlertIcon, PlugNewDuoIcon } from "@cartridge/ui";
 import { VStack, Text, HStack, Input, InputProps } from "@chakra-ui/react";
 import { ContainerV2 as Container } from "components/Container";
 import {
-  FieldHookConfig,
-  FieldInputProps,
   FieldMetaProps,
   Form as FormikForm,
   Field as FormikField,
   Formik,
-  useField,
   useFormikContext,
 } from "formik";
 import { constants, ec, KeyPair } from "starknet";
-import { useAuth } from "./hooks";
 import { PortalFooter, PORTAL_FOOTER_MIN_HEIGHT } from "./PortalFooter";
-import { PortalBanner } from "./PortalBanner";
+import { PortalBanner } from "components/PortalBanner";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDebounce } from "hooks/debounce";
 import {
@@ -93,7 +89,11 @@ AuthProps) {
 
   return (
     <Container fullPage={fullPage} chainId={chainId}>
-      <PortalBanner type={type} />
+      <PortalBanner
+        icon={<PlugNewDuoIcon boxSize={8} />}
+        title="Sign Up"
+        description="Select a username"
+      />
 
       <Formik initialValues={{ username: prefilledName }} onSubmit={onSubmit}>
         <Form
