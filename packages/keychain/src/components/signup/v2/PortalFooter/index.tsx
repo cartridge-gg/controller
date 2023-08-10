@@ -3,7 +3,13 @@ import { TransactionSummary } from "./TransactionSummary";
 import { WedgeUpIcon } from "@cartridge/ui";
 import { FormAction } from "../types";
 
-export function PortalFooter({ action }: { action: FormAction }) {
+export function PortalFooter({
+  action,
+  isLoggingIn,
+}: {
+  action: FormAction;
+  isLoggingIn: boolean;
+}) {
   const { isOpen, onToggle } = useDisclosure();
 
   return (
@@ -51,11 +57,12 @@ export function PortalFooter({ action }: { action: FormAction }) {
         <Button
           type="submit"
           colorScheme="colorful"
-          isDisabled={action !== "login"}
+          isDisabled={action.type !== "login"}
+          isLoading={isLoggingIn}
         >
           Log In
         </Button>
-        <Button type="submit" isDisabled={action !== "signup"}>
+        <Button type="submit" isDisabled={action.type !== "signup"}>
           Sign Up
         </Button>
       </VStack>

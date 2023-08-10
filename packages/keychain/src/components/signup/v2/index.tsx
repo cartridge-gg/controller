@@ -22,6 +22,11 @@ import Controller from "utils/controller";
 import { Status } from "utils/account";
 import { client } from "utils/graphql";
 import { PopupCenter } from "utils/url";
+import { FormAction } from "./types";
+import { useAnalytics } from "hooks/analytics";
+import { beginLogin, onLoginFinalize } from "hooks/account";
+import { WebauthnSigner } from "utils/webauthn";
+import base64url from "base64url";
 
 type AuthProps = {
   type?: "signup" | "login";
@@ -30,7 +35,7 @@ type AuthProps = {
   starterPackId?: string;
   chainId?: constants.StarknetChainId;
   onController?: (controller: Controller) => void;
-  // onComplete?: () => void;
+  onComplete?: () => void;
 };
 
 export function Auth({
@@ -40,9 +45,9 @@ export function Auth({
   starterPackId,
   chainId,
   onController,
-}: // onComplete,
-AuthProps) {
-  const [action, setAction] = useState<FormAction>("form");
+  onComplete,
+}: AuthProps) {
+  const [action, setAction] = useState<FormAction>({ type: "form" });
   const [isRegistering, setIsRegistering] = useState(false);
   const isIframe = useMemo(
     () => (typeof window !== "undefined" ? window.top !== window.self : false),
@@ -57,10 +62,55 @@ AuthProps) {
     };
   }, []);
 
+  const { event: log } = useAnalytics();
+  const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
+
   const onSubmit = useCallback(
-    (values: FormValues) => {
-      switch (action) {
+    async (values: FormValues) => {
+      switch (action.type) {
         case "login": {
+          log({ type: "webauthn_login" });
+          setIsLoggingIn(true);
+
+          try {
+            const {
+              account: {
+                credential: { id: credentialId, publicKey },
+                contractAddress: address,
+              },
+            } = action.payload;
+
+            const { data: beginLoginData } = await beginLogin(values.username);
+            const signer = new WebauthnSigner(credentialId, publicKey);
+
+            const assertion = await signer.sign(
+              base64url.toBuffer(beginLoginData.beginLogin.publicKey.challenge),
+            );
+
+            const res = await onLoginFinalize(assertion);
+            if (!res.finalizeLogin) {
+              throw Error("login failed");
+            }
+
+            const keypair = ec.genKeyPair();
+            const controller = new Controller(keypair, address, credentialId);
+
+            if (onController) {
+              onController(controller);
+            }
+
+            if (onComplete) {
+              onComplete();
+            }
+          } catch (err) {
+            setIsLoggingIn(false);
+            log({
+              type: "webauthn_login_error",
+              payload: {
+                error: err?.message,
+              },
+            });
+          }
         }
         case "signup": {
           setIsRegistering(true);
@@ -84,7 +134,7 @@ AuthProps) {
         }
       }
     },
-    [action, isIframe, deviceKey],
+    [action, log, onController, onComplete, isIframe, deviceKey],
   );
 
   return (
@@ -103,13 +153,12 @@ AuthProps) {
           onController={onController}
           keypair={keypair}
           isRegistering={isRegistering}
+          isLoggingIn={isLoggingIn}
         />
       </Formik>
     </Container>
   );
 }
-
-type FormAction = "form" | "signup" | "login";
 
 type FormValues = {
   username: string;
@@ -122,11 +171,13 @@ function Form({
   setAction,
   keypair,
   isRegistering,
+  isLoggingIn,
 }: Pick<AuthProps, "starterPackId" | "onController"> & {
   action: FormAction;
   setAction: (value: FormAction) => void;
   keypair: KeyPair;
   isRegistering: boolean;
+  isLoggingIn: boolean;
 }) {
   const { values, errors, setFieldError } = useFormikContext<FormValues>();
   const { debouncedValue: debouncedName, debouncing } = useDebounce(
@@ -160,16 +211,16 @@ function Form({
 
     if (error) {
       if ((error as Error).message === "ent: account not found") {
-        setAction("signup");
+        setAction({ type: "signup" });
       } else {
         setFieldError("username", "An error occured.");
       }
     } else if (accountData?.account) {
-      setAction("login");
+      setAction({ type: "login", payload: accountData });
     }
   }, [error, accountData, debouncing, setFieldError, setAction]);
 
-  // for pulling approach when iframe
+  // for polling approach when iframe
   useAccountQuery(
     { id: debouncedName },
     {
@@ -246,7 +297,7 @@ function Form({
         </FormikField>
       </VStack>
 
-      <PortalFooter action={action} />
+      <PortalFooter action={action} isLoggingIn={isLoggingIn} />
     </FormikForm>
   );
 }

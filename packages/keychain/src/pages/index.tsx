@@ -40,7 +40,7 @@ import { normalize, validate } from "../methods";
 import DeploymentRequired from "components/DeploymentRequired";
 import Quests from "./quests";
 import Logout from "components/Logout";
-import { Auth } from "components/Auth";
+import { Auth } from "components/signup/v2";
 
 type Context = Connect | Logout | Execute | SignMessage | StarterPack | Quests;
 
@@ -368,6 +368,7 @@ const Index: NextPage = () => {
   if (!controller) {
     return <Auth chainId={chainId} />;
 
+    // TODO: remove
     return (
       <>
         {showSignup ? (
