@@ -1,8 +1,9 @@
 import { Button, IconButton, VStack, useDisclosure } from "@chakra-ui/react";
 import { TransactionSummary } from "./TransactionSummary";
 import { WedgeUpIcon } from "@cartridge/ui";
+import { FormAction } from "../types";
 
-export function PortalFooter() {
+export function PortalFooter({ action }: { action: FormAction }) {
   const { isOpen, onToggle } = useDisclosure();
 
   return (
@@ -11,6 +12,7 @@ export function PortalFooter() {
       align="flex-start"
       position="fixed"
       bottom={0}
+      left={0}
       borderTopWidth={1}
       bg="solid.bg"
       // TODO: should calculate based on the height of iframe
@@ -46,8 +48,16 @@ export function PortalFooter() {
         position="fixed"
         bottom={0}
       >
-        <Button colorScheme="colorful">Log In</Button>
-        <Button>Sign Up</Button>
+        <Button
+          type="submit"
+          colorScheme="colorful"
+          isDisabled={action !== "login"}
+        >
+          Log In
+        </Button>
+        <Button type="submit" isDisabled={action !== "signup"}>
+          Sign Up
+        </Button>
       </VStack>
     </VStack>
   );

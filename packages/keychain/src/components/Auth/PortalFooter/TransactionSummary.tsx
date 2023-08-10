@@ -11,7 +11,7 @@ export function TransactionSummary({ isOpen }: { isOpen: boolean }) {
         "::-webkit-scrollbar": {
           display: "none",
         },
-        "-ms-overflow-style": "none",
+        msOverflowStyle: "none",
       }}
     >
       {/** TODO: use real session value */}

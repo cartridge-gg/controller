@@ -18,7 +18,7 @@ export default function Container({
         "::-webkit-scrollbar": {
           display: "none",
         },
-        "-ms-overflow-style": "none",
+        msOverflowStyle: "none",
       }}
       p="36px"
       w={["full", "full", "432px"]}
@@ -64,7 +64,7 @@ export function ContainerV2({
           "::-webkit-scrollbar": {
             display: "none",
           },
-          "-ms-overflow-style": "none",
+          msOverflowStyle: "none",
         }}
       >
         {children}

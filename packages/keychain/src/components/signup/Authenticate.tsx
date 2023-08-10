@@ -28,6 +28,7 @@ import {
   NewControllerDuoIcon,
   QRCodeDuoIcon,
 } from "@cartridge/ui";
+import { ContainerV2 } from "components/Container";
 
 export const Authenticate = ({
   name,
@@ -104,12 +105,12 @@ export const Authenticate = ({
           <Content userAgent={userAgent} />
         </SimpleModal>
       ) : (
-        <Container>
+        <ContainerV2 fullPage={true}>
           <Header />
           <Content
             icon={
-              <Circle size="48px" bgColor="gray.700">
-                <FingerprintIcon boxSize="30px" />
+              <Circle size={12} bgColor="">
+                <FingerprintDuoIcon boxSize={8} />
               </Circle>
             }
             userAgent={userAgent}
@@ -120,7 +121,7 @@ export const Authenticate = ({
             onConfirm={onAuth}
             isLoading={isLoading}
           />
-        </Container>
+        </ContainerV2>
       )}
 
       {StartupAnimation}
