@@ -105,10 +105,12 @@ const Index: NextPage = () => {
   const [context, setContext] = useState<Context>();
   const [showSignup, setShowSignup] = useState<boolean>(false);
 
+  // Restore controller from store
   useEffect(() => {
     setController(Controller.fromStore());
   }, [setController]);
 
+  // Create connection if not stored
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
@@ -131,7 +133,6 @@ const Index: NextPage = () => {
                 if (chainId) {
                   setChainId(chainId as unknown as constants.StarknetChainId);
                 }
-
                 setContext({
                   type: "connect",
                   origin,
@@ -322,6 +323,31 @@ const Index: NextPage = () => {
     return <></>;
   }
 
+  // No controller, send to login
+  if (!controller) {
+    return <Auth chainId={chainId} onController={setController} />;
+
+    // TODO: remove
+    return (
+      <>
+        {showSignup ? (
+          <Signup
+            showLogin={() => setShowSignup(false)}
+            onController={(c) => setController(c)}
+            onCancel={() => context.reject()}
+          />
+        ) : (
+          <Login
+            chainId={chainId}
+            showSignup={() => setShowSignup(true)}
+            onController={(c) => setController(c)}
+            onCancel={() => context.reject()}
+          />
+        )}
+      </>
+    );
+  }
+
   const onConnect = async ({
     context,
     policies,
@@ -363,31 +389,6 @@ const Index: NextPage = () => {
       policies,
     } as any);
   };
-
-  // No controller, send to login
-  if (!controller) {
-    return <Auth chainId={chainId} />;
-
-    // TODO: remove
-    return (
-      <>
-        {showSignup ? (
-          <Signup
-            showLogin={() => setShowSignup(false)}
-            onController={(c) => setController(c)}
-            onCancel={() => context.reject()}
-          />
-        ) : (
-          <Login
-            chainId={chainId}
-            showSignup={() => setShowSignup(true)}
-            onController={(c) => setController(c)}
-            onCancel={() => context.reject()}
-          />
-        )}
-      </>
-    );
-  }
 
   const onLogout = (context: Context) => {
     setContext({

@@ -1,6 +1,5 @@
 import ControllerConnector from "@cartridge/connector";
 import { useAccount, useConnectors } from "@starknet-react/core";
-import { useCallback } from "react";
 
 export function ConnectWallet() {
   const { available, connect, disconnect } = useConnectors();
@@ -13,16 +12,16 @@ export function ConnectWallet() {
       {address && <p>Account: {address} </p>}
       <div style={{ display: "flex", gap: "10px" }}>
         <button
-          onClick={() =>
-            address ? disconnect() : connect(controllerConnector)
-          }
+          onClick={() => {
+            address ? disconnect() : connect(controllerConnector);
+          }}
         >
           {address ? "Disconnect" : "Connect"}
         </button>
         <button
           onClick={async () => {
             const txnHash = await controllerConnector.issueStarterPack(
-              "influence"
+              "influence",
             );
             if (!address) {
               connect(controllerConnector);
