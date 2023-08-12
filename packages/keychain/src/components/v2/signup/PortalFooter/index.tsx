@@ -1,15 +1,8 @@
-import { Button, IconButton, VStack, useDisclosure } from "@chakra-ui/react";
+import { IconButton, VStack, useDisclosure } from "@chakra-ui/react";
 import { TransactionSummary } from "./TransactionSummary";
 import { WedgeUpIcon } from "@cartridge/ui";
-import { FormAction } from "../types";
 
-export function PortalFooter({
-  action,
-  isLoggingIn,
-}: {
-  action: FormAction;
-  isLoggingIn: boolean;
-}) {
+export function PortalFooter({ children }: { children: React.ReactElement }) {
   const { isOpen, onToggle } = useDisclosure();
 
   return (
@@ -24,6 +17,7 @@ export function PortalFooter({
       // TODO: should calculate based on the height of iframe
       h={isOpen ? 478 : PORTAL_FOOTER_MIN_HEIGHT}
       transition="0.20s ease-out"
+      paddingTop={4}
     >
       <IconButton
         aria-label="Expand footer"
@@ -46,26 +40,7 @@ export function PortalFooter({
 
       <TransactionSummary isOpen={isOpen} />
 
-      <VStack
-        w="full"
-        alignItems="flex"
-        p={4}
-        bg="solid.bg"
-        position="fixed"
-        bottom={0}
-      >
-        <Button
-          type="submit"
-          colorScheme="colorful"
-          isDisabled={action.type !== "login"}
-          isLoading={isLoggingIn}
-        >
-          Log In
-        </Button>
-        <Button type="submit" isDisabled={action.type !== "signup"}>
-          Sign Up
-        </Button>
-      </VStack>
+      {children}
     </VStack>
   );
 }

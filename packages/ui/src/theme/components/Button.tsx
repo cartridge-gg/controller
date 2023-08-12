@@ -24,14 +24,12 @@ export const Button = defineStyleConfig({
     },
   },
   sizes: {
+    xs: {
+      px: 2,
+      py: 3,
+    },
     sm: (p) =>
-      p.variant === "form"
-        ? {
-            h: 10,
-            px: 6,
-            py: 3,
-          }
-        : p.rightIcon
+      p.rightIcon
         ? {
             h: 9,
             p: 2,

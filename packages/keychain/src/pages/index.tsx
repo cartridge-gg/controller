@@ -40,7 +40,7 @@ import { normalize, validate } from "../methods";
 import DeploymentRequired from "components/DeploymentRequired";
 import Quests from "./quests";
 import Logout from "components/Logout";
-import { Auth } from "components/signup/v2";
+import { Signup as SignupV2, Login as LoginV2 } from "components/v2/signup";
 
 type Context = Connect | Logout | Execute | SignMessage | StarterPack | Quests;
 
@@ -103,7 +103,8 @@ const Index: NextPage = () => {
   );
   const [controller, setController] = useState<Controller>();
   const [context, setContext] = useState<Context>();
-  const [showSignup, setShowSignup] = useState<boolean>(false);
+  const [showSignup, setShowSignup] = useState(false);
+  const [prefilledUsername, setPrefilledUsername] = useState<string>();
 
   // Restore controller from store
   useEffect(() => {
@@ -325,7 +326,32 @@ const Index: NextPage = () => {
 
   // No controller, send to login
   if (!controller) {
-    return <Auth chainId={chainId} onController={setController} />;
+    return (
+      <>
+        {showSignup ? (
+          <SignupV2
+            prefilledName={prefilledUsername}
+            onLogin={(username) => {
+              setPrefilledUsername(username);
+              setShowSignup(false);
+            }}
+            onController={(c) => setController(c)}
+            // onCancel={() => context.reject()}
+          />
+        ) : (
+          <LoginV2
+            prefilledName={prefilledUsername}
+            chainId={chainId}
+            onSignup={(username) => {
+              setPrefilledUsername(username);
+              setShowSignup(true);
+            }}
+            onController={(c) => setController(c)}
+            // onCancel={() => context.reject()}
+          />
+        )}
+      </>
+    );
 
     // TODO: remove
     return (

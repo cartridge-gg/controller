@@ -14,7 +14,6 @@ export function TransactionSummary({ isOpen }: { isOpen: boolean }) {
         msOverflowStyle: "none",
       }}
     >
-      {/** TODO: use real session value */}
       <Session icon={<CodeIcon boxSize={4} />}>
         Create a session for RYO
       </Session>

@@ -19,13 +19,14 @@ import { constants } from "starknet";
 import { Loading } from "components/Loading";
 import Ether from "components/icons/Ether";
 import {
+  CartridgeColorIcon,
   CopyIcon,
   LogoutDuoIcon,
-  TimesIcon,
   WalletSolidIcon,
   WedgeDownIcon,
 } from "@cartridge/ui";
 import { useHeader } from "./hooks";
+import { NetworkButton } from "./NetworkButton";
 
 export type HeaderProps = {
   chainId?: constants.StarknetChainId;
@@ -33,21 +34,30 @@ export type HeaderProps = {
   onLogout?: () => void;
 };
 
-export function Header({ chainId, address, onLogout }: HeaderProps) {
+export function Header({
+  chainId,
+  address = "0x00000000",
+  onLogout,
+}: HeaderProps) {
   const { chainName, ethBalance, avatar } = useHeader({ chainId, address });
 
   if (!address) {
     return (
-      <Container h={14} p={1.5}>
-        <WordLogo h={6} color="brand.primary" />
+      <Container h={12} p={1.5}>
+        <WordLogo h={4} color="brand.primary" />
       </Container>
     );
   }
 
   return (
-    <Container height="50px">
-      <HStack w="full" h="full" position="relative">
+    <Container h={12} p={2}>
+      <HStack w="full">
+        <CartridgeColorIcon boxSize={8} />
+
         <Spacer />
+
+        <NetworkButton />
+
         <HStack spacing="6px">
           <Chain name={chainName} />
           <Box minW="70px">
@@ -58,9 +68,7 @@ export function Header({ chainId, address, onLogout }: HeaderProps) {
                   {parseFloat(ethBalance).toFixed(3)}
                 </Text>
               )}
-              {!ethBalance && (
-                <Loading fill="white" width="12px" height="12px" />
-              )}
+              {!ethBalance && <Loading width="12px" height="12px" />}
             </HeaderItem>
           </Box>
           {chainId && (
@@ -149,7 +157,9 @@ function Container({
         bg="solid.bg"
         {...rest}
       >
-        <ChakraContainer centerContent>{children}</ChakraContainer>
+        <ChakraContainer p={0} centerContent>
+          {children}
+        </ChakraContainer>
       </Flex>
       <Box h={h} />
     </>
