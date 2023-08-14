@@ -17,7 +17,7 @@ import { client } from "utils/graphql";
 import { PopupCenter } from "utils/url";
 import { FormValues, SignupProps } from "./types";
 import { validateUsername } from "./validate";
-import { useSubmitType, useUsername } from "./hooks";
+import { useClearField, useSubmitType, useUsername } from "./hooks";
 
 export function Signup({
   fullPage = false,
@@ -157,6 +157,7 @@ function Form({
       },
     },
   );
+  const onClearUsername = useClearField("username");
 
   return (
     <FormikForm style={{ width: "100%" }}>
@@ -178,6 +179,7 @@ function Form({
               placeholder="Username"
               touched={meta.touched}
               error={meta.error}
+              onClear={onClearUsername}
             />
           )}
         </FormikField>

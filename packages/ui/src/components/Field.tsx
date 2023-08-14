@@ -1,14 +1,31 @@
-import { VStack, Text, HStack, Input, InputProps } from "@chakra-ui/react";
-import { AlertIcon } from "./icons";
+import {
+  VStack,
+  Text,
+  HStack,
+  Input,
+  InputProps,
+  InputGroup,
+  InputRightElement,
+} from "@chakra-ui/react";
+import { AlertIcon, TimesCircleIcon } from "./icons";
 
 export function Field<T>({
   error,
   touched,
+  onClear,
   ...inputProps
-}: InputProps & { touched: boolean; error?: "string" }) {
+}: InputProps & { touched: boolean; error?: "string"; onClear?: () => void }) {
   return (
     <VStack align="flex-start">
-      <Input {...inputProps} />
+      <InputGroup>
+        <Input {...inputProps} />
+
+        {inputProps.value && onClear && (
+          <InputRightElement onClick={onClear}>
+            <TimesCircleIcon color="text.secondary" />
+          </InputRightElement>
+        )}
+      </InputGroup>
 
       {error && touched && (
         <HStack marginY={3}>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FormValues } from "./types";
 import { useFormikContext } from "formik";
 import { AccountQuery, useAccountQuery } from "generated/graphql";
@@ -61,4 +61,12 @@ export function useSubmitType(
   }, [error, data, debouncing, setFieldError, username, onAccount]);
 
   return submitType;
+}
+
+export function useClearField(name: string) {
+  const { setFieldValue } = useFormikContext();
+
+  return useCallback(() => {
+    setFieldValue(name, "");
+  }, [name, setFieldValue]);
 }

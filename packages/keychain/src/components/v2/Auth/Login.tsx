@@ -13,7 +13,7 @@ import { beginLogin, onLoginFinalize } from "hooks/account";
 import { WebauthnSigner } from "utils/webauthn";
 import base64url from "base64url";
 import { AccountQuery } from "generated/graphql";
-import { useSubmitType, useUsername } from "./hooks";
+import { useClearField, useSubmitType, useUsername } from "./hooks";
 import { validateUsername } from "./validate";
 
 export function Login({
@@ -101,6 +101,7 @@ function Form({
     onAccount: setAccount,
     debouncing,
   });
+  const onClearUsername = useClearField("username");
 
   return (
     <FormikForm style={{ width: "100%" }}>
@@ -122,6 +123,7 @@ function Form({
               placeholder="Username"
               touched={meta.touched}
               error={meta.error}
+              onClear={onClearUsername}
             />
           )}
         </FormikField>
