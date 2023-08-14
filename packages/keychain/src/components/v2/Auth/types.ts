@@ -1,3 +1,4 @@
+import { Policy } from "@cartridge/controller";
 import { constants } from "starknet";
 import Controller from "utils/controller";
 
@@ -10,6 +11,8 @@ export type AuthProps = SignupProps | LoginProps;
 type AuthBaseProps = {
   fullPage?: boolean;
   prefilledName?: string;
+  origin?: string;
+  policies?: Policy[];
   onController?: (controller: Controller) => void;
   onComplete?: () => void;
   // onCancel?: () => void;

@@ -22,6 +22,7 @@ import { useClearField, useSubmitType, useUsername } from "./hooks";
 export function Signup({
   fullPage = false,
   prefilledName = "",
+  origin,
   onController,
   onComplete,
   starterPackId,
@@ -74,6 +75,7 @@ export function Signup({
           onController={onController}
           keypair={keypair}
           isRegistering={isRegistering}
+          origin={origin}
         />
       </Formik>
     </Container>
@@ -82,11 +84,15 @@ export function Signup({
 
 function Form({
   starterPackId,
+  origin,
   onController,
   onLogin,
   keypair,
   isRegistering,
-}: Pick<SignupProps, "starterPackId" | "onController" | "onLogin"> & {
+}: Pick<
+  SignupProps,
+  "starterPackId" | "origin" | "onController" | "onLogin"
+> & {
   keypair: KeyPair;
   isRegistering: boolean;
 }) {
@@ -185,7 +191,7 @@ function Form({
         </FormikField>
       </VStack>
 
-      <PortalFooter>
+      <PortalFooter origin={origin}>
         <VStack
           w="full"
           alignItems="flex"

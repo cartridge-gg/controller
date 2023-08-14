@@ -19,6 +19,8 @@ import { validateUsername } from "./validate";
 export function Login({
   fullPage = false,
   prefilledName = "",
+  origin,
+  policies,
   onController,
   onComplete,
   onSignup,
@@ -77,6 +79,8 @@ export function Login({
     <Container fullPage={fullPage}>
       <Formik initialValues={{ username: prefilledName }} onSubmit={onSubmit}>
         <Form
+          origin={origin}
+          policies={policies}
           onController={onController}
           onSignup={onSignup}
           setAccount={setAccount}
@@ -88,11 +92,13 @@ export function Login({
 }
 
 function Form({
+  origin,
+  policies,
   // onController,
   onSignup,
   setAccount,
   isLoggingIn,
-}: Pick<LoginProps, "onController" | "onSignup"> & {
+}: Pick<LoginProps, "origin" | "policies" | "onController" | "onSignup"> & {
   setAccount: (account: AccountQuery["account"]) => void;
   isLoggingIn: boolean;
 }) {
@@ -129,7 +135,7 @@ function Form({
         </FormikField>
       </VStack>
 
-      <PortalFooter>
+      <PortalFooter origin={origin} policies={policies}>
         <VStack
           w="full"
           alignItems="flex"

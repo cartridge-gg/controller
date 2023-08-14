@@ -1,7 +1,27 @@
-import { HStack, VStack, Text, Link } from "@chakra-ui/react";
+import {
+  HStack,
+  VStack,
+  Text,
+  Link,
+  AccordionButton,
+  AccordionIcon,
+  AccordionItem,
+  Accordion,
+  Spacer,
+  AccordionPanel,
+} from "@chakra-ui/react";
 import { CodeIcon, LockIcon } from "@cartridge/ui";
+import { Policy } from "@cartridge/controller";
 
-export function TransactionSummary({ isOpen }: { isOpen: boolean }) {
+export function TransactionSummary({
+  isOpen,
+  origin,
+  policies,
+}: {
+  isOpen: boolean;
+  origin: string;
+  policies: Policy[];
+}) {
   return (
     <VStack
       align="flex-start"
@@ -13,28 +33,58 @@ export function TransactionSummary({ isOpen }: { isOpen: boolean }) {
         },
         msOverflowStyle: "none",
       }}
+      marginBottom="120px" // footer child height
     >
-      <Session icon={<CodeIcon boxSize={4} />}>
-        Create a session for RYO
-      </Session>
+      <HStack color="text.secondary" fontSize="xs">
+        {<CodeIcon boxSize={4} />}
+        <Text color="text.secondary">{<>Create a session for {origin}</>}</Text>
+      </HStack>
 
       <Terms />
-    </VStack>
-  );
-}
 
-function Session({
-  icon,
-  children,
-}: {
-  icon: React.ReactElement;
-  children: string;
-}) {
-  return (
-    <HStack color="text.secondary" fontSize="xs">
-      {icon}
-      <Text color="text.secondary">{children}</Text>
-    </HStack>
+      {policies && (
+        <VStack marginY={4}>
+          <VStack
+            align="flex-start"
+            borderTopRadius={8}
+            bg="solid.primary"
+            p={3}
+            m={0}
+          >
+            <Text
+              color="text.secondaryAccent"
+              fontSize="xs"
+              fontWeight="bold"
+              casing="uppercase"
+            >
+              Session details
+            </Text>
+            <Text color="text.secondaryAccent" fontSize="xs">
+              Allow {origin} to execute following actions on your behalf
+            </Text>
+          </VStack>
+
+          <Accordion w="full" allowMultiple={true} position="relative" top={-4}>
+            {policies.map((p) => (
+              <AccordionItem key={p.target + p.method}>
+                <AccordionButton>
+                  <HStack>
+                    {<CodeIcon boxSize={4} />}
+                    <Text>{p.method}</Text>
+                  </HStack>
+
+                  <Spacer />
+
+                  <AccordionIcon />
+                </AccordionButton>
+
+                <AccordionPanel>TODO: description</AccordionPanel>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </VStack>
+      )}
+    </VStack>
   );
 }
 
@@ -42,7 +92,7 @@ function Terms() {
   return (
     <HStack align="flex-start">
       <LockIcon color="text.secondary" boxSize={4} />
-      <Text fontSize="xs">
+      <Text fontSize="xs" color="text.secondary">
         By continuing you are agreeing to Cartridge&apos;s{" "}
         <Link
           textDecoration="underline"

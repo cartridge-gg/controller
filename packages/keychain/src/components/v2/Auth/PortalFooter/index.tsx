@@ -1,8 +1,17 @@
 import { IconButton, VStack, useDisclosure } from "@chakra-ui/react";
 import { TransactionSummary } from "./TransactionSummary";
 import { WedgeUpIcon } from "@cartridge/ui";
+import { Policy } from "@cartridge/controller";
 
-export function PortalFooter({ children }: { children: React.ReactElement }) {
+export function PortalFooter({
+  children,
+  origin,
+  policies,
+}: {
+  children: React.ReactElement;
+  origin?: string;
+  policies?: Policy[];
+}) {
   const { isOpen, onToggle } = useDisclosure();
 
   return (
@@ -14,8 +23,7 @@ export function PortalFooter({ children }: { children: React.ReactElement }) {
       left={0}
       borderTopWidth={1}
       bg="solid.bg"
-      // TODO: should calculate based on the height of iframe
-      h={isOpen ? 478 : PORTAL_FOOTER_MIN_HEIGHT}
+      h={isOpen ? 484 : PORTAL_FOOTER_MIN_HEIGHT}
       transition="0.20s ease-out"
       paddingTop={4}
     >
@@ -26,6 +34,7 @@ export function PortalFooter({ children }: { children: React.ReactElement }) {
             boxSize={10}
             transform={isOpen ? "rotate(180deg)" : undefined}
             transition="0.20s ease-out"
+            color="text.secondary"
           />
         }
         size="lg"
@@ -38,11 +47,17 @@ export function PortalFooter({ children }: { children: React.ReactElement }) {
         onClick={onToggle}
       />
 
-      <TransactionSummary isOpen={isOpen} />
+      {origin && (
+        <TransactionSummary
+          isOpen={isOpen}
+          origin={origin}
+          policies={policies}
+        />
+      )}
 
       {children}
     </VStack>
   );
 }
 
-export const PORTAL_FOOTER_MIN_HEIGHT = 200;
+export const PORTAL_FOOTER_MIN_HEIGHT = 212;

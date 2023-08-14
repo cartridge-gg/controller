@@ -336,6 +336,8 @@ const Index: NextPage = () => {
               setShowSignup(false);
             }}
             onController={(c) => setController(c)}
+            origin={context.origin}
+            policies={(context as Connect).policies}
             // onCancel={() => context.reject()}
           />
         ) : (
@@ -347,6 +349,8 @@ const Index: NextPage = () => {
               setShowSignup(true);
             }}
             onController={(c) => setController(c)}
+            origin={context.origin}
+            policies={(context as Connect).policies}
             // onCancel={() => context.reject()}
           />
         )}
@@ -373,6 +377,20 @@ const Index: NextPage = () => {
       </>
     );
   }
+
+  const onLogout = (context: Context) => {
+    setContext({
+      origin: context.origin,
+      type: "logout",
+      resolve: context.resolve,
+      reject: context.reject,
+    } as Logout);
+  };
+
+  const account = controller.account(
+    (context as any).transactionsDetail?.chainId ?? chainId,
+  );
+  const sesh = controller.session(context.origin);
 
   const onConnect = async ({
     context,
@@ -415,20 +433,6 @@ const Index: NextPage = () => {
       policies,
     } as any);
   };
-
-  const onLogout = (context: Context) => {
-    setContext({
-      origin: context.origin,
-      type: "logout",
-      resolve: context.resolve,
-      reject: context.reject,
-    } as Logout);
-  };
-
-  const account = controller.account(
-    (context as any).transactionsDetail?.chainId ?? chainId,
-  );
-  const sesh = controller.session(context.origin);
 
   if (context.type === "connect" || !sesh) {
     const ctx = context as Connect;
