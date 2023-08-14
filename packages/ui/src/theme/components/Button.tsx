@@ -27,6 +27,7 @@ export const Button = defineStyleConfig({
     xs: {
       px: 2,
       py: 3,
+      h: 8,
     },
     sm: (p) =>
       p.rightIcon

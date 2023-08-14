@@ -4,29 +4,15 @@ import {
   Flex,
   Spacer,
   HStack,
-  Text,
   Container as ChakraContainer,
   StyleProps,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
 } from "@chakra-ui/react";
 import { WordLogo } from "@cartridge/ui/src/components/brand/Word";
-import { HeaderItem } from "@cartridge/ui/src/components/HeaderItem";
-import Chain from "@cartridge/ui/src/components/menu/Chain";
 import { constants } from "starknet";
-import { Loading } from "components/Loading";
-import Ether from "components/icons/Ether";
-import {
-  CartridgeColorIcon,
-  CopyIcon,
-  LogoutDuoIcon,
-  WalletSolidIcon,
-  WedgeDownIcon,
-} from "@cartridge/ui";
-import { useHeader } from "./hooks";
+import { CartridgeColorIcon } from "@cartridge/ui";
 import { NetworkButton } from "./NetworkButton";
+import { EthBalance } from "./EthBalance";
+import { AccountMenu } from "./AccountMenu";
 
 export type HeaderProps = {
   chainId?: constants.StarknetChainId;
@@ -34,13 +20,7 @@ export type HeaderProps = {
   onLogout?: () => void;
 };
 
-export function Header({
-  chainId,
-  address = "0x00000000",
-  onLogout,
-}: HeaderProps) {
-  const { chainName, ethBalance, avatar } = useHeader({ chainId, address });
-
+export function Header({ chainId, address, onLogout }: HeaderProps) {
   if (!address) {
     return (
       <Container h={12} p={1.5}>
@@ -56,78 +36,10 @@ export function Header({
 
         <Spacer />
 
-        <NetworkButton />
+        <NetworkButton chainId={chainId} />
+        <EthBalance chainId={chainId} address={address} />
 
-        <HStack spacing="6px">
-          <Chain name={chainName} />
-          <Box minW="70px">
-            <HeaderItem>
-              <Ether w="12px" h="12px" />
-              {!!ethBalance && (
-                <Text fontWeight="700" letterSpacing="0.05em">
-                  {parseFloat(ethBalance).toFixed(3)}
-                </Text>
-              )}
-              {!ethBalance && <Loading width="12px" height="12px" />}
-            </HeaderItem>
-          </Box>
-          {chainId && (
-            <Menu>
-              <MenuButton
-                p="6px 12px"
-                borderRadius="6px"
-                bgColor="gray.600"
-                _hover={{
-                  bgColor: "gray.500",
-                }}
-              >
-                <HStack spacing="8px">
-                  <Box
-                    w="18px"
-                    h="18px"
-                    dangerouslySetInnerHTML={
-                      !!avatar?.svg ? { __html: avatar?.svg } : undefined
-                    }
-                  />
-                  <WedgeDownIcon
-                    direction="down"
-                    boxSize="8px"
-                    color="gray.300"
-                  />
-                </HStack>
-              </MenuButton>
-              <MenuList position="absolute" top="12px" left="-130px">
-                <MenuItem
-                  color="whiteAlpha.800"
-                  icon={<WalletSolidIcon boxSize="16px" />}
-                  onClick={() => {
-                    navigator.clipboard.writeText(address);
-                  }}
-                >
-                  <HStack>
-                    <Text color="currentColor" fontWeight="400">
-                      {`${address?.slice(0, 3)}...${address?.slice(
-                        address.length - 4,
-                        address.length,
-                      )}`}
-                    </Text>
-                    <Spacer />
-                    <CopyIcon />
-                  </HStack>
-                </MenuItem>
-                <MenuItem
-                  color="whiteAlpha.800"
-                  icon={<LogoutDuoIcon boxSize="16px" />}
-                  onClick={onLogout}
-                >
-                  <Text color="currentColor" fontWeight="400">
-                    Log Out
-                  </Text>
-                </MenuItem>
-              </MenuList>
-            </Menu>
-          )}
-        </HStack>
+        {chainId && <AccountMenu onLogout={onLogout} address={address} />}
       </HStack>
     </Container>
   );

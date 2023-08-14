@@ -11,28 +11,25 @@ const helpers = createMultiStyleConfigHelpers([
 export const Menu: ComponentMultiStyleConfig = helpers.defineMultiStyleConfig({
   baseStyle: {
     button: {
-      paddingX: "14px",
-      paddingY: "6px",
-      borderRadius: "full",
-      background: "gray.700",
+      p: 2,
+      borderRadius: 4,
+      bg: "solid.primary",
       _hover: {
-        background: "gray.600",
+        bg: "solid.secondary",
       },
     },
     list: {
-      py: "0",
-      border: "0",
+      py: 0,
+      border: 0,
       overflow: "hidden",
-      background: "gray.700",
     },
     item: {
       p: "11px",
-      color: "gray.200",
-      fontSize: "14px",
+      fontSize: "sm",
       fontWeight: "bold",
       letterSpacing: "0.02em",
       borderBottom: "1px solid",
-      borderColor: "gray.900",
+      background: "solid.primary",
       transition: "color 0.2s ease",
     },
   },
