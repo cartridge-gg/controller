@@ -16,14 +16,12 @@ import {
   Spacer,
   useDisclosure,
   InputGroup,
-  InputRightElement,
 } from "@chakra-ui/react";
 import { useAccountQuery, DiscordRevokeDocument } from "generated/graphql";
 import { client } from "utils/graphql";
 import base64url from "base64url";
 import { useAnalytics } from "hooks/analytics";
 import { beginLogin, onLoginFinalize } from "hooks/account";
-import login from "methods/login";
 import { useDebounce } from "hooks/debounce";
 import Web3Auth from "./Web3Auth";
 import { constants, ec } from "starknet";
@@ -34,7 +32,6 @@ import { DrawerWrapper } from "components/DrawerWrapper";
 import FingerprintIcon from "./icons/Fingerprint2";
 import { useWhitelist } from "hooks/whitelist";
 import { WebauthnSigner } from "utils/webauthn";
-import logout from "methods/logout";
 import { InfoIcon, LockIcon } from "@cartridge/ui";
 
 export const Login = ({

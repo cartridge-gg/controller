@@ -1,21 +1,5 @@
-import {
-  useEffect,
-  useState,
-  ReactNode,
-  useCallback,
-  ReactElement,
-} from "react";
-import {
-  Box,
-  Flex,
-  Circle,
-  Container,
-  VStack,
-  Text,
-  Link,
-  UseDisclosureProps,
-} from "@chakra-ui/react";
-import { Header } from "components/Header";
+import { useEffect, useState, useCallback } from "react";
+import { Circle, UseDisclosureProps } from "@chakra-ui/react";
 import Footer from "components/Footer";
 import Unsupported from "components/signup/Unsupported";
 import { Credentials, onCreateBegin, onCreateFinalize } from "hooks/account";
@@ -27,7 +11,7 @@ import {
   NewControllerDuoIcon,
   QRCodeDuoIcon,
 } from "@cartridge/ui";
-import { ContainerV2 } from "components/Container";
+import { Container } from "../v2/Container";
 import { PortalBanner } from "components/PortalBanner";
 
 export const Authenticate = ({
@@ -91,7 +75,7 @@ export const Authenticate = ({
     <>
       {isModal ? (
         <SimpleModal
-          icon={<NewControllerDuoIcon boxSize="40px" />}
+          icon={<NewControllerDuoIcon boxSize={10} />}
           onClose={onClose}
           onConfirm={() => {
             onAuth().then(() => onClose());
@@ -105,22 +89,15 @@ export const Authenticate = ({
           <Content userAgent={userAgent} />
         </SimpleModal>
       ) : (
-        <ContainerV2 fullPage={true}>
-          <Content
-            icon={
-              <Circle size={12} bg="solid.secondary">
-                <FingerprintDuoIcon boxSize={8} />
-              </Circle>
-            }
-            userAgent={userAgent}
-          />
+        <Container fullPage={true}>
+          <Content userAgent={userAgent} />
           <Footer
             confirmText="Continue"
             showCancel={false}
             onConfirm={onAuth}
             isLoading={isLoading}
           />
-        </ContainerV2>
+        </Container>
       )}
 
       {StartupAnimation}
@@ -130,7 +107,7 @@ export const Authenticate = ({
 
 type UserAgent = "ios" | "android" | "other";
 
-const Content = ({ icon, userAgent }: { icon?: any; userAgent: any }) => {
+const Content = ({ userAgent }: { userAgent: UserAgent }) => {
   const renderIcon = useCallback(() => {
     switch (userAgent) {
       case "ios":

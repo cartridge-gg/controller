@@ -1,12 +1,7 @@
 import { Field, PlugNewDuoIcon } from "@cartridge/ui";
 import { VStack, Button } from "@chakra-ui/react";
 import { Container } from "../Container";
-import {
-  Form as FormikForm,
-  Field as FormikField,
-  Formik,
-  useFormikContext,
-} from "formik";
+import { Form as FormikForm, Field as FormikField, Formik } from "formik";
 import { constants, ec, KeyPair } from "starknet";
 import { PortalFooter, PORTAL_FOOTER_MIN_HEIGHT } from "./PortalFooter";
 import { PortalBanner } from "components/PortalBanner";

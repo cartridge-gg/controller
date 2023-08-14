@@ -1,4 +1,4 @@
-import { Field, FingerprintDuoIcon, PlugNewDuoIcon } from "@cartridge/ui";
+import { Field, FingerprintDuoIcon } from "@cartridge/ui";
 import { VStack, Button } from "@chakra-ui/react";
 import { Container } from "../Container";
 import { Form as FormikForm, Field as FormikField, Formik } from "formik";

@@ -40,7 +40,7 @@ import { normalize, validate } from "../methods";
 import DeploymentRequired from "components/DeploymentRequired";
 import Quests from "./quests";
 import Logout from "components/Logout";
-import { Signup as SignupV2, Login as LoginV2 } from "components/v2/signup";
+import { Signup as SignupV2, Login as LoginV2 } from "components/v2";
 
 type Context = Connect | Logout | Execute | SignMessage | StarterPack | Quests;
 
