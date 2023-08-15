@@ -324,6 +324,50 @@ const Index: NextPage = () => {
     return <></>;
   }
 
+  const onController = async (controller: Controller) => {
+    if (context.type !== "connect") return;
+
+    if (controller.session(context.origin)) return;
+
+    const account = controller.account(
+      (context as any).transactionsDetail?.chainId ?? chainId,
+    );
+
+    if (account.status === Status.COUNTERFACTUAL) {
+      // TODO: Deploy?
+      context.resolve({
+        code: ResponseCodes.SUCCESS,
+        address: controller.address,
+        policies: context.policies,
+      } as any);
+      return;
+    }
+
+    // This device needs to be registered, so do a webauthn signature request
+    // for the register transaction during the connect flow.
+    if (account.status === Status.DEPLOYED) {
+      try {
+        await account.register();
+      } catch (e) {
+        context.resolve({
+          code: ResponseCodes.CANCELED,
+          message: "Canceled",
+        } as Error);
+        return;
+      }
+    }
+
+    controller.approve(context.origin, context.policies, "");
+
+    context.resolve({
+      code: ResponseCodes.SUCCESS,
+      address: controller.address,
+      policies: context.policies,
+    } as any);
+
+    setController(controller);
+  };
+
   // No controller, send to login
   if (!controller) {
     return (
@@ -331,26 +375,22 @@ const Index: NextPage = () => {
         {showSignup ? (
           <SignupV2
             prefilledName={prefilledUsername}
-            chainId={chainId}
             onLogin={(username) => {
               setPrefilledUsername(username);
               setShowSignup(false);
             }}
-            onController={(c) => setController(c)}
+            onController={onController}
             context={context as Connect}
-            // onCancel={() => context.reject()}
           />
         ) : (
           <LoginV2
             prefilledName={prefilledUsername}
-            chainId={chainId}
             onSignup={(username) => {
               setPrefilledUsername(username);
               setShowSignup(true);
             }}
-            onController={(c) => setController(c)}
+            onController={onController}
             context={context as Connect}
-            // onCancel={() => context.reject()}
           />
         )}
       </>

@@ -1,4 +1,3 @@
-import { PlugNewDuoIcon } from "@cartridge/ui";
 import { VStack, Circle, Text } from "@chakra-ui/react";
 
 export function PortalBanner({

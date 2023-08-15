@@ -19,15 +19,13 @@ import { PopupCenter } from "utils/url";
 import { FormValues, SignupProps } from "./types";
 import { validateUsername } from "./validate";
 import { useClearField, useSubmitType, useUsername } from "./hooks";
-import BannerImage from "components/signup/BannerImage";
+import { BannerImage } from "./BannerImage";
 import { ClaimSuccess } from "./StarterPack";
 import { Authenticate as AuthModal } from "./Authenticate";
-import { ResponseCodes, Error } from "@cartridge/controller";
 
 export function Signup({
   fullPage = false,
   prefilledName = "",
-  chainId,
   context,
   onController,
   onComplete: onCompleteProp,
@@ -120,7 +118,6 @@ export function Signup({
           onController={onController}
           keypair={keypair}
           isRegistering={isRegistering}
-          chainId={chainId}
           context={context}
           starterData={starterData}
           isAuthOpen={isAuthOpen}
@@ -133,7 +130,6 @@ export function Signup({
 }
 
 function Form({
-  chainId,
   context,
   onController,
   onLogin,
@@ -143,7 +139,7 @@ function Form({
   isAuthOpen,
   onAuthClose,
   onComplete,
-}: Pick<SignupProps, "chainId" | "context" | "onController" | "onLogin"> & {
+}: Pick<SignupProps, "context" | "onController" | "onLogin"> & {
   keypair: KeyPair;
   isRegistering: boolean;
   starterData: StarterPackQuery;
@@ -174,8 +170,6 @@ function Form({
         } = data;
 
         const controller = new Controller(keypair, address, credentialId);
-
-        if (onController) onController(controller);
 
         controller.account(constants.StarknetChainId.TESTNET).status =
           Status.DEPLOYING;
@@ -209,46 +203,7 @@ function Form({
             controller.account(constants.StarknetChainId.MAINNET).sync();
           });
 
-        // check session
-        if (context) {
-          const account = controller.account(
-            (context as any).transactionsDetail?.chainId ?? chainId,
-          );
-          const sesh = controller.session(context.origin);
-          if (!sesh) {
-            if (account.status === Status.COUNTERFACTUAL) {
-              // TODO: Deploy?
-              context.resolve({
-                code: ResponseCodes.SUCCESS,
-                address: controller.address,
-                policies: context.policies,
-              } as any);
-              return;
-            }
-
-            // This device needs to be registered, so do a webauthn signature request
-            // for the register transaction during the connect flow.
-            if (account.status === Status.DEPLOYED) {
-              try {
-                await account.register();
-              } catch (e) {
-                context.resolve({
-                  code: ResponseCodes.CANCELED,
-                  message: "Canceled",
-                } as Error);
-                return;
-              }
-            }
-
-            controller.approve(context.origin, context.policies, "");
-
-            context.resolve({
-              code: ResponseCodes.SUCCESS,
-              address: controller.address,
-              policies: context.policies,
-            } as any);
-          }
-        }
+        if (onController) await onController(controller);
       },
     },
   );
@@ -271,10 +226,7 @@ function Form({
       />
 
       {starterData && remaining > 0 && (
-        <BannerImage
-          imgSrc={starterData?.game.banner.uri}
-          obscuredWidth="0px"
-        />
+        <BannerImage imgSrc={starterData?.game.banner.uri} />
       )}
 
       <VStack align="stretch" paddingBottom={PORTAL_FOOTER_MIN_HEIGHT}>
@@ -295,7 +247,7 @@ function Form({
         </FormikField>
       </VStack>
 
-      <PortalFooter origin={context.origin} policies={context.policies}>
+      <PortalFooter origin={context?.origin} policies={context?.policies}>
         <VStack
           w="full"
           alignItems="flex"

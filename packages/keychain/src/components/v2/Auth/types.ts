@@ -11,9 +11,8 @@ export type AuthProps = SignupProps | LoginProps;
 type AuthBaseProps = {
   fullPage?: boolean;
   prefilledName?: string;
-  chainId?: constants.StarknetChainId;
   context?: Connect;
-  onController?: (controller: Controller) => void;
+  onController?: (controller: Controller) => void | Promise<void>;
   onComplete?: () => void;
   // onCancel?: () => void;
 };
@@ -24,5 +23,6 @@ export type SignupProps = AuthBaseProps & {
 };
 
 export type LoginProps = AuthBaseProps & {
+  chainId?: constants.StarknetChainId;
   onSignup: (username: string) => void;
 };

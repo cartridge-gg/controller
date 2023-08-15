@@ -6,10 +6,11 @@ import {
   HStack,
   Container as ChakraContainer,
   StyleProps,
+  IconButton,
 } from "@chakra-ui/react";
 import { WordLogo } from "@cartridge/ui/src/components/brand/Word";
 import { constants } from "starknet";
-import { CartridgeColorIcon } from "@cartridge/ui";
+import { ArrowLeftIcon, CartridgeColorIcon } from "@cartridge/ui";
 import { NetworkButton } from "./NetworkButton";
 import { EthBalance } from "./EthBalance";
 import { AccountMenu } from "./AccountMenu";
@@ -18,9 +19,10 @@ export type HeaderProps = {
   chainId?: constants.StarknetChainId;
   address?: string;
   onLogout?: () => void;
+  onBack?: () => void;
 };
 
-export function Header({ chainId, address, onLogout }: HeaderProps) {
+export function Header({ chainId, address, onLogout, onBack }: HeaderProps) {
   if (!address) {
     return (
       <Container h={12} p={1.5}>
@@ -32,7 +34,15 @@ export function Header({ chainId, address, onLogout }: HeaderProps) {
   return (
     <Container h={12} p={2}>
       <HStack w="full">
-        <CartridgeColorIcon boxSize={8} />
+        {onBack ? (
+          <IconButton
+            aria-label="Go back"
+            icon={<ArrowLeftIcon />}
+            onClick={onBack}
+          />
+        ) : (
+          <CartridgeColorIcon boxSize={8} />
+        )}
 
         <Spacer />
 
