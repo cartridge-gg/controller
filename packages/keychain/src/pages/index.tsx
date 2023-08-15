@@ -44,7 +44,7 @@ import { Signup as SignupV2, Login as LoginV2 } from "components/v2";
 
 type Context = Connect | Logout | Execute | SignMessage | StarterPack | Quests;
 
-type Connect = {
+export type Connect = {
   origin: string;
   type: "connect";
   policies: Policy[];
@@ -331,13 +331,13 @@ const Index: NextPage = () => {
         {showSignup ? (
           <SignupV2
             prefilledName={prefilledUsername}
+            chainId={chainId}
             onLogin={(username) => {
               setPrefilledUsername(username);
               setShowSignup(false);
             }}
             onController={(c) => setController(c)}
-            origin={context.origin}
-            policies={(context as Connect).policies}
+            context={context as Connect}
             // onCancel={() => context.reject()}
           />
         ) : (
@@ -349,8 +349,7 @@ const Index: NextPage = () => {
               setShowSignup(true);
             }}
             onController={(c) => setController(c)}
-            origin={context.origin}
-            policies={(context as Connect).policies}
+            context={context as Connect}
             // onCancel={() => context.reject()}
           />
         )}

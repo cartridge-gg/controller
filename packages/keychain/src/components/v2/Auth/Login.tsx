@@ -15,12 +15,14 @@ import base64url from "base64url";
 import { AccountQuery } from "generated/graphql";
 import { useClearField, useSubmitType, useUsername } from "./hooks";
 import { validateUsername } from "./validate";
+import { Status } from "utils/account";
+import { ResponseCodes, Error } from "@cartridge/controller";
 
 export function Login({
   fullPage = false,
   prefilledName = "",
-  origin,
-  policies,
+  chainId,
+  context,
   onController,
   onComplete,
   onSignup,
@@ -62,6 +64,48 @@ export function Login({
         if (onComplete) {
           onComplete();
         }
+
+        // check session
+        if (context) {
+          const account = controller.account(
+            (context as any).transactionsDetail?.chainId ?? chainId,
+          );
+          const sesh = controller.session(context.origin);
+
+          if (!sesh) {
+            if (account.status === Status.COUNTERFACTUAL) {
+              // TODO: Deploy?
+              context.resolve({
+                code: ResponseCodes.SUCCESS,
+                address: controller.address,
+                policies: context.policies,
+              } as any);
+              return;
+            }
+
+            // This device needs to be registered, so do a webauthn signature request
+            // for the register transaction during the connect flow.
+            if (account.status === Status.DEPLOYED) {
+              try {
+                await account.register();
+              } catch (e) {
+                context.resolve({
+                  code: ResponseCodes.CANCELED,
+                  message: "Canceled",
+                } as Error);
+                return;
+              }
+            }
+
+            controller.approve(context.origin, context.policies, "");
+
+            context.resolve({
+              code: ResponseCodes.SUCCESS,
+              address: controller.address,
+              policies: context.policies,
+            } as any);
+          }
+        }
       } catch (err) {
         setIsLoggingIn(false);
         log({
@@ -72,15 +116,14 @@ export function Login({
         });
       }
     },
-    [account, log, onComplete, onController],
+    [account, log, onComplete, onController, chainId, context],
   );
 
   return (
     <Container fullPage={fullPage}>
       <Formik initialValues={{ username: prefilledName }} onSubmit={onSubmit}>
         <Form
-          origin={origin}
-          policies={policies}
+          context={context}
           onController={onController}
           onSignup={onSignup}
           setAccount={setAccount}
@@ -92,13 +135,12 @@ export function Login({
 }
 
 function Form({
-  origin,
-  policies,
+  context,
   // onController,
   onSignup,
   setAccount,
   isLoggingIn,
-}: Pick<LoginProps, "origin" | "policies" | "onController" | "onSignup"> & {
+}: Pick<LoginProps, "context" | "onController" | "onSignup"> & {
   setAccount: (account: AccountQuery["account"]) => void;
   isLoggingIn: boolean;
 }) {
@@ -135,7 +177,7 @@ function Form({
         </FormikField>
       </VStack>
 
-      <PortalFooter origin={origin} policies={policies}>
+      <PortalFooter origin={context.origin} policies={context.policies}>
         <VStack
           w="full"
           alignItems="flex"

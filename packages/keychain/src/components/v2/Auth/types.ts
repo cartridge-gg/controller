@@ -1,4 +1,4 @@
-import { Policy } from "@cartridge/controller";
+import { Connect } from "pages";
 import { constants } from "starknet";
 import Controller from "utils/controller";
 
@@ -11,8 +11,8 @@ export type AuthProps = SignupProps | LoginProps;
 type AuthBaseProps = {
   fullPage?: boolean;
   prefilledName?: string;
-  origin?: string;
-  policies?: Policy[];
+  chainId?: constants.StarknetChainId;
+  context?: Connect;
   onController?: (controller: Controller) => void;
   onComplete?: () => void;
   // onCancel?: () => void;
@@ -24,6 +24,5 @@ export type SignupProps = AuthBaseProps & {
 };
 
 export type LoginProps = AuthBaseProps & {
-  chainId?: constants.StarknetChainId;
   onSignup: (username: string) => void;
 };

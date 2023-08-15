@@ -22,11 +22,13 @@ import { useClearField, useSubmitType, useUsername } from "./hooks";
 import BannerImage from "components/signup/BannerImage";
 import { ClaimSuccess } from "./StarterPack";
 import { Authenticate as AuthModal } from "./Authenticate";
+import { ResponseCodes, Error } from "@cartridge/controller";
 
 export function Signup({
   fullPage = false,
   prefilledName = "",
-  origin,
+  chainId,
+  context,
   onController,
   onComplete: onCompleteProp,
   starterPackId,
@@ -118,7 +120,8 @@ export function Signup({
           onController={onController}
           keypair={keypair}
           isRegistering={isRegistering}
-          origin={origin}
+          chainId={chainId}
+          context={context}
           starterData={starterData}
           isAuthOpen={isAuthOpen}
           onAuthClose={onAuthClose}
@@ -130,7 +133,8 @@ export function Signup({
 }
 
 function Form({
-  origin,
+  chainId,
+  context,
   onController,
   onLogin,
   keypair,
@@ -139,7 +143,7 @@ function Form({
   isAuthOpen,
   onAuthClose,
   onComplete,
-}: Pick<SignupProps, "origin" | "onController" | "onLogin"> & {
+}: Pick<SignupProps, "chainId" | "context" | "onController" | "onLogin"> & {
   keypair: KeyPair;
   isRegistering: boolean;
   starterData: StarterPackQuery;
@@ -160,7 +164,7 @@ function Form({
       staleTime: 10000000,
       cacheTime: 10000000,
       refetchInterval: (data) => (!data ? 1000 : undefined),
-      onSuccess: (data) => {
+      onSuccess: async (data) => {
         console.log("deploy request");
         const {
           account: {
@@ -204,6 +208,47 @@ function Form({
           .then(() => {
             controller.account(constants.StarknetChainId.MAINNET).sync();
           });
+
+        // check session
+        if (context) {
+          const account = controller.account(
+            (context as any).transactionsDetail?.chainId ?? chainId,
+          );
+          const sesh = controller.session(context.origin);
+          if (!sesh) {
+            if (account.status === Status.COUNTERFACTUAL) {
+              // TODO: Deploy?
+              context.resolve({
+                code: ResponseCodes.SUCCESS,
+                address: controller.address,
+                policies: context.policies,
+              } as any);
+              return;
+            }
+
+            // This device needs to be registered, so do a webauthn signature request
+            // for the register transaction during the connect flow.
+            if (account.status === Status.DEPLOYED) {
+              try {
+                await account.register();
+              } catch (e) {
+                context.resolve({
+                  code: ResponseCodes.CANCELED,
+                  message: "Canceled",
+                } as Error);
+                return;
+              }
+            }
+
+            controller.approve(context.origin, context.policies, "");
+
+            context.resolve({
+              code: ResponseCodes.SUCCESS,
+              address: controller.address,
+              policies: context.policies,
+            } as any);
+          }
+        }
       },
     },
   );
@@ -250,7 +295,7 @@ function Form({
         </FormikField>
       </VStack>
 
-      <PortalFooter origin={origin}>
+      <PortalFooter origin={context.origin} policies={context.policies}>
         <VStack
           w="full"
           alignItems="flex"
