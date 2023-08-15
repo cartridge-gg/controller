@@ -1,5 +1,5 @@
 import { Field, PlugNewDuoIcon } from "@cartridge/ui";
-import { VStack, Button } from "@chakra-ui/react";
+import { VStack, Button, useDisclosure } from "@chakra-ui/react";
 import { Container } from "../Container";
 import { Form as FormikForm, Field as FormikField, Formik } from "formik";
 import { constants, ec, KeyPair } from "starknet";
@@ -8,6 +8,7 @@ import { PortalBanner } from "components/PortalBanner";
 import { useCallback, useMemo, useState } from "react";
 import {
   DeployAccountDocument,
+  StarterPackQuery,
   useAccountQuery,
   useStarterPackQuery,
 } from "generated/graphql";
@@ -19,17 +20,33 @@ import { FormValues, SignupProps } from "./types";
 import { validateUsername } from "./validate";
 import { useClearField, useSubmitType, useUsername } from "./hooks";
 import BannerImage from "components/signup/BannerImage";
+import { ClaimSuccess } from "./StarterPack";
+import { Authenticate as AuthModal } from "./Authenticate";
 
 export function Signup({
   fullPage = false,
   prefilledName = "",
   origin,
   onController,
-  onComplete,
+  onComplete: onCompleteProp,
   starterPackId,
   onLogin,
 }: SignupProps) {
   const [isRegistering, setIsRegistering] = useState(false);
+  const [claimSuccess, setClaimSuccess] = useState<boolean>(false);
+
+  const {
+    isOpen: isAuthOpen,
+    onOpen: onAuthOpen,
+    onClose: onAuthClose,
+  } = useDisclosure();
+
+  const { data: starterData } = useStarterPackQuery(
+    {
+      id: starterPackId,
+    },
+    { enabled: !!starterPackId && !isRegistering },
+  );
 
   const isIframe = useMemo(
     () => (typeof window !== "undefined" ? window.top !== window.self : false),
@@ -42,6 +59,15 @@ export function Signup({
       deviceKey: ec.getStarkKey(keypair),
     };
   }, []);
+
+  const onComplete = useCallback(() => {
+    if (starterPackId) {
+      setClaimSuccess(true);
+      return;
+    }
+
+    onCompleteProp();
+  }, [starterPackId, onCompleteProp]);
 
   const onSubmit = useCallback(
     async (values: FormValues) => {
@@ -61,22 +87,42 @@ export function Signup({
           640,
         );
       } else {
-        // onAuthOpen();
+        onAuthOpen();
       }
     },
-    [isIframe, deviceKey],
+    [isIframe, deviceKey, onAuthOpen],
   );
+
+  if (claimSuccess) {
+    // hardcode briq for now
+    const media =
+      starterData?.game.name === "Briq"
+        ? "https://storage.googleapis.com/c7e-prod-static/media/briq_cartridge_poap_nft_paris_1_7x16x11.glb"
+        : undefined;
+    return (
+      <ClaimSuccess
+        name={starterData?.game.name}
+        banner={starterData?.game.banner.uri}
+        url={starterData?.game.socials.website}
+        media={media}
+        fullPage={fullPage}
+      />
+    );
+  }
 
   return (
     <Container fullPage={fullPage}>
       <Formik initialValues={{ username: prefilledName }} onSubmit={onSubmit}>
         <Form
           onLogin={onLogin}
-          starterPackId={starterPackId}
           onController={onController}
           keypair={keypair}
           isRegistering={isRegistering}
           origin={origin}
+          starterData={starterData}
+          isAuthOpen={isAuthOpen}
+          onAuthClose={onAuthClose}
+          onComplete={onComplete}
         />
       </Formik>
     </Container>
@@ -84,26 +130,23 @@ export function Signup({
 }
 
 function Form({
-  starterPackId,
   origin,
   onController,
   onLogin,
   keypair,
   isRegistering,
-}: Pick<
-  SignupProps,
-  "starterPackId" | "origin" | "onController" | "onLogin"
-> & {
+  starterData,
+  isAuthOpen,
+  onAuthClose,
+  onComplete,
+}: Pick<SignupProps, "origin" | "onController" | "onLogin"> & {
   keypair: KeyPair;
   isRegistering: boolean;
+  starterData: StarterPackQuery;
+  isAuthOpen: boolean;
+  onAuthClose: () => void;
+  onComplete: () => void;
 }) {
-  const { data: starterData } = useStarterPackQuery(
-    {
-      id: starterPackId,
-    },
-    { enabled: !!starterPackId && !isRegistering },
-  );
-
   const { username } = useUsername();
   const submitType = useSubmitType(username, { isRegistering });
 
@@ -232,6 +275,15 @@ function Form({
           </Button>
         </VStack>
       </PortalFooter>
+
+      <AuthModal
+        isModal
+        isOpen={isAuthOpen}
+        onClose={onAuthClose}
+        name={username}
+        pubkey={keypair ? ec.getStarkKey(keypair) : ""}
+        onComplete={onComplete}
+      />
     </FormikForm>
   );
 }
