@@ -18,6 +18,7 @@ import { PopupCenter } from "utils/url";
 import { FormValues, SignupProps } from "./types";
 import { validateUsername } from "./validate";
 import { useClearField, useSubmitType, useUsername } from "./hooks";
+import BannerImage from "components/signup/BannerImage";
 
 export function Signup({
   fullPage = false,
@@ -110,7 +111,7 @@ function Form({
   useAccountQuery(
     { id: username },
     {
-      enabled: false,
+      enabled: isRegistering,
       refetchIntervalInBackground: true,
       refetchOnWindowFocus: false,
       staleTime: 10000000,
@@ -164,6 +165,14 @@ function Form({
     },
   );
   const onClearUsername = useClearField("username");
+  const remaining = useMemo(
+    () =>
+      starterData
+        ? starterData.game.starterPack.maxIssuance -
+          starterData.game.starterPack.issuance
+        : 0,
+    [starterData],
+  );
 
   return (
     <FormikForm style={{ width: "100%" }}>
@@ -172,6 +181,13 @@ function Form({
         title="Sign Up"
         description="Select a username"
       />
+
+      {starterData && remaining > 0 && (
+        <BannerImage
+          imgSrc={starterData?.game.banner.uri}
+          obscuredWidth="0px"
+        />
+      )}
 
       <VStack align="stretch" paddingBottom={PORTAL_FOOTER_MIN_HEIGHT}>
         <FormikField
