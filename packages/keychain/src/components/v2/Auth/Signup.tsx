@@ -10,7 +10,7 @@ import {
 import { constants, ec, KeyPair } from "starknet";
 import { PortalFooter, PORTAL_FOOTER_MIN_HEIGHT } from "./PortalFooter";
 import { PortalBanner } from "components/PortalBanner";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   DeployAccountDocument,
   StarterPackQuery,
@@ -23,7 +23,7 @@ import { client } from "utils/graphql";
 import { PopupCenter } from "utils/url";
 import { FormValues, SignupProps } from "./types";
 import { validateUsernameFor } from "./utils";
-import { useClearField, useUsername } from "./hooks";
+import { useClearField } from "./hooks";
 import { BannerImage } from "./BannerImage";
 import { ClaimSuccess } from "./StarterPack";
 import { Authenticate as AuthModal } from "./Authenticate";
@@ -41,12 +41,11 @@ export function Signup({
   const [isRegistering, setIsRegistering] = useState(false);
   const [claimSuccess, setClaimSuccess] = useState<boolean>(false);
 
-  const { isOpen: isAuthOpen, onOpen: onAuthOpen, onClose } = useDisclosure();
-
-  const onAuthClose = useCallback(() => {
-    setIsRegistering(false);
-    onClose();
-  }, [onClose]);
+  const {
+    isOpen: isAuthOpen,
+    onOpen: onAuthOpen,
+    onClose: onAuthClose,
+  } = useDisclosure();
 
   const { data: starterData } = useStarterPackQuery(
     {
@@ -96,7 +95,6 @@ export function Signup({
       } else {
         onAuthOpen();
       }
-      setIsRegistering(false);
     },
     [isIframe, deviceKey, onAuthOpen],
   );
@@ -131,6 +129,7 @@ export function Signup({
           onController={onController}
           keypair={keypair}
           isRegistering={isRegistering}
+          setIsRegistering={setIsRegistering}
           context={context}
           starterData={starterData}
           isAuthOpen={isAuthOpen}
@@ -148,6 +147,7 @@ function Form({
   onLogin: onLoginProp,
   keypair,
   isRegistering,
+  setIsRegistering,
   starterData,
   isAuthOpen,
   onAuthClose,
@@ -155,12 +155,17 @@ function Form({
 }: Pick<SignupProps, "context" | "onController" | "onLogin"> & {
   keypair: KeyPair;
   isRegistering: boolean;
+  setIsRegistering: (val: boolean) => void;
   starterData: StarterPackQuery;
   isAuthOpen: boolean;
   onAuthClose: () => void;
   onComplete: () => void;
 }) {
   const { values, isValidating } = useFormikContext<FormValues>();
+
+  useEffect(() => {
+    setIsRegistering(false);
+  }, [values.username, setIsRegistering]);
 
   // for polling approach when iframe
   useAccountQuery(
