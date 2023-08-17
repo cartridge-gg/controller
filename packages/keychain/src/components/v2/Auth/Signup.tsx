@@ -10,7 +10,7 @@ import {
 import { constants, ec, KeyPair } from "starknet";
 import { PortalFooter, PORTAL_FOOTER_MIN_HEIGHT } from "./PortalFooter";
 import { PortalBanner } from "components/PortalBanner";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   DeployAccountDocument,
   StarterPackQuery,
@@ -22,7 +22,7 @@ import { Status } from "utils/account";
 import { client } from "utils/graphql";
 import { PopupCenter } from "utils/url";
 import { FormValues, SignupProps } from "./types";
-import { validateUsername } from "./validate";
+import { validateUsernameFor } from "./utils";
 import { useClearField, useUsername } from "./hooks";
 import { BannerImage } from "./BannerImage";
 import { ClaimSuccess } from "./StarterPack";
@@ -40,13 +40,13 @@ export function Signup({
 }: SignupProps) {
   const [isRegistering, setIsRegistering] = useState(false);
   const [claimSuccess, setClaimSuccess] = useState<boolean>(false);
-  const [isAsyncValidationPassed, setIsAsyncValidationPassed] = useState(false);
 
-  const {
-    isOpen: isAuthOpen,
-    onOpen: onAuthOpen,
-    onClose: onAuthClose,
-  } = useDisclosure();
+  const { isOpen: isAuthOpen, onOpen: onAuthOpen, onClose } = useDisclosure();
+
+  const onAuthClose = useCallback(() => {
+    setIsRegistering(false);
+    onClose();
+  }, [onClose]);
 
   const { data: starterData } = useStarterPackQuery(
     {
@@ -78,10 +78,6 @@ export function Signup({
 
   const onSubmit = useCallback(
     async (values: FormValues) => {
-      if (!isAsyncValidationPassed) {
-        return;
-      }
-
       setIsRegistering(true);
 
       // due to same origin restriction, if we're in iframe, pop up a
@@ -100,8 +96,9 @@ export function Signup({
       } else {
         onAuthOpen();
       }
+      setIsRegistering(false);
     },
-    [isAsyncValidationPassed, isIframe, deviceKey, onAuthOpen],
+    [isIframe, deviceKey, onAuthOpen],
   );
 
   if (claimSuccess) {
@@ -139,8 +136,6 @@ export function Signup({
           isAuthOpen={isAuthOpen}
           onAuthClose={onAuthClose}
           onComplete={onComplete}
-          isAsyncValidationPassed={isAsyncValidationPassed}
-          setIsAsyncValidationPassed={setIsAsyncValidationPassed}
         />
       </Formik>
     </Container>
@@ -157,8 +152,6 @@ function Form({
   isAuthOpen,
   onAuthClose,
   onComplete,
-  isAsyncValidationPassed,
-  setIsAsyncValidationPassed,
 }: Pick<SignupProps, "context" | "onController" | "onLogin"> & {
   keypair: KeyPair;
   isRegistering: boolean;
@@ -166,56 +159,12 @@ function Form({
   isAuthOpen: boolean;
   onAuthClose: () => void;
   onComplete: () => void;
-  isAsyncValidationPassed: boolean;
-  setIsAsyncValidationPassed: (val: boolean) => void;
 }) {
-  const { values, setFieldError, isValid, touched } =
-    useFormikContext<FormValues>();
-
-  useEffect(() => {
-    setIsAsyncValidationPassed(false);
-  }, [values, setIsAsyncValidationPassed]);
-
-  const { username, debouncing } = useUsername();
-
-  const { error, data } = useAccountQuery(
-    { id: username },
-    {
-      enabled: isValid,
-      retry: false,
-    },
-  );
-
-  useEffect(() => {
-    if (!isValid) {
-      return;
-    }
-    if (debouncing) {
-      return;
-    }
-
-    if (error) {
-      if ((error as Error).message === "ent: account not found") {
-        setIsAsyncValidationPassed(true);
-      } else {
-        setFieldError("username", "An error occured.");
-      }
-    } else if (data?.account) {
-      setFieldError("username", "Account already exists");
-    }
-  }, [
-    error,
-    data,
-    debouncing,
-    setFieldError,
-    username,
-    setIsAsyncValidationPassed,
-    isValid,
-  ]);
+  const { values, isValidating } = useFormikContext<FormValues>();
 
   // for polling approach when iframe
   useAccountQuery(
-    { id: username },
+    { id: values.username },
     {
       enabled: isRegistering,
       refetchIntervalInBackground: true,
@@ -238,7 +187,7 @@ function Form({
           Status.DEPLOYING;
         client
           .request(DeployAccountDocument, {
-            id: username,
+            id: values.username,
             chainId: "starknet:SN_GOERLI",
             starterpackIds: starterData?.game?.starterPack?.chainID?.includes(
               "SN_GOERLI",
@@ -254,7 +203,7 @@ function Form({
           Status.DEPLOYING;
         client
           .request(DeployAccountDocument, {
-            id: username,
+            id: values.username,
             chainId: "starknet:SN_MAIN",
             starterpackIds: starterData?.game?.starterPack?.chainID?.includes(
               "SN_MAIN",
@@ -274,8 +223,8 @@ function Form({
   const onClearUsername = useClearField("username");
 
   const onLogin = useCallback(() => {
-    onLoginProp(username);
-  }, [username, onLoginProp]);
+    onLoginProp(values.username);
+  }, [values.username, onLoginProp]);
 
   const remaining = useMemo(
     () =>
@@ -302,7 +251,7 @@ function Form({
         <FormikField
           name="username"
           placeholder="Username"
-          validate={validateUsername}
+          validate={validateUsernameFor("signup")}
         >
           {({ field, meta }) => (
             <Field
@@ -313,9 +262,7 @@ function Form({
               error={meta.error}
               onClear={onClearUsername}
               container={{ marginBottom: 6 }}
-              isValidating={
-                touched.username && isValid && !isAsyncValidationPassed
-              }
+              isLoading={isValidating}
             />
           )}
         </FormikField>
@@ -347,7 +294,7 @@ function Form({
         isModal
         isOpen={isAuthOpen}
         onClose={onAuthClose}
-        name={username}
+        name={values.username}
         pubkey={keypair ? ec.getStarkKey(keypair) : ""}
         onComplete={onComplete}
       />

@@ -1,5 +1,5 @@
 import { Field, FingerprintDuoIcon } from "@cartridge/ui";
-import { VStack, Button, Spinner } from "@chakra-ui/react";
+import { VStack, Button } from "@chakra-ui/react";
 import { Container } from "../Container";
 import {
   Form as FormikForm,
@@ -10,16 +10,15 @@ import {
 import { ec } from "starknet";
 import { PortalFooter, PORTAL_FOOTER_MIN_HEIGHT } from "./PortalFooter";
 import { PortalBanner } from "components/PortalBanner";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import Controller from "utils/controller";
 import { FormValues, LoginProps } from "./types";
 import { useAnalytics } from "hooks/analytics";
 import { beginLogin, onLoginFinalize } from "hooks/account";
 import { WebauthnSigner } from "utils/webauthn";
 import base64url from "base64url";
-import { AccountQuery, useAccountQuery } from "generated/graphql";
-import { useClearField, useUsername } from "./hooks";
-import { validateUsername } from "./validate";
+import { useClearField } from "./hooks";
+import { fetchAccount, validateUsernameFor } from "./utils";
 import { RegistrationLink } from "./RegistrationLink";
 
 export function Login({
@@ -32,25 +31,20 @@ export function Login({
   onSignup,
 }: LoginProps) {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [account, setAccount] = useState<AccountQuery["account"]>();
   const { event: log } = useAnalytics();
-
-  const [isAsyncValidationPassed, setIsAsyncValidationPassed] = useState(false);
 
   const onSubmit = useCallback(
     async (values: FormValues) => {
-      if (!isAsyncValidationPassed) {
-        return;
-      }
-
       log({ type: "webauthn_login" });
       setIsLoggingIn(true);
 
       try {
         const {
-          credential: { id: credentialId, publicKey },
-          contractAddress: address,
-        } = account;
+          account: {
+            credential: { id: credentialId, publicKey },
+            contractAddress: address,
+          },
+        } = await fetchAccount(values.username);
 
         const { data: beginLoginData } = await beginLogin(values.username);
         const signer = new WebauthnSigner(credentialId, publicKey);
@@ -84,7 +78,7 @@ export function Login({
         });
       }
     },
-    [account, log, onComplete, onController, isAsyncValidationPassed],
+    [log, onComplete, onController],
   );
 
   return (
@@ -95,14 +89,7 @@ export function Login({
         validateOnChange={false}
         validateOnBlur={false}
       >
-        <Form
-          context={context}
-          onSignup={onSignup}
-          setAccount={setAccount}
-          isLoggingIn={isLoggingIn}
-          isAsyncValidationPassed={isAsyncValidationPassed}
-          setIsAsyncValidationPassed={setIsAsyncValidationPassed}
-        />
+        <Form context={context} onSignup={onSignup} isLoggingIn={isLoggingIn} />
       </Formik>
     </Container>
   );
@@ -111,67 +98,17 @@ export function Login({
 function Form({
   context,
   onSignup: onSignupProp,
-  setAccount,
   isLoggingIn,
-  isAsyncValidationPassed,
-  setIsAsyncValidationPassed,
 }: Pick<LoginProps, "context" | "onSignup"> & {
-  setAccount: (account: AccountQuery["account"]) => void;
   isLoggingIn: boolean;
-  isAsyncValidationPassed: boolean;
-  setIsAsyncValidationPassed: (val: boolean) => void;
 }) {
-  const { values, setFieldError, isValid, touched } =
-    useFormikContext<FormValues>();
-
-  useEffect(() => {
-    setIsAsyncValidationPassed(false);
-  }, [values, setIsAsyncValidationPassed]);
-
-  const { username, debouncing } = useUsername();
-
-  const { error, data } = useAccountQuery(
-    { id: username },
-    {
-      enabled: isValid,
-      retry: false,
-    },
-  );
-
-  useEffect(() => {
-    if (!isValid) {
-      return;
-    }
-    if (debouncing) {
-      return;
-    }
-
-    if (error) {
-      if ((error as Error).message === "ent: account not found") {
-        setFieldError("username", "Account not found");
-      } else {
-        setFieldError("username", "An error occured.");
-      }
-    } else if (data?.account) {
-      setIsAsyncValidationPassed(true);
-      setAccount?.(data.account);
-    }
-  }, [
-    error,
-    data,
-    debouncing,
-    setFieldError,
-    username,
-    setAccount,
-    setIsAsyncValidationPassed,
-    isValid,
-  ]);
+  const { values, isValidating } = useFormikContext<FormValues>();
 
   const onClearUsername = useClearField("username");
 
   const onSignup = useCallback(() => {
-    onSignupProp(username);
-  }, [onSignupProp, username]);
+    onSignupProp(values.username);
+  }, [onSignupProp, values]);
 
   return (
     <FormikForm style={{ width: "100%" }}>
@@ -185,7 +122,7 @@ function Form({
         <FormikField
           name="username"
           placeholder="Username"
-          validate={validateUsername}
+          validate={validateUsernameFor("login")}
         >
           {({ field, meta }) => (
             <Field
@@ -196,9 +133,7 @@ function Form({
               error={meta.error}
               onClear={onClearUsername}
               container={{ marginBottom: 6 }}
-              isValidating={
-                touched.username && isValid && !isAsyncValidationPassed
-              }
+              isValidating={isValidating}
             />
           )}
         </FormikField>

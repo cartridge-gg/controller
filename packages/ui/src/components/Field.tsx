@@ -18,14 +18,14 @@ export function Field<T>({
   touched,
   onClear,
   container,
-  isValidating,
+  isLoading,
   ...inputProps
 }: InputProps & {
   touched: boolean;
   error?: string;
   onClear?: () => void;
   container: StackProps;
-  isValidating: boolean;
+  isLoading?: boolean;
 }) {
   const [isActive, setIsActive] = useState(false);
 
@@ -55,7 +55,7 @@ export function Field<T>({
           isInvalid={!!error && touched}
         />
 
-        {isValidating ? (
+        {isLoading ? (
           <InputRightElement>
             {/** TODO: <Loading fill="text.secondary" /> */}
             <Spinner color="text.secondary" size="sm" />

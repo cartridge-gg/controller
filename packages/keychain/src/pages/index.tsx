@@ -327,7 +327,10 @@ const Index: NextPage = () => {
   const onController = async (controller: Controller) => {
     if (context.type !== "connect") return;
 
-    if (controller.session(context.origin)) return;
+    if (controller.session(context.origin)) {
+      setController(controller);
+      return;
+    }
 
     const account = controller.account(
       (context as any).transactionsDetail?.chainId ?? chainId,
@@ -340,6 +343,7 @@ const Index: NextPage = () => {
         address: controller.address,
         policies: context.policies,
       } as any);
+      setController(controller);
       return;
     }
 
@@ -353,6 +357,7 @@ const Index: NextPage = () => {
           code: ResponseCodes.CANCELED,
           message: "Canceled",
         } as Error);
+        setController(controller);
         return;
       }
     }
