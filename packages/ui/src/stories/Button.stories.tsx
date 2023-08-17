@@ -18,7 +18,7 @@ const meta: Meta<typeof Button> = {
     variant: {
       control: "select",
       description: "Variable of buttons",
-      options: ["solid"],
+      options: ["solid", "link"],
     },
     colorScheme: {
       control: "select",
@@ -28,7 +28,7 @@ const meta: Meta<typeof Button> = {
     size: {
       control: "select",
       description: "Select size",
-      options: ["sm", "md", "lg"],
+      options: ["xs", "sm", "md", "lg"],
     },
     isDisabled: {
       control: "boolean",
@@ -100,5 +100,12 @@ export const HeaderButton: Story = {
     variant: "round",
     leftIcon: <JoystickLineIcon />,
     rightIcon: <CopyIcon />,
+  },
+};
+
+export const LinkButton: Story = {
+  args: {
+    variant: "link",
+    children: "log in",
   },
 };

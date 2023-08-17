@@ -1,11 +1,16 @@
 import { Field, PlugNewDuoIcon } from "@cartridge/ui";
 import { VStack, Button, useDisclosure } from "@chakra-ui/react";
 import { Container } from "../Container";
-import { Form as FormikForm, Field as FormikField, Formik } from "formik";
+import {
+  Form as FormikForm,
+  Field as FormikField,
+  Formik,
+  useFormikContext,
+} from "formik";
 import { constants, ec, KeyPair } from "starknet";
 import { PortalFooter, PORTAL_FOOTER_MIN_HEIGHT } from "./PortalFooter";
 import { PortalBanner } from "components/PortalBanner";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   DeployAccountDocument,
   StarterPackQuery,
@@ -18,10 +23,11 @@ import { client } from "utils/graphql";
 import { PopupCenter } from "utils/url";
 import { FormValues, SignupProps } from "./types";
 import { validateUsername } from "./validate";
-import { useClearField, useSubmitType, useUsername } from "./hooks";
+import { useClearField, useUsername } from "./hooks";
 import { BannerImage } from "./BannerImage";
 import { ClaimSuccess } from "./StarterPack";
 import { Authenticate as AuthModal } from "./Authenticate";
+import { RegistrationLink } from "./RegistrationLink";
 
 export function Signup({
   fullPage = false,
@@ -34,6 +40,7 @@ export function Signup({
 }: SignupProps) {
   const [isRegistering, setIsRegistering] = useState(false);
   const [claimSuccess, setClaimSuccess] = useState<boolean>(false);
+  const [isAsyncValidationPassed, setIsAsyncValidationPassed] = useState(false);
 
   const {
     isOpen: isAuthOpen,
@@ -71,6 +78,10 @@ export function Signup({
 
   const onSubmit = useCallback(
     async (values: FormValues) => {
+      if (!isAsyncValidationPassed) {
+        return;
+      }
+
       setIsRegistering(true);
 
       // due to same origin restriction, if we're in iframe, pop up a
@@ -90,7 +101,7 @@ export function Signup({
         onAuthOpen();
       }
     },
-    [isIframe, deviceKey, onAuthOpen],
+    [isAsyncValidationPassed, isIframe, deviceKey, onAuthOpen],
   );
 
   if (claimSuccess) {
@@ -112,7 +123,12 @@ export function Signup({
 
   return (
     <Container fullPage={fullPage}>
-      <Formik initialValues={{ username: prefilledName }} onSubmit={onSubmit}>
+      <Formik
+        initialValues={{ username: prefilledName }}
+        onSubmit={onSubmit}
+        validateOnChange={false}
+        validateOnBlur={false}
+      >
         <Form
           onLogin={onLogin}
           onController={onController}
@@ -123,6 +139,8 @@ export function Signup({
           isAuthOpen={isAuthOpen}
           onAuthClose={onAuthClose}
           onComplete={onComplete}
+          isAsyncValidationPassed={isAsyncValidationPassed}
+          setIsAsyncValidationPassed={setIsAsyncValidationPassed}
         />
       </Formik>
     </Container>
@@ -132,13 +150,15 @@ export function Signup({
 function Form({
   context,
   onController,
-  onLogin,
+  onLogin: onLoginProp,
   keypair,
   isRegistering,
   starterData,
   isAuthOpen,
   onAuthClose,
   onComplete,
+  isAsyncValidationPassed,
+  setIsAsyncValidationPassed,
 }: Pick<SignupProps, "context" | "onController" | "onLogin"> & {
   keypair: KeyPair;
   isRegistering: boolean;
@@ -146,9 +166,52 @@ function Form({
   isAuthOpen: boolean;
   onAuthClose: () => void;
   onComplete: () => void;
+  isAsyncValidationPassed: boolean;
+  setIsAsyncValidationPassed: (val: boolean) => void;
 }) {
-  const { username } = useUsername();
-  const submitType = useSubmitType(username, { isRegistering });
+  const { values, setFieldError, isValid, touched } =
+    useFormikContext<FormValues>();
+
+  useEffect(() => {
+    setIsAsyncValidationPassed(false);
+  }, [values, setIsAsyncValidationPassed]);
+
+  const { username, debouncing } = useUsername();
+
+  const { error, data } = useAccountQuery(
+    { id: username },
+    {
+      enabled: isValid,
+      retry: false,
+    },
+  );
+
+  useEffect(() => {
+    if (!isValid) {
+      return;
+    }
+    if (debouncing) {
+      return;
+    }
+
+    if (error) {
+      if ((error as Error).message === "ent: account not found") {
+        setIsAsyncValidationPassed(true);
+      } else {
+        setFieldError("username", "An error occured.");
+      }
+    } else if (data?.account) {
+      setFieldError("username", "Account already exists");
+    }
+  }, [
+    error,
+    data,
+    debouncing,
+    setFieldError,
+    username,
+    setIsAsyncValidationPassed,
+    isValid,
+  ]);
 
   // for polling approach when iframe
   useAccountQuery(
@@ -207,7 +270,13 @@ function Form({
       },
     },
   );
+
   const onClearUsername = useClearField("username");
+
+  const onLogin = useCallback(() => {
+    onLoginProp(username);
+  }, [username, onLoginProp]);
+
   const remaining = useMemo(
     () =>
       starterData
@@ -238,13 +307,25 @@ function Form({
           {({ field, meta }) => (
             <Field
               {...field}
+              autoFocus={true}
               placeholder="Username"
               touched={meta.touched}
               error={meta.error}
               onClear={onClearUsername}
+              container={{ marginBottom: 6 }}
+              isValidating={
+                touched.username && isValid && !isAsyncValidationPassed
+              }
             />
           )}
         </FormikField>
+
+        <RegistrationLink
+          description="Already have a controller?"
+          onClick={onLogin}
+        >
+          log in
+        </RegistrationLink>
       </VStack>
 
       <PortalFooter origin={context?.origin} policies={context?.policies}>
@@ -256,19 +337,8 @@ function Form({
           position="fixed"
           bottom={0}
         >
-          <Button
-            type="submit"
-            colorScheme="colorful"
-            isDisabled={submitType !== "signup"}
-          >
+          <Button type="submit" colorScheme="colorful">
             Sign Up
-          </Button>
-
-          <Button
-            isDisabled={submitType !== "login"}
-            onClick={() => onLogin(username)}
-          >
-            Log In
           </Button>
         </VStack>
       </PortalFooter>

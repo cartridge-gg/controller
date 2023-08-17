@@ -2,7 +2,17 @@ export const colors = {
   transparent: "transparent",
   white: "#FFF",
   black: "#000",
-  red: "#E15B49",
+  red: {
+    200: "#ED9D92",
+    300: "#EA8D80",
+    400: "#E67566",
+    500: "#E46958",
+    800: "#87372C",
+  },
+  blue: {
+    200: "#73C4FF",
+    400: "#007FDB",
+  },
   yellow: {
     200: "#FDE092",
     400: "#FBCB4A",
@@ -78,7 +88,13 @@ export const semanticColors = {
       default: "darkGray.100",
       _light: "blueGray.800",
     },
-    error: "red",
+    error: "red.400",
+  },
+  link: {
+    blue: {
+      default: "blue.200",
+      _light: "blue.400",
+    },
   },
   brand: {
     primary: {
