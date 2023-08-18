@@ -1,89 +1,36 @@
-import {
-  HStack,
-  VStack,
-  Text,
-  Link,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  Accordion,
-  Spacer,
-  AccordionPanel,
-} from "@chakra-ui/react";
-import { CodeIcon, LockIcon } from "@cartridge/ui";
-import { Policy } from "@cartridge/controller";
+import { HStack, VStack, Text, Link, IconProps } from "@chakra-ui/react";
+import { CodeIcon, JoystickSolidIcon, LockIcon } from "@cartridge/ui";
+import { useMemo } from "react";
 
 export function TransactionSummary({
-  isOpen,
   origin,
-  policies,
+  isSignup,
 }: {
-  isOpen: boolean;
   origin: string;
-  policies: Policy[];
+  isSignup?: boolean;
 }) {
+  const hostname = useMemo(() => new URL(origin).hostname, [origin]);
+
   return (
-    <VStack
-      align="flex-start"
-      p={4}
-      overflowY={isOpen ? "scroll" : "hidden"}
-      css={{
-        "::-webkit-scrollbar": {
-          display: "none",
-        },
-        msOverflowStyle: "none",
-      }}
-      marginBottom="120px" // footer child height
-    >
+    <VStack align="flex-start">
+      {isSignup && (
+        <HStack color="text.secondary" fontSize="xs">
+          {<JoystickSolidIcon boxSize={4} />}
+          <Text color="text.secondary">Create a new Cartridge Controller</Text>
+        </HStack>
+      )}
+
       <HStack color="text.secondary" fontSize="xs">
         {<CodeIcon boxSize={4} />}
-        <Text color="text.secondary">{<>Create a session for {origin}</>}</Text>
+        <Text color="text.secondary">
+          Create a session for{" "}
+          <Text color="text.secondaryAccent" as="span" fontWeight="bold">
+            {hostname}
+          </Text>
+        </Text>
       </HStack>
 
       <Terms />
-
-      {policies && (
-        <VStack marginY={4}>
-          <VStack
-            align="flex-start"
-            borderTopRadius={8}
-            bg="solid.primary"
-            p={3}
-            m={0}
-          >
-            <Text
-              color="text.secondaryAccent"
-              fontSize="xs"
-              fontWeight="bold"
-              casing="uppercase"
-            >
-              Session details
-            </Text>
-            <Text color="text.secondaryAccent" fontSize="xs">
-              Allow {origin} to execute following actions on your behalf
-            </Text>
-          </VStack>
-
-          <Accordion w="full" allowMultiple={true} position="relative" top={-4}>
-            {policies.map((p) => (
-              <AccordionItem key={p.target + p.method}>
-                <AccordionButton>
-                  <HStack>
-                    {<CodeIcon boxSize={4} />}
-                    <Text>{p.method}</Text>
-                  </HStack>
-
-                  <Spacer />
-
-                  <AccordionIcon />
-                </AccordionButton>
-
-                <AccordionPanel>TODO: description</AccordionPanel>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </VStack>
-      )}
     </VStack>
   );
 }
@@ -113,3 +60,8 @@ function Terms() {
     </HStack>
   );
 }
+
+export type Summary = {
+  desc: React.ReactElement | string;
+  Icon: React.ComponentType<IconProps>;
+};

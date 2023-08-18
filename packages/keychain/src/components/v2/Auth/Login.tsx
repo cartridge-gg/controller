@@ -144,18 +144,9 @@ function Form({
       </VStack>
 
       <PortalFooter origin={context?.origin} policies={context?.policies}>
-        <VStack
-          w="full"
-          alignItems="flex"
-          p={4}
-          bg="solid.bg"
-          position="fixed"
-          bottom={0}
-        >
-          <Button type="submit" colorScheme="colorful" isLoading={isLoggingIn}>
-            Log In
-          </Button>
-        </VStack>
+        <Button type="submit" colorScheme="colorful" isLoading={isLoggingIn}>
+          Log In
+        </Button>
       </PortalFooter>
     </FormikForm>
   );

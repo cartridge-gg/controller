@@ -280,19 +280,14 @@ function Form({
         </RegistrationLink>
       </VStack>
 
-      <PortalFooter origin={context?.origin} policies={context?.policies}>
-        <VStack
-          w="full"
-          alignItems="flex"
-          p={4}
-          bg="solid.bg"
-          position="fixed"
-          bottom={0}
-        >
-          <Button type="submit" colorScheme="colorful">
-            Sign Up
-          </Button>
-        </VStack>
+      <PortalFooter
+        origin={context?.origin}
+        policies={context?.policies}
+        isSignup
+      >
+        <Button type="submit" colorScheme="colorful">
+          Sign Up
+        </Button>
       </PortalFooter>
 
       <AuthModal
