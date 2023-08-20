@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { VStack, HStack, Text, Spacer } from "@chakra-ui/react";
-import Container from "./Container";
+import Container from "./legacy/Container";
 import { Header } from "./Header";
 import Session from "components/Session";
 import { Banner } from "components/Banner";

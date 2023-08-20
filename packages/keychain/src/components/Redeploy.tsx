@@ -1,6 +1,6 @@
 import { Error as ErrorReply, ResponseCodes } from "@cartridge/controller";
 import { constants, addAddressPadding } from "starknet";
-import Container from "components/Container";
+import Container from "components/legacy/Container";
 import { Header } from "components/Header";
 import { Banner } from "components/Banner";
 import Controller from "utils/controller";

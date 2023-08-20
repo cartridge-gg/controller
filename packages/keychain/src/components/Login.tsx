@@ -26,7 +26,7 @@ import { useDebounce } from "hooks/debounce";
 import Web3Auth from "./Web3Auth";
 import { constants, ec } from "starknet";
 import Controller from "utils/controller";
-import Container from "./Container";
+import Container from "./legacy/Container";
 import { Header } from "./Header";
 import { DrawerWrapper } from "components/DrawerWrapper";
 import FingerprintIcon from "./icons/Fingerprint2";

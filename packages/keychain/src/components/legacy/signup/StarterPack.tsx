@@ -20,7 +20,7 @@ import {
 } from "generated/graphql";
 import Controller from "utils/controller";
 import Container from "../Container";
-import Footer from "../Footer";
+import Footer from "../../Footer";
 import { remoteSvgIcon } from "utils/svg";
 import BannerImage from "./BannerImage";
 

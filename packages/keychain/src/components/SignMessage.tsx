@@ -3,14 +3,13 @@ import { Circle, Flex, HStack, Spacer, Text, VStack } from "@chakra-ui/react";
 
 import { typedData as td, shortString, constants, Signature } from "starknet";
 
-import Container from "./Container";
+import Container from "./legacy/Container";
 import Controller from "utils/controller";
 import Footer from "./Footer";
 import { ResponseCodes } from "@cartridge/controller";
 import { Error } from "@cartridge/controller/src/types";
 import { Header } from "./Header";
 import Transfer from "./icons/Transfer";
-import logout from "methods/logout";
 
 const DataContainer = ({
   title,

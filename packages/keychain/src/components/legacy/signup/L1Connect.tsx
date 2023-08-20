@@ -1,7 +1,6 @@
 import { useState, useCallback } from "react";
 import {
   Flex,
-  Box,
   Text,
   Link,
   Circle,

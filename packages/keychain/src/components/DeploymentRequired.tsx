@@ -1,7 +1,7 @@
 import { constants } from "starknet";
 import Controller from "utils/controller";
 import { Error as ErrorReply, ResponseCodes } from "@cartridge/controller";
-import Container from "components/Container";
+import Container from "components/legacy/Container";
 import { Header } from "components/Header";
 import { Banner } from "components/Banner";
 import { useEffect, useState } from "react";

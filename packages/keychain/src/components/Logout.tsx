@@ -6,7 +6,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import Container from "./Container";
+import Container from "./legacy/Container";
 import { Header } from "./Header";
 import LogoutLarge from "./icons/LogoutLarge";
 

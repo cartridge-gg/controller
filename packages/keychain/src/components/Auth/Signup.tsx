@@ -9,7 +9,7 @@ import {
 } from "formik";
 import { constants, ec, KeyPair } from "starknet";
 import { PortalFooter, PORTAL_FOOTER_MIN_HEIGHT } from "./PortalFooter";
-import { PortalBanner } from "components/PortalBanner";
+import { PortalBanner } from "components";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   DeployAccountDocument,

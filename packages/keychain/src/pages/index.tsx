@@ -14,8 +14,6 @@ import {
   SupportedChainIds,
 } from "@cartridge/controller";
 import Connect from "components/Connect";
-import { Login } from "components/Login";
-import { Signup } from "components/signup";
 import { Redeploy } from "components/Redeploy";
 import {
   Abi,
@@ -28,7 +26,7 @@ import {
 } from "starknet";
 import SignMessage from "components/SignMessage";
 import Execute from "components/Execute";
-import { StarterPack } from "components/signup/StarterPack";
+import { StarterPack } from "components/legacy/signup/StarterPack";
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
 import provision from "../methods/provision";
 import { register } from "../methods/register";
@@ -40,7 +38,7 @@ import { normalize, validate } from "../methods";
 import DeploymentRequired from "components/DeploymentRequired";
 import Quests from "./quests";
 import Logout from "components/Logout";
-import { Signup as SignupV2, Login as LoginV2 } from "components/v2";
+import { Signup, Login } from "components";
 
 type Context = Connect | Logout | Execute | SignMessage | StarterPack | Quests;
 
@@ -378,7 +376,7 @@ const Index: NextPage = () => {
     return (
       <>
         {showSignup ? (
-          <SignupV2
+          <Signup
             prefilledName={prefilledUsername}
             onLogin={(username) => {
               setPrefilledUsername(username);
@@ -388,7 +386,7 @@ const Index: NextPage = () => {
             context={context as Connect}
           />
         ) : (
-          <LoginV2
+          <Login
             prefilledName={prefilledUsername}
             onSignup={(username) => {
               setPrefilledUsername(username);
@@ -396,26 +394,6 @@ const Index: NextPage = () => {
             }}
             onController={onController}
             context={context as Connect}
-          />
-        )}
-      </>
-    );
-
-    // TODO: remove
-    return (
-      <>
-        {showSignup ? (
-          <Signup
-            showLogin={() => setShowSignup(false)}
-            onController={(c) => setController(c)}
-            onCancel={() => context.reject()}
-          />
-        ) : (
-          <Login
-            chainId={chainId}
-            showSignup={() => setShowSignup(true)}
-            onController={(c) => setController(c)}
-            onCancel={() => context.reject()}
           />
         )}
       </>

@@ -86,6 +86,31 @@ export function PortalFooter({
         {isOpen && origin && policies && (
           <SessionDetails origin={origin} policies={policies} />
         )}
+
+        {/* TODO: starter pack
+          starterData && remaining > 0 && (
+          <>
+            <HStack gap="10px">
+              {starterData.game.starterPack.starterPackTokens.map(
+                (data, key) => (
+                  <ImageFrame
+                    key={key}
+                    bgImage={`url(${data.token.thumbnail.uri})`}
+                  />
+                ),
+              )}
+              <ImageFrame>
+                <OlmechIcon boxSize="30px" />
+              </ImageFrame>
+            </HStack>
+            <HStack align="flex-start">
+              <SparklesSolidIcon />
+              <Text fontSize="12px" color="whiteAlpha.600">
+                Claim Starterpack
+              </Text>
+            </HStack>
+          </>
+                ) */}
       </VStack>
 
       <Spacer />

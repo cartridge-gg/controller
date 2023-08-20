@@ -1,4 +1,4 @@
-import Container from "components/Container";
+import Container from "components/legacy/Container";
 import { useEffect, useMemo, useState } from "react";
 import { Header } from "components/Header";
 import { useAccountInfoQuery, useAccountQuestsQuery } from "generated/graphql";

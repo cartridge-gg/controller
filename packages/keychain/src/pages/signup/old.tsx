@@ -17,11 +17,11 @@ import {
   Quests,
   PendingTxn,
   Form as UsernameForm,
-} from "components/signup";
+} from "components/legacy/signup";
 
 import { useRouter } from "next/router";
 import Controller from "utils/controller";
-import BannerImage from "components/signup/BannerImage";
+import BannerImage from "components/legacy/signup/BannerImage";
 import { StepsBar, Step } from "components/StepsBar";
 import { Credentials, onCreateFinalize } from "hooks/account";
 import { parseAttestationObject } from "utils/webauthn";

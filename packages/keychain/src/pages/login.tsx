@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import type { NextPage } from "next";
 import { constants } from "starknet";
-import { Login as LoginComponent } from "components/v2";
+import { Login as LoginComponent } from "components";
 
 const Login: NextPage = () => {
   const router = useRouter();

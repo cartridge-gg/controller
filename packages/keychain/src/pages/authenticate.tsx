@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import type { NextPage } from "next";
-import { Authenticate as AuthComponent } from "components/signup";
+import { Authenticate as AuthComponent } from "components/Auth";
 
 // auth page used for externally embedded keychain
 const Authenticate: NextPage = () => {

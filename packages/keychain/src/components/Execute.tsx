@@ -21,12 +21,11 @@ import {
   ExecuteReply,
   ResponseCodes,
 } from "@cartridge/controller";
-import Container from "./Container";
+import Container from "./legacy/Container";
 import { Status } from "utils/account";
 import { Header } from "./Header";
 import LowEth, { LowEthInfo } from "./LowEth";
 import BridgeEth from "./bridge/BridgeEth";
-import logout from "methods/logout";
 
 export const CONTRACT_ETH =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
