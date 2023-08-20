@@ -8,8 +8,11 @@ import {
   useFormikContext,
 } from "formik";
 import { constants, ec, KeyPair } from "starknet";
-import { PortalFooter, PORTAL_FOOTER_MIN_HEIGHT } from "./PortalFooter";
-import { PortalBanner } from "components";
+import {
+  PortalBanner,
+  PortalFooter,
+  PORTAL_FOOTER_MIN_HEIGHT,
+} from "components";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   DeployAccountDocument,
@@ -243,7 +246,7 @@ function Form({
   return (
     <FormikForm style={{ width: "100%" }}>
       <PortalBanner
-        icon={<PlugNewDuoIcon boxSize={8} />}
+        Icon={PlugNewDuoIcon}
         title="Sign Up"
         description="Select a username"
       />
@@ -286,7 +289,7 @@ function Form({
         isSignup
       >
         <Button type="submit" colorScheme="colorful">
-          Sign Up
+          sign up
         </Button>
       </PortalFooter>
 

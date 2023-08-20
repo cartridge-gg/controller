@@ -8,8 +8,11 @@ import {
   useFormikContext,
 } from "formik";
 import { ec } from "starknet";
-import { PortalFooter, PORTAL_FOOTER_MIN_HEIGHT } from "./PortalFooter";
-import { PortalBanner } from "components";
+import {
+  PortalBanner,
+  PortalFooter,
+  PORTAL_FOOTER_MIN_HEIGHT,
+} from "components";
 import { useCallback, useState } from "react";
 import Controller from "utils/controller";
 import { FormValues, LoginProps } from "./types";
@@ -113,7 +116,7 @@ function Form({
   return (
     <FormikForm style={{ width: "100%" }}>
       <PortalBanner
-        icon={<FingerprintDuoIcon boxSize={8} />}
+        Icon={FingerprintDuoIcon}
         title="Log In"
         description="Enter your username"
       />
@@ -145,7 +148,7 @@ function Form({
 
       <PortalFooter origin={context?.origin} policies={context?.policies}>
         <Button type="submit" colorScheme="colorful" isLoading={isLoggingIn}>
-          Log In
+          log in
         </Button>
       </PortalFooter>
     </FormikForm>

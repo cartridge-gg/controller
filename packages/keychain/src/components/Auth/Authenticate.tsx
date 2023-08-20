@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { UseDisclosureProps } from "@chakra-ui/react";
 import Footer from "components/Footer";
 import { Unsupported } from "./Unsupported";
@@ -108,20 +108,20 @@ export const Authenticate = ({
 type UserAgent = "ios" | "android" | "other";
 
 const Content = ({ userAgent }: { userAgent: UserAgent }) => {
-  const renderIcon = useCallback(() => {
+  const Icon = useMemo(() => {
     switch (userAgent) {
       case "ios":
-        return <FaceIDDuoIcon boxSize={6} />;
+        return FaceIDDuoIcon;
       case "android":
-        return <QRCodeDuoIcon boxSize={6} />;
+        return QRCodeDuoIcon;
       case "other":
-        return <FingerprintDuoIcon boxSize={6} />;
+        return FingerprintDuoIcon;
     }
   }, [userAgent]);
 
   return (
     <PortalBanner
-      icon={renderIcon()}
+      Icon={Icon}
       title="Authenticate Yourself"
       description={
         <>

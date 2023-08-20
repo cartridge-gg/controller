@@ -13,7 +13,6 @@ import {
   ProbeReply,
   SupportedChainIds,
 } from "@cartridge/controller";
-import Connect from "components/Connect";
 import { Redeploy } from "components/Redeploy";
 import {
   Abi,
@@ -38,7 +37,7 @@ import { normalize, validate } from "../methods";
 import DeploymentRequired from "components/DeploymentRequired";
 import Quests from "./quests";
 import Logout from "components/Logout";
-import { Signup, Login } from "components";
+import { Signup, Login, Connect } from "components";
 
 type Context = Connect | Logout | Execute | SignMessage | StarterPack | Quests;
 
@@ -473,7 +472,7 @@ const Index: NextPage = () => {
       <Connect
         chainId={chainId}
         origin={ctx.origin}
-        policys={ctx.type === "connect" ? (ctx as Connect).policies : []}
+        policies={ctx.type === "connect" ? (ctx as Connect).policies : []}
         onConnect={() =>
           onConnect({
             context: ctx,
@@ -481,7 +480,9 @@ const Index: NextPage = () => {
             maxFee: "",
           })
         }
-        onCancel={(error: Error) => ctx.resolve(error)}
+        onCancel={() =>
+          ctx.resolve({ code: ResponseCodes.CANCELED, message: "Canceled" })
+        }
         onLogout={() => onLogout(ctx)}
       />
     );
@@ -560,7 +561,7 @@ const Index: NextPage = () => {
         <Connect
           origin={ctx.origin}
           chainId={_chainId}
-          policys={[]}
+          policies={[]}
           onConnect={() =>
             onConnect({
               context: ctx,
@@ -568,7 +569,9 @@ const Index: NextPage = () => {
               maxFee: "",
             })
           }
-          onCancel={(error: Error) => ctx.resolve(error)}
+          onCancel={() =>
+            ctx.resolve({ code: ResponseCodes.CANCELED, message: "Canceled" })
+          }
           onLogout={() => onLogout(ctx)}
         />
       );
