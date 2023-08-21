@@ -1,5 +1,5 @@
 import { Button, Circle, HStack, Spacer, Text, VStack } from "@chakra-ui/react";
-import Warning from "./icons/Warning";
+import { AlertIcon } from "@cartridge/ui";
 
 export interface LowEthInfo {
   label: string;
@@ -10,62 +10,66 @@ export interface LowEthInfo {
   onBridge: () => void;
 }
 
-const LowEth = ({
+export function LowEth({
   label,
   balance,
   max,
   lowAmount,
   reject,
   onBridge,
-}: LowEthInfo) => {
+}: LowEthInfo) {
   return (
     <VStack
       w="full"
-      spacing="18px"
-      pt="18px"
+      spacing={4.5}
+      pt={4.5}
       borderTop="1px solid"
-      borderTopColor="gray.700"
+      borderTopColor="solid.accent"
     >
-      <HStack w="full" borderRadius="6px" bgColor="gray.700" p="12px 18px">
-        <HStack color="gray.200" w="full">
+      <HStack w="full" borderRadius="md" bg="solid.primary" px={3} py={4.5}>
+        <HStack color="text.secondaryAccent" w="full">
           <Text
-            color="currentColor"
-            fontSize="10px"
-            fontWeight="700"
-            letterSpacing="0.05em"
+            color="text.secondaryAccent"
+            fontSize="xs"
+            fontWeight="bold"
             textTransform="uppercase"
           >
             {label}
           </Text>
         </HStack>
+
         <Spacer />
+
         <VStack w="full" align="end">
-          <Text color="red.400" fontSize="13px">{`~${lowAmount}`}</Text>
-          <HStack color="gray.200" fontSize="11px">
+          <Text color="text.error" fontSize="sm">{`~${lowAmount}`}</Text>
+          <HStack color="text.secondary" fontSize="xs">
             <Text color="currentColor">{`Bal: ${balance}`}</Text>
             <Text color="currentColor">{`Max: ${max}`}</Text>
           </HStack>
         </VStack>
       </HStack>
+
       <VStack
         w="full"
-        borderRadius="6px"
-        p="12px 18px"
-        bgColor="yellow.200"
+        borderRadius="md"
+        px={4}
+        py={3}
+        bg="yellow.200"
         align="start"
       >
         <HStack
           w="full"
           minH="42px"
           borderBottom="1px solid"
-          borderBottomColor="blackAlpha.200"
+          borderBottomColor="solid.accent"
         >
-          <Circle size="30px" bgColor="yellow.300">
-            <Warning width="13px" height="13px" color="yellow.800" />
+          <Circle size={7} bg="yellow.300">
+            <AlertIcon color="yellow.800" />
           </Circle>
+
           <Text
-            fontSize="11px"
-            fontWeight="700"
+            fontSize="xs"
+            fontWeight="bold"
             color="yellow.800"
             letterSpacing="0.05em"
             textTransform="uppercase"
@@ -73,30 +77,26 @@ const LowEth = ({
             Insufficient Funds
           </Text>
         </HStack>
-        <Text fontSize="13px" color="yellow.800">
+
+        <Text fontSize="xs" color="yellow.800">
           You do not have enough ETH to complete the above transaction
         </Text>
+
         <HStack w="full">
           <Button
-            variant="primaryDarken"
-            colorScheme="blackAlpha"
-            flexGrow="1"
+            colorScheme="translucent"
+            color="black"
+            flex={1}
             onClick={reject}
           >
             Reject
           </Button>
-          <Button
-            variant="primary400"
-            colorScheme="yellow"
-            flexGrow="1"
-            onClick={onBridge}
-          >
+
+          <Button flex={1} onClick={onBridge}>
             Add Funds
           </Button>
         </HStack>
       </VStack>
     </VStack>
   );
-};
-
-export default LowEth;
+}

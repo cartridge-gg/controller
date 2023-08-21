@@ -19,7 +19,7 @@ import EthL1BridgeABI from "./abis/EthL1Bridge.json";
 import { BigNumber } from "ethers";
 import Account from "utils/account";
 
-const TransferButton = ({
+export function TransferButton({
   account,
   value,
   disabled,
@@ -31,7 +31,7 @@ const TransferButton = ({
   disabled: boolean;
   onError: (err: any) => void;
   onTxSubmitted: (hash: string) => void;
-}) => {
+}) {
   const [l2Fee, setL2Fee] = useState<number>();
 
   const estimateL2Fee =
@@ -106,6 +106,4 @@ const TransferButton = ({
       Transfer
     </Button>
   );
-};
-
-export default TransferButton;
+}

@@ -4,7 +4,7 @@ import { typedData as td, shortString, constants, Signature } from "starknet";
 import { Container } from "./Container";
 import { PortalBanner } from "./PortalBanner";
 import Controller from "utils/controller";
-import { TransferDuoIcon } from "@cartridge/ui/lib";
+import { TransferDuoIcon } from "@cartridge/ui";
 import { PortalFooter } from "./PortalFooter";
 
 export function SignMessage({

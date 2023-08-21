@@ -24,7 +24,7 @@ async function fetchEthPrice() {
   return res.json();
 }
 
-const Fees = ({
+export function Fees({
   error,
   chainId,
   fees,
@@ -36,7 +36,7 @@ const Fees = ({
   fees?: { base: BN; max: BN };
   balance: string;
   approved?: string;
-}) => {
+}) {
   const [formattedFee, setFormattedFee] = useState<{
     base: string;
     max: string;
@@ -87,8 +87,9 @@ const Fees = ({
     <>
       <Error error={error} />
       <VStack
+        w="full"
         overflow="hidden"
-        borderRadius="6px"
+        borderRadius="md"
         spacing="1px"
         align="flex-start"
       >
@@ -121,9 +122,9 @@ const Fees = ({
       </VStack>
     </>
   );
-};
+}
 
-const LineItem = ({
+function LineItem({
   name,
   description,
   value,
@@ -133,29 +134,34 @@ const LineItem = ({
   description?: string;
   value?: string;
   isLoading?: boolean;
-}) => (
-  <HStack w="full" h="40px" p="18px" bgColor="gray.700" color="gray.200">
-    <Text variant="ibm-upper-bold" fontSize={10} color="inherit">
-      {name}
-    </Text>
-    <Spacer />
-    <HStack spacing="12px">
-      {isLoading ? (
-        <Spinner size="sm" />
-      ) : (
-        <>
-          {description && (
-            <>
-              <Text fontSize={11} color="inherit">
-                {description}
-              </Text>
-              <Divider orientation="vertical" borderColor="gray.600" h="16px" />
-            </>
-          )}
-          <Text fontSize={13}>{value}</Text>
-        </>
-      )}
+}) {
+  return (
+    <HStack w="full" h="40px" p={4} bg="solid.primary" color="text.secondary">
+      <Text fontSize="2xs" color="inherit">
+        {name}
+      </Text>
+      <Spacer />
+      <HStack spacing="12px">
+        {isLoading ? (
+          <Spinner size="sm" />
+        ) : (
+          <>
+            {description && (
+              <>
+                <Text fontSize={11} color="inherit">
+                  {description}
+                </Text>
+                <Divider
+                  orientation="vertical"
+                  borderColor="gray.600"
+                  h="16px"
+                />
+              </>
+            )}
+            <Text fontSize={13}>{value}</Text>
+          </>
+        )}
+      </HStack>
     </HStack>
-  </HStack>
-);
-export default Fees;
+  );
+}

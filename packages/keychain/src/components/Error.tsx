@@ -1,10 +1,6 @@
 import {
-  Box,
-  Flex,
   Text,
-  HStack,
   VStack,
-  Divider,
   Accordion,
   AccordionItem,
   AccordionButton,
@@ -14,7 +10,7 @@ import {
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 
-export const Error = ({ error }: { error: Error }) => {
+export function Error({ error }: { error: Error }) {
   return (
     <>
       {error && (
@@ -26,21 +22,28 @@ export const Error = ({ error }: { error: Error }) => {
           allowToggle
           variant="error"
           color="red.800"
-          fontSize="11px"
+          fontSize="sm"
         >
           <AccordionItem position="relative">
             <AccordionButton>
-              <Text variant="ibm-upper-bold" fontSize="10px" color="inherit">
+              <Text fontSize="2xs" color="inherit">
                 Error Expected
               </Text>
+
               <Spacer />
-              <AccordionIcon boxSize="14px" />
+
+              <AccordionIcon boxSize={5} />
             </AccordionButton>
-            <AccordionPanel borderTop="1px solid" borderColor="blackAlpha.200">
+
+            <AccordionPanel
+              borderTop="1px solid"
+              borderColor="translucent.soft"
+            >
               <VStack align="flex-start">
                 <Text color="inherit" fontWeight="bold">
                   Error Details
                 </Text>
+
                 <Text color="inherit">{error?.message}</Text>
               </VStack>
             </AccordionPanel>
@@ -49,4 +52,4 @@ export const Error = ({ error }: { error: Error }) => {
       )}
     </>
   );
-};
+}

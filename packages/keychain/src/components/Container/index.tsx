@@ -12,6 +12,7 @@ export function Container({
   fullPage,
   chainId,
   address,
+  onBack,
   ...rest
 }: { children: ReactNode; fullPage: boolean } & StyleProps & HeaderProps) {
   return (
@@ -26,7 +27,7 @@ export function Container({
       p={0}
       {...rest}
     >
-      <Header chainId={chainId} address={address} />
+      <Header chainId={chainId} address={address} onBack={onBack} />
       <VStack
         w="full"
         h="full"

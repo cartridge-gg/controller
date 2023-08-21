@@ -13,7 +13,6 @@ import {
   ProbeReply,
   SupportedChainIds,
 } from "@cartridge/controller";
-import { Redeploy } from "components/Redeploy";
 import {
   Abi,
   Call,
@@ -23,7 +22,6 @@ import {
   Signature,
   typedData,
 } from "starknet";
-import Execute from "components/Execute";
 import { StarterPack } from "components/legacy/signup/StarterPack";
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
 import provision from "../methods/provision";
@@ -33,9 +31,17 @@ import logout from "../methods/logout";
 import { revoke, session, sessions } from "../methods/sessions";
 import { Status } from "utils/account";
 import { normalize, validate } from "../methods";
-import DeploymentRequired from "components/DeploymentRequired";
 import Quests from "./quests";
-import { Connect, Login, Logout, Signup, SignMessage } from "components";
+import {
+  Connect,
+  DeploymentRequired,
+  Execute,
+  Login,
+  Logout,
+  Redeploy,
+  SignMessage,
+  Signup,
+} from "components";
 
 type Context = Connect | Logout | Execute | SignMessage | StarterPack | Quests;
 
@@ -585,7 +591,6 @@ const Index: NextPage = () => {
         <Redeploy
           chainId={_chainId}
           controller={controller}
-          onClose={(error: Error) => ctx.resolve(error)}
           onLogout={() => onLogout(ctx)}
         />
       );
@@ -595,7 +600,12 @@ const Index: NextPage = () => {
       <DeploymentRequired
         chainId={chainId}
         controller={controller}
-        onClose={(error: Error) => ctx.resolve(error)}
+        onClose={() =>
+          ctx.resolve({
+            code: ResponseCodes.CANCELED,
+            message: "Canceled",
+          })
+        }
         onLogout={() => onLogout(ctx)}
       >
         <Execute
@@ -603,7 +613,12 @@ const Index: NextPage = () => {
           chainId={_chainId}
           controller={controller}
           onExecute={(res: ExecuteReply) => ctx.resolve(res)}
-          onCancel={(error: Error) => ctx.resolve(error)}
+          onCancel={() =>
+            ctx.resolve({
+              code: ResponseCodes.CANCELED,
+              message: "Canceled",
+            })
+          }
           onLogout={() => onLogout(ctx)}
         />
       </DeploymentRequired>

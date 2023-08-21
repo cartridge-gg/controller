@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Text, Circle, HStack, VStack, Spacer } from "@chakra-ui/react";
+import { Text, VStack, Spacer, Button } from "@chakra-ui/react";
 
 import Controller from "utils/controller";
 import {
@@ -10,27 +10,27 @@ import {
   InvocationsDetails,
   uint256,
 } from "starknet";
-import { Call } from "components/Call";
 import Footer from "components/Footer";
-import Fees from "components/Fees";
-import TransactionIcon from "./icons/Transaction";
+import { Fees } from "./Fees";
 import BN from "bn.js";
 import { BigNumber, utils } from "ethers";
-import {
-  Error as ErrorReply,
-  ExecuteReply,
-  ResponseCodes,
-} from "@cartridge/controller";
-import Container from "./legacy/Container";
+import { ExecuteReply, ResponseCodes } from "@cartridge/controller";
+import { Container } from "../Container";
 import { Status } from "utils/account";
-import { Header } from "./Header";
-import LowEth, { LowEthInfo } from "./LowEth";
-import BridgeEth from "./bridge/BridgeEth";
+import { LowEth, LowEthInfo } from "./LowEth";
+import { BridgeEth } from "../bridge/BridgeEth";
+import { PortalBanner } from "../PortalBanner";
+import { TransactionDuoIcon } from "@cartridge/ui";
+import { Call } from "./Call";
+import {
+  PORTAL_FOOTER_MIN_HEIGHT,
+  PortalFooter,
+} from "components/PortalFooter";
 
 export const CONTRACT_ETH =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 
-const Execute = ({
+export function Execute({
   origin,
   chainId,
   controller,
@@ -48,9 +48,9 @@ const Execute = ({
   transactionsDetail?: InvocationsDetails;
   abis?: Abi[];
   onExecute: (res: ExecuteReply) => void;
-  onCancel: (error: ErrorReply) => void;
+  onCancel: () => void;
   onLogout: () => void;
-}) => {
+}) {
   const [fees, setFees] = useState<{
     base: BN;
     max: BN;
@@ -145,18 +145,14 @@ const Execute = ({
     if (!ethBalance || !ethApproved) {
       return;
     }
+
     if (ethBalance.lt(ethApproved)) {
       setLowEthInfo({
         label: "Approved Eth",
         balance: format(ethBalance),
         max: format(ethApproved),
         lowAmount: format(ethBalance.sub(ethApproved).mul(new BN("-1"))),
-        reject: () => {
-          onCancel({
-            code: ResponseCodes.CANCELED,
-            message: "Canceled",
-          });
-        },
+        reject: onCancel,
         onBridge: () => setBridging(true),
       });
     } else if (fees?.max && ethBalance.lt(ethApproved.add(fees.max))) {
@@ -167,12 +163,7 @@ const Execute = ({
         lowAmount: format(
           ethBalance.sub(ethApproved.add(fees.max)).mul(new BN("-1")),
         ),
-        reject: () => {
-          onCancel({
-            code: ResponseCodes.CANCELED,
-            message: "Canceled",
-          });
-        },
+        reject: onCancel,
         onBridge: () => setBridging(true),
       });
     }
@@ -189,101 +180,89 @@ const Execute = ({
     });
   }, [account, calls, fees, onExecute]);
 
+  const onBack = useCallback(() => {
+    setBridging(false);
+  }, []);
+
   if (bridging) {
     return (
-      <Container>
-        <BridgeEth
-          chainId={chainId}
-          controller={controller}
-          onBack={() => setBridging(false)}
-          onClose={() => {
-            onCancel({
-              code: ResponseCodes.CANCELED,
-              message: "Canceled",
-            });
-          }}
-          onLogout={onLogout}
-        />
+      <Container
+        fullPage={false}
+        chainId={chainId}
+        address={account.address}
+        onLogout={onLogout}
+        onBack={onBack}
+      >
+        <BridgeEth chainId={chainId} controller={controller} />
       </Container>
     );
   }
 
   return (
-    <Container>
-      <Header
-        chainId={chainId}
-        address={account.address}
-        onClose={() => {
-          onCancel({
-            code: ResponseCodes.CANCELED,
-            message: "Cancelled",
-          });
-        }}
-        onLogout={onLogout}
-      />
-      <HStack w="full" justify="flex-start" pb="20px" spacing="20px">
-        <Circle bgColor="gray.700" size="48px">
-          <TransactionIcon boxSize="30px" />
-        </Circle>
-        <Text fontSize="17px" fontWeight="bold">
-          Submit Transaction
-        </Text>
-      </HStack>
-      <VStack spacing="1px" w="full">
-        <VStack
-          w="full"
-          p="12px"
-          align="flex-start"
-          bgColor="gray.700"
-          borderRadius="6px 6px 0 0"
-        >
-          <Text variant="ibm-upper-bold" fontSize="10px" color="gray.200">
-            Actions
-          </Text>
+    <Container
+      fullPage={false}
+      chainId={chainId}
+      address={account.address}
+      onLogout={onLogout}
+    >
+      <PortalBanner Icon={TransactionDuoIcon} title="Submit Transaction" />
+
+      <VStack
+        w="full"
+        paddingBottom={lowEthInfo ? undefined : PORTAL_FOOTER_MIN_HEIGHT}
+      >
+        <VStack spacing="1px" w="full" borderRadius="md" bg="solid.primary">
+          <VStack w="full" p={3} align="flex-start">
+            <Text fontSize="xs" fontWeight="bold" color="text.secondaryAccent">
+              Actions
+            </Text>
+          </VStack>
+
+          <VStack w="full" spacing="1px">
+            {calls.map((call, i) => (
+              <Call
+                key={i}
+                chainId={chainId}
+                policy={{
+                  target: call.contractAddress,
+                  method: call.entrypoint,
+                }}
+                _last={{ borderBottomRadius: "md" }}
+              />
+            ))}
+          </VStack>
         </VStack>
-        <VStack w="full" spacing="1px">
-          {calls.map((call, i) => (
-            <Call
-              key={i}
+
+        {lowEthInfo ? (
+          <>
+            <Spacer />
+            <LowEth {...lowEthInfo} />
+          </>
+        ) : (
+          <VStack w="full">
+            <Fees
+              error={error}
               chainId={chainId}
-              policy={{
-                target: call.contractAddress,
-                method: call.entrypoint,
-              }}
-              _last={{ borderRadius: "0 0 6px 6px" }}
+              fees={fees}
+              balance={ethBalance && format(ethBalance)}
+              approved={ethApproved && format(ethApproved)}
             />
-          ))}
-        </VStack>
+
+            <PortalFooter>
+              <Button
+                colorScheme="colorful"
+                onClick={onSubmit}
+                isLoading={isLoading}
+                isDisabled={!fees}
+              >
+                submit
+              </Button>
+
+              <Button onClick={onCancel}>Cancel</Button>
+            </PortalFooter>
+          </VStack>
+        )}
       </VStack>
-      {lowEthInfo ? (
-        <>
-          <Spacer />
-          <LowEth {...lowEthInfo} />
-        </>
-      ) : (
-        <Footer
-          isLoading={isLoading}
-          isDisabled={!fees}
-          confirmText="Submit"
-          onConfirm={onSubmit}
-          onCancel={() => {
-            onCancel({
-              code: ResponseCodes.CANCELED,
-              message: "Canceled",
-            });
-          }}
-        >
-          <Fees
-            error={error}
-            chainId={chainId}
-            fees={fees}
-            balance={ethBalance && format(ethBalance)}
-            approved={ethApproved && format(ethApproved)}
-          />
-        </Footer>
-      )}
     </Container>
   );
-};
-
-export default Execute;
+}

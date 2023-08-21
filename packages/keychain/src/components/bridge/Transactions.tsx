@@ -1,80 +1,24 @@
 import { Circle, HStack, Link, Spacer, Text, VStack } from "@chakra-ui/react";
-import Check from "components/icons/Check";
-import Transfer from "components/icons/Transfer";
-import Label from "components/Label";
+import { Label } from "./Label";
 import { Loading } from "components/Loading";
 import { useEffect, useState } from "react";
 import { constants } from "starknet";
 import { goerli, mainnet, useWaitForTransaction } from "wagmi";
-import { ExternalIcon } from "@cartridge/ui";
+import { CheckIcon, ExternalIcon, TransferDuoIcon } from "@cartridge/ui";
+import { PortalBanner } from "components/PortalBanner";
 
 enum CardState {
   PENDING = "PENDING",
   COMPLETE = "COMPLETE",
 }
 
-const Card = ({
-  state,
-  href,
-  chainId,
-  ethTxnHash,
-  onConfirmed,
-  children,
-}: {
-  state: CardState;
-  href: string;
-  chainId: constants.StarknetChainId;
-  ethTxnHash: string;
-  onConfirmed?: () => void;
-  children: React.ReactNode;
-}) => {
-  const { data } = useWaitForTransaction({
-    chainId:
-      chainId === constants.StarknetChainId.MAINNET ? mainnet.id : goerli.id,
-    hash: ethTxnHash as `0x${string}`,
-    enabled: state === CardState.PENDING,
-  });
-
-  useEffect(() => {
-    if (data !== undefined) onConfirmed?.();
-  }, [data, onConfirmed]);
-
-  return (
-    <HStack
-      w="full"
-      minH="54px"
-      bgColor="gray.700"
-      borderRadius="4px"
-      p="12px"
-      spacing="12px"
-    >
-      <Circle bgColor="gray.600" size="30px">
-        {state === CardState.PENDING ? (
-          <Loading width="12px" height="12px" fill="white" />
-        ) : (
-          <Check boxSize="18px" fill="green.400" />
-        )}
-      </Circle>
-      {children}
-      <Spacer />
-      <Link href={href} isExternal>
-        <HStack px="13px" h="full">
-          <ExternalIcon color="blue.400" boxSize="12px" />
-        </HStack>
-      </Link>
-    </HStack>
-  );
-};
-
-const TxnTracker = ({
-  address,
+export function TxnTracker({
   chainId,
   ethTxnHash,
 }: {
-  address: string;
   chainId: constants.StarknetChainId;
   ethTxnHash: string;
-}) => {
+}) {
   const [txn, setTxn] = useState<{ hash: string; state: CardState }>({
     hash: ethTxnHash,
     state: CardState.PENDING,
@@ -84,23 +28,9 @@ const TxnTracker = ({
   const etherscanHref = `https://${etherscanSubdomain}etherscan.io/tx/${ethTxnHash}`;
 
   return (
-    <VStack w="full" align="start" spacing="24px">
-      <HStack
-        w="full"
-        minH="72px"
-        borderBottom="1px solid"
-        borderColor="gray.700"
-        justify="flex-start"
-        pb="20px"
-        spacing="20px"
-      >
-        <Circle bgColor="gray.700" size="48px">
-          <Transfer boxSize="30px" color="green.400" />
-        </Circle>
-        <Text fontSize="17px" fontWeight="bold">
-          Transactions
-        </Text>
-      </HStack>
+    <VStack w="full" align="start" spacing={6}>
+      <PortalBanner Icon={TransferDuoIcon} title="Transactions" />
+
       {txn.state === CardState.PENDING && (
         <>
           <Label>Pending...</Label>
@@ -117,9 +47,9 @@ const TxnTracker = ({
             }}
           >
             <Text
-              fontSize="11px"
+              fontSize="xs"
               letterSpacing="0.05em"
-              fontWeight="700"
+              fontWeight="bold"
               textTransform="uppercase"
             >
               Eth leaving L1
@@ -127,6 +57,7 @@ const TxnTracker = ({
           </Card>
         </>
       )}
+
       {txn.state === CardState.COMPLETE && (
         <>
           <Label>Today</Label>
@@ -137,11 +68,11 @@ const TxnTracker = ({
             ethTxnHash={ethTxnHash}
           >
             <Text
-              fontSize="11px"
+              fontSize="xs"
               letterSpacing="0.05em"
-              fontWeight="700"
+              fontWeight="bold"
               textTransform="uppercase"
-              color="green.400"
+              color="brand.accent" // not meant for text color
             >
               Eth arriving on L2
             </Text>
@@ -150,6 +81,60 @@ const TxnTracker = ({
       )}
     </VStack>
   );
-};
+}
 
-export default TxnTracker;
+function Card({
+  state,
+  href,
+  chainId,
+  ethTxnHash,
+  onConfirmed,
+  children,
+}: {
+  state: CardState;
+  href: string;
+  chainId: constants.StarknetChainId;
+  ethTxnHash: string;
+  onConfirmed?: () => void;
+  children: React.ReactNode;
+}) {
+  const { data } = useWaitForTransaction({
+    chainId:
+      chainId === constants.StarknetChainId.MAINNET ? mainnet.id : goerli.id,
+    hash: ethTxnHash as `0x${string}`,
+    enabled: state === CardState.PENDING,
+  });
+
+  useEffect(() => {
+    if (data !== undefined) onConfirmed?.();
+  }, [data, onConfirmed]);
+
+  return (
+    <HStack
+      w="full"
+      minH="54px"
+      bg="solid.primary"
+      borderRadius="sm"
+      p={4}
+      spacing={4}
+    >
+      <Circle bg="solid.secondary" size={12}>
+        {state === CardState.PENDING ? (
+          <Loading fill="text.primary" />
+        ) : (
+          <CheckIcon boxSize={6} color="brand.accent" />
+        )}
+      </Circle>
+
+      {children}
+
+      <Spacer />
+
+      <Link href={href} isExternal>
+        <HStack px={3} h="full">
+          <ExternalIcon color="link.blue" boxSize={4} />
+        </HStack>
+      </Link>
+    </HStack>
+  );
+}

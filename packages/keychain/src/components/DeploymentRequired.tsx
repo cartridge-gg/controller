@@ -1,18 +1,16 @@
 import { constants } from "starknet";
 import Controller from "utils/controller";
-import { Error as ErrorReply, ResponseCodes } from "@cartridge/controller";
-import Container from "components/legacy/Container";
-import { Header } from "components/Header";
-import { Banner } from "components/Banner";
+import { Container } from "./Container";
 import { useEffect, useState } from "react";
 import { Status } from "utils/account";
-import Footer from "./Footer";
 import { Loading } from "./Loading";
 import { Button, Link } from "@chakra-ui/react";
 import { NamedChainId } from "@cartridge/controller/src/constants";
 import { ExternalIcon } from "@cartridge/ui";
+import { PortalBanner } from "./PortalBanner";
+import { PortalFooter } from "./PortalFooter";
 
-const DeploymentRequired = ({
+export function DeploymentRequired({
   chainId,
   controller,
   onClose,
@@ -21,17 +19,10 @@ const DeploymentRequired = ({
 }: {
   chainId: constants.StarknetChainId;
   controller: Controller;
-  onClose: (error: ErrorReply) => void;
+  onClose: () => void;
   onLogout: () => void;
   children: React.ReactNode;
-}) => {
-  const close = () => {
-    onClose({
-      code: ResponseCodes.CANCELED,
-      message: "Canceled",
-    });
-  };
-
+}) {
   const account = controller.account(chainId);
   const [status, setStatus] = useState<Status>(account.status);
   const [deployHash, setDeployHash] = useState<string>();
@@ -63,50 +54,41 @@ const DeploymentRequired = ({
     return () => clearInterval(id);
   }, [account, setStatus]);
 
-  return status === Status.DEPLOYING ? (
-    <Container>
-      <Header
+  if (status === Status.DEPLOYING) {
+    return (
+      <Container
+        fullPage={false}
         chainId={chainId}
         address={account.address}
-        onClose={() =>
-          onClose({
-            code: ResponseCodes.CANCELED,
-            message: "Canceled",
-          })
-        }
         onLogout={onLogout}
-      />
-      <Banner
-        icon={<Loading fill="white" />}
-        title="Deploying your account"
-        description="This may take a second"
-      />
-      {typeof deployHash === "string" && (
-        <Link
-          href={`https://${
-            NamedChainId[account._chainId] === "SN_GOERLI"
-              ? "testnet."
-              : undefined
-          }starkscan.co/tx/${deployHash}`}
-          isExternal
-        >
-          <Button
-            variant="dark"
-            size="xs"
-            fontSize="11px"
-            color="blue.400"
-            marginTop="40px"
-            rightIcon={<ExternalIcon />}
-          >
-            View on Starkscan
-          </Button>
-        </Link>
-      )}
-      <Footer cancelText="Close" onCancel={close} showConfirm={false} />
-    </Container>
-  ) : (
-    <>{children}</>
-  );
-};
+      >
+        <PortalBanner
+          icon={<Loading fill="white" />}
+          title="Deploying your account"
+          description="This may take a second"
+        />
 
-export default DeploymentRequired;
+        {typeof deployHash === "string" && (
+          <Link
+            href={`https://${
+              NamedChainId[account._chainId] === "SN_GOERLI"
+                ? "testnet."
+                : undefined
+            }starkscan.co/tx/${deployHash}`}
+            isExternal
+          >
+            <Button variant="link" marginTop={10} rightIcon={<ExternalIcon />}>
+              View on Starkscan
+            </Button>
+          </Link>
+        )}
+
+        <PortalFooter>
+          <Button onClick={onClose}>close</Button>
+        </PortalFooter>
+      </Container>
+    );
+  }
+
+  return <>{children}</>;
+}
