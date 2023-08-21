@@ -9,7 +9,7 @@ import { TransactionSummary } from "./TransactionSummary";
 import { WedgeUpIcon } from "@cartridge/ui";
 import { Policy } from "@cartridge/controller";
 import { SessionDetails } from "./SessionDetails";
-import React from "react";
+import React, { useMemo } from "react";
 
 export function PortalFooter({
   children,
@@ -22,6 +22,7 @@ export function PortalFooter({
   isSignup?: boolean;
 }) {
   const { isOpen, onToggle } = useDisclosure();
+  const isExpandable = useMemo(() => origin, [origin]);
 
   return (
     <VStack
@@ -37,37 +38,39 @@ export function PortalFooter({
       p={4}
       paddingTop={0}
     >
-      <Box // mimic top border
-        w="50px"
-        h="25px"
-        bg="solid.accent"
-        borderRadius="50px 50px 0 0"
-        position="absolute"
-        left="calc(50% - 50px / 2)"
-        top="calc(-50px / 2)"
-      >
-        <IconButton
-          left="1px"
-          top="1px"
-          aria-label="Expand footer"
-          icon={
-            <WedgeUpIcon
-              boxSize={10}
-              transform={isOpen ? "rotate(180deg)" : undefined}
-              transition="all 0.40s ease-out"
-              color="text.secondary"
-            />
-          }
-          size="lg"
-          variant="round"
-          bg="solid.bg"
-          onClick={onToggle}
-        />
-      </Box>
+      {isExpandable && (
+        <Box // mimic top border
+          w="50px"
+          h="25px"
+          bg="solid.accent"
+          borderRadius="50px 50px 0 0"
+          position="absolute"
+          left="calc(50% - 50px / 2)"
+          top="calc(-50px / 2)"
+        >
+          <IconButton
+            left="1px"
+            top="1px"
+            aria-label="Expand footer"
+            icon={
+              <WedgeUpIcon
+                boxSize={10}
+                transform={isOpen ? "rotate(180deg)" : undefined}
+                transition="all 0.40s ease-out"
+                color="text.secondary"
+              />
+            }
+            size="lg"
+            variant="round"
+            bg="solid.bg"
+            onClick={onToggle}
+          />
+        </Box>
+      )}
 
       <VStack
-        paddingTop={6}
-        paddingBottom={4}
+        paddingTop={isExpandable ? 6 : undefined}
+        paddingBottom={isExpandable ? 4 : undefined}
         align="stretch"
         w="full"
         h="full"

@@ -1,63 +1,13 @@
-import { useEffect, useState } from "react";
-import { Circle, Flex, HStack, Spacer, Text, VStack } from "@chakra-ui/react";
-
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Button, Flex, Text } from "@chakra-ui/react";
 import { typedData as td, shortString, constants, Signature } from "starknet";
-
-import Container from "./legacy/Container";
+import { Container } from "./Container";
+import { PortalBanner } from "./PortalBanner";
 import Controller from "utils/controller";
-import Footer from "./Footer";
-import { ResponseCodes } from "@cartridge/controller";
-import { Error } from "@cartridge/controller/src/types";
-import { Header } from "./Header";
-import Transfer from "./icons/Transfer";
+import { TransferDuoIcon } from "@cartridge/ui/lib";
+import { PortalFooter } from "./PortalFooter";
 
-const DataContainer = ({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) => {
-  return (
-    <Flex
-      direction="column"
-      align="start"
-      w="full"
-      css={{
-        "> p": {
-          width: "100%",
-          padding: "12px",
-          fontSize: "13px",
-          lineHeight: "16px",
-          backgroundColor: "var(--chakra-colors-gray-600)",
-        },
-        "> p:first-of-type": {
-          fontSize: "10px",
-          fontWeight: "700",
-          letterSpacing: "0.05em",
-          lineHeight: "18px",
-          textTransform: "uppercase",
-          color: "var(--chakra-colors-gray-200)",
-          backgroundColor: "var(--chakra-colors-gray-700)",
-          borderRadius: "6px 6px 0 0",
-        },
-        "> p:last-of-type": {
-          borderRadius: "0 0 6px 6px",
-        },
-        "> p:not(p:last-of-type)": {
-          borderBottom: "1px solid var(--chakra-colors-gray-800)",
-        },
-      }}
-    >
-      <>
-        <Text>{title}</Text>
-        {children}
-      </>
-    </Flex>
-  );
-};
-
-const SignMessage = ({
+export function SignMessage({
   controller,
   origin,
   typedData,
@@ -71,9 +21,9 @@ const SignMessage = ({
   typedData: td.TypedData;
   chainId: constants.StarknetChainId;
   onSign: (sig: Signature) => void;
-  onCancel: (error: Error) => void;
+  onCancel: () => void;
   onLogout: () => void;
-}) => {
+}) {
   const [messageData, setMessageData] = useState<td.TypedData>();
 
   useEffect(() => {
@@ -105,39 +55,28 @@ const SignMessage = ({
     setMessageData(typedData);
   }, [typedData]);
 
+  const hostname = useMemo(() => new URL(origin).hostname, [origin]);
+
+  const onConfirm = useCallback(async () => {
+    const account = controller.account(chainId);
+    const sig = await account.signMessage(typedData);
+    onSign(sig);
+  }, [chainId, controller, onSign, typedData]);
+
   return (
-    <Container>
-      <Header
-        address={controller.address}
-        chainId={chainId}
-        onClose={() =>
-          onCancel({
-            code: ResponseCodes.CANCELED,
-            message: "Canceled",
-          })
-        }
-        onLogout={onLogout}
+    <Container
+      fullPage={false}
+      chainId={chainId}
+      address={controller.address}
+      onLogout={onLogout}
+    >
+      <PortalBanner
+        Icon={TransferDuoIcon}
+        title="Signature Request"
+        description={`${hostname} is asking you to sign a message`}
       />
-      <Spacer minH="36px" />
+
       <Flex direction="column" align="start" gap="18px" w="full">
-        <HStack
-          w="full"
-          pb="24px"
-          borderBottom="1px solid"
-          borderColor="gray.700"
-        >
-          <Circle bgColor="gray.700" size="40px">
-            <Transfer color="green.400" fontSize="30px" />
-          </Circle>
-          <VStack align="start">
-            <Text fontSize="17px" lineHeight="20px" fontWeight="600">
-              Signature Request
-            </Text>
-            <Text color="gray.200" fontSize="12px" lineHeight="16px">
-              {origin} is asking you to sign a message
-            </Text>
-          </VStack>
-        </HStack>
         {(() => {
           if (!messageData) return <></>;
           const ptName = messageData.primaryType;
@@ -170,23 +109,54 @@ const SignMessage = ({
         })()}
       </Flex>
 
-      <Footer
-        onConfirm={async () => {
-          const account = controller.account(chainId);
-          const sig = await account.signMessage(typedData);
-          onSign(sig);
-        }}
-        onCancel={() => {
-          onCancel({
-            code: ResponseCodes.CANCELED,
-            message: "Canceled",
-          });
-        }}
-        confirmText="SIGN"
-        cancelText="REJECT"
-      />
+      <PortalFooter>
+        <Button colorScheme="colorful" onClick={onConfirm}>
+          sign
+        </Button>
+
+        <Button onClick={onCancel}>reject</Button>
+      </PortalFooter>
     </Container>
   );
-};
+}
 
-export default SignMessage;
+function DataContainer({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Flex
+      direction="column"
+      align="start"
+      w="full"
+      bg="solid.primary"
+      borderRadius="md"
+      css={{
+        "> p": {
+          padding: "12px",
+          fontSize: "13px",
+          lineHeight: "16px",
+        },
+        "> p:first-of-type": {
+          fontSize: "10px",
+          fontWeight: "700",
+          letterSpacing: "0.05em",
+          lineHeight: "18px",
+          textTransform: "uppercase",
+          color: "var(--chakra-colors-text-secondaryAccent)",
+        },
+        "> p:not(p:last-of-type)": {
+          borderBottom: "1px solid var(--chakra-colors-solid-bg)",
+        },
+      }}
+    >
+      <>
+        <Text>{title}</Text>
+        {children}
+      </>
+    </Flex>
+  );
+}

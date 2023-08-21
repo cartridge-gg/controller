@@ -23,7 +23,6 @@ import {
   Signature,
   typedData,
 } from "starknet";
-import SignMessage from "components/SignMessage";
 import Execute from "components/Execute";
 import { StarterPack } from "components/legacy/signup/StarterPack";
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
@@ -36,8 +35,7 @@ import { Status } from "utils/account";
 import { normalize, validate } from "../methods";
 import DeploymentRequired from "components/DeploymentRequired";
 import Quests from "./quests";
-import Logout from "components/Logout";
-import { Signup, Login, Connect } from "components";
+import { Connect, Login, Logout, Signup, SignMessage } from "components";
 
 type Context = Connect | Logout | Execute | SignMessage | StarterPack | Quests;
 
@@ -545,7 +543,12 @@ const Index: NextPage = () => {
         origin={ctx.origin}
         typedData={ctx.typedData}
         onSign={(sig: Signature) => context.resolve(sig)}
-        onCancel={(error: Error) => ctx.resolve(error)}
+        onCancel={() =>
+          ctx.resolve({
+            code: ResponseCodes.CANCELED,
+            message: "Canceled",
+          })
+        }
         onLogout={() => onLogout(ctx)}
       />
     );
