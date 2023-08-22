@@ -37,7 +37,7 @@ export function Quests({
   useEffect(() => {
     const qwp: Array<{ quest: any; progress: any }> = [];
     quests?.forEach(({ node: q }) => {
-      const progress = questProgression.find(
+      const progress = questProgression?.find(
         ({ node: qp }) => qp.questID === q.id,
       );
       qwp.push({
@@ -56,7 +56,7 @@ export function Quests({
       onBack={!!selectedQuestId ? () => setSelectedQuestId(null) : undefined}
       onLogout={onLogout}
     >
-      {false && !selectedQuestId ? (
+      {!selectedQuestId ? (
         <QuestOverview
           questsWithProgression={questsWithProgression}
           onSelect={(id: string) => setSelectedQuestId(id)}

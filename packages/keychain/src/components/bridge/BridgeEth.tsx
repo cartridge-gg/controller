@@ -15,7 +15,6 @@ import {
 } from "@chakra-ui/react";
 import { configureChains, fetchBalance } from "@wagmi/core";
 import { alchemyProvider } from "@wagmi/core/providers/alchemy";
-import EthereumLarge from "components/icons/EthereumLarge";
 import { useDebounce } from "hooks/debounce";
 import { useEffect, useState } from "react";
 import { constants } from "starknet";
@@ -30,6 +29,7 @@ import { Error } from "components/Error";
 import {
   CheckIcon,
   EthereumDuoIcon,
+  EthereumIcon,
   MetaMaskIcon,
   WedgeDownIcon,
 } from "@cartridge/ui";
@@ -184,7 +184,7 @@ export function BridgeEth({
             flexBasis="54px"
           >
             <Circle size={4} bg="solid.secondary">
-              <EthereumLarge boxSize={4} />
+              <EthereumIcon />
             </Circle>
           </HStack>
           <Input

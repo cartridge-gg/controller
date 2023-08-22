@@ -1,11 +1,14 @@
 import { Box, Button, Flex, HStack, Text, VStack } from "@chakra-ui/react";
 import { QuestState } from "./types";
 import { useEffect, useState } from "react";
-import Check from "components/icons/Check";
-import CircleCheck from "components/icons/CircleCheck";
-import CircleIcon from "components/icons/Circle";
 import { useClaimQuestRewardsMutation } from "generated/graphql";
-import { QuestsDuoIcon, SparklesLineIcon } from "@cartridge/ui";
+import {
+  CheckIcon,
+  CircleCheckIcon,
+  CircleNoCheckIcon,
+  QuestsDuoIcon,
+  SparklesLineIcon,
+} from "@cartridge/ui";
 import { PortalBanner } from "components/PortalBanner";
 
 export function QuestDetails({
@@ -73,7 +76,9 @@ export function QuestDetails({
             >
               <Tag>
                 {typeof questState !== "undefined" ||
-                  (questState !== QuestState.Incomplete && <Check mr="6px" />)}
+                  (questState !== QuestState.Incomplete && (
+                    <CheckIcon mr="6px" />
+                  ))}
                 {typeof questState === "undefined" ||
                 questState === QuestState.Incomplete
                   ? "incomplete"
@@ -101,14 +106,16 @@ export function QuestDetails({
                 return (
                   <HStack key={evt.id}>
                     {eventProgress?.completed ? (
-                      <CircleCheck color="green.400" />
+                      <CircleCheckIcon color="green.400" />
                     ) : (
-                      <CircleIcon color="gray.200" />
+                      <CircleNoCheckIcon color="text.secondary" />
                     )}
                     <Text
                       fontSize="12px"
                       color={
-                        eventProgress?.completed ? "green.400" : "gray.200"
+                        eventProgress?.completed
+                          ? "green.400"
+                          : "text.secondary"
                       }
                       fontWeight="700"
                     >

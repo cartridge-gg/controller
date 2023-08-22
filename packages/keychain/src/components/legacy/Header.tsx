@@ -15,7 +15,7 @@ import {
   MenuList,
   MenuItem,
 } from "@chakra-ui/react";
-import { Logo, WordLogo, HeaderItem, Chain } from "@cartridge/ui";
+import { Logo, WordLogo, HeaderItem, Chain, EthereumIcon } from "@cartridge/ui";
 import {
   CONTRACT_ETH,
   CONTRACT_POINTS,
@@ -25,7 +25,6 @@ import { Loading } from "components/Loading";
 import { useBalanceQuery } from "generated/graphql";
 import { useAvatar } from "hooks/avatar";
 import { BigNumber, utils, Wallet } from "ethers";
-import Ether from "components/icons/Ether";
 import {
   ArrowUpIcon,
   CopyIcon,
@@ -188,7 +187,7 @@ export const Header = ({
           <Chain name={chainName} />
           <Box minW="70px">
             <HeaderItem>
-              <Ether w="12px" h="12px" />
+              <EthereumIcon w="12px" h="12px" />
               {!!ethBalance && (
                 <Text fontWeight="700" letterSpacing="0.05em">
                   {parseFloat(ethBalance).toFixed(3)}
