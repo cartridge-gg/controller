@@ -25,7 +25,7 @@ import { useFormik } from "formik";
 import { Credentials, onCreateBegin } from "hooks/account";
 import { useAnalytics } from "hooks/analytics";
 import Unsupported from "./Unsupported";
-import { SimpleModal } from "@cartridge/ui/src/components/modals/SimpleModal";
+import { SimpleModal } from "@cartridge/ui";
 import {
   ArrowDownIcon,
   FaceIDDuoIcon,

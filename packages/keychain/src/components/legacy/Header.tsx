@@ -15,10 +15,7 @@ import {
   MenuList,
   MenuItem,
 } from "@chakra-ui/react";
-import { Logo } from "@cartridge/ui/src/components/brand/Logo";
-import { WordLogo } from "@cartridge/ui/src/components/brand/Word";
-import { HeaderItem } from "@cartridge/ui/src/components/HeaderItem";
-import Chain from "@cartridge/ui/src/components/menu/Chain";
+import { Logo, WordLogo, HeaderItem, Chain } from "@cartridge/ui";
 import {
   CONTRACT_ETH,
   CONTRACT_POINTS,

@@ -1,5 +1,5 @@
 import NextHead from "next/head";
-import CartridgeTheme from "@cartridge/ui/src/theme";
+import { CartridgeTheme } from "@cartridge/ui";
 import type { AppProps } from "next/app";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { CartridgeUIProvider } from "@cartridge/ui";

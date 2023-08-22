@@ -1,12 +1,11 @@
 import Container from "components/legacy/Container";
-import { useEffect, useMemo, useState } from "react";
-import { Header } from "components/Header";
+import { useEffect, useState } from "react";
+import { Header } from "components/legacy/Header";
 import { useAccountInfoQuery, useAccountQuestsQuery } from "generated/graphql";
 import { constants } from "starknet";
 import QuestOverview from "components/quests/Overview";
 import QuestDetails from "components/quests/Details";
-import { Box, Flex, Text, useToast } from "@chakra-ui/react";
-import logout from "methods/logout";
+import { Flex, Text, useToast } from "@chakra-ui/react";
 
 export enum QuestState {
   Incomplete,

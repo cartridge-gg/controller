@@ -1,10 +1,10 @@
 import { Button, HStack } from "@chakra-ui/react";
 import { WALLET_ADAPTERS } from "@web3auth/base";
-import Discord from "./icons/Discord";
 import { ec, number } from "starknet";
 import { computeAddress } from "methods/register";
 import Controller from "utils/controller";
 import web3auth from "utils/web3auth";
+import { DiscordIcon } from "@cartridge/ui";
 
 const Web3Auth = ({
   isDisabled = false,
@@ -63,7 +63,7 @@ const Web3Auth = ({
           }}
           isDisabled={isDisabled}
         >
-          <Discord height="16px" width="16px" mr="12px" mt="1px" />
+          <DiscordIcon height="16px" width="16px" mr="12px" mt="1px" />
           Connect with Discord
         </Button>
         {/* <Button flex={1} variant="secondary700" onClick={async () => {

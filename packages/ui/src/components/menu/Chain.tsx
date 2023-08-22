@@ -2,7 +2,7 @@ import { Text } from "@chakra-ui/react";
 import { HeaderItem } from "../HeaderItem";
 import { StarknetIcon } from "../icons";
 
-const Chain = ({ name }: { name: string }) => {
+export function Chain({ name }: { name: string }) {
   return (
     <HeaderItem>
       <StarknetIcon />
@@ -11,6 +11,4 @@ const Chain = ({ name }: { name: string }) => {
       </Text>
     </HeaderItem>
   );
-};
-
-export default Chain;
+}

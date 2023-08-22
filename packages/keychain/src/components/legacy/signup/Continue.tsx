@@ -1,5 +1,5 @@
-import { Text, VStack, Link, StyleProps } from "@chakra-ui/react";
-import { Header } from "components/Header";
+import { Text, VStack, StyleProps } from "@chakra-ui/react";
+import { Header } from "components/legacy/Header";
 import Container from "components/legacy/Container";
 import { SparklesDuoIcon } from "@cartridge/ui";
 

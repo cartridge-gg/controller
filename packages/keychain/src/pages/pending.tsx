@@ -1,15 +1,11 @@
 import type { NextPage } from "next";
 import dynamic from "next/dynamic";
-import { Flex, Container } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
 import Controller from "utils/controller";
 import { useUrlTxns } from "hooks/transaction";
-
-import { Header } from "components/Header";
-import { Banner } from "components/Banner";
-import Footer from "components/Footer";
 import { Transaction, TransactionState } from "components/Transaction";
-import { TimesCircleIcon } from "@cartridge/ui";
+import { TimerDuoIcon } from "@cartridge/ui";
+import { Container, PortalBanner } from "components";
 
 const Pending: NextPage = () => {
   const [txnResults, setTxnResults] = useState<TransactionState[]>([]);
@@ -37,15 +33,13 @@ const Pending: NextPage = () => {
 
   return (
     <>
-      <Header address={controller.address} />
-      <Container w={["full", "full", "400px"]} centerContent>
-        <Flex w="full" m={4} flexDirection="column" gap="18px">
-          <Banner
-            title={title}
-            description={description}
-            icon={<TimesCircleIcon boxSize="30px" />}
-          />
-        </Flex>
+      <Container fullPage address={controller.address} chainId={chainId}>
+        <PortalBanner
+          Icon={TimerDuoIcon}
+          title={title}
+          description={description}
+        />
+
         {txns.map((txn, idx) => (
           <Transaction
             key={idx}
@@ -57,7 +51,6 @@ const Pending: NextPage = () => {
             }}
           />
         ))}
-        <Footer showConfirm={false} cancelText="Close" onCancel={() => {}} />
       </Container>
     </>
   );

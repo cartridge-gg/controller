@@ -1,9 +1,3 @@
-export { Card } from "./components/Card";
-export { Logo } from "./components/brand/Logo";
-export { WordLogo } from "./components/brand/Word";
-export { Loading } from "./components/Loading";
-export { CartridgeUIProvider } from "./theme/Provider";
-
-export * as Components from "./components";
-
 export * from "./components";
+export * from "./theme";
+export { default as CartridgeTheme } from "./theme";

@@ -1,4 +1,3 @@
-import { Error as ErrorReply } from "@cartridge/controller";
 import { constants, addAddressPadding } from "starknet";
 import { Container } from "./Container";
 import Controller from "utils/controller";

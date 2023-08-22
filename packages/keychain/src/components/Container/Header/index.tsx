@@ -8,9 +8,8 @@ import {
   StyleProps,
   IconButton,
 } from "@chakra-ui/react";
-import { WordLogo } from "@cartridge/ui/src/components/brand/Word";
 import { constants } from "starknet";
-import { ArrowLeftIcon, CartridgeColorIcon } from "@cartridge/ui";
+import { ArrowLeftIcon, CartridgeColorIcon, WordLogo } from "@cartridge/ui";
 import { NetworkButton } from "./NetworkButton";
 import { EthBalance } from "./EthBalance";
 import { AccountMenu } from "./AccountMenu";

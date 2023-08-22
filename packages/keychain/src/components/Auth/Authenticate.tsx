@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { Button, UseDisclosureProps } from "@chakra-ui/react";
 import { Unsupported } from "./Unsupported";
 import { Credentials, onCreateBegin, onCreateFinalize } from "hooks/account";
-import { SimpleModal } from "@cartridge/ui/src/components/modals/SimpleModal";
+import { SimpleModal } from "@cartridge/ui";
 import { useStartup } from "hooks/startup";
 import {
   FaceIDDuoIcon,
