@@ -77,7 +77,7 @@ export function DeploymentRequired({
             }starkscan.co/tx/${deployHash}`}
             isExternal
           >
-            <Button variant="link" marginTop={10} rightIcon={<ExternalIcon />}>
+            <Button variant="link" mt={10} rightIcon={<ExternalIcon />}>
               View on Starkscan
             </Button>
           </Link>

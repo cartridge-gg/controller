@@ -22,7 +22,7 @@ import {
   Signature,
   typedData,
 } from "starknet";
-import { StarterPack } from "components/legacy/signup/StarterPack";
+// import { StarterPack } from "components/legacy/signup/StarterPack";
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
 import provision from "../methods/provision";
 import { register } from "../methods/register";
@@ -41,6 +41,7 @@ import {
   Redeploy,
   SignMessage,
   Signup,
+  StarterPack,
 } from "components";
 
 type Context = Connect | Logout | Execute | SignMessage | StarterPack | Quests;
@@ -521,7 +522,6 @@ const Index: NextPage = () => {
         controller={controller}
         starterPackId={ctx.starterPackId}
         onClaim={(res: ExecuteReply) => ctx.resolve(res)}
-        onCancel={(error: Error) => ctx.resolve(error)}
       />
     );
   }

@@ -67,7 +67,7 @@ export const Tabs: ComponentMultiStyleConfig = {
         height: "50px",
         fontSize: "0.875rem",
         letterSpacing: "0.01em",
-        marginBottom: "-1px",
+        mb: "-1px",
         borderBottom: "1px solid",
         color: "gray.200",
         px: "25px",

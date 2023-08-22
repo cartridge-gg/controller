@@ -6,7 +6,9 @@ const ETH_CONTRACT =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 
 export const TransferEth = () => {
-  const [chainId, setChainId] = useState<constants.StarknetChainId>(constants.StarknetChainId.TESTNET);
+  const [chainId, setChainId] = useState<constants.StarknetChainId>(
+    constants.StarknetChainId.TESTNET,
+  );
   const { account } = useAccount();
   const [accepted, setAccepted] = useState<boolean>();
 
@@ -28,10 +30,11 @@ export const TransferEth = () => {
       undefined,
       {
         chainId,
-      } as any
+      } as any,
     );
 
-    account.waitForTransaction(res.transaction_hash)
+    account
+      .waitForTransaction(res.transaction_hash)
       .then(() => setAccepted(true))
       .catch((err) => console.error(err))
       .finally(() => console.log("done"));
@@ -54,10 +57,11 @@ export const TransferEth = () => {
       undefined,
       {
         chainId,
-      } as any
+      } as any,
     );
 
-    account.waitForTransaction(res.transaction_hash)
+    account
+      .waitForTransaction(res.transaction_hash)
       .then(() => setAccepted(true))
       .catch((err) => console.error(err))
       .finally(() => console.log("done"));
@@ -80,9 +84,10 @@ export const TransferEth = () => {
       undefined,
       {
         chainId,
-      } as any
+      } as any,
     );
-    account.waitForTransaction(res.transaction_hash)
+    account
+      .waitForTransaction(res.transaction_hash)
       .then(() => setAccepted(true))
       .catch((err) => console.error(err))
       .finally(() => console.log("done"));
@@ -102,7 +107,9 @@ export const TransferEth = () => {
           id="testnet"
           name="network"
           value={constants.StarknetChainId.TESTNET}
-          onChange={(evt) => setChainId(evt.target.value as constants.StarknetChainId)}
+          onChange={(evt) =>
+            setChainId(evt.target.value as constants.StarknetChainId)
+          }
           defaultChecked
         />
         <label htmlFor="testnet">Testnet</label>
@@ -111,13 +118,19 @@ export const TransferEth = () => {
           id="mainnet"
           name="network"
           value={constants.StarknetChainId.MAINNET}
-          onChange={(evt) => setChainId(evt.target.value as constants.StarknetChainId)}
+          onChange={(evt) =>
+            setChainId(evt.target.value as constants.StarknetChainId)
+          }
         />
         <label htmlFor="mainnet">Mainnet</label>
       </div>
       <button onClick={() => execute005()}>Transfer 0.005 ETH to self</button>
-      <button style={{ marginLeft: "10px" }} onClick={() => executePointOne()}>Transfer 0.1 ETH to self</button>
-      <button style={{ marginLeft: "10px" }} onClick={() => executeOne()}>Transfer 1.0 ETH to self</button>
+      <button style={{ marginLeft: "10px" }} onClick={() => executePointOne()}>
+        Transfer 0.1 ETH to self
+      </button>
+      <button style={{ marginLeft: "10px" }} onClick={() => executeOne()}>
+        Transfer 1.0 ETH to self
+      </button>
       <p>Accepted: {accepted && accepted.toString()}</p>
     </>
   );

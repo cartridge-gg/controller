@@ -14,7 +14,7 @@ import {
 import { Container } from "../Container";
 import { PortalBanner } from "components/PortalBanner";
 
-export const Authenticate = ({
+export function Authenticate({
   name,
   pubkey,
   isModal = false,
@@ -26,7 +26,7 @@ export const Authenticate = ({
   pubkey: string;
   isModal?: boolean;
   onComplete: () => void;
-} & UseDisclosureProps) => {
+} & UseDisclosureProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [userAgent, setUserAgent] = useState<UserAgent>("other");
   const [unsupportedMessage, setUnsupportedMessage] = useState<string>();
@@ -103,11 +103,11 @@ export const Authenticate = ({
       {StartupAnimation}
     </>
   );
-};
+}
 
 type UserAgent = "ios" | "android" | "other";
 
-const Content = ({ userAgent }: { userAgent: UserAgent }) => {
+function Content({ userAgent }: { userAgent: UserAgent }) {
   const Icon = useMemo(() => {
     switch (userAgent) {
       case "ios":
@@ -132,4 +132,4 @@ const Content = ({ userAgent }: { userAgent: UserAgent }) => {
       }
     />
   );
-};
+}

@@ -18,7 +18,7 @@ export const Switch: ComponentStyleConfig = {
       },
       thumb: {
         boxSize: "14px",
-        marginTop: "2px",
+        mt: "2px",
         background: "#4B4B4B",
         "&[data-checked]": {
           background: "#518A63",

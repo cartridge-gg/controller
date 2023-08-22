@@ -3,13 +3,12 @@ import {
   VStack,
   Text,
   AccordionButton,
-  AccordionIcon,
   AccordionItem,
   Accordion,
   Spacer,
   AccordionPanel,
 } from "@chakra-ui/react";
-import { CodeIcon, WedgeRightIcon, WedgeUpIcon } from "@cartridge/ui";
+import { CodeIcon, WedgeRightIcon } from "@cartridge/ui";
 import { Policy } from "@cartridge/controller";
 
 export function SessionDetails({

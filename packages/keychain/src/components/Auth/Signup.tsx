@@ -255,7 +255,7 @@ function Form({
         <BannerImage imgSrc={starterData?.game.banner.uri} />
       )}
 
-      <VStack align="stretch" paddingBottom={PORTAL_FOOTER_MIN_HEIGHT}>
+      <VStack align="stretch" pb={PORTAL_FOOTER_MIN_HEIGHT}>
         <FormikField
           name="username"
           placeholder="Username"
@@ -269,7 +269,7 @@ function Form({
               touched={meta.touched}
               error={meta.error}
               onClear={onClearUsername}
-              container={{ marginBottom: 6 }}
+              container={{ mb: 6 }}
               isLoading={isValidating}
             />
           )}

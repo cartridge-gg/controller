@@ -1,9 +1,4 @@
-import {
-  WedgeDownIcon,
-  WedgeLeftIcon,
-  WedgeRightIcon,
-  WedgeUpIcon,
-} from "@cartridge/ui";
+import { WedgeLeftIcon, WedgeRightIcon } from "@cartridge/ui";
 import { Circle, IconProps } from "@chakra-ui/react";
 
 export type DotProps = {
@@ -21,8 +16,8 @@ export const Dot = ({ active, diff, size = 5, onClick }: DotProps) => {
   const color = active
     ? "white"
     : diff == 1
-    ? "whiteAlpha.600"
-    : "whiteAlpha.400";
+    ? "translucent.lg"
+    : "trancludent.md";
   return (
     <Circle
       as="button"
@@ -33,40 +28,34 @@ export const Dot = ({ active, diff, size = 5, onClick }: DotProps) => {
   );
 };
 
-export const Prev = ({ onClick, enabled }: NavProps) =>
-  navBtn("left", onClick, enabled);
+export const Prev = (props: NavProps) => (
+  <NavBtn {...props} Icon={WedgeLeftIcon} />
+);
 
-export const Next = ({ onClick, enabled }: NavProps) =>
-  navBtn("right", onClick, enabled);
+export const Next = (props: NavProps) => (
+  <NavBtn {...props} Icon={WedgeRightIcon} />
+);
 
-function navBtn(
-  direction: "up" | "right" | "down" | "left",
-  onClick: React.MouseEventHandler<HTMLDivElement>,
-  enabled: boolean,
-) {
-  let Wedge;
-  switch (direction) {
-    case "up":
-      Wedge = WedgeUpIcon;
-    case "right":
-      Wedge = WedgeRightIcon;
-    case "down":
-      Wedge = WedgeDownIcon;
-    case "left":
-      Wedge = WedgeLeftIcon;
-  }
-
+function NavBtn({
+  enabled,
+  onClick,
+  Icon,
+}: {
+  enabled: boolean;
+  onClick: React.MouseEventHandler<HTMLDivElement>;
+  Icon: React.ComponentType<IconProps>;
+}) {
   return (
     <Circle
       as="button"
       size="26px"
-      bgColor="whiteAlpha.300"
+      bg="translucent.soft"
       onClick={onClick}
       opacity={enabled ? "1" : "0.3"}
       transition="opacity 0.25s ease"
       pointerEvents={enabled ? "auto" : "none"}
     >
-      <Wedge color="whiteAlpha.600" />
+      <Icon color="translucent.lg" />
     </Circle>
   );
 }

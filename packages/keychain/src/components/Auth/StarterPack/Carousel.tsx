@@ -1,15 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
 import { Text, Flex, VStack, HStack, Spacer } from "@chakra-ui/react";
 import useEmblaCarousel from "embla-carousel-react";
-import { Next, Prev, Dot } from "./Buttons";
-import { EdgeFade } from "./EdgeFade";
-import { StarterItemProps } from "components/legacy/signup/StarterPack";
+import { Next, Prev, Dot } from "components/carousel/Buttons";
+import { EdgeFade } from "components/carousel/EdgeFade";
+import { StarterItemProps } from "components/Auth/StarterPack";
 
-export const StarterPackCarousel = ({
+export function StarterPackCarousel({
   nonfungibles,
 }: {
   nonfungibles: StarterItemProps[];
-}) => {
+}) {
   const [viewportRef, embla] = useEmblaCarousel();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [prevBtnEnabled, setPrevBtnEnabled] = useState(false);
@@ -45,7 +45,7 @@ export const StarterPackCarousel = ({
         gap="12px"
         overflow="hidden"
         direction="column"
-        bgColor="gray.700"
+        bg="solid.primary"
         position="relative"
         ref={viewportRef}
         borderRadius="0 0 8px 8px"
@@ -55,8 +55,8 @@ export const StarterPackCarousel = ({
             <HStack
               key={index}
               minWidth="full"
-              gap="20px"
-              pr="20px"
+              gap={5}
+              pr={5}
               userSelect="none"
               align="flex-start"
             >
@@ -65,8 +65,8 @@ export const StarterPackCarousel = ({
                 justify="center"
                 minWidth="70px"
                 minHeight="70px"
-                borderRadius="5px"
-                bgColor="gray.600"
+                borderRadius="sm"
+                bg="solid.primary"
                 overflow="hidden"
                 position="relative"
                 border="1px solid"
@@ -77,9 +77,9 @@ export const StarterPackCarousel = ({
               </Flex>
               <VStack boxSize="full" align="flex-start">
                 <HStack w="full" fontWeight="bold" textTransform="uppercase">
-                  <Text fontSize="11px">{item.name}</Text>
+                  <Text fontSize="sm">{item.name}</Text>
                 </HStack>
-                <Text fontSize="11px" color="gray.200">
+                <Text fontSize="sm" color="text.secondary">
                   {item.description}
                 </Text>
               </VStack>
@@ -87,14 +87,17 @@ export const StarterPackCarousel = ({
           ))}
         </Flex>
         <Spacer minHeight="10px" />
+
         <EdgeFade percentage={3} />
+
         <HStack w="full" pointerEvents="none" align="flex-end" zIndex="1">
           <HStack w="full" justify="space-between">
             <Prev onClick={scrollPrev} enabled={prevBtnEnabled} />
+
             <Flex
-              h="10px"
+              h={2.5}
               w="full"
-              gap="10px"
+              gap={2.5}
               my={["10px", "25px"]}
               align="center"
               justify="center"
@@ -110,15 +113,16 @@ export const StarterPackCarousel = ({
                 />
               ))}
             </Flex>
+
             <Next onClick={scrollNext} enabled={nextBtnEnabled} />
           </HStack>
         </HStack>
       </Flex>
-      <Spacer minHeight="10px" />
+      <Spacer minHeight={2.5} />
       <VStack
         w="full"
-        px="12px"
-        spacing="10px"
+        px={3}
+        spacing={2.5}
         align="flex-start"
         textTransform="uppercase"
       >
@@ -126,10 +130,10 @@ export const StarterPackCarousel = ({
           <HStack
             key={index}
             w="full"
-            fontSize="10px"
+            fontSize="2xs"
             transition="color 0.5s ease"
             onClick={() => scrollTo(index)}
-            color={selectedIndex === index ? "white" : "whiteAlpha.600"}
+            color={selectedIndex === index ? "white" : "translucent.lg"}
             _hover={{ cursor: selectedIndex === index ? "default" : "pointer" }}
           >
             {/** TODO: icon <ChevronPixelIcon
@@ -143,4 +147,4 @@ export const StarterPackCarousel = ({
       </VStack>
     </>
   );
-};
+}

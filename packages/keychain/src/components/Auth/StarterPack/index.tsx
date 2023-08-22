@@ -1,17 +1,14 @@
-import { ReactNode, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/future/image";
 import {
-  Box,
   Text,
-  Flex,
   Link,
   VStack,
-  HStack,
-  Tooltip,
-  Spacer,
   Circle,
-  SystemProps,
+  HStack,
+  Spacer,
   Divider,
+  Button,
 } from "@chakra-ui/react";
 import {
   useAccountInfoQuery,
@@ -19,28 +16,21 @@ import {
   useClaimStarterpackMutation,
 } from "generated/graphql";
 import Controller from "utils/controller";
-import Container from "../Container";
-import Footer from "../../Footer";
-import { remoteSvgIcon } from "utils/svg";
-import BannerImage from "./BannerImage";
-
-import { Error, ExecuteReply } from "@cartridge/controller";
+import { Container } from "../../Container";
+import { ExecuteReply } from "@cartridge/controller";
 import { addAddressPadding } from "starknet";
-import { StarterPackCarousel } from "components/carousel/StarterPack";
-import { Header } from "components/Header";
-import Ellipses from "./Ellipses";
-import { MediaViewer } from "./MediaViewer";
-import { InfoIcon, OlmechIcon, SparklesDuoIcon } from "@cartridge/ui";
+import { OlmechIcon, SparklesDuoIcon } from "@cartridge/ui";
+import { BannerImage } from "../BannerImage";
+import { MediaViewer } from "../MediaViewer";
+import Ellipses from "components/legacy/signup/Ellipses";
+import { remoteSvgIcon } from "utils/svg";
+import { StarterPackCarousel } from "./Carousel";
+import {
+  PORTAL_FOOTER_MIN_HEIGHT,
+  PortalFooter,
+} from "components/PortalFooter";
 
-export type StarterItemProps = {
-  name: string;
-  description: string;
-  amount: string;
-  uri?: string;
-  icon?: ReactNode;
-};
-
-export const ClaimSuccess = ({
+export function ClaimSuccess({
   name,
   banner,
   media,
@@ -52,25 +42,30 @@ export const ClaimSuccess = ({
   media?: string;
   url: string;
   fullPage: boolean;
-}) => {
+}) {
   const domain = new URL(url);
   return (
     <>
-      <Container position={fullPage ? "relative" : "fixed"}>
-        <Header />
-        <BannerImage imgSrc={banner} obscuredWidth="0px" />
-        <VStack spacing="18px" pt="36px" pb="24px">
+      <Container fullPage={fullPage}>
+        <BannerImage imgSrc={banner} />
+        <VStack spacing={4} pt={9} pb={6}>
           {media ? (
-            <MediaViewer src={media} height="400px" width="300px" />
+            <MediaViewer
+              src={media}
+              alt="Claimed starter pack"
+              height="400px"
+              width="300px"
+            />
           ) : (
-            <Circle size="48px" bgColor="gray.700">
-              <SparklesDuoIcon boxSize="30px" />
+            <Circle size={12}>
+              <SparklesDuoIcon boxSize={8} />
             </Circle>
           )}
-          <Text fontWeight="bold" fontSize="17px">
+          <Text fontWeight="bold" fontSize="lg">
             {`Your ${name} Starter Pack is on the way!`}
           </Text>
-          <Text fontSize="12px" color="whiteAlpha.600" textAlign="center">
+
+          <Text fontSize="xm" textAlign="center">
             Checkout{" "}
             <Link href={url} variant="traditional" isExternal>
               {domain.hostname}
@@ -81,56 +76,19 @@ export const ClaimSuccess = ({
       </Container>
     </>
   );
-};
+}
 
-export const StarterItem = ({
-  name,
-  description,
-  amount,
-  icon,
-  ...rest
-}: StarterItemProps & SystemProps) => (
-  <HStack
-    px="16px"
-    py="8px"
-    w="full"
-    bgColor="gray.700"
-    fontSize="14px"
-    color="gray.200"
-    {...rest}
-  >
-    {icon}
-    <Text color="inherit">{name || "unknown"}</Text>
-    {description && (
-      <Tooltip placement="bottom" hasArrow label={description} mt="10px">
-        <Link>
-          <InfoIcon _hover={{ cursor: "pointer" }} />
-        </Link>
-      </Tooltip>
-    )}
-    <Spacer />
-    <Text color="inherit">{amount}</Text>
-  </HStack>
-);
-
-export type StarterPackProps = {
-  starterpack: any;
-  gameIcon: ReactNode;
-};
-
-export const StarterPack = ({
+export function StarterPack({
   starterPackId,
   controller,
   fullPage = false,
   onClaim,
-  onCancel,
 }: {
   starterPackId: string;
   controller?: Controller;
   fullPage?: boolean;
   onClaim?: (res?: ExecuteReply) => void;
-  onCancel?: (error: Error) => void;
-}) => {
+}) {
   const [remaining, setRemaining] = useState<number>();
   const [nonfungibles, setNonfungibles] = useState<StarterItemProps[]>([]);
 
@@ -155,6 +113,24 @@ export const StarterPack = ({
     },
     { enabled: !!controller },
   );
+
+  const onSubmit = useCallback(() => {
+    if (controller) {
+      claimMutate({
+        id: starterData?.game?.starterPack?.id,
+        account: accountData?.accounts.edges?.[0]?.node.id,
+      });
+      return;
+    }
+
+    onClaim();
+  }, [
+    accountData?.accounts.edges,
+    claimMutate,
+    controller,
+    onClaim,
+    starterData?.game?.starterPack?.id,
+  ]);
 
   useEffect(() => {
     if (starterData) {
@@ -209,20 +185,22 @@ export const StarterPack = ({
   }
 
   return (
-    <Container position={fullPage ? "relative" : "fixed"}>
-      <Header />
-      <BannerImage imgSrc={starterData?.game.banner.uri} obscuredWidth="0px" />
+    <Container fullPage={fullPage}>
+      <BannerImage imgSrc={starterData?.game.banner.uri} />
+
       {claimError && (
         // HACK: assuming error is "already claimed"
         <>
-          <VStack spacing="18px" pt="36px" pb="24px">
-            <Circle size="48px" bgColor="gray.700">
-              <SparklesDuoIcon boxSize="30px" />
+          <VStack spacing={4.5} pt={9} pb={6}>
+            <Circle size={12} bg="solid.primary">
+              <SparklesDuoIcon boxSize={8} />
             </Circle>
-            <Text fontWeight="bold" fontSize="17px">
+
+            <Text fontWeight="bold" fontSize="lg">
               {"You've already claimed this Starterpack"}
             </Text>
-            <Text fontSize="12px" color="whiteAlpha.600" textAlign="center">
+
+            <Text fontSize="sm" color="translucent.lg" textAlign="center">
               Thanks for participating!
             </Text>
           </VStack>
@@ -231,60 +209,58 @@ export const StarterPack = ({
 
       {!claimData && !claimError && (
         <>
-          <VStack spacing="18px" pt="36px" pb="24px">
-            <HStack spacing="14px">
-              <Circle size="48px" bgColor="gray.700">
-                <SparklesDuoIcon boxSize="30px" />
+          <VStack spacing={4.5} pt={9} pb={6}>
+            <HStack spacing={3.5}>
+              <Circle size={12} bgColor="solid.primary">
+                <SparklesDuoIcon boxSize={8} />
               </Circle>
               <Ellipses />
-              <Circle size="48px" bgColor="gray.700">
+              <Circle size={12} bgColor="solid.primary">
                 {remoteSvgIcon(starterData?.game.icon.uri, "30px", "white")}
               </Circle>
             </HStack>
-            <Text fontWeight="bold" fontSize="17px">
+            <Text fontWeight="bold" fontSize="lg">
               Claim Starterpack
             </Text>
-            <Text fontSize="12px" color="whiteAlpha.600" textAlign="center">
+            <Text fontSize="sm" color="translucent.lg" textAlign="center">
               You will receive the following items.
             </Text>
           </VStack>
-          <VStack w="full" borderRadius="8px" overflow="hidden">
+          <VStack w="full" borderRadius="sm" overflow="hidden">
             {nonfungibles.length != 0 && (
               <StarterPackCarousel nonfungibles={nonfungibles} />
             )}
             <Spacer minHeight="10px" />
-            <Divider bgColor="gray.400" />
+            <Divider bgColor="solid.spacer" />
             <HStack w="full" px="12px" fontSize="10px">
-              <Text
-                variant="ibm-upper-bold"
-                color={remaining > 0 ? "green.400" : "red.200"}
-              >
+              <Text color={remaining > 0 ? "green.400" : "red.200"}>
                 {remaining} remaining
               </Text>
               <Spacer />
-              <Text variant="ibm-upper-bold">FREE</Text>
+              <Text>FREE</Text>
             </HStack>
           </VStack>
-          <Footer
-            confirmText={remaining === 0 ? "OUT OF STOCK" : "CLAIM"}
-            isDisabled={!!starterError || remaining === 0}
-            isLoading={claimLoading || starterLoading || accountLoading}
-            onConfirm={() => {
-              if (controller) {
-                claimMutate({
-                  id: starterData.game?.starterPack?.id,
-                  account: accountData.accounts.edges?.[0]?.node.id,
-                });
-                return;
-              }
 
-              onClaim();
-            }}
-            showCancel={false}
-            floatBottom={!fullPage}
-          />
+          <PortalFooter>
+            <Button
+              colorScheme="colorful"
+              onClick={onSubmit}
+              isDisabled={!!starterError || remaining === 0}
+              isLoading={claimLoading || starterLoading || accountLoading}
+            >
+              {remaining === 0 ? "OUT OF STOCK" : "CLAIM"}
+            </Button>
+          </PortalFooter>
         </>
       )}
     </Container>
   );
+}
+
+export type StarterItemProps = {
+  name: string;
+  description: string;
+  amount: string;
+  uri?: string;
+  icon?: React.ReactNode;
 };

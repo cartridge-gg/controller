@@ -10,7 +10,6 @@ import {
   InvocationsDetails,
   uint256,
 } from "starknet";
-import Footer from "components/Footer";
 import { Fees } from "./Fees";
 import BN from "bn.js";
 import { BigNumber, utils } from "ethers";
@@ -207,10 +206,7 @@ export function Execute({
     >
       <PortalBanner Icon={TransactionDuoIcon} title="Submit Transaction" />
 
-      <VStack
-        w="full"
-        paddingBottom={lowEthInfo ? undefined : PORTAL_FOOTER_MIN_HEIGHT}
-      >
+      <VStack w="full" pb={lowEthInfo ? undefined : PORTAL_FOOTER_MIN_HEIGHT}>
         <VStack spacing="1px" w="full" borderRadius="md" bg="solid.primary">
           <VStack w="full" p={3} align="flex-start">
             <Text fontSize="xs" fontWeight="bold" color="text.secondaryAccent">

@@ -36,7 +36,7 @@ export function PortalFooter({
       minH={isOpen ? 478 : 0}
       transition="all 0.40s ease-out"
       p={4}
-      paddingTop={0}
+      pt={0}
     >
       {isExpandable && (
         <Box // mimic top border
@@ -69,8 +69,8 @@ export function PortalFooter({
       )}
 
       <VStack
-        paddingTop={isExpandable ? 6 : undefined}
-        paddingBottom={isExpandable ? 4 : undefined}
+        pt={isExpandable ? 6 : undefined}
+        pb={isExpandable ? 4 : undefined}
         align="stretch"
         w="full"
         h="full"

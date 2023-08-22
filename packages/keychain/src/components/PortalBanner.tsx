@@ -12,9 +12,9 @@ export function PortalBanner({
   description?: string | React.ReactElement;
 }) {
   return (
-    <VStack w="full" marginBottom={4} p={3}>
-      <VStack paddingTop={6} paddingX={8}>
-        <Circle size={12} marginBottom={4} bg="solid.primary">
+    <VStack w="full" mb={4} p={3}>
+      <VStack pt={6} px={8}>
+        <Circle size={12} mb={4} bg="solid.primary">
           {icon ? icon : <Icon boxSize={8} />}
         </Circle>
 
