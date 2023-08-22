@@ -52,16 +52,16 @@ export const PendingTxn = ({ transaction, name, gameId }: PendingProps) => {
           )}
         </Box>
         <VStack spacing="10px">
-          <Text variant="ibm-upper-bold" fontSize="11px">
+          <Text fontSize="2xs">
             Transaction {pending ? "Pending..." : "Complete!"}
           </Text>
-          <Text fontSize="12px" color="gray.200">
+          <Text fontSize="sm" color="text.secondary">
             {pending ? "This may take a few minutes" : "You're ready to go!"}
           </Text>
           <Link
             href={`https://starkscan.co/tx/${transaction}`}
             variant="traditional"
-            fontSize="12px"
+            fontSize="sm"
             isExternal
           >
             View on Starkscan

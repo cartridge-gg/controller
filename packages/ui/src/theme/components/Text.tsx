@@ -11,11 +11,5 @@ export const Text: ComponentStyleConfig = {
       textTransform: "uppercase",
       letterSpacing: "0.1em",
     },
-    "ibm-upper-bold": {
-      fontFamily: "IBM Plex Sans",
-      fontWeight: "bold",
-      textTransform: "uppercase",
-      letterSpacing: "0.05em",
-    },
   },
 };

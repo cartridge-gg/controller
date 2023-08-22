@@ -153,7 +153,7 @@ function LineItem({
                 </Text>
                 <Divider
                   orientation="vertical"
-                  borderColor="gray.600"
+                  borderColor="solid.secondary"
                   h="16px"
                 />
               </>

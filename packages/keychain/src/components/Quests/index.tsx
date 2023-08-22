@@ -84,7 +84,7 @@ export function Quests({
                     top="64px"
                     w="360px"
                     h="60px"
-                    bg="gray.700"
+                    bg="solid.primary"
                     p="16px 24px 16px 24px"
                     borderRadius="8px"
                   >

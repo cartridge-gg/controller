@@ -70,7 +70,9 @@ export function StarterPackCarousel({
                 overflow="hidden"
                 position="relative"
                 border="1px solid"
-                borderColor={selectedIndex == index ? "green.100" : "gray.400"}
+                borderColor={
+                  selectedIndex == index ? "green.100" : "solid.accent"
+                }
                 transition="border-color 0.5s ease"
               >
                 {item.icon}

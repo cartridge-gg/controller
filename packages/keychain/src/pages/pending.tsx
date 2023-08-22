@@ -40,7 +40,7 @@ const Pending: NextPage = () => {
           description={description}
         />
 
-        {txns.map((txn, idx) => (
+        {[...txns, { name: "name", hash: "hash" }].map((txn, idx) => (
           <Transaction
             key={idx}
             name={txn.name}
