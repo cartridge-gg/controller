@@ -1,6 +1,4 @@
 import { ReactNode, useEffect, useState } from "react";
-/** @jsxImportSource @emotion/react */
-import { css } from "@emotion/react";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import {
@@ -141,13 +139,13 @@ export const Form = ({ onConfirm }: FormType) => {
   return (
     <>
       <form
-        css={css`
-          display: flex;
-          flex-direction: column;
-          flex: 1;
-          gap: 25px;
-          width: 100%;
-        `}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          flex: 1,
+          gap: "25px",
+          width: "100%",
+        }}
         onSubmit={formik.handleSubmit}
       >
         <Flex gap="1px" borderRadius="8px" overflow="hidden">

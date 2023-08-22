@@ -1,7 +1,5 @@
 import { ReactNode, CSSProperties } from "react";
 import { Flex, forwardRef } from "@chakra-ui/react";
-/** @jsxImportSource @emotion/react */
-import { css } from "@emotion/react";
 
 // Workaround
 export const Badge: React.FC<{
@@ -9,17 +7,17 @@ export const Badge: React.FC<{
   style?: CSSProperties;
 }> = forwardRef(({ children, style }, ref) => (
   <Flex
-    css={css`
-      background-color: #0f1410;
-      border-radius: 30px;
-      text-transform: uppercase;
-      font-family: "LD_Mono";
-      font-weight: 600;
-      font-size: 14px;
-      padding: 8px 10px;
-      align-items: center;
-    `}
-    style={style}
+    style={{
+      backgroundColor: "#0f1410",
+      borderRadius: "30px",
+      textTransform: "uppercase",
+      fontFamily: "LD_Mono",
+      fontWeight: 600,
+      fontSize: "14px",
+      padding: "8px 10px",
+      alignItems: "center",
+      ...style,
+    }}
   >
     <span ref={ref}>{children}</span>
   </Flex>
