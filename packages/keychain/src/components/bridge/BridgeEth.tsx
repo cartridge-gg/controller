@@ -15,96 +15,33 @@ import {
 } from "@chakra-ui/react";
 import { configureChains, fetchBalance } from "@wagmi/core";
 import { alchemyProvider } from "@wagmi/core/providers/alchemy";
-import { Header } from "components/Header";
-import Check from "components/icons/Check";
-import EthereumLarge from "components/icons/EthereumLarge";
-import MetaMask from "components/icons/Metamask";
 import { useDebounce } from "hooks/debounce";
 import { useEffect, useState } from "react";
 import { constants } from "starknet";
 import { createClient, goerli, mainnet, WagmiConfig } from "wagmi";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
-import ConnectButton from "./ConnectButton";
-import TransferButton from "./TransferButton";
-import Transactions from "./Transactions";
-import Label from "components/Label";
+import { ConnectButton } from "./ConnectButton";
+import { TransferButton } from "./TransferButton";
+import { TxnTracker } from "./Transactions";
+import { Label } from "./Label";
 import Controller from "utils/controller";
 import { Error } from "components/Error";
-import { WedgeDownIcon } from "@cartridge/ui";
+import {
+  CheckIcon,
+  EthereumDuoIcon,
+  EthereumIcon,
+  MetaMaskIcon,
+  WedgeDownIcon,
+} from "@cartridge/ui";
+import { PortalBanner } from "components/PortalBanner";
 
-const SelectBox = forwardRef<
-  {
-    leftIcon: React.ReactNode;
-    rightIcon: React.ReactNode;
-    text: string;
-  },
-  typeof HStack
->((props, ref) => (
-  <HStack
-    h="40px"
-    p="12px 14px"
-    borderBottom="1px solid"
-    borderBottomColor="gray.600"
-    borderRadius="4px"
-    transition="all 0.2s"
-    _hover={{ cursor: "pointer", bgColor: "gray.700" }}
-    ref={ref}
-  >
-    {props.leftIcon}
-    <Text fontSize="14px">{props.text}</Text>
-    <Spacer />
-    {props.rightIcon}
-  </HStack>
-));
-
-const { chains, provider } = configureChains(
-  [mainnet, goerli],
-  [
-    alchemyProvider({
-      apiKey: process.env.NEXT_PUBLIC_ETH_RPC_MAINNET.replace(
-        /^.+\/v2\//,
-        "$`",
-      ),
-    }),
-    alchemyProvider({
-      apiKey: process.env.NEXT_PUBLIC_ETH_RPC_GOERLI.replace(/^.+\/v2\//, "$`"),
-    }),
-  ],
-);
-
-const ethereumClient = createClient({
-  provider,
-  connectors: [
-    new MetaMaskConnector({
-      chains,
-    }),
-  ],
-});
-
-async function fetchEthPrice() {
-  const res = await fetch(process.env.NEXT_PUBLIC_API_URL, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-    },
-    body: `{"query":"query { price(quote: ETH, base: USD) { amount }}"}`,
-  });
-  return res.json();
-}
-
-const BridgeEth = ({
+export function BridgeEth({
   chainId,
   controller,
-  onBack,
-  onClose,
-  onLogout,
 }: {
   chainId: constants.StarknetChainId;
   controller: Controller;
-  onBack: () => void;
-  onClose: () => void;
-  onLogout: () => void;
-}) => {
+}) {
   const [ethAddress, setEthAddress] = useState<string>();
   const [ethBalance, setEthBalance] = useState<string>();
   const [transferAmount, setTransferAmount] = useState<string>();
@@ -171,38 +108,15 @@ const BridgeEth = ({
   if (transferHash) {
     return (
       <WagmiConfig client={ethereumClient}>
-        <Header
-          chainId={chainId}
-          address={controller.address}
-          onBack={onBack}
-          onClose={onClose}
-          onLogout={onLogout}
-        />
-        <Transactions
-          address={controller.address}
-          chainId={chainId}
-          ethTxnHash={transferHash}
-        />
+        <TxnTracker chainId={chainId} ethTxnHash={transferHash} />
       </WagmiConfig>
     );
   }
 
   return (
     <WagmiConfig client={ethereumClient}>
-      <Header
-        chainId={chainId}
-        address={controller.address}
-        onBack={onBack}
-        onClose={onClose}
-      />
-      <HStack w="full" justify="flex-start" pb="20px" spacing="20px">
-        <Circle bgColor="gray.700" size="48px">
-          <EthereumLarge boxSize="30px" color="green.400" />
-        </Circle>
-        <Text fontSize="17px" fontWeight="bold">
-          Bridge ETH
-        </Text>
-      </HStack>
+      <PortalBanner Icon={EthereumDuoIcon} title="Bridge ETH" />
+
       <VStack w="full" align="start" spacing="18px">
         <Label>From</Label>
         <HStack w="full">
@@ -210,14 +124,8 @@ const BridgeEth = ({
             <Menu variant="select" placement="bottom">
               <MenuButton
                 as={SelectBox}
-                leftIcon={<MetaMask />}
-                rightIcon={
-                  !!ethAddress ? (
-                    <Check color="whiteAlpha.400" />
-                  ) : (
-                    <WedgeDownIcon boxSize="7px" color="whiteAlpha.400" />
-                  )
-                }
+                leftIcon={<MetaMaskIcon />}
+                rightIcon={!!ethAddress ? <CheckIcon /> : <WedgeDownIcon />}
                 text={
                   !!ethAddress
                     ? ethAddress.substring(0, 3) +
@@ -246,14 +154,17 @@ const BridgeEth = ({
         </HStack>
         <HStack w="full">
           <Label>Transfer Amount</Label>
+
           <Spacer />
-          <Label color="gray.400">
+
+          <Label>
             Available{" "}
-            <Text display="inline" color="gray.200" pl="12px">
+            <Text display="inline" pl={3} color="text.secondaryAccent">
               {ethBalance ? ethBalance + " ETH" : "---"}
             </Text>
           </Label>
         </HStack>
+
         <HStack
           position="relative"
           w="full"
@@ -268,46 +179,38 @@ const BridgeEth = ({
           <HStack
             w="full"
             h="full"
-            bgColor="gray.600"
+            bg="solid.primary"
             justify="center"
             flexBasis="54px"
           >
-            <Circle size="18px" bgColor="whiteAlpha.50">
-              <EthereumLarge boxSize="18px" />
+            <Circle size={4} bg="solid.secondary">
+              <EthereumIcon />
             </Circle>
           </HStack>
           <Input
             h="full"
             type="number"
-            variant=""
             flexGrow="1"
-            bgColor="gray.700"
             placeholder="Enter amount"
-            fontFamily="IBM Plex Sans"
-            fontSize="13px"
-            lineHeight="18px"
             borderRadius="0"
             border="1px solid"
             borderColor="transparent"
-            _focus={{ borderColor: "whiteAlpha.200" }}
             onChange={(event) => {
               setTransferAmount(event.target.value);
             }}
           />
+
           {transferAmountCost && (
-            <Text
-              position="absolute"
-              right="10px"
-              fontSize="13px"
-              color="gray.200"
-            >
+            <Text position="absolute" right={2.5} fontSize="sm">
               {transferAmountCost}
             </Text>
           )}
         </HStack>
       </VStack>
+
       <Spacer />
-      <Flex w="full" gap="10px" direction="column">
+
+      <Flex w="full" gap={2.5} direction="column">
         {errorMessage && !debouncing && (
           <Error
             error={{
@@ -316,6 +219,7 @@ const BridgeEth = ({
             }}
           />
         )}
+
         <TransferButton
           account={controller.account(chainId)}
           value={transferAmount}
@@ -348,6 +252,65 @@ const BridgeEth = ({
       </Flex>
     </WagmiConfig>
   );
-};
+}
 
-export default BridgeEth;
+const SelectBox = forwardRef<
+  {
+    leftIcon: React.ReactNode;
+    rightIcon: React.ReactNode;
+    text: string;
+  },
+  typeof HStack
+>((props, ref) => (
+  <HStack
+    h="40px"
+    px={3}
+    py={4}
+    borderBottom="1px solid"
+    borderBottomColor="solid.accent"
+    borderRadius="sm"
+    transition="all 0.2s"
+    _hover={{ cursor: "pointer", bg: "solid.accent" }}
+    ref={ref}
+  >
+    {props.leftIcon}
+    <Text fontSize="sm">{props.text}</Text>
+    <Spacer />
+    {props.rightIcon}
+  </HStack>
+));
+
+const { chains, provider } = configureChains(
+  [mainnet, goerli],
+  [
+    alchemyProvider({
+      apiKey: process.env.NEXT_PUBLIC_ETH_RPC_MAINNET.replace(
+        /^.+\/v2\//,
+        "$`",
+      ),
+    }),
+    alchemyProvider({
+      apiKey: process.env.NEXT_PUBLIC_ETH_RPC_GOERLI.replace(/^.+\/v2\//, "$`"),
+    }),
+  ],
+);
+
+const ethereumClient = createClient({
+  provider,
+  connectors: [
+    new MetaMaskConnector({
+      chains,
+    }),
+  ],
+});
+
+async function fetchEthPrice() {
+  const res = await fetch(process.env.NEXT_PUBLIC_API_URL, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: `{"query":"query { price(quote: ETH, base: USD) { amount }}"}`,
+  });
+  return res.json();
+}

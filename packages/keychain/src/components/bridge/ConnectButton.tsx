@@ -2,13 +2,13 @@ import { Button } from "@chakra-ui/react";
 import { useEffect } from "react";
 import { useAccount, useClient, useConnect, useDisconnect } from "wagmi";
 
-const ConnectButton = ({
+export function ConnectButton({
   onConnect,
   onDisconnect,
 }: {
   onConnect: (ethAddress: string) => void;
   onDisconnect: () => void;
-}) => {
+}) {
   const { address: ethAddress, isConnected } = useAccount();
   const { connectors } = useClient();
   const { connect } = useConnect({ connector: connectors[0] });
@@ -27,8 +27,8 @@ const ConnectButton = ({
       <Button
         flexBasis="50%"
         variant="special"
-        bgColor="gray.700"
-        color={isConnected ? "whiteAlpha.800" : undefined}
+        bg="solid.primary"
+        color={isConnected ? "text.secondary" : undefined}
         onClick={() => {
           if (isConnected) {
             disconnect();
@@ -41,6 +41,4 @@ const ConnectButton = ({
       </Button>
     </>
   );
-};
-
-export default ConnectButton;
+}

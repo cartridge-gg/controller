@@ -1,0 +1,87 @@
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import {
+  Box,
+  Flex,
+  Text,
+  Link,
+  VStack,
+  Button,
+  Circle,
+} from "@chakra-ui/react";
+import { Loading } from "components/Loading";
+import { defaultProvider } from "starknet";
+import useSound from "use-sound";
+import { ArrowRightIcon, CheckIcon } from "@cartridge/ui";
+export interface PendingProps {
+  transaction: string;
+  name: string;
+  gameId: string;
+}
+
+export const PendingTxn = ({ transaction, name, gameId }: PendingProps) => {
+  const router = useRouter();
+  const { redirect_uri } = router.query;
+  const [pending, setPending] = useState<boolean>(true);
+  const [play] = useSound("https://static.cartridge.gg/sounds/startup.mp3");
+
+  useEffect(() => {
+    play();
+    defaultProvider
+      .waitForTransaction(transaction)
+      .then(() => setPending(true))
+      .catch((e) => {
+        console.error(e);
+      });
+  }, [transaction, play]);
+  return (
+    <>
+      <Flex
+        py="20px"
+        bgColor="gray.700"
+        direction="column"
+        borderRadius="8px"
+        align="center"
+        justify="center"
+      >
+        <Box py="20px">
+          {pending ? (
+            <Loading fill="white" height="26px" width="26px" />
+          ) : (
+            <CheckIcon boxSize="26px" />
+          )}
+        </Box>
+        <VStack spacing="10px">
+          <Text fontSize="2xs">
+            Transaction {pending ? "Pending..." : "Complete!"}
+          </Text>
+          <Text fontSize="sm" color="text.secondary">
+            {pending ? "This may take a few minutes" : "You're ready to go!"}
+          </Text>
+          <Link
+            href={`https://starkscan.co/tx/${transaction}`}
+            variant="traditional"
+            fontSize="sm"
+            isExternal
+          >
+            View on Starkscan
+          </Link>
+        </VStack>
+      </Flex>
+      <Box h="1px" w="full" my="20px" bgColor="whiteAlpha.300" />
+      <Button
+        w="full"
+        gap="5px"
+        onClick={() => {
+          router.replace(
+            redirect_uri
+              ? `${redirect_uri}?hash=${transaction}`
+              : `/games/${gameId}`,
+          );
+        }}
+      >
+        {redirect_uri && "Return to"} {name} <ArrowRightIcon />{" "}
+      </Button>
+    </>
+  );
+};

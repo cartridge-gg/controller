@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import type { NextPage } from "next";
-import { Signup as SignupComponent, StarterPack } from "components/signup";
+import { Signup as SignupComponent } from "components";
 import { useMemo } from "react";
 import Controller from "utils/controller";
 
@@ -16,7 +16,7 @@ const Signup: NextPage = () => {
   return (
     <SignupComponent
       starterPackId={starterPackId}
-      showLogin={() => router.push({ pathname: "/login", query: router.query })}
+      onLogin={() => router.push({ pathname: "/login", query: router.query })}
       onComplete={() => {
         router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);
       }}

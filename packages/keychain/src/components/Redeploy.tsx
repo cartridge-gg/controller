@@ -1,26 +1,22 @@
-import { Error as ErrorReply, ResponseCodes } from "@cartridge/controller";
 import { constants, addAddressPadding } from "starknet";
-import Container from "components/Container";
-import { Header } from "components/Header";
-import { Banner } from "components/Banner";
+import { Container } from "./Container";
 import Controller from "utils/controller";
 import { useEffect } from "react";
 import { client } from "utils/graphql";
 import { DeployAccountDocument, AccountInfoDocument } from "generated/graphql";
 import { Status } from "utils/account";
 import { SparklesDuoIcon } from "@cartridge/ui";
+import { PortalBanner } from "./PortalBanner";
 
-export const Redeploy = ({
+export function Redeploy({
   chainId,
   controller,
-  onClose,
   onLogout,
 }: {
   chainId: constants.StarknetChainId;
   controller: Controller;
-  onClose: (error: ErrorReply) => void;
   onLogout: () => void;
-}) => {
+}) {
   useEffect(() => {
     const deploy = async () => {
       const result = await client.request(AccountInfoDocument, {
@@ -43,22 +39,12 @@ export const Redeploy = ({
   }, [controller]);
 
   return (
-    <Container>
-      <Header
-        chainId={chainId}
-        onClose={() =>
-          onClose({
-            code: ResponseCodes.CANCELED,
-            message: "Canceled",
-          })
-        }
-        onLogout={onLogout}
-      />
-      <Banner
-        icon={<SparklesDuoIcon boxSize="30px" />}
+    <Container fullPage={false} chainId={chainId} onLogout={onLogout}>
+      <PortalBanner
+        Icon={SparklesDuoIcon}
         title="Deploying your account"
         description="This may take a second, try again in a bit"
       />
     </Container>
   );
-};
+}

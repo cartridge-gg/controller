@@ -63,10 +63,13 @@ class ControllerConnector extends Connector {
   }
 
   async connect(): Promise<AccountInterface> {
-    this._account = await this.controller.connect();
-    if (!this._account) {
+    const account = await this.controller.connect();
+
+    if (!account) {
       throw new Error("account not found");
     }
+
+    this._account = account;
     return this._account;
   }
 

@@ -1,10 +1,11 @@
 import NextHead from "next/head";
-import CartridgeTheme from "@cartridge/ui/src/theme";
+import { CartridgeTheme } from "@cartridge/ui";
 import type { AppProps } from "next/app";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { CartridgeUIProvider } from "@cartridge/ui";
 
 import "../style.css";
+import { useEffect } from "react";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -14,7 +15,9 @@ const queryClient = new QueryClient({
   },
 });
 
-function Keychain({ Component, pageProps }: AppProps) {
+export default function Keychain({ Component, pageProps }: AppProps) {
+  useGlobalInjection();
+
   return (
     <>
       <NextHead>
@@ -38,4 +41,27 @@ function Keychain({ Component, pageProps }: AppProps) {
   );
 }
 
-export default Keychain;
+function useGlobalInjection() {
+  useEffect(() => {
+    window.cartridge = {
+      ...window.cartridge,
+      exportAccount() {
+        return JSON.stringify(window.localStorage);
+      },
+      importAccount(accountDump) {
+        Object.entries(
+          JSON.parse(accountDump) as Record<string, string>,
+        ).forEach(([key, value]) => window.localStorage.setItem(key, value));
+      },
+    };
+  }, []);
+}
+
+declare global {
+  interface Window {
+    cartridge: {
+      exportAccount: () => string;
+      importAccount: (accountDump: string) => void;
+    };
+  }
+}

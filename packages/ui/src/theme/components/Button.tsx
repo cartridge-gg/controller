@@ -1,6 +1,10 @@
 import React from "react";
 import { StyleFunctionProps } from "@chakra-ui/theme-tools";
-import { Button as ChakraButton, defineStyleConfig } from "@chakra-ui/react";
+import {
+  Button as ChakraButton,
+  Spinner,
+  defineStyleConfig,
+} from "@chakra-ui/react";
 
 import { Loading } from "../../components/Loading";
 
@@ -22,20 +26,15 @@ export const Button = defineStyleConfig({
     _disabled: {
       pointerEvents: "none",
     },
-    _focus: {
-      // TODO: handle accessibility properly
-      boxShadow: "none",
-    },
   },
   sizes: {
+    xs: {
+      px: 2,
+      py: 3,
+      h: 8,
+    },
     sm: (p) =>
-      p.variant === "form"
-        ? {
-            h: 10,
-            px: 6,
-            py: 3,
-          }
-        : p.rightIcon
+      p.rightIcon
         ? {
             h: 9,
             p: 2,
@@ -61,6 +60,20 @@ export const Button = defineStyleConfig({
       ...getColorProps(p),
       borderRadius: "full",
     }),
+    link: {
+      color: "link.blue",
+      borderColor: "solid.secondary",
+      borderWidth: 1,
+      p: "4px 16px",
+      fontSize: "xs",
+      fontFamily: "Inter",
+      fontWeight: "normal",
+      textTransform: "capitalize",
+      _hover: {
+        bg: "solid.secondary",
+        textDecor: "none",
+      },
+    },
   },
 });
 
@@ -103,5 +116,6 @@ function getColorProps({ colorScheme }: StyleFunctionProps) {
 type ColorScheme = "colorful" | "translucent" | "white";
 
 ChakraButton.defaultProps = {
-  spinner: <Loading />,
+  // spinner: <Loading />,
+  spinner: <Spinner />, // workaround for emotion css issue with typescript v5
 };

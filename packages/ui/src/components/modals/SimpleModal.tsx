@@ -7,11 +7,7 @@ import {
   ModalOverlay,
   ModalContent,
   ModalCloseButton,
-  UseDisclosureProps,
   useBreakpointValue,
-  Spacer,
-  HStack,
-  Box,
   ModalProps,
 } from "@chakra-ui/react";
 import { Headstone, HeadStoneProps } from "./Headstone";
@@ -28,7 +24,7 @@ interface SimpleModalProps {
   onClose?: () => void;
 }
 
-export const SimpleModal = ({
+export function SimpleModal({
   icon,
   color,
   bgColor,
@@ -40,7 +36,7 @@ export const SimpleModal = ({
   dismissable = true,
   onConfirm,
   onClose,
-}: SimpleModalProps & HeadStoneProps & ModalProps) => {
+}: SimpleModalProps & HeadStoneProps & ModalProps) {
   const isMobile = useBreakpointValue([true, true, false]);
   return (
     <Modal
@@ -63,9 +59,9 @@ export const SimpleModal = ({
             {children}
           </Flex>
         </ModalBody>
-        <ModalFooter gap="16px">
+        <ModalFooter gap={4}>
           {dismissable && (
-            <Button flex="1" variant="secondary600" onClick={onClose}>
+            <Button flex="1" onClick={onClose}>
               {onConfirm ? "Cancel" : "Close"}
             </Button>
           )}
@@ -78,4 +74,4 @@ export const SimpleModal = ({
       </ModalContent>
     </Modal>
   );
-};
+}

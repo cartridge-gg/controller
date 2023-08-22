@@ -1,8 +1,8 @@
 import type { NextPage } from "next";
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { connectToParent } from "@cartridge/penpal";
-import Controller, { diff, VERSION } from "utils/controller";
+import Controller, { diff } from "utils/controller";
 import {
   ConnectReply,
   Error,
@@ -13,10 +13,6 @@ import {
   ProbeReply,
   SupportedChainIds,
 } from "@cartridge/controller";
-import Connect from "components/Connect";
-import { Login } from "components/Login";
-import { Signup } from "components/signup";
-import { Redeploy } from "components/Redeploy";
 import {
   Abi,
   Call,
@@ -26,11 +22,6 @@ import {
   Signature,
   typedData,
 } from "starknet";
-import SignMessage from "components/SignMessage";
-import Execute from "components/Execute";
-import { StarterPack } from "components/signup/StarterPack";
-import selectors from "utils/selectors";
-import Storage from "utils/storage";
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
 import provision from "../methods/provision";
 import { register } from "../methods/register";
@@ -39,13 +30,22 @@ import logout from "../methods/logout";
 import { revoke, session, sessions } from "../methods/sessions";
 import { Status } from "utils/account";
 import { normalize, validate } from "../methods";
-import DeploymentRequired from "components/DeploymentRequired";
-import Quests from "./quests";
-import Logout from "components/Logout";
+import {
+  Connect,
+  DeploymentRequired,
+  Execute,
+  Login,
+  Logout,
+  Quests,
+  Redeploy,
+  SignMessage,
+  Signup,
+  StarterPack,
+} from "components";
 
 type Context = Connect | Logout | Execute | SignMessage | StarterPack | Quests;
 
-type Connect = {
+export type Connect = {
   origin: string;
   type: "connect";
   policies: Policy[];
@@ -104,12 +104,15 @@ const Index: NextPage = () => {
   );
   const [controller, setController] = useState<Controller>();
   const [context, setContext] = useState<Context>();
-  const [showSignup, setShowSignup] = useState<boolean>(false);
+  const [showSignup, setShowSignup] = useState(false);
+  const [prefilledUsername, setPrefilledUsername] = useState<string>();
 
+  // Restore controller from store
   useEffect(() => {
     setController(Controller.fromStore());
   }, [setController]);
 
+  // Create connection if not stored
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
@@ -132,7 +135,6 @@ const Index: NextPage = () => {
                 if (chainId) {
                   setChainId(chainId as unknown as constants.StarknetChainId);
                 }
-
                 setContext({
                   type: "connect",
                   origin,
@@ -323,6 +325,98 @@ const Index: NextPage = () => {
     return <></>;
   }
 
+  const onController = async (controller: Controller) => {
+    if (context.type !== "connect") return;
+
+    if (controller.session(context.origin)) {
+      setController(controller);
+      return;
+    }
+
+    const account = controller.account(
+      (context as any).transactionsDetail?.chainId ?? chainId,
+    );
+
+    if (account.status === Status.COUNTERFACTUAL) {
+      // TODO: Deploy?
+      context.resolve({
+        code: ResponseCodes.SUCCESS,
+        address: controller.address,
+        policies: context.policies,
+      } as any);
+      setController(controller);
+      return;
+    }
+
+    // This device needs to be registered, so do a webauthn signature request
+    // for the register transaction during the connect flow.
+    if (account.status === Status.DEPLOYED) {
+      try {
+        await account.register();
+      } catch (e) {
+        context.resolve({
+          code: ResponseCodes.CANCELED,
+          message: "Canceled",
+        } as Error);
+        setController(controller);
+        return;
+      }
+    }
+
+    controller.approve(context.origin, context.policies, "");
+
+    context.resolve({
+      code: ResponseCodes.SUCCESS,
+      address: controller.address,
+      policies: context.policies,
+    } as any);
+
+    setController(controller);
+  };
+
+  // No controller, send to login
+  if (!controller) {
+    return (
+      <>
+        {showSignup ? (
+          <Signup
+            prefilledName={prefilledUsername}
+            onLogin={(username) => {
+              setPrefilledUsername(username);
+              setShowSignup(false);
+            }}
+            onController={onController}
+            context={context as Connect}
+          />
+        ) : (
+          <Login
+            prefilledName={prefilledUsername}
+            onSignup={(username) => {
+              setPrefilledUsername(username);
+              setShowSignup(true);
+            }}
+            onController={onController}
+            context={context as Connect}
+          />
+        )}
+      </>
+    );
+  }
+
+  const onLogout = (context: Context) => {
+    setContext({
+      origin: context.origin,
+      type: "logout",
+      resolve: context.resolve,
+      reject: context.reject,
+    } as Logout);
+  };
+
+  const account = controller.account(
+    (context as any).transactionsDetail?.chainId ?? chainId,
+  );
+  const sesh = controller.session(context.origin);
+
   const onConnect = async ({
     context,
     policies,
@@ -365,42 +459,6 @@ const Index: NextPage = () => {
     } as any);
   };
 
-  // No controller, send to login
-  if (!controller) {
-    return (
-      <>
-        {showSignup ? (
-          <Signup
-            showLogin={() => setShowSignup(false)}
-            onController={(c) => setController(c)}
-            onCancel={() => context.reject()}
-          />
-        ) : (
-          <Login
-            chainId={chainId}
-            showSignup={() => setShowSignup(true)}
-            onController={(c) => setController(c)}
-            onCancel={() => context.reject()}
-          />
-        )}
-      </>
-    );
-  }
-
-  const onLogout = (context: Context) => {
-    setContext({
-      origin: context.origin,
-      type: "logout",
-      resolve: context.resolve,
-      reject: context.reject,
-    } as Logout);
-  };
-
-  const account = controller.account(
-    (context as any).transactionsDetail?.chainId ?? chainId,
-  );
-  const sesh = controller.session(context.origin);
-
   if (context.type === "connect" || !sesh) {
     const ctx = context as Connect;
 
@@ -418,7 +476,7 @@ const Index: NextPage = () => {
       <Connect
         chainId={chainId}
         origin={ctx.origin}
-        policys={ctx.type === "connect" ? (ctx as Connect).policies : []}
+        policies={ctx.type === "connect" ? (ctx as Connect).policies : []}
         onConnect={() =>
           onConnect({
             context: ctx,
@@ -426,7 +484,9 @@ const Index: NextPage = () => {
             maxFee: "",
           })
         }
-        onCancel={(error: Error) => ctx.resolve(error)}
+        onCancel={() =>
+          ctx.resolve({ code: ResponseCodes.CANCELED, message: "Canceled" })
+        }
         onLogout={() => onLogout(ctx)}
       />
     );
@@ -461,7 +521,6 @@ const Index: NextPage = () => {
         controller={controller}
         starterPackId={ctx.starterPackId}
         onClaim={(res: ExecuteReply) => ctx.resolve(res)}
-        onCancel={(error: Error) => ctx.resolve(error)}
       />
     );
   }
@@ -473,8 +532,6 @@ const Index: NextPage = () => {
         gameId={ctx.gameId}
         address={controller.address}
         chainId={chainId}
-        onClose={() => ctx.resolve()}
-        origin={ctx.origin}
         onLogout={() => onLogout(ctx)}
       />
     );
@@ -489,7 +546,12 @@ const Index: NextPage = () => {
         origin={ctx.origin}
         typedData={ctx.typedData}
         onSign={(sig: Signature) => context.resolve(sig)}
-        onCancel={(error: Error) => ctx.resolve(error)}
+        onCancel={() =>
+          ctx.resolve({
+            code: ResponseCodes.CANCELED,
+            message: "Canceled",
+          })
+        }
         onLogout={() => onLogout(ctx)}
       />
     );
@@ -505,7 +567,7 @@ const Index: NextPage = () => {
         <Connect
           origin={ctx.origin}
           chainId={_chainId}
-          policys={[]}
+          policies={[]}
           onConnect={() =>
             onConnect({
               context: ctx,
@@ -513,7 +575,9 @@ const Index: NextPage = () => {
               maxFee: "",
             })
           }
-          onCancel={(error: Error) => ctx.resolve(error)}
+          onCancel={() =>
+            ctx.resolve({ code: ResponseCodes.CANCELED, message: "Canceled" })
+          }
           onLogout={() => onLogout(ctx)}
         />
       );
@@ -524,7 +588,6 @@ const Index: NextPage = () => {
         <Redeploy
           chainId={_chainId}
           controller={controller}
-          onClose={(error: Error) => ctx.resolve(error)}
           onLogout={() => onLogout(ctx)}
         />
       );
@@ -534,7 +597,12 @@ const Index: NextPage = () => {
       <DeploymentRequired
         chainId={chainId}
         controller={controller}
-        onClose={(error: Error) => ctx.resolve(error)}
+        onClose={() =>
+          ctx.resolve({
+            code: ResponseCodes.CANCELED,
+            message: "Canceled",
+          })
+        }
         onLogout={() => onLogout(ctx)}
       >
         <Execute
@@ -542,7 +610,12 @@ const Index: NextPage = () => {
           chainId={_chainId}
           controller={controller}
           onExecute={(res: ExecuteReply) => ctx.resolve(res)}
-          onCancel={(error: Error) => ctx.resolve(error)}
+          onCancel={() =>
+            ctx.resolve({
+              code: ResponseCodes.CANCELED,
+              message: "Canceled",
+            })
+          }
           onLogout={() => onLogout(ctx)}
         />
       </DeploymentRequired>
