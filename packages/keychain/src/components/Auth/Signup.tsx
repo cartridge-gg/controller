@@ -133,6 +133,7 @@ export function Signup({
           keypair={keypair}
           isRegistering={isRegistering}
           setIsRegistering={setIsRegistering}
+          fullPage={fullPage}
           context={context}
           starterData={starterData}
           isAuthOpen={isAuthOpen}
@@ -145,6 +146,7 @@ export function Signup({
 }
 
 function Form({
+  fullPage,
   context,
   onController,
   onLogin: onLoginProp,
@@ -155,7 +157,7 @@ function Form({
   isAuthOpen,
   onAuthClose,
   onComplete,
-}: Pick<SignupProps, "context" | "onController" | "onLogin"> & {
+}: Pick<SignupProps, "fullPage" | "context" | "onController" | "onLogin"> & {
   keypair: KeyPair;
   isRegistering: boolean;
   setIsRegistering: (val: boolean) => void;
@@ -264,7 +266,7 @@ function Form({
           {({ field, meta }) => (
             <Field
               {...field}
-              autoFocus={true}
+              autoFocus
               placeholder="Username"
               touched={meta.touched}
               error={meta.error}
@@ -284,6 +286,7 @@ function Form({
       </VStack>
 
       <PortalFooter
+        fullPage={fullPage}
         origin={context?.origin}
         policies={context?.policies}
         isSignup

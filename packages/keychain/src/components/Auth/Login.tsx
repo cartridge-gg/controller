@@ -92,17 +92,23 @@ export function Login({
         validateOnChange={false}
         validateOnBlur={false}
       >
-        <Form context={context} onSignup={onSignup} isLoggingIn={isLoggingIn} />
+        <Form
+          context={context}
+          onSignup={onSignup}
+          isLoggingIn={isLoggingIn}
+          fullPage={fullPage}
+        />
       </Formik>
     </Container>
   );
 }
 
 function Form({
+  fullPage,
   context,
   onSignup: onSignupProp,
   isLoggingIn,
-}: Pick<LoginProps, "context" | "onSignup"> & {
+}: Pick<LoginProps, "fullPage" | "context" | "onSignup"> & {
   isLoggingIn: boolean;
 }) {
   const { values, isValidating } = useFormikContext<FormValues>();
@@ -130,7 +136,7 @@ function Form({
           {({ field, meta }) => (
             <Field
               {...field}
-              autoFocus={true}
+              autoFocus
               placeholder="Username"
               touched={meta.touched}
               error={meta.error}
@@ -146,7 +152,11 @@ function Form({
         </RegistrationLink>
       </VStack>
 
-      <PortalFooter origin={context?.origin} policies={context?.policies}>
+      <PortalFooter
+        fullPage={fullPage}
+        origin={context?.origin}
+        policies={context?.policies}
+      >
         <Button type="submit" colorScheme="colorful" isLoading={isLoggingIn}>
           log in
         </Button>

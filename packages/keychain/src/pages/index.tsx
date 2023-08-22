@@ -22,7 +22,6 @@ import {
   Signature,
   typedData,
 } from "starknet";
-// import { StarterPack } from "components/legacy/signup/StarterPack";
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
 import provision from "../methods/provision";
 import { register } from "../methods/register";

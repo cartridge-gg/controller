@@ -117,7 +117,7 @@ export function Fees({
             )}
           </>
         ) : (
-          <LineItem name="Calculating Fees" isLoading={true} />
+          <LineItem name="Calculating Fees" isLoading />
         )}
       </VStack>
     </>

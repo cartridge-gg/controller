@@ -25,10 +25,7 @@ import { MediaViewer } from "../MediaViewer";
 import Ellipses from "components/legacy/signup/Ellipses";
 import { remoteSvgIcon } from "utils/svg";
 import { StarterPackCarousel } from "./Carousel";
-import {
-  PORTAL_FOOTER_MIN_HEIGHT,
-  PortalFooter,
-} from "components/PortalFooter";
+import { PortalFooter } from "components/PortalFooter";
 
 export function ClaimSuccess({
   name,
@@ -241,7 +238,7 @@ export function StarterPack({
             </HStack>
           </VStack>
 
-          <PortalFooter>
+          <PortalFooter fullPage={fullPage}>
             <Button
               colorScheme="colorful"
               onClick={onSubmit}

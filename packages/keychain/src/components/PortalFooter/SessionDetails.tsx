@@ -44,12 +44,12 @@ export function SessionDetails({
         </Text>
       </VStack>
 
-      <Accordion w="full" allowMultiple={true} position="relative" top={-4}>
+      <Accordion w="full" allowMultiple position="relative" top={-4}>
         {policies.map((p, i) => (
           <AccordionItem
             key={p.target + p.method}
             borderBottomRadius={i === policies.length - 1 ? "md" : "none"}
-            isDisabled={true} // disable until action metadata is supported
+            isDisabled // disable until action metadata is supported
           >
             {({ isExpanded }) => (
               <>

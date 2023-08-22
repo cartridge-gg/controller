@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { UseDisclosureProps } from "@chakra-ui/react";
-import Footer from "components/Footer";
+import { Button, UseDisclosureProps } from "@chakra-ui/react";
 import { Unsupported } from "./Unsupported";
 import { Credentials, onCreateBegin, onCreateFinalize } from "hooks/account";
 import { SimpleModal } from "@cartridge/ui/src/components/modals/SimpleModal";
@@ -13,6 +12,7 @@ import {
 } from "@cartridge/ui";
 import { Container } from "../Container";
 import { PortalBanner } from "components/PortalBanner";
+import { PortalFooter } from "components/PortalFooter";
 
 export function Authenticate({
   name,
@@ -89,14 +89,17 @@ export function Authenticate({
           <Content userAgent={userAgent} />
         </SimpleModal>
       ) : (
-        <Container fullPage={true}>
+        <Container fullPage>
           <Content userAgent={userAgent} />
-          <Footer
-            confirmText="Continue"
-            showCancel={false}
-            onConfirm={onAuth}
-            isLoading={isLoading}
-          />
+          <PortalFooter fullPage>
+            <Button
+              colorScheme="colorful"
+              onClick={onAuth}
+              isLoading={isLoading}
+            >
+              continue
+            </Button>
+          </PortalFooter>
         </Container>
       )}
 

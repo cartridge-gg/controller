@@ -1,5 +1,6 @@
 import {
   Box,
+  Flex,
   IconButton,
   Spacer,
   VStack,
@@ -12,11 +13,13 @@ import { SessionDetails } from "./SessionDetails";
 import React, { useMemo } from "react";
 
 export function PortalFooter({
+  fullPage,
   children,
   origin,
   policies,
   isSignup,
 }: React.PropsWithChildren & {
+  fullPage?: boolean;
   origin?: string;
   policies?: Policy[];
   isSignup?: boolean;
@@ -118,9 +121,15 @@ export function PortalFooter({
 
       <Spacer />
 
-      <VStack align="strech" w="full">
-        {children}
-      </VStack>
+      {fullPage ? (
+        <Flex w="full" direction="row-reverse" justify="space-between">
+          {children}
+        </Flex>
+      ) : (
+        <VStack align="strech" w="full">
+          {children}
+        </VStack>
+      )}
     </VStack>
   );
 }
