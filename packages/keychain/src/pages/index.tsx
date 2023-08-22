@@ -30,13 +30,13 @@ import logout from "../methods/logout";
 import { revoke, session, sessions } from "../methods/sessions";
 import { Status } from "utils/account";
 import { normalize, validate } from "../methods";
-import Quests from "./quests";
 import {
   Connect,
   DeploymentRequired,
   Execute,
   Login,
   Logout,
+  Quests,
   Redeploy,
   SignMessage,
   Signup,
@@ -532,8 +532,6 @@ const Index: NextPage = () => {
         gameId={ctx.gameId}
         address={controller.address}
         chainId={chainId}
-        onClose={() => ctx.resolve()}
-        origin={ctx.origin}
         onLogout={() => onLogout(ctx)}
       />
     );

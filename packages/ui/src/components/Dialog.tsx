@@ -23,7 +23,7 @@ export const Dialog = ({
       {...rest}
     >
       <Arrow color="gray.700" placement={arrowPlacement} />
-      <Text as="strong" variant="ld-mono-upper" fontSize="15px">
+      <Text as="strong" fontSize="15px">
         {title}
       </Text>
       <Text fontSize="13px" color="whiteAlpha.800">

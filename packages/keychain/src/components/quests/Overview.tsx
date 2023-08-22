@@ -1,47 +1,20 @@
-import { Box, HStack, Circle, Flex, Text } from "@chakra-ui/react";
-import { QuestState } from "pages/quests";
-import QuestCard from "./Card";
+import { Box, Flex, Text } from "@chakra-ui/react";
+import { QuestState } from "./types";
+import { QuestCard } from "./Card";
+import { PortalBanner } from "components/PortalBanner";
+import { QuestsDuoIcon } from "@cartridge/ui/lib";
 
-const Label = ({ children }: { children: React.ReactNode }) => (
-  <Box w="full" p="0 6px 6px 6px" mt="24px">
-    <Text
-      color="gray.200"
-      fontSize="10px"
-      fontWeight="700"
-      lineHeight="16px"
-      letterSpacing="0.08em"
-      textTransform="uppercase"
-    >
-      {children}
-    </Text>
-  </Box>
-);
-
-const QuestsOverview = ({
+export function QuestOverview({
   questsWithProgression,
   onSelect,
 }: {
   questsWithProgression: Array<{ quest: any; progress: any }>;
   onSelect: (id: string) => void;
-}) => {
+}) {
   return (
     <>
-      <Box
-        w="full"
-        h="72px"
-        borderBottom="1px solid"
-        borderColor="gray.700"
-        userSelect="none"
-      >
-        <HStack w="full" spacing="18px">
-          <Circle bgColor="gray.700" size="48px">
-            {/* TODO: <MapIcon w="30px" h="30px" /> */}
-          </Circle>
-          <Text as="h1" fontWeight="600" fontSize="17px">
-            Quests
-          </Text>
-        </HStack>
-      </Box>
+      <PortalBanner Icon={QuestsDuoIcon} title="Quests" />
+
       <Flex direction="column" w="full" align="start" gap="12px">
         <>
           <Label>Pending</Label>
@@ -60,13 +33,14 @@ const QuestsOverview = ({
                         ? QuestState.Claimable
                         : QuestState.Incomplete
                     }
-                    rewards={qwp.quest.rewards.edges?.map((r) => r.id)}
                   />
                 </Box>
               );
             }
           })}
+
           <Label>Completed</Label>
+
           {questsWithProgression?.map((qwp) => {
             if (qwp.progress?.claimed) {
               return (
@@ -78,7 +52,6 @@ const QuestsOverview = ({
                   <QuestCard
                     name={qwp.quest.title}
                     state={QuestState.Complete}
-                    rewards={qwp.quest.rewards.edges?.map((r) => r.id)}
                   />
                 </Box>
               );
@@ -88,6 +61,19 @@ const QuestsOverview = ({
       </Flex>
     </>
   );
-};
+}
 
-export default QuestsOverview;
+const Label = ({ children }: { children: React.ReactNode }) => (
+  <Box w="full" p="0 6px 6px 6px" mt="24px">
+    <Text
+      color="text.secondaryAccent"
+      fontSize="2xs"
+      fontWeight="bold"
+      lineHeight="16px"
+      letterSpacing="0.08em"
+      textTransform="uppercase"
+    >
+      {children}
+    </Text>
+  </Box>
+);

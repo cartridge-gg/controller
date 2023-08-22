@@ -1,35 +1,33 @@
 import { SparklesLineIcon } from "@cartridge/ui";
 import { HStack, Spacer, Text } from "@chakra-ui/react";
 import CircleCheck from "components/icons/CircleCheck";
-import { QuestState } from "pages/quests";
+import { QuestState } from "./types";
 
-const QuestCard = ({
+export function QuestCard({
   name,
   state,
-  rewards,
 }: {
   name: string;
   state: QuestState;
-  rewards: Array<any>;
-}) => {
-  let bgColor = "gray.700";
+}) {
+  let bgColor = "solid.primary";
   let color = "white";
   let check = false;
   let border = undefined;
 
   switch (state) {
     case QuestState.Claimable:
-      bgColor = "gray.600";
+      bgColor = "solid.secondary";
       color = "green.400";
       check = true;
       break;
     case QuestState.Complete:
       bgColor = "transparent";
-      color = "gray.200";
+      color = "text.secondary";
       check = true;
       border = {
         border: "1px solid",
-        borderColor: "gray.700",
+        borderColor: "solid.primary",
       };
       break;
     default:
@@ -57,19 +55,12 @@ const QuestCard = ({
       {check && <CircleCheck fontSize="18px" color="currentColor" />}
       <Text color="currentColor">{name}</Text>
       <Spacer />
-      {state !== QuestState.Complete && <SparklesLineIcon fontSize="18px" />}
+      {state !== QuestState.Complete && <SparklesLineIcon fontSize="lg" />}
       {state === QuestState.Complete && (
-        <Text
-          variant="ld-mono-upper"
-          fontSize="10px"
-          textTransform="uppercase"
-          color="currentColor"
-        >
+        <Text fontSize="2xs" textTransform="uppercase" color="currentColor">
           Completed
         </Text>
       )}
     </HStack>
   );
-};
-
-export default QuestCard;
+}

@@ -6,5 +6,6 @@ export * from "./Execute";
 export * from "./Logout";
 export * from "./PortalBanner";
 export * from "./PortalFooter";
+export * from "./Quests";
 export * from "./Redeploy";
 export * from "./SignMessage";

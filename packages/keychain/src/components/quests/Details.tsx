@@ -1,77 +1,14 @@
-import {
-  Box,
-  Button,
-  Circle,
-  Flex,
-  HStack,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
-import { QuestState } from "pages/quests";
+import { Box, Button, Flex, HStack, Text, VStack } from "@chakra-ui/react";
+import { QuestState } from "./types";
 import { useEffect, useState } from "react";
 import Check from "components/icons/Check";
 import CircleCheck from "components/icons/CircleCheck";
 import CircleIcon from "components/icons/Circle";
 import { useClaimQuestRewardsMutation } from "generated/graphql";
-import { MysteryIcon, SparklesLineIcon } from "@cartridge/ui";
+import { QuestsDuoIcon, SparklesLineIcon } from "@cartridge/ui";
+import { PortalBanner } from "components/PortalBanner";
 
-const Tag = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <Box
-      bgColor="whiteAlpha.100"
-      color="currentColor"
-      p="6px 12px"
-      fontFamily="LD_Mono"
-      textTransform="uppercase"
-      fontSize="10px"
-      fontWeight="700"
-      letterSpacing="0.1em"
-      borderRadius="4px"
-    >
-      {children}
-    </Box>
-  );
-};
-
-const Reward = ({
-  icon,
-  name,
-  amount,
-}: {
-  icon: React.ReactNode;
-  name: string;
-  amount: string;
-}) => {
-  return (
-    <VStack w="90px" h="84px" borderRadius="6px" spacing="0" overflow="hidden">
-      <VStack
-        bgColor="gray.400"
-        color="green.400"
-        w="100%"
-        flexGrow="1"
-        justify="center"
-        fontSize="36px"
-      >
-        {icon}
-      </VStack>
-      <Text
-        w="100%"
-        lineHeight="16px"
-        fontSize="10px"
-        fontWeight="700"
-        p="4px 10px"
-        letterSpacing="0.08em"
-        bgColor="#262A27"
-        color="green.800"
-        textAlign="center"
-      >
-        {amount} {name}
-      </Text>
-    </VStack>
-  );
-};
-
-const QuestDetails = ({
+export function QuestDetails({
   questsWithProgress,
   selectedId,
   address,
@@ -81,7 +18,7 @@ const QuestDetails = ({
   selectedId: string;
   address: string;
   onClaim: () => void;
-}) => {
+}) {
   const [quest, setQuest] = useState<any>();
   const [questState, setQuestState] = useState<QuestState>();
   const [questProgress, setQuestProgress] = useState<any>();
@@ -120,24 +57,17 @@ const QuestDetails = ({
             w="full"
             minH="72px"
             borderBottom="1px solid"
-            borderColor="gray.700"
+            borderColor="solid.primary"
             userSelect="none"
           >
-            <HStack w="full" spacing="18px">
-              <Circle bgColor="gray.700" size="48px">
-                {/* TODO: icon <MapIcon w="30px" h="30px" /> */}
-                <MysteryIcon w="30px" h="30px" />
-              </Circle>
-              <Text as="h1" fontWeight="600" fontSize="17px">
-                {quest?.node?.title}
-              </Text>
-            </HStack>
+            <PortalBanner Icon={QuestsDuoIcon} title={quest?.node?.title} />
+
             <HStack
               my="24px"
               color={
                 typeof questState === "undefined" ||
                 questState === QuestState.Incomplete
-                  ? "whiteAlpha.800"
+                  ? "translucent.heavy"
                   : "green.400"
               }
             >
@@ -151,13 +81,14 @@ const QuestDetails = ({
               </Tag>
             </HStack>
           </Box>
+
           <Flex
             minH="130px"
             p="24px"
             direction="column"
             align="start"
             gap="18px"
-            bgColor="whiteAlpha.50"
+            bgColor="solid.primary"
             borderRadius="4px"
             boxShadow="0px 69px 28px rgba(0, 0, 0, 0.01), 0px 39px 23px rgba(0, 0, 0, 0.05), 0px 17px 17px rgba(0, 0, 0, 0.09), 0px 4px 10px rgba(0, 0, 0, 0.1), 0px 0px 0px rgba(0, 0, 0, 0.1);"
           >
@@ -199,7 +130,7 @@ const QuestDetails = ({
           </Flex>
         </Flex>
       </Box>
-      <Box w="full" h="65px" borderTop="1px solid" borderColor="gray.700">
+      <Box w="full" h="65px" borderTop="1px solid" borderColor="solid.primary">
         <Button
           w="full"
           mt="24px"
@@ -220,6 +151,61 @@ const QuestDetails = ({
       </Box>
     </Flex>
   );
+}
+
+const Tag = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <Box
+      bgColor="translucent.soft"
+      color="currentColor"
+      py={1.5}
+      px={3}
+      textTransform="uppercase"
+      fontSize="2xl"
+      fontWeight="bold"
+      letterSpacing="0.1em"
+      borderRadius="4px"
+    >
+      {children}
+    </Box>
+  );
 };
 
-export default QuestDetails;
+const Reward = ({
+  icon,
+  name,
+  amount,
+}: {
+  icon: React.ReactNode;
+  name: string;
+  amount: string;
+}) => {
+  return (
+    <VStack w="90px" h="84px" borderRadius="6px" spacing="0" overflow="hidden">
+      <VStack
+        bg="solid.primary"
+        color="green.400"
+        w="100%"
+        flexGrow="1"
+        justify="center"
+        fontSize="36px"
+      >
+        {icon}
+      </VStack>
+      <Text
+        w="100%"
+        lineHeight="16px"
+        fontSize="10px"
+        fontWeight="700"
+        py={1}
+        px={2.5}
+        letterSpacing="0.08em"
+        bgColor="#262A27"
+        color="green.800"
+        textAlign="center"
+      >
+        {amount} {name}
+      </Text>
+    </VStack>
+  );
+};

@@ -59,7 +59,6 @@ export const Overlay = ({
     <Spacer />
     <Text
       fontWeight="bold"
-      variant="ld-mono-upper"
       color="inherit"
       transition="color 0.5s ease"
       pointerEvents="none"

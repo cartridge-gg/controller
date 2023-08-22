@@ -35,6 +35,8 @@ export function Header({ chainId, address, onLogout, onBack }: HeaderProps) {
       <HStack w="full">
         {onBack ? (
           <IconButton
+            h={8}
+            size="sm"
             aria-label="Go back"
             icon={<ArrowLeftIcon />}
             onClick={onBack}

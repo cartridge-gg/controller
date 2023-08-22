@@ -10,6 +10,7 @@ import {
 } from "@chakra-ui/react";
 import { CodeIcon, WedgeRightIcon } from "@cartridge/ui";
 import { Policy } from "@cartridge/controller";
+import { useMemo } from "react";
 
 export function SessionDetails({
   origin,
@@ -18,6 +19,8 @@ export function SessionDetails({
   origin: string;
   policies: Policy[];
 }) {
+  const hostname = useMemo(() => new URL(origin).hostname, [origin]);
+
   if (!policies) {
     return null;
   }
@@ -40,7 +43,7 @@ export function SessionDetails({
           Session details
         </Text>
         <Text color="text.secondaryAccent" fontSize="xs">
-          Allow {origin} to execute following actions on your behalf
+          Allow {hostname} to execute following actions on your behalf
         </Text>
       </VStack>
 
