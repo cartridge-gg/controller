@@ -186,7 +186,9 @@ function Form({
         console.log("deploy request");
         const {
           account: {
-            credential: { id: credentialId },
+            credentials: {
+              webauthn: [{ id: credentialId }]
+            },
             contractAddress: address,
           },
         } = data;
@@ -240,7 +242,7 @@ function Form({
     () =>
       starterData
         ? starterData.game.starterPack.maxIssuance -
-          starterData.game.starterPack.issuance
+        starterData.game.starterPack.issuance
         : 0,
     [starterData],
   );

@@ -44,7 +44,7 @@ export function Login({
       try {
         const {
           account: {
-            credential: { id: credentialId, publicKey },
+            credentials: { webauthn: [{ id: credentialId, publicKey }] },
             contractAddress: address,
           },
         } = await fetchAccount(values.username);
