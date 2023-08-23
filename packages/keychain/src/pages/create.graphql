@@ -32,9 +32,11 @@ query Account($id: ID!) {
   account(id: $id) {
     id
     type
-    credential {
-      id
-      publicKey
+    credentials {
+      webauthn {
+        id
+        publicKey
+      }
     }
     contractAddress
     contracts {
