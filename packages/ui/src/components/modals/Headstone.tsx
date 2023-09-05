@@ -9,7 +9,7 @@ export type HeadStoneProps = {
 export const Headstone = ({
   color = "white",
   icon,
-  bgColor = "gray.800",
+  bgColor = "solid.bg",
 }: HeadStoneProps) => (
   <Box
     top="0"
@@ -33,7 +33,7 @@ export const Headstone = ({
       right="50%"
       position="absolute"
       transform="translate(50%)"
-      bgColor="gray.700"
+      bgColor="solid.primary"
       color={color}
     >
       {icon}

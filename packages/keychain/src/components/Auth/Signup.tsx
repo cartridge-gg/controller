@@ -187,7 +187,7 @@ function Form({
         const {
           account: {
             credentials: {
-              webauthn: [{ id: credentialId }]
+              webauthn: [{ id: credentialId }],
             },
             contractAddress: address,
           },
@@ -242,7 +242,7 @@ function Form({
     () =>
       starterData
         ? starterData.game.starterPack.maxIssuance -
-        starterData.game.starterPack.issuance
+          starterData.game.starterPack.issuance
         : 0,
     [starterData],
   );

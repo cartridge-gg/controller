@@ -7,7 +7,6 @@ import { useStartup } from "hooks/startup";
 import {
   FaceIDDuoIcon,
   FingerprintDuoIcon,
-  NewControllerDuoIcon,
   QRCodeDuoIcon,
 } from "@cartridge/ui";
 import { Container } from "../Container";
@@ -30,7 +29,6 @@ export function Authenticate({
   const [isLoading, setIsLoading] = useState(false);
   const [userAgent, setUserAgent] = useState<UserAgent>("other");
   const [unsupportedMessage, setUnsupportedMessage] = useState<string>();
-
   const { play, StartupAnimation } = useStartup({ onComplete });
 
   const onAuth = useCallback(async () => {
@@ -67,6 +65,17 @@ export function Authenticate({
     }
   }, []);
 
+  const Icon = useMemo(() => {
+    switch (userAgent) {
+      case "ios":
+        return FaceIDDuoIcon;
+      case "android":
+        return QRCodeDuoIcon;
+      case "other":
+        return FingerprintDuoIcon;
+    }
+  }, [userAgent]);
+
   if (unsupportedMessage) {
     return <Unsupported message={unsupportedMessage} />;
   }
@@ -75,7 +84,7 @@ export function Authenticate({
     <>
       {isModal ? (
         <SimpleModal
-          icon={<NewControllerDuoIcon boxSize={10} />}
+          icon={<Icon boxSize={10} />}
           onClose={onClose}
           onConfirm={() => {
             onAuth().then(() => onClose());
@@ -85,12 +94,14 @@ export function Authenticate({
           showCloseButton={false}
           isLoading={isLoading}
           dismissable={false}
+          contentStyles={{ minH: 340 }}
         >
-          <Content userAgent={userAgent} />
+          <Content />
         </SimpleModal>
       ) : (
         <Container fullPage>
-          <Content userAgent={userAgent} />
+          <Content />
+
           <PortalFooter fullPage>
             <Button
               colorScheme="colorful"
@@ -110,21 +121,9 @@ export function Authenticate({
 
 type UserAgent = "ios" | "android" | "other";
 
-function Content({ userAgent }: { userAgent: UserAgent }) {
-  const Icon = useMemo(() => {
-    switch (userAgent) {
-      case "ios":
-        return FaceIDDuoIcon;
-      case "android":
-        return QRCodeDuoIcon;
-      case "other":
-        return FingerprintDuoIcon;
-    }
-  }, [userAgent]);
-
+function Content() {
   return (
     <PortalBanner
-      Icon={Icon}
       title="Authenticate Yourself"
       description={
         <>
