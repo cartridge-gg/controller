@@ -33,7 +33,6 @@ import { Authenticate as AuthModal } from "./Authenticate";
 import { RegistrationLink } from "./RegistrationLink";
 
 export function Signup({
-  fullPage = false,
   prefilledName = "",
   context,
   onController,
@@ -114,13 +113,12 @@ export function Signup({
         banner={starterData?.game.banner.uri}
         url={starterData?.game.socials.website}
         media={media}
-        fullPage={fullPage}
       />
     );
   }
 
   return (
-    <Container fullPage={fullPage}>
+    <Container>
       <Formik
         initialValues={{ username: prefilledName }}
         onSubmit={onSubmit}
@@ -133,7 +131,6 @@ export function Signup({
           keypair={keypair}
           isRegistering={isRegistering}
           setIsRegistering={setIsRegistering}
-          fullPage={fullPage}
           context={context}
           starterData={starterData}
           isAuthOpen={isAuthOpen}
@@ -146,7 +143,6 @@ export function Signup({
 }
 
 function Form({
-  fullPage,
   context,
   onController,
   onLogin: onLoginProp,
@@ -157,7 +153,7 @@ function Form({
   isAuthOpen,
   onAuthClose,
   onComplete,
-}: Pick<SignupProps, "fullPage" | "context" | "onController" | "onLogin"> & {
+}: Pick<SignupProps, "context" | "onController" | "onLogin"> & {
   keypair: KeyPair;
   isRegistering: boolean;
   setIsRegistering: (val: boolean) => void;
@@ -288,7 +284,6 @@ function Form({
       </VStack>
 
       <PortalFooter
-        fullPage={fullPage}
         origin={context?.origin}
         policies={context?.policies}
         isSignup

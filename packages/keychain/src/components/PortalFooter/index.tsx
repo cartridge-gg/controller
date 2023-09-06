@@ -1,6 +1,5 @@
 import {
   Box,
-  Flex,
   IconButton,
   Spacer,
   VStack,
@@ -13,13 +12,11 @@ import { SessionDetails } from "./SessionDetails";
 import React, { useMemo } from "react";
 
 export function PortalFooter({
-  fullPage,
   children,
   origin,
   policies,
   isSignup,
 }: React.PropsWithChildren & {
-  fullPage?: boolean;
   origin?: string;
   policies?: Policy[];
   isSignup?: boolean;
@@ -31,7 +28,7 @@ export function PortalFooter({
     <VStack
       w="full"
       align="flex-start"
-      position="fixed"
+      position={["fixed", "fixed", "absolute"]}
       bottom={0}
       left={0}
       bg="solid.bg"
@@ -78,7 +75,7 @@ export function PortalFooter({
         w="full"
         h="full"
         borderTopWidth={1}
-        borderColor="solid.accent"
+        borderColor="solid.tertiary"
         overflowY={isOpen ? "scroll" : "hidden"}
         css={{
           "::-webkit-scrollbar": {
@@ -121,15 +118,9 @@ export function PortalFooter({
 
       <Spacer />
 
-      {fullPage ? (
-        <Flex w="full" direction="row-reverse" justify="space-between">
-          {children}
-        </Flex>
-      ) : (
-        <VStack align="strech" w="full">
-          {children}
-        </VStack>
-      )}
+      <VStack align="strech" w="full">
+        {children}
+      </VStack>
     </VStack>
   );
 }

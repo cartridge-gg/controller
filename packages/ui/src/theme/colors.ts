@@ -136,9 +136,13 @@ export const semanticColors = {
       default: "darkGray.600",
       _light: "blueGray.300",
     },
-    accent: {
+    tertiary: {
       default: "darkGray.500",
       _light: "blueGray.400",
+    },
+    accent: {
+      default: "darkGray.400",
+      _light: "blueGray.500",
     },
     spacer: {
       default: "darkGray.900",

@@ -19,7 +19,7 @@ export const createModal = (src: string, onClose?: () => void) => {
   container.style.top = "0";
   container.style.left = "0";
   container.style.zIndex = "10000";
-  container.style.backgroundColor = "rgba(0,0,0,0.5)";
+  container.style.backgroundColor = "rgba(0,0,0,0.6)";
   container.style.display = "flex";
   container.style.alignItems = "center";
   container.style.justifyContent = "center";
@@ -55,7 +55,7 @@ export const createModal = (src: string, onClose?: () => void) => {
 };
 
 const resize = (el: HTMLElement) => {
-  if (window.innerWidth < 600) {
+  if (window.innerWidth < 768) {
     el.style.height = "100%";
     el.style.width = "100%";
     el.style.borderRadius = "0";

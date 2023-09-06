@@ -94,15 +94,14 @@ export function Authenticate({
           showCloseButton={false}
           isLoading={isLoading}
           dismissable={false}
-          contentStyles={{ minH: 340 }}
         >
           <Content />
         </SimpleModal>
       ) : (
-        <Container fullPage>
+        <Container>
           <Content />
 
-          <PortalFooter fullPage>
+          <PortalFooter>
             <Button
               colorScheme="colorful"
               onClick={onAuth}

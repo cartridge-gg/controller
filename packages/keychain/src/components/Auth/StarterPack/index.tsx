@@ -32,18 +32,16 @@ export function ClaimSuccess({
   banner,
   media,
   url,
-  fullPage,
 }: {
   name: string;
   banner: string;
   media?: string;
   url: string;
-  fullPage: boolean;
 }) {
   const domain = new URL(url);
   return (
     <>
-      <Container fullPage={fullPage}>
+      <Container>
         <BannerImage imgSrc={banner} />
         <VStack spacing={4} pt={9} pb={6}>
           {media ? (
@@ -78,12 +76,10 @@ export function ClaimSuccess({
 export function StarterPack({
   starterPackId,
   controller,
-  fullPage = false,
   onClaim,
 }: {
   starterPackId: string;
   controller?: Controller;
-  fullPage?: boolean;
   onClaim?: (res?: ExecuteReply) => void;
 }) {
   const [remaining, setRemaining] = useState<number>();
@@ -176,13 +172,12 @@ export function StarterPack({
         banner={starterData?.game.banner.uri}
         url={starterData?.game.socials.website}
         media={media}
-        fullPage={fullPage}
       />
     );
   }
 
   return (
-    <Container fullPage={fullPage}>
+    <Container>
       <BannerImage imgSrc={starterData?.game.banner.uri} />
 
       {claimError && (
@@ -238,7 +233,7 @@ export function StarterPack({
             </HStack>
           </VStack>
 
-          <PortalFooter fullPage={fullPage}>
+          <PortalFooter>
             <Button
               colorScheme="colorful"
               onClick={onSubmit}

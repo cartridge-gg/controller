@@ -33,7 +33,7 @@ const Pending: NextPage = () => {
 
   return (
     <>
-      <Container fullPage address={controller.address} chainId={chainId}>
+      <Container address={controller.address} chainId={chainId}>
         <PortalBanner
           Icon={TimerDuoIcon}
           title={title}

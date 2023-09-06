@@ -37,10 +37,7 @@ export function SimpleModal({
   dismissable = true,
   onConfirm,
   onClose,
-  contentStyles,
-}: SimpleModalProps &
-  HeadStoneProps &
-  ModalProps & { contentStyles?: ModalContentProps }) {
+}: SimpleModalProps & HeadStoneProps & ModalProps) {
   const isMobile = useBreakpointValue([true, true, false]);
 
   return (
@@ -53,7 +50,7 @@ export function SimpleModal({
     >
       <ModalOverlay />
 
-      <ModalContent {...contentStyles}>
+      <ModalContent>
         {showCloseButton && <ModalCloseButton />}
 
         <ModalBody>

@@ -14,7 +14,6 @@ const ClaimStarterPack: NextPage = () => {
       starterPackId={gameId}
       controller={controller}
       onClaim={() => router.push(`/signup?sp=${gameId}`)}
-      fullPage
     />
   );
 };

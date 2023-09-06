@@ -65,7 +65,6 @@ export function SignMessage({
 
   return (
     <Container
-      fullPage={false}
       chainId={chainId}
       address={controller.address}
       onLogout={onLogout}

@@ -20,7 +20,6 @@ const Signup: NextPage = () => {
       onComplete={() => {
         router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);
       }}
-      fullPage
     />
   );
 };

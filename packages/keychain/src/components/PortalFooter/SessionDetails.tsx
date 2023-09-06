@@ -26,7 +26,7 @@ export function SessionDetails({
   }
 
   return (
-    <VStack marginY={4}>
+    <VStack marginY={4} alignItems="flex">
       <VStack
         align="flex-start"
         borderTopRadius="md"

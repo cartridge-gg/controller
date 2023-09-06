@@ -25,7 +25,6 @@ import { fetchAccount, validateUsernameFor } from "./utils";
 import { RegistrationLink } from "./RegistrationLink";
 
 export function Login({
-  fullPage = false,
   prefilledName = "",
   chainId,
   context,
@@ -44,7 +43,9 @@ export function Login({
       try {
         const {
           account: {
-            credentials: { webauthn: [{ id: credentialId, publicKey }] },
+            credentials: {
+              webauthn: [{ id: credentialId, publicKey }],
+            },
             contractAddress: address,
           },
         } = await fetchAccount(values.username);
@@ -85,30 +86,24 @@ export function Login({
   );
 
   return (
-    <Container fullPage={fullPage} chainId={chainId}>
+    <Container chainId={chainId}>
       <Formik
         initialValues={{ username: prefilledName }}
         onSubmit={onSubmit}
         validateOnChange={false}
         validateOnBlur={false}
       >
-        <Form
-          context={context}
-          onSignup={onSignup}
-          isLoggingIn={isLoggingIn}
-          fullPage={fullPage}
-        />
+        <Form context={context} onSignup={onSignup} isLoggingIn={isLoggingIn} />
       </Formik>
     </Container>
   );
 }
 
 function Form({
-  fullPage,
   context,
   onSignup: onSignupProp,
   isLoggingIn,
-}: Pick<LoginProps, "fullPage" | "context" | "onSignup"> & {
+}: Pick<LoginProps, "context" | "onSignup"> & {
   isLoggingIn: boolean;
 }) {
   const { values, isValidating } = useFormikContext<FormValues>();
@@ -152,11 +147,7 @@ function Form({
         </RegistrationLink>
       </VStack>
 
-      <PortalFooter
-        fullPage={fullPage}
-        origin={context?.origin}
-        policies={context?.policies}
-      >
+      <PortalFooter origin={context?.origin} policies={context?.policies}>
         <Button type="submit" colorScheme="colorful" isLoading={isLoggingIn}>
           log in
         </Button>

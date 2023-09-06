@@ -57,13 +57,12 @@ export function DeploymentRequired({
   if (status === Status.DEPLOYING) {
     return (
       <Container
-        fullPage={false}
         chainId={chainId}
         address={account.address}
         onLogout={onLogout}
       >
         <PortalBanner
-          icon={<Loading fill="white" />}
+          Icon={Loading}
           title="Deploying your account"
           description="This may take a second"
         />

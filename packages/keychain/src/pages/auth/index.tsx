@@ -26,7 +26,6 @@ const Auth: NextPage = () => {
     <>
       {showSignup ? (
         <Signup
-          fullPage
           prefilledName={prefilledUsername}
           onLogin={(username) => {
             setPrefilledUsername(username);
@@ -36,7 +35,6 @@ const Auth: NextPage = () => {
         />
       ) : (
         <Login
-          fullPage
           prefilledName={prefilledUsername}
           onSignup={(username) => {
             setPrefilledUsername(username);

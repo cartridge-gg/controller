@@ -186,7 +186,6 @@ export function Execute({
   if (bridging) {
     return (
       <Container
-        fullPage={false}
         chainId={chainId}
         address={account.address}
         onLogout={onLogout}
@@ -198,12 +197,7 @@ export function Execute({
   }
 
   return (
-    <Container
-      fullPage={false}
-      chainId={chainId}
-      address={account.address}
-      onLogout={onLogout}
-    >
+    <Container chainId={chainId} address={account.address} onLogout={onLogout}>
       <PortalBanner Icon={TransactionDuoIcon} title="Submit Transaction" />
 
       <VStack w="full" pb={lowEthInfo ? undefined : PORTAL_FOOTER_MIN_HEIGHT}>

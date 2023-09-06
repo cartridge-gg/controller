@@ -64,27 +64,24 @@ function Container({
   children: React.ReactNode;
 } & StyleProps) {
   return (
-    <>
-      <Flex
-        h={h}
-        w="full"
-        top="0"
-        left="0"
-        position="fixed"
-        zIndex="overlay"
-        align="center"
-        justify="center"
-        flexShrink={0}
-        borderBottomWidth={1}
-        borderBottomColor="solid.spacer"
-        bg="solid.bg"
-        {...rest}
-      >
-        <ChakraContainer p={0} centerContent>
-          {children}
-        </ChakraContainer>
-      </Flex>
-      <Box h={h} />
-    </>
+    <Flex
+      h={h}
+      w="full"
+      top="0"
+      left="0"
+      // position="fixed"
+      zIndex="overlay"
+      align="center"
+      justify="center"
+      flexShrink={0}
+      borderBottomWidth={1}
+      borderBottomColor="solid.spacer"
+      bg="solid.bg"
+      {...rest}
+    >
+      <ChakraContainer p={0} centerContent>
+        {children}
+      </ChakraContainer>
+    </Flex>
   );
 }

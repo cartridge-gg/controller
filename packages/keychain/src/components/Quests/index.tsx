@@ -7,13 +7,11 @@ import { QuestDetails } from "./Details";
 import { Flex, Text, useToast } from "@chakra-ui/react";
 
 export function Quests({
-  fullPage,
   gameId,
   address,
   chainId,
   onLogout,
 }: {
-  fullPage?: boolean;
   gameId: string;
   address: string;
   chainId: constants.StarknetChainId;
@@ -50,7 +48,6 @@ export function Quests({
 
   return (
     <Container
-      fullPage={fullPage}
       address={address}
       chainId={chainId}
       onBack={!!selectedQuestId ? () => setSelectedQuestId(null) : undefined}
