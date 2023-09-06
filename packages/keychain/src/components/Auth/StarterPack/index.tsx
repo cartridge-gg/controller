@@ -19,10 +19,9 @@ import Controller from "utils/controller";
 import { Container } from "../../Container";
 import { ExecuteReply } from "@cartridge/controller";
 import { addAddressPadding } from "starknet";
-import { OlmechIcon, SparklesDuoIcon } from "@cartridge/ui";
+import { OlmechIcon, SparklesDuoIcon, DotsIcon } from "@cartridge/ui";
 import { BannerImage } from "../BannerImage";
 import { MediaViewer } from "../MediaViewer";
-import Ellipses from "components/legacy/signup/Ellipses";
 import { remoteSvgIcon } from "utils/svg";
 import { StarterPackCarousel } from "./Carousel";
 import { PortalFooter } from "components/PortalFooter";
@@ -206,7 +205,7 @@ export function StarterPack({
               <Circle size={12} bgColor="solid.primary">
                 <SparklesDuoIcon boxSize={8} />
               </Circle>
-              <Ellipses />
+              <DotsIcon />
               <Circle size={12} bgColor="solid.primary">
                 {remoteSvgIcon(starterData?.game.icon.uri, "30px", "white")}
               </Circle>
