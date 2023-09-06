@@ -11,25 +11,30 @@ const Consent: NextPage = () => {
   const [controller] = useController();
 
   const onSubmit = useCallback(async () => {
-    // include the address of local server as a query param
-    const redirect_uri = `${process.env.NEXT_PUBLIC_SITE_URL}/auth/success?redirect_uri=${router.query.redirect_uri}`;
-    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/oauth2/auth?client_id=cartridge&response_type=code&redirect_uri=${redirect_uri}`;
+    // Include the address of local server as `state` query param
+    const state = encodeURIComponent(
+      `${process.env.NEXT_PUBLIC_SITE_URL}/auth/success?redirect_uri=${router.query.redirect_uri}`,
+    );
+    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/oauth2/auth?client_id=cartridge&response_type=code&state=${state}`;
 
     window.location.href = url;
   }, [router.query.redirect_uri]);
 
   const onDeny = useCallback(async () => {
     const url = `${router.query.redirect_url}/callback`;
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-    });
+    try {
+      await fetch(url, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+      });
 
-    console.log(res);
-    // TODO: redirect to auth failure page
-  }, [router.query.redirect_url]);
+      router.replace("/auth/failure");
+    } catch (e) {
+      console.error(e);
+    }
+  }, [router]);
 
   useEffect(() => {
     if (!controller) {
