@@ -1,19 +1,15 @@
 import { Login, Signup } from "components";
+import { useController } from "hooks/controller";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import Controller from "utils/controller";
+import { useState } from "react";
 
 const Auth: NextPage = () => {
   const router = useRouter();
 
   const [showSignup, setShowSignup] = useState(false);
   const [prefilledUsername, setPrefilledUsername] = useState<string>();
-  const [controller, setController] = useState<Controller>();
-
-  useEffect(() => {
-    setController(Controller.fromStore());
-  }, [setController]);
+  const [controller, setController] = useController();
 
   if (controller) {
     router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/auth/consent`);

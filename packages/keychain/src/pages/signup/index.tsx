@@ -1,13 +1,12 @@
 import { useRouter } from "next/router";
 import type { NextPage } from "next";
 import { Signup as SignupComponent } from "components";
-import { useMemo } from "react";
-import Controller from "utils/controller";
+import { useController } from "hooks/controller";
 
 const Signup: NextPage = () => {
   const router = useRouter();
   const { sp: starterPackId } = router.query as { sp: string };
-  const controller = useMemo(() => Controller.fromStore(), []);
+  const [controller] = useController();
 
   if (controller) {
     router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);

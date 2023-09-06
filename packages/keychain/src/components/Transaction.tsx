@@ -2,9 +2,9 @@ import { ReactNode, useEffect, useMemo, useState } from "react";
 import { Text, Link, HStack, Circle, Spacer, Divider } from "@chakra-ui/react";
 
 import { constants } from "starknet";
-import Controller from "utils/controller";
 import { StarkscanUrl } from "utils/url";
 import { CheckIcon, ExternalIcon, StarknetIcon, Loading } from "@cartridge/ui";
+import { useController } from "hooks/controller";
 
 export type TransactionState = "pending" | "success" | "error";
 
@@ -15,15 +15,15 @@ export interface TransactionProps {
   finalized?: (TransactionState) => void;
 }
 
-export const Transaction = ({
+export function Transaction({
   name,
   chainId,
   hash,
   finalized,
-}: TransactionProps) => {
+}: TransactionProps) {
   const [state, setState] = useState<TransactionState>("pending");
   const { color, icon } = useMemo(() => getColorIcon(state), [state]);
-  const controller = useMemo(() => Controller.fromStore(), []);
+  const [controller] = useController();
 
   useEffect(() => {
     if (chainId) {
@@ -44,6 +44,7 @@ export const Transaction = ({
         });
     }
   }, [controller, hash, chainId, finalized]);
+
   return (
     <HStack w="full" borderRadius="sm" bgColor="solid.primary" p={3}>
       <HStack spacing={3} color={color}>
@@ -73,11 +74,12 @@ export const Transaction = ({
       </HStack>
     </HStack>
   );
-};
+}
 
-const getColorIcon = (
-  state: TransactionState,
-): { color: string; icon: ReactNode } => {
+function getColorIcon(state: TransactionState): {
+  color: string;
+  icon: ReactNode;
+} {
   switch (state) {
     case "success":
       return {
@@ -95,4 +97,4 @@ const getColorIcon = (
         icon: <></>,
       };
   }
-};
+}

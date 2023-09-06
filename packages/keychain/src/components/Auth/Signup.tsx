@@ -1,5 +1,5 @@
 import { Field, PlugNewDuoIcon } from "@cartridge/ui";
-import { VStack, Button, useDisclosure } from "@chakra-ui/react";
+import { VStack, Button } from "@chakra-ui/react";
 import { Container } from "../Container";
 import {
   Form as FormikForm,
@@ -44,12 +44,6 @@ export function Signup({
   const [isRegistering, setIsRegistering] = useState(false);
   const [claimSuccess, setClaimSuccess] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  const {
-    isOpen: isAuthOpen,
-    onOpen: onAuthOpen,
-    onClose: onAuthClose,
-  } = useDisclosure();
 
   const { data: starterData } = useStarterPackQuery(
     {
@@ -156,9 +150,6 @@ export function Signup({
             setIsRegistering={setIsRegistering}
             context={context}
             starterData={starterData}
-            isAuthOpen={isAuthOpen}
-            onAuthClose={onAuthClose}
-            onComplete={onComplete}
           />
         </Formik>
       </Container>
@@ -177,18 +168,12 @@ function Form({
   isLoading,
   setIsRegistering,
   starterData,
-  isAuthOpen,
-  onAuthClose,
-  onComplete,
 }: Pick<SignupProps, "context" | "onController" | "onLogin"> & {
   keypair: KeyPair;
   isRegistering: boolean;
   isLoading: boolean;
   setIsRegistering: (val: boolean) => void;
   starterData: StarterPackQuery;
-  isAuthOpen: boolean;
-  onAuthClose: () => void;
-  onComplete: () => void;
 }) {
   const { values, isValidating } = useFormikContext<FormValues>();
 

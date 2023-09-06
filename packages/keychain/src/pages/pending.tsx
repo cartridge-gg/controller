@@ -1,18 +1,18 @@
 import type { NextPage } from "next";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
-import Controller from "utils/controller";
 import { useUrlTxns } from "hooks/transaction";
 import { Transaction, TransactionState } from "components/Transaction";
 import { TimerDuoIcon } from "@cartridge/ui";
 import { Container, PortalBanner } from "components";
+import { useController } from "hooks/controller";
 
 const Pending: NextPage = () => {
   const [txnResults, setTxnResults] = useState<TransactionState[]>([]);
   const [title, setTitle] = useState("Pending...");
   const [description, setDescription] = useState("This may take a second");
 
-  const controller = useMemo(() => Controller.fromStore(), []);
+  const [controller] = useController();
   const { chainId, txns } = useUrlTxns();
 
   useEffect(() => {
