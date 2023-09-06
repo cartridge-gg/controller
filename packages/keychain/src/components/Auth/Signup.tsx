@@ -29,8 +29,9 @@ import { validateUsernameFor } from "./utils";
 import { useClearField } from "./hooks";
 import { BannerImage } from "./BannerImage";
 import { ClaimSuccess } from "./StarterPack";
-import { Authenticate as AuthModal } from "./Authenticate";
 import { RegistrationLink } from "./RegistrationLink";
+import { Credentials, onCreateBegin, onCreateFinalize } from "hooks/account";
+import { useStartup } from "hooks/startup";
 
 export function Signup({
   prefilledName = "",
@@ -42,6 +43,7 @@ export function Signup({
 }: SignupProps) {
   const [isRegistering, setIsRegistering] = useState(false);
   const [claimSuccess, setClaimSuccess] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     isOpen: isAuthOpen,
@@ -77,15 +79,18 @@ export function Signup({
     onCompleteProp();
   }, [starterPackId, onCompleteProp]);
 
+  const { play, StartupAnimation } = useStartup({ onComplete });
+
   const onSubmit = useCallback(
     async (values: FormValues) => {
-      setIsRegistering(true);
+      setIsLoading(true);
 
       // due to same origin restriction, if we're in iframe, pop up a
       // window to continue webauthn registration. otherwise,
       // display modal overlay. in either case, account is created in
       // authenticate component, so we poll and then deploy
       if (isIframe) {
+        setIsRegistering(true);
         PopupCenter(
           `/authenticate?name=${encodeURIComponent(
             values.username,
@@ -95,10 +100,26 @@ export function Signup({
           640,
         );
       } else {
-        onAuthOpen();
+        // https://webkit.org/blog/11545/updates-to-the-storage-access-api/
+        document.cookie = "visited=true; path=/;";
+
+        try {
+          const credentials: Credentials = await onCreateBegin(
+            decodeURIComponent(values.username),
+          );
+          await onCreateFinalize(deviceKey, credentials);
+
+          play();
+        } catch (e) {
+          console.error(e);
+          setIsLoading(false);
+          throw e;
+        }
+
+        setIsLoading(false);
       }
     },
-    [isIframe, deviceKey, onAuthOpen],
+    [isIframe, deviceKey, play],
   );
 
   if (claimSuccess) {
@@ -118,27 +139,32 @@ export function Signup({
   }
 
   return (
-    <Container>
-      <Formik
-        initialValues={{ username: prefilledName }}
-        onSubmit={onSubmit}
-        validateOnChange={false}
-        validateOnBlur={false}
-      >
-        <Form
-          onLogin={onLogin}
-          onController={onController}
-          keypair={keypair}
-          isRegistering={isRegistering}
-          setIsRegistering={setIsRegistering}
-          context={context}
-          starterData={starterData}
-          isAuthOpen={isAuthOpen}
-          onAuthClose={onAuthClose}
-          onComplete={onComplete}
-        />
-      </Formik>
-    </Container>
+    <>
+      <Container>
+        <Formik
+          initialValues={{ username: prefilledName }}
+          onSubmit={onSubmit}
+          validateOnChange={false}
+          validateOnBlur={false}
+        >
+          <Form
+            onLogin={onLogin}
+            onController={onController}
+            keypair={keypair}
+            isRegistering={isRegistering}
+            isLoading={isLoading}
+            setIsRegistering={setIsRegistering}
+            context={context}
+            starterData={starterData}
+            isAuthOpen={isAuthOpen}
+            onAuthClose={onAuthClose}
+            onComplete={onComplete}
+          />
+        </Formik>
+      </Container>
+
+      {StartupAnimation}
+    </>
   );
 }
 
@@ -148,6 +174,7 @@ function Form({
   onLogin: onLoginProp,
   keypair,
   isRegistering,
+  isLoading,
   setIsRegistering,
   starterData,
   isAuthOpen,
@@ -156,6 +183,7 @@ function Form({
 }: Pick<SignupProps, "context" | "onController" | "onLogin"> & {
   keypair: KeyPair;
   isRegistering: boolean;
+  isLoading: boolean;
   setIsRegistering: (val: boolean) => void;
   starterData: StarterPackQuery;
   isAuthOpen: boolean;
@@ -288,19 +316,10 @@ function Form({
         policies={context?.policies}
         isSignup
       >
-        <Button type="submit" colorScheme="colorful">
+        <Button type="submit" colorScheme="colorful" isLoading={isLoading}>
           sign up
         </Button>
       </PortalFooter>
-
-      <AuthModal
-        isModal
-        isOpen={isAuthOpen}
-        onClose={onAuthClose}
-        name={values.username}
-        pubkey={keypair ? ec.getStarkKey(keypair) : ""}
-        onComplete={onComplete}
-      />
     </FormikForm>
   );
 }

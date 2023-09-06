@@ -78,7 +78,9 @@ function Wrapper({ children }: React.PropsWithChildren) {
 
           <ModalContent>
             <ModalContent p={0} overflow="hidden">
-              <ModalBody p={0}>{children}</ModalBody>
+              <ModalBody p={0} minH={600}>
+                {children}
+              </ModalBody>
             </ModalContent>
           </ModalContent>
         </Modal>

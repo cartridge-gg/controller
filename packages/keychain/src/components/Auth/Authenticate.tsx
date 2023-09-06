@@ -1,8 +1,7 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { Button, UseDisclosureProps } from "@chakra-ui/react";
+import { Button } from "@chakra-ui/react";
 import { Unsupported } from "./Unsupported";
 import { Credentials, onCreateBegin, onCreateFinalize } from "hooks/account";
-import { SimpleModal } from "@cartridge/ui";
 import { useStartup } from "hooks/startup";
 import {
   FaceIDDuoIcon,
@@ -16,16 +15,12 @@ import { PortalFooter } from "components/PortalFooter";
 export function Authenticate({
   name,
   pubkey,
-  isModal = false,
-  isOpen,
   onComplete,
-  onClose,
 }: {
   name: string;
   pubkey: string;
-  isModal?: boolean;
   onComplete: () => void;
-} & UseDisclosureProps) {
+}) {
   const [isLoading, setIsLoading] = useState(false);
   const [userAgent, setUserAgent] = useState<UserAgent>("other");
   const [unsupportedMessage, setUnsupportedMessage] = useState<string>();
@@ -82,36 +77,25 @@ export function Authenticate({
 
   return (
     <>
-      {isModal ? (
-        <SimpleModal
-          icon={<Icon boxSize={10} />}
-          onClose={onClose}
-          onConfirm={() => {
-            onAuth().then(() => onClose());
-          }}
-          confirmText="Continue"
-          isOpen={isOpen}
-          showCloseButton={false}
-          isLoading={isLoading}
-          dismissable={false}
-        >
-          <Content />
-        </SimpleModal>
-      ) : (
-        <Container>
-          <Content />
+      <Container>
+        <PortalBanner
+          Icon={Icon}
+          title="Authenticate Yourself"
+          description={
+            <>
+              You will now be asked to authenticate yourself.
+              <br />
+              Note: this experience varies from browser to browser.
+            </>
+          }
+        />
 
-          <PortalFooter>
-            <Button
-              colorScheme="colorful"
-              onClick={onAuth}
-              isLoading={isLoading}
-            >
-              continue
-            </Button>
-          </PortalFooter>
-        </Container>
-      )}
+        <PortalFooter>
+          <Button colorScheme="colorful" onClick={onAuth} isLoading={isLoading}>
+            continue
+          </Button>
+        </PortalFooter>
+      </Container>
 
       {StartupAnimation}
     </>
@@ -119,18 +103,3 @@ export function Authenticate({
 }
 
 type UserAgent = "ios" | "android" | "other";
-
-function Content() {
-  return (
-    <PortalBanner
-      title="Authenticate Yourself"
-      description={
-        <>
-          You will now be asked to authenticate yourself.
-          <br />
-          Note: this experience varies from browser to browser.
-        </>
-      }
-    />
-  );
-}
