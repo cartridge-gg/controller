@@ -6,7 +6,6 @@ import Controller from "utils/controller";
 
 const Auth: NextPage = () => {
   const router = useRouter();
-  // const {} = router.query as {};
 
   const [showSignup, setShowSignup] = useState(false);
   const [prefilledUsername, setPrefilledUsername] = useState<string>();
@@ -17,8 +16,6 @@ const Auth: NextPage = () => {
   }, [setController]);
 
   if (controller) {
-    // Controller exists (user logged in already)
-    // redirect to consent
     router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/auth/consent`);
   }
 

@@ -137,7 +137,7 @@ function Form({
               error={meta.error}
               onClear={onClearUsername}
               container={{ mb: 6 }}
-              isValidating={isValidating}
+              isLoading={isValidating}
             />
           )}
         </FormikField>
