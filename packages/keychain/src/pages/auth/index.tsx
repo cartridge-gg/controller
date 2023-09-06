@@ -15,12 +15,10 @@ const Auth: NextPage = () => {
     const query = Object.entries(router.query).reduce(
       (prev, [key, val], i) =>
         i === 0 ? `${prev}${key}=${val}` : `${prev}&${key}=${val}`,
-      "",
+      "?",
     );
 
-    router.replace(
-      `${process.env.NEXT_PUBLIC_ADMIN_URL}/auth/consent?${query}`,
-    );
+    router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/auth/consent${query}`);
   }
 
   return (

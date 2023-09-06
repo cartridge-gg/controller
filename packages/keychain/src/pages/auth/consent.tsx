@@ -11,13 +11,14 @@ const Consent: NextPage = () => {
   const [controller] = useController();
 
   const onSubmit = useCallback(async () => {
-    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/oauth2/auth?client_id=cartridge&response_type=code&redirect_uri=${router.query.redirect_uri}`;
+    // include the address of local server as a query param
+    const redirect_uri = `${process.env.NEXT_PUBLIC_SITE_URL}/auth/success?redirect_uri=${router.query.redirect_uri}`;
+    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/oauth2/auth?client_id=cartridge&response_type=code&redirect_uri=${redirect_uri}`;
 
     window.location.href = url;
   }, [router.query.redirect_uri]);
 
   const onDeny = useCallback(async () => {
-    // TODO: call deny request to the slot local server
     const url = `${router.query.redirect_url}/callback`;
     const res = await fetch(url, {
       method: "POST",
