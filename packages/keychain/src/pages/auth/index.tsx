@@ -18,7 +18,7 @@ const Auth: NextPage = () => {
       "",
     );
 
-    router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/auth/consent${query}`);
+    router.replace(`/auth/consent${query}`);
   }
 
   return (

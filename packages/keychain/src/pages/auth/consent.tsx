@@ -38,7 +38,7 @@ const Consent: NextPage = () => {
 
   useEffect(() => {
     if (!controller) {
-      router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/auth`);
+      router.replace("/auth");
     }
   }, [controller, router]);
 
