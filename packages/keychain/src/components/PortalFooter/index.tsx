@@ -2,11 +2,17 @@ import {
   Box,
   IconButton,
   Spacer,
+  Text,
   VStack,
   useDisclosure,
 } from "@chakra-ui/react";
-import { TransactionSummary } from "./TransactionSummary";
-import { WedgeUpIcon } from "@cartridge/ui";
+import { Summary, TransactionSummary } from "./TransactionSummary";
+import {
+  CodeSolidIcon,
+  JoystickSolidIcon,
+  WedgeUpIcon,
+  WrenchSolidIcon,
+} from "@cartridge/ui";
 import { Policy } from "@cartridge/controller";
 import { SessionDetails } from "./SessionDetails";
 import React, { useMemo } from "react";
@@ -16,13 +22,19 @@ export function PortalFooter({
   origin,
   policies,
   isSignup,
+  isSlot,
 }: React.PropsWithChildren & {
   origin?: string;
   policies?: Policy[];
   isSignup?: boolean;
+  isSlot?: boolean;
 }) {
   const { isOpen, onToggle } = useDisclosure();
-  const isExpandable = useMemo(() => origin, [origin]);
+  const isExpandable = useMemo(() => !!origin, [origin]);
+  const hostname = useMemo(
+    () => (origin ? new URL(origin).hostname : undefined),
+    [origin],
+  );
 
   return (
     <VStack
@@ -69,7 +81,7 @@ export function PortalFooter({
       )}
 
       <VStack
-        pt={isExpandable ? 6 : undefined}
+        pt={6}
         pb={isExpandable ? 4 : undefined}
         align="stretch"
         w="full"
@@ -84,10 +96,37 @@ export function PortalFooter({
           msOverflowStyle: "none",
         }}
       >
-        {origin && <TransactionSummary origin={origin} isSignup={isSignup} />}
+        {/* {origin && <TransactionSummary origin={origin} isSignup={isSignup} />} */}
 
-        {isOpen && origin && policies && (
-          <SessionDetails origin={origin} policies={policies} />
+        <TransactionSummary>
+          <>
+            {isSignup && (
+              <Summary
+                Icon={JoystickSolidIcon}
+                title="Create a new Cartridge Controller"
+              />
+            )}
+
+            {hostname && (
+              <Summary Icon={CodeSolidIcon}>
+                Create a session for{" "}
+                <Text color="text.secondaryAccent" as="span" fontWeight="bold">
+                  {hostname}
+                </Text>
+              </Summary>
+            )}
+
+            {isSlot && (
+              <Summary
+                Icon={WrenchSolidIcon}
+                title="Authorize Slot to manage your Cartridge infrastructure"
+              />
+            )}
+          </>
+        </TransactionSummary>
+
+        {isOpen && hostname && policies && (
+          <SessionDetails hostname={hostname} policies={policies} />
         )}
 
         {/* TODO: starter pack

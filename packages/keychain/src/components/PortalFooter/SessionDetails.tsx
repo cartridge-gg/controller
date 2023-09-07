@@ -10,17 +10,14 @@ import {
 } from "@chakra-ui/react";
 import { CodeIcon, WedgeRightIcon } from "@cartridge/ui";
 import { Policy } from "@cartridge/controller";
-import { useMemo } from "react";
 
 export function SessionDetails({
-  origin,
+  hostname,
   policies,
 }: {
-  origin: string;
+  hostname: string;
   policies: Policy[];
 }) {
-  const hostname = useMemo(() => new URL(origin).hostname, [origin]);
-
   if (!policies) {
     return null;
   }

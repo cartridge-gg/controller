@@ -1,30 +1,10 @@
 import { HStack, VStack, Text, Link, IconProps } from "@chakra-ui/react";
-import { CodeIcon, JoystickSolidIcon, LockIcon } from "@cartridge/ui";
-import { useMemo } from "react";
+import { LockIcon } from "@cartridge/ui";
 
-export function TransactionSummary({
-  origin,
-  isSignup,
-}: {
-  origin: string;
-  isSignup?: boolean;
-}) {
-  const hostname = useMemo(() => new URL(origin).hostname, [origin]);
-
+export function TransactionSummary({ children }: React.PropsWithChildren & {}) {
   return (
     <VStack align="flex-start">
-      {isSignup && (
-        <Summary Icon={JoystickSolidIcon}>
-          Create a new Cartridge Controller
-        </Summary>
-      )}
-
-      <Summary Icon={CodeIcon}>
-        Create a session for{" "}
-        <Text color="text.secondaryAccent" as="span" fontWeight="bold">
-          {hostname}
-        </Text>
-      </Summary>
+      {children}
 
       <Summary Icon={LockIcon}>
         <>
@@ -50,19 +30,20 @@ export function TransactionSummary({
   );
 }
 
-function Summary({
+export function Summary({
   Icon,
+  title,
   children,
 }: React.PropsWithChildren & {
   Icon: React.ComponentType<IconProps>;
+  title?: string;
 }) {
   return (
     <HStack align="flex-start" color="text.secondary" fontSize="xs">
       <Icon boxSize={4} />
 
-      {}
       <Text color="text.secondary" fontSize="xs">
-        {children}
+        {title || children}
       </Text>
     </HStack>
   );

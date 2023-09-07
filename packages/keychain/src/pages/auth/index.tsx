@@ -31,6 +31,7 @@ const Auth: NextPage = () => {
             setShowSignup(false);
           }}
           onController={setController}
+          isSlot
         />
       ) : (
         <Login
@@ -40,6 +41,7 @@ const Auth: NextPage = () => {
             setShowSignup(true);
           }}
           onController={setController}
+          isSlot
         />
       )}
     </>

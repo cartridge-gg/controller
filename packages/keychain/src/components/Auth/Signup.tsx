@@ -40,6 +40,7 @@ export function Signup({
   onComplete: onCompleteProp,
   starterPackId,
   onLogin,
+  isSlot,
 }: SignupProps) {
   const [isRegistering, setIsRegistering] = useState(false);
   const [claimSuccess, setClaimSuccess] = useState<boolean>(false);
@@ -150,6 +151,7 @@ export function Signup({
             setIsRegistering={setIsRegistering}
             context={context}
             starterData={starterData}
+            isSlot={isSlot}
           />
         </Formik>
       </Container>
@@ -168,7 +170,8 @@ function Form({
   isLoading,
   setIsRegistering,
   starterData,
-}: Pick<SignupProps, "context" | "onController" | "onLogin"> & {
+  isSlot,
+}: Pick<SignupProps, "context" | "isSlot" | "onController" | "onLogin"> & {
   keypair: KeyPair;
   isRegistering: boolean;
   isLoading: boolean;
@@ -300,6 +303,7 @@ function Form({
         origin={context?.origin}
         policies={context?.policies}
         isSignup
+        isSlot={isSlot}
       >
         <Button type="submit" colorScheme="colorful" isLoading={isLoading}>
           sign up

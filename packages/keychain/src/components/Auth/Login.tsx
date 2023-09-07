@@ -28,6 +28,7 @@ export function Login({
   prefilledName = "",
   chainId,
   context,
+  isSlot,
   onController,
   onComplete,
   onSignup,
@@ -93,7 +94,12 @@ export function Login({
         validateOnChange={false}
         validateOnBlur={false}
       >
-        <Form context={context} onSignup={onSignup} isLoggingIn={isLoggingIn} />
+        <Form
+          context={context}
+          isSlot={isSlot}
+          onSignup={onSignup}
+          isLoggingIn={isLoggingIn}
+        />
       </Formik>
     </Container>
   );
@@ -101,9 +107,10 @@ export function Login({
 
 function Form({
   context,
+  isSlot,
   onSignup: onSignupProp,
   isLoggingIn,
-}: Pick<LoginProps, "context" | "onSignup"> & {
+}: Pick<LoginProps, "context" | "isSlot" | "onSignup"> & {
   isLoggingIn: boolean;
 }) {
   const { values, isValidating } = useFormikContext<FormValues>();
@@ -147,7 +154,11 @@ function Form({
         </RegistrationLink>
       </VStack>
 
-      <PortalFooter origin={context?.origin} policies={context?.policies}>
+      <PortalFooter
+        origin={context?.origin}
+        policies={context?.policies}
+        isSlot={isSlot}
+      >
         <Button type="submit" colorScheme="colorful" isLoading={isLoggingIn}>
           log in
         </Button>
