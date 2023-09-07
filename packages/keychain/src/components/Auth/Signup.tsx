@@ -70,7 +70,7 @@ export function Signup({
       return;
     }
 
-    onCompleteProp();
+    onCompleteProp?.();
   }, [starterPackId, onCompleteProp]);
 
   const { play, StartupAnimation } = useStartup({ onComplete });
