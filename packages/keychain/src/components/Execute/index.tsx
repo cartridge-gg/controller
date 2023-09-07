@@ -185,19 +185,14 @@ export function Execute({
 
   if (bridging) {
     return (
-      <Container
-        chainId={chainId}
-        address={account.address}
-        onLogout={onLogout}
-        onBack={onBack}
-      >
+      <Container chainId={chainId} onLogout={onLogout} onBack={onBack}>
         <BridgeEth chainId={chainId} controller={controller} />
       </Container>
     );
   }
 
   return (
-    <Container chainId={chainId} address={account.address} onLogout={onLogout}>
+    <Container chainId={chainId} onLogout={onLogout}>
       <PortalBanner Icon={TransactionDuoIcon} title="Submit Transaction" />
 
       <VStack w="full" pb={lowEthInfo ? undefined : PORTAL_FOOTER_MIN_HEIGHT}>

@@ -1,18 +1,16 @@
 import type { NextPage } from "next";
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useUrlTxns } from "hooks/transaction";
 import { Transaction, TransactionState } from "components/Transaction";
 import { TimerDuoIcon } from "@cartridge/ui";
 import { Container, PortalBanner } from "components";
-import { useController } from "hooks/controller";
 
 const Pending: NextPage = () => {
   const [txnResults, setTxnResults] = useState<TransactionState[]>([]);
   const [title, setTitle] = useState("Pending...");
   const [description, setDescription] = useState("This may take a second");
 
-  const [controller] = useController();
   const { chainId, txns } = useUrlTxns();
 
   useEffect(() => {
@@ -33,7 +31,7 @@ const Pending: NextPage = () => {
 
   return (
     <>
-      <Container address={controller.address} chainId={chainId}>
+      <Container chainId={chainId}>
         <PortalBanner
           Icon={TimerDuoIcon}
           title={title}

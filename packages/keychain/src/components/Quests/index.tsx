@@ -48,7 +48,6 @@ export function Quests({
 
   return (
     <Container
-      address={address}
       chainId={chainId}
       onBack={!!selectedQuestId ? () => setSelectedQuestId(null) : undefined}
       onLogout={onLogout}

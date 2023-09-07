@@ -3,20 +3,16 @@ import {
   VStack,
   StyleProps,
   Flex,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalBody,
   Show,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { ReactNode } from "react";
 import { Header, HeaderProps } from "./Header";
+import { constants } from "starknet";
 
 export function Container({
   children,
-  chainId,
-  address,
+  chainId = constants.StarknetChainId.TESTNET,
   onBack,
   ...rest
 }: {
@@ -25,7 +21,7 @@ export function Container({
   HeaderProps) {
   return (
     <Wrapper {...rest}>
-      <Header chainId={chainId} address={address} onBack={onBack} />
+      <Header chainId={chainId} onBack={onBack} />
       <VStack
         w="full"
         h="full"
