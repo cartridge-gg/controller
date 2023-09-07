@@ -2,8 +2,9 @@ import { Login, Signup } from "components";
 import { useController } from "hooks/controller";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
+/** This page is for authenticating with Slot */
 const Auth: NextPage = () => {
   const router = useRouter();
 
@@ -11,15 +12,17 @@ const Auth: NextPage = () => {
   const [prefilledUsername, setPrefilledUsername] = useState<string>();
   const [controller, setController] = useController();
 
-  if (controller) {
-    const query = Object.entries(router.query).reduce(
-      (prev, [key, val], i) =>
-        i === 0 ? `?${key}=${val}` : `${prev}&${key}=${val}`,
-      "",
-    );
+  useEffect(() => {
+    if (controller) {
+      const query = Object.entries(router.query).reduce(
+        (prev, [key, val], i) =>
+          i === 0 ? `?${key}=${val}` : `${prev}&${key}=${val}`,
+        "",
+      );
 
-    router.replace(`/auth/consent${query}`);
-  }
+      router.replace(`/slot/auth/consent${query}`);
+    }
+  }, [controller, router]);
 
   return (
     <>

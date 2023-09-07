@@ -12,7 +12,7 @@ const Consent: NextPage = () => {
   const onSubmit = useCallback(async () => {
     // Include the address of local server as `state` query param
     const state = encodeURIComponent(
-      `${process.env.NEXT_PUBLIC_SITE_URL}/auth/success?redirect_uri=${router.query.redirect_uri}`,
+      `${process.env.NEXT_PUBLIC_SITE_URL}/slot/auth/success?redirect_uri=${router.query.redirect_uri}`,
     );
     const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/oauth2/auth?client_id=cartridge&response_type=code&state=${state}`;
 
@@ -29,7 +29,7 @@ const Consent: NextPage = () => {
         },
       });
 
-      router.replace("/auth/failure");
+      router.replace("/slot/auth/failure");
     } catch (e) {
       console.error(e);
     }
@@ -37,7 +37,7 @@ const Consent: NextPage = () => {
 
   useEffect(() => {
     if (!Controller.fromStore()) {
-      router.replace("/auth");
+      router.replace("/slot/auth");
     }
   }, [router]);
 
