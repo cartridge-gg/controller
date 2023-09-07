@@ -22,7 +22,7 @@ const theme = extendTheme({
     global: {
       body: {
         color: "text.primary",
-        background: "solid.bg",
+        background: "translucent.lg",
         WebkitTapHighlightColor: "transparent",
       },
     },

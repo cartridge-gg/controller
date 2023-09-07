@@ -7,7 +7,6 @@ import {
   InputGroup,
   InputRightElement,
   StackProps,
-  Stack,
   Spinner,
 } from "@chakra-ui/react";
 import { AlertIcon, TimesCircleIcon } from "./icons";

@@ -1,3 +1,4 @@
+export * from "./Alert";
 export * from "./Battery";
 export * from "./Coins";
 export * from "./CreditCard";

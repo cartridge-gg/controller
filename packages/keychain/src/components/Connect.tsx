@@ -20,7 +20,7 @@ export function Connect({
   onLogout: () => void;
 }) {
   return (
-    <Container fullPage={false} chainId={chainId} onLogout={onLogout}>
+    <Container chainId={chainId} onLogout={onLogout}>
       <PortalBanner
         Icon={PlugNewDuoIcon}
         title="Create Session"

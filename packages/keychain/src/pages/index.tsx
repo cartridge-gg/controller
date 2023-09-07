@@ -42,6 +42,7 @@ import {
   Signup,
   StarterPack,
 } from "components";
+import { useController } from "hooks/controller";
 
 type Context = Connect | Logout | Execute | SignMessage | StarterPack | Quests;
 
@@ -102,15 +103,10 @@ const Index: NextPage = () => {
   const [chainId, setChainId] = useState<constants.StarknetChainId>(
     constants.StarknetChainId.TESTNET,
   );
-  const [controller, setController] = useState<Controller>();
+  const [controller, setController] = useController();
   const [context, setContext] = useState<Context>();
   const [showSignup, setShowSignup] = useState(false);
   const [prefilledUsername, setPrefilledUsername] = useState<string>();
-
-  // Restore controller from store
-  useEffect(() => {
-    setController(Controller.fromStore());
-  }, [setController]);
 
   // Create connection if not stored
   useEffect(() => {

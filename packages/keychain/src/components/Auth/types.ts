@@ -9,9 +9,9 @@ export type FormValues = {
 export type AuthProps = SignupProps | LoginProps;
 
 type AuthBaseProps = {
-  fullPage?: boolean;
   prefilledName?: string;
   context?: Connect;
+  isSlot?: boolean;
   onController?: (controller: Controller) => void | Promise<void>;
   onComplete?: () => void;
   // onCancel?: () => void;

@@ -1,37 +1,50 @@
 import {
   Box,
-  Flex,
   IconButton,
   Spacer,
+  Text,
   VStack,
   useDisclosure,
+  Link,
 } from "@chakra-ui/react";
-import { TransactionSummary } from "./TransactionSummary";
-import { WedgeUpIcon } from "@cartridge/ui";
+import { Summary, TransactionSummary } from "./TransactionSummary";
+import {
+  CodeSolidIcon,
+  JoystickSolidIcon,
+  LockIcon,
+  WedgeUpIcon,
+  WrenchSolidIcon,
+} from "@cartridge/ui";
 import { Policy } from "@cartridge/controller";
 import { SessionDetails } from "./SessionDetails";
 import React, { useMemo } from "react";
 
 export function PortalFooter({
-  fullPage,
   children,
   origin,
   policies,
   isSignup,
+  isSlot,
+  showTerm = true,
 }: React.PropsWithChildren & {
-  fullPage?: boolean;
   origin?: string;
   policies?: Policy[];
   isSignup?: boolean;
+  isSlot?: boolean;
+  showTerm?: boolean;
 }) {
   const { isOpen, onToggle } = useDisclosure();
-  const isExpandable = useMemo(() => origin, [origin]);
+  const isExpandable = useMemo(() => !!origin, [origin]);
+  const hostname = useMemo(
+    () => (origin ? new URL(origin).hostname : undefined),
+    [origin],
+  );
 
   return (
     <VStack
       w="full"
       align="flex-start"
-      position="fixed"
+      position={["fixed", "fixed", "absolute"]}
       bottom={0}
       left={0}
       bg="solid.bg"
@@ -72,13 +85,13 @@ export function PortalFooter({
       )}
 
       <VStack
-        pt={isExpandable ? 6 : undefined}
+        pt={6}
         pb={isExpandable ? 4 : undefined}
         align="stretch"
         w="full"
         h="full"
         borderTopWidth={1}
-        borderColor="solid.accent"
+        borderColor="solid.tertiary"
         overflowY={isOpen ? "scroll" : "hidden"}
         css={{
           "::-webkit-scrollbar": {
@@ -87,10 +100,15 @@ export function PortalFooter({
           msOverflowStyle: "none",
         }}
       >
-        {origin && <TransactionSummary origin={origin} isSignup={isSignup} />}
+        <TransactionSummary
+          isSignup={isSignup}
+          isSlot={isSlot}
+          showTerm={showTerm}
+          hostname={hostname}
+        />
 
-        {isOpen && origin && policies && (
-          <SessionDetails origin={origin} policies={policies} />
+        {isOpen && hostname && policies && (
+          <SessionDetails hostname={hostname} policies={policies} />
         )}
 
         {/* TODO: starter pack
@@ -121,15 +139,9 @@ export function PortalFooter({
 
       <Spacer />
 
-      {fullPage ? (
-        <Flex w="full" direction="row-reverse" justify="space-between">
-          {children}
-        </Flex>
-      ) : (
-        <VStack align="strech" w="full">
-          {children}
-        </VStack>
-      )}
+      <VStack align="strech" w="full">
+        {children}
+      </VStack>
     </VStack>
   );
 }

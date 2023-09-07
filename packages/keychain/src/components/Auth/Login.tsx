@@ -25,10 +25,10 @@ import { fetchAccount, validateUsernameFor } from "./utils";
 import { RegistrationLink } from "./RegistrationLink";
 
 export function Login({
-  fullPage = false,
   prefilledName = "",
   chainId,
   context,
+  isSlot,
   onController,
   onComplete,
   onSignup,
@@ -44,7 +44,9 @@ export function Login({
       try {
         const {
           account: {
-            credentials: { webauthn: [{ id: credentialId, publicKey }] },
+            credentials: {
+              webauthn: [{ id: credentialId, publicKey }],
+            },
             contractAddress: address,
           },
         } = await fetchAccount(values.username);
@@ -85,7 +87,7 @@ export function Login({
   );
 
   return (
-    <Container fullPage={fullPage} chainId={chainId}>
+    <Container chainId={chainId}>
       <Formik
         initialValues={{ username: prefilledName }}
         onSubmit={onSubmit}
@@ -94,9 +96,9 @@ export function Login({
       >
         <Form
           context={context}
+          isSlot={isSlot}
           onSignup={onSignup}
           isLoggingIn={isLoggingIn}
-          fullPage={fullPage}
         />
       </Formik>
     </Container>
@@ -104,11 +106,11 @@ export function Login({
 }
 
 function Form({
-  fullPage,
   context,
+  isSlot,
   onSignup: onSignupProp,
   isLoggingIn,
-}: Pick<LoginProps, "fullPage" | "context" | "onSignup"> & {
+}: Pick<LoginProps, "context" | "isSlot" | "onSignup"> & {
   isLoggingIn: boolean;
 }) {
   const { values, isValidating } = useFormikContext<FormValues>();
@@ -142,7 +144,7 @@ function Form({
               error={meta.error}
               onClear={onClearUsername}
               container={{ mb: 6 }}
-              isValidating={isValidating}
+              isLoading={isValidating}
             />
           )}
         </FormikField>
@@ -153,9 +155,9 @@ function Form({
       </VStack>
 
       <PortalFooter
-        fullPage={fullPage}
         origin={context?.origin}
         policies={context?.policies}
+        isSlot={isSlot}
       >
         <Button type="submit" colorScheme="colorful" isLoading={isLoggingIn}>
           log in

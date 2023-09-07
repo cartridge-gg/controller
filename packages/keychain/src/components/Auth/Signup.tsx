@@ -1,5 +1,5 @@
 import { Field, PlugNewDuoIcon } from "@cartridge/ui";
-import { VStack, Button, useDisclosure } from "@chakra-ui/react";
+import { VStack, Button } from "@chakra-ui/react";
 import { Container } from "../Container";
 import {
   Form as FormikForm,
@@ -29,26 +29,22 @@ import { validateUsernameFor } from "./utils";
 import { useClearField } from "./hooks";
 import { BannerImage } from "./BannerImage";
 import { ClaimSuccess } from "./StarterPack";
-import { Authenticate as AuthModal } from "./Authenticate";
 import { RegistrationLink } from "./RegistrationLink";
+import { Credentials, onCreateBegin, onCreateFinalize } from "hooks/account";
+import { useStartup } from "hooks/startup";
 
 export function Signup({
-  fullPage = false,
   prefilledName = "",
   context,
   onController,
   onComplete: onCompleteProp,
   starterPackId,
   onLogin,
+  isSlot,
 }: SignupProps) {
   const [isRegistering, setIsRegistering] = useState(false);
   const [claimSuccess, setClaimSuccess] = useState<boolean>(false);
-
-  const {
-    isOpen: isAuthOpen,
-    onOpen: onAuthOpen,
-    onClose: onAuthClose,
-  } = useDisclosure();
+  const [isLoading, setIsLoading] = useState(false);
 
   const { data: starterData } = useStarterPackQuery(
     {
@@ -75,18 +71,21 @@ export function Signup({
       return;
     }
 
-    onCompleteProp();
+    onCompleteProp?.();
   }, [starterPackId, onCompleteProp]);
+
+  const { play, StartupAnimation } = useStartup({ onComplete });
 
   const onSubmit = useCallback(
     async (values: FormValues) => {
-      setIsRegistering(true);
+      setIsLoading(true);
 
       // due to same origin restriction, if we're in iframe, pop up a
       // window to continue webauthn registration. otherwise,
       // display modal overlay. in either case, account is created in
       // authenticate component, so we poll and then deploy
       if (isIframe) {
+        setIsRegistering(true);
         PopupCenter(
           `/authenticate?name=${encodeURIComponent(
             values.username,
@@ -96,10 +95,26 @@ export function Signup({
           640,
         );
       } else {
-        onAuthOpen();
+        // https://webkit.org/blog/11545/updates-to-the-storage-access-api/
+        document.cookie = "visited=true; path=/;";
+
+        try {
+          const credentials: Credentials = await onCreateBegin(
+            decodeURIComponent(values.username),
+          );
+          await onCreateFinalize(deviceKey, credentials);
+
+          play();
+        } catch (e) {
+          console.error(e);
+          setIsLoading(false);
+          throw e;
+        }
+
+        setIsLoading(false);
       }
     },
-    [isIframe, deviceKey, onAuthOpen],
+    [isIframe, deviceKey, play],
   );
 
   if (claimSuccess) {
@@ -114,57 +129,54 @@ export function Signup({
         banner={starterData?.game.banner.uri}
         url={starterData?.game.socials.website}
         media={media}
-        fullPage={fullPage}
       />
     );
   }
 
   return (
-    <Container fullPage={fullPage}>
-      <Formik
-        initialValues={{ username: prefilledName }}
-        onSubmit={onSubmit}
-        validateOnChange={false}
-        validateOnBlur={false}
-      >
-        <Form
-          onLogin={onLogin}
-          onController={onController}
-          keypair={keypair}
-          isRegistering={isRegistering}
-          setIsRegistering={setIsRegistering}
-          fullPage={fullPage}
-          context={context}
-          starterData={starterData}
-          isAuthOpen={isAuthOpen}
-          onAuthClose={onAuthClose}
-          onComplete={onComplete}
-        />
-      </Formik>
-    </Container>
+    <>
+      <Container>
+        <Formik
+          initialValues={{ username: prefilledName }}
+          onSubmit={onSubmit}
+          validateOnChange={false}
+          validateOnBlur={false}
+        >
+          <Form
+            onLogin={onLogin}
+            onController={onController}
+            keypair={keypair}
+            isRegistering={isRegistering}
+            isLoading={isLoading}
+            setIsRegistering={setIsRegistering}
+            context={context}
+            starterData={starterData}
+            isSlot={isSlot}
+          />
+        </Formik>
+      </Container>
+
+      {StartupAnimation}
+    </>
   );
 }
 
 function Form({
-  fullPage,
   context,
   onController,
   onLogin: onLoginProp,
   keypair,
   isRegistering,
+  isLoading,
   setIsRegistering,
   starterData,
-  isAuthOpen,
-  onAuthClose,
-  onComplete,
-}: Pick<SignupProps, "fullPage" | "context" | "onController" | "onLogin"> & {
+  isSlot,
+}: Pick<SignupProps, "context" | "isSlot" | "onController" | "onLogin"> & {
   keypair: KeyPair;
   isRegistering: boolean;
+  isLoading: boolean;
   setIsRegistering: (val: boolean) => void;
   starterData: StarterPackQuery;
-  isAuthOpen: boolean;
-  onAuthClose: () => void;
-  onComplete: () => void;
 }) {
   const { values, isValidating } = useFormikContext<FormValues>();
 
@@ -187,7 +199,7 @@ function Form({
         const {
           account: {
             credentials: {
-              webauthn: [{ id: credentialId }]
+              webauthn: [{ id: credentialId }],
             },
             contractAddress: address,
           },
@@ -242,7 +254,7 @@ function Form({
     () =>
       starterData
         ? starterData.game.starterPack.maxIssuance -
-        starterData.game.starterPack.issuance
+          starterData.game.starterPack.issuance
         : 0,
     [starterData],
   );
@@ -288,24 +300,15 @@ function Form({
       </VStack>
 
       <PortalFooter
-        fullPage={fullPage}
         origin={context?.origin}
         policies={context?.policies}
         isSignup
+        isSlot={isSlot}
       >
-        <Button type="submit" colorScheme="colorful">
+        <Button type="submit" colorScheme="colorful" isLoading={isLoading}>
           sign up
         </Button>
       </PortalFooter>
-
-      <AuthModal
-        isModal
-        isOpen={isAuthOpen}
-        onClose={onAuthClose}
-        name={values.username}
-        pubkey={keypair ? ec.getStarkKey(keypair) : ""}
-        onComplete={onComplete}
-      />
     </FormikForm>
   );
 }

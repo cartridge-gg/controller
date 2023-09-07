@@ -4,11 +4,10 @@ import { useLottie } from "lottie-react";
 import useSound from "use-sound";
 import { ReactElement, useCallback, useState } from "react";
 
-export const useStartup = ({
-  onComplete,
-}: {
-  onComplete: () => void;
-}): { play: () => void; StartupAnimation: ReactElement } => {
+export function useStartup({ onComplete }: { onComplete: () => void }): {
+  play: () => void;
+  StartupAnimation: ReactElement;
+} {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [playSound] = useSound(
     "https://static.cartridge.gg/sounds/startup.mp3",
@@ -31,15 +30,15 @@ export const useStartup = ({
     play,
     StartupAnimation: <StartupAnimation show={isPlaying} View={View} />,
   };
-};
+}
 
-const StartupAnimation = ({
+function StartupAnimation({
   show,
   View,
 }: {
   show: boolean;
   View: ReactElement;
-}) => {
+}) {
   return (
     <Flex
       display={show ? "flex" : "none"}
@@ -56,4 +55,4 @@ const StartupAnimation = ({
       <Box w={["full", "full", "400px"]}>{View}</Box>
     </Flex>
   );
-};
+}

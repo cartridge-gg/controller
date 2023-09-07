@@ -5,6 +5,7 @@ import { SequencerProvider, constants, uint256 } from "starknet";
 import { CONTRACT_ETH } from "@cartridge/controller/src/constants";
 import { BigNumber, utils } from "ethers";
 
+// TODO: Round to specific digits so that width doesn't change?
 export function EthBalance({
   chainId,
   address,
@@ -32,7 +33,7 @@ export function useEthBalance({
   address: string;
   chainId: constants.StarknetChainId;
 }) {
-  const [ethBalance, setEthBalance] = useState<string>();
+  const [ethBalance, setEthBalance] = useState<string>("0");
 
   useEffect(() => {
     if (address) {

@@ -19,10 +19,9 @@ import Controller from "utils/controller";
 import { Container } from "../../Container";
 import { ExecuteReply } from "@cartridge/controller";
 import { addAddressPadding } from "starknet";
-import { OlmechIcon, SparklesDuoIcon } from "@cartridge/ui";
+import { OlmechIcon, SparklesDuoIcon, DotsIcon } from "@cartridge/ui";
 import { BannerImage } from "../BannerImage";
 import { MediaViewer } from "../MediaViewer";
-import Ellipses from "components/legacy/signup/Ellipses";
 import { remoteSvgIcon } from "utils/svg";
 import { StarterPackCarousel } from "./Carousel";
 import { PortalFooter } from "components/PortalFooter";
@@ -32,18 +31,16 @@ export function ClaimSuccess({
   banner,
   media,
   url,
-  fullPage,
 }: {
   name: string;
   banner: string;
   media?: string;
   url: string;
-  fullPage: boolean;
 }) {
   const domain = new URL(url);
   return (
     <>
-      <Container fullPage={fullPage}>
+      <Container>
         <BannerImage imgSrc={banner} />
         <VStack spacing={4} pt={9} pb={6}>
           {media ? (
@@ -78,12 +75,10 @@ export function ClaimSuccess({
 export function StarterPack({
   starterPackId,
   controller,
-  fullPage = false,
   onClaim,
 }: {
   starterPackId: string;
   controller?: Controller;
-  fullPage?: boolean;
   onClaim?: (res?: ExecuteReply) => void;
 }) {
   const [remaining, setRemaining] = useState<number>();
@@ -176,13 +171,12 @@ export function StarterPack({
         banner={starterData?.game.banner.uri}
         url={starterData?.game.socials.website}
         media={media}
-        fullPage={fullPage}
       />
     );
   }
 
   return (
-    <Container fullPage={fullPage}>
+    <Container>
       <BannerImage imgSrc={starterData?.game.banner.uri} />
 
       {claimError && (
@@ -211,7 +205,7 @@ export function StarterPack({
               <Circle size={12} bgColor="solid.primary">
                 <SparklesDuoIcon boxSize={8} />
               </Circle>
-              <Ellipses />
+              <DotsIcon />
               <Circle size={12} bgColor="solid.primary">
                 {remoteSvgIcon(starterData?.game.icon.uri, "30px", "white")}
               </Circle>
@@ -238,7 +232,7 @@ export function StarterPack({
             </HStack>
           </VStack>
 
-          <PortalFooter fullPage={fullPage}>
+          <PortalFooter>
             <Button
               colorScheme="colorful"
               onClick={onSubmit}

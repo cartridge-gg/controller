@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
-  Box,
   Flex,
   Spacer,
   HStack,
@@ -13,15 +12,18 @@ import { ArrowLeftIcon, CartridgeColorIcon, WordLogo } from "@cartridge/ui";
 import { NetworkButton } from "./NetworkButton";
 import { EthBalance } from "./EthBalance";
 import { AccountMenu } from "./AccountMenu";
+import { useController } from "hooks/controller";
 
 export type HeaderProps = {
   chainId?: constants.StarknetChainId;
-  address?: string;
   onLogout?: () => void;
   onBack?: () => void;
 };
 
-export function Header({ chainId, address, onLogout, onBack }: HeaderProps) {
+export function Header({ chainId, onLogout, onBack }: HeaderProps) {
+  const [controller] = useController();
+  const address = useMemo(() => controller?.address, [controller]);
+
   if (!address) {
     return (
       <Container h={12} p={1.5}>
@@ -64,27 +66,24 @@ function Container({
   children: React.ReactNode;
 } & StyleProps) {
   return (
-    <>
-      <Flex
-        h={h}
-        w="full"
-        top="0"
-        left="0"
-        position="fixed"
-        zIndex="overlay"
-        align="center"
-        justify="center"
-        flexShrink={0}
-        borderBottomWidth={1}
-        borderBottomColor="solid.spacer"
-        bg="solid.bg"
-        {...rest}
-      >
-        <ChakraContainer p={0} centerContent>
-          {children}
-        </ChakraContainer>
-      </Flex>
-      <Box h={h} />
-    </>
+    <Flex
+      h={h}
+      w="full"
+      top="0"
+      left="0"
+      // position="fixed"
+      zIndex="overlay"
+      align="center"
+      justify="center"
+      flexShrink={0}
+      borderBottomWidth={1}
+      borderBottomColor="solid.spacer"
+      bg="solid.bg"
+      {...rest}
+    >
+      <ChakraContainer p={0} centerContent>
+        {children}
+      </ChakraContainer>
+    </Flex>
   );
 }

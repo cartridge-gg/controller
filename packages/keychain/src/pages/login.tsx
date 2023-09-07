@@ -20,7 +20,6 @@ const Login: NextPage = () => {
 
         router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);
       }}
-      fullPage
     />
   );
 };

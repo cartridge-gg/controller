@@ -39,7 +39,7 @@ export function Redeploy({
   }, [controller]);
 
   return (
-    <Container fullPage={false} chainId={chainId} onLogout={onLogout}>
+    <Container chainId={chainId} onLogout={onLogout}>
       <PortalBanner
         Icon={SparklesDuoIcon}
         title="Deploying your account"

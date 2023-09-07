@@ -12,7 +12,7 @@ export function Logout({
   onCancel: () => void;
 }) {
   return (
-    <Container fullPage={false}>
+    <Container>
       <PortalBanner
         Icon={LogoutDuoIcon}
         title="Log Out"
