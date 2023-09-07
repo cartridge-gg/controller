@@ -10,17 +10,16 @@ const Consent: NextPage = () => {
   const router = useRouter();
 
   const onSubmit = useCallback(async () => {
-    // Include the address of local server as `state` query param
-    const state = encodeURIComponent(
-      `${process.env.NEXT_PUBLIC_SITE_URL}/slot/auth/success?redirect_uri=${router.query.redirect_uri}`,
-    );
-    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/oauth2/auth?client_id=cartridge&response_type=code&state=${state}`;
+    const redirect_uri = `${process.env.NEXT_PUBLIC_SITE_URL}/slot/auth/success`;
+    // Include the callback uri of local server as `state` query param
+    const state = router.query.callback_uri;
+    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/oauth2/auth?client_id=cartridge&redirect_uri=${redirect_uri}&state=${state}`;
 
     window.location.href = url;
-  }, [router.query.redirect_uri]);
+  }, [router.query.callback_uri]);
 
   const onDeny = useCallback(async () => {
-    const url = `${router.query.redirect_url}/callback`;
+    const url = `${router.query.callback_uri}/callback`;
     try {
       await fetch(url, {
         method: "POST",
