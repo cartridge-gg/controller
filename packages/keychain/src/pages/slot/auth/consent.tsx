@@ -19,7 +19,7 @@ const Consent: NextPage = () => {
   }, [router.query.callback_uri]);
 
   const onDeny = useCallback(async () => {
-    const url = `${router.query.callback_uri}/callback`;
+    const url = router.query.callback_uri as string;
     try {
       await fetch(url, {
         method: "POST",
