@@ -1,31 +1,69 @@
 import { HStack, VStack, Text, Link, IconProps } from "@chakra-ui/react";
-import { LockIcon } from "@cartridge/ui";
+import {
+  CodeSolidIcon,
+  JoystickSolidIcon,
+  LockIcon,
+  WrenchSolidIcon,
+} from "@cartridge/ui";
 
-export function TransactionSummary({ children }: React.PropsWithChildren & {}) {
+export function TransactionSummary({
+  isSignup,
+  isSlot,
+  showTerm,
+  hostname,
+}: {
+  isSignup?: boolean;
+  isSlot?: boolean;
+  showTerm?: boolean;
+  hostname?: string;
+}) {
   return (
     <VStack align="flex-start">
-      {children}
+      {isSignup && (
+        <Summary
+          Icon={JoystickSolidIcon}
+          title="Create a new Cartridge Controller"
+        />
+      )}
 
-      <Summary Icon={LockIcon}>
-        <>
-          By continuing you are agreeing to Cartridge&apos;s{" "}
-          <Link
-            textDecoration="underline"
-            href="https://cartridgegg.notion.site/Cartridge-Terms-of-Use-a7e65445041449c1a75aed697b2f6e62"
-            isExternal
-          >
-            Terms of Service
-          </Link>{" "}
-          and{" "}
-          <Link
-            textDecoration="underline"
-            href="https://cartridgegg.notion.site/Cartridge-Privacy-Policy-747901652aa34c6fb354c7d91930d66c"
-            isExternal
-          >
-            Privacy Policy
-          </Link>
-        </>
-      </Summary>
+      {hostname && (
+        <Summary Icon={CodeSolidIcon}>
+          Create a session for{" "}
+          <Text color="text.secondaryAccent" as="span" fontWeight="bold">
+            {hostname}
+          </Text>
+        </Summary>
+      )}
+
+      {isSlot && (
+        <Summary
+          Icon={WrenchSolidIcon}
+          title="Authorize Slot to manage your Cartridge infrastructure"
+        />
+      )}
+
+      {showTerm && (
+        <Summary Icon={LockIcon}>
+          <>
+            By continuing you are agreeing to Cartridge&apos;s{" "}
+            <Link
+              textDecoration="underline"
+              href="https://cartridgegg.notion.site/Cartridge-Terms-of-Use-a7e65445041449c1a75aed697b2f6e62"
+              isExternal
+            >
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link
+              textDecoration="underline"
+              href="https://cartridgegg.notion.site/Cartridge-Privacy-Policy-747901652aa34c6fb354c7d91930d66c"
+              isExternal
+            >
+              Privacy Policy
+            </Link>
+          </>
+        </Summary>
+      )}
     </VStack>
   );
 }

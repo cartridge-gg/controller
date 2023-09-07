@@ -5,11 +5,13 @@ import {
   Text,
   VStack,
   useDisclosure,
+  Link,
 } from "@chakra-ui/react";
 import { Summary, TransactionSummary } from "./TransactionSummary";
 import {
   CodeSolidIcon,
   JoystickSolidIcon,
+  LockIcon,
   WedgeUpIcon,
   WrenchSolidIcon,
 } from "@cartridge/ui";
@@ -23,11 +25,13 @@ export function PortalFooter({
   policies,
   isSignup,
   isSlot,
+  showTerm = true,
 }: React.PropsWithChildren & {
   origin?: string;
   policies?: Policy[];
   isSignup?: boolean;
   isSlot?: boolean;
+  showTerm?: boolean;
 }) {
   const { isOpen, onToggle } = useDisclosure();
   const isExpandable = useMemo(() => !!origin, [origin]);
@@ -96,34 +100,12 @@ export function PortalFooter({
           msOverflowStyle: "none",
         }}
       >
-        {/* {origin && <TransactionSummary origin={origin} isSignup={isSignup} />} */}
-
-        <TransactionSummary>
-          <>
-            {isSignup && (
-              <Summary
-                Icon={JoystickSolidIcon}
-                title="Create a new Cartridge Controller"
-              />
-            )}
-
-            {hostname && (
-              <Summary Icon={CodeSolidIcon}>
-                Create a session for{" "}
-                <Text color="text.secondaryAccent" as="span" fontWeight="bold">
-                  {hostname}
-                </Text>
-              </Summary>
-            )}
-
-            {isSlot && (
-              <Summary
-                Icon={WrenchSolidIcon}
-                title="Authorize Slot to manage your Cartridge infrastructure"
-              />
-            )}
-          </>
-        </TransactionSummary>
+        <TransactionSummary
+          isSignup={isSignup}
+          isSlot={isSlot}
+          showTerm={showTerm}
+          hostname={hostname}
+        />
 
         {isOpen && hostname && policies && (
           <SessionDetails hostname={hostname} policies={policies} />

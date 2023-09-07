@@ -1,14 +1,13 @@
+import Controller from "utils/controller";
 import { PlugActiveDuoIcon } from "@cartridge/ui/lib";
 import { Button, Text } from "@chakra-ui/react";
 import { Container, PortalBanner, PortalFooter } from "components";
-import { useController } from "hooks/controller";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect } from "react";
 
 const Consent: NextPage = () => {
   const router = useRouter();
-  const [controller] = useController();
 
   const onSubmit = useCallback(async () => {
     // Include the address of local server as `state` query param
@@ -37,10 +36,10 @@ const Consent: NextPage = () => {
   }, [router]);
 
   useEffect(() => {
-    if (!controller) {
+    if (!Controller.fromStore()) {
       router.replace("/auth");
     }
-  }, [controller, router]);
+  }, [router]);
 
   return (
     <Container>
@@ -57,7 +56,7 @@ const Consent: NextPage = () => {
         }
       />
 
-      <PortalFooter>
+      <PortalFooter showTerm={false}>
         <Button colorScheme="colorful" onClick={onSubmit}>
           approve
         </Button>
