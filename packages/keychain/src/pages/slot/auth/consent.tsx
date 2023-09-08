@@ -11,7 +11,7 @@ const Consent: NextPage = () => {
 
   const onSubmit = useCallback(async () => {
     const redirect_uri = encodeURIComponent(
-      `${process.env.NEXT_PUBLIC_SITE_URL}/slot/auth/success`,
+      `${process.env.NEXT_PUBLIC_SITE_URL}/slot/auth/callback`,
     );
     // Include the callback uri of local server as `state` query param
     const state = encodeURIComponent(router.query.callback_uri as string);
@@ -21,16 +21,9 @@ const Consent: NextPage = () => {
   }, [router.query.callback_uri]);
 
   const onDeny = useCallback(async () => {
-    const url = new URL(router.query.callback_uri as string);
-
-    try {
-      await fetch(url);
-
-      router.replace("/slot/auth/failure");
-    } catch (e) {
-      console.error(e);
-    }
-  }, [router]);
+    const url = decodeURIComponent(router.query.callback_uri as string);
+    window.location.href = url;
+  }, [router.query.callback_uri]);
 
   useEffect(() => {
     if (!Controller.fromStore()) {
