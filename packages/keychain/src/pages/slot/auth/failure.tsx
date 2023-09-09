@@ -5,7 +5,7 @@ import { VStack, Text } from "@chakra-ui/react";
 
 const Consent: NextPage = () => {
   return (
-    <Container>
+    <Container hideAccount>
       <PortalBanner
         icon={<AlertDuoIcon boxSize={8} accent="text.error" />}
         title="Failure"

@@ -6,6 +6,10 @@ const Consent: NextPage = () => {
   const router = useRouter();
 
   useEffect(() => {
+    if (!router.query.code || !router.query.state) {
+      return;
+    }
+
     // 1. Retrieve slot local server address from state param
     const code = encodeURIComponent(router.query.code as string);
 

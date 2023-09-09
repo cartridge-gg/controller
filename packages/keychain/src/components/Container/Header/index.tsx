@@ -18,13 +18,19 @@ export type HeaderProps = {
   chainId?: constants.StarknetChainId;
   onLogout?: () => void;
   onBack?: () => void;
+  hideAccount?: boolean;
 };
 
-export function Header({ chainId, onLogout, onBack }: HeaderProps) {
+export function Header({
+  chainId,
+  onLogout,
+  onBack,
+  hideAccount,
+}: HeaderProps) {
   const [controller] = useController();
   const address = useMemo(() => controller?.address, [controller]);
 
-  if (!address) {
+  if (!address || hideAccount) {
     return (
       <Container h={12} p={1.5}>
         <WordLogo h={4} color="brand.primary" />
