@@ -32,7 +32,7 @@ const Consent: NextPage = () => {
   }, [router]);
 
   return (
-    <Container>
+    <Container hideAccount>
       <PortalBanner
         Icon={PlugActiveDuoIcon}
         title="Requesting Permission"

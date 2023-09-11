@@ -14,6 +14,7 @@ export function Container({
   children,
   chainId = constants.StarknetChainId.TESTNET,
   onBack,
+  hideAccount,
   ...rest
 }: {
   children: ReactNode;
@@ -21,7 +22,7 @@ export function Container({
   HeaderProps) {
   return (
     <Wrapper {...rest}>
-      <Header chainId={chainId} onBack={onBack} />
+      <Header chainId={chainId} onBack={onBack} hideAccount={hideAccount} />
       <VStack
         w="full"
         h="full"
