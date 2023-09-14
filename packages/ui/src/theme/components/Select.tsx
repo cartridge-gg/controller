@@ -1,6 +1,6 @@
-import type { ComponentStyleConfig } from "@chakra-ui/theme";
+import { ComponentStyleConfig, defineStyleConfig } from "@chakra-ui/react";
 
-export const Select: ComponentStyleConfig = {
+export const Select: ComponentStyleConfig = defineStyleConfig({
   baseStyle: {},
   variants: {
     primary: {
@@ -14,4 +14,4 @@ export const Select: ComponentStyleConfig = {
   defaultProps: {
     variant: "primary",
   },
-};
+});

@@ -18,8 +18,7 @@
     "types": ["@emotion/react/types/css-prop"]
   },
   "paths": {
-    // "~*": ["./src/*"]
-    "@cartridge/ui/components": ["./src/components"]
+    "@cartridge/ui/components": ["./src/components"],
   },
   "include": [
     "./src/**/*"

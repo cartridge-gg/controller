@@ -1,6 +1,6 @@
-import type { ComponentStyleConfig } from "@chakra-ui/theme";
+import { ComponentStyleConfig, defineStyleConfig } from "@chakra-ui/react";
 
-export const Text: ComponentStyleConfig = {
+export const Text: ComponentStyleConfig = defineStyleConfig({
   baseStyle: {
     color: "text.primary",
     bg: "transparent",
@@ -12,4 +12,4 @@ export const Text: ComponentStyleConfig = {
       letterSpacing: "0.1em",
     },
   },
-};
+});

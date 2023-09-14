@@ -1,7 +1,17 @@
-import type { ComponentMultiStyleConfig } from "@chakra-ui/theme";
+import {
+  ComponentStyleConfig,
+  createMultiStyleConfigHelpers,
+} from "@chakra-ui/react";
 
-export const Accordion: ComponentMultiStyleConfig = {
-  parts: ["root", "container", "button", "panel", "icon"],
+const helpers = createMultiStyleConfigHelpers([
+  "root",
+  "container",
+  "button",
+  "panel",
+  "icon",
+]);
+
+export const Accordion: ComponentStyleConfig = helpers.defineMultiStyleConfig({
   baseStyle: {
     container: {
       bg: "solid.primary",
@@ -74,4 +84,4 @@ export const Accordion: ComponentMultiStyleConfig = {
       },
     },
   },
-};
+});
