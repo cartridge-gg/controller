@@ -11,6 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { AlertIcon, TimesCircleIcon } from "./icons";
 import { useCallback, useState } from "react";
+import { Loading } from "./Loading";
 
 export function Field<T>({
   error,
@@ -56,8 +57,8 @@ export function Field<T>({
 
         {isLoading ? (
           <InputRightElement>
-            {/** TODO: <Loading fill="text.secondary" /> */}
-            <Spinner color="text.secondary" size="sm" />
+            <Loading color="text.secondary" size="12px" />
+            {/** <Spinner color="text.secondary" size="sm" /> */}
           </InputRightElement>
         ) : (
           inputProps.value &&

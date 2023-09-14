@@ -1,8 +1,9 @@
-import { ComponentStyleConfig } from "@chakra-ui/react";
+import { ComponentStyleConfig, defineStyleConfig } from "@chakra-ui/react";
 
-export const Input: ComponentStyleConfig = {
+export const Input: ComponentStyleConfig = defineStyleConfig({
   defaultProps: {
     variant: "filled",
+    // @ts-expect-error TODO: Seems style theme props only
     focusBorderColor: "solid.accent",
     errorBorderColor: "red.500",
   },
@@ -30,4 +31,4 @@ export const Input: ComponentStyleConfig = {
       },
     },
   },
-};
+});

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import Image from "next/future/image";
+import Image from "next/image";
 import {
   Text,
   Link,
@@ -47,8 +47,8 @@ export function ClaimSuccess({
             <MediaViewer
               src={media}
               alt="Claimed starter pack"
-              height="400px"
-              width="300px"
+              height="400"
+              width="300"
             />
           ) : (
             <Circle size={12}>

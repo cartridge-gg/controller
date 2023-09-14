@@ -1,6 +1,6 @@
 import { NextPage } from "next";
 import { Container, PortalBanner } from "components";
-import { SparklesDuoIcon } from "@cartridge/ui/lib";
+import { SparklesDuoIcon } from "@cartridge/ui";
 
 const Consent: NextPage = () => {
   return (

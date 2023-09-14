@@ -1,7 +1,7 @@
-import type { ComponentStyleConfig } from "@chakra-ui/theme";
+import { ComponentStyleConfig, defineStyleConfig } from "@chakra-ui/react";
 
-export const Container: ComponentStyleConfig = {
+export const Container: ComponentStyleConfig = defineStyleConfig({
   baseStyle: {
     maxWidth: "container.lg", // 1024px
   },
-};
+});

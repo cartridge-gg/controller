@@ -1,8 +1,8 @@
-import type { ComponentStyleConfig } from "@chakra-ui/theme";
+import { ComponentStyleConfig, defineStyleConfig } from "@chakra-ui/react";
 
-export const Card: ComponentStyleConfig = {
+export const Card: ComponentStyleConfig = defineStyleConfig({
   baseStyle: {
     borderRadius: "8px",
     padding: "8px",
   },
-};
+});

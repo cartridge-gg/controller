@@ -1,15 +1,19 @@
-import type { ComponentMultiStyleConfig } from "@chakra-ui/theme";
+import {
+  ComponentStyleConfig,
+  createMultiStyleConfigHelpers,
+} from "@chakra-ui/react";
 
-export const Modal: ComponentMultiStyleConfig = {
-  parts: [
-    "overlay",
-    "dialogContainer",
-    "dialog",
-    "header",
-    "closeButton",
-    "body",
-    "footer",
-  ],
+const helpers = createMultiStyleConfigHelpers([
+  "overlay",
+  "dialogContainer",
+  "dialog",
+  "header",
+  "closeButton",
+  "body",
+  "footer",
+]);
+
+export const Modal: ComponentStyleConfig = helpers.defineMultiStyleConfig({
   baseStyle: {
     dialog: {
       background: "solid.bg",
@@ -24,4 +28,4 @@ export const Modal: ComponentMultiStyleConfig = {
       p: "16px",
     },
   },
-};
+});

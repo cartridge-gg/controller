@@ -1,23 +1,19 @@
-import React from "react";
-/** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
 import { Box } from "@chakra-ui/react";
 
 export const Loading = ({
-  fill = "text.primary",
+  color = "text.primary",
   hidden = false,
-  width = "20px",
-  height = "20px",
+  size = "20px",
 }: {
-  fill?: string;
+  color?: string;
   hidden?: boolean;
-  width?: string;
-  height?: string;
+  size?: string;
 }) => (
   <Box
-    h={height}
-    w={width}
-    color={fill}
+    h={size}
+    w={size}
+    color={color}
     visibility={hidden ? "hidden" : "visible"}
   >
     <div
@@ -27,19 +23,19 @@ export const Loading = ({
         transform-origin: bottom;
         -webkit-animation: eating-top 0.5s infinite;
         animation: eating-top 0.5s infinite;
-        width: ${width};
-        height: calc(${height} / 2);
+        width: ${size};
+        height: calc(${size} / 2);
         background: currentColor;
 
         &::before {
-          width: ${width};
-          height: calc(${height} / 2);
+          width: ${size};
+          height: calc(${size} / 2);
           background: currentColor;
         }
         &::before {
           content: "";
           display: block;
-          margin-top: calc(${height} / 2);
+          margin-top: calc(${size} / 2);
           position: absolute;
           transform-origin: top;
           border-radius: 0 0 100em 100em;

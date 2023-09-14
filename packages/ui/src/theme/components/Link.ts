@@ -1,6 +1,6 @@
-import type { ComponentStyleConfig } from "@chakra-ui/theme";
+import { ComponentStyleConfig, defineStyleConfig } from "@chakra-ui/react";
 
-export const Link: ComponentStyleConfig = {
+export const Link: ComponentStyleConfig = defineStyleConfig({
   baseStyle: {
     _focus: {
       // TODO: handle accessibility properly
@@ -31,4 +31,4 @@ export const Link: ComponentStyleConfig = {
   defaultProps: {
     variant: "transparent",
   },
-};
+});

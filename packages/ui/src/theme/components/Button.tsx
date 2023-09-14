@@ -1,14 +1,12 @@
-import React from "react";
-import { StyleFunctionProps } from "@chakra-ui/theme-tools";
 import {
-  Button as ChakraButton,
-  Spinner,
   defineStyleConfig,
+  StyleFunctionProps,
+  ComponentStyleConfig,
 } from "@chakra-ui/react";
 
 import { Loading } from "../../components/Loading";
 
-export const Button = defineStyleConfig({
+export const Button: ComponentStyleConfig = defineStyleConfig({
   defaultProps: {
     variant: "solid",
   },
@@ -114,8 +112,3 @@ function getColorProps({ colorScheme }: StyleFunctionProps) {
 }
 
 type ColorScheme = "colorful" | "translucent" | "white";
-
-ChakraButton.defaultProps = {
-  // spinner: <Loading />,
-  spinner: <Spinner />, // workaround for emotion css issue with typescript v5
-};

@@ -33,7 +33,7 @@ export function Header({
   if (!address || hideAccount) {
     return (
       <Container h={12} p={1.5}>
-        <WordLogo h={4} color="brand.primary" />
+        <WordLogo h={4} fill="brand.primary" />
       </Container>
     );
   }
