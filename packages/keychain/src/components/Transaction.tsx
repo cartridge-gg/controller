@@ -89,7 +89,7 @@ function getColorIcon(state: TransactionState): {
     case "pending":
       return {
         color: "white",
-        icon: <Loading height="12px" width="12px" color="white" />,
+        icon: <Loading size="12px" color="white" />,
       };
     case "error":
       return {
