@@ -25,6 +25,12 @@ Install dependencies:
 pnpm i
 ```
 
+Build dependencies:
+
+```sh
+pnpm build
+```
+
 Run `keychain` and `starknet-reat-next`:
 
 ```sh

@@ -1,5 +1,5 @@
 import Controller from "utils/controller";
-import { PlugActiveDuoIcon } from "@cartridge/ui/lib";
+import { PlugActiveDuoIcon } from "@cartridge/ui";
 import { Button, Text } from "@chakra-ui/react";
 import { Container, PortalBanner, PortalFooter } from "components";
 import { NextPage } from "next";

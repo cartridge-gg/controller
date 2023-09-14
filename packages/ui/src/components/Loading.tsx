@@ -1,15 +1,13 @@
-import React from "react";
-/** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
 import { Box } from "@chakra-ui/react";
 
 export const Loading = ({
-  fill = "text.primary",
+  color = "text.primary",
   hidden = false,
   width = "20px",
   height = "20px",
 }: {
-  fill?: string;
+  color?: string;
   hidden?: boolean;
   width?: string;
   height?: string;
@@ -17,7 +15,7 @@ export const Loading = ({
   <Box
     h={height}
     w={width}
-    color={fill}
+    color={color}
     visibility={hidden ? "hidden" : "visible"}
   >
     <div

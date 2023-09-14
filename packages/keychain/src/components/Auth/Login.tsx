@@ -1,4 +1,4 @@
-import { Field, FingerprintDuoIcon } from "@cartridge/ui";
+import { Field, FingerprintDuoIcon, Loading } from "@cartridge/ui";
 import { VStack, Button } from "@chakra-ui/react";
 import { Container } from "../Container";
 import {
@@ -159,7 +159,12 @@ function Form({
         policies={context?.policies}
         isSlot={isSlot}
       >
-        <Button type="submit" colorScheme="colorful" isLoading={isLoggingIn}>
+        <Button
+          type="submit"
+          colorScheme="colorful"
+          isLoading={isLoggingIn}
+          spinner={<Loading color="solid.primary" />}
+        >
           log in
         </Button>
       </PortalFooter>

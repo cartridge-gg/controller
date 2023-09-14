@@ -7,14 +7,15 @@
     "module": "esnext",
     "jsx": "react-jsx",
     "sourceMap": true,
-    "outDir": "lib",
+    "outDir": "dist",
     "strict": true,
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
+    "emitDeclarationOnly": true,
     "types": ["@emotion/react/types/css-prop"]
   },
   "paths": {

@@ -2,7 +2,7 @@ import { Box, Flex, Text } from "@chakra-ui/react";
 import { QuestState } from "./types";
 import { QuestCard } from "./Card";
 import { PortalBanner } from "components/PortalBanner";
-import { QuestsDuoIcon } from "@cartridge/ui/lib";
+import { QuestsDuoIcon } from "@cartridge/ui";
 
 export function QuestOverview({
   questsWithProgression,

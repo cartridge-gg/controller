@@ -1,6 +1,4 @@
-import React, { useState } from "react";
 import { Box, Input as ChakraInput, InputProps } from "@chakra-ui/react";
-/** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
 
 export const Input = (props: InputProps) => {

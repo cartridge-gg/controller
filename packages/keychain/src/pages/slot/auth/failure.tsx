@@ -1,6 +1,6 @@
 import { NextPage } from "next";
 import { Container, PortalBanner } from "components";
-import { AlertDuoIcon } from "@cartridge/ui/lib";
+import { AlertDuoIcon } from "@cartridge/ui";
 import { VStack, Text } from "@chakra-ui/react";
 
 const Consent: NextPage = () => {

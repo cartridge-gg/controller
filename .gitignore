@@ -145,3 +145,6 @@ node_modules/
 **/.pnpm-debug.log*
 
 **/storybook-static/
+
+# vite
+vite.config.{js,ts}.timestamp-*
