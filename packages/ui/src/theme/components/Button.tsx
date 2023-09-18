@@ -11,7 +11,7 @@ export const Button: ComponentStyleConfig = defineStyleConfig({
   baseStyle: {
     outline: "none",
     borderRadius: "base",
-    fontFamily: "var(--font-ibm-plex-mono)",
+    fontFamily: "IBM Plex Mono",
     fontWeight: "semibold",
     ":hover:disabled": {
       cursor: "not-allowed",

@@ -1,8 +1,9 @@
 export * from "./Provider";
 
 import { extendTheme, type ThemeConfig } from "@chakra-ui/react";
-import { colors, semanticColors } from "./colors";
+import { colors } from "./colors";
 import { fonts } from "./fonts";
+import { semanticTokens } from "./semanticTokens";
 import * as Components from "./components";
 
 const config: ThemeConfig = {
@@ -13,9 +14,7 @@ const config: ThemeConfig = {
 const theme = extendTheme({
   config,
   colors,
-  semanticTokens: {
-    colors: semanticColors,
-  },
+  semanticTokens,
   fonts,
   styles: {
     global: {

@@ -1,6 +1,6 @@
 import { VStack, HStack, Text as CText, Box } from "@chakra-ui/react";
 import { Meta, StoryObj } from "@storybook/react";
-import { semanticColors } from "../theme/colors";
+import { semanticTokens } from "../theme/semanticTokens";
 
 /**
  *
@@ -14,7 +14,7 @@ const meta: Meta<typeof Palette> = {
     colorName: {
       control: "select",
       description: "Base color name",
-      options: Object.keys(semanticColors),
+      options: Object.keys(semanticTokens.colors),
     },
   },
 };
@@ -48,13 +48,13 @@ export const Translucent: Story = {
 };
 
 type ColorsProps = {
-  colorName: keyof typeof semanticColors;
+  colorName: keyof typeof semanticTokens.colors;
 };
 
 function Palette({ colorName }: ColorsProps) {
   return (
     <HStack overflowX="auto">
-      {Object.keys(semanticColors[colorName])
+      {Object.keys(semanticTokens.colors[colorName])
         .sort((k1, k2) => (k1 < k2 ? -1 : 1))
         .map((variant) => (
           <ColorSample
