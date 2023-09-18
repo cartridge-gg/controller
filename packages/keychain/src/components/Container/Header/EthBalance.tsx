@@ -16,7 +16,11 @@ export function EthBalance({
   const ethBalance = useEthBalance({ address, chainId });
 
   return (
-    <Button size="xs" leftIcon={<EthereumIcon boxSize={4} />}>
+    <Button
+      size="xs"
+      leftIcon={<EthereumIcon boxSize={4} />}
+      fontFamily="Inter"
+    >
       {typeof ethBalance === undefined ? (
         <Loading />
       ) : (

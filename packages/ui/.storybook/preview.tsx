@@ -3,8 +3,13 @@ import { Preview } from "@storybook/react";
 import { CartridgeUIProvider } from "../src/theme";
 import { useColorMode } from "@chakra-ui/react";
 import { useDarkMode } from "storybook-dark-mode";
+import { Inter, IBM_Plex_Mono } from "@next/font/google";
 
-import "../../keychain/src/style.css";
+const inter = Inter({ subsets: ["latin"] });
+const ibmPlexMono = IBM_Plex_Mono({
+  weight: "600",
+  subsets: ["latin"],
+});
 
 const preview: Preview = {
   parameters: {
@@ -28,11 +33,24 @@ const preview: Preview = {
   },
   decorators: [
     (Story) => (
-      <CartridgeUIProvider>
-        <ColorModeProvider>
-          <Story />
-        </ColorModeProvider>
-      </CartridgeUIProvider>
+      <>
+        <style
+          // @ts-expect-error type error
+          jsx
+          global
+        >{`
+          :root {
+            --font-inter: ${inter.style.fontFamily};
+            --font-ibm-plex-mono: ${ibmPlexMono.style.fontFamily};
+          }
+        `}</style>
+
+        <CartridgeUIProvider>
+          <ColorModeProvider>
+            <Story />
+          </ColorModeProvider>
+        </CartridgeUIProvider>
+      </>
     ),
   ],
 };

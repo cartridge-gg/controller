@@ -20,7 +20,11 @@ export function NetworkButton({
   // }, [status]);
 
   return (
-    <Button size="xs" leftIcon={<Circle bg="#73C4FF" size={2} />}>
+    <Button
+      size="xs"
+      leftIcon={<Circle bg="#73C4FF" size={2} />}
+      fontFamily="Inter"
+    >
       {chainName}
     </Button>
   );

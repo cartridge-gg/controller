@@ -25,7 +25,9 @@
   },
   "devDependencies": {
     "@emotion/babel-plugin": "^11.11.0",
+    "@next/font": "^13.4.19",
     "@storybook/addon-essentials": "^7.1.1",
+    "@storybook/nextjs": "^7.4.2",
     "@storybook/react": "^7.1.1",
     "@storybook/react-vite": "^7.1.1",
     "@storybook/testing-library": "^0.2.0",
