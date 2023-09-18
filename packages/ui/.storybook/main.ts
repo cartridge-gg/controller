@@ -16,7 +16,7 @@ const config: StorybookConfig = {
     getAbsolutePath("storybook-dark-mode"),
   ],
   framework: {
-    name: getAbsolutePath("@storybook/react-vite"),
+    name: getAbsolutePath("@storybook/nextjs"),
     options: {},
   },
   docs: {

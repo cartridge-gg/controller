@@ -4,8 +4,6 @@ import {
   ComponentStyleConfig,
 } from "@chakra-ui/react";
 
-import { Loading } from "../../components/Loading";
-
 export const Button: ComponentStyleConfig = defineStyleConfig({
   defaultProps: {
     variant: "solid",
@@ -13,7 +11,7 @@ export const Button: ComponentStyleConfig = defineStyleConfig({
   baseStyle: {
     outline: "none",
     borderRadius: "base",
-    fontFamily: "'IBM Plex Mono'",
+    fontFamily: "var(--font-ibm-plex-mono)",
     fontWeight: "semibold",
     ":hover:disabled": {
       cursor: "not-allowed",

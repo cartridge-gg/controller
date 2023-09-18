@@ -3,8 +3,14 @@ import { CartridgeTheme } from "@cartridge/ui";
 import type { AppProps } from "next/app";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { CartridgeUIProvider } from "@cartridge/ui";
+import { Inter, IBM_Plex_Mono } from "next/font/google";
 
-import "../style.css";
+const inter = Inter({ subsets: ["latin"] });
+const ibmPlexMono = IBM_Plex_Mono({
+  weight: "600",
+  subsets: ["latin"],
+});
+
 import { useEffect } from "react";
 
 const queryClient = new QueryClient({
@@ -22,6 +28,7 @@ export default function Keychain({ Component, pageProps }: AppProps) {
     <>
       <NextHead>
         <title>Cartridge</title>
+
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
@@ -32,6 +39,14 @@ export default function Keychain({ Component, pageProps }: AppProps) {
         <meta property="og:site_name" content="cartridge" />
         <meta property="theme-color" content={CartridgeTheme.colors.brand} />
       </NextHead>
+
+      <style jsx global>{`
+        :root {
+          --font-inter: ${inter.style.fontFamily};
+          --font-ibm-plex-mono: ${ibmPlexMono.style.fontFamily};
+        }
+      `}</style>
+
       <CartridgeUIProvider>
         <QueryClientProvider client={queryClient}>
           <Component {...pageProps} />

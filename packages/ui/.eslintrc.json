@@ -5,7 +5,7 @@
     "plugin:storybook/recommended"
   ],
   "rules": {
-    "react/no-unknown-property": ["error", { "ignore": ["css"] }],
+    "react/no-unknown-property": ["error", { "ignore": ["css", "jsx"] }],
     "react/display-name": "off"
   }
 }
