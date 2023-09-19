@@ -45,6 +45,10 @@ export default function Keychain({ Component, pageProps }: AppProps) {
           --font-inter: ${inter.style.fontFamily};
           --font-ibm-plex-mono: ${ibmPlexMono.style.fontFamily};
         }
+
+        body {
+          background: var(--chakra-colors-translucent-lg);
+        }
       `}</style>
 
       <CartridgeUIProvider>
