@@ -8,7 +8,11 @@ import {
   IconButton,
 } from "@chakra-ui/react";
 import { constants } from "starknet";
-import { ArrowLeftIcon, CartridgeColorIcon, WordLogo } from "@cartridge/ui";
+import {
+  ArrowLeftIcon,
+  CartridgeColorIcon,
+  CartridgeLogo,
+} from "@cartridge/ui";
 import { NetworkButton } from "./NetworkButton";
 import { EthBalance } from "./EthBalance";
 import { AccountMenu } from "./AccountMenu";
@@ -33,7 +37,7 @@ export function Header({
   if (!address || hideAccount) {
     return (
       <Container h={12} p={1.5}>
-        <WordLogo h={4} fill="brand.primary" />
+        <CartridgeLogo boxSize={28} />
       </Container>
     );
   }
