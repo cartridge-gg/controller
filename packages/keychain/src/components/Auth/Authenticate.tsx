@@ -77,7 +77,7 @@ export function Authenticate({
 
   return (
     <>
-      <Container>
+      <Container hideAccount>
         <PortalBanner
           Icon={Icon}
           title="Authenticate Yourself"
