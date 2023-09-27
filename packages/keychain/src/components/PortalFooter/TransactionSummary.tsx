@@ -1,10 +1,5 @@
 import { HStack, VStack, Text, Link, IconProps } from "@chakra-ui/react";
-import {
-  CodeSolidIcon,
-  JoystickSolidIcon,
-  LockIcon,
-  WrenchSolidIcon,
-} from "@cartridge/ui";
+import { CodeIcon, JoystickIcon, LockIcon, WrenchIcon } from "@cartridge/ui";
 
 export function TransactionSummary({
   isSignup,
@@ -21,13 +16,13 @@ export function TransactionSummary({
     <VStack align="flex-start">
       {isSignup && (
         <Summary
-          Icon={JoystickSolidIcon}
+          Icon={JoystickIcon}
           title="Create a new Cartridge Controller"
         />
       )}
 
       {hostname && (
-        <Summary Icon={CodeSolidIcon}>
+        <Summary Icon={CodeIcon}>
           Create a session for{" "}
           <Text color="text.secondaryAccent" as="span" fontWeight="bold">
             {hostname}
@@ -37,7 +32,7 @@ export function TransactionSummary({
 
       {isSlot && (
         <Summary
-          Icon={WrenchSolidIcon}
+          Icon={WrenchIcon}
           title="Authorize Slot to manage your Cartridge infrastructure"
         />
       )}

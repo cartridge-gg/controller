@@ -1,4 +1,4 @@
-import { CircleCheckIcon, SparklesLineIcon } from "@cartridge/ui";
+import { CircleCheckIcon, SparklesIcon } from "@cartridge/ui";
 import { HStack, Spacer, Text } from "@chakra-ui/react";
 import { QuestState } from "./types";
 
@@ -54,7 +54,9 @@ export function QuestCard({
       {check && <CircleCheckIcon fontSize="lg" />}
       <Text color="currentColor">{name}</Text>
       <Spacer />
-      {state !== QuestState.Complete && <SparklesLineIcon fontSize="lg" />}
+      {state !== QuestState.Complete && (
+        <SparklesIcon variant="line" fontSize="lg" />
+      )}
       {state === QuestState.Complete && (
         <Text fontSize="2xs" textTransform="uppercase" color="currentColor">
           Completed

@@ -7,7 +7,7 @@ import {
   CircleCheckIcon,
   CircleNoCheckIcon,
   QuestsDuoIcon,
-  SparklesLineIcon,
+  SparklesIcon,
 } from "@cartridge/ui";
 import { PortalBanner } from "components/PortalBanner";
 
@@ -129,7 +129,7 @@ export function QuestDetails({
             <Tag>Rewards</Tag>
             {quest.points && (
               <Reward
-                icon={<SparklesLineIcon />}
+                icon={<SparklesIcon variant="line" />}
                 amount={quest.points}
                 name="XP"
               />
