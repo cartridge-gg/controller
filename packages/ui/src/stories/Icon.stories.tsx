@@ -1,4 +1,4 @@
-import { Grid, GridItem, IconProps, Text, VStack } from "@chakra-ui/react";
+import { Grid, GridItem, Text, VStack } from "@chakra-ui/react";
 import { Meta, StoryObj } from "@storybook/react";
 import {
   brandIcons,
@@ -8,6 +8,7 @@ import {
   stateIcons,
   utilityIcons,
 } from "../components/icons";
+import { StateIconProps } from "src/components/icons/state/types";
 
 const iconList = {
   brand: brandIcons,
@@ -53,6 +54,11 @@ const meta: Meta<typeof Icons> = {
     color: {
       control: "color",
       description: "Color icons do not support this prop.",
+    },
+    variant: {
+      control: "select",
+      options: ["solid", "line"],
+      description: "State icons only.",
     },
     accent: {
       control: "color",
@@ -109,12 +115,14 @@ function Icons({
   category = "state",
   boxSize,
   color,
+  variant,
   ...duotoneProps
 }: {
   category: keyof typeof iconList;
   boxSize: number;
   color: string;
   accent?: string;
+  variant: StateIconProps["variant"];
   accentHighlight?: string;
 }) {
   return (
@@ -129,11 +137,30 @@ function Icons({
               borderColor="text.secondary"
               borderRadius={4}
             >
-              {category === "duotone" ? (
-                <Comp m={1} boxSize={boxSize} color={color} {...duotoneProps} />
-              ) : (
-                <Comp m={1} boxSize={boxSize} color={color} />
-              )}
+              {(() => {
+                switch (category) {
+                  case "state":
+                    return (
+                      <Comp
+                        m={1}
+                        boxSize={boxSize}
+                        color={color}
+                        variant={variant}
+                      />
+                    );
+                  case "duotone":
+                    return (
+                      <Comp
+                        m={1}
+                        boxSize={boxSize}
+                        color={color}
+                        {...duotoneProps}
+                      />
+                    );
+                  default:
+                    return <Comp m={1} boxSize={boxSize} color={color} />;
+                }
+              })()}
               <Text fontSize="2xs">{name}</Text>
             </VStack>
           </GridItem>

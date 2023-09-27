@@ -1,6 +1,6 @@
 import { Button } from "@chakra-ui/react";
 import { Meta, StoryObj } from "@storybook/react";
-import { CopyIcon, JoystickLineIcon } from "../components/icons";
+import { CopyIcon, JoystickIcon } from "../components/icons";
 
 /**
  *
@@ -98,7 +98,7 @@ export const HeaderButton: Story = {
     children: "0xb5…34a5",
     fontSize: "small",
     variant: "round",
-    leftIcon: <JoystickLineIcon />,
+    leftIcon: <JoystickIcon variant="line" />,
     rightIcon: <CopyIcon />,
   },
 };

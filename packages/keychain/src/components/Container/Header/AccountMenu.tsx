@@ -10,7 +10,7 @@ import {
 } from "@chakra-ui/react";
 import {
   WedgeDownIcon,
-  WalletSolidIcon,
+  WalletIcon,
   CopyIcon,
   LogoutDuoIcon,
 } from "@cartridge/ui";
@@ -44,7 +44,7 @@ export function AccountMenu({
 
       <MenuList position="absolute" top={3} right={-10}>
         <MenuItem
-          icon={<WalletSolidIcon boxSize={4} />}
+          icon={<WalletIcon boxSize={4} />}
           onClick={() => {
             navigator.clipboard.writeText(address);
           }}

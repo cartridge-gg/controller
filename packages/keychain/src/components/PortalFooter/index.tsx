@@ -2,19 +2,11 @@ import {
   Box,
   IconButton,
   Spacer,
-  Text,
   VStack,
   useDisclosure,
-  Link,
 } from "@chakra-ui/react";
-import { Summary, TransactionSummary } from "./TransactionSummary";
-import {
-  CodeSolidIcon,
-  JoystickSolidIcon,
-  LockIcon,
-  WedgeUpIcon,
-  WrenchSolidIcon,
-} from "@cartridge/ui";
+import { TransactionSummary } from "./TransactionSummary";
+import { WedgeUpIcon } from "@cartridge/ui";
 import { Policy } from "@cartridge/controller";
 import { SessionDetails } from "./SessionDetails";
 import React, { useMemo } from "react";
