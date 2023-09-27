@@ -52,6 +52,8 @@ export * from "./SingularOvalLine";
 export * from "./SingularOvalSolid";
 export * from "./SingularShapeLine";
 export * from "./SingularShapeSolid";
+export * from "./SpaceInvaderLine";
+export * from "./SpaceInvaderSolid";
 export * from "./StackDiamondLine";
 export * from "./StackDiamondSolid";
 export * from "./StackOvalLine";
