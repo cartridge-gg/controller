@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { Icon, IconProps } from "@chakra-ui/react";
 
-export const CodeIcon = memo((props: IconProps) => (
+export const CodeUtilIcon = memo((props: IconProps) => (
   <Icon viewBox="0 0 24 24" {...props}>
     <path
       fill="currentColor"

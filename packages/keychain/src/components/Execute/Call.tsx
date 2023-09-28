@@ -1,5 +1,5 @@
 import { Policy } from "@cartridge/controller";
-import { CodeIcon } from "@cartridge/ui";
+import { CodeUtilIcon } from "@cartridge/ui";
 import { HStack, Spacer, SystemProps, Text } from "@chakra-ui/react";
 import { constants } from "starknet";
 
@@ -13,7 +13,7 @@ export function Call({
 } & SystemProps) {
   return (
     <HStack w="full" py={2} px={3} {...rest}>
-      <CodeIcon boxSize={4} />
+      <CodeUtilIcon boxSize={4} />
       <Text fontSize="sm">{policy.method}</Text>
       <Spacer />
     </HStack>

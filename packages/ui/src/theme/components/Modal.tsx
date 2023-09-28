@@ -1,17 +1,10 @@
+import { modalAnatomy } from "@chakra-ui/anatomy";
 import {
   ComponentStyleConfig,
   createMultiStyleConfigHelpers,
 } from "@chakra-ui/react";
 
-const helpers = createMultiStyleConfigHelpers([
-  "overlay",
-  "dialogContainer",
-  "dialog",
-  "header",
-  "closeButton",
-  "body",
-  "footer",
-]);
+const helpers = createMultiStyleConfigHelpers(modalAnatomy.keys);
 
 export const Modal: ComponentStyleConfig = helpers.defineMultiStyleConfig({
   baseStyle: {

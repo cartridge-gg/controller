@@ -1,5 +1,10 @@
 import { HStack, VStack, Text, Link, IconProps } from "@chakra-ui/react";
-import { CodeIcon, JoystickIcon, LockIcon, WrenchIcon } from "@cartridge/ui";
+import {
+  CodeUtilIcon,
+  JoystickIcon,
+  LockIcon,
+  WrenchIcon,
+} from "@cartridge/ui";
 
 export function TransactionSummary({
   isSignup,
@@ -22,7 +27,7 @@ export function TransactionSummary({
       )}
 
       {hostname && (
-        <Summary Icon={CodeIcon}>
+        <Summary Icon={CodeUtilIcon}>
           Create a session for{" "}
           <Text color="text.secondaryAccent" as="span" fontWeight="bold">
             {hostname}
