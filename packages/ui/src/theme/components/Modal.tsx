@@ -4,10 +4,11 @@ import {
   createMultiStyleConfigHelpers,
 } from "@chakra-ui/react";
 
-const helpers = createMultiStyleConfigHelpers(modalAnatomy.keys);
+const { defineMultiStyleConfig, definePartsStyle } =
+  createMultiStyleConfigHelpers(modalAnatomy.keys);
 
-export const Modal: ComponentStyleConfig = helpers.defineMultiStyleConfig({
-  baseStyle: {
+export const Modal: ComponentStyleConfig = defineMultiStyleConfig({
+  baseStyle: definePartsStyle({
     dialog: {
       background: "solid.bg",
       pt: "42px",
@@ -20,5 +21,5 @@ export const Modal: ComponentStyleConfig = helpers.defineMultiStyleConfig({
     footer: {
       p: "16px",
     },
-  },
+  }),
 });
