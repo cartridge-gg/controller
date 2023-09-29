@@ -10,16 +10,13 @@ const { defineMultiStyleConfig, definePartsStyle } =
 export const Modal: ComponentStyleConfig = defineMultiStyleConfig({
   baseStyle: definePartsStyle({
     dialog: {
-      background: "solid.bg",
-      pt: "42px",
+      bg: "solid.bg",
     },
     closeButton: {
+      color: "text.secondary",
       _focus: {
         boxShadow: "none",
       },
-    },
-    footer: {
-      p: "16px",
     },
   }),
 });
