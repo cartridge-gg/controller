@@ -1,6 +1,6 @@
 {
   "name": "cartridge",
-  "packageManager": "pnpm@8.6.10",
+  "packageManager": "^pnpm@8.8.0",
   "private": true,
   "scripts": {
     "preinstall": "npx only-allow pnpm",
