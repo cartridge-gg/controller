@@ -8,7 +8,7 @@ import {
   Spacer,
   AccordionPanel,
 } from "@chakra-ui/react";
-import { CodeIcon, WedgeRightIcon } from "@cartridge/ui";
+import { CodeUtilIcon, WedgeRightIcon } from "@cartridge/ui";
 import { Policy } from "@cartridge/controller";
 
 export function SessionDetails({
@@ -60,7 +60,7 @@ export function SessionDetails({
                   }}
                 >
                   <HStack>
-                    {<CodeIcon boxSize={4} />}
+                    {<CodeUtilIcon boxSize={4} />}
                     <Text>{p.method}</Text>
                   </HStack>
 

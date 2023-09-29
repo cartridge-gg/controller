@@ -1,60 +1,37 @@
+import { menuAnatomy } from "@chakra-ui/anatomy";
 import {
   ComponentStyleConfig,
+  MenuItem,
   createMultiStyleConfigHelpers,
 } from "@chakra-ui/react";
 
-const helpers = createMultiStyleConfigHelpers([
-  "menu",
-  "item",
-  "list",
-  "divider",
-]);
+const { defineMultiStyleConfig, definePartsStyle } =
+  createMultiStyleConfigHelpers(menuAnatomy.keys);
 
-export const Menu: ComponentStyleConfig = helpers.defineMultiStyleConfig({
-  baseStyle: {
+export const Menu: ComponentStyleConfig = defineMultiStyleConfig({
+  baseStyle: definePartsStyle({
     button: {
       p: 2,
-      borderRadius: 4,
-      bg: "solid.primary",
+      borderRadius: "md",
       _hover: {
         bg: "solid.secondary",
       },
     },
     list: {
-      py: 0,
-      border: 0,
-      overflow: "hidden",
+      bg: "solid.primary",
+      borderWidth: 0,
     },
     item: {
-      p: "11px",
-      fontSize: "sm",
-      fontWeight: "bold",
-      letterSpacing: "0.02em",
-      borderBottom: "1px solid",
-      background: "solid.primary",
-      transition: "color 0.2s ease",
-    },
-  },
-  variants: {
-    select: {
-      menu: {
-        button: {
-          w: "full",
-          fontSize: "14px",
-          background: "none",
-          borderRadius: "0",
-          _hover: {
-            background: "none",
-          },
-        },
-        list: {
-          borderRadius: "4px",
-        },
-        item: {
-          color: "white",
-          fontWeight: "normal",
-        },
+      color: "text.secondary",
+      bg: "solid.primary",
+      _hover: {
+        bg: "solid.secondary",
+        color: "text.primary",
       },
     },
-  },
+  }),
 });
+
+MenuItem.defaultProps = {
+  iconSpacing: 1,
+};

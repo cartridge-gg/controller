@@ -1,18 +1,14 @@
+import { accordionAnatomy } from "@chakra-ui/anatomy";
 import {
   ComponentStyleConfig,
   createMultiStyleConfigHelpers,
 } from "@chakra-ui/react";
 
-const helpers = createMultiStyleConfigHelpers([
-  "root",
-  "container",
-  "button",
-  "panel",
-  "icon",
-]);
+const { defineMultiStyleConfig, definePartsStyle } =
+  createMultiStyleConfigHelpers(accordionAnatomy.keys);
 
-export const Accordion: ComponentStyleConfig = helpers.defineMultiStyleConfig({
-  baseStyle: {
+export const Accordion: ComponentStyleConfig = defineMultiStyleConfig({
+  baseStyle: definePartsStyle({
     container: {
       bg: "solid.primary",
       borderColor: "solid.bg",
@@ -28,7 +24,7 @@ export const Accordion: ComponentStyleConfig = helpers.defineMultiStyleConfig({
     icon: {
       color: "text.secondary",
     },
-  },
+  }),
   variants: {
     access: {},
     inventory: {},

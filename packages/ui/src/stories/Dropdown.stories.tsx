@@ -1,9 +1,4 @@
-import {
-  DiscordIcon,
-  GitHubIcon,
-  TwitterIcon,
-  WedgeDownIcon,
-} from "../components/icons";
+import { DiscordIcon, GitHubIcon, TwitterIcon } from "../components/icons";
 import { Dropdown } from "../components/menu/Dropdown";
 import { Meta, StoryObj } from "@storybook/react";
 
@@ -19,7 +14,6 @@ type Story = StoryObj<typeof Dropdown>;
 
 export const Example: Story = {
   args: {
-    // icon: <WedgeDownIcon boxSize={6} />,
     items: [
       {
         label: "Twitter",
