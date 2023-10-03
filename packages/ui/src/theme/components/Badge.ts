@@ -12,7 +12,7 @@ export const Badge: ComponentStyleConfig = defineStyleConfig({
       bg: "brand.primary",
       color: "solid.bg",
       borderRadius: "full",
-      lineHeight: 1,
+      lineHeight: 0.75,
     },
   },
 });

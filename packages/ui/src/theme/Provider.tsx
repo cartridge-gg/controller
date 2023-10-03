@@ -1,10 +1,19 @@
 import React from "react";
 import theme from ".";
 
-import { ChakraProvider } from "@chakra-ui/react";
+import { ChakraProvider, createStandaloneToast } from "@chakra-ui/react";
 
-export const CartridgeUIProvider = ({
+export function CartridgeUIProvider({
   children,
 }: {
   children?: React.ReactNode;
-}) => <ChakraProvider theme={theme}>{children}</ChakraProvider>;
+}) {
+  const { ToastContainer } = createStandaloneToast();
+
+  return (
+    <ChakraProvider theme={theme}>
+      {children}
+      <ToastContainer />
+    </ChakraProvider>
+  );
+}
