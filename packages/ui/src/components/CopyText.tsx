@@ -2,6 +2,7 @@ import {
   Flex,
   HStack,
   Text,
+  TextProps,
   UseToastOptions,
   useToast,
 } from "@chakra-ui/react";
@@ -12,11 +13,12 @@ export function CopyText({
   value,
   copyValue,
   toastOptions = DEFAULT_TOAST_OPTIONS,
+  ...textProps
 }: {
   value: string;
   copyValue?: string;
   toastOptions?: UseToastOptions;
-}) {
+} & TextProps) {
   const toast = useToast(toastOptions);
 
   const [isHovered, setIsHovered] = useState(false);
@@ -43,9 +45,15 @@ export function CopyText({
       onMouseLeave={onMouseLeave}
       onClick={onClick}
     >
-      <Text color="inherit">{value}</Text>
+      <Text color="inherit" {...textProps}>
+        {value}
+      </Text>
 
-      <CopyIcon color="inherit" visibility={isHovered ? "visible" : "hidden"} />
+      <CopyIcon
+        color="inherit"
+        visibility={isHovered ? "visible" : "hidden"}
+        fontSize={textProps.fontSize}
+      />
     </HStack>
   );
 }

@@ -17,3 +17,11 @@ export const Default: Story = {
     copyValue: "0x0000000000000000000000000000000000000000",
   },
 };
+
+export const Small: Story = {
+  args: {
+    value: "0x00...0000",
+    copyValue: "0x0000000000000000000000000000000000000000",
+    fontSize: "sm",
+  },
+};
