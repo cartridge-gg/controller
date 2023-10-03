@@ -11,6 +11,8 @@ export const Modal: ComponentStyleConfig = defineMultiStyleConfig({
   baseStyle: definePartsStyle({
     dialog: {
       bg: "solid.bg",
+      borderColor: "translucent.md",
+      borderWidth: 4,
     },
     closeButton: {
       color: "text.secondary",
