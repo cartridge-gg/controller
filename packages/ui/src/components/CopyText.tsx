@@ -10,14 +10,11 @@ import { CopyIcon } from "./icons";
 
 export function CopyText({
   value,
-  toastOptions = {
-    title: "Copied!",
-    position: "top",
-    render: Toaster,
-    duration: 2000,
-  },
+  copyValue,
+  toastOptions = DEFAULT_TOAST_OPTIONS,
 }: {
   value: string;
+  copyValue?: string;
   toastOptions?: UseToastOptions;
 }) {
   const toast = useToast(toastOptions);
@@ -33,9 +30,9 @@ export function CopyText({
   }, []);
 
   const onClick = useCallback(() => {
-    navigator.clipboard.writeText(value);
+    navigator.clipboard.writeText(copyValue ?? value);
     toast();
-  }, [toast, value]);
+  }, [toast, value, copyValue]);
 
   return (
     <HStack
@@ -52,6 +49,13 @@ export function CopyText({
     </HStack>
   );
 }
+
+export const DEFAULT_TOAST_OPTIONS: UseToastOptions = {
+  title: "Copied!",
+  position: "top",
+  render: Toaster,
+  duration: 2000,
+};
 
 function Toaster({ title }: UseToastOptions) {
   return (

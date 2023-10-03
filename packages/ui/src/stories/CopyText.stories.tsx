@@ -12,5 +12,8 @@ export default meta;
 type Story = StoryObj<typeof CopyText>;
 
 export const Default: Story = {
-  args: { value: "0x00...0000" },
+  args: {
+    value: "0x00...0000",
+    copyValue: "0x0000000000000000000000000000000000000000",
+  },
 };

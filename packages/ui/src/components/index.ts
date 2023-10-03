@@ -1,4 +1,5 @@
 export * from "./brand";
+export * from "./CopyAddress";
 export * from "./CopyText";
 export * from "./Field";
 export * from "./HeaderItem";
