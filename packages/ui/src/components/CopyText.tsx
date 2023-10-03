@@ -1,6 +1,6 @@
 import {
+  Box,
   Flex,
-  HStack,
   Text,
   TextProps,
   UseToastOptions,
@@ -31,30 +31,39 @@ export function CopyText({
     setIsHovered(false);
   }, []);
 
-  const onClick = useCallback(() => {
-    navigator.clipboard.writeText(copyValue ?? value);
-    toast();
-  }, [toast, value, copyValue]);
+  const onClick = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      e.stopPropagation();
+
+      navigator.clipboard.writeText(copyValue ?? value);
+      toast();
+    },
+    [toast, value, copyValue],
+  );
 
   return (
-    <HStack
-      color="brand.primary"
-      cursor="pointer"
-      gap={0.5}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-      onClick={onClick}
-    >
-      <Text color="inherit" {...textProps}>
-        {value}
-      </Text>
+    <>
+      <Box
+        color="brand.primary"
+        cursor="pointer"
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        onClick={onClick}
+        alignItems="center"
+        display="inline-flex"
+      >
+        <Text color="inherit" {...textProps}>
+          {value}
+        </Text>
 
-      <CopyIcon
-        color="inherit"
-        visibility={isHovered ? "visible" : "hidden"}
-        fontSize={textProps.fontSize}
-      />
-    </HStack>
+        <CopyIcon
+          color="inherit"
+          visibility={isHovered ? "visible" : "hidden"}
+          fontSize={textProps.fontSize}
+          ml={0.5}
+        />
+      </Box>
+    </>
   );
 }
 
