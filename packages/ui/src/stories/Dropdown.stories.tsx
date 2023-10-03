@@ -1,5 +1,5 @@
 import { DiscordIcon, GitHubIcon, TwitterIcon } from "../components/icons";
-import { Dropdown } from "../components/menu/Dropdown";
+import { Dropdown } from "../components";
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof Dropdown> = {

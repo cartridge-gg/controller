@@ -25,4 +25,5 @@ Th.defaultProps = {
 
 Td.defaultProps = {
   borderBottomColor: "solid.bg",
+  p: 3,
 };
