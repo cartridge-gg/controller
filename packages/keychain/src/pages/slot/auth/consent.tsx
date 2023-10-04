@@ -5,6 +5,7 @@ import { Container, PortalBanner, PortalFooter } from "components";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect } from "react";
+import { useMeQuery } from "generated/graphql";
 
 const Consent: NextPage = () => {
   const router = useRouter();
