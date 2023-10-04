@@ -49,5 +49,5 @@ from the production keychain:
 - Load your account into your local keychain
 
 ```js
-window.cartridge.exportAccount("EXPORTED ACCOUNT");
+window.cartridge.importAccount("EXPORTED ACCOUNT");
 ```

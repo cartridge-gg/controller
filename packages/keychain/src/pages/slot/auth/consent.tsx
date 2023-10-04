@@ -10,12 +10,8 @@ const Consent: NextPage = () => {
   const router = useRouter();
 
   const onSubmit = useCallback(async () => {
-    const redirect_uri = encodeURIComponent(
-      `${process.env.NEXT_PUBLIC_SITE_URL}/slot/auth/callback`,
-    );
-    // Include the callback uri of local server as `state` query param
-    const state = encodeURIComponent(router.query.callback_uri as string);
-    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/oauth2/auth?client_id=cartridge&redirect_uri=${redirect_uri}&state=${state}`;
+    const redirect_uri = encodeURIComponent(router.query.callback_uri as string);
+    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/oauth2/auth?client_id=cartridge&redirect_uri=${redirect_uri}`;
 
     window.location.href = url;
   }, [router.query.callback_uri]);
