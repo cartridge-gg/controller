@@ -1,4 +1,4 @@
-import { Login, Signup } from "components";
+import { Login, Signup, LoadingLogo } from "components";
 import { useMeQuery } from "generated/graphql";
 import { useController } from "hooks/controller";
 import { NextPage } from "next";
@@ -25,10 +25,10 @@ const Auth: NextPage = () => {
 
       router.replace(`/slot/auth/consent${query}`);
     }
-  }, [controller, router]);
+  }, [user, controller, router]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <LoadingLogo />;
   }
 
   return (

@@ -1,6 +1,9 @@
 import React from "react";
 import { css } from "@emotion/react";
 import { Box } from "@chakra-ui/react";
+import { useLottie } from "lottie-react";
+import startupAnimation from "../lottie/startup.json";
+import { FullPageAnimation } from "./Animation";
 
 export const Loading = ({
   fill = "#0f1410",
@@ -116,3 +119,13 @@ export const Loading = ({
     ></div>
   </Box>
 );
+
+export function LoadingLogo() {
+  const { View } = useLottie({
+    animationData: startupAnimation,
+    loop: true,
+    autoplay: true,
+  });
+
+  return <FullPageAnimation show={true} View={View} />;
+}
