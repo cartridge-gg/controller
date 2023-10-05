@@ -14,6 +14,7 @@ export default defineConfig({
     rollupOptions: {
       external: ["react", "react-dom", "react/jsx-runtime", "@emotion/react"],
     },
+    outDir: "lib",
   },
   plugins: [
     react({

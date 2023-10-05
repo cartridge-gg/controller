@@ -1,9 +1,9 @@
 {
   "name": "@cartridge/ui",
   "version": "0.2.5",
-  "main": "dist/index.umd.cjs",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "lib/index.umd.cjs",
+  "module": "lib/index.js",
+  "types": "lib/index.d.ts",
   "type": "module",
   "scripts": {
     "build": "vite build",
@@ -12,7 +12,7 @@
     "storybook:build": "storybook build"
   },
   "files": [
-    "dist",
+    "lib",
     "README.md"
   ],
   "peerDependencies": {
