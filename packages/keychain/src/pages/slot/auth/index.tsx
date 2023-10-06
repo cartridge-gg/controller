@@ -13,7 +13,7 @@ const Auth: NextPage = () => {
   const [prefilledUsername, setPrefilledUsername] = useState<string>();
   const [controller, setController] = useController();
 
-  const { data: user, isLoading } = useMeQuery();
+  const { data: user, isFetched } = useMeQuery();
 
   useEffect(() => {
     if (user && controller) {
@@ -27,7 +27,7 @@ const Auth: NextPage = () => {
     }
   }, [user, controller, router]);
 
-  if (isLoading) {
+  if (!isFetched) {
     return <LoadingLogo />;
   }
 
