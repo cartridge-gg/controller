@@ -1,10 +1,10 @@
-import { Box, Flex } from "@chakra-ui/react";
 import startupAnimation from "../lottie/startup.json";
 import { useLottie } from "lottie-react";
 import useSound from "use-sound";
 import { ReactElement, useCallback, useState } from "react";
+import { FullPageAnimation } from "components";
 
-export function useStartup({ onComplete }: { onComplete: () => void }): {
+export function useStartup({ onComplete }: { onComplete?: () => void }): {
   play: () => void;
   StartupAnimation: ReactElement;
 } {
@@ -28,31 +28,6 @@ export function useStartup({ onComplete }: { onComplete: () => void }): {
 
   return {
     play,
-    StartupAnimation: <StartupAnimation show={isPlaying} View={View} />,
+    StartupAnimation: <FullPageAnimation show={isPlaying} View={View} />,
   };
-}
-
-function StartupAnimation({
-  show,
-  View,
-}: {
-  show: boolean;
-  View: ReactElement;
-}) {
-  return (
-    <Flex
-      display={show ? "flex" : "none"}
-      position="fixed"
-      align="center"
-      justify="center"
-      top="0"
-      left="0"
-      h="100vh"
-      w="100vw"
-      bg="solid.bg"
-      zIndex="overlay"
-    >
-      <Box w={["full", "full", "400px"]}>{View}</Box>
-    </Flex>
-  );
 }

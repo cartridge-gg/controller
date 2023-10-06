@@ -1,4 +1,5 @@
-import { Login, Signup } from "components";
+import { Login, Signup, LoadingLogo } from "components";
+import { useMeQuery } from "generated/graphql";
 import { useController } from "hooks/controller";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
@@ -12,8 +13,10 @@ const Auth: NextPage = () => {
   const [prefilledUsername, setPrefilledUsername] = useState<string>();
   const [controller, setController] = useController();
 
+  const { data: user, isLoading } = useMeQuery();
+
   useEffect(() => {
-    if (controller) {
+    if (user && controller) {
       const query = Object.entries(router.query).reduce(
         (prev, [key, val], i) =>
           i === 0 ? `?${key}=${val}` : `${prev}&${key}=${val}`,
@@ -22,7 +25,11 @@ const Auth: NextPage = () => {
 
       router.replace(`/slot/auth/consent${query}`);
     }
-  }, [controller, router]);
+  }, [user, controller, router]);
+
+  if (isLoading) {
+    return <LoadingLogo />;
+  }
 
   return (
     <>
