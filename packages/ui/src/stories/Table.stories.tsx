@@ -9,6 +9,7 @@ import {
   Td,
 } from "@chakra-ui/react";
 import { Meta, StoryObj } from "@storybook/react";
+import { CopyText } from "src/components";
 
 const meta: Meta<typeof Table> = {
   title: "Table",
@@ -38,8 +39,18 @@ function Table() {
         <Tbody>
           <Tr>
             <Td>12 mins</Td>
-            <Td>0x02dw...3sd1</Td>
-            <Td>0x02dw...3sd1</Td>
+            <Td>
+              <CopyText
+                value="0x0000...0000"
+                copyValue="0x0000000000000000000000000000000000000000"
+              />
+            </Td>
+            <Td>
+              <CopyText
+                value="0x0000...0000"
+                copyValue="0x0000000000000000000000000000000000000000"
+              />
+            </Td>
 
             <Td>
               <Badge>pending</Badge>
@@ -48,8 +59,18 @@ function Table() {
 
           <Tr>
             <Td>12 mins</Td>
-            <Td>0x02dw...3sd1</Td>
-            <Td>0x02dw...3sd1</Td>
+            <Td>
+              <CopyText
+                value="0x0000...0000"
+                copyValue="0x0000000000000000000000000000000000000000"
+              />
+            </Td>
+            <Td>
+              <CopyText
+                value="0x0000...0000"
+                copyValue="0x0000000000000000000000000000000000000000"
+              />
+            </Td>
 
             <Td>
               <Badge>pending</Badge>
@@ -58,8 +79,18 @@ function Table() {
 
           <Tr>
             <Td>12 mins</Td>
-            <Td>0x02dw...3sd1</Td>
-            <Td>0x02dw...3sd1</Td>
+            <Td>
+              <CopyText
+                value="0x0000...0000"
+                copyValue="0x0000000000000000000000000000000000000000"
+              />
+            </Td>
+            <Td>
+              <CopyText
+                value="0x0000...0000"
+                copyValue="0x0000000000000000000000000000000000000000"
+              />
+            </Td>
 
             <Td>
               <Badge>pending</Badge>

@@ -11,9 +11,28 @@ const { defineMultiStyleConfig, definePartsStyle } =
 
 export const Table: ComponentStyleConfig = defineMultiStyleConfig({
   baseStyle: definePartsStyle({
-    thead: { h: 20 },
-    th: { p: 3 },
-    tbody: { bg: "solid.primary", fontSize: "sm" },
+    table: {
+      borderCollapse: "separate",
+      borderSpacing: "0 0.5rem",
+    },
+    tbody: {
+      bg: "solid.primary",
+      fontSize: "sm",
+      tr: {
+        _hover: {
+          bg: "solid.secondary",
+          cursor: "pointer",
+        },
+        td: {
+          _first: {
+            borderLeftRadius: "md",
+          },
+          _last: {
+            borderRightRadius: "md",
+          },
+        },
+      },
+    },
   }),
 });
 
@@ -21,9 +40,14 @@ export const Table: ComponentStyleConfig = defineMultiStyleConfig({
 Th.defaultProps = {
   color: "translucent.lg",
   borderBottomColor: "solid.bg",
+  py: 3,
+  px: 4,
 };
 
 Td.defaultProps = {
   borderBottomColor: "solid.bg",
-  p: 3,
+  borderBottomWidth: 0,
+  marginBottom: 8,
+  py: 3,
+  px: 4,
 };
