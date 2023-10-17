@@ -59,8 +59,8 @@ export function Header({
 
         <Spacer />
 
-        <NetworkButton chainId={chainId} />
-        <EthBalance chainId={chainId} address={address} />
+        {/* <NetworkButton chainId={chainId} /> */}
+        {/* <EthBalance chainId={chainId} address={address} /> */}
 
         {chainId && <AccountMenu onLogout={onLogout} address={address} />}
       </HStack>
