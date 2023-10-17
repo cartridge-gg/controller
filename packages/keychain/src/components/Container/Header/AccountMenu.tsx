@@ -70,12 +70,7 @@ export function AccountMenu({
 }
 
 function useAvatar(address: string) {
-  const { data } = usePointsData(address);
-  const { current: avatar } = useAvatarRaw(
-    address || "",
-    data?.balance?.balance ?? 10,
-  );
-
+  const { current: avatar } = useAvatarRaw(address || "", 10);
   return avatar;
 }
 
