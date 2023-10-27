@@ -1,4 +1,4 @@
-import { DiscordIcon, GitHubIcon, TwitterIcon } from "../components/icons";
+import { DiscordIcon, GitHubIcon, XIcon } from "../components/icons";
 import { Dropdown } from "../components";
 import { Meta, StoryObj } from "@storybook/react";
 
@@ -16,8 +16,8 @@ export const Example: Story = {
   args: {
     items: [
       {
-        label: "Twitter",
-        icon: <TwitterIcon boxSize={6} />,
+        label: "X",
+        icon: <XIcon boxSize={6} />,
         onClick: () => console.log("clicked"),
       },
       {

@@ -1,6 +1,6 @@
 import { IconButton } from "@chakra-ui/react";
 import { Meta, StoryObj } from "@storybook/react";
-import { ArrowLeftIcon, TwitterIcon } from "../components/icons";
+import { ArrowLeftIcon, XIcon } from "../components/icons";
 
 /**
  *
@@ -29,7 +29,7 @@ export const Square: Story = {
 
 export const Brand: Story = {
   args: {
-    icon: <TwitterIcon />,
+    icon: <XIcon />,
     fontSize: "2xl",
     px: 4,
     py: 2,
@@ -39,7 +39,7 @@ export const Brand: Story = {
 export const BrandRound: Story = {
   args: {
     variant: "round",
-    icon: <TwitterIcon />,
+    icon: <XIcon />,
     fontSize: "2xl",
     px: 4,
     py: 2,

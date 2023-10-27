@@ -28,4 +28,4 @@ export * from "./Redline";
 export * from "./Safari";
 export * from "./Starknet";
 export * from "./Telegram";
-export * from "./Twitter";
+export * from "./X";
