@@ -1,8 +1,6 @@
-export function truncateAddress(addr: string) {
-  return `${addr.substring(0, 4)}...${addr.substring(
-    ADDRESS_FULL_LENGTH - 4,
-    ADDRESS_FULL_LENGTH,
+export function truncateHash(hash: string) {
+  return `${hash.substring(0, 4)}...${hash.substring(
+    hash.length - 4,
+    hash.length,
   )}`;
 }
-
-const ADDRESS_FULL_LENGTH = 42;
