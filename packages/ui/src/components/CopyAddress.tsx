@@ -2,7 +2,7 @@ import { Button, HStack, UseToastOptions, useToast } from "@chakra-ui/react";
 import { DEFAULT_TOAST_OPTIONS } from "./CopyText";
 import { useCallback, useState } from "react";
 import { CheckIcon, CopyIcon } from "./icons";
-import { truncateAddress } from "../utils";
+import { truncateHash } from "../utils";
 
 export function CopyAddress({
   address,
@@ -36,7 +36,7 @@ export function CopyAddress({
         rightIcon={isCopied ? <CheckIcon /> : <CopyIcon />}
         onClick={onCopyAddress}
       >
-        {truncateAddress(address)}
+        {truncateHash(address)}
       </Button>
     </HStack>
   );
