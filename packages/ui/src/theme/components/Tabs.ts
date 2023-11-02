@@ -19,5 +19,9 @@ export const Tabs: ComponentStyleConfig = defineMultiStyleConfig({
         color: "brand.primary",
       },
     },
+    tabpanel: {
+      p: 0,
+      py: 4,
+    },
   }),
 });
