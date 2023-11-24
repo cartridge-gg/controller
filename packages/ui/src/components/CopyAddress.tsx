@@ -18,7 +18,7 @@ export function CopyAddress({
   ...buttonProps
 }: {
   address: string;
-  colorScheme: ButtonColorScheme;
+  colorScheme?: ButtonColorScheme;
   toastOptions?: UseToastOptions;
 } & ButtonProps) {
   const toast = useToast(toastOptions);
