@@ -16,6 +16,12 @@ export const Menu: ComponentStyleConfig = defineMultiStyleConfig({
       _hover: {
         bg: "solid.secondary",
       },
+      _disabled: {
+        _hover: {
+          bg: "inherit",
+          cursor: "default",
+        },
+      },
     },
     list: {
       bg: "solid.bg",
