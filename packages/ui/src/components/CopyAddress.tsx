@@ -1,16 +1,26 @@
-import { Button, HStack, UseToastOptions, useToast } from "@chakra-ui/react";
+import {
+  Button,
+  ButtonProps,
+  HStack,
+  UseToastOptions,
+  useToast,
+} from "@chakra-ui/react";
 import { DEFAULT_TOAST_OPTIONS } from "./CopyText";
 import { useCallback, useState } from "react";
 import { CheckIcon, CopyIcon } from "./icons";
 import { truncateHash } from "../utils";
+import { ButtonColorScheme } from "src/theme/components";
 
 export function CopyAddress({
   address,
   toastOptions = DEFAULT_TOAST_OPTIONS,
+  colorScheme = "translucent",
+  ...buttonProps
 }: {
   address: string;
+  colorScheme: ButtonColorScheme;
   toastOptions?: UseToastOptions;
-}) {
+} & ButtonProps) {
   const toast = useToast(toastOptions);
   const [isCopied, setIsCopied] = useState(false);
 
@@ -29,15 +39,15 @@ export function CopyAddress({
   }, [address, toast, toastOptions.duration]);
 
   return (
-    <HStack>
-      <Button
-        fontSize="sm"
-        variant="round"
-        rightIcon={isCopied ? <CheckIcon /> : <CopyIcon />}
-        onClick={onCopyAddress}
-      >
-        {truncateHash(address)}
-      </Button>
-    </HStack>
+    <Button
+      fontSize="sm"
+      variant="round"
+      rightIcon={isCopied ? <CheckIcon /> : <CopyIcon />}
+      onClick={onCopyAddress}
+      colorScheme={colorScheme}
+      {...buttonProps}
+    >
+      {truncateHash(address)}
+    </Button>
   );
 }

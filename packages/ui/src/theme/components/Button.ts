@@ -74,7 +74,7 @@ export const Button: ComponentStyleConfig = defineStyleConfig({
 });
 
 function getColorProps({ colorScheme }: StyleFunctionProps) {
-  switch (colorScheme as ColorScheme) {
+  switch (colorScheme as ButtonColorScheme) {
     case "colorful":
       return {
         color: "solid.bg",
@@ -90,12 +90,12 @@ function getColorProps({ colorScheme }: StyleFunctionProps) {
     case "translucent":
       return {
         color: "text.primary",
-        bg: "tarnslucent.soft",
+        bg: "translucent.soft",
         _hover: {
-          bg: "tarnslucent.medium",
+          bg: "translucent.md",
         },
       };
-    default:
+    case "solid":
       return {
         color: "text.primary",
         bg: "solid.primary",
@@ -109,4 +109,4 @@ function getColorProps({ colorScheme }: StyleFunctionProps) {
   }
 }
 
-type ColorScheme = "colorful" | "translucent" | "white";
+export type ButtonColorScheme = "colorful" | "translucent" | "solid";
