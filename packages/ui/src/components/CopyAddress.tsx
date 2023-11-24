@@ -1,7 +1,6 @@
 import {
   Button,
   ButtonProps,
-  HStack,
   UseToastOptions,
   useToast,
 } from "@chakra-ui/react";
