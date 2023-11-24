@@ -34,10 +34,14 @@ function Modal() {
 
       <ChakraModal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
-        <ModalContent>
+        {/* maxW doesn't seems to work with baseStyle */}
+        <ModalContent maxW="container.md">
           <ModalHeader>Modal Title</ModalHeader>
           <ModalCloseButton />
-          <ModalBody>bla bla bla...</ModalBody>
+          <ModalBody>
+            bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla
+            bla bla bla bla bla bla bla ...
+          </ModalBody>
 
           <ModalFooter>
             <Button mr={3} onClick={onClose}>
