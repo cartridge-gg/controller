@@ -25,6 +25,12 @@ const theme = extendTheme({
       },
     },
   },
+  sizes: {
+    container: {
+      "2xl": "1366px",
+      "3xl": "1920px",
+    },
+  },
   components: {
     ...Components,
   },
