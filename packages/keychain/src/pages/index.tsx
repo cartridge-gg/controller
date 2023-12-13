@@ -18,7 +18,6 @@ import {
   Call,
   constants,
   InvocationsDetails,
-  number,
   Signature,
   typedData,
 } from "starknet";
@@ -222,9 +221,7 @@ const Index: NextPage = () => {
                 if (
                   session.maxFee &&
                   transactionsDetail &&
-                  number
-                    .toBN(transactionsDetail.maxFee)
-                    .gt(number.toBN(session.maxFee))
+                  BigInt(transactionsDetail.maxFee) > BigInt(session.maxFee)
                 ) {
                   return Promise.resolve({
                     code: ResponseCodes.NOT_ALLOWED,

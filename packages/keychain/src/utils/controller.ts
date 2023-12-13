@@ -1,10 +1,11 @@
 import {
   constants,
   ec,
-  number,
   Invocation,
   InvocationsDetails,
   SignerInterface,
+  BigNumberish,
+  num,
 } from "starknet";
 import equal from "fast-deep-equal";
 
@@ -123,7 +124,7 @@ export default class Controller {
     return Storage.clear();
   }
 
-  approve(origin: string, policies: Policy[], maxFee?: number.BigNumberish) {
+  approve(origin: string, policies: Policy[], maxFee?: BigNumberish) {
     Storage.set(selectors[VERSION].session(this.address, origin), {
       policies,
       maxFee,
@@ -150,7 +151,7 @@ export default class Controller {
   store() {
     Storage.set("version", VERSION);
     return Storage.set(selectors[VERSION].account(this.address), {
-      privateKey: number.toHex(this.privateKey),
+      privateKey: num.toHex(this.privateKey),
       publicKey: this.publicKey,
       address: this.address,
       credentialId: this.credentialId,

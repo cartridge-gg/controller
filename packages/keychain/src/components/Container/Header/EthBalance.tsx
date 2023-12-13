@@ -48,7 +48,8 @@ export function useEthBalance({
         .callContract({
           contractAddress: CONTRACT_ETH,
           entrypoint: "balanceOf",
-          calldata: [BigNumber.from(address).toString()],
+          // #233 check
+          calldata: [BigInt(address)],
         })
         .then((res) => {
           setEthBalance(

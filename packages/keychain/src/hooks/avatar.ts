@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { number, Provider, uint256 } from "starknet";
+import { cairo, constants, num, uint256 } from "starknet";
 import { CONTRACT_AVATAR } from "@cartridge/controller/src/constants";
 import dataUriToBuffer from "data-uri-to-buffer";
 
 import Storage from "../utils/storage";
+import { providers } from "@cartridge/controller";
 
 const SCALE = 10;
 const PADDING = 0;
@@ -109,16 +110,12 @@ export const parseAvatars = (data: AttributeData): AvatarData[] => {
 export const callContract = async (address: string): Promise<AttributeData> => {
   const tokenId = uint256.bnToUint256(address);
 
-  const provider = new Provider({
-    sequencer: {
-      network: "goerli-alpha",
-    },
-  });
+  const provider = providers[constants.StarknetChainId.SN_GOERLI];
 
   let res = await provider.callContract({
     contractAddress: CONTRACT_AVATAR,
     entrypoint: "tokenURI",
-    calldata: [number.toFelt(tokenId.low), number.toFelt(tokenId.high)],
+    calldata: [cairo.felt(tokenId.low), cairo.felt(tokenId.high)],
   });
 
   res.result.shift();
@@ -133,8 +130,8 @@ export const callContract = async (address: string): Promise<AttributeData> => {
   const borderColor = findValue(json.attributes, "Border Color");
   const backgroundColor = findValue(json.attributes, "Background Color");
   const dimension = parseInt(findValue(json.attributes, "Dimension"));
-  const fingerprint = number.toHex(
-    number.toBN(findValue(json.attributes, "Fingerprint")),
+  const fingerprint = num.toHex(
+    BigInt(findValue(json.attributes, "Fingerprint")),
   );
 
   return {

@@ -1,8 +1,11 @@
-import { CLASS_HASHES } from "@cartridge/controller/src/constants";
+import {
+  CLASS_HASHES,
+  ETH_RPC_GOERLI,
+  ETH_RPC_MAINNET,
+} from "@cartridge/controller/src/constants";
 import {
   constants,
   hash,
-  number,
   Account as BaseAccount,
   RpcProvider,
   SignerInterface,
@@ -21,6 +24,8 @@ import {
   typedData,
   TransactionFinalityStatus,
   waitForTransactionOptions,
+  num,
+  BigNumberish,
 } from "starknet";
 import { AccountContractDocument } from "generated/graphql";
 import { client } from "utils/graphql";
@@ -197,7 +202,7 @@ class Account extends BaseAccount {
         "pending",
       );
 
-      if (number.toBN(res.result[1]).eq(number.toBN(1))) {
+      if (BigInt(res.result[1]) === 1n) {
         this.status = Status.REGISTERED;
       }
     } catch (e) {
@@ -230,7 +235,7 @@ class Account extends BaseAccount {
         }),
         super.execute(calls, null, {
           maxFee: transactionsDetail.maxFee,
-          nonce: number.toBN(transactionsDetail.nonce).add(number.toBN(1)),
+          nonce: BigInt(transactionsDetail.nonce) + 1n,
           version: hash.transactionVersion,
         }),
       ]);
@@ -239,10 +244,7 @@ class Account extends BaseAccount {
       this.status = Status.REGISTERED;
       Storage.update(this.selector, {
         status: Status.REGISTERED,
-        nonce: number
-          .toBN(transactionsDetail.nonce)
-          .add(number.toBN(2))
-          .toString(),
+        nonce: (BigInt(transactionsDetail.nonce) + 2n).toString(),
       });
 
       this.rpc
@@ -259,10 +261,7 @@ class Account extends BaseAccount {
 
     const res = await super.execute(calls, abis, transactionsDetail);
     Storage.update(this.selector, {
-      nonce: number
-        .toBN(transactionsDetail.nonce)
-        .add(number.toBN(1))
-        .toString(),
+      nonce: (BigInt(transactionsDetail.nonce) + 1n).toString(),
     });
 
     this.rpc
@@ -294,9 +293,8 @@ class Account extends BaseAccount {
         selectors[VERSION].register(this.address, this._chainId),
       );
 
-      const nextNonce = number.toHex(
-        number.toBN(details.nonce).add(number.toBN(1)),
-      );
+      const nextNonce = num.toHex(BigInt(details.nonce) + 1n);
+      // TODO: #223
       const signerDetails = {
         walletAddress: this.address,
         nonce: nextNonce,
@@ -307,7 +305,7 @@ class Account extends BaseAccount {
 
       const signature = await this.signer.signTransaction(calls, signerDetails);
 
-      // TODO: adapt to https://github.com/starknet-io/starknet.js/blob/v5.24.3/src/types/lib/index.ts#L203..L210
+      // TODO: #223 adapt to https://github.com/starknet-io/starknet.js/blob/v5.24.3/src/types/lib/index.ts#L203..L210
       let estimates = await this.rpc.getEstimateFeeBulk([
         pendingRegister.invoke,
         {
@@ -331,23 +329,19 @@ class Account extends BaseAccount {
       const estimates2 = estimates as EstimateFeeResponse[];
       const fees = estimates2.reduce<EstimateFee>(
         (prev, estimate) => {
-          const overall_fee = prev.overall_fee.add(
-            number.toBN(estimate.overall_fee),
-          );
+          const overall_fee = prev.overall_fee + estimate.overall_fee;
           return {
             overall_fee: overall_fee,
-            gas_consumed: prev.gas_consumed.add(
-              number.toBN(estimate.gas_consumed),
-            ),
-            gas_price: prev.gas_price.add(number.toBN(estimate.gas_price)),
+            gas_consumed: prev.gas_consumed + estimate.gas_consumed,
+            gas_price: prev.gas_price + estimate.gas_price,
             suggestedMaxFee: overall_fee,
           };
         },
         {
-          overall_fee: number.toBN(0),
-          gas_consumed: number.toBN(0),
-          gas_price: number.toBN(0),
-          suggestedMaxFee: number.toBN(0),
+          overall_fee: 0n,
+          gas_consumed: 0n,
+          gas_price: 0n,
+          suggestedMaxFee: 0n,
         },
       );
 
@@ -359,15 +353,15 @@ class Account extends BaseAccount {
     return super.estimateInvokeFee(calls, details);
   }
 
-  // TODO: is this still relevant?
+  // TODO: #223 is this still relevant?
   async verifyMessageHash(
-    hash: string | number | import("bn.js"),
+    hash: BigNumberish,
     signature: Signature,
   ): Promise<boolean> {
-    if (number.toBN(signature[0]).cmp(number.toBN(0)) === 0) {
+    if (BigInt(signature[0]) === 0n) {
       return ec.starkCurve.verify(
         signature,
-        number.toBN(hash).toString(),
+        BigInt(hash).toString(),
         signature[0],
       );
     }
@@ -399,13 +393,13 @@ class Account extends BaseAccount {
     ];
 
     const nonce = await this.getNonce();
-    const version = number.toBN(hash.transactionVersion);
+    const version = hash.transactionVersion;
     const calldata = transaction.fromCallsToExecuteCalldata(calls);
 
-    const gas = 28000;
+    const gas = 28000n;
     const gasPrice = await getGasPrice(this._chainId);
-    const fee = number.toBN(gasPrice).mul(number.toBN(gas));
-    const suggestedMaxFee = number.toHex(stark.estimatedFeeToMaxFee(fee));
+    const fee = BigInt(gasPrice) * gas;
+    const suggestedMaxFee = num.toHex(stark.estimatedFeeToMaxFee(fee));
 
     let msgHash = hash.calculateTransactionHash(
       this.address,
@@ -452,22 +446,18 @@ class Account extends BaseAccount {
     };
   }
 
-  async getNonce(blockIdentifier?: any): Promise<number.BigNumberish> {
+  async getNonce(blockIdentifier?: any): Promise<string> {
     if (blockIdentifier && blockIdentifier !== "pending") {
       return super.getNonce(blockIdentifier);
     }
 
     const chainNonce = await super.getNonce("pending");
     const state = Storage.get(this.selector);
-    if (
-      !state ||
-      !state.nonce ||
-      number.toBN(chainNonce).gt(number.toBN(state.nonce))
-    ) {
+    if (!state || !state.nonce || BigInt(chainNonce) > BigInt(state.nonce)) {
       return chainNonce;
     }
 
-    return number.toBN(state.nonce);
+    return state.nonce;
   }
 
   resetNonce() {
@@ -478,3 +468,24 @@ class Account extends BaseAccount {
 }
 
 export default Account;
+
+async function getGasPrice(chainId: constants.StarknetChainId) {
+  const uri =
+    chainId === constants.StarknetChainId.SN_MAIN
+      ? ETH_RPC_MAINNET
+      : ETH_RPC_GOERLI;
+  const response = await fetch(uri, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      method: "eth_gasPrice",
+      params: [],
+      id: 1,
+    }),
+  });
+  const data = await response.json();
+  return data.result;
+}

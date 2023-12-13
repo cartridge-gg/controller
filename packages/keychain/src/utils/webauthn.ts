@@ -1,7 +1,6 @@
 import {
   constants,
   hash,
-  number,
   stark,
   transaction,
   typedData,
@@ -199,8 +198,8 @@ class WebauthnAccount extends Account {
     }: EstimateFeeDetails & { ext?: Buffer } = {},
   ): Promise<EstimateFee> {
     const transactions = Array.isArray(calls) ? calls : [calls];
-    const nonce = number.toBN(providedNonce ?? (await this.getNonce()));
-    const version = number.toBN(hash.transactionVersion);
+    const nonce = BigInt(providedNonce ?? (await this.getNonce()));
+    const version = hash.transactionVersion;
     const chainId = await this.getChainId();
 
     const signerDetails = {
@@ -238,16 +237,14 @@ class WebauthnAccount extends Account {
     transactionsDetail?: InvocationsDetails & { ext?: Buffer },
   ): Promise<InvokeFunctionResponse> {
     const transactions = Array.isArray(calls) ? calls : [calls];
-    const nonce = number.toBN(
-      transactionsDetail.nonce ?? (await this.getNonce()),
-    );
+    const nonce = BigInt(transactionsDetail.nonce ?? (await this.getNonce()));
     const maxFee =
       transactionsDetail.maxFee ??
       (await this.getSuggestedMaxFee(
         { type: "INVOKE", payload: calls },
         transactionsDetail,
       ));
-    const version = number.toBN(hash.transactionVersion);
+    const version = BigInt(hash.transactionVersion);
     const chainId = await this.getChainId();
 
     const signerDetails: InvocationsSignerDetails = {
@@ -304,10 +301,10 @@ export function formatAssertion(assertion: RawAssertion): Signature {
   const rEnd = rStart + 32;
   const sStart = usignature[rEnd + 2] === 0 ? rEnd + 3 : rEnd + 2;
 
-  const r = number.toBN(
+  const r = BigInt(
     "0x" + Buffer.from(usignature.slice(rStart, rEnd)).toString("hex"),
   );
-  const s = number.toBN(
+  const s = BigInt(
     "0x" + Buffer.from(usignature.slice(sStart)).toString("hex"),
   );
 
@@ -315,7 +312,7 @@ export function formatAssertion(assertion: RawAssertion): Signature {
   const { x: s0, y: s1, z: s2 } = split(s);
 
   return [
-    number.toBN(CLASS_HASHES["0.0.1"].controller).toString(),
+    BigInt(CLASS_HASHES["0.0.1"].controller).toString(),
     "0",
     r0.toString(),
     r1.toString(),
@@ -410,8 +407,8 @@ export function parseAttestationObject(data) {
     const publicKeyCbor =
       decoded.authData.attestedCredentialData.credentialPublicKey;
 
-    const x = number.toBN("0x" + publicKeyCbor.get(-2).toString("hex"));
-    const y = number.toBN("0x" + publicKeyCbor.get(-3).toString("hex"));
+    const x = BigInt("0x" + publicKeyCbor.get(-2).toString("hex"));
+    const y = BigInt("0x" + publicKeyCbor.get(-3).toString("hex"));
 
     return { ...decoded, pub: { x, y } };
   } catch (e) {

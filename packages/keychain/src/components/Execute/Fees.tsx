@@ -8,9 +8,8 @@ import {
   VStack,
 } from "@chakra-ui/react";
 
-import { constants, number } from "starknet";
+import { constants } from "starknet";
 import { formatUnits } from "ethers/lib/utils";
-import BN from "bn.js";
 import { Error } from "components/Error";
 
 async function fetchEthPrice() {
@@ -33,7 +32,7 @@ export function Fees({
 }: {
   error: Error;
   chainId: constants.StarknetChainId;
-  fees?: { base: BN; max: BN };
+  fees?: { base: bigint; max: bigint };
   balance: string;
   approved?: string;
 }) {
@@ -50,9 +49,9 @@ export function Fees({
       if (chainId === constants.StarknetChainId.SN_MAIN) {
         let dollarUSLocale = Intl.NumberFormat("en-US");
         const { data } = await fetchEthPrice();
-        const usdeth = BigInt(data.price.amount * 100);
-        const overallFee = fees.base.mul(usdeth).toString();
-        const suggestedMaxFee = fees.max.mul(usdeth).toString();
+        const usdeth = BigInt(data.price.amount) * 100n;
+        const overallFee = (fees.base * usdeth).toString();
+        const suggestedMaxFee = (fees.max * usdeth).toString();
         setFormattedFee({
           base: `~$${dollarUSLocale.format(
             parseFloat(formatUnits(overallFee, 20)),
@@ -65,7 +64,7 @@ export function Fees({
       }
 
       setFormattedFee(
-        fees.max.gt(number.toBN(10000000000000))
+        fees.max > 10000000000000n
           ? {
               base: `~${parseFloat(
                 formatUnits(fees.base.toString(), 18),

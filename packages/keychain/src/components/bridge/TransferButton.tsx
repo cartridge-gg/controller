@@ -16,7 +16,6 @@ import {
   EthL2BridgeMainnet,
 } from "./constants";
 import EthL1BridgeABI from "./abis/EthL1Bridge.json";
-import { BigNumber } from "ethers";
 import Account from "utils/account";
 
 export function TransferButton({
@@ -72,10 +71,7 @@ export function TransferButton({
         : EthL1BridgeGoerli,
     abi: EthL1BridgeABI,
     functionName: "deposit",
-    args: [
-      parseEther(value?.length ? value : "0"),
-      BigNumber.from(account.address),
-    ],
+    args: [parseEther(value?.length ? value : "0"), BigInt(account.address)],
     overrides: {
       value: value && l2Fee ? parseEther(value).add(l2Fee) : undefined,
     },
