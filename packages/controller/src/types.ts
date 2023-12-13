@@ -1,6 +1,5 @@
 import {
   constants,
-  number,
   Abi,
   Call,
   InvocationsDetails,
@@ -10,6 +9,7 @@ import {
   EstimateFeeDetails,
   EstimateFee,
   DeclareContractPayload,
+  BigNumberish,
 } from "starknet";
 
 export type Assertion = {
@@ -27,18 +27,13 @@ export type Assertion = {
 export type Session = {
   chainId: constants.StarknetChainId;
   policies: Policy[];
-  maxFee: number.BigNumberish;
+  maxFee: BigNumberish;
 };
 
 export type Policy = {
   target: string;
   method?: string;
 };
-
-export enum SupportedChainIds {
-  MAINNET = "0x534e5f4d41494e",
-  TESTNET = "0x534e5f474f45524c49",
-}
 
 export enum ResponseCodes {
   SUCCESS = "SUCCESS",
@@ -73,7 +68,7 @@ export interface Keychain {
   connect(
     policies: Policy[],
     starterPackId?: string,
-    chainId?: SupportedChainIds,
+    chainId?: constants.StarknetChainId,
   ): Promise<ConnectReply | Error>;
   disconnect(): void;
 

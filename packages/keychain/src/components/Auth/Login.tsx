@@ -7,7 +7,7 @@ import {
   Formik,
   useFormikContext,
 } from "formik";
-import { ec } from "starknet";
+import { stark } from "starknet";
 import {
   PortalBanner,
   PortalFooter,
@@ -63,8 +63,8 @@ export function Login({
           throw Error("login failed");
         }
 
-        const keypair = ec.genKeyPair();
-        const controller = new Controller(keypair, address, credentialId);
+        const privateKey = stark.randomAddress();
+        const controller = new Controller(privateKey, address, credentialId);
 
         if (onController) {
           await onController(controller);

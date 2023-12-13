@@ -1,11 +1,13 @@
-import { CLASS_HASHES } from "@cartridge/controller/src/constants";
+import {
+  CLASS_HASHES,
+  ETH_RPC_GOERLI,
+  ETH_RPC_MAINNET,
+} from "@cartridge/controller/src/constants";
 import {
   constants,
   hash,
-  number,
   Account as BaseAccount,
   RpcProvider,
-  SequencerProvider,
   SignerInterface,
   Call,
   EstimateFeeDetails,
@@ -29,9 +31,7 @@ import { client } from "utils/graphql";
 
 import selectors from "./selectors";
 import Storage from "./storage";
-import { NamedChainId } from "@cartridge/controller/src/constants";
 import { RegisterData, VERSION } from "./controller";
-import { estimateFeeBulk, getGasPrice } from "./gateway";
 import WebauthnAccount, { formatAssertion } from "./webauthn";
 
 export enum Status {
@@ -46,7 +46,6 @@ export enum Status {
 
 class Account extends BaseAccount {
   rpc: RpcProvider;
-  gateway: SequencerProvider;
   private selector: string;
   _chainId: constants.StarknetChainId;
   updated: boolean = true;
@@ -63,12 +62,6 @@ class Account extends BaseAccount {
     super({ rpc: { nodeUrl } }, address, signer);
 
     this.rpc = new RpcProvider({ nodeUrl });
-    this.gateway = new SequencerProvider({
-      network:
-        chainId === constants.StarknetChainId.MAINNET
-          ? "mainnet-alpha"
-          : "goerli-alpha",
-    });
     this.selector = selectors["0.0.3"].deployment(address, chainId);
     this._chainId = chainId;
     this.webauthn = webauthn;
@@ -79,6 +72,20 @@ class Account extends BaseAccount {
       this.sync();
       return;
     }
+  }
+
+  static get waitForTransactionOptions(): waitForTransactionOptions {
+    return {
+      retryInterval: 1000,
+      successStates: [
+        TransactionFinalityStatus.ACCEPTED_ON_L1,
+        TransactionFinalityStatus.ACCEPTED_ON_L2,
+      ],
+      errorStates: [
+        TransactionFinalityStatus.ACCEPTED_ON_L1,
+        TransactionFinalityStatus.ACCEPTED_ON_L2,
+      ],
+    };
   }
 
   get status() {
@@ -99,7 +106,7 @@ class Account extends BaseAccount {
   async getContract() {
     try {
       return await client.request(AccountContractDocument, {
-        id: `starknet:${NamedChainId[this._chainId]}:${this.address}`,
+        id: `starknet:${this._chainId}:${this.address}`,
       });
     } catch (e) {
       if (e.message.includes("not found")) {
@@ -125,10 +132,10 @@ class Account extends BaseAccount {
         if (registerTxnHash) {
           this.status = Status.REGISTERING;
           this.rpc
-            .waitForTransaction(registerTxnHash, 1000, [
-              "ACCEPTED_ON_L1",
-              "ACCEPTED_ON_L2",
-            ])
+            .waitForTransaction(
+              registerTxnHash,
+              Account.waitForTransactionOptions,
+            )
             .then(() => this.sync());
           return;
         }
@@ -149,10 +156,10 @@ class Account extends BaseAccount {
 
           if (!this.waitingForDeploy) {
             this.rpc
-              .waitForTransaction(deployTxnHash, 1000, [
-                "ACCEPTED_ON_L1",
-                "ACCEPTED_ON_L2",
-              ])
+              .waitForTransaction(
+                deployTxnHash,
+                Account.waitForTransactionOptions,
+              )
               .then(() => this.sync());
             this.waitingForDeploy = true;
           }
@@ -195,7 +202,7 @@ class Account extends BaseAccount {
         "pending",
       );
 
-      if (number.toBN(res.result[1]).eq(number.toBN(1))) {
+      if (BigInt(res.result[1]) === 1n) {
         this.status = Status.REGISTERED;
       }
     } catch (e) {
@@ -228,7 +235,7 @@ class Account extends BaseAccount {
         }),
         super.execute(calls, null, {
           maxFee: transactionsDetail.maxFee,
-          nonce: number.toBN(transactionsDetail.nonce).add(number.toBN(1)),
+          nonce: BigInt(transactionsDetail.nonce) + 1n,
           version: hash.transactionVersion,
         }),
       ]);
@@ -237,10 +244,7 @@ class Account extends BaseAccount {
       this.status = Status.REGISTERED;
       Storage.update(this.selector, {
         status: Status.REGISTERED,
-        nonce: number
-          .toBN(transactionsDetail.nonce)
-          .add(number.toBN(2))
-          .toString(),
+        nonce: (BigInt(transactionsDetail.nonce) + 2n).toString(),
       });
 
       this.rpc
@@ -257,10 +261,7 @@ class Account extends BaseAccount {
 
     const res = await super.execute(calls, abis, transactionsDetail);
     Storage.update(this.selector, {
-      nonce: number
-        .toBN(transactionsDetail.nonce)
-        .add(number.toBN(1))
-        .toString(),
+      nonce: (BigInt(transactionsDetail.nonce) + 1n).toString(),
     });
 
     this.rpc
@@ -361,13 +362,17 @@ class Account extends BaseAccount {
     // return super.estimateInvokeFee(calls, details);
   }
 
+  // TODO: #223 is this still relevant?
   async verifyMessageHash(
-    hash: string | number | import("bn.js"),
+    hash: BigNumberish,
     signature: Signature,
   ): Promise<boolean> {
-    if (number.toBN(signature[0]).cmp(number.toBN(0)) === 0) {
-      const keyPair = ec.getKeyPairFromPublicKey(signature[0]);
-      return ec.verify(keyPair, number.toBN(hash).toString(), signature);
+    if (BigInt(signature[0]) === 0n) {
+      return ec.starkCurve.verify(
+        signature,
+        BigInt(hash).toString(),
+        signature[0],
+      );
     }
 
     super.verifyMessageHash(hash, signature);
@@ -397,13 +402,13 @@ class Account extends BaseAccount {
     ];
 
     const nonce = await this.getNonce();
-    const version = number.toBN(hash.transactionVersion);
+    const version = hash.transactionVersion;
     const calldata = transaction.fromCallsToExecuteCalldata(calls);
 
-    const gas = 28000;
+    const gas = 28000n;
     const gasPrice = await getGasPrice(this._chainId);
-    const fee = number.toBN(gasPrice).mul(number.toBN(gas));
-    const suggestedMaxFee = number.toHex(stark.estimatedFeeToMaxFee(fee));
+    const fee = BigInt(gasPrice) * gas;
+    const suggestedMaxFee = num.toHex(stark.estimatedFeeToMaxFee(fee));
 
     let msgHash = hash.calculateTransactionHash(
       this.address,
@@ -450,22 +455,18 @@ class Account extends BaseAccount {
     };
   }
 
-  async getNonce(blockIdentifier?: any): Promise<number.BigNumberish> {
+  async getNonce(blockIdentifier?: any): Promise<string> {
     if (blockIdentifier && blockIdentifier !== "pending") {
       return super.getNonce(blockIdentifier);
     }
 
     const chainNonce = await super.getNonce("pending");
     const state = Storage.get(this.selector);
-    if (
-      !state ||
-      !state.nonce ||
-      number.toBN(chainNonce).gt(number.toBN(state.nonce))
-    ) {
+    if (!state || !state.nonce || BigInt(chainNonce) > BigInt(state.nonce)) {
       return chainNonce;
     }
 
-    return number.toBN(state.nonce);
+    return state.nonce;
   }
 
   resetNonce() {
@@ -476,3 +477,24 @@ class Account extends BaseAccount {
 }
 
 export default Account;
+
+async function getGasPrice(chainId: constants.StarknetChainId) {
+  const uri =
+    chainId === constants.StarknetChainId.SN_MAIN
+      ? ETH_RPC_MAINNET
+      : ETH_RPC_GOERLI;
+  const response = await fetch(uri, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      method: "eth_gasPrice",
+      params: [],
+      id: 1,
+    }),
+  });
+  const data = await response.json();
+  return data.result;
+}

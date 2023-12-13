@@ -23,7 +23,7 @@ export function Redeploy({
         address: addAddressPadding(controller.address),
       });
 
-      controller.account(constants.StarknetChainId.TESTNET).status =
+      controller.account(constants.StarknetChainId.SN_GOERLI).status =
         Status.DEPLOYING;
 
       await client.request(DeployAccountDocument, {
@@ -32,7 +32,7 @@ export function Redeploy({
       });
 
       console.log("sync redeploy");
-      controller.account(constants.StarknetChainId.TESTNET).sync();
+      controller.account(constants.StarknetChainId.SN_GOERLI).sync();
     };
 
     deploy();

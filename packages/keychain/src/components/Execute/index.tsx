@@ -5,14 +5,12 @@ import Controller from "utils/controller";
 import {
   Abi,
   constants,
-  number,
   Call as StarknetCall,
   InvocationsDetails,
   uint256,
 } from "starknet";
 import { Fees } from "./Fees";
-import BN from "bn.js";
-import { BigNumber, utils } from "ethers";
+import { formatEther } from "viem";
 import { ExecuteReply, ResponseCodes } from "@cartridge/controller";
 import { Container } from "../Container";
 import { Status } from "utils/account";
@@ -51,13 +49,13 @@ export function Execute({
   onLogout: () => void;
 }) {
   const [fees, setFees] = useState<{
-    base: BN;
-    max: BN;
+    base: bigint;
+    max: bigint;
   }>();
   const [error, setError] = useState<Error>();
   const [isLoading, setLoading] = useState<boolean>(false);
-  const [ethBalance, setEthBalance] = useState<BN>();
-  const [ethApproved, setEthApproved] = useState<BN>();
+  const [ethBalance, setEthBalance] = useState<bigint>();
+  const [ethApproved, setEthApproved] = useState<bigint>();
   const [lowEthInfo, setLowEthInfo] = useState<LowEthInfo>();
   const [bridging, setBridging] = useState<boolean>(false);
 
@@ -66,9 +64,9 @@ export function Execute({
     return Array.isArray(transactions) ? transactions : [transactions];
   }, [transactions]);
 
-  const format = (bn: BN) => {
+  const format = (val: bigint) => {
     return (
-      Number(utils.formatEther(bn.toString()))
+      Number(formatEther(val))
         .toFixed(5)
         // strips trailing 0s
         .replace(/0*$/, "$'")
@@ -80,16 +78,15 @@ export function Execute({
       .callContract({
         contractAddress: CONTRACT_ETH,
         entrypoint: "balanceOf",
-        calldata: [BigNumber.from(controller.address).toString()],
+        calldata: [BigInt(controller.address).toString()],
       })
       .then((res) => {
         setEthBalance(
-          new BN(
+          BigInt(
             res.result
               .map((r) => r.replace("0x", ""))
               .reverse()
               .join(""),
-            16,
           ),
         );
       });
@@ -103,8 +100,8 @@ export function Execute({
 
     if (account.status === Status.REGISTERED && transactionsDetail.maxFee) {
       setFees({
-        base: number.toBN(transactionsDetail.maxFee),
-        max: number.toBN(transactionsDetail.maxFee),
+        base: BigInt(transactionsDetail.maxFee),
+        max: BigInt(transactionsDetail.maxFee),
       });
       return;
     }
@@ -145,23 +142,21 @@ export function Execute({
       return;
     }
 
-    if (ethBalance.lt(ethApproved)) {
+    if (ethBalance < ethApproved) {
       setLowEthInfo({
         label: "Approved Eth",
         balance: format(ethBalance),
         max: format(ethApproved),
-        lowAmount: format(ethBalance.sub(ethApproved).mul(new BN("-1"))),
+        lowAmount: format((ethBalance - ethApproved) * -1n),
         reject: onCancel,
         onBridge: () => setBridging(true),
       });
-    } else if (fees?.max && ethBalance.lt(ethApproved.add(fees.max))) {
+    } else if (fees?.max && ethBalance < ethApproved + fees.max) {
       setLowEthInfo({
         label: "Network Fee",
         balance: format(ethBalance),
-        max: format(ethApproved.add(fees.max)),
-        lowAmount: format(
-          ethBalance.sub(ethApproved.add(fees.max)).mul(new BN("-1")),
-        ),
+        max: format(ethApproved + fees.max),
+        lowAmount: format(ethBalance - (ethApproved + fees.max) * -1n),
         reject: onCancel,
         onBridge: () => setBridging(true),
       });

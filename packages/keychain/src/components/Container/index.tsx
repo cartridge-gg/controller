@@ -12,7 +12,7 @@ import { constants } from "starknet";
 
 export function Container({
   children,
-  chainId = constants.StarknetChainId.TESTNET,
+  chainId = constants.StarknetChainId.SN_GOERLI,
   onBack,
   hideAccount,
   ...rest

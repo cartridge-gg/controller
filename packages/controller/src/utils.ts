@@ -2,14 +2,14 @@ import equal from "fast-deep-equal";
 import { Policy } from "./types";
 import {
   ec,
-  number,
   hash,
   shortString,
   Signature,
-  Provider,
   addAddressPadding,
+  RpcProvider,
+  BigNumberish,
+  num,
 } from "starknet";
-import BN from "bn.js";
 import { PROXY_CLASS, CLASS_HASHES } from "./constants";
 import { decode } from "cbor-x";
 
@@ -23,18 +23,18 @@ export function diff(a: Policy[], b: Policy[]): Policy[] {
 
 export const computeAddress = (
   username: string,
-  { x0, x1, x2 }: { x0: BN; x1: BN; x2: BN },
-  { y0, y1, y2 }: { y0: BN; y1: BN; y2: BN },
+  { x0, x1, x2 }: { x0: bigint; x1: bigint; x2: bigint },
+  { y0, y1, y2 }: { y0: bigint; y1: bigint; y2: bigint },
   deviceKey: string,
 ) =>
   hash.calculateContractAddressFromHash(
     shortString.encodeShortString(username),
-    number.toBN(PROXY_CLASS),
+    BigInt(PROXY_CLASS),
     [
-      number.toBN(CLASS_HASHES["0.0.1"].account),
+      BigInt(CLASS_HASHES["0.0.1"].account),
       hash.getSelectorFromName("initialize"),
       "9",
-      number.toBN(CLASS_HASHES["0.0.1"].controller),
+      BigInt(CLASS_HASHES["0.0.1"].controller),
       "7",
       x0,
       x1,
@@ -42,15 +42,15 @@ export const computeAddress = (
       y0,
       y1,
       y2,
-      number.toBN(deviceKey),
+      BigInt(deviceKey),
     ],
     "0",
   );
 
 export const verifyMessageHash = async (
-  provider: Provider,
+  provider: RpcProvider,
   address: string,
-  messageHash: number.BigNumberish,
+  messageHash: BigNumberish,
   signature: Signature,
 ) => {
   const isDeployed = !!provider.getClassHashAt(address, "latest");
@@ -69,8 +69,12 @@ export const verifyMessageHash = async (
 
     const isRegistered = res?.result[0] === "0x1";
     if (isRegistered) {
-      const keyPair = ec.getKeyPairFromPublicKey(signature[0]);
-      return ec.verify(keyPair, number.toBN(messageHash).toString(), signature);
+      // TODO: #223
+      return ec.starkCurve.verify(
+        signature[0],
+        num.toHex(messageHash),
+        signature,
+      );
     } else {
       const res = await provider.callContract(
         {
@@ -103,11 +107,12 @@ export const verifyMessageHash = async (
       return false;
     }
 
+    // TODO: #223 bigint to buffer
     const pubKeyCbor = decode(
-      number.toBN(account.credential.publicKey).toBuffer(),
+      BigInt(account.credential.publicKey).toBuffer(),
     )[0];
-    const x = number.toBN("0x" + pubKeyCbor[-2].toString("hex"));
-    const y = number.toBN("0x" + pubKeyCbor[-3].toString("hex"));
+    const x = BigInt("0x" + pubKeyCbor[-2].toString("hex"));
+    const y = BigInt("0x" + pubKeyCbor[-3].toString("hex"));
     const { x: x0, y: x1, z: x2 } = split(x);
     const { x: y0, y: y1, z: y2 } = split(y);
     const computedAddress = computeAddress(
@@ -120,8 +125,11 @@ export const verifyMessageHash = async (
       throw new Error("invalid public key");
     }
 
-    const keyPair = ec.getKeyPairFromPublicKey(signature[0]);
-    return ec.verify(keyPair, number.toBN(messageHash).toString(), signature);
+    return ec.starkCurve.verify(
+      signature[0],
+      BigInt(messageHash).toString(),
+      signature,
+    );
   }
 };
 
@@ -155,15 +163,15 @@ export const getAccounts = async (addresses: string[]) => {
   }));
 };
 
-const BASE = number.toBN(2).pow(number.toBN(86));
+const BASE = 2n ** 86n;
 
-export function split(n: BN): {
-  x: BN;
-  y: BN;
-  z: BN;
+export function split(n: bigint): {
+  x: bigint;
+  y: bigint;
+  z: bigint;
 } {
-  const x = n.mod(BASE);
-  const y = n.div(BASE).mod(BASE);
-  const z = n.div(BASE).div(BASE);
+  const x = n % BASE;
+  const y = (n / BASE) % BASE;
+  const z = n / BASE / BASE;
   return { x, y, z };
 }

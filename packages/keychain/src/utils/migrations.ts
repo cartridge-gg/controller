@@ -14,27 +14,27 @@ const migrations = {
       Storage.set(
         selectors["0.0.3"].deployment(
           address,
-          constants.StarknetChainId.MAINNET,
+          constants.StarknetChainId.SN_MAIN,
         ),
         Storage.get(
-          selectors["0.0.2"].deployment(constants.StarknetChainId.MAINNET),
+          selectors["0.0.2"].deployment(constants.StarknetChainId.SN_MAIN),
         ),
       );
       Storage.remove(
-        selectors["0.0.2"].deployment(constants.StarknetChainId.MAINNET),
+        selectors["0.0.2"].deployment(constants.StarknetChainId.SN_MAIN),
       );
 
       Storage.set(
         selectors["0.0.3"].deployment(
           address,
-          constants.StarknetChainId.TESTNET,
+          constants.StarknetChainId.SN_GOERLI,
         ),
         Storage.get(
-          selectors["0.0.2"].deployment(constants.StarknetChainId.TESTNET),
+          selectors["0.0.2"].deployment(constants.StarknetChainId.SN_GOERLI),
         ),
       );
       Storage.remove(
-        selectors["0.0.2"].deployment(constants.StarknetChainId.TESTNET),
+        selectors["0.0.2"].deployment(constants.StarknetChainId.SN_GOERLI),
       );
 
       Storage.keys()
