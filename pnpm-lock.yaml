@@ -68,7 +68,7 @@ importers:
         version: 1.2.0
       get-starknet:
         specifier: ^1.5.0
-        version: 1.5.0(starknet@4.22.0)
+        version: 1.5.0(starknet@5.24.3)
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -79,8 +79,8 @@ importers:
         specifier: 5.0.1
         version: 5.0.1(@babel/plugin-syntax-flow@7.22.5)(@babel/plugin-transform-react-jsx@7.22.5)(eslint@8.46.0)(react@18.2.0)(typescript@5.2.2)
       starknet:
-        specifier: ^4.17.1
-        version: 4.22.0
+        specifier: ^5.24.3
+        version: 5.24.3
 
   examples/starknet-react-next:
     dependencies:
@@ -89,7 +89,7 @@ importers:
         version: link:../../packages/connector
       '@starknet-react/core':
         specifier: ^0.16.0
-        version: 0.16.0(react-dom@18.2.0)(react@18.2.0)(starknet@4.22.0)
+        version: 0.16.0(react-dom@18.2.0)(react@18.2.0)(starknet@5.24.3)
       next:
         specifier: ^13.4.19
         version: 13.4.19(@babel/core@7.22.9)(react-dom@18.2.0)(react@18.2.0)
@@ -100,8 +100,8 @@ importers:
         specifier: ^18.2.0
         version: 18.2.0(react@18.2.0)
       starknet:
-        specifier: ^4.22.0
-        version: 4.22.0
+        specifier: ^5.24.3
+        version: 5.24.3
     devDependencies:
       '@types/node':
         specifier: ^20.6.0
@@ -126,10 +126,10 @@ importers:
         version: link:../controller
       '@starknet-react/core':
         specifier: ^0.16.0
-        version: 0.16.0(react-dom@18.2.0)(react@18.2.0)(starknet@4.22.0)
+        version: 0.16.0(react-dom@18.2.0)(react@18.2.0)(starknet@5.24.3)
       starknet:
-        specifier: ^4.22.0
-        version: 4.22.0
+        specifier: ^5.24.3
+        version: 5.24.3
     devDependencies:
       '@types/jest':
         specifier: ^26.0.18
@@ -171,8 +171,8 @@ importers:
         specifier: ^7.1.1
         version: 7.1.1
       starknet:
-        specifier: ^4.17.1
-        version: 4.22.0
+        specifier: ^5.24.3
+        version: 5.24.3
     devDependencies:
       '@types/bn.js':
         specifier: ^5.1.1
@@ -221,7 +221,7 @@ importers:
         version: 1.73.0
       '@starknet-react/core':
         specifier: ^0.16.0
-        version: 0.16.0(react-dom@18.2.0)(react@18.2.0)(starknet@4.22.0)
+        version: 0.16.0(react-dom@18.2.0)(react@18.2.0)(starknet@5.24.3)
       '@wagmi/core':
         specifier: ^0.9.7
         version: 0.9.7(@types/node@20.6.0)(@types/react@18.2.21)(ethers@5.5.4)(react@18.2.0)(typescript@5.2.2)
@@ -289,8 +289,8 @@ importers:
         specifier: ^3.39.2
         version: 3.39.2(react-dom@18.2.0)(react@18.2.0)
       starknet:
-        specifier: ^4.22.0
-        version: 4.22.0
+        specifier: ^5.24.3
+        version: 5.24.3
       use-sound:
         specifier: ^4.0.1
         version: 4.0.1(react@18.2.0)
@@ -4596,6 +4596,7 @@ packages:
     cpu: [arm64]
     os: [android]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/android-arm@0.18.17:
@@ -4604,6 +4605,7 @@ packages:
     cpu: [arm]
     os: [android]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/android-x64@0.18.17:
@@ -4612,6 +4614,7 @@ packages:
     cpu: [x64]
     os: [android]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/darwin-arm64@0.18.17:
@@ -4620,6 +4623,7 @@ packages:
     cpu: [arm64]
     os: [darwin]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/darwin-x64@0.18.17:
@@ -4628,6 +4632,7 @@ packages:
     cpu: [x64]
     os: [darwin]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/freebsd-arm64@0.18.17:
@@ -4636,6 +4641,7 @@ packages:
     cpu: [arm64]
     os: [freebsd]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/freebsd-x64@0.18.17:
@@ -4644,6 +4650,7 @@ packages:
     cpu: [x64]
     os: [freebsd]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-arm64@0.18.17:
@@ -4652,6 +4659,7 @@ packages:
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-arm@0.18.17:
@@ -4660,6 +4668,7 @@ packages:
     cpu: [arm]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-ia32@0.18.17:
@@ -4668,6 +4677,7 @@ packages:
     cpu: [ia32]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-loong64@0.18.17:
@@ -4676,6 +4686,7 @@ packages:
     cpu: [loong64]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-mips64el@0.18.17:
@@ -4684,6 +4695,7 @@ packages:
     cpu: [mips64el]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-ppc64@0.18.17:
@@ -4692,6 +4704,7 @@ packages:
     cpu: [ppc64]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-riscv64@0.18.17:
@@ -4700,6 +4713,7 @@ packages:
     cpu: [riscv64]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-s390x@0.18.17:
@@ -4708,6 +4722,7 @@ packages:
     cpu: [s390x]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-x64@0.18.17:
@@ -4716,6 +4731,7 @@ packages:
     cpu: [x64]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/netbsd-x64@0.18.17:
@@ -4724,6 +4740,7 @@ packages:
     cpu: [x64]
     os: [netbsd]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/openbsd-x64@0.18.17:
@@ -4732,6 +4749,7 @@ packages:
     cpu: [x64]
     os: [openbsd]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/sunos-x64@0.18.17:
@@ -4740,6 +4758,7 @@ packages:
     cpu: [x64]
     os: [sunos]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/win32-arm64@0.18.17:
@@ -4748,6 +4767,7 @@ packages:
     cpu: [arm64]
     os: [win32]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/win32-ia32@0.18.17:
@@ -4756,6 +4776,7 @@ packages:
     cpu: [ia32]
     os: [win32]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/win32-x64@0.18.17:
@@ -4764,6 +4785,7 @@ packages:
     cpu: [x64]
     os: [win32]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@eslint-community/eslint-utils@4.4.0(eslint@8.46.0):
@@ -7255,16 +7277,28 @@ packages:
       '@noble/hashes': 1.3.1
     dev: false
 
+  /@noble/curves@1.2.0:
+    resolution: {integrity: sha512-oYclrNgRaM9SsBUBVbb8M6DTV7ZHRTKugureoYEncY5c65HOmRzvSiTE3y5CYaPYJA/GVkrhXEoF0M3Ya9PMnw==}
+    dependencies:
+      '@noble/hashes': 1.3.2
+    dev: false
+
   /@noble/ed25519@1.7.3:
     resolution: {integrity: sha512-iR8GBkDt0Q3GyaVcIu7mSsVIqnFbkbRzGLWlvhwunacoLwt4J3swfKhfaM6rN6WY+TBGoYT1GtT1mIh2/jGbRQ==}
     dev: false
 
-  /@noble/hashes@1.2.0:
-    resolution: {integrity: sha512-FZfhjEDbT5GRswV3C6uvLPHMiVD6lQBmpoX5+eSiPaMTXte/IKqI5dykDxzZB/WBeK/CDuQRBWarPdi3FNY2zQ==}
-    dev: false
-
   /@noble/hashes@1.3.1:
     resolution: {integrity: sha512-EbqwksQwz9xDRGfDST86whPBgM65E0OH/pCgqW0GBVzO22bNE+NuIbeTb714+IfSjU3aRk47EUvXIb5bTsenKA==}
+    engines: {node: '>= 16'}
+    dev: false
+
+  /@noble/hashes@1.3.2:
+    resolution: {integrity: sha512-MVC8EAQp7MvEcm30KWENFjgR+Mkmf+D189XJTkFIlwohU5hcBbn1ZkKq7KVTi2Hme3PMGF390DaL52beVrIihQ==}
+    engines: {node: '>= 16'}
+    dev: false
+
+  /@noble/hashes@1.3.3:
+    resolution: {integrity: sha512-V7/fPHgl+jsVPXqqeOzT8egNj2iBIVt+ECeMMG8TdcnTikP3oaBtUVqpT/gYCR68aEBJSF+XbYUxStjbFMqIIA==}
     engines: {node: '>= 16'}
     dev: false
 
@@ -8146,12 +8180,8 @@ packages:
     resolution: {integrity: sha512-ZxOhsSyxYwLJj3pLZCefNitxsj093tb2vq90mp2txoYeBqbcjDjqFhyM8eUjq/uFm6zJ+mUuqxlS2FkuSY1MTA==}
     dev: false
 
-  /@scure/bip32@1.1.5:
-    resolution: {integrity: sha512-XyNh1rB0SkEqd3tXcXMi+Xe1fvg+kUIcoRIEujP1Jgv7DqW2r9lg3Ah0NkFaCs9sTkQAQA8kw7xiRXzENi9Rtw==}
-    dependencies:
-      '@noble/hashes': 1.2.0
-      '@noble/secp256k1': 1.7.1
-      '@scure/base': 1.1.1
+  /@scure/base@1.1.5:
+    resolution: {integrity: sha512-Brj9FiG2W1MRQSTB212YVPRrcbjkv48FoZi/u4l/zds/ieRrqsh7aUf6CLwkAq61oKXr/ZlTzlY66gLIj3TFTQ==}
     dev: false
 
   /@scure/bip32@1.3.1:
@@ -8162,18 +8192,18 @@ packages:
       '@scure/base': 1.1.1
     dev: false
 
-  /@scure/bip39@1.1.1:
-    resolution: {integrity: sha512-t+wDck2rVkh65Hmv280fYdVdY25J9YeEUIgn2LG1WM6gxFkGzcksoDiUkWVpVp3Oex9xGC68JU2dSbUfwZ2jPg==}
-    dependencies:
-      '@noble/hashes': 1.2.0
-      '@scure/base': 1.1.1
-    dev: false
-
   /@scure/bip39@1.2.1:
     resolution: {integrity: sha512-Z3/Fsz1yr904dduJD0NpiyRHhRYHdcnyh73FZWiV+/qhWi83wNJ3NWolYqCEN+ZWsUz2TWwajJggcRE9r1zUYg==}
     dependencies:
       '@noble/hashes': 1.3.1
       '@scure/base': 1.1.1
+    dev: false
+
+  /@scure/starknet@0.3.0:
+    resolution: {integrity: sha512-Ma66yZlwa5z00qI5alSxdWtIpky5LBhy22acVFdoC5kwwbd9uDyMWEYzWHdNyKmQg9t5Y2UOXzINMeb3yez+Gw==}
+    dependencies:
+      '@noble/curves': 1.2.0
+      '@noble/hashes': 1.3.3
     dev: false
 
   /@sideway/address@4.1.4:
@@ -8390,17 +8420,17 @@ packages:
       '@stablelib/wipe': 1.0.1
     dev: false
 
-  /@starknet-react/core@0.16.0(react-dom@18.2.0)(react@18.2.0)(starknet@4.22.0):
+  /@starknet-react/core@0.16.0(react-dom@18.2.0)(react@18.2.0)(starknet@5.24.3):
     resolution: {integrity: sha512-VWBAilTrF3RAuD2laQJepx3Zhd2I8CHCA8p81hzAKlPyiUXIkLYLlGncckbRXX+a/wBSGZs+FNoqsUE0nOUYCg==}
     peerDependencies:
       react: ^17.0 || ^18.0
       starknet: next
     dependencies:
       '@tanstack/react-query': 4.32.1(react-dom@18.2.0)(react@18.2.0)
-      get-starknet-core: 2.1.0(starknet@4.22.0)
+      get-starknet-core: 2.1.0(starknet@5.24.3)
       immutable: 4.3.1
       react: 18.2.0
-      starknet: 4.22.0
+      starknet: 5.24.3
     transitivePeerDependencies:
       - react-dom
       - react-native
@@ -10181,6 +10211,7 @@ packages:
     cpu: [arm64]
     os: [darwin]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@swc/core-darwin-x64@1.3.85:
@@ -10189,6 +10220,7 @@ packages:
     cpu: [x64]
     os: [darwin]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@swc/core-linux-arm-gnueabihf@1.3.85:
@@ -10197,6 +10229,7 @@ packages:
     cpu: [arm]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@swc/core-linux-arm64-gnu@1.3.85:
@@ -10205,6 +10238,7 @@ packages:
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@swc/core-linux-arm64-musl@1.3.85:
@@ -10213,6 +10247,7 @@ packages:
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@swc/core-linux-x64-gnu@1.3.85:
@@ -10221,6 +10256,7 @@ packages:
     cpu: [x64]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@swc/core-linux-x64-musl@1.3.85:
@@ -10229,6 +10265,7 @@ packages:
     cpu: [x64]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@swc/core-win32-arm64-msvc@1.3.85:
@@ -10237,6 +10274,7 @@ packages:
     cpu: [arm64]
     os: [win32]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@swc/core-win32-ia32-msvc@1.3.85:
@@ -10245,6 +10283,7 @@ packages:
     cpu: [ia32]
     os: [win32]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@swc/core-win32-x64-msvc@1.3.85:
@@ -10253,6 +10292,7 @@ packages:
     cpu: [x64]
     os: [win32]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@swc/core@1.3.85:
@@ -10277,6 +10317,7 @@ packages:
       '@swc/core-win32-arm64-msvc': 1.3.85
       '@swc/core-win32-ia32-msvc': 1.3.85
       '@swc/core-win32-x64-msvc': 1.3.85
+    dev: true
 
   /@swc/helpers@0.5.1:
     resolution: {integrity: sha512-sJ902EfIzn1Fa+qYmjdQqh8tPsoxyBz+8yBKC2HKUxyezKJFwPGOn7pv4WY6QuQW//ySQi5lJjA/ZT9sNWWNTg==}
@@ -10285,6 +10326,7 @@ packages:
 
   /@swc/types@0.1.4:
     resolution: {integrity: sha512-z/G02d+59gyyUb7KYhKi9jOhicek6QD2oMaotUyG+lUkybpXoV49dY9bj7Ah5Q+y7knK2jU67UTX9FyfGzaxQg==}
+    dev: true
 
   /@szmarczak/http-timer@1.1.2:
     resolution: {integrity: sha512-XIB2XbzHTN6ieIjfIMV9hlVcfPU26s2vafYWQcZHWXHOxiaRZYEDKEwdl129Zyg50+foYV2jCgtrqSA6qNuNSA==}
@@ -14624,7 +14666,7 @@ packages:
       postcss-modules-values: 4.0.0(postcss@8.4.27)
       postcss-value-parser: 4.2.0
       semver: 7.5.4
-      webpack: 5.88.2(@swc/core@1.3.85)(esbuild@0.18.17)
+      webpack: 5.88.2
 
   /css-minimizer-webpack-plugin@3.4.1(webpack@5.88.2):
     resolution: {integrity: sha512-1u6D71zeIfgngN2XNRJefc/hY7Ybsxd74Jm4qngIXyUEk7fss3VUzuHxLAq/R8NAba4QU9OUSaMZlbpRc7bM4Q==}
@@ -15785,6 +15827,7 @@ packages:
       '@esbuild/win32-arm64': 0.18.17
       '@esbuild/win32-ia32': 0.18.17
       '@esbuild/win32-x64': 0.18.17
+    dev: true
 
   /escalade@3.1.1:
     resolution: {integrity: sha512-k0er2gUkLf8O0zKJiAhmkTnJlTvINGv7ygDNPbeIsX/TJjGJZHuh9B2UxbsaEkmlEo9MfhrSzmhIlhRlI2GXnw==}
@@ -16531,15 +16574,6 @@ packages:
     resolution: {integrity: sha512-Z3ymjopaoft7JDoxZcEb3pwdGh7yiYMhOwm2doUt6ASXlMavpNlK6Cre0+IMl2VSGyEU9rkiperQhp5iRxn5Pg==}
     dependencies:
       fast-safe-stringify: 2.1.1
-    dev: false
-
-  /ethereum-cryptography@1.2.0:
-    resolution: {integrity: sha512-6yFQC9b5ug6/17CQpCyE3k9eKBMdhyVjzUy1WkiuY/E4vj/SXDBbCw8QEIaXqf0Mf2SnY6RmpDcwlUmBSS0EJw==}
-    dependencies:
-      '@noble/hashes': 1.2.0
-      '@noble/secp256k1': 1.7.1
-      '@scure/bip32': 1.1.5
-      '@scure/bip39': 1.1.1
     dev: false
 
   /ethereum-cryptography@2.1.2:
@@ -17484,21 +17518,21 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /get-starknet-core@2.1.0(starknet@4.22.0):
+  /get-starknet-core@2.1.0(starknet@5.24.3):
     resolution: {integrity: sha512-sT9fxIiM3maEqz1cVggiB/jGn+nUCavhhhJRnU/G1zKMmJFYORjRNohEZ1xXgRt6MFVUNPnAzxQrhI1F645VNA==}
     peerDependencies:
       starknet: ^4.9.0
     dependencies:
-      starknet: 4.22.0
+      starknet: 5.24.3
     dev: false
 
-  /get-starknet@1.5.0(starknet@4.22.0):
+  /get-starknet@1.5.0(starknet@5.24.3):
     resolution: {integrity: sha512-6A14mdPoMwO4orETjG5D+wwaZOzuAyNp/5+ZlDJnU+UU7QRGMYILUo8WjgqeVTg0mcN0BZoUE0C/Qhgd7dBvVQ==}
     peerDependencies:
       starknet: ^3.12.3
     dependencies:
       bowser: 2.11.0
-      starknet: 4.22.0
+      starknet: 5.24.3
     dev: false
 
   /get-stream@4.1.0:
@@ -20651,12 +20685,6 @@ packages:
     engines: {node: '>=4'}
     hasBin: true
 
-  /json-bigint@1.0.0:
-    resolution: {integrity: sha512-SiPv/8VpZuWbvLSMtTDU8hEfrZWg/mH/nV/b4o0CYbSxu1UIQPLdwKOCIyLQX+VIPO5vrLX3i8qtqFyhdPSUSQ==}
-    dependencies:
-      bignumber.js: 9.1.1
-    dev: false
-
   /json-buffer@3.0.0:
     resolution: {integrity: sha512-CuUqjv0FUZIdXkHPI8MezCnFCdaTAacej1TZYulLoAg1h/PhwkdXFN4V/gzY4g+fMBCOV2xF+rp7t2XD2ns/NQ==}
 
@@ -21067,6 +21095,10 @@ packages:
     hasBin: true
     dependencies:
       js-tokens: 4.0.0
+
+  /lossless-json@2.0.11:
+    resolution: {integrity: sha512-BP0vn+NGYvzDielvBZaFain/wgeJ1hTvURCqtKvhr1SCPePdaaTanmmcplrHfEJSJOUql7hk4FHwToNJjWRY3g==}
+    dev: false
 
   /lottie-react@2.3.1(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-8cxd6XZZtECT6LoAhCftRdYrEpHxiouvB5EPiYA+TtCG5LHNYAdMS9IVIHcxKtWnpo7x16QfCLj1XLXZpaN81A==}
@@ -22918,7 +22950,7 @@ packages:
       jiti: 1.19.1
       postcss: 8.4.27
       semver: 7.5.4
-      webpack: 5.88.2(@swc/core@1.3.85)(esbuild@0.18.17)
+      webpack: 5.88.2
 
   /postcss-logical@5.0.4(postcss@8.4.27):
     resolution: {integrity: sha512-RHXxplCeLh9VjinvMrZONq7im4wjWGlRJAqmAVLXyZaXwfDWP73/oq4NdIp+OZwhQUMj0zjqDfM5Fj7qby+B4g==}
@@ -24996,7 +25028,7 @@ packages:
     dependencies:
       klona: 2.0.6
       neo-async: 2.6.2
-      webpack: 5.88.2(@swc/core@1.3.85)(esbuild@0.18.17)
+      webpack: 5.88.2
 
   /sax@1.2.4:
     resolution: {integrity: sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==}
@@ -25634,19 +25666,15 @@ packages:
   /stackframe@1.3.4:
     resolution: {integrity: sha512-oeVtt7eWQS+Na6F//S4kJ2K2VbRlS9D43mAlMyVpVWovy9o+jfgH8O9agzANzaiLjclA0oYzUXEM4PurhSUChw==}
 
-  /starknet@4.22.0:
-    resolution: {integrity: sha512-jC9Taxb6a/ht9zmS1LU/DSLfwJKpgCJnE9AktVksc5SE/+jQMpqxsq6fm7PRiqupjiqRC1DOS8N47cj+KaGv4Q==}
+  /starknet@5.24.3:
+    resolution: {integrity: sha512-v0TuaNc9iNtHdbIRzX372jfQH1vgx2rwBHQDMqK4DqjJbwFEE5dog8Go6rGiZVW750NqRSWrZ7ahqyRNc3bscg==}
     dependencies:
-      '@ethersproject/bytes': 5.7.0
-      bn.js: 5.2.1
-      elliptic: 6.5.4
-      ethereum-cryptography: 1.2.0
-      hash.js: 1.1.7
+      '@noble/curves': 1.2.0
+      '@scure/base': 1.1.5
+      '@scure/starknet': 0.3.0
       isomorphic-fetch: 3.0.0
-      json-bigint: 1.0.0
-      minimalistic-assert: 1.0.1
+      lossless-json: 2.0.11
       pako: 2.1.0
-      ts-custom-error: 3.3.1
       url-join: 4.0.1
     transitivePeerDependencies:
       - encoding
@@ -25970,7 +25998,7 @@ packages:
     peerDependencies:
       webpack: ^5.0.0
     dependencies:
-      webpack: 5.88.2(@swc/core@1.3.85)(esbuild@0.18.17)
+      webpack: 5.88.2
 
   /style-to-object@0.3.0:
     resolution: {integrity: sha512-CzFnRRXhzWIdItT3OmF8SQfWyahHhjq3HwcMNCNLn+N7klOOqPjMeG/4JSu77D7ypZdGvSzvkrbyeTMizz2VrA==}
@@ -26292,6 +26320,7 @@ packages:
       serialize-javascript: 6.0.1
       terser: 5.19.2
       webpack: 5.88.2(@swc/core@1.3.85)(esbuild@0.18.17)
+    dev: true
 
   /terser-webpack-plugin@5.3.9(webpack@5.88.2):
     resolution: {integrity: sha512-ZuXsqE07EcggTWQjXUj+Aot/OMcD0bMKGgF63f7UxYcu5/AJF53aIpK1YoP5xR9l6s/Hy2b+t1AM0bLNPRuhwA==}
@@ -27892,6 +27921,7 @@ packages:
       - '@swc/core'
       - esbuild
       - uglify-js
+    dev: true
 
   /webpackbar@5.0.2(webpack@5.88.2):
     resolution: {integrity: sha512-BmFJo7veBDgQzfWXl/wwYXr/VFus0614qZ8i9znqcl9fnEdiVkdbi0TedLQ6xAK92HZHDJ0QmyQ0fmuZPAgCYQ==}

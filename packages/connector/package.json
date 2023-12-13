@@ -26,6 +26,6 @@
   "dependencies": {
     "@cartridge/controller": "workspace:^",
     "@starknet-react/core": "^0.16.0",
-    "starknet": "^4.22.0"
+    "starknet": "^5.24.3"
   }
 }
