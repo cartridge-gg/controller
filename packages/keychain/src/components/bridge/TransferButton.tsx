@@ -2,7 +2,7 @@ import { Button } from "@chakra-ui/react";
 import BN from "bn.js";
 import { parseEther } from "ethers/lib/utils.js";
 import { useCallback, useEffect, useState } from "react";
-import { constants, Sequencer, uint256 } from "starknet";
+import { constants, uint256 } from "starknet";
 import {
   goerli,
   mainnet,
@@ -32,47 +32,42 @@ export function TransferButton({
   onError: (err: any) => void;
   onTxSubmitted: (hash: string) => void;
 }) {
-  const [l2Fee, setL2Fee] = useState<number>();
+  const [l2Fee, setL2Fee] = useState<string>();
 
-  const estimateL2Fee =
-    useCallback(async (): Promise<Sequencer.EstimateFeeResponse> => {
-      const parsed = parseEther(value);
-      const amount = uint256.bnToUint256(new BN(parsed.toString()));
-      const from =
-        account._chainId === constants.StarknetChainId.MAINNET
-          ? EthL1BridgeMainnet
-          : EthL1BridgeGoerli;
-      const to =
-        account._chainId === constants.StarknetChainId.MAINNET
-          ? EthL2BridgeMainnet
-          : EthL2BridgeGoerli;
-      const res = await account.gateway.estimateMessageFee({
-        from_address: from,
-        to_address: to,
-        entry_point_selector: "handle_deposit",
-        payload: [
-          account.address,
-          amount.low.toString(),
-          amount.high.toString(),
-        ],
-      });
-      return res;
-    }, [account._chainId, account.gateway, account.address, value]);
+  const estimateL2Fee = useCallback(async () => {
+    const parsed = parseEther(value);
+    const amount = uint256.bnToUint256(new BN(parsed.toString()));
+    const from =
+      account._chainId === constants.StarknetChainId.SN_MAIN
+        ? EthL1BridgeMainnet
+        : EthL1BridgeGoerli;
+    const to =
+      account._chainId === constants.StarknetChainId.SN_MAIN
+        ? EthL2BridgeMainnet
+        : EthL2BridgeGoerli;
+    const res = await account.rpc.estimateMessageFee({
+      from_address: from,
+      to_address: to,
+      entry_point_selector: "handle_deposit",
+      payload: [account.address, amount.low.toString(), amount.high.toString()],
+    });
+    return res;
+  }, [account._chainId, account.rpc, account.address, value]);
 
   useEffect(() => {
     if (!value) return;
     estimateL2Fee().then((res) => {
-      setL2Fee((res as any).overall_fee);
+      setL2Fee(res.overall_fee);
     });
   }, [estimateL2Fee, value]);
 
   const { config, error: configError } = usePrepareContractWrite({
     chainId:
-      account._chainId === constants.StarknetChainId.MAINNET
+      account._chainId === constants.StarknetChainId.SN_MAIN
         ? mainnet.id
         : goerli.id,
     address:
-      account._chainId === constants.StarknetChainId.MAINNET
+      account._chainId === constants.StarknetChainId.SN_MAIN
         ? EthL1BridgeMainnet
         : EthL1BridgeGoerli,
     abi: EthL1BridgeABI,

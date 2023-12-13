@@ -5,7 +5,6 @@ import {
   number,
   Account as BaseAccount,
   RpcProvider,
-  SequencerProvider,
   SignerInterface,
   Call,
   EstimateFeeDetails,
@@ -20,15 +19,15 @@ import {
   InvocationsDetails,
   InvokeFunctionResponse,
   typedData,
+  TransactionFinalityStatus,
+  waitForTransactionOptions,
 } from "starknet";
 import { AccountContractDocument } from "generated/graphql";
 import { client } from "utils/graphql";
 
 import selectors from "./selectors";
 import Storage from "./storage";
-import { NamedChainId } from "@cartridge/controller/src/constants";
 import { RegisterData, VERSION } from "./controller";
-import { estimateFeeBulk, getGasPrice } from "./gateway";
 import WebauthnAccount, { formatAssertion } from "./webauthn";
 
 export enum Status {
@@ -43,7 +42,6 @@ export enum Status {
 
 class Account extends BaseAccount {
   rpc: RpcProvider;
-  gateway: SequencerProvider;
   private selector: string;
   _chainId: constants.StarknetChainId;
   updated: boolean = true;
@@ -60,12 +58,6 @@ class Account extends BaseAccount {
     super({ rpc: { nodeUrl } }, address, signer);
 
     this.rpc = new RpcProvider({ nodeUrl });
-    this.gateway = new SequencerProvider({
-      network:
-        chainId === constants.StarknetChainId.MAINNET
-          ? "mainnet-alpha"
-          : "goerli-alpha",
-    });
     this.selector = selectors["0.0.3"].deployment(address, chainId);
     this._chainId = chainId;
     this.webauthn = webauthn;
@@ -76,6 +68,20 @@ class Account extends BaseAccount {
       this.sync();
       return;
     }
+  }
+
+  static get waitForTransactionOptions(): waitForTransactionOptions {
+    return {
+      retryInterval: 1000,
+      successStates: [
+        TransactionFinalityStatus.ACCEPTED_ON_L1,
+        TransactionFinalityStatus.ACCEPTED_ON_L2,
+      ],
+      errorStates: [
+        TransactionFinalityStatus.ACCEPTED_ON_L1,
+        TransactionFinalityStatus.ACCEPTED_ON_L2,
+      ],
+    };
   }
 
   get status() {
@@ -96,7 +102,7 @@ class Account extends BaseAccount {
   async getContract() {
     try {
       return await client.request(AccountContractDocument, {
-        id: `starknet:${NamedChainId[this._chainId]}:${this.address}`,
+        id: `starknet:${this._chainId}:${this.address}`,
       });
     } catch (e) {
       if (e.message.includes("not found")) {
@@ -122,10 +128,10 @@ class Account extends BaseAccount {
         if (registerTxnHash) {
           this.status = Status.REGISTERING;
           this.rpc
-            .waitForTransaction(registerTxnHash, 1000, [
-              "ACCEPTED_ON_L1",
-              "ACCEPTED_ON_L2",
-            ])
+            .waitForTransaction(
+              registerTxnHash,
+              Account.waitForTransactionOptions,
+            )
             .then(() => this.sync());
           return;
         }
@@ -146,10 +152,10 @@ class Account extends BaseAccount {
 
           if (!this.waitingForDeploy) {
             this.rpc
-              .waitForTransaction(deployTxnHash, 1000, [
-                "ACCEPTED_ON_L1",
-                "ACCEPTED_ON_L2",
-              ])
+              .waitForTransaction(
+                deployTxnHash,
+                Account.waitForTransactionOptions,
+              )
               .then(() => this.sync());
             this.waitingForDeploy = true;
           }
@@ -239,11 +245,11 @@ class Account extends BaseAccount {
           .toString(),
       });
 
-      this.gateway
-        .waitForTransaction(responses[1].transaction_hash, 1000, [
-          "ACCEPTED_ON_L1",
-          "ACCEPTED_ON_L2",
-        ])
+      this.rpc
+        .waitForTransaction(
+          responses[1].transaction_hash,
+          Account.waitForTransactionOptions,
+        )
         .catch(() => {
           this.resetNonce();
         });
@@ -259,11 +265,11 @@ class Account extends BaseAccount {
         .toString(),
     });
 
-    this.gateway
-      .waitForTransaction(res.transaction_hash, 1000, [
-        "ACCEPTED_ON_L1",
-        "ACCEPTED_ON_L2",
-      ])
+    this.rpc
+      .waitForTransaction(
+        res.transaction_hash,
+        Account.waitForTransactionOptions,
+      )
       .catch(() => {
         this.resetNonce();
       });
@@ -301,7 +307,8 @@ class Account extends BaseAccount {
 
       const signature = await this.signer.signTransaction(calls, signerDetails);
 
-      let estimates = await estimateFeeBulk(this._chainId, [
+      // TODO: adapt to https://github.com/starknet-io/starknet.js/blob/v5.24.3/src/types/lib/index.ts#L203..L210
+      let estimates = await this.rpc.getEstimateFeeBulk([
         pendingRegister.invoke,
         {
           invocation: {

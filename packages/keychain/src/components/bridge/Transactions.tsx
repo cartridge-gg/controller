@@ -24,7 +24,7 @@ export function TxnTracker({
     state: CardState.PENDING,
   });
   const etherscanSubdomain =
-    chainId === constants.StarknetChainId.MAINNET ? "" : "goerli.";
+    chainId === constants.StarknetChainId.SN_MAIN ? "" : "goerli.";
   const etherscanHref = `https://${etherscanSubdomain}etherscan.io/tx/${ethTxnHash}`;
 
   return (
@@ -100,7 +100,7 @@ function Card({
 }) {
   const { data } = useWaitForTransaction({
     chainId:
-      chainId === constants.StarknetChainId.MAINNET ? mainnet.id : goerli.id,
+      chainId === constants.StarknetChainId.SN_MAIN ? mainnet.id : goerli.id,
     hash: ethTxnHash as `0x${string}`,
     enabled: state === CardState.PENDING,
   });

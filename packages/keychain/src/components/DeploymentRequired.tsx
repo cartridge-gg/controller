@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { Status } from "utils/account";
 import { Loading } from "./Loading";
 import { Button, Link } from "@chakra-ui/react";
-import { NamedChainId } from "@cartridge/controller/src/constants";
 import { ExternalIcon } from "@cartridge/ui";
 import { PortalBanner } from "./PortalBanner";
 import { PortalFooter } from "./PortalFooter";
@@ -66,7 +65,7 @@ export function DeploymentRequired({
         {typeof deployHash === "string" && (
           <Link
             href={`https://${
-              NamedChainId[account._chainId] === "SN_GOERLI"
+              account._chainId === constants.StarknetChainId.SN_GOERLI
                 ? "testnet."
                 : undefined
             }starkscan.co/tx/${deployHash}`}

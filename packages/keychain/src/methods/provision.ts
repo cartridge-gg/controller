@@ -1,10 +1,10 @@
-import { ec } from "starknet";
+import { ec, stark } from "starknet";
 import Controller from "utils/controller";
 
 const provision = () => async (address: string, credentialId: string) => {
-  const keypair = ec.genKeyPair();
-  const deviceKey = ec.getStarkKey(keypair);
-  const controller = new Controller(keypair, address, credentialId);
+  const privateKey = stark.randomAddress();
+  const deviceKey = ec.starkCurve.getStarkKey(privateKey);
+  const controller = new Controller(privateKey, address, credentialId);
   controller.store();
 
   return deviceKey;

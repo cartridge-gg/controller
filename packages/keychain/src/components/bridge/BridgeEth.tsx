@@ -57,7 +57,7 @@ export function BridgeEth({
         return await fetchBalance({
           address: ethAddress as any,
           chainId:
-            chainId === constants.StarknetChainId.MAINNET
+            chainId === constants.StarknetChainId.SN_MAIN
               ? mainnet.id
               : goerli.id,
         });
@@ -72,7 +72,7 @@ export function BridgeEth({
 
   useEffect(() => {
     async function compute() {
-      if (chainId === constants.StarknetChainId.MAINNET) {
+      if (chainId === constants.StarknetChainId.SN_MAIN) {
         const { data } = await fetchEthPrice();
         const usdeth = parseFloat(data.price.amount);
         const inputValue = parseFloat(debouncedValue);
@@ -235,7 +235,7 @@ export function BridgeEth({
               return;
             } else if (error.name === "ChainMismatchError") {
               const networkName =
-                chainId === constants.StarknetChainId.MAINNET
+                chainId === constants.StarknetChainId.SN_MAIN
                   ? "mainnet"
                   : "goerli";
               setErrorMessage(

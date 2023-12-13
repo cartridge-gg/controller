@@ -1,6 +1,6 @@
 import Storage from "utils/storage";
-import Controller, { VERSION } from "utils/controller";
-import { constants, ec } from "starknet";
+import Controller from "utils/controller";
+import { constants, stark } from "starknet";
 import base64url from "base64url";
 import selectors from "utils/selectors";
 
@@ -15,8 +15,13 @@ const login =
       challengeExt?: Buffer;
     },
   ) => {
-    const keypair = ec.genKeyPair();
-    const controller = new Controller(keypair, address, credentialId, options);
+    const privateKey = stark.randomAddress();
+    const controller = new Controller(
+      privateKey,
+      address,
+      credentialId,
+      options,
+    );
 
     const { assertion } = await controller.account(chainId).register();
     Storage.set(selectors["0.0.3"].active(), address);

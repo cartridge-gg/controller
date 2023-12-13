@@ -1,15 +1,10 @@
 import {
   constants,
   ec,
-  KeyPair,
-  hash,
   number,
-  transaction,
-  Call,
   Invocation,
   InvocationsDetails,
   SignerInterface,
-  stark,
 } from "starknet";
 import equal from "fast-deep-equal";
 
@@ -44,21 +39,16 @@ type SerializedController = {
   address: string;
 };
 
-enum SupportedChainIds {
-  MAINNET = "0x534e5f4d41494e",
-  TESTNET = "0x534e5f474f45524c49",
-}
-
 export default class Controller {
   public address: string;
   public signer: SignerInterface;
   public publicKey: string;
-  protected keypair: KeyPair;
+  protected privateKey: string;
   protected credentialId: string;
-  protected accounts: { [key in SupportedChainIds]: Account };
+  protected accounts: { [key in constants.StarknetChainId]: Account };
 
   constructor(
-    keypair: KeyPair,
+    privateKey: string,
     address: string,
     credentialId: string,
     options?: {
@@ -66,14 +56,14 @@ export default class Controller {
     },
   ) {
     this.address = address;
-    this.signer = new DeviceSigner(keypair);
-    this.keypair = keypair;
-    this.publicKey = ec.getStarkKey(keypair);
+    this.signer = new DeviceSigner(privateKey);
+    this.privateKey = privateKey;
+    this.publicKey = ec.starkCurve.getStarkKey(privateKey);
     this.credentialId = credentialId;
 
     this.accounts = {
-      [constants.StarknetChainId.TESTNET]: new Account(
-        constants.StarknetChainId.TESTNET,
+      [constants.StarknetChainId.SN_GOERLI]: new Account(
+        constants.StarknetChainId.SN_GOERLI,
         process.env.NEXT_PUBLIC_RPC_GOERLI,
         address,
         this.signer,
@@ -85,8 +75,8 @@ export default class Controller {
           options,
         ),
       ),
-      [constants.StarknetChainId.MAINNET]: new Account(
-        constants.StarknetChainId.MAINNET,
+      [constants.StarknetChainId.SN_GOERLI]: new Account(
+        constants.StarknetChainId.SN_GOERLI,
         process.env.NEXT_PUBLIC_RPC_MAINNET,
         address,
         this.signer,
@@ -160,7 +150,7 @@ export default class Controller {
   store() {
     Storage.set("version", VERSION);
     return Storage.set(selectors[VERSION].account(this.address), {
-      privateKey: number.toHex(this.keypair.priv),
+      privateKey: number.toHex(this.privateKey),
       publicKey: this.publicKey,
       address: this.address,
       credentialId: this.credentialId,
@@ -191,8 +181,7 @@ export default class Controller {
       migrations[version][VERSION](address);
     }
 
-    const keypair = ec.getKeyPair(privateKey);
-    return new Controller(keypair, address, credentialId);
+    return new Controller(privateKey, address, credentialId);
   }
 }
 

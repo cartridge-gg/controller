@@ -4,15 +4,14 @@ import {
   Call,
   InvocationsSignerDetails,
   Signature,
-  KeyPair,
   Signer,
   typedData,
 } from "starknet";
 import { CLASS_HASHES } from "@cartridge/controller/src/constants";
 
 export class DeviceSigner extends Signer {
-  constructor(keyPair: KeyPair) {
-    super(keyPair);
+  constructor(privateKey: string) {
+    super(privateKey);
   }
 
   public async signTransaction(

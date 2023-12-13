@@ -1,5 +1,5 @@
 import { Button, Circle } from "@chakra-ui/react";
-import { useMemo } from "react";
+import { useChainName } from "hooks/chain";
 import { constants } from "starknet";
 
 export function NetworkButton({
@@ -28,17 +28,4 @@ export function NetworkButton({
       {chainName}
     </Button>
   );
-}
-
-function useChainName(chainId: constants.StarknetChainId) {
-  return useMemo(() => {
-    switch (chainId) {
-      case constants.StarknetChainId.MAINNET:
-        return "Mainnet";
-      case constants.StarknetChainId.TESTNET:
-        return "Testnet";
-      case constants.StarknetChainId.TESTNET2:
-        return "Testnet 2";
-    }
-  }, [chainId]);
 }

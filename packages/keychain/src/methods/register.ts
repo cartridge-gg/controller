@@ -1,5 +1,5 @@
 import { split } from "@cartridge/controller";
-import { ec, hash, number, shortString } from "starknet";
+import { ec, hash, number, shortString, stark } from "starknet";
 
 import Controller from "utils/controller";
 import { CLASS_HASHES, PROXY_CLASS } from "@cartridge/controller/src/constants";
@@ -12,8 +12,8 @@ const register =
     credentialId: string,
     credential: { x: string; y: string },
   ) => {
-    const keypair = ec.genKeyPair();
-    const deviceKey = ec.getStarkKey(keypair);
+    const privateKey = stark.randomAddress();
+    const deviceKey = ec.starkCurve.getStarkKey(privateKey);
 
     const { x: x0, y: x1, z: x2 } = split(number.toBN(credential.x));
     const { x: y0, y: y1, z: y2 } = split(number.toBN(credential.y));
@@ -23,7 +23,7 @@ const register =
       { y0, y1, y2 },
       deviceKey,
     );
-    const controller = new Controller(keypair, address, credentialId);
+    const controller = new Controller(privateKey, address, credentialId);
     controller.store();
 
     return { address, deviceKey };

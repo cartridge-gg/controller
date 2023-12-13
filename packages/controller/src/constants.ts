@@ -1,9 +1,3 @@
-import { constants } from "starknet";
-
-export const GATEWAY_MAINNET =
-  "https://alpha-mainnet.starknet.io/feeder_gateway";
-export const GATEWAY_GOERLI = "https://alpha4.starknet.io/feeder_gateway";
-
 export const ETH_RPC_MAINNET =
   "https://eth-mainnet.g.alchemy.com/v2/OGPRMquXP3K7oTkLrmVZpjCd1DswtYz3";
 export const ETH_RPC_GOERLI =
@@ -48,9 +42,4 @@ export const CLASS_HASHES = {
     legacyController:
       "0x58e648a242085d5ff1e8f92a6b91057826639a82b23798998d40b61a27bca85",
   },
-};
-
-export const NamedChainId = {
-  [constants.StarknetChainId.MAINNET]: "SN_MAIN",
-  [constants.StarknetChainId.TESTNET]: "SN_GOERLI",
 };

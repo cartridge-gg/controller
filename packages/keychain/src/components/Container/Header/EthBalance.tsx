@@ -1,7 +1,7 @@
 import { EthereumIcon, Loading } from "@cartridge/ui";
 import { Button, Text } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { SequencerProvider, constants, uint256 } from "starknet";
+import { RpcProvider, constants, uint256 } from "starknet";
 import { CONTRACT_ETH } from "@cartridge/controller/src/constants";
 import { BigNumber, utils } from "ethers";
 
@@ -41,12 +41,7 @@ export function useEthBalance({
 
   useEffect(() => {
     if (address) {
-      const provider = new SequencerProvider({
-        network:
-          chainId === constants.StarknetChainId.MAINNET
-            ? "mainnet-alpha"
-            : "goerli-alpha",
-      });
+      const provider = new RpcProvider({ chainId });
 
       provider
         .callContract({
