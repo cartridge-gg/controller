@@ -35,11 +35,6 @@ export type Policy = {
   method?: string;
 };
 
-export enum SupportedChainIds {
-  MAINNET = "0x534e5f4d41494e",
-  TESTNET = "0x534e5f474f45524c49",
-}
-
 export enum ResponseCodes {
   SUCCESS = "SUCCESS",
   NOT_CONNECTED = "NOT_CONNECTED",
@@ -73,7 +68,7 @@ export interface Keychain {
   connect(
     policies: Policy[],
     starterPackId?: string,
-    chainId?: SupportedChainIds,
+    chainId?: constants.StarknetChainId,
   ): Promise<ConnectReply | Error>;
   disconnect(): void;
 

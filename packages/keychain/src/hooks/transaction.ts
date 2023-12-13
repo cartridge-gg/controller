@@ -23,7 +23,7 @@ export function useUrlTxns(): {
     setChainId(
       chainId
         ? (chainId as constants.StarknetChainId)
-        : constants.StarknetChainId.TESTNET,
+        : constants.StarknetChainId.SN_GOERLI,
     );
 
     if (!raw) {

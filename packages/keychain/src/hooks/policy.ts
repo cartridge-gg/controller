@@ -35,7 +35,7 @@ export function useUrlPolicys(): {
     setChainId(
       chainId
         ? (chainId as constants.StarknetChainId)
-        : constants.StarknetChainId.TESTNET,
+        : constants.StarknetChainId.SN_GOERLI,
     );
 
     setIsValidating(true);
@@ -92,7 +92,7 @@ async function getValidPolicys(
 //     body: JSON.stringify({
 //       query: SelectorsDocument,
 //       variables: {
-//         id: `starknet:${defaultProvider.chainId === StarknetChainId.MAINNET
+//         id: `starknet:${defaultProvider.chainId === StarknetChainId.SN_MAIN
 //             ? "SN_MAIN"
 //             : "SN_GOERLI"
 //           }:${address}`,

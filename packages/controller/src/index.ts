@@ -14,16 +14,15 @@ import {
   ConnectReply,
   ProbeReply,
   Modal,
-  SupportedChainIds,
 } from "./types";
 import { createModal } from "./modal";
 
 export const providers = {
-  [constants.StarknetChainId.TESTNET]: new RpcProvider({
+  [constants.StarknetChainId.SN_GOERLI]: new RpcProvider({
     nodeUrl:
       "https://starknet-goerli.g.alchemy.com/v2/FS0Fge2Rq1dlf2IsAIC_Ecy0UBp9uq51",
   }),
-  [constants.StarknetChainId.MAINNET]: new RpcProvider({
+  [constants.StarknetChainId.SN_MAIN]: new RpcProvider({
     nodeUrl:
       "https://starknet-mainnet.g.alchemy.com/v2/-FbmIoy3U7xEqQhuhW6wkDB2uqfu0yKi",
   }),
@@ -34,8 +33,9 @@ class Controller {
   public keychain?: AsyncMethodReturns<Keychain>;
   private policies: Policy[] = [];
   private url: string = "https://x.cartridge.gg";
-  public chainId: SupportedChainIds = SupportedChainIds.TESTNET;
-  public accounts?: { [key in SupportedChainIds]: AccountInterface };
+  public chainId: constants.StarknetChainId =
+    constants.StarknetChainId.SN_GOERLI;
+  public accounts?: { [key in constants.StarknetChainId]: AccountInterface };
   private modal?: Modal;
   private starterPackId?: string;
 
@@ -45,7 +45,7 @@ class Controller {
       url?: string;
       origin?: string;
       starterPackId?: string;
-      chainId?: SupportedChainIds;
+      chainId?: constants.StarknetChainId;
     },
   ) {
     if (policies) {
@@ -122,14 +122,14 @@ class Controller {
 
       const { address } = res as ProbeReply;
       this.accounts = {
-        [constants.StarknetChainId.MAINNET]: new DeviceAccount(
-          providers[constants.StarknetChainId.MAINNET],
+        [constants.StarknetChainId.SN_MAIN]: new DeviceAccount(
+          providers[constants.StarknetChainId.SN_MAIN],
           address,
           this.keychain,
           this.modal,
         ),
-        [constants.StarknetChainId.TESTNET]: new DeviceAccount(
-          providers[constants.StarknetChainId.TESTNET],
+        [constants.StarknetChainId.SN_GOERLI]: new DeviceAccount(
+          providers[constants.StarknetChainId.SN_GOERLI],
           address,
           this.keychain,
           this.modal,
@@ -144,15 +144,11 @@ class Controller {
   }
 
   async switchChain(chainId: constants.StarknetChainId) {
-    const cid =
-      chainId === constants.StarknetChainId.MAINNET
-        ? SupportedChainIds.MAINNET
-        : SupportedChainIds.TESTNET;
-    if (this.chainId === cid) {
+    if (this.chainId === chainId) {
       return;
     }
 
-    this.chainId = cid;
+    this.chainId = chainId;
   }
 
   // Register a new device key.
@@ -270,14 +266,14 @@ class Controller {
 
       response = response as ConnectReply;
       this.accounts = {
-        [constants.StarknetChainId.MAINNET]: new DeviceAccount(
-          providers[constants.StarknetChainId.MAINNET],
+        [constants.StarknetChainId.SN_MAIN]: new DeviceAccount(
+          providers[constants.StarknetChainId.SN_MAIN],
           response.address,
           this.keychain,
           this.modal,
         ),
-        [constants.StarknetChainId.TESTNET]: new DeviceAccount(
-          providers[constants.StarknetChainId.TESTNET],
+        [constants.StarknetChainId.SN_GOERLI]: new DeviceAccount(
+          providers[constants.StarknetChainId.SN_GOERLI],
           response.address,
           this.keychain,
           this.modal,

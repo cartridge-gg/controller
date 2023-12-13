@@ -1,9 +1,10 @@
 import { EthereumIcon, Loading } from "@cartridge/ui";
 import { Button, Text } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { RpcProvider, constants, uint256 } from "starknet";
+import { constants, uint256 } from "starknet";
 import { CONTRACT_ETH } from "@cartridge/controller/src/constants";
 import { BigNumber, utils } from "ethers";
+import { providers } from "@cartridge/controller";
 
 // TODO: Round to specific digits so that width doesn't change?
 export function EthBalance({
@@ -41,7 +42,7 @@ export function useEthBalance({
 
   useEffect(() => {
     if (address) {
-      const provider = new RpcProvider({ chainId });
+      const provider = providers[chainId];
 
       provider
         .callContract({

@@ -47,10 +47,10 @@ export function Fees({
       return;
     }
     async function compute() {
-      if (chainId === constants.StarknetChainId.MAINNET) {
+      if (chainId === constants.StarknetChainId.SN_MAIN) {
         let dollarUSLocale = Intl.NumberFormat("en-US");
         const { data } = await fetchEthPrice();
-        const usdeth = number.toBN(data.price.amount * 100);
+        const usdeth = BigInt(data.price.amount * 100);
         const overallFee = fees.base.mul(usdeth).toString();
         const suggestedMaxFee = fees.max.mul(usdeth).toString();
         setFormattedFee({

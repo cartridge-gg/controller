@@ -359,13 +359,17 @@ class Account extends BaseAccount {
     return super.estimateInvokeFee(calls, details);
   }
 
+  // TODO: is this still relevant?
   async verifyMessageHash(
     hash: string | number | import("bn.js"),
     signature: Signature,
   ): Promise<boolean> {
     if (number.toBN(signature[0]).cmp(number.toBN(0)) === 0) {
-      const keyPair = ec.getKeyPairFromPublicKey(signature[0]);
-      return ec.verify(keyPair, number.toBN(hash).toString(), signature);
+      return ec.starkCurve.verify(
+        signature,
+        number.toBN(hash).toString(),
+        signature[0],
+      );
     }
 
     super.verifyMessageHash(hash, signature);

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { defaultProvider, number, Provider, uint256 } from "starknet";
+import { number, Provider, uint256 } from "starknet";
 import { CONTRACT_AVATAR } from "@cartridge/controller/src/constants";
 import dataUriToBuffer from "data-uri-to-buffer";
 
