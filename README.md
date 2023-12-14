@@ -31,7 +31,7 @@ Build dependencies:
 pnpm build
 ```
 
-Run `keychain` and `starknet-reat-next`:
+Run `keychain` and `starknet-react-next`:
 
 ```sh
 pnpm dev
