@@ -24,7 +24,6 @@
   "dependencies": {
     "@cartridge/penpal": "^6.2.3",
     "base64url": "^3.0.1",
-    "bn.js": "^5.2.1",
     "cbor-x": "^1.5.0",
     "fast-deep-equal": "^3.1.3",
     "query-string": "^7.1.1",
