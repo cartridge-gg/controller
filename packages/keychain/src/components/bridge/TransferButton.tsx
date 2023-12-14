@@ -1,8 +1,7 @@
 import { Button } from "@chakra-ui/react";
-import BN from "bn.js";
 import { parseEther } from "ethers/lib/utils.js";
 import { useCallback, useEffect, useState } from "react";
-import { constants, uint256 } from "starknet";
+import { cairo, constants } from "starknet";
 import {
   goerli,
   mainnet,
@@ -35,7 +34,7 @@ export function TransferButton({
 
   const estimateL2Fee = useCallback(async () => {
     const parsed = parseEther(value);
-    const amount = uint256.bnToUint256(new BN(parsed.toString()));
+    const amount = cairo.uint256(BigInt(parsed.toString()));
     const from =
       account._chainId === constants.StarknetChainId.SN_MAIN
         ? EthL1BridgeMainnet

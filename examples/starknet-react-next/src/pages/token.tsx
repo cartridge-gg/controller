@@ -5,7 +5,7 @@ import {
 } from "@starknet-react/core";
 import type { NextPage } from "next";
 import { useCallback, useMemo, useState } from "react";
-import { number, uint256 } from "starknet";
+import { cairo, uint256 } from "starknet";
 import { ConnectWallet } from "components/ConnectWallet";
 import { TransactionList } from "components/TransactionList";
 import { useTokenContract } from "hooks/token";
@@ -14,8 +14,8 @@ import Erc20Abi from "abi/erc20.json";
 
 function UserBalance() {
   const { account } = useAccount();
-  const { contract } = useTokenContract();
 
+  // TODO: #223 replace with `useBalance`
   const { data, isLoading, error } = useContractRead({
     abi: Erc20Abi as Abi,
     address:
@@ -53,6 +53,7 @@ function MintToken() {
 
   const { contract } = useTokenContract();
 
+  // TODO: #223 useStarknetInvoke is deprecated
   const { loading, error, reset, invoke } = useStarknetInvoke({
     contract,
     method: "mint",
@@ -63,7 +64,7 @@ function MintToken() {
       // soft-validate amount
       setAmount(newAmount);
       try {
-        number.toBN(newAmount);
+        BigInt(newAmount);
         setAmountError(undefined);
       } catch (err) {
         console.error(err);
@@ -76,7 +77,7 @@ function MintToken() {
   const onMint = useCallback(() => {
     reset();
     if (account && !amountError) {
-      const amountBn = uint256.bnToUint256(amount);
+      const amountBn = cairo.uint256(amount);
       invoke({ args: [account, amountBn] });
     }
   }, [account, amount]);

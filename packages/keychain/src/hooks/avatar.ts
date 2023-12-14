@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { cairo, constants, num, uint256 } from "starknet";
+import { cairo, constants, num } from "starknet";
 import { CONTRACT_AVATAR } from "@cartridge/controller/src/constants";
 import dataUriToBuffer from "data-uri-to-buffer";
 
@@ -108,7 +108,7 @@ export const parseAvatars = (data: AttributeData): AvatarData[] => {
 };
 
 export const callContract = async (address: string): Promise<AttributeData> => {
-  const tokenId = uint256.bnToUint256(address);
+  const tokenId = cairo.uint256(address);
 
   const provider = providers[constants.StarknetChainId.SN_GOERLI];
 
