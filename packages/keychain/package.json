@@ -19,7 +19,7 @@
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@solana/web3.js": "^1.73.0",
-    "@starknet-react/core": "^0.16.0",
+    "@starknet-react/core": "^2.1.5",
     "@wagmi/core": "^0.9.7",
     "@web3auth/base": "^4.2.2",
     "@web3auth/core": "^4.2.2",

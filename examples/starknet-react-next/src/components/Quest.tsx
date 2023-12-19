@@ -1,9 +1,9 @@
 import ControllerConnector from "@cartridge/connector";
-import { useConnectors } from "@starknet-react/core";
+import { useConnect } from "@starknet-react/core";
 
 const Quests = () => {
-  const { available } = useConnectors()
-  const cartridgeConnector = available[0] as ControllerConnector;
+  const { connectors } = useConnect();
+  const cartridgeConnector = connectors[0] as unknown as ControllerConnector;
   const gameId = "influence";
 
   return (
@@ -12,7 +12,9 @@ const Quests = () => {
         onClick={async () => {
           await cartridgeConnector.showQuests(gameId);
         }}
-      >{gameId}</button>
+      >
+        {gameId}
+      </button>
     </>
   );
 };

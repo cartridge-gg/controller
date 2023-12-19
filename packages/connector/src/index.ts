@@ -1,4 +1,4 @@
-import { Connector, EventHandler } from "@starknet-react/core";
+import { Connector } from "@starknet-react/core";
 import Controller, {
   Assertion,
   Policy,
@@ -18,17 +18,23 @@ class ControllerConnector extends Connector {
       chainId?: SupportedChainIds;
     },
   ) {
-    super({ options });
+    super();
     this._account = null;
     this.controller = new Controller(policies, options);
   }
 
-  id() {
-    return "cartridge";
-  }
+  readonly id = "cartridge";
 
-  name() {
-    return "Cartridge";
+  readonly name = "Cartridge";
+
+  // TODO: #223 Set controller icon
+  readonly icon = {
+    dark: "",
+    light: "",
+  };
+
+  chainId() {
+    return Promise.resolve(this.controller.chainId);
   }
 
   available(): boolean {
@@ -62,15 +68,20 @@ class ControllerConnector extends Connector {
     return this.controller.provision(address, credentialId);
   }
 
-  async connect(): Promise<AccountInterface> {
+  async connect() {
     const account = await this.controller.connect();
 
     if (!account) {
       throw new Error("account not found");
     }
+    const chainId = await this.chainId();
 
     this._account = account;
-    return this._account;
+
+    return {
+      account: this._account,
+      chainId,
+    };
   }
 
   async disconnect(): Promise<void> {
@@ -87,16 +98,6 @@ class ControllerConnector extends Connector {
 
   async showQuests(gameId: string): Promise<void> {
     return this.controller.showQuests(gameId);
-  }
-
-  initEventListener(accountChangeCb: EventHandler): Promise<void> {
-    // TODO
-    return Promise.resolve();
-  }
-
-  removeEventListener(accountChangeCb: EventHandler): Promise<void> {
-    // TODO
-    return Promise.resolve();
   }
 }
 
