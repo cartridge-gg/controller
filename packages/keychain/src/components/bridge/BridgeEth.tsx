@@ -18,7 +18,8 @@ import { alchemyProvider } from "@wagmi/core/providers/alchemy";
 import { useDebounce } from "hooks/debounce";
 import { useEffect, useState } from "react";
 import { constants } from "starknet";
-import { createClient, goerli, mainnet, WagmiConfig } from "wagmi";
+import { createConfig, mainnet, WagmiConfig } from "wagmi";
+import { goerli } from "wagmi/chains";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import { ConnectButton } from "./ConnectButton";
 import { TransferButton } from "./TransferButton";
@@ -107,14 +108,14 @@ export function BridgeEth({
 
   if (transferHash) {
     return (
-      <WagmiConfig client={ethereumClient}>
+      <WagmiConfig config={ethereumConfig}>
         <TxnTracker chainId={chainId} ethTxnHash={transferHash} />
       </WagmiConfig>
     );
   }
 
   return (
-    <WagmiConfig client={ethereumClient}>
+    <WagmiConfig config={ethereumConfig}>
       <PortalBanner Icon={EthereumDuoIcon} title="Bridge ETH" />
 
       <VStack w="full" align="start" spacing="18px">
@@ -295,7 +296,8 @@ const { chains, provider } = configureChains(
   ],
 );
 
-const ethereumClient = createClient({
+const ethereumConfig = createConfig({
+  // TODO: #223
   provider,
   connectors: [
     new MetaMaskConnector({

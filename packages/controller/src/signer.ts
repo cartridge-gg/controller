@@ -1,10 +1,18 @@
-import { Signature, typedData } from "starknet";
-import qs from "query-string";
+import {
+  Abi,
+  Call,
+  DeclareSignerDetails,
+  DeployAccountSignerDetails,
+  InvocationsSignerDetails,
+  Signature,
+  SignerInterface,
+  typedData,
+} from "starknet";
 
 import { Keychain, Modal } from "./types";
 import { AsyncMethodReturns } from "@cartridge/penpal";
 
-export class Signer {
+export class Signer implements SignerInterface {
   private keychain: AsyncMethodReturns<Keychain>;
   modal: Modal;
   constructor(keychain: AsyncMethodReturns<Keychain>, modal: Modal) {
@@ -38,5 +46,25 @@ export class Signer {
     const res = await this.keychain.signMessage(typedData, account);
     this.modal.close();
     return res as Signature;
+  }
+
+  public async signTransaction(
+    transactions: Call[],
+    transactionsDetail: InvocationsSignerDetails,
+    abis?: Abi[],
+  ): Promise<Signature> {
+    // TODO: #223
+  }
+
+  public async signDeployAccountTransaction(
+    transaction: DeployAccountSignerDetails,
+  ): Promise<Signature> {
+    // TODO: #223
+  }
+
+  public async signDeclareTransaction(
+    transaction: DeclareSignerDetails,
+  ): Promise<Signature> {
+    // TODO: #223
   }
 }

@@ -107,7 +107,7 @@ export const verifyMessageHash = async (
       return false;
     }
 
-    // #223 bigint to buffer
+    // TODO: #223 bigint to buffer
     const pubKeyCbor = decode(
       BigInt(account.credential.publicKey).toBuffer(),
     )[0];

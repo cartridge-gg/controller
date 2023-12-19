@@ -10,7 +10,7 @@ import {
   uint256,
 } from "starknet";
 import { Fees } from "./Fees";
-import { utils } from "ethers";
+import { formatEther } from "viem";
 import { ExecuteReply, ResponseCodes } from "@cartridge/controller";
 import { Container } from "../Container";
 import { Status } from "utils/account";
@@ -64,9 +64,9 @@ export function Execute({
     return Array.isArray(transactions) ? transactions : [transactions];
   }, [transactions]);
 
-  const format = (bn: bigint) => {
+  const format = (val: bigint) => {
     return (
-      Number(utils.formatEther(bn.toString()))
+      Number(formatEther(val))
         .toFixed(5)
         // strips trailing 0s
         .replace(/0*$/, "$'")

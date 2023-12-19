@@ -1,13 +1,9 @@
 import { Button } from "@chakra-ui/react";
-import { parseEther } from "ethers/lib/utils.js";
+import { parseEther } from "viem";
 import { useCallback, useEffect, useState } from "react";
 import { cairo, constants } from "starknet";
-import {
-  goerli,
-  mainnet,
-  useContractWrite,
-  usePrepareContractWrite,
-} from "wagmi";
+import { mainnet, useContractWrite, usePrepareContractWrite } from "wagmi";
+import { goerli } from "wagmi/chains";
 import {
   EthL1BridgeGoerli,
   EthL1BridgeMainnet,
@@ -72,7 +68,7 @@ export function TransferButton({
     functionName: "deposit",
     args: [parseEther(value?.length ? value : "0"), BigInt(account.address)],
     overrides: {
-      value: value && l2Fee ? parseEther(value).add(l2Fee) : undefined,
+      value: value && l2Fee ? parseEther(value) + BigInt(l2Fee) : undefined,
     },
     enabled: !disabled && value && !!l2Fee,
   });

@@ -9,7 +9,7 @@ import {
 } from "@chakra-ui/react";
 
 import { constants } from "starknet";
-import { formatUnits } from "ethers/lib/utils";
+import { formatUnits } from "viem";
 import { Error } from "components/Error";
 
 async function fetchEthPrice() {
@@ -50,8 +50,8 @@ export function Fees({
         let dollarUSLocale = Intl.NumberFormat("en-US");
         const { data } = await fetchEthPrice();
         const usdeth = BigInt(data.price.amount) * 100n;
-        const overallFee = (fees.base * usdeth).toString();
-        const suggestedMaxFee = (fees.max * usdeth).toString();
+        const overallFee = fees.base * usdeth;
+        const suggestedMaxFee = fees.max * usdeth;
         setFormattedFee({
           base: `~$${dollarUSLocale.format(
             parseFloat(formatUnits(overallFee, 20)),
@@ -66,12 +66,8 @@ export function Fees({
       setFormattedFee(
         fees.max > 10000000000000n
           ? {
-              base: `~${parseFloat(
-                formatUnits(fees.base.toString(), 18),
-              ).toFixed(5)} eth`,
-              max: `~${parseFloat(formatUnits(fees.max.toString(), 18)).toFixed(
-                5,
-              )} eth`,
+              base: `~${parseFloat(formatUnits(fees.base, 18)).toFixed(5)} eth`,
+              max: `~${parseFloat(formatUnits(fees.max, 18)).toFixed(5)} eth`,
             }
           : {
               base: "<0.00001",

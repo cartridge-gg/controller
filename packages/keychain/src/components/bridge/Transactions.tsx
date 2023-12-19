@@ -3,7 +3,8 @@ import { Label } from "./Label";
 import { Loading } from "components/Loading";
 import { useEffect, useState } from "react";
 import { constants } from "starknet";
-import { goerli, mainnet, useWaitForTransaction } from "wagmi";
+import { mainnet, useWaitForTransaction } from "wagmi";
+import { goerli } from "wagmi/chains";
 import { CheckIcon, ExternalIcon, TransferDuoIcon } from "@cartridge/ui";
 import { PortalBanner } from "components/PortalBanner";
 
