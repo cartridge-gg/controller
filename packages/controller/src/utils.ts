@@ -69,7 +69,7 @@ export const verifyMessageHash = async (
 
     const isRegistered = res?.result[0] === "0x1";
     if (isRegistered) {
-      // TODO: #233
+      // TODO: #223
       return ec.starkCurve.verify(
         signature[0],
         num.toHex(messageHash),

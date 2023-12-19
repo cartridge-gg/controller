@@ -1,7 +1,7 @@
 import {
   useAccount,
   useContractRead,
-  useStarknetInvoke,
+  useContractWrite,
 } from "@starknet-react/core";
 import type { NextPage } from "next";
 import { useCallback, useMemo, useState } from "react";
@@ -15,7 +15,6 @@ import Erc20Abi from "abi/erc20.json";
 function UserBalance() {
   const { account } = useAccount();
 
-  // TODO: #223 replace with `useBalance`
   const { data, isLoading, error } = useContractRead({
     abi: Erc20Abi as Abi,
     address:
@@ -25,7 +24,7 @@ function UserBalance() {
   });
 
   const content = useMemo(() => {
-    if (isLoading || !data?.length) {
+    if (isLoading || !(data as [])?.length) {
       return <div>Loading balance</div>;
     }
 
@@ -34,7 +33,8 @@ function UserBalance() {
       return <div>Error!</div>;
     }
 
-    const balance = uint256.uint256ToBN(data[0]);
+    // #223 check. it used to be `uint256.uint256ToBN(data[0])`
+    const balance = uint256.uint256ToBN({ low: data[0], high: data[1] });
     return <div>{balance.toString(10)}</div>;
   }, [data, isLoading, error]);
 
@@ -47,16 +47,21 @@ function UserBalance() {
 }
 
 function MintToken() {
-  const { account } = useAccount();
+  const { account, address } = useAccount();
   const [amount, setAmount] = useState("");
   const [amountError, setAmountError] = useState<string | undefined>();
 
   const { contract } = useTokenContract();
 
-  // TODO: #223 useStarknetInvoke is deprecated
-  const { loading, error, reset, invoke } = useStarknetInvoke({
-    contract,
-    method: "mint",
+  const calls = useMemo(() => {
+    if (!address || !contract) return [];
+
+    const amountBn = cairo.uint256(amount);
+    return contract.populateTransaction["mint"]!(address, [address, amountBn]);
+  }, [address, contract]);
+
+  const { writeAsync, isPending, error, reset } = useContractWrite({
+    calls,
   });
 
   const updateAmount = useCallback(
@@ -77,15 +82,14 @@ function MintToken() {
   const onMint = useCallback(() => {
     reset();
     if (account && !amountError) {
-      const amountBn = cairo.uint256(amount);
-      invoke({ args: [account, amountBn] });
+      writeAsync();
     }
   }, [account, amount]);
 
   const mintButtonDisabled = useMemo(() => {
-    if (loading) return true;
+    if (isPending) return true;
     return !account || !!amountError;
-  }, [loading, account, amountError]);
+  }, [isPending, account, amountError]);
 
   return (
     <div>
@@ -98,7 +102,7 @@ function MintToken() {
         />
       </p>
       <button disabled={mintButtonDisabled} onClick={onMint}>
-        {loading ? "Waiting for wallet" : "Mint"}
+        {isPending ? "Submitting" : "Mint"}
       </button>
       {error && (
         <p>
