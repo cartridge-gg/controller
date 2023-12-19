@@ -13,12 +13,12 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { configureChains, fetchBalance } from "@wagmi/core";
+import { fetchBalance } from "@wagmi/core";
 import { alchemyProvider } from "@wagmi/core/providers/alchemy";
 import { useDebounce } from "hooks/debounce";
 import { useEffect, useState } from "react";
 import { constants } from "starknet";
-import { createConfig, mainnet, WagmiConfig } from "wagmi";
+import { createConfig, mainnet, WagmiConfig, configureChains } from "wagmi";
 import { goerli } from "wagmi/chains";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import { ConnectButton } from "./ConnectButton";
@@ -281,7 +281,7 @@ const SelectBox = forwardRef<
   </HStack>
 ));
 
-const { chains, provider } = configureChains(
+const { chains, publicClient } = configureChains(
   [mainnet, goerli],
   [
     alchemyProvider({
@@ -297,8 +297,7 @@ const { chains, provider } = configureChains(
 );
 
 const ethereumConfig = createConfig({
-  // TODO: #223
-  provider,
+  publicClient,
   connectors: [
     new MetaMaskConnector({
       chains,
