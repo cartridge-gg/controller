@@ -239,7 +239,7 @@ class Account extends BaseAccount {
           .toString(),
       });
 
-      this.gateway
+      this.rpc
         .waitForTransaction(responses[1].transaction_hash, 1000, [
           "ACCEPTED_ON_L1",
           "ACCEPTED_ON_L2",
@@ -259,7 +259,7 @@ class Account extends BaseAccount {
         .toString(),
     });
 
-    this.gateway
+    this.rpc
       .waitForTransaction(res.transaction_hash, 1000, [
         "ACCEPTED_ON_L1",
         "ACCEPTED_ON_L2",
