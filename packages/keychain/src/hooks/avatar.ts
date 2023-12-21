@@ -110,9 +110,9 @@ export const callContract = async (address: string): Promise<AttributeData> => {
   const tokenId = uint256.bnToUint256(address);
 
   const provider = new Provider({
-    sequencer: {
-      network: "goerli-alpha",
-    },
+    rpc: {
+      nodeUrl: process.env.NEXT_PUBLIC_RPC_GOERLI
+    }
   });
 
   let res = await provider.callContract({
@@ -226,13 +226,11 @@ const data2Svg = ({
       //const fill = cell == CellType.BASE ? baseColor : borderColor; // Uncomment after new contract deployed
       const fill = cell == CellType.BASE ? baseColor : "rgba(255,255,255,0.08)";
       rects.push(
-        `<rect x="${x + PADDING}" y="${
-          y + PADDING
+        `<rect x="${x + PADDING}" y="${y + PADDING
         }" width="1" height="1" fill="${fill}"/>`,
       );
       rects.push(
-        `<rect x="${mirror_x + PADDING}" y="${
-          y + PADDING
+        `<rect x="${mirror_x + PADDING}" y="${y + PADDING
         }" width="1" height="1" fill="${fill}"/>`,
       );
     }
