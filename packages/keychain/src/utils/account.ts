@@ -141,7 +141,7 @@ class Account extends BaseAccount {
         );
 
         // Pending txn so poll for inclusion.
-        if (!("status" in deployTxnReceipt)) {
+        if (!("execution_status" in deployTxnReceipt)) {
           this.status = Status.DEPLOYING;
 
           if (!this.waitingForDeploy) {
@@ -153,10 +153,11 @@ class Account extends BaseAccount {
               .then(() => this.sync());
             this.waitingForDeploy = true;
           }
+
           return;
         }
 
-        if (deployTxnReceipt.status === "REJECTED") {
+        if (deployTxnReceipt.execution_status === "REJECTED") {
           this.status = Status.COUNTERFACTUAL;
           return;
         }
@@ -366,8 +367,8 @@ class Account extends BaseAccount {
 
   async signMessage(typedData: typedData.TypedData): Promise<Signature> {
     return await (this.status === Status.REGISTERED ||
-    this.status === Status.COUNTERFACTUAL ||
-    this.status === Status.DEPLOYING
+      this.status === Status.COUNTERFACTUAL ||
+      this.status === Status.DEPLOYING
       ? super.signMessage(typedData)
       : this.webauthn.signMessage(typedData));
   }
