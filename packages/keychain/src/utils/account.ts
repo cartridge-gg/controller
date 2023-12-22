@@ -1,4 +1,8 @@
-import { CLASS_HASHES } from "@cartridge/controller/src/constants";
+import {
+  CLASS_HASHES,
+  ETH_RPC_GOERLI,
+  ETH_RPC_MAINNET,
+} from "@cartridge/controller/src/constants";
 import {
   constants,
   hash,
@@ -33,6 +37,7 @@ import { NamedChainId } from "@cartridge/controller/src/constants";
 import { RegisterData, VERSION } from "./controller";
 import { estimateFeeBulk, getGasPrice } from "./gateway";
 import WebauthnAccount, { formatAssertion } from "./webauthn";
+import { Block } from "./block";
 
 export enum Status {
   UNKNOWN = "UNKNOWN",
@@ -307,14 +312,17 @@ class Account extends BaseAccount {
       const invocation = {
         contractAddress: this.address,
         calldata: transaction.fromCallsToExecuteCalldata(calls),
-        signature
+        signature,
       } as Invocation;
       const invokeDetails = {
         nonce: nextNonce,
         maxFee: constants.ZERO,
-        version: hash.transactionVersion
+        version: hash.transactionVersion,
       } as InvocationsDetailsWithNonce;
-      const invocationBulk = [pendingRegister.invoke, { invocation, invokeDetails }] as InvocationBulk;
+      const invocationBulk = [
+        pendingRegister.invoke,
+        { invocation, invokeDetails },
+      ] as InvocationBulk;
 
       const estimates = await this.rpc.getEstimateFeeBulk(invocationBulk);
 
@@ -348,6 +356,111 @@ class Account extends BaseAccount {
     return super.estimateInvokeFee(calls, details);
   }
 
+  // ref: https://github.com/starknet-io/starknet.js/blob/v5.24.3/src/provider/rpc.ts#L561-L574
+  // TODO: #223 don't forget to remove
+  private async getEstimateFeeBulk(
+    invocations: InvocationBulk,
+    blockIdentifier: EstimateFeeDetails["blockIdentifier"],
+  ) {
+    const block_id = new Block(blockIdentifier).identifier;
+
+    const uri =
+      this.chainId === constants.StarknetChainId.MAINNET
+        ? ETH_RPC_MAINNET
+        : ETH_RPC_GOERLI;
+    const response = await fetch(uri, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "starknet_estimateFee",
+        params: invocations.map((it) => this.buildTransaction(it, "fee")),
+        id: 1,
+      }),
+    });
+    const data = await response.json();
+    return this.parseFeeEstimateBulkResponse(data);
+    // return this.fetchEndpoint("starknet_estimateFee", {
+    //   request: invocations.map((it) => this.buildTransaction(it, "fee")),
+    //   block_id,
+    // }).then(this.responseParser.parseFeeEstimateBulkResponse);
+  }
+
+  // TODO: #223 remove
+  private buildTransaction(
+    // ref: https://github.com/starknet-io/starknet.js/blob/v5.24.3/src/types/lib/index.ts#L188
+    // invocation: AccountInvocationItem,
+    invocation: InvocationBulk[0],
+    versionType?: "fee" | "transaction",
+    // ref: https://github.com/starknet-io/starknet.js/blob/v5.24.3/src/types/api/rpcspec/components.ts#L230
+  ): RPC.BaseTransaction {
+    const defaultVersions = getVersionsByType(versionType);
+    const details = {
+      signature: signatureToHexArray(invocation.signature),
+      nonce: number.toHex(invocation.nonce),
+      max_fee: number.toHex(invocation.maxFee || 0),
+    };
+
+    if (invocation.type === TransactionType.INVOKE) {
+      return {
+        type: RPC.ETransactionType.INVOKE, // Diff between sequencer and rpc invoke type
+        sender_address: invocation.contractAddress,
+        calldata: CallData.toHex(invocation.calldata),
+        version: number.toHex(invocation.version || defaultVersions.v1),
+        ...details,
+      };
+    }
+    if (invocation.type === TransactionType.DECLARE) {
+      if (!isSierra(invocation.contract)) {
+        return {
+          type: invocation.type,
+          contract_class: invocation.contract,
+          sender_address: invocation.senderAddress,
+          version: number.toHex(invocation.version || defaultVersions.v1),
+          ...details,
+        };
+      }
+      return {
+        // compiled_class_hash
+        type: invocation.type,
+        contract_class: {
+          ...invocation.contract,
+          sierra_program: decompressProgram(invocation.contract.sierra_program),
+        },
+        compiled_class_hash: invocation.compiledClassHash || "",
+        sender_address: invocation.senderAddress,
+        version: number.toHex(invocation.version || defaultVersions.v2),
+        ...details,
+      };
+    }
+    if (invocation.type === TransactionType.DEPLOY_ACCOUNT) {
+      return {
+        type: invocation.type,
+        constructor_calldata: CallData.toHex(
+          invocation.constructorCalldata || [],
+        ),
+        class_hash: number.toHex(invocation.classHash),
+        contract_address_salt: number.toHex(invocation.addressSalt || 0),
+        version: number.toHex(invocation.version || defaultVersions.v1),
+        ...details,
+      };
+    }
+    throw Error("RPC buildTransaction received unknown TransactionType");
+  }
+
+  // TODO: #223 remove
+  private parseFeeEstimateBulkResponse(
+    res: FeeEstimate[],
+  ): EstimateFeeResponseBulk {
+    return res.map((val) => ({
+      overall_fee: number.toBN(val.overall_fee),
+      gas_consumed: number.toBN(val.gas_consumed),
+      gas_price: number.toBN(val.gas_price),
+    }));
+  }
+
   async verifyMessageHash(
     hash: string | number | import("bn.js"),
     signature: Signature,
@@ -362,8 +475,8 @@ class Account extends BaseAccount {
 
   async signMessage(typedData: typedData.TypedData): Promise<Signature> {
     return await (this.status === Status.REGISTERED ||
-      this.status === Status.COUNTERFACTUAL ||
-      this.status === Status.DEPLOYING
+    this.status === Status.COUNTERFACTUAL ||
+    this.status === Status.DEPLOYING
       ? super.signMessage(typedData)
       : this.webauthn.signMessage(typedData));
   }
