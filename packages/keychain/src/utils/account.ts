@@ -23,6 +23,7 @@ import {
   Invocation,
   InvocationsDetailsWithNonce,
   InvocationBulk,
+  EstimateFeeResponseBulk,
 } from "starknet";
 import { AccountContractDocument } from "generated/graphql";
 import { client } from "utils/graphql";
@@ -287,6 +288,13 @@ class Account extends BaseAccount {
 
     details.nonce = details.nonce ?? (await super.getNonce("latest"));
 
+    return {
+      overall_fee: number.toBN(0),
+      gas_consumed: number.toBN(0),
+      gas_price: number.toBN(0),
+      suggestedMaxFee: number.toBN(0),
+    };
+
     if (this.status === Status.PENDING_REGISTER) {
       const pendingRegister = Storage.get(
         selectors[VERSION].register(this.address, this._chainId),
@@ -314,9 +322,13 @@ class Account extends BaseAccount {
         maxFee: constants.ZERO,
         version: hash.transactionVersion
       } as InvocationsDetailsWithNonce;
-      const invocationBulk = [pendingRegister.invoke, { invocation, invokeDetails }] as InvocationBulk;
 
-      const estimates = await this.rpc.getEstimateFeeBulk(invocationBulk);
+      // const registraion_est = await this.rpc.getEstimateFee(
+      //   pendingRegister.invoke.invocation,
+      //   pendingRegister.invoke.details
+      // );
+      const txn_est = await this.rpc.getEstimateFee(invocation, invokeDetails);
+      const estimates = [txn_est] as EstimateFeeResponseBulk;
 
       const fees = estimates.reduce<EstimateFee>(
         (prev, estimate) => {
