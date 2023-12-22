@@ -20,6 +20,9 @@ import {
   InvocationsDetails,
   InvokeFunctionResponse,
   typedData,
+  Invocation,
+  InvocationsDetailsWithNonce,
+  InvocationBulk,
 } from "starknet";
 import { AccountContractDocument } from "generated/graphql";
 import { client } from "utils/graphql";
@@ -141,7 +144,7 @@ class Account extends BaseAccount {
         );
 
         // Pending txn so poll for inclusion.
-        if (!("status" in deployTxnReceipt)) {
+        if (!("execution_status" in deployTxnReceipt)) {
           this.status = Status.DEPLOYING;
 
           if (!this.waitingForDeploy) {
@@ -153,10 +156,11 @@ class Account extends BaseAccount {
               .then(() => this.sync());
             this.waitingForDeploy = true;
           }
+
           return;
         }
 
-        if (deployTxnReceipt.status === "REJECTED") {
+        if (deployTxnReceipt.execution_status === "REJECTED") {
           this.status = Status.COUNTERFACTUAL;
           return;
         }
@@ -300,29 +304,21 @@ class Account extends BaseAccount {
       };
 
       const signature = await this.signer.signTransaction(calls, signerDetails);
+      const invocation = {
+        contractAddress: this.address,
+        calldata: transaction.fromCallsToExecuteCalldata(calls),
+        signature
+      } as Invocation;
+      const invokeDetails = {
+        nonce: nextNonce,
+        maxFee: constants.ZERO,
+        version: hash.transactionVersion
+      } as InvocationsDetailsWithNonce;
+      const invocationBulk = [pendingRegister.invoke, { invocation, invokeDetails }] as InvocationBulk;
 
-      let estimates = await estimateFeeBulk(this._chainId, [
-        pendingRegister.invoke,
-        {
-          invocation: {
-            contractAddress: this.address,
-            calldata: transaction.fromCallsToExecuteCalldata(calls),
-            signature,
-          },
-          details: {
-            version: hash.transactionVersion,
-            nonce: nextNonce,
-            maxFee: constants.ZERO,
-          },
-        },
-      ]);
+      const estimates = await this.rpc.getEstimateFeeBulk(invocationBulk);
 
-      if (estimates.code) {
-        throw new Error(estimates.message);
-      }
-
-      const estimates2 = estimates as EstimateFeeResponse[];
-      const fees = estimates2.reduce<EstimateFee>(
+      const fees = estimates.reduce<EstimateFee>(
         (prev, estimate) => {
           const overall_fee = prev.overall_fee.add(
             number.toBN(estimate.overall_fee),
@@ -366,8 +362,8 @@ class Account extends BaseAccount {
 
   async signMessage(typedData: typedData.TypedData): Promise<Signature> {
     return await (this.status === Status.REGISTERED ||
-    this.status === Status.COUNTERFACTUAL ||
-    this.status === Status.DEPLOYING
+      this.status === Status.COUNTERFACTUAL ||
+      this.status === Status.DEPLOYING
       ? super.signMessage(typedData)
       : this.webauthn.signMessage(typedData));
   }
