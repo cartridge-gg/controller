@@ -28,6 +28,7 @@ import {
   InvocationsDetailsWithNonce,
   InvocationBulk,
 } from "starknet";
+import { CallData, RPC, TransactionType, isSierra } from "starknet5";
 import { AccountContractDocument } from "generated/graphql";
 import { client } from "utils/graphql";
 
@@ -324,7 +325,10 @@ class Account extends BaseAccount {
         { invocation, invokeDetails },
       ] as InvocationBulk;
 
-      const estimates = await this.rpc.getEstimateFeeBulk(invocationBulk);
+      const estimates = await this.getEstimateFeeBulk(
+        invocationBulk,
+        details.blockIdentifier,
+      );
 
       const fees = estimates.reduce<EstimateFee>(
         (prev, estimate) => {
@@ -396,7 +400,7 @@ class Account extends BaseAccount {
     invocation: InvocationBulk[0],
     versionType?: "fee" | "transaction",
     // ref: https://github.com/starknet-io/starknet.js/blob/v5.24.3/src/types/api/rpcspec/components.ts#L230
-  ): BaseTransaction {
+  ): RPC.BaseTransaction {
     const defaultVersions = getVersionsByType(versionType);
     const details = {
       signature: signatureToHexArray(invocation.signature),
@@ -406,7 +410,7 @@ class Account extends BaseAccount {
 
     if (invocation.type === TransactionType.INVOKE) {
       return {
-        type: ETransactionType.INVOKE, // Diff between sequencer and rpc invoke type
+        type: RPC.ETransactionType.INVOKE, // Diff between sequencer and rpc invoke type
         sender_address: invocation.contractAddress,
         calldata: CallData.toHex(invocation.calldata),
         version: number.toHex(
@@ -588,15 +592,6 @@ class Account extends BaseAccount {
 }
 
 // TODO(#223): remove
-// ref: https://github.com/starknet-io/starknet.js/blob/v5.24.3/src/types/lib/index.ts#L131-L136
-enum TransactionType {
-  DECLARE = "DECLARE",
-  DEPLOY = "DEPLOY",
-  DEPLOY_ACCOUNT = "DEPLOY_ACCOUNT",
-  INVOKE = "INVOKE_FUNCTION",
-}
-
-// TODO(#223): remove
 // ref: https://github.com/starknet-io/starknet.js/blob/v5.24.3/src/utils/hash.ts#L46-L50
 function getVersionsByType(versionType?: "fee" | "transaction") {
   // return versionType === "fee"
@@ -617,138 +612,8 @@ const BN_TRANSACTION_VERSION_2 = 2n;
 const BN_FEE_TRANSACTION_VERSION_1 = 2n ** 128n + BN_TRANSACTION_VERSION_1;
 const BN_FEE_TRANSACTION_VERSION_2 = 2n ** 128n + BN_TRANSACTION_VERSION_2;
 
-enum ETransactionType {
-  DECLARE = "DECLARE",
-  DEPLOY = "DEPLOY",
-  DEPLOY_ACCOUNT = "DEPLOY_ACCOUNT",
-  INVOKE = "INVOKE",
-  L1_HANDLER = "L1_HANDLER",
-}
-
-// ref: https://github.com/starknet-io/starknet.js/blob/v5.24.5/src/types/api/rpcspec/nonspec.ts#L82
-type BaseTransaction = BROADCASTED_TXN;
-
-// ref: https://github.com/starknet-io/starknet.js/blob/v5.24.5/src/types/api/rpcspec/components.ts#L230-L233
-type BROADCASTED_TXN =
-  | BROADCASTED_INVOKE_TXN
-  | BROADCASTED_DECLARE_TXN
-  | BROADCASTED_DEPLOY_ACCOUNT_TXN;
-
-// ref: https://github.com/starknet-io/starknet.js/blob/v5.24.5/src/types/api/rpcspec/components.ts#L235C8-L235C68
-type BROADCASTED_INVOKE_TXN = INVOKE_TXN_V0 | INVOKE_TXN_V1;
-
-// ref: https://github.com/starknet-io/starknet.js/blob/v5.24.5/src/types/api/rpcspec/components.ts#L285-L303
-type INVOKE_TXN_V0 = {
-  type: "INVOKE";
-  max_fee: FELT;
-  version: "0x0";
-  signature: SIGNATURE;
-  contract_address: ADDRESS;
-  entry_point_selector: FELT;
-  calldata: FELT[];
-};
-
-type INVOKE_TXN_V1 = {
-  type: "INVOKE";
-  sender_address: ADDRESS;
-  calldata: FELT[];
-  max_fee: FELT;
-  version: NUM_AS_HEX;
-  signature: SIGNATURE;
-  nonce: FELT;
-};
-
-// ref: https://github.com/starknet-io/starknet.js/blob/v5.24.5/src/types/api/rpcspec/components.ts#L239
-type BROADCASTED_DECLARE_TXN =
-  | BROADCASTED_DECLARE_TXN_V1
-  | BROADCASTED_DECLARE_TXN_V2;
-
-// ref: https://github.com/starknet-io/starknet.js/blob/v5.24.5/src/types/api/rpcspec/components.ts#L241-L249
-type BROADCASTED_DECLARE_TXN_V1 = {
-  type: "DECLARE";
-  sender_address: ADDRESS;
-  max_fee: FELT;
-  version: NUM_AS_HEX;
-  signature: SIGNATURE;
-  nonce: FELT;
-  contract_class: DEPRECATED_CONTRACT_CLASS;
-};
-
-// ref: https://github.com/starknet-io/starknet.js/blob/v5.24.5/src/types/api/rpcspec/components.ts#L251-L260
-export type BROADCASTED_DECLARE_TXN_V2 = {
-  type: "DECLARE";
-  sender_address: ADDRESS;
-  compiled_class_hash: FELT;
-  max_fee: FELT;
-  version: NUM_AS_HEX;
-  signature: SIGNATURE;
-  nonce: FELT;
-  contract_class: CONTRACT_CLASS;
-};
-
-// ref: https://github.com/starknet-io/starknet.js/blob/v5.24.5/src/types/api/rpcspec/components.ts#L237
-type BROADCASTED_DEPLOY_ACCOUNT_TXN = DEPLOY_ACCOUNT_TXN;
-// ref: https://github.com/starknet-io/starknet.js/blob/v5.24.5/src/types/api/rpcspec/components.ts#L262
-type DEPLOY_ACCOUNT_TXN = DEPLOY_ACCOUNT_TXN_V1;
-// ref: https://github.com/starknet-io/starknet.js/blob/v5.24.5/src/types/api/rpcspec/components.ts#L264-L273
-type DEPLOY_ACCOUNT_TXN_V1 = {
-  type: "DEPLOY_ACCOUNT";
-  max_fee: FELT;
-  version: NUM_AS_HEX;
-  signature: SIGNATURE;
-  nonce: FELT;
-  contract_address_salt: FELT;
-  constructor_calldata: FELT[];
-  class_hash: FELT;
-};
-
-// ref: https://github.com/starknet-io/starknet.js/blob/v5.24.5/src/types/api/rpcspec/components.ts#L9
-type FELT = string;
-// ref: https://github.com/starknet-io/starknet.js/blob/v5.24.5/src/types/api/rpcspec/components.ts#L22
-type SIGNATURE = Array<FELT>;
-// ref: https://github.com/starknet-io/starknet.js/blob/v5.24.5/src/types/api/rpcspec/components.ts#L20
-type ADDRESS = FELT;
 // ref: https://github.com/starknet-io/starknet.js/blob/v5.24.5/src/types/api/rpcspec/components.ts#L21
 type NUM_AS_HEX = string;
-// ref: https://github.com/starknet-io/starknet.js/blob/v5.24.5/src/types/api/rpcspec/components.ts#L420-L428
-type DEPRECATED_CONTRACT_CLASS = {
-  program: string;
-  entry_points_by_type: {
-    CONSTRUCTOR: DEPRECATED_CAIRO_ENTRY_POINT[];
-    EXTERNAL: DEPRECATED_CAIRO_ENTRY_POINT[];
-    L1_HANDLER: DEPRECATED_CAIRO_ENTRY_POINT[];
-  };
-  abi: CONTRACT_ABI;
-};
-// ref: https://github.com/starknet-io/starknet.js/blob/v5.24.5/src/types/api/rpcspec/components.ts#L430-L433
-type DEPRECATED_CAIRO_ENTRY_POINT = {
-  offset: NUM_AS_HEX | number;
-  selector: FELT;
-};
-// ref: https://github.com/starknet-io/starknet.js/blob/v5.24.5/src/types/api/rpcspec/components.ts#L440
-type CONTRACT_ABI = CONTRACT_ABI_ENTRY[];
-// ref: https://github.com/starknet-io/starknet.js/blob/v5.24.5/src/types/api/rpcspec/components.ts#L442-L446
-type CONTRACT_ABI_ENTRY = {
-  selector: FELT;
-  input: string;
-  output: string;
-};
-// ref: https://github.com/starknet-io/starknet.js/blob/v5.24.5/src/types/api/rpcspec/components.ts#L409
-type CONTRACT_CLASS = {
-  sierra_program: FELT[];
-  contract_class_version: string;
-  entry_points_by_type: {
-    CONSTRUCTOR: SIERRA_ENTRY_POINT[];
-    EXTERNAL: SIERRA_ENTRY_POINT[];
-    L1_HANDLER: SIERRA_ENTRY_POINT[];
-  };
-  abi: string;
-};
-// ref: https://github.com/starknet-io/starknet.js/blob/v5.24.5/src/types/api/rpcspec/components.ts#L435-L438
-type SIERRA_ENTRY_POINT = {
-  selector: FELT;
-  function_idx: number;
-};
 
 // ref: https://github.com/starknet-io/starknet.js/blob/v5.24.5/src/types/api/rpcspec/nonspec.ts#L47
 type FeeEstimate = FEE_ESTIMATE;
