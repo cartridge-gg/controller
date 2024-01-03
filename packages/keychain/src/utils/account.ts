@@ -287,75 +287,78 @@ class Account extends BaseAccount {
 
     details.nonce = details.nonce ?? (await super.getNonce("latest"));
 
-    if (this.status === Status.PENDING_REGISTER) {
-      const pendingRegister = Storage.get(
-        selectors[VERSION].register(this.address, this._chainId),
-      );
+    const overall_fee = number.toBN(0.01);
+    const fees: EstimateFee = {
+      overall_fee,
+      gas_consumed: number.toBN(0),
+      gas_price: number.toBN("0.0000001"),
+      suggestedMaxFee: overall_fee,
+    };
 
-      const nextNonce = number.toHex(
-        number.toBN(details.nonce).add(number.toBN(1)),
-      );
-      const signerDetails = {
-        walletAddress: this.address,
-        nonce: nextNonce,
-        maxFee: constants.ZERO,
-        version: hash.transactionVersion,
-        chainId: this._chainId,
-      };
+    return fees;
 
-      const signature = await this.signer.signTransaction(calls, signerDetails);
-      // const invocation = {
-      //   contractAddress: this.address,
-      //   calldata: transaction.fromCallsToExecuteCalldata(calls),
-      //   signature,
-      // } as Invocation;
-      // const invokeDetails = {
-      //   nonce: nextNonce,
-      //   maxFee: constants.ZERO,
-      //   version: hash.transactionVersion,
-      // } as InvocationsDetailsWithNonce;
-      // const invocationBulk = [
-      //   pendingRegister.invoke,
-      //   { invocation, invokeDetails },
-      // ] as InvocationBulk;
+    // if (this.status === Status.PENDING_REGISTER) {
+    //   const pendingRegister = Storage.get(
+    //     selectors[VERSION].register(this.address, this._chainId),
+    //   );
 
-      // const estimates = await this.rpc.getEstimateFeeBulk(invocationBulk);
+    //   const nextNonce = number.toHex(
+    //     number.toBN(details.nonce).add(number.toBN(1)),
+    //   );
+    //   const signerDetails = {
+    //     walletAddress: this.address,
+    //     nonce: nextNonce,
+    //     maxFee: constants.ZERO,
+    //     version: hash.transactionVersion,
+    //     chainId: this._chainId,
+    //   };
 
-      // const fees = estimates.reduce<EstimateFee>(
-      //   (prev, estimate) => {
-      //     const overall_fee = prev.overall_fee.add(
-      //       number.toBN(estimate.overall_fee),
-      //     );
-      //     return {
-      //       overall_fee: overall_fee,
-      //       gas_consumed: prev.gas_consumed.add(
-      //         number.toBN(estimate.gas_consumed),
-      //       ),
-      //       gas_price: prev.gas_price.add(number.toBN(estimate.gas_price)),
-      //       suggestedMaxFee: overall_fee,
-      //     };
-      //   },
-      //   {
-      //     overall_fee: number.toBN(0),
-      //     gas_consumed: number.toBN(0),
-      //     gas_price: number.toBN(0),
-      //     suggestedMaxFee: number.toBN(0),
-      //   },
-      // );
+    //   const signature = await this.signer.signTransaction(calls, signerDetails);
+    //   const invocation = {
+    //     contractAddress: this.address,
+    //     calldata: transaction.fromCallsToExecuteCalldata(calls),
+    //     signature,
+    //   } as Invocation;
+    //   const invokeDetails = {
+    //     nonce: nextNonce,
+    //     maxFee: constants.ZERO,
+    //     version: hash.transactionVersion,
+    //   } as InvocationsDetailsWithNonce;
+    //   const invocationBulk = [
+    //     pendingRegister.invoke,
+    //     { invocation, invokeDetails },
+    //   ] as InvocationBulk;
 
-      // fees.suggestedMaxFee = stark.estimatedFeeToMaxFee(fees.overall_fee);
-      const overall_fee = number.toBN(0.01);
-      const fees: EstimateFee = {
-        overall_fee,
-        gas_consumed: number.toBN(0),
-        gas_price: number.toBN("0.0000001"),
-        suggestedMaxFee: overall_fee,
-      };
+    //   const estimates = await this.rpc.getEstimateFeeBulk(invocationBulk);
 
-      return fees;
-    }
+    //   const fees = estimates.reduce<EstimateFee>(
+    //     (prev, estimate) => {
+    //       const overall_fee = prev.overall_fee.add(
+    //         number.toBN(estimate.overall_fee),
+    //       );
+    //       return {
+    //         overall_fee: overall_fee,
+    //         gas_consumed: prev.gas_consumed.add(
+    //           number.toBN(estimate.gas_consumed),
+    //         ),
+    //         gas_price: prev.gas_price.add(number.toBN(estimate.gas_price)),
+    //         suggestedMaxFee: overall_fee,
+    //       };
+    //     },
+    //     {
+    //       overall_fee: number.toBN(0),
+    //       gas_consumed: number.toBN(0),
+    //       gas_price: number.toBN(0),
+    //       suggestedMaxFee: number.toBN(0),
+    //     },
+    //   );
 
-    return super.estimateInvokeFee(calls, details);
+    //   fees.suggestedMaxFee = stark.estimatedFeeToMaxFee(fees.overall_fee);
+
+    //   return fees;
+    // }
+
+    // return super.estimateInvokeFee(calls, details);
   }
 
   async verifyMessageHash(
