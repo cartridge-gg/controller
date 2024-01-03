@@ -28,7 +28,14 @@ import {
   InvocationsDetailsWithNonce,
   InvocationBulk,
 } from "starknet";
-import { CallData, RPC, TransactionType, isSierra } from "starknet5";
+import {
+  AccountInvocationItem,
+  CallData,
+  RPC,
+  TransactionType,
+  isSierra,
+  stark as stark5,
+} from "starknet5";
 import { AccountContractDocument } from "generated/graphql";
 import { client } from "utils/graphql";
 
@@ -362,7 +369,7 @@ class Account extends BaseAccount {
 
   // ref: https://github.com/starknet-io/starknet.js/blob/v5.24.3/src/provider/rpc.ts#L561-L574
   // TODO(#223): don't forget to remove
-  private async getEstimateFeeBulk(
+  public async getEstimateFeeBulk(
     invocations: InvocationBulk,
     blockIdentifier: EstimateFeeDetails["blockIdentifier"],
   ) {
@@ -378,18 +385,17 @@ class Account extends BaseAccount {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        id: 1,
         jsonrpc: "2.0",
         method: "starknet_estimateFee",
-        params: invocations.map((it) => this.buildTransaction(it, "fee")),
-        id: 1,
+        params: [
+          ...invocations.map((it) => this.buildTransaction(it, "fee")),
+          block_id,
+        ],
       }),
     });
     const data = await response.json();
     return this.parseFeeEstimateBulkResponse(data);
-    // return this.fetchEndpoint("starknet_estimateFee", {
-    //   request: invocations.map((it) => this.buildTransaction(it, "fee")),
-    //   block_id,
-    // }).then(this.responseParser.parseFeeEstimateBulkResponse);
   }
 
   // TODO(#223): remove
@@ -403,7 +409,7 @@ class Account extends BaseAccount {
   ): RPC.BaseTransaction {
     const defaultVersions = getVersionsByType(versionType);
     const details = {
-      signature: signatureToHexArray(invocation.signature),
+      signature: stark5.signatureToHexArray(invocation.signature),
       nonce: number.toHex(number.toBN(invocation.nonce)),
       max_fee: number.toHex(number.toBN(invocation.maxFee || 0)),
     };
@@ -420,7 +426,7 @@ class Account extends BaseAccount {
       };
     }
     if (invocation.type === TransactionType.DECLARE) {
-      if (!isSierra(invocation.contract)) {
+      if (!isSierra(invocation.contractDefinition)) {
         return {
           type: invocation.type,
           contract_class: invocation.contract,
@@ -436,7 +442,9 @@ class Account extends BaseAccount {
         type: invocation.type,
         contract_class: {
           ...invocation.contract,
-          sierra_program: decompressProgram(invocation.contract.sierra_program),
+          sierra_program: stark5.decompressProgram(
+            invocation.contract.sierra_program,
+          ),
         },
         compiled_class_hash: invocation.compiledClassHash || "",
         sender_address: invocation.senderAddress,
