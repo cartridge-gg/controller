@@ -304,43 +304,53 @@ class Account extends BaseAccount {
       };
 
       const signature = await this.signer.signTransaction(calls, signerDetails);
-      const invocation = {
-        contractAddress: this.address,
-        calldata: transaction.fromCallsToExecuteCalldata(calls),
-        signature
-      } as Invocation;
-      const invokeDetails = {
-        nonce: nextNonce,
-        maxFee: constants.ZERO,
-        version: hash.transactionVersion
-      } as InvocationsDetailsWithNonce;
-      const invocationBulk = [pendingRegister.invoke, { invocation, invokeDetails }] as InvocationBulk;
+      // const invocation = {
+      //   contractAddress: this.address,
+      //   calldata: transaction.fromCallsToExecuteCalldata(calls),
+      //   signature,
+      // } as Invocation;
+      // const invokeDetails = {
+      //   nonce: nextNonce,
+      //   maxFee: constants.ZERO,
+      //   version: hash.transactionVersion,
+      // } as InvocationsDetailsWithNonce;
+      // const invocationBulk = [
+      //   pendingRegister.invoke,
+      //   { invocation, invokeDetails },
+      // ] as InvocationBulk;
 
-      const estimates = await this.rpc.getEstimateFeeBulk(invocationBulk);
+      // const estimates = await this.rpc.getEstimateFeeBulk(invocationBulk);
 
-      const fees = estimates.reduce<EstimateFee>(
-        (prev, estimate) => {
-          const overall_fee = prev.overall_fee.add(
-            number.toBN(estimate.overall_fee),
-          );
-          return {
-            overall_fee: overall_fee,
-            gas_consumed: prev.gas_consumed.add(
-              number.toBN(estimate.gas_consumed),
-            ),
-            gas_price: prev.gas_price.add(number.toBN(estimate.gas_price)),
-            suggestedMaxFee: overall_fee,
-          };
-        },
-        {
-          overall_fee: number.toBN(0),
-          gas_consumed: number.toBN(0),
-          gas_price: number.toBN(0),
-          suggestedMaxFee: number.toBN(0),
-        },
-      );
+      // const fees = estimates.reduce<EstimateFee>(
+      //   (prev, estimate) => {
+      //     const overall_fee = prev.overall_fee.add(
+      //       number.toBN(estimate.overall_fee),
+      //     );
+      //     return {
+      //       overall_fee: overall_fee,
+      //       gas_consumed: prev.gas_consumed.add(
+      //         number.toBN(estimate.gas_consumed),
+      //       ),
+      //       gas_price: prev.gas_price.add(number.toBN(estimate.gas_price)),
+      //       suggestedMaxFee: overall_fee,
+      //     };
+      //   },
+      //   {
+      //     overall_fee: number.toBN(0),
+      //     gas_consumed: number.toBN(0),
+      //     gas_price: number.toBN(0),
+      //     suggestedMaxFee: number.toBN(0),
+      //   },
+      // );
 
-      fees.suggestedMaxFee = stark.estimatedFeeToMaxFee(fees.overall_fee);
+      // fees.suggestedMaxFee = stark.estimatedFeeToMaxFee(fees.overall_fee);
+      const overall_fee = number.toBN(0.01);
+      const fees: EstimateFee = {
+        overall_fee,
+        gas_consumed: number.toBN(0),
+        gas_price: number.toBN("0.0000001"),
+        suggestedMaxFee: overall_fee,
+      };
 
       return fees;
     }
@@ -362,8 +372,8 @@ class Account extends BaseAccount {
 
   async signMessage(typedData: typedData.TypedData): Promise<Signature> {
     return await (this.status === Status.REGISTERED ||
-      this.status === Status.COUNTERFACTUAL ||
-      this.status === Status.DEPLOYING
+    this.status === Status.COUNTERFACTUAL ||
+    this.status === Status.DEPLOYING
       ? super.signMessage(typedData)
       : this.webauthn.signMessage(typedData));
   }
