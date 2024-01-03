@@ -123,14 +123,12 @@ export function Execute({
       );
     }
 
-    const overall_fee = number.toBN("0.01");
-    setFees({ base: overall_fee, max: overall_fee });
-    // account
-    //   .estimateInvokeFee(calls, transactionsDetail)
-    //   .then((fees) => {
-    //     setFees({ base: fees.overall_fee, max: fees.suggestedMaxFee });
-    //   })
-    //   .catch((e) => setError(e));
+    account
+      .estimateInvokeFee(calls, transactionsDetail)
+      .then((fees) => {
+        setFees({ base: fees.overall_fee, max: fees.suggestedMaxFee });
+      })
+      .catch((e) => setError(e));
   }, [
     account,
     controller,

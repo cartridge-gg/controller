@@ -287,11 +287,11 @@ class Account extends BaseAccount {
 
     details.nonce = details.nonce ?? (await super.getNonce("latest"));
 
-    const overall_fee = number.toBN("0.01");
+    const overall_fee = number.toBN("10000000");
     const fees: EstimateFee = {
       overall_fee,
       gas_consumed: number.toBN(0),
-      gas_price: number.toBN("0.0000001"),
+      gas_price: number.toBN("100"),
       suggestedMaxFee: overall_fee,
     };
 
