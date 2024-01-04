@@ -93,6 +93,7 @@ export class WebauthnSigner implements SignerInterface {
     },
     abis?: Abi[],
   ): Promise<Signature> {
+    console.log("WebauthnSigner.signTransaction");
     if (abis && abis.length !== calls.length) {
       throw new Error(
         "ABI must be provided for each transaction or no transaction",
@@ -121,6 +122,7 @@ export class WebauthnSigner implements SignerInterface {
     // }
 
     const assertion = await this.sign(challenge);
+    console.log("keychain assertion:", assertion);
     return formatAssertion(assertion);
   }
 

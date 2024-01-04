@@ -20,6 +20,7 @@ export class DeviceSigner extends Signer {
     transactionsDetail: InvocationsSignerDetails,
     abis?: Abi[],
   ): Promise<Signature> {
+    console.log("DeviceSigner.signTransaction");
     const sig = await super.signTransaction(calls, transactionsDetail, abis);
     const pub = await this.getPubKey();
     return [

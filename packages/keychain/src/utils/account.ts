@@ -61,6 +61,7 @@ class Account extends BaseAccount {
     webauthn: WebauthnAccount,
   ) {
     super({ rpc: { nodeUrl } }, address, signer);
+    console.log("keychain account signer:", signer);
 
     this.rpc = new RpcProvider({ nodeUrl });
     this.gateway = new SequencerProvider({
@@ -255,6 +256,7 @@ class Account extends BaseAccount {
       return responses[1];
     }
 
+    console.log("super.execute");
     const res = await super.execute(calls, abis, transactionsDetail);
     Storage.update(this.selector, {
       nonce: number
