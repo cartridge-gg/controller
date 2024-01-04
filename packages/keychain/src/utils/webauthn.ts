@@ -38,7 +38,7 @@ function convertUint8ArrayToWordArray(u8Array: Uint8Array) {
         (u8Array[i++] << 16) |
         (u8Array[i++] << 8) |
         u8Array[i++]) >>>
-        0,
+      0,
     );
   }
 
@@ -136,7 +136,9 @@ export class WebauthnSigner implements SignerInterface {
       "hex",
     );
     const assertion = await this.sign(challenge);
-    return formatAssertion(assertion);
+    const formatted = formatAssertion(assertion);
+    console.log(formatted);
+    return formatted;
   }
 
   public async signDeclareTransaction({
@@ -188,6 +190,7 @@ class WebauthnAccount extends Account {
       publicKey,
       options ? options.rpId : undefined,
     );
+
     super({ rpc: { nodeUrl } }, address, signer);
     this.signer = signer;
   }
@@ -293,6 +296,8 @@ export function formatAssertion(assertion: RawAssertion): Signature {
   ).words;
 
   var clientDataJSONBytes = new Uint8Array(assertion.response.clientDataJSON);
+  console.log("assertion.response.ClientDataJson", clientDataJSONBytes);
+
   let clientDataJSONRem = 4 - (clientDataJSONBytes.length % 4);
   if (clientDataJSONRem == 4) {
     clientDataJSONRem = 0;
@@ -316,7 +321,7 @@ export function formatAssertion(assertion: RawAssertion): Signature {
   const { x: r0, y: r1, z: r2 } = split(r);
   const { x: s0, y: s1, z: s2 } = split(s);
 
-  return [
+  const formatted = [
     number.toBN(CLASS_HASHES["0.0.1"].controller).toString(),
     "0",
     r0.toString(),
@@ -334,6 +339,12 @@ export function formatAssertion(assertion: RawAssertion): Signature {
     `${authenticatorDataRem}`,
     ...authenticatorDataWords.map((word) => `${word}`),
   ];
+
+  let hex = formatted.map((word) => {
+    return number.toHexString(word);
+  })
+  console.log("signature", hex);
+  return formatted;
 }
 
 export function parseAuthenticatorData(data) {

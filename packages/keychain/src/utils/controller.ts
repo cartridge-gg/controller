@@ -99,7 +99,6 @@ export default class Controller {
         ),
       ),
     };
-
     Storage.set(
       selectors[VERSION].admin(this.address, process.env.NEXT_PUBLIC_ADMIN_URL),
       {},

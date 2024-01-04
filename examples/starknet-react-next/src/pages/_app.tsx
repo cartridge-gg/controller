@@ -4,7 +4,7 @@ import { StarknetProvider } from "@starknet-react/core";
 import CartridgeConnector from "@cartridge/connector";
 import { RpcProvider } from "starknet";
 
-const url = "https://keychain-git-fixkeychain-log-tx.preview.cartridge.gg";
+const url = "https://x.cartridge.gg/";
 // const url =
 //   process.env.NEXT_PUBLIC_VERCEL_ENV === "preview"
 //     ? `https://keychain-git-${process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF}.preview.cartridge.gg`
