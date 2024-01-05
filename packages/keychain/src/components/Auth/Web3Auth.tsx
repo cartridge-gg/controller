@@ -1,43 +1,36 @@
 import { DiscordIcon } from "@cartridge/ui";
 import { Button, HStack } from "@chakra-ui/react";
-import { WALLET_ADAPTERS } from "@web3auth/base";
-import { ec, number } from "starknet";
-import { computeAddress } from "methods/register";
-import Controller from "utils/controller";
-import web3auth from "utils/web3auth";
 
 export function Web3Auth({
   isDisabled = false,
-  username,
-  onAuth,
+  onSubmit,
 }: {
   isDisabled?: boolean;
-  username: string;
-  onAuth: (controller: Controller, token: string) => void;
+  onSubmit: (loginProvider: "discord" | "twitter" | "metamask") => void;
 }) {
-  const login = async (loginProvider: "discord" | "twitter" | "metamask") => {
-    if (!web3auth) {
-      console.error("web3auth not initialized yet");
-      return;
-    }
-    const web3authProvider = await web3auth.connectTo(
-      WALLET_ADAPTERS.OPENLOGIN,
-      { loginProvider },
-    );
-    const { oAuthAccessToken } = await web3auth.getUserInfo();
-    const privateKey: string = await web3authProvider.request({
-      method: "private_key",
-    });
-    const keyPair = ec.getKeyPair(number.toBN(privateKey, "hex"));
-    const address = computeAddress(
-      username,
-      { x0: number.toBN(0), x1: number.toBN(0), x2: number.toBN(0) },
-      { y0: number.toBN(0), y1: number.toBN(0), y2: number.toBN(0) },
-      ec.getStarkKey(keyPair),
-    );
-    const controller = new Controller(keyPair, address, loginProvider);
-    onAuth(controller, oAuthAccessToken);
-  };
+  // const login = async (loginProvider: "discord" | "twitter" | "metamask") => {
+  //   if (!web3auth) {
+  //     console.error("web3auth not initialized yet");
+  //     return;
+  //   }
+  //   const web3authProvider = await web3auth.connectTo(
+  //     WALLET_ADAPTERS.OPENLOGIN,
+  //     { loginProvider },
+  //   );
+  //   const { oAuthAccessToken } = await web3auth.getUserInfo();
+  //   const privateKey: string = await web3authProvider.request({
+  //     method: "private_key",
+  //   });
+  //   const keyPair = ec.getKeyPair(number.toBN(privateKey, "hex"));
+  //   const address = computeAddress(
+  //     username,
+  //     { x0: number.toBN(0), x1: number.toBN(0), x2: number.toBN(0) },
+  //     { y0: number.toBN(0), y1: number.toBN(0), y2: number.toBN(0) },
+  //     ec.getStarkKey(keyPair),
+  //   );
+  //   const controller = new Controller(keyPair, address, loginProvider);
+  //   onAuth(controller, oAuthAccessToken);
+  // };
 
   return (
     <>
@@ -58,9 +51,7 @@ export function Web3Auth({
         <Button
           flex={1}
           variant="secondary700"
-          onClick={async () => {
-            login("discord");
-          }}
+          onClick={() => onSubmit("discord")}
           isDisabled={isDisabled}
         >
           <DiscordIcon height="16px" width="16px" mr="12px" mt="1px" />
