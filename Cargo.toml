@@ -9,26 +9,26 @@ version.workspace = true
 crate-type = ["cdylib"]
 
 [dependencies]
-serde = "1"
-serde_json = "1"
-starknet = "0.8.0"
-url = "2"
-toml = "0.8"
-tokio = { version = "1.0", features = ["macros"] }
-wasm-bindgen = "0.2"
-thiserror = "1"
-futures = "0.3"
-async-trait = "0.1"
-anyhow = "1"
-cairo-lang-starknet = "2"
-lazy_static = "1.4.0"
-u256-literal = "1.2.1"
-primitive-types = { version = "0.12", default-features = false }
-p256 = "0.13.2"
-rand_core = { version = "0.6.4", features = ["getrandom"] }
-webauthn-authenticator-rs = { version = "0.4.9" }
-webauthn-rs-proto = "0.4.9"
-base64 = "0.21.5"
-sha2 = "0.10.8"
-cainome = { git = "https://github.com/cartridge-gg/cainome", tag = "v0.1.0", features = ["abigen-rs"] }
-starknet-crypto = "0.6.1"
+anyhow.workspace = true
+async-trait.workspace = true
+base64.workspace = true
+cainome.workspace = true
+cairo-lang-starknet.workspace = true
+futures.workspace = true
+lazy_static.workspace = true
+p256.workspace = true
+primitive-types.workspace = true
+rand_core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+starknet.workspace = true
+starknet-crypto.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+toml.workspace = true
+u256-literal.workspace = true
+url.workspace = true
+wasm-bindgen.workspace = true
+webauthn-authenticator-rs.workspace = true
+webauthn-rs-proto.workspace = true
