@@ -11,8 +11,8 @@ use tokio::time::sleep;
 
 use starknet::{core::types::FieldElement, macros::felt};
 
-use crate::abigen::account::{CartridgeAccount, Call};
-use crate::session_token::{SessionAccount, Session};
+use crate::abigen::account::{Call, CartridgeAccount};
+use crate::session_token::{Session, SessionAccount};
 use crate::tests::{
     deployment_test::create_account,
     runners::{KatanaRunner, TestnetRunner},
@@ -33,8 +33,7 @@ async fn test_session_valid() {
     // Creating a session, that will be used to sign calls
     let session_key = SigningKey::from_secret_scalar(FieldElement::from(2137u32));
     let session_key = LocalWallet::from(session_key);
-    let mut session: Session =
-        Session::new(session_key.get_public_key().await.unwrap(), u64::MAX);
+    let mut session: Session = Session::new(session_key.get_public_key().await.unwrap(), u64::MAX);
 
     // Define what calls are allowed to be signed by the session
     let permitted_calls = vec![Call {
@@ -118,8 +117,7 @@ async fn test_session_revoked() {
 async fn test_session_invalid_proof() {
     let runner: KatanaRunner = KatanaRunner::load();
     // Initializing a prepared session account and master account
-    let (mut session_account, master_key, master_account) =
-        create_session_account(&runner).await;
+    let (mut session_account, master_key, master_account) = create_session_account(&runner).await;
 
     // Setting a single allowed call, not including the one later called
     let permitted_calls = vec![Call {
@@ -154,8 +152,7 @@ async fn test_session_invalid_proof() {
 async fn test_session_many_allowed() {
     let runner = KatanaRunner::load();
     // Initializing a prepared session account and master account
-    let (mut session_account, master_key, master_account) =
-        create_session_account(&runner).await;
+    let (mut session_account, master_key, master_account) = create_session_account(&runner).await;
 
     // Defining multiple allowed calls
     let to = ContractAddress::from(session_account.address());
@@ -204,8 +201,7 @@ async fn test_session_many_allowed() {
 #[tokio::test]
 async fn test_session_compute_proof() {
     let runner = KatanaRunner::load();
-    let (master_account, _) =
-        create_account(&runner.prefunded_single_owner_account().await).await;
+    let (master_account, _) = create_account(&runner.prefunded_single_owner_account().await).await;
 
     let address = master_account.address();
     let account = CartridgeAccount::new(address, &master_account);
@@ -226,8 +222,7 @@ async fn test_session_compute_proof() {
 #[tokio::test]
 async fn test_session_compute_root() {
     let runner = KatanaRunner::load();
-    let (master_account, _) =
-        create_account(&runner.prefunded_single_owner_account().await).await;
+    let (master_account, _) = create_account(&runner.prefunded_single_owner_account().await).await;
 
     let address = master_account.address();
     let account = CartridgeAccount::new(address, &master_account);

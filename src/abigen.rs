@@ -16,5 +16,8 @@ pub mod account {
 pub mod erc20 {
     use cainome::rs::abigen;
 
-    abigen!(Erc20Contract, "./crates/cartridge_account/abi/erc20.abi.json");
+    abigen!(
+        Erc20Contract,
+        "./crates/cartridge_account/abi/erc20.abi.json"
+    );
 }
