@@ -9,12 +9,10 @@ use starknet::{
 
 use super::pending::PendingDeclaration;
 
-pub const SIERRA_STR: &str = include_str!(
-    "../../../cartridge_account/target/dev/cartridge_account_Account.contract_class.json"
-);
-pub const CASM_STR: &str = include_str!(
-    "../../../cartridge_account/target/dev/cartridge_account_Account.compiled_contract_class.json"
-);
+pub const SIERRA_STR: &str =
+    include_str!("../../../../target/dev/cartridge_account_Account.contract_class.json");
+pub const CASM_STR: &str =
+    include_str!("../../../../target/dev/cartridge_account_Account.compiled_contract_class.json");
 
 pub struct AccountDeclaration<'a, T> {
     contract_artifact: SierraClass,
