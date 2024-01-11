@@ -10,7 +10,7 @@ use crate::session_token::SessionAccount;
 use crate::tests::deployment_test::create_account;
 use crate::{abigen::account::Call, tests::runners::TestnetRunner};
 
-use super::Session;
+use crate::session_token::Session;
 
 pub async fn create_session_account<'a, T>(
     runner: &'a T,
