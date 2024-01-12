@@ -9,7 +9,6 @@ use starknet::{
 use crate::abigen::account::WebauthnPubKey;
 use crate::abigen::account::WebauthnSignature;
 use crate::{
-    abigen,
     tests::runners::devnet_runner::DevnetRunner,
     webauthn_signer::{cairo_args::VerifyWebauthnSignerArgs, P256r1Signer},
 };
@@ -31,8 +30,8 @@ async fn test_set_webauthn_public_key() {
         .unwrap();
 
     match public_key {
-        abigen::account::Option::Some(_) => panic!("Public key already set"),
-        abigen::account::Option::None => (),
+        Option::Some(_) => panic!("Public key already set"),
+        Option::None => (),
     }
 
     data.set_webauthn_public_key().await;
@@ -45,8 +44,8 @@ async fn test_set_webauthn_public_key() {
         .unwrap();
 
     match public_key {
-        abigen::account::Option::Some(_) => (),
-        abigen::account::Option::None => panic!("Public key not set"),
+        Option::Some(_) => (),
+        Option::None => panic!("Public key not set"),
     }
 }
 
