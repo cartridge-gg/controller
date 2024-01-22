@@ -34,16 +34,7 @@ impl P256r1Signer {
         Self { signing_key, rp_id }
     }
     pub fn public_key_bytes(&self) -> ([u8; 32], [u8; 32]) {
-        let verifying_key: VerifyingKey = VerifyingKey::from(&self.signing_key);
-        let encoded = &verifying_key.to_encoded_point(false);
-        let (x, y) = match encoded.coordinates() {
-            Coordinates::Uncompressed { x, y } => (x, y),
-            _ => panic!("unexpected compression"),
-        };
-        (
-            x.as_slice().try_into().unwrap(),
-            y.as_slice().try_into().unwrap(),
-        )
+        P256VerifyingKeyConverter::new(*self.signing_key.verifying_key()).to_bytes()
     }
     pub fn sign(&self, challenge: &[u8]) -> AuthenticatorAssertionResponse {
         use sha2::{digest::Update, Digest, Sha256};
@@ -67,6 +58,27 @@ impl P256r1Signer {
             signature,
             user_handle: None,
         }
+    }
+}
+
+pub struct P256VerifyingKeyConverter {
+    pub verifying_key: VerifyingKey,
+}
+
+impl P256VerifyingKeyConverter {
+    pub fn new(verifying_key: VerifyingKey) -> Self {
+        Self { verifying_key }
+    }
+    pub fn to_bytes(&self) -> ([u8; 32], [u8; 32]) {
+        let encoded = &self.verifying_key.to_encoded_point(false);
+        let (x, y) = match encoded.coordinates() {
+            Coordinates::Uncompressed { x, y } => (x, y),
+            _ => panic!("unexpected compression"),
+        };
+        (
+            x.as_slice().try_into().unwrap(),
+            y.as_slice().try_into().unwrap(),
+        )
     }
 }
 
