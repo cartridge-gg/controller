@@ -101,14 +101,10 @@ impl Session {
             .map(|c| self.call_proof(c).ok_or(SessionError::CallNotInPolicy))
             .collect::<Result<Vec<_>, SessionError>>()?;
 
-        let proofs_flat = proofs.into_iter().fold(Ok(vec![]), |acc, proof| {
-            acc.and_then(|mut acc| {
-                acc.extend(proof.1.clone());
-                Ok(acc)
-            })
+        let proofs_flat = proofs.into_iter().try_fold(vec![], |mut acc, proof| {
+            acc.extend(proof.1.clone());
+            Ok(acc)
         })?;
-
-        assert!(!self.session_token().is_empty(), "Session token is empty");
 
         Ok(SessionSignature {
             signature_type: SESSION_SIGNATURE_TYPE,
