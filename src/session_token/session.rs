@@ -106,6 +106,8 @@ impl Session {
             Ok(acc)
         })?;
 
+        assert!(!self.session_token().is_empty(), "Session token is empty");
+
         Ok(SessionSignature {
             signature_type: SESSION_SIGNATURE_TYPE,
             r: transaction_signature.r,
