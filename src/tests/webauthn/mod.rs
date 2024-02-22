@@ -8,8 +8,9 @@ use starknet::{
 
 use crate::abigen::account::WebauthnPubKey;
 use crate::abigen::account::WebauthnSignature;
+use crate::abigen::account::U256;
 use crate::{
-    tests::runners::devnet_runner::DevnetRunner,
+    tests::runners::katana_runner::KatanaRunner,
     webauthn_signer::{cairo_args::VerifyWebauthnSignerArgs, P256r1Signer},
 };
 
@@ -19,34 +20,40 @@ async fn test_set_webauthn_public_key() {
     let origin = "localhost".to_string();
     let signer = P256r1Signer::random(origin.clone());
 
-    let data = utils::WebauthnTestData::<DevnetRunner>::new(private_key, signer).await;
+    let data = utils::WebauthnTestData::<KatanaRunner>::new(private_key, signer).await;
     let reader = data.account_reader();
 
-    let public_key = reader
+    let public_key: WebauthnPubKey = reader
         .get_webauthn_pub_key()
         .block_id(BlockId::Tag(BlockTag::Latest))
         .call()
         .await
         .unwrap();
+    assert!(
+        public_key
+            == WebauthnPubKey {
+                x: U256 { low: 0, high: 0 },
+                y: U256 { low: 0, high: 0 }
+            }
+    );
 
-    match public_key {
-        Option::Some(_) => panic!("Public key already set"),
-        Option::None => (),
-    }
-
+    let target_key = data.webauthn_public_key();
     data.set_webauthn_public_key().await;
 
-    let public_key = reader
+    let public_key: WebauthnPubKey = reader
         .get_webauthn_pub_key()
         .block_id(BlockId::Tag(BlockTag::Latest))
         .call()
         .await
         .unwrap();
 
-    match public_key {
-        Option::Some(_) => (),
-        Option::None => panic!("Public key not set"),
-    }
+    assert!(
+        public_key
+            == WebauthnPubKey {
+                x: target_key.0.into(),
+                y: target_key.1.into(),
+            }
+    )
 }
 
 #[tokio::test]
@@ -55,7 +62,7 @@ async fn test_verify_webauthn_explicit() {
     let origin = "localhost".to_string();
     let signer = P256r1Signer::random(origin.clone());
 
-    let data = utils::WebauthnTestData::<DevnetRunner>::new(private_key, signer).await;
+    let data = utils::WebauthnTestData::<KatanaRunner>::new(private_key, signer).await;
     data.set_webauthn_public_key().await;
     let reader = data.account_reader();
 
@@ -93,7 +100,7 @@ async fn test_verify_webauthn_execute() {
     let origin = "localhost".to_string();
     let signer = P256r1Signer::random(origin.clone());
 
-    let data = utils::WebauthnTestData::<DevnetRunner>::new(private_key, signer).await;
+    let data = utils::WebauthnTestData::<KatanaRunner>::new(private_key, signer).await;
     data.set_webauthn_public_key().await;
 
     let webauthn_executor = data.webauthn_executor().await;
