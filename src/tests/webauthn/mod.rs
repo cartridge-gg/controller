@@ -8,7 +8,6 @@ use starknet::{
 
 use crate::abigen::account::WebauthnPubKey;
 use crate::abigen::account::WebauthnSignature;
-use crate::abigen::account::U256;
 use crate::{
     tests::runners::katana_runner::KatanaRunner,
     webauthn_signer::{cairo_args::VerifyWebauthnSignerArgs, P256r1Signer},
@@ -23,24 +22,19 @@ async fn test_set_webauthn_public_key() {
     let data = utils::WebauthnTestData::<KatanaRunner>::new(private_key, signer).await;
     let reader = data.account_reader();
 
-    let public_key: WebauthnPubKey = reader
+    let public_key = reader
         .get_webauthn_pub_key()
         .block_id(BlockId::Tag(BlockTag::Latest))
         .call()
         .await
         .unwrap();
-    assert!(
-        public_key
-            == WebauthnPubKey {
-                x: U256 { low: 0, high: 0 },
-                y: U256 { low: 0, high: 0 }
-            }
-    );
+
+    assert!(public_key.is_none(), "Public key already set");
 
     let target_key = data.webauthn_public_key();
     data.set_webauthn_public_key().await;
 
-    let public_key: WebauthnPubKey = reader
+    let public_key = reader
         .get_webauthn_pub_key()
         .block_id(BlockId::Tag(BlockTag::Latest))
         .call()
@@ -49,10 +43,11 @@ async fn test_set_webauthn_public_key() {
 
     assert!(
         public_key
-            == WebauthnPubKey {
+            == Some(WebauthnPubKey {
                 x: target_key.0.into(),
                 y: target_key.1.into(),
-            }
+            }),
+        "Public key mismatch"
     )
 }
 
