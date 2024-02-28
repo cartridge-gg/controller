@@ -1,5 +1,5 @@
 use starknet::{core::types::FieldElement, macros::felt};
-use starknet_crypto::PoseidonHasher;
+use starknet_crypto::{poseidon_hash, PoseidonHasher};
 
 use crate::abigen::account::{Call, SessionSignature};
 
@@ -17,13 +17,6 @@ const POLICY_TYPE_HASH: FieldElement =
     felt!("0x2f0026e78543f036f33e26a8f5891b88c58dc1e20cbbfaf0bb53274da6fa568");
 
 const STARKNET_MESSAGE_FELT: FieldElement = felt!("0x537461726b4e6574204d657373616765");
-
-fn hash_two_elements(a: FieldElement, b: FieldElement) -> FieldElement {
-    let mut hasher = PoseidonHasher::new();
-    hasher.update(a);
-    hasher.update(b);
-    hasher.finalize()
-}
 
 pub fn compute_session_hash(
     signature: SessionSignature,
@@ -89,9 +82,9 @@ pub fn compute_root(mut current_node: FieldElement, mut proof: Vec<FieldElement>
         // We need to check if the current node is smaller than the current element of the proof.
         // If it is, we need to swap the order of the hash.
         current_node = if current_node < proof_element {
-            hash_two_elements(current_node, proof_element)
+            poseidon_hash(current_node, proof_element)
         } else {
-            hash_two_elements(proof_element, current_node)
+            poseidon_hash(proof_element, current_node)
         };
     }
 }
@@ -129,9 +122,9 @@ fn get_next_level(nodes: &Vec<FieldElement>) -> Vec<FieldElement> {
         let right = nodes[i * 2 + 1];
 
         let node = if left < right {
-            hash_two_elements(left, right)
+            poseidon_hash(left, right)
         } else {
-            hash_two_elements(right, left)
+            poseidon_hash(right, left)
         };
         next_level.push(node);
     }
