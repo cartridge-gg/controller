@@ -142,11 +142,11 @@ fn get_next_level(nodes: &Vec<FieldElement>) -> Vec<FieldElement> {
 #[test]
 fn merkle_tree_poseidon_test() {
     // [Setup] Merkle tree.
-    let root = felt!("0x7abc09d19c8a03abd4333a23f7823975c7bdd325170f0d32612b8baa1457d47");
+    let root = felt!("0x48924a3b2a7a7b7cc1c9371357e95e322899880a6534bdfe24e96a828b9d780");
     let leaf = felt!("0x1");
     let valid_proof = vec![
         felt!("0x2"),
-        felt!("0x47ef3ad11ad3f8fc055281f1721acd537563ec134036bc4bd4de2af151f0832"),
+        felt!("0x338eb608d7e48306d01f5a8d4275dd85a52ba79aaf7a1a7b35808ba573c3669"),
     ];
     let leaves = vec![felt!("0x1"), felt!("0x2"), felt!("0x3")];
 
