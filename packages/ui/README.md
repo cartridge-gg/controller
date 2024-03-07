@@ -1,14 +1,8 @@
-# @cartridge/web 
+# @cartridge/ui
 
 ## Usage
 
-### 🛠️ Automatically re-build when file changes
-
-```sh
-pnpm ui dev
-```
-
-### 📖 Storybook
+### Storybook
 
 ```sh
 pnpm ui storybook
