@@ -13,10 +13,12 @@
     "keychain": "pnpm --filter @cartridge/keychain",
     "controller": "pnpm --filter @cartridge/controller",
     "connector": "pnpm --filter @cartridge/connector",
+    "account-sdk": "pnpm --filter @cartridge/account-sdk",
     "book": "pnpm --filter @cartridge/docs",
     "ui": "pnpm --filter @cartridge/ui",
     "example:next": "pnpm --filter starknet-react-next",
     "example:get-starknet": "pnpm --filter get-starknet",
+    "example:account-sdk": "pnpm --filter account-sdk",
     "test": "pnpm keychain test",
     "test:ci": "pnpm keychain test:ci"
   },

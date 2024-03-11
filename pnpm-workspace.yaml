@@ -2,3 +2,4 @@ packages:
   - docs
   - examples/*
   - packages/*
+  - crates/account-sdk/pkg
