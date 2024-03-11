@@ -1,5 +1,5 @@
 [package]
-name = "account-sdk"
+name = "account-sdk-wasm"
 version = "0.1.0"
 authors = ["JunichiSugiura <jun.sugiura.jp@gmail.com>"]
 edition = "2018"

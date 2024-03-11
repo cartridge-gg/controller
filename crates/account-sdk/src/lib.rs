@@ -14,5 +14,8 @@ pub fn greet() {
     let signer = P256r1Signer::random(origin.clone());
     let private_key = SigningKey::from_random();
 
-    alert(format!("{}", private_key.verifying_key().scalar()));
+    alert(format!(
+        "Random private key: {}",
+        private_key.verifying_key().scalar()
+    ));
 }
