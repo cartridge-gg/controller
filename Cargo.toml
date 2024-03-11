@@ -25,9 +25,14 @@ sha2.workspace = true
 starknet.workspace = true
 starknet-crypto.workspace = true
 thiserror.workspace = true
-tokio.workspace = true
+tokio = { version = "1", features = ["macros", "time"]}
+async-std = { version = "1.12.0"}
 toml.workspace = true
 u256-literal.workspace = true
 url.workspace = true
 wasm-bindgen.workspace = true
 webauthn-rs-proto.workspace = true
+
+[features]
+tokio-runtime = []
+async-std-runtime = []

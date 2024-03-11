@@ -9,7 +9,7 @@ use super::deployment::DeployResult;
 
 pub struct PendingTransaction<'a, P, T>
 where
-    &'a P: Provider + Send,
+    &'a P: Provider + Send + Sync,
 {
     transaction_result: T,
     transaction_hash: FieldElement,
@@ -18,7 +18,7 @@ where
 
 impl<'a, P, T> PendingTransaction<'a, P, T>
 where
-    &'a P: Provider + Send,
+    &'a P: Provider + Send + Sync,
 {
     pub fn new(transaction_result: T, transaction_hash: FieldElement, client: &'a P) -> Self {
         PendingTransaction {
@@ -29,6 +29,7 @@ where
     }
     pub async fn wait_for_completion(self) -> T {
         TransactionWaiter::new(self.transaction_hash, &self.client)
+            .wait()
             .await
             .unwrap();
         self.transaction_result

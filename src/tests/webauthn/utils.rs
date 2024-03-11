@@ -98,6 +98,7 @@ where
         set_execution.send().await.unwrap();
 
         TransactionWaiter::new(set_tx, self.runner.client())
+            .wait()
             .await
             .unwrap();
     }
