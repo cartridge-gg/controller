@@ -115,7 +115,7 @@ fn compute_proof(mut nodes: Vec<FieldElement>, index: usize, proof: &mut Vec<Fie
     compute_proof(next_level, index_parent, proof)
 }
 
-fn get_next_level(nodes: &Vec<FieldElement>) -> Vec<FieldElement> {
+fn get_next_level(nodes: &[FieldElement]) -> Vec<FieldElement> {
     let mut next_level: Vec<FieldElement> = Vec::with_capacity(nodes.len() / 2);
     for i in 0..nodes.len() / 2 {
         let left = nodes[i * 2];
