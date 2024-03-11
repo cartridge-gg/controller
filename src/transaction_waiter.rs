@@ -1,7 +1,7 @@
 use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use futures::FutureExt;
 use starknet::core::types::{
@@ -9,7 +9,6 @@ use starknet::core::types::{
     StarknetError, TransactionFinalityStatus, TransactionReceipt,
 };
 use starknet::providers::{Provider, ProviderError};
-use tokio::time::{Instant, Interval};
 
 type GetReceiptResult = Result<MaybePendingTransactionReceipt, ProviderError>;
 type GetReceiptFuture<'a> = Pin<Box<dyn Future<Output = GetReceiptResult> + Send + 'a>>;
@@ -77,6 +76,31 @@ pub struct TransactionWaiter<'a, P: Provider> {
     started_at: Option<Instant>,
 }
 
+struct Interval {
+    last: Instant,
+    interval: Duration,
+}
+
+impl Interval {
+    fn new(interval: Duration) -> Self {
+        Self {
+            last: Instant::now(),
+            interval,
+        }
+    }
+
+    fn poll_tick(&mut self, _cx: &mut Context<'_>) -> Poll<()> {
+        if self.last.elapsed() > self.interval {
+            self.last = Instant::now();
+            Poll::Ready(())
+        } else {
+            std::thread::sleep(self.interval);
+            Poll::Pending
+        }
+    }
+
+}
+
 #[allow(dead_code)]
 impl<'a, P> TransactionWaiter<'a, P>
 where
@@ -94,17 +118,13 @@ where
             finality_status: None,
             receipt_request_fut: None,
             timeout: Self::DEFAULT_TIMEOUT,
-            interval: tokio::time::interval_at(
-                Instant::now() + Self::DEFAULT_INTERVAL,
-                Self::DEFAULT_INTERVAL,
-            ),
+            interval: Interval::new(Self::DEFAULT_INTERVAL),
         }
     }
 
     pub fn with_interval(self, milisecond: u64) -> Self {
-        let interval = Duration::from_millis(milisecond);
         Self {
-            interval: tokio::time::interval_at(Instant::now() + interval, interval),
+            interval: Interval::new(Duration::from_millis(milisecond)),
             ..self
         }
     }
