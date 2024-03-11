@@ -95,7 +95,7 @@ where
 
     pub fn new(tx: FieldElement, provider: &'a P) -> Self {
         Self {
-            provider: provider.into(),
+            provider,
             tx_hash: tx,
             must_succeed: true,
             finality_status: None,
@@ -123,7 +123,7 @@ where
     }
 
     pub async fn wait(self) -> Result<MaybePendingTransactionReceipt, TransactionWaitingError> {
-        let timeout = self.timeout.clone();
+        let timeout = self.timeout;
         select! {
             result = self.wait_without_timeout().fuse() => result,
             _ = Sleeper::sleep(timeout).fuse() => Err(TransactionWaitingError::Timeout),
