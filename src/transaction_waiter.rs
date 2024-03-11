@@ -69,18 +69,37 @@ pub struct TransactionWaiter<'a, P: Provider> {
 enum Sleeper {}
 
 impl Sleeper {
-    pub async fn sleep(interval: Duration) {
-        #[cfg(feature = "tokio-runtime")]
+    pub async fn sleep(delay: Duration) {
+        #[cfg(not(target_arch = "wasm32"))]
         {
-            tokio::time::sleep(interval).await;
+            tokio::time::sleep(delay).await;
         }
-        #[cfg(feature = "async-std-runtime")]
+        #[cfg(target_arch = "wasm32")]
         {
-            async_std::task::sleep(interval).await;
-        }
-        #[cfg(not(any(feature = "tokio-runtime", feature = "async-std-runtime")))]
-        {
-            compile_error!("At least one of the features 'tokio-runtime' or 'async-std-runtime' must be enabled");
+            use wasm_bindgen::JsCast;
+            use web_sys::WorkerGlobalScope;
+            let mut cb = |resolve: js_sys::Function, _reject: js_sys::Function| {
+                // if we are in a worker, use the global worker's scope
+                // otherwise, use the window's scope
+                if let Ok(worker_scope) = js_sys::global().dyn_into::<WorkerGlobalScope>() {
+                    worker_scope
+                        .set_timeout_with_callback_and_timeout_and_arguments_0(
+                            &resolve,
+                            delay.as_millis() as i32,
+                        )
+                        .expect("should register `setTimeout`");
+                } else {
+                    web_sys::window()
+                        .unwrap()
+                        .set_timeout_with_callback_and_timeout_and_arguments_0(
+                            &resolve,
+                            delay.as_millis() as i32,
+                        )
+                        .expect("should register `setTimeout`");
+                }
+            };
+            let p = js_sys::Promise::new(&mut cb);
+            wasm_bindgen_futures::JsFuture::from(p).await.unwrap();
         }
     }
 }

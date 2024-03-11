@@ -25,14 +25,15 @@ sha2.workspace = true
 starknet.workspace = true
 starknet-crypto.workspace = true
 thiserror.workspace = true
-tokio = { version = "1", features = ["macros", "time"]}
-async-std = { version = "1.12.0"}
+tokio.workspace = true
 toml.workspace = true
 u256-literal.workspace = true
 url.workspace = true
 wasm-bindgen.workspace = true
 webauthn-rs-proto.workspace = true
 
-[features]
-tokio-runtime = []
-async-std-runtime = []
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+js-sys = "0.3.69"
+web-sys = "0.3.69"
+wasm-bindgen-futures = "0.4.42"
