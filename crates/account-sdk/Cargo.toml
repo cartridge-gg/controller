@@ -21,6 +21,7 @@ console_error_panic_hook = { version = "0.1.7", optional = true }
 
 # account-sdk = { git = "https://github.com/cartridge-gg/cairo-webauthn.git" }
 account-sdk = { path = "../../../cairo-webauthn/crates/account_sdk/" }
+starknet = "0.8"
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.34"
