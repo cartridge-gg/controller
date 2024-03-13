@@ -18,11 +18,11 @@ lazy_static! {
     pub static ref PREFUNDED: (SigningKey, FieldElement) = (
         SigningKey::from_secret_scalar(
             felt!(
-                "0x1800000000300000180000000000030000000000003006001800006600"
+                "0x2bbf4f9fd0bbb2e60b0316c1fe0b76cf7a4d0198bd493ced9b8df2a3a24d68a"
             ),
         ),
         felt!(
-            "0x517ececd29116499f4a1b64b094da79ba08dfd54a3edaa316134c41f8160973"
+            "0xb3ff441a68610b30fd5e2abbf3a1548eb6ba6f3559f2862bf2dc757e5828ca"
         )
     );
 

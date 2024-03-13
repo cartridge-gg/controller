@@ -87,7 +87,7 @@ where
                 x: pub_x.into(),
                 y: pub_y.into(),
             });
-        let max_fee = set_execution.estimate_fee().await.unwrap().overall_fee * 2;
+        let max_fee = set_execution.estimate_fee().await.unwrap().overall_fee * FieldElement::TWO;
         let set_execution = set_execution
             .nonce(account.get_nonce().await.unwrap())
             .max_fee(FieldElement::from(max_fee))
