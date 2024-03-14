@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { cairo, constants, num } from "starknet";
+import { cairo, num, RpcProvider } from "starknet";
 import { CONTRACT_AVATAR } from "@cartridge/controller/src/constants";
 import dataUriToBuffer from "data-uri-to-buffer";
 
 import Storage from "../utils/storage";
-import { providers } from "@cartridge/controller";
 
 const SCALE = 10;
 const PADDING = 0;
@@ -110,10 +109,8 @@ export const parseAvatars = (data: AttributeData): AvatarData[] => {
 export const callContract = async (address: string): Promise<AttributeData> => {
   const tokenId = cairo.uint256(address);
 
-  const provider = new Provider({
-    rpc: {
-      nodeUrl: process.env.NEXT_PUBLIC_RPC_GOERLI,
-    },
+  const provider = new RpcProvider({
+    nodeUrl: process.env.NEXT_PUBLIC_RPC_GOERLI,
   });
 
   let res = await provider.callContract({

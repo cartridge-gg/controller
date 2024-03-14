@@ -25,6 +25,7 @@ import {
   Invocation,
   InvocationsDetailsWithNonce,
   InvocationBulk,
+  BigNumberish,
 } from "starknet";
 import { AccountContractDocument } from "generated/graphql";
 import { client } from "utils/graphql";
@@ -375,7 +376,7 @@ class Account extends BaseAccount {
       );
     }
 
-    super.verifyMessageHash(hash, signature);
+    return super.verifyMessageHash(hash, signature);
   }
 
   async signMessage(typedData: typedData.TypedData): Promise<Signature> {

@@ -1,5 +1,5 @@
 import { goerli } from "@starknet-react/chains";
-import { StarknetConfig } from "@starknet-react/core";
+import { Connector, StarknetConfig } from "@starknet-react/core";
 import { PropsWithChildren } from "react";
 import CartridgeConnector from "@cartridge/connector";
 import { RpcProvider } from "starknet";
@@ -30,5 +30,5 @@ const url =
 const connectors = [
   new CartridgeConnector([{ target: "0xdeadbeef", method: "testMethod" }], {
     url,
-  }),
+  }) as never as Connector,
 ];
