@@ -75,7 +75,7 @@ impl TestnetRunner for KatanaRunner {
             &self.client,
             PREFUNDED.0.clone(),
             PREFUNDED.1,
-            ExecutionEncoding::Legacy,
+            ExecutionEncoding::New,
         )
         .await
     }
