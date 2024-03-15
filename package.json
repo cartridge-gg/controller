@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "preinstall": "npx only-allow pnpm",
+    "postinstall": "pnpm gen:account-sdk",
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",

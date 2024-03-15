@@ -1,0 +1,8 @@
+#!/bin/sh
+
+set -x
+
+cd "$(dirname "$0")/.." || exit
+
+wasm-pack build --target web
+sed -i '' 's#account-sdk-wasm#@cartridge/account-sdk#g' pkg/package.json
