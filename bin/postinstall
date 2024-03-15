@@ -1,0 +1,20 @@
+#!/bin/sh
+
+set -x
+set -e
+
+if [ -n "$CI" ]; then
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    PATH=$PATH:$HOME/.cargo/bin
+    rustup default nightly
+
+    cargo install wasm-pack jaq
+    mv "$HOME/.cargo/bin/jaq" "$HOME/.cargo/bin/jq"
+
+    curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | sh -s -- -v 2.6.3
+    PATH=$PATH:$HOME/.local/bin
+fi 
+
+cd "$(dirname "$0")/../crates/account-sdk/" || exit
+wasm-pack build --target web
+sed -i '' -e 's#account-sdk-wasm#@cartridge/account-sdk#g' pkg/package.json
