@@ -129,9 +129,10 @@ impl<'a> ser::Serializer for &'a mut Serializer {
         Err(Error::TypeNotSupported)
     }
 
-    fn serialize_some<T: ?Sized>(self, value: &T) -> Result<()>
+    fn serialize_some<T>(self, value: &T) -> Result<()>
     where
         T: Serialize,
+        T: ?Sized,
     {
         Err(Error::TypeNotSupported)
     }
@@ -153,14 +154,15 @@ impl<'a> ser::Serializer for &'a mut Serializer {
         Err(Error::TypeNotSupported)
     }
 
-    fn serialize_newtype_struct<T: ?Sized>(self, name: &'static str, value: &T) -> Result<()>
+    fn serialize_newtype_struct<T>(self, name: &'static str, value: &T) -> Result<()>
     where
         T: Serialize,
+        T: ?Sized,
     {
         value.serialize(self)
     }
 
-    fn serialize_newtype_variant<T: ?Sized>(
+    fn serialize_newtype_variant<T>(
         self,
         name: &'static str,
         variant_index: u32,
@@ -169,6 +171,7 @@ impl<'a> ser::Serializer for &'a mut Serializer {
     ) -> Result<()>
     where
         T: Serialize,
+        T: ?Sized,
     {
         Err(Error::TypeNotSupported)
     }
