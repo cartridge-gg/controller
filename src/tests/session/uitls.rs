@@ -12,12 +12,12 @@ use crate::{abigen::account::Call, tests::runners::TestnetRunner};
 
 use crate::session_token::Session;
 
-pub async fn create_session_account<'a, T>(
-    runner: &'a T,
+pub async fn create_session_account<T>(
+    runner: &T,
 ) -> (
-    SessionAccount<&'a JsonRpcClient<HttpTransport>, LocalWallet>,
+    SessionAccount<&JsonRpcClient<HttpTransport>, LocalWallet>,
     SigningKey,
-    SingleOwnerAccount<&'a JsonRpcClient<HttpTransport>, LocalWallet>,
+    SingleOwnerAccount<&JsonRpcClient<HttpTransport>, LocalWallet>,
 )
 where
     T: TestnetRunner,

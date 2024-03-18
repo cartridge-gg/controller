@@ -20,11 +20,11 @@ pub async fn create_account<'a>(
     SigningKey,
 ) {
     let provider = *from.provider();
-    let class_hash = declare(provider, &from).await;
+    let class_hash = declare(provider, from).await;
     let private_key = SigningKey::from_random();
     let deployed_address = deploy(
         provider,
-        &from,
+        from,
         private_key.verifying_key().scalar(),
         class_hash,
     )
@@ -53,13 +53,12 @@ pub async fn declare(
     client: &JsonRpcClient<HttpTransport>,
     account: &SingleOwnerAccount<&JsonRpcClient<HttpTransport>, LocalWallet>,
 ) -> FieldElement {
-    let DeclareTransactionResult { class_hash, .. } =
-        AccountDeclaration::cartridge_account(&client)
-            .declare(&account)
-            .await
-            .unwrap()
-            .wait_for_completion()
-            .await;
+    let DeclareTransactionResult { class_hash, .. } = AccountDeclaration::cartridge_account(client)
+        .declare(account)
+        .await
+        .unwrap()
+        .wait_for_completion()
+        .await;
 
     class_hash
 }
@@ -72,8 +71,8 @@ pub async fn deploy(
 ) -> FieldElement {
     let DeployResult {
         deployed_address, ..
-    } = AccountDeployment::new(&client)
-        .deploy(vec![public_key], FieldElement::ZERO, &account, class_hash)
+    } = AccountDeployment::new(client)
+        .deploy(vec![public_key], FieldElement::ZERO, account, class_hash)
         .await
         .unwrap()
         .wait_for_completion()

@@ -395,8 +395,7 @@ mod tests {
         let serialized = vec![val.a, val.i.into(), val.x.into()];
         let seq = (0..100).map(|_| val.clone()).collect::<Vec<_>>();
         let mut result = (0..100)
-            .map(|_| serialized.clone())
-            .flatten()
+            .flat_map(|_| serialized.clone())
             .collect::<Vec<_>>();
         result.insert(0, seq.len().into());
         assert_eq!(to_felts(&seq), result);
