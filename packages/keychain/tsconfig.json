@@ -4,7 +4,7 @@
     "rootDir": ".",
     "lib": ["dom", "dom.iterable", "esnext"],
     "declaration": true,
-    "target": "es5",
+    "target": "ES2022",
     "module": "esnext",
     "strict": false,
     "jsx": "preserve",

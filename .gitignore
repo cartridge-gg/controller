@@ -147,4 +147,4 @@ node_modules/
 **/storybook-static/
 
 # vite
-vite.config.{js,ts}.timestamp-*
+**/vite.config.*.timestamp-*

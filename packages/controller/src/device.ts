@@ -51,7 +51,7 @@ class DeviceAccount extends Account {
   ): Promise<EstimateFee> {
     return this.keychain.estimateInvokeFee(calls, {
       ...details,
-      chainId: this.chainId,
+      chainId: await this.getChainId(),
     });
   }
 
@@ -61,7 +61,7 @@ class DeviceAccount extends Account {
   ): Promise<EstimateFee> {
     return this.keychain.estimateDeclareFee(payload, {
       ...details,
-      chainId: this.chainId,
+      chainId: await this.getChainId(),
     });
   }
 

@@ -1,7 +1,6 @@
 import { useContractRead } from "@starknet-react/core";
 import type { NextPage } from "next";
 import { useMemo } from "react";
-import { number } from "starknet";
 import { TransferEth } from "components/TransferEth";
 import { ConnectWallet } from "components/ConnectWallet";
 import { IncrementCounter } from "components/IncrementCounter";
@@ -26,10 +25,8 @@ const Home: NextPage = () => {
   });
 
   const counterValue = useMemo(() => {
-    if (counterResult && counterResult.length > 0) {
-      const value = number.toBN(counterResult[0]);
-      return value.toString(10);
-    }
+    const val = Array.isArray(counterResult) ? counterResult[0] : counterResult;
+    return val.toString(10);
   }, [counterResult]);
 
   return (

@@ -1,10 +1,6 @@
-import { Connector, EventHandler } from "@starknet-react/core";
-import Controller, {
-  Assertion,
-  Policy,
-  SupportedChainIds,
-} from "@cartridge/controller";
-import { AccountInterface, InvokeFunctionResponse } from "starknet";
+import { Connector } from "@starknet-react/core";
+import Controller, { Policy } from "@cartridge/controller";
+import { AccountInterface, InvokeFunctionResponse, constants } from "starknet";
 
 class ControllerConnector extends Connector {
   public controller: Controller;
@@ -15,20 +11,27 @@ class ControllerConnector extends Connector {
     options?: {
       url?: string;
       origin?: string;
-      chainId?: SupportedChainIds;
+      chainId?: constants.StarknetChainId;
     },
   ) {
-    super({ options });
+    super();
     this._account = null;
     this.controller = new Controller(policies, options);
   }
 
-  id() {
-    return "cartridge";
-  }
+  readonly id = "cartridge";
 
-  name() {
-    return "Cartridge";
+  readonly name = "Cartridge";
+
+  // TODO(#244): Set controller icon
+  readonly icon = {
+    dark: "",
+    light: "",
+  };
+
+  async chainId() {
+    const val = await this.controller.account.getChainId();
+    return Promise.resolve(BigInt(val));
   }
 
   available(): boolean {
@@ -62,15 +65,20 @@ class ControllerConnector extends Connector {
     return this.controller.provision(address, credentialId);
   }
 
-  async connect(): Promise<AccountInterface> {
+  async connect() {
     const account = await this.controller.connect();
 
     if (!account) {
       throw new Error("account not found");
     }
+    const chainId = await this.chainId();
 
     this._account = account;
-    return this._account;
+
+    return {
+      account: this._account.address,
+      chainId,
+    };
   }
 
   async disconnect(): Promise<void> {
@@ -87,16 +95,6 @@ class ControllerConnector extends Connector {
 
   async showQuests(gameId: string): Promise<void> {
     return this.controller.showQuests(gameId);
-  }
-
-  initEventListener(accountChangeCb: EventHandler): Promise<void> {
-    // TODO
-    return Promise.resolve();
-  }
-
-  removeEventListener(accountChangeCb: EventHandler): Promise<void> {
-    // TODO
-    return Promise.resolve();
   }
 }
 

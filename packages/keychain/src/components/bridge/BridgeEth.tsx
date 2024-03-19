@@ -13,12 +13,13 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { configureChains, fetchBalance } from "@wagmi/core";
+import { fetchBalance } from "@wagmi/core";
 import { alchemyProvider } from "@wagmi/core/providers/alchemy";
 import { useDebounce } from "hooks/debounce";
 import { useEffect, useState } from "react";
 import { constants } from "starknet";
-import { createClient, goerli, mainnet, WagmiConfig } from "wagmi";
+import { createConfig, mainnet, WagmiConfig, configureChains } from "wagmi";
+import { goerli } from "wagmi/chains";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import { ConnectButton } from "./ConnectButton";
 import { TransferButton } from "./TransferButton";
@@ -57,7 +58,7 @@ export function BridgeEth({
         return await fetchBalance({
           address: ethAddress as any,
           chainId:
-            chainId === constants.StarknetChainId.MAINNET
+            chainId === constants.StarknetChainId.SN_MAIN
               ? mainnet.id
               : goerli.id,
         });
@@ -72,7 +73,7 @@ export function BridgeEth({
 
   useEffect(() => {
     async function compute() {
-      if (chainId === constants.StarknetChainId.MAINNET) {
+      if (chainId === constants.StarknetChainId.SN_MAIN) {
         const { data } = await fetchEthPrice();
         const usdeth = parseFloat(data.price.amount);
         const inputValue = parseFloat(debouncedValue);
@@ -107,14 +108,14 @@ export function BridgeEth({
 
   if (transferHash) {
     return (
-      <WagmiConfig client={ethereumClient}>
+      <WagmiConfig config={ethereumConfig}>
         <TxnTracker chainId={chainId} ethTxnHash={transferHash} />
       </WagmiConfig>
     );
   }
 
   return (
-    <WagmiConfig client={ethereumClient}>
+    <WagmiConfig config={ethereumConfig}>
       <PortalBanner Icon={EthereumDuoIcon} title="Bridge ETH" />
 
       <VStack w="full" align="start" spacing="18px">
@@ -235,7 +236,7 @@ export function BridgeEth({
               return;
             } else if (error.name === "ChainMismatchError") {
               const networkName =
-                chainId === constants.StarknetChainId.MAINNET
+                chainId === constants.StarknetChainId.SN_MAIN
                   ? "mainnet"
                   : "goerli";
               setErrorMessage(
@@ -280,7 +281,7 @@ const SelectBox = forwardRef<
   </HStack>
 ));
 
-const { chains, provider } = configureChains(
+const { chains, publicClient } = configureChains(
   [mainnet, goerli],
   [
     alchemyProvider({
@@ -295,8 +296,8 @@ const { chains, provider } = configureChains(
   ],
 );
 
-const ethereumClient = createClient({
-  provider,
+const ethereumConfig = createConfig({
+  publicClient,
   connectors: [
     new MetaMaskConnector({
       chains,

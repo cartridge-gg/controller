@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { defaultProvider, number, Provider, uint256 } from "starknet";
+import { cairo, num, RpcProvider } from "starknet";
 import { CONTRACT_AVATAR } from "@cartridge/controller/src/constants";
 import dataUriToBuffer from "data-uri-to-buffer";
 
@@ -107,18 +107,16 @@ export const parseAvatars = (data: AttributeData): AvatarData[] => {
 };
 
 export const callContract = async (address: string): Promise<AttributeData> => {
-  const tokenId = uint256.bnToUint256(address);
+  const tokenId = cairo.uint256(address);
 
-  const provider = new Provider({
-    rpc: {
-      nodeUrl: process.env.NEXT_PUBLIC_RPC_GOERLI
-    }
+  const provider = new RpcProvider({
+    nodeUrl: process.env.NEXT_PUBLIC_RPC_GOERLI,
   });
 
   let res = await provider.callContract({
     contractAddress: CONTRACT_AVATAR,
     entrypoint: "tokenURI",
-    calldata: [number.toFelt(tokenId.low), number.toFelt(tokenId.high)],
+    calldata: [cairo.felt(tokenId.low), cairo.felt(tokenId.high)],
   });
 
   res.result.shift();
@@ -133,8 +131,8 @@ export const callContract = async (address: string): Promise<AttributeData> => {
   const borderColor = findValue(json.attributes, "Border Color");
   const backgroundColor = findValue(json.attributes, "Background Color");
   const dimension = parseInt(findValue(json.attributes, "Dimension"));
-  const fingerprint = number.toHex(
-    number.toBN(findValue(json.attributes, "Fingerprint")),
+  const fingerprint = num.toHex(
+    BigInt(findValue(json.attributes, "Fingerprint")),
   );
 
   return {
@@ -226,11 +224,13 @@ const data2Svg = ({
       //const fill = cell == CellType.BASE ? baseColor : borderColor; // Uncomment after new contract deployed
       const fill = cell == CellType.BASE ? baseColor : "rgba(255,255,255,0.08)";
       rects.push(
-        `<rect x="${x + PADDING}" y="${y + PADDING
+        `<rect x="${x + PADDING}" y="${
+          y + PADDING
         }" width="1" height="1" fill="${fill}"/>`,
       );
       rects.push(
-        `<rect x="${mirror_x + PADDING}" y="${y + PADDING
+        `<rect x="${mirror_x + PADDING}" y="${
+          y + PADDING
         }" width="1" height="1" fill="${fill}"/>`,
       );
     }

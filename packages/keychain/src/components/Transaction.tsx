@@ -5,6 +5,8 @@ import { constants } from "starknet";
 import { StarkscanUrl } from "utils/url";
 import { CheckIcon, ExternalIcon, StarknetIcon, Loading } from "@cartridge/ui";
 import { useController } from "hooks/controller";
+import { useChainName } from "hooks/chain";
+import Account from "utils/account";
 
 export type TransactionState = "pending" | "success" | "error";
 
@@ -30,7 +32,10 @@ export function Transaction({
       let result: TransactionState = "pending";
       controller
         .account(chainId)
-        .waitForTransaction(hash, 8000, ["ACCEPTED_ON_L1", "ACCEPTED_ON_L2"])
+        .waitForTransaction(hash, {
+          ...Account.waitForTransactionOptions,
+          retryInterval: 8000,
+        })
         .then(() => {
           result = "success";
         })
@@ -44,6 +49,8 @@ export function Transaction({
         });
     }
   }, [controller, hash, chainId, finalized]);
+
+  const chainName = useChainName(chainId);
 
   return (
     <HStack w="full" borderRadius="sm" bgColor="solid.primary" p={3}>
@@ -62,9 +69,7 @@ export function Transaction({
         <HStack color="text.secondary" spacing="5px">
           <StarknetIcon boxSize="14px" />
           <Text color="inherit" fontSize="13px">
-            {chainId === constants.StarknetChainId.MAINNET
-              ? "Mainnet"
-              : "Testnet"}
+            {chainName}
           </Text>
         </HStack>
         <Divider orientation="vertical" bgColor="solid.accent" h="30px" />

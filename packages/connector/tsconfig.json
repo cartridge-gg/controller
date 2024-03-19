@@ -9,7 +9,7 @@
       "esnext"
     ],
     "declaration": true,
-    "target": "ES6",
+    "target": "es2022",
     "module": "commonjs",
     "strict": false,
     "jsx": "preserve",

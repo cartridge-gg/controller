@@ -1,6 +1,6 @@
 import { Button } from "@chakra-ui/react";
 import { useEffect } from "react";
-import { useAccount, useClient, useConnect, useDisconnect } from "wagmi";
+import { useAccount, useConfig, useConnect, useDisconnect } from "wagmi";
 
 export function ConnectButton({
   onConnect,
@@ -10,7 +10,7 @@ export function ConnectButton({
   onDisconnect: () => void;
 }) {
   const { address: ethAddress, isConnected } = useAccount();
-  const { connectors } = useClient();
+  const { connectors } = useConfig();
   const { connect } = useConnect({ connector: connectors[0] });
   const { disconnect } = useDisconnect();
 

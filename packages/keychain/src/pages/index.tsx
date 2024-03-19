@@ -11,14 +11,12 @@ import {
   Policy,
   Session,
   ProbeReply,
-  SupportedChainIds,
 } from "@cartridge/controller";
 import {
   Abi,
   Call,
   constants,
   InvocationsDetails,
-  number,
   Signature,
   typedData,
 } from "starknet";
@@ -101,7 +99,7 @@ type Quests = {
 
 const Index: NextPage = () => {
   const [chainId, setChainId] = useState<constants.StarknetChainId>(
-    constants.StarknetChainId.TESTNET,
+    constants.StarknetChainId.SN_GOERLI,
   );
   const [controller, setController] = useController();
   const [context, setContext] = useState<Context>();
@@ -125,11 +123,11 @@ const Index: NextPage = () => {
             async (
               policies: Policy[],
               starterPackId?: string,
-              chainId?: SupportedChainIds,
+              chainId?: constants.StarknetChainId,
             ): Promise<ConnectReply> => {
               return await new Promise((resolve, reject) => {
                 if (chainId) {
-                  setChainId(chainId as unknown as constants.StarknetChainId);
+                  setChainId(chainId);
                 }
                 setContext({
                   type: "connect",
@@ -222,9 +220,7 @@ const Index: NextPage = () => {
                 if (
                   session.maxFee &&
                   transactionsDetail &&
-                  number
-                    .toBN(transactionsDetail.maxFee)
-                    .gt(number.toBN(session.maxFee))
+                  BigInt(transactionsDetail.maxFee) > BigInt(session.maxFee)
                 ) {
                   return Promise.resolve({
                     code: ResponseCodes.NOT_ALLOWED,
