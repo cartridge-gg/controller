@@ -67,8 +67,8 @@ importers:
         specifier: 1.2.0
         version: 1.2.0
       get-starknet:
-        specifier: ^1.5.0
-        version: 1.5.0(starknet@5.24.3)
+        specifier: ^3.0.1
+        version: 3.0.1(starknet@5.24.3)
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -17033,13 +17033,13 @@ packages:
       starknet: 5.24.3
     dev: false
 
-  /get-starknet@1.5.0(starknet@5.24.3):
-    resolution: {integrity: sha512-6A14mdPoMwO4orETjG5D+wwaZOzuAyNp/5+ZlDJnU+UU7QRGMYILUo8WjgqeVTg0mcN0BZoUE0C/Qhgd7dBvVQ==}
-    peerDependencies:
-      starknet: ^3.12.3
+  /get-starknet@3.0.1(starknet@5.24.3):
+    resolution: {integrity: sha512-EyUl+DVQH5PXW2OUdY06/yaqlMizzLKRLzp3S+VhYz+l6wGvW5pmhTXHLaYI4hWfebIDfFkFvAPxVPv/TkWLyA==}
     dependencies:
       bowser: 2.11.0
-      starknet: 5.24.3
+      get-starknet-core: 3.2.0(starknet@5.24.3)
+    transitivePeerDependencies:
+      - starknet
     dev: false
 
   /get-stream@4.1.0:
