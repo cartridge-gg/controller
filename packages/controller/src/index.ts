@@ -19,12 +19,10 @@ import { createModal } from "./modal";
 
 export const providers = {
   [constants.StarknetChainId.SN_GOERLI]: new RpcProvider({
-    nodeUrl:
-      "https://starknet-goerli.g.alchemy.com/v2/FS0Fge2Rq1dlf2IsAIC_Ecy0UBp9uq51",
+    nodeUrl: "http://localhost:5050",
   }),
   [constants.StarknetChainId.SN_MAIN]: new RpcProvider({
-    nodeUrl:
-      "https://starknet-mainnet.g.alchemy.com/v2/-FbmIoy3U7xEqQhuhW6wkDB2uqfu0yKi",
+    nodeUrl: "http://localhost:5050",
   }),
 };
 

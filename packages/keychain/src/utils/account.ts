@@ -108,9 +108,12 @@ class Account extends BaseAccount {
   }
 
   async getContract() {
+    let chainId = this._chainId.substring(2);
+    chainId = Buffer.from(chainId, "hex").toString("ascii");
+
     try {
       return await client.request(AccountContractDocument, {
-        id: `starknet:${this._chainId}:${this.address}`,
+        id: `starknet:${chainId}:${this.address}`,
       });
     } catch (e) {
       if (e.message.includes("not found")) {
@@ -191,24 +194,27 @@ class Account extends BaseAccount {
         this.updated = false;
       }
 
-      const pub = await this.signer.getPubKey();
-      const res = await this.rpc.callContract(
-        {
-          contractAddress: this.address,
-          entrypoint: "executeOnPlugin",
-          calldata: [
-            CLASS_HASHES["0.0.1"].controller,
-            hash.getSelector("is_public_key"),
-            "0x1",
-            pub,
-          ],
-        },
-        "pending",
-      );
+      // TODO: this needs to be updated to reflect webauthn and/or session token status
+      this.status = Status.REGISTERED;
+      // const pub = await this.signer.getPubKey();
+      // console.log(pub);
+      // const res = await this.rpc.callContract(
+      //   {
+      //     contractAddress: this.address,
+      //     entrypoint: "executeOnPlugin",
+      //     calldata: [
+      //       CLASS_HASHES["0.0.1"].controller,
+      //       hash.getSelector("is_public_key"),
+      //       "0x1",
+      //       pub,
+      //     ],
+      //   },
+      //   "pending",
+      // );
 
-      if (BigInt(res.result[1]) === 1n) {
-        this.status = Status.REGISTERED;
-      }
+      // if (BigInt(res.result[1]) === 1n) {
+      //   this.status = Status.REGISTERED;
+      // }
     } catch (e) {
       /* no-op */
       console.log(e);
