@@ -38,18 +38,19 @@ export function Login({
 
   const onSubmit = useCallback(
     async (values: FormValues) => {
-      log({ type: "webauthn_login" });
       setIsLoggingIn(true);
 
-      try {
-        const {
-          account: {
-            credentials: {
-              webauthn: [{ id: credentialId, publicKey }],
-            },
-            contractAddress: address,
+      const {
+        account: {
+          credentials: {
+            webauthn: [{ id: credentialId, publicKey }],
           },
-        } = await fetchAccount(values.username);
+          contractAddress: address,
+        },
+      } = await fetchAccount(values.username);
+
+      try {
+        log({ type: "webauthn_login", address });
 
         const { data: beginLoginData } = await beginLogin(values.username);
         const signer = new WebauthnSigner(credentialId, publicKey);
@@ -80,6 +81,7 @@ export function Login({
           payload: {
             error: err?.message,
           },
+          address,
         });
       }
     },

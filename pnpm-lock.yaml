@@ -219,9 +219,6 @@ importers:
       '@solana/web3.js':
         specifier: ^1.73.0
         version: 1.73.0
-      '@starknet-react/core':
-        specifier: ^2.1.5
-        version: 2.1.5(get-starknet-core@3.2.0)(react@18.2.0)(starknet@5.24.3)
       '@wagmi/core':
         specifier: ^1.4.12
         version: 1.4.12(@types/react@18.2.21)(react@18.2.0)(typescript@5.2.2)(viem@1.20.2)
@@ -8915,8 +8912,6 @@ packages:
       webpack: ^5.0.0
     peerDependenciesMeta:
       '@next/font':
-        optional: true
-      '@storybook/addon-actions':
         optional: true
       typescript:
         optional: true
