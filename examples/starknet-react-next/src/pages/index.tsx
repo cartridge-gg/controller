@@ -25,7 +25,7 @@ const Home: NextPage = () => {
 
   const counterValue = useMemo(() => {
     const val = Array.isArray(counterResult) ? counterResult[0] : counterResult;
-    return val.toString(10);
+    return val?.toString(10);
   }, [counterResult]);
 
   return (

@@ -7,7 +7,7 @@
       "esnext"
     ],
     "declaration": true,
-    "target": "es2022",
+    "target": "ES2022",
     "module": "esnext",
     "strict": false,
     "jsx": "preserve",
@@ -20,7 +20,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "downlevelIteration": true,
-    "noEmit": true,
+    "noEmit": true
   },
   "include": [
     "next-env.d.ts",
@@ -29,5 +29,5 @@
   ],
   "exclude": [
     "node_modules"
-  ],
+  ]
 }

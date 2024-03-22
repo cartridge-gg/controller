@@ -2,7 +2,11 @@
   "compilerOptions": {
     "baseUrl": "./src",
     "rootDir": ".",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "declaration": true,
     "target": "ES2022",
     "module": "esnext",
@@ -18,7 +22,9 @@
     "isolatedModules": true,
     "downlevelIteration": true,
     "noEmit": true,
-    "types": ["@emotion/react/types/css-prop"]
+    "types": [
+      "@emotion/react/types/css-prop"
+    ]
   },
   "include": [
     "next-env.d.ts",
@@ -27,5 +33,7 @@
     "src/components/ModelViewer.jsx",
     "../ui/src/components/icons/StarknetGray.tsx"
   ],
-  "exclude": ["node_modules"],
+  "exclude": [
+    "node_modules"
+  ]
 }

@@ -1,6 +1,6 @@
 import {
   useAccount,
-  useContract,
+  // useContract,
   useSignTypedData,
 } from "@starknet-react/core";
 import { useState } from "react";
@@ -8,9 +8,9 @@ import { typedData } from "starknet";
 
 export function SignMessage() {
   const { address, account } = useAccount();
-  const { contract } = useContract({
-    address,
-  });
+  // const { contract } = useContract({
+  //   address,
+  // });
 
   const defaultMessage: typedData.TypedData = {
     types: {
@@ -50,7 +50,7 @@ export function SignMessage() {
   const [message, setMessage] = useState(defaultMessage);
   const { signTypedData, data: signature } = useSignTypedData(message);
 
-  const msgHash = typedData.getMessageHash(message, address);
+  // const msgHash = typedData.getMessageHash(message, address);
 
   if (!account) {
     return null;
