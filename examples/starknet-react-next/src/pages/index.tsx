@@ -6,7 +6,6 @@ import { ConnectWallet } from "components/ConnectWallet";
 import { IncrementCounter } from "components/IncrementCounter";
 import { InvalidTxn } from "components/InvalidTxn";
 import { SignMessage } from "components/SignMessage";
-import { TransactionList } from "components/TransactionList";
 import { useCounterContract } from "hooks/counter";
 import Quests from "components/Quest";
 import { Abi } from "starknet";
@@ -45,7 +44,6 @@ const Home: NextPage = () => {
       <SignMessage />
       <TransferEth />
       <h2>Recent Transactions</h2>
-      <TransactionList />
     </div>
   );
 };

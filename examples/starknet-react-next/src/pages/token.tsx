@@ -7,7 +7,6 @@ import type { NextPage } from "next";
 import { useCallback, useMemo, useState } from "react";
 import { cairo, uint256 } from "starknet";
 import { ConnectWallet } from "components/ConnectWallet";
-import { TransactionList } from "components/TransactionList";
 import { useTokenContract } from "hooks/token";
 import { Abi } from "starknet";
 import Erc20Abi from "abi/erc20.json";
@@ -129,7 +128,6 @@ const TokenPage: NextPage = () => {
       <p>Connected: {address}</p>
       <UserBalance />
       <MintToken />
-      <TransactionList />
     </div>
   );
 };

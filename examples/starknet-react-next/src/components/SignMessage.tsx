@@ -65,7 +65,10 @@ export function SignMessage() {
         onChange={(e) => setMessage(JSON.parse(e.target.value))}
       />
       <div>
-        <button onClick={signTypedData}>Sign Message</button>
+        <button onClick={() => signTypedData(message)}>Sign Message</button>
+        {/* 
+        // TODO: verify signature https://www.starknetjs.com/docs/guides/signature/#verify-in-the-starknet-network-with-the-account
+        
         {signature && (
           <button
             style={{ paddingLeft: "8px" }}
@@ -82,7 +85,7 @@ export function SignMessage() {
           >
             Validate Signature
           </button>
-        )}
+        )} */}
       </div>
       {signature && <div>Signature: {JSON.stringify(signature, null, 2)}</div>}
     </div>
