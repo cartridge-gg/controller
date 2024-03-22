@@ -125,7 +125,10 @@ export function Execute({
       .then((fees) => {
         setFees({ base: fees.overall_fee, max: fees.suggestedMaxFee });
       })
-      .catch((e) => setError(e));
+      .catch((e) => {
+        console.error(e);
+        setError(e);
+      });
   }, [
     account,
     controller,

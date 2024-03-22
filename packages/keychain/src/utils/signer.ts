@@ -18,25 +18,29 @@ export class DeviceSigner extends Signer {
     transactionsDetail: InvocationsSignerDetails,
     abis?: Abi[],
   ): Promise<Signature> {
-    const sig = await super.signTransaction(calls, transactionsDetail, abis);
-    const pub = await this.getPubKey();
-    return [
-      BigInt(CLASS_HASHES["0.0.1"].controller).toString(),
-      BigInt(pub).toString(),
-      ...(sig as string[]),
-    ];
+    return super.signTransaction(calls, transactionsDetail, abis);
+    // TODO: properly remove this
+    // const sig = await super.signTransaction(calls, transactionsDetail, abis);
+    // const pub = await this.getPubKey();
+    // return [
+    //   BigInt(CLASS_HASHES["0.0.1"].controller).toString(),
+    //   BigInt(pub).toString(),
+    //   ...(sig as string[]),
+    // ];
   }
 
   public async signMessage(
     typedData: typedData.TypedData,
     accountAddress: string,
   ): Promise<Signature> {
-    const sig = await super.signMessage(typedData, accountAddress);
-    const pub = await this.getPubKey();
-    return [
-      BigInt(CLASS_HASHES["0.0.1"].controller).toString(),
-      BigInt(pub).toString(),
-      ...(sig as string[]),
-    ];
+    return super.signMessage(typedData, accountAddress);
+    // TODO: properly remove this
+    // const sig = await super.signMessage(typedData, accountAddress);
+    // const pub = await this.getPubKey();
+    // return [
+    //   BigInt(CLASS_HASHES["0.0.1"].controller).toString(),
+    //   BigInt(pub).toString(),
+    //   ...(sig as string[]),
+    // ];
   }
 }
