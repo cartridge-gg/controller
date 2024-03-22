@@ -101,7 +101,7 @@ export function StarterPack({
 
   const { data: accountData, isLoading: accountLoading } = useAccountInfoQuery(
     {
-      address: addAddressPadding(controller?.address),
+      address: controller ? addAddressPadding(controller.address) : undefined,
     },
     { enabled: !!controller },
   );
