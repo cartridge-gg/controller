@@ -19,32 +19,28 @@ use std::sync::Arc;
 
 use crate::felt_ser::to_felts;
 
-use super::{cairo_args::VerifyWebauthnSignerArgs, P256r1Signer};
+use super::{cairo_args::VerifyWebauthnSignerArgs, signers::device::DeviceError};
 use crate::abigen::account::WebauthnSignature;
+use crate::webauthn_signer::signers::Signer;
 
-pub struct WebauthnAccount<P>
+pub struct WebauthnAccount<P, S>
 where
     P: Provider + Send,
+    S: Signer + Send,
 {
     provider: P,
-    // Later the struct will be generic over the signer type
-    // and will support "external" signers
-    signer: P256r1Signer,
+    signer: S,
     address: FieldElement,
     chain_id: FieldElement,
     block_id: BlockId,
     origin: String,
 }
-impl<P> WebauthnAccount<P>
+impl<P, S> WebauthnAccount<P, S>
 where
     P: Provider + Send,
+    S: Signer + Send,
 {
-    pub fn new(
-        provider: P,
-        signer: P256r1Signer,
-        address: FieldElement,
-        chain_id: FieldElement,
-    ) -> Self {
+    pub fn new(provider: P, signer: S, address: FieldElement, chain_id: FieldElement) -> Self {
         Self {
             provider,
             signer,
@@ -74,9 +70,10 @@ impl<'a> From<&'a Call> for SerializableCall<'a> {
     }
 }
 
-impl<P> ExecutionEncoder for WebauthnAccount<P>
+impl<P, S> ExecutionEncoder for WebauthnAccount<P, S>
 where
     P: Provider + Send,
+    S: Signer + Send,
 {
     fn encode_calls(&self, calls: &[Call]) -> Vec<FieldElement> {
         to_felts(&calls.iter().map(SerializableCall::from).collect::<Vec<_>>())
@@ -87,13 +84,16 @@ where
 pub enum SignError {
     #[error("Signer error: {0}")]
     Signer(EcdsaSignError),
+    #[error("Device error: {0}")]
+    Device(DeviceError),
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<P> Account for WebauthnAccount<P>
+impl<P, S> Account for WebauthnAccount<P, S>
 where
     P: Provider + Send + Sync,
+    S: Signer + Send + Sync,
 {
     type SignError = SignError;
 
@@ -112,7 +112,7 @@ where
     ) -> Result<Vec<FieldElement>, Self::SignError> {
         let tx_hash = execution.transaction_hash(self.chain_id, self.address, query_only, self);
         let challenge = tx_hash.to_bytes_be().to_vec();
-        let assertion = self.signer.sign(&challenge);
+        let assertion = self.signer.sign(&challenge).await?;
 
         let args =
             VerifyWebauthnSignerArgs::from_response(self.origin.clone(), challenge, assertion);
@@ -164,9 +164,10 @@ where
     }
 }
 
-impl<P> ConnectedAccount for WebauthnAccount<P>
+impl<P, S> ConnectedAccount for WebauthnAccount<P, S>
 where
     P: Provider + Send + Sync,
+    S: Signer + Send + Sync,
 {
     type Provider = P;
 

@@ -18,7 +18,7 @@ use crate::{
 };
 use crate::{
     deploy_contract::single_owner_account, tests::runners::TestnetRunner,
-    webauthn_signer::P256r1Signer,
+    webauthn_signer::signers::p256r1::P256r1Signer,
 };
 
 use super::super::deployment_test::{declare, deploy};
@@ -112,7 +112,7 @@ where
     }
     pub async fn webauthn_executor(
         &self,
-    ) -> CartridgeAccount<WebauthnAccount<&JsonRpcClient<HttpTransport>>> {
+    ) -> CartridgeAccount<WebauthnAccount<&JsonRpcClient<HttpTransport>, P256r1Signer>> {
         CartridgeAccount::new(
             self.address,
             WebauthnAccount::new(

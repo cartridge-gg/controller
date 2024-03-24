@@ -28,13 +28,14 @@ thiserror.workspace = true
 toml.workspace = true
 u256-literal.workspace = true
 url.workspace = true
+wasm-bindgen-futures.workspace = true
 wasm-bindgen.workspace = true
-webauthn-rs-proto.workspace = true
+wasm-webauthn.workspace = true
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tokio.workspace = true
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen-test = "0.3.34"
 js-sys = "0.3.69"
 web-sys = "0.3.69"
-wasm-bindgen-futures = "0.4.42"

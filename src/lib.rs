@@ -6,12 +6,6 @@ pub mod abigen;
 pub mod felt_ser;
 pub mod session_token;
 
+#[cfg(not(target_arch = "wasm32"))]
 #[cfg(test)]
 pub mod tests;
-
-use wasm_bindgen::prelude::*;
-
-#[wasm_bindgen]
-extern "C" {
-    pub fn alert(s: &str);
-}
