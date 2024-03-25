@@ -24,6 +24,9 @@ export const providers = {
   [constants.StarknetChainId.SN_MAIN]: new RpcProvider({
     nodeUrl: "http://localhost:5050",
   }),
+  [constants.StarknetChainId.SN_SEPOLIA]: new RpcProvider({
+    nodeUrl: "http://localhost:5050",
+  }),
 };
 
 class Controller {
@@ -128,6 +131,12 @@ class Controller {
         ),
         [constants.StarknetChainId.SN_GOERLI]: new DeviceAccount(
           providers[constants.StarknetChainId.SN_GOERLI],
+          address,
+          this.keychain,
+          this.modal,
+        ),
+        [constants.StarknetChainId.SN_SEPOLIA]: new DeviceAccount(
+          providers[constants.StarknetChainId.SN_SEPOLIA],
           address,
           this.keychain,
           this.modal,
@@ -272,6 +281,12 @@ class Controller {
         ),
         [constants.StarknetChainId.SN_GOERLI]: new DeviceAccount(
           providers[constants.StarknetChainId.SN_GOERLI],
+          response.address,
+          this.keychain,
+          this.modal,
+        ),
+        [constants.StarknetChainId.SN_SEPOLIA]: new DeviceAccount(
+          providers[constants.StarknetChainId.SN_SEPOLIA],
           response.address,
           this.keychain,
           this.modal,

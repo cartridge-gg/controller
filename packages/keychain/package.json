@@ -39,7 +39,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-query": "^3.39.2",
-    "starknet": "^5.24.3",
+    "starknet": "^6.6.0",
     "use-sound": "^4.0.1",
     "usehooks-ts": "^2.9.1",
     "viem": "^1.20.2",

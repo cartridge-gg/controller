@@ -89,6 +89,19 @@ export default class Controller {
           options,
         ),
       ),
+      [constants.StarknetChainId.SN_SEPOLIA]: new Account(
+        constants.StarknetChainId.SN_SEPOLIA,
+        process.env.NEXT_PUBLIC_RPC_SEPOLIA,
+        address,
+        this.signer,
+        new WebauthnAccount(
+          process.env.NEXT_PUBLIC_RPC_SEPOLIA,
+          address,
+          credentialId,
+          this.publicKey,
+          options,
+        ),
+      ),
     };
 
     Storage.set(

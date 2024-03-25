@@ -68,7 +68,7 @@ export const verifyMessageHash = async (
       ],
     });
 
-    const isRegistered = res?.result[0] === "0x1";
+    const isRegistered = res[0] === "0x1";
     if (isRegistered) {
       return ec.starkCurve.verify(
         // @ts-expect-error TODO(#244): Adapt signature
@@ -88,7 +88,7 @@ export const verifyMessageHash = async (
         "latest",
       );
 
-      return res?.result[0] === "0x1";
+      return res[0] === "0x1";
     }
   } else {
     const res = await (

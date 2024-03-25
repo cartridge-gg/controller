@@ -55,8 +55,8 @@ export function useEthBalance({
           setEthBalance(
             formatEther(
               uint256.uint256ToBN({
-                low: res.result[0],
-                high: res.result[1],
+                low: res[0],
+                high: res[1],
               }),
             ),
           );

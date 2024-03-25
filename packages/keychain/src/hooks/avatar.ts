@@ -119,8 +119,8 @@ export const callContract = async (address: string): Promise<AttributeData> => {
     calldata: [cairo.felt(tokenId.low), cairo.felt(tokenId.high)],
   });
 
-  res.result.shift();
-  const data = res.result.map((felt) =>
+  res.shift();
+  const data = res.map((felt) =>
     Buffer.from(felt.substring(2), "hex").toString(),
   );
 

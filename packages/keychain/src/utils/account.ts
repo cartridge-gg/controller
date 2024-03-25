@@ -63,7 +63,7 @@ class Account extends BaseAccount {
     signer: SignerInterface,
     webauthn: WebauthnAccount,
   ) {
-    super({ rpc: { nodeUrl } }, address, signer);
+    super({ nodeUrl }, address, signer);
 
     this.rpc = new RpcProvider({ nodeUrl });
     this.selector = selectors["0.0.3"].deployment(address, chainId);
@@ -246,7 +246,7 @@ class Account extends BaseAccount {
         super.execute(calls, null, {
           maxFee: transactionsDetail.maxFee,
           nonce: BigInt(transactionsDetail.nonce) + 1n,
-          version: hash.transactionVersion,
+          version: 1n,
         }),
       ]);
       Storage.remove(selectors[VERSION].register(this.address, this._chainId));
@@ -314,7 +314,7 @@ class Account extends BaseAccount {
         walletAddress: this.address,
         nonce: nextNonce,
         maxFee: constants.ZERO,
-        version: hash.transactionVersion,
+        version: "0x2",
         chainId: this._chainId,
         cairoVersion: this.cairoVersion,
       };
@@ -328,7 +328,7 @@ class Account extends BaseAccount {
       const invokeDetails = {
         nonce: nextNonce,
         maxFee: constants.ZERO,
-        version: hash.transactionVersion,
+        version: "0x2",
       } as InvocationsDetailsWithNonce;
       const invocationBulk = [
         pendingRegister.invoke,
@@ -341,10 +341,22 @@ class Account extends BaseAccount {
         (prev, estimate) => {
           const overall_fee = prev.overall_fee + estimate.overall_fee;
           return {
+            ...prev,
             overall_fee: overall_fee,
             gas_consumed: prev.gas_consumed + estimate.gas_consumed,
             gas_price: prev.gas_price + estimate.gas_price,
             suggestedMaxFee: overall_fee,
+            // TODO(#244): Set resource bounds
+            resourceBounds: {
+              l1_gas: {
+                max_amount: "",
+                max_price_per_unit: "",
+              },
+              l2_gas: {
+                max_amount: "",
+                max_price_per_unit: "",
+              },
+            },
           };
         },
         {
@@ -352,6 +364,17 @@ class Account extends BaseAccount {
           gas_consumed: 0n,
           gas_price: 0n,
           suggestedMaxFee: 0n,
+          unit: "WEI",
+          resourceBounds: {
+            l1_gas: {
+              max_amount: "",
+              max_price_per_unit: "",
+            },
+            l2_gas: {
+              max_amount: "",
+              max_price_per_unit: "",
+            },
+          },
         },
       );
 
@@ -403,24 +426,25 @@ class Account extends BaseAccount {
     ];
 
     const nonce = await this.getNonce();
-    const version = hash.transactionVersion;
-    const calldata = transaction.fromCallsToExecuteCalldata(calls);
+    // TODO(#244): check version
+    const version = "0x2";
+    const compiledCalldata = transaction.fromCallsToExecuteCalldata(calls);
 
     const gas = 28000n;
     const gasPrice = await getGasPrice(this._chainId);
     const fee = BigInt(gasPrice) * gas;
-    const suggestedMaxFee = num.toHex(stark.estimatedFeeToMaxFee(fee));
+    const maxFee = num.toHex(stark.estimatedFeeToMaxFee(fee));
 
-    let msgHash = hash.calculateTransactionHash(
-      this.address,
+    const msgHash = hash.calculateInvokeTransactionHash({
+      senderAddress: this.address,
       version,
-      calldata,
-      suggestedMaxFee,
-      this._chainId,
+      compiledCalldata,
+      maxFee,
+      chainId: this._chainId,
       nonce,
-    );
+    });
 
-    let challenge = Uint8Array.from(
+    const challenge = Uint8Array.from(
       msgHash
         .slice(2)
         .padStart(64, "0")
@@ -432,10 +456,14 @@ class Account extends BaseAccount {
     const signature = formatAssertion(assertion);
 
     const invoke = {
-      invocation: { contractAddress: this.address, calldata, signature },
+      invocation: {
+        contractAddress: this.address,
+        compiledCalldata,
+        signature,
+      },
       details: {
         nonce,
-        maxFee: suggestedMaxFee,
+        maxFee,
         version,
       },
     };

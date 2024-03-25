@@ -83,7 +83,7 @@ export function Execute({
       .then((res) => {
         setEthBalance(
           BigInt(
-            `0x${res.result
+            `0x${res
               .map((r) => r.replace("0x", ""))
               .reverse()
               .join("")}`,
