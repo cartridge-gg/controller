@@ -191,8 +191,7 @@ class WebauthnAccount extends Account {
       publicKey,
       options ? options.rpId : undefined,
     );
-    // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account-sdk
-    super({ rpc: { nodeUrl } }, address, signer);
+    super({ nodeUrl }, address, signer);
     this.signer = signer;
   }
 

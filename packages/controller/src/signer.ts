@@ -53,21 +53,31 @@ export class Signer implements SignerInterface {
     transactionsDetail: InvocationsSignerDetails,
     abis?: Abi[],
   ): Promise<Signature> {
-    // NOTE(#244): Not implemented
-    return Promise.reject("Not implemented");
+    this.modal.open();
+    const res = await this.keychain.signTransaction(
+      transactions,
+      transactionsDetail,
+      abis,
+    );
+    this.modal.close();
+    return res;
   }
 
   public async signDeployAccountTransaction(
     transaction: DeployAccountSignerDetails,
   ): Promise<Signature> {
-    // NOTE(#244): Not implemented
-    return Promise.reject("Not implemented");
+    this.modal.open();
+    const res = await this.keychain.signDeployAccountTransaction(transaction);
+    this.modal.close();
+    return res;
   }
 
   public async signDeclareTransaction(
     transaction: DeclareSignerDetails,
   ): Promise<Signature> {
-    // NOTE(#244): Not implemented
-    return Promise.reject("Not implemented");
+    this.modal.open();
+    const res = await this.keychain.signDeclareTransaction(transaction);
+    this.modal.close();
+    return res;
   }
 }

@@ -10,6 +10,9 @@ import {
   EstimateFee,
   DeclareContractPayload,
   BigNumberish,
+  InvocationsSignerDetails,
+  DeployAccountSignerDetails,
+  DeclareSignerDetails,
 } from "starknet";
 
 export type Assertion = {
@@ -115,11 +118,19 @@ export interface Keychain {
   sessions(): Promise<{
     [key: string]: Session;
   }>;
-
   signMessage(
     typedData: typedData.TypedData,
     account: string,
   ): Promise<Signature | Error>;
+  signTransaction(
+    transactions: Call[],
+    transactionsDetail: InvocationsSignerDetails,
+    abis?: Abi[],
+  ): Promise<Signature>;
+  signDeployAccountTransaction(
+    transaction: DeployAccountSignerDetails,
+  ): Promise<Signature>;
+  signDeclareTransaction(transaction: DeclareSignerDetails): Promise<Signature>;
 
   issueStarterPack(id: string): Promise<InvokeFunctionResponse>;
   showQuests(gameId: string): Promise<void>;

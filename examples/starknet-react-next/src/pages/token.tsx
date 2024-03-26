@@ -32,8 +32,7 @@ function UserBalance() {
       return <div>Error!</div>;
     }
 
-    // TODO(#244) check. it used to be `uint256.uint256ToBN(data[0])`
-    const balance = uint256.uint256ToBN({ low: data[0], high: data[1] });
+    const balance = uint256.uint256ToBN(cairo.uint256(data[0]));
     return <div>{balance.toString(10)}</div>;
   }, [data, isLoading, error]);
 

@@ -52,7 +52,6 @@ class Account extends BaseAccount {
   private selector: string;
   _chainId: constants.StarknetChainId;
   updated: boolean = true;
-  // NOTE(#244): This will be replacaed by account-sdk
   webauthn: WebauthnAccount;
   waitingForDeploy: boolean = false;
 
@@ -426,7 +425,6 @@ class Account extends BaseAccount {
     ];
 
     const nonce = await this.getNonce();
-    // TODO(#244): check version
     const version = "0x2";
     const compiledCalldata = transaction.fromCallsToExecuteCalldata(calls);
 

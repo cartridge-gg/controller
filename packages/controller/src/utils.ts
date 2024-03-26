@@ -9,6 +9,7 @@ import {
   RpcProvider,
   BigNumberish,
   num,
+  ArraySignatureType,
 } from "starknet";
 import { PROXY_CLASS, CLASS_HASHES } from "./constants";
 import { decode } from "cbor-x";
@@ -51,7 +52,7 @@ export const verifyMessageHash = async (
   provider: RpcProvider,
   address: string,
   messageHash: BigNumberish,
-  signature: Signature,
+  signature: ArraySignatureType,
 ) => {
   const isDeployed = !!provider.getClassHashAt(address, "latest");
 
@@ -63,7 +64,6 @@ export const verifyMessageHash = async (
         CLASS_HASHES["0.0.1"].controller,
         hash.getSelector("is_public_key"),
         "0x1",
-        // @ts-expect-error TODO(#244): Adapt signature
         signature[0],
       ],
     });
@@ -72,17 +72,15 @@ export const verifyMessageHash = async (
     if (isRegistered) {
       return ec.starkCurve.verify(
         // @ts-expect-error TODO(#244): Adapt signature
-        signature[0],
-        num.toHex(messageHash),
-        // @ts-expect-error TODO(#244): Adapt signature
         signature,
+        num.toHex(messageHash),
+        signature[0],
       );
     } else {
       const res = await provider.callContract(
         {
           contractAddress: address,
           entrypoint: "isValidSignature",
-          // @ts-expect-error TODO(#244): Adapt signature
           calldata: [messageHash, signature.length, ...signature],
         },
         "latest",
@@ -110,10 +108,10 @@ export const verifyMessageHash = async (
       return false;
     }
 
-    const pubKeyCbor = decode(
-      // @ts-expect-error TODO(#244): Adapt signature
-      BigInt(account.credential.publicKey).toBuffer(),
-    )[0];
+    const buf = Buffer.alloc(32);
+    buf.writeBigInt64BE(BigInt(account.credential.publicKey));
+
+    const pubKeyCbor = decode(buf)[0];
     const x = BigInt("0x" + pubKeyCbor[-2].toString("hex"));
     const y = BigInt("0x" + pubKeyCbor[-3].toString("hex"));
     const { x: x0, y: x1, z: x2 } = split(x);
@@ -122,7 +120,6 @@ export const verifyMessageHash = async (
       account.id,
       { x0, x1, x2 },
       { y0, y1, y2 },
-      // @ts-expect-error TODO(#244): Adapt signature
       signature[0],
     );
     if (computedAddress !== address) {
@@ -130,11 +127,9 @@ export const verifyMessageHash = async (
     }
 
     return ec.starkCurve.verify(
-      // @ts-expect-error TODO(#244): Adapt signature
       signature[0],
       BigInt(messageHash).toString(),
-      // @ts-expect-error TODO(#244): Adapt signature
-      signature,
+      account.credential.publicKey,
     );
   }
 };
