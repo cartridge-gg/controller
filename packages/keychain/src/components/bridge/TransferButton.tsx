@@ -2,13 +2,20 @@ import { Button } from "@chakra-ui/react";
 import { parseEther } from "viem";
 import { useCallback, useEffect, useState } from "react";
 import { cairo, constants } from "starknet";
-import { mainnet, useContractWrite, usePrepareContractWrite } from "wagmi";
+import {
+  mainnet,
+  sepolia,
+  useContractWrite,
+  usePrepareContractWrite,
+} from "wagmi";
 import { goerli } from "wagmi/chains";
 import {
   EthL1BridgeGoerli,
   EthL1BridgeMainnet,
+  EthL1BridgeSepolia,
   EthL2BridgeGoerli,
   EthL2BridgeMainnet,
+  EthL2BridgeSepolia,
 } from "./constants";
 import EthL1BridgeABI from "./abis/EthL1Bridge.json";
 import Account from "utils/account";
@@ -34,10 +41,14 @@ export function TransferButton({
     const from =
       account._chainId === constants.StarknetChainId.SN_MAIN
         ? EthL1BridgeMainnet
+        : account._chainId === constants.StarknetChainId.SN_SEPOLIA
+        ? EthL1BridgeSepolia
         : EthL1BridgeGoerli;
     const to =
       account._chainId === constants.StarknetChainId.SN_MAIN
         ? EthL2BridgeMainnet
+        : account._chainId === constants.StarknetChainId.SN_SEPOLIA
+        ? EthL2BridgeSepolia
         : EthL2BridgeGoerli;
     const res = await account.rpc.estimateMessageFee({
       from_address: from,
@@ -59,10 +70,14 @@ export function TransferButton({
     chainId:
       account._chainId === constants.StarknetChainId.SN_MAIN
         ? mainnet.id
+        : account._chainId === constants.StarknetChainId.SN_SEPOLIA
+        ? sepolia.id
         : goerli.id,
     address:
       account._chainId === constants.StarknetChainId.SN_MAIN
         ? EthL1BridgeMainnet
+        : account._chainId === constants.StarknetChainId.SN_SEPOLIA
+        ? EthL2BridgeSepolia
         : EthL1BridgeGoerli,
     abi: EthL1BridgeABI,
     functionName: "deposit",
