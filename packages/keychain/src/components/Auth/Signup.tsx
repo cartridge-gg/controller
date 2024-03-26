@@ -207,20 +207,20 @@ function Form({
 
         const controller = new Controller(privateKey, address, credentialId);
 
-        controller.account(constants.StarknetChainId.SN_GOERLI).status =
+        controller.account(constants.StarknetChainId.SN_SEPOLIA).status =
           Status.DEPLOYING;
         client
           .request(DeployAccountDocument, {
             id: values.username,
-            chainId: "starknet:SN_GOERLI",
+            chainId: "starknet:SN_SEPOLIA",
             starterpackIds: starterData?.game?.starterPack?.chainID?.includes(
-              "SN_GOERLI",
+              "SN_SEPOLIA",
             )
               ? [starterData?.game?.starterPack?.id]
               : undefined,
           })
           .then(() => {
-            controller.account(constants.StarknetChainId.SN_GOERLI).sync();
+            controller.account(constants.StarknetChainId.SN_SEPOLIA).sync();
           });
 
         controller.account(constants.StarknetChainId.SN_MAIN).status =

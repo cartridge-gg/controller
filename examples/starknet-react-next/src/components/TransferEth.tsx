@@ -7,7 +7,7 @@ const ETH_CONTRACT =
 
 export const TransferEth = () => {
   const [chainId, setChainId] = useState<constants.StarknetChainId>(
-    constants.StarknetChainId.SN_GOERLI,
+    constants.StarknetChainId.SN_SEPOLIA,
   );
   const { account } = useAccount();
   const [accepted, setAccepted] = useState<boolean>();
@@ -106,7 +106,7 @@ export const TransferEth = () => {
           type="radio"
           id="testnet"
           name="network"
-          value={constants.StarknetChainId.SN_GOERLI}
+          value={constants.StarknetChainId.SN_SEPOLIA}
           onChange={(evt) =>
             setChainId(evt.target.value as constants.StarknetChainId)
           }
