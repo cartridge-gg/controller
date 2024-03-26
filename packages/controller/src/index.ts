@@ -35,7 +35,7 @@ class Controller {
   private policies: Policy[] = [];
   private url: string = "https://x.cartridge.gg";
   public chainId: constants.StarknetChainId =
-    constants.StarknetChainId.SN_GOERLI;
+    constants.StarknetChainId.SN_SEPOLIA;
   public accounts?: { [key in constants.StarknetChainId]: AccountInterface };
   private modal?: Modal;
   private starterPackId?: string;

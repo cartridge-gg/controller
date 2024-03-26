@@ -39,11 +39,8 @@ const Home: NextPage = () => {
         <IncrementCounter />
         <InvalidTxn />
       </div>
-      <h2>Quests</h2>
-      <Quests />
       <SignMessage />
       <TransferEth />
-      <h2>Recent Transactions</h2>
     </div>
   );
 };

@@ -12,7 +12,7 @@ import { constants } from "starknet";
 
 export function Container({
   children,
-  chainId = constants.StarknetChainId.SN_GOERLI,
+  chainId = constants.StarknetChainId.SN_SEPOLIA,
   onBack,
   hideAccount,
   ...rest

@@ -99,7 +99,7 @@ type Quests = {
 
 const Index: NextPage = () => {
   const [chainId, setChainId] = useState<constants.StarknetChainId>(
-    constants.StarknetChainId.SN_GOERLI,
+    constants.StarknetChainId.SN_SEPOLIA,
   );
   const [controller, setController] = useController();
   const [context, setContext] = useState<Context>();

@@ -65,7 +65,7 @@ export function DeploymentRequired({
         {typeof deployHash === "string" && (
           <Link
             href={`https://${
-              account._chainId === constants.StarknetChainId.SN_GOERLI
+              account._chainId === constants.StarknetChainId.SN_SEPOLIA
                 ? "testnet."
                 : undefined
             }starkscan.co/tx/${deployHash}`}

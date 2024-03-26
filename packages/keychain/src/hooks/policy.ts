@@ -35,7 +35,7 @@ export function useUrlPolicys(): {
     setChainId(
       chainId
         ? (chainId as constants.StarknetChainId)
-        : constants.StarknetChainId.SN_GOERLI,
+        : constants.StarknetChainId.SN_SEPOLIA,
     );
 
     setIsValidating(true);

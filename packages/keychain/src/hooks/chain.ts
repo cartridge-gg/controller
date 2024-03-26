@@ -6,7 +6,7 @@ export function useChainName(chainId: constants.StarknetChainId) {
     switch (chainId) {
       case constants.StarknetChainId.SN_MAIN:
         return "Mainnet";
-      case constants.StarknetChainId.SN_GOERLI:
+      case constants.StarknetChainId.SN_SEPOLIA:
         return "Testnet";
     }
   }, [chainId]);
