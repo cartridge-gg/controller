@@ -19,19 +19,6 @@ export function ConnectWallet() {
         >
           {address ? "Disconnect" : "Connect"}
         </button>
-        <button
-          onClick={async () => {
-            const _txnHash = await (
-              connector as unknown as ControllerConnector
-            ).issueStarterPack("influence");
-
-            if (!address) {
-              connect({ connector });
-            }
-          }}
-        >
-          Claim as {address ? "Logged in User" : "New User"}
-        </button>
       </div>
     </>
   );

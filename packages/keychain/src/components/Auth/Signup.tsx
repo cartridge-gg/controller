@@ -223,21 +223,22 @@ function Form({
             controller.account(constants.StarknetChainId.SN_SEPOLIA).sync();
           });
 
-        controller.account(constants.StarknetChainId.SN_MAIN).status =
-          Status.DEPLOYING;
-        client
-          .request(DeployAccountDocument, {
-            id: values.username,
-            chainId: "starknet:SN_MAIN",
-            starterpackIds: starterData?.game?.starterPack?.chainID?.includes(
-              "SN_MAIN",
-            )
-              ? [starterData?.game?.starterPack?.id]
-              : undefined,
-          })
-          .then(() => {
-            controller.account(constants.StarknetChainId.SN_MAIN).sync();
-          });
+        // TODO: Enable once controller is ready for mainnet
+        // controller.account(constants.StarknetChainId.SN_MAIN).status =
+        //   Status.DEPLOYING;
+        // client
+        //   .request(DeployAccountDocument, {
+        //     id: values.username,
+        //     chainId: "starknet:SN_MAIN",
+        //     starterpackIds: starterData?.game?.starterPack?.chainID?.includes(
+        //       "SN_MAIN",
+        //     )
+        //       ? [starterData?.game?.starterPack?.id]
+        //       : undefined,
+        //   })
+        //   .then(() => {
+        //     controller.account(constants.StarknetChainId.SN_MAIN).sync();
+        //   });
 
         if (onController) await onController(controller);
       },
