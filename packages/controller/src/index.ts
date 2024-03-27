@@ -19,13 +19,13 @@ import { createModal } from "./modal";
 
 export const providers = {
   [constants.StarknetChainId.SN_GOERLI]: new RpcProvider({
-    nodeUrl: "http://localhost:5050",
+    nodeUrl: "https://api.cartridge.gg/rpc/starknet-sepolia", // TODO: remove goerli
   }),
   [constants.StarknetChainId.SN_MAIN]: new RpcProvider({
-    nodeUrl: "http://localhost:5050",
+    nodeUrl: "https://api.cartridge.gg/rpc/starknet",
   }),
   [constants.StarknetChainId.SN_SEPOLIA]: new RpcProvider({
-    nodeUrl: "http://localhost:5050",
+    nodeUrl: "https://api.cartridge.gg/rpc/starknet-sepolia",
   }),
 };
 

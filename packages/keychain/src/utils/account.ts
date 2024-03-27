@@ -216,7 +216,8 @@ class Account extends BaseAccount {
       // }
     } catch (e) {
       /* no-op */
-      console.log(e);
+      console.log(this.rpc.getChainId());
+      console.error(e);
     }
   }
 
