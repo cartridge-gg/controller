@@ -46,7 +46,7 @@ export default class Controller {
   public publicKey: string;
   protected privateKey: string;
   protected credentialId: string;
-  protected accounts: { [key in constants.StarknetChainId]: Account };
+  protected accounts: Account[];
 
   constructor(
     privateKey: string,
@@ -62,34 +62,22 @@ export default class Controller {
     this.publicKey = ec.starkCurve.getStarkKey(privateKey);
     this.credentialId = credentialId;
 
-    this.accounts = {
-      [constants.StarknetChainId.SN_GOERLI]: new Account(
-        constants.StarknetChainId.SN_GOERLI,
-        process.env.NEXT_PUBLIC_RPC_GOERLI,
-        address,
-        this.signer,
-        new WebauthnAccount(
-          process.env.NEXT_PUBLIC_RPC_GOERLI,
-          address,
-          credentialId,
-          this.publicKey,
-          options,
-        ),
-      ),
-      [constants.StarknetChainId.SN_MAIN]: new Account(
-        constants.StarknetChainId.SN_MAIN,
-        process.env.NEXT_PUBLIC_RPC_MAINNET,
-        address,
-        this.signer,
-        new WebauthnAccount(
-          process.env.NEXT_PUBLIC_RPC_MAINNET,
-          address,
-          credentialId,
-          this.publicKey,
-          options,
-        ),
-      ),
-      [constants.StarknetChainId.SN_SEPOLIA]: new Account(
+    this.accounts = [
+      // TODO: Enable once controller is ready for mainnet
+      // [constants.StarknetChainId.SN_MAIN]: new Account(
+      //   constants.StarknetChainId.SN_MAIN,
+      //   process.env.NEXT_PUBLIC_RPC_MAINNET,
+      //   address,
+      //   this.signer,
+      //   new WebauthnAccount(
+      //     process.env.NEXT_PUBLIC_RPC_MAINNET,
+      //     address,
+      //     credentialId,
+      //     this.publicKey,
+      //     options,
+      //   ),
+      // ),
+      new Account(
         constants.StarknetChainId.SN_SEPOLIA,
         process.env.NEXT_PUBLIC_RPC_SEPOLIA,
         address,
@@ -102,7 +90,7 @@ export default class Controller {
           options,
         ),
       ),
-    };
+    ];
 
     Storage.set(
       selectors[VERSION].admin(this.address, process.env.NEXT_PUBLIC_ADMIN_URL),
@@ -129,8 +117,8 @@ export default class Controller {
     };
   }
 
-  account(chainId: constants.StarknetChainId): Account {
-    return this.accounts[chainId];
+  account(chainId: constants.StarknetChainId): Account | undefined {
+    return this.accounts.find((a) => a._chainId === chainId);
   }
 
   delete() {
