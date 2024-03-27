@@ -18,8 +18,11 @@ export function InvalidTxn() {
   }
 
   return (
-    <div>
-      <button onClick={() => write()}>Invalid Entrypoint</button>
-    </div>
+    <>
+      <h2>Invalid Entry Point</h2>
+      <div>
+        <button onClick={() => write()}>Invalid Entrypoint</button>
+      </div>
+    </>
   );
 }
