@@ -9,8 +9,8 @@
       "esnext"
     ],
     "declaration": true,
-    "target": "ES6",
-    "module": "commonjs",
+    "target": "ES2022",
+    "module": "ES2022",
     "strict": false,
     "jsx": "preserve",
     "allowJs": true,

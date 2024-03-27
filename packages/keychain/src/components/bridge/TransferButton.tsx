@@ -1,22 +1,23 @@
 import { Button } from "@chakra-ui/react";
-import BN from "bn.js";
-import { parseEther } from "ethers/lib/utils.js";
+import { parseEther } from "viem";
 import { useCallback, useEffect, useState } from "react";
-import { constants, Sequencer, uint256 } from "starknet";
+import { cairo, constants } from "starknet";
 import {
-  goerli,
   mainnet,
+  sepolia,
   useContractWrite,
   usePrepareContractWrite,
 } from "wagmi";
+import { goerli } from "wagmi/chains";
 import {
   EthL1BridgeGoerli,
   EthL1BridgeMainnet,
+  EthL1BridgeSepolia,
   EthL2BridgeGoerli,
   EthL2BridgeMainnet,
+  EthL2BridgeSepolia,
 } from "./constants";
 import EthL1BridgeABI from "./abis/EthL1Bridge.json";
-import { BigNumber } from "ethers";
 import Account from "utils/account";
 
 export function TransferButton({
@@ -32,57 +33,57 @@ export function TransferButton({
   onError: (err: any) => void;
   onTxSubmitted: (hash: string) => void;
 }) {
-  const [l2Fee, setL2Fee] = useState<number>();
+  const [l2Fee, setL2Fee] = useState<string>();
 
-  const estimateL2Fee =
-    useCallback(async (): Promise<Sequencer.EstimateFeeResponse> => {
-      const parsed = parseEther(value);
-      const amount = uint256.bnToUint256(new BN(parsed.toString()));
-      const from =
-        account._chainId === constants.StarknetChainId.MAINNET
-          ? EthL1BridgeMainnet
-          : EthL1BridgeGoerli;
-      const to =
-        account._chainId === constants.StarknetChainId.MAINNET
-          ? EthL2BridgeMainnet
-          : EthL2BridgeGoerli;
-      const res = await account.gateway.estimateMessageFee({
-        from_address: from,
-        to_address: to,
-        entry_point_selector: "handle_deposit",
-        payload: [
-          account.address,
-          amount.low.toString(),
-          amount.high.toString(),
-        ],
-      });
-      return res;
-    }, [account._chainId, account.gateway, account.address, value]);
+  const estimateL2Fee = useCallback(async () => {
+    const parsed = parseEther(value);
+    const amount = cairo.uint256(BigInt(parsed.toString()));
+    const from =
+      account._chainId === constants.StarknetChainId.SN_MAIN
+        ? EthL1BridgeMainnet
+        : account._chainId === constants.StarknetChainId.SN_SEPOLIA
+        ? EthL1BridgeSepolia
+        : EthL1BridgeGoerli;
+    const to =
+      account._chainId === constants.StarknetChainId.SN_MAIN
+        ? EthL2BridgeMainnet
+        : account._chainId === constants.StarknetChainId.SN_SEPOLIA
+        ? EthL2BridgeSepolia
+        : EthL2BridgeGoerli;
+    const res = await account.rpc.estimateMessageFee({
+      from_address: from,
+      to_address: to,
+      entry_point_selector: "handle_deposit",
+      payload: [account.address, amount.low.toString(), amount.high.toString()],
+    });
+    return res;
+  }, [account._chainId, account.rpc, account.address, value]);
 
   useEffect(() => {
     if (!value) return;
     estimateL2Fee().then((res) => {
-      setL2Fee((res as any).overall_fee);
+      setL2Fee(res.overall_fee);
     });
   }, [estimateL2Fee, value]);
 
   const { config, error: configError } = usePrepareContractWrite({
     chainId:
-      account._chainId === constants.StarknetChainId.MAINNET
+      account._chainId === constants.StarknetChainId.SN_MAIN
         ? mainnet.id
+        : account._chainId === constants.StarknetChainId.SN_SEPOLIA
+        ? sepolia.id
         : goerli.id,
     address:
-      account._chainId === constants.StarknetChainId.MAINNET
+      account._chainId === constants.StarknetChainId.SN_MAIN
         ? EthL1BridgeMainnet
+        : account._chainId === constants.StarknetChainId.SN_SEPOLIA
+        ? EthL2BridgeSepolia
         : EthL1BridgeGoerli,
     abi: EthL1BridgeABI,
     functionName: "deposit",
-    args: [
-      parseEther(value?.length ? value : "0"),
-      BigNumber.from(account.address),
-    ],
+    args: [parseEther(value?.length ? value : "0"), BigInt(account.address)],
     overrides: {
-      value: value && l2Fee ? parseEther(value).add(l2Fee) : undefined,
+      value: value && l2Fee ? parseEther(value) + BigInt(l2Fee) : undefined,
     },
     enabled: !disabled && value && !!l2Fee,
   });

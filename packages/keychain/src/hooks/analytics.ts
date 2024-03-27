@@ -1,4 +1,3 @@
-import { useAccount } from "@starknet-react/core";
 import { useRouter } from "next/router";
 import { useCallback } from "react";
 
@@ -14,16 +13,16 @@ export interface AnalyticsEvent {
     | "quest_claim"
     | "logout";
   payload?: object;
+  address: string;
 }
 
 export const useAnalytics = () => {
   const router = useRouter();
-  const { address } = useAccount();
   const event = useCallback(
-    ({ type, payload }: AnalyticsEvent) => {
+    ({ type, payload, address }: AnalyticsEvent) => {
       log(type, { address, path: router.pathname, ...payload });
     },
-    [address, router],
+    [router],
   );
 
   return {

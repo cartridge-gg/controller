@@ -8,9 +8,8 @@ import {
   VStack,
 } from "@chakra-ui/react";
 
-import { constants, number } from "starknet";
-import { formatUnits } from "ethers/lib/utils";
-import BN from "bn.js";
+import { constants } from "starknet";
+import { formatUnits } from "viem";
 import { Error } from "components/Error";
 
 async function fetchEthPrice() {
@@ -33,7 +32,7 @@ export function Fees({
 }: {
   error: Error;
   chainId: constants.StarknetChainId;
-  fees?: { base: BN; max: BN };
+  fees?: { base: bigint; max: bigint };
   balance: string;
   approved?: string;
 }) {
@@ -47,12 +46,12 @@ export function Fees({
       return;
     }
     async function compute() {
-      if (chainId === constants.StarknetChainId.MAINNET) {
+      if (chainId === constants.StarknetChainId.SN_MAIN) {
         let dollarUSLocale = Intl.NumberFormat("en-US");
         const { data } = await fetchEthPrice();
-        const usdeth = number.toBN(data.price.amount * 100);
-        const overallFee = fees.base.mul(usdeth).toString();
-        const suggestedMaxFee = fees.max.mul(usdeth).toString();
+        const usdeth = BigInt(data.price.amount) * 100n;
+        const overallFee = fees.base * usdeth;
+        const suggestedMaxFee = fees.max * usdeth;
         setFormattedFee({
           base: `~$${dollarUSLocale.format(
             parseFloat(formatUnits(overallFee, 20)),
@@ -65,14 +64,10 @@ export function Fees({
       }
 
       setFormattedFee(
-        fees.max.gt(number.toBN(10000000000000))
+        fees.max > 10000000000000n
           ? {
-              base: `~${parseFloat(
-                formatUnits(fees.base.toString(), 18),
-              ).toFixed(5)} eth`,
-              max: `~${parseFloat(formatUnits(fees.max.toString(), 18)).toFixed(
-                5,
-              )} eth`,
+              base: `~${parseFloat(formatUnits(fees.base, 18)).toFixed(5)} eth`,
+              max: `~${parseFloat(formatUnits(fees.max, 18)).toFixed(5)} eth`,
             }
           : {
               base: "<0.00001",

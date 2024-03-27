@@ -8,8 +8,8 @@
       "esnext"
     ],
     "composite": true,
-    "target": "es6",
-    "module": "commonjs",
+    "target": "ES2022",
+    "module": "ES2022",
     "sourceMap": true,
     "outDir": "lib",
     "strict": true,

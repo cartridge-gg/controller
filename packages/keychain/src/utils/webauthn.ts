@@ -1,7 +1,6 @@
 import {
   constants,
   hash,
-  number,
   stark,
   transaction,
   typedData,
@@ -17,6 +16,7 @@ import {
   EstimateFee,
   InvocationsDetails,
   InvokeFunctionResponse,
+  TransactionType,
 } from "starknet";
 import cbor from "cbor";
 import base64url from "base64url";
@@ -102,10 +102,12 @@ export class WebauthnSigner implements SignerInterface {
 
     const calldata = transaction.fromCallsToExecuteCalldata(calls);
 
+    // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account-sdk
     const msgHash = hash.calculateTransactionHash(
       transactionsDetail.walletAddress,
       transactionsDetail.version,
       calldata,
+      // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account-sdk
       transactionsDetail.maxFee,
       transactionsDetail.chainId,
       transactionsDetail.nonce,
@@ -141,12 +143,14 @@ export class WebauthnSigner implements SignerInterface {
     classHash,
     senderAddress,
     chainId,
+    // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account-sdk
     maxFee,
     version,
     nonce,
   }: DeclareSignerDetails) {
     const msgHash = hash.calculateDeclareTransactionHash(
       classHash,
+      // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account-sdk
       senderAddress,
       version,
       maxFee,
@@ -171,6 +175,7 @@ export class WebauthnSigner implements SignerInterface {
 }
 
 class WebauthnAccount extends Account {
+  // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account-sdk
   public signer: WebauthnSigner;
   constructor(
     nodeUrl: string,
@@ -186,7 +191,7 @@ class WebauthnAccount extends Account {
       publicKey,
       options ? options.rpId : undefined,
     );
-    super({ rpc: { nodeUrl } }, address, signer);
+    super({ nodeUrl }, address, signer);
     this.signer = signer;
   }
 
@@ -199,8 +204,9 @@ class WebauthnAccount extends Account {
     }: EstimateFeeDetails & { ext?: Buffer } = {},
   ): Promise<EstimateFee> {
     const transactions = Array.isArray(calls) ? calls : [calls];
-    const nonce = number.toBN(providedNonce ?? (await this.getNonce()));
-    const version = number.toBN(hash.transactionVersion);
+    const nonce = BigInt(providedNonce ?? (await this.getNonce()));
+    // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account-sdk
+    const version = hash.transactionVersion;
     const chainId = await this.getChainId();
 
     const signerDetails = {
@@ -214,6 +220,7 @@ class WebauthnAccount extends Account {
 
     const signature = await this.signer.signTransaction(
       transactions,
+      // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account-sdk
       signerDetails,
     );
 
@@ -238,22 +245,23 @@ class WebauthnAccount extends Account {
     transactionsDetail?: InvocationsDetails & { ext?: Buffer },
   ): Promise<InvokeFunctionResponse> {
     const transactions = Array.isArray(calls) ? calls : [calls];
-    const nonce = number.toBN(
-      transactionsDetail.nonce ?? (await this.getNonce()),
-    );
+    const nonce = BigInt(transactionsDetail.nonce ?? (await this.getNonce()));
     const maxFee =
       transactionsDetail.maxFee ??
+      // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account-sdk
       (await this.getSuggestedMaxFee(
-        { type: "INVOKE", payload: calls },
+        { type: TransactionType.INVOKE, payload: calls },
         transactionsDetail,
       ));
-    const version = number.toBN(hash.transactionVersion);
+    // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account-sdk
+    const version = BigInt(hash.transactionVersion);
     const chainId = await this.getChainId();
 
     const signerDetails: InvocationsSignerDetails = {
       walletAddress: this.address,
       nonce,
       maxFee,
+      // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account-sdk
       version,
       chainId,
     };
@@ -304,10 +312,10 @@ export function formatAssertion(assertion: RawAssertion): Signature {
   const rEnd = rStart + 32;
   const sStart = usignature[rEnd + 2] === 0 ? rEnd + 3 : rEnd + 2;
 
-  const r = number.toBN(
+  const r = BigInt(
     "0x" + Buffer.from(usignature.slice(rStart, rEnd)).toString("hex"),
   );
-  const s = number.toBN(
+  const s = BigInt(
     "0x" + Buffer.from(usignature.slice(sStart)).toString("hex"),
   );
 
@@ -315,7 +323,7 @@ export function formatAssertion(assertion: RawAssertion): Signature {
   const { x: s0, y: s1, z: s2 } = split(s);
 
   return [
-    number.toBN(CLASS_HASHES["0.0.1"].controller).toString(),
+    BigInt(CLASS_HASHES["0.0.1"].controller).toString(),
     "0",
     r0.toString(),
     r1.toString(),
@@ -410,8 +418,8 @@ export function parseAttestationObject(data) {
     const publicKeyCbor =
       decoded.authData.attestedCredentialData.credentialPublicKey;
 
-    const x = number.toBN("0x" + publicKeyCbor.get(-2).toString("hex"));
-    const y = number.toBN("0x" + publicKeyCbor.get(-3).toString("hex"));
+    const x = BigInt("0x" + publicKeyCbor.get(-2).toString("hex"));
+    const y = BigInt("0x" + publicKeyCbor.get(-3).toString("hex"));
 
     return { ...decoded, pub: { x, y } };
   } catch (e) {

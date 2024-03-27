@@ -1,13 +1,11 @@
 import { useContractRead } from "@starknet-react/core";
 import type { NextPage } from "next";
 import { useMemo } from "react";
-import { number } from "starknet";
 import { TransferEth } from "components/TransferEth";
 import { ConnectWallet } from "components/ConnectWallet";
 import { IncrementCounter } from "components/IncrementCounter";
 import { InvalidTxn } from "components/InvalidTxn";
 import { SignMessage } from "components/SignMessage";
-import { TransactionList } from "components/TransactionList";
 import { useCounterContract } from "hooks/counter";
 import Quests from "components/Quest";
 import { Abi } from "starknet";
@@ -26,10 +24,8 @@ const Home: NextPage = () => {
   });
 
   const counterValue = useMemo(() => {
-    if (counterResult && counterResult.length > 0) {
-      const value = number.toBN(counterResult[0]);
-      return value.toString(10);
-    }
+    const val = Array.isArray(counterResult) ? counterResult[0] : counterResult;
+    return val?.count.toString(10);
   }, [counterResult]);
 
   return (
@@ -43,12 +39,8 @@ const Home: NextPage = () => {
         <IncrementCounter />
         <InvalidTxn />
       </div>
-      <h2>Quests</h2>
-      <Quests />
       <SignMessage />
       <TransferEth />
-      <h2>Recent Transactions</h2>
-      <TransactionList />
     </div>
   );
 };

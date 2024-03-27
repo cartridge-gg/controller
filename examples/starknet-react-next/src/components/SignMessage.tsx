@@ -1,6 +1,6 @@
 import {
   useAccount,
-  useContract,
+  // useContract,
   useSignTypedData,
 } from "@starknet-react/core";
 import { useState } from "react";
@@ -8,9 +8,9 @@ import { typedData } from "starknet";
 
 export function SignMessage() {
   const { address, account } = useAccount();
-  const { contract } = useContract({
-    address,
-  });
+  // const { contract } = useContract({
+  //   address,
+  // });
 
   const defaultMessage: typedData.TypedData = {
     types: {
@@ -50,7 +50,7 @@ export function SignMessage() {
   const [message, setMessage] = useState(defaultMessage);
   const { signTypedData, data: signature } = useSignTypedData(message);
 
-  const msgHash = typedData.getMessageHash(message, address);
+  // const msgHash = typedData.getMessageHash(message, address);
 
   if (!account) {
     return null;
@@ -65,7 +65,10 @@ export function SignMessage() {
         onChange={(e) => setMessage(JSON.parse(e.target.value))}
       />
       <div>
-        <button onClick={signTypedData}>Sign Message</button>
+        <button onClick={() => signTypedData(message)}>Sign Message</button>
+        {/* 
+        // TODO: verify signature https://www.starknetjs.com/docs/guides/signature/#verify-in-the-starknet-network-with-the-account
+        
         {signature && (
           <button
             style={{ paddingLeft: "8px" }}
@@ -82,7 +85,7 @@ export function SignMessage() {
           >
             Validate Signature
           </button>
-        )}
+        )} */}
       </div>
       {signature && <div>Signature: {JSON.stringify(signature, null, 2)}</div>}
     </div>
