@@ -131,7 +131,11 @@ export const TransferEth = () => {
       <button style={{ marginLeft: "10px" }} onClick={() => executeOne()}>
         Transfer 1.0 ETH to self
       </button>
-      <p>Accepted: {accepted && accepted.toString()}</p>
+      {accepted && (
+        <>
+          <p>Accepted: {accepted && accepted.toString()}</p>
+        </>
+      )}
     </>
   );
 };
