@@ -19,7 +19,7 @@ import { useDebounce } from "hooks/debounce";
 import { useEffect, useState } from "react";
 import { constants } from "starknet";
 import { createConfig, mainnet, WagmiConfig, configureChains } from "wagmi";
-import { goerli } from "wagmi/chains";
+import { sepolia } from "wagmi/chains";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import { ConnectButton } from "./ConnectButton";
 import { TransferButton } from "./TransferButton";
@@ -60,7 +60,7 @@ export function BridgeEth({
           chainId:
             chainId === constants.StarknetChainId.SN_MAIN
               ? mainnet.id
-              : goerli.id,
+              : sepolia.id,
         });
       };
       balance().then((res) => {
@@ -238,7 +238,7 @@ export function BridgeEth({
               const networkName =
                 chainId === constants.StarknetChainId.SN_MAIN
                   ? "mainnet"
-                  : "goerli";
+                  : "sepolia";
               setErrorMessage(
                 `Please select the ${networkName} network in your wallet`,
               );
@@ -282,7 +282,7 @@ const SelectBox = forwardRef<
 ));
 
 const { chains, publicClient } = configureChains(
-  [mainnet, goerli],
+  [mainnet, sepolia],
   [
     alchemyProvider({
       apiKey: process.env.NEXT_PUBLIC_ETH_RPC_MAINNET.replace(
@@ -291,7 +291,7 @@ const { chains, publicClient } = configureChains(
       ),
     }),
     alchemyProvider({
-      apiKey: process.env.NEXT_PUBLIC_ETH_RPC_GOERLI.replace(/^.+\/v2\//, "$`"),
+      apiKey: process.env.NEXT_PUBLIC_ETH_RPC_SEPOLIA.replace(/^.+\/v2\//, "$`"),
     }),
   ],
 );

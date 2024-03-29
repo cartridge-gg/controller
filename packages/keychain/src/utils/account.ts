@@ -1,6 +1,6 @@
 import {
   CLASS_HASHES,
-  ETH_RPC_GOERLI,
+  ETH_RPC_SEPOLIA,
   ETH_RPC_MAINNET,
 } from "@cartridge/controller/src/constants";
 import {
@@ -509,7 +509,7 @@ async function getGasPrice(chainId: constants.StarknetChainId) {
   const uri =
     chainId === constants.StarknetChainId.SN_MAIN
       ? ETH_RPC_MAINNET
-      : ETH_RPC_GOERLI;
+      : ETH_RPC_SEPOLIA;
   const response = await fetch(uri, {
     method: "POST",
     headers: {
