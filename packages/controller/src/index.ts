@@ -19,13 +19,13 @@ import { createModal } from "./modal";
 
 export const providers = {
   [constants.StarknetChainId.SN_GOERLI]: new RpcProvider({
-    nodeUrl: "http://localhost:5050",
+    nodeUrl: process.env.NEXT_PUBLIC_RPC_GOERLI, // TODO: remove goerli
   }),
   [constants.StarknetChainId.SN_MAIN]: new RpcProvider({
-    nodeUrl: "http://localhost:5050",
+    nodeUrl: process.env.NEXT_PUBLIC_RPC_MAINNET,
   }),
   [constants.StarknetChainId.SN_SEPOLIA]: new RpcProvider({
-    nodeUrl: "http://localhost:5050",
+    nodeUrl: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
   }),
 };
 
