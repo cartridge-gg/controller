@@ -4,7 +4,7 @@ import { Loading } from "components/Loading";
 import { useEffect, useState } from "react";
 import { constants } from "starknet";
 import { mainnet, useWaitForTransaction } from "wagmi";
-import { goerli } from "wagmi/chains";
+import { sepolia } from "wagmi/chains";
 import { CheckIcon, ExternalIcon, TransferDuoIcon } from "@cartridge/ui";
 import { PortalBanner } from "components/PortalBanner";
 
@@ -25,7 +25,7 @@ export function TxnTracker({
     state: CardState.PENDING,
   });
   const etherscanSubdomain =
-    chainId === constants.StarknetChainId.SN_MAIN ? "" : "goerli.";
+    chainId === constants.StarknetChainId.SN_MAIN ? "" : "sepolia.";
   const etherscanHref = `https://${etherscanSubdomain}etherscan.io/tx/${ethTxnHash}`;
 
   return (
@@ -101,7 +101,7 @@ function Card({
 }) {
   const { data } = useWaitForTransaction({
     chainId:
-      chainId === constants.StarknetChainId.SN_MAIN ? mainnet.id : goerli.id,
+      chainId === constants.StarknetChainId.SN_MAIN ? mainnet.id : sepolia.id,
     hash: ethTxnHash as `0x${string}`,
     enabled: state === CardState.PENDING,
   });

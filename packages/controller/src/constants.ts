@@ -1,7 +1,7 @@
 export const ETH_RPC_MAINNET =
   "https://eth-mainnet.g.alchemy.com/v2/OGPRMquXP3K7oTkLrmVZpjCd1DswtYz3";
-export const ETH_RPC_GOERLI =
-  "https://eth-goerli.g.alchemy.com/v2/RMPbO9CyB-lVmkbpXCyg8W482pZDDht_";
+export const ETH_RPC_SEPOLIA =
+  "https://eth-sepolia.g.alchemy.com/v2/mURnclB5pn5elDfyzgTN4W2GR-rOYevI"
 
 export const CONTRACT_ETH =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
