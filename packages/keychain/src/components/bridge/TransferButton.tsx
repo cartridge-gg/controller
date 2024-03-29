@@ -4,11 +4,10 @@ import { useCallback, useEffect, useState } from "react";
 import { cairo, constants } from "starknet";
 import {
   mainnet,
-  sepolia,
   useContractWrite,
   usePrepareContractWrite,
 } from "wagmi";
-import { goerli } from "wagmi/chains";
+import { goerli, sepolia } from "wagmi/chains";
 import {
   EthL1BridgeGoerli,
   EthL1BridgeMainnet,

@@ -110,7 +110,7 @@ export const callContract = async (address: string): Promise<AttributeData> => {
   const tokenId = cairo.uint256(address);
 
   const provider = new RpcProvider({
-    nodeUrl: process.env.NEXT_PUBLIC_RPC_GOERLI,
+    nodeUrl: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
   });
 
   let res = await provider.callContract({
