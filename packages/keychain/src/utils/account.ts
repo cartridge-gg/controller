@@ -63,7 +63,6 @@ class Account extends BaseAccount {
     webauthn: WebauthnAccount,
   ) {
     super({ nodeUrl }, address, signer);
-    console.log(nodeUrl);
     this.rpc = new RpcProvider({ nodeUrl });
     this.selector = selectors["0.0.3"].deployment(address, chainId);
     this._chainId = chainId;
@@ -216,8 +215,7 @@ class Account extends BaseAccount {
       // }
     } catch (e) {
       /* no-op */
-      console.log(await this.rpc.getChainId());
-      console.error(e);
+      console.log(e);
     }
   }
 
