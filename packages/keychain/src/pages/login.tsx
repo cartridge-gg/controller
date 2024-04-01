@@ -8,7 +8,7 @@ const Login: NextPage = () => {
   const { sp: starterPackId } = router.query as { sp: string };
   return (
     <LoginComponent
-      chainId={constants.StarknetChainId.TESTNET}
+      chainId={constants.StarknetChainId.SN_SEPOLIA}
       onSignup={() => router.push({ pathname: "/signup", query: router.query })}
       onComplete={() => {
         if (starterPackId) {

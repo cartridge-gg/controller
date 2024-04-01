@@ -51,7 +51,7 @@ class DeviceAccount extends Account {
   ): Promise<EstimateFee> {
     return this.keychain.estimateInvokeFee(calls, {
       ...details,
-      chainId: this.chainId,
+      chainId: await this.getChainId(),
     });
   }
 
@@ -61,7 +61,7 @@ class DeviceAccount extends Account {
   ): Promise<EstimateFee> {
     return this.keychain.estimateDeclareFee(payload, {
       ...details,
-      chainId: this.chainId,
+      chainId: await this.getChainId(),
     });
   }
 
@@ -103,7 +103,10 @@ class DeviceAccount extends Account {
       );
       this.modal.close();
 
-      if (res2.code !== ResponseCodes.SUCCESS) {
+      if (
+        res2.code !== ResponseCodes.SUCCESS &&
+        res2.code !== ResponseCodes.CANCELED
+      ) {
         throw new Error(res2.message);
       }
 

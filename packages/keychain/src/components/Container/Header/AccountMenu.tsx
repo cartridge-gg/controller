@@ -75,7 +75,7 @@ function useAvatar(address: string) {
 }
 
 function usePointsData(address: string) {
-  const pointsChain = "starknet:SN_GOERLI";
+  const pointsChain = "starknet:SN_SEPOLIA";
   const pointsTokenAccountId = `${pointsChain}/${pointsChain}:${
     address || ""
   }/erc20:${CONTRACT_POINTS}`;

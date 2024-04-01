@@ -1,9 +1,10 @@
 import { EthereumIcon, Loading } from "@cartridge/ui";
 import { Button, Text } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { SequencerProvider, constants, uint256 } from "starknet";
+import { constants, uint256 } from "starknet";
 import { CONTRACT_ETH } from "@cartridge/controller/src/constants";
-import { BigNumber, utils } from "ethers";
+import { formatEther } from "viem";
+import { providers } from "@cartridge/controller";
 
 // TODO: Round to specific digits so that width doesn't change?
 export function EthBalance({
@@ -41,28 +42,21 @@ export function useEthBalance({
 
   useEffect(() => {
     if (address) {
-      const provider = new SequencerProvider({
-        network:
-          chainId === constants.StarknetChainId.MAINNET
-            ? "mainnet-alpha"
-            : "goerli-alpha",
-      });
+      const provider = providers[chainId];
 
       provider
         .callContract({
           contractAddress: CONTRACT_ETH,
           entrypoint: "balanceOf",
-          calldata: [BigNumber.from(address).toString()],
+          calldata: [BigInt(address)],
         })
         .then((res) => {
           setEthBalance(
-            utils.formatEther(
-              uint256
-                .uint256ToBN({
-                  low: res.result[0],
-                  high: res.result[1],
-                })
-                .toString(),
+            formatEther(
+              uint256.uint256ToBN({
+                low: res[0],
+                high: res[1],
+              }),
             ),
           );
         });

@@ -1,6 +1,5 @@
 import {
   constants,
-  number,
   Abi,
   Call,
   InvocationsDetails,
@@ -10,6 +9,10 @@ import {
   EstimateFeeDetails,
   EstimateFee,
   DeclareContractPayload,
+  BigNumberish,
+  InvocationsSignerDetails,
+  DeployAccountSignerDetails,
+  DeclareSignerDetails,
 } from "starknet";
 
 export type Assertion = {
@@ -27,18 +30,13 @@ export type Assertion = {
 export type Session = {
   chainId: constants.StarknetChainId;
   policies: Policy[];
-  maxFee: number.BigNumberish;
+  maxFee: BigNumberish;
 };
 
 export type Policy = {
   target: string;
   method?: string;
 };
-
-export enum SupportedChainIds {
-  MAINNET = "0x534e5f4d41494e",
-  TESTNET = "0x534e5f474f45524c49",
-}
 
 export enum ResponseCodes {
   SUCCESS = "SUCCESS",
@@ -73,7 +71,7 @@ export interface Keychain {
   connect(
     policies: Policy[],
     starterPackId?: string,
-    chainId?: SupportedChainIds,
+    chainId?: constants.StarknetChainId,
   ): Promise<ConnectReply | Error>;
   disconnect(): void;
 
@@ -120,11 +118,19 @@ export interface Keychain {
   sessions(): Promise<{
     [key: string]: Session;
   }>;
-
   signMessage(
     typedData: typedData.TypedData,
     account: string,
   ): Promise<Signature | Error>;
+  signTransaction(
+    transactions: Call[],
+    transactionsDetail: InvocationsSignerDetails,
+    abis?: Abi[],
+  ): Promise<Signature>;
+  signDeployAccountTransaction(
+    transaction: DeployAccountSignerDetails,
+  ): Promise<Signature>;
+  signDeclareTransaction(transaction: DeclareSignerDetails): Promise<Signature>;
 
   issueStarterPack(id: string): Promise<InvokeFunctionResponse>;
   showQuests(gameId: string): Promise<void>;

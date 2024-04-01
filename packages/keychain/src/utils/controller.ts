@@ -1,15 +1,11 @@
 import {
   constants,
   ec,
-  KeyPair,
-  hash,
-  number,
-  transaction,
-  Call,
   Invocation,
   InvocationsDetails,
   SignerInterface,
-  stark,
+  BigNumberish,
+  num,
 } from "starknet";
 import equal from "fast-deep-equal";
 
@@ -44,21 +40,16 @@ type SerializedController = {
   address: string;
 };
 
-enum SupportedChainIds {
-  MAINNET = "0x534e5f4d41494e",
-  TESTNET = "0x534e5f474f45524c49",
-}
-
 export default class Controller {
   public address: string;
   public signer: SignerInterface;
   public publicKey: string;
-  protected keypair: KeyPair;
+  protected privateKey: string;
   protected credentialId: string;
-  protected accounts: { [key in SupportedChainIds]: Account };
+  protected accounts: Account[];
 
   constructor(
-    keypair: KeyPair,
+    privateKey: string,
     address: string,
     credentialId: string,
     options?: {
@@ -66,39 +57,40 @@ export default class Controller {
     },
   ) {
     this.address = address;
-    this.signer = new DeviceSigner(keypair);
-    this.keypair = keypair;
-    this.publicKey = ec.getStarkKey(keypair);
+    this.signer = new DeviceSigner(privateKey);
+    this.privateKey = privateKey;
+    this.publicKey = ec.starkCurve.getStarkKey(privateKey);
     this.credentialId = credentialId;
 
-    this.accounts = {
-      [constants.StarknetChainId.TESTNET]: new Account(
-        constants.StarknetChainId.TESTNET,
-        process.env.NEXT_PUBLIC_RPC_GOERLI,
+    this.accounts = [
+      // TODO: Enable once controller is ready for mainnet
+      // [constants.StarknetChainId.SN_MAIN]: new Account(
+      //   constants.StarknetChainId.SN_MAIN,
+      //   process.env.NEXT_PUBLIC_RPC_MAINNET,
+      //   address,
+      //   this.signer,
+      //   new WebauthnAccount(
+      //     process.env.NEXT_PUBLIC_RPC_MAINNET,
+      //     address,
+      //     credentialId,
+      //     this.publicKey,
+      //     options,
+      //   ),
+      // ),
+      new Account(
+        constants.StarknetChainId.SN_SEPOLIA,
+        process.env.NEXT_PUBLIC_RPC_SEPOLIA,
         address,
         this.signer,
         new WebauthnAccount(
-          process.env.NEXT_PUBLIC_RPC_GOERLI,
+          process.env.NEXT_PUBLIC_RPC_SEPOLIA,
           address,
           credentialId,
           this.publicKey,
           options,
         ),
       ),
-      [constants.StarknetChainId.MAINNET]: new Account(
-        constants.StarknetChainId.MAINNET,
-        process.env.NEXT_PUBLIC_RPC_MAINNET,
-        address,
-        this.signer,
-        new WebauthnAccount(
-          process.env.NEXT_PUBLIC_RPC_MAINNET,
-          address,
-          credentialId,
-          this.publicKey,
-          options,
-        ),
-      ),
-    };
+    ];
 
     Storage.set(
       selectors[VERSION].admin(this.address, process.env.NEXT_PUBLIC_ADMIN_URL),
@@ -125,15 +117,15 @@ export default class Controller {
     };
   }
 
-  account(chainId: constants.StarknetChainId): Account {
-    return this.accounts[chainId];
+  account(chainId: constants.StarknetChainId): Account | undefined {
+    return this.accounts.find((a) => a._chainId === chainId);
   }
 
   delete() {
     return Storage.clear();
   }
 
-  approve(origin: string, policies: Policy[], maxFee?: number.BigNumberish) {
+  approve(origin: string, policies: Policy[], maxFee?: BigNumberish) {
     Storage.set(selectors[VERSION].session(this.address, origin), {
       policies,
       maxFee,
@@ -160,7 +152,7 @@ export default class Controller {
   store() {
     Storage.set("version", VERSION);
     return Storage.set(selectors[VERSION].account(this.address), {
-      privateKey: number.toHex(this.keypair.priv),
+      privateKey: num.toHex(this.privateKey),
       publicKey: this.publicKey,
       address: this.address,
       credentialId: this.credentialId,
@@ -191,8 +183,7 @@ export default class Controller {
       migrations[version][VERSION](address);
     }
 
-    const keypair = ec.getKeyPair(privateKey);
-    return new Controller(keypair, address, credentialId);
+    return new Controller(privateKey, address, credentialId);
   }
 }
 

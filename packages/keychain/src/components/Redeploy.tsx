@@ -23,16 +23,16 @@ export function Redeploy({
         address: addAddressPadding(controller.address),
       });
 
-      controller.account(constants.StarknetChainId.TESTNET).status =
+      controller.account(constants.StarknetChainId.SN_SEPOLIA).status =
         Status.DEPLOYING;
 
       await client.request(DeployAccountDocument, {
         id: result.accounts.edges?.[0]?.node.id,
-        chainId: "starknet:SN_GOERLI",
+        chainId: "starknet:SN_SEPOLIA",
       });
 
       console.log("sync redeploy");
-      controller.account(constants.StarknetChainId.TESTNET).sync();
+      controller.account(constants.StarknetChainId.SN_SEPOLIA).sync();
     };
 
     deploy();

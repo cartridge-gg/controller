@@ -15,12 +15,15 @@ export function Connect({
   chainId: constants.StarknetChainId;
   policies: Policy[];
   origin: string;
-  onConnect: () => void;
+  onConnect: (policies: Policy[]) => void;
   onCancel: () => void;
   onLogout: () => void;
 }) {
   return (
-    <Container chainId={chainId} onLogout={onLogout}>
+    <Container
+      chainId={constants.StarknetChainId.SN_SEPOLIA}
+      onLogout={onLogout}
+    >
       <PortalBanner
         Icon={PlugNewDuoIcon}
         title="Create Session"
@@ -29,7 +32,7 @@ export function Connect({
 
       <PortalFooter origin={origin} policies={policies}>
         <>
-          <Button colorScheme="colorful" onClick={onConnect}>
+          <Button colorScheme="colorful" onClick={() => onConnect(policies)}>
             create
           </Button>
 

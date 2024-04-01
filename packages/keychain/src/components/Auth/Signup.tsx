@@ -7,7 +7,7 @@ import {
   Formik,
   useFormikContext,
 } from "formik";
-import { constants, ec, KeyPair } from "starknet";
+import { constants, ec, stark } from "starknet";
 import {
   PortalBanner,
   PortalFooter,
@@ -57,11 +57,11 @@ export function Signup({
     () => (typeof window !== "undefined" ? window.top !== window.self : false),
     [],
   );
-  const { keypair, deviceKey } = useMemo(() => {
-    const keypair = ec.genKeyPair();
+  const { privateKey, deviceKey } = useMemo(() => {
+    const privateKey = stark.randomAddress();
     return {
-      keypair,
-      deviceKey: ec.getStarkKey(keypair),
+      privateKey,
+      deviceKey: ec.starkCurve.getStarkKey(privateKey),
     };
   }, []);
 
@@ -145,7 +145,7 @@ export function Signup({
           <Form
             onLogin={onLogin}
             onController={onController}
-            keypair={keypair}
+            privateKey={privateKey}
             isRegistering={isRegistering}
             isLoading={isLoading}
             setIsRegistering={setIsRegistering}
@@ -165,14 +165,14 @@ function Form({
   context,
   onController,
   onLogin: onLoginProp,
-  keypair,
+  privateKey,
   isRegistering,
   isLoading,
   setIsRegistering,
   starterData,
   isSlot,
 }: Pick<SignupProps, "context" | "isSlot" | "onController" | "onLogin"> & {
-  keypair: KeyPair;
+  privateKey: string;
   isRegistering: boolean;
   isLoading: boolean;
   setIsRegistering: (val: boolean) => void;
@@ -205,39 +205,40 @@ function Form({
           },
         } = data;
 
-        const controller = new Controller(keypair, address, credentialId);
+        const controller = new Controller(privateKey, address, credentialId);
 
-        controller.account(constants.StarknetChainId.TESTNET).status =
+        controller.account(constants.StarknetChainId.SN_SEPOLIA).status =
           Status.DEPLOYING;
         client
           .request(DeployAccountDocument, {
             id: values.username,
-            chainId: "starknet:SN_GOERLI",
+            chainId: "starknet:SN_SEPOLIA",
             starterpackIds: starterData?.game?.starterPack?.chainID?.includes(
-              "SN_GOERLI",
+              "SN_SEPOLIA",
             )
               ? [starterData?.game?.starterPack?.id]
               : undefined,
           })
           .then(() => {
-            controller.account(constants.StarknetChainId.TESTNET).sync();
+            controller.account(constants.StarknetChainId.SN_SEPOLIA).sync();
           });
 
-        controller.account(constants.StarknetChainId.MAINNET).status =
-          Status.DEPLOYING;
-        client
-          .request(DeployAccountDocument, {
-            id: values.username,
-            chainId: "starknet:SN_MAIN",
-            starterpackIds: starterData?.game?.starterPack?.chainID?.includes(
-              "SN_MAIN",
-            )
-              ? [starterData?.game?.starterPack?.id]
-              : undefined,
-          })
-          .then(() => {
-            controller.account(constants.StarknetChainId.MAINNET).sync();
-          });
+        // TODO: Enable once controller is ready for mainnet
+        // controller.account(constants.StarknetChainId.SN_MAIN).status =
+        //   Status.DEPLOYING;
+        // client
+        //   .request(DeployAccountDocument, {
+        //     id: values.username,
+        //     chainId: "starknet:SN_MAIN",
+        //     starterpackIds: starterData?.game?.starterPack?.chainID?.includes(
+        //       "SN_MAIN",
+        //     )
+        //       ? [starterData?.game?.starterPack?.id]
+        //       : undefined,
+        //   })
+        //   .then(() => {
+        //     controller.account(constants.StarknetChainId.SN_MAIN).sync();
+        //   });
 
         if (onController) await onController(controller);
       },

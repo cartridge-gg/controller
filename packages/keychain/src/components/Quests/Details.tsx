@@ -144,7 +144,7 @@ export function QuestDetails({
           disabled={questState !== QuestState.Claimable || !address}
           onClick={() => {
             mutateAsync({
-              accountId: `starknet:SN_GOERLI:${address}`,
+              accountId: `starknet:SN_SEPOLIA:${address}`,
               questId: selectedId,
             })
               .then((res) => {
