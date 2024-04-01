@@ -63,6 +63,7 @@ class Account extends BaseAccount {
     webauthn: WebauthnAccount,
   ) {
     super({ nodeUrl }, address, signer);
+
     this.rpc = new RpcProvider({ nodeUrl });
     this.selector = selectors["0.0.3"].deployment(address, chainId);
     this._chainId = chainId;
@@ -192,27 +193,18 @@ class Account extends BaseAccount {
         this.updated = false;
       }
 
-      // TODO: this needs to be updated to reflect webauthn and/or session token status
-      this.status = Status.REGISTERED;
-      // const pub = await this.signer.getPubKey();
-      // console.log(pub);
-      // const res = await this.rpc.callContract(
-      //   {
-      //     contractAddress: this.address,
-      //     entrypoint: "executeOnPlugin",
-      //     calldata: [
-      //       CLASS_HASHES["0.0.1"].controller,
-      //       hash.getSelector("is_public_key"),
-      //       "0x1",
-      //       pub,
-      //     ],
-      //   },
-      //   "pending",
-      // );
+      const pub = await this.signer.getPubKey();
+      const res = await this.rpc.callContract(
+        {
+          contractAddress: this.address,
+          entrypoint: "get_public_key",
+        },
+        "pending",
+      );
 
-      // if (BigInt(res.result[1]) === 1n) {
-      //   this.status = Status.REGISTERED;
-      // }
+      if (res[0] === pub) {
+        this.status = Status.REGISTERED;
+      }
     } catch (e) {
       /* no-op */
       console.log(e);
