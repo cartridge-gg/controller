@@ -87,7 +87,18 @@ export function SignMessage() {
           </button>
         )} */}
       </div>
-      {signature && <div>Signature: {JSON.stringify(signature, null, 2)}</div>}
+      {signature && (
+        <div>
+          <p>Signature:</p>
+          <pre>
+            <code>{JSON.stringify(signature, null, 2)}</code>
+          </pre>
+        </div>
+      )}
     </div>
   );
 }
+
+BigInt.prototype["toJSON"] = function () {
+  return this.toString();
+};
