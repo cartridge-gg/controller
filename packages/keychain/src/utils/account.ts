@@ -36,6 +36,7 @@ import selectors from "./selectors";
 import Storage from "./storage";
 import { RegisterData, VERSION } from "./controller";
 import WebauthnAccount, { formatAssertion } from "./webauthn";
+//import { WebauthnAccount } from "@cartridge/account-wasm";
 
 export enum Status {
   UNKNOWN = "UNKNOWN",
@@ -450,6 +451,7 @@ class Account extends BaseAccount {
         .match(/.{1,2}/g)
         .map((byte) => parseInt(byte, 16)),
     );
+
     const assertion = await this.webauthn.signer.sign(challenge);
     const signature = formatAssertion(assertion);
 

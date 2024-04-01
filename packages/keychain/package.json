@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@cartridge/controller": "workspace:^",
+    "@cartridge/account-wasm": "workspace:^",
     "@cartridge/penpal": "^6.2.3",
     "@cartridge/ui": "workspace:^",
     "@emotion/react": "^11.11.1",
