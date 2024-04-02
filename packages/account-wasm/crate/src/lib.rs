@@ -57,7 +57,7 @@ impl WebauthnAccount {
 
         let url = Url::parse(&rpc_url).map_err(|e| JsValue::from_str(&format!("{}", e)))?;
         let provider = JsonRpcClient::new(HttpTransport::new(url));
-        let credential_id = general_purpose::STANDARD
+        let credential_id = general_purpose::URL_SAFE_NO_PAD
             .decode(credential_id)
             .map_err(|e| JsValue::from_str(&format!("{}", e)))?;
         let signer = DeviceSigner::new(rp_id.clone(), credential_id);
