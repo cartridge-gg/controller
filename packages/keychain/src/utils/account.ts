@@ -28,15 +28,17 @@ import {
   InvocationsSignerDetails,
   Invocation,
   InvocationsDetailsWithNonce,
+  CallDetails,
+  AccountInvocationItem,
+  TransactionType,
 } from "starknet";
 import { AccountContractDocument } from "generated/graphql";
 import { client } from "utils/graphql";
 
 import selectors from "./selectors";
 import Storage from "./storage";
-import { RegisterData, VERSION } from "./controller";
-import WebauthnAccount, { formatAssertion } from "./webauthn";
-//import { WebauthnAccount } from "@cartridge/account-wasm";
+import { InvocationWithDetails, RegisterData, VERSION } from "./controller";
+import { WebauthnAccount } from "@cartridge/account-wasm";
 
 export enum Status {
   UNKNOWN = "UNKNOWN",
@@ -299,34 +301,37 @@ class Account extends BaseAccount {
       const pendingRegister = Storage.get(
         selectors[VERSION].register(this.address, this._chainId),
       );
+      const registerInvocation: AccountInvocationItem = {
+        type: TransactionType.INVOKE,
+        ...pendingRegister.invoke.invocation,
+        ...pendingRegister.invoke.details,
+      };
 
       const nextNonce = num.toHex(BigInt(details.nonce) + 1n);
       const signerDetails: InvocationsSignerDetails = {
         walletAddress: this.address,
         nonce: nextNonce,
         maxFee: constants.ZERO,
-        version: "0x2",
+        version: "0x1",
         chainId: this._chainId,
         cairoVersion: this.cairoVersion,
       };
 
       const signature = await this.signer.signTransaction(calls, signerDetails);
-      const invocation = {
+      const invocation: AccountInvocationItem = {
+        type: TransactionType.INVOKE,
         contractAddress: this.address,
-        calldata: transaction.fromCallsToExecuteCalldata(calls),
+        calldata: transaction.fromCallsToExecuteCalldata_cairo1(calls),
         signature,
-      } as Invocation;
-      const invokeDetails = {
         nonce: nextNonce,
         maxFee: constants.ZERO,
-        version: "0x2",
-      } as InvocationsDetailsWithNonce;
-      const invocationBulk = [
-        pendingRegister.invoke,
-        { invocation, invokeDetails },
-      ];
+        version: "0x1",
+      };
 
-      const estimates = await this.rpc.getEstimateFeeBulk(invocationBulk, {});
+      const estimates = await this.rpc.getEstimateFeeBulk(
+        [registerInvocation, invocation],
+        {},
+      );
 
       const fees = estimates.reduce<EstimateFee>(
         (prev, estimate) => {
@@ -398,7 +403,7 @@ class Account extends BaseAccount {
     this.status === Status.COUNTERFACTUAL ||
     this.status === Status.DEPLOYING
       ? super.signMessage(typedData)
-      : this.webauthn.signMessage(typedData));
+      : this.webauthn.signMessage()); // TODO: Fix on wasm side
   }
 
   async register(): Promise<RegisterData> {
@@ -406,61 +411,73 @@ class Account extends BaseAccount {
     const calls: Call[] = [
       {
         contractAddress: this.address,
-        entrypoint: "executeOnPlugin",
-        calldata: [
-          CLASS_HASHES["0.0.1"].controller,
-          hash.getSelector("add_device_key"),
-          1,
-          pubKey,
-        ],
+        entrypoint: "set_public_key",
+        calldata: [pubKey],
       },
     ];
 
     const nonce = await this.getNonce();
-    const version = "0x2";
-    const compiledCalldata = transaction.fromCallsToExecuteCalldata(calls);
+    const version = "0x1";
 
     const gas = 28000n;
     const gasPrice = await getGasPrice(this._chainId);
     const fee = BigInt(gasPrice) * gas;
     const maxFee = num.toHex(stark.estimatedFeeToMaxFee(fee));
 
-    const msgHash = hash.calculateInvokeTransactionHash({
-      senderAddress: this.address,
-      version,
-      compiledCalldata,
-      maxFee,
-      chainId: this._chainId,
-      nonce,
-    });
+    const signature = await this.webauthn
+      .signTransaction(calls, {
+        maxFee,
+        version,
+        nonce,
+      })
+      .catch((e) => {
+        console.error(e);
+      });
 
-    const challenge = Uint8Array.from(
-      msgHash
-        .slice(2)
-        .padStart(64, "0")
-        .slice(0, 64)
-        .match(/.{1,2}/g)
-        .map((byte) => parseInt(byte, 16)),
-    );
-
-    const assertion = await this.webauthn.signer.sign(challenge);
-    const signature = formatAssertion(assertion);
-
-    const invoke = {
+    const invoke: InvocationWithDetails = {
       invocation: {
         contractAddress: this.address,
-        compiledCalldata,
+        calldata: transaction.fromCallsToExecuteCalldata_cairo1(calls),
         signature,
       },
       details: {
-        nonce,
         maxFee,
         version,
+        nonce,
       },
     };
 
+    // const hash = await this.rpc
+    //   .invokeFunction(invoke, {
+    //     maxFee,
+    //     version,
+    //     nonce,
+    //   })
+    //   .catch((e) => {
+    //     console.error(e);
+    //   });
+
+    // console.log(hash);
+    // let txHash = hash.calculateInvokeTransactionHash({
+    //   senderAddress: this.address,
+    //   version,
+    //   compiledCalldata: transaction.fromCallsToExecuteCalldata_cairo1(calls),
+    //   maxFee,
+    //   chainId: this._chainId,
+    //   nonce,
+    // });
+
+    // let res = await this.rpc
+    //   .callContract({
+    //     contractAddress: this.address,
+    //     entrypoint: "verify_webauthn_signer",
+    //     calldata: [...signature, txHash],
+    //   })
+    //   .catch((e) => {
+    //     console.error(e);
+    //   });
+
     Storage.set(selectors[VERSION].register(this.address, this._chainId), {
-      assertion,
       invoke,
     });
 
@@ -470,7 +487,6 @@ class Account extends BaseAccount {
     });
 
     return {
-      assertion,
       invoke,
     };
   }

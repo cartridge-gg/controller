@@ -9,6 +9,10 @@ const nextConfig = {
   images: {
     domains: ["static.cartridge.gg", "static.localhost"],
   },
+  webpack: function (config) {
+    config.experiments = { asyncWebAssembly: true };
+    return config;
+  },
 };
 
 module.exports = nextConfig;

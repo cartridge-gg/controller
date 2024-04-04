@@ -9,13 +9,13 @@ import {
 } from "starknet";
 import equal from "fast-deep-equal";
 
-import { Policy, Session } from "@cartridge/controller";
+import { Assertion, Policy, Session } from "@cartridge/controller";
 
 import Storage from "utils/storage";
 
 import Account from "./account";
 import { DeviceSigner } from "./signer";
-import WebauthnAccount, { RawAssertion } from "./webauthn";
+import { WebauthnAccount } from "@cartridge/account-wasm";
 import selectors from "./selectors";
 import migrations from "./migrations";
 import { AccountInfoDocument } from "generated/graphql";
@@ -29,7 +29,6 @@ export type InvocationWithDetails = {
 };
 
 export type RegisterData = {
-  assertion: RawAssertion;
   invoke: InvocationWithDetails;
 };
 
@@ -82,12 +81,12 @@ export default class Controller {
         process.env.NEXT_PUBLIC_RPC_SEPOLIA,
         address,
         this.signer,
-        new WebauthnAccount(
+        WebauthnAccount.new(
           process.env.NEXT_PUBLIC_RPC_SEPOLIA,
+          constants.StarknetChainId.SN_SEPOLIA,
           address,
+          options?.rpId || process.env.NEXT_PUBLIC_RP_ID,
           credentialId,
-          this.publicKey,
-          options,
         ),
       ),
     ];

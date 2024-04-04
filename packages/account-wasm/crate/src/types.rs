@@ -1,27 +1,10 @@
 use serde::{Deserialize, Serialize};
 use starknet::{
     accounts::Call,
-    core::types::{FieldElement, FromStrError},
+    core::{types::{FieldElement, FromStrError}, utils::get_selector_from_name},
 };
 use std::str::FromStr;
 use wasm_bindgen::prelude::*;
-
-// pub struct CallWrapper(pub JsCall);
-
-// #[wasm_bindgen]
-// extern "C" {
-//   #[wasm_bindgen(typescript_type = "Call")]
-//   pub type JsCall;
-
-//   #[wasm_bindgen]
-//   fn contractAddress(this: &JsCall) -> String;
-
-//   #[wasm_bindgen]
-//   fn calldata(this: &JsCall) -> Vec<String>;
-
-//   #[wasm_bindgen]
-//   fn entrypoint(this: &JsCall) -> String;
-// }
 
 #[derive(Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -35,7 +18,7 @@ pub struct JsInvocationsDetails {
 #[serde(rename_all = "camelCase")]
 pub struct JsCall {
     pub contract_address: FieldElement,
-    pub entrypoint: FieldElement,
+    pub entrypoint: String,
     pub calldata: Vec<FieldElement>,
 }
 
@@ -44,7 +27,7 @@ impl TryFrom<JsCall> for Call {
 
     fn try_from(value: JsCall) -> Result<Self, Self::Error> {
         let contract_address = FieldElement::from_str(&value.contract_address.to_string())?;
-        let entrypoint = FieldElement::from_str(&value.entrypoint.to_string())?;
+        let entrypoint = get_selector_from_name(&value.entrypoint).unwrap();
         let calldata = value
             .calldata
             .iter()

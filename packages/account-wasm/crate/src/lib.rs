@@ -15,15 +15,10 @@ use types::{JsCall, JsInvocationsDetails};
 use url::Url;
 use wasm_bindgen::prelude::*;
 use web_sys::js_sys::{Array, Uint8Array};
+use web_sys::console;
 
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = console)]
-    fn log(s: &str);
 
-    #[wasm_bindgen(js_namespace = console)]
-    fn error(s: &str);
-}
+
 
 #[wasm_bindgen]
 pub struct WebauthnAccount {

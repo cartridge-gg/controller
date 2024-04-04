@@ -22,7 +22,7 @@ const selectors = {
     transaction: (address: string, hash: string) =>
       `@transaction/${address}/${hash}`,
     register: (address: string, chainId: constants.StarknetChainId) =>
-      `@register/${address}/${chainId}/set_device_key`,
+      `@register/${address}/${chainId}/set_public_key`,
   },
 };
 
