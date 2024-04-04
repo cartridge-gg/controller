@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use futures::channel::oneshot;
+use p256::NistP256;
 use std::result::Result;
 use wasm_bindgen_futures::spawn_local;
 use wasm_webauthn::*;
@@ -130,15 +131,23 @@ impl DeviceSigner {
 impl Signer for DeviceSigner {
     async fn sign(&self, challenge: &[u8]) -> Result<AuthenticatorAssertionResponse, SignError> {
         let GetAssertionResponse {
-            signature,
+            signature: encoded_sig,
+            rp_id_hash,
             client_data_json,
             flags,
             counter,
         } = self.get_assertion(challenge).await?;
 
+        let ecdsa_sig = ecdsa::Signature::<NistP256>::from_der(&encoded_sig).unwrap();
+        let r = ecdsa_sig.r().to_bytes(); 
+        let s = ecdsa_sig.s().to_bytes();
+
+        let mut signature = r.as_slice().to_vec();
+        signature.extend_from_slice(s.as_slice());
+
         Ok(AuthenticatorAssertionResponse {
             authenticator_data: AuthenticatorData {
-                rp_id_hash: [0; 32],
+                rp_id_hash,
                 flags,
                 sign_count: counter,
             },
