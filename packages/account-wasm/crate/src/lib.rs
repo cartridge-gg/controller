@@ -15,10 +15,6 @@ use types::{JsCall, JsInvocationsDetails};
 use url::Url;
 use wasm_bindgen::prelude::*;
 use web_sys::js_sys::{Array, Uint8Array};
-use web_sys::console;
-
-
-
 
 #[wasm_bindgen]
 pub struct WebauthnAccount {
