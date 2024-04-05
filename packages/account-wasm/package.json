@@ -1,0 +1,27 @@
+{
+  "name": "@cartridge/account-wasm",
+  "version": "0.1.0",
+  "description": "Wasm bindings for Cartridge Account",
+  "main": "./pkg/account_wasm.js",
+  "type": "module",
+  "scripts": {
+    "build-wasm": "cd crate && ./build.sh"
+  },
+  "files": [
+    "./pkg/account_wasm_bg.wasm",
+    "./pkg/account_wasm.js",
+    "./pkg/account_wasm_bg.js",
+    "./pkg/account_wasm.d.ts"
+  ],
+  "module": "./pkg/account_wasm.js",
+  "types": "./pkg/account_wasm.d.ts",
+  "sideEffects": [
+    "./pkg/account_wasm.js",
+    "./pkg/snippets/*"
+  ],
+  "devDependencies": {
+    "tsup": "^8.0.1",
+    "typescript": "^5.0.3",
+    "wasm-pack": "^0.12.1"
+  }
+}

@@ -23,7 +23,6 @@ import {
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
 import provision from "../methods/provision";
 import { register } from "../methods/register";
-import login from "../methods/login";
 import logout from "../methods/logout";
 import { revoke, session, sessions } from "../methods/sessions";
 import { Status } from "utils/account";
@@ -244,7 +243,6 @@ const Index: NextPage = () => {
         estimateInvokeFee: normalize(validate(estimateInvokeFee)),
         provision: normalize(provision),
         register: normalize(register),
-        login: normalize(login),
         logout: normalize(logout),
         probe: normalize(
           validate(
