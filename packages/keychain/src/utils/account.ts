@@ -417,7 +417,7 @@ class Account extends BaseAccount {
     const nonce = await this.getNonce();
     const version = "0x1";
 
-    const gas = 28000n;
+    const gas = 100000n;
     const gasPrice = await getGasPrice(this._chainId);
     const fee = BigInt(gasPrice) * gas;
     const maxFee = num.toHex(stark.estimatedFeeToMaxFee(fee));
