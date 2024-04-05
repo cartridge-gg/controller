@@ -161,6 +161,8 @@ class Account extends BaseAccount {
           deployTxnHash,
         );
 
+        console.log(deployTxnReceipt);
+
         // Pending txn so poll for inclusion.
         if (!("execution_status" in deployTxnReceipt)) {
           this.status = Status.DEPLOYING;
