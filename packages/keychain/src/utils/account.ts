@@ -308,16 +308,14 @@ class Account extends BaseAccount {
       };
 
       const nextNonce = num.toHex(BigInt(details.nonce) + 1n);
-      const signerDetails: InvocationsSignerDetails = {
+      const signature = await this.signer.signTransaction(calls, {
         walletAddress: this.address,
+        chainId: this._chainId,
+        cairoVersion: this.cairoVersion,
         nonce: nextNonce,
         maxFee: constants.ZERO,
         version: "0x1",
-        chainId: this._chainId,
-        cairoVersion: this.cairoVersion,
-      };
-
-      const signature = await this.signer.signTransaction(calls, signerDetails);
+      });
       const invocation: AccountInvocationItem = {
         type: TransactionType.INVOKE,
         contractAddress: this.address,
@@ -447,36 +445,6 @@ class Account extends BaseAccount {
       },
     };
 
-    // const hash = await this.rpc
-    //   .invokeFunction(invoke, {
-    //     maxFee,
-    //     version,
-    //     nonce,
-    //   })
-    //   .catch((e) => {
-    //     console.error(e);
-    //   });
-
-    // console.log(hash);
-    // let txHash = hash.calculateInvokeTransactionHash({
-    //   senderAddress: this.address,
-    //   version,
-    //   compiledCalldata: transaction.fromCallsToExecuteCalldata_cairo1(calls),
-    //   maxFee,
-    //   chainId: this._chainId,
-    //   nonce,
-    // });
-
-    // let res = await this.rpc
-    //   .callContract({
-    //     contractAddress: this.address,
-    //     entrypoint: "verify_webauthn_signer",
-    //     calldata: [...signature, txHash],
-    //   })
-    //   .catch((e) => {
-    //     console.error(e);
-    //   });
-
     Storage.set(selectors[VERSION].register(this.address, this._chainId), {
       invoke,
     });
@@ -534,3 +502,33 @@ async function getGasPrice(chainId: constants.StarknetChainId) {
   const data = await response.json();
   return data.result;
 }
+
+// const hash = await this.rpc
+//   .invokeFunction(invoke, {
+//     maxFee,
+//     version,
+//     nonce,
+//   })
+//   .catch((e) => {
+//     console.error(e);
+//   });
+
+// console.log(hash);
+// let txHash = hash.calculateInvokeTransactionHash({
+//   senderAddress: this.address,
+//   version,
+//   compiledCalldata: transaction.fromCallsToExecuteCalldata_cairo1(calls),
+//   maxFee,
+//   chainId: this._chainId,
+//   nonce,
+// });
+
+// let res = await this.rpc
+//   .callContract({
+//     contractAddress: this.address,
+//     entrypoint: "verify_webauthn_signer",
+//     calldata: [...signature, txHash],
+//   })
+//   .catch((e) => {
+//     console.error(e);
+//   });
