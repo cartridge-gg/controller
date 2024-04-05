@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b",
     "prepublish": "pnpm build",
     "dev": "tsc --watch",
     "format": "prettier --write \"src/**/*.ts\"",

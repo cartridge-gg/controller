@@ -1,4 +1,4 @@
-import { constants } from "starknet";
+import { Contract, constants } from "starknet";
 import Controller from "utils/controller";
 import { Container } from "./Container";
 import { useEffect, useState } from "react";
@@ -32,9 +32,11 @@ export function DeploymentRequired({
         return;
       }
       const data = await account.getContract();
+      // @ts-expect-error TODO: fix type error
       if (!data?.contract?.deployTransaction?.id) {
         return;
       }
+      // @ts-expect-error TODO: fix type error
       const deployTxnHash = data.contract.deployTransaction.id.split("/")[1];
       setDeployHash(deployTxnHash);
     };

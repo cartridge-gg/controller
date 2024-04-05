@@ -1,11 +1,13 @@
 {
   "name": "@cartridge/ui-next",
-  "private": true,
   "version": "0.1.0",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b",
     "format": "prettier ./src --write",
+    "lint": "eslint . --ext ts,tsx",
     "storybook": "storybook dev -p 6006",
     "storybook:build": "storybook build"
   },
@@ -62,7 +64,6 @@
     "autoprefixer": "^10.4.18",
     "eslint": "^8.56.0",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.5",
     "eslint-plugin-storybook": "^0.6.13",
     "postcss": "^8.4.35",
     "storybook": "^8.0.5",

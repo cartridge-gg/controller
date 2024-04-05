@@ -147,10 +147,12 @@ class Account extends BaseAccount {
         }
 
         const data = await this.getContract();
+        // @ts-expect-error TODO: fix type error
         if (!data?.contract?.deployTransaction?.id) {
           return;
         }
 
+        // @ts-expect-error TODO: fix type error
         const deployTxnHash = data.contract.deployTransaction.id.split("/")[1];
         const deployTxnReceipt = await this.rpc.getTransactionReceipt(
           deployTxnHash,
