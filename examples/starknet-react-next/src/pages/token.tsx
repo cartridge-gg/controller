@@ -56,7 +56,7 @@ function MintToken() {
 
     const amountBn = cairo.uint256(amount);
     return contract.populateTransaction["mint"]!(address, [address, amountBn]);
-  }, [address, contract]);
+  }, [address, contract, amount]);
 
   const { writeAsync, isPending, error, reset } = useContractWrite({
     calls,
@@ -82,7 +82,7 @@ function MintToken() {
     if (account && !amountError) {
       writeAsync();
     }
-  }, [account, amount]);
+  }, [account, amountError, reset, writeAsync]);
 
   const mintButtonDisabled = useMemo(() => {
     if (isPending) return true;
