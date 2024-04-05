@@ -15,7 +15,7 @@ import Storage from "utils/storage";
 
 import Account from "./account";
 import { DeviceSigner } from "./signer";
-import { WebauthnAccount } from "@cartridge/account-wasm";
+import { WebauthnAccount } from "account-wasm";
 import selectors from "./selectors";
 import migrations from "./migrations";
 import { AccountInfoDocument } from "generated/graphql";

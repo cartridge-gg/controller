@@ -210,9 +210,6 @@ importers:
 
   packages/keychain:
     dependencies:
-      '@cartridge/account-wasm':
-        specifier: workspace:^
-        version: link:../account-wasm
       '@cartridge/controller':
         specifier: workspace:^
         version: link:../controller
@@ -246,6 +243,9 @@ importers:
       '@web3auth/openlogin-adapter':
         specifier: ^4.2.2
         version: 4.2.2(@babel/runtime@7.22.6)(@solana/web3.js@1.73.0)
+      account-wasm:
+        specifier: ^0.1.0
+        version: 0.1.0
       base64url:
         specifier: ^3.0.1
         version: 3.0.1
@@ -12341,6 +12341,10 @@ packages:
     dependencies:
       mime-types: 2.1.35
       negotiator: 0.6.3
+
+  /account-wasm@0.1.0:
+    resolution: {integrity: sha512-o/6ilQzW2RFa9sTgwyqM2F0Nj8xdSDGAHaU6t4mL1m5j+z7irpb1kmJWlkfhvFz0uGUfDnCqpKTSUDqylCCCKA==}
+    dev: false
 
   /acorn-globals@6.0.0:
     resolution: {integrity: sha512-ZQl7LOWaF5ePqqcX4hLuv/bLXYQNfNWw2c0/yX/TsPRKamzHcTGQnlCjHT3TsmkOUVEPS3crCxiPfdzE/Trlhg==}

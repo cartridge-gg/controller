@@ -20,7 +20,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
     </StarknetConfig>
   );
 }
-
+console.log(process.env.NEXT_PUBLIC_VERCEL_ENV);
 const url =
   process.env.NEXT_PUBLIC_VERCEL_ENV === "preview"
     ? `https://keychain-git-${process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF}.preview.cartridge.gg`
