@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "build": "tsc && vite build",
+    "build": "tsc",
     "format": "prettier ./src --write",
     "storybook": "storybook dev -p 6006",
     "storybook:build": "storybook build"
