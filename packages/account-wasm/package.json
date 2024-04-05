@@ -4,10 +4,8 @@
   "description": "Wasm bindings for Cartridge Account",
   "main": "./pkg/account_wasm.js",
   "type": "module",
-  "private": true,
   "scripts": {
-    "build-wasm": "cd crate && ./build.sh",
-    "build": "npm run build-wasm && tsc"
+    "build-wasm": "cd crate && ./build.sh"
   },
   "files": [
     "./pkg/account_wasm_bg.wasm",
