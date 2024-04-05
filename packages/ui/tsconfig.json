@@ -15,7 +15,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
-    "emitDeclarationOnly": true,
     "types": ["@emotion/react/types/css-prop"]
   },
   "paths": {

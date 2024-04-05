@@ -16,6 +16,7 @@
     "account-wasm": "pnpm --filter @cartridge/account-wasm",
     "book": "pnpm --filter @cartridge/docs",
     "ui": "pnpm --filter @cartridge/ui",
+    "ui:next": "pnpm --filter @cartridge/ui-next",
     "example:next": "pnpm --filter starknet-react-next",
     "example:get-starknet": "pnpm --filter get-starknet",
     "test": "pnpm keychain test",

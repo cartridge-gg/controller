@@ -27,6 +27,7 @@ export function Redeploy({
         Status.DEPLOYING;
 
       await client.request(DeployAccountDocument, {
+        // @ts-expect-error TODO: fix type error
         id: result.accounts.edges?.[0]?.node.id,
         chainId: "starknet:SN_SEPOLIA",
       });
