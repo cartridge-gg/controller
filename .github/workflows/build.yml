@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+env:
+  CARGO_TERM_COLOR: always
+  RUST_VERSION: nightly-2023-09-26
+
 jobs:
   test:
     runs-on: ubuntu-latest
