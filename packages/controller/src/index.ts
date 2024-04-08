@@ -17,10 +17,7 @@ import {
 } from "./types";
 import { createModal } from "./modal";
 
-export const providers = {
-  [constants.StarknetChainId.SN_GOERLI]: new RpcProvider({
-    nodeUrl: process.env.NEXT_PUBLIC_RPC_GOERLI, // TODO: remove goerli
-  }),
+export const providers: { [key: string]: RpcProvider } = {
   [constants.StarknetChainId.SN_MAIN]: new RpcProvider({
     nodeUrl: process.env.NEXT_PUBLIC_RPC_MAINNET,
   }),
@@ -36,7 +33,7 @@ class Controller {
   private url: string = "https://x.cartridge.gg";
   public chainId: constants.StarknetChainId =
     constants.StarknetChainId.SN_SEPOLIA;
-  public accounts?: { [key in constants.StarknetChainId]: AccountInterface };
+  public accounts?: { [key: string]: AccountInterface };
   private modal?: Modal;
   private starterPackId?: string;
 
@@ -97,6 +94,7 @@ class Controller {
     if (!this.accounts) {
       return;
     }
+
     return this.accounts[this.chainId];
   }
 
@@ -125,12 +123,6 @@ class Controller {
       this.accounts = {
         [constants.StarknetChainId.SN_MAIN]: new DeviceAccount(
           providers[constants.StarknetChainId.SN_MAIN],
-          address,
-          this.keychain,
-          this.modal,
-        ),
-        [constants.StarknetChainId.SN_GOERLI]: new DeviceAccount(
-          providers[constants.StarknetChainId.SN_GOERLI],
           address,
           this.keychain,
           this.modal,
@@ -275,12 +267,6 @@ class Controller {
       this.accounts = {
         [constants.StarknetChainId.SN_MAIN]: new DeviceAccount(
           providers[constants.StarknetChainId.SN_MAIN],
-          response.address,
-          this.keychain,
-          this.modal,
-        ),
-        [constants.StarknetChainId.SN_GOERLI]: new DeviceAccount(
-          providers[constants.StarknetChainId.SN_GOERLI],
           response.address,
           this.keychain,
           this.modal,
