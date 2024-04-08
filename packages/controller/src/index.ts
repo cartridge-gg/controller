@@ -17,7 +17,7 @@ import {
 } from "./types";
 import { createModal } from "./modal";
 
-export const providers = {
+export const providers: { [key: string]: RpcProvider } = {
   [constants.StarknetChainId.SN_MAIN]: new RpcProvider({
     nodeUrl: process.env.NEXT_PUBLIC_RPC_MAINNET,
   }),
