@@ -1,0 +1,16 @@
+{
+  "name": "account-wasm",
+  "version": "0.1.0",
+  "files": [
+    "account_wasm_bg.wasm",
+    "account_wasm.js",
+    "account_wasm_bg.js",
+    "account_wasm.d.ts"
+  ],
+  "module": "account_wasm.js",
+  "types": "account_wasm.d.ts",
+  "sideEffects": [
+    "./account_wasm.js",
+    "./snippets/*"
+  ]
+}

@@ -38,7 +38,7 @@ import { client } from "utils/graphql";
 import selectors from "./selectors";
 import Storage from "./storage";
 import { InvocationWithDetails, RegisterData, VERSION } from "./controller";
-import { WebauthnAccount } from "account-wasm";
+import { WebauthnAccount } from "@cartridge/account-wasm";
 
 export enum Status {
   UNKNOWN = "UNKNOWN",
