@@ -31,14 +31,8 @@ export function DeploymentRequired({
       if (account.status !== Status.DEPLOYING) {
         return;
       }
-      const data = await account.getContract();
-      // @ts-expect-error TODO: fix type error
-      if (!data?.contract?.deployTransaction?.id) {
-        return;
-      }
-      // @ts-expect-error TODO: fix type error
-      const deployTxnHash = data.contract.deployTransaction.id.split("/")[1];
-      setDeployHash(deployTxnHash);
+      const hash = await account.getDeploymentTxn();
+      setDeployHash(hash);
     };
 
     fetch();
