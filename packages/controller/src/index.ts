@@ -139,7 +139,7 @@ class Controller {
       return;
     }
 
-    return this.account;
+    return !!this.accounts[this.chainId];
   }
 
   async switchChain(chainId: constants.StarknetChainId) {
@@ -236,7 +236,7 @@ class Controller {
 
   async connect() {
     if (this.accounts) {
-      return this.account;
+      return this.accounts[this.chainId];
     }
 
     if (!this.keychain || !this.modal) {
@@ -283,7 +283,7 @@ class Controller {
         await this.keychain.issueStarterPack(this.starterPackId);
       }
 
-      return this.account;
+      return this.accounts[this.chainId];
     } catch (e) {
       console.log(e);
     } finally {
