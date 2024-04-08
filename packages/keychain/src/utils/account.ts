@@ -5,7 +5,6 @@ import {
 } from "@cartridge/controller/src/constants";
 import {
   constants,
-  hash,
   Account as BaseAccount,
   RpcProvider,
   SignerInterface,
@@ -25,14 +24,13 @@ import {
   waitForTransactionOptions,
   num,
   TransactionFinalityStatus,
-  InvocationsSignerDetails,
-  Invocation,
-  InvocationsDetailsWithNonce,
-  CallDetails,
   AccountInvocationItem,
   TransactionType,
 } from "starknet";
-import { AccountContractDocument } from "generated/graphql";
+import {
+  AccountContractDocument,
+  AccountContractQuery,
+} from "generated/graphql";
 import { client } from "utils/graphql";
 
 import selectors from "./selectors";
@@ -48,6 +46,7 @@ export enum Status {
   REGISTERING = "REGISTERING",
   REGISTERED = "REGISTERED",
   PENDING_REGISTER = "PENDING_REGISTER",
+  REJECTED = "REJECTED",
 }
 
 class Account extends BaseAccount {
@@ -56,7 +55,6 @@ class Account extends BaseAccount {
   _chainId: constants.StarknetChainId;
   updated: boolean = true;
   webauthn: WebauthnAccount;
-  waitingForDeploy: boolean = false;
 
   constructor(
     chainId: constants.StarknetChainId,
@@ -74,7 +72,6 @@ class Account extends BaseAccount {
 
     const state = Storage.get(this.selector);
     if (!state || Date.now() - state.syncing > 5000) {
-      console.log("sync account");
       this.sync();
       return;
     }
@@ -109,14 +106,24 @@ class Account extends BaseAccount {
     });
   }
 
-  async getContract() {
+  async getDeploymentTxn() {
     let chainId = this._chainId.substring(2);
     chainId = Buffer.from(chainId, "hex").toString("ascii");
 
     try {
-      return await client.request(AccountContractDocument, {
-        id: `starknet:${chainId}:${this.address}`,
-      });
+      const data: AccountContractQuery = await client.request(
+        AccountContractDocument,
+        {
+          id: `starknet:${chainId}:${this.address}`,
+        },
+      );
+
+      if (!data?.contract?.deployTransaction?.id) {
+        console.error("could not find deployment txn");
+        return;
+      }
+
+      return data.contract.deployTransaction.id.split("/")[1];
     } catch (e) {
       if (e.message.includes("not found")) {
         return null;
@@ -133,70 +140,28 @@ class Account extends BaseAccount {
     });
 
     try {
-      if (
-        this.status === Status.COUNTERFACTUAL ||
-        this.status === Status.DEPLOYING
-      ) {
-        const registerTxnHash = Storage.get(this.selector).registerTxnHashHash;
-        if (registerTxnHash) {
-          this.status = Status.REGISTERING;
-          this.rpc
-            .waitForTransaction(
-              registerTxnHash,
-              Account.waitForTransactionOptions,
-            )
-            .then(() => this.sync());
-          return;
-        }
-
-        const data = await this.getContract();
-        // @ts-expect-error TODO: fix type error
-        if (!data?.contract?.deployTransaction?.id) {
-          return;
-        }
-
-        // @ts-expect-error TODO: fix type error
-        const deployTxnHash = data.contract.deployTransaction.id.split("/")[1];
-        const deployTxnReceipt = await this.rpc.getTransactionReceipt(
-          deployTxnHash,
-        );
-
-        // Pending txn so poll for inclusion.
-        if (!("execution_status" in deployTxnReceipt)) {
-          this.status = Status.DEPLOYING;
-
-          if (!this.waitingForDeploy) {
-            this.rpc
-              .waitForTransaction(
-                deployTxnHash,
-                Account.waitForTransactionOptions,
-              )
-              .then(() => this.sync());
-            this.waitingForDeploy = true;
+      switch (this.status) {
+        case Status.DEPLOYING:
+        case Status.COUNTERFACTUAL:
+          const hash = await this.getDeploymentTxn();
+          const receipt = await this.rpc.getTransactionReceipt(hash);
+          if (receipt.isRejected()) {
+            // TODO: Handle redeployment
+            this.status = Status.REJECTED;
+            return;
           }
-
+          break;
+        case Status.DEPLOYED:
+        case Status.REGISTERED:
+        case Status.PENDING_REGISTER:
           return;
-        }
-
-        if (deployTxnReceipt.execution_status === "REVERTED") {
-          this.status = Status.COUNTERFACTUAL;
-          return;
-        }
       }
 
-      if (this.status === Status.PENDING_REGISTER) {
-        return;
-      }
-
-      const classHash = await this.rpc.getClassHashAt(this.address, "pending");
+      const classHash = await this.rpc.getClassHashAt(this.address, "latest");
       Storage.update(this.selector, {
         classHash,
       });
       this.status = Status.DEPLOYED;
-
-      if (classHash !== CLASS_HASHES["latest"].account) {
-        this.updated = false;
-      }
 
       const pub = await this.signer.getPubKey();
       const res = await this.rpc.callContract(
@@ -204,7 +169,7 @@ class Account extends BaseAccount {
           contractAddress: this.address,
           entrypoint: "get_public_key",
         },
-        "pending",
+        "latest",
       );
 
       if (res[0] === pub) {

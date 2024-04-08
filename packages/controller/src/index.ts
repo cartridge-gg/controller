@@ -279,10 +279,6 @@ class Controller {
         ),
       };
 
-      if (this.starterPackId) {
-        await this.keychain.issueStarterPack(this.starterPackId);
-      }
-
       return this.accounts[this.chainId];
     } catch (e) {
       console.log(e);
