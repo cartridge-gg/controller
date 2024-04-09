@@ -1,4 +1,4 @@
-import { brandIcons } from "@/components/icons";
+import { brandColorIcons, brandIcons } from "@/components/icons";
 import {
   DuotoneIconProps,
   IconProps,
@@ -11,7 +11,7 @@ import { ComponentType } from "react";
 
 const iconsByCategory = {
   brand: brandIcons,
-  // "brand-color": brandColorIcons,
+  "brand-color": brandColorIcons,
   // directional: [],
   // duotone: [AlertDuoIcon],
   // state: [BoltIcon],
@@ -74,11 +74,11 @@ export const Brand: Story = {
   },
 };
 
-// export const BrandColor: Story = {
-//   args: {
-//     category: "brand-color",
-//   },
-// };
+export const BrandColor: Story = {
+  args: {
+    category: "brand-color",
+  },
+};
 
 // export const Directional: Story = {
 //   args: {
