@@ -1,9 +1,4 @@
-import { ArgentIcon } from "@/components/icons/brand/argent";
-import { BriqIcon } from "@/components/icons/brand/briq";
-import { CartridgeIcon } from "@/components/icons/brand/cartridge";
-import { CartridgeFaceIcon } from "@/components/icons/brand/cartridge-face";
-import { AlertDuoIcon } from "@/components/icons/duotone/alert";
-import { BoltIcon } from "@/components/icons/state/bolt";
+import { brandIcons } from "@/components/icons";
 import {
   DuotoneIconProps,
   IconProps,
@@ -15,12 +10,12 @@ import { Meta, StoryObj } from "@storybook/react";
 import { ComponentType } from "react";
 
 const iconsByCategory = {
-  brand: [ArgentIcon, BriqIcon, CartridgeFaceIcon, CartridgeIcon],
-  brandColor: [],
-  directional: [],
-  duotone: [AlertDuoIcon],
-  state: [BoltIcon],
-  utility: [],
+  brand: brandIcons,
+  // "brand-color": brandColorIcons,
+  // directional: [],
+  // duotone: [AlertDuoIcon],
+  // state: [BoltIcon],
+  // utility: [],
 };
 
 const meta: Meta<typeof Icons> = {
@@ -61,7 +56,7 @@ const meta: Meta<typeof Icons> = {
     },
   },
   args: {
-    category: "state",
+    category: "brand",
     className: "text-foreground",
     size: "default",
     duotoneVariant: "default",
@@ -79,43 +74,43 @@ export const Brand: Story = {
   },
 };
 
-export const BrandColor: Story = {
-  args: {
-    category: "brandColor",
-  },
-};
+// export const BrandColor: Story = {
+//   args: {
+//     category: "brand-color",
+//   },
+// };
 
-export const Directional: Story = {
-  args: {
-    category: "directional",
-  },
-};
+// export const Directional: Story = {
+//   args: {
+//     category: "directional",
+//   },
+// };
 
-export const Duotone: Story = {
-  args: {
-    category: "duotone",
-  },
-};
+// export const Duotone: Story = {
+//   args: {
+//     category: "duotone",
+//   },
+// };
 
-export const State: Story = {
-  args: {
-    category: "state",
-  },
-};
+// export const State: Story = {
+//   args: {
+//     category: "state",
+//   },
+// };
 
-export const Utility: Story = {
-  args: {
-    category: "utility",
-  },
-};
+// export const Utility: Story = {
+//   args: {
+//     category: "utility",
+//   },
+// };
 
 function Icons({
   className,
   category,
   size,
-  duotoneVariant,
-  stateVariant,
-}: {
+}: // duotoneVariant,
+// stateVariant,
+{
   className: string;
   category: keyof typeof iconsByCategory;
   size?: IconProps["size"];
@@ -123,32 +118,34 @@ function Icons({
   stateVariant: StateIconProps["variant"];
 }) {
   return (
-    <div className="grid grid-cols-6 gap-2">
-      {iconsByCategory[category].map((icon) => (
+    <div className="grid grid-cols-3 sm:grip-cols-4 md:grid-cols-6 gap-2">
+      {Object.entries(iconsByCategory[category]).map(([, icon]) => (
         <div
           key={icon.displayName}
           className={cn(
-            "border rounded flex flex-col items-center py-4 px-2 gap-2",
+            "border rounded flex flex-col items-center py-4 px-2 gap-2 overflow-hidden",
             className,
           )}
         >
           {(() => {
             switch (category) {
-              case "duotone": {
-                const DuotoneIcon = icon as ComponentType<DuotoneIconProps>;
-                return <DuotoneIcon size={size} variant={duotoneVariant} />;
-              }
-              case "state": {
-                const StateIcon = icon as ComponentType<StateIconProps>;
-                return <StateIcon size={size} variant={stateVariant} />;
-              }
+              // case "duotone": {
+              //   const DuotoneIcon = icon as ComponentType<DuotoneIconProps>;
+              //   return <DuotoneIcon size={size} variant={duotoneVariant} />;
+              // }
+              // case "state": {
+              //   const StateIcon = icon as ComponentType<StateIconProps>;
+              //   return <StateIcon size={size} variant={stateVariant} />;
+              // }
               default: {
                 const Icon = icon as ComponentType<IconProps>;
                 return <Icon size={size} />;
               }
             }
           })()}
-          <p className="text-xs text-muted-foreground">{icon.displayName}</p>
+          <p className="text-[10px] md:text-xs text-muted-foreground">
+            {icon.displayName}
+          </p>
         </div>
       ))}
     </div>
