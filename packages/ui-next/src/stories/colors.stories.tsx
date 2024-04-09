@@ -70,6 +70,17 @@ export const Secondary: Story = {
   },
 };
 
+export const Tertiary: Story = {
+  args: {
+    children: (
+      <>
+        <Sample color="bg-tertiary" legacyName="solid.accent" />
+        <Sample color="bg-tertiary-foreground border" legacyName="bg" />
+      </>
+    ),
+  },
+};
+
 export const Muted: Story = {
   args: {
     children: (
