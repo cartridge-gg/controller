@@ -1,15 +1,25 @@
+import { ArgentIcon } from "@/components/icons/brand/argent";
+import { BriqIcon } from "@/components/icons/brand/briq";
+import { CartridgeIcon } from "@/components/icons/brand/cartridge";
 import { CartridgeFaceIcon } from "@/components/icons/brand/cartridge-face";
 import { AlertDuoIcon } from "@/components/icons/duotone/alert";
-import { IconProps } from "@/components/icons/types";
-import { size } from "@/components/icons/utils";
+import { BoltIcon } from "@/components/icons/state/bolt";
+import {
+  DuotoneIconProps,
+  IconProps,
+  StateIconProps,
+} from "@/components/icons/types";
+import { size, duotoneVariant } from "@/components/icons/utils";
+import { cn } from "@/utils";
 import { Meta, StoryObj } from "@storybook/react";
+import { ComponentType } from "react";
 
 const iconsByCategory = {
-  brand: [CartridgeFaceIcon],
+  brand: [ArgentIcon, BriqIcon, CartridgeFaceIcon, CartridgeIcon],
   brandColor: [],
   directional: [],
   duotone: [AlertDuoIcon],
-  state: [],
+  state: [BoltIcon],
   utility: [],
 };
 
@@ -22,25 +32,40 @@ const meta: Meta<typeof Icons> = {
       control: "select",
       options: Object.keys(iconsByCategory),
     },
+    className: {
+      control: "text",
+    },
     size: {
-      control: {
-        type: "select",
-        options: Object.keys(size),
+      control: "radio",
+      options: Object.keys(size),
+      table: {
+        defaultValue: { summary: "default" },
       },
     },
-    // variant: {
-    //   control: "select",
-    //   options: ["solid", "line"],
-    //   description: "State icons only.",
-    // },
-    // accent: {
-    //   control: "color",
-    //   description: "Duotone icons only.",
-    // },
-    // accentHighlight: {
-    //   control: "color",
-    //   description: "Duotone icons only.",
-    // },
+    duotoneVariant: {
+      control: "radio",
+      options: Object.keys(duotoneVariant),
+      description: "Duotone icons only.",
+      table: {
+        defaultValue: { summary: "default" },
+      },
+    },
+    stateVariant: {
+      control: "radio",
+      options: ["solid", "line"],
+      defaultValue: "solid",
+      description: "State icons only.",
+      table: {
+        defaultValue: { summary: "solid" },
+      },
+    },
+  },
+  args: {
+    category: "state",
+    className: "text-foreground",
+    size: "default",
+    duotoneVariant: "default",
+    stateVariant: "solid",
   },
 };
 
@@ -85,34 +110,45 @@ export const Utility: Story = {
 };
 
 function Icons({
-  category = "brand",
+  className,
+  category,
   size,
+  duotoneVariant,
+  stateVariant,
 }: {
+  className: string;
   category: keyof typeof iconsByCategory;
   size?: IconProps["size"];
+  duotoneVariant?: DuotoneIconProps["variant"];
+  stateVariant: StateIconProps["variant"];
 }) {
   return (
     <div className="grid grid-cols-6 gap-2">
-      {iconsByCategory[category].map((Icon) => (
-        <div className="border rounded flex flex-col items-center py-4 px-2 gap-2">
+      {iconsByCategory[category].map((icon) => (
+        <div
+          key={icon.displayName}
+          className={cn(
+            "border rounded flex flex-col items-center py-4 px-2 gap-2",
+            className,
+          )}
+        >
           {(() => {
             switch (category) {
-              // case "state":
-              //   return (
-              //     <Comp
-              //       m={1}
-              //       boxSize={boxSize}
-              //       color={color}
-              //       variant={variant}
-              //     />
-              //   );
-              case "duotone":
+              case "duotone": {
+                const DuotoneIcon = icon as ComponentType<DuotoneIconProps>;
+                return <DuotoneIcon size={size} variant={duotoneVariant} />;
+              }
+              case "state": {
+                const StateIcon = icon as ComponentType<StateIconProps>;
+                return <StateIcon size={size} variant={stateVariant} />;
+              }
+              default: {
+                const Icon = icon as ComponentType<IconProps>;
                 return <Icon size={size} />;
-              default:
-                return <Icon size={size} />;
+              }
             }
           })()}
-          <p className="text-xs text-muted-foreground">{Icon.displayName}</p>
+          <p className="text-xs text-muted-foreground">{icon.displayName}</p>
         </div>
       ))}
     </div>

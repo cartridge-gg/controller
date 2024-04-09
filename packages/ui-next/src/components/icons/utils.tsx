@@ -17,14 +17,16 @@ export const iconVariants = cva(base, {
   },
 });
 
+export const duotoneVariant = {
+  default: "[&>*.accentColor]:fill-tertiary",
+  destructive:
+    "[&>*.accentColor]:fill-destructive [&>*.color]:fill-destructive",
+};
+
 export const duotoneIconVariants = cva(base, {
   variants: {
     size,
-    variant: {
-      default: "[&>*.accentColor]:fill-tertiary",
-      destructive:
-        "[&>*.accentColor]:fill-destructive [&>*.color]:fill-destructive",
-    },
+    variant: duotoneVariant,
   },
   defaultVariants: {
     size: "default",
