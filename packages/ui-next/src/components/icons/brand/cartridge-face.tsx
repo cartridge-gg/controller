@@ -23,3 +23,5 @@ export const CartridgeFaceIcon = memo(
     ),
   ),
 );
+
+CartridgeFaceIcon.displayName = "CartridgeFaceIcon";

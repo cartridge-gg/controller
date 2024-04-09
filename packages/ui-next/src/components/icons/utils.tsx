@@ -2,7 +2,7 @@ import { cva } from "class-variance-authority";
 
 const base = "";
 
-const size = {
+export const size = {
   sm: "h-4 w-4",
   default: "h-6 w-6",
   lg: "h-8 w-8",
