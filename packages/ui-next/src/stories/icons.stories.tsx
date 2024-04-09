@@ -1,5 +1,10 @@
-import { brandColorIcons, brandIcons } from "@/components/icons";
 import {
+  brandColorIcons,
+  brandIcons,
+  directionalIcons,
+} from "@/components/icons";
+import {
+  DirectionalIconProps,
   DuotoneIconProps,
   IconProps,
   StateIconProps,
@@ -12,7 +17,7 @@ import { ComponentType } from "react";
 const iconsByCategory = {
   brand: brandIcons,
   "brand-color": brandColorIcons,
-  // directional: [],
+  directional: directionalIcons,
   // duotone: [AlertDuoIcon],
   // state: [BoltIcon],
   // utility: [],
@@ -37,6 +42,11 @@ const meta: Meta<typeof Icons> = {
         defaultValue: { summary: "default" },
       },
     },
+    directionalVariant: {
+      control: "radio",
+      options: ["up", "right", "down", "left"],
+      description: "Directional icons only.",
+    },
     duotoneVariant: {
       control: "radio",
       options: Object.keys(duotoneVariant),
@@ -59,6 +69,7 @@ const meta: Meta<typeof Icons> = {
     category: "brand",
     className: "text-foreground",
     size: "default",
+    directionalVariant: "up",
     duotoneVariant: "default",
     stateVariant: "solid",
   },
@@ -80,11 +91,11 @@ export const BrandColor: Story = {
   },
 };
 
-// export const Directional: Story = {
-//   args: {
-//     category: "directional",
-//   },
-// };
+export const Directional: Story = {
+  args: {
+    category: "directional",
+  },
+};
 
 // export const Duotone: Story = {
 //   args: {
@@ -108,12 +119,14 @@ function Icons({
   className,
   category,
   size,
+  directionalVariant,
 }: // duotoneVariant,
 // stateVariant,
 {
   className: string;
   category: keyof typeof iconsByCategory;
   size?: IconProps["size"];
+  directionalVariant: DirectionalIconProps["variant"];
   duotoneVariant?: DuotoneIconProps["variant"];
   stateVariant: StateIconProps["variant"];
 }) {
@@ -129,6 +142,13 @@ function Icons({
         >
           {(() => {
             switch (category) {
+              case "directional": {
+                const DirectionalIcon =
+                  icon as ComponentType<DirectionalIconProps>;
+                return (
+                  <DirectionalIcon size={size} variant={directionalVariant} />
+                );
+              }
               // case "duotone": {
               //   const DuotoneIcon = icon as ComponentType<DuotoneIconProps>;
               //   return <DuotoneIcon size={size} variant={duotoneVariant} />;
