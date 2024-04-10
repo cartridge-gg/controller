@@ -142,7 +142,7 @@ class Account extends BaseAccount {
     try {
       switch (this.status) {
         case Status.DEPLOYING:
-        case Status.COUNTERFACTUAL:
+        case Status.COUNTERFACTUAL: {
           const hash = await this.getDeploymentTxn();
           const receipt = await this.rpc.getTransactionReceipt(hash);
           if (receipt.isRejected()) {
@@ -151,6 +151,7 @@ class Account extends BaseAccount {
             return;
           }
           break;
+        }
         case Status.DEPLOYED:
         case Status.REGISTERED:
         case Status.PENDING_REGISTER:
@@ -262,7 +263,7 @@ class Account extends BaseAccount {
       throw new Error("Account is not deployed");
     }
 
-    details.nonce = details.nonce ?? (await super.getNonce("latest"));
+    details.nonce = details.nonce ?? (await super.getNonce("pending"));
 
     if (this.status === Status.PENDING_REGISTER) {
       const pendingRegister = Storage.get(
@@ -431,7 +432,7 @@ class Account extends BaseAccount {
       return super.getNonce(blockIdentifier);
     }
 
-    const chainNonce = await super.getNonce("pending");
+    const chainNonce = await super.getNonce("latest");
     const state = Storage.get(this.selector);
     if (!state || !state.nonce || BigInt(chainNonce) > BigInt(state.nonce)) {
       return chainNonce;
