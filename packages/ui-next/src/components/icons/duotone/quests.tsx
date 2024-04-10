@@ -12,7 +12,7 @@ export const QuestsDuoIcon = memo(
         {...props}
       >
         <path
-          className="color fill-foreground"
+          className="color fill-current"
           fillOpacity="0.32"
           fillRule="evenodd"
           clipRule="evenodd"

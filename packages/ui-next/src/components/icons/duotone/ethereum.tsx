@@ -20,7 +20,7 @@ export const EthereumDuoIcon = memo(
           d="M14.9986 3.99976L8.12402 15.2038L14.9986 12.1323V3.99976Z"
         />
         <path
-          className="color fill-foreground"
+          className="color fill-current"
           fillOpacity="0.32"
           d="M14.9973 20.4742V26.0001L21.8756 16.484L14.9973 20.4742Z"
         />
@@ -29,7 +29,7 @@ export const EthereumDuoIcon = memo(
           d="M14.9986 26.0001V20.4733L8.12402 16.484L14.9986 26.0001Z"
         />
         <path
-          className="color fill-foreground"
+          className="color fill-current"
           fillOpacity="0.32"
           d="M14.9973 19.1952L21.871 15.2042L14.9973 12.1345V19.1952Z"
         />

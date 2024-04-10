@@ -3,6 +3,7 @@ import {
   brandIcons,
   directionalIcons,
   duotoneIcons,
+  stateIcons,
 } from "@/components/icons";
 import {
   DirectionalIconProps,
@@ -20,7 +21,7 @@ const iconsByCategory = {
   "brand-color": brandColorIcons,
   directional: directionalIcons,
   duotone: duotoneIcons,
-  // state: [BoltIcon],
+  state: stateIcons,
   // utility: [],
 };
 
@@ -104,11 +105,11 @@ export const Duotone: Story = {
   },
 };
 
-// export const State: Story = {
-//   args: {
-//     category: "state",
-//   },
-// };
+export const State: Story = {
+  args: {
+    category: "state",
+  },
+};
 
 // export const Utility: Story = {
 //   args: {
@@ -122,8 +123,8 @@ function Icons({
   size,
   directionalVariant,
   duotoneVariant,
-}: // stateVariant,
-{
+  stateVariant,
+}: {
   className: string;
   category: keyof typeof iconsByCategory;
   size?: IconProps["size"];
@@ -154,10 +155,10 @@ function Icons({
                 const DuotoneIcon = icon as ComponentType<DuotoneIconProps>;
                 return <DuotoneIcon size={size} variant={duotoneVariant} />;
               }
-              // case "state": {
-              //   const StateIcon = icon as ComponentType<StateIconProps>;
-              //   return <StateIcon size={size} variant={stateVariant} />;
-              // }
+              case "state": {
+                const StateIcon = icon as ComponentType<StateIconProps>;
+                return <StateIcon size={size} variant={stateVariant} />;
+              }
               default: {
                 const Icon = icon as ComponentType<IconProps>;
                 return <Icon size={size} />;

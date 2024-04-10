@@ -21,6 +21,7 @@ const config = {
       },
     },
     colors: {
+      current: "currentColor",
       border: "hsl(var(--border)/0.12)",
       input: "hsl(var(--input)/0.12)",
       ring: "hsl(var(--ring))",
