@@ -62,7 +62,7 @@ export function DeploymentRequired({
           <Link
             href={`https://${
               account._chainId === constants.StarknetChainId.SN_SEPOLIA
-                ? "testnet."
+                ? "sepolia."
                 : undefined
             }starkscan.co/tx/${deployHash}`}
             isExternal
