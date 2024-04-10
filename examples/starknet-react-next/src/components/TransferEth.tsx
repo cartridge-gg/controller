@@ -10,10 +10,9 @@ export const TransferEth = () => {
     constants.StarknetChainId.SN_SEPOLIA,
   );
   const { account } = useAccount();
-  const [accepted, setAccepted] = useState<boolean>();
+  const [txnHash, setTxnHash] = useState<string>();
 
   const executePointOne = useCallback(async () => {
-    setAccepted(false);
     const res = await account.execute(
       [
         {
@@ -33,14 +32,14 @@ export const TransferEth = () => {
       } as any,
     );
 
+    setTxnHash(res.transaction_hash);
     account
       .waitForTransaction(res.transaction_hash)
-      .then(() => setAccepted(true))
       .catch((err) => console.error(err))
       .finally(() => console.log("done"));
   }, [account, chainId]);
   const executeOne = useCallback(async () => {
-    setAccepted(false);
+    setTxnHash(undefined);
     const res = await account.execute(
       [
         {
@@ -60,14 +59,14 @@ export const TransferEth = () => {
       } as any,
     );
 
+    setTxnHash(res.transaction_hash);
     account
       .waitForTransaction(res.transaction_hash)
-      .then(() => setAccepted(true))
       .catch((err) => console.error(err))
       .finally(() => console.log("done"));
   }, [account, chainId]);
   const execute005 = useCallback(async () => {
-    setAccepted(false);
+    setTxnHash(undefined);
     const res = await account.execute(
       [
         {
@@ -86,9 +85,10 @@ export const TransferEth = () => {
         chainId,
       } as any,
     );
+
+    setTxnHash(res.transaction_hash);
     account
       .waitForTransaction(res.transaction_hash)
-      .then(() => setAccepted(true))
       .catch((err) => console.error(err))
       .finally(() => console.log("done"));
   }, [account, chainId]);
@@ -131,10 +131,17 @@ export const TransferEth = () => {
       <button style={{ marginLeft: "10px" }} onClick={() => executeOne()}>
         Transfer 1.0 ETH to self
       </button>
-      {accepted && (
-        <>
-          <p>Accepted: {accepted && accepted.toString()}</p>
-        </>
+      {txnHash && (
+        <p>
+          Transaction hash:{" "}
+          <a
+            href={`https://sepolia.starkscan.io/tx/${txnHash}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {txnHash}
+          </a>
+        </p>
       )}
     </>
   );
