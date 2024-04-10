@@ -21,6 +21,9 @@
     --secondary: 210 22% 96%;
     --secondary-foreground: 0 0% 0%;
 
+    --tertiary: 255 73% 61%;
+    --tertiary-foreground: 220 60% 99%;
+
     --muted: 207 15% 85%;
     --muted-foreground: 0 0% 50%;
 
@@ -52,6 +55,9 @@
 
     --secondary: 136 6% 13%; /* solid.primary */
     --secondary-foreground: 0 0% 100%; /* text.primary */
+
+    --tertiary: 120 57% 78%;
+    --tertiary-foreground: 0 0% 0%;
 
     --muted: 132 4% 23%; /* solid.accent */
     --muted-foreground: 0 0% 50%; /* text.secondary */

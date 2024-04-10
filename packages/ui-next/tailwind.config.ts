@@ -21,6 +21,7 @@ const config = {
       },
     },
     colors: {
+      current: "currentColor",
       border: "hsl(var(--border)/0.12)",
       input: "hsl(var(--input)/0.12)",
       ring: "hsl(var(--ring))",
@@ -33,6 +34,10 @@ const config = {
       secondary: {
         DEFAULT: "hsl(var(--secondary))",
         foreground: "hsl(var(--secondary-foreground))",
+      },
+      tertiary: {
+        DEFAULT: "hsl(var(--tertiary))",
+        foreground: "hsl(var(--tertiary-foreground))",
       },
       destructive: {
         DEFAULT: "hsl(var(--destructive))",

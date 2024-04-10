@@ -21,7 +21,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
   );
 }
 
-const url = process.env.XFRAME_URL;
+const url = "https://keychain-git-hardcode-url.preview.cartridge.gg";
 const connectors = [
   new CartridgeConnector([{ target: "0xdeadbeef", method: "testMethod" }], {
     url,

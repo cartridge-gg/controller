@@ -191,6 +191,9 @@ class Account extends BaseAccount {
       throw new Error("Account is not deployed");
     }
 
+    // hardcode for now 0.001ETH
+    transactionsDetail.maxFee = 1000000000000000;
+
     transactionsDetail.nonce =
       transactionsDetail.nonce ?? (await this.getNonce());
 
