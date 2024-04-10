@@ -37,6 +37,10 @@ const meta: Meta<typeof Icons> = {
     },
     className: {
       control: "text",
+      description: "Apply icon color by `text-<color-name>`.",
+      table: {
+        defaultValue: { summary: "text-current" },
+      },
     },
     size: {
       control: "radio",
