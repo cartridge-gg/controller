@@ -68,7 +68,7 @@ const meta: Meta<typeof Icons> = {
     },
   },
   args: {
-    category: "brand",
+    category: "state",
     className: "text-foreground",
     size: "default",
     directionalVariant: "up",
