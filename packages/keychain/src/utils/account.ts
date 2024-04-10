@@ -195,12 +195,14 @@ class Account extends BaseAccount {
     transactionsDetail.maxFee = 1000000000000000;
 
     transactionsDetail.nonce =
-      transactionsDetail.nonce ?? (await this.getNonce());
+      transactionsDetail.nonce ?? (await this.getNonce("pending"));
 
     if (this.status === Status.PENDING_REGISTER) {
       const pendingRegister = Storage.get(
         selectors[VERSION].register(this.address, this._chainId),
       ) as RegisterData;
+
+      pendingRegister.invoke.details.maxFee = transactionsDetail.maxFee;
 
       const responses = await Promise.all([
         this.invokeFunction(pendingRegister.invoke.invocation, {
@@ -211,6 +213,7 @@ class Account extends BaseAccount {
           maxFee: transactionsDetail.maxFee,
           nonce: BigInt(transactionsDetail.nonce) + 1n,
           version: 1n,
+          blockIdentifier: "pending"
         }),
       ]);
       Storage.remove(selectors[VERSION].register(this.address, this._chainId));
