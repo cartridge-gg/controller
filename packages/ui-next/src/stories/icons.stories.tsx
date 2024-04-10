@@ -4,6 +4,7 @@ import {
   directionalIcons,
   duotoneIcons,
   stateIcons,
+  utilityIcons,
 } from "@/components/icons";
 import {
   DirectionalIconProps,
@@ -22,7 +23,7 @@ const iconsByCategory = {
   directional: directionalIcons,
   duotone: duotoneIcons,
   state: stateIcons,
-  // utility: [],
+  utility: utilityIcons,
 };
 
 const meta: Meta<typeof Icons> = {
@@ -111,11 +112,11 @@ export const State: Story = {
   },
 };
 
-// export const Utility: Story = {
-//   args: {
-//     category: "utility",
-//   },
-// };
+export const Utility: Story = {
+  args: {
+    category: "utility",
+  },
+};
 
 function Icons({
   className,
