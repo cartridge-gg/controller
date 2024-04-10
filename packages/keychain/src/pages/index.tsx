@@ -327,17 +327,6 @@ const Index: NextPage = () => {
       (context as any).transactionsDetail?.chainId ?? chainId,
     );
 
-    if (account.status === Status.COUNTERFACTUAL) {
-      // TODO: Deploy?
-      context.resolve({
-        code: ResponseCodes.SUCCESS,
-        address: controller.address,
-        policies: context.policies,
-      } as any);
-      setController(controller);
-      return;
-    }
-
     // This device needs to be registered, so do a webauthn signature request
     // for the register transaction during the connect flow.
     if (account.status === Status.DEPLOYED) {
