@@ -1,4 +1,4 @@
-import { useAccount } from "@starknet-react/core";
+import { useAccount, useExplorer } from "@starknet-react/core";
 import { useCallback, useState } from "react";
 import { constants } from "starknet";
 
@@ -10,6 +10,7 @@ export const TransferEth = () => {
     constants.StarknetChainId.SN_SEPOLIA,
   );
   const { account } = useAccount();
+  const explorer = useExplorer();
   const [txnHash, setTxnHash] = useState<string>();
 
   const executePointOne = useCallback(async () => {
@@ -135,7 +136,7 @@ export const TransferEth = () => {
         <p>
           Transaction hash:{" "}
           <a
-            href={`https://sepolia.starkscan.io/tx/${txnHash}`}
+            href={explorer.transaction(txnHash)}
             target="_blank"
             rel="noreferrer"
           >
