@@ -193,6 +193,9 @@ class Account extends BaseAccount {
       throw new Error("Account is not deployed");
     }
 
+    // hardcode for now 0.001ETH
+    transactionsDetail.maxFee = 1000000000000000;
+
     transactionsDetail.nonce =
       transactionsDetail.nonce ?? (await this.getNonce("pending"));
 
@@ -271,7 +274,9 @@ class Account extends BaseAccount {
     const gas = 100000n;
     const gasPrice = await getGasPrice(this._chainId);
     const fee = BigInt(gasPrice) * gas;
-    const maxFee = num.toHex(stark.estimatedFeeToMaxFee(fee));
+    //const maxFee = num.toHex(stark.estimatedFeeToMaxFee(fee));
+    // hardcode for now 0.001ETH
+    const maxFee = "0x38D7EA4C68000";
 
     try {
       const signature = await this.webauthn.signTransaction(calls, {
