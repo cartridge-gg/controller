@@ -7,7 +7,10 @@ import { useState } from "react";
 import { typedData } from "starknet";
 
 export function SignMessage() {
-  const { address, account } = useAccount();
+  const {
+    // address,
+    account,
+  } = useAccount();
   // const { contract } = useContract({
   //   address,
   // });
@@ -99,6 +102,7 @@ export function SignMessage() {
   );
 }
 
+// @ts-expect-error workaround to parse json with bigint
 BigInt.prototype["toJSON"] = function () {
   return this.toString();
 };
