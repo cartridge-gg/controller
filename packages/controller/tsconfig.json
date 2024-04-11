@@ -1,29 +1,11 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": ".",
     "rootDir": "./src",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "composite": true,
-    "target": "ES2022",
-    "module": "ES2022",
-    "sourceMap": true,
-    "outDir": "lib",
-    "strict": true,
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "declaration": true
+    "outDir": "./lib"
   },
   "include": [
     "src/**/*"
   ],
-  "exclude": [
-    "node_modules"
-  ]
 }

@@ -1,21 +1,10 @@
 {
+  "extends": "../../tsconfig.react.json",
   "compilerOptions": {
     "baseUrl": ".",
     "rootDir": "./src",
-    "composite": true,
-    "target": "ES2022",
-    "module": "ES2022",
-    "jsx": "react-jsx",
-    "sourceMap": true,
-    "outDir": "lib",
-    "strict": true,
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "declaration": true,
-    "types": ["@emotion/react/types/css-prop"]
+    "outDir": "./lib",
+    "types": ["@emotion/react/types/css-prop"],
   },
   "paths": {
     "@cartridge/ui/components": ["./src/components"],

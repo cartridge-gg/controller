@@ -5,13 +5,14 @@ import { Container, PortalBanner, PortalFooter } from "components";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect } from "react";
-import { useMeQuery } from "generated/graphql";
 
 const Consent: NextPage = () => {
   const router = useRouter();
 
   const onSubmit = useCallback(async () => {
-    const redirect_uri = encodeURIComponent(router.query.callback_uri as string);
+    const redirect_uri = encodeURIComponent(
+      router.query.callback_uri as string,
+    );
     const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/oauth2/auth?client_id=cartridge&redirect_uri=${redirect_uri}`;
 
     window.location.href = url;

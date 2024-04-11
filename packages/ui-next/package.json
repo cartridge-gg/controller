@@ -5,7 +5,7 @@
   "types": "lib/index.d.ts",
   "type": "module",
   "scripts": {
-    "build": "tsc -b",
+    "build": "tsc",
     "format": "prettier ./src --write",
     "lint": "eslint . --ext ts,tsx",
     "storybook": "storybook dev -p 6006",
@@ -68,7 +68,7 @@
     "postcss": "^8.4.35",
     "storybook": "^8.0.5",
     "tailwindcss": "^3.4.3",
-    "typescript": "^5.2.2",
+    "typescript": "^5.4.3",
     "vite": "^5.1.4"
   }
 }
