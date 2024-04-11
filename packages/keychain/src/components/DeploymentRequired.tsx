@@ -1,4 +1,4 @@
-import { Contract, constants } from "starknet";
+import { constants } from "starknet";
 import Controller from "utils/controller";
 import { Container } from "./Container";
 import { useEffect, useState } from "react";
@@ -40,7 +40,11 @@ export function DeploymentRequired({
 
   useEffect(() => {
     const id = setInterval(async () => {
-      if (account.status !== Status.DEPLOYING && account.status !== Status.REGISTERING) clearInterval(id);
+      if (
+        account.status !== Status.DEPLOYING &&
+        account.status !== Status.REGISTERING
+      )
+        clearInterval(id);
       setStatus(account.status);
       console.log("deployment/registration required");
       await account.sync();
@@ -50,7 +54,10 @@ export function DeploymentRequired({
   }, [account, setStatus]);
 
   if (status === Status.DEPLOYING || status === Status.REGISTERING) {
-    const title = status === Status.DEPLOYING ? "Deploying your account" : "Creating a session"
+    const title =
+      status === Status.DEPLOYING
+        ? "Deploying your account"
+        : "Creating a session";
     return (
       <Container chainId={chainId} onLogout={onLogout}>
         <PortalBanner
@@ -59,7 +66,8 @@ export function DeploymentRequired({
           description="This may take a second"
         />
 
-          {status === Status.DEPLOYING && <Link
+        {status === Status.DEPLOYING && (
+          <Link
             href={`https://${
               account._chainId === constants.StarknetChainId.SN_SEPOLIA
                 ? "sepolia."
@@ -70,7 +78,8 @@ export function DeploymentRequired({
             <Button variant="link" mt={10} rightIcon={<ExternalIcon />}>
               View on Starkscan
             </Button>
-          </Link>}
+          </Link>
+        )}
 
         <PortalFooter>
           <Button onClick={onClose}>close</Button>

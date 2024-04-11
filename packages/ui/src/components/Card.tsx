@@ -1,4 +1,3 @@
-import { ReactNode } from "react";
 import {
   Box,
   Spacer,
@@ -18,11 +17,9 @@ export function Card(props: any) {
 export const Overlay = ({
   displayOnHover,
   name,
-  children,
 }: {
   displayOnHover?: boolean;
   name: string;
-  children?: ReactNode;
 }) => (
   <Box
     top={0}

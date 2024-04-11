@@ -147,7 +147,7 @@ export function QuestDetails({
               accountId: `starknet:SN_SEPOLIA:${address}`,
               questId: selectedId,
             })
-              .then((res) => {
+              .then(() => {
                 onClaim();
               })
               .catch((err) => console.error(err));

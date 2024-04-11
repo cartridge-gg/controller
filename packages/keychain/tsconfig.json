@@ -1,37 +1,23 @@
 {
+  "extends": "../../tsconfig.react.json",
   "compilerOptions": {
     "baseUrl": "./src",
     "rootDir": ".",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "declaration": true,
-    "target": "ES2020",
-    "module": "ESNext",
-    "strict": false,
-    "jsx": "preserve",
-    "allowJs": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "incremental": true,
-    "esModuleInterop": true,
-    "moduleResolution": "Bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "downlevelIteration": true,
-    "noEmit": true,
     "types": [
       "@emotion/react/types/css-prop"
-    ]
+    ],
+    // TODO(#262): Enable these options (too many errors for this scope)
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     "src/components/ModelViewer.jsx",
-    "../ui/src/components/icons/StarknetGray.tsx"
+    "../ui/src/components/icons/StarknetGray.tsx",
+    "src/components/bridge/abis/EthL1Bridge.json"
   ],
   "exclude": [
     "node_modules"
