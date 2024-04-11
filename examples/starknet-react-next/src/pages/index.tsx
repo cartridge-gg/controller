@@ -10,10 +10,9 @@ const Home: NextPage = () => {
     <div>
       <h2>Wallet</h2>
       <ConnectWallet />
-      <DojoSpawnAndMove />
       <SignMessage />
       <TransferEth />
-      <InvalidTxn />
+      <DojoSpawnAndMove />
     </div>
   );
 };

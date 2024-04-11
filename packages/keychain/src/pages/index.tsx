@@ -589,12 +589,12 @@ const Index: NextPage = () => {
           chainId={_chainId}
           controller={controller}
           onExecute={(res: ExecuteReply) => ctx.resolve(res)}
-          onCancel={() =>
+          onCancel={() => {
             ctx.resolve({
               code: ResponseCodes.CANCELED,
               message: "Canceled",
-            })
-          }
+            });
+          }}
           onLogout={() => onLogout(ctx)}
         />
       </DeploymentRequired>
