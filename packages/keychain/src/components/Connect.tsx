@@ -3,6 +3,7 @@ import { constants } from "starknet";
 import { Policy } from "@cartridge/controller";
 import { PlugNewDuoIcon } from "@cartridge/ui";
 import { Button } from "@chakra-ui/react";
+import { useState } from "react";
 
 export function Connect({
   chainId,
@@ -19,6 +20,7 @@ export function Connect({
   onCancel: () => void;
   onLogout: () => void;
 }) {
+  const [isConnecting, setIsConnecting] = useState(false);
   return (
     <Container
       chainId={constants.StarknetChainId.SN_SEPOLIA}
@@ -32,7 +34,15 @@ export function Connect({
 
       <PortalFooter origin={origin} policies={policies}>
         <>
-          <Button colorScheme="colorful" onClick={() => onConnect(policies)}>
+          <Button
+            colorScheme="colorful"
+            isDisabled={isConnecting}
+            isLoading={isConnecting}
+            onClick={() => {
+              setIsConnecting(true);
+              onConnect(policies);
+            }}
+          >
             create
           </Button>
 

@@ -280,7 +280,7 @@ class Account extends BaseAccount {
         nonce,
       });
 
-      await this.invokeFunction(
+      const { transaction_hash } = await this.invokeFunction(
         {
           contractAddress: this.address,
           calldata: transaction.fromCallsToExecuteCalldata_cairo1(calls),
@@ -292,6 +292,14 @@ class Account extends BaseAccount {
           nonce,
         },
       );
+
+      await this.rpc.waitForTransaction(transaction_hash, {
+        retryInterval: 1000,
+        successStates: [
+          TransactionFinalityStatus.ACCEPTED_ON_L1,
+          TransactionFinalityStatus.ACCEPTED_ON_L2,
+        ],
+      });
 
       this.status = Status.REGISTERING;
       Storage.update(this.selector, {
