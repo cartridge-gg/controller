@@ -1,4 +1,8 @@
-import { useAccount, useContractWrite } from "@starknet-react/core";
+import {
+  useAccount,
+  useContractWrite,
+  useExplorer,
+} from "@starknet-react/core";
 import { useEffect, useState } from "react";
 
 const worldAddress =
@@ -8,6 +12,7 @@ const actionsAddress =
 
 export function DojoSpawnAndMove() {
   const { account } = useAccount();
+  const explorer = useExplorer();
   const [txnHash, setTxnHash] = useState<string>();
   const { writeAsync: spawn } = useContractWrite({
     calls: [
@@ -60,7 +65,7 @@ export function DojoSpawnAndMove() {
           <p>
             Transaction hash:{" "}
             <a
-              href={`https://sepolia.starkscan.io/tx/${txnHash}`}
+              href={explorer.transaction(txnHash)}
               target="_blank"
               rel="noreferrer"
             >
