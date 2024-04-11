@@ -453,7 +453,7 @@ const Index: NextPage = () => {
 
     return (
       <Connect
-        chainId={chainId}
+        // chainId={chainId}
         origin={ctx.origin}
         policies={ctx.type === "connect" ? (ctx as Connect).policies : []}
         onConnect={(policies) =>
@@ -545,7 +545,7 @@ const Index: NextPage = () => {
       return (
         <Connect
           origin={ctx.origin}
-          chainId={_chainId}
+          // chainId={_chainId}
           policies={[]}
           onConnect={() =>
             onConnect({

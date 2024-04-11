@@ -1,5 +1,5 @@
 import {
-  CLASS_HASHES,
+  // CLASS_HASHES,
   ETH_RPC_SEPOLIA,
   ETH_RPC_MAINNET,
 } from "@cartridge/controller/src/constants";
@@ -24,8 +24,8 @@ import {
   waitForTransactionOptions,
   num,
   TransactionFinalityStatus,
-  AccountInvocationItem,
-  TransactionType,
+  // AccountInvocationItem,
+  // TransactionType,
 } from "starknet";
 import {
   AccountContractDocument,
@@ -35,7 +35,7 @@ import { client } from "utils/graphql";
 
 import selectors from "./selectors";
 import Storage from "./storage";
-import { InvocationWithDetails, RegisterData, VERSION } from "./controller";
+// import { InvocationWithDetails, RegisterData, VERSION } from "./controller";
 import { WebauthnAccount } from "@cartridge/account-wasm";
 
 export enum Status {

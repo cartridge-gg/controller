@@ -168,7 +168,7 @@ export class WebauthnSigner implements SignerInterface {
   }
 
   public async signDeployAccountTransaction(
-    transaction: DeployAccountSignerDetails,
+    _transaction: DeployAccountSignerDetails,
   ): Promise<Signature> {
     return;
   }

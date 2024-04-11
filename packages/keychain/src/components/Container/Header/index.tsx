@@ -13,8 +13,8 @@ import {
   CartridgeColorIcon,
   CartridgeLogo,
 } from "@cartridge/ui";
-import { NetworkButton } from "./NetworkButton";
-import { EthBalance } from "./EthBalance";
+// import { NetworkButton } from "./NetworkButton";
+// import { EthBalance } from "./EthBalance";
 import { AccountMenu } from "./AccountMenu";
 import { useController } from "hooks/controller";
 

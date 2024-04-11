@@ -1,5 +1,4 @@
 import {
-  Abi,
   Call,
   InvocationsSignerDetails,
   Signature,
