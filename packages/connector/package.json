@@ -4,6 +4,7 @@
   "description": "Cartridge Controler Connector",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "type": "module",
   "scripts": {
     "build": "tsc -b",
     "prepublish": "pnpm build",

@@ -4,6 +4,7 @@
   "description": "Cartridge Controller",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "type": "module",
   "scripts": {
     "build": "tsc -b",
     "dev": "tsc --watch",
