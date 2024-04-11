@@ -13,8 +13,8 @@
     "gen": "graphql-codegen --config codegen.yaml"
   },
   "dependencies": {
-    "@cartridge/controller": "workspace:^",
     "@cartridge/account-wasm": "workspace:^",
+    "@cartridge/controller": "workspace:^",
     "@cartridge/penpal": "^6.2.3",
     "@cartridge/ui": "workspace:^",
     "@emotion/react": "^11.11.1",
@@ -65,7 +65,8 @@
     "eslint-config-next": "^12.2.5",
     "jest": "^29.3.1",
     "jest-environment-jsdom": "^29.3.1",
-    "prettier": "^2.7.1"
+    "prettier": "^2.7.1",
+    "typescript": "^5.4.5"
   },
   "peerDependencies": {
     "@chakra-ui/react": "^2.8.1"
