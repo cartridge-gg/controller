@@ -152,7 +152,10 @@ class Account extends BaseAccount {
             return;
           }
 
-          const classHash = await this.rpc.getClassHashAt(this.address, "latest");
+          const classHash = await this.rpc.getClassHashAt(
+            this.address,
+            "latest",
+          );
           Storage.update(this.selector, {
             classHash,
           });
@@ -270,30 +273,33 @@ class Account extends BaseAccount {
     const fee = BigInt(gasPrice) * gas;
     const maxFee = num.toHex(stark.estimatedFeeToMaxFee(fee));
 
-    const signature = await this.webauthn
-      .signTransaction(calls, {
+    try {
+      const signature = await this.webauthn.signTransaction(calls, {
         maxFee,
         version,
         nonce,
-      })
-      .catch((e) => {
-        console.error(e);
       });
 
-    this.invokeFunction({
-      contractAddress: this.address,
-      calldata: transaction.fromCallsToExecuteCalldata_cairo1(calls),
-      signature,
-    }, {
-      maxFee,
-      version,
-      nonce,
-    })
+      await this.invokeFunction(
+        {
+          contractAddress: this.address,
+          calldata: transaction.fromCallsToExecuteCalldata_cairo1(calls),
+          signature,
+        },
+        {
+          maxFee,
+          version,
+          nonce,
+        },
+      );
 
-    this.status = Status.REGISTERING;
-    Storage.update(this.selector, {
-      status: Status.REGISTERING,
-    });
+      this.status = Status.REGISTERING;
+      Storage.update(this.selector, {
+        status: Status.REGISTERING,
+      });
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   async getNonce(blockIdentifier?: any): Promise<string> {
