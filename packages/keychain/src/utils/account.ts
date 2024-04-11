@@ -45,7 +45,6 @@ export enum Status {
   DEPLOYED = "DEPLOYED",
   REGISTERING = "REGISTERING",
   REGISTERED = "REGISTERED",
-  PENDING_REGISTER = "PENDING_REGISTER",
   REJECTED = "REJECTED",
 }
 
@@ -141,6 +140,8 @@ class Account extends BaseAccount {
 
     try {
       switch (this.status) {
+        case Status.REGISTERED:
+          return;
         case Status.DEPLOYING:
         case Status.COUNTERFACTUAL: {
           const hash = await this.getDeploymentTxn();
@@ -150,31 +151,29 @@ class Account extends BaseAccount {
             this.status = Status.REJECTED;
             return;
           }
-          break;
-        }
-        case Status.DEPLOYED:
-        case Status.REGISTERED:
-        case Status.PENDING_REGISTER:
+
+          const classHash = await this.rpc.getClassHashAt(this.address, "latest");
+          Storage.update(this.selector, {
+            classHash,
+          });
+          this.status = Status.DEPLOYED;
           return;
-      }
+        }
+        case Status.REGISTERING: {
+          const pub = await this.signer.getPubKey();
+          const res = await this.rpc.callContract(
+            {
+              contractAddress: this.address,
+              entrypoint: "get_public_key",
+            },
+            "latest",
+          );
 
-      const classHash = await this.rpc.getClassHashAt(this.address, "latest");
-      Storage.update(this.selector, {
-        classHash,
-      });
-      this.status = Status.DEPLOYED;
-
-      const pub = await this.signer.getPubKey();
-      const res = await this.rpc.callContract(
-        {
-          contractAddress: this.address,
-          entrypoint: "get_public_key",
-        },
-        "latest",
-      );
-
-      if (res[0] === pub) {
-        this.status = Status.REGISTERED;
+          if (res[0] === pub) {
+            this.status = Status.REGISTERED;
+          }
+          return;
+        }
       }
     } catch (e) {
       /* no-op */
@@ -192,46 +191,7 @@ class Account extends BaseAccount {
     }
 
     transactionsDetail.nonce =
-      transactionsDetail.nonce ?? (await this.getNonce());
-
-    if (this.status === Status.PENDING_REGISTER) {
-      const pendingRegister = Storage.get(
-        selectors[VERSION].register(this.address, this._chainId),
-      ) as RegisterData;
-
-      const responses = await Promise.all([
-        this.invokeFunction(pendingRegister.invoke.invocation, {
-          ...pendingRegister.invoke.details,
-          nonce: pendingRegister.invoke.details.nonce!,
-        }),
-        super.execute(calls, null, {
-          maxFee: transactionsDetail.maxFee,
-          nonce: BigInt(transactionsDetail.nonce) + 1n,
-          version: 1n,
-        }),
-      ]);
-      Storage.remove(selectors[VERSION].register(this.address, this._chainId));
-
-      this.status = Status.REGISTERED;
-      Storage.update(this.selector, {
-        status: Status.REGISTERED,
-        nonce: (BigInt(transactionsDetail.nonce) + 2n).toString(),
-      });
-
-      this.rpc
-        .waitForTransaction(responses[1].transaction_hash, {
-          retryInterval: 1000,
-          successStates: [
-            TransactionFinalityStatus.ACCEPTED_ON_L1,
-            TransactionFinalityStatus.ACCEPTED_ON_L2,
-          ],
-        })
-        .catch(() => {
-          this.resetNonce();
-        });
-
-      return responses[1];
-    }
+      transactionsDetail.nonce ?? (await this.getNonce("pending"));
 
     const res = await super.execute(calls, abis, transactionsDetail);
     Storage.update(this.selector, {
@@ -265,86 +225,6 @@ class Account extends BaseAccount {
 
     details.nonce = details.nonce ?? (await super.getNonce("pending"));
 
-    if (this.status === Status.PENDING_REGISTER) {
-      const pendingRegister = Storage.get(
-        selectors[VERSION].register(this.address, this._chainId),
-      );
-      const registerInvocation: AccountInvocationItem = {
-        type: TransactionType.INVOKE,
-        ...pendingRegister.invoke.invocation,
-        ...pendingRegister.invoke.details,
-      };
-
-      const nextNonce = num.toHex(BigInt(details.nonce) + 1n);
-      const signature = await this.signer.signTransaction(calls, {
-        walletAddress: this.address,
-        chainId: this._chainId,
-        cairoVersion: this.cairoVersion,
-        nonce: nextNonce,
-        maxFee: constants.ZERO,
-        version: "0x1",
-      });
-      const invocation: AccountInvocationItem = {
-        type: TransactionType.INVOKE,
-        contractAddress: this.address,
-        calldata: transaction.fromCallsToExecuteCalldata_cairo1(calls),
-        signature,
-        nonce: nextNonce,
-        maxFee: constants.ZERO,
-        version: "0x1",
-      };
-
-      const estimates = await this.rpc.getEstimateFeeBulk(
-        [registerInvocation, invocation],
-        {},
-      );
-
-      const fees = estimates.reduce<EstimateFee>(
-        (prev, estimate) => {
-          const overall_fee = prev.overall_fee + estimate.overall_fee;
-          return {
-            ...prev,
-            overall_fee: overall_fee,
-            gas_consumed: prev.gas_consumed + estimate.gas_consumed,
-            gas_price: prev.gas_price + estimate.gas_price,
-            suggestedMaxFee: overall_fee,
-            // TODO(#244): Set resource bounds
-            resourceBounds: {
-              l1_gas: {
-                max_amount: "",
-                max_price_per_unit: "",
-              },
-              l2_gas: {
-                max_amount: "",
-                max_price_per_unit: "",
-              },
-            },
-          };
-        },
-        {
-          overall_fee: 0n,
-          gas_consumed: 0n,
-          gas_price: 0n,
-          suggestedMaxFee: 0n,
-          unit: "WEI",
-          resourceBounds: {
-            l1_gas: {
-              max_amount: "",
-              max_price_per_unit: "",
-            },
-            l2_gas: {
-              max_amount: "",
-              max_price_per_unit: "",
-            },
-          },
-        },
-      );
-
-      fees.suggestedMaxFee = stark.estimatedFeeToMaxFee(fees.overall_fee);
-
-      return fees;
-    }
-
     return super.estimateInvokeFee(calls, details);
   }
 
@@ -372,7 +252,7 @@ class Account extends BaseAccount {
       : this.webauthn.signMessage()); // TODO: Fix on wasm side
   }
 
-  async register(): Promise<RegisterData> {
+  async register() {
     const pubKey = await this.signer.getPubKey();
     const calls: Call[] = [
       {
@@ -382,7 +262,7 @@ class Account extends BaseAccount {
       },
     ];
 
-    const nonce = await this.getNonce();
+    const nonce = await this.getNonce("pending");
     const version = "0x1";
 
     const gas = 100000n;
@@ -400,31 +280,20 @@ class Account extends BaseAccount {
         console.error(e);
       });
 
-    const invoke: InvocationWithDetails = {
-      invocation: {
-        contractAddress: this.address,
-        calldata: transaction.fromCallsToExecuteCalldata_cairo1(calls),
-        signature,
-      },
-      details: {
-        maxFee,
-        version,
-        nonce,
-      },
-    };
+    this.invokeFunction({
+      contractAddress: this.address,
+      calldata: transaction.fromCallsToExecuteCalldata_cairo1(calls),
+      signature,
+    }, {
+      maxFee,
+      version,
+      nonce,
+    })
 
-    Storage.set(selectors[VERSION].register(this.address, this._chainId), {
-      invoke,
-    });
-
-    this.status = Status.PENDING_REGISTER;
+    this.status = Status.REGISTERING;
     Storage.update(this.selector, {
-      status: Status.PENDING_REGISTER,
+      status: Status.REGISTERING,
     });
-
-    return {
-      invoke,
-    };
   }
 
   async getNonce(blockIdentifier?: any): Promise<string> {

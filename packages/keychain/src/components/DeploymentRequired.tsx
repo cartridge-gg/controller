@@ -49,17 +49,17 @@ export function DeploymentRequired({
     return () => clearInterval(id);
   }, [account, setStatus]);
 
-  if (status === Status.DEPLOYING) {
+  if (status === Status.DEPLOYING || status === Status.REGISTERING) {
+    const title = status === Status.DEPLOYING ? "Deploying your account" : "Creating a session"
     return (
       <Container chainId={chainId} onLogout={onLogout}>
         <PortalBanner
           Icon={Loading}
-          title="Deploying your account"
+          title={title}
           description="This may take a second"
         />
 
-        {typeof deployHash === "string" && (
-          <Link
+          {status === Status.DEPLOYING && <Link
             href={`https://${
               account._chainId === constants.StarknetChainId.SN_SEPOLIA
                 ? "sepolia."
@@ -70,8 +70,7 @@ export function DeploymentRequired({
             <Button variant="link" mt={10} rightIcon={<ExternalIcon />}>
               View on Starkscan
             </Button>
-          </Link>
-        )}
+          </Link>}
 
         <PortalFooter>
           <Button onClick={onClose}>close</Button>
