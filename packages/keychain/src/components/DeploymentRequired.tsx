@@ -40,9 +40,9 @@ export function DeploymentRequired({
 
   useEffect(() => {
     const id = setInterval(async () => {
-      if (account.status !== Status.DEPLOYING) clearInterval(id);
+      if (account.status !== Status.DEPLOYING && account.status !== Status.REGISTERING) clearInterval(id);
       setStatus(account.status);
-      console.log("deployment required signup");
+      console.log("deployment/registration required");
       await account.sync();
     }, 2000);
 
