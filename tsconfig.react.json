@@ -1,9 +1,9 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    // nextjs override these if not exist
+    // NextJS overrides these configs below if not specified
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "allowJs": true,
+    "allowJs": false,
     "incremental": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
