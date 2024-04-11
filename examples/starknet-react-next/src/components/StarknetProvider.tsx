@@ -1,5 +1,5 @@
 import { sepolia } from "@starknet-react/chains";
-import { Connector, StarknetConfig } from "@starknet-react/core";
+import { Connector, StarknetConfig, starkscan } from "@starknet-react/core";
 import { PropsWithChildren } from "react";
 import CartridgeConnector from "@cartridge/connector";
 import { RpcProvider } from "starknet";
@@ -10,6 +10,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
       autoConnect
       chains={[sepolia]}
       connectors={connectors}
+      explorer={starkscan}
       provider={(_chain) =>
         new RpcProvider({
           nodeUrl: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
