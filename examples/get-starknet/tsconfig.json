@@ -1,35 +1,8 @@
 {
+  "extends": "../../tsconfig.react.json",
   "compilerOptions": {
     "baseUrl": ".",
     "rootDir": "./src",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "declaration": true,
-    "target": "ES2020",
-    "module": "ESNext",
-    "strict": false,
-    "jsx": "preserve",
-    "jsxImportSource": "@emotion/react",
-    "allowJs": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "incremental": true,
-    "esModuleInterop": true,
-    "moduleResolution": "Bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "downlevelIteration": true,
     "noEmit": true,
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx"
-  ],
-  "exclude": [
-    "node_modules"
-  ],
 }

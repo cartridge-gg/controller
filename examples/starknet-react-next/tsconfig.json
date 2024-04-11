@@ -1,25 +1,7 @@
 {
+  "extends": "../../tsconfig.react.json",
   "compilerOptions": {
     "baseUrl": "./src",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "declaration": true,
-    "target": "ES2020",
-    "module": "ESNext",
-    "strict": false,
-    "jsx": "preserve",
-    "allowJs": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "incremental": true,
-    "esModuleInterop": true,
-    "moduleResolution": "Bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "downlevelIteration": true,
     "noEmit": true
   },
   "include": [

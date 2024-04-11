@@ -4,7 +4,6 @@
     // nextjs override these if not exist
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "allowJs": true,
-    "noEmit": true,
     "incremental": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
