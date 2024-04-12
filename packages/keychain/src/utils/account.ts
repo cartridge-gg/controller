@@ -162,6 +162,7 @@ class Account extends BaseAccount {
           this.status = Status.DEPLOYED;
           return;
         }
+        case Status.DEPLOYED:
         case Status.REGISTERING: {
           const pub = await this.signer.getPubKey();
           const res = await this.rpc.callContract(
