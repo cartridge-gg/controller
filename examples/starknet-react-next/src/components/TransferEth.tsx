@@ -102,7 +102,7 @@ export const TransferEth = () => {
     <>
       <h2>Transfer Eth</h2>
       <p>Address: {ETH_CONTRACT}</p>
-      <div style={{ marginBottom: "10px" }}>
+      {/* <div style={{ marginBottom: "10px" }}>
         <input
           type="radio"
           id="testnet"
@@ -124,14 +124,14 @@ export const TransferEth = () => {
           }
         />
         <label htmlFor="mainnet">Mainnet</label>
-      </div>
+      </div> */}
       <button onClick={() => execute005()}>Transfer 0.005 ETH to self</button>
-      <button style={{ marginLeft: "10px" }} onClick={() => executePointOne()}>
+      {/* <button style={{ marginLeft: "10px" }} onClick={() => executePointOne()}>
         Transfer 0.1 ETH to self
       </button>
       <button style={{ marginLeft: "10px" }} onClick={() => executeOne()}>
         Transfer 1.0 ETH to self
-      </button>
+      </button> */}
       {txnHash && (
         <p>
           Transaction hash:{" "}
