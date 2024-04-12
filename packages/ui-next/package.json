@@ -1,9 +1,14 @@
 {
   "name": "@cartridge/ui-next",
   "version": "0.1.0",
+  "description": "Catridge UI component library",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
+  "files": [
+    "./lib/index.js",
+    "./lib/**/*.css"
+  ],
   "scripts": {
     "dev": "tsc",
     "build": "tsc",

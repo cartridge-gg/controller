@@ -14,7 +14,10 @@ import { cartridgeTWPlugin } from "@cartridge/ui-next";
 
 const config = {
   darkMode: "class",
-  content: ["./src/**/*.{ts,tsx}""],
+  content: [
+    "./src/**/*.{ts,tsx}",
+    "./node_modules/@cartridge/ui-next/lib/**/*.{js}",
+  ],
   prefix: "",
   plugin: [cartridgeTWPlugin],
 } satisfies Config;
@@ -25,9 +28,9 @@ export default config;
 2. Import themes in your `global.css`
 
 ```css
-@import url("@cartridge/ui-next/themes/default.css");
-@import url("@cartridge/ui-next/themes/dark.css");
-@import url("@cartridge/ui-next/themes/fonts.css");
+@import url("@cartridge/ui-next/lib/themes/default.css");
+@import url("@cartridge/ui-next/lib/themes/dark.css");
+@import url("@cartridge/ui-next/lib/themes/fonts.css");
 
 @tailwind base;
 @tailwind components;

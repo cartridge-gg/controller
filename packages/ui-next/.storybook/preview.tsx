@@ -5,7 +5,7 @@ import { themes } from "@storybook/theming";
 import { SonnerToaster } from "../src/components/primitives/sonner";
 import { Toaster } from "../src/components/primitives/toaster";
 
-import "../src/index.css";
+import "./index.css";
 
 const preview: Preview = {
   parameters: {

@@ -1,7 +1,0 @@
-@import url("./themes/fonts.css");
-@import url("./themes/default.css");
-@import url("./themes/dark.css");
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
