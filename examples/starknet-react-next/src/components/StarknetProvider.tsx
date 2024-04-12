@@ -24,9 +24,11 @@ export function StarknetProvider({ children }: PropsWithChildren) {
 
 const url =
   process.env.NEXT_PUBLIC_VERCEL_ENV === "preview"
-    ? `https://keychain-git-${process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF}.preview.cartridge.gg`
-        .replace("(", "")
-        .replace(")/", "-") // e.g. `feat(keychain)/branch-name` -> `featkeychain-branch-name`
+    ? "https://" +
+      (process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL as string).replace(
+        "cartridge-starknet-react-next-git",
+        "keychain-git",
+      )
     : process.env.XFRAME_URL;
 const connectors = [
   new CartridgeConnector([{ target: "0xdeadbeef", method: "testMethod" }], {
