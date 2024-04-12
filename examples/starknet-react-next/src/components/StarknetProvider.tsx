@@ -23,11 +23,11 @@ export function StarknetProvider({ children }: PropsWithChildren) {
 }
 
 const url =
-  process.env.NEXT_PUBLIC_VERCEL_ENV === "preview"
+  process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL === "preview"
     ? "https://" +
       (process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL as string).replace(
-        "cartridge-starknet-react-next-git",
-        "keychain-git",
+        "cartridge-starknet-react-next",
+        "keychain",
       )
     : process.env.XFRAME_URL;
 const connectors = [
