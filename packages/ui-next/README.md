@@ -6,29 +6,45 @@
 pnpm add @cartridge/ui-next
 ```
 
-`tailwind.config.ts`
+1. Add `catrdigeTWPlugin` in your `tailwind.config.ts`
 
 ```ts
 import type { Config } from "tailwindcss";
-import { cartridgeTWPreset } from "./src/preset";
+import { cartridgeTWPlugin } from "@cartridge/ui-next";
 
 const config = {
   darkMode: "class",
   content: ["./src/**/*.{ts,tsx}""],
   prefix: "",
-  presets: [cartridgeTWPreset],
+  plugin: [cartridgeTWPlugin],
 } satisfies Config;
 
 export default config;
 ```
 
-`index.tsx`
+2. Import themes in your `global.css`
+
+```css
+@import url("@cartridge/ui-next/themes/default.css");
+@import url("@cartridge/ui-next/themes/dark.css");
+@import url("@cartridge/ui-next/themes/fonts.css");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+3. `index.tsx`
 
 ```ts
 import { Button } from "@cartridge/ui-next"
 
 export function MyComponent {
-  return <Button className="" />
+  return (
+    <div className="p-4 bg-background">
+      <Button onClick={() => console.log("clicked!")}>Click me</Button>
+    </div>
+  )
 }
 ```
 

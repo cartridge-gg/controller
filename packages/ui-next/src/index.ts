@@ -1,3 +1,3 @@
 export * from "./components";
-export * from "./preset";
+export * from "./plugin";
 export * from "./utils";

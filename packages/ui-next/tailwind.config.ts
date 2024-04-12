@@ -1,11 +1,11 @@
 import type { Config } from "tailwindcss";
-import { cartridgeTWPreset } from "./src/preset";
+import { cartridgeTWPlugin } from "./src/plugin";
 
 const config = {
   darkMode: "class",
   content: ["./src/**/*.{ts,tsx}", "./.storybook/**/*.{ts,tsx}"],
   prefix: "",
-  presets: [cartridgeTWPreset],
+  plugins: [cartridgeTWPlugin],
 } satisfies Config;
 
 export default config;
