@@ -1,4 +1,4 @@
-import { ScrollArea as UIScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea as UIScrollArea } from "@/components/primitives/scroll-area";
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof ScrollArea> = {

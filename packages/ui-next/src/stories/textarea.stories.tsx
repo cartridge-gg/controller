@@ -1,4 +1,4 @@
-import { Textarea as UITextarea } from "@/components/ui/textarea";
+import { Textarea as UITextarea } from "@/components/primitives/textarea";
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof Textarea> = {

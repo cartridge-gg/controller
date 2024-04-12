@@ -3,7 +3,7 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/components/ui/tabs";
+} from "@/components/primitives/tabs";
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof Tabs> = {

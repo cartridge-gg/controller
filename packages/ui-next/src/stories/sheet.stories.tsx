@@ -5,7 +5,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
+} from "@/components/primitives/sheet";
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof Sheet> = {
