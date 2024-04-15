@@ -1,5 +1,4 @@
 import {
-  CLASS_HASHES,
   ETH_RPC_SEPOLIA,
   ETH_RPC_MAINNET,
 } from "@cartridge/controller/src/constants";
@@ -24,8 +23,6 @@ import {
   waitForTransactionOptions,
   num,
   TransactionFinalityStatus,
-  AccountInvocationItem,
-  TransactionType,
 } from "starknet";
 import {
   AccountContractDocument,
@@ -35,8 +32,9 @@ import { client } from "utils/graphql";
 
 import selectors from "./selectors";
 import Storage from "./storage";
-import { InvocationWithDetails, RegisterData, VERSION } from "./controller";
 import { WebauthnAccount } from "@cartridge/account-wasm";
+
+const MIN_FEE = 3632658268208n;
 
 export enum Status {
   UNKNOWN = "UNKNOWN",
@@ -194,8 +192,9 @@ class Account extends BaseAccount {
       throw new Error("Account is not deployed");
     }
 
-    // hardcode for now 0.001ETH
-    transactionsDetail.maxFee = 1000000000000000;
+    if (BigInt(transactionsDetail.maxFee) < MIN_FEE) {
+      transactionsDetail.maxFee = MIN_FEE;
+    }
 
     transactionsDetail.nonce =
       transactionsDetail.nonce ?? (await this.getNonce("pending"));
@@ -275,9 +274,8 @@ class Account extends BaseAccount {
     const gas = 100000n;
     const gasPrice = await getGasPrice(this._chainId);
     const fee = BigInt(gasPrice) * gas;
-    //const maxFee = num.toHex(stark.estimatedFeeToMaxFee(fee));
-    // hardcode for now 0.001ETH
-    const maxFee = "0x38D7EA4C68000";
+    const maxFee =
+      fee < MIN_FEE ? MIN_FEE : num.toHex(stark.estimatedFeeToMaxFee(fee));
 
     try {
       const signature = await this.webauthn.signTransaction(calls, {
