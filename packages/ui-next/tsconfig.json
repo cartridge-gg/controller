@@ -9,5 +9,10 @@
         "@/*": ["./src/*"]
     }
   },
+<<<<<<< HEAD
   "include": ["src"]
+=======
+  "include": ["src/**/*"],
+  "exclude": ["lib", "node_modules", "src/**/*.stories.(ts|tsx)"]
+>>>>>>> b9d0e4c (Apply ui-next to next example)
 }

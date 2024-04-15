@@ -7,7 +7,7 @@ import { DojoSpawnAndMove } from "components/DojoSpawnAndMove";
 
 const Home: NextPage = () => {
   return (
-    <div>
+    <div className="bg-background">
       <h2>Wallet</h2>
       <ConnectWallet />
       <DojoSpawnAndMove />

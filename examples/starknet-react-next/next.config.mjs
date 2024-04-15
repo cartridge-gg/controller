@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+export const nextConfig = {
   productionBrowserSourceMaps: true,
   reactStrictMode: true,
   swcMinify: false,
@@ -7,8 +7,6 @@ const nextConfig = {
     externalDir: true,
   },
   env: {
-    XFRAME_URL: process.env.XFRAME_URL
-  }
-}
-
-module.exports = nextConfig
+    XFRAME_URL: process.env.XFRAME_URL,
+  },
+};

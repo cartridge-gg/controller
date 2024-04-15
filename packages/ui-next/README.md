@@ -2,14 +2,24 @@
 
 ## Usage
 
+1. Install packages
+
 ```sh
-pnpm add @cartridge/ui-next
+pnpm add @cartridge/ui-next tailwindcss postcss autoprefixer
 ```
 
-1. Add `catrdigeTWPlugin` in your `tailwind.config.ts`
+2. Initialize tailwind config
+
+This will create `tailwind.config.js` and `postcss.config.js`.
+
+```sh
+npx tailwindcss init -p
+```
+
+3. Add `catrdigeTWPlugin` in your `tailwind.config.ts`
 
 ```ts
-import type { Config } from "tailwindcss";
+import { Config } from "tailwindcss";
 import { cartridgeTWPlugin } from "@cartridge/ui-next";
 
 const config = {
@@ -25,7 +35,7 @@ const config = {
 export default config;
 ```
 
-2. Import themes in your `global.css`
+4. Import themes in your `global.css`
 
 ```css
 @import url("@cartridge/ui-next/lib/themes/default.css");
@@ -37,9 +47,11 @@ export default config;
 @tailwind utilities;
 ```
 
-3. `index.tsx`
+5. Import the `global.css` in the entry file (`_app.json`, `layout.json`,
+   `index.tsx` etc.)
 
 ```ts
+import "./global.css"
 import { Button } from "@cartridge/ui-next"
 
 export function MyComponent {

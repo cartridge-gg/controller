@@ -5,8 +5,17 @@
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
+  "exports": {
+    ".": {
+      "import": "./lib/index.js",
+      "types": "./lib/index.d.ts"
+    },
+    "./themes/*.css": "./lib/themes/*.css"
+  },
   "files": [
     "./lib/index.js",
+    "./lib/index.js.map",
+    "./lib/**/*.d.ts",
     "./lib/**/*.css"
   ],
   "scripts": {
@@ -68,14 +77,15 @@
     "@typescript-eslint/eslint-plugin": "^7.0.2",
     "@typescript-eslint/parser": "^7.0.2",
     "@vitejs/plugin-react-swc": "^3.5.0",
-    "autoprefixer": "^10.4.18",
+    "autoprefixer": "^10.4.19",
     "eslint": "^8.56.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-storybook": "^0.6.13",
-    "postcss": "^8.4.35",
+    "postcss": "^8.4.38",
     "storybook": "^8.0.5",
     "tailwindcss": "^3.4.3",
     "typescript": "^5.4.3",
-    "vite": "^5.1.4"
+    "vite": "^5.1.4",
+    "vite-plugin-dts": "^3.5.3"
   }
 }
