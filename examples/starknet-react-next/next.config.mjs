@@ -9,4 +9,8 @@ export const nextConfig = {
   env: {
     XFRAME_URL: process.env.XFRAME_URL,
   },
+  transpilePackages: ["@cartridge/ui-next"],
+  experimental: {
+    esmExternals: "loose",
+  },
 };

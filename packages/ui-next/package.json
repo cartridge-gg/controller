@@ -10,7 +10,9 @@
       "import": "./lib/index.js",
       "types": "./lib/index.d.ts"
     },
-    "./themes/*.css": "./lib/themes/*.css"
+    "./themes/*.css": {
+      "import": "./lib/themes/*.css"
+    }
   },
   "files": [
     "./lib/index.js",
