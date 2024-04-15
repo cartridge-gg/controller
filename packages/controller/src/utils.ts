@@ -4,6 +4,7 @@ import {
   ec,
   hash,
   shortString,
+  Signature,
   addAddressPadding,
   RpcProvider,
   BigNumberish,

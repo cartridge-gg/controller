@@ -5,7 +5,7 @@ import dataUriToBuffer from "data-uri-to-buffer";
 
 import Storage from "../utils/storage";
 
-// const SCALE = 10;
+const SCALE = 10;
 const PADDING = 0;
 const MAX_ROWS = 14;
 const MAX_COLS = 7;
@@ -157,8 +157,8 @@ const findValue = (
 
 const data2Svg = ({
   baseColor,
-  // borderColor,
-  // dimension,
+  borderColor,
+  dimension,
   fingerprint,
   crop,
 }: { crop: number } & AttributeData): string => {

@@ -35,7 +35,7 @@ class Controller {
     constants.StarknetChainId.SN_SEPOLIA;
   public accounts?: { [key: string]: AccountInterface };
   private modal?: Modal;
-  // private starterPackId?: string;
+  private starterPackId?: string;
 
   constructor(
     policies?: Policy[],
@@ -54,9 +54,9 @@ class Controller {
       this.chainId = options.chainId;
     }
 
-    // if (options?.starterPackId) {
-    //   this.starterPackId = options.starterPackId;
-    // }
+    if (options?.starterPackId) {
+      this.starterPackId = options.starterPackId;
+    }
 
     if (options?.url) {
       this.url = options.url;
@@ -98,15 +98,13 @@ class Controller {
     return this.accounts[this.chainId];
   }
 
-  ready() {
-    return (
-      this.connection?.promise
-        .then(() => this.probe())
-        .then(
-          (res) => !!res,
-          () => false,
-        ) ?? Promise.resolve(false)
-    );
+  async ready() {
+    return this.connection?.promise
+      .then(() => this.probe())
+      .then(
+        (res) => !!res,
+        () => false,
+      );
   }
 
   async probe() {
@@ -194,7 +192,7 @@ class Controller {
   async issueStarterPack(id: string) {
     if (!this.keychain || !this.modal) {
       console.error("not ready for connect");
-      return Promise.reject("not ready for connect");
+      return;
     }
 
     this.modal.open();
@@ -214,7 +212,6 @@ class Controller {
       return await this.keychain.issueStarterPack(id);
     } catch (e) {
       console.log(e);
-      return Promise.reject(e);
     } finally {
       this.modal.close();
     }
@@ -293,7 +290,7 @@ class Controller {
   async disconnect() {
     if (!this.keychain) {
       console.error("not ready for disconnect");
-      return;
+      return null;
     }
 
     if (!!document.hasStorageAccess) {
@@ -303,10 +300,10 @@ class Controller {
       }
     }
 
-    return this.keychain.disconnect();
+    return await this.keychain.disconnect();
   }
 
-  revoke(origin: string, _policy: Policy[]) {
+  revoke(origin: string, policy: Policy[]) {
     if (!this.keychain) {
       console.error("not ready for disconnect");
       return null;

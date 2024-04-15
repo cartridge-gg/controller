@@ -15,8 +15,8 @@ import {
   LogoutDuoIcon,
 } from "@cartridge/ui";
 import { useAvatar as useAvatarRaw } from "hooks/avatar";
-// import { useBalanceQuery } from "generated/graphql";
-// import { CONTRACT_POINTS } from "@cartridge/controller/src/constants";
+import { useBalanceQuery } from "generated/graphql";
+import { CONTRACT_POINTS } from "@cartridge/controller/src/constants";
 
 export function AccountMenu({
   address,
@@ -74,13 +74,13 @@ function useAvatar(address: string) {
   return avatar;
 }
 
-// function usePointsData(address: string) {
-//   const pointsChain = "starknet:SN_SEPOLIA";
-//   const pointsTokenAccountId = `${pointsChain}/${pointsChain}:${
-//     address || ""
-//   }/erc20:${CONTRACT_POINTS}`;
+function usePointsData(address: string) {
+  const pointsChain = "starknet:SN_SEPOLIA";
+  const pointsTokenAccountId = `${pointsChain}/${pointsChain}:${
+    address || ""
+  }/erc20:${CONTRACT_POINTS}`;
 
-//   return useBalanceQuery({
-//     tokenAccountId: pointsTokenAccountId,
-//   });
-// }
+  return useBalanceQuery({
+    tokenAccountId: pointsTokenAccountId,
+  });
+}

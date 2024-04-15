@@ -1,3 +1,4 @@
+import ControllerConnector from "@cartridge/connector";
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
 
 export function ConnectWallet() {

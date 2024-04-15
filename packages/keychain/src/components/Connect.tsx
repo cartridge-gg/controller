@@ -6,14 +6,14 @@ import { Button } from "@chakra-ui/react";
 import { useState } from "react";
 
 export function Connect({
-  // chainId,
+  chainId,
   policies,
   origin,
   onConnect,
   onCancel,
   onLogout,
 }: {
-  // chainId: constants.StarknetChainId;
+  chainId: constants.StarknetChainId;
   policies: Policy[];
   origin: string;
   onConnect: (policies: Policy[]) => void;

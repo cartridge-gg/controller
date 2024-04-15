@@ -14,10 +14,6 @@ export const TransferEth = () => {
   const [txnHash, setTxnHash] = useState<string>();
 
   const executePointOne = useCallback(async () => {
-    if (!account) {
-      return;
-    }
-
     const res = await account.execute(
       [
         {
@@ -44,9 +40,6 @@ export const TransferEth = () => {
       .finally(() => console.log("done"));
   }, [account, chainId]);
   const executeOne = useCallback(async () => {
-    if (!account) {
-      return;
-    }
     setTxnHash(undefined);
     const res = await account.execute(
       [
@@ -74,9 +67,6 @@ export const TransferEth = () => {
       .finally(() => console.log("done"));
   }, [account, chainId]);
   const execute005 = useCallback(async () => {
-    if (!account) {
-      return;
-    }
     setTxnHash(undefined);
     const res = await account.execute(
       [

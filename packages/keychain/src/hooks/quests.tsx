@@ -61,7 +61,7 @@ export function QuestsProvider({
   children: React.ReactNode;
 }): JSX.Element {
   const controller = useMemo(() => Controller.fromStore(), []);
-  const { data: accountData } = useAccountInfoQuery(
+  const { data: accountData, error } = useAccountInfoQuery(
     {
       address: addAddressPadding(controller.address),
     },

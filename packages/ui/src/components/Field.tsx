@@ -7,12 +7,13 @@ import {
   InputGroup,
   InputRightElement,
   StackProps,
+  Spinner,
 } from "@chakra-ui/react";
 import { AlertIcon, TimesCircleIcon } from "./icons";
 import { useCallback, useState } from "react";
 import { Loading } from "./Loading";
 
-export function Field({
+export function Field<T>({
   error,
   touched,
   onClear,

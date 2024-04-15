@@ -3,10 +3,10 @@ import {
   useContractWrite,
   useExplorer,
 } from "@starknet-react/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-// const worldAddress =
-//   "0x426bf51e62109e5c98e7d36dddf813881b610a1ff7c241e51ec3533ce58778c";
+const worldAddress =
+  "0x426bf51e62109e5c98e7d36dddf813881b610a1ff7c241e51ec3533ce58778c";
 const actionsAddress =
   "0x6823753387c85935c6a3d141fb273e35ea9114a5f6e1c2b69d7c5bc3916c7f2";
 

@@ -1,7 +1,15 @@
-import { constants, ec, SignerInterface, BigNumberish, num } from "starknet";
+import {
+  constants,
+  ec,
+  Invocation,
+  InvocationsDetails,
+  SignerInterface,
+  BigNumberish,
+  num,
+} from "starknet";
 import equal from "fast-deep-equal";
 
-import { Policy, Session } from "@cartridge/controller";
+import { Assertion, Policy, Session } from "@cartridge/controller";
 
 import Storage from "utils/storage";
 
@@ -15,14 +23,14 @@ import { client } from "./graphql";
 
 export const VERSION = "0.0.3";
 
-// export type InvocationWithDetails = {
-//   invocation: Invocation;
-//   details: InvocationsDetails;
-// };
+export type InvocationWithDetails = {
+  invocation: Invocation;
+  details: InvocationsDetails;
+};
 
-// export type RegisterData = {
-//   invoke: InvocationWithDetails;
-// };
+export type RegisterData = {
+  invoke: InvocationWithDetails;
+};
 
 type SerializedController = {
   credentialId: string;

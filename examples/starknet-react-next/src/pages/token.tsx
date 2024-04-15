@@ -32,7 +32,6 @@ function UserBalance() {
       return <div>Error!</div>;
     }
 
-    // @ts-expect-error TODO: fix type
     const balance = uint256.uint256ToBN(cairo.uint256(data[0]));
     return <div>{balance.toString(10)}</div>;
   }, [data, isLoading, error]);

@@ -1,11 +1,33 @@
 {
-  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": ".",
     "rootDir": "./src",
-    "outDir": "./lib"
+    "outDir": "lib",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "declaration": true,
+    "target": "ES2022",
+    "module": "ES2022",
+    "strict": false,
+    "jsx": "preserve",
+    "allowJs": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "incremental": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "downlevelIteration": true,
+    "sourceMap": true,
   },
   "include": [
     "src/**/*"
   ],
+  "exclude": [
+    "node_modules"
+  ]
 }

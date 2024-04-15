@@ -104,7 +104,7 @@ export class InjectedController implements IStarknetWindowObject {
   }
 
   request = (
-    _call: Omit<RpcMessage, "result">,
+    call: Omit<RpcMessage, "result">,
   ): Promise<RpcMessage["result"]> => {
     throw Error("Not implemented");
   };
