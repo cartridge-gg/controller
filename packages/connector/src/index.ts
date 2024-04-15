@@ -29,10 +29,7 @@ class ControllerConnector extends Connector {
   };
 
   async chainId() {
-    if (!this._account) {
-      return Promise.reject("Account is not connected");
-    }
-    const val = await this._account.getChainId();
+    const val = await this.controller.account.getChainId();
     return Promise.resolve(BigInt(val));
   }
 
@@ -40,8 +37,8 @@ class ControllerConnector extends Connector {
     return true;
   }
 
-  ready() {
-    return this.controller.ready();
+  async ready() {
+    return await this.controller.ready();
   }
 
   async register(
@@ -83,14 +80,11 @@ class ControllerConnector extends Connector {
     };
   }
 
-  disconnect(): Promise<void> {
+  async disconnect(): Promise<void> {
     return this.controller.disconnect();
   }
 
   account() {
-    if (!this._account) {
-      return Promise.reject("account not found");
-    }
     return Promise.resolve(this._account);
   }
 
