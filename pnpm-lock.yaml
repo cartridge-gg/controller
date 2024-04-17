@@ -76,6 +76,9 @@ importers:
         specifier: ^6.6.0
         version: 6.6.6
     devDependencies:
+      '@cartridge/tsconfig':
+        specifier: workspace:^
+        version: link:../../packages/tsconfig
       '@types/node':
         specifier: ^20.6.0
         version: 20.12.2
@@ -97,6 +100,9 @@ importers:
 
   packages/account-wasm:
     devDependencies:
+      '@cartridge/tsconfig':
+        specifier: workspace:^
+        version: link:../tsconfig
       tsup:
         specifier: ^8.0.1
         version: 8.0.2(typescript@5.4.3)
@@ -121,6 +127,10 @@ importers:
       typescript:
         specifier: ^5.4.5
         version: 5.4.5
+    devDependencies:
+      '@cartridge/tsconfig':
+        specifier: workspace:^
+        version: link:../tsconfig
 
   packages/controller:
     dependencies:
@@ -143,6 +153,9 @@ importers:
         specifier: ^6.6.0
         version: 6.6.6
     devDependencies:
+      '@cartridge/tsconfig':
+        specifier: workspace:^
+        version: link:../tsconfig
       '@types/node':
         specifier: ^20.6.0
         version: 20.12.2
@@ -252,6 +265,9 @@ importers:
         specifier: ^1.4.12
         version: 1.4.13(@types/react@18.2.74)(react-dom@18.2.0)(react@18.2.0)(typescript@5.4.5)(viem@1.21.4)
     devDependencies:
+      '@cartridge/tsconfig':
+        specifier: workspace:^
+        version: link:../tsconfig
       '@graphql-codegen/cli':
         specifier: ^2.6.2
         version: 2.16.5(@babel/core@7.24.3)(@types/node@20.12.2)(graphql@16.8.1)(typescript@5.4.5)
@@ -313,6 +329,8 @@ importers:
         specifier: ^5.4.5
         version: 5.4.5
 
+  packages/tsconfig: {}
+
   packages/ui:
     dependencies:
       '@chakra-ui/anatomy':
@@ -337,6 +355,9 @@ importers:
         specifier: ^18.2.0
         version: 18.2.0(react@18.2.0)
     devDependencies:
+      '@cartridge/tsconfig':
+        specifier: workspace:^
+        version: link:../tsconfig
       '@emotion/babel-plugin':
         specifier: ^11.11.0
         version: 11.11.0
@@ -500,6 +521,9 @@ importers:
         specifier: ^0.9.0
         version: 0.9.0(@types/react-dom@18.2.23)(@types/react@18.2.74)(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
+      '@cartridge/tsconfig':
+        specifier: workspace:^
+        version: link:../tsconfig
       '@storybook/addon-essentials':
         specifier: ^8.0.5
         version: 8.0.5(@types/react@18.2.74)(react-dom@18.2.0)(react@18.2.0)

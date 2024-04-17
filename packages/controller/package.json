@@ -2,8 +2,8 @@
   "name": "@cartridge/controller",
   "version": "0.3.19",
   "description": "Cartridge Controller",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
     "build": "tsc",
@@ -11,7 +11,7 @@
     "format": "prettier --write \"src/**/*.ts\""
   },
   "files": [
-    "lib"
+    "dist"
   ],
   "dependencies": {
     "@cartridge/penpal": "^6.2.3",
@@ -22,6 +22,7 @@
     "starknet": "^6.6.0"
   },
   "devDependencies": {
+    "@cartridge/tsconfig": "workspace:^",
     "@types/node": "^20.6.0",
     "typescript": "^5.4.5"
   }

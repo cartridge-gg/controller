@@ -12,6 +12,9 @@
     "react-scripts": "5.0.1",
     "starknet": "^6.6.0"
   },
+  "devDependencies": {
+    "@cartridge/tsconfig": "workspace:^"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",

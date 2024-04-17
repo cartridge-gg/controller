@@ -1,5 +1,6 @@
 {
-  "extends": "../../tsconfig.react.json",
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@cartridge/tsconfig/react.json",
   "compilerOptions": {
     "baseUrl": "./src",
     "rootDir": ".",
@@ -10,7 +11,7 @@
     // TODO(#262): Enable these options (too many errors for this scope)
     "strict": false,
     "noImplicitAny": false,
-    "strictNullChecks": false,
+    "strictNullChecks": false
   },
   "include": [
     "next-env.d.ts",

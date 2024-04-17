@@ -47,6 +47,7 @@
     "wagmi": "^1.4.12"
   },
   "devDependencies": {
+    "@cartridge/tsconfig": "workspace:^",
     "@graphql-codegen/cli": "^2.6.2",
     "@graphql-codegen/fragment-matcher": "^3.2.1",
     "@graphql-codegen/introspection": "^2.1.1",

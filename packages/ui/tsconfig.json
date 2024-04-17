@@ -1,13 +1,14 @@
 {
-  "extends": "../../tsconfig.react.json",
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@cartridge/tsconfig/react.json",
   "compilerOptions": {
     "baseUrl": ".",
     "rootDir": "./src",
-    "outDir": "./lib",
-    "types": ["@emotion/react/types/css-prop"],
+    "outDir": "./dist",
+    "types": ["@emotion/react/types/css-prop"]
   },
   "paths": {
-    "@cartridge/ui/components": ["./src/components"],
+    "@cartridge/ui/components": ["./src/components"]
   },
   "include": [
     "./src/**/*"
