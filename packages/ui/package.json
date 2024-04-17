@@ -5,6 +5,7 @@
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
+    "dev": "tsc --watch",
     "build": "tsc",
     "format": "prettier ./src --write",
     "storybook": "storybook dev -p 6006",

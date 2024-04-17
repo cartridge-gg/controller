@@ -5,6 +5,7 @@
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
+    "dev": "tsc --watch",
     "build": "tsc",
     "format": "prettier ./src --write",
     "lint": "eslint . --ext ts,tsx",
