@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc",
     "prepublish": "pnpm build",
-    "dev": "tsc --watch",
+    "dev": "tsc",
     "format": "prettier --write \"src/**/*.ts\""
   },
   "files": [
