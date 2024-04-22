@@ -105,7 +105,7 @@ class Account extends BaseAccount {
     });
   }
 
-  async getDeploymentTxn() {
+  async getDeploymentTxn(): Promise<string | undefined> {
     let chainId = this._chainId.substring(2);
     chainId = Buffer.from(chainId, "hex").toString("ascii");
 
@@ -125,10 +125,10 @@ class Account extends BaseAccount {
       return data.contract.deployTransaction.id.split("/")[1];
     } catch (e) {
       if (e.message.includes("not found")) {
-        return null;
+        return Promise.resolve(undefined);
       }
 
-      throw e;
+      throw Promise.reject(e);
     }
   }
 
@@ -137,7 +137,6 @@ class Account extends BaseAccount {
     Storage.update(this.selector, {
       syncing: Date.now(),
     });
-
     try {
       switch (this.status) {
         case Status.REGISTERED:
@@ -145,6 +144,7 @@ class Account extends BaseAccount {
         case Status.DEPLOYING:
         case Status.COUNTERFACTUAL: {
           const hash = await this.getDeploymentTxn();
+          if (!hash) return;
           const receipt = await this.rpc.getTransactionReceipt(hash);
           if (receipt.isRejected()) {
             // TODO: Handle redeployment
