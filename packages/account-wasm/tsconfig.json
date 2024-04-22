@@ -1,18 +1,4 @@
 {
-    "compilerOptions": {
-        "target": "ESNext",
-        "module": "ESNext",
-        "declaration": true,
-        "outDir": "./dist",
-        "sourceMap": true,
-        "noImplicitAny": true,
-        "noUnusedLocals": true,
-        "moduleResolution": "node",
-        "skipLibCheck": true,
-        "strict": true,
-        "strictNullChecks": true,
-        "esModuleInterop": true
-    },
-    "skipLibCheck": true,
-    "exclude": ["node_modules", "dist", "**/*.test.ts"]
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@cartridge/tsconfig/base.json"
 }

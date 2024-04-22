@@ -3,7 +3,7 @@ import { Text, VStack, Spacer, Button } from "@chakra-ui/react";
 
 import Controller from "utils/controller";
 import {
-  Abi,
+  // Abi,
   constants,
   Call as StarknetCall,
   InvocationsDetails,
@@ -28,22 +28,22 @@ export const CONTRACT_ETH =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 
 export function Execute({
-  origin,
+  // origin,
   chainId,
   controller,
   transactions,
   transactionsDetail,
-  abis,
+  // abis,
   onExecute,
   onCancel,
   onLogout,
 }: {
-  origin: string;
+  // origin: string;
   chainId: constants.StarknetChainId;
   controller: Controller;
   transactions: StarknetCall | StarknetCall[];
   transactionsDetail?: InvocationsDetails;
-  abis?: Abi[];
+  // abis?: Abi[];
   onExecute: (res: ExecuteReply) => void;
   onCancel: () => void;
   onLogout: () => void;

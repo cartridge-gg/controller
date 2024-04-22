@@ -75,11 +75,11 @@ export const onCreateBegin = async (name: string): Promise<Credentials> => {
   return credentials;
 };
 
-export const onCreateFinalize = async (
+export const onCreateFinalize = (
   deviceKey: string,
   credentials: Credentials,
 ) => {
-  return await client.request(FinalizeRegistrationDocument, {
+  return client.request(FinalizeRegistrationDocument, {
     credentials: JSON.stringify({
       id: credentials.id,
       rawId: base64url(Buffer.from(credentials.rawId)),
@@ -97,10 +97,10 @@ export const onCreateFinalize = async (
   });
 };
 
-export const onLoginFinalize = async (
+export const onLoginFinalize = (
   assertion: RawAssertion,
 ): Promise<FinalizeLoginMutation> => {
-  return await client.request(FinalizeLoginDocument, {
+  return client.request(FinalizeLoginDocument, {
     credentials: JSON.stringify({
       id: assertion.id,
       type: assertion.type,

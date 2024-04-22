@@ -16,7 +16,7 @@ export default defineConfig({
       // Ref: https://github.com/emotion-js/emotion/issues/2853
       external: makeExternalPredicate(Object.keys(pkg.peerDependencies)),
     },
-    outDir: "lib",
+    outDir: "dist",
   },
   plugins: [
     react({

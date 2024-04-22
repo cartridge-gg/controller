@@ -1,5 +1,5 @@
 import {
-  CLASS_HASHES,
+  // CLASS_HASHES,
   ETH_RPC_SEPOLIA,
   ETH_RPC_MAINNET,
 } from "@cartridge/controller/src/constants";
@@ -24,8 +24,8 @@ import {
   waitForTransactionOptions,
   num,
   TransactionFinalityStatus,
-  AccountInvocationItem,
-  TransactionType,
+  // AccountInvocationItem,
+  // TransactionType,
 } from "starknet";
 import {
   AccountContractDocument,
@@ -35,7 +35,7 @@ import { client } from "utils/graphql";
 
 import selectors from "./selectors";
 import Storage from "./storage";
-import { InvocationWithDetails, RegisterData, VERSION } from "./controller";
+// import { InvocationWithDetails, RegisterData, VERSION } from "./controller";
 import { WebauthnAccount } from "@cartridge/account-wasm";
 
 export enum Status {
@@ -105,7 +105,7 @@ class Account extends BaseAccount {
     });
   }
 
-  async getDeploymentTxn() {
+  async getDeploymentTxn(): Promise<string | undefined> {
     let chainId = this._chainId.substring(2);
     chainId = Buffer.from(chainId, "hex").toString("ascii");
 
@@ -125,10 +125,10 @@ class Account extends BaseAccount {
       return data.contract.deployTransaction.id.split("/")[1];
     } catch (e) {
       if (e.message.includes("not found")) {
-        return null;
+        return Promise.resolve(undefined);
       }
 
-      throw e;
+      return Promise.reject(e);
     }
   }
 
@@ -145,6 +145,7 @@ class Account extends BaseAccount {
         case Status.DEPLOYING:
         case Status.COUNTERFACTUAL: {
           const hash = await this.getDeploymentTxn();
+          if (!hash) return;
           const receipt = await this.rpc.getTransactionReceipt(hash);
           if (receipt.isRejected()) {
             // TODO: Handle redeployment

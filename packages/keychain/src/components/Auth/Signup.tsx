@@ -209,19 +209,16 @@ function Form({
 
         controller.account(constants.StarknetChainId.SN_SEPOLIA).status =
           Status.DEPLOYING;
-        client
-          .request(DeployAccountDocument, {
-            id: values.username,
-            chainId: "starknet:SN_SEPOLIA",
-            starterpackIds: starterData?.game?.starterPack?.chainID?.includes(
-              "SN_SEPOLIA",
-            )
-              ? [starterData?.game?.starterPack?.id]
-              : undefined,
-          })
-          .then(() => {
-            controller.account(constants.StarknetChainId.SN_SEPOLIA).sync();
-          });
+        await client.request(DeployAccountDocument, {
+          id: values.username,
+          chainId: "starknet:SN_SEPOLIA",
+          starterpackIds: starterData?.game?.starterPack?.chainID?.includes(
+            "SN_SEPOLIA",
+          )
+            ? [starterData?.game?.starterPack?.id]
+            : undefined,
+        });
+        await controller.account(constants.StarknetChainId.SN_SEPOLIA).sync();
 
         // TODO: Enable once controller is ready for mainnet
         // controller.account(constants.StarknetChainId.SN_MAIN).status =

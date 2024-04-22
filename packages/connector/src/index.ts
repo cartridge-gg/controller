@@ -4,7 +4,7 @@ import { AccountInterface, InvokeFunctionResponse, constants } from "starknet";
 
 class ControllerConnector extends Connector {
   public controller: Controller;
-  private _account: AccountInterface | null;
+  private _account: AccountInterface | undefined;
 
   constructor(
     policies?: Policy[],
@@ -15,7 +15,6 @@ class ControllerConnector extends Connector {
     },
   ) {
     super();
-    this._account = null;
     this.controller = new Controller(policies, options);
   }
 
@@ -29,7 +28,10 @@ class ControllerConnector extends Connector {
   };
 
   async chainId() {
-    const val = await this.controller.account.getChainId();
+    if (!this._account) {
+      return Promise.reject("Account is not connected");
+    }
+    const val = await this._account.getChainId();
     return Promise.resolve(BigInt(val));
   }
 
@@ -37,8 +39,8 @@ class ControllerConnector extends Connector {
     return true;
   }
 
-  async ready() {
-    return await this.controller.ready();
+  ready() {
+    return this.controller.ready();
   }
 
   async register(
@@ -65,26 +67,26 @@ class ControllerConnector extends Connector {
   }
 
   async connect() {
-    const account = await this.controller.connect();
+    this._account = await this.controller.connect();
 
-    if (!account) {
-      throw new Error("account not found");
+    if (!this._account) {
+      return Promise.reject("account not found");
     }
-    const chainId = await this.chainId();
-
-    this._account = account;
 
     return {
       account: this._account.address,
-      chainId,
+      chainId: await this.chainId(),
     };
   }
 
-  async disconnect(): Promise<void> {
+  disconnect(): Promise<void> {
     return this.controller.disconnect();
   }
 
   account() {
+    if (!this._account) {
+      return Promise.reject("account not found");
+    }
     return Promise.resolve(this._account);
   }
 

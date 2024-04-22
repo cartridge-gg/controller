@@ -168,14 +168,13 @@ export class WebauthnSigner implements SignerInterface {
   }
 
   public async signDeployAccountTransaction(
-    transaction: DeployAccountSignerDetails,
+    _transaction: DeployAccountSignerDetails,
   ): Promise<Signature> {
     return;
   }
 }
 
 class WebauthnAccount extends Account {
-  // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account-sdk
   public signer: WebauthnSigner;
   constructor(
     nodeUrl: string,
