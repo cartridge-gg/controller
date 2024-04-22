@@ -105,35 +105,25 @@ class Account extends BaseAccount {
     });
   }
 
-  async getDeploymentTxn(): Promise<string | undefined> {
+  async getDeploymentTxn() {
     let chainId = this._chainId.substring(2);
     chainId = Buffer.from(chainId, "hex").toString("ascii");
 
-    try {
-      const data: AccountContractQuery = await client.request(
-        AccountContractDocument,
-        {
-          id: `starknet:${chainId}:${this.address}`,
-        },
-      );
+    const data: AccountContractQuery = await client.request(
+      AccountContractDocument,
+      {
+        id: `starknet:${chainId}:${this.address}`,
+      },
+    );
 
-      if (!data?.contract?.deployTransaction?.id) {
-        console.error("could not find deployment txn");
-        return;
-      }
-
-      return data.contract.deployTransaction.id.split("/")[1];
-    } catch (e) {
-      if (e.message.includes("not found")) {
-        return Promise.resolve(undefined);
-      }
-
-      throw Promise.reject(e);
+    if (!data?.contract?.deployTransaction?.id) {
+      return Promise.reject("could not find deployment txn");
     }
+
+    return data.contract.deployTransaction.id.split("/")[1];
   }
 
-  async sync() {
-    console.log("sync");
+  async sync({ isSignup = false } = {}) {
     Storage.update(this.selector, {
       syncing: Date.now(),
     });
@@ -144,7 +134,6 @@ class Account extends BaseAccount {
         case Status.DEPLOYING:
         case Status.COUNTERFACTUAL: {
           const hash = await this.getDeploymentTxn();
-          if (!hash) return;
           const receipt = await this.rpc.getTransactionReceipt(hash);
           if (receipt.isRejected()) {
             // TODO: Handle redeployment
@@ -159,7 +148,7 @@ class Account extends BaseAccount {
           Storage.update(this.selector, {
             classHash,
           });
-          this.status = Status.DEPLOYED;
+          this.status = isSignup ? Status.REGISTERING : Status.DEPLOYED;
           return;
         }
         case Status.DEPLOYED:
@@ -180,8 +169,11 @@ class Account extends BaseAccount {
         }
       }
     } catch (e) {
-      /* no-op */
-      console.log(e);
+      if (!e.message.includes("not found")) {
+        console.log(e);
+      }
+    } finally {
+      console.log("sync:", this.address, this.status);
     }
   }
 
@@ -190,6 +182,7 @@ class Account extends BaseAccount {
     abis?: Abi[],
     transactionsDetail?: InvocationsDetails,
   ): Promise<InvokeFunctionResponse> {
+    console.log("account execute");
     if (this.status === Status.COUNTERFACTUAL) {
       throw new Error("Account is not deployed");
     }

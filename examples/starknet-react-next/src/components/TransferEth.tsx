@@ -87,6 +87,9 @@ export const TransferEth = () => {
       } as any,
     );
 
+    // @ts-expect-error execute return type only includes `transaction_hash` field for some reason
+    if (res.code == "CANCELED") return;
+
     setTxnHash(res.transaction_hash);
     account
       .waitForTransaction(res.transaction_hash)
