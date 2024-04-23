@@ -83,6 +83,10 @@ class ControllerConnector extends Connector {
     return this.controller.disconnect();
   }
 
+  logout() {
+    return this.controller.logout();
+  }
+
   account() {
     if (!this._account) {
       return Promise.reject("account not found");

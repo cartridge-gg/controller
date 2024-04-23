@@ -323,6 +323,15 @@ class Controller {
 
     return this.keychain.approvals(origin);
   }
+
+  logout() {
+    if (!this.keychain) {
+      console.error("not ready for disconnect");
+      return;
+    }
+
+    return this.keychain.logout();
+  }
 }
 
 export * from "./types";
