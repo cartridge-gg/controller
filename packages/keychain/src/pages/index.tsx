@@ -18,7 +18,7 @@ import {
   constants,
   InvocationsDetails,
   Signature,
-  typedData,
+  TypedData,
 } from "starknet";
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
 import provision from "../methods/provision";
@@ -74,7 +74,7 @@ type Execute = {
 type SignMessage = {
   origin: string;
   type: "sign-message";
-  typedData: typedData.TypedData;
+  typedData: TypedData;
   account: string;
   resolve: (signature: Signature | Error) => void;
   reject: (reason?: unknown) => void;
@@ -257,7 +257,7 @@ const Index: NextPage = () => {
         signMessage: normalize(
           validate(
             (_: Controller, _session: Session, origin: string) =>
-              async (typedData: typedData.TypedData, account: string) => {
+              async (typedData: TypedData, account: string) => {
                 return await new Promise((resolve, reject) => {
                   setContext({
                     type: "sign-message",

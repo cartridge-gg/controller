@@ -1,16 +1,16 @@
 import {
-  constants,
   Account,
   Abi,
   Call,
   EstimateFeeDetails,
-  InvocationsDetails,
   Signature,
-  typedData,
   InvokeFunctionResponse,
   EstimateFee,
   DeclareContractPayload,
   RpcProvider,
+  UniversalDetails,
+  AllowArray,
+  TypedData,
 } from "starknet";
 
 import { Keychain, ResponseCodes, Modal } from "./types";
@@ -77,30 +77,46 @@ class DeviceAccount extends Account {
    *
    * @returns response from addTransaction
    */
-  async execute(
-    calls: Call | Call[],
+  execute(
+    transactions: AllowArray<Call>,
+    transactionsDetail?: UniversalDetails,
+  ): Promise<InvokeFunctionResponse>;
+  execute(
+    transactions: AllowArray<Call>,
     abis?: Abi[],
-    transactionsDetail?: InvocationsDetails & {
-      chainId?: constants.StarknetChainId;
-    },
+    transactionsDetail?: UniversalDetails,
+  ): Promise<InvokeFunctionResponse>;
+  async execute(
+    calls: AllowArray<Call>,
+    abisOrTransactionsDetail?: Abi[] | UniversalDetails,
+    transactionsDetail?: UniversalDetails,
   ): Promise<InvokeFunctionResponse> {
-    if (!transactionsDetail) {
-      transactionsDetail = {};
-    }
-
     try {
-      const res = await this.keychain.execute(calls, abis, transactionsDetail);
+      const res = Array.isArray(abisOrTransactionsDetail)
+        ? await this.keychain.execute(
+            calls,
+            abisOrTransactionsDetail,
+            transactionsDetail,
+          )
+        : await this.keychain.execute(calls, abisOrTransactionsDetail as Abi[]);
       if (res.code === ResponseCodes.SUCCESS) {
         return res as InvokeFunctionResponse;
       }
 
       this.modal.open();
-      const res2 = await this.keychain.execute(
-        calls,
-        abis,
-        transactionsDetail,
-        true,
-      );
+      const res2 = Array.isArray(abisOrTransactionsDetail)
+        ? await this.keychain.execute(
+            calls,
+            abisOrTransactionsDetail,
+            transactionsDetail,
+            true,
+          )
+        : await this.keychain.execute(
+            calls,
+            abisOrTransactionsDetail as Abi[],
+            undefined,
+            true,
+          );
       this.modal.close();
 
       if (
@@ -125,7 +141,7 @@ class DeviceAccount extends Account {
    * @returns the signature of the JSON object
    * @throws {Error} if the JSON object is not a valid JSON
    */
-  async signMessage(typedData: typedData.TypedData): Promise<Signature> {
+  async signMessage(typedData: TypedData): Promise<Signature> {
     try {
       this.modal.open();
       const res = await this.keychain.signMessage(typedData, this.address);

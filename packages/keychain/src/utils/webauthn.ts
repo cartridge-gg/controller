@@ -17,6 +17,7 @@ import {
   InvocationsDetails,
   InvokeFunctionResponse,
   TransactionType,
+  TypedData,
 } from "starknet";
 import cbor from "cbor";
 import base64url from "base64url";
@@ -127,7 +128,7 @@ export class WebauthnSigner implements SignerInterface {
   }
 
   public async signMessage(
-    td: typedData.TypedData,
+    td: TypedData,
     accountAddress: string,
   ): Promise<Signature> {
     const msgHash = typedData.getMessageHash(td, accountAddress);
@@ -238,6 +239,7 @@ class WebauthnAccount extends Account {
     };
   }
 
+  // @ts-expect-error TODO(@268): Fix type error
   async execute(
     calls: Call[],
     abis?: Abi[] | undefined,

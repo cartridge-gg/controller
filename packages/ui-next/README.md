@@ -38,9 +38,9 @@ export default config;
 4. Import themes in your `global.css`
 
 ```css
-@import url("@cartridge/ui-next/lib/themes/default.css");
-@import url("@cartridge/ui-next/lib/themes/dark.css");
-@import url("@cartridge/ui-next/lib/themes/fonts.css");
+@import url("../node_modules/@cartridge/ui-next/dist/themes/default.css");
+@import url("../node_modules/@cartridge/ui-next/dist/themes/dark.css");
+@import url("../node_modules/@cartridge/ui-next/dist/themes/fonts.css");
 
 @tailwind base;
 @tailwind components;

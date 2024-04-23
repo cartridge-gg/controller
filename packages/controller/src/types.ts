@@ -3,7 +3,6 @@ import {
   Abi,
   Call,
   InvocationsDetails,
-  typedData,
   InvokeFunctionResponse,
   Signature,
   EstimateFeeDetails,
@@ -13,6 +12,7 @@ import {
   InvocationsSignerDetails,
   DeployAccountSignerDetails,
   DeclareSignerDetails,
+  TypedData,
 } from "starknet";
 
 export type Assertion = {
@@ -119,7 +119,7 @@ export interface Keychain {
     [key: string]: Session;
   }>;
   signMessage(
-    typedData: typedData.TypedData,
+    typedData: TypedData,
     account: string,
   ): Promise<Signature | Error>;
   signTransaction(

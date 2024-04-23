@@ -2,7 +2,7 @@
   "name": "@cartridge/ui-next",
   "version": "0.1.0",
   "description": "Catridge UI component library",
-  "module": "dist/index.js",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
   "files": [
@@ -10,9 +10,8 @@
   ],
   "exports": {
     ".": {
-      "module": "./dist/index.js",
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.js"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     },
     "./themes/*": "./dist/themes/*.css"
   },

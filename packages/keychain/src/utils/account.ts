@@ -17,13 +17,13 @@ import {
   Abi,
   AllowArray,
   ec,
-  InvocationsDetails,
   InvokeFunctionResponse,
-  typedData,
   BigNumberish,
   waitForTransactionOptions,
   num,
   TransactionFinalityStatus,
+  TypedData,
+  UniversalDetails,
   // AccountInvocationItem,
   // TransactionType,
 } from "starknet";
@@ -186,10 +186,19 @@ class Account extends BaseAccount {
     }
   }
 
+  execute(
+    transactions: AllowArray<Call>,
+    transactionsDetail?: UniversalDetails,
+  ): Promise<InvokeFunctionResponse>;
+  execute(
+    transactions: AllowArray<Call>,
+    abis?: Abi[],
+    transactionsDetail?: UniversalDetails,
+  ): Promise<InvokeFunctionResponse>;
   async execute(
     calls: AllowArray<Call>,
-    abis?: Abi[],
-    transactionsDetail?: InvocationsDetails,
+    abisOrTransactionsDetail?: Abi[] | UniversalDetails,
+    transactionsDetail?: UniversalDetails,
   ): Promise<InvokeFunctionResponse> {
     if (this.status === Status.COUNTERFACTUAL) {
       throw new Error("Account is not deployed");
@@ -198,7 +207,10 @@ class Account extends BaseAccount {
     transactionsDetail.nonce =
       transactionsDetail.nonce ?? (await this.getNonce("pending"));
 
-    const res = await super.execute(calls, abis, transactionsDetail);
+    const res = Array.isArray(abisOrTransactionsDetail)
+      ? await super.execute(calls, abisOrTransactionsDetail, transactionsDetail)
+      : await super.execute(calls, transactionsDetail);
+
     Storage.update(this.selector, {
       nonce: (BigInt(transactionsDetail.nonce) + 1n).toString(),
     });
@@ -249,7 +261,7 @@ class Account extends BaseAccount {
     return super.verifyMessageHash(hash, signature);
   }
 
-  async signMessage(typedData: typedData.TypedData): Promise<Signature> {
+  async signMessage(typedData: TypedData): Promise<Signature> {
     return await (this.status === Status.REGISTERED ||
     this.status === Status.COUNTERFACTUAL ||
     this.status === Status.DEPLOYING

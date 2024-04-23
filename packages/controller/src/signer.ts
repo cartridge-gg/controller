@@ -6,7 +6,7 @@ import {
   InvocationsSignerDetails,
   Signature,
   SignerInterface,
-  typedData,
+  TypedData,
 } from "starknet";
 
 import { Keychain, Modal } from "./types";
@@ -39,7 +39,7 @@ export class Signer implements SignerInterface {
    * @throws {Error} if the JSON object is not a valid JSON
    */
   public async signMessage(
-    typedData: typedData.TypedData,
+    typedData: TypedData,
     account: string,
   ): Promise<Signature> {
     this.modal.open();
