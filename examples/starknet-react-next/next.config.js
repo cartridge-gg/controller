@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-export const nextConfig = {
+const nextConfig = {
   productionBrowserSourceMaps: true,
   reactStrictMode: true,
   swcMinify: false,
@@ -9,8 +9,6 @@ export const nextConfig = {
   env: {
     XFRAME_URL: process.env.XFRAME_URL,
   },
-  transpilePackages: ["@cartridge/ui-next"],
-  experimental: {
-    esmExternals: "loose",
-  },
 };
+
+export default nextConfig;

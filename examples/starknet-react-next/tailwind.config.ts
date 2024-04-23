@@ -5,7 +5,7 @@ const config = {
   darkMode: "class",
   content: [
     "./src/**/*.{ts,tsx}",
-    "./node_modules/@cartridge/ui-next/lib/**/*.js",
+    "./node_modules/@cartridge/ui-next/dist/**/*.js",
   ],
   prefix: "",
   plugin: [cartridgeTWPlugin],

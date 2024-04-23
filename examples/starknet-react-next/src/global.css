@@ -1,6 +1,6 @@
-/* @import url("@cartridge/ui-next/themes/default.css");
-@import url("@cartridge/ui-next/themes/dark.css");
-@import url("@cartridge/ui-next/themes/fonts.css"); */
+@import url("../node_modules/@cartridge/ui-next/dist/themes/default.css");
+@import url("../node_modules/@cartridge/ui-next/dist/themes/dark.css");
+@import url("../node_modules/@cartridge/ui-next/dist/themes/fonts.css");
 
 @tailwind base;
 @tailwind components;
