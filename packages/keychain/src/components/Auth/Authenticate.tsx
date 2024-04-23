@@ -35,7 +35,7 @@ export function Authenticate({
       const credentials: Credentials = await onCreateBegin(
         decodeURIComponent(name),
       );
-      await onCreateFinalize(pubkey, credentials);
+      await onCreateFinalize(credentials);
 
       play();
     } catch (e) {

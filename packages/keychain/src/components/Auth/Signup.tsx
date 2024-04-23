@@ -102,7 +102,7 @@ export function Signup({
           const credentials: Credentials = await onCreateBegin(
             decodeURIComponent(values.username),
           );
-          await onCreateFinalize(deviceKey, credentials);
+          await onCreateFinalize(credentials);
 
           play();
         } catch (e) {

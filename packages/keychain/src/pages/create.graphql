@@ -2,8 +2,8 @@ mutation BeginRegistration($id: String!) {
   beginRegistration(id: $id)
 }
 
-mutation FinalizeRegistration($credentials: String!, $signer: String!) {
-  finalizeRegistration(credentials: $credentials, signer: $signer) {
+mutation FinalizeRegistration($credentials: String!) {
+  finalizeRegistration(credentials: $credentials) {
     id
     contractAddress
     contracts {

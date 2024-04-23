@@ -14,6 +14,11 @@
       "ERC20Metadata",
       "ERC721Metadata"
     ],
+    "DeploymentConfig": [
+      "KatanaConfig",
+      "MadaraConfig",
+      "ToriiConfig"
+    ],
     "Node": [
       "Account",
       "AccountQuest",
@@ -33,6 +38,7 @@
       "Quest",
       "QuestEvent",
       "Scope",
+      "Service",
       "StarterPack",
       "StarterPackContract",
       "StarterPackToken",
