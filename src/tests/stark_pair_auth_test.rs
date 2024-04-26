@@ -1,7 +1,7 @@
-use cainome::cairo_serde::ContractAddress;
+use cainome::cairo_serde::{ContractAddress, NonZero};
 use starknet::{accounts::Account, signers::SigningKey};
 
-use crate::abigen::cartridge_account::CartridgeAccount;
+use crate::abigen::cartridge_account::{CartridgeAccount, Signer, StarknetSigner};
 use crate::abigen::erc_20::{Erc20, U256};
 use crate::{
     deploy_contract::{single_owner_account, FEE_TOKEN_ADDRESS},
@@ -17,10 +17,14 @@ async fn test_authorize_execute() {
     let prefunded = runner.prefunded_single_owner_account().await;
     let class_hash = declare(runner.client(), &prefunded).await;
     let private_key = SigningKey::from_random();
+    let signer = Signer::Starknet(StarknetSigner {
+        pubkey: NonZero(private_key.verifying_key().scalar()),
+    });
     let deployed_address = deploy(
         runner.client(),
         &prefunded,
-        private_key.verifying_key().scalar(),
+        signer,
+        None,
         class_hash,
     )
     .await;
