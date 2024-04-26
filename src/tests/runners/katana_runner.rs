@@ -49,7 +49,7 @@ impl KatanaRunner {
             .expect("failed to start subprocess");
 
         let testnet = SubprocessRunner::new(child, config.log_file_path, |l| {
-            l.contains(r#""target":"katana""#)
+            l.contains(r#""target":"katana::cli""#)
         });
 
         let client = JsonRpcClient::new(HttpTransport::new(

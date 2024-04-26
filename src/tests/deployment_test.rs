@@ -7,11 +7,12 @@ use starknet::{
 };
 
 use super::runners::katana_runner::KatanaRunner;
-use crate::abigen::account::CartridgeAccount;
+use crate::abigen::cartridge_account::{self, CartridgeAccount, Signer, StarknetSigner};
 use crate::deploy_contract::{
     single_owner_account, AccountDeclaration, DeployResult, FEE_TOKEN_ADDRESS,
 };
 use crate::{deploy_contract::AccountDeployment, tests::runners::TestnetRunner};
+use cainome::cairo_serde::{CairoSerde, NonZero};
 
 pub async fn create_account<'a>(
     from: &SingleOwnerAccount<&'a JsonRpcClient<HttpTransport>, LocalWallet>,
@@ -22,13 +23,12 @@ pub async fn create_account<'a>(
     let provider = *from.provider();
     let class_hash = declare(provider, from).await;
     let private_key = SigningKey::from_random();
-    let deployed_address = deploy(
-        provider,
-        from,
-        private_key.verifying_key().scalar(),
-        class_hash,
-    )
-    .await;
+
+    let signer = Signer::Starknet(StarknetSigner {
+        pubkey: NonZero(private_key.verifying_key().scalar()),
+    });
+
+    let deployed_address = deploy(provider, from, signer, None, class_hash).await;
 
     let mut created = single_owner_account(provider, private_key.clone(), deployed_address).await;
     created.set_block_id(BlockId::Tag(BlockTag::Latest));
@@ -66,13 +66,21 @@ pub async fn declare(
 pub async fn deploy(
     client: &JsonRpcClient<HttpTransport>,
     account: &SingleOwnerAccount<&JsonRpcClient<HttpTransport>, LocalWallet>,
-    public_key: FieldElement,
+    owner: Signer,
+    guardian: Option<Signer>,
     class_hash: FieldElement,
 ) -> FieldElement {
+    let mut constructor_calldata = cartridge_account::Signer::cairo_serialize(&owner);
+    constructor_calldata.extend(Option::<Signer>::cairo_serialize(&guardian));
     let DeployResult {
         deployed_address, ..
     } = AccountDeployment::new(client)
-        .deploy(vec![public_key], FieldElement::ZERO, account, class_hash)
+        .deploy(
+            constructor_calldata,
+            FieldElement::ZERO,
+            account,
+            class_hash,
+        )
         .await
         .unwrap()
         .wait_for_completion()
@@ -92,7 +100,10 @@ async fn test_deploy() {
     let runner = KatanaRunner::load();
     let account = runner.prefunded_single_owner_account().await;
     let class_hash = declare(runner.client(), &account).await;
-    deploy(runner.client(), &account, felt!("1337"), class_hash).await;
+    let signer = Signer::Starknet(StarknetSigner {
+        pubkey: NonZero(felt!("1337")),
+    });
+    deploy(runner.client(), &account, signer, None, class_hash).await;
 }
 
 #[tokio::test]
@@ -101,8 +112,11 @@ async fn test_deploy_and_call() {
     let account = runner.prefunded_single_owner_account().await;
     let client = runner.client();
     let class_hash = declare(client, &account).await;
-    let deployed_address = deploy(client, &account, felt!("1337"), class_hash).await;
+    let signer = Signer::Starknet(StarknetSigner {
+        pubkey: NonZero(felt!("1337")),
+    });
+    let deployed_address = deploy(client, &account, signer, None, class_hash).await;
 
     let contract = CartridgeAccount::new(deployed_address, account);
-    contract.get_public_key().call().await.unwrap();
+    contract.get_owner().call().await.unwrap();
 }

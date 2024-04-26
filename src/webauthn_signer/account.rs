@@ -17,10 +17,10 @@ use starknet::{
 };
 use std::sync::Arc;
 
-use crate::felt_ser::to_felts;
+use crate::{abigen::cartridge_account::{Signature, WebauthnAssertion}, felt_ser::to_felts};
 
 use super::{cairo_args::VerifyWebauthnSignerArgs, signers::device::DeviceError};
-use crate::abigen::account::WebauthnSignature;
+
 use crate::webauthn_signer::signers::Signer;
 
 pub struct WebauthnAccount<P, S>
@@ -117,18 +117,23 @@ where
         let args =
             VerifyWebauthnSignerArgs::from_response(self.origin.clone(), challenge, assertion);
 
-        let result = WebauthnSignature {
-            signature_type: super::WEBAUTHN_SIGNATURE_TYPE,
+        let signature = Signature {
             r: args.r.into(),
             s: args.s.into(),
-            type_offset: args.type_offset,
-            challenge_offset: args.challenge_offset,
-            origin_offset: args.origin_offset,
+            y_parity: args.y_parity,
+        };
+
+        let result = WebauthnAssertion {
+            signature,
+            type_offset: args.type_offset as u32,
+            challenge_offset: args.challenge_offset as u32,
+            challenge_length: args.challenge_length as u32,
+            origin_offset: args.origin_offset as u32,
+            origin_length: args.origin_length as u32,
             client_data_json: args.client_data_json,
-            origin: args.origin,
             authenticator_data: args.authenticator_data,
         };
-        Ok(WebauthnSignature::cairo_serialize(&result))
+        Ok(WebauthnAssertion::cairo_serialize(&result))
     }
 
     async fn sign_declaration(

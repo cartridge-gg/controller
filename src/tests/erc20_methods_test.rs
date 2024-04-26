@@ -6,7 +6,7 @@ use starknet::{
 };
 
 use super::runners::katana_runner::KatanaRunner;
-use crate::abigen::erc20::{Erc20Contract, Erc20ContractReader, U256};
+use crate::abigen::erc_20::{Erc20 as Erc20Contract, Erc20Reader, U256};
 use crate::{deploy_contract::FEE_TOKEN_ADDRESS, tests::runners::TestnetRunner};
 
 #[tokio::test]
@@ -14,7 +14,7 @@ async fn test_balance_of() {
     let runner = KatanaRunner::load();
     let account = runner.prefunded_single_owner_account().await;
 
-    let contract_erc20 = Erc20ContractReader::new(*FEE_TOKEN_ADDRESS, runner.client());
+    let contract_erc20 = Erc20Reader::new(*FEE_TOKEN_ADDRESS, runner.client());
 
     contract_erc20
         .balanceOf(&ContractAddress(account.address()))

@@ -1,8 +1,8 @@
 use cainome::cairo_serde::ContractAddress;
 use starknet::{accounts::Account, signers::SigningKey};
 
-use crate::abigen::account::CartridgeAccount;
-use crate::abigen::erc20::{Erc20Contract, U256};
+use crate::abigen::cartridge_account::CartridgeAccount;
+use crate::abigen::erc_20::{Erc20, U256};
 use crate::{
     deploy_contract::{single_owner_account, FEE_TOKEN_ADDRESS},
     tests::runners::TestnetRunner,
@@ -27,7 +27,7 @@ async fn test_authorize_execute() {
 
     let new_account = single_owner_account(runner.client(), private_key, deployed_address).await;
 
-    let contract_erc20 = Erc20Contract::new(*FEE_TOKEN_ADDRESS, prefunded);
+    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, prefunded);
     let new_account = CartridgeAccount::new(deployed_address, &new_account);
 
     let amount = U256 {
@@ -41,5 +41,5 @@ async fn test_authorize_execute() {
         .await
         .unwrap();
 
-    new_account.get_public_key().call().await.unwrap();
+    new_account.get_owner().call().await.unwrap();
 }
