@@ -1,7 +1,7 @@
 import { constants } from "starknet";
 import { AccountInterface, ProviderInterface } from "starknet";
 import Controller, { providers } from ".";
-import { Policy } from "./types";
+import { OffChainSession } from "./types";
 
 export type EventType = "accountsChanged" | "networkChanged";
 
@@ -83,16 +83,13 @@ export class InjectedController implements IStarknetWindowObject {
 
   private controller: Controller;
 
-  constructor(
-    policies?: Policy[],
-    options?: {
-      url?: string;
-      origin?: string;
-      starterPackId?: string;
-      chainId?: constants.StarknetChainId;
-    },
-  ) {
-    this.controller = new Controller(policies, options);
+  constructor(options?: {
+    url?: string;
+    origin?: string;
+    starterPackId?: string;
+    chainId?: constants.StarknetChainId;
+  }) {
+    this.controller = new Controller(options);
     this.controller.ready().then((isConnected) => {
       this.isConnected = !!isConnected;
       if (this.controller.account) {
@@ -160,19 +157,13 @@ export class InjectedController implements IStarknetWindowObject {
   };
 }
 
-function injectController(
-  policies?: Policy[],
-  options?: {
-    url?: string;
-    origin?: string;
-    starterPackId?: string;
-    chainId?: constants.StarknetChainId;
-  },
-) {
-  (window as any).starknet_cartridge = new InjectedController(
-    policies,
-    options,
-  );
+function injectController(options?: {
+  url?: string;
+  origin?: string;
+  starterPackId?: string;
+  chainId?: constants.StarknetChainId;
+}) {
+  (window as any).starknet_cartridge = new InjectedController(options);
 }
 
 export { injectController };

@@ -1,5 +1,5 @@
 import equal from "fast-deep-equal";
-import { Policy } from "./types";
+import { AllowedMethod } from "./types";
 import {
   ec,
   hash,
@@ -13,11 +13,13 @@ import {
 import { PROXY_CLASS, CLASS_HASHES } from "./constants";
 import { decode } from "cbor-x";
 
-export function diff(a: Policy[], b: Policy[]): Policy[] {
+export function diff(a: AllowedMethod[], b: AllowedMethod[]): AllowedMethod[] {
   return a.reduce(
-    (prev, policyA) =>
-      b.some((policyB) => equal(policyB, policyA)) ? prev : [...prev, policyA],
-    [] as Policy[],
+    (prev, allowedA) =>
+      b.some((allowedB) => equal(allowedB, allowedA))
+        ? prev
+        : [...prev, allowedA],
+    [] as AllowedMethod[],
   );
 }
 

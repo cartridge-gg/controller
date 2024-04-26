@@ -1,21 +1,18 @@
 import { Connector } from "@starknet-react/core";
-import Controller, { Assertion, Policy } from "@cartridge/controller";
+import Controller, { Assertion } from "@cartridge/controller";
 import { AccountInterface, InvokeFunctionResponse, constants } from "starknet";
 
 class ControllerConnector extends Connector {
   public controller: Controller;
   private _account: AccountInterface | undefined;
 
-  constructor(
-    policies?: Policy[],
-    options?: {
-      url?: string;
-      origin?: string;
-      chainId?: constants.StarknetChainId;
-    },
-  ) {
+  constructor(options?: {
+    url?: string;
+    origin?: string;
+    chainId?: constants.StarknetChainId;
+  }) {
     super();
-    this.controller = new Controller(policies, options);
+    this.controller = new Controller(options);
   }
 
   readonly id = "cartridge";

@@ -98,7 +98,7 @@ export function Execute({
       return;
     }
 
-    if (account.status === Status.REGISTERED && transactionsDetail.maxFee) {
+    if (account.status === Status.DEPLOYED && transactionsDetail.maxFee) {
       setFees({
         base: BigInt(transactionsDetail.maxFee),
         max: BigInt(transactionsDetail.maxFee),

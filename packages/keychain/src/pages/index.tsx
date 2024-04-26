@@ -177,18 +177,6 @@ const Index: NextPage = () => {
                 }
 
                 const account = controller.account(cId);
-                if (
-                  !(
-                    account.status === Status.REGISTERED ||
-                    account.status === Status.REGISTERING
-                  )
-                ) {
-                  return Promise.resolve({
-                    code: ResponseCodes.NOT_ALLOWED,
-                    message: "Account not registered or deployed.",
-                  });
-                }
-
                 const calls = Array.isArray(transactions)
                   ? transactions
                   : [transactions];
@@ -246,10 +234,10 @@ const Index: NextPage = () => {
         logout: normalize(logout),
         probe: normalize(
           validate(
-            (controller: Controller, session: Session) => (): ProbeReply => ({
+            (controller: Controller, _session: Session) => (): ProbeReply => ({
               code: ResponseCodes.SUCCESS,
               address: controller.address,
-              policies: session.policies,
+              policies: [],
             }),
           ),
         ),
@@ -323,25 +311,6 @@ const Index: NextPage = () => {
       return;
     }
 
-    const account = controller.account(
-      (context as any).transactionsDetail?.chainId ?? chainId,
-    );
-
-    // This device needs to be registered, so do a webauthn signature request
-    // for the register transaction during the connect flow.
-    if (account.status === Status.DEPLOYED) {
-      try {
-        await account.register();
-      } catch (e) {
-        context.resolve({
-          code: ResponseCodes.CANCELED,
-          message: "Canceled",
-        } as Error);
-        setController(controller);
-        return;
-      }
-    }
-
     controller.approve(context.origin, context.policies, "");
 
     context.resolve({
@@ -394,7 +363,6 @@ const Index: NextPage = () => {
   const account = controller.account(
     (context as any).transactionsDetail?.chainId ?? chainId,
   );
-  const sesh = controller.session(context.origin);
 
   const onConnect = async ({
     context,
@@ -415,20 +383,6 @@ const Index: NextPage = () => {
       return;
     }
 
-    // This device needs to be registered, so do a webauthn signature request
-    // for the register transaction during the connect flow.
-    if (account.status === Status.DEPLOYED) {
-      try {
-        await account.register();
-      } catch (e) {
-        context.resolve({
-          code: ResponseCodes.CANCELED,
-          message: "Canceled",
-        } as Error);
-        return;
-      }
-    }
-
     controller.approve(context.origin, policies, maxFee);
 
     context.resolve({
@@ -438,38 +392,39 @@ const Index: NextPage = () => {
     } as any);
   };
 
-  if (context.type === "connect" || !sesh) {
-    const ctx = context as Connect;
+  //const sesh = controller.session(context.origin);
+  // if (context.type === "connect" || !sesh) {
+  //   const ctx = context as Connect;
 
-    // if no mismatch with existing policies then return success
-    if (sesh && diff(sesh.policies, ctx.policies).length === 0) {
-      ctx.resolve({
-        code: ResponseCodes.SUCCESS,
-        address: controller.address,
-        policies: ctx.policies,
-      });
-      return <></>;
-    }
+  //   // if no mismatch with existing policies then return success
+  //   if (sesh && diff(sesh.policies, ctx.policies).length === 0) {
+  //     ctx.resolve({
+  //       code: ResponseCodes.SUCCESS,
+  //       address: controller.address,
+  //       policies: ctx.policies,
+  //     });
+  //     return <></>;
+  //   }
 
-    return (
-      <Connect
-        // chainId={chainId}
-        origin={ctx.origin}
-        policies={ctx.type === "connect" ? (ctx as Connect).policies : []}
-        onConnect={(policies) =>
-          onConnect({
-            context: ctx,
-            policies,
-            maxFee: "",
-          })
-        }
-        onCancel={() =>
-          ctx.resolve({ code: ResponseCodes.CANCELED, message: "Canceled" })
-        }
-        onLogout={() => onLogout(ctx)}
-      />
-    );
-  }
+  //   return (
+  //     <Connect
+  //       // chainId={chainId}
+  //       origin={ctx.origin}
+  //       policies={ctx.type === "connect" ? (ctx as Connect).policies : []}
+  //       onConnect={(policies) =>
+  //         onConnect({
+  //           context: ctx,
+  //           policies,
+  //           maxFee: "",
+  //         })
+  //       }
+  //       onCancel={() =>
+  //         ctx.resolve({ code: ResponseCodes.CANCELED, message: "Canceled" })
+  //       }
+  //       onLogout={() => onLogout(ctx)}
+  //     />
+  //   );
+  // }
 
   if (context.type === "logout") {
     const ctx = context as Logout;

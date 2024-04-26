@@ -7,15 +7,14 @@ import {
 
 import DeviceAccount from "./device";
 import {
-  Session,
   Keychain,
-  Policy,
   ResponseCodes,
   ConnectReply,
   ProbeReply,
   Modal,
 } from "./types";
 import { createModal } from "./modal";
+import { OffChainSession } from "./types";
 
 export const providers: { [key: string]: RpcProvider } = {
   [constants.StarknetChainId.SN_MAIN]: new RpcProvider({
@@ -29,7 +28,6 @@ export const providers: { [key: string]: RpcProvider } = {
 class Controller {
   private connection?: Connection<Keychain>;
   public keychain?: AsyncMethodReturns<Keychain>;
-  private policies: Policy[] = [];
   private url: string = "https://x.cartridge.gg";
   public chainId: constants.StarknetChainId =
     constants.StarknetChainId.SN_SEPOLIA;
@@ -37,26 +35,15 @@ class Controller {
   private modal?: Modal;
   // private starterPackId?: string;
 
-  constructor(
-    policies?: Policy[],
-    options?: {
-      url?: string;
-      origin?: string;
-      starterPackId?: string;
-      chainId?: constants.StarknetChainId;
-    },
-  ) {
-    if (policies) {
-      this.policies = policies;
-    }
-
+  constructor(options?: {
+    url?: string;
+    origin?: string;
+    starterPackId?: string;
+    chainId?: constants.StarknetChainId;
+  }) {
     if (options?.chainId) {
       this.chainId = options.chainId;
     }
-
-    // if (options?.starterPackId) {
-    //   this.starterPackId = options.starterPackId;
-    // }
 
     if (options?.url) {
       this.url = options.url;
@@ -201,11 +188,7 @@ class Controller {
 
     try {
       if (!this.account) {
-        let response = await this.keychain.connect(
-          this.policies,
-          undefined,
-          this.chainId,
-        );
+        let response = await this.keychain.connect(undefined, this.chainId);
         if (response.code !== ResponseCodes.SUCCESS) {
           throw new Error(response.message);
         }
@@ -257,11 +240,7 @@ class Controller {
     this.modal.open();
 
     try {
-      let response = await this.keychain.connect(
-        this.policies,
-        undefined,
-        this.chainId,
-      );
+      let response = await this.keychain.connect(undefined, this.chainId);
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
       }
@@ -306,7 +285,7 @@ class Controller {
     return this.keychain.disconnect();
   }
 
-  revoke(origin: string, _policy: Policy[]) {
+  revoke(origin: string, _session: OffChainSession) {
     if (!this.keychain) {
       console.error("not ready for disconnect");
       return null;
@@ -315,7 +294,7 @@ class Controller {
     return this.keychain.revoke(origin);
   }
 
-  async approvals(origin: string): Promise<Session | undefined> {
+  async approvals(origin: string): Promise<void> {
     if (!this.keychain) {
       console.error("not ready for disconnect");
       return;

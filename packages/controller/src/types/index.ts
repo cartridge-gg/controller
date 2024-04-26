@@ -9,11 +9,12 @@ import {
   EstimateFeeDetails,
   EstimateFee,
   DeclareContractPayload,
-  BigNumberish,
   InvocationsSignerDetails,
   DeployAccountSignerDetails,
   DeclareSignerDetails,
 } from "starknet";
+import { OffChainSession } from "./session";
+export * from "./session";
 
 export type Assertion = {
   id: string;
@@ -25,17 +26,6 @@ export type Assertion = {
     clientDataJSON: string;
     signature: string;
   };
-};
-
-export type Session = {
-  chainId: constants.StarknetChainId;
-  policies: Policy[];
-  maxFee: BigNumberish;
-};
-
-export type Policy = {
-  target: string;
-  method?: string;
 };
 
 export enum ResponseCodes {
@@ -53,7 +43,6 @@ export type Error = {
 export type ConnectReply = {
   code: ResponseCodes.SUCCESS;
   address: string;
-  policies: Policy[];
 };
 
 export type ExecuteReply = InvokeFunctionResponse & {
@@ -63,13 +52,11 @@ export type ExecuteReply = InvokeFunctionResponse & {
 export type ProbeReply = {
   code: ResponseCodes.SUCCESS;
   address: string;
-  policies: Policy[];
 };
 
 export interface Keychain {
   probe(): Promise<ProbeReply | Error>;
   connect(
-    policies: Policy[],
     starterPackId?: string,
     chainId?: constants.StarknetChainId,
   ): Promise<ConnectReply | Error>;
@@ -77,7 +64,7 @@ export interface Keychain {
 
   reset(): void;
   revoke(origin: string): void;
-  approvals(origin: string): Promise<Session | undefined>;
+  approvals(origin: string): Promise<void>;
 
   estimateDeclareFee(
     payload: DeclareContractPayload,
@@ -114,9 +101,9 @@ export interface Keychain {
     },
   ): Promise<{ assertion: Assertion }>;
   logout(): Promise<void>;
-  session(): Promise<Session>;
+  session(): Promise<OffChainSession>;
   sessions(): Promise<{
-    [key: string]: Session;
+    [key: string]: OffChainSession;
   }>;
   signMessage(
     typedData: TypedData,
