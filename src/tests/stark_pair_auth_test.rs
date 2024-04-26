@@ -20,14 +20,7 @@ async fn test_authorize_execute() {
     let signer = Signer::Starknet(StarknetSigner {
         pubkey: NonZero(private_key.verifying_key().scalar()),
     });
-    let deployed_address = deploy(
-        runner.client(),
-        &prefunded,
-        signer,
-        None,
-        class_hash,
-    )
-    .await;
+    let deployed_address = deploy(runner.client(), &prefunded, signer, None, class_hash).await;
 
     let new_account = single_owner_account(runner.client(), private_key, deployed_address).await;
 

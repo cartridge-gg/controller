@@ -1,4 +1,4 @@
-use cainome::cairo_serde::ContractAddress;
+use cainome::cairo_serde::{ContractAddress, NonZero};
 use starknet::{
     accounts::{ConnectedAccount, Execution, SingleOwnerAccount},
     core::types::FieldElement,
@@ -7,13 +7,15 @@ use starknet::{
 };
 
 use crate::{
-    abigen::account::{CartridgeAccount, CartridgeAccountReader, WebauthnPubKey},
+    abigen::cartridge_account::{
+        CartridgeAccount, CartridgeAccountReader, Signature, Signer, WebauthnSigner, U256,
+    },
     deploy_contract::FEE_TOKEN_ADDRESS,
     transaction_waiter::TransactionWaiter,
-    webauthn_signer::account::WebauthnAccount,
+    webauthn_signer::{account::WebauthnAccount, cairo_args::felt_pair},
 };
 use crate::{
-    abigen::erc20::{Erc20Contract, U256},
+    abigen::erc_20::{Erc20 as Erc20Contract, U256 as ERC20U256},
     webauthn_signer::cairo_args::pub_key_to_felts,
 };
 use crate::{
@@ -34,25 +36,27 @@ impl<R> WebauthnTestData<R>
 where
     R: TestnetRunner,
 {
-    pub async fn new(private_key: SigningKey, signer: P256r1Signer) -> Self {
+    pub async fn new(private_key: SigningKey, p256r1_signer: P256r1Signer) -> Self {
         let runner = R::load();
         let prefunded = runner.prefunded_single_owner_account().await;
         let class_hash = declare(runner.client(), &prefunded).await;
 
-        let address = deploy(
-            runner.client(),
-            &prefunded,
-            private_key.verifying_key().scalar(),
-            class_hash,
-        )
-        .await;
+        let pub_key = pub_key_to_felts(p256r1_signer.public_key_bytes()).0;
+
+        let signer = Signer::Webauthn(WebauthnSigner {
+            origin: p256r1_signer.origin.clone().into_bytes(),
+            pubkey: NonZero(pub_key.into()),
+            rp_id_hash: NonZero(p256r1_signer.rp_id_hash_felt().into()),
+        });
+
+        let address = deploy(runner.client(), &prefunded, signer, None, class_hash).await;
 
         let erc20_prefunded = Erc20Contract::new(*FEE_TOKEN_ADDRESS, prefunded);
 
         erc20_prefunded
             .transfer(
                 &ContractAddress(address),
-                &U256 {
+                &ERC20U256 {
                     low: 0x8944000000000000_u128,
                     high: 0,
                 },
@@ -65,7 +69,7 @@ where
             runner,
             address,
             private_key,
-            signer,
+            signer: p256r1_signer,
         }
     }
     async fn single_owner_account(
@@ -78,30 +82,30 @@ where
     ) -> ((FieldElement, FieldElement), (FieldElement, FieldElement)) {
         pub_key_to_felts(self.signer.public_key_bytes())
     }
-    pub async fn set_webauthn_public_key(&self) {
-        let (pub_x, pub_y) = self.webauthn_public_key();
-        let account = self.single_owner_account().await;
-        let new_account_executor = self.single_owner_executor().await;
-        let set_execution: Execution<'_, _> =
-            new_account_executor.set_webauthn_pub_key(&WebauthnPubKey {
-                x: pub_x.into(),
-                y: pub_y.into(),
-            });
-        let max_fee = set_execution.estimate_fee().await.unwrap().overall_fee * 2;
-        let set_execution = set_execution
-            .nonce(account.get_nonce().await.unwrap())
-            .max_fee(FieldElement::from(max_fee))
-            .prepared()
-            .unwrap();
-        let set_tx = set_execution.transaction_hash(false);
+    // pub async fn set_webauthn_public_key(&self) {
+    //     let (pub_x, pub_y) = self.webauthn_public_key();
+    //     let account = self.single_owner_account().await;
+    //     let new_account_executor = self.single_owner_executor().await;
+    //     let set_execution: Execution<'_, _> =
+    //         new_account_executor.set_webauthn_pub_key(&WebauthnPubKey {
+    //             x: pub_x.into(),
+    //             y: pub_y.into(),
+    //         });
+    //     let max_fee = set_execution.estimate_fee().await.unwrap().overall_fee * 2;
+    //     let set_execution = set_execution
+    //         .nonce(account.get_nonce().await.unwrap())
+    //         .max_fee(FieldElement::from(max_fee))
+    //         .prepared()
+    //         .unwrap();
+    //     let set_tx = set_execution.transaction_hash(false);
 
-        set_execution.send().await.unwrap();
+    //     set_execution.send().await.unwrap();
 
-        TransactionWaiter::new(set_tx, self.runner.client())
-            .wait()
-            .await
-            .unwrap();
-    }
+    //     TransactionWaiter::new(set_tx, self.runner.client())
+    //         .wait()
+    //         .await
+    //         .unwrap();
+    // }
     pub fn account_reader(&self) -> CartridgeAccountReader<&JsonRpcClient<HttpTransport>> {
         CartridgeAccountReader::new(self.address, self.runner.client())
     }
@@ -120,6 +124,7 @@ where
                 self.signer.clone(),
                 self.address,
                 self.runner.client().chain_id().await.unwrap(),
+                self.signer.origin.clone(),
             ),
         )
     }

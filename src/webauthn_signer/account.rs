@@ -17,11 +17,16 @@ use starknet::{
 };
 use std::sync::Arc;
 
-use crate::{abigen::cartridge_account::{Signature, WebauthnAssertion}, felt_ser::to_felts};
+use crate::{
+    abigen::cartridge_account::{Signature, SignerSignature, WebauthnAssertion},
+    felt_ser::to_felts,
+};
 
-use super::{cairo_args::VerifyWebauthnSignerArgs, signers::device::DeviceError};
+// use super::{cairo_args::VerifyWebauthnSignerArgs, signers::device::DeviceError};
 
 use crate::webauthn_signer::signers::Signer;
+
+use super::cairo_args::VerifyWebauthnSignerArgs;
 
 pub struct WebauthnAccount<P, S>
 where
@@ -40,16 +45,57 @@ where
     P: Provider + Send,
     S: Signer + Send,
 {
-    pub fn new(provider: P, signer: S, address: FieldElement, chain_id: FieldElement) -> Self {
+    pub fn new(
+        provider: P,
+        signer: S,
+        address: FieldElement,
+        chain_id: FieldElement,
+        origin: String,
+    ) -> Self {
         Self {
             provider,
             signer,
             address,
             chain_id,
             block_id: BlockId::Tag(BlockTag::Latest),
-            // Not security critical, but should be agreed upon
-            origin: "starknet".to_string(),
+            origin,
         }
+    }
+    pub async fn execution_signature(
+        &self,
+        execution: &RawExecution,
+        query_only: bool,
+    ) -> Result<SignerSignature, SignError> {
+        let tx_hash = execution.transaction_hash(self.chain_id, self.address, query_only, self);
+        let mut challenge = tx_hash.to_bytes_be().to_vec();
+
+        // Cairo-1 sha256
+        challenge.push(1);
+        let assertion = self.signer.sign(&challenge).await?;
+
+        let args =
+            VerifyWebauthnSignerArgs::from_response(self.origin.clone(), challenge, assertion);
+
+        let signature = Signature {
+            r: args.r.into(),
+            s: args.s.into(),
+            y_parity: args.y_parity,
+        };
+
+        let result = WebauthnAssertion {
+            signature,
+            type_offset: args.type_offset as u32,
+            challenge_offset: args.challenge_offset as u32,
+            challenge_length: args.challenge_length as u32,
+            origin_offset: args.origin_offset as u32,
+            origin_length: args.origin_length as u32,
+            client_data_json: args.client_data_json,
+            authenticator_data: args.authenticator_data,
+        };
+        Ok(SignerSignature::Webauthn((
+            self.signer.account_signer(),
+            result,
+        )))
     }
 }
 
@@ -84,8 +130,8 @@ where
 pub enum SignError {
     #[error("Signer error: {0}")]
     Signer(EcdsaSignError),
-    #[error("Device error: {0}")]
-    Device(DeviceError),
+    // #[error("Device error: {0}")]
+    // Device(DeviceError),
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
@@ -110,30 +156,8 @@ where
         execution: &RawExecution,
         query_only: bool,
     ) -> Result<Vec<FieldElement>, Self::SignError> {
-        let tx_hash = execution.transaction_hash(self.chain_id, self.address, query_only, self);
-        let challenge = tx_hash.to_bytes_be().to_vec();
-        let assertion = self.signer.sign(&challenge).await?;
-
-        let args =
-            VerifyWebauthnSignerArgs::from_response(self.origin.clone(), challenge, assertion);
-
-        let signature = Signature {
-            r: args.r.into(),
-            s: args.s.into(),
-            y_parity: args.y_parity,
-        };
-
-        let result = WebauthnAssertion {
-            signature,
-            type_offset: args.type_offset as u32,
-            challenge_offset: args.challenge_offset as u32,
-            challenge_length: args.challenge_length as u32,
-            origin_offset: args.origin_offset as u32,
-            origin_length: args.origin_length as u32,
-            client_data_json: args.client_data_json,
-            authenticator_data: args.authenticator_data,
-        };
-        Ok(WebauthnAssertion::cairo_serialize(&result))
+        let result = self.execution_signature(execution, query_only).await?;
+        Ok(Vec::<SignerSignature>::cairo_serialize(&vec![result]))
     }
 
     async fn sign_declaration(
