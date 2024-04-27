@@ -49,8 +49,7 @@ impl VerifyWebauthnSignerArgs {
             felt_pair(&response.signature[0..32].try_into().unwrap()),
             felt_pair(&response.signature[32..64].try_into().unwrap()),
         );
-        // TODO: this is NOT correct
-        let y_parity = false;
+        let y_parity = response.signature[64] == 1;
         let (type_offset, _) = find_value_index_length(&response.client_data_json, "type").unwrap();
         let (challenge_offset, challenge_length) =
             find_value_index_length(&response.client_data_json, "challenge").unwrap();

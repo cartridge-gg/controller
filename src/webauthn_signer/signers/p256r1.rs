@@ -8,8 +8,9 @@ use crate::{
 };
 use async_trait::async_trait;
 use cainome::cairo_serde::NonZero;
+use ecdsa::RecoveryId;
 use p256::{
-    ecdsa::{signature::Signer as P256Signer, Signature, SigningKey, VerifyingKey},
+    ecdsa::{Signature, SigningKey, VerifyingKey},
     elliptic_curve::sec1::Coordinates,
 };
 use rand_core::OsRng;
@@ -72,8 +73,10 @@ impl Signer for P256r1Signer {
 
         let mut to_sign = Into::<Vec<u8>>::into(authenticator_data.clone());
         to_sign.append(&mut client_data_hash.to_vec());
-        let signature: Signature = self.signing_key.try_sign(&to_sign).unwrap();
-        let signature_bytes = signature.to_bytes().to_vec();
+        let (signature, recovery_id): (Signature, RecoveryId) =
+            self.signing_key.sign_recoverable(&to_sign).unwrap();
+        let mut signature_bytes = signature.to_bytes().to_vec();
+        signature_bytes.push(recovery_id.is_y_odd() as u8);
 
         Ok(AuthenticatorAssertionResponse {
             authenticator_data,
