@@ -6,6 +6,7 @@ use starknet::{
     signers::{LocalWallet, SigningKey},
 };
 
+use crate::abigen::erc_20::Erc20 as Erc20Contract;
 use crate::{
     abigen::cartridge_account::{
         CartridgeAccount, CartridgeAccountReader, Signature, Signer, WebauthnSigner,
@@ -13,9 +14,6 @@ use crate::{
     deploy_contract::FEE_TOKEN_ADDRESS,
     transaction_waiter::TransactionWaiter,
     webauthn_signer::{account::WebauthnAccount, cairo_args::felt_pair, Secp256r1Point},
-};
-use crate::{
-    abigen::erc_20::Erc20 as Erc20Contract, webauthn_signer::cairo_args::pub_key_to_felts,
 };
 use crate::{
     deploy_contract::single_owner_account, tests::runners::TestnetRunner,
@@ -40,12 +38,12 @@ where
         let prefunded = runner.prefunded_single_owner_account().await;
         let class_hash = declare(runner.client(), &prefunded).await;
 
-        let pub_key = pub_key_to_felts(p256r1_signer.public_key_bytes()).0;
+        let pub_key = p256r1_signer.public_key().0;
 
         let signer = Signer::Webauthn(WebauthnSigner {
             origin: p256r1_signer.origin.clone().into_bytes(),
             pubkey: NonZero(pub_key.into()),
-            rp_id_hash: NonZero(p256r1_signer.rp_id_hash_felt().try_into().unwrap()),
+            rp_id_hash: NonZero(U256::from_bytes_be(&p256r1_signer.rp_id_hash())),
         });
 
         let address = deploy(runner.client(), &prefunded, signer, None, class_hash).await;
@@ -77,7 +75,7 @@ where
         single_owner_account(self.runner.client(), self.private_key.clone(), self.address).await
     }
     pub fn webauthn_public_key(&self) -> Secp256r1Point {
-        pub_key_to_felts(self.signer.public_key_bytes())
+        self.signer.public_key()
     }
     // pub async fn set_webauthn_public_key(&self) {
     //     let (pub_x, pub_y) = self.webauthn_public_key();

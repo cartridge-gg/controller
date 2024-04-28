@@ -10,4 +10,3 @@ pub type Secp256r1Point = (U256, U256);
 
 // "Webauthn v1"
 pub const WEBAUTHN_SIGNATURE_TYPE: FieldElement = felt!("0x576562617574686e207631");
-

@@ -2,19 +2,18 @@ use crate::{
     abigen::cartridge_account::WebauthnSigner,
     webauthn_signer::{
         account::SignError,
-        cairo_args::{felt_pair, pub_key_to_felts},
-        credential::{AuthenticatorData, CliendData}, Secp256r1Point,
+        credential::{AuthenticatorData, CliendData},
+        Secp256r1Point,
     },
 };
 use async_trait::async_trait;
-use cainome::cairo_serde::NonZero;
+use cainome::cairo_serde::{NonZero, U256};
 use ecdsa::RecoveryId;
 use p256::{
-    ecdsa::{Signature, SigningKey, VerifyingKey},
+    ecdsa::{Signature, SigningKey},
     elliptic_curve::sec1::Coordinates,
 };
 use rand_core::OsRng;
-use starknet_crypto::FieldElement;
 
 use crate::webauthn_signer::credential::AuthenticatorAssertionResponse;
 
@@ -41,19 +40,24 @@ impl P256r1Signer {
         Self::new(rp_id, signing_key, origin)
     }
 
-    pub fn public_key_bytes(&self) -> ([u8; 32], [u8; 32]) {
-        P256VerifyingKeyConverter::new(*self.signing_key.verifying_key()).to_bytes()
+    fn public_key_bytes(&self) -> ([u8; 32], [u8; 32]) {
+        let encoded = self.signing_key.verifying_key().to_encoded_point(false);
+        let (x, y) = match encoded.coordinates() {
+            Coordinates::Uncompressed { x, y } => (x, y),
+            _ => panic!("unexpected compression"),
+        };
+        (
+            x.as_slice().try_into().unwrap(),
+            y.as_slice().try_into().unwrap(),
+        )
     }
     pub fn public_key(&self) -> Secp256r1Point {
-        let pk = self.public_key_bytes();
-        pub_key_to_felts(pk)
+        let (x, y) = self.public_key_bytes();
+        (U256::from_bytes_be(&x), U256::from_bytes_be(&y))
     }
     pub fn rp_id_hash(&self) -> [u8; 32] {
         use sha2::{digest::Update, Digest, Sha256};
         Sha256::new().chain(self.rp_id.clone()).finalize().into()
-    }
-    pub fn rp_id_hash_felt(&self) -> (FieldElement, FieldElement) {
-        felt_pair(&self.rp_id_hash()).into()
     }
 }
 
@@ -87,30 +91,9 @@ impl Signer for P256r1Signer {
     }
     fn account_signer(&self) -> WebauthnSigner {
         WebauthnSigner {
-            rp_id_hash: NonZero(self.rp_id_hash_felt().try_into().unwrap()),
+            rp_id_hash: NonZero(U256::from_bytes_be(&self.rp_id_hash())),
             origin: self.origin.clone().into_bytes(),
             pubkey: NonZero(self.public_key().0.try_into().unwrap()),
         }
-    }
-}
-
-pub struct P256VerifyingKeyConverter {
-    pub verifying_key: VerifyingKey,
-}
-
-impl P256VerifyingKeyConverter {
-    pub fn new(verifying_key: VerifyingKey) -> Self {
-        Self { verifying_key }
-    }
-    pub fn to_bytes(&self) -> ([u8; 32], [u8; 32]) {
-        let encoded = &self.verifying_key.to_encoded_point(false);
-        let (x, y) = match encoded.coordinates() {
-            Coordinates::Uncompressed { x, y } => (x, y),
-            _ => panic!("unexpected compression"),
-        };
-        (
-            x.as_slice().try_into().unwrap(),
-            y.as_slice().try_into().unwrap(),
-        )
     }
 }

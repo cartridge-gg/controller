@@ -20,10 +20,6 @@ pub struct VerifyWebauthnSignerArgs {
     pub authenticator_data: Vec<u8>,
 }
 
-pub fn pub_key_to_felts((x, y): ([u8; 32], [u8; 32])) -> (U256, U256) {
-    (U256::from_bytes_be(&x), U256::from_bytes_be(&y))
-}
-
 impl VerifyWebauthnSignerArgs {
     pub fn from_response(
         origin: String,
