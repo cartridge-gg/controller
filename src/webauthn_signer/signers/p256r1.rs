@@ -3,7 +3,7 @@ use crate::{
     webauthn_signer::{
         account::SignError,
         cairo_args::{felt_pair, pub_key_to_felts},
-        credential::{AuthenticatorData, CliendData},
+        credential::{AuthenticatorData, CliendData}, Secp256r1Point,
     },
 };
 use async_trait::async_trait;
@@ -44,7 +44,7 @@ impl P256r1Signer {
     pub fn public_key_bytes(&self) -> ([u8; 32], [u8; 32]) {
         P256VerifyingKeyConverter::new(*self.signing_key.verifying_key()).to_bytes()
     }
-    pub fn public_key(&self) -> ((FieldElement, FieldElement), (FieldElement, FieldElement)) {
+    pub fn public_key(&self) -> Secp256r1Point {
         let pk = self.public_key_bytes();
         pub_key_to_felts(pk)
     }
@@ -87,9 +87,9 @@ impl Signer for P256r1Signer {
     }
     fn account_signer(&self) -> WebauthnSigner {
         WebauthnSigner {
-            rp_id_hash: NonZero(self.rp_id_hash_felt().into()),
+            rp_id_hash: NonZero(self.rp_id_hash_felt().try_into().unwrap()),
             origin: self.origin.clone().into_bytes(),
-            pubkey: NonZero(self.public_key().0.into()),
+            pubkey: NonZero(self.public_key().0.try_into().unwrap()),
         }
     }
 }

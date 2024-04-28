@@ -77,8 +77,8 @@ where
             VerifyWebauthnSignerArgs::from_response(self.origin.clone(), challenge, assertion);
 
         let signature = Signature {
-            r: args.r.into(),
-            s: args.s.into(),
+            r: args.r.try_into().unwrap(),
+            s: args.s.try_into().unwrap(),
             y_parity: args.y_parity,
         };
 

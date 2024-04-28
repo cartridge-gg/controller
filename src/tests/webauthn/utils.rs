@@ -1,4 +1,4 @@
-use cainome::cairo_serde::{ContractAddress, NonZero};
+use cainome::cairo_serde::{ContractAddress, NonZero, U256};
 use starknet::{
     accounts::{ConnectedAccount, Execution, SingleOwnerAccount},
     core::types::FieldElement,
@@ -8,15 +8,14 @@ use starknet::{
 
 use crate::{
     abigen::cartridge_account::{
-        CartridgeAccount, CartridgeAccountReader, Signature, Signer, WebauthnSigner, U256,
+        CartridgeAccount, CartridgeAccountReader, Signature, Signer, WebauthnSigner,
     },
     deploy_contract::FEE_TOKEN_ADDRESS,
     transaction_waiter::TransactionWaiter,
-    webauthn_signer::{account::WebauthnAccount, cairo_args::felt_pair},
+    webauthn_signer::{account::WebauthnAccount, cairo_args::felt_pair, Secp256r1Point},
 };
 use crate::{
-    abigen::erc_20::{Erc20 as Erc20Contract, U256 as ERC20U256},
-    webauthn_signer::cairo_args::pub_key_to_felts,
+    abigen::erc_20::Erc20 as Erc20Contract, webauthn_signer::cairo_args::pub_key_to_felts,
 };
 use crate::{
     deploy_contract::single_owner_account, tests::runners::TestnetRunner,
@@ -46,7 +45,7 @@ where
         let signer = Signer::Webauthn(WebauthnSigner {
             origin: p256r1_signer.origin.clone().into_bytes(),
             pubkey: NonZero(pub_key.into()),
-            rp_id_hash: NonZero(p256r1_signer.rp_id_hash_felt().into()),
+            rp_id_hash: NonZero(p256r1_signer.rp_id_hash_felt().try_into().unwrap()),
         });
 
         let address = deploy(runner.client(), &prefunded, signer, None, class_hash).await;
@@ -56,7 +55,7 @@ where
         erc20_prefunded
             .transfer(
                 &ContractAddress(address),
-                &ERC20U256 {
+                &U256 {
                     low: 0x8944000000000000_u128,
                     high: 0,
                 },
@@ -77,9 +76,7 @@ where
     ) -> SingleOwnerAccount<&JsonRpcClient<HttpTransport>, LocalWallet> {
         single_owner_account(self.runner.client(), self.private_key.clone(), self.address).await
     }
-    pub fn webauthn_public_key(
-        &self,
-    ) -> ((FieldElement, FieldElement), (FieldElement, FieldElement)) {
+    pub fn webauthn_public_key(&self) -> Secp256r1Point {
         pub_key_to_felts(self.signer.public_key_bytes())
     }
     // pub async fn set_webauthn_public_key(&self) {

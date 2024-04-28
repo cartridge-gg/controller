@@ -1,8 +1,8 @@
-use cainome::cairo_serde::{ContractAddress, NonZero};
+use cainome::cairo_serde::{ContractAddress, NonZero, U256};
 use starknet::{accounts::Account, signers::SigningKey};
 
 use crate::abigen::cartridge_account::{CartridgeAccount, Signer, StarknetSigner};
-use crate::abigen::erc_20::{Erc20, U256};
+use crate::abigen::erc_20::Erc20;
 use crate::{
     deploy_contract::{single_owner_account, FEE_TOKEN_ADDRESS},
     tests::runners::TestnetRunner,

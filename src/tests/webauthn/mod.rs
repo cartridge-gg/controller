@@ -2,17 +2,12 @@ mod utils;
 
 use starknet::{
     core::types::{BlockId, BlockTag},
-    macros::felt,
     signers::SigningKey,
 };
 
 use crate::{
-    abigen::cartridge_account::SignerType,
-    tests::runners::katana_runner::KatanaRunner,
-    webauthn_signer::{
-        cairo_args::VerifyWebauthnSignerArgs,
-        signers::{p256r1::P256r1Signer, Signer},
-    },
+    abigen::cartridge_account::SignerType, tests::runners::katana_runner::KatanaRunner,
+    webauthn_signer::signers::p256r1::P256r1Signer,
 };
 
 #[tokio::test]

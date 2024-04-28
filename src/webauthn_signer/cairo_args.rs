@@ -1,24 +1,10 @@
-use serde::Serialize;
 use starknet::core::types::FieldElement;
 
-use crate::abigen::cartridge_account::U256 as AbiU256;
+use cainome::cairo_serde::U256;
 
-use super::{credential::AuthenticatorAssertionResponse, U256};
+use super::credential::AuthenticatorAssertionResponse;
 
-// Note: The conversion is done here to avoid modifying the whole
-// codebase for now.
-// `unwrap()` is supposed to be safe here and the FieldElement value is
-// only use for serialiaziation.
-impl From<U256> for AbiU256 {
-    fn from(value: U256) -> Self {
-        Self {
-            low: value.0.try_into().unwrap(),
-            high: value.1.try_into().unwrap(),
-        }
-    }
-}
-
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone)]
 pub struct VerifyWebauthnSignerArgs {
     pub r: U256,
     pub s: U256,
@@ -34,9 +20,8 @@ pub struct VerifyWebauthnSignerArgs {
     pub authenticator_data: Vec<u8>,
 }
 
-pub fn pub_key_to_felts(pub_key: ([u8; 32], [u8; 32])) -> (U256, U256) {
-    let (pub_x, pub_y) = (felt_pair(&pub_key.0), felt_pair(&pub_key.1));
-    (pub_x, pub_y)
+pub fn pub_key_to_felts((x, y): ([u8; 32], [u8; 32])) -> (U256, U256) {
+    (U256::from_bytes_be(&x), U256::from_bytes_be(&y))
 }
 
 impl VerifyWebauthnSignerArgs {
@@ -46,8 +31,8 @@ impl VerifyWebauthnSignerArgs {
         response: AuthenticatorAssertionResponse,
     ) -> Self {
         let (r, s) = (
-            felt_pair(&response.signature[0..32].try_into().unwrap()),
-            felt_pair(&response.signature[32..64].try_into().unwrap()),
+            U256::from_bytes_be(&response.signature[0..32].try_into().unwrap()),
+            U256::from_bytes_be(&response.signature[32..64].try_into().unwrap()),
         );
         let y_parity = response.signature[64] == 1;
         let (type_offset, _) = find_value_index_length(&response.client_data_json, "type").unwrap();

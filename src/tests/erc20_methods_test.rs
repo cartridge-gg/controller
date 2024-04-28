@@ -1,4 +1,4 @@
-use cainome::cairo_serde::ContractAddress;
+use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{
     accounts::Account,
     core::types::{BlockId, BlockTag},
@@ -6,7 +6,7 @@ use starknet::{
 };
 
 use super::runners::katana_runner::KatanaRunner;
-use crate::abigen::erc_20::{Erc20 as Erc20Contract, Erc20Reader, U256};
+use crate::abigen::erc_20::{Erc20 as Erc20Contract, Erc20Reader};
 use crate::{deploy_contract::FEE_TOKEN_ADDRESS, tests::runners::TestnetRunner};
 
 #[tokio::test]
