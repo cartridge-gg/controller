@@ -1,31 +1,22 @@
 use cainome::cairo_serde::{ContractAddress, NonZero, U256};
 use starknet::{
-    accounts::{ConnectedAccount, Execution, SingleOwnerAccount},
     core::types::FieldElement,
     providers::{jsonrpc::HttpTransport, JsonRpcClient, Provider},
-    signers::{LocalWallet, SigningKey},
 };
 
 use crate::abigen::erc_20::Erc20 as Erc20Contract;
 use crate::{
-    abigen::cartridge_account::{
-        CartridgeAccount, CartridgeAccountReader, Signature, Signer, WebauthnSigner,
-    },
+    abigen::cartridge_account::{CartridgeAccount, CartridgeAccountReader, Signer, WebauthnSigner},
     deploy_contract::FEE_TOKEN_ADDRESS,
-    transaction_waiter::TransactionWaiter,
-    webauthn_signer::{account::WebauthnAccount, cairo_args::felt_pair, Secp256r1Point},
+    webauthn_signer::account::WebauthnAccount,
 };
-use crate::{
-    deploy_contract::single_owner_account, tests::runners::TestnetRunner,
-    webauthn_signer::signers::p256r1::P256r1Signer,
-};
+use crate::{tests::runners::TestnetRunner, webauthn_signer::signers::p256r1::P256r1Signer};
 
 use super::super::deployment_test::{declare, deploy};
 
 pub struct WebauthnTestData<R> {
     pub runner: R,
     pub address: FieldElement,
-    pub private_key: SigningKey,
     pub signer: P256r1Signer,
 }
 
@@ -33,7 +24,7 @@ impl<R> WebauthnTestData<R>
 where
     R: TestnetRunner,
 {
-    pub async fn new(private_key: SigningKey, p256r1_signer: P256r1Signer) -> Self {
+    pub async fn new(p256r1_signer: P256r1Signer) -> Self {
         let runner = R::load();
         let prefunded = runner.prefunded_single_owner_account().await;
         let class_hash = declare(runner.client(), &prefunded).await;
@@ -65,62 +56,28 @@ where
         Self {
             runner,
             address,
-            private_key,
             signer: p256r1_signer,
         }
     }
-    async fn single_owner_account(
+    pub fn cartridge_account_reader(
         &self,
-    ) -> SingleOwnerAccount<&JsonRpcClient<HttpTransport>, LocalWallet> {
-        single_owner_account(self.runner.client(), self.private_key.clone(), self.address).await
-    }
-    pub fn webauthn_public_key(&self) -> Secp256r1Point {
-        self.signer.public_key()
-    }
-    // pub async fn set_webauthn_public_key(&self) {
-    //     let (pub_x, pub_y) = self.webauthn_public_key();
-    //     let account = self.single_owner_account().await;
-    //     let new_account_executor = self.single_owner_executor().await;
-    //     let set_execution: Execution<'_, _> =
-    //         new_account_executor.set_webauthn_pub_key(&WebauthnPubKey {
-    //             x: pub_x.into(),
-    //             y: pub_y.into(),
-    //         });
-    //     let max_fee = set_execution.estimate_fee().await.unwrap().overall_fee * 2;
-    //     let set_execution = set_execution
-    //         .nonce(account.get_nonce().await.unwrap())
-    //         .max_fee(FieldElement::from(max_fee))
-    //         .prepared()
-    //         .unwrap();
-    //     let set_tx = set_execution.transaction_hash(false);
-
-    //     set_execution.send().await.unwrap();
-
-    //     TransactionWaiter::new(set_tx, self.runner.client())
-    //         .wait()
-    //         .await
-    //         .unwrap();
-    // }
-    pub fn account_reader(&self) -> CartridgeAccountReader<&JsonRpcClient<HttpTransport>> {
+    ) -> CartridgeAccountReader<&JsonRpcClient<HttpTransport>> {
         CartridgeAccountReader::new(self.address, self.runner.client())
     }
-    pub async fn single_owner_executor(
+    pub async fn webauthn_account(
         &self,
-    ) -> CartridgeAccount<SingleOwnerAccount<&JsonRpcClient<HttpTransport>, LocalWallet>> {
-        CartridgeAccount::new(self.address, self.single_owner_account().await)
+    ) -> WebauthnAccount<&JsonRpcClient<HttpTransport>, P256r1Signer> {
+        WebauthnAccount::new(
+            self.runner.client(),
+            self.signer.clone(),
+            self.address,
+            self.runner.client().chain_id().await.unwrap(),
+            self.signer.origin.clone(),
+        )
     }
-    pub async fn webauthn_executor(
+    pub async fn cartridge_account(
         &self,
     ) -> CartridgeAccount<WebauthnAccount<&JsonRpcClient<HttpTransport>, P256r1Signer>> {
-        CartridgeAccount::new(
-            self.address,
-            WebauthnAccount::new(
-                self.runner.client(),
-                self.signer.clone(),
-                self.address,
-                self.runner.client().chain_id().await.unwrap(),
-                self.signer.origin.clone(),
-            ),
-        )
+        CartridgeAccount::new(self.address, self.webauthn_account().await)
     }
 }
