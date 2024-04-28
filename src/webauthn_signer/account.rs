@@ -1,6 +1,5 @@
 use async_trait::async_trait;
-use cainome::cairo_serde::CairoSerde;
-use serde::Serialize;
+use cainome::cairo_serde::{CairoSerde, ContractAddress};
 use starknet::{
     accounts::{
         Account, Call, ConnectedAccount, Declaration, Execution, ExecutionEncoder,
@@ -17,10 +16,7 @@ use starknet::{
 };
 use std::sync::Arc;
 
-use crate::{
-    abigen::cartridge_account::{SignerSignature, WebauthnAssertion},
-    felt_ser::to_felts,
-};
+use crate::abigen::cartridge_account::{Call as AbigenCall, SignerSignature, WebauthnAssertion};
 
 // use super::{cairo_args::VerifyWebauthnSignerArgs, signers::device::DeviceError};
 
@@ -88,30 +84,28 @@ where
     }
 }
 
-//starknet::accounts::Call really should implement serde::Serialize, at least as a crate feature
-#[derive(Debug, Clone, Serialize)]
-struct SerializableCall<'a> {
-    pub to: &'a FieldElement,
-    pub selector: &'a FieldElement,
-    pub calldata: &'a Vec<FieldElement>,
-}
-impl<'a> From<&'a Call> for SerializableCall<'a> {
-    fn from(call: &'a Call) -> Self {
-        Self {
-            to: &call.to,
-            selector: &call.selector,
-            calldata: &call.calldata,
-        }
-    }
-}
-
 impl<P, S> ExecutionEncoder for WebauthnAccount<P, S>
 where
     P: Provider + Send,
     S: Signer + Send,
 {
     fn encode_calls(&self, calls: &[Call]) -> Vec<FieldElement> {
-        to_felts(&calls.iter().map(SerializableCall::from).collect::<Vec<_>>())
+        <Vec<AbigenCall> as CairoSerde>::cairo_serialize(
+            &calls
+                .into_iter()
+                .map(
+                    |Call {
+                         to,
+                         selector,
+                         calldata,
+                     }| AbigenCall {
+                        to: ContractAddress(*to),
+                        selector: *selector,
+                        calldata: calldata.clone(),
+                    },
+                )
+                .collect(),
+        )
     }
 }
 
