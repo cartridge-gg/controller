@@ -1,13 +1,18 @@
 use async_trait::async_trait;
+use cainome::cairo_serde::{NonZero, U256};
+use ecdsa::{RecoveryId, VerifyingKey};
 use futures::channel::oneshot;
 use p256::NistP256;
 use std::result::Result;
 use wasm_bindgen_futures::spawn_local;
 use wasm_webauthn::*;
 
-use crate::webauthn_signer::{
-    account::SignError,
-    credential::{AuthenticatorAssertionResponse, AuthenticatorData},
+use crate::{
+    abigen::cartridge_account::{Signature, WebauthnSigner},
+    webauthn_signer::{
+        account::SignError,
+        credential::{AuthenticatorAssertionResponse, AuthenticatorData},
+    },
 };
 
 use super::Signer;
@@ -18,6 +23,8 @@ pub enum DeviceError {
     CreateCredential(String),
     #[error("Get assertion error: {0}")]
     GetAssertion(String),
+    #[error("Bad assertion error: {0}")]
+    BadAssertion(String),
     #[error("Channel error: {0}")]
     Channel(String),
 }
@@ -26,18 +33,21 @@ pub enum DeviceError {
 pub struct DeviceSigner {
     pub rp_id: String,
     pub credential_id: Vec<u8>,
+    pub origin: String,
 }
 
 impl DeviceSigner {
-    pub fn new(rp_id: String, credential_id: Vec<u8>) -> Self {
+    pub fn new(rp_id: String, credential_id: Vec<u8>, origin: String) -> Self {
         Self {
             rp_id,
             credential_id,
+            origin,
         }
     }
 
     pub async fn register(
         rp_id: String,
+        origin: String,
         user_name: String,
         challenge: &[u8],
     ) -> Result<Self, SignError> {
@@ -47,6 +57,7 @@ impl DeviceSigner {
         Ok(Self {
             rp_id,
             credential_id: credential.id.0,
+            origin,
         })
     }
 
@@ -124,6 +135,13 @@ impl DeviceSigner {
             ))),
         }
     }
+    pub fn rp_id_hash(&self) -> [u8; 32] {
+        use sha2::{digest::Update, Digest, Sha256};
+        Sha256::new().chain(self.rp_id.clone()).finalize().into()
+    }
+    pub fn pub_key_bytes(&self) -> [u8; 64] {
+        todo!()
+    }
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
@@ -139,11 +157,27 @@ impl Signer for DeviceSigner {
         } = self.get_assertion(challenge).await?;
 
         let ecdsa_sig = ecdsa::Signature::<NistP256>::from_der(&encoded_sig).unwrap();
-        let r = ecdsa_sig.r().to_bytes(); 
-        let s = ecdsa_sig.s().to_bytes();
+        let r = U256::from_bytes_be(ecdsa_sig.r().to_bytes().as_slice().try_into().unwrap());
+        let s = U256::from_bytes_be(ecdsa_sig.s().to_bytes().as_slice().try_into().unwrap());
 
-        let mut signature = r.as_slice().to_vec();
-        signature.extend_from_slice(s.as_slice());
+        let recovery_id = RecoveryId::trial_recovery_from_msg(
+            &VerifyingKey::from_sec1_bytes(&self.pub_key_bytes()).map_err(|_| {
+                SignError::Device(DeviceError::BadAssertion("Invalid public key".to_string()))
+            })?,
+            challenge,
+            &ecdsa_sig,
+        )
+        .map_err(|_| {
+            SignError::Device(DeviceError::BadAssertion(
+                "Unable to recover id".to_string(),
+            ))
+        })?;
+
+        let signature = Signature {
+            r,
+            s,
+            y_parity: recovery_id.is_y_odd(),
+        };
 
         Ok(AuthenticatorAssertionResponse {
             authenticator_data: AuthenticatorData {
@@ -155,5 +189,14 @@ impl Signer for DeviceSigner {
             signature,
             user_handle: None,
         })
+    }
+    fn account_signer(&self) -> WebauthnSigner {
+        WebauthnSigner {
+            rp_id_hash: NonZero(U256::from_bytes_be(&self.rp_id_hash())),
+            origin: self.origin.clone().into_bytes(),
+            pubkey: NonZero(U256::from_bytes_be(
+                &self.pub_key_bytes()[0..32].try_into().unwrap(),
+            )),
+        }
     }
 }

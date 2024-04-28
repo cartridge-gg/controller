@@ -20,7 +20,7 @@ use crate::abigen::cartridge_account::{Call as AbigenCall, SignerSignature, Weba
 
 use crate::webauthn_signer::signers::Signer;
 
-use super::json_helper::find_value_index_length;
+use super::{json_helper::find_value_index_length, signers::device::DeviceError};
 
 pub struct WebauthnAccount<P, S>
 where
@@ -147,8 +147,8 @@ impl Sha256Version {
 pub enum SignError {
     #[error("Signer error: {0}")]
     Signer(EcdsaSignError),
-    // #[error("Device error: {0}")]
-    // Device(DeviceError),
+    #[error("Device error: {0}")]
+    Device(DeviceError),
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
