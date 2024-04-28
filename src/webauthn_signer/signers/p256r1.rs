@@ -1,5 +1,5 @@
 use crate::{
-    abigen::cartridge_account::{self, WebauthnSigner},
+    abigen::cartridge_account::{Signature, WebauthnSigner},
     webauthn_signer::{
         account::SignError,
         credential::{AuthenticatorData, CliendData},
@@ -10,7 +10,7 @@ use async_trait::async_trait;
 use cainome::cairo_serde::{NonZero, U256};
 use ecdsa::RecoveryId;
 use p256::{
-    ecdsa::{Signature, SigningKey},
+    ecdsa::{Signature as ECDSASignature, SigningKey},
     elliptic_curve::sec1::Coordinates,
 };
 use rand_core::OsRng;
@@ -77,11 +77,11 @@ impl Signer for P256r1Signer {
 
         let mut to_sign = Into::<Vec<u8>>::into(authenticator_data.clone());
         to_sign.append(&mut client_data_hash.to_vec());
-        let (signature, recovery_id): (Signature, RecoveryId) =
+        let (signature, recovery_id): (ECDSASignature, RecoveryId) =
             self.signing_key.sign_recoverable(&to_sign).unwrap();
         let signature_bytes = signature.to_bytes().to_vec();
 
-        let signature = cartridge_account::Signature {
+        let signature = Signature {
             r: U256::from_bytes_be(&signature_bytes[0..32].try_into().unwrap()),
             s: U256::from_bytes_be(&signature_bytes[32..64].try_into().unwrap()),
             y_parity: recovery_id.is_y_odd(),

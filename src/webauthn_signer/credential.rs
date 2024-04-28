@@ -42,7 +42,6 @@ pub struct AuthenticatorData {
     pub rp_id_hash: [u8; 32],
     pub flags: u8,
     pub sign_count: u32,
-    // ...
 }
 
 impl From<AuthenticatorData> for Vec<u8> {

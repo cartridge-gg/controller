@@ -18,8 +18,6 @@ use std::sync::Arc;
 
 use crate::abigen::cartridge_account::{Call as AbigenCall, SignerSignature, WebauthnAssertion};
 
-// use super::{cairo_args::VerifyWebauthnSignerArgs, signers::device::DeviceError};
-
 use crate::webauthn_signer::signers::Signer;
 
 use super::json_helper::find_value_index_length;
@@ -34,6 +32,7 @@ where
     address: FieldElement,
     chain_id: FieldElement,
     block_id: BlockId,
+    sha256_version: Sha256Version,
 }
 impl<P, S> WebauthnAccount<P, S>
 where
@@ -47,6 +46,23 @@ where
             address,
             chain_id,
             block_id: BlockId::Tag(BlockTag::Latest),
+            sha256_version: Sha256Version::Cairo1,
+        }
+    }
+    pub fn with_sha256_version(
+        provider: P,
+        signer: S,
+        address: FieldElement,
+        chain_id: FieldElement,
+        sha256_version: Sha256Version,
+    ) -> Self {
+        Self {
+            provider,
+            signer,
+            address,
+            chain_id,
+            block_id: BlockId::Tag(BlockTag::Latest),
+            sha256_version,
         }
     }
     pub async fn execution_signature(
@@ -57,8 +73,7 @@ where
         let tx_hash = execution.transaction_hash(self.chain_id, self.address, query_only, self);
         let mut challenge = tx_hash.to_bytes_be().to_vec();
 
-        // Cairo-1 sha256
-        challenge.push(1);
+        challenge.push(self.sha256_version.encode());
         let assertion = self.signer.sign(&challenge).await?;
 
         let (type_offset, _) =
@@ -107,6 +122,24 @@ where
                 )
                 .collect(),
         )
+    }
+}
+
+/// Represents a version of the sha256 algorithm
+/// that the contract should use when validating the signature
+pub enum Sha256Version {
+    /// A faster implementation, but might not always be available
+    Cairo0,
+    /// A slower implementation, but always available
+    Cairo1,
+}
+
+impl Sha256Version {
+    pub fn encode(&self) -> u8 {
+        match self {
+            Sha256Version::Cairo0 => 0,
+            Sha256Version::Cairo1 => 1,
+        }
     }
 }
 
