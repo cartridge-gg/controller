@@ -22,7 +22,7 @@ use crate::abigen::cartridge_account::{Call as AbigenCall, SignerSignature, Weba
 
 use crate::webauthn_signer::signers::Signer;
 
-use super::cairo_args::find_value_index_length;
+use super::json_helper::find_value_index_length;
 
 pub struct WebauthnAccount<P, S>
 where
@@ -59,27 +59,28 @@ where
 
         // Cairo-1 sha256
         challenge.push(1);
-        let response = self.signer.sign(&challenge).await?;
+        let assertion = self.signer.sign(&challenge).await?;
 
-        let (type_offset, _) = find_value_index_length(&response.client_data_json, "type").unwrap();
+        let (type_offset, _) =
+            find_value_index_length(&assertion.client_data_json, "type").unwrap();
         let (challenge_offset, challenge_length) =
-            find_value_index_length(&response.client_data_json, "challenge").unwrap();
+            find_value_index_length(&assertion.client_data_json, "challenge").unwrap();
         let (origin_offset, origin_length) =
-            find_value_index_length(&response.client_data_json, "origin").unwrap();
+            find_value_index_length(&assertion.client_data_json, "origin").unwrap();
 
-        let result = WebauthnAssertion {
-            signature: response.signature,
+        let transformed_assertion = WebauthnAssertion {
+            signature: assertion.signature,
             type_offset: type_offset as u32,
             challenge_offset: challenge_offset as u32,
             challenge_length: challenge_length as u32,
             origin_offset: origin_offset as u32,
             origin_length: origin_length as u32,
-            client_data_json: response.client_data_json.into_bytes(),
-            authenticator_data: response.authenticator_data.into(),
+            client_data_json: assertion.client_data_json.into_bytes(),
+            authenticator_data: assertion.authenticator_data.into(),
         };
         Ok(SignerSignature::Webauthn((
             self.signer.account_signer(),
-            result,
+            transformed_assertion,
         )))
     }
 }
