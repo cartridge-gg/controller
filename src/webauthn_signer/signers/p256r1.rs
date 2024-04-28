@@ -1,5 +1,5 @@
 use crate::{
-    abigen::cartridge_account::WebauthnSigner,
+    abigen::cartridge_account::{self, WebauthnSigner},
     webauthn_signer::{
         account::SignError,
         credential::{AuthenticatorData, CliendData},
@@ -79,13 +79,18 @@ impl Signer for P256r1Signer {
         to_sign.append(&mut client_data_hash.to_vec());
         let (signature, recovery_id): (Signature, RecoveryId) =
             self.signing_key.sign_recoverable(&to_sign).unwrap();
-        let mut signature_bytes = signature.to_bytes().to_vec();
-        signature_bytes.push(recovery_id.is_y_odd() as u8);
+        let signature_bytes = signature.to_bytes().to_vec();
+
+        let signature = cartridge_account::Signature {
+            r: U256::from_bytes_be(&signature_bytes[0..32].try_into().unwrap()),
+            s: U256::from_bytes_be(&signature_bytes[32..64].try_into().unwrap()),
+            y_parity: recovery_id.is_y_odd(),
+        };
 
         Ok(AuthenticatorAssertionResponse {
             authenticator_data,
             client_data_json,
-            signature: signature_bytes,
+            signature,
             user_handle: None,
         })
     }

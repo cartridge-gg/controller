@@ -18,7 +18,7 @@ use starknet::{
 use std::sync::Arc;
 
 use crate::{
-    abigen::cartridge_account::{Signature, SignerSignature, WebauthnAssertion},
+    abigen::cartridge_account::{SignerSignature, WebauthnAssertion},
     felt_ser::to_felts,
 };
 
@@ -26,7 +26,7 @@ use crate::{
 
 use crate::webauthn_signer::signers::Signer;
 
-use super::cairo_args::VerifyWebauthnSignerArgs;
+use super::cairo_args::find_value_index_length;
 
 pub struct WebauthnAccount<P, S>
 where
@@ -38,27 +38,19 @@ where
     address: FieldElement,
     chain_id: FieldElement,
     block_id: BlockId,
-    origin: String,
 }
 impl<P, S> WebauthnAccount<P, S>
 where
     P: Provider + Send,
     S: Signer + Send,
 {
-    pub fn new(
-        provider: P,
-        signer: S,
-        address: FieldElement,
-        chain_id: FieldElement,
-        origin: String,
-    ) -> Self {
+    pub fn new(provider: P, signer: S, address: FieldElement, chain_id: FieldElement) -> Self {
         Self {
             provider,
             signer,
             address,
             chain_id,
             block_id: BlockId::Tag(BlockTag::Latest),
-            origin,
         }
     }
     pub async fn execution_signature(
@@ -71,26 +63,23 @@ where
 
         // Cairo-1 sha256
         challenge.push(1);
-        let assertion = self.signer.sign(&challenge).await?;
+        let response = self.signer.sign(&challenge).await?;
 
-        let args =
-            VerifyWebauthnSignerArgs::from_response(self.origin.clone(), challenge, assertion);
-
-        let signature = Signature {
-            r: args.r.try_into().unwrap(),
-            s: args.s.try_into().unwrap(),
-            y_parity: args.y_parity,
-        };
+        let (type_offset, _) = find_value_index_length(&response.client_data_json, "type").unwrap();
+        let (challenge_offset, challenge_length) =
+            find_value_index_length(&response.client_data_json, "challenge").unwrap();
+        let (origin_offset, origin_length) =
+            find_value_index_length(&response.client_data_json, "origin").unwrap();
 
         let result = WebauthnAssertion {
-            signature,
-            type_offset: args.type_offset as u32,
-            challenge_offset: args.challenge_offset as u32,
-            challenge_length: args.challenge_length as u32,
-            origin_offset: args.origin_offset as u32,
-            origin_length: args.origin_length as u32,
-            client_data_json: args.client_data_json,
-            authenticator_data: args.authenticator_data,
+            signature: response.signature,
+            type_offset: type_offset as u32,
+            challenge_offset: challenge_offset as u32,
+            challenge_length: challenge_length as u32,
+            origin_offset: origin_offset as u32,
+            origin_length: origin_length as u32,
+            client_data_json: response.client_data_json.into_bytes(),
+            authenticator_data: response.authenticator_data.into(),
         };
         Ok(SignerSignature::Webauthn((
             self.signer.account_signer(),

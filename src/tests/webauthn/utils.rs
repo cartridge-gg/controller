@@ -72,7 +72,6 @@ where
             self.signer.clone(),
             self.address,
             self.runner.client().chain_id().await.unwrap(),
-            self.signer.origin.clone(),
         )
     }
     pub async fn cartridge_account(

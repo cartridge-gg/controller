@@ -1,5 +1,7 @@
 use serde::Serialize;
 
+use crate::abigen::cartridge_account::Signature;
+
 #[derive(Debug, Clone, Serialize)]
 pub struct CliendData {
     #[serde(rename = "type")]
@@ -27,11 +29,11 @@ impl CliendData {
     }
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone)]
 pub struct AuthenticatorAssertionResponse {
     pub authenticator_data: AuthenticatorData,
     pub client_data_json: String,
-    pub signature: Vec<u8>,
+    pub signature: Signature,
     pub user_handle: Option<Vec<u8>>,
 }
 
