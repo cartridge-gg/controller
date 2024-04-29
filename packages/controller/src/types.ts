@@ -3,7 +3,7 @@ import {
   Abi,
   Call,
   InvocationsDetails,
-  typedData,
+  TypedData,
   InvokeFunctionResponse,
   Signature,
   EstimateFeeDetails,
@@ -119,7 +119,7 @@ export interface Keychain {
     [key: string]: Session;
   }>;
   signMessage(
-    typedData: typedData.TypedData,
+    typedData: TypedData,
     account: string,
   ): Promise<Signature | Error>;
   signTransaction(

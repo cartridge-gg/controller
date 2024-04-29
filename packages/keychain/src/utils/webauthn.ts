@@ -4,6 +4,7 @@ import {
   stark,
   transaction,
   typedData,
+  TypedData,
   Abi,
   Call,
   DeployAccountSignerDetails,
@@ -127,7 +128,7 @@ export class WebauthnSigner implements SignerInterface {
   }
 
   public async signMessage(
-    td: typedData.TypedData,
+    td: TypedData,
     accountAddress: string,
   ): Promise<Signature> {
     const msgHash = typedData.getMessageHash(td, accountAddress);
@@ -238,6 +239,7 @@ class WebauthnAccount extends Account {
     };
   }
 
+  // @ts-expect-error TODO: fix overload type mismatch
   async execute(
     calls: Call[],
     abis?: Abi[] | undefined,

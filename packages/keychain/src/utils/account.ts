@@ -17,13 +17,13 @@ import {
   Abi,
   AllowArray,
   ec,
-  InvocationsDetails,
   InvokeFunctionResponse,
-  typedData,
+  TypedData,
   BigNumberish,
   waitForTransactionOptions,
   num,
   TransactionFinalityStatus,
+  InvocationsDetails,
   // AccountInvocationItem,
   // TransactionType,
 } from "starknet";
@@ -186,6 +186,7 @@ class Account extends BaseAccount {
     }
   }
 
+  // @ts-expect-error TODO: fix overload type mismatch
   async execute(
     calls: AllowArray<Call>,
     abis?: Abi[],
@@ -249,7 +250,7 @@ class Account extends BaseAccount {
     return super.verifyMessageHash(hash, signature);
   }
 
-  async signMessage(typedData: typedData.TypedData): Promise<Signature> {
+  async signMessage(typedData: TypedData): Promise<Signature> {
     return await (this.status === Status.REGISTERED ||
     this.status === Status.COUNTERFACTUAL ||
     this.status === Status.DEPLOYING

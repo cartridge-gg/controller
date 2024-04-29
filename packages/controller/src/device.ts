@@ -1,16 +1,16 @@
 import {
-  constants,
   Account,
   Abi,
   Call,
   EstimateFeeDetails,
-  InvocationsDetails,
   Signature,
-  typedData,
   InvokeFunctionResponse,
   EstimateFee,
   DeclareContractPayload,
   RpcProvider,
+  TypedData,
+  InvocationsDetails,
+  constants,
 } from "starknet";
 
 import { Keychain, ResponseCodes, Modal } from "./types";
@@ -77,6 +77,7 @@ class DeviceAccount extends Account {
    *
    * @returns response from addTransaction
    */
+  // @ts-expect-error TODO: fix overload type mismatch
   async execute(
     calls: Call | Call[],
     abis?: Abi[],
@@ -125,7 +126,7 @@ class DeviceAccount extends Account {
    * @returns the signature of the JSON object
    * @throws {Error} if the JSON object is not a valid JSON
    */
-  async signMessage(typedData: typedData.TypedData): Promise<Signature> {
+  async signMessage(typedData: TypedData): Promise<Signature> {
     try {
       this.modal.open();
       const res = await this.keychain.signMessage(typedData, this.address);

@@ -128,20 +128,20 @@ class Controller {
           address,
           this.keychain,
           this.modal,
-        ),
+        ) as AccountInterface, // Note: workaround for execute type mismatch error
         [constants.StarknetChainId.SN_SEPOLIA]: new DeviceAccount(
           providers[constants.StarknetChainId.SN_SEPOLIA],
           address,
           this.keychain,
           this.modal,
-        ),
+        ) as AccountInterface,
       };
     } catch (e) {
       console.error(e);
       return;
     }
 
-    return !!this.accounts[this.chainId];
+    return !!this.accounts?.[this.chainId];
   }
 
   async switchChain(chainId: constants.StarknetChainId) {
@@ -273,13 +273,13 @@ class Controller {
           response.address,
           this.keychain,
           this.modal,
-        ),
+        ) as AccountInterface,
         [constants.StarknetChainId.SN_SEPOLIA]: new DeviceAccount(
           providers[constants.StarknetChainId.SN_SEPOLIA],
           response.address,
           this.keychain,
           this.modal,
-        ),
+        ) as AccountInterface,
       };
 
       return this.accounts[this.chainId];

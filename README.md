@@ -17,7 +17,11 @@ iframe.
 
 ## Development
 
-[pnpm - Installation](https://pnpm.io/installation)
+Install pnpm via corepack:
+
+```sh
+corepack enable pnpm
+```
 
 Install dependencies:
 
