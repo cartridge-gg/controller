@@ -33,8 +33,8 @@ where
 
         let signer = Signer::Webauthn(WebauthnSigner {
             origin: p256r1_signer.origin.clone().into_bytes(),
-            pubkey: NonZero(pub_key.into()),
-            rp_id_hash: NonZero(U256::from_bytes_be(&p256r1_signer.rp_id_hash())),
+            pubkey: NonZero::new(pub_key.into()).unwrap(),
+            rp_id_hash: NonZero::new(U256::from_bytes_be(&p256r1_signer.rp_id_hash())).unwrap(),
         });
 
         let address = deploy(runner.client(), &prefunded, signer, None, class_hash).await;

@@ -18,7 +18,7 @@ async fn test_authorize_execute() {
     let class_hash = declare(runner.client(), &prefunded).await;
     let private_key = SigningKey::from_random();
     let signer = Signer::Starknet(StarknetSigner {
-        pubkey: NonZero(private_key.verifying_key().scalar()),
+        pubkey: NonZero::new(private_key.verifying_key().scalar()).unwrap(),
     });
     let deployed_address = deploy(runner.client(), &prefunded, signer, None, class_hash).await;
 

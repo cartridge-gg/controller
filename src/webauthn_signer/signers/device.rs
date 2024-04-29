@@ -192,11 +192,12 @@ impl Signer for DeviceSigner {
     }
     fn account_signer(&self) -> WebauthnSigner {
         WebauthnSigner {
-            rp_id_hash: NonZero(U256::from_bytes_be(&self.rp_id_hash())),
+            rp_id_hash: NonZero::new(U256::from_bytes_be(&self.rp_id_hash())).unwrap(),
             origin: self.origin.clone().into_bytes(),
-            pubkey: NonZero(U256::from_bytes_be(
+            pubkey: NonZero::new(U256::from_bytes_be(
                 &self.pub_key_bytes()[0..32].try_into().unwrap(),
-            )),
+            ))
+            .unwrap(),
         }
     }
 }

@@ -25,7 +25,7 @@ pub async fn create_account<'a>(
     let private_key = SigningKey::from_random();
 
     let signer = Signer::Starknet(StarknetSigner {
-        pubkey: NonZero(private_key.verifying_key().scalar()),
+        pubkey: NonZero::new(private_key.verifying_key().scalar()).unwrap(),
     });
 
     let deployed_address = deploy(provider, from, signer, None, class_hash).await;
@@ -101,7 +101,7 @@ async fn test_deploy() {
     let account = runner.prefunded_single_owner_account().await;
     let class_hash = declare(runner.client(), &account).await;
     let signer = Signer::Starknet(StarknetSigner {
-        pubkey: NonZero(felt!("1337")),
+        pubkey: NonZero::new(felt!("1337")).unwrap(),
     });
     deploy(runner.client(), &account, signer, None, class_hash).await;
 }
@@ -113,7 +113,7 @@ async fn test_deploy_and_call() {
     let client = runner.client();
     let class_hash = declare(client, &account).await;
     let signer = Signer::Starknet(StarknetSigner {
-        pubkey: NonZero(felt!("1337")),
+        pubkey: NonZero::new(felt!("1337")).unwrap(),
     });
     let deployed_address = deploy(client, &account, signer, None, class_hash).await;
 
