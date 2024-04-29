@@ -3,7 +3,7 @@ import {
   InvocationsSignerDetails,
   Signature,
   Signer,
-  typedData,
+  TypedData,
 } from "starknet";
 // import { CLASS_HASHES } from "@cartridge/controller/src/constants";
 
@@ -28,7 +28,7 @@ export class DeviceSigner extends Signer {
   }
 
   public async signMessage(
-    typedData: typedData.TypedData,
+    typedData: TypedData,
     accountAddress: string,
   ): Promise<Signature> {
     return super.signMessage(typedData, accountAddress);
