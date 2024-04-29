@@ -32,19 +32,12 @@ pub enum DeviceError {
 #[derive(Debug, Clone)]
 pub struct DeviceSigner {
     pub rp_id: String,
-    pub credential_id: Vec<u8>,
+    pub credential_id: CredentialID,
+    pub pub_key: [u8; 64],
     pub origin: String,
 }
 
 impl DeviceSigner {
-    pub fn new(rp_id: String, credential_id: Vec<u8>, origin: String) -> Self {
-        Self {
-            rp_id,
-            credential_id,
-            origin,
-        }
-    }
-
     pub async fn register(
         rp_id: String,
         origin: String,
@@ -54,9 +47,15 @@ impl DeviceSigner {
         let MakeCredentialResponse { credential } =
             Self::create_credential(rp_id.clone(), user_name, challenge).await?;
 
+        let pub_key = credential
+            .public_key
+            .map(|_| [1; 64] /* TODO: Do something meaningful here */)
+            .unwrap();
+
         Ok(Self {
             rp_id,
-            credential_id: credential.id.0,
+            credential_id: credential.id,
+            pub_key,
             origin,
         })
     }
@@ -106,7 +105,7 @@ impl DeviceSigner {
         let challenge = challenge.to_vec();
 
         spawn_local(async move {
-            let credential = Credential::from(CredentialID(credential_id));
+            let credential = Credential::from(credential_id);
 
             let result = GetAssertionArgsBuilder::default()
                 .rp_id(Some(rp_id))
@@ -140,7 +139,7 @@ impl DeviceSigner {
         Sha256::new().chain(self.rp_id.clone()).finalize().into()
     }
     pub fn pub_key_bytes(&self) -> [u8; 64] {
-        todo!()
+        self.pub_key
     }
 }
 
