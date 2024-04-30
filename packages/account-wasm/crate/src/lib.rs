@@ -3,12 +3,16 @@ mod utils;
 
 use std::str::FromStr;
 
+use account_sdk::wasm_webauthn::CredentialID;
 use account_sdk::webauthn_signer::signers::{device::DeviceSigner, Signer};
 use base64::{engine::general_purpose, Engine};
 use serde_wasm_bindgen::to_value;
 use starknet::{
     accounts::{Call, Execution},
-    core::types::FieldElement,
+    core::types::{
+        BroadcastedInvokeTransaction, BroadcastedInvokeTransactionV1,
+        BroadcastedInvokeTransactionV3, FieldElement,
+    },
     providers::{jsonrpc::HttpTransport, JsonRpcClient},
 };
 use types::{JsCall, JsInvocationsDetails};
@@ -35,6 +39,7 @@ impl WebauthnAccount {
     /// - `chain_id`: Identifier of the blockchain network to interact with.
     /// - `address`: The blockchain address associated with the account.
     /// - `rp_id`: Relying Party Identifier, a string that uniquely identifies the WebAuthn relying party.
+    /// - `origin`: The origin of the WebAuthn request. Example https://cartridge.gg
     /// - `credential_id`: Base64 encoded bytes of the raw credential ID generated during the WebAuthn registration process.
     ///
     pub fn new(
@@ -42,7 +47,9 @@ impl WebauthnAccount {
         chain_id: String,
         address: String,
         rp_id: String,
+        origin: String,
         credential_id: String,
+        pub_key: String,
     ) -> Result<WebauthnAccount, JsValue> {
         utils::set_panic_hook();
 
@@ -51,7 +58,16 @@ impl WebauthnAccount {
         let credential_id = general_purpose::URL_SAFE_NO_PAD
             .decode(credential_id)
             .map_err(|e| JsValue::from_str(&format!("{}", e)))?;
-        let signer = DeviceSigner::new(rp_id.clone(), credential_id);
+        let pub_key = general_purpose::URL_SAFE_NO_PAD
+            .decode(pub_key)
+            .map_err(|e| JsValue::from_str(&format!("{}", e)))?;
+        let pub_key: [u8; 64] = pub_key.try_into().unwrap();
+        let signer = DeviceSigner::new(
+            rp_id.clone(),
+            origin.clone(),
+            CredentialID(credential_id),
+            pub_key,
+        );
         let address =
             FieldElement::from_str(&address).map_err(|e| JsValue::from_str(&format!("{}", e)))?;
         let chain_id =
@@ -77,19 +93,21 @@ impl WebauthnAccount {
     /// - `chain_id`: Identifier of the blockchain network to interact with.
     /// - `address`: The blockchain address associated with the account.
     /// - `rp_id`: Relying Party Identifier, a string that uniquely identifies the WebAuthn relying party.
+    /// - `origin`: The origin of the WebAuthn request. Example https://cartridge.gg
     /// - `user_name`: The user name associated with the account.
     pub async fn register(
         rpc_url: String,
         chain_id: String,
         address: String,
         rp_id: String,
+        origin: String,
         user_name: String,
     ) -> Result<WebauthnAccount, JsValue> {
         utils::set_panic_hook();
 
         let url = Url::parse(&rpc_url).map_err(|e| JsValue::from_str(&format!("{}", e)))?;
         let provider = JsonRpcClient::new(HttpTransport::new(url));
-        let signer = DeviceSigner::register(rp_id.clone(), user_name, &vec![])
+        let signer = DeviceSigner::register(rp_id.clone(), origin.clone(), user_name, &vec![])
             .await
             .map_err(|e| JsValue::from_str(&format!("{}", e)))?;
         let address =
@@ -114,7 +132,7 @@ impl WebauthnAccount {
     pub fn get_credential_id(&self) -> String {
         utils::set_panic_hook();
 
-        general_purpose::STANDARD.encode(&self.signer.credential_id)
+        general_purpose::STANDARD.encode(&self.signer.credential_id.0)
     }
 
     #[wasm_bindgen(js_name = getRpId)]
@@ -123,15 +141,16 @@ impl WebauthnAccount {
     }
 
     #[wasm_bindgen(js_name = sign)]
-    pub async fn sign(&self, challenge: Uint8Array) -> Result<JsValue, JsValue> {
-        utils::set_panic_hook();
+    pub async fn sign(&self, _challenge: Uint8Array) -> Result<JsValue, JsValue> {
+        // utils::set_panic_hook();
 
-        let assertion = self
-            .signer
-            .sign(&challenge.to_vec())
-            .await
-            .map_err(|e| JsValue::from_str(&format!("{}", e)))?;
-        Ok(to_value(&assertion).unwrap_or_else(|_| JsValue::UNDEFINED))
+        // let assertion = self
+        //     .signer
+        //     .sign(&challenge.to_vec())
+        //     .await
+        //     .map_err(|e| JsValue::from_str(&format!("{}", e)))?;
+        // Ok(to_value(&assertion).unwrap_or_else(|_| JsValue::UNDEFINED))
+        unimplemented!("Sign Message not implemented");
     }
 
     #[wasm_bindgen(js_name = signTransaction)]
@@ -164,8 +183,12 @@ impl WebauthnAccount {
             .await
             .map_err(|e| JsValue::from_str(&format!("{}", e)))?;
 
-        let signature_js: Array = broadcast
-            .signature
+        let signature = match broadcast {
+            BroadcastedInvokeTransaction::V1(invoke) => invoke.signature,
+            BroadcastedInvokeTransaction::V3(invoke) => invoke.signature,
+        };
+
+        let signature_js: Array = signature
             .iter()
             .map(|f| JsValue::from_str(&format!("0x{:x}", f)))
             .collect();

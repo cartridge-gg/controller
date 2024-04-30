@@ -1,7 +1,10 @@
 use serde::{Deserialize, Serialize};
 use starknet::{
     accounts::Call,
-    core::{types::{FieldElement, FromStrError}, utils::get_selector_from_name},
+    core::{
+        types::{FieldElement, FromStrError},
+        utils::get_selector_from_name,
+    },
 };
 use std::str::FromStr;
 use wasm_bindgen::prelude::*;

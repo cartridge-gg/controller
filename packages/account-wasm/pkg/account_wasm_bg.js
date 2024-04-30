@@ -4,26 +4,6 @@ export function __wbg_set_wasm(val) {
 }
 
 
-const heap = new Array(128).fill(undefined);
-
-heap.push(undefined, null, true, false);
-
-function getObject(idx) { return heap[idx]; }
-
-let heap_next = heap.length;
-
-function dropObject(idx) {
-    if (idx < 132) return;
-    heap[idx] = heap_next;
-    heap_next = idx;
-}
-
-function takeObject(idx) {
-    const ret = getObject(idx);
-    dropObject(idx);
-    return ret;
-}
-
 const lTextDecoder = typeof TextDecoder === 'undefined' ? (0, module.require)('util').TextDecoder : TextDecoder;
 
 let cachedTextDecoder = new lTextDecoder('utf-8', { ignoreBOM: true, fatal: true });
@@ -44,6 +24,12 @@ function getStringFromWasm0(ptr, len) {
     return cachedTextDecoder.decode(getUint8Memory0().subarray(ptr, ptr + len));
 }
 
+const heap = new Array(128).fill(undefined);
+
+heap.push(undefined, null, true, false);
+
+let heap_next = heap.length;
+
 function addHeapObject(obj) {
     if (heap_next === heap.length) heap.push(heap.length + 1);
     const idx = heap_next;
@@ -51,6 +37,20 @@ function addHeapObject(obj) {
 
     heap[idx] = obj;
     return idx;
+}
+
+function getObject(idx) { return heap[idx]; }
+
+function dropObject(idx) {
+    if (idx < 132) return;
+    heap[idx] = heap_next;
+    heap_next = idx;
+}
+
+function takeObject(idx) {
+    const ret = getObject(idx);
+    dropObject(idx);
+    return ret;
 }
 
 let WASM_VECTOR_LEN = 0;
@@ -229,7 +229,7 @@ function makeMutClosure(arg0, arg1, dtor, f) {
     return real;
 }
 function __wbg_adapter_36(arg0, arg1, arg2) {
-    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h9f98f19da5e448cd(arg0, arg1, addHeapObject(arg2));
+    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h2358c22c6fa49f27(arg0, arg1, addHeapObject(arg2));
 }
 
 let cachedUint32Memory0 = null;
@@ -269,8 +269,8 @@ function handleError(f, args) {
         wasm.__wbindgen_exn_store(addHeapObject(e));
     }
 }
-function __wbg_adapter_118(arg0, arg1, arg2, arg3) {
-    wasm.wasm_bindgen__convert__closures__invoke2_mut__h4b7a32c4d1333497(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
+function __wbg_adapter_116(arg0, arg1, arg2, arg3) {
+    wasm.wasm_bindgen__convert__closures__invoke2_mut__h77a7a2d49a5e5811(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
 }
 
 const WebauthnAccountFinalization = (typeof FinalizationRegistry === 'undefined')
@@ -307,15 +307,18 @@ export class WebauthnAccount {
     * - `chain_id`: Identifier of the blockchain network to interact with.
     * - `address`: The blockchain address associated with the account.
     * - `rp_id`: Relying Party Identifier, a string that uniquely identifies the WebAuthn relying party.
+    * - `origin`: The origin of the WebAuthn request. Example https://cartridge.gg
     * - `credential_id`: Base64 encoded bytes of the raw credential ID generated during the WebAuthn registration process.
     * @param {string} rpc_url
     * @param {string} chain_id
     * @param {string} address
     * @param {string} rp_id
+    * @param {string} origin
     * @param {string} credential_id
+    * @param {string} pub_key
     * @returns {WebauthnAccount}
     */
-    static new(rpc_url, chain_id, address, rp_id, credential_id) {
+    static new(rpc_url, chain_id, address, rp_id, origin, credential_id, pub_key) {
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
             const ptr0 = passStringToWasm0(rpc_url, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -326,9 +329,13 @@ export class WebauthnAccount {
             const len2 = WASM_VECTOR_LEN;
             const ptr3 = passStringToWasm0(rp_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
             const len3 = WASM_VECTOR_LEN;
-            const ptr4 = passStringToWasm0(credential_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const ptr4 = passStringToWasm0(origin, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
             const len4 = WASM_VECTOR_LEN;
-            wasm.webauthnaccount_new(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4);
+            const ptr5 = passStringToWasm0(credential_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const len5 = WASM_VECTOR_LEN;
+            const ptr6 = passStringToWasm0(pub_key, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const len6 = WASM_VECTOR_LEN;
+            wasm.webauthnaccount_new(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6);
             var r0 = getInt32Memory0()[retptr / 4 + 0];
             var r1 = getInt32Memory0()[retptr / 4 + 1];
             var r2 = getInt32Memory0()[retptr / 4 + 2];
@@ -348,15 +355,17 @@ export class WebauthnAccount {
     * - `chain_id`: Identifier of the blockchain network to interact with.
     * - `address`: The blockchain address associated with the account.
     * - `rp_id`: Relying Party Identifier, a string that uniquely identifies the WebAuthn relying party.
+    * - `origin`: The origin of the WebAuthn request. Example https://cartridge.gg
     * - `user_name`: The user name associated with the account.
     * @param {string} rpc_url
     * @param {string} chain_id
     * @param {string} address
     * @param {string} rp_id
+    * @param {string} origin
     * @param {string} user_name
     * @returns {Promise<WebauthnAccount>}
     */
-    static register(rpc_url, chain_id, address, rp_id, user_name) {
+    static register(rpc_url, chain_id, address, rp_id, origin, user_name) {
         const ptr0 = passStringToWasm0(rpc_url, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passStringToWasm0(chain_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -365,9 +374,11 @@ export class WebauthnAccount {
         const len2 = WASM_VECTOR_LEN;
         const ptr3 = passStringToWasm0(rp_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len3 = WASM_VECTOR_LEN;
-        const ptr4 = passStringToWasm0(user_name, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const ptr4 = passStringToWasm0(origin, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len4 = WASM_VECTOR_LEN;
-        const ret = wasm.webauthnaccount_register(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4);
+        const ptr5 = passStringToWasm0(user_name, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len5 = WASM_VECTOR_LEN;
+        const ret = wasm.webauthnaccount_register(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5);
         return takeObject(ret);
     }
     /**
@@ -409,11 +420,11 @@ export class WebauthnAccount {
         }
     }
     /**
-    * @param {Uint8Array} challenge
+    * @param {Uint8Array} _challenge
     * @returns {Promise<any>}
     */
-    sign(challenge) {
-        const ret = wasm.webauthnaccount_sign(this.__wbg_ptr, addHeapObject(challenge));
+    sign(_challenge) {
+        const ret = wasm.webauthnaccount_sign(this.__wbg_ptr, addHeapObject(_challenge));
         return takeObject(ret);
     }
     /**
@@ -477,13 +488,13 @@ export class WebauthnAccount {
     }
 }
 
-export function __wbindgen_object_drop_ref(arg0) {
-    takeObject(arg0);
-};
-
 export function __wbindgen_string_new(arg0, arg1) {
     const ret = getStringFromWasm0(arg0, arg1);
     return addHeapObject(ret);
+};
+
+export function __wbindgen_object_drop_ref(arg0) {
+    takeObject(arg0);
 };
 
 export function __wbg_webauthnaccount_new(arg0) {
@@ -554,17 +565,13 @@ export function __wbindgen_number_new(arg0) {
     return addHeapObject(ret);
 };
 
-export function __wbg_getwithrefkey_edc2c8960f0f1191(arg0, arg1) {
-    const ret = getObject(arg0)[getObject(arg1)];
+export function __wbindgen_object_clone_ref(arg0) {
+    const ret = getObject(arg0);
     return addHeapObject(ret);
 };
 
-export function __wbg_set_f975102236d3c502(arg0, arg1, arg2) {
-    getObject(arg0)[takeObject(arg1)] = takeObject(arg2);
-};
-
-export function __wbindgen_object_clone_ref(arg0) {
-    const ret = getObject(arg0);
+export function __wbg_getwithrefkey_edc2c8960f0f1191(arg0, arg1) {
+    const ret = getObject(arg0)[getObject(arg1)];
     return addHeapObject(ret);
 };
 
@@ -580,6 +587,10 @@ export function __wbg_String_88810dfeb4021902(arg0, arg1) {
     getInt32Memory0()[arg0 / 4 + 0] = ptr1;
 };
 
+export function __wbg_queueMicrotask_481971b0d87f3dd4(arg0) {
+    queueMicrotask(getObject(arg0));
+};
+
 export function __wbg_queueMicrotask_3cbae2ec6b6cd3d6(arg0) {
     const ret = getObject(arg0).queueMicrotask;
     return addHeapObject(ret);
@@ -588,10 +599,6 @@ export function __wbg_queueMicrotask_3cbae2ec6b6cd3d6(arg0) {
 export function __wbindgen_is_function(arg0) {
     const ret = typeof(getObject(arg0)) === 'function';
     return ret;
-};
-
-export function __wbg_queueMicrotask_481971b0d87f3dd4(arg0) {
-    queueMicrotask(getObject(arg0));
 };
 
 export function __wbg_instanceof_Window_f401953a2cf86220(arg0) {
@@ -615,23 +622,26 @@ export function __wbg_navigator_6c8fa55c5cc8796e(arg0) {
     return addHeapObject(ret);
 };
 
-export function __wbg_log_5bb5f88f245d7762(arg0) {
-    console.log(getObject(arg0));
+export function __wbg_credentials_301bbb1c5ba6b52c(arg0) {
+    const ret = getObject(arg0).credentials;
+    return addHeapObject(ret);
 };
-
-export function __wbg_create_21f4f173d36edabb() { return handleError(function (arg0, arg1) {
-    const ret = getObject(arg0).create(getObject(arg1));
-    return addHeapObject(ret);
-}, arguments) };
-
-export function __wbg_get_af826bc073cbd7b3() { return handleError(function (arg0, arg1) {
-    const ret = getObject(arg0).get(getObject(arg1));
-    return addHeapObject(ret);
-}, arguments) };
 
 export function __wbg_response_08b180427e74dd5a(arg0) {
     const ret = getObject(arg0).response;
     return addHeapObject(ret);
+};
+
+export function __wbg_hostname_3d9f22c60dc5bec6() { return handleError(function (arg0, arg1) {
+    const ret = getObject(arg1).hostname;
+    const ptr1 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len1 = WASM_VECTOR_LEN;
+    getInt32Memory0()[arg0 / 4 + 1] = len1;
+    getInt32Memory0()[arg0 / 4 + 0] = ptr1;
+}, arguments) };
+
+export function __wbg_log_5bb5f88f245d7762(arg0) {
+    console.log(getObject(arg0));
 };
 
 export function __wbg_authenticatorData_46fd4548141bf5a9(arg0) {
@@ -644,28 +654,25 @@ export function __wbg_signature_65655420a7b69a5e(arg0) {
     return addHeapObject(ret);
 };
 
-export function __wbg_attestationObject_6ba2ca39bba4997b(arg0) {
-    const ret = getObject(arg0).attestationObject;
+export function __wbg_create_21f4f173d36edabb() { return handleError(function (arg0, arg1) {
+    const ret = getObject(arg0).create(getObject(arg1));
     return addHeapObject(ret);
-};
+}, arguments) };
+
+export function __wbg_get_af826bc073cbd7b3() { return handleError(function (arg0, arg1) {
+    const ret = getObject(arg0).get(getObject(arg1));
+    return addHeapObject(ret);
+}, arguments) };
 
 export function __wbg_clientDataJSON_c62fc9ad5f2cb8ba(arg0) {
     const ret = getObject(arg0).clientDataJSON;
     return addHeapObject(ret);
 };
 
-export function __wbg_credentials_301bbb1c5ba6b52c(arg0) {
-    const ret = getObject(arg0).credentials;
+export function __wbg_attestationObject_6ba2ca39bba4997b(arg0) {
+    const ret = getObject(arg0).attestationObject;
     return addHeapObject(ret);
 };
-
-export function __wbg_hostname_3d9f22c60dc5bec6() { return handleError(function (arg0, arg1) {
-    const ret = getObject(arg1).hostname;
-    const ptr1 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    const len1 = WASM_VECTOR_LEN;
-    getInt32Memory0()[arg0 / 4 + 1] = len1;
-    getInt32Memory0()[arg0 / 4 + 0] = ptr1;
-}, arguments) };
 
 export function __wbg_get_bd8e338fbd5f5cc8(arg0, arg1) {
     const ret = getObject(arg0)[arg1 >>> 0];
@@ -784,7 +791,7 @@ export function __wbg_new_81740750da40724f(arg0, arg1) {
             const a = state0.a;
             state0.a = 0;
             try {
-                return __wbg_adapter_118(a, state0.b, arg0, arg1);
+                return __wbg_adapter_116(a, state0.b, arg0, arg1);
             } finally {
                 state0.a = a;
             }
@@ -868,8 +875,8 @@ export function __wbindgen_memory() {
     return addHeapObject(ret);
 };
 
-export function __wbindgen_closure_wrapper590(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 223, __wbg_adapter_36);
+export function __wbindgen_closure_wrapper633(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 229, __wbg_adapter_36);
     return addHeapObject(ret);
 };
 

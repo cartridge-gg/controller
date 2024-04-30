@@ -12,15 +12,18 @@ export class WebauthnAccount {
 * - `chain_id`: Identifier of the blockchain network to interact with.
 * - `address`: The blockchain address associated with the account.
 * - `rp_id`: Relying Party Identifier, a string that uniquely identifies the WebAuthn relying party.
+* - `origin`: The origin of the WebAuthn request. Example https://cartridge.gg
 * - `credential_id`: Base64 encoded bytes of the raw credential ID generated during the WebAuthn registration process.
 * @param {string} rpc_url
 * @param {string} chain_id
 * @param {string} address
 * @param {string} rp_id
+* @param {string} origin
 * @param {string} credential_id
+* @param {string} pub_key
 * @returns {WebauthnAccount}
 */
-  static new(rpc_url: string, chain_id: string, address: string, rp_id: string, credential_id: string): WebauthnAccount;
+  static new(rpc_url: string, chain_id: string, address: string, rp_id: string, origin: string, credential_id: string, pub_key: string): WebauthnAccount;
 /**
 * Registers a new keypair on device signer and creates a new `WebauthnAccount` instance.
 *
@@ -29,15 +32,17 @@ export class WebauthnAccount {
 * - `chain_id`: Identifier of the blockchain network to interact with.
 * - `address`: The blockchain address associated with the account.
 * - `rp_id`: Relying Party Identifier, a string that uniquely identifies the WebAuthn relying party.
+* - `origin`: The origin of the WebAuthn request. Example https://cartridge.gg
 * - `user_name`: The user name associated with the account.
 * @param {string} rpc_url
 * @param {string} chain_id
 * @param {string} address
 * @param {string} rp_id
+* @param {string} origin
 * @param {string} user_name
 * @returns {Promise<WebauthnAccount>}
 */
-  static register(rpc_url: string, chain_id: string, address: string, rp_id: string, user_name: string): Promise<WebauthnAccount>;
+  static register(rpc_url: string, chain_id: string, address: string, rp_id: string, origin: string, user_name: string): Promise<WebauthnAccount>;
 /**
 * @returns {string}
 */
@@ -47,10 +52,10 @@ export class WebauthnAccount {
 */
   getRpId(): string;
 /**
-* @param {Uint8Array} challenge
+* @param {Uint8Array} _challenge
 * @returns {Promise<any>}
 */
-  sign(challenge: Uint8Array): Promise<any>;
+  sign(_challenge: Uint8Array): Promise<any>;
 /**
 * @param {any[]} transactions
 * @param {any} transaction_details
