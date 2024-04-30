@@ -7,3 +7,5 @@ pub mod webauthn_signer;
 #[cfg(not(target_arch = "wasm32"))]
 #[cfg(test)]
 pub mod tests;
+
+pub use wasm_webauthn;

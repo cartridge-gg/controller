@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use cainome::cairo_serde::{NonZero, U256};
+use coset::{cbor::Value, iana, CoseKey, KeyType, Label};
 use ecdsa::{RecoveryId, VerifyingKey};
 use futures::channel::oneshot;
 use p256::NistP256;
@@ -32,25 +33,40 @@ pub enum DeviceError {
 #[derive(Debug, Clone)]
 pub struct DeviceSigner {
     pub rp_id: String,
+    pub origin: String,
     pub credential_id: CredentialID,
     pub pub_key: [u8; 64],
-    pub origin: String,
 }
 
 impl DeviceSigner {
+    pub fn new(
+        rp_id: String,
+        origin: String,
+        credential_id: CredentialID,
+        pub_key: [u8; 64],
+    ) -> Self {
+        Self {
+            rp_id,
+            origin,
+            credential_id,
+            pub_key,
+        }
+    }
+
     pub async fn register(
         rp_id: String,
         origin: String,
         user_name: String,
         challenge: &[u8],
-    ) -> Result<Self, SignError> {
+    ) -> Result<Self, DeviceError> {
         let MakeCredentialResponse { credential } =
             Self::create_credential(rp_id.clone(), user_name, challenge).await?;
 
-        let pub_key = credential
+        let cose_key = credential
             .public_key
-            .map(|_| [1; 64] /* TODO: Do something meaningful here */)
-            .unwrap();
+            .ok_or(DeviceError::CreateCredential("No public key".to_string()))?;
+
+        let pub_key = Self::extract_pub_key(&cose_key)?;
 
         Ok(Self {
             rp_id,
@@ -60,11 +76,53 @@ impl DeviceSigner {
         })
     }
 
+    fn extract_pub_key(cose_key: &CoseKey) -> Result<[u8; 64], DeviceError> {
+        if cose_key.kty != KeyType::Assigned(iana::KeyType::EC2) {
+            return Err(DeviceError::CreateCredential(
+                "Invalid key type".to_string(),
+            ));
+        }
+
+        let mut x_coord: Option<Vec<u8>> = None;
+        let mut y_coord: Option<Vec<u8>> = None;
+
+        for (label, value) in &cose_key.params {
+            match label {
+                Label::Int(-2) => {
+                    if let Value::Bytes(vec) = value {
+                        x_coord = Some(vec.clone());
+                    }
+                }
+                Label::Int(-3) => {
+                    if let Value::Bytes(vec) = value {
+                        y_coord = Some(vec.clone());
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        let x = x_coord.ok_or(DeviceError::CreateCredential("No x coord".to_string()))?;
+        let y = y_coord.ok_or(DeviceError::CreateCredential("No y coord".to_string()))?;
+
+        if x.len() != 32 || y.len() != 32 {
+            return Err(DeviceError::CreateCredential(
+                "Invalid key length".to_string(),
+            ));
+        }
+
+        let mut pub_key = [0u8; 64];
+        pub_key[..32].copy_from_slice(&x);
+        pub_key[32..].copy_from_slice(&y);
+
+        Ok(pub_key)
+    }
+
     async fn create_credential(
         rp_id: String,
         user_name: String,
         challenge: &[u8],
-    ) -> Result<MakeCredentialResponse, SignError> {
+    ) -> Result<MakeCredentialResponse, DeviceError> {
         let (tx, rx) = oneshot::channel();
         let rp_id = rp_id.to_owned();
         let challenge = challenge.to_vec();
@@ -91,10 +149,10 @@ impl DeviceSigner {
         });
 
         match rx.await {
-            Ok(result) => result.map_err(SignError::Device),
-            Err(_) => Err(SignError::Device(DeviceError::Channel(
+            Ok(result) => result.map_err(|e| DeviceError::CreateCredential(e.to_string())),
+            Err(_) => Err(DeviceError::Channel(
                 "credential receiver dropped".to_string(),
-            ))),
+            )),
         }
     }
 
@@ -159,8 +217,10 @@ impl Signer for DeviceSigner {
         let r = U256::from_bytes_be(ecdsa_sig.r().to_bytes().as_slice().try_into().unwrap());
         let s = U256::from_bytes_be(ecdsa_sig.s().to_bytes().as_slice().try_into().unwrap());
 
+        // First byte of Sec1 pubkey is 0x04, followed by x and y coordinates
+        let sec1_pubkey = [vec![4u8], self.pub_key_bytes().to_vec()].concat();
         let recovery_id = RecoveryId::trial_recovery_from_msg(
-            &VerifyingKey::from_sec1_bytes(&self.pub_key_bytes()).map_err(|_| {
+            &VerifyingKey::from_sec1_bytes(&sec1_pubkey.as_slice()).map_err(|_| {
                 SignError::Device(DeviceError::BadAssertion("Invalid public key".to_string()))
             })?,
             challenge,
