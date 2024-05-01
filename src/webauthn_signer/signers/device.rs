@@ -216,26 +216,12 @@ impl Signer for DeviceSigner {
         let ecdsa_sig = ecdsa::Signature::<NistP256>::from_der(&encoded_sig).unwrap();
         let r = U256::from_bytes_be(ecdsa_sig.r().to_bytes().as_slice().try_into().unwrap());
         let s = U256::from_bytes_be(ecdsa_sig.s().to_bytes().as_slice().try_into().unwrap());
-
-        // First byte of Sec1 pubkey is 0x04, followed by x and y coordinates
-        let sec1_pubkey = [vec![4u8], self.pub_key_bytes().to_vec()].concat();
-        let recovery_id = RecoveryId::trial_recovery_from_msg(
-            &VerifyingKey::from_sec1_bytes(&sec1_pubkey.as_slice()).map_err(|_| {
-                SignError::Device(DeviceError::BadAssertion("Invalid public key".to_string()))
-            })?,
-            challenge,
-            &ecdsa_sig,
-        )
-        .map_err(|_| {
-            SignError::Device(DeviceError::BadAssertion(
-                "Unable to recover id".to_string(),
-            ))
-        })?;
-
+        let y_parity = self.pub_key_bytes()[63] %2 != 0;
+        
         let signature = Signature {
             r,
             s,
-            y_parity: recovery_id.is_y_odd(),
+            y_parity,
         };
 
         Ok(AuthenticatorAssertionResponse {
