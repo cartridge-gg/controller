@@ -14,6 +14,7 @@ crate-type = ["cdylib", "rlib"]
 account-sdk = { path = "../../../../../controller/crates/account_sdk" }
 # account-sdk = { git = "https://github.com/cartridge-gg/cairo-webauthn", package = "account-sdk", rev = "8618af71b6de4eb685a6b4bac5c40220088280c3" }
 base64 = "0.22.0"
+coset = { version = "0.3.4", features = ["std"] }
 hex = "0.4.3"
 p256 = "0.13"
 starknet = "0.10"

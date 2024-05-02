@@ -1,7 +1,6 @@
 import { constants } from "starknet";
 import { AccountInterface, ProviderInterface } from "starknet";
 import Controller, { providers } from ".";
-import { OffChainSession } from "./types";
 
 export type EventType = "accountsChanged" | "networkChanged";
 

@@ -180,21 +180,21 @@ const Index: NextPage = () => {
                 const calls = Array.isArray(transactions)
                   ? transactions
                   : [transactions];
-                const policies = calls.map(
-                  (txn) =>
-                    ({
-                      target: txn.contractAddress,
-                      method: txn.entrypoint,
-                    } as Policy),
-                );
+                // const policies = calls.map(
+                //   (txn) =>
+                //     ({
+                //       target: txn.contractAddress,
+                //       method: txn.entrypoint,
+                //     } as Policy),
+                // );
 
-                const missing = diff(policies, session.policies);
-                if (missing.length > 0) {
-                  return Promise.resolve({
-                    code: ResponseCodes.NOT_ALLOWED,
-                    message: `Missing policies: ${JSON.stringify(missing)}`,
-                  });
-                }
+                // const missing = diff(policies, session.policies);
+                // if (missing.length > 0) {
+                //   return Promise.resolve({
+                //     code: ResponseCodes.NOT_ALLOWED,
+                //     message: `Missing policies: ${JSON.stringify(missing)}`,
+                //   });
+                // }
 
                 if (!transactionsDetail.maxFee) {
                   transactionsDetail.maxFee = (

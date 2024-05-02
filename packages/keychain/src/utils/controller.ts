@@ -1,4 +1,4 @@
-import { constants, ec, SignerInterface, BigNumberish, num } from "starknet";
+import { constants, SignerInterface, BigNumberish } from "starknet";
 import equal from "fast-deep-equal";
 
 import { Policy, Session } from "@cartridge/controller";
@@ -6,7 +6,6 @@ import { Policy, Session } from "@cartridge/controller";
 import Storage from "utils/storage";
 
 import Account from "./account";
-import { DeviceSigner } from "./signer";
 import { WebauthnAccount } from "@cartridge/account-wasm";
 import selectors from "./selectors";
 import migrations from "./migrations";
@@ -26,7 +25,6 @@ export const VERSION = "0.0.3";
 
 type SerializedController = {
   credentialId: string;
-  privateKey: string;
   publicKey: string;
   address: string;
 };
@@ -35,22 +33,20 @@ export default class Controller {
   public address: string;
   public signer: SignerInterface;
   public publicKey: string;
-  protected privateKey: string;
   protected credentialId: string;
   protected accounts: Account[];
 
   constructor(
-    privateKey: string,
+    publicKey: string,
     address: string,
     credentialId: string,
     options?: {
       rpId?: string;
+      origin?: string;
     },
   ) {
     this.address = address;
-    this.signer = new DeviceSigner(privateKey);
-    this.privateKey = privateKey;
-    this.publicKey = ec.starkCurve.getStarkKey(privateKey);
+    this.publicKey = publicKey;
     this.credentialId = credentialId;
 
     this.accounts = [
@@ -78,7 +74,9 @@ export default class Controller {
           constants.StarknetChainId.SN_SEPOLIA,
           address,
           options?.rpId || process.env.NEXT_PUBLIC_RP_ID,
+          options?.origin || process.env.NEXT_PUBLIC_ORIGIN,
           credentialId,
+          publicKey,
         ),
       ),
     ];
@@ -144,9 +142,8 @@ export default class Controller {
   store() {
     Storage.set("version", VERSION);
     return Storage.set(selectors[VERSION].account(this.address), {
-      privateKey: num.toHex(this.privateKey),
-      publicKey: this.publicKey,
       address: this.address,
+      publicKey: this.publicKey,
       credentialId: this.credentialId,
     });
   }
@@ -169,13 +166,13 @@ export default class Controller {
       return;
     }
 
-    const { credentialId, privateKey, address } = controller;
+    const { credentialId, publicKey, address } = controller;
 
     if (version !== VERSION) {
       migrations[version][VERSION](address);
     }
 
-    return new Controller(privateKey, address, credentialId);
+    return new Controller(publicKey, address, credentialId);
   }
 }
 

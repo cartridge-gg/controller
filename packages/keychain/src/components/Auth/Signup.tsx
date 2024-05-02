@@ -57,13 +57,6 @@ export function Signup({
     () => (typeof window !== "undefined" ? window.top !== window.self : false),
     [],
   );
-  const { privateKey, deviceKey } = useMemo(() => {
-    const privateKey = stark.randomAddress();
-    return {
-      privateKey,
-      deviceKey: ec.starkCurve.getStarkKey(privateKey),
-    };
-  }, []);
 
   const onComplete = useCallback(() => {
     if (starterPackId) {
@@ -87,9 +80,7 @@ export function Signup({
       if (isIframe) {
         setIsRegistering(true);
         PopupCenter(
-          `/authenticate?name=${encodeURIComponent(
-            values.username,
-          )}&pubkey=${encodeURIComponent(deviceKey)}`,
+          `/authenticate?name=${encodeURIComponent(values.username)}`,
           "Cartridge Signup",
           480,
           640,
@@ -102,9 +93,10 @@ export function Signup({
           const credentials: Credentials = await onCreateBegin(
             decodeURIComponent(values.username),
           );
+
           await onCreateFinalize(credentials);
 
-          play();
+          //play();
         } catch (e) {
           console.error(e);
           setIsLoading(false);
@@ -114,21 +106,15 @@ export function Signup({
         setIsLoading(false);
       }
     },
-    [isIframe, deviceKey, play],
+    [isIframe, play],
   );
 
   if (claimSuccess) {
-    // hardcode briq for now
-    const media =
-      starterData?.game.name === "Briq"
-        ? "https://storage.googleapis.com/c7e-prod-static/media/briq_cartridge_poap_nft_paris_1_7x16x11.glb"
-        : undefined;
     return (
       <ClaimSuccess
         name={starterData?.game.name}
         banner={starterData?.game.banner.uri}
         url={starterData?.game.socials.website}
-        media={media}
       />
     );
   }
@@ -145,7 +131,6 @@ export function Signup({
           <Form
             onLogin={onLogin}
             onController={onController}
-            privateKey={privateKey}
             isRegistering={isRegistering}
             isLoading={isLoading}
             setIsRegistering={setIsRegistering}
@@ -165,14 +150,12 @@ function Form({
   context,
   onController,
   onLogin: onLoginProp,
-  privateKey,
   isRegistering,
   isLoading,
   setIsRegistering,
   starterData,
   isSlot,
 }: Pick<SignupProps, "context" | "isSlot" | "onController" | "onLogin"> & {
-  privateKey: string;
   isRegistering: boolean;
   isLoading: boolean;
   setIsRegistering: (val: boolean) => void;
@@ -195,28 +178,25 @@ function Form({
       cacheTime: 10000000,
       refetchInterval: (data) => (!data ? 1000 : undefined),
       onSuccess: async (data) => {
-        console.log("deploy request");
+        console.log("deploy request", { data });
         const {
           account: {
             credentials: {
-              webauthn: [{ id: credentialId }],
+              webauthn: [{ id: credentialId, publicKey }],
             },
             contractAddress: address,
           },
         } = data;
 
-        const controller = new Controller(privateKey, address, credentialId);
+        console.log({ publicKey, address, credentialId });
+
+        const controller = new Controller(publicKey, address, credentialId);
 
         controller.account(constants.StarknetChainId.SN_SEPOLIA).status =
           Status.DEPLOYING;
         await client.request(DeployAccountDocument, {
           id: values.username,
           chainId: "starknet:SN_SEPOLIA",
-          starterpackIds: starterData?.game?.starterPack?.chainID?.includes(
-            "SN_SEPOLIA",
-          )
-            ? [starterData?.game?.starterPack?.id]
-            : undefined,
         });
         await controller.account(constants.StarknetChainId.SN_SEPOLIA).sync();
 

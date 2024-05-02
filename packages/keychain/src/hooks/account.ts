@@ -74,7 +74,7 @@ export const onCreateBegin = async (name: string): Promise<Credentials> => {
 
   return credentials;
 };
-
+``;
 export const onCreateFinalize = (credentials: Credentials) => {
   return client.request(FinalizeRegistrationDocument, {
     credentials: JSON.stringify({

@@ -4,14 +4,13 @@ mod utils;
 use std::str::FromStr;
 
 use account_sdk::wasm_webauthn::CredentialID;
-use account_sdk::webauthn_signer::signers::{device::DeviceSigner, Signer};
+use account_sdk::webauthn_signer::signers::{device::DeviceSigner};
 use base64::{engine::general_purpose, Engine};
-use serde_wasm_bindgen::to_value;
+use coset::{CborSerializable, CoseKey};
 use starknet::{
     accounts::{Call, Execution},
     core::types::{
-        BroadcastedInvokeTransaction, BroadcastedInvokeTransactionV1,
-        BroadcastedInvokeTransactionV3, FieldElement,
+        BroadcastedInvokeTransaction, FieldElement,
     },
     providers::{jsonrpc::HttpTransport, JsonRpcClient},
 };
@@ -41,6 +40,7 @@ impl WebauthnAccount {
     /// - `rp_id`: Relying Party Identifier, a string that uniquely identifies the WebAuthn relying party.
     /// - `origin`: The origin of the WebAuthn request. Example https://cartridge.gg
     /// - `credential_id`: Base64 encoded bytes of the raw credential ID generated during the WebAuthn registration process.
+    /// - `public_key`: Base64 encoded bytes of the public key generated during the WebAuthn registration process (COSE format).
     ///
     pub fn new(
         rpc_url: String,
@@ -49,29 +49,34 @@ impl WebauthnAccount {
         rp_id: String,
         origin: String,
         credential_id: String,
-        pub_key: String,
+        public_key: String,
     ) -> Result<WebauthnAccount, JsValue> {
         utils::set_panic_hook();
-
         let url = Url::parse(&rpc_url).map_err(|e| JsValue::from_str(&format!("{}", e)))?;
-        let provider = JsonRpcClient::new(HttpTransport::new(url));
+        let provider: JsonRpcClient<HttpTransport> = JsonRpcClient::new(HttpTransport::new(url));
         let credential_id = general_purpose::URL_SAFE_NO_PAD
             .decode(credential_id)
             .map_err(|e| JsValue::from_str(&format!("{}", e)))?;
-        let pub_key = general_purpose::URL_SAFE_NO_PAD
-            .decode(pub_key)
+
+        let bytes = general_purpose::URL_SAFE_NO_PAD
+            .decode(public_key)
             .map_err(|e| JsValue::from_str(&format!("{}", e)))?;
-        let pub_key: [u8; 64] = pub_key.try_into().unwrap();
+
+        let cose =
+            CoseKey::from_slice(&bytes).map_err(|e| JsValue::from_str(&format!("{}", e)))?;
+            
         let signer = DeviceSigner::new(
             rp_id.clone(),
             origin.clone(),
             CredentialID(credential_id),
-            pub_key,
+            cose,
         );
+
         let address =
             FieldElement::from_str(&address).map_err(|e| JsValue::from_str(&format!("{}", e)))?;
         let chain_id =
             FieldElement::from_str(&chain_id).map_err(|e| JsValue::from_str(&format!("{}", e)))?;
+
         let inner = account_sdk::webauthn_signer::account::WebauthnAccount::new(
             provider,
             signer.clone(),
