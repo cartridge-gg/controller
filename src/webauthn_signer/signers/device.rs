@@ -1,7 +1,6 @@
 use async_trait::async_trait;
 use cainome::cairo_serde::{NonZero, U256};
 use coset::{cbor::Value, iana, CoseKey, KeyType, Label};
-use ecdsa::{RecoveryId, VerifyingKey};
 use futures::channel::oneshot;
 use p256::NistP256;
 use std::result::Result;
@@ -35,7 +34,7 @@ pub struct DeviceSigner {
     pub rp_id: String,
     pub origin: String,
     pub credential_id: CredentialID,
-    pub pub_key: [u8; 64],
+    pub pub_key: CoseKey,
 }
 
 impl DeviceSigner {
@@ -43,7 +42,7 @@ impl DeviceSigner {
         rp_id: String,
         origin: String,
         credential_id: CredentialID,
-        pub_key: [u8; 64],
+        pub_key: CoseKey,
     ) -> Self {
         Self {
             rp_id,
@@ -62,11 +61,9 @@ impl DeviceSigner {
         let MakeCredentialResponse { credential } =
             Self::create_credential(rp_id.clone(), user_name, challenge).await?;
 
-        let cose_key = credential
+        let pub_key = credential
             .public_key
             .ok_or(DeviceError::CreateCredential("No public key".to_string()))?;
-
-        let pub_key = Self::extract_pub_key(&cose_key)?;
 
         Ok(Self {
             rp_id,
@@ -196,8 +193,8 @@ impl DeviceSigner {
         use sha2::{digest::Update, Digest, Sha256};
         Sha256::new().chain(self.rp_id.clone()).finalize().into()
     }
-    pub fn pub_key_bytes(&self) -> [u8; 64] {
-        self.pub_key
+    pub fn pub_key_bytes(&self) -> Result<[u8; 64], DeviceError> {
+        Self::extract_pub_key(&self.pub_key)
     }
 }
 
@@ -216,7 +213,8 @@ impl Signer for DeviceSigner {
         let ecdsa_sig = ecdsa::Signature::<NistP256>::from_der(&encoded_sig).unwrap();
         let r = U256::from_bytes_be(ecdsa_sig.r().to_bytes().as_slice().try_into().unwrap());
         let s = U256::from_bytes_be(ecdsa_sig.s().to_bytes().as_slice().try_into().unwrap());
-        let y_parity = self.pub_key_bytes()[63] %2 != 0;
+        let y_last_byte = self.pub_key_bytes().map_err(SignError::Device)?[63];
+        let y_parity = y_last_byte %2 != 0;
         
         let signature = Signature {
             r,
@@ -240,7 +238,7 @@ impl Signer for DeviceSigner {
             rp_id_hash: NonZero::new(U256::from_bytes_be(&self.rp_id_hash())).unwrap(),
             origin: self.origin.clone().into_bytes(),
             pubkey: NonZero::new(U256::from_bytes_be(
-                &self.pub_key_bytes()[0..32].try_into().unwrap(),
+                &self.pub_key_bytes().unwrap()[0..32].try_into().unwrap(),
             ))
             .unwrap(),
         }
