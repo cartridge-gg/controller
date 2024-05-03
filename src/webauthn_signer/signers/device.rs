@@ -5,7 +5,6 @@ use ecdsa::{RecoveryId, VerifyingKey};
 use futures::channel::oneshot;
 use p256::NistP256;
 use sha2::{digest::Update, Digest, Sha256};
-use web_sys::console;
 use std::result::Result;
 use wasm_bindgen_futures::spawn_local;
 use wasm_webauthn::*;
