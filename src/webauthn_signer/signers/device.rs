@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use cainome::cairo_serde::{NonZero, U256};
 use coset::{cbor::Value, iana, CoseKey, KeyType, Label};
+use ecdsa::{RecoveryId, VerifyingKey};
 use futures::channel::oneshot;
 use p256::NistP256;
 use std::result::Result;
@@ -213,13 +214,25 @@ impl Signer for DeviceSigner {
         let ecdsa_sig = ecdsa::Signature::<NistP256>::from_der(&encoded_sig).unwrap();
         let r = U256::from_bytes_be(ecdsa_sig.r().to_bytes().as_slice().try_into().unwrap());
         let s = U256::from_bytes_be(ecdsa_sig.s().to_bytes().as_slice().try_into().unwrap());
-        let y_last_byte = self.pub_key_bytes().map_err(SignError::Device)?[63];
-        let y_parity = y_last_byte %2 != 0;
-        
+
+        let pub_key = self.pub_key_bytes().map_err(SignError::Device)?;
+        let recovery_id = RecoveryId::trial_recovery_from_msg(
+            &VerifyingKey::from_sec1_bytes(&pub_key).map_err(|_| {
+                SignError::Device(DeviceError::BadAssertion("Invalid public key".to_string()))
+            })?,
+            challenge,
+            &ecdsa_sig,
+        )
+        .map_err(|_| {
+            SignError::Device(DeviceError::BadAssertion(
+                "Unable to recover id".to_string(),
+            ))
+        })?;
+
         let signature = Signature {
             r,
             s,
-            y_parity,
+            y_parity: recovery_id.is_y_odd(),
         };
 
         Ok(AuthenticatorAssertionResponse {
