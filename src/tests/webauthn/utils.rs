@@ -6,8 +6,10 @@ use starknet::{
 
 use crate::abigen::erc_20::Erc20 as Erc20Contract;
 use crate::{
-    abigen::cartridge_account::{CartridgeAccount, CartridgeAccountReader, Signer, WebauthnSigner},
-    account::WebauthnAccount,
+    abigen::cartridge_account::{
+        CartridgeAccount as AbigenCartridgeAccount, CartridgeAccountReader, Signer, WebauthnSigner,
+    },
+    account::CartridgeAccount,
     deploy_contract::FEE_TOKEN_ADDRESS,
 };
 use crate::{signers::webauthn::p256r1::P256r1Signer, tests::runners::TestnetRunner};
@@ -66,8 +68,8 @@ where
     }
     pub async fn webauthn_account(
         &self,
-    ) -> WebauthnAccount<&JsonRpcClient<HttpTransport>, P256r1Signer> {
-        WebauthnAccount::new(
+    ) -> CartridgeAccount<&JsonRpcClient<HttpTransport>, P256r1Signer> {
+        CartridgeAccount::new(
             self.runner.client(),
             self.signer.clone(),
             self.address,
@@ -76,7 +78,7 @@ where
     }
     pub async fn cartridge_account(
         &self,
-    ) -> CartridgeAccount<WebauthnAccount<&JsonRpcClient<HttpTransport>, P256r1Signer>> {
-        CartridgeAccount::new(self.address, self.webauthn_account().await)
+    ) -> AbigenCartridgeAccount<CartridgeAccount<&JsonRpcClient<HttpTransport>, P256r1Signer>> {
+        AbigenCartridgeAccount::new(self.address, self.webauthn_account().await)
     }
 }

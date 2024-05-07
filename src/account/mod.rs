@@ -18,7 +18,7 @@ use crate::{
     signers::{AccountSigner, SignError},
 };
 
-pub struct WebauthnAccount<P, S>
+pub struct CartridgeAccount<P, S>
 where
     P: Provider + Send,
     S: AccountSigner + Send,
@@ -29,7 +29,7 @@ where
     chain_id: FieldElement,
     block_id: BlockId,
 }
-impl<P, S> WebauthnAccount<P, S>
+impl<P, S> CartridgeAccount<P, S>
 where
     P: Provider + Send,
     S: AccountSigner + Send,
@@ -45,7 +45,7 @@ where
     }
 }
 
-impl<P, S> ExecutionEncoder for WebauthnAccount<P, S>
+impl<P, S> ExecutionEncoder for CartridgeAccount<P, S>
 where
     P: Provider + Send,
     S: AccountSigner + Send,
@@ -72,7 +72,7 @@ where
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<P, S> Account for WebauthnAccount<P, S>
+impl<P, S> Account for CartridgeAccount<P, S>
 where
     P: Provider + Send + Sync,
     S: AccountSigner + Send + Sync,
@@ -130,7 +130,7 @@ where
     }
 }
 
-impl<P, S> ConnectedAccount for WebauthnAccount<P, S>
+impl<P, S> ConnectedAccount for CartridgeAccount<P, S>
 where
     P: Provider + Send + Sync,
     S: AccountSigner + Send + Sync,
