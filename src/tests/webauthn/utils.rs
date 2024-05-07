@@ -7,10 +7,10 @@ use starknet::{
 use crate::abigen::erc_20::Erc20 as Erc20Contract;
 use crate::{
     abigen::cartridge_account::{CartridgeAccount, CartridgeAccountReader, Signer, WebauthnSigner},
+    account::WebauthnAccount,
     deploy_contract::FEE_TOKEN_ADDRESS,
-    webauthn::account::WebauthnAccount,
 };
-use crate::{tests::runners::TestnetRunner, webauthn::signers::p256r1::P256r1Signer};
+use crate::{signers::webauthn::p256r1::P256r1Signer, tests::runners::TestnetRunner};
 
 use super::super::deployment_test::{declare, deploy};
 

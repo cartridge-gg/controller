@@ -1,11 +1,4 @@
-use crate::{
-    abigen::cartridge_account::{Signature, WebauthnSigner},
-    webauthn::{
-        account::SignError,
-        credential::{AuthenticatorData, CliendData},
-        Secp256r1Point,
-    },
-};
+use crate::abigen::cartridge_account::{Signature, WebauthnSigner};
 use async_trait::async_trait;
 use cainome::cairo_serde::{NonZero, U256};
 use ecdsa::RecoveryId;
@@ -15,7 +8,10 @@ use p256::{
 };
 use rand_core::OsRng;
 
-use crate::webauthn::credential::AuthenticatorAssertionResponse;
+use super::{
+    credential::{AuthenticatorAssertionResponse, AuthenticatorData, CliendData},
+    Secp256r1Point, WebautnSignError,
+};
 
 use super::WebauthnAccountSigner;
 
@@ -64,7 +60,10 @@ impl P256r1Signer {
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 impl WebauthnAccountSigner for P256r1Signer {
-    async fn sign(&self, challenge: &[u8]) -> Result<AuthenticatorAssertionResponse, SignError> {
+    async fn sign(
+        &self,
+        challenge: &[u8],
+    ) -> Result<AuthenticatorAssertionResponse, WebautnSignError> {
         use sha2::{digest::Update, Digest, Sha256};
 
         let authenticator_data = AuthenticatorData {

@@ -5,12 +5,9 @@ use starknet::{
         Account, Call, ConnectedAccount, Declaration, Execution, ExecutionEncoder,
         LegacyDeclaration, RawDeclaration, RawExecution, RawLegacyDeclaration,
     },
-    core::{
-        crypto::EcdsaSignError,
-        types::{
-            contract::legacy::LegacyContractClass, BlockId, BlockTag, FieldElement,
-            FlattenedSierraClass,
-        },
+    core::types::{
+        contract::legacy::LegacyContractClass, BlockId, BlockTag, FieldElement,
+        FlattenedSierraClass,
     },
     providers::Provider,
 };
@@ -18,12 +15,8 @@ use std::sync::Arc;
 
 use crate::{
     abigen::cartridge_account::{Call as AbigenCall, SignerSignature},
-    signer::AccountSigner,
+    signers::{AccountSigner, SignError},
 };
-
-use super::signers::device::DeviceError;
-
-// mod guardian;
 
 pub struct WebauthnAccount<P, S>
 where
@@ -75,14 +68,6 @@ where
                 .collect(),
         )
     }
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum SignError {
-    #[error("Signer error: {0}")]
-    Signer(EcdsaSignError),
-    #[error("Device error: {0}")]
-    Device(DeviceError),
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]

@@ -9,15 +9,12 @@ use std::result::Result;
 use wasm_bindgen_futures::spawn_local;
 use wasm_webauthn::*;
 
-use crate::{
-    abigen::cartridge_account::{Signature, WebauthnSigner},
-    webauthn::{
-        account::SignError,
-        credential::{AuthenticatorAssertionResponse, AuthenticatorData},
-    },
-};
+use crate::abigen::cartridge_account::{Signature, WebauthnSigner};
 
-use super::WebauthnAccountSigner;
+use super::{
+    credential::{AuthenticatorAssertionResponse, AuthenticatorData},
+    WebauthnAccountSigner, WebautnSignError,
+};
 
 #[derive(Debug, thiserror::Error)]
 pub enum DeviceError {
@@ -155,7 +152,10 @@ impl DeviceSigner {
         }
     }
 
-    async fn get_assertion(&self, challenge: &[u8]) -> Result<GetAssertionResponse, SignError> {
+    async fn get_assertion(
+        &self,
+        challenge: &[u8],
+    ) -> Result<GetAssertionResponse, WebautnSignError> {
         let (tx, rx) = oneshot::channel();
         let credential_id = self.credential_id.clone();
         let rp_id = self.rp_id.to_owned();
@@ -185,8 +185,8 @@ impl DeviceSigner {
         });
 
         match rx.await {
-            Ok(result) => result.map_err(SignError::Device),
-            Err(_) => Err(SignError::Device(DeviceError::Channel(
+            Ok(result) => result.map_err(WebautnSignError::Device),
+            Err(_) => Err(WebautnSignError::Device(DeviceError::Channel(
                 "assertion receiver dropped".to_string(),
             ))),
         }
@@ -203,7 +203,10 @@ impl DeviceSigner {
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 impl WebauthnAccountSigner for DeviceSigner {
-    async fn sign(&self, challenge: &[u8]) -> Result<AuthenticatorAssertionResponse, SignError> {
+    async fn sign(
+        &self,
+        challenge: &[u8],
+    ) -> Result<AuthenticatorAssertionResponse, WebautnSignError> {
         let GetAssertionResponse {
             signature: encoded_sig,
             rp_id_hash,
@@ -221,20 +224,22 @@ impl WebauthnAccountSigner for DeviceSigner {
         let r = U256::from_bytes_be(ecdsa_sig.r().to_bytes().as_slice().try_into().unwrap());
         let s = U256::from_bytes_be(ecdsa_sig.s().to_bytes().as_slice().try_into().unwrap());
 
-        let pub_key = self.pub_key_bytes().map_err(SignError::Device)?;
+        let pub_key = self.pub_key_bytes().map_err(WebautnSignError::Device)?;
         let mut sec1_key = Vec::with_capacity(65);
         sec1_key.push(0x4); // prefix 0x04 for uncompressed SEC1 format
         sec1_key.extend_from_slice(&pub_key);
 
         let recovery_id = RecoveryId::trial_recovery_from_msg(
             &VerifyingKey::from_sec1_bytes(&sec1_key).map_err(|_| {
-                SignError::Device(DeviceError::BadAssertion("Invalid public key".to_string()))
+                WebautnSignError::Device(DeviceError::BadAssertion(
+                    "Invalid public key".to_string(),
+                ))
             })?,
             &message,
             &ecdsa_sig,
         )
         .map_err(|_| {
-            SignError::Device(DeviceError::BadAssertion(
+            WebautnSignError::Device(DeviceError::BadAssertion(
                 "Unable to recover id".to_string(),
             ))
         })?;
