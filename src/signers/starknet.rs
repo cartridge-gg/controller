@@ -2,7 +2,9 @@ use cainome::cairo_serde::NonZero;
 use starknet::signers::SigningKey;
 use starknet_crypto::FieldElement;
 
-use crate::abigen::cartridge_account::{SignerSignature, StarknetSignature, StarknetSigner};
+use crate::abigen::cartridge_account::{
+    Signer, SignerSignature, StarknetSignature, StarknetSigner,
+};
 
 use super::{AccountSigner, SignError};
 
@@ -21,5 +23,10 @@ impl AccountSigner for SigningKey {
                 s: signature.s,
             },
         )))
+    }
+    fn signer(&self) -> Signer {
+        Signer::Starknet(StarknetSigner {
+            pubkey: NonZero::new(self.verifying_key().scalar()).unwrap(),
+        })
     }
 }

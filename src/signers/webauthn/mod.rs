@@ -1,5 +1,7 @@
 use super::{AccountSigner, SignError};
-use crate::abigen::cartridge_account::{SignerSignature, WebauthnAssertion, WebauthnSigner};
+use crate::abigen::cartridge_account::{
+    Signer, SignerSignature, WebauthnAssertion, WebauthnSigner,
+};
 
 use async_trait::async_trait;
 use cainome::cairo_serde::U256;
@@ -58,6 +60,9 @@ where
             self.signer_pub_data(),
             transformed_assertion,
         )))
+    }
+    fn signer(&self) -> Signer {
+        Signer::Webauthn(self.signer_pub_data())
     }
 }
 
