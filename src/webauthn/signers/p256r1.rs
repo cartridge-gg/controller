@@ -1,6 +1,6 @@
 use crate::{
     abigen::cartridge_account::{Signature, WebauthnSigner},
-    webauthn_signer::{
+    webauthn::{
         account::SignError,
         credential::{AuthenticatorData, CliendData},
         Secp256r1Point,
@@ -15,7 +15,7 @@ use p256::{
 };
 use rand_core::OsRng;
 
-use crate::webauthn_signer::credential::AuthenticatorAssertionResponse;
+use crate::webauthn::credential::AuthenticatorAssertionResponse;
 
 use super::Signer;
 

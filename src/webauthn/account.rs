@@ -18,7 +18,7 @@ use std::sync::Arc;
 
 use crate::abigen::cartridge_account::{Call as AbigenCall, SignerSignature, WebauthnAssertion};
 
-use crate::webauthn_signer::signers::Signer;
+use crate::webauthn::signers::Signer;
 
 use super::{json_helper::find_value_index_length, signers::device::DeviceError};
 

@@ -11,7 +11,7 @@ use wasm_webauthn::*;
 
 use crate::{
     abigen::cartridge_account::{Signature, WebauthnSigner},
-    webauthn_signer::{
+    webauthn::{
         account::SignError,
         credential::{AuthenticatorAssertionResponse, AuthenticatorData},
     },

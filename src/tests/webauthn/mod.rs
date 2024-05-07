@@ -2,7 +2,7 @@ mod utils;
 use crate::{
     abigen::{cartridge_account::SignerType, erc_20::Erc20},
     tests::runners::katana_runner::KatanaRunner,
-    webauthn_signer::signers::p256r1::P256r1Signer,
+    webauthn::signers::p256r1::P256r1Signer,
 };
 use starknet::{
     core::types::{BlockId, BlockTag},

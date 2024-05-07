@@ -8,9 +8,9 @@ use crate::abigen::erc_20::Erc20 as Erc20Contract;
 use crate::{
     abigen::cartridge_account::{CartridgeAccount, CartridgeAccountReader, Signer, WebauthnSigner},
     deploy_contract::FEE_TOKEN_ADDRESS,
-    webauthn_signer::account::WebauthnAccount,
+    webauthn::account::WebauthnAccount,
 };
-use crate::{tests::runners::TestnetRunner, webauthn_signer::signers::p256r1::P256r1Signer};
+use crate::{tests::runners::TestnetRunner, webauthn::signers::p256r1::P256r1Signer};
 
 use super::super::deployment_test::{declare, deploy};
 
