@@ -17,7 +17,7 @@ use rand_core::OsRng;
 
 use crate::webauthn::credential::AuthenticatorAssertionResponse;
 
-use super::Signer;
+use super::WebauthnAccountSigner;
 
 #[derive(Debug, Clone)]
 pub struct P256r1Signer {
@@ -63,7 +63,7 @@ impl P256r1Signer {
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl Signer for P256r1Signer {
+impl WebauthnAccountSigner for P256r1Signer {
     async fn sign(&self, challenge: &[u8]) -> Result<AuthenticatorAssertionResponse, SignError> {
         use sha2::{digest::Update, Digest, Sha256};
 
@@ -94,7 +94,7 @@ impl Signer for P256r1Signer {
             user_handle: None,
         })
     }
-    fn account_signer(&self) -> WebauthnSigner {
+    fn signer_pub_data(&self) -> WebauthnSigner {
         WebauthnSigner {
             rp_id_hash: NonZero::new(U256::from_bytes_be(&self.rp_id_hash())).unwrap(),
             origin: self.origin.clone().into_bytes(),

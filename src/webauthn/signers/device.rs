@@ -17,7 +17,7 @@ use crate::{
     },
 };
 
-use super::Signer;
+use super::WebauthnAccountSigner;
 
 #[derive(Debug, thiserror::Error)]
 pub enum DeviceError {
@@ -202,7 +202,7 @@ impl DeviceSigner {
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl Signer for DeviceSigner {
+impl WebauthnAccountSigner for DeviceSigner {
     async fn sign(&self, challenge: &[u8]) -> Result<AuthenticatorAssertionResponse, SignError> {
         let GetAssertionResponse {
             signature: encoded_sig,
@@ -256,7 +256,7 @@ impl Signer for DeviceSigner {
             user_handle: None,
         })
     }
-    fn account_signer(&self) -> WebauthnSigner {
+    fn signer_pub_data(&self) -> WebauthnSigner {
         WebauthnSigner {
             rp_id_hash: NonZero::new(U256::from_bytes_be(&self.rp_id_hash())).unwrap(),
             origin: self.origin.clone().into_bytes(),

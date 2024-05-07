@@ -16,28 +16,30 @@ use starknet::{
 };
 use std::sync::Arc;
 
-use crate::abigen::cartridge_account::{Call as AbigenCall, SignerSignature, WebauthnAssertion};
+use crate::{
+    abigen::cartridge_account::{Call as AbigenCall, SignerSignature},
+    signer::AccountSigner,
+};
 
-use crate::webauthn::signers::Signer;
+use super::signers::device::DeviceError;
 
-use super::{json_helper::find_value_index_length, signers::device::DeviceError};
+// mod guardian;
 
 pub struct WebauthnAccount<P, S>
 where
     P: Provider + Send,
-    S: Signer + Send,
+    S: AccountSigner + Send,
 {
     provider: P,
     signer: S,
     address: FieldElement,
     chain_id: FieldElement,
     block_id: BlockId,
-    sha256_version: Sha256Version,
 }
 impl<P, S> WebauthnAccount<P, S>
 where
     P: Provider + Send,
-    S: Signer + Send,
+    S: AccountSigner + Send,
 {
     pub fn new(provider: P, signer: S, address: FieldElement, chain_id: FieldElement) -> Self {
         Self {
@@ -46,64 +48,14 @@ where
             address,
             chain_id,
             block_id: BlockId::Tag(BlockTag::Latest),
-            sha256_version: Sha256Version::Cairo1,
         }
-    }
-    pub fn with_sha256_version(
-        provider: P,
-        signer: S,
-        address: FieldElement,
-        chain_id: FieldElement,
-        sha256_version: Sha256Version,
-    ) -> Self {
-        Self {
-            provider,
-            signer,
-            address,
-            chain_id,
-            block_id: BlockId::Tag(BlockTag::Latest),
-            sha256_version,
-        }
-    }
-    pub async fn execution_signature(
-        &self,
-        execution: &RawExecution,
-        query_only: bool,
-    ) -> Result<SignerSignature, SignError> {
-        let tx_hash = execution.transaction_hash(self.chain_id, self.address, query_only, self);
-        let mut challenge = tx_hash.to_bytes_be().to_vec();
-
-        challenge.push(self.sha256_version.encode());
-        let assertion = self.signer.sign(&challenge).await?;
-
-        let (type_offset, _) =
-            find_value_index_length(&assertion.client_data_json, "type").unwrap();
-        let (challenge_offset, challenge_length) =
-            find_value_index_length(&assertion.client_data_json, "challenge").unwrap();
-        let (origin_offset, origin_length) =
-            find_value_index_length(&assertion.client_data_json, "origin").unwrap();
-
-        let transformed_assertion = WebauthnAssertion {
-            signature: assertion.signature,
-            type_offset: type_offset as u32,
-            challenge_offset: challenge_offset as u32,
-            challenge_length: challenge_length as u32,
-            origin_offset: origin_offset as u32,
-            origin_length: origin_length as u32,
-            client_data_json: assertion.client_data_json.into_bytes(),
-            authenticator_data: assertion.authenticator_data.into(),
-        };
-        Ok(SignerSignature::Webauthn((
-            self.signer.account_signer(),
-            transformed_assertion,
-        )))
     }
 }
 
 impl<P, S> ExecutionEncoder for WebauthnAccount<P, S>
 where
     P: Provider + Send,
-    S: Signer + Send,
+    S: AccountSigner + Send,
 {
     fn encode_calls(&self, calls: &[Call]) -> Vec<FieldElement> {
         <Vec<AbigenCall> as CairoSerde>::cairo_serialize(
@@ -125,24 +77,6 @@ where
     }
 }
 
-/// Represents a version of the sha256 algorithm
-/// that the contract should use when validating the signature
-pub enum Sha256Version {
-    /// A faster implementation, but might not always be available
-    Cairo0,
-    /// A slower implementation, but always available
-    Cairo1,
-}
-
-impl Sha256Version {
-    pub fn encode(&self) -> u8 {
-        match self {
-            Sha256Version::Cairo0 => 0,
-            Sha256Version::Cairo1 => 1,
-        }
-    }
-}
-
 #[derive(Debug, thiserror::Error)]
 pub enum SignError {
     #[error("Signer error: {0}")]
@@ -156,7 +90,7 @@ pub enum SignError {
 impl<P, S> Account for WebauthnAccount<P, S>
 where
     P: Provider + Send + Sync,
-    S: Signer + Send + Sync,
+    S: AccountSigner + Send + Sync,
 {
     type SignError = SignError;
 
@@ -173,7 +107,8 @@ where
         execution: &RawExecution,
         query_only: bool,
     ) -> Result<Vec<FieldElement>, Self::SignError> {
-        let result = self.execution_signature(execution, query_only).await?;
+        let tx_hash = execution.transaction_hash(self.chain_id, self.address, query_only, self);
+        let result = self.signer.sign(&tx_hash).await.ok().unwrap();
         Ok(Vec::<SignerSignature>::cairo_serialize(&vec![result]))
     }
 
@@ -213,7 +148,7 @@ where
 impl<P, S> ConnectedAccount for WebauthnAccount<P, S>
 where
     P: Provider + Send + Sync,
-    S: Signer + Send + Sync,
+    S: AccountSigner + Send + Sync,
 {
     type Provider = P;
 
