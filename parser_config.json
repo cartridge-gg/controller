@@ -1,6 +1,8 @@
 {
     "sierra_extension": ".contract_class.json",
-    "contract_aliases": {},
+    "contract_aliases": {
+        "CartridgeAccount": "CartridgeAccountContract"
+    },
     "type_aliases": {
         "argent::session::session::session_component::Event": "SessionComponentEvent",
         "argent::outside_execution::outside_execution::outside_execution_component::Event": "OEvent",
