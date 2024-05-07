@@ -10,7 +10,7 @@ use rand_core::OsRng;
 
 use super::{
     credential::{AuthenticatorAssertionResponse, AuthenticatorData, CliendData},
-    Secp256r1Point, WebautnSignError,
+    Secp256r1Point, SignError,
 };
 
 use super::WebauthnAccountSigner;
@@ -60,10 +60,7 @@ impl P256r1Signer {
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 impl WebauthnAccountSigner for P256r1Signer {
-    async fn sign(
-        &self,
-        challenge: &[u8],
-    ) -> Result<AuthenticatorAssertionResponse, WebautnSignError> {
+    async fn sign(&self, challenge: &[u8]) -> Result<AuthenticatorAssertionResponse, SignError> {
         use sha2::{digest::Update, Digest, Sha256};
 
         let authenticator_data = AuthenticatorData {

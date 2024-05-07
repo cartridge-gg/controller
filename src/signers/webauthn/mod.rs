@@ -4,7 +4,6 @@ use crate::abigen::cartridge_account::{SignerSignature, WebauthnAssertion, Webau
 use async_trait::async_trait;
 use cainome::cairo_serde::U256;
 use credential::AuthenticatorAssertionResponse;
-use starknet::core::crypto::EcdsaSignError;
 use starknet_crypto::FieldElement;
 
 pub mod credential;
@@ -19,27 +18,10 @@ pub type Secp256r1Point = (U256, U256);
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 pub trait WebauthnAccountSigner {
-    async fn sign(
-        &self,
-        challenge: &[u8],
-    ) -> Result<AuthenticatorAssertionResponse, WebautnSignError>;
+    async fn sign(&self, challenge: &[u8]) -> Result<AuthenticatorAssertionResponse, SignError>;
     fn signer_pub_data(&self) -> WebauthnSigner;
     fn sha256_version(&self) -> Sha256Version {
         Sha256Version::Cairo1
-    }
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum WebautnSignError {
-    #[error("Signer error: {0}")]
-    Signer(EcdsaSignError),
-    #[error("Device error: {0}")]
-    Device(DeviceError),
-}
-
-impl Into<SignError> for WebautnSignError {
-    fn into(self) -> SignError {
-        SignError::Webauthn(self)
     }
 }
 
@@ -49,8 +31,7 @@ impl<T> AccountSigner for T
 where
     T: WebauthnAccountSigner + Sync,
 {
-    type SignError = WebautnSignError;
-    async fn sign(&self, tx_hash: &FieldElement) -> Result<SignerSignature, Self::SignError> {
+    async fn sign(&self, tx_hash: &FieldElement) -> Result<SignerSignature, SignError> {
         let mut challenge = tx_hash.to_bytes_be().to_vec();
 
         challenge.push(self.sha256_version().encode());
