@@ -16,6 +16,7 @@ use starknet::{
     core::types::{BlockId, BlockTag},
     macros::felt,
     providers::Provider,
+    signers::SigningKey,
 };
 use starknet_crypto::FieldElement;
 
@@ -129,4 +130,14 @@ async fn test_verify_execute_webautn() {
         "rp_id".to_string(),
     ))
     .await;
+}
+
+#[tokio::test]
+async fn test_deploy_owner_type_starknet() {
+    test_deploy_owner_type(SigningKey::from_random(), SignerType::Starknet).await;
+}
+
+#[tokio::test]
+async fn test_verify_execute_starknet() {
+    test_verify_execute(SigningKey::from_random()).await;
 }
