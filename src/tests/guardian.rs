@@ -1,9 +1,6 @@
 use crate::{
-    abigen::{
-        cartridge_account::{CartridgeAccountReader, SignerType},
-        erc_20::Erc20,
-    },
-    account::CartridgeAccount,
+    abigen::erc_20::Erc20,
+    account::CartridgeGuardianAccount,
     deploy_contract::FEE_TOKEN_ADDRESS,
     signers::{webauthn::p256r1::P256r1Signer, AccountSigner},
     tests::{
@@ -20,9 +17,10 @@ use starknet::{
 };
 use starknet_crypto::FieldElement;
 
-async fn deploy_helper<R: TestnetRunner, S: AccountSigner + Clone>(
+async fn deploy_helper<R: TestnetRunner, S: AccountSigner + Clone, G: AccountSigner + Clone>(
     runner: &R,
     signer: &S,
+    guardian: &G,
 ) -> FieldElement {
     let prefunded = runner.prefunded_single_owner_account().await;
     let class_hash = declare(runner.client(), &prefunded).await;
@@ -31,7 +29,7 @@ async fn deploy_helper<R: TestnetRunner, S: AccountSigner + Clone>(
         runner.client(),
         &prefunded,
         signer.signer(),
-        None,
+        Some(guardian.signer()),
         class_hash,
     )
     .await
@@ -54,34 +52,22 @@ async fn transfer_helper<R: TestnetRunner>(runner: &R, address: &FieldElement) {
         .unwrap();
 }
 
-pub async fn test_deploy_owner_type<S: AccountSigner + Clone>(
+pub async fn test_verify_execute<
+    S: AccountSigner + Clone + Sync + Send,
+    G: AccountSigner + Clone + Sync + Send,
+>(
     signer: S,
-    expected_signer_type: SignerType,
+    guardian: G,
 ) {
     let runner = KatanaRunner::load();
-    let address = deploy_helper(&runner, &signer).await;
-
-    let reader = CartridgeAccountReader::new(address, runner.client());
-
-    let owner_type = reader
-        .get_owner_type()
-        .block_id(BlockId::Tag(BlockTag::Latest))
-        .call()
-        .await
-        .unwrap();
-
-    assert_eq!(owner_type, expected_signer_type);
-}
-
-pub async fn test_verify_execute<S: AccountSigner + Clone + Sync + Send>(signer: S) {
-    let runner = KatanaRunner::load();
-    let address = deploy_helper(&runner, &signer).await;
+    let address = deploy_helper(&runner, &signer, &guardian).await;
 
     transfer_helper(&runner, &address).await;
 
-    let account = CartridgeAccount::new(
+    let account = CartridgeGuardianAccount::new(
         runner.client(),
         signer.clone(),
+        guardian.clone(),
         address,
         runner.client().chain_id().await.unwrap(),
     );
@@ -111,29 +97,15 @@ pub async fn test_verify_execute<S: AccountSigner + Clone + Sync + Send>(signer:
 }
 
 #[tokio::test]
-async fn test_deploy_owner_type_webauthn() {
-    test_deploy_owner_type(
+async fn test_verify_execute_webauthn_guardian_starknet() {
+    test_verify_execute(
         P256r1Signer::random("localhost".to_string(), "rp_id".to_string()),
-        SignerType::Webauthn,
+        SigningKey::from_random(),
     )
     .await;
 }
 
 #[tokio::test]
-async fn test_verify_execute_webautn() {
-    test_verify_execute(P256r1Signer::random(
-        "localhost".to_string(),
-        "rp_id".to_string(),
-    ))
-    .await;
-}
-
-#[tokio::test]
-async fn test_deploy_owner_type_starknet() {
-    test_deploy_owner_type(SigningKey::from_random(), SignerType::Starknet).await;
-}
-
-#[tokio::test]
-async fn test_verify_execute_starknet() {
-    test_verify_execute(SigningKey::from_random()).await;
+async fn test_verify_execute_starknet_guardian_starknet() {
+    test_verify_execute(SigningKey::from_random(), SigningKey::from_random()).await;
 }
