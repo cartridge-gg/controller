@@ -84,10 +84,11 @@ pub async fn test_verify_execute<
     let account = guardian_account
         .session_account(
             session_signer,
-            vec![AllowedMethod::with_selector(
-                *FEE_TOKEN_ADDRESS,
-                selector!("transfer"),
-            )],
+            vec![
+                AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
+                AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("transfds")),
+                AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("transfer")),
+            ],
             u64::MAX,
         )
         .await
@@ -121,6 +122,27 @@ pub async fn test_verify_execute<
 async fn test_verify_execute_session_webauthn_starknet_starknet() {
     test_verify_execute(
         P256r1Signer::random("localhost".to_string(), "rp_id".to_string()),
+        SigningKey::from_random(),
+        SigningKey::from_random(),
+    )
+    .await;
+}
+
+#[ignore = "Not enough resources"]
+#[tokio::test]
+async fn test_verify_execute_session_webauthn_starknet_webauthn() {
+    test_verify_execute(
+        P256r1Signer::random("localhost".to_string(), "rp_id".to_string()),
+        SigningKey::from_random(),
+        P256r1Signer::random("localhost".to_string(), "rp_id".to_string()),
+    )
+    .await;
+}
+
+#[tokio::test]
+async fn test_verify_execute_session_starknet_x3() {
+    test_verify_execute(
+        SigningKey::from_random(),
         SigningKey::from_random(),
         SigningKey::from_random(),
     )

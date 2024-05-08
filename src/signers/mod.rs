@@ -6,7 +6,7 @@ use ::starknet::{
     core::{crypto::EcdsaSignError, utils::NonAsciiNameError},
     macros::short_string,
 };
-use starknet_crypto::{poseidon_hash, FieldElement};
+use starknet_crypto::{poseidon_hash, FieldElement, PoseidonHasher};
 
 use crate::abigen::cartridge_account::{Signer, SignerSignature};
 use async_trait::async_trait;
@@ -53,6 +53,22 @@ impl SignerTrait for Signer {
     fn into_guid(&self) -> FieldElement {
         match self {
             Signer::Starknet(signer) => poseidon_hash(self.magic(), signer.pubkey.inner().clone()),
+            Signer::Webauthn(signer) => {
+                let mut state = PoseidonHasher::new();
+                state.update(self.magic());
+                state.update(signer.origin.len().into());
+                for b in &signer.origin {
+                    state.update((*b).into())
+                };
+                let rp_id_hash = signer.rp_id_hash.inner();
+                state.update(rp_id_hash.low.into());
+                state.update(rp_id_hash.high.into());
+                let pub_key = signer.pubkey.inner();
+                state.update(pub_key.low.into());
+                state.update(pub_key.high.into());
+                state.finalize()
+
+            },
             _ => unimplemented!(),
         }
     }
