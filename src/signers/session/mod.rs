@@ -28,10 +28,11 @@ where
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<P, S, G> SessionRequestSigner<P, S, G> for CartridgeGuardianAccount<P, S, G>
+impl<P, S, Q, G> SessionRequestSigner<P, Q, G> for CartridgeGuardianAccount<P, S, G>
 where
     P: Provider + Send + Sync + Clone,
     S: TransactionHashSigner + Send + Sync,
+    Q: TransactionHashSigner + Send + Sync + 'static, // 'static is required for async_trait macro
     G: TransactionHashSigner + Send + Sync + Clone,
 {
     async fn sign_session(&self, session: Session) -> Result<Vec<FieldElement>, SignError> {
@@ -43,18 +44,23 @@ where
     }
     async fn session_account(
         &self,
-        signer: S,
+        signer: Q,
         allowed_methods: Vec<AllowedMethod>,
         expires_at: u64,
-    ) -> Result<SessionAccount<P, S, G>, SignError> {
+    ) -> Result<SessionAccount<P, Q, G>, SignError> {
         let session = Session::new(allowed_methods, expires_at, &signer.signer());
-        let session_authorization = self.sign_session(session.clone()).await?;
+        let session_authorization = <CartridgeGuardianAccount<P, S, G> as SessionRequestSigner<
+            P,
+            Q,
+            G,
+        >>::sign_session(self, session.clone())
+        .await?;
         Ok(SessionAccount::new(
             self.account.provider.clone(),
             signer,
             self.guardian.clone(),
-            self.chain_id(),
             self.address(),
+            self.chain_id(),
             session_authorization,
             session,
         ))

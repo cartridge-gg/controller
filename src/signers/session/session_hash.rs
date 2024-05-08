@@ -61,6 +61,7 @@ impl RawSession {
             Self::session_type_hash_rev_1(),
             self.expires_at.into(),
             self.allowed_methods_root,
+            self.metadata_hash,
             self.session_key_guid,
         ])
     }
@@ -70,8 +71,8 @@ impl RawSession {
         contract_address: FieldElement,
     ) -> FieldElement {
         let domain = StarknetDomain {
-            name: short_string!("Account.execute_from_outside"),
-            version: FieldElement::ONE,
+            name: short_string!("SessionAccount.session"),
+            version: short_string!("1"),
             chain_id,
             revision: FieldElement::ONE,
         };
@@ -115,6 +116,7 @@ pub struct RawSessionToken {
     pub(crate) session_authorization: Vec<FieldElement>,
     pub(crate) session_signature: SignerSignature,
     pub(crate) guardian_signature: SignerSignature,
+    pub(crate) proofs: Vec<Vec<FieldElement>>
 }
 
 impl CairoSerde for RawSession {
@@ -148,6 +150,7 @@ impl CairoSerde for RawSession {
         let metadata_hash = FieldElement::cairo_deserialize(felts, offset)?;
         offset += FieldElement::cairo_serialized_size(&metadata_hash);
         let session_key_guid = FieldElement::cairo_deserialize(felts, offset)?;
+        
 
         Ok(Self {
             expires_at,
@@ -166,6 +169,7 @@ impl CairoSerde for RawSessionToken {
             + <Vec<FieldElement>>::cairo_serialized_size(&rust.session_authorization)
             + SignerSignature::cairo_serialized_size(&rust.session_signature)
             + SignerSignature::cairo_serialized_size(&rust.guardian_signature)
+            + <Vec<Vec<FieldElement>>>::cairo_serialized_size(&rust.proofs)
     }
 
     fn cairo_serialize(rust: &Self::RustType) -> Vec<FieldElement> {
@@ -174,6 +178,7 @@ impl CairoSerde for RawSessionToken {
             <Vec<FieldElement>>::cairo_serialize(&rust.session_authorization),
             SignerSignature::cairo_serialize(&rust.session_signature),
             SignerSignature::cairo_serialize(&rust.guardian_signature),
+            <Vec<Vec<FieldElement>>>::cairo_serialize(&rust.proofs)
         ]
         .concat()
     }
@@ -189,12 +194,15 @@ impl CairoSerde for RawSessionToken {
         let session_signature = SignerSignature::cairo_deserialize(felts, offset)?;
         offset += SignerSignature::cairo_serialized_size(&session_signature);
         let guardian_signature = SignerSignature::cairo_deserialize(felts, offset)?;
+        offset += SignerSignature::cairo_serialized_size(&guardian_signature);
+        let proofs = <Vec<Vec<FieldElement>>>::cairo_deserialize(felts, offset)?;
 
         Ok(Self {
             session,
             session_authorization,
             session_signature,
             guardian_signature,
+            proofs
         })
     }
 }

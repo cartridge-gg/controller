@@ -69,6 +69,7 @@ where
             session_authorization: self.session_authorization.clone(),
             session_signature: self.signer.sign(&hash).await?,
             guardian_signature: self.guardian.sign(&hash).await?,
+            proofs: vec![]
         })
     }
     fn session_magic() -> FieldElement {
