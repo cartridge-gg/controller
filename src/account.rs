@@ -15,13 +15,13 @@ use std::sync::Arc;
 
 use crate::{
     abigen::cartridge_account::{Call as AbigenCall, SignerSignature},
-    signers::{AccountSigner, SignError},
+    signers::{TranactionHashSigner, SignError},
 };
 
 pub struct CartridgeAccount<P, S>
 where
     P: Provider + Send,
-    S: AccountSigner + Send,
+    S: TranactionHashSigner + Send,
 {
     provider: P,
     signer: S,
@@ -32,7 +32,7 @@ where
 impl<P, S> CartridgeAccount<P, S>
 where
     P: Provider + Send,
-    S: AccountSigner + Send,
+    S: TranactionHashSigner + Send,
 {
     pub fn new(provider: P, signer: S, address: FieldElement, chain_id: FieldElement) -> Self {
         Self {
@@ -48,7 +48,7 @@ where
 impl<P, S> ExecutionEncoder for CartridgeAccount<P, S>
 where
     P: Provider + Send,
-    S: AccountSigner + Send,
+    S: TranactionHashSigner + Send,
 {
     fn encode_calls(&self, calls: &[Call]) -> Vec<FieldElement> {
         <Vec<AbigenCall> as CairoSerde>::cairo_serialize(
@@ -75,7 +75,7 @@ where
 impl<P, S> Account for CartridgeAccount<P, S>
 where
     P: Provider + Send + Sync,
-    S: AccountSigner + Send + Sync,
+    S: TranactionHashSigner + Send + Sync,
 {
     type SignError = SignError;
 
@@ -133,7 +133,7 @@ where
 impl<P, S> ConnectedAccount for CartridgeAccount<P, S>
 where
     P: Provider + Send + Sync,
-    S: AccountSigner + Send + Sync,
+    S: TranactionHashSigner + Send + Sync,
 {
     type Provider = P;
 
@@ -149,8 +149,8 @@ where
 pub struct CartridgeGuardianAccount<P, S, G>
 where
     P: Provider + Send,
-    S: AccountSigner + Send,
-    G: AccountSigner + Send,
+    S: TranactionHashSigner + Send,
+    G: TranactionHashSigner + Send,
 {
     account: CartridgeAccount<P, S>,
     guardian: G,
@@ -159,8 +159,8 @@ where
 impl<P, S, G> CartridgeGuardianAccount<P, S, G>
 where
     P: Provider + Send,
-    S: AccountSigner + Send,
-    G: AccountSigner + Send,
+    S: TranactionHashSigner + Send,
+    G: TranactionHashSigner + Send,
 {
     pub fn new(
         provider: P,
@@ -182,8 +182,8 @@ where
 impl<P, S, G> ExecutionEncoder for CartridgeGuardianAccount<P, S, G>
 where
     P: Provider + Send,
-    S: AccountSigner + Send,
-    G: AccountSigner + Send,
+    S: TranactionHashSigner + Send,
+    G: TranactionHashSigner + Send,
 {
     fn encode_calls(&self, calls: &[Call]) -> Vec<FieldElement> {
         self.account.encode_calls(calls)
@@ -195,8 +195,8 @@ where
 impl<P, S, G> Account for CartridgeGuardianAccount<P, S, G>
 where
     P: Provider + Send + Sync,
-    S: AccountSigner + Send + Sync,
-    G: AccountSigner + Send + Sync,
+    S: TranactionHashSigner + Send + Sync,
+    G: TranactionHashSigner + Send + Sync,
 {
     type SignError = SignError;
 
@@ -258,8 +258,8 @@ where
 impl<P, S, G> ConnectedAccount for CartridgeGuardianAccount<P, S, G>
 where
     P: Provider + Send + Sync,
-    S: AccountSigner + Send + Sync,
-    G: AccountSigner + Send + Sync,
+    S: TranactionHashSigner + Send + Sync,
+    G: TranactionHashSigner + Send + Sync,
 {
     type Provider = P;
 
