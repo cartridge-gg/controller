@@ -12,7 +12,6 @@ use starknet::{
     macros::short_string,
     providers::Provider,
 };
-use starknet_crypto::poseidon_permute_comp;
 use std::sync::Arc;
 
 use crate::{
@@ -132,10 +131,7 @@ where
         query_only: bool,
     ) -> Result<Vec<FieldElement>, Self::SignError> {
         let tx_hash = execution.transaction_hash(self.chain_id, self.address, query_only, self);
-        let token_session_hash = self.session.clone().raw().get_message_hash_rev_1(self.chain_id, self.address);
-        let mut msg_hash = [tx_hash, token_session_hash, FieldElement::TWO];
-        poseidon_permute_comp(&mut msg_hash);
-        let result = self.sign(msg_hash[0]).await?;
+        let result = self.sign(self.session.message_hash(tx_hash, self.chain_id, self.address)).await?;
         Ok(vec![
             vec![Self::session_magic()],
             RawSessionToken::cairo_serialize(&result),

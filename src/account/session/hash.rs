@@ -1,11 +1,12 @@
 use cainome::cairo_serde::CairoSerde;
 use serde_json::json;
 use starknet::macros::{selector, short_string};
-use starknet_crypto::{poseidon_hash_many, FieldElement};
+use starknet_crypto::{poseidon_hash_many, poseidon_permute_comp, FieldElement};
 
 use crate::abigen::cartridge_account::{Signer, SignerSignature};
 
 use crate::signers::SignerTrait;
+
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Session {
@@ -25,7 +26,7 @@ impl Session {
             session_key_guid: signer.into_guid(),
         }
     }
-    pub fn raw(self) -> RawSession {
+    pub fn raw(&self) -> RawSession {
         // TODO: todo!!!
         RawSession {
             expires_at: self.expires_at,
@@ -33,6 +34,12 @@ impl Session {
             metadata_hash: FieldElement::ZERO,
             session_key_guid: self.session_key_guid,
         }
+    }
+    pub fn message_hash(&self, tx_hash: FieldElement, chain_id: FieldElement, address: FieldElement) -> FieldElement {
+        let token_session_hash = self.raw().get_message_hash_rev_1(chain_id, address);
+        let mut msg_hash = [tx_hash, token_session_hash, FieldElement::TWO];
+        poseidon_permute_comp(&mut msg_hash);
+        msg_hash[0]
     }
 }
 
