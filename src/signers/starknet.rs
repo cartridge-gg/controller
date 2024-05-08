@@ -6,7 +6,7 @@ use crate::abigen::cartridge_account::{
     Signer, SignerSignature, StarknetSignature, StarknetSigner,
 };
 
-use super::{TransactionHashSigner, SignError};
+use super::{SignError, TransactionHashSigner};
 
 use async_trait::async_trait;
 

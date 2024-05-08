@@ -1,4 +1,4 @@
-use super::{TransactionHashSigner, SignError};
+use super::{SignError, TransactionHashSigner};
 use crate::abigen::cartridge_account::{
     Signer, SignerSignature, WebauthnAssertion, WebauthnSigner,
 };

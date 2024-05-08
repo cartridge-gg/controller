@@ -15,7 +15,7 @@ use std::sync::Arc;
 
 use crate::{
     abigen::cartridge_account::{Call as AbigenCall, SignerSignature},
-    signers::{TransactionHashSigner, SignError},
+    signers::{SignError, TransactionHashSigner},
 };
 
 pub struct SessionAccount<P, S>
