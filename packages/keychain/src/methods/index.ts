@@ -22,13 +22,6 @@ export function validate<T>(
     }
 
     const session = controller.session(origin);
-    if (!session) {
-      return async () => ({
-        code: ResponseCodes.NOT_CONNECTED,
-        message: "Controller not connected.",
-      });
-    }
-
     return fn(controller, session, origin);
   };
 }

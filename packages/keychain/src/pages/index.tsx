@@ -177,18 +177,6 @@ const Index: NextPage = () => {
                 }
 
                 const account = controller.account(cId);
-                if (
-                  !(
-                    account.status === Status.REGISTERED ||
-                    account.status === Status.REGISTERING
-                  )
-                ) {
-                  return Promise.resolve({
-                    code: ResponseCodes.NOT_ALLOWED,
-                    message: "Account not registered or deployed.",
-                  });
-                }
-
                 const calls = Array.isArray(transactions)
                   ? transactions
                   : [transactions];

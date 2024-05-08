@@ -6,8 +6,7 @@ import { Policy, Session } from "@cartridge/controller";
 import Storage from "utils/storage";
 
 import Account from "./account";
-import { DeviceSigner } from "./signer";
-import { WebauthnAccount } from "@cartridge/account-wasm";
+import { CartridgeAccount } from "@cartridge/account-wasm";
 import selectors from "./selectors";
 import migrations from "./migrations";
 import { AccountInfoDocument } from "generated/graphql";
@@ -25,32 +24,29 @@ export const VERSION = "0.0.3";
 // };
 
 type SerializedController = {
-  credentialId: string;
-  privateKey: string;
   publicKey: string;
+  credentialId: string;
   address: string;
 };
 
 export default class Controller {
   public address: string;
   public signer: SignerInterface;
-  public publicKey: string;
-  protected privateKey: string;
+  protected publicKey: string;
   protected credentialId: string;
   protected accounts: Account[];
 
   constructor(
-    privateKey: string,
     address: string,
+    publicKey: string,
     credentialId: string,
     options?: {
       rpId?: string;
+      origin?: string;
     },
   ) {
     this.address = address;
-    this.signer = new DeviceSigner(privateKey);
-    this.privateKey = privateKey;
-    this.publicKey = ec.starkCurve.getStarkKey(privateKey);
+    this.publicKey = publicKey;
     this.credentialId = credentialId;
 
     this.accounts = [
@@ -60,7 +56,7 @@ export default class Controller {
       //   process.env.NEXT_PUBLIC_RPC_MAINNET,
       //   address,
       //   this.signer,
-      //   new WebauthnAccount(
+      //   new CartridgeAccount(
       //     process.env.NEXT_PUBLIC_RPC_MAINNET,
       //     address,
       //     credentialId,
@@ -73,12 +69,14 @@ export default class Controller {
         process.env.NEXT_PUBLIC_RPC_SEPOLIA,
         address,
         this.signer,
-        WebauthnAccount.new(
+        CartridgeAccount.new(
           process.env.NEXT_PUBLIC_RPC_SEPOLIA,
           constants.StarknetChainId.SN_SEPOLIA,
           address,
           options?.rpId || process.env.NEXT_PUBLIC_RP_ID,
+          options?.origin || process.env.NEXT_PUBLIC_ORIGIN,
           credentialId,
+          publicKey,
         ),
       ),
     ];
@@ -144,9 +142,8 @@ export default class Controller {
   store() {
     Storage.set("version", VERSION);
     return Storage.set(selectors[VERSION].account(this.address), {
-      privateKey: num.toHex(this.privateKey),
-      publicKey: this.publicKey,
       address: this.address,
+      publicKey: this.publicKey,
       credentialId: this.credentialId,
     });
   }
@@ -169,13 +166,13 @@ export default class Controller {
       return;
     }
 
-    const { credentialId, privateKey, address } = controller;
+    const { publicKey, credentialId, address } = controller;
 
     if (version !== VERSION) {
       migrations[version][VERSION](address);
     }
 
-    return new Controller(privateKey, address, credentialId);
+    return new Controller(address, publicKey, credentialId);
   }
 }
 

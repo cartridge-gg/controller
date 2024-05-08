@@ -1,9 +1,4 @@
 import {
-  // CLASS_HASHES,
-  ETH_RPC_SEPOLIA,
-  ETH_RPC_MAINNET,
-} from "@cartridge/controller/src/constants";
-import {
   constants,
   Account as BaseAccount,
   RpcProvider,
@@ -12,8 +7,6 @@ import {
   EstimateFeeDetails,
   EstimateFee,
   Signature,
-  transaction,
-  stark,
   Abi,
   AllowArray,
   ec,
@@ -21,11 +14,8 @@ import {
   TypedData,
   BigNumberish,
   waitForTransactionOptions,
-  num,
   TransactionFinalityStatus,
   InvocationsDetails,
-  // AccountInvocationItem,
-  // TransactionType,
 } from "starknet";
 import {
   AccountContractDocument,
@@ -35,17 +25,12 @@ import { client } from "utils/graphql";
 
 import selectors from "./selectors";
 import Storage from "./storage";
-// import { InvocationWithDetails, RegisterData, VERSION } from "./controller";
-import { WebauthnAccount } from "@cartridge/account-wasm";
+import { CartridgeAccount } from "@cartridge/account-wasm";
 
 export enum Status {
-  UNKNOWN = "UNKNOWN",
   COUNTERFACTUAL = "COUNTERFACTUAL",
   DEPLOYING = "DEPLOYING",
   DEPLOYED = "DEPLOYED",
-  REGISTERING = "REGISTERING",
-  REGISTERED = "REGISTERED",
-  REJECTED = "REJECTED",
 }
 
 class Account extends BaseAccount {
@@ -53,21 +38,21 @@ class Account extends BaseAccount {
   private selector: string;
   _chainId: constants.StarknetChainId;
   updated: boolean = true;
-  webauthn: WebauthnAccount;
+  cartridge: CartridgeAccount;
 
   constructor(
     chainId: constants.StarknetChainId,
     nodeUrl: string,
     address: string,
     signer: SignerInterface,
-    webauthn: WebauthnAccount,
+    cartridge: CartridgeAccount,
   ) {
     super({ nodeUrl }, address, signer);
 
     this.rpc = new RpcProvider({ nodeUrl });
     this.selector = selectors["0.0.3"].deployment(address, chainId);
     this._chainId = chainId;
-    this.webauthn = webauthn;
+    this.cartridge = cartridge;
 
     const state = Storage.get(this.selector);
     if (!state || Date.now() - state.syncing > 5000) {
@@ -140,16 +125,14 @@ class Account extends BaseAccount {
 
     try {
       switch (this.status) {
-        case Status.REGISTERED:
-          return;
         case Status.DEPLOYING:
         case Status.COUNTERFACTUAL: {
           const hash = await this.getDeploymentTxn();
           if (!hash) return;
           const receipt = await this.rpc.getTransactionReceipt(hash);
-          if (receipt.isRejected()) {
+          if (receipt.isReverted() || receipt.isRejected()) {
             // TODO: Handle redeployment
-            this.status = Status.REJECTED;
+            this.status = Status.COUNTERFACTUAL;
             return;
           }
 
@@ -161,22 +144,6 @@ class Account extends BaseAccount {
             classHash,
           });
           this.status = Status.DEPLOYED;
-          return;
-        }
-        case Status.DEPLOYED:
-        case Status.REGISTERING: {
-          const pub = await this.signer.getPubKey();
-          const res = await this.rpc.callContract(
-            {
-              contractAddress: this.address,
-              entrypoint: "get_public_key",
-            },
-            "latest",
-          );
-
-          if (res[0] === pub) {
-            this.status = Status.REGISTERED;
-          }
           return;
         }
       }
@@ -196,10 +163,23 @@ class Account extends BaseAccount {
       throw new Error("Account is not deployed");
     }
 
+    // let sessionCredentials = await this.cartridge.createSession(
+    //   [],
+    //   2715274011n,
+    // );
+    // console.log(sessionCredentials);
+
     transactionsDetail.nonce =
       transactionsDetail.nonce ?? (await this.getNonce("pending"));
+    // FIXME: estimated max fee is always too low
+    //transactionsDetail.maxFee = num.toHex(transactionsDetail.maxFee);
+    transactionsDetail.maxFee = "0x38D7EA4C68000"; // 0.001 eth
 
-    const res = await super.execute(calls, abis, transactionsDetail);
+    const res = await this.cartridge.execute(
+      calls as Array<Call>,
+      transactionsDetail,
+    );
+
     Storage.update(this.selector, {
       nonce: (BigInt(transactionsDetail.nonce) + 1n).toString(),
     });
@@ -231,7 +211,7 @@ class Account extends BaseAccount {
 
     details.nonce = details.nonce ?? (await super.getNonce("pending"));
 
-    return super.estimateInvokeFee(calls, details);
+    return await super.estimateInvokeFee(calls, details);
   }
 
   async verifyMessageHash(
@@ -251,66 +231,10 @@ class Account extends BaseAccount {
   }
 
   async signMessage(typedData: TypedData): Promise<Signature> {
-    return await (this.status === Status.REGISTERED ||
-    this.status === Status.COUNTERFACTUAL ||
+    return await (this.status === Status.COUNTERFACTUAL ||
     this.status === Status.DEPLOYING
       ? super.signMessage(typedData)
-      : this.webauthn.signMessage()); // TODO: Fix on wasm side
-  }
-
-  async register() {
-    const pubKey = await this.signer.getPubKey();
-    const calls: Call[] = [
-      {
-        contractAddress: this.address,
-        entrypoint: "set_public_key",
-        calldata: [pubKey],
-      },
-    ];
-
-    const nonce = await this.getNonce("pending");
-    const version = "0x1";
-
-    const gas = 100000n;
-    const gasPrice = await getGasPrice(this._chainId);
-    const fee = BigInt(gasPrice) * gas;
-    const maxFee = num.toHex(stark.estimatedFeeToMaxFee(fee));
-
-    try {
-      const signature = await this.webauthn.signTransaction(calls, {
-        maxFee,
-        version,
-        nonce,
-      });
-
-      const { transaction_hash } = await this.invokeFunction(
-        {
-          contractAddress: this.address,
-          calldata: transaction.fromCallsToExecuteCalldata_cairo1(calls),
-          signature,
-        },
-        {
-          maxFee,
-          version,
-          nonce,
-        },
-      );
-
-      await this.rpc.waitForTransaction(transaction_hash, {
-        retryInterval: 1000,
-        successStates: [
-          TransactionFinalityStatus.ACCEPTED_ON_L1,
-          TransactionFinalityStatus.ACCEPTED_ON_L2,
-        ],
-      });
-
-      this.status = Status.REGISTERING;
-      Storage.update(this.selector, {
-        status: Status.REGISTERING,
-      });
-    } catch (e) {
-      console.error(e);
-    }
+      : this.cartridge.signMessage()); // TODO: Fix on wasm side
   }
 
   async getNonce(blockIdentifier?: any): Promise<string> {
@@ -335,54 +259,3 @@ class Account extends BaseAccount {
 }
 
 export default Account;
-
-async function getGasPrice(chainId: constants.StarknetChainId) {
-  const uri =
-    chainId === constants.StarknetChainId.SN_MAIN
-      ? ETH_RPC_MAINNET
-      : ETH_RPC_SEPOLIA;
-  const response = await fetch(uri, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      jsonrpc: "2.0",
-      method: "eth_gasPrice",
-      params: [],
-      id: 1,
-    }),
-  });
-  const data = await response.json();
-  return data.result;
-}
-
-// const hash = await this.rpc
-//   .invokeFunction(invoke, {
-//     maxFee,
-//     version,
-//     nonce,
-//   })
-//   .catch((e) => {
-//     console.error(e);
-//   });
-
-// console.log(hash);
-// let txHash = hash.calculateInvokeTransactionHash({
-//   senderAddress: this.address,
-//   version,
-//   compiledCalldata: transaction.fromCallsToExecuteCalldata_cairo1(calls),
-//   maxFee,
-//   chainId: this._chainId,
-//   nonce,
-// });
-
-// let res = await this.rpc
-//   .callContract({
-//     contractAddress: this.address,
-//     entrypoint: "verify_webauthn_signer",
-//     calldata: [...signature, txHash],
-//   })
-//   .catch((e) => {
-//     console.error(e);
-//   });

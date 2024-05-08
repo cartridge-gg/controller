@@ -1,25 +1,36 @@
+use account_sdk::account::session::hash::Session;
 use serde::{Deserialize, Serialize};
 use starknet::{
     accounts::Call,
-    core::{types::{FieldElement, FromStrError}, utils::get_selector_from_name},
+    core::{
+        types::{FieldElement, FromStrError},
+        utils::get_selector_from_name,
+    },
 };
 use std::str::FromStr;
 use wasm_bindgen::prelude::*;
 
-#[derive(Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct JsInvocationsDetails {
     pub nonce: FieldElement,
     pub max_fee: FieldElement,
-    pub version: FieldElement,
+    pub version: Option<FieldElement>,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct JsCall {
     pub contract_address: FieldElement,
     pub entrypoint: String,
     pub calldata: Vec<FieldElement>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SessionCredentials {
+    pub authorization: Vec<FieldElement>,
+    pub private_key: FieldElement,
 }
 
 impl TryFrom<JsCall> for Call {

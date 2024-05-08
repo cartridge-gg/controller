@@ -54,10 +54,6 @@ class Controller {
       this.chainId = options.chainId;
     }
 
-    // if (options?.starterPackId) {
-    //   this.starterPackId = options.starterPackId;
-    // }
-
     if (options?.url) {
       this.url = options.url;
     }
