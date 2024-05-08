@@ -23,7 +23,7 @@ pub enum SignError {
     #[error("NoAllowedSessionMethods error")]
     NoAllowedSessionMethods,
     #[error("MethodNotAllowed error")]
-    MethodNotAllowed,
+    SessionMethodNotAllowed,
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]

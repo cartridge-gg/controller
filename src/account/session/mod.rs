@@ -76,7 +76,7 @@ where
             .iter()
             .map(|m| self.session.single_proof(m))
             .collect::<Option<Vec<_>>>()
-            .ok_or(SignError::MethodNotAllowed)?;
+            .ok_or(SignError::SessionMethodNotAllowed)?;
         Ok(RawSessionToken {
             session: self.session.raw(),
             session_authorization: self.session_authorization.clone(),
