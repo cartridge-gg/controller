@@ -14,7 +14,7 @@ use std::sync::Arc;
 
 use crate::{
     abigen::cartridge_account::SignerSignature,
-    signers::{SignError, HashSigner},
+    signers::{HashSigner, SignError},
 };
 
 use super::cartridge::CartridgeAccount;

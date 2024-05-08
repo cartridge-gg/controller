@@ -17,11 +17,7 @@ use starknet::{
 };
 use starknet_crypto::FieldElement;
 
-async fn deploy_helper<
-    R: TestnetRunner,
-    S: HashSigner + Clone,
-    G: HashSigner + Clone,
->(
+async fn deploy_helper<R: TestnetRunner, S: HashSigner + Clone, G: HashSigner + Clone>(
     runner: &R,
     signer: &S,
     guardian: &G,

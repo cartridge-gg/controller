@@ -16,10 +16,13 @@ use std::sync::Arc;
 
 use crate::{
     abigen::cartridge_account::Call as AbigenCall,
-    signers::{SignError, HashSigner},
+    signers::{HashSigner, SignError},
 };
 
-use self::{hash::{AllowedMethod, Session}, raw_session::RawSessionToken};
+use self::{
+    hash::{AllowedMethod, Session},
+    raw_session::RawSessionToken,
+};
 
 pub mod create;
 pub mod hash;

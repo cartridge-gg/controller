@@ -48,7 +48,7 @@ impl SignerTrait for Signer {
                 state.update(signer.origin.len().into());
                 for b in &signer.origin {
                     state.update((*b).into())
-                };
+                }
                 let rp_id_hash = signer.rp_id_hash.inner();
                 state.update(rp_id_hash.low.into());
                 state.update(rp_id_hash.high.into());
@@ -56,8 +56,7 @@ impl SignerTrait for Signer {
                 state.update(pub_key.low.into());
                 state.update(pub_key.high.into());
                 state.finalize()
-
-            },
+            }
             _ => unimplemented!(),
         }
     }
