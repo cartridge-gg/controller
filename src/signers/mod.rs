@@ -1,4 +1,3 @@
-pub mod session;
 pub mod starknet;
 pub mod webauthn;
 

@@ -1,8 +1,7 @@
 use crate::account::{session::SessionAccount, CartridgeGuardianAccount};
 
-use self::session_hash::{AllowedMethod, Session};
+use super::hash::{AllowedMethod, Session};
 
-pub mod session_hash;
 use async_trait::async_trait;
 use starknet::{accounts::Account, providers::Provider};
 use starknet_crypto::FieldElement;
@@ -11,7 +10,7 @@ use super::{SignError, TransactionHashSigner};
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-pub trait SessionRequestSigner<P, S, G>
+pub trait SessionCreator<P, S, G>
 where
     P: Provider + Send + Sync,
     S: TransactionHashSigner + Send + Sync,
@@ -28,7 +27,7 @@ where
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<P, S, Q, G> SessionRequestSigner<P, Q, G> for CartridgeGuardianAccount<P, S, G>
+impl<P, S, Q, G> SessionCreator<P, Q, G> for CartridgeGuardianAccount<P, S, G>
 where
     P: Provider + Send + Sync + Clone,
     S: TransactionHashSigner + Send + Sync,
@@ -49,7 +48,7 @@ where
         expires_at: u64,
     ) -> Result<SessionAccount<P, Q, G>, SignError> {
         let session = Session::new(allowed_methods, expires_at, &signer.signer());
-        let session_authorization = <CartridgeGuardianAccount<P, S, G> as SessionRequestSigner<
+        let session_authorization = <CartridgeGuardianAccount<P, S, G> as SessionCreator<
             P,
             Q,
             G,

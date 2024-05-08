@@ -18,10 +18,14 @@ use std::sync::Arc;
 use crate::{
     abigen::cartridge_account::Call as AbigenCall,
     signers::{
-        session::session_hash::{RawSessionToken, Session},
         SignError, TransactionHashSigner,
     },
 };
+
+use self::hash::{RawSessionToken, Session};
+
+pub mod hash;
+pub mod create;
 
 pub struct SessionAccount<P, S, G>
 where

@@ -5,7 +5,7 @@ use starknet_crypto::{poseidon_hash_many, FieldElement};
 
 use crate::abigen::cartridge_account::{Signer, SignerSignature};
 
-use super::super::SignerTrait;
+use crate::signers::SignerTrait;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Session {
