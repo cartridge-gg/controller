@@ -19,7 +19,7 @@ pub enum SignError {
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-pub trait AccountSigner: Sized {
+pub trait AccountSigner {
     async fn sign(&self, tx_hash: &FieldElement) -> Result<SignerSignature, SignError>;
     fn signer(&self) -> Signer;
 }

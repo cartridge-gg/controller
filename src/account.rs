@@ -214,8 +214,8 @@ where
         query_only: bool,
     ) -> Result<Vec<FieldElement>, Self::SignError> {
         let tx_hash = execution.transaction_hash(self.chain_id(), self.address(), query_only, self);
-        let owner_signature = self.account.signer.sign(&tx_hash).await.ok().unwrap();
-        let guardian_signature = self.guardian.sign(&tx_hash).await.ok().unwrap();
+        let owner_signature = self.account.signer.sign(&tx_hash).await?;
+        let guardian_signature = self.guardian.sign(&tx_hash).await?;
         Ok(Vec::<SignerSignature>::cairo_serialize(&vec![
             owner_signature,
             guardian_signature,
