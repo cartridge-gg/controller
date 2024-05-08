@@ -18,16 +18,17 @@ use crate::{
     signers::{SignError, TransactionHashSigner},
 };
 
+#[derive(Clone, Debug)]
 pub struct CartridgeAccount<P, S>
 where
     P: Provider + Send,
     S: TransactionHashSigner + Send,
 {
-    pub(super) provider: P,
-    pub(super) signer: S,
-    pub(super) address: FieldElement,
-    pub(super) chain_id: FieldElement,
-    pub(super) block_id: BlockId,
+    pub(crate) provider: P,
+    pub(crate) signer: S,
+    pub(crate) address: FieldElement,
+    pub(crate) chain_id: FieldElement,
+    pub(crate) block_id: BlockId,
 }
 impl<P, S> CartridgeAccount<P, S>
 where

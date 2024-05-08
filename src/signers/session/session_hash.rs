@@ -111,10 +111,10 @@ impl StarknetDomain {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RawSessionToken {
-    session: RawSession,
-    session_authorization: Vec<FieldElement>,
-    session_signature: SignerSignature,
-    guardian_signature: SignerSignature,
+    pub(crate) session: RawSession,
+    pub(crate) session_authorization: Vec<FieldElement>,
+    pub(crate) session_signature: SignerSignature,
+    pub(crate) guardian_signature: SignerSignature,
 }
 
 impl CairoSerde for RawSession {

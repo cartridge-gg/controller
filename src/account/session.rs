@@ -9,46 +9,78 @@ use starknet::{
         contract::legacy::LegacyContractClass, BlockId, BlockTag, FieldElement,
         FlattenedSierraClass,
     },
+    macros::short_string,
     providers::Provider,
 };
 use std::sync::Arc;
 
 use crate::{
-    abigen::cartridge_account::{Call as AbigenCall, SignerSignature},
-    signers::{SignError, TransactionHashSigner},
+    abigen::cartridge_account::Call as AbigenCall,
+    signers::{
+        session::session_hash::{RawSessionToken, Session},
+        SignError, TransactionHashSigner,
+    },
 };
 
-pub struct SessionAccount<P, S>
+pub struct SessionAccount<P, S, G>
 where
     P: Provider + Send,
     S: TransactionHashSigner + Send,
+    G: TransactionHashSigner + Send,
 {
     provider: P,
-    guardian: S,
+    signer: S,
+    guardian: G,
     address: FieldElement,
     chain_id: FieldElement,
     block_id: BlockId,
+    session_authorization: Vec<FieldElement>,
+    session: Session,
 }
-impl<P, S> SessionAccount<P, S>
+impl<P, S, G> SessionAccount<P, S, G>
 where
     P: Provider + Send,
     S: TransactionHashSigner + Send,
+    G: TransactionHashSigner + Send,
 {
-    pub fn new(provider: P, guardian: S, address: FieldElement, chain_id: FieldElement) -> Self {
+    pub fn new(
+        provider: P,
+        signer: S,
+        guardian: G,
+        address: FieldElement,
+        chain_id: FieldElement,
+        session_authorization: Vec<FieldElement>,
+        session: Session,
+    ) -> Self {
         Self {
             provider,
+            signer,
             guardian,
             address,
             chain_id,
             block_id: BlockId::Tag(BlockTag::Latest),
+            session_authorization,
+            session,
         }
+    }
+    pub async fn sign(&self, hash: FieldElement) -> Result<RawSessionToken, SignError> {
+        Ok(RawSessionToken {
+            session: self.session.clone().raw(),
+            session_authorization: self.session_authorization.clone(),
+            session_signature: self.signer.sign(&hash).await?,
+            guardian_signature: self.guardian.sign(&hash).await?,
+        })
+    }
+    fn session_magic() -> FieldElement {
+        short_string!("session-token")
     }
 }
 
-impl<P, S> ExecutionEncoder for SessionAccount<P, S>
+impl<P, S, G> ExecutionEncoder for SessionAccount<P, S, G>
 where
     P: Provider + Send,
     S: TransactionHashSigner + Send,
+    G: TransactionHashSigner + Send,
 {
     fn encode_calls(&self, calls: &[Call]) -> Vec<FieldElement> {
         <Vec<AbigenCall> as CairoSerde>::cairo_serialize(
@@ -72,10 +104,11 @@ where
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<P, S> Account for SessionAccount<P, S>
+impl<P, S, G> Account for SessionAccount<P, S, G>
 where
     P: Provider + Send + Sync,
     S: TransactionHashSigner + Send + Sync,
+    G: TransactionHashSigner + Send + Sync,
 {
     type SignError = SignError;
 
@@ -93,8 +126,12 @@ where
         query_only: bool,
     ) -> Result<Vec<FieldElement>, Self::SignError> {
         let tx_hash = execution.transaction_hash(self.chain_id, self.address, query_only, self);
-        let result = self.guardian.sign(&tx_hash).await.ok().unwrap();
-        Ok(Vec::<SignerSignature>::cairo_serialize(&vec![result]))
+        let result = self.sign(tx_hash).await?;
+        Ok(vec![
+            vec![Self::session_magic()],
+            RawSessionToken::cairo_serialize(&result),
+        ]
+        .concat())
     }
 
     async fn sign_declaration(
@@ -130,10 +167,11 @@ where
     }
 }
 
-impl<P, S> ConnectedAccount for SessionAccount<P, S>
+impl<P, S, G> ConnectedAccount for SessionAccount<P, S, G>
 where
     P: Provider + Send + Sync,
     S: TransactionHashSigner + Send + Sync,
+    G: TransactionHashSigner + Send + Sync,
 {
     type Provider = P;
 

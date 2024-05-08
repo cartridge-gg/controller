@@ -19,14 +19,15 @@ use crate::{
 
 use super::cartridge::CartridgeAccount;
 
+#[derive(Clone, Debug)]
 pub struct CartridgeGuardianAccount<P, S, G>
 where
     P: Provider + Send,
     S: TransactionHashSigner + Send,
     G: TransactionHashSigner + Send,
 {
-    pub(super) account: CartridgeAccount<P, S>,
-    pub(super) guardian: G,
+    pub(crate) account: CartridgeAccount<P, S>,
+    pub(crate) guardian: G,
 }
 
 impl<P, S, G> CartridgeGuardianAccount<P, S, G>
