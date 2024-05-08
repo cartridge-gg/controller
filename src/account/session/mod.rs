@@ -19,11 +19,12 @@ use crate::{
     signers::{SignError, HashSigner},
 };
 
-use self::hash::{AllowedMethod, RawSessionToken, Session};
+use self::{hash::{AllowedMethod, Session}, raw_session::RawSessionToken};
 
 pub mod create;
 pub mod hash;
 pub mod merkle;
+pub mod raw_session;
 
 pub struct SessionAccount<P, S, G>
 where
