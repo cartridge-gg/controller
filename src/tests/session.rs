@@ -2,7 +2,7 @@ use crate::{
     abigen::erc_20::Erc20,
     account::CartridgeGuardianAccount,
     deploy_contract::FEE_TOKEN_ADDRESS,
-    signers::{session::SessionRequestSigner, TransactionHashSigner},
+    signers::{session::SessionRequestSigner, webauthn::P256r1Signer, TransactionHashSigner},
     tests::{
         deployment_test::{declare, deploy},
         runners::{katana_runner::KatanaRunner, TestnetRunner},
@@ -107,7 +107,7 @@ pub async fn test_verify_execute<
 #[tokio::test]
 async fn test_verify_execute_session_webauthn_starknet_starknet() {
     test_verify_execute(
-        SigningKey::from_random(),
+        P256r1Signer::random("localhost".to_string(), "rp_id".to_string()),
         SigningKey::from_random(),
         SigningKey::from_random(),
     )
