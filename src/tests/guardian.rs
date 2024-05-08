@@ -2,7 +2,7 @@ use crate::{
     abigen::erc_20::Erc20,
     account::CartridgeGuardianAccount,
     deploy_contract::FEE_TOKEN_ADDRESS,
-    signers::{webauthn::p256r1::P256r1Signer, TranactionHashSigner},
+    signers::{webauthn::p256r1::P256r1Signer, TransactionHashSigner},
     tests::{
         deployment_test::{declare, deploy},
         runners::{katana_runner::KatanaRunner, TestnetRunner},
@@ -17,7 +17,7 @@ use starknet::{
 };
 use starknet_crypto::FieldElement;
 
-async fn deploy_helper<R: TestnetRunner, S: TranactionHashSigner + Clone, G: TranactionHashSigner + Clone>(
+async fn deploy_helper<R: TestnetRunner, S: TransactionHashSigner + Clone, G: TransactionHashSigner + Clone>(
     runner: &R,
     signer: &S,
     guardian: &G,
@@ -53,8 +53,8 @@ async fn transfer_helper<R: TestnetRunner>(runner: &R, address: &FieldElement) {
 }
 
 pub async fn test_verify_execute<
-    S: TranactionHashSigner + Clone + Sync + Send,
-    G: TranactionHashSigner + Clone + Sync + Send,
+    S: TransactionHashSigner + Clone + Sync + Send,
+    G: TransactionHashSigner + Clone + Sync + Send,
 >(
     signer: S,
     guardian: G,

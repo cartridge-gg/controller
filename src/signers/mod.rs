@@ -1,7 +1,7 @@
 pub mod starknet;
 pub mod webauthn;
 
-use ::starknet::core::crypto::EcdsaSignError;
+use ::starknet::{accounts::RawExecution, core::crypto::EcdsaSignError};
 use starknet_crypto::FieldElement;
 
 use crate::abigen::cartridge_account::{Signer, SignerSignature};
@@ -19,7 +19,14 @@ pub enum SignError {
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-pub trait TranactionHashSigner {
+pub trait TransactionHashSigner {
     async fn sign(&self, tx_hash: &FieldElement) -> Result<SignerSignature, SignError>;
+    fn signer(&self) -> Signer;
+}
+
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+pub trait TransactionExecutionSigner {
+    async fn sign(&self, execution: RawExecution, tx_hash: &FieldElement) -> Result<SignerSignature, SignError>;
     fn signer(&self) -> Signer;
 }

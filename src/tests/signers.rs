@@ -5,7 +5,7 @@ use crate::{
     },
     account::CartridgeAccount,
     deploy_contract::FEE_TOKEN_ADDRESS,
-    signers::{webauthn::p256r1::P256r1Signer, TranactionHashSigner},
+    signers::{webauthn::p256r1::P256r1Signer, TransactionHashSigner},
     tests::{
         deployment_test::{declare, deploy},
         runners::{katana_runner::KatanaRunner, TestnetRunner},
@@ -20,7 +20,7 @@ use starknet::{
 };
 use starknet_crypto::FieldElement;
 
-async fn deploy_helper<R: TestnetRunner, S: TranactionHashSigner + Clone>(
+async fn deploy_helper<R: TestnetRunner, S: TransactionHashSigner + Clone>(
     runner: &R,
     signer: &S,
 ) -> FieldElement {
@@ -54,7 +54,7 @@ async fn transfer_helper<R: TestnetRunner>(runner: &R, address: &FieldElement) {
         .unwrap();
 }
 
-pub async fn test_deploy_owner_type<S: TranactionHashSigner + Clone>(
+pub async fn test_deploy_owner_type<S: TransactionHashSigner + Clone>(
     signer: S,
     expected_signer_type: SignerType,
 ) {
@@ -73,7 +73,7 @@ pub async fn test_deploy_owner_type<S: TranactionHashSigner + Clone>(
     assert_eq!(owner_type, expected_signer_type);
 }
 
-pub async fn test_verify_execute<S: TranactionHashSigner + Clone + Sync + Send>(signer: S) {
+pub async fn test_verify_execute<S: TransactionHashSigner + Clone + Sync + Send>(signer: S) {
     let runner = KatanaRunner::load();
     let address = deploy_helper(&runner, &signer).await;
 
