@@ -16,7 +16,7 @@ use std::sync::Arc;
 
 use crate::{
     abigen::cartridge_account::Call as AbigenCall,
-    signers::{SignError, TransactionHashSigner},
+    signers::{SignError, HashSigner},
 };
 
 use self::hash::{AllowedMethod, RawSessionToken, Session};
@@ -28,8 +28,8 @@ pub mod merkle;
 pub struct SessionAccount<P, S, G>
 where
     P: Provider + Send,
-    S: TransactionHashSigner + Send,
-    G: TransactionHashSigner + Send,
+    S: HashSigner + Send,
+    G: HashSigner + Send,
 {
     provider: P,
     signer: S,
@@ -43,8 +43,8 @@ where
 impl<P, S, G> SessionAccount<P, S, G>
 where
     P: Provider + Send,
-    S: TransactionHashSigner + Send,
-    G: TransactionHashSigner + Send,
+    S: HashSigner + Send,
+    G: HashSigner + Send,
 {
     pub fn new(
         provider: P,
@@ -112,8 +112,8 @@ where
 impl<P, S, G> ExecutionEncoder for SessionAccount<P, S, G>
 where
     P: Provider + Send,
-    S: TransactionHashSigner + Send,
-    G: TransactionHashSigner + Send,
+    S: HashSigner + Send,
+    G: HashSigner + Send,
 {
     fn encode_calls(&self, calls: &[Call]) -> Vec<FieldElement> {
         <Vec<AbigenCall> as CairoSerde>::cairo_serialize(
@@ -140,8 +140,8 @@ where
 impl<P, S, G> Account for SessionAccount<P, S, G>
 where
     P: Provider + Send + Sync,
-    S: TransactionHashSigner + Send + Sync,
-    G: TransactionHashSigner + Send + Sync,
+    S: HashSigner + Send + Sync,
+    G: HashSigner + Send + Sync,
 {
     type SignError = SignError;
 
@@ -209,8 +209,8 @@ where
 impl<P, S, G> ConnectedAccount for SessionAccount<P, S, G>
 where
     P: Provider + Send + Sync,
-    S: TransactionHashSigner + Send + Sync,
-    G: TransactionHashSigner + Send + Sync,
+    S: HashSigner + Send + Sync,
+    G: HashSigner + Send + Sync,
 {
     type Provider = P;
 

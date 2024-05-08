@@ -1,4 +1,4 @@
-use super::{SignError, TransactionHashSigner};
+use super::{SignError, HashSigner};
 use crate::abigen::cartridge_account::{
     Signer, SignerSignature, WebauthnAssertion, WebauthnSigner,
 };
@@ -29,7 +29,7 @@ pub trait WebauthnAccountSigner {
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<T> TransactionHashSigner for T
+impl<T> HashSigner for T
 where
     T: WebauthnAccountSigner + Sync,
 {

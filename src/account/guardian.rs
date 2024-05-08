@@ -14,7 +14,7 @@ use std::sync::Arc;
 
 use crate::{
     abigen::cartridge_account::SignerSignature,
-    signers::{SignError, TransactionHashSigner},
+    signers::{SignError, HashSigner},
 };
 
 use super::cartridge::CartridgeAccount;
@@ -23,8 +23,8 @@ use super::cartridge::CartridgeAccount;
 pub struct CartridgeGuardianAccount<P, S, G>
 where
     P: Provider + Send,
-    S: TransactionHashSigner + Send,
-    G: TransactionHashSigner + Send,
+    S: HashSigner + Send,
+    G: HashSigner + Send,
 {
     pub(crate) account: CartridgeAccount<P, S>,
     pub(crate) guardian: G,
@@ -33,8 +33,8 @@ where
 impl<P, S, G> CartridgeGuardianAccount<P, S, G>
 where
     P: Provider + Send,
-    S: TransactionHashSigner + Send,
-    G: TransactionHashSigner + Send,
+    S: HashSigner + Send,
+    G: HashSigner + Send,
 {
     pub fn new(
         provider: P,
@@ -64,8 +64,8 @@ where
 impl<P, S, G> ExecutionEncoder for CartridgeGuardianAccount<P, S, G>
 where
     P: Provider + Send,
-    S: TransactionHashSigner + Send,
-    G: TransactionHashSigner + Send,
+    S: HashSigner + Send,
+    G: HashSigner + Send,
 {
     fn encode_calls(&self, calls: &[Call]) -> Vec<FieldElement> {
         self.account.encode_calls(calls)
@@ -77,8 +77,8 @@ where
 impl<P, S, G> Account for CartridgeGuardianAccount<P, S, G>
 where
     P: Provider + Send + Sync,
-    S: TransactionHashSigner + Send + Sync,
-    G: TransactionHashSigner + Send + Sync,
+    S: HashSigner + Send + Sync,
+    G: HashSigner + Send + Sync,
 {
     type SignError = SignError;
 
@@ -135,8 +135,8 @@ where
 impl<P, S, G> ConnectedAccount for CartridgeGuardianAccount<P, S, G>
 where
     P: Provider + Send + Sync,
-    S: TransactionHashSigner + Send + Sync,
-    G: TransactionHashSigner + Send + Sync,
+    S: HashSigner + Send + Sync,
+    G: HashSigner + Send + Sync,
 {
     type Provider = P;
 

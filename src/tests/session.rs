@@ -5,7 +5,7 @@ use crate::{
         CartridgeGuardianAccount,
     },
     deploy_contract::FEE_TOKEN_ADDRESS,
-    signers::{webauthn::P256r1Signer, TransactionHashSigner},
+    signers::{webauthn::P256r1Signer, HashSigner},
     tests::{
         deployment_test::{declare, deploy},
         runners::{katana_runner::KatanaRunner, TestnetRunner},
@@ -22,8 +22,8 @@ use starknet_crypto::FieldElement;
 
 async fn deploy_helper<
     R: TestnetRunner,
-    S: TransactionHashSigner + Clone,
-    G: TransactionHashSigner + Clone,
+    S: HashSigner + Clone,
+    G: HashSigner + Clone,
 >(
     runner: &R,
     signer: &S,
@@ -60,9 +60,9 @@ async fn transfer_helper<R: TestnetRunner>(runner: &R, address: &FieldElement) {
 }
 
 pub async fn test_verify_execute<
-    S: TransactionHashSigner + Clone + Sync + Send,
-    G: TransactionHashSigner + Clone + Sync + Send,
-    Q: TransactionHashSigner + Clone + Sync + Send + 'static,
+    S: HashSigner + Clone + Sync + Send,
+    G: HashSigner + Clone + Sync + Send,
+    Q: HashSigner + Clone + Sync + Send + 'static,
 >(
     signer: S,
     guardian: G,

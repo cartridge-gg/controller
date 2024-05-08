@@ -2,7 +2,6 @@ pub mod starknet;
 pub mod webauthn;
 
 use ::starknet::{
-    accounts::RawExecution,
     core::{crypto::EcdsaSignError, utils::NonAsciiNameError},
     macros::short_string,
 };
@@ -29,19 +28,9 @@ pub enum SignError {
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-pub trait TransactionHashSigner {
+pub trait HashSigner {
     async fn sign(&self, tx_hash: &FieldElement) -> Result<SignerSignature, SignError>;
     fn signer(&self) -> Signer;
-}
-
-#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
-#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-pub trait SimpleTransactionExecutionSigner {
-    async fn sign(
-        &self,
-        execution: &RawExecution,
-        tx_hash: &FieldElement,
-    ) -> Result<Vec<FieldElement>, SignError>;
 }
 
 pub trait SignerTrait {

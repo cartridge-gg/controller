@@ -6,15 +6,15 @@ use async_trait::async_trait;
 use starknet::{accounts::Account, providers::Provider};
 use starknet_crypto::FieldElement;
 
-use super::{SignError, TransactionHashSigner};
+use super::{SignError, HashSigner};
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 pub trait SessionCreator<P, S, G>
 where
     P: Provider + Send + Sync,
-    S: TransactionHashSigner + Send + Sync,
-    G: TransactionHashSigner + Send + Sync,
+    S: HashSigner + Send + Sync,
+    G: HashSigner + Send + Sync,
 {
     async fn sign_session(&self, session: Session) -> Result<Vec<FieldElement>, SignError>;
     async fn session_account(
@@ -30,9 +30,9 @@ where
 impl<P, S, Q, G> SessionCreator<P, Q, G> for CartridgeGuardianAccount<P, S, G>
 where
     P: Provider + Send + Sync + Clone,
-    S: TransactionHashSigner + Send + Sync,
-    Q: TransactionHashSigner + Send + Sync + 'static, // 'static is required for async_trait macro
-    G: TransactionHashSigner + Send + Sync + Clone,
+    S: HashSigner + Send + Sync,
+    Q: HashSigner + Send + Sync + 'static, // 'static is required for async_trait macro
+    G: HashSigner + Send + Sync + Clone,
 {
     async fn sign_session(&self, session: Session) -> Result<Vec<FieldElement>, SignError> {
         let hash = session

@@ -15,14 +15,14 @@ use std::sync::Arc;
 
 use crate::{
     abigen::cartridge_account::{Call as AbigenCall, SignerSignature},
-    signers::{SignError, TransactionHashSigner},
+    signers::{SignError, HashSigner},
 };
 
 #[derive(Clone, Debug)]
 pub struct CartridgeAccount<P, S>
 where
     P: Provider + Send,
-    S: TransactionHashSigner + Send,
+    S: HashSigner + Send,
 {
     pub(crate) provider: P,
     pub(crate) signer: S,
@@ -33,7 +33,7 @@ where
 impl<P, S> CartridgeAccount<P, S>
 where
     P: Provider + Send,
-    S: TransactionHashSigner + Send,
+    S: HashSigner + Send,
 {
     pub fn new(provider: P, signer: S, address: FieldElement, chain_id: FieldElement) -> Self {
         Self {
@@ -49,7 +49,7 @@ where
 impl<P, S> ExecutionEncoder for CartridgeAccount<P, S>
 where
     P: Provider + Send,
-    S: TransactionHashSigner + Send,
+    S: HashSigner + Send,
 {
     fn encode_calls(&self, calls: &[Call]) -> Vec<FieldElement> {
         <Vec<AbigenCall> as CairoSerde>::cairo_serialize(
@@ -76,7 +76,7 @@ where
 impl<P, S> Account for CartridgeAccount<P, S>
 where
     P: Provider + Send + Sync,
-    S: TransactionHashSigner + Send + Sync,
+    S: HashSigner + Send + Sync,
 {
     type SignError = SignError;
 
@@ -134,7 +134,7 @@ where
 impl<P, S> ConnectedAccount for CartridgeAccount<P, S>
 where
     P: Provider + Send + Sync,
-    S: TransactionHashSigner + Send + Sync,
+    S: HashSigner + Send + Sync,
 {
     type Provider = P;
 

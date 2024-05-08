@@ -6,13 +6,13 @@ use crate::abigen::cartridge_account::{
     Signer, SignerSignature, StarknetSignature, StarknetSigner,
 };
 
-use super::{SignError, TransactionHashSigner};
+use super::{SignError, HashSigner};
 
 use async_trait::async_trait;
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl TransactionHashSigner for SigningKey {
+impl HashSigner for SigningKey {
     async fn sign(&self, tx_hash: &FieldElement) -> Result<SignerSignature, SignError> {
         let signature = self.sign(tx_hash).map_err(SignError::Signer)?;
         let pubkey = NonZero::new(self.verifying_key().scalar()).unwrap();
