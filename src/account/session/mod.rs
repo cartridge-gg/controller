@@ -16,15 +16,14 @@ use std::sync::Arc;
 
 use crate::{
     abigen::cartridge_account::Call as AbigenCall,
-    signers::{
-        SignError, TransactionHashSigner,
-    },
+    signers::{SignError, TransactionHashSigner},
 };
 
-use self::hash::{RawSessionToken, Session};
+use self::hash::{AllowedMethod, RawSessionToken, Session};
 
-pub mod hash;
 pub mod create;
+pub mod hash;
+pub mod merkle;
 
 pub struct SessionAccount<P, S, G>
 where
@@ -67,17 +66,46 @@ where
             session,
         }
     }
-    pub async fn sign(&self, hash: FieldElement) -> Result<RawSessionToken, SignError> {
+    pub async fn sign(
+        &self,
+        hash: FieldElement,
+        execution: &RawExecution,
+    ) -> Result<RawSessionToken, SignError> {
+        let methods = Self::parse_calls(execution);
+        let proofs = methods
+            .iter()
+            .map(|m| self.session.single_proof(m))
+            .collect::<Option<Vec<_>>>()
+            .ok_or(SignError::MethodNotAllowed)?;
         Ok(RawSessionToken {
-            session: self.session.clone().raw(),
+            session: self.session.raw(),
             session_authorization: self.session_authorization.clone(),
             session_signature: self.signer.sign(&hash).await?,
             guardian_signature: self.guardian.sign(&hash).await?,
-            proofs: vec![]
+            proofs: proofs,
         })
     }
     fn session_magic() -> FieldElement {
         short_string!("session-token")
+    }
+    pub fn parse_calls(execution: &RawExecution) -> Vec<AllowedMethod> {
+        let tx_printed = format!("{:?}", execution);
+        let mut individual_calls = tx_printed.split("Call { to: FieldElement { inner: ");
+        individual_calls.next(); // First one is not a call
+
+        individual_calls
+            .map(|call| {
+                let mut call = call.split(" }, selector: FieldElement { inner: ");
+                let to = call.next().unwrap();
+                let selector = call.next().unwrap();
+                let selector = selector.split(" }").next().unwrap();
+
+                AllowedMethod {
+                    contract_address: FieldElement::from_hex_be(to).unwrap(),
+                    selector: FieldElement::from_hex_be(selector).unwrap(),
+                }
+            })
+            .collect()
     }
 }
 
@@ -131,7 +159,13 @@ where
         query_only: bool,
     ) -> Result<Vec<FieldElement>, Self::SignError> {
         let tx_hash = execution.transaction_hash(self.chain_id, self.address, query_only, self);
-        let result = self.sign(self.session.message_hash(tx_hash, self.chain_id, self.address)).await?;
+        let result = self
+            .sign(
+                self.session
+                    .message_hash(tx_hash, self.chain_id, self.address)?,
+                execution,
+            )
+            .await?;
         Ok(vec![
             vec![Self::session_magic()],
             RawSessionToken::cairo_serialize(&result),

@@ -47,7 +47,7 @@ where
         allowed_methods: Vec<AllowedMethod>,
         expires_at: u64,
     ) -> Result<SessionAccount<P, Q, G>, SignError> {
-        let session = Session::new(allowed_methods, expires_at, &signer.signer());
+        let session = Session::new(allowed_methods, expires_at, &signer.signer())?;
         let session_authorization = <CartridgeGuardianAccount<P, S, G> as SessionCreator<
             P,
             Q,

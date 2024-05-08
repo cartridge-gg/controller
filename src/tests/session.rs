@@ -1,6 +1,9 @@
 use crate::{
     abigen::erc_20::Erc20,
-    account::{session::create::SessionCreator, CartridgeGuardianAccount},
+    account::{
+        session::{create::SessionCreator, hash::AllowedMethod},
+        CartridgeGuardianAccount,
+    },
     deploy_contract::FEE_TOKEN_ADDRESS,
     signers::{webauthn::P256r1Signer, TransactionHashSigner},
     tests::{
@@ -11,7 +14,7 @@ use crate::{
 use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{
     core::types::{BlockId, BlockTag},
-    macros::felt,
+    macros::{felt, selector},
     providers::Provider,
     signers::SigningKey,
 };
@@ -63,7 +66,7 @@ pub async fn test_verify_execute<
 >(
     signer: S,
     guardian: G,
-    session_signer: Q 
+    session_signer: Q,
 ) {
     let runner = KatanaRunner::load();
     let address = deploy_helper(&runner, &signer, &guardian).await;
@@ -78,7 +81,17 @@ pub async fn test_verify_execute<
         runner.client().chain_id().await.unwrap(),
     );
 
-    let account = guardian_account.session_account(session_signer, vec![], u64::MAX).await.unwrap();
+    let account = guardian_account
+        .session_account(
+            session_signer,
+            vec![AllowedMethod::with_selector(
+                *FEE_TOKEN_ADDRESS,
+                selector!("transfer"),
+            )],
+            u64::MAX,
+        )
+        .await
+        .unwrap();
 
     let new_account = ContractAddress(felt!("0x18301129"));
 
@@ -113,4 +126,3 @@ async fn test_verify_execute_session_webauthn_starknet_starknet() {
     )
     .await;
 }
-

@@ -1,7 +1,11 @@
 pub mod starknet;
 pub mod webauthn;
 
-use ::starknet::{accounts::RawExecution, core::crypto::EcdsaSignError, macros::short_string};
+use ::starknet::{
+    accounts::RawExecution,
+    core::{crypto::EcdsaSignError, utils::NonAsciiNameError},
+    macros::short_string,
+};
 use starknet_crypto::{poseidon_hash, FieldElement};
 
 use crate::abigen::cartridge_account::{Signer, SignerSignature};
@@ -15,6 +19,12 @@ pub enum SignError {
     Signer(EcdsaSignError),
     #[error("Device error: {0}")]
     Device(DeviceError),
+    #[error("NonAsciiName error: {0}")]
+    NonAsciiSessionNameError(#[from] NonAsciiNameError),
+    #[error("NoAllowedSessionMethods error")]
+    NoAllowedSessionMethods,
+    #[error("MethodNotAllowed error")]
+    MethodNotAllowed,
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
