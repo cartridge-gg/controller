@@ -6,7 +6,7 @@ import { Policy, Session } from "@cartridge/controller";
 import Storage from "utils/storage";
 
 import Account from "./account";
-import { WebauthnAccount } from "@cartridge/account-wasm";
+import { CartridgeAccount } from "@cartridge/account-wasm";
 import selectors from "./selectors";
 import migrations from "./migrations";
 import { AccountInfoDocument } from "generated/graphql";
@@ -69,7 +69,7 @@ export default class Controller {
         process.env.NEXT_PUBLIC_RPC_SEPOLIA,
         address,
         this.signer,
-        WebauthnAccount.new(
+        CartridgeAccount.new(
           process.env.NEXT_PUBLIC_RPC_SEPOLIA,
           constants.StarknetChainId.SN_SEPOLIA,
           address,

@@ -19,6 +19,8 @@ import {
   num,
   TransactionFinalityStatus,
   InvocationsDetails,
+  CallData,
+  shortString,
   // AccountInvocationItem,
   // TransactionType,
 } from "starknet";
@@ -31,7 +33,7 @@ import { client } from "utils/graphql";
 import selectors from "./selectors";
 import Storage from "./storage";
 // import { InvocationWithDetails, RegisterData, VERSION } from "./controller";
-import { WebauthnAccount } from "@cartridge/account-wasm";
+import { CartridgeAccount } from "@cartridge/account-wasm";
 
 export enum Status {
   COUNTERFACTUAL = "COUNTERFACTUAL",
@@ -44,21 +46,21 @@ class Account extends BaseAccount {
   private selector: string;
   _chainId: constants.StarknetChainId;
   updated: boolean = true;
-  webauthn: WebauthnAccount;
+  cartridge: CartridgeAccount;
 
   constructor(
     chainId: constants.StarknetChainId,
     nodeUrl: string,
     address: string,
     signer: SignerInterface,
-    webauthn: WebauthnAccount,
+    cartridge: CartridgeAccount,
   ) {
     super({ nodeUrl }, address, signer);
 
     this.rpc = new RpcProvider({ nodeUrl });
     this.selector = selectors["0.0.3"].deployment(address, chainId);
     this._chainId = chainId;
-    this.webauthn = webauthn;
+    this.cartridge = cartridge;
   }
 
   static get waitForTransactionOptions(): waitForTransactionOptions {
@@ -159,10 +161,21 @@ class Account extends BaseAccount {
       throw new Error("Account is not deployed");
     }
 
+    const origin = "http://localhost:8000";
+    const originBytes = CallData.compile(
+      origin.split("").map(shortString.encodeShortString),
+    );
+
     transactionsDetail.nonce =
       transactionsDetail.nonce ?? (await this.getNonce("pending"));
+    transactionsDetail.maxFee =
+      "0x000000000000000000000000000000000000000000000000001386f26fc10000";
+    transactionsDetail.version = "1";
+    const res = await this.cartridge.execute(
+      calls as Array<Call>,
+      transactionsDetail,
+    );
 
-    const res = await super.execute(calls, abis, transactionsDetail);
     Storage.update(this.selector, {
       nonce: (BigInt(transactionsDetail.nonce) + 1n).toString(),
     });
@@ -217,7 +230,7 @@ class Account extends BaseAccount {
     return await (this.status === Status.COUNTERFACTUAL ||
     this.status === Status.DEPLOYING
       ? super.signMessage(typedData)
-      : this.webauthn.signMessage()); // TODO: Fix on wasm side
+      : this.cartridge.signMessage()); // TODO: Fix on wasm side
   }
 
   // async register() {

@@ -196,24 +196,24 @@ const Index: NextPage = () => {
                 //   });
                 // }
 
-                if (!transactionsDetail.maxFee) {
-                  transactionsDetail.maxFee = (
-                    await account.estimateInvokeFee(calls, {
-                      nonce: transactionsDetail.nonce,
-                    })
-                  ).suggestedMaxFee;
-                }
+                // if (!transactionsDetail.maxFee) {
+                //   transactionsDetail.maxFee = (
+                //     await account.estimateInvokeFee(calls, {
+                //       nonce: transactionsDetail.nonce,
+                //     })
+                //   ).suggestedMaxFee;
+                // }
 
-                if (
-                  session.maxFee &&
-                  transactionsDetail &&
-                  BigInt(transactionsDetail.maxFee) > BigInt(session.maxFee)
-                ) {
-                  return Promise.resolve({
-                    code: ResponseCodes.NOT_ALLOWED,
-                    message: `Max fee exceeded: ${transactionsDetail.maxFee.toString()} > ${session.maxFee.toString()}`,
-                  });
-                }
+                // if (
+                //   session.maxFee &&
+                //   transactionsDetail &&
+                //   BigInt(transactionsDetail.maxFee) > BigInt(session.maxFee)
+                // ) {
+                //   return Promise.resolve({
+                //     code: ResponseCodes.NOT_ALLOWED,
+                //     message: `Max fee exceeded: ${transactionsDetail.maxFee.toString()} > ${session.maxFee.toString()}`,
+                //   });
+                // }
 
                 const res = await account.execute(
                   calls,
@@ -237,7 +237,6 @@ const Index: NextPage = () => {
             (controller: Controller, _session: Session) => (): ProbeReply => ({
               code: ResponseCodes.SUCCESS,
               address: controller.address,
-              policies: [],
             }),
           ),
         ),
@@ -311,7 +310,7 @@ const Index: NextPage = () => {
       return;
     }
 
-    controller.approve(context.origin, context.policies, "");
+    //controller.approve(context.origin, context.policies, "");
 
     context.resolve({
       code: ResponseCodes.SUCCESS,

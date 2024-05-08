@@ -2,10 +2,10 @@
 /* eslint-disable */
 /**
 */
-export class WebauthnAccount {
+export class CartridgeAccount {
   free(): void;
 /**
-* Creates a new `WebauthnAccount` instance.
+* Creates a new `CartridgeAccount` instance.
 *
 * # Parameters
 * - `rpc_url`: The URL of the JSON-RPC endpoint.
@@ -22,9 +22,9 @@ export class WebauthnAccount {
 * @param {string} origin
 * @param {string} credential_id
 * @param {string} public_key
-* @returns {WebauthnAccount}
+* @returns {CartridgeAccount}
 */
-  static new(rpc_url: string, chain_id: string, address: string, rp_id: string, origin: string, credential_id: string, public_key: string): WebauthnAccount;
+  static new(rpc_url: string, chain_id: string, address: string, rp_id: string, origin: string, credential_id: string, public_key: string): CartridgeAccount;
 /**
 * Registers a new keypair on device signer and creates a new `WebauthnAccount` instance.
 *
@@ -41,13 +41,9 @@ export class WebauthnAccount {
 * @param {string} rp_id
 * @param {string} origin
 * @param {string} user_name
-* @returns {Promise<WebauthnAccount>}
+* @returns {Promise<CartridgeAccount>}
 */
-  static register(rpc_url: string, chain_id: string, address: string, rp_id: string, origin: string, user_name: string): Promise<WebauthnAccount>;
-/**
-* @returns {string}
-*/
-  getCredentialId(): string;
+  static register(rpc_url: string, chain_id: string, address: string, rp_id: string, origin: string, user_name: string): Promise<CartridgeAccount>;
 /**
 * @returns {string}
 */
@@ -57,6 +53,12 @@ export class WebauthnAccount {
 * @returns {Promise<any>}
 */
   sign(_challenge: Uint8Array): Promise<any>;
+/**
+* @param {any[]} calls
+* @param {any} transaction_details
+* @returns {Promise<any>}
+*/
+  execute(calls: any[], transaction_details: any): Promise<any>;
 /**
 * @param {any[]} transactions
 * @param {any} transaction_details
