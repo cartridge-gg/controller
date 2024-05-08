@@ -4,6 +4,7 @@ pub mod deploy_contract;
 pub mod signers;
 mod transaction_waiter;
 // pub mod session_token;
+pub mod session;
 
 #[cfg(not(target_arch = "wasm32"))]
 #[cfg(test)]
