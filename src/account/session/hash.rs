@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use serde_json::json;
 use starknet::core::utils::{get_selector_from_name, NonAsciiNameError};
 use starknet::macros::selector;
@@ -10,7 +11,7 @@ use crate::signers::{SignError, SignerTrait};
 use super::merkle::MerkleTree;
 use super::raw_session::RawSession;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ProvedMethod {
     pub(crate) method: AllowedMethod,
     pub(crate) proof: Vec<FieldElement>,
@@ -86,7 +87,7 @@ impl Session {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AllowedMethod {
     pub contract_address: FieldElement,
     pub selector: FieldElement,
