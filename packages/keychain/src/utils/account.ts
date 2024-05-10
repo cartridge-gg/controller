@@ -118,7 +118,6 @@ class Account extends BaseAccount {
   }
 
   async sync() {
-    console.log("sync");
     Storage.update(this.selector, {
       syncing: Date.now(),
     });

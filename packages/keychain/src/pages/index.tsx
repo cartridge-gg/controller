@@ -25,29 +25,23 @@ import provision from "../methods/provision";
 import { register } from "../methods/register";
 import logout from "../methods/logout";
 import { revoke, session, sessions } from "../methods/sessions";
-import { Status } from "utils/account";
 import { normalize, validate } from "../methods";
 import {
   Connect,
-  DeploymentRequired,
   Execute,
   Login,
   Logout,
-  Quests,
-  Redeploy,
   SignMessage,
   Signup,
-  StarterPack,
 } from "components";
 import { useController } from "hooks/controller";
 
-type Context = Connect | Logout | Execute | SignMessage | StarterPack | Quests;
+type Context = Connect | Logout | Execute | SignMessage;
 
 export type Connect = {
   origin: string;
   type: "connect";
   policies: Policy[];
-  starterPackId?: string;
   resolve: (res: ConnectReply | Error) => void;
   reject: (reason?: unknown) => void;
 };
@@ -80,22 +74,6 @@ type SignMessage = {
   reject: (reason?: unknown) => void;
 };
 
-type StarterPack = {
-  origin: string;
-  type: "starterpack";
-  starterPackId: string;
-  resolve: (res: ExecuteReply | Error) => void;
-  reject: (reason?: unknown) => void;
-};
-
-type Quests = {
-  origin: string;
-  type: "quests";
-  gameId: string;
-  resolve: () => void;
-  reject: () => void;
-};
-
 const Index: NextPage = () => {
   const [chainId, setChainId] = useState<constants.StarknetChainId>(
     constants.StarknetChainId.SN_SEPOLIA,
@@ -121,7 +99,6 @@ const Index: NextPage = () => {
           (origin: string) =>
             async (
               policies: Policy[],
-              starterPackId?: string,
               chainId?: constants.StarknetChainId,
             ): Promise<ConnectReply> => {
               return await new Promise((resolve, reject) => {
@@ -132,7 +109,6 @@ const Index: NextPage = () => {
                   type: "connect",
                   origin,
                   policies,
-                  starterPackId,
                   resolve,
                   reject,
                 } as Connect);
@@ -140,17 +116,14 @@ const Index: NextPage = () => {
             },
         ),
         disconnect: normalize(
-          validate(
-            (controller: Controller, _session: Session, origin: string) =>
-              async () => {
-                controller.revoke(origin);
-                return;
-              },
-          ),
+          validate((controller: Controller, origin: string) => async () => {
+            controller.revoke(origin);
+            return;
+          }),
         ),
         execute: normalize(
           validate(
-            (controller: Controller, session: Session, origin: string) =>
+            (controller: Controller, origin: string, session?: Session) =>
               async (
                 transactions: Call | Call[],
                 abis?: Abi[],
@@ -187,6 +160,14 @@ const Index: NextPage = () => {
                       method: txn.entrypoint,
                     } as Policy),
                 );
+
+                // TODO: Make session optional, which would require webauthn sig on every execution
+                if (!session) {
+                  return Promise.resolve({
+                    code: ResponseCodes.NOT_ALLOWED,
+                    message: `No session`,
+                  });
+                }
 
                 const missing = diff(policies, session.policies);
                 if (missing.length > 0) {
@@ -234,17 +215,18 @@ const Index: NextPage = () => {
         logout: normalize(logout),
         probe: normalize(
           validate(
-            (controller: Controller, session: Session) => (): ProbeReply => ({
-              code: ResponseCodes.SUCCESS,
-              address: controller.address,
-              policies: session.policies,
-            }),
+            (controller: Controller, _origin: string, session?: Session) =>
+              (): ProbeReply => ({
+                code: ResponseCodes.SUCCESS,
+                address: controller.address,
+                policies: session?.policies || [],
+              }),
           ),
         ),
         revoke: normalize(revoke),
         signMessage: normalize(
           validate(
-            (_: Controller, _session: Session, origin: string) =>
+            (_: Controller, origin: string) =>
               async (typedData: TypedData, account: string) => {
                 return await new Promise((resolve, reject) => {
                   setContext({
@@ -262,30 +244,6 @@ const Index: NextPage = () => {
         session: normalize(session),
         sessions: normalize(sessions),
         reset: normalize(() => () => setContext(undefined)),
-        issueStarterPack: normalize(
-          (origin: string) => async (starterPackId: string) => {
-            return await new Promise((resolve, reject) => {
-              setContext({
-                type: "starterpack",
-                origin,
-                starterPackId,
-                resolve,
-                reject,
-              } as StarterPack);
-            });
-          },
-        ),
-        showQuests: normalize((origin: string) => async (gameId: string) => {
-          return await new Promise((resolve, reject) => {
-            setContext({
-              type: "quests",
-              origin,
-              gameId,
-              resolve,
-              reject,
-            } as Quests);
-          });
-        }),
       },
     });
 
@@ -310,27 +268,6 @@ const Index: NextPage = () => {
       setController(controller);
       return;
     }
-
-    const account = controller.account(
-      (context as any).transactionsDetail?.chainId ?? chainId,
-    );
-
-    // This device needs to be registered, so do a webauthn signature request
-    // for the register transaction during the connect flow.
-    if (account.status === Status.DEPLOYED) {
-      try {
-        await account.register();
-      } catch (e) {
-        context.resolve({
-          code: ResponseCodes.CANCELED,
-          message: "Canceled",
-        } as Error);
-        setController(controller);
-        return;
-      }
-    }
-
-    controller.approve(context.origin, context.policies, "");
 
     context.resolve({
       code: ResponseCodes.SUCCESS,
@@ -379,11 +316,6 @@ const Index: NextPage = () => {
     } as Logout);
   };
 
-  const account = controller.account(
-    (context as any).transactionsDetail?.chainId ?? chainId,
-  );
-  const sesh = controller.session(context.origin);
-
   const onConnect = async ({
     context,
     policies,
@@ -393,32 +325,6 @@ const Index: NextPage = () => {
     policies: Policy[];
     maxFee: string;
   }) => {
-    if (account.status === Status.COUNTERFACTUAL) {
-      // TODO: Deploy?
-      context.resolve({
-        code: ResponseCodes.SUCCESS,
-        address: controller.address,
-        policies,
-      } as any);
-      return;
-    }
-
-    // This device needs to be registered, so do a webauthn signature request
-    // for the register transaction during the connect flow.
-    if (account.status === Status.DEPLOYED) {
-      try {
-        await account.register();
-      } catch (e) {
-        context.resolve({
-          code: ResponseCodes.CANCELED,
-          message: "Canceled",
-        } as Error);
-        return;
-      }
-    }
-
-    controller.approve(context.origin, policies, maxFee);
-
     context.resolve({
       code: ResponseCodes.SUCCESS,
       address: controller.address,
@@ -426,11 +332,12 @@ const Index: NextPage = () => {
     } as any);
   };
 
-  if (context.type === "connect" || !sesh) {
+  if (context.type === "connect") {
     const ctx = context as Connect;
+    const session = controller.session(context.origin);
 
     // if no mismatch with existing policies then return success
-    if (sesh && diff(sesh.policies, ctx.policies).length === 0) {
+    if (session && diff(session.policies, ctx.policies).length === 0) {
       ctx.resolve({
         code: ResponseCodes.SUCCESS,
         address: controller.address,
@@ -481,29 +388,6 @@ const Index: NextPage = () => {
     );
   }
 
-  if (context.type === "starterpack") {
-    const ctx = context as StarterPack;
-    return (
-      <StarterPack
-        controller={controller}
-        starterPackId={ctx.starterPackId}
-        onClaim={(res: ExecuteReply) => ctx.resolve(res)}
-      />
-    );
-  }
-
-  if (context.type === "quests") {
-    const ctx = context as Quests;
-    return (
-      <Quests
-        gameId={ctx.gameId}
-        address={controller.address}
-        chainId={chainId}
-        onLogout={() => onLogout(ctx)}
-      />
-    );
-  }
-
   if (context.type === "sign-message") {
     const ctx = context as SignMessage;
     return (
@@ -526,66 +410,21 @@ const Index: NextPage = () => {
 
   if (context.type === "execute") {
     const ctx = context as Execute;
-    const _chainId = ctx.transactionsDetail?.chainId ?? chainId;
-    const account = controller.account(_chainId);
-
-    if (account.status === Status.DEPLOYED) {
-      return (
-        <Connect
-          origin={ctx.origin}
-          // chainId={_chainId}
-          policies={[]}
-          onConnect={() =>
-            onConnect({
-              context: ctx,
-              policies: [],
-              maxFee: "",
-            })
-          }
-          onCancel={() =>
-            ctx.resolve({ code: ResponseCodes.CANCELED, message: "Canceled" })
-          }
-          onLogout={() => onLogout(ctx)}
-        />
-      );
-    }
-
-    if (account.status === Status.COUNTERFACTUAL) {
-      return (
-        <Redeploy
-          chainId={_chainId}
-          controller={controller}
-          onLogout={() => onLogout(ctx)}
-        />
-      );
-    }
 
     return (
-      <DeploymentRequired
-        chainId={chainId}
+      <Execute
+        {...ctx}
+        chainId={ctx.transactionsDetail?.chainId ?? chainId}
         controller={controller}
-        onClose={() =>
+        onExecute={(res: ExecuteReply) => ctx.resolve(res)}
+        onCancel={() =>
           ctx.resolve({
             code: ResponseCodes.CANCELED,
             message: "Canceled",
           })
         }
         onLogout={() => onLogout(ctx)}
-      >
-        <Execute
-          {...ctx}
-          chainId={_chainId}
-          controller={controller}
-          onExecute={(res: ExecuteReply) => ctx.resolve(res)}
-          onCancel={() =>
-            ctx.resolve({
-              code: ResponseCodes.CANCELED,
-              message: "Canceled",
-            })
-          }
-          onLogout={() => onLogout(ctx)}
-        />
-      </DeploymentRequired>
+      />
     );
   }
 

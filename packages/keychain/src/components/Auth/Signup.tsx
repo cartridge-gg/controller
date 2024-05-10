@@ -80,7 +80,7 @@ export function Signup({
       if (isIframe) {
         setIsRegistering(true);
         PopupCenter(
-          `/authenticate?name=${encodeURIComponent(values.username)}}`,
+          `/authenticate?name=${encodeURIComponent(values.username)}`,
           "Cartridge Signup",
           480,
           640,
