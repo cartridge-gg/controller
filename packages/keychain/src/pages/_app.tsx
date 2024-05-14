@@ -1,8 +1,8 @@
 import NextHead from "next/head";
-import { CartridgeTheme } from "@cartridge/ui";
 import type { AppProps } from "next/app";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { CartridgeUIProvider } from "@cartridge/ui";
+import { CartridgeTheme } from "@cartridge/ui";
+import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import { Inter, IBM_Plex_Mono } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -21,8 +21,27 @@ const queryClient = new QueryClient({
   },
 });
 
+import { useRouter } from "next/router";
+
 export default function Keychain({ Component, pageProps }: AppProps) {
   useGlobalInjection();
+
+  const router = useRouter();
+  const { primary, secondary } = router.query;
+
+  console.log(CartridgeTheme.colors)
+
+  const customTheme = extendTheme({
+    ...CartridgeTheme,
+    colors: {
+      ...CartridgeTheme.colors,
+      // brand: {
+      //   primary: (primary as string) || CartridgeTheme.colors.brand.primary,
+      //   secondary:
+      //     (secondary as string) || CartridgeTheme.colors.brand.secondary,
+      // },
+    },
+  });
 
   return (
     <>
@@ -51,11 +70,11 @@ export default function Keychain({ Component, pageProps }: AppProps) {
         }
       `}</style>
 
-      <CartridgeUIProvider>
+      <ChakraProvider theme={customTheme}>
         <QueryClientProvider client={queryClient}>
           <Component {...pageProps} />
         </QueryClientProvider>
-      </CartridgeUIProvider>
+      </ChakraProvider>
     </>
   );
 }

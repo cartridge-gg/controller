@@ -49,6 +49,12 @@ class Controller {
       origin?: string;
       starterPackId?: string;
       chainId?: constants.StarknetChainId;
+      theme?: {
+        colors?: {
+          primary?: string;
+          secondary?: string;
+        }
+      }
     },
   ) {
     if (policies) {
@@ -67,6 +73,15 @@ class Controller {
     if (options?.url) {
       this.url = options.url;
     }
+
+    const url = new URL(this.url);
+    if (options?.theme?.colors?.primary) {
+      url.searchParams.set('primary', options.theme.colors.primary);
+    }
+    if (options?.theme?.colors?.secondary) {
+      url.searchParams.set('secondary', options.theme.colors.secondary);
+    }
+    this.url = url.toString();
 
     if (typeof document === "undefined") {
       return;
