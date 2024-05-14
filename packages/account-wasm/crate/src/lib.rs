@@ -20,7 +20,7 @@ use starknet::{
     core::types::FieldElement,
     providers::{jsonrpc::HttpTransport, JsonRpcClient},
 };
-use types::{JsCall, JsCredentials, JsInvocationsDetails, JsSession};
+use types::{JsCall, JsCredentials, JsInvocationsDetails, JsPolicy, JsSession};
 use url::Url;
 use wasm_bindgen::prelude::*;
 use web_sys::console;
@@ -89,18 +89,14 @@ impl CartridgeAccount {
             from_value(session_details).map_err(|e| JsValue::from_str(&format!("{}", e)))?;
         let session: Option<SessionAccount<JsonRpcClient<HttpTransport>, SigningKey, SigningKey>> =
             if let Some(session_details) = session_details {
-                let methods: Vec<AllowedMethod> = vec![
-                    AllowedMethod::new(
-                        felt!("0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"),
-                        "approve",
-                    )
-                    .unwrap(),
-                    AllowedMethod::new(
-                        felt!("0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"),
-                        "transfer",
-                    )
-                    .unwrap(),
-                ];
+                let methods = session_details
+                    .policies
+                    .into_iter()
+                    .map(|policy| {
+                        AllowedMethod::try_from(policy)
+                            .map_err(|e| JsValue::from_str(&format!("{}", e)))
+                    })
+                    .collect::<Result<Vec<AllowedMethod>, _>>()?;
 
                 let session_signer =
                     SigningKey::from_secret_scalar(session_details.credentials.private_key);
@@ -139,18 +135,17 @@ impl CartridgeAccount {
         policies: Vec<JsValue>,
         expires_at: u64,
     ) -> Result<JsValue, JsValue> {
-        let methods: Vec<AllowedMethod> = vec![
-            AllowedMethod::new(
-                felt!("0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"),
-                "approve",
-            )
-            .unwrap(),
-            AllowedMethod::new(
-                felt!("0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"),
-                "transfer",
-            )
-            .unwrap(),
-        ];
+        utils::set_panic_hook();
+
+        let methods = policies
+            .into_iter()
+            .map(|js_value| {
+                JsPolicy::try_from(js_value).and_then(|js_policy| {
+                    AllowedMethod::try_from(js_policy).map_err(|e| JsValue::from_str(&format!("{}", e)))
+                })
+            })
+            .collect::<Result<Vec<AllowedMethod>, _>>()?;
+
         let signer = SigningKey::from_random();
         let session = Session::new(methods, expires_at, &signer.signer())
             .map_err(|e| JsValue::from_str(&format!("{}", e)))?;

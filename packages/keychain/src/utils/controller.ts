@@ -121,10 +121,11 @@ export default class Controller {
       throw new Error("Account not found");
     }
 
-    const credentials = await account.cartridge.createSession(
-      policies,
-      expiresAt,
-    );
+    const credentials = await account.cartridge
+      .createSession(policies, expiresAt)
+      .catch((e) => {
+        console.log(e);
+      });
 
     Storage.set(selectors[VERSION].session(this.address, origin, chainId), {
       policies,

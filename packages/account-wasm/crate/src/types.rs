@@ -1,3 +1,4 @@
+use account_sdk::account::session::hash::AllowedMethod;
 use serde::{Deserialize, Serialize};
 use starknet::{
     accounts::Call,
@@ -47,6 +48,25 @@ pub struct JsSession {
     pub credentials: JsCredentials,
 }
 
+impl TryFrom<JsPolicy> for AllowedMethod {
+    type Error = FromStrError;
+
+    fn try_from(value: JsPolicy) -> Result<Self, Self::Error> {
+        Ok(AllowedMethod {
+            contract_address: FieldElement::from_str(&value.target)?,
+            selector: get_selector_from_name(&value.method).unwrap(),
+        })
+    }
+}
+
+impl TryFrom<JsValue> for JsPolicy {
+    type Error = JsValue;
+
+    fn try_from(value: JsValue) -> Result<Self, Self::Error> {
+        Ok(serde_wasm_bindgen::from_value(value)?)
+    }
+}
+
 impl TryFrom<JsCall> for Call {
     type Error = FromStrError;
 
@@ -82,3 +102,4 @@ impl TryFrom<JsValue> for JsInvocationsDetails {
         Ok(serde_wasm_bindgen::from_value(value)?)
     }
 }
+

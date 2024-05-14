@@ -407,11 +407,6 @@ export function __wbindgen_string_new(arg0, arg1) {
     return addHeapObject(ret);
 };
 
-export function __wbindgen_error_new(arg0, arg1) {
-    const ret = new Error(getStringFromWasm0(arg0, arg1));
-    return addHeapObject(ret);
-};
-
 export function __wbindgen_cb_drop(arg0) {
     const obj = takeObject(arg0).original;
     if (obj.cnt-- == 1) {
@@ -420,6 +415,11 @@ export function __wbindgen_cb_drop(arg0) {
     }
     const ret = false;
     return ret;
+};
+
+export function __wbindgen_error_new(arg0, arg1) {
+    const ret = new Error(getStringFromWasm0(arg0, arg1));
+    return addHeapObject(ret);
 };
 
 export function __wbindgen_is_object(arg0) {
@@ -905,7 +905,7 @@ export function __wbindgen_memory() {
 };
 
 export function __wbindgen_closure_wrapper1114(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 396, __wbg_adapter_38);
+    const ret = makeMutClosure(arg0, arg1, 395, __wbg_adapter_38);
     return addHeapObject(ret);
 };
 
