@@ -1,4 +1,9 @@
-import { AccountInterface, constants, RpcProvider } from "starknet";
+import {
+  AccountInterface,
+  addAddressPadding,
+  constants,
+  RpcProvider,
+} from "starknet";
 import {
   AsyncMethodReturns,
   Connection,
@@ -47,7 +52,12 @@ class Controller {
     },
   ) {
     if (policies) {
-      this.policies = policies;
+      this.policies = policies.map((policy) => {
+        return {
+          ...policy,
+          target: addAddressPadding(policy.target),
+        };
+      });
     }
 
     if (options?.chainId) {

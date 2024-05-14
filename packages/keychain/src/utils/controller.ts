@@ -1,4 +1,4 @@
-import { constants, ec, SignerInterface, BigNumberish, num } from "starknet";
+import { constants, SignerInterface, BigNumberish } from "starknet";
 import equal from "fast-deep-equal";
 
 import { Policy, Session } from "@cartridge/controller";

@@ -155,7 +155,7 @@ class Account extends BaseAccount {
   // @ts-expect-error TODO: fix overload type mismatch
   async execute(
     calls: AllowArray<Call>,
-    abis?: Abi[],
+    _abis?: Abi[],
     transactionsDetail?: InvocationsDetails,
   ): Promise<InvokeFunctionResponse> {
     if (this.status === Status.COUNTERFACTUAL) {

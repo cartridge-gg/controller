@@ -1,4 +1,4 @@
-import { Error, ResponseCodes, Session } from "@cartridge/controller";
+import { Error, ResponseCodes } from "@cartridge/controller";
 
 import { normalize as normalizeOrigin } from "utils/url";
 import Controller from "utils/controller";

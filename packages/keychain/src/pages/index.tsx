@@ -161,9 +161,7 @@ const Index: NextPage = () => {
                     } as Policy),
                 );
 
-                // TODO: Make session optional, which would require webauthn sig on every execution
                 const session = controller.session(origin, cId);
-                console.log(session);
                 if (!session) {
                   return Promise.resolve({
                     code: ResponseCodes.NOT_ALLOWED,
