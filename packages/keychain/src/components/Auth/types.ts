@@ -9,6 +9,7 @@ export type FormValues = {
 export type AuthProps = SignupProps | LoginProps;
 
 type AuthBaseProps = {
+  origin: string;
   prefilledName?: string;
   context?: Connect;
   isSlot?: boolean;

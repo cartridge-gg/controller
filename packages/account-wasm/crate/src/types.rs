@@ -1,4 +1,3 @@
-use account_sdk::account::session::hash::Session;
 use serde::{Deserialize, Serialize};
 use starknet::{
     accounts::Call,
@@ -28,9 +27,24 @@ pub struct JsCall {
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct SessionCredentials {
+pub struct JsCredentials {
     pub authorization: Vec<FieldElement>,
     pub private_key: FieldElement,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct JsPolicy {
+    pub target: String,
+    pub method: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct JsSession {
+    pub policies: Vec<JsPolicy>,
+    pub expires_at: String,
+    pub credentials: JsCredentials,
 }
 
 impl TryFrom<JsCall> for Call {

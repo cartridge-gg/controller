@@ -1,31 +1,32 @@
 import { Container, PortalBanner, PortalFooter } from "components";
-import { constants } from "starknet";
+import { BigNumberish, constants } from "starknet";
 import { Policy } from "@cartridge/controller";
 import { PlugNewDuoIcon } from "@cartridge/ui";
 import { Button } from "@chakra-ui/react";
 import { useState } from "react";
+import { useController } from "hooks/controller";
 
 export function Connect({
-  // chainId,
+  chainId,
   policies,
   origin,
   onConnect,
   onCancel,
   onLogout,
 }: {
-  // chainId: constants.StarknetChainId;
+  chainId: constants.StarknetChainId;
   policies: Policy[];
   origin: string;
   onConnect: (policies: Policy[]) => void;
   onCancel: () => void;
   onLogout: () => void;
 }) {
+  const [controller] = useController();
   const [isConnecting, setIsConnecting] = useState(false);
+  const [expiresAt] = useState<bigint>(3000000000n);
+  const [maxFees] = useState<BigNumberish>();
   return (
-    <Container
-      chainId={constants.StarknetChainId.SN_SEPOLIA}
-      onLogout={onLogout}
-    >
+    <Container chainId={chainId} onLogout={onLogout}>
       <PortalBanner
         Icon={PlugNewDuoIcon}
         title="Create Session"
@@ -38,9 +39,16 @@ export function Connect({
             colorScheme="colorful"
             isDisabled={isConnecting}
             isLoading={isConnecting}
-            onClick={() => {
+            onClick={async () => {
               setIsConnecting(true);
-              onConnect(policies);
+              await controller
+                .approve(origin, chainId, expiresAt, policies, maxFees)
+                .then(() => {
+                  onConnect(policies);
+                })
+                .catch(() => {
+                  setIsConnecting(false);
+                });
             }}
           >
             create

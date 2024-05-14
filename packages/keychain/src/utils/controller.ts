@@ -12,16 +12,7 @@ import migrations from "./migrations";
 import { AccountInfoDocument } from "generated/graphql";
 import { client } from "./graphql";
 
-export const VERSION = "0.0.3";
-
-// export type InvocationWithDetails = {
-//   invocation: Invocation;
-//   details: InvocationsDetails;
-// };
-
-// export type RegisterData = {
-//   invoke: InvocationWithDetails;
-// };
+export const VERSION = "0.0.1";
 
 type SerializedController = {
   publicKey: string;
@@ -48,7 +39,6 @@ export default class Controller {
     this.address = address;
     this.publicKey = publicKey;
     this.credentialId = credentialId;
-
     this.accounts = [
       // TODO: Enable once controller is ready for mainnet
       // [constants.StarknetChainId.SN_MAIN]: new Account(
@@ -77,6 +67,10 @@ export default class Controller {
           options?.origin || process.env.NEXT_PUBLIC_ORIGIN,
           credentialId,
           publicKey,
+          this.session(
+            "http://localhost:3002",
+            constants.StarknetChainId.SN_SEPOLIA,
+          ),
         ),
       ),
     ];
@@ -85,7 +79,7 @@ export default class Controller {
       selectors[VERSION].admin(this.address, process.env.NEXT_PUBLIC_ADMIN_URL),
       {},
     );
-    Storage.set(selectors["0.0.3"].active(), address);
+    Storage.set(selectors["0.0.1"].active(), address);
     this.store();
   }
 
@@ -108,31 +102,55 @@ export default class Controller {
   }
 
   account(chainId: constants.StarknetChainId): Account | undefined {
-    return this.accounts.find((a) => a._chainId === chainId);
+    return this.accounts.find((a) => a.chainId === chainId);
   }
 
   delete() {
     return Storage.clear();
   }
 
-  approve(origin: string, policies: Policy[], maxFee?: BigNumberish) {
-    Storage.set(selectors[VERSION].session(this.address, origin), {
+  async approve(
+    origin: string,
+    chainId: constants.StarknetChainId,
+    expiresAt: bigint,
+    policies: Policy[],
+    maxFee?: BigNumberish,
+  ) {
+    const account = this.account(chainId);
+    if (!account) {
+      throw new Error("Account not found");
+    }
+
+    const credentials = await account.cartridge.createSession(
+      policies,
+      expiresAt,
+    );
+
+    Storage.set(selectors[VERSION].session(this.address, origin, chainId), {
       policies,
       maxFee,
+      credentials,
+      expiresAt: expiresAt.toString(),
     });
   }
 
-  revoke(origin: string) {
-    Storage.remove(selectors[VERSION].session(this.address, origin));
+  revoke(origin: string, chainId: constants.StarknetChainId) {
+    // TODO: Cartridge Account SDK to implement revoke session tokens
+    Storage.remove(selectors[VERSION].session(this.address, origin, chainId));
   }
 
-  session(origin: string): Session | undefined {
-    return Storage.get(selectors[VERSION].session(this.address, origin));
+  session(
+    origin: string,
+    chainId: constants.StarknetChainId,
+  ): Session | undefined {
+    return Storage.get(
+      selectors[VERSION].session(this.address, origin, chainId),
+    );
   }
 
   sessions(): { [key: string]: Session } | undefined {
     return Storage.keys()
-      .filter((k) => k.startsWith(selectors[VERSION].session(this.address, "")))
+      .filter((k) => k.startsWith(`@session/${this.address}/${origin}`))
       .reduce((prev, key) => {
         prev[key.slice(9)] = Storage.get(key);
         return prev;
@@ -155,11 +173,9 @@ export default class Controller {
     }
 
     let controller: SerializedController;
-    if (version === "0.0.2") {
-      controller = Storage.get(selectors["0.0.2"].account());
-    } else if (version === "0.0.3") {
-      const active = Storage.get(selectors["0.0.3"].active());
-      controller = Storage.get(selectors["0.0.3"].account(active));
+    if (version === "0.0.1") {
+      const active = Storage.get(selectors["0.0.1"].active());
+      controller = Storage.get(selectors["0.0.1"].account(active));
     }
 
     if (!controller) {

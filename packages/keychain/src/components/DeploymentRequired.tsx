@@ -65,7 +65,7 @@ export function DeploymentRequired({
         {status === Status.DEPLOYING && (
           <Link
             href={`https://${
-              account._chainId === constants.StarknetChainId.SN_SEPOLIA
+              account.chainId === constants.StarknetChainId.SN_SEPOLIA
                 ? "sepolia."
                 : undefined
             }starkscan.co/tx/${deployHash}`}

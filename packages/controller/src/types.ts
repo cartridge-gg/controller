@@ -31,6 +31,11 @@ export type Session = {
   chainId: constants.StarknetChainId;
   policies: Policy[];
   maxFee: BigNumberish;
+  expiresAt: bigint;
+  credentials: {
+    authorization: string[];
+    privateKey: string;
+  };
 };
 
 export type Policy = {

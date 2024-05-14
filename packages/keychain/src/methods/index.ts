@@ -10,7 +10,7 @@ export function normalize<Promise>(
 }
 
 export function validate<T>(
-  fn: (controller: Controller, origin: string, session?: Session) => T,
+  fn: (controller: Controller, origin: string) => T,
 ): (origin: string) => T | (() => Promise<Error>) {
   return (origin: string) => {
     const controller = Controller.fromStore();
@@ -21,6 +21,6 @@ export function validate<T>(
       });
     }
 
-    return fn(controller, origin, controller.session(origin));
+    return fn(controller, origin);
   };
 }

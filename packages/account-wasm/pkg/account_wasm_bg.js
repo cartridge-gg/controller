@@ -24,11 +24,7 @@ function takeObject(idx) {
     return ret;
 }
 
-const lTextDecoder = typeof TextDecoder === 'undefined' ? (0, module.require)('util').TextDecoder : TextDecoder;
-
-let cachedTextDecoder = new lTextDecoder('utf-8', { ignoreBOM: true, fatal: true });
-
-cachedTextDecoder.decode();
+let WASM_VECTOR_LEN = 0;
 
 let cachedUint8Memory0 = null;
 
@@ -38,22 +34,6 @@ function getUint8Memory0() {
     }
     return cachedUint8Memory0;
 }
-
-function getStringFromWasm0(ptr, len) {
-    ptr = ptr >>> 0;
-    return cachedTextDecoder.decode(getUint8Memory0().subarray(ptr, ptr + len));
-}
-
-function addHeapObject(obj) {
-    if (heap_next === heap.length) heap.push(heap.length + 1);
-    const idx = heap_next;
-    heap_next = heap[idx];
-
-    heap[idx] = obj;
-    return idx;
-}
-
-let WASM_VECTOR_LEN = 0;
 
 const lTextEncoder = typeof TextEncoder === 'undefined' ? (0, module.require)('util').TextEncoder : TextEncoder;
 
@@ -122,6 +102,26 @@ function getInt32Memory0() {
         cachedInt32Memory0 = new Int32Array(wasm.memory.buffer);
     }
     return cachedInt32Memory0;
+}
+
+const lTextDecoder = typeof TextDecoder === 'undefined' ? (0, module.require)('util').TextDecoder : TextDecoder;
+
+let cachedTextDecoder = new lTextDecoder('utf-8', { ignoreBOM: true, fatal: true });
+
+cachedTextDecoder.decode();
+
+function getStringFromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return cachedTextDecoder.decode(getUint8Memory0().subarray(ptr, ptr + len));
+}
+
+function addHeapObject(obj) {
+    if (heap_next === heap.length) heap.push(heap.length + 1);
+    const idx = heap_next;
+    heap_next = heap[idx];
+
+    heap[idx] = obj;
+    return idx;
 }
 
 let cachedFloat64Memory0 = null;
@@ -269,7 +269,7 @@ function handleError(f, args) {
         wasm.__wbindgen_exn_store(addHeapObject(e));
     }
 }
-function __wbg_adapter_160(arg0, arg1, arg2, arg3) {
+function __wbg_adapter_151(arg0, arg1, arg2, arg3) {
     wasm.wasm_bindgen__convert__closures__invoke2_mut__h9884f08b4938b13b(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
 }
 
@@ -317,9 +317,10 @@ export class CartridgeAccount {
     * @param {string} origin
     * @param {string} credential_id
     * @param {string} public_key
+    * @param {any} session_details
     * @returns {CartridgeAccount}
     */
-    static new(rpc_url, chain_id, address, rp_id, origin, credential_id, public_key) {
+    static new(rpc_url, chain_id, address, rp_id, origin, credential_id, public_key, session_details) {
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
             const ptr0 = passStringToWasm0(rpc_url, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -336,7 +337,7 @@ export class CartridgeAccount {
             const len5 = WASM_VECTOR_LEN;
             const ptr6 = passStringToWasm0(public_key, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
             const len6 = WASM_VECTOR_LEN;
-            wasm.cartridgeaccount_new(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6);
+            wasm.cartridgeaccount_new(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, addHeapObject(session_details));
             var r0 = getInt32Memory0()[retptr / 4 + 0];
             var r1 = getInt32Memory0()[retptr / 4 + 1];
             var r2 = getInt32Memory0()[retptr / 4 + 2];
@@ -347,40 +348,6 @@ export class CartridgeAccount {
         } finally {
             wasm.__wbindgen_add_to_stack_pointer(16);
         }
-    }
-    /**
-    * Registers a new keypair on device signer and creates a new `CartridgeAccount` instance.
-    *
-    * # Parameters
-    * - `rpc_url`: The URL of the JSON-RPC endpoint.
-    * - `chain_id`: Identifier of the blockchain network to interact with.
-    * - `address`: The blockchain address associated with the account.
-    * - `rp_id`: Relying Party Identifier, a string that uniquely identifies the WebAuthn relying party.
-    * - `origin`: The origin of the WebAuthn request. Example https://cartridge.gg
-    * - `user_name`: The user name associated with the account.
-    * @param {string} rpc_url
-    * @param {string} chain_id
-    * @param {string} address
-    * @param {string} rp_id
-    * @param {string} origin
-    * @param {string} user_name
-    * @returns {Promise<CartridgeAccount>}
-    */
-    static register(rpc_url, chain_id, address, rp_id, origin, user_name) {
-        const ptr0 = passStringToWasm0(rpc_url, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len0 = WASM_VECTOR_LEN;
-        const ptr1 = passStringToWasm0(chain_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len1 = WASM_VECTOR_LEN;
-        const ptr2 = passStringToWasm0(address, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len2 = WASM_VECTOR_LEN;
-        const ptr3 = passStringToWasm0(rp_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len3 = WASM_VECTOR_LEN;
-        const ptr4 = passStringToWasm0(origin, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len4 = WASM_VECTOR_LEN;
-        const ptr5 = passStringToWasm0(user_name, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len5 = WASM_VECTOR_LEN;
-        const ret = wasm.cartridgeaccount_register(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5);
-        return takeObject(ret);
     }
     /**
     * @param {any[]} policies
@@ -426,26 +393,6 @@ export function __wbindgen_object_drop_ref(arg0) {
     takeObject(arg0);
 };
 
-export function __wbindgen_string_new(arg0, arg1) {
-    const ret = getStringFromWasm0(arg0, arg1);
-    return addHeapObject(ret);
-};
-
-export function __wbg_cartridgeaccount_new(arg0) {
-    const ret = CartridgeAccount.__wrap(arg0);
-    return addHeapObject(ret);
-};
-
-export function __wbindgen_cb_drop(arg0) {
-    const obj = takeObject(arg0).original;
-    if (obj.cnt-- == 1) {
-        obj.a = 0;
-        return true;
-    }
-    const ret = false;
-    return ret;
-};
-
 export function __wbindgen_string_get(arg0, arg1) {
     const obj = getObject(arg1);
     const ret = typeof(obj) === 'string' ? obj : undefined;
@@ -453,6 +400,16 @@ export function __wbindgen_string_get(arg0, arg1) {
     var len1 = WASM_VECTOR_LEN;
     getInt32Memory0()[arg0 / 4 + 1] = len1;
     getInt32Memory0()[arg0 / 4 + 0] = ptr1;
+};
+
+export function __wbindgen_string_new(arg0, arg1) {
+    const ret = getStringFromWasm0(arg0, arg1);
+    return addHeapObject(ret);
+};
+
+export function __wbindgen_error_new(arg0, arg1) {
+    const ret = new Error(getStringFromWasm0(arg0, arg1));
+    return addHeapObject(ret);
 };
 
 export function __wbindgen_is_object(arg0) {
@@ -471,9 +428,14 @@ export function __wbindgen_in(arg0, arg1) {
     return ret;
 };
 
-export function __wbindgen_error_new(arg0, arg1) {
-    const ret = new Error(getStringFromWasm0(arg0, arg1));
-    return addHeapObject(ret);
+export function __wbindgen_cb_drop(arg0) {
+    const obj = takeObject(arg0).original;
+    if (obj.cnt-- == 1) {
+        obj.a = 0;
+        return true;
+    }
+    const ret = false;
+    return ret;
 };
 
 export function __wbindgen_jsval_loose_eq(arg0, arg1) {
@@ -519,10 +481,6 @@ export function __wbg_String_b9412f8799faab3e(arg0, arg1) {
     const len1 = WASM_VECTOR_LEN;
     getInt32Memory0()[arg0 / 4 + 1] = len1;
     getInt32Memory0()[arg0 / 4 + 0] = ptr1;
-};
-
-export function __wbg_set_841ac57cff3d672b(arg0, arg1, arg2) {
-    getObject(arg0)[takeObject(arg1)] = takeObject(arg2);
 };
 
 export function __wbg_String_88810dfeb4021902(arg0, arg1) {
@@ -658,11 +616,6 @@ export function __wbg_text_450a059667fd91fd() { return handleError(function (arg
     return addHeapObject(ret);
 }, arguments) };
 
-export function __wbg_create_21f4f173d36edabb() { return handleError(function (arg0, arg1) {
-    const ret = getObject(arg0).create(getObject(arg1));
-    return addHeapObject(ret);
-}, arguments) };
-
 export function __wbg_get_af826bc073cbd7b3() { return handleError(function (arg0, arg1) {
     const ret = getObject(arg0).get(getObject(arg1));
     return addHeapObject(ret);
@@ -684,11 +637,6 @@ export function __wbg_abort_2aa7521d5690750e(arg0) {
 
 export function __wbg_clientDataJSON_c62fc9ad5f2cb8ba(arg0) {
     const ret = getObject(arg0).clientDataJSON;
-    return addHeapObject(ret);
-};
-
-export function __wbg_attestationObject_6ba2ca39bba4997b(arg0) {
-    const ret = getObject(arg0).attestationObject;
     return addHeapObject(ret);
 };
 
@@ -852,7 +800,7 @@ export function __wbg_new_81740750da40724f(arg0, arg1) {
             const a = state0.a;
             state0.a = 0;
             try {
-                return __wbg_adapter_160(a, state0.b, arg0, arg1);
+                return __wbg_adapter_151(a, state0.b, arg0, arg1);
             } finally {
                 state0.a = a;
             }
@@ -956,8 +904,8 @@ export function __wbindgen_memory() {
     return addHeapObject(ret);
 };
 
-export function __wbindgen_closure_wrapper1170(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 407, __wbg_adapter_38);
+export function __wbindgen_closure_wrapper1114(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 396, __wbg_adapter_38);
     return addHeapObject(ret);
 };
 

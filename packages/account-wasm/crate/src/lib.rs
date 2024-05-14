@@ -11,7 +11,7 @@ use account_sdk::signers::HashSigner;
 use account_sdk::wasm_webauthn::CredentialID;
 use base64::{engine::general_purpose, Engine};
 use coset::{CborSerializable, CoseKey};
-use serde_wasm_bindgen::to_value;
+use serde_wasm_bindgen::{from_value, to_value};
 use starknet::accounts::Account;
 use starknet::macros::felt;
 use starknet::signers::SigningKey;
@@ -20,7 +20,7 @@ use starknet::{
     core::types::FieldElement,
     providers::{jsonrpc::HttpTransport, JsonRpcClient},
 };
-use types::{JsCall, JsInvocationsDetails, SessionCredentials};
+use types::{JsCall, JsCredentials, JsInvocationsDetails, JsSession};
 use url::Url;
 use wasm_bindgen::prelude::*;
 use web_sys::console;
@@ -53,6 +53,7 @@ impl CartridgeAccount {
         origin: String,
         credential_id: String,
         public_key: String,
+        session_details: JsValue,
     ) -> Result<CartridgeAccount, JsValue> {
         utils::set_panic_hook();
         let rpc_url = Url::parse(&rpc_url).map_err(|e| JsValue::from_str(&format!("{}", e)))?;
@@ -61,14 +62,11 @@ impl CartridgeAccount {
         let credential_id = general_purpose::URL_SAFE_NO_PAD
             .decode(credential_id)
             .map_err(|e| JsValue::from_str(&format!("{}", e)))?;
-
         let bytes = general_purpose::URL_SAFE_NO_PAD
             .decode(public_key)
             .map_err(|e| JsValue::from_str(&format!("{}", e)))?;
-
         let cose = CoseKey::from_slice(&bytes).map_err(|e| JsValue::from_str(&format!("{}", e)))?;
-
-        let signer = DeviceSigner::new(
+        let webauthn_signer = DeviceSigner::new(
             rp_id.clone(),
             origin.clone(),
             CredentialID(credential_id),
@@ -76,63 +74,71 @@ impl CartridgeAccount {
         );
 
         let dummy_guardian = SigningKey::from_secret_scalar(felt!("0x42"));
-
         let address =
             FieldElement::from_str(&address).map_err(|e| JsValue::from_str(&format!("{}", e)))?;
         let chain_id =
             FieldElement::from_str(&chain_id).map_err(|e| JsValue::from_str(&format!("{}", e)))?;
+        let account = CartridgeGuardianAccount::new(
+            provider,
+            webauthn_signer,
+            dummy_guardian.clone(),
+            address,
+            chain_id,
+        );
+        let session_details: Option<JsSession> =
+            from_value(session_details).map_err(|e| JsValue::from_str(&format!("{}", e)))?;
+        let session: Option<SessionAccount<JsonRpcClient<HttpTransport>, SigningKey, SigningKey>> =
+            if let Some(session_details) = session_details {
+                let methods: Vec<AllowedMethod> = vec![
+                    AllowedMethod::new(
+                        felt!("0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"),
+                        "approve",
+                    )
+                    .unwrap(),
+                    AllowedMethod::new(
+                        felt!("0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"),
+                        "transfer",
+                    )
+                    .unwrap(),
+                ];
 
-        let account =
-            CartridgeGuardianAccount::new(provider, signer, dummy_guardian, address, chain_id);
+                let session_signer =
+                    SigningKey::from_secret_scalar(session_details.credentials.private_key);
+                let expires_at: u64 = session_details
+                    .expires_at
+                    .parse()
+                    .map_err(|e| JsValue::from_str(&format!("{}", e)))?;
+                let session = Session::new(methods, expires_at, &session_signer.signer())
+                    .map_err(|e| JsValue::from_str(&format!("{}", e)))?;
+                let provider: JsonRpcClient<HttpTransport> =
+                    JsonRpcClient::new(HttpTransport::new(rpc_url.clone()));
+
+                Some(SessionAccount::new(
+                    provider,
+                    session_signer,
+                    dummy_guardian,
+                    account.address(),
+                    account.chain_id(),
+                    session_details.credentials.authorization,
+                    session.clone(),
+                ))
+            } else {
+                None
+            };
 
         Ok(CartridgeAccount {
             account,
-            session: None,
-            rpc_url,
-        })
-    }
-
-    /// Registers a new keypair on device signer and creates a new `CartridgeAccount` instance.
-    ///
-    /// # Parameters
-    /// - `rpc_url`: The URL of the JSON-RPC endpoint.
-    /// - `chain_id`: Identifier of the blockchain network to interact with.
-    /// - `address`: The blockchain address associated with the account.
-    /// - `rp_id`: Relying Party Identifier, a string that uniquely identifies the WebAuthn relying party.
-    /// - `origin`: The origin of the WebAuthn request. Example https://cartridge.gg
-    /// - `user_name`: The user name associated with the account.
-    pub async fn register(
-        rpc_url: String,
-        chain_id: String,
-        address: String,
-        rp_id: String,
-        origin: String,
-        user_name: String,
-    ) -> Result<CartridgeAccount, JsValue> {
-        utils::set_panic_hook();
-
-        let rpc_url = Url::parse(&rpc_url).map_err(|e| JsValue::from_str(&format!("{}", e)))?;
-        let provider = JsonRpcClient::new(HttpTransport::new(rpc_url.clone()));
-        let signer = DeviceSigner::register(rp_id.clone(), origin.clone(), user_name, &vec![])
-            .await
-            .map_err(|e| JsValue::from_str(&format!("{}", e)))?;
-        let dummy_guardian = SigningKey::from_secret_scalar(felt!("0x42"));
-        let address =
-            FieldElement::from_str(&address).map_err(|e| JsValue::from_str(&format!("{}", e)))?;
-        let chain_id =
-            FieldElement::from_str(&chain_id).map_err(|e| JsValue::from_str(&format!("{}", e)))?;
-        let account =
-            CartridgeGuardianAccount::new(provider, signer, dummy_guardian, address, chain_id);
-
-        Ok(CartridgeAccount {
-            account,
-            session: None,
+            session,
             rpc_url,
         })
     }
 
     #[wasm_bindgen(js_name = createSession)]
-    pub async fn create_session(&mut self, policies: Vec<JsValue>, expires_at: u64) -> Result<JsValue, JsValue> {
+    pub async fn create_session(
+        &mut self,
+        policies: Vec<JsValue>,
+        expires_at: u64,
+    ) -> Result<JsValue, JsValue> {
         let methods: Vec<AllowedMethod> = vec![
             AllowedMethod::new(
                 felt!("0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"),
@@ -171,7 +177,7 @@ impl CartridgeAccount {
             session.clone(),
         ));
 
-        Ok(to_value(&SessionCredentials {
+        Ok(to_value(&JsCredentials {
             authorization,
             private_key: signer.secret_scalar(),
         })

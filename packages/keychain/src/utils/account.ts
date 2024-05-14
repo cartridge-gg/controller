@@ -36,7 +36,7 @@ export enum Status {
 class Account extends BaseAccount {
   rpc: RpcProvider;
   private selector: string;
-  _chainId: constants.StarknetChainId;
+  chainId: constants.StarknetChainId;
   updated: boolean = true;
   cartridge: CartridgeAccount;
 
@@ -50,8 +50,8 @@ class Account extends BaseAccount {
     super({ nodeUrl }, address, signer);
 
     this.rpc = new RpcProvider({ nodeUrl });
-    this.selector = selectors["0.0.3"].deployment(address, chainId);
-    this._chainId = chainId;
+    this.selector = selectors["0.0.1"].deployment(address, chainId);
+    this.chainId = chainId;
     this.cartridge = cartridge;
 
     const state = Storage.get(this.selector);
@@ -91,7 +91,7 @@ class Account extends BaseAccount {
   }
 
   async getDeploymentTxn(): Promise<string | undefined> {
-    let chainId = this._chainId.substring(2);
+    let chainId = this.chainId.substring(2);
     chainId = Buffer.from(chainId, "hex").toString("ascii");
 
     try {
@@ -161,12 +161,6 @@ class Account extends BaseAccount {
     if (this.status === Status.COUNTERFACTUAL) {
       throw new Error("Account is not deployed");
     }
-
-    // let sessionCredentials = await this.cartridge.createSession(
-    //   [],
-    //   2715274011n,
-    // );
-    // console.log(sessionCredentials);
 
     transactionsDetail.nonce =
       transactionsDetail.nonce ?? (await this.getNonce("pending"));
