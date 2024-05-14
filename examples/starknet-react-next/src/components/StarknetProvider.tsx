@@ -31,7 +31,21 @@ const url =
       )
     : process.env.XFRAME_URL;
 const connectors = [
-  new CartridgeConnector([{ target: "0xdeadbeef", method: "testMethod" }], {
-    url,
-  }) as never as Connector,
+  new CartridgeConnector(
+    [
+      {
+        target:
+          "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+        method: "approve",
+      },
+      {
+        target:
+          "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+        method: "transfer",
+      },
+    ],
+    {
+      url,
+    },
+  ) as never as Connector,
 ];

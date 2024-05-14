@@ -2,11 +2,7 @@ import { Button } from "@chakra-ui/react";
 import { parseEther } from "viem";
 import { useCallback, useEffect, useState } from "react";
 import { cairo, constants } from "starknet";
-import {
-  mainnet,
-  useContractWrite,
-  usePrepareContractWrite,
-} from "wagmi";
+import { mainnet, useContractWrite, usePrepareContractWrite } from "wagmi";
 import { goerli, sepolia } from "wagmi/chains";
 import {
   EthL1BridgeGoerli,
@@ -38,15 +34,15 @@ export function TransferButton({
     const parsed = parseEther(value);
     const amount = cairo.uint256(BigInt(parsed.toString()));
     const from =
-      account._chainId === constants.StarknetChainId.SN_MAIN
+      account.chainId === constants.StarknetChainId.SN_MAIN
         ? EthL1BridgeMainnet
-        : account._chainId === constants.StarknetChainId.SN_SEPOLIA
+        : account.chainId === constants.StarknetChainId.SN_SEPOLIA
         ? EthL1BridgeSepolia
         : EthL1BridgeGoerli;
     const to =
-      account._chainId === constants.StarknetChainId.SN_MAIN
+      account.chainId === constants.StarknetChainId.SN_MAIN
         ? EthL2BridgeMainnet
-        : account._chainId === constants.StarknetChainId.SN_SEPOLIA
+        : account.chainId === constants.StarknetChainId.SN_SEPOLIA
         ? EthL2BridgeSepolia
         : EthL2BridgeGoerli;
     const res = await account.rpc.estimateMessageFee({
@@ -56,7 +52,7 @@ export function TransferButton({
       payload: [account.address, amount.low.toString(), amount.high.toString()],
     });
     return res;
-  }, [account._chainId, account.rpc, account.address, value]);
+  }, [account.chainId, account.rpc, account.address, value]);
 
   useEffect(() => {
     if (!value) return;
@@ -67,15 +63,15 @@ export function TransferButton({
 
   const { config, error: configError } = usePrepareContractWrite({
     chainId:
-      account._chainId === constants.StarknetChainId.SN_MAIN
+      account.chainId === constants.StarknetChainId.SN_MAIN
         ? mainnet.id
-        : account._chainId === constants.StarknetChainId.SN_SEPOLIA
+        : account.chainId === constants.StarknetChainId.SN_SEPOLIA
         ? sepolia.id
         : goerli.id,
     address:
-      account._chainId === constants.StarknetChainId.SN_MAIN
+      account.chainId === constants.StarknetChainId.SN_MAIN
         ? EthL1BridgeMainnet
-        : account._chainId === constants.StarknetChainId.SN_SEPOLIA
+        : account.chainId === constants.StarknetChainId.SN_SEPOLIA
         ? EthL2BridgeSepolia
         : EthL1BridgeGoerli,
     abi: EthL1BridgeABI,

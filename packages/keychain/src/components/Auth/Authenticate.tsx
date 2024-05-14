@@ -14,11 +14,9 @@ import { PortalFooter } from "components/PortalFooter";
 
 export function Authenticate({
   name,
-  pubkey,
   onComplete,
 }: {
   name: string;
-  pubkey: string;
   onComplete: () => void;
 }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +33,7 @@ export function Authenticate({
       const credentials: Credentials = await onCreateBegin(
         decodeURIComponent(name),
       );
-      await onCreateFinalize(pubkey, credentials);
+      await onCreateFinalize(credentials);
 
       play();
     } catch (e) {
@@ -43,7 +41,7 @@ export function Authenticate({
       setIsLoading(false);
       throw e;
     }
-  }, [play, name, pubkey]);
+  }, [play, name]);
 
   useEffect(() => {
     const userAgent = window.navigator.userAgent;

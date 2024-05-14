@@ -40,11 +40,7 @@ export function DeploymentRequired({
 
   useEffect(() => {
     const id = setInterval(async () => {
-      if (
-        account.status !== Status.DEPLOYING &&
-        account.status !== Status.REGISTERING
-      )
-        clearInterval(id);
+      if (account.status !== Status.DEPLOYING) clearInterval(id);
       setStatus(account.status);
       console.log("deployment/registration required");
       await account.sync();
@@ -53,7 +49,7 @@ export function DeploymentRequired({
     return () => clearInterval(id);
   }, [account, setStatus]);
 
-  if (status === Status.DEPLOYING || status === Status.REGISTERING) {
+  if (status === Status.DEPLOYING) {
     const title =
       status === Status.DEPLOYING
         ? "Deploying your account"
@@ -69,7 +65,7 @@ export function DeploymentRequired({
         {status === Status.DEPLOYING && (
           <Link
             href={`https://${
-              account._chainId === constants.StarknetChainId.SN_SEPOLIA
+              account.chainId === constants.StarknetChainId.SN_SEPOLIA
                 ? "sepolia."
                 : undefined
             }starkscan.co/tx/${deployHash}`}

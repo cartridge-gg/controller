@@ -1,4 +1,4 @@
-import { Error, ResponseCodes, Session } from "@cartridge/controller";
+import { Error, ResponseCodes } from "@cartridge/controller";
 
 import { normalize as normalizeOrigin } from "utils/url";
 import Controller from "utils/controller";
@@ -10,7 +10,7 @@ export function normalize<Promise>(
 }
 
 export function validate<T>(
-  fn: (controller: Controller, session: Session, origin: string) => T,
+  fn: (controller: Controller, origin: string) => T,
 ): (origin: string) => T | (() => Promise<Error>) {
   return (origin: string) => {
     const controller = Controller.fromStore();
@@ -21,14 +21,6 @@ export function validate<T>(
       });
     }
 
-    const session = controller.session(origin);
-    if (!session) {
-      return async () => ({
-        code: ResponseCodes.NOT_CONNECTED,
-        message: "Controller not connected.",
-      });
-    }
-
-    return fn(controller, session, origin);
+    return fn(controller, origin);
   };
 }

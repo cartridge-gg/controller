@@ -75,10 +75,7 @@ export const onCreateBegin = async (name: string): Promise<Credentials> => {
   return credentials;
 };
 
-export const onCreateFinalize = (
-  deviceKey: string,
-  credentials: Credentials,
-) => {
+export const onCreateFinalize = (credentials: Credentials) => {
   return client.request(FinalizeRegistrationDocument, {
     credentials: JSON.stringify({
       id: credentials.id,
@@ -93,7 +90,6 @@ export const onCreateFinalize = (
         ),
       },
     }),
-    signer: deviceKey,
   });
 };
 

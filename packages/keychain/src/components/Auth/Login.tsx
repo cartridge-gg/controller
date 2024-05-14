@@ -7,7 +7,6 @@ import {
   Formik,
   useFormikContext,
 } from "formik";
-import { stark } from "starknet";
 import {
   PortalBanner,
   PortalFooter,
@@ -54,7 +53,6 @@ export function Login({
 
         const { data: beginLoginData } = await beginLogin(values.username);
         const signer = new WebauthnSigner(credentialId, publicKey);
-
         const assertion = await signer.sign(
           base64url.toBuffer(beginLoginData.beginLogin.publicKey.challenge),
         );
@@ -64,8 +62,7 @@ export function Login({
           throw Error("login failed");
         }
 
-        const privateKey = stark.randomAddress();
-        const controller = new Controller(privateKey, address, credentialId);
+        const controller = new Controller(address, publicKey, credentialId);
 
         if (onController) {
           await onController(controller);

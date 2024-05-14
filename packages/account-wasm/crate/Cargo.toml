@@ -11,11 +11,12 @@ version = "0.1.0"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-account-sdk = { git = "https://github.com/cartridge-gg/cairo-webauthn", package = "account-sdk", rev = "8618af71b6de4eb685a6b4bac5c40220088280c3" }
+account-sdk = { git = "https://github.com/cartridge-gg/controller", package = "account-sdk", rev = "1617ac6ae61f175c27ce5d54e0206628cd69f066" }
 base64 = "0.22.0"
+coset = { version = "0.3.4", features = ["std"] }
 hex = "0.4.3"
 p256 = "0.13"
-starknet = "0.8"
+starknet = "0.10"
 serde = "1.0.197"
 serde-wasm-bindgen = "0.6.5"
 serde_json = "1.0.114"

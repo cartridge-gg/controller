@@ -291,7 +291,10 @@ const { chains, publicClient } = configureChains(
       ),
     }),
     alchemyProvider({
-      apiKey: process.env.NEXT_PUBLIC_ETH_RPC_SEPOLIA.replace(/^.+\/v2\//, "$`"),
+      apiKey: process.env.NEXT_PUBLIC_ETH_RPC_SEPOLIA.replace(
+        /^.+\/v2\//,
+        "$`",
+      ),
     }),
   ],
 );
