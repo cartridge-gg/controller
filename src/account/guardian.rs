@@ -141,7 +141,7 @@ where
     type Provider = P;
 
     fn provider(&self) -> &Self::Provider {
-        &self.account.provider()
+        self.account.provider()
     }
 
     fn block_id(&self) -> BlockId {

@@ -34,14 +34,14 @@ pub trait HashSigner {
 }
 
 pub trait SignerTrait {
-    fn into_guid(&self) -> FieldElement;
+    fn guid(&self) -> FieldElement;
     fn magic(&self) -> FieldElement;
 }
 
 impl SignerTrait for Signer {
-    fn into_guid(&self) -> FieldElement {
+    fn guid(&self) -> FieldElement {
         match self {
-            Signer::Starknet(signer) => poseidon_hash(self.magic(), signer.pubkey.inner().clone()),
+            Signer::Starknet(signer) => poseidon_hash(self.magic(), *signer.pubkey.inner()),
             Signer::Webauthn(signer) => {
                 let mut state = PoseidonHasher::new();
                 state.update(self.magic());

@@ -94,7 +94,7 @@ impl WebauthnAccountSigner for P256r1Signer {
         WebauthnSigner {
             rp_id_hash: NonZero::new(U256::from_bytes_be(&self.rp_id_hash())).unwrap(),
             origin: self.origin.clone().into_bytes(),
-            pubkey: NonZero::new(self.public_key().0.try_into().unwrap()).unwrap(),
+            pubkey: NonZero::new(self.public_key().0).unwrap(),
         }
     }
 }

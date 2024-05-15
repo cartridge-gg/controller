@@ -19,7 +19,7 @@ impl RawSession {
         )
     }
     fn get_struct_hash_rev_1(&self) -> FieldElement {
-        poseidon_hash_many(&vec![
+        poseidon_hash_many(&[
             Self::session_type_hash_rev_1(),
             self.expires_at.into(),
             self.allowed_methods_root,
@@ -38,7 +38,7 @@ impl RawSession {
             chain_id,
             revision: FieldElement::ONE,
         };
-        poseidon_hash_many(&vec![
+        poseidon_hash_many(&[
             short_string!("StarkNet Message"),
             domain.get_struct_hash_rev_1(),
             contract_address,
@@ -62,7 +62,7 @@ impl StarknetDomain {
         )
     }
     fn get_struct_hash_rev_1(&self) -> FieldElement {
-        poseidon_hash_many(&vec![
+        poseidon_hash_many(&[
             Self::session_type_hash_rev_1(),
             self.name,
             self.version,
@@ -92,7 +92,7 @@ impl CairoSerde for RawSession {
     }
 
     fn cairo_serialize(rust: &Self::RustType) -> Vec<FieldElement> {
-        vec![
+        [
             u64::cairo_serialize(&rust.expires_at),
             FieldElement::cairo_serialize(&rust.allowed_methods_root),
             FieldElement::cairo_serialize(&rust.metadata_hash),
@@ -134,7 +134,7 @@ impl CairoSerde for RawSessionToken {
     }
 
     fn cairo_serialize(rust: &Self::RustType) -> Vec<FieldElement> {
-        vec![
+        [
             RawSession::cairo_serialize(&rust.session),
             <Vec<FieldElement>>::cairo_serialize(&rust.session_authorization),
             SignerSignature::cairo_serialize(&rust.session_signature),

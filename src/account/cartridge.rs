@@ -54,7 +54,7 @@ where
     fn encode_calls(&self, calls: &[Call]) -> Vec<FieldElement> {
         <Vec<AbigenCall> as CairoSerde>::cairo_serialize(
             &calls
-                .into_iter()
+                .iter()
                 .map(
                     |Call {
                          to,

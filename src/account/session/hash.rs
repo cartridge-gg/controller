@@ -54,7 +54,7 @@ impl Session {
             allowed_methods,
             allowed_methods_root: root,
             metadata: serde_json::to_string(&metadata).unwrap(),
-            session_key_guid: signer.into_guid(),
+            session_key_guid: signer.guid(),
         })
     }
     fn allowed_method_hash_rev_1() -> FieldElement {
@@ -113,7 +113,7 @@ impl AllowedMethod {
 
 impl AllowedMethod {
     pub fn as_merkle_leaf(&self) -> FieldElement {
-        poseidon_hash_many(&vec![
+        poseidon_hash_many(&[
             Session::allowed_method_hash_rev_1(),
             self.contract_address,
             self.selector,

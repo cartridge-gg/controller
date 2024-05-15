@@ -44,7 +44,7 @@ async fn transfer_helper<R: TestnetRunner>(runner: &R, address: &FieldElement) {
 
     erc20_prefunded
         .transfer(
-            &ContractAddress(address.clone()),
+            &ContractAddress(*address),
             &U256 {
                 low: 0x8944000000000000_u128,
                 high: 0,

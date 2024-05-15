@@ -86,7 +86,7 @@ where
             session_authorization: self.session_authorization.clone(),
             session_signature: self.signer.sign(&hash).await?,
             guardian_signature: self.guardian.sign(&hash).await?,
-            proofs: proofs,
+            proofs,
         })
     }
     fn session_magic() -> FieldElement {
@@ -122,7 +122,7 @@ where
     fn encode_calls(&self, calls: &[Call]) -> Vec<FieldElement> {
         <Vec<AbigenCall> as CairoSerde>::cairo_serialize(
             &calls
-                .into_iter()
+                .iter()
                 .map(
                     |Call {
                          to,
@@ -170,7 +170,7 @@ where
                 execution,
             )
             .await?;
-        Ok(vec![
+        Ok([
             vec![Self::session_magic()],
             RawSessionToken::cairo_serialize(&result),
         ]
