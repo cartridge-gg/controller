@@ -168,10 +168,11 @@ class Account extends BaseAccount {
     //transactionsDetail.maxFee = num.toHex(transactionsDetail.maxFee);
     transactionsDetail.maxFee = "0x38D7EA4C68000"; // 0.001 eth
 
-    const res = await this.cartridge.execute(
-      calls as Array<Call>,
-      transactionsDetail,
-    );
+    const res = await this.cartridge
+      .execute(calls as Array<Call>, transactionsDetail)
+      .catch((e) => {
+        throw new Error("Execute error: " + e.message);
+      });
 
     Storage.update(this.selector, {
       nonce: (BigInt(transactionsDetail.nonce) + 1n).toString(),
