@@ -6,7 +6,6 @@ import {
   Container as ChakraContainer,
   StyleProps,
   IconButton,
-  useTheme,
   useColorMode,
 } from "@chakra-ui/react";
 import { constants } from "starknet";
@@ -61,7 +60,7 @@ export function Header({
     return (
       <Container h={12} p={1.5}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        {icon ? <img src={icon} alt="Controller icon" /> : <CartridgeLogo boxSize={28} />}
+        {icon ? <img src={icon} alt="Controller icon" style={{ height: "100%" }} /> : <CartridgeLogo boxSize={28} />}
       </Container>
     );
   }
@@ -115,7 +114,7 @@ function Container({
       bg="solid.bg"
       {...rest}
     >
-      <ChakraContainer p={0} centerContent>
+      <ChakraContainer p={0} h="full" centerContent>
         {children}
       </ChakraContainer>
     </Flex>

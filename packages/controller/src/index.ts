@@ -113,10 +113,7 @@ class Controller {
   private setCustomIcon(icon: CustomIcon) {
     const url = new URL(this.url);
 
-    if (!icon) return;
     url.searchParams.set("icon", encodeURIComponent(JSON.stringify(icon)));
-
-    console.log("!!!", url.toString());
 
     this.url = url.toString();
   }
