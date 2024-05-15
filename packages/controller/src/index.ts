@@ -1,4 +1,4 @@
-export type { ControllerOptions } from "./types";
+export * from "./types";
 
 import {
   AccountInterface,
@@ -65,13 +65,20 @@ class Controller {
 
     const url = new URL(this.url);
     if (options?.theme?.colors?.primary) {
-      url.searchParams.set("primary", options.theme.colors.primary);
+      const color = options.theme.colors.primary;
+      const val =
+        typeof color === "string"
+          ? color
+          : encodeURIComponent(JSON.stringify(color));
+      url.searchParams.set("primary", val);
     }
     if (options?.theme?.colors?.secondary) {
-      url.searchParams.set("secondary", options.theme.colors.secondary);
-    }
-    if (options?.theme?.colors?.muted) {
-      url.searchParams.set("secondary", options.theme.colors.muted);
+      const color = options.theme.colors.secondary;
+      const val =
+        typeof color === "string"
+          ? color
+          : encodeURIComponent(JSON.stringify(color));
+      url.searchParams.set("secondary", val);
     }
     this.url = url.toString();
 

@@ -155,10 +155,13 @@ export type ControllerOptions = {
   theme?: CustomTheme;
 };
 
-type CustomTheme = {
-  colors?: {
-    primary?: string;
-    secondary?: string;
-    muted?: string;
-  };
+export type CustomTheme = {
+  colors?: CustomColors;
 };
+
+export type CustomColors = {
+  primary?: CustomColor;
+  secondary?: CustomColor;
+};
+
+export type CustomColor = string | { default: string; _light: string };

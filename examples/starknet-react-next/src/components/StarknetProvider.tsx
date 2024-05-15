@@ -49,11 +49,15 @@ const connectors = [
       url,
       theme: {
         colors: {
-          primary: "#00b4d8", // button bg
-          secondary: "red", // hover
-          muted: "green" // disabled
+          // e.g. button bg
+          primary: "#00b4d8",
+          // e.g. button bg hover
+          secondary: {
+            default: "red",
+            _light: "green",
+          },
         }
-      }
-    },
+      },
+    }
   ) as never as Connector,
 ];

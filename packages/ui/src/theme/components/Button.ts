@@ -83,7 +83,6 @@ function getColorProps({ colorScheme }: StyleFunctionProps) {
           bg: "brand.secondary",
         },
         _disabled: {
-          bg: "brand.muted",
           opacity: 0.5,
         },
       };

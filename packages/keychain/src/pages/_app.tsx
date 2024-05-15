@@ -22,6 +22,7 @@ const queryClient = new QueryClient({
 });
 
 import { useRouter } from "next/router";
+import { CustomColor } from "@cartridge/controller";
 
 export default function Keychain({ Component, pageProps }: AppProps) {
   useGlobalInjection();
@@ -34,10 +35,10 @@ export default function Keychain({ Component, pageProps }: AppProps) {
     semanticTokens: {
       ...CartridgeTheme.semanticTokens,
       colors: {
+        ...CartridgeTheme.semanticTokens.colors,
         brand: {
-          primary: (primary as string) ?? CartridgeTheme.semanticTokens.colors.brand.primary,
-          secondary:
-            (secondary as string) ?? CartridgeTheme.semanticTokens.colors.brand.secondary,
+          primary: parseCustomColor(primary) ?? CartridgeTheme.semanticTokens.colors.brand.primary,
+          secondary: parseCustomColor(secondary) ?? CartridgeTheme.semanticTokens.colors.brand.secondary
         },
       }
     },
@@ -93,6 +94,20 @@ function useGlobalInjection() {
       },
     };
   }, []);
+}
+
+function parseCustomColor(val: string | string[] | undefined): CustomColor {
+  if (typeof val === "undefined") return
+  const str = Array.isArray(val) ? val[val.length - 1] : val
+
+  let color: CustomColor;
+  try {
+    color = JSON.parse(decodeURIComponent(str));
+  } catch {
+    color = str
+  }
+
+  return color;
 }
 
 declare global {
