@@ -72,13 +72,13 @@ export function Signup({
   const onSubmit = useCallback(
     async (values: FormValues) => {
       setIsLoading(true);
+      setIsRegistering(true);
 
       // due to same origin restriction, if we're in iframe, pop up a
       // window to continue webauthn registration. otherwise,
       // display modal overlay. in either case, account is created in
       // authenticate component, so we poll and then deploy
       if (isIframe) {
-        setIsRegistering(true);
         PopupCenter(
           `/authenticate?name=${encodeURIComponent(values.username)}`,
           "Cartridge Signup",
