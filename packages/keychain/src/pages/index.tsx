@@ -28,6 +28,7 @@ import { revoke, session, sessions } from "../methods/sessions";
 import { normalize, validate } from "../methods";
 import {
   Connect,
+  DeploymentRequired,
   Execute,
   Login,
   Logout,
@@ -35,6 +36,7 @@ import {
   Signup,
 } from "components";
 import { useController } from "hooks/controller";
+import { Status } from "utils/account";
 
 type Context = Connect | Logout | Execute | SignMessage;
 
@@ -148,8 +150,14 @@ const Index: NextPage = () => {
                     } as Execute);
                   });
                 }
-
                 const account = controller.account(cId);
+                if (account.status === Status.DEPLOYING) {
+                  return Promise.resolve({
+                    code: ResponseCodes.NOT_ALLOWED,
+                    message: "Account is deploying.",
+                  });
+                }
+
                 const calls = Array.isArray(transactions)
                   ? transactions
                   : [transactions];
@@ -384,19 +392,31 @@ const Index: NextPage = () => {
     const ctx = context as Execute;
 
     return (
-      <Execute
-        {...ctx}
-        chainId={ctx.transactionsDetail?.chainId ?? chainId}
+      <DeploymentRequired
+        chainId={chainId}
         controller={controller}
-        onExecute={(res: ExecuteReply) => ctx.resolve(res)}
-        onCancel={() =>
+        onClose={() =>
           ctx.resolve({
             code: ResponseCodes.CANCELED,
             message: "Canceled",
           })
         }
         onLogout={() => onLogout(ctx)}
-      />
+      >
+        <Execute
+          {...ctx}
+          chainId={chainId}
+          controller={controller}
+          onExecute={(res: ExecuteReply) => ctx.resolve(res)}
+          onCancel={() =>
+            ctx.resolve({
+              code: ResponseCodes.CANCELED,
+              message: "Canceled",
+            })
+          }
+          onLogout={() => onLogout(ctx)}
+        />
+      </DeploymentRequired>
     );
   }
 

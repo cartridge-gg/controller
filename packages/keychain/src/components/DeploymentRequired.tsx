@@ -42,7 +42,6 @@ export function DeploymentRequired({
     const id = setInterval(async () => {
       if (account.status !== Status.DEPLOYING) clearInterval(id);
       setStatus(account.status);
-      console.log("deployment/registration required");
       await account.sync();
     }, 2000);
 
@@ -50,15 +49,11 @@ export function DeploymentRequired({
   }, [account, setStatus]);
 
   if (status === Status.DEPLOYING) {
-    const title =
-      status === Status.DEPLOYING
-        ? "Deploying your account"
-        : "Creating a session";
     return (
       <Container chainId={chainId} onLogout={onLogout}>
         <PortalBanner
           Icon={Loading}
-          title={title}
+          title={"Deploying your account"}
           description="This may take a second"
         />
 
