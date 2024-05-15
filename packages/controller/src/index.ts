@@ -22,6 +22,9 @@ import {
   ProbeReply,
   Modal,
   ControllerOptions,
+  CustomTheme,
+  CustomColor,
+  CustomIcon,
 } from "./types";
 import { createModal } from "./modal";
 
@@ -63,24 +66,13 @@ class Controller {
       this.url = options.url;
     }
 
-    const url = new URL(this.url);
-    if (options?.theme?.colors?.primary) {
-      const color = options.theme.colors.primary;
-      const val =
-        typeof color === "string"
-          ? color
-          : encodeURIComponent(JSON.stringify(color));
-      url.searchParams.set("primary", val);
+    if (options?.icon) {
+      this.setCustomIcon(options.icon);
     }
-    if (options?.theme?.colors?.secondary) {
-      const color = options.theme.colors.secondary;
-      const val =
-        typeof color === "string"
-          ? color
-          : encodeURIComponent(JSON.stringify(color));
-      url.searchParams.set("secondary", val);
+
+    if (options?.theme) {
+      this.setCustomTheme(options.theme);
     }
-    this.url = url.toString();
 
     if (typeof document === "undefined") {
       return;
@@ -116,6 +108,41 @@ class Controller {
     }
 
     return this.accounts[this.chainId];
+  }
+
+  private setCustomIcon(icon: CustomIcon) {
+    const url = new URL(this.url);
+
+    if (!icon) return;
+    url.searchParams.set("icon", encodeURIComponent(JSON.stringify(icon)));
+
+    console.log("!!!", url.toString());
+
+    this.url = url.toString();
+  }
+
+  private setCustomTheme(theme: CustomTheme) {
+    const url = new URL(this.url);
+
+    const primary = this.encodeColor(theme.colors?.primary);
+    if (primary) {
+      url.searchParams.set("primary", primary);
+    }
+
+    const secondary = this.encodeColor(theme.colors?.secondary);
+    if (secondary) {
+      url.searchParams.set("secondary", secondary);
+    }
+
+    this.url = url.toString();
+  }
+
+  private encodeColor(color: CustomColor | undefined) {
+    if (!color) return;
+
+    return typeof color === "string"
+      ? color
+      : encodeURIComponent(JSON.stringify(color));
   }
 
   ready() {

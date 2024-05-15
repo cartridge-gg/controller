@@ -22,7 +22,6 @@ const queryClient = new QueryClient({
 });
 
 import { useRouter } from "next/router";
-import { CustomColor } from "@cartridge/controller";
 
 export default function Keychain({ Component, pageProps }: AppProps) {
   useGlobalInjection();
@@ -57,7 +56,7 @@ export default function Keychain({ Component, pageProps }: AppProps) {
         <meta property="twitter:creator" content="@cartridge_gg" />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="cartridge" />
-        <meta property="theme-color" content={CartridgeTheme.colors.brand} />
+        <meta property="theme-color" content={CartridgeTheme.semanticTokens.colors.brand} />
       </NextHead>
 
       <style jsx global>{`
@@ -96,13 +95,15 @@ function useGlobalInjection() {
   }, []);
 }
 
-function parseCustomColor(val: string | string[] | undefined): CustomColor {
+function parseCustomColor(val: string | string[] | undefined) {
   if (typeof val === "undefined") return
-  const str = Array.isArray(val) ? val[val.length - 1] : val
 
-  let color: CustomColor;
+  const str = decodeURIComponent(Array.isArray(val) ? val[val.length - 1] : val)
+
+  let color: string | { default: string; _light: string; };
   try {
-    color = JSON.parse(decodeURIComponent(str));
+    const c = JSON.parse(str);
+    color = { default: c.dark, _light: c.dark }
   } catch {
     color = str
   }

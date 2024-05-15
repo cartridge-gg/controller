@@ -6,6 +6,8 @@ import {
   Container as ChakraContainer,
   StyleProps,
   IconButton,
+  useTheme,
+  useColorMode,
 } from "@chakra-ui/react";
 import { constants } from "starknet";
 import {
@@ -17,6 +19,7 @@ import {
 // import { EthBalance } from "./EthBalance";
 import { AccountMenu } from "./AccountMenu";
 import { useController } from "hooks/controller";
+import { useRouter } from "next/router";
 
 export type HeaderProps = {
   chainId?: constants.StarknetChainId;
@@ -34,10 +37,31 @@ export function Header({
   const [controller] = useController();
   const address = useMemo(() => controller?.address, [controller]);
 
+  const router = useRouter();
+  const { colorMode } = useColorMode();
+  const icon = useMemo(() => {
+    const { icon: val } = router.query;
+    if (typeof val === "undefined") return
+
+    const str = decodeURIComponent(Array.isArray(val) ? val[val.length - 1] : val)
+
+    let icon: string;
+    try {
+      const _icon = JSON.parse(str);
+      icon = typeof _icon === "string" ? _icon : _icon[colorMode]
+    } catch (e) {
+      console.error(e)
+      icon = str
+    }
+    return icon
+  }, [router.query, colorMode])
+
+
   if (!address || hideAccount) {
     return (
       <Container h={12} p={1.5}>
-        <CartridgeLogo boxSize={28} />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        {icon ? <img src={icon} alt="Controller icon" /> : <CartridgeLogo boxSize={28} />}
       </Container>
     );
   }
