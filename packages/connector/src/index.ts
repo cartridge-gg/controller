@@ -1,19 +1,16 @@
 import { Connector } from "@starknet-react/core";
-import Controller, { Assertion, Policy } from "@cartridge/controller";
-import { AccountInterface, InvokeFunctionResponse, constants } from "starknet";
+import Controller, {
+  Assertion,
+  Policy,
+  ControllerOptions,
+} from "@cartridge/controller";
+import { AccountInterface, InvokeFunctionResponse } from "starknet";
 
 class ControllerConnector extends Connector {
   public controller: Controller;
   private _account: AccountInterface | undefined;
 
-  constructor(
-    policies?: Policy[],
-    options?: {
-      url?: string;
-      origin?: string;
-      chainId?: constants.StarknetChainId;
-    },
-  ) {
+  constructor(policies?: Policy[], options?: ControllerOptions) {
     super();
     this.controller = new Controller(policies, options);
   }

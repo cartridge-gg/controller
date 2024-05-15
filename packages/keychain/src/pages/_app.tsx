@@ -29,17 +29,17 @@ export default function Keychain({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const { primary, secondary } = router.query;
 
-  console.log(CartridgeTheme.colors)
-
   const customTheme = extendTheme({
     ...CartridgeTheme,
-    colors: {
-      ...CartridgeTheme.colors,
-      // brand: {
-      //   primary: (primary as string) || CartridgeTheme.colors.brand.primary,
-      //   secondary:
-      //     (secondary as string) || CartridgeTheme.colors.brand.secondary,
-      // },
+    semanticTokens: {
+      ...CartridgeTheme.semanticTokens,
+      colors: {
+        brand: {
+          primary: (primary as string) ?? CartridgeTheme.semanticTokens.colors.brand.primary,
+          secondary:
+            (secondary as string) ?? CartridgeTheme.semanticTokens.colors.brand.secondary,
+        },
+      }
     },
   });
 

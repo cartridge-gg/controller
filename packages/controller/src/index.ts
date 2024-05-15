@@ -1,3 +1,5 @@
+export type { ControllerOptions } from "./types";
+
 import {
   AccountInterface,
   addAddressPadding,
@@ -19,6 +21,7 @@ import {
   ConnectReply,
   ProbeReply,
   Modal,
+  ControllerOptions,
 } from "./types";
 import { createModal } from "./modal";
 
@@ -42,21 +45,7 @@ class Controller {
   private modal?: Modal;
   // private starterPackId?: string;
 
-  constructor(
-    policies?: Policy[],
-    options?: {
-      url?: string;
-      origin?: string;
-      starterPackId?: string;
-      chainId?: constants.StarknetChainId;
-      theme?: {
-        colors?: {
-          primary?: string;
-          secondary?: string;
-        }
-      }
-    },
-  ) {
+  constructor(policies?: Policy[], options?: ControllerOptions) {
     if (policies) {
       this.policies = policies.map((policy) => {
         return {
@@ -76,10 +65,13 @@ class Controller {
 
     const url = new URL(this.url);
     if (options?.theme?.colors?.primary) {
-      url.searchParams.set('primary', options.theme.colors.primary);
+      url.searchParams.set("primary", options.theme.colors.primary);
     }
     if (options?.theme?.colors?.secondary) {
-      url.searchParams.set('secondary', options.theme.colors.secondary);
+      url.searchParams.set("secondary", options.theme.colors.secondary);
+    }
+    if (options?.theme?.colors?.muted) {
+      url.searchParams.set("secondary", options.theme.colors.muted);
     }
     this.url = url.toString();
 

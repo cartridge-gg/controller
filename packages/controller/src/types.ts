@@ -146,3 +146,19 @@ export interface Modal {
   open: () => void;
   close: () => void;
 }
+
+export type ControllerOptions = {
+  url?: string;
+  origin?: string;
+  starterPackId?: string;
+  chainId?: constants.StarknetChainId;
+  theme?: CustomTheme;
+};
+
+type CustomTheme = {
+  colors?: {
+    primary?: string;
+    secondary?: string;
+    muted?: string;
+  };
+};
