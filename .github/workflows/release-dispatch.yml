@@ -1,0 +1,42 @@
+name: release-dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to release
+        required: true
+        type: string
+
+jobs:
+  propose-release:
+    permissions:
+      pull-requests: write
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Configure Git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20.x"
+          registry-url: "https://registry.npmjs.org/"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: "8"
+      - name: Update Workspace Packages Version
+        run: |
+          VERSION=${{ github.event.inputs.version }}
+          pnpm -r exec -- bash -c "npm version $VERSION --no-git-tag-version"
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.CREATE_PR_TOKEN }}
+          title: "Prepare release: ${{ github.event.inputs.version }}"
+          commit-message: "Prepare release: ${{ github.event.inputs.version }}"
+          branch: "prepare-release-${{ github.event.inputs.version }}"
+          base: main
+          delete-branch: true
