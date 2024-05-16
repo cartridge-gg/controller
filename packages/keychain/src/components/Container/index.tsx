@@ -46,7 +46,8 @@ export function Container({
         w="full"
         h={10}
         borderTopWidth={1}
-        borderTopColor="solid.spacer"
+        borderColor="solid.tertiary"
+
         alignItems="center"
         justify="center"
       >

@@ -41,10 +41,12 @@ export function PortalFooter({
       left={0}
       bg="solid.bg"
       h="auto"
-      minH={isOpen ? 478 : 0}
+      minH={isOpen ? "calc(100vh - 164px)" : 0}
       transition="all 0.40s ease-out"
       p={4}
       pt={0}
+      borderTopWidth={1}
+      borderColor="solid.tertiary"
     >
       {isExpandable && (
         <Box // mimic top border
@@ -78,12 +80,9 @@ export function PortalFooter({
 
       <VStack
         pt={6}
-        pb={isExpandable ? 4 : undefined}
         align="stretch"
         w="full"
         h="full"
-        borderTopWidth={1}
-        borderColor="solid.tertiary"
         overflowY={isOpen ? "scroll" : "hidden"}
         css={{
           "::-webkit-scrollbar": {
@@ -139,4 +138,4 @@ export function PortalFooter({
   );
 }
 
-export const PORTAL_FOOTER_MIN_HEIGHT = 212;
+export const PORTAL_FOOTER_MIN_HEIGHT = 252;
