@@ -37,6 +37,6 @@ jobs:
           token: ${{ secrets.CREATE_PR_TOKEN }}
           title: "Prepare release: ${{ github.event.inputs.version }}"
           commit-message: "Prepare release: ${{ github.event.inputs.version }}"
-          branch: "prepare-release-${{ github.event.inputs.version }}"
+          branch: "prepare-release"
           base: main
           delete-branch: true
