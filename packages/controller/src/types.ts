@@ -152,7 +152,7 @@ export type ControllerOptions = {
   origin?: string;
   starterPackId?: string;
   chainId?: constants.StarknetChainId;
-  icon?: CustomIcon;
+  // icon?: CustomIcon;
   theme?: CustomTheme;
 };
 
@@ -165,7 +165,7 @@ export type CustomColors = {
   secondary?: CustomColor;
 };
 
-export type CustomIcon = ThemeValue<string>;
+// export type CustomIcon = ThemeValue<string>;
 export type CustomColor = ThemeValue<string>;
 
 export type ThemeValue<T> = T | { dark: T; light: T };

@@ -24,7 +24,7 @@ import {
   ControllerOptions,
   CustomTheme,
   CustomColor,
-  CustomIcon,
+  // CustomIcon,
 } from "./types";
 import { createModal } from "./modal";
 
@@ -66,9 +66,9 @@ class Controller {
       this.url = options.url;
     }
 
-    if (options?.icon) {
-      this.setCustomIcon(options.icon);
-    }
+    // if (options?.icon) {
+    //   this.setCustomIcon(options.icon);
+    // }
 
     if (options?.theme) {
       this.setCustomTheme(options.theme);
@@ -110,13 +110,13 @@ class Controller {
     return this.accounts[this.chainId];
   }
 
-  private setCustomIcon(icon: CustomIcon) {
-    const url = new URL(this.url);
+  // private setCustomIcon(icon: CustomIcon) {
+  //   const url = new URL(this.url);
 
-    url.searchParams.set("icon", encodeURIComponent(JSON.stringify(icon)));
+  //   url.searchParams.set("icon", encodeURIComponent(JSON.stringify(icon)));
 
-    this.url = url.toString();
-  }
+  //   this.url = url.toString();
+  // }
 
   private setCustomTheme(theme: CustomTheme) {
     const url = new URL(this.url);
