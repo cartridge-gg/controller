@@ -6,7 +6,7 @@ const ETH_CONTRACT =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 
 export const TransferEth = () => {
-  const [chainId, setChainId] = useState<constants.StarknetChainId>(
+  const [chainId] = useState<constants.StarknetChainId>(
     constants.StarknetChainId.SN_SEPOLIA,
   );
   const { account } = useAccount();
@@ -112,7 +112,7 @@ export const TransferEth = () => {
     <>
       <h2>Transfer Eth</h2>
       <p>Address: {ETH_CONTRACT}</p>
-      <div style={{ marginBottom: "10px" }}>
+      {/* <div style={{ marginBottom: "10px" }}>
         <input
           type="radio"
           id="testnet"
@@ -134,7 +134,7 @@ export const TransferEth = () => {
           }
         />
         <label htmlFor="mainnet">Mainnet</label>
-      </div>
+      </div> */}
       <button onClick={() => execute005()}>Transfer 0.005 ETH to self</button>
       <button style={{ marginLeft: "10px" }} onClick={() => executePointOne()}>
         Transfer 0.1 ETH to self

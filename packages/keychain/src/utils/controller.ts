@@ -68,7 +68,7 @@ export default class Controller {
           credentialId,
           publicKey,
           this.session(
-            "http://localhost:3002",
+            "https://cartridge-starknet-react-next-git-test-d.preview.cartridge.gg",
             constants.StarknetChainId.SN_SEPOLIA,
           ),
         ),
