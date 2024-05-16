@@ -23,13 +23,13 @@ export function StarknetProvider({ children }: PropsWithChildren) {
 }
 
 const url =
-  process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL === "preview"
-    ? "https://" +
-      (process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL as string).replace(
-        "cartridge-starknet-react-next",
-        "keychain",
-      )
-    : process.env.XFRAME_URL;
+  !process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL || process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL.split(".")[0] === "cartridge-starknet-react-next"
+    ? process.env.XFRAME_URL
+    : "https://" +
+    (process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ?? "").replace(
+      "cartridge-starknet-react-next",
+      "keychain",
+    )
 
 const connectors = [
   new CartridgeConnector(
@@ -47,6 +47,17 @@ const connectors = [
     ],
     {
       url,
-    },
+      theme: {
+        colors: {
+          // e.g. button bg
+          primary: "#00b4d8",
+          // e.g. button bg hover
+          secondary: {
+            dark: "red",
+            light: "green",
+          },
+        }
+      },
+    }
   ) as never as Connector,
 ];

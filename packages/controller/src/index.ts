@@ -1,3 +1,5 @@
+export * from "./types";
+
 import {
   AccountInterface,
   addAddressPadding,
@@ -19,6 +21,10 @@ import {
   ConnectReply,
   ProbeReply,
   Modal,
+  ControllerOptions,
+  CustomTheme,
+  CustomColor,
+  // CustomIcon,
 } from "./types";
 import { createModal } from "./modal";
 
@@ -42,15 +48,7 @@ class Controller {
   private modal?: Modal;
   // private starterPackId?: string;
 
-  constructor(
-    policies?: Policy[],
-    options?: {
-      url?: string;
-      origin?: string;
-      starterPackId?: string;
-      chainId?: constants.StarknetChainId;
-    },
-  ) {
+  constructor(policies?: Policy[], options?: ControllerOptions) {
     if (policies) {
       this.policies = policies.map((policy) => {
         return {
@@ -66,6 +64,14 @@ class Controller {
 
     if (options?.url) {
       this.url = options.url;
+    }
+
+    // if (options?.icon) {
+    //   this.setCustomIcon(options.icon);
+    // }
+
+    if (options?.theme) {
+      this.setCustomTheme(options.theme);
     }
 
     if (typeof document === "undefined") {
@@ -102,6 +108,38 @@ class Controller {
     }
 
     return this.accounts[this.chainId];
+  }
+
+  // private setCustomIcon(icon: CustomIcon) {
+  //   const url = new URL(this.url);
+
+  //   url.searchParams.set("icon", encodeURIComponent(JSON.stringify(icon)));
+
+  //   this.url = url.toString();
+  // }
+
+  private setCustomTheme(theme: CustomTheme) {
+    const url = new URL(this.url);
+
+    const primary = this.encodeColor(theme.colors?.primary);
+    if (primary) {
+      url.searchParams.set("primary", primary);
+    }
+
+    const secondary = this.encodeColor(theme.colors?.secondary);
+    if (secondary) {
+      url.searchParams.set("secondary", secondary);
+    }
+
+    this.url = url.toString();
+  }
+
+  private encodeColor(color: CustomColor | undefined) {
+    if (!color) return;
+
+    return typeof color === "string"
+      ? color
+      : encodeURIComponent(JSON.stringify(color));
   }
 
   ready() {

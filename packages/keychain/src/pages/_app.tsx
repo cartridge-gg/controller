@@ -1,8 +1,8 @@
 import NextHead from "next/head";
-import { CartridgeTheme } from "@cartridge/ui";
 import type { AppProps } from "next/app";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { CartridgeUIProvider } from "@cartridge/ui";
+import { CartridgeTheme } from "@cartridge/ui";
+import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import { Inter, IBM_Plex_Mono } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -21,8 +21,27 @@ const queryClient = new QueryClient({
   },
 });
 
+import { useRouter } from "next/router";
+
 export default function Keychain({ Component, pageProps }: AppProps) {
   useGlobalInjection();
+
+  const router = useRouter();
+  const { primary, secondary } = router.query;
+
+  const customTheme = extendTheme({
+    ...CartridgeTheme,
+    semanticTokens: {
+      ...CartridgeTheme.semanticTokens,
+      colors: {
+        ...CartridgeTheme.semanticTokens.colors,
+        brand: {
+          primary: parseCustomColor(primary) ?? CartridgeTheme.semanticTokens.colors.brand.primary,
+          secondary: parseCustomColor(secondary) ?? CartridgeTheme.semanticTokens.colors.brand.secondary
+        },
+      }
+    },
+  });
 
   return (
     <>
@@ -37,7 +56,7 @@ export default function Keychain({ Component, pageProps }: AppProps) {
         <meta property="twitter:creator" content="@cartridge_gg" />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="cartridge" />
-        <meta property="theme-color" content={CartridgeTheme.colors.brand} />
+        <meta property="theme-color" content={CartridgeTheme.semanticTokens.colors.brand} />
       </NextHead>
 
       <style jsx global>{`
@@ -51,11 +70,11 @@ export default function Keychain({ Component, pageProps }: AppProps) {
         }
       `}</style>
 
-      <CartridgeUIProvider>
+      <ChakraProvider theme={customTheme}>
         <QueryClientProvider client={queryClient}>
           <Component {...pageProps} />
         </QueryClientProvider>
-      </CartridgeUIProvider>
+      </ChakraProvider>
     </>
   );
 }
@@ -74,6 +93,22 @@ function useGlobalInjection() {
       },
     };
   }, []);
+}
+
+function parseCustomColor(val: string | string[] | undefined) {
+  if (typeof val === "undefined") return
+
+  const str = decodeURIComponent(Array.isArray(val) ? val[val.length - 1] : val)
+
+  let color: string | { default: string; _light: string; };
+  try {
+    const c = JSON.parse(str);
+    color = { default: c.dark, _light: c.dark }
+  } catch {
+    color = str
+  }
+
+  return color;
 }
 
 declare global {
