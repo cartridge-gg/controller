@@ -4,11 +4,14 @@ import {
   StyleProps,
   Flex,
   Show,
+  HStack,
+  Text,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { ReactNode } from "react";
 import { Header, HeaderProps } from "./Header";
 import { constants } from "starknet";
+import { CartridgeIcon } from "@cartridge/ui";
 
 export function Container({
   children,
@@ -23,6 +26,7 @@ export function Container({
   return (
     <Wrapper {...rest}>
       <Header chainId={chainId} onBack={onBack} hideAccount={hideAccount} />
+
       <VStack
         w="full"
         h="full"
@@ -36,6 +40,20 @@ export function Container({
         }}
       >
         {children}
+      </VStack>
+
+      <VStack
+        w="full"
+        h={10}
+        borderTopWidth={1}
+        borderTopColor="solid.spacer"
+        alignItems="center"
+        justify="center"
+      >
+        <HStack color="text.secondary">
+          <CartridgeIcon fontSize="sm" />
+          <Text as="i" fontSize="xs" color="currentColor">Powered by Cartridge</Text>
+        </HStack>
       </VStack>
     </Wrapper>
   );

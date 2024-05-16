@@ -37,7 +37,7 @@ export function PortalFooter({
       w="full"
       align="flex-start"
       position={["fixed", "fixed", "absolute"]}
-      bottom={0}
+      bottom={10}
       left={0}
       bg="solid.bg"
       h="auto"
@@ -134,7 +134,8 @@ export function PortalFooter({
       <VStack align="strech" w="full">
         {children}
       </VStack>
-    </VStack>
+
+    </VStack >
   );
 }
 
