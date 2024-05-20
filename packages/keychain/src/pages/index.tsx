@@ -14,6 +14,7 @@ import {
 } from "@cartridge/controller";
 import {
   Abi,
+  addAddressPadding,
   Call,
   constants,
   InvocationsDetails,
@@ -164,7 +165,7 @@ const Index: NextPage = () => {
                 const policies = calls.map(
                   (txn) =>
                     ({
-                      target: txn.contractAddress,
+                      target: addAddressPadding(txn.contractAddress),
                       method: txn.entrypoint,
                     } as Policy),
                 );
