@@ -123,9 +123,8 @@ function Form({
   return (
     <FormikForm style={{ width: "100%" }}>
       <PortalBanner
-        Icon={FingerprintDuoIcon}
-        title="Log In"
-        description="Enter your username"
+        title="Play Roll Your Own"
+        description="Enter your Controller username"
       />
 
       <VStack align="stretch" pb={PORTAL_FOOTER_MIN_HEIGHT}>
@@ -147,10 +146,6 @@ function Form({
             />
           )}
         </FormikField>
-
-        <RegistrationLink description="Need a controller?" onClick={onSignup}>
-          sign up
-        </RegistrationLink>
       </VStack>
 
       <PortalFooter
@@ -166,6 +161,9 @@ function Form({
         >
           log in
         </Button>
+        <RegistrationLink description="Need a controller?" onClick={onSignup}>
+          Sign up
+        </RegistrationLink>
       </PortalFooter>
     </FormikForm>
   );

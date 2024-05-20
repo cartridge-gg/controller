@@ -6,14 +6,15 @@ import {
   Container as ChakraContainer,
   StyleProps,
   IconButton,
+  VStack,
+  Box,
+  Text,
+  Image,
+  Center,
   // useColorMode,
 } from "@chakra-ui/react";
 import { constants } from "starknet";
-import {
-  ArrowLeftIcon,
-  CartridgeColorIcon,
-  CartridgeLogo,
-} from "@cartridge/ui";
+import { ArrowLeftIcon, CartridgeColorIcon } from "@cartridge/ui";
 // import { NetworkButton } from "./NetworkButton";
 // import { EthBalance } from "./EthBalance";
 import { AccountMenu } from "./AccountMenu";
@@ -55,12 +56,23 @@ export function Header({
   //   return icon
   // }, [router.query, colorMode])
 
-
   if (!address || hideAccount) {
     return (
-      <Container h={12} p={1.5}>
-        <CartridgeLogo boxSize={28} h="full" />
-        {/* {icon ? <img src={icon} alt="Controller icon" style={{ height: "100%" }} /> : <CartridgeLogo boxSize={28} />} */}
+      <Container h="150px" position="relative">
+        <VStack
+          h="full"
+          w="full"
+          bg="linear-gradient(to top, black, transparent), url('whitelabel/ryo/cover.png')"
+          bgSize="cover"
+          bgPos="center"
+          position="relative"
+        >
+          <Center position="absolute" bottom="-32px" left="0" right="0">
+            <Box bg="solid.bg" borderRadius="lg" p="2">
+              <Image src="/whitelabel/ryo/icon.png" boxSize="64px" />
+            </Box>
+          </Center>
+        </VStack>
       </Container>
     );
   }

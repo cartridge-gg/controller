@@ -47,13 +47,14 @@ export function Container({
         h={10}
         borderTopWidth={1}
         borderColor="solid.tertiary"
-
         alignItems="center"
         justify="center"
       >
         <HStack color="text.secondary">
           <CartridgeIcon fontSize="sm" />
-          <Text as="i" fontSize="xs" color="currentColor">Powered by Cartridge</Text>
+          <Text fontSize="xs" color="currentColor">
+            Controller by Cartridge
+          </Text>
         </HStack>
       </VStack>
     </Wrapper>

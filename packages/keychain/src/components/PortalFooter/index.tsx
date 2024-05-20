@@ -17,7 +17,7 @@ export function PortalFooter({
   policies,
   isSignup,
   isSlot,
-  showTerm = true,
+  showTerm = false,
 }: React.PropsWithChildren & {
   origin?: string;
   policies?: Policy[];

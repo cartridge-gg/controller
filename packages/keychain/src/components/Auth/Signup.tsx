@@ -237,9 +237,8 @@ function Form({
   return (
     <FormikForm style={{ width: "100%" }}>
       <PortalBanner
-        Icon={PlugNewDuoIcon}
-        title="Sign Up"
-        description="Select a username"
+        title="Play Roll Your Own"
+        description="Create your Cartridge Controller"
       />
 
       {starterData && remaining > 0 && (
@@ -265,13 +264,6 @@ function Form({
             />
           )}
         </FormikField>
-
-        <RegistrationLink
-          description="Already have a controller?"
-          onClick={onLogin}
-        >
-          log in
-        </RegistrationLink>
       </VStack>
 
       <PortalFooter
@@ -283,6 +275,12 @@ function Form({
         <Button type="submit" colorScheme="colorful" isLoading={isLoading}>
           sign up
         </Button>
+        <RegistrationLink
+          description="Already have a Controller?"
+          onClick={onLogin}
+        >
+          Log In
+        </RegistrationLink>
       </PortalFooter>
     </FormikForm>
   );
