@@ -47,84 +47,6 @@ impl<P: starknet::providers::Provider + Sync> CartridgeAccountReader<P> {
     }
 }
 #[derive(Debug, PartialEq, PartialOrd, Clone)]
-pub struct SignatureProofs {
-    pub single_proof_len: u32,
-    pub proofs_flat: Vec<starknet::core::types::FieldElement>,
-}
-impl cainome::cairo_serde::CairoSerde for SignatureProofs {
-    type RustType = Self;
-    const SERIALIZED_SIZE: std::option::Option<usize> = None;
-    #[inline]
-    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
-        let mut __size = 0;
-        __size += u32::cairo_serialized_size(&__rust.single_proof_len);
-        __size +=
-            Vec::<starknet::core::types::FieldElement>::cairo_serialized_size(&__rust.proofs_flat);
-        __size
-    }
-    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::FieldElement> {
-        let mut __out: Vec<starknet::core::types::FieldElement> = vec![];
-        __out.extend(u32::cairo_serialize(&__rust.single_proof_len));
-        __out.extend(Vec::<starknet::core::types::FieldElement>::cairo_serialize(
-            &__rust.proofs_flat,
-        ));
-        __out
-    }
-    fn cairo_deserialize(
-        __felts: &[starknet::core::types::FieldElement],
-        __offset: usize,
-    ) -> cainome::cairo_serde::Result<Self::RustType> {
-        let mut __offset = __offset;
-        let single_proof_len = u32::cairo_deserialize(__felts, __offset)?;
-        __offset += u32::cairo_serialized_size(&single_proof_len);
-        let proofs_flat =
-            Vec::<starknet::core::types::FieldElement>::cairo_deserialize(__felts, __offset)?;
-        __offset += Vec::<starknet::core::types::FieldElement>::cairo_serialized_size(&proofs_flat);
-        Ok(SignatureProofs {
-            single_proof_len,
-            proofs_flat,
-        })
-    }
-}
-#[derive(Debug, PartialEq, PartialOrd, Clone)]
-pub struct Signature {
-    pub r: cainome::cairo_serde::U256,
-    pub s: cainome::cairo_serde::U256,
-    pub y_parity: bool,
-}
-impl cainome::cairo_serde::CairoSerde for Signature {
-    type RustType = Self;
-    const SERIALIZED_SIZE: std::option::Option<usize> = None;
-    #[inline]
-    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
-        let mut __size = 0;
-        __size += cainome::cairo_serde::U256::cairo_serialized_size(&__rust.r);
-        __size += cainome::cairo_serde::U256::cairo_serialized_size(&__rust.s);
-        __size += bool::cairo_serialized_size(&__rust.y_parity);
-        __size
-    }
-    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::FieldElement> {
-        let mut __out: Vec<starknet::core::types::FieldElement> = vec![];
-        __out.extend(cainome::cairo_serde::U256::cairo_serialize(&__rust.r));
-        __out.extend(cainome::cairo_serde::U256::cairo_serialize(&__rust.s));
-        __out.extend(bool::cairo_serialize(&__rust.y_parity));
-        __out
-    }
-    fn cairo_deserialize(
-        __felts: &[starknet::core::types::FieldElement],
-        __offset: usize,
-    ) -> cainome::cairo_serde::Result<Self::RustType> {
-        let mut __offset = __offset;
-        let r = cainome::cairo_serde::U256::cairo_deserialize(__felts, __offset)?;
-        __offset += cainome::cairo_serde::U256::cairo_serialized_size(&r);
-        let s = cainome::cairo_serde::U256::cairo_deserialize(__felts, __offset)?;
-        __offset += cainome::cairo_serde::U256::cairo_serialized_size(&s);
-        let y_parity = bool::cairo_deserialize(__felts, __offset)?;
-        __offset += bool::cairo_serialized_size(&y_parity);
-        Ok(Signature { r, s, y_parity })
-    }
-}
-#[derive(Debug, PartialEq, PartialOrd, Clone)]
 pub struct Call {
     pub to: cainome::cairo_serde::ContractAddress,
     pub selector: starknet::core::types::FieldElement,
@@ -175,23 +97,27 @@ impl cainome::cairo_serde::CairoSerde for Call {
     }
 }
 #[derive(Debug, PartialEq, PartialOrd, Clone)]
-pub struct TokenRevoked {
-    pub token: Vec<starknet::core::types::FieldElement>,
+pub struct Signature {
+    pub r: cainome::cairo_serde::U256,
+    pub s: cainome::cairo_serde::U256,
+    pub y_parity: bool,
 }
-impl cainome::cairo_serde::CairoSerde for TokenRevoked {
+impl cainome::cairo_serde::CairoSerde for Signature {
     type RustType = Self;
     const SERIALIZED_SIZE: std::option::Option<usize> = None;
     #[inline]
     fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
         let mut __size = 0;
-        __size += Vec::<starknet::core::types::FieldElement>::cairo_serialized_size(&__rust.token);
+        __size += cainome::cairo_serde::U256::cairo_serialized_size(&__rust.r);
+        __size += cainome::cairo_serde::U256::cairo_serialized_size(&__rust.s);
+        __size += bool::cairo_serialized_size(&__rust.y_parity);
         __size
     }
     fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::FieldElement> {
         let mut __out: Vec<starknet::core::types::FieldElement> = vec![];
-        __out.extend(Vec::<starknet::core::types::FieldElement>::cairo_serialize(
-            &__rust.token,
-        ));
+        __out.extend(cainome::cairo_serde::U256::cairo_serialize(&__rust.r));
+        __out.extend(cainome::cairo_serde::U256::cairo_serialize(&__rust.s));
+        __out.extend(bool::cairo_serialize(&__rust.y_parity));
         __out
     }
     fn cairo_deserialize(
@@ -199,195 +125,13 @@ impl cainome::cairo_serde::CairoSerde for TokenRevoked {
         __offset: usize,
     ) -> cainome::cairo_serde::Result<Self::RustType> {
         let mut __offset = __offset;
-        let token =
-            Vec::<starknet::core::types::FieldElement>::cairo_deserialize(__felts, __offset)?;
-        __offset += Vec::<starknet::core::types::FieldElement>::cairo_serialized_size(&token);
-        Ok(TokenRevoked { token })
-    }
-}
-#[derive(Debug, PartialEq, PartialOrd, Clone)]
-pub struct OwnerRemoved {
-    pub removed_owner_guid: starknet::core::types::FieldElement,
-}
-impl cainome::cairo_serde::CairoSerde for OwnerRemoved {
-    type RustType = Self;
-    const SERIALIZED_SIZE: std::option::Option<usize> = None;
-    #[inline]
-    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
-        let mut __size = 0;
-        __size +=
-            starknet::core::types::FieldElement::cairo_serialized_size(&__rust.removed_owner_guid);
-        __size
-    }
-    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::FieldElement> {
-        let mut __out: Vec<starknet::core::types::FieldElement> = vec![];
-        __out.extend(starknet::core::types::FieldElement::cairo_serialize(
-            &__rust.removed_owner_guid,
-        ));
-        __out
-    }
-    fn cairo_deserialize(
-        __felts: &[starknet::core::types::FieldElement],
-        __offset: usize,
-    ) -> cainome::cairo_serde::Result<Self::RustType> {
-        let mut __offset = __offset;
-        let removed_owner_guid =
-            starknet::core::types::FieldElement::cairo_deserialize(__felts, __offset)?;
-        __offset += starknet::core::types::FieldElement::cairo_serialized_size(&removed_owner_guid);
-        Ok(OwnerRemoved { removed_owner_guid })
-    }
-}
-#[derive(Debug, PartialEq, PartialOrd, Clone)]
-pub struct SessionSignature {
-    pub signature_type: starknet::core::types::FieldElement,
-    pub r: starknet::core::types::FieldElement,
-    pub s: starknet::core::types::FieldElement,
-    pub session_key: starknet::core::types::FieldElement,
-    pub session_expires: u64,
-    pub root: starknet::core::types::FieldElement,
-    pub proofs: SignatureProofs,
-    pub session_token: Vec<starknet::core::types::FieldElement>,
-}
-impl cainome::cairo_serde::CairoSerde for SessionSignature {
-    type RustType = Self;
-    const SERIALIZED_SIZE: std::option::Option<usize> = None;
-    #[inline]
-    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
-        let mut __size = 0;
-        __size +=
-            starknet::core::types::FieldElement::cairo_serialized_size(&__rust.signature_type);
-        __size += starknet::core::types::FieldElement::cairo_serialized_size(&__rust.r);
-        __size += starknet::core::types::FieldElement::cairo_serialized_size(&__rust.s);
-        __size += starknet::core::types::FieldElement::cairo_serialized_size(&__rust.session_key);
-        __size += u64::cairo_serialized_size(&__rust.session_expires);
-        __size += starknet::core::types::FieldElement::cairo_serialized_size(&__rust.root);
-        __size += SignatureProofs::cairo_serialized_size(&__rust.proofs);
-        __size += Vec::<starknet::core::types::FieldElement>::cairo_serialized_size(
-            &__rust.session_token,
-        );
-        __size
-    }
-    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::FieldElement> {
-        let mut __out: Vec<starknet::core::types::FieldElement> = vec![];
-        __out.extend(starknet::core::types::FieldElement::cairo_serialize(
-            &__rust.signature_type,
-        ));
-        __out.extend(starknet::core::types::FieldElement::cairo_serialize(
-            &__rust.r,
-        ));
-        __out.extend(starknet::core::types::FieldElement::cairo_serialize(
-            &__rust.s,
-        ));
-        __out.extend(starknet::core::types::FieldElement::cairo_serialize(
-            &__rust.session_key,
-        ));
-        __out.extend(u64::cairo_serialize(&__rust.session_expires));
-        __out.extend(starknet::core::types::FieldElement::cairo_serialize(
-            &__rust.root,
-        ));
-        __out.extend(SignatureProofs::cairo_serialize(&__rust.proofs));
-        __out.extend(Vec::<starknet::core::types::FieldElement>::cairo_serialize(
-            &__rust.session_token,
-        ));
-        __out
-    }
-    fn cairo_deserialize(
-        __felts: &[starknet::core::types::FieldElement],
-        __offset: usize,
-    ) -> cainome::cairo_serde::Result<Self::RustType> {
-        let mut __offset = __offset;
-        let signature_type =
-            starknet::core::types::FieldElement::cairo_deserialize(__felts, __offset)?;
-        __offset += starknet::core::types::FieldElement::cairo_serialized_size(&signature_type);
-        let r = starknet::core::types::FieldElement::cairo_deserialize(__felts, __offset)?;
-        __offset += starknet::core::types::FieldElement::cairo_serialized_size(&r);
-        let s = starknet::core::types::FieldElement::cairo_deserialize(__felts, __offset)?;
-        __offset += starknet::core::types::FieldElement::cairo_serialized_size(&s);
-        let session_key =
-            starknet::core::types::FieldElement::cairo_deserialize(__felts, __offset)?;
-        __offset += starknet::core::types::FieldElement::cairo_serialized_size(&session_key);
-        let session_expires = u64::cairo_deserialize(__felts, __offset)?;
-        __offset += u64::cairo_serialized_size(&session_expires);
-        let root = starknet::core::types::FieldElement::cairo_deserialize(__felts, __offset)?;
-        __offset += starknet::core::types::FieldElement::cairo_serialized_size(&root);
-        let proofs = SignatureProofs::cairo_deserialize(__felts, __offset)?;
-        __offset += SignatureProofs::cairo_serialized_size(&proofs);
-        let session_token =
-            Vec::<starknet::core::types::FieldElement>::cairo_deserialize(__felts, __offset)?;
-        __offset +=
-            Vec::<starknet::core::types::FieldElement>::cairo_serialized_size(&session_token);
-        Ok(SessionSignature {
-            signature_type,
-            r,
-            s,
-            session_key,
-            session_expires,
-            root,
-            proofs,
-            session_token,
-        })
-    }
-}
-#[derive(Debug, PartialEq, PartialOrd, Clone)]
-pub struct OwnerAdded {
-    pub new_owner_guid: starknet::core::types::FieldElement,
-}
-impl cainome::cairo_serde::CairoSerde for OwnerAdded {
-    type RustType = Self;
-    const SERIALIZED_SIZE: std::option::Option<usize> = None;
-    #[inline]
-    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
-        let mut __size = 0;
-        __size +=
-            starknet::core::types::FieldElement::cairo_serialized_size(&__rust.new_owner_guid);
-        __size
-    }
-    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::FieldElement> {
-        let mut __out: Vec<starknet::core::types::FieldElement> = vec![];
-        __out.extend(starknet::core::types::FieldElement::cairo_serialize(
-            &__rust.new_owner_guid,
-        ));
-        __out
-    }
-    fn cairo_deserialize(
-        __felts: &[starknet::core::types::FieldElement],
-        __offset: usize,
-    ) -> cainome::cairo_serde::Result<Self::RustType> {
-        let mut __offset = __offset;
-        let new_owner_guid =
-            starknet::core::types::FieldElement::cairo_deserialize(__felts, __offset)?;
-        __offset += starknet::core::types::FieldElement::cairo_serialized_size(&new_owner_guid);
-        Ok(OwnerAdded { new_owner_guid })
-    }
-}
-#[derive(Debug, PartialEq, PartialOrd, Clone)]
-pub struct StarknetSigner {
-    pub pubkey: cainome::cairo_serde::NonZero<starknet::core::types::FieldElement>,
-}
-impl cainome::cairo_serde::CairoSerde for StarknetSigner {
-    type RustType = Self;
-    const SERIALIZED_SIZE: std::option::Option<usize> = None;
-    #[inline]
-    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
-        let mut __size = 0;
-        __size += cainome :: cairo_serde :: NonZero :: < starknet :: core :: types :: FieldElement > :: cairo_serialized_size (& __rust . pubkey) ;
-        __size
-    }
-    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::FieldElement> {
-        let mut __out: Vec<starknet::core::types::FieldElement> = vec![];
-        __out.extend(cainome::cairo_serde::NonZero::<
-            starknet::core::types::FieldElement,
-        >::cairo_serialize(&__rust.pubkey));
-        __out
-    }
-    fn cairo_deserialize(
-        __felts: &[starknet::core::types::FieldElement],
-        __offset: usize,
-    ) -> cainome::cairo_serde::Result<Self::RustType> {
-        let mut __offset = __offset;
-        let pubkey = cainome :: cairo_serde :: NonZero :: < starknet :: core :: types :: FieldElement > :: cairo_deserialize (__felts , __offset) ? ;
-        __offset += cainome :: cairo_serde :: NonZero :: < starknet :: core :: types :: FieldElement > :: cairo_serialized_size (& pubkey) ;
-        Ok(StarknetSigner { pubkey })
+        let r = cainome::cairo_serde::U256::cairo_deserialize(__felts, __offset)?;
+        __offset += cainome::cairo_serde::U256::cairo_serialized_size(&r);
+        let s = cainome::cairo_serde::U256::cairo_deserialize(__felts, __offset)?;
+        __offset += cainome::cairo_serde::U256::cairo_serialized_size(&s);
+        let y_parity = bool::cairo_deserialize(__felts, __offset)?;
+        __offset += bool::cairo_serialized_size(&y_parity);
+        Ok(Signature { r, s, y_parity })
     }
 }
 #[derive(Debug, PartialEq, PartialOrd, Clone)]
@@ -425,6 +169,134 @@ impl cainome::cairo_serde::CairoSerde for StarknetSignature {
         let s = starknet::core::types::FieldElement::cairo_deserialize(__felts, __offset)?;
         __offset += starknet::core::types::FieldElement::cairo_serialized_size(&s);
         Ok(StarknetSignature { r, s })
+    }
+}
+#[derive(Debug, PartialEq, PartialOrd, Clone)]
+pub struct SessionToken {
+    pub session: Session,
+    pub session_authorization: Vec<starknet::core::types::FieldElement>,
+    pub session_signature: SignerSignature,
+    pub guardian_signature: SignerSignature,
+    pub proofs: Vec<Vec<starknet::core::types::FieldElement>>,
+}
+impl cainome::cairo_serde::CairoSerde for SessionToken {
+    type RustType = Self;
+    const SERIALIZED_SIZE: std::option::Option<usize> = None;
+    #[inline]
+    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
+        let mut __size = 0;
+        __size += Session::cairo_serialized_size(&__rust.session);
+        __size += Vec::<starknet::core::types::FieldElement>::cairo_serialized_size(
+            &__rust.session_authorization,
+        );
+        __size += SignerSignature::cairo_serialized_size(&__rust.session_signature);
+        __size += SignerSignature::cairo_serialized_size(&__rust.guardian_signature);
+        __size +=
+            Vec::<Vec<starknet::core::types::FieldElement>>::cairo_serialized_size(&__rust.proofs);
+        __size
+    }
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::FieldElement> {
+        let mut __out: Vec<starknet::core::types::FieldElement> = vec![];
+        __out.extend(Session::cairo_serialize(&__rust.session));
+        __out.extend(Vec::<starknet::core::types::FieldElement>::cairo_serialize(
+            &__rust.session_authorization,
+        ));
+        __out.extend(SignerSignature::cairo_serialize(&__rust.session_signature));
+        __out.extend(SignerSignature::cairo_serialize(&__rust.guardian_signature));
+        __out.extend(
+            Vec::<Vec<starknet::core::types::FieldElement>>::cairo_serialize(&__rust.proofs),
+        );
+        __out
+    }
+    fn cairo_deserialize(
+        __felts: &[starknet::core::types::FieldElement],
+        __offset: usize,
+    ) -> cainome::cairo_serde::Result<Self::RustType> {
+        let mut __offset = __offset;
+        let session = Session::cairo_deserialize(__felts, __offset)?;
+        __offset += Session::cairo_serialized_size(&session);
+        let session_authorization =
+            Vec::<starknet::core::types::FieldElement>::cairo_deserialize(__felts, __offset)?;
+        __offset += Vec::<starknet::core::types::FieldElement>::cairo_serialized_size(
+            &session_authorization,
+        );
+        let session_signature = SignerSignature::cairo_deserialize(__felts, __offset)?;
+        __offset += SignerSignature::cairo_serialized_size(&session_signature);
+        let guardian_signature = SignerSignature::cairo_deserialize(__felts, __offset)?;
+        __offset += SignerSignature::cairo_serialized_size(&guardian_signature);
+        let proofs =
+            Vec::<Vec<starknet::core::types::FieldElement>>::cairo_deserialize(__felts, __offset)?;
+        __offset += Vec::<Vec<starknet::core::types::FieldElement>>::cairo_serialized_size(&proofs);
+        Ok(SessionToken {
+            session,
+            session_authorization,
+            session_signature,
+            guardian_signature,
+            proofs,
+        })
+    }
+}
+#[derive(Debug, PartialEq, PartialOrd, Clone)]
+pub struct OwnerAdded {
+    pub new_owner_guid: starknet::core::types::FieldElement,
+}
+impl cainome::cairo_serde::CairoSerde for OwnerAdded {
+    type RustType = Self;
+    const SERIALIZED_SIZE: std::option::Option<usize> = None;
+    #[inline]
+    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
+        let mut __size = 0;
+        __size +=
+            starknet::core::types::FieldElement::cairo_serialized_size(&__rust.new_owner_guid);
+        __size
+    }
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::FieldElement> {
+        let mut __out: Vec<starknet::core::types::FieldElement> = vec![];
+        __out.extend(starknet::core::types::FieldElement::cairo_serialize(
+            &__rust.new_owner_guid,
+        ));
+        __out
+    }
+    fn cairo_deserialize(
+        __felts: &[starknet::core::types::FieldElement],
+        __offset: usize,
+    ) -> cainome::cairo_serde::Result<Self::RustType> {
+        let mut __offset = __offset;
+        let new_owner_guid =
+            starknet::core::types::FieldElement::cairo_deserialize(__felts, __offset)?;
+        __offset += starknet::core::types::FieldElement::cairo_serialized_size(&new_owner_guid);
+        Ok(OwnerAdded { new_owner_guid })
+    }
+}
+#[derive(Debug, PartialEq, PartialOrd, Clone)]
+pub struct TokenRevoked {
+    pub token: Vec<starknet::core::types::FieldElement>,
+}
+impl cainome::cairo_serde::CairoSerde for TokenRevoked {
+    type RustType = Self;
+    const SERIALIZED_SIZE: std::option::Option<usize> = None;
+    #[inline]
+    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
+        let mut __size = 0;
+        __size += Vec::<starknet::core::types::FieldElement>::cairo_serialized_size(&__rust.token);
+        __size
+    }
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::FieldElement> {
+        let mut __out: Vec<starknet::core::types::FieldElement> = vec![];
+        __out.extend(Vec::<starknet::core::types::FieldElement>::cairo_serialize(
+            &__rust.token,
+        ));
+        __out
+    }
+    fn cairo_deserialize(
+        __felts: &[starknet::core::types::FieldElement],
+        __offset: usize,
+    ) -> cainome::cairo_serde::Result<Self::RustType> {
+        let mut __offset = __offset;
+        let token =
+            Vec::<starknet::core::types::FieldElement>::cairo_deserialize(__felts, __offset)?;
+        __offset += Vec::<starknet::core::types::FieldElement>::cairo_serialized_size(&token);
+        Ok(TokenRevoked { token })
     }
 }
 #[derive(Debug, PartialEq, PartialOrd, Clone)]
@@ -493,6 +365,129 @@ impl cainome::cairo_serde::CairoSerde for WebauthnSigner {
             rp_id_hash,
             pubkey,
         })
+    }
+}
+#[derive(Debug, PartialEq, PartialOrd, Clone)]
+pub struct Session {
+    pub expires_at: u64,
+    pub allowed_methods_root: starknet::core::types::FieldElement,
+    pub metadata_hash: starknet::core::types::FieldElement,
+    pub session_key_guid: starknet::core::types::FieldElement,
+}
+impl cainome::cairo_serde::CairoSerde for Session {
+    type RustType = Self;
+    const SERIALIZED_SIZE: std::option::Option<usize> = None;
+    #[inline]
+    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
+        let mut __size = 0;
+        __size += u64::cairo_serialized_size(&__rust.expires_at);
+        __size += starknet::core::types::FieldElement::cairo_serialized_size(
+            &__rust.allowed_methods_root,
+        );
+        __size += starknet::core::types::FieldElement::cairo_serialized_size(&__rust.metadata_hash);
+        __size +=
+            starknet::core::types::FieldElement::cairo_serialized_size(&__rust.session_key_guid);
+        __size
+    }
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::FieldElement> {
+        let mut __out: Vec<starknet::core::types::FieldElement> = vec![];
+        __out.extend(u64::cairo_serialize(&__rust.expires_at));
+        __out.extend(starknet::core::types::FieldElement::cairo_serialize(
+            &__rust.allowed_methods_root,
+        ));
+        __out.extend(starknet::core::types::FieldElement::cairo_serialize(
+            &__rust.metadata_hash,
+        ));
+        __out.extend(starknet::core::types::FieldElement::cairo_serialize(
+            &__rust.session_key_guid,
+        ));
+        __out
+    }
+    fn cairo_deserialize(
+        __felts: &[starknet::core::types::FieldElement],
+        __offset: usize,
+    ) -> cainome::cairo_serde::Result<Self::RustType> {
+        let mut __offset = __offset;
+        let expires_at = u64::cairo_deserialize(__felts, __offset)?;
+        __offset += u64::cairo_serialized_size(&expires_at);
+        let allowed_methods_root =
+            starknet::core::types::FieldElement::cairo_deserialize(__felts, __offset)?;
+        __offset +=
+            starknet::core::types::FieldElement::cairo_serialized_size(&allowed_methods_root);
+        let metadata_hash =
+            starknet::core::types::FieldElement::cairo_deserialize(__felts, __offset)?;
+        __offset += starknet::core::types::FieldElement::cairo_serialized_size(&metadata_hash);
+        let session_key_guid =
+            starknet::core::types::FieldElement::cairo_deserialize(__felts, __offset)?;
+        __offset += starknet::core::types::FieldElement::cairo_serialized_size(&session_key_guid);
+        Ok(Session {
+            expires_at,
+            allowed_methods_root,
+            metadata_hash,
+            session_key_guid,
+        })
+    }
+}
+#[derive(Debug, PartialEq, PartialOrd, Clone)]
+pub struct StarknetSigner {
+    pub pubkey: cainome::cairo_serde::NonZero<starknet::core::types::FieldElement>,
+}
+impl cainome::cairo_serde::CairoSerde for StarknetSigner {
+    type RustType = Self;
+    const SERIALIZED_SIZE: std::option::Option<usize> = None;
+    #[inline]
+    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
+        let mut __size = 0;
+        __size += cainome :: cairo_serde :: NonZero :: < starknet :: core :: types :: FieldElement > :: cairo_serialized_size (& __rust . pubkey) ;
+        __size
+    }
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::FieldElement> {
+        let mut __out: Vec<starknet::core::types::FieldElement> = vec![];
+        __out.extend(cainome::cairo_serde::NonZero::<
+            starknet::core::types::FieldElement,
+        >::cairo_serialize(&__rust.pubkey));
+        __out
+    }
+    fn cairo_deserialize(
+        __felts: &[starknet::core::types::FieldElement],
+        __offset: usize,
+    ) -> cainome::cairo_serde::Result<Self::RustType> {
+        let mut __offset = __offset;
+        let pubkey = cainome :: cairo_serde :: NonZero :: < starknet :: core :: types :: FieldElement > :: cairo_deserialize (__felts , __offset) ? ;
+        __offset += cainome :: cairo_serde :: NonZero :: < starknet :: core :: types :: FieldElement > :: cairo_serialized_size (& pubkey) ;
+        Ok(StarknetSigner { pubkey })
+    }
+}
+#[derive(Debug, PartialEq, PartialOrd, Clone)]
+pub struct OwnerRemoved {
+    pub removed_owner_guid: starknet::core::types::FieldElement,
+}
+impl cainome::cairo_serde::CairoSerde for OwnerRemoved {
+    type RustType = Self;
+    const SERIALIZED_SIZE: std::option::Option<usize> = None;
+    #[inline]
+    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
+        let mut __size = 0;
+        __size +=
+            starknet::core::types::FieldElement::cairo_serialized_size(&__rust.removed_owner_guid);
+        __size
+    }
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::FieldElement> {
+        let mut __out: Vec<starknet::core::types::FieldElement> = vec![];
+        __out.extend(starknet::core::types::FieldElement::cairo_serialize(
+            &__rust.removed_owner_guid,
+        ));
+        __out
+    }
+    fn cairo_deserialize(
+        __felts: &[starknet::core::types::FieldElement],
+        __offset: usize,
+    ) -> cainome::cairo_serde::Result<Self::RustType> {
+        let mut __offset = __offset;
+        let removed_owner_guid =
+            starknet::core::types::FieldElement::cairo_deserialize(__felts, __offset)?;
+        __offset += starknet::core::types::FieldElement::cairo_serialized_size(&removed_owner_guid);
+        Ok(OwnerRemoved { removed_owner_guid })
     }
 }
 #[derive(Debug, PartialEq, PartialOrd, Clone)]
@@ -568,38 +563,28 @@ impl cainome::cairo_serde::CairoSerde for WebauthnAssertion {
     }
 }
 #[derive(Debug, PartialEq, PartialOrd, Clone)]
-pub enum Signer {
-    Starknet(StarknetSigner),
-    Webauthn(WebauthnSigner),
+pub enum SignerType {
+    Starknet,
+    Webauthn,
     Unimplemented,
 }
-impl cainome::cairo_serde::CairoSerde for Signer {
+impl cainome::cairo_serde::CairoSerde for SignerType {
     type RustType = Self;
     const SERIALIZED_SIZE: std::option::Option<usize> = std::option::Option::None;
     #[inline]
     fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
         match __rust {
-            Signer::Starknet(val) => StarknetSigner::cairo_serialized_size(val) + 1,
-            Signer::Webauthn(val) => WebauthnSigner::cairo_serialized_size(val) + 1,
-            Signer::Unimplemented => 1,
+            SignerType::Starknet => 1,
+            SignerType::Webauthn => 1,
+            SignerType::Unimplemented => 1,
             _ => 0,
         }
     }
     fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::FieldElement> {
         match __rust {
-            Signer::Starknet(val) => {
-                let mut temp = vec![];
-                temp.extend(usize::cairo_serialize(&0usize));
-                temp.extend(StarknetSigner::cairo_serialize(val));
-                temp
-            }
-            Signer::Webauthn(val) => {
-                let mut temp = vec![];
-                temp.extend(usize::cairo_serialize(&1usize));
-                temp.extend(WebauthnSigner::cairo_serialize(val));
-                temp
-            }
-            Signer::Unimplemented => usize::cairo_serialize(&2usize),
+            SignerType::Starknet => usize::cairo_serialize(&0usize),
+            SignerType::Webauthn => usize::cairo_serialize(&1usize),
+            SignerType::Unimplemented => usize::cairo_serialize(&2usize),
             _ => vec![],
         }
     }
@@ -609,168 +594,13 @@ impl cainome::cairo_serde::CairoSerde for Signer {
     ) -> cainome::cairo_serde::Result<Self::RustType> {
         let __index: u128 = __felts[__offset].try_into().unwrap();
         match __index as usize {
-            0usize => Ok(Signer::Starknet(StarknetSigner::cairo_deserialize(
-                __felts,
-                __offset + 1,
-            )?)),
-            1usize => Ok(Signer::Webauthn(WebauthnSigner::cairo_deserialize(
-                __felts,
-                __offset + 1,
-            )?)),
-            2usize => Ok(Signer::Unimplemented),
+            0usize => Ok(SignerType::Starknet),
+            1usize => Ok(SignerType::Webauthn),
+            2usize => Ok(SignerType::Unimplemented),
             _ => {
                 return Err(cainome::cairo_serde::Error::Deserialize(format!(
                     "Index not handle for enum {}",
-                    "Signer"
-                )))
-            }
-        }
-    }
-}
-#[derive(Debug, PartialEq, PartialOrd, Clone)]
-pub enum SessionComponentEvent {
-    TokenRevoked(TokenRevoked),
-}
-impl cainome::cairo_serde::CairoSerde for SessionComponentEvent {
-    type RustType = Self;
-    const SERIALIZED_SIZE: std::option::Option<usize> = std::option::Option::None;
-    #[inline]
-    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
-        match __rust {
-            SessionComponentEvent::TokenRevoked(val) => {
-                TokenRevoked::cairo_serialized_size(val) + 1
-            }
-            _ => 0,
-        }
-    }
-    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::FieldElement> {
-        match __rust {
-            SessionComponentEvent::TokenRevoked(val) => {
-                let mut temp = vec![];
-                temp.extend(usize::cairo_serialize(&0usize));
-                temp.extend(TokenRevoked::cairo_serialize(val));
-                temp
-            }
-            _ => vec![],
-        }
-    }
-    fn cairo_deserialize(
-        __felts: &[starknet::core::types::FieldElement],
-        __offset: usize,
-    ) -> cainome::cairo_serde::Result<Self::RustType> {
-        let __index: u128 = __felts[__offset].try_into().unwrap();
-        match __index as usize {
-            0usize => Ok(SessionComponentEvent::TokenRevoked(
-                TokenRevoked::cairo_deserialize(__felts, __offset + 1)?,
-            )),
-            _ => {
-                return Err(cainome::cairo_serde::Error::Deserialize(format!(
-                    "Index not handle for enum {}",
-                    "SessionComponentEvent"
-                )))
-            }
-        }
-    }
-}
-impl TryFrom<starknet::core::types::EmittedEvent> for SessionComponentEvent {
-    type Error = String;
-    fn try_from(event: starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
-        use cainome::cairo_serde::CairoSerde;
-        if event.keys.is_empty() {
-            return Err("Event has no key".to_string());
-        }
-        let selector = event.keys[0];
-        if selector
-            == starknet::core::utils::get_selector_from_name("TokenRevoked")
-                .unwrap_or_else(|_| panic!("Invalid selector for {}", "TokenRevoked"))
-        {
-            let mut key_offset = 0 + 1;
-            let mut data_offset = 0;
-            let token = match Vec::<starknet::core::types::FieldElement>::cairo_deserialize(
-                &event.data,
-                data_offset,
-            ) {
-                Ok(v) => v,
-                Err(e) => {
-                    return Err(format!(
-                        "Could not deserialize field {} for {}: {:?}",
-                        "token", "TokenRevoked", e
-                    ))
-                }
-            };
-            data_offset +=
-                Vec::<starknet::core::types::FieldElement>::cairo_serialized_size(&token);
-            return Ok(SessionComponentEvent::TokenRevoked(TokenRevoked { token }));
-        };
-        Err(format!(
-            "Could not match any event from keys {:?}",
-            event.keys
-        ))
-    }
-}
-#[derive(Debug, PartialEq, PartialOrd, Clone)]
-pub enum SignerSignature {
-    Starknet((StarknetSigner, StarknetSignature)),
-    Webauthn((WebauthnSigner, WebauthnAssertion)),
-    Unimplemented,
-}
-impl cainome::cairo_serde::CairoSerde for SignerSignature {
-    type RustType = Self;
-    const SERIALIZED_SIZE: std::option::Option<usize> = std::option::Option::None;
-    #[inline]
-    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
-        match __rust {
-            SignerSignature::Starknet(val) => {
-                <(StarknetSigner, StarknetSignature)>::cairo_serialized_size(val) + 1
-            }
-            SignerSignature::Webauthn(val) => {
-                <(WebauthnSigner, WebauthnAssertion)>::cairo_serialized_size(val) + 1
-            }
-            SignerSignature::Unimplemented => 1,
-            _ => 0,
-        }
-    }
-    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::FieldElement> {
-        match __rust {
-            SignerSignature::Starknet(val) => {
-                let mut temp = vec![];
-                temp.extend(usize::cairo_serialize(&0usize));
-                temp.extend(<(StarknetSigner, StarknetSignature)>::cairo_serialize(val));
-                temp
-            }
-            SignerSignature::Webauthn(val) => {
-                let mut temp = vec![];
-                temp.extend(usize::cairo_serialize(&1usize));
-                temp.extend(<(WebauthnSigner, WebauthnAssertion)>::cairo_serialize(val));
-                temp
-            }
-            SignerSignature::Unimplemented => usize::cairo_serialize(&2usize),
-            _ => vec![],
-        }
-    }
-    fn cairo_deserialize(
-        __felts: &[starknet::core::types::FieldElement],
-        __offset: usize,
-    ) -> cainome::cairo_serde::Result<Self::RustType> {
-        let __index: u128 = __felts[__offset].try_into().unwrap();
-        match __index as usize {
-            0usize => Ok(SignerSignature::Starknet(<(
-                StarknetSigner,
-                StarknetSignature,
-            )>::cairo_deserialize(
-                __felts, __offset + 1
-            )?)),
-            1usize => Ok(SignerSignature::Webauthn(<(
-                WebauthnSigner,
-                WebauthnAssertion,
-            )>::cairo_deserialize(
-                __felts, __offset + 1
-            )?)),
-            2usize => Ok(SignerSignature::Unimplemented),
-            _ => {
-                return Err(cainome::cairo_serde::Error::Deserialize(format!(
-                    "Index not handle for enum {}",
-                    "SignerSignature"
+                    "SignerType"
                 )))
             }
         }
@@ -934,28 +764,29 @@ impl TryFrom<starknet::core::types::EmittedEvent> for Event {
     }
 }
 #[derive(Debug, PartialEq, PartialOrd, Clone)]
-pub enum SignerType {
-    Starknet,
-    Webauthn,
-    Unimplemented,
+pub enum SessionComponentEvent {
+    TokenRevoked(TokenRevoked),
 }
-impl cainome::cairo_serde::CairoSerde for SignerType {
+impl cainome::cairo_serde::CairoSerde for SessionComponentEvent {
     type RustType = Self;
     const SERIALIZED_SIZE: std::option::Option<usize> = std::option::Option::None;
     #[inline]
     fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
         match __rust {
-            SignerType::Starknet => 1,
-            SignerType::Webauthn => 1,
-            SignerType::Unimplemented => 1,
+            SessionComponentEvent::TokenRevoked(val) => {
+                TokenRevoked::cairo_serialized_size(val) + 1
+            }
             _ => 0,
         }
     }
     fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::FieldElement> {
         match __rust {
-            SignerType::Starknet => usize::cairo_serialize(&0usize),
-            SignerType::Webauthn => usize::cairo_serialize(&1usize),
-            SignerType::Unimplemented => usize::cairo_serialize(&2usize),
+            SessionComponentEvent::TokenRevoked(val) => {
+                let mut temp = vec![];
+                temp.extend(usize::cairo_serialize(&0usize));
+                temp.extend(TokenRevoked::cairo_serialize(val));
+                temp
+            }
             _ => vec![],
         }
     }
@@ -965,13 +796,177 @@ impl cainome::cairo_serde::CairoSerde for SignerType {
     ) -> cainome::cairo_serde::Result<Self::RustType> {
         let __index: u128 = __felts[__offset].try_into().unwrap();
         match __index as usize {
-            0usize => Ok(SignerType::Starknet),
-            1usize => Ok(SignerType::Webauthn),
-            2usize => Ok(SignerType::Unimplemented),
+            0usize => Ok(SessionComponentEvent::TokenRevoked(
+                TokenRevoked::cairo_deserialize(__felts, __offset + 1)?,
+            )),
             _ => {
                 return Err(cainome::cairo_serde::Error::Deserialize(format!(
                     "Index not handle for enum {}",
-                    "SignerType"
+                    "SessionComponentEvent"
+                )))
+            }
+        }
+    }
+}
+impl TryFrom<starknet::core::types::EmittedEvent> for SessionComponentEvent {
+    type Error = String;
+    fn try_from(event: starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
+        use cainome::cairo_serde::CairoSerde;
+        if event.keys.is_empty() {
+            return Err("Event has no key".to_string());
+        }
+        let selector = event.keys[0];
+        if selector
+            == starknet::core::utils::get_selector_from_name("TokenRevoked")
+                .unwrap_or_else(|_| panic!("Invalid selector for {}", "TokenRevoked"))
+        {
+            let mut key_offset = 0 + 1;
+            let mut data_offset = 0;
+            let token = match Vec::<starknet::core::types::FieldElement>::cairo_deserialize(
+                &event.data,
+                data_offset,
+            ) {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(format!(
+                        "Could not deserialize field {} for {}: {:?}",
+                        "token", "TokenRevoked", e
+                    ))
+                }
+            };
+            data_offset +=
+                Vec::<starknet::core::types::FieldElement>::cairo_serialized_size(&token);
+            return Ok(SessionComponentEvent::TokenRevoked(TokenRevoked { token }));
+        };
+        Err(format!(
+            "Could not match any event from keys {:?}",
+            event.keys
+        ))
+    }
+}
+#[derive(Debug, PartialEq, PartialOrd, Clone)]
+pub enum Signer {
+    Starknet(StarknetSigner),
+    Webauthn(WebauthnSigner),
+    Unimplemented,
+}
+impl cainome::cairo_serde::CairoSerde for Signer {
+    type RustType = Self;
+    const SERIALIZED_SIZE: std::option::Option<usize> = std::option::Option::None;
+    #[inline]
+    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
+        match __rust {
+            Signer::Starknet(val) => StarknetSigner::cairo_serialized_size(val) + 1,
+            Signer::Webauthn(val) => WebauthnSigner::cairo_serialized_size(val) + 1,
+            Signer::Unimplemented => 1,
+            _ => 0,
+        }
+    }
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::FieldElement> {
+        match __rust {
+            Signer::Starknet(val) => {
+                let mut temp = vec![];
+                temp.extend(usize::cairo_serialize(&0usize));
+                temp.extend(StarknetSigner::cairo_serialize(val));
+                temp
+            }
+            Signer::Webauthn(val) => {
+                let mut temp = vec![];
+                temp.extend(usize::cairo_serialize(&1usize));
+                temp.extend(WebauthnSigner::cairo_serialize(val));
+                temp
+            }
+            Signer::Unimplemented => usize::cairo_serialize(&2usize),
+            _ => vec![],
+        }
+    }
+    fn cairo_deserialize(
+        __felts: &[starknet::core::types::FieldElement],
+        __offset: usize,
+    ) -> cainome::cairo_serde::Result<Self::RustType> {
+        let __index: u128 = __felts[__offset].try_into().unwrap();
+        match __index as usize {
+            0usize => Ok(Signer::Starknet(StarknetSigner::cairo_deserialize(
+                __felts,
+                __offset + 1,
+            )?)),
+            1usize => Ok(Signer::Webauthn(WebauthnSigner::cairo_deserialize(
+                __felts,
+                __offset + 1,
+            )?)),
+            2usize => Ok(Signer::Unimplemented),
+            _ => {
+                return Err(cainome::cairo_serde::Error::Deserialize(format!(
+                    "Index not handle for enum {}",
+                    "Signer"
+                )))
+            }
+        }
+    }
+}
+#[derive(Debug, PartialEq, PartialOrd, Clone)]
+pub enum SignerSignature {
+    Starknet((StarknetSigner, StarknetSignature)),
+    Webauthn((WebauthnSigner, WebauthnAssertion)),
+    Unimplemented,
+}
+impl cainome::cairo_serde::CairoSerde for SignerSignature {
+    type RustType = Self;
+    const SERIALIZED_SIZE: std::option::Option<usize> = std::option::Option::None;
+    #[inline]
+    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
+        match __rust {
+            SignerSignature::Starknet(val) => {
+                <(StarknetSigner, StarknetSignature)>::cairo_serialized_size(val) + 1
+            }
+            SignerSignature::Webauthn(val) => {
+                <(WebauthnSigner, WebauthnAssertion)>::cairo_serialized_size(val) + 1
+            }
+            SignerSignature::Unimplemented => 1,
+            _ => 0,
+        }
+    }
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::FieldElement> {
+        match __rust {
+            SignerSignature::Starknet(val) => {
+                let mut temp = vec![];
+                temp.extend(usize::cairo_serialize(&0usize));
+                temp.extend(<(StarknetSigner, StarknetSignature)>::cairo_serialize(val));
+                temp
+            }
+            SignerSignature::Webauthn(val) => {
+                let mut temp = vec![];
+                temp.extend(usize::cairo_serialize(&1usize));
+                temp.extend(<(WebauthnSigner, WebauthnAssertion)>::cairo_serialize(val));
+                temp
+            }
+            SignerSignature::Unimplemented => usize::cairo_serialize(&2usize),
+            _ => vec![],
+        }
+    }
+    fn cairo_deserialize(
+        __felts: &[starknet::core::types::FieldElement],
+        __offset: usize,
+    ) -> cainome::cairo_serde::Result<Self::RustType> {
+        let __index: u128 = __felts[__offset].try_into().unwrap();
+        match __index as usize {
+            0usize => Ok(SignerSignature::Starknet(<(
+                StarknetSigner,
+                StarknetSignature,
+            )>::cairo_deserialize(
+                __felts, __offset + 1
+            )?)),
+            1usize => Ok(SignerSignature::Webauthn(<(
+                WebauthnSigner,
+                WebauthnAssertion,
+            )>::cairo_deserialize(
+                __felts, __offset + 1
+            )?)),
+            2usize => Ok(SignerSignature::Unimplemented),
+            _ => {
+                return Err(cainome::cairo_serde::Error::Deserialize(format!(
+                    "Index not handle for enum {}",
+                    "SignerSignature"
                 )))
             }
         }
@@ -980,20 +975,18 @@ impl cainome::cairo_serde::CairoSerde for SignerType {
 impl<A: starknet::accounts::ConnectedAccount + Sync> CartridgeAccount<A> {
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
-    pub fn is_valid_signature(
+    pub fn __validate_declare__(
         &self,
-        hash: &starknet::core::types::FieldElement,
-        signature: &Vec<starknet::core::types::FieldElement>,
+        class_hash: &starknet::core::types::FieldElement,
     ) -> cainome::cairo_serde::call::FCall<A::Provider, starknet::core::types::FieldElement> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
-        __calldata.extend(starknet::core::types::FieldElement::cairo_serialize(hash));
-        __calldata.extend(Vec::<starknet::core::types::FieldElement>::cairo_serialize(
-            signature,
+        __calldata.extend(starknet::core::types::FieldElement::cairo_serialize(
+            class_hash,
         ));
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
-            entry_point_selector: starknet::macros::selector!("is_valid_signature"),
+            entry_point_selector: starknet::macros::selector!("__validate_declare__"),
             calldata: __calldata,
         };
         cainome::cairo_serde::call::FCall::new(__call, self.provider())
@@ -1044,18 +1037,46 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> CartridgeAccount<A> {
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
-    pub fn __validate_declare__(
+    pub fn is_valid_signature(
+        &self,
+        hash: &starknet::core::types::FieldElement,
+        signature: &Vec<starknet::core::types::FieldElement>,
+    ) -> cainome::cairo_serde::call::FCall<A::Provider, starknet::core::types::FieldElement> {
+        use cainome::cairo_serde::CairoSerde;
+        let mut __calldata = vec![];
+        __calldata.extend(starknet::core::types::FieldElement::cairo_serialize(hash));
+        __calldata.extend(Vec::<starknet::core::types::FieldElement>::cairo_serialize(
+            signature,
+        ));
+        let __call = starknet::core::types::FunctionCall {
+            contract_address: self.address,
+            entry_point_selector: starknet::macros::selector!("is_valid_signature"),
+            calldata: __calldata,
+        };
+        cainome::cairo_serde::call::FCall::new(__call, self.provider())
+    }
+    #[allow(clippy::ptr_arg)]
+    #[allow(clippy::too_many_arguments)]
+    pub fn __validate_deploy__(
         &self,
         class_hash: &starknet::core::types::FieldElement,
+        contract_address_salt: &starknet::core::types::FieldElement,
+        public_key: &starknet::core::types::FieldElement,
     ) -> cainome::cairo_serde::call::FCall<A::Provider, starknet::core::types::FieldElement> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         __calldata.extend(starknet::core::types::FieldElement::cairo_serialize(
             class_hash,
         ));
+        __calldata.extend(starknet::core::types::FieldElement::cairo_serialize(
+            contract_address_salt,
+        ));
+        __calldata.extend(starknet::core::types::FieldElement::cairo_serialize(
+            public_key,
+        ));
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
-            entry_point_selector: starknet::macros::selector!("__validate_declare__"),
+            entry_point_selector: starknet::macros::selector!("__validate_deploy__"),
             calldata: __calldata,
         };
         cainome::cairo_serde::call::FCall::new(__call, self.provider())
@@ -1064,17 +1085,17 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> CartridgeAccount<A> {
     #[allow(clippy::too_many_arguments)]
     pub fn validate_session(
         &self,
-        public_key: &starknet::core::types::FieldElement,
-        signature: &SessionSignature,
+        signature: &SessionToken,
         calls: &Vec<Call>,
+        transaction_hash: &starknet::core::types::FieldElement,
     ) -> cainome::cairo_serde::call::FCall<A::Provider, starknet::core::types::FieldElement> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
-        __calldata.extend(starknet::core::types::FieldElement::cairo_serialize(
-            public_key,
-        ));
-        __calldata.extend(SessionSignature::cairo_serialize(signature));
+        __calldata.extend(SessionToken::cairo_serialize(signature));
         __calldata.extend(Vec::<Call>::cairo_serialize(calls));
+        __calldata.extend(starknet::core::types::FieldElement::cairo_serialize(
+            transaction_hash,
+        ));
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
             entry_point_selector: starknet::macros::selector!("validate_session"),
@@ -1086,19 +1107,19 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> CartridgeAccount<A> {
     #[allow(clippy::too_many_arguments)]
     pub fn validate_session_serialized(
         &self,
-        public_key: &starknet::core::types::FieldElement,
         signature: &Vec<starknet::core::types::FieldElement>,
         calls: &Vec<Call>,
+        transaction_hash: &starknet::core::types::FieldElement,
     ) -> cainome::cairo_serde::call::FCall<A::Provider, starknet::core::types::FieldElement> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
-        __calldata.extend(starknet::core::types::FieldElement::cairo_serialize(
-            public_key,
-        ));
         __calldata.extend(Vec::<starknet::core::types::FieldElement>::cairo_serialize(
             signature,
         ));
         __calldata.extend(Vec::<Call>::cairo_serialize(calls));
+        __calldata.extend(starknet::core::types::FieldElement::cairo_serialize(
+            transaction_hash,
+        ));
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
             entry_point_selector: starknet::macros::selector!("validate_session_serialized"),
@@ -1149,40 +1170,14 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> CartridgeAccount<A> {
     #[allow(clippy::too_many_arguments)]
     pub fn compute_session_hash(
         &self,
-        unsigned_signature: &SessionSignature,
+        unsigned_signature: &Session,
     ) -> cainome::cairo_serde::call::FCall<A::Provider, starknet::core::types::FieldElement> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
-        __calldata.extend(SessionSignature::cairo_serialize(unsigned_signature));
+        __calldata.extend(Session::cairo_serialize(unsigned_signature));
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
             entry_point_selector: starknet::macros::selector!("compute_session_hash"),
-            calldata: __calldata,
-        };
-        cainome::cairo_serde::call::FCall::new(__call, self.provider())
-    }
-    #[allow(clippy::ptr_arg)]
-    #[allow(clippy::too_many_arguments)]
-    pub fn __validate_deploy__(
-        &self,
-        class_hash: &starknet::core::types::FieldElement,
-        contract_address_salt: &starknet::core::types::FieldElement,
-        public_key: &starknet::core::types::FieldElement,
-    ) -> cainome::cairo_serde::call::FCall<A::Provider, starknet::core::types::FieldElement> {
-        use cainome::cairo_serde::CairoSerde;
-        let mut __calldata = vec![];
-        __calldata.extend(starknet::core::types::FieldElement::cairo_serialize(
-            class_hash,
-        ));
-        __calldata.extend(starknet::core::types::FieldElement::cairo_serialize(
-            contract_address_salt,
-        ));
-        __calldata.extend(starknet::core::types::FieldElement::cairo_serialize(
-            public_key,
-        ));
-        let __call = starknet::core::types::FunctionCall {
-            contract_address: self.address,
-            entry_point_selector: starknet::macros::selector!("__validate_deploy__"),
             calldata: __calldata,
         };
         cainome::cairo_serde::call::FCall::new(__call, self.provider())
@@ -1273,20 +1268,18 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> CartridgeAccount<A> {
 impl<P: starknet::providers::Provider + Sync> CartridgeAccountReader<P> {
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
-    pub fn is_valid_signature(
+    pub fn __validate_declare__(
         &self,
-        hash: &starknet::core::types::FieldElement,
-        signature: &Vec<starknet::core::types::FieldElement>,
+        class_hash: &starknet::core::types::FieldElement,
     ) -> cainome::cairo_serde::call::FCall<P, starknet::core::types::FieldElement> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
-        __calldata.extend(starknet::core::types::FieldElement::cairo_serialize(hash));
-        __calldata.extend(Vec::<starknet::core::types::FieldElement>::cairo_serialize(
-            signature,
+        __calldata.extend(starknet::core::types::FieldElement::cairo_serialize(
+            class_hash,
         ));
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
-            entry_point_selector: starknet::macros::selector!("is_valid_signature"),
+            entry_point_selector: starknet::macros::selector!("__validate_declare__"),
             calldata: __calldata,
         };
         cainome::cairo_serde::call::FCall::new(__call, self.provider())
@@ -1337,18 +1330,46 @@ impl<P: starknet::providers::Provider + Sync> CartridgeAccountReader<P> {
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
-    pub fn __validate_declare__(
+    pub fn is_valid_signature(
+        &self,
+        hash: &starknet::core::types::FieldElement,
+        signature: &Vec<starknet::core::types::FieldElement>,
+    ) -> cainome::cairo_serde::call::FCall<P, starknet::core::types::FieldElement> {
+        use cainome::cairo_serde::CairoSerde;
+        let mut __calldata = vec![];
+        __calldata.extend(starknet::core::types::FieldElement::cairo_serialize(hash));
+        __calldata.extend(Vec::<starknet::core::types::FieldElement>::cairo_serialize(
+            signature,
+        ));
+        let __call = starknet::core::types::FunctionCall {
+            contract_address: self.address,
+            entry_point_selector: starknet::macros::selector!("is_valid_signature"),
+            calldata: __calldata,
+        };
+        cainome::cairo_serde::call::FCall::new(__call, self.provider())
+    }
+    #[allow(clippy::ptr_arg)]
+    #[allow(clippy::too_many_arguments)]
+    pub fn __validate_deploy__(
         &self,
         class_hash: &starknet::core::types::FieldElement,
+        contract_address_salt: &starknet::core::types::FieldElement,
+        public_key: &starknet::core::types::FieldElement,
     ) -> cainome::cairo_serde::call::FCall<P, starknet::core::types::FieldElement> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         __calldata.extend(starknet::core::types::FieldElement::cairo_serialize(
             class_hash,
         ));
+        __calldata.extend(starknet::core::types::FieldElement::cairo_serialize(
+            contract_address_salt,
+        ));
+        __calldata.extend(starknet::core::types::FieldElement::cairo_serialize(
+            public_key,
+        ));
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
-            entry_point_selector: starknet::macros::selector!("__validate_declare__"),
+            entry_point_selector: starknet::macros::selector!("__validate_deploy__"),
             calldata: __calldata,
         };
         cainome::cairo_serde::call::FCall::new(__call, self.provider())
@@ -1357,17 +1378,17 @@ impl<P: starknet::providers::Provider + Sync> CartridgeAccountReader<P> {
     #[allow(clippy::too_many_arguments)]
     pub fn validate_session(
         &self,
-        public_key: &starknet::core::types::FieldElement,
-        signature: &SessionSignature,
+        signature: &SessionToken,
         calls: &Vec<Call>,
+        transaction_hash: &starknet::core::types::FieldElement,
     ) -> cainome::cairo_serde::call::FCall<P, starknet::core::types::FieldElement> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
-        __calldata.extend(starknet::core::types::FieldElement::cairo_serialize(
-            public_key,
-        ));
-        __calldata.extend(SessionSignature::cairo_serialize(signature));
+        __calldata.extend(SessionToken::cairo_serialize(signature));
         __calldata.extend(Vec::<Call>::cairo_serialize(calls));
+        __calldata.extend(starknet::core::types::FieldElement::cairo_serialize(
+            transaction_hash,
+        ));
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
             entry_point_selector: starknet::macros::selector!("validate_session"),
@@ -1379,19 +1400,19 @@ impl<P: starknet::providers::Provider + Sync> CartridgeAccountReader<P> {
     #[allow(clippy::too_many_arguments)]
     pub fn validate_session_serialized(
         &self,
-        public_key: &starknet::core::types::FieldElement,
         signature: &Vec<starknet::core::types::FieldElement>,
         calls: &Vec<Call>,
+        transaction_hash: &starknet::core::types::FieldElement,
     ) -> cainome::cairo_serde::call::FCall<P, starknet::core::types::FieldElement> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
-        __calldata.extend(starknet::core::types::FieldElement::cairo_serialize(
-            public_key,
-        ));
         __calldata.extend(Vec::<starknet::core::types::FieldElement>::cairo_serialize(
             signature,
         ));
         __calldata.extend(Vec::<Call>::cairo_serialize(calls));
+        __calldata.extend(starknet::core::types::FieldElement::cairo_serialize(
+            transaction_hash,
+        ));
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
             entry_point_selector: starknet::macros::selector!("validate_session_serialized"),
@@ -1441,40 +1462,14 @@ impl<P: starknet::providers::Provider + Sync> CartridgeAccountReader<P> {
     #[allow(clippy::too_many_arguments)]
     pub fn compute_session_hash(
         &self,
-        unsigned_signature: &SessionSignature,
+        unsigned_signature: &Session,
     ) -> cainome::cairo_serde::call::FCall<P, starknet::core::types::FieldElement> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
-        __calldata.extend(SessionSignature::cairo_serialize(unsigned_signature));
+        __calldata.extend(Session::cairo_serialize(unsigned_signature));
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
             entry_point_selector: starknet::macros::selector!("compute_session_hash"),
-            calldata: __calldata,
-        };
-        cainome::cairo_serde::call::FCall::new(__call, self.provider())
-    }
-    #[allow(clippy::ptr_arg)]
-    #[allow(clippy::too_many_arguments)]
-    pub fn __validate_deploy__(
-        &self,
-        class_hash: &starknet::core::types::FieldElement,
-        contract_address_salt: &starknet::core::types::FieldElement,
-        public_key: &starknet::core::types::FieldElement,
-    ) -> cainome::cairo_serde::call::FCall<P, starknet::core::types::FieldElement> {
-        use cainome::cairo_serde::CairoSerde;
-        let mut __calldata = vec![];
-        __calldata.extend(starknet::core::types::FieldElement::cairo_serialize(
-            class_hash,
-        ));
-        __calldata.extend(starknet::core::types::FieldElement::cairo_serialize(
-            contract_address_salt,
-        ));
-        __calldata.extend(starknet::core::types::FieldElement::cairo_serialize(
-            public_key,
-        ));
-        let __call = starknet::core::types::FunctionCall {
-            contract_address: self.address,
-            entry_point_selector: starknet::macros::selector!("__validate_deploy__"),
             calldata: __calldata,
         };
         cainome::cairo_serde::call::FCall::new(__call, self.provider())
