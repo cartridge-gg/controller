@@ -28,7 +28,6 @@ use web_sys::console;
 #[wasm_bindgen]
 pub struct CartridgeAccount {
     account: CartridgeGuardianAccount<JsonRpcClient<HttpTransport>, DeviceSigner, SigningKey>,
-    session: Option<SessionAccount<JsonRpcClient<HttpTransport>, SigningKey, SigningKey>>,
     rpc_url: Url,
 }
 
@@ -53,7 +52,6 @@ impl CartridgeAccount {
         origin: String,
         credential_id: String,
         public_key: String,
-        session_details: JsValue,
     ) -> Result<CartridgeAccount, JsValue> {
         utils::set_panic_hook();
         let rpc_url = Url::parse(&rpc_url).map_err(|e| JsValue::from_str(&format!("{}", e)))?;
@@ -85,48 +83,8 @@ impl CartridgeAccount {
             address,
             chain_id,
         );
-        let session_details: Option<JsSession> =
-            from_value(session_details).map_err(|e| JsValue::from_str(&format!("{}", e)))?;
-        let session: Option<SessionAccount<JsonRpcClient<HttpTransport>, SigningKey, SigningKey>> =
-            if let Some(session_details) = session_details {
-                let methods = session_details
-                    .policies
-                    .into_iter()
-                    .map(|policy| {
-                        AllowedMethod::try_from(policy)
-                            .map_err(|e| JsValue::from_str(&format!("{}", e)))
-                    })
-                    .collect::<Result<Vec<AllowedMethod>, _>>()?;
 
-                let session_signer =
-                    SigningKey::from_secret_scalar(session_details.credentials.private_key);
-                let expires_at: u64 = session_details
-                    .expires_at
-                    .parse()
-                    .map_err(|e| JsValue::from_str(&format!("{}", e)))?;
-                let session = Session::new(methods, expires_at, &session_signer.signer())
-                    .map_err(|e| JsValue::from_str(&format!("{}", e)))?;
-                let provider: JsonRpcClient<HttpTransport> =
-                    JsonRpcClient::new(HttpTransport::new(rpc_url.clone()));
-
-                Some(SessionAccount::new(
-                    provider,
-                    session_signer,
-                    dummy_guardian,
-                    account.address(),
-                    account.chain_id(),
-                    session_details.credentials.authorization,
-                    session.clone(),
-                ))
-            } else {
-                None
-            };
-
-        Ok(CartridgeAccount {
-            account,
-            session,
-            rpc_url,
-        })
+        Ok(CartridgeAccount { account, rpc_url })
     }
 
     #[wasm_bindgen(js_name = createSession)]
@@ -141,7 +99,8 @@ impl CartridgeAccount {
             .into_iter()
             .map(|js_value| {
                 JsPolicy::try_from(js_value).and_then(|js_policy| {
-                    AllowedMethod::try_from(js_policy).map_err(|e| JsValue::from_str(&format!("{}", e)))
+                    AllowedMethod::try_from(js_policy)
+                        .map_err(|e| JsValue::from_str(&format!("{}", e)))
                 })
             })
             .collect::<Result<Vec<AllowedMethod>, _>>()?;
@@ -160,18 +119,6 @@ impl CartridgeAccount {
             .await
             .map_err(|e| JsValue::from_str(&format!("{}", e)))?;
 
-        let provider = JsonRpcClient::new(HttpTransport::new(self.rpc_url.clone()));
-        let dummy_guardian = SigningKey::from_secret_scalar(felt!("0x42"));
-        self.session = Some(SessionAccount::new(
-            provider,
-            signer.clone(),
-            dummy_guardian,
-            self.account.address(),
-            self.account.chain_id(),
-            authorization.clone(),
-            session.clone(),
-        ));
-
         Ok(to_value(&JsCredentials {
             authorization,
             private_key: signer.secret_scalar(),
@@ -184,6 +131,7 @@ impl CartridgeAccount {
         &self,
         calls: Vec<JsValue>,
         transaction_details: JsValue,
+        session_details: JsValue,
     ) -> Result<JsValue, JsValue> {
         utils::set_panic_hook();
 
@@ -198,9 +146,40 @@ impl CartridgeAccount {
 
         let details: JsInvocationsDetails = JsInvocationsDetails::try_from(transaction_details)?;
 
-        let execution = if let Some(session) = &self.session {
-            session
-                .execute(calls.clone())
+        let session_details: Option<JsSession> =
+            from_value(session_details).map_err(|e| JsValue::from_str(&format!("{}", e)))?;
+        let execution = if let Some(session_details) = session_details {
+            let methods = session_details
+                .policies
+                .into_iter()
+                .map(|policy| {
+                    AllowedMethod::try_from(policy)
+                        .map_err(|e| JsValue::from_str(&format!("{}", e)))
+                })
+                .collect::<Result<Vec<AllowedMethod>, _>>()?;
+
+            let dummy_guardian = SigningKey::from_secret_scalar(felt!("0x42"));
+            let session_signer =
+                SigningKey::from_secret_scalar(session_details.credentials.private_key);
+            let expires_at: u64 = session_details
+                .expires_at
+                .parse()
+                .map_err(|e| JsValue::from_str(&format!("{}", e)))?;
+            let session = Session::new(methods, expires_at, &session_signer.signer())
+                .map_err(|e| JsValue::from_str(&format!("{}", e)))?;
+
+            let session_account = SessionAccount::new(
+                JsonRpcClient::new(HttpTransport::new(self.rpc_url.clone())),
+                session_signer,
+                dummy_guardian,
+                self.account.address(),
+                self.account.chain_id(),
+                session_details.credentials.authorization,
+                session.clone(),
+            );
+
+            session_account
+                .execute(calls)
                 .max_fee(details.max_fee)
                 .nonce(details.nonce)
                 .send()
@@ -217,6 +196,11 @@ impl CartridgeAccount {
         };
 
         Ok(to_value(&execution).map_err(|e| JsValue::from_str(&format!("{}", e)))?)
+    }
+
+    #[wasm_bindgen(js_name = revokeSession)]
+    pub fn revoke_session(&self) -> Result<(), JsValue> {
+        unimplemented!("Revoke Session not implemented");
     }
 
     #[wasm_bindgen(js_name = signMessage)]

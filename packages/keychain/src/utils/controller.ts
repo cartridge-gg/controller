@@ -6,7 +6,6 @@ import { Policy, Session } from "@cartridge/controller";
 import Storage from "utils/storage";
 
 import Account from "./account";
-import { CartridgeAccount } from "@cartridge/account-wasm";
 import selectors from "./selectors";
 import migrations from "./migrations";
 import { AccountInfoDocument } from "generated/graphql";
@@ -27,15 +26,7 @@ export default class Controller {
   protected credentialId: string;
   protected accounts: Account[];
 
-  constructor(
-    address: string,
-    publicKey: string,
-    credentialId: string,
-    options?: {
-      rpId?: string;
-      origin?: string;
-    },
-  ) {
+  constructor(address: string, publicKey: string, credentialId: string) {
     this.address = address;
     this.publicKey = publicKey;
     this.credentialId = credentialId;
@@ -59,19 +50,12 @@ export default class Controller {
         process.env.NEXT_PUBLIC_RPC_SEPOLIA,
         address,
         this.signer,
-        CartridgeAccount.new(
-          process.env.NEXT_PUBLIC_RPC_SEPOLIA,
-          constants.StarknetChainId.SN_SEPOLIA,
-          address,
-          options?.rpId || process.env.NEXT_PUBLIC_RP_ID,
-          options?.origin || process.env.NEXT_PUBLIC_ORIGIN,
+        {
+          rpId: process.env.NEXT_PUBLIC_RP_ID,
+          origin: process.env.NEXT_PUBLIC_ORIGIN,
           credentialId,
           publicKey,
-          this.session(
-            "http://localhost:3002",
-            constants.StarknetChainId.SN_SEPOLIA,
-          ),
-        ),
+        },
       ),
     ];
 

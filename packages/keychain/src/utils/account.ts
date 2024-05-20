@@ -7,7 +7,6 @@ import {
   EstimateFeeDetails,
   EstimateFee,
   Signature,
-  Abi,
   AllowArray,
   ec,
   InvokeFunctionResponse,
@@ -26,6 +25,7 @@ import { client } from "utils/graphql";
 import selectors from "./selectors";
 import Storage from "./storage";
 import { CartridgeAccount } from "@cartridge/account-wasm";
+import { Session } from "@cartridge/controller";
 
 export enum Status {
   COUNTERFACTUAL = "COUNTERFACTUAL",
@@ -37,7 +37,6 @@ class Account extends BaseAccount {
   rpc: RpcProvider;
   private selector: string;
   chainId: constants.StarknetChainId;
-  updated: boolean = true;
   cartridge: CartridgeAccount;
 
   constructor(
@@ -45,14 +44,27 @@ class Account extends BaseAccount {
     nodeUrl: string,
     address: string,
     signer: SignerInterface,
-    cartridge: CartridgeAccount,
+    webauthn: {
+      rpId: string;
+      origin: string;
+      credentialId: string;
+      publicKey: string;
+    },
   ) {
     super({ nodeUrl }, address, signer);
 
     this.rpc = new RpcProvider({ nodeUrl });
     this.selector = selectors["0.0.1"].deployment(address, chainId);
     this.chainId = chainId;
-    this.cartridge = cartridge;
+    this.cartridge = CartridgeAccount.new(
+      nodeUrl,
+      chainId,
+      address,
+      webauthn.rpId,
+      webauthn.origin,
+      webauthn.credentialId,
+      webauthn.publicKey,
+    );
 
     const state = Storage.get(this.selector);
     if (!state || Date.now() - state.syncing > 5000) {
@@ -155,7 +167,7 @@ class Account extends BaseAccount {
   // @ts-expect-error TODO: fix overload type mismatch
   async execute(
     calls: AllowArray<Call>,
-    _abis?: Abi[],
+    session: Session,
     transactionsDetail?: InvocationsDetails,
   ): Promise<InvokeFunctionResponse> {
     if (this.status === Status.COUNTERFACTUAL) {
@@ -169,7 +181,7 @@ class Account extends BaseAccount {
     transactionsDetail.maxFee = "0x38D7EA4C68000"; // 0.001 eth
 
     const res = await this.cartridge
-      .execute(calls as Array<Call>, transactionsDetail)
+      .execute(calls as Array<Call>, transactionsDetail, session)
       .catch((e) => {
         throw new Error("Execute error: " + e.message);
       });
