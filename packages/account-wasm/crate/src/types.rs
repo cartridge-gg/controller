@@ -102,4 +102,3 @@ impl TryFrom<JsValue> for JsInvocationsDetails {
         Ok(serde_wasm_bindgen::from_value(value)?)
     }
 }
-
