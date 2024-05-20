@@ -75,6 +75,13 @@ export default class Controller {
       ),
     ];
 
+    const session = this.session(
+      "https://cartridge-starknet-react-next-git-test-d.preview.cartridge.gg",
+      constants.StarknetChainId.SN_SEPOLIA,
+    );
+
+    console.log(session);
+
     Storage.set(
       selectors[VERSION].admin(this.address, process.env.NEXT_PUBLIC_ADMIN_URL),
       {},

@@ -225,6 +225,7 @@ const Index: NextPage = () => {
           validate(
             (controller: Controller, origin: string) => (): ProbeReply => {
               const session = controller.session(origin, chainId);
+              console.log({ session });
               return {
                 code: ResponseCodes.SUCCESS,
                 address: controller.address,
