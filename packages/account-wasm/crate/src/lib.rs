@@ -13,7 +13,7 @@ use base64::{engine::general_purpose, Engine};
 use coset::{CborSerializable, CoseKey};
 use serde_wasm_bindgen::{from_value, to_value};
 use starknet::accounts::Account;
-use starknet::macros::felt;
+use starknet::macros::short_string;
 use starknet::signers::SigningKey;
 use starknet::{
     accounts::Call,
@@ -23,7 +23,6 @@ use starknet::{
 use types::{JsCall, JsCredentials, JsInvocationsDetails, JsPolicy, JsSession};
 use url::Url;
 use wasm_bindgen::prelude::*;
-use web_sys::console;
 
 #[wasm_bindgen]
 pub struct CartridgeAccount {
@@ -70,8 +69,8 @@ impl CartridgeAccount {
             CredentialID(credential_id),
             cose,
         );
-
-        let dummy_guardian = SigningKey::from_secret_scalar(felt!("0x42"));
+        
+        let dummy_guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
         let address =
             FieldElement::from_str(&address).map_err(|e| JsValue::from_str(&format!("{}", e)))?;
         let chain_id =
@@ -79,7 +78,7 @@ impl CartridgeAccount {
         let account = CartridgeGuardianAccount::new(
             provider,
             webauthn_signer,
-            dummy_guardian.clone(),
+            dummy_guardian,
             address,
             chain_id,
         );
@@ -158,7 +157,7 @@ impl CartridgeAccount {
                 })
                 .collect::<Result<Vec<AllowedMethod>, _>>()?;
 
-            let dummy_guardian = SigningKey::from_secret_scalar(felt!("0x42"));
+            let dummy_guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
             let session_signer =
                 SigningKey::from_secret_scalar(session_details.credentials.private_key);
             let expires_at: u64 = session_details
