@@ -206,7 +206,7 @@ const Index: NextPage = () => {
 
                 const res = await account.execute(
                   calls,
-                  abis,
+                  session,
                   transactionsDetail,
                 );
                 return {

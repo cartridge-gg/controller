@@ -22,10 +22,9 @@ export class CartridgeAccount {
 * @param {string} origin
 * @param {string} credential_id
 * @param {string} public_key
-* @param {any} session_details
 * @returns {CartridgeAccount}
 */
-  static new(rpc_url: string, chain_id: string, address: string, rp_id: string, origin: string, credential_id: string, public_key: string, session_details: any): CartridgeAccount;
+  static new(rpc_url: string, chain_id: string, address: string, rp_id: string, origin: string, credential_id: string, public_key: string): CartridgeAccount;
 /**
 * @param {any[]} policies
 * @param {bigint} expires_at
@@ -35,9 +34,13 @@ export class CartridgeAccount {
 /**
 * @param {any[]} calls
 * @param {any} transaction_details
+* @param {any} session_details
 * @returns {Promise<any>}
 */
-  execute(calls: any[], transaction_details: any): Promise<any>;
+  execute(calls: any[], transaction_details: any, session_details: any): Promise<any>;
+/**
+*/
+  revokeSession(): void;
 /**
 * @returns {any[]}
 */
