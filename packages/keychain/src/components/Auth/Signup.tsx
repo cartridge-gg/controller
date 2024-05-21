@@ -1,4 +1,4 @@
-import { Field, PlugNewDuoIcon } from "@cartridge/ui";
+import { Field } from "@cartridge/ui";
 import { VStack, Button } from "@chakra-ui/react";
 import { Container } from "../Container";
 import {
@@ -229,7 +229,7 @@ function Form({
     () =>
       starterData
         ? starterData.game.starterPack.maxIssuance -
-          starterData.game.starterPack.issuance
+        starterData.game.starterPack.issuance
         : 0,
     [starterData],
   );

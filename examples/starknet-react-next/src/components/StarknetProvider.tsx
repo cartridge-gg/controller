@@ -50,7 +50,7 @@ const connectors = [
     ],
     {
       url,
-      preset: "rollyourown",
+      theme: "rollyourown",
     },
   ) as never as Connector,
 ];

@@ -1,5 +1,4 @@
 export * from "./types";
-export { presets } from "./presets";
 
 import {
   AccountInterface,
@@ -23,10 +22,11 @@ import {
   ProbeReply,
   Modal,
   ControllerOptions,
-  ControllerThemeOptions,
+  ControllerThemePresets,
 } from "./types";
 import { createModal } from "./modal";
 import nodeUrl from "./nodeUrl";
+import { defaultPresets } from "./presets";
 
 export const providers: { [key: string]: RpcProvider } = {
   [constants.StarknetChainId.SN_MAIN]: new RpcProvider({
@@ -67,7 +67,7 @@ class Controller {
     }
 
     if (options?.theme) {
-      this.setTheme(options.theme);
+      this.setTheme(options.theme, options?.config?.presets);
     }
 
     if (typeof document === "undefined") {
@@ -106,9 +106,14 @@ class Controller {
     return this.accounts[this.chainId];
   }
 
-  private setTheme(theme: ControllerThemeOptions) {
+  private setTheme(
+    theme: string,
+    presets: ControllerThemePresets = defaultPresets,
+  ) {
+    const t = presets[theme] ?? defaultPresets.cartridge;
+
     const url = new URL(this.url);
-    url.searchParams.set("theme", encodeURIComponent(JSON.stringify(theme)));
+    url.searchParams.set("theme", encodeURIComponent(JSON.stringify(t)));
 
     this.url = url.toString();
   }

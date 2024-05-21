@@ -1,17 +1,13 @@
-import {
-  presets,
-} from "@cartridge/controller";
 import { ChakraProvider } from "@chakra-ui/react";
 import { PropsWithChildren } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { ControllerThemeProvider, useChakraTheme, useControllerThemeQuery } from "hooks/theme";
+import { ControllerThemeProvider, useChakraTheme, useControllerThemePreset } from "hooks/theme";
 
 export function Provider({ children }: PropsWithChildren) {
-  const query = useControllerThemeQuery();
-  const preset = presets[query?.preset ?? ""] ?? presets.cartridge;
-  const chakraTheme = useChakraTheme(query);
+  const preset = useControllerThemePreset();
+  const chakraTheme = useChakraTheme(preset);
 
-  const { colors, ...controllerTheme } = preset
+  const controllerTheme = preset ? { id: preset.id, name: preset.name, icon: preset.icon, cover: preset.cover } : undefined
 
   return (
     <ChakraProvider theme={chakraTheme}>

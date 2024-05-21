@@ -152,15 +152,10 @@ export type ControllerOptions = {
   origin?: string;
   starterPackId?: string;
   chainId?: constants.StarknetChainId;
-  theme?: ControllerThemeOptions;
-};
-
-export type ControllerPresetThemeName = "cartridge" | "rollyourown";
-
-export type ControllerThemeOptions = {
-  name?: string;
-  preset?: ControllerPresetThemeName;
-  colors?: ControllerColors;
+  theme?: string;
+  config?: {
+    presets?: ControllerThemePresets;
+  };
 };
 
 export type ControllerTheme = {
@@ -169,6 +164,8 @@ export type ControllerTheme = {
   icon: string;
   cover: string;
 };
+
+export type ControllerThemePresets = Record<string, ControllerThemePreset>;
 
 export type ControllerThemePreset = ControllerTheme & {
   colors?: ControllerColors;

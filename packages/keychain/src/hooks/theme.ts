@@ -1,16 +1,15 @@
 import {
   ControllerColor,
   ControllerTheme,
-  ControllerThemeOptions,
-  presets,
+  ControllerThemePreset,
 } from "@cartridge/controller";
 import { CartridgeTheme } from "@cartridge/ui";
 import { useRouter } from "next/router";
 import { useContext, createContext, useMemo } from "react";
 
-const ControllerThemeContext = createContext<ControllerThemeContext>(
-  presets.cartridge,
-);
+const ControllerThemeContext = createContext<
+  ControllerThemeContext | undefined
+>(undefined);
 
 type ControllerThemeContext = ControllerTheme;
 
@@ -20,26 +19,24 @@ export function useControllerTheme() {
   return useContext<ControllerThemeContext>(ControllerThemeContext);
 }
 
-export function useControllerThemeQuery() {
+export function useControllerThemePreset() {
   const router = useRouter();
 
-  return useMemo<ControllerThemeOptions>(() => {
+  return useMemo(() => {
     const q = router.query.theme;
     if (typeof q === "undefined") return;
 
     const str = decodeURIComponent(Array.isArray(q) ? q[q.length - 1] : q);
 
     try {
-      return JSON.parse(str);
+      return JSON.parse(str) as ControllerThemePreset;
     } catch {
       return undefined;
     }
   }, [router.query.theme]);
 }
 
-export function useChakraTheme(query: ControllerThemeOptions) {
-  const preset = presets[query?.preset ?? ""] ?? presets.cartridge;
-
+export function useChakraTheme(preset: ControllerThemePreset) {
   return useMemo(
     () => ({
       ...CartridgeTheme,
@@ -50,13 +47,13 @@ export function useChakraTheme(query: ControllerThemeOptions) {
           brand: {
             ...CartridgeTheme.semanticTokens.colors.brand,
             primary:
-              toThemeColor(query?.colors?.primary ?? preset?.colors?.primary) ??
+              toThemeColor(preset?.colors?.primary) ??
               CartridgeTheme.semanticTokens.colors.brand.primary,
           },
         },
       },
     }),
-    [preset, query?.colors],
+    [preset],
   );
 }
 
