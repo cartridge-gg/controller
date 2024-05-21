@@ -11,7 +11,7 @@ version = "0.1.0"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-account-sdk = { git = "https://github.com/cartridge-gg/controller", package = "account-sdk", rev = "1617ac6ae61f175c27ce5d54e0206628cd69f066" }
+account-sdk = { git = "https://github.com/cartridge-gg/controller", package = "account-sdk", rev = "394b60b1df92d7b173b3215051d67b85c342dbea" }
 base64 = "0.22.0"
 coset = { version = "0.3.4", features = ["std"] }
 hex = "0.4.3"
