@@ -42,21 +42,20 @@ export function Container({
         {children}
       </VStack>
 
-      <VStack
+      <HStack
         w="full"
-        h={10}
         borderTopWidth={1}
         borderColor="solid.tertiary"
+        color="text.secondary"
         alignItems="center"
         justify="center"
+        h={10}
       >
-        <HStack color="text.secondary">
-          <CartridgeIcon fontSize="sm" />
-          <Text fontSize="xs" color="currentColor">
-            Controller by Cartridge
-          </Text>
-        </HStack>
-      </VStack>
+        <CartridgeIcon fontSize="sm" />
+        <Text fontSize="xs" color="currentColor">
+          Controller by Cartridge
+        </Text>
+      </HStack>
     </Wrapper>
   );
 }

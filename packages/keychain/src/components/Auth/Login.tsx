@@ -1,4 +1,4 @@
-import { Field, FingerprintDuoIcon, Loading } from "@cartridge/ui";
+import { Field, Loading } from "@cartridge/ui";
 import { VStack, Button } from "@chakra-ui/react";
 import { Container } from "../Container";
 import {

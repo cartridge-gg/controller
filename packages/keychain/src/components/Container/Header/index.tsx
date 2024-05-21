@@ -8,10 +8,8 @@ import {
   IconButton,
   VStack,
   Box,
-  Text,
   Image,
   Center,
-  // useColorMode,
 } from "@chakra-ui/react";
 import { constants } from "starknet";
 import { ArrowLeftIcon, CartridgeColorIcon } from "@cartridge/ui";
@@ -19,7 +17,7 @@ import { ArrowLeftIcon, CartridgeColorIcon } from "@cartridge/ui";
 // import { EthBalance } from "./EthBalance";
 import { AccountMenu } from "./AccountMenu";
 import { useController } from "hooks/controller";
-// import { useRouter } from "next/router";
+import { useControllerTheme } from "hooks/theme";
 
 export type HeaderProps = {
   chainId?: constants.StarknetChainId;
@@ -36,25 +34,7 @@ export function Header({
 }: HeaderProps) {
   const [controller] = useController();
   const address = useMemo(() => controller?.address, [controller]);
-
-  // const router = useRouter();
-  // const { colorMode } = useColorMode();
-  // const icon = useMemo(() => {
-  //   const { icon: val } = router.query;
-  //   if (typeof val === "undefined") return
-
-  //   const str = decodeURIComponent(Array.isArray(val) ? val[val.length - 1] : val)
-
-  //   let icon: string;
-  //   try {
-  //     const _icon = JSON.parse(str);
-  //     icon = typeof _icon === "string" ? _icon : _icon[colorMode]
-  //   } catch (e) {
-  //     console.error(e)
-  //     icon = str
-  //   }
-  //   return icon
-  // }, [router.query, colorMode])
+  const theme = useControllerTheme();
 
   if (!address || hideAccount) {
     return (
@@ -62,14 +42,14 @@ export function Header({
         <VStack
           h="full"
           w="full"
-          bg="linear-gradient(to top, black, transparent), url('whitelabel/ryo/cover.png')"
+          bg={`linear-gradient(to top, black, transparent), url('${theme.cover}')`}
           bgSize="cover"
           bgPos="center"
           position="relative"
         >
-          <Center position="absolute" bottom="-32px" left="0" right="0">
-            <Box bg="solid.bg" borderRadius="lg" p="2">
-              <Image src="/whitelabel/ryo/icon.png" boxSize="64px" />
+          <Center position="absolute" bottom={-8} left={0} right={0}>
+            <Box bg="solid.bg" borderRadius="lg" p={2}>
+              <Image src={theme.icon} boxSize={16} alt="Controller Icon" />
             </Box>
           </Center>
         </VStack>

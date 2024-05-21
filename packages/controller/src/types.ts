@@ -152,20 +152,32 @@ export type ControllerOptions = {
   origin?: string;
   starterPackId?: string;
   chainId?: constants.StarknetChainId;
-  // icon?: CustomIcon;
-  theme?: CustomTheme;
+  theme?: ControllerThemeOptions;
 };
 
-export type CustomTheme = {
-  colors?: CustomColors;
+export type ControllerPresetThemeName = "cartridge" | "rollyourown";
+
+export type ControllerThemeOptions = {
+  name?: string;
+  preset?: ControllerPresetThemeName;
+  colors?: ControllerColors;
 };
 
-export type CustomColors = {
-  primary?: CustomColor;
-  secondary?: CustomColor;
+export type ControllerTheme = {
+  id: string;
+  name: string;
+  icon: string;
+  cover: string;
 };
 
-// export type CustomIcon = ThemeValue<string>;
-export type CustomColor = ThemeValue<string>;
+export type ControllerThemePreset = ControllerTheme & {
+  colors?: ControllerColors;
+};
+
+export type ControllerColors = {
+  primary?: ControllerColor;
+};
+
+export type ControllerColor = ThemeValue<string>;
 
 export type ThemeValue<T> = T | { dark: T; light: T };

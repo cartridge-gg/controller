@@ -80,7 +80,7 @@ function getColorProps({ colorScheme }: StyleFunctionProps) {
         color: "solid.bg",
         bg: "brand.primary",
         _hover: {
-          bg: "brand.secondary",
+          opacity: 0.8,
         },
         _disabled: {
           opacity: 0.5,

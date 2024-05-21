@@ -1,4 +1,4 @@
-import { sepolia } from "@starknet-react/chains";
+import { Chain, sepolia } from "@starknet-react/chains";
 import { Connector, StarknetConfig, starkscan } from "@starknet-react/core";
 import { PropsWithChildren } from "react";
 import CartridgeConnector from "@cartridge/connector";
@@ -14,7 +14,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
       chains={[sepolia]}
       connectors={connectors}
       explorer={starkscan}
-      provider={(_chain) =>
+      provider={(_chain: Chain) =>
         new RpcProvider({
           nodeUrl: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
         })
@@ -27,14 +27,14 @@ export function StarknetProvider({ children }: PropsWithChildren) {
 
 const url =
   !process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ||
-  process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL.split(".")[0] ===
+    process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL.split(".")[0] ===
     "cartridge-starknet-react-next"
     ? process.env.XFRAME_URL
     : "https://" +
-      (process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ?? "").replace(
-        "cartridge-starknet-react-next",
-        "keychain",
-      );
+    (process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ?? "").replace(
+      "cartridge-starknet-react-next",
+      "keychain",
+    );
 
 const connectors = [
   new CartridgeConnector(
@@ -50,17 +50,7 @@ const connectors = [
     ],
     {
       url,
-      theme: {
-        colors: {
-          // e.g. button bg
-          primary: "#00b4d8",
-          // e.g. button bg hover
-          secondary: {
-            dark: "red",
-            light: "green",
-          },
-        },
-      },
+      preset: "rollyourown",
     },
   ) as never as Connector,
 ];

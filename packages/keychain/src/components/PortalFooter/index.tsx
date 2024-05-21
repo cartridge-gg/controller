@@ -41,12 +41,14 @@ export function PortalFooter({
       left={0}
       bg="solid.bg"
       h="auto"
-      minH={isOpen ? "calc(100vh - 164px)" : 0}
+      // window height - cover image height + icon image offset - footer height
+      minH={isOpen ? "calc(100vh - 150px + 8px - 40px)" : 0}
       transition="all 0.40s ease-out"
       p={4}
       pt={0}
       borderTopWidth={1}
       borderColor="solid.tertiary"
+      zIndex="999999"
     >
       {isExpandable && (
         <Box // mimic top border
