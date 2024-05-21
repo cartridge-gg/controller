@@ -3,7 +3,6 @@ import { Connector, StarknetConfig, starkscan } from "@starknet-react/core";
 import { PropsWithChildren } from "react";
 import CartridgeConnector from "@cartridge/connector";
 import { RpcProvider } from "starknet";
-import { DOJO_ACTION_ADDRESS } from "./DojoSpawnAndMove";
 
 const ETH_TOKEN_ADDRESS =
   "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
@@ -47,14 +46,6 @@ const connectors = [
       {
         target: ETH_TOKEN_ADDRESS,
         method: "transfer",
-      },
-      {
-        target: DOJO_ACTION_ADDRESS,
-        method: "spawn",
-      },
-      {
-        target: DOJO_ACTION_ADDRESS,
-        method: "move",
       },
     ],
     {
