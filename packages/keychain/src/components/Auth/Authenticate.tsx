@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { Button } from "@chakra-ui/react";
 import { Unsupported } from "./Unsupported";
 import { Credentials, onCreateBegin, onCreateFinalize } from "hooks/account";
-import { useStartup } from "hooks/startup";
 import {
   FaceIDDuoIcon,
   FingerprintDuoIcon,
@@ -22,7 +21,6 @@ export function Authenticate({
   const [isLoading, setIsLoading] = useState(false);
   const [userAgent, setUserAgent] = useState<UserAgent>("other");
   const [unsupportedMessage, setUnsupportedMessage] = useState<string>();
-  const { play, StartupAnimation } = useStartup({ onComplete });
 
   const onAuth = useCallback(async () => {
     // https://webkit.org/blog/11545/updates-to-the-storage-access-api/
@@ -35,13 +33,15 @@ export function Authenticate({
       );
       await onCreateFinalize(credentials);
 
-      play();
+      setTimeout(() => {
+        onComplete();
+      }, 2000);
     } catch (e) {
       console.error(e);
       setIsLoading(false);
       throw e;
     }
-  }, [play, name]);
+  }, [name]);
 
   useEffect(() => {
     const userAgent = window.navigator.userAgent;
@@ -78,13 +78,17 @@ export function Authenticate({
       <Container hideAccount>
         <PortalBanner
           Icon={Icon}
-          title="Authenticate Yourself"
+          title={isLoading ? "Creating Your Account" : "Authenticate Yourself"}
           description={
-            <>
-              You will now be asked to authenticate yourself.
-              <br />
-              Note: this experience varies from browser to browser.
-            </>
+            isLoading ? (
+              <>This window will close automatically</>
+            ) : (
+              <>
+                You will now be asked to authenticate yourself.
+                <br />
+                Note: this experience varies from browser to browser.
+              </>
+            )
           }
         />
 
@@ -94,8 +98,6 @@ export function Authenticate({
           </Button>
         </PortalFooter>
       </Container>
-
-      {StartupAnimation}
     </>
   );
 }
