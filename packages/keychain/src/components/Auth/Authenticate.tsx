@@ -41,7 +41,7 @@ export function Authenticate({
       setIsLoading(false);
       throw e;
     }
-  }, [name]);
+  }, [onComplete, name]);
 
   useEffect(() => {
     const userAgent = window.navigator.userAgent;

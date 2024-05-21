@@ -27,13 +27,14 @@ import {
   // CustomIcon,
 } from "./types";
 import { createModal } from "./modal";
+import nodeUrl from "./nodeUrl";
 
 export const providers: { [key: string]: RpcProvider } = {
   [constants.StarknetChainId.SN_MAIN]: new RpcProvider({
-    nodeUrl: process.env.NEXT_PUBLIC_RPC_MAINNET,
+    nodeUrl: nodeUrl.mainnet,
   }),
   [constants.StarknetChainId.SN_SEPOLIA]: new RpcProvider({
-    nodeUrl: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
+    nodeUrl: nodeUrl.sepolia,
   }),
 };
 
