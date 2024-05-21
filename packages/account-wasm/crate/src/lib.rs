@@ -69,7 +69,7 @@ impl CartridgeAccount {
             CredentialID(credential_id),
             cose,
         );
-        
+
         let dummy_guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
         let address =
             FieldElement::from_str(&address).map_err(|e| JsValue::from_str(&format!("{}", e)))?;
@@ -157,7 +157,8 @@ impl CartridgeAccount {
                 })
                 .collect::<Result<Vec<AllowedMethod>, _>>()?;
 
-            let dummy_guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
+            let dummy_guardian =
+                SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
             let session_signer =
                 SigningKey::from_secret_scalar(session_details.credentials.private_key);
             let expires_at: u64 = session_details
