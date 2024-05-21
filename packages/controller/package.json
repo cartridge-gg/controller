@@ -6,8 +6,8 @@
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc",
+    "build": "NODE_ENV=production tsc",
+    "dev": "NODE_ENV=development tsc",
     "format": "prettier --write \"src/**/*.ts\""
   },
   "files": [
