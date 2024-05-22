@@ -149,7 +149,7 @@ class Account extends BaseAccount {
 
           const classHash = await this.rpc.getClassHashAt(
             this.address,
-            "latest",
+            "pending",
           );
           Storage.update(this.selector, {
             classHash,
@@ -160,7 +160,6 @@ class Account extends BaseAccount {
       }
     } catch (e) {
       /* no-op */
-      console.log(e);
     }
   }
 
@@ -244,11 +243,12 @@ class Account extends BaseAccount {
   }
 
   async getNonce(blockIdentifier?: any): Promise<string> {
-    if (blockIdentifier && blockIdentifier !== "pending") {
-      return super.getNonce(blockIdentifier);
+    const chainNonce = await super.getNonce(blockIdentifier);
+
+    if (blockIdentifier !== "pending") {
+      return chainNonce;
     }
 
-    const chainNonce = await super.getNonce("latest");
     const state = Storage.get(this.selector);
     if (!state || !state.nonce || BigInt(chainNonce) > BigInt(state.nonce)) {
       return chainNonce;
