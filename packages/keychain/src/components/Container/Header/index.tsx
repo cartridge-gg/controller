@@ -15,7 +15,7 @@ import { constants } from "starknet";
 import { ArrowLeftIcon, CartridgeColorIcon } from "@cartridge/ui";
 // import { NetworkButton } from "./NetworkButton";
 // import { EthBalance } from "./EthBalance";
-import { AccountMenu } from "./AccountMenu";
+// import { AccountMenu } from "./AccountMenu";
 import { useController } from "hooks/controller";
 import { useControllerTheme } from "hooks/theme";
 
@@ -27,14 +27,18 @@ export type HeaderProps = {
 };
 
 export function Header({
-  chainId,
-  onLogout,
+  // chainId,
+  // onLogout,
   onBack,
   hideAccount,
 }: HeaderProps) {
   const [controller] = useController();
   const address = useMemo(() => controller?.address, [controller]);
   const theme = useControllerTheme();
+
+  if (!theme) {
+    return null
+  }
 
   if (!address || hideAccount) {
     return (
@@ -68,16 +72,18 @@ export function Header({
             icon={<ArrowLeftIcon />}
             onClick={onBack}
           />
-        ) : (
-          <CartridgeColorIcon boxSize={8} />
-        )}
+        ) :
+          theme.id === "cartridge"
+            ? <CartridgeColorIcon boxSize={8} />
+            : <Image src={theme.icon} boxSize={8} alt="Controller Icon" />
+        }
 
         <Spacer />
 
         {/* <NetworkButton chainId={chainId} /> */}
         {/* <EthBalance chainId={chainId} address={address} /> */}
 
-        {chainId && <AccountMenu onLogout={onLogout} address={address} />}
+        {/* {chainId && <AccountMenu onLogout={onLogout} address={address} />} */}
       </HStack>
     </Container>
   );
