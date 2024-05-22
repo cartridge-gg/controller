@@ -1,5 +1,5 @@
 import { ChakraProvider } from "@chakra-ui/react";
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useMemo } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ControllerThemeProvider, useChakraTheme, useControllerThemePreset } from "hooks/theme";
 
@@ -7,7 +7,18 @@ export function Provider({ children }: PropsWithChildren) {
   const preset = useControllerThemePreset();
   const chakraTheme = useChakraTheme(preset);
 
-  const controllerTheme = preset ? { id: preset.id, name: preset.name, icon: preset.icon, cover: preset.cover } : undefined
+  const controllerTheme = useMemo(
+    () =>
+      preset
+        ? {
+          id: preset.id,
+          name: preset.name,
+          icon: preset.icon,
+          cover: preset.cover,
+        }
+        : undefined,
+    [preset],
+  );
 
   return (
     <ChakraProvider theme={chakraTheme}>

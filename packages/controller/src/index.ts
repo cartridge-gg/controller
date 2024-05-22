@@ -66,9 +66,7 @@ class Controller {
       this.url = options.url;
     }
 
-    if (options?.theme) {
-      this.setTheme(options.theme, options?.config?.presets);
-    }
+    this.setTheme(options?.theme, options?.config?.presets);
 
     if (typeof document === "undefined") {
       return;
@@ -107,7 +105,7 @@ class Controller {
   }
 
   private setTheme(
-    theme: string,
+    theme: string = "cartridge",
     presets: ControllerThemePresets = defaultPresets,
   ) {
     const t = presets[theme] ?? defaultPresets.cartridge;

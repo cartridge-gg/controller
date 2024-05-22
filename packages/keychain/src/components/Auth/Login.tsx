@@ -22,6 +22,7 @@ import base64url from "base64url";
 import { useClearField } from "./hooks";
 import { fetchAccount, validateUsernameFor } from "./utils";
 import { RegistrationLink } from "./RegistrationLink";
+import { useControllerTheme } from "hooks/theme";
 
 export function Login({
   prefilledName = "",
@@ -112,6 +113,7 @@ function Form({
 }: Pick<LoginProps, "context" | "isSlot" | "onSignup"> & {
   isLoggingIn: boolean;
 }) {
+  const theme = useControllerTheme();
   const { values, isValidating } = useFormikContext<FormValues>();
 
   const onClearUsername = useClearField("username");
@@ -123,7 +125,7 @@ function Form({
   return (
     <FormikForm style={{ width: "100%" }}>
       <PortalBanner
-        title="Play Roll Your Own"
+        title={theme.id === "cartridge" ? "Play with Cartridge Controller" : `Play ${theme.name}`}
         description="Enter your Controller username"
       />
 

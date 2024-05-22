@@ -32,6 +32,7 @@ import { ClaimSuccess } from "./StarterPack";
 import { RegistrationLink } from "./RegistrationLink";
 import { Credentials, onCreateBegin, onCreateFinalize } from "hooks/account";
 import { useStartup } from "hooks/startup";
+import { useControllerTheme } from "hooks/theme";
 
 export function Signup({
   prefilledName = "",
@@ -160,6 +161,7 @@ function Form({
   setIsRegistering: (val: boolean) => void;
   starterData: StarterPackQuery;
 }) {
+  const theme = useControllerTheme();
   const { values, isValidating } = useFormikContext<FormValues>();
 
   useEffect(() => {
@@ -237,7 +239,7 @@ function Form({
   return (
     <FormikForm style={{ width: "100%" }}>
       <PortalBanner
-        title="Play Roll Your Own"
+        title={theme.id === "cartridge" ? "Play with Cartridge Controller" : `Play ${theme.name}`}
         description="Create your Cartridge Controller"
       />
 
