@@ -2,6 +2,7 @@ import {
   ControllerColor,
   ControllerTheme,
   ControllerThemePreset,
+  defaultPresets,
 } from "@cartridge/controller";
 import { CartridgeTheme } from "@cartridge/ui";
 import { useRouter } from "next/router";
@@ -27,14 +28,16 @@ export function useControllerThemePreset() {
 
   return useMemo(() => {
     const q = router.query.theme;
-    if (typeof q === "undefined") return;
+    if (typeof q === "undefined") {
+      return defaultPresets.cartridge;
+    }
 
     const str = decodeURIComponent(Array.isArray(q) ? q[q.length - 1] : q);
 
     try {
       return JSON.parse(str) as ControllerThemePreset;
     } catch {
-      return undefined;
+      return defaultPresets.cartridge;
     }
   }, [router.query.theme]);
 }

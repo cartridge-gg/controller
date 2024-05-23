@@ -8,15 +8,12 @@ export function Provider({ children }: PropsWithChildren) {
   const chakraTheme = useChakraTheme(preset);
 
   const controllerTheme = useMemo(
-    () =>
-      preset
-        ? {
-          id: preset.id,
-          name: preset.name,
-          icon: preset.icon,
-          cover: preset.cover,
-        }
-        : undefined,
+    () => ({
+      id: preset.id,
+      name: preset.name,
+      icon: preset.icon,
+      cover: preset.cover,
+    }),
     [preset],
   );
 
