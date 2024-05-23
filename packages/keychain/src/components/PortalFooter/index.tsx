@@ -10,6 +10,8 @@ import { WedgeUpIcon } from "@cartridge/ui";
 import { Policy } from "@cartridge/controller";
 import { SessionDetails } from "./SessionDetails";
 import React, { useMemo } from "react";
+import { FOOTER_HEIGHT } from "components";
+import { BANNER_HEIGHT, ICON_OFFSET, ICON_SIZE } from "components/Container/Header";
 
 export function PortalFooter({
   children,
@@ -37,12 +39,12 @@ export function PortalFooter({
       w="full"
       align="flex-start"
       position={["fixed", "fixed", "absolute"]}
-      bottom={10}
+      bottom={FOOTER_HEIGHT}
       left={0}
       bg="solid.bg"
       h="auto"
       // window height - cover image height + icon image offset - footer height
-      minH={isOpen ? "calc(100vh - 150px + 8px - 40px)" : 0}
+      minH={isOpen ? `calc(100vh - ${BANNER_HEIGHT} - ${FOOTER_HEIGHT} + ${ICON_SIZE}/2 - ${ICON_OFFSET})` : 0}
       transition="all 0.40s ease-out"
       p={4}
       pt={0}
@@ -85,7 +87,7 @@ export function PortalFooter({
         align="stretch"
         w="full"
         h="full"
-        overflowY={isOpen ? "scroll" : "hidden"}
+        overflowY={isOpen ? "auto" : "hidden"}
         css={{
           "::-webkit-scrollbar": {
             display: "none",

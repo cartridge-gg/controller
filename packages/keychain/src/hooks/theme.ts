@@ -7,16 +7,19 @@ import { CartridgeTheme } from "@cartridge/ui";
 import { useRouter } from "next/router";
 import { useContext, createContext, useMemo } from "react";
 
-const ControllerThemeContext = createContext<
-  ControllerThemeContext | undefined
->(undefined);
+const ControllerThemeContext = createContext<ControllerThemeContext>(undefined);
 
 type ControllerThemeContext = ControllerTheme;
 
 export const ControllerThemeProvider = ControllerThemeContext.Provider;
 
 export function useControllerTheme() {
-  return useContext<ControllerThemeContext>(ControllerThemeContext);
+  const ctx = useContext<ControllerThemeContext>(ControllerThemeContext);
+  if (!ctx) {
+    throw new Error("ControllerThemeProvider must be placed");
+  }
+
+  return ctx;
 }
 
 export function useControllerThemePreset() {

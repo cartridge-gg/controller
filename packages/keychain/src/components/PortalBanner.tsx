@@ -26,7 +26,7 @@ export function PortalBanner({
           </Circle>
         )}
 
-        <Text fontSize="lg" fontWeight="semibold">
+        <Text fontSize="lg" fontWeight="semibold" whiteSpace="nowrap">
           {title}
         </Text>
         {description && (

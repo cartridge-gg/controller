@@ -36,13 +36,9 @@ export function Header({
   const address = useMemo(() => controller?.address, [controller]);
   const theme = useControllerTheme();
 
-  if (!theme) {
-    return null
-  }
-
   if (!address || hideAccount) {
     return (
-      <Container h="150px" position="relative">
+      <Container h={BANNER_HEIGHT} position="relative">
         <VStack
           h="full"
           w="full"
@@ -51,10 +47,10 @@ export function Header({
           bgPos="center"
           position="relative"
         >
-          <Center position="absolute" bottom={-8} left={0} right={0}>
-            <Box bg="solid.bg" borderRadius="lg" p={2}>
-              <Image src={theme.icon} boxSize={16} alt="Controller Icon" />
-            </Box>
+          <Center position="absolute" bottom={`-${ICON_OFFSET}`} left={0} right={0}>
+            <Flex bg="solid.primary" borderRadius="lg" h={ICON_SIZE} w={ICON_SIZE} justify="center" alignItems="center">
+              <Image src={theme.icon} boxSize={ICON_IMAGE_SIZE} alt="Controller Icon" />
+            </Flex>
           </Center>
         </VStack>
       </Container>
@@ -118,3 +114,8 @@ function Container({
     </Flex>
   );
 }
+
+export const BANNER_HEIGHT = "150px"
+export const ICON_IMAGE_SIZE = "56px"
+export const ICON_SIZE = "72px"
+export const ICON_OFFSET = "16px"

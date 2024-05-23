@@ -11,7 +11,6 @@ import { constants } from "starknet";
 import {
   PortalBanner,
   PortalFooter,
-  PORTAL_FOOTER_MIN_HEIGHT,
 } from "components";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -247,7 +246,7 @@ function Form({
         <BannerImage imgSrc={starterData?.game.banner.uri} />
       )}
 
-      <VStack align="stretch" pb={PORTAL_FOOTER_MIN_HEIGHT}>
+      <VStack align="stretch">
         <FormikField
           name="username"
           placeholder="Username"

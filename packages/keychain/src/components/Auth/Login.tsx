@@ -10,7 +10,6 @@ import {
 import {
   PortalBanner,
   PortalFooter,
-  PORTAL_FOOTER_MIN_HEIGHT,
 } from "components";
 import { useCallback, useState } from "react";
 import Controller from "utils/controller";
@@ -129,7 +128,7 @@ function Form({
         description="Enter your Controller username"
       />
 
-      <VStack align="stretch" pb={PORTAL_FOOTER_MIN_HEIGHT}>
+      <VStack align="stretch">
         <FormikField
           name="username"
           placeholder="Username"

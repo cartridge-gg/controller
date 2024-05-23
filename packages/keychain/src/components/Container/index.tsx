@@ -31,7 +31,7 @@ export function Container({
         w="full"
         h="full"
         p={4}
-        overflowY="scroll"
+        overflowY="auto"
         css={{
           "::-webkit-scrollbar": {
             display: "none",
@@ -49,7 +49,7 @@ export function Container({
         color="text.secondary"
         alignItems="center"
         justify="center"
-        h={10}
+        minH={FOOTER_HEIGHT}
       >
         <CartridgeIcon fontSize="sm" />
         <Text fontSize="xs" color="currentColor">
@@ -59,6 +59,8 @@ export function Container({
     </Wrapper>
   );
 }
+
+export const FOOTER_HEIGHT = "40px"
 
 function Wrapper({ children }: React.PropsWithChildren) {
   return (
