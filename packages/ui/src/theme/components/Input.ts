@@ -28,6 +28,14 @@ export const Input: ComponentStyleConfig = defineStyleConfig({
           bg: "solid.secondary",
           borderColor: "solid.accent",
         },
+        // Workaround to set background color for autofill
+        // ref: https://stackoverflow.com/a/71693606
+        _autofill: {
+          border: "1px solid var(--chakra-colors-solid-accent)",
+          textFillColor: "text.primary",
+          boxShadow: "0 0 0px 1000px var(--chakra-colors-solid-primary) inset",
+          transition: "background-color 5000s ease-in-out 0s",
+        },
       },
     },
   },
