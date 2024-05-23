@@ -3,7 +3,7 @@ import { ControllerThemePreset } from "./types";
 const cartridge: ControllerThemePreset = {
   id: "cartridge",
   name: "Cartridge",
-  icon: "/whitelabel/cartridge/icon.png",
+  icon: "/whitelabel/cartridge/icon.svg",
   cover: "/whitelabel/cartridge/cover.png",
 };
 

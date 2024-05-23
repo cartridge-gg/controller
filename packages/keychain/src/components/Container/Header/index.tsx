@@ -7,7 +7,6 @@ import {
   StyleProps,
   IconButton,
   VStack,
-  Box,
   Image,
   Center,
 } from "@chakra-ui/react";
