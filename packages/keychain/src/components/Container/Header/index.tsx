@@ -6,19 +6,17 @@ import {
   Container as ChakraContainer,
   StyleProps,
   IconButton,
-  // useColorMode,
+  VStack,
+  Image,
+  Center,
 } from "@chakra-ui/react";
 import { constants } from "starknet";
-import {
-  ArrowLeftIcon,
-  CartridgeColorIcon,
-  CartridgeLogo,
-} from "@cartridge/ui";
+import { ArrowLeftIcon, CartridgeColorIcon } from "@cartridge/ui";
 // import { NetworkButton } from "./NetworkButton";
 // import { EthBalance } from "./EthBalance";
-import { AccountMenu } from "./AccountMenu";
+// import { AccountMenu } from "./AccountMenu";
 import { useController } from "hooks/controller";
-// import { useRouter } from "next/router";
+import { useControllerTheme } from "hooks/theme";
 
 export type HeaderProps = {
   chainId?: constants.StarknetChainId;
@@ -28,39 +26,32 @@ export type HeaderProps = {
 };
 
 export function Header({
-  chainId,
-  onLogout,
+  // chainId,
+  // onLogout,
   onBack,
   hideAccount,
 }: HeaderProps) {
   const [controller] = useController();
   const address = useMemo(() => controller?.address, [controller]);
-
-  // const router = useRouter();
-  // const { colorMode } = useColorMode();
-  // const icon = useMemo(() => {
-  //   const { icon: val } = router.query;
-  //   if (typeof val === "undefined") return
-
-  //   const str = decodeURIComponent(Array.isArray(val) ? val[val.length - 1] : val)
-
-  //   let icon: string;
-  //   try {
-  //     const _icon = JSON.parse(str);
-  //     icon = typeof _icon === "string" ? _icon : _icon[colorMode]
-  //   } catch (e) {
-  //     console.error(e)
-  //     icon = str
-  //   }
-  //   return icon
-  // }, [router.query, colorMode])
-
+  const theme = useControllerTheme();
 
   if (!address || hideAccount) {
     return (
-      <Container h={12} p={1.5}>
-        <CartridgeLogo boxSize={28} h="full" />
-        {/* {icon ? <img src={icon} alt="Controller icon" style={{ height: "100%" }} /> : <CartridgeLogo boxSize={28} />} */}
+      <Container h={BANNER_HEIGHT} position="relative">
+        <VStack
+          h="full"
+          w="full"
+          bg={`linear-gradient(to top, black, transparent), url('${theme.cover}')`}
+          bgSize="cover"
+          bgPos="center"
+          position="relative"
+        >
+          <Center position="absolute" bottom={`-${ICON_OFFSET}`} left={0} right={0}>
+            <Flex bg="solid.primary" borderRadius="lg" h={ICON_SIZE} w={ICON_SIZE} justify="center" alignItems="center">
+              <Image src={theme.icon} boxSize={ICON_IMAGE_SIZE} alt="Controller Icon" />
+            </Flex>
+          </Center>
+        </VStack>
       </Container>
     );
   }
@@ -76,16 +67,18 @@ export function Header({
             icon={<ArrowLeftIcon />}
             onClick={onBack}
           />
-        ) : (
-          <CartridgeColorIcon boxSize={8} />
-        )}
+        ) :
+          theme.id === "cartridge"
+            ? <CartridgeColorIcon boxSize={8} />
+            : <Image src={theme.icon} boxSize={8} alt="Controller Icon" />
+        }
 
         <Spacer />
 
         {/* <NetworkButton chainId={chainId} /> */}
         {/* <EthBalance chainId={chainId} address={address} /> */}
 
-        {chainId && <AccountMenu onLogout={onLogout} address={address} />}
+        {/* {chainId && <AccountMenu onLogout={onLogout} address={address} />} */}
       </HStack>
     </Container>
   );
@@ -120,3 +113,8 @@ function Container({
     </Flex>
   );
 }
+
+export const BANNER_HEIGHT = "150px"
+export const ICON_IMAGE_SIZE = "56px"
+export const ICON_SIZE = "72px"
+export const ICON_OFFSET = "16px"

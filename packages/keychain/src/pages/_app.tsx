@@ -1,9 +1,9 @@
 import NextHead from "next/head";
 import type { AppProps } from "next/app";
-import { QueryClient, QueryClientProvider } from "react-query";
 import { CartridgeTheme } from "@cartridge/ui";
-import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import { Inter, IBM_Plex_Mono } from "next/font/google";
+import { useEffect } from "react";
+import { Provider } from "components/Provider";
 
 const inter = Inter({ subsets: ["latin"] });
 const ibmPlexMono = IBM_Plex_Mono({
@@ -11,38 +11,10 @@ const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
 });
 
-import { useEffect } from "react";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 20,
-    },
-  },
-});
-
-import { useRouter } from "next/router";
 
 export default function Keychain({ Component, pageProps }: AppProps) {
   useGlobalInjection();
-
-  const router = useRouter();
-  const { primary, secondary } = router.query;
-
-  const customTheme = extendTheme({
-    ...CartridgeTheme,
-    semanticTokens: {
-      ...CartridgeTheme.semanticTokens,
-      colors: {
-        ...CartridgeTheme.semanticTokens.colors,
-        brand: {
-          primary: parseCustomColor(primary) ?? CartridgeTheme.semanticTokens.colors.brand.primary,
-          secondary: parseCustomColor(secondary) ?? CartridgeTheme.semanticTokens.colors.brand.secondary
-        },
-      }
-    },
-  });
-
   return (
     <>
       <NextHead>
@@ -70,11 +42,9 @@ export default function Keychain({ Component, pageProps }: AppProps) {
         }
       `}</style>
 
-      <ChakraProvider theme={customTheme}>
-        <QueryClientProvider client={queryClient}>
-          <Component {...pageProps} />
-        </QueryClientProvider>
-      </ChakraProvider>
+      <Provider>
+        <Component {...pageProps} />
+      </Provider>
     </>
   );
 }
@@ -95,21 +65,6 @@ function useGlobalInjection() {
   }, []);
 }
 
-function parseCustomColor(val: string | string[] | undefined) {
-  if (typeof val === "undefined") return
-
-  const str = decodeURIComponent(Array.isArray(val) ? val[val.length - 1] : val)
-
-  let color: string | { default: string; _light: string; };
-  try {
-    const c = JSON.parse(str);
-    color = { default: c.dark, _light: c.dark }
-  } catch {
-    color = str
-  }
-
-  return color;
-}
 
 declare global {
   interface Window {

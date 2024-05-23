@@ -10,6 +10,8 @@ import { WedgeUpIcon } from "@cartridge/ui";
 import { Policy } from "@cartridge/controller";
 import { SessionDetails } from "./SessionDetails";
 import React, { useMemo } from "react";
+import { FOOTER_HEIGHT } from "components";
+import { BANNER_HEIGHT, ICON_OFFSET, ICON_SIZE } from "components/Container/Header";
 
 export function PortalFooter({
   children,
@@ -17,7 +19,7 @@ export function PortalFooter({
   policies,
   isSignup,
   isSlot,
-  showTerm = true,
+  showTerm = false,
 }: React.PropsWithChildren & {
   origin?: string;
   policies?: Policy[];
@@ -37,16 +39,18 @@ export function PortalFooter({
       w="full"
       align="flex-start"
       position={["fixed", "fixed", "absolute"]}
-      bottom={10}
+      bottom={FOOTER_HEIGHT}
       left={0}
       bg="solid.bg"
       h="auto"
-      minH={isOpen ? "calc(100vh - 164px)" : 0}
+      // window height - cover image height + icon image offset - footer height
+      minH={isOpen ? `calc(100vh - ${BANNER_HEIGHT} - ${FOOTER_HEIGHT} + ${ICON_SIZE}/2 - ${ICON_OFFSET})` : 0}
       transition="all 0.40s ease-out"
       p={4}
       pt={0}
       borderTopWidth={1}
       borderColor="solid.tertiary"
+      zIndex="999999"
     >
       {isExpandable && (
         <Box // mimic top border
@@ -83,7 +87,7 @@ export function PortalFooter({
         align="stretch"
         w="full"
         h="full"
-        overflowY={isOpen ? "scroll" : "hidden"}
+        overflowY={isOpen ? "auto" : "hidden"}
         css={{
           "::-webkit-scrollbar": {
             display: "none",

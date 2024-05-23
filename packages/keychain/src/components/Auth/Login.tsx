@@ -1,4 +1,4 @@
-import { Field, FingerprintDuoIcon, Loading } from "@cartridge/ui";
+import { Field, Loading } from "@cartridge/ui";
 import { VStack, Button } from "@chakra-ui/react";
 import { Container } from "../Container";
 import {
@@ -10,7 +10,6 @@ import {
 import {
   PortalBanner,
   PortalFooter,
-  PORTAL_FOOTER_MIN_HEIGHT,
 } from "components";
 import { useCallback, useState } from "react";
 import Controller from "utils/controller";
@@ -22,6 +21,7 @@ import base64url from "base64url";
 import { useClearField } from "./hooks";
 import { fetchAccount, validateUsernameFor } from "./utils";
 import { RegistrationLink } from "./RegistrationLink";
+import { useControllerTheme } from "hooks/theme";
 
 export function Login({
   prefilledName = "",
@@ -112,6 +112,7 @@ function Form({
 }: Pick<LoginProps, "context" | "isSlot" | "onSignup"> & {
   isLoggingIn: boolean;
 }) {
+  const theme = useControllerTheme();
   const { values, isValidating } = useFormikContext<FormValues>();
 
   const onClearUsername = useClearField("username");
@@ -123,12 +124,11 @@ function Form({
   return (
     <FormikForm style={{ width: "100%" }}>
       <PortalBanner
-        Icon={FingerprintDuoIcon}
-        title="Log In"
-        description="Enter your username"
+        title={theme.id === "cartridge" ? "Play with Cartridge Controller" : `Play ${theme.name}`}
+        description="Enter your Controller username"
       />
 
-      <VStack align="stretch" pb={PORTAL_FOOTER_MIN_HEIGHT}>
+      <VStack align="stretch">
         <FormikField
           name="username"
           placeholder="Username"
@@ -147,10 +147,6 @@ function Form({
             />
           )}
         </FormikField>
-
-        <RegistrationLink description="Need a controller?" onClick={onSignup}>
-          sign up
-        </RegistrationLink>
       </VStack>
 
       <PortalFooter
@@ -166,6 +162,9 @@ function Form({
         >
           log in
         </Button>
+        <RegistrationLink description="Need a controller?" onClick={onSignup}>
+          Sign up
+        </RegistrationLink>
       </PortalFooter>
     </FormikForm>
   );

@@ -1,4 +1,4 @@
-import { Field, PlugNewDuoIcon } from "@cartridge/ui";
+import { Field } from "@cartridge/ui";
 import { VStack, Button } from "@chakra-ui/react";
 import { Container } from "../Container";
 import {
@@ -11,7 +11,6 @@ import { constants } from "starknet";
 import {
   PortalBanner,
   PortalFooter,
-  PORTAL_FOOTER_MIN_HEIGHT,
 } from "components";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -32,6 +31,7 @@ import { ClaimSuccess } from "./StarterPack";
 import { RegistrationLink } from "./RegistrationLink";
 import { Credentials, onCreateBegin, onCreateFinalize } from "hooks/account";
 import { useStartup } from "hooks/startup";
+import { useControllerTheme } from "hooks/theme";
 
 export function Signup({
   prefilledName = "",
@@ -160,6 +160,7 @@ function Form({
   setIsRegistering: (val: boolean) => void;
   starterData: StarterPackQuery;
 }) {
+  const theme = useControllerTheme();
   const { values, isValidating } = useFormikContext<FormValues>();
 
   useEffect(() => {
@@ -229,7 +230,7 @@ function Form({
     () =>
       starterData
         ? starterData.game.starterPack.maxIssuance -
-          starterData.game.starterPack.issuance
+        starterData.game.starterPack.issuance
         : 0,
     [starterData],
   );
@@ -237,16 +238,15 @@ function Form({
   return (
     <FormikForm style={{ width: "100%" }}>
       <PortalBanner
-        Icon={PlugNewDuoIcon}
-        title="Sign Up"
-        description="Select a username"
+        title={theme.id === "cartridge" ? "Play with Cartridge Controller" : `Play ${theme.name}`}
+        description="Create your Cartridge Controller"
       />
 
       {starterData && remaining > 0 && (
         <BannerImage imgSrc={starterData?.game.banner.uri} />
       )}
 
-      <VStack align="stretch" pb={PORTAL_FOOTER_MIN_HEIGHT}>
+      <VStack align="stretch">
         <FormikField
           name="username"
           placeholder="Username"
@@ -265,13 +265,6 @@ function Form({
             />
           )}
         </FormikField>
-
-        <RegistrationLink
-          description="Already have a controller?"
-          onClick={onLogin}
-        >
-          log in
-        </RegistrationLink>
       </VStack>
 
       <PortalFooter
@@ -283,6 +276,12 @@ function Form({
         <Button type="submit" colorScheme="colorful" isLoading={isLoading}>
           sign up
         </Button>
+        <RegistrationLink
+          description="Already have a Controller?"
+          onClick={onLogin}
+        >
+          Log In
+        </RegistrationLink>
       </PortalFooter>
     </FormikForm>
   );
