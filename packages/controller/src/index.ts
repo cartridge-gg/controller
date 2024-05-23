@@ -26,15 +26,16 @@ import {
   ControllerThemePresets,
 } from "./types";
 import { createModal } from "./modal";
-import nodeUrl from "./nodeUrl";
 import { defaultPresets } from "./presets";
 
+// @dev override url to local sequencer for local dev
+// http://localhost:8000/x/starknet/mainnet
 export const providers: { [key: string]: RpcProvider } = {
   [constants.StarknetChainId.SN_MAIN]: new RpcProvider({
-    nodeUrl: nodeUrl.mainnet,
+    nodeUrl: "https://api.cartridge.gg/x/starknet/mainnet",
   }),
   [constants.StarknetChainId.SN_SEPOLIA]: new RpcProvider({
-    nodeUrl: nodeUrl.sepolia,
+    nodeUrl: "https://api.cartridge.gg/x/starknet/sepolia",
   }),
 };
 
