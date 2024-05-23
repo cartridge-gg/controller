@@ -1,4 +1,4 @@
-import { sepolia } from "@starknet-react/chains";
+import { Chain, sepolia } from "@starknet-react/chains";
 import { Connector, StarknetConfig, starkscan } from "@starknet-react/core";
 import { PropsWithChildren } from "react";
 import CartridgeConnector from "@cartridge/connector";
@@ -14,7 +14,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
       chains={[sepolia]}
       connectors={connectors}
       explorer={starkscan}
-      provider={(_chain) =>
+      provider={(_chain: Chain) =>
         new RpcProvider({
           nodeUrl: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
         })
@@ -50,17 +50,7 @@ const connectors = [
     ],
     {
       url,
-      theme: {
-        colors: {
-          // e.g. button bg
-          primary: "#00b4d8",
-          // e.g. button bg hover
-          secondary: {
-            dark: "red",
-            light: "green",
-          },
-        },
-      },
+      // theme: "rollyourown",
     },
   ) as never as Connector,
 ];

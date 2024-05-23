@@ -31,7 +31,7 @@ export function Container({
         w="full"
         h="full"
         p={4}
-        overflowY="scroll"
+        overflowY="auto"
         css={{
           "::-webkit-scrollbar": {
             display: "none",
@@ -42,23 +42,25 @@ export function Container({
         {children}
       </VStack>
 
-      <VStack
+      <HStack
         w="full"
-        h={10}
         borderTopWidth={1}
         borderColor="solid.tertiary"
-
+        color="text.secondary"
         alignItems="center"
         justify="center"
+        minH={FOOTER_HEIGHT}
       >
-        <HStack color="text.secondary">
-          <CartridgeIcon fontSize="sm" />
-          <Text as="i" fontSize="xs" color="currentColor">Powered by Cartridge</Text>
-        </HStack>
-      </VStack>
+        <CartridgeIcon fontSize="sm" />
+        <Text fontSize="xs" color="currentColor">
+          Controller by Cartridge
+        </Text>
+      </HStack>
     </Wrapper>
   );
 }
+
+export const FOOTER_HEIGHT = "40px"
 
 function Wrapper({ children }: React.PropsWithChildren) {
   return (

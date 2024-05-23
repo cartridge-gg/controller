@@ -23,8 +23,18 @@ export function Authenticate({
   const [unsupportedMessage, setUnsupportedMessage] = useState<string>();
 
   const onAuth = useCallback(async () => {
-    // https://webkit.org/blog/11545/updates-to-the-storage-access-api/
-    document.cookie = "visited=true; path=/;";
+    if (!!document.hasStorageAccess) {
+      const ok = await document.hasStorageAccess();
+      if (!ok) {
+        document.requestStorageAccess().then(() => {
+          console.log("successful storage access requested!");
+        }).catch((e) => {
+          console.error(e);
+        });
+      } else {
+        console.log("already has storage access");
+      }
+    }
 
     setIsLoading(true);
     try {
@@ -34,7 +44,7 @@ export function Authenticate({
       await onCreateFinalize(credentials);
 
       setTimeout(() => {
-        onComplete();
+        //onComplete();
       }, 2000);
     } catch (e) {
       console.error(e);

@@ -1,4 +1,5 @@
 export * from "./types";
+export { defaultPresets } from "./presets";
 
 import {
   AccountInterface,
@@ -22,12 +23,11 @@ import {
   ProbeReply,
   Modal,
   ControllerOptions,
-  CustomTheme,
-  CustomColor,
-  // CustomIcon,
+  ControllerThemePresets,
 } from "./types";
 import { createModal } from "./modal";
 import nodeUrl from "./nodeUrl";
+import { defaultPresets } from "./presets";
 
 export const providers: { [key: string]: RpcProvider } = {
   [constants.StarknetChainId.SN_MAIN]: new RpcProvider({
@@ -67,13 +67,7 @@ class Controller {
       this.url = options.url;
     }
 
-    // if (options?.icon) {
-    //   this.setCustomIcon(options.icon);
-    // }
-
-    if (options?.theme) {
-      this.setCustomTheme(options.theme);
-    }
+    this.setTheme(options?.theme, options?.config?.presets);
 
     if (typeof document === "undefined") {
       return;
@@ -111,36 +105,16 @@ class Controller {
     return this.accounts[this.chainId];
   }
 
-  // private setCustomIcon(icon: CustomIcon) {
-  //   const url = new URL(this.url);
+  private setTheme(
+    theme: string = "cartridge",
+    presets: ControllerThemePresets = defaultPresets,
+  ) {
+    const t = presets[theme] ?? defaultPresets.cartridge;
 
-  //   url.searchParams.set("icon", encodeURIComponent(JSON.stringify(icon)));
-
-  //   this.url = url.toString();
-  // }
-
-  private setCustomTheme(theme: CustomTheme) {
     const url = new URL(this.url);
-
-    const primary = this.encodeColor(theme.colors?.primary);
-    if (primary) {
-      url.searchParams.set("primary", primary);
-    }
-
-    const secondary = this.encodeColor(theme.colors?.secondary);
-    if (secondary) {
-      url.searchParams.set("secondary", secondary);
-    }
+    url.searchParams.set("theme", encodeURIComponent(JSON.stringify(t)));
 
     this.url = url.toString();
-  }
-
-  private encodeColor(color: CustomColor | undefined) {
-    if (!color) return;
-
-    return typeof color === "string"
-      ? color
-      : encodeURIComponent(JSON.stringify(color));
   }
 
   ready() {

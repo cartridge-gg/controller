@@ -9,8 +9,8 @@ export function RegistrationLink({
   description: string;
 } & React.PropsWithChildren) {
   return (
-    <HStack justify="center">
-      <Text fontSize="sm" color="text.secondary" marginRight={3}>
+    <HStack justify="center" mt={3}>
+      <Text fontSize="sm" color="text.secondary">
         {description}
       </Text>
 
