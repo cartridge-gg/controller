@@ -88,10 +88,5 @@ export async function dropCookie() {
     await document.requestStorageAccess();
   }
 
-  if (process.env.NODE_ENV === "development") {
-    document.cookie = "visited=true; path=/";
-    return;
-  }
-
-  document.cookie = "visited=true; path=/; Secure; HttpOnly; SameSite=None";
+  document.cookie = "visited=true; path=/";
 }
