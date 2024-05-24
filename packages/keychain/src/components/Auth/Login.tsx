@@ -7,10 +7,7 @@ import {
   Formik,
   useFormikContext,
 } from "formik";
-import {
-  PortalBanner,
-  PortalFooter,
-} from "components";
+import { PortalBanner, PortalFooter } from "components";
 import { useCallback, useState } from "react";
 import Controller from "utils/controller";
 import { FormValues, LoginProps } from "./types";
@@ -38,6 +35,22 @@ export function Login({
   const onSubmit = useCallback(
     async (values: FormValues) => {
       setIsLoggingIn(true);
+
+      if (!!document.hasStorageAccess) {
+        const ok = await document.hasStorageAccess();
+        if (!ok) {
+          document
+            .requestStorageAccess()
+            .then(() => {
+              console.log("successful storage access requested!");
+            })
+            .catch((e) => {
+              console.error(e);
+            });
+        } else {
+          console.log("already has storage access");
+        }
+      }
 
       const {
         account: {
@@ -124,7 +137,11 @@ function Form({
   return (
     <FormikForm style={{ width: "100%" }}>
       <PortalBanner
-        title={theme.id === "cartridge" ? "Play with Cartridge Controller" : `Play ${theme.name}`}
+        title={
+          theme.id === "cartridge"
+            ? "Play with Cartridge Controller"
+            : `Play ${theme.name}`
+        }
         description="Enter your Controller username"
       />
 

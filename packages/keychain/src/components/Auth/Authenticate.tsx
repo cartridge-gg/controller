@@ -26,15 +26,20 @@ export function Authenticate({
     if (!!document.hasStorageAccess) {
       const ok = await document.hasStorageAccess();
       if (!ok) {
-        document.requestStorageAccess().then(() => {
-          console.log("successful storage access requested!");
-        }).catch((e) => {
-          console.error(e);
-        });
+        document
+          .requestStorageAccess()
+          .then(() => {
+            console.log("successful storage access requested!");
+          })
+          .catch((e) => {
+            console.error(e);
+          });
       } else {
         console.log("already has storage access");
       }
     }
+
+    document.cookie = "visited=true; path=/;";
 
     setIsLoading(true);
     try {
