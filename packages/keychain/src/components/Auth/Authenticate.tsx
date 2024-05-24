@@ -10,7 +10,7 @@ import {
 import { Container } from "../Container";
 import { PortalBanner } from "components/PortalBanner";
 import { PortalFooter } from "components/PortalFooter";
-import { dropCookie } from "./utils";
+import { requestStorageDropCookie } from "./utils";
 
 export function Authenticate({
   name,
@@ -26,7 +26,7 @@ export function Authenticate({
   const onAuth = useCallback(async () => {
     setIsLoading(true);
     try {
-      await dropCookie();
+      await requestStorageDropCookie();
 
       const credentials: Credentials = await onCreateBegin(
         decodeURIComponent(name),

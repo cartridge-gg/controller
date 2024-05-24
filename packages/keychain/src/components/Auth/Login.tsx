@@ -7,10 +7,7 @@ import {
   Formik,
   useFormikContext,
 } from "formik";
-import {
-  PortalBanner,
-  PortalFooter,
-} from "components";
+import { PortalBanner, PortalFooter } from "components";
 import { useCallback, useState } from "react";
 import Controller from "utils/controller";
 import { FormValues, LoginProps } from "./types";
@@ -19,7 +16,11 @@ import { beginLogin, onLoginFinalize } from "hooks/account";
 import { WebauthnSigner } from "utils/webauthn";
 import base64url from "base64url";
 import { useClearField } from "./hooks";
-import { fetchAccount, validateUsernameFor } from "./utils";
+import {
+  requestStorageDropCookie,
+  fetchAccount,
+  validateUsernameFor,
+} from "./utils";
 import { RegistrationLink } from "./RegistrationLink";
 import { useControllerTheme } from "hooks/theme";
 
@@ -50,6 +51,9 @@ export function Login({
 
       try {
         log({ type: "webauthn_login", address });
+        console.log("requesting storage drop cookie");
+        await requestStorageDropCookie();
+        console.log("requested storage drop cookie");
 
         const { data: beginLoginData } = await beginLogin(values.username);
         const signer = new WebauthnSigner(credentialId, publicKey);
@@ -124,7 +128,11 @@ function Form({
   return (
     <FormikForm style={{ width: "100%" }}>
       <PortalBanner
-        title={theme.id === "cartridge" ? "Play with Cartridge Controller" : `Play ${theme.name}`}
+        title={
+          theme.id === "cartridge"
+            ? "Play with Cartridge Controller"
+            : `Play ${theme.name}`
+        }
         description="Enter your Controller username"
       />
 
