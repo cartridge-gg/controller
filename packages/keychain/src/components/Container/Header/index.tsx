@@ -46,9 +46,9 @@ export function Header({
           bgPos="center"
           position="relative"
         >
-          <Center position="absolute" bottom={`-${ICON_OFFSET}`} left={0} right={0}>
-            <Flex bg="solid.primary" borderRadius="lg" h={ICON_SIZE} w={ICON_SIZE} justify="center" alignItems="center">
-              <Image src={theme.icon} boxSize={ICON_IMAGE_SIZE} alt="Controller Icon" />
+          <Center position="absolute" bottom={-ICON_OFFSET / 4} left={0} right={0}>
+            <Flex bg="solid.primary" borderRadius="lg" h={`${ICON_SIZE}px`} w={`${ICON_SIZE}px`} justify="center" alignItems="center">
+              <Image src={theme.icon} boxSize={ICON_IMAGE_SIZE / 4} alt="Controller Icon" />
             </Flex>
           </Center>
         </VStack>
@@ -114,7 +114,7 @@ function Container({
   );
 }
 
-export const BANNER_HEIGHT = "150px"
-export const ICON_IMAGE_SIZE = "56px"
-export const ICON_SIZE = "72px"
-export const ICON_OFFSET = "16px"
+export const BANNER_HEIGHT = 150
+export const ICON_IMAGE_SIZE = 56
+export const ICON_SIZE = 72
+export const ICON_OFFSET = 16

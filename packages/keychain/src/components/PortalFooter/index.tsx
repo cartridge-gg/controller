@@ -12,6 +12,7 @@ import { SessionDetails } from "./SessionDetails";
 import React, { useMemo } from "react";
 import { FOOTER_HEIGHT } from "components";
 import { BANNER_HEIGHT, ICON_OFFSET, ICON_SIZE } from "components/Container/Header";
+import { motion } from "framer-motion";
 
 export function PortalFooter({
   children,
@@ -34,21 +35,34 @@ export function PortalFooter({
     [origin],
   );
 
+  const height = useMemo(() =>
+    isOpen
+      ? `${window.document.body.scrollHeight
+      - BANNER_HEIGHT
+      - FOOTER_HEIGHT
+      + ICON_SIZE / 2
+      - ICON_OFFSET}px`
+      : "auto",
+    [isOpen])
+
+  console.log("!!!", height);
+
   return (
     <VStack
       w="full"
       align="flex-start"
       position={["fixed", "fixed", "absolute"]}
-      bottom={FOOTER_HEIGHT}
+      bottom={FOOTER_HEIGHT / 4}
       left={0}
       bg="solid.bg"
-      h={isOpen ? `calc(100vh - ${BANNER_HEIGHT} - ${FOOTER_HEIGHT} + ${ICON_SIZE}/2 - ${ICON_OFFSET})` : undefined}
-      transition="all 0.40s ease-out"
       p={4}
       pt={0}
       borderTopWidth={1}
       borderColor="solid.tertiary"
       zIndex="999999"
+      as={motion.div}
+      layout="position"
+      animate={{ height, transition: { bounce: 0 } }}
     >
       {isExpandable && (
         <Box // mimic top border
@@ -65,12 +79,15 @@ export function PortalFooter({
             top="1px"
             aria-label="Expand footer"
             icon={
-              <WedgeUpIcon
-                boxSize={10}
-                transform={isOpen ? "rotate(180deg)" : undefined}
-                transition="all 0.40s ease-out"
-                color="text.secondary"
-              />
+              <motion.div
+                layout
+                animate={{ rotate: isOpen ? 180 : 0, transition: { bounce: 0 } }}
+              >
+                <WedgeUpIcon
+                  boxSize={10}
+                  color="text.secondary"
+                />
+              </motion.div>
             }
             size="lg"
             variant="round"
@@ -79,7 +96,8 @@ export function PortalFooter({
             onClick={onToggle}
           />
         </Box>
-      )}
+      )
+      }
 
       <VStack
         pt={6}
