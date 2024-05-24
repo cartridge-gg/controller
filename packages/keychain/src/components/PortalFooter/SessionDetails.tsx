@@ -10,20 +10,30 @@ import {
 } from "@chakra-ui/react";
 import { CodeUtilIcon, WedgeRightIcon } from "@cartridge/ui";
 import { Policy } from "@cartridge/controller";
+import { motion } from "framer-motion";
 
 export function SessionDetails({
   hostname,
   policies,
+  isOpen,
 }: {
   hostname: string;
   policies: Policy[];
+  isOpen: boolean;
 }) {
   if (!policies) {
     return null;
   }
 
   return (
-    <VStack marginY={4} alignItems="flex">
+    <VStack
+      marginY={4}
+      alignItems="flex"
+      as={motion.div}
+      layoutScroll
+      animate={{ display: isOpen ? "flex" : "none", transition: { delay: 0.3 } }}
+      display="none"
+    >
       <VStack
         align="flex-start"
         borderTopRadius="md"

@@ -80,7 +80,6 @@ export function PortalFooter({
               <WedgeUpIcon
                 boxSize={10}
                 color="text.secondary"
-                rotate={isOpen ? 180 : 0}
                 transform={isOpen ? "rotate(180deg)" : "rotate(0deg)"}
               />
             }
@@ -115,7 +114,7 @@ export function PortalFooter({
         />
 
         {isOpen && hostname && policies && (
-          <SessionDetails hostname={hostname} policies={policies} />
+          <SessionDetails hostname={hostname} policies={policies} isOpen={isOpen} />
         )}
 
         {/* TODO: starter pack
