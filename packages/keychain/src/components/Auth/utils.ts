@@ -88,5 +88,6 @@ export async function dropCookie() {
     await document.requestStorageAccess();
   }
 
-  document.cookie = "visited=true; path=/";
+  document.cookie =
+    "visited=true; domain=.cartridge.gg; path=/; samesite=none; secure";
 }
