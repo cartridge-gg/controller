@@ -42,9 +42,7 @@ export function PortalFooter({
       bottom={FOOTER_HEIGHT}
       left={0}
       bg="solid.bg"
-      h="auto"
-      // window height - cover image height + icon image offset - footer height
-      minH={isOpen ? `calc(100vh - ${BANNER_HEIGHT} - ${FOOTER_HEIGHT} + ${ICON_SIZE}/2 - ${ICON_OFFSET})` : 0}
+      h={isOpen ? `calc(100vh - ${BANNER_HEIGHT} - ${FOOTER_HEIGHT} + ${ICON_SIZE}/2 - ${ICON_OFFSET})` : undefined}
       transition="all 0.40s ease-out"
       p={4}
       pt={0}
@@ -77,6 +75,7 @@ export function PortalFooter({
             size="lg"
             variant="round"
             bg="solid.bg"
+            zIndex="999999"
             onClick={onToggle}
           />
         </Box>
