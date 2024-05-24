@@ -49,7 +49,7 @@ export function Container({
         color="text.secondary"
         alignItems="center"
         justify="center"
-        minH={FOOTER_HEIGHT}
+        minH={FOOTER_HEIGHT / 4}
       >
         <CartridgeIcon fontSize="sm" />
         <Text fontSize="xs" color="currentColor">
@@ -60,7 +60,7 @@ export function Container({
   );
 }
 
-export const FOOTER_HEIGHT = "40px"
+export const FOOTER_HEIGHT = 40
 
 function Wrapper({ children }: React.PropsWithChildren) {
   return (
