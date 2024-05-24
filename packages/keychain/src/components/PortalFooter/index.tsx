@@ -45,8 +45,6 @@ export function PortalFooter({
       : "auto",
     [isOpen])
 
-  console.log("!!!", height);
-
   return (
     <VStack
       w="full"
@@ -79,15 +77,12 @@ export function PortalFooter({
             top="1px"
             aria-label="Expand footer"
             icon={
-              <motion.div
-                layout
-                animate={{ rotate: isOpen ? 180 : 0, transition: { bounce: 0 } }}
-              >
-                <WedgeUpIcon
-                  boxSize={10}
-                  color="text.secondary"
-                />
-              </motion.div>
+              <WedgeUpIcon
+                boxSize={10}
+                color="text.secondary"
+                rotate={isOpen ? 180 : 0}
+                transform={isOpen ? "rotate(180deg)" : "rotate(0deg)"}
+              />
             }
             size="lg"
             variant="round"
