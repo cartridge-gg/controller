@@ -78,3 +78,15 @@ export function fetchAccount(username: string) {
     id: username,
   });
 }
+
+// Cross-site cookies access will eventually be disabled on all major browsers, use storage access api
+// for now, then migrate to CHIPS when golang 1.23 with support for partitioned cookies is released.
+// https://developers.google.com/privacy-sandbox/3pcd
+export async function dropCookie() {
+  const ok = await document.hasStorageAccess();
+  if (!ok) {
+    await document.requestStorageAccess();
+  }
+
+  document.cookie = "visited=true; path=/;";
+}

@@ -10,6 +10,7 @@ import {
 import { Container } from "../Container";
 import { PortalBanner } from "components/PortalBanner";
 import { PortalFooter } from "components/PortalFooter";
+import { dropCookie } from "./utils";
 
 export function Authenticate({
   name,
@@ -23,11 +24,10 @@ export function Authenticate({
   const [unsupportedMessage, setUnsupportedMessage] = useState<string>();
 
   const onAuth = useCallback(async () => {
-    // https://webkit.org/blog/11545/updates-to-the-storage-access-api/
-    document.cookie = "visited=true; path=/;";
-
     setIsLoading(true);
     try {
+      await dropCookie();
+
       const credentials: Credentials = await onCreateBegin(
         decodeURIComponent(name),
       );
