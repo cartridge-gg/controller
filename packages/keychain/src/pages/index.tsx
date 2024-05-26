@@ -286,7 +286,7 @@ const Index: NextPage = () => {
               setPrefilledUsername(username);
               setShowSignup(false);
             }}
-            onController={setController}
+            onSuccess={setController}
             context={context as Connect}
           />
         ) : (
@@ -296,7 +296,7 @@ const Index: NextPage = () => {
               setPrefilledUsername(username);
               setShowSignup(true);
             }}
-            onController={setController}
+            onSuccess={setController}
             context={context as Connect}
           />
         )}

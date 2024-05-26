@@ -8,7 +8,7 @@ import {
 
 import { client, ENDPOINT } from "utils/graphql";
 import base64url from "base64url";
-import { RawAssertion } from "utils/webauthn";
+import { RawAssertion, WebauthnSigner } from "utils/webauthn";
 
 export interface CredentialDescriptor
   extends Omit<PublicKeyCredentialDescriptor, "id"> {
@@ -159,3 +159,27 @@ export const doXHR = async (json: string): Promise<any> => {
     xhr.send(json);
   });
 };
+
+export async function doSignup(name: string) {
+  const credentials: Credentials = await onCreateBegin(name);
+  await onCreateFinalize(credentials);
+}
+
+export async function doLogin(
+  name: string,
+  credentialId: string,
+  publicKey: string,
+) {
+  const { data: beginLoginData } = await beginLogin(name);
+
+  // TODO: replace with account sdk webauthn signer
+  const signer = new WebauthnSigner(credentialId, publicKey);
+  const assertion = await signer.sign(
+    base64url.toBuffer(beginLoginData.beginLogin.publicKey.challenge),
+  );
+
+  const res = await onLoginFinalize(assertion);
+  if (!res.finalizeLogin) {
+    throw Error("login failed");
+  }
+}
