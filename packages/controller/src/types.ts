@@ -153,21 +153,25 @@ export type ControllerOptions = {
   starterPackId?: string;
   chainId?: constants.StarknetChainId;
   theme?: string;
+  colorMode?: ColorMode;
   config?: {
     presets?: ControllerThemePresets;
   };
 };
 
+export type ColorMode = "light" | "dark";
+
 export type ControllerTheme = {
   id: string;
   name: string;
   icon: string;
-  cover: string;
+  cover: ThemeValue<string>;
+  colorMode: ColorMode;
 };
 
 export type ControllerThemePresets = Record<string, ControllerThemePreset>;
 
-export type ControllerThemePreset = ControllerTheme & {
+export type ControllerThemePreset = Omit<ControllerTheme, "colorMode"> & {
   colors?: ControllerColors;
 };
 

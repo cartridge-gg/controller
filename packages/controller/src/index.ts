@@ -24,6 +24,7 @@ import {
   Modal,
   ControllerOptions,
   ControllerThemePresets,
+  ColorMode,
 } from "./types";
 import { createModal } from "./modal";
 import { defaultPresets } from "./presets";
@@ -69,6 +70,9 @@ class Controller {
     }
 
     this.setTheme(options?.theme, options?.config?.presets);
+    if (options?.colorMode) {
+      this.setColorMode(options.colorMode);
+    }
 
     if (typeof document === "undefined") {
       return;
@@ -107,14 +111,19 @@ class Controller {
   }
 
   private setTheme(
-    theme: string = "cartridge",
+    id: string = "cartridge",
     presets: ControllerThemePresets = defaultPresets,
   ) {
-    const t = presets[theme] ?? defaultPresets.cartridge;
+    const theme = presets[id] ?? defaultPresets.cartridge;
 
     const url = new URL(this.url);
-    url.searchParams.set("theme", encodeURIComponent(JSON.stringify(t)));
+    url.searchParams.set("theme", encodeURIComponent(JSON.stringify(theme)));
+    this.url = url.toString();
+  }
 
+  private setColorMode(colorMode: ColorMode) {
+    const url = new URL(this.url);
+    url.searchParams.set("colorMode", colorMode);
     this.url = url.toString();
   }
 

@@ -51,6 +51,7 @@ const connectors = [
     {
       url,
       // theme: "rollyourown",
+      // colorMode: "light"
     },
   ) as never as Connector,
 ];

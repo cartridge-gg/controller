@@ -1,11 +1,14 @@
-import { ControllerThemePreset } from "./types";
+import { ControllerThemePresets } from "./types";
 
-export const defaultPresets: { [key: string]: ControllerThemePreset } = {
+export const defaultPresets: ControllerThemePresets = {
   cartridge: {
     id: "cartridge",
     name: "Cartridge",
     icon: "/whitelabel/cartridge/icon.svg",
-    cover: "/whitelabel/cartridge/cover-dark.png",
+    cover: {
+      light: "/whitelabel/cartridge/cover-light.png",
+      dark: "/whitelabel/cartridge/cover-dark.png",
+    },
   },
   "force-prime": {
     id: "force-prime",
@@ -34,4 +37,4 @@ export const defaultPresets: { [key: string]: ControllerThemePreset } = {
       primary: "#11ED83",
     },
   },
-} as const;
+};
