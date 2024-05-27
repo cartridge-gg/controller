@@ -53,7 +53,7 @@ export function Header({
           position="relative"
         >
           <Center position="absolute" bottom={-ICON_OFFSET / 4} left={0} right={0}>
-            <Flex bg="solid.primary" borderRadius="lg" h={`${ICON_SIZE}px`} w={`${ICON_SIZE}px`} justify="center" alignItems="center">
+            <Flex bg="darkGray.800" borderRadius="lg" h={`${ICON_SIZE}px`} w={`${ICON_SIZE}px`} justify="center" alignItems="center" borderWidth={4} borderColor={colorMode === "dark" ? "solid.bg" : "blueGray.100"}>
               <Image src={theme.icon} boxSize={ICON_IMAGE_SIZE / 4} alt="Controller Icon" />
             </Flex>
           </Center>
@@ -121,6 +121,6 @@ function Container({
 }
 
 export const BANNER_HEIGHT = 150
-export const ICON_IMAGE_SIZE = 56
-export const ICON_SIZE = 72
+export const ICON_IMAGE_SIZE = 64
+export const ICON_SIZE = 80
 export const ICON_OFFSET = 16
