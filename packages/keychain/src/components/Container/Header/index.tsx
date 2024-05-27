@@ -9,6 +9,7 @@ import {
   VStack,
   Image,
   Center,
+  useColorMode,
 } from "@chakra-ui/react";
 import { constants } from "starknet";
 import { ArrowLeftIcon, CartridgeColorIcon } from "@cartridge/ui";
@@ -34,6 +35,11 @@ export function Header({
   const [controller] = useController();
   const address = useMemo(() => controller?.address, [controller]);
   const theme = useControllerTheme();
+  const { colorMode } = useColorMode();
+
+  const cover = useMemo(() =>
+    typeof theme.cover === "string" ? theme.cover : theme.cover[colorMode]
+    , [theme, colorMode])
 
   if (!address || hideAccount) {
     return (
@@ -41,7 +47,7 @@ export function Header({
         <VStack
           h="full"
           w="full"
-          bg={`linear-gradient(to top, black, transparent), url('${theme.cover}')`}
+          bg={`url('${cover}')`}
           bgSize="cover"
           bgPos="center"
           position="relative"
