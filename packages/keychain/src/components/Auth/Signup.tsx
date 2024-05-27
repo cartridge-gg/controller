@@ -8,115 +8,58 @@ import {
   useFormikContext,
 } from "formik";
 import { constants } from "starknet";
-import {
-  PortalBanner,
-  PortalFooter,
-} from "components";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  DeployAccountDocument,
-  StarterPackQuery,
-  useAccountQuery,
-  useStarterPackQuery,
-} from "generated/graphql";
+import { PortalBanner, PortalFooter } from "components";
+import { useCallback, useEffect, useState } from "react";
+import { DeployAccountDocument, useAccountQuery } from "generated/graphql";
 import Controller from "utils/controller";
 import { Status } from "utils/account";
 import { client } from "utils/graphql";
 import { PopupCenter } from "utils/url";
 import { FormValues, SignupProps } from "./types";
-import { validateUsernameFor } from "./utils";
+import { isIframe, validateUsernameFor } from "./utils";
 import { useClearField } from "./hooks";
-import { BannerImage } from "./BannerImage";
-import { ClaimSuccess } from "./StarterPack";
 import { RegistrationLink } from "./RegistrationLink";
-import { Credentials, onCreateBegin, onCreateFinalize } from "hooks/account";
-import { useStartup } from "hooks/startup";
+import { doSignup } from "hooks/account";
 import { useControllerTheme } from "hooks/theme";
 
 export function Signup({
   prefilledName = "",
   context,
-  onController,
-  onComplete: onCompleteProp,
-  starterPackId,
-  onLogin,
   isSlot,
+  onSuccess,
+  onLogin,
 }: SignupProps) {
   const [isRegistering, setIsRegistering] = useState(false);
-  const [claimSuccess, setClaimSuccess] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { data: starterData } = useStarterPackQuery(
-    {
-      id: starterPackId,
-    },
-    { enabled: !!starterPackId && !isRegistering },
-  );
+  const onSubmit = useCallback(async (values: FormValues) => {
+    setIsLoading(true);
+    setIsRegistering(true);
 
-  const isIframe = useMemo(
-    () => (typeof window !== "undefined" ? window.top !== window.self : false),
-    [],
-  );
+    // due to same origin restriction, if we're in iframe, pop up a
+    // window to continue webauthn registration. otherwise,
+    // display modal overlay. in either case, account is created in
+    // authenticate component, so we poll and then deploy
+    if (isIframe()) {
+      PopupCenter(
+        `/authenticate?name=${encodeURIComponent(
+          values.username,
+        )}&action=signup`,
+        "Cartridge Signup",
+        480,
+        640,
+      );
 
-  const onComplete = useCallback(() => {
-    if (starterPackId) {
-      setClaimSuccess(true);
       return;
     }
 
-    onCompleteProp?.();
-  }, [starterPackId, onCompleteProp]);
-
-  const { play, StartupAnimation } = useStartup({ onComplete });
-
-  const onSubmit = useCallback(
-    async (values: FormValues) => {
-      setIsLoading(true);
-      setIsRegistering(true);
-
-      // due to same origin restriction, if we're in iframe, pop up a
-      // window to continue webauthn registration. otherwise,
-      // display modal overlay. in either case, account is created in
-      // authenticate component, so we poll and then deploy
-      if (isIframe) {
-        PopupCenter(
-          `/authenticate?name=${encodeURIComponent(values.username)}`,
-          "Cartridge Signup",
-          480,
-          640,
-        );
-      } else {
-        // https://webkit.org/blog/11545/updates-to-the-storage-access-api/
-        document.cookie = "visited=true; path=/;";
-
-        try {
-          const credentials: Credentials = await onCreateBegin(
-            decodeURIComponent(values.username),
-          );
-          await onCreateFinalize(credentials);
-
-          play();
-        } catch (e) {
-          console.error(e);
-          setIsLoading(false);
-          throw e;
-        }
-
-        setIsLoading(false);
-      }
-    },
-    [isIframe, play],
-  );
-
-  if (claimSuccess) {
-    return (
-      <ClaimSuccess
-        name={starterData?.game.name}
-        banner={starterData?.game.banner.uri}
-        url={starterData?.game.socials.website}
-      />
-    );
-  }
+    doSignup(decodeURIComponent(values.username))
+      .catch((e) => {
+        console.error(e);
+        throw e;
+      })
+      .finally(() => setIsLoading(false));
+  }, []);
 
   return (
     <>
@@ -129,36 +72,31 @@ export function Signup({
         >
           <Form
             onLogin={onLogin}
-            onController={onController}
+            onSuccess={onSuccess}
             isRegistering={isRegistering}
             isLoading={isLoading}
             setIsRegistering={setIsRegistering}
             context={context}
-            starterData={starterData}
             isSlot={isSlot}
           />
         </Formik>
       </Container>
-
-      {StartupAnimation}
     </>
   );
 }
 
 function Form({
   context,
-  onController,
-  onLogin: onLoginProp,
   isRegistering,
   isLoading,
-  setIsRegistering,
-  starterData,
   isSlot,
-}: Pick<SignupProps, "context" | "isSlot" | "onController" | "onLogin"> & {
+  onLogin: onLoginProp,
+  onSuccess,
+  setIsRegistering,
+}: SignupProps & {
   isRegistering: boolean;
   isLoading: boolean;
   setIsRegistering: (val: boolean) => void;
-  starterData: StarterPackQuery;
 }) {
   const theme = useControllerTheme();
   const { values, isValidating } = useFormikContext<FormValues>();
@@ -178,7 +116,6 @@ function Form({
       cacheTime: 10000000,
       refetchInterval: (data) => (!data ? 1000 : undefined),
       onSuccess: async (data) => {
-        console.log("deploy request");
         const {
           account: {
             credentials: {
@@ -215,7 +152,7 @@ function Form({
         //     controller.account(constants.StarknetChainId.SN_MAIN).sync();
         //   });
 
-        if (onController) await onController(controller);
+        onSuccess(controller);
       },
     },
   );
@@ -226,25 +163,16 @@ function Form({
     onLoginProp(values.username);
   }, [values.username, onLoginProp]);
 
-  const remaining = useMemo(
-    () =>
-      starterData
-        ? starterData.game.starterPack.maxIssuance -
-        starterData.game.starterPack.issuance
-        : 0,
-    [starterData],
-  );
-
   return (
     <FormikForm style={{ width: "100%" }}>
       <PortalBanner
-        title={theme.id === "cartridge" ? "Play with Cartridge Controller" : `Play ${theme.name}`}
+        title={
+          theme.id === "cartridge"
+            ? "Play with Cartridge Controller"
+            : `Play ${theme.name}`
+        }
         description="Create your Cartridge Controller"
       />
-
-      {starterData && remaining > 0 && (
-        <BannerImage imgSrc={starterData?.game.banner.uri} />
-      )}
 
       <VStack align="stretch">
         <FormikField

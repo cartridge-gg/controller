@@ -40,7 +40,7 @@ const Auth: NextPage = () => {
             setPrefilledUsername(username);
             setShowSignup(false);
           }}
-          onController={setController}
+          onSuccess={setController}
           isSlot
         />
       ) : (
@@ -50,7 +50,7 @@ const Auth: NextPage = () => {
             setPrefilledUsername(username);
             setShowSignup(true);
           }}
-          onController={setController}
+          onSuccess={setController}
           isSlot
         />
       )}

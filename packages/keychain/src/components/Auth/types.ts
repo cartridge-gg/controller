@@ -12,13 +12,10 @@ type AuthBaseProps = {
   prefilledName?: string;
   context?: Connect;
   isSlot?: boolean;
-  onController?: (controller: Controller) => void | Promise<void>;
-  onComplete?: () => void;
-  // onCancel?: () => void;
+  onSuccess: (controller: Controller) => void;
 };
 
 export type SignupProps = AuthBaseProps & {
-  starterPackId?: string;
   onLogin: (username: string) => void;
 };
 

@@ -5,17 +5,6 @@ import {
 } from "generated/graphql";
 import { fetchData } from "hooks/fetcher";
 
-// export function validateUsername(val: string) {
-//   if (!val) {
-//     return "Username required";
-//   } else if (val.length < 3) {
-//     return "Username must be at least 3 characters";
-//   } else if (val.split(" ").length > 1) {
-//     return "Username cannot contain spaces";
-//   }
-// }
-//
-
 export function validateUsernameFor(type: "signup" | "login") {
   return async (val: string) => {
     if (!val) {
@@ -53,26 +42,6 @@ export function validateUsernameFor(type: "signup" | "login") {
   };
 }
 
-// async function validateUsername(val: string) {
-//   if (!val) {
-//     return "Username required";
-//   } else if (val.length < 3) {
-//     return "Username must be at least 3 characters";
-//   } else if (val.split(" ").length > 1) {
-//     return "Username cannot contain spaces";
-//   }
-
-//   try {
-//     await fetchAccount(val);
-//   } catch (error) {
-//     if ((error as Error).message === "ent: account not found") {
-//       return "Account not found";
-//     } else {
-//       return "An error occured.";
-//     }
-//   }
-// }
-
 export function fetchAccount(username: string) {
   return fetchData<AccountQuery, AccountQueryVariables>(AccountDocument, {
     id: username,
@@ -82,11 +51,8 @@ export function fetchAccount(username: string) {
 // Cross-site cookies access will eventually be disabled on all major browsers, use storage access api
 // for now, then migrate to CHIPS when golang 1.23 with support for partitioned cookies is released.
 // https://developers.google.com/privacy-sandbox/3pcd
-export async function dropCookie() {
-  const ok = await document.hasStorageAccess();
-  if (!ok) {
-    await document.requestStorageAccess();
-  }
+export async function requestStorageDropCookie() {
+  await document.requestStorageAccess();
 
   if (process.env.NODE_ENV === "development") {
     document.cookie = "visited=true; path=/";
@@ -95,4 +61,8 @@ export async function dropCookie() {
 
   document.cookie =
     "visited=true; domain=.cartridge.gg; path=/; samesite=none; secure";
+}
+
+export function isIframe() {
+  return typeof window !== "undefined" ? window.top !== window.self : false;
 }

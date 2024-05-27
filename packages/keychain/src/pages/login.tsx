@@ -10,7 +10,7 @@ const Login: NextPage = () => {
     <LoginComponent
       chainId={constants.StarknetChainId.SN_SEPOLIA}
       onSignup={() => router.push({ pathname: "/signup", query: router.query })}
-      onComplete={() => {
+      onSuccess={async () => {
         if (starterPackId) {
           router.replace(
             `${process.env.NEXT_PUBLIC_ADMIN_URL}/claim/${starterPackId}`,

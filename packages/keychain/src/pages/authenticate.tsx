@@ -5,11 +5,13 @@ import { Authenticate as AuthComponent } from "components/Auth";
 // auth page used for externally embedded keychain
 const Authenticate: NextPage = () => {
   const router = useRouter();
-  const { name } = router.query as { name: string };
+  const { name, action } = router.query as { name: string; action: string };
+
   return (
     <AuthComponent
       name={decodeURIComponent(name)}
-      onComplete={() => {
+      action={decodeURIComponent(action) as "login" | "signup"}
+      onSuccess={() => {
         if (window.opener) {
           return window.close();
         }

@@ -1,43 +1,33 @@
-import { Field, Loading } from "@cartridge/ui";
+import { Field } from "@cartridge/ui";
 import { VStack, Button } from "@chakra-ui/react";
 import { Container } from "../Container";
-import {
-  Form as FormikForm,
-  Field as FormikField,
-  Formik,
-  useFormikContext,
-} from "formik";
-import {
-  PortalBanner,
-  PortalFooter,
-} from "components";
+import { Form as FormikForm, Field as FormikField, Formik } from "formik";
+import { PortalBanner, PortalFooter } from "components";
 import { useCallback, useState } from "react";
 import Controller from "utils/controller";
 import { FormValues, LoginProps } from "./types";
 import { useAnalytics } from "hooks/analytics";
-import { beginLogin, onLoginFinalize } from "hooks/account";
-import { WebauthnSigner } from "utils/webauthn";
-import base64url from "base64url";
-import { useClearField } from "./hooks";
 import { fetchAccount, validateUsernameFor } from "./utils";
 import { RegistrationLink } from "./RegistrationLink";
 import { useControllerTheme } from "hooks/theme";
+import { PopupCenter } from "utils/url";
+import { doLogin } from "hooks/account";
 
 export function Login({
   prefilledName = "",
   chainId,
   context,
   isSlot,
-  onController,
-  onComplete,
+  onSuccess,
   onSignup,
 }: LoginProps) {
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const { event: log } = useAnalytics();
+  const theme = useControllerTheme();
+  const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = useCallback(
     async (values: FormValues) => {
-      setIsLoggingIn(true);
+      setIsLoading(true);
 
       const {
         account: {
@@ -48,41 +38,22 @@ export function Login({
         },
       } = await fetchAccount(values.username);
 
-      try {
-        log({ type: "webauthn_login", address });
+      log({ type: "webauthn_login", address });
 
-        const { data: beginLoginData } = await beginLogin(values.username);
-        const signer = new WebauthnSigner(credentialId, publicKey);
-        const assertion = await signer.sign(
-          base64url.toBuffer(beginLoginData.beginLogin.publicKey.challenge),
-        );
-
-        const res = await onLoginFinalize(assertion);
-        if (!res.finalizeLogin) {
-          throw Error("login failed");
-        }
-
-        const controller = new Controller(address, publicKey, credentialId);
-
-        if (onController) {
-          await onController(controller);
-        }
-
-        if (onComplete) {
-          onComplete();
-        }
-      } catch (err) {
-        setIsLoggingIn(false);
-        log({
-          type: "webauthn_login_error",
-          payload: {
-            error: err?.message,
-          },
-          address,
-        });
-      }
+      doLogin(values.username, credentialId, publicKey)
+        .then(() => onSuccess(new Controller(address, publicKey, credentialId)))
+        .catch((e) =>
+          log({
+            type: "webauthn_login_error",
+            payload: {
+              error: e?.message,
+            },
+            address,
+          }),
+        )
+        .finally(() => setIsLoading(false));
     },
-    [log, onComplete, onController],
+    [log, onSuccess],
   );
 
   return (
@@ -93,79 +64,77 @@ export function Login({
         validateOnChange={false}
         validateOnBlur={false}
       >
-        <Form
-          context={context}
-          isSlot={isSlot}
-          onSignup={onSignup}
-          isLoggingIn={isLoggingIn}
-        />
+        {(props) => (
+          <FormikForm style={{ width: "100%" }}>
+            <PortalBanner
+              title={
+                theme.id === "cartridge"
+                  ? "Play with Cartridge Controller"
+                  : `Play ${theme.name}`
+              }
+              description="Enter your Controller username"
+            />
+
+            <VStack align="stretch">
+              <FormikField
+                name="username"
+                placeholder="Username"
+                validate={validateUsernameFor("login")}
+              >
+                {({ field, meta }) => (
+                  <Field
+                    {...field}
+                    autoFocus
+                    placeholder="Username"
+                    touched={meta.touched}
+                    error={meta.error}
+                    container={{ mb: 6 }}
+                    isLoading={props.isValidating}
+                    isDisabled={isLoading}
+                  />
+                )}
+              </FormikField>
+            </VStack>
+
+            <PortalFooter
+              origin={context?.origin}
+              policies={context?.policies}
+              isSlot={isSlot}
+            >
+              <Button
+                type="submit"
+                colorScheme="colorful"
+                isLoading={isLoading}
+                onClick={async (ev) => {
+                  // Storage request must be done in onClick rather than onSubmit
+                  document.requestStorageAccess().catch((e) => {
+                    console.error(e);
+                    PopupCenter(
+                      `/authenticate?name=${encodeURIComponent(
+                        props.values.username,
+                      )}&action=login`,
+                      "Cartridge Login",
+                      480,
+                      640,
+                    );
+
+                    // Prevent onsubmit from firing
+                    ev.preventDefault();
+                  });
+                }}
+              >
+                Log in
+              </Button>
+              <RegistrationLink
+                description="Need a controller?"
+                onClick={() => onSignup(props.values.username)}
+              >
+                Sign up
+              </RegistrationLink>
+            </PortalFooter>
+          </FormikForm>
+        )}
       </Formik>
     </Container>
-  );
-}
-
-function Form({
-  context,
-  isSlot,
-  onSignup: onSignupProp,
-  isLoggingIn,
-}: Pick<LoginProps, "context" | "isSlot" | "onSignup"> & {
-  isLoggingIn: boolean;
-}) {
-  const theme = useControllerTheme();
-  const { values, isValidating } = useFormikContext<FormValues>();
-
-  const onClearUsername = useClearField("username");
-
-  const onSignup = useCallback(() => {
-    onSignupProp(values.username);
-  }, [onSignupProp, values]);
-
-  return (
-    <FormikForm style={{ width: "100%" }}>
-      <PortalBanner
-        title={theme.id === "cartridge" ? "Play with Cartridge Controller" : `Play ${theme.name}`}
-        description="Enter your Controller username"
-      />
-
-      <VStack align="stretch">
-        <FormikField
-          name="username"
-          placeholder="Username"
-          validate={validateUsernameFor("login")}
-        >
-          {({ field, meta }) => (
-            <Field
-              {...field}
-              autoFocus
-              placeholder="Username"
-              touched={meta.touched}
-              error={meta.error}
-              onClear={onClearUsername}
-              container={{ mb: 6 }}
-              isLoading={isValidating}
-            />
-          )}
-        </FormikField>
-      </VStack>
-
-      <PortalFooter
-        origin={context?.origin}
-        policies={context?.policies}
-        isSlot={isSlot}
-      >
-        <Button
-          type="submit"
-          colorScheme="colorful"
-          isLoading={isLoggingIn}
-          spinner={<Loading color="solid.primary" />}
-        >
-          log in
-        </Button>
-        <RegistrationLink description="Need a controller?" onClick={onSignup}>
-          Sign up
-        </RegistrationLink>
-      </PortalFooter>
-    </FormikForm>
   );
 }

@@ -5,7 +5,6 @@ import { useController } from "hooks/controller";
 
 const Signup: NextPage = () => {
   const router = useRouter();
-  const { sp: starterPackId } = router.query as { sp: string };
   const [controller] = useController();
 
   if (controller) {
@@ -14,9 +13,8 @@ const Signup: NextPage = () => {
 
   return (
     <SignupComponent
-      starterPackId={starterPackId}
       onLogin={() => router.push({ pathname: "/login", query: router.query })}
-      onComplete={() => {
+      onSuccess={() => {
         router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);
       }}
     />

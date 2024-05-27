@@ -1,7 +1,7 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { Button } from "@chakra-ui/react";
 import { Unsupported } from "./Unsupported";
-import { Credentials, onCreateBegin, onCreateFinalize } from "hooks/account";
+import { doSignup } from "hooks/account";
 import {
   FaceIDDuoIcon,
   FingerprintDuoIcon,
@@ -10,14 +10,19 @@ import {
 import { Container } from "../Container";
 import { PortalBanner } from "components/PortalBanner";
 import { PortalFooter } from "components/PortalFooter";
-import { dropCookie } from "./utils";
+import { requestStorageDropCookie } from "./utils";
 
+type UserAgent = "ios" | "android" | "other";
+type AuthAction = "signup" | "login";
+``;
 export function Authenticate({
   name,
-  onComplete,
+  action,
+  onSuccess,
 }: {
   name: string;
-  onComplete: () => void;
+  action: AuthAction;
+  onSuccess: () => void;
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [userAgent, setUserAgent] = useState<UserAgent>("other");
@@ -25,23 +30,27 @@ export function Authenticate({
 
   const onAuth = useCallback(async () => {
     setIsLoading(true);
+
+    await requestStorageDropCookie();
+
     try {
-      await dropCookie();
+      switch (action) {
+        case "signup":
+          await doSignup(decodeURIComponent(name));
+          break;
+        case "login":
+          break;
+        default:
+          throw new Error(`Unsupported action ${action}`);
+      }
 
-      const credentials: Credentials = await onCreateBegin(
-        decodeURIComponent(name),
-      );
-      await onCreateFinalize(credentials);
-
-      setTimeout(() => {
-        onComplete();
-      }, 2000);
+      onSuccess();
     } catch (e) {
       console.error(e);
       setIsLoading(false);
       throw e;
     }
-  }, [onComplete, name]);
+  }, [onSuccess, action, name]);
 
   useEffect(() => {
     const userAgent = window.navigator.userAgent;
@@ -73,23 +82,25 @@ export function Authenticate({
     return <Unsupported message={unsupportedMessage} />;
   }
 
+  const title =
+    action === "signup" ? "Authenticate Yourself" : "Hello from Cartridge!";
+  const description =
+    action === "signup" ? (
+      <>
+        You will now be asked to authenticate yourself.
+        <br />
+        Note: this experience varies from browser to browser.
+      </>
+    ) : (
+      <>Please click continue.</>
+    );
   return (
     <>
       <Container hideAccount>
         <PortalBanner
-          Icon={Icon}
-          title={isLoading ? "Creating Your Account" : "Authenticate Yourself"}
-          description={
-            isLoading ? (
-              <>This window will close automatically</>
-            ) : (
-              <>
-                You will now be asked to authenticate yourself.
-                <br />
-                Note: this experience varies from browser to browser.
-              </>
-            )
-          }
+          Icon={action === "signup" && Icon}
+          title={title}
+          description={description}
         />
 
         <PortalFooter>
@@ -101,5 +112,3 @@ export function Authenticate({
     </>
   );
 }
-
-type UserAgent = "ios" | "android" | "other";
