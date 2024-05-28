@@ -2,7 +2,7 @@ import { Field } from "@cartridge/ui";
 import { VStack, Button } from "@chakra-ui/react";
 import { Container } from "../Container";
 import { Form as FormikForm, Field as FormikField, Formik } from "formik";
-import { PortalBanner, PortalFooter } from "components";
+import { PORTAL_FOOTER_MIN_HEIGHT, PortalBanner, PortalFooter } from "components";
 import { useCallback, useState } from "react";
 import Controller from "utils/controller";
 import { FormValues, LoginProps } from "./types";
@@ -12,6 +12,7 @@ import { RegistrationLink } from "./RegistrationLink";
 import { useControllerTheme } from "hooks/theme";
 import { PopupCenter } from "utils/url";
 import { doLogin } from "hooks/account";
+import { Error as ErrorComp } from "components/Error";
 
 export function Login({
   prefilledName = "",
@@ -24,40 +25,47 @@ export function Login({
   const { event: log } = useAnalytics();
   const theme = useControllerTheme();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState();
 
   const onSubmit = useCallback(
     async (values: FormValues) => {
       setIsLoading(true);
 
-      const {
-        account: {
-          credentials: {
-            webauthn: [{ id: credentialId, publicKey }],
-          },
-          contractAddress: address,
-        },
-      } = await fetchAccount(values.username);
-
-      log({ type: "webauthn_login", address });
-
-      doLogin(values.username, credentialId, publicKey)
-        .then(() => onSuccess(new Controller(address, publicKey, credentialId)))
-        .catch((e) =>
-          log({
-            type: "webauthn_login_error",
-            payload: {
-              error: e?.message,
+      let address;
+      try {
+        const {
+          account: {
+            credentials: {
+              webauthn: [{ id: credentialId, publicKey }],
             },
-            address,
-          }),
-        )
-        .finally(() => setIsLoading(false));
+            contractAddress,
+          },
+        } = await fetchAccount(values.username);
+        address = contractAddress;
+
+        await doLogin(values.username, credentialId, publicKey)
+        onSuccess(new Controller(address, publicKey, credentialId))
+
+        log({ type: "webauthn_login", address });
+      } catch (e) {
+        setError(e)
+
+        log({
+          type: "webauthn_login_error",
+          payload: {
+            error: e?.message,
+          },
+          address,
+        })
+      }
+
+      setIsLoading(false)
     },
     [log, onSuccess],
   );
 
   return (
-    <Container chainId={chainId}>
+    <Container chainId={chainId} overflowY="auto">
       <Formik
         initialValues={{ username: prefilledName }}
         onSubmit={onSubmit}
@@ -75,7 +83,7 @@ export function Login({
               description="Enter your Controller username"
             />
 
-            <VStack align="stretch">
+            <VStack align="stretch" pb={PORTAL_FOOTER_MIN_HEIGHT}>
               <FormikField
                 name="username"
                 placeholder="Username"
@@ -88,12 +96,13 @@ export function Login({
                     placeholder="Username"
                     touched={meta.touched}
                     error={meta.error}
-                    container={{ mb: 6 }}
                     isLoading={props.isValidating}
                     isDisabled={isLoading}
                   />
                 )}
               </FormikField>
+
+              <ErrorComp error={error} />
             </VStack>
 
             <PortalFooter

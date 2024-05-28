@@ -8,7 +8,7 @@ import {
   useFormikContext,
 } from "formik";
 import { constants } from "starknet";
-import { PortalBanner, PortalFooter } from "components";
+import { PORTAL_FOOTER_MIN_HEIGHT, PortalBanner, PortalFooter } from "components";
 import { useCallback, useEffect, useState } from "react";
 import { DeployAccountDocument, useAccountQuery } from "generated/graphql";
 import Controller from "utils/controller";
@@ -21,6 +21,7 @@ import { useClearField } from "./hooks";
 import { RegistrationLink } from "./RegistrationLink";
 import { doSignup } from "hooks/account";
 import { useControllerTheme } from "hooks/theme";
+import { Error as ErrorComp } from "components/Error";
 
 export function Signup({
   prefilledName = "",
@@ -31,6 +32,7 @@ export function Signup({
 }: SignupProps) {
   const [isRegistering, setIsRegistering] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState();
 
   const onSubmit = useCallback(async (values: FormValues) => {
     setIsLoading(true);
@@ -55,8 +57,7 @@ export function Signup({
 
     doSignup(decodeURIComponent(values.username))
       .catch((e) => {
-        console.error(e);
-        throw e;
+        setError(e)
       })
       .finally(() => setIsLoading(false));
   }, []);
@@ -78,6 +79,7 @@ export function Signup({
             setIsRegistering={setIsRegistering}
             context={context}
             isSlot={isSlot}
+            error={error}
           />
         </Formik>
       </Container>
@@ -93,10 +95,12 @@ function Form({
   onLogin: onLoginProp,
   onSuccess,
   setIsRegistering,
+  error,
 }: SignupProps & {
   isRegistering: boolean;
   isLoading: boolean;
   setIsRegistering: (val: boolean) => void;
+  error: Error;
 }) {
   const theme = useControllerTheme();
   const { values, isValidating } = useFormikContext<FormValues>();
@@ -174,7 +178,7 @@ function Form({
         description="Create your Cartridge Controller"
       />
 
-      <VStack align="stretch">
+      <VStack align="stretch" pb={PORTAL_FOOTER_MIN_HEIGHT}>
         <FormikField
           name="username"
           placeholder="Username"
@@ -188,11 +192,12 @@ function Form({
               touched={meta.touched}
               error={meta.error}
               onClear={onClearUsername}
-              container={{ mb: 6 }}
               isLoading={isValidating}
             />
           )}
         </FormikField>
+
+        <ErrorComp error={error} />
       </VStack>
 
       <PortalFooter
