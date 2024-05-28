@@ -15,6 +15,7 @@ import {
   waitForTransactionOptions,
   TransactionFinalityStatus,
   InvocationsDetails,
+  num,
 } from "starknet";
 import {
   AccountContractDocument,
@@ -176,8 +177,8 @@ class Account extends BaseAccount {
     transactionsDetail.nonce =
       transactionsDetail.nonce ?? (await this.getNonce("pending"));
     // FIXME: estimated max fee is always too low
-    //transactionsDetail.maxFee = num.toHex(transactionsDetail.maxFee);
-    transactionsDetail.maxFee = "0x38D7EA4C68000"; // 0.001 eth
+    transactionsDetail.maxFee = num.toHex(transactionsDetail.maxFee);
+    // transactionsDetail.maxFee = "0x38D7EA4C68000"; // 0.001 eth
 
     const res = await this.cartridge
       .execute(calls as Array<Call>, transactionsDetail, session)
