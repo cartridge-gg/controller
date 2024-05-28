@@ -1,20 +1,14 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Button } from "@chakra-ui/react";
 import { Unsupported } from "./Unsupported";
 import { doSignup } from "hooks/account";
-import {
-  FaceIDDuoIcon,
-  FingerprintDuoIcon,
-  QRCodeDuoIcon,
-} from "@cartridge/ui";
 import { Container } from "../Container";
 import { PortalBanner } from "components/PortalBanner";
 import { PortalFooter } from "components/PortalFooter";
 import { requestStorageDropCookie } from "./utils";
 
-type UserAgent = "ios" | "android" | "other";
 type AuthAction = "signup" | "login";
-``;
+
 export function Authenticate({
   name,
   action,
@@ -25,7 +19,6 @@ export function Authenticate({
   onSuccess: () => void;
 }) {
   const [isLoading, setIsLoading] = useState(false);
-  const [userAgent, setUserAgent] = useState<UserAgent>("other");
   const [unsupportedMessage, setUnsupportedMessage] = useState<string>();
 
   const onAuth = useCallback(async () => {
@@ -61,22 +54,8 @@ export function Authenticate({
           `iOS ${iosVersion[1]} does not support passkeys. Upgrade to iOS 16 to continue`,
         );
       }
-      setUserAgent("ios");
-    } else if (/android/i.test(userAgent)) {
-      setUserAgent("android");
     }
   }, []);
-
-  const Icon = useMemo(() => {
-    switch (userAgent) {
-      case "ios":
-        return FaceIDDuoIcon;
-      case "android":
-        return QRCodeDuoIcon;
-      case "other":
-        return FingerprintDuoIcon;
-    }
-  }, [userAgent]);
 
   if (unsupportedMessage) {
     return <Unsupported message={unsupportedMessage} />;
@@ -98,7 +77,6 @@ export function Authenticate({
     <>
       <Container hideAccount>
         <PortalBanner
-          Icon={action === "signup" && Icon}
           title={title}
           description={description}
         />
