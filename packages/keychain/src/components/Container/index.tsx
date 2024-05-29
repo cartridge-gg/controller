@@ -60,7 +60,7 @@ export function Container({
   );
 }
 
-export const FOOTER_HEIGHT = 40
+export const FOOTER_HEIGHT = 40;
 
 function Wrapper({ children }: React.PropsWithChildren) {
   return (

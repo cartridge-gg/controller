@@ -187,11 +187,18 @@ const Index: NextPage = () => {
                 }
 
                 if (!transactionsDetail.maxFee) {
-                  transactionsDetail.maxFee = (
-                    await account.estimateInvokeFee(calls, {
+                  try {
+                    const estFee = await account.estimateInvokeFee(calls, {
                       nonce: transactionsDetail.nonce,
-                    })
-                  ).suggestedMaxFee;
+                    });
+
+                    transactionsDetail.maxFee = estFee.suggestedMaxFee;
+                  } catch (e) {
+                    return Promise.resolve({
+                      code: ResponseCodes.NOT_ALLOWED,
+                      message: e.message,
+                    });
+                  }
                 }
 
                 if (
