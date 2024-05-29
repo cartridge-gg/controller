@@ -164,10 +164,10 @@ const Index: NextPage = () => {
                   : [transactions];
                 const policies = calls.map(
                   (txn) =>
-                  ({
-                    target: addAddressPadding(txn.contractAddress),
-                    method: txn.entrypoint,
-                  } as Policy),
+                    ({
+                      target: addAddressPadding(txn.contractAddress),
+                      method: txn.entrypoint,
+                    } as Policy),
                 );
 
                 const session = controller.session(origin, cId);
@@ -192,6 +192,8 @@ const Index: NextPage = () => {
                       nonce: transactionsDetail.nonce,
                     })
                   ).suggestedMaxFee;
+
+                  console.log("execute", { estFee: transactionsDetail.maxFee });
                 }
 
                 if (
