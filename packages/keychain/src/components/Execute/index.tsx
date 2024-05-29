@@ -57,7 +57,7 @@ export function Execute({
   const [ethApproved, setEthApproved] = useState<bigint>();
   const [lowEth, setLowEth] = useState<boolean>(false);
 
-  const account = controller.account(chainId);
+  const account = controller.account;
   const calls = useMemo(() => {
     return Array.isArray(transactions) ? transactions : [transactions];
   }, [transactions]);
@@ -163,7 +163,7 @@ export function Execute({
     return (
       <LowEth
         chainId={chainId}
-        address={controller.account(chainId).address}
+        address={controller.account.address}
         balance={format(ethBalance)}
       />
     );

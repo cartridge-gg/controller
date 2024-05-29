@@ -11,7 +11,6 @@ import {
   Center,
   useColorMode,
 } from "@chakra-ui/react";
-import { constants } from "starknet";
 import { ArrowLeftIcon, CartridgeColorIcon } from "@cartridge/ui";
 // import { NetworkButton } from "./NetworkButton";
 // import { EthBalance } from "./EthBalance";
@@ -20,7 +19,7 @@ import { useController } from "hooks/controller";
 import { useControllerTheme } from "hooks/theme";
 
 export type HeaderProps = {
-  chainId?: constants.StarknetChainId;
+  chainId?: string;
   onLogout?: () => void;
   onBack?: () => void;
   hideAccount?: boolean;
@@ -37,9 +36,11 @@ export function Header({
   const theme = useControllerTheme();
   const { colorMode } = useColorMode();
 
-  const cover = useMemo(() =>
-    typeof theme.cover === "string" ? theme.cover : theme.cover[colorMode]
-    , [theme, colorMode])
+  const cover = useMemo(
+    () =>
+      typeof theme.cover === "string" ? theme.cover : theme.cover[colorMode],
+    [theme, colorMode],
+  );
 
   if (!address || hideAccount) {
     return (
@@ -52,9 +53,27 @@ export function Header({
           bgPos="center"
           position="relative"
         >
-          <Center position="absolute" bottom={-ICON_OFFSET / 4} left={0} right={0}>
-            <Flex bg="darkGray.800" borderRadius="lg" h={`${ICON_SIZE}px`} w={`${ICON_SIZE}px`} justify="center" alignItems="center" borderWidth={4} borderColor={colorMode === "dark" ? "solid.bg" : "blueGray.100"}>
-              <Image src={theme.icon} boxSize={ICON_IMAGE_SIZE / 4} alt="Controller Icon" />
+          <Center
+            position="absolute"
+            bottom={-ICON_OFFSET / 4}
+            left={0}
+            right={0}
+          >
+            <Flex
+              bg="darkGray.800"
+              borderRadius="lg"
+              h={`${ICON_SIZE}px`}
+              w={`${ICON_SIZE}px`}
+              justify="center"
+              alignItems="center"
+              borderWidth={4}
+              borderColor={colorMode === "dark" ? "solid.bg" : "blueGray.100"}
+            >
+              <Image
+                src={theme.icon}
+                boxSize={ICON_IMAGE_SIZE / 4}
+                alt="Controller Icon"
+              />
             </Flex>
           </Center>
         </VStack>
@@ -73,11 +92,11 @@ export function Header({
             icon={<ArrowLeftIcon />}
             onClick={onBack}
           />
-        ) :
-          theme.id === "cartridge"
-            ? <CartridgeColorIcon boxSize={8} />
-            : <Image src={theme.icon} boxSize={8} alt="Controller Icon" />
-        }
+        ) : theme.id === "cartridge" ? (
+          <CartridgeColorIcon boxSize={8} />
+        ) : (
+          <Image src={theme.icon} boxSize={8} alt="Controller Icon" />
+        )}
 
         <Spacer />
 
@@ -120,7 +139,7 @@ function Container({
   );
 }
 
-export const BANNER_HEIGHT = 150
-export const ICON_IMAGE_SIZE = 64
-export const ICON_SIZE = 80
-export const ICON_OFFSET = 16
+export const BANNER_HEIGHT = 150;
+export const ICON_IMAGE_SIZE = 64;
+export const ICON_SIZE = 80;
+export const ICON_OFFSET = 16;

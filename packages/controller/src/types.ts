@@ -104,8 +104,8 @@ export interface Keychain {
     },
     sync?: boolean,
   ): Promise<ExecuteReply | Error>;
-  provision(address: string, credentialId: string): Promise<string>;
   register(
+    rpcUrl: string,
     username: string,
     credentialId: string,
     credential: { x: string; y: string },
@@ -152,6 +152,7 @@ export type ControllerOptions = {
   origin?: string;
   starterPackId?: string;
   chainId?: constants.StarknetChainId;
+  rpc?: string;
   theme?: string;
   colorMode?: ColorMode;
   config?: {

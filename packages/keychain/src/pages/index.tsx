@@ -22,7 +22,6 @@ import {
   TypedData,
 } from "starknet";
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
-import provision from "../methods/provision";
 import { register } from "../methods/register";
 import logout from "../methods/logout";
 import { revoke, session, sessions } from "../methods/sessions";
@@ -121,7 +120,7 @@ const Index: NextPage = () => {
         disconnect: normalize(
           validate(
             (controller: Controller, origin: string) => async () =>
-              controller.revoke(origin, chainId),
+              controller.revoke(origin),
           ),
         ),
         execute: normalize(
@@ -130,14 +129,9 @@ const Index: NextPage = () => {
               async (
                 transactions: Call | Call[],
                 abis?: Abi[],
-                transactionsDetail?: InvocationsDetails & {
-                  chainId?: constants.StarknetChainId;
-                },
+                transactionsDetail?: InvocationsDetails,
                 sync?: boolean,
               ): Promise<ExecuteReply | Error> => {
-                const cId = transactionsDetail?.chainId
-                  ? transactionsDetail.chainId
-                  : chainId;
                 if (sync) {
                   return await new Promise((resolve, reject) => {
                     setContext({
@@ -151,7 +145,7 @@ const Index: NextPage = () => {
                     } as Execute);
                   });
                 }
-                const account = controller.account(cId);
+                const account = controller.account;
                 if (account.status === Status.DEPLOYING) {
                   return Promise.resolve({
                     code: ResponseCodes.NOT_ALLOWED,
@@ -170,7 +164,7 @@ const Index: NextPage = () => {
                     } as Policy),
                 );
 
-                const session = controller.session(origin, cId);
+                const session = controller.session(origin);
                 if (!session) {
                   return Promise.resolve({
                     code: ResponseCodes.NOT_ALLOWED,
@@ -226,13 +220,12 @@ const Index: NextPage = () => {
         ),
         estimateDeclareFee: normalize(validate(estimateDeclareFee)),
         estimateInvokeFee: normalize(validate(estimateInvokeFee)),
-        provision: normalize(provision),
         register: normalize(register),
         logout: normalize(logout),
         probe: normalize(
           validate(
             (controller: Controller, origin: string) => (): ProbeReply => {
-              const session = controller.session(origin, chainId);
+              const session = controller.session(origin);
               return {
                 code: ResponseCodes.SUCCESS,
                 address: controller.address,
@@ -261,7 +254,7 @@ const Index: NextPage = () => {
         ),
         session: normalize(
           (origin: string) => async (): Promise<Session> =>
-            await new Promise(() => session(origin, chainId)),
+            await new Promise(() => session(origin)),
         ),
         sessions: normalize(sessions),
         reset: normalize(() => () => setContext(undefined)),
@@ -288,6 +281,8 @@ const Index: NextPage = () => {
       <>
         {showSignup ? (
           <Signup
+            chainId={chainId}
+            rpcUrl=""
             prefilledName={prefilledUsername}
             onLogin={(username) => {
               setPrefilledUsername(username);
@@ -298,6 +293,8 @@ const Index: NextPage = () => {
           />
         ) : (
           <Login
+            chainId={chainId}
+            rpcUrl=""
             prefilledName={prefilledUsername}
             onSignup={(username) => {
               setPrefilledUsername(username);
@@ -322,7 +319,7 @@ const Index: NextPage = () => {
 
   if (context.type === "connect") {
     const ctx = context as Connect;
-    const session = controller.session(context.origin, chainId);
+    const session = controller.session(context.origin);
 
     // if no mismatch with existing policies then return success
     if (session && diff(session.policies, ctx.policies).length === 0) {

@@ -11,7 +11,7 @@ import {
 import { motion } from "framer-motion";
 
 export function Error({ error }: { error?: Error }) {
-  if (!error) return null
+  if (!error) return null;
 
   return (
     <Accordion
@@ -35,16 +35,13 @@ export function Error({ error }: { error?: Error }) {
           <AccordionIcon boxSize={5} />
         </AccordionButton>
 
-        <AccordionPanel
-          borderTop="1px solid"
-          borderColor="translucent.soft"
-        >
+        <AccordionPanel borderTop="1px solid" borderColor="translucent.soft">
           <VStack align="flex-start">
             <Text color="inherit" fontWeight="bold">
               Error Details
             </Text>
 
-            <Text color="inherit">{error?.message}</Text>
+            <Text color="inherit">{error.message}</Text>
           </VStack>
         </AccordionPanel>
       </AccordionItem>

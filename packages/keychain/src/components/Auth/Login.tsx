@@ -21,6 +21,7 @@ import { Error as ErrorComp } from "components/Error";
 export function Login({
   prefilledName = "",
   chainId,
+  rpcUrl,
   context,
   isSlot,
   onSuccess,
@@ -48,7 +49,9 @@ export function Login({
         address = contractAddress;
 
         await doLogin(values.username, credentialId, publicKey);
-        onSuccess(new Controller(address, publicKey, credentialId));
+        onSuccess(
+          new Controller(chainId, rpcUrl, address, publicKey, credentialId),
+        );
 
         log({ type: "webauthn_login", address });
       } catch (e) {
@@ -65,7 +68,7 @@ export function Login({
 
       setIsLoading(false);
     },
-    [log, onSuccess],
+    [chainId, rpcUrl, log, onSuccess],
   );
 
   return (

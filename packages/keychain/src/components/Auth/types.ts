@@ -1,5 +1,4 @@
 import { Connect } from "pages";
-import { constants } from "starknet";
 import Controller from "utils/controller";
 
 export type FormValues = {
@@ -12,6 +11,8 @@ type AuthBaseProps = {
   prefilledName?: string;
   context?: Connect;
   isSlot?: boolean;
+  chainId: string;
+  rpcUrl: string;
   onSuccess: (controller: Controller) => void;
 };
 
@@ -20,6 +21,7 @@ export type SignupProps = AuthBaseProps & {
 };
 
 export type LoginProps = AuthBaseProps & {
-  chainId?: constants.StarknetChainId;
+  chainId: string;
+  rpcUrl: string;
   onSignup: (username: string) => void;
 };

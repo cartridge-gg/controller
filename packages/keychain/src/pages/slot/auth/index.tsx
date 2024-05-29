@@ -35,6 +35,8 @@ const Auth: NextPage = () => {
     <>
       {showSignup ? (
         <Signup
+          chainId=""
+          rpcUrl=""
           prefilledName={prefilledUsername}
           onLogin={(username) => {
             setPrefilledUsername(username);
@@ -45,6 +47,8 @@ const Auth: NextPage = () => {
         />
       ) : (
         <Login
+          chainId=""
+          rpcUrl=""
           prefilledName={prefilledUsername}
           onSignup={(username) => {
             setPrefilledUsername(username);

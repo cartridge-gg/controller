@@ -10,7 +10,6 @@ import {
   RpcProvider,
   TypedData,
   InvocationsDetails,
-  constants,
 } from "starknet";
 
 import { Keychain, ResponseCodes, Modal } from "./types";
@@ -81,9 +80,7 @@ class DeviceAccount extends Account {
   async execute(
     calls: Call | Call[],
     abis?: Abi[],
-    transactionsDetail?: InvocationsDetails & {
-      chainId?: constants.StarknetChainId;
-    },
+    transactionsDetail?: InvocationsDetails,
   ): Promise<InvokeFunctionResponse> {
     if (!transactionsDetail) {
       transactionsDetail = {};

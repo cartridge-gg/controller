@@ -5,10 +5,15 @@ import { Login as LoginComponent } from "components";
 
 const Login: NextPage = () => {
   const router = useRouter();
-  const { sp: starterPackId } = router.query as { sp: string };
+  const { sp: starterPackId, rpcUrl } = router.query as {
+    sp: string;
+    rpcUrl: string;
+  };
+
   return (
     <LoginComponent
       chainId={constants.StarknetChainId.SN_SEPOLIA}
+      rpcUrl={rpcUrl}
       onSignup={() => router.push({ pathname: "/signup", query: router.query })}
       onSuccess={async () => {
         if (starterPackId) {

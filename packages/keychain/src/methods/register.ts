@@ -1,5 +1,5 @@
 import { split } from "@cartridge/controller";
-import { ec, hash, shortString, stark } from "starknet";
+import { ec, hash, RpcProvider, shortString, stark } from "starknet";
 
 import Controller from "utils/controller";
 import { CLASS_HASHES, PROXY_CLASS } from "@cartridge/controller/src/constants";
@@ -7,6 +7,7 @@ import { CLASS_HASHES, PROXY_CLASS } from "@cartridge/controller/src/constants";
 const register =
   () =>
   async (
+    rpcUrl: string,
     username: string,
     credentialId: string,
     credential: { x: string; y: string },
@@ -22,7 +23,17 @@ const register =
       { y0, y1, y2 },
       deviceKey,
     );
-    const controller = new Controller(privateKey, address, credentialId);
+
+    const rpc = new RpcProvider({ nodeUrl: rpcUrl });
+    const chainId = await rpc.getChainId();
+
+    const controller = new Controller(
+      chainId,
+      rpcUrl,
+      privateKey,
+      address,
+      credentialId,
+    );
     controller.store();
 
     return { address, deviceKey };

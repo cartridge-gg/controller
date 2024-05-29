@@ -1,5 +1,4 @@
 import {
-  constants,
   Call,
   DeclareContractPayload,
   EstimateFee,
@@ -12,28 +11,20 @@ const estimateInvokeFee =
   (controller: Controller) =>
   async (
     transactions: Call | Call[],
-    details?: EstimateFeeDetails & {
-      chainId: constants.StarknetChainId;
-    },
+    details?: EstimateFeeDetails,
   ): Promise<EstimateFee> => {
     const calls = Array.isArray(transactions) ? transactions : [transactions];
     details.blockIdentifier ? details.blockIdentifier : "latest";
-    return await controller
-      .account(details.chainId)
-      .estimateInvokeFee(calls, details);
+    return await controller.account.estimateInvokeFee(calls, details);
   };
 
 const estimateDeclareFee =
   (controller: Controller) =>
   async (
     payload: DeclareContractPayload,
-    details?: EstimateFeeDetails & {
-      chainId: constants.StarknetChainId;
-    },
+    details?: EstimateFeeDetails,
   ): Promise<EstimateFee> => {
-    return await controller
-      .account(details.chainId)
-      .estimateDeclareFee(payload, details);
+    return await controller.account.estimateDeclareFee(payload, details);
   };
 
 export { estimateDeclareFee, estimateInvokeFee };

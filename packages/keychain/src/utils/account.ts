@@ -1,5 +1,4 @@
 import {
-  constants,
   Account as BaseAccount,
   RpcProvider,
   SignerInterface,
@@ -39,11 +38,11 @@ export enum Status {
 class Account extends BaseAccount {
   rpc: RpcProvider;
   private selector: string;
-  chainId: constants.StarknetChainId;
+  chainId: string;
   cartridge: CartridgeAccount;
 
   constructor(
-    chainId: constants.StarknetChainId,
+    chainId: string,
     nodeUrl: string,
     address: string,
     signer: SignerInterface,
