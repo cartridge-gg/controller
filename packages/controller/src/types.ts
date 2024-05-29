@@ -149,6 +149,7 @@ export type ControllerOptions = {
   origin?: string;
   starterPackId?: string;
   chainId?: constants.StarknetChainId;
+  rpc?: string;
   theme?: string;
   colorMode?: ColorMode;
   config?: {

@@ -42,7 +42,7 @@ export function CreateSession({
             onClick={async () => {
               setIsConnecting(true);
               await controller
-                .approve(origin, chainId, expiresAt, policies, maxFees)
+                .approve(origin, expiresAt, policies, maxFees)
                 .then(() => {
                   onConnect(policies);
                 })

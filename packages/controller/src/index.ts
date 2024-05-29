@@ -48,7 +48,7 @@ class Controller {
   private url: string = "https://x.cartridge.gg";
   public chainId: constants.StarknetChainId =
     constants.StarknetChainId.SN_SEPOLIA;
-  public accounts?: { [key: string]: AccountInterface };
+  public account?: AccountInterface;
   private modal?: Modal;
   // private starterPackId?: string;
 
@@ -108,14 +108,6 @@ class Controller {
       .then(() => this.probe());
   }
 
-  get account() {
-    if (!this.accounts) {
-      return;
-    }
-
-    return this.accounts[this.chainId];
-  }
-
   private setTheme(
     id: string = "cartridge",
     presets: ControllerThemePresets = defaultPresets,
@@ -157,34 +149,18 @@ class Controller {
       }
 
       const { address } = res as ProbeReply;
-      this.accounts = {
-        [constants.StarknetChainId.SN_MAIN]: new DeviceAccount(
-          providers[constants.StarknetChainId.SN_MAIN],
-          address,
-          this.keychain,
-          this.modal,
-        ) as AccountInterface, // Note: workaround for execute type mismatch error
-        [constants.StarknetChainId.SN_SEPOLIA]: new DeviceAccount(
-          providers[constants.StarknetChainId.SN_SEPOLIA],
-          address,
-          this.keychain,
-          this.modal,
-        ) as AccountInterface,
-      };
+      this.account = new DeviceAccount(
+        providers[this.chainId],
+        address,
+        this.keychain,
+        this.modal,
+      ) as AccountInterface;
     } catch (e) {
       console.error(e);
       return;
     }
 
-    return !!this.accounts?.[this.chainId];
-  }
-
-  async switchChain(chainId: constants.StarknetChainId) {
-    if (this.chainId === chainId) {
-      return;
-    }
-
-    this.chainId = chainId;
+    return !!this.account;
   }
 
   async login(
@@ -251,8 +227,8 @@ class Controller {
   }
 
   async connect() {
-    if (this.accounts) {
-      return this.accounts[this.chainId];
+    if (this.account) {
+      return this.account;
     }
 
     if (!this.keychain || !this.modal) {
@@ -280,22 +256,14 @@ class Controller {
       }
 
       response = response as ConnectReply;
-      this.accounts = {
-        [constants.StarknetChainId.SN_MAIN]: new DeviceAccount(
-          providers[constants.StarknetChainId.SN_MAIN],
-          response.address,
-          this.keychain,
-          this.modal,
-        ) as AccountInterface,
-        [constants.StarknetChainId.SN_SEPOLIA]: new DeviceAccount(
-          providers[constants.StarknetChainId.SN_SEPOLIA],
-          response.address,
-          this.keychain,
-          this.modal,
-        ) as AccountInterface,
-      };
+      this.account = new DeviceAccount(
+        providers[this.chainId],
+        response.address,
+        this.keychain,
+        this.modal,
+      ) as AccountInterface;
 
-      return this.accounts[this.chainId];
+      return this.account;
     } catch (e) {
       console.log(e);
     } finally {
@@ -316,7 +284,7 @@ class Controller {
       }
     }
 
-    this.accounts = undefined;
+    this.account = undefined;
     return this.keychain.disconnect();
   }
 

@@ -22,7 +22,7 @@ export function DeploymentRequired({
   onLogout: () => void;
   children: React.ReactNode;
 }) {
-  const account = controller.account(chainId);
+  const account = controller.account;
   const [status, setStatus] = useState<Status>(account.status);
   const [deployHash, setDeployHash] = useState<string>();
 

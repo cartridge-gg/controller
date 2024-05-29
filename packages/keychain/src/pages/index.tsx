@@ -56,7 +56,7 @@ function Home() {
   switch (context.type) {
     case "connect": {
       const ctx = context as ConnectCtx;
-      const session = controller.session(context.origin, chainId);
+      const session = controller.session(context.origin);
 
       // if no mismatch with existing policies then return success
       if (session && diff(session.policies, ctx.policies).length === 0) {

@@ -58,10 +58,10 @@ export function SignMessage({
   const hostname = useMemo(() => new URL(origin).hostname, [origin]);
 
   const onConfirm = useCallback(async () => {
-    const account = controller.account(chainId);
+    const account = controller.account;
     const sig = await account.signMessage(typedData);
     onSign(sig);
-  }, [chainId, controller, onSign, typedData]);
+  }, [controller, onSign, typedData]);
 
   return (
     <Container chainId={chainId} onLogout={onLogout}>

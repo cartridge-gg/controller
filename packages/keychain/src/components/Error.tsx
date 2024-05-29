@@ -41,7 +41,7 @@ export function Error({ error }: { error?: Error }) {
               Error Details
             </Text>
 
-            <Text color="inherit">{error?.message}</Text>
+            <Text color="inherit">{error.message}</Text>
           </VStack>
         </AccordionPanel>
       </AccordionItem>

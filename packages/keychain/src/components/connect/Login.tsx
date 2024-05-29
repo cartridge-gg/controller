@@ -18,10 +18,11 @@ import { doLogin } from "hooks/account";
 import { Error as ErrorComp } from "components/Error";
 
 export function Login({
-  prefilledName = "",
   chainId,
+  rpcUrl,
   origin,
   policies,
+  prefilledName = "",
   isSlot,
   onSuccess,
   onSignup,
@@ -47,6 +48,8 @@ export function Login({
 
       try {
         const controller = new Controller({
+          chainId,
+          rpcUrl,
           address,
           username: values.username,
           publicKey,
@@ -56,7 +59,7 @@ export function Login({
         if (isSlot) {
           await doLogin(values.username, credentialId, publicKey);
         } else {
-          await controller.approve(origin, chainId, expiresAt, policies);
+          await controller.approve(origin, expiresAt, policies);
         }
 
         controller.store();
@@ -77,7 +80,7 @@ export function Login({
 
       setIsLoading(false);
     },
-    [chainId, origin, policies, expiresAt, isSlot, log, onSuccess],
+    [chainId, rpcUrl, origin, policies, expiresAt, isSlot, log, onSuccess],
   );
 
   return (
