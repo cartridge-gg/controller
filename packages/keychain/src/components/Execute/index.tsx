@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Text, VStack, Spacer, Button } from "@chakra-ui/react";
+import { Text, VStack, Button } from "@chakra-ui/react";
 
 import Controller from "utils/controller";
 import {
@@ -14,8 +14,6 @@ import { formatEther } from "viem";
 import { ExecuteReply, ResponseCodes } from "@cartridge/controller";
 import { Container } from "../Container";
 import { Status } from "utils/account";
-import { LowEth, LowEthInfo } from "./LowEth";
-import { BridgeEth } from "../bridge/BridgeEth";
 import { PortalBanner } from "../PortalBanner";
 import { TransactionDuoIcon } from "@cartridge/ui";
 import { Call } from "./Call";
@@ -23,6 +21,7 @@ import {
   PORTAL_FOOTER_MIN_HEIGHT,
   PortalFooter,
 } from "components/PortalFooter";
+import LowEth from "./LowEth";
 
 export const CONTRACT_ETH =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
@@ -56,8 +55,7 @@ export function Execute({
   const [isLoading, setLoading] = useState<boolean>(false);
   const [ethBalance, setEthBalance] = useState<bigint>();
   const [ethApproved, setEthApproved] = useState<bigint>();
-  const [lowEthInfo, setLowEthInfo] = useState<LowEthInfo>();
-  const [bridging, setBridging] = useState<boolean>(false);
+  const [lowEth, setLowEth] = useState<boolean>(false);
 
   const account = controller.account(chainId);
   const calls = useMemo(() => {
@@ -146,25 +144,9 @@ export function Execute({
     }
 
     if (ethBalance < ethApproved) {
-      setLowEthInfo({
-        label: "Approved Eth",
-        balance: format(ethBalance),
-        max: format(ethApproved),
-        lowAmount: format((ethBalance - ethApproved) * -1n),
-        reject: onCancel,
-        onBridge: () => setBridging(true),
-      });
-    } else if (fees?.max && ethBalance < ethApproved + fees.max) {
-      setLowEthInfo({
-        label: "Network Fee",
-        balance: format(ethBalance),
-        max: format(ethApproved + fees.max),
-        lowAmount: format(ethBalance - (ethApproved + fees.max) * -1n),
-        reject: onCancel,
-        onBridge: () => setBridging(true),
-      });
+      setLowEth(true);
     }
-  }, [ethBalance, ethApproved, fees?.max, onCancel]);
+  }, [ethBalance, ethApproved]);
 
   const onSubmit = useCallback(async () => {
     setLoading(true);
@@ -177,15 +159,13 @@ export function Execute({
     });
   }, [account, calls, fees, onExecute]);
 
-  const onBack = useCallback(() => {
-    setBridging(false);
-  }, []);
-
-  if (bridging) {
+  if (lowEth) {
     return (
-      <Container chainId={chainId} onLogout={onLogout} onBack={onBack}>
-        <BridgeEth chainId={chainId} controller={controller} />
-      </Container>
+      <LowEth
+        chainId={chainId}
+        address={controller.account(chainId).address}
+        balance={format(ethBalance)}
+      />
     );
   }
 
@@ -193,7 +173,7 @@ export function Execute({
     <Container chainId={chainId} onLogout={onLogout}>
       <PortalBanner Icon={TransactionDuoIcon} title="Submit Transaction" />
 
-      <VStack w="full" pb={lowEthInfo ? undefined : PORTAL_FOOTER_MIN_HEIGHT}>
+      <VStack w="full" pb={lowEth ? undefined : PORTAL_FOOTER_MIN_HEIGHT}>
         <VStack spacing="1px" w="full" borderRadius="md" bg="solid.primary">
           <VStack w="full" p={3} align="flex-start">
             <Text fontSize="xs" fontWeight="bold" color="text.secondaryAccent">
@@ -216,35 +196,28 @@ export function Execute({
           </VStack>
         </VStack>
 
-        {lowEthInfo ? (
-          <>
-            <Spacer />
-            <LowEth {...lowEthInfo} />
-          </>
-        ) : (
-          <VStack w="full">
-            <Fees
-              error={error}
-              chainId={chainId}
-              fees={fees}
-              balance={ethBalance && format(ethBalance)}
-              approved={ethApproved && format(ethApproved)}
-            />
+        <VStack w="full">
+          <Fees
+            error={error}
+            chainId={chainId}
+            fees={fees}
+            balance={ethBalance && format(ethBalance)}
+            approved={ethApproved && format(ethApproved)}
+          />
 
-            <PortalFooter>
-              <Button
-                colorScheme="colorful"
-                onClick={onSubmit}
-                isLoading={isLoading}
-                isDisabled={!fees}
-              >
-                submit
-              </Button>
+          <PortalFooter>
+            <Button
+              colorScheme="colorful"
+              onClick={onSubmit}
+              isLoading={isLoading}
+              isDisabled={!fees}
+            >
+              submit
+            </Button>
 
-              <Button onClick={onCancel}>Cancel</Button>
-            </PortalFooter>
-          </VStack>
-        )}
+            <Button onClick={onCancel}>Cancel</Button>
+          </PortalFooter>
+        </VStack>
       </VStack>
     </Container>
   );

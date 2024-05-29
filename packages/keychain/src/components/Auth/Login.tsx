@@ -2,7 +2,11 @@ import { Field } from "@cartridge/ui";
 import { VStack, Button } from "@chakra-ui/react";
 import { Container } from "../Container";
 import { Form as FormikForm, Field as FormikField, Formik } from "formik";
-import { PORTAL_FOOTER_MIN_HEIGHT, PortalBanner, PortalFooter } from "components";
+import {
+  PORTAL_FOOTER_MIN_HEIGHT,
+  PortalBanner,
+  PortalFooter,
+} from "components";
 import { useCallback, useState } from "react";
 import Controller from "utils/controller";
 import { FormValues, LoginProps } from "./types";
@@ -43,12 +47,12 @@ export function Login({
         } = await fetchAccount(values.username);
         address = contractAddress;
 
-        await doLogin(values.username, credentialId, publicKey)
-        onSuccess(new Controller(address, publicKey, credentialId))
+        await doLogin(values.username, credentialId, publicKey);
+        onSuccess(new Controller(address, publicKey, credentialId));
 
         log({ type: "webauthn_login", address });
       } catch (e) {
-        setError(e)
+        setError(e);
 
         log({
           type: "webauthn_login_error",
@@ -56,10 +60,10 @@ export function Login({
             error: e?.message,
           },
           address,
-        })
+        });
       }
 
-      setIsLoading(false)
+      setIsLoading(false);
     },
     [log, onSuccess],
   );

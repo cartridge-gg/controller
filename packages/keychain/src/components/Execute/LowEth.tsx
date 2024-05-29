@@ -1,102 +1,96 @@
-import { Button, Circle, HStack, Spacer, Text, VStack } from "@chakra-ui/react";
-import { AlertIcon } from "@cartridge/ui";
+import { CopyIcon, EthereumIcon, StarknetIcon } from "@cartridge/ui";
+import { HStack, Spacer, Text, VStack } from "@chakra-ui/react";
+import { Container } from "components/Container";
+import { PortalBanner } from "components/PortalBanner";
+import { useState } from "react";
+import { BigNumberish, constants } from "starknet";
+import { formatAddress } from "utils/contracts";
 
-export interface LowEthInfo {
-  label: string;
-  balance: string;
-  max: string;
-  lowAmount: string;
-  reject: () => void;
-  onBridge: () => void;
-}
-
-export function LowEth({
-  label,
+const NewLowEth = ({
+  chainId,
+  address,
   balance,
-  max,
-  lowAmount,
-  reject,
-  onBridge,
-}: LowEthInfo) {
+}: {
+  chainId: constants.StarknetChainId;
+  address: BigNumberish;
+  balance: BigNumberish;
+}) => {
+  const [copied, setCopied] = useState(false);
   return (
-    <VStack
-      w="full"
-      spacing={4.5}
-      pt={4.5}
-      borderTop="1px solid"
-      borderTopColor="solid.accent"
-    >
-      <HStack w="full" borderRadius="md" bg="solid.primary" px={3} py={4.5}>
-        <HStack color="text.secondaryAccent" w="full">
-          <Text
-            color="text.secondaryAccent"
-            fontSize="xs"
-            fontWeight="bold"
-            textTransform="uppercase"
-          >
-            {label}
+    <Container chainId={chainId} hideAccount>
+      <PortalBanner
+        title="Insufficient Funds"
+        description="You'll need more gas to complete this transaction. Send some ETH to your controller address."
+      />
+
+      <VStack w="full">
+        <VStack w="full" align="flex-start" fontSize="14px">
+          <Text color="darkGray.400" fontSize="11px">
+            BALANCE
           </Text>
-        </HStack>
-
-        <Spacer />
-
-        <VStack w="full" align="end">
-          <Text color="text.error" fontSize="sm">{`~${lowAmount}`}</Text>
-          <HStack color="text.secondary" fontSize="xs">
-            <Text color="currentColor">{`Bal: ${balance}`}</Text>
-            <Text color="currentColor">{`Max: ${max}`}</Text>
+          <HStack
+            h="40px"
+            w="full"
+            borderRadius="4px"
+            overflow="hidden"
+            spacing="3px"
+          >
+            <HStack bgColor="darkGray.900" boxSize="full" flex="2" px="10px">
+              <EthereumIcon boxSize="24px" color="red.400" />{" "}
+              <Text color="red.400">{balance}</Text>
+            </HStack>
+            <HStack
+              bgColor="darkGray.900"
+              boxSize="full"
+              flex="1"
+              justify="center"
+            >
+              <StarknetIcon boxSize="24px" /> <Text>Sepolia</Text>
+            </HStack>
           </HStack>
         </VStack>
-      </HStack>
 
-      <VStack
-        w="full"
-        borderRadius="md"
-        px={4}
-        py={3}
-        bg="yellow.200"
-        align="start"
-      >
-        <HStack
-          w="full"
-          minH="42px"
-          borderBottom="1px solid"
-          borderBottomColor="solid.accent"
-        >
-          <Circle size={7} bg="yellow.300">
-            <AlertIcon color="yellow.800" />
-          </Circle>
-
-          <Text
-            fontSize="xs"
-            fontWeight="bold"
-            color="yellow.800"
-            letterSpacing="0.05em"
-            textTransform="uppercase"
-          >
-            Insufficient Funds
+        <VStack w="full" align="flex-start" fontSize="14px">
+          <Text color="darkGray.400" fontSize="11px">
+            ADDRESS
           </Text>
-        </HStack>
-
-        <Text fontSize="xs" color="yellow.800">
-          You do not have enough ETH to complete the above transaction
-        </Text>
-
-        <HStack w="full">
-          <Button
-            colorScheme="translucent"
-            color="black"
-            flex={1}
-            onClick={reject}
+          <HStack
+            h="40px"
+            w="full"
+            borderRadius="4px"
+            overflow="hidden"
+            spacing="3px"
           >
-            Reject
-          </Button>
-
-          <Button flex={1} onClick={onBridge}>
-            Add Funds
-          </Button>
-        </HStack>
+            <HStack
+              bgColor="darkGray.900"
+              boxSize="full"
+              flex="2"
+              px="10px"
+              cursor="pointer"
+              _hover={{
+                color: "darkGray.100",
+              }}
+              onClick={() => {
+                navigator.clipboard.writeText(address.toString());
+                setCopied(true);
+              }}
+            >
+              <Text color="inherit">{formatAddress(address)}</Text>
+              <Spacer />
+              <CopyIcon boxSize="24px" />
+            </HStack>
+          </HStack>
+          {copied && (
+            <HStack w="full" justify="center">
+              <Text color="darkGray.200" fontSize="12px">
+                COPIED
+              </Text>
+            </HStack>
+          )}
+        </VStack>
       </VStack>
-    </VStack>
+    </Container>
   );
-}
+};
+
+export default NewLowEth;
