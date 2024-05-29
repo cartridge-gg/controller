@@ -192,8 +192,6 @@ const Index: NextPage = () => {
                       nonce: transactionsDetail.nonce,
                     })
                   ).suggestedMaxFee;
-
-                  console.log("execute", { estFee: transactionsDetail.maxFee });
                 }
 
                 if (

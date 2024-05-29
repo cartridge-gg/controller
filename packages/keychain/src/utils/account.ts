@@ -28,6 +28,8 @@ import Storage from "./storage";
 import { CartridgeAccount } from "@cartridge/account-wasm";
 import { Session } from "@cartridge/controller";
 
+const EST_FEE_MULTIPLIER = 100n;
+
 export enum Status {
   COUNTERFACTUAL = "COUNTERFACTUAL",
   DEPLOYING = "DEPLOYING",
@@ -178,8 +180,6 @@ class Account extends BaseAccount {
       transactionsDetail.nonce ?? (await this.getNonce("pending"));
     transactionsDetail.maxFee = num.toHex(transactionsDetail.maxFee);
 
-    console.log("account", { estFee: transactionsDetail.maxFee });
-
     const res = await this.cartridge
       .execute(calls as Array<Call>, transactionsDetail, session)
       .catch((e) => {
@@ -217,7 +217,12 @@ class Account extends BaseAccount {
 
     details.nonce = details.nonce ?? (await super.getNonce("pending"));
 
-    return await super.estimateInvokeFee(calls, details);
+    let estFee = await super.estimateInvokeFee(calls, details);
+
+    // FIXME: temp fix for the sepolia fee estimation
+    estFee.suggestedMaxFee *= EST_FEE_MULTIPLIER;
+
+    return estFee;
   }
 
   async verifyMessageHash(

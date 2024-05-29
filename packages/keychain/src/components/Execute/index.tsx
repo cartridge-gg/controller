@@ -58,9 +58,6 @@ export function Execute({
   const [ethApproved, setEthApproved] = useState<bigint>();
   const [lowEthInfo, setLowEthInfo] = useState<LowEthInfo>();
   const [bridging, setBridging] = useState<boolean>(false);
-  // temporary boosting max fees
-  // @ts-expect-error there's no setter field for now
-  const [multiplier, setMultiplier] = useState(2n);
 
   const account = controller.account(chainId);
   const calls = useMemo(() => {
@@ -103,8 +100,8 @@ export function Execute({
 
     if (account.status === Status.DEPLOYED && transactionsDetail.maxFee) {
       setFees({
-        base: BigInt(transactionsDetail.maxFee) * multiplier,
-        max: BigInt(transactionsDetail.maxFee) * multiplier,
+        base: BigInt(transactionsDetail.maxFee),
+        max: BigInt(transactionsDetail.maxFee),
       });
       return;
     }
@@ -126,7 +123,7 @@ export function Execute({
     account
       .estimateInvokeFee(calls, transactionsDetail)
       .then((fees) => {
-        setFees({ base: fees.overall_fee * multiplier, max: fees.suggestedMaxFee * multiplier });
+        setFees({ base: fees.overall_fee, max: fees.suggestedMaxFee });
       })
       .catch((e) => {
         console.error(e);
@@ -141,7 +138,6 @@ export function Execute({
     calls,
     chainId,
     transactionsDetail,
-    multiplier
   ]);
 
   useEffect(() => {
