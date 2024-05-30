@@ -1,11 +1,12 @@
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
+import CartridgeConnector from "@cartridge/connector"
 
 export function ConnectWallet() {
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const { address } = useAccount();
 
-  const connector = connectors[0];
+  const connector = connectors[0] as unknown as CartridgeConnector;
 
   return (
     <>
@@ -18,6 +19,13 @@ export function ConnectWallet() {
         >
           {address ? "Disconnect" : "Connect"}
         </button>
+
+        {address && (
+          <div>
+            <div>username: {connector.username()}</div>
+            <div>address: {address}</div>
+          </div>
+        )}
       </div>
     </>
   );
