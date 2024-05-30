@@ -28,6 +28,16 @@ export const defaultPresets: ControllerThemePresets = {
       primary: "#B0CAF8",
     },
   },
+  pixelaw: {
+    id: "pixelaw",
+    name: "Pixelaw",
+    icon: "/whitelabel/pixelaw/icon.svg",
+    cover: "/whitelabel/pixelaw/cover.png",
+    colors: {
+      primary: "#7C00B1",
+      primaryForeground: "white",
+    },
+  },
   rollyourown: {
     id: "rollyourown",
     name: "Roll Your Own",

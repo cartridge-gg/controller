@@ -77,7 +77,7 @@ function getColorProps({ colorScheme }: StyleFunctionProps) {
   switch (colorScheme as ButtonColorScheme) {
     case "colorful":
       return {
-        color: "solid.bg",
+        color: "brand.primaryForeground",
         bg: "brand.primary",
         _hover: {
           opacity: 0.8,

@@ -177,6 +177,7 @@ export type ControllerThemePreset = Omit<ControllerTheme, "colorMode"> & {
 
 export type ControllerColors = {
   primary?: ControllerColor;
+  primaryForeground?: ControllerColor;
 };
 
 export type ControllerColor = ThemeValue<string>;
