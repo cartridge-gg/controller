@@ -14,7 +14,6 @@ import { useAnalytics } from "hooks/analytics";
 import { fetchAccount, validateUsernameFor } from "./utils";
 import { RegistrationLink } from "./RegistrationLink";
 import { useControllerTheme } from "hooks/theme";
-import { PopupCenter } from "utils/url";
 import { doLogin } from "hooks/account";
 import { Error as ErrorComp } from "components/Error";
 
@@ -29,26 +28,38 @@ export function Login({
   const { event: log } = useAnalytics();
   const theme = useControllerTheme();
   const [isLoading, setIsLoading] = useState(false);
+  const [expiresAt] = useState<bigint>(3000000000n);
   const [error, setError] = useState();
 
   const onSubmit = useCallback(
     async (values: FormValues) => {
       setIsLoading(true);
 
-      let address;
-      try {
-        const {
-          account: {
-            credentials: {
-              webauthn: [{ id: credentialId, publicKey }],
-            },
-            contractAddress,
+      const {
+        account: {
+          credentials: {
+            webauthn: [{ id: credentialId, publicKey }],
           },
-        } = await fetchAccount(values.username);
-        address = contractAddress;
+          contractAddress: address,
+        },
+      } = await fetchAccount(values.username);
 
-        await doLogin(values.username, credentialId, publicKey);
-        onSuccess(new Controller(address, publicKey, credentialId));
+      try {
+        const controller = new Controller(address, publicKey, credentialId);
+
+        if (isSlot) {
+          await doLogin(values.username, credentialId, publicKey);
+        } else {
+          await controller.approve(
+            context.origin,
+            chainId,
+            expiresAt,
+            context.policies,
+          );
+        }
+
+        controller.store();
+        onSuccess(controller);
 
         log({ type: "webauthn_login", address });
       } catch (e) {
@@ -118,23 +129,6 @@ export function Login({
                 type="submit"
                 colorScheme="colorful"
                 isLoading={isLoading}
-                onClick={async (ev) => {
-                  // Storage request must be done in onClick rather than onSubmit
-                  document.requestStorageAccess().catch((e) => {
-                    console.error(e);
-                    PopupCenter(
-                      `/authenticate?name=${encodeURIComponent(
-                        props.values.username,
-                      )}&action=login`,
-                      "Cartridge Login",
-                      480,
-                      640,
-                    );
-
-                    // Prevent onsubmit from firing
-                    ev.preventDefault();
-                  });
-                }}
               >
                 Log in
               </Button>

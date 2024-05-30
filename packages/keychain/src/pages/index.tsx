@@ -298,6 +298,7 @@ const Index: NextPage = () => {
           />
         ) : (
           <Login
+            chainId={chainId}
             prefilledName={prefilledUsername}
             onSignup={(username) => {
               setPrefilledUsername(username);

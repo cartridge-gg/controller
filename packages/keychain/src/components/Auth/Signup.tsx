@@ -8,7 +8,11 @@ import {
   useFormikContext,
 } from "formik";
 import { constants } from "starknet";
-import { PORTAL_FOOTER_MIN_HEIGHT, PortalBanner, PortalFooter } from "components";
+import {
+  PORTAL_FOOTER_MIN_HEIGHT,
+  PortalBanner,
+  PortalFooter,
+} from "components";
 import { useCallback, useEffect, useState } from "react";
 import { DeployAccountDocument, useAccountQuery } from "generated/graphql";
 import Controller from "utils/controller";
@@ -57,7 +61,7 @@ export function Signup({
 
     doSignup(decodeURIComponent(values.username))
       .catch((e) => {
-        setError(e)
+        setError(e);
       })
       .finally(() => setIsLoading(false));
   }, []);
@@ -138,6 +142,7 @@ function Form({
           chainId: "starknet:SN_SEPOLIA",
         });
         await controller.account(constants.StarknetChainId.SN_SEPOLIA).sync();
+        controller.store();
 
         // TODO: Enable once controller is ready for mainnet
         // controller.account(constants.StarknetChainId.SN_MAIN).status =
