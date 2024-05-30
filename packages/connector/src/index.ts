@@ -94,6 +94,10 @@ class ControllerConnector extends Connector {
   async showQuests(gameId: string): Promise<void> {
     return this.controller.showQuests(gameId);
   }
+
+  username() {
+    return this.controller.username();
+  }
 }
 
 export default ControllerConnector;

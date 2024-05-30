@@ -22,7 +22,12 @@ const register =
       { y0, y1, y2 },
       deviceKey,
     );
-    const controller = new Controller(privateKey, address, credentialId);
+    const controller = new Controller(
+      address,
+      username,
+      privateKey,
+      credentialId,
+    );
     controller.store();
 
     return { address, deviceKey };

@@ -17,17 +17,25 @@ type SerializedController = {
   publicKey: string;
   credentialId: string;
   address: string;
+  username: string;
 };
 
 export default class Controller {
   public address: string;
+  public username: string;
   public signer: SignerInterface;
   protected publicKey: string;
   protected credentialId: string;
   protected accounts: Account[];
 
-  constructor(address: string, publicKey: string, credentialId: string) {
+  constructor(
+    address: string,
+    username: string,
+    publicKey: string,
+    credentialId: string,
+  ) {
     this.address = address;
+    this.username = username;
     this.publicKey = publicKey;
     this.credentialId = credentialId;
     this.accounts = [
@@ -145,6 +153,7 @@ export default class Controller {
 
     return Storage.set(selectors[VERSION].account(this.address), {
       address: this.address,
+      username: this.username,
       publicKey: this.publicKey,
       credentialId: this.credentialId,
     });
@@ -166,13 +175,13 @@ export default class Controller {
       return;
     }
 
-    const { publicKey, credentialId, address } = controller;
+    const { publicKey, credentialId, address, username } = controller;
 
     if (version !== VERSION) {
       migrations[version][VERSION](address);
     }
 
-    return new Controller(address, publicKey, credentialId);
+    return new Controller(address, username, publicKey, credentialId);
   }
 }
 

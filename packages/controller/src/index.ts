@@ -28,6 +28,7 @@ import {
 } from "./types";
 import { createModal } from "./modal";
 import { defaultPresets } from "./presets";
+import { NotReadyToConnect } from "./errors";
 
 // @dev override url to local sequencer for local dev
 // http://localhost:8000/x/starknet/mainnet
@@ -140,7 +141,7 @@ class Controller {
 
   async probe() {
     if (!this.keychain || !this.modal) {
-      console.error("not ready for connect");
+      console.error(new NotReadyToConnect().message);
       return null;
     }
 
@@ -188,7 +189,7 @@ class Controller {
     credential: { x: string; y: string },
   ) {
     if (!this.keychain) {
-      console.error("not ready for connect");
+      console.error(new NotReadyToConnect().message);
       return null;
     }
 
@@ -204,7 +205,7 @@ class Controller {
     },
   ) {
     if (!this.keychain) {
-      console.error("not ready for connect");
+      console.error(new NotReadyToConnect().message);
       return null;
     }
 
@@ -213,7 +214,7 @@ class Controller {
 
   async provision(address: string, credentialId: string) {
     if (!this.keychain) {
-      console.error("not ready for connect");
+      console.error(new NotReadyToConnect().message);
       return null;
     }
 
@@ -222,8 +223,9 @@ class Controller {
 
   async issueStarterPack(id: string) {
     if (!this.keychain || !this.modal) {
-      console.error("not ready for connect");
-      return Promise.reject("not ready for connect");
+      const err = new NotReadyToConnect();
+      console.error(err.message);
+      return Promise.reject(err.message);
     }
 
     this.modal.open();
@@ -251,7 +253,7 @@ class Controller {
 
   async showQuests(gameId: string) {
     if (!this.keychain || !this.modal) {
-      console.error("not ready for connect");
+      console.error(new NotReadyToConnect().message);
       return;
     }
 
@@ -272,7 +274,7 @@ class Controller {
     }
 
     if (!this.keychain || !this.modal) {
-      console.error("not ready for connect");
+      console.error(new NotReadyToConnect().message);
       return;
     }
 
@@ -321,7 +323,7 @@ class Controller {
 
   async disconnect() {
     if (!this.keychain) {
-      console.error("not ready for disconnect");
+      console.error(new NotReadyToConnect().message);
       return;
     }
 
@@ -337,7 +339,7 @@ class Controller {
 
   revoke(origin: string, _policy: Policy[]) {
     if (!this.keychain) {
-      console.error("not ready for disconnect");
+      console.error(new NotReadyToConnect().message);
       return null;
     }
 
@@ -346,11 +348,20 @@ class Controller {
 
   async approvals(origin: string): Promise<Session | undefined> {
     if (!this.keychain) {
-      console.error("not ready for disconnect");
+      console.error(new NotReadyToConnect().message);
       return;
     }
 
     return this.keychain.approvals(origin);
+  }
+
+  username() {
+    if (!this.keychain) {
+      console.error(new NotReadyToConnect().message);
+      return;
+    }
+
+    return this.keychain.username();
   }
 }
 
