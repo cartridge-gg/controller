@@ -119,10 +119,10 @@ const Index: NextPage = () => {
             },
         ),
         disconnect: normalize(
-          validate(
-            (controller: Controller, origin: string) => async () =>
-              controller.revoke(origin, chainId),
-          ),
+          validate((controller: Controller, _origin: string) => () => {
+            controller.delete();
+            setController(undefined);
+          }),
         ),
         execute: normalize(
           validate(
