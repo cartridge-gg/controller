@@ -36,6 +36,7 @@ import {
 } from "components";
 import { useController } from "hooks/controller";
 import { Status } from "utils/account";
+import { username } from "methods/username";
 
 type Context = Connect | Logout | Execute | SignMessage;
 
@@ -261,6 +262,7 @@ const Index: NextPage = () => {
         ),
         sessions: normalize(sessions),
         reset: normalize(() => () => setContext(undefined)),
+        username: normalize(username)
       },
     });
 
