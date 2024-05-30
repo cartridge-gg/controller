@@ -5,7 +5,6 @@ import { doSignup } from "hooks/account";
 import { Container } from "../Container";
 import { PortalBanner } from "components/PortalBanner";
 import { PortalFooter } from "components/PortalFooter";
-import { requestStorageDropCookie } from "./utils";
 
 type AuthAction = "signup" | "login";
 
@@ -23,8 +22,6 @@ export function Authenticate({
 
   const onAuth = useCallback(async () => {
     setIsLoading(true);
-
-    await requestStorageDropCookie();
 
     try {
       switch (action) {
@@ -76,10 +73,7 @@ export function Authenticate({
   return (
     <>
       <Container hideAccount>
-        <PortalBanner
-          title={title}
-          description={description}
-        />
+        <PortalBanner title={title} description={description} />
 
         <PortalFooter>
           <Button colorScheme="colorful" onClick={onAuth} isLoading={isLoading}>

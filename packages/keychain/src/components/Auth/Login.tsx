@@ -14,7 +14,6 @@ import { useAnalytics } from "hooks/analytics";
 import { fetchAccount, validateUsernameFor } from "./utils";
 import { RegistrationLink } from "./RegistrationLink";
 import { useControllerTheme } from "hooks/theme";
-import { PopupCenter } from "utils/url";
 import { doLogin } from "hooks/account";
 import { Error as ErrorComp } from "components/Error";
 
@@ -130,23 +129,6 @@ export function Login({
                 type="submit"
                 colorScheme="colorful"
                 isLoading={isLoading}
-                onClick={async (ev) => {
-                  // Storage request must be done in onClick rather than onSubmit
-                  document.requestStorageAccess().catch((e) => {
-                    console.error(e);
-                    PopupCenter(
-                      `/authenticate?name=${encodeURIComponent(
-                        props.values.username,
-                      )}&action=login`,
-                      "Cartridge Login",
-                      480,
-                      640,
-                    );
-
-                    // Prevent onsubmit from firing
-                    ev.preventDefault();
-                  });
-                }}
               >
                 Log in
               </Button>
