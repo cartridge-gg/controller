@@ -11,8 +11,6 @@ const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
 });
 
-
-
 export default function Keychain({ Component, pageProps }: AppProps) {
   useGlobalInjection();
   return (
@@ -28,7 +26,10 @@ export default function Keychain({ Component, pageProps }: AppProps) {
         <meta property="twitter:creator" content="@cartridge_gg" />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="cartridge" />
-        <meta property="theme-color" content={CartridgeTheme.semanticTokens.colors.brand} />
+        <meta
+          property="theme-color"
+          content={CartridgeTheme.semanticTokens.colors.brand}
+        />
       </NextHead>
 
       <style jsx global>{`
@@ -64,7 +65,6 @@ function useGlobalInjection() {
     };
   }, []);
 }
-
 
 declare global {
   interface Window {

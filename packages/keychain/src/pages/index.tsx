@@ -163,10 +163,10 @@ const Index: NextPage = () => {
                   : [transactions];
                 const policies = calls.map(
                   (txn) =>
-                  ({
-                    target: addAddressPadding(txn.contractAddress),
-                    method: txn.entrypoint,
-                  } as Policy),
+                    ({
+                      target: addAddressPadding(txn.contractAddress),
+                      method: txn.entrypoint,
+                    } as Policy),
                 );
 
                 const session = controller.session(origin, cId);
@@ -262,7 +262,7 @@ const Index: NextPage = () => {
         ),
         sessions: normalize(sessions),
         reset: normalize(() => () => setContext(undefined)),
-        username: normalize(username)
+        username: normalize(username),
       },
     });
 

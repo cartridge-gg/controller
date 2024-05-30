@@ -11,7 +11,11 @@ import { Policy } from "@cartridge/controller";
 import { SessionDetails } from "./SessionDetails";
 import React, { useMemo } from "react";
 import { FOOTER_HEIGHT } from "components";
-import { BANNER_HEIGHT, ICON_OFFSET, ICON_SIZE } from "components/Container/Header";
+import {
+  BANNER_HEIGHT,
+  ICON_OFFSET,
+  ICON_SIZE,
+} from "components/Container/Header";
 import { motion } from "framer-motion";
 
 export function PortalFooter({
@@ -35,15 +39,19 @@ export function PortalFooter({
     [origin],
   );
 
-  const height = useMemo(() =>
-    isOpen
-      ? `${window.document.body.scrollHeight
-      - BANNER_HEIGHT
-      - FOOTER_HEIGHT
-      + ICON_SIZE / 2
-      - ICON_OFFSET}px`
-      : "auto",
-    [isOpen])
+  const height = useMemo(
+    () =>
+      isOpen
+        ? `${
+            window.document.body.scrollHeight -
+            BANNER_HEIGHT -
+            FOOTER_HEIGHT +
+            ICON_SIZE / 2 -
+            ICON_OFFSET
+          }px`
+        : "auto",
+    [isOpen],
+  );
 
   return (
     <VStack
@@ -90,8 +98,7 @@ export function PortalFooter({
             onClick={onToggle}
           />
         </Box>
-      )
-      }
+      )}
 
       <VStack
         pt={6}
@@ -114,7 +121,11 @@ export function PortalFooter({
         />
 
         {isOpen && hostname && policies && (
-          <SessionDetails hostname={hostname} policies={policies} isOpen={isOpen} />
+          <SessionDetails
+            hostname={hostname}
+            policies={policies}
+            isOpen={isOpen}
+          />
         )}
 
         {/* TODO: starter pack
@@ -148,8 +159,7 @@ export function PortalFooter({
       <VStack align="strech" w="full">
         {children}
       </VStack>
-
-    </VStack >
+    </VStack>
   );
 }
 

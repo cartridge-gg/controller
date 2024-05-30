@@ -1,7 +1,11 @@
 import { ChakraProvider, ColorMode } from "@chakra-ui/react";
 import { PropsWithChildren, useMemo } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { ControllerThemeProvider, useChakraTheme, useControllerThemePreset } from "hooks/theme";
+import {
+  ControllerThemeProvider,
+  useChakraTheme,
+  useControllerThemePreset,
+} from "hooks/theme";
 import { useRouter } from "next/router";
 
 export function Provider({ children }: PropsWithChildren) {
@@ -15,7 +19,7 @@ export function Provider({ children }: PropsWithChildren) {
       name: preset.name,
       icon: preset.icon,
       cover: preset.cover,
-      colorMode: (router.query.colorMode as ColorMode) ?? "dark"
+      colorMode: (router.query.colorMode as ColorMode) ?? "dark",
     }),
     [preset, router.query],
   );
@@ -28,7 +32,7 @@ export function Provider({ children }: PropsWithChildren) {
         </ControllerThemeProvider>
       </QueryClientProvider>
     </ChakraProvider>
-  )
+  );
 }
 
 const queryClient = new QueryClient({

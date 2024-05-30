@@ -133,7 +133,12 @@ function Form({
           },
         } = data;
 
-        const controller = new Controller({ address, username: values.username, publicKey, credentialId });
+        const controller = new Controller({
+          address,
+          username: values.username,
+          publicKey,
+          credentialId,
+        });
 
         controller.account(constants.StarknetChainId.SN_SEPOLIA).status =
           Status.DEPLOYING;
