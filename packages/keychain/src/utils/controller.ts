@@ -28,12 +28,17 @@ export default class Controller {
   protected credentialId: string;
   protected accounts: Account[];
 
-  constructor(
-    address: string,
-    username: string,
-    publicKey: string,
-    credentialId: string,
-  ) {
+  constructor({
+    address,
+    username,
+    publicKey,
+    credentialId,
+  }: {
+    address: string;
+    username: string;
+    publicKey: string;
+    credentialId: string;
+  }) {
     this.address = address;
     this.username = username;
     this.publicKey = publicKey;
@@ -181,7 +186,7 @@ export default class Controller {
       migrations[version][VERSION](address);
     }
 
-    return new Controller(address, username, publicKey, credentialId);
+    return new Controller({ address, username, publicKey, credentialId });
   }
 }
 
