@@ -104,12 +104,6 @@ export interface Keychain {
     },
     sync?: boolean,
   ): Promise<ExecuteReply | Error>;
-  provision(address: string, credentialId: string): Promise<string>;
-  register(
-    username: string,
-    credentialId: string,
-    credential: { x: string; y: string },
-  ): Promise<{ address: string; deviceKey: string } | Error>;
   login(
     address: string,
     credentialId: string,

@@ -22,8 +22,6 @@ import {
   TypedData,
 } from "starknet";
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
-import provision from "../methods/provision";
-import { register } from "../methods/register";
 import logout from "../methods/logout";
 import { revoke, session, sessions } from "../methods/sessions";
 import { normalize, validate } from "../methods";
@@ -164,10 +162,10 @@ const Index: NextPage = () => {
                   : [transactions];
                 const policies = calls.map(
                   (txn) =>
-                    ({
-                      target: addAddressPadding(txn.contractAddress),
-                      method: txn.entrypoint,
-                    } as Policy),
+                  ({
+                    target: addAddressPadding(txn.contractAddress),
+                    method: txn.entrypoint,
+                  } as Policy),
                 );
 
                 const session = controller.session(origin, cId);
@@ -226,8 +224,6 @@ const Index: NextPage = () => {
         ),
         estimateDeclareFee: normalize(validate(estimateDeclareFee)),
         estimateInvokeFee: normalize(validate(estimateInvokeFee)),
-        provision: normalize(provision),
-        register: normalize(register),
         logout: normalize(logout),
         probe: normalize(
           validate(

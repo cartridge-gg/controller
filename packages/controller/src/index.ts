@@ -182,20 +182,6 @@ class Controller {
     this.chainId = chainId;
   }
 
-  // Register a new device key.
-  async register(
-    username: string,
-    credentialId: string,
-    credential: { x: string; y: string },
-  ) {
-    if (!this.keychain) {
-      console.error(new NotReadyToConnect().message);
-      return null;
-    }
-
-    return await this.keychain.register(username, credentialId, credential);
-  }
-
   async login(
     address: string,
     credentialId: string,
@@ -210,15 +196,6 @@ class Controller {
     }
 
     return this.keychain.login(address, credentialId, options);
-  }
-
-  async provision(address: string, credentialId: string) {
-    if (!this.keychain) {
-      console.error(new NotReadyToConnect().message);
-      return null;
-    }
-
-    return this.keychain.provision(address, credentialId);
   }
 
   async issueStarterPack(id: string) {

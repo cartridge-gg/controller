@@ -40,14 +40,6 @@ class ControllerConnector extends Connector {
     return this.controller.ready();
   }
 
-  async register(
-    username: string,
-    credentialId: string,
-    credential: { x: string; y: string },
-  ) {
-    return this.controller.register(username, credentialId, credential);
-  }
-
   async login(
     address: string,
     credentialId: string,
@@ -57,10 +49,6 @@ class ControllerConnector extends Connector {
     },
   ): Promise<{ assertion: Assertion } | null> {
     return this.controller.login(address, credentialId, options);
-  }
-
-  async provision(address: string, credentialId: string) {
-    return this.controller.provision(address, credentialId);
   }
 
   async connect() {
