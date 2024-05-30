@@ -163,10 +163,10 @@ const Index: NextPage = () => {
                   : [transactions];
                 const policies = calls.map(
                   (txn) =>
-                  ({
-                    target: addAddressPadding(txn.contractAddress),
-                    method: txn.entrypoint,
-                  } as Policy),
+                    ({
+                      target: addAddressPadding(txn.contractAddress),
+                      method: txn.entrypoint,
+                    } as Policy),
                 );
 
                 const session = controller.session(origin, cId);
@@ -211,15 +211,23 @@ const Index: NextPage = () => {
                   });
                 }
 
-                const res = await account.execute(
-                  calls,
-                  session,
-                  transactionsDetail,
-                );
-                return {
-                  code: ResponseCodes.SUCCESS,
-                  ...res,
-                };
+                try {
+                  const res = await account.execute(
+                    calls,
+                    session,
+                    transactionsDetail,
+                  );
+
+                  return {
+                    code: ResponseCodes.SUCCESS,
+                    ...res,
+                  };
+                } catch (e) {
+                  return {
+                    code: ResponseCodes.NOT_ALLOWED,
+                    message: e.message,
+                  };
+                }
               },
           ),
         ),
@@ -262,7 +270,7 @@ const Index: NextPage = () => {
         ),
         sessions: normalize(sessions),
         reset: normalize(() => () => setContext(undefined)),
-        username: normalize(username)
+        username: normalize(username),
       },
     });
 
