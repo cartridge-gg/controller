@@ -1,0 +1,44 @@
+[package]
+name = "account-sdk"
+edition = "2021"
+version = "0.1.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+crate-type = ["lib"]
+
+[dependencies]
+anyhow = "1"
+async-trait = "0.1"
+base64 = "0.21"
+cainome = { git = "https://github.com/piniom/cainome", rev = "beb1f1f5" }
+cairo-lang-starknet = "2.4.0"
+coset = { version = "0.3.4", features = ["std"] }
+ecdsa = "0.16.9"
+futures = "0.3"
+lazy_static = "1"
+p256 = "0.13"
+primitive-types = { version = "0.12", default-features = false }
+rand_core = { version = "0.6", features = ["getrandom"] }
+serde = "1"
+serde_json = "1"
+sha2 = "0.10"
+starknet = "0.10.0"
+starknet-crypto = "0.6.1"
+thiserror = "1"
+toml = "0.8"
+u256-literal = "1"
+url = "2"
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4.42"
+wasm-webauthn = { git = "https://github.com/broody/wasm-webauthn", rev = "972693fdeaa5dbcf7eee181c1e4aad5dfdb73a82" }
+tokio = { version = "1", features = ["macros", "time"] }
+web-sys = "0.3.69"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+tokio = { version = "1", features = ["macros", "time"] }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen-test = "0.3.34"
+js-sys = "0.3.69"
