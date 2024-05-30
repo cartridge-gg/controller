@@ -332,6 +332,7 @@ class Controller {
       }
     }
 
+    this.accounts = undefined;
     return this.keychain.disconnect();
   }
 
