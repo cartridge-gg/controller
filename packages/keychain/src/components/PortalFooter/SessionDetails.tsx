@@ -31,7 +31,10 @@ export function SessionDetails({
       alignItems="flex"
       as={motion.div}
       layoutScroll
-      animate={{ display: isOpen ? "flex" : "none", transition: { delay: 0.3 } }}
+      animate={{
+        display: isOpen ? "flex" : "none",
+        transition: { delay: 0.3 },
+      }}
       display="none"
     >
       <VStack

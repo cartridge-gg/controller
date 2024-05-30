@@ -7,20 +7,33 @@ import {
 import { CartridgeTheme } from "@cartridge/ui";
 import { useColorMode } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import { useContext, createContext, useMemo, PropsWithChildren, useEffect } from "react";
+import {
+  useContext,
+  createContext,
+  useMemo,
+  PropsWithChildren,
+  useEffect,
+} from "react";
 
 const ControllerThemeContext = createContext<ControllerThemeContext>(undefined);
 
 type ControllerThemeContext = ControllerTheme;
 
-export function ControllerThemeProvider({ value, children }: { value: ControllerThemeContext } & PropsWithChildren) {
+export function ControllerThemeProvider({
+  value,
+  children,
+}: { value: ControllerThemeContext } & PropsWithChildren) {
   const { setColorMode } = useColorMode();
 
   useEffect(() => {
-    setColorMode(value.colorMode)
+    setColorMode(value.colorMode);
   }, [setColorMode, value.colorMode]);
 
-  return <ControllerThemeContext.Provider value={value}>{children}</ControllerThemeContext.Provider>;
+  return (
+    <ControllerThemeContext.Provider value={value}>
+      {children}
+    </ControllerThemeContext.Provider>
+  );
 }
 
 export function useControllerTheme() {
@@ -53,8 +66,7 @@ export function useControllerThemePreset() {
 
 export function useChakraTheme(preset: ControllerThemePreset) {
   return useMemo(
-    () =>
-    ({
+    () => ({
       ...CartridgeTheme,
       semanticTokens: {
         ...CartridgeTheme.semanticTokens,

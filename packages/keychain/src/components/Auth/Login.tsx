@@ -45,7 +45,12 @@ export function Login({
       } = await fetchAccount(values.username);
 
       try {
-        const controller = new Controller({ address, username: values.username, publicKey, credentialId });
+        const controller = new Controller({
+          address,
+          username: values.username,
+          publicKey,
+          credentialId,
+        });
 
         if (isSlot) {
           await doLogin(values.username, credentialId, publicKey);
@@ -76,7 +81,7 @@ export function Login({
 
       setIsLoading(false);
     },
-    [log, onSuccess],
+    [chainId, context, expiresAt, isSlot, log, onSuccess],
   );
 
   return (
