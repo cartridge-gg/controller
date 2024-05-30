@@ -58,13 +58,6 @@ export default class Controller {
         },
       ),
     ];
-
-    Storage.set(
-      selectors[VERSION].admin(this.address, process.env.NEXT_PUBLIC_ADMIN_URL),
-      {},
-    );
-    Storage.set(selectors["0.0.1"].active(), address);
-    this.store();
   }
 
   async getUser() {
@@ -105,11 +98,10 @@ export default class Controller {
       throw new Error("Account not found");
     }
 
-    const credentials = await account.cartridge
-      .createSession(policies, expiresAt)
-      .catch((e) => {
-        console.log(e);
-      });
+    const credentials = await account.cartridge.createSession(
+      policies,
+      expiresAt,
+    );
 
     Storage.set(selectors[VERSION].session(this.address, origin, chainId), {
       policies,
@@ -144,6 +136,13 @@ export default class Controller {
 
   store() {
     Storage.set("version", VERSION);
+
+    Storage.set(
+      selectors[VERSION].admin(this.address, process.env.NEXT_PUBLIC_ADMIN_URL),
+      {},
+    );
+    Storage.set(selectors[VERSION].active(), this.address);
+
     return Storage.set(selectors[VERSION].account(this.address), {
       address: this.address,
       publicKey: this.publicKey,

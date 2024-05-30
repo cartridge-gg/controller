@@ -29,26 +29,38 @@ export function Login({
   const { event: log } = useAnalytics();
   const theme = useControllerTheme();
   const [isLoading, setIsLoading] = useState(false);
+  const [expiresAt] = useState<bigint>(3000000000n);
   const [error, setError] = useState();
 
   const onSubmit = useCallback(
     async (values: FormValues) => {
       setIsLoading(true);
 
-      let address;
-      try {
-        const {
-          account: {
-            credentials: {
-              webauthn: [{ id: credentialId, publicKey }],
-            },
-            contractAddress,
+      const {
+        account: {
+          credentials: {
+            webauthn: [{ id: credentialId, publicKey }],
           },
-        } = await fetchAccount(values.username);
-        address = contractAddress;
+          contractAddress: address,
+        },
+      } = await fetchAccount(values.username);
 
-        await doLogin(values.username, credentialId, publicKey);
-        onSuccess(new Controller(address, publicKey, credentialId));
+      try {
+        const controller = new Controller(address, publicKey, credentialId);
+
+        if (isSlot) {
+          await doLogin(values.username, credentialId, publicKey);
+        } else {
+          await controller.approve(
+            context.origin,
+            chainId,
+            expiresAt,
+            context.policies,
+          );
+        }
+
+        controller.store();
+        onSuccess(controller);
 
         log({ type: "webauthn_login", address });
       } catch (e) {
