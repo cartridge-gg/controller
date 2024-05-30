@@ -28,7 +28,7 @@ import Storage from "./storage";
 import { CartridgeAccount } from "@cartridge/account-wasm";
 import { Session } from "@cartridge/controller";
 
-const EST_FEE_MULTIPLIER = 100n;
+const EST_FEE_MULTIPLIER = 2n;
 
 export enum Status {
   COUNTERFACTUAL = "COUNTERFACTUAL",
