@@ -12,3 +12,11 @@ export class MissingPolicys extends Error {
     Object.setPrototypeOf(this, MissingPolicys.prototype);
   }
 }
+
+export class NotReadyToConnect extends Error {
+  constructor() {
+    super("Not ready to connect");
+
+    Object.setPrototypeOf(this, NotReadyToConnect.prototype);
+  }
+}
