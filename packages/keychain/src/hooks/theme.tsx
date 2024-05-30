@@ -65,6 +65,9 @@ export function useChakraTheme(preset: ControllerThemePreset) {
             primary:
               toThemeColor(preset?.colors?.primary) ??
               CartridgeTheme.semanticTokens.colors.brand.primary,
+            primaryForeground:
+              toThemeColor(preset?.colors?.primaryForeground) ??
+              CartridgeTheme.semanticTokens.colors.solid.bg,
           },
         },
       },

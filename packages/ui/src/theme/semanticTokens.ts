@@ -61,6 +61,10 @@ export const semanticTokens = {
         default: "darkGray.700",
         _light: "blueGray.200",
       },
+      primaryForeground: {
+        default: "darkGray.800",
+        _light: "blueGray.100",
+      },
       secondary: {
         default: "darkGray.600",
         _light: "blueGray.300",
