@@ -11,7 +11,7 @@ import { motion } from "framer-motion";
 import { ReactNode } from "react";
 import { Header, HeaderProps } from "./Header";
 import { constants } from "starknet";
-import { CartridgeIcon } from "@cartridge/ui";
+import { CartridgeLogo } from "@cartridge/ui";
 
 export function Container({
   children,
@@ -50,14 +50,16 @@ export function Container({
         color="text.secondary"
         alignItems="center"
         justify="center"
-        minH={FOOTER_HEIGHT / 4}
+        h={FOOTER_HEIGHT / 4}
         bottom={0}
         position={["fixed", "fixed", "absolute"]}
+        gap={1}
       >
-        <CartridgeIcon fontSize="sm" />
         <Text fontSize="xs" color="currentColor">
-          Controller by Cartridge
+          Controller by
         </Text>
+
+        <CartridgeLogo fontSize={100} color="text.secondary" />
       </HStack>
     </Wrapper >
   );
