@@ -1,5 +1,4 @@
 import Controller from "utils/controller";
-import { PlugActiveDuoIcon } from "@cartridge/ui";
 import { Button, Text } from "@chakra-ui/react";
 import { Container, PortalBanner, PortalFooter } from "components";
 import { NextPage } from "next";
@@ -32,7 +31,6 @@ const Consent: NextPage = () => {
   return (
     <Container hideAccount>
       <PortalBanner
-        Icon={PlugActiveDuoIcon}
         title="Requesting Permission"
         description={
           <>

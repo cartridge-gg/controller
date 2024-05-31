@@ -41,6 +41,7 @@ export type Session = {
 export type Policy = {
   target: string;
   method?: string;
+  description?: string;
 };
 
 export enum ResponseCodes {
