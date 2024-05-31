@@ -1,6 +1,5 @@
-import type { NextPage } from "next";
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { connectToParent } from "@cartridge/penpal";
 import Controller, { diff } from "utils/controller";
 import {
@@ -76,10 +75,12 @@ type SignMessage = {
   reject: (reason?: unknown) => void;
 };
 
-const Index: NextPage = () => {
-  const [chainId, setChainId] = useState<constants.StarknetChainId>(
-    constants.StarknetChainId.SN_SEPOLIA,
-  );
+interface IndexProps {
+  chainId: string | null;
+  rpcUrl: string | null;
+}
+
+const Index: FC<IndexProps> = ({ chainId, rpcUrl }) => {
   const [controller, setController] = useController();
   const [context, setContext] = useState<Context>();
   const [showSignup, setShowSignup] = useState(false);
@@ -99,14 +100,8 @@ const Index: NextPage = () => {
       methods: {
         connect: normalize(
           (origin: string) =>
-            async (
-              policies: Policy[],
-              chainId?: constants.StarknetChainId,
-            ): Promise<ConnectReply> => {
+            async (policies: Policy[]): Promise<ConnectReply> => {
               return await new Promise((resolve, reject) => {
-                if (chainId) {
-                  setChainId(chainId);
-                }
                 setContext({
                   type: "connect",
                   origin,
@@ -289,8 +284,8 @@ const Index: NextPage = () => {
       <>
         {showSignup ? (
           <Signup
+            rpcUrl={rpcUrl}
             chainId={chainId}
-            rpcUrl=""
             prefilledName={prefilledUsername}
             onLogin={(username) => {
               setPrefilledUsername(username);
@@ -301,8 +296,8 @@ const Index: NextPage = () => {
           />
         ) : (
           <Login
+            rpcUrl={rpcUrl}
             chainId={chainId}
-            rpcUrl=""
             prefilledName={prefilledUsername}
             onSignup={(username) => {
               setPrefilledUsername(username);

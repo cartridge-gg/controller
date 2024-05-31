@@ -2,12 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Text, VStack, Button } from "@chakra-ui/react";
 
 import Controller from "utils/controller";
-import {
-  // Abi,
-  constants,
-  Call as StarknetCall,
-  InvocationsDetails,
-} from "starknet";
+import { Call as StarknetCall, InvocationsDetails } from "starknet";
 import { Fees } from "./Fees";
 import { formatEther } from "viem";
 import { ExecuteReply, ResponseCodes } from "@cartridge/controller";
@@ -37,7 +32,7 @@ export function Execute({
   onLogout,
 }: {
   // origin: string;
-  chainId: constants.StarknetChainId;
+  chainId: string;
   controller: Controller;
   transactions: StarknetCall | StarknetCall[];
   transactionsDetail?: InvocationsDetails;

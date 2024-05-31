@@ -1,5 +1,5 @@
 import { Container, PortalBanner, PortalFooter } from "components";
-import { BigNumberish, constants } from "starknet";
+import { BigNumberish } from "starknet";
 import { Policy } from "@cartridge/controller";
 import { PlugNewDuoIcon } from "@cartridge/ui";
 import { Button } from "@chakra-ui/react";
@@ -14,7 +14,7 @@ export function Connect({
   onCancel,
   onLogout,
 }: {
-  chainId: constants.StarknetChainId;
+  chainId: string;
   policies: Policy[];
   origin: string;
   onConnect: (policies: Policy[]) => void;

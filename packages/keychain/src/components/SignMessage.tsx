@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button, Flex, Text } from "@chakra-ui/react";
-import { shortString, constants, Signature, TypedData } from "starknet";
+import { shortString, Signature, TypedData } from "starknet";
 import { Container } from "./Container";
 import { PortalBanner } from "./PortalBanner";
 import Controller from "utils/controller";
@@ -19,7 +19,7 @@ export function SignMessage({
   controller: Controller;
   origin: string;
   typedData: TypedData;
-  chainId: constants.StarknetChainId;
+  chainId: string;
   onSign: (sig: Signature) => void;
   onCancel: () => void;
   onLogout: () => void;
