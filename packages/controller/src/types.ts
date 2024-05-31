@@ -41,6 +41,7 @@ export type Session = {
 export type Policy = {
   target: string;
   method?: string;
+  description?: string;
 };
 
 export enum ResponseCodes {
@@ -104,12 +105,6 @@ export interface Keychain {
     },
     sync?: boolean,
   ): Promise<ExecuteReply | Error>;
-  register(
-    rpcUrl: string,
-    username: string,
-    credentialId: string,
-    credential: { x: string; y: string },
-  ): Promise<{ address: string; deviceKey: string } | Error>;
   login(
     address: string,
     credentialId: string,
@@ -139,6 +134,8 @@ export interface Keychain {
 
   issueStarterPack(id: string): Promise<InvokeFunctionResponse>;
   showQuests(gameId: string): Promise<void>;
+
+  username(): string;
 }
 
 export interface Modal {

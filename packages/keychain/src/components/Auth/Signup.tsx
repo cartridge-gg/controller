@@ -20,7 +20,6 @@ import { client } from "utils/graphql";
 import { PopupCenter } from "utils/url";
 import { FormValues, SignupProps } from "./types";
 import { isIframe, validateUsernameFor } from "./utils";
-import { useClearField } from "./hooks";
 import { RegistrationLink } from "./RegistrationLink";
 import { doSignup } from "hooks/account";
 import { useControllerTheme } from "hooks/theme";
@@ -69,7 +68,7 @@ export function Signup({
 
   return (
     <>
-      <Container>
+      <Container overflowY={error ? "auto" : undefined}>
         <Formik
           initialValues={{ username: prefilledName }}
           onSubmit={onSubmit}
@@ -142,6 +141,7 @@ function Form({
           chainId,
           rpcUrl,
           address,
+          values.username,
           publicKey,
           credentialId,
         );
@@ -158,8 +158,6 @@ function Form({
     },
   );
 
-  const onClearUsername = useClearField("username");
-
   const onLogin = useCallback(() => {
     onLoginProp(values.username);
   }, [values.username, onLoginProp]);
@@ -175,20 +173,20 @@ function Form({
         description="Create your Cartridge Controller"
       />
 
-      <VStack align="stretch" pb={PORTAL_FOOTER_MIN_HEIGHT}>
+      <VStack align="stretch" pb={error ? PORTAL_FOOTER_MIN_HEIGHT : undefined}>
         <FormikField
           name="username"
           placeholder="Username"
           validate={validateUsernameFor("signup")}
         >
-          {({ field, meta }) => (
+          {({ field, meta, form }) => (
             <Field
               {...field}
               autoFocus
               placeholder="Username"
               touched={meta.touched}
               error={meta.error}
-              onClear={onClearUsername}
+              onClear={() => form.setFieldValue(field.name, "")}
               isLoading={isValidating}
             />
           )}

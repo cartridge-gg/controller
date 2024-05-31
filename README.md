@@ -1,7 +1,10 @@
-# Cartridge Controller
+![Controller Cover Image](.github/cover.png)
 
-Cartridge Controller is a web wallet for starknet that leverages webauthn for
-transaction / session authorization.
+# Controller
+
+Controller is a gaming specific smart contract wallet that enables seamless player onboarding and game interactions.
+
+It supports transaction signing using Passkeys and Session Tokens.
 
 It consists of the [`keychain`](packages/keychain) which is a simple, sandboxed
 application hosted at https://x.cartridge.gg/ and responsible for sensitive

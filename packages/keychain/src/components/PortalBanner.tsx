@@ -12,29 +12,28 @@ export function PortalBanner({
   description?: string | React.ReactElement;
 }) {
   return (
-    <VStack w="full" mb={4} p={3}>
-      <VStack pt={6} px={8}>
-        {!!Icon && (
-          <Circle size={12} mb={4} bg="solid.primary">
-            <Icon boxSize={8} />
-          </Circle>
-        )}
+    <VStack pb={6}>
+      {!!Icon && (
+        <Circle size={12} mb={4} bg="solid.primary">
+          <Icon boxSize={8} />
+        </Circle>
+      )}
 
-        {!!icon && (
-          <Circle size={12} mb={4} bg="solid.primary">
-            {icon}
-          </Circle>
-        )}
+      {!!icon && (
+        <Circle size={12} mb={4} bg="solid.primary">
+          {icon}
+        </Circle>
+      )}
 
-        <Text fontSize="lg" fontWeight="semibold" whiteSpace="nowrap">
-          {title}
+      <Text fontSize="lg" fontWeight="semibold" whiteSpace="nowrap">
+        {title}
+      </Text>
+
+      {description && (
+        <Text fontSize="sm" color="text.secondary" align="center">
+          {description}
         </Text>
-        {description && (
-          <Text fontSize="sm" color="text.secondary" align="center">
-            {description}
-          </Text>
-        )}
-      </VStack>
+      )}
     </VStack>
   );
 }

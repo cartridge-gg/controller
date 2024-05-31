@@ -67,7 +67,7 @@ export function Field({
               cursor={isActive ? "pointer" : "default"}
               opacity={isActive ? 100 : 0} // workaround for onBlur handler triggeres before onClear
             >
-              <TimesCircleIcon color="text.secondary" boxSize={5} />
+              <TimesCircleIcon color="text.secondary" boxSize={6} />
             </InputRightElement>
           )
         )}
@@ -75,7 +75,7 @@ export function Field({
 
       {error && touched && (
         <HStack marginY={3}>
-          <AlertIcon color="text.error" />
+          <AlertIcon fontSize="xl" color="text.error" />
           <Text color="text.error" fontSize="sm">
             {error}
           </Text>

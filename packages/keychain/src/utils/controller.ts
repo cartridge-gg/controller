@@ -17,11 +17,13 @@ type SerializedController = {
   publicKey: string;
   credentialId: string;
   address: string;
+  username: string;
 };
 
 export default class Controller {
   public account: Account;
   public address: string;
+  public username: string;
   public signer: SignerInterface;
   protected publicKey: string;
   protected credentialId: string;
@@ -30,10 +32,12 @@ export default class Controller {
     chainId: string,
     rpcUrl: string,
     address: string,
+    username: string,
     publicKey: string,
     credentialId: string,
   ) {
     this.address = address;
+    this.username = username;
     this.publicKey = publicKey;
     this.credentialId = credentialId;
     this.account = new Account(chainId, rpcUrl, address, this.signer, {
@@ -42,19 +46,6 @@ export default class Controller {
       credentialId,
       publicKey,
     });
-
-    Storage.set(
-      selectors[VERSION].admin(this.address, process.env.NEXT_PUBLIC_ADMIN_URL),
-      {},
-    );
-
-    Storage.set(selectors["0.0.1"].active(), {
-      address,
-      chainId,
-      rpcUrl,
-    });
-
-    this.store();
   }
 
   async getUser() {
@@ -89,11 +80,10 @@ export default class Controller {
       throw new Error("Account not found");
     }
 
-    const credentials = await this.account.cartridge
-      .createSession(policies, expiresAt)
-      .catch((e) => {
-        console.log(e);
-      });
+    const credentials = await this.account.cartridge.createSession(
+      policies,
+      expiresAt,
+    );
 
     Storage.set(
       selectors[VERSION].session(this.address, origin, this.account.chainId),
@@ -130,8 +120,16 @@ export default class Controller {
 
   store() {
     Storage.set("version", VERSION);
+
+    Storage.set(
+      selectors[VERSION].admin(this.address, process.env.NEXT_PUBLIC_ADMIN_URL),
+      {},
+    );
+    Storage.set(selectors[VERSION].active(), this.address);
+
     return Storage.set(selectors[VERSION].account(this.address), {
       address: this.address,
+      username: this.username,
       publicKey: this.publicKey,
       credentialId: this.credentialId,
     });
@@ -146,21 +144,28 @@ export default class Controller {
 
       let controller: SerializedController;
       const { address, chainId, rpcUrl } = Storage.get(
-        selectors["0.0.1"].active(),
+        selectors[VERSION].active(),
       );
-      controller = Storage.get(selectors["0.0.1"].account(address));
+      controller = Storage.get(selectors[VERSION].account(address));
 
       if (!controller) {
         return;
       }
 
-      const { publicKey, credentialId } = controller;
+      const { publicKey, credentialId, username } = controller;
 
       if (version !== VERSION) {
         migrations[version][VERSION](address);
       }
 
-      return new Controller(chainId, rpcUrl, address, publicKey, credentialId);
+      return new Controller(
+        chainId,
+        rpcUrl,
+        address,
+        username,
+        publicKey,
+        credentialId,
+      );
     } catch (e) {
       // If the current storage is incompatible, clear it so it gets recreated.
       Storage.clear();

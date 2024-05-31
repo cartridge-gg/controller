@@ -22,7 +22,6 @@ import {
   TypedData,
 } from "starknet";
 import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
-import { register } from "../methods/register";
 import logout from "../methods/logout";
 import { revoke, session, sessions } from "../methods/sessions";
 import { normalize, validate } from "../methods";
@@ -37,6 +36,7 @@ import {
 } from "components";
 import { useController } from "hooks/controller";
 import { Status } from "utils/account";
+import { username } from "methods/username";
 
 type Context = Connect | Logout | Execute | SignMessage;
 
@@ -118,10 +118,10 @@ const Index: NextPage = () => {
             },
         ),
         disconnect: normalize(
-          validate(
-            (controller: Controller, origin: string) => async () =>
-              controller.revoke(origin),
-          ),
+          validate((controller: Controller, _origin: string) => () => {
+            controller.delete();
+            setController(undefined);
+          }),
         ),
         execute: normalize(
           validate(
@@ -206,21 +206,28 @@ const Index: NextPage = () => {
                   });
                 }
 
-                const res = await account.execute(
-                  calls,
-                  session,
-                  transactionsDetail,
-                );
-                return {
-                  code: ResponseCodes.SUCCESS,
-                  ...res,
-                };
+                try {
+                  const res = await account.execute(
+                    calls,
+                    session,
+                    transactionsDetail,
+                  );
+
+                  return {
+                    code: ResponseCodes.SUCCESS,
+                    ...res,
+                  };
+                } catch (e) {
+                  return {
+                    code: ResponseCodes.NOT_ALLOWED,
+                    message: e.message,
+                  };
+                }
               },
           ),
         ),
         estimateDeclareFee: normalize(validate(estimateDeclareFee)),
         estimateInvokeFee: normalize(validate(estimateInvokeFee)),
-        register: normalize(register),
         logout: normalize(logout),
         probe: normalize(
           validate(
@@ -258,6 +265,7 @@ const Index: NextPage = () => {
         ),
         sessions: normalize(sessions),
         reset: normalize(() => () => setContext(undefined)),
+        username: normalize(username),
       },
     });
 

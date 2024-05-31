@@ -85,7 +85,7 @@ export default function Keychain({
         }
 
         body {
-          background: var(--chakra-colors-translucent-lg);
+          background: var(--chakra-colors-solid-bg);
         }
       `}</style>
 

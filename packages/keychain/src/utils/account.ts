@@ -15,6 +15,7 @@ import {
   TransactionFinalityStatus,
   InvocationsDetails,
   num,
+  TransactionExecutionStatus,
 } from "starknet";
 import {
   AccountContractDocument,
@@ -27,7 +28,7 @@ import Storage from "./storage";
 import { CartridgeAccount } from "@cartridge/account-wasm";
 import { Session } from "@cartridge/controller";
 
-const EST_FEE_MULTIPLIER = 100n;
+const EST_FEE_MULTIPLIER = 2n;
 
 export enum Status {
   COUNTERFACTUAL = "COUNTERFACTUAL",
@@ -195,6 +196,10 @@ class Account extends BaseAccount {
         successStates: [
           TransactionFinalityStatus.ACCEPTED_ON_L1,
           TransactionFinalityStatus.ACCEPTED_ON_L2,
+        ],
+        errorStates: [
+          TransactionExecutionStatus.REJECTED,
+          TransactionExecutionStatus.REVERTED,
         ],
       })
       .catch(() => {

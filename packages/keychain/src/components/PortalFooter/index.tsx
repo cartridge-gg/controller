@@ -1,5 +1,5 @@
 import {
-  Box,
+  HStack,
   IconButton,
   Spacer,
   VStack,
@@ -11,7 +11,11 @@ import { Policy } from "@cartridge/controller";
 import { SessionDetails } from "./SessionDetails";
 import React, { useMemo } from "react";
 import { FOOTER_HEIGHT } from "components";
-import { BANNER_HEIGHT, ICON_OFFSET, ICON_SIZE } from "components/Container/Header";
+import {
+  BANNER_HEIGHT,
+  ICON_OFFSET,
+  ICON_SIZE,
+} from "components/Container/Header";
 import { motion } from "framer-motion";
 
 export function PortalFooter({
@@ -35,15 +39,18 @@ export function PortalFooter({
     [origin],
   );
 
-  const height = useMemo(() =>
-    isOpen
-      ? `${window.document.body.scrollHeight
-      - BANNER_HEIGHT
-      - FOOTER_HEIGHT
-      + ICON_SIZE / 2
-      - ICON_OFFSET}px`
-      : "auto",
-    [isOpen])
+  const height = useMemo(
+    () =>
+      isOpen
+        ? `${window.innerHeight -
+        BANNER_HEIGHT -
+        FOOTER_HEIGHT +
+        ICON_SIZE / 2 -
+        ICON_OFFSET
+        }px`
+        : "auto",
+    [isOpen],
+  );
 
   return (
     <VStack
@@ -56,43 +63,12 @@ export function PortalFooter({
       p={4}
       pt={0}
       borderTopWidth={1}
-      borderColor="solid.tertiary"
+      borderColor="solid.spacer"
       zIndex="999999"
       as={motion.div}
       layout="position"
       animate={{ height, transition: { bounce: 0 } }}
     >
-      {isExpandable && (
-        <Box // mimic top border
-          w="50px"
-          h="25px"
-          bg="solid.accent"
-          borderRadius="50px 50px 0 0"
-          position="absolute"
-          left="calc(50% - 50px / 2)"
-          top="calc(-50px / 2)"
-        >
-          <IconButton
-            left="1px"
-            top="1px"
-            aria-label="Expand footer"
-            icon={
-              <WedgeUpIcon
-                boxSize={10}
-                color="text.secondary"
-                transform={isOpen ? "rotate(180deg)" : "rotate(0deg)"}
-              />
-            }
-            size="lg"
-            variant="round"
-            bg="solid.bg"
-            zIndex="999999"
-            onClick={onToggle}
-          />
-        </Box>
-      )
-      }
-
       <VStack
         pt={6}
         align="stretch"
@@ -106,15 +82,36 @@ export function PortalFooter({
           msOverflowStyle: "none",
         }}
       >
-        <TransactionSummary
-          isSignup={isSignup}
-          isSlot={isSlot}
-          showTerm={showTerm}
-          hostname={hostname}
-        />
+        <HStack align="center">
+          <TransactionSummary
+            isSignup={isSignup}
+            isSlot={isSlot}
+            showTerm={showTerm}
+            hostname={hostname}
+          />
 
-        {isOpen && hostname && policies && (
-          <SessionDetails hostname={hostname} policies={policies} isOpen={isOpen} />
+          <Spacer />
+
+          {isExpandable && (
+            <IconButton
+              aria-label="Expand footer"
+              icon={
+                <WedgeUpIcon
+                  boxSize={8}
+                  color="text.secondary"
+                  transform={isOpen ? "rotate(180deg)" : "rotate(0deg)"}
+                />
+              }
+              size="sm"
+              bg="solid.primary"
+              zIndex="999999"
+              onClick={onToggle}
+            />
+          )}
+        </HStack>
+
+        {isOpen && policies && (
+          <SessionDetails policies={policies} isOpen={isOpen} />
         )}
 
         {/* TODO: starter pack
@@ -148,8 +145,7 @@ export function PortalFooter({
       <VStack align="strech" w="full">
         {children}
       </VStack>
-
-    </VStack >
+    </VStack>
   );
 }
 

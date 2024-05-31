@@ -40,15 +40,6 @@ class ControllerConnector extends Connector {
     return this.controller.ready();
   }
 
-  async register(
-    rpcUrl: string,
-    username: string,
-    credentialId: string,
-    credential: { x: string; y: string },
-  ) {
-    return this.controller.register(rpcUrl, username, credentialId, credential);
-  }
-
   async login(
     address: string,
     credentialId: string,
@@ -90,6 +81,10 @@ class ControllerConnector extends Connector {
 
   async showQuests(gameId: string): Promise<void> {
     return this.controller.showQuests(gameId);
+  }
+
+  username() {
+    return this.controller.username();
   }
 }
 
