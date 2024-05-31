@@ -7,7 +7,6 @@ import {
   constants,
   Call as StarknetCall,
   InvocationsDetails,
-  uint256,
 } from "starknet";
 import { Fees } from "./Fees";
 import { formatEther } from "viem";
@@ -54,7 +53,6 @@ export function Execute({
   const [error, setError] = useState<Error>();
   const [isLoading, setLoading] = useState<boolean>(false);
   const [ethBalance, setEthBalance] = useState<bigint>();
-  const [ethApproved, setEthApproved] = useState<bigint>();
   const [lowEth, setLowEth] = useState<boolean>(false);
 
   const account = controller.account(chainId);
@@ -104,20 +102,6 @@ export function Execute({
       return;
     }
 
-    const approve: StarknetCall[] = calls.filter(
-      (call) =>
-        call.contractAddress === CONTRACT_ETH && call.entrypoint === "approve",
-    );
-
-    if (approve.length > 0) {
-      setEthApproved(
-        uint256.uint256ToBN({
-          low: approve[0].calldata[1],
-          high: approve[0].calldata[2],
-        }),
-      );
-    }
-
     account
       .estimateInvokeFee(calls, transactionsDetail)
       .then((fees) => {
@@ -130,7 +114,6 @@ export function Execute({
   }, [
     account,
     controller,
-    setEthApproved,
     setError,
     setFees,
     calls,
@@ -139,14 +122,14 @@ export function Execute({
   ]);
 
   useEffect(() => {
-    if (!ethBalance || !ethApproved) {
+    if (!ethBalance || !fees) {
       return;
     }
 
-    if (ethBalance < ethApproved) {
+    if (ethBalance < fees.max) {
       setLowEth(true);
     }
-  }, [ethBalance, ethApproved]);
+  }, [ethBalance, fees]);
 
   const onSubmit = useCallback(async () => {
     setLoading(true);
@@ -202,7 +185,6 @@ export function Execute({
             chainId={chainId}
             fees={fees}
             balance={ethBalance && format(ethBalance)}
-            approved={ethApproved && format(ethApproved)}
           />
 
           <PortalFooter>

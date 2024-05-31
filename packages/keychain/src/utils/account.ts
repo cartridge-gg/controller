@@ -16,6 +16,7 @@ import {
   TransactionFinalityStatus,
   InvocationsDetails,
   num,
+  TransactionExecutionStatus,
 } from "starknet";
 import {
   AccountContractDocument,
@@ -196,6 +197,10 @@ class Account extends BaseAccount {
         successStates: [
           TransactionFinalityStatus.ACCEPTED_ON_L1,
           TransactionFinalityStatus.ACCEPTED_ON_L2,
+        ],
+        errorStates: [
+          TransactionExecutionStatus.REJECTED,
+          TransactionExecutionStatus.REVERTED,
         ],
       })
       .catch(() => {

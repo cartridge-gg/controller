@@ -81,7 +81,7 @@ export function Login({
 
       setIsLoading(false);
     },
-    [log, onSuccess],
+    [chainId, context, expiresAt, isSlot, log, onSuccess],
   );
 
   return (

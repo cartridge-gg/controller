@@ -211,15 +211,23 @@ const Index: NextPage = () => {
                   });
                 }
 
-                const res = await account.execute(
-                  calls,
-                  session,
-                  transactionsDetail,
-                );
-                return {
-                  code: ResponseCodes.SUCCESS,
-                  ...res,
-                };
+                try {
+                  const res = await account.execute(
+                    calls,
+                    session,
+                    transactionsDetail,
+                  );
+
+                  return {
+                    code: ResponseCodes.SUCCESS,
+                    ...res,
+                  };
+                } catch (e) {
+                  return {
+                    code: ResponseCodes.NOT_ALLOWED,
+                    message: e.message,
+                  };
+                }
               },
           ),
         ),
