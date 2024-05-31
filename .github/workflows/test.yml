@@ -1,0 +1,56 @@
+name: test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_VERSION: 1.78.0
+
+jobs:
+  rust-test:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/dojoengine/dojo-dev:v0.7.0-alpha.2
+    steps:
+      - uses: actions/checkout@v3
+      - uses: asdf-vm/actions/install@v3
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          components: llvm-tools-preview
+      - uses: taiki-e/install-action@cargo-llvm-cov
+      - run: cargo llvm-cov --all-features --lcov --output-path lcov.info
+      - uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: lcov.info
+
+  ts-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+      - uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+      - run: corepack enable pnpm
+      - uses: pnpm/action-setup@v2
+        id: pnpm-install
+        with:
+          version: 9
+          run_install: false
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:ci --coverage
+      - uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage/lcov.info
