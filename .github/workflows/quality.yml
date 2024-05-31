@@ -19,7 +19,9 @@ jobs:
         with:
           toolchain: ${{ env.RUST_VERSION }}
           target: wasm32-unknown-unknown
-      - run: cargo build -r --target wasm32-unknown-unknown -p account-sdk
+      - run: |
+          cd packages/account_sdk
+          cargo build -r --target wasm32-unknown-unknown -p account-sdk
 
   clippy:
     runs-on: ubuntu-latest
