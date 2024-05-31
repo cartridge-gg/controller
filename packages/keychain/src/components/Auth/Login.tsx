@@ -135,7 +135,6 @@ export function Login({
                 type="submit"
                 colorScheme="colorful"
                 isLoading={isLoading}
-                leftIcon={<FingerprintIcon fontSize="2xl" />}
               >
                 Log in
               </Button>
