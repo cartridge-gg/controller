@@ -12,13 +12,11 @@ const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
 });
 
-export default function Keychain({
-  Component,
-  pageProps,
-}: AppProps<{ rpcUrl: string }>) {
+export default function Keychain({ Component, pageProps }: AppProps) {
   useGlobalInjection();
 
   const [chainId, setChainId] = useState<string | null>(null);
+  const [rpcUrl, setRpcUrl] = useState<string | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
@@ -39,6 +37,7 @@ export default function Keychain({
         const rpc = new RpcProvider({ nodeUrl: rpcUrl });
         const chainId = (await rpc.getChainId()) as string;
         setChainId(chainId);
+        setRpcUrl(rpcUrl);
       } catch (error) {
         setError(new Error("Unable to fetch Chain ID from provided RPC URL"));
       }
@@ -90,7 +89,11 @@ export default function Keychain({
       `}</style>
 
       <Provider>
-        {error ? error.message : <Component chainId={chainId} {...pageProps} />}
+        {error ? (
+          error.message
+        ) : (
+          <Component chainId={chainId} rpcUrl={rpcUrl} {...pageProps} />
+        )}
       </Provider>
     </>
   );

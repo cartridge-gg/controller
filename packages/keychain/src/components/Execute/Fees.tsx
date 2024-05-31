@@ -31,7 +31,7 @@ export function Fees({
   approved,
 }: {
   error: Error;
-  chainId: constants.StarknetChainId;
+  chainId: string;
   fees?: { base: bigint; max: bigint };
   balance: string;
   approved?: string;

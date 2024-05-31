@@ -190,11 +190,7 @@ class Controller {
 
     try {
       if (!this.account) {
-        let response = await this.keychain.connect(
-          this.policies,
-          undefined,
-          this.chainId,
-        );
+        let response = await this.keychain.connect(this.policies, undefined);
         if (response.code !== ResponseCodes.SUCCESS) {
           throw new Error(response.message);
         }
@@ -246,11 +242,7 @@ class Controller {
     this.modal.open();
 
     try {
-      let response = await this.keychain.connect(
-        this.policies,
-        undefined,
-        this.chainId,
-      );
+      let response = await this.keychain.connect(this.policies, undefined);
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
       }

@@ -16,7 +16,7 @@ export function DeploymentRequired({
   onLogout,
   children,
 }: {
-  chainId: constants.StarknetChainId;
+  chainId: string;
   controller: Controller;
   onClose: () => void;
   onLogout: () => void;

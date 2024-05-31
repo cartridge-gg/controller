@@ -77,8 +77,7 @@ export interface Keychain {
   connect(
     policies: Policy[],
     starterPackId?: string,
-    chainId?: constants.StarknetChainId,
-  ): Promise<ConnectReply | ConnectError>;
+  ): Promise<ConnectReply | Error>;
   disconnect(): void;
 
   reset(): void;
