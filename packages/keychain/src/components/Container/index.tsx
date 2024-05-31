@@ -31,6 +31,7 @@ export function Container({
         w="full"
         h="full"
         p={4}
+        pt={12}
         overflowY="auto"
         css={{
           "::-webkit-scrollbar": {
@@ -50,6 +51,8 @@ export function Container({
         alignItems="center"
         justify="center"
         minH={FOOTER_HEIGHT / 4}
+        bottom={0}
+        position="fixed"
       >
         <CartridgeIcon fontSize="sm" />
         <Text fontSize="xs" color="currentColor">
@@ -69,7 +72,6 @@ function Wrapper({ children }: React.PropsWithChildren) {
       <Show below="md">
         <ChakraContainer
           w="100vw"
-          h="100vh"
           bg="solid.bg"
           p={0}
           as={motion.div}
@@ -83,10 +85,9 @@ function Wrapper({ children }: React.PropsWithChildren) {
 
       {/** Show as modal  */}
       <Show above="md">
-        <Flex w="100vw" h="100vh" m={0} p={0} alignItems="center">
+        <Flex w="100vw" m={0} p={0} alignItems="center">
           <ChakraContainer
             w="432px"
-            h="600px"
             bg="solid.bg"
             p={0}
             as={motion.div}

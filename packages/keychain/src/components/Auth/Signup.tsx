@@ -36,7 +36,7 @@ export function Signup({
 }: SignupProps) {
   const [isRegistering, setIsRegistering] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState();
+  const [error, setError] = useState(new Error("errorrrrrrrrrrr"));
 
   const onSubmit = useCallback(async (values: FormValues) => {
     setIsLoading(true);
@@ -68,7 +68,7 @@ export function Signup({
 
   return (
     <>
-      <Container>
+      <Container overflowY={error ? "auto" : undefined}>
         <Formik
           initialValues={{ username: prefilledName }}
           onSubmit={onSubmit}
@@ -188,7 +188,7 @@ function Form({
         description="Create your Cartridge Controller"
       />
 
-      <VStack align="stretch" pb={PORTAL_FOOTER_MIN_HEIGHT}>
+      <VStack align="stretch" pb={error ? PORTAL_FOOTER_MIN_HEIGHT : undefined}>
         <FormikField
           name="username"
           placeholder="Username"

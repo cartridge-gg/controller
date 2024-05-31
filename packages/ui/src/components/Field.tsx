@@ -75,7 +75,7 @@ export function Field({
 
       {error && touched && (
         <HStack marginY={3}>
-          <AlertIcon color="text.error" />
+          <AlertIcon fontSize="xl" color="text.error" />
           <Text color="text.error" fontSize="sm">
             {error}
           </Text>
