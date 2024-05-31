@@ -1,12 +1,7 @@
 import { HStack, VStack, Text, Link, IconProps } from "@chakra-ui/react";
-import {
-  JoystickIcon,
-  LockIcon,
-  WrenchIcon,
-} from "@cartridge/ui";
+import { LockIcon, WrenchIcon } from "@cartridge/ui";
 
 export function TransactionSummary({
-  isSignup,
   isSlot,
   showTerm,
   hostname,
@@ -18,17 +13,9 @@ export function TransactionSummary({
 }) {
   return (
     <VStack align="flex-start">
-      {isSignup && (
-        <Summary
-          Icon={JoystickIcon}
-          title="Create a new Cartridge Controller"
-        />
-      )}
-
       {hostname && (
         <Summary>
-          Create a session for{" "}
-          <LockIcon color="text.secondaryAccent" />
+          Create a session for <LockIcon color="text.secondaryAccent" />
           <Text color="text.secondaryAccent" as="span" fontWeight="bold">
             {hostname}{" "}
           </Text>

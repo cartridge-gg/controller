@@ -90,6 +90,8 @@ export function PortalFooter({
             hostname={hostname}
           />
 
+          <Spacer />
+
           {isExpandable && (
             <IconButton
               aria-label="Expand footer"
@@ -101,7 +103,6 @@ export function PortalFooter({
                 />
               }
               size="sm"
-              px={1.5}
               bg="solid.primary"
               zIndex="999999"
               onClick={onToggle}
@@ -110,10 +111,7 @@ export function PortalFooter({
         </HStack>
 
         {isOpen && policies && (
-          <SessionDetails
-            policies={policies}
-            isOpen={isOpen}
-          />
+          <SessionDetails policies={policies} isOpen={isOpen} />
         )}
 
         {/* TODO: starter pack

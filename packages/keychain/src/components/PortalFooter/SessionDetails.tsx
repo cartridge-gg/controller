@@ -35,12 +35,7 @@ export function SessionDetails({
       }}
       display="none"
     >
-      <VStack
-        align="flex-start"
-        borderTopRadius="md"
-        bg="solid.primary"
-        p={3}
-      >
+      <VStack align="flex-start" borderTopRadius="md" bg="solid.primary" p={3}>
         <Text
           color="text.secondaryAccent"
           fontSize="xs"
@@ -83,7 +78,9 @@ export function SessionDetails({
                   )}
                 </AccordionButton>
 
-                {p.description && <AccordionPanel>{p.description}</AccordionPanel>}
+                {p.description && (
+                  <AccordionPanel>{p.description}</AccordionPanel>
+                )}
               </>
             )}
           </AccordionItem>
