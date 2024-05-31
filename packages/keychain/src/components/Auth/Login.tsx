@@ -1,4 +1,4 @@
-import { Field } from "@cartridge/ui";
+import { Field, FingerprintIcon } from "@cartridge/ui";
 import { VStack, Button } from "@chakra-ui/react";
 import { Container } from "../Container";
 import { Form as FormikForm, Field as FormikField, Formik } from "formik";
@@ -85,7 +85,7 @@ export function Login({
   );
 
   return (
-    <Container chainId={chainId} overflowY="auto">
+    <Container chainId={chainId} overflowY={error ? "auto" : undefined}>
       <Formik
         initialValues={{ username: prefilledName }}
         onSubmit={onSubmit}
@@ -103,13 +103,13 @@ export function Login({
               description="Enter your Controller username"
             />
 
-            <VStack align="stretch" pb={PORTAL_FOOTER_MIN_HEIGHT}>
+            <VStack align="stretch" pb={error ? PORTAL_FOOTER_MIN_HEIGHT : undefined}>
               <FormikField
                 name="username"
                 placeholder="Username"
                 validate={validateUsernameFor("login")}
               >
-                {({ field, meta }) => (
+                {({ field, meta, form }) => (
                   <Field
                     {...field}
                     autoFocus
@@ -118,6 +118,7 @@ export function Login({
                     error={meta.error}
                     isLoading={props.isValidating}
                     isDisabled={isLoading}
+                    onClear={() => form.setFieldValue(field.name, "")}
                   />
                 )}
               </FormikField>
@@ -134,6 +135,7 @@ export function Login({
                 type="submit"
                 colorScheme="colorful"
                 isLoading={isLoading}
+                leftIcon={<FingerprintIcon fontSize="2xl" />}
               >
                 Log in
               </Button>

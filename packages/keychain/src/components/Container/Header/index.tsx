@@ -61,14 +61,14 @@ export function Header({
             right={0}
           >
             <Flex
-              bg="darkGray.800"
+              bg="darkGray.700"
               borderRadius="lg"
               h={`${ICON_SIZE}px`}
               w={`${ICON_SIZE}px`}
               justify="center"
               alignItems="center"
               borderWidth={4}
-              borderColor={colorMode === "dark" ? "solid.bg" : "blueGray.100"}
+              borderColor="solid.bg"
             >
               <Image
                 src={theme.icon}
@@ -143,4 +143,4 @@ function Container({
 export const BANNER_HEIGHT = 150;
 export const ICON_IMAGE_SIZE = 64;
 export const ICON_SIZE = 80;
-export const ICON_OFFSET = 16;
+export const ICON_OFFSET = 32;

@@ -42,13 +42,12 @@ export function PortalFooter({
   const height = useMemo(
     () =>
       isOpen
-        ? `${
-            window.document.body.scrollHeight -
-            BANNER_HEIGHT -
-            FOOTER_HEIGHT +
-            ICON_SIZE / 2 -
-            ICON_OFFSET
-          }px`
+        ? `${window.innerHeight -
+        BANNER_HEIGHT -
+        FOOTER_HEIGHT +
+        ICON_SIZE / 2 -
+        ICON_OFFSET
+        }px`
         : "auto",
     [isOpen],
   );

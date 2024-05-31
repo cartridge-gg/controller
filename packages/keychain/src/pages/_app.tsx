@@ -39,7 +39,7 @@ export default function Keychain({ Component, pageProps }: AppProps) {
         }
 
         body {
-          background: var(--chakra-colors-translucent-lg);
+          background: var(--chakra-colors-solid-bg);
         }
       `}</style>
 

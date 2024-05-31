@@ -18,7 +18,6 @@ export const Button: ComponentStyleConfig = defineStyleConfig({
     },
     lineHeight: "none",
     textTransform: "uppercase",
-    letterSpacing: "widest",
     _disabled: {
       pointerEvents: "none",
     },
