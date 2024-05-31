@@ -1,6 +1,5 @@
 import { HStack, VStack, Text, Link, IconProps } from "@chakra-ui/react";
 import {
-  CodeUtilIcon,
   JoystickIcon,
   LockIcon,
   WrenchIcon,
@@ -27,10 +26,15 @@ export function TransactionSummary({
       )}
 
       {hostname && (
-        <Summary Icon={CodeUtilIcon}>
+        <Summary>
           Create a session for{" "}
+          <LockIcon color="text.secondaryAccent" />
           <Text color="text.secondaryAccent" as="span" fontWeight="bold">
-            {hostname}
+            {hostname}{" "}
+          </Text>
+          and allow the game to{" "}
+          <Text color="text.secondaryAccent" as="span" fontWeight="bold">
+            perform actions on your behalf
           </Text>
         </Summary>
       )}
@@ -73,12 +77,12 @@ export function Summary({
   title,
   children,
 }: React.PropsWithChildren & {
-  Icon: React.ComponentType<IconProps>;
+  Icon?: React.ComponentType<IconProps>;
   title?: string;
 }) {
   return (
     <HStack align="flex-start" color="text.secondary" fontSize="xs">
-      <Icon boxSize={4} />
+      {Icon && <Icon boxSize={4} />}
 
       <Text color="text.secondary" fontSize="xs">
         {title || children}

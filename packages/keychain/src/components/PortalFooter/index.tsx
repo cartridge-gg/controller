@@ -119,9 +119,8 @@ export function PortalFooter({
           hostname={hostname}
         />
 
-        {isOpen && hostname && policies && (
+        {isOpen && policies && (
           <SessionDetails
-            hostname={hostname}
             policies={policies}
             isOpen={isOpen}
           />
