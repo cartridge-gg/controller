@@ -109,7 +109,7 @@ export function Login({
                 placeholder="Username"
                 validate={validateUsernameFor("login")}
               >
-                {({ field, meta }) => (
+                {({ field, meta, form }) => (
                   <Field
                     {...field}
                     autoFocus
@@ -118,6 +118,7 @@ export function Login({
                     error={meta.error}
                     isLoading={props.isValidating}
                     isDisabled={isLoading}
+                    onClear={() => form.setFieldValue(field.name, "")}
                   />
                 )}
               </FormikField>

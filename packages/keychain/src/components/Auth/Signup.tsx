@@ -21,7 +21,6 @@ import { client } from "utils/graphql";
 import { PopupCenter } from "utils/url";
 import { FormValues, SignupProps } from "./types";
 import { isIframe, validateUsernameFor } from "./utils";
-import { useClearField } from "./hooks";
 import { RegistrationLink } from "./RegistrationLink";
 import { doSignup } from "hooks/account";
 import { useControllerTheme } from "hooks/theme";
@@ -36,7 +35,7 @@ export function Signup({
 }: SignupProps) {
   const [isRegistering, setIsRegistering] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(new Error("errorrrrrrrrrrr"));
+  const [error, setError] = useState();
 
   const onSubmit = useCallback(async (values: FormValues) => {
     setIsLoading(true);
@@ -171,8 +170,6 @@ function Form({
     },
   );
 
-  const onClearUsername = useClearField("username");
-
   const onLogin = useCallback(() => {
     onLoginProp(values.username);
   }, [values.username, onLoginProp]);
@@ -194,14 +191,14 @@ function Form({
           placeholder="Username"
           validate={validateUsernameFor("signup")}
         >
-          {({ field, meta }) => (
+          {({ field, meta, form }) => (
             <Field
               {...field}
               autoFocus
               placeholder="Username"
               touched={meta.touched}
               error={meta.error}
-              onClear={onClearUsername}
+              onClear={() => form.setFieldValue(field.name, "")}
               isLoading={isValidating}
             />
           )}
