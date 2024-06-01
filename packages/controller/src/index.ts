@@ -15,7 +15,6 @@ import {
 
 import DeviceAccount from "./device";
 import {
-  Session,
   Keychain,
   Policy,
   ResponseCodes,
@@ -158,65 +157,6 @@ class Controller {
     return !!this.account;
   }
 
-  async login(
-    address: string,
-    credentialId: string,
-    options: {
-      rpId?: string;
-      challengeExt?: Buffer;
-    },
-  ) {
-    if (!this.keychain) {
-      console.error(new NotReadyToConnect().message);
-      return null;
-    }
-
-    return this.keychain.login(address, credentialId, options);
-  }
-
-  async issueStarterPack(id: string) {
-    if (!this.keychain || !this.modal) {
-      const err = new NotReadyToConnect();
-      console.error(err.message);
-      return Promise.reject(err.message);
-    }
-
-    this.modal.open();
-
-    try {
-      if (!this.account) {
-        let response = await this.keychain.connect(this.policies, undefined);
-        if (response.code !== ResponseCodes.SUCCESS) {
-          throw new Error(response.message);
-        }
-      }
-
-      return await this.keychain.issueStarterPack(id);
-    } catch (e) {
-      console.log(e);
-      return Promise.reject(e);
-    } finally {
-      this.modal.close();
-    }
-  }
-
-  async showQuests(gameId: string) {
-    if (!this.keychain || !this.modal) {
-      console.error(new NotReadyToConnect().message);
-      return;
-    }
-
-    this.modal.open();
-
-    try {
-      return await this.keychain.showQuests(gameId);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      this.modal.close();
-    }
-  }
-
   async connect() {
     if (this.account) {
       return this.account;
@@ -237,7 +177,7 @@ class Controller {
     this.modal.open();
 
     try {
-      let response = await this.keychain.connect(this.policies, undefined);
+      let response = await this.keychain.connect(this.policies);
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
       }
@@ -282,15 +222,6 @@ class Controller {
     }
 
     return this.keychain.revoke(origin);
-  }
-
-  async approvals(origin: string): Promise<Session | undefined> {
-    if (!this.keychain) {
-      console.error(new NotReadyToConnect().message);
-      return;
-    }
-
-    return this.keychain.approvals(origin);
   }
 
   username() {
