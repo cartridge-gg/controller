@@ -74,44 +74,26 @@ export type ProbeReply = {
 
 export interface Keychain {
   probe(): Promise<ProbeReply | ConnectError>;
-  connect(
-    policies: Policy[],
-    starterPackId?: string,
-  ): Promise<ConnectReply | Error>;
+  connect(policies: Policy[]): Promise<ConnectReply | ConnectError>;
   disconnect(): void;
 
   reset(): void;
   revoke(origin: string): void;
-  approvals(origin: string): Promise<Session | undefined>;
 
   estimateDeclareFee(
     payload: DeclareContractPayload,
-    details?: EstimateFeeDetails & {
-      chainId: constants.StarknetChainId;
-    },
+    details?: EstimateFeeDetails,
   ): Promise<EstimateFee>;
   estimateInvokeFee(
     calls: Call | Call[],
-    estimateFeeDetails?: EstimateFeeDetails & {
-      chainId: constants.StarknetChainId;
-    },
+    estimateFeeDetails?: EstimateFeeDetails,
   ): Promise<EstimateFee>;
   execute(
     calls: Call | Call[],
     abis?: Abi[],
-    transactionsDetail?: InvocationsDetails & {
-      chainId?: constants.StarknetChainId;
-    },
+    transactionsDetail?: InvocationsDetails,
     sync?: boolean,
   ): Promise<ExecuteReply | ConnectError>;
-  login(
-    address: string,
-    credentialId: string,
-    options: {
-      rpId?: string;
-      challengeExt?: Buffer;
-    },
-  ): Promise<{ assertion: Assertion }>;
   logout(): Promise<void>;
   session(): Promise<Session>;
   sessions(): Promise<{
@@ -130,9 +112,6 @@ export interface Keychain {
     transaction: DeployAccountSignerDetails,
   ): Promise<Signature>;
   signDeclareTransaction(transaction: DeclareSignerDetails): Promise<Signature>;
-
-  issueStarterPack(id: string): Promise<InvokeFunctionResponse>;
-  showQuests(gameId: string): Promise<void>;
 
   username(): string;
 }
