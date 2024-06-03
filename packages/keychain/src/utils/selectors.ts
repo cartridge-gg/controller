@@ -8,8 +8,6 @@ const selectors = {
       `@cartridge/admin/${address}/${origin}`,
     session: (address: string, origin: string, chainId: string) =>
       `@cartridge/session/${address}/${origin}/${chainId}`,
-    transaction: (address: string, hash: string) =>
-      `@cartridge/transaction/${address}/${hash}`,
   },
 };
 

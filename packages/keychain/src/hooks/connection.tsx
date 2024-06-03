@@ -8,8 +8,9 @@ import {
   useCallback,
 } from "react";
 import Controller from "utils/controller";
-import { constants } from "starknet";
 import { connectToController, ConnectionCtx } from "utils/connection";
+import { isIframe } from "components/connect/utils";
+import { RpcProvider } from "starknet";
 
 const ConnectionContext = createContext<ConnectionContextValue>(undefined);
 
@@ -18,17 +19,45 @@ type ConnectionContextValue = {
   setController: (controller: Controller) => void;
   context: ConnectionCtx;
   setContext: (context: ConnectionCtx) => void;
-  chainId: constants.StarknetChainId;
+  rpcUrl: string;
+  error: Error;
+  chainId: string;
   close: () => void;
 };
 
 export function ConnectionProvider({ children }: PropsWithChildren) {
   const [parent, setParent] = useState<ParentMethods>();
   const [context, setContext] = useState<ConnectionCtx>();
-  const [chainId, setChainId] = useState<constants.StarknetChainId>(
-    constants.StarknetChainId.SN_SEPOLIA,
-  );
+  const [rpcUrl, setRpcUrl] = useState<string>();
+  const [chainId, setChainId] = useState<string>();
   const [controller, setController] = useState(Controller.fromStore);
+  const [error, setError] = useState<Error>();
+
+  useEffect(() => {
+    if (isIframe()) {
+      return;
+    }
+
+    const fetchChainId = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const nodeUrl = urlParams.get("rpcUrl");
+
+      if (!nodeUrl) {
+        setError(new Error("rpcUrl is not provided in the query parameters"));
+        return;
+      }
+
+      try {
+        const rpc = new RpcProvider({ nodeUrl });
+        setRpcUrl(nodeUrl);
+        setChainId(await rpc.getChainId());
+      } catch (error) {
+        setError(new Error("Unable to fetch Chain ID from provided RPC URL"));
+      }
+    };
+
+    fetchChainId();
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined" || window.self === window.top) {
@@ -66,7 +95,9 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
       value={{
         controller,
         setController,
+        rpcUrl,
         chainId,
+        error,
         context,
         setContext,
         close,

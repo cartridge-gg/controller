@@ -21,8 +21,7 @@ import { diff } from "utils/controller";
 import { logout } from "utils/connection/logout";
 
 function Home() {
-  const { context, controller, chainId, setContext } =
-    useConnection();
+  const { context, controller, chainId, setContext, error } = useConnection();
 
   if (window.self === window.top) {
     return <></>;
@@ -32,16 +31,13 @@ function Home() {
     return <></>;
   }
 
+  if (error) {
+    return <>{error.message}</>;
+  }
+
   // No controller, send to login
   if (!controller) {
-    const ctx = context as ConnectCtx;
-    return (
-      <CreateController
-        origin={ctx.origin}
-        policies={ctx.policies}
-        chainId={chainId}
-      />
-    );
+    return <CreateController />;
   }
 
   const onLogout = (context: ConnectionCtx) => {

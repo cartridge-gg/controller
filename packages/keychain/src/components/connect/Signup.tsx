@@ -151,10 +151,12 @@ function Form({
         });
 
         controller.account.status = Status.DEPLOYING;
+
         await client.request(DeployAccountDocument, {
           id: values.username,
           chainId: `starknet:${shortString.decodeShortString(chainId)}`,
         });
+
         controller.store();
         await controller.account.sync();
 

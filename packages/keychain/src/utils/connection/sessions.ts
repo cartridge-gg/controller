@@ -1,32 +1,31 @@
-import { constants } from "starknet";
 import Controller from "utils/controller";
 import selectors from "utils/selectors";
 import Storage from "utils/storage";
 
 export function revoke() {
-  return (origin: string, chainId: constants.StarknetChainId) => {
-    const controller = Controller.fromStore();
-    if (!controller) {
-      throw new Error("no controller");
-    }
-
-    const session = controller.session(origin, chainId);
-    if (!controller || !session) {
-      throw new Error("not connected");
-    }
-
-    controller.revoke(origin, chainId);
-  };
-}
-
-export function sessionFactory(chainId: constants.StarknetChainId) {
   return (origin: string) => {
     const controller = Controller.fromStore();
     if (!controller) {
       throw new Error("no controller");
     }
 
-    return controller.session(origin, chainId);
+    const session = controller.session(origin);
+    if (!controller || !session) {
+      throw new Error("not connected");
+    }
+
+    controller.revoke(origin);
+  };
+}
+
+export function session(origin: string) {
+  return () => {
+    const controller = Controller.fromStore();
+    if (!controller) {
+      throw new Error("no controller");
+    }
+
+    return controller.session(origin);
   };
 }
 

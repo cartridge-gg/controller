@@ -1,6 +1,5 @@
 export * from "./types";
 
-import { constants } from "starknet";
 import { ConnectError, ResponseCodes } from "@cartridge/controller";
 import { connectToParent } from "@cartridge/penpal";
 import { normalize as normalizeOrigin } from "utils/url";
@@ -9,8 +8,8 @@ import { connectFactory, disconnectFactory } from "./connect";
 import { executeFactory } from "./execute";
 import { estimateDeclareFee, estimateInvokeFee } from "./estimate";
 import { logout } from "./logout";
-import { probeFactory } from "./probe";
-import { revoke, sessionFactory, sessions } from "./sessions";
+import { probe } from "./probe";
+import { revoke, session, sessions } from "./sessions";
 import { signMessageFactory } from "./sign";
 import { username } from "./username";
 import { ConnectionCtx } from "./types";
@@ -21,8 +20,8 @@ export function connectToController({
   setContext,
   setController,
 }: {
-  chainId: constants.StarknetChainId;
-  setChainId: (chainId: constants.StarknetChainId) => void;
+  chainId: string;
+  setChainId: (chainId: string) => void;
   setContext: (ctx: ConnectionCtx) => void;
   setController: (controller: Controller) => void;
 }) {
@@ -34,10 +33,10 @@ export function connectToController({
       estimateDeclareFee: normalize(validate(estimateDeclareFee)),
       estimateInvokeFee: normalize(validate(estimateInvokeFee)),
       logout: normalize(logout),
-      probe: normalize(validate(probeFactory(chainId))),
+      probe: normalize(validate(probe)),
       revoke: normalize(revoke),
       signMessage: normalize(validate(signMessageFactory(setContext))),
-      session: normalize(sessionFactory(chainId)),
+      session: normalize(session),
       sessions: normalize(sessions),
       reset: normalize(() => () => setContext(undefined)),
       username: normalize(username),

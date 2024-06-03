@@ -1,10 +1,9 @@
-import { constants } from "starknet";
 import { ProbeReply, ResponseCodes } from "@cartridge/controller";
 import Controller from "utils/controller";
 
-export function probeFactory(chainId: constants.StarknetChainId) {
-  return (controller: Controller, origin: string) => (): ProbeReply => {
-    const session = controller.session(origin, chainId);
+export function probe(controller: Controller, origin: string) {
+  return (): ProbeReply => {
+    const session = controller.session(origin);
     return {
       code: ResponseCodes.SUCCESS,
       address: controller.address,

@@ -51,7 +51,7 @@ export enum ResponseCodes {
   CANCELED = "CANCELED",
 }
 
-export type ConnectError = {
+export type ControllerError = {
   code: ResponseCodes;
   message: string;
 };
@@ -73,8 +73,11 @@ export type ProbeReply = {
 };
 
 export interface Keychain {
-  probe(): Promise<ProbeReply | ConnectError>;
-  connect(policies: Policy[]): Promise<ConnectReply | ConnectError>;
+  probe(): Promise<ProbeReply | ControllerError>;
+  connect(
+    policies: Policy[],
+    rpcUrl: string,
+  ): Promise<ConnectReply | ControllerError>;
   disconnect(): void;
 
   reset(): void;
@@ -93,7 +96,7 @@ export interface Keychain {
     abis?: Abi[],
     transactionsDetail?: InvocationsDetails,
     sync?: boolean,
-  ): Promise<ExecuteReply | ConnectError>;
+  ): Promise<ExecuteReply | ControllerError>;
   logout(): Promise<void>;
   session(): Promise<Session>;
   sessions(): Promise<{
@@ -102,7 +105,7 @@ export interface Keychain {
   signMessage(
     typedData: TypedData,
     account: string,
-  ): Promise<Signature | ConnectError>;
+  ): Promise<Signature | ControllerError>;
   signTransaction(
     transactions: Call[],
     transactionsDetail: InvocationsSignerDetails,
@@ -126,7 +129,6 @@ export type ControllerOptions = {
   url?: string;
   origin?: string;
   starterPackId?: string;
-  chainId?: constants.StarknetChainId;
   rpc?: string;
   theme?: string;
   colorMode?: ColorMode;

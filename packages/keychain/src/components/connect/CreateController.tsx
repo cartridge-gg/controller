@@ -1,22 +1,21 @@
 import { useState } from "react";
 import { Signup } from "./Signup";
 import { Login } from "./Login";
-import { Policy } from "@cartridge/controller";
-import { constants } from "starknet";
-import { useController } from "hooks/controller";
+import { useConnection } from "hooks/connection";
+import { ConnectCtx } from "utils/connection";
 
-export function CreateController(props: {
-  origin?: string;
-  policies?: Policy[];
-  chainId?: constants.StarknetChainId;
-}) {
-  const { setController } = useController()
+export function CreateController() {
+  const { chainId, rpcUrl, context, setController } = useConnection();
   const [showSignup, setShowSignup] = useState(false);
   const [prefilledUsername, setPrefilledUsername] = useState<string>();
+  const ctx = context as ConnectCtx;
 
   return showSignup ? (
     <Signup
-      {...props}
+      origin={ctx.origin}
+      policies={ctx.policies}
+      chainId={chainId}
+      rpcUrl={rpcUrl}
       prefilledName={prefilledUsername}
       onLogin={(username) => {
         setPrefilledUsername(username);
@@ -26,7 +25,10 @@ export function CreateController(props: {
     />
   ) : (
     <Login
-      {...props}
+      origin={ctx.origin}
+      policies={ctx.policies}
+      chainId={chainId}
+      rpcUrl={rpcUrl}
       prefilledName={prefilledUsername}
       onSignup={(username) => {
         setPrefilledUsername(username);
