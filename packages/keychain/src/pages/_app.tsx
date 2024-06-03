@@ -2,9 +2,8 @@ import NextHead from "next/head";
 import type { AppProps } from "next/app";
 import { CartridgeTheme } from "@cartridge/ui";
 import { Inter, IBM_Plex_Mono } from "next/font/google";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Provider } from "components/Provider";
-import { RpcProvider } from "starknet";
 
 const inter = Inter({ subsets: ["latin"] });
 const ibmPlexMono = IBM_Plex_Mono({
@@ -14,37 +13,6 @@ const ibmPlexMono = IBM_Plex_Mono({
 
 export default function Keychain({ Component, pageProps }: AppProps) {
   useGlobalInjection();
-
-  const [chainId, setChainId] = useState<string | null>(null);
-  const [rpcUrl, setRpcUrl] = useState<string | null>(null);
-  const [error, setError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    const fetchChainId = async () => {
-      let rpcUrl: string | undefined;
-
-      if (window.location.search) {
-        const urlParams = new URLSearchParams(window.location.search);
-        rpcUrl = urlParams.get("rpcUrl");
-      }
-
-      if (!rpcUrl) {
-        setError(new Error("rpcUrl is not provided in the query parameters"));
-        return;
-      }
-
-      try {
-        const rpc = new RpcProvider({ nodeUrl: rpcUrl });
-        const chainId = (await rpc.getChainId()) as string;
-        setChainId(chainId);
-        setRpcUrl(rpcUrl);
-      } catch (error) {
-        setError(new Error("Unable to fetch Chain ID from provided RPC URL"));
-      }
-    };
-
-    fetchChainId();
-  }, []);
 
   return (
     <>
@@ -89,11 +57,7 @@ export default function Keychain({ Component, pageProps }: AppProps) {
       `}</style>
 
       <Provider>
-        {error ? (
-          error.message
-        ) : (
-          <Component chainId={chainId} rpcUrl={rpcUrl} {...pageProps} />
-        )}
+        <Component {...pageProps} />
       </Provider>
     </>
   );

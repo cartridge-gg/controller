@@ -1,10 +1,10 @@
 import dynamic from "next/dynamic";
-import { FC, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { connectToParent } from "@cartridge/penpal";
 import Controller, { diff } from "utils/controller";
 import {
   ConnectReply,
-  Error,
+  Error as ControllerError,
   ResponseCodes,
   ExecuteReply,
   Policy,
@@ -17,6 +17,7 @@ import {
   Call,
   constants,
   InvocationsDetails,
+  RpcProvider,
   Signature,
   TypedData,
 } from "starknet";
@@ -36,6 +37,8 @@ import {
 import { useController } from "hooks/controller";
 import { Status } from "utils/account";
 import { username } from "methods/username";
+import { NextPage } from "next";
+import { isIframe } from "components/Auth/utils";
 
 type Context = Connect | Logout | Execute | SignMessage;
 
@@ -43,14 +46,14 @@ export type Connect = {
   origin: string;
   type: "connect";
   policies: Policy[];
-  resolve: (res: ConnectReply | Error) => void;
+  resolve: (res: ConnectReply | ControllerError) => void;
   reject: (reason?: unknown) => void;
 };
 
 type Logout = {
   origin: string;
   type: "logout";
-  resolve: (res: Error) => void;
+  resolve: (res: ControllerError) => void;
   reject: (reason?: unknown) => void;
 };
 
@@ -62,7 +65,7 @@ type Execute = {
   transactionsDetail?: InvocationsDetails & {
     chainId?: constants.StarknetChainId;
   };
-  resolve: (res: ExecuteReply | Error) => void;
+  resolve: (res: ExecuteReply | ControllerError) => void;
   reject: (reason?: unknown) => void;
 };
 
@@ -71,28 +74,52 @@ type SignMessage = {
   type: "sign-message";
   typedData: TypedData;
   account: string;
-  resolve: (signature: Signature | Error) => void;
+  resolve: (signature: Signature | ControllerError) => void;
   reject: (reason?: unknown) => void;
 };
 
-interface IndexProps {
-  chainId: string | null;
-  rpcUrl: string | null;
-}
-
-const Index: FC<IndexProps> = ({ chainId, rpcUrl }) => {
+const Index: NextPage= () => {
+  const [rpcUrl, setRpcUrl] = useState<string>();
+  const [chainId, setChainId] = useState<string>();
   const [controller, setController] = useController();
   const [context, setContext] = useState<Context>();
   const [showSignup, setShowSignup] = useState(false);
   const [prefilledUsername, setPrefilledUsername] = useState<string>();
+  const [error, setError] = useState<Error>(null);
 
-  // Create connection if not stored
   useEffect(() => {
-    if (typeof window === "undefined") {
+    if (isIframe()) {
       return;
     }
 
-    if (window.self === window.top) {
+    const fetchChainId = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const nodeUrl = urlParams.get("rpcUrl");
+
+      if (!nodeUrl) {
+        setError(new Error("rpcUrl is not provided in the query parameters"));
+        return;
+      }
+
+      try {
+        const rpc = new RpcProvider({ nodeUrl });
+        setRpcUrl(nodeUrl);
+        setChainId(await rpc.getChainId());
+      } catch (error) {
+        setError(new Error("Unable to fetch Chain ID from provided RPC URL"));
+      }
+    };
+
+    fetchChainId();
+  }, []);
+
+  // Create connection if not stored
+  useEffect(() => {
+    if (!isIframe()) {
+      return;
+    }
+
+    if (chainId === null || rpcUrl === null) {
       return;
     }
 
@@ -100,7 +127,11 @@ const Index: FC<IndexProps> = ({ chainId, rpcUrl }) => {
       methods: {
         connect: normalize(
           (origin: string) =>
-            async (policies: Policy[]): Promise<ConnectReply> => {
+            async (policies: Policy[], rpcUrl: string): Promise<ConnectReply | ControllerError> => {
+              const rpc = new RpcProvider({ nodeUrl: rpcUrl });
+              setChainId(await rpc.getChainId());
+              setRpcUrl(rpcUrl);
+
               return await new Promise((resolve, reject) => {
                 setContext({
                   type: "connect",
@@ -126,9 +157,9 @@ const Index: FC<IndexProps> = ({ chainId, rpcUrl }) => {
                 abis?: Abi[],
                 transactionsDetail?: InvocationsDetails,
                 sync?: boolean,
-              ): Promise<ExecuteReply | Error> => {
+              ): Promise<ExecuteReply | ControllerError> => {
                 if (sync) {
-                  return await new Promise((resolve, reject) => {
+                  return new Promise((resolve, reject) => {
                     setContext({
                       type: "execute",
                       origin,
@@ -261,14 +292,14 @@ const Index: FC<IndexProps> = ({ chainId, rpcUrl }) => {
         sessions: normalize(sessions),
         reset: normalize(() => () => setContext(undefined)),
         username: normalize(username),
-      },
+      }
     });
 
     return () => {
       connection.destroy();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setContext]);
+  }, [chainId, rpcUrl, setContext]);
 
   if (window.self === window.top) {
     return <></>;
@@ -276,6 +307,10 @@ const Index: FC<IndexProps> = ({ chainId, rpcUrl }) => {
 
   if (!context?.origin) {
     return <></>;
+  }
+
+  if (error) {
+    return <>{error.message}</>
   }
 
   // No controller, send to login
@@ -344,7 +379,7 @@ const Index: FC<IndexProps> = ({ chainId, rpcUrl }) => {
             code: ResponseCodes.SUCCESS,
             address: controller.address,
             policies,
-          } as any);
+          });
         }}
         onCancel={() =>
           ctx.resolve({ code: ResponseCodes.CANCELED, message: "Canceled" })

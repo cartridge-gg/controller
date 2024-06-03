@@ -5,7 +5,6 @@ import {
   AccountInterface,
   addAddressPadding,
   constants,
-  RpcProvider,
 } from "starknet";
 import {
   AsyncMethodReturns,
@@ -29,24 +28,13 @@ import { createModal } from "./modal";
 import { defaultPresets } from "./presets";
 import { NotReadyToConnect } from "./errors";
 
-// @dev override url to local sequencer for local dev
-// http://localhost:8000/x/starknet/mainnet
-export const providers: { [key: string]: RpcProvider } = {
-  [constants.StarknetChainId.SN_MAIN]: new RpcProvider({
-    nodeUrl: "https://api.cartridge.gg/x/starknet/mainnet",
-  }),
-  [constants.StarknetChainId.SN_SEPOLIA]: new RpcProvider({
-    nodeUrl: "https://api.cartridge.gg/x/starknet/sepolia",
-  }),
-};
-
 class Controller {
   private connection?: Connection<Keychain>;
   public keychain?: AsyncMethodReturns<Keychain>;
   private policies: Policy[] = [];
-  private url: string = "https://x.cartridge.gg";
-  public chainId: constants.StarknetChainId =
-    constants.StarknetChainId.SN_SEPOLIA;
+  private url = new URL("https://x.cartridge.gg");
+  public rpc = new URL("https://api.cartridge.gg/x/starknet/sepolia");
+  public chainId: string = constants.StarknetChainId.SN_SEPOLIA;
   public account?: AccountInterface;
   private modal?: Modal;
   // private starterPackId?: string;
@@ -61,12 +49,12 @@ class Controller {
       });
     }
 
-    if (options?.chainId) {
-      this.chainId = options.chainId;
+    if (options?.url) {
+      this.url = new URL(options.url);
     }
 
-    if (options?.url) {
-      this.url = options.url;
+    if (options?.rpc) {
+      this.rpc = new URL(options.rpc);
     }
 
     this.setTheme(options?.theme, options?.config?.presets);
@@ -78,7 +66,7 @@ class Controller {
       return;
     }
 
-    this.modal = createModal(this.url, () => {
+    this.modal = createModal(this.url.toString(), () => {
       this.keychain?.reset();
     });
 
@@ -94,7 +82,7 @@ class Controller {
     }
 
     this.connection = connectToChild<Keychain>({
-      iframe: this.modal.element.children[0] as HTMLIFrameElement,
+      iframe: this.modal.element.children[0] as HTMLIFrameElement
     });
 
     this.connection.promise
@@ -107,16 +95,11 @@ class Controller {
     presets: ControllerThemePresets = defaultPresets,
   ) {
     const theme = presets[id] ?? defaultPresets.cartridge;
-
-    const url = new URL(this.url);
-    url.searchParams.set("theme", encodeURIComponent(JSON.stringify(theme)));
-    this.url = url.toString();
+    this.url.searchParams.set("theme", encodeURIComponent(JSON.stringify(theme)));
   }
 
   private setColorMode(colorMode: ColorMode) {
-    const url = new URL(this.url);
-    url.searchParams.set("colorMode", colorMode);
-    this.url = url.toString();
+    this.url.searchParams.set("colorMode", colorMode);
   }
 
   ready() {
@@ -144,7 +127,7 @@ class Controller {
 
       const { address } = res as ProbeReply;
       this.account = new DeviceAccount(
-        providers[this.chainId],
+        this.rpc.toString(),
         address,
         this.keychain,
         this.modal,
@@ -177,14 +160,14 @@ class Controller {
     this.modal.open();
 
     try {
-      let response = await this.keychain.connect(this.policies);
+      let response = await this.keychain.connect(this.policies, this.rpc.toString());
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
       }
-
+      
       response = response as ConnectReply;
       this.account = new DeviceAccount(
-        providers[this.chainId],
+        this.rpc.toString(),
         response.address,
         this.keychain,
         this.modal,
@@ -237,5 +220,4 @@ class Controller {
 export * from "./types";
 export * from "./errors";
 export { computeAddress, split, verifyMessageHash } from "./utils";
-export { injectController } from "./inject";
 export default Controller;

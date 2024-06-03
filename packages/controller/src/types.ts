@@ -75,7 +75,8 @@ export type ProbeReply = {
 export interface Keychain {
   probe(): Promise<ProbeReply | Error>;
   connect(
-    policies: Policy[]
+    policies: Policy[],
+    rpcUrl: string,
   ): Promise<ConnectReply | Error>;
   disconnect(): void;
 
@@ -128,7 +129,6 @@ export type ControllerOptions = {
   url?: string;
   origin?: string;
   starterPackId?: string;
-  chainId?: constants.StarknetChainId;
   rpc?: string;
   theme?: string;
   colorMode?: ColorMode;

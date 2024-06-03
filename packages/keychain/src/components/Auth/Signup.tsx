@@ -24,6 +24,7 @@ import { RegistrationLink } from "./RegistrationLink";
 import { doSignup } from "hooks/account";
 import { useControllerTheme } from "hooks/theme";
 import { Error as ErrorComp } from "components/Error";
+import { shortString } from "starknet";
 
 export function Signup({
   prefilledName = "",
@@ -147,10 +148,13 @@ function Form({
         );
 
         controller.account.status = Status.DEPLOYING;
+
         await client.request(DeployAccountDocument, {
           id: values.username,
-          chainId,
+          chainId: `starknet:${shortString.decodeShortString(chainId)}`
         });
+
+        controller.store();
         await controller.account.sync();
 
         onSuccess(controller);

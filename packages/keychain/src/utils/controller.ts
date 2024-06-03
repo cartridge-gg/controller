@@ -24,6 +24,8 @@ export default class Controller {
   public account: Account;
   public address: string;
   public username: string;
+  public chainId: string;
+  public rpcUrl: string;
   public signer: SignerInterface;
   protected publicKey: string;
   protected credentialId: string;
@@ -38,6 +40,8 @@ export default class Controller {
   ) {
     this.address = address;
     this.username = username;
+    this.chainId = chainId;
+    this.rpcUrl = rpcUrl;
     this.publicKey = publicKey;
     this.credentialId = credentialId;
     this.account = new Account(chainId, rpcUrl, address, this.signer, {
@@ -125,10 +129,13 @@ export default class Controller {
       selectors[VERSION].admin(this.address, process.env.NEXT_PUBLIC_ADMIN_URL),
       {},
     );
-    Storage.set(selectors[VERSION].active(), this.address);
+    Storage.set(selectors[VERSION].active(), {
+      address: this.address,
+      rpcUrl: this.rpcUrl,
+      chainId: this.chainId,
+    });
 
     return Storage.set(selectors[VERSION].account(this.address), {
-      address: this.address,
       username: this.username,
       publicKey: this.publicKey,
       credentialId: this.credentialId,
@@ -147,7 +154,7 @@ export default class Controller {
         selectors[VERSION].active(),
       );
       controller = Storage.get(selectors[VERSION].account(address));
-
+      console.log(controller);
       if (!controller) {
         return;
       }
