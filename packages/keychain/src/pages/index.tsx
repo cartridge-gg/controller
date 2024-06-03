@@ -1,8 +1,8 @@
 import type { NextPage } from "next";
 import dynamic from "next/dynamic";
-import { diff } from "utils/controller";
-import { ResponseCodes, ExecuteReply } from "@cartridge/controller";
+import { useState } from "react";
 import { Signature } from "starknet";
+import { ResponseCodes, ExecuteReply } from "@cartridge/controller";
 import {
   Connect,
   DeploymentRequired,
@@ -12,16 +12,16 @@ import {
   SignMessage,
   Signup,
 } from "components";
+import { useConnection, } from 'hooks/connection'
 import {
   ConnectionCtx,
   ConnectCtx,
   ExecuteCtx,
   LogoutCtx,
   SignMessageCtx,
-  useConnection,
-} from "hooks/connection";
-import { useState } from "react";
-import logout from "methods/logout";
+} from "utils/connection";
+import { diff } from "utils/controller";
+import { logout } from "utils/connection/logout";
 
 const Index: NextPage = () => {
   const [showSignup, setShowSignup] = useState(false);

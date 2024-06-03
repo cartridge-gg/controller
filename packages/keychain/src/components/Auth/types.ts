@@ -1,6 +1,6 @@
 import { constants } from "starknet";
 import Controller from "utils/controller";
-import { ConnectCtx } from "hooks/connection";
+import { ConnectCtx } from "utils/connection";
 
 export type FormValues = {
   username: string;

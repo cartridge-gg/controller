@@ -1,0 +1,68 @@
+export * from "./types";
+
+import { constants } from "starknet";
+import { ConnectError, ResponseCodes } from "@cartridge/controller";
+import { connectToParent } from "@cartridge/penpal";
+import { normalize as normalizeOrigin } from "utils/url";
+import Controller from "utils/controller";
+import { connectFactory, disconnectFactory } from "./connect";
+import { executeFactory } from "./execute";
+import { estimateDeclareFee, estimateInvokeFee } from "./estimate";
+import { logout } from "./logout";
+import { probeFactory } from "./probe";
+import { revoke, sessionFactory, sessions } from "./sessions";
+import { signMessageFactory } from "./sign";
+import { username } from "./username";
+import { ConnectionCtx } from "./types";
+
+export function connectToController({
+  chainId,
+  setChainId,
+  setContext,
+  setController,
+}: {
+  chainId: constants.StarknetChainId;
+  setChainId: (chainId: constants.StarknetChainId) => void;
+  setContext: (ctx: ConnectionCtx) => void;
+  setController: (controller: Controller) => void;
+}) {
+  return connectToParent({
+    methods: {
+      connect: normalize(connectFactory({ setChainId, setContext })),
+      disconnect: normalize(validate(disconnectFactory(setController))),
+      execute: normalize(validate(executeFactory({ chainId, setContext }))),
+      estimateDeclareFee: normalize(validate(estimateDeclareFee)),
+      estimateInvokeFee: normalize(validate(estimateInvokeFee)),
+      logout: normalize(logout),
+      probe: normalize(validate(probeFactory(chainId))),
+      revoke: normalize(revoke),
+      signMessage: normalize(validate(signMessageFactory(setContext))),
+      session: normalize(sessionFactory(chainId)),
+      sessions: normalize(sessions),
+      reset: normalize(() => () => setContext(undefined)),
+      username: normalize(username),
+    },
+  });
+}
+
+function normalize<Promise>(
+  fn: (origin: string) => Promise,
+): (origin: string) => Promise {
+  return (origin: string) => fn(normalizeOrigin(origin));
+}
+
+function validate<T>(
+  fn: (controller: Controller, origin: string) => T,
+): (origin: string) => T | (() => Promise<ConnectError>) {
+  return (origin: string) => {
+    const controller = Controller.fromStore();
+    if (!controller) {
+      return async () => ({
+        code: ResponseCodes.NOT_CONNECTED,
+        message: "Controller not found.",
+      });
+    }
+
+    return fn(controller, origin);
+  };
+}
