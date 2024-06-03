@@ -8,9 +8,8 @@ import {
 
 import Controller from "utils/controller";
 
-const estimateInvokeFee =
-  (controller: Controller) =>
-  async (
+export function estimateInvokeFee(controller: Controller) {
+  return async (
     transactions: Call | Call[],
     details?: EstimateFeeDetails & {
       chainId: constants.StarknetChainId;
@@ -22,10 +21,10 @@ const estimateInvokeFee =
       .account(details.chainId)
       .estimateInvokeFee(calls, details);
   };
+}
 
-const estimateDeclareFee =
-  (controller: Controller) =>
-  async (
+export function estimateDeclareFee(controller: Controller) {
+  return async (
     payload: DeclareContractPayload,
     details?: EstimateFeeDetails & {
       chainId: constants.StarknetChainId;
@@ -35,5 +34,4 @@ const estimateDeclareFee =
       .account(details.chainId)
       .estimateDeclareFee(payload, details);
   };
-
-export { estimateDeclareFee, estimateInvokeFee };
+}

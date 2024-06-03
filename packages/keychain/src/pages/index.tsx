@@ -1,30 +1,8 @@
 import type { NextPage } from "next";
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
-import { connectToParent } from "@cartridge/penpal";
-import Controller, { diff } from "utils/controller";
-import {
-  ConnectReply,
-  Error,
-  ResponseCodes,
-  ExecuteReply,
-  Policy,
-  Session,
-  ProbeReply,
-} from "@cartridge/controller";
-import {
-  Abi,
-  addAddressPadding,
-  Call,
-  constants,
-  InvocationsDetails,
-  Signature,
-  TypedData,
-} from "starknet";
-import { estimateDeclareFee, estimateInvokeFee } from "../methods/estimate";
-import logout from "../methods/logout";
-import { revoke, session, sessions } from "../methods/sessions";
-import { normalize, validate } from "../methods";
+import { useState } from "react";
+import { Signature } from "starknet";
+import { ResponseCodes, ExecuteReply } from "@cartridge/controller";
 import {
   Connect,
   DeploymentRequired,
@@ -34,251 +12,22 @@ import {
   SignMessage,
   Signup,
 } from "components";
-import { useController } from "hooks/controller";
-import { Status } from "utils/account";
-import { username } from "methods/username";
-
-type Context = Connect | Logout | Execute | SignMessage;
-
-export type Connect = {
-  origin: string;
-  type: "connect";
-  policies: Policy[];
-  resolve: (res: ConnectReply | Error) => void;
-  reject: (reason?: unknown) => void;
-};
-
-type Logout = {
-  origin: string;
-  type: "logout";
-  resolve: (res: Error) => void;
-  reject: (reason?: unknown) => void;
-};
-
-type Execute = {
-  origin: string;
-  type: "execute";
-  transactions: Call | Call[];
-  abis?: Abi[];
-  transactionsDetail?: InvocationsDetails & {
-    chainId?: constants.StarknetChainId;
-  };
-  resolve: (res: ExecuteReply | Error) => void;
-  reject: (reason?: unknown) => void;
-};
-
-type SignMessage = {
-  origin: string;
-  type: "sign-message";
-  typedData: TypedData;
-  account: string;
-  resolve: (signature: Signature | Error) => void;
-  reject: (reason?: unknown) => void;
-};
+import { useConnection, } from 'hooks/connection'
+import {
+  ConnectionCtx,
+  ConnectCtx,
+  ExecuteCtx,
+  LogoutCtx,
+  SignMessageCtx,
+} from "utils/connection";
+import { diff } from "utils/controller";
+import { logout } from "utils/connection/logout";
 
 const Index: NextPage = () => {
-  const [chainId, setChainId] = useState<constants.StarknetChainId>(
-    constants.StarknetChainId.SN_SEPOLIA,
-  );
-  const [controller, setController] = useController();
-  const [context, setContext] = useState<Context>();
   const [showSignup, setShowSignup] = useState(false);
   const [prefilledUsername, setPrefilledUsername] = useState<string>();
-
-  // Create connection if not stored
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    if (window.self === window.top) {
-      return;
-    }
-
-    const connection = connectToParent({
-      methods: {
-        connect: normalize(
-          (origin: string) =>
-            async (
-              policies: Policy[],
-              chainId?: constants.StarknetChainId,
-            ): Promise<ConnectReply> => {
-              return await new Promise((resolve, reject) => {
-                if (chainId) {
-                  setChainId(chainId);
-                }
-                setContext({
-                  type: "connect",
-                  origin,
-                  policies,
-                  resolve,
-                  reject,
-                } as Connect);
-              });
-            },
-        ),
-        disconnect: normalize(
-          validate((controller: Controller, _origin: string) => () => {
-            controller.delete();
-            setController(undefined);
-          }),
-        ),
-        execute: normalize(
-          validate(
-            (controller: Controller, origin: string) =>
-              async (
-                transactions: Call | Call[],
-                abis?: Abi[],
-                transactionsDetail?: InvocationsDetails & {
-                  chainId?: constants.StarknetChainId;
-                },
-                sync?: boolean,
-              ): Promise<ExecuteReply | Error> => {
-                const cId = transactionsDetail?.chainId
-                  ? transactionsDetail.chainId
-                  : chainId;
-                if (sync) {
-                  return await new Promise((resolve, reject) => {
-                    setContext({
-                      type: "execute",
-                      origin,
-                      transactions,
-                      abis,
-                      transactionsDetail,
-                      resolve,
-                      reject,
-                    } as Execute);
-                  });
-                }
-                const account = controller.account(cId);
-                if (account.status === Status.DEPLOYING) {
-                  return Promise.resolve({
-                    code: ResponseCodes.NOT_ALLOWED,
-                    message: "Account is deploying.",
-                  });
-                }
-
-                const calls = Array.isArray(transactions)
-                  ? transactions
-                  : [transactions];
-                const policies = calls.map(
-                  (txn) =>
-                    ({
-                      target: addAddressPadding(txn.contractAddress),
-                      method: txn.entrypoint,
-                    } as Policy),
-                );
-
-                const session = controller.session(origin, cId);
-                if (!session) {
-                  return Promise.resolve({
-                    code: ResponseCodes.NOT_ALLOWED,
-                    message: `No session`,
-                  });
-                }
-
-                const missing = diff(policies, session.policies);
-                if (missing.length > 0) {
-                  return Promise.resolve({
-                    code: ResponseCodes.NOT_ALLOWED,
-                    message: `Missing policies: ${JSON.stringify(missing)}`,
-                  });
-                }
-
-                if (!transactionsDetail.maxFee) {
-                  try {
-                    const estFee = await account.estimateInvokeFee(calls, {
-                      nonce: transactionsDetail.nonce,
-                    });
-
-                    transactionsDetail.maxFee = estFee.suggestedMaxFee;
-                  } catch (e) {
-                    return Promise.resolve({
-                      code: ResponseCodes.NOT_ALLOWED,
-                      message: e.message,
-                    });
-                  }
-                }
-
-                if (
-                  session.maxFee &&
-                  transactionsDetail &&
-                  BigInt(transactionsDetail.maxFee) > BigInt(session.maxFee)
-                ) {
-                  return Promise.resolve({
-                    code: ResponseCodes.NOT_ALLOWED,
-                    message: `Max fee exceeded: ${transactionsDetail.maxFee.toString()} > ${session.maxFee.toString()}`,
-                  });
-                }
-
-                try {
-                  const res = await account.execute(
-                    calls,
-                    session,
-                    transactionsDetail,
-                  );
-
-                  return {
-                    code: ResponseCodes.SUCCESS,
-                    ...res,
-                  };
-                } catch (e) {
-                  return {
-                    code: ResponseCodes.NOT_ALLOWED,
-                    message: e.message,
-                  };
-                }
-              },
-          ),
-        ),
-        estimateDeclareFee: normalize(validate(estimateDeclareFee)),
-        estimateInvokeFee: normalize(validate(estimateInvokeFee)),
-        logout: normalize(logout),
-        probe: normalize(
-          validate(
-            (controller: Controller, origin: string) => (): ProbeReply => {
-              const session = controller.session(origin, chainId);
-              return {
-                code: ResponseCodes.SUCCESS,
-                address: controller.address,
-                policies: session?.policies || [],
-              };
-            },
-          ),
-        ),
-        revoke: normalize(revoke),
-        signMessage: normalize(
-          validate(
-            (_: Controller, origin: string) =>
-              async (typedData: TypedData, account: string) => {
-                return await new Promise((resolve, reject) => {
-                  setContext({
-                    type: "sign-message",
-                    origin,
-                    typedData,
-                    account,
-                    resolve,
-                    reject,
-                  } as SignMessage);
-                });
-              },
-          ),
-        ),
-        session: normalize(
-          (origin: string) => async (): Promise<Session> =>
-            await new Promise(() => session(origin, chainId)),
-        ),
-        sessions: normalize(sessions),
-        reset: normalize(() => () => setContext(undefined)),
-        username: normalize(username),
-      },
-    });
-
-    return () => {
-      connection.destroy();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setContext]);
+  const { context, controller, setController, chainId, setContext } =
+    useConnection();
 
   if (window.self === window.top) {
     return <></>;
@@ -290,6 +39,7 @@ const Index: NextPage = () => {
 
   // No controller, send to login
   if (!controller) {
+    const ctx = context as ConnectCtx;
     return (
       <>
         {showSignup ? (
@@ -300,7 +50,7 @@ const Index: NextPage = () => {
               setShowSignup(false);
             }}
             onSuccess={setController}
-            context={context as Connect}
+            context={ctx}
           />
         ) : (
           <Login
@@ -311,118 +61,86 @@ const Index: NextPage = () => {
               setShowSignup(true);
             }}
             onSuccess={setController}
-            context={context as Connect}
+            context={ctx}
           />
         )}
       </>
     );
   }
 
-  const onLogout = (context: Context) => {
+  const onLogout = (context: ConnectionCtx) => {
     setContext({
       origin: context.origin,
       type: "logout",
       resolve: context.resolve,
       reject: context.reject,
-    } as Logout);
+    } as LogoutCtx);
   };
 
-  if (context.type === "connect") {
-    const ctx = context as Connect;
-    const session = controller.session(context.origin, chainId);
+  switch (context.type) {
+    case "connect": {
+      const ctx = context as ConnectCtx;
+      const session = controller.session(context.origin, chainId);
 
-    // if no mismatch with existing policies then return success
-    if (session && diff(session.policies, ctx.policies).length === 0) {
-      ctx.resolve({
-        code: ResponseCodes.SUCCESS,
-        address: controller.address,
-        policies: ctx.policies,
-      });
-      return <></>;
+      // if no mismatch with existing policies then return success
+      if (session && diff(session.policies, ctx.policies).length === 0) {
+        ctx.resolve({
+          code: ResponseCodes.SUCCESS,
+          address: controller.address,
+          policies: ctx.policies,
+        });
+        return <></>;
+      }
+
+      return (
+        <Connect
+          chainId={chainId}
+          origin={ctx.origin}
+          policies={ctx.type === "connect" ? (ctx as ConnectCtx).policies : []}
+          onConnect={(policies) => {
+            context.resolve({
+              code: ResponseCodes.SUCCESS,
+              address: controller.address,
+              policies,
+            } as any);
+          }}
+          onCancel={() =>
+            ctx.resolve({ code: ResponseCodes.CANCELED, message: "Canceled" })
+          }
+          onLogout={() => onLogout(ctx)}
+        />
+      );
     }
+    case "logout": {
+      const ctx = context as LogoutCtx;
 
-    return (
-      <Connect
-        chainId={chainId}
-        origin={ctx.origin}
-        policies={ctx.type === "connect" ? (ctx as Connect).policies : []}
-        onConnect={(policies) => {
-          context.resolve({
-            code: ResponseCodes.SUCCESS,
-            address: controller.address,
-            policies,
-          } as any);
-        }}
-        onCancel={() =>
-          ctx.resolve({ code: ResponseCodes.CANCELED, message: "Canceled" })
-        }
-        onLogout={() => onLogout(ctx)}
-      />
-    );
-  }
-
-  if (context.type === "logout") {
-    const ctx = context as Logout;
-
-    return (
-      <Logout
-        onConfirm={() => {
-          logout(ctx.origin)();
-          ctx.resolve({
-            code: ResponseCodes.NOT_CONNECTED,
-            message: "User logged out",
-          });
-        }}
-        onCancel={() =>
-          ctx.resolve({
-            code: ResponseCodes.CANCELED,
-            message: "User cancelled logout",
-          })
-        }
-      />
-    );
-  }
-
-  if (context.type === "sign-message") {
-    const ctx = context as SignMessage;
-    return (
-      <SignMessage
-        chainId={chainId}
-        controller={controller}
-        origin={ctx.origin}
-        typedData={ctx.typedData}
-        onSign={(sig: Signature) => context.resolve(sig)}
-        onCancel={() =>
-          ctx.resolve({
-            code: ResponseCodes.CANCELED,
-            message: "Canceled",
-          })
-        }
-        onLogout={() => onLogout(ctx)}
-      />
-    );
-  }
-
-  if (context.type === "execute") {
-    const ctx = context as Execute;
-
-    return (
-      <DeploymentRequired
-        chainId={chainId}
-        controller={controller}
-        onClose={() =>
-          ctx.resolve({
-            code: ResponseCodes.CANCELED,
-            message: "Canceled",
-          })
-        }
-        onLogout={() => onLogout(ctx)}
-      >
-        <Execute
-          {...ctx}
+      return (
+        <Logout
+          onConfirm={() => {
+            logout(ctx.origin)();
+            ctx.resolve({
+              code: ResponseCodes.NOT_CONNECTED,
+              message: "User logged out",
+            });
+          }}
+          onCancel={() =>
+            ctx.resolve({
+              code: ResponseCodes.CANCELED,
+              message: "User cancelled logout",
+            })
+          }
+        />
+      );
+    }
+    case "sign-message": {
+      const ctx = context as SignMessageCtx;
+      return (
+        <SignMessage
           chainId={chainId}
           controller={controller}
-          onExecute={(res: ExecuteReply) => ctx.resolve(res)}
+          origin={ctx.origin}
+          typedData={ctx.typedData}
+          onSign={(sig: Signature) => context.resolve(sig)}
           onCancel={() =>
             ctx.resolve({
               code: ResponseCodes.CANCELED,
@@ -431,11 +149,42 @@ const Index: NextPage = () => {
           }
           onLogout={() => onLogout(ctx)}
         />
-      </DeploymentRequired>
-    );
-  }
+      );
+    }
+    case "execute": {
+      const ctx = context as ExecuteCtx;
 
-  return <>*Waves*</>;
+      return (
+        <DeploymentRequired
+          chainId={chainId}
+          controller={controller}
+          onClose={() =>
+            ctx.resolve({
+              code: ResponseCodes.CANCELED,
+              message: "Canceled",
+            })
+          }
+          onLogout={() => onLogout(ctx)}
+        >
+          <Execute
+            {...ctx}
+            chainId={chainId}
+            controller={controller}
+            onExecute={(res: ExecuteReply) => ctx.resolve(res)}
+            onCancel={() =>
+              ctx.resolve({
+                code: ResponseCodes.CANCELED,
+                message: "Canceled",
+              })
+            }
+            onLogout={() => onLogout(ctx)}
+          />
+        </DeploymentRequired>
+      );
+    }
+    default:
+      return <>*Waves*</>;
+  }
 };
 
 export default dynamic(() => Promise.resolve(Index), { ssr: false });

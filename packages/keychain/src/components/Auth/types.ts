@@ -1,6 +1,6 @@
-import { Connect } from "pages";
 import { constants } from "starknet";
 import Controller from "utils/controller";
+import { ConnectCtx } from "utils/connection";
 
 export type FormValues = {
   username: string;
@@ -10,7 +10,7 @@ export type AuthProps = SignupProps | LoginProps;
 
 type AuthBaseProps = {
   prefilledName?: string;
-  context?: Connect;
+  context?: ConnectCtx;
   isSlot?: boolean;
   onSuccess: (controller: Controller) => void;
 };

@@ -6,12 +6,14 @@ import {
   Show,
   HStack,
   Text,
+  IconButton,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { ReactNode } from "react";
 import { Header, HeaderProps } from "./Header";
 import { constants } from "starknet";
-import { CartridgeLogo } from "@cartridge/ui";
+import { CartridgeLogo, TimesIcon } from "@cartridge/ui";
+import { useConnection } from "hooks/connection";
 
 export function Container({
   children,
@@ -23,8 +25,23 @@ export function Container({
   children: ReactNode;
 } & StyleProps &
   HeaderProps) {
+  const { close } = useConnection();
+
   return (
     <Wrapper {...rest}>
+      <IconButton
+        aria-label="Close Keychain"
+        icon={<TimesIcon />}
+        position="absolute"
+        zIndex="9999999"
+        colorScheme="translucent"
+        size="sm"
+        h={8}
+        top={3}
+        left={3}
+        onClick={close}
+      />
+
       <Header chainId={chainId} onBack={onBack} hideAccount={hideAccount} />
 
       <VStack
@@ -61,7 +78,7 @@ export function Container({
 
         <CartridgeLogo fontSize={100} color="text.secondary" />
       </HStack>
-    </Wrapper >
+    </Wrapper>
   );
 }
 
