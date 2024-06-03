@@ -1,4 +1,4 @@
-import { Error, ResponseCodes } from "@cartridge/controller";
+import { ConnectError, ResponseCodes } from "@cartridge/controller";
 
 import { normalize as normalizeOrigin } from "utils/url";
 import Controller from "utils/controller";
@@ -11,7 +11,7 @@ export function normalize<Promise>(
 
 export function validate<T>(
   fn: (controller: Controller, origin: string) => T,
-): (origin: string) => T | (() => Promise<Error>) {
+): (origin: string) => T | (() => Promise<ConnectError>) {
   return (origin: string) => {
     const controller = Controller.fromStore();
     if (!controller) {
