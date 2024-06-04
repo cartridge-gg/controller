@@ -51,7 +51,7 @@ export enum ResponseCodes {
   CANCELED = "CANCELED",
 }
 
-export type ControllerError = {
+export type ConnectError = {
   code: ResponseCodes;
   message: string;
 };
@@ -73,16 +73,16 @@ export type ProbeReply = {
 };
 
 export interface Keychain {
-  probe(): Promise<ProbeReply | ControllerError>;
+  probe(): Promise<ProbeReply | ConnectError>;
   connect(
     policies: Policy[],
     rpcUrl: string,
-  ): Promise<ConnectReply | ControllerError>;
+  ): Promise<ConnectReply | ConnectError>;
   disconnect(): void;
 
   reset(): void;
   revoke(origin: string): void;
-
+  
   estimateDeclareFee(
     payload: DeclareContractPayload,
     details?: EstimateFeeDetails,
@@ -96,7 +96,7 @@ export interface Keychain {
     abis?: Abi[],
     transactionsDetail?: InvocationsDetails,
     sync?: boolean,
-  ): Promise<ExecuteReply | ControllerError>;
+  ): Promise<ExecuteReply | ConnectError>;
   logout(): Promise<void>;
   session(): Promise<Session>;
   sessions(): Promise<{
@@ -105,7 +105,7 @@ export interface Keychain {
   signMessage(
     typedData: TypedData,
     account: string,
-  ): Promise<Signature | ControllerError>;
+  ): Promise<Signature | ConnectError>;
   signTransaction(
     transactions: Call[],
     transactionsDetail: InvocationsSignerDetails,

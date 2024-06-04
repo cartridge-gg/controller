@@ -1,31 +1,26 @@
 import { ConnectReply, Policy } from "@cartridge/controller";
-import { constants } from "starknet";
 import { ConnectCtx, ConnectionCtx } from "./types";
 import Controller from "utils/controller";
 
 export function connectFactory({
-  setChainId,
+  setRpcUrl,
   setContext,
 }: {
-  setChainId: (chainId: constants.StarknetChainId) => void;
+  setRpcUrl: (url: string) => void;
   setContext: (context: ConnectionCtx) => void;
 }) {
   return (origin: string) =>
     (
       policies: Policy[],
-      starterPackId?: string,
-      chainId?: constants.StarknetChainId,
+      rpcUrl: string,
     ): Promise<ConnectReply> => {
-      if (chainId) {
-        setChainId(chainId);
-      }
+      setRpcUrl(rpcUrl);
 
       return new Promise((resolve, reject) => {
         setContext({
           type: "connect",
           origin,
           policies,
-          starterPackId,
           resolve,
           reject,
         } as ConnectCtx);

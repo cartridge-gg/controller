@@ -15,21 +15,19 @@ import { username } from "./username";
 import { ConnectionCtx } from "./types";
 
 export function connectToController({
-  chainId,
-  setChainId,
+  setRpcUrl,
   setContext,
   setController,
 }: {
-  chainId: string;
-  setChainId: (chainId: string) => void;
+  setRpcUrl: (url: string) => void;
   setContext: (ctx: ConnectionCtx) => void;
   setController: (controller: Controller) => void;
 }) {
   return connectToParent({
     methods: {
-      connect: normalize(connectFactory({ setChainId, setContext })),
+      connect: normalize(connectFactory({ setRpcUrl, setContext })),
       disconnect: normalize(validate(disconnectFactory(setController))),
-      execute: normalize(validate(executeFactory({ chainId, setContext }))),
+      execute: normalize(validate(executeFactory({ setContext }))),
       estimateDeclareFee: normalize(validate(estimateDeclareFee)),
       estimateInvokeFee: normalize(validate(estimateInvokeFee)),
       logout: normalize(logout),
@@ -41,6 +39,7 @@ export function connectToController({
       reset: normalize(() => () => setContext(undefined)),
       username: normalize(username),
     },
+    debug: true
   });
 }
 

@@ -53,8 +53,7 @@ const connectors = [
       },
     ],
     {
-      url,
-      rpc: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
+      url
       // theme: "rollyourown",
       // colorMode: "light"
     },

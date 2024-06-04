@@ -10,10 +10,8 @@ import { Status } from "utils/account";
 import { ConnectionCtx, ExecuteCtx } from "./types";
 
 export function executeFactory({
-  chainId,
   setContext,
 }: {
-  chainId: string;
   setContext: (context: ConnectionCtx) => void;
 }) {
   return (controller: Controller, origin: string) =>
@@ -25,9 +23,6 @@ export function executeFactory({
       },
       sync?: boolean,
     ): Promise<ExecuteReply | ConnectError> => {
-      const cId = transactionsDetail?.chainId
-        ? transactionsDetail.chainId
-        : chainId;
       if (sync) {
         return await new Promise((resolve, reject) => {
           setContext({

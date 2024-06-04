@@ -1,7 +1,11 @@
 export * from "./types";
 export { defaultPresets } from "./presets";
 
-import { AccountInterface, addAddressPadding, constants } from "starknet";
+import {
+  AccountInterface,
+  addAddressPadding,
+  constants,
+} from "starknet";
 import {
   AsyncMethodReturns,
   Connection,
@@ -25,14 +29,14 @@ import { defaultPresets } from "./presets";
 import { NotReadyToConnect } from "./errors";
 
 class Controller {
-  private connection?: Connection<Keychain>;
-  public keychain?: AsyncMethodReturns<Keychain>;
-  private policies: Policy[] = [];
   private url = new URL("https://x.cartridge.gg");
+  private policies: Policy[] = [];
+  private connection?: Connection<Keychain>;
+  private modal?: Modal;
+  public keychain?: AsyncMethodReturns<Keychain>;
   public rpc = new URL("https://api.cartridge.gg/x/starknet/sepolia");
   public chainId: string = constants.StarknetChainId.SN_SEPOLIA;
   public account?: AccountInterface;
-  private modal?: Modal;
   // private starterPackId?: string;
 
   constructor(policies?: Policy[], options?: ControllerOptions) {
@@ -76,7 +80,7 @@ class Controller {
         document.body.appendChild(this.modal!.element);
       });
     }
-
+    
     this.connection = connectToChild<Keychain>({
       iframe: this.modal.element.children[0] as HTMLIFrameElement,
       methods: {
@@ -84,6 +88,7 @@ class Controller {
           this.modal?.close();
         },
       },
+      debug: true
     });
 
     this.connection.promise
@@ -96,10 +101,7 @@ class Controller {
     presets: ControllerThemePresets = defaultPresets,
   ) {
     const theme = presets[id] ?? defaultPresets.cartridge;
-    this.url.searchParams.set(
-      "theme",
-      encodeURIComponent(JSON.stringify(theme)),
-    );
+    this.url.searchParams.set("theme", encodeURIComponent(JSON.stringify(theme)));
   }
 
   private setColorMode(colorMode: ColorMode) {
@@ -164,14 +166,11 @@ class Controller {
     this.modal.open();
 
     try {
-      let response = await this.keychain.connect(
-        this.policies,
-        this.rpc.toString(),
-      );
+      let response = await this.keychain.connect(this.policies, this.rpc.toString());
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
       }
-
+      
       response = response as ConnectReply;
       this.account = new DeviceAccount(
         this.rpc.toString(),

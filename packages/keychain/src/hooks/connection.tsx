@@ -63,10 +63,9 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
     if (!isIframe() || !chainId || !rpcUrl) {
       return;
     }
-
+  
     const connection = connectToController({
-      chainId,
-      setChainId,
+      setRpcUrl,
       setContext,
       setController,
     });

@@ -47,14 +47,12 @@ export function Login({
       } = await fetchAccount(values.username);
 
       try {
-        const controller = new Controller({
-          chainId,
+        const controller = new Controller({chainId,
           rpcUrl,
           address,
           username: values.username,
           publicKey,
-          credentialId,
-        });
+          credentialId,});
 
         if (isSlot) {
           await doLogin(values.username, credentialId, publicKey);
