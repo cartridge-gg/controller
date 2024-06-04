@@ -27,7 +27,11 @@ class DeviceAccount extends Account {
     keychain: AsyncMethodReturns<Keychain>,
     modal: Modal,
   ) {
-    super(new RpcProvider({nodeUrl: rpcUrl}), address, new Signer(keychain, modal));
+    super(
+      new RpcProvider({ nodeUrl: rpcUrl }),
+      address,
+      new Signer(keychain, modal),
+    );
     this.address = address;
     this.keychain = keychain;
     this.modal = modal;
@@ -49,7 +53,7 @@ class DeviceAccount extends Account {
     details?: EstimateFeeDetails,
   ): Promise<EstimateFee> {
     return this.keychain.estimateInvokeFee(calls, {
-      ...details
+      ...details,
     });
   }
 
@@ -58,7 +62,7 @@ class DeviceAccount extends Account {
     details?: EstimateFeeDetails,
   ): Promise<EstimateFee> {
     return this.keychain.estimateDeclareFee(payload, {
-      ...details
+      ...details,
     });
   }
 

@@ -10,10 +10,7 @@ export function connectFactory({
   setContext: (context: ConnectionCtx) => void;
 }) {
   return (origin: string) =>
-    (
-      policies: Policy[],
-      rpcUrl: string,
-    ): Promise<ConnectReply> => {
+    (policies: Policy[], rpcUrl: string): Promise<ConnectReply> => {
       setRpcUrl(rpcUrl);
 
       return new Promise((resolve, reject) => {

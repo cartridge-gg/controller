@@ -39,7 +39,6 @@ export function connectToController({
       reset: normalize(() => () => setContext(undefined)),
       username: normalize(username),
     },
-    debug: true
   });
 }
 

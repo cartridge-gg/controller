@@ -148,7 +148,7 @@ function Form({
           username: values.username,
           publicKey,
           credentialId,
-      });
+        });
 
         controller.account.status = Status.DEPLOYING;
 

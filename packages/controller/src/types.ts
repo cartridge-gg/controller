@@ -82,7 +82,7 @@ export interface Keychain {
 
   reset(): void;
   revoke(origin: string): void;
-  
+
   estimateDeclareFee(
     payload: DeclareContractPayload,
     details?: EstimateFeeDetails,

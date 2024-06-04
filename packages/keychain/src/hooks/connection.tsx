@@ -34,36 +34,19 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
   const [error, setError] = useState<Error>();
 
   useEffect(() => {
-    if (isIframe()) {
-      return;
-    }
-
-    const fetchChainId = async () => {
+    if (!isIframe()) {
       const urlParams = new URLSearchParams(window.location.search);
-      const nodeUrl = urlParams.get("rpcUrl");
+      const url = urlParams.get("rpcUrl");
 
-      if (!nodeUrl) {
+      if (!url) {
         setError(new Error("rpcUrl is not provided in the query parameters"));
         return;
       }
 
-      try {
-        const rpc = new RpcProvider({ nodeUrl });
-        setRpcUrl(nodeUrl);
-        setChainId(await rpc.getChainId());
-      } catch (error) {
-        setError(new Error("Unable to fetch Chain ID from provided RPC URL"));
-      }
-    };
-
-    fetchChainId();
-  }, []);
-
-  useEffect(() => {
-    if (!isIframe() || !chainId || !rpcUrl) {
+      setRpcUrl(url);
       return;
     }
-  
+
     const connection = connectToController({
       setRpcUrl,
       setContext,
@@ -76,8 +59,18 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
     return () => {
       connection.destroy();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (rpcUrl) {
+      new RpcProvider({ nodeUrl: rpcUrl })
+        .getChainId()
+        .then(setChainId)
+        .catch(() => {
+          setError(new Error("Unable to fetch Chain ID from provided RPC URL"));
+        });
+    }
+  }, [rpcUrl]);
 
   const close = useCallback(async () => {
     if (!parent) return;
