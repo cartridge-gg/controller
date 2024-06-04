@@ -21,8 +21,7 @@ import { diff } from "utils/controller";
 import { logout } from "utils/connection/logout";
 
 function Home() {
-  const { context, controller, chainId, setContext } =
-    useConnection();
+  const { context, controller, chainId, setContext } = useConnection();
 
   if (window.self === window.top) {
     return <></>;

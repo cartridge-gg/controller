@@ -6,11 +6,12 @@ import { constants } from "starknet";
 import { useController } from "hooks/controller";
 
 export function CreateController(props: {
+  isSlot?: boolean;
   origin?: string;
   policies?: Policy[];
   chainId?: constants.StarknetChainId;
 }) {
-  const { setController } = useController()
+  const { setController } = useController();
   const [showSignup, setShowSignup] = useState(false);
   const [prefilledUsername, setPrefilledUsername] = useState<string>();
 

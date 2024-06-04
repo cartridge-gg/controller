@@ -25,5 +25,5 @@ export default function Auth() {
     return <LoadingLogo />;
   }
 
-  return <CreateController />;
+  return <CreateController isSlot={true} />;
 }
