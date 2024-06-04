@@ -60,7 +60,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
   }, []);
 
   useEffect(() => {
-    if (typeof window === "undefined" || window.self === window.top) {
+    if (!isIframe() || !chainId || !rpcUrl) {
       return;
     }
 
