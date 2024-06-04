@@ -11,18 +11,16 @@ import {
   useContext,
   createContext,
   useMemo,
-  PropsWithChildren,
   useEffect,
+  ProviderProps,
 } from "react";
 
-const ControllerThemeContext = createContext<ControllerThemeContext>(undefined);
-
-type ControllerThemeContext = ControllerTheme;
+const ControllerThemeContext = createContext<ControllerTheme>(undefined);
 
 export function ControllerThemeProvider({
   value,
   children,
-}: { value: ControllerThemeContext } & PropsWithChildren) {
+}: ProviderProps<ControllerTheme>) {
   const { setColorMode } = useColorMode();
 
   useEffect(() => {
@@ -37,7 +35,7 @@ export function ControllerThemeProvider({
 }
 
 export function useControllerTheme() {
-  const ctx = useContext<ControllerThemeContext>(ControllerThemeContext);
+  const ctx = useContext<ControllerTheme>(ControllerThemeContext);
   if (!ctx) {
     throw new Error("ControllerThemeProvider must be placed");
   }

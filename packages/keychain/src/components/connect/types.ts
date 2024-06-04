@@ -1,5 +1,5 @@
-import { Connect } from "pages";
 import Controller from "utils/controller";
+import { Policy } from "@cartridge/controller";
 
 export type FormValues = {
   username: string;
@@ -9,7 +9,8 @@ export type AuthProps = SignupProps | LoginProps;
 
 type AuthBaseProps = {
   prefilledName?: string;
-  context?: Connect;
+  origin?: string;
+  policies?: Policy[];
   isSlot?: boolean;
   chainId: string;
   rpcUrl: string;

@@ -1,6 +1,5 @@
 export * from "./Animation";
-export * from "./Auth";
-export * from "./Connect";
+export * from "./connect";
 export * from "./Container";
 export * from "./DeploymentRequired";
 export * from "./Execute";

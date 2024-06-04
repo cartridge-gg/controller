@@ -20,8 +20,9 @@ import { Error as ErrorComp } from "components/Error";
 export function Login({
   prefilledName = "",
   chainId,
+  origin,
   rpcUrl,
-  context,
+  policies,
   isSlot,
   onSuccess,
   onSignup,
@@ -58,7 +59,7 @@ export function Login({
         if (isSlot) {
           await doLogin(values.username, credentialId, publicKey);
         } else {
-          await controller.approve(context.origin, expiresAt, context.policies);
+          await controller.approve(origin, expiresAt, policies);
         }
 
         controller.store();
@@ -79,7 +80,7 @@ export function Login({
 
       setIsLoading(false);
     },
-    [chainId, context, expiresAt, isSlot, rpcUrl, log, onSuccess],
+    [chainId, origin, policies, expiresAt, isSlot, rpcUrl, log, onSuccess],
   );
 
   return (
@@ -127,11 +128,7 @@ export function Login({
               <ErrorComp error={error} />
             </VStack>
 
-            <PortalFooter
-              origin={context?.origin}
-              policies={context?.policies}
-              isSlot={isSlot}
-            >
+            <PortalFooter origin={origin} policies={policies} isSlot={isSlot}>
               <Button
                 type="submit"
                 colorScheme="colorful"

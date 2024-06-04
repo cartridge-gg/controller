@@ -6,7 +6,7 @@ import { Button } from "@chakra-ui/react";
 import { useState } from "react";
 import { useController } from "hooks/controller";
 
-export function Connect({
+export function CreateSession({
   chainId,
   policies,
   origin,
@@ -21,7 +21,7 @@ export function Connect({
   onCancel: () => void;
   onLogout: () => void;
 }) {
-  const [controller] = useController();
+  const { controller } = useController();
   const [isConnecting, setIsConnecting] = useState(false);
   const [expiresAt] = useState<bigint>(3000000000n);
   const [maxFees] = useState<BigNumberish>();

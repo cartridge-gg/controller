@@ -25,7 +25,7 @@ export function Transaction({
 }: TransactionProps) {
   const [state, setState] = useState<TransactionState>("pending");
   const { color, icon } = useMemo(() => getColorIcon(state), [state]);
-  const [controller] = useController();
+  const { controller } = useController();
 
   useEffect(() => {
     if (chainId) {

@@ -31,7 +31,7 @@ export function Header({
   onBack,
   hideAccount,
 }: HeaderProps) {
-  const [controller] = useController();
+  const { controller } = useController();
   const address = useMemo(() => controller?.address, [controller]);
   const theme = useControllerTheme();
   const { colorMode } = useColorMode();

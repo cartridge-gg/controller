@@ -1,18 +1,12 @@
-import { Login, Signup, LoadingLogo } from "components";
+import { LoadingLogo, CreateController } from "components";
 import { useMeQuery } from "generated/graphql";
 import { useController } from "hooks/controller";
-import { NextPage } from "next";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
-/** This page is for authenticating with Slot */
-const Auth: NextPage = () => {
+export default function Auth() {
   const router = useRouter();
-
-  const [showSignup, setShowSignup] = useState(false);
-  const [prefilledUsername, setPrefilledUsername] = useState<string>();
-  const [controller, setController] = useController();
-
+  const { controller } = useController();
   const { data: user, isFetched } = useMeQuery();
 
   useEffect(() => {
@@ -31,35 +25,5 @@ const Auth: NextPage = () => {
     return <LoadingLogo />;
   }
 
-  return (
-    <>
-      {showSignup ? (
-        <Signup
-          chainId=""
-          rpcUrl=""
-          prefilledName={prefilledUsername}
-          onLogin={(username) => {
-            setPrefilledUsername(username);
-            setShowSignup(false);
-          }}
-          onSuccess={setController}
-          isSlot
-        />
-      ) : (
-        <Login
-          chainId=""
-          rpcUrl=""
-          prefilledName={prefilledUsername}
-          onSignup={(username) => {
-            setPrefilledUsername(username);
-            setShowSignup(true);
-          }}
-          onSuccess={setController}
-          isSlot
-        />
-      )}
-    </>
-  );
-};
-
-export default Auth;
+  return <CreateController />;
+}

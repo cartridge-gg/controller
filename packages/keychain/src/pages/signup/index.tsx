@@ -5,7 +5,7 @@ import { useController } from "hooks/controller";
 
 const Signup: NextPage = () => {
   const router = useRouter();
-  const [controller] = useController();
+  const { controller } = useController();
 
   if (controller) {
     router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);

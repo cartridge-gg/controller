@@ -1,9 +1,8 @@
 import { useRouter } from "next/router";
-import type { NextPage } from "next";
-import { Authenticate as AuthComponent } from "components/Auth";
+import { Authenticate as AuthComponent } from "components";
 
 // auth page used for externally embedded keychain
-const Authenticate: NextPage = () => {
+export default function Authenticate() {
   const router = useRouter();
   const { name, action } = router.query as { name: string; action: string };
 
@@ -21,5 +20,3 @@ const Authenticate: NextPage = () => {
     />
   );
 };
-
-export default Authenticate;

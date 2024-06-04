@@ -7,6 +7,7 @@ import {
   useControllerThemePreset,
 } from "hooks/theme";
 import { useRouter } from "next/router";
+import { ConnectionProvider } from "hooks/connection";
 
 export function Provider({ children }: PropsWithChildren) {
   const preset = useControllerThemePreset();
@@ -28,7 +29,9 @@ export function Provider({ children }: PropsWithChildren) {
     <ChakraProvider theme={chakraTheme}>
       <QueryClientProvider client={queryClient}>
         <ControllerThemeProvider value={controllerTheme}>
-          {children}
+          <ConnectionProvider>
+            {children}
+          </ConnectionProvider>
         </ControllerThemeProvider>
       </QueryClientProvider>
     </ChakraProvider>

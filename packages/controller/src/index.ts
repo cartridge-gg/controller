@@ -82,7 +82,12 @@ class Controller {
     }
 
     this.connection = connectToChild<Keychain>({
-      iframe: this.modal.element.children[0] as HTMLIFrameElement
+      iframe: this.modal.element.children[0] as HTMLIFrameElement,
+      methods: {
+        close: () => {
+          this.modal?.close();
+        },
+      },
     });
 
     this.connection.promise

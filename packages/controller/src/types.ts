@@ -51,7 +51,7 @@ export enum ResponseCodes {
   CANCELED = "CANCELED",
 }
 
-export type Error = {
+export type ConnectError = {
   code: ResponseCodes;
   message: string;
 };
@@ -73,11 +73,11 @@ export type ProbeReply = {
 };
 
 export interface Keychain {
-  probe(): Promise<ProbeReply | Error>;
+  probe(): Promise<ProbeReply | ConnectError>;
   connect(
     policies: Policy[],
     rpcUrl: string,
-  ): Promise<ConnectReply | Error>;
+  ): Promise<ConnectReply | ConnectError>;
   disconnect(): void;
 
   reset(): void;
@@ -96,7 +96,15 @@ export interface Keychain {
     abis?: Abi[],
     transactionsDetail?: InvocationsDetails,
     sync?: boolean,
-  ): Promise<ExecuteReply | Error>;
+  ): Promise<ExecuteReply | ConnectError>;
+  login(
+    address: string,
+    credentialId: string,
+    options: {
+      rpId?: string;
+      challengeExt?: Buffer;
+    },
+  ): Promise<{ assertion: Assertion }>;
   logout(): Promise<void>;
   session(): Promise<Session>;
   sessions(): Promise<{
@@ -105,7 +113,7 @@ export interface Keychain {
   signMessage(
     typedData: TypedData,
     account: string,
-  ): Promise<Signature | Error>;
+  ): Promise<Signature | ConnectError>;
   signTransaction(
     transactions: Call[],
     transactionsDetail: InvocationsSignerDetails,
