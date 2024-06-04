@@ -1,6 +1,4 @@
-import {
-  AsyncMethodReturns,
-} from "@cartridge/penpal";
+import { AsyncMethodReturns } from "@cartridge/penpal";
 import {
   useContext,
   createContext,
@@ -10,11 +8,8 @@ import {
   useCallback,
 } from "react";
 import Controller from "utils/controller";
-import {
-  constants,
-} from "starknet";
+import { constants } from "starknet";
 import { connectToController, ConnectionCtx } from "utils/connection";
-import { useController } from "./controller";
 
 const ConnectionContext = createContext<ConnectionContextValue>(undefined);
 
@@ -33,15 +28,22 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
   const [chainId, setChainId] = useState<constants.StarknetChainId>(
     constants.StarknetChainId.SN_SEPOLIA,
   );
-  const [controller, setController] = useController();
+  const [controller, setController] = useState(Controller.fromStore);
 
   useEffect(() => {
     if (typeof window === "undefined" || window.self === window.top) {
       return;
     }
 
-    const connection = connectToController({ chainId, setChainId, setContext, setController });
-    connection.promise.then(parent => setParent(parent as unknown as ParentMethods))
+    const connection = connectToController({
+      chainId,
+      setChainId,
+      setContext,
+      setController,
+    });
+    connection.promise.then((parent) =>
+      setParent(parent as unknown as ParentMethods),
+    );
 
     return () => {
       connection.destroy();
@@ -50,7 +52,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
   }, []);
 
   const close = useCallback(async () => {
-    if (!parent) return
+    if (!parent) return;
 
     try {
       await parent.close();
@@ -75,7 +77,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
   );
 }
 
-type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>
+type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
 
 export function useConnection() {
   const ctx = useContext<ConnectionContextValue>(ConnectionContext);
