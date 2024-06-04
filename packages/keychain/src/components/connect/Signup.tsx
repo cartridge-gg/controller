@@ -28,7 +28,8 @@ import { Error as ErrorComp } from "components/Error";
 
 export function Signup({
   prefilledName = "",
-  context,
+  origin,
+  policies,
   isSlot,
   onSuccess,
   onLogin,
@@ -80,7 +81,8 @@ export function Signup({
             isRegistering={isRegistering}
             isLoading={isLoading}
             setIsRegistering={setIsRegistering}
-            context={context}
+            origin={origin}
+            policies={policies}
             isSlot={isSlot}
             error={error}
           />
@@ -91,7 +93,8 @@ export function Signup({
 }
 
 function Form({
-  context,
+  origin,
+  policies,
   isRegistering,
   isLoading,
   isSlot,
@@ -208,8 +211,8 @@ function Form({
       </VStack>
 
       <PortalFooter
-        origin={context?.origin}
-        policies={context?.policies}
+        origin={origin}
+        policies={policies}
         isSignup
         isSlot={isSlot}
       >

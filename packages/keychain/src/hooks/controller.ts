@@ -1,15 +1,6 @@
-import { useEffect, useState } from "react";
-import Controller from "utils/controller";
+import { useConnection } from "./connection";
 
-export function useController(): [
-  controller: Controller,
-  setter: (controller: Controller) => void,
-] {
-  const [controller, setController] = useState<Controller>();
-
-  useEffect(() => {
-    setController(Controller.fromStore());
-  }, []);
-
-  return [controller, setController];
+export function useController() {
+  const { controller, setController } = useConnection();
+  return { controller, setController };
 }

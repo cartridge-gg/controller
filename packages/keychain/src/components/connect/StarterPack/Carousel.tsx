@@ -3,7 +3,7 @@ import { Text, Flex, VStack, HStack, Spacer } from "@chakra-ui/react";
 import useEmblaCarousel from "embla-carousel-react";
 import { Next, Prev, Dot } from "components/carousel/Buttons";
 import { EdgeFade } from "components/carousel/EdgeFade";
-import { StarterItemProps } from "components/Auth/StarterPack";
+import { StarterItemProps } from "components/connect";
 
 export function StarterPackCarousel({
   nonfungibles,

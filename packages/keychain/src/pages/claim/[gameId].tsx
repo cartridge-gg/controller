@@ -6,7 +6,7 @@ import { useController } from "hooks/controller";
 const ClaimStarterPack: NextPage = () => {
   const router = useRouter();
   const gameId = (router.query.gameId as string) || undefined;
-  const [controller] = useController();
+  const { controller } = useController();
   return null;
 
   return (

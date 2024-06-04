@@ -1,18 +1,15 @@
-import type { NextPage } from "next";
 import dynamic from "next/dynamic";
-import { useState } from "react";
 import { Signature } from "starknet";
 import { ResponseCodes, ExecuteReply } from "@cartridge/controller";
 import {
-  Connect,
+  CreateController,
+  CreateSession,
   DeploymentRequired,
   Execute,
-  Login,
   Logout,
   SignMessage,
-  Signup,
 } from "components";
-import { useConnection, } from 'hooks/connection'
+import { useConnection } from "hooks/connection";
 import {
   ConnectionCtx,
   ConnectCtx,
@@ -23,10 +20,8 @@ import {
 import { diff } from "utils/controller";
 import { logout } from "utils/connection/logout";
 
-const Index: NextPage = () => {
-  const [showSignup, setShowSignup] = useState(false);
-  const [prefilledUsername, setPrefilledUsername] = useState<string>();
-  const { context, controller, setController, chainId, setContext } =
+function Home() {
+  const { context, controller, chainId, setContext } =
     useConnection();
 
   if (window.self === window.top) {
@@ -41,30 +36,11 @@ const Index: NextPage = () => {
   if (!controller) {
     const ctx = context as ConnectCtx;
     return (
-      <>
-        {showSignup ? (
-          <Signup
-            prefilledName={prefilledUsername}
-            onLogin={(username) => {
-              setPrefilledUsername(username);
-              setShowSignup(false);
-            }}
-            onSuccess={setController}
-            context={ctx}
-          />
-        ) : (
-          <Login
-            chainId={chainId}
-            prefilledName={prefilledUsername}
-            onSignup={(username) => {
-              setPrefilledUsername(username);
-              setShowSignup(true);
-            }}
-            onSuccess={setController}
-            context={ctx}
-          />
-        )}
-      </>
+      <CreateController
+        origin={ctx.origin}
+        policies={ctx.policies}
+        chainId={chainId}
+      />
     );
   }
 
@@ -93,7 +69,7 @@ const Index: NextPage = () => {
       }
 
       return (
-        <Connect
+        <CreateSession
           chainId={chainId}
           origin={ctx.origin}
           policies={ctx.type === "connect" ? (ctx as ConnectCtx).policies : []}
@@ -185,6 +161,6 @@ const Index: NextPage = () => {
     default:
       return <>*Waves*</>;
   }
-};
+}
 
-export default dynamic(() => Promise.resolve(Index), { ssr: false });
+export default dynamic(() => Promise.resolve(Home), { ssr: false });
