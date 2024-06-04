@@ -29,9 +29,7 @@ export function Provider({ children }: PropsWithChildren) {
     <ChakraProvider theme={chakraTheme}>
       <QueryClientProvider client={queryClient}>
         <ControllerThemeProvider value={controllerTheme}>
-          <ConnectionProvider>
-            {children}
-          </ConnectionProvider>
+          <ConnectionProvider>{children}</ConnectionProvider>
         </ControllerThemeProvider>
       </QueryClientProvider>
     </ChakraProvider>
