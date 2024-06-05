@@ -1,9 +1,7 @@
-[workspace]
-
 [package]
-edition = "2021"
+edition.workspace = true
 name = "account-wasm"
-version = "0.1.0"
+version.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -11,7 +9,7 @@ version = "0.1.0"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-account-sdk = { git = "https://github.com/cartridge-gg/controller", package = "account-sdk", rev = "394b60b1df92d7b173b3215051d67b85c342dbea" }
+account-sdk.workspace = true
 base64 = "0.22.0"
 coset = { version = "0.3.4", features = ["std"] }
 hex = "0.4.3"
@@ -24,10 +22,7 @@ url = "2.3.1"
 wasm-bindgen = "0.2.84"
 wasm-bindgen-futures = "0.4.37"
 wasm-webauthn = "0.1.0"
-web-sys = { version = "0.3.4", features = [
-    'Window',
-    'console',
-] }
+web-sys = { version = "0.3.4", features = ['Window', 'console'] }
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires
@@ -35,7 +30,7 @@ web-sys = { version = "0.3.4", features = [
 # code size when deploying.
 console_error_panic_hook = { version = "0.1.7", optional = true }
 
-# Compiler optimization when running test to prevent ‘locals exceed maximum’ error, 
+# Compiler optimization when running test to prevent ‘locals exceed maximum’ error,
 # where a function is using more that the maximum allowed local variables.
 [profile.dev]
 incremental = true

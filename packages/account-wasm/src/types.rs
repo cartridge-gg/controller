@@ -60,7 +60,7 @@ impl TryFrom<JsPolicy> for AllowedMethod {
 }
 
 impl TryFrom<JsValue> for JsPolicy {
-    type Error = JsValue;
+    type Error = JsError;
 
     fn try_from(value: JsValue) -> Result<Self, Self::Error> {
         Ok(serde_wasm_bindgen::from_value(value)?)
@@ -88,7 +88,7 @@ impl TryFrom<JsCall> for Call {
 }
 
 impl TryFrom<JsValue> for JsCall {
-    type Error = JsValue;
+    type Error = JsError;
 
     fn try_from(value: JsValue) -> Result<Self, Self::Error> {
         Ok(serde_wasm_bindgen::from_value(value)?)
@@ -96,7 +96,7 @@ impl TryFrom<JsValue> for JsCall {
 }
 
 impl TryFrom<JsValue> for JsInvocationsDetails {
-    type Error = JsValue;
+    type Error = JsError;
 
     fn try_from(value: JsValue) -> Result<Self, Self::Error> {
         Ok(serde_wasm_bindgen::from_value(value)?)
