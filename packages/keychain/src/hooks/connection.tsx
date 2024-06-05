@@ -36,14 +36,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     if (!isIframe()) {
       const urlParams = new URLSearchParams(window.location.search);
-      const url = urlParams.get("rpc_url");
-
-      if (!url) {
-        setError(new Error("rpc_url is not provided in the query parameters"));
-        return;
-      }
-
-      setRpcUrl(url);
+      setRpcUrl(urlParams.get("rpc_url") || process.env.NEXT_PUBLIC_RPC_SEPOLIA);
       return;
     }
 
