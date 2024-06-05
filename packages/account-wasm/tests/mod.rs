@@ -10,7 +10,7 @@ async fn test_webauth_wasm() {
     let rp_id = "cartridge".to_string();
     let username = "foo".to_string();
 
-    let account = DeviceSigner::register(origin.clone(), rp_id.clone(), username, &vec![])
+    let account = DeviceSigner::register(origin.clone(), rp_id.clone(), username, &[])
         .await
         .unwrap();
 
