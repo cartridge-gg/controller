@@ -36,10 +36,10 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     if (!isIframe()) {
       const urlParams = new URLSearchParams(window.location.search);
-      const url = urlParams.get("rpcUrl");
+      const url = urlParams.get("rpc_url");
 
       if (!url) {
-        setError(new Error("rpcUrl is not provided in the query parameters"));
+        setError(new Error("rpc_url is not provided in the query parameters"));
         return;
       }
 
