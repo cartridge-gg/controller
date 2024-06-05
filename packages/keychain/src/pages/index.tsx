@@ -2,13 +2,15 @@ import dynamic from "next/dynamic";
 import { Signature } from "starknet";
 import { ResponseCodes, ExecuteReply } from "@cartridge/controller";
 import {
-  CreateController,
-  CreateSession,
   DeploymentRequired,
   Execute,
-  Logout,
   SignMessage,
 } from "components";
+import {
+  CreateController,
+  CreateSession,
+  Logout,
+} from "components/connect"
 import { useConnection } from "hooks/connection";
 import {
   ConnectionCtx,
@@ -22,7 +24,7 @@ import { logout } from "utils/connection/logout";
 import { LoginMode } from "components/connect/types";
 
 function Home() {
-  const { context, controller, chainId, setContext, error } = useConnection();
+  const { context, controller, setContext, error } = useConnection();
 
   if (window.self === window.top) {
     return <></>;
@@ -54,7 +56,6 @@ function Home() {
     case "connect": {
       const ctx = context as ConnectCtx;
       const session = controller.session(context.origin);
-
       // if no mismatch with existing policies then return success
       if (session && diff(session.policies, ctx.policies).length === 0) {
         ctx.resolve({
@@ -67,7 +68,6 @@ function Home() {
 
       return (
         <CreateSession
-          chainId={chainId}
           origin={ctx.origin}
           policies={ctx.type === "connect" ? (ctx as ConnectCtx).policies : []}
           onConnect={(policies) => {
@@ -86,7 +86,6 @@ function Home() {
     }
     case "logout": {
       const ctx = context as LogoutCtx;
-
       return (
         <Logout
           onConfirm={() => {
@@ -109,8 +108,6 @@ function Home() {
       const ctx = context as SignMessageCtx;
       return (
         <SignMessage
-          chainId={chainId}
-          controller={controller}
           origin={ctx.origin}
           typedData={ctx.typedData}
           onSign={(sig: Signature) => context.resolve(sig)}
@@ -126,11 +123,8 @@ function Home() {
     }
     case "execute": {
       const ctx = context as ExecuteCtx;
-
       return (
         <DeploymentRequired
-          chainId={chainId}
-          controller={controller}
           onClose={() =>
             ctx.resolve({
               code: ResponseCodes.CANCELED,
@@ -141,8 +135,6 @@ function Home() {
         >
           <Execute
             {...ctx}
-            chainId={chainId}
-            controller={controller}
             onExecute={(res: ExecuteReply) => ctx.resolve(res)}
             onCancel={() =>
               ctx.resolve({

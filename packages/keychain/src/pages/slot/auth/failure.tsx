@@ -1,25 +1,14 @@
-import { NextPage } from "next";
-import { Container, PortalBanner } from "components";
-import { AlertDuoIcon } from "@cartridge/ui";
-import { VStack, Text } from "@chakra-ui/react";
+import { Container, Banner } from "components/layout";
+import { AlertIcon } from "@cartridge/ui";
 
-const Consent: NextPage = () => {
+export default function Consent() {
   return (
-    <Container hideAccount>
-      <PortalBanner
-        icon={<AlertDuoIcon boxSize={8} accent="text.error" />}
-        title="Failure"
-        description="Uh-oh something went wrong"
+    <Container variant="connect" hideAccount>
+      <Banner
+        icon={<AlertIcon boxSize={9} />}
+        title="Uh-oh something went wrong"
+        description="If this problem persists swing by the Cartridge support channel on Discord"
       />
-
-      <VStack p={3} borderRadius="md" bg="solid.primary" w="full">
-        <Text fontSize="xs" align="center" color="text.secondaryAccent">
-          If this problem persists swing by the Cartridge
-          <Text color="inherit">support channel on Discord</Text>
-        </Text>
-      </VStack>
     </Container>
   );
 };
-
-export default Consent;

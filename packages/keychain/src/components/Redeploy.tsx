@@ -1,22 +1,22 @@
-import { constants, addAddressPadding } from "starknet";
-import { Container } from "./Container";
+import { addAddressPadding } from "starknet";
+import { Container, Banner } from "components/layout";
 import Controller from "utils/controller";
 import { useEffect } from "react";
 import { client } from "utils/graphql";
 import { DeployAccountDocument, AccountInfoDocument } from "generated/graphql";
 import { Status } from "utils/account";
 import { SparklesDuoIcon } from "@cartridge/ui";
-import { PortalBanner } from "./PortalBanner";
+import { useChainId } from "hooks/connection";
 
 export function Redeploy({
-  chainId,
   controller,
   onLogout,
 }: {
-  chainId: constants.StarknetChainId;
   controller: Controller;
   onLogout: () => void;
 }) {
+  const chainId = useChainId();
+
   useEffect(() => {
     const deploy = async () => {
       const result = await client.request(AccountInfoDocument, {
@@ -39,8 +39,8 @@ export function Redeploy({
   }, [chainId, controller]);
 
   return (
-    <Container chainId={chainId} onLogout={onLogout}>
-      <PortalBanner
+    <Container onLogout={onLogout}>
+      <Banner
         Icon={SparklesDuoIcon}
         title="Deploying your account"
         description="This may take a second, try again in a bit"

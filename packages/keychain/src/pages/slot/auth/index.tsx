@@ -1,4 +1,5 @@
-import { LoadingLogo, CreateController } from "components";
+import { LoadingLogo } from "components";
+import { CreateController } from "components/connect"
 import { useMeQuery } from "generated/graphql";
 import { useController } from "hooks/controller";
 import { useRouter } from "next/router";

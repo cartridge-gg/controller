@@ -72,6 +72,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     if (rpcUrl) {
+      console.log("!!!", rpcUrl)
       new RpcProvider({ nodeUrl: rpcUrl })
         .getChainId()
         .then(setChainId)
@@ -120,4 +121,29 @@ export function useConnection() {
   }
 
   return ctx;
+}
+
+export function useChainId() {
+  const { chainId } = useConnection();
+  return chainId
+}
+
+export function useRpcUrl() {
+  const { rpcUrl } = useConnection();
+  return rpcUrl
+}
+
+export function useOrigin() {
+  const { context } = useConnection();
+  return context?.origin
+}
+
+export function usePolicies() {
+  const { context } = useConnection();
+  switch (context?.type) {
+    case "connect":
+      return context.policies
+    default:
+      return []
+  }
 }

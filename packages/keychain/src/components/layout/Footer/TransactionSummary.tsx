@@ -1,12 +1,11 @@
 import { HStack, VStack, Text, Link, IconProps } from "@chakra-ui/react";
-import { LockIcon, WrenchIcon } from "@cartridge/ui";
+import { CartridgeIcon, KeyIcon, ScrollIcon, WebsiteIcon } from "@cartridge/ui";
 
 export function TransactionSummary({
   isSlot,
   showTerm,
   hostname,
 }: {
-  isSignup?: boolean;
   isSlot?: boolean;
   showTerm?: boolean;
   hostname?: string;
@@ -14,8 +13,8 @@ export function TransactionSummary({
   return (
     <VStack align="flex-start">
       {hostname && (
-        <Summary>
-          Create a session for <LockIcon color="text.secondaryAccent" />
+        <Summary Icon={KeyIcon}>
+          Create a session for <WebsiteIcon color="text.secondaryAccent" fontSize="sm" />
           <Text color="text.secondaryAccent" as="span" fontWeight="bold">
             {hostname}{" "}
           </Text>
@@ -28,13 +27,13 @@ export function TransactionSummary({
 
       {isSlot && (
         <Summary
-          Icon={WrenchIcon}
+          Icon={CartridgeIcon}
           title="Authorize Slot to manage your Cartridge infrastructure"
         />
       )}
 
       {showTerm && (
-        <Summary Icon={LockIcon}>
+        <Summary Icon={ScrollIcon}>
           <>
             By continuing you are agreeing to Cartridge&apos;s{" "}
             <Link

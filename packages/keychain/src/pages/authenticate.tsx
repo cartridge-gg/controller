@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { Authenticate as AuthComponent } from "components";
+import { AuthAction, Authenticate as AuthComponent } from "components/connect";
 
 // auth page used for externally embedded keychain
 export default function Authenticate() {
@@ -9,7 +9,7 @@ export default function Authenticate() {
   return (
     <AuthComponent
       name={decodeURIComponent(name)}
-      action={decodeURIComponent(action) as "login" | "signup"}
+      action={decodeURIComponent(action) as AuthAction}
       onSuccess={() => {
         if (window.opener) {
           return window.close();
