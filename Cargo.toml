@@ -1,12 +1,15 @@
 [workspace]
 resolver = "2"
-members = ["packages/account_sdk"]
+members = ["packages/account_sdk", "packages/account-wasm"]
 
 [workspace.package]
 edition = "2021"
 version = "0.1.0"
 
 [workspace.dependencies]
+account-sdk = { path = "packages/account_sdk" }
+account_wasm = { path = "packages/account-wasm" }
+
 anyhow = "1"
 async-trait = "0.1"
 base64 = "0.21"
