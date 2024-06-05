@@ -1,10 +1,6 @@
 import { Connector } from "@starknet-react/core";
-import Controller, {
-  Assertion,
-  Policy,
-  ControllerOptions,
-} from "@cartridge/controller";
-import { AccountInterface, InvokeFunctionResponse } from "starknet";
+import Controller, { Policy, ControllerOptions } from "@cartridge/controller";
+import { AccountInterface } from "starknet";
 
 class ControllerConnector extends Connector {
   public controller: Controller;
@@ -40,17 +36,6 @@ class ControllerConnector extends Connector {
     return this.controller.ready();
   }
 
-  async login(
-    address: string,
-    credentialId: string,
-    options: {
-      rpId?: string;
-      challengeExt?: Buffer;
-    },
-  ): Promise<{ assertion: Assertion } | null> {
-    return this.controller.login(address, credentialId, options);
-  }
-
   async connect() {
     this._account = await this.controller.connect();
 
@@ -73,14 +58,6 @@ class ControllerConnector extends Connector {
       return Promise.reject("account not found");
     }
     return Promise.resolve(this._account);
-  }
-
-  async issueStarterPack(id: string): Promise<InvokeFunctionResponse> {
-    return this.controller.issueStarterPack(id);
-  }
-
-  async showQuests(gameId: string): Promise<void> {
-    return this.controller.showQuests(gameId);
   }
 
   username() {

@@ -32,38 +32,5 @@ describe.skip("migrations", () => {
     migrations["0.0.2"]["0.0.3"](address);
 
     expect(Storage.get("version")).toBe("0.0.3");
-
-    expect(Storage.get(selectors["0.0.3"].account(address))).toStrictEqual({
-      address: "0xdead",
-    });
-    expect(Storage.get(selectors["0.0.2"].account())).toBe(null);
-
-    expect(
-      Storage.get(selectors["0.0.3"].admin(address, "http://localhost:3000")),
-    ).toStrictEqual({});
-    expect(Storage.get(selectors["0.0.2"].admin("http://localhost:3000"))).toBe(
-      null,
-    );
-
-    expect(
-      Storage.get(
-        selectors["0.0.3"].deployment(
-          address,
-          constants.StarknetChainId.SN_MAIN,
-        ),
-      ),
-    ).toStrictEqual(deployment);
-    expect(
-      Storage.get(
-        selectors["0.0.2"].deployment(constants.StarknetChainId.SN_MAIN),
-      ),
-    ).toBe(null);
-
-    expect(
-      Storage.get(selectors["0.0.3"].session(address, "http://localhost:3002")),
-    ).toStrictEqual({ policies: [], maxFee: null });
-    expect(
-      Storage.get(selectors["0.0.2"].session("http://localhost:3002")),
-    ).toBe(null);
   });
 });

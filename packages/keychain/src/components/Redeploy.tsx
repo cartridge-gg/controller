@@ -23,21 +23,20 @@ export function Redeploy({
         address: addAddressPadding(controller.address),
       });
 
-      controller.account(constants.StarknetChainId.SN_SEPOLIA).status =
-        Status.DEPLOYING;
+      controller.account.status = Status.DEPLOYING;
 
       await client.request(DeployAccountDocument, {
         // @ts-expect-error TODO: fix type error
         id: result.accounts.edges?.[0]?.node.id,
-        chainId: "starknet:SN_SEPOLIA",
+        chainId,
       });
 
       console.log("sync redeploy");
-      controller.account(constants.StarknetChainId.SN_SEPOLIA).sync();
+      controller.account.sync();
     };
 
     deploy();
-  }, [controller]);
+  }, [chainId, controller]);
 
   return (
     <Container chainId={chainId} onLogout={onLogout}>

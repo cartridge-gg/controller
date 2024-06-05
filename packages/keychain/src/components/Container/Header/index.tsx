@@ -11,7 +11,6 @@ import {
   Center,
   useColorMode,
 } from "@chakra-ui/react";
-import { constants } from "starknet";
 import { ArrowLeftIcon, CartridgeColorIcon } from "@cartridge/ui";
 // import { NetworkButton } from "./NetworkButton";
 // import { EthBalance } from "./EthBalance";
@@ -20,7 +19,7 @@ import { useController } from "hooks/controller";
 import { useControllerTheme } from "hooks/theme";
 
 export type HeaderProps = {
-  chainId?: constants.StarknetChainId;
+  chainId?: string;
   onLogout?: () => void;
   onBack?: () => void;
   hideAccount?: boolean;

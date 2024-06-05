@@ -1,4 +1,3 @@
-import { constants } from "starknet";
 import Controller from "utils/controller";
 import { Policy } from "@cartridge/controller";
 
@@ -13,6 +12,8 @@ type AuthBaseProps = {
   origin?: string;
   policies?: Policy[];
   isSlot?: boolean;
+  chainId: string;
+  rpcUrl: string;
   onSuccess: (controller: Controller) => void;
 };
 
@@ -21,6 +22,7 @@ export type SignupProps = AuthBaseProps & {
 };
 
 export type LoginProps = AuthBaseProps & {
-  chainId?: constants.StarknetChainId;
+  chainId: string;
+  rpcUrl: string;
   onSignup: (username: string) => void;
 };

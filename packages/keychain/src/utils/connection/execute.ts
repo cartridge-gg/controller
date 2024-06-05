@@ -5,21 +5,13 @@ import {
   ConnectError,
 } from "@cartridge/controller";
 import Controller, { diff } from "utils/controller";
-import {
-  Abi,
-  Call,
-  InvocationsDetails,
-  addAddressPadding,
-  constants,
-} from "starknet";
+import { Abi, Call, InvocationsDetails, addAddressPadding } from "starknet";
 import { Status } from "utils/account";
 import { ConnectionCtx, ExecuteCtx } from "./types";
 
 export function executeFactory({
-  chainId,
   setContext,
 }: {
-  chainId: constants.StarknetChainId;
   setContext: (context: ConnectionCtx) => void;
 }) {
   return (controller: Controller, origin: string) =>
@@ -27,13 +19,10 @@ export function executeFactory({
       transactions: Call | Call[],
       abis?: Abi[],
       transactionsDetail?: InvocationsDetails & {
-        chainId?: constants.StarknetChainId;
+        chainId?: string;
       },
       sync?: boolean,
     ): Promise<ExecuteReply | ConnectError> => {
-      const cId = transactionsDetail?.chainId
-        ? transactionsDetail.chainId
-        : chainId;
       if (sync) {
         return await new Promise((resolve, reject) => {
           setContext({
@@ -47,7 +36,7 @@ export function executeFactory({
           } as ExecuteCtx);
         });
       }
-      const account = controller.account(cId);
+      const account = controller.account;
       if (account.status === Status.DEPLOYING) {
         return Promise.resolve({
           code: ResponseCodes.NOT_ALLOWED,
@@ -64,7 +53,7 @@ export function executeFactory({
           } as Policy),
       );
 
-      const session = controller.session(origin, cId);
+      const session = controller.session(origin);
       if (!session) {
         return Promise.resolve({
           code: ResponseCodes.NOT_ALLOWED,

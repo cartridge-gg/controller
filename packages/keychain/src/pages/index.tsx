@@ -21,7 +21,7 @@ import { diff } from "utils/controller";
 import { logout } from "utils/connection/logout";
 
 function Home() {
-  const { context, controller, chainId, setContext } = useConnection();
+  const { context, controller, chainId, setContext, error } = useConnection();
 
   if (window.self === window.top) {
     return <></>;
@@ -31,16 +31,13 @@ function Home() {
     return <></>;
   }
 
+  if (error) {
+    return <>{error.message}</>;
+  }
+
   // No controller, send to login
   if (!controller) {
-    const ctx = context as ConnectCtx;
-    return (
-      <CreateController
-        origin={ctx.origin}
-        policies={ctx.policies}
-        chainId={chainId}
-      />
-    );
+    return <CreateController />;
   }
 
   const onLogout = (context: ConnectionCtx) => {
@@ -55,7 +52,7 @@ function Home() {
   switch (context.type) {
     case "connect": {
       const ctx = context as ConnectCtx;
-      const session = controller.session(context.origin, chainId);
+      const session = controller.session(context.origin);
 
       // if no mismatch with existing policies then return success
       if (session && diff(session.policies, ctx.policies).length === 0) {

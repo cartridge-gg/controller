@@ -1,14 +1,13 @@
 import { Policy } from "@cartridge/controller";
 import { CodeUtilIcon } from "@cartridge/ui";
 import { HStack, Spacer, SystemProps, Text } from "@chakra-ui/react";
-import { constants } from "starknet";
 
 export function Call({
   chainId,
   policy,
   ...rest
 }: {
-  chainId: constants.StarknetChainId;
+  chainId: string;
   policy: Policy;
 } & SystemProps) {
   return (

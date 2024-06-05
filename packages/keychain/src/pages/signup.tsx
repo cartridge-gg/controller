@@ -1,24 +1,31 @@
 import { useRouter } from "next/router";
-import type { NextPage } from "next";
 import { Signup as SignupComponent } from "components";
-import { useController } from "hooks/controller";
+import { useConnection } from "hooks/connection";
 
-const Signup: NextPage = () => {
+export default function Signup() {
   const router = useRouter();
-  const { controller } = useController();
+  const { controller, rpcUrl, chainId, error } = useConnection();
+
+  if (error) {
+    return <>{error.message}</>;
+  }
 
   if (controller) {
     router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);
   }
 
+  if (!rpcUrl || !chainId) {
+    return <></>;
+  }
+
   return (
     <SignupComponent
+      chainId={chainId}
+      rpcUrl={rpcUrl}
       onLogin={() => router.push({ pathname: "/login", query: router.query })}
       onSuccess={() => {
         router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);
       }}
     />
   );
-};
-
-export default Signup;
+}

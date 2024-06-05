@@ -7,7 +7,6 @@ import {
   Formik,
   useFormikContext,
 } from "formik";
-import { constants } from "starknet";
 import {
   PORTAL_FOOTER_MIN_HEIGHT,
   PortalBanner,
@@ -25,12 +24,15 @@ import { RegistrationLink } from "./RegistrationLink";
 import { doSignup } from "hooks/account";
 import { useControllerTheme } from "hooks/theme";
 import { Error as ErrorComp } from "components/Error";
+import { shortString } from "starknet";
 
 export function Signup({
   prefilledName = "",
   origin,
   policies,
   isSlot,
+  chainId,
+  rpcUrl,
   onSuccess,
   onLogin,
 }: SignupProps) {
@@ -76,6 +78,8 @@ export function Signup({
           validateOnBlur={false}
         >
           <Form
+            chainId={chainId}
+            rpcUrl={rpcUrl}
             onLogin={onLogin}
             onSuccess={onSuccess}
             isRegistering={isRegistering}
@@ -95,6 +99,8 @@ export function Signup({
 function Form({
   origin,
   policies,
+  chainId,
+  rpcUrl,
   isRegistering,
   isLoading,
   isSlot,
@@ -136,37 +142,23 @@ function Form({
         } = data;
 
         const controller = new Controller({
+          chainId,
+          rpcUrl,
           address,
           username: values.username,
           publicKey,
           credentialId,
         });
 
-        controller.account(constants.StarknetChainId.SN_SEPOLIA).status =
-          Status.DEPLOYING;
+        controller.account.status = Status.DEPLOYING;
+
         await client.request(DeployAccountDocument, {
           id: values.username,
-          chainId: "starknet:SN_SEPOLIA",
+          chainId: `starknet:${shortString.decodeShortString(chainId)}`,
         });
-        await controller.account(constants.StarknetChainId.SN_SEPOLIA).sync();
-        controller.store();
 
-        // TODO: Enable once controller is ready for mainnet
-        // controller.account(constants.StarknetChainId.SN_MAIN).status =
-        //   Status.DEPLOYING;
-        // client
-        //   .request(DeployAccountDocument, {
-        //     id: values.username,
-        //     chainId: "starknet:SN_MAIN",
-        //     starterpackIds: starterData?.game?.starterPack?.chainID?.includes(
-        //       "SN_MAIN",
-        //     )
-        //       ? [starterData?.game?.starterPack?.id]
-        //       : undefined,
-        //   })
-        //   .then(() => {
-        //     controller.account(constants.StarknetChainId.SN_MAIN).sync();
-        //   });
+        controller.store();
+        await controller.account.sync();
 
         onSuccess(controller);
       },

@@ -1,4 +1,4 @@
-import { constants, SignerInterface, BigNumberish } from "starknet";
+import { SignerInterface, BigNumberish } from "starknet";
 import equal from "fast-deep-equal";
 
 import { Policy, Session } from "@cartridge/controller";
@@ -21,19 +21,25 @@ type SerializedController = {
 };
 
 export default class Controller {
+  public account: Account;
   public address: string;
   public username: string;
+  public chainId: string;
+  public rpcUrl: string;
   public signer: SignerInterface;
   protected publicKey: string;
   protected credentialId: string;
-  protected accounts: Account[];
 
   constructor({
+    chainId,
+    rpcUrl,
     address,
     username,
     publicKey,
     credentialId,
   }: {
+    chainId: string;
+    rpcUrl: string;
     address: string;
     username: string;
     publicKey: string;
@@ -41,36 +47,16 @@ export default class Controller {
   }) {
     this.address = address;
     this.username = username;
+    this.chainId = chainId;
+    this.rpcUrl = rpcUrl;
     this.publicKey = publicKey;
     this.credentialId = credentialId;
-    this.accounts = [
-      // TODO: Enable once controller is ready for mainnet
-      // [constants.StarknetChainId.SN_MAIN]: new Account(
-      //   constants.StarknetChainId.SN_MAIN,
-      //   process.env.NEXT_PUBLIC_RPC_MAINNET,
-      //   address,
-      //   this.signer,
-      //   new CartridgeAccount(
-      //     process.env.NEXT_PUBLIC_RPC_MAINNET,
-      //     address,
-      //     credentialId,
-      //     this.publicKey,
-      //     options,
-      //   ),
-      // ),
-      new Account(
-        constants.StarknetChainId.SN_SEPOLIA,
-        process.env.NEXT_PUBLIC_RPC_SEPOLIA,
-        address,
-        this.signer,
-        {
-          rpId: process.env.NEXT_PUBLIC_RP_ID,
-          origin: process.env.NEXT_PUBLIC_ORIGIN,
-          credentialId,
-          publicKey,
-        },
-      ),
-    ];
+    this.account = new Account(chainId, rpcUrl, address, this.signer, {
+      rpId: process.env.NEXT_PUBLIC_RP_ID,
+      origin: process.env.NEXT_PUBLIC_ORIGIN,
+      credentialId,
+      publicKey,
+    });
   }
 
   async getUser() {
@@ -91,50 +77,46 @@ export default class Controller {
     };
   }
 
-  account(chainId: constants.StarknetChainId): Account | undefined {
-    return this.accounts.find((a) => a.chainId === chainId);
-  }
-
   delete() {
     return Storage.clear();
   }
 
   async approve(
     origin: string,
-    chainId: constants.StarknetChainId,
     expiresAt: bigint,
     policies: Policy[],
     maxFee?: BigNumberish,
   ) {
-    const account = this.account(chainId);
-    if (!account) {
+    if (!this.account) {
       throw new Error("Account not found");
     }
 
-    const credentials = await account.cartridge.createSession(
+    const credentials = await this.account.cartridge.createSession(
       policies,
       expiresAt,
     );
 
-    Storage.set(selectors[VERSION].session(this.address, origin, chainId), {
-      policies,
-      maxFee,
-      credentials,
-      expiresAt: expiresAt.toString(),
-    });
+    Storage.set(
+      selectors[VERSION].session(this.address, origin, this.account.chainId),
+      {
+        policies,
+        maxFee,
+        credentials,
+        expiresAt: expiresAt.toString(),
+      },
+    );
   }
 
-  revoke(origin: string, chainId: constants.StarknetChainId) {
+  revoke(origin: string) {
     // TODO: Cartridge Account SDK to implement revoke session tokens
-    Storage.remove(selectors[VERSION].session(this.address, origin, chainId));
+    Storage.remove(
+      selectors[VERSION].session(this.address, origin, this.account.chainId),
+    );
   }
 
-  session(
-    origin: string,
-    chainId: constants.StarknetChainId,
-  ): Session | undefined {
+  session(origin: string): Session | undefined {
     return Storage.get(
-      selectors[VERSION].session(this.address, origin, chainId),
+      selectors[VERSION].session(this.address, origin, this.account.chainId),
     );
   }
 
@@ -154,10 +136,13 @@ export default class Controller {
       selectors[VERSION].admin(this.address, process.env.NEXT_PUBLIC_ADMIN_URL),
       {},
     );
-    Storage.set(selectors[VERSION].active(), this.address);
+    Storage.set(selectors[VERSION].active(), {
+      address: this.address,
+      rpcUrl: this.rpcUrl,
+      chainId: this.chainId,
+    });
 
     return Storage.set(selectors[VERSION].account(this.address), {
-      address: this.address,
       username: this.username,
       publicKey: this.publicKey,
       credentialId: this.credentialId,
@@ -165,28 +150,40 @@ export default class Controller {
   }
 
   static fromStore() {
-    const version = Storage.get("version");
-    if (!version) {
+    try {
+      const version = Storage.get("version");
+      if (!version) {
+        return;
+      }
+
+      let controller: SerializedController;
+      const { address, chainId, rpcUrl } = Storage.get(
+        selectors[VERSION].active(),
+      );
+      controller = Storage.get(selectors[VERSION].account(address));
+      if (!controller) {
+        return;
+      }
+
+      const { username, publicKey, credentialId } = controller;
+
+      if (version !== VERSION) {
+        migrations[version][VERSION](address);
+      }
+
+      return new Controller({
+        chainId,
+        rpcUrl,
+        address,
+        username,
+        publicKey,
+        credentialId,
+      });
+    } catch (e) {
+      // If the current storage is incompatible, clear it so it gets recreated.
+      Storage.clear();
       return;
     }
-
-    let controller: SerializedController;
-    if (version === "0.0.1") {
-      const active = Storage.get(selectors["0.0.1"].active());
-      controller = Storage.get(selectors["0.0.1"].account(active));
-    }
-
-    if (!controller) {
-      return;
-    }
-
-    const { publicKey, credentialId, address, username } = controller;
-
-    if (version !== VERSION) {
-      migrations[version][VERSION](address);
-    }
-
-    return new Controller({ address, username, publicKey, credentialId });
   }
 }
 

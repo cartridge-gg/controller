@@ -13,10 +13,11 @@ const ibmPlexMono = IBM_Plex_Mono({
 
 export default function Keychain({ Component, pageProps }: AppProps) {
   useGlobalInjection();
+
   return (
     <>
       <NextHead>
-        <title>Cartridge</title>
+        <title>Cartridge Controller</title>
 
         <meta
           name="viewport"
@@ -24,8 +25,20 @@ export default function Keychain({ Component, pageProps }: AppProps) {
         ></meta>
         <meta property="twitter:card" content="summary_large_image" />
         <meta property="twitter:creator" content="@cartridge_gg" />
+        <meta property="twitter:title" content="Cartridge Controller" />
+        <meta
+          property="twitter:description"
+          content="Controller is a gaming specific smart contract wallet that enables seamless player onboarding and game interactions."
+        />
+        <meta property="twitter:image" content="/cover.png" />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="cartridge" />
+        <meta property="og:title" content="Cartridge Controller" />
+        <meta
+          property="og:description"
+          content="Controller is a gaming specific smart contract wallet that enables seamless player onboarding and game interactions."
+        />
+        <meta property="og:image" content="/cover.png" />
         <meta
           property="theme-color"
           content={CartridgeTheme.semanticTokens.colors.brand}

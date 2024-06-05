@@ -2,12 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Text, VStack, Button } from "@chakra-ui/react";
 
 import Controller from "utils/controller";
-import {
-  // Abi,
-  constants,
-  Call as StarknetCall,
-  InvocationsDetails,
-} from "starknet";
+import { Call as StarknetCall, InvocationsDetails } from "starknet";
 import { Fees } from "./Fees";
 import { formatEther } from "viem";
 import { ExecuteReply, ResponseCodes } from "@cartridge/controller";
@@ -37,7 +32,7 @@ export function Execute({
   onLogout,
 }: {
   // origin: string;
-  chainId: constants.StarknetChainId;
+  chainId: string;
   controller: Controller;
   transactions: StarknetCall | StarknetCall[];
   transactionsDetail?: InvocationsDetails;
@@ -55,7 +50,7 @@ export function Execute({
   const [ethBalance, setEthBalance] = useState<bigint>();
   const [lowEth, setLowEth] = useState<boolean>(false);
 
-  const account = controller.account(chainId);
+  const account = controller.account;
   const calls = useMemo(() => {
     return Array.isArray(transactions) ? transactions : [transactions];
   }, [transactions]);
@@ -146,7 +141,7 @@ export function Execute({
     return (
       <LowEth
         chainId={chainId}
-        address={controller.account(chainId).address}
+        address={controller.account.address}
         balance={format(ethBalance)}
       />
     );

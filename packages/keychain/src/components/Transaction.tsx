@@ -30,8 +30,7 @@ export function Transaction({
   useEffect(() => {
     if (chainId) {
       let result: TransactionState = "pending";
-      controller
-        .account(chainId)
+      controller.account
         .waitForTransaction(hash, {
           ...Account.waitForTransactionOptions,
           retryInterval: 8000,

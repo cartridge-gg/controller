@@ -3,7 +3,7 @@ import { HStack, Spacer, Text, VStack } from "@chakra-ui/react";
 import { Container } from "components/Container";
 import { PortalBanner } from "components/PortalBanner";
 import { useState } from "react";
-import { BigNumberish, constants } from "starknet";
+import { BigNumberish } from "starknet";
 import { formatAddress } from "utils/contracts";
 
 const NewLowEth = ({
@@ -11,7 +11,7 @@ const NewLowEth = ({
   address,
   balance,
 }: {
-  chainId: constants.StarknetChainId;
+  chainId: string;
   address: BigNumberish;
   balance: BigNumberish;
 }) => {

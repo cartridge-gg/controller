@@ -1,5 +1,5 @@
 import { Container, PortalBanner, PortalFooter } from "components";
-import { BigNumberish, constants } from "starknet";
+import { BigNumberish } from "starknet";
 import { Policy } from "@cartridge/controller";
 import { PlugNewDuoIcon } from "@cartridge/ui";
 import { Button } from "@chakra-ui/react";
@@ -14,7 +14,7 @@ export function CreateSession({
   onCancel,
   onLogout,
 }: {
-  chainId: constants.StarknetChainId;
+  chainId: string;
   policies: Policy[];
   origin: string;
   onConnect: (policies: Policy[]) => void;
@@ -42,7 +42,7 @@ export function CreateSession({
             onClick={async () => {
               setIsConnecting(true);
               await controller
-                .approve(origin, chainId, expiresAt, policies, maxFees)
+                .approve(origin, expiresAt, policies, maxFees)
                 .then(() => {
                   onConnect(policies);
                 })

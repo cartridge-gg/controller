@@ -10,7 +10,6 @@ import {
   RpcProvider,
   TypedData,
   InvocationsDetails,
-  constants,
 } from "starknet";
 
 import { Keychain, ResponseCodes, Modal } from "./types";
@@ -23,12 +22,16 @@ class DeviceAccount extends Account {
   private modal: Modal;
 
   constructor(
-    provider: RpcProvider,
+    rpcUrl: string,
     address: string,
     keychain: AsyncMethodReturns<Keychain>,
     modal: Modal,
   ) {
-    super(provider, address, new Signer(keychain, modal));
+    super(
+      new RpcProvider({ nodeUrl: rpcUrl }),
+      address,
+      new Signer(keychain, modal),
+    );
     this.address = address;
     this.keychain = keychain;
     this.modal = modal;
@@ -51,7 +54,6 @@ class DeviceAccount extends Account {
   ): Promise<EstimateFee> {
     return this.keychain.estimateInvokeFee(calls, {
       ...details,
-      chainId: await this.getChainId(),
     });
   }
 
@@ -61,7 +63,6 @@ class DeviceAccount extends Account {
   ): Promise<EstimateFee> {
     return this.keychain.estimateDeclareFee(payload, {
       ...details,
-      chainId: await this.getChainId(),
     });
   }
 
@@ -81,9 +82,7 @@ class DeviceAccount extends Account {
   async execute(
     calls: Call | Call[],
     abis?: Abi[],
-    transactionsDetail?: InvocationsDetails & {
-      chainId?: constants.StarknetChainId;
-    },
+    transactionsDetail?: InvocationsDetails,
   ): Promise<InvokeFunctionResponse> {
     if (!transactionsDetail) {
       transactionsDetail = {};

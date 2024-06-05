@@ -32,7 +32,7 @@ export function validateUsernameFor(type: "signup" | "login") {
         }
         case "login": {
           if ((error as Error).message === "ent: account not found") {
-            return "Account not found";
+            return "Controller with username not found";
           } else {
             return "An error occured.";
           }

@@ -1,12 +1,7 @@
 export * from "./types";
 export { defaultPresets } from "./presets";
 
-import {
-  AccountInterface,
-  addAddressPadding,
-  constants,
-  RpcProvider,
-} from "starknet";
+import { AccountInterface, addAddressPadding, constants } from "starknet";
 import {
   AsyncMethodReturns,
   Connection,
@@ -15,7 +10,6 @@ import {
 
 import DeviceAccount from "./device";
 import {
-  Session,
   Keychain,
   Policy,
   ResponseCodes,
@@ -30,26 +24,15 @@ import { createModal } from "./modal";
 import { defaultPresets } from "./presets";
 import { NotReadyToConnect } from "./errors";
 
-// @dev override url to local sequencer for local dev
-// http://localhost:8000/x/starknet/mainnet
-export const providers: { [key: string]: RpcProvider } = {
-  [constants.StarknetChainId.SN_MAIN]: new RpcProvider({
-    nodeUrl: "https://api.cartridge.gg/x/starknet/mainnet",
-  }),
-  [constants.StarknetChainId.SN_SEPOLIA]: new RpcProvider({
-    nodeUrl: "https://api.cartridge.gg/x/starknet/sepolia",
-  }),
-};
-
 class Controller {
-  private connection?: Connection<Keychain>;
-  public keychain?: AsyncMethodReturns<Keychain>;
+  private url = new URL("https://x.cartridge.gg");
   private policies: Policy[] = [];
-  private url: string = "https://x.cartridge.gg";
-  public chainId: constants.StarknetChainId =
-    constants.StarknetChainId.SN_SEPOLIA;
-  public accounts?: { [key: string]: AccountInterface };
+  private connection?: Connection<Keychain>;
   private modal?: Modal;
+  public keychain?: AsyncMethodReturns<Keychain>;
+  public rpc = new URL("https://api.cartridge.gg/x/starknet/sepolia");
+  public chainId: string = constants.StarknetChainId.SN_SEPOLIA;
+  public account?: AccountInterface;
   // private starterPackId?: string;
 
   constructor(policies?: Policy[], options?: ControllerOptions) {
@@ -62,12 +45,12 @@ class Controller {
       });
     }
 
-    if (options?.chainId) {
-      this.chainId = options.chainId;
+    if (options?.url) {
+      this.url = new URL(options.url);
     }
 
-    if (options?.url) {
-      this.url = options.url;
+    if (options?.rpc) {
+      this.rpc = new URL(options.rpc);
     }
 
     this.setTheme(options?.theme, options?.config?.presets);
@@ -79,7 +62,7 @@ class Controller {
       return;
     }
 
-    this.modal = createModal(this.url, () => {
+    this.modal = createModal(this.url.toString(), () => {
       this.keychain?.reset();
     });
 
@@ -108,29 +91,19 @@ class Controller {
       .then(() => this.probe());
   }
 
-  get account() {
-    if (!this.accounts) {
-      return;
-    }
-
-    return this.accounts[this.chainId];
-  }
-
   private setTheme(
     id: string = "cartridge",
     presets: ControllerThemePresets = defaultPresets,
   ) {
     const theme = presets[id] ?? defaultPresets.cartridge;
-
-    const url = new URL(this.url);
-    url.searchParams.set("theme", encodeURIComponent(JSON.stringify(theme)));
-    this.url = url.toString();
+    this.url.searchParams.set(
+      "theme",
+      encodeURIComponent(JSON.stringify(theme)),
+    );
   }
 
   private setColorMode(colorMode: ColorMode) {
-    const url = new URL(this.url);
-    url.searchParams.set("colorMode", colorMode);
-    this.url = url.toString();
+    this.url.searchParams.set("colorMode", colorMode);
   }
 
   ready() {
@@ -157,102 +130,23 @@ class Controller {
       }
 
       const { address } = res as ProbeReply;
-      this.accounts = {
-        [constants.StarknetChainId.SN_MAIN]: new DeviceAccount(
-          providers[constants.StarknetChainId.SN_MAIN],
-          address,
-          this.keychain,
-          this.modal,
-        ) as AccountInterface, // Note: workaround for execute type mismatch error
-        [constants.StarknetChainId.SN_SEPOLIA]: new DeviceAccount(
-          providers[constants.StarknetChainId.SN_SEPOLIA],
-          address,
-          this.keychain,
-          this.modal,
-        ) as AccountInterface,
-      };
+      this.account = new DeviceAccount(
+        this.rpc.toString(),
+        address,
+        this.keychain,
+        this.modal,
+      ) as AccountInterface;
     } catch (e) {
       console.error(e);
       return;
     }
 
-    return !!this.accounts?.[this.chainId];
-  }
-
-  async switchChain(chainId: constants.StarknetChainId) {
-    if (this.chainId === chainId) {
-      return;
-    }
-
-    this.chainId = chainId;
-  }
-
-  async login(
-    address: string,
-    credentialId: string,
-    options: {
-      rpId?: string;
-      challengeExt?: Buffer;
-    },
-  ) {
-    if (!this.keychain) {
-      console.error(new NotReadyToConnect().message);
-      return null;
-    }
-
-    return this.keychain.login(address, credentialId, options);
-  }
-
-  async issueStarterPack(id: string) {
-    if (!this.keychain || !this.modal) {
-      const err = new NotReadyToConnect();
-      console.error(err.message);
-      return Promise.reject(err.message);
-    }
-
-    this.modal.open();
-
-    try {
-      if (!this.account) {
-        let response = await this.keychain.connect(
-          this.policies,
-          undefined,
-          this.chainId,
-        );
-        if (response.code !== ResponseCodes.SUCCESS) {
-          throw new Error(response.message);
-        }
-      }
-
-      return await this.keychain.issueStarterPack(id);
-    } catch (e) {
-      console.log(e);
-      return Promise.reject(e);
-    } finally {
-      this.modal.close();
-    }
-  }
-
-  async showQuests(gameId: string) {
-    if (!this.keychain || !this.modal) {
-      console.error(new NotReadyToConnect().message);
-      return;
-    }
-
-    this.modal.open();
-
-    try {
-      return await this.keychain.showQuests(gameId);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      this.modal.close();
-    }
+    return !!this.account;
   }
 
   async connect() {
-    if (this.accounts) {
-      return this.accounts[this.chainId];
+    if (this.account) {
+      return this.account;
     }
 
     if (!this.keychain || !this.modal) {
@@ -272,30 +166,21 @@ class Controller {
     try {
       let response = await this.keychain.connect(
         this.policies,
-        undefined,
-        this.chainId,
+        this.rpc.toString(),
       );
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
       }
 
       response = response as ConnectReply;
-      this.accounts = {
-        [constants.StarknetChainId.SN_MAIN]: new DeviceAccount(
-          providers[constants.StarknetChainId.SN_MAIN],
-          response.address,
-          this.keychain,
-          this.modal,
-        ) as AccountInterface,
-        [constants.StarknetChainId.SN_SEPOLIA]: new DeviceAccount(
-          providers[constants.StarknetChainId.SN_SEPOLIA],
-          response.address,
-          this.keychain,
-          this.modal,
-        ) as AccountInterface,
-      };
+      this.account = new DeviceAccount(
+        this.rpc.toString(),
+        response.address,
+        this.keychain,
+        this.modal,
+      ) as AccountInterface;
 
-      return this.accounts[this.chainId];
+      return this.account;
     } catch (e) {
       console.log(e);
     } finally {
@@ -316,7 +201,7 @@ class Controller {
       }
     }
 
-    this.accounts = undefined;
+    this.account = undefined;
     return this.keychain.disconnect();
   }
 
@@ -327,15 +212,6 @@ class Controller {
     }
 
     return this.keychain.revoke(origin);
-  }
-
-  async approvals(origin: string): Promise<Session | undefined> {
-    if (!this.keychain) {
-      console.error(new NotReadyToConnect().message);
-      return;
-    }
-
-    return this.keychain.approvals(origin);
   }
 
   username() {
@@ -351,5 +227,4 @@ class Controller {
 export * from "./types";
 export * from "./errors";
 export { computeAddress, split, verifyMessageHash } from "./utils";
-export { injectController } from "./inject";
 export default Controller;
