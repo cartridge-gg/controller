@@ -1,6 +1,6 @@
 export * from "./types";
 
-import { ConnectError, ResponseCodes } from "@cartridge/controller";
+import { ConnectError, Policy, ResponseCodes } from "@cartridge/controller";
 import { connectToParent } from "@cartridge/penpal";
 import { normalize as normalizeOrigin } from "utils/url";
 import Controller from "utils/controller";
@@ -15,17 +15,23 @@ import { username } from "./username";
 import { ConnectionCtx } from "./types";
 
 export function connectToController({
+  setOrigin,
   setRpcUrl,
+  setPolicies,
   setContext,
   setController,
 }: {
+  setOrigin: (origin: string) => void;
   setRpcUrl: (url: string) => void;
+  setPolicies: (policies: Policy[]) => void;
   setContext: (ctx: ConnectionCtx) => void;
   setController: (controller: Controller) => void;
 }) {
   return connectToParent({
     methods: {
-      connect: normalize(connectFactory({ setRpcUrl, setContext })),
+      connect: normalize(
+        connectFactory({ setOrigin, setRpcUrl, setPolicies, setContext }),
+      ),
       disconnect: normalize(validate(disconnectFactory(setController))),
       execute: normalize(validate(executeFactory({ setContext }))),
       estimateDeclareFee: normalize(validate(estimateDeclareFee)),

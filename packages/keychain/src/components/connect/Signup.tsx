@@ -25,14 +25,11 @@ import { doSignup } from "hooks/account";
 import { useControllerTheme } from "hooks/theme";
 import { Error as ErrorComp } from "components/Error";
 import { shortString } from "starknet";
+import { useConnection } from "hooks/connection";
 
 export function Signup({
   prefilledName = "",
-  origin,
-  policies,
   isSlot,
-  chainId,
-  rpcUrl,
   onSuccess,
   onLogin,
 }: SignupProps) {
@@ -78,15 +75,11 @@ export function Signup({
           validateOnBlur={false}
         >
           <Form
-            chainId={chainId}
-            rpcUrl={rpcUrl}
             onLogin={onLogin}
-            onSuccess={onSuccess}
             isRegistering={isRegistering}
             isLoading={isLoading}
+            onSuccess={onSuccess}
             setIsRegistering={setIsRegistering}
-            origin={origin}
-            policies={policies}
             isSlot={isSlot}
             error={error}
           />
@@ -97,10 +90,6 @@ export function Signup({
 }
 
 function Form({
-  origin,
-  policies,
-  chainId,
-  rpcUrl,
   isRegistering,
   isLoading,
   isSlot,
@@ -114,6 +103,7 @@ function Form({
   setIsRegistering: (val: boolean) => void;
   error: Error;
 }) {
+  const { origin, policies, chainId, rpcUrl, setController } = useConnection();
   const theme = useControllerTheme();
   const { values, isValidating } = useFormikContext<FormValues>();
 
@@ -160,7 +150,11 @@ function Form({
         controller.store();
         await controller.account.sync();
 
-        onSuccess(controller);
+        setController(controller);
+
+        if (onSuccess) {
+          onSuccess();
+        }
       },
     },
   );

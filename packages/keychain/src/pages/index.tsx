@@ -19,6 +19,7 @@ import {
 } from "utils/connection";
 import { diff } from "utils/controller";
 import { logout } from "utils/connection/logout";
+import { LoginMode } from "components/connect/types";
 
 function Home() {
   const { context, controller, chainId, setContext, error } = useConnection();
@@ -37,7 +38,7 @@ function Home() {
 
   // No controller, send to login
   if (!controller) {
-    return <CreateController />;
+    return <CreateController loginMode={LoginMode.Controller} />;
   }
 
   const onLogout = (context: ConnectionCtx) => {

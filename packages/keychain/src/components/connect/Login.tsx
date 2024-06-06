@@ -9,24 +9,23 @@ import {
 } from "components";
 import { useCallback, useState } from "react";
 import Controller from "utils/controller";
-import { FormValues, LoginProps } from "./types";
+import { FormValues, LoginMode, LoginProps } from "./types";
 import { useAnalytics } from "hooks/analytics";
 import { fetchAccount, validateUsernameFor } from "./utils";
 import { RegistrationLink } from "./RegistrationLink";
 import { useControllerTheme } from "hooks/theme";
 import { doLogin } from "hooks/account";
 import { Error as ErrorComp } from "components/Error";
+import { useConnection } from "hooks/connection";
 
 export function Login({
-  chainId,
-  rpcUrl,
-  origin,
-  policies,
   prefilledName = "",
   isSlot,
+  mode = LoginMode.Webauthn,
   onSuccess,
   onSignup,
 }: LoginProps) {
+  const { origin, policies, chainId, rpcUrl, setController } = useConnection();
   const { event: log } = useAnalytics();
   const theme = useControllerTheme();
   const [isLoading, setIsLoading] = useState(false);
@@ -56,14 +55,25 @@ export function Login({
       });
 
       try {
-        if (isSlot || !origin || !policies) {
-          await doLogin(values.username, credentialId, publicKey);
-        } else {
-          await controller.approve(origin, expiresAt, policies);
+        switch (mode) {
+          case LoginMode.Webauthn:
+            await doLogin(values.username, credentialId, publicKey);
+            break;
+          case LoginMode.Controller:
+            if (policies.length === 0) {
+              throw new Error("Policies required for controller ");
+            }
+
+            await controller.approve(origin, expiresAt, policies);
+            break;
         }
 
         controller.store();
-        onSuccess(controller);
+        setController(controller);
+
+        if (onSuccess) {
+          onSuccess();
+        }
 
         log({ type: "webauthn_login", address });
       } catch (e) {
@@ -80,7 +90,7 @@ export function Login({
 
       setIsLoading(false);
     },
-    [chainId, rpcUrl, origin, policies, expiresAt, isSlot, log, onSuccess],
+    [chainId, rpcUrl, origin, policies, expiresAt, isSlot, log],
   );
 
   return (

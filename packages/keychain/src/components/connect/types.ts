@@ -1,6 +1,3 @@
-import Controller from "utils/controller";
-import { Policy } from "@cartridge/controller";
-
 export type FormValues = {
   username: string;
 };
@@ -9,20 +6,20 @@ export type AuthProps = SignupProps | LoginProps;
 
 type AuthBaseProps = {
   prefilledName?: string;
-  origin?: string;
-  policies?: Policy[];
   isSlot?: boolean;
-  chainId: string;
-  rpcUrl: string;
-  onSuccess: (controller: Controller) => void;
+  onSuccess?: () => void;
 };
 
 export type SignupProps = AuthBaseProps & {
   onLogin: (username: string) => void;
 };
 
+export enum LoginMode {
+  Webauthn, // client server login flow
+  Controller, // client side only create session flow
+}
+
 export type LoginProps = AuthBaseProps & {
-  chainId: string;
-  rpcUrl: string;
+  mode?: LoginMode;
   onSignup: (username: string) => void;
 };
