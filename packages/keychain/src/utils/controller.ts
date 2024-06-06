@@ -1,5 +1,4 @@
 import { SignerInterface, BigNumberish } from "starknet";
-import equal from "fast-deep-equal";
 
 import { Policy, Session } from "@cartridge/controller";
 
@@ -190,7 +189,13 @@ export default class Controller {
 export function diff(a: Policy[], b: Policy[]): Policy[] {
   return a.reduce(
     (prev, policy) =>
-      b.some((approval) => equal(approval, policy)) ? prev : [...prev, policy],
+      b.some(
+        (approval) =>
+          approval.target === policy.target &&
+          approval.method === policy.method,
+      )
+        ? prev
+        : [...prev, policy],
     [] as Policy[],
   );
 }
