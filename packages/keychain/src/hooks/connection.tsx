@@ -36,7 +36,9 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     if (!isIframe()) {
       const urlParams = new URLSearchParams(window.location.search);
-      setRpcUrl(urlParams.get("rpc_url") || process.env.NEXT_PUBLIC_RPC_SEPOLIA);
+      setRpcUrl(
+        urlParams.get("rpc_url") || process.env.NEXT_PUBLIC_RPC_SEPOLIA,
+      );
       return;
     }
 
