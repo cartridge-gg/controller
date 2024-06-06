@@ -44,7 +44,7 @@ export function Container({
           onClick={close}
         />
       )}
-
+      
       <Header chainId={chainId} onBack={onBack} hideAccount={hideAccount} />
 
       <VStack
