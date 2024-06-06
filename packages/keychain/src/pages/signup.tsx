@@ -20,8 +20,6 @@ export default function Signup() {
 
   return (
     <SignupComponent
-      chainId={chainId}
-      rpcUrl={rpcUrl}
       onLogin={() => router.push({ pathname: "/login", query: router.query })}
       onSuccess={() => {
         router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);

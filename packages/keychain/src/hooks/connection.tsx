@@ -41,19 +41,23 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
   const parsePolicies = (policiesStr: string | null): Policy[] => {
     if (!policiesStr) return [];
     return JSON.parse(policiesStr);
-  }
+  };
 
   useEffect(() => {
     if (!isIframe()) {
       const urlParams = new URLSearchParams(window.location.search);
       setOrigin(urlParams.get("origin") || process.env.NEXT_PUBLIC_ORIGIN);
-      setRpcUrl(urlParams.get("rpc_url") || process.env.NEXT_PUBLIC_RPC_SEPOLIA);
+      setRpcUrl(
+        urlParams.get("rpc_url") || process.env.NEXT_PUBLIC_RPC_SEPOLIA,
+      );
       setPolicies(parsePolicies(urlParams.get("policies")));
       return;
     }
 
     const connection = connectToController({
+      setOrigin,
       setRpcUrl,
+      setPolicies,
       setContext,
       setController,
     });

@@ -16,17 +16,15 @@ import { RegistrationLink } from "./RegistrationLink";
 import { useControllerTheme } from "hooks/theme";
 import { doLogin } from "hooks/account";
 import { Error as ErrorComp } from "components/Error";
+import { useConnection } from "hooks/connection";
 
 export function Login({
-  chainId,
-  rpcUrl,
-  origin,
-  policies,
   prefilledName = "",
   isSlot,
   onSuccess,
   onSignup,
 }: LoginProps) {
+  const { origin, policies, chainId, rpcUrl, setController } = useConnection();
   const { event: log } = useAnalytics();
   const theme = useControllerTheme();
   const [isLoading, setIsLoading] = useState(false);
@@ -63,7 +61,11 @@ export function Login({
         }
 
         controller.store();
-        onSuccess(controller);
+        setController(controller);
+
+        if (onSuccess) {
+          onSuccess();
+        }
 
         log({ type: "webauthn_login", address });
       } catch (e) {
@@ -80,7 +82,7 @@ export function Login({
 
       setIsLoading(false);
     },
-    [chainId, rpcUrl, origin, policies, expiresAt, isSlot, log, onSuccess],
+    [chainId, rpcUrl, origin, policies, expiresAt, isSlot, log],
   );
 
   return (
