@@ -2,8 +2,15 @@ import { useState } from "react";
 import { Signup } from "./Signup";
 import { Login } from "./Login";
 import { useConnection } from "hooks/connection";
+import { LoginMode } from "./types";
 
-export function CreateController({ isSlot }: { isSlot?: boolean }) {
+export function CreateController({
+  isSlot,
+  loginMode,
+}: {
+  isSlot?: boolean;
+  loginMode?: LoginMode;
+}) {
   const { error } = useConnection();
   const [showSignup, setShowSignup] = useState(false);
   const [prefilledUsername, setPrefilledUsername] = useState<string>();
@@ -28,6 +35,7 @@ export function CreateController({ isSlot }: { isSlot?: boolean }) {
         setPrefilledUsername(username);
         setShowSignup(true);
       }}
+      mode={loginMode}
       isSlot={isSlot}
     />
   );

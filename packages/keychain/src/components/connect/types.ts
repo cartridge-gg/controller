@@ -14,6 +14,12 @@ export type SignupProps = AuthBaseProps & {
   onLogin: (username: string) => void;
 };
 
+export enum LoginMode {
+  Webauthn, // client server login flow
+  Controller, // client side only create session flow
+}
+
 export type LoginProps = AuthBaseProps & {
+  mode?: LoginMode;
   onSignup: (username: string) => void;
 };
