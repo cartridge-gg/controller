@@ -14,6 +14,7 @@ import { Header, HeaderProps } from "./Header";
 import { constants } from "starknet";
 import { CartridgeLogo, TimesIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
+import { isIframe } from "components/connect/utils";
 
 export function Container({
   children,
@@ -29,19 +30,21 @@ export function Container({
 
   return (
     <Wrapper {...rest}>
-      <IconButton
-        aria-label="Close Keychain"
-        icon={<TimesIcon />}
-        position="absolute"
-        zIndex="9999999"
-        colorScheme="translucent"
-        size="sm"
-        h={8}
-        top={3}
-        left={3}
-        onClick={close}
-      />
-
+      {isIframe() && (
+        <IconButton
+          aria-label="Close Keychain"
+          icon={<TimesIcon />}
+          position="absolute"
+          zIndex="9999999"
+          colorScheme="translucent"
+          size="sm"
+          h={8}
+          top={3}
+          left={3}
+          onClick={close}
+        />
+      )}
+      
       <Header chainId={chainId} onBack={onBack} hideAccount={hideAccount} />
 
       <VStack
