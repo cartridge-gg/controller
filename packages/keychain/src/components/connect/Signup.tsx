@@ -15,7 +15,6 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { DeployAccountDocument, useAccountQuery } from "generated/graphql";
 import Controller from "utils/controller";
-import { Status } from "utils/account";
 import { client } from "utils/graphql";
 import { PopupCenter } from "utils/url";
 import { FormValues, SignupProps } from "./types";
@@ -122,6 +121,12 @@ function Form({
       cacheTime: 10000000,
       refetchInterval: (data) => (!data ? 1000 : undefined),
       onSuccess: async (data) => {
+        // Deploy account
+        await client.request(DeployAccountDocument, {
+          id: values.username,
+          chainId: `starknet:${shortString.decodeShortString(chainId)}`,
+        });
+
         const {
           account: {
             credentials: {
@@ -140,16 +145,7 @@ function Form({
           credentialId,
         });
 
-        controller.account.status = Status.DEPLOYING;
-
-        await client.request(DeployAccountDocument, {
-          id: values.username,
-          chainId: `starknet:${shortString.decodeShortString(chainId)}`,
-        });
-
         controller.store();
-        await controller.account.sync();
-
         setController(controller);
 
         if (onSuccess) {

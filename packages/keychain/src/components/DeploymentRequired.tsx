@@ -4,11 +4,10 @@ import { Container } from "./Container";
 import { useEffect, useState } from "react";
 import { Status } from "utils/account";
 import { Loading } from "./Loading";
-import { Button, Link } from "@chakra-ui/react";
+import { Button, Link, Text } from "@chakra-ui/react";
 import { ExternalIcon } from "@cartridge/ui";
 import { PortalBanner } from "./PortalBanner";
 import { PortalFooter } from "./PortalFooter";
-
 export function DeploymentRequired({
   chainId,
   controller,
@@ -25,14 +24,30 @@ export function DeploymentRequired({
   const account = controller.account;
   const [status, setStatus] = useState<Status>(account.status);
   const [deployHash, setDeployHash] = useState<string>();
+  const [error, setError] = useState<Error>();
 
   useEffect(() => {
     const fetch = async () => {
-      if (account.status !== Status.DEPLOYING) {
-        return;
+      try {
+        switch (account.status) {
+          case Status.COUNTERFACTUAL: {
+            await account.requestDeployment();
+            break;
+          }
+          case Status.DEPLOYING: {
+            const hash = await account.getDeploymentTxn();
+
+            if (hash) {
+              setDeployHash(hash);
+            }
+            break;
+          }
+          case Status.DEPLOYED:
+            return;
+        }
+      } catch (e) {
+        setError(e);
       }
-      const hash = await account.getDeploymentTxn();
-      setDeployHash(hash);
     };
 
     fetch();
@@ -40,7 +55,7 @@ export function DeploymentRequired({
 
   useEffect(() => {
     const id = setInterval(async () => {
-      if (account.status !== Status.DEPLOYING) clearInterval(id);
+      if (account.status === Status.DEPLOYED) clearInterval(id);
       setStatus(account.status);
       await account.sync();
     }, 2000);
@@ -48,7 +63,7 @@ export function DeploymentRequired({
     return () => clearInterval(id);
   }, [account, setStatus]);
 
-  if (status === Status.DEPLOYING) {
+  if (status !== Status.DEPLOYED) {
     return (
       <Container chainId={chainId} onLogout={onLogout}>
         <PortalBanner
@@ -70,6 +85,15 @@ export function DeploymentRequired({
               View on Starkscan
             </Button>
           </Link>
+        )}
+
+        {error && (
+          <>
+            <Text>
+              We encounter an account deployment error: {error.message}
+            </Text>
+            <Text>Please come by discord and report this issue.</Text>
+          </>
         )}
 
         <PortalFooter>
