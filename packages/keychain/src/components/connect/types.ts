@@ -22,7 +22,5 @@ export type SignupProps = AuthBaseProps & {
 };
 
 export type LoginProps = AuthBaseProps & {
-  chainId: string;
-  rpcUrl: string;
   onSignup: (username: string) => void;
 };

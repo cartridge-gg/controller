@@ -11,32 +11,44 @@ import Controller from "utils/controller";
 import { connectToController, ConnectionCtx } from "utils/connection";
 import { isIframe } from "components/connect/utils";
 import { RpcProvider } from "starknet";
+import { Policy } from "@cartridge/controller";
 
 const ConnectionContext = createContext<ConnectionContextValue>(undefined);
 
 type ConnectionContextValue = {
-  controller: Controller;
-  setController: (controller: Controller) => void;
   context: ConnectionCtx;
-  setContext: (context: ConnectionCtx) => void;
+  controller: Controller;
+  origin: string;
   rpcUrl: string;
-  error: Error;
   chainId: string;
+  policies: Policy[];
+  error: Error;
+  setContext: (context: ConnectionCtx) => void;
+  setController: (controller: Controller) => void;
   close: () => void;
 };
 
 export function ConnectionProvider({ children }: PropsWithChildren) {
   const [parent, setParent] = useState<ParentMethods>();
   const [context, setContext] = useState<ConnectionCtx>();
+  const [origin, setOrigin] = useState<string>();
   const [rpcUrl, setRpcUrl] = useState<string>();
   const [chainId, setChainId] = useState<string>();
+  const [policies, setPolicies] = useState<Policy[]>([]);
   const [controller, setController] = useState(Controller.fromStore);
   const [error, setError] = useState<Error>();
+
+  const parsePolicies = (policiesStr: string | null): Policy[] => {
+    if (!policiesStr) return [];
+    return JSON.parse(policiesStr);
+  }
 
   useEffect(() => {
     if (!isIframe()) {
       const urlParams = new URLSearchParams(window.location.search);
+      setOrigin(urlParams.get("origin") || process.env.NEXT_PUBLIC_ORIGIN);
       setRpcUrl(urlParams.get("rpc_url") || process.env.NEXT_PUBLIC_RPC_SEPOLIA);
+      setPolicies(parsePolicies(urlParams.get("policies")));
       return;
     }
 
@@ -78,12 +90,14 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
   return (
     <ConnectionContext.Provider
       value={{
+        context,
         controller,
-        setController,
+        origin,
         rpcUrl,
         chainId,
+        policies,
         error,
-        context,
+        setController,
         setContext,
         close,
       }}
