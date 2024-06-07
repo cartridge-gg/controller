@@ -37,7 +37,10 @@ export function executeFactory({
         });
       }
       const account = controller.account;
-      if (account.status === Status.DEPLOYING) {
+      if (
+        account.status === Status.COUNTERFACTUAL ||
+        account.status === Status.DEPLOYING
+      ) {
         return Promise.resolve({
           code: ResponseCodes.NOT_ALLOWED,
           message: "Account is deploying.",

@@ -50,12 +50,19 @@ export default class Controller {
     this.rpcUrl = rpcUrl;
     this.publicKey = publicKey;
     this.credentialId = credentialId;
-    this.account = new Account(chainId, rpcUrl, address, this.signer, {
-      rpId: process.env.NEXT_PUBLIC_RP_ID,
-      origin: process.env.NEXT_PUBLIC_ORIGIN,
-      credentialId,
-      publicKey,
-    });
+    this.account = new Account(
+      chainId,
+      rpcUrl,
+      address,
+      username,
+      this.signer,
+      {
+        rpId: process.env.NEXT_PUBLIC_RP_ID,
+        origin: process.env.NEXT_PUBLIC_ORIGIN,
+        credentialId,
+        publicKey,
+      },
+    );
   }
 
   async getUser() {

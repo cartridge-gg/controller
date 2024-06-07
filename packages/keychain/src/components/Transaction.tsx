@@ -6,7 +6,6 @@ import { StarkscanUrl } from "utils/url";
 import { CheckIcon, ExternalIcon, StarknetIcon, Loading } from "@cartridge/ui";
 import { useController } from "hooks/controller";
 import { useChainName } from "hooks/chain";
-import Account from "utils/account";
 
 export type TransactionState = "pending" | "success" | "error";
 
@@ -32,7 +31,6 @@ export function Transaction({
       let result: TransactionState = "pending";
       controller.account
         .waitForTransaction(hash, {
-          ...Account.waitForTransactionOptions,
           retryInterval: 8000,
         })
         .then(() => {

@@ -90,7 +90,17 @@ export function Login({
 
       setIsLoading(false);
     },
-    [chainId, rpcUrl, origin, policies, expiresAt, isSlot, log],
+    [
+      chainId,
+      rpcUrl,
+      origin,
+      policies,
+      expiresAt,
+      mode,
+      log,
+      onSuccess,
+      setController,
+    ],
   );
 
   return (

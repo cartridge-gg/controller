@@ -11,11 +11,11 @@ import {
   InvokeFunctionResponse,
   TypedData,
   BigNumberish,
-  waitForTransactionOptions,
   TransactionFinalityStatus,
   InvocationsDetails,
   num,
   TransactionExecutionStatus,
+  shortString,
 } from "starknet";
 import {
   AccountContractDocument,
@@ -27,6 +27,7 @@ import selectors from "./selectors";
 import Storage from "./storage";
 import { CartridgeAccount } from "@cartridge/account-wasm";
 import { Session } from "@cartridge/controller";
+import { VERSION } from "./controller";
 
 const EST_FEE_MULTIPLIER = 2n;
 
@@ -40,12 +41,14 @@ class Account extends BaseAccount {
   rpc: RpcProvider;
   private selector: string;
   chainId: string;
+  username: string;
   cartridge: CartridgeAccount;
 
   constructor(
     chainId: string,
     nodeUrl: string,
     address: string,
+    username: string,
     signer: SignerInterface,
     webauthn: {
       rpId: string;
@@ -57,8 +60,9 @@ class Account extends BaseAccount {
     super({ nodeUrl }, address, signer);
 
     this.rpc = new RpcProvider({ nodeUrl });
-    this.selector = selectors["0.0.1"].deployment(address, chainId);
+    this.selector = selectors[VERSION].deployment(address, chainId);
     this.chainId = chainId;
+    this.username = username;
     this.cartridge = CartridgeAccount.new(
       nodeUrl,
       chainId,
@@ -69,31 +73,13 @@ class Account extends BaseAccount {
       webauthn.publicKey,
     );
 
-    const state = Storage.get(this.selector);
-    if (!state || Date.now() - state.syncing > 5000) {
-      this.sync();
-      return;
-    }
-  }
-
-  static get waitForTransactionOptions(): waitForTransactionOptions {
-    return {
-      retryInterval: 1000,
-      successStates: [
-        TransactionFinalityStatus.ACCEPTED_ON_L1,
-        TransactionFinalityStatus.ACCEPTED_ON_L2,
-      ],
-      errorStates: [
-        TransactionFinalityStatus.ACCEPTED_ON_L1,
-        TransactionFinalityStatus.ACCEPTED_ON_L2,
-      ],
-    };
+    this.sync();
   }
 
   get status() {
     const state = Storage.get(this.selector);
     if (!state || !state.status) {
-      return Status.COUNTERFACTUAL;
+      return Status.DEPLOYING;
     }
 
     return state.status;
@@ -105,21 +91,28 @@ class Account extends BaseAccount {
     });
   }
 
-  async getDeploymentTxn(): Promise<string | undefined> {
-    let chainId = this.chainId.substring(2);
-    chainId = Buffer.from(chainId, "hex").toString("ascii");
+  async requestDeployment(): Promise<void> {
+    await client.request(AccountContractDocument, {
+      id: this.username,
+      chainId: `starknet:${shortString.decodeShortString(this.chainId)}`,
+    });
 
+    this.status = Status.DEPLOYING;
+  }
+
+  async getDeploymentTxn(): Promise<string | undefined> {
     try {
       const data: AccountContractQuery = await client.request(
         AccountContractDocument,
         {
-          id: `starknet:${chainId}:${this.address}`,
+          id: `starknet:${shortString.decodeShortString(this.chainId)}:${
+            this.address
+          }`,
         },
       );
 
       if (!data?.contract?.deployTransaction?.id) {
-        console.error("could not find deployment txn");
-        return;
+        throw new Error("deployment txn not found");
       }
 
       return data.contract.deployTransaction.id.split("/")[1];
@@ -133,19 +126,17 @@ class Account extends BaseAccount {
   }
 
   async sync() {
-    Storage.update(this.selector, {
-      syncing: Date.now(),
-    });
-
     try {
       switch (this.status) {
-        case Status.DEPLOYING:
-        case Status.COUNTERFACTUAL: {
+        case Status.DEPLOYING: {
           const hash = await this.getDeploymentTxn();
-          if (!hash) return;
+          if (!hash) {
+            this.status = Status.COUNTERFACTUAL;
+            return;
+          }
+
           const receipt = await this.rpc.getTransactionReceipt(hash);
           if (receipt.isReverted() || receipt.isRejected()) {
-            // TODO: Handle redeployment
             this.status = Status.COUNTERFACTUAL;
             return;
           }
