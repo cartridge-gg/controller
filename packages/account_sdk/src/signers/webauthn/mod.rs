@@ -10,10 +10,10 @@ use starknet_crypto::FieldElement;
 
 pub mod credential;
 pub mod device;
-pub mod p256r1;
+pub mod internal;
 
 pub use device::{DeviceError, DeviceSigner};
-pub use p256r1::P256r1Signer;
+pub use internal::InternalWebauthnSigner;
 
 pub type Secp256r1Point = (U256, U256);
 

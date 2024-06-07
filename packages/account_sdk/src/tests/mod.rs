@@ -1,8 +1,11 @@
-pub mod deployment_test;
+mod account_test;
+mod declaration_using_account_test;
+mod deployment_test;
 mod ecdsa_test;
 mod erc20_methods_test;
 mod guardian;
-pub mod runners;
+mod outside_execution_test;
+mod runners;
 mod runners_test;
 mod session;
 mod signers;

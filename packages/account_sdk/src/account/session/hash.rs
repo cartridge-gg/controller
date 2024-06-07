@@ -6,6 +6,7 @@ use starknet_crypto::{poseidon_hash_many, poseidon_permute_comp, FieldElement};
 
 use crate::abigen::cartridge_account::Signer;
 
+use crate::hash::MessageHashRev1;
 use crate::signers::{SignError, SignerTrait};
 
 use super::merkle::MerkleTree;
