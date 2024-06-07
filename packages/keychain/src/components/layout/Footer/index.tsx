@@ -58,19 +58,7 @@ export function Footer({
         layout="position"
         animate={{ height, transition: { bounce: 0 } }}
       >
-        <VStack
-          pt={6}
-          align="stretch"
-          w="full"
-          h="full"
-          overflowY={isOpen ? "auto" : "hidden"}
-          css={{
-            "::-webkit-scrollbar": {
-              display: "none",
-            },
-            msOverflowStyle: "none",
-          }}
-        >
+        <VStack pt={6} align="stretch" w="full" h="full" overflowY="hidden">
           <HStack align="flex-start">
             <TransactionSummary
               isSlot={isSlot}

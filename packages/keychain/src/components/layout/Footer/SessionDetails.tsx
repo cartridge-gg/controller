@@ -21,17 +21,19 @@ export function SessionDetails({
 
   return (
     <VStack
+      borderRadius="md"
+      overflow="hidden"
+      rowGap="0.1rem"
+      minH={"min-content"}
       marginY={4}
       alignItems="flex"
       as={motion.div}
-      layoutScroll
       animate={{
         display: isOpen ? "flex" : "none",
         transition: { delay: 0.3 },
       }}
-      display="none"
     >
-      <VStack align="flex-start" borderTopRadius="md" bg="solid.primary" p={3}>
+      <VStack align="flex-start" bg="solid.primary" p={3}>
         <Text
           color="text.secondaryAccent"
           fontSize="xs"
@@ -42,7 +44,7 @@ export function SessionDetails({
         </Text>
       </VStack>
 
-      <Accordion w="full" allowMultiple position="relative" top={-2}>
+      <Accordion w="full" allowMultiple overflowY="scroll">
         {policies.map((p, i) => (
           <AccordionItem
             key={p.target + p.method}
