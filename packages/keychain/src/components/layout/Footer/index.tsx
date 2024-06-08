@@ -88,7 +88,7 @@ export function Footer({
           </HStack>
 
           {isOpen && (
-            <SessionDetails isOpen={isOpen} />
+            <SessionDetails />
           )}
         </VStack>
 
