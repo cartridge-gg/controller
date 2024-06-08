@@ -42,12 +42,32 @@ const connectors = [
       {
         target: ETH_TOKEN_ADDRESS,
         method: "approve",
-        description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry."
+        description:
+          "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
       },
       {
         target: ETH_TOKEN_ADDRESS,
         method: "transfer",
-        // description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry."
+        description:
+          "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
+      },
+      {
+        target: ETH_TOKEN_ADDRESS,
+        method: "mint",
+        description:
+          "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
+      },
+      {
+        target: ETH_TOKEN_ADDRESS,
+        method: "burn",
+        description:
+          "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
+      },
+      {
+        target: ETH_TOKEN_ADDRESS,
+        method: "allowance",
+        description:
+          "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
       },
     ],
     {
