@@ -103,7 +103,7 @@ function Form({
   setIsRegistering: (val: boolean) => void;
   error: Error;
 }) {
-  const { origin, policies, chainId, rpcUrl, setController } = useConnection();
+  const { chainId, rpcUrl, setController } = useConnection();
   const theme = useControllerTheme();
   const { values, isValidating } = useFormikContext<FormValues>();
 
@@ -194,8 +194,6 @@ function Form({
       </Content>
 
       <Footer
-        origin={origin}
-        policies={policies}
         isSlot={isSlot}
         showLogo
         showTerm

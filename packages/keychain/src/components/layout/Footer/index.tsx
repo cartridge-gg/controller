@@ -7,29 +7,27 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { CartridgeLogo, WedgeUpIcon } from "@cartridge/ui";
-import { Policy } from "@cartridge/controller";
 import React, { useMemo } from "react";
-import { TOP_OFFSET, FOOTER_HEIGHT } from "components/layout";
+import { TOP_OFFSET, FOOTER_HEIGHT, PORTAL_WINDOW_HEIGHT } from "components/layout";
 import { motion } from "framer-motion";
 import { SessionDetails } from "./SessionDetails";
 import { TransactionSummary } from "./TransactionSummary";
+import { isIframe } from "components/connect/utils";
+import { useConnection } from "hooks/connection";
 
 export function Footer({
   children,
-  origin,
-  policies,
   isSlot,
   showTerm = false,
   showLogo = false
 }: React.PropsWithChildren & {
-  origin?: string;
-  policies?: Policy[];
   isSlot?: boolean;
   showTerm?: boolean;
   showLogo?: boolean;
 }) {
+  const { origin, policies } = useConnection()
   const { isOpen, onToggle } = useDisclosure();
-  const isExpandable = useMemo(() => !!origin, [origin]);
+  const isExpandable = useMemo(() => !!origin && !!policies.length, [origin, policies]);
   const hostname = useMemo(
     () => (origin ? new URL(origin).hostname : undefined),
     [origin],
@@ -37,7 +35,7 @@ export function Footer({
 
   const height = useMemo(
     () =>
-      isOpen ? `${window.innerHeight - TOP_OFFSET - FOOTER_HEIGHT}px` : "auto",
+      isOpen ? `${(isIframe() ? window.innerHeight : PORTAL_WINDOW_HEIGHT) - TOP_OFFSET - FOOTER_HEIGHT}px` : "auto",
     [isOpen],
   );
 
@@ -101,8 +99,8 @@ export function Footer({
             )}
           </HStack>
 
-          {isOpen && policies && (
-            <SessionDetails policies={policies} isOpen={isOpen} />
+          {isOpen && (
+            <SessionDetails isOpen={isOpen} />
           )}
         </VStack>
 

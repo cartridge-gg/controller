@@ -4,22 +4,18 @@ import { Policy } from "@cartridge/controller";
 import { PlugNewDuoIcon } from "@cartridge/ui";
 import { Button } from "@chakra-ui/react";
 import { useState } from "react";
-import { useController } from "hooks/controller";
+import { useConnection } from "hooks/connection";
 
 export function CreateSession({
-  policies,
-  origin,
   onConnect,
   onCancel,
   onLogout,
 }: {
-  policies: Policy[];
-  origin: string;
   onConnect: (policies: Policy[]) => void;
   onCancel: () => void;
   onLogout: () => void;
 }) {
-  const { controller } = useController();
+  const { controller, policies } = useConnection();
   const [isConnecting, setIsConnecting] = useState(false);
   const [expiresAt] = useState<bigint>(3000000000n);
   const [maxFees] = useState<BigNumberish>();
@@ -31,7 +27,7 @@ export function CreateSession({
         description={`${origin} is requesting to connect to your Cartridge Controller`}
       />
 
-      <Footer origin={origin} policies={policies}>
+      <Footer>
         <Button
           colorScheme="colorful"
           isDisabled={isConnecting}

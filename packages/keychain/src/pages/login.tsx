@@ -11,7 +11,7 @@ export default function Login() {
   }
 
   if (controller) {
-    // router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);
+    router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);
   }
 
   if (!rpcUrl || !chainId) {

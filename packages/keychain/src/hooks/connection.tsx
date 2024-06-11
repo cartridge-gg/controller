@@ -50,6 +50,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
       setRpcUrl(
         urlParams.get("rpc_url") || process.env.NEXT_PUBLIC_RPC_SEPOLIA,
       );
+      setChainId(urlParams.get("chain_id"))
       setPolicies(parsePolicies(urlParams.get("policies")));
       return;
     }
@@ -72,7 +73,6 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     if (rpcUrl) {
-      console.log("!!!", rpcUrl)
       new RpcProvider({ nodeUrl: rpcUrl })
         .getChainId()
         .then(setChainId)
