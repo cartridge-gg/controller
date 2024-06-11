@@ -41,7 +41,7 @@ impl MessageHashRev1 for RawSession {
             name: short_string!("SessionAccount.session"),
             version: short_string!("1"),
             chain_id,
-            revision: short_string!("1"),
+            revision: FieldElement::ONE,
         };
         poseidon_hash_many(&[
             short_string!("StarkNet Message"),
