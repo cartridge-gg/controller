@@ -20,7 +20,7 @@ export function CreateSession({
   const [expiresAt] = useState<bigint>(3000000000n);
   const [maxFees] = useState<BigNumberish>();
   return (
-    <Container onLogout={onLogout}>
+    <Container variant="connect" onLogout={onLogout}>
       <Banner
         Icon={PlugNewDuoIcon}
         title="Create Session"
