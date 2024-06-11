@@ -12,26 +12,27 @@ import { CodeUtilIcon, WedgeRightIcon } from "@cartridge/ui";
 import { motion } from "framer-motion";
 import { usePolicies } from "hooks/connection";
 
-export function SessionDetails({
-  isOpen,
-}: {
-  isOpen: boolean;
-}) {
+export function SessionDetails() {
   const policies = usePolicies();
 
   return (
     <VStack
+      borderRadius="md"
+      overflowY="hidden"
+      rowGap="0.1rem"
+      minH="min-content"
       marginY={4}
       alignItems="flex"
       as={motion.div}
-      layoutScroll
-      animate={{
-        display: isOpen ? "flex" : "none",
-        transition: { delay: 0.3 },
-      }}
+      // Setting the initial display to `none` prevents the
+      // div from being visible on the first render
+      // which otherwise would cause a 'bouncy' effect.
       display="none"
+      animate={{
+        display: "flex",
+      }}
     >
-      <VStack align="flex-start" borderTopRadius="md" bg="solid.primary" p={3}>
+      <VStack align="flex-start" bg="solid.primary" p={3}>
         <Text
           color="text.secondaryAccent"
           fontSize="xs"
@@ -42,10 +43,13 @@ export function SessionDetails({
         </Text>
       </VStack>
 
-      <Accordion w="full" allowMultiple position="relative" top={-2}>
+      <Accordion w="full" allowMultiple overflowY="auto">
         {policies.map((p, i) => (
           <AccordionItem
             key={p.target + p.method}
+            // The container already set border radius (for top & bottom), but we
+            // set the bottom radius for the last item here because for certain
+            // browsers' scrolling behaviour (eg Firefox) just to make it look nicer.
             borderBottomRadius={i === policies.length - 1 ? "md" : "none"}
             isDisabled={!p.description}
           >
