@@ -1,4 +1,4 @@
-import { Container, PortalBanner, PortalFooter } from "components";
+import { Container, Banner, Footer } from "components/layout";
 import { BigNumberish } from "starknet";
 import { Policy } from "@cartridge/controller";
 import { PlugNewDuoIcon } from "@cartridge/ui";
@@ -7,14 +7,12 @@ import { useState } from "react";
 import { useController } from "hooks/controller";
 
 export function CreateSession({
-  chainId,
   policies,
   origin,
   onConnect,
   onCancel,
   onLogout,
 }: {
-  chainId: string;
   policies: Policy[];
   origin: string;
   onConnect: (policies: Policy[]) => void;
@@ -26,37 +24,35 @@ export function CreateSession({
   const [expiresAt] = useState<bigint>(3000000000n);
   const [maxFees] = useState<BigNumberish>();
   return (
-    <Container chainId={chainId} onLogout={onLogout}>
-      <PortalBanner
+    <Container onLogout={onLogout}>
+      <Banner
         Icon={PlugNewDuoIcon}
         title="Create Session"
         description={`${origin} is requesting to connect to your Cartridge Controller`}
       />
 
-      <PortalFooter origin={origin} policies={policies}>
-        <>
-          <Button
-            colorScheme="colorful"
-            isDisabled={isConnecting}
-            isLoading={isConnecting}
-            onClick={async () => {
-              setIsConnecting(true);
-              await controller
-                .approve(origin, expiresAt, policies, maxFees)
-                .then(() => {
-                  onConnect(policies);
-                })
-                .catch(() => {
-                  setIsConnecting(false);
-                });
-            }}
-          >
-            create
-          </Button>
+      <Footer origin={origin} policies={policies}>
+        <Button
+          colorScheme="colorful"
+          isDisabled={isConnecting}
+          isLoading={isConnecting}
+          onClick={async () => {
+            setIsConnecting(true);
+            await controller
+              .approve(origin, expiresAt, policies, maxFees)
+              .then(() => {
+                onConnect(policies);
+              })
+              .catch(() => {
+                setIsConnecting(false);
+              });
+          }}
+        >
+          create
+        </Button>
 
-          <Button onClick={onCancel}>cancel</Button>
-        </>
-      </PortalFooter>
+        <Button onClick={onCancel}>cancel</Button>
+      </Footer>
     </Container>
   );
 }

@@ -1,8 +1,6 @@
 import { Button } from "@chakra-ui/react";
-import { Container } from "./Container";
-import { PortalBanner } from "./PortalBanner";
+import { Container, Banner, Footer } from "components/layout";
 import { LogoutDuoIcon } from "@cartridge/ui";
-import { PortalFooter } from "./PortalFooter";
 
 export function Logout({
   onConfirm,
@@ -13,18 +11,18 @@ export function Logout({
 }) {
   return (
     <Container>
-      <PortalBanner
+      <Banner
         Icon={LogoutDuoIcon}
         title="Log Out"
         description="Are you sure?"
       />
 
-      <PortalFooter>
+      <Footer>
         <Button colorScheme="colorful" onClick={onConfirm}>
           Log Out
         </Button>
         <Button onClick={onCancel}>Cancel</Button>
-      </PortalFooter>
+      </Footer>
     </Container>
   );
 }

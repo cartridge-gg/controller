@@ -1,11 +1,10 @@
-import { NextPage } from "next";
-import { Container, PortalBanner } from "components";
+import { Container, Banner } from "components/layout";
 import { SparklesDuoIcon } from "@cartridge/ui";
 
-const Consent: NextPage = () => {
+export default function Consent() {
   return (
-    <Container hideAccount>
-      <PortalBanner
+    <Container variant="connect" hideAccount>
+      <Banner
         Icon={SparklesDuoIcon}
         title="Success!"
         description="Return to your terminal to continue"
@@ -13,5 +12,3 @@ const Consent: NextPage = () => {
     </Container>
   );
 };
-
-export default Consent;

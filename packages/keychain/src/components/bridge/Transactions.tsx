@@ -6,7 +6,7 @@ import { constants } from "starknet";
 import { mainnet, useWaitForTransaction } from "wagmi";
 import { sepolia } from "wagmi/chains";
 import { CheckIcon, ExternalIcon, TransferDuoIcon } from "@cartridge/ui";
-import { PortalBanner } from "components/PortalBanner";
+import { Banner } from "components/layout";
 
 enum CardState {
   PENDING = "PENDING",
@@ -30,7 +30,7 @@ export function TxnTracker({
 
   return (
     <VStack w="full" align="start" spacing={6}>
-      <PortalBanner Icon={TransferDuoIcon} title="Transactions" />
+      <Banner Icon={TransferDuoIcon} title="Transactions" />
 
       {txn.state === CardState.PENDING && (
         <>

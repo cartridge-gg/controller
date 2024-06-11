@@ -1,17 +1,18 @@
 import { Field } from "@cartridge/ui";
-import { VStack, Button } from "@chakra-ui/react";
-import { Container } from "../Container";
+import { Button } from "@chakra-ui/react";
+import {
+  Container,
+  FOOTER_MIN_HEIGHT,
+  Banner,
+  Footer,
+  Content,
+} from "components/layout";
 import {
   Form as FormikForm,
   Field as FormikField,
   Formik,
   useFormikContext,
 } from "formik";
-import {
-  PORTAL_FOOTER_MIN_HEIGHT,
-  PortalBanner,
-  PortalFooter,
-} from "components";
 import { useCallback, useEffect, useState } from "react";
 import { DeployAccountDocument, useAccountQuery } from "generated/graphql";
 import Controller from "utils/controller";
@@ -66,7 +67,7 @@ export function Signup({
 
   return (
     <>
-      <Container overflowY={error ? "auto" : undefined}>
+      <Container variant="connect" overflowY={error ? "auto" : undefined}>
         <Formik
           initialValues={{ username: prefilledName }}
           onSubmit={onSubmit}
@@ -161,7 +162,7 @@ function Form({
 
   return (
     <FormikForm style={{ width: "100%" }}>
-      <PortalBanner
+      <Banner
         title={
           theme.id === "cartridge"
             ? "Play with Cartridge Controller"
@@ -170,7 +171,7 @@ function Form({
         description="Create your Cartridge Controller"
       />
 
-      <VStack align="stretch" pb={error ? PORTAL_FOOTER_MIN_HEIGHT : undefined}>
+      <Content pb={error ? FOOTER_MIN_HEIGHT : undefined} >
         <FormikField
           name="username"
           placeholder="Username"
@@ -190,13 +191,14 @@ function Form({
         </FormikField>
 
         <ErrorComp error={error} />
-      </VStack>
+      </Content>
 
-      <PortalFooter
+      <Footer
         origin={origin}
         policies={policies}
-        isSignup
         isSlot={isSlot}
+        showLogo
+        showTerm
       >
         <Button type="submit" colorScheme="colorful" isLoading={isLoading}>
           sign up
@@ -207,7 +209,7 @@ function Form({
         >
           Log In
         </RegistrationLink>
-      </PortalFooter>
+      </Footer>
     </FormikForm>
   );
 }

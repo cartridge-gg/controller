@@ -1,11 +1,10 @@
 import Controller from "utils/controller";
 import { Button, Text } from "@chakra-ui/react";
-import { Container, PortalBanner, PortalFooter } from "components";
-import { NextPage } from "next";
+import { Container, Banner, Footer } from "components/layout";
 import { useRouter } from "next/router";
 import { useCallback, useEffect } from "react";
 
-const Consent: NextPage = () => {
+export default function Consent() {
   const router = useRouter();
 
   const onSubmit = useCallback(async () => {
@@ -29,8 +28,8 @@ const Consent: NextPage = () => {
   }, [router]);
 
   return (
-    <Container hideAccount>
-      <PortalBanner
+    <Container variant="connect" hideAccount>
+      <Banner
         title="Requesting Permission"
         description={
           <>
@@ -42,15 +41,13 @@ const Consent: NextPage = () => {
         }
       />
 
-      <PortalFooter showTerm={false}>
+      <Footer showLogo>
         <Button colorScheme="colorful" onClick={onSubmit}>
           approve
         </Button>
 
         <Button onClick={onDeny}>deny</Button>
-      </PortalFooter>
+      </Footer>
     </Container>
   );
 };
-
-export default Consent;

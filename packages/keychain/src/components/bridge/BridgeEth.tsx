@@ -26,6 +26,7 @@ import { TransferButton } from "./TransferButton";
 import { TxnTracker } from "./Transactions";
 import { Label } from "./Label";
 import Controller from "utils/controller";
+import { Banner } from "components/layout";
 import { Error } from "components/Error";
 import {
   CheckIcon,
@@ -34,7 +35,6 @@ import {
   MetaMaskIcon,
   WedgeDownIcon,
 } from "@cartridge/ui";
-import { PortalBanner } from "components/PortalBanner";
 
 export function BridgeEth({
   chainId,
@@ -116,7 +116,7 @@ export function BridgeEth({
 
   return (
     <WagmiConfig config={ethereumConfig}>
-      <PortalBanner Icon={EthereumDuoIcon} title="Bridge ETH" />
+      <Banner Icon={EthereumDuoIcon} title="Bridge ETH" />
 
       <VStack w="full" align="start" spacing="18px">
         <Label>From</Label>
@@ -130,8 +130,8 @@ export function BridgeEth({
                 text={
                   !!ethAddress
                     ? ethAddress.substring(0, 3) +
-                      "..." +
-                      ethAddress.substring(ethAddress.length - 4)
+                    "..." +
+                    ethAddress.substring(ethAddress.length - 4)
                     : "Metamask"
                 }
                 pointerEvents={!!ethAddress ? "none" : "auto"}
