@@ -43,7 +43,7 @@ export function SessionDetails() {
         </Text>
       </VStack>
 
-      <Accordion w="full" allowMultiple overflowY="scroll">
+      <Accordion w="full" allowMultiple overflowY="auto">
         {policies.map((p, i) => (
           <AccordionItem
             key={p.target + p.method}
