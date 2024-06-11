@@ -9,19 +9,15 @@ import {
   AccordionPanel,
 } from "@chakra-ui/react";
 import { CodeUtilIcon, WedgeRightIcon } from "@cartridge/ui";
-import { Policy } from "@cartridge/controller";
 import { motion } from "framer-motion";
+import { usePolicies } from "hooks/connection";
 
 export function SessionDetails({
-  policies,
   isOpen,
 }: {
-  policies: Policy[];
   isOpen: boolean;
 }) {
-  if (!policies) {
-    return null;
-  }
+  const policies = usePolicies();
 
   return (
     <VStack

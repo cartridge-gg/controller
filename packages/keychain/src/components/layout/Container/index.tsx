@@ -42,6 +42,7 @@ export function Container({
 }
 
 export const FOOTER_HEIGHT = 40;
+export const PORTAL_WINDOW_HEIGHT = 600;
 
 function Wrapper({ variant = "default", children, ...rest }: React.PropsWithChildren & { variant?: LayoutVariant }) {
   return (
@@ -67,7 +68,7 @@ function Wrapper({ variant = "default", children, ...rest }: React.PropsWithChil
         <Flex w="100vw" h="100vh" p={0} align="center">
           <ChakraContainer
             w="432px"
-            h="600px"
+            h={`${PORTAL_WINDOW_HEIGHT}px`}
             borderWidth={1}
             borderColor="solid.primaryAccent"
             verticalAlign="middle"

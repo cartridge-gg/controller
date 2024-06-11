@@ -146,7 +146,7 @@ export function Login({
               <ErrorComp error={error} />
             </Content>
 
-            <Footer origin={origin} policies={policies} isSlot={isSlot} showLogo>
+            <Footer isSlot={isSlot} showLogo>
               <Button
                 type="submit"
                 colorScheme="colorful"

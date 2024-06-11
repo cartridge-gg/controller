@@ -68,8 +68,6 @@ function Home() {
 
       return (
         <CreateSession
-          origin={ctx.origin}
-          policies={ctx.type === "connect" ? (ctx as ConnectCtx).policies : []}
           onConnect={(policies) => {
             context.resolve({
               code: ResponseCodes.SUCCESS,
