@@ -65,7 +65,7 @@ export function Header({
 function CloseButton() {
   const { close } = useConnection();
 
-  if (isIframe()) {
+  if (!isIframe()) {
     return null
   }
 
