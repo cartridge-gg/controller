@@ -7,7 +7,7 @@ use starknet::{
 };
 
 use super::runners::katana_runner::KatanaRunner;
-use crate::abigen::controller::{self, CartridgeAccount, Signer, StarknetSigner};
+use crate::abigen::controller::{self, Controller, Signer, StarknetSigner};
 use crate::deploy_contract::{
     single_owner_account, AccountDeclaration, DeployResult, FEE_TOKEN_ADDRESS,
 };
@@ -117,6 +117,6 @@ async fn test_deploy_and_call() {
     });
     let deployed_address = deploy(client, &account, signer, None, class_hash).await;
 
-    let contract = CartridgeAccount::new(deployed_address, account);
+    let contract = Controller::new(deployed_address, account);
     contract.get_owner().call().await.unwrap();
 }
