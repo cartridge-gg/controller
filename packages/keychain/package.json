@@ -13,7 +13,7 @@
     "gen": "graphql-codegen --config codegen.yaml"
   },
   "dependencies": {
-    "@cartridge/account_wasm": "workspace:^",
+    "@cartridge/account-wasm": "workspace:^",
     "@cartridge/controller": "workspace:^",
     "@cartridge/penpal": "^6.2.3",
     "@cartridge/ui": "workspace:^",

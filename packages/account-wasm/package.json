@@ -1,5 +1,5 @@
 {
-  "name": "@cartridge/account_wasm",
+  "name": "@cartridge/account-wasm",
   "version": "0.3.26",
   "description": "Wasm bindings for Cartridge Account",
   "main": "./pkg/account_wasm.js",
