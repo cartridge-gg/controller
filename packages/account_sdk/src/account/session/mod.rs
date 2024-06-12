@@ -15,7 +15,7 @@ use starknet::{
 use std::sync::Arc;
 
 use crate::{
-    abigen::controller::Call as AbigenCall,
+    abigen::cartridge_account::Call as AbigenCall,
     signers::{HashSigner, SignError},
 };
 
