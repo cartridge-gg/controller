@@ -102,7 +102,7 @@ export function Banner({
       return (
         <VStack w="full">
           <HStack
-            h={TOP_BAR_HEIGHT}
+            h={TOP_BAR_HEIGHT / 4}
             w="full"
             bg={`url('${cover}')`}
             bgSize="cover"
@@ -142,7 +142,6 @@ export function Banner({
         </VStack >
       )
   }
-
 }
 
 const ICON_IMAGE_SIZE = 64;
