@@ -98,7 +98,7 @@ importers:
         specifier: ^5.4.5
         version: 5.4.5
 
-  packages/account-wasm:
+  packages/account_wasm:
     devDependencies:
       '@cartridge/tsconfig':
         specifier: workspace:^
@@ -165,9 +165,9 @@ importers:
 
   packages/keychain:
     dependencies:
-      '@cartridge/account-wasm':
+      '@cartridge/account_wasm':
         specifier: workspace:^
-        version: link:../account-wasm
+        version: link:../account_wasm
       '@cartridge/controller':
         specifier: workspace:^
         version: link:../controller

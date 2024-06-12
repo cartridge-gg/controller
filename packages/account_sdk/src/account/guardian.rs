@@ -13,7 +13,7 @@ use starknet::{
 use std::sync::Arc;
 
 use crate::{
-    abigen::cartridge_account::SignerSignature,
+    abigen::controller::SignerSignature,
     signers::{HashSigner, SignError},
 };
 

@@ -1,6 +1,6 @@
 use crate::{
     abigen::{
-        cartridge_account::{CartridgeAccountReader, SignerType},
+        controller::{CartridgeAccountReader, SignerType},
         erc_20::Erc20,
     },
     account::CartridgeAccount,

@@ -1,5 +1,5 @@
 {
-  "name": "account-wasm",
+  "name": "account_wasm",
   "version": "0.1.0",
   "files": [
     "account_wasm_bg.wasm",

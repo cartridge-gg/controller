@@ -2,7 +2,7 @@ use cainome::cairo_serde::NonZero;
 use starknet::signers::SigningKey;
 use starknet_crypto::FieldElement;
 
-use crate::abigen::cartridge_account::{
+use crate::abigen::controller::{
     Signer, SignerSignature, StarknetSignature, StarknetSigner,
 };
 
