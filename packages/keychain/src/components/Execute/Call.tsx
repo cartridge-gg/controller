@@ -3,11 +3,9 @@ import { CodeUtilIcon } from "@cartridge/ui";
 import { HStack, Spacer, SystemProps, Text } from "@chakra-ui/react";
 
 export function Call({
-  chainId,
   policy,
   ...rest
 }: {
-  chainId: string;
   policy: Policy;
 } & SystemProps) {
   return (

@@ -1,12 +1,12 @@
 import { Field } from "@cartridge/ui";
-import { VStack, Button } from "@chakra-ui/react";
-import { Container } from "../Container";
-import { Form as FormikForm, Field as FormikField, Formik } from "formik";
+import { Button } from "@chakra-ui/react";
 import {
-  PORTAL_FOOTER_MIN_HEIGHT,
-  PortalBanner,
-  PortalFooter,
-} from "components";
+  Container,
+  FOOTER_MIN_HEIGHT,
+  Footer,
+  Content,
+} from "components/layout";
+import { Form as FormikForm, Field as FormikField, Formik } from "formik";
 import { useCallback, useState } from "react";
 import Controller from "utils/controller";
 import { FormValues, LoginMode, LoginProps } from "./types";
@@ -104,7 +104,16 @@ export function Login({
   );
 
   return (
-    <Container chainId={chainId} overflowY={error ? "auto" : undefined}>
+    <Container
+      variant="connect"
+      overflowY={error ? "auto" : undefined}
+      title={
+        theme.id === "cartridge"
+          ? "Play with Cartridge Controller"
+          : `Play ${theme.name}`
+      }
+      description="Enter your Controller username"
+    >
       <Formik
         initialValues={{ username: prefilledName }}
         onSubmit={onSubmit}
@@ -113,19 +122,7 @@ export function Login({
       >
         {(props) => (
           <FormikForm style={{ width: "100%" }}>
-            <PortalBanner
-              title={
-                theme.id === "cartridge"
-                  ? "Play with Cartridge Controller"
-                  : `Play ${theme.name}`
-              }
-              description="Enter your Controller username"
-            />
-
-            <VStack
-              align="stretch"
-              pb={error ? PORTAL_FOOTER_MIN_HEIGHT : undefined}
-            >
+            <Content pb={error ? FOOTER_MIN_HEIGHT : undefined}>
               <FormikField
                 name="username"
                 placeholder="Username"
@@ -146,9 +143,9 @@ export function Login({
               </FormikField>
 
               <ErrorComp error={error} />
-            </VStack>
+            </Content>
 
-            <PortalFooter origin={origin} policies={policies} isSlot={isSlot}>
+            <Footer isSlot={isSlot} showLogo>
               <Button
                 type="submit"
                 colorScheme="colorful"
@@ -162,7 +159,7 @@ export function Login({
               >
                 Sign up
               </RegistrationLink>
-            </PortalFooter>
+            </Footer>
           </FormikForm>
         )}
       </Formik>

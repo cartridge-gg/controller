@@ -8,7 +8,7 @@ import {
   useCallback,
 } from "react";
 import Controller from "utils/controller";
-import { connectToController, ConnectionCtx } from "utils/connection";
+import { connectToController, ConnectionCtx, LogoutCtx } from "utils/connection";
 import { isIframe } from "components/connect/utils";
 import { RpcProvider } from "starknet";
 import { Policy } from "@cartridge/controller";
@@ -26,6 +26,7 @@ type ConnectionContextValue = {
   setContext: (context: ConnectionCtx) => void;
   setController: (controller: Controller) => void;
   close: () => void;
+  logout: (context: ConnectionCtx) => void;
 };
 
 export function ConnectionProvider({ children }: PropsWithChildren) {
@@ -50,6 +51,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
       setRpcUrl(
         urlParams.get("rpc_url") || process.env.NEXT_PUBLIC_RPC_SEPOLIA,
       );
+      setChainId(urlParams.get("chain_id"))
       setPolicies(parsePolicies(urlParams.get("policies")));
       return;
     }
@@ -91,6 +93,15 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
     }
   }, [parent]);
 
+  const logout = useCallback((context: ConnectionCtx) => {
+    setContext({
+      origin: context.origin,
+      type: "logout",
+      resolve: context.resolve,
+      reject: context.reject,
+    } as LogoutCtx)
+  }, [])
+
   return (
     <ConnectionContext.Provider
       value={{
@@ -104,6 +115,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
         setController,
         setContext,
         close,
+        logout,
       }}
     >
       {children}
@@ -120,4 +132,29 @@ export function useConnection() {
   }
 
   return ctx;
+}
+
+export function useChainId() {
+  const { chainId } = useConnection();
+  return chainId
+}
+
+export function useRpcUrl() {
+  const { rpcUrl } = useConnection();
+  return rpcUrl
+}
+
+export function useOrigin() {
+  const { context } = useConnection();
+  return context?.origin
+}
+
+export function usePolicies() {
+  const { context } = useConnection();
+  switch (context?.type) {
+    case "connect":
+      return context.policies
+    default:
+      return []
+  }
 }

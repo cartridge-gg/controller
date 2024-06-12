@@ -1,17 +1,17 @@
 import { Field } from "@cartridge/ui";
-import { VStack, Button } from "@chakra-ui/react";
-import { Container } from "../Container";
+import { Button } from "@chakra-ui/react";
+import {
+  Container,
+  FOOTER_MIN_HEIGHT,
+  Footer,
+  Content,
+} from "components/layout";
 import {
   Form as FormikForm,
   Field as FormikField,
   Formik,
   useFormikContext,
 } from "formik";
-import {
-  PORTAL_FOOTER_MIN_HEIGHT,
-  PortalBanner,
-  PortalFooter,
-} from "components";
 import { useCallback, useEffect, useState } from "react";
 import { DeployAccountDocument, useAccountQuery } from "generated/graphql";
 import Controller from "utils/controller";
@@ -35,6 +35,7 @@ export function Signup({
   const [isRegistering, setIsRegistering] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState();
+  const theme = useControllerTheme();
 
   const onSubmit = useCallback(async (values: FormValues) => {
     setIsLoading(true);
@@ -66,7 +67,15 @@ export function Signup({
 
   return (
     <>
-      <Container overflowY={error ? "auto" : undefined}>
+      <Container
+        variant="connect" overflowY={error ? "auto" : undefined}
+        title={
+          theme.id === "cartridge"
+            ? "Play with Cartridge Controller"
+            : `Play ${theme.name}`
+        }
+        description="Create your Cartridge Controller"
+      >
         <Formik
           initialValues={{ username: prefilledName }}
           onSubmit={onSubmit}
@@ -102,8 +111,7 @@ function Form({
   setIsRegistering: (val: boolean) => void;
   error: Error;
 }) {
-  const { origin, policies, chainId, rpcUrl, setController } = useConnection();
-  const theme = useControllerTheme();
+  const { chainId, rpcUrl, setController } = useConnection();
   const { values, isValidating } = useFormikContext<FormValues>();
 
   useEffect(() => {
@@ -161,16 +169,7 @@ function Form({
 
   return (
     <FormikForm style={{ width: "100%" }}>
-      <PortalBanner
-        title={
-          theme.id === "cartridge"
-            ? "Play with Cartridge Controller"
-            : `Play ${theme.name}`
-        }
-        description="Create your Cartridge Controller"
-      />
-
-      <VStack align="stretch" pb={error ? PORTAL_FOOTER_MIN_HEIGHT : undefined}>
+      <Content pb={error ? FOOTER_MIN_HEIGHT : undefined} >
         <FormikField
           name="username"
           placeholder="Username"
@@ -190,13 +189,12 @@ function Form({
         </FormikField>
 
         <ErrorComp error={error} />
-      </VStack>
+      </Content>
 
-      <PortalFooter
-        origin={origin}
-        policies={policies}
-        isSignup
+      <Footer
         isSlot={isSlot}
+        showLogo
+        showTerm
       >
         <Button type="submit" colorScheme="colorful" isLoading={isLoading}>
           sign up
@@ -207,7 +205,7 @@ function Form({
         >
           Log In
         </RegistrationLink>
-      </PortalFooter>
+      </Footer>
     </FormikForm>
   );
 }

@@ -12,6 +12,7 @@ export * from "./Filter";
 export * from "./Gem";
 export * from "./Grid";
 export * from "./Joystick";
+export * from "./Key";
 export * from "./Metrics";
 export * from "./Moon";
 export * from "./Pencil";

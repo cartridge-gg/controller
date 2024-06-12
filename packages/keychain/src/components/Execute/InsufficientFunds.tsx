@@ -1,29 +1,25 @@
 import { CopyIcon, EthereumIcon, StarknetIcon } from "@cartridge/ui";
 import { HStack, Spacer, Text, VStack } from "@chakra-ui/react";
-import { Container } from "components/Container";
-import { PortalBanner } from "components/PortalBanner";
+import { Container, Content } from "components/layout";
 import { useState } from "react";
 import { BigNumberish } from "starknet";
 import { formatAddress } from "utils/contracts";
 
-const NewLowEth = ({
-  chainId,
+export function InsufficientFunds({
   address,
   balance,
 }: {
-  chainId: string;
   address: BigNumberish;
   balance: BigNumberish;
-}) => {
+}) {
   const [copied, setCopied] = useState(false);
   return (
-    <Container chainId={chainId} hideAccount>
-      <PortalBanner
-        title="Insufficient Funds"
-        description="You'll need more gas to complete this transaction. Send some ETH to your controller address."
-      />
-
-      <VStack w="full">
+    <Container
+      hideAccount
+      title="Insufficient Funds"
+      description="You'll need more gas to complete this transaction. Send some ETH to your controller address."
+    >
+      <Content>
         <VStack w="full" align="flex-start" fontSize="14px">
           <Text color="darkGray.400" fontSize="11px">
             BALANCE
@@ -88,9 +84,7 @@ const NewLowEth = ({
             </HStack>
           )}
         </VStack>
-      </VStack>
+      </Content>
     </Container>
   );
 };
-
-export default NewLowEth;

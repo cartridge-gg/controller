@@ -1,25 +1,34 @@
-import { NextPage } from "next";
-import { Container, PortalBanner } from "components";
-import { AlertDuoIcon } from "@cartridge/ui";
-import { VStack, Text } from "@chakra-ui/react";
+import { Container } from "components/layout";
+import { AlertIcon, ExternalIcon } from "@cartridge/ui";
+import { Link, Text } from "@chakra-ui/react";
+import NextLink from "next/link"
 
-const Consent: NextPage = () => {
+export default function Consent() {
   return (
-    <Container hideAccount>
-      <PortalBanner
-        icon={<AlertDuoIcon boxSize={8} accent="text.error" />}
-        title="Failure"
-        description="Uh-oh something went wrong"
-      />
-
-      <VStack p={3} borderRadius="md" bg="solid.primary" w="full">
-        <Text fontSize="xs" align="center" color="text.secondaryAccent">
+    <Container variant="connect" hideAccount
+      icon={<AlertIcon boxSize={9} />}
+      title="Uh-oh something went wrong"
+      description={
+        <>
           If this problem persists swing by the Cartridge
-          <Text color="inherit">support channel on Discord</Text>
-        </Text>
-      </VStack>
-    </Container>
+          <Text color="inherit">
+            support channel on{" "}
+            <Link
+              as={NextLink}
+              href="https://discord.gg/cartridge"
+              isExternal
+              color="link.blue"
+              display="inline-flex"
+              flexDir="row"
+              columnGap="0.1rem"
+              alignItems="center"
+            >
+              Discord
+              <ExternalIcon />
+            </Link>
+          </Text>
+        </>
+      }
+    />
   );
 };
-
-export default Consent;

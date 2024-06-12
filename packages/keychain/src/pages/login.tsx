@@ -1,9 +1,8 @@
 import { useRouter } from "next/router";
-import type { NextPage } from "next";
-import { Login as LoginComponent } from "components";
+import { Login as LoginComponent } from "components/connect";
 import { useConnection } from "hooks/connection";
 
-const Login: NextPage = () => {
+export default function Login() {
   const router = useRouter();
   const { controller, rpcUrl, chainId, error } = useConnection();
 
@@ -28,5 +27,3 @@ const Login: NextPage = () => {
     />
   );
 };
-
-export default Login;
