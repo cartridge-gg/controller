@@ -3,6 +3,7 @@ mod utils;
 
 use std::str::FromStr;
 
+use account_sdk::account::outside_execution::{OutsideExecution, OutsideExecutionAccount};
 use account_sdk::account::session::hash::{AllowedMethod, Session};
 use account_sdk::account::session::SessionAccount;
 use account_sdk::account::{AccountHashSigner, CartridgeGuardianAccount};
@@ -15,15 +16,22 @@ use coset::{CborSerializable, CoseKey};
 use serde_wasm_bindgen::{from_value, to_value};
 use starknet::accounts::Account;
 use starknet::macros::short_string;
+use starknet::providers::jsonrpc::JsonRpcTransport;
 use starknet::signers::SigningKey;
 use starknet::{
     accounts::Call,
     core::types::FieldElement,
     providers::{jsonrpc::HttpTransport, JsonRpcClient},
 };
-use types::{JsCall, JsCredentials, JsInvocationsDetails, JsPolicy, JsSession};
+use types::call::JsCall;
+use types::invocation::JsInvocationsDetails;
+use types::outside_execution::JsOutsideExecution;
+use types::policy::JsPolicy;
+use types::session::{JsCredentials, JsSession};
 use url::Url;
 use wasm_bindgen::prelude::*;
+use web_sys::{console};
+use web_sys::js_sys::JSON::stringify;
 
 type Result<T> = std::result::Result<T, JsError>;
 
@@ -132,7 +140,7 @@ impl CartridgeAccount {
             })
             .collect::<Result<Vec<Call>>>()?;
 
-        let details: JsInvocationsDetails = JsInvocationsDetails::try_from(transaction_details)?;
+        let details = JsInvocationsDetails::try_from(transaction_details)?;
 
         let session_details: Option<JsSession> = from_value(session_details)?;
         let execution = if let Some(session_details) = session_details {
@@ -177,6 +185,24 @@ impl CartridgeAccount {
         Ok(to_value(&execution)?)
     }
 
+    #[wasm_bindgen(js_name = executeFromOutside)]
+    pub async fn execute_from_outside(&self, outside_execution: JsValue) -> Result<()> {
+        utils::set_panic_hook();
+
+        let outside =
+            OutsideExecution::try_from(JsOutsideExecution::try_from(outside_execution.clone())?)?;
+        let signed = self.account.sign_outside_execution(outside).await?;
+
+        // let payload = PaymasterRequest {
+        //     outside_execution: JsOutsideExecution::try_from(outside_execution.clone())?,
+        //     signature: signed.signature
+        // };
+
+        // console::log_1(&format!("payload: {}", stringify(&to_value(&payload)?).unwrap()).into());
+
+        Ok(())
+    }
+
     #[wasm_bindgen(js_name = revokeSession)]
     pub fn revoke_session(&self) -> Result<()> {
         unimplemented!("Revoke Session not implemented");
@@ -187,3 +213,5 @@ impl CartridgeAccount {
         unimplemented!("Sign Message not implemented");
     }
 }
+
+
