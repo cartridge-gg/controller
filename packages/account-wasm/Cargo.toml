@@ -9,7 +9,7 @@ version.workspace = true
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-account-sdk.workspace = true
+account_sdk.workspace = true
 base64 = "0.22.0"
 coset = { version = "0.3.4", features = ["std"] }
 hex = "0.4.3"

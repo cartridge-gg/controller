@@ -21,7 +21,7 @@ jobs:
           target: wasm32-unknown-unknown
       - run: |
           cd packages/account_sdk
-          cargo build -r --target wasm32-unknown-unknown -p account-sdk
+          cargo build -r --target wasm32-unknown-unknown -p account_sdk
 
   clippy:
     runs-on: ubuntu-latest
