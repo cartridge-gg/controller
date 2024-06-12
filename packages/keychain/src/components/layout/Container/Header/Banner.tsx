@@ -13,7 +13,7 @@ import {
 import { useControllerTheme } from "hooks/theme";
 import { useMemo } from "react";
 import { useLayoutVariant } from "../";
-import { HEADER_HEIGHT } from "./";
+import { TOP_BAR_HEIGHT } from "./TopBar";
 
 export type BannerProps = {
   Icon?: React.ComponentType<IconProps>;
@@ -102,7 +102,7 @@ export function Banner({
       return (
         <VStack w="full">
           <HStack
-            h={HEADER_HEIGHT}
+            h={TOP_BAR_HEIGHT}
             w="full"
             bg={`url('${cover}')`}
             bgSize="cover"

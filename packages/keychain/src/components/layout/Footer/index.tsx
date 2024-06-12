@@ -8,12 +8,13 @@ import {
 } from "@chakra-ui/react";
 import { CartridgeLogo, WedgeUpIcon } from "@cartridge/ui";
 import React, { useMemo } from "react";
-import { TOP_OFFSET, FOOTER_HEIGHT, PORTAL_WINDOW_HEIGHT } from "components/layout";
+import { FOOTER_HEIGHT, PORTAL_WINDOW_HEIGHT } from "components/layout";
 import { motion } from "framer-motion";
 import { SessionDetails } from "./SessionDetails";
 import { TransactionSummary } from "./TransactionSummary";
 import { isIframe } from "components/connect/utils";
 import { useConnection } from "hooks/connection";
+import { TOP_BAR_HEIGHT } from "../Container/Header/TopBar";
 
 export function Footer({
   children,
@@ -35,7 +36,7 @@ export function Footer({
 
   const height = useMemo(
     () =>
-      isOpen ? `${(isIframe() ? window.innerHeight : PORTAL_WINDOW_HEIGHT) - TOP_OFFSET - FOOTER_HEIGHT}px` : "auto",
+      isOpen ? `${(isIframe() ? window.innerHeight : PORTAL_WINDOW_HEIGHT) - TOP_BAR_HEIGHT - FOOTER_HEIGHT}px` : "auto",
     [isOpen],
   );
 
@@ -44,7 +45,8 @@ export function Footer({
       position={["fixed", "fixed", "absolute"]}
       bottom={0}
       w="full"
-      zIndex="999999"
+      zIndex={1}
+      gap={0}
     >
       <VStack
         w="full"
@@ -81,7 +83,7 @@ export function Footer({
                 size="sm"
                 h={8}
                 bg="solid.primary"
-                zIndex="999999"
+                zIndex={1}
                 onClick={onToggle}
               />
             )}

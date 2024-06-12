@@ -10,13 +10,9 @@ export function Header({
   ...bannerProps
 }: HeaderProps) {
   return (
-    <Box position="sticky" top={0} w="full">
+    <Box position="sticky" top={0} w="full" zIndex={1} bg="solid.bg">
       <Banner {...bannerProps} />
       <TopBar onBack={onBack} hideAccount={hideAccount} />
     </Box>
   );
 }
-
-
-export const TOP_OFFSET = 64;
-export const HEADER_HEIGHT = 14

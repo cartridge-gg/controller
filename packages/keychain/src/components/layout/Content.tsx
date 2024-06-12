@@ -6,6 +6,10 @@ export function Content({ children, ...stackProps }: StackProps) {
       w="full"
       px={4}
       align="stretch"
-      {...stackProps}>{children}</VStack>
+      overflowY="hidden"
+      {...stackProps}
+    >
+      {children}
+    </VStack>
   );
 }

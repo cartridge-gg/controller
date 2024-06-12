@@ -25,11 +25,7 @@ import { LoginMode } from "components/connect/types";
 function Home() {
   const { context, controller, error } = useConnection();
 
-  if (window.self === window.top) {
-    return <></>;
-  }
-
-  if (!context?.origin) {
+  if (window.self === window.top || !context?.origin) {
     return <></>;
   }
 

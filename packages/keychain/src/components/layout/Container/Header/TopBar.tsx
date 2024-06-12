@@ -5,7 +5,6 @@ import {
 } from "@chakra-ui/react";
 import { ArrowLeftIcon } from "@cartridge/ui";
 import { CloseButton } from "./CloseButton";
-import { HEADER_HEIGHT } from ".";
 import { useController } from "hooks/controller";
 import { useMemo } from "react";
 
@@ -28,7 +27,7 @@ export function TopBar({ onBack, hideAccount }: TopBarProps) {
       bg="transparent"
       position="absolute"
       top={0}
-      h={HEADER_HEIGHT}
+      h={TOP_BAR_HEIGHT / 4}
       p={2}
     >
       {onBack ? (
@@ -55,3 +54,5 @@ export function TopBar({ onBack, hideAccount }: TopBarProps) {
     </HStack>
   );
 }
+
+export const TOP_BAR_HEIGHT = 56
