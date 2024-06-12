@@ -10,9 +10,6 @@ mutation FinalizeRegistration($credentials: String!) {
       edges {
         node {
           id
-          deployTransaction {
-            transactionHash
-          }
         }
       }
     }
@@ -22,9 +19,6 @@ mutation FinalizeRegistration($credentials: String!) {
 mutation DeployAccount($id: ID!, $chainId: ChainID!, $starterpackIds: [ID!]) {
   deployAccount(id: $id, chainId: $chainId, starterpackIds: $starterpackIds) {
     id
-    deployTransaction {
-      transactionHash
-    }
   }
 }
 
