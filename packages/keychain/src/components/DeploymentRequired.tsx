@@ -1,5 +1,5 @@
 import { constants } from "starknet";
-import { Container, Banner, Footer, Content } from "components/layout";
+import { Container, Footer, Content } from "components/layout";
 import { useEffect, useState } from "react";
 import { Status } from "utils/account";
 import { Loading } from "./Loading";
@@ -9,11 +9,9 @@ import { useController } from "hooks/controller";
 
 export function DeploymentRequired({
   onClose,
-  onLogout,
   children,
 }: {
   onClose: () => void;
-  onLogout: () => void;
   children: React.ReactNode;
 }) {
   const { controller } = useController()
@@ -61,13 +59,11 @@ export function DeploymentRequired({
 
   if (status !== Status.DEPLOYED) {
     return (
-      <Container onLogout={onLogout}>
-        <Banner
-          Icon={Loading}
-          title={"Deploying your account"}
-          description="This may take a second"
-        />
-
+      <Container
+        Icon={Loading}
+        title={"Deploying your account"}
+        description="This may take a second"
+      >
         <Content>
           {status === Status.DEPLOYING && (
             <Link

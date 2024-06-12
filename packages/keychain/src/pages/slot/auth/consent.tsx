@@ -1,6 +1,6 @@
 import Controller from "utils/controller";
 import { Button, Text } from "@chakra-ui/react";
-import { Container, Banner, Footer } from "components/layout";
+import { Container, Footer } from "components/layout";
 import { useRouter } from "next/router";
 import { useCallback, useEffect } from "react";
 
@@ -28,19 +28,19 @@ export default function Consent() {
   }, [router]);
 
   return (
-    <Container variant="connect" hideAccount>
-      <Banner
-        title="Requesting Permission"
-        description={
-          <>
-            <Text as="span" fontWeight="bold" color="inherit">
-              Slot
-            </Text>{" "}
-            is requesting permission to manage your Cartridge Infrastructure
-          </>
-        }
-      />
-
+    <Container
+      variant="connect"
+      hideAccount
+      title="Requesting Permission"
+      description={
+        <>
+          <Text as="span" fontWeight="bold" color="inherit">
+            Slot
+          </Text>{" "}
+          is requesting permission to manage your Cartridge Infrastructure
+        </>
+      }
+    >
       <Footer showLogo>
         <Button colorScheme="colorful" onClick={onSubmit}>
           approve

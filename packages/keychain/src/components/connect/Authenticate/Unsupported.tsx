@@ -1,15 +1,15 @@
 import { AlertIcon } from "@cartridge/ui";
-import { Container, Banner } from "components/layout";
+import { Container } from "components/layout";
 import { useEffect, useState } from "react";
 
 export function Unsupported({ message }: { message: string }) {
   return (
-    <Container hideAccount>
-      <Banner
-        Icon={AlertIcon}
-        title="Device is not supported"
-        description={message}
-      />
+    <Container
+      hideAccount
+      Icon={AlertIcon}
+      title="Device is not supported"
+      description={message}
+    >
     </Container>
   );
 }

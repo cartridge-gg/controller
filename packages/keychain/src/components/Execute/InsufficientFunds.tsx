@@ -1,6 +1,6 @@
 import { CopyIcon, EthereumIcon, StarknetIcon } from "@cartridge/ui";
 import { HStack, Spacer, Text, VStack } from "@chakra-ui/react";
-import { Container, Content, Banner } from "components/layout";
+import { Container, Content } from "components/layout";
 import { useState } from "react";
 import { BigNumberish } from "starknet";
 import { formatAddress } from "utils/contracts";
@@ -14,12 +14,11 @@ export function InsufficientFunds({
 }) {
   const [copied, setCopied] = useState(false);
   return (
-    <Container hideAccount>
-      <Banner
-        title="Insufficient Funds"
-        description="You'll need more gas to complete this transaction. Send some ETH to your controller address."
-      />
-
+    <Container
+      hideAccount
+      title="Insufficient Funds"
+      description="You'll need more gas to complete this transaction. Send some ETH to your controller address."
+    >
       <Content>
         <VStack w="full" align="flex-start" fontSize="14px">
           <Text color="darkGray.400" fontSize="11px">

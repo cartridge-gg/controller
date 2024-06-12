@@ -3,7 +3,6 @@ import { Button } from "@chakra-ui/react";
 import {
   Container,
   FOOTER_MIN_HEIGHT,
-  Banner,
   Footer,
   Content,
 } from "components/layout";
@@ -105,7 +104,16 @@ export function Login({
   );
 
   return (
-    <Container variant="connect" overflowY={error ? "auto" : undefined}>
+    <Container
+      variant="connect"
+      overflowY={error ? "auto" : undefined}
+      title={
+        theme.id === "cartridge"
+          ? "Play with Cartridge Controller"
+          : `Play ${theme.name}`
+      }
+      description="Enter your Controller username"
+    >
       <Formik
         initialValues={{ username: prefilledName }}
         onSubmit={onSubmit}
@@ -114,15 +122,6 @@ export function Login({
       >
         {(props) => (
           <FormikForm style={{ width: "100%" }}>
-            <Banner
-              title={
-                theme.id === "cartridge"
-                  ? "Play with Cartridge Controller"
-                  : `Play ${theme.name}`
-              }
-              description="Enter your Controller username"
-            />
-
             <Content pb={error ? FOOTER_MIN_HEIGHT : undefined}>
               <FormikField
                 name="username"

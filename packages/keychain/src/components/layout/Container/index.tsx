@@ -1,5 +1,3 @@
-export { TOP_OFFSET } from "./Header"
-
 import {
   Container as ChakraContainer,
   VStack,
@@ -8,33 +6,34 @@ import {
   Show,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import { ReactNode, createContext, useContext } from "react";
+import { PropsWithChildren, createContext, useContext } from "react";
 import { Header, HeaderProps } from "./Header";
 
 export function Container({
   children,
   onBack,
   hideAccount,
-  ...rest
+  Icon,
+  icon,
+  title,
+  description,
+  variant,
 }: {
   variant?: LayoutVariant;
-  children: ReactNode;
-} & StyleProps &
+} & PropsWithChildren & StyleProps &
   HeaderProps) {
   return (
-    <Wrapper {...rest}>
-      <Header onBack={onBack} hideAccount={hideAccount} />
-      <VStack
-        w="full"
-        h="full"
-        overflowY="auto"
-        css={{
-          "::-webkit-scrollbar": {
-            display: "none",
-          },
-          msOverflowStyle: "none",
-        }}
-      >
+    <Wrapper variant={variant}>
+      <Header
+        onBack={onBack}
+        hideAccount={hideAccount}
+        Icon={Icon}
+        icon={icon}
+        title={title}
+        description={description}
+      />
+
+      <VStack w="full">
         {children}
       </VStack>
     </Wrapper>
@@ -57,6 +56,7 @@ function Wrapper({ variant = "default", children, ...rest }: React.PropsWithChil
           animate={{ opacity: 1 }}
           initial={{ opacity: 0 }}
           centerContent
+          position="relative"
           {...rest}
         >
           {children}

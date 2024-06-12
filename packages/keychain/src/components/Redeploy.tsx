@@ -1,5 +1,5 @@
 import { addAddressPadding } from "starknet";
-import { Container, Banner } from "components/layout";
+import { Container } from "components/layout";
 import Controller from "utils/controller";
 import { useEffect } from "react";
 import { client } from "utils/graphql";
@@ -10,10 +10,8 @@ import { useChainId } from "hooks/connection";
 
 export function Redeploy({
   controller,
-  onLogout,
 }: {
   controller: Controller;
-  onLogout: () => void;
 }) {
   const chainId = useChainId();
 
@@ -39,12 +37,10 @@ export function Redeploy({
   }, [chainId, controller]);
 
   return (
-    <Container onLogout={onLogout}>
-      <Banner
-        Icon={SparklesDuoIcon}
-        title="Deploying your account"
-        description="This may take a second, try again in a bit"
-      />
-    </Container>
+    <Container
+      Icon={SparklesDuoIcon}
+      title="Deploying your account"
+      description="This may take a second, try again in a bit"
+    />
   );
 }

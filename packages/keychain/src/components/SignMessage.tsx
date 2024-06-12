@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button, Flex, Text } from "@chakra-ui/react";
 import { shortString, Signature, TypedData } from "starknet";
-import { Container, Banner, Footer, Content } from "components/layout";
+import { Container, Footer, Content } from "components/layout";
 import { TransferDuoIcon } from "@cartridge/ui";
 import { useController } from "hooks/controller";
 
@@ -10,13 +10,11 @@ export function SignMessage({
   typedData,
   onSign,
   onCancel,
-  onLogout,
 }: {
   origin: string;
   typedData: TypedData;
   onSign: (sig: Signature) => void;
   onCancel: () => void;
-  onLogout: () => void;
 }) {
   const { controller } = useController();
   const [messageData, setMessageData] = useState<TypedData>();
@@ -59,13 +57,11 @@ export function SignMessage({
   }, [controller, onSign, typedData]);
 
   return (
-    <Container onLogout={onLogout}>
-      <Banner
-        Icon={TransferDuoIcon}
-        title="Signature Request"
-        description={`${hostname} is asking you to sign a message`}
-      />
-
+    <Container
+      Icon={TransferDuoIcon}
+      title="Signature Request"
+      description={`${hostname} is asking you to sign a message`}
+    >
       <Content>
         <Flex direction="column" align="start" gap="18px" w="full">
           {(() => {

@@ -26,7 +26,6 @@ import { TransferButton } from "./TransferButton";
 import { TxnTracker } from "./Transactions";
 import { Label } from "./Label";
 import Controller from "utils/controller";
-import { Banner } from "components/layout";
 import { Error } from "components/Error";
 import {
   CheckIcon,
@@ -35,6 +34,7 @@ import {
   MetaMaskIcon,
   WedgeDownIcon,
 } from "@cartridge/ui";
+import { Container, Content } from "components/layout";
 
 export function BridgeEth({
   chainId,
@@ -116,141 +116,144 @@ export function BridgeEth({
 
   return (
     <WagmiConfig config={ethereumConfig}>
-      <Banner Icon={EthereumDuoIcon} title="Bridge ETH" />
+      <Container Icon={EthereumDuoIcon} title="Bridge ETH">
+        <Content>
 
-      <VStack w="full" align="start" spacing="18px">
-        <Label>From</Label>
-        <HStack w="full">
-          <Box flexBasis="50%">
-            <Menu variant="select" placement="bottom">
-              <MenuButton
-                as={SelectBox}
-                leftIcon={<MetaMaskIcon />}
-                rightIcon={!!ethAddress ? <CheckIcon /> : <WedgeDownIcon />}
-                text={
-                  !!ethAddress
-                    ? ethAddress.substring(0, 3) +
-                    "..." +
-                    ethAddress.substring(ethAddress.length - 4)
-                    : "Metamask"
-                }
-                pointerEvents={!!ethAddress ? "none" : "auto"}
+          <VStack w="full" align="start" spacing="18px">
+            <Label>From</Label>
+            <HStack w="full">
+              <Box flexBasis="50%">
+                <Menu variant="select" placement="bottom">
+                  <MenuButton
+                    as={SelectBox}
+                    leftIcon={<MetaMaskIcon />}
+                    rightIcon={!!ethAddress ? <CheckIcon /> : <WedgeDownIcon />}
+                    text={
+                      !!ethAddress
+                        ? ethAddress.substring(0, 3) +
+                        "..." +
+                        ethAddress.substring(ethAddress.length - 4)
+                        : "Metamask"
+                    }
+                    pointerEvents={!!ethAddress ? "none" : "auto"}
+                  />
+                  <MenuList>
+                    <MenuItem>Metamask</MenuItem>
+                  </MenuList>
+                </Menu>
+              </Box>
+              <ConnectButton
+                onConnect={(ethAddress: string) => {
+                  setEthAddress(ethAddress);
+                }}
+                onDisconnect={() => {
+                  setEthAddress(undefined);
+                  setEthBalance(undefined);
+                  setTransferAmount(undefined);
+                  setTransferAmountCost(undefined);
+                }}
               />
-              <MenuList>
-                <MenuItem>Metamask</MenuItem>
-              </MenuList>
-            </Menu>
-          </Box>
-          <ConnectButton
-            onConnect={(ethAddress: string) => {
-              setEthAddress(ethAddress);
-            }}
-            onDisconnect={() => {
-              setEthAddress(undefined);
-              setEthBalance(undefined);
-              setTransferAmount(undefined);
-              setTransferAmountCost(undefined);
-            }}
-          />
-        </HStack>
-        <HStack w="full">
-          <Label>Transfer Amount</Label>
+            </HStack>
+            <HStack w="full">
+              <Label>Transfer Amount</Label>
+
+              <Spacer />
+
+              <Label>
+                Available{" "}
+                <Text display="inline" pl={3} color="text.secondaryAccent">
+                  {ethBalance ? ethBalance + " ETH" : "---"}
+                </Text>
+              </Label>
+            </HStack>
+
+            <HStack
+              position="relative"
+              w="full"
+              h="42px"
+              spacing="0"
+              borderRadius="4px"
+              overflow="clip"
+              opacity={!!ethAddress ? undefined : "0.4"}
+              pointerEvents={!!ethAddress ? "auto" : "none"}
+              _hover={!!ethAddress ? undefined : { cursor: "not-allowed" }}
+            >
+              <HStack
+                w="full"
+                h="full"
+                bg="solid.primary"
+                justify="center"
+                flexBasis="54px"
+              >
+                <Circle size={4} bg="solid.secondary">
+                  <EthereumIcon />
+                </Circle>
+              </HStack>
+              <Input
+                h="full"
+                type="number"
+                flexGrow="1"
+                placeholder="Enter amount"
+                borderRadius="0"
+                border="1px solid"
+                borderColor="transparent"
+                onChange={(event) => {
+                  setTransferAmount(event.target.value);
+                }}
+              />
+
+              {transferAmountCost && (
+                <Text position="absolute" right={2.5} fontSize="sm">
+                  {transferAmountCost}
+                </Text>
+              )}
+            </HStack>
+          </VStack>
 
           <Spacer />
 
-          <Label>
-            Available{" "}
-            <Text display="inline" pl={3} color="text.secondaryAccent">
-              {ethBalance ? ethBalance + " ETH" : "---"}
-            </Text>
-          </Label>
-        </HStack>
+          <Flex w="full" gap={2.5} direction="column">
+            {errorMessage && !debouncing && (
+              <Error
+                error={{
+                  name: "Wallet error",
+                  message: errorMessage,
+                }}
+              />
+            )}
 
-        <HStack
-          position="relative"
-          w="full"
-          h="42px"
-          spacing="0"
-          borderRadius="4px"
-          overflow="clip"
-          opacity={!!ethAddress ? undefined : "0.4"}
-          pointerEvents={!!ethAddress ? "auto" : "none"}
-          _hover={!!ethAddress ? undefined : { cursor: "not-allowed" }}
-        >
-          <HStack
-            w="full"
-            h="full"
-            bg="solid.primary"
-            justify="center"
-            flexBasis="54px"
-          >
-            <Circle size={4} bg="solid.secondary">
-              <EthereumIcon />
-            </Circle>
-          </HStack>
-          <Input
-            h="full"
-            type="number"
-            flexGrow="1"
-            placeholder="Enter amount"
-            borderRadius="0"
-            border="1px solid"
-            borderColor="transparent"
-            onChange={(event) => {
-              setTransferAmount(event.target.value);
-            }}
-          />
-
-          {transferAmountCost && (
-            <Text position="absolute" right={2.5} fontSize="sm">
-              {transferAmountCost}
-            </Text>
-          )}
-        </HStack>
-      </VStack>
-
-      <Spacer />
-
-      <Flex w="full" gap={2.5} direction="column">
-        {errorMessage && !debouncing && (
-          <Error
-            error={{
-              name: "Wallet error",
-              message: errorMessage,
-            }}
-          />
-        )}
-
-        <TransferButton
-          account={controller.account}
-          value={transferAmount}
-          disabled={
-            !!!ethAddress ||
-            !!!transferAmount ||
-            transferAmountInvalid ||
-            debouncing
-          }
-          onError={(error) => {
-            if (error === null) {
-              setErrorMessage(null);
-              return;
-            } else if (error.name === "ChainMismatchError") {
-              const networkName =
-                chainId === constants.StarknetChainId.SN_MAIN
-                  ? "mainnet"
-                  : "sepolia";
-              setErrorMessage(
-                `Please select the ${networkName} network in your wallet`,
-              );
-            } else {
-              setErrorMessage(error.message);
-            }
-          }}
-          onTxSubmitted={(hash) => {
-            setTransferHash(hash);
-          }}
-        />
-      </Flex>
+            <TransferButton
+              account={controller.account}
+              value={transferAmount}
+              disabled={
+                !!!ethAddress ||
+                !!!transferAmount ||
+                transferAmountInvalid ||
+                debouncing
+              }
+              onError={(error) => {
+                if (error === null) {
+                  setErrorMessage(null);
+                  return;
+                } else if (error.name === "ChainMismatchError") {
+                  const networkName =
+                    chainId === constants.StarknetChainId.SN_MAIN
+                      ? "mainnet"
+                      : "sepolia";
+                  setErrorMessage(
+                    `Please select the ${networkName} network in your wallet`,
+                  );
+                } else {
+                  setErrorMessage(error.message);
+                }
+              }}
+              onTxSubmitted={(hash) => {
+                setTransferHash(hash);
+              }}
+            />
+          </Flex>
+        </Content>
+      </Container>
     </WagmiConfig>
   );
 }
