@@ -13,7 +13,6 @@ import {
 } from "components/connect"
 import { useConnection } from "hooks/connection";
 import {
-  ConnectionCtx,
   ConnectCtx,
   ExecuteCtx,
   LogoutCtx,
@@ -24,7 +23,7 @@ import { logout } from "utils/connection/logout";
 import { LoginMode } from "components/connect/types";
 
 function Home() {
-  const { context, controller, setContext, error } = useConnection();
+  const { context, controller, error } = useConnection();
 
   if (window.self === window.top) {
     return <></>;
@@ -42,15 +41,6 @@ function Home() {
   if (!controller) {
     return <CreateController loginMode={LoginMode.Controller} />;
   }
-
-  const onLogout = (context: ConnectionCtx) => {
-    setContext({
-      origin: context.origin,
-      type: "logout",
-      resolve: context.resolve,
-      reject: context.reject,
-    } as LogoutCtx);
-  };
 
   switch (context.type) {
     case "connect": {
@@ -78,7 +68,6 @@ function Home() {
           onCancel={() =>
             ctx.resolve({ code: ResponseCodes.CANCELED, message: "Canceled" })
           }
-          onLogout={() => onLogout(ctx)}
         />
       );
     }
@@ -115,7 +104,6 @@ function Home() {
               message: "Canceled",
             })
           }
-          onLogout={() => onLogout(ctx)}
         />
       );
     }
@@ -129,7 +117,6 @@ function Home() {
               message: "Canceled",
             })
           }
-          onLogout={() => onLogout(ctx)}
         >
           <Execute
             {...ctx}
@@ -140,7 +127,6 @@ function Home() {
                 message: "Canceled",
               })
             }
-            onLogout={() => onLogout(ctx)}
           />
         </DeploymentRequired>
       );

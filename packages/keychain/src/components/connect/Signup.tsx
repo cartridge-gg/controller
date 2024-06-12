@@ -3,7 +3,6 @@ import { Button } from "@chakra-ui/react";
 import {
   Container,
   FOOTER_MIN_HEIGHT,
-  Banner,
   Footer,
   Content,
 } from "components/layout";
@@ -36,6 +35,7 @@ export function Signup({
   const [isRegistering, setIsRegistering] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState();
+  const theme = useControllerTheme();
 
   const onSubmit = useCallback(async (values: FormValues) => {
     setIsLoading(true);
@@ -67,7 +67,15 @@ export function Signup({
 
   return (
     <>
-      <Container variant="connect" overflowY={error ? "auto" : undefined}>
+      <Container
+        variant="connect" overflowY={error ? "auto" : undefined}
+        title={
+          theme.id === "cartridge"
+            ? "Play with Cartridge Controller"
+            : `Play ${theme.name}`
+        }
+        description="Create your Cartridge Controller"
+      >
         <Formik
           initialValues={{ username: prefilledName }}
           onSubmit={onSubmit}
@@ -104,7 +112,6 @@ function Form({
   error: Error;
 }) {
   const { chainId, rpcUrl, setController } = useConnection();
-  const theme = useControllerTheme();
   const { values, isValidating } = useFormikContext<FormValues>();
 
   useEffect(() => {
@@ -162,15 +169,6 @@ function Form({
 
   return (
     <FormikForm style={{ width: "100%" }}>
-      <Banner
-        title={
-          theme.id === "cartridge"
-            ? "Play with Cartridge Controller"
-            : `Play ${theme.name}`
-        }
-        description="Create your Cartridge Controller"
-      />
-
       <Content pb={error ? FOOTER_MIN_HEIGHT : undefined} >
         <FormikField
           name="username"

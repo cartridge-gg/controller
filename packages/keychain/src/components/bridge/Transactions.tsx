@@ -6,7 +6,7 @@ import { constants } from "starknet";
 import { mainnet, useWaitForTransaction } from "wagmi";
 import { sepolia } from "wagmi/chains";
 import { CheckIcon, ExternalIcon, TransferDuoIcon } from "@cartridge/ui";
-import { Banner } from "components/layout";
+import { Container, Content } from "components/layout";
 
 enum CardState {
   PENDING = "PENDING",
@@ -29,58 +29,60 @@ export function TxnTracker({
   const etherscanHref = `https://${etherscanSubdomain}etherscan.io/tx/${ethTxnHash}`;
 
   return (
-    <VStack w="full" align="start" spacing={6}>
-      <Banner Icon={TransferDuoIcon} title="Transactions" />
+    <Container Icon={TransferDuoIcon} title="Transactions">
+      <Content>
+        <VStack w="full" align="start" spacing={6}>
+          {txn.state === CardState.PENDING && (
+            <>
+              <Label>Pending...</Label>
+              <Card
+                state={CardState.PENDING}
+                href={etherscanHref}
+                chainId={chainId}
+                ethTxnHash={ethTxnHash}
+                onConfirmed={() => {
+                  setTxn({
+                    hash: txn.hash,
+                    state: CardState.COMPLETE,
+                  });
+                }}
+              >
+                <Text
+                  fontSize="xs"
+                  letterSpacing="0.05em"
+                  fontWeight="bold"
+                  textTransform="uppercase"
+                >
+                  Eth leaving L1
+                </Text>
+              </Card>
+            </>
+          )}
 
-      {txn.state === CardState.PENDING && (
-        <>
-          <Label>Pending...</Label>
-          <Card
-            state={CardState.PENDING}
-            href={etherscanHref}
-            chainId={chainId}
-            ethTxnHash={ethTxnHash}
-            onConfirmed={() => {
-              setTxn({
-                hash: txn.hash,
-                state: CardState.COMPLETE,
-              });
-            }}
-          >
-            <Text
-              fontSize="xs"
-              letterSpacing="0.05em"
-              fontWeight="bold"
-              textTransform="uppercase"
-            >
-              Eth leaving L1
-            </Text>
-          </Card>
-        </>
-      )}
-
-      {txn.state === CardState.COMPLETE && (
-        <>
-          <Label>Today</Label>
-          <Card
-            state={CardState.COMPLETE}
-            href={etherscanHref}
-            chainId={chainId}
-            ethTxnHash={ethTxnHash}
-          >
-            <Text
-              fontSize="xs"
-              letterSpacing="0.05em"
-              fontWeight="bold"
-              textTransform="uppercase"
-              color="brand.accent" // not meant for text color
-            >
-              Eth arriving on L2
-            </Text>
-          </Card>
-        </>
-      )}
-    </VStack>
+          {txn.state === CardState.COMPLETE && (
+            <>
+              <Label>Today</Label>
+              <Card
+                state={CardState.COMPLETE}
+                href={etherscanHref}
+                chainId={chainId}
+                ethTxnHash={ethTxnHash}
+              >
+                <Text
+                  fontSize="xs"
+                  letterSpacing="0.05em"
+                  fontWeight="bold"
+                  textTransform="uppercase"
+                  color="brand.accent" // not meant for text color
+                >
+                  Eth arriving on L2
+                </Text>
+              </Card>
+            </>
+          )}
+        </VStack>
+      </Content>
+    </Container>
   );
 }
 

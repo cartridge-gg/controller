@@ -12,20 +12,21 @@ import {
 } from "@chakra-ui/react";
 import { useControllerTheme } from "hooks/theme";
 import { useMemo } from "react";
-import { useLayoutVariant } from "./Container";
-import { HEADER_HEIGHT } from "./Container/Header";
+import { useLayoutVariant } from "../";
+import { HEADER_HEIGHT } from "./";
 
+export type BannerProps = {
+  Icon?: React.ComponentType<IconProps>;
+  icon?: React.ReactElement;
+  title: string;
+  description?: string | React.ReactElement;
+}
 export function Banner({
   Icon,
   icon,
   title,
   description,
-}: {
-  Icon?: React.ComponentType<IconProps>;
-  icon?: React.ReactElement;
-  title: string;
-  description?: string | React.ReactElement;
-}) {
+}: BannerProps) {
   const theme = useControllerTheme();
   const { colorMode } = useColorMode();
   const cover = useMemo(

@@ -7,7 +7,6 @@ import { ExecuteReply, ResponseCodes } from "@cartridge/controller";
 import {
   Container,
   Content,
-  Banner,
   FOOTER_MIN_HEIGHT,
   Footer,
 } from "components/layout";
@@ -26,13 +25,11 @@ export function Execute({
   transactionsDetail,
   onExecute,
   onCancel,
-  onLogout,
 }: {
   transactions: StarknetCall | StarknetCall[];
   transactionsDetail?: InvocationsDetails;
   onExecute: (res: ExecuteReply) => void;
   onCancel: () => void;
-  onLogout: () => void;
 }) {
   const chainId = useChainId();
   const { controller } = useController();
@@ -144,9 +141,11 @@ export function Execute({
   }
 
   return (
-    <Container onLogout={onLogout}>
-      <Banner Icon={TransactionDuoIcon} title="Confirm Transaction" description={origin} />
-
+    <Container
+      Icon={TransactionDuoIcon}
+      title="Confirm Transaction"
+      description={origin}
+    >
       <Content pb={FOOTER_MIN_HEIGHT}>
         <VStack spacing="1px" w="full" borderRadius="md" bg="solid.primary">
           <VStack w="full" p={3} align="flex-start">

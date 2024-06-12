@@ -8,22 +8,25 @@ import {
   Show,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import { ReactNode, createContext, useContext } from "react";
+import { PropsWithChildren, createContext, useContext } from "react";
 import { Header, HeaderProps } from "./Header";
 
 export function Container({
   children,
   onBack,
   hideAccount,
+  Icon,
+  icon,
+  title,
+  description,
   ...rest
 }: {
   variant?: LayoutVariant;
-  children: ReactNode;
-} & StyleProps &
+} & PropsWithChildren & StyleProps &
   HeaderProps) {
   return (
     <Wrapper {...rest}>
-      <Header onBack={onBack} hideAccount={hideAccount} />
+      <Header onBack={onBack} hideAccount={hideAccount} Icon={Icon} icon={icon} title={title} description={description} />
       <VStack
         w="full"
         h="full"

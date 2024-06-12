@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useUrlTxns } from "hooks/transaction";
 import { Transaction, TransactionState } from "components/Transaction";
 import { TimerDuoIcon } from "@cartridge/ui";
-import { Container, Banner, Content } from "components/layout";
+import { Container, Content } from "components/layout";
 
 function Pending() {
   const [txnResults, setTxnResults] = useState<TransactionState[]>([]);
@@ -29,13 +29,11 @@ function Pending() {
   }, [txnResults, txns]);
 
   return (
-    <Container>
-      <Banner
-        Icon={TimerDuoIcon}
-        title={title}
-        description={description}
-      />
-
+    <Container
+      Icon={TimerDuoIcon}
+      title={title}
+      description={description}
+    >
       <Content>
         {[...txns, { name: "name", hash: "hash" }].map((txn, idx) => (
           <Transaction
