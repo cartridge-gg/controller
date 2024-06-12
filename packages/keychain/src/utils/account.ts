@@ -29,7 +29,7 @@ import { CartridgeAccount } from "@cartridge/account-wasm";
 import { Session } from "@cartridge/controller";
 import { VERSION } from "./controller";
 
-const EST_FEE_MULTIPLIER = 2n;
+const EST_FEE_MULTIPLIER = 5n;
 
 export enum Status {
   COUNTERFACTUAL = "COUNTERFACTUAL",
