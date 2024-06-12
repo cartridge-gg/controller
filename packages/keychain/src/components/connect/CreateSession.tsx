@@ -13,7 +13,7 @@ export function CreateSession({
   onConnect: (policies: Policy[]) => void;
   onCancel: () => void;
 }) {
-  const { controller, policies } = useConnection();
+  const { controller, policies, origin } = useConnection();
   const [isConnecting, setIsConnecting] = useState(false);
   const [expiresAt] = useState<bigint>(3000000000n);
   const [maxFees] = useState<BigNumberish>();
