@@ -111,11 +111,11 @@ class Account extends BaseAccount {
         },
       );
 
-      if (!data?.contract?.deployTransaction?.id) {
+      if (!data?.contract?.deployTransactionID?) {
         throw new Error("deployment txn not found");
       }
 
-      return data.contract.deployTransaction.id.split("/")[1];
+      return data.contract.deployTransactionID.split("/")[1];
     } catch (e) {
       if (e.message.includes("not found")) {
         return Promise.resolve(undefined);
