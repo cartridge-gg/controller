@@ -1,4 +1,4 @@
-use crate::abigen::controller::{Signature, WebauthnSigner};
+use crate::abigen::cartridge_account::{Signature, WebauthnSigner};
 use async_trait::async_trait;
 use cainome::cairo_serde::{NonZero, U256};
 use ecdsa::RecoveryId;

@@ -9,9 +9,10 @@ use starknet::{
 
 use super::pending::PendingDeclaration;
 
-pub const SIERRA_STR: &str = include_str!("../../compiled/controller.contract_class.json");
+pub const SIERRA_STR: &str = include_str!("../../compiled/cartridge_account.contract_class.json");
 // We can store only the class_hash and thus te casm_str would not be needed but for now it is
-pub const CASM_STR: &str = include_str!("../../compiled/controller.compiled_contract_class.json");
+pub const CASM_STR: &str =
+    include_str!("../../compiled/cartridge_account.compiled_contract_class.json");
 
 pub struct AccountDeclaration<'a, T> {
     contract_artifact: SierraClass,
@@ -35,7 +36,7 @@ impl<'a, T> AccountDeclaration<'a, T> {
             client,
         }
     }
-    pub fn controller(client: &'a JsonRpcClient<T>) -> Self
+    pub fn cartridge_account(client: &'a JsonRpcClient<T>) -> Self
     where
         T: Send + Sync,
         &'a JsonRpcClient<T>: Provider,
