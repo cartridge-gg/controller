@@ -16,6 +16,7 @@ import {
   num,
   TransactionExecutionStatus,
   shortString,
+  stark,
 } from "starknet";
 import {
   AccountContractDocument,
@@ -173,15 +174,13 @@ class Account extends BaseAccount {
 
     const res = await this.cartridge.execute(calls as Array<Call>, transactionsDetail, session);
 
-    const outsideExecution = await this.cartridge.executeFromOutside({
-      caller: this.address,
+    await this.cartridge.executeFromOutside({
+      caller: shortString.encodeShortString("ANY_CALLER"),
       executeBefore: "3000000000",
       executeAfter: "0",
       calls: calls as Array<Call>,
-      nonce: transactionsDetail.nonce,
+      nonce: stark.randomAddress()
     });
-
-    console.log({outsideExecution});
 
     Storage.update(this.selector, {
       nonce: (BigInt(transactionsDetail.nonce) + 1n).toString(),
@@ -222,8 +221,6 @@ class Account extends BaseAccount {
 
     // FIXME: temp fix for the sepolia fee estimation
     estFee.suggestedMaxFee *= EST_FEE_MULTIPLIER;
-
-    estFee.suggestedMaxFee = "0x2386F26FC10000"
 
     return estFee;
   }

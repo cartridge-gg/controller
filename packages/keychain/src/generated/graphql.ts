@@ -1,4 +1,4 @@
-import { useQuery, useInfiniteQuery, useMutation, UseQueryOptions, UseInfiniteQueryOptions, UseMutationOptions } from 'react-query';
+import { useQuery, useInfiniteQuery, useMutation, UseQueryOptions, UseInfiniteQueryOptions, UseMutationOptions, QueryFunctionContext } from 'react-query';
 import { useFetchData } from 'hooks/fetcher';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
@@ -1098,7 +1098,7 @@ export type Contract = Node & {
   cover?: Maybe<File>;
   coverID?: Maybe<Scalars['ID']>;
   createdAt: Scalars['Time'];
-  deployTransactionID?: Maybe<Scalars['String']>;
+  deployTransactionID?: Maybe<Scalars['ID']>;
   description?: Maybe<Scalars['String']>;
   game?: Maybe<Game>;
   gameID?: Maybe<Scalars['ID']>;
@@ -1273,20 +1273,20 @@ export type ContractWhereInput = {
   createdAtNEQ?: InputMaybe<Scalars['Time']>;
   createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
   /** deploy_transaction_id field predicates */
-  deployTransactionID?: InputMaybe<Scalars['String']>;
-  deployTransactionIDContains?: InputMaybe<Scalars['String']>;
-  deployTransactionIDContainsFold?: InputMaybe<Scalars['String']>;
-  deployTransactionIDEqualFold?: InputMaybe<Scalars['String']>;
-  deployTransactionIDGT?: InputMaybe<Scalars['String']>;
-  deployTransactionIDGTE?: InputMaybe<Scalars['String']>;
-  deployTransactionIDHasPrefix?: InputMaybe<Scalars['String']>;
-  deployTransactionIDHasSuffix?: InputMaybe<Scalars['String']>;
-  deployTransactionIDIn?: InputMaybe<Array<Scalars['String']>>;
+  deployTransactionID?: InputMaybe<Scalars['ID']>;
+  deployTransactionIDContains?: InputMaybe<Scalars['ID']>;
+  deployTransactionIDContainsFold?: InputMaybe<Scalars['ID']>;
+  deployTransactionIDEqualFold?: InputMaybe<Scalars['ID']>;
+  deployTransactionIDGT?: InputMaybe<Scalars['ID']>;
+  deployTransactionIDGTE?: InputMaybe<Scalars['ID']>;
+  deployTransactionIDHasPrefix?: InputMaybe<Scalars['ID']>;
+  deployTransactionIDHasSuffix?: InputMaybe<Scalars['ID']>;
+  deployTransactionIDIn?: InputMaybe<Array<Scalars['ID']>>;
   deployTransactionIDIsNil?: InputMaybe<Scalars['Boolean']>;
-  deployTransactionIDLT?: InputMaybe<Scalars['String']>;
-  deployTransactionIDLTE?: InputMaybe<Scalars['String']>;
-  deployTransactionIDNEQ?: InputMaybe<Scalars['String']>;
-  deployTransactionIDNotIn?: InputMaybe<Array<Scalars['String']>>;
+  deployTransactionIDLT?: InputMaybe<Scalars['ID']>;
+  deployTransactionIDLTE?: InputMaybe<Scalars['ID']>;
+  deployTransactionIDNEQ?: InputMaybe<Scalars['ID']>;
+  deployTransactionIDNotIn?: InputMaybe<Array<Scalars['ID']>>;
   deployTransactionIDNotNil?: InputMaybe<Scalars['Boolean']>;
   /** description field predicates */
   description?: InputMaybe<Scalars['String']>;

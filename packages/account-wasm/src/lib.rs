@@ -1,3 +1,4 @@
+mod paymaster;
 mod types;
 mod utils;
 
@@ -13,6 +14,7 @@ use account_sdk::signers::HashSigner;
 use account_sdk::wasm_webauthn::CredentialID;
 use base64::{engine::general_purpose, Engine};
 use coset::{CborSerializable, CoseKey};
+use paymaster::PaymasterRequest;
 use serde_wasm_bindgen::{from_value, to_value};
 use starknet::accounts::Account;
 use starknet::macros::short_string;
@@ -30,7 +32,7 @@ use types::policy::JsPolicy;
 use types::session::{JsCredentials, JsSession};
 use url::Url;
 use wasm_bindgen::prelude::*;
-use web_sys::{console};
+use web_sys::console;
 use web_sys::js_sys::JSON::stringify;
 
 type Result<T> = std::result::Result<T, JsError>;
@@ -191,14 +193,16 @@ impl CartridgeAccount {
 
         let outside =
             OutsideExecution::try_from(JsOutsideExecution::try_from(outside_execution.clone())?)?;
+
         let signed = self.account.sign_outside_execution(outside).await?;
 
-        // let payload = PaymasterRequest {
-        //     outside_execution: JsOutsideExecution::try_from(outside_execution.clone())?,
-        //     signature: signed.signature
-        // };
-
-        // console::log_1(&format!("payload: {}", stringify(&to_value(&payload)?).unwrap()).into());
+        PaymasterRequest::send(
+            self.rpc_url.clone(),
+            outside_execution.try_into()?,
+            signed.signature,
+        )
+        .await?
+        .error_for_status()?;
 
         Ok(())
     }
@@ -213,5 +217,3 @@ impl CartridgeAccount {
         unimplemented!("Sign Message not implemented");
     }
 }
-
-
