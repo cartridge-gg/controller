@@ -22,7 +22,6 @@ import { isIframe, validateUsernameFor } from "./utils";
 import { RegistrationLink } from "./RegistrationLink";
 import { doSignup } from "hooks/account";
 import { useControllerTheme } from "hooks/theme";
-import { Error as ErrorComp } from "components/Error";
 import { shortString } from "starknet";
 import { useConnection } from "hooks/connection";
 
@@ -141,21 +140,25 @@ function Form({
               autoFocus
               placeholder="Username"
               touched={meta.touched}
-              error={meta.error}
+              error={meta.error || error?.message}
               onClear={() => form.setFieldValue(field.name, "")}
               isLoading={isValidating}
             />
           )}
         </FormikField>
-
-        <ErrorComp error={error} />
       </Content>
 
       <Footer isSlot={isSlot} createSession showTerm>
         <Button
           colorScheme="colorful"
           isLoading={isRegistering}
-          onClick={() => {
+          onClick={async () => {
+            const error = await validateUsernameFor("signup")(values.username);
+            if (error) {
+              setError(new Error(error));
+              return;
+            }
+
             setIsRegistering(true);
 
             const searchParams = new URLSearchParams(window.location.search);
