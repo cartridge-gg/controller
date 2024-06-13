@@ -12,7 +12,7 @@ import {
   Formik,
   useFormikContext,
 } from "formik";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { DeployAccountDocument, useAccountQuery } from "generated/graphql";
 import Controller from "utils/controller";
 import { client } from "utils/graphql";
@@ -32,40 +32,8 @@ export function Signup({
   onSuccess,
   onLogin,
 }: SignupProps) {
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState();
   const theme = useControllerTheme();
-
-  const onSubmit = useCallback(async (values: FormValues) => {
-    setIsLoading(true);
-    setIsRegistering(true);
-
-    const searchParams = new URLSearchParams(window.location.search);
-    searchParams.set("name", encodeURIComponent(values.username));
-    searchParams.set("action", "signup");
-
-    // due to same origin restriction, if we're in iframe, pop up a
-    // window to continue webauthn registration. otherwise,
-    // display modal overlay. in either case, account is created in
-    // authenticate component, so we poll and then deploy
-    if (isIframe()) {
-      PopupCenter(
-        `/authenticate?${searchParams.toString()}`,
-        "Cartridge Signup",
-        480,
-        640,
-      );
-
-      return;
-    }
-
-    doSignup(decodeURIComponent(values.username))
-      .catch((e) => {
-        setError(e);
-      })
-      .finally(() => setIsLoading(false));
-  }, []);
 
   return (
     <>
@@ -81,16 +49,17 @@ export function Signup({
       >
         <Formik
           initialValues={{ username: prefilledName }}
-          onSubmit={onSubmit}
+          onSubmit={(values) =>
+            doSignup(decodeURIComponent(values.username)).catch((e) => {
+              setError(e);
+            })
+          }
           validateOnChange={false}
           validateOnBlur={false}
         >
           <Form
             onLogin={onLogin}
-            isRegistering={isRegistering}
-            isLoading={isLoading}
             onSuccess={onSuccess}
-            setIsRegistering={setIsRegistering}
             isSlot={isSlot}
             error={error}
           />
@@ -101,25 +70,16 @@ export function Signup({
 }
 
 function Form({
-  isRegistering,
-  isLoading,
   isSlot,
-  onLogin: onLoginProp,
+  onLogin,
   onSuccess,
-  setIsRegistering,
   error,
 }: SignupProps & {
-  isRegistering: boolean;
-  isLoading: boolean;
-  setIsRegistering: (val: boolean) => void;
   error: Error;
 }) {
   const { chainId, rpcUrl, setController } = useConnection();
-  const { values, isValidating } = useFormikContext<FormValues>();
-
-  useEffect(() => {
-    setIsRegistering(false);
-  }, [values.username, setIsRegistering]);
+  const { values, isValidating, submitForm } = useFormikContext<FormValues>();
+  const [isRegistering, setIsRegistering] = useState(false);
 
   // for polling approach when iframe
   useAccountQuery(
@@ -166,10 +126,6 @@ function Form({
     },
   );
 
-  const onLogin = useCallback(() => {
-    onLoginProp(values.username);
-  }, [values.username, onLoginProp]);
-
   return (
     <FormikForm style={{ width: "100%" }}>
       <Content pb={error ? FOOTER_MIN_HEIGHT : undefined}>
@@ -195,12 +151,39 @@ function Form({
       </Content>
 
       <Footer isSlot={isSlot} createSession showTerm>
-        <Button type="submit" colorScheme="colorful" isLoading={isLoading}>
+        <Button
+          colorScheme="colorful"
+          isLoading={isRegistering}
+          onClick={() => {
+            setIsRegistering(true);
+
+            const searchParams = new URLSearchParams(window.location.search);
+            searchParams.set("name", encodeURIComponent(values.username));
+            searchParams.set("action", "signup");
+
+            // due to same origin restriction, if we're in iframe, pop up a
+            // window to continue webauthn registration. otherwise,
+            // display modal overlay. in either case, account is created in
+            // authenticate component, so we poll and then deploy
+            if (isIframe()) {
+              PopupCenter(
+                `/authenticate?${searchParams.toString()}`,
+                "Cartridge Signup",
+                480,
+                640,
+              );
+
+              return;
+            }
+
+            submitForm();
+          }}
+        >
           sign up
         </Button>
         <RegistrationLink
           description="Already have a Controller?"
-          onClick={onLogin}
+          onClick={() => onLogin(values.username)}
         >
           Log In
         </RegistrationLink>
