@@ -72,7 +72,6 @@ function Wrapper({ variant = "default", children, ...rest }: React.PropsWithChil
             borderWidth={1}
             borderColor="solid.primaryAccent"
             verticalAlign="middle"
-            // m="auto auto"
             bg="solid.bg"
             p={0}
             as={motion.div}

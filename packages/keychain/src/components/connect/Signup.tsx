@@ -41,15 +41,17 @@ export function Signup({
     setIsLoading(true);
     setIsRegistering(true);
 
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set("name", encodeURIComponent(values.username))
+    searchParams.set("action", "signup")
+
     // due to same origin restriction, if we're in iframe, pop up a
     // window to continue webauthn registration. otherwise,
     // display modal overlay. in either case, account is created in
     // authenticate component, so we poll and then deploy
     if (isIframe()) {
       PopupCenter(
-        `/authenticate?name=${encodeURIComponent(
-          values.username,
-        )}&action=signup`,
+        `/authenticate?${searchParams.toString()}`,
         "Cartridge Signup",
         480,
         640,
