@@ -41,7 +41,7 @@ export default function Consent() {
         </>
       }
     >
-      <Footer showLogo>
+      <Footer>
         <Button colorScheme="colorful" onClick={onSubmit}>
           approve
         </Button>
@@ -50,4 +50,4 @@ export default function Consent() {
       </Footer>
     </Container>
   );
-};
+}

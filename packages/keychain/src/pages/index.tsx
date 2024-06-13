@@ -1,16 +1,8 @@
 import dynamic from "next/dynamic";
 import { Signature } from "starknet";
 import { ResponseCodes, ExecuteReply } from "@cartridge/controller";
-import {
-  DeploymentRequired,
-  Execute,
-  SignMessage,
-} from "components";
-import {
-  CreateController,
-  CreateSession,
-  Logout,
-} from "components/connect"
+import { DeploymentRequired, Execute, SignMessage } from "components";
+import { CreateController, CreateSession, Logout } from "components/connect";
 import { useConnection } from "hooks/connection";
 import {
   ConnectCtx,
