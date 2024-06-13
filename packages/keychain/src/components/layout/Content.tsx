@@ -1,11 +1,12 @@
 import { StackProps, VStack } from "@chakra-ui/react";
-import { FOOTER_HEIGHT, useLayoutVariant } from "./Container";
+import { useLayout } from "./Container";
 
 export function Content({ children, ...stackProps }: StackProps) {
-  const variant = useLayoutVariant();
+  const { footerHeight } = useLayout();
+
   return (
-    <VStack w="full" px={4} align="stretch" pb={FOOTER_HEIGHT} {...stackProps}>
+    <VStack w="full" px={4} pb={footerHeight} align="stretch" {...stackProps}>
       {children}
-    </VStack>
+    </VStack >
   );
 }

@@ -7,10 +7,11 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { CartridgeLogo, WedgeUpIcon } from "@cartridge/ui";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import {
   FOOTER_HEIGHT,
   PORTAL_WINDOW_HEIGHT,
+  useLayout,
   useLayoutVariant,
 } from "components/layout";
 import { motion } from "framer-motion";
@@ -30,17 +31,19 @@ export function Footer({
   showTerm?: boolean;
   createSession?: boolean;
 }) {
+  const { setFooterHeight } = useLayout();
+  const ref = useRef<HTMLDivElement>();
   const { origin, policies } = useConnection();
   const { isOpen, onToggle } = useDisclosure();
+  const variant = useLayoutVariant();
   const isExpandable = useMemo(
-    () => !!origin && !!policies.length,
-    [origin, policies],
+    () => !!origin && !!policies.length && variant === "connect",
+    [origin, policies, variant],
   );
   const hostname = useMemo(
     () => (origin ? new URL(origin).hostname : undefined),
     [origin],
   );
-  const variant = useLayoutVariant();
   const showLogo = useMemo(() => variant === "connect", [variant]);
   const height = useMemo(
     () =>
@@ -52,6 +55,12 @@ export function Footer({
     [isOpen],
   );
 
+  useEffect(() => {
+    if (!ref.current) return
+
+    setFooterHeight(ref.current.clientHeight)
+  }, [setFooterHeight])
+
   return (
     <VStack
       position={["fixed", "fixed", "absolute"]}
@@ -62,16 +71,16 @@ export function Footer({
       as={motion.div}
       layout="position"
       animate={{ height, transition: { bounce: 0 } }}
+      ref={ref}
     >
       <VStack
         w="full"
         align="stretch"
         bg="solid.bg"
-        p={4}
-        pt={0}
         borderTopWidth={1}
         borderColor="solid.spacer"
         h="full"
+        px={4}
       >
         <HStack align="flex-start" pt={isExpandable ? 6 : 0}>
           <TransactionSummary
@@ -105,30 +114,30 @@ export function Footer({
         {isOpen && <SessionDetails />}
       </VStack>
 
-      <VStack justifySelf="flex-end" bg="solid.bg" w="full">
-        <VStack align="stretch" w="full" px={4}>
-          {children}
-        </VStack>
-
-        {showLogo && (
-          <HStack
-            w="full"
-            borderTopWidth={1}
-            borderColor="solid.tertiary"
-            color="text.secondary"
-            alignItems="center"
-            justify="center"
-            h={FOOTER_HEIGHT / 4}
-            gap={1}
-          >
-            <Text fontSize="xs" color="currentColor">
-              Controller by
-            </Text>
-
-            <CartridgeLogo fontSize={100} color="text.secondary" />
-          </HStack>
-        )}
+      <VStack justifySelf="flex-end" bg="solid.bg" w="full" align="stretch" p={4}>
+        {children}
       </VStack>
+
+      {showLogo && (
+        <HStack
+          justifySelf="flex-end"
+          bg="solid.bg"
+          w="full"
+          borderTopWidth={1}
+          borderColor="solid.tertiary"
+          color="text.secondary"
+          alignItems="center"
+          justify="center"
+          h={FOOTER_HEIGHT / 4}
+          gap={1}
+        >
+          <Text fontSize="xs" color="currentColor">
+            Controller by
+          </Text>
+
+          <CartridgeLogo fontSize={100} color="text.secondary" />
+        </HStack>
+      )}
     </VStack>
   );
 }

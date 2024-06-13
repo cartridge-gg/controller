@@ -11,9 +11,14 @@ import {
 import { CodeUtilIcon, WedgeRightIcon } from "@cartridge/ui";
 import { motion } from "framer-motion";
 import { usePolicies } from "hooks/connection";
+import { PORTAL_WINDOW_HEIGHT, useLayout } from "../Container";
+import { isIframe } from "components/connect/utils";
+import { TOP_BAR_HEIGHT } from "../Container/Header/TopBar";
 
 export function SessionDetails() {
   const policies = usePolicies();
+  const { footerHeight } = useLayout();
+
 
   return (
     <VStack
@@ -43,9 +48,13 @@ export function SessionDetails() {
         </Text>
       </VStack>
 
-      <Accordion w="full" allowMultiple overflowY="auto"
-        // TODO: maxH should be dynamically calculated
-        maxH={280}
+      <Accordion
+        w="full"
+        allowMultiple
+        overflowY="auto"
+        maxH={
+          (isIframe() ? window.innerHeight : PORTAL_WINDOW_HEIGHT) - TOP_BAR_HEIGHT - footerHeight
+        }
       >
         {policies.map((p, i) => (
           <AccordionItem
