@@ -6,7 +6,7 @@ import { Button, Link, Text } from "@chakra-ui/react";
 import { ExternalIcon, PacmanIcon } from "@cartridge/ui";
 import { useController } from "hooks/controller";
 import { ErrorAlert } from "./ErrorAlert";
-import NextLink from "next/link"
+import NextLink from "next/link";
 
 export function DeploymentRequired({
   onClose,
@@ -15,7 +15,7 @@ export function DeploymentRequired({
   onClose: () => void;
   children: React.ReactNode;
 }) {
-  const { controller } = useController()
+  const { controller } = useController();
   const account = controller.account;
   const [status, setStatus] = useState<Status>(account.status);
   const [deployHash, setDeployHash] = useState<string>();
@@ -68,10 +68,11 @@ export function DeploymentRequired({
         <Content alignItems="center">
           {status === Status.DEPLOYING && (
             <Link
-              href={`https://${account.chainId === constants.StarknetChainId.SN_SEPOLIA
-                ? "sepolia."
-                : undefined
-                }starkscan.co/tx/${deployHash}`}
+              href={`https://${
+                account.chainId === constants.StarknetChainId.SN_SEPOLIA
+                  ? "sepolia."
+                  : undefined
+              }starkscan.co/tx/${deployHash}`}
               isExternal
             >
               <Button variant="link" mt={10} rightIcon={<ExternalIcon />}>
@@ -82,33 +83,34 @@ export function DeploymentRequired({
         </Content>
 
         <Footer>
-          <ErrorAlert title="Account deployment error" description={
-            error ? (
-              <>
-                <Text mb={4}>
-                  Please come by{" "}
-                  <Link
-                    as={NextLink}
-                    href="https://discord.gg/cartridge"
-                    isExternal
-                    color="link.blue"
-                    display="inline-flex"
-                    flexDir="row"
-                    columnGap="0.1rem"
-                    alignItems="center"
-                  >
-                    Discord
-                    <ExternalIcon />
-                  </Link>
-                  {" "}and report this issue.
-                </Text>
+          <ErrorAlert
+            title="Account deployment error"
+            description={
+              error ? (
+                <>
+                  <Text mb={4}>
+                    Please come by{" "}
+                    <Link
+                      as={NextLink}
+                      href="https://discord.gg/cartridge"
+                      isExternal
+                      color="link.blue"
+                      display="inline-flex"
+                      flexDir="row"
+                      columnGap="0.1rem"
+                      alignItems="center"
+                    >
+                      Discord
+                      <ExternalIcon />
+                    </Link>{" "}
+                    and report this issue.
+                  </Text>
 
-                <Text>
-                  {error.message}
-                </Text>
-              </>
-            ) : undefined
-          } />
+                  <Text>{error.message}</Text>
+                </>
+              ) : undefined
+            }
+          />
           <Button onClick={onClose}>close</Button>
         </Footer>
       </Container>

@@ -7,7 +7,7 @@ export function CloseButton() {
   const { close } = useConnection();
 
   if (!isIframe()) {
-    return null
+    return null;
   }
 
   return (
@@ -16,7 +16,7 @@ export function CloseButton() {
       bg="solid.bg"
       _hover={{
         bg: "solid.bg",
-        opacity: 0.75
+        opacity: 0.75,
       }}
       icon={<TimesIcon fontSize={24} />}
       onClick={close}

@@ -1,11 +1,13 @@
 import { Container } from "components/layout";
 import { AlertIcon, ExternalIcon } from "@cartridge/ui";
 import { Link, Text } from "@chakra-ui/react";
-import NextLink from "next/link"
+import NextLink from "next/link";
 
 export default function Consent() {
   return (
-    <Container variant="connect" hideAccount
+    <Container
+      variant="connect"
+      hideAccount
       icon={<AlertIcon boxSize={9} />}
       title="Uh-oh something went wrong"
       description={
@@ -31,4 +33,4 @@ export default function Consent() {
       }
     />
   );
-};
+}

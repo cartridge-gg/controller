@@ -29,11 +29,7 @@ function Pending() {
   }, [txnResults, txns]);
 
   return (
-    <Container
-      Icon={TimerDuoIcon}
-      title={title}
-      description={description}
-    >
+    <Container Icon={TimerDuoIcon} title={title} description={description}>
       <Content>
         {[...txns, { name: "name", hash: "hash" }].map((txn, idx) => (
           <Transaction
@@ -49,6 +45,6 @@ function Pending() {
       </Content>
     </Container>
   );
-};
+}
 
 export default dynamic(() => Promise.resolve(Pending), { ssr: false });

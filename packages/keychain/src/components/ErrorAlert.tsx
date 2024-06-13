@@ -12,7 +12,13 @@ import {
 import { motion } from "framer-motion";
 import { ReactElement } from "react";
 
-export function ErrorAlert({ title, description }: { title: string; description?: string | ReactElement }) {
+export function ErrorAlert({
+  title,
+  description,
+}: {
+  title: string;
+  description?: string | ReactElement;
+}) {
   return (
     <Accordion
       as={motion.div}
@@ -28,7 +34,12 @@ export function ErrorAlert({ title, description }: { title: string; description?
         <AccordionButton disabled={!description}>
           <HStack>
             <AlertIcon />
-            <Text as="b" fontSize="2xs" color="inherit" textTransform="uppercase">
+            <Text
+              as="b"
+              fontSize="2xs"
+              color="inherit"
+              textTransform="uppercase"
+            >
               {title}
             </Text>
           </HStack>
