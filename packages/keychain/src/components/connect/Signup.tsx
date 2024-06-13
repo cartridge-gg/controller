@@ -1,18 +1,13 @@
 import { Field } from "@cartridge/ui";
 import { Button } from "@chakra-ui/react";
-import {
-  Container,
-  FOOTER_MIN_HEIGHT,
-  Footer,
-  Content,
-} from "components/layout";
+import { Container, Footer, Content } from "components/layout";
 import {
   Form as FormikForm,
   Field as FormikField,
   Formik,
   useFormikContext,
 } from "formik";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { DeployAccountDocument, useAccountQuery } from "generated/graphql";
 import Controller from "utils/controller";
 import { client } from "utils/graphql";
@@ -24,6 +19,7 @@ import { doSignup } from "hooks/account";
 import { useControllerTheme } from "hooks/theme";
 import { shortString } from "starknet";
 import { useConnection } from "hooks/connection";
+import { useDebounce } from "hooks/debounce";
 
 export function Signup({
   prefilledName = "",
@@ -31,14 +27,12 @@ export function Signup({
   onSuccess,
   onLogin,
 }: SignupProps) {
-  const [error, setError] = useState<Error>();
   const theme = useControllerTheme();
 
   return (
     <>
       <Container
         variant="connect"
-        overflowY={error ? "auto" : undefined}
         title={
           theme.id === "cartridge"
             ? "Play with Cartridge Controller"
@@ -54,32 +48,37 @@ export function Signup({
           validateOnChange={false}
           validateOnBlur={false}
         >
-          <Form
-            onLogin={onLogin}
-            onSuccess={onSuccess}
-            isSlot={isSlot}
-            error={error}
-            setError={setError}
-          />
+          <Form onLogin={onLogin} onSuccess={onSuccess} isSlot={isSlot} />
         </Formik>
       </Container>
     </>
   );
 }
 
-function Form({
-  isSlot,
-  error,
-  onLogin,
-  onSuccess,
-  setError,
-}: SignupProps & {
-  error: Error;
-  setError: (error: Error) => void;
-}) {
+function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
   const { chainId, rpcUrl, setController } = useConnection();
-  const { values, isValidating } = useFormikContext<FormValues>();
+  const { values, errors, setErrors, setTouched } =
+    useFormikContext<FormValues>();
   const [isRegistering, setIsRegistering] = useState(false);
+  const { debouncedValue: username, debouncing } = useDebounce(
+    values.username,
+    1000,
+  );
+
+  useEffect(() => {
+    setErrors(undefined);
+
+    if (username) {
+      const validate = async () => {
+        const error = await validateUsernameFor("signup")(username);
+        if (error) {
+          setTouched({ username: true }, false);
+          setErrors({ username: error });
+        }
+      };
+      validate();
+    }
+  }, [username, setErrors, setTouched]);
 
   // for polling approach when iframe
   useAccountQuery(
@@ -126,64 +125,59 @@ function Form({
     },
   );
 
+  const onSubmit = useCallback(() => {
+    setIsRegistering(true);
+
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set("name", encodeURIComponent(username));
+    searchParams.set("action", "signup");
+
+    // due to same origin restriction, if we're in iframe, pop up a
+    // window to continue webauthn registration. otherwise,
+    // display modal overlay. in either case, account is created in
+    // authenticate component, so we poll and then deploy
+    if (isIframe()) {
+      PopupCenter(
+        `/authenticate?${searchParams.toString()}`,
+        "Cartridge Signup",
+        480,
+        640,
+      );
+
+      return;
+    }
+
+    doSignup(decodeURIComponent(username)).catch((e) => {
+      setErrors({ username: e.message });
+    });
+  }, [username, setErrors]);
+
   return (
     <FormikForm style={{ width: "100%" }}>
-      <Content pb={error ? FOOTER_MIN_HEIGHT : undefined}>
-        <FormikField
-          name="username"
-          placeholder="Username"
-          validate={validateUsernameFor("signup")}
-        >
+      <Content>
+        <FormikField name="username" placeholder="Username">
           {({ field, meta, form }) => (
             <Field
               {...field}
               autoFocus
               placeholder="Username"
               touched={meta.touched}
-              error={meta.error || error?.message}
-              onClear={() => form.setFieldValue(field.name, "")}
-              isLoading={isValidating}
+              error={meta.error || errors?.username}
+              onClear={() => {
+                form.setFieldValue(field.name, "");
+                setErrors(undefined);
+              }}
             />
           )}
         </FormikField>
       </Content>
 
-      <Footer isSlot={isSlot} createSession showTerm>
+      <Footer isSlot={isSlot} createSession>
         <Button
           colorScheme="colorful"
           isLoading={isRegistering}
-          onClick={async () => {
-            const error = await validateUsernameFor("signup")(values.username);
-            if (error) {
-              setError(new Error(error));
-              return;
-            }
-
-            setIsRegistering(true);
-
-            const searchParams = new URLSearchParams(window.location.search);
-            searchParams.set("name", encodeURIComponent(values.username));
-            searchParams.set("action", "signup");
-
-            // due to same origin restriction, if we're in iframe, pop up a
-            // window to continue webauthn registration. otherwise,
-            // display modal overlay. in either case, account is created in
-            // authenticate component, so we poll and then deploy
-            if (isIframe()) {
-              PopupCenter(
-                `/authenticate?${searchParams.toString()}`,
-                "Cartridge Signup",
-                480,
-                640,
-              );
-
-              return;
-            }
-
-            doSignup(decodeURIComponent(values.username)).catch((e) => {
-              setError(e);
-            });
-          }}
+          isDisabled={debouncing || !!errors?.username}
+          onClick={onSubmit}
         >
           sign up
         </Button>
