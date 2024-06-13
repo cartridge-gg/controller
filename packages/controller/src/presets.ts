@@ -38,11 +38,11 @@ export const defaultPresets: ControllerThemePresets = {
       primaryForeground: "white",
     },
   },
-  rollyourown: {
-    id: "rollyourown",
-    name: "Roll Your Own",
-    icon: "/whitelabel/rollyourown/icon.png",
-    cover: "/whitelabel/rollyourown/cover.png",
+  "dope-wars": {
+    id: "dope-wars",
+    name: "Dope Wars",
+    icon: "/whitelabel/dope-wars/icon.png",
+    cover: "/whitelabel/dope-wars/cover.png",
     colors: {
       primary: "#11ED83",
     },
