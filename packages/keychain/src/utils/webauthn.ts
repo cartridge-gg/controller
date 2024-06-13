@@ -103,12 +103,12 @@ export class WebauthnSigner implements SignerInterface {
 
     const calldata = transaction.fromCallsToExecuteCalldata(calls);
 
-    // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account-sdk
+    // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account_sdk
     const msgHash = hash.calculateTransactionHash(
       transactionsDetail.walletAddress,
       transactionsDetail.version,
       calldata,
-      // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account-sdk
+      // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account_sdk
       transactionsDetail.maxFee,
       transactionsDetail.chainId,
       transactionsDetail.nonce,
@@ -144,14 +144,14 @@ export class WebauthnSigner implements SignerInterface {
     classHash,
     senderAddress,
     chainId,
-    // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account-sdk
+    // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account_sdk
     maxFee,
     version,
     nonce,
   }: DeclareSignerDetails) {
     const msgHash = hash.calculateDeclareTransactionHash(
       classHash,
-      // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account-sdk
+      // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account_sdk
       senderAddress,
       version,
       maxFee,
@@ -205,7 +205,7 @@ class WebauthnAccount extends Account {
   ): Promise<EstimateFee> {
     const transactions = Array.isArray(calls) ? calls : [calls];
     const nonce = BigInt(providedNonce ?? (await this.getNonce()));
-    // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account-sdk
+    // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account_sdk
     const version = hash.transactionVersion;
     const chainId = await this.getChainId();
 
@@ -220,7 +220,7 @@ class WebauthnAccount extends Account {
 
     const signature = await this.signer.signTransaction(
       transactions,
-      // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account-sdk
+      // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account_sdk
       signerDetails,
     );
 
@@ -249,12 +249,12 @@ class WebauthnAccount extends Account {
     const nonce = BigInt(transactionsDetail.nonce ?? (await this.getNonce()));
     const maxFee =
       transactionsDetail.maxFee ??
-      // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account-sdk
+      // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account_sdk
       (await this.getSuggestedMaxFee(
         { type: TransactionType.INVOKE, payload: calls },
         transactionsDetail,
       ));
-    // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account-sdk
+    // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account_sdk
     const version = BigInt(hash.transactionVersion);
     const chainId = await this.getChainId();
 
@@ -262,7 +262,7 @@ class WebauthnAccount extends Account {
       walletAddress: this.address,
       nonce,
       maxFee,
-      // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account-sdk
+      // @ts-expect-error Note(#244): WebauthnAccount will be deprecated by account_sdk
       version,
       chainId,
     };

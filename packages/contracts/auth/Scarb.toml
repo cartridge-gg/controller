@@ -1,0 +1,9 @@
+[package]
+description = "Webauthn authentication library"
+edition.workspace = true
+name = "controller_auth"
+version.workspace = true
+
+[dependencies]
+starknet.workspace = true
+alexandria_encoding.workspace = true
