@@ -6,7 +6,7 @@ import {
   Show,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import { PropsWithChildren, createContext, useContext } from "react";
+import { PropsWithChildren, createContext, useContext, useState } from "react";
 import { Header, HeaderProps } from "./Header";
 
 export function Container({
@@ -47,8 +47,10 @@ function Wrapper({
   children,
   ...rest
 }: React.PropsWithChildren & { variant?: LayoutVariant }) {
+  const [footerHeight, setFooterHeight] = useState(0)
+
   return (
-    <LayoutContext.Provider value={{ variant }}>
+    <LayoutContext.Provider value={{ variant, footerHeight, setFooterHeight }}>
       {/** Show as full page  */}
       <Show below="md">
         <ChakraContainer
@@ -94,14 +96,20 @@ function Wrapper({
   );
 }
 
-const LayoutContext = createContext<LayoutContextValue>({ variant: "default" });
+const LayoutContext = createContext<LayoutContextValue>({ variant: "default", footerHeight: 0, setFooterHeight: () => { } });
 
 type LayoutContextValue = {
   variant: LayoutVariant;
+  footerHeight: number;
+  setFooterHeight: (height: number) => void
 };
 
 type LayoutVariant = "default" | "connect";
 
+export function useLayout() {
+  return useContext(LayoutContext)
+}
+
 export function useLayoutVariant() {
-  return useContext(LayoutContext).variant;
+  return useLayout().variant;
 }
