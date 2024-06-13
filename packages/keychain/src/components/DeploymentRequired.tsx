@@ -2,10 +2,11 @@ import { constants } from "starknet";
 import { Container, Footer, Content } from "components/layout";
 import { useEffect, useState } from "react";
 import { Status } from "utils/account";
-import { Loading } from "./Loading";
 import { Button, Link, Text } from "@chakra-ui/react";
-import { ExternalIcon } from "@cartridge/ui";
+import { ExternalIcon, PacmanIcon } from "@cartridge/ui";
 import { useController } from "hooks/controller";
+import { ErrorAlert } from "./ErrorAlert";
+import NextLink from "next/link"
 
 export function DeploymentRequired({
   onClose,
@@ -60,11 +61,11 @@ export function DeploymentRequired({
   if (status !== Status.DEPLOYED) {
     return (
       <Container
-        Icon={Loading}
+        icon={<PacmanIcon color="brand.primary" fontSize="3xl" />}
         title={"Deploying your account"}
         description="This may take a second"
       >
-        <Content>
+        <Content alignItems="center">
           {status === Status.DEPLOYING && (
             <Link
               href={`https://${account.chainId === constants.StarknetChainId.SN_SEPOLIA
@@ -78,18 +79,36 @@ export function DeploymentRequired({
               </Button>
             </Link>
           )}
-
-          {error && (
-            <>
-              <Text>
-                We encounter an account deployment error: {error.message}
-              </Text>
-              <Text>Please come by discord and report this issue.</Text>
-            </>
-          )}
         </Content>
 
         <Footer>
+          <ErrorAlert title="Account deployment error" description={
+            error ? (
+              <>
+                <Text mb={4}>
+                  Please come by{" "}
+                  <Link
+                    as={NextLink}
+                    href="https://discord.gg/cartridge"
+                    isExternal
+                    color="link.blue"
+                    display="inline-flex"
+                    flexDir="row"
+                    columnGap="0.1rem"
+                    alignItems="center"
+                  >
+                    Discord
+                    <ExternalIcon />
+                  </Link>
+                  {" "}and report this issue.
+                </Text>
+
+                <Text>
+                  {error.message}
+                </Text>
+              </>
+            ) : undefined
+          } />
           <Button onClick={onClose}>close</Button>
         </Footer>
       </Container>
