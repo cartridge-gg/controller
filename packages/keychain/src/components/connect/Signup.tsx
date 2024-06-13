@@ -32,7 +32,7 @@ export function Signup({
   onSuccess,
   onLogin,
 }: SignupProps) {
-  const [error, setError] = useState();
+  const [error, setError] = useState<Error>();
   const theme = useControllerTheme();
 
   return (
@@ -49,11 +49,9 @@ export function Signup({
       >
         <Formik
           initialValues={{ username: prefilledName }}
-          onSubmit={(values) =>
-            doSignup(decodeURIComponent(values.username)).catch((e) => {
-              setError(e);
-            })
-          }
+          onSubmit={() => {
+            /* defer to onClick */
+          }}
           validateOnChange={false}
           validateOnBlur={false}
         >
@@ -62,6 +60,7 @@ export function Signup({
             onSuccess={onSuccess}
             isSlot={isSlot}
             error={error}
+            setError={setError}
           />
         </Formik>
       </Container>
@@ -71,14 +70,16 @@ export function Signup({
 
 function Form({
   isSlot,
+  error,
   onLogin,
   onSuccess,
-  error,
+  setError,
 }: SignupProps & {
   error: Error;
+  setError: (error: Error) => void;
 }) {
   const { chainId, rpcUrl, setController } = useConnection();
-  const { values, isValidating, submitForm } = useFormikContext<FormValues>();
+  const { values, isValidating } = useFormikContext<FormValues>();
   const [isRegistering, setIsRegistering] = useState(false);
 
   // for polling approach when iframe
@@ -176,7 +177,9 @@ function Form({
               return;
             }
 
-            submitForm();
+            doSignup(decodeURIComponent(values.username)).catch((e) => {
+              setError(e);
+            });
           }}
         >
           sign up
