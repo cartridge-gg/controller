@@ -7,6 +7,6 @@ export function Content({ children, ...stackProps }: StackProps) {
   return (
     <VStack w="full" px={4} pb={footerHeight} align="stretch" {...stackProps}>
       {children}
-    </VStack >
+    </VStack>
   );
 }

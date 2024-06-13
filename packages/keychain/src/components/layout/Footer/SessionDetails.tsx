@@ -19,7 +19,6 @@ export function SessionDetails() {
   const policies = usePolicies();
   const { footerHeight } = useLayout();
 
-
   return (
     <VStack
       borderRadius="md"
@@ -53,7 +52,9 @@ export function SessionDetails() {
         allowMultiple
         overflowY="auto"
         maxH={
-          (isIframe() ? window.innerHeight : PORTAL_WINDOW_HEIGHT) - TOP_BAR_HEIGHT - footerHeight
+          (isIframe() ? window.innerHeight : PORTAL_WINDOW_HEIGHT) -
+          TOP_BAR_HEIGHT -
+          footerHeight
         }
       >
         {policies.map((p, i) => (

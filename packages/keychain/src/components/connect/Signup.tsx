@@ -30,28 +30,24 @@ export function Signup({
   const theme = useControllerTheme();
 
   return (
-    <>
-      <Container
-        variant="connect"
-        title={
-          theme.id === "cartridge"
-            ? "Play with Cartridge Controller"
-            : `Play ${theme.name}`
-        }
-        description="Create your Cartridge Controller"
+    <Container
+      variant="connect"
+      title={
+        theme.id === "cartridge"
+          ? "Play with Cartridge Controller"
+          : `Play ${theme.name}`
+      }
+      description="Create your Cartridge Controller"
+    >
+      <Formik
+        initialValues={{ username: prefilledName }}
+        onSubmit={() => {
+          /* defer to onClick */
+        }}
       >
-        <Formik
-          initialValues={{ username: prefilledName }}
-          onSubmit={() => {
-            /* defer to onClick */
-          }}
-          validateOnChange={false}
-          validateOnBlur={false}
-        >
-          <Form onLogin={onLogin} onSuccess={onSuccess} isSlot={isSlot} />
-        </Formik>
-      </Container>
-    </>
+        <Form onLogin={onLogin} onSuccess={onSuccess} isSlot={isSlot} />
+      </Formik>
+    </Container>
   );
 }
 
@@ -60,6 +56,7 @@ function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
   const { values, errors, setErrors, setTouched } =
     useFormikContext<FormValues>();
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
   const { debouncedValue: username, debouncing } = useDebounce(
     values.username,
     1000,
@@ -70,11 +67,14 @@ function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
 
     if (username) {
       const validate = async () => {
+        setIsValidating(true);
         const error = await validateUsernameFor("signup")(username);
         if (error) {
           setTouched({ username: true }, false);
           setErrors({ username: error });
         }
+
+        setIsValidating(false);
       };
       validate();
     }
@@ -176,7 +176,9 @@ function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
         <Button
           colorScheme="colorful"
           isLoading={isRegistering}
-          isDisabled={debouncing || !!errors?.username}
+          isDisabled={
+            debouncing || !username || !!errors?.username || isValidating
+          }
           onClick={onSubmit}
         >
           sign up

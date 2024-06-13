@@ -48,18 +48,19 @@ export function Footer({
   const height = useMemo(
     () =>
       isOpen
-        ? `${(isIframe() ? window.innerHeight : PORTAL_WINDOW_HEIGHT) -
-        TOP_BAR_HEIGHT
-        }px`
+        ? `${
+            (isIframe() ? window.innerHeight : PORTAL_WINDOW_HEIGHT) -
+            TOP_BAR_HEIGHT
+          }px`
         : "auto",
     [isOpen],
   );
 
   useEffect(() => {
-    if (!ref.current) return
+    if (!ref.current) return;
 
-    setFooterHeight(ref.current.clientHeight)
-  }, [setFooterHeight])
+    setFooterHeight(ref.current.clientHeight);
+  }, [setFooterHeight]);
 
   return (
     <VStack
@@ -114,7 +115,13 @@ export function Footer({
         {isOpen && <SessionDetails />}
       </VStack>
 
-      <VStack justifySelf="flex-end" bg="solid.bg" w="full" align="stretch" p={4}>
+      <VStack
+        justifySelf="flex-end"
+        bg="solid.bg"
+        w="full"
+        align="stretch"
+        p={4}
+      >
         {children}
       </VStack>
 

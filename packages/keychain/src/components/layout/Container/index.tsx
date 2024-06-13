@@ -47,7 +47,7 @@ function Wrapper({
   children,
   ...rest
 }: React.PropsWithChildren & { variant?: LayoutVariant }) {
-  const [footerHeight, setFooterHeight] = useState(0)
+  const [footerHeight, setFooterHeight] = useState(0);
 
   return (
     <LayoutContext.Provider value={{ variant, footerHeight, setFooterHeight }}>
@@ -96,18 +96,22 @@ function Wrapper({
   );
 }
 
-const LayoutContext = createContext<LayoutContextValue>({ variant: "default", footerHeight: 0, setFooterHeight: () => { } });
+const LayoutContext = createContext<LayoutContextValue>({
+  variant: "default",
+  footerHeight: 0,
+  setFooterHeight: () => {},
+});
 
 type LayoutContextValue = {
   variant: LayoutVariant;
   footerHeight: number;
-  setFooterHeight: (height: number) => void
+  setFooterHeight: (height: number) => void;
 };
 
 type LayoutVariant = "default" | "connect";
 
 export function useLayout() {
-  return useContext(LayoutContext)
+  return useContext(LayoutContext);
 }
 
 export function useLayoutVariant() {
