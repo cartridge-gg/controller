@@ -2,7 +2,7 @@ use cainome::cairo_serde::CairoSerde;
 use starknet::macros::{selector, short_string};
 use starknet_crypto::{poseidon_hash_many, FieldElement};
 
-use crate::abigen::cartridge_account::SignerSignature;
+use crate::abigen::controller::SignerSignature;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RawSession {

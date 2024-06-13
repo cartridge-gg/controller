@@ -7,7 +7,7 @@ use starknet::{
 };
 
 use super::runners::katana_runner::KatanaRunner;
-use crate::abigen::cartridge_account::{self, CartridgeAccount, Signer, StarknetSigner};
+use crate::abigen::controller::{self, Controller, Signer, StarknetSigner};
 use crate::deploy_contract::{
     single_owner_account, AccountDeclaration, DeployResult, FEE_TOKEN_ADDRESS,
 };
@@ -53,7 +53,7 @@ pub async fn declare(
     client: &JsonRpcClient<HttpTransport>,
     account: &SingleOwnerAccount<&JsonRpcClient<HttpTransport>, LocalWallet>,
 ) -> FieldElement {
-    let DeclareTransactionResult { class_hash, .. } = AccountDeclaration::cartridge_account(client)
+    let DeclareTransactionResult { class_hash, .. } = AccountDeclaration::controller(client)
         .declare(account)
         .await
         .unwrap()
@@ -70,7 +70,7 @@ pub async fn deploy(
     guardian: Option<Signer>,
     class_hash: FieldElement,
 ) -> FieldElement {
-    let mut constructor_calldata = cartridge_account::Signer::cairo_serialize(&owner);
+    let mut constructor_calldata = controller::Signer::cairo_serialize(&owner);
     constructor_calldata.extend(Option::<Signer>::cairo_serialize(&guardian));
     let DeployResult {
         deployed_address, ..
@@ -117,6 +117,6 @@ async fn test_deploy_and_call() {
     });
     let deployed_address = deploy(client, &account, signer, None, class_hash).await;
 
-    let contract = CartridgeAccount::new(deployed_address, account);
+    let contract = Controller::new(deployed_address, account);
     contract.get_owner().call().await.unwrap();
 }
