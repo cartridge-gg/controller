@@ -8,7 +8,11 @@ import {
   useCallback,
 } from "react";
 import Controller from "utils/controller";
-import { connectToController, ConnectionCtx, LogoutCtx } from "utils/connection";
+import {
+  connectToController,
+  ConnectionCtx,
+  LogoutCtx,
+} from "utils/connection";
 import { isIframe } from "components/connect/utils";
 import { RpcProvider } from "starknet";
 import { Policy } from "@cartridge/controller";
@@ -51,7 +55,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
       setRpcUrl(
         urlParams.get("rpc_url") || process.env.NEXT_PUBLIC_RPC_SEPOLIA,
       );
-      setChainId(urlParams.get("chain_id"))
+      setChainId(urlParams.get("chain_id"));
       setPolicies(parsePolicies(urlParams.get("policies")));
       return;
     }
@@ -99,8 +103,8 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
       type: "logout",
       resolve: context.resolve,
       reject: context.reject,
-    } as LogoutCtx)
-  }, [])
+    } as LogoutCtx);
+  }, []);
 
   return (
     <ConnectionContext.Provider
@@ -136,25 +140,25 @@ export function useConnection() {
 
 export function useChainId() {
   const { chainId } = useConnection();
-  return chainId
+  return chainId;
 }
 
 export function useRpcUrl() {
   const { rpcUrl } = useConnection();
-  return rpcUrl
+  return rpcUrl;
 }
 
 export function useOrigin() {
   const { context } = useConnection();
-  return context?.origin
+  return context?.origin;
 }
 
 export function usePolicies() {
   const { context } = useConnection();
   switch (context?.type) {
     case "connect":
-      return context.policies
+      return context.policies;
     default:
-      return []
+      return [];
   }
 }

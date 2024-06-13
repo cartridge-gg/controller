@@ -42,8 +42,8 @@ export function Signup({
     setIsRegistering(true);
 
     const searchParams = new URLSearchParams(window.location.search);
-    searchParams.set("name", encodeURIComponent(values.username))
-    searchParams.set("action", "signup")
+    searchParams.set("name", encodeURIComponent(values.username));
+    searchParams.set("action", "signup");
 
     // due to same origin restriction, if we're in iframe, pop up a
     // window to continue webauthn registration. otherwise,
@@ -70,7 +70,8 @@ export function Signup({
   return (
     <>
       <Container
-        variant="connect" overflowY={error ? "auto" : undefined}
+        variant="connect"
+        overflowY={error ? "auto" : undefined}
         title={
           theme.id === "cartridge"
             ? "Play with Cartridge Controller"
@@ -171,7 +172,7 @@ function Form({
 
   return (
     <FormikForm style={{ width: "100%" }}>
-      <Content pb={error ? FOOTER_MIN_HEIGHT : undefined} >
+      <Content pb={error ? FOOTER_MIN_HEIGHT : undefined}>
         <FormikField
           name="username"
           placeholder="Username"
@@ -193,11 +194,7 @@ function Form({
         <ErrorComp error={error} />
       </Content>
 
-      <Footer
-        isSlot={isSlot}
-        showLogo
-        showTerm
-      >
+      <Footer isSlot={isSlot} createSession showTerm>
         <Button type="submit" colorScheme="colorful" isLoading={isLoading}>
           sign up
         </Button>

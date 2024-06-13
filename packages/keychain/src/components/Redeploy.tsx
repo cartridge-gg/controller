@@ -8,11 +8,7 @@ import { Status } from "utils/account";
 import { SparklesDuoIcon } from "@cartridge/ui";
 import { useChainId } from "hooks/connection";
 
-export function Redeploy({
-  controller,
-}: {
-  controller: Controller;
-}) {
+export function Redeploy({ controller }: { controller: Controller }) {
   const chainId = useChainId();
 
   useEffect(() => {

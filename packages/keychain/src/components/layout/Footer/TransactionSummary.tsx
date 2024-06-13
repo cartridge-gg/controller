@@ -1,20 +1,23 @@
-import { HStack, VStack, Text, Link, IconProps } from "@chakra-ui/react";
-import { CartridgeIcon, KeyIcon, ScrollIcon, WebsiteIcon } from "@cartridge/ui";
+import { HStack, VStack, Text, Link } from "@chakra-ui/react";
+import { WebsiteIcon } from "@cartridge/ui";
 
 export function TransactionSummary({
   isSlot,
   showTerm,
+  createSession,
   hostname,
 }: {
-  isSlot?: boolean;
-  showTerm?: boolean;
-  hostname?: string;
+  isSlot: boolean;
+  showTerm: boolean;
+  createSession: boolean;
+  hostname: string;
 }) {
   return (
     <VStack align="flex-start">
-      {hostname && (
-        <Summary Icon={KeyIcon}>
-          Create a session for <WebsiteIcon color="text.secondaryAccent" fontSize="sm" />
+      {createSession && hostname && (
+        <Summary>
+          Create a session for{" "}
+          <WebsiteIcon color="text.secondaryAccent" fontSize="sm" />
           <Text color="text.secondaryAccent" as="span" fontWeight="bold">
             {hostname}{" "}
           </Text>
@@ -26,14 +29,11 @@ export function TransactionSummary({
       )}
 
       {isSlot && (
-        <Summary
-          Icon={CartridgeIcon}
-          title="Authorize Slot to manage your Cartridge infrastructure"
-        />
+        <Summary title="Authorize Slot to manage your Cartridge infrastructure" />
       )}
 
-      {showTerm && (
-        <Summary Icon={ScrollIcon}>
+      {!!showTerm && (
+        <Summary>
           <>
             By continuing you are agreeing to Cartridge&apos;s{" "}
             <Link
@@ -59,17 +59,13 @@ export function TransactionSummary({
 }
 
 export function Summary({
-  Icon,
   title,
   children,
 }: React.PropsWithChildren & {
-  Icon?: React.ComponentType<IconProps>;
   title?: string;
 }) {
   return (
     <HStack align="flex-start" color="text.secondary" fontSize="xs">
-      {Icon && <Icon boxSize={4} />}
-
       <Text color="text.secondary" fontSize="xs">
         {title || children}
       </Text>

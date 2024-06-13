@@ -1,4 +1,5 @@
 import { StackProps, VStack } from "@chakra-ui/react";
+import { FOOTER_HEIGHT } from "./Container";
 
 export function Content({ children, ...stackProps }: StackProps) {
   return (
@@ -7,6 +8,7 @@ export function Content({ children, ...stackProps }: StackProps) {
       px={4}
       align="stretch"
       overflowY="hidden"
+      pb={FOOTER_HEIGHT}
       {...stackProps}
     >
       {children}

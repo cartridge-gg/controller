@@ -66,13 +66,13 @@ export function Fees({
       setFormattedFee(
         fees.max > 10000000000000n
           ? {
-            base: `~${parseFloat(formatUnits(fees.base, 18)).toFixed(5)} eth`,
-            max: `~${parseFloat(formatUnits(fees.max, 18)).toFixed(5)} eth`,
-          }
+              base: `~${parseFloat(formatUnits(fees.base, 18)).toFixed(5)} eth`,
+              max: `~${parseFloat(formatUnits(fees.max, 18)).toFixed(5)} eth`,
+            }
           : {
-            base: "<0.00001",
-            max: "<0.00001",
-          },
+              base: "<0.00001",
+              max: "<0.00001",
+            },
       );
     }
     compute();

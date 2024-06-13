@@ -87,4 +87,4 @@ export function InsufficientFunds({
       </Content>
     </Container>
   );
-};
+}

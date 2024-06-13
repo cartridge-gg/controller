@@ -8,7 +8,11 @@ import {
 } from "@chakra-ui/react";
 import { CartridgeLogo, WedgeUpIcon } from "@cartridge/ui";
 import React, { useMemo } from "react";
-import { FOOTER_HEIGHT, PORTAL_WINDOW_HEIGHT } from "components/layout";
+import {
+  FOOTER_HEIGHT,
+  PORTAL_WINDOW_HEIGHT,
+  useLayoutVariant,
+} from "components/layout";
 import { motion } from "framer-motion";
 import { SessionDetails } from "./SessionDetails";
 import { TransactionSummary } from "./TransactionSummary";
@@ -18,27 +22,37 @@ import { TOP_BAR_HEIGHT } from "../Container/Header/TopBar";
 
 export function Footer({
   children,
-  isSlot,
+  isSlot = false,
   showTerm = false,
-  showLogo = false
+  createSession = false,
 }: React.PropsWithChildren & {
   isSlot?: boolean;
   showTerm?: boolean;
-  showLogo?: boolean;
+  createSession?: boolean;
 }) {
-  const { origin, policies } = useConnection()
+  const { origin, policies } = useConnection();
   const { isOpen, onToggle } = useDisclosure();
-  const isExpandable = useMemo(() => !!origin && !!policies.length, [origin, policies]);
+  const isExpandable = useMemo(
+    () => !!origin && !!policies.length,
+    [origin, policies],
+  );
   const hostname = useMemo(
     () => (origin ? new URL(origin).hostname : undefined),
     [origin],
   );
-
   const height = useMemo(
     () =>
-      isOpen ? `${(isIframe() ? window.innerHeight : PORTAL_WINDOW_HEIGHT) - TOP_BAR_HEIGHT - FOOTER_HEIGHT}px` : "auto",
+      isOpen
+        ? `${
+            (isIframe() ? window.innerHeight : PORTAL_WINDOW_HEIGHT) -
+            TOP_BAR_HEIGHT -
+            FOOTER_HEIGHT
+          }px`
+        : "auto",
     [isOpen],
   );
+  const variant = useLayoutVariant();
+  const showLogo = useMemo(() => variant === "connect", [variant]);
 
   return (
     <VStack
@@ -60,11 +74,12 @@ export function Footer({
         layout="position"
         animate={{ height, transition: { bounce: 0 } }}
       >
-        <VStack pt={6} align="stretch" w="full" h="full" overflowY="hidden">
-          <HStack align="flex-start">
+        <VStack align="stretch" w="full" h="full">
+          <HStack align="flex-start" pt={isExpandable ? 6 : 0}>
             <TransactionSummary
               isSlot={isSlot}
               showTerm={showTerm}
+              createSession={createSession}
               hostname={hostname}
             />
 
@@ -89,9 +104,7 @@ export function Footer({
             )}
           </HStack>
 
-          {isOpen && (
-            <SessionDetails />
-          )}
+          {isOpen && <SessionDetails />}
         </VStack>
 
         <Spacer />

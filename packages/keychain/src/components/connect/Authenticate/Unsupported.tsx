@@ -9,8 +9,7 @@ export function Unsupported({ message }: { message: string }) {
       Icon={AlertIcon}
       title="Device is not supported"
       description={message}
-    >
-    </Container>
+    ></Container>
   );
 }
 

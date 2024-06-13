@@ -20,7 +20,8 @@ export function Container({
   variant,
 }: {
   variant?: LayoutVariant;
-} & PropsWithChildren & StyleProps &
+} & PropsWithChildren &
+  StyleProps &
   HeaderProps) {
   return (
     <Wrapper variant={variant}>
@@ -33,9 +34,7 @@ export function Container({
         description={description}
       />
 
-      <VStack w="full">
-        {children}
-      </VStack>
+      <VStack w="full">{children}</VStack>
     </Wrapper>
   );
 }
@@ -43,7 +42,11 @@ export function Container({
 export const FOOTER_HEIGHT = 40;
 export const PORTAL_WINDOW_HEIGHT = 600;
 
-function Wrapper({ variant = "default", children, ...rest }: React.PropsWithChildren & { variant?: LayoutVariant }) {
+function Wrapper({
+  variant = "default",
+  children,
+  ...rest
+}: React.PropsWithChildren & { variant?: LayoutVariant }) {
   return (
     <LayoutContext.Provider value={{ variant }}>
       {/** Show as full page  */}
@@ -94,11 +97,11 @@ function Wrapper({ variant = "default", children, ...rest }: React.PropsWithChil
 const LayoutContext = createContext<LayoutContextValue>({ variant: "default" });
 
 type LayoutContextValue = {
-  variant: LayoutVariant
-}
+  variant: LayoutVariant;
+};
 
-type LayoutVariant = "default" | "connect"
+type LayoutVariant = "default" | "connect";
 
 export function useLayoutVariant() {
-  return useContext(LayoutContext).variant
+  return useContext(LayoutContext).variant;
 }

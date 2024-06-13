@@ -20,13 +20,8 @@ export type BannerProps = {
   icon?: React.ReactElement;
   title: string;
   description?: string | React.ReactElement;
-}
-export function Banner({
-  Icon,
-  icon,
-  title,
-  description,
-}: BannerProps) {
+};
+export function Banner({ Icon, icon, title, description }: BannerProps) {
   const theme = useControllerTheme();
   const { colorMode } = useColorMode();
   const cover = useMemo(
@@ -96,8 +91,7 @@ export function Banner({
             )}
           </VStack>
         </VStack>
-
-      )
+      );
     default:
       return (
         <VStack w="full">
@@ -120,11 +114,7 @@ export function Banner({
                 {icon}
               </Square>
             ) : (
-              <Image
-                src={theme.icon}
-                boxSize={11}
-                alt="Controller Icon"
-              />
+              <Image src={theme.icon} boxSize={11} alt="Controller Icon" />
             )}
 
             <VStack align="flex-start" gap={1}>
@@ -139,8 +129,8 @@ export function Banner({
               )}
             </VStack>
           </HStack>
-        </VStack >
-      )
+        </VStack>
+      );
   }
 }
 

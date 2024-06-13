@@ -118,7 +118,6 @@ export function BridgeEth({
     <WagmiConfig config={ethereumConfig}>
       <Container Icon={EthereumDuoIcon} title="Bridge ETH">
         <Content>
-
           <VStack w="full" align="start" spacing="18px">
             <Label>From</Label>
             <HStack w="full">
@@ -131,8 +130,8 @@ export function BridgeEth({
                     text={
                       !!ethAddress
                         ? ethAddress.substring(0, 3) +
-                        "..." +
-                        ethAddress.substring(ethAddress.length - 4)
+                          "..." +
+                          ethAddress.substring(ethAddress.length - 4)
                         : "Metamask"
                     }
                     pointerEvents={!!ethAddress ? "none" : "auto"}

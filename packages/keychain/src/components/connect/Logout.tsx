@@ -10,11 +10,7 @@ export function Logout({
   onCancel: () => void;
 }) {
   return (
-    <Container
-      Icon={LogoutDuoIcon}
-      title="Log Out"
-      description="Are you sure?"
-    >
+    <Container Icon={LogoutDuoIcon} title="Log Out" description="Are you sure?">
       <Footer>
         <Button colorScheme="colorful" onClick={onConfirm}>
           Log Out
