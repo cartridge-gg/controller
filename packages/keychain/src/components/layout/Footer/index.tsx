@@ -40,19 +40,17 @@ export function Footer({
     () => (origin ? new URL(origin).hostname : undefined),
     [origin],
   );
+  const variant = useLayoutVariant();
+  const showLogo = useMemo(() => variant === "connect", [variant]);
   const height = useMemo(
     () =>
       isOpen
-        ? `${
-            (isIframe() ? window.innerHeight : PORTAL_WINDOW_HEIGHT) -
-            TOP_BAR_HEIGHT -
-            FOOTER_HEIGHT
-          }px`
+        ? `${(isIframe() ? window.innerHeight : PORTAL_WINDOW_HEIGHT) -
+        TOP_BAR_HEIGHT
+        }px`
         : "auto",
     [isOpen],
   );
-  const variant = useLayoutVariant();
-  const showLogo = useMemo(() => variant === "connect", [variant]);
 
   return (
     <VStack
@@ -61,77 +59,76 @@ export function Footer({
       w="full"
       zIndex={1}
       gap={0}
+      as={motion.div}
+      layout="position"
+      animate={{ height, transition: { bounce: 0 } }}
     >
       <VStack
         w="full"
-        align="flex-start"
+        align="stretch"
         bg="solid.bg"
         p={4}
         pt={0}
         borderTopWidth={1}
         borderColor="solid.spacer"
-        as={motion.div}
-        layout="position"
-        animate={{ height, transition: { bounce: 0 } }}
+        h="full"
       >
-        <VStack align="stretch" w="full" h="full">
-          <HStack align="flex-start" pt={isExpandable ? 6 : 0}>
-            <TransactionSummary
-              isSlot={isSlot}
-              showTerm={showTerm}
-              createSession={createSession}
-              hostname={hostname}
+        <HStack align="flex-start" pt={isExpandable ? 6 : 0}>
+          <TransactionSummary
+            isSlot={isSlot}
+            showTerm={showTerm}
+            createSession={createSession}
+            hostname={hostname}
+          />
+
+          <Spacer />
+
+          {isExpandable && (
+            <IconButton
+              aria-label="Expand footer"
+              icon={
+                <WedgeUpIcon
+                  boxSize={8}
+                  color="text.secondary"
+                  transform={isOpen ? "rotate(180deg)" : "rotate(0deg)"}
+                />
+              }
+              size="sm"
+              h={8}
+              bg="solid.primary"
+              zIndex={1}
+              onClick={onToggle}
             />
+          )}
+        </HStack>
 
-            <Spacer />
-
-            {isExpandable && (
-              <IconButton
-                aria-label="Expand footer"
-                icon={
-                  <WedgeUpIcon
-                    boxSize={8}
-                    color="text.secondary"
-                    transform={isOpen ? "rotate(180deg)" : "rotate(0deg)"}
-                  />
-                }
-                size="sm"
-                h={8}
-                bg="solid.primary"
-                zIndex={1}
-                onClick={onToggle}
-              />
-            )}
-          </HStack>
-
-          {isOpen && <SessionDetails />}
-        </VStack>
-
-        <Spacer />
-
-        <VStack align="strech" w="full">
-          {children}
-        </VStack>
+        {isOpen && <SessionDetails />}
       </VStack>
 
-      {showLogo && (
-        <HStack
-          w="full"
-          borderTopWidth={1}
-          borderColor="solid.tertiary"
-          color="text.secondary"
-          alignItems="center"
-          justify="center"
-          h={FOOTER_HEIGHT / 4}
-          gap={1}
-        >
-          <Text fontSize="xs" color="currentColor">
-            Controller by
-          </Text>
+      <VStack justifySelf="flex-end" bg="solid.bg" w="full">
+        <VStack align="stretch" w="full" px={4}>
+          {children}
+        </VStack>
 
-          <CartridgeLogo fontSize={100} color="text.secondary" />
-        </HStack>
-      )}
+        {showLogo && (
+          <HStack
+            w="full"
+            borderTopWidth={1}
+            borderColor="solid.tertiary"
+            color="text.secondary"
+            alignItems="center"
+            justify="center"
+            h={FOOTER_HEIGHT / 4}
+            gap={1}
+          >
+            <Text fontSize="xs" color="currentColor">
+              Controller by
+            </Text>
+
+            <CartridgeLogo fontSize={100} color="text.secondary" />
+          </HStack>
+        )}
+      </VStack>
     </VStack>
   );
 }

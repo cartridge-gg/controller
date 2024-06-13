@@ -18,7 +18,7 @@ export function SessionDetails() {
   return (
     <VStack
       borderRadius="md"
-      overflowY="hidden"
+      overflowY="auto"
       rowGap="0.1rem"
       minH="min-content"
       marginY={4}
@@ -43,7 +43,10 @@ export function SessionDetails() {
         </Text>
       </VStack>
 
-      <Accordion w="full" allowMultiple overflowY="auto">
+      <Accordion w="full" allowMultiple overflowY="auto"
+        // TODO: maxH should be dynamically calculated
+        maxH={280}
+      >
         {policies.map((p, i) => (
           <AccordionItem
             key={p.target + p.method}
