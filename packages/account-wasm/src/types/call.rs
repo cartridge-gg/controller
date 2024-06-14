@@ -6,6 +6,8 @@ use starknet::{
 use std::str::FromStr;
 use wasm_bindgen::prelude::*;
 
+use super::TryFromJsValue;
+
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct JsCall {
@@ -39,5 +41,22 @@ impl TryFrom<JsValue> for JsCall {
 
     fn try_from(value: JsValue) -> Result<Self, Self::Error> {
         Ok(serde_wasm_bindgen::from_value(value)?)
+    }
+}
+
+impl From<Call> for JsCall {
+    fn from(value: Call) -> Self {
+        JsCall {
+            contract_address: value.to,
+            entrypoint: value.selector.to_string(),
+            calldata: value.calldata,
+        }
+    }
+}
+
+impl TryFromJsValue<Call> for Call {
+    fn try_from_js_value(value: JsValue) -> Result<Self, JsError> {
+        let js_call: JsCall = value.try_into()?;
+        js_call.try_into()
     }
 }

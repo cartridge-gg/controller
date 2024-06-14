@@ -178,13 +178,7 @@ class Account extends BaseAccount {
       session,
     );
 
-    await this.cartridge.executeFromOutside({
-      caller: shortString.encodeShortString("ANY_CALLER"),
-      executeBefore: "3000000000",
-      executeAfter: "0",
-      calls: calls as Array<Call>,
-      nonce: stark.randomAddress(),
-    });
+    await this.cartridge.executeFromOutside(calls as Array<Call>, session);
 
     Storage.update(this.selector, {
       nonce: (BigInt(transactionsDetail.nonce) + 1n).toString(),

@@ -7,6 +7,8 @@ use starknet::core::{
 use std::str::FromStr;
 use wasm_bindgen::prelude::*;
 
+use super::TryFromJsValue;
+
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct JsPolicy {
@@ -30,5 +32,13 @@ impl TryFrom<JsPolicy> for AllowedMethod {
             contract_address: FieldElement::from_str(&value.target)?,
             selector: get_selector_from_name(&value.method).unwrap(),
         })
+    }
+}
+
+impl TryFromJsValue<AllowedMethod> for AllowedMethod {
+    fn try_from_js_value(value: JsValue) -> Result<Self, JsError> {
+        let js_policy: JsPolicy = value.try_into()?;
+        let allowed_method: AllowedMethod = js_policy.try_into()?;
+        Ok(allowed_method)
     }
 }

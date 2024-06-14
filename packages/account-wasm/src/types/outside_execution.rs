@@ -1,6 +1,6 @@
 use account_sdk::account::outside_execution::{OutsideExecution, OutsideExecutionCaller};
 use serde::{Deserialize, Serialize};
-use starknet::{accounts::Call, core::types::FieldElement};
+use starknet::{accounts::Call, core::types::FieldElement, macros::short_string};
 use wasm_bindgen::prelude::*;
 
 use super::call::JsCall;
@@ -38,5 +38,17 @@ impl TryFrom<JsOutsideExecution> for OutsideExecution {
                 .map(|c| Call::try_from(c))
                 .collect::<Result<Vec<Call>, _>>()?,
         })
+    }
+}
+
+impl From<OutsideExecution> for JsOutsideExecution {
+    fn from(value: OutsideExecution) -> Self {
+        JsOutsideExecution {
+            caller: short_string!("ANY_CALLER"),
+            execute_before: value.execute_before.to_string(),
+            execute_after: value.execute_after.to_string(),
+            calls: value.calls.into_iter().map(JsCall::from).collect(),
+            nonce: value.nonce,
+        }
     }
 }
