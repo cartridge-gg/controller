@@ -2,7 +2,6 @@ import { Field } from "@cartridge/ui";
 import { Button } from "@chakra-ui/react";
 import {
   Container,
-  FOOTER_MIN_HEIGHT,
   Footer,
   Content,
 } from "components/layout";
@@ -106,7 +105,6 @@ export function Login({
   return (
     <Container
       variant="connect"
-      overflowY={error ? "auto" : undefined}
       title={
         theme.id === "cartridge"
           ? "Play with Cartridge Controller"
@@ -122,7 +120,7 @@ export function Login({
       >
         {(props) => (
           <FormikForm style={{ width: "100%" }}>
-            <Content pb={error ? FOOTER_MIN_HEIGHT : undefined}>
+            <Content>
               <FormikField
                 name="username"
                 placeholder="Username"
@@ -131,13 +129,20 @@ export function Login({
                 {({ field, meta, form }) => (
                   <Field
                     {...field}
+                    onChange={(e) => {
+                      setError(undefined)
+                      field.onChange(e)
+                    }}
                     autoFocus
                     placeholder="Username"
                     touched={meta.touched}
                     error={meta.error}
                     isLoading={props.isValidating}
                     isDisabled={isLoading}
-                    onClear={() => form.setFieldValue(field.name, "")}
+                    onClear={() => {
+                      setError(undefined)
+                      form.setFieldValue(field.name, "")
+                    }}
                   />
                 )}
               </FormikField>
