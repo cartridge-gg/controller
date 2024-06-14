@@ -1,12 +1,11 @@
-import type { NextPage } from "next";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { useUrlTxns } from "hooks/transaction";
 import { Transaction, TransactionState } from "components/Transaction";
 import { TimerDuoIcon } from "@cartridge/ui";
-import { Container, PortalBanner } from "components";
+import { Container, Content } from "components/layout";
 
-const Pending: NextPage = () => {
+function Pending() {
   const [txnResults, setTxnResults] = useState<TransactionState[]>([]);
   const [title, setTitle] = useState("Pending...");
   const [description, setDescription] = useState("This may take a second");
@@ -30,14 +29,8 @@ const Pending: NextPage = () => {
   }, [txnResults, txns]);
 
   return (
-    <>
-      <Container chainId={chainId}>
-        <PortalBanner
-          Icon={TimerDuoIcon}
-          title={title}
-          description={description}
-        />
-
+    <Container Icon={TimerDuoIcon} title={title} description={description}>
+      <Content>
         {[...txns, { name: "name", hash: "hash" }].map((txn, idx) => (
           <Transaction
             key={idx}
@@ -49,9 +42,9 @@ const Pending: NextPage = () => {
             }}
           />
         ))}
-      </Container>
-    </>
+      </Content>
+    </Container>
   );
-};
+}
 
 export default dynamic(() => Promise.resolve(Pending), { ssr: false });

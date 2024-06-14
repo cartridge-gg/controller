@@ -4,8 +4,9 @@ import {
   AccountQueryVariables,
 } from "generated/graphql";
 import { fetchData } from "hooks/fetcher";
+import { AuthAction } from "./Authenticate";
 
-export function validateUsernameFor(type: "signup" | "login") {
+export function validateUsernameFor(type: AuthAction) {
   return async (val: string) => {
     if (!val) {
       return "Username required";

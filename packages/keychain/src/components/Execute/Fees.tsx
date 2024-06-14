@@ -10,7 +10,7 @@ import {
 
 import { constants } from "starknet";
 import { formatUnits } from "viem";
-import { Error } from "components/Error";
+import { useChainId } from "hooks/connection";
 
 async function fetchEthPrice() {
   const res = await fetch(process.env.NEXT_PUBLIC_API_URL, {
@@ -25,17 +25,16 @@ async function fetchEthPrice() {
 
 export function Fees({
   error,
-  chainId,
   fees,
   balance,
   approved,
 }: {
   error: Error;
-  chainId: string;
   fees?: { base: bigint; max: bigint };
   balance: string;
   approved?: string;
 }) {
+  const chainId = useChainId();
   const [formattedFee, setFormattedFee] = useState<{
     base: string;
     max: string;
@@ -80,7 +79,6 @@ export function Fees({
 
   return (
     <>
-      <Error error={error} />
       <VStack
         w="full"
         overflow="hidden"

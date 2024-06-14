@@ -1,12 +1,11 @@
 import { Field } from "@cartridge/ui";
-import { VStack, Button } from "@chakra-ui/react";
-import { Container } from "../Container";
-import { Form as FormikForm, Field as FormikField, Formik } from "formik";
+import { Button } from "@chakra-ui/react";
 import {
-  PORTAL_FOOTER_MIN_HEIGHT,
-  PortalBanner,
-  PortalFooter,
-} from "components";
+  Container,
+  Footer,
+  Content,
+} from "components/layout";
+import { Form as FormikForm, Field as FormikField, Formik } from "formik";
 import { useCallback, useState } from "react";
 import Controller from "utils/controller";
 import { FormValues, LoginMode, LoginProps } from "./types";
@@ -15,8 +14,8 @@ import { fetchAccount, validateUsernameFor } from "./utils";
 import { RegistrationLink } from "./RegistrationLink";
 import { useControllerTheme } from "hooks/theme";
 import { doLogin } from "hooks/account";
-import { Error as ErrorComp } from "components/Error";
 import { useConnection } from "hooks/connection";
+import { ErrorAlert } from "components/ErrorAlert";
 
 export function Login({
   prefilledName = "",
@@ -30,7 +29,7 @@ export function Login({
   const theme = useControllerTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [expiresAt] = useState<bigint>(3000000000n);
-  const [error, setError] = useState();
+  const [error, setError] = useState<Error>();
 
   const onSubmit = useCallback(
     async (values: FormValues) => {
@@ -104,7 +103,15 @@ export function Login({
   );
 
   return (
-    <Container chainId={chainId} overflowY={error ? "auto" : undefined}>
+    <Container
+      variant="connect"
+      title={
+        theme.id === "cartridge"
+          ? "Play with Cartridge Controller"
+          : `Play ${theme.name}`
+      }
+      description="Enter your Controller username"
+    >
       <Formik
         initialValues={{ username: prefilledName }}
         onSubmit={onSubmit}
@@ -113,19 +120,7 @@ export function Login({
       >
         {(props) => (
           <FormikForm style={{ width: "100%" }}>
-            <PortalBanner
-              title={
-                theme.id === "cartridge"
-                  ? "Play with Cartridge Controller"
-                  : `Play ${theme.name}`
-              }
-              description="Enter your Controller username"
-            />
-
-            <VStack
-              align="stretch"
-              pb={error ? PORTAL_FOOTER_MIN_HEIGHT : undefined}
-            >
+            <Content>
               <FormikField
                 name="username"
                 placeholder="Username"
@@ -134,21 +129,29 @@ export function Login({
                 {({ field, meta, form }) => (
                   <Field
                     {...field}
+                    onChange={(e) => {
+                      setError(undefined)
+                      field.onChange(e)
+                    }}
                     autoFocus
                     placeholder="Username"
                     touched={meta.touched}
                     error={meta.error}
                     isLoading={props.isValidating}
                     isDisabled={isLoading}
-                    onClear={() => form.setFieldValue(field.name, "")}
+                    onClear={() => {
+                      setError(undefined)
+                      form.setFieldValue(field.name, "")
+                    }}
                   />
                 )}
               </FormikField>
+            </Content>
 
-              <ErrorComp error={error} />
-            </VStack>
-
-            <PortalFooter origin={origin} policies={policies} isSlot={isSlot}>
+            <Footer isSlot={isSlot} createSession>
+              {error && (
+                <ErrorAlert title="Login failed" description={error.message} />
+              )}
               <Button
                 type="submit"
                 colorScheme="colorful"
@@ -162,7 +165,7 @@ export function Login({
               >
                 Sign up
               </RegistrationLink>
-            </PortalFooter>
+            </Footer>
           </FormikForm>
         )}
       </Formik>

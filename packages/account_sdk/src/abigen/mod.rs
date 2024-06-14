@@ -1,6 +1,6 @@
 #[allow(warnings)]
 #[allow(non_snake_case)]
-pub mod cartridge_account;
+pub mod controller;
 
 #[allow(warnings)]
 #[allow(non_snake_case)]

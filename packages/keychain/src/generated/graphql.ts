@@ -1099,7 +1099,7 @@ export type Contract = Node & {
   cover?: Maybe<File>;
   coverID?: Maybe<Scalars["ID"]>;
   createdAt: Scalars["Time"];
-  deployTransaction?: Maybe<Transaction>;
+  deployTransactionID?: Maybe<Scalars["String"]>;
   description?: Maybe<Scalars["String"]>;
   game?: Maybe<Game>;
   gameID?: Maybe<Scalars["ID"]>;
@@ -1267,6 +1267,22 @@ export type ContractWhereInput = {
   createdAtLTE?: InputMaybe<Scalars["Time"]>;
   createdAtNEQ?: InputMaybe<Scalars["Time"]>;
   createdAtNotIn?: InputMaybe<Array<Scalars["Time"]>>;
+  /** deploy_transaction_id field predicates */
+  deployTransactionID?: InputMaybe<Scalars["String"]>;
+  deployTransactionIDContains?: InputMaybe<Scalars["String"]>;
+  deployTransactionIDContainsFold?: InputMaybe<Scalars["String"]>;
+  deployTransactionIDEqualFold?: InputMaybe<Scalars["String"]>;
+  deployTransactionIDGT?: InputMaybe<Scalars["String"]>;
+  deployTransactionIDGTE?: InputMaybe<Scalars["String"]>;
+  deployTransactionIDHasPrefix?: InputMaybe<Scalars["String"]>;
+  deployTransactionIDHasSuffix?: InputMaybe<Scalars["String"]>;
+  deployTransactionIDIn?: InputMaybe<Array<Scalars["String"]>>;
+  deployTransactionIDIsNil?: InputMaybe<Scalars["Boolean"]>;
+  deployTransactionIDLT?: InputMaybe<Scalars["String"]>;
+  deployTransactionIDLTE?: InputMaybe<Scalars["String"]>;
+  deployTransactionIDNEQ?: InputMaybe<Scalars["String"]>;
+  deployTransactionIDNotIn?: InputMaybe<Array<Scalars["String"]>>;
+  deployTransactionIDNotNil?: InputMaybe<Scalars["Boolean"]>;
   /** description field predicates */
   description?: InputMaybe<Scalars["String"]>;
   descriptionContains?: InputMaybe<Scalars["String"]>;
@@ -1311,9 +1327,6 @@ export type ContractWhereInput = {
   /** cover edge predicates */
   hasCover?: InputMaybe<Scalars["Boolean"]>;
   hasCoverWith?: InputMaybe<Array<FileWhereInput>>;
-  /** deploy_transaction edge predicates */
-  hasDeployTransaction?: InputMaybe<Scalars["Boolean"]>;
-  hasDeployTransactionWith?: InputMaybe<Array<TransactionWhereInput>>;
   /** game edge predicates */
   hasGame?: InputMaybe<Scalars["Boolean"]>;
   hasGameWith?: InputMaybe<Array<GameWhereInput>>;
@@ -1395,7 +1408,6 @@ export type ContractWhereInput = {
 export type CreateKatanaConfigInput = {
   accounts?: InputMaybe<Scalars["Int"]>;
   blockTime?: InputMaybe<Scalars["Int"]>;
-  chainId?: InputMaybe<Scalars["String"]>;
   disableFee?: InputMaybe<Scalars["Boolean"]>;
   forkBlockNumber?: InputMaybe<Scalars["Long"]>;
   forkRpcUrl?: InputMaybe<Scalars["String"]>;
@@ -2346,11 +2358,18 @@ export type HasValueInput = {
   value: Scalars["String"];
 };
 
+export type KatanaAccount = {
+  __typename?: "KatanaAccount";
+  address: Scalars["String"];
+  privateKey: Scalars["String"];
+  publicKey: Scalars["String"];
+};
+
 export type KatanaConfig = {
   __typename?: "KatanaConfig";
-  accounts?: Maybe<Scalars["Int"]>;
+  accounts?: Maybe<Array<KatanaAccount>>;
   blockTime?: Maybe<Scalars["Int"]>;
-  chainId?: Maybe<Scalars["String"]>;
+  chainId: Scalars["String"];
   disableFee?: Maybe<Scalars["Boolean"]>;
   forkBlockNumber?: Maybe<Scalars["Long"]>;
   forkRpcUrl?: Maybe<Scalars["String"]>;
@@ -4144,7 +4163,6 @@ export type Transaction = Node & {
   contract: Contract;
   contractID: Scalars["ID"];
   createdAt?: Maybe<Scalars["Time"]>;
-  deployedContract?: Maybe<Contract>;
   entryPointSelector?: Maybe<Scalars["String"]>;
   estimatedFee?: Maybe<Scalars["String"]>;
   events?: Maybe<Array<Event>>;
@@ -4417,9 +4435,6 @@ export type TransactionWhereInput = {
   /** contract edge predicates */
   hasContract?: InputMaybe<Scalars["Boolean"]>;
   hasContractWith?: InputMaybe<Array<ContractWhereInput>>;
-  /** deployed_contract edge predicates */
-  hasDeployedContract?: InputMaybe<Scalars["Boolean"]>;
-  hasDeployedContractWith?: InputMaybe<Array<ContractWhereInput>>;
   /** events edge predicates */
   hasEvents?: InputMaybe<Scalars["Boolean"]>;
   hasEventsWith?: InputMaybe<Array<EventWhereInput>>;
@@ -4624,112 +4639,6 @@ export type AccountInfoQuery = {
   } | null;
 };
 
-export type AccountQuestsQueryVariables = Exact<{
-  accountId: Scalars["ID"];
-  gameId?: InputMaybe<Scalars["ID"]>;
-}>;
-
-export type AccountQuestsQuery = {
-  __typename?: "Query";
-  quests?: {
-    __typename?: "QuestConnection";
-    edges?: Array<{
-      __typename?: "QuestEdge";
-      node?: {
-        __typename?: "Quest";
-        id: string;
-        title: string;
-        description: string;
-        points: any;
-        game: { __typename?: "Game"; id: string };
-        metadata?: {
-          __typename?: "QuestMetadata";
-          callToAction?: {
-            __typename?: "QuestCallToAction";
-            text?: string | null;
-            url?: string | null;
-            redirect?: boolean | null;
-          } | null;
-        } | null;
-        rewards: {
-          __typename?: "TokenConnection";
-          edges?: Array<{
-            __typename?: "TokenEdge";
-            node?: { __typename?: "Token"; id: string } | null;
-          } | null> | null;
-        };
-        parent?: { __typename?: "Quest"; id: string; title: string } | null;
-        discordGuild?: Array<{
-          __typename?: "DiscordGuild";
-          id: string;
-        }> | null;
-        twitterQuests?: Array<{
-          __typename?: "TwitterQuest";
-          id: string;
-        }> | null;
-        questEvents?: Array<{
-          __typename?: "QuestEvent";
-          id: string;
-          description?: string | null;
-        }> | null;
-      } | null;
-    } | null> | null;
-  } | null;
-  account?: {
-    __typename?: "Account";
-    questProgression: {
-      __typename?: "AccountQuestConnection";
-      edges?: Array<{
-        __typename?: "AccountQuestEdge";
-        node?: {
-          __typename?: "AccountQuest";
-          questID: string;
-          completed: boolean;
-          claimed: boolean;
-          completedAt?: any | null;
-          claimTransaction?: {
-            __typename?: "Transaction";
-            transactionHash: string;
-          } | null;
-          completion?: Array<{
-            __typename?: "CompletionCriteria";
-            questEvent: string;
-            completed: boolean;
-          } | null> | null;
-        } | null;
-      } | null> | null;
-    };
-  } | null;
-};
-
-export type ClaimQuestRewardsMutationVariables = Exact<{
-  accountId: Scalars["ID"];
-  questId: Scalars["ID"];
-}>;
-
-export type ClaimQuestRewardsMutation = {
-  __typename?: "Mutation";
-  claimQuestRewards: any;
-};
-
-export type CheckDiscordQuestsMutationVariables = Exact<{
-  accountId: Scalars["ID"];
-}>;
-
-export type CheckDiscordQuestsMutation = {
-  __typename?: "Mutation";
-  checkDiscordQuests: boolean;
-};
-
-export type CheckTwitterQuestsMutationVariables = Exact<{
-  accountId: Scalars["ID"];
-}>;
-
-export type CheckTwitterQuestsMutation = {
-  __typename?: "Mutation";
-  checkTwitterQuests: boolean;
-};
-
 export type BalanceQueryVariables = Exact<{
   tokenAccountId: Scalars["ID"];
 }>;
@@ -4762,14 +4671,7 @@ export type FinalizeRegistrationMutation = {
       __typename?: "ContractConnection";
       edges?: Array<{
         __typename?: "ContractEdge";
-        node?: {
-          __typename?: "Contract";
-          id: string;
-          deployTransaction?: {
-            __typename?: "Transaction";
-            transactionHash: string;
-          } | null;
-        } | null;
+        node?: { __typename?: "Contract"; id: string } | null;
       } | null> | null;
     };
   };
@@ -4783,14 +4685,7 @@ export type DeployAccountMutationVariables = Exact<{
 
 export type DeployAccountMutation = {
   __typename?: "Mutation";
-  deployAccount: {
-    __typename?: "Contract";
-    id: string;
-    deployTransaction?: {
-      __typename?: "Transaction";
-      transactionHash: string;
-    } | null;
-  };
+  deployAccount: { __typename?: "Contract"; id: string };
 };
 
 export type AccountQueryVariables = Exact<{
@@ -4862,92 +4757,6 @@ export type MeQuery = {
   me?: { __typename?: "Account"; id: string } | null;
 };
 
-export type StarterPackQueryVariables = Exact<{
-  id: Scalars["ID"];
-}>;
-
-export type StarterPackQuery = {
-  __typename?: "Query";
-  game?: {
-    __typename?: "Game";
-    id: string;
-    name: string;
-    description: string;
-    socials: {
-      __typename?: "Socials";
-      discord?: string | null;
-      twitter?: string | null;
-      website?: string | null;
-    };
-    icon?: { __typename?: "File"; uri: string } | null;
-    profilePicture?: {
-      __typename?: "File";
-      uri: string;
-      alt?: string | null;
-    } | null;
-    banner?: { __typename?: "File"; uri: string; alt?: string | null } | null;
-    starterPack?: {
-      __typename?: "StarterPack";
-      id: string;
-      name?: string | null;
-      description?: string | null;
-      chainID: any;
-      issuance: number;
-      maxIssuance?: number | null;
-      starterPackFungibles?: Array<{
-        __typename?: "StarterPackContract";
-        amount?: any | null;
-        contract: {
-          __typename?: "Contract";
-          id: string;
-          name?: string | null;
-          description?: string | null;
-          priority: number;
-        };
-      }> | null;
-      starterPackTokens?: Array<{
-        __typename?: "StarterPackToken";
-        amount?: any | null;
-        token: {
-          __typename?: "Token";
-          tokenID: any;
-          contract: { __typename?: "Contract"; priority: number };
-          metadata?: {
-            __typename?: "Metadata";
-            name?: string | null;
-            description?: string | null;
-          } | null;
-          thumbnail?: { __typename?: "File"; uri: string } | null;
-        };
-      }> | null;
-      prerequisitesQuests?: Array<{
-        __typename?: "Quest";
-        id: string;
-        title: string;
-        parent?: { __typename?: "Quest"; id: string } | null;
-        metadata?: {
-          __typename?: "QuestMetadata";
-          callToAction?: {
-            __typename?: "QuestCallToAction";
-            text?: string | null;
-            url?: string | null;
-          } | null;
-        } | null;
-      }> | null;
-    } | null;
-  } | null;
-};
-
-export type ClaimStarterpackMutationVariables = Exact<{
-  id: Scalars["ID"];
-  account: Scalars["ID"];
-}>;
-
-export type ClaimStarterpackMutation = {
-  __typename?: "Mutation";
-  claimStarterpack?: string | null;
-};
-
 export type AccountContractQueryVariables = Exact<{
   id: Scalars["ID"];
 }>;
@@ -4957,14 +4766,7 @@ export type AccountContractQuery = {
   contract?: {
     __typename?: "Contract";
     id: string;
-    deployTransaction?: {
-      __typename?: "Transaction";
-      id: string;
-      receipt?: {
-        __typename?: "TransactionReceipt";
-        status: TransactionReceiptStatus;
-      } | null;
-    } | null;
+    deployTransactionID?: string | null;
   } | null;
 };
 
@@ -5016,195 +4818,6 @@ useInfiniteAccountInfoQuery.getKey = (variables: AccountInfoQueryVariables) => [
   "AccountInfo.infinite",
   variables,
 ];
-export const AccountQuestsDocument = `
-    query AccountQuests($accountId: ID!, $gameId: ID) {
-  quests(where: {hasGameWith: {id: $gameId}}) {
-    edges {
-      node {
-        id
-        title
-        description
-        game {
-          id
-        }
-        points
-        metadata {
-          callToAction {
-            text
-            url
-            redirect
-          }
-        }
-        rewards {
-          edges {
-            node {
-              id
-            }
-          }
-        }
-        parent {
-          id
-          title
-        }
-        discordGuild {
-          id
-        }
-        twitterQuests {
-          id
-        }
-        questEvents {
-          id
-          description
-        }
-      }
-    }
-  }
-  account(id: $accountId) {
-    questProgression {
-      edges {
-        node {
-          questID
-          completed
-          claimed
-          completedAt
-          claimTransaction {
-            transactionHash
-          }
-          completion {
-            questEvent
-            completed
-          }
-        }
-      }
-    }
-  }
-}
-    `;
-export const useAccountQuestsQuery = <
-  TData = AccountQuestsQuery,
-  TError = unknown,
->(
-  variables: AccountQuestsQueryVariables,
-  options?: UseQueryOptions<AccountQuestsQuery, TError, TData>,
-) =>
-  useQuery<AccountQuestsQuery, TError, TData>(
-    ["AccountQuests", variables],
-    useFetchData<AccountQuestsQuery, AccountQuestsQueryVariables>(
-      AccountQuestsDocument,
-    ).bind(null, variables),
-    options,
-  );
-
-useAccountQuestsQuery.getKey = (variables: AccountQuestsQueryVariables) => [
-  "AccountQuests",
-  variables,
-];
-export const useInfiniteAccountQuestsQuery = <
-  TData = AccountQuestsQuery,
-  TError = unknown,
->(
-  variables: AccountQuestsQueryVariables,
-  options?: UseInfiniteQueryOptions<AccountQuestsQuery, TError, TData>,
-) => {
-  const query = useFetchData<AccountQuestsQuery, AccountQuestsQueryVariables>(
-    AccountQuestsDocument,
-  );
-  return useInfiniteQuery<AccountQuestsQuery, TError, TData>(
-    ["AccountQuests.infinite", variables],
-    (metaData) => query({ ...variables, ...(metaData.pageParam ?? {}) }),
-    options,
-  );
-};
-
-useInfiniteAccountQuestsQuery.getKey = (
-  variables: AccountQuestsQueryVariables,
-) => ["AccountQuests.infinite", variables];
-export const ClaimQuestRewardsDocument = `
-    mutation ClaimQuestRewards($accountId: ID!, $questId: ID!) {
-  claimQuestRewards(accountId: $accountId, questId: $questId)
-}
-    `;
-export const useClaimQuestRewardsMutation = <
-  TError = unknown,
-  TContext = unknown,
->(
-  options?: UseMutationOptions<
-    ClaimQuestRewardsMutation,
-    TError,
-    ClaimQuestRewardsMutationVariables,
-    TContext
-  >,
-) =>
-  useMutation<
-    ClaimQuestRewardsMutation,
-    TError,
-    ClaimQuestRewardsMutationVariables,
-    TContext
-  >(
-    ["ClaimQuestRewards"],
-    useFetchData<ClaimQuestRewardsMutation, ClaimQuestRewardsMutationVariables>(
-      ClaimQuestRewardsDocument,
-    ),
-    options,
-  );
-export const CheckDiscordQuestsDocument = `
-    mutation CheckDiscordQuests($accountId: ID!) {
-  checkDiscordQuests(accountId: $accountId)
-}
-    `;
-export const useCheckDiscordQuestsMutation = <
-  TError = unknown,
-  TContext = unknown,
->(
-  options?: UseMutationOptions<
-    CheckDiscordQuestsMutation,
-    TError,
-    CheckDiscordQuestsMutationVariables,
-    TContext
-  >,
-) =>
-  useMutation<
-    CheckDiscordQuestsMutation,
-    TError,
-    CheckDiscordQuestsMutationVariables,
-    TContext
-  >(
-    ["CheckDiscordQuests"],
-    useFetchData<
-      CheckDiscordQuestsMutation,
-      CheckDiscordQuestsMutationVariables
-    >(CheckDiscordQuestsDocument),
-    options,
-  );
-export const CheckTwitterQuestsDocument = `
-    mutation CheckTwitterQuests($accountId: ID!) {
-  checkTwitterQuests(accountId: $accountId)
-}
-    `;
-export const useCheckTwitterQuestsMutation = <
-  TError = unknown,
-  TContext = unknown,
->(
-  options?: UseMutationOptions<
-    CheckTwitterQuestsMutation,
-    TError,
-    CheckTwitterQuestsMutationVariables,
-    TContext
-  >,
-) =>
-  useMutation<
-    CheckTwitterQuestsMutation,
-    TError,
-    CheckTwitterQuestsMutationVariables,
-    TContext
-  >(
-    ["CheckTwitterQuests"],
-    useFetchData<
-      CheckTwitterQuestsMutation,
-      CheckTwitterQuestsMutationVariables
-    >(CheckTwitterQuestsDocument),
-    options,
-  );
 export const BalanceDocument = `
     query balance($tokenAccountId: ID!) {
   balance(id: $tokenAccountId) {
@@ -5284,9 +4897,6 @@ export const FinalizeRegistrationDocument = `
       edges {
         node {
           id
-          deployTransaction {
-            transactionHash
-          }
         }
       }
     }
@@ -5321,9 +4931,6 @@ export const DeployAccountDocument = `
     mutation DeployAccount($id: ID!, $chainId: ChainID!, $starterpackIds: [ID!]) {
   deployAccount(id: $id, chainId: $chainId, starterpackIds: $starterpackIds) {
     id
-    deployTransaction {
-      transactionHash
-    }
   }
 }
     `;
@@ -5558,152 +5165,11 @@ export const useInfiniteMeQuery = <TData = MeQuery, TError = unknown>(
 
 useInfiniteMeQuery.getKey = (variables?: MeQueryVariables) =>
   variables === undefined ? ["Me.infinite"] : ["Me.infinite", variables];
-export const StarterPackDocument = `
-    query StarterPack($id: ID!) {
-  game(id: $id) {
-    id
-    name
-    description
-    socials {
-      discord
-      twitter
-      website
-    }
-    icon {
-      uri
-    }
-    profilePicture {
-      uri
-      alt
-    }
-    banner {
-      uri
-      alt
-    }
-    starterPack {
-      id
-      name
-      description
-      chainID
-      issuance
-      maxIssuance
-      starterPackFungibles {
-        contract {
-          id
-          name
-          description
-          priority
-        }
-        amount
-      }
-      starterPackTokens {
-        token {
-          tokenID
-          contract {
-            priority
-          }
-          metadata {
-            name
-            description
-          }
-          thumbnail {
-            uri
-          }
-        }
-        amount
-      }
-      prerequisitesQuests {
-        id
-        title
-        parent {
-          id
-        }
-        metadata {
-          callToAction {
-            text
-            url
-          }
-        }
-      }
-    }
-  }
-}
-    `;
-export const useStarterPackQuery = <TData = StarterPackQuery, TError = unknown>(
-  variables: StarterPackQueryVariables,
-  options?: UseQueryOptions<StarterPackQuery, TError, TData>,
-) =>
-  useQuery<StarterPackQuery, TError, TData>(
-    ["StarterPack", variables],
-    useFetchData<StarterPackQuery, StarterPackQueryVariables>(
-      StarterPackDocument,
-    ).bind(null, variables),
-    options,
-  );
-
-useStarterPackQuery.getKey = (variables: StarterPackQueryVariables) => [
-  "StarterPack",
-  variables,
-];
-export const useInfiniteStarterPackQuery = <
-  TData = StarterPackQuery,
-  TError = unknown,
->(
-  variables: StarterPackQueryVariables,
-  options?: UseInfiniteQueryOptions<StarterPackQuery, TError, TData>,
-) => {
-  const query = useFetchData<StarterPackQuery, StarterPackQueryVariables>(
-    StarterPackDocument,
-  );
-  return useInfiniteQuery<StarterPackQuery, TError, TData>(
-    ["StarterPack.infinite", variables],
-    (metaData) => query({ ...variables, ...(metaData.pageParam ?? {}) }),
-    options,
-  );
-};
-
-useInfiniteStarterPackQuery.getKey = (variables: StarterPackQueryVariables) => [
-  "StarterPack.infinite",
-  variables,
-];
-export const ClaimStarterpackDocument = `
-    mutation ClaimStarterpack($id: ID!, $account: ID!) {
-  claimStarterpack(starterpackId: $id, account: $account)
-}
-    `;
-export const useClaimStarterpackMutation = <
-  TError = unknown,
-  TContext = unknown,
->(
-  options?: UseMutationOptions<
-    ClaimStarterpackMutation,
-    TError,
-    ClaimStarterpackMutationVariables,
-    TContext
-  >,
-) =>
-  useMutation<
-    ClaimStarterpackMutation,
-    TError,
-    ClaimStarterpackMutationVariables,
-    TContext
-  >(
-    ["ClaimStarterpack"],
-    useFetchData<ClaimStarterpackMutation, ClaimStarterpackMutationVariables>(
-      ClaimStarterpackDocument,
-    ),
-    options,
-  );
 export const AccountContractDocument = `
     query AccountContract($id: ID!) {
   contract(id: $id) {
     id
-    deployTransaction {
-      id
-      receipt {
-        status
-      }
-    }
+    deployTransactionID
   }
 }
     `;
