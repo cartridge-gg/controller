@@ -20,6 +20,7 @@ import { useControllerTheme } from "hooks/theme";
 import { shortString } from "starknet";
 import { useConnection } from "hooks/connection";
 import { useDebounce } from "hooks/debounce";
+import { ErrorAlert } from "components/ErrorAlert";
 
 export function Signup({
   prefilledName = "",
@@ -124,8 +125,10 @@ function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
       },
     },
   );
+  const [error, setError] = useState<Error>();
 
   const onSubmit = useCallback(() => {
+    setError(undefined);
     setIsRegistering(true);
 
     const searchParams = new URLSearchParams(window.location.search);
@@ -149,7 +152,7 @@ function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
 
     doSignup(decodeURIComponent(username)).catch((e) => {
       setErrors({ username: e.message });
-    });
+    }).finally(() => setIsRegistering(false));
   }, [username, setErrors]);
 
   return (
@@ -163,7 +166,12 @@ function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
               placeholder="Username"
               touched={meta.touched}
               error={meta.error || errors?.username}
+              onChange={(e) => {
+                setError(undefined)
+                field.onChange(e)
+              }}
               onClear={() => {
+                setError(undefined)
                 form.setFieldValue(field.name, "");
                 setErrors(undefined);
               }}
@@ -173,6 +181,10 @@ function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
       </Content>
 
       <Footer isSlot={isSlot} createSession>
+        {error && (
+          <ErrorAlert title="Login failed" description={error.message} />
+        )}
+
         <Button
           colorScheme="colorful"
           isLoading={isRegistering}
