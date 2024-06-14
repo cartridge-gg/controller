@@ -68,10 +68,11 @@ export function DeploymentRequired({
         <Content alignItems="center">
           {status === Status.DEPLOYING && (
             <Link
-              href={`https://${account.chainId === constants.StarknetChainId.SN_SEPOLIA
-                ? "sepolia."
-                : undefined
-                }starkscan.co/tx/${deployHash}`}
+              href={`https://${
+                account.chainId === constants.StarknetChainId.SN_SEPOLIA
+                  ? "sepolia."
+                  : undefined
+              }starkscan.co/tx/${deployHash}`}
               isExternal
             >
               <Button variant="link" mt={10} rightIcon={<ExternalIcon />}>

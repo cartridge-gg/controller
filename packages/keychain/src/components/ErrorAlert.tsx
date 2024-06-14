@@ -1,4 +1,4 @@
-import { AlertIcon, WedgeDownIcon } from "@cartridge/ui";
+import { AlertIcon } from "@cartridge/ui";
 import {
   Text,
   Accordion,
@@ -51,7 +51,7 @@ export function ErrorAlert({
         </AccordionButton>
 
         {description && (
-          <AccordionPanel>
+          <AccordionPanel maxH={200}>
             <Text color="solid.bg">{description}</Text>
           </AccordionPanel>
         )}

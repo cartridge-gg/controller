@@ -15,8 +15,8 @@ import { fetchAccount, validateUsernameFor } from "./utils";
 import { RegistrationLink } from "./RegistrationLink";
 import { useControllerTheme } from "hooks/theme";
 import { doLogin } from "hooks/account";
-import { Error as ErrorComp } from "components/Error";
 import { useConnection } from "hooks/connection";
+import { ErrorAlert } from "components/ErrorAlert";
 
 export function Login({
   prefilledName = "",
@@ -30,7 +30,7 @@ export function Login({
   const theme = useControllerTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [expiresAt] = useState<bigint>(3000000000n);
-  const [error, setError] = useState();
+  const [error, setError] = useState<Error>();
 
   const onSubmit = useCallback(
     async (values: FormValues) => {
@@ -141,11 +141,12 @@ export function Login({
                   />
                 )}
               </FormikField>
-
-              <ErrorComp error={error} />
             </Content>
 
             <Footer isSlot={isSlot} createSession>
+              {error && (
+                <ErrorAlert title="Login failed" description={error.message} />
+              )}
               <Button
                 type="submit"
                 colorScheme="colorful"

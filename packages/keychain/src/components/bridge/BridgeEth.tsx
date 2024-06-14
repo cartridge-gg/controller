@@ -26,7 +26,6 @@ import { TransferButton } from "./TransferButton";
 import { TxnTracker } from "./Transactions";
 import { Label } from "./Label";
 import Controller from "utils/controller";
-import { Error } from "components/Error";
 import {
   CheckIcon,
   EthereumDuoIcon,
@@ -35,6 +34,7 @@ import {
   WedgeDownIcon,
 } from "@cartridge/ui";
 import { Container, Content } from "components/layout";
+import { ErrorAlert } from "components/ErrorAlert";
 
 export function BridgeEth({
   chainId,
@@ -213,12 +213,7 @@ export function BridgeEth({
 
           <Flex w="full" gap={2.5} direction="column">
             {errorMessage && !debouncing && (
-              <Error
-                error={{
-                  name: "Wallet error",
-                  message: errorMessage,
-                }}
-              />
+              <ErrorAlert title="Wallet error" description={errorMessage} />
             )}
 
             <TransferButton
