@@ -10,7 +10,6 @@ import {
 
 import { constants } from "starknet";
 import { formatUnits } from "viem";
-import { Error } from "components/Error";
 import { useChainId } from "hooks/connection";
 
 async function fetchEthPrice() {
@@ -80,7 +79,6 @@ export function Fees({
 
   return (
     <>
-      <Error error={error} />
       <VStack
         w="full"
         overflow="hidden"

@@ -27,11 +27,11 @@ export function ErrorAlert({
       animate={{ height: "auto" }}
       allowToggle
       variant="error"
-      color="text.primary"
+      color="solid.bg"
       fontSize="sm"
     >
       <AccordionItem position="relative">
-        <AccordionButton disabled={!description}>
+        <AccordionButton disabled={!description} color="solid.bg">
           <HStack>
             <AlertIcon />
             <Text
@@ -46,12 +46,13 @@ export function ErrorAlert({
 
           <Spacer />
 
-          {description && <AccordionIcon boxSize={5} />}
+          {/* color does not seems to be applied */}
+          {description && <AccordionIcon boxSize={5} color="solid.bg" />}
         </AccordionButton>
 
         {description && (
-          <AccordionPanel borderTop="1px solid" borderColor="translucent.soft">
-            <Text color="inherit">{description}</Text>
+          <AccordionPanel maxH={200}>
+            <Text color="solid.bg">{description}</Text>
           </AccordionPanel>
         )}
       </AccordionItem>
