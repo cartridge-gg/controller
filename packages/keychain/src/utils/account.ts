@@ -172,14 +172,18 @@ class Account extends BaseAccount {
       transactionsDetail.nonce ?? (await this.getNonce("pending"));
     transactionsDetail.maxFee = num.toHex(transactionsDetail.maxFee);
 
-    const res = await this.cartridge.execute(calls as Array<Call>, transactionsDetail, session);
+    const res = await this.cartridge.execute(
+      calls as Array<Call>,
+      transactionsDetail,
+      session,
+    );
 
     await this.cartridge.executeFromOutside({
       caller: shortString.encodeShortString("ANY_CALLER"),
       executeBefore: "3000000000",
       executeAfter: "0",
       calls: calls as Array<Call>,
-      nonce: stark.randomAddress()
+      nonce: stark.randomAddress(),
     });
 
     Storage.update(this.selector, {
