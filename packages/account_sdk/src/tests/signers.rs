@@ -1,6 +1,6 @@
 use crate::{
     abigen::{
-        cartridge_account::{CartridgeAccountReader, SignerType},
+        controller::{ControllerReader, SignerType},
         erc_20::Erc20,
     },
     account::CartridgeAccount,
@@ -28,7 +28,7 @@ pub async fn test_deploy_owner_type<S: HashSigner + Clone>(
     let runner = KatanaRunner::load();
     let address = deploy_helper(&runner, &signer, None as Option<&SigningKey>).await;
 
-    let reader = CartridgeAccountReader::new(address, runner.client());
+    let reader = ControllerReader::new(address, runner.client());
 
     let owner_type = reader
         .get_owner_type()

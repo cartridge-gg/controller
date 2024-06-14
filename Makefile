@@ -17,20 +17,20 @@ generate_artifacts:
 	mkdir -p ${store}
 
 	jq . ${build}CartridgeAccount${sierra} > ${store}controller${sierra}
-	jq . ${build}ERC20${sierra} > ${store}erc20${sierra}
+	jq . ${build}ERC20Upgradeable${sierra} > ${store}erc20${sierra}
 
 	cp ${build}CartridgeAccount${compiled} ${store}controller${compiled}
-	cp ${build}ERC20${compiled} ${store}erc20${compiled}
+	cp ${build}ERC20Upgradeable${compiled} ${store}erc20${compiled}
 
-	cainome --artifacts-path packages/account_sdk/compiled --parser-config packages/account_sdk/parser_config.json --output-dir packages/account_sdk/src/abigen --rust
+	cainome --artifacts-path packages/account_sdk/compiled --parser-config packages/account_sdk/parser_config.json --output-dir packages/account_sdk/src/abigen --rust&& cargo fmt -p account_sdk
 
 deploy-katana:
 	@set -x; \
-	erc20_class=$$(starkli class-hash ${build}ERC20${sierra}); \
+	erc20_class=$$(starkli class-hash ${build}ERC20Upgradeable${sierra}); \
 	account_class=$$(starkli class-hash ${build}Account${sierra}); \
 	starkli declare ${build}Account${sierra} ${config}; \
 	starkli deploy "$${account_class}" ${test_pubkey} --salt 0x1234 ${config}; \
-	starkli declare ${build}ERC20${sierra} ${config}; \
+	starkli declare ${build}ERC20Upgradeable${sierra} ${config}; \
 	starkli deploy "$${erc20_class}" str:token str:tkn u256:1 ${katana_0} --salt 0x1234 ${config};
 
 test-session: generate_artifacts
