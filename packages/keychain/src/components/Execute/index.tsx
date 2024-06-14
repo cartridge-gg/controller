@@ -151,7 +151,7 @@ export function Execute({
         <VStack spacing="1px" w="full" borderRadius="md" bg="solid.primary">
           <VStack w="full" p={3} align="flex-start">
             <Text fontSize="xs" fontWeight="bold" color="text.secondaryAccent">
-              Actions
+              Transaction Details
             </Text>
           </VStack>
 
