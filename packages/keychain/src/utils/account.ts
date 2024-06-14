@@ -178,8 +178,6 @@ class Account extends BaseAccount {
       session,
     );
 
-    await this.cartridge.executeFromOutside(calls as Array<Call>, session);
-
     Storage.update(this.selector, {
       nonce: (BigInt(transactionsDetail.nonce) + 1n).toString(),
     });

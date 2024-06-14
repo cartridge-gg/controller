@@ -72,6 +72,21 @@ export function executeFactory({
         });
       }
 
+      // Try execute from outside for fee subsized transactions
+      try {
+        const res = await this.cartridge.executeFromOutside(
+          calls as Array<Call>,
+          session,
+        );
+
+        return {
+          code: ResponseCodes.SUCCESS,
+          ...res,
+        };
+      } catch (e) {
+        /* do nothing */
+      }
+
       if (!transactionsDetail.maxFee) {
         try {
           const estFee = await account.estimateInvokeFee(calls, {

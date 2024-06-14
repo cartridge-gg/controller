@@ -102,7 +102,7 @@ impl CartridgeAccount {
             .into_iter()
             .map(AllowedMethod::try_from_js_value)
             .collect::<Result<Vec<AllowedMethod>>>()?;
-        
+
         let signer = SigningKey::from_random();
         let session = Session::new(methods, expires_at, &signer.signer())?;
 
@@ -183,9 +183,14 @@ impl CartridgeAccount {
             self.account.sign_outside_execution(outside.clone()).await?
         };
 
-        PaymasterRequest::send(self.rpc_url.clone(), outside.into(), signed.signature)
-            .await?
-            .error_for_status()?;
+        PaymasterRequest::send(
+            self.rpc_url.clone(),
+            outside.into(),
+            self.account.chain_id(),
+            signed.signature,
+        )
+        .await?
+        .error_for_status()?;
 
         Ok(())
     }

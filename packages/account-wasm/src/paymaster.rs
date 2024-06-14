@@ -22,6 +22,7 @@ struct JsonRpcRequest<T> {
 #[serde(rename_all = "camelCase")]
 struct OutsideExecutionParams {
     outside_execution: JsOutsideExecution,
+    chain_id: FieldElement,
     signature: Vec<FieldElement>,
 }
 
@@ -29,6 +30,7 @@ impl PaymasterRequest {
     pub async fn send(
         rpc_url: Url,
         outside_execution: JsOutsideExecution,
+        chain_id: FieldElement,
         signature: Vec<FieldElement>,
     ) -> Result<Response> {
         let request = JsonRpcRequest {
@@ -37,6 +39,7 @@ impl PaymasterRequest {
             method: "cartridge_addExecuteOutsideTransaction",
             params: OutsideExecutionParams {
                 outside_execution,
+                chain_id,
                 signature,
             },
         };

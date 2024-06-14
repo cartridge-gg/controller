@@ -424,15 +424,6 @@ export function __wbindgen_error_new(arg0, arg1) {
     return addHeapObject(ret);
 };
 
-export function __wbindgen_string_get(arg0, arg1) {
-    const obj = getObject(arg1);
-    const ret = typeof(obj) === 'string' ? obj : undefined;
-    var ptr1 = isLikeNone(ret) ? 0 : passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    var len1 = WASM_VECTOR_LEN;
-    getInt32Memory0()[arg0 / 4 + 1] = len1;
-    getInt32Memory0()[arg0 / 4 + 0] = ptr1;
-};
-
 export function __wbindgen_cb_drop(arg0) {
     const obj = takeObject(arg0).original;
     if (obj.cnt-- == 1) {
@@ -441,6 +432,15 @@ export function __wbindgen_cb_drop(arg0) {
     }
     const ret = false;
     return ret;
+};
+
+export function __wbindgen_string_get(arg0, arg1) {
+    const obj = getObject(arg1);
+    const ret = typeof(obj) === 'string' ? obj : undefined;
+    var ptr1 = isLikeNone(ret) ? 0 : passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    var len1 = WASM_VECTOR_LEN;
+    getInt32Memory0()[arg0 / 4 + 1] = len1;
+    getInt32Memory0()[arg0 / 4 + 0] = ptr1;
 };
 
 export function __wbindgen_is_object(arg0) {
@@ -935,7 +935,7 @@ export function __wbindgen_memory() {
     return addHeapObject(ret);
 };
 
-export function __wbindgen_closure_wrapper1302(arg0, arg1, arg2) {
+export function __wbindgen_closure_wrapper1303(arg0, arg1, arg2) {
     const ret = makeMutClosure(arg0, arg1, 419, __wbg_adapter_40);
     return addHeapObject(ret);
 };
