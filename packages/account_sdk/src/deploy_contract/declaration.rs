@@ -1,17 +1,20 @@
 use std::sync::Arc;
 
 use starknet::{
-    accounts::{Account, SingleOwnerAccount},
+    accounts::ConnectedAccount,
     core::types::contract::{CompiledClass, SierraClass},
     providers::{JsonRpcClient, Provider},
-    signers::Signer,
 };
 
 use super::pending::PendingDeclaration;
 
-pub const SIERRA_STR: &str = include_str!("../../compiled/controller.contract_class.json");
+pub const SIERRA_STR: &str = include_str!("../../compiled/cartridge_account.contract_class.json");
 // We can store only the class_hash and thus te casm_str would not be needed but for now it is
-pub const CASM_STR: &str = include_str!("../../compiled/controller.compiled_contract_class.json");
+pub const CASM_STR: &str =
+    include_str!("../../compiled/cartridge_account.compiled_contract_class.json");
+
+pub const ERC_20_SIERRA_STR: &str = include_str!("../../compiled/erc20.contract_class.json");
+pub const ERC_20_CASM_STR: &str = include_str!("../../compiled/erc20.compiled_contract_class.json");
 
 pub struct AccountDeclaration<'a, T> {
     contract_artifact: SierraClass,
@@ -35,7 +38,7 @@ impl<'a, T> AccountDeclaration<'a, T> {
             client,
         }
     }
-    pub fn controller(client: &'a JsonRpcClient<T>) -> Self
+    pub fn cartridge_account(client: &'a JsonRpcClient<T>) -> Self
     where
         T: Send + Sync,
         &'a JsonRpcClient<T>: Provider,
@@ -46,18 +49,28 @@ impl<'a, T> AccountDeclaration<'a, T> {
             client,
         )
     }
+    pub fn erc_20(client: &'a JsonRpcClient<T>) -> Self
+    where
+        T: Send + Sync,
+        &'a JsonRpcClient<T>: Provider,
+    {
+        Self::new(
+            serde_json::from_str(ERC_20_SIERRA_STR).unwrap(),
+            serde_json::from_str(ERC_20_CASM_STR).unwrap(),
+            client,
+        )
+    }
 }
 
 impl<'a, T> AccountDeclaration<'a, T> {
-    pub async fn declare<P, S>(
+    pub async fn declare<P>(
         self,
-        account: &SingleOwnerAccount<P, S>,
+        account: &(impl ConnectedAccount + Send + Sync),
     ) -> Result<PendingDeclaration<'a, T>, String>
     where
         T: Send + Sync,
         &'a JsonRpcClient<T>: Provider,
         P: Provider + Send + Sync,
-        S: Signer + Send + Sync,
     {
         let casm_class_hash = self
             .compiled_class

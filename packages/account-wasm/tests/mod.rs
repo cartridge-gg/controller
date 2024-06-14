@@ -1,4 +1,4 @@
-use account_sdk::signers::webauthn::{DeviceSigner, P256r1Signer, WebauthnAccountSigner};
+use account_sdk::signers::webauthn::{DeviceSigner, InternalWebauthnSigner, WebauthnAccountSigner};
 use starknet::macros::felt;
 use wasm_bindgen_test::*;
 
@@ -27,7 +27,7 @@ async fn test_webauth_wasm() {
     // let client_data = String::from_utf8(args.client_data_json).unwrap();
     // console::log_1(&client_data.into());
 
-    let signer = P256r1Signer::random(origin.to_string(), rp_id);
+    let signer = InternalWebauthnSigner::random(origin.to_string(), rp_id);
     let _ = signer.sign(&challenge_bytes).await.unwrap();
 
     // let args = VerifyWebauthnSignerArgs::from_response(

@@ -2,7 +2,10 @@ use cainome::cairo_serde::CairoSerde;
 use starknet::macros::{selector, short_string};
 use starknet_crypto::{poseidon_hash_many, FieldElement};
 
-use crate::abigen::controller::SignerSignature;
+use crate::{
+    abigen::cartridge_account::SignerSignature,
+    hash::{MessageHashRev1, StarknetDomain, StructHashRev1},
+};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RawSession {
@@ -12,22 +15,24 @@ pub struct RawSession {
     pub(crate) session_key_guid: FieldElement,
 }
 
-impl RawSession {
-    fn session_type_hash_rev_1() -> FieldElement {
-        selector!(
-            "\"Session\"(\"Expires At\":\"timestamp\",\"Allowed Methods\":\"merkletree\",\"Metadata\":\"string\",\"Session Key\":\"felt\")"
-        )
-    }
+impl StructHashRev1 for RawSession {
     fn get_struct_hash_rev_1(&self) -> FieldElement {
         poseidon_hash_many(&[
-            Self::session_type_hash_rev_1(),
+            Self::TYPE_HASH_REV_1,
             self.expires_at.into(),
             self.allowed_methods_root,
             self.metadata_hash,
             self.session_key_guid,
         ])
     }
-    pub fn get_message_hash_rev_1(
+
+    const TYPE_HASH_REV_1: FieldElement = selector!(
+        "\"Session\"(\"Expires At\":\"timestamp\",\"Allowed Methods\":\"merkletree\",\"Metadata\":\"string\",\"Session Key\":\"felt\")"
+    );
+}
+
+impl MessageHashRev1 for RawSession {
+    fn get_message_hash_rev_1(
         &self,
         chain_id: FieldElement,
         contract_address: FieldElement,
@@ -43,31 +48,6 @@ impl RawSession {
             domain.get_struct_hash_rev_1(),
             contract_address,
             self.get_struct_hash_rev_1(),
-        ])
-    }
-}
-
-#[derive(Clone, Debug, PartialEq)]
-struct StarknetDomain {
-    name: FieldElement,
-    version: FieldElement,
-    chain_id: FieldElement,
-    revision: FieldElement,
-}
-
-impl StarknetDomain {
-    fn session_type_hash_rev_1() -> FieldElement {
-        selector!(
-            "\"StarknetDomain\"(\"name\":\"shortstring\",\"version\":\"shortstring\",\"chainId\":\"shortstring\",\"revision\":\"shortstring\")"
-        )
-    }
-    fn get_struct_hash_rev_1(&self) -> FieldElement {
-        poseidon_hash_many(&[
-            Self::session_type_hash_rev_1(),
-            self.name,
-            self.version,
-            self.chain_id,
-            self.revision,
         ])
     }
 }

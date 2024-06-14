@@ -1,60 +1,29 @@
 use starknet::{
-    accounts::{Account, Call, ConnectedAccount, SingleOwnerAccount},
-    core::types::{BlockId, BlockTag, DeclareTransactionResult, FieldElement},
-    macros::{felt, selector},
+    accounts::{ConnectedAccount, SingleOwnerAccount},
+    core::types::{DeclareTransactionResult, FieldElement},
+    macros::felt,
     providers::{jsonrpc::HttpTransport, JsonRpcClient},
-    signers::{LocalWallet, SigningKey},
+    signers::LocalWallet,
 };
 
 use super::runners::katana_runner::KatanaRunner;
-use crate::abigen::controller::{self, Controller, Signer, StarknetSigner};
-use crate::deploy_contract::{
-    single_owner_account, AccountDeclaration, DeployResult, FEE_TOKEN_ADDRESS,
+use crate::{
+    abigen::cartridge_account::{self, CartridgeAccount, Signer, StarknetSigner},
+    signers::HashSigner,
+};
+use crate::{
+    abigen::erc_20::Erc20,
+    deploy_contract::{AccountDeclaration, DeployResult, FEE_TOKEN_ADDRESS},
 };
 use crate::{deploy_contract::AccountDeployment, tests::runners::TestnetRunner};
-use cainome::cairo_serde::{CairoSerde, NonZero};
-
-pub async fn create_account<'a>(
-    from: &SingleOwnerAccount<&'a JsonRpcClient<HttpTransport>, LocalWallet>,
-) -> (
-    SingleOwnerAccount<&'a JsonRpcClient<HttpTransport>, LocalWallet>,
-    SigningKey,
-) {
-    let provider = *from.provider();
-    let class_hash = declare(provider, from).await;
-    let private_key = SigningKey::from_random();
-
-    let signer = Signer::Starknet(StarknetSigner {
-        pubkey: NonZero::new(private_key.verifying_key().scalar()).unwrap(),
-    });
-
-    let deployed_address = deploy(provider, from, signer, None, class_hash).await;
-
-    let mut created = single_owner_account(provider, private_key.clone(), deployed_address).await;
-    created.set_block_id(BlockId::Tag(BlockTag::Latest));
-
-    from.execute(vec![Call {
-        to: *FEE_TOKEN_ADDRESS,
-        selector: selector!("transfer"),
-        calldata: vec![
-            created.address(),
-            felt!("100000000000000000000"),
-            felt!("0x0"),
-        ],
-    }])
-    .send()
-    .await
-    .unwrap();
-
-    (created, private_key)
-}
+use cainome::cairo_serde::{CairoSerde, ContractAddress, NonZero, U256};
 
 pub async fn declare(
     client: &JsonRpcClient<HttpTransport>,
-    account: &SingleOwnerAccount<&JsonRpcClient<HttpTransport>, LocalWallet>,
+    account: &(impl ConnectedAccount + Send + Sync),
 ) -> FieldElement {
-    let DeclareTransactionResult { class_hash, .. } = AccountDeclaration::controller(client)
-        .declare(account)
+    let DeclareTransactionResult { class_hash, .. } = AccountDeclaration::cartridge_account(client)
+        .declare::<JsonRpcClient<HttpTransport>>(account)
         .await
         .unwrap()
         .wait_for_completion()
@@ -70,7 +39,7 @@ pub async fn deploy(
     guardian: Option<Signer>,
     class_hash: FieldElement,
 ) -> FieldElement {
-    let mut constructor_calldata = controller::Signer::cairo_serialize(&owner);
+    let mut constructor_calldata = cartridge_account::Signer::cairo_serialize(&owner);
     constructor_calldata.extend(Option::<Signer>::cairo_serialize(&guardian));
     let DeployResult {
         deployed_address, ..
@@ -86,6 +55,74 @@ pub async fn deploy(
         .wait_for_completion()
         .await;
     deployed_address
+}
+
+pub async fn deploy_helper<R: TestnetRunner, S: HashSigner + Clone, G: HashSigner + Clone>(
+    runner: &R,
+    signer: &S,
+    guardian: Option<&G>,
+) -> FieldElement {
+    let prefunded = runner.prefunded_single_owner_account().await;
+    let class_hash = declare(runner.client(), &prefunded).await;
+
+    deploy(
+        runner.client(),
+        &prefunded,
+        signer.signer(),
+        guardian.map(|g| g.signer()),
+        class_hash,
+    )
+    .await
+}
+
+pub async fn deploy_two_helper<
+    R: TestnetRunner,
+    S1: HashSigner + Clone,
+    G1: HashSigner + Clone,
+    S2: HashSigner + Clone,
+    G2: HashSigner + Clone,
+>(
+    runner: &R,
+    (signer_1, guardian_1): (&S1, Option<&G1>),
+    (signer_2, guardian_2): (&S2, Option<&G2>),
+) -> (FieldElement, FieldElement) {
+    let prefunded = runner.prefunded_single_owner_account().await;
+    let class_hash = declare(runner.client(), &prefunded).await;
+
+    let account_1 = deploy(
+        runner.client(),
+        &prefunded,
+        signer_1.signer(),
+        guardian_1.map(|g| g.signer()),
+        class_hash,
+    )
+    .await;
+    let account_2 = deploy(
+        runner.client(),
+        &prefunded,
+        signer_2.signer(),
+        guardian_2.map(|g| g.signer()),
+        class_hash,
+    )
+    .await;
+    (account_1, account_2)
+}
+
+pub async fn transfer_helper<R: TestnetRunner>(runner: &R, address: &FieldElement) {
+    let prefunded = runner.prefunded_single_owner_account().await;
+    let erc20_prefunded = Erc20::new(*FEE_TOKEN_ADDRESS, prefunded);
+
+    erc20_prefunded
+        .transfer(
+            &ContractAddress(*address),
+            &U256 {
+                low: 0x8944000000000000_u128,
+                high: 0,
+            },
+        )
+        .send()
+        .await
+        .unwrap();
 }
 
 #[tokio::test]
@@ -117,6 +154,6 @@ async fn test_deploy_and_call() {
     });
     let deployed_address = deploy(client, &account, signer, None, class_hash).await;
 
-    let contract = Controller::new(deployed_address, account);
+    let contract = CartridgeAccount::new(deployed_address, account);
     contract.get_owner().call().await.unwrap();
 }

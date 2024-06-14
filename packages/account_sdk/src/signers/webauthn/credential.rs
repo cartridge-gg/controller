@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-use crate::abigen::controller::Signature;
+use crate::abigen::cartridge_account::Signature;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct CliendData {

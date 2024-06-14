@@ -1,4 +1,4 @@
-use crate::abigen::controller::{Signature, WebauthnSigner};
+use crate::abigen::cartridge_account::{Signature, WebauthnSigner};
 use async_trait::async_trait;
 use cainome::cairo_serde::{NonZero, U256};
 use ecdsa::RecoveryId;
@@ -16,13 +16,13 @@ use super::{
 use super::WebauthnAccountSigner;
 
 #[derive(Debug, Clone)]
-pub struct P256r1Signer {
+pub struct InternalWebauthnSigner {
     pub signing_key: SigningKey,
     rp_id: String,
     pub origin: String,
 }
 
-impl P256r1Signer {
+impl InternalWebauthnSigner {
     pub fn new(rp_id: String, signing_key: SigningKey, origin: String) -> Self {
         Self {
             rp_id,
@@ -59,7 +59,7 @@ impl P256r1Signer {
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl WebauthnAccountSigner for P256r1Signer {
+impl WebauthnAccountSigner for InternalWebauthnSigner {
     async fn sign(&self, challenge: &[u8]) -> Result<AuthenticatorAssertionResponse, SignError> {
         use sha2::{digest::Update, Digest, Sha256};
 

@@ -5,11 +5,8 @@ use crate::{
         CartridgeGuardianAccount,
     },
     deploy_contract::FEE_TOKEN_ADDRESS,
-    signers::{webauthn::P256r1Signer, HashSigner},
-    tests::{
-        deployment_test::{declare, deploy},
-        runners::{katana_runner::KatanaRunner, TestnetRunner},
-    },
+    signers::{webauthn::InternalWebauthnSigner, HashSigner},
+    tests::runners::{katana_runner::KatanaRunner, TestnetRunner},
 };
 use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{
@@ -18,42 +15,8 @@ use starknet::{
     providers::Provider,
     signers::SigningKey,
 };
-use starknet_crypto::FieldElement;
 
-async fn deploy_helper<R: TestnetRunner, S: HashSigner + Clone, G: HashSigner + Clone>(
-    runner: &R,
-    signer: &S,
-    guardian: &G,
-) -> FieldElement {
-    let prefunded = runner.prefunded_single_owner_account().await;
-    let class_hash = declare(runner.client(), &prefunded).await;
-
-    deploy(
-        runner.client(),
-        &prefunded,
-        signer.signer(),
-        Some(guardian.signer()),
-        class_hash,
-    )
-    .await
-}
-
-async fn transfer_helper<R: TestnetRunner>(runner: &R, address: &FieldElement) {
-    let prefunded = runner.prefunded_single_owner_account().await;
-    let erc20_prefunded = Erc20::new(*FEE_TOKEN_ADDRESS, prefunded);
-
-    erc20_prefunded
-        .transfer(
-            &ContractAddress(*address),
-            &U256 {
-                low: 0x8944000000000000_u128,
-                high: 0,
-            },
-        )
-        .send()
-        .await
-        .unwrap();
-}
+use super::deployment_test::{deploy_helper, transfer_helper};
 
 pub async fn test_verify_execute<
     S: HashSigner + Clone + Sync + Send,
@@ -65,7 +28,7 @@ pub async fn test_verify_execute<
     session_signer: Q,
 ) {
     let runner = KatanaRunner::load();
-    let address = deploy_helper(&runner, &signer, &guardian).await;
+    let address = deploy_helper(&runner, &signer, Some(&guardian)).await;
 
     transfer_helper(&runner, &address).await;
 
@@ -117,7 +80,7 @@ pub async fn test_verify_execute<
 #[tokio::test]
 async fn test_verify_execute_session_webauthn_starknet_starknet() {
     test_verify_execute(
-        P256r1Signer::random("localhost".to_string(), "rp_id".to_string()),
+        InternalWebauthnSigner::random("localhost".to_string(), "rp_id".to_string()),
         SigningKey::from_random(),
         SigningKey::from_random(),
     )
@@ -128,9 +91,9 @@ async fn test_verify_execute_session_webauthn_starknet_starknet() {
 #[tokio::test]
 async fn test_verify_execute_session_webauthn_starknet_webauthn() {
     test_verify_execute(
-        P256r1Signer::random("localhost".to_string(), "rp_id".to_string()),
+        InternalWebauthnSigner::random("localhost".to_string(), "rp_id".to_string()),
         SigningKey::from_random(),
-        P256r1Signer::random("localhost".to_string(), "rp_id".to_string()),
+        InternalWebauthnSigner::random("localhost".to_string(), "rp_id".to_string()),
     )
     .await;
 }

@@ -4,8 +4,9 @@ use starknet::core::utils::{get_selector_from_name, NonAsciiNameError};
 use starknet::macros::selector;
 use starknet_crypto::{poseidon_hash_many, poseidon_permute_comp, FieldElement};
 
-use crate::abigen::controller::Signer;
+use crate::abigen::cartridge_account::Signer;
 
+use crate::hash::MessageHashRev1;
 use crate::signers::{SignError, SignerTrait};
 
 use super::merkle::MerkleTree;

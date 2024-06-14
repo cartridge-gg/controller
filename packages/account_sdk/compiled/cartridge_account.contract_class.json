@@ -333,7 +333,7 @@
     "0x137",
     "0x6f776e65722d6e6f742d666f756e64",
     "0x1bc",
-    "0x1ff20c1b9fc017bc98394811a2148828b5aa6f49fe458c445ba3aebf98672f6",
+    "0x2357ea821d49219ffc8a005ce1f3ce41806adece53bc0c962cef8d4fd3024ab",
     "0x13a",
     "0x753235365f737562204f766572666c6f77",
     "0x553132384d756c47756172616e746565",
@@ -362,18 +362,18 @@
     "0x696e76616c69642d6368616c6c656e6765",
     "0x75385f616464204f766572666c6f77",
     "0x696e76616c69642d757365722d666c616773",
-    "0xdee600d88abbe3015dacf1de7f46b1ecd4b5b4c45e5a3495e6d9f2cd79acb5",
+    "0x95f9af7c9f016704f83caa62215635895d97a59b590be4af16027ddbb35ce",
     "0x157",
-    "0x2d2cd740e0b96248253a3d4781ab839058a450486cfbc5875cfe39acad15715",
+    "0x20da773c996e3e4e57e5bec0aa6e9c0fd85e6eb27e3fcc62a83ce4ee4f5d609",
     "0x159",
-    "0xe46e162f283715bff40d609883392a5adf192f7859b23fe027a1ec3476cefc",
+    "0x1da0da5407ba5ab2dc0852d68fa54b4ab1d0e8b8ebbc9b534b37c97ae1f5726",
     "0x15a",
     "0x80000000000000070000000000000000000000000000000e",
-    "0x6b086cf4eada82c368f17cb7242bb9288a189704f7b2f7f8af7318eb98eb5c",
-    "0x371462b763e09d5b4cd4da2b60a746babd17bd0e6325b87c413e9b22b5fa3ed",
+    "0x3585da0365fd584a6a74b18a61491e5cc513ab7e2276f8c6bf099b02a611dab",
+    "0x3713a62c2fecb7bcbdb90ecd73ed0d081198dca15d96c12cd6508c718a819d9",
     "0x15c",
     "0x15d",
-    "0x3cce7362bb62dd82a2197c32e572eb232d1f1c6398bda66f0396be0017dc53b",
+    "0x12f5d3de19da97d4e94fd1085d298df7913bd8399d8311b486ac8ee236aab2e",
     "0x15e",
     "0x22f0fa46620d4e0a147eaeba6c45cb3a6f3b9b6e5db245f9630750b32652ab8",
     "0x5f",
@@ -412,23 +412,23 @@
     "0x73657373696f6e2f696e76616c69642d6163636f756e742d736967",
     "0x53657373696f6e2065787069726564",
     "0x4c656e677468206f662070726f6f6673206d69736d617463686564",
-    "0x278a61c0e5826a0665cc85d105443c3eb8da173ad094e3d07607439dc7c86eb",
-    "0x28dc486417d8af9898c4e5a579dc35d17ee44b79ba59f5f98c28e4ab1d70b8b",
+    "0x12f3fc793681d7d5acc42c0e58b0fe3b4bceb212f993bdeeff6b85f02645c7",
+    "0xfa448d65659ff5d3ea9cf5a96b49af29d8e16af7da413b924be7d2eec9bf4c",
     "0x182",
-    "0x3b0976bf99766ff2842d8ff3f364263bd00a49f82c70a97866d811e77914227",
+    "0x28e7538ffd97794debf833d9420c58f1d23e2bdc5146c0329b93c578e875872",
     "0x183",
     "0x184",
-    "0x63fe7ffc289269f18c75a0f2ed1a0ad61b2be88b273bcf71fd006ac49f9d3c",
+    "0xddb9c91d3d8a6ce4ca77ae5623eaed80dc76ae32145a50b554e55a91c31f19",
     "0x107a3e65b6e33d1b25fa00c80dfe693f414350005bc697782c25eaac141fedd",
     "0x186",
     "0x187",
-    "0x36f0c2ed8af4e07c34354445815632f497dde026ede86be86346543899b288f",
+    "0xa88225a9e0283bbf07eeee4a14ee2103e37c79c6665c9932926d9c119ac37b",
     "0x189",
     "0x800000000000000700000000000000000000000000000009",
-    "0x43460660022535da1908f8678811cc1b497040379dba19cf403cab4762235a",
+    "0x340c905959dac5fbe8f8c40c4a3bfe829a95d36922ac432e8ada39de4110d02",
     "0x18a",
     "0x18b",
-    "0x2db31b19e5788de13278144d0d475f2ce5e0e1b41cdd34acf4a3bee41bb54c8",
+    "0x35fd8f59ef3572a3dd9bbafd05192cc9c78d4a8a9dc7de5480a38962096cb71",
     "0x185",
     "0x188",
     "0x18c",
@@ -436,7 +436,7 @@
     "0x28f8d296e28032baef1f420f78ea9d933102ba47a50b1c5f80fc8a3a1041da",
     "0x18f",
     "0x800000000000000700000000000000000000000000000006",
-    "0x35eb2c618fdfe84c0115d45acfe88748be1047ebfb899616c22a2a3e5604e3b",
+    "0x24a195ceb577ab3ad8f22a2fe3f11ac5d1cb430cc1416b6412e970299781a6",
     "0x181",
     "0x18d",
     "0x190",
@@ -446,7 +446,7 @@
     "0x195",
     "0x143b49248950b13cd51495337deab12ad7cb3a805a29eff60266137d4794c42",
     "0x196",
-    "0x38dc10454ac7a7c20102179cd9b661ee801b309035d8e112772879991b750c9",
+    "0x34cddaaf3d6b43e32c1f63bbdfe341bfea40747206d71e0c74335e45776bc72",
     "0x6e6f2d6d756c746963616c6c2d746f2d73656c66",
     "0x1ff2f602e42168014d405a94f75e8a93d640751d71d16311266e140d8b0a210",
     "0x312b56c05a7965066ddbda31c016d8d05afc305071c0ca3cdc2192c3c2f1f0f",
@@ -468,8 +468,8 @@
     "0x302b4aa3237648863fc569a648f3625780753ababf66d86fd6f7e7bbc648c63",
     "0x114a7f68d7ddec6c5190387d6ad7af1548e987c5f152b940ee48c2618efd29b",
     "0x67753421a99564465b580dcc61f1e7befc7fd138c447dae233bba1d477458c",
-    "0x2f848284d06350a72286eb4ec07d996f783a2b4d3da1aee48058a2a6f8e4adf",
-    "0x2359336c3867f47c39316853ff81c09b6e5fe837f53a63fc4d88be37f96b748",
+    "0x27fab4c35e0054c35af7dff5b295b88a79e8fac7a1c50df9f31db28f3271beb",
+    "0x1d864f940277e74722fb95d9ccd0ce1e79eb00699ab1a2951deb30d4ddb5ef0",
     "0x10a4ad544c3e0608b1a9e1ff69b5fdc230bace25740547273d3877854c8b722",
     "0x1b2",
     "0x21133a377494b8d0d09028c44f433efe66b5daf28a351a5fbddd300cf24a859",
@@ -479,13 +479,13 @@
     "0x537461726b6e6574205369676e6572",
     "0x1746f7542cac71b5c88f0b2301e87cd9b0896dab1c83b8b515762697e521040",
     "0x1b9",
-    "0x1ddff015b55bb5afba07c17f59cf20e40f56e997bc461e27e26c897f1eedb12",
+    "0x13b4e369b825f37aab52d45df53d87b45ca08b49f5dbab9675d83b54ed8cb27",
     "0x1ba",
-    "0x8eeab0afd9d7bfc114415f8c850f988105431f58f270f9607f03e0b03fd716",
-    "0x193b1564fbaf82642eb2a34bb83fe8eb7f849cdf07d2fe9650d160c88237a75",
+    "0x34014f5e0a5fd99b0b1639ccf1fc758d8cf1ed64afc64fe70d214c6dc833ead",
+    "0x201042feffe5f74abadd856b279315a0d2cbcb51d64fb8512fbae24cdcc0de3",
     "0x1bb",
     "0x1bd",
-    "0x2e51e169f1e69a8044577d65c702ea7081f28f01f5114838274b379716dd2c0",
+    "0x339c1a9c426bff4d625da6ba1f9ca29ee642d8f20023d29e4482b630c1fee3c",
     "0x1be",
     "0x436f6e747261637441646472657373",
     "0x1c7",
@@ -504,8 +504,8 @@
     "0x30f87c80a9ff91f3ba0997da70c24279680d81f2429f998f2964b1a555ebb1a",
     "0x1cb",
     "0x15c8f6405cdeb9eaae2ed24a3495b29405ab2908ba280b6359f0ecb1500a893",
-    "0x387338d4f63ce7d93d39064317baac12633ac3f7ff98ea26577b3726ef06ad1",
-    "0x8bfc0a0a415618003719e1de423237051467ae50ce81505e18c6f03b9aa576",
+    "0x3448c050925434430dc903e743783a02d34b87744d93b82285ebce125e195e7",
+    "0x3af5719205764babecaaf54a6ea69f6e4a663ac3aa76280b9f037bfcfc8b734",
     "0x696e76616c69642d6f776e65722d736967",
     "0x696e76616c696420",
     "0x696e76616c69642d7369672d666f726d6174",
@@ -517,7 +517,7 @@
     "0x1d5",
     "0x2ce4352eafa6073ab4ecf9445ae96214f99c2c33a29c01fcae68ba501d10e2c",
     "0x1d7",
-    "0x2288a6a89dada35a101b0a8d88bfe814fba6532e3a359b9a688db84415b40ac",
+    "0x630ec805938efca43e29aad5e5560322899e98ac33eb3ef3bf518f843d3db7",
     "0x1d9",
     "0x185fda19bc33857e9f1d92d61312b69416f20cf740fa3993dcc2de228a6671d",
     "0x1db",
@@ -527,16 +527,16 @@
     "0x1c85cfe38772db9df99e2b01984abc87d868a6ed1abf1013cf120a0f3457fe1",
     "0x1df",
     "0x73657373696f6e2f696e76616c69642d6d616769632d76616c7565",
-    "0x1181d78f487b2a764db018f35faba23c5f9a14b91b3becc11041cc1682db757",
+    "0x12731c159cacdb8b6df365a9219dfe49d0b79b3a33c0e5ae5a1a6a6dbcc25b0",
     "0x800000000000000f00000000000000000000000000000002",
-    "0x3ab6fc0873248797de69f0001c155fcb85c8cbc5a2c1355aa032fe4883a6f49",
+    "0x17d262b21d62dbce879149ce9f24d8d841368a60c5198e83344599c3450ea6a",
     "0x1e2",
     "0x1e3",
-    "0x39af97a814ff581c77c2a665fc49798e7dbb9877aa66bf1703e87edd5010eb9",
+    "0x352966dfe3ecdb19ecf06e8781e623b460ab32d7cabec7c94397f3151c9109d",
     "0x1e4",
-    "0x1e2d095cee05e93aa3bb8032128e8368a6c1599003dea2b0423d775c309d8ec",
+    "0x2a0a27b84f1499af9652cd685aa83dc07ae5b6f91ac7ebb7dc8e00089b423be",
     "0x1e6",
-    "0xf7ae5f9e9e483dca3e41022931e4cea02b7d485c001958a3f535b5d44ebec5",
+    "0x234a34333a3f5e2ea15cd1e559f879cc8b805402df0b86ca0a4ac3d43829e46",
     "0x1e7",
     "0x212c0191d31f49f0f3dfb855d91d40f886e0cb5f1dac8834b67820dc5346a20",
     "0x1ea",
@@ -551,7 +551,7 @@
     "0x414e595f43414c4c4552",
     "0x2a594b95e3522276fe0ac7ac7a7e4ad8c47eaa6223bc0fd6991aa683b7ee495",
     "0x1f7",
-    "0x746b05def2f8fdb7c89ad1ffa1aed63cae60366b3e9be02436c976fb3660bd",
+    "0x3af97057171a4d1fabf14b6adf351a7adb5c41531f89c9eb2a9904342a208ef",
     "0x4163636f756e742e657865637574655f66726f6d5f6f757473696465",
     "0x537461726b4e6574204d657373616765",
     "0x200",
@@ -572,23 +572,23 @@
     "0x341d38eba34b7f63af136a2fa0264203bb537421424d8af22f13c0486c6bd62",
     "0x6f6e6c792d73656c66",
     "0x73657373696f6e2f616c72656164792d7265766f6b6564",
-    "0x4539183488166d705fdae1c3fe496c43cb571a328f8e7deb3d27520ee62a3a",
-    "0x31fe463048534a83cdf7bb6ad6660ae926c9baf36363ed903bd5edd57c4d852",
-    "0x214db10aa980ee6a46ac7de0f7eb71599e6e62f5efae422f2cec88555fb8a49",
-    "0x2f517c2aae113df7ef08e645fe398b6a55649c9f947d031edb66004dcd74e95",
+    "0x2bc7a08e7ab7e12609b390631fe58954996ca0cdb2174f3246b309fc5b8e03f",
+    "0xe446fffae799dc31e52de34db07ed149789d3d30c84332ee759b42fdbbbef8",
+    "0x261129b2a3a141ebb9b76340becd7ab8150297780612f5dee6c921e6784ba3f",
+    "0x428f31d5f1fca0ec7124adbb4cbd259444513cc9b2b3f1a590883fdfa57f2f",
     "0x20f",
-    "0x3bf392771372ef5ecae9935cd9f1bc7f67be1551d1ad426a3a4439dada64457",
-    "0x1a0dcaba848bdff9e5397bf0b001ec1c8f87acf8790f4b2799fa66a2b957178",
+    "0x17e1487fee3e4406893dfb2bb849a1b41e6c2e5a9d4e30ed53ee182d611b90b",
+    "0x2195796a623d9087c225d80df6d54ffa5d11b4ac36991e5ba622b099917935a",
     "0x211",
     "0x800000000000000700000000000000000000000000000007",
-    "0x1621e24832caf217b6e01484eca5091d136e080123612e109bfbb42f01f9ea5",
+    "0x26508e16b2fb3ae31b25927368774fcb2b8ef37bacf181caf02f7453e213d6",
     "0x20d",
     "0x20e",
     "0x210",
     "0x212",
     "0x1b1",
     "0x1b0",
-    "0x389c7cf1a1d49c20322326b3fa30021386968a7e17068a02177e4d79ce9c901",
+    "0x1bb81dffbdb34c93b98c09a990063ba7c4c3c2251e221a0c2933e1069b72d29",
     "0xcb225fab72ba716c11ed91a275ead37678197e582ac11d3b2ef895f8d3d209",
     "0x4163636f756e743a20756e617574686f72697a6564",
     "0x217",
@@ -601,20 +601,20 @@
     "0x21d",
     "0x556e696d706c656d656e746564207369676e65722074797065",
     "0x62797465733331",
-    "0x179dbfff6900e46277df3847de2e515627e934b8ba61e6b3813f23259ac840f",
-    "0x1b266b8be54812750339f69a13b9b45b8195bb6099c8fb608a6a6cd0cc65dda",
+    "0x282cf06175520c9be45a065e911ec2128cb90a8afac8b439874780a2e48ec25",
+    "0x14bb33b548a51fa944e65b9a140929a8c6f0fa4a2791e3740d50845f5c24564",
     "0x226",
-    "0x1a4ada30892d6735e8899156ba0086cb46bee82386fc40cb3a82ca34b4cc546",
+    "0x3140db4cef0d91a4ba3e027abd8f979b4671494f51d0ae63dca299c5aa4ea02",
     "0x227",
-    "0x958391e4cda6308b345ed50f8f11ed4e5ca2ef0ce982319b547f4d1f91d94f",
+    "0x3fc09e86607316a88d89d03e0fec487fe5a827dccc03f0f63a76841a3b63a0a",
     "0x229",
-    "0x3082393ce5d640aaf27f817ef3cd67177680665716fd22f8c2d60c808f39c50",
+    "0x3be85b355f936ab8b1d846d2fc1e24713552608719d4a7e0bdde207a2f6f2a2",
     "0x22a",
-    "0x230f62ce7038ee615eb691126d31fcfeaea7daec07a4b67d79f823ade813046",
+    "0x39f087bd91c276a406445d0d35d1dbc42c40e98b4a9396b5ab970cc78c53545",
     "0x22c",
-    "0x519a6f1a4263d0d5d354f005a358d57fc87ecd23fc23a938b9b9fa0adbafe8",
+    "0x13fe93db609d9b21b3fca5836784e5b01212092edd499936a673df907ac390e",
     "0x22d",
-    "0x3b80336ea2e057d898c1bcdd96c5205dcce7f11189eaf675d593e26f330e795",
+    "0x16a471e67f9f3240ea241a951dcf6e1029194a4167b3649e7d3ab6f32257884",
     "0xcc5e86243f861d2d64b08c35db21013e773ac5cf10097946fe0011304886d5",
     "0x231",
     "0x2268edf67b91950354fd1020241302474ef67970e8063160d48ee70c4e0da9e",
@@ -624,9 +624,9 @@
     "0x7a65726f2d7075626b6579",
     "0x696e76616c69642d7369676e61747572652d666f726d6174",
     "0x696e76616c69642d7369676e61747572652d6c656e677468",
-    "0x344f20987ae6d433bcd90c842fc0ec649738918bb4b6a120edacb2a7536ad7b",
+    "0x18a0f072cde96d4ad0ea86ba5b3d475c03ed83548e0f4f12331f96fb66572d3",
     "0x23c",
-    "0x31ae8cf873afb8502f67f0c62063fdeb1bc5cbb7f2f868e315318efaba5c4d",
+    "0x2df6648c5cf45867ab9f001d8ea4c18d4deea3a83aabd27e42f31d5c67c48d7",
     "0x23d",
     "0x1f5d91ca543c7f9a0585a1c8beffc7a207d4af73ee640223a154b1da196a40d",
     "0x241",
@@ -636,7 +636,7 @@
     "0x246",
     "0x100000000000000000000000000000001",
     "0x56414c4944",
-    "0x1d3040cbc98057328ba18f0b7ebbc070381309d8777f33d59b861217fcde1fc",
+    "0x2d9afce7430a8ba3c5d4c5645f65523de87f332b057c1d254e892a622d122f5",
     "0x24a",
     "0x73657373696f6e2d746f6b656e",
     "0x756e737570706f727465642d7061796d6173746572",
@@ -650,32 +650,32 @@
     "0x253",
     "0x8416421239ce8805ed9d27e6ddae62a97ab5d01883bb8f5246b4742a44b429",
     "0x254",
-    "0x22796c0d6a650acdaf7abbc18976cfa91b8683b7c958233d75464bda0d6abda",
-    "0x187e287aa444f06666b3a791824f77072eca7802471b4feec6e5117778f2993",
+    "0x3d519f30d1ed88861989e2913554c5a76e75762e9239464f373b733084233aa",
+    "0x206141fbadbe8578da7ac659272d05c518a8393bbc0e69d3a56d93e4faaa692",
     "0x256",
     "0x257",
-    "0xc5fb44287edb3b7934bf55053a0b8cc13f94e8af5da8f6e37f63f0381d6f9d",
+    "0x11d8a4bd13fc1bddfa783361c0ddc75daa3dd409206d4b631d1f96d4b939fe4",
     "0x258",
-    "0x1d6c11a27ab1d80358fb55a47ea72cb37daf1519f3975e4a2b01b6c141853bc",
+    "0xd77e87e3b4b725b3bb35183f996c9f980fb57a99c9bc1a59c31dd7b2f88b07",
     "0x25a",
     "0x1d1144bb2138366ff28d8e9ab57456b1d332ac42196230c3a602003c89872",
     "0x3f918d17e5ee77373b56385708f855659a07f75997f365cf87748628532a055",
     "0x32b90df821786fc0a5a5492c92e3241a5e680e5d53cd88c2bfdd094a70c90f5",
-    "0x1707cbd3f89370a5affb26fb29b402f4eb99ff82d334aa99a33978ef1a61f8d",
-    "0x2fad01acaa00d4c3f0241c0c071338c8770df4688e65e59471d16af2d0b936f",
+    "0x23e12790f1b5f8e29bf3704ae9de501b698ec89447d18a503d0232035f4e360",
+    "0x363b4cd3256be798b754a03c9d3e59435c2a236e029a24c29ab4e2e84d41da3",
     "0x260",
     "0x261",
-    "0x1f508ef45b753b6d638b97c23f85e21eefd53d9e4eb955ea3205cb9a1307878",
+    "0x2e2fc833bbf00484bab4fba571e84ed3a3b6f40f7ca7aa673632d34ff89d315",
     "0x262",
     "0x1d49f7a4b277bf7b55a2664ce8cef5d6922b5ffb806b89644b9e0cdbbcac378",
     "0x264",
     "0x13fdd7105045794a99550ae1c4ac13faa62610dfab62c16422bfcf5803baa6e",
     "0x265",
-    "0x3dfebc955212ba0c7d4b3a4bc7cf2903be13d8f72927dba4c8721692b53b2f1",
-    "0x18dba4d6e57fc43648611e5af5d1706f53a927172cd1f1224c7ac6be29f9914",
+    "0x1343e96e5bc48b35e37aa09405818eeba68d85cf6a2b2efe75921a3cc688757",
+    "0x2793e4d91bedc91ff22a4c3d6c593eb48950b0d12ada76800273b495f5c7569",
     "0x267",
     "0x268",
-    "0x138ec51536c49d15fafa67a12eadbcec55c1620e4fa89c6662a67a64d74b297",
+    "0x24d4f103ceefac8334d8dd74cccb89732d0383b2ecc32ad83a10d3cec115c1b",
     "0x269",
     "0x45634f70",
     "0x26d",
@@ -688,26 +688,26 @@
     "0xa853c166304d20fb0711becf2cbdf482dee3cac4e9717d040b7a7ab1df7eec",
     "0x275",
     "0x800000000000000f00000000000000000000000000000003",
-    "0x37e29a587e133b9b2bafb5475dbb9a447f2d864329caf14b210dec746f2f9ea",
+    "0xe15309a45076179e4c78d3fa797413c95264345f8aebd7a139d5bea9f3c49a",
     "0x277",
     "0x4661696c656420746f20646573657269616c697a6520706172616d202333",
     "0x6f6e6c795f67756964",
     "0x53746f7261676541646472657373",
     "0x53746f726167654261736541646472657373",
-    "0x2b23f1d00aec12304bb9b4b55f1b4d061b717555f0f4473423941aa83e1fad3",
-    "0x3a60bf31c3fd0a0f9de00d183de724829bca97d61825a4c2cabed2ea3d32f8e",
-    "0xdd18ca4118c7f8f231e7bcdbfb3b990e4d30340112e44788090ea62effba61",
+    "0x84826c0fbbe8e64df2d9795aa400c9e6abf4ee1dc40fe82813bce0b250eabe",
+    "0x2fe06eb01985bd78b209e8d159c5c51c7cf0f1ff0b03be63ee181b88491fede",
+    "0x2b0300bbb1525923b10b50b0ee014a4d2caf8b9853963b6cf12878b2fa189b5",
     "0x800000000000000f00000000000000000000000000000006",
-    "0x2017b2a1a899898ec9ffcdc0838e23269af948c978bb7cf9746ec66c0b650fe",
+    "0x2efb582cfec82e33e8830563ae6b05a447af32587719d14c50a17dfe7e11cb0",
     "0x282",
     "0x283",
     "0x284",
     "0x285",
-    "0x1f3886b5b09d01be9424f6d09e8ad8542a8d0a6f98eca8c9ceb62fff69d276e",
+    "0x118251b985063793ccd6b0c8d0940a2e1bd9eb3b8c037f56fe9585834844594",
     "0x286",
-    "0x2d60f05b80bec40b13caf5706c4ec260a4db40d992d7b69bd5f5f7aa3e7612",
+    "0x3b5e9ef0d45ce9fc1798cabd919cf3e748b1c8d35732249ea07b15f4817ee23",
     "0x288",
-    "0x203b1e6af7ddd4564c35a43b76b3229f60764dd45baf8d2a94ae1c66c6f0af",
+    "0x2459ac2f9b45e4f7d216de61b22db16e820ec87c63f1560e5fb19e1576bb289",
     "0x289",
     "0x4661696c656420746f20646573657269616c697a6520706172616d202332",
     "0x10203be321c62a7bd4c060d69539c1fbe065baa9e253c74d2cc48be163e259",
@@ -719,13 +719,13 @@
     "0x11c6d8087e00642489f92d2821ad6ebd6532ad1a3b6d12833da6d6810391511",
     "0x74584e9f10ffb1a40aa5a3582e203f6758defc4a497d1a2d5a89f274a320e9",
     "0x293",
-    "0x35b1d2e6efa1329668b64cbde2c6a8b9de11ee98e06a047411233d1cc82c495",
+    "0x1260a2edaa0c43fc3aa3a1f956a60c52abbdd3322e2c934ac5f7002c58039f3",
     "0x295",
     "0x53797374656d",
     "0x297",
     "0x4661696c656420746f20646573657269616c697a6520706172616d202331",
     "0x4f7574206f6620676173",
-    "0x6f349d1f3797997e489172ca04ee2bd06c7b33fe7822eba3ff9766789378c3",
+    "0xc211aac7af7939221d4353b8cd041d3921b141998a38efb8d0930c56468779",
     "0x29c",
     "0x4275696c74696e436f737473",
     "0x496e70757420746f6f206c6f6e6720666f7220617267756d656e7473",
@@ -15680,11 +15680,11 @@
       ],
       [
         314,
-        "Box<controller_auth::signer::SignerType>"
+        "Box<webauthn_auth::signer::SignerType>"
       ],
       [
         315,
-        "core::option::Option::<core::box::Box::<@controller_auth::signer::SignerType>>"
+        "core::option::Option::<core::box::Box::<@webauthn_auth::signer::SignerType>>"
       ],
       [
         316,
@@ -15796,39 +15796,39 @@
       ],
       [
         343,
-        "controller_auth::types::AuthenticatorData"
+        "webauthn_auth::types::AuthenticatorData"
       ],
       [
         344,
-        "Snapshot<controller_auth::types::AuthenticatorData>"
+        "Snapshot<webauthn_auth::types::AuthenticatorData>"
       ],
       [
         345,
-        "core::option::Option::<controller_auth::types::AuthenticatorData>"
+        "core::option::Option::<webauthn_auth::types::AuthenticatorData>"
       ],
       [
         346,
-        "Tuple<core::option::Option::<controller_auth::types::AuthenticatorData>>"
+        "Tuple<core::option::Option::<webauthn_auth::types::AuthenticatorData>>"
       ],
       [
         347,
-        "core::panics::PanicResult::<(core::option::Option::<controller_auth::types::AuthenticatorData>,)>"
+        "core::panics::PanicResult::<(core::option::Option::<webauthn_auth::types::AuthenticatorData>,)>"
       ],
       [
         348,
-        "controller_auth::errors::AuthnError"
+        "webauthn_auth::errors::AuthnError"
       ],
       [
         349,
-        "core::result::Result::<(), controller_auth::errors::AuthnError>"
+        "core::result::Result::<(), webauthn_auth::errors::AuthnError>"
       ],
       [
         350,
-        "Tuple<u32, core::result::Result::<(), controller_auth::errors::AuthnError>>"
+        "Tuple<u32, core::result::Result::<(), webauthn_auth::errors::AuthnError>>"
       ],
       [
         351,
-        "core::panics::PanicResult::<(core::integer::u32, core::result::Result::<(), controller_auth::errors::AuthnError>)>"
+        "core::panics::PanicResult::<(core::integer::u32, core::result::Result::<(), webauthn_auth::errors::AuthnError>)>"
       ],
       [
         352,
@@ -15964,7 +15964,7 @@
       ],
       [
         385,
-        "controller_session::interface::Session"
+        "webauthn_session::interface::Session"
       ],
       [
         386,
@@ -15972,19 +15972,19 @@
       ],
       [
         387,
-        "controller_auth::signer::StarknetSigner"
+        "webauthn_auth::signer::StarknetSigner"
       ],
       [
         388,
-        "controller_auth::signer::StarknetSignature"
+        "webauthn_auth::signer::StarknetSignature"
       ],
       [
         389,
-        "Tuple<controller_auth::signer::StarknetSigner, controller_auth::signer::StarknetSignature>"
+        "Tuple<webauthn_auth::signer::StarknetSigner, webauthn_auth::signer::StarknetSignature>"
       ],
       [
         390,
-        "controller_auth::signer::Secp256k1Signer"
+        "webauthn_auth::signer::Secp256k1Signer"
       ],
       [
         391,
@@ -15992,7 +15992,7 @@
       ],
       [
         392,
-        "Tuple<controller_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature>"
+        "Tuple<webauthn_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature>"
       ],
       [
         393,
@@ -16000,19 +16000,19 @@
       ],
       [
         394,
-        "controller_auth::signer::WebauthnSigner"
+        "webauthn_auth::signer::WebauthnSigner"
       ],
       [
         395,
-        "controller_auth::webauthn::WebauthnAssertion"
+        "webauthn_auth::webauthn::WebauthnAssertion"
       ],
       [
         396,
-        "Tuple<controller_auth::signer::WebauthnSigner, controller_auth::webauthn::WebauthnAssertion>"
+        "Tuple<webauthn_auth::signer::WebauthnSigner, webauthn_auth::webauthn::WebauthnAssertion>"
       ],
       [
         397,
-        "controller_auth::signer::SignerSignature"
+        "webauthn_auth::signer::SignerSignature"
       ],
       [
         398,
@@ -16028,11 +16028,11 @@
       ],
       [
         401,
-        "controller_session::interface::SessionToken"
+        "webauthn_session::interface::SessionToken"
       ],
       [
         402,
-        "Uninitialized<controller_session::interface::SessionToken>"
+        "Uninitialized<webauthn_session::interface::SessionToken>"
       ],
       [
         403,
@@ -16056,15 +16056,15 @@
       ],
       [
         408,
-        "core::option::Option::<controller_session::interface::Session>"
+        "core::option::Option::<webauthn_session::interface::Session>"
       ],
       [
         409,
-        "Uninitialized<controller_session::interface::Session>"
+        "Uninitialized<webauthn_session::interface::Session>"
       ],
       [
         410,
-        "Uninitialized<controller_auth::signer::SignerSignature>"
+        "Uninitialized<webauthn_auth::signer::SignerSignature>"
       ],
       [
         411,
@@ -16152,11 +16152,11 @@
       ],
       [
         432,
-        "controller::src5::src5_component::Event"
+        "cartridge_account::src5::src5_component::Event"
       ],
       [
         433,
-        "controller::outside_execution::outside_execution::outside_execution_component::Event"
+        "cartridge_account::outside_execution::outside_execution::outside_execution_component::Event"
       ],
       [
         434,
@@ -16188,31 +16188,31 @@
       ],
       [
         441,
-        "Array<controller_auth::signer::SignerType>"
+        "Array<webauthn_auth::signer::SignerType>"
       ],
       [
         442,
-        "Snapshot<Array<controller_auth::signer::SignerType>>"
+        "Snapshot<Array<webauthn_auth::signer::SignerType>>"
       ],
       [
         443,
-        "core::array::Span::<controller_auth::signer::SignerType>"
+        "core::array::Span::<webauthn_auth::signer::SignerType>"
       ],
       [
         444,
-        "controller_auth::signer::SignerType"
+        "webauthn_auth::signer::SignerType"
       ],
       [
         445,
-        "controller_auth::signer::SignerStorageValue"
+        "webauthn_auth::signer::SignerStorageValue"
       ],
       [
         446,
-        "Tuple<core::array::Span::<controller_auth::signer::SignerType>, controller_auth::signer::SignerStorageValue>"
+        "Tuple<core::array::Span::<webauthn_auth::signer::SignerType>, webauthn_auth::signer::SignerStorageValue>"
       ],
       [
         447,
-        "core::panics::PanicResult::<(core::array::Span::<controller_auth::signer::SignerType>, controller_auth::signer::SignerStorageValue)>"
+        "core::panics::PanicResult::<(core::array::Span::<webauthn_auth::signer::SignerType>, webauthn_auth::signer::SignerStorageValue)>"
       ],
       [
         448,
@@ -16272,11 +16272,11 @@
       ],
       [
         462,
-        "core::option::Option::<controller_auth::signer::Secp256k1Signer>"
+        "core::option::Option::<webauthn_auth::signer::Secp256k1Signer>"
       ],
       [
         463,
-        "core::option::Option::<controller_auth::signer::StarknetSignature>"
+        "core::option::Option::<webauthn_auth::signer::StarknetSignature>"
       ],
       [
         464,
@@ -16316,11 +16316,11 @@
       ],
       [
         473,
-        "Tuple<core::result::Result::<(), controller_auth::errors::AuthnError>>"
+        "Tuple<core::result::Result::<(), webauthn_auth::errors::AuthnError>>"
       ],
       [
         474,
-        "core::panics::PanicResult::<(core::result::Result::<(), controller_auth::errors::AuthnError>,)>"
+        "core::panics::PanicResult::<(core::result::Result::<(), webauthn_auth::errors::AuthnError>,)>"
       ],
       [
         475,
@@ -16352,31 +16352,31 @@
       ],
       [
         482,
-        "controller_session::session_component::__member_module_session_states::ComponentMemberState"
+        "webauthn_session::session_component::__member_module_session_states::ComponentMemberState"
       ],
       [
         483,
-        "controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>"
+        "webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>"
       ],
       [
         484,
-        "Tuple<controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>>"
+        "Tuple<webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>>"
       ],
       [
         485,
-        "core::panics::PanicResult::<(controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>)>"
+        "core::panics::PanicResult::<(webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>)>"
       ],
       [
         486,
-        "core::option::Option::<controller_session::interface::SessionToken>"
+        "core::option::Option::<webauthn_session::interface::SessionToken>"
       ],
       [
         487,
-        "Tuple<core::array::Span::<core::felt252>, core::option::Option::<controller_session::interface::SessionToken>>"
+        "Tuple<core::array::Span::<core::felt252>, core::option::Option::<webauthn_session::interface::SessionToken>>"
       ],
       [
         488,
-        "core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller_session::interface::SessionToken>)>"
+        "core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<webauthn_session::interface::SessionToken>)>"
       ],
       [
         489,
@@ -16444,7 +16444,7 @@
       ],
       [
         505,
-        "controller_session::hash::StarknetDomain"
+        "webauthn_session::hash::StarknetDomain"
       ],
       [
         506,
@@ -16524,35 +16524,35 @@
       ],
       [
         525,
-        "controller::account::CartridgeAccount::OwnerChanged"
+        "cartridge_account::cartridge::CartridgeAccount::OwnerChanged"
       ],
       [
         526,
-        "controller::account::CartridgeAccount::OwnerChangedGuid"
+        "cartridge_account::cartridge::CartridgeAccount::OwnerChangedGuid"
       ],
       [
         527,
-        "controller_auth::signer::Signer"
+        "webauthn_auth::signer::Signer"
       ],
       [
         528,
-        "controller::account::CartridgeAccount::SignerLinked"
+        "cartridge_account::cartridge::CartridgeAccount::SignerLinked"
       ],
       [
         529,
-        "controller_session::session_component::SessionRevoked"
+        "webauthn_session::session_component::SessionRevoked"
       ],
       [
         530,
-        "controller_session::session_component::Event"
+        "webauthn_session::session_component::Event"
       ],
       [
         531,
-        "controller::account::CartridgeAccount::Event"
+        "cartridge_account::cartridge::CartridgeAccount::Event"
       ],
       [
         532,
-        "controller_session::interface::SessionState"
+        "webauthn_session::interface::SessionState"
       ],
       [
         533,
@@ -16608,11 +16608,11 @@
       ],
       [
         546,
-        "Uninitialized<controller_auth::signer::SignerType>"
+        "Uninitialized<webauthn_auth::signer::SignerType>"
       ],
       [
         547,
-        "Uninitialized<controller_auth::signer::SignerStorageValue>"
+        "Uninitialized<webauthn_auth::signer::SignerStorageValue>"
       ],
       [
         548,
@@ -16620,51 +16620,51 @@
       ],
       [
         549,
-        "core::option::Option::<(controller_auth::signer::WebauthnSigner, controller_auth::webauthn::WebauthnAssertion)>"
+        "core::option::Option::<(webauthn_auth::signer::WebauthnSigner, webauthn_auth::webauthn::WebauthnAssertion)>"
       ],
       [
         550,
-        "core::option::Option::<controller_auth::webauthn::WebauthnAssertion>"
+        "core::option::Option::<webauthn_auth::webauthn::WebauthnAssertion>"
       ],
       [
         551,
-        "Tuple<core::array::Span::<core::felt252>, core::option::Option::<controller_auth::webauthn::WebauthnAssertion>>"
+        "Tuple<core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::webauthn::WebauthnAssertion>>"
       ],
       [
         552,
-        "core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller_auth::webauthn::WebauthnAssertion>)>"
+        "core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::webauthn::WebauthnAssertion>)>"
       ],
       [
         553,
-        "core::option::Option::<controller_auth::signer::WebauthnSigner>"
+        "core::option::Option::<webauthn_auth::signer::WebauthnSigner>"
       ],
       [
         554,
-        "Tuple<core::array::Span::<core::felt252>, core::option::Option::<controller_auth::signer::WebauthnSigner>>"
+        "Tuple<core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::signer::WebauthnSigner>>"
       ],
       [
         555,
-        "core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller_auth::signer::WebauthnSigner>)>"
+        "core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::signer::WebauthnSigner>)>"
       ],
       [
         556,
-        "core::option::Option::<(controller_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature)>"
+        "core::option::Option::<(webauthn_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature)>"
       ],
       [
         557,
-        "Tuple<core::array::Span::<core::felt252>, core::option::Option::<(controller_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature)>>"
+        "Tuple<core::array::Span::<core::felt252>, core::option::Option::<(webauthn_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature)>>"
       ],
       [
         558,
-        "core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<(controller_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature)>)>"
+        "core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<(webauthn_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature)>)>"
       ],
       [
         559,
-        "core::option::Option::<(controller_auth::signer::StarknetSigner, controller_auth::signer::StarknetSignature)>"
+        "core::option::Option::<(webauthn_auth::signer::StarknetSigner, webauthn_auth::signer::StarknetSignature)>"
       ],
       [
         560,
-        "Uninitialized<controller_auth::signer::WebauthnSigner>"
+        "Uninitialized<webauthn_auth::signer::WebauthnSigner>"
       ],
       [
         561,
@@ -16688,15 +16688,15 @@
       ],
       [
         566,
-        "Box<controller_auth::signer::SignerSignature>"
+        "Box<webauthn_auth::signer::SignerSignature>"
       ],
       [
         567,
-        "Array<controller_auth::signer::SignerSignature>"
+        "Array<webauthn_auth::signer::SignerSignature>"
       ],
       [
         568,
-        "Snapshot<Array<controller_auth::signer::SignerSignature>>"
+        "Snapshot<Array<webauthn_auth::signer::SignerSignature>>"
       ],
       [
         569,
@@ -16712,15 +16712,15 @@
       ],
       [
         572,
-        "core::option::Option::<core::array::Array::<controller_auth::signer::SignerSignature>>"
+        "core::option::Option::<core::array::Array::<webauthn_auth::signer::SignerSignature>>"
       ],
       [
         573,
-        "Tuple<core::array::Span::<core::felt252>, core::option::Option::<core::array::Array::<controller_auth::signer::SignerSignature>>>"
+        "Tuple<core::array::Span::<core::felt252>, core::option::Option::<core::array::Array::<webauthn_auth::signer::SignerSignature>>>"
       ],
       [
         574,
-        "core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<core::array::Array::<controller_auth::signer::SignerSignature>>)>"
+        "core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<core::array::Array::<webauthn_auth::signer::SignerSignature>>)>"
       ],
       [
         575,
@@ -16768,11 +16768,11 @@
       ],
       [
         586,
-        "Tuple<controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, felt252>"
+        "Tuple<webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, felt252>"
       ],
       [
         587,
-        "core::panics::PanicResult::<(controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::felt252)>"
+        "core::panics::PanicResult::<(webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, core::felt252)>"
       ],
       [
         588,
@@ -16816,31 +16816,31 @@
       ],
       [
         598,
-        "core::option::Option::<controller_auth::signer::Signer>"
+        "core::option::Option::<webauthn_auth::signer::Signer>"
       ],
       [
         599,
-        "core::option::Option::<core::option::Option::<controller_auth::signer::Signer>>"
+        "core::option::Option::<core::option::Option::<webauthn_auth::signer::Signer>>"
       ],
       [
         600,
-        "Tuple<core::array::Span::<core::felt252>, core::option::Option::<core::option::Option::<controller_auth::signer::Signer>>>"
+        "Tuple<core::array::Span::<core::felt252>, core::option::Option::<core::option::Option::<webauthn_auth::signer::Signer>>>"
       ],
       [
         601,
-        "core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<core::option::Option::<controller_auth::signer::Signer>>)>"
+        "core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<core::option::Option::<webauthn_auth::signer::Signer>>)>"
       ],
       [
         602,
-        "Tuple<core::array::Span::<core::felt252>, core::option::Option::<controller_auth::signer::Signer>>"
+        "Tuple<core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::signer::Signer>>"
       ],
       [
         603,
-        "core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller_auth::signer::Signer>)>"
+        "core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::signer::Signer>)>"
       ],
       [
         604,
-        "Uninitialized<controller_auth::signer::Signer>"
+        "Uninitialized<webauthn_auth::signer::Signer>"
       ],
       [
         605,
@@ -16856,19 +16856,19 @@
       ],
       [
         608,
-        "controller::outside_execution::outside_execution::outside_execution_component::__member_module_outside_nonces::ComponentMemberState"
+        "cartridge_account::outside_execution::outside_execution::outside_execution_component::__member_module_outside_nonces::ComponentMemberState"
       ],
       [
         609,
-        "controller::outside_execution::outside_execution::outside_execution_component::ComponentState::<controller::account::CartridgeAccount::ContractState>"
+        "cartridge_account::outside_execution::outside_execution::outside_execution_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>"
       ],
       [
         610,
-        "Tuple<controller::outside_execution::outside_execution::outside_execution_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, Array<core::array::Span::<core::felt252>>>"
+        "Tuple<cartridge_account::outside_execution::outside_execution::outside_execution_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, Array<core::array::Span::<core::felt252>>>"
       ],
       [
         611,
-        "core::panics::PanicResult::<(controller::outside_execution::outside_execution::outside_execution_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::array::Array::<core::array::Span::<core::felt252>>)>"
+        "core::panics::PanicResult::<(cartridge_account::outside_execution::outside_execution::outside_execution_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, core::array::Array::<core::array::Span::<core::felt252>>)>"
       ],
       [
         612,
@@ -16884,23 +16884,23 @@
       ],
       [
         615,
-        "controller::outside_execution::interface::OutsideExecution"
+        "cartridge_account::outside_execution::interface::OutsideExecution"
       ],
       [
         616,
-        "core::option::Option::<controller::outside_execution::interface::OutsideExecution>"
+        "core::option::Option::<cartridge_account::outside_execution::interface::OutsideExecution>"
       ],
       [
         617,
-        "Tuple<core::array::Span::<core::felt252>, core::option::Option::<controller::outside_execution::interface::OutsideExecution>>"
+        "Tuple<core::array::Span::<core::felt252>, core::option::Option::<cartridge_account::outside_execution::interface::OutsideExecution>>"
       ],
       [
         618,
-        "core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller::outside_execution::interface::OutsideExecution>)>"
+        "core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<cartridge_account::outside_execution::interface::OutsideExecution>)>"
       ],
       [
         619,
-        "Uninitialized<controller::outside_execution::interface::OutsideExecution>"
+        "Uninitialized<cartridge_account::outside_execution::interface::OutsideExecution>"
       ],
       [
         620,
@@ -16948,11 +16948,11 @@
       ],
       [
         631,
-        "Tuple<controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, Unit>"
+        "Tuple<webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, Unit>"
       ],
       [
         632,
-        "core::panics::PanicResult::<(controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, ())>"
+        "core::panics::PanicResult::<(webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, ())>"
       ],
       [
         633,
@@ -16992,39 +16992,39 @@
       ],
       [
         642,
-        "controller::account::CartridgeAccount::__member_module__owner::ContractMemberState"
+        "cartridge_account::cartridge::CartridgeAccount::__member_module__owner::ContractMemberState"
       ],
       [
         643,
-        "controller::account::CartridgeAccount::__member_module__owner_non_stark::ContractMemberState"
+        "cartridge_account::cartridge::CartridgeAccount::__member_module__owner_non_stark::ContractMemberState"
       ],
       [
         644,
-        "controller::src5::src5_component::ComponentState::<controller::account::CartridgeAccount::ContractState>"
+        "cartridge_account::src5::src5_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>"
       ],
       [
         645,
-        "controller::account::CartridgeAccount::ContractState"
+        "cartridge_account::cartridge::CartridgeAccount::ContractState"
       ],
       [
         646,
-        "Tuple<controller::account::CartridgeAccount::ContractState, Unit>"
+        "Tuple<cartridge_account::cartridge::CartridgeAccount::ContractState, Unit>"
       ],
       [
         647,
-        "core::panics::PanicResult::<(controller::account::CartridgeAccount::ContractState, ())>"
+        "core::panics::PanicResult::<(cartridge_account::cartridge::CartridgeAccount::ContractState, ())>"
       ],
       [
         648,
-        "core::option::Option::<controller_auth::signer::SignerSignature>"
+        "core::option::Option::<webauthn_auth::signer::SignerSignature>"
       ],
       [
         649,
-        "Tuple<core::array::Span::<core::felt252>, core::option::Option::<controller_auth::signer::SignerSignature>>"
+        "Tuple<core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::signer::SignerSignature>>"
       ],
       [
         650,
-        "core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller_auth::signer::SignerSignature>)>"
+        "core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::signer::SignerSignature>)>"
       ],
       [
         651,
@@ -17068,11 +17068,11 @@
       ],
       [
         661,
-        "Tuple<controller::account::CartridgeAccount::ContractState, Array<core::array::Span::<core::felt252>>>"
+        "Tuple<cartridge_account::cartridge::CartridgeAccount::ContractState, Array<core::array::Span::<core::felt252>>>"
       ],
       [
         662,
-        "core::panics::PanicResult::<(controller::account::CartridgeAccount::ContractState, core::array::Array::<core::array::Span::<core::felt252>>)>"
+        "core::panics::PanicResult::<(cartridge_account::cartridge::CartridgeAccount::ContractState, core::array::Array::<core::array::Span::<core::felt252>>)>"
       ],
       [
         663,
@@ -17096,11 +17096,11 @@
       ],
       [
         668,
-        "Tuple<controller::account::CartridgeAccount::ContractState, felt252>"
+        "Tuple<cartridge_account::cartridge::CartridgeAccount::ContractState, felt252>"
       ],
       [
         669,
-        "core::panics::PanicResult::<(controller::account::CartridgeAccount::ContractState, core::felt252)>"
+        "core::panics::PanicResult::<(cartridge_account::cartridge::CartridgeAccount::ContractState, core::felt252)>"
       ],
       [
         670,
@@ -17334,51 +17334,51 @@
       ],
       [
         48,
-        "struct_construct<controller::account::CartridgeAccount::__member_module__owner::ContractMemberState>"
+        "struct_construct<cartridge_account::cartridge::CartridgeAccount::__member_module__owner::ContractMemberState>"
       ],
       [
         49,
-        "struct_construct<controller::account::CartridgeAccount::__member_module__owner_non_stark::ContractMemberState>"
+        "struct_construct<cartridge_account::cartridge::CartridgeAccount::__member_module__owner_non_stark::ContractMemberState>"
       ],
       [
         50,
-        "struct_construct<controller_session::session_component::__member_module_session_states::ComponentMemberState>"
+        "struct_construct<webauthn_session::session_component::__member_module_session_states::ComponentMemberState>"
       ],
       [
         51,
-        "struct_construct<controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>>"
+        "struct_construct<webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>>"
       ],
       [
         52,
-        "struct_construct<controller::outside_execution::outside_execution::outside_execution_component::__member_module_outside_nonces::ComponentMemberState>"
+        "struct_construct<cartridge_account::outside_execution::outside_execution::outside_execution_component::__member_module_outside_nonces::ComponentMemberState>"
       ],
       [
         53,
-        "struct_construct<controller::outside_execution::outside_execution::outside_execution_component::ComponentState::<controller::account::CartridgeAccount::ContractState>>"
+        "struct_construct<cartridge_account::outside_execution::outside_execution::outside_execution_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>>"
       ],
       [
         54,
-        "struct_construct<controller::src5::src5_component::ComponentState::<controller::account::CartridgeAccount::ContractState>>"
+        "struct_construct<cartridge_account::src5::src5_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>>"
       ],
       [
         55,
-        "struct_construct<controller::account::CartridgeAccount::ContractState>"
+        "struct_construct<cartridge_account::cartridge::CartridgeAccount::ContractState>"
       ],
       [
         56,
-        "function_call<user@controller::account::CartridgeAccount::AccountImpl::__validate__>"
+        "function_call<user@cartridge_account::cartridge::CartridgeAccount::AccountImpl::__validate__>"
       ],
       [
         57,
-        "enum_match<core::panics::PanicResult::<(controller::account::CartridgeAccount::ContractState, core::felt252)>>"
+        "enum_match<core::panics::PanicResult::<(cartridge_account::cartridge::CartridgeAccount::ContractState, core::felt252)>>"
       ],
       [
         58,
-        "struct_deconstruct<Tuple<controller::account::CartridgeAccount::ContractState, felt252>>"
+        "struct_deconstruct<Tuple<cartridge_account::cartridge::CartridgeAccount::ContractState, felt252>>"
       ],
       [
         59,
-        "drop<controller::account::CartridgeAccount::ContractState>"
+        "drop<cartridge_account::cartridge::CartridgeAccount::ContractState>"
       ],
       [
         60,
@@ -17422,7 +17422,7 @@
       ],
       [
         70,
-        "function_call<user@controller::account::CartridgeAccount::AccountImpl::__execute__>"
+        "function_call<user@cartridge_account::cartridge::CartridgeAccount::AccountImpl::__execute__>"
       ],
       [
         71,
@@ -17430,11 +17430,11 @@
       ],
       [
         72,
-        "enum_match<core::panics::PanicResult::<(controller::account::CartridgeAccount::ContractState, core::array::Array::<core::array::Span::<core::felt252>>)>>"
+        "enum_match<core::panics::PanicResult::<(cartridge_account::cartridge::CartridgeAccount::ContractState, core::array::Array::<core::array::Span::<core::felt252>>)>>"
       ],
       [
         73,
-        "struct_deconstruct<Tuple<controller::account::CartridgeAccount::ContractState, Array<core::array::Span::<core::felt252>>>>"
+        "struct_deconstruct<Tuple<cartridge_account::cartridge::CartridgeAccount::ContractState, Array<core::array::Span::<core::felt252>>>>"
       ],
       [
         74,
@@ -17534,11 +17534,11 @@
       ],
       [
         98,
-        "snapshot_take<controller::account::CartridgeAccount::ContractState>"
+        "snapshot_take<cartridge_account::cartridge::CartridgeAccount::ContractState>"
       ],
       [
         99,
-        "function_call<user@controller::account::CartridgeAccount::AccountImpl::is_valid_signature>"
+        "function_call<user@cartridge_account::cartridge::CartridgeAccount::AccountImpl::is_valid_signature>"
       ],
       [
         100,
@@ -17558,43 +17558,43 @@
       ],
       [
         104,
-        "function_call<user@controller::account::CartridgeAccount::DeclarerImpl::__validate_declare__>"
+        "function_call<user@cartridge_account::cartridge::CartridgeAccount::DeclarerImpl::__validate_declare__>"
       ],
       [
         105,
-        "function_call<user@controller_auth::signer::SignerSignatureSerde::deserialize>"
+        "function_call<user@webauthn_auth::signer::SignerSignatureSerde::deserialize>"
       ],
       [
         106,
-        "enum_match<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller_auth::signer::SignerSignature>)>>"
+        "enum_match<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::signer::SignerSignature>)>>"
       ],
       [
         107,
-        "struct_deconstruct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<controller_auth::signer::SignerSignature>>>"
+        "struct_deconstruct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::signer::SignerSignature>>>"
       ],
       [
         108,
-        "enum_match<core::option::Option::<controller_auth::signer::SignerSignature>>"
+        "enum_match<core::option::Option::<webauthn_auth::signer::SignerSignature>>"
       ],
       [
         109,
-        "drop<controller_auth::signer::SignerSignature>"
+        "drop<webauthn_auth::signer::SignerSignature>"
       ],
       [
         110,
-        "store_temp<controller_auth::signer::SignerSignature>"
+        "store_temp<webauthn_auth::signer::SignerSignature>"
       ],
       [
         111,
-        "function_call<user@controller::account::CartridgeAccount::UserAccountImpl::change_owner>"
+        "function_call<user@cartridge_account::cartridge::CartridgeAccount::UserAccountImpl::change_owner>"
       ],
       [
         112,
-        "enum_match<core::panics::PanicResult::<(controller::account::CartridgeAccount::ContractState, ())>>"
+        "enum_match<core::panics::PanicResult::<(cartridge_account::cartridge::CartridgeAccount::ContractState, ())>>"
       ],
       [
         113,
-        "drop<Tuple<controller::account::CartridgeAccount::ContractState, Unit>>"
+        "drop<Tuple<cartridge_account::cartridge::CartridgeAccount::ContractState, Unit>>"
       ],
       [
         114,
@@ -17638,27 +17638,27 @@
       ],
       [
         124,
-        "enum_init<controller_auth::signer::SignerType, 2>"
+        "enum_init<webauthn_auth::signer::SignerType, 2>"
       ],
       [
         125,
-        "store_temp<controller_auth::signer::SignerType>"
+        "store_temp<webauthn_auth::signer::SignerType>"
       ],
       [
         126,
-        "enum_init<controller_auth::signer::SignerType, 0>"
+        "enum_init<webauthn_auth::signer::SignerType, 0>"
       ],
       [
         127,
-        "snapshot_take<controller_auth::signer::SignerType>"
+        "snapshot_take<webauthn_auth::signer::SignerType>"
       ],
       [
         128,
-        "drop<controller_auth::signer::SignerType>"
+        "drop<webauthn_auth::signer::SignerType>"
       ],
       [
         129,
-        "enum_match<controller_auth::signer::SignerType>"
+        "enum_match<webauthn_auth::signer::SignerType>"
       ],
       [
         130,
@@ -17678,7 +17678,7 @@
       ],
       [
         134,
-        "function_call<user@controller::account::CartridgeAccount::DeployableImpl::__validate_deploy__>"
+        "function_call<user@cartridge_account::cartridge::CartridgeAccount::DeployableImpl::__validate_deploy__>"
       ],
       [
         135,
@@ -17686,39 +17686,39 @@
       ],
       [
         136,
-        "function_call<user@controller_session::session_component::SessionImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl>::revoke_session>"
+        "function_call<user@webauthn_session::session_component::SessionImpl::<cartridge_account::cartridge::CartridgeAccount::ContractState, cartridge_account::cartridge::CartridgeAccount::HasComponentImpl_session_component, cartridge_account::cartridge::CartridgeAccount::SessionCallbackImpl>::revoke_session>"
       ],
       [
         137,
-        "enum_match<core::panics::PanicResult::<(controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, ())>>"
+        "enum_match<core::panics::PanicResult::<(webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, ())>>"
       ],
       [
         138,
-        "drop<Tuple<controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, Unit>>"
+        "drop<Tuple<webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, Unit>>"
       ],
       [
         139,
-        "struct_deconstruct<controller::account::CartridgeAccount::ContractState>"
+        "struct_deconstruct<cartridge_account::cartridge::CartridgeAccount::ContractState>"
       ],
       [
         140,
-        "drop<controller::account::CartridgeAccount::__member_module__owner::ContractMemberState>"
+        "drop<cartridge_account::cartridge::CartridgeAccount::__member_module__owner::ContractMemberState>"
       ],
       [
         141,
-        "drop<controller::account::CartridgeAccount::__member_module__owner_non_stark::ContractMemberState>"
+        "drop<cartridge_account::cartridge::CartridgeAccount::__member_module__owner_non_stark::ContractMemberState>"
       ],
       [
         142,
-        "drop<controller::outside_execution::outside_execution::outside_execution_component::ComponentState::<controller::account::CartridgeAccount::ContractState>>"
+        "drop<cartridge_account::outside_execution::outside_execution::outside_execution_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>>"
       ],
       [
         143,
-        "drop<controller::src5::src5_component::ComponentState::<controller::account::CartridgeAccount::ContractState>>"
+        "drop<cartridge_account::src5::src5_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>>"
       ],
       [
         144,
-        "function_call<user@controller_session::session_component::SessionImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl>::is_session_revoked>"
+        "function_call<user@webauthn_session::session_component::SessionImpl::<cartridge_account::cartridge::CartridgeAccount::ContractState, cartridge_account::cartridge::CartridgeAccount::HasComponentImpl_session_component, cartridge_account::cartridge::CartridgeAccount::SessionCallbackImpl>::is_session_revoked>"
       ],
       [
         145,
@@ -17754,23 +17754,23 @@
       ],
       [
         153,
-        "alloc_local<controller::outside_execution::interface::OutsideExecution>"
+        "alloc_local<cartridge_account::outside_execution::interface::OutsideExecution>"
       ],
       [
         154,
-        "function_call<user@controller::outside_execution::interface::OutsideExecutionSerde::deserialize>"
+        "function_call<user@cartridge_account::outside_execution::interface::OutsideExecutionSerde::deserialize>"
       ],
       [
         155,
-        "enum_match<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller::outside_execution::interface::OutsideExecution>)>>"
+        "enum_match<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<cartridge_account::outside_execution::interface::OutsideExecution>)>>"
       ],
       [
         156,
-        "struct_deconstruct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<controller::outside_execution::interface::OutsideExecution>>>"
+        "struct_deconstruct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<cartridge_account::outside_execution::interface::OutsideExecution>>>"
       ],
       [
         157,
-        "enum_match<core::option::Option::<controller::outside_execution::interface::OutsideExecution>>"
+        "enum_match<core::option::Option::<cartridge_account::outside_execution::interface::OutsideExecution>>"
       ],
       [
         158,
@@ -17778,7 +17778,7 @@
       ],
       [
         159,
-        "store_local<controller::outside_execution::interface::OutsideExecution>"
+        "store_local<cartridge_account::outside_execution::interface::OutsideExecution>"
       ],
       [
         160,
@@ -17814,23 +17814,23 @@
       ],
       [
         168,
-        "drop<controller::outside_execution::interface::OutsideExecution>"
+        "drop<cartridge_account::outside_execution::interface::OutsideExecution>"
       ],
       [
         169,
-        "snapshot_take<controller::outside_execution::interface::OutsideExecution>"
+        "snapshot_take<cartridge_account::outside_execution::interface::OutsideExecution>"
       ],
       [
         170,
-        "store_temp<controller::outside_execution::interface::OutsideExecution>"
+        "store_temp<cartridge_account::outside_execution::interface::OutsideExecution>"
       ],
       [
         171,
-        "function_call<user@controller::outside_execution::outside_execution_hash::get_message_hash_rev_1>"
+        "function_call<user@cartridge_account::outside_execution::outside_execution_hash::get_message_hash_rev_1>"
       ],
       [
         172,
-        "function_call<user@controller::outside_execution::outside_execution::outside_execution_component::Internal::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_outside_execution_component, controller::account::CartridgeAccount::OutsideExecutionCallbackImpl, controller::account::CartridgeAccount::ContractStateDrop>::assert_valid_outside_execution>"
+        "function_call<user@cartridge_account::outside_execution::outside_execution::outside_execution_component::Internal::<cartridge_account::cartridge::CartridgeAccount::ContractState, cartridge_account::cartridge::CartridgeAccount::HasComponentImpl_outside_execution_component, cartridge_account::cartridge::CartridgeAccount::OutsideExecutionCallbackImpl, cartridge_account::cartridge::CartridgeAccount::ContractStateDrop>::assert_valid_outside_execution>"
       ],
       [
         173,
@@ -17850,11 +17850,11 @@
       ],
       [
         177,
-        "enum_match<core::panics::PanicResult::<(controller::outside_execution::outside_execution::outside_execution_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::array::Array::<core::array::Span::<core::felt252>>)>>"
+        "enum_match<core::panics::PanicResult::<(cartridge_account::outside_execution::outside_execution::outside_execution_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, core::array::Array::<core::array::Span::<core::felt252>>)>>"
       ],
       [
         178,
-        "struct_deconstruct<Tuple<controller::outside_execution::outside_execution::outside_execution_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, Array<core::array::Span::<core::felt252>>>>"
+        "struct_deconstruct<Tuple<cartridge_account::outside_execution::outside_execution::outside_execution_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, Array<core::array::Span::<core::felt252>>>>"
       ],
       [
         179,
@@ -17866,7 +17866,7 @@
       ],
       [
         181,
-        "drop<Uninitialized<controller::outside_execution::interface::OutsideExecution>>"
+        "drop<Uninitialized<cartridge_account::outside_execution::interface::OutsideExecution>>"
       ],
       [
         182,
@@ -17910,67 +17910,67 @@
       ],
       [
         192,
-        "alloc_local<controller_auth::signer::Signer>"
+        "alloc_local<webauthn_auth::signer::Signer>"
       ],
       [
         193,
-        "function_call<user@controller_auth::signer::SignerSerde::deserialize>"
+        "function_call<user@webauthn_auth::signer::SignerSerde::deserialize>"
       ],
       [
         194,
-        "enum_match<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller_auth::signer::Signer>)>>"
+        "enum_match<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::signer::Signer>)>>"
       ],
       [
         195,
-        "struct_deconstruct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<controller_auth::signer::Signer>>>"
+        "struct_deconstruct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::signer::Signer>>>"
       ],
       [
         196,
-        "enum_match<core::option::Option::<controller_auth::signer::Signer>>"
+        "enum_match<core::option::Option::<webauthn_auth::signer::Signer>>"
       ],
       [
         197,
-        "store_local<controller_auth::signer::Signer>"
+        "store_local<webauthn_auth::signer::Signer>"
       ],
       [
         198,
-        "function_call<user@core::option::OptionSerde::<controller_auth::signer::Signer, controller_auth::signer::SignerSerde, core::traits::DestructFromDrop::<controller_auth::signer::Signer, controller_auth::signer::SignerDrop>>::deserialize>"
+        "function_call<user@core::option::OptionSerde::<webauthn_auth::signer::Signer, webauthn_auth::signer::SignerSerde, core::traits::DestructFromDrop::<webauthn_auth::signer::Signer, webauthn_auth::signer::SignerDrop>>::deserialize>"
       ],
       [
         199,
-        "enum_match<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<core::option::Option::<controller_auth::signer::Signer>>)>>"
+        "enum_match<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<core::option::Option::<webauthn_auth::signer::Signer>>)>>"
       ],
       [
         200,
-        "struct_deconstruct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<core::option::Option::<controller_auth::signer::Signer>>>>"
+        "struct_deconstruct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<core::option::Option::<webauthn_auth::signer::Signer>>>>"
       ],
       [
         201,
-        "enum_match<core::option::Option::<core::option::Option::<controller_auth::signer::Signer>>>"
+        "enum_match<core::option::Option::<core::option::Option::<webauthn_auth::signer::Signer>>>"
       ],
       [
         202,
-        "drop<core::option::Option::<controller_auth::signer::Signer>>"
+        "drop<core::option::Option::<webauthn_auth::signer::Signer>>"
       ],
       [
         203,
-        "drop<controller_auth::signer::Signer>"
+        "drop<webauthn_auth::signer::Signer>"
       ],
       [
         204,
-        "store_temp<controller_auth::signer::Signer>"
+        "store_temp<webauthn_auth::signer::Signer>"
       ],
       [
         205,
-        "store_temp<core::option::Option::<controller_auth::signer::Signer>>"
+        "store_temp<core::option::Option::<webauthn_auth::signer::Signer>>"
       ],
       [
         206,
-        "function_call<user@controller::account::CartridgeAccount::constructor>"
+        "function_call<user@cartridge_account::cartridge::CartridgeAccount::constructor>"
       ],
       [
         207,
-        "drop<Uninitialized<controller_auth::signer::Signer>>"
+        "drop<Uninitialized<webauthn_auth::signer::Signer>>"
       ],
       [
         208,
@@ -18074,11 +18074,11 @@
       ],
       [
         233,
-        "enum_init<core::panics::PanicResult::<(controller::account::CartridgeAccount::ContractState, core::felt252)>, 1>"
+        "enum_init<core::panics::PanicResult::<(cartridge_account::cartridge::CartridgeAccount::ContractState, core::felt252)>, 1>"
       ],
       [
         234,
-        "store_temp<core::panics::PanicResult::<(controller::account::CartridgeAccount::ContractState, core::felt252)>>"
+        "store_temp<core::panics::PanicResult::<(cartridge_account::cartridge::CartridgeAccount::ContractState, core::felt252)>>"
       ],
       [
         235,
@@ -18110,35 +18110,35 @@
       ],
       [
         242,
-        "function_call<user@controller_session::session_component::InternalImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl>::validate_session_serialized>"
+        "function_call<user@webauthn_session::session_component::InternalImpl::<cartridge_account::cartridge::CartridgeAccount::ContractState, cartridge_account::cartridge::CartridgeAccount::HasComponentImpl_session_component, cartridge_account::cartridge::CartridgeAccount::SessionCallbackImpl>::validate_session_serialized>"
       ],
       [
         243,
-        "enum_match<core::panics::PanicResult::<(controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::felt252)>>"
+        "enum_match<core::panics::PanicResult::<(webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, core::felt252)>>"
       ],
       [
         244,
-        "struct_deconstruct<Tuple<controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, felt252>>"
+        "struct_deconstruct<Tuple<webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, felt252>>"
       ],
       [
         245,
-        "rename<controller::account::CartridgeAccount::__member_module__owner::ContractMemberState>"
+        "rename<cartridge_account::cartridge::CartridgeAccount::__member_module__owner::ContractMemberState>"
       ],
       [
         246,
-        "rename<controller::account::CartridgeAccount::__member_module__owner_non_stark::ContractMemberState>"
+        "rename<cartridge_account::cartridge::CartridgeAccount::__member_module__owner_non_stark::ContractMemberState>"
       ],
       [
         247,
-        "rename<controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>>"
+        "rename<webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>>"
       ],
       [
         248,
-        "rename<controller::outside_execution::outside_execution::outside_execution_component::ComponentState::<controller::account::CartridgeAccount::ContractState>>"
+        "rename<cartridge_account::outside_execution::outside_execution::outside_execution_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>>"
       ],
       [
         249,
-        "rename<controller::src5::src5_component::ComponentState::<controller::account::CartridgeAccount::ContractState>>"
+        "rename<cartridge_account::src5::src5_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>>"
       ],
       [
         250,
@@ -18150,11 +18150,11 @@
       ],
       [
         252,
-        "function_call<user@controller::account::CartridgeAccount::ContractInternalImpl::assert_valid_calls_and_signature>"
+        "function_call<user@cartridge_account::cartridge::CartridgeAccount::ContractInternalImpl::assert_valid_calls_and_signature>"
       ],
       [
         253,
-        "struct_deconstruct<Tuple<controller::account::CartridgeAccount::ContractState, Unit>>"
+        "struct_deconstruct<Tuple<cartridge_account::cartridge::CartridgeAccount::ContractState, Unit>>"
       ],
       [
         254,
@@ -18162,11 +18162,11 @@
       ],
       [
         255,
-        "struct_construct<Tuple<controller::account::CartridgeAccount::ContractState, felt252>>"
+        "struct_construct<Tuple<cartridge_account::cartridge::CartridgeAccount::ContractState, felt252>>"
       ],
       [
         256,
-        "enum_init<core::panics::PanicResult::<(controller::account::CartridgeAccount::ContractState, core::felt252)>, 0>"
+        "enum_init<core::panics::PanicResult::<(cartridge_account::cartridge::CartridgeAccount::ContractState, core::felt252)>, 0>"
       ],
       [
         257,
@@ -18186,7 +18186,7 @@
       ],
       [
         261,
-        "function_call<user@controller::account::CartridgeAccount::_execute_calls[expr13]>"
+        "function_call<user@cartridge_account::cartridge::CartridgeAccount::_execute_calls[expr13]>"
       ],
       [
         262,
@@ -18202,19 +18202,19 @@
       ],
       [
         265,
-        "struct_construct<Tuple<controller::account::CartridgeAccount::ContractState, Array<core::array::Span::<core::felt252>>>>"
+        "struct_construct<Tuple<cartridge_account::cartridge::CartridgeAccount::ContractState, Array<core::array::Span::<core::felt252>>>>"
       ],
       [
         266,
-        "enum_init<core::panics::PanicResult::<(controller::account::CartridgeAccount::ContractState, core::array::Array::<core::array::Span::<core::felt252>>)>, 0>"
+        "enum_init<core::panics::PanicResult::<(cartridge_account::cartridge::CartridgeAccount::ContractState, core::array::Array::<core::array::Span::<core::felt252>>)>, 0>"
       ],
       [
         267,
-        "store_temp<core::panics::PanicResult::<(controller::account::CartridgeAccount::ContractState, core::array::Array::<core::array::Span::<core::felt252>>)>>"
+        "store_temp<core::panics::PanicResult::<(cartridge_account::cartridge::CartridgeAccount::ContractState, core::array::Array::<core::array::Span::<core::felt252>>)>>"
       ],
       [
         268,
-        "enum_init<core::panics::PanicResult::<(controller::account::CartridgeAccount::ContractState, core::array::Array::<core::array::Span::<core::felt252>>)>, 1>"
+        "enum_init<core::panics::PanicResult::<(cartridge_account::cartridge::CartridgeAccount::ContractState, core::array::Array::<core::array::Span::<core::felt252>>)>, 1>"
       ],
       [
         269,
@@ -18342,27 +18342,27 @@
       ],
       [
         300,
-        "array_new<controller_auth::signer::SignerSignature>"
+        "array_new<webauthn_auth::signer::SignerSignature>"
       ],
       [
         301,
-        "store_temp<Array<controller_auth::signer::SignerSignature>>"
+        "store_temp<Array<webauthn_auth::signer::SignerSignature>>"
       ],
       [
         302,
-        "function_call<user@core::array::deserialize_array_helper::<controller_auth::signer::SignerSignature, controller_auth::signer::SignerSignatureSerde, controller_auth::signer::SignerSignatureDrop>>"
+        "function_call<user@core::array::deserialize_array_helper::<webauthn_auth::signer::SignerSignature, webauthn_auth::signer::SignerSignatureSerde, webauthn_auth::signer::SignerSignatureDrop>>"
       ],
       [
         303,
-        "enum_match<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<core::array::Array::<controller_auth::signer::SignerSignature>>)>>"
+        "enum_match<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<core::array::Array::<webauthn_auth::signer::SignerSignature>>)>>"
       ],
       [
         304,
-        "struct_deconstruct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<core::array::Array::<controller_auth::signer::SignerSignature>>>>"
+        "struct_deconstruct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<core::array::Array::<webauthn_auth::signer::SignerSignature>>>>"
       ],
       [
         305,
-        "store_temp<core::option::Option::<core::array::Array::<controller_auth::signer::SignerSignature>>>"
+        "store_temp<core::option::Option::<core::array::Array::<webauthn_auth::signer::SignerSignature>>>"
       ],
       [
         306,
@@ -18374,15 +18374,15 @@
       ],
       [
         308,
-        "enum_init<core::option::Option::<core::array::Array::<controller_auth::signer::SignerSignature>>, 1>"
+        "enum_init<core::option::Option::<core::array::Array::<webauthn_auth::signer::SignerSignature>>, 1>"
       ],
       [
         309,
-        "enum_match<core::option::Option::<core::array::Array::<controller_auth::signer::SignerSignature>>>"
+        "enum_match<core::option::Option::<core::array::Array::<webauthn_auth::signer::SignerSignature>>>"
       ],
       [
         310,
-        "drop<Array<controller_auth::signer::SignerSignature>>"
+        "drop<Array<webauthn_auth::signer::SignerSignature>>"
       ],
       [
         311,
@@ -18398,35 +18398,35 @@
       ],
       [
         314,
-        "struct_construct<controller_auth::signer::StarknetSigner>"
+        "struct_construct<webauthn_auth::signer::StarknetSigner>"
       ],
       [
         315,
-        "struct_construct<controller_auth::signer::StarknetSignature>"
+        "struct_construct<webauthn_auth::signer::StarknetSignature>"
       ],
       [
         316,
-        "struct_construct<Tuple<controller_auth::signer::StarknetSigner, controller_auth::signer::StarknetSignature>>"
+        "struct_construct<Tuple<webauthn_auth::signer::StarknetSigner, webauthn_auth::signer::StarknetSignature>>"
       ],
       [
         317,
-        "enum_init<controller_auth::signer::SignerSignature, 0>"
+        "enum_init<webauthn_auth::signer::SignerSignature, 0>"
       ],
       [
         318,
-        "dup<controller_auth::signer::SignerSignature>"
+        "dup<webauthn_auth::signer::SignerSignature>"
       ],
       [
         319,
-        "array_append<controller_auth::signer::SignerSignature>"
+        "array_append<webauthn_auth::signer::SignerSignature>"
       ],
       [
         320,
-        "snapshot_take<Array<controller_auth::signer::SignerSignature>>"
+        "snapshot_take<Array<webauthn_auth::signer::SignerSignature>>"
       ],
       [
         321,
-        "array_len<controller_auth::signer::SignerSignature>"
+        "array_len<webauthn_auth::signer::SignerSignature>"
       ],
       [
         322,
@@ -18434,23 +18434,23 @@
       ],
       [
         323,
-        "array_get<controller_auth::signer::SignerSignature>"
+        "array_get<webauthn_auth::signer::SignerSignature>"
       ],
       [
         324,
-        "store_temp<Box<controller_auth::signer::SignerSignature>>"
+        "store_temp<Box<webauthn_auth::signer::SignerSignature>>"
       ],
       [
         325,
-        "unbox<controller_auth::signer::SignerSignature>"
+        "unbox<webauthn_auth::signer::SignerSignature>"
       ],
       [
         326,
-        "rename<controller_auth::signer::SignerSignature>"
+        "rename<webauthn_auth::signer::SignerSignature>"
       ],
       [
         327,
-        "function_call<user@controller::account::CartridgeAccount::ContractInternalImpl::is_valid_owner_signature>"
+        "function_call<user@cartridge_account::cartridge::CartridgeAccount::ContractInternalImpl::is_valid_owner_signature>"
       ],
       [
         328,
@@ -18474,7 +18474,7 @@
       ],
       [
         333,
-        "drop<controller_auth::signer::StarknetSigner>"
+        "drop<webauthn_auth::signer::StarknetSigner>"
       ],
       [
         334,
@@ -18494,11 +18494,11 @@
       ],
       [
         338,
-        "drop<controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>>"
+        "drop<webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>>"
       ],
       [
         339,
-        "function_call<user@controller::account::CartridgeAccount::ContractInternalImpl::assert_valid_span_signature>"
+        "function_call<user@cartridge_account::cartridge::CartridgeAccount::ContractInternalImpl::assert_valid_span_signature>"
       ],
       [
         340,
@@ -18510,131 +18510,131 @@
       ],
       [
         342,
-        "alloc_local<controller_auth::signer::WebauthnSigner>"
+        "alloc_local<webauthn_auth::signer::WebauthnSigner>"
       ],
       [
         343,
-        "drop<Uninitialized<controller_auth::signer::WebauthnSigner>>"
+        "drop<Uninitialized<webauthn_auth::signer::WebauthnSigner>>"
       ],
       [
         344,
-        "function_call<user@core::serde::TupleSize2Serde::<controller_auth::signer::StarknetSigner, controller_auth::signer::StarknetSignature, controller_auth::signer::StarknetSignerSerde, controller_auth::signer::StarknetSignerDrop, controller_auth::signer::StarknetSignatureSerde, controller_auth::signer::StarknetSignatureDrop>::deserialize>"
+        "function_call<user@core::serde::TupleSize2Serde::<webauthn_auth::signer::StarknetSigner, webauthn_auth::signer::StarknetSignature, webauthn_auth::signer::StarknetSignerSerde, webauthn_auth::signer::StarknetSignerDrop, webauthn_auth::signer::StarknetSignatureSerde, webauthn_auth::signer::StarknetSignatureDrop>::deserialize>"
       ],
       [
         345,
-        "enum_match<core::option::Option::<(controller_auth::signer::StarknetSigner, controller_auth::signer::StarknetSignature)>>"
+        "enum_match<core::option::Option::<(webauthn_auth::signer::StarknetSigner, webauthn_auth::signer::StarknetSignature)>>"
       ],
       [
         346,
-        "enum_init<core::option::Option::<controller_auth::signer::SignerSignature>, 1>"
+        "enum_init<core::option::Option::<webauthn_auth::signer::SignerSignature>, 1>"
       ],
       [
         347,
-        "struct_construct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<controller_auth::signer::SignerSignature>>>"
+        "struct_construct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::signer::SignerSignature>>>"
       ],
       [
         348,
-        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller_auth::signer::SignerSignature>)>, 0>"
+        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::signer::SignerSignature>)>, 0>"
       ],
       [
         349,
-        "store_temp<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller_auth::signer::SignerSignature>)>>"
+        "store_temp<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::signer::SignerSignature>)>>"
       ],
       [
         350,
-        "function_call<user@core::serde::TupleSize2Serde::<controller_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature, controller_auth::signer::Secp256k1SignerSerde, controller_auth::signer::Secp256k1SignerDrop, core::starknet::secp256_trait::SignatureSerde, core::starknet::secp256_trait::SignatureDrop>::deserialize>"
+        "function_call<user@core::serde::TupleSize2Serde::<webauthn_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature, webauthn_auth::signer::Secp256k1SignerSerde, webauthn_auth::signer::Secp256k1SignerDrop, core::starknet::secp256_trait::SignatureSerde, core::starknet::secp256_trait::SignatureDrop>::deserialize>"
       ],
       [
         351,
-        "enum_match<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<(controller_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature)>)>>"
+        "enum_match<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<(webauthn_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature)>)>>"
       ],
       [
         352,
-        "struct_deconstruct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<(controller_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature)>>>"
+        "struct_deconstruct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<(webauthn_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature)>>>"
       ],
       [
         353,
-        "enum_match<core::option::Option::<(controller_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature)>>"
+        "enum_match<core::option::Option::<(webauthn_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature)>>"
       ],
       [
         354,
-        "enum_init<controller_auth::signer::SignerSignature, 1>"
+        "enum_init<webauthn_auth::signer::SignerSignature, 1>"
       ],
       [
         355,
-        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller_auth::signer::SignerSignature>)>, 1>"
+        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::signer::SignerSignature>)>, 1>"
       ],
       [
         356,
-        "function_call<user@controller_auth::signer::WebauthnSignerSerde::deserialize>"
+        "function_call<user@webauthn_auth::signer::WebauthnSignerSerde::deserialize>"
       ],
       [
         357,
-        "enum_match<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller_auth::signer::WebauthnSigner>)>>"
+        "enum_match<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::signer::WebauthnSigner>)>>"
       ],
       [
         358,
-        "struct_deconstruct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<controller_auth::signer::WebauthnSigner>>>"
+        "struct_deconstruct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::signer::WebauthnSigner>>>"
       ],
       [
         359,
-        "enum_match<core::option::Option::<controller_auth::signer::WebauthnSigner>>"
+        "enum_match<core::option::Option::<webauthn_auth::signer::WebauthnSigner>>"
       ],
       [
         360,
-        "store_local<controller_auth::signer::WebauthnSigner>"
+        "store_local<webauthn_auth::signer::WebauthnSigner>"
       ],
       [
         361,
-        "function_call<user@controller_auth::webauthn::WebauthnAssertionSerde::deserialize>"
+        "function_call<user@webauthn_auth::webauthn::WebauthnAssertionSerde::deserialize>"
       ],
       [
         362,
-        "enum_match<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller_auth::webauthn::WebauthnAssertion>)>>"
+        "enum_match<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::webauthn::WebauthnAssertion>)>>"
       ],
       [
         363,
-        "struct_deconstruct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<controller_auth::webauthn::WebauthnAssertion>>>"
+        "struct_deconstruct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::webauthn::WebauthnAssertion>>>"
       ],
       [
         364,
-        "enum_match<core::option::Option::<controller_auth::webauthn::WebauthnAssertion>>"
+        "enum_match<core::option::Option::<webauthn_auth::webauthn::WebauthnAssertion>>"
       ],
       [
         365,
-        "struct_construct<Tuple<controller_auth::signer::WebauthnSigner, controller_auth::webauthn::WebauthnAssertion>>"
+        "struct_construct<Tuple<webauthn_auth::signer::WebauthnSigner, webauthn_auth::webauthn::WebauthnAssertion>>"
       ],
       [
         366,
-        "enum_init<core::option::Option::<(controller_auth::signer::WebauthnSigner, controller_auth::webauthn::WebauthnAssertion)>, 0>"
+        "enum_init<core::option::Option::<(webauthn_auth::signer::WebauthnSigner, webauthn_auth::webauthn::WebauthnAssertion)>, 0>"
       ],
       [
         367,
-        "store_temp<core::option::Option::<(controller_auth::signer::WebauthnSigner, controller_auth::webauthn::WebauthnAssertion)>>"
+        "store_temp<core::option::Option::<(webauthn_auth::signer::WebauthnSigner, webauthn_auth::webauthn::WebauthnAssertion)>>"
       ],
       [
         368,
-        "drop<controller_auth::signer::WebauthnSigner>"
+        "drop<webauthn_auth::signer::WebauthnSigner>"
       ],
       [
         369,
-        "enum_init<core::option::Option::<(controller_auth::signer::WebauthnSigner, controller_auth::webauthn::WebauthnAssertion)>, 1>"
+        "enum_init<core::option::Option::<(webauthn_auth::signer::WebauthnSigner, webauthn_auth::webauthn::WebauthnAssertion)>, 1>"
       ],
       [
         370,
-        "enum_match<core::option::Option::<(controller_auth::signer::WebauthnSigner, controller_auth::webauthn::WebauthnAssertion)>>"
+        "enum_match<core::option::Option::<(webauthn_auth::signer::WebauthnSigner, webauthn_auth::webauthn::WebauthnAssertion)>>"
       ],
       [
         371,
-        "enum_init<controller_auth::signer::SignerSignature, 2>"
+        "enum_init<webauthn_auth::signer::SignerSignature, 2>"
       ],
       [
         372,
-        "enum_init<controller_auth::signer::SignerSignature, 3>"
+        "enum_init<webauthn_auth::signer::SignerSignature, 3>"
       ],
       [
         373,
-        "enum_init<core::option::Option::<controller_auth::signer::SignerSignature>, 0>"
+        "enum_init<core::option::Option::<webauthn_auth::signer::SignerSignature>, 0>"
       ],
       [
         374,
@@ -18642,31 +18642,31 @@
       ],
       [
         375,
-        "alloc_local<controller_auth::signer::SignerStorageValue>"
+        "alloc_local<webauthn_auth::signer::SignerStorageValue>"
       ],
       [
         376,
-        "alloc_local<controller_auth::signer::SignerType>"
+        "alloc_local<webauthn_auth::signer::SignerType>"
       ],
       [
         377,
-        "enum_match<controller_auth::signer::SignerSignature>"
+        "enum_match<webauthn_auth::signer::SignerSignature>"
       ],
       [
         378,
-        "struct_deconstruct<Tuple<controller_auth::signer::StarknetSigner, controller_auth::signer::StarknetSignature>>"
+        "struct_deconstruct<Tuple<webauthn_auth::signer::StarknetSigner, webauthn_auth::signer::StarknetSignature>>"
       ],
       [
         379,
-        "drop<controller_auth::signer::StarknetSignature>"
+        "drop<webauthn_auth::signer::StarknetSignature>"
       ],
       [
         380,
-        "enum_init<controller_auth::signer::Signer, 0>"
+        "enum_init<webauthn_auth::signer::Signer, 0>"
       ],
       [
         381,
-        "struct_deconstruct<Tuple<controller_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature>>"
+        "struct_deconstruct<Tuple<webauthn_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature>>"
       ],
       [
         382,
@@ -18674,39 +18674,39 @@
       ],
       [
         383,
-        "enum_init<controller_auth::signer::Signer, 1>"
+        "enum_init<webauthn_auth::signer::Signer, 1>"
       ],
       [
         384,
-        "struct_deconstruct<Tuple<controller_auth::signer::WebauthnSigner, controller_auth::webauthn::WebauthnAssertion>>"
+        "struct_deconstruct<Tuple<webauthn_auth::signer::WebauthnSigner, webauthn_auth::webauthn::WebauthnAssertion>>"
       ],
       [
         385,
-        "drop<controller_auth::webauthn::WebauthnAssertion>"
+        "drop<webauthn_auth::webauthn::WebauthnAssertion>"
       ],
       [
         386,
-        "enum_init<controller_auth::signer::Signer, 2>"
+        "enum_init<webauthn_auth::signer::Signer, 2>"
       ],
       [
         387,
-        "enum_init<controller_auth::signer::Signer, 3>"
+        "enum_init<webauthn_auth::signer::Signer, 3>"
       ],
       [
         388,
-        "function_call<user@controller::account::CartridgeAccount::ContractInternalImpl::assert_valid_new_owner_signature>"
+        "function_call<user@cartridge_account::cartridge::CartridgeAccount::ContractInternalImpl::assert_valid_new_owner_signature>"
       ],
       [
         389,
-        "dup<controller_auth::signer::Signer>"
+        "dup<webauthn_auth::signer::Signer>"
       ],
       [
         390,
-        "enum_match<controller_auth::signer::Signer>"
+        "enum_match<webauthn_auth::signer::Signer>"
       ],
       [
         391,
-        "struct_deconstruct<controller_auth::signer::StarknetSigner>"
+        "struct_deconstruct<webauthn_auth::signer::StarknetSigner>"
       ],
       [
         392,
@@ -18714,11 +18714,11 @@
       ],
       [
         393,
-        "enum_init<controller_auth::signer::SignerType, 1>"
+        "enum_init<webauthn_auth::signer::SignerType, 1>"
       ],
       [
         394,
-        "struct_deconstruct<controller_auth::signer::Secp256k1Signer>"
+        "struct_deconstruct<webauthn_auth::signer::Secp256k1Signer>"
       ],
       [
         395,
@@ -18726,11 +18726,11 @@
       ],
       [
         396,
-        "function_call<user@controller_auth::signer::SignerTraitImpl::into_guid>"
+        "function_call<user@webauthn_auth::signer::SignerTraitImpl::into_guid>"
       ],
       [
         397,
-        "drop<Uninitialized<controller_auth::signer::SignerType>>"
+        "drop<Uninitialized<webauthn_auth::signer::SignerType>>"
       ],
       [
         398,
@@ -18738,95 +18738,95 @@
       ],
       [
         399,
-        "drop<Uninitialized<controller_auth::signer::SignerStorageValue>>"
+        "drop<Uninitialized<webauthn_auth::signer::SignerStorageValue>>"
       ],
       [
         400,
-        "enum_init<core::panics::PanicResult::<(controller::account::CartridgeAccount::ContractState, ())>, 1>"
+        "enum_init<core::panics::PanicResult::<(cartridge_account::cartridge::CartridgeAccount::ContractState, ())>, 1>"
       ],
       [
         401,
-        "store_temp<core::panics::PanicResult::<(controller::account::CartridgeAccount::ContractState, ())>>"
+        "store_temp<core::panics::PanicResult::<(cartridge_account::cartridge::CartridgeAccount::ContractState, ())>>"
       ],
       [
         402,
-        "enum_init<controller_auth::signer::SignerType, 3>"
+        "enum_init<webauthn_auth::signer::SignerType, 3>"
       ],
       [
         403,
-        "store_local<controller_auth::signer::SignerType>"
+        "store_local<webauthn_auth::signer::SignerType>"
       ],
       [
         404,
-        "dup<controller_auth::signer::SignerType>"
+        "dup<webauthn_auth::signer::SignerType>"
       ],
       [
         405,
-        "struct_construct<controller_auth::signer::SignerStorageValue>"
+        "struct_construct<webauthn_auth::signer::SignerStorageValue>"
       ],
       [
         406,
-        "store_local<controller_auth::signer::SignerStorageValue>"
+        "store_local<webauthn_auth::signer::SignerStorageValue>"
       ],
       [
         407,
-        "dup<controller_auth::signer::SignerStorageValue>"
+        "dup<webauthn_auth::signer::SignerStorageValue>"
       ],
       [
         408,
-        "store_temp<controller_auth::signer::SignerStorageValue>"
+        "store_temp<webauthn_auth::signer::SignerStorageValue>"
       ],
       [
         409,
-        "function_call<user@controller::account::CartridgeAccount::ContractInternalImpl::write_owner>"
+        "function_call<user@cartridge_account::cartridge::CartridgeAccount::ContractInternalImpl::write_owner>"
       ],
       [
         410,
-        "struct_construct<controller::account::CartridgeAccount::OwnerChanged>"
+        "struct_construct<cartridge_account::cartridge::CartridgeAccount::OwnerChanged>"
       ],
       [
         411,
-        "store_temp<controller::account::CartridgeAccount::OwnerChanged>"
+        "store_temp<cartridge_account::cartridge::CartridgeAccount::OwnerChanged>"
       ],
       [
         412,
-        "function_call<user@controller::account::CartridgeAccount::ContractStateEventEmitter::emit::<controller::account::CartridgeAccount::OwnerChanged, controller::account::CartridgeAccount::EventOwnerChangedIntoEvent>>"
+        "function_call<user@cartridge_account::cartridge::CartridgeAccount::ContractStateEventEmitter::emit::<cartridge_account::cartridge::CartridgeAccount::OwnerChanged, cartridge_account::cartridge::CartridgeAccount::EventOwnerChangedIntoEvent>>"
       ],
       [
         413,
-        "rename<controller::account::CartridgeAccount::ContractState>"
+        "rename<cartridge_account::cartridge::CartridgeAccount::ContractState>"
       ],
       [
         414,
-        "drop<controller_auth::signer::SignerStorageValue>"
+        "drop<webauthn_auth::signer::SignerStorageValue>"
       ],
       [
         415,
-        "function_call<user@controller_auth::signer::SignerStorageValueImpl::into_guid>"
+        "function_call<user@webauthn_auth::signer::SignerStorageValueImpl::into_guid>"
       ],
       [
         416,
-        "struct_construct<controller::account::CartridgeAccount::OwnerChangedGuid>"
+        "struct_construct<cartridge_account::cartridge::CartridgeAccount::OwnerChangedGuid>"
       ],
       [
         417,
-        "store_temp<controller::account::CartridgeAccount::OwnerChangedGuid>"
+        "store_temp<cartridge_account::cartridge::CartridgeAccount::OwnerChangedGuid>"
       ],
       [
         418,
-        "function_call<user@controller::account::CartridgeAccount::ContractStateEventEmitter::emit::<controller::account::CartridgeAccount::OwnerChangedGuid, controller::account::CartridgeAccount::EventOwnerChangedGuidIntoEvent>>"
+        "function_call<user@cartridge_account::cartridge::CartridgeAccount::ContractStateEventEmitter::emit::<cartridge_account::cartridge::CartridgeAccount::OwnerChangedGuid, cartridge_account::cartridge::CartridgeAccount::EventOwnerChangedGuidIntoEvent>>"
       ],
       [
         419,
-        "struct_construct<controller::account::CartridgeAccount::SignerLinked>"
+        "struct_construct<cartridge_account::cartridge::CartridgeAccount::SignerLinked>"
       ],
       [
         420,
-        "store_temp<controller::account::CartridgeAccount::SignerLinked>"
+        "store_temp<cartridge_account::cartridge::CartridgeAccount::SignerLinked>"
       ],
       [
         421,
-        "function_call<user@controller::account::CartridgeAccount::ContractStateEventEmitter::emit::<controller::account::CartridgeAccount::SignerLinked, controller::account::CartridgeAccount::EventSignerLinkedIntoEvent>>"
+        "function_call<user@cartridge_account::cartridge::CartridgeAccount::ContractStateEventEmitter::emit::<cartridge_account::cartridge::CartridgeAccount::SignerLinked, cartridge_account::cartridge::CartridgeAccount::EventSignerLinkedIntoEvent>>"
       ],
       [
         422,
@@ -18926,31 +18926,31 @@
       ],
       [
         446,
-        "enum_init<controller_session::interface::SessionState, 0>"
+        "enum_init<webauthn_session::interface::SessionState, 0>"
       ],
       [
         447,
-        "store_temp<controller_session::interface::SessionState>"
+        "store_temp<webauthn_session::interface::SessionState>"
       ],
       [
         448,
-        "enum_init<controller_session::interface::SessionState, 1>"
+        "enum_init<webauthn_session::interface::SessionState, 1>"
       ],
       [
         449,
-        "enum_init<controller_session::interface::SessionState, 2>"
+        "enum_init<webauthn_session::interface::SessionState, 2>"
       ],
       [
         450,
-        "snapshot_take<controller_session::interface::SessionState>"
+        "snapshot_take<webauthn_session::interface::SessionState>"
       ],
       [
         451,
-        "drop<controller_session::interface::SessionState>"
+        "drop<webauthn_session::interface::SessionState>"
       ],
       [
         452,
-        "function_call<user@core::traits::PartialEqSnap::<controller_session::interface::SessionState, controller_session::interface::SessionStatePartialEq>::eq>"
+        "function_call<user@core::traits::PartialEqSnap::<webauthn_session::interface::SessionState, webauthn_session::interface::SessionStatePartialEq>::eq>"
       ],
       [
         453,
@@ -18958,39 +18958,39 @@
       ],
       [
         454,
-        "struct_construct<controller_session::session_component::SessionRevoked>"
+        "struct_construct<webauthn_session::session_component::SessionRevoked>"
       ],
       [
         455,
-        "enum_init<controller_session::session_component::Event, 0>"
+        "enum_init<webauthn_session::session_component::Event, 0>"
       ],
       [
         456,
-        "enum_init<controller::account::CartridgeAccount::Event, 3>"
+        "enum_init<cartridge_account::cartridge::CartridgeAccount::Event, 3>"
       ],
       [
         457,
-        "store_temp<controller::account::CartridgeAccount::Event>"
+        "store_temp<cartridge_account::cartridge::CartridgeAccount::Event>"
       ],
       [
         458,
-        "function_call<user@controller::account::CartridgeAccount::ContractStateEventEmitter::emit::<controller::account::CartridgeAccount::Event, core::traits::TIntoT::<controller::account::CartridgeAccount::Event>>>"
+        "function_call<user@cartridge_account::cartridge::CartridgeAccount::ContractStateEventEmitter::emit::<cartridge_account::cartridge::CartridgeAccount::Event, core::traits::TIntoT::<cartridge_account::cartridge::CartridgeAccount::Event>>>"
       ],
       [
         459,
-        "struct_construct<Tuple<controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, Unit>>"
+        "struct_construct<Tuple<webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, Unit>>"
       ],
       [
         460,
-        "enum_init<core::panics::PanicResult::<(controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, ())>, 0>"
+        "enum_init<core::panics::PanicResult::<(webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, ())>, 0>"
       ],
       [
         461,
-        "store_temp<core::panics::PanicResult::<(controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, ())>>"
+        "store_temp<core::panics::PanicResult::<(webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, ())>>"
       ],
       [
         462,
-        "enum_init<core::panics::PanicResult::<(controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, ())>, 1>"
+        "enum_init<core::panics::PanicResult::<(webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, ())>, 1>"
       ],
       [
         463,
@@ -19002,7 +19002,7 @@
       ],
       [
         465,
-        "enum_match<controller_session::interface::SessionState>"
+        "enum_match<webauthn_session::interface::SessionState>"
       ],
       [
         466,
@@ -19046,11 +19046,11 @@
       ],
       [
         476,
-        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller::outside_execution::interface::OutsideExecution>)>, 1>"
+        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<cartridge_account::outside_execution::interface::OutsideExecution>)>, 1>"
       ],
       [
         477,
-        "store_temp<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller::outside_execution::interface::OutsideExecution>)>>"
+        "store_temp<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<cartridge_account::outside_execution::interface::OutsideExecution>)>>"
       ],
       [
         478,
@@ -19058,23 +19058,23 @@
       ],
       [
         479,
-        "struct_construct<controller::outside_execution::interface::OutsideExecution>"
+        "struct_construct<cartridge_account::outside_execution::interface::OutsideExecution>"
       ],
       [
         480,
-        "enum_init<core::option::Option::<controller::outside_execution::interface::OutsideExecution>, 0>"
+        "enum_init<core::option::Option::<cartridge_account::outside_execution::interface::OutsideExecution>, 0>"
       ],
       [
         481,
-        "struct_construct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<controller::outside_execution::interface::OutsideExecution>>>"
+        "struct_construct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<cartridge_account::outside_execution::interface::OutsideExecution>>>"
       ],
       [
         482,
-        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller::outside_execution::interface::OutsideExecution>)>, 0>"
+        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<cartridge_account::outside_execution::interface::OutsideExecution>)>, 0>"
       ],
       [
         483,
-        "enum_init<core::option::Option::<controller::outside_execution::interface::OutsideExecution>, 1>"
+        "enum_init<core::option::Option::<cartridge_account::outside_execution::interface::OutsideExecution>, 1>"
       ],
       [
         484,
@@ -19142,11 +19142,11 @@
       ],
       [
         500,
-        "rename<controller::outside_execution::interface::OutsideExecution>"
+        "rename<cartridge_account::outside_execution::interface::OutsideExecution>"
       ],
       [
         501,
-        "function_call<user@controller::outside_execution::outside_execution_hash::StructHashOutsideExecutionRev1::get_struct_hash_rev_1>"
+        "function_call<user@cartridge_account::outside_execution::outside_execution_hash::StructHashOutsideExecutionRev1::get_struct_hash_rev_1>"
       ],
       [
         502,
@@ -19182,19 +19182,19 @@
       ],
       [
         510,
-        "struct_construct<controller_session::hash::StarknetDomain>"
+        "struct_construct<webauthn_session::hash::StarknetDomain>"
       ],
       [
         511,
-        "snapshot_take<controller_session::hash::StarknetDomain>"
+        "snapshot_take<webauthn_session::hash::StarknetDomain>"
       ],
       [
         512,
-        "drop<controller_session::hash::StarknetDomain>"
+        "drop<webauthn_session::hash::StarknetDomain>"
       ],
       [
         513,
-        "store_temp<controller_session::hash::StarknetDomain>"
+        "store_temp<webauthn_session::hash::StarknetDomain>"
       ],
       [
         514,
@@ -19202,7 +19202,7 @@
       ],
       [
         515,
-        "function_call<user@controller_session::hash::StructHashStarknetDomain::get_struct_hash_rev_1>"
+        "function_call<user@webauthn_session::hash::StructHashStarknetDomain::get_struct_hash_rev_1>"
       ],
       [
         516,
@@ -19226,7 +19226,7 @@
       ],
       [
         521,
-        "struct_deconstruct<controller::outside_execution::interface::OutsideExecution>"
+        "struct_deconstruct<cartridge_account::outside_execution::interface::OutsideExecution>"
       ],
       [
         522,
@@ -19266,11 +19266,11 @@
       ],
       [
         531,
-        "enum_init<core::panics::PanicResult::<(controller::outside_execution::outside_execution::outside_execution_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::array::Array::<core::array::Span::<core::felt252>>)>, 1>"
+        "enum_init<core::panics::PanicResult::<(cartridge_account::outside_execution::outside_execution::outside_execution_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, core::array::Array::<core::array::Span::<core::felt252>>)>, 1>"
       ],
       [
         532,
-        "store_temp<core::panics::PanicResult::<(controller::outside_execution::outside_execution::outside_execution_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::array::Array::<core::array::Span::<core::felt252>>)>>"
+        "store_temp<core::panics::PanicResult::<(cartridge_account::outside_execution::outside_execution::outside_execution_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, core::array::Array::<core::array::Span::<core::felt252>>)>>"
       ],
       [
         533,
@@ -19278,7 +19278,7 @@
       ],
       [
         534,
-        "drop<controller::outside_execution::outside_execution::outside_execution_component::__member_module_outside_nonces::ComponentMemberState>"
+        "drop<cartridge_account::outside_execution::outside_execution::outside_execution_component::__member_module_outside_nonces::ComponentMemberState>"
       ],
       [
         535,
@@ -19286,19 +19286,19 @@
       ],
       [
         536,
-        "drop<Tuple<controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, felt252>>"
+        "drop<Tuple<webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, felt252>>"
       ],
       [
         537,
-        "struct_construct<Tuple<controller::outside_execution::outside_execution::outside_execution_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, Array<core::array::Span::<core::felt252>>>>"
+        "struct_construct<Tuple<cartridge_account::outside_execution::outside_execution::outside_execution_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, Array<core::array::Span::<core::felt252>>>>"
       ],
       [
         538,
-        "enum_init<core::panics::PanicResult::<(controller::outside_execution::outside_execution::outside_execution_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::array::Array::<core::array::Span::<core::felt252>>)>, 0>"
+        "enum_init<core::panics::PanicResult::<(cartridge_account::outside_execution::outside_execution::outside_execution_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, core::array::Array::<core::array::Span::<core::felt252>>)>, 0>"
       ],
       [
         539,
-        "drop<controller_session::session_component::__member_module_session_states::ComponentMemberState>"
+        "drop<webauthn_session::session_component::__member_module_session_states::ComponentMemberState>"
       ],
       [
         540,
@@ -19310,19 +19310,19 @@
       ],
       [
         542,
-        "enum_init<core::option::Option::<controller_auth::signer::Signer>, 1>"
+        "enum_init<core::option::Option::<webauthn_auth::signer::Signer>, 1>"
       ],
       [
         543,
-        "struct_construct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<controller_auth::signer::Signer>>>"
+        "struct_construct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::signer::Signer>>>"
       ],
       [
         544,
-        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller_auth::signer::Signer>)>, 0>"
+        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::signer::Signer>)>, 0>"
       ],
       [
         545,
-        "store_temp<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller_auth::signer::Signer>)>>"
+        "store_temp<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::signer::Signer>)>>"
       ],
       [
         546,
@@ -19366,7 +19366,7 @@
       ],
       [
         556,
-        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller_auth::signer::Signer>)>, 1>"
+        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::signer::Signer>)>, 1>"
       ],
       [
         557,
@@ -19374,35 +19374,35 @@
       ],
       [
         558,
-        "struct_construct<controller_auth::signer::Secp256k1Signer>"
+        "struct_construct<webauthn_auth::signer::Secp256k1Signer>"
       ],
       [
         559,
-        "enum_init<core::option::Option::<controller_auth::signer::Signer>, 0>"
+        "enum_init<core::option::Option::<webauthn_auth::signer::Signer>, 0>"
       ],
       [
         560,
-        "enum_init<core::option::Option::<core::option::Option::<controller_auth::signer::Signer>>, 1>"
+        "enum_init<core::option::Option::<core::option::Option::<webauthn_auth::signer::Signer>>, 1>"
       ],
       [
         561,
-        "struct_construct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<core::option::Option::<controller_auth::signer::Signer>>>>"
+        "struct_construct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<core::option::Option::<webauthn_auth::signer::Signer>>>>"
       ],
       [
         562,
-        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<core::option::Option::<controller_auth::signer::Signer>>)>, 0>"
+        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<core::option::Option::<webauthn_auth::signer::Signer>>)>, 0>"
       ],
       [
         563,
-        "store_temp<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<core::option::Option::<controller_auth::signer::Signer>>)>>"
+        "store_temp<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<core::option::Option::<webauthn_auth::signer::Signer>>)>>"
       ],
       [
         564,
-        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<core::option::Option::<controller_auth::signer::Signer>>)>, 1>"
+        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<core::option::Option::<webauthn_auth::signer::Signer>>)>, 1>"
       ],
       [
         565,
-        "enum_init<core::option::Option::<core::option::Option::<controller_auth::signer::Signer>>, 0>"
+        "enum_init<core::option::Option::<core::option::Option::<webauthn_auth::signer::Signer>>, 0>"
       ],
       [
         566,
@@ -19418,11 +19418,11 @@
       ],
       [
         569,
-        "struct_construct<Tuple<controller::account::CartridgeAccount::ContractState, Unit>>"
+        "struct_construct<Tuple<cartridge_account::cartridge::CartridgeAccount::ContractState, Unit>>"
       ],
       [
         570,
-        "enum_init<core::panics::PanicResult::<(controller::account::CartridgeAccount::ContractState, ())>, 0>"
+        "enum_init<core::panics::PanicResult::<(cartridge_account::cartridge::CartridgeAccount::ContractState, ())>, 0>"
       ],
       [
         571,
@@ -19450,7 +19450,7 @@
       ],
       [
         577,
-        "function_call<user@controller_auth::assert_no_self_call[expr21]>"
+        "function_call<user@webauthn_auth::assert_no_self_call[expr21]>"
       ],
       [
         578,
@@ -19466,35 +19466,35 @@
       ],
       [
         581,
-        "function_call<user@controller_session::interface::SessionTokenSerde::deserialize>"
+        "function_call<user@webauthn_session::interface::SessionTokenSerde::deserialize>"
       ],
       [
         582,
-        "enum_match<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller_session::interface::SessionToken>)>>"
+        "enum_match<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<webauthn_session::interface::SessionToken>)>>"
       ],
       [
         583,
-        "struct_deconstruct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<controller_session::interface::SessionToken>>>"
+        "struct_deconstruct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<webauthn_session::interface::SessionToken>>>"
       ],
       [
         584,
-        "enum_match<core::option::Option::<controller_session::interface::SessionToken>>"
+        "enum_match<core::option::Option::<webauthn_session::interface::SessionToken>>"
       ],
       [
         585,
-        "store_temp<controller_session::interface::SessionToken>"
+        "store_temp<webauthn_session::interface::SessionToken>"
       ],
       [
         586,
-        "function_call<user@controller_session::session_component::InternalImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl>::validate_signature>"
+        "function_call<user@webauthn_session::session_component::InternalImpl::<cartridge_account::cartridge::CartridgeAccount::ContractState, cartridge_account::cartridge::CartridgeAccount::HasComponentImpl_session_component, cartridge_account::cartridge::CartridgeAccount::SessionCallbackImpl>::validate_signature>"
       ],
       [
         587,
-        "enum_match<core::panics::PanicResult::<(controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>)>>"
+        "enum_match<core::panics::PanicResult::<(webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>)>>"
       ],
       [
         588,
-        "struct_deconstruct<Tuple<controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>>>"
+        "struct_deconstruct<Tuple<webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>>>"
       ],
       [
         589,
@@ -19502,19 +19502,19 @@
       ],
       [
         590,
-        "struct_construct<Tuple<controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, felt252>>"
+        "struct_construct<Tuple<webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, felt252>>"
       ],
       [
         591,
-        "enum_init<core::panics::PanicResult::<(controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::felt252)>, 0>"
+        "enum_init<core::panics::PanicResult::<(webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, core::felt252)>, 0>"
       ],
       [
         592,
-        "store_temp<core::panics::PanicResult::<(controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::felt252)>>"
+        "store_temp<core::panics::PanicResult::<(webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, core::felt252)>>"
       ],
       [
         593,
-        "enum_init<core::panics::PanicResult::<(controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::felt252)>, 1>"
+        "enum_init<core::panics::PanicResult::<(webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, core::felt252)>, 1>"
       ],
       [
         594,
@@ -19594,27 +19594,27 @@
       ],
       [
         613,
-        "enum_init<core::option::Option::<core::array::Array::<controller_auth::signer::SignerSignature>>, 0>"
+        "enum_init<core::option::Option::<core::array::Array::<webauthn_auth::signer::SignerSignature>>, 0>"
       ],
       [
         614,
-        "struct_construct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<core::array::Array::<controller_auth::signer::SignerSignature>>>>"
+        "struct_construct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<core::array::Array::<webauthn_auth::signer::SignerSignature>>>>"
       ],
       [
         615,
-        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<core::array::Array::<controller_auth::signer::SignerSignature>>)>, 0>"
+        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<core::array::Array::<webauthn_auth::signer::SignerSignature>>)>, 0>"
       ],
       [
         616,
-        "store_temp<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<core::array::Array::<controller_auth::signer::SignerSignature>>)>>"
+        "store_temp<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<core::array::Array::<webauthn_auth::signer::SignerSignature>>)>>"
       ],
       [
         617,
-        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<core::array::Array::<controller_auth::signer::SignerSignature>>)>, 1>"
+        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<core::array::Array::<webauthn_auth::signer::SignerSignature>>)>, 1>"
       ],
       [
         618,
-        "struct_deconstruct<controller_auth::signer::StarknetSignature>"
+        "struct_deconstruct<webauthn_auth::signer::StarknetSignature>"
       ],
       [
         619,
@@ -19658,11 +19658,11 @@
       ],
       [
         629,
-        "dup<controller_auth::webauthn::WebauthnAssertion>"
+        "dup<webauthn_auth::webauthn::WebauthnAssertion>"
       ],
       [
         630,
-        "struct_deconstruct<controller_auth::webauthn::WebauthnAssertion>"
+        "struct_deconstruct<webauthn_auth::webauthn::WebauthnAssertion>"
       ],
       [
         631,
@@ -19670,27 +19670,27 @@
       ],
       [
         632,
-        "function_call<user@controller_auth::webauthn::verify>"
+        "function_call<user@webauthn_auth::webauthn::verify>"
       ],
       [
         633,
-        "enum_match<core::panics::PanicResult::<(core::result::Result::<(), controller_auth::errors::AuthnError>,)>>"
+        "enum_match<core::panics::PanicResult::<(core::result::Result::<(), webauthn_auth::errors::AuthnError>,)>>"
       ],
       [
         634,
-        "struct_deconstruct<Tuple<core::result::Result::<(), controller_auth::errors::AuthnError>>>"
+        "struct_deconstruct<Tuple<core::result::Result::<(), webauthn_auth::errors::AuthnError>>>"
       ],
       [
         635,
-        "enum_match<core::result::Result::<(), controller_auth::errors::AuthnError>>"
+        "enum_match<core::result::Result::<(), webauthn_auth::errors::AuthnError>>"
       ],
       [
         636,
-        "store_temp<controller_auth::webauthn::WebauthnAssertion>"
+        "store_temp<webauthn_auth::webauthn::WebauthnAssertion>"
       ],
       [
         637,
-        "function_call<user@controller_auth::webauthn::get_webauthn_hash>"
+        "function_call<user@webauthn_auth::webauthn::get_webauthn_hash>"
       ],
       [
         638,
@@ -19726,7 +19726,7 @@
       ],
       [
         646,
-        "struct_deconstruct<controller_auth::signer::WebauthnSigner>"
+        "struct_deconstruct<webauthn_auth::signer::WebauthnSigner>"
       ],
       [
         647,
@@ -19758,7 +19758,7 @@
       ],
       [
         654,
-        "drop<controller_auth::errors::AuthnError>"
+        "drop<webauthn_auth::errors::AuthnError>"
       ],
       [
         655,
@@ -19786,55 +19786,55 @@
       ],
       [
         661,
-        "enum_init<core::option::Option::<controller_auth::signer::StarknetSignature>, 0>"
+        "enum_init<core::option::Option::<webauthn_auth::signer::StarknetSignature>, 0>"
       ],
       [
         662,
-        "store_temp<core::option::Option::<controller_auth::signer::StarknetSignature>>"
+        "store_temp<core::option::Option::<webauthn_auth::signer::StarknetSignature>>"
       ],
       [
         663,
-        "enum_init<core::option::Option::<controller_auth::signer::StarknetSignature>, 1>"
+        "enum_init<core::option::Option::<webauthn_auth::signer::StarknetSignature>, 1>"
       ],
       [
         664,
-        "enum_match<core::option::Option::<controller_auth::signer::StarknetSignature>>"
+        "enum_match<core::option::Option::<webauthn_auth::signer::StarknetSignature>>"
       ],
       [
         665,
-        "enum_init<core::option::Option::<(controller_auth::signer::StarknetSigner, controller_auth::signer::StarknetSignature)>, 0>"
+        "enum_init<core::option::Option::<(webauthn_auth::signer::StarknetSigner, webauthn_auth::signer::StarknetSignature)>, 0>"
       ],
       [
         666,
-        "store_temp<core::option::Option::<(controller_auth::signer::StarknetSigner, controller_auth::signer::StarknetSignature)>>"
+        "store_temp<core::option::Option::<(webauthn_auth::signer::StarknetSigner, webauthn_auth::signer::StarknetSignature)>>"
       ],
       [
         667,
-        "enum_init<core::option::Option::<(controller_auth::signer::StarknetSigner, controller_auth::signer::StarknetSignature)>, 1>"
+        "enum_init<core::option::Option::<(webauthn_auth::signer::StarknetSigner, webauthn_auth::signer::StarknetSignature)>, 1>"
       ],
       [
         668,
-        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<(controller_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature)>)>, 1>"
+        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<(webauthn_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature)>)>, 1>"
       ],
       [
         669,
-        "store_temp<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<(controller_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature)>)>>"
+        "store_temp<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<(webauthn_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature)>)>>"
       ],
       [
         670,
-        "enum_init<core::option::Option::<controller_auth::signer::Secp256k1Signer>, 0>"
+        "enum_init<core::option::Option::<webauthn_auth::signer::Secp256k1Signer>, 0>"
       ],
       [
         671,
-        "store_temp<core::option::Option::<controller_auth::signer::Secp256k1Signer>>"
+        "store_temp<core::option::Option::<webauthn_auth::signer::Secp256k1Signer>>"
       ],
       [
         672,
-        "enum_init<core::option::Option::<controller_auth::signer::Secp256k1Signer>, 1>"
+        "enum_init<core::option::Option::<webauthn_auth::signer::Secp256k1Signer>, 1>"
       ],
       [
         673,
-        "enum_match<core::option::Option::<controller_auth::signer::Secp256k1Signer>>"
+        "enum_match<core::option::Option::<webauthn_auth::signer::Secp256k1Signer>>"
       ],
       [
         674,
@@ -19846,27 +19846,27 @@
       ],
       [
         676,
-        "struct_construct<Tuple<controller_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature>>"
+        "struct_construct<Tuple<webauthn_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature>>"
       ],
       [
         677,
-        "enum_init<core::option::Option::<(controller_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature)>, 0>"
+        "enum_init<core::option::Option::<(webauthn_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature)>, 0>"
       ],
       [
         678,
-        "struct_construct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<(controller_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature)>>>"
+        "struct_construct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<(webauthn_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature)>>>"
       ],
       [
         679,
-        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<(controller_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature)>)>, 0>"
+        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<(webauthn_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature)>)>, 0>"
       ],
       [
         680,
-        "drop<controller_auth::signer::Secp256k1Signer>"
+        "drop<webauthn_auth::signer::Secp256k1Signer>"
       ],
       [
         681,
-        "enum_init<core::option::Option::<(controller_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature)>, 1>"
+        "enum_init<core::option::Option::<(webauthn_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature)>, 1>"
       ],
       [
         682,
@@ -19918,11 +19918,11 @@
       ],
       [
         694,
-        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller_auth::signer::WebauthnSigner>)>, 1>"
+        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::signer::WebauthnSigner>)>, 1>"
       ],
       [
         695,
-        "store_temp<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller_auth::signer::WebauthnSigner>)>>"
+        "store_temp<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::signer::WebauthnSigner>)>>"
       ],
       [
         696,
@@ -19950,23 +19950,23 @@
       ],
       [
         702,
-        "struct_construct<controller_auth::signer::WebauthnSigner>"
+        "struct_construct<webauthn_auth::signer::WebauthnSigner>"
       ],
       [
         703,
-        "enum_init<core::option::Option::<controller_auth::signer::WebauthnSigner>, 0>"
+        "enum_init<core::option::Option::<webauthn_auth::signer::WebauthnSigner>, 0>"
       ],
       [
         704,
-        "struct_construct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<controller_auth::signer::WebauthnSigner>>>"
+        "struct_construct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::signer::WebauthnSigner>>>"
       ],
       [
         705,
-        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller_auth::signer::WebauthnSigner>)>, 0>"
+        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::signer::WebauthnSigner>)>, 0>"
       ],
       [
         706,
-        "enum_init<core::option::Option::<controller_auth::signer::WebauthnSigner>, 1>"
+        "enum_init<core::option::Option::<webauthn_auth::signer::WebauthnSigner>, 1>"
       ],
       [
         707,
@@ -19978,11 +19978,11 @@
       ],
       [
         709,
-        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller_auth::webauthn::WebauthnAssertion>)>, 1>"
+        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::webauthn::WebauthnAssertion>)>, 1>"
       ],
       [
         710,
-        "store_temp<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller_auth::webauthn::WebauthnAssertion>)>>"
+        "store_temp<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::webauthn::WebauthnAssertion>)>>"
       ],
       [
         711,
@@ -19990,23 +19990,23 @@
       ],
       [
         712,
-        "struct_construct<controller_auth::webauthn::WebauthnAssertion>"
+        "struct_construct<webauthn_auth::webauthn::WebauthnAssertion>"
       ],
       [
         713,
-        "enum_init<core::option::Option::<controller_auth::webauthn::WebauthnAssertion>, 0>"
+        "enum_init<core::option::Option::<webauthn_auth::webauthn::WebauthnAssertion>, 0>"
       ],
       [
         714,
-        "struct_construct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<controller_auth::webauthn::WebauthnAssertion>>>"
+        "struct_construct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::webauthn::WebauthnAssertion>>>"
       ],
       [
         715,
-        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller_auth::webauthn::WebauthnAssertion>)>, 0>"
+        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<webauthn_auth::webauthn::WebauthnAssertion>)>, 0>"
       ],
       [
         716,
-        "enum_init<core::option::Option::<controller_auth::webauthn::WebauthnAssertion>, 1>"
+        "enum_init<core::option::Option::<webauthn_auth::webauthn::WebauthnAssertion>, 1>"
       ],
       [
         717,
@@ -20014,27 +20014,27 @@
       ],
       [
         718,
-        "array_new<controller_auth::signer::SignerType>"
+        "array_new<webauthn_auth::signer::SignerType>"
       ],
       [
         719,
-        "array_append<controller_auth::signer::SignerType>"
+        "array_append<webauthn_auth::signer::SignerType>"
       ],
       [
         720,
-        "snapshot_take<Array<controller_auth::signer::SignerType>>"
+        "snapshot_take<Array<webauthn_auth::signer::SignerType>>"
       ],
       [
         721,
-        "drop<Array<controller_auth::signer::SignerType>>"
+        "drop<Array<webauthn_auth::signer::SignerType>>"
       ],
       [
         722,
-        "struct_construct<core::array::Span::<controller_auth::signer::SignerType>>"
+        "struct_construct<core::array::Span::<webauthn_auth::signer::SignerType>>"
       ],
       [
         723,
-        "store_temp<core::array::Span::<controller_auth::signer::SignerType>>"
+        "store_temp<core::array::Span::<webauthn_auth::signer::SignerType>>"
       ],
       [
         724,
@@ -20042,19 +20042,19 @@
       ],
       [
         725,
-        "function_call<user@controller::account::CartridgeAccount::ContractInternalImpl::read_owner[expr46]>"
+        "function_call<user@cartridge_account::cartridge::CartridgeAccount::ContractInternalImpl::read_owner[expr46]>"
       ],
       [
         726,
-        "enum_match<core::panics::PanicResult::<(core::array::Span::<controller_auth::signer::SignerType>, controller_auth::signer::SignerStorageValue)>>"
+        "enum_match<core::panics::PanicResult::<(core::array::Span::<webauthn_auth::signer::SignerType>, webauthn_auth::signer::SignerStorageValue)>>"
       ],
       [
         727,
-        "struct_deconstruct<Tuple<core::array::Span::<controller_auth::signer::SignerType>, controller_auth::signer::SignerStorageValue>>"
+        "struct_deconstruct<Tuple<core::array::Span::<webauthn_auth::signer::SignerType>, webauthn_auth::signer::SignerStorageValue>>"
       ],
       [
         728,
-        "drop<core::array::Span::<controller_auth::signer::SignerType>>"
+        "drop<core::array::Span::<webauthn_auth::signer::SignerType>>"
       ],
       [
         729,
@@ -20106,7 +20106,7 @@
       ],
       [
         741,
-        "function_call<user@controller_auth::signer::SignerTraitImpl::into_guid[expr36]>"
+        "function_call<user@webauthn_auth::signer::SignerTraitImpl::into_guid[expr36]>"
       ],
       [
         742,
@@ -20126,7 +20126,7 @@
       ],
       [
         746,
-        "struct_deconstruct<controller_auth::signer::SignerStorageValue>"
+        "struct_deconstruct<webauthn_auth::signer::SignerStorageValue>"
       ],
       [
         747,
@@ -20134,19 +20134,19 @@
       ],
       [
         748,
-        "enum_init<controller::account::CartridgeAccount::Event, 0>"
+        "enum_init<cartridge_account::cartridge::CartridgeAccount::Event, 0>"
       ],
       [
         749,
-        "snapshot_take<controller::account::CartridgeAccount::Event>"
+        "snapshot_take<cartridge_account::cartridge::CartridgeAccount::Event>"
       ],
       [
         750,
-        "drop<controller::account::CartridgeAccount::Event>"
+        "drop<cartridge_account::cartridge::CartridgeAccount::Event>"
       ],
       [
         751,
-        "enum_match<controller::account::CartridgeAccount::Event>"
+        "enum_match<cartridge_account::cartridge::CartridgeAccount::Event>"
       ],
       [
         752,
@@ -20154,7 +20154,7 @@
       ],
       [
         753,
-        "struct_deconstruct<controller::account::CartridgeAccount::OwnerChanged>"
+        "struct_deconstruct<cartridge_account::cartridge::CartridgeAccount::OwnerChanged>"
       ],
       [
         754,
@@ -20162,7 +20162,7 @@
       ],
       [
         755,
-        "struct_deconstruct<controller::account::CartridgeAccount::OwnerChangedGuid>"
+        "struct_deconstruct<cartridge_account::cartridge::CartridgeAccount::OwnerChangedGuid>"
       ],
       [
         756,
@@ -20170,7 +20170,7 @@
       ],
       [
         757,
-        "function_call<user@controller::account::CartridgeAccount::SignerLinkedIsEvent::append_keys_and_data>"
+        "function_call<user@cartridge_account::cartridge::CartridgeAccount::SignerLinkedIsEvent::append_keys_and_data>"
       ],
       [
         758,
@@ -20182,7 +20182,7 @@
       ],
       [
         760,
-        "enum_match<controller_session::session_component::Event>"
+        "enum_match<webauthn_session::session_component::Event>"
       ],
       [
         761,
@@ -20190,7 +20190,7 @@
       ],
       [
         762,
-        "struct_deconstruct<controller_session::session_component::SessionRevoked>"
+        "struct_deconstruct<webauthn_session::session_component::SessionRevoked>"
       ],
       [
         763,
@@ -20198,19 +20198,19 @@
       ],
       [
         764,
-        "enum_match<controller::outside_execution::outside_execution::outside_execution_component::Event>"
+        "enum_match<cartridge_account::outside_execution::outside_execution::outside_execution_component::Event>"
       ],
       [
         765,
-        "enum_match<controller::src5::src5_component::Event>"
+        "enum_match<cartridge_account::src5::src5_component::Event>"
       ],
       [
         766,
-        "enum_init<controller::account::CartridgeAccount::Event, 1>"
+        "enum_init<cartridge_account::cartridge::CartridgeAccount::Event, 1>"
       ],
       [
         767,
-        "enum_init<controller::account::CartridgeAccount::Event, 2>"
+        "enum_init<cartridge_account::cartridge::CartridgeAccount::Event, 2>"
       ],
       [
         768,
@@ -20342,11 +20342,11 @@
       ],
       [
         800,
-        "rename<controller_session::interface::SessionState>"
+        "rename<webauthn_session::interface::SessionState>"
       ],
       [
         801,
-        "function_call<user@controller::outside_execution::outside_execution_hash::StructHashOutsideExecutionRev1::get_struct_hash_rev_1[expr15]>"
+        "function_call<user@cartridge_account::outside_execution::outside_execution_hash::StructHashOutsideExecutionRev1::get_struct_hash_rev_1[expr15]>"
       ],
       [
         802,
@@ -20370,11 +20370,11 @@
       ],
       [
         807,
-        "dup<controller_session::hash::StarknetDomain>"
+        "dup<webauthn_session::hash::StarknetDomain>"
       ],
       [
         808,
-        "struct_deconstruct<controller_session::hash::StarknetDomain>"
+        "struct_deconstruct<webauthn_session::hash::StarknetDomain>"
       ],
       [
         809,
@@ -20434,27 +20434,27 @@
       ],
       [
         823,
-        "alloc_local<controller_auth::signer::SignerSignature>"
+        "alloc_local<webauthn_auth::signer::SignerSignature>"
       ],
       [
         824,
-        "alloc_local<controller_session::interface::Session>"
+        "alloc_local<webauthn_session::interface::Session>"
       ],
       [
         825,
-        "function_call<user@controller_session::interface::SessionSerde::deserialize>"
+        "function_call<user@webauthn_session::interface::SessionSerde::deserialize>"
       ],
       [
         826,
-        "enum_match<core::option::Option::<controller_session::interface::Session>>"
+        "enum_match<core::option::Option::<webauthn_session::interface::Session>>"
       ],
       [
         827,
-        "store_local<controller_session::interface::Session>"
+        "store_local<webauthn_session::interface::Session>"
       ],
       [
         828,
-        "store_local<controller_auth::signer::SignerSignature>"
+        "store_local<webauthn_auth::signer::SignerSignature>"
       ],
       [
         829,
@@ -20486,15 +20486,15 @@
       ],
       [
         836,
-        "drop<controller_session::interface::Session>"
+        "drop<webauthn_session::interface::Session>"
       ],
       [
         837,
-        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller_session::interface::SessionToken>)>, 1>"
+        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<webauthn_session::interface::SessionToken>)>, 1>"
       ],
       [
         838,
-        "store_temp<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller_session::interface::SessionToken>)>>"
+        "store_temp<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<webauthn_session::interface::SessionToken>)>>"
       ],
       [
         839,
@@ -20502,31 +20502,31 @@
       ],
       [
         840,
-        "struct_construct<controller_session::interface::SessionToken>"
+        "struct_construct<webauthn_session::interface::SessionToken>"
       ],
       [
         841,
-        "enum_init<core::option::Option::<controller_session::interface::SessionToken>, 0>"
+        "enum_init<core::option::Option::<webauthn_session::interface::SessionToken>, 0>"
       ],
       [
         842,
-        "struct_construct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<controller_session::interface::SessionToken>>>"
+        "struct_construct<Tuple<core::array::Span::<core::felt252>, core::option::Option::<webauthn_session::interface::SessionToken>>>"
       ],
       [
         843,
-        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<controller_session::interface::SessionToken>)>, 0>"
+        "enum_init<core::panics::PanicResult::<(core::array::Span::<core::felt252>, core::option::Option::<webauthn_session::interface::SessionToken>)>, 0>"
       ],
       [
         844,
-        "enum_init<core::option::Option::<controller_session::interface::SessionToken>, 1>"
+        "enum_init<core::option::Option::<webauthn_session::interface::SessionToken>, 1>"
       ],
       [
         845,
-        "drop<Uninitialized<controller_auth::signer::SignerSignature>>"
+        "drop<Uninitialized<webauthn_auth::signer::SignerSignature>>"
       ],
       [
         846,
-        "drop<Uninitialized<controller_session::interface::Session>>"
+        "drop<Uninitialized<webauthn_session::interface::Session>>"
       ],
       [
         847,
@@ -20534,11 +20534,11 @@
       ],
       [
         848,
-        "alloc_local<controller_session::interface::SessionToken>"
+        "alloc_local<webauthn_session::interface::SessionToken>"
       ],
       [
         849,
-        "struct_deconstruct<controller_session::interface::SessionToken>"
+        "struct_deconstruct<webauthn_session::interface::SessionToken>"
       ],
       [
         850,
@@ -20550,7 +20550,7 @@
       ],
       [
         852,
-        "drop<Uninitialized<controller_session::interface::SessionToken>>"
+        "drop<Uninitialized<webauthn_session::interface::SessionToken>>"
       ],
       [
         853,
@@ -20566,23 +20566,23 @@
       ],
       [
         856,
-        "struct_construct<Tuple<controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>>>"
+        "struct_construct<Tuple<webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>>>"
       ],
       [
         857,
-        "enum_init<core::panics::PanicResult::<(controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>)>, 0>"
+        "enum_init<core::panics::PanicResult::<(webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>)>, 0>"
       ],
       [
         858,
-        "store_temp<core::panics::PanicResult::<(controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>)>>"
+        "store_temp<core::panics::PanicResult::<(webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>)>>"
       ],
       [
         859,
-        "dup<controller_session::interface::Session>"
+        "dup<webauthn_session::interface::Session>"
       ],
       [
         860,
-        "struct_deconstruct<controller_session::interface::Session>"
+        "struct_deconstruct<webauthn_session::interface::Session>"
       ],
       [
         861,
@@ -20590,19 +20590,19 @@
       ],
       [
         862,
-        "snapshot_take<controller_session::interface::Session>"
+        "snapshot_take<webauthn_session::interface::Session>"
       ],
       [
         863,
-        "store_temp<controller_session::interface::Session>"
+        "store_temp<webauthn_session::interface::Session>"
       ],
       [
         864,
-        "function_call<user@controller_session::hash::get_message_hash_rev_1>"
+        "function_call<user@webauthn_session::hash::get_message_hash_rev_1>"
       ],
       [
         865,
-        "function_call<user@controller::account::CartridgeAccount::SessionCallbackImpl::session_callback>"
+        "function_call<user@cartridge_account::cartridge::CartridgeAccount::SessionCallbackImpl::session_callback>"
       ],
       [
         866,
@@ -20610,27 +20610,27 @@
       ],
       [
         867,
-        "enum_init<core::panics::PanicResult::<(controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>)>, 1>"
+        "enum_init<core::panics::PanicResult::<(webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>)>, 1>"
       ],
       [
         868,
-        "store_local<controller_session::interface::SessionToken>"
+        "store_local<webauthn_session::interface::SessionToken>"
       ],
       [
         869,
-        "snapshot_take<controller_session::interface::SessionToken>"
+        "snapshot_take<webauthn_session::interface::SessionToken>"
       ],
       [
         870,
-        "struct_deconstruct<controller_session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>>"
+        "struct_deconstruct<webauthn_session::session_component::ComponentState::<cartridge_account::cartridge::CartridgeAccount::ContractState>>"
       ],
       [
         871,
-        "rename<controller_session::session_component::__member_module_session_states::ComponentMemberState>"
+        "rename<webauthn_session::session_component::__member_module_session_states::ComponentMemberState>"
       ],
       [
         872,
-        "drop<controller_session::interface::SessionToken>"
+        "drop<webauthn_session::interface::SessionToken>"
       ],
       [
         873,
@@ -20642,7 +20642,7 @@
       ],
       [
         875,
-        "function_call<user@controller_session::check_policy[expr35]>"
+        "function_call<user@webauthn_session::check_policy[expr35]>"
       ],
       [
         876,
@@ -20878,43 +20878,43 @@
       ],
       [
         934,
-        "function_call<user@controller_auth::webauthn::verify_challenge[expr38]>"
+        "function_call<user@webauthn_auth::webauthn::verify_challenge[expr38]>"
       ],
       [
         935,
-        "enum_match<core::panics::PanicResult::<(core::integer::u32, core::result::Result::<(), controller_auth::errors::AuthnError>)>>"
+        "enum_match<core::panics::PanicResult::<(core::integer::u32, core::result::Result::<(), webauthn_auth::errors::AuthnError>)>>"
       ],
       [
         936,
-        "struct_deconstruct<Tuple<u32, core::result::Result::<(), controller_auth::errors::AuthnError>>>"
+        "struct_deconstruct<Tuple<u32, core::result::Result::<(), webauthn_auth::errors::AuthnError>>>"
       ],
       [
         937,
-        "function_call<user@controller_auth::webauthn::ImplArrayu8TryIntoAuthData::try_into>"
+        "function_call<user@webauthn_auth::webauthn::ImplArrayu8TryIntoAuthData::try_into>"
       ],
       [
         938,
-        "enum_match<core::panics::PanicResult::<(core::option::Option::<controller_auth::types::AuthenticatorData>,)>>"
+        "enum_match<core::panics::PanicResult::<(core::option::Option::<webauthn_auth::types::AuthenticatorData>,)>>"
       ],
       [
         939,
-        "struct_deconstruct<Tuple<core::option::Option::<controller_auth::types::AuthenticatorData>>>"
+        "struct_deconstruct<Tuple<core::option::Option::<webauthn_auth::types::AuthenticatorData>>>"
       ],
       [
         940,
-        "enum_match<core::option::Option::<controller_auth::types::AuthenticatorData>>"
+        "enum_match<core::option::Option::<webauthn_auth::types::AuthenticatorData>>"
       ],
       [
         941,
-        "snapshot_take<controller_auth::types::AuthenticatorData>"
+        "snapshot_take<webauthn_auth::types::AuthenticatorData>"
       ],
       [
         942,
-        "drop<controller_auth::types::AuthenticatorData>"
+        "drop<webauthn_auth::types::AuthenticatorData>"
       ],
       [
         943,
-        "struct_snapshot_deconstruct<controller_auth::types::AuthenticatorData>"
+        "struct_snapshot_deconstruct<webauthn_auth::types::AuthenticatorData>"
       ],
       [
         944,
@@ -20950,23 +20950,23 @@
       ],
       [
         952,
-        "enum_init<core::panics::PanicResult::<(core::result::Result::<(), controller_auth::errors::AuthnError>,)>, 1>"
+        "enum_init<core::panics::PanicResult::<(core::result::Result::<(), webauthn_auth::errors::AuthnError>,)>, 1>"
       ],
       [
         953,
-        "store_temp<core::panics::PanicResult::<(core::result::Result::<(), controller_auth::errors::AuthnError>,)>>"
+        "store_temp<core::panics::PanicResult::<(core::result::Result::<(), webauthn_auth::errors::AuthnError>,)>>"
       ],
       [
         954,
-        "enum_init<core::result::Result::<(), controller_auth::errors::AuthnError>, 0>"
+        "enum_init<core::result::Result::<(), webauthn_auth::errors::AuthnError>, 0>"
       ],
       [
         955,
-        "struct_construct<Tuple<core::result::Result::<(), controller_auth::errors::AuthnError>>>"
+        "struct_construct<Tuple<core::result::Result::<(), webauthn_auth::errors::AuthnError>>>"
       ],
       [
         956,
-        "enum_init<core::panics::PanicResult::<(core::result::Result::<(), controller_auth::errors::AuthnError>,)>, 0>"
+        "enum_init<core::panics::PanicResult::<(core::result::Result::<(), webauthn_auth::errors::AuthnError>,)>, 0>"
       ],
       [
         957,
@@ -20978,11 +20978,11 @@
       ],
       [
         959,
-        "enum_init<controller_auth::errors::AuthnError, 10>"
+        "enum_init<webauthn_auth::errors::AuthnError, 10>"
       ],
       [
         960,
-        "enum_init<core::result::Result::<(), controller_auth::errors::AuthnError>, 1>"
+        "enum_init<core::result::Result::<(), webauthn_auth::errors::AuthnError>, 1>"
       ],
       [
         961,
@@ -21038,7 +21038,7 @@
       ],
       [
         974,
-        "function_call<user@controller_auth::helpers::extract_u256_from_u8_array[expr44]>"
+        "function_call<user@webauthn_auth::helpers::extract_u256_from_u8_array[expr44]>"
       ],
       [
         975,
@@ -21214,59 +21214,59 @@
       ],
       [
         1018,
-        "struct_deconstruct<core::array::Span::<controller_auth::signer::SignerType>>"
+        "struct_deconstruct<core::array::Span::<webauthn_auth::signer::SignerType>>"
       ],
       [
         1019,
-        "array_snapshot_pop_front<controller_auth::signer::SignerType>"
+        "array_snapshot_pop_front<webauthn_auth::signer::SignerType>"
       ],
       [
         1020,
-        "enum_init<core::option::Option::<core::box::Box::<@controller_auth::signer::SignerType>>, 0>"
+        "enum_init<core::option::Option::<core::box::Box::<@webauthn_auth::signer::SignerType>>, 0>"
       ],
       [
         1021,
-        "store_temp<Snapshot<Array<controller_auth::signer::SignerType>>>"
+        "store_temp<Snapshot<Array<webauthn_auth::signer::SignerType>>>"
       ],
       [
         1022,
-        "store_temp<core::option::Option::<core::box::Box::<@controller_auth::signer::SignerType>>>"
+        "store_temp<core::option::Option::<core::box::Box::<@webauthn_auth::signer::SignerType>>>"
       ],
       [
         1023,
-        "enum_init<core::option::Option::<core::box::Box::<@controller_auth::signer::SignerType>>, 1>"
+        "enum_init<core::option::Option::<core::box::Box::<@webauthn_auth::signer::SignerType>>, 1>"
       ],
       [
         1024,
-        "enum_match<core::option::Option::<core::box::Box::<@controller_auth::signer::SignerType>>>"
+        "enum_match<core::option::Option::<core::box::Box::<@webauthn_auth::signer::SignerType>>>"
       ],
       [
         1025,
-        "unbox<controller_auth::signer::SignerType>"
+        "unbox<webauthn_auth::signer::SignerType>"
       ],
       [
         1026,
-        "rename<controller_auth::signer::SignerType>"
+        "rename<webauthn_auth::signer::SignerType>"
       ],
       [
         1027,
-        "enum_init<core::panics::PanicResult::<(core::array::Span::<controller_auth::signer::SignerType>, controller_auth::signer::SignerStorageValue)>, 1>"
+        "enum_init<core::panics::PanicResult::<(core::array::Span::<webauthn_auth::signer::SignerType>, webauthn_auth::signer::SignerStorageValue)>, 1>"
       ],
       [
         1028,
-        "store_temp<core::panics::PanicResult::<(core::array::Span::<controller_auth::signer::SignerType>, controller_auth::signer::SignerStorageValue)>>"
+        "store_temp<core::panics::PanicResult::<(core::array::Span::<webauthn_auth::signer::SignerType>, webauthn_auth::signer::SignerStorageValue)>>"
       ],
       [
         1029,
-        "struct_construct<Tuple<core::array::Span::<controller_auth::signer::SignerType>, controller_auth::signer::SignerStorageValue>>"
+        "struct_construct<Tuple<core::array::Span::<webauthn_auth::signer::SignerType>, webauthn_auth::signer::SignerStorageValue>>"
       ],
       [
         1030,
-        "enum_init<core::panics::PanicResult::<(core::array::Span::<controller_auth::signer::SignerType>, controller_auth::signer::SignerStorageValue)>, 0>"
+        "enum_init<core::panics::PanicResult::<(core::array::Span::<webauthn_auth::signer::SignerType>, webauthn_auth::signer::SignerStorageValue)>, 0>"
       ],
       [
         1031,
-        "drop<Snapshot<Array<controller_auth::signer::SignerType>>>"
+        "drop<Snapshot<Array<webauthn_auth::signer::SignerType>>>"
       ],
       [
         1032,
@@ -21322,11 +21322,11 @@
       ],
       [
         1045,
-        "dup<controller::account::CartridgeAccount::SignerLinked>"
+        "dup<cartridge_account::cartridge::CartridgeAccount::SignerLinked>"
       ],
       [
         1046,
-        "struct_deconstruct<controller::account::CartridgeAccount::SignerLinked>"
+        "struct_deconstruct<cartridge_account::cartridge::CartridgeAccount::SignerLinked>"
       ],
       [
         1047,
@@ -21334,11 +21334,11 @@
       ],
       [
         1048,
-        "store_temp<controller_auth::signer::WebauthnSigner>"
+        "store_temp<webauthn_auth::signer::WebauthnSigner>"
       ],
       [
         1049,
-        "function_call<user@controller_auth::signer::WebauthnSignerSerde::serialize>"
+        "function_call<user@webauthn_auth::signer::WebauthnSignerSerde::serialize>"
       ],
       [
         1050,
@@ -21462,7 +21462,7 @@
       ],
       [
         1080,
-        "function_call<user@controller::outside_execution::outside_execution_hash::StructHashCallRev1::get_struct_hash_rev_1>"
+        "function_call<user@cartridge_account::outside_execution::outside_execution_hash::StructHashCallRev1::get_struct_hash_rev_1>"
       ],
       [
         1081,
@@ -21486,19 +21486,19 @@
       ],
       [
         1086,
-        "struct_construct<controller_session::interface::Session>"
+        "struct_construct<webauthn_session::interface::Session>"
       ],
       [
         1087,
-        "enum_init<core::option::Option::<controller_session::interface::Session>, 0>"
+        "enum_init<core::option::Option::<webauthn_session::interface::Session>, 0>"
       ],
       [
         1088,
-        "store_temp<core::option::Option::<controller_session::interface::Session>>"
+        "store_temp<core::option::Option::<webauthn_session::interface::Session>>"
       ],
       [
         1089,
-        "enum_init<core::option::Option::<controller_session::interface::Session>, 1>"
+        "enum_init<core::option::Option::<webauthn_session::interface::Session>, 1>"
       ],
       [
         1090,
@@ -21530,11 +21530,11 @@
       ],
       [
         1097,
-        "rename<controller_session::interface::Session>"
+        "rename<webauthn_session::interface::Session>"
       ],
       [
         1098,
-        "function_call<user@controller_session::hash::get_message_hash_rev_1_with_precalc::<controller_session::interface::Session, controller_session::interface::SessionDrop, controller_session::hash::StructHashSession>>"
+        "function_call<user@webauthn_session::hash::get_message_hash_rev_1_with_precalc::<webauthn_session::interface::Session, webauthn_session::interface::SessionDrop, webauthn_session::hash::StructHashSession>>"
       ],
       [
         1099,
@@ -22146,15 +22146,15 @@
       ],
       [
         1251,
-        "struct_construct<Tuple<u32, core::result::Result::<(), controller_auth::errors::AuthnError>>>"
+        "struct_construct<Tuple<u32, core::result::Result::<(), webauthn_auth::errors::AuthnError>>>"
       ],
       [
         1252,
-        "enum_init<core::panics::PanicResult::<(core::integer::u32, core::result::Result::<(), controller_auth::errors::AuthnError>)>, 0>"
+        "enum_init<core::panics::PanicResult::<(core::integer::u32, core::result::Result::<(), webauthn_auth::errors::AuthnError>)>, 0>"
       ],
       [
         1253,
-        "store_temp<core::panics::PanicResult::<(core::integer::u32, core::result::Result::<(), controller_auth::errors::AuthnError>)>>"
+        "store_temp<core::panics::PanicResult::<(core::integer::u32, core::result::Result::<(), webauthn_auth::errors::AuthnError>)>>"
       ],
       [
         1254,
@@ -22162,11 +22162,11 @@
       ],
       [
         1255,
-        "enum_init<controller_auth::errors::AuthnError, 6>"
+        "enum_init<webauthn_auth::errors::AuthnError, 6>"
       ],
       [
         1256,
-        "enum_init<core::panics::PanicResult::<(core::integer::u32, core::result::Result::<(), controller_auth::errors::AuthnError>)>, 1>"
+        "enum_init<core::panics::PanicResult::<(core::integer::u32, core::result::Result::<(), webauthn_auth::errors::AuthnError>)>, 1>"
       ],
       [
         1257,
@@ -22186,7 +22186,7 @@
       ],
       [
         1261,
-        "function_call<user@controller_auth::webauthn::ImplArrayu8TryIntoAuthData::try_into[expr31]>"
+        "function_call<user@webauthn_auth::webauthn::ImplArrayu8TryIntoAuthData::try_into[expr31]>"
       ],
       [
         1262,
@@ -22262,23 +22262,23 @@
       ],
       [
         1280,
-        "struct_construct<controller_auth::types::AuthenticatorData>"
+        "struct_construct<webauthn_auth::types::AuthenticatorData>"
       ],
       [
         1281,
-        "enum_init<core::option::Option::<controller_auth::types::AuthenticatorData>, 0>"
+        "enum_init<core::option::Option::<webauthn_auth::types::AuthenticatorData>, 0>"
       ],
       [
         1282,
-        "struct_construct<Tuple<core::option::Option::<controller_auth::types::AuthenticatorData>>>"
+        "struct_construct<Tuple<core::option::Option::<webauthn_auth::types::AuthenticatorData>>>"
       ],
       [
         1283,
-        "enum_init<core::panics::PanicResult::<(core::option::Option::<controller_auth::types::AuthenticatorData>,)>, 0>"
+        "enum_init<core::panics::PanicResult::<(core::option::Option::<webauthn_auth::types::AuthenticatorData>,)>, 0>"
       ],
       [
         1284,
-        "store_temp<core::panics::PanicResult::<(core::option::Option::<controller_auth::types::AuthenticatorData>,)>>"
+        "store_temp<core::panics::PanicResult::<(core::option::Option::<webauthn_auth::types::AuthenticatorData>,)>>"
       ],
       [
         1285,
@@ -22286,7 +22286,7 @@
       ],
       [
         1286,
-        "enum_init<core::panics::PanicResult::<(core::option::Option::<controller_auth::types::AuthenticatorData>,)>, 1>"
+        "enum_init<core::panics::PanicResult::<(core::option::Option::<webauthn_auth::types::AuthenticatorData>,)>, 1>"
       ],
       [
         1287,
@@ -22302,7 +22302,7 @@
       ],
       [
         1290,
-        "enum_init<core::option::Option::<controller_auth::types::AuthenticatorData>, 1>"
+        "enum_init<core::option::Option::<webauthn_auth::types::AuthenticatorData>, 1>"
       ],
       [
         1291,
@@ -22614,7 +22614,7 @@
       ],
       [
         1368,
-        "dup<controller_auth::signer::WebauthnSigner>"
+        "dup<webauthn_auth::signer::WebauthnSigner>"
       ],
       [
         1369,
@@ -23424,63 +23424,63 @@
     "user_func_names": [
       [
         0,
-        "controller::account::CartridgeAccount::__wrapper__AccountImpl____validate__"
+        "cartridge_account::cartridge::CartridgeAccount::__wrapper__AccountImpl____validate__"
       ],
       [
         1,
-        "controller::account::CartridgeAccount::__wrapper__AccountImpl____execute__"
+        "cartridge_account::cartridge::CartridgeAccount::__wrapper__AccountImpl____execute__"
       ],
       [
         2,
-        "controller::account::CartridgeAccount::__wrapper__AccountImpl__is_valid_signature"
+        "cartridge_account::cartridge::CartridgeAccount::__wrapper__AccountImpl__is_valid_signature"
       ],
       [
         3,
-        "controller::account::CartridgeAccount::__wrapper__DeclarerImpl____validate_declare__"
+        "cartridge_account::cartridge::CartridgeAccount::__wrapper__DeclarerImpl____validate_declare__"
       ],
       [
         4,
-        "controller::account::CartridgeAccount::__wrapper__UserAccountImpl__change_owner"
+        "cartridge_account::cartridge::CartridgeAccount::__wrapper__UserAccountImpl__change_owner"
       ],
       [
         5,
-        "controller::account::CartridgeAccount::__wrapper__UserAccountImpl__get_owner"
+        "cartridge_account::cartridge::CartridgeAccount::__wrapper__UserAccountImpl__get_owner"
       ],
       [
         6,
-        "controller::account::CartridgeAccount::__wrapper__UserAccountImpl__get_owner_type"
+        "cartridge_account::cartridge::CartridgeAccount::__wrapper__UserAccountImpl__get_owner_type"
       ],
       [
         7,
-        "controller::account::CartridgeAccount::__wrapper__DeployableImpl____validate_deploy__"
+        "cartridge_account::cartridge::CartridgeAccount::__wrapper__DeployableImpl____validate_deploy__"
       ],
       [
         8,
-        "controller_session::session_component::__wrapper__SessionComponent__revoke_session::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl, controller::account::CartridgeAccount::ContractStateDrop, controller::account::CartridgeAccount::ContractStateSessionComponent>"
+        "webauthn_session::session_component::__wrapper__SessionComponent__revoke_session::<cartridge_account::cartridge::CartridgeAccount::ContractState, cartridge_account::cartridge::CartridgeAccount::HasComponentImpl_session_component, cartridge_account::cartridge::CartridgeAccount::SessionCallbackImpl, cartridge_account::cartridge::CartridgeAccount::ContractStateDrop, cartridge_account::cartridge::CartridgeAccount::ContractStateSessionComponent>"
       ],
       [
         9,
-        "controller_session::session_component::__wrapper__SessionComponent__is_session_revoked::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl, controller::account::CartridgeAccount::ContractStateDrop, controller::account::CartridgeAccount::ContractStateSessionComponent>"
+        "webauthn_session::session_component::__wrapper__SessionComponent__is_session_revoked::<cartridge_account::cartridge::CartridgeAccount::ContractState, cartridge_account::cartridge::CartridgeAccount::HasComponentImpl_session_component, cartridge_account::cartridge::CartridgeAccount::SessionCallbackImpl, cartridge_account::cartridge::CartridgeAccount::ContractStateDrop, cartridge_account::cartridge::CartridgeAccount::ContractStateSessionComponent>"
       ],
       [
         10,
-        "controller::outside_execution::outside_execution::outside_execution_component::__wrapper__OutsideExecutionImpl__execute_from_outside_v2::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_outside_execution_component, controller::account::CartridgeAccount::OutsideExecutionCallbackImpl, controller::account::CartridgeAccount::ContractStateDrop, controller::account::CartridgeAccount::ContractStateOutsideExecutionImpl>"
+        "cartridge_account::outside_execution::outside_execution::outside_execution_component::__wrapper__OutsideExecutionImpl__execute_from_outside_v2::<cartridge_account::cartridge::CartridgeAccount::ContractState, cartridge_account::cartridge::CartridgeAccount::HasComponentImpl_outside_execution_component, cartridge_account::cartridge::CartridgeAccount::OutsideExecutionCallbackImpl, cartridge_account::cartridge::CartridgeAccount::ContractStateDrop, cartridge_account::cartridge::CartridgeAccount::ContractStateOutsideExecutionImpl>"
       ],
       [
         11,
-        "controller::outside_execution::outside_execution::outside_execution_component::__wrapper__OutsideExecutionImpl__get_outside_execution_message_hash_rev_1::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_outside_execution_component, controller::account::CartridgeAccount::OutsideExecutionCallbackImpl, controller::account::CartridgeAccount::ContractStateDrop, controller::account::CartridgeAccount::ContractStateOutsideExecutionImpl>"
+        "cartridge_account::outside_execution::outside_execution::outside_execution_component::__wrapper__OutsideExecutionImpl__get_outside_execution_message_hash_rev_1::<cartridge_account::cartridge::CartridgeAccount::ContractState, cartridge_account::cartridge::CartridgeAccount::HasComponentImpl_outside_execution_component, cartridge_account::cartridge::CartridgeAccount::OutsideExecutionCallbackImpl, cartridge_account::cartridge::CartridgeAccount::ContractStateDrop, cartridge_account::cartridge::CartridgeAccount::ContractStateOutsideExecutionImpl>"
       ],
       [
         12,
-        "controller::outside_execution::outside_execution::outside_execution_component::__wrapper__OutsideExecutionImpl__is_valid_outside_execution_nonce::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_outside_execution_component, controller::account::CartridgeAccount::OutsideExecutionCallbackImpl, controller::account::CartridgeAccount::ContractStateDrop, controller::account::CartridgeAccount::ContractStateOutsideExecutionImpl>"
+        "cartridge_account::outside_execution::outside_execution::outside_execution_component::__wrapper__OutsideExecutionImpl__is_valid_outside_execution_nonce::<cartridge_account::cartridge::CartridgeAccount::ContractState, cartridge_account::cartridge::CartridgeAccount::HasComponentImpl_outside_execution_component, cartridge_account::cartridge::CartridgeAccount::OutsideExecutionCallbackImpl, cartridge_account::cartridge::CartridgeAccount::ContractStateDrop, cartridge_account::cartridge::CartridgeAccount::ContractStateOutsideExecutionImpl>"
       ],
       [
         13,
-        "controller::src5::src5_component::__wrapper__SRC5Impl__supports_interface::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_src5_component, controller::account::CartridgeAccount::ContractStateDrop, controller::account::CartridgeAccount::ContractStateSRC5Impl>"
+        "cartridge_account::src5::src5_component::__wrapper__SRC5Impl__supports_interface::<cartridge_account::cartridge::CartridgeAccount::ContractState, cartridge_account::cartridge::CartridgeAccount::HasComponentImpl_src5_component, cartridge_account::cartridge::CartridgeAccount::ContractStateDrop, cartridge_account::cartridge::CartridgeAccount::ContractStateSRC5Impl>"
       ],
       [
         14,
-        "controller::account::CartridgeAccount::__wrapper__constructor"
+        "cartridge_account::cartridge::CartridgeAccount::__wrapper__constructor"
       ],
       [
         15,
@@ -23488,11 +23488,11 @@
       ],
       [
         16,
-        "controller::account::CartridgeAccount::AccountImpl::__validate__"
+        "cartridge_account::cartridge::CartridgeAccount::AccountImpl::__validate__"
       ],
       [
         17,
-        "controller::account::CartridgeAccount::AccountImpl::__execute__"
+        "cartridge_account::cartridge::CartridgeAccount::AccountImpl::__execute__"
       ],
       [
         18,
@@ -23504,35 +23504,35 @@
       ],
       [
         20,
-        "controller::account::CartridgeAccount::AccountImpl::is_valid_signature"
+        "cartridge_account::cartridge::CartridgeAccount::AccountImpl::is_valid_signature"
       ],
       [
         21,
-        "controller::account::CartridgeAccount::DeclarerImpl::__validate_declare__"
+        "cartridge_account::cartridge::CartridgeAccount::DeclarerImpl::__validate_declare__"
       ],
       [
         22,
-        "controller_auth::signer::SignerSignatureSerde::deserialize"
+        "webauthn_auth::signer::SignerSignatureSerde::deserialize"
       ],
       [
         23,
-        "controller::account::CartridgeAccount::UserAccountImpl::change_owner"
+        "cartridge_account::cartridge::CartridgeAccount::UserAccountImpl::change_owner"
       ],
       [
         24,
-        "controller::account::CartridgeAccount::DeployableImpl::__validate_deploy__"
+        "cartridge_account::cartridge::CartridgeAccount::DeployableImpl::__validate_deploy__"
       ],
       [
         25,
-        "controller_session::session_component::SessionImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl>::revoke_session"
+        "webauthn_session::session_component::SessionImpl::<cartridge_account::cartridge::CartridgeAccount::ContractState, cartridge_account::cartridge::CartridgeAccount::HasComponentImpl_session_component, cartridge_account::cartridge::CartridgeAccount::SessionCallbackImpl>::revoke_session"
       ],
       [
         26,
-        "controller_session::session_component::SessionImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl>::is_session_revoked"
+        "webauthn_session::session_component::SessionImpl::<cartridge_account::cartridge::CartridgeAccount::ContractState, cartridge_account::cartridge::CartridgeAccount::HasComponentImpl_session_component, cartridge_account::cartridge::CartridgeAccount::SessionCallbackImpl>::is_session_revoked"
       ],
       [
         27,
-        "controller::outside_execution::interface::OutsideExecutionSerde::deserialize"
+        "cartridge_account::outside_execution::interface::OutsideExecutionSerde::deserialize"
       ],
       [
         28,
@@ -23540,23 +23540,23 @@
       ],
       [
         29,
-        "controller::outside_execution::outside_execution_hash::get_message_hash_rev_1"
+        "cartridge_account::outside_execution::outside_execution_hash::get_message_hash_rev_1"
       ],
       [
         30,
-        "controller::outside_execution::outside_execution::outside_execution_component::Internal::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_outside_execution_component, controller::account::CartridgeAccount::OutsideExecutionCallbackImpl, controller::account::CartridgeAccount::ContractStateDrop>::assert_valid_outside_execution"
+        "cartridge_account::outside_execution::outside_execution::outside_execution_component::Internal::<cartridge_account::cartridge::CartridgeAccount::ContractState, cartridge_account::cartridge::CartridgeAccount::HasComponentImpl_outside_execution_component, cartridge_account::cartridge::CartridgeAccount::OutsideExecutionCallbackImpl, cartridge_account::cartridge::CartridgeAccount::ContractStateDrop>::assert_valid_outside_execution"
       ],
       [
         31,
-        "controller_auth::signer::SignerSerde::deserialize"
+        "webauthn_auth::signer::SignerSerde::deserialize"
       ],
       [
         32,
-        "core::option::OptionSerde::<controller_auth::signer::Signer, controller_auth::signer::SignerSerde, core::traits::DestructFromDrop::<controller_auth::signer::Signer, controller_auth::signer::SignerDrop>>::deserialize"
+        "core::option::OptionSerde::<webauthn_auth::signer::Signer, webauthn_auth::signer::SignerSerde, core::traits::DestructFromDrop::<webauthn_auth::signer::Signer, webauthn_auth::signer::SignerDrop>>::deserialize"
       ],
       [
         33,
-        "controller::account::CartridgeAccount::constructor"
+        "cartridge_account::cartridge::CartridgeAccount::constructor"
       ],
       [
         34,
@@ -23564,15 +23564,15 @@
       ],
       [
         35,
-        "controller_session::session_component::InternalImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl>::validate_session_serialized"
+        "webauthn_session::session_component::InternalImpl::<cartridge_account::cartridge::CartridgeAccount::ContractState, cartridge_account::cartridge::CartridgeAccount::HasComponentImpl_session_component, cartridge_account::cartridge::CartridgeAccount::SessionCallbackImpl>::validate_session_serialized"
       ],
       [
         36,
-        "controller::account::CartridgeAccount::ContractInternalImpl::assert_valid_calls_and_signature"
+        "cartridge_account::cartridge::CartridgeAccount::ContractInternalImpl::assert_valid_calls_and_signature"
       ],
       [
         37,
-        "controller::account::CartridgeAccount::_execute_calls[expr13]"
+        "cartridge_account::cartridge::CartridgeAccount::_execute_calls[expr13]"
       ],
       [
         38,
@@ -23580,59 +23580,59 @@
       ],
       [
         39,
-        "core::array::deserialize_array_helper::<controller_auth::signer::SignerSignature, controller_auth::signer::SignerSignatureSerde, controller_auth::signer::SignerSignatureDrop>"
+        "core::array::deserialize_array_helper::<webauthn_auth::signer::SignerSignature, webauthn_auth::signer::SignerSignatureSerde, webauthn_auth::signer::SignerSignatureDrop>"
       ],
       [
         40,
-        "controller::account::CartridgeAccount::ContractInternalImpl::is_valid_owner_signature"
+        "cartridge_account::cartridge::CartridgeAccount::ContractInternalImpl::is_valid_owner_signature"
       ],
       [
         41,
-        "controller::account::CartridgeAccount::ContractInternalImpl::assert_valid_span_signature"
+        "cartridge_account::cartridge::CartridgeAccount::ContractInternalImpl::assert_valid_span_signature"
       ],
       [
         42,
-        "core::serde::TupleSize2Serde::<controller_auth::signer::StarknetSigner, controller_auth::signer::StarknetSignature, controller_auth::signer::StarknetSignerSerde, controller_auth::signer::StarknetSignerDrop, controller_auth::signer::StarknetSignatureSerde, controller_auth::signer::StarknetSignatureDrop>::deserialize"
+        "core::serde::TupleSize2Serde::<webauthn_auth::signer::StarknetSigner, webauthn_auth::signer::StarknetSignature, webauthn_auth::signer::StarknetSignerSerde, webauthn_auth::signer::StarknetSignerDrop, webauthn_auth::signer::StarknetSignatureSerde, webauthn_auth::signer::StarknetSignatureDrop>::deserialize"
       ],
       [
         43,
-        "core::serde::TupleSize2Serde::<controller_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature, controller_auth::signer::Secp256k1SignerSerde, controller_auth::signer::Secp256k1SignerDrop, core::starknet::secp256_trait::SignatureSerde, core::starknet::secp256_trait::SignatureDrop>::deserialize"
+        "core::serde::TupleSize2Serde::<webauthn_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature, webauthn_auth::signer::Secp256k1SignerSerde, webauthn_auth::signer::Secp256k1SignerDrop, core::starknet::secp256_trait::SignatureSerde, core::starknet::secp256_trait::SignatureDrop>::deserialize"
       ],
       [
         44,
-        "controller_auth::signer::WebauthnSignerSerde::deserialize"
+        "webauthn_auth::signer::WebauthnSignerSerde::deserialize"
       ],
       [
         45,
-        "controller_auth::webauthn::WebauthnAssertionSerde::deserialize"
+        "webauthn_auth::webauthn::WebauthnAssertionSerde::deserialize"
       ],
       [
         46,
-        "controller::account::CartridgeAccount::ContractInternalImpl::assert_valid_new_owner_signature"
+        "cartridge_account::cartridge::CartridgeAccount::ContractInternalImpl::assert_valid_new_owner_signature"
       ],
       [
         47,
-        "controller_auth::signer::SignerTraitImpl::into_guid"
+        "webauthn_auth::signer::SignerTraitImpl::into_guid"
       ],
       [
         48,
-        "controller::account::CartridgeAccount::ContractInternalImpl::write_owner"
+        "cartridge_account::cartridge::CartridgeAccount::ContractInternalImpl::write_owner"
       ],
       [
         49,
-        "controller::account::CartridgeAccount::ContractStateEventEmitter::emit::<controller::account::CartridgeAccount::OwnerChanged, controller::account::CartridgeAccount::EventOwnerChangedIntoEvent>"
+        "cartridge_account::cartridge::CartridgeAccount::ContractStateEventEmitter::emit::<cartridge_account::cartridge::CartridgeAccount::OwnerChanged, cartridge_account::cartridge::CartridgeAccount::EventOwnerChangedIntoEvent>"
       ],
       [
         50,
-        "controller_auth::signer::SignerStorageValueImpl::into_guid"
+        "webauthn_auth::signer::SignerStorageValueImpl::into_guid"
       ],
       [
         51,
-        "controller::account::CartridgeAccount::ContractStateEventEmitter::emit::<controller::account::CartridgeAccount::OwnerChangedGuid, controller::account::CartridgeAccount::EventOwnerChangedGuidIntoEvent>"
+        "cartridge_account::cartridge::CartridgeAccount::ContractStateEventEmitter::emit::<cartridge_account::cartridge::CartridgeAccount::OwnerChangedGuid, cartridge_account::cartridge::CartridgeAccount::EventOwnerChangedGuidIntoEvent>"
       ],
       [
         52,
-        "controller::account::CartridgeAccount::ContractStateEventEmitter::emit::<controller::account::CartridgeAccount::SignerLinked, controller::account::CartridgeAccount::EventSignerLinkedIntoEvent>"
+        "cartridge_account::cartridge::CartridgeAccount::ContractStateEventEmitter::emit::<cartridge_account::cartridge::CartridgeAccount::SignerLinked, cartridge_account::cartridge::CartridgeAccount::EventSignerLinkedIntoEvent>"
       ],
       [
         53,
@@ -23644,19 +23644,19 @@
       ],
       [
         55,
-        "core::traits::PartialEqSnap::<controller_session::interface::SessionState, controller_session::interface::SessionStatePartialEq>::eq"
+        "core::traits::PartialEqSnap::<webauthn_session::interface::SessionState, webauthn_session::interface::SessionStatePartialEq>::eq"
       ],
       [
         56,
-        "controller::account::CartridgeAccount::ContractStateEventEmitter::emit::<controller::account::CartridgeAccount::Event, core::traits::TIntoT::<controller::account::CartridgeAccount::Event>>"
+        "cartridge_account::cartridge::CartridgeAccount::ContractStateEventEmitter::emit::<cartridge_account::cartridge::CartridgeAccount::Event, core::traits::TIntoT::<cartridge_account::cartridge::CartridgeAccount::Event>>"
       ],
       [
         57,
-        "controller::outside_execution::outside_execution_hash::StructHashOutsideExecutionRev1::get_struct_hash_rev_1"
+        "cartridge_account::outside_execution::outside_execution_hash::StructHashOutsideExecutionRev1::get_struct_hash_rev_1"
       ],
       [
         58,
-        "controller_session::hash::StructHashStarknetDomain::get_struct_hash_rev_1"
+        "webauthn_session::hash::StructHashStarknetDomain::get_struct_hash_rev_1"
       ],
       [
         59,
@@ -23664,15 +23664,15 @@
       ],
       [
         60,
-        "controller_auth::assert_no_self_call[expr21]"
+        "webauthn_auth::assert_no_self_call[expr21]"
       ],
       [
         61,
-        "controller_session::interface::SessionTokenSerde::deserialize"
+        "webauthn_session::interface::SessionTokenSerde::deserialize"
       ],
       [
         62,
-        "controller_session::session_component::InternalImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl>::validate_signature"
+        "webauthn_session::session_component::InternalImpl::<cartridge_account::cartridge::CartridgeAccount::ContractState, cartridge_account::cartridge::CartridgeAccount::HasComponentImpl_session_component, cartridge_account::cartridge::CartridgeAccount::SessionCallbackImpl>::validate_signature"
       ],
       [
         63,
@@ -23684,11 +23684,11 @@
       ],
       [
         65,
-        "controller_auth::webauthn::verify"
+        "webauthn_auth::webauthn::verify"
       ],
       [
         66,
-        "controller_auth::webauthn::get_webauthn_hash"
+        "webauthn_auth::webauthn::get_webauthn_hash"
       ],
       [
         67,
@@ -23704,15 +23704,15 @@
       ],
       [
         70,
-        "controller::account::CartridgeAccount::ContractInternalImpl::read_owner[expr46]"
+        "cartridge_account::cartridge::CartridgeAccount::ContractInternalImpl::read_owner[expr46]"
       ],
       [
         71,
-        "controller_auth::signer::SignerTraitImpl::into_guid[expr36]"
+        "webauthn_auth::signer::SignerTraitImpl::into_guid[expr36]"
       ],
       [
         72,
-        "controller::account::CartridgeAccount::SignerLinkedIsEvent::append_keys_and_data"
+        "cartridge_account::cartridge::CartridgeAccount::SignerLinkedIsEvent::append_keys_and_data"
       ],
       [
         73,
@@ -23720,11 +23720,11 @@
       ],
       [
         74,
-        "controller::outside_execution::outside_execution_hash::StructHashOutsideExecutionRev1::get_struct_hash_rev_1[expr15]"
+        "cartridge_account::outside_execution::outside_execution_hash::StructHashOutsideExecutionRev1::get_struct_hash_rev_1[expr15]"
       ],
       [
         75,
-        "controller_session::interface::SessionSerde::deserialize"
+        "webauthn_session::interface::SessionSerde::deserialize"
       ],
       [
         76,
@@ -23732,15 +23732,15 @@
       ],
       [
         77,
-        "controller_session::hash::get_message_hash_rev_1"
+        "webauthn_session::hash::get_message_hash_rev_1"
       ],
       [
         78,
-        "controller::account::CartridgeAccount::SessionCallbackImpl::session_callback"
+        "cartridge_account::cartridge::CartridgeAccount::SessionCallbackImpl::session_callback"
       ],
       [
         79,
-        "controller_session::check_policy[expr35]"
+        "webauthn_session::check_policy[expr35]"
       ],
       [
         80,
@@ -23760,11 +23760,11 @@
       ],
       [
         84,
-        "controller_auth::webauthn::verify_challenge[expr38]"
+        "webauthn_auth::webauthn::verify_challenge[expr38]"
       ],
       [
         85,
-        "controller_auth::webauthn::ImplArrayu8TryIntoAuthData::try_into"
+        "webauthn_auth::webauthn::ImplArrayu8TryIntoAuthData::try_into"
       ],
       [
         86,
@@ -23780,7 +23780,7 @@
       ],
       [
         89,
-        "controller_auth::helpers::extract_u256_from_u8_array[expr44]"
+        "webauthn_auth::helpers::extract_u256_from_u8_array[expr44]"
       ],
       [
         90,
@@ -23788,15 +23788,15 @@
       ],
       [
         91,
-        "controller_auth::signer::WebauthnSignerSerde::serialize"
+        "webauthn_auth::signer::WebauthnSignerSerde::serialize"
       ],
       [
         92,
-        "controller::outside_execution::outside_execution_hash::StructHashCallRev1::get_struct_hash_rev_1"
+        "cartridge_account::outside_execution::outside_execution_hash::StructHashCallRev1::get_struct_hash_rev_1"
       ],
       [
         93,
-        "controller_session::hash::get_message_hash_rev_1_with_precalc::<controller_session::interface::Session, controller_session::interface::SessionDrop, controller_session::hash::StructHashSession>"
+        "webauthn_session::hash::get_message_hash_rev_1_with_precalc::<webauthn_session::interface::Session, webauthn_session::interface::SessionDrop, webauthn_session::hash::StructHashSession>"
       ],
       [
         94,
@@ -23824,7 +23824,7 @@
       ],
       [
         100,
-        "controller_auth::webauthn::ImplArrayu8TryIntoAuthData::try_into[expr31]"
+        "webauthn_auth::webauthn::ImplArrayu8TryIntoAuthData::try_into[expr31]"
       ],
       [
         101,
@@ -23972,7 +23972,7 @@
     {
       "type": "impl",
       "name": "AccountImpl",
-      "interface_name": "controller::account::IAccount"
+      "interface_name": "cartridge_account::cartridge::IAccount"
     },
     {
       "type": "struct",
@@ -24004,7 +24004,7 @@
     },
     {
       "type": "interface",
-      "name": "controller::account::IAccount",
+      "name": "cartridge_account::cartridge::IAccount",
       "items": [
         {
           "type": "function",
@@ -24063,11 +24063,11 @@
     {
       "type": "impl",
       "name": "DeclarerImpl",
-      "interface_name": "controller::account::IDeclarer"
+      "interface_name": "cartridge_account::cartridge::IDeclarer"
     },
     {
       "type": "interface",
-      "name": "controller::account::IDeclarer",
+      "name": "cartridge_account::cartridge::IDeclarer",
       "items": [
         {
           "type": "function",
@@ -24090,11 +24090,11 @@
     {
       "type": "impl",
       "name": "UserAccountImpl",
-      "interface_name": "controller::account::IUserAccount"
+      "interface_name": "cartridge_account::cartridge::IUserAccount"
     },
     {
       "type": "struct",
-      "name": "controller_auth::signer::StarknetSigner",
+      "name": "webauthn_auth::signer::StarknetSigner",
       "members": [
         {
           "name": "pubkey",
@@ -24104,7 +24104,7 @@
     },
     {
       "type": "struct",
-      "name": "controller_auth::signer::StarknetSignature",
+      "name": "webauthn_auth::signer::StarknetSignature",
       "members": [
         {
           "name": "r",
@@ -24128,7 +24128,7 @@
     },
     {
       "type": "struct",
-      "name": "controller_auth::signer::Secp256k1Signer",
+      "name": "webauthn_auth::signer::Secp256k1Signer",
       "members": [
         {
           "name": "pubkey_hash",
@@ -24194,7 +24194,7 @@
     },
     {
       "type": "struct",
-      "name": "controller_auth::signer::WebauthnSigner",
+      "name": "webauthn_auth::signer::WebauthnSigner",
       "members": [
         {
           "name": "origin",
@@ -24212,7 +24212,7 @@
     },
     {
       "type": "struct",
-      "name": "controller_auth::webauthn::WebauthnAssertion",
+      "name": "webauthn_auth::webauthn::WebauthnAssertion",
       "members": [
         {
           "name": "authenticator_data",
@@ -24250,19 +24250,19 @@
     },
     {
       "type": "enum",
-      "name": "controller_auth::signer::SignerSignature",
+      "name": "webauthn_auth::signer::SignerSignature",
       "variants": [
         {
           "name": "Starknet",
-          "type": "(controller_auth::signer::StarknetSigner, controller_auth::signer::StarknetSignature)"
+          "type": "(webauthn_auth::signer::StarknetSigner, webauthn_auth::signer::StarknetSignature)"
         },
         {
           "name": "Secp256k1",
-          "type": "(controller_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature)"
+          "type": "(webauthn_auth::signer::Secp256k1Signer, core::starknet::secp256_trait::Signature)"
         },
         {
           "name": "Webauthn",
-          "type": "(controller_auth::signer::WebauthnSigner, controller_auth::webauthn::WebauthnAssertion)"
+          "type": "(webauthn_auth::signer::WebauthnSigner, webauthn_auth::webauthn::WebauthnAssertion)"
         },
         {
           "name": "Unimplemented",
@@ -24272,7 +24272,7 @@
     },
     {
       "type": "enum",
-      "name": "controller_auth::signer::SignerType",
+      "name": "webauthn_auth::signer::SignerType",
       "variants": [
         {
           "name": "Starknet",
@@ -24294,7 +24294,7 @@
     },
     {
       "type": "interface",
-      "name": "controller::account::IUserAccount",
+      "name": "cartridge_account::cartridge::IUserAccount",
       "items": [
         {
           "type": "function",
@@ -24302,7 +24302,7 @@
           "inputs": [
             {
               "name": "signer_signature",
-              "type": "controller_auth::signer::SignerSignature"
+              "type": "webauthn_auth::signer::SignerSignature"
             }
           ],
           "outputs": [],
@@ -24325,7 +24325,7 @@
           "inputs": [],
           "outputs": [
             {
-              "type": "controller_auth::signer::SignerType"
+              "type": "webauthn_auth::signer::SignerType"
             }
           ],
           "state_mutability": "view"
@@ -24370,11 +24370,11 @@
     {
       "type": "impl",
       "name": "SessionImpl",
-      "interface_name": "controller_session::interface::ISession"
+      "interface_name": "webauthn_session::interface::ISession"
     },
     {
       "type": "interface",
-      "name": "controller_session::interface::ISession",
+      "name": "webauthn_session::interface::ISession",
       "items": [
         {
           "type": "function",
@@ -24409,7 +24409,7 @@
     {
       "type": "impl",
       "name": "ExecuteFromOutside",
-      "interface_name": "controller::outside_execution::interface::IOutsideExecution"
+      "interface_name": "cartridge_account::outside_execution::interface::IOutsideExecution"
     },
     {
       "type": "struct",
@@ -24423,7 +24423,7 @@
     },
     {
       "type": "struct",
-      "name": "controller::outside_execution::interface::OutsideExecution",
+      "name": "cartridge_account::outside_execution::interface::OutsideExecution",
       "members": [
         {
           "name": "caller",
@@ -24449,7 +24449,7 @@
     },
     {
       "type": "interface",
-      "name": "controller::outside_execution::interface::IOutsideExecution",
+      "name": "cartridge_account::outside_execution::interface::IOutsideExecution",
       "items": [
         {
           "type": "function",
@@ -24457,7 +24457,7 @@
           "inputs": [
             {
               "name": "outside_execution",
-              "type": "controller::outside_execution::interface::OutsideExecution"
+              "type": "cartridge_account::outside_execution::interface::OutsideExecution"
             },
             {
               "name": "signature",
@@ -24493,7 +24493,7 @@
           "inputs": [
             {
               "name": "outside_execution",
-              "type": "controller::outside_execution::interface::OutsideExecution"
+              "type": "cartridge_account::outside_execution::interface::OutsideExecution"
             }
           ],
           "outputs": [
@@ -24508,11 +24508,11 @@
     {
       "type": "impl",
       "name": "SRC5",
-      "interface_name": "controller::src5::ISRC5"
+      "interface_name": "cartridge_account::src5::ISRC5"
     },
     {
       "type": "interface",
-      "name": "controller::src5::ISRC5",
+      "name": "cartridge_account::src5::ISRC5",
       "items": [
         {
           "type": "function",
@@ -24534,19 +24534,19 @@
     },
     {
       "type": "enum",
-      "name": "controller_auth::signer::Signer",
+      "name": "webauthn_auth::signer::Signer",
       "variants": [
         {
           "name": "Starknet",
-          "type": "controller_auth::signer::StarknetSigner"
+          "type": "webauthn_auth::signer::StarknetSigner"
         },
         {
           "name": "Secp256k1",
-          "type": "controller_auth::signer::Secp256k1Signer"
+          "type": "webauthn_auth::signer::Secp256k1Signer"
         },
         {
           "name": "Webauthn",
-          "type": "controller_auth::signer::WebauthnSigner"
+          "type": "webauthn_auth::signer::WebauthnSigner"
         },
         {
           "name": "Unimplemented",
@@ -24556,11 +24556,11 @@
     },
     {
       "type": "enum",
-      "name": "core::option::Option::<controller_auth::signer::Signer>",
+      "name": "core::option::Option::<webauthn_auth::signer::Signer>",
       "variants": [
         {
           "name": "Some",
-          "type": "controller_auth::signer::Signer"
+          "type": "webauthn_auth::signer::Signer"
         },
         {
           "name": "None",
@@ -24574,17 +24574,17 @@
       "inputs": [
         {
           "name": "owner",
-          "type": "controller_auth::signer::Signer"
+          "type": "webauthn_auth::signer::Signer"
         },
         {
           "name": "guardian",
-          "type": "core::option::Option::<controller_auth::signer::Signer>"
+          "type": "core::option::Option::<webauthn_auth::signer::Signer>"
         }
       ]
     },
     {
       "type": "event",
-      "name": "controller::account::CartridgeAccount::OwnerChanged",
+      "name": "cartridge_account::cartridge::CartridgeAccount::OwnerChanged",
       "kind": "struct",
       "members": [
         {
@@ -24596,7 +24596,7 @@
     },
     {
       "type": "event",
-      "name": "controller::account::CartridgeAccount::OwnerChangedGuid",
+      "name": "cartridge_account::cartridge::CartridgeAccount::OwnerChangedGuid",
       "kind": "struct",
       "members": [
         {
@@ -24608,7 +24608,7 @@
     },
     {
       "type": "event",
-      "name": "controller::account::CartridgeAccount::SignerLinked",
+      "name": "cartridge_account::cartridge::CartridgeAccount::SignerLinked",
       "kind": "struct",
       "members": [
         {
@@ -24618,14 +24618,14 @@
         },
         {
           "name": "signer",
-          "type": "controller_auth::signer::Signer",
+          "type": "webauthn_auth::signer::Signer",
           "kind": "data"
         }
       ]
     },
     {
       "type": "event",
-      "name": "controller_session::session_component::SessionRevoked",
+      "name": "webauthn_session::session_component::SessionRevoked",
       "kind": "struct",
       "members": [
         {
@@ -24637,61 +24637,61 @@
     },
     {
       "type": "event",
-      "name": "controller_session::session_component::Event",
+      "name": "webauthn_session::session_component::Event",
       "kind": "enum",
       "variants": [
         {
           "name": "SessionRevoked",
-          "type": "controller_session::session_component::SessionRevoked",
+          "type": "webauthn_session::session_component::SessionRevoked",
           "kind": "nested"
         }
       ]
     },
     {
       "type": "event",
-      "name": "controller::outside_execution::outside_execution::outside_execution_component::Event",
+      "name": "cartridge_account::outside_execution::outside_execution::outside_execution_component::Event",
       "kind": "enum",
       "variants": []
     },
     {
       "type": "event",
-      "name": "controller::src5::src5_component::Event",
+      "name": "cartridge_account::src5::src5_component::Event",
       "kind": "enum",
       "variants": []
     },
     {
       "type": "event",
-      "name": "controller::account::CartridgeAccount::Event",
+      "name": "cartridge_account::cartridge::CartridgeAccount::Event",
       "kind": "enum",
       "variants": [
         {
           "name": "OwnerChanged",
-          "type": "controller::account::CartridgeAccount::OwnerChanged",
+          "type": "cartridge_account::cartridge::CartridgeAccount::OwnerChanged",
           "kind": "nested"
         },
         {
           "name": "OwnerChangedGuid",
-          "type": "controller::account::CartridgeAccount::OwnerChangedGuid",
+          "type": "cartridge_account::cartridge::CartridgeAccount::OwnerChangedGuid",
           "kind": "nested"
         },
         {
           "name": "SignerLinked",
-          "type": "controller::account::CartridgeAccount::SignerLinked",
+          "type": "cartridge_account::cartridge::CartridgeAccount::SignerLinked",
           "kind": "nested"
         },
         {
           "name": "SessionEvent",
-          "type": "controller_session::session_component::Event",
+          "type": "webauthn_session::session_component::Event",
           "kind": "flat"
         },
         {
           "name": "ExecuteFromOutsideEvents",
-          "type": "controller::outside_execution::outside_execution::outside_execution_component::Event",
+          "type": "cartridge_account::outside_execution::outside_execution::outside_execution_component::Event",
           "kind": "flat"
         },
         {
           "name": "SRC5Events",
-          "type": "controller::src5::src5_component::Event",
+          "type": "cartridge_account::src5::src5_component::Event",
           "kind": "flat"
         }
       ]

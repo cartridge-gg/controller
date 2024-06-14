@@ -5,7 +5,8 @@ use std::str::FromStr;
 
 use account_sdk::account::session::hash::{AllowedMethod, Session};
 use account_sdk::account::session::SessionAccount;
-use account_sdk::account::CartridgeGuardianAccount;
+use account_sdk::account::{AccountHashSigner, CartridgeGuardianAccount};
+use account_sdk::hash::MessageHashRev1;
 use account_sdk::signers::webauthn::device::DeviceSigner;
 use account_sdk::signers::HashSigner;
 use account_sdk::wasm_webauthn::CredentialID;
