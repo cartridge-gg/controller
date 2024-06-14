@@ -68,11 +68,10 @@ export function DeploymentRequired({
         <Content alignItems="center">
           {status === Status.DEPLOYING && (
             <Link
-              href={`https://${
-                account.chainId === constants.StarknetChainId.SN_SEPOLIA
-                  ? "sepolia."
-                  : undefined
-              }starkscan.co/tx/${deployHash}`}
+              href={`https://${account.chainId === constants.StarknetChainId.SN_SEPOLIA
+                ? "sepolia."
+                : undefined
+                }starkscan.co/tx/${deployHash}`}
               isExternal
             >
               <Button variant="link" mt={10} rightIcon={<ExternalIcon />}>
@@ -88,7 +87,7 @@ export function DeploymentRequired({
             description={
               error ? (
                 <>
-                  <Text mb={4}>
+                  <Text mb={4} color="inherit">
                     Please come by{" "}
                     <Link
                       as={NextLink}
@@ -106,7 +105,7 @@ export function DeploymentRequired({
                     and report this issue.
                   </Text>
 
-                  <Text>{error.message}</Text>
+                  <Text color="text.secondary">{error.message}</Text>
                 </>
               ) : undefined
             }
