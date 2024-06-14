@@ -72,6 +72,7 @@ export function Footer({
       as={motion.div}
       layout="position"
       animate={{ height, transition: { bounce: 0 } }}
+      overflow="hidden"
       ref={ref}
     >
       <VStack

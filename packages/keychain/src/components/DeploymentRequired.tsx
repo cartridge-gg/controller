@@ -88,7 +88,7 @@ export function DeploymentRequired({
             description={
               error ? (
                 <>
-                  <Text mb={4}>
+                  <Text mb={4} color="inherit">
                     Please come by{" "}
                     <Link
                       as={NextLink}
@@ -106,7 +106,7 @@ export function DeploymentRequired({
                     and report this issue.
                   </Text>
 
-                  <Text>{error.message}</Text>
+                  <Text color="text.secondary">{error.message}</Text>
                 </>
               ) : undefined
             }
