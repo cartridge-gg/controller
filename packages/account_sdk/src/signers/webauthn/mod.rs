@@ -1,5 +1,7 @@
 use super::{HashSigner, SignError};
-use crate::abigen::controller::{Signer, SignerSignature, WebauthnAssertion, WebauthnSigner};
+use crate::abigen::cartridge_account::{
+    Signer, SignerSignature, WebauthnAssertion, WebauthnSigner,
+};
 
 use async_trait::async_trait;
 use cainome::cairo_serde::U256;

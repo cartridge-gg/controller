@@ -11,7 +11,7 @@
         "cartridge_account::src5::src5_component::Event": "Src5ComponentEvent",
         "openzeppelin::token::erc20::erc20::ERC20Component::Event": "ERC20ComponentEvent",
         "openzeppelin::access::ownable::ownable::OwnableComponent::Event": "OwnableComponentEvent",
-        "controller_session::session_component::Event": "SessionComponentEvent",
-        "controller_auth::component::webauthn_component::Event": "WebauthnComponentEvent"
+        "webauthn_session::session_component::Event": "SessionComponentEvent",
+        "webauthn_auth::component::webauthn_component::Event": "WebauthnComponentEvent"
     }
 }

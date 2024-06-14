@@ -1,10 +1,10 @@
 #[derive(Debug)]
-pub struct Controller<A: starknet::accounts::ConnectedAccount + Sync> {
+pub struct CartridgeAccount<A: starknet::accounts::ConnectedAccount + Sync> {
     pub address: starknet::core::types::FieldElement,
     pub account: A,
     pub block_id: starknet::core::types::BlockId,
 }
-impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
+impl<A: starknet::accounts::ConnectedAccount + Sync> CartridgeAccount<A> {
     pub fn new(address: starknet::core::types::FieldElement, account: A) -> Self {
         Self {
             address,
@@ -12,26 +12,23 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
             block_id: starknet::core::types::BlockId::Tag(starknet::core::types::BlockTag::Pending),
         }
     }
-    pub fn set_contract_address(&mut self, address: starknet::core::types::FieldElement) {
+    pub fn set_contract_address(mut self, address: starknet::core::types::FieldElement) {
         self.address = address;
     }
     pub fn provider(&self) -> &A::Provider {
         self.account.provider()
-    }
-    pub fn set_block(&mut self, block_id: starknet::core::types::BlockId) {
-        self.block_id = block_id;
     }
     pub fn with_block(self, block_id: starknet::core::types::BlockId) -> Self {
         Self { block_id, ..self }
     }
 }
 #[derive(Debug)]
-pub struct ControllerReader<P: starknet::providers::Provider + Sync> {
+pub struct CartridgeAccountReader<P: starknet::providers::Provider + Sync> {
     pub address: starknet::core::types::FieldElement,
     pub provider: P,
     pub block_id: starknet::core::types::BlockId,
 }
-impl<P: starknet::providers::Provider + Sync> ControllerReader<P> {
+impl<P: starknet::providers::Provider + Sync> CartridgeAccountReader<P> {
     pub fn new(address: starknet::core::types::FieldElement, provider: P) -> Self {
         Self {
             address,
@@ -39,14 +36,11 @@ impl<P: starknet::providers::Provider + Sync> ControllerReader<P> {
             block_id: starknet::core::types::BlockId::Tag(starknet::core::types::BlockTag::Pending),
         }
     }
-    pub fn set_contract_address(&mut self, address: starknet::core::types::FieldElement) {
+    pub fn set_contract_address(mut self, address: starknet::core::types::FieldElement) {
         self.address = address;
     }
     pub fn provider(&self) -> &P {
         &self.provider
-    }
-    pub fn set_block(&mut self, block_id: starknet::core::types::BlockId) {
-        self.block_id = block_id;
     }
     pub fn with_block(self, block_id: starknet::core::types::BlockId) -> Self {
         Self { block_id, ..self }
@@ -567,7 +561,7 @@ impl cainome::cairo_serde::CairoSerde for OutsideExecution {
         })
     }
 }
-#[derive(Debug, PartialEq, PartialOrd, Clone, serde :: Serialize, serde :: Deserialize)]
+#[derive(Debug, PartialEq, PartialOrd, Clone)]
 pub enum SessionComponentEvent {
     SessionRevoked(SessionRevoked),
 }
@@ -773,7 +767,7 @@ impl cainome::cairo_serde::CairoSerde for SignerSignature {
             _ => {
                 return Err(cainome::cairo_serde::Error::Deserialize(format!(
                     "Index not handle for enum {}",
-                    "Event"
+                    "SignerSignature"
                 )))
             }
         }
@@ -1417,7 +1411,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> CartridgeAccount<A> {
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
-    pub fn change_owner_getcall(
+    pub fn revoke_session_getcall(
         &self,
         session_hash: &starknet::core::types::FieldElement,
     ) -> starknet::accounts::Call {

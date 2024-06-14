@@ -7,7 +7,7 @@ use ::starknet::{
 };
 use starknet_crypto::{poseidon_hash, FieldElement, PoseidonHasher};
 
-use crate::abigen::controller::{Signer, SignerSignature};
+use crate::abigen::cartridge_account::{Signer, SignerSignature};
 use async_trait::async_trait;
 
 use self::webauthn::DeviceError;
