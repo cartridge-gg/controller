@@ -44,22 +44,16 @@ export function Footer({
     () => (origin ? new URL(origin).hostname : undefined),
     [origin],
   );
-  const height = useMemo(
-    () =>
-      isOpen
-        ? `${
-            (isIframe() ? window.innerHeight : PORTAL_WINDOW_HEIGHT) -
-            TOP_BAR_HEIGHT
-          }px`
-        : "auto",
-    [isOpen],
-  );
+  const maxH = `${
+    (isIframe() ? window.innerHeight : PORTAL_WINDOW_HEIGHT) - TOP_BAR_HEIGHT
+  }px`;
+  const { footerHeight } = useLayout();
 
   useEffect(() => {
-    if (!ref.current) return;
+    if (!ref.current || !!footerHeight) return;
 
     setFooterHeight(ref.current.clientHeight);
-  }, [setFooterHeight]);
+  }, [setFooterHeight, footerHeight]);
 
   return (
     <VStack
@@ -70,7 +64,8 @@ export function Footer({
       gap={0}
       as={motion.div}
       layout="position"
-      animate={{ height, transition: { bounce: 0 } }}
+      className="whatever"
+      animate={{ height: isOpen ? maxH : "auto", transition: { bounce: 0 } }}
       overflow="hidden"
       ref={ref}
     >
@@ -80,8 +75,9 @@ export function Footer({
         bg="solid.bg"
         borderTopWidth={1}
         borderColor="solid.spacer"
-        h="full"
         px={4}
+        flex={1}
+        h={`calc(${maxH} - ${footerHeight}px)`}
       >
         <HStack align="flex-start" pt={isExpandable ? 6 : 0}>
           <TransactionSummary
