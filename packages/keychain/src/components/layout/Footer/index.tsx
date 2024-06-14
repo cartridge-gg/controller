@@ -44,7 +44,6 @@ export function Footer({
     () => (origin ? new URL(origin).hostname : undefined),
     [origin],
   );
-  const showLogo = useMemo(() => variant === "connect", [variant]);
   const height = useMemo(
     () =>
       isOpen
@@ -126,7 +125,7 @@ export function Footer({
         {children}
       </VStack>
 
-      {showLogo && (
+      {variant === "connect" && (
         <HStack
           justifySelf="flex-end"
           bg="solid.bg"
