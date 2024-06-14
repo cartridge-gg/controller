@@ -26,21 +26,30 @@ export interface PublicKeyRequest
 export const createCredentials = async (
   name: string,
   beginRegistration: CredentialCreationOptions,
-  hasPlatformAuthenticator: boolean,
 ) => {
-  if (!hasPlatformAuthenticator || navigator.userAgent.indexOf("Win") != -1)
-    beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
-      "cross-platform";
-  else
-    beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
-      undefined;
+  const hasPlatformAuth =
+    await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
 
+  beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
+    hasPlatformAuth ? "platform" : "cross-platform";
+
+  beginRegistration.publicKey.pubKeyCredParams = [
+    {
+      type: "public-key",
+      alg: -7,
+    },
+    {
+      type: "public-key",
+      alg: -257,
+    },
+  ];
+
+  beginRegistration.publicKey.rp.id = process.env.NEXT_PUBLIC_RP_ID;
   beginRegistration.publicKey.user.id = Buffer.from(name);
   beginRegistration.publicKey.challenge = base64url.toBuffer(
     beginRegistration.publicKey.challenge as unknown as string,
   );
 
-  beginRegistration.publicKey.rp.id = process.env.NEXT_PUBLIC_RP_ID;
   const credentials = (await navigator.credentials.create(
     beginRegistration,
   )) as PublicKeyCredential & {
@@ -63,14 +72,8 @@ export type Credentials = PublicKeyCredential & {
 };
 
 export const onCreateBegin = async (name: string): Promise<Credentials> => {
-  const hasPlatformAuthenticator =
-    await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
   const { data } = await beginRegistration(name);
-  const credentials = await createCredentials(
-    name,
-    data.beginRegistration,
-    hasPlatformAuthenticator,
-  );
+  const credentials = await createCredentials(name, data.beginRegistration);
 
   return credentials;
 };
