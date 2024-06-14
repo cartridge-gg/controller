@@ -95,38 +95,6 @@ export function SignMessage({
             });
           })()}
         </Flex>
-        <Flex direction="column" align="start" gap="18px" w="full">
-          {(() => {
-            if (!messageData) return <></>;
-            const ptName = messageData.primaryType;
-            const pt = messageData.types[ptName];
-            const values = (typeName: string) => {
-              const v = messageData.message[typeName];
-              if (typeof v === "object") {
-                return Object.entries(v).map(([key, value]) => {
-                  return (
-                    <Text key={key}>
-                      <Text as="span" opacity="50%" textTransform="capitalize">
-                        {key}:
-                      </Text>{" "}
-                      {value as string}
-                    </Text>
-                  );
-                });
-              } else {
-                return <Text>{v as string}</Text>;
-              }
-            };
-
-            return pt.map((typ) => {
-              return (
-                <DataContainer key={typ.name} title={typ.name}>
-                  {values(typ.name)}
-                </DataContainer>
-              );
-            });
-          })()}
-        </Flex>
       </Content>
 
       <Footer>
