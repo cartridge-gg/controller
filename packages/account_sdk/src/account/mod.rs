@@ -3,7 +3,7 @@ pub mod guardian;
 pub mod outside_execution;
 pub mod session;
 
-use crate::abigen::cartridge_account::Call as AbigenCall;
+use crate::abigen::controller::Call as AbigenCall;
 use cainome::cairo_serde::{CairoSerde, ContractAddress};
 pub use cartridge::CartridgeAccount;
 pub use guardian::CartridgeGuardianAccount;

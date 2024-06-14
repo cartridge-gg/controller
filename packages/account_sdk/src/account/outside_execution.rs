@@ -1,4 +1,4 @@
-use crate::abigen::cartridge_account::Call as AbigenCall;
+use crate::abigen::controller::Call as AbigenCall;
 use crate::{
     hash::{MessageHashRev1, StarknetDomain, StructHashRev1},
     signers::SignError,
@@ -144,7 +144,7 @@ impl From<OutsideExecutionCaller> for ContractAddress {
     }
 }
 
-pub type OutsideExecutionRaw = crate::abigen::cartridge_account::OutsideExecution;
+pub type OutsideExecutionRaw = crate::abigen::controller::OutsideExecution;
 
 impl StructHashRev1 for OutsideExecutionRaw {
     fn get_struct_hash_rev_1(&self) -> FieldElement {

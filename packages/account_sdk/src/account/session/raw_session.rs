@@ -3,7 +3,7 @@ use starknet::macros::{selector, short_string};
 use starknet_crypto::{poseidon_hash_many, FieldElement};
 
 use crate::{
-    abigen::cartridge_account::SignerSignature,
+    abigen::controller::SignerSignature,
     hash::{MessageHashRev1, StarknetDomain, StructHashRev1},
 };
 

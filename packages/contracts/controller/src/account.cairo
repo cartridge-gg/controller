@@ -28,7 +28,7 @@ trait IDeclarer<TState> {
     fn __validate_declare__(ref self: TState, class_hash: felt252) -> felt252;
 }
 
-#[starknet::contract]
+#[starknet::contract(account)]
 mod CartridgeAccount {
     use core::traits::TryInto;
     use core::option::OptionTrait;
@@ -66,6 +66,8 @@ mod CartridgeAccount {
         outside_execution::outside_execution_component, interface::IOutsideExecutionCallback
     };
     use controller::src5::src5_component;
+    use openzeppelin::upgrades::UpgradeableComponent;
+    use openzeppelin::upgrades::interface::IUpgradeable;
 
     const TRANSACTION_VERSION: felt252 = 1;
     // 2**128 + TRANSACTION_VERSION
@@ -89,6 +91,8 @@ mod CartridgeAccount {
     #[abi(embed_v0)]
     impl SRC5 = src5_component::SRC5Impl<ContractState>;
 
+    component!(path: UpgradeableComponent, storage: upgradeable, event: UpgradeableEvent);
+    impl UpgradeableInternalImpl = UpgradeableComponent::InternalImpl<ContractState>;
 
     #[storage]
     struct Storage {
@@ -100,6 +104,8 @@ mod CartridgeAccount {
         execute_from_outside: outside_execution_component::Storage,
         #[substorage(v0)]
         src5: src5_component::Storage,
+        #[substorage(v0)]
+        upgradeable: UpgradeableComponent::Storage
     }
 
     #[event]
@@ -113,7 +119,9 @@ mod CartridgeAccount {
         #[flat]
         ExecuteFromOutsideEvents: outside_execution_component::Event,
         #[flat]
-        SRC5Events: src5_component::Event
+        SRC5Events: src5_component::Event,
+        #[flat]
+        UpgradeableEvent: UpgradeableComponent::Event
     }
 
     #[derive(Drop, starknet::Event)]
@@ -149,7 +157,6 @@ mod CartridgeAccount {
     // External
     //
 
-    // TODO: Remove this warning
     #[abi(embed_v0)]
     impl AccountImpl of IAccount<ContractState> {
         fn __validate__(ref self: ContractState, mut calls: Array<Call>) -> felt252 {
@@ -212,9 +219,7 @@ mod CartridgeAccount {
                 let call = Call {
                     to: get_contract_address(),
                     selector: controller_auth::DECLARE_SELECTOR,
-                    calldata: array![
-                        class_hash,
-                    ].span()
+                    calldata: array![class_hash,].span()
                 };
                 self
                     .session
@@ -230,6 +235,7 @@ mod CartridgeAccount {
             starknet::VALIDATED
         }
     }
+
     #[abi(embed_v0)]
     impl UserAccountImpl of IUserAccount<ContractState> {
         fn change_owner(ref self: ContractState, signer_signature: SignerSignature) {
@@ -316,6 +322,14 @@ mod CartridgeAccount {
             }
             let retdata = _execute_calls(calls);
             retdata
+        }
+    }
+
+    #[abi(embed_v0)]
+    impl UpgradeableImpl of IUpgradeable<ContractState> {
+        fn upgrade(ref self: ContractState, new_class_hash: ClassHash) {
+            assert_only_self();
+            self.upgradeable._upgrade(new_class_hash);
         }
     }
 
@@ -430,8 +444,7 @@ mod CartridgeAccount {
         ) {
             assert(signer_signatures.len() <= 2, 'invalid-signature-length');
             assert(
-                self.is_valid_owner_signature(hash, *signer_signatures.at(0)),
-                'invalid-owner-sig'
+                self.is_valid_owner_signature(hash, *signer_signatures.at(0)), 'invalid-owner-sig'
             );
         }
         #[inline(always)]
