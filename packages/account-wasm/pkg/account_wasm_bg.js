@@ -228,8 +228,13 @@ function makeMutClosure(arg0, arg1, dtor, f) {
     CLOSURE_DTORS.register(real, state, state);
     return real;
 }
+<<<<<<< HEAD
 function __wbg_adapter_40(arg0, arg1, arg2) {
     wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h48ddaae0efb24961(arg0, arg1, addHeapObject(arg2));
+=======
+function __wbg_adapter_38(arg0, arg1, arg2) {
+    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__hf0f5cf13d081514f(arg0, arg1, addHeapObject(arg2));
+>>>>>>> main
 }
 
 let cachedUint32Memory0 = null;
@@ -269,8 +274,13 @@ function handleError(f, args) {
         wasm.__wbindgen_exn_store(addHeapObject(e));
     }
 }
+<<<<<<< HEAD
 function __wbg_adapter_155(arg0, arg1, arg2, arg3) {
     wasm.wasm_bindgen__convert__closures__invoke2_mut__h8496ed3272017b5c(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
+=======
+function __wbg_adapter_152(arg0, arg1, arg2, arg3) {
+    wasm.wasm_bindgen__convert__closures__invoke2_mut__hc994a4c6af3638a9(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
+>>>>>>> main
 }
 
 const CartridgeAccountFinalization = (typeof FinalizationRegistry === 'undefined')
@@ -932,8 +942,13 @@ export function __wbindgen_memory() {
     return addHeapObject(ret);
 };
 
+<<<<<<< HEAD
 export function __wbindgen_closure_wrapper1307(arg0, arg1, arg2) {
     const ret = makeMutClosure(arg0, arg1, 417, __wbg_adapter_40);
+=======
+export function __wbindgen_closure_wrapper1115(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 394, __wbg_adapter_38);
+>>>>>>> main
     return addHeapObject(ret);
 };
 

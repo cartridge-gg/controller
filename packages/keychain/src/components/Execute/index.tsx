@@ -16,6 +16,7 @@ import { Call } from "./Call";
 import { InsufficientFunds } from "./InsufficientFunds";
 import { useChainId, useOrigin } from "hooks/connection";
 import { useController } from "hooks/controller";
+import { ErrorAlert } from "components/ErrorAlert";
 
 export const CONTRACT_ETH =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
@@ -150,7 +151,7 @@ export function Execute({
         <VStack spacing="1px" w="full" borderRadius="md" bg="solid.primary">
           <VStack w="full" p={3} align="flex-start">
             <Text fontSize="xs" fontWeight="bold" color="text.secondaryAccent">
-              Actions
+              Transaction Details
             </Text>
           </VStack>
 
@@ -176,6 +177,12 @@ export function Execute({
       </Content>
 
       <Footer>
+        {error && (
+          <ErrorAlert
+            title="Fee estimation failed"
+            description={error.message}
+          />
+        )}
         <Button
           colorScheme="colorful"
           onClick={onSubmit}

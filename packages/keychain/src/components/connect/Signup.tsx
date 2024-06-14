@@ -1,11 +1,6 @@
 import { Field } from "@cartridge/ui";
 import { Button } from "@chakra-ui/react";
-import {
-  Container,
-  FOOTER_MIN_HEIGHT,
-  Footer,
-  Content,
-} from "components/layout";
+import { Container, Footer, Content } from "components/layout";
 import {
   Form as FormikForm,
   Field as FormikField,
@@ -22,9 +17,10 @@ import { isIframe, validateUsernameFor } from "./utils";
 import { RegistrationLink } from "./RegistrationLink";
 import { doSignup } from "hooks/account";
 import { useControllerTheme } from "hooks/theme";
-import { Error as ErrorComp } from "components/Error";
 import { shortString } from "starknet";
 import { useConnection } from "hooks/connection";
+import { useDebounce } from "hooks/debounce";
+import { ErrorAlert } from "components/ErrorAlert";
 
 export function Signup({
   prefilledName = "",
@@ -32,91 +28,58 @@ export function Signup({
   onSuccess,
   onLogin,
 }: SignupProps) {
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState();
   const theme = useControllerTheme();
 
-  const onSubmit = useCallback(async (values: FormValues) => {
-    setIsLoading(true);
-    setIsRegistering(true);
-
-    // due to same origin restriction, if we're in iframe, pop up a
-    // window to continue webauthn registration. otherwise,
-    // display modal overlay. in either case, account is created in
-    // authenticate component, so we poll and then deploy
-    if (isIframe()) {
-      PopupCenter(
-        `/authenticate?name=${encodeURIComponent(
-          values.username,
-        )}&action=signup`,
-        "Cartridge Signup",
-        480,
-        640,
-      );
-
-      return;
-    }
-
-    doSignup(decodeURIComponent(values.username))
-      .catch((e) => {
-        setError(e);
-      })
-      .finally(() => setIsLoading(false));
-  }, []);
-
   return (
-    <>
-      <Container
-        variant="connect" overflowY={error ? "auto" : undefined}
-        title={
-          theme.id === "cartridge"
-            ? "Play with Cartridge Controller"
-            : `Play ${theme.name}`
-        }
-        description="Create your Cartridge Controller"
+    <Container
+      variant="connect"
+      title={
+        theme.id === "cartridge"
+          ? "Play with Cartridge Controller"
+          : `Play ${theme.name}`
+      }
+      description="Create your Cartridge Controller"
+    >
+      <Formik
+        initialValues={{ username: prefilledName }}
+        onSubmit={() => {
+          /* defer to onClick */
+        }}
       >
-        <Formik
-          initialValues={{ username: prefilledName }}
-          onSubmit={onSubmit}
-          validateOnChange={false}
-          validateOnBlur={false}
-        >
-          <Form
-            onLogin={onLogin}
-            isRegistering={isRegistering}
-            isLoading={isLoading}
-            onSuccess={onSuccess}
-            setIsRegistering={setIsRegistering}
-            isSlot={isSlot}
-            error={error}
-          />
-        </Formik>
-      </Container>
-    </>
+        <Form onLogin={onLogin} onSuccess={onSuccess} isSlot={isSlot} />
+      </Formik>
+    </Container>
   );
 }
 
-function Form({
-  isRegistering,
-  isLoading,
-  isSlot,
-  onLogin: onLoginProp,
-  onSuccess,
-  setIsRegistering,
-  error,
-}: SignupProps & {
-  isRegistering: boolean;
-  isLoading: boolean;
-  setIsRegistering: (val: boolean) => void;
-  error: Error;
-}) {
+function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
   const { chainId, rpcUrl, setController } = useConnection();
-  const { values, isValidating } = useFormikContext<FormValues>();
+  const { values, errors, setErrors, setTouched } =
+    useFormikContext<FormValues>();
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
+  const { debouncedValue: username, debouncing } = useDebounce(
+    values.username,
+    1000,
+  );
 
   useEffect(() => {
-    setIsRegistering(false);
-  }, [values.username, setIsRegistering]);
+    setErrors(undefined);
+
+    if (username) {
+      const validate = async () => {
+        setIsValidating(true);
+        const error = await validateUsernameFor("signup")(username);
+        if (error) {
+          setTouched({ username: true }, false);
+          setErrors({ username: error });
+        }
+
+        setIsValidating(false);
+      };
+      validate();
+    }
+  }, [username, setErrors, setTouched]);
 
   // for polling approach when iframe
   useAccountQuery(
@@ -162,46 +125,79 @@ function Form({
       },
     },
   );
+  const [error, setError] = useState<Error>();
 
-  const onLogin = useCallback(() => {
-    onLoginProp(values.username);
-  }, [values.username, onLoginProp]);
+  const onSubmit = useCallback(() => {
+    setError(undefined);
+    setIsRegistering(true);
+
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set("name", encodeURIComponent(username));
+    searchParams.set("action", "signup");
+
+    // due to same origin restriction, if we're in iframe, pop up a
+    // window to continue webauthn registration. otherwise,
+    // display modal overlay. in either case, account is created in
+    // authenticate component, so we poll and then deploy
+    if (isIframe()) {
+      PopupCenter(
+        `/authenticate?${searchParams.toString()}`,
+        "Cartridge Signup",
+        480,
+        640,
+      );
+
+      return;
+    }
+
+    doSignup(decodeURIComponent(username)).catch((e) => {
+      setErrors({ username: e.message });
+    }).finally(() => setIsRegistering(false));
+  }, [username, setErrors]);
 
   return (
     <FormikForm style={{ width: "100%" }}>
-      <Content pb={error ? FOOTER_MIN_HEIGHT : undefined} >
-        <FormikField
-          name="username"
-          placeholder="Username"
-          validate={validateUsernameFor("signup")}
-        >
+      <Content>
+        <FormikField name="username" placeholder="Username">
           {({ field, meta, form }) => (
             <Field
               {...field}
               autoFocus
               placeholder="Username"
               touched={meta.touched}
-              error={meta.error}
-              onClear={() => form.setFieldValue(field.name, "")}
-              isLoading={isValidating}
+              error={meta.error || errors?.username}
+              onChange={(e) => {
+                setError(undefined)
+                field.onChange(e)
+              }}
+              onClear={() => {
+                setError(undefined)
+                form.setFieldValue(field.name, "");
+                setErrors(undefined);
+              }}
             />
           )}
         </FormikField>
-
-        <ErrorComp error={error} />
       </Content>
 
-      <Footer
-        isSlot={isSlot}
-        showLogo
-        showTerm
-      >
-        <Button type="submit" colorScheme="colorful" isLoading={isLoading}>
+      <Footer isSlot={isSlot} createSession>
+        {error && (
+          <ErrorAlert title="Login failed" description={error.message} />
+        )}
+
+        <Button
+          colorScheme="colorful"
+          isLoading={isRegistering}
+          isDisabled={
+            debouncing || !username || !!errors?.username || isValidating
+          }
+          onClick={onSubmit}
+        >
           sign up
         </Button>
         <RegistrationLink
           description="Already have a Controller?"
-          onClick={onLogin}
+          onClick={() => onLogin(values.username)}
         >
           Log In
         </RegistrationLink>

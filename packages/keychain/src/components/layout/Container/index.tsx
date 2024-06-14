@@ -6,7 +6,7 @@ import {
   Show,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import { PropsWithChildren, createContext, useContext } from "react";
+import { PropsWithChildren, createContext, useContext, useState } from "react";
 import { Header, HeaderProps } from "./Header";
 
 export function Container({
@@ -20,7 +20,8 @@ export function Container({
   variant,
 }: {
   variant?: LayoutVariant;
-} & PropsWithChildren & StyleProps &
+} & PropsWithChildren &
+  StyleProps &
   HeaderProps) {
   return (
     <Wrapper variant={variant}>
@@ -33,9 +34,7 @@ export function Container({
         description={description}
       />
 
-      <VStack w="full">
-        {children}
-      </VStack>
+      <VStack w="full">{children}</VStack>
     </Wrapper>
   );
 }
@@ -43,9 +42,15 @@ export function Container({
 export const FOOTER_HEIGHT = 40;
 export const PORTAL_WINDOW_HEIGHT = 600;
 
-function Wrapper({ variant = "default", children, ...rest }: React.PropsWithChildren & { variant?: LayoutVariant }) {
+function Wrapper({
+  variant = "default",
+  children,
+  ...rest
+}: React.PropsWithChildren & { variant?: LayoutVariant }) {
+  const [footerHeight, setFooterHeight] = useState(0);
+
   return (
-    <LayoutContext.Provider value={{ variant }}>
+    <LayoutContext.Provider value={{ variant, footerHeight, setFooterHeight }}>
       {/** Show as full page  */}
       <Show below="md">
         <ChakraContainer
@@ -72,7 +77,6 @@ function Wrapper({ variant = "default", children, ...rest }: React.PropsWithChil
             borderWidth={1}
             borderColor="solid.primaryAccent"
             verticalAlign="middle"
-            // m="auto auto"
             bg="solid.bg"
             p={0}
             as={motion.div}
@@ -92,14 +96,24 @@ function Wrapper({ variant = "default", children, ...rest }: React.PropsWithChil
   );
 }
 
-const LayoutContext = createContext<LayoutContextValue>({ variant: "default" });
+const LayoutContext = createContext<LayoutContextValue>({
+  variant: "default",
+  footerHeight: 0,
+  setFooterHeight: () => {},
+});
 
 type LayoutContextValue = {
-  variant: LayoutVariant
+  variant: LayoutVariant;
+  footerHeight: number;
+  setFooterHeight: (height: number) => void;
+};
+
+type LayoutVariant = "default" | "connect";
+
+export function useLayout() {
+  return useContext(LayoutContext);
 }
 
-type LayoutVariant = "default" | "connect"
-
 export function useLayoutVariant() {
-  return useContext(LayoutContext).variant
+  return useLayout().variant;
 }

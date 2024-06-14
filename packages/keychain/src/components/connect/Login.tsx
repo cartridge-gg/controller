@@ -2,7 +2,6 @@ import { Field } from "@cartridge/ui";
 import { Button } from "@chakra-ui/react";
 import {
   Container,
-  FOOTER_MIN_HEIGHT,
   Footer,
   Content,
 } from "components/layout";
@@ -15,8 +14,8 @@ import { fetchAccount, validateUsernameFor } from "./utils";
 import { RegistrationLink } from "./RegistrationLink";
 import { useControllerTheme } from "hooks/theme";
 import { doLogin } from "hooks/account";
-import { Error as ErrorComp } from "components/Error";
 import { useConnection } from "hooks/connection";
+import { ErrorAlert } from "components/ErrorAlert";
 
 export function Login({
   prefilledName = "",
@@ -30,7 +29,7 @@ export function Login({
   const theme = useControllerTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [expiresAt] = useState<bigint>(3000000000n);
-  const [error, setError] = useState();
+  const [error, setError] = useState<Error>();
 
   const onSubmit = useCallback(
     async (values: FormValues) => {
@@ -106,7 +105,6 @@ export function Login({
   return (
     <Container
       variant="connect"
-      overflowY={error ? "auto" : undefined}
       title={
         theme.id === "cartridge"
           ? "Play with Cartridge Controller"
@@ -122,7 +120,7 @@ export function Login({
       >
         {(props) => (
           <FormikForm style={{ width: "100%" }}>
-            <Content pb={error ? FOOTER_MIN_HEIGHT : undefined}>
+            <Content>
               <FormikField
                 name="username"
                 placeholder="Username"
@@ -131,21 +129,29 @@ export function Login({
                 {({ field, meta, form }) => (
                   <Field
                     {...field}
+                    onChange={(e) => {
+                      setError(undefined)
+                      field.onChange(e)
+                    }}
                     autoFocus
                     placeholder="Username"
                     touched={meta.touched}
                     error={meta.error}
                     isLoading={props.isValidating}
                     isDisabled={isLoading}
-                    onClear={() => form.setFieldValue(field.name, "")}
+                    onClear={() => {
+                      setError(undefined)
+                      form.setFieldValue(field.name, "")
+                    }}
                   />
                 )}
               </FormikField>
-
-              <ErrorComp error={error} />
             </Content>
 
-            <Footer isSlot={isSlot} showLogo>
+            <Footer isSlot={isSlot} createSession>
+              {error && (
+                <ErrorAlert title="Login failed" description={error.message} />
+              )}
               <Button
                 type="submit"
                 colorScheme="colorful"

@@ -65,7 +65,7 @@ export function Authenticate({
       title={title}
       description={description}
     >
-      <Footer showLogo>
+      <Footer>
         <Button colorScheme="colorful" onClick={onAuth} isLoading={isLoading}>
           continue
         </Button>

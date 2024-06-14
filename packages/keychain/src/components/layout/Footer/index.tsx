@@ -7,8 +7,13 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { CartridgeLogo, WedgeUpIcon } from "@cartridge/ui";
-import React, { useMemo } from "react";
-import { FOOTER_HEIGHT, PORTAL_WINDOW_HEIGHT } from "components/layout";
+import React, { useEffect, useMemo, useRef } from "react";
+import {
+  FOOTER_HEIGHT,
+  PORTAL_WINDOW_HEIGHT,
+  useLayout,
+  useLayoutVariant,
+} from "components/layout";
 import { motion } from "framer-motion";
 import { SessionDetails } from "./SessionDetails";
 import { TransactionSummary } from "./TransactionSummary";
@@ -18,27 +23,37 @@ import { TOP_BAR_HEIGHT } from "../Container/Header/TopBar";
 
 export function Footer({
   children,
-  isSlot,
+  isSlot = false,
   showTerm = false,
-  showLogo = false
+  createSession = false,
 }: React.PropsWithChildren & {
   isSlot?: boolean;
   showTerm?: boolean;
-  showLogo?: boolean;
+  createSession?: boolean;
 }) {
-  const { origin, policies } = useConnection()
+  const { setFooterHeight } = useLayout();
+  const ref = useRef<HTMLDivElement>();
+  const { origin, policies } = useConnection();
   const { isOpen, onToggle } = useDisclosure();
-  const isExpandable = useMemo(() => !!origin && !!policies.length, [origin, policies]);
+  const variant = useLayoutVariant();
+  const isExpandable = useMemo(
+    () => !!origin && !!policies.length && variant === "connect",
+    [origin, policies, variant],
+  );
   const hostname = useMemo(
     () => (origin ? new URL(origin).hostname : undefined),
     [origin],
   );
+  const maxH = `${
+    (isIframe() ? window.innerHeight : PORTAL_WINDOW_HEIGHT) - TOP_BAR_HEIGHT
+  }px`;
+  const { footerHeight } = useLayout();
 
-  const height = useMemo(
-    () =>
-      isOpen ? `${(isIframe() ? window.innerHeight : PORTAL_WINDOW_HEIGHT) - TOP_BAR_HEIGHT - FOOTER_HEIGHT}px` : "auto",
-    [isOpen],
-  );
+  useEffect(() => {
+    if (!ref.current || !!footerHeight) return;
+
+    setFooterHeight(ref.current.clientHeight);
+  }, [setFooterHeight, footerHeight]);
 
   return (
     <VStack
@@ -47,62 +62,69 @@ export function Footer({
       w="full"
       zIndex={1}
       gap={0}
+      as={motion.div}
+      layout="position"
+      className="whatever"
+      animate={{ height: isOpen ? maxH : "auto", transition: { bounce: 0 } }}
+      overflow="hidden"
+      ref={ref}
     >
       <VStack
         w="full"
-        align="flex-start"
+        align="stretch"
         bg="solid.bg"
-        p={4}
-        pt={0}
         borderTopWidth={1}
         borderColor="solid.spacer"
-        as={motion.div}
-        layout="position"
-        animate={{ height, transition: { bounce: 0 } }}
+        px={4}
+        flex={1}
+        h={`calc(${maxH} - ${footerHeight}px)`}
       >
-        <VStack pt={6} align="stretch" w="full" h="full" overflowY="hidden">
-          <HStack align="flex-start">
-            <TransactionSummary
-              isSlot={isSlot}
-              showTerm={showTerm}
-              hostname={hostname}
+        <HStack align="flex-start" pt={isExpandable ? 6 : 0}>
+          <TransactionSummary
+            isSlot={isSlot}
+            showTerm={showTerm}
+            createSession={createSession}
+            hostname={hostname}
+          />
+
+          <Spacer />
+
+          {isExpandable && (
+            <IconButton
+              aria-label="Expand footer"
+              icon={
+                <WedgeUpIcon
+                  boxSize={8}
+                  color="text.secondary"
+                  transform={isOpen ? "rotate(180deg)" : "rotate(0deg)"}
+                />
+              }
+              size="sm"
+              h={8}
+              bg="solid.primary"
+              zIndex={1}
+              onClick={onToggle}
             />
-
-            <Spacer />
-
-            {isExpandable && (
-              <IconButton
-                aria-label="Expand footer"
-                icon={
-                  <WedgeUpIcon
-                    boxSize={8}
-                    color="text.secondary"
-                    transform={isOpen ? "rotate(180deg)" : "rotate(0deg)"}
-                  />
-                }
-                size="sm"
-                h={8}
-                bg="solid.primary"
-                zIndex={1}
-                onClick={onToggle}
-              />
-            )}
-          </HStack>
-
-          {isOpen && (
-            <SessionDetails />
           )}
-        </VStack>
+        </HStack>
 
-        <Spacer />
-
-        <VStack align="strech" w="full">
-          {children}
-        </VStack>
+        {isOpen && <SessionDetails />}
       </VStack>
 
-      {showLogo && (
+      <VStack
+        justifySelf="flex-end"
+        bg="solid.bg"
+        w="full"
+        align="stretch"
+        p={4}
+      >
+        {children}
+      </VStack>
+
+      {variant === "connect" && (
         <HStack
+          justifySelf="flex-end"
+          bg="solid.bg"
           w="full"
           borderTopWidth={1}
           borderColor="solid.tertiary"

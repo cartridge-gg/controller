@@ -9,9 +9,13 @@ version.workspace = true
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+<<<<<<< HEAD
 account-sdk.workspace = true
 async-trait = "0.1.68"
 auto_impl = "1.0.1"
+=======
+account_sdk.workspace = true
+>>>>>>> main
 base64 = "0.22.0"
 coset = { version = "0.3.4", features = ["std"] }
 hex = "0.4.3"

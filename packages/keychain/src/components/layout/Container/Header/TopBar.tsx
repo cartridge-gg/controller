@@ -1,8 +1,4 @@
-import {
-  Spacer,
-  IconButton,
-  HStack,
-} from "@chakra-ui/react";
+import { Spacer, IconButton, HStack } from "@chakra-ui/react";
 import { ArrowLeftIcon } from "@cartridge/ui";
 import { CloseButton } from "./CloseButton";
 import { useController } from "hooks/controller";
@@ -11,7 +7,7 @@ import { useMemo } from "react";
 export type TopBarProps = {
   onBack?: () => void;
   hideAccount?: boolean;
-}
+};
 
 export function TopBar({ onBack, hideAccount }: TopBarProps) {
   const { controller } = useController();
@@ -38,9 +34,9 @@ export function TopBar({ onBack, hideAccount }: TopBarProps) {
           icon={<ArrowLeftIcon />}
           onClick={onBack}
         />
-      ) :
+      ) : (
         <CloseButton />
-      }
+      )}
 
       <Spacer />
 
@@ -55,4 +51,4 @@ export function TopBar({ onBack, hideAccount }: TopBarProps) {
   );
 }
 
-export const TOP_BAR_HEIGHT = 56
+export const TOP_BAR_HEIGHT = 56;
