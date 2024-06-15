@@ -10,7 +10,7 @@ It supports transaction signing using Passkeys and Session Tokens.
 The project consists of several subfolders located in the ```packages``` directory:
 
 - **[account_sdk](packages/account_sdk)** - a rust sdk for interacting interacting with the controller account contract.
-- **[account-wasm](packages/account_wasm)** - a wasm version of the rust account sdk for usage in the browser.
+- **[account-wasm](packages/account-wasm)** - a wasm version of the rust account sdk for usage in the browser.
 - **[contracts](packages/contracts)** - a cairo project containing the controller account contract, signer, and session implementations.
 - **[keychain](packages/keychain)** - a sandboxed application hosted at https://x.cartridge.gg/ and responsible for sensitive operations, such as signing transactions. When an application requests to sign or execute a transaction, keychain enforces client side authorization logic and displays UI for user approval if necessary.
 - **[controller](packages/controller)** sdk. Controller implements the account interfaces required by [starknet.js](https://github.com/0xs34n/starknet.js). Underneath, the implementation communicates with an embedded sandboxed keychain iframe.
