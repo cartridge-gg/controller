@@ -1,10 +1,11 @@
-import {
-  useAccount,
-  // useContract,
-  useSignTypedData,
-} from "@starknet-react/core";
+import { useAccount, useSignTypedData } from "@starknet-react/core";
 import { useCallback, useState } from "react";
-import { ArraySignatureType, TypedData, shortString, typedData } from "starknet";
+import {
+  ArraySignatureType,
+  TypedData,
+  shortString,
+  typedData,
+} from "starknet";
 
 const MESSAGE: TypedData = {
   types: {
@@ -45,15 +46,12 @@ const MESSAGE: TypedData = {
 };
 
 export function SignMessage() {
-  const {
-    address,
-    account,
-  } = useAccount();
+  const { address, account } = useAccount();
   const [message, setMessage] = useState(MESSAGE);
   const [isValid, setIsValid] = useState<boolean | null>(null);
   const { signTypedData, data: signature } = useSignTypedData(message);
 
-  const validateSig = useCallback(async ()=>{
+  const onValidateSig = useCallback(async () => {
     if (!account || !address) {
       return;
     }
@@ -64,9 +62,9 @@ export function SignMessage() {
         contractAddress: address,
         entrypoint: "is_valid_signature",
         calldata: [
-          typedData.getMessageHash(message, address), 
-          (signature as ArraySignatureType).length, 
-          ...(signature as ArraySignatureType)
+          typedData.getMessageHash(message, address),
+          (signature as ArraySignatureType).length,
+          ...(signature as ArraySignatureType),
         ],
       },
       "pending",
@@ -75,8 +73,7 @@ export function SignMessage() {
     setIsValid(res[0] === shortString.encodeShortString("VALID"));
   }, [address, message, signature, account]);
 
-  if (!account || !address) 
-    return <></>;
+  if (!account || !address) return <></>;
 
   return (
     <div style={{ marginTop: "10px" }}>
@@ -87,25 +84,32 @@ export function SignMessage() {
         onChange={(e) => setMessage(JSON.parse(e.target.value))}
       />
       <div style={{ display: "flex", flexDirection: "row", gap: "10px" }}>
-        <button onClick={() => {
-          setIsValid(null);
-          signTypedData(message);
-        }}>Sign Message</button>
-      
+        <button
+          onClick={() => {
+            setIsValid(null);
+            signTypedData(message);
+          }}
+        >
+          Sign Message
+        </button>
+
         {signature && (
-          <button
-            style={{ paddingLeft: "8px" }}
-            onClick={validateSig}
-          >
+          <button style={{ paddingLeft: "8px" }} onClick={onValidateSig}>
             Validate Signature
           </button>
         )}
       </div>
-      
 
       {signature && (
         <div>
-          <p>Signature {isValid === null ? "not validated" : isValid ? "is valid" : "is invalid"}</p>
+          <p>
+            Signature{" "}
+            {isValid === null
+              ? "not validated"
+              : isValid
+              ? "is valid"
+              : "is invalid"}
+          </p>
           <pre>
             <code>{JSON.stringify(signature, null, 2)}</code>
           </pre>
