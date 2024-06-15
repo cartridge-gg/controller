@@ -3,7 +3,7 @@ pub mod guardian;
 pub mod outside_execution;
 pub mod session;
 
-use crate::abigen::controller::Call as AbigenCall;
+use crate::{abigen::controller::Call as AbigenCall, typed_data::TypedData};
 use cainome::cairo_serde::{CairoSerde, ContractAddress};
 pub use cartridge::CartridgeAccount;
 pub use guardian::CartridgeGuardianAccount;
@@ -68,6 +68,24 @@ where
         hash: FieldElement,
         _calls: &[Call],
     ) -> Result<Vec<FieldElement>, SignError> {
+        self.sign_hash(hash).await
+    }
+}
+
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+pub trait MessageSignerAccount {
+    async fn sign_message(&self, data: TypedData) -> Result<Vec<FieldElement>, SignError>;
+}
+
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+impl<T> MessageSignerAccount for T
+where
+    T: AccountHashSigner + SpecificAccount + Sync,
+{
+    async fn sign_message(&self, data: TypedData) -> Result<Vec<FieldElement>, SignError> {
+        let hash = data.encode(self.address())?;
         self.sign_hash(hash).await
     }
 }
