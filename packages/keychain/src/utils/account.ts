@@ -237,10 +237,7 @@ class Account extends BaseAccount {
   }
 
   async signMessage(typedData: TypedData): Promise<Signature> {
-    return await (this.status === Status.COUNTERFACTUAL ||
-    this.status === Status.DEPLOYING
-      ? super.signMessage(typedData)
-      : this.cartridge.signMessage()); // TODO: Fix on wasm side
+    return this.cartridge.signMessage(JSON.stringify(typedData));
   }
 
   async getNonce(blockIdentifier?: any): Promise<string> {
