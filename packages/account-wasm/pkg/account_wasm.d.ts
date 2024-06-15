@@ -42,7 +42,8 @@ export class CartridgeAccount {
 */
   revokeSession(): void;
 /**
-* @returns {any[]}
+* @param {string} typed_data
+* @returns {Promise<any>}
 */
-  signMessage(): any[];
+  signMessage(typed_data: string): Promise<any>;
 }
