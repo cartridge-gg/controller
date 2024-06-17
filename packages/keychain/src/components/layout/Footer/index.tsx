@@ -50,10 +50,20 @@ export function Footer({
   const { footerHeight } = useLayout();
 
   useEffect(() => {
-    if (!ref.current || !!footerHeight) return;
+    if (!ref.current) return;
 
-    setFooterHeight(ref.current.clientHeight);
-  }, [setFooterHeight, footerHeight]);
+    const observer = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        setFooterHeight(entry.contentRect.height);
+      }
+    });
+
+    observer.observe(ref.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [setFooterHeight]);
 
   return (
     <VStack

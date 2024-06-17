@@ -150,9 +150,11 @@ function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
       return;
     }
 
-    doSignup(decodeURIComponent(username)).catch((e) => {
-      setErrors({ username: e.message });
-    }).finally(() => setIsRegistering(false));
+    doSignup(decodeURIComponent(username))
+      .catch((e) => {
+        setErrors({ username: e.message });
+      })
+      .finally(() => setIsRegistering(false));
   }, [username, setErrors]);
 
   return (
@@ -167,11 +169,11 @@ function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
               touched={meta.touched}
               error={meta.error || errors?.username}
               onChange={(e) => {
-                setError(undefined)
-                field.onChange(e)
+                setError(undefined);
+                field.onChange(e);
               }}
               onClear={() => {
-                setError(undefined)
+                setError(undefined);
                 form.setFieldValue(field.name, "");
                 setErrors(undefined);
               }}
