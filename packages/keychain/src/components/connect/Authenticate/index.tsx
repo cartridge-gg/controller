@@ -2,7 +2,8 @@ import React, { useState, useCallback } from "react";
 import { Button } from "@chakra-ui/react";
 import { Unsupported, useIsSupported } from "./Unsupported";
 import { doSignup } from "hooks/account";
-import { Container, Footer } from "components/layout";
+import { Container, Content, Footer } from "components/layout";
+import { FaceIDDuoImage } from "./FaceID";
 
 export type AuthAction = "signup" | "login";
 
@@ -46,17 +47,17 @@ export function Authenticate({
   }
 
   const title =
-    action === "signup" ? "Authenticate Yourself" : "Hello from Cartridge!";
+    action === "signup" ? "Create Passkey" : "Hello from Cartridge!";
   const description =
     action === "signup" ? (
       <>
-        You will now be asked to authenticate yourself.
-        <br />
-        Note: this experience varies from browser to browser.
+        Your controller keys will be saved in
+        <br /> your device&apos;s password manager
       </>
     ) : (
       <>Please click continue.</>
     );
+  const cta = "signup" ? "Create Passkey" : "continue";
 
   return (
     <Container
@@ -65,9 +66,13 @@ export function Authenticate({
       title={title}
       description={description}
     >
+      <Content>
+        <FaceIDDuoImage />
+      </Content>
+
       <Footer>
         <Button colorScheme="colorful" onClick={onAuth} isLoading={isLoading}>
-          continue
+          {cta}
         </Button>
       </Footer>
     </Container>
