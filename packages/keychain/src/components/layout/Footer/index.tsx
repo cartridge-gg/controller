@@ -89,7 +89,12 @@ export function Footer({
         flex={1}
         h={`calc(${maxH} - ${footerHeight}px)`}
       >
-        <HStack align="flex-start" pt={isExpandable ? 6 : 0}>
+        <HStack
+          align="flex-start"
+          pt={isExpandable ? 6 : 0}
+          onClick={onToggle}
+          _hover={{ cursor: "pointer" }}
+        >
           <TransactionSummary
             isSlot={isSlot}
             showTerm={showTerm}
@@ -113,7 +118,6 @@ export function Footer({
               h={8}
               bg="solid.primary"
               zIndex={1}
-              onClick={onToggle}
             />
           )}
         </HStack>

@@ -159,7 +159,7 @@ export function Login({
                 description="Need a controller?"
                 onClick={() => onSignup(props.values.username)}
               >
-                Sign up
+                Sign Up
               </RegistrationLink>
             </Footer>
           </FormikForm>
