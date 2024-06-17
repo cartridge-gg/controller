@@ -229,7 +229,7 @@ function makeMutClosure(arg0, arg1, dtor, f) {
     return real;
 }
 function __wbg_adapter_40(arg0, arg1, arg2) {
-    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h48ddaae0efb24961(arg0, arg1, addHeapObject(arg2));
+    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h62caa38513d55a9d(arg0, arg1, addHeapObject(arg2));
 }
 
 let cachedUint32Memory0 = null;
@@ -251,17 +251,6 @@ function passArrayJsValueToWasm0(array, malloc) {
     return ptr;
 }
 
-function getArrayJsValueFromWasm0(ptr, len) {
-    ptr = ptr >>> 0;
-    const mem = getUint32Memory0();
-    const slice = mem.subarray(ptr / 4, ptr / 4 + len);
-    const result = [];
-    for (let i = 0; i < slice.length; i++) {
-        result.push(takeObject(slice[i]));
-    }
-    return result;
-}
-
 function handleError(f, args) {
     try {
         return f.apply(this, args);
@@ -270,7 +259,7 @@ function handleError(f, args) {
     }
 }
 function __wbg_adapter_155(arg0, arg1, arg2, arg3) {
-    wasm.wasm_bindgen__convert__closures__invoke2_mut__h8496ed3272017b5c(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
+    wasm.wasm_bindgen__convert__closures__invoke2_mut__h36eeb9bb8ab1ea47(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
 }
 
 const CartridgeAccountFinalization = (typeof FinalizationRegistry === 'undefined')
@@ -398,20 +387,14 @@ export class CartridgeAccount {
         }
     }
     /**
-    * @returns {any[]}
+    * @param {string} typed_data
+    * @returns {Promise<any>}
     */
-    signMessage() {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.cartridgeaccount_signMessage(retptr, this.__wbg_ptr);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var v1 = getArrayJsValueFromWasm0(r0, r1).slice();
-            wasm.__wbindgen_free(r0, r1 * 4, 4);
-            return v1;
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-        }
+    signMessage(typed_data) {
+        const ptr0 = passStringToWasm0(typed_data, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.cartridgeaccount_signMessage(this.__wbg_ptr, ptr0, len0);
+        return takeObject(ret);
     }
 }
 
@@ -935,8 +918,8 @@ export function __wbindgen_memory() {
     return addHeapObject(ret);
 };
 
-export function __wbindgen_closure_wrapper1303(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 419, __wbg_adapter_40);
+export function __wbindgen_closure_wrapper1463(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 464, __wbg_adapter_40);
     return addHeapObject(ret);
 };
 

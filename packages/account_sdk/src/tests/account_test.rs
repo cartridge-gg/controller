@@ -1,5 +1,5 @@
 use crate::{
-    abigen::{cartridge_account::CartridgeAccount as AbigenCartidgeAccount, erc_20::Erc20},
+    abigen::{controller::Controller as AbigenController, erc_20::Erc20},
     account::{
         session::{create::SessionCreator, hash::AllowedMethod},
         CartridgeAccount, CartridgeGuardianAccount,
@@ -38,7 +38,7 @@ async fn test_change_owner() {
         runner.client().chain_id().await.unwrap(),
     );
 
-    let account = AbigenCartidgeAccount::new(address, account);
+    let account = AbigenController::new(address, account);
     assert_eq!(
         account.get_owner().call().await.unwrap(),
         signer.verifying_key().scalar()
@@ -76,7 +76,7 @@ async fn test_change_owner_wrong_signature() {
         runner.client().chain_id().await.unwrap(),
     );
 
-    let account = AbigenCartidgeAccount::new(address, account);
+    let account = AbigenController::new(address, account);
     assert_eq!(
         account.get_owner().call().await.unwrap(),
         signer.verifying_key().scalar()
@@ -110,7 +110,7 @@ async fn test_change_owner_execute_after() {
         runner.client().chain_id().await.unwrap(),
     );
 
-    let account = AbigenCartidgeAccount::new(address, account);
+    let account = AbigenController::new(address, account);
     let new_signer = SigningKey::from_random();
     let old_guid = signer.signer().guid();
     let new_signer_signature = new_signer
@@ -200,7 +200,7 @@ async fn test_change_owner_invalidate_old_sessions() {
         .await
         .unwrap();
 
-    let account = AbigenCartidgeAccount::new(address, account);
+    let account = AbigenController::new(address, account);
 
     let new_signer = SigningKey::from_random();
     let old_guid = signer.signer().guid();

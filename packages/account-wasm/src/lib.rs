@@ -9,7 +9,7 @@ use account_sdk::account::outside_execution::{
 };
 use account_sdk::account::session::hash::{AllowedMethod, Session};
 use account_sdk::account::session::SessionAccount;
-use account_sdk::account::{AccountHashSigner, CartridgeGuardianAccount};
+use account_sdk::account::{AccountHashSigner, CartridgeGuardianAccount, MessageSignerAccount};
 use account_sdk::hash::MessageHashRev1;
 use account_sdk::signers::webauthn::device::DeviceSigner;
 use account_sdk::signers::HashSigner;
@@ -201,8 +201,12 @@ impl CartridgeAccount {
     }
 
     #[wasm_bindgen(js_name = signMessage)]
-    pub fn sign_message(&self) -> Vec<JsValue> {
-        unimplemented!("Sign Message not implemented");
+    pub async fn sign_message(&self, typed_data: String) -> Result<JsValue> {
+        let signature = self
+            .account
+            .sign_message(serde_json::from_str(&typed_data)?)
+            .await?;
+        Ok(to_value(&signature)?)
     }
 
     async fn session_account(

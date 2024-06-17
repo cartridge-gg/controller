@@ -1,7 +1,7 @@
 use starknet::macros::selector;
 use starknet_crypto::{poseidon_hash_many, FieldElement};
 
-use crate::abigen::cartridge_account::Call;
+use crate::abigen::controller::Call;
 
 pub trait StructHashRev1 {
     const TYPE_HASH_REV_1: FieldElement;

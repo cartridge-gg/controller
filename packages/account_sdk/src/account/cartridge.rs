@@ -7,7 +7,7 @@ use starknet::{
 };
 
 use crate::{
-    abigen::cartridge_account::SignerSignature,
+    abigen::controller::SignerSignature,
     impl_account, impl_execution_encoder,
     signers::{HashSigner, SignError},
 };

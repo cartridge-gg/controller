@@ -7,7 +7,7 @@ use ::starknet::{
 };
 use starknet_crypto::{poseidon_hash, FieldElement, PoseidonHasher};
 
-use crate::abigen::cartridge_account::{Signer, SignerSignature};
+use crate::abigen::controller::{Signer, SignerSignature};
 use async_trait::async_trait;
 
 use self::webauthn::DeviceError;
@@ -24,6 +24,8 @@ pub enum SignError {
     NoAllowedSessionMethods,
     #[error("MethodNotAllowed error")]
     SessionMethodNotAllowed,
+    #[error("Invalid message provided: {0}")]
+    InvalidMessageError(String),
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]

@@ -11,9 +11,9 @@ const Home: NextPage = () => {
       <h2>Wallet</h2>
       <ConnectWallet />
       <DojoSpawnAndMove />
-      <SignMessage />
       <TransferEth />
       <InvalidTxn />
+      <SignMessage />
     </div>
   );
 };
