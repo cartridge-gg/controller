@@ -137,12 +137,13 @@ export function Footer({
           bg="solid.bg"
           w="full"
           borderTopWidth={1}
-          borderColor="solid.tertiary"
+          borderColor="solid.spacer"
           color="text.secondary"
           alignItems="center"
           justify="center"
           h={FOOTER_HEIGHT / 4}
           gap={1}
+          opacity={0.5}
         >
           <Text fontSize="xs" color="currentColor">
             Controller by
