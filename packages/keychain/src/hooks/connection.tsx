@@ -91,11 +91,12 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
     if (!parent) return;
 
     try {
+      context.reject("User closed modal");
       await parent.close();
     } catch (e) {
       // Always fails for some reason
     }
-  }, [parent]);
+  }, [context, parent]);
 
   const logout = useCallback((context: ConnectionCtx) => {
     setContext({
