@@ -1,10 +1,6 @@
 import { Field } from "@cartridge/ui";
 import { Button } from "@chakra-ui/react";
-import {
-  Container,
-  Footer,
-  Content,
-} from "components/layout";
+import { Container, Footer, Content } from "components/layout";
 import { Form as FormikForm, Field as FormikField, Formik } from "formik";
 import { useCallback, useState } from "react";
 import Controller from "utils/controller";
@@ -130,8 +126,8 @@ export function Login({
                   <Field
                     {...field}
                     onChange={(e) => {
-                      setError(undefined)
-                      field.onChange(e)
+                      setError(undefined);
+                      field.onChange(e);
                     }}
                     autoFocus
                     placeholder="Username"
@@ -140,8 +136,8 @@ export function Login({
                     isLoading={props.isValidating}
                     isDisabled={isLoading}
                     onClear={() => {
-                      setError(undefined)
-                      form.setFieldValue(field.name, "")
+                      setError(undefined);
+                      form.setFieldValue(field.name, "");
                     }}
                   />
                 )}
