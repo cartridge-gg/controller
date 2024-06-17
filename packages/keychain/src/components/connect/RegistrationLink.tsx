@@ -14,7 +14,7 @@ export function RegistrationLink({
         {description}
       </Text>
 
-      <Button variant="link" onClick={onClick}>
+      <Button variant="gohst" onClick={onClick} textTransform="none" px={4} py={2} fontWeight="medium" color="link.blue" fontSize="xs">
         {children}
       </Button>
     </HStack>
