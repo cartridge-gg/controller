@@ -15,6 +15,11 @@ pub struct JsOutsideExecution {
     pub nonce: FieldElement,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct OutsideExecutionResult {
+    pub transaction_hash: FieldElement,
+}
+
 impl TryFrom<JsValue> for JsOutsideExecution {
     type Error = JsError;
 

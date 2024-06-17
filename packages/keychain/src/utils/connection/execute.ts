@@ -74,11 +74,10 @@ export function executeFactory({
 
       // Try execute from outside for fee subsized transactions
       try {
-        const res = await this.cartridge.executeFromOutside(
+        const res= await controller.account.cartridge.executeFromOutside(
           calls as Array<Call>,
           session,
         );
-
         return {
           code: ResponseCodes.SUCCESS,
           ...res,

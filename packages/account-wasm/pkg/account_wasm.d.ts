@@ -41,9 +41,9 @@ export class CartridgeAccount {
 /**
 * @param {any[]} calls
 * @param {any} session_details
-* @returns {Promise<void>}
+* @returns {Promise<any>}
 */
-  executeFromOutside(calls: any[], session_details: any): Promise<void>;
+  executeFromOutside(calls: any[], session_details: any): Promise<any>;
 /**
 */
   revokeSession(): void;

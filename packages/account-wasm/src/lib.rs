@@ -19,7 +19,7 @@ use coset::{CborSerializable, CoseKey};
 use paymaster::PaymasterRequest;
 use serde_wasm_bindgen::{from_value, to_value};
 use starknet::accounts::Account;
-use starknet::macros::short_string;
+use starknet::macros::{felt, short_string};
 use starknet::signers::SigningKey;
 use starknet::{
     accounts::Call,
@@ -27,6 +27,7 @@ use starknet::{
     providers::{jsonrpc::HttpTransport, JsonRpcClient},
 };
 use types::invocation::JsInvocationsDetails;
+use types::outside_execution::OutsideExecutionResult;
 use types::session::{JsCredentials, JsSession};
 use url::Url;
 use wasm_bindgen::prelude::*;
@@ -158,7 +159,7 @@ impl CartridgeAccount {
         &self,
         calls: Vec<JsValue>,
         session_details: JsValue,
-    ) -> Result<()> {
+    ) -> Result<JsValue> {
         utils::set_panic_hook();
 
         let calls = calls
@@ -192,7 +193,9 @@ impl CartridgeAccount {
         .await?
         .error_for_status()?;
 
-        Ok(())
+        Ok(to_value(&OutsideExecutionResult {
+            transaction_hash: felt!("0x42"),
+        })?)
     }
 
     #[wasm_bindgen(js_name = revokeSession)]
