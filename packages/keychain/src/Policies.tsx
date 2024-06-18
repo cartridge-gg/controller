@@ -9,7 +9,11 @@ import {
   AccordionPanel,
   Box,
 } from "@chakra-ui/react";
-import { CodeUtilIcon, WedgeRightIcon } from "@cartridge/ui";
+import {
+  CodeUtilIcon,
+  CopyHash,
+  WedgeRightIcon,
+} from "@cartridge/ui";
 import { Policy } from "@cartridge/controller";
 
 export function Policies({
@@ -47,7 +51,6 @@ export function Policies({
             // set the bottom radius for the last item here because for certain
             // browsers' scrolling behaviour (eg Firefox) just to make it look nicer.
             borderBottomRadius={i === policies.length - 1 ? "md" : "none"}
-            isDisabled={!p.description}
           >
             {({ isExpanded }) => (
               <>
@@ -64,19 +67,24 @@ export function Policies({
 
                   <Spacer />
 
-                  {p.description && (
-                    <WedgeRightIcon
-                      fontSize="2xl"
-                      transform={isExpanded ? "rotate(90deg)" : undefined}
-                      transition="all 0.2s ease"
-                      color="text.secondary"
-                    />
-                  )}
+                  <WedgeRightIcon
+                    fontSize="2xl"
+                    transform={isExpanded ? "rotate(90deg)" : undefined}
+                    transition="all 0.2s ease"
+                    color="text.secondary"
+                  />
                 </AccordionButton>
 
-                {p.description && (
-                  <AccordionPanel>{p.description}</AccordionPanel>
-                )}
+                <AccordionPanel>
+                  <VStack align="flex-start" w="full">
+                    <CopyHash hash={p.target} />
+                    {p.description && (
+                      <Text w="full" color="inherit">
+                        {p.description}
+                      </Text>
+                    )}
+                  </VStack>
+                </AccordionPanel>
               </>
             )}
           </AccordionItem>
