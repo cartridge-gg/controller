@@ -6,7 +6,8 @@ use crate::{
     },
     deploy_contract::FEE_TOKEN_ADDRESS,
     signers::{
-        webauthn::internal::InternalWebauthnSigner, HashSigner, NewOwnerSigner, SignerTrait,
+        webauthn::internal::InternalWebauthnSigner, HashSigner, NewOwnerSigner, SignError,
+        SignerTrait,
     },
     tests::{
         deployment_test::deploy_helper,
@@ -15,7 +16,7 @@ use crate::{
 };
 use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{
-    accounts::Account,
+    accounts::{Account, AccountError},
     macros::{felt, selector},
     providers::Provider,
     signers::SigningKey,
@@ -267,4 +268,64 @@ async fn test_change_owner_invalidate_old_sessions() {
         .send()
         .await
         .unwrap();
+}
+
+#[tokio::test]
+async fn test_call_unallowed_methods() {
+    let signer = InternalWebauthnSigner::random("localhost".to_string(), "rp_id".to_string());
+    let guardian = SigningKey::from_random();
+    let runner = KatanaRunner::load();
+    let address = deploy_helper(&runner, &signer, None as Option<&SigningKey>).await;
+    transfer_helper(&runner, &address).await;
+
+    let account = CartridgeGuardianAccount::new(
+        runner.client(),
+        signer.clone(),
+        guardian.clone(),
+        address,
+        runner.client().chain_id().await.unwrap(),
+    );
+
+    // Create random allowed method
+    let transfer_method = AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("transfer"));
+
+    let session_account = account
+        .session_account(
+            SigningKey::from_random(),
+            vec![transfer_method.clone()],
+            u64::MAX,
+        )
+        .await
+        .unwrap();
+
+    let contract = Erc20::new(*FEE_TOKEN_ADDRESS, &session_account);
+
+    let address = ContractAddress(address);
+    let amount = U256 {
+        high: 0,
+        low: 0x10_u128,
+    };
+
+    // calling allowed method should succeed
+    assert!(contract.transfer(&address, &amount).send().await.is_ok());
+
+    // Perform contract invocation that is not part of the allowed methods
+    let error = contract
+        .approve(&address, &amount)
+        .send()
+        .await
+        .unwrap_err();
+
+    // calling unallowed method should fail with `SessionMethodNotAllowed` error
+    let e @ AccountError::Signing(SignError::SessionMethodNotAllowed {
+        selector,
+        contract_address,
+    }) = error
+    else {
+        panic!("Expected `SessionMethodNotAllowed` error, got: {error:?}")
+    };
+
+    assert_eq!(selector!("approve"), selector);
+    assert_eq!(contract.address, contract_address);
+    assert!(e.to_string().contains("Not allowed to call method"));
 }
