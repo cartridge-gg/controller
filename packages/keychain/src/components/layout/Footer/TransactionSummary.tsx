@@ -1,14 +1,12 @@
-import { HStack, VStack, Text, Link } from "@chakra-ui/react";
+import { HStack, VStack, Text } from "@chakra-ui/react";
 import { WebsiteIcon } from "@cartridge/ui";
 
 export function TransactionSummary({
   isSlot,
-  showTerm,
   createSession,
   hostname,
 }: {
   isSlot: boolean;
-  showTerm: boolean;
   createSession: boolean;
   hostname: string;
 }) {
@@ -30,29 +28,6 @@ export function TransactionSummary({
 
       {isSlot && (
         <Summary title="Authorize Slot to manage your Cartridge infrastructure" />
-      )}
-
-      {!!showTerm && (
-        <Summary>
-          <>
-            By continuing you are agreeing to Cartridge&apos;s{" "}
-            <Link
-              textDecoration="underline"
-              href="https://cartridgegg.notion.site/Cartridge-Terms-of-Use-a7e65445041449c1a75aed697b2f6e62"
-              isExternal
-            >
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link
-              textDecoration="underline"
-              href="https://cartridgegg.notion.site/Cartridge-Privacy-Policy-747901652aa34c6fb354c7d91930d66c"
-              isExternal
-            >
-              Privacy Policy
-            </Link>
-          </>
-        </Summary>
       )}
     </VStack>
   );

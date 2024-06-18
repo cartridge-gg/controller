@@ -24,7 +24,7 @@ export function CreateSession({
       title="Create Session"
       description={`${origin} is requesting to connect to your Cartridge Controller`}
     >
-      <Footer>
+      <Footer createSession>
         <Button
           colorScheme="colorful"
           isDisabled={isConnecting}
