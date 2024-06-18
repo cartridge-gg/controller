@@ -7,6 +7,7 @@ use crate::{
     deploy_contract::FEE_TOKEN_ADDRESS,
     signers::{webauthn::InternalWebauthnSigner, HashSigner},
     tests::runners::{katana_runner::KatanaRunner, TestnetRunner},
+    transaction_waiter::TransactionWaiter,
 };
 use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{
@@ -106,4 +107,65 @@ async fn test_verify_execute_session_starknet_x3() {
         SigningKey::from_random(),
     )
     .await;
+}
+#[tokio::test]
+async fn test_verify_execute_session_multiple() {
+    let signer = SigningKey::from_random();
+    let guardian = SigningKey::from_random();
+    let session_signer = SigningKey::from_random();
+    let runner = KatanaRunner::load();
+    let address = deploy_helper(&runner, &signer, Some(&guardian)).await;
+
+    transfer_helper(&runner, &address).await;
+
+    let guardian_account = CartridgeGuardianAccount::new(
+        runner.client(),
+        signer.clone(),
+        guardian.clone(),
+        address,
+        runner.client().chain_id().await.unwrap(),
+    );
+
+    let account = guardian_account
+        .session_account(
+            session_signer,
+            vec![
+                AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
+                AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("transfds")),
+                AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("transfer")),
+            ],
+            u64::MAX,
+        )
+        .await
+        .unwrap();
+
+    let new_account = ContractAddress(felt!("0x18301129"));
+
+    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &account);
+
+    contract_erc20
+        .balanceOf(&new_account)
+        .block_id(BlockId::Tag(BlockTag::Latest))
+        .call()
+        .await
+        .expect("failed to call contract");
+
+    for i in 0u32..3 {
+        let tx = contract_erc20.transfer(
+            &new_account,
+            &U256 {
+                low: 0x1_u128,
+                high: 0,
+            },
+        );
+        let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * 4u32.into();
+        let tx = tx.nonce(i.into()).max_fee(fee_estimate).prepared().unwrap();
+
+        let tx_hash = tx.transaction_hash(false);
+        tx.send().await.unwrap();
+        TransactionWaiter::new(tx_hash, runner.client())
+            .wait()
+            .await
+            .unwrap();
+    }
 }
