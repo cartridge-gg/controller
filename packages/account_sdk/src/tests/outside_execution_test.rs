@@ -10,6 +10,7 @@ use crate::{
     deploy_contract::FEE_TOKEN_ADDRESS,
     signers::{webauthn::internal::InternalWebauthnSigner, HashSigner},
     tests::runners::{katana_runner::KatanaRunner, TestnetRunner},
+    transaction_waiter::TransactionWaiter,
 };
 use cainome::cairo_serde::{CairoSerde, ContractAddress, U256};
 use starknet::{
@@ -291,7 +292,7 @@ async fn test_verify_execute_paymaster_session() {
         .await
         .unwrap();
 
-    for _ in 0..10 {
+    for i in 0u32..10 {
         let outside_execution = OutsideExecution {
             caller: OutsideExecutionCaller::Any,
             execute_after: u64::MIN,
@@ -313,9 +314,14 @@ async fn test_verify_execute_paymaster_session() {
             .await
             .unwrap();
 
-        paymaster_account
-            .execute(vec![outside_execution.clone().into()])
-            .send()
+        let tx = paymaster_account.execute(vec![outside_execution.clone().into()]);
+        let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * 4u32.into();
+        let tx = tx.nonce(i.into()).max_fee(fee_estimate).prepared().unwrap();
+
+        let tx_hash = tx.transaction_hash(false);
+        tx.send().await.unwrap();
+        TransactionWaiter::new(tx_hash, runner.client())
+            .wait()
             .await
             .unwrap();
     }
