@@ -9,11 +9,7 @@ import {
   AccordionPanel,
   Box,
 } from "@chakra-ui/react";
-import {
-  CodeUtilIcon,
-  CopyHash,
-  WedgeRightIcon,
-} from "@cartridge/ui";
+import { CodeUtilIcon, CopyHash, WedgeRightIcon } from "@cartridge/ui";
 import { Policy } from "@cartridge/controller";
 
 export function Policies({

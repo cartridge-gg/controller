@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Text, VStack, Button } from "@chakra-ui/react";
+import { Button } from "@chakra-ui/react";
 import { Call as StarknetCall, InvocationsDetails } from "starknet";
-import { Fees } from "./Fees";
 import { formatEther } from "viem";
-import { ExecuteReply, ResponseCodes } from "@cartridge/controller";
+import { ExecuteReply, Policy, ResponseCodes } from "@cartridge/controller";
 import {
   Container,
   Content,
@@ -12,11 +11,12 @@ import {
 } from "components/layout";
 import { Status } from "utils/account";
 import { TransactionDuoIcon } from "@cartridge/ui";
-import { Call } from "./Call";
 import { InsufficientFunds } from "./InsufficientFunds";
 import { useChainId, useOrigin } from "hooks/connection";
 import { useController } from "hooks/controller";
 import { ErrorAlert } from "components/ErrorAlert";
+import { Policies } from "Policies";
+import { Fees } from "./Fees";
 
 export const CONTRACT_ETH =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
@@ -132,6 +132,12 @@ export function Execute({
     });
   }, [account, calls, fees, onExecute]);
 
+  const policies = useMemo<Policy[]>(
+    () =>
+      calls.map((c) => ({ target: c.contractAddress, method: c.entrypoint })),
+    [calls],
+  );
+
   if (isInsufficient) {
     return (
       <InsufficientFunds
@@ -148,40 +154,17 @@ export function Execute({
       description={origin}
     >
       <Content pb={FOOTER_MIN_HEIGHT}>
-        <VStack spacing="1px" w="full" borderRadius="md" bg="solid.primary">
-          <VStack w="full" p={3} align="flex-start">
-            <Text fontSize="xs" fontWeight="bold" color="text.secondaryAccent">
-              Transaction Details
-            </Text>
-          </VStack>
-
-          <VStack w="full" spacing="1px">
-            {calls.map((call, i) => (
-              <Call
-                key={i}
-                policy={{
-                  target: call.contractAddress,
-                  method: call.entrypoint,
-                }}
-                _last={{ borderBottomRadius: "md" }}
-              />
-            ))}
-          </VStack>
-        </VStack>
-
-        <Fees
-          error={error}
-          fees={fees}
-          balance={ethBalance && format(ethBalance)}
-        />
+        <Policies title="Transaction Details" policies={policies} />
       </Content>
 
       <Footer>
-        {error && (
+        {error ? (
           <ErrorAlert
             title="Fee estimation failed"
             description={error.message}
           />
+        ) : (
+          <Fees fees={fees} balance={ethBalance && format(ethBalance)} />
         )}
         <Button
           colorScheme="colorful"
