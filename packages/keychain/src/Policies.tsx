@@ -27,7 +27,6 @@ export function Policies({
         p={3}
         position="sticky"
         top={0}
-        zIndex={1}
       >
         <Text
           color="text.secondaryAccent"

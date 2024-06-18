@@ -22,6 +22,7 @@ export function SessionDetails() {
       animate={{
         display: "flex",
       }}
+      zIndex={1}
     >
       <Policies title="Session Details" policies={policies} />
     </VStack>
