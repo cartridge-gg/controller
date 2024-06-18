@@ -307,7 +307,7 @@ async fn test_verify_execute_paymaster_session() {
             }],
             nonce: session_account.random_outside_execution_nonce(),
         };
-    
+
         let outside_execution = session_account
             .sign_outside_execution(outside_execution.clone())
             .await
