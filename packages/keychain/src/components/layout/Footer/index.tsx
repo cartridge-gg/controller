@@ -50,10 +50,20 @@ export function Footer({
   const { footerHeight } = useLayout();
 
   useEffect(() => {
-    if (!ref.current || !!footerHeight) return;
+    if (!ref.current) return;
 
-    setFooterHeight(ref.current.clientHeight);
-  }, [setFooterHeight, footerHeight]);
+    const observer = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        setFooterHeight(entry.contentRect.height);
+      }
+    });
+
+    observer.observe(ref.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [setFooterHeight]);
 
   return (
     <VStack
@@ -79,7 +89,12 @@ export function Footer({
         flex={1}
         h={`calc(${maxH} - ${footerHeight}px)`}
       >
-        <HStack align="flex-start" pt={isExpandable ? 6 : 0}>
+        <HStack
+          align="flex-start"
+          pt={isExpandable ? 6 : 0}
+          onClick={onToggle}
+          _hover={{ cursor: "pointer" }}
+        >
           <TransactionSummary
             isSlot={isSlot}
             showTerm={showTerm}
@@ -103,7 +118,6 @@ export function Footer({
               h={8}
               bg="solid.primary"
               zIndex={1}
-              onClick={onToggle}
             />
           )}
         </HStack>
@@ -127,12 +141,13 @@ export function Footer({
           bg="solid.bg"
           w="full"
           borderTopWidth={1}
-          borderColor="solid.tertiary"
+          borderColor="solid.spacer"
           color="text.secondary"
           alignItems="center"
           justify="center"
           h={FOOTER_HEIGHT / 4}
           gap={1}
+          opacity={0.5}
         >
           <Text fontSize="xs" color="currentColor">
             Controller by

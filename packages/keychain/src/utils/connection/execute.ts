@@ -89,7 +89,6 @@ export function executeFactory({
           ...res,
         };
       } catch (e) {
-        console.log(e);
         /* do nothing */
       }
 
