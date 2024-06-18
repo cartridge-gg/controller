@@ -1,16 +1,10 @@
 import { useEffect, useState } from "react";
-import {
-  Divider,
-  HStack,
-  Spacer,
-  Spinner,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
+import { HStack, Spacer, Spinner, Text, VStack } from "@chakra-ui/react";
 
 import { constants } from "starknet";
 import { formatUnits } from "viem";
 import { useChainId } from "hooks/connection";
+import { EthereumIcon } from "@cartridge/ui";
 
 async function fetchEthPrice() {
   const res = await fetch(process.env.NEXT_PUBLIC_API_URL, {
@@ -24,12 +18,10 @@ async function fetchEthPrice() {
 }
 
 export function Fees({
-  error,
   fees,
   balance,
   approved,
 }: {
-  error: Error;
   fees?: { base: bigint; max: bigint };
   balance: string;
   approved?: string;
@@ -78,48 +70,39 @@ export function Fees({
   }, [chainId, fees, balance, approved]);
 
   return (
-    <>
-      <VStack
-        w="full"
-        overflow="hidden"
-        borderRadius="md"
-        spacing="1px"
-        align="flex-start"
-      >
-        {formattedFee || error ? (
-          <>
-            {approved && (
-              <LineItem name="Cost" description="" value={approved} />
-            )}
+    <VStack
+      w="full"
+      overflow="hidden"
+      borderRadius="md"
+      spacing="1px"
+      align="flex-start"
+    >
+      {formattedFee ? (
+        <>
+          {approved && <LineItem name="Cost" value={approved} />}
 
+          <LineItem
+            name="Network Fee"
+            value={formattedFee?.base}
+            isLoading={!formattedFee}
+          />
+
+          {approved && (
             <LineItem
-              name="Network Fee"
-              description={!error && `Max: ${formattedFee?.max}`}
-              value={!error ? formattedFee?.base : "..."}
-              isLoading={!formattedFee && !error}
+              name="Total"
+              value={approved ? approved : formattedFee?.base}
             />
-
-            {approved && (
-              <LineItem
-                name="Total"
-                description={`Balance: ${Number(
-                  parseFloat(balance).toFixed(5),
-                )}`}
-                value={approved ? approved : formattedFee?.base}
-              />
-            )}
-          </>
-        ) : (
-          <LineItem name="Calculating Fees" isLoading />
-        )}
-      </VStack>
-    </>
+          )}
+        </>
+      ) : (
+        <LineItem name="Calculating Fees" isLoading />
+      )}
+    </VStack>
   );
 }
 
 function LineItem({
   name,
-  description,
   value,
   isLoading = false,
 }: {
@@ -130,31 +113,24 @@ function LineItem({
 }) {
   return (
     <HStack w="full" h="40px" p={4} bg="solid.primary" color="text.secondary">
-      <Text fontSize="2xs" color="inherit">
+      <Text
+        fontSize="xs"
+        color="inherit"
+        textTransform="uppercase"
+        fontWeight="bold"
+      >
         {name}
       </Text>
       <Spacer />
-      <HStack spacing="12px">
-        {isLoading ? (
-          <Spinner size="sm" />
-        ) : (
-          <>
-            {description && (
-              <>
-                <Text fontSize={11} color="inherit">
-                  {description}
-                </Text>
-                <Divider
-                  orientation="vertical"
-                  borderColor="solid.secondary"
-                  h="16px"
-                />
-              </>
-            )}
-            <Text fontSize={13}>{value}</Text>
-          </>
-        )}
-      </HStack>
+
+      {isLoading ? (
+        <Spinner size="sm" />
+      ) : (
+        <HStack>
+          <EthereumIcon color="text.primary" />
+          <Text fontSize={13}>{value}</Text>
+        </HStack>
+      )}
     </HStack>
   );
 }

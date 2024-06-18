@@ -15,7 +15,7 @@ import {
 } from "utils/connection";
 import { isIframe } from "components/connect/utils";
 import { RpcProvider } from "starknet";
-import { Policy } from "@cartridge/controller";
+import { Policy, ResponseCodes } from "@cartridge/controller";
 
 const ConnectionContext = createContext<ConnectionContextValue>(undefined);
 
@@ -48,6 +48,20 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
     return JSON.parse(policiesStr);
   };
 
+  const close = useCallback(async () => {
+    if (!parent) return;
+
+    try {
+      context.resolve({
+        code: ResponseCodes.CANCELED,
+        message: "User closed modal",
+      });
+      await parent.close();
+    } catch (e) {
+      // Always fails for some reason
+    }
+  }, [context, parent]);
+
   useEffect(() => {
     if (!isIframe()) {
       const urlParams = new URLSearchParams(window.location.search);
@@ -72,9 +86,15 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
     );
 
     return () => {
+      if (context) {
+        context.resolve({
+          code: ResponseCodes.CANCELED,
+          message: "User closed modal",
+        });
+      }
       connection.destroy();
     };
-  }, []);
+  }, [context]);
 
   useEffect(() => {
     if (rpcUrl) {
@@ -86,17 +106,6 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
         });
     }
   }, [rpcUrl]);
-
-  const close = useCallback(async () => {
-    if (!parent) return;
-
-    try {
-      context.reject("User closed modal");
-      await parent.close();
-    } catch (e) {
-      // Always fails for some reason
-    }
-  }, [context, parent]);
 
   const logout = useCallback((context: ConnectionCtx) => {
     setContext({
