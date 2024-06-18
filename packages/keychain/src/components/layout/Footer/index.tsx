@@ -24,11 +24,9 @@ import { TOP_BAR_HEIGHT } from "../Container/Header/TopBar";
 export function Footer({
   children,
   isSlot = false,
-  showTerm = false,
   createSession = false,
 }: React.PropsWithChildren & {
   isSlot?: boolean;
-  showTerm?: boolean;
   createSession?: boolean;
 }) {
   const { setFooterHeight } = useLayout();
@@ -97,7 +95,6 @@ export function Footer({
         >
           <TransactionSummary
             isSlot={isSlot}
-            showTerm={showTerm}
             createSession={createSession}
             hostname={hostname}
           />
