@@ -15,6 +15,7 @@ import {
   TransactionExecutionStatus,
   shortString,
   transaction,
+  num,
 } from "starknet";
 
 import {
