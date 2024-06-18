@@ -29,7 +29,7 @@ type ConnectionContextValue = {
   error: Error;
   setContext: (context: ConnectionCtx) => void;
   setController: (controller: Controller) => void;
-  close: () => void;
+  cancel: () => void;
   logout: (context: ConnectionCtx) => void;
 };
 
@@ -48,7 +48,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
     return JSON.parse(policiesStr);
   };
 
-  const close = useCallback(async () => {
+  const cancel = useCallback(async () => {
     if (!parent) return;
 
     try {
@@ -128,7 +128,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
         error,
         setController,
         setContext,
-        close,
+        cancel,
         logout,
       }}
     >
