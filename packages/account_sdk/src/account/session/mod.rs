@@ -65,20 +65,30 @@ where
             session,
         }
     }
+
     pub async fn sign(
         &self,
         hash: FieldElement,
         calls: &[Call],
     ) -> Result<RawSessionToken, SignError> {
-        let proofs = calls
-            .iter()
-            .map(|c| AllowedMethod {
-                contract_address: c.to,
-                selector: c.selector,
-            })
-            .map(|ref m| self.session.single_proof(m))
-            .collect::<Option<Vec<_>>>()
-            .ok_or(SignError::SessionMethodNotAllowed)?;
+        let mut proofs = Vec::new();
+
+        for call in calls {
+            let method = AllowedMethod {
+                selector: call.selector,
+                contract_address: call.to,
+            };
+
+            let Some(proof) = self.session.single_proof(&method) else {
+                return Err(SignError::SessionMethodNotAllowed {
+                    selector: method.selector,
+                    contract_address: method.contract_address,
+                });
+            };
+
+            proofs.push(proof);
+        }
+
         Ok(RawSessionToken {
             session: self.session.raw(),
             session_authorization: self.session_authorization.clone(),
@@ -87,6 +97,7 @@ where
             proofs,
         })
     }
+
     fn session_magic() -> FieldElement {
         short_string!("session-token")
     }

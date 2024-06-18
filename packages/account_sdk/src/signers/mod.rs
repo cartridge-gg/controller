@@ -16,14 +16,28 @@ use self::webauthn::DeviceError;
 pub enum SignError {
     #[error("Signer error: {0}")]
     Signer(EcdsaSignError),
+
     #[error("Device error: {0}")]
     Device(DeviceError),
+
     #[error("NonAsciiName error: {0}")]
     NonAsciiSessionNameError(#[from] NonAsciiNameError),
+
     #[error("NoAllowedSessionMethods error")]
     NoAllowedSessionMethods,
-    #[error("MethodNotAllowed error")]
-    SessionMethodNotAllowed,
+
+    /// Represents an error when trying to perform contract invocation that is not part
+    /// of a session's allowed methods.
+    #[error(
+        "Not allowed to call method selector `{selector:#x}` on contract `{contract_address:#x}`"
+    )]
+    SessionMethodNotAllowed {
+        /// The method selector that was not allowed.
+        selector: FieldElement,
+        /// The contract address the method was called on.
+        contract_address: FieldElement,
+    },
+
     #[error("Invalid message provided: {0}")]
     InvalidMessageError(String),
 }
