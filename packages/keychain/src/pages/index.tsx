@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 import { Signature } from "starknet";
-import { ResponseCodes, ExecuteReply } from "@cartridge/controller";
+import { ResponseCodes } from "@cartridge/controller";
 import { DeploymentRequired, Execute, SignMessage } from "components";
 import { CreateController, CreateSession, Logout } from "components/connect";
 import { useConnection } from "hooks/connection";
@@ -106,16 +106,7 @@ function Home() {
             })
           }
         >
-          <Execute
-            {...ctx}
-            onExecute={(res: ExecuteReply) => ctx.resolve(res)}
-            onCancel={() =>
-              ctx.resolve({
-                code: ResponseCodes.CANCELED,
-                message: "Canceled",
-              })
-            }
-          />
+          <Execute />
         </DeploymentRequired>
       );
     }

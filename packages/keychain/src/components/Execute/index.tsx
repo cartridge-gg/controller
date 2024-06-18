@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@chakra-ui/react";
-import { Call as StarknetCall, InvocationsDetails } from "starknet";
 import { formatEther } from "viem";
-import { ExecuteReply, Policy, ResponseCodes } from "@cartridge/controller";
+import { Policy, ResponseCodes } from "@cartridge/controller";
 import {
   Container,
   Content,
@@ -12,29 +11,18 @@ import {
 import { Status } from "utils/account";
 import { TransactionDuoIcon } from "@cartridge/ui";
 import { InsufficientFunds } from "./InsufficientFunds";
-import { useChainId, useOrigin } from "hooks/connection";
-import { useController } from "hooks/controller";
+import { useConnection } from "hooks/connection";
 import { ErrorAlert } from "components/ErrorAlert";
 import { Policies } from "Policies";
 import { Fees } from "./Fees";
+import { ExecuteCtx } from "utils/connection";
 
 export const CONTRACT_ETH =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 
-export function Execute({
-  transactions,
-  transactionsDetail,
-  onExecute,
-  onCancel,
-}: {
-  transactions: StarknetCall | StarknetCall[];
-  transactionsDetail?: InvocationsDetails;
-  onExecute: (res: ExecuteReply) => void;
-  onCancel: () => void;
-}) {
-  const chainId = useChainId();
-  const { controller } = useController();
-  const origin = useOrigin();
+export function Execute() {
+  const { chainId, controller, context, origin, cancel } = useConnection();
+  const ctx = context as ExecuteCtx;
 
   const [fees, setFees] = useState<{
     base: bigint;
@@ -47,8 +35,10 @@ export function Execute({
 
   const account = controller.account;
   const calls = useMemo(() => {
-    return Array.isArray(transactions) ? transactions : [transactions];
-  }, [transactions]);
+    return Array.isArray(ctx.transactions)
+      ? ctx.transactions
+      : [ctx.transactions];
+  }, [ctx.transactions]);
 
   const format = (val: bigint) => {
     return (
@@ -84,16 +74,16 @@ export function Execute({
       return;
     }
 
-    if (account.status === Status.DEPLOYED && transactionsDetail.maxFee) {
+    if (account.status === Status.DEPLOYED && ctx.transactionsDetail.maxFee) {
       setFees({
-        base: BigInt(transactionsDetail.maxFee),
-        max: BigInt(transactionsDetail.maxFee),
+        base: BigInt(ctx.transactionsDetail.maxFee),
+        max: BigInt(ctx.transactionsDetail.maxFee),
       });
       return;
     }
 
     account
-      .estimateInvokeFee(calls, transactionsDetail)
+      .estimateInvokeFee(calls, ctx.transactionsDetail)
       .then((fees) => {
         setFees({ base: fees.overall_fee, max: fees.suggestedMaxFee });
       })
@@ -101,15 +91,7 @@ export function Execute({
         console.error(e);
         setError(e);
       });
-  }, [
-    account,
-    controller,
-    setError,
-    setFees,
-    calls,
-    chainId,
-    transactionsDetail,
-  ]);
+  }, [account, controller, setError, setFees, calls, chainId, ctx]);
 
   useEffect(() => {
     if (!ethBalance || !fees) {
@@ -126,11 +108,11 @@ export function Execute({
     const response = await account.execute(calls, null, {
       maxFee: fees.max,
     });
-    onExecute({
+    ctx.resolve({
       transaction_hash: response.transaction_hash,
       code: ResponseCodes.SUCCESS,
     });
-  }, [account, calls, fees, onExecute]);
+  }, [account, calls, fees, ctx]);
 
   const policies = useMemo<Policy[]>(
     () =>
@@ -175,7 +157,7 @@ export function Execute({
           submit
         </Button>
 
-        <Button onClick={onCancel}>Cancel</Button>
+        <Button onClick={cancel}>Cancel</Button>
       </Footer>
     </Container>
   );
