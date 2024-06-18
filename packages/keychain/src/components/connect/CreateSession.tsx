@@ -1,7 +1,6 @@
 import { Container, Footer } from "components/layout";
 import { BigNumberish } from "starknet";
 import { Policy } from "@cartridge/controller";
-import { PlugNewDuoIcon } from "@cartridge/ui";
 import { Button } from "@chakra-ui/react";
 import { useState } from "react";
 import { useConnection } from "hooks/connection";
@@ -20,7 +19,6 @@ export function CreateSession({
   return (
     <Container
       variant="connect"
-      Icon={PlugNewDuoIcon}
       title="Create Session"
       description={`${origin} is requesting to connect to your Cartridge Controller`}
     >

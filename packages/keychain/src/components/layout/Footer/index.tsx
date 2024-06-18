@@ -63,6 +63,10 @@ export function Footer({
     };
   }, [setFooterHeight]);
 
+  useEffect(() => {
+    window.document.body.style.overflowY = isOpen ? "hidden" : "auto";
+  }, [isOpen]);
+
   return (
     <VStack
       position={["fixed", "fixed", "absolute"]}
