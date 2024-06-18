@@ -1,8 +1,12 @@
+mod paymaster;
 mod types;
 mod utils;
 
 use std::str::FromStr;
 
+use account_sdk::account::outside_execution::{
+    OutsideExecution, OutsideExecutionAccount, OutsideExecutionCaller,
+};
 use account_sdk::account::session::hash::{AllowedMethod, Session};
 use account_sdk::account::session::SessionAccount;
 use account_sdk::account::{AccountHashSigner, CartridgeGuardianAccount, MessageSignerAccount};
@@ -12,6 +16,7 @@ use account_sdk::signers::HashSigner;
 use account_sdk::wasm_webauthn::CredentialID;
 use base64::{engine::general_purpose, Engine};
 use coset::{CborSerializable, CoseKey};
+use paymaster::PaymasterRequest;
 use serde_wasm_bindgen::{from_value, to_value};
 use starknet::accounts::Account;
 use starknet::macros::short_string;
@@ -21,9 +26,12 @@ use starknet::{
     core::types::FieldElement,
     providers::{jsonrpc::HttpTransport, JsonRpcClient},
 };
-use types::{JsCall, JsCredentials, JsInvocationsDetails, JsPolicy, JsSession};
+use types::invocation::JsInvocationsDetails;
+use types::session::{JsCredentials, JsSession};
 use url::Url;
 use wasm_bindgen::prelude::*;
+
+use crate::types::TryFromJsValue;
 
 type Result<T> = std::result::Result<T, JsError>;
 
@@ -92,11 +100,7 @@ impl CartridgeAccount {
 
         let methods = policies
             .into_iter()
-            .map(|js_value| {
-                let policy = JsPolicy::try_from(js_value)?;
-                let method = AllowedMethod::try_from(policy)?;
-                Ok(method)
-            })
+            .map(AllowedMethod::try_from_js_value)
             .collect::<Result<Vec<AllowedMethod>>>()?;
 
         let signer = SigningKey::from_random();
@@ -125,56 +129,70 @@ impl CartridgeAccount {
 
         let calls = calls
             .into_iter()
-            .map(|js_value| {
-                let js_call = JsCall::try_from(js_value)?;
-                let call = Call::try_from(js_call)?;
-                Ok(call)
-            })
+            .map(Call::try_from_js_value)
             .collect::<Result<Vec<Call>>>()?;
 
-        let details: JsInvocationsDetails = JsInvocationsDetails::try_from(transaction_details)?;
-
-        let session_details: Option<JsSession> = from_value(session_details)?;
-        let execution = if let Some(session_details) = session_details {
-            let methods = session_details
-                .policies
-                .into_iter()
-                .map(|policy| Ok(AllowedMethod::try_from(policy)?))
-                .collect::<Result<Vec<AllowedMethod>>>()?;
-
-            let dummy_guardian =
-                SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
-            let session_signer =
-                SigningKey::from_secret_scalar(session_details.credentials.private_key);
-            let expires_at: u64 = session_details.expires_at.parse()?;
-            let session = Session::new(methods, expires_at, &session_signer.signer())?;
-
-            let session_account = SessionAccount::new(
-                JsonRpcClient::new(HttpTransport::new(self.rpc_url.clone())),
-                session_signer,
-                dummy_guardian,
-                self.account.address(),
-                self.account.chain_id(),
-                session_details.credentials.authorization,
-                session.clone(),
-            );
-
-            session_account
+        let transaction_details = JsInvocationsDetails::try_from(transaction_details)?;
+        let execution = if let Some(session_details) = from_value(session_details)? {
+            self.session_account(session_details)
+                .await?
                 .execute(calls)
-                .max_fee(details.max_fee)
-                .nonce(details.nonce)
+                .max_fee(transaction_details.max_fee)
+                .nonce(transaction_details.nonce)
                 .send()
                 .await?
         } else {
             self.account
                 .execute(calls)
-                .max_fee(details.max_fee)
-                .nonce(details.nonce)
+                .max_fee(transaction_details.max_fee)
+                .nonce(transaction_details.nonce)
                 .send()
                 .await?
         };
 
         Ok(to_value(&execution)?)
+    }
+
+    #[wasm_bindgen(js_name = executeFromOutside)]
+    pub async fn execute_from_outside(
+        &self,
+        calls: Vec<JsValue>,
+        session_details: JsValue,
+    ) -> Result<JsValue> {
+        utils::set_panic_hook();
+
+        let calls = calls
+            .into_iter()
+            .map(Call::try_from_js_value)
+            .collect::<Result<Vec<Call>>>()?;
+
+        let outside = OutsideExecution {
+            caller: OutsideExecutionCaller::Any,
+            calls,
+            execute_after: 0_u64,
+            execute_before: 3000000000_u64,
+            nonce: SigningKey::from_random().secret_scalar(),
+        };
+
+        let signed = if let Some(session_details) = from_value(session_details)? {
+            self.session_account(session_details)
+                .await?
+                .sign_outside_execution(outside.clone())
+                .await?
+        } else {
+            self.account.sign_outside_execution(outside.clone()).await?
+        };
+
+        let response = PaymasterRequest::send(
+            self.rpc_url.clone(),
+            outside.into(),
+            self.account.address(),
+            self.account.chain_id(),
+            signed.signature,
+        )
+        .await?;
+
+        Ok(to_value(&response)?)
     }
 
     #[wasm_bindgen(js_name = revokeSession)]
@@ -189,5 +207,31 @@ impl CartridgeAccount {
             .sign_message(serde_json::from_str(&typed_data)?)
             .await?;
         Ok(to_value(&signature)?)
+    }
+
+    async fn session_account(
+        &self,
+        details: JsSession,
+    ) -> Result<SessionAccount<JsonRpcClient<HttpTransport>, SigningKey, SigningKey>> {
+        let methods = details
+            .policies
+            .into_iter()
+            .map(|policy| Ok(AllowedMethod::try_from(policy)?))
+            .collect::<Result<Vec<AllowedMethod>>>()?;
+
+        let dummy_guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
+        let session_signer = SigningKey::from_secret_scalar(details.credentials.private_key);
+        let expires_at: u64 = details.expires_at.parse()?;
+        let session = Session::new(methods, expires_at, &session_signer.signer())?;
+
+        Ok(SessionAccount::new(
+            JsonRpcClient::new(HttpTransport::new(self.rpc_url.clone())),
+            session_signer,
+            dummy_guardian,
+            self.account.address(),
+            self.account.chain_id(),
+            details.credentials.authorization,
+            session.clone(),
+        ))
     }
 }

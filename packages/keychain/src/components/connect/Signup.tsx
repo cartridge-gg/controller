@@ -92,6 +92,8 @@ function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
       cacheTime: 10000000,
       refetchInterval: (data) => (!data ? 1000 : undefined),
       onSuccess: async (data) => {
+
+        console.log({chainId})
         // Deploy account
         await client.request(DeployAccountDocument, {
           id: values.username,

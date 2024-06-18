@@ -5,7 +5,13 @@ import {
   ConnectError,
 } from "@cartridge/controller";
 import Controller, { diff } from "utils/controller";
-import { Abi, Call, InvocationsDetails, addAddressPadding } from "starknet";
+import {
+  Abi,
+  Call,
+  InvocationsDetails,
+  addAddressPadding,
+  transaction,
+} from "starknet";
 import { Status } from "utils/account";
 import { ConnectionCtx, ExecuteCtx } from "./types";
 
@@ -70,6 +76,20 @@ export function executeFactory({
           code: ResponseCodes.NOT_ALLOWED,
           message: `Missing policies: ${JSON.stringify(missing)}`,
         });
+      }
+
+      // Try execute from outside for fee subsized transactions
+      try {
+        const res = await controller.account.cartridge.executeFromOutside(
+          transaction.transformCallsToMulticallArrays_cairo1(calls),
+          session,
+        );
+        return {
+          code: ResponseCodes.SUCCESS,
+          ...res,
+        };
+      } catch (e) {
+        /* do nothing */
       }
 
       if (!transactionsDetail.maxFee) {

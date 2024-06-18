@@ -6,17 +6,18 @@ import {
   EstimateFeeDetails,
   EstimateFee,
   Signature,
-  AllowArray,
   ec,
   InvokeFunctionResponse,
   TypedData,
   BigNumberish,
   TransactionFinalityStatus,
   InvocationsDetails,
-  num,
   TransactionExecutionStatus,
   shortString,
+  transaction,
+  num,
 } from "starknet";
+
 import {
   AccountContractDocument,
   AccountContractQuery,
@@ -159,7 +160,7 @@ class Account extends BaseAccount {
 
   // @ts-expect-error TODO: fix overload type mismatch
   async execute(
-    calls: AllowArray<Call>,
+    calls: Call[],
     session: Session,
     transactionsDetail?: InvocationsDetails,
   ): Promise<InvokeFunctionResponse> {
@@ -171,11 +172,11 @@ class Account extends BaseAccount {
       transactionsDetail.nonce ?? (await this.getNonce("pending"));
     transactionsDetail.maxFee = num.toHex(transactionsDetail.maxFee);
 
-    const res = await this.cartridge
-      .execute(calls as Array<Call>, transactionsDetail, session)
-      .catch((e) => {
-        throw new Error("Execute error: " + e.message);
-      });
+    const res = await this.cartridge.execute(
+      transaction.transformCallsToMulticallArrays_cairo1(calls),
+      transactionsDetail,
+      session,
+    );
 
     Storage.update(this.selector, {
       nonce: (BigInt(transactionsDetail.nonce) + 1n).toString(),
