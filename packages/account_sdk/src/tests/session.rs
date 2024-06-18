@@ -107,3 +107,59 @@ async fn test_verify_execute_session_starknet_x3() {
     )
     .await;
 }
+#[tokio::test]
+async fn test_verify_execute_session_multiple() {
+    let signer = SigningKey::from_random();
+    let guardian = SigningKey::from_random();
+    let session_signer = SigningKey::from_random();
+    let runner = KatanaRunner::load();
+    let address = deploy_helper(&runner, &signer, Some(&guardian)).await;
+
+    transfer_helper(&runner, &address).await;
+
+    let guardian_account = CartridgeGuardianAccount::new(
+        runner.client(),
+        signer.clone(),
+        guardian.clone(),
+        address,
+        runner.client().chain_id().await.unwrap(),
+    );
+
+    let account = guardian_account
+        .session_account(
+            session_signer,
+            vec![
+                AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
+                AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("transfds")),
+                AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("transfer")),
+            ],
+            u64::MAX,
+        )
+        .await
+        .unwrap();
+
+    let new_account = ContractAddress(felt!("0x18301129"));
+
+    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &account);
+
+    contract_erc20
+        .balanceOf(&new_account)
+        .block_id(BlockId::Tag(BlockTag::Latest))
+        .call()
+        .await
+        .expect("failed to call contract");
+
+    for _ in 0..10 {
+        contract_erc20
+            .transfer(
+                &new_account,
+                &U256 {
+                    low: 0x1_u128,
+                    high: 0,
+                },
+            )
+            .send()
+            .await
+            .unwrap();
+    }
+}
