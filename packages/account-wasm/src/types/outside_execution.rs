@@ -9,15 +9,10 @@ use super::call::JsCall;
 #[serde(rename_all = "camelCase")]
 pub struct JsOutsideExecution {
     pub caller: FieldElement,
-    pub execute_before: String,
-    pub execute_after: String,
+    pub execute_before: u64,
+    pub execute_after: u64,
     pub calls: Vec<JsCall>,
     pub nonce: FieldElement,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct OutsideExecutionResult {
-    pub transaction_hash: FieldElement,
 }
 
 impl TryFrom<JsValue> for JsOutsideExecution {
@@ -34,8 +29,8 @@ impl TryFrom<JsOutsideExecution> for OutsideExecution {
     fn try_from(value: JsOutsideExecution) -> Result<Self, Self::Error> {
         Ok(OutsideExecution {
             caller: OutsideExecutionCaller::Any,
-            execute_after: value.execute_after.parse()?,
-            execute_before: value.execute_before.parse()?,
+            execute_after: value.execute_after,
+            execute_before: value.execute_before,
             nonce: value.nonce,
             calls: value
                 .calls
@@ -50,8 +45,8 @@ impl From<OutsideExecution> for JsOutsideExecution {
     fn from(value: OutsideExecution) -> Self {
         JsOutsideExecution {
             caller: short_string!("ANY_CALLER"),
-            execute_before: value.execute_before.to_string(),
-            execute_after: value.execute_after.to_string(),
+            execute_before: value.execute_before,
+            execute_after: value.execute_after,
             calls: value.calls.into_iter().map(JsCall::from).collect(),
             nonce: value.nonce,
         }

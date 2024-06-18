@@ -19,7 +19,7 @@ use coset::{CborSerializable, CoseKey};
 use paymaster::PaymasterRequest;
 use serde_wasm_bindgen::{from_value, to_value};
 use starknet::accounts::Account;
-use starknet::macros::{felt, short_string};
+use starknet::macros::short_string;
 use starknet::signers::SigningKey;
 use starknet::{
     accounts::Call,
@@ -27,7 +27,6 @@ use starknet::{
     providers::{jsonrpc::HttpTransport, JsonRpcClient},
 };
 use types::invocation::JsInvocationsDetails;
-use types::outside_execution::OutsideExecutionResult;
 use types::session::{JsCredentials, JsSession};
 use url::Url;
 use wasm_bindgen::prelude::*;
@@ -175,27 +174,25 @@ impl CartridgeAccount {
             nonce: SigningKey::from_random().secret_scalar(),
         };
 
-        let signed = if let Some(session_details) = from_value(session_details)? {
-            self.session_account(session_details)
-                .await?
-                .sign_outside_execution(outside.clone())
-                .await?
-        } else {
-            self.account.sign_outside_execution(outside.clone()).await?
-        };
+        // let signed = if let Some(session_details) = from_value(session_details)? {
+        //     self.session_account(session_details)
+        //         .await?
+        //         .sign_outside_execution(outside.clone())
+        //         .await?
+        // } else {
+        let signed = self.account.sign_outside_execution(outside.clone()).await?;
+        //};
 
-        PaymasterRequest::send(
+        let response = PaymasterRequest::send(
             self.rpc_url.clone(),
             outside.into(),
+            self.account.address(),
             self.account.chain_id(),
             signed.signature,
         )
-        .await?
-        .error_for_status()?;
+        .await?;
 
-        Ok(to_value(&OutsideExecutionResult {
-            transaction_hash: felt!("0x42"),
-        })?)
+        Ok(to_value(&response)?)
     }
 
     #[wasm_bindgen(js_name = revokeSession)]

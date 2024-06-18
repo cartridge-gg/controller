@@ -21,36 +21,50 @@ struct JsonRpcRequest<T> {
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct OutsideExecutionParams {
-    outside_execution: JsOutsideExecution,
+    address: FieldElement,
     chain_id: FieldElement,
+    outside_execution: JsOutsideExecution,
     signature: Vec<FieldElement>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct PaymasterResponse {
+    pub transaction_hash: FieldElement,
 }
 
 impl PaymasterRequest {
     pub async fn send(
         rpc_url: Url,
         outside_execution: JsOutsideExecution,
+        address: FieldElement,
         chain_id: FieldElement,
         signature: Vec<FieldElement>,
-    ) -> Result<Response> {
+    ) -> Result<PaymasterResponse> {
         let request = JsonRpcRequest {
             id: 1,
             jsonrpc: "2.0",
             method: "cartridge_addExecuteOutsideTransaction",
             params: OutsideExecutionParams {
-                outside_execution,
+                address,
                 chain_id,
+                outside_execution,
                 signature,
             },
         };
+        
         let body = stringify(&to_value(&request)?)
             .map_err(|_| JsError::new("Error stringifying payload"))?;
 
-        Ok(Client::new()
+        let response = Client::new()
             .post(rpc_url)
             .header("Content-Type", "application/json")
             .body(format!("{}", body))
             .send()
-            .await?)
+            .await?
+            .error_for_status()?;
+
+        let json_body = response.text().await?;
+
+        Ok(serde_json::from_str(&json_body)?)
     }
 }

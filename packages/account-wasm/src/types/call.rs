@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use starknet::{
     accounts::Call,
-    core::{types::FieldElement, utils::get_selector_from_name},
+    core::types::FieldElement,
 };
 use std::str::FromStr;
 use wasm_bindgen::prelude::*;
@@ -11,8 +11,8 @@ use super::TryFromJsValue;
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct JsCall {
-    pub contract_address: FieldElement,
-    pub entrypoint: String,
+    pub to: FieldElement,
+    pub selector: FieldElement,
     pub calldata: Vec<FieldElement>,
 }
 
@@ -20,8 +20,6 @@ impl TryFrom<JsCall> for Call {
     type Error = JsError;
 
     fn try_from(value: JsCall) -> Result<Self, Self::Error> {
-        let contract_address = FieldElement::from_str(&value.contract_address.to_string())?;
-        let entrypoint = get_selector_from_name(&value.entrypoint).unwrap();
         let calldata = value
             .calldata
             .iter()
@@ -29,8 +27,8 @@ impl TryFrom<JsCall> for Call {
             .collect::<Result<Vec<FieldElement>, _>>()?;
 
         Ok(Call {
-            to: contract_address,
-            selector: entrypoint,
+            to: value.to,
+            selector: value.selector,
             calldata,
         })
     }
@@ -47,8 +45,8 @@ impl TryFrom<JsValue> for JsCall {
 impl From<Call> for JsCall {
     fn from(value: Call) -> Self {
         JsCall {
-            contract_address: value.to,
-            entrypoint: value.selector.to_string(),
+            to: value.to,
+            selector: value.selector,
             calldata: value.calldata,
         }
     }
