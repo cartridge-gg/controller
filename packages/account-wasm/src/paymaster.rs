@@ -1,4 +1,4 @@
-use reqwest::{Client, Response};
+use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen::to_value;
 use starknet::core::types::FieldElement;
@@ -29,7 +29,7 @@ struct OutsideExecutionParams {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PaymasterResponse {
-    pub transaction_hash: FieldElement,
+    transaction_hash: FieldElement,
 }
 
 impl PaymasterRequest {
@@ -51,7 +51,7 @@ impl PaymasterRequest {
                 signature,
             },
         };
-        
+
         let body = stringify(&to_value(&request)?)
             .map_err(|_| JsError::new("Error stringifying payload"))?;
 
@@ -63,8 +63,6 @@ impl PaymasterRequest {
             .await?
             .error_for_status()?;
 
-        let json_body = response.text().await?;
-
-        Ok(serde_json::from_str(&json_body)?)
+        Ok(serde_json::from_str(&response.text().await?)?)
     }
 }

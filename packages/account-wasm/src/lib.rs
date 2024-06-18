@@ -174,14 +174,14 @@ impl CartridgeAccount {
             nonce: SigningKey::from_random().secret_scalar(),
         };
 
-        // let signed = if let Some(session_details) = from_value(session_details)? {
-        //     self.session_account(session_details)
-        //         .await?
-        //         .sign_outside_execution(outside.clone())
-        //         .await?
-        // } else {
-        let signed = self.account.sign_outside_execution(outside.clone()).await?;
-        //};
+        let signed = if let Some(session_details) = from_value(session_details)? {
+            self.session_account(session_details)
+                .await?
+                .sign_outside_execution(outside.clone())
+                .await?
+        } else {
+            self.account.sign_outside_execution(outside.clone()).await?
+        };
 
         let response = PaymasterRequest::send(
             self.rpc_url.clone(),

@@ -12,7 +12,6 @@ import {
   BigNumberish,
   TransactionFinalityStatus,
   InvocationsDetails,
-  num,
   TransactionExecutionStatus,
   shortString,
   transaction,
@@ -30,7 +29,7 @@ import { CartridgeAccount } from "@cartridge/account-wasm";
 import { Session } from "@cartridge/controller";
 import { VERSION } from "./controller";
 
-const EST_FEE_MULTIPLIER = 10n;
+const EST_FEE_MULTIPLIER = 2n;
 
 export enum Status {
   COUNTERFACTUAL = "COUNTERFACTUAL",
@@ -170,8 +169,7 @@ class Account extends BaseAccount {
 
     transactionsDetail.nonce =
       transactionsDetail.nonce ?? (await this.getNonce("pending"));
-    //transactionsDetail.maxFee = num.toHex(transactionsDetail.maxFee);
-    transactionsDetail.maxFee = "0x2386F26FC10000";
+    transactionsDetail.maxFee = num.toHex(transactionsDetail.maxFee);
 
     const res = await this.cartridge.execute(
       transaction.transformCallsToMulticallArrays_cairo1(calls),

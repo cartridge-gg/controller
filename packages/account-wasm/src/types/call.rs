@@ -1,8 +1,5 @@
 use serde::{Deserialize, Serialize};
-use starknet::{
-    accounts::Call,
-    core::types::FieldElement,
-};
+use starknet::{accounts::Call, core::types::FieldElement};
 use std::str::FromStr;
 use wasm_bindgen::prelude::*;
 

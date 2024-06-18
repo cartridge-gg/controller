@@ -35,7 +35,7 @@ impl TryFrom<JsOutsideExecution> for OutsideExecution {
             calls: value
                 .calls
                 .into_iter()
-                .map(|c| Call::try_from(c))
+                .map(Call::try_from)
                 .collect::<Result<Vec<Call>, _>>()?,
         })
     }
