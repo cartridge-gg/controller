@@ -29,7 +29,7 @@ pub enum SignError {
     /// Represents an error when trying to perform contract invocation that is not part
     /// of a session's allowed methods.
     #[error(
-        "Not allowed to call method selector `{selector:#x}` on contract: `{contract_address:#x}`"
+        "Not allowed to call method selector `{selector:#x}` on contract `{contract_address:#x}`"
     )]
     SessionMethodNotAllowed {
         /// The method selector that was not allowed.
