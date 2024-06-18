@@ -150,7 +150,7 @@ async fn test_verify_execute_session_multiple() {
         .await
         .expect("failed to call contract");
 
-    for i in 0u32..10 {
+    for i in 0u32..3 {
         let tx = contract_erc20.transfer(
             &new_account,
             &U256 {

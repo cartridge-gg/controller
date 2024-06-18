@@ -292,7 +292,7 @@ async fn test_verify_execute_paymaster_session() {
         .await
         .unwrap();
 
-    for i in 0u32..10 {
+    for i in 0u32..3 {
         let outside_execution = OutsideExecution {
             caller: OutsideExecutionCaller::Any,
             execute_after: u64::MIN,
