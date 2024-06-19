@@ -86,15 +86,9 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
     );
 
     return () => {
-      if (context) {
-        context.resolve({
-          code: ResponseCodes.CANCELED,
-          message: "User closed modal",
-        });
-      }
       connection.destroy();
     };
-  }, [context]);
+  }, []);
 
   useEffect(() => {
     if (rpcUrl) {
