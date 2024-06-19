@@ -1,22 +1,15 @@
 use serde::{Deserialize, Serialize};
-use serde_with::serde_as;
-use starknet::core::serde::unsigned_field_element::UfeHex;
-use starknet::{
-    accounts::Call,
-    core::{types::FieldElement, utils::get_selector_from_name},
-};
+use starknet::{accounts::Call, core::types::FieldElement};
+use std::str::FromStr;
 use wasm_bindgen::prelude::*;
 
 use super::TryFromJsValue;
 
-#[serde_as]
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct JsCall {
-    #[serde_as(as = "UfeHex")]
-    pub contract_address: FieldElement,
-    pub entrypoint: String,
-    #[serde_as(as = "Vec<UfeHex>")]
+    pub to: FieldElement,
+    pub selector: FieldElement,
     pub calldata: Vec<FieldElement>,
 }
 
@@ -24,10 +17,16 @@ impl TryFrom<JsCall> for Call {
     type Error = JsError;
 
     fn try_from(value: JsCall) -> Result<Self, Self::Error> {
+        let calldata = value
+            .calldata
+            .iter()
+            .map(|c| FieldElement::from_str(&c.to_string()))
+            .collect::<Result<Vec<FieldElement>, _>>()?;
+
         Ok(Call {
-            to: value.contract_address,
-            selector: get_selector_from_name(&value.entrypoint)?,
-            calldata: value.calldata,
+            to: value.to,
+            selector: value.selector,
+            calldata,
         })
     }
 }
@@ -37,6 +36,16 @@ impl TryFrom<JsValue> for JsCall {
 
     fn try_from(value: JsValue) -> Result<Self, Self::Error> {
         Ok(serde_wasm_bindgen::from_value(value)?)
+    }
+}
+
+impl From<Call> for JsCall {
+    fn from(value: Call) -> Self {
+        JsCall {
+            to: value.to,
+            selector: value.selector,
+            calldata: value.calldata,
+        }
     }
 }
 
