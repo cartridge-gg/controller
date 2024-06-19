@@ -23,6 +23,7 @@ import cbor from "cbor";
 import base64url from "base64url";
 import { split } from "@cartridge/controller";
 import { CLASS_HASHES } from "@cartridge/controller/src/constants";
+import { VERSION } from "./controller";
 
 export type RawAssertion = PublicKeyCredential & {
   response: AuthenticatorAssertionResponse;
@@ -324,7 +325,7 @@ export function formatAssertion(assertion: RawAssertion): Signature {
   const { x: s0, y: s1, z: s2 } = split(s);
 
   return [
-    BigInt(CLASS_HASHES["0.0.1"].controller).toString(),
+    BigInt(CLASS_HASHES[VERSION].controller).toString(),
     "0",
     r0.toString(),
     r1.toString(),

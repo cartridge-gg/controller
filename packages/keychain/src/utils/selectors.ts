@@ -1,5 +1,6 @@
 const selectors = {
-  ["0.0.1"]: {
+  // FIXME: there's a build error if we use the VERSION constant here
+  ["0.0.2"]: {
     active: () => `@cartridge/active`,
     account: (address: string) => `@cartridge/account/${address}`,
     deployment: (address: string, chainId: string) =>

@@ -1,5 +1,5 @@
 import Storage from "utils/storage";
-import Controller from "utils/controller";
+import Controller, { VERSION } from "utils/controller";
 import selectors from "utils/selectors";
 
 export function logout(origin: string) {
@@ -9,7 +9,7 @@ export function logout(origin: string) {
       throw new Error("no controller");
     }
 
-    if (!Storage.get(selectors["0.0.1"].admin(controller.address, origin))) {
+    if (!Storage.get(selectors[VERSION].admin(controller.address, origin))) {
       throw new Error("unauthorized");
     }
 
