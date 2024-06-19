@@ -78,7 +78,7 @@ export function executeFactory({
       //     await controller.account.cartridge.executeFromOutside(calls, session);
       //   return {
       //     code: ResponseCodes.SUCCESS,
-      //     transaction_hash,
+      //     transaction_has,
       //   };
       // } catch (e) {
       //   console.error(e);
