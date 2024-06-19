@@ -73,17 +73,17 @@ export function executeFactory({
       }
 
       // Try execute from outside for fee subsized transactions
-      try {
-        const { transaction_hash } =
-          await controller.account.cartridge.executeFromOutside(calls, session);
-        return {
-          code: ResponseCodes.SUCCESS,
-          transaction_hash,
-        };
-      } catch (e) {
-        console.error(e);
-        /* do nothing */
-      }
+      // try {
+      //   const { transaction_hash } =
+      //     await controller.account.cartridge.executeFromOutside(calls, session);
+      //   return {
+      //     code: ResponseCodes.SUCCESS,
+      //     transaction_hash,
+      //   };
+      // } catch (e) {
+      //   console.error(e);
+      //   /* do nothing */
+      // }
 
       if (!transactionsDetail.maxFee) {
         try {
