@@ -18,9 +18,6 @@ pub mod devnet_runner;
 pub mod katana_runner;
 pub mod waiter;
 
-pub use devnet_runner::DevnetRunner;
-pub use katana_runner::KatanaRunner;
-
 #[async_trait]
 pub trait TestnetRunner {
     fn load() -> Self;

@@ -1,4 +1,7 @@
-use crate::account::{session::SessionAccount, CartridgeGuardianAccount};
+use crate::{
+    account::{session::SessionAccount, AccountHashSigner, CartridgeGuardianAccount},
+    hash::MessageHashRev1,
+};
 
 use super::hash::{AllowedMethod, Session};
 

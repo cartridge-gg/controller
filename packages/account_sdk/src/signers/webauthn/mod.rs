@@ -1,7 +1,5 @@
 use super::{HashSigner, SignError};
-use crate::abigen::cartridge_account::{
-    Signer, SignerSignature, WebauthnAssertion, WebauthnSigner,
-};
+use crate::abigen::controller::{Signer, SignerSignature, WebauthnAssertion, WebauthnSigner};
 
 use async_trait::async_trait;
 use cainome::cairo_serde::U256;
@@ -10,10 +8,10 @@ use starknet_crypto::FieldElement;
 
 pub mod credential;
 pub mod device;
-pub mod p256r1;
+pub mod internal;
 
 pub use device::{DeviceError, DeviceSigner};
-pub use p256r1::P256r1Signer;
+pub use internal::InternalWebauthnSigner;
 
 pub type Secp256r1Point = (U256, U256);
 
