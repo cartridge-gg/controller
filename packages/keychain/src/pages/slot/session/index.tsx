@@ -34,10 +34,15 @@ const CreateSessionPage: NextPage = () => {
   // success page. Else, redirect to the failure page.
   const onSlotCallback = useCallback(
     (session: Session) => {
-      const url = decodeURIComponent(queries.callback_uri);
+      const url = sanitizeCallbackUrl(decodeURIComponent(queries.callback_uri));
       const body = JSON.stringify(session);
       const headers = new Headers();
       headers.append("Content-Type", "application/json");
+
+      if (!url) {
+        router.replace(`/slot/auth/failure`);
+        return;
+      }
 
       fetch(url, {
         body,
@@ -147,3 +152,20 @@ const CreateSessionPage: NextPage = () => {
 };
 
 export default CreateSessionPage;
+
+/**
+ * Sanitize the callback url to ensure that it is a valid URL. Returns back the URL.
+ */
+function sanitizeCallbackUrl(url: string): URL | undefined {
+  try {
+    const parsed = new URL(url);
+
+    if (parsed.hostname !== "localhost" || parsed.pathname !== "/callback") {
+      throw new Error(`Invalid callback url: ${url}`);
+    }
+
+    return parsed;
+  } catch (e) {
+    console.error(e);
+  }
+}
