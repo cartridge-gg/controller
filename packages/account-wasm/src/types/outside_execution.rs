@@ -1,23 +1,17 @@
 use account_sdk::account::outside_execution::{OutsideExecution, OutsideExecutionCaller};
 use serde::{Deserialize, Serialize};
-use serde_with::serde_as;
-use starknet::core::serde::unsigned_field_element::UfeHex;
-use starknet::macros::short_string;
-use starknet::{accounts::Call, core::types::FieldElement};
+use starknet::{accounts::Call, core::types::FieldElement, macros::short_string};
 use wasm_bindgen::prelude::*;
 
 use super::call::JsCall;
 
-#[serde_as]
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct JsOutsideExecution {
-    #[serde_as(as = "UfeHex")]
     pub caller: FieldElement,
     pub execute_before: u64,
     pub execute_after: u64,
     pub calls: Vec<JsCall>,
-    #[serde_as(as = "UfeHex")]
     pub nonce: FieldElement,
 }
 
@@ -33,14 +27,8 @@ impl TryFrom<JsOutsideExecution> for OutsideExecution {
     type Error = JsError;
 
     fn try_from(value: JsOutsideExecution) -> Result<Self, Self::Error> {
-        let caller = if value.caller.eq(&short_string!("ANY_CALLER")) {
-            OutsideExecutionCaller::Any
-        } else {
-            OutsideExecutionCaller::Specific(value.caller.into())
-        };
-
         Ok(OutsideExecution {
-            caller,
+            caller: OutsideExecutionCaller::Any,
             execute_after: value.execute_after,
             execute_before: value.execute_before,
             nonce: value.nonce,
@@ -50,5 +38,17 @@ impl TryFrom<JsOutsideExecution> for OutsideExecution {
                 .map(Call::try_from)
                 .collect::<Result<Vec<Call>, _>>()?,
         })
+    }
+}
+
+impl From<OutsideExecution> for JsOutsideExecution {
+    fn from(value: OutsideExecution) -> Self {
+        JsOutsideExecution {
+            caller: short_string!("ANY_CALLER"),
+            execute_before: value.execute_before,
+            execute_after: value.execute_after,
+            calls: value.calls.into_iter().map(JsCall::from).collect(),
+            nonce: value.nonce,
+        }
     }
 }

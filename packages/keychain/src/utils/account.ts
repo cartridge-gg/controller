@@ -14,6 +14,7 @@ import {
   InvocationsDetails,
   TransactionExecutionStatus,
   shortString,
+  transaction,
   num,
 } from "starknet";
 
@@ -172,7 +173,7 @@ class Account extends BaseAccount {
     transactionsDetail.maxFee = num.toHex(transactionsDetail.maxFee);
 
     const res = await this.cartridge.execute(
-      calls,
+      transaction.transformCallsToMulticallArrays_cairo1(calls),
       transactionsDetail,
       session,
     );

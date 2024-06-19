@@ -4,7 +4,9 @@ mod utils;
 
 use std::str::FromStr;
 
-use account_sdk::account::outside_execution::OutsideExecutionAccount;
+use account_sdk::account::outside_execution::{
+    OutsideExecution, OutsideExecutionAccount, OutsideExecutionCaller,
+};
 use account_sdk::account::session::hash::{AllowedMethod, Session};
 use account_sdk::account::session::SessionAccount;
 use account_sdk::account::{AccountHashSigner, CartridgeGuardianAccount, MessageSignerAccount};
@@ -24,9 +26,7 @@ use starknet::{
     core::types::FieldElement,
     providers::{jsonrpc::HttpTransport, JsonRpcClient},
 };
-use types::call::JsCall;
 use types::invocation::JsInvocationsDetails;
-use types::outside_execution::JsOutsideExecution;
 use types::session::{JsCredentials, JsSession};
 use url::Url;
 use wasm_bindgen::prelude::*;
@@ -161,31 +161,31 @@ impl CartridgeAccount {
     ) -> Result<JsValue> {
         utils::set_panic_hook();
 
-        let outside = JsOutsideExecution {
-            caller: short_string!("ANY_CALLER"),
+        let calls = calls
+            .into_iter()
+            .map(Call::try_from_js_value)
+            .collect::<Result<Vec<Call>>>()?;
+
+        let outside = OutsideExecution {
+            caller: OutsideExecutionCaller::Any,
+            calls,
             execute_after: 0_u64,
             execute_before: 3000000000_u64,
-            calls: calls
-                .into_iter()
-                .map(JsCall::try_from)
-                .collect::<Result<Vec<JsCall>>>()?,
             nonce: SigningKey::from_random().secret_scalar(),
         };
 
         let signed = if let Some(session_details) = from_value(session_details)? {
             self.session_account(session_details)
                 .await?
-                .sign_outside_execution(outside.clone().try_into()?)
+                .sign_outside_execution(outside.clone())
                 .await?
         } else {
-            self.account
-                .sign_outside_execution(outside.clone().try_into()?)
-                .await?
+            self.account.sign_outside_execution(outside.clone()).await?
         };
 
         let response = PaymasterRequest::send(
             self.rpc_url.clone(),
-            outside,
+            outside.into(),
             self.account.address(),
             self.account.chain_id(),
             signed.signature,
@@ -231,7 +231,7 @@ impl CartridgeAccount {
             self.account.address(),
             self.account.chain_id(),
             details.credentials.authorization,
-            session,
+            session.clone(),
         ))
     }
 }
