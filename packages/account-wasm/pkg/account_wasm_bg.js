@@ -425,6 +425,16 @@ export function __wbindgen_string_get(arg0, arg1) {
     getInt32Memory0()[arg0 / 4 + 0] = ptr1;
 };
 
+export function __wbindgen_cb_drop(arg0) {
+    const obj = takeObject(arg0).original;
+    if (obj.cnt-- == 1) {
+        obj.a = 0;
+        return true;
+    }
+    const ret = false;
+    return ret;
+};
+
 export function __wbindgen_is_bigint(arg0) {
     const ret = typeof(getObject(arg0)) === 'bigint';
     return ret;
@@ -471,16 +481,6 @@ export function __wbindgen_bigint_from_i64(arg0) {
 
 export function __wbindgen_is_undefined(arg0) {
     const ret = getObject(arg0) === undefined;
-    return ret;
-};
-
-export function __wbindgen_cb_drop(arg0) {
-    const obj = takeObject(arg0).original;
-    if (obj.cnt-- == 1) {
-        obj.a = 0;
-        return true;
-    }
-    const ret = false;
     return ret;
 };
 
@@ -970,8 +970,8 @@ export function __wbindgen_memory() {
     return addHeapObject(ret);
 };
 
-export function __wbindgen_closure_wrapper1476(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 457, __wbg_adapter_48);
+export function __wbindgen_closure_wrapper1479(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 463, __wbg_adapter_48);
     return addHeapObject(ret);
 };
 
