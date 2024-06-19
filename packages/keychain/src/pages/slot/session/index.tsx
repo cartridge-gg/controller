@@ -45,7 +45,7 @@ const CreateSessionPage: NextPage = () => {
         method: "POST",
       })
         .then((res) => {
-          res.status === 200
+          return res.status === 200
             ? router.replace(`/slot/auth/success`)
             : new Promise((_, reject) => reject(res));
         })
