@@ -139,7 +139,7 @@ const CreateSessionPage: NextPage = () => {
   }, [controller, origin, policies, onSlotCallback]);
 
   // Show loader if currently fetching account
-  if (isFetching || !controller) {
+  if (isFetching) {
     return <LoadingLogo />;
   }
 
