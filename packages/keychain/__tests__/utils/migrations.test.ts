@@ -5,7 +5,7 @@ import selectors from "utils/selectors";
 import Storage from "utils/storage";
 
 describe.skip("migrations", () => {
-  it("migrates 0.0.2 to 0.0.3", () => {
+  it.skip("migrates 0.0.2 to 0.0.3", () => {
     const address = "0xdead";
     const deployment = {
       classHash:
