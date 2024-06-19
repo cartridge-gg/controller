@@ -18,6 +18,7 @@
     "ui": "pnpm --filter @cartridge/ui",
     "ui:next": "pnpm --filter @cartridge/ui-next",
     "example:next": "pnpm --filter starknet-react-next",
+    "example:vite": "pnpm --filter get-starknet-vite",
     "test": "pnpm keychain test",
     "test:ci": "pnpm keychain test:ci"
   },
