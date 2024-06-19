@@ -10,7 +10,7 @@ export function CreateSession({
   onCancel,
 }: {
   onConnect: (policies: Policy[]) => void;
-  onCancel: () => void;
+  onCancel?: () => void;
 }) {
   const { controller, policies, origin } = useConnection();
   const [isConnecting, setIsConnecting] = useState(false);
@@ -42,7 +42,7 @@ export function CreateSession({
           create
         </Button>
 
-        <Button onClick={onCancel}>cancel</Button>
+        {onCancel && <Button onClick={onCancel}>cancel</Button>}
       </Footer>
     </Container>
   );
