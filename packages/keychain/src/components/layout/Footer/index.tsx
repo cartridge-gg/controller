@@ -20,13 +20,16 @@ import { TransactionSummary } from "./TransactionSummary";
 import { isIframe } from "components/connect/utils";
 import { useConnection } from "hooks/connection";
 import { TOP_BAR_HEIGHT } from "../Container/Header/TopBar";
+import NextLink from "next/link";
 
 export function Footer({
   children,
   isSlot = false,
+  isSignup,
   createSession = false,
 }: React.PropsWithChildren & {
   isSlot?: boolean;
+  isSignup?: boolean;
   createSession?: boolean;
 }) {
   const { setFooterHeight } = useLayout();
@@ -35,8 +38,8 @@ export function Footer({
   const { isOpen, onToggle } = useDisclosure();
   const variant = useLayoutVariant();
   const isExpandable = useMemo(
-    () => !!origin && !!policies.length && variant === "connect",
-    [origin, policies, variant],
+    () => !!origin && !!policies.length && variant === "connect" && !isSignup,
+    [origin, policies, variant, isSignup],
   );
   const hostname = useMemo(
     () => (origin ? new URL(origin).hostname : undefined),
@@ -149,6 +152,9 @@ export function Footer({
           h={FOOTER_HEIGHT / 4}
           gap={1}
           opacity={0.5}
+          as={NextLink}
+          href="https://cartridge.gg"
+          target="_blank"
         >
           <Text fontSize="xs" color="currentColor">
             Controller by

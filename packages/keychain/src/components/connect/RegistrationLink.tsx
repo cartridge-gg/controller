@@ -23,6 +23,7 @@ export function RegistrationLink({
         fontWeight="medium"
         color="link.blue"
         fontSize="xs"
+        borderWidth={1}
       >
         {children}
       </Button>
