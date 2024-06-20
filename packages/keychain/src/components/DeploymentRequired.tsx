@@ -61,6 +61,7 @@ export function DeploymentRequired({
   if (status !== Status.DEPLOYED) {
     return (
       <Container
+        variant="connect"
         icon={<PacmanIcon color="brand.primary" fontSize="3xl" />}
         title={"Deploying your account"}
         description="This may take a second"
@@ -83,10 +84,10 @@ export function DeploymentRequired({
         </Content>
 
         <Footer>
-          <ErrorAlert
-            title="Account deployment error"
-            description={
-              error ? (
+          {error && (
+            <ErrorAlert
+              title="Account deployment error"
+              description={
                 <>
                   <Text mb={4} color="inherit">
                     Please come by{" "}
@@ -108,9 +109,9 @@ export function DeploymentRequired({
 
                   <Text color="text.secondary">{error.message}</Text>
                 </>
-              ) : undefined
-            }
-          />
+              }
+            />
+          )}
           <Button onClick={onClose}>close</Button>
         </Footer>
       </Container>
