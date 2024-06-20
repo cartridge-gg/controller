@@ -182,7 +182,7 @@ function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
         </FormikField>
       </Content>
 
-      <Footer isSlot={isSlot} createSession>
+      <Footer isSlot={isSlot} isSignup>
         {error && (
           <ErrorAlert title="Login failed" description={error.message} />
         )}
