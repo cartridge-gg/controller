@@ -45,9 +45,8 @@ export function Footer({
     () => (origin ? new URL(origin).hostname : undefined),
     [origin],
   );
-  const maxH = `${
-    (isIframe() ? window.innerHeight : PORTAL_WINDOW_HEIGHT) - TOP_BAR_HEIGHT
-  }px`;
+  const maxH = `${(isIframe() ? window.innerHeight : PORTAL_WINDOW_HEIGHT) - TOP_BAR_HEIGHT
+    }px`;
   const { footerHeight } = useLayout();
 
   useEffect(() => {
@@ -155,6 +154,7 @@ export function Footer({
           as={NextLink}
           href="https://cartridge.gg"
           target="_blank"
+          overflow="hidden"
         >
           <Text fontSize="xs" color="currentColor">
             Controller by

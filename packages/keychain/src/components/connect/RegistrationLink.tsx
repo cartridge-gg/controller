@@ -24,6 +24,7 @@ export function RegistrationLink({
         color="link.blue"
         fontSize="xs"
         borderWidth={1}
+        borderColor="solid.secondary"
       >
         {children}
       </Button>
