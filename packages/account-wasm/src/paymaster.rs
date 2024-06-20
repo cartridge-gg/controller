@@ -1,6 +1,8 @@
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen::to_value;
+use serde_with::serde_as;
+use starknet::core::serde::unsigned_field_element::UfeHex;
 use starknet::core::types::FieldElement;
 use url::Url;
 use wasm_bindgen::JsError;
@@ -18,17 +20,23 @@ struct JsonRpcRequest<T> {
     params: T,
 }
 
+#[serde_as]
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct OutsideExecutionParams {
+    #[serde_as(as = "UfeHex")]
     address: FieldElement,
+    #[serde_as(as = "UfeHex")]
     chain_id: FieldElement,
     outside_execution: JsOutsideExecution,
+    #[serde_as(as = "Vec<UfeHex>")]
     signature: Vec<FieldElement>,
 }
 
+#[serde_as]
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PaymasterResponse {
+    #[serde_as(as = "UfeHex")]
     transaction_hash: FieldElement,
 }
 
