@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { cairo, num, RpcProvider } from "starknet";
-import { CONTRACT_AVATAR } from "@cartridge/controller/src/constants";
 import dataUriToBuffer from "data-uri-to-buffer";
 
 import Storage from "../utils/storage";
+
+const CONTRACT_AVATAR = null;
 
 // const SCALE = 10;
 const PADDING = 0;

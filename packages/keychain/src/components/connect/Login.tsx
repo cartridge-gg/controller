@@ -52,7 +52,7 @@ export function Login({
       try {
         switch (mode) {
           case LoginMode.Webauthn:
-            await doLogin(values.username, credentialId, publicKey);
+            await doLogin(values.username, credentialId);
             break;
           case LoginMode.Controller:
             if (policies.length === 0) {
