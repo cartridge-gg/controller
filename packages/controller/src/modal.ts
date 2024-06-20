@@ -42,8 +42,6 @@ export const createModal = (src: string, onClose?: () => void) => {
     container.style.opacity = "0";
   };
 
-  container.onclick = () => close();
-
   resize(iframe);
   window.addEventListener("resize", () => resize(iframe));
 
