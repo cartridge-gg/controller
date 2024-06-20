@@ -227,4 +227,5 @@ class Controller {
 export * from "./types";
 export * from "./errors";
 export { computeAddress, split, verifyMessageHash } from "./utils";
+export { injectController } from "./inject";
 export default Controller;
