@@ -8,21 +8,19 @@ import {
 
 import { client, ENDPOINT } from "utils/graphql";
 import base64url from "base64url";
-import { RawAssertion, WebauthnSigner } from "utils/webauthn";
 
-export interface CredentialDescriptor
-  extends Omit<PublicKeyCredentialDescriptor, "id"> {
-  id: string;
-}
+type RawAssertion = PublicKeyCredential & {
+  response: AuthenticatorAssertionResponse;
+};
 
-export interface PublicKeyRequest
-  extends Omit<
-    PublicKeyCredentialRequestOptions,
-    "allowCredentials" | "challenge"
-  > {
-  allowCredentials?: CredentialDescriptor[];
-  challenge: string;
-}
+type RawAttestation = PublicKeyCredential & {
+  response: AuthenticatorAttestationResponse;
+};
+
+type Credentials = RawAttestation & {
+  getPublicKey(): ArrayBuffer | null;
+};
+
 export const createCredentials = async (
   name: string,
   beginRegistration: CredentialCreationOptions,
@@ -43,23 +41,11 @@ export const createCredentials = async (
   beginRegistration.publicKey.rp.id = process.env.NEXT_PUBLIC_RP_ID;
   const credentials = (await navigator.credentials.create(
     beginRegistration,
-  )) as PublicKeyCredential & {
-    response: AuthenticatorAttestationResponse & {
-      getPublicKey(): ArrayBuffer | null;
-    };
+  )) as RawAttestation & {
+    getPublicKey(): ArrayBuffer | null;
   };
 
   return credentials;
-};
-
-export type OnCreateResult = {
-  address: string;
-};
-
-export type Credentials = PublicKeyCredential & {
-  response: AuthenticatorAttestationResponse & {
-    getPublicKey(): ArrayBuffer | null;
-  };
 };
 
 export const onCreateBegin = async (name: string): Promise<Credentials> => {
@@ -165,18 +151,26 @@ export async function doSignup(name: string) {
   await onCreateFinalize(credentials);
 }
 
-export async function doLogin(
-  name: string,
-  credentialId: string,
-  publicKey: string,
-) {
+export async function doLogin(name: string, credentialId: string) {
   const { data: beginLoginData } = await beginLogin(name);
 
-  // TODO: replace with account sdk webauthn signer
-  const signer = new WebauthnSigner(credentialId, publicKey);
-  const assertion = await signer.sign(
-    base64url.toBuffer(beginLoginData.beginLogin.publicKey.challenge),
-  );
+  // TODO: replace with account_sdk device signer
+  const assertion = (await navigator.credentials.get({
+    publicKey: {
+      challenge: base64url.toBuffer(
+        beginLoginData.beginLogin.publicKey.challenge,
+      ),
+      timeout: 60000,
+      rpId: process.env.NEXT_PUBLIC_RP_ID,
+      allowCredentials: [
+        {
+          type: "public-key",
+          id: base64url.toBuffer(credentialId),
+        },
+      ],
+      userVerification: "required",
+    },
+  })) as RawAssertion;
 
   const res = await onLoginFinalize(assertion);
   if (!res.finalizeLogin) {
