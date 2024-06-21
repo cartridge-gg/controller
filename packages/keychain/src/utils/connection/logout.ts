@@ -1,6 +1,6 @@
 import Storage from "utils/storage";
-import Controller, { VERSION } from "utils/controller";
-import selectors from "utils/selectors";
+import Controller from "utils/controller";
+import { selectors, VERSION } from "utils/selectors";
 
 export function logout(origin: string) {
   return () => {

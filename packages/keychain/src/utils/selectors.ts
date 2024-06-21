@@ -1,6 +1,7 @@
-const selectors = {
-  // FIXME: there's a build error if we use the VERSION constant here
-  ["0.0.3"]: {
+export const VERSION = "0.0.3";
+
+export const selectors = {
+  [VERSION]: {
     active: () => `@cartridge/active`,
     account: (address: string) => `@cartridge/account/${address}`,
     deployment: (address: string, chainId: string) =>
@@ -11,5 +12,3 @@ const selectors = {
       `@cartridge/session/${address}/${origin}/${chainId}`,
   },
 };
-
-export default selectors;

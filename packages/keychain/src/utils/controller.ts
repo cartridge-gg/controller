@@ -5,12 +5,10 @@ import { Policy, Session } from "@cartridge/controller";
 import Storage from "utils/storage";
 
 import Account from "./account";
-import selectors from "./selectors";
+import { selectors, VERSION } from "./selectors";
 import migrations from "./migrations";
 import { AccountInfoDocument } from "generated/graphql";
 import { client } from "./graphql";
-
-export const VERSION = "0.0.3";
 
 type SerializedController = {
   publicKey: string;

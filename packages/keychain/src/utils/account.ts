@@ -21,11 +21,10 @@ import {
 } from "generated/graphql";
 import { client } from "utils/graphql";
 
-import selectors from "./selectors";
+import { selectors, VERSION } from "./selectors";
 import Storage from "./storage";
 import { CartridgeAccount } from "@cartridge/account-wasm";
 import { Session } from "@cartridge/controller";
-import { VERSION } from "./controller";
 
 const EST_FEE_MULTIPLIER = 2n;
 
