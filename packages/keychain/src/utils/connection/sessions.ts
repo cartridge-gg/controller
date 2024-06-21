@@ -1,5 +1,5 @@
 import Controller from "utils/controller";
-import selectors from "utils/selectors";
+import { selectors } from "utils/selectors";
 import Storage from "utils/storage";
 
 export function revoke() {

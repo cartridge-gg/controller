@@ -5,7 +5,13 @@ import {
   ConnectError,
 } from "@cartridge/controller";
 import Controller, { diff } from "utils/controller";
-import { Abi, Call, InvocationsDetails, addAddressPadding } from "starknet";
+import {
+  Abi,
+  Call,
+  CallData,
+  InvocationsDetails,
+  addAddressPadding,
+} from "starknet";
 import { Status } from "utils/account";
 import { ConnectionCtx, ExecuteCtx } from "./types";
 
@@ -36,82 +42,57 @@ export function executeFactory({
           } as ExecuteCtx);
         });
       }
-      const account = controller.account;
-      if (
-        account.status === Status.COUNTERFACTUAL ||
-        account.status === Status.DEPLOYING
-      ) {
-        return Promise.resolve({
-          code: ResponseCodes.NOT_ALLOWED,
-          message: "Account is deploying.",
-        });
-      }
 
-      const calls = Array.isArray(transactions) ? transactions : [transactions];
-      const policies = calls.map(
-        (txn) =>
-          ({
-            target: addAddressPadding(txn.contractAddress),
-            method: txn.entrypoint,
-          } as Policy),
-      );
+      try {
+        const account = controller.account;
+        if (account.status !== Status.DEPLOYED) {
+          throw new Error("Account is deploying.");
+        }
 
-      const session = controller.session(origin);
-      if (!session) {
-        return Promise.resolve({
-          code: ResponseCodes.NOT_ALLOWED,
-          message: `No session`,
-        });
-      }
+        const session = controller.session(origin);
+        if (!session) {
+          throw new Error("No session");
+        }
 
-      const missing = diff(policies, session.policies);
-      if (missing.length > 0) {
-        return Promise.resolve({
-          code: ResponseCodes.NOT_ALLOWED,
-          message: `Missing policies: ${JSON.stringify(missing)}`,
-        });
-      }
+        const calls = normalizeCalls(transactions);
 
-      // Try execute from outside for fee subsized transactions
-      // try {
-      //   const { transaction_hash } =
-      //     await controller.account.cartridge.executeFromOutside(calls, session);
-      //   return {
-      //     code: ResponseCodes.SUCCESS,
-      //     transaction_hash,
-      //   };
-      // } catch (e) {
-      //   console.error(e);
-      //   /* do nothing */
-      // }
+        const missing = diff(mapPolicies(calls), session.policies);
+        if (missing.length > 0) {
+          throw new Error(`Missing policies: ${JSON.stringify(missing)}`);
+        }
 
-      if (!transactionsDetail.maxFee) {
-        try {
+        // TODO: Pass down paymaster option
+        // try {
+        //   const { transaction_hash } =
+        //     await controller.account.cartridge.executeFromOutside(
+        //       calls,
+        //       session,
+        //     );
+        //   return {
+        //     code: ResponseCodes.SUCCESS,
+        //     transaction_hash,
+        //   };
+        // } catch (e) {
+        //   /* user pays */
+        // }
+
+        if (!transactionsDetail.maxFee) {
           const estFee = await account.estimateInvokeFee(calls, {
             nonce: transactionsDetail.nonce,
           });
-
           transactionsDetail.maxFee = estFee.suggestedMaxFee;
-        } catch (e) {
-          return Promise.resolve({
-            code: ResponseCodes.NOT_ALLOWED,
-            message: e.message,
-          });
         }
-      }
 
-      if (
-        session.maxFee &&
-        transactionsDetail &&
-        BigInt(transactionsDetail.maxFee) > BigInt(session.maxFee)
-      ) {
-        return Promise.resolve({
-          code: ResponseCodes.NOT_ALLOWED,
-          message: `Max fee exceeded: ${transactionsDetail.maxFee.toString()} > ${session.maxFee.toString()}`,
-        });
-      }
+        if (
+          session.maxFee &&
+          transactionsDetail &&
+          BigInt(transactionsDetail.maxFee) > BigInt(session.maxFee)
+        ) {
+          throw new Error(
+            `Max fee exceeded: ${transactionsDetail.maxFee.toString()} > ${session.maxFee.toString()}`,
+          );
+        }
 
-      try {
         const res = await account.execute(calls, session, transactionsDetail);
 
         return {
@@ -126,3 +107,23 @@ export function executeFactory({
       }
     };
 }
+
+const normalizeCalls = (calls: Call | Call[]): Call[] => {
+  return (Array.isArray(calls) ? calls : [calls]).map((call) => {
+    return {
+      entrypoint: call.entrypoint,
+      contractAddress: addAddressPadding(call.contractAddress),
+      calldata: CallData.toHex(call.calldata),
+    } as Call;
+  });
+};
+
+const mapPolicies = (calls: Call[]): Policy[] => {
+  return calls.map(
+    (txn) =>
+      ({
+        target: txn.contractAddress,
+        method: txn.entrypoint,
+      } as Policy),
+  );
+};

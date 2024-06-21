@@ -10,11 +10,8 @@ import {
   InvokeFunctionResponse,
   TypedData,
   BigNumberish,
-  TransactionFinalityStatus,
   InvocationsDetails,
-  TransactionExecutionStatus,
   shortString,
-  transaction,
   num,
 } from "starknet";
 
@@ -24,11 +21,10 @@ import {
 } from "generated/graphql";
 import { client } from "utils/graphql";
 
-import selectors from "./selectors";
+import { selectors, VERSION } from "./selectors";
 import Storage from "./storage";
 import { CartridgeAccount } from "@cartridge/account-wasm";
 import { Session } from "@cartridge/controller";
-import { VERSION } from "./controller";
 
 const EST_FEE_MULTIPLIER = 2n;
 
@@ -173,26 +169,18 @@ class Account extends BaseAccount {
     transactionsDetail.maxFee = num.toHex(transactionsDetail.maxFee);
 
     const res = await this.cartridge.execute(
-      transaction.transformCallsToMulticallArrays_cairo1(calls),
+      calls,
       transactionsDetail,
       session,
     );
 
     Storage.update(this.selector, {
-      nonce: (BigInt(transactionsDetail.nonce) + 1n).toString(),
+      nonce: num.toHex(BigInt(transactionsDetail.nonce) + 1n),
     });
 
     this.rpc
       .waitForTransaction(res.transaction_hash, {
         retryInterval: 1000,
-        successStates: [
-          TransactionFinalityStatus.ACCEPTED_ON_L1,
-          TransactionFinalityStatus.ACCEPTED_ON_L2,
-        ],
-        errorStates: [
-          TransactionExecutionStatus.REJECTED,
-          TransactionExecutionStatus.REVERTED,
-        ],
       })
       .catch(() => {
         this.resetNonce();
