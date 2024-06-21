@@ -371,13 +371,14 @@ export class CartridgeAccount {
     }
     /**
     * @param {any[]} calls
+    * @param {any} caller
     * @param {any} session_details
     * @returns {Promise<any>}
     */
-    executeFromOutside(calls, session_details) {
+    executeFromOutside(calls, caller, session_details) {
         const ptr0 = passArrayJsValueToWasm0(calls, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.cartridgeaccount_executeFromOutside(this.__wbg_ptr, ptr0, len0, addHeapObject(session_details));
+        const ret = wasm.cartridgeaccount_executeFromOutside(this.__wbg_ptr, ptr0, len0, addHeapObject(caller), addHeapObject(session_details));
         return takeObject(ret);
     }
     /**
@@ -970,7 +971,7 @@ export function __wbindgen_memory() {
     return addHeapObject(ret);
 };
 
-export function __wbindgen_closure_wrapper1471(arg0, arg1, arg2) {
+export function __wbindgen_closure_wrapper1479(arg0, arg1, arg2) {
     const ret = makeMutClosure(arg0, arg1, 463, __wbg_adapter_48);
     return addHeapObject(ret);
 };

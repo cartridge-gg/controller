@@ -157,12 +157,13 @@ impl CartridgeAccount {
     pub async fn execute_from_outside(
         &self,
         calls: Vec<JsValue>,
+        caller: JsValue,
         session_details: JsValue,
     ) -> Result<JsValue> {
         utils::set_panic_hook();
 
         let outside = JsOutsideExecution {
-            caller: short_string!("ANY_CALLER"),
+            caller: serde_wasm_bindgen::from_value(caller)?,
             execute_after: 0_u64,
             execute_before: 3000000000_u64,
             calls: calls

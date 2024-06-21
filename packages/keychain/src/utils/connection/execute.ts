@@ -68,6 +68,7 @@ export function executeFactory({
             const { transaction_hash } =
               await controller.account.cartridge.executeFromOutside(
                 calls,
+                paymaster.caller,
                 session,
               );
             return {
