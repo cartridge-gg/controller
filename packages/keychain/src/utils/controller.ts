@@ -10,7 +10,7 @@ import migrations from "./migrations";
 import { AccountInfoDocument } from "generated/graphql";
 import { client } from "./graphql";
 
-export const VERSION = "0.0.2";
+export const VERSION = "0.0.3";
 
 type SerializedController = {
   publicKey: string;
