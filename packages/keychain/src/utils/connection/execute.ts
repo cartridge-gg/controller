@@ -3,6 +3,7 @@ import {
   Policy,
   ResponseCodes,
   ConnectError,
+  PaymasterOptions,
 } from "@cartridge/controller";
 import Controller, { diff } from "utils/controller";
 import {
@@ -28,6 +29,7 @@ export function executeFactory({
         chainId?: string;
       },
       sync?: boolean,
+      paymaster?: PaymasterOptions,
     ): Promise<ExecuteReply | ConnectError> => {
       if (sync) {
         return await new Promise((resolve, reject) => {
@@ -61,20 +63,22 @@ export function executeFactory({
           throw new Error(`Missing policies: ${JSON.stringify(missing)}`);
         }
 
-        // TODO: Pass down paymaster option
-        // try {
-        //   const { transaction_hash } =
-        //     await controller.account.cartridge.executeFromOutside(
-        //       calls,
-        //       session,
-        //     );
-        //   return {
-        //     code: ResponseCodes.SUCCESS,
-        //     transaction_hash,
-        //   };
-        // } catch (e) {
-        //   /* user pays */
-        // }
+        if (paymaster) {
+          try {
+            const { transaction_hash } =
+              await controller.account.cartridge.executeFromOutside(
+                calls,
+                paymaster.caller,
+                session,
+              );
+            return {
+              code: ResponseCodes.SUCCESS,
+              transaction_hash,
+            };
+          } catch (e) {
+            /* user pays */
+          }
+        }
 
         if (!transactionsDetail.maxFee) {
           const estFee = await account.estimateInvokeFee(calls, {

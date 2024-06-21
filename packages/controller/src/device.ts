@@ -12,7 +12,7 @@ import {
   InvocationsDetails,
 } from "starknet";
 
-import { Keychain, ResponseCodes, Modal } from "./types";
+import { Keychain, ResponseCodes, Modal, PaymasterOptions } from "./types";
 import { Signer } from "./signer";
 import { AsyncMethodReturns } from "@cartridge/penpal";
 
@@ -20,12 +20,14 @@ class DeviceAccount extends Account {
   address: string;
   private keychain: AsyncMethodReturns<Keychain>;
   private modal: Modal;
+  private paymaster?: PaymasterOptions;
 
   constructor(
     rpcUrl: string,
     address: string,
     keychain: AsyncMethodReturns<Keychain>,
     modal: Modal,
+    paymaster?: PaymasterOptions,
   ) {
     super(
       new RpcProvider({ nodeUrl: rpcUrl }),
@@ -35,6 +37,7 @@ class DeviceAccount extends Account {
     this.address = address;
     this.keychain = keychain;
     this.modal = modal;
+    this.paymaster = paymaster;
   }
 
   /**
@@ -89,28 +92,35 @@ class DeviceAccount extends Account {
     }
 
     try {
-      const res = await this.keychain.execute(calls, abis, transactionsDetail);
+      let res = await this.keychain.execute(
+        calls,
+        abis,
+        transactionsDetail,
+        false,
+        this.paymaster,
+      );
       if (res.code === ResponseCodes.SUCCESS) {
         return res as InvokeFunctionResponse;
       }
 
       this.modal.open();
-      const res2 = await this.keychain.execute(
+      res = await this.keychain.execute(
         calls,
         abis,
         transactionsDetail,
         true,
+        this.paymaster,
       );
       this.modal.close();
 
       if (
-        res2.code !== ResponseCodes.SUCCESS &&
-        res2.code !== ResponseCodes.CANCELED
+        res.code !== ResponseCodes.SUCCESS &&
+        res.code !== ResponseCodes.CANCELED
       ) {
-        throw new Error(res2.message);
+        throw new Error(res.message);
       }
 
-      return res2 as InvokeFunctionResponse;
+      return res as InvokeFunctionResponse;
     } catch (e) {
       console.error(e);
       throw e;

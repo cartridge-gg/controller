@@ -15,18 +15,6 @@ import {
   DeclareSignerDetails,
 } from "starknet";
 
-export type Assertion = {
-  id: string;
-  type: string;
-  rawId: string;
-  clientExtensionResults: AuthenticationExtensionsClientOutputs;
-  response: {
-    authenticatorData: string;
-    clientDataJSON: string;
-    signature: string;
-  };
-};
-
 export type Session = {
   chainId: constants.StarknetChainId;
   policies: Policy[];
@@ -96,6 +84,7 @@ export interface Keychain {
     abis?: Abi[],
     transactionsDetail?: InvocationsDetails,
     sync?: boolean,
+    paymaster?: PaymasterOptions,
   ): Promise<ExecuteReply | ConnectError>;
   logout(): Promise<void>;
   session(): Promise<Session>;
@@ -125,16 +114,44 @@ export interface Modal {
   close: () => void;
 }
 
+/**
+ * Options for configuring the controller
+ */
 export type ControllerOptions = {
+  /** The URL of keychain */
   url?: string;
-  origin?: string;
-  starterPackId?: string;
+  /** The URL of the RPC */
   rpc?: string;
+  /** The origin of keychain */
+  origin?: string;
+  /** Paymaster options for transaction fee management */
+  paymaster?: PaymasterOptions;
+  /** The ID of the starter pack to use */
+  starterPackId?: string;
+  /** The theme to use */
   theme?: string;
+  /** The color mode to use */
   colorMode?: ColorMode;
+  /** Additional configuration options */
   config?: {
+    /** Preset themes for the controller */
     presets?: ControllerThemePresets;
   };
+};
+
+/**
+ * Options for configuring a paymaster
+ */
+export type PaymasterOptions = {
+  /**
+   * The address of the account paying for the transaction.
+   * This should be a valid Starknet address or "ANY_CALLER" short string.
+   */
+  caller: string;
+  /**
+   * The URL of the paymaster. Currently not used.
+   */
+  url?: string;
 };
 
 export type ColorMode = "light" | "dark";
