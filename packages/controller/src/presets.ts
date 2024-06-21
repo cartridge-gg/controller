@@ -50,7 +50,7 @@ export const defaultPresets: ControllerThemePresets = {
   zkastle: {
     id: "zkastle",
     name: "zKastle",
-    icon: "/whitelabel/zkastle/icon.png",
+    icon: "/whitelabel/zkastle/icon.svg",
     cover: "/whitelabel/zkastle/cover.png",
     colors: {
       primary: "#E50D2C",
