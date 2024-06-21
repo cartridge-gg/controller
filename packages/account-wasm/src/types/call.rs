@@ -1,4 +1,6 @@
 use serde::{Deserialize, Serialize};
+use serde_with::serde_as;
+use starknet::core::serde::unsigned_field_element::UfeHex;
 use starknet::{
     accounts::Call,
     core::{types::FieldElement, utils::get_selector_from_name},
@@ -7,11 +9,14 @@ use wasm_bindgen::prelude::*;
 
 use super::TryFromJsValue;
 
+#[serde_as]
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct JsCall {
+    #[serde_as(as = "UfeHex")]
     pub contract_address: FieldElement,
     pub entrypoint: String,
+    #[serde_as(as = "Vec<UfeHex>")]
     pub calldata: Vec<FieldElement>,
 }
 

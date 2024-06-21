@@ -10,9 +10,7 @@ import {
   InvokeFunctionResponse,
   TypedData,
   BigNumberish,
-  TransactionFinalityStatus,
   InvocationsDetails,
-  TransactionExecutionStatus,
   shortString,
   num,
 } from "starknet";
@@ -179,20 +177,12 @@ class Account extends BaseAccount {
     );
 
     Storage.update(this.selector, {
-      nonce: (BigInt(transactionsDetail.nonce) + 1n).toString(),
+      nonce: num.toHex(BigInt(transactionsDetail.nonce) + 1n),
     });
 
     this.rpc
       .waitForTransaction(res.transaction_hash, {
         retryInterval: 1000,
-        successStates: [
-          TransactionFinalityStatus.ACCEPTED_ON_L1,
-          TransactionFinalityStatus.ACCEPTED_ON_L2,
-        ],
-        errorStates: [
-          TransactionExecutionStatus.REJECTED,
-          TransactionExecutionStatus.REVERTED,
-        ],
       })
       .catch(() => {
         this.resetNonce();
