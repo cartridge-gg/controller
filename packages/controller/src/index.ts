@@ -1,7 +1,7 @@
 export * from "./types";
 export { defaultPresets } from "./presets";
 
-import { AccountInterface, addAddressPadding, constants } from "starknet";
+import { AccountInterface, addAddressPadding } from "starknet";
 import {
   AsyncMethodReturns,
   Connection,
@@ -19,76 +19,64 @@ import {
   ControllerOptions,
   ControllerThemePresets,
   ColorMode,
+  PaymasterOptions,
 } from "./types";
 import { createModal } from "./modal";
 import { defaultPresets } from "./presets";
 import { NotReadyToConnect } from "./errors";
+import { KEYCHAIN_URL, RPC_SEPOLIA } from "./constants";
 
 class Controller {
-  private url = new URL("https://x.cartridge.gg");
-  private policies: Policy[] = [];
+  private url: URL;
+  private policies: Policy[];
+  private paymaster?: PaymasterOptions;
   private connection?: Connection<Keychain>;
   private modal?: Modal;
   public keychain?: AsyncMethodReturns<Keychain>;
-  public rpc = new URL("https://api.cartridge.gg/x/starknet/sepolia");
-  public chainId: string = constants.StarknetChainId.SN_SEPOLIA;
+  public rpc: URL;
   public account?: AccountInterface;
-  // private starterPackId?: string;
 
-  constructor(policies?: Policy[], options?: ControllerOptions) {
-    if (policies) {
-      this.policies = policies.map((policy) => {
-        return {
-          ...policy,
-          target: addAddressPadding(policy.target),
-        };
-      });
-    }
-
-    if (options?.url) {
-      this.url = new URL(options.url);
-    }
-
-    if (options?.rpc) {
-      this.rpc = new URL(options.rpc);
-    }
+  constructor(policies: Policy[] = [], options: ControllerOptions = {}) {
+    this.url = new URL(options?.url || KEYCHAIN_URL);
+    this.rpc = new URL(options?.rpc || RPC_SEPOLIA);
+    this.paymaster = options.paymaster;
+    this.policies = policies.map((policy) => ({
+      ...policy,
+      target: addAddressPadding(policy.target),
+    }));
 
     this.setTheme(options?.theme, options?.config?.presets);
     if (options?.colorMode) {
       this.setColorMode(options.colorMode);
     }
 
-    if (typeof document === "undefined") {
-      return;
-    }
+    this.initModal();
+  }
 
-    this.modal = createModal(this.url.toString(), () => {
-      this.keychain?.reset();
-    });
+  private initModal() {
+    if (typeof document === "undefined") return;
+
+    this.modal = createModal(this.url.toString(), () => this.keychain?.reset());
+    const appendModal = () => document.body.appendChild(this.modal!.element);
 
     if (
       document.readyState === "complete" ||
       document.readyState === "interactive"
     ) {
-      document.body.appendChild(this.modal.element);
+      appendModal();
     } else {
-      document.addEventListener("DOMContentLoaded", () => {
-        document.body.appendChild(this.modal!.element);
-      });
+      document.addEventListener("DOMContentLoaded", appendModal);
     }
 
     this.connection = connectToChild<Keychain>({
       iframe: this.modal.element.children[0] as HTMLIFrameElement,
-      methods: {
-        close: () => {
-          this.modal?.close();
-        },
-      },
+      methods: { close: () => this.modal?.close() },
     });
 
-    this.connection.promise
-      .then((keychain) => (this.keychain = keychain))
-      .then(() => this.probe());
+    this.connection.promise.then((keychain) => {
+      this.keychain = keychain;
+      return this.probe();
+    });
   }
 
   private setTheme(
@@ -135,6 +123,7 @@ class Controller {
         address,
         this.keychain,
         this.modal,
+        this.paymaster,
       ) as AccountInterface;
     } catch (e) {
       console.error(e);
@@ -178,6 +167,7 @@ class Controller {
         response.address,
         this.keychain,
         this.modal,
+        this.paymaster,
       ) as AccountInterface;
 
       return this.account;

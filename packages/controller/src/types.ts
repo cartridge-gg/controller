@@ -15,18 +15,6 @@ import {
   DeclareSignerDetails,
 } from "starknet";
 
-export type Assertion = {
-  id: string;
-  type: string;
-  rawId: string;
-  clientExtensionResults: AuthenticationExtensionsClientOutputs;
-  response: {
-    authenticatorData: string;
-    clientDataJSON: string;
-    signature: string;
-  };
-};
-
 export type Session = {
   chainId: constants.StarknetChainId;
   policies: Policy[];
@@ -96,6 +84,7 @@ export interface Keychain {
     abis?: Abi[],
     transactionsDetail?: InvocationsDetails,
     sync?: boolean,
+    paymaster?: PaymasterOptions,
   ): Promise<ExecuteReply | ConnectError>;
   logout(): Promise<void>;
   session(): Promise<Session>;
@@ -127,14 +116,20 @@ export interface Modal {
 
 export type ControllerOptions = {
   url?: string;
-  origin?: string;
-  starterPackId?: string;
   rpc?: string;
+  origin?: string;
+  paymaster?: PaymasterOptions;
+  starterPackId?: string;
   theme?: string;
   colorMode?: ColorMode;
   config?: {
     presets?: ControllerThemePresets;
   };
+};
+
+export type PaymasterOptions = {
+  caller: string;
+  url?: string;
 };
 
 export type ColorMode = "light" | "dark";
