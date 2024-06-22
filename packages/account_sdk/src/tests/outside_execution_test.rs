@@ -15,6 +15,7 @@ use crate::{
 use cainome::cairo_serde::{CairoSerde, ContractAddress, U256};
 use starknet::{
     accounts::{Account, Call},
+    core::types::{BlockId, BlockTag},
     macros::{felt, selector},
     providers::Provider,
     signers::SigningKey,
@@ -325,4 +326,116 @@ async fn test_verify_execute_paymaster_session() {
             .await
             .unwrap();
     }
+}
+
+#[tokio::test]
+async fn test_execute_session_then_paymaster_session() {
+    let paymaster = InternalWebauthnSigner::random("localhost".to_string(), "rp_id".to_string());
+    let signer = SigningKey::from_random();
+    let runner = KatanaRunner::load();
+    let (paymaster_address, address) = deploy_two_helper(
+        &runner,
+        (&paymaster, None as Option<&SigningKey>),
+        (&signer, None as Option<&SigningKey>),
+    )
+    .await;
+
+    transfer_helper(&runner, &paymaster_address).await;
+    tokio::time::sleep(std::time::Duration::from_secs(3)).await;
+    transfer_helper(&runner, &address).await;
+
+    let guardian_account = CartridgeGuardianAccount::new(
+        runner.client(),
+        signer.clone(),
+        SigningKey::from_random(),
+        address,
+        runner.client().chain_id().await.unwrap(),
+    );
+
+    let paymaster_account = CartridgeAccount::new(
+        runner.client(),
+        paymaster.clone(),
+        paymaster_address,
+        runner.client().chain_id().await.unwrap(),
+    );
+
+    let new_account = ContractAddress(felt!("0x18301129"));
+    let amount = U256 {
+        low: 0x1_u128,
+        high: 0,
+    };
+
+    let session_key = SigningKey::from_random();
+    let session_account = guardian_account
+        .session_account(
+            session_key.clone(),
+            vec![AllowedMethod::with_selector(
+                *FEE_TOKEN_ADDRESS,
+                selector!("transfer"),
+            )],
+            u64::MAX,
+        )
+        .await
+        .unwrap();
+
+    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &session_account);
+
+    contract_erc20
+        .balanceOf(&new_account)
+        .block_id(BlockId::Tag(BlockTag::Latest))
+        .call()
+        .await
+        .expect("failed to call contract");
+
+    contract_erc20
+        .transfer(&new_account, &amount)
+        .send()
+        .await
+        .unwrap();
+
+    tokio::time::sleep(std::time::Duration::from_secs(3)).await;
+
+    let outside_execution = OutsideExecution {
+        caller: OutsideExecutionCaller::Any,
+        execute_after: u64::MIN,
+        execute_before: u64::MAX,
+        calls: vec![Call {
+            to: *FEE_TOKEN_ADDRESS,
+            selector: selector!("transfer"),
+            calldata: [
+                <ContractAddress as CairoSerde>::cairo_serialize(&new_account),
+                <U256 as CairoSerde>::cairo_serialize(&amount),
+            ]
+            .concat(),
+        }],
+        nonce: session_account.random_outside_execution_nonce(),
+    };
+
+    let signed_outside_execution = session_account
+        .sign_outside_execution(outside_execution.clone())
+        .await
+        .unwrap();
+
+    paymaster_account
+        .execute(vec![signed_outside_execution.into()])
+        .send()
+        .await
+        .unwrap();
+
+    tokio::time::sleep(std::time::Duration::from_secs(3)).await;
+
+    let final_balance = Erc20::new(*FEE_TOKEN_ADDRESS, &session_account)
+        .balanceOf(&new_account)
+        .call()
+        .await
+        .unwrap();
+
+    assert_eq!(
+        final_balance,
+        U256 {
+            low: 0x2_u128,
+            high: 0
+        },
+        "Expected balance to be 2 times the initial amount"
+    );
 }
