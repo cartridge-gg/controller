@@ -113,16 +113,12 @@ class DeviceAccount extends Account {
       );
       this.modal.close();
 
-      if (
-        res.code !== ResponseCodes.SUCCESS &&
-        res.code !== ResponseCodes.CANCELED
-      ) {
-        throw new Error(res.message);
+      if (res.code !== ResponseCodes.SUCCESS) {
+        return Promise.reject(res.message);
       }
 
       return res as InvokeFunctionResponse;
     } catch (e) {
-      console.error(e);
       throw e;
     }
   }
