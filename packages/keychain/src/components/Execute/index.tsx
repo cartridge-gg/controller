@@ -88,7 +88,6 @@ export function Execute() {
         setFees({ base: fees.overall_fee, max: fees.suggestedMaxFee });
       })
       .catch((e) => {
-        console.error(e);
         setError(e);
       });
   }, [account, controller, setError, setFees, calls, chainId, ctx]);

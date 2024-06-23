@@ -13,14 +13,16 @@ export const TransferEth = () => {
   const { account } = useAccount();
   const explorer = useExplorer();
   const [txnHash, setTxnHash] = useState<string>();
-  const execute005 = useCallback(async () => {
+
+  const execute = useCallback(async () => {
     if (!account) {
       return;
     }
     setSubmitted(true);
     setTxnHash(undefined);
-    const res = await account.execute(
-      [
+
+    account
+      .execute([
         {
           contractAddress: ETH_CONTRACT,
           entrypoint: "approve",
@@ -31,19 +33,10 @@ export const TransferEth = () => {
           entrypoint: "transfer",
           calldata: [account?.address, "0x11C37937E08000", "0x0"],
         },
-      ],
-      undefined,
-      {
-        chainId,
-      } as any,
-    );
-
-    setTxnHash(res.transaction_hash);
-    setSubmitted(false);
-    account
-      .waitForTransaction(res.transaction_hash)
-      .catch((err) => console.error(err))
-      .finally(() => console.log("done"));
+      ])
+      .then(({ transaction_hash }) => setTxnHash(transaction_hash))
+      .catch((e) => console.error(e))
+      .finally(() => setSubmitted(false));
   }, [account, chainId]);
 
   if (!account) {
@@ -55,7 +48,7 @@ export const TransferEth = () => {
       <h2>Transfer Eth</h2>
       <p>Address: {ETH_CONTRACT}</p>
 
-      <button onClick={() => execute005()} disabled={submitted}>
+      <button onClick={() => execute()} disabled={submitted}>
         Transfer 0.005 ETH to self
       </button>
       {txnHash && (

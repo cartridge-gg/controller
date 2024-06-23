@@ -54,7 +54,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
     try {
       context.resolve({
         code: ResponseCodes.CANCELED,
-        message: "User closed modal",
+        message: "User aborted",
       });
       await parent.close();
     } catch (e) {

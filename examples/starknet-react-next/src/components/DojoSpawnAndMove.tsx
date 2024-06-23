@@ -46,9 +46,10 @@ export function DojoSpawnAndMove() {
           onClick={async () => {
             setTxnHash(undefined);
             setSubmitted(true);
-            const { transaction_hash } = await spawn();
-            setSubmitted(false);
-            setTxnHash(transaction_hash);
+            spawn()
+              .then(({ transaction_hash }) => setTxnHash(transaction_hash))
+              .catch((e) => console.error(e))
+              .finally(() => setSubmitted(false));
           }}
           disabled={submitted}
         >
@@ -58,9 +59,10 @@ export function DojoSpawnAndMove() {
           onClick={async () => {
             setTxnHash(undefined);
             setSubmitted(true);
-            const { transaction_hash } = await move();
-            setSubmitted(false);
-            setTxnHash(transaction_hash);
+            move()
+              .then(({ transaction_hash }) => setTxnHash(transaction_hash))
+              .catch((e) => console.error(e))
+              .finally(() => setSubmitted(false));
           }}
           disabled={submitted}
         >
