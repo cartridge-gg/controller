@@ -13,6 +13,7 @@ import {
   InvocationsDetails,
   shortString,
   num,
+  AllowArray,
 } from "starknet";
 
 import {
@@ -26,6 +27,7 @@ import { selectors, VERSION } from "./selectors";
 import Storage from "./storage";
 import { CartridgeAccount } from "@cartridge/account-wasm";
 import { Session } from "@cartridge/controller";
+import { normalizeCalls } from "./connection/execute";
 
 const EST_FEE_MULTIPLIER = 2n;
 
@@ -157,9 +159,9 @@ class Account extends BaseAccount {
 
   // @ts-expect-error TODO: fix overload type mismatch
   async execute(
-    calls: Call[],
-    session: Session,
+    calls: AllowArray<Call>,
     transactionsDetail?: InvocationsDetails,
+    session?: Session,
   ): Promise<InvokeFunctionResponse> {
     if (this.status === Status.COUNTERFACTUAL) {
       throw new Error("Account is not deployed");
@@ -170,7 +172,7 @@ class Account extends BaseAccount {
     transactionsDetail.maxFee = num.toHex(transactionsDetail.maxFee);
 
     const res = await this.cartridge.execute(
-      calls,
+      normalizeCalls(calls),
       transactionsDetail,
       session,
     );
@@ -191,7 +193,7 @@ class Account extends BaseAccount {
   }
 
   async estimateInvokeFee(
-    calls: Call[],
+    calls: AllowArray<Call>,
     details: EstimateFeeDetails = {},
   ): Promise<EstimateFee> {
     details.blockIdentifier = details.blockIdentifier ?? "pending";

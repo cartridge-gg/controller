@@ -104,7 +104,7 @@ export function Execute() {
 
   const onSubmit = useCallback(async () => {
     setLoading(true);
-    const response = await account.execute(calls, null, {
+    const response = await account.execute(calls, {
       maxFee: fees.max,
     });
     ctx.resolve({
