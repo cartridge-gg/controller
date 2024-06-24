@@ -26,7 +26,15 @@ export function DeploymentRequired({
       try {
         switch (account.status) {
           case Status.COUNTERFACTUAL: {
-            await account.requestDeployment();
+            try {
+              await account.requestDeployment();
+            } catch (e) {
+              if (e.message.includes("account already deployed")) {
+                account.sync();
+              } else {
+                throw e;
+              }
+            }
             break;
           }
           case Status.DEPLOYING: {
