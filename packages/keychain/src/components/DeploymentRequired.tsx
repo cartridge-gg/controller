@@ -30,6 +30,7 @@ export function DeploymentRequired({
               await account.requestDeployment();
             } catch (e) {
               if (e.message.includes("account already deployed")) {
+                account.status = Status.DEPLOYING;
                 await account.sync();
                 setStatus(Status.DEPLOYED);
               } else {
