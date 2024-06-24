@@ -18,6 +18,7 @@ import {
 import {
   AccountContractDocument,
   AccountContractQuery,
+  DeployAccountDocument,
 } from "generated/graphql";
 import { client } from "utils/graphql";
 
@@ -89,7 +90,7 @@ class Account extends BaseAccount {
   }
 
   async requestDeployment(): Promise<void> {
-    await client.request(AccountContractDocument, {
+    await client.request(DeployAccountDocument, {
       id: this.username,
       chainId: `starknet:${shortString.decodeShortString(this.chainId)}`,
     });
