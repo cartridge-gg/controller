@@ -8,6 +8,7 @@ import {
 import Controller, { diff } from "utils/controller";
 import {
   Abi,
+  AllowArray,
   Call,
   CallData,
   InvocationsDetails,
@@ -23,11 +24,9 @@ export function executeFactory({
 }) {
   return (controller: Controller, origin: string) =>
     async (
-      transactions: Call | Call[],
+      transactions: AllowArray<Call>,
       abis?: Abi[],
-      transactionsDetail?: InvocationsDetails & {
-        chainId?: string;
-      },
+      transactionsDetail?: InvocationsDetails,
       sync?: boolean,
       paymaster?: PaymasterOptions,
     ): Promise<ExecuteReply | ConnectError> => {
@@ -56,9 +55,7 @@ export function executeFactory({
           throw new Error("No session");
         }
 
-        const calls = normalizeCalls(transactions);
-
-        const missing = diff(mapPolicies(calls), session.policies);
+        const missing = diff(mapPolicies(transactions), session.policies);
         if (missing.length > 0) {
           throw new Error(`Missing policies: ${JSON.stringify(missing)}`);
         }
@@ -67,7 +64,7 @@ export function executeFactory({
           try {
             const { transaction_hash } =
               await controller.account.cartridge.executeFromOutside(
-                calls,
+                normalizeCalls(transactions),
                 paymaster.caller,
                 session,
               );
@@ -81,7 +78,7 @@ export function executeFactory({
         }
 
         if (!transactionsDetail.maxFee) {
-          const estFee = await account.estimateInvokeFee(calls, {
+          const estFee = await account.estimateInvokeFee(transactions, {
             nonce: transactionsDetail.nonce,
           });
           transactionsDetail.maxFee = estFee.suggestedMaxFee;
@@ -97,7 +94,11 @@ export function executeFactory({
           );
         }
 
-        const res = await account.execute(calls, session, transactionsDetail);
+        const res = await account.execute(
+          transactions,
+          transactionsDetail,
+          session,
+        );
 
         return {
           code: ResponseCodes.SUCCESS,
@@ -112,7 +113,7 @@ export function executeFactory({
     };
 }
 
-const normalizeCalls = (calls: Call | Call[]): Call[] => {
+export const normalizeCalls = (calls: AllowArray<Call>): Call[] => {
   return (Array.isArray(calls) ? calls : [calls]).map((call) => {
     return {
       entrypoint: call.entrypoint,
@@ -122,12 +123,11 @@ const normalizeCalls = (calls: Call | Call[]): Call[] => {
   });
 };
 
-const mapPolicies = (calls: Call[]): Policy[] => {
-  return calls.map(
-    (txn) =>
-      ({
-        target: txn.contractAddress,
-        method: txn.entrypoint,
-      } as Policy),
-  );
+export const mapPolicies = (calls: AllowArray<Call>): Policy[] => {
+  return (Array.isArray(calls) ? calls : [calls]).map((call) => {
+    return {
+      target: addAddressPadding(call.contractAddress),
+      method: call.entrypoint,
+    } as Policy;
+  });
 };

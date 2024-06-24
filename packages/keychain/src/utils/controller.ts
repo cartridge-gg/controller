@@ -1,4 +1,4 @@
-import { SignerInterface, BigNumberish } from "starknet";
+import { SignerInterface, BigNumberish, addAddressPadding } from "starknet";
 
 import { Policy, Session } from "@cartridge/controller";
 
@@ -196,7 +196,8 @@ export function diff(a: Policy[], b: Policy[]): Policy[] {
     (prev, policy) =>
       b.some(
         (approval) =>
-          approval.target === policy.target &&
+          addAddressPadding(approval.target) ===
+            addAddressPadding(policy.target) &&
           approval.method === policy.method,
       )
         ? prev
