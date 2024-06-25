@@ -1,9 +1,8 @@
-import { addAddressPadding } from "starknet";
 import { Container } from "components/layout";
 import Controller from "utils/controller";
 import { useEffect } from "react";
 import { client } from "utils/graphql";
-import { DeployAccountDocument, AccountInfoDocument } from "generated/graphql";
+import { DeployAccountDocument } from "generated/graphql";
 import { Status } from "utils/account";
 import { SparklesDuoIcon } from "@cartridge/ui";
 import { useChainId } from "hooks/connection";
@@ -13,15 +12,10 @@ export function Redeploy({ controller }: { controller: Controller }) {
 
   useEffect(() => {
     const deploy = async () => {
-      const result = await client.request(AccountInfoDocument, {
-        address: addAddressPadding(controller.address),
-      });
-
       controller.account.status = Status.DEPLOYING;
 
       await client.request(DeployAccountDocument, {
-        // @ts-expect-error TODO: fix type error
-        id: result.accounts.edges?.[0]?.node.id,
+        id: controller.username,
         chainId,
       });
 

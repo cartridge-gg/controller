@@ -16,11 +16,7 @@ import {
   AllowArray,
 } from "starknet";
 
-import {
-  AccountContractDocument,
-  AccountContractQuery,
-  DeployAccountDocument,
-} from "generated/graphql";
+import { DeployAccountDocument } from "generated/graphql";
 import { client } from "utils/graphql";
 
 import { selectors, VERSION } from "./selectors";
@@ -100,55 +96,29 @@ class Account extends BaseAccount {
     this.status = Status.DEPLOYING;
   }
 
-  async getDeploymentTxn(): Promise<string | undefined> {
-    try {
-      const data: AccountContractQuery = await client.request(
-        AccountContractDocument,
-        {
-          id: `starknet:${shortString.decodeShortString(this.chainId)}:${
-            this.address
-          }`,
-        },
-      );
-
-      if (!data?.contract?.deployTransactionID) {
-        throw new Error("deployment txn not found");
-      }
-
-      return data.contract.deployTransactionID.split("/")[1];
-    } catch (e) {
-      if (e.message.includes("not found")) {
-        return Promise.resolve(undefined);
-      }
-
-      return Promise.reject(e);
-    }
-  }
-
   async sync() {
     try {
       switch (this.status) {
         case Status.DEPLOYING: {
-          const hash = await this.getDeploymentTxn();
-          if (!hash) {
-            this.status = Status.COUNTERFACTUAL;
-            return;
+          try {
+            const classHash = await this.rpc.getClassHashAt(
+              this.address,
+              "pending",
+            );
+            Storage.update(this.selector, {
+              classHash,
+            });
+            this.status = Status.DEPLOYED;
+          } catch (error) {
+            if (
+              error instanceof Error &&
+              error.message.includes("Contract not found")
+            ) {
+              this.status = Status.COUNTERFACTUAL;
+            } else {
+              throw error;
+            }
           }
-
-          const receipt = await this.rpc.getTransactionReceipt(hash);
-          if (receipt.isReverted() || receipt.isRejected()) {
-            this.status = Status.COUNTERFACTUAL;
-            return;
-          }
-
-          const classHash = await this.rpc.getClassHashAt(
-            this.address,
-            "pending",
-          );
-          Storage.update(this.selector, {
-            classHash,
-          });
-          this.status = Status.DEPLOYED;
           return;
         }
       }
