@@ -2458,7 +2458,7 @@ export type Mutation = {
   createScopes: Scalars['Boolean'];
   createStarterpack?: Maybe<Scalars['ID']>;
   deleteDeployment: Scalars['Boolean'];
-  deployAccount: Contract;
+  deployAccount: Scalars['String'];
   discordRevoke: Scalars['Boolean'];
   finalizeLogin: Scalars['String'];
   finalizeRegistration: Account;
@@ -4737,7 +4737,7 @@ export type DeployAccountMutationVariables = Exact<{
 }>;
 
 
-export type DeployAccountMutation = { __typename?: 'Mutation', deployAccount: { __typename?: 'Contract', id: string } };
+export type DeployAccountMutation = { __typename?: 'Mutation', deployAccount: string };
 
 export type AccountQueryVariables = Exact<{
   id: Scalars['ID'];
@@ -4892,9 +4892,7 @@ export const useFinalizeRegistrationMutation = <
     );
 export const DeployAccountDocument = `
     mutation DeployAccount($id: ID!, $chainId: ChainID!, $starterpackIds: [ID!]) {
-  deployAccount(id: $id, chainId: $chainId, starterpackIds: $starterpackIds) {
-    id
-  }
+  deployAccount(id: $id, chainId: $chainId, starterpackIds: $starterpackIds)
 }
     `;
 export const useDeployAccountMutation = <
