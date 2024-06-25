@@ -18,7 +18,6 @@ export function DeploymentRequired({
   const { controller } = useController();
   const account = controller.account;
   const [status, setStatus] = useState<Status>(account.status);
-  const [deployHash, setDeployHash] = useState<string>();
   const [error, setError] = useState<Error>();
 
   useEffect(() => {
@@ -27,8 +26,8 @@ export function DeploymentRequired({
         switch (account.status) {
           case Status.COUNTERFACTUAL: {
             try {
-              const hash = await account.requestDeployment();
-              setDeployHash(hash);
+              await account.requestDeployment();
+              setStatus(Status.DEPLOYING);
             } catch (e) {
               if (e.message.includes("account already deployed")) {
                 account.status = Status.DEPLOYED;
@@ -49,7 +48,7 @@ export function DeploymentRequired({
     };
 
     fetch();
-  }, [account, setDeployHash]);
+  }, [account]);
 
   useEffect(() => {
     const id = setInterval(async () => {
@@ -77,7 +76,7 @@ export function DeploymentRequired({
                   account.chainId === constants.StarknetChainId.SN_SEPOLIA
                     ? "sepolia."
                     : undefined
-                }starkscan.co/tx/${deployHash}`}
+                }starkscan.co/tx/${account.deployTxn}`}
                 isExternal
               >
                 <Button variant="link" mt={10} rightIcon={<ExternalIcon />}>

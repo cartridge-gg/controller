@@ -38,6 +38,7 @@ class Account extends BaseAccount {
   private selector: string;
   chainId: string;
   username: string;
+  deployTxn: string;
   cartridge: CartridgeAccount;
 
   constructor(
@@ -94,6 +95,7 @@ class Account extends BaseAccount {
     });
 
     this.status = Status.DEPLOYING;
+    this.deployTxn = hash.deployAccount;
 
     return hash.deployAccount;
   }
