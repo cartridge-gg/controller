@@ -27,9 +27,8 @@ export function DeploymentRequired({
         switch (account.status) {
           case Status.COUNTERFACTUAL: {
             try {
-              // TODO: Update once requestDeployment returns hash
-              await account.requestDeployment();
-              setDeployHash("");
+              const hash = await account.requestDeployment();
+              setDeployHash(hash);
             } catch (e) {
               if (e.message.includes("account already deployed")) {
                 account.status = Status.DEPLOYED;
@@ -57,7 +56,7 @@ export function DeploymentRequired({
       if (account.status === Status.DEPLOYED) clearInterval(id);
       setStatus(account.status);
       await account.sync();
-    }, 2000);
+    }, 500);
 
     return () => clearInterval(id);
   }, [account, setStatus]);

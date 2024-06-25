@@ -16,7 +16,7 @@ import {
   AllowArray,
 } from "starknet";
 
-import { DeployAccountDocument } from "generated/graphql";
+import { DeployAccountDocument, DeployAccountMutation } from "generated/graphql";
 import { client } from "utils/graphql";
 
 import { selectors, VERSION } from "./selectors";
@@ -87,13 +87,15 @@ class Account extends BaseAccount {
     });
   }
 
-  async requestDeployment(): Promise<void> {
-    await client.request(DeployAccountDocument, {
+  async requestDeployment(): Promise<string> {
+    const hash: DeployAccountMutation = await client.request(DeployAccountDocument, {
       id: this.username,
       chainId: `starknet:${shortString.decodeShortString(this.chainId)}`,
     });
 
     this.status = Status.DEPLOYING;
+
+    return hash.deployAccount;
   }
 
   async sync() {
