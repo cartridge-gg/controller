@@ -6,13 +6,6 @@ mutation FinalizeRegistration($credentials: String!) {
   finalizeRegistration(credentials: $credentials) {
     id
     contractAddress
-    contracts {
-      edges {
-        node {
-          id
-        }
-      }
-    }
   }
 }
 
@@ -33,18 +26,5 @@ query Account($id: ID!) {
       }
     }
     contractAddress
-    contracts {
-      edges {
-        node {
-          id
-        }
-      }
-    }
-  }
-}
-
-query ContractType($id: ID!) {
-  contract(id: $id) {
-    type
   }
 }

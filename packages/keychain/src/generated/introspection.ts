@@ -1,14 +1,25 @@
-export interface PossibleTypesResultData {
-  possibleTypes: {
-    [key: string]: string[];
-  };
-}
-const result: PossibleTypesResultData = {
-  possibleTypes: {
-    Attribute: ["NumberAttribute", "StringAttribute"],
-    ContractMetadata: ["ERC20Metadata", "ERC721Metadata"],
-    DeploymentConfig: ["KatanaConfig", "MadaraConfig", "ToriiConfig"],
-    Node: [
+
+      export interface PossibleTypesResultData {
+        possibleTypes: {
+          [key: string]: string[]
+        }
+      }
+      const result: PossibleTypesResultData = {
+  "possibleTypes": {
+    "Attribute": [
+      "NumberAttribute",
+      "StringAttribute"
+    ],
+    "ContractMetadata": [
+      "ERC20Metadata",
+      "ERC721Metadata"
+    ],
+    "DeploymentConfig": [
+      "KatanaConfig",
+      "MadaraConfig",
+      "ToriiConfig"
+    ],
+    "Node": [
       "Account",
       "AccountQuest",
       "AccountStarterPack",
@@ -36,9 +47,13 @@ const result: PossibleTypesResultData = {
       "Token",
       "Transaction",
       "TransactionReceipt",
-      "TwitterQuest",
+      "TwitterQuest"
     ],
-    TransactionMetadata: ["Call", "MultiCall"],
-  },
+    "TransactionMetadata": [
+      "Call",
+      "MultiCall"
+    ]
+  }
 };
-export default result;
+      export default result;
+    

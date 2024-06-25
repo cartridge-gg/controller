@@ -27,23 +27,17 @@ export function DeploymentRequired({
         switch (account.status) {
           case Status.COUNTERFACTUAL: {
             try {
+              // TODO: Update once requestDeployment returns hash
               await account.requestDeployment();
+              setDeployHash("");
             } catch (e) {
               if (e.message.includes("account already deployed")) {
-                account.status = Status.DEPLOYING;
+                account.status = Status.DEPLOYED;
                 await account.sync();
                 setStatus(Status.DEPLOYED);
               } else {
                 throw e;
               }
-            }
-            break;
-          }
-          case Status.DEPLOYING: {
-            const hash = await account.getDeploymentTxn();
-
-            if (hash) {
-              setDeployHash(hash);
             }
             break;
           }
@@ -56,7 +50,7 @@ export function DeploymentRequired({
     };
 
     fetch();
-  }, [account]);
+  }, [account, setDeployHash]);
 
   useEffect(() => {
     const id = setInterval(async () => {
@@ -77,20 +71,21 @@ export function DeploymentRequired({
         description="This may take a second"
       >
         <Content alignItems="center">
-          {status === Status.DEPLOYING && (
-            <Link
-              href={`https://${
-                account.chainId === constants.StarknetChainId.SN_SEPOLIA
-                  ? "sepolia."
-                  : undefined
-              }starkscan.co/tx/${deployHash}`}
-              isExternal
-            >
-              <Button variant="link" mt={10} rightIcon={<ExternalIcon />}>
-                View on Starkscan
-              </Button>
-            </Link>
-          )}
+          {status === Status.DEPLOYING &&
+            account.chainId === constants.StarknetChainId.SN_SEPOLIA && (
+              <Link
+                href={`https://${
+                  account.chainId === constants.StarknetChainId.SN_SEPOLIA
+                    ? "sepolia."
+                    : undefined
+                }starkscan.co/tx/${deployHash}`}
+                isExternal
+              >
+                <Button variant="link" mt={10} rightIcon={<ExternalIcon />}>
+                  View on Starkscan
+                </Button>
+              </Link>
+            )}
         </Content>
 
         <Footer>
