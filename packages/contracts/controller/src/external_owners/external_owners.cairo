@@ -38,7 +38,8 @@ mod external_owners_component {
         fn register_external_owner(
             ref self: ComponentState<TContractState>, external_owner_address: ContractAddress
         ) {
-            assert(self.is_registered_external_owner(get_caller_address()), 'caller-not-owner');
+            let caller = get_caller_address();
+            assert(caller == get_contract_address() ||  self.is_registered_external_owner(caller), 'caller-not-owner');
             assert(self.is_registered_external_owner(external_owner_address) == false, 'ext-owners/already-registered');
             self.external_owners.write(external_owner_address.into(), true);
             self.emit(ExternalOwnerRegistered{address: external_owner_address});
