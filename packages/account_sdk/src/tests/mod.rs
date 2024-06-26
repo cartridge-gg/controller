@@ -10,3 +10,5 @@ mod runners_test;
 mod session;
 mod signers;
 mod stark_pair_auth_test;
+
+mod register_session_test;
