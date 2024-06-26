@@ -84,6 +84,7 @@ mod session_component {
             ref self: ComponentState<TContractState>,
             session: Session
         ) {
+            assert_only_self();
             let now = get_block_timestamp();
             assert(session.expires_at > now, 'session/expired');
             // check validity of token

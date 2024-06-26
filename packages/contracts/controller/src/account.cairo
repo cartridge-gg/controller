@@ -48,7 +48,7 @@ mod CartridgeAccount {
             storage_write_syscall
         }
     };
-    use controller_auth::webauthn::verify;
+    use controller_auth::{assert_only_self, webauthn::verify};
     use controller_session::{
         session_component::{InternalImpl, InternalTrait}, session_component,
         interface::{ISessionCallback, SessionToken}
@@ -466,12 +466,6 @@ mod CartridgeAccount {
             let signer_signatures: Array<SignerSignature> = self.parse_signature_array(signatures);
             self.assert_valid_span_signature(execution_hash, signer_signatures);
         }
-    }
-
-    fn assert_only_self() {
-        let caller = get_caller_address();
-        let self = get_contract_address();
-        assert(self == caller, Errors::UNAUTHORIZED);
     }
 
     fn _execute_calls(mut calls: Span<Call>) -> Array<Span<felt252>> {
