@@ -56,4 +56,13 @@ export const defaultPresets: ControllerThemePresets = {
       primary: "#E50D2C",
     },
   },
+  "loot-survivor": {
+    id: "loot-survivor",
+    name: "Loot Survivor",
+    icon: "/whitelabel/loot-survivor/icon.png",
+    cover: "/whitelabel/loot-survivor/cover.png",
+    colors: {
+      primary: "#33FF33",
+    },
+  },
 };
