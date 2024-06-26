@@ -82,11 +82,8 @@ mod session_component {
         }
         fn register_session(
             ref self: ComponentState<TContractState>,
-            session: Session,
-            session_authorization: Span<felt252>
+            session: Session
         ) {
-            let state = self.get_contract();
-
             let now = get_block_timestamp();
             assert(session.expires_at > now, 'session/expired');
             // check validity of token
@@ -95,11 +92,7 @@ mod session_component {
             match self.session_state(session_hash) {
                 SessionState::Revoked => { assert(false, 'session/already-revoked'); },
                 SessionState::NotRegistered => {
-                    assert(
-                        state.session_callback(session_hash, session_authorization),
-                        'session/invalid-account-sig'
-                    );
-                    let authorization_hash = authorization_hash(session_authorization);
+                    let authorization_hash = authorization_hash(array![].span());
                     self
                         .session_states
                         .write(
