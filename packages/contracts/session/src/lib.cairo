@@ -80,6 +80,35 @@ mod session_component {
             self.session_states.write(session_hash, SessionState::Revoked.into_felt());
             self.emit(SessionRevoked { session_hash: session_hash });
         }
+        fn register_session(
+            ref self: ComponentState<TContractState>,
+            session: Session,
+            session_authorization: Span<felt252>
+        ) {
+            let state = self.get_contract();
+
+            let now = get_block_timestamp();
+            assert(session.expires_at > now, 'session/expired');
+            // check validity of token
+            let session_hash = get_message_hash_rev_1(@session);
+
+            match self.session_state(session_hash) {
+                SessionState::Revoked => { assert(false, 'session/already-revoked'); },
+                SessionState::NotRegistered => {
+                    assert(
+                        state.session_callback(session_hash, session_authorization),
+                        'session/invalid-account-sig'
+                    );
+                    let authorization_hash = authorization_hash(session_authorization);
+                    self
+                        .session_states
+                        .write(
+                            session_hash, SessionState::Validated(authorization_hash).into_felt()
+                        );
+                },
+                SessionState::Validated(_) => { assert(false, 'session/already-registered'); },
+            }
+        }
         fn is_session_revoked(
             self: @ComponentState<TContractState>, session_hash: felt252
         ) -> bool {
@@ -143,7 +172,7 @@ mod session_component {
                         state.session_callback(session_hash, signature.session_authorization),
                         'session/invalid-account-sig'
                     );
-                    let authorization_hash = authorization_hash(@signature);
+                    let authorization_hash = authorization_hash(signature.session_authorization);
                     self
                         .session_states
                         .write(
@@ -152,7 +181,7 @@ mod session_component {
                 },
                 SessionState::Validated(authorization_hash) => {
                     assert(
-                        authorization_hash == authorization_hash(@signature),
+                        authorization_hash == authorization_hash(signature.session_authorization),
                         'session/account-sig-mismatch'
                     );
                 },
