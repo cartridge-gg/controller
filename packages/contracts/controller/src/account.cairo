@@ -5,6 +5,7 @@ use starknet::testing;
 use starknet::secp256r1::Secp256r1Point;
 use starknet::account::Call;
 use controller_auth::signer::{Signer, SignerStorageValue, SignerType, SignerSignature,};
+use starknet::ContractAddress;
 
 
 #[starknet::interface]
@@ -28,6 +29,11 @@ trait IDeclarer<TState> {
     fn __validate_declare__(ref self: TState, class_hash: felt252) -> felt252;
 }
 
+#[starknet::interface]
+trait IAllowedCallerCallback<TState> {
+    fn is_caller_allowed(self: @TState, caller_address: ContractAddress) -> bool;
+}
+
 #[starknet::contract(account)]
 mod CartridgeAccount {
     use core::traits::TryInto;
@@ -48,9 +54,9 @@ mod CartridgeAccount {
             storage_write_syscall
         }
     };
-    use controller_auth::{assert_only_self, webauthn::verify};
-    use controller_session::{
-        session_component::{InternalImpl, InternalTrait}, session_component,
+    use controller_auth::{webauthn::verify};
+    use controller::session::{
+        lib::session_component::{InternalImpl, InternalTrait}, lib::session_component,
         interface::{ISessionCallback, SessionToken}
     };
     use serde::Serde;
@@ -61,10 +67,11 @@ mod CartridgeAccount {
     };
     use hash::HashStateTrait;
     use pedersen::PedersenTrait;
-    use controller::account::{IAccount, IUserAccount, IDeclarer};
+    use controller::account::{IAccount, IUserAccount, IDeclarer, IAllowedCallerCallback};
     use controller::outside_execution::{
         outside_execution::outside_execution_component, interface::IOutsideExecutionCallback
     };
+    use controller::external_owners::external_owners::external_owners_component;
     use controller::src5::src5_component;
     use openzeppelin::upgrades::UpgradeableComponent;
     use openzeppelin::upgrades::interface::IUpgradeable;
@@ -87,6 +94,13 @@ mod CartridgeAccount {
     impl ExecuteFromOutside =
         outside_execution_component::OutsideExecutionImpl<ContractState>;
 
+    component!(
+        path: external_owners_component, storage: external_owners, event: ExternalOwnersEvent
+    );
+    #[abi(embed_v0)]
+    impl ExternalOwners =
+        external_owners_component::ExternalOwnersImpl<ContractState>;
+
     component!(path: src5_component, storage: src5, event: SRC5Events);
     #[abi(embed_v0)]
     impl SRC5 = src5_component::SRC5Impl<ContractState>;
@@ -100,6 +114,8 @@ mod CartridgeAccount {
         _owner_non_stark: LegacyMap<felt252, felt252>,
         #[substorage(v0)]
         session: session_component::Storage,
+        #[substorage(v0)]
+        external_owners: external_owners_component::Storage,
         #[substorage(v0)]
         execute_from_outside: outside_execution_component::Storage,
         #[substorage(v0)]
@@ -116,6 +132,8 @@ mod CartridgeAccount {
         SignerLinked: SignerLinked,
         #[flat]
         SessionEvent: session_component::Event,
+        #[flat]
+        ExternalOwnersEvent: external_owners_component::Event,
         #[flat]
         ExecuteFromOutsideEvents: outside_execution_component::Event,
         #[flat]
@@ -239,7 +257,7 @@ mod CartridgeAccount {
     #[abi(embed_v0)]
     impl UserAccountImpl of IUserAccount<ContractState> {
         fn change_owner(ref self: ContractState, signer_signature: SignerSignature) {
-            assert_only_self();
+            assert(self.is_caller_allowed(get_caller_address()), 'caller-not-owner');
 
             let new_owner = signer_signature.signer();
 
@@ -299,6 +317,12 @@ mod CartridgeAccount {
                 )
         }
     }
+    impl IAllowedCallerCallbackImpl of IAllowedCallerCallback<ContractState> {
+        fn is_caller_allowed(self: @ContractState, caller_address: ContractAddress) -> bool {
+            caller_address == get_contract_address()
+                || self.is_registered_external_owner(caller_address)
+        }
+    }
 
     impl OutsideExecutionCallbackImpl of IOutsideExecutionCallback<ContractState> {
         #[inline(always)]
@@ -328,7 +352,7 @@ mod CartridgeAccount {
     #[abi(embed_v0)]
     impl UpgradeableImpl of IUpgradeable<ContractState> {
         fn upgrade(ref self: ContractState, new_class_hash: ClassHash) {
-            assert_only_self();
+            assert(self.is_caller_allowed(get_caller_address()), 'caller-not-owner');
             self.upgradeable._upgrade(new_class_hash);
         }
     }
