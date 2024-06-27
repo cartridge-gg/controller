@@ -28,6 +28,15 @@ export const defaultPresets: ControllerThemePresets = {
       primary: "#B0CAF8",
     },
   },
+  pistols: {
+    id: "pistols",
+    name: "Pistols at Ten Blocks",
+    icon: "/whitelabel/pistols/icon.png",
+    cover: "/whitelabel/pistols/cover.png",
+    colors: {
+      primary: "#EF9758",
+    },
+  },
   pixelaw: {
     id: "pixelaw",
     name: "Pixelaw",
