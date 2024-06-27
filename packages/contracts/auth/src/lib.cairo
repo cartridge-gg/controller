@@ -1,5 +1,4 @@
 mod webauthn;
-mod eip191;
 mod types;
 mod helpers;
 mod errors;
