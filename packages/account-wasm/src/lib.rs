@@ -1,4 +1,5 @@
 mod paymaster;
+mod tests;
 mod types;
 mod utils;
 
