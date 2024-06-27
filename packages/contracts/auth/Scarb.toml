@@ -7,3 +7,4 @@ version.workspace = true
 [dependencies]
 starknet.workspace = true
 alexandria_encoding.workspace = true
+alexandria_math.workspace = true

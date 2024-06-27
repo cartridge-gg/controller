@@ -426,16 +426,6 @@ export function __wbindgen_error_new(arg0, arg1) {
     return addHeapObject(ret);
 };
 
-export function __wbindgen_cb_drop(arg0) {
-    const obj = takeObject(arg0).original;
-    if (obj.cnt-- == 1) {
-        obj.a = 0;
-        return true;
-    }
-    const ret = false;
-    return ret;
-};
-
 export function __wbindgen_is_bigint(arg0) {
     const ret = typeof(getObject(arg0)) === 'bigint';
     return ret;
@@ -448,6 +438,16 @@ export function __wbindgen_bigint_from_u64(arg0) {
 
 export function __wbindgen_jsval_eq(arg0, arg1) {
     const ret = getObject(arg0) === getObject(arg1);
+    return ret;
+};
+
+export function __wbindgen_cb_drop(arg0) {
+    const obj = takeObject(arg0).original;
+    if (obj.cnt-- == 1) {
+        obj.a = 0;
+        return true;
+    }
+    const ret = false;
     return ret;
 };
 
@@ -971,8 +971,8 @@ export function __wbindgen_memory() {
     return addHeapObject(ret);
 };
 
-export function __wbindgen_closure_wrapper1544(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 477, __wbg_adapter_48);
+export function __wbindgen_closure_wrapper1500(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 465, __wbg_adapter_48);
     return addHeapObject(ret);
 };
 

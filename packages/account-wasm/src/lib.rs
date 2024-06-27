@@ -1,7 +1,9 @@
 mod paymaster;
-mod tests;
 mod types;
 mod utils;
+
+#[cfg(test)]
+mod tests;
 
 use std::str::FromStr;
 

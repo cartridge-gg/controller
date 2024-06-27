@@ -59,13 +59,12 @@ impl PaymasterRequest {
             },
         };
 
-        let serialized = serde_json::to_value(&request)?;
-        let snake_case = convert_to_snake_case(serialized);
-        let body = serde_json::to_string(&snake_case)?;
+        let body = serde_json::to_value(&request).map(convert_to_snake_case)?;
+
         let response = Client::new()
             .post(rpc_url)
             .header("Content-Type", "application/json")
-            .body(format!("{}", body))
+            .body(body.to_string())
             .send()
             .await?
             .error_for_status()?;
