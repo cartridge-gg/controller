@@ -2,6 +2,9 @@ mod paymaster;
 mod types;
 mod utils;
 
+#[cfg(test)]
+mod tests;
+
 use std::str::FromStr;
 
 use account_sdk::account::outside_execution::OutsideExecutionAccount;

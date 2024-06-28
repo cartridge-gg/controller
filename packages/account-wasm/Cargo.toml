@@ -11,6 +11,7 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 account_sdk.workspace = true
 base64 = "0.22.0"
+convert_case = "0.6.0"
 coset = { version = "0.3.4", features = ["std"] }
 hex = "0.4.3"
 p256 = "0.13"

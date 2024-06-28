@@ -1,19 +1,18 @@
+use convert_case::{Case, Casing};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use serde_wasm_bindgen::to_value;
+use serde_json::{Map, Value};
 use serde_with::serde_as;
 use starknet::core::serde::unsigned_field_element::UfeHex;
 use starknet::core::types::FieldElement;
 use url::Url;
-use wasm_bindgen::JsError;
-use web_sys::js_sys::JSON::stringify;
 
 use crate::{types::outside_execution::JsOutsideExecution, Result};
 
 pub struct PaymasterRequest {}
 
 #[derive(Debug, Deserialize, Serialize)]
-struct JsonRpcRequest<T> {
+pub(crate) struct JsonRpcRequest<T> {
     id: u64,
     jsonrpc: &'static str,
     method: &'static str,
@@ -60,17 +59,31 @@ impl PaymasterRequest {
             },
         };
 
-        let body = stringify(&to_value(&request)?)
-            .map_err(|_| JsError::new("Error stringifying payload"))?;
+        let body = serde_json::to_value(&request).map(convert_to_snake_case)?;
 
         let response = Client::new()
             .post(rpc_url)
             .header("Content-Type", "application/json")
-            .body(format!("{}", body))
+            .body(body.to_string())
             .send()
             .await?
             .error_for_status()?;
 
         Ok(serde_json::from_str(&response.text().await?)?)
+    }
+}
+
+pub(crate) fn convert_to_snake_case(value: Value) -> Value {
+    match value {
+        Value::Object(map) => {
+            let mut new_map = Map::new();
+            for (k, v) in map {
+                let new_key = k.to_case(Case::Snake);
+                new_map.insert(new_key, convert_to_snake_case(v));
+            }
+            Value::Object(new_map)
+        }
+        Value::Array(arr) => Value::Array(arr.into_iter().map(convert_to_snake_case).collect()),
+        v => v,
     }
 }
