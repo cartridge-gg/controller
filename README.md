@@ -60,6 +60,12 @@ window.cartridge.importAccount("EXPORTED ACCOUNT");
 
 ### Contracts
 
+#### Install cainome
+
+```bash
+cargo install --git https://github.com/cartridge-gg/cainome --features="build-binary"
+```
+
 #### Compiling the cairo code
 
 To build rust you first have to compile cairo. Run
