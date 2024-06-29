@@ -25,16 +25,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
   );
 }
 
-const url =
-  !process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ||
-  process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL.split(".")[0] ===
-    "cartridge-starknet-react-next"
-    ? process.env.XFRAME_URL
-    : "https://" +
-      (process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ?? "").replace(
-        "cartridge-starknet-react-next",
-        "keychain",
-      );
+const url = "https://keychain-git-mainnet.preview.cartridge.gg";
 
 const connectors = [
   new CartridgeConnector(
@@ -64,7 +55,7 @@ const connectors = [
     ],
     {
       url,
-      rpc: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
+      rpc: "https://api.cartridge.gg/x/controller-test/katana",
       // paymaster: {
       //   caller: shortString.encodeShortString("ANY_CALLER"),
       // },
