@@ -105,33 +105,27 @@ class Account extends BaseAccount {
   }
 
   async sync() {
-    try {
-      switch (this.status) {
-        case Status.DEPLOYING: {
-          try {
-            const classHash = await this.rpc.getClassHashAt(
-              this.address,
-              "pending",
-            );
-            Storage.update(this.selector, {
-              classHash,
-            });
-            this.status = Status.DEPLOYED;
-          } catch (error) {
-            if (
-              error instanceof Error &&
-              error.message.includes("Contract not found")
-            ) {
-              this.status = Status.COUNTERFACTUAL;
-            } else {
-              throw error;
-            }
-          }
-          return;
+    if (this.status != Status.DEPLOYED) {
+      try {
+        const classHash = await this.rpc.getClassHashAt(
+          this.address,
+          "pending",
+        );
+        Storage.update(this.selector, {
+          classHash,
+        });
+        this.status = Status.DEPLOYED;
+      } catch (error) {
+        if (
+          error instanceof Error &&
+          error.message.includes("Contract not found")
+        ) {
+          this.status = Status.COUNTERFACTUAL;
+          setTimeout(() => this.sync(), 1000);
+        } else {
+          throw error;
         }
       }
-    } catch (e) {
-      /* no-op */
     }
   }
 
