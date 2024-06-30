@@ -2,4 +2,4 @@
 
 set -ex
 
-pnpx wasm-pack build --out-dir ./pkg --release --features console-error-panic
+pnpm dlx wasm-pack build --out-dir ./pkg --release --features console-error-panic
