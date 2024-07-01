@@ -32,7 +32,6 @@ export function DeploymentRequired({
             } catch (e) {
               if (e.message.includes("account already deployed")) {
                 account.status = Status.DEPLOYED;
-                await account.sync();
                 setStatus(Status.DEPLOYED);
               } else {
                 throw e;
@@ -55,7 +54,6 @@ export function DeploymentRequired({
     const id = setInterval(async () => {
       if (account.status === Status.DEPLOYED) clearInterval(id);
       setStatus(account.status);
-      await account.sync();
     }, 500);
 
     return () => clearInterval(id);
@@ -70,7 +68,7 @@ export function DeploymentRequired({
         description="This may take a second"
       >
         <Content alignItems="center">
-          {status === Status.DEPLOYING &&
+          {status === Status.COUNTERFACTUAL &&
             account.chainId === constants.StarknetChainId.SN_SEPOLIA && (
               <Link
                 href={`https://${

@@ -32,7 +32,6 @@ const EST_FEE_MULTIPLIER = 2n;
 
 export enum Status {
   COUNTERFACTUAL = "COUNTERFACTUAL",
-  DEPLOYING = "DEPLOYING",
   DEPLOYED = "DEPLOYED",
 }
 
@@ -78,7 +77,7 @@ class Account extends BaseAccount {
   get status() {
     const state = Storage.get(this.selector);
     if (!state || !state.status) {
-      return Status.DEPLOYING;
+      return Status.COUNTERFACTUAL;
     }
 
     return state.status;
@@ -99,12 +98,10 @@ class Account extends BaseAccount {
       },
     );
 
-    this.status = Status.DEPLOYING;
-
     return hash.deployAccount;
   }
 
-  async sync() {
+  private async sync() {
     if (this.status != Status.DEPLOYED) {
       try {
         const classHash = await this.rpc.getClassHashAt(
