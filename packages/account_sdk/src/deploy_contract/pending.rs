@@ -1,5 +1,5 @@
 use starknet::{
-    core::types::{DeclareTransactionResult, FieldElement},
+    core::types::{DeclareTransactionResult, Felt},
     providers::{JsonRpcClient, Provider},
 };
 
@@ -12,7 +12,7 @@ where
     &'a P: Provider + Send + Sync,
 {
     transaction_result: T,
-    transaction_hash: FieldElement,
+    transaction_hash: Felt,
     client: &'a P,
 }
 
@@ -20,7 +20,7 @@ impl<'a, P, T> PendingTransaction<'a, P, T>
 where
     &'a P: Provider + Send + Sync,
 {
-    pub fn new(transaction_result: T, transaction_hash: FieldElement, client: &'a P) -> Self {
+    pub fn new(transaction_result: T, transaction_hash: Felt, client: &'a P) -> Self {
         PendingTransaction {
             transaction_result,
             transaction_hash,

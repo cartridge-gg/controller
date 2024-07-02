@@ -1,18 +1,18 @@
 #[derive(Debug)]
 pub struct Erc20<A: starknet::accounts::ConnectedAccount + Sync> {
-    pub address: starknet::core::types::FieldElement,
+    pub address: starknet::core::types::Felt,
     pub account: A,
     pub block_id: starknet::core::types::BlockId,
 }
 impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
-    pub fn new(address: starknet::core::types::FieldElement, account: A) -> Self {
+    pub fn new(address: starknet::core::types::Felt, account: A) -> Self {
         Self {
             address,
             account,
             block_id: starknet::core::types::BlockId::Tag(starknet::core::types::BlockTag::Pending),
         }
     }
-    pub fn set_contract_address(&mut self, address: starknet::core::types::FieldElement) {
+    pub fn set_contract_address(&mut self, address: starknet::core::types::Felt) {
         self.address = address;
     }
     pub fn provider(&self) -> &A::Provider {
@@ -27,19 +27,19 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
 }
 #[derive(Debug)]
 pub struct Erc20Reader<P: starknet::providers::Provider + Sync> {
-    pub address: starknet::core::types::FieldElement,
+    pub address: starknet::core::types::Felt,
     pub provider: P,
     pub block_id: starknet::core::types::BlockId,
 }
 impl<P: starknet::providers::Provider + Sync> Erc20Reader<P> {
-    pub fn new(address: starknet::core::types::FieldElement, provider: P) -> Self {
+    pub fn new(address: starknet::core::types::Felt, provider: P) -> Self {
         Self {
             address,
             provider,
             block_id: starknet::core::types::BlockId::Tag(starknet::core::types::BlockTag::Pending),
         }
     }
-    pub fn set_contract_address(&mut self, address: starknet::core::types::FieldElement) {
+    pub fn set_contract_address(&mut self, address: starknet::core::types::Felt) {
         self.address = address;
     }
     pub fn provider(&self) -> &P {
@@ -69,8 +69,8 @@ impl cainome::cairo_serde::CairoSerde for Approval {
         __size += cainome::cairo_serde::U256::cairo_serialized_size(&__rust.value);
         __size
     }
-    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::FieldElement> {
-        let mut __out: Vec<starknet::core::types::FieldElement> = vec![];
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
+        let mut __out: Vec<starknet::core::types::Felt> = vec![];
         __out.extend(cainome::cairo_serde::ContractAddress::cairo_serialize(
             &__rust.owner,
         ));
@@ -81,7 +81,7 @@ impl cainome::cairo_serde::CairoSerde for Approval {
         __out
     }
     fn cairo_deserialize(
-        __felts: &[starknet::core::types::FieldElement],
+        __felts: &[starknet::core::types::Felt],
         __offset: usize,
     ) -> cainome::cairo_serde::Result<Self::RustType> {
         let mut __offset = __offset;
@@ -114,8 +114,8 @@ impl cainome::cairo_serde::CairoSerde for OwnershipTransferStarted {
         __size += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&__rust.new_owner);
         __size
     }
-    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::FieldElement> {
-        let mut __out: Vec<starknet::core::types::FieldElement> = vec![];
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
+        let mut __out: Vec<starknet::core::types::Felt> = vec![];
         __out.extend(cainome::cairo_serde::ContractAddress::cairo_serialize(
             &__rust.previous_owner,
         ));
@@ -125,7 +125,7 @@ impl cainome::cairo_serde::CairoSerde for OwnershipTransferStarted {
         __out
     }
     fn cairo_deserialize(
-        __felts: &[starknet::core::types::FieldElement],
+        __felts: &[starknet::core::types::Felt],
         __offset: usize,
     ) -> cainome::cairo_serde::Result<Self::RustType> {
         let mut __offset = __offset;
@@ -170,7 +170,7 @@ impl cainome::cairo_serde::CairoSerde for Transfer {
         __out
     }
     fn cairo_deserialize(
-        __felts: &[starknet::core::types::FieldElement],
+        __felts: &[starknet::core::types::Felt],
         __offset: usize,
     ) -> cainome::cairo_serde::Result<Self::RustType> {
         let mut __offset = __offset;
@@ -194,23 +194,24 @@ impl cainome::cairo_serde::CairoSerde for OwnershipTransferred {
     #[inline]
     fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
         let mut __size = 0;
-        __size +=
-            cainome::cairo_serde::ContractAddress::cairo_serialized_size(&__rust.previous_owner);
-        __size += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&__rust.new_owner);
+        __size += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&__rust.from);
+        __size += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&__rust.to);
+        __size += cainome::cairo_serde::U256::cairo_serialized_size(&__rust.value);
         __size
     }
-    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::FieldElement> {
-        let mut __out: Vec<starknet::core::types::FieldElement> = vec![];
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
+        let mut __out: Vec<starknet::core::types::Felt> = vec![];
         __out.extend(cainome::cairo_serde::ContractAddress::cairo_serialize(
-            &__rust.previous_owner,
+            &__rust.from,
         ));
         __out.extend(cainome::cairo_serde::ContractAddress::cairo_serialize(
-            &__rust.new_owner,
+            &__rust.to,
         ));
+        __out.extend(cainome::cairo_serde::U256::cairo_serialize(&__rust.value));
         __out
     }
     fn cairo_deserialize(
-        __felts: &[starknet::core::types::FieldElement],
+        __felts: &[starknet::core::types::Felt],
         __offset: usize,
     ) -> cainome::cairo_serde::Result<Self::RustType> {
         let mut __offset = __offset;
@@ -247,7 +248,7 @@ impl cainome::cairo_serde::CairoSerde for Upgraded {
         __out
     }
     fn cairo_deserialize(
-        __felts: &[starknet::core::types::FieldElement],
+        __felts: &[starknet::core::types::Felt],
         __offset: usize,
     ) -> cainome::cairo_serde::Result<Self::RustType> {
         let mut __offset = __offset;
@@ -506,7 +507,7 @@ impl cainome::cairo_serde::CairoSerde for Event {
             _ => 0,
         }
     }
-    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::FieldElement> {
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
         match __rust {
             Event::OwnableEvent(val) => {
                 let mut temp = vec![];
@@ -530,10 +531,12 @@ impl cainome::cairo_serde::CairoSerde for Event {
         }
     }
     fn cairo_deserialize(
-        __felts: &[starknet::core::types::FieldElement],
+        __felts: &[starknet::core::types::Felt],
         __offset: usize,
     ) -> cainome::cairo_serde::Result<Self::RustType> {
-        let __index: u128 = __felts[__offset].try_into().unwrap();
+        let __index: u128 =
+            <starknet::core::types::Felt as num_traits::ToPrimitive>::to_u128(&__felts[__offset])
+                .unwrap();
         match __index as usize {
             0usize => Ok(Event::OwnableEvent(
                 OwnableComponentEvent::cairo_deserialize(__felts, __offset + 1)?,
@@ -790,7 +793,7 @@ impl cainome::cairo_serde::CairoSerde for ERC20ComponentEvent {
             _ => 0,
         }
     }
-    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::FieldElement> {
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
         match __rust {
             ERC20ComponentEvent::Transfer(val) => {
                 let mut temp = vec![];
@@ -808,10 +811,12 @@ impl cainome::cairo_serde::CairoSerde for ERC20ComponentEvent {
         }
     }
     fn cairo_deserialize(
-        __felts: &[starknet::core::types::FieldElement],
+        __felts: &[starknet::core::types::Felt],
         __offset: usize,
     ) -> cainome::cairo_serde::Result<Self::RustType> {
-        let __index: u128 = __felts[__offset].try_into().unwrap();
+        let __index: u128 =
+            <starknet::core::types::Felt as num_traits::ToPrimitive>::to_u128(&__felts[__offset])
+                .unwrap();
         match __index as usize {
             0usize => Ok(ERC20ComponentEvent::Transfer(Transfer::cairo_deserialize(
                 __felts,
@@ -1112,7 +1117,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
             selector: starknet::macros::selector!("transfer_ownership"),
             calldata: __calldata,
         };
-        self.account.execute(vec![__call])
+        self.account.execute_v1(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
@@ -1134,7 +1139,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
             selector: starknet::macros::selector!("renounce_ownership"),
             calldata: __calldata,
         };
-        self.account.execute(vec![__call])
+        self.account.execute_v1(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
@@ -1168,7 +1173,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
             selector: starknet::macros::selector!("transferOwnership"),
             calldata: __calldata,
         };
-        self.account.execute(vec![__call])
+        self.account.execute_v1(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
@@ -1190,7 +1195,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
             selector: starknet::macros::selector!("renounceOwnership"),
             calldata: __calldata,
         };
-        self.account.execute(vec![__call])
+        self.account.execute_v1(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
@@ -1228,7 +1233,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
             selector: starknet::macros::selector!("transfer"),
             calldata: __calldata,
         };
-        self.account.execute(vec![__call])
+        self.account.execute_v1(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
@@ -1274,7 +1279,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
             selector: starknet::macros::selector!("transfer_from"),
             calldata: __calldata,
         };
-        self.account.execute(vec![__call])
+        self.account.execute_v1(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
@@ -1312,7 +1317,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
             selector: starknet::macros::selector!("approve"),
             calldata: __calldata,
         };
-        self.account.execute(vec![__call])
+        self.account.execute_v1(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]

@@ -13,7 +13,7 @@ account-wasm = { path = "packages/account-wasm" }
 anyhow = "1"
 async-trait = "0.1"
 base64 = "0.21"
-cainome = { git = "https://github.com/cartridge-gg/cainome", rev = "a84dfe0f" }
+# cainome = { git = "https://github.com/cartridge-gg/cainome", rev = "a84dfe0f" }
 cairo-lang-starknet = "2.4.0"
 coset = { version = "0.3.4", features = ["std"] }
 ecdsa = "0.16.9"
@@ -26,8 +26,8 @@ rand_core = { version = "0.6", features = ["getrandom"] }
 serde = "1"
 serde_json = "1"
 sha2 = "0.10"
-starknet = "0.10.0"
-starknet-crypto = "0.6.1"
+starknet = "0.11.0"
+starknet-crypto = "0.7.1"
 thiserror = "1"
 toml = "0.8"
 u256-literal = "1"
@@ -36,3 +36,8 @@ wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4.42"
 wasm-webauthn = { git = "https://github.com/cartridge-gg/wasm-webauthn", rev = "972693f" }
 tokio = { version = "1", features = ["macros", "time"] }
+
+[workspace.dependencies.cainome]
+git = "https://github.com/cartridge-gg/cainome"
+branch = "bump-starknet-rs"
+features = ["abigen-rs"]

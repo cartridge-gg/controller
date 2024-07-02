@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use cainome::cairo_serde::CairoSerde;
 use starknet::{
     accounts::{Account, Call, ConnectedAccount, ExecutionEncoder},
-    core::types::{BlockId, FieldElement},
+    core::types::{BlockId, Felt},
     providers::Provider,
 };
 
@@ -33,13 +33,7 @@ where
     S: HashSigner + Send,
     G: HashSigner + Send,
 {
-    pub fn new(
-        provider: P,
-        signer: S,
-        guardian: G,
-        address: FieldElement,
-        chain_id: FieldElement,
-    ) -> Self {
+    pub fn new(provider: P, signer: S, guardian: G, address: Felt, chain_id: Felt) -> Self {
         CartridgeGuardianAccount {
             account: CartridgeAccount::new(provider, signer, address, chain_id),
             guardian,
@@ -58,7 +52,7 @@ where
     S: HashSigner + Send + Sync,
     G: HashSigner + Send + Sync,
 {
-    async fn sign_hash(&self, hash: FieldElement) -> Result<Vec<FieldElement>, SignError> {
+    async fn sign_hash(&self, hash: Felt) -> Result<Vec<Felt>, SignError> {
         let owner_signature = self.account.signer.sign(&hash).await?;
         let guardian_signature = self.guardian.sign(&hash).await?;
         Ok(Vec::<SignerSignature>::cairo_serialize(&vec![
@@ -74,11 +68,11 @@ where
     S: HashSigner + Send + Sync,
     G: HashSigner + Send + Sync,
 {
-    fn address(&self) -> FieldElement {
+    fn address(&self) -> Felt {
         self.account.address
     }
 
-    fn chain_id(&self) -> FieldElement {
+    fn chain_id(&self) -> Felt {
         self.account.chain_id
     }
 }

@@ -106,7 +106,7 @@ pub async fn test_verify_paymaster_execute<
         .unwrap();
 
     paymaster_account
-        .execute(vec![outside_execution.into()])
+        .execute_v1(vec![outside_execution.into()])
         .send()
         .await
         .unwrap();
@@ -234,7 +234,7 @@ async fn test_verify_execute_paymaster_should_fail() {
         .unwrap();
 
     paymaster_account
-        .execute(vec![outside_execution.into()])
+        .execute_v1(vec![outside_execution.into()])
         .send()
         .await
         .unwrap();
@@ -314,7 +314,7 @@ async fn test_verify_execute_paymaster_session() {
             .await
             .unwrap();
 
-        let tx = paymaster_account.execute(vec![outside_execution.clone().into()]);
+        let tx = paymaster_account.execute_v1(vec![outside_execution.clone().into()]);
         let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * 4u32.into();
         let tx = tx.nonce(i.into()).max_fee(fee_estimate).prepared().unwrap();
 

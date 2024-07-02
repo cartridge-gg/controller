@@ -6,8 +6,8 @@ use crate::{
 use super::hash::{AllowedMethod, Session};
 
 use async_trait::async_trait;
+use starknet::core::types::Felt;
 use starknet::{accounts::Account, providers::Provider};
-use starknet_crypto::FieldElement;
 
 use super::{HashSigner, SignError};
 
@@ -19,7 +19,7 @@ where
     S: HashSigner + Send + Sync,
     G: HashSigner + Send + Sync,
 {
-    async fn sign_session(&self, session: Session) -> Result<Vec<FieldElement>, SignError>;
+    async fn sign_session(&self, session: Session) -> Result<Vec<Felt>, SignError>;
     async fn session_account(
         &self,
         signer: S,
@@ -37,7 +37,7 @@ where
     Q: HashSigner + Send + Sync + 'static, // 'static is required for async_trait macro
     G: HashSigner + Send + Sync + Clone,
 {
-    async fn sign_session(&self, session: Session) -> Result<Vec<FieldElement>, SignError> {
+    async fn sign_session(&self, session: Session) -> Result<Vec<Felt>, SignError> {
         let hash = session
             .raw()
             .get_message_hash_rev_1(self.chain_id(), self.address());
