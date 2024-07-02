@@ -238,7 +238,7 @@ function makeMutClosure(arg0, arg1, dtor, f) {
     return real;
 }
 function __wbg_adapter_48(arg0, arg1, arg2) {
-    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h684b586f178b72d6(arg0, arg1, addHeapObject(arg2));
+    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h9bd69eb5ef7eea47(arg0, arg1, addHeapObject(arg2));
 }
 
 let cachedUint32Memory0 = null;
@@ -267,8 +267,8 @@ function handleError(f, args) {
         wasm.__wbindgen_exn_store(addHeapObject(e));
     }
 }
-function __wbg_adapter_169(arg0, arg1, arg2, arg3) {
-    wasm.wasm_bindgen__convert__closures__invoke2_mut__h3dc4acd37607db0e(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
+function __wbg_adapter_170(arg0, arg1, arg2, arg3) {
+    wasm.wasm_bindgen__convert__closures__invoke2_mut__h641cd87b11e04d71(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
 }
 
 const CartridgeAccountFinalization = (typeof FinalizationRegistry === 'undefined')
@@ -406,6 +406,13 @@ export class CartridgeAccount {
         const ret = wasm.cartridgeaccount_signMessage(this.__wbg_ptr, ptr0, len0);
         return takeObject(ret);
     }
+    /**
+    * @returns {Promise<any>}
+    */
+    delegateAccount() {
+        const ret = wasm.cartridgeaccount_delegateAccount(this.__wbg_ptr);
+        return takeObject(ret);
+    }
 }
 
 export function __wbindgen_object_drop_ref(arg0) {
@@ -419,6 +426,16 @@ export function __wbindgen_string_get(arg0, arg1) {
     var len1 = WASM_VECTOR_LEN;
     getInt32Memory0()[arg0 / 4 + 1] = len1;
     getInt32Memory0()[arg0 / 4 + 0] = ptr1;
+};
+
+export function __wbindgen_cb_drop(arg0) {
+    const obj = takeObject(arg0).original;
+    if (obj.cnt-- == 1) {
+        obj.a = 0;
+        return true;
+    }
+    const ret = false;
+    return ret;
 };
 
 export function __wbindgen_error_new(arg0, arg1) {
@@ -438,16 +455,6 @@ export function __wbindgen_bigint_from_u64(arg0) {
 
 export function __wbindgen_jsval_eq(arg0, arg1) {
     const ret = getObject(arg0) === getObject(arg1);
-    return ret;
-};
-
-export function __wbindgen_cb_drop(arg0) {
-    const obj = takeObject(arg0).original;
-    if (obj.cnt-- == 1) {
-        obj.a = 0;
-        return true;
-    }
-    const ret = false;
     return ret;
 };
 
@@ -860,7 +867,7 @@ export function __wbg_new_81740750da40724f(arg0, arg1) {
             const a = state0.a;
             state0.a = 0;
             try {
-                return __wbg_adapter_169(a, state0.b, arg0, arg1);
+                return __wbg_adapter_170(a, state0.b, arg0, arg1);
             } finally {
                 state0.a = a;
             }
@@ -971,8 +978,8 @@ export function __wbindgen_memory() {
     return addHeapObject(ret);
 };
 
-export function __wbindgen_closure_wrapper1498(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 465, __wbg_adapter_48);
+export function __wbindgen_closure_wrapper1526(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 473, __wbg_adapter_48);
     return addHeapObject(ret);
 };
 

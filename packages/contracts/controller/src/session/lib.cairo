@@ -13,11 +13,8 @@ use alexandria_merkle_tree::merkle_tree::{
 };
 
 use core::ecdsa::check_ecdsa_signature;
-use controller_session::hash::get_merkle_leaf;
+use controller::session::hash::get_merkle_leaf;
 
-
-mod hash;
-mod interface;
 
 const SESSION_TOKEN_V1: felt252 = 'session-token';
 
@@ -25,23 +22,24 @@ const SESSION_TOKEN_V1: felt252 = 'session-token';
 #[starknet::component]
 mod session_component {
     use core::result::ResultTrait;
-    use super::check_policy;
-    use starknet::info::{TxInfo, get_tx_info, get_block_timestamp};
+    use controller::session::lib::check_policy;
+    use starknet::info::{TxInfo, get_tx_info, get_block_timestamp, get_caller_address};
     use starknet::account::Call;
-    use controller_session::hash::{get_merkle_leaf, get_message_hash_rev_1, authorization_hash};
+    use controller::session::hash::{get_merkle_leaf, get_message_hash_rev_1, authorization_hash};
     use core::ecdsa::check_ecdsa_signature;
     use alexandria_merkle_tree::merkle_tree::{
         Hasher, MerkleTree, poseidon::PoseidonHasherImpl, MerkleTreeTrait
     };
     use starknet::contract_address::ContractAddress;
     use starknet::get_contract_address;
-    use super::interface::{
+    use controller::session::interface::{
         ISession, SessionToken, Session, ISessionCallback, SessionState, SessionStateImpl
     };
     use controller_auth::signer::{SignerSignatureTrait, SignerTrait};
-    use controller_auth::{assert_only_self, assert_no_self_call};
-    use super::SESSION_TOKEN_V1;
+    use controller_auth::{assert_no_self_call};
+    use controller::session::lib::SESSION_TOKEN_V1;
     use core::poseidon::{hades_permutation};
+    use controller::account::IAllowedCallerCallback;
 
     #[storage]
     struct Storage {
@@ -70,15 +68,38 @@ mod session_component {
 
     #[embeddable_as(SessionComponent)]
     impl SessionImpl<
-        TContractState, +HasComponent<TContractState>, +ISessionCallback<TContractState>
+        TContractState, +HasComponent<TContractState>, +ISessionCallback<TContractState>, +IAllowedCallerCallback<TContractState>
     > of ISession<ComponentState<TContractState>> {
         fn revoke_session(ref self: ComponentState<TContractState>, session_hash: felt252) {
-            assert_only_self();
+            self.get_contract().is_caller_allowed(get_caller_address());
             assert(
                 self.session_state(session_hash) != SessionState::Revoked, 'session/already-revoked'
             );
             self.session_states.write(session_hash, SessionState::Revoked.into_felt());
             self.emit(SessionRevoked { session_hash: session_hash });
+        }
+        fn register_session(
+            ref self: ComponentState<TContractState>,
+            session: Session
+        ) {
+            self.get_contract().is_caller_allowed(get_caller_address());
+            let now = get_block_timestamp();
+            assert(session.expires_at > now, 'session/expired');
+            // check validity of token
+            let session_hash = get_message_hash_rev_1(@session);
+
+            match self.session_state(session_hash) {
+                SessionState::Revoked => { assert(false, 'session/already-revoked'); },
+                SessionState::NotRegistered => {
+                    let authorization_hash = authorization_hash(array![].span());
+                    self
+                        .session_states
+                        .write(
+                            session_hash, SessionState::Validated(authorization_hash).into_felt()
+                        );
+                },
+                SessionState::Validated(_) => { assert(false, 'session/already-registered'); },
+            }
         }
         fn is_session_revoked(
             self: @ComponentState<TContractState>, session_hash: felt252
@@ -143,7 +164,7 @@ mod session_component {
                         state.session_callback(session_hash, signature.session_authorization),
                         'session/invalid-account-sig'
                     );
-                    let authorization_hash = authorization_hash(@signature);
+                    let authorization_hash = authorization_hash(signature.session_authorization);
                     self
                         .session_states
                         .write(
@@ -152,7 +173,7 @@ mod session_component {
                 },
                 SessionState::Validated(authorization_hash) => {
                     assert(
-                        authorization_hash == authorization_hash(@signature),
+                        authorization_hash == authorization_hash(signature.session_authorization),
                         'session/account-sig-mismatch'
                     );
                 },

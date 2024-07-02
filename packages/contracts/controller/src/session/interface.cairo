@@ -48,6 +48,7 @@ struct SessionToken {
 #[starknet::interface]
 trait ISession<TContractState> {
     fn revoke_session(ref self: TContractState, session_hash: felt252);
+    fn register_session(ref self: TContractState, session: Session);
     fn is_session_revoked(self: @TContractState, session_hash: felt252) -> bool;
 }
 

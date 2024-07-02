@@ -139,6 +139,7 @@ class Account extends BaseAccount {
     transactionsDetail.nonce =
       transactionsDetail.nonce ?? (await this.getNonce("pending"));
     transactionsDetail.maxFee = num.toHex(transactionsDetail.maxFee);
+    // transactionsDetail.maxFee = num.toHex(1000000000000);
 
     const res = await this.cartridge.execute(
       normalizeCalls(calls),

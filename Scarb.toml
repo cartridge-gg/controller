@@ -2,7 +2,6 @@
 members = [
     "packages/contracts/controller",
     "packages/contracts/auth",
-    "packages/contracts/session",
 ]
 
 [workspace.package]

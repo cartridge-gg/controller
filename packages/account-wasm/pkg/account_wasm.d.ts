@@ -53,4 +53,8 @@ export class CartridgeAccount {
 * @returns {Promise<any>}
 */
   signMessage(typed_data: string): Promise<any>;
+/**
+* @returns {Promise<any>}
+*/
+  delegateAccount(): Promise<any>;
 }

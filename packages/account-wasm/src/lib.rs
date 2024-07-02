@@ -19,8 +19,10 @@ use base64::{engine::general_purpose, Engine};
 use coset::{CborSerializable, CoseKey};
 use paymaster::PaymasterRequest;
 use serde_wasm_bindgen::{from_value, to_value};
-use starknet::accounts::Account;
-use starknet::macros::short_string;
+use starknet::accounts::{Account, ConnectedAccount};
+use starknet::core::types::{BlockId, BlockTag, FunctionCall};
+use starknet::macros::{selector, short_string};
+use starknet::providers::Provider;
 use starknet::signers::SigningKey;
 use starknet::{
     accounts::Call,
@@ -237,5 +239,22 @@ impl CartridgeAccount {
             details.credentials.authorization,
             session,
         ))
+    }
+
+    #[wasm_bindgen(js_name = delegateAccount)]
+    pub async fn delegate_account(&self) -> Result<JsValue> {
+        let res = self
+            .account
+            .provider()
+            .call(
+                FunctionCall {
+                    contract_address: self.account.address(),
+                    entry_point_selector: selector!("delegate_account"),
+                    calldata: vec![],
+                },
+                BlockId::Tag(BlockTag::Pending),
+            )
+            .await?;
+        Ok(to_value(&res[0])?)
     }
 }

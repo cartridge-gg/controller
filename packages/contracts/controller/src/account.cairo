@@ -5,6 +5,7 @@ use starknet::testing;
 use starknet::secp256r1::Secp256r1Point;
 use starknet::account::Call;
 use controller_auth::signer::{Signer, SignerStorageValue, SignerType, SignerSignature,};
+use starknet::ContractAddress;
 
 
 #[starknet::interface]
@@ -28,6 +29,11 @@ trait IDeclarer<TState> {
     fn __validate_declare__(ref self: TState, class_hash: felt252) -> felt252;
 }
 
+#[starknet::interface]
+trait IAllowedCallerCallback<TState> {
+    fn is_caller_allowed(self: @TState, caller_address: ContractAddress) -> bool;
+}
+
 #[starknet::contract(account)]
 mod CartridgeAccount {
     use core::traits::TryInto;
@@ -48,9 +54,9 @@ mod CartridgeAccount {
             storage_write_syscall
         }
     };
-    use controller_auth::webauthn::verify;
-    use controller_session::{
-        session_component::{InternalImpl, InternalTrait}, session_component,
+    use controller_auth::{webauthn::verify};
+    use controller::session::{
+        lib::session_component::{InternalImpl, InternalTrait}, lib::session_component,
         interface::{ISessionCallback, SessionToken}
     };
     use serde::Serde;
@@ -61,10 +67,12 @@ mod CartridgeAccount {
     };
     use hash::HashStateTrait;
     use pedersen::PedersenTrait;
-    use controller::account::{IAccount, IUserAccount, IDeclarer};
+    use controller::account::{IAccount, IUserAccount, IDeclarer, IAllowedCallerCallback};
     use controller::outside_execution::{
         outside_execution::outside_execution_component, interface::IOutsideExecutionCallback
     };
+    use controller::external_owners::external_owners::external_owners_component;
+    use controller::delegate_account::delegate_account::delegate_account_component;
     use controller::src5::src5_component;
     use openzeppelin::upgrades::UpgradeableComponent;
     use openzeppelin::upgrades::interface::IUpgradeable;
@@ -87,12 +95,32 @@ mod CartridgeAccount {
     impl ExecuteFromOutside =
         outside_execution_component::OutsideExecutionImpl<ContractState>;
 
+    // External owners
+    component!(
+        path: external_owners_component, storage: external_owners, event: ExternalOwnersEvent
+    );
+    #[abi(embed_v0)]
+    impl ExternalOwners =
+        external_owners_component::ExternalOwnersImpl<ContractState>;
+ 
+    // Delegate Account
+    component!(
+        path: delegate_account_component, storage: delegate_account, event: DelegateAccountEvents
+    );
+    #[abi(embed_v0)]
+    impl DelegateAccount =
+        delegate_account_component::DelegateAccountImpl<ContractState>;
+
+    // SRC5
     component!(path: src5_component, storage: src5, event: SRC5Events);
     #[abi(embed_v0)]
     impl SRC5 = src5_component::SRC5Impl<ContractState>;
 
+    // Upgradeable
     component!(path: UpgradeableComponent, storage: upgradeable, event: UpgradeableEvent);
     impl UpgradeableInternalImpl = UpgradeableComponent::InternalImpl<ContractState>;
+
+   
 
     #[storage]
     struct Storage {
@@ -101,11 +129,15 @@ mod CartridgeAccount {
         #[substorage(v0)]
         session: session_component::Storage,
         #[substorage(v0)]
+        external_owners: external_owners_component::Storage,
+        #[substorage(v0)]
         execute_from_outside: outside_execution_component::Storage,
+        #[substorage(v0)]
+        delegate_account: delegate_account_component::Storage,
         #[substorage(v0)]
         src5: src5_component::Storage,
         #[substorage(v0)]
-        upgradeable: UpgradeableComponent::Storage
+        upgradeable: UpgradeableComponent::Storage,
     }
 
     #[event]
@@ -117,7 +149,11 @@ mod CartridgeAccount {
         #[flat]
         SessionEvent: session_component::Event,
         #[flat]
+        ExternalOwnersEvent: external_owners_component::Event,
+        #[flat]
         ExecuteFromOutsideEvents: outside_execution_component::Event,
+        #[flat]
+        DelegateAccountEvents: delegate_account_component::Event,
         #[flat]
         SRC5Events: src5_component::Event,
         #[flat]
@@ -239,7 +275,7 @@ mod CartridgeAccount {
     #[abi(embed_v0)]
     impl UserAccountImpl of IUserAccount<ContractState> {
         fn change_owner(ref self: ContractState, signer_signature: SignerSignature) {
-            assert_only_self();
+            assert(self.is_caller_allowed(get_caller_address()), 'caller-not-owner');
 
             let new_owner = signer_signature.signer();
 
@@ -299,6 +335,12 @@ mod CartridgeAccount {
                 )
         }
     }
+    impl IAllowedCallerCallbackImpl of IAllowedCallerCallback<ContractState> {
+        fn is_caller_allowed(self: @ContractState, caller_address: ContractAddress) -> bool {
+            caller_address == get_contract_address()
+                || self.is_registered_external_owner(caller_address)
+        }
+    }
 
     impl OutsideExecutionCallbackImpl of IOutsideExecutionCallback<ContractState> {
         #[inline(always)]
@@ -328,7 +370,7 @@ mod CartridgeAccount {
     #[abi(embed_v0)]
     impl UpgradeableImpl of IUpgradeable<ContractState> {
         fn upgrade(ref self: ContractState, new_class_hash: ClassHash) {
-            assert_only_self();
+            assert(self.is_caller_allowed(get_caller_address()), 'caller-not-owner');
             self.upgradeable._upgrade(new_class_hash);
         }
     }
@@ -400,7 +442,9 @@ mod CartridgeAccount {
         ) {
             let chain_id = get_tx_info().unbox().chain_id;
             let owner_guid = self.read_owner().into_guid();
-            // We now need to hash message_hash with the size of the array: (change_owner selector, chain id, contract address, old_owner_guid)
+            // We now need to hash message_hash with the size of the array: (change_owner selector,
+            // chain id, contract address, old_owner_guid)
+            // 
             // https://github.com/starkware-libs/cairo-lang/blob/b614d1867c64f3fb2cf4a4879348cfcf87c3a5a7/src/starkware/cairo/common/hash_state.py#L6
             let message_hash = PedersenTrait::new(0)
                 .update(selector!("change_owner"))
@@ -466,12 +510,6 @@ mod CartridgeAccount {
             let signer_signatures: Array<SignerSignature> = self.parse_signature_array(signatures);
             self.assert_valid_span_signature(execution_hash, signer_signatures);
         }
-    }
-
-    fn assert_only_self() {
-        let caller = get_caller_address();
-        let self = get_contract_address();
-        assert(self == caller, Errors::UNAUTHORIZED);
     }
 
     fn _execute_calls(mut calls: Span<Call>) -> Array<Span<felt252>> {
