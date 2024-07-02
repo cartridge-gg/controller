@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@chakra-ui/react";
 import { formatEther } from "viem";
-import { Policy, ResponseCodes } from "@cartridge/controller";
-import {
+import { Policy, ResponseCodes } from "@cartridge/controller"; import {
   Container,
   Content,
   FOOTER_MIN_HEIGHT,
@@ -16,6 +15,7 @@ import { ErrorAlert } from "components/ErrorAlert";
 import { Policies } from "Policies";
 import { Fees } from "./Fees";
 import { ExecuteCtx } from "utils/connection";
+import { TransferAmountExceedsBalance } from "errors";
 
 export const CONTRACT_ETH =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
@@ -88,6 +88,12 @@ export function Execute() {
         setFees({ base: fees.overall_fee, max: fees.suggestedMaxFee });
       })
       .catch((e) => {
+        if (e.message.includes("ERC20: transfer amount exceeds balance")) {
+          setIsInsufficient(true)
+          setError(new TransferAmountExceedsBalance())
+          return
+        }
+
         setError(e);
       });
   }, [account, controller, setError, setFees, calls, chainId, ctx]);
@@ -139,9 +145,13 @@ export function Execute() {
       </Content>
 
       <Footer>
-        {error ? (
+        {error ? error.name === "TransferAmountExceedsBalance" ? (
           <ErrorAlert
-            title="Fee estimation failed"
+            title={error.message}
+          />
+        ) : (
+          <ErrorAlert
+            title="Something went wrong"
             description={error.message}
           />
         ) : (
