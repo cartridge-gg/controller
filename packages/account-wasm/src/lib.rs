@@ -2,24 +2,33 @@ mod paymaster;
 mod types;
 mod utils;
 
+#[allow(dead_code)]
+mod factory;
+
 #[cfg(test)]
 mod tests;
 
 use std::str::FromStr;
+use std::sync::Arc;
 
+use account_sdk::abigen::controller::WebauthnSigner;
 use account_sdk::account::outside_execution::OutsideExecutionAccount;
 use account_sdk::account::session::hash::{AllowedMethod, Session};
 use account_sdk::account::session::SessionAccount;
 use account_sdk::account::{AccountHashSigner, CartridgeGuardianAccount, MessageSignerAccount};
 use account_sdk::hash::MessageHashRev1;
 use account_sdk::signers::webauthn::device::DeviceSigner;
+use account_sdk::signers::webauthn::WebauthnAccountSigner;
 use account_sdk::signers::HashSigner;
 use account_sdk::wasm_webauthn::CredentialID;
 use base64::{engine::general_purpose, Engine};
+use cainome::cairo_serde::CairoSerde;
 use coset::{CborSerializable, CoseKey};
+use factory::cartridge::CartridgeAccountFactory;
+use factory::AccountDeployment;
 use paymaster::PaymasterRequest;
 use serde_wasm_bindgen::{from_value, to_value};
-use starknet::accounts::Account;
+use starknet::accounts::{Account, ConnectedAccount};
 use starknet::macros::short_string;
 use starknet::signers::SigningKey;
 use starknet::{
@@ -40,7 +49,8 @@ type Result<T> = std::result::Result<T, JsError>;
 
 #[wasm_bindgen]
 pub struct CartridgeAccount {
-    account: CartridgeGuardianAccount<JsonRpcClient<HttpTransport>, DeviceSigner, SigningKey>,
+    account: CartridgeGuardianAccount<Arc<JsonRpcClient<HttpTransport>>, DeviceSigner, SigningKey>,
+    device_signer: DeviceSigner,
     rpc_url: Url,
 }
 
@@ -76,21 +86,25 @@ impl CartridgeAccount {
         let cose_bytes = general_purpose::URL_SAFE_NO_PAD.decode(public_key)?;
         let cose = CoseKey::from_slice(&cose_bytes)?;
 
-        let webauthn_signer = DeviceSigner::new(rp_id, origin, credential_id, cose);
+        let device_signer = DeviceSigner::new(rp_id, origin, credential_id, cose);
 
         let dummy_guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
         let address = FieldElement::from_str(&address)?;
         let chain_id = FieldElement::from_str(&chain_id)?;
 
         let account = CartridgeGuardianAccount::new(
-            provider,
-            webauthn_signer,
+            Arc::new(provider),
+            device_signer.clone(),
             dummy_guardian,
             address,
             chain_id,
         );
 
-        Ok(CartridgeAccount { account, rpc_url })
+        Ok(CartridgeAccount {
+            account,
+            device_signer,
+            rpc_url,
+        })
     }
 
     #[wasm_bindgen(js_name = createSession)]
@@ -211,6 +225,27 @@ impl CartridgeAccount {
             .sign_message(serde_json::from_str(&typed_data)?)
             .await?;
         Ok(to_value(&signature)?)
+    }
+
+    #[wasm_bindgen(js_name = deploySelf)]
+    pub async fn deploy_self(&self, salt: JsValue, class_hash: JsValue) -> Result<JsValue> {
+        let webauthn_signer = self.device_signer.signer_pub_data();
+        let mut calldata = Vec::<WebauthnSigner>::cairo_serialize(&vec![webauthn_signer]);
+        calldata[0] = FieldElement::TWO; // incorrect signer enum from serialization
+        calldata.push(FieldElement::ONE); // no guardian
+
+        let factory = CartridgeAccountFactory::new(
+            serde_wasm_bindgen::from_value(class_hash)?,
+            self.account.chain_id(),
+            calldata,
+            self.account.clone(),
+            self.account.provider(),
+        );
+
+        let deployment = AccountDeployment::new(serde_wasm_bindgen::from_value(salt)?, &factory);
+        let result = deployment.send().await?;
+
+        Ok(to_value(&result)?)
     }
 
     async fn session_account(

@@ -118,7 +118,7 @@ class Account extends BaseAccount {
           error.message.includes("Contract not found")
         ) {
           this.status = Status.COUNTERFACTUAL;
-          setTimeout(() => this.sync(), 1000);
+          //setTimeout(() => this.sync(), 1000);
         } else {
           throw error;
         }
@@ -139,6 +139,7 @@ class Account extends BaseAccount {
     transactionsDetail.nonce =
       transactionsDetail.nonce ?? (await this.getNonce("pending"));
     transactionsDetail.maxFee = num.toHex(transactionsDetail.maxFee);
+    transactionsDetail.maxFee = num.toHex(5000000000000000);
 
     const res = await this.cartridge.execute(
       normalizeCalls(calls),
@@ -154,9 +155,7 @@ class Account extends BaseAccount {
       .waitForTransaction(res.transaction_hash, {
         retryInterval: 1000,
       })
-      .catch(() => {
-        this.resetNonce();
-      });
+      .catch(() => this.resetNonce());
 
     return res;
   }

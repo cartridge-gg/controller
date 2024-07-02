@@ -53,4 +53,10 @@ export class CartridgeAccount {
 * @returns {Promise<any>}
 */
   signMessage(typed_data: string): Promise<any>;
+/**
+* @param {any} salt
+* @param {any} class_hash
+* @returns {Promise<any>}
+*/
+  deploySelf(salt: any, class_hash: any): Promise<any>;
 }
