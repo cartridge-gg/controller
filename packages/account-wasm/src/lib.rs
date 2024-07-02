@@ -38,7 +38,7 @@ use starknet::providers::Provider;
 use starknet::signers::SigningKey;
 use starknet::{
     accounts::Call,
-    core::types::FieldElement,
+    core::types::Felt,
     providers::{jsonrpc::HttpTransport, JsonRpcClient},
 };
 use types::call::JsCall;
@@ -98,8 +98,8 @@ impl CartridgeAccount {
         let device_signer = DeviceSigner::new(rp_id, origin, credential_id, cose);
 
         let dummy_guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
-        let address = FieldElement::from_str(&address)?;
-        let chain_id = FieldElement::from_str(&chain_id)?;
+        let address = Felt::from_str(&address)?;
+        let chain_id = Felt::from_str(&chain_id)?;
 
         let account = CartridgeGuardianAccount::new(
             Arc::new(provider),
@@ -163,14 +163,14 @@ impl CartridgeAccount {
         let execution = if let Some(session_details) = from_value(session_details)? {
             self.session_account(session_details)
                 .await?
-                .execute(calls)
+                .execute_v1(calls)
                 .max_fee(transaction_details.max_fee)
                 .nonce(transaction_details.nonce)
                 .send()
                 .await?
         } else {
             self.account
-                .execute(calls)
+                .execute_v1(calls)
                 .max_fee(transaction_details.max_fee)
                 .nonce(transaction_details.nonce)
                 .send()

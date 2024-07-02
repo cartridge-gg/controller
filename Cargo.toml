@@ -41,3 +41,10 @@ tokio = { version = "1", features = ["macros", "time"] }
 git = "https://github.com/cartridge-gg/cainome"
 branch = "bump-starknet-rs"
 features = ["abigen-rs"]
+
+[patch.crates-io]
+# Remove this patch once the following PR is merged: <https://github.com/xJonathanLEI/starknet-rs/pull/615>
+#
+# To enable std feature on `starknet-types-core`.
+# To re-export the entire `felt` module from `starknet-types-core`.
+starknet-core = { git = "https://github.com/kariy/starknet-rs", branch = "dojo-patch" }

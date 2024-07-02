@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 use serde_with::serde_as;
 use starknet::core::serde::unsigned_field_element::UfeHex;
-use starknet::core::types::FieldElement;
+use starknet::core::types::Felt;
 use url::Url;
 
 use crate::{types::outside_execution::JsOutsideExecution, Result};
@@ -24,28 +24,28 @@ pub(crate) struct JsonRpcRequest<T> {
 #[serde(rename_all = "camelCase")]
 struct OutsideExecutionParams {
     #[serde_as(as = "UfeHex")]
-    address: FieldElement,
+    address: Felt,
     #[serde_as(as = "UfeHex")]
-    chain_id: FieldElement,
+    chain_id: Felt,
     outside_execution: JsOutsideExecution,
     #[serde_as(as = "Vec<UfeHex>")]
-    signature: Vec<FieldElement>,
+    signature: Vec<Felt>,
 }
 
 #[serde_as]
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PaymasterResponse {
     #[serde_as(as = "UfeHex")]
-    transaction_hash: FieldElement,
+    transaction_hash: Felt,
 }
 
 impl PaymasterRequest {
     pub async fn send(
         rpc_url: Url,
         outside_execution: JsOutsideExecution,
-        address: FieldElement,
-        chain_id: FieldElement,
-        signature: Vec<FieldElement>,
+        address: Felt,
+        chain_id: Felt,
+        signature: Vec<Felt>,
     ) -> Result<PaymasterResponse> {
         let request = JsonRpcRequest {
             id: 1,
