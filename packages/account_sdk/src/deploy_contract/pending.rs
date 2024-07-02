@@ -29,6 +29,7 @@ where
     }
     pub async fn wait_for_completion(self) -> T {
         TransactionWaiter::new(self.transaction_hash, &self.client)
+            .wait()
             .await
             .unwrap();
         self.transaction_result
