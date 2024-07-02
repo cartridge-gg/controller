@@ -322,6 +322,7 @@ async fn test_verify_execute_paymaster_session() {
         let tx_hash = tx.transaction_hash(false);
         tx.send().await.unwrap();
         TransactionWaiter::new(tx_hash, runner.client())
+            .wait()
             .await
             .unwrap();
     }
