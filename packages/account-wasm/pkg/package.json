@@ -7,7 +7,7 @@
     "account_wasm_bg.js",
     "account_wasm.d.ts"
   ],
-  "module": "account_wasm.js",
+  "main": "account_wasm.js",
   "types": "account_wasm.d.ts",
   "sideEffects": [
     "./account_wasm.js",
