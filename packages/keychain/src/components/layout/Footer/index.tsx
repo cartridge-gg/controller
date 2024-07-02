@@ -135,7 +135,7 @@ export function Footer({
         {children}
       </VStack>
 
-      {variant === "connect" && (
+      {(variant === "connect" || variant === "menu") && (
         <HStack
           justifySelf="flex-end"
           bg="solid.bg"
@@ -152,12 +152,15 @@ export function Footer({
           href="https://cartridge.gg"
           target="_blank"
           overflow="hidden"
+          _hover={{
+            color: "#FFC52A",
+          }}
         >
           <Text fontSize="xs" fontWeight={500} color="currentColor">
             Controller by
           </Text>
 
-          <CartridgeLogo color="text.secondary" />
+          <CartridgeLogo fontSize={100} color="currentColor" />
         </HStack>
       )}
     </VStack>

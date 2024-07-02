@@ -1,13 +1,14 @@
 import dynamic from "next/dynamic";
 import { Signature } from "starknet";
 import { ResponseCodes } from "@cartridge/controller";
-import { DeploymentRequired, Execute, SignMessage } from "components";
+import { DeploymentRequired, Execute, Menu, SignMessage } from "components";
 import { CreateController, CreateSession, Logout } from "components/connect";
 import { useConnection } from "hooks/connection";
 import {
   ConnectCtx,
   ExecuteCtx,
   LogoutCtx,
+  OpenMenuCtx,
   SignMessageCtx,
 } from "utils/connection";
 import { diff } from "utils/controller";
@@ -113,6 +114,30 @@ function Home() {
           }
         >
           <Execute />
+        </DeploymentRequired>
+      );
+    }
+    case "open-menu": {
+      const ctx = context as OpenMenuCtx;
+      return (
+        <DeploymentRequired
+          onClose={() =>
+            ctx.resolve({
+              code: ResponseCodes.CANCELED,
+              message: "Canceled",
+            })
+          }
+        >
+          <Menu
+            onLogout={() => {
+              logout(ctx.origin)();
+
+              ctx.resolve({
+                code: ResponseCodes.NOT_CONNECTED,
+                message: "User logged out",
+              });
+            }}
+          />
         </DeploymentRequired>
       );
     }

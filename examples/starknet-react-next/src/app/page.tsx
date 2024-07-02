@@ -5,6 +5,7 @@ import { SignMessage } from "components/SignMessage";
 import { DojoSpawnAndMove } from "components/DojoSpawnAndMove";
 import { DelegateAccount } from "components/DelegateAccount";
 import { ColorModeToggle } from "components/ColorModeToggle";
+import { Menu } from "components/Menu";
 
 export default function Home() {
   return (
@@ -16,6 +17,7 @@ export default function Home() {
         <ColorModeToggle />
       </div>
       <ConnectWallet />
+      <Menu />
       <DojoSpawnAndMove />
       <TransferEth />
       <DelegateAccount />
