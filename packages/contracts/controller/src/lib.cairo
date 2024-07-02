@@ -1,4 +1,5 @@
 mod account;
+mod delegate_account;
 mod signature_type;
 mod outside_execution;
 mod external_owners;

@@ -72,6 +72,7 @@ mod CartridgeAccount {
         outside_execution::outside_execution_component, interface::IOutsideExecutionCallback
     };
     use controller::external_owners::external_owners::external_owners_component;
+    use controller::delegate_account::delegate_account::delegate_account_component;
     use controller::src5::src5_component;
     use openzeppelin::upgrades::UpgradeableComponent;
     use openzeppelin::upgrades::interface::IUpgradeable;
@@ -94,19 +95,32 @@ mod CartridgeAccount {
     impl ExecuteFromOutside =
         outside_execution_component::OutsideExecutionImpl<ContractState>;
 
+    // External owners
     component!(
         path: external_owners_component, storage: external_owners, event: ExternalOwnersEvent
     );
     #[abi(embed_v0)]
     impl ExternalOwners =
         external_owners_component::ExternalOwnersImpl<ContractState>;
+ 
+    // Delegate Account
+    component!(
+        path: delegate_account_component, storage: delegate_account, event: DelegateAccountEvents
+    );
+    #[abi(embed_v0)]
+    impl DelegateAccount =
+        delegate_account_component::DelegateAccountImpl<ContractState>;
 
+    // SRC5
     component!(path: src5_component, storage: src5, event: SRC5Events);
     #[abi(embed_v0)]
     impl SRC5 = src5_component::SRC5Impl<ContractState>;
 
+    // Upgradeable
     component!(path: UpgradeableComponent, storage: upgradeable, event: UpgradeableEvent);
     impl UpgradeableInternalImpl = UpgradeableComponent::InternalImpl<ContractState>;
+
+   
 
     #[storage]
     struct Storage {
@@ -119,9 +133,11 @@ mod CartridgeAccount {
         #[substorage(v0)]
         execute_from_outside: outside_execution_component::Storage,
         #[substorage(v0)]
+        delegate_account: delegate_account_component::Storage,
+        #[substorage(v0)]
         src5: src5_component::Storage,
         #[substorage(v0)]
-        upgradeable: UpgradeableComponent::Storage
+        upgradeable: UpgradeableComponent::Storage,
     }
 
     #[event]
@@ -136,6 +152,8 @@ mod CartridgeAccount {
         ExternalOwnersEvent: external_owners_component::Event,
         #[flat]
         ExecuteFromOutsideEvents: outside_execution_component::Event,
+        #[flat]
+        DelegateAccountEvents: delegate_account_component::Event,
         #[flat]
         SRC5Events: src5_component::Event,
         #[flat]
@@ -424,7 +442,9 @@ mod CartridgeAccount {
         ) {
             let chain_id = get_tx_info().unbox().chain_id;
             let owner_guid = self.read_owner().into_guid();
-            // We now need to hash message_hash with the size of the array: (change_owner selector, chain id, contract address, old_owner_guid)
+            // We now need to hash message_hash with the size of the array: (change_owner selector,
+            // chain id, contract address, old_owner_guid)
+            // 
             // https://github.com/starkware-libs/cairo-lang/blob/b614d1867c64f3fb2cf4a4879348cfcf87c3a5a7/src/starkware/cairo/common/hash_state.py#L6
             let message_hash = PedersenTrait::new(0)
                 .update(selector!("change_owner"))

@@ -63,6 +63,10 @@ class ControllerConnector extends Connector {
   username() {
     return this.controller.username();
   }
+
+  async delegateAccount() {
+    return this.controller.delegateAccount();
+  }
 }
 
 export default ControllerConnector;
