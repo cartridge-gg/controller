@@ -20,8 +20,21 @@ export function InsufficientFunds({
       description="You'll need more gas to complete this transaction. Send some ETH to your controller address."
     >
       <Content>
-        <VStack w="full" align="flex-start" fontSize="sm" borderRadius="sm" spacing="1px">
-          <Text color="text.secondary" fontSize="11px" w="full" bg="solid.primary" as="b" p={3}>
+        <VStack
+          w="full"
+          align="flex-start"
+          fontSize="sm"
+          borderRadius="sm"
+          spacing="1px"
+        >
+          <Text
+            color="text.secondary"
+            fontSize="11px"
+            w="full"
+            bg="solid.primary"
+            as="b"
+            p={3}
+          >
             BALANCE
           </Text>
 
@@ -32,24 +45,38 @@ export function InsufficientFunds({
             overflow="hidden"
             spacing="1px"
           >
-            <HStack boxSize="full" flex="2" px="10px" bg="solid.primary" color="text.error">
+            <HStack
+              boxSize="full"
+              flex="2"
+              px="10px"
+              bg="solid.primary"
+              color="text.error"
+            >
               <EthereumIcon boxSize="24px" color="inherit" />{" "}
               <Text color="inherit">{balance}</Text>
             </HStack>
 
-            <HStack
-              bg="solid.primary"
-              boxSize="full"
-              flex="1"
-              justify="center"
-            >
+            <HStack bg="solid.primary" boxSize="full" flex="1" justify="center">
               <StarknetIcon boxSize="24px" /> <Text>Sepolia</Text>
             </HStack>
           </HStack>
         </VStack>
 
-        <VStack w="full" align="flex-start" fontSize="sm" borderRadius="sm" spacing="1px">
-          <Text color="text.secondary" fontSize="11px" w="full" bg="solid.primary" as="b" p={3}>
+        <VStack
+          w="full"
+          align="flex-start"
+          fontSize="sm"
+          borderRadius="sm"
+          spacing="1px"
+        >
+          <Text
+            color="text.secondary"
+            fontSize="11px"
+            w="full"
+            bg="solid.primary"
+            as="b"
+            p={3}
+          >
             ADDRESS
           </Text>
 
@@ -67,7 +94,7 @@ export function InsufficientFunds({
               px="10px"
               cursor="pointer"
               _hover={{
-                opacity: 0.8
+                opacity: 0.8,
               }}
               onClick={() => {
                 navigator.clipboard.writeText(address.toString());

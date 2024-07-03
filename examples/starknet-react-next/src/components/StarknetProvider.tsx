@@ -1,4 +1,4 @@
-import { Chain, sepolia } from "@starknet-react/chains";
+import { Chain, mainnet, sepolia } from "@starknet-react/chains";
 import { Connector, StarknetConfig, starkscan } from "@starknet-react/core";
 import { PropsWithChildren } from "react";
 import CartridgeConnector from "@cartridge/connector";
@@ -14,18 +14,29 @@ export function StarknetProvider({ children }: PropsWithChildren) {
       chains={[sepolia]}
       connectors={connectors}
       explorer={starkscan}
-      provider={(_chain: Chain) =>
-        new RpcProvider({
-          nodeUrl: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
-        })
-      }
+      provider={provider}
     >
       {children}
     </StarknetConfig>
   );
 }
 
-const url = "https://keychain-git-client-deploy.preview.cartridge.gg/";
+// const url = "https://keychain-git-client-deploy.preview.cartridge.gg/";
+const url = "http://localhost:3001/";
+
+function provider(chain: Chain) {
+  switch (chain) {
+    case mainnet:
+      return new RpcProvider({
+        nodeUrl: process.env.NEXT_PUBLIC_RPC_MAINNET,
+      });
+    case sepolia:
+    default:
+      return new RpcProvider({
+        nodeUrl: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
+      });
+  }
+}
 
 const connectors = [
   new CartridgeConnector(
@@ -59,7 +70,7 @@ const connectors = [
       // paymaster: {
       //   caller: shortString.encodeShortString("ANY_CALLER"),
       // },
-      // theme: "dope-wars",
+      theme: "dope-wars",
       // colorMode: "light"
     },
   ) as never as Connector,

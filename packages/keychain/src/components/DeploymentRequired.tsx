@@ -7,6 +7,7 @@ import { ExternalIcon, PacmanIcon } from "@cartridge/ui";
 import { useController } from "hooks/controller";
 import { ErrorAlert } from "./ErrorAlert";
 import NextLink from "next/link";
+import { Funding } from "./Funding";
 
 export function DeploymentRequired({
   onClose,
@@ -22,6 +23,20 @@ export function DeploymentRequired({
   const [fundingRequired, setFundingRequired] = useState<boolean>(false);
   const [error, setError] = useState<Error>();
 
+  const deployAccount = useCallback(async () => {
+    try {
+      const hash = await account.requestDeployment();
+      setDeployHash(hash);
+    } catch (e) {
+      if (e.message.includes("account already deployed")) {
+        account.status = Status.DEPLOYED;
+        setStatus(Status.DEPLOYED);
+      } else {
+        setError(e);
+      }
+    }
+  }, [account]);
+
   useEffect(() => {
     if (account.chainId === constants.StarknetChainId.SN_MAIN) {
       setFundingRequired(true);
@@ -29,7 +44,7 @@ export function DeploymentRequired({
     }
 
     deployAccount();
-  }, [account]);
+  }, [account, deployAccount]);
 
   useEffect(() => {
     const checkStatus = () => {
@@ -47,20 +62,6 @@ export function DeploymentRequired({
 
     return () => clearInterval(id);
   }, [account]);
-
-  const deployAccount = useCallback(async () => {
-    try {
-      const hash = await account.requestDeployment();
-      setDeployHash(hash);
-    } catch (e) {
-      if (e.message.includes("account already deployed")) {
-        account.status = Status.DEPLOYED;
-        setStatus(Status.DEPLOYED);
-      } else {
-        setError(e);
-      }
-    }
-  }, []);
 
   if (status === Status.DEPLOYED) {
     return <>{children}</>;
@@ -126,25 +127,3 @@ export function DeploymentRequired({
     </Container>
   );
 }
-
-// Temporary place holder for funding UI
-const Funding = () => {
-  const { controller } = useController();
-  const account = controller.account;
-
-  return (
-    <Container variant="connect" title="Funding Required for Starknet Mainnet">
-      <Footer>
-        <Button
-          onClick={async () => {
-            const res = await account.cartridge.deploySelf();
-
-            console.log({ res });
-          }}
-        >
-          Deploy
-        </Button>
-      </Footer>
-    </Container>
-  );
-};

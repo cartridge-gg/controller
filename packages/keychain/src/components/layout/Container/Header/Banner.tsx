@@ -104,7 +104,7 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
             pb={6}
           />
 
-          <HStack w="full" p={4} gap={4}>
+          <HStack w="full" p={4} gap={4} minW={0}>
             {!!Icon ? (
               <Square size="44px" bg="solid.primary">
                 <Icon boxSize={8} />
@@ -117,13 +117,23 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
               <Image src={theme.icon} boxSize="44px" alt="Controller Icon" />
             )}
 
-            <VStack align="flex-start" gap={1}>
-              <Text fontSize="lg" fontWeight="semibold" whiteSpace="nowrap">
+            <VStack w="full" align="stretch" gap={1} minW={0}>
+              <Text
+                w="full"
+                fontSize="lg"
+                fontWeight="semibold"
+                whiteSpace="nowrap"
+              >
                 {title}
               </Text>
 
               {description && (
-                <Text fontSize="xs" color="text.secondary">
+                <Text
+                  w="full"
+                  fontSize="xs"
+                  color="text.secondary"
+                  overflowWrap="break-word"
+                >
                   {description}
                 </Text>
               )}
