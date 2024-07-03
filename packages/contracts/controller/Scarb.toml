@@ -11,7 +11,7 @@ alexandria_merkle_tree.workspace = true
 snforge_std.workspace = true
 openzeppelin.workspace = true
 controller_auth.workspace = true
-controller_session.workspace = true
+
 
 
 [[target.starknet-contract]]

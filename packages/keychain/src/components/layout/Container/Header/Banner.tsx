@@ -114,7 +114,7 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
                 {icon}
               </Square>
             ) : (
-              <Image src={theme.icon} boxSize={11} alt="Controller Icon" />
+              <Image src={theme.icon} boxSize="44px" alt="Controller Icon" />
             )}
 
             <VStack align="flex-start" gap={1}>
@@ -123,7 +123,7 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
               </Text>
 
               {description && (
-                <Text fontSize="xs" color="text.secondary" whiteSpace="nowrap">
+                <Text fontSize="xs" color="text.secondary">
                   {description}
                 </Text>
               )}

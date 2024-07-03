@@ -59,4 +59,8 @@ export class CartridgeAccount {
 * @returns {Promise<any>}
 */
   deploySelf(salt: any, class_hash: any): Promise<any>;
+/**
+* @returns {Promise<any>}
+*/
+  delegateAccount(): Promise<any>;
 }

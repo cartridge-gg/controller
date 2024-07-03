@@ -7,13 +7,7 @@ use crate::{
     hash::{MessageHashRev1, StarknetDomain, StructHashRev1},
 };
 
-#[derive(Clone, Debug, PartialEq)]
-pub struct RawSession {
-    pub(crate) expires_at: u64,
-    pub(crate) allowed_methods_root: FieldElement,
-    pub(crate) metadata_hash: FieldElement,
-    pub(crate) session_key_guid: FieldElement,
-}
+pub type RawSession = crate::abigen::controller::Session;
 
 impl StructHashRev1 for RawSession {
     fn get_struct_hash_rev_1(&self) -> FieldElement {
@@ -59,47 +53,6 @@ pub struct RawSessionToken {
     pub(crate) session_signature: SignerSignature,
     pub(crate) guardian_signature: SignerSignature,
     pub(crate) proofs: Vec<Vec<FieldElement>>,
-}
-
-impl CairoSerde for RawSession {
-    type RustType = Self;
-
-    fn cairo_serialized_size(rust: &Self::RustType) -> usize {
-        u64::cairo_serialized_size(&rust.expires_at)
-            + FieldElement::cairo_serialized_size(&rust.allowed_methods_root)
-            + FieldElement::cairo_serialized_size(&rust.metadata_hash)
-            + FieldElement::cairo_serialized_size(&rust.session_key_guid)
-    }
-
-    fn cairo_serialize(rust: &Self::RustType) -> Vec<FieldElement> {
-        [
-            u64::cairo_serialize(&rust.expires_at),
-            FieldElement::cairo_serialize(&rust.allowed_methods_root),
-            FieldElement::cairo_serialize(&rust.metadata_hash),
-            FieldElement::cairo_serialize(&rust.session_key_guid),
-        ]
-        .concat()
-    }
-
-    fn cairo_deserialize(
-        felts: &[FieldElement],
-        mut offset: usize,
-    ) -> cainome::cairo_serde::Result<Self::RustType> {
-        let expires_at = u64::cairo_deserialize(felts, offset)?;
-        offset += u64::cairo_serialized_size(&expires_at);
-        let allowed_methods_root = FieldElement::cairo_deserialize(felts, offset)?;
-        offset += FieldElement::cairo_serialized_size(&allowed_methods_root);
-        let metadata_hash = FieldElement::cairo_deserialize(felts, offset)?;
-        offset += FieldElement::cairo_serialized_size(&metadata_hash);
-        let session_key_guid = FieldElement::cairo_deserialize(felts, offset)?;
-
-        Ok(Self {
-            expires_at,
-            allowed_methods_root,
-            metadata_hash,
-            session_key_guid,
-        })
-    }
 }
 
 impl CairoSerde for RawSessionToken {

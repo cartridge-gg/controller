@@ -212,6 +212,19 @@ class Controller {
 
     return this.keychain.username();
   }
+
+  async delegateAccount() {
+    if (!this.account) {
+      console.error(new NotReadyToConnect().message);
+      return null;
+    }
+
+    return this.account.callContract({
+      contractAddress: this.account.address,
+      entrypoint: "delegate_account",
+      calldata: [],
+    });
+  }
 }
 
 export * from "./types";

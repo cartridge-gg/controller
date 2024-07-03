@@ -34,8 +34,8 @@ fn get_merkle_leaf(call: @Call) -> felt252 {
     poseidon_hash_span(array![ALLOWED_METHOD_HASH_REV_1, (*call.to).into(), *call.selector].span())
 }
 
-fn authorization_hash(signature: @SessionToken) -> felt252 {
-    poseidon_hash_span(signature.session_authorization.clone())
+fn authorization_hash(session_authorization: Span<felt252>) -> felt252 {
+    poseidon_hash_span(session_authorization)
 }
 
 trait IStructHashRev1<T> {

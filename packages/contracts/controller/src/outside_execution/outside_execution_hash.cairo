@@ -15,7 +15,7 @@
 // This file is based on:
 // https://github.com/argentlabs/argent-contracts-starknet/blob/main/src/common/outside_execution.cairo
 
-use controller_session::hash::{StarknetDomain, IStructHashRev1, get_message_hash_rev_1_with_precalc,};
+use controller::session::hash::{StarknetDomain, IStructHashRev1, get_message_hash_rev_1_with_precalc,};
 use controller::outside_execution::interface::{OutsideExecution};
 use hash::{HashStateTrait, HashStateExTrait};
 use pedersen::PedersenTrait;
