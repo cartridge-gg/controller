@@ -1,4 +1,4 @@
-import { constants, shortString } from "starknet";
+import { constants } from "starknet";
 import { Container, Footer, Content } from "components/layout";
 import { useCallback, useEffect, useState } from "react";
 import { Status } from "utils/account";

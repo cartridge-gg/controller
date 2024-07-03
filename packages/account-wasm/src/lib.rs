@@ -239,15 +239,16 @@ impl CartridgeAccount {
 
     #[wasm_bindgen(js_name = deploySelf)]
     pub async fn deploy_self(&self) -> Result<JsValue> {
-        let webauthn_signer = self.device_signer.signer_pub_data();
-        let mut calldata = Vec::<WebauthnSigner>::cairo_serialize(&vec![webauthn_signer]);
-        calldata[0] = FieldElement::TWO; // incorrect signer enum from serialization
-        calldata.push(FieldElement::ONE); // no guardian
+        let webauthn_calldata = self.device_signer.signer_pub_data();
+        let mut constructor_calldata =
+            Vec::<WebauthnSigner>::cairo_serialize(&vec![webauthn_calldata]);
+        constructor_calldata[0] = FieldElement::TWO; // incorrect signer enum from serialization
+        constructor_calldata.push(FieldElement::ONE); // no guardian
 
         let factory = CartridgeAccountFactory::new(
             FieldElement::from_str(ACCOUNT_CLASS_HASH)?,
             self.account.chain_id(),
-            calldata,
+            constructor_calldata,
             self.account.clone(),
             self.account.provider(),
         );
