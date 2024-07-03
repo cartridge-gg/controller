@@ -25,9 +25,17 @@ trait IUserAccount<TContractState> {
 }
 
 #[starknet::interface]
-trait IDeclarer<TState> {
-    fn __validate_declare__(ref self: TState, class_hash: felt252) -> felt252;
+trait ICartridgeAccount<TContractState> {
+    fn __validate_declare__(ref self: TContractState, class_hash: felt252) -> felt252;
+    fn __validate_deploy__(
+        ref self: TContractState, 
+        class_hash: felt252, 
+        contract_address_salt: felt252, 
+        owner: Signer, 
+        guardian: Option<Signer>
+    ) -> felt252;
 }
+
 
 #[starknet::interface]
 trait IAllowedCallerCallback<TState> {
@@ -67,7 +75,7 @@ mod CartridgeAccount {
     };
     use hash::HashStateTrait;
     use pedersen::PedersenTrait;
-    use controller::account::{IAccount, IUserAccount, IDeclarer, IAllowedCallerCallback};
+    use controller::account::{IAccount, IUserAccount, ICartridgeAccount, IAllowedCallerCallback};
     use controller::outside_execution::{
         outside_execution::outside_execution_component, interface::IOutsideExecutionCallback
     };
@@ -247,7 +255,7 @@ mod CartridgeAccount {
     }
 
     #[abi(embed_v0)]
-    impl DeclarerImpl of IDeclarer<ContractState> {
+    impl CartridgeAccountImpl of ICartridgeAccount<ContractState> {
         fn __validate_declare__(ref self: ContractState, class_hash: felt252) -> felt252 {
             let tx_info = get_tx_info().unbox();
             assert(tx_info.paymaster_data.is_empty(), 'unsupported-paymaster');
@@ -268,6 +276,22 @@ mod CartridgeAccount {
                         tx_info.transaction_hash, self.parse_signature_array(tx_info.signature)
                     );
             }
+            starknet::VALIDATED
+        }
+    
+        fn __validate_deploy__(
+            ref self: ContractState,
+            class_hash: felt252,
+            contract_address_salt: felt252,
+            owner: Signer, 
+            guardian: Option<Signer>,
+        ) -> felt252 {
+            let tx_info = get_tx_info().unbox();
+            assert(tx_info.paymaster_data.is_empty(), 'unsupported-paymaster');
+            self
+                .assert_valid_span_signature(
+                    tx_info.transaction_hash, self.parse_signature_array(tx_info.signature)
+                );
             starknet::VALIDATED
         }
     }
@@ -306,25 +330,7 @@ mod CartridgeAccount {
             }
         }
     }
-
-    #[abi(embed_v0)]
-    impl DeployableImpl of interface::IDeployable<ContractState> {
-        fn __validate_deploy__(
-            self: @ContractState,
-            class_hash: felt252,
-            contract_address_salt: felt252,
-            public_key: felt252
-        ) -> felt252 {
-            let tx_info = get_tx_info().unbox();
-            assert(tx_info.paymaster_data.is_empty(), 'unsupported-paymaster');
-            self
-                .assert_valid_span_signature(
-                    tx_info.transaction_hash, self.parse_signature_array(tx_info.signature)
-                );
-            starknet::VALIDATED
-        }
-    }
-
+    
     impl SessionCallbackImpl of ISessionCallback<ContractState> {
         fn session_callback(
             self: @ContractState, session_hash: felt252, authorization_signature: Span<felt252>
