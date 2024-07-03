@@ -74,4 +74,13 @@ export const defaultPresets: ControllerThemePresets = {
       primary: "#33FF33",
     },
   },
+  "tale-weaver": {
+    id: "tale-weaver",
+    name: "Tale Weaver",
+    icon: "/whitelabel/tale-weaver/icon.png",
+    cover: "/whitelabel/tale-weaver/cover.png",
+    colors: {
+      primary: "#fce377",
+    },
+  }
 };
