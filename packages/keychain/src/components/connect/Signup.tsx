@@ -92,8 +92,7 @@ function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
       cacheTime: 10000000,
       refetchInterval: (data) => (!data ? 1000 : undefined),
       onSuccess: async (data) => {
-        console.log({ chainId });
-        // mainnet deployment requires user self-fund account
+        // mainnet deployment requires user to self fund account
         if (chainId !== constants.StarknetChainId.SN_MAIN) {
           await client.request(DeployAccountDocument, {
             id: values.username,

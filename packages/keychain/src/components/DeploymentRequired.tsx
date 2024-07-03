@@ -1,13 +1,12 @@
 import { constants, shortString } from "starknet";
 import { Container, Footer, Content } from "components/layout";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Status } from "utils/account";
 import { Button, Link, Text } from "@chakra-ui/react";
 import { ExternalIcon, PacmanIcon } from "@cartridge/ui";
 import { useController } from "hooks/controller";
 import { ErrorAlert } from "./ErrorAlert";
 import NextLink from "next/link";
-import { useConnection } from "hooks/connection";
 
 export function DeploymentRequired({
   onClose,
@@ -128,23 +127,19 @@ export function DeploymentRequired({
   );
 }
 
+// Temporary place holder for funding UI
 const Funding = () => {
   const { controller } = useController();
-  const { origin } = useConnection();
   const account = controller.account;
-  const session = controller.session(origin);
 
   return (
     <Container variant="connect" title="Funding Required for Starknet Mainnet">
       <Footer>
         <Button
           onClick={async () => {
-            console.log(
-              await account.cartridge.deploySelf(
-                shortString.encodeShortString(account.username),
-                "0x228e91aad32f01b4c64a9d307352f67ea44d7e3fa88a90c9caf72423eed083c",
-              ),
-            );
+            const res = await account.cartridge.deploySelf();
+
+            console.log({ res });
           }}
         >
           Deploy

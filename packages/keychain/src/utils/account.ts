@@ -67,6 +67,7 @@ class Account extends BaseAccount {
       address,
       webauthn.rpId,
       webauthn.origin,
+      username,
       webauthn.credentialId,
       webauthn.publicKey,
     );
@@ -118,7 +119,7 @@ class Account extends BaseAccount {
           error.message.includes("Contract not found")
         ) {
           this.status = Status.COUNTERFACTUAL;
-          //setTimeout(() => this.sync(), 1000);
+          setTimeout(() => this.sync(), 1000);
         } else {
           throw error;
         }

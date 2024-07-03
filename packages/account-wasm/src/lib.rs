@@ -1,3 +1,4 @@
+mod constants;
 mod paymaster;
 mod types;
 mod utils;
@@ -23,6 +24,7 @@ use account_sdk::signers::HashSigner;
 use account_sdk::wasm_webauthn::CredentialID;
 use base64::{engine::general_purpose, Engine};
 use cainome::cairo_serde::CairoSerde;
+use constants::ACCOUNT_CLASS_HASH;
 use coset::{CborSerializable, CoseKey};
 use factory::cartridge::CartridgeAccountFactory;
 use factory::AccountDeployment;
@@ -30,6 +32,7 @@ use paymaster::PaymasterRequest;
 use serde_wasm_bindgen::{from_value, to_value};
 use starknet::accounts::{Account, ConnectedAccount};
 use starknet::core::types::{BlockId, BlockTag, FunctionCall};
+use starknet::core::utils as starknetutils;
 use starknet::macros::{selector, short_string};
 use starknet::providers::Provider;
 use starknet::signers::SigningKey;
@@ -53,6 +56,7 @@ type Result<T> = std::result::Result<T, JsError>;
 pub struct CartridgeAccount {
     account: CartridgeGuardianAccount<Arc<JsonRpcClient<HttpTransport>>, DeviceSigner, SigningKey>,
     device_signer: DeviceSigner,
+    username: String,
     rpc_url: Url,
 }
 
@@ -66,15 +70,18 @@ impl CartridgeAccount {
     /// - `address`: The blockchain address associated with the account.
     /// - `rp_id`: Relying Party Identifier, a string that uniquely identifies the WebAuthn relying party.
     /// - `origin`: The origin of the WebAuthn request. Example https://cartridge.gg
+    /// - `username`: Username associated with the account.
     /// - `credential_id`: Base64 encoded bytes of the raw credential ID generated during the WebAuthn registration process.
     /// - `public_key`: Base64 encoded bytes of the public key generated during the WebAuthn registration process (COSE format).
     ///
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         rpc_url: String,
         chain_id: String,
         address: String,
         rp_id: String,
         origin: String,
+        username: String,
         credential_id: String,
         public_key: String,
     ) -> Result<CartridgeAccount> {
@@ -105,6 +112,7 @@ impl CartridgeAccount {
         Ok(CartridgeAccount {
             account,
             device_signer,
+            username,
             rpc_url,
         })
     }
@@ -230,24 +238,44 @@ impl CartridgeAccount {
     }
 
     #[wasm_bindgen(js_name = deploySelf)]
-    pub async fn deploy_self(&self, salt: JsValue, class_hash: JsValue) -> Result<JsValue> {
+    pub async fn deploy_self(&self) -> Result<JsValue> {
         let webauthn_signer = self.device_signer.signer_pub_data();
         let mut calldata = Vec::<WebauthnSigner>::cairo_serialize(&vec![webauthn_signer]);
         calldata[0] = FieldElement::TWO; // incorrect signer enum from serialization
         calldata.push(FieldElement::ONE); // no guardian
 
         let factory = CartridgeAccountFactory::new(
-            serde_wasm_bindgen::from_value(class_hash)?,
+            FieldElement::from_str(ACCOUNT_CLASS_HASH)?,
             self.account.chain_id(),
             calldata,
             self.account.clone(),
             self.account.provider(),
         );
 
-        let deployment = AccountDeployment::new(serde_wasm_bindgen::from_value(salt)?, &factory);
-        let result = deployment.send().await?;
+        let deployment = AccountDeployment::new(
+            starknetutils::cairo_short_string_to_felt(&self.username)?,
+            &factory,
+        );
+        let res = deployment.send().await?;
 
-        Ok(to_value(&result)?)
+        Ok(to_value(&res)?)
+    }
+
+    #[wasm_bindgen(js_name = delegateAccount)]
+    pub async fn delegate_account(&self) -> Result<JsValue> {
+        let res = self
+            .account
+            .provider()
+            .call(
+                FunctionCall {
+                    contract_address: self.account.address(),
+                    entry_point_selector: selector!("delegate_account"),
+                    calldata: vec![],
+                },
+                BlockId::Tag(BlockTag::Pending),
+            )
+            .await?;
+        Ok(to_value(&res[0])?)
     }
 
     async fn session_account(
@@ -274,22 +302,5 @@ impl CartridgeAccount {
             details.credentials.authorization,
             session,
         ))
-    }
-
-    #[wasm_bindgen(js_name = delegateAccount)]
-    pub async fn delegate_account(&self) -> Result<JsValue> {
-        let res = self
-            .account
-            .provider()
-            .call(
-                FunctionCall {
-                    contract_address: self.account.address(),
-                    entry_point_selector: selector!("delegate_account"),
-                    calldata: vec![],
-                },
-                BlockId::Tag(BlockTag::Pending),
-            )
-            .await?;
-        Ok(to_value(&res[0])?)
     }
 }
