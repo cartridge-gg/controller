@@ -106,6 +106,7 @@ export interface Keychain {
   signDeclareTransaction(transaction: DeclareSignerDetails): Promise<Signature>;
 
   username(): string;
+  delegateAccount(): string;
 }
 
 export interface Modal {

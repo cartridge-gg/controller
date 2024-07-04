@@ -13,8 +13,10 @@ import {
   connectToController,
   ConnectionCtx,
   LogoutCtx,
+  SetDelegateCtx,
+  ExecuteCtx,
 } from "utils/connection";
-import { RpcProvider, constants, shortString } from "starknet";
+import { RpcProvider, CallData, constants, shortString } from "starknet";
 import { Policy, Prefund, ResponseCodes } from "@cartridge/controller";
 import { mergeDefaultETHPrefund } from "utils/token";
 import { isIframe } from "components/connect/utils";
@@ -36,6 +38,11 @@ type ConnectionContextValue = {
   setController: (controller: Controller) => void;
   cancel: () => void;
   logout: (context: ConnectionCtx) => void;
+  setDelegate: (context: ConnectionCtx) => void;
+  setDelegateTransaction: (
+    context: ConnectionCtx,
+    delegateAddress: string,
+  ) => void;
 };
 
 export function ConnectionProvider({ children }: PropsWithChildren) {
@@ -147,6 +154,35 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
     } as LogoutCtx);
   }, []);
 
+  const setDelegate = useCallback((context: ConnectionCtx) => {
+    setContext({
+      origin: context.origin,
+      type: "set-delegate",
+      resolve: context.resolve,
+      reject: context.reject,
+    } as SetDelegateCtx);
+  }, []);
+
+  const setDelegateTransaction = useCallback(
+    (context: ConnectionCtx, delegateAddress: string) => {
+      setContext({
+        origin: context.origin,
+        transactions: [
+          {
+            contractAddress: controller.address,
+            entrypoint: "set_delegate_account",
+            calldata: CallData.compile([delegateAddress]),
+          },
+        ],
+        transactionsDetail: {},
+        type: "execute",
+        resolve: context.resolve,
+        reject: context.reject,
+      } as ExecuteCtx);
+    },
+    [controller?.address],
+  );
+
   return (
     <ConnectionContext.Provider
       value={{
@@ -164,6 +200,8 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
         setContext,
         cancel,
         logout,
+        setDelegate,
+        setDelegateTransaction,
       }}
     >
       {children}

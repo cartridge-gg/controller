@@ -238,16 +238,12 @@ class Controller {
   }
 
   async delegateAccount() {
-    if (!this.account) {
+    if (!this.keychain) {
       console.error(new NotReadyToConnect().message);
       return null;
     }
 
-    return this.account.callContract({
-      contractAddress: this.account.address,
-      entrypoint: "delegate_account",
-      calldata: [],
-    });
+    return await this.keychain.delegateAccount();
   }
 }
 

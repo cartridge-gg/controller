@@ -65,7 +65,7 @@ class ControllerConnector extends Connector {
   }
 
   async delegateAccount() {
-    return this.controller.delegateAccount();
+    return await this.controller.delegateAccount();
   }
 
   async openMenu() {

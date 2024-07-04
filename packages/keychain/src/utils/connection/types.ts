@@ -18,7 +18,8 @@ export type ConnectionCtx =
   | LogoutCtx
   | ExecuteCtx
   | SignMessageCtx
-  | OpenMenuCtx;
+  | OpenMenuCtx
+  | SetDelegateCtx;
 
 export type ConnectCtx = {
   origin: string;
@@ -62,4 +63,12 @@ export type OpenMenuCtx = {
   account: string;
   resolve: (res: ConnectError) => void;
   reject: (reason?: unknown) => void;
+};
+
+export type SetDelegateCtx = {
+  origin: string;
+  type: "set-delegate";
+  account: string;
+  resolve: (res: ConnectError) => void; // ?
+  reject: (reason?: unknown) => void; // ?
 };

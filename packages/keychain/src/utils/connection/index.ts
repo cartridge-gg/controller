@@ -14,6 +14,7 @@ import { signMessageFactory } from "./sign";
 import { username } from "./username";
 import { ConnectionCtx } from "./types";
 import { openMenuFactory } from "./menu";
+import { delegateAccount, setDelegateFactory } from "./delegate";
 
 export function connectToController({
   setOrigin,
@@ -49,8 +50,10 @@ export function connectToController({
       openMenu: normalize(validate(openMenuFactory(setContext))),
       session: normalize(session),
       sessions: normalize(sessions),
+      setDelegate: normalize(validate(setDelegateFactory(setContext))),
       reset: normalize(() => () => setContext(undefined)),
       username: normalize(username),
+      delegateAccount: normalize(delegateAccount),
     },
   });
 }
