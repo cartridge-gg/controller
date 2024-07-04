@@ -1,5 +1,5 @@
 import { Container, Content, Footer } from "components/layout";
-import { Button, HStack, Image, Text, VStack } from "@chakra-ui/react";
+import { Button, HStack, Image, Spacer, Text, VStack } from "@chakra-ui/react";
 import {
   PropsWithChildren,
   ReactElement,
@@ -16,8 +16,8 @@ import {
   useInjectedConnectors,
   voyager,
 } from "@starknet-react/core";
-import { RpcProvider } from "starknet";
-import { AlertIcon, CoinsIcon, CopyHash, EthereumIcon } from "@cartridge/ui";
+import { Contract, RpcProvider, uint256 } from "starknet";
+import { AlertIcon, CheckIcon, CoinsIcon, CopyHash, EthereumIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 
 export function Funding() {
@@ -45,6 +45,7 @@ type TokenInfo = {
   address: string;
   logo: string;
   min: string;
+  isFunded: boolean;
 };
 
 function useTokens() {
@@ -69,6 +70,7 @@ function useTokens() {
           symbol: info.symbol,
           decimals: info.decimals,
           logo: info.logo_url,
+          isFunded: false,
         };
       });
 
@@ -79,11 +81,15 @@ function useTokens() {
   return tokens;
 }
 
+const ETH_CONTRACT = "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"
+
 function FundingInner() {
   const { account } = useAccount();
   const { connect, connectors } = useConnect();
   const { controller } = useConnection();
+  const [isEthFunded, setIsEthFunded] = useState(false);
   const tokens = useTokens();
+
 
   const onConnect = useCallback(
     (connector: Connector) => () => {
@@ -112,25 +118,27 @@ function FundingInner() {
   //   await account.waitForTransaction(prefundRes.transaction_hash, { retryInterval: 1000 });
   // }, [account, controller])
 
-  // const checkFunds = useCallback(async () => {
-  //   const { abi } = await account.rpc.getClassAt(account.address);
-  //   const contract = new Contract(abi, account.address, account.rpc);
-  //   const balance = await contract.get_balance();
+  const checkFunds = useCallback(async () => {
+    const { abi } = await controller.account.rpc.getClassAt(ETH_CONTRACT);
+    const contract = new Contract(abi, ETH_CONTRACT, controller.account.rpc);
+    const { balance } = await contract.balanceOf(controller.account.address);
 
-  //   //   TODO: check
-  // }, [account])
+    if (uint256.uint256ToBN(balance) >= 10000000000000000n) {
+      setIsEthFunded(true)
+    }
+  }, [controller.account])
 
-  // useEffect(() => {
-  //   checkFunds();
-  //   // prefundAndDeploy();
+  useEffect(() => {
+    checkFunds();
+    // prefundAndDeploy();
 
-  //   // async function prefundAndDeploy() {
-  //   //   await prefund();
-  //   //   // const res = await controller.account.cartridge.deploySelf();
-  //   //   // TODO: set
-  //   // }
+    // async function prefundAndDeploy() {
+    //   await prefund();
+    //   // const res = await controller.account.cartridge.deploySelf();
+    //   // TODO: set
+    // }
 
-  // }, [checkFunds]);
+  }, [checkFunds]);
 
   return (
     <Container
@@ -146,7 +154,7 @@ function FundingInner() {
     >
       <Content>
         <Text color="text.secondary" fontSize="sm">
-          Send below assets to your controller address.
+          Send assets below to your controller address.
         </Text>
 
         <VStack w="full" borderRadius="md" overflow="hidden" gap={0.25}>
@@ -160,6 +168,8 @@ function FundingInner() {
           >
             <EthereumIcon fontSize={20} />
             <Text w="full">0.01 ETH</Text>
+            <Spacer />
+            {isEthFunded && <CheckIcon />}
           </HStack>
 
           {tokens.map((t) => (
@@ -175,7 +185,7 @@ function FundingInner() {
               {t.logo}
               <Image src={t.logo} alt={`${t.name} ERC-20 Token Logo`} h={5} />
               <Text w="full">
-                {parseInt(t.min, 16)} {t.symbol}
+                {t.min} {t.symbol}
               </Text>
             </HStack>
           ))}
@@ -237,9 +247,7 @@ function Warning({
 }
 
 function ExternalWalletProvider({ children }: PropsWithChildren) {
-  const { connectors } = useInjectedConnectors({
-    // recommended: [argent(), braavos()],
-  });
+  const { connectors } = useInjectedConnectors({});
 
   return (
     <StarknetConfig

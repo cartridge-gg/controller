@@ -106,15 +106,15 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
 
           <HStack w="full" p={4} gap={4} minW={0}>
             {!!Icon ? (
-              <Square size="44px" bg="solid.primary">
+              <Square size="44px" bg="solid.primary" borderRadius="md">
                 <Icon boxSize={8} />
               </Square>
             ) : !!icon ? (
-              <Square size="44px" bg="solid.primary">
+              <Square size="44px" bg="solid.primary" borderRadius="md">
                 {icon}
               </Square>
             ) : (
-              <Image src={theme.icon} boxSize="44px" alt="Controller Icon" />
+              <Image src={theme.icon} boxSize="44px" alt="Controller Icon" borderRadius="md" />
             )}
 
             <VStack w="full" align="stretch" gap={1} minW={0}>
