@@ -1,42 +1,89 @@
 import { Container, Content, Footer } from "components/layout";
-import { Button, HStack, Text, VStack } from "@chakra-ui/react";
-import { useController } from "hooks/controller";
-import { PropsWithChildren, ReactElement, useCallback, useEffect } from "react";
-import { sepolia, mainnet, Chain } from "@starknet-react/chains";
+import { Button, HStack, Image, Text, VStack } from "@chakra-ui/react";
+import {
+  PropsWithChildren,
+  ReactElement,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
+import { mainnet } from "@starknet-react/chains";
 import {
   Connector,
   StarknetConfig,
-  argent,
-  braavos,
   useAccount,
   useConnect,
   useInjectedConnectors,
   voyager,
 } from "@starknet-react/core";
 import { RpcProvider } from "starknet";
-import { AlertIcon, CoinsIcon, CopyHash } from "@cartridge/ui";
+import { AlertIcon, CoinsIcon, CopyHash, EthereumIcon } from "@cartridge/ui";
+import { useConnection } from "hooks/connection";
 
 export function Funding() {
-  const {
-    controller: { account },
-  } = useController();
-
-  const deploy = useCallback(async () => {
-    const res = await account.cartridge.deploySelf();
-    console.log({ res });
-  }, [account.cartridge]);
-
   return (
-    <StarknetProvider>
+    <ExternalWalletProvider>
       <FundingInner />
-    </StarknetProvider>
+    </ExternalWalletProvider>
   );
+}
+
+type TokenInfoRaw = {
+  name: string;
+  symbol: string;
+  decimals: number;
+  l2_token_address: string;
+  sort_order: string;
+  total_supply: number;
+  logo_url: string;
+};
+
+type TokenInfo = {
+  name: string;
+  symbol: string;
+  decimals: number;
+  address: string;
+  logo: string;
+  min: string;
+};
+
+function useTokens() {
+  const { controller, prefunds } = useConnection();
+  const [tokens, setTokens] = useState<TokenInfo[]>([]);
+
+  useEffect(() => {
+    fetchTokneInfo();
+
+    async function fetchTokneInfo() {
+      const res = await fetch("https://mainnet-api.ekubo.org/tokens");
+      const data: TokenInfoRaw[] = await res.json();
+      const tokens = prefunds.map((t) => {
+        const info = data.find(
+          ({ l2_token_address }) => l2_token_address === t.address,
+        );
+
+        return {
+          address: t.address,
+          min: t.min,
+          name: info.name,
+          symbol: info.symbol,
+          decimals: info.decimals,
+          logo: info.logo_url,
+        };
+      });
+
+      setTokens(tokens);
+    }
+  }, [prefunds, controller.account.address]);
+
+  return tokens;
 }
 
 function FundingInner() {
   const { account } = useAccount();
   const { connect, connectors } = useConnect();
-  const { controller } = useController();
+  const { controller } = useConnection();
+  const tokens = useTokens();
 
   const onConnect = useCallback(
     (connector: Connector) => () => {
@@ -45,21 +92,45 @@ function FundingInner() {
     [connect],
   );
 
-  useEffect(() => {
-    if (!account || !controller.account) return;
+  // const prefund = useCallback(async () => {
+  //   if (!account || !controller.account) return;
 
-    transfer();
+  //   const ethAmount = "0x0"
+  //   const prefundRes = await account.execute([
+  //     {
+  //       contractAddress: account.address,
+  //       entrypoint: "approve",
+  //       calldata: [controller.account?.address, ethAmount],
+  //     },
+  //     {
+  //       contractAddress: account.address,
+  //       entrypoint: "transfer",
+  //       calldata: [controller.account?.address, ethAmount],
+  //     },
+  //     // TODO: ERC20
+  //   ]);
+  //   await account.waitForTransaction(prefundRes.transaction_hash, { retryInterval: 1000 });
+  // }, [account, controller])
 
-    async function transfer() {
-      const res = await account.execute([
-        {
-          contractAddress: account.address,
-          entrypoint: "transfer",
-          calldata: [controller.account?.address, "0x11C37937E08000"],
-        },
-      ]);
-    }
-  }, [account, controller]);
+  // const checkFunds = useCallback(async () => {
+  //   const { abi } = await account.rpc.getClassAt(account.address);
+  //   const contract = new Contract(abi, account.address, account.rpc);
+  //   const balance = await contract.get_balance();
+
+  //   //   TODO: check
+  // }, [account])
+
+  // useEffect(() => {
+  //   checkFunds();
+  //   // prefundAndDeploy();
+
+  //   // async function prefundAndDeploy() {
+  //   //   await prefund();
+  //   //   // const res = await controller.account.cartridge.deploySelf();
+  //   //   // TODO: set
+  //   // }
+
+  // }, [checkFunds]);
 
   return (
     <Container
@@ -75,24 +146,40 @@ function FundingInner() {
     >
       <Content>
         <Text color="text.secondary" fontSize="sm">
-          You’ll need{" "}
-          <Text as="b" color="text.secondary">
-            ETH
-          </Text>{" "}
-          and{" "}
-          <Text as="b" color="text.secondary">
-            LORDS
-          </Text>{" "}
-          to play{" "}
-          <Text as="b" color="text.secondary">
-            Loot Survivor
-          </Text>
-          . Send some{" "}
-          <Text as="b" color="text.secondary">
-            testnet ETH
-          </Text>{" "}
-          to your controller address.
+          Send below assets to your controller address.
         </Text>
+
+        <VStack w="full" borderRadius="md" overflow="hidden" gap={0.25}>
+          <HStack
+            w="full"
+            align="center"
+            fontSize="sm"
+            p={3}
+            bg="solid.primary"
+            fontWeight="semibold"
+          >
+            <EthereumIcon fontSize={20} />
+            <Text w="full">0.01 ETH</Text>
+          </HStack>
+
+          {tokens.map((t) => (
+            <HStack
+              key={t.address}
+              w="full"
+              align="center"
+              fontSize="sm"
+              p={3}
+              bg="solid.primary"
+              fontWeight="semibold"
+            >
+              {t.logo}
+              <Image src={t.logo} alt={`${t.name} ERC-20 Token Logo`} h={5} />
+              <Text w="full">
+                {parseInt(t.min, 16)} {t.symbol}
+              </Text>
+            </HStack>
+          ))}
+        </VStack>
       </Content>
 
       <Footer>
@@ -100,15 +187,17 @@ function FundingInner() {
           title="The controller is in alpha"
           description="Depositing funds into the controller is risky and they may not be recoverable"
         />
-        {!account &&
-          connectors.map((c) => (
+        {connectors
+          .filter((c) => ["argentX", "braavos"].includes(c.id))
+          .map((c) => (
             <Button
               key={c.id}
               bg="brand.primary"
               color="brand.primaryForeground"
               onClick={onConnect(c)}
+              isLoading={!!account}
             >
-              Connect To {c.name}
+              Send from {c.name}
             </Button>
           ))}
       </Footer>
@@ -147,26 +236,19 @@ function Warning({
   );
 }
 
-function StarknetProvider({ children }: PropsWithChildren) {
+function ExternalWalletProvider({ children }: PropsWithChildren) {
   const { connectors } = useInjectedConnectors({
-    recommended: [argent(), braavos()],
+    // recommended: [argent(), braavos()],
   });
 
   return (
     <StarknetConfig
       chains={[mainnet]}
-      provider={(chain: Chain) => {
-        switch (chain) {
-          case mainnet:
-            return new RpcProvider({
-              nodeUrl: process.env.NEXT_PUBLIC_RPC_MAINNET,
-            });
-          case sepolia:
-            return new RpcProvider({
-              nodeUrl: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
-            });
-        }
-      }}
+      provider={() =>
+        new RpcProvider({
+          nodeUrl: process.env.NEXT_PUBLIC_RPC_MAINNET,
+        })
+      }
       connectors={connectors}
       explorer={voyager}
     >

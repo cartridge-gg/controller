@@ -20,8 +20,8 @@ export function DeploymentRequired({
   const account = controller.account;
   const [status, setStatus] = useState<Status>(account.status);
   const [deployHash, setDeployHash] = useState<string>();
-  const [fundingRequired, setFundingRequired] = useState<boolean>(false);
   const [error, setError] = useState<Error>();
+  const [fundingRequired, setIsFundingRequired] = useState(false);
 
   const deployAccount = useCallback(async () => {
     try {
@@ -39,12 +39,11 @@ export function DeploymentRequired({
 
   useEffect(() => {
     if (account.chainId === constants.StarknetChainId.SN_MAIN) {
-      setFundingRequired(true);
-      return;
+      setIsFundingRequired(true);
     }
 
     deployAccount();
-  }, [account, deployAccount]);
+  }, [account.chainId, deployAccount]);
 
   useEffect(() => {
     const checkStatus = () => {
@@ -78,7 +77,10 @@ export function DeploymentRequired({
     >
       <Content alignItems="center">
         {status === Status.COUNTERFACTUAL &&
-          account.chainId === constants.StarknetChainId.SN_SEPOLIA && (
+          [
+            constants.StarknetChainId.SN_SEPOLIA,
+            constants.StarknetChainId.SN_MAIN,
+          ].includes(account.chainId as constants.StarknetChainId) && (
             <Link
               href={`https://${
                 account.chainId === constants.StarknetChainId.SN_SEPOLIA

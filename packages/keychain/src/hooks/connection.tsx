@@ -15,7 +15,7 @@ import {
 } from "utils/connection";
 import { isIframe } from "components/connect/utils";
 import { RpcProvider } from "starknet";
-import { Policy, ResponseCodes } from "@cartridge/controller";
+import { Policy, Prefund, ResponseCodes } from "@cartridge/controller";
 
 const ConnectionContext = createContext<ConnectionContextValue>(undefined);
 
@@ -26,6 +26,7 @@ type ConnectionContextValue = {
   rpcUrl: string;
   chainId: string;
   policies: Policy[];
+  prefunds: Prefund[];
   error: Error;
   setContext: (context: ConnectionCtx) => void;
   setController: (controller: Controller) => void;
@@ -41,6 +42,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
   const [chainId, setChainId] = useState<string>();
   const [policies, setPolicies] = useState<Policy[]>([]);
   const [controller, setController] = useState(Controller.fromStore);
+  const [prefunds, setPrefunds] = useState<Prefund[]>([]);
   const [error, setError] = useState<Error>();
 
   const parsePolicies = (policiesStr: string | null): Policy[] => {
@@ -63,14 +65,14 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
   }, [context, parent]);
 
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    setOrigin(urlParams.get("origin") || process.env.NEXT_PUBLIC_ORIGIN);
+    setPrefunds(JSON.parse(decodeURIComponent(urlParams.get("prefunds"))));
+    setRpcUrl(urlParams.get("rpc_url") || process.env.NEXT_PUBLIC_RPC_SEPOLIA);
+    setChainId(urlParams.get("chain_id"));
+    setPolicies(parsePolicies(urlParams.get("policies")));
+
     if (!isIframe()) {
-      const urlParams = new URLSearchParams(window.location.search);
-      setOrigin(urlParams.get("origin") || process.env.NEXT_PUBLIC_ORIGIN);
-      setRpcUrl(
-        urlParams.get("rpc_url") || process.env.NEXT_PUBLIC_RPC_SEPOLIA,
-      );
-      setChainId(urlParams.get("chain_id"));
-      setPolicies(parsePolicies(urlParams.get("policies")));
       return;
     }
 
@@ -119,6 +121,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
         rpcUrl,
         chainId,
         policies,
+        prefunds,
         error,
         setController,
         setContext,
