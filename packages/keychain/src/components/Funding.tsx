@@ -348,9 +348,15 @@ function useTokens() {
   const checkFunds = useCallback(async () => {
     const funded = await Promise.allSettled(
       remaining.map(async (t) => {
+        console.log("grabbing price" + t.symbol);
+        console.log("address: " + controller.account.address);
         const { abi } = await controller.account.getClassAt(t.address);
-        const contract = new Contract(abi, t.address, controller.account);
-        const { balance } = await contract.balanceOf(controller.address);
+        console.log("abi");
+        const contract = new Contract(abi, t.address);
+        console.log("contract");
+        const { balance } = await contract.balanceOf(
+          controller.account.address,
+        );
 
         console.log(t.symbol + ": " + uint256.uint256ToBN(balance));
 
@@ -367,7 +373,7 @@ function useTokens() {
     if (res.length) {
       setIsFundedBulk(res);
     }
-  }, [remaining, setIsFundedBulk, controller.account, controller.address]);
+  }, [remaining, setIsFundedBulk, controller.account]);
 
   useInterval(checkFunds, 3000);
 
