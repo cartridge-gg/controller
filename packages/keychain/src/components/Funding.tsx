@@ -1,5 +1,13 @@
 import { Container, Content, Footer } from "components/layout";
-import { Button, HStack, Image, Spacer, Text, VStack } from "@chakra-ui/react";
+import {
+  Button,
+  HStack,
+  Image,
+  Spacer,
+  Text,
+  VStack,
+  useInterval,
+} from "@chakra-ui/react";
 import {
   PropsWithChildren,
   ReactElement,
@@ -17,8 +25,15 @@ import {
   voyager,
 } from "@starknet-react/core";
 import { Contract, RpcProvider, uint256 } from "starknet";
-import { AlertIcon, CheckIcon, CoinsIcon, CopyHash, EthereumIcon } from "@cartridge/ui";
+import {
+  AlertIcon,
+  CheckIcon,
+  CoinsIcon,
+  CopyHash,
+  EthereumIcon,
+} from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
+import { formatEther } from "viem";
 
 export function Funding() {
   return (
@@ -28,68 +43,15 @@ export function Funding() {
   );
 }
 
-type TokenInfoRaw = {
-  name: string;
-  symbol: string;
-  decimals: number;
-  l2_token_address: string;
-  sort_order: string;
-  total_supply: number;
-  logo_url: string;
-};
 
-type TokenInfo = {
-  name: string;
-  symbol: string;
-  decimals: number;
-  address: string;
-  logo: string;
-  min: string;
-  isFunded: boolean;
-};
-
-function useTokens() {
-  const { controller, prefunds } = useConnection();
-  const [tokens, setTokens] = useState<TokenInfo[]>([]);
-
-  useEffect(() => {
-    fetchTokneInfo();
-
-    async function fetchTokneInfo() {
-      const res = await fetch("https://mainnet-api.ekubo.org/tokens");
-      const data: TokenInfoRaw[] = await res.json();
-      const tokens = prefunds.map((t) => {
-        const info = data.find(
-          ({ l2_token_address }) => l2_token_address === t.address,
-        );
-
-        return {
-          address: t.address,
-          min: t.min,
-          name: info.name,
-          symbol: info.symbol,
-          decimals: info.decimals,
-          logo: info.logo_url,
-          isFunded: false,
-        };
-      });
-
-      setTokens(tokens);
-    }
-  }, [prefunds, controller.account.address]);
-
-  return tokens;
-}
-
-const ETH_CONTRACT = "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"
+const ETH_CONTRACT =
+  "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 
 function FundingInner() {
   const { account } = useAccount();
   const { connect, connectors } = useConnect();
   const { controller } = useConnection();
-  const [isEthFunded, setIsEthFunded] = useState(false);
   const tokens = useTokens();
-
 
   const onConnect = useCallback(
     (connector: Connector) => () => {
@@ -118,27 +80,15 @@ function FundingInner() {
   //   await account.waitForTransaction(prefundRes.transaction_hash, { retryInterval: 1000 });
   // }, [account, controller])
 
-  const checkFunds = useCallback(async () => {
-    const { abi } = await controller.account.rpc.getClassAt(ETH_CONTRACT);
-    const contract = new Contract(abi, ETH_CONTRACT, controller.account.rpc);
-    const { balance } = await contract.balanceOf(controller.account.address);
+  // useEffect(() => {
+  //   prefundAndDeploy();
 
-    if (uint256.uint256ToBN(balance) >= 10000000000000000n) {
-      setIsEthFunded(true)
-    }
-  }, [controller.account])
-
-  useEffect(() => {
-    checkFunds();
-    // prefundAndDeploy();
-
-    // async function prefundAndDeploy() {
-    //   await prefund();
-    //   // const res = await controller.account.cartridge.deploySelf();
-    //   // TODO: set
-    // }
-
-  }, [checkFunds]);
+  //   async function prefundAndDeploy() {
+  //     await prefund();
+  //     const res = await controller.account.cartridge.deploySelf();
+  //     // TODO: set
+  //   }
+  // }, []);
 
   return (
     <Container
@@ -158,20 +108,6 @@ function FundingInner() {
         </Text>
 
         <VStack w="full" borderRadius="md" overflow="hidden" gap={0.25}>
-          <HStack
-            w="full"
-            align="center"
-            fontSize="sm"
-            p={3}
-            bg="solid.primary"
-            fontWeight="semibold"
-          >
-            <EthereumIcon fontSize={20} />
-            <Text w="full">0.01 ETH</Text>
-            <Spacer />
-            {isEthFunded && <CheckIcon />}
-          </HStack>
-
           {tokens.map((t) => (
             <HStack
               key={t.address}
@@ -183,10 +119,11 @@ function FundingInner() {
               fontWeight="semibold"
             >
               {t.logo}
-              <Image src={t.logo} alt={`${t.name} ERC-20 Token Logo`} h={5} />
               <Text w="full">
-                {t.min} {t.symbol}
+                {t.address === ETH_CONTRACT ? formatEther(BigInt(t.min)) : t.min} {t.symbol}
               </Text>
+              <Spacer />
+              {t.isFunded && <CheckIcon />}
             </HStack>
           ))}
         </VStack>
@@ -264,3 +201,107 @@ function ExternalWalletProvider({ children }: PropsWithChildren) {
     </StarknetConfig>
   );
 }
+
+function useTokens() {
+  const { controller, prefunds } = useConnection();
+  const [tokens, setTokens] = useState<TokenInfo[]>([]);
+
+  useEffect(() => {
+    const target = [{
+      address: ETH_CONTRACT,
+      min: "10000000000000000",
+    }, ...prefunds]
+    if (!target.length) return
+    fetchTokneInfo();
+
+    async function fetchTokneInfo() {
+      const res = await fetch("https://mainnet-api.ekubo.org/tokens");
+      const data: TokenInfoRaw[] = await res.json();
+      const tokens = target.map((t) => {
+        const info = data.find(
+          ({ l2_token_address }) => l2_token_address === t.address,
+        );
+
+        return {
+          address: t.address,
+          min: t.min,
+          name: info.name,
+          symbol: info.symbol,
+          decimals: info.decimals,
+          logo: t.address === ETH_CONTRACT ? <EthereumIcon fontSize={20} /> : (
+            <Image
+              src={info.logo_url}
+              alt={`${info.name} ERC-20 Token Logo`}
+              h={5}
+            />
+          ),
+          isFunded: false,
+        };
+      });
+      setTokens(tokens);
+    }
+  }, [prefunds, controller.account.address]);
+
+  const setIsFundedBulk = useCallback(
+    (funded: TokenInfo[]) => {
+      if (funded.length === 0) return
+
+      const fundedAddrs = funded.map((f) => f.address);
+      const newTokens = tokens.map((t) => ({
+        ...t,
+        isFunded: fundedAddrs.includes(t.address) ? true : t.isFunded,
+      }));
+
+      setTokens(newTokens);
+    },
+    [tokens],
+  );
+
+  const checkFunds = useCallback(async () => {
+    const funded = await Promise.allSettled(
+      tokens
+        .filter((t) => !t.isFunded)
+        .map(async (t) => {
+          const { abi } = await controller.account.getClassAt(t.address);
+          const contract = new Contract(abi, t.address, controller.account);
+          const { balance } = await contract.balanceOf(t.address);
+
+          return {
+            ...t,
+            isFunded: uint256.uint256ToBN(balance) >= BigInt(t.min),
+          };
+        }),
+    );
+    const res = funded
+      .filter((res) => res.status === "fulfilled" && res.value.isFunded)
+      .map((res) => (res as PromiseFulfilledResult<TokenInfo>).value);
+
+    if (res.length) {
+      setIsFundedBulk(res);
+    }
+  }, [tokens, setIsFundedBulk, controller.account]);
+
+  useInterval(checkFunds, 3000);
+
+  return tokens;
+}
+
+type TokenInfoRaw = {
+  name: string;
+  symbol: string;
+  decimals: number;
+  l2_token_address: string;
+  sort_order: string;
+  total_supply: number;
+  logo_url: string;
+};
+
+type TokenInfo = {
+  name: string;
+  symbol: string;
+  decimals: number;
+  address: string;
+  logo: React.ReactNode;
+  min: string;
+  isFunded: boolean;
+};

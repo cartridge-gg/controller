@@ -114,7 +114,12 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
                 {icon}
               </Square>
             ) : (
-              <Image src={theme.icon} boxSize="44px" alt="Controller Icon" borderRadius="md" />
+              <Image
+                src={theme.icon}
+                boxSize="44px"
+                alt="Controller Icon"
+                borderRadius="md"
+              />
             )}
 
             <VStack w="full" align="stretch" gap={1} minW={0}>
