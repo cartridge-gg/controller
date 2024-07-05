@@ -43,10 +43,6 @@ export function Funding() {
   );
 }
 
-
-const ETH_CONTRACT =
-  "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
-
 function FundingInner() {
   const { account } = useAccount();
   const { connect, connectors } = useConnect();
@@ -285,6 +281,9 @@ function useTokens() {
 
   return tokens;
 }
+
+const ETH_CONTRACT =
+  "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 
 type TokenInfoRaw = {
   name: string;

@@ -14,19 +14,19 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Configure Git
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "20.x"
           registry-url: "https://registry.npmjs.org/"
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
-          version: "8"
+          version: 9.1.4
       - name: Update Workspace Packages Version
         run: |
           VERSION=${{ github.event.inputs.version }}
