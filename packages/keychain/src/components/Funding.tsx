@@ -58,18 +58,21 @@ function FundingInner() {
       throw new Error("External account is not connected");
     }
 
-    const calls = tokens.flatMap((t) => [
-      {
-        contractAddress: t.address,
-        entrypoint: "approve",
-        calldata: [controller.account.address, t.min],
-      },
-      {
-        contractAddress: t.address,
-        entrypoint: "transfer",
-        calldata: [controller.account.address, t.min],
-      },
-    ]);
+    const calls = tokens.flatMap((t) => {
+      const amount = `0x${BigInt(t.min).toString(16)}`;
+      return [
+        {
+          contractAddress: t.address,
+          entrypoint: "approve",
+          calldata: [controller.account.address, amount],
+        },
+        {
+          contractAddress: t.address,
+          entrypoint: "transfer",
+          calldata: [controller.account.address, amount],
+        },
+      ];
+    });
     const res = await extAccount.execute(calls);
     await extAccount.waitForTransaction(res.transaction_hash, {
       retryInterval: 1000,
