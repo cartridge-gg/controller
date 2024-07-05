@@ -286,7 +286,7 @@ function useTokens() {
     const target = [
       {
         address: ETH_CONTRACT,
-        min: "10000000000000000",
+        min: "100000000000000",
       },
       ...prefunds,
     ];
@@ -344,7 +344,7 @@ function useTokens() {
       remaining.map(async (t) => {
         const { abi } = await controller.account.getClassAt(t.address);
         const contract = new Contract(abi, t.address, controller.account);
-        const { balance } = await contract.balanceOf(t.address);
+        const { balance } = await contract.balanceOf(controller.address);
 
         return {
           ...t,
