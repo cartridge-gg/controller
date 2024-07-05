@@ -64,7 +64,7 @@ const connectors = [
     ],
     {
       url,
-      rpc: process.env.NEXT_PUBLIC_RPC_MAINNET,
+      rpc: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
       // paymaster: {
       //   caller: shortString.encodeShortString("ANY_CALLER"),
       // },
