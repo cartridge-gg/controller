@@ -7,6 +7,7 @@ import {
   Text,
   VStack,
   useInterval,
+  useToast,
 } from "@chakra-ui/react";
 import {
   PropsWithChildren,
@@ -30,10 +31,12 @@ import {
   CheckIcon,
   CoinsIcon,
   CopyHash,
+  DEFAULT_TOAST_OPTIONS,
   EthereumIcon,
 } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { formatEther } from "viem";
+import { Toaster } from "./Toaster";
 
 export function Funding() {
   return (
@@ -86,6 +89,20 @@ function FundingInner() {
   //   }
   // }, []);
 
+  const toast = useToast({
+    ...DEFAULT_TOAST_OPTIONS,
+    render: Toaster,
+  });
+  const onCopy = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      e.stopPropagation();
+
+      navigator.clipboard.writeText(controller.account.address);
+      toast();
+    },
+    [controller.account.address, toast],
+  );
+
   return (
     <Container
       title={`Fund ${controller.username}`}
@@ -116,7 +133,10 @@ function FundingInner() {
             >
               {t.logo}
               <Text w="full">
-                {t.address === ETH_CONTRACT ? formatEther(BigInt(t.min)) : t.min} {t.symbol}
+                {t.address === ETH_CONTRACT
+                  ? formatEther(BigInt(t.min))
+                  : t.min}{" "}
+                {t.symbol}
               </Text>
               <Spacer />
               {t.isFunded && <CheckIcon />}
@@ -130,19 +150,29 @@ function FundingInner() {
           title="The controller is in alpha"
           description="Depositing funds into the controller is risky and they may not be recoverable"
         />
-        {connectors
-          .filter((c) => ["argentX", "braavos"].includes(c.id))
-          .map((c) => (
-            <Button
-              key={c.id}
-              bg="brand.primary"
-              color="brand.primaryForeground"
-              onClick={onConnect(c)}
-              isLoading={!!account}
-            >
-              Send from {c.name}
-            </Button>
-          ))}
+        {connectors.length ? (
+          connectors
+            .filter((c) => ["argentX", "braavos"].includes(c.id))
+            .map((c) => (
+              <Button
+                key={c.id}
+                bg="brand.primary"
+                color="brand.primaryForeground"
+                onClick={onConnect(c)}
+                isLoading={!!account}
+              >
+                Send from {c.name}
+              </Button>
+            ))
+        ) : (
+          <Button
+            bg="brand.primary"
+            color="brand.primaryForeground"
+            onClick={onCopy}
+          >
+            copy address
+          </Button>
+        )}
       </Footer>
     </Container>
   );
@@ -203,11 +233,14 @@ function useTokens() {
   const [tokens, setTokens] = useState<TokenInfo[]>([]);
 
   useEffect(() => {
-    const target = [{
-      address: ETH_CONTRACT,
-      min: "10000000000000000",
-    }, ...prefunds]
-    if (!target.length) return
+    const target = [
+      {
+        address: ETH_CONTRACT,
+        min: "10000000000000000",
+      },
+      ...prefunds,
+    ];
+    if (!target.length) return;
     fetchTokneInfo();
 
     async function fetchTokneInfo() {
@@ -224,13 +257,16 @@ function useTokens() {
           name: info.name,
           symbol: info.symbol,
           decimals: info.decimals,
-          logo: t.address === ETH_CONTRACT ? <EthereumIcon fontSize={20} /> : (
-            <Image
-              src={info.logo_url}
-              alt={`${info.name} ERC-20 Token Logo`}
-              h={5}
-            />
-          ),
+          logo:
+            t.address === ETH_CONTRACT ? (
+              <EthereumIcon fontSize={20} />
+            ) : (
+              <Image
+                src={info.logo_url}
+                alt={`${info.name} ERC-20 Token Logo`}
+                h={5}
+              />
+            ),
           isFunded: false,
         };
       });
@@ -240,7 +276,7 @@ function useTokens() {
 
   const setIsFundedBulk = useCallback(
     (funded: TokenInfo[]) => {
-      if (funded.length === 0) return
+      if (funded.length === 0) return;
 
       const fundedAddrs = funded.map((f) => f.address);
       const newTokens = tokens.map((t) => ({
