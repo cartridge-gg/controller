@@ -66,7 +66,14 @@ export function DeploymentRequired({
     return <>{children}</>;
   }
 
-  if (fundingRequired) return <Funding />;
+  if (fundingRequired)
+    return (
+      <Funding
+        onComplete={() => {
+          setIsFundingRequired(false);
+        }}
+      />
+    );
 
   return (
     <Container

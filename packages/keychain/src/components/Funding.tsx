@@ -14,6 +14,7 @@ import {
   ReactElement,
   useCallback,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import { mainnet } from "@starknet-react/chains";
@@ -38,19 +39,23 @@ import { useConnection } from "hooks/connection";
 import { formatEther } from "viem";
 import { Toaster } from "./Toaster";
 
-export function Funding() {
+export function Funding(innerProps: FundingInnerProps) {
   return (
     <ExternalWalletProvider>
-      <FundingInner />
+      <FundingInner {...innerProps} />
     </ExternalWalletProvider>
   );
 }
 
-function FundingInner() {
+type FundingInnerProps = {
+  onComplete?: () => void;
+};
+
+function FundingInner({ onComplete }: FundingInnerProps) {
   const { account: extAccount } = useAccount();
   const { connectAsync, connectors } = useConnect();
   const { controller } = useConnection();
-  const tokens = useTokens();
+  const { tokens, isAllFunded } = useTokens();
   const [isSending, setIsSending] = useState(false);
 
   const prefund = useCallback(async () => {
@@ -138,6 +143,11 @@ function FundingInner() {
       setIsSending(false);
     }
   }, [extAccount, isSending, prefundAndDeploy]);
+
+  useEffect(() => {
+    if (!isAllFunded || onComplete) return;
+    onComplete();
+  }, [isAllFunded, onComplete]);
 
   return (
     <Container
@@ -268,6 +278,8 @@ function useTokens() {
   const { controller, prefunds } = useConnection();
   const [tokens, setTokens] = useState<TokenInfo[]>([]);
 
+  const remaining = useMemo(() => tokens.filter((t) => !t.isFunded), [tokens]);
+
   useEffect(() => {
     const target = [
       {
@@ -327,18 +339,16 @@ function useTokens() {
 
   const checkFunds = useCallback(async () => {
     const funded = await Promise.allSettled(
-      tokens
-        .filter((t) => !t.isFunded)
-        .map(async (t) => {
-          const { abi } = await controller.account.getClassAt(t.address);
-          const contract = new Contract(abi, t.address, controller.account);
-          const { balance } = await contract.balanceOf(t.address);
+      remaining.map(async (t) => {
+        const { abi } = await controller.account.getClassAt(t.address);
+        const contract = new Contract(abi, t.address, controller.account);
+        const { balance } = await contract.balanceOf(t.address);
 
-          return {
-            ...t,
-            isFunded: uint256.uint256ToBN(balance) >= BigInt(t.min),
-          };
-        }),
+        return {
+          ...t,
+          isFunded: uint256.uint256ToBN(balance) >= BigInt(t.min),
+        };
+      }),
     );
     const res = funded
       .filter((res) => res.status === "fulfilled" && res.value.isFunded)
@@ -347,11 +357,11 @@ function useTokens() {
     if (res.length) {
       setIsFundedBulk(res);
     }
-  }, [tokens, setIsFundedBulk, controller.account]);
+  }, [remaining, setIsFundedBulk, controller.account]);
 
   useInterval(checkFunds, 3000);
 
-  return tokens;
+  return { tokens, remaining, isAllFunded: !remaining };
 }
 
 const ETH_CONTRACT =
