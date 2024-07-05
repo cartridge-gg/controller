@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { Signature, constants } from "starknet";
+import { Signature } from "starknet";
 import { ResponseCodes } from "@cartridge/controller";
 import { DeploymentRequired, Execute, SignMessage } from "components";
 import { CreateController, CreateSession, Logout } from "components/connect";
@@ -13,11 +13,8 @@ import {
 import { diff } from "utils/controller";
 import { logout } from "utils/connection/logout";
 import { LoginMode } from "components/connect/types";
-import { Status } from "utils/account";
-import { Funding } from "components/Funding";
-
 function Home() {
-  const { context, controller, error, chainId } = useConnection();
+  const { context, controller, error } = useConnection();
 
   if (window.self === window.top || !context?.origin) {
     return <></>;
