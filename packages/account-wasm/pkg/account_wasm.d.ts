@@ -13,6 +13,7 @@ export class CartridgeAccount {
 * - `address`: The blockchain address associated with the account.
 * - `rp_id`: Relying Party Identifier, a string that uniquely identifies the WebAuthn relying party.
 * - `origin`: The origin of the WebAuthn request. Example https://cartridge.gg
+* - `username`: Username associated with the account.
 * - `credential_id`: Base64 encoded bytes of the raw credential ID generated during the WebAuthn registration process.
 * - `public_key`: Base64 encoded bytes of the public key generated during the WebAuthn registration process (COSE format).
 * @param {string} rpc_url
@@ -20,11 +21,12 @@ export class CartridgeAccount {
 * @param {string} address
 * @param {string} rp_id
 * @param {string} origin
+* @param {string} username
 * @param {string} credential_id
 * @param {string} public_key
 * @returns {CartridgeAccount}
 */
-  static new(rpc_url: string, chain_id: string, address: string, rp_id: string, origin: string, credential_id: string, public_key: string): CartridgeAccount;
+  static new(rpc_url: string, chain_id: string, address: string, rp_id: string, origin: string, username: string, credential_id: string, public_key: string): CartridgeAccount;
 /**
 * @param {any[]} policies
 * @param {bigint} expires_at
@@ -53,6 +55,10 @@ export class CartridgeAccount {
 * @returns {Promise<any>}
 */
   signMessage(typed_data: string): Promise<any>;
+/**
+* @returns {Promise<any>}
+*/
+  deploySelf(): Promise<any>;
 /**
 * @returns {Promise<any>}
 */

@@ -67,6 +67,7 @@ class Account extends BaseAccount {
       address,
       webauthn.rpId,
       webauthn.origin,
+      username,
       webauthn.credentialId,
       webauthn.publicKey,
     );
@@ -155,9 +156,7 @@ class Account extends BaseAccount {
       .waitForTransaction(res.transaction_hash, {
         retryInterval: 1000,
       })
-      .catch(() => {
-        this.resetNonce();
-      });
+      .catch(() => this.resetNonce());
 
     return res;
   }

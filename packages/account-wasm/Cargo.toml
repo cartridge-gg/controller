@@ -10,7 +10,9 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 account_sdk.workspace = true
+async-trait.worksspace = true
 base64 = "0.22.0"
+cainome.workspace = true
 convert_case = "0.6.0"
 coset = { version = "0.3.4", features = ["std"] }
 hex = "0.4.3"
@@ -21,6 +23,7 @@ serde = "1.0.197"
 serde-wasm-bindgen = "0.6.5"
 serde_json = "1.0.114"
 serde_with = "2.3"
+thiserror.workspace = true
 url = "2.3.1"
 wasm-bindgen = "0.2.84"
 wasm-bindgen-futures = "0.4.37"

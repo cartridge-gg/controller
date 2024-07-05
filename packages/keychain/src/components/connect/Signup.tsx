@@ -17,7 +17,7 @@ import { isIframe, validateUsernameFor } from "./utils";
 import { RegistrationLink } from "./RegistrationLink";
 import { doSignup } from "hooks/account";
 import { useControllerTheme } from "hooks/theme";
-import { shortString } from "starknet";
+import { constants, shortString } from "starknet";
 import { useConnection } from "hooks/connection";
 import { useDebounce } from "hooks/debounce";
 import { ErrorAlert } from "components/ErrorAlert";
@@ -92,11 +92,13 @@ function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
       cacheTime: 10000000,
       refetchInterval: (data) => (!data ? 1000 : undefined),
       onSuccess: async (data) => {
-        // Deploy account
-        await client.request(DeployAccountDocument, {
-          id: values.username,
-          chainId: `starknet:${shortString.decodeShortString(chainId)}`,
-        });
+        // mainnet deployment requires user to self fund account
+        if (chainId !== constants.StarknetChainId.SN_MAIN) {
+          await client.request(DeployAccountDocument, {
+            id: values.username,
+            chainId: `starknet:${shortString.decodeShortString(chainId)}`,
+          });
+        }
 
         const {
           account: {

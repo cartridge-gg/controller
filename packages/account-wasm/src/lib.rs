@@ -1,26 +1,38 @@
+mod constants;
 mod paymaster;
 mod types;
 mod utils;
+
+#[allow(dead_code)]
+mod factory;
 
 #[cfg(test)]
 mod tests;
 
 use std::str::FromStr;
+use std::sync::Arc;
 
+use account_sdk::abigen::controller::WebauthnSigner;
 use account_sdk::account::outside_execution::OutsideExecutionAccount;
 use account_sdk::account::session::hash::{AllowedMethod, Session};
 use account_sdk::account::session::SessionAccount;
 use account_sdk::account::{AccountHashSigner, CartridgeGuardianAccount, MessageSignerAccount};
 use account_sdk::hash::MessageHashRev1;
 use account_sdk::signers::webauthn::device::DeviceSigner;
+use account_sdk::signers::webauthn::WebauthnAccountSigner;
 use account_sdk::signers::HashSigner;
 use account_sdk::wasm_webauthn::CredentialID;
 use base64::{engine::general_purpose, Engine};
+use cainome::cairo_serde::CairoSerde;
+use constants::ACCOUNT_CLASS_HASH;
 use coset::{CborSerializable, CoseKey};
+use factory::cartridge::CartridgeAccountFactory;
+use factory::AccountDeployment;
 use paymaster::PaymasterRequest;
 use serde_wasm_bindgen::{from_value, to_value};
 use starknet::accounts::{Account, ConnectedAccount};
 use starknet::core::types::{BlockId, BlockTag, FunctionCall};
+use starknet::core::utils as starknetutils;
 use starknet::macros::{selector, short_string};
 use starknet::providers::Provider;
 use starknet::signers::SigningKey;
@@ -42,7 +54,9 @@ type Result<T> = std::result::Result<T, JsError>;
 
 #[wasm_bindgen]
 pub struct CartridgeAccount {
-    account: CartridgeGuardianAccount<JsonRpcClient<HttpTransport>, DeviceSigner, SigningKey>,
+    account: CartridgeGuardianAccount<Arc<JsonRpcClient<HttpTransport>>, DeviceSigner, SigningKey>,
+    device_signer: DeviceSigner,
+    username: String,
     rpc_url: Url,
 }
 
@@ -56,15 +70,18 @@ impl CartridgeAccount {
     /// - `address`: The blockchain address associated with the account.
     /// - `rp_id`: Relying Party Identifier, a string that uniquely identifies the WebAuthn relying party.
     /// - `origin`: The origin of the WebAuthn request. Example https://cartridge.gg
+    /// - `username`: Username associated with the account.
     /// - `credential_id`: Base64 encoded bytes of the raw credential ID generated during the WebAuthn registration process.
     /// - `public_key`: Base64 encoded bytes of the public key generated during the WebAuthn registration process (COSE format).
     ///
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         rpc_url: String,
         chain_id: String,
         address: String,
         rp_id: String,
         origin: String,
+        username: String,
         credential_id: String,
         public_key: String,
     ) -> Result<CartridgeAccount> {
@@ -78,21 +95,26 @@ impl CartridgeAccount {
         let cose_bytes = general_purpose::URL_SAFE_NO_PAD.decode(public_key)?;
         let cose = CoseKey::from_slice(&cose_bytes)?;
 
-        let webauthn_signer = DeviceSigner::new(rp_id, origin, credential_id, cose);
+        let device_signer = DeviceSigner::new(rp_id, origin, credential_id, cose);
 
         let dummy_guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
         let address = FieldElement::from_str(&address)?;
         let chain_id = FieldElement::from_str(&chain_id)?;
 
         let account = CartridgeGuardianAccount::new(
-            provider,
-            webauthn_signer,
+            Arc::new(provider),
+            device_signer.clone(),
             dummy_guardian,
             address,
             chain_id,
         );
 
-        Ok(CartridgeAccount { account, rpc_url })
+        Ok(CartridgeAccount {
+            account,
+            device_signer,
+            username,
+            rpc_url,
+        })
     }
 
     #[wasm_bindgen(js_name = createSession)]
@@ -215,6 +237,48 @@ impl CartridgeAccount {
         Ok(to_value(&signature)?)
     }
 
+    #[wasm_bindgen(js_name = deploySelf)]
+    pub async fn deploy_self(&self) -> Result<JsValue> {
+        let webauthn_calldata = self.device_signer.signer_pub_data();
+        let mut constructor_calldata =
+            Vec::<WebauthnSigner>::cairo_serialize(&vec![webauthn_calldata]);
+        constructor_calldata[0] = FieldElement::TWO; // incorrect signer enum from serialization
+        constructor_calldata.push(FieldElement::ONE); // no guardian
+
+        let factory = CartridgeAccountFactory::new(
+            FieldElement::from_str(ACCOUNT_CLASS_HASH)?,
+            self.account.chain_id(),
+            constructor_calldata,
+            self.account.clone(),
+            self.account.provider(),
+        );
+
+        let deployment = AccountDeployment::new(
+            starknetutils::cairo_short_string_to_felt(&self.username)?,
+            &factory,
+        );
+        let res = deployment.send().await?;
+
+        Ok(to_value(&res)?)
+    }
+
+    #[wasm_bindgen(js_name = delegateAccount)]
+    pub async fn delegate_account(&self) -> Result<JsValue> {
+        let res = self
+            .account
+            .provider()
+            .call(
+                FunctionCall {
+                    contract_address: self.account.address(),
+                    entry_point_selector: selector!("delegate_account"),
+                    calldata: vec![],
+                },
+                BlockId::Tag(BlockTag::Pending),
+            )
+            .await?;
+        Ok(to_value(&res[0])?)
+    }
+
     async fn session_account(
         &self,
         details: JsSession,
@@ -239,22 +303,5 @@ impl CartridgeAccount {
             details.credentials.authorization,
             session,
         ))
-    }
-
-    #[wasm_bindgen(js_name = delegateAccount)]
-    pub async fn delegate_account(&self) -> Result<JsValue> {
-        let res = self
-            .account
-            .provider()
-            .call(
-                FunctionCall {
-                    contract_address: self.account.address(),
-                    entry_point_selector: selector!("delegate_account"),
-                    calldata: vec![],
-                },
-                BlockId::Tag(BlockTag::Pending),
-            )
-            .await?;
-        Ok(to_value(&res[0])?)
     }
 }
