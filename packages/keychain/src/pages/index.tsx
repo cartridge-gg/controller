@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { Signature } from "starknet";
+import { Signature, constants } from "starknet";
 import { ResponseCodes } from "@cartridge/controller";
 import { DeploymentRequired, Execute, SignMessage } from "components";
 import { CreateController, CreateSession, Logout } from "components/connect";
@@ -13,9 +13,11 @@ import {
 import { diff } from "utils/controller";
 import { logout } from "utils/connection/logout";
 import { LoginMode } from "components/connect/types";
+import { Status } from "utils/account";
+import { Funding } from "components/Funding";
 
 function Home() {
-  const { context, controller, error } = useConnection();
+  const { context, controller, error, chainId } = useConnection();
 
   if (window.self === window.top || !context?.origin) {
     return <></>;
@@ -33,6 +35,14 @@ function Home() {
   switch (context.type) {
     case "connect": {
       const ctx = context as ConnectCtx;
+
+      if (
+        chainId === constants.StarknetChainId.SN_MAIN &&
+        controller.account.status === Status.COUNTERFACTUAL
+      ) {
+        return <Funding />;
+      }
+
       const session = controller.session(context.origin);
       // if no mismatch with existing policies then return success
       if (session && diff(session.policies, ctx.policies).length === 0) {

@@ -38,6 +38,7 @@ import {
 import { useConnection } from "hooks/connection";
 import { formatEther } from "viem";
 import { Toaster } from "./Toaster";
+import { Status } from "utils/account";
 
 export function Funding(innerProps: FundingInnerProps) {
   return (
@@ -89,6 +90,7 @@ function FundingInner({ onComplete }: FundingInnerProps) {
     await controller.account.waitForTransaction(res.transaction_hash, {
       retryInterval: 1000,
     });
+    controller.account.status = Status.DEPLOYED;
   }, [controller.account]);
 
   const prefundAndDeploy = useCallback(async () => {
