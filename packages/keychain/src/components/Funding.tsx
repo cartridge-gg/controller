@@ -183,8 +183,8 @@ function FundingInner() {
 
       <Footer>
         <Warning
-          title="The controller is in alpha"
-          description="Depositing funds into the controller is risky and they may not be recoverable"
+          title="Controller is in Alpha"
+          description="We recommend limiting deposits to necessary assets for now."
         />
         {connectors.length ? (
           connectors
