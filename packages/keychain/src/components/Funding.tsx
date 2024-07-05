@@ -352,6 +352,8 @@ function useTokens() {
         const contract = new Contract(abi, t.address, controller.account);
         const { balance } = await contract.balanceOf(controller.address);
 
+        console.log(t.symbol + ": " + balance);
+
         return {
           ...t,
           isFunded: uint256.uint256ToBN(balance) >= BigInt(t.min),
