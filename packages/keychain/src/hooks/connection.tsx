@@ -65,18 +65,22 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
   }, [context, parent]);
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    setOrigin(urlParams.get("origin") || process.env.NEXT_PUBLIC_ORIGIN);
-    setRpcUrl(urlParams.get("rpc_url") || process.env.NEXT_PUBLIC_RPC_SEPOLIA);
-    setChainId(urlParams.get("chain_id"));
-    setPolicies(parsePolicies(urlParams.get("policies")));
+    if (isIframe()) {
+      const urlParams = new URLSearchParams(window.location.search);
+      setOrigin(urlParams.get("origin") || process.env.NEXT_PUBLIC_ORIGIN);
+      setRpcUrl(
+        urlParams.get("rpc_url") || process.env.NEXT_PUBLIC_RPC_SEPOLIA,
+      );
+      setChainId(urlParams.get("chain_id"));
+      setPolicies(parsePolicies(urlParams.get("policies")));
 
-    const prefunds = JSON.parse(decodeURIComponent(urlParams.get("prefunds")));
-    if (prefunds.length) {
-      setPrefunds(prefunds);
-    }
-
-    if (!isIframe()) {
+      const prefunds = JSON.parse(
+        decodeURIComponent(urlParams.get("prefunds")),
+      );
+      if (prefunds.length) {
+        setPrefunds(prefunds);
+      }
+    } else {
       return;
     }
 

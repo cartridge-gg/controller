@@ -47,66 +47,57 @@ export function Funding() {
 }
 
 function FundingInner() {
-  const { account } = useAccount();
-  const { connect, connectors } = useConnect();
+  const { account: extAccount } = useAccount();
+  const { connectAsync, connectors } = useConnect();
   const { controller } = useConnection();
   const tokens = useTokens();
   const [isSending, setIsSending] = useState(false);
 
   const prefund = useCallback(async () => {
-    if (!account || !controller.account) return;
+    if (!extAccount) {
+      throw new Error("External account is not connected");
+    }
 
     const calls = tokens.flatMap((t) => [
       {
         contractAddress: t.address,
         entrypoint: "approve",
-        calldata: [controller.account?.address, t.min],
+        calldata: [controller.account.address, t.min],
       },
       {
         contractAddress: t.address,
         entrypoint: "transfer",
-        calldata: [controller.account?.address, t.min],
+        calldata: [controller.account.address, t.min],
       },
     ]);
-    const res = await account.execute(calls);
-    await account.waitForTransaction(res.transaction_hash, {
+    const res = await extAccount.execute(calls);
+    await extAccount.waitForTransaction(res.transaction_hash, {
       retryInterval: 1000,
     });
-  }, [account, controller, tokens]);
-
-  const onConnect = useCallback(
-    (connector: Connector) => () => {
-      setIsSending(true);
-      connect({ connector });
-    },
-    [connect],
-  );
-
-  useEffect(() => {
-    if (!account) return;
-
-    prefund();
-  }, [account, prefund]);
+  }, [extAccount, controller, tokens]);
 
   const deploy = useCallback(async () => {
     const res = await controller.account.cartridge.deploySelf();
-    await account.waitForTransaction(res.transaction_hash, {
+    await controller.account.waitForTransaction(res.transaction_hash, {
       retryInterval: 1000,
     });
-  }, [controller.account, account]);
+  }, [controller.account]);
 
-  useEffect(() => {
-    if (tokens.find((t) => t.isFunded)) return;
+  const prefundAndDeploy = useCallback(async () => {
+    console.log("Requesting prefund transaction...");
+    await prefund();
 
-    deploy();
+    console.log("Deploying account...");
+    await deploy();
 
-    setIsSending(false);
-  }, [tokens, deploy]);
+    console.log("Account is successfully deploed.");
+  }, [prefund, deploy]);
 
   const toast = useToast({
     ...DEFAULT_TOAST_OPTIONS,
     render: Toaster,
   });
+
   const onCopy = useCallback(
     (e: React.MouseEvent<HTMLElement>) => {
       e.stopPropagation();
@@ -116,6 +107,34 @@ function FundingInner() {
     },
     [controller.account.address, toast],
   );
+
+  const onConnect = useCallback(
+    (connector: Connector) => async () => {
+      if (extAccount) return;
+
+      setIsSending(true);
+
+      try {
+        await connectAsync({ connector });
+      } catch (e) {
+        console.error(e);
+        setIsSending(false);
+      }
+    },
+    [extAccount, connectAsync],
+  );
+
+  useEffect(() => {
+    if (!extAccount || !isSending) return;
+
+    try {
+      prefundAndDeploy();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSending(false);
+    }
+  }, [extAccount, isSending, prefundAndDeploy]);
 
   return (
     <Container
