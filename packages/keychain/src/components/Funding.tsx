@@ -51,43 +51,57 @@ function FundingInner() {
   const { connect, connectors } = useConnect();
   const { controller } = useConnection();
   const tokens = useTokens();
+  const [isSending, setIsSending] = useState(false);
+
+  const prefund = useCallback(async () => {
+    if (!account || !controller.account) return;
+
+    const calls = tokens.flatMap((t) => [
+      {
+        contractAddress: t.address,
+        entrypoint: "approve",
+        calldata: [controller.account?.address, t.min],
+      },
+      {
+        contractAddress: t.address,
+        entrypoint: "transfer",
+        calldata: [controller.account?.address, t.min],
+      },
+    ]);
+    const res = await account.execute(calls);
+    await account.waitForTransaction(res.transaction_hash, {
+      retryInterval: 1000,
+    });
+  }, [account, controller, tokens]);
 
   const onConnect = useCallback(
     (connector: Connector) => () => {
+      setIsSending(true);
       connect({ connector });
     },
     [connect],
   );
 
-  // const prefund = useCallback(async () => {
-  //   if (!account || !controller.account) return;
+  useEffect(() => {
+    if (!account) return;
 
-  //   const ethAmount = "0x0"
-  //   const prefundRes = await account.execute([
-  //     {
-  //       contractAddress: account.address,
-  //       entrypoint: "approve",
-  //       calldata: [controller.account?.address, ethAmount],
-  //     },
-  //     {
-  //       contractAddress: account.address,
-  //       entrypoint: "transfer",
-  //       calldata: [controller.account?.address, ethAmount],
-  //     },
-  //     // TODO: ERC20
-  //   ]);
-  //   await account.waitForTransaction(prefundRes.transaction_hash, { retryInterval: 1000 });
-  // }, [account, controller])
+    prefund();
+  }, [account, prefund]);
 
-  // useEffect(() => {
-  //   prefundAndDeploy();
+  const deploy = useCallback(async () => {
+    const res = await controller.account.cartridge.deploySelf();
+    await account.waitForTransaction(res.transaction_hash, {
+      retryInterval: 1000,
+    });
+  }, [controller.account, account]);
 
-  //   async function prefundAndDeploy() {
-  //     await prefund();
-  //     const res = await controller.account.cartridge.deploySelf();
-  //     // TODO: set
-  //   }
-  // }, []);
+  useEffect(() => {
+    if (tokens.find((t) => t.isFunded)) return;
+
+    deploy();
+
+    setIsSending(false);
+  }, [tokens, deploy]);
 
   const toast = useToast({
     ...DEFAULT_TOAST_OPTIONS,
@@ -159,7 +173,7 @@ function FundingInner() {
                 bg="brand.primary"
                 color="brand.primaryForeground"
                 onClick={onConnect(c)}
-                isLoading={!!account}
+                isLoading={isSending}
               >
                 Send from {c.name}
               </Button>
