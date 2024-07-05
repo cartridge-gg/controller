@@ -111,14 +111,19 @@ export function Execute() {
 
   const onSubmit = useCallback(async () => {
     setLoading(true);
-    const response = await account.execute(calls, {
-      maxFee: fees.max,
-    });
+    const session = controller.session(origin);
+    const response = await account.execute(
+      calls,
+      {
+        maxFee: fees.max,
+      },
+      session,
+    );
     ctx.resolve({
       transaction_hash: response.transaction_hash,
       code: ResponseCodes.SUCCESS,
     });
-  }, [account, calls, fees, ctx]);
+  }, [account, calls, fees, ctx, origin]);
 
   const policies = useMemo<Policy[]>(
     () =>
