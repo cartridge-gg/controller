@@ -25,7 +25,7 @@ import {
   useInjectedConnectors,
   voyager,
 } from "@starknet-react/core";
-import { Contract, RpcProvider, uint256 } from "starknet";
+import { CallData, Contract, RpcProvider, cairo, uint256 } from "starknet";
 import {
   AlertIcon,
   CheckIcon,
@@ -63,17 +63,23 @@ function FundingInner({ onComplete }: FundingInnerProps) {
     }
 
     const calls = tokens.flatMap((t) => {
-      const amount = `0x${BigInt(t.min).toString(16)}`;
+      const amount = cairo.uint256(t.min);
       return [
         {
           contractAddress: t.address,
           entrypoint: "approve",
-          calldata: [controller.account.address, amount],
+          calldata: CallData.compile({
+            recipient: controller.account.address,
+            amount,
+          }),
         },
         {
           contractAddress: t.address,
           entrypoint: "transfer",
-          calldata: [controller.account.address, amount],
+          calldata: CallData.compile({
+            recipient: controller.account.address,
+            amount,
+          }),
         },
       ];
     });
