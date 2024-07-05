@@ -19,7 +19,6 @@ import {
 } from "react";
 import { mainnet } from "@starknet-react/chains";
 import {
-  Connector,
   StarknetConfig,
   useAccount,
   useConnect,
@@ -38,7 +37,6 @@ import {
 import { useConnection } from "hooks/connection";
 import { formatEther } from "viem";
 import { Toaster } from "./Toaster";
-import { Status } from "utils/account";
 
 export function Funding(innerProps: FundingInnerProps) {
   return (
@@ -53,11 +51,11 @@ type FundingInnerProps = {
 };
 
 function FundingInner({ onComplete }: FundingInnerProps) {
-  const { account: extAccount } = useAccount();
-  const { connectAsync, connectors } = useConnect();
+  const { account: extAccount, isConnecting: isExtConnecting } = useAccount();
+  const { connect, connectors } = useConnect();
   const { controller } = useConnection();
   const { tokens, isAllFunded } = useTokens();
-  const [isSending, setIsSending] = useState(false);
+  const [isDeploying, setIsDeploying] = useState(false);
 
   const prefund = useCallback(async () => {
     if (!extAccount) {
@@ -85,23 +83,45 @@ function FundingInner({ onComplete }: FundingInnerProps) {
     });
   }, [extAccount, controller, tokens]);
 
-  const deploy = useCallback(async () => {
-    const res = await controller.account.cartridge.deploySelf();
-    await controller.account.waitForTransaction(res.transaction_hash, {
-      retryInterval: 1000,
-    });
-    controller.account.status = Status.DEPLOYED;
-  }, [controller.account]);
+  const onDeploy = useCallback(async () => {
+    try {
+      setIsDeploying(true);
+      if (!isAllFunded) await prefund();
 
-  const prefundAndDeploy = useCallback(async () => {
-    console.log("Requesting prefund transaction...");
-    await prefund();
+      const { transaction_hash } =
+        await controller.account.cartridge.deploySelf();
+      const receipt = await controller.account.waitForTransaction(
+        transaction_hash,
+        {
+          retryInterval: 1000,
+        },
+      );
 
-    console.log("Deploying account...");
-    await deploy();
+      if (receipt.isRejected()) {
+        throw new Error(
+          "Transaction rejected: " +
+            receipt.transaction_failure_reason.error_message,
+        );
+      }
 
-    console.log("Account is successfully deploed.");
-  }, [prefund, deploy]);
+      if (receipt.isReverted()) {
+        throw new Error("Transaction everted: " + receipt.revert_reason);
+      }
+
+      if (onComplete) {
+        onComplete();
+      }
+    } catch (e) {
+      setIsDeploying(false);
+    }
+  }, [
+    controller.account,
+    extAccount,
+    controller,
+    tokens,
+    isAllFunded,
+    onComplete,
+  ]);
 
   const toast = useToast({
     ...DEFAULT_TOAST_OPTIONS,
@@ -117,39 +137,6 @@ function FundingInner({ onComplete }: FundingInnerProps) {
     },
     [controller.account.address, toast],
   );
-
-  const onConnect = useCallback(
-    (connector: Connector) => async () => {
-      if (extAccount) return;
-
-      setIsSending(true);
-
-      try {
-        await connectAsync({ connector });
-      } catch (e) {
-        console.error(e);
-        setIsSending(false);
-      }
-    },
-    [extAccount, connectAsync],
-  );
-
-  useEffect(() => {
-    if (!extAccount || !isSending) return;
-
-    try {
-      prefundAndDeploy();
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsSending(false);
-    }
-  }, [extAccount, isSending, prefundAndDeploy]);
-
-  useEffect(() => {
-    if (!isAllFunded || onComplete) return;
-    onComplete();
-  }, [isAllFunded, onComplete]);
 
   return (
     <Container
@@ -198,28 +185,41 @@ function FundingInner({ onComplete }: FundingInnerProps) {
           title="Controller is in Alpha"
           description="We recommend limiting deposits to necessary assets for now."
         />
-        {connectors.length ? (
-          connectors
-            .filter((c) => ["argentX", "braavos"].includes(c.id))
-            .map((c) => (
-              <Button
-                key={c.id}
-                bg="brand.primary"
-                color="brand.primaryForeground"
-                onClick={onConnect(c)}
-                isLoading={isSending}
-              >
-                Send from {c.name}
-              </Button>
-            ))
-        ) : (
+        {extAccount || isAllFunded ? (
           <Button
             bg="brand.primary"
             color="brand.primaryForeground"
-            onClick={onCopy}
+            onClick={onDeploy}
+            isLoading={isDeploying}
           >
-            copy address
+            Deploy Controller
           </Button>
+        ) : (
+          <>
+            {connectors.length ? (
+              connectors
+                .filter((c) => ["argentX", "braavos"].includes(c.id))
+                .map((c) => (
+                  <Button
+                    key={c.id}
+                    bg="brand.primary"
+                    color="brand.primaryForeground"
+                    onClick={() => connect({ connector: c })}
+                    isLoading={isExtConnecting}
+                  >
+                    Connect {c.name}
+                  </Button>
+                ))
+            ) : (
+              <Button
+                bg="brand.primary"
+                color="brand.primaryForeground"
+                onClick={onCopy}
+              >
+                copy address
+              </Button>
+            )}
+          </>
         )}
       </Footer>
     </Container>
@@ -363,7 +363,11 @@ function useTokens() {
 
   useInterval(checkFunds, 3000);
 
-  return { tokens, remaining, isAllFunded: !remaining };
+  return {
+    tokens,
+    remaining,
+    isAllFunded: !remaining || remaining.length === 0,
+  };
 }
 
 const ETH_CONTRACT =

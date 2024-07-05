@@ -36,12 +36,13 @@ function Home() {
     case "connect": {
       const ctx = context as ConnectCtx;
 
-      if (
-        chainId === constants.StarknetChainId.SN_MAIN &&
-        controller.account.status === Status.COUNTERFACTUAL
-      ) {
-        return <Funding />;
-      }
+      // TODO: support this fund first flow for mainnet
+      // if (
+      //   chainId === constants.StarknetChainId.SN_MAIN &&
+      //   controller.account.status === Status.COUNTERFACTUAL
+      // ) {
+      //   return <Funding />;
+      // }
 
       const session = controller.session(context.origin);
       // if no mismatch with existing policies then return success

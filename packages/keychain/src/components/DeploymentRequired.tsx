@@ -18,7 +18,6 @@ export function DeploymentRequired({
 }) {
   const { controller } = useController();
   const account = controller.account;
-  const [status, setStatus] = useState<Status>(account.status);
   const [deployHash, setDeployHash] = useState<string>();
   const [error, setError] = useState<Error>();
   const [fundingRequired, setIsFundingRequired] = useState(false);
@@ -30,7 +29,6 @@ export function DeploymentRequired({
     } catch (e) {
       if (e.message.includes("account already deployed")) {
         account.status = Status.DEPLOYED;
-        setStatus(Status.DEPLOYED);
       } else {
         setError(e);
       }
@@ -40,40 +38,18 @@ export function DeploymentRequired({
   useEffect(() => {
     if (account.chainId === constants.StarknetChainId.SN_MAIN) {
       setIsFundingRequired(true);
+      return;
     }
 
     deployAccount();
   }, [account.chainId, deployAccount]);
 
-  useEffect(() => {
-    const checkStatus = () => {
-      if (account.status === Status.DEPLOYED) {
-        setStatus(Status.DEPLOYED);
-        return true;
-      }
-      setStatus(account.status);
-      return false;
-    };
-
-    const id = setInterval(() => {
-      if (checkStatus()) clearInterval(id);
-    }, 500);
-
-    return () => clearInterval(id);
-  }, [account]);
-
-  if (status === Status.DEPLOYED) {
+  if (account.status === Status.DEPLOYED) {
     return <>{children}</>;
   }
 
   if (fundingRequired)
-    return (
-      <Funding
-        onComplete={() => {
-          setIsFundingRequired(false);
-        }}
-      />
-    );
+    return <Funding onComplete={() => setIsFundingRequired(false)} />;
 
   return (
     <Container

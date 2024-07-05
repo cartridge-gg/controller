@@ -21,8 +21,16 @@ export function StarknetProvider({ children }: PropsWithChildren) {
   );
 }
 
-// const url = "https://keychain-git-client-deploy.preview.cartridge.gg/";
-const url = "http://localhost:3001/";
+const url =
+  !process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ||
+  process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL.split(".")[0] ===
+    "cartridge-starknet-react-next"
+    ? process.env.XFRAME_URL
+    : "https://" +
+      (process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ?? "").replace(
+        "cartridge-starknet-react-next",
+        "keychain",
+      );
 
 function provider(chain: Chain) {
   switch (chain) {
@@ -70,15 +78,15 @@ const connectors = [
       // paymaster: {
       //   caller: shortString.encodeShortString("ANY_CALLER"),
       // },
-      theme: "dope-wars",
+      //theme: "dope-wars",
       // colorMode: "light"
-      prefunds: [
-        {
-          address:
-            "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
-          min: "100",
-        },
-      ],
+      // prefunds: [
+      //   {
+      //     address:
+      //       "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
+      //     min: "100",
+      //   },
+      // ],
     },
   ) as never as Connector,
 ];
