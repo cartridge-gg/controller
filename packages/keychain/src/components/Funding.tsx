@@ -292,7 +292,7 @@ function useTokens() {
     const target = [
       {
         address: ETH_CONTRACT,
-        min: "100000000000000",
+        min: "500000000000000",
       },
       ...prefunds,
     ];
