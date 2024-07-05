@@ -77,7 +77,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
       const prefunds = JSON.parse(
         decodeURIComponent(urlParams.get("prefunds")),
       );
-      if (prefunds.length) {
+      if (prefunds?.length) {
         setPrefunds(prefunds);
       }
     } else {
