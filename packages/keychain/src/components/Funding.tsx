@@ -352,7 +352,7 @@ function useTokens() {
         const contract = new Contract(abi, t.address, controller.account);
         const { balance } = await contract.balanceOf(controller.address);
 
-        console.log(t.symbol + ": " + balance);
+        console.log(t.symbol + ": " + uint256.uint256ToBN(balance));
 
         return {
           ...t,
@@ -367,7 +367,7 @@ function useTokens() {
     if (res.length) {
       setIsFundedBulk(res);
     }
-  }, [remaining, setIsFundedBulk, controller.account]);
+  }, [remaining, setIsFundedBulk, controller.account, controller.address]);
 
   useInterval(checkFunds, 3000);
 
