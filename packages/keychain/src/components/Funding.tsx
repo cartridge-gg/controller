@@ -25,7 +25,7 @@ import {
   useInjectedConnectors,
   voyager,
 } from "@starknet-react/core";
-import { CallData, Contract, RpcProvider, cairo, uint256 } from "starknet";
+import { CallData, RpcProvider, cairo, uint256 } from "starknet";
 import {
   AlertIcon,
   CheckIcon,
@@ -348,21 +348,19 @@ function useTokens() {
   const checkFunds = useCallback(async () => {
     const funded = await Promise.allSettled(
       remaining.map(async (t) => {
-        console.log("grabbing price" + t.symbol);
-        console.log("address: " + controller.account.address);
-        const { abi } = await controller.account.getClassAt(t.address);
-        console.log("abi");
-        const contract = new Contract(abi, t.address);
-        console.log("contract");
-        const { balance } = await contract.balanceOf(
-          controller.account.address,
-        );
-
-        console.log(t.symbol + ": " + uint256.uint256ToBN(balance));
+        const balance = await controller.account.callContract({
+          contractAddress: t.address,
+          entrypoint: "balanceOf",
+          calldata: [controller.account.address],
+        });
 
         return {
           ...t,
-          isFunded: uint256.uint256ToBN(balance) >= BigInt(t.min),
+          isFunded:
+            uint256.uint256ToBN({
+              low: balance[0],
+              high: balance[1],
+            }) >= BigInt(t.min),
         };
       }),
     );
