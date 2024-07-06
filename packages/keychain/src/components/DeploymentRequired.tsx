@@ -2,7 +2,7 @@ import { constants } from "starknet";
 import { Container, Footer, Content } from "components/layout";
 import { useCallback, useEffect, useState } from "react";
 import { Status } from "utils/account";
-import { Button, Link, Text } from "@chakra-ui/react";
+import { Button, Link, Text, useInterval } from "@chakra-ui/react";
 import { ExternalIcon, PacmanIcon } from "@cartridge/ui";
 import { useController } from "hooks/controller";
 import { ErrorAlert } from "./ErrorAlert";
@@ -44,21 +44,11 @@ export function DeploymentRequired({
     deployAccount();
   }, [account.chainId, deployAccount]);
 
-  useEffect(() => {
-    const checkStatus = async () => {
+  useInterval(async () => {
+    if (account.status !== Status.DEPLOYED) {
       await account.sync();
-      if (account.status === Status.DEPLOYED) {
-        return true;
-      }
-      return false;
-    };
-
-    const id = setInterval(() => {
-      if (checkStatus()) clearInterval(id);
-    }, 500);
-
-    return () => clearInterval(id);
-  }, [account]);
+    }
+  }, 1000);
 
   if (account.status === Status.DEPLOYED) {
     return <>{children}</>;
