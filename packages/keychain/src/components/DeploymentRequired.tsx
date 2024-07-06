@@ -10,7 +10,6 @@ import NextLink from "next/link";
 import { Funding } from "./Funding";
 
 export function DeploymentRequired({
-  onClose,
   children,
 }: {
   onClose: () => void;
@@ -18,6 +17,7 @@ export function DeploymentRequired({
 }) {
   const { controller } = useController();
   const account = controller.account;
+  const [status, setStatus] = useState<Status>(account.status);
   const [deployHash, setDeployHash] = useState<string>();
   const [error, setError] = useState<Error>();
   const [fundingRequired, setIsFundingRequired] = useState(false);
@@ -45,24 +45,49 @@ export function DeploymentRequired({
   }, [account.chainId, deployAccount]);
 
   useInterval(async () => {
-    if (account.status !== Status.DEPLOYED) {
+    if (account.status === Status.COUNTERFACTUAL) {
       await account.sync();
+      setStatus(account.status);
     }
   }, 1000);
 
-  if (account.status === Status.DEPLOYED) {
+  const fundingComplete = useCallback(
+    async (deployHash) => {
+      setIsFundingRequired(false);
+      setDeployHash(deployHash);
+
+      const receipt = await account.waitForTransaction(deployHash, {
+        retryInterval: 1000,
+      });
+
+      if (receipt.isRejected()) {
+        setError(
+          new Error(
+            "Transaction rejected: " +
+              receipt.transaction_failure_reason.error_message,
+          ),
+        );
+      }
+
+      if (receipt.isReverted()) {
+        setError(new Error("Transaction everted: " + receipt.revert_reason));
+      }
+    },
+    [account],
+  );
+
+  if (fundingRequired) return <Funding onComplete={fundingComplete} />;
+
+  if (status === Status.DEPLOYED) {
     return <>{children}</>;
   }
-
-  if (fundingRequired)
-    return <Funding onComplete={() => setIsFundingRequired(false)} />;
 
   return (
     <Container
       variant="connect"
       icon={<PacmanIcon color="brand.primary" fontSize="3xl" />}
       title="Deploying your account"
-      description="This may take a second"
+      description="This may take a second, don't close this window"
     >
       <Content alignItems="center">
         {status === Status.COUNTERFACTUAL &&
@@ -113,7 +138,6 @@ export function DeploymentRequired({
             }
           />
         )}
-        <Button onClick={onClose}>close</Button>
       </Footer>
     </Container>
   );

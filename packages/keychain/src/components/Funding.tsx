@@ -47,7 +47,7 @@ export function Funding(innerProps: FundingInnerProps) {
 }
 
 type FundingInnerProps = {
-  onComplete?: () => void;
+  onComplete?: (deployHash: string) => void;
 };
 
 function FundingInner({ onComplete }: FundingInnerProps) {
@@ -95,26 +95,9 @@ function FundingInner({ onComplete }: FundingInnerProps) {
       if (!isAllFunded) await prefund();
       const { transaction_hash } =
         await controller.account.cartridge.deploySelf();
-      const receipt = await controller.account.waitForTransaction(
-        transaction_hash,
-        {
-          retryInterval: 1000,
-        },
-      );
-
-      if (receipt.isRejected()) {
-        throw new Error(
-          "Transaction rejected: " +
-            receipt.transaction_failure_reason.error_message,
-        );
-      }
-
-      if (receipt.isReverted()) {
-        throw new Error("Transaction everted: " + receipt.revert_reason);
-      }
 
       if (onComplete) {
-        onComplete();
+        onComplete(transaction_hash);
       }
     } catch (e) {
       setIsDeploying(false);
