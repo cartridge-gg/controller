@@ -4,6 +4,7 @@ import {
   HStack,
   Image,
   Spacer,
+  Spinner,
   Text,
   VStack,
   useInterval,
@@ -48,16 +49,22 @@ function FundingInner({ onComplete }: FundingInnerProps) {
   const { account: extAccount, isConnecting: isExtConnecting } = useAccount();
   const { connect, connectors } = useConnect();
   const { controller } = useConnection();
-  const { tokens, isAllFunded } = useTokens();
+  const { tokens, isAllFunded, isChecked } = useTokens();
   const [isDeploying, setIsDeploying] = useState(false);
 
   const prefund = useCallback(async () => {
     if (!extAccount) {
       throw new Error("External account is not connected");
     }
+    if (!isChecked) {
+      throw new Error("Fund check has not been done");
+    }
 
     const calls = tokens.flatMap((t) => {
-      const amount = cairo.uint256(t.min);
+      if (typeof t.balance === "undefined") {
+        throw new Error("Fund check has not been done");
+      }
+      const amount = cairo.uint256(t.min - t.balance);
       return [
         {
           contractAddress: t.address,
@@ -81,7 +88,7 @@ function FundingInner({ onComplete }: FundingInnerProps) {
     await extAccount.waitForTransaction(res.transaction_hash, {
       retryInterval: 1000,
     });
-  }, [extAccount, controller, tokens]);
+  }, [extAccount, controller, tokens, isChecked]);
 
   const onDeploy = useCallback(async () => {
     try {
@@ -94,6 +101,7 @@ function FundingInner({ onComplete }: FundingInnerProps) {
         onComplete(transaction_hash);
       }
     } catch (e) {
+      console.error(e);
       setIsDeploying(false);
     }
   }, [controller.account, isAllFunded, onComplete, prefund]);
@@ -136,9 +144,12 @@ function FundingInner({ onComplete }: FundingInnerProps) {
               <HStack>
                 <HStack>
                   {t.logo}
-                  <Text>
-                    {getBalanceStr(t)} {t.symbol}
-                  </Text>
+                  {typeof t.balance === "bigint" ? (
+                    <Text>{getBalanceStr(t)}</Text>
+                  ) : (
+                    <Spinner size="xs" />
+                  )}
+                  <Text>{t.symbol}</Text>
                 </HStack>
                 {isFunded(t) && <CheckIcon />}
               </HStack>
@@ -160,7 +171,16 @@ function FundingInner({ onComplete }: FundingInnerProps) {
       <Footer>
         <AlphaWarning />
 
-        {extAccount || isAllFunded ? (
+        {!isChecked ? (
+          <Button
+            bg="brand.primary"
+            color="brand.primaryForeground"
+            onClick={onDeploy}
+            isLoading={isDeploying}
+          >
+            <Spinner size="sm" />
+          </Button>
+        ) : extAccount || isAllFunded ? (
           <Button
             bg="brand.primary"
             color="brand.primaryForeground"
@@ -223,6 +243,7 @@ function ExternalWalletProvider({ children }: PropsWithChildren) {
 function useTokens() {
   const { controller, prefunds } = useConnection();
   const [tokens, setTokens] = useState<TokenInfo[]>([]);
+  const [isChecked, setIsChecked] = useState(false);
 
   const remaining = useMemo(() => tokens.filter((t) => !isFunded(t)), [tokens]);
 
@@ -244,6 +265,10 @@ function useTokens() {
           ({ l2_token_address }) => l2_token_address === t.address,
         );
 
+        if (!info) {
+          throw new Error(`Cannot find token info for: ${t.address}`);
+        }
+
         return {
           address: t.address,
           min: BigInt(t.min),
@@ -259,7 +284,6 @@ function useTokens() {
               h={5}
             />
           ),
-          balance: BigInt(0),
         };
       });
       setTokens(tokens);
@@ -268,7 +292,7 @@ function useTokens() {
 
   const checkFunds = useCallback(async () => {
     const funded = await Promise.allSettled(
-      remaining.map(async (t) => {
+      tokens.map(async (t) => {
         const balance = await controller.account.callContract({
           contractAddress: t.address,
           entrypoint: "balanceOf",
@@ -285,13 +309,17 @@ function useTokens() {
       }),
     );
     const res = funded
-      .filter((res) => res.status === "fulfilled" && isFunded(res.value))
+      .filter((res) => res.status === "fulfilled")
       .map((res) => (res as PromiseFulfilledResult<TokenInfo>).value);
 
     if (res.length) {
       setTokens(res);
+
+      if (!isChecked) {
+        setIsChecked(true);
+      }
     }
-  }, [remaining, controller.account]);
+  }, [tokens, controller.account, isChecked]);
 
   useInterval(checkFunds, 3000);
 
@@ -299,11 +327,12 @@ function useTokens() {
     tokens,
     remaining,
     isAllFunded: remaining.length === 0,
+    isChecked,
   };
 }
 
 function isFunded(t: TokenInfo) {
-  return t.min <= t.balance;
+  return t.min <= (t.balance ?? 0n);
 }
 
 function isEther(t: Prefund | TokenInfo) {
@@ -311,6 +340,7 @@ function isEther(t: Prefund | TokenInfo) {
 }
 
 function getBalanceStr(t: TokenInfo) {
+  if (typeof t.balance === "undefined") return "...";
   return isEther(t) ? formatEther(t.balance) : t.balance.toString();
 }
 
@@ -338,5 +368,5 @@ type TokenInfo = {
   address: string;
   logo: React.ReactNode;
   min: bigint;
-  balance: bigint;
+  balance?: bigint;
 };
