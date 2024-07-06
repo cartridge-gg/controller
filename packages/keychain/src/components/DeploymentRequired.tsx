@@ -40,10 +40,7 @@ export function DeploymentRequired({
       return;
     }
 
-    if (
-      account.chainId === constants.StarknetChainId.SN_MAIN ||
-      account.chainId === constants.StarknetChainId.SN_SEPOLIA
-    ) {
+    if (account.chainId === constants.StarknetChainId.SN_MAIN) {
       setIsFundingRequired(true);
       return;
     }
