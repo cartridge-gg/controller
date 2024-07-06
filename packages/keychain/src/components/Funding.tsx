@@ -24,12 +24,13 @@ import {
   voyager,
 } from "@starknet-react/core";
 import { CallData, RpcProvider, cairo, uint256 } from "starknet";
-import { CheckIcon, CoinsIcon, CopyHash, EthereumIcon } from "@cartridge/ui";
+import { CheckIcon, CoinsIcon, CopyIcon, EthereumIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { formatEther } from "viem";
-import { useCopyToast } from "./Toaster";
+import { useCopyAndToast } from "./Toaster";
 import { Prefund } from "@cartridge/controller";
 import { AlphaWarning } from "./Warning";
+import { formatAddress } from "utils/contracts";
 
 export function Funding(innerProps: FundingInnerProps) {
   return (
@@ -97,26 +98,21 @@ function FundingInner({ onComplete }: FundingInnerProps) {
     }
   }, [controller.account, isAllFunded, onComplete, prefund]);
 
-  const copyToast = useCopyToast();
-
-  const onCopy = useCallback(
-    (e: React.MouseEvent<HTMLElement>) => {
-      e.stopPropagation();
-
-      navigator.clipboard.writeText(controller.account.address);
-      copyToast();
-    },
-    [controller.account.address, copyToast],
-  );
+  const copyAndToast = useCopyAndToast();
+  const onCopy = useCallback(() => {
+    copyAndToast(formatAddress(controller.account.address));
+  }, [copyAndToast, controller.account.address]);
 
   return (
     <Container
       title={`Fund ${controller.username}`}
       description={
-        <CopyHash
-          color="text.secondaryAccent"
-          hash={controller.account.address}
-        />
+        <HStack onClick={onCopy} _hover={{ cursor: "pointer" }}>
+          <Text color="text.secondaryAccent">
+            {formatAddress(controller.account.address, { first: 20, last: 10 })}
+          </Text>
+          <CopyIcon />
+        </HStack>
       }
       // TODO: Add line icons
       Icon={CoinsIcon}

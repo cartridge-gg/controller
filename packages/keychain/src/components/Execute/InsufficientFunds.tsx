@@ -1,6 +1,6 @@
 import { CopyIcon, EthereumIcon, StarknetIcon } from "@cartridge/ui";
 import { Button, HStack, Spacer, Text, VStack } from "@chakra-ui/react";
-import { useCopyToast } from "components/Toaster";
+import { useCopyAndToast } from "components/Toaster";
 import { AlphaWarning } from "components/Warning";
 import { Container, Content, Footer } from "components/layout";
 import { useConnection } from "hooks/connection";
@@ -16,16 +16,10 @@ export function InsufficientFunds({
   balance: BigNumberish;
 }) {
   const { controller } = useConnection();
-  const copyToast = useCopyToast();
-  const onCopy = useCallback(
-    (e: React.MouseEvent<HTMLElement>) => {
-      e.stopPropagation();
-
-      navigator.clipboard.writeText(controller.account.address);
-      copyToast();
-    },
-    [controller.account.address, copyToast],
-  );
+  const copyAndToast = useCopyAndToast();
+  const onCopy = useCallback(() => {
+    copyAndToast(formatAddress(controller.account.address));
+  }, [controller.account.address, copyAndToast]);
 
   return (
     <Container
