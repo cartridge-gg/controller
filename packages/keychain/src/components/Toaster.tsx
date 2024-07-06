@@ -1,4 +1,5 @@
-import { Flex, UseToastOptions } from "@chakra-ui/react";
+import { Flex, UseToastOptions, useToast } from "@chakra-ui/react";
+import { DEFAULT_TOAST_OPTIONS } from "@cartridge/ui";
 
 export function Toaster({ title }: UseToastOptions) {
   return (
@@ -12,4 +13,11 @@ export function Toaster({ title }: UseToastOptions) {
       {title}
     </Flex>
   );
+}
+
+export function useCopyToast(): () => void {
+  return useToast({
+    ...DEFAULT_TOAST_OPTIONS,
+    render: Toaster,
+  });
 }

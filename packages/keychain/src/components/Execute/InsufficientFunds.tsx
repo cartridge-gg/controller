@@ -1,7 +1,10 @@
 import { CopyIcon, EthereumIcon, StarknetIcon } from "@cartridge/ui";
-import { HStack, Spacer, Text, VStack } from "@chakra-ui/react";
-import { Container, Content } from "components/layout";
-import { useState } from "react";
+import { Button, HStack, Spacer, Text, VStack } from "@chakra-ui/react";
+import { useCopyToast } from "components/Toaster";
+import { AlphaWarning } from "components/Warning";
+import { Container, Content, Footer } from "components/layout";
+import { useConnection } from "hooks/connection";
+import { useCallback } from "react";
 import { BigNumberish } from "starknet";
 import { formatAddress } from "utils/contracts";
 
@@ -12,7 +15,18 @@ export function InsufficientFunds({
   address: BigNumberish;
   balance: BigNumberish;
 }) {
-  const [copied, setCopied] = useState(false);
+  const { controller } = useConnection();
+  const copyToast = useCopyToast();
+  const onCopy = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      e.stopPropagation();
+
+      navigator.clipboard.writeText(controller.account.address);
+      copyToast();
+    },
+    [controller.account.address, copyToast],
+  );
+
   return (
     <Container
       hideAccount
@@ -34,6 +48,7 @@ export function InsufficientFunds({
             bg="solid.primary"
             as="b"
             p={3}
+            textTransform="uppercase"
           >
             BALANCE
           </Text>
@@ -76,6 +91,45 @@ export function InsufficientFunds({
             bg="solid.primary"
             as="b"
             p={3}
+            textTransform="uppercase"
+          >
+            username
+          </Text>
+
+          <HStack
+            h="40px"
+            w="full"
+            borderRadius="4px"
+            overflow="hidden"
+            spacing="1px"
+          >
+            <HStack
+              bg="solid.primary"
+              boxSize="full"
+              flex="2"
+              px="10px"
+              cursor="pointer"
+            >
+              <Text color="inherit">{controller.account.username}</Text>
+            </HStack>
+          </HStack>
+        </VStack>
+
+        <VStack
+          w="full"
+          align="flex-start"
+          fontSize="sm"
+          borderRadius="sm"
+          spacing="1px"
+        >
+          <Text
+            color="text.secondary"
+            fontSize="11px"
+            w="full"
+            bg="solid.primary"
+            as="b"
+            p={3}
+            textTransform="uppercase"
           >
             ADDRESS
           </Text>
@@ -96,25 +150,28 @@ export function InsufficientFunds({
               _hover={{
                 opacity: 0.8,
               }}
-              onClick={() => {
-                navigator.clipboard.writeText(address.toString());
-                setCopied(true);
-              }}
+              onClick={onCopy}
             >
-              <Text color="inherit">{formatAddress(address)}</Text>
+              <Text color="inherit">
+                {formatAddress(address, { first: 20, last: 10 })}
+              </Text>
               <Spacer />
-              <CopyIcon boxSize="24px" />
+              <CopyIcon boxSize={6} />
             </HStack>
           </HStack>
-          {copied && (
-            <HStack w="full" justify="center">
-              <Text color="text.secondary" fontSize="12px">
-                COPIED
-              </Text>
-            </HStack>
-          )}
         </VStack>
       </Content>
+
+      <Footer>
+        <AlphaWarning />
+        <Button
+          bg="brand.primary"
+          color="brand.primaryForeground"
+          onClick={onCopy}
+        >
+          copy address
+        </Button>
+      </Footer>
     </Container>
   );
 }

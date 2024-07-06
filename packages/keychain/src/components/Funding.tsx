@@ -7,11 +7,9 @@ import {
   Text,
   VStack,
   useInterval,
-  useToast,
 } from "@chakra-ui/react";
 import {
   PropsWithChildren,
-  ReactElement,
   useCallback,
   useEffect,
   useMemo,
@@ -26,18 +24,12 @@ import {
   voyager,
 } from "@starknet-react/core";
 import { CallData, RpcProvider, cairo, uint256 } from "starknet";
-import {
-  AlertIcon,
-  CheckIcon,
-  CoinsIcon,
-  CopyHash,
-  DEFAULT_TOAST_OPTIONS,
-  EthereumIcon,
-} from "@cartridge/ui";
+import { CheckIcon, CoinsIcon, CopyHash, EthereumIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { formatEther } from "viem";
-import { Toaster } from "./Toaster";
+import { useCopyToast } from "./Toaster";
 import { Prefund } from "@cartridge/controller";
+import { AlphaWarning } from "./Warning";
 
 export function Funding(innerProps: FundingInnerProps) {
   return (
@@ -105,19 +97,16 @@ function FundingInner({ onComplete }: FundingInnerProps) {
     }
   }, [controller.account, isAllFunded, onComplete, prefund]);
 
-  const toast = useToast({
-    ...DEFAULT_TOAST_OPTIONS,
-    render: Toaster,
-  });
+  const copyToast = useCopyToast();
 
   const onCopy = useCallback(
     (e: React.MouseEvent<HTMLElement>) => {
       e.stopPropagation();
 
       navigator.clipboard.writeText(controller.account.address);
-      toast();
+      copyToast();
     },
-    [controller.account.address, toast],
+    [controller.account.address, copyToast],
   );
 
   return (
@@ -173,10 +162,8 @@ function FundingInner({ onComplete }: FundingInnerProps) {
       </Content>
 
       <Footer>
-        <Warning
-          title="Controller is in Alpha"
-          description="We recommend limiting deposits to necessary assets for now."
-        />
+        <AlphaWarning />
+
         {extAccount || isAllFunded ? (
           <Button
             bg="brand.primary"
@@ -215,37 +202,6 @@ function FundingInner({ onComplete }: FundingInnerProps) {
         )}
       </Footer>
     </Container>
-  );
-}
-
-function Warning({
-  title,
-  description,
-}: {
-  title: string;
-  description?: string | ReactElement;
-}) {
-  return (
-    <VStack
-      w="full"
-      borderRadius="md"
-      px={5}
-      py={3}
-      bg="solid.secondary"
-      alignItems="flex-start"
-      gap={1}
-    >
-      <HStack>
-        <AlertIcon />
-        <Text casing="uppercase" fontSize="11px" as="b">
-          {title}
-        </Text>
-      </HStack>
-
-      <Text fontSize="xs" color="text.secondaryAccent">
-        {description}
-      </Text>
-    </VStack>
   );
 }
 
