@@ -134,7 +134,7 @@ function FundingInner({ onComplete }: FundingInnerProps) {
       console.error(e);
       setIsDeploying(false);
     }
-  }, [controller.account, isAllFunded, onComplete]);
+  }, [controller.account, onComplete]);
 
   const copyAndToast = useCopyAndToast();
   const onCopy = useCallback(() => {
@@ -201,54 +201,64 @@ function FundingInner({ onComplete }: FundingInnerProps) {
       <Footer>
         <AlphaWarning />
 
-        {state === FundingState.CONNECT && (
+        {!isChecked ? (
+          <Button
+            bg="brand.primary"
+            color="brand.primaryForeground"
+            isLoading={true}
+          />
+        ) : (
           <>
-            {connectors.length ? (
-              connectors
-                .filter((c) => ["argentX", "braavos"].includes(c.id))
-                .map((c) => (
+            {state === FundingState.CONNECT && (
+              <>
+                {connectors.length ? (
+                  connectors
+                    .filter((c) => ["argentX", "braavos"].includes(c.id))
+                    .map((c) => (
+                      <Button
+                        key={c.id}
+                        bg="brand.primary"
+                        color="brand.primaryForeground"
+                        onClick={() => onConnect(c)}
+                        isLoading={isConnecting}
+                      >
+                        Connect {c.name}
+                      </Button>
+                    ))
+                ) : (
                   <Button
-                    key={c.id}
                     bg="brand.primary"
                     color="brand.primaryForeground"
-                    onClick={() => onConnect(c)}
-                    isLoading={isConnecting || !isChecked}
+                    onClick={onCopy}
                   >
-                    Connect {c.name}
+                    copy address
                   </Button>
-                ))
-            ) : (
+                )}
+              </>
+            )}
+
+            {state === FundingState.PREFUND && (
               <Button
                 bg="brand.primary"
                 color="brand.primaryForeground"
-                onClick={onCopy}
+                onClick={onPrefund}
+                isLoading={isSending}
               >
-                copy address
+                Send Funds
+              </Button>
+            )}
+
+            {state === FundingState.DEPLOY && (
+              <Button
+                bg="brand.primary"
+                color="brand.primaryForeground"
+                onClick={onDeploy}
+                isLoading={isDeploying}
+              >
+                Deploy Controller
               </Button>
             )}
           </>
-        )}
-
-        {state === FundingState.PREFUND && (
-          <Button
-            bg="brand.primary"
-            color="brand.primaryForeground"
-            onClick={onPrefund}
-            isLoading={isSending || !isChecked}
-          >
-            Send Funds
-          </Button>
-        )}
-
-        {state === FundingState.DEPLOY && (
-          <Button
-            bg="brand.primary"
-            color="brand.primaryForeground"
-            onClick={onDeploy}
-            isLoading={isDeploying || !isChecked}
-          >
-            Deploy Controller
-          </Button>
         )}
       </Footer>
     </Container>

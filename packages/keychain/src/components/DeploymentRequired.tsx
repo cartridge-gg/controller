@@ -71,7 +71,7 @@ export function DeploymentRequired({
         setError(
           new Error(
             "Transaction rejected: " +
-            receipt.transaction_failure_reason.error_message,
+              receipt.transaction_failure_reason.error_message,
           ),
         );
       }
@@ -103,10 +103,11 @@ export function DeploymentRequired({
             constants.StarknetChainId.SN_MAIN,
           ].includes(account.chainId as constants.StarknetChainId) && (
             <Link
-              href={`https://${account.chainId === constants.StarknetChainId.SN_SEPOLIA
+              href={`https://${
+                account.chainId === constants.StarknetChainId.SN_SEPOLIA
                   ? "sepolia."
                   : ""
-                }starkscan.co/tx/${deployHash}`}
+              }starkscan.co/tx/${deployHash}`}
               isExternal
             >
               <Button variant="link" mt={10} rightIcon={<ExternalIcon />}>
