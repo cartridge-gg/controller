@@ -18,6 +18,7 @@ import {
 } from "react";
 import { sepolia } from "@starknet-react/chains";
 import {
+  Connector,
   StarknetConfig,
   useAccount,
   useConnect,
@@ -33,6 +34,12 @@ import { Prefund } from "@cartridge/controller";
 import { AlphaWarning } from "./Warning";
 import { formatAddress } from "utils/contracts";
 
+enum FundingState {
+  CONNECT,
+  PREFUND,
+  DEPLOY,
+}
+
 export function Funding(innerProps: FundingInnerProps) {
   return (
     <ExternalWalletProvider>
@@ -46,13 +53,32 @@ type FundingInnerProps = {
 };
 
 function FundingInner({ onComplete }: FundingInnerProps) {
-  const { account: extAccount, isConnecting: isExtConnecting } = useAccount();
-  const { connect, connectors } = useConnect();
+  const { account: extAccount } = useAccount();
+  const { connectAsync, connectors, isPending: isConnecting } = useConnect();
   const { controller } = useConnection();
   const { tokens, isAllFunded, isChecked } = useTokens();
+  const [isSending, setIsSending] = useState(false);
   const [isDeploying, setIsDeploying] = useState(false);
+  const [state, setState] = useState<FundingState>(FundingState.CONNECT);
 
-  const prefund = useCallback(async () => {
+  useEffect(() => {
+    if (isAllFunded && isChecked) {
+      setState(FundingState.DEPLOY);
+    }
+  }, [isAllFunded, isChecked]);
+
+  const onConnect = useCallback(
+    (c: Connector) => {
+      connectAsync({ connector: c })
+        .then(() => setState(FundingState.PREFUND))
+        .catch(() => {
+          /* user abort */
+        });
+    },
+    [connectAsync],
+  );
+
+  const onPrefund = useCallback(async () => {
     if (!extAccount) {
       throw new Error("External account is not connected");
     }
@@ -60,40 +86,44 @@ function FundingInner({ onComplete }: FundingInnerProps) {
       throw new Error("Fund check has not been done");
     }
 
-    const calls = tokens.flatMap((t) => {
-      if (typeof t.balance === "undefined") {
-        throw new Error("Fund check has not been done");
-      }
-      const amount = cairo.uint256(t.min - t.balance);
-      return [
-        {
-          contractAddress: t.address,
-          entrypoint: "approve",
-          calldata: CallData.compile({
-            recipient: controller.account.address,
-            amount,
-          }),
-        },
-        {
-          contractAddress: t.address,
-          entrypoint: "transfer",
-          calldata: CallData.compile({
-            recipient: controller.account.address,
-            amount,
-          }),
-        },
-      ];
-    });
-    const res = await extAccount.execute(calls);
-    await extAccount.waitForTransaction(res.transaction_hash, {
-      retryInterval: 1000,
-    });
+    try {
+      setIsSending(true);
+      const calls = tokens.flatMap((t) => {
+        if (typeof t.balance === "undefined") {
+          throw new Error("Fund check has not been done");
+        }
+        const amount = cairo.uint256(t.min - t.balance);
+        return [
+          {
+            contractAddress: t.address,
+            entrypoint: "approve",
+            calldata: CallData.compile({
+              recipient: controller.account.address,
+              amount,
+            }),
+          },
+          {
+            contractAddress: t.address,
+            entrypoint: "transfer",
+            calldata: CallData.compile({
+              recipient: controller.account.address,
+              amount,
+            }),
+          },
+        ];
+      });
+      const res = await extAccount.execute(calls);
+      await extAccount.waitForTransaction(res.transaction_hash, {
+        retryInterval: 1000,
+      });
+    } catch (e) {
+      setIsSending(false);
+    }
   }, [extAccount, controller, tokens, isChecked]);
 
   const onDeploy = useCallback(async () => {
     try {
       setIsDeploying(true);
-      if (!isAllFunded) await prefund();
       const { transaction_hash } =
         await controller.account.cartridge.deploySelf();
 
@@ -104,7 +134,7 @@ function FundingInner({ onComplete }: FundingInnerProps) {
       console.error(e);
       setIsDeploying(false);
     }
-  }, [controller.account, isAllFunded, onComplete, prefund]);
+  }, [controller.account, isAllFunded, onComplete]);
 
   const copyAndToast = useCopyAndToast();
   const onCopy = useCallback(() => {
@@ -171,25 +201,7 @@ function FundingInner({ onComplete }: FundingInnerProps) {
       <Footer>
         <AlphaWarning />
 
-        {!isChecked ? (
-          <Button
-            bg="brand.primary"
-            color="brand.primaryForeground"
-            onClick={onDeploy}
-            isLoading={isDeploying}
-          >
-            <Spinner size="sm" />
-          </Button>
-        ) : extAccount || isAllFunded ? (
-          <Button
-            bg="brand.primary"
-            color="brand.primaryForeground"
-            onClick={onDeploy}
-            isLoading={isDeploying}
-          >
-            Deploy Controller
-          </Button>
-        ) : (
+        {state === FundingState.CONNECT && (
           <>
             {connectors.length ? (
               connectors
@@ -199,8 +211,8 @@ function FundingInner({ onComplete }: FundingInnerProps) {
                     key={c.id}
                     bg="brand.primary"
                     color="brand.primaryForeground"
-                    onClick={() => connect({ connector: c })}
-                    isLoading={isExtConnecting}
+                    onClick={() => onConnect(c)}
+                    isLoading={isConnecting || !isChecked}
                   >
                     Connect {c.name}
                   </Button>
@@ -215,6 +227,28 @@ function FundingInner({ onComplete }: FundingInnerProps) {
               </Button>
             )}
           </>
+        )}
+
+        {state === FundingState.PREFUND && (
+          <Button
+            bg="brand.primary"
+            color="brand.primaryForeground"
+            onClick={onPrefund}
+            isLoading={isSending || !isChecked}
+          >
+            Send Funds
+          </Button>
+        )}
+
+        {state === FundingState.DEPLOY && (
+          <Button
+            bg="brand.primary"
+            color="brand.primaryForeground"
+            onClick={onDeploy}
+            isLoading={isDeploying || !isChecked}
+          >
+            Deploy Controller
+          </Button>
         )}
       </Footer>
     </Container>
