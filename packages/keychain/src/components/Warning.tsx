@@ -37,7 +37,7 @@ export function AlphaWarning() {
   return (
     <Warning
       title="Controller is in Alpha"
-      description="We recommend limiting deposits to necessary assets for now."
+      description="Exercise caution when depositing funds"
     />
   );
 }
