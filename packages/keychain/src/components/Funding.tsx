@@ -102,8 +102,6 @@ function FundingInner({ onComplete }: FundingInnerProps) {
         },
       );
 
-      console.log({ receipt });
-
       if (receipt.isRejected()) {
         throw new Error(
           "Transaction rejected: " +
@@ -293,7 +291,7 @@ function useTokens() {
     const target = [
       {
         address: ETH_CONTRACT,
-        min: "500000000000000",
+        min: "200000000000000",
       },
       ...prefunds,
     ];
