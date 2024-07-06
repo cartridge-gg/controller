@@ -10,6 +10,7 @@ import NextLink from "next/link";
 import { Funding } from "./Funding";
 
 export function DeploymentRequired({
+  onClose,
   children,
 }: {
   onClose: () => void;
@@ -57,25 +58,8 @@ export function DeploymentRequired({
 
   const fundingComplete = useCallback(
     async (deployHash) => {
+      if (deployHash) setDeployHash(deployHash);
       setIsFundingRequired(false);
-      setDeployHash(deployHash);
-
-      const receipt = await account.waitForTransaction(deployHash, {
-        retryInterval: 1000,
-      });
-
-      if (receipt.isRejected()) {
-        setError(
-          new Error(
-            "Transaction rejected: " +
-              receipt.transaction_failure_reason.error_message,
-          ),
-        );
-      }
-
-      if (receipt.isReverted()) {
-        setError(new Error("Transaction everted: " + receipt.revert_reason));
-      }
     },
     [account],
   );
@@ -91,10 +75,11 @@ export function DeploymentRequired({
       variant="connect"
       icon={<PacmanIcon color="brand.primary" fontSize="3xl" />}
       title="Deploying your account"
-      description="This may take a second, don't close this window"
+      description="This may take a second"
     >
       <Content alignItems="center">
         {status === Status.COUNTERFACTUAL &&
+          deployHash &&
           [
             constants.StarknetChainId.SN_SEPOLIA,
             constants.StarknetChainId.SN_MAIN,
@@ -113,7 +98,6 @@ export function DeploymentRequired({
             </Link>
           )}
       </Content>
-
       <Footer>
         {error && (
           <ErrorAlert
@@ -142,6 +126,7 @@ export function DeploymentRequired({
             }
           />
         )}
+        <Button onClick={onClose}>Close</Button>
       </Footer>
     </Container>
   );

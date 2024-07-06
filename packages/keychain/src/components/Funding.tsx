@@ -49,7 +49,7 @@ export function Funding(innerProps: FundingInnerProps) {
 }
 
 type FundingInnerProps = {
-  onComplete?: (deployHash: string) => void;
+  onComplete: (deployHash?: string) => void;
 };
 
 function FundingInner({ onComplete }: FundingInnerProps) {
@@ -127,11 +127,12 @@ function FundingInner({ onComplete }: FundingInnerProps) {
       const { transaction_hash } =
         await controller.account.cartridge.deploySelf();
 
-      if (onComplete) {
-        onComplete(transaction_hash);
-      }
+      onComplete(transaction_hash);
     } catch (e) {
-      console.error(e);
+      if (e.message && e.message.includes("DuplicateTx")) {
+        onComplete();
+      }
+
       setIsDeploying(false);
     }
   }, [controller.account, onComplete]);
