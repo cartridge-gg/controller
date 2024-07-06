@@ -44,6 +44,22 @@ export function DeploymentRequired({
     deployAccount();
   }, [account.chainId, deployAccount]);
 
+  useEffect(() => {
+    const checkStatus = async () => {
+      await account.sync();
+      if (account.status === Status.DEPLOYED) {
+        return true;
+      }
+      return false;
+    };
+
+    const id = setInterval(() => {
+      if (checkStatus()) clearInterval(id);
+    }, 500);
+
+    return () => clearInterval(id);
+  }, [account]);
+
   if (account.status === Status.DEPLOYED) {
     return <>{children}</>;
   }

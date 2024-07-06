@@ -102,7 +102,7 @@ class Account extends BaseAccount {
     return hash.deployAccount;
   }
 
-  private async sync() {
+  async sync() {
     if (this.status != Status.DEPLOYED) {
       try {
         const classHash = await this.rpc.getClassHashAt(
@@ -119,7 +119,6 @@ class Account extends BaseAccount {
           error.message.includes("Contract not found")
         ) {
           this.status = Status.COUNTERFACTUAL;
-          setTimeout(() => this.sync(), 1000);
         } else {
           throw error;
         }
