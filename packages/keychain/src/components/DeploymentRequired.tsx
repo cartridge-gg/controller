@@ -36,6 +36,10 @@ export function DeploymentRequired({
   }, [account]);
 
   useEffect(() => {
+    if (account.status === Status.DEPLOYED) {
+      return;
+    }
+
     if (
       account.chainId === constants.StarknetChainId.SN_MAIN ||
       account.chainId === constants.StarknetChainId.SN_SEPOLIA
