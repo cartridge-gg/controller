@@ -17,6 +17,7 @@ import {
 } from "react";
 import { sepolia } from "@starknet-react/chains";
 import {
+  Connector,
   StarknetConfig,
   useAccount,
   useConnect,
@@ -32,6 +33,12 @@ import { Prefund } from "@cartridge/controller";
 import { AlphaWarning } from "./Warning";
 import { formatAddress } from "utils/contracts";
 
+enum FundingState {
+  CONNECT,
+  PREFUND,
+  DEPLOY,
+}
+
 export function Funding(innerProps: FundingInnerProps) {
   return (
     <ExternalWalletProvider>
@@ -45,48 +52,69 @@ type FundingInnerProps = {
 };
 
 function FundingInner({ onComplete }: FundingInnerProps) {
-  const { account: extAccount, isConnecting: isExtConnecting } = useAccount();
-  const { connect, connectors } = useConnect();
+  const { account: extAccount } = useAccount();
+  const { connectAsync, connectors, isPending: isConnecting } = useConnect();
   const { controller } = useConnection();
   const { tokens, isAllFunded } = useTokens();
   const [isDeploying, setIsDeploying] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [state, setState] = useState<FundingState>(FundingState.CONNECT);
 
-  const prefund = useCallback(async () => {
+  useEffect(() => {
+    if (isAllFunded) {
+      setState(FundingState.DEPLOY);
+    }
+  }, [isAllFunded]);
+
+  const onConnect = useCallback(
+    (c: Connector) => {
+      connectAsync({ connector: c })
+        .then(() => setState(FundingState.PREFUND))
+        .catch(() => {});
+    },
+    [connectAsync],
+  );
+
+  const onPrefund = useCallback(async () => {
     if (!extAccount) {
       throw new Error("External account is not connected");
     }
 
-    const calls = tokens.flatMap((t) => {
-      const amount = cairo.uint256(t.min);
-      return [
-        {
-          contractAddress: t.address,
-          entrypoint: "approve",
-          calldata: CallData.compile({
-            recipient: controller.account.address,
-            amount,
-          }),
-        },
-        {
-          contractAddress: t.address,
-          entrypoint: "transfer",
-          calldata: CallData.compile({
-            recipient: controller.account.address,
-            amount,
-          }),
-        },
-      ];
-    });
-    const res = await extAccount.execute(calls);
-    await extAccount.waitForTransaction(res.transaction_hash, {
-      retryInterval: 1000,
-    });
+    try {
+      setIsSending(true);
+      const calls = tokens.flatMap((t) => {
+        const amount = cairo.uint256(t.min);
+        return [
+          {
+            contractAddress: t.address,
+            entrypoint: "approve",
+            calldata: CallData.compile({
+              recipient: controller.account.address,
+              amount,
+            }),
+          },
+          {
+            contractAddress: t.address,
+            entrypoint: "transfer",
+            calldata: CallData.compile({
+              recipient: controller.account.address,
+              amount,
+            }),
+          },
+        ];
+      });
+      const res = await extAccount.execute(calls);
+      await extAccount.waitForTransaction(res.transaction_hash, {
+        retryInterval: 1000,
+      });
+    } catch (e) {
+      setIsSending(false);
+    }
   }, [extAccount, controller, tokens]);
 
   const onDeploy = useCallback(async () => {
     try {
       setIsDeploying(true);
-      if (!isAllFunded) await prefund();
       const { transaction_hash } =
         await controller.account.cartridge.deploySelf();
 
@@ -96,7 +124,7 @@ function FundingInner({ onComplete }: FundingInnerProps) {
     } catch (e) {
       setIsDeploying(false);
     }
-  }, [controller.account, isAllFunded, onComplete, prefund]);
+  }, [controller.account, isAllFunded, onComplete]);
 
   const copyAndToast = useCopyAndToast();
   const onCopy = useCallback(() => {
@@ -159,17 +187,7 @@ function FundingInner({ onComplete }: FundingInnerProps) {
 
       <Footer>
         <AlphaWarning />
-
-        {extAccount || isAllFunded ? (
-          <Button
-            bg="brand.primary"
-            color="brand.primaryForeground"
-            onClick={onDeploy}
-            isLoading={isDeploying}
-          >
-            Deploy Controller
-          </Button>
-        ) : (
+        {state === FundingState.CONNECT && (
           <>
             {connectors.length ? (
               connectors
@@ -179,8 +197,8 @@ function FundingInner({ onComplete }: FundingInnerProps) {
                     key={c.id}
                     bg="brand.primary"
                     color="brand.primaryForeground"
-                    onClick={() => connect({ connector: c })}
-                    isLoading={isExtConnecting}
+                    onClick={() => onConnect(c)}
+                    isLoading={isConnecting}
                   >
                     Connect {c.name}
                   </Button>
@@ -195,6 +213,26 @@ function FundingInner({ onComplete }: FundingInnerProps) {
               </Button>
             )}
           </>
+        )}
+        {state === FundingState.PREFUND && (
+          <Button
+            bg="brand.primary"
+            color="brand.primaryForeground"
+            onClick={onPrefund}
+            isLoading={isSending}
+          >
+            Send Funds
+          </Button>
+        )}
+        {state === FundingState.DEPLOY && (
+          <Button
+            bg="brand.primary"
+            color="brand.primaryForeground"
+            onClick={onDeploy}
+            isLoading={isDeploying}
+          >
+            Deploy Controller
+          </Button>
         )}
       </Footer>
     </Container>
