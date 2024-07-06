@@ -93,7 +93,6 @@ function FundingInner({ onComplete }: FundingInnerProps) {
     try {
       setIsDeploying(true);
       if (!isAllFunded) await prefund();
-
       const { transaction_hash } =
         await controller.account.cartridge.deploySelf();
       const receipt = await controller.account.waitForTransaction(
@@ -102,6 +101,8 @@ function FundingInner({ onComplete }: FundingInnerProps) {
           retryInterval: 1000,
         },
       );
+
+      console.log({ receipt });
 
       if (receipt.isRejected()) {
         throw new Error(
