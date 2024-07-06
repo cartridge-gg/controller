@@ -37,6 +37,7 @@ import {
 import { useConnection } from "hooks/connection";
 import { formatEther } from "viem";
 import { Toaster } from "./Toaster";
+import { Prefund } from "@cartridge/controller";
 
 export function Funding(innerProps: FundingInnerProps) {
   return (
@@ -102,14 +103,7 @@ function FundingInner({ onComplete }: FundingInnerProps) {
     } catch (e) {
       setIsDeploying(false);
     }
-  }, [
-    controller.account,
-    extAccount,
-    controller,
-    tokens,
-    isAllFunded,
-    onComplete,
-  ]);
+  }, [controller.account, isAllFunded, onComplete, prefund]);
 
   const toast = useToast({
     ...DEFAULT_TOAST_OPTIONS,
@@ -154,15 +148,25 @@ function FundingInner({ onComplete }: FundingInnerProps) {
               bg="solid.primary"
               fontWeight="semibold"
             >
-              {t.logo}
-              <Text w="full">
-                {t.address === ETH_CONTRACT
-                  ? formatEther(BigInt(t.min))
-                  : t.min}{" "}
-                {t.symbol}
-              </Text>
+              <HStack>
+                <HStack>
+                  {t.logo}
+                  <Text>
+                    {getBalanceStr(t)} {t.symbol}
+                  </Text>
+                </HStack>
+                {isFunded(t) && <CheckIcon />}
+              </HStack>
+
               <Spacer />
-              {t.isFunded && <CheckIcon />}
+
+              <HStack gap={isEther(t) ? 2 : 3} color="text.secondary">
+                <Text color="inherit">min:</Text>
+                <HStack gap={isEther(t) ? 0 : 1}>
+                  {t.logo}
+                  <Text color="inherit">{getMinStr(t)}</Text>
+                </HStack>
+              </HStack>
             </HStack>
           ))}
         </VStack>
@@ -268,7 +272,7 @@ function useTokens() {
   const { controller, prefunds } = useConnection();
   const [tokens, setTokens] = useState<TokenInfo[]>([]);
 
-  const remaining = useMemo(() => tokens.filter((t) => !t.isFunded), [tokens]);
+  const remaining = useMemo(() => tokens.filter((t) => !isFunded(t)), [tokens]);
 
   useEffect(() => {
     const target = [
@@ -278,7 +282,6 @@ function useTokens() {
       },
       ...prefunds,
     ];
-    if (!target.length) return;
     fetchTokneInfo();
 
     async function fetchTokneInfo() {
@@ -291,41 +294,25 @@ function useTokens() {
 
         return {
           address: t.address,
-          min: t.min,
+          min: BigInt(t.min),
           name: info.name,
           symbol: info.symbol,
           decimals: info.decimals,
-          logo:
-            t.address === ETH_CONTRACT ? (
-              <EthereumIcon fontSize={20} />
-            ) : (
-              <Image
-                src={info.logo_url}
-                alt={`${info.name} ERC-20 Token Logo`}
-                h={5}
-              />
-            ),
-          isFunded: false,
+          logo: isEther(t) ? (
+            <EthereumIcon fontSize={20} color="currentColor" />
+          ) : (
+            <Image
+              src={info.logo_url}
+              alt={`${info.name} ERC-20 Token Logo`}
+              h={5}
+            />
+          ),
+          balance: BigInt(0),
         };
       });
       setTokens(tokens);
     }
   }, [prefunds, controller.account.address]);
-
-  const setIsFundedBulk = useCallback(
-    (funded: TokenInfo[]) => {
-      if (funded.length === 0) return;
-
-      const fundedAddrs = funded.map((f) => f.address);
-      const newTokens = tokens.map((t) => ({
-        ...t,
-        isFunded: fundedAddrs.includes(t.address) ? true : t.isFunded,
-      }));
-
-      setTokens(newTokens);
-    },
-    [tokens],
-  );
 
   const checkFunds = useCallback(async () => {
     const funded = await Promise.allSettled(
@@ -338,30 +325,45 @@ function useTokens() {
 
         return {
           ...t,
-          isFunded:
-            uint256.uint256ToBN({
-              low: balance[0],
-              high: balance[1],
-            }) >= BigInt(t.min),
+          balance: uint256.uint256ToBN({
+            low: balance[0],
+            high: balance[1],
+          }),
         };
       }),
     );
     const res = funded
-      .filter((res) => res.status === "fulfilled" && res.value.isFunded)
+      .filter((res) => res.status === "fulfilled" && isFunded(res.value))
       .map((res) => (res as PromiseFulfilledResult<TokenInfo>).value);
 
     if (res.length) {
-      setIsFundedBulk(res);
+      setTokens(res);
     }
-  }, [remaining, setIsFundedBulk, controller.account]);
+  }, [remaining, controller.account]);
 
   useInterval(checkFunds, 3000);
 
   return {
     tokens,
     remaining,
-    isAllFunded: !remaining || remaining.length === 0,
+    isAllFunded: remaining.length === 0,
   };
+}
+
+function isFunded(t: TokenInfo) {
+  return t.min <= t.balance;
+}
+
+function isEther(t: Prefund | TokenInfo) {
+  return t.address === ETH_CONTRACT;
+}
+
+function getBalanceStr(t: TokenInfo) {
+  return isEther(t) ? formatEther(t.balance) : t.balance.toString();
+}
+
+function getMinStr(t: TokenInfo) {
+  return isEther(t) ? formatEther(t.min) : t.min.toString();
 }
 
 const ETH_CONTRACT =
@@ -383,6 +385,6 @@ type TokenInfo = {
   decimals: number;
   address: string;
   logo: React.ReactNode;
-  min: string;
-  isFunded: boolean;
+  min: bigint;
+  balance: bigint;
 };
