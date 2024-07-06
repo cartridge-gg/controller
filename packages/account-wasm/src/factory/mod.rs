@@ -122,7 +122,7 @@ impl<'f, F> AccountDeployment<'f, F> {
             salt,
             nonce: None,
             max_fee: None,
-            fee_estimate_multiplier: 2.0,
+            fee_estimate_multiplier: 100.0,
         }
     }
 

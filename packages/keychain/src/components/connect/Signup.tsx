@@ -93,12 +93,12 @@ function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
       refetchInterval: (data) => (!data ? 1000 : undefined),
       onSuccess: async (data) => {
         // mainnet deployment requires user to self fund account
-        if (chainId !== constants.StarknetChainId.SN_MAIN) {
-          await client.request(DeployAccountDocument, {
-            id: values.username,
-            chainId: `starknet:${shortString.decodeShortString(chainId)}`,
-          });
-        }
+        // if (chainId !== constants.StarknetChainId.SN_MAIN) {
+        //   await client.request(DeployAccountDocument, {
+        //     id: values.username,
+        //     chainId: `starknet:${shortString.decodeShortString(chainId)}`,
+        //   });
+        // }
 
         const {
           account: {

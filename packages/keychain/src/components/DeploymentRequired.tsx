@@ -36,7 +36,10 @@ export function DeploymentRequired({
   }, [account]);
 
   useEffect(() => {
-    if (account.chainId === constants.StarknetChainId.SN_MAIN) {
+    if (
+      account.chainId === constants.StarknetChainId.SN_MAIN ||
+      account.chainId === constants.StarknetChainId.SN_SEPOLIA
+    ) {
       setIsFundingRequired(true);
       return;
     }

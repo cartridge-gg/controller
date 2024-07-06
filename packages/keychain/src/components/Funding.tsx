@@ -213,7 +213,7 @@ function ExternalWalletProvider({ children }: PropsWithChildren) {
       chains={[mainnet]}
       provider={() =>
         new RpcProvider({
-          nodeUrl: process.env.NEXT_PUBLIC_RPC_MAINNET,
+          nodeUrl: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
         })
       }
       connectors={connectors}
