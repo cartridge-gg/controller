@@ -205,7 +205,7 @@ function FundingInner({ onComplete }: FundingInnerProps) {
           <Button
             bg="brand.primary"
             color="brand.primaryForeground"
-            isLoading={true}
+            isLoading
           />
         ) : (
           <>
