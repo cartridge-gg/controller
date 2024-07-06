@@ -6,6 +6,8 @@ import { RpcProvider } from "starknet";
 
 const ETH_TOKEN_ADDRESS =
   "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
+// const PAPER_TOKEN_ADDRESS =
+//   "0x0410466536b5ae074f7fea81e5533b8134a9fa08b3dd077dd9db08f64997d113";
 
 export function StarknetProvider({ children }: PropsWithChildren) {
   return (
@@ -23,14 +25,14 @@ export function StarknetProvider({ children }: PropsWithChildren) {
 
 const url =
   !process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ||
-  process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL.split(".")[0] ===
+    process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL.split(".")[0] ===
     "cartridge-starknet-react-next"
     ? process.env.XFRAME_URL
     : "https://" +
-      (process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ?? "").replace(
-        "cartridge-starknet-react-next",
-        "keychain",
-      );
+    (process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ?? "").replace(
+      "cartridge-starknet-react-next",
+      "keychain",
+    );
 
 function provider(chain: Chain) {
   switch (chain) {
@@ -78,12 +80,11 @@ const connectors = [
       // paymaster: {
       //   caller: shortString.encodeShortString("ANY_CALLER"),
       // },
-      //theme: "dope-wars",
+      // theme: "dope-wars",
       // colorMode: "light"
       // prefunds: [
       //   {
-      //     address:
-      //       "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
+      //     address: PAPER_TOKEN_ADDRESS,
       //     min: "100",
       //   },
       // ],
