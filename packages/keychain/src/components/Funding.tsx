@@ -15,7 +15,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { mainnet } from "@starknet-react/chains";
+import { sepolia } from "@starknet-react/chains";
 import {
   StarknetConfig,
   useAccount,
@@ -206,7 +206,7 @@ function ExternalWalletProvider({ children }: PropsWithChildren) {
 
   return (
     <StarknetConfig
-      chains={[mainnet]}
+      chains={[sepolia]}
       provider={() =>
         new RpcProvider({
           nodeUrl: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
