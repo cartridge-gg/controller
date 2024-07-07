@@ -1,11 +1,12 @@
 import { Container, Content, Footer } from "components/layout";
 import {
+  Box,
   Button,
   HStack,
-  Image,
   Spacer,
   Spinner,
   Text,
+  Tooltip,
   VStack,
   useInterval,
 } from "@chakra-ui/react";
@@ -25,14 +26,27 @@ import {
   useInjectedConnectors,
   voyager,
 } from "@starknet-react/core";
-import { CallData, RpcProvider, cairo, uint256 } from "starknet";
-import { CheckIcon, CoinsIcon, CopyIcon, EthereumIcon } from "@cartridge/ui";
+import { CallData, RpcProvider, cairo } from "starknet";
+import {
+  AlertIcon,
+  CheckIcon,
+  CoinsIcon,
+  CopyIcon,
+  DotsIcon,
+} from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
-import { formatEther } from "viem";
 import { useCopyAndToast } from "./Toaster";
-import { Prefund } from "@cartridge/controller";
 import { AlphaWarning } from "./Warning";
 import { formatAddress } from "utils/contracts";
+import {
+  TokenInfo,
+  fetchTokenInfo,
+  getBalanceStr,
+  getMinStr,
+  isEther,
+  isFunded,
+  updateBalance,
+} from "utils/token";
 
 enum FundingState {
   CONNECT,
@@ -183,12 +197,27 @@ function FundingInner({ onComplete }: FundingInnerProps) {
                   {t.logo}
                   {typeof t.balance === "bigint" ? (
                     <Text>{getBalanceStr(t)}</Text>
+                  ) : !!t.error ? (
+                    // <Text>...</Text>
+                    <DotsIcon />
                   ) : (
                     <Spinner size="xs" />
                   )}
                   <Text>{t.symbol}</Text>
                 </HStack>
-                {isFunded(t) && <CheckIcon />}
+                {isFunded(t) && <CheckIcon color="text.success" />}
+                {!!t.error && (
+                  <Tooltip
+                    label={t.error.message}
+                    fontSize="xs"
+                    bg="solid.bg"
+                    color="text.primary"
+                  >
+                    <Box>
+                      <AlertIcon color="text.error" />
+                    </Box>
+                  </Tooltip>
+                )}
               </HStack>
 
               <Spacer />
@@ -300,80 +329,20 @@ function useTokens() {
   const remaining = useMemo(() => tokens.filter((t) => !isFunded(t)), [tokens]);
 
   useEffect(() => {
-    const target = [
-      {
-        address: ETH_CONTRACT,
-        min: "100000000000000",
-      },
-      ...prefunds,
-    ];
-    fetchTokneInfo();
-
-    async function fetchTokneInfo() {
-      const res = await fetch("https://mainnet-api.ekubo.org/tokens");
-      const data: TokenInfoRaw[] = await res.json();
-      const tokens = target.map((t) => {
-        const info = data.find(
-          ({ l2_token_address }) => l2_token_address === t.address,
-        );
-
-        if (!info) {
-          throw new Error(`Cannot find token info for: ${t.address}`);
-        }
-
-        return {
-          address: t.address,
-          min: BigInt(t.min),
-          name: info.name,
-          symbol: info.symbol,
-          decimals: info.decimals,
-          logo: isEther(t) ? (
-            <EthereumIcon fontSize={20} color="currentColor" />
-          ) : (
-            <Image
-              src={info.logo_url}
-              alt={`${info.name} ERC-20 Token Logo`}
-              h={5}
-            />
-          ),
-        };
-      });
-      setTokens(tokens);
-    }
+    fetchTokenInfo(prefunds).then(setTokens);
   }, [prefunds, controller.account.address]);
 
   const checkFunds = useCallback(async () => {
-    setIsFetching(true)
-    const funded = await Promise.allSettled(
-      tokens.map(async (t) => {
-        const balance = await controller.account.callContract({
-          contractAddress: t.address,
-          entrypoint: "balanceOf",
-          calldata: [controller.account.address],
-        });
+    setIsFetching(true);
 
-        return {
-          ...t,
-          balance: uint256.uint256ToBN({
-            low: balance[0],
-            high: balance[1],
-          }),
-        };
-      }),
-    );
-    const res = funded
-      .filter((res) => res.status === "fulfilled")
-      .map((res) => (res as PromiseFulfilledResult<TokenInfo>).value);
+    const checked = await updateBalance(tokens, controller);
+    setTokens(checked);
 
-    if (res.length) {
-      setTokens(res);
-    }
-
-    setIsFetching(false)
+    setIsFetching(false);
     if (!isChecked) {
       setIsChecked(true);
     }
-  }, [tokens, controller.account, isChecked]);
+  }, [tokens, controller, isChecked]);
 
   useInterval(checkFunds, 3000);
 
@@ -385,43 +354,3 @@ function useTokens() {
     isFetching,
   };
 }
-
-function isFunded(t: TokenInfo) {
-  return t.min <= (t.balance ?? 0n);
-}
-
-function isEther(t: Prefund | TokenInfo) {
-  return t.address === ETH_CONTRACT;
-}
-
-function getBalanceStr(t: TokenInfo) {
-  if (typeof t.balance === "undefined") return "...";
-  return isEther(t) ? formatEther(t.balance) : t.balance.toString();
-}
-
-function getMinStr(t: TokenInfo) {
-  return isEther(t) ? formatEther(t.min) : t.min.toString();
-}
-
-const ETH_CONTRACT =
-  "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
-
-type TokenInfoRaw = {
-  name: string;
-  symbol: string;
-  decimals: number;
-  l2_token_address: string;
-  sort_order: string;
-  total_supply: number;
-  logo_url: string;
-};
-
-type TokenInfo = {
-  name: string;
-  symbol: string;
-  decimals: number;
-  address: string;
-  logo: React.ReactNode;
-  min: bigint;
-  balance?: bigint;
-};

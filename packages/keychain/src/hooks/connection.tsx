@@ -16,6 +16,7 @@ import {
 import { isIframe } from "components/connect/utils";
 import { RpcProvider } from "starknet";
 import { Policy, Prefund, ResponseCodes } from "@cartridge/controller";
+import { mergeDefaultETHPrefund } from "utils/token";
 
 const ConnectionContext = createContext<ConnectionContextValue>(undefined);
 
@@ -74,12 +75,9 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
       setChainId(urlParams.get("chain_id"));
       setPolicies(parsePolicies(urlParams.get("policies")));
 
-      const prefunds = JSON.parse(
-        decodeURIComponent(urlParams.get("prefunds")),
-      );
-      if (prefunds?.length) {
-        setPrefunds(prefunds);
-      }
+      const prefunds: Prefund[] =
+        JSON.parse(decodeURIComponent(urlParams.get("prefunds"))) ?? [];
+      setPrefunds(mergeDefaultETHPrefund(prefunds));
     } else {
       return;
     }

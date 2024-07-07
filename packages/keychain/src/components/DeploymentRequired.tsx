@@ -56,13 +56,10 @@ export function DeploymentRequired({
     }
   }, 1000);
 
-  const fundingComplete = useCallback(
-    async (deployHash) => {
-      if (deployHash) setDeployHash(deployHash);
-      setIsFundingRequired(false);
-    },
-    [account],
-  );
+  const fundingComplete = useCallback(async (deployHash) => {
+    if (deployHash) setDeployHash(deployHash);
+    setIsFundingRequired(false);
+  }, []);
 
   if (fundingRequired) return <Funding onComplete={fundingComplete} />;
 
