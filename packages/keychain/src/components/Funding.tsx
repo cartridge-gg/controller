@@ -56,7 +56,7 @@ function FundingInner({ onComplete }: FundingInnerProps) {
   const { account: extAccount } = useAccount();
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
   const { controller } = useConnection();
-  const { tokens, isAllFunded, isChecked } = useTokens();
+  const { tokens, isAllFunded, isChecked, isFetching } = useTokens();
   const [isSending, setIsSending] = useState(false);
   const [isDeploying, setIsDeploying] = useState(false);
   const [state, setState] = useState<FundingState>(FundingState.CONNECT);
@@ -157,9 +157,15 @@ function FundingInner({ onComplete }: FundingInnerProps) {
       Icon={CoinsIcon}
     >
       <Content>
-        <Text color="text.secondary" fontSize="sm">
-          Send assets below to your controller address.
-        </Text>
+        <HStack w="full">
+          <Text color="text.secondary" fontSize="sm">
+            Send assets below to your controller address.
+          </Text>
+
+          <Spacer />
+
+          {isFetching && <Spinner size="xs" color="text.secondary" />}
+        </HStack>
 
         <VStack w="full" borderRadius="md" overflow="hidden" gap={0.25}>
           {tokens.map((t) => (
@@ -289,6 +295,7 @@ function useTokens() {
   const { controller, prefunds } = useConnection();
   const [tokens, setTokens] = useState<TokenInfo[]>([]);
   const [isChecked, setIsChecked] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
 
   const remaining = useMemo(() => tokens.filter((t) => !isFunded(t)), [tokens]);
 
@@ -336,6 +343,7 @@ function useTokens() {
   }, [prefunds, controller.account.address]);
 
   const checkFunds = useCallback(async () => {
+    setIsFetching(true)
     const funded = await Promise.allSettled(
       tokens.map(async (t) => {
         const balance = await controller.account.callContract({
@@ -359,10 +367,11 @@ function useTokens() {
 
     if (res.length) {
       setTokens(res);
+    }
 
-      if (!isChecked) {
-        setIsChecked(true);
-      }
+    setIsFetching(false)
+    if (!isChecked) {
+      setIsChecked(true);
     }
   }, [tokens, controller.account, isChecked]);
 
@@ -373,6 +382,7 @@ function useTokens() {
     remaining,
     isAllFunded: remaining.length === 0,
     isChecked,
+    isFetching,
   };
 }
 
