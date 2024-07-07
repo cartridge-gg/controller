@@ -47,6 +47,7 @@ import {
   isFunded,
   updateBalance,
 } from "utils/token";
+import { ErrorAlert } from "./ErrorAlert";
 
 enum FundingState {
   CONNECT,
@@ -71,6 +72,7 @@ function FundingInner({ onComplete }: FundingInnerProps) {
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
   const { controller } = useConnection();
   const { tokens, isAllFunded, isChecked, isFetching } = useTokens();
+  const [error, setError] = useState<Error>();
   const [isSending, setIsSending] = useState(false);
   const [isDeploying, setIsDeploying] = useState(false);
   const [state, setState] = useState<FundingState>(FundingState.CONNECT);
@@ -145,8 +147,11 @@ function FundingInner({ onComplete }: FundingInnerProps) {
     } catch (e) {
       if (e.message && e.message.includes("DuplicateTx")) {
         onComplete();
+        return;
       }
 
+      setError(e);
+    } finally {
       setIsDeploying(false);
     }
   }, [controller.account, onComplete]);
@@ -235,8 +240,13 @@ function FundingInner({ onComplete }: FundingInnerProps) {
       </Content>
 
       <Footer>
+        {error && (
+          <ErrorAlert
+            title="Account deployment error"
+            description={error.message}
+          />
+        )}
         <AlphaWarning />
-
         {!isChecked ? (
           <Button
             bg="brand.primary"
