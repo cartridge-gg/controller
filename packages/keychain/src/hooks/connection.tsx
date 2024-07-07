@@ -6,6 +6,7 @@ import {
   useEffect,
   PropsWithChildren,
   useCallback,
+  useMemo,
 } from "react";
 import Controller from "utils/controller";
 import {
@@ -14,7 +15,7 @@ import {
   LogoutCtx,
 } from "utils/connection";
 import { isIframe } from "components/connect/utils";
-import { RpcProvider } from "starknet";
+import { RpcProvider, constants } from "starknet";
 import { Policy, Prefund, ResponseCodes } from "@cartridge/controller";
 import { mergeDefaultETHPrefund } from "utils/token";
 
@@ -26,6 +27,7 @@ type ConnectionContextValue = {
   origin: string;
   rpcUrl: string;
   chainId: string;
+  chainName: string;
   policies: Policy[];
   prefunds: Prefund[];
   error: Error;
@@ -45,6 +47,17 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
   const [controller, setController] = useState(Controller.fromStore);
   const [prefunds, setPrefunds] = useState<Prefund[]>([]);
   const [error, setError] = useState<Error>();
+
+  const chainName = useMemo(() => {
+    switch (chainId) {
+      case constants.StarknetChainId.SN_MAIN:
+        return "Mainnet";
+      case constants.StarknetChainId.SN_SEPOLIA:
+        return "Sepolia";
+      default:
+        return chainId;
+    }
+  }, [chainId]);
 
   const parsePolicies = (policiesStr: string | null): Policy[] => {
     if (!policiesStr) return [];
@@ -126,6 +139,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
         origin,
         rpcUrl,
         chainId,
+        chainName,
         policies,
         prefunds,
         error,
