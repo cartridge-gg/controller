@@ -2,16 +2,16 @@ use account_sdk::account::AccountHashSigner;
 use account_sdk::signers::SignError;
 use async_trait::async_trait;
 use starknet::{
-    core::types::{BlockId, BlockTag, FieldElement},
+    core::types::{BlockId, BlockTag, Felt},
     providers::Provider,
 };
 
 use super::{AccountFactory, PreparedAccountDeployment, RawAccountDeployment};
 
 pub struct CartridgeAccountFactory<S, P> {
-    class_hash: FieldElement,
-    chain_id: FieldElement,
-    calldata: Vec<FieldElement>,
+    class_hash: Felt,
+    chain_id: Felt,
+    calldata: Vec<Felt>,
     signer: S,
     provider: P,
     block_id: BlockId,
@@ -22,9 +22,9 @@ where
     S: AccountHashSigner,
 {
     pub fn new(
-        class_hash: FieldElement,
-        chain_id: FieldElement,
-        calldata: Vec<FieldElement>,
+        class_hash: Felt,
+        chain_id: Felt,
+        calldata: Vec<Felt>,
         signer: S,
         provider: P,
     ) -> Self {
@@ -49,15 +49,15 @@ where
     type Provider = P;
     type SignError = SignError;
 
-    fn class_hash(&self) -> FieldElement {
+    fn class_hash(&self) -> Felt {
         self.class_hash
     }
 
-    fn calldata(&self) -> Vec<FieldElement> {
+    fn calldata(&self) -> Vec<Felt> {
         self.calldata.clone()
     }
 
-    fn chain_id(&self) -> FieldElement {
+    fn chain_id(&self) -> Felt {
         self.chain_id
     }
 
@@ -72,7 +72,7 @@ where
     async fn sign_deployment(
         &self,
         deployment: &RawAccountDeployment,
-    ) -> Result<Vec<FieldElement>, Self::SignError> {
+    ) -> Result<Vec<Felt>, Self::SignError> {
         let tx_hash =
             PreparedAccountDeployment::from_raw(deployment.clone(), self).transaction_hash();
         let signature = self.signer.sign_hash(tx_hash).await?;

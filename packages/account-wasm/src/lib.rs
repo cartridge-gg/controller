@@ -242,11 +242,11 @@ impl CartridgeAccount {
         let webauthn_calldata = self.device_signer.signer_pub_data();
         let mut constructor_calldata =
             Vec::<WebauthnSigner>::cairo_serialize(&vec![webauthn_calldata]);
-        constructor_calldata[0] = FieldElement::TWO; // incorrect signer enum from serialization
-        constructor_calldata.push(FieldElement::ONE); // no guardian
+        constructor_calldata[0] = Felt::TWO; // incorrect signer enum from serialization
+        constructor_calldata.push(Felt::ONE); // no guardian
 
         let factory = CartridgeAccountFactory::new(
-            FieldElement::from_str(ACCOUNT_CLASS_HASH)?,
+            Felt::from_str(ACCOUNT_CLASS_HASH)?,
             self.account.chain_id(),
             constructor_calldata,
             self.account.clone(),
