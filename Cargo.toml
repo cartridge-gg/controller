@@ -20,7 +20,7 @@ cairo-lang-starknet = "2.4.0"
 coset = { version = "0.3.4", features = ["std"] }
 ecdsa = "0.16.9"
 futures = "0.3"
-indexmap = "2.2.6"
+indexmap = { version = "2.2.6", features = ["serde"] }
 lazy_static = "1"
 p256 = "0.13"
 primitive-types = { version = "0.12", default-features = false }
@@ -34,6 +34,7 @@ thiserror = "1"
 toml = "0.8"
 u256-literal = "1"
 url = "2"
+num-traits = "0.2.19"
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4.42"
 wasm-webauthn = { git = "https://github.com/cartridge-gg/wasm-webauthn", rev = "972693f" }

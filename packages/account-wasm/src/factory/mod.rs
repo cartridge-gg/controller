@@ -5,13 +5,14 @@
 pub mod cartridge;
 
 use async_trait::async_trait;
+use num_traits::{FromPrimitive, ToPrimitive};
 use starknet::{
     core::{
         crypto::compute_hash_on_elements,
         types::{
             BlockId, BlockTag, BroadcastedDeployAccountTransaction,
             BroadcastedDeployAccountTransactionV1, BroadcastedTransaction,
-            DeployAccountTransactionResult, FeeEstimate, Felt, SimulatedTransaction,
+            DeployAccountTransactionResult, FeeEstimate, Felt, NonZeroFelt, SimulatedTransaction,
             SimulationFlag, SimulationFlagForEstimateFee, StarknetError,
         },
     },
@@ -40,7 +41,7 @@ const PREFIX_CONTRACT_ADDRESS: Felt = Felt::from_raw([
 ]);
 
 // 2 ** 251 - 256
-const ADDR_BOUND: Felt = Felt::from_raw([
+const ADDR_BOUND: NonZeroFelt = NonZeroFelt::from_raw([
     576459263475590224,
     18446744073709255680,
     160989183,
@@ -245,10 +246,13 @@ where
             Some(value) => value,
             None => {
                 let fee_estimate = self.estimate_fee_with_nonce(nonce).await?;
-                ((((TryInto::<u64>::try_into(fee_estimate.overall_fee)
-                    .map_err(|_| AccountFactoryError::FeeOutOfRange)?) as f64)
-                    * self.fee_estimate_multiplier) as u64)
-                    .into()
+                let fee_estimate = fee_estimate
+                    .overall_fee
+                    .to_f64()
+                    .ok_or(AccountFactoryError::FeeOutOfRange)?
+                    * self.fee_estimate_multiplier;
+
+                Felt::from_f64(fee_estimate).ok_or(AccountFactoryError::FeeOutOfRange)?
             }
         };
 
@@ -428,5 +432,6 @@ fn calculate_contract_address(salt: Felt, class_hash: Felt, constructor_calldata
         salt,
         class_hash,
         compute_hash_on_elements(constructor_calldata),
-    ]) % ADDR_BOUND
+    ])
+    .mod_floor(&ADDR_BOUND)
 }

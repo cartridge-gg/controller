@@ -34,7 +34,7 @@ wasm-bindgen.workspace = true
 wasm-webauthn.workspace = true
 web-sys = "0.3.69"
 indexmap.workspace = true
-num-traits = "0.2.19"
+num-traits.workspace = true
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tokio.workspace = true
