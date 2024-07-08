@@ -28,8 +28,6 @@ import { CartridgeAccount } from "@cartridge/account-wasm";
 import { Session } from "@cartridge/controller";
 import { normalizeCalls } from "./connection/execute";
 
-const EST_FEE_MULTIPLIER = 2n;
-
 export enum Status {
   COUNTERFACTUAL = "COUNTERFACTUAL",
   DEPLOYED = "DEPLOYED",
@@ -164,20 +162,13 @@ class Account extends BaseAccount {
     calls: AllowArray<Call>,
     details: EstimateFeeDetails = {},
   ): Promise<EstimateFee> {
-    details.blockIdentifier = details.blockIdentifier ?? "pending";
-
     if (this.status === Status.COUNTERFACTUAL) {
       throw new Error("Account is not deployed");
     }
 
+    details.blockIdentifier = details.blockIdentifier ?? "pending";
     details.nonce = details.nonce ?? (await super.getNonce("pending"));
-
-    let estFee = await super.estimateInvokeFee(calls, details);
-
-    // FIXME: temp fix for the sepolia fee estimation
-    estFee.suggestedMaxFee *= EST_FEE_MULTIPLIER;
-
-    return estFee;
+    return await super.estimateInvokeFee(calls, details);
   }
 
   async verifyMessageHash(
