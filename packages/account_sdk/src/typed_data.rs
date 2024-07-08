@@ -8,8 +8,9 @@ use cainome::cairo_serde::ByteArray;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use serde_json::Number;
+use starknet::core::types::Felt;
 use starknet::core::utils::{cairo_short_string_to_felt, get_selector_from_name};
-use starknet_crypto::{poseidon_hash_many, Felt};
+use starknet_crypto::poseidon_hash_many;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SimpleField {
@@ -498,8 +499,8 @@ impl TypedData {
 
 #[cfg(test)]
 mod tests {
-    use starknet::core::types::Felt;
     use starknet::core::utils::starknet_keccak;
+    use starknet_crypto::Felt;
 
     use super::*;
 
