@@ -29,7 +29,7 @@ export function getMinStr(t: TokenInfo) {
 export function mergeDefaultETHPrefund(prefunds: Prefund[]) {
   return prefunds.find(isEther)
     ? prefunds
-    : [{ address: ETH_CONTRACT_ADDRESS, min: "100000000000000" }, ...prefunds];
+    : [{ address: ETH_CONTRACT_ADDRESS, min: "50000000000000" }, ...prefunds];
 }
 
 export async function fetchTokenInfo(prefunds: Prefund[]) {
