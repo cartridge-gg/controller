@@ -158,11 +158,7 @@ export function InsufficientFunds({
 
       <Footer>
         <AlphaWarning />
-        <Button
-          bg="brand.primary"
-          color="brand.primaryForeground"
-          onClick={onCopy}
-        >
+        <Button colorScheme="colorful" onClick={onCopy}>
           copy address
         </Button>
       </Footer>

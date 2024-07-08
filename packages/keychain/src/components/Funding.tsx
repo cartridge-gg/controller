@@ -248,11 +248,7 @@ function FundingInner({ onComplete }: FundingInnerProps) {
         )}
         <AlphaWarning />
         {!isChecked ? (
-          <Button
-            bg="brand.primary"
-            color="brand.primaryForeground"
-            isLoading
-          />
+          <Button colorScheme="colorful" isLoading />
         ) : (
           <>
             {state === FundingState.CONNECT && (
@@ -263,8 +259,7 @@ function FundingInner({ onComplete }: FundingInnerProps) {
                     .map((c) => (
                       <Button
                         key={c.id}
-                        bg="brand.primary"
-                        color="brand.primaryForeground"
+                        colorScheme="colorful"
                         onClick={() => onConnect(c)}
                         isLoading={isConnecting}
                       >
@@ -272,11 +267,7 @@ function FundingInner({ onComplete }: FundingInnerProps) {
                       </Button>
                     ))
                 ) : (
-                  <Button
-                    bg="brand.primary"
-                    color="brand.primaryForeground"
-                    onClick={onCopy}
-                  >
+                  <Button colorScheme="colorful" onClick={onCopy}>
                     copy address
                   </Button>
                 )}
@@ -285,8 +276,7 @@ function FundingInner({ onComplete }: FundingInnerProps) {
 
             {state === FundingState.PREFUND && (
               <Button
-                bg="brand.primary"
-                color="brand.primaryForeground"
+                colorScheme="colorful"
                 onClick={onPrefund}
                 isLoading={isSending}
               >
@@ -296,8 +286,7 @@ function FundingInner({ onComplete }: FundingInnerProps) {
 
             {state === FundingState.DEPLOY && (
               <Button
-                bg="brand.primary"
-                color="brand.primaryForeground"
+                colorScheme="colorful"
                 onClick={onDeploy}
                 isLoading={isDeploying}
               >
