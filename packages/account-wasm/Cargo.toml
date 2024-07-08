@@ -10,7 +10,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 account_sdk.workspace = true
-async-trait.worksspace = true
+async-trait.workspace = true
 base64 = "0.22.0"
 cainome.workspace = true
 convert_case = "0.6.0"
