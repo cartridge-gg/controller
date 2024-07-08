@@ -6,8 +6,8 @@ import { Button, Link, Text, useInterval } from "@chakra-ui/react";
 import { ExternalIcon, PacmanIcon } from "@cartridge/ui";
 import { useController } from "hooks/controller";
 import { ErrorAlert } from "./ErrorAlert";
-import NextLink from "next/link";
 import { Funding } from "./Funding";
+import NextLink from "next/link";
 
 export function DeploymentRequired({
   onClose,
