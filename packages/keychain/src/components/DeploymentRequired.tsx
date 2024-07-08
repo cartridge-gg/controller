@@ -51,6 +51,10 @@ export function DeploymentRequired({
 
   useInterval(async () => {
     if (account.status === Status.COUNTERFACTUAL) {
+      if (deployHash) {
+        await account.waitForTransaction(deployHash, { retryInterval: 1000 });
+      }
+
       await account.sync();
       setStatus(account.status);
     }
