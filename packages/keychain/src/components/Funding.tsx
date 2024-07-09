@@ -17,7 +17,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { mainnet } from "@starknet-react/chains";
+import { mainnet, sepolia } from "@starknet-react/chains";
 import {
   Connector,
   StarknetConfig,
@@ -26,7 +26,7 @@ import {
   useInjectedConnectors,
   voyager,
 } from "@starknet-react/core";
-import { CallData, RpcProvider, cairo } from "starknet";
+import { CallData, cairo } from "starknet";
 import {
   AlertIcon,
   CheckIcon,
@@ -303,15 +303,12 @@ function FundingInner({ onComplete }: FundingInnerProps) {
 
 function ExternalWalletProvider({ children }: PropsWithChildren) {
   const { connectors } = useInjectedConnectors({});
+  const { controller } = useConnection();
 
   return (
     <StarknetConfig
-      chains={[mainnet]}
-      provider={() =>
-        new RpcProvider({
-          nodeUrl: process.env.NEXT_PUBLIC_RPC_MAINNET,
-        })
-      }
+      chains={[sepolia, mainnet]}
+      provider={() => controller.account.rpc}
       connectors={connectors}
       explorer={voyager}
     >
