@@ -84,7 +84,7 @@ impl<'a, T> AccountDeclaration<'a, T> {
             .map_err(|e| e.to_string())?;
 
         let declaration_result = account
-            .declare(Arc::new(flattened_class), casm_class_hash)
+            .declare_v2(Arc::new(flattened_class), casm_class_hash)
             .send()
             .await
             .unwrap();

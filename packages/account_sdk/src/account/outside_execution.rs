@@ -5,12 +5,13 @@ use crate::{
 };
 use async_trait::async_trait;
 use cainome::cairo_serde::{CairoSerde, ContractAddress};
+use starknet::core::types::Felt;
 use starknet::signers::SigningKey;
 use starknet::{
     accounts::Call,
     macros::{selector, short_string},
 };
-use starknet_crypto::{poseidon_hash_many, FieldElement};
+use starknet_crypto::poseidon_hash_many;
 
 use super::{AccountHashAndCallsSigner, SpecificAccount};
 
@@ -21,7 +22,7 @@ pub trait OutsideExecutionAccount {
         &self,
         outside_execution: OutsideExecution,
     ) -> Result<SignedOutsideExecution, SignError>;
-    fn random_outside_execution_nonce(&self) -> FieldElement {
+    fn random_outside_execution_nonce(&self) -> Felt {
         SigningKey::from_random().secret_scalar()
     }
 }
@@ -58,8 +59,8 @@ where
 #[derive(Clone, Debug)]
 pub struct SignedOutsideExecution {
     pub outside_execution: OutsideExecutionRaw,
-    pub signature: Vec<FieldElement>,
-    pub contract_address: FieldElement,
+    pub signature: Vec<Felt>,
+    pub contract_address: Felt,
 }
 
 impl From<SignedOutsideExecution> for Call {
@@ -69,7 +70,7 @@ impl From<SignedOutsideExecution> for Call {
             selector: selector!("execute_from_outside_v2"),
             calldata: [
                 <OutsideExecutionRaw as CairoSerde>::cairo_serialize(&value.outside_execution),
-                <Vec<FieldElement> as CairoSerde>::cairo_serialize(&value.signature),
+                <Vec<Felt> as CairoSerde>::cairo_serialize(&value.signature),
             ]
             .concat(),
         }
@@ -82,7 +83,7 @@ pub struct OutsideExecution {
     pub execute_after: u64,
     pub execute_before: u64,
     pub calls: Vec<Call>,
-    pub nonce: FieldElement,
+    pub nonce: Felt,
 }
 
 impl From<OutsideExecution> for OutsideExecutionRaw {
@@ -147,7 +148,7 @@ impl From<OutsideExecutionCaller> for ContractAddress {
 pub type OutsideExecutionRaw = crate::abigen::controller::OutsideExecution;
 
 impl StructHashRev1 for OutsideExecutionRaw {
-    fn get_struct_hash_rev_1(&self) -> FieldElement {
+    fn get_struct_hash_rev_1(&self) -> Felt {
         let hashed_calls = self
             .calls
             .iter()
@@ -163,25 +164,21 @@ impl StructHashRev1 for OutsideExecutionRaw {
         ])
     }
 
-    const TYPE_HASH_REV_1: FieldElement = selector!(
+    const TYPE_HASH_REV_1: Felt = selector!(
         "\"OutsideExecution\"(\"Caller\":\"ContractAddress\",\"Nonce\":\"felt\",\"Execute After\":\"u128\",\"Execute Before\":\"u128\",\"Calls\":\"Call*\")\"Call\"(\"To\":\"ContractAddress\",\"Selector\":\"selector\",\"Calldata\":\"felt*\")"
     );
 }
 
 impl MessageHashRev1 for OutsideExecutionRaw {
-    fn get_message_hash_rev_1(
-        &self,
-        chain_id: FieldElement,
-        contract_address: FieldElement,
-    ) -> FieldElement {
+    fn get_message_hash_rev_1(&self, chain_id: Felt, contract_address: Felt) -> Felt {
         // Version and Revision should be shortstring '1' and not felt 1 for SNIP-9 due to a mistake
         // in the Braavos contracts and has been copied for compatibility.
         // Revision will also be a number for all SNIP12-rev1 signatures because of the same issue
         let domain = StarknetDomain {
             name: short_string!("Account.execute_from_outside"),
-            version: FieldElement::ONE,
+            version: Felt::ONE,
             chain_id,
-            revision: FieldElement::ONE,
+            revision: Felt::ONE,
         };
         poseidon_hash_many(&[
             short_string!("StarkNet Message"),

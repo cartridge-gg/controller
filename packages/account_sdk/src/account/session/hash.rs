@@ -1,8 +1,9 @@
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use starknet::core::types::Felt;
 use starknet::core::utils::{get_selector_from_name, NonAsciiNameError};
 use starknet::macros::selector;
-use starknet_crypto::{poseidon_hash_many, poseidon_permute_comp, FieldElement};
+use starknet_crypto::{poseidon_hash_many, poseidon_permute_comp};
 
 use crate::abigen::controller::Signer;
 
@@ -15,16 +16,16 @@ use super::raw_session::RawSession;
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ProvedMethod {
     pub(crate) method: AllowedMethod,
-    pub(crate) proof: Vec<FieldElement>,
+    pub(crate) proof: Vec<Felt>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Session {
     expires_at: u64,
     allowed_methods: Vec<ProvedMethod>,
-    allowed_methods_root: FieldElement,
+    allowed_methods_root: Felt,
     metadata: String,
-    session_key_guid: FieldElement,
+    session_key_guid: Felt,
 }
 
 impl Session {
@@ -40,7 +41,7 @@ impl Session {
         let hashes = allowed_methods
             .iter()
             .map(AllowedMethod::as_merkle_leaf)
-            .collect::<Vec<FieldElement>>();
+            .collect::<Vec<Felt>>();
         let allowed_methods: Vec<_> = allowed_methods
             .into_iter()
             .enumerate()
@@ -58,29 +59,29 @@ impl Session {
             session_key_guid: signer.guid(),
         })
     }
-    fn allowed_method_hash_rev_1() -> FieldElement {
+    fn allowed_method_hash_rev_1() -> Felt {
         selector!("\"Allowed Method\"(\"Contract Address\":\"ContractAddress\",\"selector\":\"selector\")")
     }
     pub fn raw(&self) -> RawSession {
         RawSession {
             expires_at: self.expires_at,
             allowed_methods_root: self.allowed_methods_root,
-            metadata_hash: FieldElement::ZERO,
+            metadata_hash: Felt::ZERO,
             session_key_guid: self.session_key_guid,
         }
     }
     pub fn message_hash(
         &self,
-        tx_hash: FieldElement,
-        chain_id: FieldElement,
-        address: FieldElement,
-    ) -> Result<FieldElement, NonAsciiNameError> {
+        tx_hash: Felt,
+        chain_id: Felt,
+        address: Felt,
+    ) -> Result<Felt, NonAsciiNameError> {
         let token_session_hash = self.raw().get_message_hash_rev_1(chain_id, address);
-        let mut msg_hash = [tx_hash, token_session_hash, FieldElement::TWO];
+        let mut msg_hash = [tx_hash, token_session_hash, Felt::TWO];
         poseidon_permute_comp(&mut msg_hash);
         Ok(msg_hash[0])
     }
-    pub fn single_proof(&self, call: &AllowedMethod) -> Option<Vec<FieldElement>> {
+    pub fn single_proof(&self, call: &AllowedMethod) -> Option<Vec<Felt>> {
         self.allowed_methods
             .iter()
             .find(|ProvedMethod { method, .. }| method == call)
@@ -90,21 +91,18 @@ impl Session {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AllowedMethod {
-    pub contract_address: FieldElement,
-    pub selector: FieldElement,
+    pub contract_address: Felt,
+    pub selector: Felt,
 }
 
 impl AllowedMethod {
-    pub fn new(
-        contract_address: FieldElement,
-        name: &str,
-    ) -> Result<AllowedMethod, NonAsciiNameError> {
+    pub fn new(contract_address: Felt, name: &str) -> Result<AllowedMethod, NonAsciiNameError> {
         Ok(Self::with_selector(
             contract_address,
             get_selector_from_name(name)?,
         ))
     }
-    pub fn with_selector(contract_address: FieldElement, selector: FieldElement) -> AllowedMethod {
+    pub fn with_selector(contract_address: Felt, selector: Felt) -> AllowedMethod {
         Self {
             contract_address,
             selector,
@@ -113,7 +111,7 @@ impl AllowedMethod {
 }
 
 impl AllowedMethod {
-    pub fn as_merkle_leaf(&self) -> FieldElement {
+    pub fn as_merkle_leaf(&self) -> Felt {
         poseidon_hash_many(&[
             Session::allowed_method_hash_rev_1(),
             self.contract_address,

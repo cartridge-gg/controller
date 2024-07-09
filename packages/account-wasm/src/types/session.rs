@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
 use starknet::core::serde::unsigned_field_element::UfeHex;
-use starknet::core::types::FieldElement;
+use starknet::core::types::Felt;
 
 use super::policy::JsPolicy;
 
@@ -10,9 +10,9 @@ use super::policy::JsPolicy;
 #[serde(rename_all = "camelCase")]
 pub struct JsCredentials {
     #[serde_as(as = "Vec<UfeHex>")]
-    pub authorization: Vec<FieldElement>,
+    pub authorization: Vec<Felt>,
     #[serde_as(as = "UfeHex")]
-    pub private_key: FieldElement,
+    pub private_key: Felt,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

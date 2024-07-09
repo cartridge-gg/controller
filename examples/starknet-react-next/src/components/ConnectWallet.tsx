@@ -7,7 +7,7 @@ export function ConnectWallet() {
   const { disconnect } = useDisconnect();
   const { address } = useAccount();
 
-  const connector = connectors[0] as unknown as CartridgeConnector;
+  const connector = connectors[0] as CartridgeConnector;
 
   const [username, setUsername] = useState<string>();
   useEffect(() => {

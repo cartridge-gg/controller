@@ -3,7 +3,7 @@ use starknet::accounts::{ExecutionEncoding, SingleOwnerAccount};
 use starknet::providers::jsonrpc::HttpTransport;
 use starknet::providers::JsonRpcClient;
 use starknet::signers::LocalWallet;
-use starknet::{core::types::FieldElement, macros::felt, signers::SigningKey};
+use starknet::{core::types::Felt, macros::felt, signers::SigningKey};
 use std::process::{Command, Stdio};
 use url::Url;
 
@@ -15,7 +15,7 @@ use super::{find_free_port, SubprocessRunner, TestnetConfig, TestnetRunner};
 
 lazy_static! {
     // Signing key and address of the katana prefunded account.
-    pub static ref PREFUNDED: (SigningKey, FieldElement) = (
+    pub static ref PREFUNDED: (SigningKey, Felt) = (
         SigningKey::from_secret_scalar(
             felt!(
                 "0x2bbf4f9fd0bbb2e60b0316c1fe0b76cf7a4d0198bd493ced9b8df2a3a24d68a"

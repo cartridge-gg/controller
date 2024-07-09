@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use cainome::cairo_serde::CairoSerde;
 use starknet::{
     accounts::{Account, Call, ConnectedAccount, ExecutionEncoder},
-    core::types::{BlockId, BlockTag, FieldElement},
+    core::types::{BlockId, BlockTag, Felt},
     providers::Provider,
 };
 
@@ -22,8 +22,8 @@ where
 {
     pub(crate) provider: P,
     pub(crate) signer: S,
-    pub(crate) address: FieldElement,
-    pub(crate) chain_id: FieldElement,
+    pub(crate) address: Felt,
+    pub(crate) chain_id: Felt,
     pub(crate) block_id: BlockId,
 }
 impl<P, S> CartridgeAccount<P, S>
@@ -31,7 +31,7 @@ where
     P: Provider + Send,
     S: HashSigner + Send,
 {
-    pub fn new(provider: P, signer: S, address: FieldElement, chain_id: FieldElement) -> Self {
+    pub fn new(provider: P, signer: S, address: Felt, chain_id: Felt) -> Self {
         Self {
             provider,
             signer,
@@ -49,7 +49,7 @@ where
     P: Provider + Send + Sync,
     S: HashSigner + Send + Sync,
 {
-    async fn sign_hash(&self, hash: FieldElement) -> Result<Vec<FieldElement>, SignError> {
+    async fn sign_hash(&self, hash: Felt) -> Result<Vec<Felt>, SignError> {
         let result = self.signer.sign(&hash).await.ok().unwrap();
         Ok(Vec::<SignerSignature>::cairo_serialize(&vec![result]))
     }
@@ -60,11 +60,11 @@ where
     P: Provider + Send,
     S: HashSigner + Send,
 {
-    fn address(&self) -> FieldElement {
+    fn address(&self) -> Felt {
         self.address
     }
 
-    fn chain_id(&self) -> FieldElement {
+    fn chain_id(&self) -> Felt {
         self.chain_id
     }
 }

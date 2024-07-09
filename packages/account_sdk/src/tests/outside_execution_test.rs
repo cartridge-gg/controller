@@ -13,6 +13,7 @@ use crate::{
     transaction_waiter::TransactionWaiter,
 };
 use cainome::cairo_serde::{CairoSerde, ContractAddress, U256};
+use starknet::core::types::Felt;
 use starknet::{
     accounts::{Account, Call},
     macros::{felt, selector},
@@ -106,7 +107,7 @@ pub async fn test_verify_paymaster_execute<
         .unwrap();
 
     paymaster_account
-        .execute(vec![outside_execution.into()])
+        .execute_v1(vec![outside_execution.into()])
         .send()
         .await
         .unwrap();
@@ -234,7 +235,7 @@ async fn test_verify_execute_paymaster_should_fail() {
         .unwrap();
 
     paymaster_account
-        .execute(vec![outside_execution.into()])
+        .execute_v1(vec![outside_execution.into()])
         .send()
         .await
         .unwrap();
@@ -314,8 +315,8 @@ async fn test_verify_execute_paymaster_session() {
             .await
             .unwrap();
 
-        let tx = paymaster_account.execute(vec![outside_execution.clone().into()]);
-        let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * 4u32.into();
+        let tx = paymaster_account.execute_v1(vec![outside_execution.clone().into()]);
+        let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * Felt::from(4u128);
         let tx = tx.nonce(i.into()).max_fee(fee_estimate).prepared().unwrap();
 
         let tx_hash = tx.transaction_hash(false);

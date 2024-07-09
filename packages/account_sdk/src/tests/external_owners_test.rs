@@ -19,7 +19,7 @@ use crate::{
 use cainome::cairo_serde::{CairoSerde, ContractAddress, U256};
 use starknet::{
     accounts::{Account, Call},
-    core::types::{BlockId, BlockTag},
+    core::types::{BlockId, BlockTag, Felt},
     macros::{felt, selector},
     providers::Provider,
     signers::SigningKey,
@@ -63,7 +63,7 @@ async fn test_verify_external_owner() {
 
     let tx = account_interface.register_external_owner(&other_address.into());
 
-    let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * 4u32.into();
+    let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * Felt::from(4u128);
     let tx = tx
         .nonce(0u32.into())
         .max_fee(fee_estimate)
@@ -90,13 +90,13 @@ async fn test_verify_external_owner() {
     )
     .unwrap();
 
-    let tx = other_account.execute(vec![Call {
+    let tx = other_account.execute_v1(vec![Call {
         to: address,
         selector: selector!("register_session"),
         calldata: <RawSession as CairoSerde>::cairo_serialize(&session.raw()),
     }]);
 
-    let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * 4u32.into();
+    let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * Felt::from(4u128);
     let tx = tx
         .nonce(0u32.into())
         .max_fee(fee_estimate)

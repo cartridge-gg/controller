@@ -2,8 +2,8 @@ use std::time::Duration;
 
 use futures::{select, FutureExt};
 use starknet::core::types::{
-    ExecutionResult, FieldElement, MaybePendingTransactionReceipt, PendingTransactionReceipt,
-    StarknetError, TransactionFinalityStatus, TransactionReceipt,
+    ExecutionResult, Felt, ReceiptBlock, StarknetError, TransactionFinalityStatus,
+    TransactionReceipt, TransactionReceiptWithBlockInfo,
 };
 use starknet::providers::{Provider, ProviderError};
 
@@ -35,13 +35,13 @@ pub enum TransactionWaitingError {
 ///
 /// let provider = JsonRpcClient::new(HttpTransport::new(Url::parse("http://localhost:5000").unwrap()));
 ///
-/// let tx_hash = FieldElement::from(0xbadbeefu64);
+/// let tx_hash = Felt::from(0xbadbeefu64);
 /// let receipt = TransactionWaiter::new(tx_hash, &provider).with_finality(TransactionFinalityStatus::ACCEPTED_ON_L2).await.unwrap();
 /// ```
 #[must_use = "TransactionWaiter does nothing unless polled"]
 pub struct TransactionWaiter<'a, P: Provider> {
     /// The hash of the transaction to wait for.
-    tx_hash: FieldElement,
+    tx_hash: Felt,
     /// The finality status to wait for.
     ///
     /// If set, the waiter will wait for the transaction to achieve this finality status.
@@ -112,7 +112,7 @@ where
     const DEFAULT_TIMEOUT: Duration = Duration::from_secs(300);
     const DEFAULT_INTERVAL: Duration = Duration::from_millis(2500);
 
-    pub fn new(tx: FieldElement, provider: &'a P) -> Self {
+    pub fn new(tx: Felt, provider: &'a P) -> Self {
         Self {
             provider,
             tx_hash: tx,
@@ -141,7 +141,7 @@ where
         Self { timeout, ..self }
     }
 
-    pub async fn wait(self) -> Result<MaybePendingTransactionReceipt, TransactionWaitingError> {
+    pub async fn wait(self) -> Result<TransactionReceiptWithBlockInfo, TransactionWaitingError> {
         let timeout = self.timeout;
         select! {
             result = self.wait_without_timeout().fuse() => result,
@@ -150,16 +150,16 @@ where
     }
     async fn wait_without_timeout(
         self,
-    ) -> Result<MaybePendingTransactionReceipt, TransactionWaitingError> {
+    ) -> Result<TransactionReceiptWithBlockInfo, TransactionWaitingError> {
         loop {
             let now = std::time::Instant::now();
             let transaction = self.provider.get_transaction_receipt(self.tx_hash).await;
             match transaction {
-                Ok(receipt) => match &receipt {
-                    MaybePendingTransactionReceipt::PendingReceipt(r) => {
+                Ok(receipt) => match &receipt.block {
+                    ReceiptBlock::Pending => {
                         if self.finality_status.is_none() {
                             if self.must_succeed {
-                                return match execution_status_from_pending_receipt(r) {
+                                return match execution_status_from_receipt(&receipt.receipt) {
                                     ExecutionResult::Succeeded => Ok(receipt),
                                     ExecutionResult::Reverted { reason } => {
                                         Err(TransactionWaitingError::TransactionReverted(
@@ -172,12 +172,13 @@ where
                         }
                     }
 
-                    MaybePendingTransactionReceipt::Receipt(r) => {
+                    ReceiptBlock::Block { .. } => {
                         if let Some(finality_status) = self.finality_status {
-                            match finality_status_from_receipt(r) {
+                            match finality_status_from_receipt(&receipt.receipt) {
                                 status if status == finality_status => {
                                     if self.must_succeed {
-                                        return match execution_status_from_receipt(r) {
+                                        return match execution_status_from_receipt(&receipt.receipt)
+                                        {
                                             ExecutionResult::Succeeded => Ok(receipt),
                                             ExecutionResult::Reverted { reason } => {
                                                 Err(TransactionWaitingError::TransactionReverted(
@@ -220,16 +221,6 @@ fn execution_status_from_receipt(receipt: &TransactionReceipt) -> &ExecutionResu
 }
 
 #[inline]
-fn execution_status_from_pending_receipt(receipt: &PendingTransactionReceipt) -> &ExecutionResult {
-    match receipt {
-        PendingTransactionReceipt::Invoke(receipt) => &receipt.execution_result,
-        PendingTransactionReceipt::Declare(receipt) => &receipt.execution_result,
-        PendingTransactionReceipt::L1Handler(receipt) => &receipt.execution_result,
-        PendingTransactionReceipt::DeployAccount(receipt) => &receipt.execution_result,
-    }
-}
-
-#[inline]
 fn finality_status_from_receipt(receipt: &TransactionReceipt) -> TransactionFinalityStatus {
     match receipt {
         TransactionReceipt::Invoke(receipt) => receipt.finality_status,
@@ -237,17 +228,5 @@ fn finality_status_from_receipt(receipt: &TransactionReceipt) -> TransactionFina
         TransactionReceipt::Declare(receipt) => receipt.finality_status,
         TransactionReceipt::L1Handler(receipt) => receipt.finality_status,
         TransactionReceipt::DeployAccount(receipt) => receipt.finality_status,
-    }
-}
-
-#[inline]
-#[allow(dead_code)]
-pub fn block_number_from_receipt(receipt: &TransactionReceipt) -> u64 {
-    match receipt {
-        TransactionReceipt::Invoke(tx) => tx.block_number,
-        TransactionReceipt::L1Handler(tx) => tx.block_number,
-        TransactionReceipt::Declare(tx) => tx.block_number,
-        TransactionReceipt::Deploy(tx) => tx.block_number,
-        TransactionReceipt::DeployAccount(tx) => tx.block_number,
     }
 }

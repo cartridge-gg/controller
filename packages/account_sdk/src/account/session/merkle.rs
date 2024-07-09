@@ -1,13 +1,10 @@
-use starknet::core::types::FieldElement;
+use starknet::core::types::Felt;
 use starknet_crypto::poseidon_hash;
 
 pub struct MerkleTree;
 
 impl MerkleTree {
-    pub fn compute_root(
-        mut current_node: FieldElement,
-        mut proof: Vec<FieldElement>,
-    ) -> FieldElement {
+    pub fn compute_root(mut current_node: Felt, mut proof: Vec<Felt>) -> Felt {
         loop {
             if proof.is_empty() {
                 break current_node;
@@ -24,7 +21,7 @@ impl MerkleTree {
             };
         }
     }
-    pub fn compute_proof(leaves: Vec<FieldElement>, index: usize) -> Vec<FieldElement> {
+    pub fn compute_proof(leaves: Vec<Felt>, index: usize) -> Vec<Felt> {
         let mut proof = vec![];
         compute_proof(leaves, index, &mut proof);
         proof
@@ -32,7 +29,7 @@ impl MerkleTree {
 }
 
 // based on: https://github.com/keep-starknet-strange/alexandria/blob/ecc881e2aee668332441bdfa32336e3404cf8eb1/src/merkle_tree/src/merkle_tree.cairo#L182C4-L215
-fn compute_proof(mut nodes: Vec<FieldElement>, index: usize, proof: &mut Vec<FieldElement>) {
+fn compute_proof(mut nodes: Vec<Felt>, index: usize, proof: &mut Vec<Felt>) {
     // Break if we have reached the top of the tree
     if nodes.len() == 1 {
         return;
@@ -40,7 +37,7 @@ fn compute_proof(mut nodes: Vec<FieldElement>, index: usize, proof: &mut Vec<Fie
 
     // If odd number of nodes, add a null virtual leaf
     if nodes.len() % 2 != 0 {
-        nodes.push(FieldElement::ZERO);
+        nodes.push(Felt::ZERO);
     }
 
     // Compute next level
@@ -57,8 +54,8 @@ fn compute_proof(mut nodes: Vec<FieldElement>, index: usize, proof: &mut Vec<Fie
     compute_proof(next_level, index_parent, proof)
 }
 
-fn get_next_level(nodes: &[FieldElement]) -> Vec<FieldElement> {
-    let mut next_level: Vec<FieldElement> = Vec::with_capacity(nodes.len() / 2);
+fn get_next_level(nodes: &[Felt]) -> Vec<Felt> {
+    let mut next_level: Vec<Felt> = Vec::with_capacity(nodes.len() / 2);
     for i in 0..nodes.len() / 2 {
         let left = nodes[i * 2];
         let right = nodes[i * 2 + 1];
