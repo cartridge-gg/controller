@@ -1,5 +1,4 @@
 import {
-  Abi,
   Account as BaseAccount,
   RpcProvider,
   SignerInterface,
@@ -126,6 +125,7 @@ class Account extends BaseAccount {
     }
   }
 
+  // @ts-expect-error TODO: fix overload type mismatch
   async execute(
     calls: AllowArray<Call>,
     transactionsDetail?: InvocationsDetails,
@@ -192,6 +192,7 @@ class Account extends BaseAccount {
   ): Promise<boolean> {
     if (BigInt(signature[0]) === 0n) {
       return ec.starkCurve.verify(
+        // @ts-expect-error TODO: fix overload type mismatch
         signature,
         BigInt(hash).toString(),
         signature[0],

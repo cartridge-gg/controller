@@ -60,7 +60,7 @@ where
             guardian,
             address,
             chain_id,
-            block_id: BlockId::Tag(BlockTag::Latest),
+            block_id: BlockId::Tag(BlockTag::Pending),
             session_authorization,
             session,
         }
