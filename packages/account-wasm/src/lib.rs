@@ -48,7 +48,6 @@ use types::outside_execution::JsOutsideExecution;
 use types::session::{JsCredentials, JsSession};
 use url::Url;
 use wasm_bindgen::prelude::*;
-use web_sys::console;
 
 use crate::types::TryFromJsValue;
 
@@ -165,13 +164,13 @@ impl CartridgeAccount {
         let fee_estimate = if let Some(session_details) = from_value(session_details)? {
             self.session_account(session_details)
                 .await?
-                .execute(calls)
+                .execute_v1(calls)
                 .nonce(details.nonce)
                 .estimate_fee()
                 .await?
         } else {
             self.account
-                .execute(calls)
+                .execute_v1(calls)
                 .nonce(details.nonce)
                 .estimate_fee()
                 .await?
@@ -198,14 +197,14 @@ impl CartridgeAccount {
         let execution = if let Some(session_details) = from_value(session_details)? {
             self.session_account(session_details)
                 .await?
-                .execute(calls)
+                .execute_v1(calls)
                 .max_fee(details.max_fee)
                 .nonce(details.nonce)
                 .send()
                 .await?
         } else {
             self.account
-                .execute(calls)
+                .execute_v1(calls)
                 .max_fee(details.max_fee)
                 .nonce(details.nonce)
                 .send()

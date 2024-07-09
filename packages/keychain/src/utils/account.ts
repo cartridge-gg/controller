@@ -1,4 +1,5 @@
 import {
+  Abi,
   Account as BaseAccount,
   RpcProvider,
   SignerInterface,
@@ -125,7 +126,6 @@ class Account extends BaseAccount {
     }
   }
 
-  // @ts-expect-error TODO: fix overload type mismatch
   async execute(
     calls: AllowArray<Call>,
     transactionsDetail?: InvocationsDetails,
@@ -168,6 +168,7 @@ class Account extends BaseAccount {
     }
 
     const nonce = details.nonce ?? (await super.getNonce("pending"));
+
     const { gas_consumed, gas_price, overall_fee } =
       await this.cartridge.estimateInvokeFee(
         normalizeCalls(calls),
@@ -191,7 +192,6 @@ class Account extends BaseAccount {
   ): Promise<boolean> {
     if (BigInt(signature[0]) === 0n) {
       return ec.starkCurve.verify(
-        // @ts-expect-error TODO(#244): Adapt signature
         signature,
         BigInt(hash).toString(),
         signature[0],

@@ -5,6 +5,7 @@ import {
   ConnectError,
 } from "@cartridge/controller";
 import {
+  Abi,
   Call,
   InvocationsDetails,
   Signature,
@@ -37,6 +38,7 @@ export type ExecuteCtx = {
   origin: string;
   type: "execute";
   transactions: Call | Call[];
+  abis: Abi[];
   transactionsDetail?: InvocationsDetails & {
     chainId?: constants.StarknetChainId;
   };

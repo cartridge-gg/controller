@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
-use starknet::core::serde::unsigned_field_element::UfeHex;
-use starknet::core::types::FieldElement;
+use starknet::core::{serde::unsigned_field_element::UfeHex, types::Felt};
 use wasm_bindgen::prelude::*;
 
 #[serde_as]
@@ -9,7 +8,7 @@ use wasm_bindgen::prelude::*;
 #[serde(rename_all = "camelCase")]
 pub struct JsEstimateFeeDetails {
     #[serde_as(as = "UfeHex")]
-    pub nonce: FieldElement,
+    pub nonce: Felt,
 }
 
 impl TryFrom<JsValue> for JsEstimateFeeDetails {

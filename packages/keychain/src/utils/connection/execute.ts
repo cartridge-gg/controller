@@ -7,6 +7,7 @@ import {
 } from "@cartridge/controller";
 import Controller, { diff } from "utils/controller";
 import {
+  Abi,
   AllowArray,
   Call,
   CallData,
@@ -24,6 +25,7 @@ export function executeFactory({
   return (controller: Controller, origin: string) =>
     async (
       transactions: AllowArray<Call>,
+      abis: Abi[],
       transactionsDetail?: InvocationsDetails,
       sync?: boolean,
       paymaster?: PaymasterOptions,
@@ -34,6 +36,7 @@ export function executeFactory({
             type: "execute",
             origin,
             transactions,
+            abis,
             transactionsDetail,
             resolve,
             reject,
