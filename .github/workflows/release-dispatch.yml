@@ -27,10 +27,21 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: "8"
-      - name: Update Workspace Packages Version
+
+      - name: Install cargo-release
+        run: cargo install cargo-release
+
+      - name: Update NPM packages Version
         run: |
           VERSION=${{ github.event.inputs.version }}
           pnpm -r exec -- bash -c "npm version $VERSION --no-git-tag-version"
+
+      - name: Update Cargo packages Version
+        run: |
+          VERSION=${{ github.event.inputs.version }}
+          VERSION=${VERSION#v}
+          cargo release version $VERSION --execute --no-confirm && cargo release replace --execute --no-confirm
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
