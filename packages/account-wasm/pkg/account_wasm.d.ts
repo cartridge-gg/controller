@@ -56,9 +56,10 @@ export class CartridgeAccount {
 */
   signMessage(typed_data: string): Promise<any>;
 /**
+* @param {any} max_fee
 * @returns {Promise<any>}
 */
-  deploySelf(): Promise<any>;
+  deploySelf(max_fee: any): Promise<any>;
 /**
 * @returns {Promise<any>}
 */

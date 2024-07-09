@@ -9,6 +9,8 @@ import Controller from "./controller";
 export const ETH_CONTRACT_ADDRESS =
   "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 
+export const ETH_MIN_PREFUND = "50000000000000";
+
 export function isEther(t: TokenInfo | Prefund) {
   return formatAddress(t.address) === formatAddress(ETH_CONTRACT_ADDRESS);
 }
@@ -29,7 +31,7 @@ export function getMinStr(t: TokenInfo) {
 export function mergeDefaultETHPrefund(prefunds: Prefund[]) {
   return prefunds.find(isEther)
     ? prefunds
-    : [{ address: ETH_CONTRACT_ADDRESS, min: "50000000000000" }, ...prefunds];
+    : [{ address: ETH_CONTRACT_ADDRESS, min: ETH_MIN_PREFUND }, ...prefunds];
 }
 
 export async function fetchTokenInfo(prefunds: Prefund[]) {

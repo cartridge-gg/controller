@@ -39,6 +39,7 @@ import { useCopyAndToast } from "./Toaster";
 import { AlphaWarning } from "./Warning";
 import { formatAddress } from "utils/contracts";
 import {
+  ETH_MIN_PREFUND,
   TokenInfo,
   fetchTokenInfo,
   getBalanceStr,
@@ -141,7 +142,7 @@ function FundingInner({ onComplete }: FundingInnerProps) {
     try {
       setIsDeploying(true);
       const { transaction_hash } =
-        await controller.account.cartridge.deploySelf();
+        await controller.account.cartridge.deploySelf(ETH_MIN_PREFUND);
 
       onComplete(transaction_hash);
     } catch (e) {
