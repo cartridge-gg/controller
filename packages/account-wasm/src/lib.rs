@@ -257,9 +257,8 @@ impl CartridgeAccount {
             starknetutils::cairo_short_string_to_felt(&self.username)?,
             &factory,
         );
-        let res: starknet::core::types::DeployAccountTransactionResult = deployment
-            .max_fee(from_value(max_fee)?)
-            .send().await?;
+        let res: starknet::core::types::DeployAccountTransactionResult =
+            deployment.max_fee(from_value(max_fee)?).send().await?;
 
         Ok(to_value(&res)?)
     }
