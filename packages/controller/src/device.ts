@@ -1,6 +1,5 @@
 import {
   Account,
-  Abi,
   Call,
   EstimateFeeDetails,
   Signature,
@@ -84,7 +83,6 @@ class DeviceAccount extends Account {
   // @ts-expect-error TODO: fix overload type mismatch
   async execute(
     calls: Call | Call[],
-    abis?: Abi[],
     transactionsDetail?: InvocationsDetails,
   ): Promise<InvokeFunctionResponse> {
     if (!transactionsDetail) {
@@ -94,7 +92,6 @@ class DeviceAccount extends Account {
     try {
       let res = await this.keychain.execute(
         calls,
-        abis,
         transactionsDetail,
         false,
         this.paymaster,
@@ -106,7 +103,6 @@ class DeviceAccount extends Account {
       this.modal.open();
       res = await this.keychain.execute(
         calls,
-        abis,
         transactionsDetail,
         true,
         this.paymaster,

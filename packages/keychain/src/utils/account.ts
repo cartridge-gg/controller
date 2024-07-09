@@ -28,8 +28,6 @@ import { CartridgeAccount } from "@cartridge/account-wasm";
 import { Session } from "@cartridge/controller";
 import { normalizeCalls } from "./connection/execute";
 
-const EST_FEE_MULTIPLIER = 2n;
-
 export enum Status {
   COUNTERFACTUAL = "COUNTERFACTUAL",
   DEPLOYED = "DEPLOYED",
@@ -140,7 +138,6 @@ class Account extends BaseAccount {
     transactionsDetail.nonce =
       transactionsDetail.nonce ?? (await this.getNonce("pending"));
     transactionsDetail.maxFee = num.toHex(transactionsDetail.maxFee);
-    // transactionsDetail.maxFee = num.toHex(1000000000000);
 
     const res = await this.cartridge.execute(
       normalizeCalls(calls),
@@ -164,21 +161,28 @@ class Account extends BaseAccount {
   async estimateInvokeFee(
     calls: AllowArray<Call>,
     details: EstimateFeeDetails = {},
+    session?: Session,
   ): Promise<EstimateFee> {
-    details.blockIdentifier = details.blockIdentifier ?? "pending";
-
     if (this.status === Status.COUNTERFACTUAL) {
       throw new Error("Account is not deployed");
     }
 
-    details.nonce = details.nonce ?? (await super.getNonce("pending"));
+    const nonce = details.nonce ?? (await super.getNonce("pending"));
+    const { gas_consumed, gas_price, overall_fee } =
+      await this.cartridge.estimateInvokeFee(
+        normalizeCalls(calls),
+        {
+          nonce,
+        },
+        session,
+      );
 
-    let estFee = await super.estimateInvokeFee(calls, details);
-
-    // FIXME: temp fix for the sepolia fee estimation
-    estFee.suggestedMaxFee *= EST_FEE_MULTIPLIER;
-
-    return estFee;
+    return {
+      gas_consumed,
+      gas_price,
+      overall_fee,
+      suggestedMaxFee: (BigInt(overall_fee) * 11n) / 10n, // 10% margin
+    } as EstimateFee;
   }
 
   async verifyMessageHash(

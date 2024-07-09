@@ -9,7 +9,7 @@ use wasm_bindgen::prelude::*;
 
 use super::TryFromJsValue;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct JsPolicy {
     pub target: String,

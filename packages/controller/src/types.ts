@@ -81,7 +81,6 @@ export interface Keychain {
   ): Promise<EstimateFee>;
   execute(
     calls: Call | Call[],
-    abis?: Abi[],
     transactionsDetail?: InvocationsDetails,
     sync?: boolean,
     paymaster?: PaymasterOptions,
