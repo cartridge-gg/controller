@@ -1,14 +1,10 @@
 import { useAccount, useExplorer } from "@starknet-react/core";
 import { useCallback, useState } from "react";
-import { constants } from "starknet";
 
 const ETH_CONTRACT =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 
 export const TransferEth = () => {
-  const [chainId] = useState<constants.StarknetChainId>(
-    constants.StarknetChainId.SN_SEPOLIA,
-  );
   const [submitted, setSubmitted] = useState<boolean>(false);
   const { account } = useAccount();
   const explorer = useExplorer();
@@ -37,7 +33,7 @@ export const TransferEth = () => {
       .then(({ transaction_hash }) => setTxnHash(transaction_hash))
       .catch((e) => console.error(e))
       .finally(() => setSubmitted(false));
-  }, [account, chainId]);
+  }, [account]);
 
   if (!account) {
     return null;

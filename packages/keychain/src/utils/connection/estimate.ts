@@ -12,9 +12,7 @@ export function estimateInvokeFee(controller: Controller) {
     transactions: Call | Call[],
     details?: EstimateFeeDetails,
   ): Promise<EstimateFee> => {
-    const calls = Array.isArray(transactions) ? transactions : [transactions];
-    details.blockIdentifier ? details.blockIdentifier : "latest";
-    return await controller.account.estimateInvokeFee(calls, details);
+    return await controller.account.estimateInvokeFee(transactions, details);
   };
 }
 

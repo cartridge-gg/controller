@@ -1,21 +1,9 @@
 import { useEffect, useState } from "react";
 import { HStack, Spacer, Spinner, Text, VStack } from "@chakra-ui/react";
 
-import { constants } from "starknet";
 import { formatUnits } from "viem";
 import { useChainId } from "hooks/connection";
 import { EthereumIcon } from "@cartridge/ui";
-
-async function fetchEthPrice() {
-  const res = await fetch(process.env.NEXT_PUBLIC_API_URL, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-    },
-    body: `{"query":"query { price(quote: ETH, base: USD) { amount }}"}`,
-  });
-  return res.json();
-}
 
 export function Fees({
   fees,
@@ -37,23 +25,6 @@ export function Fees({
       return;
     }
     async function compute() {
-      if (chainId === constants.StarknetChainId.SN_MAIN) {
-        let dollarUSLocale = Intl.NumberFormat("en-US");
-        const { data } = await fetchEthPrice();
-        const usdeth = BigInt(data.price.amount) * 100n;
-        const overallFee = fees.base * usdeth;
-        const suggestedMaxFee = fees.max * usdeth;
-        setFormattedFee({
-          base: `~$${dollarUSLocale.format(
-            parseFloat(formatUnits(overallFee, 20)),
-          )}`,
-          max: `~$${dollarUSLocale.format(
-            parseFloat(formatUnits(suggestedMaxFee, 20)),
-          )}`,
-        });
-        return;
-      }
-
       setFormattedFee(
         fees.max > 10000000000000n
           ? {

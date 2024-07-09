@@ -1,8 +1,7 @@
 import { Spacer, IconButton, HStack } from "@chakra-ui/react";
 import { ArrowLeftIcon } from "@cartridge/ui";
 import { CloseButton } from "./CloseButton";
-import { useController } from "hooks/controller";
-import { useMemo } from "react";
+import { NetworkButton } from "./NetworkButton";
 
 export type TopBarProps = {
   onBack?: () => void;
@@ -10,9 +9,6 @@ export type TopBarProps = {
 };
 
 export function TopBar({ onBack, hideAccount }: TopBarProps) {
-  const { controller } = useController();
-  const address = useMemo(() => controller?.address, [controller]);
-
   return (
     <HStack
       w="full"
@@ -40,11 +36,15 @@ export function TopBar({ onBack, hideAccount }: TopBarProps) {
 
       <Spacer />
 
-      {!!address && !hideAccount && (
+      {!hideAccount && (
         <>
-          {/* <NetworkButton chainId={chainId} /> */}
-          {/* <EthBalance chainId={chainId} address={address} /> */}
-          {/* {chainId && <AccountMenu onLogout={onLogout} address={address} />} */}
+          <NetworkButton />
+          {/* {!!address && (
+            <>
+              <EthBalance chainId={chainId} address={address} />
+              {chainId && <AccountMenu onLogout={onLogout} address={address} />}
+            </>
+          )} */}
         </>
       )}
     </HStack>

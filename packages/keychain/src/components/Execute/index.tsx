@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@chakra-ui/react";
 import { formatEther } from "viem";
-import { Policy, ResponseCodes } from "@cartridge/controller"; import {
+import { Policy, ResponseCodes } from "@cartridge/controller";
+import {
   Container,
   Content,
   FOOTER_MIN_HEIGHT,
@@ -89,9 +90,9 @@ export function Execute() {
       })
       .catch((e) => {
         if (e.message.includes("ERC20: transfer amount exceeds balance")) {
-          setIsInsufficient(true)
-          setError(new TransferAmountExceedsBalance())
-          return
+          setIsInsufficient(true);
+          setError(new TransferAmountExceedsBalance());
+          return;
         }
 
         setError(e);
@@ -110,14 +111,19 @@ export function Execute() {
 
   const onSubmit = useCallback(async () => {
     setLoading(true);
-    const response = await account.execute(calls, {
-      maxFee: fees.max,
-    });
+    const session = controller.session(origin);
+    const response = await account.execute(
+      calls,
+      {
+        maxFee: fees.max,
+      },
+      session,
+    );
     ctx.resolve({
       transaction_hash: response.transaction_hash,
       code: ResponseCodes.SUCCESS,
     });
-  }, [account, calls, fees, ctx]);
+  }, [account, calls, fees, ctx, origin, controller]);
 
   const policies = useMemo<Policy[]>(
     () =>
@@ -145,15 +151,15 @@ export function Execute() {
       </Content>
 
       <Footer>
-        {error ? error.name === "TransferAmountExceedsBalance" ? (
-          <ErrorAlert
-            title={error.message}
-          />
-        ) : (
-          <ErrorAlert
-            title="Something went wrong"
-            description={error.message}
-          />
+        {error ? (
+          error.name === "TransferAmountExceedsBalance" ? (
+            <ErrorAlert title={error.message} />
+          ) : (
+            <ErrorAlert
+              title="Something went wrong"
+              description={error.message}
+            />
+          )
         ) : (
           <Fees fees={fees} balance={ethBalance && format(ethBalance)} />
         )}

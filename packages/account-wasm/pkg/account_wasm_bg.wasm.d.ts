@@ -8,12 +8,12 @@ export function cartridgeaccount_execute(a: number, b: number, c: number, d: num
 export function cartridgeaccount_executeFromOutside(a: number, b: number, c: number, d: number, e: number): number;
 export function cartridgeaccount_revokeSession(a: number, b: number): void;
 export function cartridgeaccount_signMessage(a: number, b: number, c: number): number;
-export function cartridgeaccount_deploySelf(a: number): number;
+export function cartridgeaccount_deploySelf(a: number, b: number): number;
 export function cartridgeaccount_delegateAccount(a: number): number;
 export function __wbindgen_malloc(a: number, b: number): number;
 export function __wbindgen_realloc(a: number, b: number, c: number, d: number): number;
 export const __wbindgen_export_2: WebAssembly.Table;
-export function _dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h6d3f40175a80a063(a: number, b: number, c: number): void;
+export function _dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h88b478b231db6a9d(a: number, b: number, c: number): void;
 export function __wbindgen_add_to_stack_pointer(a: number): number;
 export function __wbindgen_exn_store(a: number): void;
-export function wasm_bindgen__convert__closures__invoke2_mut__h16403dee52b857fc(a: number, b: number, c: number, d: number): void;
+export function wasm_bindgen__convert__closures__invoke2_mut__hb7dd9dcbadce4d42(a: number, b: number, c: number, d: number): void;

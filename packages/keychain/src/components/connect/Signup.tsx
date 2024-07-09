@@ -10,17 +10,17 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { DeployAccountDocument, useAccountQuery } from "generated/graphql";
 import Controller from "utils/controller";
-import { client } from "utils/graphql";
 import { PopupCenter } from "utils/url";
 import { FormValues, SignupProps } from "./types";
 import { isIframe, validateUsernameFor } from "./utils";
 import { RegistrationLink } from "./RegistrationLink";
 import { doSignup } from "hooks/account";
 import { useControllerTheme } from "hooks/theme";
-import { constants, shortString } from "starknet";
 import { useConnection } from "hooks/connection";
 import { useDebounce } from "hooks/debounce";
 import { ErrorAlert } from "components/ErrorAlert";
+import { constants, shortString } from "starknet";
+import { client } from "utils/graphql";
 
 export function Signup({
   prefilledName = "",

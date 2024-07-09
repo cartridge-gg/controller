@@ -137,6 +137,8 @@ export type ControllerOptions = {
     /** Preset themes for the controller */
     presets?: ControllerThemePresets;
   };
+  /** List of ERC20 tokens to pre-fund */
+  prefunds?: Prefund[];
 };
 
 /**
@@ -178,3 +180,5 @@ export type ControllerColors = {
 export type ControllerColor = ThemeValue<string>;
 
 export type ThemeValue<T> = T | { dark: T; light: T };
+
+export type Prefund = { address: string; min: string };
