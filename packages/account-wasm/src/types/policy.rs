@@ -1,7 +1,7 @@
 use account_sdk::account::session::hash::AllowedMethod;
 use serde::{Deserialize, Serialize};
 use starknet::core::{
-    types::{FieldElement, FromStrError},
+    types::{Felt, FromStrError},
     utils::get_selector_from_name,
 };
 use std::str::FromStr;
@@ -29,7 +29,7 @@ impl TryFrom<JsPolicy> for AllowedMethod {
 
     fn try_from(value: JsPolicy) -> Result<Self, Self::Error> {
         Ok(AllowedMethod {
-            contract_address: FieldElement::from_str(&value.target)?,
+            contract_address: Felt::from_str(&value.target)?,
             selector: get_selector_from_name(&value.method).unwrap(),
         })
     }

@@ -14,7 +14,7 @@ jobs:
   rust-test:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/dojoengine/dojo-dev:v0.7.0-alpha.2
+      image: ghcr.io/dojoengine/dojo-dev:v1.0.0-alpha.0
     steps:
       - uses: actions/checkout@v3
       - uses: asdf-vm/actions/install@v3

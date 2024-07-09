@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use cainome::cairo_serde::CairoSerde;
 use starknet::{
     accounts::{Account, Call, ConnectedAccount, ExecutionEncoder},
-    core::types::{BlockId, BlockTag, FieldElement},
+    core::types::{BlockId, BlockTag, Felt},
     macros::short_string,
     providers::Provider,
 };
@@ -33,10 +33,10 @@ where
     provider: P,
     signer: S,
     guardian: G,
-    address: FieldElement,
-    chain_id: FieldElement,
+    address: Felt,
+    chain_id: Felt,
     block_id: BlockId,
-    session_authorization: Vec<FieldElement>,
+    session_authorization: Vec<Felt>,
     session: Session,
 }
 impl<P, S, G> SessionAccount<P, S, G>
@@ -49,9 +49,9 @@ where
         provider: P,
         signer: S,
         guardian: G,
-        address: FieldElement,
-        chain_id: FieldElement,
-        session_authorization: Vec<FieldElement>,
+        address: Felt,
+        chain_id: Felt,
+        session_authorization: Vec<Felt>,
         session: Session,
     ) -> Self {
         Self {
@@ -66,11 +66,7 @@ where
         }
     }
 
-    pub async fn sign(
-        &self,
-        hash: FieldElement,
-        calls: &[Call],
-    ) -> Result<RawSessionToken, SignError> {
+    pub async fn sign(&self, hash: Felt, calls: &[Call]) -> Result<RawSessionToken, SignError> {
         let mut proofs = Vec::new();
 
         for call in calls {
@@ -98,7 +94,7 @@ where
         })
     }
 
-    fn session_magic() -> FieldElement {
+    fn session_magic() -> Felt {
         short_string!("session-token")
     }
 }
@@ -113,9 +109,9 @@ where
 {
     async fn sign_hash_and_calls(
         &self,
-        hash: FieldElement,
+        hash: Felt,
         calls: &[Call],
-    ) -> Result<Vec<FieldElement>, SignError> {
+    ) -> Result<Vec<Felt>, SignError> {
         let tx_hash = self
             .session
             .message_hash(hash, self.chain_id, self.address)?;
@@ -134,11 +130,11 @@ where
     S: HashSigner + Send + Sync,
     G: HashSigner + Send + Sync,
 {
-    fn address(&self) -> FieldElement {
+    fn address(&self) -> Felt {
         self.address
     }
 
-    fn chain_id(&self) -> FieldElement {
+    fn chain_id(&self) -> Felt {
         self.chain_id
     }
 }

@@ -2,10 +2,12 @@ pub mod starknet;
 pub mod webauthn;
 
 use ::starknet::{
+    core::types::Felt,
     core::{crypto::EcdsaSignError, utils::NonAsciiNameError},
     macros::{selector, short_string},
 };
-use starknet_crypto::{poseidon_hash, FieldElement, PoseidonHasher};
+
+use starknet_crypto::{poseidon_hash, PoseidonHasher};
 
 use crate::abigen::controller::{Signer, SignerSignature};
 use async_trait::async_trait;
@@ -33,9 +35,9 @@ pub enum SignError {
     )]
     SessionMethodNotAllowed {
         /// The method selector that was not allowed.
-        selector: FieldElement,
+        selector: Felt,
         /// The contract address the method was called on.
-        contract_address: FieldElement,
+        contract_address: Felt,
     },
 
     #[error("Invalid message provided: {0}")]
@@ -45,17 +47,17 @@ pub enum SignError {
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 pub trait HashSigner {
-    async fn sign(&self, tx_hash: &FieldElement) -> Result<SignerSignature, SignError>;
+    async fn sign(&self, tx_hash: &Felt) -> Result<SignerSignature, SignError>;
     fn signer(&self) -> Signer;
 }
 
 pub trait SignerTrait {
-    fn guid(&self) -> FieldElement;
-    fn magic(&self) -> FieldElement;
+    fn guid(&self) -> Felt;
+    fn magic(&self) -> Felt;
 }
 
 impl SignerTrait for Signer {
-    fn guid(&self) -> FieldElement {
+    fn guid(&self) -> Felt {
         match self {
             Signer::Starknet(signer) => poseidon_hash(self.magic(), *signer.pubkey.inner()),
             Signer::Webauthn(signer) => {
@@ -76,7 +78,7 @@ impl SignerTrait for Signer {
             _ => unimplemented!(),
         }
     }
-    fn magic(&self) -> FieldElement {
+    fn magic(&self) -> Felt {
         match self {
             Signer::Starknet(_) => short_string!("Starknet Signer"),
             Signer::Webauthn(_) => short_string!("Webauthn Signer"),
@@ -90,11 +92,11 @@ impl SignerTrait for Signer {
 pub trait NewOwnerSigner: HashSigner {
     async fn sign_new_owner(
         &self,
-        chain_id: &FieldElement,
-        contract_address: &FieldElement,
-        old_owner_guid: &FieldElement,
+        chain_id: &Felt,
+        contract_address: &Felt,
+        old_owner_guid: &Felt,
     ) -> Result<SignerSignature, SignError> {
-        let message_hash = PedersenHasher::new(FieldElement::ZERO)
+        let message_hash = PedersenHasher::new(Felt::ZERO)
             .update(&selector!("change_owner"))
             .update(chain_id)
             .update(contract_address)
@@ -110,20 +112,20 @@ pub trait NewOwnerSigner: HashSigner {
 impl<T> NewOwnerSigner for T where T: HashSigner {}
 
 struct PedersenHasher {
-    state: FieldElement,
+    state: Felt,
 }
 
 impl PedersenHasher {
-    pub fn new(state: FieldElement) -> Self {
+    pub fn new(state: Felt) -> Self {
         Self { state }
     }
-    pub fn update(&self, data: &FieldElement) -> Self {
+    pub fn update(&self, data: &Felt) -> Self {
         use starknet_crypto::pedersen_hash;
         Self {
             state: pedersen_hash(&self.state, data),
         }
     }
-    pub fn finalize(self) -> FieldElement {
+    pub fn finalize(self) -> Felt {
         self.state
     }
 }

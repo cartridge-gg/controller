@@ -16,6 +16,7 @@ use starknet::{
     providers::Provider,
     signers::SigningKey,
 };
+use starknet_crypto::Felt;
 
 use super::deployment_test::{deploy_helper, transfer_helper};
 
@@ -158,7 +159,7 @@ async fn test_verify_execute_session_multiple() {
                 high: 0,
             },
         );
-        let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * 4u32.into();
+        let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * Felt::from(4u128);
         let tx = tx.nonce(i.into()).max_fee(fee_estimate).prepared().unwrap();
 
         let tx_hash = tx.transaction_hash(false);

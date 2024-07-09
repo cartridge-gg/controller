@@ -3,7 +3,7 @@ use starknet::accounts::{ExecutionEncoding, SingleOwnerAccount};
 use starknet::providers::jsonrpc::HttpTransport;
 use starknet::providers::JsonRpcClient;
 use starknet::signers::LocalWallet;
-use starknet::{core::types::FieldElement, macros::felt, signers::SigningKey};
+use starknet::{core::types::Felt, macros::felt, signers::SigningKey};
 use std::process::{Command, Stdio};
 use url::Url;
 
@@ -15,7 +15,7 @@ use super::{find_free_port, SubprocessRunner, TestnetConfig, TestnetRunner};
 
 lazy_static! {
     // Signing key and address of the devnet prefunded account.
-    pub static ref PREFUNDED: (SigningKey, FieldElement) = (
+    pub static ref PREFUNDED: (SigningKey, Felt) = (
         SigningKey::from_secret_scalar(felt!("0x71d7bb07b9a64f6f78ac4c816aff4da9"),),
         felt!("0x64b48806902a367c8598f4f95c305e8c1a1acba5f082d294a43793113115691")
     );

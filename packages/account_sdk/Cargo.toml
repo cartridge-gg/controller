@@ -13,7 +13,6 @@ anyhow.workspace = true
 async-trait.workspace = true
 base64.workspace = true
 cainome.workspace = true
-cairo-lang-starknet.workspace = true
 coset.workspace = true
 ecdsa.workspace = true
 futures.workspace = true
@@ -35,6 +34,7 @@ wasm-bindgen.workspace = true
 wasm-webauthn.workspace = true
 web-sys = "0.3.69"
 indexmap.workspace = true
+num-traits.workspace = true
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tokio.workspace = true

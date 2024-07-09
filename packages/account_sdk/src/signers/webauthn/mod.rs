@@ -4,7 +4,7 @@ use crate::abigen::controller::{Signer, SignerSignature, WebauthnAssertion, Weba
 use async_trait::async_trait;
 use cainome::cairo_serde::U256;
 use credential::AuthenticatorAssertionResponse;
-use starknet_crypto::FieldElement;
+use starknet::core::types::Felt;
 
 pub mod credential;
 pub mod device;
@@ -31,7 +31,7 @@ impl<T> HashSigner for T
 where
     T: WebauthnAccountSigner + Sync,
 {
-    async fn sign(&self, tx_hash: &FieldElement) -> Result<SignerSignature, SignError> {
+    async fn sign(&self, tx_hash: &Felt) -> Result<SignerSignature, SignError> {
         let mut challenge = tx_hash.to_bytes_be().to_vec();
 
         challenge.push(self.sha256_version().encode());

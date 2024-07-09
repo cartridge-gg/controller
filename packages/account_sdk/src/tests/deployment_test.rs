@@ -1,6 +1,6 @@
 use starknet::{
     accounts::{ConnectedAccount, SingleOwnerAccount},
-    core::types::{DeclareTransactionResult, FieldElement},
+    core::types::{DeclareTransactionResult, Felt},
     macros::felt,
     providers::{jsonrpc::HttpTransport, JsonRpcClient},
     signers::LocalWallet,
@@ -21,7 +21,7 @@ use cainome::cairo_serde::{CairoSerde, ContractAddress, NonZero, U256};
 pub async fn declare(
     client: &JsonRpcClient<HttpTransport>,
     account: &(impl ConnectedAccount + Send + Sync),
-) -> FieldElement {
+) -> Felt {
     let DeclareTransactionResult { class_hash, .. } = AccountDeclaration::cartridge_account(client)
         .declare::<JsonRpcClient<HttpTransport>>(account)
         .await
@@ -37,19 +37,14 @@ pub async fn deploy(
     account: &SingleOwnerAccount<&JsonRpcClient<HttpTransport>, LocalWallet>,
     owner: Signer,
     guardian: Option<Signer>,
-    class_hash: FieldElement,
-) -> FieldElement {
+    class_hash: Felt,
+) -> Felt {
     let mut constructor_calldata = controller::Signer::cairo_serialize(&owner);
     constructor_calldata.extend(Option::<Signer>::cairo_serialize(&guardian));
     let DeployResult {
         deployed_address, ..
     } = AccountDeployment::new(client)
-        .deploy(
-            constructor_calldata,
-            FieldElement::ZERO,
-            account,
-            class_hash,
-        )
+        .deploy(constructor_calldata, Felt::ZERO, account, class_hash)
         .await
         .unwrap()
         .wait_for_completion()
@@ -61,7 +56,7 @@ pub async fn deploy_helper<R: TestnetRunner, S: HashSigner + Clone, G: HashSigne
     runner: &R,
     signer: &S,
     guardian: Option<&G>,
-) -> FieldElement {
+) -> Felt {
     let prefunded = runner.prefunded_single_owner_account().await;
     let class_hash = declare(runner.client(), &prefunded).await;
 
@@ -85,7 +80,7 @@ pub async fn deploy_two_helper<
     runner: &R,
     (signer_1, guardian_1): (&S1, Option<&G1>),
     (signer_2, guardian_2): (&S2, Option<&G2>),
-) -> (FieldElement, FieldElement) {
+) -> (Felt, Felt) {
     let prefunded = runner.prefunded_single_owner_account().await;
     let class_hash = declare(runner.client(), &prefunded).await;
 
@@ -108,7 +103,7 @@ pub async fn deploy_two_helper<
     (account_1, account_2)
 }
 
-pub async fn transfer_helper<R: TestnetRunner>(runner: &R, address: &FieldElement) {
+pub async fn transfer_helper<R: TestnetRunner>(runner: &R, address: &Felt) {
     let prefunded = runner.prefunded_single_owner_account().await;
     let erc20_prefunded = Erc20::new(*FEE_TOKEN_ADDRESS, prefunded);
 
