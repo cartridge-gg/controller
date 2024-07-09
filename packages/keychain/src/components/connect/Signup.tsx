@@ -8,7 +8,7 @@ import {
   useFormikContext,
 } from "formik";
 import { useCallback, useEffect, useState } from "react";
-import { DeployAccountDocument, useAccountQuery } from "generated/graphql";
+import { useAccountQuery } from "generated/graphql";
 import Controller from "utils/controller";
 import { PopupCenter } from "utils/url";
 import { FormValues, SignupProps } from "./types";
@@ -19,8 +19,6 @@ import { useControllerTheme } from "hooks/theme";
 import { useConnection } from "hooks/connection";
 import { useDebounce } from "hooks/debounce";
 import { ErrorAlert } from "components/ErrorAlert";
-import { constants, shortString } from "starknet";
-import { client } from "utils/graphql";
 
 export function Signup({
   prefilledName = "",
@@ -92,14 +90,6 @@ function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
       cacheTime: 10000000,
       refetchInterval: (data) => (!data ? 1000 : undefined),
       onSuccess: async (data) => {
-        // mainnet deployment requires user to self fund account
-        if (chainId !== constants.StarknetChainId.SN_MAIN) {
-          await client.request(DeployAccountDocument, {
-            id: values.username,
-            chainId: `starknet:${shortString.decodeShortString(chainId)}`,
-          });
-        }
-
         const {
           account: {
             credentials: {
