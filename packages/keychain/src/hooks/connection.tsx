@@ -6,6 +6,7 @@ import {
   useEffect,
   PropsWithChildren,
   useCallback,
+  useMemo,
 } from "react";
 import Controller from "utils/controller";
 import {
@@ -14,8 +15,9 @@ import {
   LogoutCtx,
 } from "utils/connection";
 import { isIframe } from "components/connect/utils";
-import { RpcProvider } from "starknet";
-import { Policy, ResponseCodes } from "@cartridge/controller";
+import { RpcProvider, constants } from "starknet";
+import { Policy, Prefund, ResponseCodes } from "@cartridge/controller";
+import { mergeDefaultETHPrefund } from "utils/token";
 
 const ConnectionContext = createContext<ConnectionContextValue>(undefined);
 
@@ -25,7 +27,9 @@ type ConnectionContextValue = {
   origin: string;
   rpcUrl: string;
   chainId: string;
+  chainName: string;
   policies: Policy[];
+  prefunds: Prefund[];
   error: Error;
   setContext: (context: ConnectionCtx) => void;
   setController: (controller: Controller) => void;
@@ -41,7 +45,19 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
   const [chainId, setChainId] = useState<string>();
   const [policies, setPolicies] = useState<Policy[]>([]);
   const [controller, setController] = useState(Controller.fromStore);
+  const [prefunds, setPrefunds] = useState<Prefund[]>([]);
   const [error, setError] = useState<Error>();
+
+  const chainName = useMemo(() => {
+    switch (chainId) {
+      case constants.StarknetChainId.SN_MAIN:
+        return "Mainnet";
+      case constants.StarknetChainId.SN_SEPOLIA:
+        return "Sepolia";
+      default:
+        return chainId;
+    }
+  }, [chainId]);
 
   const parsePolicies = (policiesStr: string | null): Policy[] => {
     if (!policiesStr) return [];
@@ -63,7 +79,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
   }, [context, parent]);
 
   useEffect(() => {
-    if (!isIframe()) {
+    if (isIframe()) {
       const urlParams = new URLSearchParams(window.location.search);
       setOrigin(urlParams.get("origin") || process.env.NEXT_PUBLIC_ORIGIN);
       setRpcUrl(
@@ -71,6 +87,11 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
       );
       setChainId(urlParams.get("chain_id"));
       setPolicies(parsePolicies(urlParams.get("policies")));
+
+      const prefunds: Prefund[] =
+        JSON.parse(decodeURIComponent(urlParams.get("prefunds"))) ?? [];
+      setPrefunds(mergeDefaultETHPrefund(prefunds));
+    } else {
       return;
     }
 
@@ -118,7 +139,9 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
         origin,
         rpcUrl,
         chainId,
+        chainName,
         policies,
+        prefunds,
         error,
         setController,
         setContext,

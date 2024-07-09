@@ -272,7 +272,7 @@ impl CartridgeAccount {
     }
 
     #[wasm_bindgen(js_name = deploySelf)]
-    pub async fn deploy_self(&self) -> Result<JsValue> {
+    pub async fn deploy_self(&self, max_fee: JsValue) -> Result<JsValue> {
         let webauthn_calldata = self.device_signer.signer_pub_data();
         let mut constructor_calldata =
             Vec::<WebauthnSigner>::cairo_serialize(&vec![webauthn_calldata]);
@@ -291,7 +291,8 @@ impl CartridgeAccount {
             starknetutils::cairo_short_string_to_felt(&self.username)?,
             &factory,
         );
-        let res = deployment.send().await?;
+        let res: starknet::core::types::DeployAccountTransactionResult =
+            deployment.max_fee(from_value(max_fee)?).send().await?;
 
         Ok(to_value(&res)?)
     }

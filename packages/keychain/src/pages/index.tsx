@@ -13,7 +13,6 @@ import {
 import { diff } from "utils/controller";
 import { logout } from "utils/connection/logout";
 import { LoginMode } from "components/connect/types";
-
 function Home() {
   const { context, controller, error } = useConnection();
 
@@ -33,6 +32,15 @@ function Home() {
   switch (context.type) {
     case "connect": {
       const ctx = context as ConnectCtx;
+
+      // TODO: support this fund first flow for mainnet
+      // if (
+      //   chainId === constants.StarknetChainId.SN_MAIN &&
+      //   controller.account.status === Status.COUNTERFACTUAL
+      // ) {
+      //   return <Funding />;
+      // }
+
       const session = controller.session(context.origin);
       // if no mismatch with existing policies then return success
       if (session && diff(session.policies, ctx.policies).length === 0) {

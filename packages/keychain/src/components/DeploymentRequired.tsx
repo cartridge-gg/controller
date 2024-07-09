@@ -2,10 +2,11 @@ import { constants } from "starknet";
 import { Container, Footer, Content } from "components/layout";
 import { useCallback, useEffect, useState } from "react";
 import { Status } from "utils/account";
-import { Button, Link, Text } from "@chakra-ui/react";
+import { Button, Link, Text, useInterval } from "@chakra-ui/react";
 import { ExternalIcon, PacmanIcon } from "@cartridge/ui";
 import { useController } from "hooks/controller";
 import { ErrorAlert } from "./ErrorAlert";
+import { Funding } from "./Funding";
 import NextLink from "next/link";
 
 export function DeploymentRequired({
@@ -19,34 +20,8 @@ export function DeploymentRequired({
   const account = controller.account;
   const [status, setStatus] = useState<Status>(account.status);
   const [deployHash, setDeployHash] = useState<string>();
-  const [fundingRequired, setFundingRequired] = useState<boolean>(false);
   const [error, setError] = useState<Error>();
-
-  useEffect(() => {
-    if (account.chainId === constants.StarknetChainId.SN_MAIN) {
-      setFundingRequired(true);
-      return;
-    }
-
-    deployAccount();
-  }, [account]);
-
-  useEffect(() => {
-    const checkStatus = () => {
-      if (account.status === Status.DEPLOYED) {
-        setStatus(Status.DEPLOYED);
-        return true;
-      }
-      setStatus(account.status);
-      return false;
-    };
-
-    const id = setInterval(() => {
-      if (checkStatus()) clearInterval(id);
-    }, 500);
-
-    return () => clearInterval(id);
-  }, [account]);
+  const [fundingRequired, setIsFundingRequired] = useState(false);
 
   const deployAccount = useCallback(async () => {
     try {
@@ -55,18 +30,46 @@ export function DeploymentRequired({
     } catch (e) {
       if (e.message.includes("account already deployed")) {
         account.status = Status.DEPLOYED;
-        setStatus(Status.DEPLOYED);
       } else {
         setError(e);
       }
     }
+  }, [account]);
+
+  useEffect(() => {
+    if (account.status === Status.DEPLOYED) {
+      return;
+    }
+
+    if (account.chainId === constants.StarknetChainId.SN_MAIN) {
+      setIsFundingRequired(true);
+      return;
+    }
+
+    deployAccount();
+  }, [account.chainId, deployAccount, account.status]);
+
+  useInterval(async () => {
+    if (account.status === Status.COUNTERFACTUAL) {
+      if (deployHash) {
+        await account.waitForTransaction(deployHash, { retryInterval: 1000 });
+      }
+
+      await account.sync();
+      setStatus(account.status);
+    }
+  }, 1000);
+
+  const fundingComplete = useCallback(async (deployHash) => {
+    if (deployHash) setDeployHash(deployHash);
+    setIsFundingRequired(false);
   }, []);
+
+  if (fundingRequired) return <Funding onComplete={fundingComplete} />;
 
   if (status === Status.DEPLOYED) {
     return <>{children}</>;
   }
-
-  if (fundingRequired) return <Funding />;
 
   return (
     <Container
@@ -77,7 +80,11 @@ export function DeploymentRequired({
     >
       <Content alignItems="center">
         {status === Status.COUNTERFACTUAL &&
-          account.chainId === constants.StarknetChainId.SN_SEPOLIA && (
+          deployHash &&
+          [
+            constants.StarknetChainId.SN_SEPOLIA,
+            constants.StarknetChainId.SN_MAIN,
+          ].includes(account.chainId as constants.StarknetChainId) && (
             <Link
               href={`https://${
                 account.chainId === constants.StarknetChainId.SN_SEPOLIA
@@ -92,7 +99,6 @@ export function DeploymentRequired({
             </Link>
           )}
       </Content>
-
       <Footer>
         {error && (
           <ErrorAlert
@@ -121,30 +127,8 @@ export function DeploymentRequired({
             }
           />
         )}
-        <Button onClick={onClose}>close</Button>
+        <Button onClick={onClose}>Close</Button>
       </Footer>
     </Container>
   );
 }
-
-// Temporary place holder for funding UI
-const Funding = () => {
-  const { controller } = useController();
-  const account = controller.account;
-
-  return (
-    <Container variant="connect" title="Funding Required for Starknet Mainnet">
-      <Footer>
-        <Button
-          onClick={async () => {
-            const res = await account.cartridge.deploySelf();
-
-            console.log({ res });
-          }}
-        >
-          Deploy
-        </Button>
-      </Footer>
-    </Container>
-  );
-};

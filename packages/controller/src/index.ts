@@ -20,6 +20,7 @@ import {
   ControllerThemePresets,
   ColorMode,
   PaymasterOptions,
+  Prefund,
 } from "./types";
 import { createModal } from "./modal";
 import { defaultPresets } from "./presets";
@@ -48,6 +49,9 @@ class Controller {
     this.setTheme(options?.theme, options?.config?.presets);
     if (options?.colorMode) {
       this.setColorMode(options.colorMode);
+    }
+    if (options?.prefunds?.length) {
+      this.setPrefunds(options.prefunds);
     }
 
     this.initModal();
@@ -87,6 +91,13 @@ class Controller {
     this.url.searchParams.set(
       "theme",
       encodeURIComponent(JSON.stringify(theme)),
+    );
+  }
+
+  private setPrefunds(prefunds: Prefund[]) {
+    this.url.searchParams.set(
+      "prefunds",
+      encodeURIComponent(JSON.stringify(prefunds)),
     );
   }
 

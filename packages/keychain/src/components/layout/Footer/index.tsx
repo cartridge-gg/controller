@@ -45,8 +45,9 @@ export function Footer({
     () => (origin ? new URL(origin).hostname : undefined),
     [origin],
   );
-  const maxH = `${(isIframe() ? window.innerHeight : PORTAL_WINDOW_HEIGHT) - TOP_BAR_HEIGHT
-    }px`;
+  const maxH = `${
+    (isIframe() ? window.innerHeight : PORTAL_WINDOW_HEIGHT) - TOP_BAR_HEIGHT
+  }px`;
   const { footerHeight } = useLayout();
 
   useEffect(() => {

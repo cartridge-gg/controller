@@ -423,10 +423,11 @@ export class CartridgeAccount {
         return takeObject(ret);
     }
     /**
+    * @param {any} max_fee
     * @returns {Promise<any>}
     */
-    deploySelf() {
-        const ret = wasm.cartridgeaccount_deploySelf(this.__wbg_ptr);
+    deploySelf(max_fee) {
+        const ret = wasm.cartridgeaccount_deploySelf(this.__wbg_ptr, addHeapObject(max_fee));
         return takeObject(ret);
     }
     /**
@@ -1001,7 +1002,7 @@ export function __wbindgen_memory() {
     return addHeapObject(ret);
 };
 
-export function __wbindgen_closure_wrapper1625(arg0, arg1, arg2) {
+export function __wbindgen_closure_wrapper1627(arg0, arg1, arg2) {
     const ret = makeMutClosure(arg0, arg1, 501, __wbg_adapter_48);
     return addHeapObject(ret);
 };

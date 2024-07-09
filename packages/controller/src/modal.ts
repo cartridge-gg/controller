@@ -29,6 +29,8 @@ export const createModal = (src: string, onClose?: () => void) => {
   container.appendChild(iframe);
 
   const open = () => {
+    document.body.style.overflow = "hidden";
+
     container.style.visibility = "visible";
     container.style.opacity = "1";
   };
@@ -37,6 +39,8 @@ export const createModal = (src: string, onClose?: () => void) => {
     if (onClose) {
       onClose();
     }
+
+    document.body.style.overflow = "auto";
 
     container.style.visibility = "hidden";
     container.style.opacity = "0";

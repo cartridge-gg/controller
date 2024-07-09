@@ -99,7 +99,7 @@ function Wrapper({
 const LayoutContext = createContext<LayoutContextValue>({
   variant: "default",
   footerHeight: 0,
-  setFooterHeight: () => { },
+  setFooterHeight: () => {},
 });
 
 type LayoutContextValue = {

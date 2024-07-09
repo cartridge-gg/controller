@@ -17,6 +17,7 @@ export const semanticTokens = {
         default: "darkGray.100",
         _light: "blueGray.800",
       },
+      success: "green.400",
       error: "red.400",
     },
     link: {

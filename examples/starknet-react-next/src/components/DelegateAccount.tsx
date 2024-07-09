@@ -28,7 +28,7 @@ export const DelegateAccount = () => {
     } catch (e: any) {
       // controller doesnt support delegateAccount, ignore
     }
-  }, [account, chainId]);
+  }, [account, cartridgeConnector]);
 
   const execute = useCallback(async () => {
     if (!account) {
@@ -46,7 +46,7 @@ export const DelegateAccount = () => {
       ])
       .catch((e) => console.error(e))
       .finally(() => setSubmitted(false));
-  }, [account, chainId, delegateAddressInput]);
+  }, [account, delegateAddressInput]);
 
   useEffect(() => {
     load();

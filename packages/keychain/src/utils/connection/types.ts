@@ -38,7 +38,7 @@ export type ExecuteCtx = {
   origin: string;
   type: "execute";
   transactions: Call | Call[];
-  abis: Abi[];
+  abis?: Abi[];
   transactionsDetail?: InvocationsDetails & {
     chainId?: constants.StarknetChainId;
   };
