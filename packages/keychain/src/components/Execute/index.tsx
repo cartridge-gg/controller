@@ -75,7 +75,7 @@ export function Execute() {
       return;
     }
 
-    if (account.status === Status.DEPLOYED && ctx.transactionsDetail.maxFee) {
+    if (account.status === Status.DEPLOYED && ctx.transactionsDetail?.maxFee) {
       setFees({
         base: BigInt(ctx.transactionsDetail.maxFee),
         max: BigInt(ctx.transactionsDetail.maxFee),
@@ -84,7 +84,11 @@ export function Execute() {
     }
 
     account
-      .estimateInvokeFee(calls, ctx.transactionsDetail)
+      .estimateInvokeFee(
+        calls,
+        ctx.transactionsDetail,
+        controller.session(origin),
+      )
       .then((fees) => {
         setFees({ base: fees.overall_fee, max: fees.suggestedMaxFee });
       })
@@ -111,16 +115,15 @@ export function Execute() {
 
   const onSubmit = useCallback(async () => {
     setLoading(true);
-    const session = controller.session(origin);
-    const response = await account.execute(
+    const { transaction_hash } = await account.execute(
       calls,
       {
         maxFee: fees.max,
       },
-      session,
+      controller.session(origin),
     );
     ctx.resolve({
-      transaction_hash: response.transaction_hash,
+      transaction_hash,
       code: ResponseCodes.SUCCESS,
     });
   }, [account, calls, fees, ctx, origin, controller]);
@@ -134,7 +137,7 @@ export function Execute() {
   if (isInsufficient) {
     return (
       <InsufficientFunds
-        address={controller.account.address}
+        address={controller.address}
         balance={format(ethBalance)}
       />
     );

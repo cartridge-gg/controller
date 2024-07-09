@@ -137,7 +137,6 @@ class Account extends BaseAccount {
     transactionsDetail.nonce =
       transactionsDetail.nonce ?? (await this.getNonce("pending"));
     transactionsDetail.maxFee = num.toHex(transactionsDetail.maxFee);
-    // transactionsDetail.maxFee = num.toHex(1000000000000);
 
     const res = await this.cartridge.execute(
       normalizeCalls(calls),
@@ -161,14 +160,29 @@ class Account extends BaseAccount {
   async estimateInvokeFee(
     calls: AllowArray<Call>,
     details: EstimateFeeDetails = {},
+    session?: Session,
   ): Promise<EstimateFee> {
     if (this.status === Status.COUNTERFACTUAL) {
       throw new Error("Account is not deployed");
     }
 
-    details.blockIdentifier = details.blockIdentifier ?? "pending";
-    details.nonce = details.nonce ?? (await super.getNonce("pending"));
-    return await super.estimateInvokeFee(calls, details);
+    const nonce = details.nonce ?? (await super.getNonce("pending"));
+
+    const { gas_consumed, gas_price, overall_fee } =
+      await this.cartridge.estimateInvokeFee(
+        normalizeCalls(calls),
+        {
+          nonce,
+        },
+        session,
+      );
+
+    return {
+      gas_consumed,
+      gas_price,
+      overall_fee,
+      suggestedMaxFee: (BigInt(overall_fee) * 11n) / 10n, // 10% margin
+    } as EstimateFee;
   }
 
   async verifyMessageHash(
@@ -177,7 +191,7 @@ class Account extends BaseAccount {
   ): Promise<boolean> {
     if (BigInt(signature[0]) === 0n) {
       return ec.starkCurve.verify(
-        // @ts-expect-error TODO(#244): Adapt signature
+        // @ts-expect-error TODO: fix overload type mismatch
         signature,
         BigInt(hash).toString(),
         signature[0],

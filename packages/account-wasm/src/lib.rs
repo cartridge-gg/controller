@@ -42,6 +42,7 @@ use starknet::{
     providers::{jsonrpc::HttpTransport, JsonRpcClient},
 };
 use types::call::JsCall;
+use types::estimate::JsEstimateFeeDetails;
 use types::invocation::JsInvocationsDetails;
 use types::outside_execution::JsOutsideExecution;
 use types::session::{JsCredentials, JsSession};
@@ -145,6 +146,39 @@ impl CartridgeAccount {
         })?)
     }
 
+    #[wasm_bindgen(js_name = estimateInvokeFee)]
+    pub async fn estimate_invoke_fee(
+        &self,
+        calls: Vec<JsValue>,
+        estimate_details: JsValue,
+        session_details: JsValue,
+    ) -> Result<JsValue> {
+        utils::set_panic_hook();
+
+        let calls = calls
+            .into_iter()
+            .map(Call::try_from_js_value)
+            .collect::<Result<Vec<Call>>>()?;
+
+        let details = JsEstimateFeeDetails::try_from(estimate_details)?;
+        let fee_estimate = if let Some(session_details) = from_value(session_details)? {
+            self.session_account(session_details)
+                .await?
+                .execute_v1(calls)
+                .nonce(details.nonce)
+                .estimate_fee()
+                .await?
+        } else {
+            self.account
+                .execute_v1(calls)
+                .nonce(details.nonce)
+                .estimate_fee()
+                .await?
+        };
+
+        Ok(to_value(&fee_estimate)?)
+    }
+
     #[wasm_bindgen(js_name = execute)]
     pub async fn execute(
         &self,
@@ -159,20 +193,20 @@ impl CartridgeAccount {
             .map(Call::try_from_js_value)
             .collect::<Result<Vec<Call>>>()?;
 
-        let transaction_details = JsInvocationsDetails::try_from(transaction_details)?;
+        let details = JsInvocationsDetails::try_from(transaction_details)?;
         let execution = if let Some(session_details) = from_value(session_details)? {
             self.session_account(session_details)
                 .await?
                 .execute_v1(calls)
-                .max_fee(transaction_details.max_fee)
-                .nonce(transaction_details.nonce)
+                .max_fee(details.max_fee)
+                .nonce(details.nonce)
                 .send()
                 .await?
         } else {
             self.account
                 .execute_v1(calls)
-                .max_fee(transaction_details.max_fee)
-                .nonce(transaction_details.nonce)
+                .max_fee(details.max_fee)
+                .nonce(details.nonce)
                 .send()
                 .await?
         };

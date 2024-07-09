@@ -1,6 +1,7 @@
 use wasm_bindgen::{JsError, JsValue};
 
 pub(crate) mod call;
+pub(crate) mod estimate;
 pub(crate) mod invocation;
 pub(crate) mod outside_execution;
 pub(crate) mod policy;

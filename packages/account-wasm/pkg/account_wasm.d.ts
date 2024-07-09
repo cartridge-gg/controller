@@ -35,6 +35,13 @@ export class CartridgeAccount {
   createSession(policies: any[], expires_at: bigint): Promise<any>;
 /**
 * @param {any[]} calls
+* @param {any} estimate_details
+* @param {any} session_details
+* @returns {Promise<any>}
+*/
+  estimateInvokeFee(calls: any[], estimate_details: any, session_details: any): Promise<any>;
+/**
+* @param {any[]} calls
 * @param {any} transaction_details
 * @param {any} session_details
 * @returns {Promise<any>}

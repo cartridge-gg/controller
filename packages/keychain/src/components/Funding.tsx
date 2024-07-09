@@ -26,7 +26,7 @@ import {
   useInjectedConnectors,
   voyager,
 } from "@starknet-react/core";
-import { CallData, cairo } from "starknet";
+import { CallData, cairo, num } from "starknet";
 import {
   AlertIcon,
   CheckIcon,
@@ -142,7 +142,9 @@ function FundingInner({ onComplete }: FundingInnerProps) {
     try {
       setIsDeploying(true);
       const { transaction_hash } =
-        await controller.account.cartridge.deploySelf(ETH_MIN_PREFUND);
+        await controller.account.cartridge.deploySelf(
+          num.toHex(ETH_MIN_PREFUND),
+        );
 
       onComplete(transaction_hash);
     } catch (e) {

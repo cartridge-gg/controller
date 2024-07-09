@@ -6,7 +6,7 @@ use starknet::core::types::Felt;
 use super::policy::JsPolicy;
 
 #[serde_as]
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct JsCredentials {
     #[serde_as(as = "Vec<UfeHex>")]
@@ -15,7 +15,7 @@ pub struct JsCredentials {
     pub private_key: Felt,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct JsSession {
     pub policies: Vec<JsPolicy>,

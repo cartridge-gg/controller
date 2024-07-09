@@ -25,7 +25,7 @@ export function executeFactory({
   return (controller: Controller, origin: string) =>
     async (
       transactions: AllowArray<Call>,
-      abis?: Abi[],
+      abis: Abi[],
       transactionsDetail?: InvocationsDetails,
       sync?: boolean,
       paymaster?: PaymasterOptions,
@@ -78,9 +78,13 @@ export function executeFactory({
         }
 
         if (!transactionsDetail.maxFee) {
-          const estFee = await account.estimateInvokeFee(transactions, {
-            nonce: transactionsDetail.nonce,
-          });
+          const estFee = await account.estimateInvokeFee(
+            transactions,
+            {
+              nonce: transactionsDetail.nonce,
+            },
+            session,
+          );
           transactionsDetail.maxFee = estFee.suggestedMaxFee;
         }
 
