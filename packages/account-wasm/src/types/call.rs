@@ -3,7 +3,7 @@ use serde_with::serde_as;
 use starknet::core::serde::unsigned_field_element::UfeHex;
 use starknet::{
     accounts::Call,
-    core::{types::FieldElement, utils::get_selector_from_name},
+    core::{types::Felt, utils::get_selector_from_name},
 };
 use wasm_bindgen::prelude::*;
 
@@ -14,10 +14,10 @@ use super::TryFromJsValue;
 #[serde(rename_all = "camelCase")]
 pub struct JsCall {
     #[serde_as(as = "UfeHex")]
-    pub contract_address: FieldElement,
+    pub contract_address: Felt,
     pub entrypoint: String,
     #[serde_as(as = "Vec<UfeHex>")]
-    pub calldata: Vec<FieldElement>,
+    pub calldata: Vec<Felt>,
 }
 
 impl TryFrom<JsCall> for Call {

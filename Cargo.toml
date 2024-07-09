@@ -13,12 +13,14 @@ account-wasm = { path = "packages/account-wasm" }
 anyhow = "1"
 async-trait = "0.1"
 base64 = "0.21"
-cainome = { git = "https://github.com/cartridge-gg/cainome", rev = "a84dfe0f" }
+cainome = { git = "https://github.com/cartridge-gg/cainome", rev = "e67d925", features = [
+    "abigen-rs",
+] }
 cairo-lang-starknet = "2.4.0"
 coset = { version = "0.3.4", features = ["std"] }
 ecdsa = "0.16.9"
 futures = "0.3"
-indexmap = "2.2.6"
+indexmap = { version = "2.2.6", features = ["serde"] }
 lazy_static = "1"
 p256 = "0.13"
 primitive-types = { version = "0.12", default-features = false }
@@ -26,13 +28,21 @@ rand_core = { version = "0.6", features = ["getrandom"] }
 serde = "1"
 serde_json = "1"
 sha2 = "0.10"
-starknet = "0.10.0"
-starknet-crypto = "0.6.1"
+starknet = "0.11.0"
+starknet-crypto = "0.7.1"
 thiserror = "1"
 toml = "0.8"
 u256-literal = "1"
 url = "2"
+num-traits = "0.2.19"
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4.42"
 wasm-webauthn = { git = "https://github.com/cartridge-gg/wasm-webauthn", rev = "972693f" }
 tokio = { version = "1", features = ["macros", "time"] }
+
+[patch.crates-io]
+# Remove this patch once the following PR is merged: <https://github.com/xJonathanLEI/starknet-rs/pull/615>
+#
+# To enable std feature on `starknet-types-core`.
+# To re-export the entire `felt` module from `starknet-types-core`.
+starknet-core = { git = "https://github.com/kariy/starknet-rs", branch = "dojo-patch" }

@@ -38,7 +38,7 @@ use starknet::providers::Provider;
 use starknet::signers::SigningKey;
 use starknet::{
     accounts::Call,
-    core::types::FieldElement,
+    core::types::Felt,
     providers::{jsonrpc::HttpTransport, JsonRpcClient},
 };
 use types::call::JsCall;
@@ -98,8 +98,8 @@ impl CartridgeAccount {
         let device_signer = DeviceSigner::new(rp_id, origin, credential_id, cose);
 
         let dummy_guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
-        let address = FieldElement::from_str(&address)?;
-        let chain_id = FieldElement::from_str(&chain_id)?;
+        let address = Felt::from_str(&address)?;
+        let chain_id = Felt::from_str(&chain_id)?;
 
         let account = CartridgeGuardianAccount::new(
             Arc::new(provider),
@@ -163,14 +163,14 @@ impl CartridgeAccount {
         let execution = if let Some(session_details) = from_value(session_details)? {
             self.session_account(session_details)
                 .await?
-                .execute(calls)
+                .execute_v1(calls)
                 .max_fee(transaction_details.max_fee)
                 .nonce(transaction_details.nonce)
                 .send()
                 .await?
         } else {
             self.account
-                .execute(calls)
+                .execute_v1(calls)
                 .max_fee(transaction_details.max_fee)
                 .nonce(transaction_details.nonce)
                 .send()
@@ -242,11 +242,11 @@ impl CartridgeAccount {
         let webauthn_calldata = self.device_signer.signer_pub_data();
         let mut constructor_calldata =
             Vec::<WebauthnSigner>::cairo_serialize(&vec![webauthn_calldata]);
-        constructor_calldata[0] = FieldElement::TWO; // incorrect signer enum from serialization
-        constructor_calldata.push(FieldElement::ONE); // no guardian
+        constructor_calldata[0] = Felt::TWO; // incorrect signer enum from serialization
+        constructor_calldata.push(Felt::ONE); // no guardian
 
         let factory = CartridgeAccountFactory::new(
-            FieldElement::from_str(ACCOUNT_CLASS_HASH)?,
+            Felt::from_str(ACCOUNT_CLASS_HASH)?,
             self.account.chain_id(),
             constructor_calldata,
             self.account.clone(),

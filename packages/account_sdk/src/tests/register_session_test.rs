@@ -14,7 +14,7 @@ use crate::{
 };
 use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{
-    core::types::{BlockId, BlockTag},
+    core::types::{BlockId, BlockTag, Felt},
     macros::{felt, selector},
     providers::Provider,
     signers::SigningKey,
@@ -56,7 +56,7 @@ async fn test_verify_execute_session_registered() {
 
     let tx = controller.register_session(&session.raw());
 
-    let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * 4u32.into();
+    let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * Felt::from(4u128);
     let tx = tx
         .nonce(0u32.into())
         .max_fee(fee_estimate)
