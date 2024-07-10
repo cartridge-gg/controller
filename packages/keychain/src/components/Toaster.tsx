@@ -1,8 +1,6 @@
-import { Flex, UseToastOptions, useToast } from "@chakra-ui/react";
-import { DEFAULT_TOAST_OPTIONS } from "@cartridge/ui";
-import { useCallback } from "react";
+import { Flex } from "@chakra-ui/react";
 
-export function Toaster({ title }: UseToastOptions) {
+export function Toaster({ message }: { message: string }) {
   return (
     <Flex
       bg="solid.primary"
@@ -11,22 +9,7 @@ export function Toaster({ title }: UseToastOptions) {
       justifyContent="center"
       opacity={0.8}
     >
-      {title}
+      {message}
     </Flex>
-  );
-}
-
-export function useCopyAndToast(): (text: string) => void {
-  const toast = useToast({
-    ...DEFAULT_TOAST_OPTIONS,
-    render: Toaster,
-  });
-
-  return useCallback(
-    (text) => {
-      navigator.clipboard.writeText(text);
-      toast();
-    },
-    [toast],
   );
 }
