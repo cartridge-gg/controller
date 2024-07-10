@@ -18,7 +18,9 @@ export function DeploymentRequired({
 }) {
   const { controller } = useController();
   const account = controller.account;
-  const [status, setStatus] = useState<Status>(account.status);
+  const [deploymentStatus, setDeploymentStatus] = useState<Status>(
+    account.status,
+  );
   const [deployHash, setDeployHash] = useState<string>();
   const [error, setError] = useState<Error>();
   const [fundingRequired, setIsFundingRequired] = useState(false);
@@ -50,13 +52,13 @@ export function DeploymentRequired({
   }, [account.chainId, deployAccount, account.status]);
 
   useInterval(async () => {
-    if (account.status === Status.COUNTERFACTUAL) {
+    if (deploymentStatus === Status.COUNTERFACTUAL) {
       if (deployHash) {
         await account.waitForTransaction(deployHash, { retryInterval: 1000 });
       }
 
       await account.sync();
-      setStatus(account.status);
+      setDeploymentStatus(account.status);
     }
   }, 1000);
 
@@ -67,7 +69,7 @@ export function DeploymentRequired({
 
   if (fundingRequired) return <Funding onComplete={fundingComplete} />;
 
-  if (status === Status.DEPLOYED) {
+  if (deploymentStatus === Status.DEPLOYED) {
     return <>{children}</>;
   }
 
