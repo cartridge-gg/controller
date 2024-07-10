@@ -27,17 +27,10 @@ import {
   voyager,
 } from "@starknet-react/core";
 import { CallData, cairo, num } from "starknet";
-import {
-  AlertIcon,
-  CheckIcon,
-  CoinsIcon,
-  CopyIcon,
-  DotsIcon,
-} from "@cartridge/ui";
+import { AlertIcon, CheckIcon, CoinsIcon, DotsIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
-import { useCopyAndToast } from "./Toaster";
+import { useToast } from "hooks/toast";
 import { AlphaWarning } from "./Warning";
-import { formatAddress } from "utils/contracts";
 import {
   ETH_MIN_PREFUND,
   TokenInfo,
@@ -49,6 +42,7 @@ import {
   updateBalance,
 } from "utils/token";
 import { ErrorAlert } from "./ErrorAlert";
+import { CopyAddress } from "./CopyAddress";
 
 enum FundingState {
   CONNECT,
@@ -71,13 +65,13 @@ type FundingInnerProps = {
 function FundingInner({ onComplete }: FundingInnerProps) {
   const { account: extAccount } = useAccount();
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
-  const { controller } = useConnection();
+  const { controller, chainId, chainName } = useConnection();
   const { tokens, isAllFunded, isChecked, isFetching } = useTokens();
   const [error, setError] = useState<Error>();
   const [isSending, setIsSending] = useState(false);
   const [isDeploying, setIsDeploying] = useState(false);
   const [state, setState] = useState<FundingState>(FundingState.CONNECT);
-
+  const { toast } = useToast();
   useEffect(() => {
     if (isAllFunded && isChecked) {
       setState(FundingState.DEPLOY);
@@ -87,7 +81,16 @@ function FundingInner({ onComplete }: FundingInnerProps) {
   const onConnect = useCallback(
     (c: Connector) => {
       connectAsync({ connector: c })
-        .then(() => setState(FundingState.PREFUND))
+        .then(async () => {
+          const connectedChain = await c.chainId();
+          if (num.toHex(connectedChain) !== chainId) {
+            c.disconnect();
+            toast("Please switch chain to: " + chainName);
+            return;
+          }
+
+          setState(FundingState.PREFUND);
+        })
         .catch(() => {
           /* user abort */
         });
@@ -159,22 +162,15 @@ function FundingInner({ onComplete }: FundingInnerProps) {
     }
   }, [controller.account, onComplete]);
 
-  const copyAndToast = useCopyAndToast();
   const onCopy = useCallback(() => {
-    copyAndToast(formatAddress(controller.account.address));
-  }, [copyAndToast, controller.account.address]);
+    navigator.clipboard.writeText(controller.address);
+    toast("Copied");
+  }, [controller.address]);
 
   return (
     <Container
       title={`Fund ${controller.username}`}
-      description={
-        <HStack onClick={onCopy} _hover={{ cursor: "pointer" }}>
-          <Text color="text.secondaryAccent">
-            {formatAddress(controller.account.address, { first: 20, last: 10 })}
-          </Text>
-          <CopyIcon />
-        </HStack>
-      }
+      description={<CopyAddress address={controller.address} />}
       // TODO: Add line icons
       Icon={CoinsIcon}
     >
