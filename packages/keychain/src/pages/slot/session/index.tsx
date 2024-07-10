@@ -1,5 +1,4 @@
 import { Policy, Session } from "@cartridge/controller";
-import { LoadingLogo } from "components";
 import { NextPage } from "next";
 import Controller from "utils/controller";
 import { CreateSession } from "components/connect";
@@ -9,6 +8,7 @@ import { fetchAccount } from "components/connect/utils";
 import { useConnection } from "hooks/connection";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
+import { PageLoading } from "components/Loading";
 
 type SessionQueryParams = Record<string, string> & {
   callback_uri: string;
@@ -145,7 +145,7 @@ const CreateSessionPage: NextPage = () => {
 
   // Show loader if currently fetching account
   if (isFetching) {
-    return <LoadingLogo />;
+    return <PageLoading />;
   }
 
   return <CreateSession onConnect={onConnect} />;

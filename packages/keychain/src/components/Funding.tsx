@@ -95,7 +95,7 @@ function FundingInner({ onComplete }: FundingInnerProps) {
           /* user abort */
         });
     },
-    [connectAsync],
+    [connectAsync, chainId, chainName, toast],
   );
 
   const onPrefund = useCallback(async () => {
@@ -165,7 +165,7 @@ function FundingInner({ onComplete }: FundingInnerProps) {
   const onCopy = useCallback(() => {
     navigator.clipboard.writeText(controller.address);
     toast("Copied");
-  }, [controller.address]);
+  }, [controller.address, toast]);
 
   return (
     <Container

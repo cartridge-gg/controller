@@ -5,6 +5,5 @@ export * from "./CopyText";
 export * from "./Field";
 export * from "./HeaderItem";
 export * from "./icons";
-export * from "./Loading";
 export * from "./menu";
 export * from "./modals";
