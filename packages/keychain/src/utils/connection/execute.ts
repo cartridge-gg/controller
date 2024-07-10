@@ -15,7 +15,7 @@ import {
   InvocationsDetails,
   addAddressPadding,
 } from "starknet";
-import Account, { Status } from "utils/account";
+import Account from "utils/account";
 import { ConnectionCtx, ExecuteCtx } from "./types";
 
 const ESTIMATE_FEE_MULTIPLIER = 1.1;
@@ -49,9 +49,6 @@ export function executeFactory({
 
       try {
         const account = controller.account;
-        if (account.status !== Status.DEPLOYED) {
-          throw new Error("Account is deploying.");
-        }
 
         const session = controller.session(origin);
         if (!session) {
@@ -147,6 +144,8 @@ async function getInvocationDetails(
   nonce = nonce ?? (await account.getNonce("pending"));
 
   if (!maxFee) {
+    await account.ensureDeployed();
+
     const estFee = await account.cartridge.estimateInvokeFee(
       calls,
       session,

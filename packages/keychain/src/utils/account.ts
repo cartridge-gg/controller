@@ -124,15 +124,20 @@ class Account extends BaseAccount {
     }
   }
 
+  async ensureDeployed() {
+    await this.sync();
+    if (this.status !== Status.DEPLOYED) {
+      throw new Error("Account is deploying");
+    }
+  }
+
   // @ts-expect-error TODO: fix overload type mismatch
   async execute(
     calls: AllowArray<Call>,
     transactionsDetail?: InvocationsDetails,
     session?: Session,
   ): Promise<InvokeFunctionResponse> {
-    if (this.status === Status.COUNTERFACTUAL) {
-      throw new Error("Account is not deployed");
-    }
+    this.ensureDeployed();
 
     const res = await this.cartridge.execute(
       normalizeCalls(calls),
@@ -157,9 +162,8 @@ class Account extends BaseAccount {
     calls: AllowArray<Call>,
     details: EstimateFeeDetails = {},
   ): Promise<EstimateFee> {
-    if (this.status === Status.COUNTERFACTUAL) {
-      throw new Error("Account is not deployed");
-    }
+    this.ensureDeployed();
+
     details.blockIdentifier = details.blockIdentifier ?? "pending";
     details.nonce = details.nonce ?? (await super.getNonce("pending"));
 
