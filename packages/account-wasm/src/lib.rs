@@ -42,7 +42,6 @@ use starknet::{
     providers::{jsonrpc::HttpTransport, JsonRpcClient},
 };
 use types::call::JsCall;
-use types::estimate::JsEstimateFeeDetails;
 use types::invocation::JsInvocationsDetails;
 use types::outside_execution::JsOutsideExecution;
 use types::session::{JsCredentials, JsSession};
@@ -150,8 +149,8 @@ impl CartridgeAccount {
     pub async fn estimate_invoke_fee(
         &self,
         calls: Vec<JsValue>,
-        estimate_details: JsValue,
         session_details: JsValue,
+        fee_multiplier: Option<f64>,
     ) -> Result<JsValue> {
         utils::set_panic_hook();
 
@@ -160,18 +159,17 @@ impl CartridgeAccount {
             .map(Call::try_from_js_value)
             .collect::<Result<Vec<Call>>>()?;
 
-        let details = JsEstimateFeeDetails::try_from(estimate_details)?;
         let fee_estimate = if let Some(session_details) = from_value(session_details)? {
             self.session_account(session_details)
                 .await?
                 .execute_v1(calls)
-                .nonce(details.nonce)
+                .fee_estimate_multiplier(fee_multiplier.unwrap_or(1.0))
                 .estimate_fee()
                 .await?
         } else {
             self.account
                 .execute_v1(calls)
-                .nonce(details.nonce)
+                .fee_estimate_multiplier(fee_multiplier.unwrap_or(1.0))
                 .estimate_fee()
                 .await?
         };

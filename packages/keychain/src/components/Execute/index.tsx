@@ -84,11 +84,7 @@ export function Execute() {
     }
 
     account
-      .estimateInvokeFee(
-        calls,
-        ctx.transactionsDetail,
-        controller.session(origin),
-      )
+      .estimateInvokeFee(calls, ctx.transactionsDetail)
       .then((fees) => {
         setFees({ base: fees.overall_fee, max: fees.suggestedMaxFee });
       })

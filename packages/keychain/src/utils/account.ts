@@ -134,10 +134,6 @@ class Account extends BaseAccount {
       throw new Error("Account is not deployed");
     }
 
-    transactionsDetail.nonce =
-      transactionsDetail.nonce ?? (await this.getNonce("pending"));
-    transactionsDetail.maxFee = num.toHex(transactionsDetail.maxFee);
-
     const res = await this.cartridge.execute(
       normalizeCalls(calls),
       transactionsDetail,
@@ -160,29 +156,15 @@ class Account extends BaseAccount {
   async estimateInvokeFee(
     calls: AllowArray<Call>,
     details: EstimateFeeDetails = {},
-    session?: Session,
   ): Promise<EstimateFee> {
     if (this.status === Status.COUNTERFACTUAL) {
       throw new Error("Account is not deployed");
     }
+    details.blockIdentifier = details.blockIdentifier ?? "pending";
+    details.nonce = details.nonce ?? (await super.getNonce("pending"));
 
-    const nonce = details.nonce ?? (await super.getNonce("pending"));
-
-    const { gas_consumed, gas_price, overall_fee } =
-      await this.cartridge.estimateInvokeFee(
-        normalizeCalls(calls),
-        {
-          nonce,
-        },
-        session,
-      );
-
-    return {
-      gas_consumed,
-      gas_price,
-      overall_fee,
-      suggestedMaxFee: (BigInt(overall_fee) * 11n) / 10n, // 10% margin
-    } as EstimateFee;
+    // TODO: use estimateInvokeFee from wasm once it can return full rpc errors
+    return await super.estimateInvokeFee(calls, details);
   }
 
   async verifyMessageHash(

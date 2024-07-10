@@ -4,6 +4,7 @@ import {
   ResponseCodes,
   ConnectError,
   PaymasterOptions,
+  Session,
 } from "@cartridge/controller";
 import Controller, { diff } from "utils/controller";
 import {
@@ -14,8 +15,10 @@ import {
   InvocationsDetails,
   addAddressPadding,
 } from "starknet";
-import { Status } from "utils/account";
+import Account, { Status } from "utils/account";
 import { ConnectionCtx, ExecuteCtx } from "./types";
+
+const ESTIMATE_FEE_MULTIPLIER = 1.1;
 
 export function executeFactory({
   setContext,
@@ -60,47 +63,23 @@ export function executeFactory({
           throw new Error(`Missing policies: ${JSON.stringify(missing)}`);
         }
 
+        const calls = normalizeCalls(transactions);
+
         if (paymaster) {
-          try {
-            const { transaction_hash } =
-              await controller.account.cartridge.executeFromOutside(
-                normalizeCalls(transactions),
-                paymaster.caller,
-                session,
-              );
-            return {
-              code: ResponseCodes.SUCCESS,
-              transaction_hash,
-            };
-          } catch (e) {
-            /* user pays */
-          }
+          const res = await tryPaymaster(account, calls, paymaster, session);
+          if (res) return res;
         }
 
-        if (!transactionsDetail.maxFee) {
-          const estFee = await account.estimateInvokeFee(
-            transactions,
-            {
-              nonce: transactionsDetail.nonce,
-            },
-            session,
-          );
-          transactionsDetail.maxFee = estFee.suggestedMaxFee;
-        }
-
-        if (
-          session.maxFee &&
-          transactionsDetail &&
-          BigInt(transactionsDetail.maxFee) > BigInt(session.maxFee)
-        ) {
-          throw new Error(
-            `Max fee exceeded: ${transactionsDetail.maxFee.toString()} > ${session.maxFee.toString()}`,
-          );
-        }
+        const { nonce, maxFee } = await getInvocationDetails(
+          transactionsDetail,
+          account,
+          calls,
+          session,
+        );
 
         const res = await account.execute(
           transactions,
-          transactionsDetail,
+          { nonce, maxFee },
           session,
         );
 
@@ -135,3 +114,53 @@ export const mapPolicies = (calls: AllowArray<Call>): Policy[] => {
     } as Policy;
   });
 };
+
+async function tryPaymaster(
+  account: Account,
+  calls: Call[],
+  paymaster: PaymasterOptions,
+  session: Session,
+): Promise<ExecuteReply> {
+  try {
+    const { transaction_hash } = await account.cartridge.executeFromOutside(
+      calls,
+      paymaster.caller,
+      session,
+    );
+    return {
+      code: ResponseCodes.SUCCESS,
+      transaction_hash,
+    };
+  } catch (e) {
+    /* user pays */
+  }
+}
+
+async function getInvocationDetails(
+  details: InvocationsDetails,
+  account: Account,
+  calls: Call[],
+  session: Session,
+): Promise<InvocationsDetails> {
+  let { nonce, maxFee } = details;
+
+  nonce = nonce ?? (await account.getNonce("pending"));
+
+  if (!maxFee) {
+    const estFee = await account.cartridge.estimateInvokeFee(
+      calls,
+      session,
+      ESTIMATE_FEE_MULTIPLIER,
+    );
+
+    maxFee = estFee.overall_fee;
+  }
+
+  if (session.maxFee && BigInt(maxFee) > BigInt(session.maxFee)) {
+    throw new Error(
+      `Max fee exceeded: ${maxFee.toString()} > ${session.maxFee.toString()}`,
+    );
+  }
+
+  return { nonce, maxFee };
+}
