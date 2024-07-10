@@ -1,8 +1,9 @@
 import { useRouter } from "next/router";
 import { AuthAction, Authenticate as AuthComponent } from "components/connect";
+import dynamic from "next/dynamic";
 
 // auth page used for externally embedded keychain
-export default function Authenticate() {
+function Authenticate() {
   const router = useRouter();
   const { name, action } = router.query as { name: string; action: string };
 
@@ -20,3 +21,5 @@ export default function Authenticate() {
     />
   );
 }
+
+export default dynamic(() => Promise.resolve(Authenticate), { ssr: false });

@@ -1,7 +1,6 @@
 import { Policy, Session } from "@cartridge/controller";
-import { NextPage } from "next";
 import Controller from "utils/controller";
-import { CreateSession } from "components/connect";
+import { CreateSession as CreateSessionComp } from "components/connect";
 
 import { diff } from "utils/controller";
 import { fetchAccount } from "components/connect/utils";
@@ -9,6 +8,7 @@ import { useConnection } from "hooks/connection";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 import { PageLoading } from "components/Loading";
+import dynamic from "next/dynamic";
 
 type SessionQueryParams = Record<string, string> & {
   callback_uri: string;
@@ -18,7 +18,7 @@ type SessionQueryParams = Record<string, string> & {
 /**
     This page is for creating session with Slot
 */
-const CreateSessionPage: NextPage = () => {
+function CreateSession() {
   const router = useRouter();
   const queries = router.query as SessionQueryParams;
 
@@ -148,10 +148,8 @@ const CreateSessionPage: NextPage = () => {
     return <PageLoading />;
   }
 
-  return <CreateSession onConnect={onConnect} />;
-};
-
-export default CreateSessionPage;
+  return <CreateSessionComp onConnect={onConnect} />;
+}
 
 /**
  * Sanitize the callback url to ensure that it is a valid URL. Returns back the URL.
@@ -169,3 +167,5 @@ function sanitizeCallbackUrl(url: string): URL | undefined {
     console.error(e);
   }
 }
+
+export default dynamic(() => Promise.resolve(CreateSession), { ssr: false });

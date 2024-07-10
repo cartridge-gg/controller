@@ -1,8 +1,9 @@
 import { useRouter } from "next/router";
 import { Signup as SignupComponent } from "components/connect";
 import { useConnection } from "hooks/connection";
+import dynamic from "next/dynamic";
 
-export default function Signup() {
+function Signup() {
   const router = useRouter();
   const { controller, rpcUrl, chainId, error } = useConnection();
 
@@ -27,3 +28,5 @@ export default function Signup() {
     />
   );
 }
+
+export default dynamic(() => Promise.resolve(Signup), { ssr: false });

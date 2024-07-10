@@ -1,7 +1,8 @@
 import { Container } from "components/layout";
 import { SparklesDuoIcon } from "@cartridge/ui";
+import dynamic from "next/dynamic";
 
-export default function Consent() {
+function Success() {
   return (
     <Container
       variant="connect"
@@ -12,3 +13,5 @@ export default function Consent() {
     />
   );
 }
+
+export default dynamic(() => Promise.resolve(Success), { ssr: false });

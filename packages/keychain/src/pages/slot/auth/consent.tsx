@@ -3,8 +3,9 @@ import { Button, Text } from "@chakra-ui/react";
 import { Container, Footer } from "components/layout";
 import { useRouter } from "next/router";
 import { useCallback, useEffect } from "react";
+import dynamic from "next/dynamic";
 
-export default function Consent() {
+function Consent() {
   const router = useRouter();
 
   const onSubmit = useCallback(async () => {
@@ -51,3 +52,5 @@ export default function Consent() {
     </Container>
   );
 }
+
+export default dynamic(() => Promise.resolve(Consent), { ssr: false });
