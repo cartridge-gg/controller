@@ -363,14 +363,14 @@ export class CartridgeAccount {
     }
     /**
     * @param {any[]} calls
-    * @param {any} estimate_details
     * @param {any} session_details
+    * @param {number | undefined} [fee_multiplier]
     * @returns {Promise<any>}
     */
-    estimateInvokeFee(calls, estimate_details, session_details) {
+    estimateInvokeFee(calls, session_details, fee_multiplier) {
         const ptr0 = passArrayJsValueToWasm0(calls, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.cartridgeaccount_estimateInvokeFee(this.__wbg_ptr, ptr0, len0, addHeapObject(estimate_details), addHeapObject(session_details));
+        const ret = wasm.cartridgeaccount_estimateInvokeFee(this.__wbg_ptr, ptr0, len0, addHeapObject(session_details), !isLikeNone(fee_multiplier), isLikeNone(fee_multiplier) ? 0 : fee_multiplier);
         return takeObject(ret);
     }
     /**
@@ -1002,8 +1002,8 @@ export function __wbindgen_memory() {
     return addHeapObject(ret);
 };
 
-export function __wbindgen_closure_wrapper1627(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 501, __wbg_adapter_48);
+export function __wbindgen_closure_wrapper1626(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 500, __wbg_adapter_48);
     return addHeapObject(ret);
 };
 
