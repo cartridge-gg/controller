@@ -1,8 +1,9 @@
 import { useRouter } from "next/router";
 import { Login as LoginComponent } from "components/connect";
 import { useConnection } from "hooks/connection";
+import dynamic from "next/dynamic";
 
-export default function Login() {
+function Login() {
   const router = useRouter();
   const { controller, rpcUrl, chainId, error } = useConnection();
 
@@ -27,3 +28,5 @@ export default function Login() {
     />
   );
 }
+
+export default dynamic(() => Promise.resolve(Login), { ssr: false });

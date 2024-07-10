@@ -13,6 +13,7 @@ import {
 import { diff } from "utils/controller";
 import { logout } from "utils/connection/logout";
 import { LoginMode } from "components/connect/types";
+
 function Home() {
   const { context, controller, error } = useConnection();
 

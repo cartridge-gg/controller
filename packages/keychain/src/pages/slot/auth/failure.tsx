@@ -2,8 +2,9 @@ import { Container } from "components/layout";
 import { AlertIcon, ExternalIcon } from "@cartridge/ui";
 import { Link, Text } from "@chakra-ui/react";
 import NextLink from "next/link";
+import dynamic from "next/dynamic";
 
-export default function Consent() {
+function Failure() {
   return (
     <Container
       variant="connect"
@@ -34,3 +35,5 @@ export default function Consent() {
     />
   );
 }
+
+export default dynamic(() => Promise.resolve(Failure), { ssr: false });
