@@ -174,7 +174,7 @@ function FundingInner({ onComplete }: FundingInnerProps) {
       // TODO: Add line icons
       Icon={CoinsIcon}
     >
-      <Content>
+      <Content gap={6}>
         <HStack w="full">
           <Text color="text.secondary" fontSize="sm">
             Send assets below to your controller address.

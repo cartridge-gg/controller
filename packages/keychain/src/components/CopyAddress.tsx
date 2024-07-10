@@ -17,7 +17,7 @@ export function CopyAddress({ address }: { address: string }) {
       <Text color="text.secondaryAccent">
         {formatAddress(address, { first: 20, last: 10 })}
       </Text>
-      <CopyIcon />
+      <CopyIcon fontSize="md" />
     </HStack>
   );
 }
