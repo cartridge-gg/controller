@@ -47,6 +47,7 @@ use types::outside_execution::JsOutsideExecution;
 use types::session::{JsCredentials, JsSession};
 use url::Url;
 use wasm_bindgen::prelude::*;
+use web_sys::console;
 
 use crate::types::TryFromJsValue;
 
@@ -289,8 +290,13 @@ impl CartridgeAccount {
             starknetutils::cairo_short_string_to_felt(&self.username)?,
             &factory,
         );
-        let res: starknet::core::types::DeployAccountTransactionResult =
-            deployment.max_fee(from_value(max_fee)?).send().await?;
+
+        let prepared = deployment
+            .max_fee(from_value(max_fee)?)
+            .nonce(Felt::ZERO)
+            .prepared()?;
+
+        let res = prepared.send().await?;
 
         Ok(to_value(&res)?)
     }
