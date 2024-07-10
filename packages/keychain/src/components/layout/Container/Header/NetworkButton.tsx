@@ -4,6 +4,10 @@ import { useConnection } from "hooks/connection";
 export function NetworkButton() {
   const { controller, chainName } = useConnection();
 
+  if (!chainName) {
+    return;
+  }
+
   return (
     <HStack bg="translucent.md" borderRadius="md" px={3} py={2}>
       <Circle bg={controller ? "text.success" : "text.error"} size={2} />

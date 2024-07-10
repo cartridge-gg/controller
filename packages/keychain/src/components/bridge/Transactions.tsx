@@ -1,6 +1,13 @@
-import { Circle, HStack, Link, Spacer, Text, VStack } from "@chakra-ui/react";
+import {
+  Circle,
+  HStack,
+  Link,
+  Spacer,
+  Spinner,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
 import { Label } from "./Label";
-import { Loading } from "components/Loading";
 import { useEffect, useState } from "react";
 import { constants } from "starknet";
 import { mainnet, useWaitForTransaction } from "wagmi";
@@ -123,7 +130,7 @@ function Card({
     >
       <Circle bg="solid.secondary" size={12}>
         {state === CardState.PENDING ? (
-          <Loading fill="text.primary" />
+          <Spinner />
         ) : (
           <CheckIcon boxSize={6} color="brand.accent" />
         )}

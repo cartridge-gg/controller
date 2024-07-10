@@ -1,4 +1,4 @@
-import { LoadingLogo } from "components";
+import { PageLoading } from "components/Loading";
 import { CreateController } from "components/connect";
 import { useMeQuery } from "generated/graphql";
 import { useController } from "hooks/controller";
@@ -23,7 +23,7 @@ export default function Auth() {
   }, [user, controller, router]);
 
   if (!isFetched) {
-    return <LoadingLogo />;
+    return <PageLoading />;
   }
 
   return <CreateController isSlot={true} />;

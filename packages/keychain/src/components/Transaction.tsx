@@ -1,9 +1,17 @@
 import { ReactNode, useEffect, useMemo, useState } from "react";
-import { Text, Link, HStack, Circle, Spacer, Divider } from "@chakra-ui/react";
+import {
+  Text,
+  Link,
+  HStack,
+  Circle,
+  Spacer,
+  Divider,
+  Spinner,
+} from "@chakra-ui/react";
 
 import { constants } from "starknet";
 import { StarkscanUrl } from "utils/url";
-import { CheckIcon, ExternalIcon, StarknetIcon, Loading } from "@cartridge/ui";
+import { CheckIcon, ExternalIcon, StarknetIcon } from "@cartridge/ui";
 import { useController } from "hooks/controller";
 import { useChainName } from "hooks/chain";
 
@@ -91,7 +99,7 @@ function getColorIcon(state: TransactionState): {
     case "pending":
       return {
         color: "white",
-        icon: <Loading size="12px" color="white" />,
+        icon: <Spinner size="sm" />,
       };
     case "error":
       return {
