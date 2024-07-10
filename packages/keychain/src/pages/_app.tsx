@@ -4,6 +4,7 @@ import { CartridgeTheme } from "@cartridge/ui";
 import { Inter, IBM_Plex_Mono } from "next/font/google";
 import { useEffect } from "react";
 import { Provider } from "components/Provider";
+import { ErrorBoundary } from "components/ErrorBooundary";
 
 const inter = Inter({ subsets: ["latin"] });
 const ibmPlexMono = IBM_Plex_Mono({
@@ -57,7 +58,9 @@ export default function Keychain({ Component, pageProps }: AppProps) {
       `}</style>
 
       <Provider>
-        <Component {...pageProps} />
+        <ErrorBoundary>
+          <Component {...pageProps} />
+        </ErrorBoundary>
       </Provider>
     </>
   );

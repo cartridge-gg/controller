@@ -108,7 +108,7 @@ type LayoutContextValue = {
   setFooterHeight: (height: number) => void;
 };
 
-type LayoutVariant = "default" | "connect";
+type LayoutVariant = "default" | "connect" | "error";
 
 export function useLayout() {
   return useContext(LayoutContext);
