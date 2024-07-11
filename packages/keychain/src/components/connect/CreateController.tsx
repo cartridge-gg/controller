@@ -12,7 +12,7 @@ export function CreateController({
   loginMode?: LoginMode;
 }) {
   const { error } = useConnection();
-  const [showSignup, setShowSignup] = useState(false);
+  const [showSignup, setShowSignup] = useState(true);
   const [prefilledUsername, setPrefilledUsername] = useState<string>();
 
   if (error) {
