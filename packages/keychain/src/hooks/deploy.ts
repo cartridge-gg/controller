@@ -2,7 +2,7 @@ import {
   DeployAccountDocument,
   DeployAccountMutation,
 } from "generated/graphql";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { constants, num, shortString } from "starknet";
 import { client } from "utils/graphql";
 import { useConnection } from "./connection";
@@ -23,18 +23,18 @@ export const useDeploy = (): DeployInterface => {
   const [isDeployed, setIsDeployed] = useState(false);
   const [isDeploying, setIsDeploying] = useState(false);
 
-  useInterval(
-    async () => {
-      if (!controller) return;
+  const syncStatus = useCallback(async () => {
+    if (!controller) return;
 
-      if ((await controller.account.sync()) === Status.COUNTERFACTUAL) {
-        return;
-      }
+    const status = await controller.account.sync();
+    setIsDeployed(status === Status.DEPLOYED);
+  }, [controller]);
 
-      setIsDeployed(true);
-    },
-    !isDeployed ? 1000 : null,
-  );
+  useEffect(() => {
+    syncStatus();
+  }, [syncStatus]);
+
+  useInterval(syncStatus, !isDeployed ? 1000 : null);
 
   const deployRequest = useCallback(
     async (username: string) => {

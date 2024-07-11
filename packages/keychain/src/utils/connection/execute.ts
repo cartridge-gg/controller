@@ -18,7 +18,7 @@ import {
 import Account from "utils/account";
 import { ConnectionCtx, ExecuteCtx } from "./types";
 
-const ESTIMATE_FEE_MULTIPLIER = 1.1;
+export const ESTIMATE_FEE_MULTIPLIER = 1.1;
 
 export function executeFactory({
   setContext,

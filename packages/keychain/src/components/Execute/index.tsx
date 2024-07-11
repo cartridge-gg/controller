@@ -17,6 +17,7 @@ import { Policies } from "Policies";
 import { Fees } from "./Fees";
 import { ExecuteCtx } from "utils/connection";
 import { TransferAmountExceedsBalance } from "errors";
+import { ESTIMATE_FEE_MULTIPLIER } from "utils/connection/execute";
 
 export const CONTRACT_ETH =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
@@ -111,12 +112,20 @@ export function Execute() {
 
   const onSubmit = useCallback(async () => {
     setLoading(true);
+    const session = controller.session(ctx.origin);
+
+    const { overall_fee } = await account.cartridge.estimateInvokeFee(
+      calls,
+      session,
+      ESTIMATE_FEE_MULTIPLIER,
+    );
+
     const { transaction_hash } = await account.execute(
       calls,
       {
-        maxFee: fees.max,
+        maxFee: overall_fee,
       },
-      controller.session(origin),
+      session,
     );
     ctx.resolve({
       transaction_hash,
