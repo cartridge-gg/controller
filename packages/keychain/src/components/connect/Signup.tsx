@@ -8,7 +8,7 @@ import {
   useFormikContext,
 } from "formik";
 import { useCallback, useEffect, useState } from "react";
-import { DeployAccountDocument, useAccountQuery } from "generated/graphql";
+import { useAccountQuery } from "generated/graphql";
 import Controller from "utils/controller";
 import { PopupCenter } from "utils/url";
 import { FormValues, SignupProps } from "./types";
@@ -19,8 +19,8 @@ import { useControllerTheme } from "hooks/theme";
 import { useConnection } from "hooks/connection";
 import { useDebounce } from "hooks/debounce";
 import { ErrorAlert } from "components/ErrorAlert";
-import { constants, shortString } from "starknet";
-import { client } from "utils/graphql";
+import { useDeploy } from "hooks/deploy";
+import { constants } from "starknet";
 
 export function Signup({
   prefilledName = "",
@@ -54,8 +54,10 @@ export function Signup({
 
 function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
   const { chainId, rpcUrl, setController } = useConnection();
+  const { deployRequest } = useDeploy();
   const { values, errors, setErrors, setTouched } =
     useFormikContext<FormValues>();
+  const [error, setError] = useState<Error>();
   const [isRegistering, setIsRegistering] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const { debouncedValue: username, debouncing } = useDebounce(
@@ -92,42 +94,41 @@ function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
       cacheTime: 10000000,
       refetchInterval: (data) => (!data ? 1000 : undefined),
       onSuccess: async (data) => {
-        // mainnet deployment requires user to self fund account
-        if (chainId !== constants.StarknetChainId.SN_MAIN) {
-          await client.request(DeployAccountDocument, {
-            id: values.username,
-            chainId: `starknet:${shortString.decodeShortString(chainId)}`,
-          });
-        }
+        try {
+          if (chainId !== constants.StarknetChainId.SN_MAIN) {
+            await deployRequest(values.username);
+          }
 
-        const {
-          account: {
-            credentials: {
-              webauthn: [{ id: credentialId, publicKey }],
+          const {
+            account: {
+              credentials: {
+                webauthn: [{ id: credentialId, publicKey }],
+              },
+              contractAddress: address,
             },
-            contractAddress: address,
-          },
-        } = data;
+          } = data;
 
-        const controller = new Controller({
-          chainId,
-          rpcUrl,
-          address,
-          username: values.username,
-          publicKey,
-          credentialId,
-        });
+          const controller = new Controller({
+            chainId,
+            rpcUrl,
+            address,
+            username: values.username,
+            publicKey,
+            credentialId,
+          });
 
-        controller.store();
-        setController(controller);
+          controller.store();
+          setController(controller);
 
-        if (onSuccess) {
-          onSuccess();
+          if (onSuccess) {
+            onSuccess();
+          }
+        } catch (e) {
+          setError(e);
         }
       },
     },
   );
-  const [error, setError] = useState<Error>();
 
   const onSubmit = useCallback(() => {
     setError(undefined);
