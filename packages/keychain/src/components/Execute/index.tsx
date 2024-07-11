@@ -17,7 +17,8 @@ import { Policies } from "Policies";
 import { Fees } from "./Fees";
 import { ExecuteCtx } from "utils/connection";
 import { TransferAmountExceedsBalance } from "errors";
-import { ESTIMATE_FEE_MULTIPLIER } from "utils/connection/execute";
+import { ETH_MIN_PREFUND } from "utils/token";
+import { num } from "starknet";
 
 export const CONTRACT_ETH =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
@@ -112,20 +113,14 @@ export function Execute() {
 
   const onSubmit = useCallback(async () => {
     setLoading(true);
-    const session = controller.session(ctx.origin);
 
-    const { overall_fee } = await account.cartridge.estimateInvokeFee(
-      calls,
-      session,
-      ESTIMATE_FEE_MULTIPLIER,
-    );
-
+    // TODO: calculate webauthn validation cost separately
+    const maxFee = num.toHex(ctx.transactionsDetail?.maxFee || ETH_MIN_PREFUND);
     const { transaction_hash } = await account.execute(
       calls,
       {
-        maxFee: overall_fee,
+        maxFee,
       },
-      session,
     );
     ctx.resolve({
       transaction_hash,
