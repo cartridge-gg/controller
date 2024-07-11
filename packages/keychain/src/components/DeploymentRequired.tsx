@@ -8,6 +8,7 @@ import { ErrorAlert } from "./ErrorAlert";
 import { Funding } from "./Funding";
 import NextLink from "next/link";
 import { useDeploy } from "hooks/deploy";
+import { Status } from "utils/account";
 
 export function DeploymentRequired({
   onClose,
@@ -19,13 +20,13 @@ export function DeploymentRequired({
   const {
     controller: { account },
   } = useController();
-  const { isDeployed, deployRequest } = useDeploy();
+  const { deployRequest } = useDeploy();
   const [deployHash, setDeployHash] = useState<string>();
   const [error, setError] = useState<Error>();
   const [fundingRequired, setIsFundingRequired] = useState(false);
 
   useEffect(() => {
-    if (isDeployed) {
+    if (account.status === Status.DEPLOYED) {
       return;
     }
 
@@ -43,9 +44,9 @@ export function DeploymentRequired({
           setError(e);
         }
       });
-  }, [account.chainId, account.username, isDeployed]);
+  }, [account.chainId, account.username, account.status]);
 
-  if (isDeployed) {
+  if (account.status === Status.DEPLOYED) {
     return <>{children}</>;
   }
 

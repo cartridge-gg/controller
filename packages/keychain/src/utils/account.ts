@@ -117,19 +117,21 @@ class Account extends BaseAccount {
   // @ts-expect-error TODO: fix overload type mismatch
   async execute(
     calls: AllowArray<Call>,
-    transactionsDetail?: InvocationsDetails,
+    details?: InvocationsDetails,
     session?: Session,
   ): Promise<InvokeFunctionResponse> {
     this.ensureDeployed();
 
+    details.nonce = details.nonce ?? (await super.getNonce("pending"));
+
     const res = await this.cartridge.execute(
       normalizeCalls(calls),
-      transactionsDetail,
+      details,
       session,
     );
 
     Storage.update(this.selector, {
-      nonce: num.toHex(BigInt(transactionsDetail.nonce) + 1n),
+      nonce: num.toHex(BigInt(details.nonce) + 1n),
     });
 
     this.rpc
