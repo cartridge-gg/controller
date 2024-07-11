@@ -1,4 +1,5 @@
 mod constants;
+mod errors;
 mod paymaster;
 mod types;
 mod utils;
@@ -26,6 +27,7 @@ use base64::{engine::general_purpose, Engine};
 use cainome::cairo_serde::CairoSerde;
 use constants::ACCOUNT_CLASS_HASH;
 use coset::{CborSerializable, CoseKey};
+use errors::{OperationError, SessionError};
 use factory::cartridge::CartridgeAccountFactory;
 use factory::AccountDeployment;
 use paymaster::PaymasterRequest;
@@ -128,16 +130,21 @@ impl CartridgeAccount {
         let methods = policies
             .into_iter()
             .map(AllowedMethod::try_from_js_value)
-            .collect::<Result<Vec<AllowedMethod>>>()?;
+            .collect::<std::result::Result<Vec<_>, _>>()?;
 
         let signer = SigningKey::from_random();
-        let session = Session::new(methods, expires_at, &signer.signer())?;
+        let session =
+            Session::new(methods, expires_at, &signer.signer()).map_err(SessionError::Creation)?;
 
         let hash = session
             .raw()
             .get_message_hash_rev_1(self.account.chain_id(), self.account.address());
 
-        let authorization = self.account.sign_hash(hash).await?;
+        let authorization = self
+            .account
+            .sign_hash(hash)
+            .await
+            .map_err(SessionError::Signing)?;
 
         Ok(to_value(&JsCredentials {
             authorization,
@@ -157,22 +164,25 @@ impl CartridgeAccount {
         let calls = calls
             .into_iter()
             .map(Call::try_from_js_value)
-            .collect::<Result<Vec<Call>>>()?;
+            .collect::<std::result::Result<Vec<_>, _>>()?;
 
-        let fee_estimate = if let Some(session_details) = from_value(session_details)? {
+        let result = if let Some(session_details) = from_value(session_details)? {
             self.session_account(session_details)
                 .await?
                 .execute_v1(calls)
                 .fee_estimate_multiplier(fee_multiplier.unwrap_or(1.0))
                 .estimate_fee()
-                .await?
+                .await
         } else {
             self.account
                 .execute_v1(calls)
                 .fee_estimate_multiplier(fee_multiplier.unwrap_or(1.0))
                 .estimate_fee()
-                .await?
+                .await
         };
+
+        let fee_estimate =
+            result.map_err(|e| OperationError::FeeEstimation(format!("{:#?}", e)))?;
 
         Ok(to_value(&fee_estimate)?)
     }
@@ -189,25 +199,27 @@ impl CartridgeAccount {
         let calls = calls
             .into_iter()
             .map(Call::try_from_js_value)
-            .collect::<Result<Vec<Call>>>()?;
+            .collect::<std::result::Result<Vec<_>, _>>()?;
 
         let details = JsInvocationsDetails::try_from(transaction_details)?;
-        let execution = if let Some(session_details) = from_value(session_details)? {
+        let result = if let Some(session_details) = from_value(session_details)? {
             self.session_account(session_details)
                 .await?
                 .execute_v1(calls)
                 .max_fee(details.max_fee)
                 .nonce(details.nonce)
                 .send()
-                .await?
+                .await
         } else {
             self.account
                 .execute_v1(calls)
                 .max_fee(details.max_fee)
                 .nonce(details.nonce)
                 .send()
-                .await?
+                .await
         };
+
+        let execution = result.map_err(|e| OperationError::Execution(format!("{:#?}", e)))?;
 
         Ok(to_value(&execution)?)
     }
@@ -228,7 +240,7 @@ impl CartridgeAccount {
             calls: calls
                 .into_iter()
                 .map(JsCall::try_from)
-                .collect::<Result<Vec<JsCall>>>()?,
+                .collect::<std::result::Result<Vec<_>, _>>()?,
             nonce: SigningKey::from_random().secret_scalar(),
         };
 
@@ -265,7 +277,9 @@ impl CartridgeAccount {
         let signature = self
             .account
             .sign_message(serde_json::from_str(&typed_data)?)
-            .await?;
+            .await
+            .map_err(OperationError::SignMessage)?;
+
         Ok(to_value(&signature)?)
     }
 
@@ -289,8 +303,11 @@ impl CartridgeAccount {
             starknetutils::cairo_short_string_to_felt(&self.username)?,
             &factory,
         );
-        let res: starknet::core::types::DeployAccountTransactionResult =
-            deployment.max_fee(from_value(max_fee)?).send().await?;
+        let res = deployment
+            .max_fee(from_value(max_fee)?)
+            .send()
+            .await
+            .map_err(|e| OperationError::Deployment(format!("{:#?}", e)))?;
 
         Ok(to_value(&res)?)
     }
@@ -308,7 +325,9 @@ impl CartridgeAccount {
                 },
                 BlockId::Tag(BlockTag::Pending),
             )
-            .await?;
+            .await
+            .map_err(|e| OperationError::Delegation(e.to_string()))?;
+
         Ok(to_value(&res[0])?)
     }
 
@@ -325,7 +344,8 @@ impl CartridgeAccount {
         let dummy_guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
         let session_signer = SigningKey::from_secret_scalar(details.credentials.private_key);
         let expires_at: u64 = details.expires_at.parse()?;
-        let session = Session::new(methods, expires_at, &session_signer.signer())?;
+        let session = Session::new(methods, expires_at, &session_signer.signer())
+            .map_err(SessionError::Creation)?;
 
         Ok(SessionAccount::new(
             JsonRpcClient::new(HttpTransport::new(self.rpc_url.clone())),

@@ -1,11 +1,10 @@
 use account_sdk::account::session::hash::AllowedMethod;
 use serde::{Deserialize, Serialize};
-use starknet::core::{
-    types::{Felt, FromStrError},
-    utils::get_selector_from_name,
-};
+use starknet::core::{types::Felt, utils::get_selector_from_name};
 use std::str::FromStr;
 use wasm_bindgen::prelude::*;
+
+use crate::errors::EncodingError;
 
 use super::TryFromJsValue;
 
@@ -17,7 +16,7 @@ pub struct JsPolicy {
 }
 
 impl TryFrom<JsValue> for JsPolicy {
-    type Error = JsError;
+    type Error = EncodingError;
 
     fn try_from(value: JsValue) -> Result<Self, Self::Error> {
         Ok(serde_wasm_bindgen::from_value(value)?)
@@ -25,7 +24,7 @@ impl TryFrom<JsValue> for JsPolicy {
 }
 
 impl TryFrom<JsPolicy> for AllowedMethod {
-    type Error = FromStrError;
+    type Error = EncodingError;
 
     fn try_from(value: JsPolicy) -> Result<Self, Self::Error> {
         Ok(AllowedMethod {
@@ -36,7 +35,7 @@ impl TryFrom<JsPolicy> for AllowedMethod {
 }
 
 impl TryFromJsValue<AllowedMethod> for AllowedMethod {
-    fn try_from_js_value(value: JsValue) -> Result<Self, JsError> {
+    fn try_from_js_value(value: JsValue) -> Result<Self, EncodingError> {
         let js_policy: JsPolicy = value.try_into()?;
         let allowed_method: AllowedMethod = js_policy.try_into()?;
         Ok(allowed_method)
