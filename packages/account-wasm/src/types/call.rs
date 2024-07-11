@@ -7,6 +7,8 @@ use starknet::{
 };
 use wasm_bindgen::prelude::*;
 
+use crate::errors::EncodingError;
+
 use super::TryFromJsValue;
 
 #[serde_as]
@@ -21,7 +23,7 @@ pub struct JsCall {
 }
 
 impl TryFrom<JsCall> for Call {
-    type Error = JsError;
+    type Error = EncodingError;
 
     fn try_from(value: JsCall) -> Result<Self, Self::Error> {
         Ok(Call {
@@ -33,7 +35,7 @@ impl TryFrom<JsCall> for Call {
 }
 
 impl TryFrom<JsValue> for JsCall {
-    type Error = JsError;
+    type Error = EncodingError;
 
     fn try_from(value: JsValue) -> Result<Self, Self::Error> {
         Ok(serde_wasm_bindgen::from_value(value)?)
@@ -41,7 +43,7 @@ impl TryFrom<JsValue> for JsCall {
 }
 
 impl TryFromJsValue<Call> for Call {
-    fn try_from_js_value(value: JsValue) -> Result<Self, JsError> {
+    fn try_from_js_value(value: JsValue) -> Result<Self, EncodingError> {
         let js_call: JsCall = value.try_into()?;
         js_call.try_into()
     }

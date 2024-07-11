@@ -6,6 +6,8 @@ use starknet::macros::short_string;
 use starknet::{accounts::Call, core::types::Felt};
 use wasm_bindgen::prelude::*;
 
+use crate::errors::EncodingError;
+
 use super::call::JsCall;
 
 #[serde_as]
@@ -22,7 +24,7 @@ pub struct JsOutsideExecution {
 }
 
 impl TryFrom<JsValue> for JsOutsideExecution {
-    type Error = JsError;
+    type Error = EncodingError;
 
     fn try_from(value: JsValue) -> Result<Self, Self::Error> {
         Ok(serde_wasm_bindgen::from_value(value)?)
@@ -30,7 +32,7 @@ impl TryFrom<JsValue> for JsOutsideExecution {
 }
 
 impl TryFrom<JsOutsideExecution> for OutsideExecution {
-    type Error = JsError;
+    type Error = EncodingError;
 
     fn try_from(value: JsOutsideExecution) -> Result<Self, Self::Error> {
         let caller = if value.caller.eq(&short_string!("ANY_CALLER")) {
