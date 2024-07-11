@@ -43,6 +43,7 @@ import {
 } from "utils/token";
 import { ErrorAlert } from "./ErrorAlert";
 import { CopyAddress } from "./CopyAddress";
+import { useDeploy } from "hooks/deploy";
 
 enum FundingState {
   CONNECT,
@@ -67,9 +68,9 @@ function FundingInner({ onComplete }: FundingInnerProps) {
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
   const { controller, chainId, chainName } = useConnection();
   const { tokens, isAllFunded, isChecked, isFetching } = useTokens();
+  const { deploySelf, isDeploying } = useDeploy();
   const [error, setError] = useState<Error>();
   const [isSending, setIsSending] = useState(false);
-  const [isDeploying, setIsDeploying] = useState(false);
   const [state, setState] = useState<FundingState>(FundingState.CONNECT);
   const { toast } = useToast();
   useEffect(() => {
@@ -143,12 +144,7 @@ function FundingInner({ onComplete }: FundingInnerProps) {
 
   const onDeploy = useCallback(async () => {
     try {
-      setIsDeploying(true);
-      const { transaction_hash } =
-        await controller.account.cartridge.deploySelf(
-          num.toHex(ETH_MIN_PREFUND),
-        );
-
+      const transaction_hash = await deploySelf(ETH_MIN_PREFUND);
       onComplete(transaction_hash);
     } catch (e) {
       if (e.message && e.message.includes("DuplicateTx")) {
@@ -157,10 +153,8 @@ function FundingInner({ onComplete }: FundingInnerProps) {
       }
 
       setError(e);
-    } finally {
-      setIsDeploying(false);
     }
-  }, [controller.account, onComplete]);
+  }, [onComplete]);
 
   const onCopy = useCallback(() => {
     navigator.clipboard.writeText(controller.address);

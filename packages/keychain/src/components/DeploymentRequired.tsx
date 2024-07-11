@@ -1,13 +1,13 @@
 import { constants } from "starknet";
 import { Container, Footer, Content } from "components/layout";
-import { useCallback, useEffect, useState } from "react";
-import { Status } from "utils/account";
-import { Button, Link, Text, useInterval } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
+import { Button, Link, Text } from "@chakra-ui/react";
 import { ExternalIcon, PacmanIcon } from "@cartridge/ui";
 import { useController } from "hooks/controller";
 import { ErrorAlert } from "./ErrorAlert";
 import { Funding } from "./Funding";
 import NextLink from "next/link";
+import { useDeploy } from "hooks/deploy";
 
 export function DeploymentRequired({
   onClose,
@@ -16,30 +16,16 @@ export function DeploymentRequired({
   onClose: () => void;
   children: React.ReactNode;
 }) {
-  const { controller } = useController();
-  const account = controller.account;
-  const [deploymentStatus, setDeploymentStatus] = useState<Status>(
-    account.status,
-  );
+  const {
+    controller: { account },
+  } = useController();
+  const { isDeployed, deployRequest } = useDeploy();
   const [deployHash, setDeployHash] = useState<string>();
   const [error, setError] = useState<Error>();
   const [fundingRequired, setIsFundingRequired] = useState(false);
 
-  const deployAccount = useCallback(async () => {
-    try {
-      const hash = await account.requestDeployment();
-      setDeployHash(hash);
-    } catch (e) {
-      if (e.message.includes("account already deployed")) {
-        account.status = Status.DEPLOYED;
-      } else {
-        setError(e);
-      }
-    }
-  }, [account]);
-
   useEffect(() => {
-    if (account.status === Status.DEPLOYED) {
+    if (isDeployed) {
       return;
     }
 
@@ -48,30 +34,30 @@ export function DeploymentRequired({
       return;
     }
 
-    deployAccount();
-  }, [account.chainId, deployAccount, account.status]);
+    deployRequest(account.username)
+      .then((hash) => {
+        setDeployHash(hash);
+      })
+      .catch((e) => {
+        if (!e.message.includes("account already deployed")) {
+          setError(e);
+        }
+      });
+  }, [account.chainId, account.username, isDeployed]);
 
-  useInterval(async () => {
-    if (deploymentStatus === Status.COUNTERFACTUAL) {
-      if (deployHash) {
-        await account.waitForTransaction(deployHash, { retryInterval: 1000 });
-      }
-
-      await account.sync();
-      setDeploymentStatus(account.status);
-    }
-  }, 1000);
-
-  const fundingComplete = useCallback(async (deployHash) => {
-    if (deployHash) setDeployHash(deployHash);
-    setIsFundingRequired(false);
-  }, []);
-
-  if (fundingRequired) return <Funding onComplete={fundingComplete} />;
-
-  if (deploymentStatus === Status.DEPLOYED) {
+  if (isDeployed) {
     return <>{children}</>;
   }
+
+  if (fundingRequired)
+    return (
+      <Funding
+        onComplete={(hash) => {
+          if (hash) setDeployHash(hash);
+          setIsFundingRequired(false);
+        }}
+      />
+    );
 
   return (
     <Container
@@ -81,8 +67,7 @@ export function DeploymentRequired({
       description="This may take a second"
     >
       <Content alignItems="center">
-        {status === Status.COUNTERFACTUAL &&
-          deployHash &&
+        {deployHash &&
           [
             constants.StarknetChainId.SN_SEPOLIA,
             constants.StarknetChainId.SN_MAIN,

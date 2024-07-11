@@ -11,16 +11,9 @@ import {
   TypedData,
   BigNumberish,
   InvocationsDetails,
-  shortString,
   num,
   AllowArray,
 } from "starknet";
-
-import {
-  DeployAccountDocument,
-  DeployAccountMutation,
-} from "generated/graphql";
-import { client } from "utils/graphql";
 
 import { selectors, VERSION } from "./selectors";
 import Storage from "./storage";
@@ -88,18 +81,6 @@ class Account extends BaseAccount {
     });
   }
 
-  async requestDeployment(): Promise<string> {
-    const hash: DeployAccountMutation = await client.request(
-      DeployAccountDocument,
-      {
-        id: this.username,
-        chainId: `starknet:${shortString.decodeShortString(this.chainId)}`,
-      },
-    );
-
-    return hash.deployAccount;
-  }
-
   async sync() {
     if (this.status != Status.DEPLOYED) {
       try {
@@ -122,6 +103,8 @@ class Account extends BaseAccount {
         }
       }
     }
+
+    return this.status;
   }
 
   async ensureDeployed() {
