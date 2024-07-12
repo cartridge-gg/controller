@@ -40,16 +40,16 @@ export function Login({
         },
       } = await fetchAccount(values.username);
 
-      const controller = new Controller({
-        chainId,
-        rpcUrl,
-        address,
-        username: values.username,
-        publicKey,
-        credentialId,
-      });
-
       try {
+        const controller = new Controller({
+          chainId,
+          rpcUrl,
+          address,
+          username: values.username,
+          publicKey,
+          credentialId,
+        });
+
         switch (mode) {
           case LoginMode.Webauthn:
             await doLogin(values.username, credentialId);

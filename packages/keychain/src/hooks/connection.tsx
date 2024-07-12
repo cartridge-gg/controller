@@ -14,7 +14,6 @@ import {
   ConnectionCtx,
   LogoutCtx,
 } from "utils/connection";
-import { isIframe } from "components/connect/utils";
 import { RpcProvider, constants } from "starknet";
 import { Policy, Prefund, ResponseCodes } from "@cartridge/controller";
 import { mergeDefaultETHPrefund } from "utils/token";
@@ -79,21 +78,14 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
   }, [context, parent]);
 
   useEffect(() => {
-    if (isIframe()) {
-      const urlParams = new URLSearchParams(window.location.search);
-      setOrigin(urlParams.get("origin") || process.env.NEXT_PUBLIC_ORIGIN);
-      setRpcUrl(
-        urlParams.get("rpc_url") || process.env.NEXT_PUBLIC_RPC_SEPOLIA,
-      );
-      setChainId(urlParams.get("chain_id"));
-      setPolicies(parsePolicies(urlParams.get("policies")));
-
-      const prefunds: Prefund[] =
-        JSON.parse(decodeURIComponent(urlParams.get("prefunds"))) ?? [];
-      setPrefunds(mergeDefaultETHPrefund(prefunds));
-    } else {
-      return;
-    }
+    const urlParams = new URLSearchParams(window.location.search);
+    setOrigin(urlParams.get("origin") || process.env.NEXT_PUBLIC_ORIGIN);
+    setRpcUrl(urlParams.get("rpc_url") || process.env.NEXT_PUBLIC_RPC_SEPOLIA);
+    setChainId(urlParams.get("chain_id"));
+    setPolicies(parsePolicies(urlParams.get("policies")));
+    const prefunds: Prefund[] =
+      JSON.parse(decodeURIComponent(urlParams.get("prefunds"))) ?? [];
+    setPrefunds(mergeDefaultETHPrefund(prefunds));
 
     const connection = connectToController({
       setOrigin,
