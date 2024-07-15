@@ -66,7 +66,7 @@ type FundingInnerProps = {
 function FundingInner({ onComplete }: FundingInnerProps) {
   const { account: extAccount } = useAccount();
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
-  const { controller, chainId, chainName } = useConnection();
+  const { controller, chainId, chainName, rpcUrl } = useConnection();
   const { tokens, isAllFunded, isChecked, isFetching } = useTokens();
   const { deploySelf, isDeploying } = useDeploy();
   const [error, setError] = useState<Error>();
@@ -236,7 +236,7 @@ function FundingInner({ onComplete }: FundingInnerProps) {
         {error && (
           <ErrorAlert
             title="Account deployment error"
-            description={error.message}
+            description={`address: ${controller.account.address}, chainId: ${chainId}, rpcUrl: ${rpcUrl}, errorName: ${error.name}, errorMessage: ${error.message}`}
           />
         )}
         <AlphaWarning />
