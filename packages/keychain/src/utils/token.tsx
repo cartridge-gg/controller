@@ -9,7 +9,7 @@ import Controller from "./controller";
 export const ETH_CONTRACT_ADDRESS =
   "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 
-export const ETH_MIN_PREFUND = "100000000000000";
+export const ETH_MIN_PREFUND = "200000000000000";
 
 export function isEther(t: TokenInfo | Prefund) {
   return formatAddress(t.address) === formatAddress(ETH_CONTRACT_ADDRESS);
