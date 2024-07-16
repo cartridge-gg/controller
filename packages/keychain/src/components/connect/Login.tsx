@@ -131,6 +131,7 @@ export function Login({
                     }}
                     autoFocus
                     placeholder="Username"
+                    textTransform="lowercase"
                     touched={meta.touched}
                     error={meta.error}
                     isLoading={props.isValidating}

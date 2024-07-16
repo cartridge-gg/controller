@@ -168,6 +168,7 @@ function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
               {...field}
               autoFocus
               placeholder="Username"
+              textTransform="lowercase"
               touched={meta.touched}
               error={meta.error || errors?.username}
               onChange={(e) => {

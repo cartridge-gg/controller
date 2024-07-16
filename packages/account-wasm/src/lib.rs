@@ -48,9 +48,8 @@ use types::invocation::JsInvocationsDetails;
 use types::outside_execution::JsOutsideExecution;
 use types::session::{JsCredentials, JsSession};
 use url::Url;
-use utils::{policies_match, set_panic_hook, calculate_contract_address};
+use utils::{policies_match, set_panic_hook};
 use wasm_bindgen::prelude::*;
-use web_sys::console;
 
 use crate::types::TryFromJsValue;
 
@@ -62,8 +61,6 @@ pub struct CartridgeAccount {
     device_signer: DeviceSigner,
     username: String,
     rpc_url: Url,
-    rp_id: String,
-    origin: String,
 }
 
 #[wasm_bindgen]
@@ -121,8 +118,6 @@ impl CartridgeAccount {
             device_signer,
             username,
             rpc_url,
-            rp_id,
-            origin,
         })
     }
 
@@ -319,13 +314,6 @@ impl CartridgeAccount {
             Vec::<WebauthnSigner>::cairo_serialize(&vec![webauthn_calldata]);
         constructor_calldata[0] = Felt::TWO; // incorrect signer enum from serialization
         constructor_calldata.push(Felt::ONE); // no guardian
-
-        let address = calculate_contract_address(starknetutils::cairo_short_string_to_felt(&self.username)?, Felt::from_str(ACCOUNT_CLASS_HASH)?, &constructor_calldata);
-        console::log_1(&format!("constructor {:#?}", constructor_calldata).into());
-        console::log_1(&format!("deployment address: {:#x}", address).into());
-        console::log_1(&format!("backend address: {:#x}", self.account.address()).into());
-        console::log_1(&format!("rp_id: {}", self.rp_id).into());
-        console::log_1(&format!("origin: {}", self.origin).into());
 
         let factory = CartridgeAccountFactory::new(
             Felt::from_str(ACCOUNT_CLASS_HASH)?,
