@@ -111,7 +111,7 @@ function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
             chainId,
             rpcUrl,
             address,
-            username: values.username,
+            username: values.username.toLowerCase(),
             publicKey,
             credentialId,
           });
