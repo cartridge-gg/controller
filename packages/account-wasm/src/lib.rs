@@ -34,7 +34,7 @@ use paymaster::PaymasterRequest;
 use serde_wasm_bindgen::{from_value, to_value};
 use starknet::accounts::{Account, ConnectedAccount};
 use starknet::core::types::{BlockId, BlockTag, FunctionCall};
-use starknet::core::utils as starknetutils;
+use starknet::core::utils::cairo_short_string_to_felt;
 use starknet::macros::{selector, short_string};
 use starknet::providers::Provider;
 use starknet::signers::SigningKey;
@@ -104,6 +104,7 @@ impl CartridgeAccount {
         let dummy_guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
         let address = Felt::from_str(&address)?;
         let chain_id = Felt::from_str(&chain_id)?;
+        let username = username.to_lowercase();
 
         let account = CartridgeGuardianAccount::new(
             Arc::new(provider),
@@ -309,24 +310,17 @@ impl CartridgeAccount {
     pub async fn deploy_self(&self, max_fee: JsValue) -> Result<JsValue> {
         set_panic_hook();
 
-        let webauthn_calldata = self.device_signer.signer_pub_data();
-        let mut constructor_calldata =
-            Vec::<WebauthnSigner>::cairo_serialize(&vec![webauthn_calldata]);
-        constructor_calldata[0] = Felt::TWO; // incorrect signer enum from serialization
-        constructor_calldata.push(Felt::ONE); // no guardian
-
         let factory = CartridgeAccountFactory::new(
             Felt::from_str(ACCOUNT_CLASS_HASH)?,
             self.account.chain_id(),
-            constructor_calldata,
+            self.get_constructor_calldata(),
             self.account.clone(),
             self.account.provider(),
         );
 
-        let deployment = AccountDeployment::new(
-            starknetutils::cairo_short_string_to_felt(&self.username)?,
-            &factory,
-        );
+        let salt = cairo_short_string_to_felt(&self.username)?;
+        let deployment = AccountDeployment::new(salt, &factory);
+
         let res = deployment
             .max_fee(from_value(max_fee)?)
             .send()
@@ -397,5 +391,14 @@ impl CartridgeAccount {
         );
 
         Ok(Some(session_account))
+    }
+
+    fn get_constructor_calldata(&self) -> Vec<Felt> {
+        let webauthn = self.device_signer.signer_pub_data();
+        let mut calldata = Vec::<WebauthnSigner>::cairo_serialize(&vec![webauthn]);
+        calldata[0] = Felt::TWO; // incorrect signer enum from serialization
+        calldata.push(Felt::ONE); // no guardian
+
+        calldata
     }
 }
