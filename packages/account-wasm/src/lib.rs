@@ -34,7 +34,7 @@ use paymaster::PaymasterRequest;
 use serde_wasm_bindgen::{from_value, to_value};
 use starknet::accounts::{Account, ConnectedAccount};
 use starknet::core::types::{BlockId, BlockTag, FunctionCall};
-use starknet::core::utils as starknetutils;
+use starknet::core::utils::{self as starknetutils};
 use starknet::macros::{selector, short_string};
 use starknet::providers::Provider;
 use starknet::signers::SigningKey;
@@ -48,8 +48,9 @@ use types::invocation::JsInvocationsDetails;
 use types::outside_execution::JsOutsideExecution;
 use types::session::{JsCredentials, JsSession};
 use url::Url;
-use utils::{policies_match, set_panic_hook};
+use utils::{policies_match, set_panic_hook, calculate_contract_address};
 use wasm_bindgen::prelude::*;
+use web_sys::console;
 
 use crate::types::TryFromJsValue;
 
@@ -61,6 +62,8 @@ pub struct CartridgeAccount {
     device_signer: DeviceSigner,
     username: String,
     rpc_url: Url,
+    rp_id: String,
+    origin: String,
 }
 
 #[wasm_bindgen]
@@ -99,7 +102,7 @@ impl CartridgeAccount {
         let cose_bytes = general_purpose::URL_SAFE_NO_PAD.decode(public_key)?;
         let cose = CoseKey::from_slice(&cose_bytes)?;
 
-        let device_signer = DeviceSigner::new(rp_id, origin, credential_id, cose);
+        let device_signer = DeviceSigner::new(rp_id.clone(), origin.clone(), credential_id, cose);
 
         let dummy_guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
         let address = Felt::from_str(&address)?;
@@ -118,6 +121,8 @@ impl CartridgeAccount {
             device_signer,
             username,
             rpc_url,
+            rp_id,
+            origin,
         })
     }
 
@@ -314,6 +319,13 @@ impl CartridgeAccount {
             Vec::<WebauthnSigner>::cairo_serialize(&vec![webauthn_calldata]);
         constructor_calldata[0] = Felt::TWO; // incorrect signer enum from serialization
         constructor_calldata.push(Felt::ONE); // no guardian
+
+        let address = calculate_contract_address(starknetutils::cairo_short_string_to_felt(&self.username)?, Felt::from_str(ACCOUNT_CLASS_HASH)?, &constructor_calldata);
+        console::log_1(&format!("constructor {:#?}", constructor_calldata).into());
+        console::log_1(&format!("deployment address: {:#x}", address).into());
+        console::log_1(&format!("backend address: {:#x}", self.account.address()).into());
+        console::log_1(&format!("rp_id: {}", self.rp_id).into());
+        console::log_1(&format!("origin: {}", self.origin).into());
 
         let factory = CartridgeAccountFactory::new(
             Felt::from_str(ACCOUNT_CLASS_HASH)?,
