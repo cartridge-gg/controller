@@ -127,6 +127,7 @@ export function Login({
                     {...field}
                     onChange={(e) => {
                       setError(undefined);
+                      e.target.value = e.target.value.toLowerCase();
                       field.onChange(e);
                     }}
                     autoFocus

@@ -173,6 +173,7 @@ function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
               error={meta.error || errors?.username}
               onChange={(e) => {
                 setError(undefined);
+                e.target.value = e.target.value.toLowerCase();
                 field.onChange(e);
               }}
               onClear={() => {
