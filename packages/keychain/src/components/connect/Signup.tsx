@@ -19,8 +19,7 @@ import { useControllerTheme } from "hooks/theme";
 import { useConnection } from "hooks/connection";
 import { useDebounce } from "hooks/debounce";
 import { ErrorAlert } from "components/ErrorAlert";
-import { useDeploy } from "hooks/deploy";
-import { constants } from "starknet";
+//import { useDeploy } from "hooks/deploy";
 
 export function Signup({
   prefilledName = "",
@@ -54,7 +53,7 @@ export function Signup({
 
 function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
   const { chainId, rpcUrl, setController } = useConnection();
-  const { deployRequest } = useDeploy();
+  //const { deployRequest } = useDeploy();
   const { values, errors, setErrors, setTouched } =
     useFormikContext<FormValues>();
   const [error, setError] = useState<Error>();
@@ -95,9 +94,9 @@ function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
       refetchInterval: (data) => (!data ? 1000 : undefined),
       onSuccess: async (data) => {
         try {
-          if (chainId !== constants.StarknetChainId.SN_MAIN) {
-            await deployRequest(values.username);
-          }
+          // if (chainId !== constants.StarknetChainId.SN_MAIN) {
+          //   await deployRequest(values.username);
+          // }
 
           const {
             account: {
@@ -169,6 +168,7 @@ function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
               {...field}
               autoFocus
               placeholder="Username"
+              textTransform="lowercase"
               touched={meta.touched}
               error={meta.error || errors?.username}
               onChange={(e) => {
