@@ -33,14 +33,12 @@ impl<T> HashSigner for T
 where
     T: WebauthnAccountSigner + Sync,
 {
+    // According to https://www.w3.org/TR/webauthn/#clientdatajson-verification
     async fn sign(&self, tx_hash: &Felt) -> Result<SignerSignature, SignError> {
         let mut challenge = tx_hash.to_bytes_be().to_vec();
 
         challenge.push(self.sha256_version().encode());
         let assertion = self.sign(&challenge).await?;
-
-        let (origin_offset, _) =
-            find_value_index_length(&assertion.client_data_json, "origin").unwrap();
 
         let webauthn_signature = WebauthnSignature {
             flags: assertion.authenticator_data.flags,
@@ -48,7 +46,7 @@ where
             sign_count: assertion.authenticator_data.sign_count,
             ec_signature: assertion.signature,
             sha256_implementation: self.sha256_version(),
-            client_data_json_outro: assertion.client_data_json.split_at(origin_offset).1.into(),
+            client_data_json_outro: vec![], //TODO: it can theoretically be non-empty
         };
 
         Ok(SignerSignature::Webauthn((
