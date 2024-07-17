@@ -1,15 +1,15 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::abigen::controller::Signature;
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CliendData {
     #[serde(rename = "type")]
-    type_: String,
-    challenge: String,
-    origin: String,
+    pub(super) type_: String,
+    pub(super) challenge: String,
+    pub(super) origin: String,
     #[serde(rename = "crossOrigin")]
-    cross_origin: bool,
+    pub(super) cross_origin: bool,
 }
 
 impl CliendData {
@@ -35,6 +35,12 @@ pub struct AuthenticatorAssertionResponse {
     pub client_data_json: String,
     pub signature: Signature,
     pub user_handle: Option<Vec<u8>>,
+}
+
+impl AuthenticatorAssertionResponse {
+    pub fn client_data(&self) -> CliendData {
+        serde_json::from_str(&self.client_data_json).unwrap()
+    }
 }
 
 #[derive(Debug, Clone, Serialize)]
