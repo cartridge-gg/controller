@@ -1,5 +1,5 @@
 use starknet::account::Call;
-use controller_auth::signer::SignerSignature;
+use argent::signer::signer_signature::SignerSignature;
 
 
 #[derive(Drop, Serde, Copy, PartialEq)]

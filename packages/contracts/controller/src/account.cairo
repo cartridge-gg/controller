@@ -4,24 +4,13 @@
 use starknet::testing;
 use starknet::secp256r1::Secp256r1Point;
 use starknet::account::Call;
-use controller_auth::signer::{Signer, SignerStorageValue, SignerType, SignerSignature,};
 use starknet::ContractAddress;
+use argent::signer::signer_signature::{Signer, SignerSignature, SignerType};
 
 
 #[starknet::interface]
-trait IAccount<TContractState> {
-    fn __validate__(ref self: TContractState, calls: Array<Call>) -> felt252;
-    fn __execute__(ref self: TContractState, calls: Array<Call>) -> Array<Span<felt252>>;
-    fn is_valid_signature(
-        self: @TContractState, hash: felt252, signature: Array<felt252>
-    ) -> felt252;
-}
-
-#[starknet::interface]
-trait IUserAccount<TContractState> {
-    fn change_owner(ref self: TContractState, signer_signature: SignerSignature);
-    fn get_owner(self: @TContractState) -> felt252;
-    fn get_owner_type(self: @TContractState) -> SignerType;
+trait IAllowedCallerCallback<TState> {
+    fn is_caller_allowed(self: @TState, caller_address: ContractAddress) -> bool;
 }
 
 #[starknet::interface]
@@ -36,10 +25,11 @@ trait ICartridgeAccount<TContractState> {
     ) -> felt252;
 }
 
-
 #[starknet::interface]
-trait IAllowedCallerCallback<TState> {
-    fn is_caller_allowed(self: @TState, caller_address: ContractAddress) -> bool;
+trait IUserAccount<TContractState> {
+    fn change_owner(ref self: TContractState, signer_signature: SignerSignature);
+    fn get_owner(self: @TContractState) -> felt252;
+    fn get_owner_type(self: @TContractState) -> SignerType;
 }
 
 #[starknet::contract(account)]
@@ -51,39 +41,44 @@ mod CartridgeAccount {
     use core::array::ArrayTrait;
     use core::traits::Into;
     use core::result::ResultTrait;
-    use ecdsa::check_ecdsa_signature;
-    use openzeppelin::account::interface;
-    use starknet::{
-        ContractAddress, ClassHash, get_block_timestamp, get_contract_address, VALIDATED,
-        replace_class_syscall, account::Call, SyscallResultTrait, get_tx_info, get_execution_info,
-        get_caller_address, syscalls::storage_read_syscall,
-        storage_access::{
-            storage_address_from_base_and_offset, storage_base_address_from_felt252,
-            storage_write_syscall
+    use argent::account::interface::{IAccount, IArgentAccount, IArgentUserAccount, IDeprecatedArgentAccount, Version};
+    use argent::introspection::src5::src5_component;
+    use argent::outside_execution::{
+        outside_execution::outside_execution_component, interface::{IOutsideExecutionCallback}
+    };
+    use argent::recovery::interface::{LegacyEscape, LegacyEscapeType, EscapeStatus};
+    use argent::signer::{
+        signer_signature::{
+            Signer, SignerStorageValue, SignerType, StarknetSigner, StarknetSignature, SignerTrait, SignerStorageTrait,
+            SignerSignature, SignerSignatureTrait, starknet_signer_from_pubkey
         }
     };
-    use controller_auth::{webauthn::verify};
+    use argent::upgrade::{upgrade::upgrade_component, interface::{IUpgradableCallback, IUpgradableCallbackOld}};
+    use argent::utils::{
+        asserts::{assert_no_self_call, assert_only_self, assert_only_protocol}, calls::execute_multicall,
+        serialization::full_deserialize,
+        transaction_version::{
+            TX_V1, TX_V1_ESTIMATE, TX_V3, TX_V3_ESTIMATE, assert_correct_invoke_version, assert_correct_declare_version,
+            assert_correct_deploy_account_version, DA_MODE_L1, is_estimate_transaction
+        }
+    };
+    use hash::HashStateTrait;
+    use openzeppelin::security::reentrancyguard::ReentrancyGuardComponent;
+    use pedersen::PedersenTrait;
+    use starknet::{
+        ContractAddress, ClassHash, get_block_timestamp, get_contract_address, VALIDATED, replace_class_syscall, get_caller_address,
+        account::Call, SyscallResultTrait, get_tx_info, get_execution_info, syscalls::storage_read_syscall,
+        storage_access::{storage_address_from_base_and_offset, storage_base_address_from_felt252, storage_write_syscall}
+    };
+    use controller::external_owners::external_owners::external_owners_component;
+    use controller::delegate_account::delegate_account::delegate_account_component;
+    use openzeppelin::upgrades::UpgradeableComponent;
+    use openzeppelin::upgrades::interface::IUpgradeable;
     use controller::session::{
         lib::session_component::{InternalImpl, InternalTrait}, lib::session_component,
         interface::{ISessionCallback, SessionToken}
     };
-    use serde::Serde;
-    use controller::signature_type::{SignatureType, SignatureTypeImpl};
-    use controller_auth::signer::{
-        Signer, WebauthnSigner, StarknetSigner, SignerTraitImpl, SignerStorageValue, SignerType,
-        SignerSignature, StarknetSignature, SignerSignatureImpl, SignerStorageValueImpl
-    };
-    use hash::HashStateTrait;
-    use pedersen::PedersenTrait;
-    use controller::account::{IAccount, IUserAccount, ICartridgeAccount, IAllowedCallerCallback};
-    use controller::outside_execution::{
-        outside_execution::outside_execution_component, interface::IOutsideExecutionCallback
-    };
-    use controller::external_owners::external_owners::external_owners_component;
-    use controller::delegate_account::delegate_account::delegate_account_component;
-    use controller::src5::src5_component;
-    use openzeppelin::upgrades::UpgradeableComponent;
-    use openzeppelin::upgrades::interface::IUpgradeable;
+    use controller::account::{ICartridgeAccount, IAllowedCallerCallback, IUserAccount};
 
     const TRANSACTION_VERSION: felt252 = 1;
     // 2**128 + TRANSACTION_VERSION
@@ -128,12 +123,18 @@ mod CartridgeAccount {
     component!(path: UpgradeableComponent, storage: upgradeable, event: UpgradeableEvent);
     impl UpgradeableInternalImpl = UpgradeableComponent::InternalImpl<ContractState>;
 
+    // Reentrancy guard
+    component!(path: ReentrancyGuardComponent, storage: reentrancy_guard, event: ReentrancyGuardEvent);
+    impl ReentrancyGuardInternalImpl = ReentrancyGuardComponent::InternalImpl<ContractState>;
+
    
 
     #[storage]
     struct Storage {
         _owner: felt252,
         _owner_non_stark: LegacyMap<felt252, felt252>,
+        #[substorage(v0)]
+        reentrancy_guard: ReentrancyGuardComponent::Storage,
         #[substorage(v0)]
         session: session_component::Storage,
         #[substorage(v0)]
@@ -154,6 +155,8 @@ mod CartridgeAccount {
         OwnerChanged: OwnerChanged,
         OwnerChangedGuid: OwnerChangedGuid,
         SignerLinked: SignerLinked,
+        #[flat]
+        ReentrancyGuardEvent: ReentrancyGuardComponent::Event,
         #[flat]
         SessionEvent: session_component::Event,
         #[flat]
@@ -262,7 +265,7 @@ mod CartridgeAccount {
             if self.session.is_session(tx_info.signature) {
                 let call = Call {
                     to: get_contract_address(),
-                    selector: controller_auth::DECLARE_SELECTOR,
+                    selector: selector!("__declare_transaction__"),
                     calldata: array![class_hash,].span()
                 };
                 self
@@ -399,13 +402,11 @@ mod CartridgeAccount {
             let old_owner = self.read_owner();
             match old_owner.signer_type {
                 SignerType::Starknet => self._owner.write(0),
-                SignerType::Unimplemented => panic!("Unimplemented signer type"),
                 _ => self._owner_non_stark.write(old_owner.signer_type.into(), 0),
             }
             // write storage
             match owner.signer_type {
                 SignerType::Starknet => self._owner.write(owner.stored_value),
-                SignerType::Unimplemented => panic!("Unimplemented signer type"),
                 _ => self._owner_non_stark.write(owner.signer_type.into(), owner.stored_value),
             }
         }
@@ -415,7 +416,6 @@ mod CartridgeAccount {
                 let signer_type = *preferred_order.pop_front().expect('owner-not-found');
                 let stored_value = match signer_type {
                     SignerType::Starknet => self._owner.read(),
-                    SignerType::Unimplemented => panic!("Unimplemented signer type"),
                     _ => self._owner_non_stark.read(signer_type.into()),
                 };
                 if stored_value != 0 {
@@ -501,7 +501,6 @@ mod CartridgeAccount {
         fn is_valid_owner(self: @ContractState, owner: SignerStorageValue) -> bool {
             match owner.signer_type {
                 SignerType::Starknet => self._owner.read() == owner.stored_value,
-                SignerType::Unimplemented => panic!("Unimplemented signer type"),
                 _ => self._owner_non_stark.read(owner.signer_type.into()) == owner.stored_value,
             }
         }
