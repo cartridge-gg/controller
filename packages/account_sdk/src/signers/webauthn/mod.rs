@@ -1,5 +1,7 @@
 use super::{HashSigner, SignError};
-use crate::abigen::controller::{Sha256Implementation, Signer, SignerSignature, WebauthnSignature, WebauthnSigner};
+use crate::abigen::controller::{
+    Sha256Implementation, Signer, SignerSignature, WebauthnSignature, WebauthnSigner,
+};
 
 use async_trait::async_trait;
 use cainome::cairo_serde::U256;
@@ -58,7 +60,7 @@ where
         Signer::Webauthn(self.signer_pub_data())
     }
 }
-trait Sha256ImplementationEncoder{
+trait Sha256ImplementationEncoder {
     fn encode(&self) -> u8;
 }
 
