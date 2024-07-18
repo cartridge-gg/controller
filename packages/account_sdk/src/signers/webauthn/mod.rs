@@ -38,7 +38,7 @@ where
         let mut challenge = tx_hash.to_bytes_be().to_vec();
 
         challenge.push(self.sha256_version().encode());
-        let assertion = self.sign(&challenge).await?;
+        let assertion = self.sign(&challenge).await?.nomalise_signature();
 
         let webauthn_signature = WebauthnSignature {
             flags: assertion.authenticator_data.flags,
