@@ -85,12 +85,8 @@ class DeviceAccount extends Account {
   async execute(
     calls: Call | Call[],
     abis?: Abi[],
-    transactionsDetail?: InvocationsDetails,
+    transactionsDetail: InvocationsDetails = {},
   ): Promise<InvokeFunctionResponse> {
-    if (!transactionsDetail) {
-      transactionsDetail = {};
-    }
-
     try {
       let res = await this.keychain.execute(
         calls,

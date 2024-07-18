@@ -30,7 +30,12 @@ export function connectToController({
   return connectToParent({
     methods: {
       connect: normalize(
-        connectFactory({ setOrigin, setRpcUrl, setPolicies, setContext }),
+        connectFactory({
+          setOrigin,
+          setRpcUrl,
+          setPolicies,
+          setContext,
+        }),
       ),
       disconnect: normalize(validate(disconnectFactory(setController))),
       execute: normalize(validate(executeFactory({ setContext }))),
