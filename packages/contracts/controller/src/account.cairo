@@ -76,8 +76,8 @@ mod CartridgeAccount {
     use openzeppelin::upgrades::interface::IUpgradeable;
     use controller::session::{
         session::session_component::{InternalImpl, InternalTrait}, session::session_component,
-        interface::{ISessionCallback, SessionToken}
     };
+    use argent::session::interface::{ISessionCallback, SessionToken};
     use controller::account::{ICartridgeAccount, IAllowedCallerCallback, IUserAccount};
 
     const TRANSACTION_VERSION: felt252 = 1;
@@ -249,7 +249,7 @@ mod CartridgeAccount {
         fn is_valid_signature(
             self: @ContractState, hash: felt252, signature: Array<felt252>
         ) -> felt252 {
-            if self.is_valid_span_signature(hash, self.parse_signature_array(signature.span())) {
+            if self.is_valid_span_signature(hash, self.parse_signature_array(signature.span()).span()) {
                 starknet::VALIDATED
             } else {
                 0
@@ -335,13 +335,15 @@ mod CartridgeAccount {
     }
     
     impl SessionCallbackImpl of ISessionCallback<ContractState> {
-        fn session_callback(
+        fn parse_and_verify_authorization(
             self: @ContractState, session_hash: felt252, authorization_signature: Span<felt252>
-        ) -> bool {
-            self
-                .is_valid_span_signature(
-                    session_hash, self.parse_signature_array(authorization_signature)
-                )
+        ) -> Array<SignerSignature> {
+            let parsed_session_authorization = self.parse_signature_array(authorization_signature);
+            assert(
+                self.is_valid_span_signature(session_hash, parsed_session_authorization.span()),
+                'session/invalid-account-sig'
+            );
+            return parsed_session_authorization;
         }
     }
     impl IAllowedCallerCallbackImpl of IAllowedCallerCallback<ContractState> {
@@ -428,7 +430,7 @@ mod CartridgeAccount {
 
         #[must_use]
         fn is_valid_span_signature(
-            self: @ContractState, hash: felt252, signer_signatures: Array<SignerSignature>
+            self: @ContractState, hash: felt252, signer_signatures: Span<SignerSignature>
         ) -> bool {
             assert(signer_signatures.len() <= 2, 'invalid-signature-length');
             self.is_valid_owner_signature(hash, *signer_signatures.at(0))

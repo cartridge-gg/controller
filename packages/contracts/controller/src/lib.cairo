@@ -9,7 +9,6 @@ mod external_owners{
 }
 mod session {
     mod interface;
-    mod hash;
     mod session;
 }
 mod utils;
