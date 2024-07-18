@@ -75,7 +75,7 @@ mod CartridgeAccount {
     use openzeppelin::upgrades::UpgradeableComponent;
     use openzeppelin::upgrades::interface::IUpgradeable;
     use controller::session::{
-        lib::session_component::{InternalImpl, InternalTrait}, lib::session_component,
+        session::session_component::{InternalImpl, InternalTrait}, session::session_component,
         interface::{ISessionCallback, SessionToken}
     };
     use controller::account::{ICartridgeAccount, IAllowedCallerCallback, IUserAccount};

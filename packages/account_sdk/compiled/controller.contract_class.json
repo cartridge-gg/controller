@@ -585,12 +585,12 @@
     "0x1c85cfe38772db9df99e2b01984abc87d868a6ed1abf1013cf120a0f3457fe1",
     "0x218",
     "0x73657373696f6e2f696e76616c69642d6d616769632d76616c7565",
-    "0x3c1563afcc767a737a61be85111f9af94b216dc99c802caf6c311e1b2ce90e6",
+    "0x3704c0942e289165c224fe609de219448b64bedaebbb6a87eb61092f9c0637f",
     "0x800000000000000f00000000000000000000000000000002",
-    "0x1a8e579d40b9717d8bfb42616ed3b5bccf2f10c426ac3c7693855cf35e3e9fc",
+    "0x5e0f15667b5d5d919ed06672b8ba9c6e6ea42592250ea7c237e4d764a1529d",
     "0x21b",
     "0x21c",
-    "0x6774b8a56452ce1e266765977fb895ebe06f1d6c895867f6996969cd94ae84",
+    "0x94982c2f611ebbd2118381202e7afd3eca7ef471e24d096c3d0bc6328c4842",
     "0x21d",
     "0x202573b64c297cd75c0b781e9046c9a93f7608515d0c444b380c6cc5922a669",
     "0x4e447f54f775bf1f953f75677f6ed9ed927e4c408e7dd8bd89c8f60d613e59",
@@ -655,8 +655,8 @@
     "0x73657373696f6e2f65787069726564",
     "0x3808c701a5d13e100ab11b6c02f91f752ecae7e420d21b56c90ec0a475cc7e5",
     "0x73657373696f6e2f616c72656164792d7265766f6b6564",
-    "0x351ca9fa67c73f70144abe1faa9e1facded593581d1e47c1cd4575d396ffd6a",
-    "0x3a161154e46edb121c08e26ddd7108d990ffd1683851dd5efb2961492672af9",
+    "0x24cfa5b21b3e0fa63616db18c95c8e817df811da6a41b2b0e003c9f459ae525",
+    "0x1eabef70076ed90f4e05253793731c9aa9ee3181ad08d197bec92558696b6f4",
     "0x255",
     "0x1c57ca7bde917aa345c50727cfef59186a59fec188aa8bce9a2d4ede0e17c71",
     "0xcb225fab72ba716c11ed91a275ead37678197e582ac11d3b2ef895f8d3d209",
@@ -732,7 +732,7 @@
     "0x293",
     "0x100000000000000000000000000000001",
     "0x56414c4944",
-    "0x14aafc6a65070066a19438d230072901d6aa43293320946534fc570c7c9ae0d",
+    "0x222b6caaaca9c0cb9f1c00b3664ee4c3cdd538fe87ac767bd2ef019f3bfb6c6",
     "0x297",
     "0x73657373696f6e2d746f6b656e",
     "0x756e737570706f727465642d7061796d6173746572",
@@ -777,7 +777,7 @@
     "0x42697477697365",
     "0x2bb",
     "0xb3b10fc2a226159b3950ec3b5d544530a03411bbeab65f01bb5e5d19d427e4",
-    "0x2241838b6545c05bca4211c2ce36c1ec3f0b0da315de66394d9fd26f426c236",
+    "0x2366990e65db45be1e5430050ce9ad31e2224a40ffec5523d6824f7874f8eaa",
     "0x2be",
     "0x104118274e7f2626bb48207a10c5b06aa1c485e34651c9a724f593b24758c1",
     "0x2c0",
@@ -21635,19 +21635,19 @@
       ],
       [
         539,
-        "controller::session::lib::session_component::__member_module_session_states::ComponentMemberState"
+        "controller::session::session::session_component::__member_module_session_states::ComponentMemberState"
       ],
       [
         540,
-        "controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>"
+        "controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>"
       ],
       [
         541,
-        "Tuple<controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>>"
+        "Tuple<controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>>"
       ],
       [
         542,
-        "core::panics::PanicResult::<(controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>)>"
+        "core::panics::PanicResult::<(controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>)>"
       ],
       [
         543,
@@ -21867,11 +21867,11 @@
       ],
       [
         597,
-        "controller::session::lib::session_component::SessionRevoked"
+        "controller::session::session::session_component::SessionRevoked"
       ],
       [
         598,
-        "controller::session::lib::session_component::Event"
+        "controller::session::session::session_component::Event"
       ],
       [
         599,
@@ -22131,11 +22131,11 @@
       ],
       [
         663,
-        "Tuple<controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, felt252>"
+        "Tuple<controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, felt252>"
       ],
       [
         664,
-        "core::panics::PanicResult::<(controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::felt252)>"
+        "core::panics::PanicResult::<(controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::felt252)>"
       ],
       [
         665,
@@ -22287,11 +22287,11 @@
       ],
       [
         702,
-        "Tuple<controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, Unit>"
+        "Tuple<controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, Unit>"
       ],
       [
         703,
-        "core::panics::PanicResult::<(controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, ())>"
+        "core::panics::PanicResult::<(controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, ())>"
       ],
       [
         704,
@@ -22769,11 +22769,11 @@
       ],
       [
         52,
-        "struct_construct<controller::session::lib::session_component::__member_module_session_states::ComponentMemberState>"
+        "struct_construct<controller::session::session::session_component::__member_module_session_states::ComponentMemberState>"
       ],
       [
         53,
-        "struct_construct<controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>>"
+        "struct_construct<controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>>"
       ],
       [
         54,
@@ -23289,7 +23289,7 @@
       ],
       [
         182,
-        "drop<controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>>"
+        "drop<controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>>"
       ],
       [
         183,
@@ -23333,15 +23333,15 @@
       ],
       [
         193,
-        "function_call<user@controller::session::lib::session_component::SessionImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl, controller::account::CartridgeAccount::IAllowedCallerCallbackImpl>::revoke_session>"
+        "function_call<user@controller::session::session::session_component::SessionImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl, controller::account::CartridgeAccount::IAllowedCallerCallbackImpl>::revoke_session>"
       ],
       [
         194,
-        "enum_match<core::panics::PanicResult::<(controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, ())>>"
+        "enum_match<core::panics::PanicResult::<(controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, ())>>"
       ],
       [
         195,
-        "drop<Tuple<controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, Unit>>"
+        "drop<Tuple<controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, Unit>>"
       ],
       [
         196,
@@ -23361,7 +23361,7 @@
       ],
       [
         200,
-        "function_call<user@controller::session::lib::session_component::SessionImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl, controller::account::CartridgeAccount::IAllowedCallerCallbackImpl>::register_session>"
+        "function_call<user@controller::session::session::session_component::SessionImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl, controller::account::CartridgeAccount::IAllowedCallerCallbackImpl>::register_session>"
       ],
       [
         201,
@@ -23369,7 +23369,7 @@
       ],
       [
         202,
-        "function_call<user@controller::session::lib::session_component::SessionImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl, controller::account::CartridgeAccount::IAllowedCallerCallbackImpl>::is_session_revoked>"
+        "function_call<user@controller::session::session::session_component::SessionImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl, controller::account::CartridgeAccount::IAllowedCallerCallbackImpl>::is_session_revoked>"
       ],
       [
         203,
@@ -23713,15 +23713,15 @@
       ],
       [
         288,
-        "function_call<user@controller::session::lib::session_component::InternalImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl>::validate_session_serialized>"
+        "function_call<user@controller::session::session::session_component::InternalImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl>::validate_session_serialized>"
       ],
       [
         289,
-        "enum_match<core::panics::PanicResult::<(controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::felt252)>>"
+        "enum_match<core::panics::PanicResult::<(controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::felt252)>>"
       ],
       [
         290,
-        "struct_deconstruct<Tuple<controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, felt252>>"
+        "struct_deconstruct<Tuple<controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, felt252>>"
       ],
       [
         291,
@@ -23737,7 +23737,7 @@
       ],
       [
         294,
-        "rename<controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>>"
+        "rename<controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>>"
       ],
       [
         295,
@@ -24689,11 +24689,11 @@
       ],
       [
         532,
-        "struct_construct<controller::session::lib::session_component::SessionRevoked>"
+        "struct_construct<controller::session::session::session_component::SessionRevoked>"
       ],
       [
         533,
-        "enum_init<controller::session::lib::session_component::Event, 0>"
+        "enum_init<controller::session::session::session_component::Event, 0>"
       ],
       [
         534,
@@ -24701,19 +24701,19 @@
       ],
       [
         535,
-        "struct_construct<Tuple<controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, Unit>>"
+        "struct_construct<Tuple<controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, Unit>>"
       ],
       [
         536,
-        "enum_init<core::panics::PanicResult::<(controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, ())>, 0>"
+        "enum_init<core::panics::PanicResult::<(controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, ())>, 0>"
       ],
       [
         537,
-        "store_temp<core::panics::PanicResult::<(controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, ())>>"
+        "store_temp<core::panics::PanicResult::<(controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, ())>>"
       ],
       [
         538,
-        "enum_init<core::panics::PanicResult::<(controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, ())>, 1>"
+        "enum_init<core::panics::PanicResult::<(controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, ())>, 1>"
       ],
       [
         539,
@@ -24937,7 +24937,7 @@
       ],
       [
         594,
-        "drop<Tuple<controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, felt252>>"
+        "drop<Tuple<controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, felt252>>"
       ],
       [
         595,
@@ -24957,7 +24957,7 @@
       ],
       [
         599,
-        "drop<controller::session::lib::session_component::__member_module_session_states::ComponentMemberState>"
+        "drop<controller::session::session::session_component::__member_module_session_states::ComponentMemberState>"
       ],
       [
         600,
@@ -25245,15 +25245,15 @@
       ],
       [
         671,
-        "function_call<user@controller::session::lib::session_component::InternalImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl>::validate_signature>"
+        "function_call<user@controller::session::session::session_component::InternalImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl>::validate_signature>"
       ],
       [
         672,
-        "enum_match<core::panics::PanicResult::<(controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>)>>"
+        "enum_match<core::panics::PanicResult::<(controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>)>>"
       ],
       [
         673,
-        "struct_deconstruct<Tuple<controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>>>"
+        "struct_deconstruct<Tuple<controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>>>"
       ],
       [
         674,
@@ -25261,19 +25261,19 @@
       ],
       [
         675,
-        "struct_construct<Tuple<controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, felt252>>"
+        "struct_construct<Tuple<controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, felt252>>"
       ],
       [
         676,
-        "enum_init<core::panics::PanicResult::<(controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::felt252)>, 0>"
+        "enum_init<core::panics::PanicResult::<(controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::felt252)>, 0>"
       ],
       [
         677,
-        "store_temp<core::panics::PanicResult::<(controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::felt252)>>"
+        "store_temp<core::panics::PanicResult::<(controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::felt252)>>"
       ],
       [
         678,
-        "enum_init<core::panics::PanicResult::<(controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::felt252)>, 1>"
+        "enum_init<core::panics::PanicResult::<(controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::felt252)>, 1>"
       ],
       [
         679,
@@ -26073,7 +26073,7 @@
       ],
       [
         878,
-        "enum_match<controller::session::lib::session_component::Event>"
+        "enum_match<controller::session::session::session_component::Event>"
       ],
       [
         879,
@@ -26081,7 +26081,7 @@
       ],
       [
         880,
-        "struct_deconstruct<controller::session::lib::session_component::SessionRevoked>"
+        "struct_deconstruct<controller::session::session::session_component::SessionRevoked>"
       ],
       [
         881,
@@ -26449,15 +26449,15 @@
       ],
       [
         972,
-        "struct_construct<Tuple<controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>>>"
+        "struct_construct<Tuple<controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>>>"
       ],
       [
         973,
-        "enum_init<core::panics::PanicResult::<(controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>)>, 0>"
+        "enum_init<core::panics::PanicResult::<(controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>)>, 0>"
       ],
       [
         974,
-        "store_temp<core::panics::PanicResult::<(controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>)>>"
+        "store_temp<core::panics::PanicResult::<(controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>)>>"
       ],
       [
         975,
@@ -26473,15 +26473,15 @@
       ],
       [
         978,
-        "enum_init<core::panics::PanicResult::<(controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>)>, 1>"
+        "enum_init<core::panics::PanicResult::<(controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>, core::result::Result::<(), core::felt252>)>, 1>"
       ],
       [
         979,
-        "struct_deconstruct<controller::session::lib::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>>"
+        "struct_deconstruct<controller::session::session::session_component::ComponentState::<controller::account::CartridgeAccount::ContractState>>"
       ],
       [
         980,
-        "rename<controller::session::lib::session_component::__member_module_session_states::ComponentMemberState>"
+        "rename<controller::session::session::session_component::__member_module_session_states::ComponentMemberState>"
       ],
       [
         981,
@@ -26493,7 +26493,7 @@
       ],
       [
         983,
-        "function_call<user@controller::session::lib::check_policy[expr35]>"
+        "function_call<user@controller::session::session::check_policy[expr35]>"
       ],
       [
         984,
@@ -29655,15 +29655,15 @@
       ],
       [
         9,
-        "controller::session::lib::session_component::__wrapper__SessionComponent__revoke_session::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl, controller::account::CartridgeAccount::IAllowedCallerCallbackImpl, controller::account::CartridgeAccount::ContractStateDrop, controller::account::CartridgeAccount::ContractStateSessionComponent>"
+        "controller::session::session::session_component::__wrapper__SessionComponent__revoke_session::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl, controller::account::CartridgeAccount::IAllowedCallerCallbackImpl, controller::account::CartridgeAccount::ContractStateDrop, controller::account::CartridgeAccount::ContractStateSessionComponent>"
       ],
       [
         10,
-        "controller::session::lib::session_component::__wrapper__SessionComponent__register_session::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl, controller::account::CartridgeAccount::IAllowedCallerCallbackImpl, controller::account::CartridgeAccount::ContractStateDrop, controller::account::CartridgeAccount::ContractStateSessionComponent>"
+        "controller::session::session::session_component::__wrapper__SessionComponent__register_session::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl, controller::account::CartridgeAccount::IAllowedCallerCallbackImpl, controller::account::CartridgeAccount::ContractStateDrop, controller::account::CartridgeAccount::ContractStateSessionComponent>"
       ],
       [
         11,
-        "controller::session::lib::session_component::__wrapper__SessionComponent__is_session_revoked::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl, controller::account::CartridgeAccount::IAllowedCallerCallbackImpl, controller::account::CartridgeAccount::ContractStateDrop, controller::account::CartridgeAccount::ContractStateSessionComponent>"
+        "controller::session::session::session_component::__wrapper__SessionComponent__is_session_revoked::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl, controller::account::CartridgeAccount::IAllowedCallerCallbackImpl, controller::account::CartridgeAccount::ContractStateDrop, controller::account::CartridgeAccount::ContractStateSessionComponent>"
       ],
       [
         12,
@@ -29771,7 +29771,7 @@
       ],
       [
         38,
-        "controller::session::lib::session_component::SessionImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl, controller::account::CartridgeAccount::IAllowedCallerCallbackImpl>::revoke_session"
+        "controller::session::session::session_component::SessionImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl, controller::account::CartridgeAccount::IAllowedCallerCallbackImpl>::revoke_session"
       ],
       [
         39,
@@ -29779,11 +29779,11 @@
       ],
       [
         40,
-        "controller::session::lib::session_component::SessionImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl, controller::account::CartridgeAccount::IAllowedCallerCallbackImpl>::register_session"
+        "controller::session::session::session_component::SessionImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl, controller::account::CartridgeAccount::IAllowedCallerCallbackImpl>::register_session"
       ],
       [
         41,
-        "controller::session::lib::session_component::SessionImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl, controller::account::CartridgeAccount::IAllowedCallerCallbackImpl>::is_session_revoked"
+        "controller::session::session::session_component::SessionImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl, controller::account::CartridgeAccount::IAllowedCallerCallbackImpl>::is_session_revoked"
       ],
       [
         42,
@@ -29831,7 +29831,7 @@
       ],
       [
         53,
-        "controller::session::lib::session_component::InternalImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl>::validate_session_serialized"
+        "controller::session::session::session_component::InternalImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl>::validate_session_serialized"
       ],
       [
         54,
@@ -29935,7 +29935,7 @@
       ],
       [
         79,
-        "controller::session::lib::session_component::InternalImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl>::validate_signature"
+        "controller::session::session::session_component::InternalImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl>::validate_signature"
       ],
       [
         80,
@@ -30011,7 +30011,7 @@
       ],
       [
         98,
-        "controller::session::lib::check_policy[expr35]"
+        "controller::session::session::check_policy[expr35]"
       ],
       [
         99,
@@ -31183,7 +31183,7 @@
     },
     {
       "type": "event",
-      "name": "controller::session::lib::session_component::SessionRevoked",
+      "name": "controller::session::session::session_component::SessionRevoked",
       "kind": "struct",
       "members": [
         {
@@ -31195,12 +31195,12 @@
     },
     {
       "type": "event",
-      "name": "controller::session::lib::session_component::Event",
+      "name": "controller::session::session::session_component::Event",
       "kind": "enum",
       "variants": [
         {
           "name": "SessionRevoked",
-          "type": "controller::session::lib::session_component::SessionRevoked",
+          "type": "controller::session::session::session_component::SessionRevoked",
           "kind": "nested"
         }
       ]
@@ -31333,7 +31333,7 @@
         },
         {
           "name": "SessionEvent",
-          "type": "controller::session::lib::session_component::Event",
+          "type": "controller::session::session::session_component::Event",
           "kind": "flat"
         },
         {

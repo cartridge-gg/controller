@@ -6,7 +6,7 @@
         "argent::outside_execution::outside_execution::outside_execution_component::Event": "OutsideExecutionEvent",
         "controller::external_owners::external_owners::external_owners_component::Event": "ExternalOwnersEvent",
         "controller::delegate_account::delegate_account::delegate_account_component::Event": "DelegateAccountEvent",
-        "controller::session::lib::session_component::Event": "SessionEvent",
+        "controller::session::session::session_component::Event": "SessionEvent",
         "argent::introspection::src5::src5_component::Event": "Src5ComponentEvent",
         "openzeppelin::token::erc20::erc20::ERC20Component::Event": "ERC20ComponentEvent",
         "openzeppelin::access::ownable::ownable::OwnableComponent::Event": "OwnableComponentEvent",

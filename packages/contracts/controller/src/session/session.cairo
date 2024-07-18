@@ -22,7 +22,7 @@ const SESSION_TOKEN_V1: felt252 = 'session-token';
 #[starknet::component]
 mod session_component {
     use core::result::ResultTrait;
-    use controller::session::lib::check_policy;
+    use controller::session::session::check_policy;
     use starknet::info::{TxInfo, get_tx_info, get_block_timestamp, get_caller_address};
     use starknet::account::Call;
     use controller::session::hash::{get_merkle_leaf, get_message_hash_rev_1, authorization_hash};
@@ -36,7 +36,7 @@ mod session_component {
         ISession, SessionToken, Session, ISessionCallback, SessionState, SessionStateImpl
     };
     use argent::signer::signer_signature::{Signer, SignerSignature, SignerType, SignerSignatureImpl, SignerTraitImpl};
-    use controller::session::lib::SESSION_TOKEN_V1;
+    use controller::session::session::SESSION_TOKEN_V1;
     use core::poseidon::{hades_permutation};
     use controller::account::IAllowedCallerCallback;
     use controller::utils::assert_no_self_call;
