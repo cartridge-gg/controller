@@ -105,14 +105,22 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     if (rpcUrl) {
-      new RpcProvider({ nodeUrl: rpcUrl })
-        .getChainId()
-        .then(setChainId)
-        .catch(() => {
+      const update = async () => {
+        try {
+          let provider = new RpcProvider({ nodeUrl: rpcUrl });
+          let chainId = await provider.getChainId();
+          setChainId(chainId);
+
+          controller?.updateChain(rpcUrl, chainId);
+        } catch (e) {
+          console.error(e);
           setError(new Error("Unable to fetch Chain ID from provided RPC URL"));
-        });
+        }
+      };
+
+      update();
     }
-  }, [rpcUrl]);
+  }, [rpcUrl, controller]);
 
   const logout = useCallback((context: ConnectionCtx) => {
     setContext({

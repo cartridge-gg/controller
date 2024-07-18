@@ -7,8 +7,6 @@ import Storage from "utils/storage";
 import Account from "./account";
 import { selectors, VERSION } from "./selectors";
 import migrations from "./migrations";
-import { AccountInfoDocument } from "generated/graphql";
-import { client } from "./graphql";
 
 type SerializedController = {
   publicKey: string;
@@ -61,24 +59,6 @@ export default class Controller {
         publicKey,
       },
     );
-  }
-
-  async getUser() {
-    const res = await client.request(AccountInfoDocument, {
-      id: this.address,
-    });
-
-    // @ts-expect-error TODO: fix type error
-    const account = res.accounts?.edges?.[0]?.node;
-    if (!account) {
-      throw new Error("User not found");
-    }
-
-    return {
-      address: this.address,
-      name: account.id,
-      profileUri: `https://cartridge.gg/profile/${this.address}`,
-    };
   }
 
   delete() {
@@ -150,6 +130,17 @@ export default class Controller {
       username: this.username,
       publicKey: this.publicKey,
       credentialId: this.credentialId,
+    });
+  }
+
+  updateChain(rpcUrl: string, chainId: string) {
+    this.rpcUrl = rpcUrl;
+    this.chainId = chainId;
+
+    Storage.set(selectors[VERSION].active(), {
+      address: this.address,
+      rpcUrl,
+      chainId,
     });
   }
 

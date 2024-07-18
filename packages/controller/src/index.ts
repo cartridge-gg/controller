@@ -123,21 +123,19 @@ class Controller {
     }
 
     try {
-      const res = await this.keychain.probe();
-      if (res.code !== ResponseCodes.SUCCESS) {
-        return;
-      }
+      const response = (await this.keychain.probe(
+        this.rpc.toString(),
+      )) as ProbeReply;
 
-      const { address } = res as ProbeReply;
       this.account = new DeviceAccount(
         this.rpc.toString(),
-        address,
+        response.address,
         this.keychain,
         this.modal,
         this.paymaster,
       ) as AccountInterface;
     } catch (e) {
-      console.error(e);
+      console.error(new NotReadyToConnect().message);
       return;
     }
 
