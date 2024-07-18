@@ -123,7 +123,7 @@ class Controller {
     }
 
     try {
-      const res = await this.keychain.probe();
+      const res = await this.keychain.probe(this.rpc.toString());
       if (res.code !== ResponseCodes.SUCCESS) {
         return;
       }

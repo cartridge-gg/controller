@@ -57,11 +57,10 @@ export type ExecuteReply = InvokeFunctionResponse & {
 export type ProbeReply = {
   code: ResponseCodes.SUCCESS;
   address: string;
-  policies: Policy[];
 };
 
 export interface Keychain {
-  probe(): Promise<ProbeReply | ConnectError>;
+  probe(rpcUrl?: string): Promise<ProbeReply | ConnectError>;
   connect(
     policies: Policy[],
     rpcUrl: string,
