@@ -46,6 +46,7 @@ impl MessageHashRev1 for RawSession {
 #[derive(Clone, Debug, PartialEq)]
 pub struct RawSessionToken {
     pub(crate) session: RawSession,
+    pub(crate) cache_authorization: bool,
     pub(crate) session_authorization: Vec<Felt>,
     pub(crate) session_signature: SignerSignature,
     pub(crate) guardian_signature: SignerSignature,
@@ -57,6 +58,7 @@ impl CairoSerde for RawSessionToken {
 
     fn cairo_serialized_size(rust: &Self::RustType) -> usize {
         RawSession::cairo_serialized_size(&rust.session)
+            + <bool>::cairo_serialized_size(&rust.cache_authorization)
             + <Vec<Felt>>::cairo_serialized_size(&rust.session_authorization)
             + SignerSignature::cairo_serialized_size(&rust.session_signature)
             + SignerSignature::cairo_serialized_size(&rust.guardian_signature)
@@ -66,6 +68,7 @@ impl CairoSerde for RawSessionToken {
     fn cairo_serialize(rust: &Self::RustType) -> Vec<Felt> {
         [
             RawSession::cairo_serialize(&rust.session),
+            <bool>::cairo_serialize(&rust.cache_authorization),
             <Vec<Felt>>::cairo_serialize(&rust.session_authorization),
             SignerSignature::cairo_serialize(&rust.session_signature),
             SignerSignature::cairo_serialize(&rust.guardian_signature),
@@ -80,6 +83,8 @@ impl CairoSerde for RawSessionToken {
     ) -> cainome::cairo_serde::Result<Self::RustType> {
         let session = RawSession::cairo_deserialize(felts, offset)?;
         offset += RawSession::cairo_serialized_size(&session);
+        let cache_authorization = <bool>::cairo_deserialize(felts, offset)?;
+        offset += <bool>::cairo_serialized_size(&cache_authorization);
         let session_authorization = <Vec<Felt>>::cairo_deserialize(felts, offset)?;
         offset += <Vec<Felt>>::cairo_serialized_size(&session_authorization);
         let session_signature = SignerSignature::cairo_deserialize(felts, offset)?;
@@ -90,6 +95,7 @@ impl CairoSerde for RawSessionToken {
 
         Ok(Self {
             session,
+            cache_authorization,
             session_authorization,
             session_signature,
             guardian_signature,
