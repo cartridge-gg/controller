@@ -30,6 +30,8 @@ trait IUserAccount<TContractState> {
     fn change_owner(ref self: TContractState, signer_signature: SignerSignature);
     fn get_owner(self: @TContractState) -> felt252;
     fn get_owner_type(self: @TContractState) -> SignerType;
+    fn get_owner_guid(self: @TContractState) -> felt252;
+    fn get_guardian_guid(self: @TContractState) -> Option<felt252>;
 }
 
 #[starknet::contract(account)]
@@ -331,6 +333,12 @@ mod CartridgeAccount {
             } else {
                 SignerType::Webauthn
             }
+        }
+        fn get_owner_guid(self: @ContractState) -> felt252{
+            self.read_owner().into_guid()
+        }
+        fn get_guardian_guid(self: @ContractState) -> Option<felt252>{
+            Option::None
         }
     }
     
