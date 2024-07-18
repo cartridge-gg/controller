@@ -87,6 +87,7 @@ where
 
         Ok(RawSessionToken {
             session: self.session.raw(),
+            cache_authorization: true,
             session_authorization: self.session_authorization.clone(),
             session_signature: self.signer.sign(&hash).await?,
             guardian_signature: self.guardian.sign(&hash).await?,

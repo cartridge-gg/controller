@@ -11,9 +11,8 @@ use starknet::contract_address::ContractAddress;
 use alexandria_merkle_tree::merkle_tree::{
     Hasher, MerkleTree, poseidon::PoseidonHasherImpl, MerkleTreeTrait
 };
-
+use argent::session::session_hash::MerkleLeafHash;
 use core::ecdsa::check_ecdsa_signature;
-use controller::session::hash::get_merkle_leaf;
 
 
 const SESSION_TOKEN_V1: felt252 = 'session-token';
@@ -22,10 +21,9 @@ const SESSION_TOKEN_V1: felt252 = 'session-token';
 #[starknet::component]
 mod session_component {
     use core::result::ResultTrait;
-    use controller::session::lib::check_policy;
+    use controller::session::session::check_policy;
     use starknet::info::{TxInfo, get_tx_info, get_block_timestamp, get_caller_address};
     use starknet::account::Call;
-    use controller::session::hash::{get_merkle_leaf, get_message_hash_rev_1, authorization_hash};
     use core::ecdsa::check_ecdsa_signature;
     use alexandria_merkle_tree::merkle_tree::{
         Hasher, MerkleTree, poseidon::PoseidonHasherImpl, MerkleTreeTrait
@@ -33,14 +31,15 @@ mod session_component {
     use starknet::contract_address::ContractAddress;
     use starknet::get_contract_address;
     use controller::session::interface::{
-        ISession, SessionToken, Session, ISessionCallback, SessionState, SessionStateImpl
+        ISession, SessionState, SessionStateImpl
     };
+    use argent::session::interface::{Session, ISessionCallback, SessionToken};
+    use argent::session::session_hash::{StructHashSession, OffChainMessageHashSessionRev1};
     use argent::signer::signer_signature::{Signer, SignerSignature, SignerType, SignerSignatureImpl, SignerTraitImpl};
-    use argent::utils::
-        asserts::assert_no_self_call;
-    use controller::session::lib::SESSION_TOKEN_V1;
-    use core::poseidon::{hades_permutation};
+    use controller::session::session::SESSION_TOKEN_V1;
+    use core::poseidon::{hades_permutation, poseidon_hash_span};
     use controller::account::IAllowedCallerCallback;
+    use controller::utils::assert_no_self_call;
 
     #[storage]
     struct Storage {
@@ -87,12 +86,12 @@ mod session_component {
             let now = get_block_timestamp();
             assert(session.expires_at > now, 'session/expired');
             // check validity of token
-            let session_hash = get_message_hash_rev_1(@session);
+            let session_hash = session.get_message_hash_rev_1();
 
             match self.session_state(session_hash) {
                 SessionState::Revoked => { assert(false, 'session/already-revoked'); },
                 SessionState::NotRegistered => {
-                    let authorization_hash = authorization_hash(array![].span());
+                    let authorization_hash = poseidon_hash_span(array![].span());
                     self
                         .session_states
                         .write(
@@ -124,7 +123,7 @@ mod session_component {
             assert_no_self_call(calls, get_contract_address());
             let mut signature = signature.slice(1, signature.len() - 1);
             let signature: SessionToken = Serde::<SessionToken>::deserialize(ref signature)
-                .unwrap();
+                .expect('session/deserialize-error');
 
             match self.validate_signature(signature, calls, transaction_hash) {
                 Result::Ok(_) => { starknet::VALIDATED },
@@ -156,25 +155,24 @@ mod session_component {
             }
 
             // check validity of token
-            let session_hash = get_message_hash_rev_1(@signature.session);
+            let session_hash = signature.session.get_message_hash_rev_1();
 
             match self.session_state(session_hash) {
                 SessionState::Revoked => { return Result::Err(Errors::SESSION_REVOKED); },
                 SessionState::NotRegistered => {
-                    assert(
-                        state.session_callback(session_hash, signature.session_authorization),
-                        'session/invalid-account-sig'
-                    );
-                    let authorization_hash = authorization_hash(signature.session_authorization);
-                    self
+                    state.parse_and_verify_authorization(session_hash, signature.session_authorization);
+                    let authorization_hash = poseidon_hash_span(signature.session_authorization);
+                    if signature.cache_authorization {
+                        self
                         .session_states
                         .write(
                             session_hash, SessionState::Validated(authorization_hash).into_felt()
                         );
+                    }
                 },
                 SessionState::Validated(authorization_hash) => {
                     assert(
-                        authorization_hash == authorization_hash(signature.session_authorization),
+                        authorization_hash == poseidon_hash_span(signature.session_authorization),
                         'session/account-sig-mismatch'
                     );
                 },
@@ -216,7 +214,7 @@ fn check_policy(
         if i >= call_array.len() {
             break Result::Ok(());
         }
-        let leaf = get_merkle_leaf(call_array.at(i));
+        let leaf = call_array.at(i).get_merkle_leaf();
         let mut merkle: MerkleTree<Hasher> = MerkleTreeTrait::new();
 
         if merkle.verify(root, leaf, *proofs.at(i)) == false {
