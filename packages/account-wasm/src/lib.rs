@@ -13,7 +13,7 @@ mod tests;
 use std::str::FromStr;
 use std::sync::Arc;
 
-use account_sdk::abigen::controller::WebauthnSigner;
+use account_sdk::abigen::controller::Signer;
 use account_sdk::account::outside_execution::OutsideExecutionAccount;
 use account_sdk::account::session::hash::{AllowedMethod, Session};
 use account_sdk::account::session::SessionAccount;
@@ -395,8 +395,7 @@ impl CartridgeAccount {
 
     fn get_constructor_calldata(&self) -> Vec<Felt> {
         let webauthn = self.device_signer.signer_pub_data();
-        let mut calldata = Vec::<WebauthnSigner>::cairo_serialize(&vec![webauthn]);
-        calldata[0] = Felt::TWO; // incorrect signer enum from serialization
+        let mut calldata = Signer::cairo_serialize(&Signer::Webauthn(webauthn));
         calldata.push(Felt::ONE); // no guardian
 
         calldata
