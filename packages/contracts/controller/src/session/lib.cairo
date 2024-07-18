@@ -36,11 +36,10 @@ mod session_component {
         ISession, SessionToken, Session, ISessionCallback, SessionState, SessionStateImpl
     };
     use argent::signer::signer_signature::{Signer, SignerSignature, SignerType, SignerSignatureImpl, SignerTraitImpl};
-    use argent::utils::
-        asserts::assert_no_self_call;
     use controller::session::lib::SESSION_TOKEN_V1;
     use core::poseidon::{hades_permutation};
     use controller::account::IAllowedCallerCallback;
+    use controller::utils::assert_no_self_call;
 
     #[storage]
     struct Storage {
