@@ -4,6 +4,7 @@ import {
   StyleProps,
   Flex,
   Show,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { PropsWithChildren, createContext, useContext, useState } from "react";
@@ -47,10 +48,13 @@ function Wrapper({
   children,
   ...rest
 }: React.PropsWithChildren & { variant?: LayoutVariant }) {
-  const [footerHeight, setFooterHeight] = useState(0);
+  const [height, setHeight] = useState(0);
+  const { isOpen, onToggle } = useDisclosure();
 
   return (
-    <LayoutContext.Provider value={{ variant, footerHeight, setFooterHeight }}>
+    <LayoutContext.Provider
+      value={{ variant, footer: { height, setHeight, isOpen, onToggle } }}
+    >
       {/** Show as full page  */}
       <Show below="md">
         <ChakraContainer
@@ -98,14 +102,22 @@ function Wrapper({
 
 const LayoutContext = createContext<LayoutContextValue>({
   variant: "default",
-  footerHeight: 0,
-  setFooterHeight: () => {},
+  footer: {
+    height: 0,
+    setHeight: () => {},
+    isOpen: false,
+    onToggle: () => {},
+  },
 });
 
 type LayoutContextValue = {
   variant: LayoutVariant;
-  footerHeight: number;
-  setFooterHeight: (height: number) => void;
+  footer: {
+    height: number;
+    setHeight: (height: number) => void;
+    isOpen: boolean;
+    onToggle: () => void;
+  };
 };
 
 type LayoutVariant = "default" | "connect" | "error";

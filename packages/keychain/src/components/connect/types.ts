@@ -1,4 +1,4 @@
-export type FormValues = {
+export type FormInput = {
   username: string;
 };
 

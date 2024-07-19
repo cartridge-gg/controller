@@ -1,17 +1,11 @@
 import { Field } from "@cartridge/ui";
 import { Button } from "@chakra-ui/react";
 import { Container, Footer, Content } from "components/layout";
-import {
-  Form as FormikForm,
-  Field as FormikField,
-  Formik,
-  useFormikContext,
-} from "formik";
 import { useCallback, useEffect, useState } from "react";
 import { useAccountQuery } from "generated/graphql";
 import Controller from "utils/controller";
 import { PopupCenter } from "utils/url";
-import { FormValues, SignupProps } from "./types";
+import { FormInput, SignupProps } from "./types";
 import { isIframe, validateUsernameFor } from "./utils";
 import { RegistrationLink } from "./RegistrationLink";
 import { doSignup } from "hooks/account";
@@ -21,6 +15,7 @@ import { useDebounce } from "hooks/debounce";
 import { ErrorAlert } from "components/ErrorAlert";
 import { useDeploy } from "hooks/deploy";
 import { constants } from "starknet";
+import { useController, useForm } from "react-hook-form";
 
 export function Signup({
   prefilledName = "",
@@ -29,105 +24,36 @@ export function Signup({
   onLogin,
 }: SignupProps) {
   const theme = useControllerTheme();
-
-  return (
-    <Container
-      variant="connect"
-      title={
-        theme.id === "cartridge"
-          ? "Play with Cartridge Controller"
-          : `Play ${theme.name}`
-      }
-      description="Create your Cartridge Controller"
-    >
-      <Formik
-        initialValues={{ username: prefilledName }}
-        onSubmit={() => {
-          /* defer to onClick */
-        }}
-      >
-        <Form onLogin={onLogin} onSuccess={onSuccess} isSlot={isSlot} />
-      </Formik>
-    </Container>
-  );
-}
-
-function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
   const { chainId, rpcUrl, setController } = useConnection();
   const { deployRequest } = useDeploy();
-  const { values, errors, setErrors, setTouched } =
-    useFormikContext<FormValues>();
   const [error, setError] = useState<Error>();
   const [isRegistering, setIsRegistering] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
-  const { debouncedValue: username, debouncing } = useDebounce(
-    values.username,
-    1000,
-  );
 
-  useEffect(() => {
-    setErrors(undefined);
-
-    if (username) {
-      const validate = async () => {
-        setIsValidating(true);
-        const error = await validateUsernameFor("signup")(username);
-        if (error) {
-          setTouched({ username: true }, false);
-          setErrors({ username: error });
-        }
-
-        setIsValidating(false);
-      };
-      validate();
-    }
-  }, [username, setErrors, setTouched]);
-
-  // for polling approach when iframe
-  useAccountQuery(
-    { id: values.username },
-    {
-      enabled: isRegistering,
-      refetchIntervalInBackground: true,
-      refetchOnWindowFocus: false,
-      staleTime: 10000000,
-      cacheTime: 10000000,
-      refetchInterval: (data) => (!data ? 1000 : undefined),
-      onSuccess: async (data) => {
-        try {
-          if (chainId !== constants.StarknetChainId.SN_MAIN) {
-            await deployRequest(values.username);
-          }
-
-          const {
-            account: {
-              credentials: {
-                webauthn: [{ id: credentialId, publicKey }],
-              },
-              contractAddress: address,
-            },
-          } = data;
-
-          const controller = new Controller({
-            chainId,
-            rpcUrl,
-            address,
-            username: values.username,
-            publicKey,
-            credentialId,
-          });
-
-          controller.store();
-          setController(controller);
-
-          if (onSuccess) {
-            onSuccess();
-          }
-        } catch (e) {
-          setError(e);
-        }
+  const {
+    handleSubmit,
+    formState,
+    control,
+    setValue,
+    setError: setFieldError,
+    clearErrors,
+  } = useForm<FormInput>({ defaultValues: { username: prefilledName } });
+  const { field: usernameField } = useController({
+    name: "username",
+    control,
+    rules: {
+      required: "Username required",
+      minLength: {
+        value: 3,
+        message: "Username must be at least 3 characters",
       },
+      validate: validateUsernameFor("signup"),
     },
+  });
+
+  const { debouncedValue: username, debouncing } = useDebounce(
+    usernameField.value,
+    1000,
   );
 
   const onSubmit = useCallback(() => {
@@ -155,59 +81,151 @@ function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
 
     doSignup(decodeURIComponent(username))
       .catch((e) => {
-        setErrors({ username: e.message });
+        setFieldError(usernameField.name, {
+          type: "custom",
+          message: e.message,
+        });
       })
       .finally(() => setIsRegistering(false));
-  }, [username, setErrors]);
+  }, [username, setFieldError, usernameField]);
+
+  useEffect(() => {
+    if (formState.errors.username) {
+      setFieldError(usernameField.name, undefined);
+    }
+
+    if (username) {
+      const validate = async () => {
+        setIsValidating(true);
+        const message = await validateUsernameFor("signup")(username);
+        if (message) {
+          setValue(usernameField.name, username, { shouldTouch: true });
+          setFieldError(usernameField.name, { type: "custom", message });
+        }
+
+        setIsValidating(false);
+      };
+      validate();
+    }
+  }, [
+    username,
+    setFieldError,
+    setValue,
+    clearErrors,
+    usernameField.name,
+    formState.errors.username,
+  ]);
+
+  // for polling approach when iframe
+  useAccountQuery(
+    { id: usernameField.value },
+    {
+      enabled: isRegistering,
+      refetchIntervalInBackground: true,
+      refetchOnWindowFocus: false,
+      staleTime: 10000000,
+      cacheTime: 10000000,
+      refetchInterval: (data) => (!data ? 1000 : undefined),
+      onSuccess: async (data) => {
+        try {
+          if (chainId !== constants.StarknetChainId.SN_MAIN) {
+            await deployRequest(usernameField.value);
+          }
+
+          const {
+            account: {
+              credentials: {
+                webauthn: [{ id: credentialId, publicKey }],
+              },
+              contractAddress: address,
+            },
+          } = data;
+
+          const controller = new Controller({
+            chainId,
+            rpcUrl,
+            address,
+            username: usernameField.value,
+            publicKey,
+            credentialId,
+          });
+
+          controller.store();
+          setController(controller);
+
+          if (onSuccess) {
+            onSuccess();
+          }
+        } catch (e) {
+          setError(e);
+        }
+      },
+    },
+  );
 
   return (
-    <FormikForm style={{ width: "100%" }}>
-      <Content>
-        <FormikField name="username" placeholder="Username">
-          {({ field, meta, form }) => (
-            <Field
-              {...field}
-              autoFocus
-              placeholder="Username"
-              touched={meta.touched}
-              error={meta.error || errors?.username}
-              onChange={(e) => {
-                setError(undefined);
-                e.target.value = e.target.value.toLowerCase();
-                field.onChange(e);
-              }}
-              onClear={() => {
-                setError(undefined);
-                form.setFieldValue(field.name, "");
-                setErrors(undefined);
-              }}
-            />
+    <Container
+      variant="connect"
+      title={
+        theme.id === "cartridge"
+          ? "Play with Cartridge Controller"
+          : `Play ${theme.name}`
+      }
+      description="Create your Cartridge Controller"
+    >
+      <form
+        style={{ width: "100%" }}
+        onKeyDown={(e) => {
+          e.key === "Enter" && e.preventDefault();
+        }}
+      >
+        <Content>
+          <Field
+            {...usernameField}
+            autoFocus
+            onChange={(e) => {
+              setError(undefined);
+              e.target.value = e.target.value.toLowerCase();
+              usernameField.onChange(e);
+            }}
+            placeholder="Username"
+            error={formState.errors.username}
+            isLoading={formState.isValidating || isValidating}
+            isDisabled={isRegistering}
+            onClear={() => {
+              setError(undefined);
+              setFieldError(usernameField.name, undefined);
+              setValue(usernameField.name, "");
+            }}
+          />
+        </Content>
+
+        <Footer isSlot={isSlot} isSignup>
+          {error && (
+            <ErrorAlert title="Login failed" description={error.message} />
           )}
-        </FormikField>
-      </Content>
 
-      <Footer isSlot={isSlot} isSignup>
-        {error && (
-          <ErrorAlert title="Login failed" description={error.message} />
-        )}
-
-        <Button
-          colorScheme="colorful"
-          isLoading={isRegistering}
-          isDisabled={
-            debouncing || !username || !!errors?.username || isValidating
-          }
-          onClick={onSubmit}
-        >
-          sign up
-        </Button>
-        <RegistrationLink
-          description="Already have a Controller?"
-          onClick={() => onLogin(values.username)}
-        >
-          Log In
-        </RegistrationLink>
-      </Footer>
-    </FormikForm>
+          <Button
+            colorScheme="colorful"
+            isLoading={isRegistering}
+            isDisabled={
+              debouncing ||
+              !username ||
+              !!Object.keys(formState.errors).length ||
+              isValidating
+            }
+            onClick={handleSubmit(onSubmit)}
+          >
+            sign up
+          </Button>
+          <RegistrationLink
+            description="Already have a Controller?"
+            onClick={() => onLogin(usernameField.value)}
+          >
+            Log In
+          </RegistrationLink>
+        </Footer>
+      </form>
+    </Container>
   );
 }
