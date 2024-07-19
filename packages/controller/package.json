@@ -8,6 +8,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc",
+    "compile": "ncc build ./src/index.ts -o build",
     "format": "prettier --write \"src/**/*.ts\""
   },
   "files": [
@@ -24,6 +25,7 @@
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:^",
     "@types/node": "^20.6.0",
+    "@vercel/ncc": "^0.38.1",
     "typescript": "^5.4.5"
   }
 }
