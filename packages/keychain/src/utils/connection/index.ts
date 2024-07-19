@@ -8,7 +8,7 @@ import { connectFactory, disconnectFactory } from "./connect";
 import { executeFactory } from "./execute";
 import { estimateDeclareFee, estimateInvokeFee } from "./estimate";
 import { logout } from "./logout";
-import { probe } from "./probe";
+import { probeFactory } from "./probe";
 import { revoke, session, sessions } from "./sessions";
 import { signMessageFactory } from "./sign";
 import { username } from "./username";
@@ -42,7 +42,7 @@ export function connectToController({
       estimateDeclareFee: normalize(validate(estimateDeclareFee)),
       estimateInvokeFee: normalize(validate(estimateInvokeFee)),
       logout: normalize(logout),
-      probe: normalize(validate(probe)),
+      probe: normalize(validate(probeFactory(setController))),
       revoke: normalize(revoke),
       signMessage: normalize(validate(signMessageFactory(setContext))),
       session: normalize(session),
