@@ -109,9 +109,9 @@ pub trait NewOwnerSigner: HashSigner {
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 pub trait DeployTokenSigner: NewOwnerSigner {
     async fn sign_deploy_token(&self, address: &Felt) -> Result<DeployToken, SignError> {
-        let signature = self.sign_new_owner(&Felt::ZERO, &address).await?;
+        let signature = self.sign_new_owner(&Felt::ZERO, address).await?;
         Ok(DeployToken {
-            address: address.clone().into(),
+            address: (*address).into(),
             signature,
         })
     }
