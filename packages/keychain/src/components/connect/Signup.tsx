@@ -1,7 +1,7 @@
 import { Field } from "@cartridge/ui";
 import { Button } from "@chakra-ui/react";
 import { Container, Footer, Content } from "components/layout";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAccountQuery } from "generated/graphql";
 import Controller from "utils/controller";
 import { PopupCenter } from "utils/url";
@@ -11,6 +11,7 @@ import { RegistrationLink } from "./RegistrationLink";
 import { doSignup } from "hooks/account";
 import { useControllerTheme } from "hooks/theme";
 import { useConnection } from "hooks/connection";
+import { useDebounce } from "hooks/debounce";
 import { ErrorAlert } from "components/ErrorAlert";
 import { useDeploy } from "hooks/deploy";
 import { constants } from "starknet";
@@ -27,6 +28,7 @@ export function Signup({
   const { deployRequest } = useDeploy();
   const [error, setError] = useState<Error>();
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
 
   const {
     handleSubmit,
@@ -34,6 +36,7 @@ export function Signup({
     control,
     setValue,
     setError: setFieldError,
+    clearErrors,
   } = useForm<FormInput>({ defaultValues: { username: prefilledName } });
   const { field: usernameField } = useController({
     name: "username",
@@ -48,12 +51,17 @@ export function Signup({
     },
   });
 
+  const { debouncedValue: username, debouncing } = useDebounce(
+    usernameField.value,
+    1000,
+  );
+
   const onSubmit = useCallback(() => {
     setError(undefined);
     setIsRegistering(true);
 
     const searchParams = new URLSearchParams(window.location.search);
-    searchParams.set("name", encodeURIComponent(usernameField.name));
+    searchParams.set("name", encodeURIComponent(username));
     searchParams.set("action", "signup");
 
     // due to same origin restriction, if we're in iframe, pop up a
@@ -71,7 +79,7 @@ export function Signup({
       return;
     }
 
-    doSignup(decodeURIComponent(usernameField.name))
+    doSignup(decodeURIComponent(username))
       .catch((e) => {
         setFieldError(usernameField.name, {
           type: "custom",
@@ -79,7 +87,34 @@ export function Signup({
         });
       })
       .finally(() => setIsRegistering(false));
-  }, [setFieldError, usernameField]);
+  }, [username, setFieldError, usernameField]);
+
+  useEffect(() => {
+    if (formState.errors.username) {
+      setFieldError(usernameField.name, undefined);
+    }
+
+    if (username) {
+      const validate = async () => {
+        setIsValidating(true);
+        const message = await validateUsernameFor("signup")(username);
+        if (message) {
+          setValue(usernameField.name, username, { shouldTouch: true });
+          setFieldError(usernameField.name, { type: "custom", message });
+        }
+
+        setIsValidating(false);
+      };
+      validate();
+    }
+  }, [
+    username,
+    setFieldError,
+    setValue,
+    clearErrors,
+    usernameField.name,
+    formState.errors.username,
+  ]);
 
   // for polling approach when iframe
   useAccountQuery(
@@ -155,7 +190,7 @@ export function Signup({
             }}
             placeholder="Username"
             error={formState.errors.username}
-            isLoading={formState.isValidating}
+            isLoading={formState.isValidating || isValidating}
             isDisabled={isRegistering}
             onClear={() => {
               setError(undefined);
@@ -174,9 +209,10 @@ export function Signup({
             colorScheme="colorful"
             isLoading={isRegistering}
             isDisabled={
-              !usernameField.value ||
+              debouncing ||
+              !username ||
               !!Object.keys(formState.errors).length ||
-              formState.isValidating
+              isValidating
             }
             onClick={handleSubmit(onSubmit)}
           >

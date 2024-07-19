@@ -7,11 +7,11 @@ import {
   useLayout,
 } from "components/layout";
 import { motion } from "framer-motion";
+import { SessionDetails } from "./SessionDetails";
+import { TransactionSummary } from "./TransactionSummary";
 import { isIframe } from "components/connect/utils";
 import { useConnection } from "hooks/connection";
 import { TOP_BAR_HEIGHT } from "../Container/Header/TopBar";
-import { TransactionSummary } from "./TransactionSummary";
-import { SessionDetails } from "./SessionDetails";
 import NextLink from "next/link";
 
 export function Footer({
@@ -19,12 +19,10 @@ export function Footer({
   isSlot = false,
   isSignup,
   createSession = false,
-  hideTxSummary = false,
 }: React.PropsWithChildren & {
   isSlot?: boolean;
   isSignup?: boolean;
   createSession?: boolean;
-  hideTxSummary?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>();
   const { origin, policies } = useConnection();
@@ -94,7 +92,7 @@ export function Footer({
           onClick={footer.onToggle}
           _hover={{ cursor: "pointer" }}
         >
-          {!hideTxSummary && !!policies.length && (
+          {!!policies.length && (
             <TransactionSummary
               isSlot={isSlot}
               createSession={createSession}

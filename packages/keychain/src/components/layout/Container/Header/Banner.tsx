@@ -33,7 +33,6 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
 
   switch (variant) {
     case "connect":
-    case "createSession":
     case "error":
       return (
         <VStack w="full" pb={6}>

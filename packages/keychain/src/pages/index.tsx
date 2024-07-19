@@ -62,6 +62,9 @@ function Home() {
               policies,
             } as any);
           }}
+          onCancel={() =>
+            ctx.resolve({ code: ResponseCodes.CANCELED, message: "Canceled" })
+          }
         />
       );
     }

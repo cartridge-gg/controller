@@ -1,16 +1,16 @@
-import { Container, Content, Footer } from "components/layout";
+import { Container, Footer } from "components/layout";
 import { BigNumberish } from "starknet";
 import { Policy } from "@cartridge/controller";
-import { Button, Text } from "@chakra-ui/react";
+import { Button } from "@chakra-ui/react";
 import { useState } from "react";
 import { useConnection } from "hooks/connection";
-import { LockIcon } from "@cartridge/ui";
-import { Policies } from "Policies";
 
 export function CreateSession({
   onConnect,
+  onCancel,
 }: {
   onConnect: (policies: Policy[]) => void;
+  onCancel?: () => void;
 }) {
   const { controller, policies, origin } = useConnection();
   const [isConnecting, setIsConnecting] = useState(false);
@@ -18,24 +18,11 @@ export function CreateSession({
   const [maxFees] = useState<BigNumberish>();
   return (
     <Container
-      variant="createSession"
+      variant="connect"
       title="Create Session"
-      description={
-        <Text fontSize="sm" color="text.secondary">
-          Pre-approve{" "}
-          <LockIcon fontSize="md" color="text.secondaryAccent" mr={0.5} />
-          <Text as="span" color="text.secondaryAccent" fontWeight="bold">
-            {origin}
-          </Text>{" "}
-          to perform the following actions on your behalf
-        </Text>
-      }
+      description={`${origin} is requesting to connect to your Cartridge Controller`}
     >
-      <Content>
-        <Policies policies={policies} />
-      </Content>
-
-      <Footer hideTxSummary>
+      <Footer createSession>
         <Button
           colorScheme="colorful"
           isDisabled={isConnecting}
@@ -52,8 +39,10 @@ export function CreateSession({
               });
           }}
         >
-          create session
+          create
         </Button>
+
+        {onCancel && <Button onClick={onCancel}>cancel</Button>}
       </Footer>
     </Container>
   );

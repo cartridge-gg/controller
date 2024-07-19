@@ -120,7 +120,7 @@ type LayoutContextValue = {
   };
 };
 
-type LayoutVariant = "default" | "connect" | "error" | "createSession";
+type LayoutVariant = "default" | "connect" | "error";
 
 export function useLayout() {
   return useContext(LayoutContext);
