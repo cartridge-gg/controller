@@ -1,6 +1,6 @@
 #[starknet::component]
 mod multiple_owners_component {
-    use controller::multiple_owners::interface::{IMultipleOwnersInternal, IMultipleOwners};
+    use controller::multiple_owners::interface::{IMultipleOwnersInternal, IMultipleOwners, DeployToken};
     use argent::signer::{
         signer_signature::{
             Signer, SignerStorageValue,  SignerType, StarknetSigner, StarknetSignature, SignerTrait, SignerStorageTrait,
@@ -71,6 +71,23 @@ mod multiple_owners_component {
             self: @ComponentState<TContractState>, signer_signature: SignerSignature,
         ) {
             self.assert_valid_new_owner_signature_internal(signer_signature, get_tx_info().unbox().chain_id, get_contract_address());
+        }
+        fn accept_deploy_token(ref self: ComponentState<TContractState>, token: DeployToken, signature: SignerSignature){
+            let address = get_contract_address();
+            assert(token.address == address, 'invalid-token-address');
+            let hash = PedersenTrait::new(0)
+                .update(selector!("deploy_token"))
+                .update(token.address.into())
+                .update(token.signature.signer().into_guid())
+                .update(2)
+                .finalize();
+            let old_signer = signature.signer();
+            assert(self.is_valid_owner(old_signer.into_guid()), 'invalid-token-owner');
+            assert(signature.is_valid_signature(hash), 'invalid-token-sig');
+            self.assert_valid_new_owner_signature_internal(token.signature, 0, address);
+            let new_signer = token.signature.signer();
+            self.add_owner_internal(new_signer.storage_value());
+            self.emit(OwnerAdded { owner: new_signer });
         }
     }
 

@@ -1,6 +1,7 @@
 mod account_test;
 mod declaration_using_account_test;
 mod delegate_account_test;
+mod deploy_token_test;
 mod deployment_test;
 mod ecdsa_test;
 mod erc20_methods_test;

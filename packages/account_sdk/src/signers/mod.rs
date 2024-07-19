@@ -9,7 +9,7 @@ use ::starknet::{
 
 use starknet_crypto::{poseidon_hash, PoseidonHasher};
 
-use crate::abigen::controller::{Signer, SignerSignature};
+use crate::abigen::controller::{DeployToken, Signer, SignerSignature};
 use async_trait::async_trait;
 
 use self::webauthn::DeviceError;
@@ -107,7 +107,44 @@ pub trait NewOwnerSigner: HashSigner {
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+pub trait DeployTokenSigner: NewOwnerSigner {
+    async fn sign_deploy_token(&self, address: &Felt) -> Result<DeployToken, SignError> {
+        let signature = self.sign_new_owner(&Felt::ZERO, &address).await?;
+        Ok(DeployToken {
+            address: address.clone().into(),
+            signature,
+        })
+    }
+}
+
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+pub trait DeployTokenRequestSigner: HashSigner {
+    async fn sign_deploy_token_request(
+        &self,
+        token: &DeployToken,
+    ) -> Result<SignerSignature, SignError> {
+        let token_hash = PedersenHasher::new(Felt::ZERO)
+            .update(&selector!("deploy_token"))
+            .update(&token.address.into())
+            .update(&token.signature.signer().guid())
+            .update(&Felt::TWO)
+            .finalize();
+        self.sign(&token_hash).await
+    }
+}
+
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 impl<T> NewOwnerSigner for T where T: HashSigner {}
+
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+impl<T> DeployTokenSigner for T where T: NewOwnerSigner {}
+
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+impl<T> DeployTokenRequestSigner for T where T: HashSigner {}
 
 struct PedersenHasher {
     state: Felt,
@@ -125,5 +162,21 @@ impl PedersenHasher {
     }
     pub fn finalize(self) -> Felt {
         self.state
+    }
+}
+
+pub trait SignerSignatureTrait {
+    fn signer(&self) -> Signer;
+}
+
+impl SignerSignatureTrait for SignerSignature {
+    fn signer(&self) -> Signer {
+        match self {
+            SignerSignature::Starknet((signer, _)) => Signer::Starknet(signer.clone()),
+            SignerSignature::Secp256k1((signer, _)) => Signer::Secp256k1(signer.clone()),
+            SignerSignature::Secp256r1((signer, _)) => Signer::Secp256r1(signer.clone()),
+            SignerSignature::Eip191((signer, _)) => Signer::Eip191(signer.clone()),
+            SignerSignature::Webauthn((signer, _)) => Signer::Webauthn(signer.clone()),
+        }
     }
 }

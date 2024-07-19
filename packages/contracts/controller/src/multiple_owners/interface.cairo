@@ -15,6 +15,7 @@ trait IMultipleOwners<TContractState> {
     fn assert_valid_new_owner_signature(
         self: @TContractState, signer_signature: SignerSignature
     );
+    fn accept_deploy_token(ref self: TContractState, token: DeployToken, signature: SignerSignature);
 }
 
 #[starknet::interface]
@@ -26,4 +27,10 @@ trait IMultipleOwnersInternal<TContractState> {
     fn assert_valid_new_owner_signature_internal(
         self: @TContractState, signer_signature: SignerSignature, chain_id: felt252, contract_address: ContractAddress
     );
+}
+
+#[derive(Drop, Serde, Copy)]
+struct DeployToken {
+    address: ContractAddress,
+    signature: SignerSignature,
 }
