@@ -70,7 +70,7 @@ mod multiple_owners_component {
         fn assert_valid_new_owner_signature(
             self: @ComponentState<TContractState>, signer_signature: SignerSignature,
         ) {
-            self.assert_valid_new_owner_signature_internal(signer_signature, get_contract_address().into(), get_tx_info().unbox().chain_id, get_contract_address());
+            self.assert_valid_new_owner_signature_internal(signer_signature, get_tx_info().unbox().chain_id, get_contract_address());
         }
     }
 
@@ -118,7 +118,7 @@ mod multiple_owners_component {
             self._owners_count.write(count - 1);
         }
         fn assert_valid_new_owner_signature_internal(
-            self: @ComponentState<TContractState>, signer_signature: SignerSignature, msg: felt252, chain_id: felt252, contract_address: ContractAddress
+            self: @ComponentState<TContractState>, signer_signature: SignerSignature, chain_id: felt252, contract_address: ContractAddress
         ) {
             // We now need to hash message_hash with the size of the array: (change_owner selector,
             // chain id, contract address, old_owner_guid)
@@ -128,8 +128,7 @@ mod multiple_owners_component {
                 .update(selector!("change_owner"))
                 .update(chain_id)
                 .update(contract_address.into())
-                .update(msg)
-                .update(4)
+                .update(3)
                 .finalize();
 
             let is_valid = signer_signature.is_valid_signature(message_hash);

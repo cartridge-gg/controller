@@ -99,8 +99,7 @@ pub trait NewOwnerSigner: HashSigner {
             .update(&selector!("change_owner"))
             .update(chain_id)
             .update(contract_address)
-            .update(contract_address)
-            .update(&4u32.into())
+            .update(&3u32.into())
             .finalize();
         self.sign(&message_hash).await
     }
