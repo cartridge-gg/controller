@@ -9,7 +9,7 @@ use starknet::{
 use super::runners::katana_runner::KatanaRunner;
 use crate::{
     abigen::controller::{self, Controller, Signer, StarknetSigner},
-    signers::HashSigner,
+    signers::{HashSigner, SignerTrait},
 };
 use crate::{
     abigen::erc_20::Erc20,
@@ -147,8 +147,12 @@ async fn test_deploy_and_call() {
     let signer = Signer::Starknet(StarknetSigner {
         pubkey: NonZero::new(felt!("1337")).unwrap(),
     });
-    let deployed_address = deploy(client, &account, signer, None, class_hash).await;
+    let deployed_address = deploy(client, &account, signer.clone(), None, class_hash).await;
 
     let contract = Controller::new(deployed_address, account);
-    contract.get_owner().call().await.unwrap();
+    assert!(contract
+        .is_valid_owner(&signer.guid())
+        .call()
+        .await
+        .unwrap());
 }

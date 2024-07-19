@@ -55,7 +55,6 @@ impl AuthenticatorAssertionResponse {
         let s_scalar = Scalar::from_uint_unchecked(Uint::from_be_bytes(s.to_bytes_be()));
         let s_neg = U256::from_bytes_be(s_scalar.neg().to_bytes().as_slice().try_into().unwrap());
         if s > s_neg {
-            dbg!("aa");
             self.signature.s = s_neg;
             self.signature.y_parity = !self.signature.y_parity;
         }

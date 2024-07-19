@@ -93,7 +93,11 @@ async fn test_verify_external_owner() {
     let tx = other_account.execute_v1(vec![Call {
         to: address,
         selector: selector!("register_session"),
-        calldata: <RawSession as CairoSerde>::cairo_serialize(&session.raw()),
+        calldata: [
+            <RawSession as CairoSerde>::cairo_serialize(&session.raw()),
+            vec![other_address],
+        ]
+        .concat(),
     }]);
 
     let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * Felt::from(4u128);
@@ -110,13 +114,13 @@ async fn test_verify_external_owner() {
         .await
         .unwrap();
 
-    let account = SessionAccount::new(
+    let account = SessionAccount::new_as_registered(
         runner.client(),
         session_signer,
         guardian_signer,
         address,
         runner.client().chain_id().await.unwrap(),
-        vec![],
+        other_address,
         session,
     );
 

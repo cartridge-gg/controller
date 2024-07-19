@@ -16,10 +16,12 @@ use core::ecdsa::check_ecdsa_signature;
 
 
 const SESSION_TOKEN_V1: felt252 = 'session-token';
+const AUTHORIZATION_BY_REGISTERED: felt252 = 'authorization-by-registered';
 
 // Based on https://github.com/argentlabs/starknet-plugin-account/blob/3c14770c3f7734ef208536d91bbd76af56dc2043/contracts/plugins/SessionKey.cairo
 #[starknet::component]
 mod session_component {
+    use core::num::traits::zero::Zero;
     use core::result::ResultTrait;
     use controller::session::session::check_policy;
     use starknet::info::{TxInfo, get_tx_info, get_block_timestamp, get_caller_address};
@@ -33,27 +35,38 @@ mod session_component {
     use controller::session::interface::{
         ISession, SessionState, SessionStateImpl
     };
-    use argent::session::interface::{Session, ISessionCallback, SessionToken};
+    use argent::session::interface::{Session, SessionToken};
+    use controller::session::interface::{ISessionCallback};
     use argent::session::session_hash::{StructHashSession, OffChainMessageHashSessionRev1};
     use argent::signer::signer_signature::{Signer, SignerSignature, SignerType, SignerSignatureImpl, SignerTraitImpl};
     use controller::session::session::SESSION_TOKEN_V1;
     use core::poseidon::{hades_permutation, poseidon_hash_span};
-    use controller::account::IAllowedCallerCallback;
+    use controller::account::{IAllowedCallerCallback};
     use controller::utils::assert_no_self_call;
+    use controller::session::session::AUTHORIZATION_BY_REGISTERED;
 
     #[storage]
     struct Storage {
-        session_states: LegacyMap::<felt252, felt252>,
+        /// A map of session hashes to a boolean indicating if the session has been revoked.
+        revoked_session: LegacyMap<felt252, bool>,
+        /// A map of (owner_guid, guardian_guid, session_hash) to a len of authorization signature
+        valid_session_cache: LegacyMap<(felt252, felt252, felt252), bool>,
     }
 
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
         SessionRevoked: SessionRevoked,
+        SessionRegistered: SessionRegistered,
     }
 
     #[derive(Drop, starknet::Event)]
     struct SessionRevoked {
+        session_hash: felt252,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct SessionRegistered {
         session_hash: felt252,
     }
 
@@ -68,50 +81,46 @@ mod session_component {
 
     #[embeddable_as(SessionComponent)]
     impl SessionImpl<
-        TContractState, +HasComponent<TContractState>, +ISessionCallback<TContractState>, +IAllowedCallerCallback<TContractState>
+        TContractState, 
+        +HasComponent<TContractState>, 
+        +ISessionCallback<TContractState>, 
+        +IAllowedCallerCallback<TContractState>,
     > of ISession<ComponentState<TContractState>> {
         fn revoke_session(ref self: ComponentState<TContractState>, session_hash: felt252) {
             self.get_contract().is_caller_allowed(get_caller_address());
-            assert(
-                self.session_state(session_hash) != SessionState::Revoked, 'session/already-revoked'
-            );
-            self.session_states.write(session_hash, SessionState::Revoked.into_felt());
-            self.emit(SessionRevoked { session_hash: session_hash });
+            assert(!self.revoked_session.read(session_hash), 'session/already-revoked');
+            self.emit(SessionRevoked { session_hash });
+            self.revoked_session.write(session_hash, true);
         }
         fn register_session(
             ref self: ComponentState<TContractState>,
-            session: Session
+            session: Session,
+            guid_or_address: felt252,
         ) {
-            self.get_contract().is_caller_allowed(get_caller_address());
+            let state = self.get_contract();
+            state.is_caller_allowed(get_caller_address());
             let now = get_block_timestamp();
             assert(session.expires_at > now, 'session/expired');
-            // check validity of token
             let session_hash = session.get_message_hash_rev_1();
-
-            match self.session_state(session_hash) {
-                SessionState::Revoked => { assert(false, 'session/already-revoked'); },
-                SessionState::NotRegistered => {
-                    let authorization_hash = poseidon_hash_span(array![].span());
-                    self
-                        .session_states
-                        .write(
-                            session_hash, SessionState::Validated(authorization_hash).into_felt()
-                        );
-                },
-                SessionState::Validated(_) => { assert(false, 'session/already-registered'); },
-            }
+            assert(!self.revoked_session.read(session_hash), 'session/already-revoked');
+            
+            let guardian_guid = 0;
+            assert(!self.valid_session_cache.read((guid_or_address, guardian_guid, session_hash)), 'session/already-registered');
+            self.valid_session_cache.write((guid_or_address, guardian_guid, session_hash), true);
         }
         fn is_session_revoked(
             self: @ComponentState<TContractState>, session_hash: felt252
         ) -> bool {
-            self.session_state(session_hash) == SessionState::Revoked
+            self.revoked_session.read(session_hash)
         }
     }
 
 
     #[generate_trait]
     impl InternalImpl<
-        TContractState, +HasComponent<TContractState>, +ISessionCallback<TContractState>
+        TContractState, 
+        +HasComponent<TContractState>, 
+        +ISessionCallback<TContractState>,
     > of InternalTrait<TContractState> {
         fn validate_session_serialized(
             ref self: ComponentState<TContractState>,
@@ -157,26 +166,36 @@ mod session_component {
             // check validity of token
             let session_hash = signature.session.get_message_hash_rev_1();
 
-            match self.session_state(session_hash) {
-                SessionState::Revoked => { return Result::Err(Errors::SESSION_REVOKED); },
-                SessionState::NotRegistered => {
-                    state.parse_and_verify_authorization(session_hash, signature.session_authorization);
-                    let authorization_hash = poseidon_hash_span(signature.session_authorization);
+            assert(!self.revoked_session.read(session_hash), 'session/already-revoked');
+            
+            
+            let guardian_guid = 0;
+
+            if(signature.session_authorization.len() == 2 
+                && *signature.session_authorization.at(0) == AUTHORIZATION_BY_REGISTERED) 
+            {
+                let owner_guid = *signature.session_authorization.at(1);
+                assert(signature.cache_authorization, 'session/cache-missing');
+                assert(self.valid_session_cache.read((owner_guid, guardian_guid, session_hash)), 'session/not-registered');
+                assert(state.is_valid_authorizer(owner_guid), 'session/invalid-authorizer');
+
+            } else {
+                let parsed = state.parse_authorization(signature.session_authorization);
+                let owner_guid = parsed.at(0).clone().signer().into_guid();
+                // check validity of token
+                if !signature.cache_authorization ||
+                    !self.valid_session_cache.read((owner_guid, guardian_guid, session_hash))
+                {
+                    state.verify_authorization(session_hash, parsed.span());
                     if signature.cache_authorization {
-                        self
-                        .session_states
-                        .write(
-                            session_hash, SessionState::Validated(authorization_hash).into_felt()
-                        );
+                        self.valid_session_cache.write((owner_guid, guardian_guid, session_hash), true);
                     }
-                },
-                SessionState::Validated(authorization_hash) => {
-                    assert(
-                        authorization_hash == poseidon_hash_span(signature.session_authorization),
-                        'session/account-sig-mismatch'
-                    );
-                },
+                } else {
+                    assert(state.is_valid_authorizer(owner_guid), 'session/invalid-authorizer');
+                }
             }
+                
+            
 
             let (message_hash, _, _) = hades_permutation(transaction_hash, session_hash, 2);
 
@@ -196,12 +215,6 @@ mod session_component {
             }
 
             Result::Ok(())
-        }
-
-        fn session_state(
-            self: @ComponentState<TContractState>, session_hash: felt252
-        ) -> SessionState {
-            SessionStateImpl::from_felt(self.session_states.read(session_hash))
         }
     }
 }
