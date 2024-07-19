@@ -158,7 +158,7 @@ function Form({ isSlot, onLogin, onSuccess }: SignupProps) {
         setErrors({ username: e.message });
       })
       .finally(() => setIsRegistering(false));
-  }, [username, setErrors]);
+  }, [username, setErrors, footer]);
 
   return (
     <FormikForm style={{ width: "100%" }}>

@@ -1,18 +1,10 @@
-import {
-  HStack,
-  IconButton,
-  Spacer,
-  Text,
-  VStack,
-  useDisclosure,
-} from "@chakra-ui/react";
+import { HStack, IconButton, Spacer, Text, VStack } from "@chakra-ui/react";
 import { CartridgeLogo, WedgeUpIcon } from "@cartridge/ui";
 import React, { useEffect, useMemo, useRef } from "react";
 import {
   FOOTER_HEIGHT,
   PORTAL_WINDOW_HEIGHT,
   useLayout,
-  useLayoutVariant,
 } from "components/layout";
 import { motion } from "framer-motion";
 import { SessionDetails } from "./SessionDetails";
@@ -32,11 +24,9 @@ export function Footer({
   isSignup?: boolean;
   createSession?: boolean;
 }) {
-  const { setFooterHeight } = useLayout();
   const ref = useRef<HTMLDivElement>();
   const { origin, policies } = useConnection();
-  const { isOpen, onToggle } = useDisclosure();
-  const variant = useLayoutVariant();
+  const { variant, footer } = useLayout();
   const isExpandable = useMemo(
     () => !!origin && !!policies.length && variant === "connect" && !isSignup,
     [origin, policies, variant, isSignup],
@@ -48,14 +38,13 @@ export function Footer({
   const maxH = `${
     (isIframe() ? window.innerHeight : PORTAL_WINDOW_HEIGHT) - TOP_BAR_HEIGHT
   }px`;
-  const { footerHeight } = useLayout();
 
   useEffect(() => {
     if (!ref.current) return;
 
     const observer = new ResizeObserver((entries) => {
       for (let entry of entries) {
-        setFooterHeight(entry.contentRect.height);
+        footer.setHeight(entry.contentRect.height);
       }
     });
 
@@ -64,11 +53,12 @@ export function Footer({
     return () => {
       observer.disconnect();
     };
-  }, [setFooterHeight]);
+  }, [footer]);
 
   useEffect(() => {
-    window.document.body.style.overflowY = isOpen ? "hidden" : "auto";
-  }, [isOpen]);
+    console.log("!!!", footer.isOpen);
+    window.document.body.style.overflowY = footer.isOpen ? "hidden" : "auto";
+  }, [footer.isOpen]);
 
   return (
     <VStack
@@ -80,7 +70,10 @@ export function Footer({
       as={motion.div}
       layout="position"
       className="whatever"
-      animate={{ height: isOpen ? maxH : "auto", transition: { bounce: 0 } }}
+      animate={{
+        height: footer.isOpen ? maxH : "auto",
+        transition: { bounce: 0 },
+      }}
       overflow="hidden"
       ref={ref}
     >
@@ -92,12 +85,12 @@ export function Footer({
         borderColor="solid.spacer"
         px={4}
         flex={1}
-        h={`calc(${maxH} - ${footerHeight}px)`}
+        h={`calc(${maxH} - ${footer.height}px)`}
       >
         <HStack
           align="flex-start"
           pt={isExpandable ? 6 : 0}
-          onClick={onToggle}
+          onClick={footer.onToggle}
           _hover={{ cursor: "pointer" }}
         >
           <TransactionSummary
@@ -115,7 +108,7 @@ export function Footer({
                 <WedgeUpIcon
                   boxSize={8}
                   color="text.secondary"
-                  transform={isOpen ? "rotate(180deg)" : "rotate(0deg)"}
+                  transform={footer.isOpen ? "rotate(180deg)" : "rotate(0deg)"}
                 />
               }
               size="sm"
@@ -126,7 +119,7 @@ export function Footer({
           )}
         </HStack>
 
-        {isOpen && <SessionDetails />}
+        {footer.isOpen && <SessionDetails />}
       </VStack>
 
       <VStack
