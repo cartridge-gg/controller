@@ -1,8 +1,8 @@
 import { Field } from "@cartridge/ui";
 import { Button } from "@chakra-ui/react";
-import { Container, Footer, Content } from "components/layout";
+import { Container, Footer, Content, useLayout } from "components/layout";
 import { SubmitHandler, useForm, useController } from "react-hook-form";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Controller from "utils/controller";
 import { FormInput, LoginMode, LoginProps } from "./types";
 import { useAnalytics } from "hooks/analytics";
@@ -13,16 +13,34 @@ import { doLogin } from "hooks/account";
 import { useConnection } from "hooks/connection";
 import { ErrorAlert } from "components/ErrorAlert";
 
-export function Login({
+export function Login(props: LoginProps) {
+  const theme = useControllerTheme();
+
+  return (
+    <Container
+      variant="connect"
+      title={
+        theme.id === "cartridge"
+          ? "Play with Cartridge Controller"
+          : `Play ${theme.name}`
+      }
+      description="Enter your Controller username"
+    >
+      <Form {...props} />
+    </Container>
+  );
+}
+
+function Form({
   prefilledName = "",
   isSlot,
   mode = LoginMode.Webauthn,
   onSuccess,
   onSignup,
 }: LoginProps) {
+  const { footer } = useLayout();
   const { origin, policies, chainId, rpcUrl, setController } = useConnection();
   const { event: log } = useAnalytics();
-  const theme = useControllerTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [expiresAt] = useState<bigint>(3000000000n);
   const [error, setError] = useState<Error>();
@@ -114,56 +132,50 @@ export function Login({
     ],
   );
 
+  useEffect(() => {
+    if (!formState.isValidating || !footer.isOpen) return;
+    footer.onToggle();
+  }, [formState.isValidating, footer]);
   return (
-    <Container
-      variant="connect"
-      title={
-        theme.id === "cartridge"
-          ? "Play with Cartridge Controller"
-          : `Play ${theme.name}`
-      }
-      description="Enter your Controller username"
+    <form
+      style={{ width: "100%" }}
+      onSubmit={handleSubmit(onSubmit)}
+      onChange={() => setError(undefined)}
     >
-      <form
-        style={{ width: "100%" }}
-        onSubmit={handleSubmit(onSubmit)}
-        onChange={() => setError(undefined)}
-      >
-        <Content>
-          <Field
-            {...usernameField}
-            autoFocus
-            onChange={(e) => {
-              setError(undefined);
-              e.target.value = e.target.value.toLowerCase();
-              usernameField.onChange(e);
-            }}
-            placeholder="Username"
-            error={formState.errors.username}
-            isLoading={formState.isValidating}
-            isDisabled={isLoading}
-            onClear={() => {
-              setError(undefined);
-              setValue(usernameField.name, "");
-            }}
-          />
-        </Content>
+      <Content>
+        <Field
+          {...usernameField}
+          autoFocus
+          onChange={(e) => {
+            setError(undefined);
+            e.target.value = e.target.value.toLowerCase();
+            usernameField.onChange(e);
+          }}
+          placeholder="Username"
+          error={formState.errors.username}
+          isLoading={formState.isValidating}
+          isDisabled={isLoading}
+          onClear={() => {
+            setError(undefined);
+            setValue(usernameField.name, "");
+          }}
+        />
+      </Content>
 
-        <Footer isSlot={isSlot} createSession>
-          {error && (
-            <ErrorAlert title="Login failed" description={error.message} />
-          )}
-          <Button type="submit" colorScheme="colorful" isLoading={isLoading}>
-            Log in
-          </Button>
-          <RegistrationLink
-            description="Need a controller?"
-            onClick={() => onSignup(usernameField.value)}
-          >
-            Sign Up
-          </RegistrationLink>
-        </Footer>
-      </form>
-    </Container>
+      <Footer isSlot={isSlot} createSession>
+        {error && (
+          <ErrorAlert title="Login failed" description={error.message} />
+        )}
+        <Button type="submit" colorScheme="colorful" isLoading={isLoading}>
+          Log in
+        </Button>
+        <RegistrationLink
+          description="Need a controller?"
+          onClick={() => onSignup(usernameField.value)}
+        >
+          Sign Up
+        </RegistrationLink>
+      </Footer>
+    </form>
   );
 }

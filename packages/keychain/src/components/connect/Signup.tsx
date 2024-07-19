@@ -82,7 +82,7 @@ export function Signup({
     doSignup(decodeURIComponent(username))
       .catch((e) => {
         setFieldError(usernameField.name, {
-          type: "custon",
+          type: "custom",
           message: e.message,
         });
       })
@@ -90,7 +90,9 @@ export function Signup({
   }, [username, setFieldError, usernameField]);
 
   useEffect(() => {
-    clearErrors();
+    if (formState.errors.username) {
+      setFieldError(usernameField.name, undefined);
+    }
 
     if (username) {
       const validate = async () => {
@@ -98,14 +100,21 @@ export function Signup({
         const message = await validateUsernameFor("signup")(username);
         if (message) {
           setValue(usernameField.name, username, { shouldTouch: true });
-          setFieldError("username", { type: "custom", message });
+          setFieldError(usernameField.name, { type: "custom", message });
         }
 
         setIsValidating(false);
       };
       validate();
     }
-  }, [username, setFieldError, setValue, clearErrors, usernameField.name]);
+  }, [
+    username,
+    setFieldError,
+    setValue,
+    clearErrors,
+    usernameField.name,
+    formState.errors.username,
+  ]);
 
   // for polling approach when iframe
   useAccountQuery(
@@ -181,7 +190,7 @@ export function Signup({
             }}
             placeholder="Username"
             error={formState.errors.username}
-            isLoading={formState.isValidating}
+            isLoading={formState.isValidating || isValidating}
             isDisabled={isRegistering}
             onClear={() => {
               setError(undefined);

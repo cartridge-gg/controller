@@ -78,7 +78,6 @@ export const Field = forwardRef(
         </InputGroup>
 
         <FormErrorMessage>
-          {/* {error && error.message} */}
           {error && (
             <HStack marginY={3}>
               <AlertIcon fontSize="xl" color="text.error" />
