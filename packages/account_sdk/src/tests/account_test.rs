@@ -13,14 +13,16 @@ use crate::{
         deployment_test::deploy_helper,
         runners::{katana_runner::KatanaRunner, TestnetRunner},
     },
+    transaction_waiter::TransactionWaiter,
 };
 use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{
-    accounts::{Account, AccountError},
+    accounts::AccountError,
     macros::{felt, selector},
     providers::Provider,
     signers::SigningKey,
 };
+use starknet_crypto::Felt;
 
 use super::deployment_test::transfer_helper;
 
@@ -39,26 +41,149 @@ async fn test_change_owner() {
         runner.client().chain_id().await.unwrap(),
     );
 
-    let account = AbigenController::new(address, account);
-    assert_eq!(
-        account.get_owner().call().await.unwrap(),
-        signer.verifying_key().scalar()
-    );
+    let controller = AbigenController::new(address, account.clone());
+    assert!(controller
+        .is_valid_owner(&signer.signer().guid())
+        .call()
+        .await
+        .unwrap());
     let new_signer = SigningKey::from_random();
-    let old_guid = signer.signer().guid();
     let new_signer_signature = new_signer
-        .sign_new_owner(
-            &account.account.chain_id,
-            &account.account.address,
-            &old_guid,
-        )
+        .sign_new_owner(&account.chain_id, &account.address)
         .await
         .unwrap();
-    account
-        .change_owner(&new_signer_signature)
-        .send()
+
+    let tx = controller.swap_owner(
+        &signer.signer(),
+        &new_signer.signer(),
+        &new_signer_signature,
+    );
+
+    let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * Felt::from(4u128);
+    let tx = tx
+        .nonce(0u32.into())
+        .max_fee(fee_estimate)
+        .prepared()
+        .unwrap();
+
+    let tx_hash = tx.transaction_hash(false);
+    tx.send().await.unwrap();
+    TransactionWaiter::new(tx_hash, runner.client())
+        .wait()
         .await
         .unwrap();
+
+    assert!(!controller
+        .is_valid_owner(&signer.signer().guid())
+        .call()
+        .await
+        .unwrap());
+    assert!(controller
+        .is_valid_owner(&new_signer.signer().guid())
+        .call()
+        .await
+        .unwrap());
+}
+
+#[tokio::test]
+async fn test_add_owner() {
+    let signer = SigningKey::from_random();
+    let runner = KatanaRunner::load();
+    let address = deploy_helper(&runner, &signer, None as Option<&SigningKey>).await;
+
+    transfer_helper(&runner, &address).await;
+
+    let account = CartridgeAccount::new(
+        runner.client(),
+        signer.clone(),
+        address,
+        runner.client().chain_id().await.unwrap(),
+    );
+
+    let controller = AbigenController::new(address, account.clone());
+    assert!(controller
+        .is_valid_owner(&signer.signer().guid())
+        .call()
+        .await
+        .unwrap());
+    let new_signer = SigningKey::from_random();
+    let new_signer_signature = new_signer
+        .sign_new_owner(&account.chain_id, &account.address)
+        .await
+        .unwrap();
+
+    let tx = controller.add_owner(&new_signer.signer(), &new_signer_signature);
+
+    let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * Felt::from(4u128);
+    let tx = tx
+        .nonce(0u32.into())
+        .max_fee(fee_estimate)
+        .prepared()
+        .unwrap();
+
+    let tx_hash = tx.transaction_hash(false);
+    tx.send().await.unwrap();
+    TransactionWaiter::new(tx_hash, runner.client())
+        .wait()
+        .await
+        .unwrap();
+
+    assert!(controller
+        .is_valid_owner(&signer.signer().guid())
+        .call()
+        .await
+        .unwrap());
+    assert!(controller
+        .is_valid_owner(&new_signer.signer().guid())
+        .call()
+        .await
+        .unwrap());
+
+    let account = CartridgeAccount::new(
+        runner.client(),
+        new_signer.clone(),
+        address,
+        runner.client().chain_id().await.unwrap(),
+    );
+    let controller = AbigenController::new(address, account.clone());
+
+    let new_new_signer = SigningKey::from_random();
+    let new_signer_signature = new_new_signer
+        .sign_new_owner(&account.chain_id, &account.address)
+        .await
+        .unwrap();
+
+    let tx = controller.add_owner(&new_new_signer.signer(), &new_signer_signature);
+
+    let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * Felt::from(4u128);
+    let tx = tx
+        .nonce(1u32.into())
+        .max_fee(fee_estimate)
+        .prepared()
+        .unwrap();
+
+    let tx_hash = tx.transaction_hash(false);
+    tx.send().await.unwrap();
+    TransactionWaiter::new(tx_hash, runner.client())
+        .wait()
+        .await
+        .unwrap();
+
+    assert!(controller
+        .is_valid_owner(&signer.signer().guid())
+        .call()
+        .await
+        .unwrap());
+    assert!(controller
+        .is_valid_owner(&new_signer.signer().guid())
+        .call()
+        .await
+        .unwrap());
+    assert!(controller
+        .is_valid_owner(&new_new_signer.signer().guid())
+        .call()
+        .await
+        .unwrap());
 }
 
 #[tokio::test]
@@ -78,10 +203,11 @@ async fn test_change_owner_wrong_signature() {
     );
 
     let account = AbigenController::new(address, account);
-    assert_eq!(
-        account.get_owner().call().await.unwrap(),
-        signer.verifying_key().scalar()
-    );
+    assert!(account
+        .is_valid_owner(&signer.signer().guid())
+        .call()
+        .await
+        .unwrap());
     let new_signer = SigningKey::from_random();
     let old_guid = signer.signer().guid();
     // We sign the wrong thing thus the owner change should painc
@@ -90,7 +216,11 @@ async fn test_change_owner_wrong_signature() {
         .await
         .unwrap();
     account
-        .change_owner(&new_signer_signature)
+        .swap_owner(
+            &signer.signer(),
+            &new_signer.signer(),
+            &new_signer_signature,
+        )
         .send()
         .await
         .unwrap();
@@ -113,17 +243,16 @@ async fn test_change_owner_execute_after() {
 
     let account = AbigenController::new(address, account);
     let new_signer = SigningKey::from_random();
-    let old_guid = signer.signer().guid();
     let new_signer_signature = new_signer
-        .sign_new_owner(
-            &account.account.chain_id,
-            &account.account.address,
-            &old_guid,
-        )
+        .sign_new_owner(&account.account.chain_id, &account.account.address)
         .await
         .unwrap();
     account
-        .change_owner(&new_signer_signature)
+        .swap_owner(
+            &signer.signer(),
+            &new_signer.signer(),
+            &new_signer_signature,
+        )
         .send()
         .await
         .unwrap();
@@ -201,20 +330,20 @@ async fn test_change_owner_invalidate_old_sessions() {
         .await
         .unwrap();
 
-    let account = AbigenController::new(address, account);
-
     let new_signer = SigningKey::from_random();
-    let old_guid = signer.signer().guid();
+
     let new_signer_signature = new_signer
-        .sign_new_owner(
-            &account.account.chain_id(),
-            &account.account.address(),
-            &old_guid,
-        )
+        .sign_new_owner(&account.account.chain_id, &account.account.address)
         .await
         .unwrap();
+
+    let account = AbigenController::new(address, account);
     account
-        .change_owner(&new_signer_signature)
+        .swap_owner(
+            &signer.signer(),
+            &new_signer.signer(),
+            &new_signer_signature,
+        )
         .send()
         .await
         .unwrap();
