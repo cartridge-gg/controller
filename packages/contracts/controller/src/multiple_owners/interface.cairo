@@ -12,7 +12,6 @@ trait IMultipleOwners<TContractState> {
     fn swap_owner(ref self: TContractState, old_owner: Signer, new_owner: Signer, signature: SignerSignature);
     fn remove_owner(ref self: TContractState, owner: Signer);
     fn is_valid_owner(self: @TContractState, owner_guid: felt252) -> bool;
-    fn get_stark_owner(self: @TContractState) -> Option<StarknetSigner>;
     fn assert_valid_new_owner_signature(
         self: @TContractState, signer_signature: SignerSignature
     );

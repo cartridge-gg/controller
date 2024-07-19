@@ -25,12 +25,6 @@ trait ICartridgeAccount<TContractState> {
     ) -> felt252;
 }
 
-#[starknet::interface]
-trait IUserAccount<TContractState> {
-    fn get_owner(self: @TContractState) -> felt252;
-    fn get_guardian_guid(self: @TContractState) -> Option<felt252>;
-}
-
 #[starknet::contract(account)]
 mod CartridgeAccount {
     use core::traits::TryInto;
@@ -78,7 +72,7 @@ mod CartridgeAccount {
         interface::ISessionCallback
     };
     use argent::session::interface::{SessionToken};
-    use controller::account::{ICartridgeAccount, IAllowedCallerCallback, IUserAccount};
+    use controller::account::{ICartridgeAccount, IAllowedCallerCallback};
     use controller::multiple_owners::{
         multiple_owners::{multiple_owners_component, multiple_owners_component::ImplMultipleOwnersInternal}, interface::{IMultipleOwners, IMultipleOwnersInternal}
     };
@@ -306,16 +300,6 @@ mod CartridgeAccount {
             starknet::VALIDATED
         }
     }
-
-    #[abi(embed_v0)]
-    impl UserAccountImpl of IUserAccount<ContractState> {
-        fn get_owner(self: @ContractState) -> felt252 {
-            self.multiple_owners.get_stark_owner().expect('no-stark-owner').pubkey.into()
-        }
-        fn get_guardian_guid(self: @ContractState) -> Option<felt252>{
-            Option::None
-        }
-    }
     
     impl SessionCallbackImpl of ISessionCallback<ContractState> {
         fn parse_authorization(
@@ -411,27 +395,11 @@ mod CartridgeAccount {
         fn parse_signature_array(
             self: @ContractState, mut signatures: Span<felt252>
         ) -> Array<SignerSignature> {
-            // Check if it's a legacy signature array (there's no support for guardian backup)
-            if signatures.len() != 2 && signatures.len() != 4 {
                 // manual inlining instead of calling full_deserialize for performance
-                let deserialized: Array<SignerSignature> = Serde::deserialize(ref signatures)
-                    .expect('invalid-signature-format');
-                assert(signatures.is_empty(), 'invalid-signature-length');
-                return deserialized;
-            }
-
-            let owner_signature = SignerSignature::Starknet(
-                (
-                    self.multiple_owners.get_stark_owner().expect('no-stark-owner'),
-                    StarknetSignature {
-                        r: *signatures.pop_front().unwrap(), s: *signatures.pop_front().unwrap()
-                    }
-                )
-            );
-            if signatures.is_empty() {
-                return array![owner_signature];
-            }
-            return array![owner_signature, owner_signature];
+            let deserialized: Array<SignerSignature> = Serde::deserialize(ref signatures)
+                .expect('invalid-signature-format');
+            assert(signatures.is_empty(), 'invalid-signature-length');
+            deserialized
         }
         fn assert_valid_span_signature(
             self: @ContractState, hash: felt252, signer_signatures: Array<SignerSignature>

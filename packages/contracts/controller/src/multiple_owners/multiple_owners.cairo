@@ -20,13 +20,24 @@ mod multiple_owners_component {
         _owners: LegacyMap<felt252, usize>,
         _owners_ordered: LegacyMap<usize, felt252>,
         _owners_count: usize,
-        _default_stark: felt252,
-        _default_stark_pos: usize,
     }
 
     #[event]
     #[derive(Drop, starknet::Event)]
-    enum Event {}
+    enum Event {
+        OwnerAdded: OwnerAdded,
+        OwnerRemoved: OwnerRemoved,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct OwnerAdded{
+        owner: Signer,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct OwnerRemoved {
+        owner: Signer,
+    }
 
     #[embeddable_as(MultipleOwnersImpl)]
     impl ImplMultipleOwners<
@@ -39,24 +50,22 @@ mod multiple_owners_component {
             self.get_contract().is_caller_allowed(get_caller_address());
             self.assert_valid_new_owner_signature(signature);
             self.add_owner_internal(owner.storage_value());
+            self.emit(OwnerAdded { owner });
         }
         fn swap_owner(ref self: ComponentState<TContractState>, old_owner: Signer, new_owner: Signer, signature: SignerSignature){
             self.get_contract().is_caller_allowed(get_caller_address());
             self.assert_valid_new_owner_signature(signature);
             self.swap_owner_internal(old_owner.storage_value(), new_owner.storage_value());
+            self.emit(OwnerAdded { owner: new_owner });
+            self.emit(OwnerRemoved { owner: old_owner });
         }
         fn remove_owner(ref self: ComponentState<TContractState>, owner: Signer){
             self.get_contract().is_caller_allowed(get_caller_address());
             self.remove_owner_internal(owner.storage_value());
+            self.emit(OwnerRemoved { owner });
         }
         fn is_valid_owner(self: @ComponentState<TContractState>, owner_guid: felt252) -> bool{
             self._owners.read(owner_guid) != 0
-        }
-        fn get_stark_owner(self: @ComponentState<TContractState>) -> Option<StarknetSigner>{
-            match self._default_stark_pos.read() {
-                0 => Option::None,
-                _ => Option::Some(StarknetSigner { pubkey: self._default_stark.read().try_into().expect('zero-pubkey') }),
-            }
         }
         fn assert_valid_new_owner_signature(
             self: @ComponentState<TContractState>, signer_signature: SignerSignature,
@@ -77,13 +86,6 @@ mod multiple_owners_component {
             self._owners.write(guid, 1);
             self._owners_ordered.write(1, guid);
             self._owners_count.write(1);
-            match owner.signer_type {
-                SignerType::Starknet => {
-                    self._default_stark.write(owner.stored_value);
-                    self._default_stark_pos.write(1);
-                },
-                _ => {},
-            }
         }
         fn add_owner_internal(ref self: ComponentState<TContractState>, owner: SignerStorageValue){
             let guid = owner.into_guid();
@@ -92,10 +94,6 @@ mod multiple_owners_component {
             self._owners.write(guid, count + 1);
             self._owners_ordered.write(count + 1, guid);
             self._owners_count.write(count + 1);
-            if self._default_stark_pos.read() == 0 && owner.signer_type == SignerType::Starknet {
-                self._default_stark.write(owner.stored_value);
-                self._default_stark_pos.write(count + 1);
-            }
         }
         fn swap_owner_internal(ref self: ComponentState<TContractState>, old_owner: SignerStorageValue, new_owner: SignerStorageValue){
             let old_guid = old_owner.into_guid();
@@ -106,13 +104,6 @@ mod multiple_owners_component {
             self._owners.write(old_guid, 0);
             self._owners.write(new_guid, old_pos);
             self._owners_ordered.write(old_pos, new_guid);
-            if self._default_stark_pos.read() == old_pos {
-                if new_owner.signer_type == SignerType::Starknet {
-                    self._default_stark.write(new_owner.stored_value);
-                } else {
-                    self._default_stark_pos.write(0);
-                }
-            }
         }
         fn remove_owner_internal(ref self: ComponentState<TContractState>, owner: SignerStorageValue){
             let guid = owner.into_guid();
@@ -125,9 +116,6 @@ mod multiple_owners_component {
             self._owners.write(last_guid, old_pos);
             self._owners_ordered.write(old_pos, last_guid);
             self._owners_count.write(count - 1);
-            if self._default_stark_pos.read() == old_pos {
-                self._default_stark_pos.write(0);
-            }
         }
         fn assert_valid_new_owner_signature_internal(
             self: @ComponentState<TContractState>, signer_signature: SignerSignature, msg: felt252, chain_id: felt252, contract_address: ContractAddress

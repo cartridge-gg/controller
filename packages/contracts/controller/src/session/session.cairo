@@ -41,7 +41,7 @@ mod session_component {
     use argent::signer::signer_signature::{Signer, SignerSignature, SignerType, SignerSignatureImpl, SignerTraitImpl};
     use controller::session::session::SESSION_TOKEN_V1;
     use core::poseidon::{hades_permutation, poseidon_hash_span};
-    use controller::account::{IAllowedCallerCallback, IUserAccount};
+    use controller::account::{IAllowedCallerCallback};
     use controller::utils::assert_no_self_call;
     use controller::session::session::AUTHORIZATION_BY_REGISTERED;
 
