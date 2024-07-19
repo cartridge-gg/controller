@@ -66,6 +66,26 @@ where
         }
     }
 
+    pub fn new_as_registered(
+        provider: P,
+        signer: S,
+        guardian: G,
+        address: Felt,
+        chain_id: Felt,
+        owner_guid: Felt,
+        session: Session,
+    ) -> Self {
+        Self::new(
+            provider,
+            signer,
+            guardian,
+            address,
+            chain_id,
+            vec![short_string!("authorization-by-registered"), owner_guid],
+            session,
+        )
+    }
+
     pub async fn sign(&self, hash: Felt, calls: &[Call]) -> Result<RawSessionToken, SignError> {
         let mut proofs = Vec::new();
 
