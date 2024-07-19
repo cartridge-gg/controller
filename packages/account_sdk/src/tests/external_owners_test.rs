@@ -93,7 +93,7 @@ async fn test_verify_external_owner() {
     let tx = other_account.execute_v1(vec![Call {
         to: address,
         selector: selector!("register_session"),
-        calldata: vec![
+        calldata: [
             <RawSession as CairoSerde>::cairo_serialize(&session.raw()),
             vec![other_address],
         ]
