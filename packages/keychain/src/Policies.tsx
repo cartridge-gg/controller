@@ -13,30 +13,32 @@ import { CodeUtilIcon, CopyHash, WedgeRightIcon } from "@cartridge/ui";
 import { Policy } from "@cartridge/controller";
 
 export function Policies({
-  title,
   policies,
+  title,
 }: {
-  title: string;
   policies: Policy[];
+  title?: string;
 }) {
   return (
     <Box position="relative">
-      <VStack
-        align="flex-start"
-        bg="solid.primary"
-        p={3}
-        position="sticky"
-        top={0}
-      >
-        <Text
-          color="text.secondaryAccent"
-          fontSize="xs"
-          fontWeight="bold"
-          casing="uppercase"
+      {title && (
+        <VStack
+          align="flex-start"
+          bg="solid.primary"
+          p={3}
+          position="sticky"
+          top={0}
         >
-          {title}
-        </Text>
-      </VStack>
+          <Text
+            color="text.secondaryAccent"
+            fontSize="xs"
+            fontWeight="bold"
+            casing="uppercase"
+          >
+            {title}
+          </Text>
+        </VStack>
+      )}
 
       <Accordion w="full" allowMultiple overflowY="auto">
         {policies.map((p, i) => (
