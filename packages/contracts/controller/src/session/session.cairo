@@ -16,6 +16,7 @@ use core::ecdsa::check_ecdsa_signature;
 
 
 const SESSION_TOKEN_V1: felt252 = 'session-token';
+const AUTHORIZATION_BY_REGISTERED: felt252 = 'authorization-by-registered';
 
 // Based on https://github.com/argentlabs/starknet-plugin-account/blob/3c14770c3f7734ef208536d91bbd76af56dc2043/contracts/plugins/SessionKey.cairo
 #[starknet::component]
@@ -34,13 +35,15 @@ mod session_component {
     use controller::session::interface::{
         ISession, SessionState, SessionStateImpl
     };
-    use argent::session::interface::{Session, ISessionCallback, SessionToken};
+    use argent::session::interface::{Session, SessionToken};
+    use controller::session::interface::{ISessionCallback};
     use argent::session::session_hash::{StructHashSession, OffChainMessageHashSessionRev1};
     use argent::signer::signer_signature::{Signer, SignerSignature, SignerType, SignerSignatureImpl, SignerTraitImpl};
     use controller::session::session::SESSION_TOKEN_V1;
     use core::poseidon::{hades_permutation, poseidon_hash_span};
     use controller::account::{IAllowedCallerCallback, IUserAccount};
     use controller::utils::assert_no_self_call;
+    use controller::session::session::AUTHORIZATION_BY_REGISTERED;
 
     #[storage]
     struct Storage {
@@ -82,7 +85,6 @@ mod session_component {
         +HasComponent<TContractState>, 
         +ISessionCallback<TContractState>, 
         +IAllowedCallerCallback<TContractState>,
-        +IUserAccount<TContractState>
     > of ISession<ComponentState<TContractState>> {
         fn revoke_session(ref self: ComponentState<TContractState>, session_hash: felt252) {
             self.get_contract().is_caller_allowed(get_caller_address());
@@ -92,7 +94,8 @@ mod session_component {
         }
         fn register_session(
             ref self: ComponentState<TContractState>,
-            session: Session
+            session: Session,
+            guid_or_address: felt252,
         ) {
             let state = self.get_contract();
             state.is_caller_allowed(get_caller_address());
@@ -101,14 +104,9 @@ mod session_component {
             let session_hash = session.get_message_hash_rev_1();
             assert(!self.revoked_session.read(session_hash), 'session/already-revoked');
             
-            let owner_guid = state.get_owner_guid();
-            let guardian_guid = match state.get_guardian_guid() {
-                Option::Some(guid) => guid,
-                Option::None => 0
-            };
-            // check validity of token
-            assert(!self.valid_session_cache.read((owner_guid, guardian_guid, session_hash)), 'session/already-registered');
-            self.valid_session_cache.write((owner_guid, guardian_guid, session_hash), true);
+            let guardian_guid = 0;
+            assert(!self.valid_session_cache.read((guid_or_address, guardian_guid, session_hash)), 'session/already-registered');
+            self.valid_session_cache.write((guid_or_address, guardian_guid, session_hash), true);
         }
         fn is_session_revoked(
             self: @ComponentState<TContractState>, session_hash: felt252
@@ -123,7 +121,6 @@ mod session_component {
         TContractState, 
         +HasComponent<TContractState>, 
         +ISessionCallback<TContractState>,
-        +IUserAccount<TContractState>
     > of InternalTrait<TContractState> {
         fn validate_session_serialized(
             ref self: ComponentState<TContractState>,
@@ -171,20 +168,34 @@ mod session_component {
 
             assert(!self.revoked_session.read(session_hash), 'session/already-revoked');
             
-            let owner_guid = state.get_owner_guid();
-            let guardian_guid = match state.get_guardian_guid() {
-                Option::Some(guid) => guid,
-                Option::None => 0
-            };
-            // check validity of token
-            if !signature.cache_authorization ||
-                !self.valid_session_cache.read((owner_guid, guardian_guid, session_hash))
+            
+            let guardian_guid = 0;
+
+            if(signature.session_authorization.len() == 2 
+                && *signature.session_authorization.at(0) == AUTHORIZATION_BY_REGISTERED) 
             {
-                state.parse_and_verify_authorization(session_hash, signature.session_authorization);
-                if signature.cache_authorization {
-                    self.valid_session_cache.write((owner_guid, guardian_guid, session_hash), true);
+                let owner_guid = *signature.session_authorization.at(1);
+                assert(signature.cache_authorization, 'session/cache-missing');
+                assert(self.valid_session_cache.read((owner_guid, guardian_guid, session_hash)), 'session/not-registered');
+                assert(state.is_valid_authorizer(owner_guid), 'session/invalid-authorizer');
+
+            } else {
+                let parsed = state.parse_authorization(signature.session_authorization);
+                let owner_guid = parsed.at(0).clone().signer().into_guid();
+                // check validity of token
+                if !signature.cache_authorization ||
+                    !self.valid_session_cache.read((owner_guid, guardian_guid, session_hash))
+                {
+                    state.verify_authorization(session_hash, parsed.span());
+                    if signature.cache_authorization {
+                        self.valid_session_cache.write((owner_guid, guardian_guid, session_hash), true);
+                    }
+                } else {
+                    assert(state.is_valid_authorizer(owner_guid), 'session/invalid-authorizer');
                 }
             }
+                
+            
 
             let (message_hash, _, _) = hades_permutation(transaction_hash, session_hash, 2);
 

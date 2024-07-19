@@ -16,7 +16,7 @@ use crate::{
 };
 use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{
-    accounts::{Account, AccountError},
+    accounts::AccountError,
     macros::{felt, selector},
     providers::Provider,
     signers::SigningKey,
@@ -39,23 +39,23 @@ async fn test_change_owner() {
         runner.client().chain_id().await.unwrap(),
     );
 
-    let account = AbigenController::new(address, account);
+    let controller = AbigenController::new(address, account.clone());
     assert_eq!(
-        account.get_owner().call().await.unwrap(),
+        controller.get_owner().call().await.unwrap(),
         signer.verifying_key().scalar()
     );
     let new_signer = SigningKey::from_random();
-    let old_guid = signer.signer().guid();
     let new_signer_signature = new_signer
-        .sign_new_owner(
-            &account.account.chain_id,
-            &account.account.address,
-            &old_guid,
-        )
+        .sign_new_owner(&account.chain_id, &account.address)
         .await
         .unwrap();
-    account
-        .change_owner(&new_signer_signature)
+
+    controller
+        .swap_owner(
+            &signer.signer(),
+            &new_signer.signer(),
+            &new_signer_signature,
+        )
         .send()
         .await
         .unwrap();
@@ -90,7 +90,11 @@ async fn test_change_owner_wrong_signature() {
         .await
         .unwrap();
     account
-        .change_owner(&new_signer_signature)
+        .swap_owner(
+            &signer.signer(),
+            &new_signer.signer(),
+            &new_signer_signature,
+        )
         .send()
         .await
         .unwrap();
@@ -113,17 +117,16 @@ async fn test_change_owner_execute_after() {
 
     let account = AbigenController::new(address, account);
     let new_signer = SigningKey::from_random();
-    let old_guid = signer.signer().guid();
     let new_signer_signature = new_signer
-        .sign_new_owner(
-            &account.account.chain_id,
-            &account.account.address,
-            &old_guid,
-        )
+        .sign_new_owner(&account.account.chain_id, &account.account.address)
         .await
         .unwrap();
     account
-        .change_owner(&new_signer_signature)
+        .swap_owner(
+            &signer.signer(),
+            &new_signer.signer(),
+            &new_signer_signature,
+        )
         .send()
         .await
         .unwrap();
@@ -201,20 +204,20 @@ async fn test_change_owner_invalidate_old_sessions() {
         .await
         .unwrap();
 
-    let account = AbigenController::new(address, account);
-
     let new_signer = SigningKey::from_random();
-    let old_guid = signer.signer().guid();
+
     let new_signer_signature = new_signer
-        .sign_new_owner(
-            &account.account.chain_id(),
-            &account.account.address(),
-            &old_guid,
-        )
+        .sign_new_owner(&account.account.chain_id, &account.account.address)
         .await
         .unwrap();
+
+    let account = AbigenController::new(address, account);
     account
-        .change_owner(&new_signer_signature)
+        .swap_owner(
+            &signer.signer(),
+            &new_signer.signer(),
+            &new_signer_signature,
+        )
         .send()
         .await
         .unwrap();
