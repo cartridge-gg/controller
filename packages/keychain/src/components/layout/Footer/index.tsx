@@ -92,11 +92,13 @@ export function Footer({
           onClick={footer.onToggle}
           _hover={{ cursor: "pointer" }}
         >
-          <TransactionSummary
-            isSlot={isSlot}
-            createSession={createSession}
-            hostname={hostname}
-          />
+          {!!policies.length && (
+            <TransactionSummary
+              isSlot={isSlot}
+              createSession={createSession}
+              hostname={hostname}
+            />
+          )}
 
           <Spacer />
 
