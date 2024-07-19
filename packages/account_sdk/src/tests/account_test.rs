@@ -86,6 +86,107 @@ async fn test_change_owner() {
 }
 
 #[tokio::test]
+async fn test_add_owner() {
+    let signer = SigningKey::from_random();
+    let runner = KatanaRunner::load();
+    let address = deploy_helper(&runner, &signer, None as Option<&SigningKey>).await;
+
+    transfer_helper(&runner, &address).await;
+
+    let account = CartridgeAccount::new(
+        runner.client(),
+        signer.clone(),
+        address,
+        runner.client().chain_id().await.unwrap(),
+    );
+
+    let controller = AbigenController::new(address, account.clone());
+    assert!(controller
+        .is_valid_owner(&signer.signer().guid())
+        .call()
+        .await
+        .unwrap());
+    let new_signer = SigningKey::from_random();
+    let new_signer_signature = new_signer
+        .sign_new_owner(&account.chain_id, &account.address)
+        .await
+        .unwrap();
+
+    let tx = controller.add_owner(&new_signer.signer(), &new_signer_signature);
+
+    let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * Felt::from(4u128);
+    let tx = tx
+        .nonce(0u32.into())
+        .max_fee(fee_estimate)
+        .prepared()
+        .unwrap();
+
+    let tx_hash = tx.transaction_hash(false);
+    tx.send().await.unwrap();
+    TransactionWaiter::new(tx_hash, runner.client())
+        .wait()
+        .await
+        .unwrap();
+
+    assert!(controller
+        .is_valid_owner(&signer.signer().guid())
+        .call()
+        .await
+        .unwrap());
+    assert!(controller
+        .is_valid_owner(&new_signer.signer().guid())
+        .call()
+        .await
+        .unwrap());
+
+    let account = CartridgeAccount::new(
+        runner.client(),
+        new_signer.clone(),
+        address,
+        runner.client().chain_id().await.unwrap(),
+    );
+    let controller = AbigenController::new(address, account.clone());
+
+    let new_new_signer = SigningKey::from_random();
+    let new_signer_signature = new_new_signer
+        .sign_new_owner(&account.chain_id, &account.address)
+        .await
+        .unwrap();
+
+    let tx = controller.add_owner(&new_new_signer.signer(), &new_signer_signature);
+
+    let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * Felt::from(4u128);
+    let tx = tx
+        .nonce(1u32.into())
+        .max_fee(fee_estimate)
+        .prepared()
+        .unwrap();
+
+    let tx_hash = tx.transaction_hash(false);
+    tx.send().await.unwrap();
+    TransactionWaiter::new(tx_hash, runner.client())
+        .wait()
+        .await
+        .unwrap();
+
+    assert!(controller
+        .is_valid_owner(&signer.signer().guid())
+        .call()
+        .await
+        .unwrap());
+    assert!(controller
+        .is_valid_owner(&new_signer.signer().guid())
+        .call()
+        .await
+        .unwrap());
+    assert!(controller
+        .is_valid_owner(&new_new_signer.signer().guid())
+        .call()
+        .await
+        .unwrap());
+}
+
+#[tokio::test]
 #[should_panic]
 async fn test_change_owner_wrong_signature() {
     let signer = SigningKey::from_random();
