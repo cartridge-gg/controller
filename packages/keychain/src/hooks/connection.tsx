@@ -17,6 +17,7 @@ import {
 import { RpcProvider, constants } from "starknet";
 import { Policy, Prefund, ResponseCodes } from "@cartridge/controller";
 import { mergeDefaultETHPrefund } from "utils/token";
+import { isIframe } from "components/connect/utils";
 
 const ConnectionContext = createContext<ConnectionContextValue>(undefined);
 
@@ -78,10 +79,14 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
   }, [context, parent]);
 
   useEffect(() => {
+    // If not embedded as iframe (eg Slot auth) set default values
+    if (!isIframe()) {
+      setOrigin(process.env.NEXT_PUBLIC_ORIGIN);
+      setRpcUrl(process.env.NEXT_PUBLIC_RPC_SEPOLIA);
+      return;
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
-    setOrigin(urlParams.get("origin") || process.env.NEXT_PUBLIC_ORIGIN);
-    setRpcUrl(urlParams.get("rpc_url") || process.env.NEXT_PUBLIC_RPC_SEPOLIA);
-    setChainId(urlParams.get("chain_id"));
     setPolicies(parsePolicies(urlParams.get("policies")));
     const prefunds: Prefund[] =
       JSON.parse(decodeURIComponent(urlParams.get("prefunds"))) ?? [];
