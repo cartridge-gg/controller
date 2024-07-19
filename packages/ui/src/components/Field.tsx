@@ -1,86 +1,94 @@
 import {
-  VStack,
-  Text,
-  HStack,
   Input,
   InputProps,
   InputGroup,
   InputRightElement,
   StackProps,
+  FormControl,
+  FormErrorMessage,
+  HStack,
+  Text,
+  Spinner,
 } from "@chakra-ui/react";
+import { FieldError } from "react-hook-form";
 import { AlertIcon, TimesCircleIcon } from "./icons";
-import { useCallback, useState } from "react";
-import { Loading } from "./Loading";
+import { forwardRef, useCallback, useState } from "react";
 
-export function Field({
-  error,
-  touched,
-  onClear,
-  container,
-  isLoading,
-  ...inputProps
-}: InputProps & {
-  touched: boolean;
-  error?: string;
-  onClear?: () => void;
-  container: StackProps;
-  isLoading?: boolean;
-}) {
-  const [isActive, setIsActive] = useState(false);
-
-  const onFocus = useCallback(
-    (e: any) => {
-      setIsActive(true);
-      inputProps.onFocus?.(e);
+export const Field = forwardRef(
+  (
+    {
+      error,
+      onClear,
+      containerStyles,
+      isLoading,
+      ...inputProps
+    }: InputProps & {
+      error?: FieldError;
+      onClear?: () => void;
+      containerStyles?: StackProps;
+      isLoading?: boolean;
     },
-    [inputProps],
-  );
+    ref,
+  ) => {
+    const [isActive, setIsActive] = useState(false);
 
-  const onBlur = useCallback(
-    (e: any) => {
-      setIsActive(false);
-      inputProps.onBlur?.(e);
-    },
-    [inputProps],
-  );
+    const onFocus = useCallback(
+      (e: any) => {
+        setIsActive(true);
+        inputProps.onFocus?.(e);
+      },
+      [inputProps],
+    );
 
-  return (
-    <VStack align="flex-start" {...container}>
-      <InputGroup>
-        <Input
-          {...inputProps}
-          onFocus={onFocus}
-          onBlur={onBlur}
-          isInvalid={!!error && touched}
-        />
+    const onBlur = useCallback(
+      (e: any) => {
+        setIsActive(false);
+        inputProps.onBlur?.(e);
+      },
+      [inputProps],
+    );
 
-        {isLoading ? (
-          <InputRightElement>
-            <Loading color="text.secondary" size="12px" />
-            {/** <Spinner color="text.secondary" size="sm" /> */}
-          </InputRightElement>
-        ) : (
-          inputProps.value &&
-          onClear && (
-            <InputRightElement
-              onClick={onClear}
-              cursor={isActive ? "pointer" : "default"}
-              opacity={isActive ? 100 : 0} // workaround for onBlur handler triggeres before onClear
-            >
-              <TimesCircleIcon color="text.secondary" boxSize={6} />
+    return (
+      <FormControl align="flex-start" {...containerStyles} isInvalid={!!error}>
+        <InputGroup>
+          <Input
+            {...inputProps}
+            onFocus={onFocus}
+            onBlur={onBlur}
+            isInvalid={!!error}
+            ref={ref}
+          />
+
+          {isLoading ? (
+            <InputRightElement>
+              <Spinner color="text.secondary" size="sm" />
             </InputRightElement>
-          )
-        )}
-      </InputGroup>
+          ) : (
+            inputProps.value &&
+            onClear && (
+              <InputRightElement
+                onClick={onClear}
+                cursor={isActive ? "pointer" : "default"}
+                opacity={isActive ? 100 : 0} // workaround for onBlur handler triggeres before onClear
+              >
+                <TimesCircleIcon color="text.secondary" boxSize={6} />
+              </InputRightElement>
+            )
+          )}
+        </InputGroup>
 
-      {error && touched && (
-        <HStack marginY={3}>
-          <AlertIcon fontSize="xl" color="text.error" />
-          <Text color="text.error" fontSize="sm">
-            {error}
-          </Text>
-        </HStack>
-      )}
-    </VStack>
-  );
-}
+        <FormErrorMessage>
+          {/* {error && error.message} */}
+          {error && (
+            <HStack marginY={3}>
+              <AlertIcon fontSize="xl" color="text.error" />
+              <Text color="text.error" fontSize="sm">
+                {error.message}
+              </Text>
+            </HStack>
+          )}
+        </FormErrorMessage>
+      </FormControl>
+    );
+  },
+);

@@ -8,11 +8,7 @@ import { AuthAction } from "./Authenticate";
 
 export function validateUsernameFor(type: AuthAction) {
   return async (val: string) => {
-    if (!val) {
-      return "Username required";
-    } else if (val.length < 3) {
-      return "Username must be at least 3 characters";
-    } else if (val.split(" ").length > 1) {
+    if (val.split(" ").length > 1) {
       return "Username cannot contain spaces";
     }
 

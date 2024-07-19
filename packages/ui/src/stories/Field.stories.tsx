@@ -12,22 +12,12 @@ const meta: Meta<typeof Field> = {
     value: {
       control: "text",
     },
-    touched: {
-      control: "boolean",
-    },
     error: {
       control: "text",
     },
   },
   args: {
     placeholder: "Username",
-    // value: "Shinobi",
-    touched: false,
-    error: "",
-    // onChange: (e) => console.log(e),
-    // onClear: () => {
-    //   console.log("Clear");
-    // },
   },
 };
 
@@ -43,7 +33,6 @@ export const Normal: Story = {};
 
 export const Error: Story = {
   args: {
-    touched: true,
-    error: "Cannot contain special characters",
+    error: { type: "validate", message: "Cannot contain special characters" },
   },
 };

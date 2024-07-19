@@ -56,7 +56,6 @@ export function Footer({
   }, [footer]);
 
   useEffect(() => {
-    console.log("!!!", footer.isOpen);
     window.document.body.style.overflowY = footer.isOpen ? "hidden" : "auto";
   }, [footer.isOpen]);
 

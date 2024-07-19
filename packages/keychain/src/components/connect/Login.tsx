@@ -1,10 +1,10 @@
 import { Field } from "@cartridge/ui";
 import { Button } from "@chakra-ui/react";
 import { Container, Footer, Content } from "components/layout";
-import { Form as FormikForm, Field as FormikField, Formik } from "formik";
+import { SubmitHandler, useForm, useController } from "react-hook-form";
 import { useCallback, useState } from "react";
 import Controller from "utils/controller";
-import { FormValues, LoginMode, LoginProps } from "./types";
+import { FormInput, LoginMode, LoginProps } from "./types";
 import { useAnalytics } from "hooks/analytics";
 import { fetchAccount, validateUsernameFor } from "./utils";
 import { RegistrationLink } from "./RegistrationLink";
@@ -27,8 +27,24 @@ export function Login({
   const [expiresAt] = useState<bigint>(3000000000n);
   const [error, setError] = useState<Error>();
 
-  const onSubmit = useCallback(
-    async (values: FormValues) => {
+  const { handleSubmit, formState, control, setValue } = useForm<FormInput>({
+    defaultValues: { username: prefilledName },
+  });
+  const { field: usernameField } = useController({
+    name: "username",
+    control,
+    rules: {
+      required: "Username required",
+      minLength: {
+        value: 3,
+        message: "Username must be at least 3 characters",
+      },
+      validate: validateUsernameFor("login"),
+    },
+  });
+
+  const onSubmit: SubmitHandler<FormInput> = useCallback(
+    async (values) => {
       setIsLoading(true);
 
       const {
@@ -108,64 +124,46 @@ export function Login({
       }
       description="Enter your Controller username"
     >
-      <Formik
-        initialValues={{ username: prefilledName }}
-        onSubmit={onSubmit}
-        validateOnChange={false}
-        validateOnBlur={false}
+      <form
+        style={{ width: "100%" }}
+        onSubmit={handleSubmit(onSubmit)}
+        onChange={() => setError(undefined)}
       >
-        {(props) => (
-          <FormikForm style={{ width: "100%" }}>
-            <Content>
-              <FormikField
-                name="username"
-                placeholder="Username"
-                validate={validateUsernameFor("login")}
-              >
-                {({ field, meta, form }) => (
-                  <Field
-                    {...field}
-                    onChange={(e) => {
-                      setError(undefined);
-                      e.target.value = e.target.value.toLowerCase();
-                      field.onChange(e);
-                    }}
-                    autoFocus
-                    placeholder="Username"
-                    touched={meta.touched}
-                    error={meta.error}
-                    isLoading={props.isValidating}
-                    isDisabled={isLoading}
-                    onClear={() => {
-                      setError(undefined);
-                      form.setFieldValue(field.name, "");
-                    }}
-                  />
-                )}
-              </FormikField>
-            </Content>
+        <Content>
+          <Field
+            {...usernameField}
+            autoFocus
+            onChange={(e) => {
+              setError(undefined);
+              e.target.value = e.target.value.toLowerCase();
+              usernameField.onChange(e);
+            }}
+            placeholder="Username"
+            error={formState.errors.username}
+            isLoading={formState.isValidating}
+            isDisabled={isLoading}
+            onClear={() => {
+              setError(undefined);
+              setValue(usernameField.name, "");
+            }}
+          />
+        </Content>
 
-            <Footer isSlot={isSlot} createSession>
-              {error && (
-                <ErrorAlert title="Login failed" description={error.message} />
-              )}
-              <Button
-                type="submit"
-                colorScheme="colorful"
-                isLoading={isLoading}
-              >
-                Log in
-              </Button>
-              <RegistrationLink
-                description="Need a controller?"
-                onClick={() => onSignup(props.values.username)}
-              >
-                Sign Up
-              </RegistrationLink>
-            </Footer>
-          </FormikForm>
-        )}
-      </Formik>
+        <Footer isSlot={isSlot} createSession>
+          {error && (
+            <ErrorAlert title="Login failed" description={error.message} />
+          )}
+          <Button type="submit" colorScheme="colorful" isLoading={isLoading}>
+            Log in
+          </Button>
+          <RegistrationLink
+            description="Need a controller?"
+            onClick={() => onSignup(usernameField.value)}
+          >
+            Sign Up
+          </RegistrationLink>
+        </Footer>
+      </form>
     </Container>
   );
 }
