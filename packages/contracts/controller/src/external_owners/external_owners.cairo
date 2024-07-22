@@ -48,7 +48,11 @@ mod external_owners_component {
         fn remove_external_owner(
             ref self: ComponentState<TContractState>, external_owner_address: ContractAddress
         ) {
-            assert(self.is_registered_external_owner(get_caller_address()), 'caller-not-owner');
+            let caller = get_caller_address();
+            assert(
+                caller == get_contract_address() || self.is_registered_external_owner(caller),
+                'caller-not-owner'
+            );
             assert(
                 self.is_registered_external_owner(external_owner_address),
                 'ext-owners/not-registered'

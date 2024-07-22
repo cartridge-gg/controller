@@ -7,7 +7,6 @@ use starknet::account::Call;
 use starknet::ContractAddress;
 use argent::signer::signer_signature::{Signer, SignerSignature, SignerType};
 
-
 #[starknet::interface]
 trait IAllowedCallerCallback<TState> {
     fn is_caller_allowed(self: @TState, caller_address: ContractAddress) -> bool;
@@ -17,10 +16,10 @@ trait IAllowedCallerCallback<TState> {
 trait ICartridgeAccount<TContractState> {
     fn __validate_declare__(ref self: TContractState, class_hash: felt252) -> felt252;
     fn __validate_deploy__(
-        ref self: TContractState, 
-        class_hash: felt252, 
-        contract_address_salt: felt252, 
-        owner: Signer, 
+        ref self: TContractState,
+        class_hash: felt252,
+        contract_address_salt: felt252,
+        owner: Signer,
         guardian: Option<Signer>
     ) -> felt252;
 }
@@ -34,7 +33,9 @@ mod CartridgeAccount {
     use core::array::ArrayTrait;
     use core::traits::Into;
     use core::result::ResultTrait;
-    use argent::account::interface::{IAccount, IArgentAccount, IArgentUserAccount, IDeprecatedArgentAccount, Version};
+    use argent::account::interface::{
+        IAccount, IArgentAccount, IArgentUserAccount, IDeprecatedArgentAccount, Version
+    };
     use argent::introspection::src5::src5_component;
     use argent::outside_execution::{
         outside_execution::outside_execution_component, interface::{IOutsideExecutionCallback}
@@ -42,26 +43,33 @@ mod CartridgeAccount {
     use argent::recovery::interface::{LegacyEscape, LegacyEscapeType, EscapeStatus};
     use argent::signer::{
         signer_signature::{
-            Signer, SignerStorageValue, SignerType, StarknetSigner, StarknetSignature, SignerTrait, SignerStorageTrait,
-            SignerSignature, SignerSignatureTrait, starknet_signer_from_pubkey
+            Signer, SignerStorageValue, SignerType, StarknetSigner, StarknetSignature, SignerTrait,
+            SignerStorageTrait, SignerSignature, SignerSignatureTrait, starknet_signer_from_pubkey
         }
     };
-    use argent::upgrade::{upgrade::upgrade_component, interface::{IUpgradableCallback, IUpgradableCallbackOld}};
+    use argent::upgrade::{
+        upgrade::upgrade_component, interface::{IUpgradableCallback, IUpgradableCallbackOld}
+    };
     use argent::utils::{
-        asserts::{assert_no_self_call, assert_only_self, assert_only_protocol}, calls::execute_multicall,
-        serialization::full_deserialize,
+        asserts::{assert_no_self_call, assert_only_self, assert_only_protocol},
+        calls::execute_multicall, serialization::full_deserialize,
         transaction_version::{
-            TX_V1, TX_V1_ESTIMATE, TX_V3, TX_V3_ESTIMATE, assert_correct_invoke_version, assert_correct_declare_version,
-            assert_correct_deploy_account_version, DA_MODE_L1, is_estimate_transaction
+            TX_V1, TX_V1_ESTIMATE, TX_V3, TX_V3_ESTIMATE, assert_correct_invoke_version,
+            assert_correct_declare_version, assert_correct_deploy_account_version, DA_MODE_L1,
+            is_estimate_transaction
         }
     };
     use hash::HashStateTrait;
     use openzeppelin::security::reentrancyguard::ReentrancyGuardComponent;
     use pedersen::PedersenTrait;
     use starknet::{
-        ContractAddress, ClassHash, get_block_timestamp, get_contract_address, VALIDATED, replace_class_syscall, get_caller_address,
-        account::Call, SyscallResultTrait, get_tx_info, get_execution_info, syscalls::storage_read_syscall,
-        storage_access::{storage_address_from_base_and_offset, storage_base_address_from_felt252, storage_write_syscall}
+        ContractAddress, ClassHash, get_block_timestamp, get_contract_address, VALIDATED,
+        replace_class_syscall, get_caller_address, account::Call, SyscallResultTrait, get_tx_info,
+        get_execution_info, syscalls::storage_read_syscall,
+        storage_access::{
+            storage_address_from_base_and_offset, storage_base_address_from_felt252,
+            storage_write_syscall
+        }
     };
     use controller::external_owners::external_owners::external_owners_component;
     use controller::delegate_account::delegate_account::delegate_account_component;
@@ -74,7 +82,10 @@ mod CartridgeAccount {
     use argent::session::interface::{SessionToken};
     use controller::account::{ICartridgeAccount, IAllowedCallerCallback};
     use controller::multiple_owners::{
-        multiple_owners::{multiple_owners_component, multiple_owners_component::ImplMultipleOwnersInternal}, interface::{IMultipleOwners, IMultipleOwnersInternal}
+        multiple_owners::{
+            multiple_owners_component, multiple_owners_component::ImplMultipleOwnersInternal
+        },
+        interface::{IMultipleOwners, IMultipleOwnersInternal}
     };
 
     const TRANSACTION_VERSION: felt252 = 1;
@@ -85,10 +96,12 @@ mod CartridgeAccount {
     #[abi(embed_v0)]
     impl SessionImpl = session_component::SessionComponent<ContractState>;
 
-    component!(path: multiple_owners_component, storage: multiple_owners, event: MultipleOwnersEvent);
+    component!(
+        path: multiple_owners_component, storage: multiple_owners, event: MultipleOwnersEvent
+    );
     #[abi(embed_v0)]
-    impl MultipleOwnersImpl = multiple_owners_component::MultipleOwnersImpl<ContractState>;
-
+    impl MultipleOwnersImpl =
+        multiple_owners_component::MultipleOwnersImpl<ContractState>;
 
     // Execute from outside
     component!(
@@ -107,7 +120,7 @@ mod CartridgeAccount {
     #[abi(embed_v0)]
     impl ExternalOwners =
         external_owners_component::ExternalOwnersImpl<ContractState>;
- 
+
     // Delegate Account
     component!(
         path: delegate_account_component, storage: delegate_account, event: DelegateAccountEvents
@@ -126,7 +139,9 @@ mod CartridgeAccount {
     impl UpgradeableInternalImpl = UpgradeableComponent::InternalImpl<ContractState>;
 
     // Reentrancy guard
-    component!(path: ReentrancyGuardComponent, storage: reentrancy_guard, event: ReentrancyGuardEvent);
+    component!(
+        path: ReentrancyGuardComponent, storage: reentrancy_guard, event: ReentrancyGuardEvent
+    );
     impl ReentrancyGuardInternalImpl = ReentrancyGuardComponent::InternalImpl<ContractState>;
 
     #[storage]
@@ -155,6 +170,7 @@ mod CartridgeAccount {
         OwnerChanged: OwnerChanged,
         OwnerChangedGuid: OwnerChangedGuid,
         SignerLinked: SignerLinked,
+        TransactionExecuted: TransactionExecuted,
         #[flat]
         MultipleOwnersEvent: multiple_owners_component::Event,
         #[flat]
@@ -171,6 +187,16 @@ mod CartridgeAccount {
         SRC5Events: src5_component::Event,
         #[flat]
         UpgradeableEvent: UpgradeableComponent::Event
+    }
+
+    /// @notice Emitted when the account executes a transaction
+    /// @param hash The transaction hash
+    /// @param response The data returned by the methods called
+    #[derive(Drop, starknet::Event)]
+    struct TransactionExecuted {
+        #[key]
+        hash: felt252,
+        response: Span<Span<felt252>>
     }
 
     #[derive(Drop, starknet::Event)]
@@ -234,24 +260,39 @@ mod CartridgeAccount {
         }
 
         fn __execute__(ref self: ContractState, mut calls: Array<Call>) -> Array<Span<felt252>> {
-            // Avoid calls from other contracts
-            // https://github.com/OpenZeppelin/cairo-contracts/issues/344
-            let sender = get_caller_address();
-            assert(sender.is_zero(), Errors::INVALID_CALLER);
-
-            let tx_info = get_tx_info().unbox();
-            let version = tx_info.version;
-            if version != TRANSACTION_VERSION {
-                assert(version == QUERY_VERSION, Errors::INVALID_TX_VERSION);
+            self.reentrancy_guard.start();
+            let exec_info = get_execution_info().unbox();
+            let tx_info = exec_info.tx_info.unbox();
+            assert_only_protocol(exec_info.caller_address);
+            assert_correct_invoke_version(tx_info.version);
+            let signature = tx_info.signature;
+            if self.session.is_session(signature) {
+                let session_timestamp = *signature[1];
+                // can call unwrap safely as the session has already been deserialized
+                let session_timestamp_u64 = session_timestamp.try_into().unwrap();
+                assert(
+                    session_timestamp_u64 >= exec_info.block_info.unbox().block_timestamp,
+                    'session/expired'
+                );
             }
 
-            _execute_calls(calls.span())
+            let retdata = execute_multicall(calls.span());
+
+            self
+                .emit(
+                    TransactionExecuted { hash: tx_info.transaction_hash, response: retdata.span() }
+                );
+            self.reentrancy_guard.end();
+            retdata
         }
 
         fn is_valid_signature(
             self: @ContractState, hash: felt252, signature: Array<felt252>
         ) -> felt252 {
-            if self.is_valid_span_signature(hash, self.parse_signature_array(signature.span()).span()) {
+            if self
+                .is_valid_span_signature(
+                    hash, self.parse_signature_array(signature.span()).span()
+                ) {
                 starknet::VALIDATED
             } else {
                 0
@@ -283,12 +324,12 @@ mod CartridgeAccount {
             }
             starknet::VALIDATED
         }
-    
+
         fn __validate_deploy__(
             ref self: ContractState,
             class_hash: felt252,
             contract_address_salt: felt252,
-            owner: Signer, 
+            owner: Signer,
             guardian: Option<Signer>,
         ) -> felt252 {
             let tx_info = get_tx_info().unbox();
@@ -300,34 +341,37 @@ mod CartridgeAccount {
             starknet::VALIDATED
         }
     }
-    
+
     impl SessionCallbackImpl of ISessionCallback<ContractState> {
         fn parse_authorization(
             self: @ContractState, authorization_signature: Span<felt252>
-        ) -> Array<SignerSignature>{
+        ) -> Array<SignerSignature> {
             self.parse_signature_array(authorization_signature)
         }
-        fn is_valid_authorizer(
-            self: @ContractState, guid_or_address: felt252
-        ) -> bool {
+
+        fn is_valid_authorizer(self: @ContractState, guid_or_address: felt252) -> bool {
             if self.multiple_owners.is_valid_owner(guid_or_address) {
                 return true;
-            } 
+            }
             let address: Option<ContractAddress> = guid_or_address.try_into();
             match address {
                 Option::Some(address) => self.is_registered_external_owner(address),
                 Option::None => false,
             }
         }
+
         fn verify_authorization(
-            self: @ContractState, session_hash: felt252, authorization_signature: Span<SignerSignature>
-        ){
+            self: @ContractState,
+            session_hash: felt252,
+            authorization_signature: Span<SignerSignature>
+        ) {
             assert(
                 self.is_valid_span_signature(session_hash, authorization_signature),
                 'session/invalid-account-sig'
             );
         }
     }
+
     impl IAllowedCallerCallbackImpl of IAllowedCallerCallback<ContractState> {
         fn is_caller_allowed(self: @ContractState, caller_address: ContractAddress) -> bool {
             caller_address == get_contract_address()
@@ -355,7 +399,11 @@ mod CartridgeAccount {
                         account_address: get_contract_address()
                     );
             }
-            let retdata = _execute_calls(calls);
+            let retdata = execute_multicall(calls);
+            self
+                .emit(
+                    TransactionExecuted { hash: outside_execution_hash, response: retdata.span() }
+                );
             retdata
         }
     }
@@ -381,6 +429,7 @@ mod CartridgeAccount {
             assert(signer_signatures.len() <= 2, 'invalid-signature-length');
             self.is_valid_owner_signature(hash, *signer_signatures.at(0))
         }
+
         #[must_use]
         fn is_valid_owner_signature(
             self: @ContractState, hash: felt252, signer_signature: SignerSignature
@@ -391,16 +440,18 @@ mod CartridgeAccount {
             }
             return signer_signature.is_valid_signature(hash);
         }
+
         #[inline(always)]
         fn parse_signature_array(
             self: @ContractState, mut signatures: Span<felt252>
         ) -> Array<SignerSignature> {
-                // manual inlining instead of calling full_deserialize for performance
+            // manual inlining instead of calling full_deserialize for performance
             let deserialized: Array<SignerSignature> = Serde::deserialize(ref signatures)
                 .expect('invalid-signature-format');
             assert(signatures.is_empty(), 'invalid-signature-length');
             deserialized
         }
+
         fn assert_valid_span_signature(
             self: @ContractState, hash: felt252, signer_signatures: Array<SignerSignature>
         ) {
@@ -409,6 +460,7 @@ mod CartridgeAccount {
                 self.is_valid_owner_signature(hash, *signer_signatures.at(0)), 'invalid-owner-sig'
             );
         }
+
         fn assert_valid_calls_and_signature(
             ref self: ContractState,
             calls: Span<Call>,
@@ -420,28 +472,5 @@ mod CartridgeAccount {
             let signer_signatures: Array<SignerSignature> = self.parse_signature_array(signatures);
             self.assert_valid_span_signature(execution_hash, signer_signatures);
         }
-    }
-
-    fn _execute_calls(mut calls: Span<Call>) -> Array<Span<felt252>> {
-        let mut res = ArrayTrait::new();
-        loop {
-            match calls.pop_front() {
-                Option::Some(call) => {
-                    let _res = _execute_single_call(call);
-                    res.append(_res);
-                },
-                Option::None(_) => { break (); },
-            };
-        };
-        res
-    }
-
-    fn _execute_single_call(call: @Call) -> Span<felt252> {
-        let Call { to, selector, calldata } = call;
-        starknet::call_contract_syscall(*to, *selector, *calldata).unwrap()
-    }
-
-    fn owner_ordered_types() -> Span<SignerType> {
-        array![SignerType::Starknet, SignerType::Webauthn, SignerType::Secp256k1].span()
     }
 }
