@@ -14,8 +14,8 @@ import { useConnection } from "hooks/connection";
 import { useDebounce } from "hooks/debounce";
 import { ErrorAlert } from "components/ErrorAlert";
 import { useDeploy } from "hooks/deploy";
-import { constants } from "starknet";
 import { useController, useForm } from "react-hook-form";
+import { constants } from "starknet";
 
 export function Signup({
   prefilledName = "",
@@ -38,6 +38,7 @@ export function Signup({
     setError: setFieldError,
     clearErrors,
   } = useForm<FormInput>({ defaultValues: { username: prefilledName } });
+  const { hasPrefundRequest } = useConnection();
   const { field: usernameField } = useController({
     name: "username",
     control,
@@ -128,7 +129,10 @@ export function Signup({
       refetchInterval: (data) => (!data ? 1000 : undefined),
       onSuccess: async (data) => {
         try {
-          if (chainId !== constants.StarknetChainId.SN_MAIN) {
+          if (
+            chainId !== constants.StarknetChainId.SN_MAIN &&
+            !hasPrefundRequest
+          ) {
             await deployRequest(usernameField.value);
           }
 

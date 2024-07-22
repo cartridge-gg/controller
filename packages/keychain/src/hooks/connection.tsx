@@ -30,6 +30,7 @@ type ConnectionContextValue = {
   chainName: string;
   policies: Policy[];
   prefunds: Prefund[];
+  hasPrefundRequest: boolean;
   error: Error;
   setContext: (context: ConnectionCtx) => void;
   setController: (controller: Controller) => void;
@@ -46,6 +47,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
   const [policies, setPolicies] = useState<Policy[]>([]);
   const [controller, setController] = useState(Controller.fromStore);
   const [prefunds, setPrefunds] = useState<Prefund[]>([]);
+  const [hasPrefundRequest, setHasPrefundRequest] = useState<boolean>(false);
   const [error, setError] = useState<Error>();
 
   const chainName = useMemo(() => {
@@ -88,8 +90,12 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
 
     const urlParams = new URLSearchParams(window.location.search);
     setPolicies(parsePolicies(urlParams.get("policies")));
-    const prefunds: Prefund[] =
-      JSON.parse(decodeURIComponent(urlParams.get("prefunds"))) ?? [];
+
+    const prefundParam = urlParams.get("prefunds");
+    const prefunds: Prefund[] = prefundParam
+      ? JSON.parse(decodeURIComponent(prefundParam))
+      : [];
+    setHasPrefundRequest(!!prefundParam);
     setPrefunds(mergeDefaultETHPrefund(prefunds));
 
     const connection = connectToController({
@@ -147,6 +153,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
         chainName,
         policies,
         prefunds,
+        hasPrefundRequest,
         error,
         setController,
         setContext,

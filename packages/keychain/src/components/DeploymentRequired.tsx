@@ -9,6 +9,7 @@ import { Funding } from "./Funding";
 import NextLink from "next/link";
 import { useDeploy } from "hooks/deploy";
 import { Status } from "utils/account";
+import { useConnection } from "hooks/connection";
 
 export function DeploymentRequired({
   onClose,
@@ -20,18 +21,22 @@ export function DeploymentRequired({
   const {
     controller: { account },
   } = useController();
+  const { hasPrefundRequest } = useConnection();
   const { deployRequest } = useDeploy();
   const [deployHash, setDeployHash] = useState<string>();
+  const [showFunding, setShowFunding] = useState(false);
   const [error, setError] = useState<Error>();
-  const [fundingRequired, setIsFundingRequired] = useState(false);
 
   useEffect(() => {
     if (account.status === Status.DEPLOYED) {
       return;
     }
 
-    if (account.chainId === constants.StarknetChainId.SN_MAIN) {
-      setIsFundingRequired(true);
+    if (
+      account.chainId === constants.StarknetChainId.SN_MAIN ||
+      hasPrefundRequest
+    ) {
+      setShowFunding(true);
       return;
     }
 
@@ -50,12 +55,12 @@ export function DeploymentRequired({
     return <>{children}</>;
   }
 
-  if (fundingRequired)
+  if (showFunding)
     return (
       <Funding
         onComplete={(hash) => {
           if (hash) setDeployHash(hash);
-          setIsFundingRequired(false);
+          setShowFunding(false);
         }}
       />
     );
