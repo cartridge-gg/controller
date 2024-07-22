@@ -5,6 +5,7 @@ import { InvalidTxn } from "components/InvalidTxn";
 import { SignMessage } from "components/SignMessage";
 import { DojoSpawnAndMove } from "components/DojoSpawnAndMove";
 import { DelegateAccount } from "components/DelegateAccount";
+import { Upgrade } from "components/Upgrade";
 
 const Home: NextPage = () => {
   return (
@@ -13,6 +14,7 @@ const Home: NextPage = () => {
       <ConnectWallet />
       <DojoSpawnAndMove />
       <TransferEth />
+      <Upgrade />
       <DelegateAccount />
       <InvalidTxn />
       <SignMessage />

@@ -18,16 +18,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
   );
 }
 
-const url =
-  !process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ||
-  process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL.split(".")[0] ===
-    "cartridge-starknet-react-next"
-    ? process.env.XFRAME_URL
-    : "https://" +
-      (process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ?? "").replace(
-        "cartridge-starknet-react-next",
-        "keychain",
-      );
+const url = "https://keychain-git-upgrade-controller.preview.cartridge.gg";
 
 function provider(chain: Chain) {
   switch (chain) {
