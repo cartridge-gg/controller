@@ -9,7 +9,7 @@ export function RegistrationLink({
   description: string;
 } & React.PropsWithChildren) {
   return (
-    <HStack justify="center" mt={3}>
+    <HStack justify="center" mt={3} gap={4}>
       <Text fontSize="sm" color="text.secondary">
         {description}
       </Text>
@@ -20,6 +20,7 @@ export function RegistrationLink({
         textTransform="none"
         px={4}
         py={2}
+        fontFamily="Inter"
         fontWeight="medium"
         color="link.blue"
         fontSize="xs"
