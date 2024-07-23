@@ -96,10 +96,9 @@ pub trait NewOwnerSigner: HashSigner {
         contract_address: &Felt,
     ) -> Result<SignerSignature, SignError> {
         let message_hash = PedersenHasher::new(Felt::ZERO)
-            .update(&selector!("change_owner"))
+            .update(&selector!("add_owner"))
             .update(chain_id)
             .update(contract_address)
-            .update(&3u32.into())
             .finalize();
         self.sign(&message_hash).await
     }
