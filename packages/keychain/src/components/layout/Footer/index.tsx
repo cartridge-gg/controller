@@ -149,11 +149,11 @@ export function Footer({
           target="_blank"
           overflow="hidden"
         >
-          <Text fontSize="xs" color="currentColor">
+          <Text fontSize="xs" fontWeight={500} color="currentColor">
             Controller by
           </Text>
 
-          <CartridgeLogo fontSize={100} color="text.secondary" />
+          <CartridgeLogo color="text.secondary" />
         </HStack>
       )}
     </VStack>

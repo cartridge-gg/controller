@@ -21,7 +21,7 @@ export function NetworkButton() {
   }
 
   return (
-    <HStack bg="solid.primary" borderRadius="md" p={3}>
+    <HStack bg="solid.bg" borderRadius="base" p={3}>
       <Circle bg={bg} opacity={controller ? 1 : 0.3} size={2} />
       <Text
         fontSize="xs"

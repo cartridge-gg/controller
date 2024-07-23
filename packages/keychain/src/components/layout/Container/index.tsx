@@ -40,7 +40,7 @@ export function Container({
   );
 }
 
-export const FOOTER_HEIGHT = 32;
+export const FOOTER_HEIGHT = 40;
 export const PORTAL_WINDOW_HEIGHT = 600;
 
 function Wrapper({
