@@ -1,10 +1,9 @@
 #[starknet::component]
 mod delegate_account_component {
     use controller::delegate_account::interface::IDelegateAccount;
-    use starknet::{get_caller_address, get_contract_address, ContractAddress};
+    use controller::account::IAllowedCallerCallback;
 
-    use controller::external_owners::external_owners::external_owners_component as external_owners_comp;
-    use external_owners_comp::ImplExternalOwners;
+    use starknet::{get_caller_address, ContractAddress};
 
     #[storage]
     struct Storage {

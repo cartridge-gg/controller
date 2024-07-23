@@ -23,26 +23,30 @@ const AUTHORIZATION_BY_REGISTERED: felt252 = 'authorization-by-registered';
 mod session_component {
     use core::num::traits::zero::Zero;
     use core::result::ResultTrait;
-    use controller::session::session::check_policy;
-    use starknet::info::{TxInfo, get_tx_info, get_block_timestamp, get_caller_address};
-    use starknet::account::Call;
     use core::ecdsa::check_ecdsa_signature;
+    use core::poseidon::{hades_permutation, poseidon_hash_span};
+    use starknet::account::Call;
+    use starknet::contract_address::ContractAddress;
+    use starknet::info::{TxInfo, get_tx_info, get_block_timestamp, get_caller_address};
+    use starknet::get_contract_address;
+
     use alexandria_merkle_tree::merkle_tree::{
         Hasher, MerkleTree, poseidon::PoseidonHasherImpl, MerkleTreeTrait
     };
-    use starknet::contract_address::ContractAddress;
-    use starknet::get_contract_address;
-    use controller::session::interface::{ISession, SessionState, SessionStateImpl};
+
     use argent::session::interface::{Session, SessionToken};
-    use controller::session::interface::{ISessionCallback};
+    use argent::utils::asserts::assert_no_self_call;
     use argent::session::session_hash::{StructHashSession, OffChainMessageHashSessionRev1};
     use argent::signer::signer_signature::{
         Signer, SignerSignature, SignerType, SignerSignatureImpl, SignerTraitImpl
     };
+
+    use controller::session::interface::{
+        ISession, ISessionCallback, SessionState, SessionStateImpl
+    };
+    use controller::session::session::check_policy;
     use controller::session::session::SESSION_TOKEN_V1;
-    use core::poseidon::{hades_permutation, poseidon_hash_span};
-    use controller::account::{IAllowedCallerCallback};
-    use controller::utils::assert_no_self_call;
+    use controller::account::IAllowedCallerCallback;
     use controller::session::session::AUTHORIZATION_BY_REGISTERED;
 
     #[storage]

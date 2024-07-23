@@ -1,8 +1,5 @@
 // SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts for Cairo v0.7.0 (account/account.cairo)
 
-use starknet::testing;
-use starknet::secp256r1::Secp256r1Point;
 use starknet::account::Call;
 use starknet::ContractAddress;
 use argent::signer::signer_signature::{Signer, SignerSignature, SignerType};
@@ -33,6 +30,18 @@ mod CartridgeAccount {
     use core::array::ArrayTrait;
     use core::traits::Into;
     use core::result::ResultTrait;
+    use hash::HashStateTrait;
+    use pedersen::PedersenTrait;
+    use starknet::{
+        ContractAddress, ClassHash, get_block_timestamp, get_contract_address, VALIDATED,
+        replace_class_syscall, get_caller_address, account::Call, SyscallResultTrait, get_tx_info,
+        get_execution_info, syscalls::storage_read_syscall,
+        storage_access::{
+            storage_address_from_base_and_offset, storage_base_address_from_felt252,
+            storage_write_syscall
+        }
+    };
+
     use argent::account::interface::{
         IAccount, IArgentAccount, IArgentUserAccount, IDeprecatedArgentAccount, Version
     };
@@ -59,27 +68,18 @@ mod CartridgeAccount {
             is_estimate_transaction
         }
     };
-    use hash::HashStateTrait;
+    use argent::session::interface::SessionToken;
+
     use openzeppelin::security::reentrancyguard::ReentrancyGuardComponent;
-    use pedersen::PedersenTrait;
-    use starknet::{
-        ContractAddress, ClassHash, get_block_timestamp, get_contract_address, VALIDATED,
-        replace_class_syscall, get_caller_address, account::Call, SyscallResultTrait, get_tx_info,
-        get_execution_info, syscalls::storage_read_syscall,
-        storage_access::{
-            storage_address_from_base_and_offset, storage_base_address_from_felt252,
-            storage_write_syscall
-        }
-    };
-    use controller::external_owners::external_owners::external_owners_component;
-    use controller::delegate_account::delegate_account::delegate_account_component;
     use openzeppelin::upgrades::UpgradeableComponent;
     use openzeppelin::upgrades::interface::IUpgradeable;
+
+    use controller::external_owners::external_owners::external_owners_component;
+    use controller::delegate_account::delegate_account::delegate_account_component;
     use controller::session::{
         session::session_component::{InternalImpl, InternalTrait}, session::session_component,
         interface::ISessionCallback
     };
-    use argent::session::interface::{SessionToken};
     use controller::account::{ICartridgeAccount, IAllowedCallerCallback};
     use controller::multiple_owners::{
         multiple_owners::{
