@@ -150,9 +150,5 @@ async fn test_deploy_and_call() {
     let deployed_address = deploy(client, &account, signer.clone(), None, class_hash).await;
 
     let contract = Controller::new(deployed_address, account);
-    assert!(contract
-        .is_owner(&signer.guid())
-        .call()
-        .await
-        .unwrap());
+    assert!(contract.is_owner(&signer.guid()).call().await.unwrap());
 }

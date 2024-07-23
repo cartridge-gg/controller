@@ -17,7 +17,7 @@ use crate::{
 };
 use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{
-    accounts::AccountError,
+    accounts::{Account, AccountError},
     macros::{felt, selector},
     providers::Provider,
     signers::SigningKey,
@@ -53,11 +53,9 @@ async fn test_change_owner() {
         .await
         .unwrap();
 
-    let tx = controller.swap_owner(
-        &signer.signer(),
-        &new_signer.signer(),
-        &new_signer_signature,
-    );
+    let add_owner = controller.add_owner_getcall(&new_signer.signer(), &new_signer_signature);
+    let remove_owner = controller.remove_owner_getcall(&signer.signer());
+    let tx = account.execute_v1(vec![add_owner, remove_owner]);
 
     let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * Felt::from(4u128);
     let tx = tx
@@ -216,11 +214,7 @@ async fn test_change_owner_wrong_signature() {
         .await
         .unwrap();
     account
-        .swap_owner(
-            &signer.signer(),
-            &new_signer.signer(),
-            &new_signer_signature,
-        )
+        .add_owner(&new_signer.signer(), &new_signer_signature)
         .send()
         .await
         .unwrap();
@@ -241,18 +235,19 @@ async fn test_change_owner_execute_after() {
         runner.client().chain_id().await.unwrap(),
     );
 
-    let account = AbigenController::new(address, account);
+    let controller = AbigenController::new(address, account);
     let new_signer = SigningKey::from_random();
     let new_signer_signature = new_signer
-        .sign_new_owner(&account.account.chain_id, &account.account.address)
+        .sign_new_owner(&controller.account.chain_id, &controller.account.address)
         .await
         .unwrap();
-    account
-        .swap_owner(
-            &signer.signer(),
-            &new_signer.signer(),
-            &new_signer_signature,
-        )
+
+    let add_owner = controller.add_owner_getcall(&new_signer.signer(), &new_signer_signature);
+    let remove_owner = controller.remove_owner_getcall(&signer.signer());
+
+    controller
+        .account
+        .execute_v1(vec![add_owner, remove_owner])
         .send()
         .await
         .unwrap();
@@ -262,7 +257,7 @@ async fn test_change_owner_execute_after() {
 
     let new_account = felt!("0x18301129");
 
-    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &account.account);
+    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller.account);
 
     // Old signature should fail
     if contract_erc20
@@ -337,13 +332,13 @@ async fn test_change_owner_invalidate_old_sessions() {
         .await
         .unwrap();
 
-    let account = AbigenController::new(address, account);
-    account
-        .swap_owner(
-            &signer.signer(),
-            &new_signer.signer(),
-            &new_signer_signature,
-        )
+    let controller = AbigenController::new(address, account);
+    let add_owner = controller.add_owner_getcall(&new_signer.signer(), &new_signer_signature);
+    let remove_owner = controller.remove_owner_getcall(&signer.signer());
+
+    controller
+        .account
+        .execute_v1(vec![add_owner, remove_owner])
         .send()
         .await
         .unwrap();

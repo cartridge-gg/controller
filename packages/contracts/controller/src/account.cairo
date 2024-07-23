@@ -82,10 +82,7 @@ mod CartridgeAccount {
     };
     use controller::account::{ICartridgeAccount, IAssertOwner};
     use controller::multiple_owners::{
-        multiple_owners::{
-            multiple_owners_component, multiple_owners_component::ImplMultipleOwnersInternal
-        },
-        interface::{IMultipleOwners, IMultipleOwnersInternal}
+        multiple_owners::{multiple_owners_component}, interface::IMultipleOwners
     };
 
     const TRANSACTION_VERSION: felt252 = 1;
@@ -167,9 +164,6 @@ mod CartridgeAccount {
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
-        OwnerChanged: OwnerChanged,
-        OwnerChangedGuid: OwnerChangedGuid,
-        SignerLinked: SignerLinked,
         TransactionExecuted: TransactionExecuted,
         #[flat]
         MultipleOwnersEvent: multiple_owners_component::Event,
@@ -199,23 +193,6 @@ mod CartridgeAccount {
         response: Span<Span<felt252>>
     }
 
-    #[derive(Drop, starknet::Event)]
-    struct OwnerChanged {
-        new_owner: felt252
-    }
-
-    #[derive(Drop, starknet::Event)]
-    struct OwnerChangedGuid {
-        new_owner_guid: felt252
-    }
-
-    #[derive(Drop, starknet::Event)]
-    struct SignerLinked {
-        #[key]
-        signer_guid: felt252,
-        signer: Signer,
-    }
-
     mod Errors {
         const INVALID_CALLER: felt252 = 'Account: invalid caller';
         const INVALID_SIGNATURE: felt252 = 'Account: invalid signature';
@@ -225,7 +202,7 @@ mod CartridgeAccount {
 
     #[constructor]
     fn constructor(ref self: ContractState, owner: Signer, guardian: Option<Signer>) {
-        self.multiple_owners.initialize(owner.storage_value());
+        self.multiple_owners.owners.write(owner.into_guid(), true);
     }
 
     //
@@ -356,6 +333,7 @@ mod CartridgeAccount {
             if self.multiple_owners.is_owner(guid_or_address) {
                 return true;
             }
+
             let address: Option<ContractAddress> = guid_or_address.try_into();
             match address {
                 Option::Some(address) => self.is_external_owner(address),

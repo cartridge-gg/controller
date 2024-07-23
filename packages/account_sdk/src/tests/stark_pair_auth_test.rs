@@ -46,9 +46,5 @@ async fn test_authorize_execute() {
         .await
         .unwrap();
 
-    new_account
-        .is_owner(&signer.guid())
-        .call()
-        .await
-        .unwrap();
+    new_account.is_owner(&signer.guid()).call().await.unwrap();
 }
