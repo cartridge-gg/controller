@@ -43,7 +43,7 @@ async fn test_change_owner() {
 
     let controller = AbigenController::new(address, account.clone());
     assert!(controller
-        .is_valid_owner(&signer.signer().guid())
+        .is_owner(&signer.signer().guid())
         .call()
         .await
         .unwrap());
@@ -74,12 +74,12 @@ async fn test_change_owner() {
         .unwrap();
 
     assert!(!controller
-        .is_valid_owner(&signer.signer().guid())
+        .is_owner(&signer.signer().guid())
         .call()
         .await
         .unwrap());
     assert!(controller
-        .is_valid_owner(&new_signer.signer().guid())
+        .is_owner(&new_signer.signer().guid())
         .call()
         .await
         .unwrap());
@@ -102,7 +102,7 @@ async fn test_add_owner() {
 
     let controller = AbigenController::new(address, account.clone());
     assert!(controller
-        .is_valid_owner(&signer.signer().guid())
+        .is_owner(&signer.signer().guid())
         .call()
         .await
         .unwrap());
@@ -129,12 +129,12 @@ async fn test_add_owner() {
         .unwrap();
 
     assert!(controller
-        .is_valid_owner(&signer.signer().guid())
+        .is_owner(&signer.signer().guid())
         .call()
         .await
         .unwrap());
     assert!(controller
-        .is_valid_owner(&new_signer.signer().guid())
+        .is_owner(&new_signer.signer().guid())
         .call()
         .await
         .unwrap());
@@ -170,17 +170,17 @@ async fn test_add_owner() {
         .unwrap();
 
     assert!(controller
-        .is_valid_owner(&signer.signer().guid())
+        .is_owner(&signer.signer().guid())
         .call()
         .await
         .unwrap());
     assert!(controller
-        .is_valid_owner(&new_signer.signer().guid())
+        .is_owner(&new_signer.signer().guid())
         .call()
         .await
         .unwrap());
     assert!(controller
-        .is_valid_owner(&new_new_signer.signer().guid())
+        .is_owner(&new_new_signer.signer().guid())
         .call()
         .await
         .unwrap());
@@ -204,7 +204,7 @@ async fn test_change_owner_wrong_signature() {
 
     let account = AbigenController::new(address, account);
     assert!(account
-        .is_valid_owner(&signer.signer().guid())
+        .is_owner(&signer.signer().guid())
         .call()
         .await
         .unwrap());

@@ -1,12 +1,12 @@
-use alexandria_data_structures::array_ext::ArrayTraitExt;
-use core::box::BoxTrait;
+// use alexandria_data_structures::array_ext::ArrayTraitExt;
+// use core::box::BoxTrait;
 use core::array::SpanTrait;
-use starknet::info::{TxInfo, get_tx_info, get_block_timestamp};
+// use starknet::info::{TxInfo, get_tx_info, get_block_timestamp};
 use starknet::account::Call;
-use core::result::ResultTrait;
-use core::option::OptionTrait;
+// use core::result::ResultTrait;
+// use core::option::OptionTrait;
 use core::array::ArrayTrait;
-use core::{TryInto, Into};
+// use core::{TryInto, Into};
 use starknet::contract_address::ContractAddress;
 use alexandria_merkle_tree::merkle_tree::{
     Hasher, MerkleTree, poseidon::PoseidonHasherImpl, MerkleTreeTrait
@@ -35,18 +35,18 @@ mod session_component {
     };
 
     use argent::session::interface::{Session, SessionToken};
-    use argent::utils::asserts::assert_no_self_call;
     use argent::session::session_hash::{StructHashSession, OffChainMessageHashSessionRev1};
     use argent::signer::signer_signature::{
         Signer, SignerSignature, SignerType, SignerSignatureImpl, SignerTraitImpl
     };
-
+    
+    use controller::asserts::assert_no_self_call;
     use controller::session::interface::{
         ISession, ISessionCallback, SessionState, SessionStateImpl
     };
     use controller::session::session::check_policy;
     use controller::session::session::SESSION_TOKEN_V1;
-    use controller::account::IAllowedCallerCallback;
+    use controller::account::IAssertOwner;
     use controller::session::session::AUTHORIZATION_BY_REGISTERED;
 
     #[storage]
@@ -88,11 +88,10 @@ mod session_component {
         TContractState,
         +HasComponent<TContractState>,
         +ISessionCallback<TContractState>,
-        +IAllowedCallerCallback<TContractState>,
+        +IAssertOwner<TContractState>,
     > of ISession<ComponentState<TContractState>> {
         fn revoke_session(ref self: ComponentState<TContractState>, session_hash: felt252) {
-            let contract = self.get_contract();
-            contract.is_caller_allowed(get_caller_address());
+            self.get_contract().assert_owner();
 
             assert(!self.revoked_session.read(session_hash), 'session/already-revoked');
             self.emit(SessionRevoked { session_hash });
@@ -102,8 +101,7 @@ mod session_component {
         fn register_session(
             ref self: ComponentState<TContractState>, session: Session, guid_or_address: felt252,
         ) {
-            let contract = self.get_contract();
-            contract.is_caller_allowed(get_caller_address());
+            self.get_contract().assert_owner();
 
             let now = get_block_timestamp();
             assert(session.expires_at > now, 'session/expired');
@@ -124,7 +122,6 @@ mod session_component {
             self.revoked_session.read(session_hash)
         }
     }
-
 
     #[generate_trait]
     impl InternalImpl<

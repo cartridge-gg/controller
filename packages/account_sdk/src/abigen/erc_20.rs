@@ -53,48 +53,6 @@ impl<P: starknet::providers::Provider + Sync> Erc20Reader<P> {
     }
 }
 #[derive(Debug, PartialEq, PartialOrd, Clone, serde :: Serialize, serde :: Deserialize)]
-pub struct Transfer {
-    pub from: cainome::cairo_serde::ContractAddress,
-    pub to: cainome::cairo_serde::ContractAddress,
-    pub value: cainome::cairo_serde::U256,
-}
-impl cainome::cairo_serde::CairoSerde for Transfer {
-    type RustType = Self;
-    const SERIALIZED_SIZE: std::option::Option<usize> = None;
-    #[inline]
-    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
-        let mut __size = 0;
-        __size += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&__rust.from);
-        __size += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&__rust.to);
-        __size += cainome::cairo_serde::U256::cairo_serialized_size(&__rust.value);
-        __size
-    }
-    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
-        let mut __out: Vec<starknet::core::types::Felt> = vec![];
-        __out.extend(cainome::cairo_serde::ContractAddress::cairo_serialize(
-            &__rust.from,
-        ));
-        __out.extend(cainome::cairo_serde::ContractAddress::cairo_serialize(
-            &__rust.to,
-        ));
-        __out.extend(cainome::cairo_serde::U256::cairo_serialize(&__rust.value));
-        __out
-    }
-    fn cairo_deserialize(
-        __felts: &[starknet::core::types::Felt],
-        __offset: usize,
-    ) -> cainome::cairo_serde::Result<Self::RustType> {
-        let mut __offset = __offset;
-        let from = cainome::cairo_serde::ContractAddress::cairo_deserialize(__felts, __offset)?;
-        __offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&from);
-        let to = cainome::cairo_serde::ContractAddress::cairo_deserialize(__felts, __offset)?;
-        __offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&to);
-        let value = cainome::cairo_serde::U256::cairo_deserialize(__felts, __offset)?;
-        __offset += cainome::cairo_serde::U256::cairo_serialized_size(&value);
-        Ok(Transfer { from, to, value })
-    }
-}
-#[derive(Debug, PartialEq, PartialOrd, Clone, serde :: Serialize, serde :: Deserialize)]
 pub struct Upgraded {
     pub class_hash: cainome::cairo_serde::ClassHash,
 }
@@ -125,29 +83,31 @@ impl cainome::cairo_serde::CairoSerde for Upgraded {
     }
 }
 #[derive(Debug, PartialEq, PartialOrd, Clone, serde :: Serialize, serde :: Deserialize)]
-pub struct OwnershipTransferred {
-    pub previous_owner: cainome::cairo_serde::ContractAddress,
-    pub new_owner: cainome::cairo_serde::ContractAddress,
+pub struct Approval {
+    pub owner: cainome::cairo_serde::ContractAddress,
+    pub spender: cainome::cairo_serde::ContractAddress,
+    pub value: cainome::cairo_serde::U256,
 }
-impl cainome::cairo_serde::CairoSerde for OwnershipTransferred {
+impl cainome::cairo_serde::CairoSerde for Approval {
     type RustType = Self;
     const SERIALIZED_SIZE: std::option::Option<usize> = None;
     #[inline]
     fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
         let mut __size = 0;
-        __size +=
-            cainome::cairo_serde::ContractAddress::cairo_serialized_size(&__rust.previous_owner);
-        __size += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&__rust.new_owner);
+        __size += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&__rust.owner);
+        __size += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&__rust.spender);
+        __size += cainome::cairo_serde::U256::cairo_serialized_size(&__rust.value);
         __size
     }
     fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
         let mut __out: Vec<starknet::core::types::Felt> = vec![];
         __out.extend(cainome::cairo_serde::ContractAddress::cairo_serialize(
-            &__rust.previous_owner,
+            &__rust.owner,
         ));
         __out.extend(cainome::cairo_serde::ContractAddress::cairo_serialize(
-            &__rust.new_owner,
+            &__rust.spender,
         ));
+        __out.extend(cainome::cairo_serde::U256::cairo_serialize(&__rust.value));
         __out
     }
     fn cairo_deserialize(
@@ -155,15 +115,16 @@ impl cainome::cairo_serde::CairoSerde for OwnershipTransferred {
         __offset: usize,
     ) -> cainome::cairo_serde::Result<Self::RustType> {
         let mut __offset = __offset;
-        let previous_owner =
-            cainome::cairo_serde::ContractAddress::cairo_deserialize(__felts, __offset)?;
-        __offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&previous_owner);
-        let new_owner =
-            cainome::cairo_serde::ContractAddress::cairo_deserialize(__felts, __offset)?;
-        __offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&new_owner);
-        Ok(OwnershipTransferred {
-            previous_owner,
-            new_owner,
+        let owner = cainome::cairo_serde::ContractAddress::cairo_deserialize(__felts, __offset)?;
+        __offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&owner);
+        let spender = cainome::cairo_serde::ContractAddress::cairo_deserialize(__felts, __offset)?;
+        __offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&spender);
+        let value = cainome::cairo_serde::U256::cairo_deserialize(__felts, __offset)?;
+        __offset += cainome::cairo_serde::U256::cairo_serialized_size(&value);
+        Ok(Approval {
+            owner,
+            spender,
+            value,
         })
     }
 }
@@ -211,29 +172,72 @@ impl cainome::cairo_serde::CairoSerde for OwnershipTransferStarted {
     }
 }
 #[derive(Debug, PartialEq, PartialOrd, Clone, serde :: Serialize, serde :: Deserialize)]
-pub struct Approval {
-    pub owner: cainome::cairo_serde::ContractAddress,
-    pub spender: cainome::cairo_serde::ContractAddress,
-    pub value: cainome::cairo_serde::U256,
+pub struct OwnershipTransferred {
+    pub previous_owner: cainome::cairo_serde::ContractAddress,
+    pub new_owner: cainome::cairo_serde::ContractAddress,
 }
-impl cainome::cairo_serde::CairoSerde for Approval {
+impl cainome::cairo_serde::CairoSerde for OwnershipTransferred {
     type RustType = Self;
     const SERIALIZED_SIZE: std::option::Option<usize> = None;
     #[inline]
     fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
         let mut __size = 0;
-        __size += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&__rust.owner);
-        __size += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&__rust.spender);
+        __size +=
+            cainome::cairo_serde::ContractAddress::cairo_serialized_size(&__rust.previous_owner);
+        __size += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&__rust.new_owner);
+        __size
+    }
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
+        let mut __out: Vec<starknet::core::types::Felt> = vec![];
+        __out.extend(cainome::cairo_serde::ContractAddress::cairo_serialize(
+            &__rust.previous_owner,
+        ));
+        __out.extend(cainome::cairo_serde::ContractAddress::cairo_serialize(
+            &__rust.new_owner,
+        ));
+        __out
+    }
+    fn cairo_deserialize(
+        __felts: &[starknet::core::types::Felt],
+        __offset: usize,
+    ) -> cainome::cairo_serde::Result<Self::RustType> {
+        let mut __offset = __offset;
+        let previous_owner =
+            cainome::cairo_serde::ContractAddress::cairo_deserialize(__felts, __offset)?;
+        __offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&previous_owner);
+        let new_owner =
+            cainome::cairo_serde::ContractAddress::cairo_deserialize(__felts, __offset)?;
+        __offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&new_owner);
+        Ok(OwnershipTransferred {
+            previous_owner,
+            new_owner,
+        })
+    }
+}
+#[derive(Debug, PartialEq, PartialOrd, Clone, serde :: Serialize, serde :: Deserialize)]
+pub struct Transfer {
+    pub from: cainome::cairo_serde::ContractAddress,
+    pub to: cainome::cairo_serde::ContractAddress,
+    pub value: cainome::cairo_serde::U256,
+}
+impl cainome::cairo_serde::CairoSerde for Transfer {
+    type RustType = Self;
+    const SERIALIZED_SIZE: std::option::Option<usize> = None;
+    #[inline]
+    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
+        let mut __size = 0;
+        __size += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&__rust.from);
+        __size += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&__rust.to);
         __size += cainome::cairo_serde::U256::cairo_serialized_size(&__rust.value);
         __size
     }
     fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
         let mut __out: Vec<starknet::core::types::Felt> = vec![];
         __out.extend(cainome::cairo_serde::ContractAddress::cairo_serialize(
-            &__rust.owner,
+            &__rust.from,
         ));
         __out.extend(cainome::cairo_serde::ContractAddress::cairo_serialize(
-            &__rust.spender,
+            &__rust.to,
         ));
         __out.extend(cainome::cairo_serde::U256::cairo_serialize(&__rust.value));
         __out
@@ -243,17 +247,413 @@ impl cainome::cairo_serde::CairoSerde for Approval {
         __offset: usize,
     ) -> cainome::cairo_serde::Result<Self::RustType> {
         let mut __offset = __offset;
-        let owner = cainome::cairo_serde::ContractAddress::cairo_deserialize(__felts, __offset)?;
-        __offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&owner);
-        let spender = cainome::cairo_serde::ContractAddress::cairo_deserialize(__felts, __offset)?;
-        __offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&spender);
+        let from = cainome::cairo_serde::ContractAddress::cairo_deserialize(__felts, __offset)?;
+        __offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&from);
+        let to = cainome::cairo_serde::ContractAddress::cairo_deserialize(__felts, __offset)?;
+        __offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&to);
         let value = cainome::cairo_serde::U256::cairo_deserialize(__felts, __offset)?;
         __offset += cainome::cairo_serde::U256::cairo_serialized_size(&value);
-        Ok(Approval {
-            owner,
-            spender,
-            value,
-        })
+        Ok(Transfer { from, to, value })
+    }
+}
+#[derive(Debug, PartialEq, PartialOrd, Clone, serde :: Serialize, serde :: Deserialize)]
+pub enum OwnableComponentEvent {
+    OwnershipTransferred(OwnershipTransferred),
+    OwnershipTransferStarted(OwnershipTransferStarted),
+}
+impl cainome::cairo_serde::CairoSerde for OwnableComponentEvent {
+    type RustType = Self;
+    const SERIALIZED_SIZE: std::option::Option<usize> = std::option::Option::None;
+    #[inline]
+    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
+        match __rust {
+            OwnableComponentEvent::OwnershipTransferred(val) => {
+                OwnershipTransferred::cairo_serialized_size(val) + 1
+            }
+            OwnableComponentEvent::OwnershipTransferStarted(val) => {
+                OwnershipTransferStarted::cairo_serialized_size(val) + 1
+            }
+            _ => 0,
+        }
+    }
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
+        match __rust {
+            OwnableComponentEvent::OwnershipTransferred(val) => {
+                let mut temp = vec![];
+                temp.extend(usize::cairo_serialize(&0usize));
+                temp.extend(OwnershipTransferred::cairo_serialize(val));
+                temp
+            }
+            OwnableComponentEvent::OwnershipTransferStarted(val) => {
+                let mut temp = vec![];
+                temp.extend(usize::cairo_serialize(&1usize));
+                temp.extend(OwnershipTransferStarted::cairo_serialize(val));
+                temp
+            }
+            _ => vec![],
+        }
+    }
+    fn cairo_deserialize(
+        __felts: &[starknet::core::types::Felt],
+        __offset: usize,
+    ) -> cainome::cairo_serde::Result<Self::RustType> {
+        let __f = __felts[__offset];
+        let __index = u128::from_be_bytes(__f.to_bytes_be()[16..].try_into().unwrap());
+        match __index as usize {
+            0usize => Ok(OwnableComponentEvent::OwnershipTransferred(
+                OwnershipTransferred::cairo_deserialize(__felts, __offset + 1)?,
+            )),
+            1usize => Ok(OwnableComponentEvent::OwnershipTransferStarted(
+                OwnershipTransferStarted::cairo_deserialize(__felts, __offset + 1)?,
+            )),
+            _ => {
+                return Err(cainome::cairo_serde::Error::Deserialize(format!(
+                    "Index not handle for enum {}",
+                    "OwnableComponentEvent"
+                )))
+            }
+        }
+    }
+}
+impl TryFrom<starknet::core::types::EmittedEvent> for OwnableComponentEvent {
+    type Error = String;
+    fn try_from(event: starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
+        use cainome::cairo_serde::CairoSerde;
+        if event.keys.is_empty() {
+            return Err("Event has no key".to_string());
+        }
+        let selector = event.keys[0];
+        if selector
+            == starknet::core::utils::get_selector_from_name("OwnershipTransferred")
+                .unwrap_or_else(|_| panic!("Invalid selector for {}", "OwnershipTransferred"))
+        {
+            let mut key_offset = 0 + 1;
+            let mut data_offset = 0;
+            let previous_owner = match cainome::cairo_serde::ContractAddress::cairo_deserialize(
+                &event.keys,
+                key_offset,
+            ) {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(format!(
+                        "Could not deserialize field {} for {}: {:?}",
+                        "previous_owner", "OwnershipTransferred", e
+                    ))
+                }
+            };
+            key_offset +=
+                cainome::cairo_serde::ContractAddress::cairo_serialized_size(&previous_owner);
+            let new_owner = match cainome::cairo_serde::ContractAddress::cairo_deserialize(
+                &event.keys,
+                key_offset,
+            ) {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(format!(
+                        "Could not deserialize field {} for {}: {:?}",
+                        "new_owner", "OwnershipTransferred", e
+                    ))
+                }
+            };
+            key_offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&new_owner);
+            return Ok(OwnableComponentEvent::OwnershipTransferred(
+                OwnershipTransferred {
+                    previous_owner,
+                    new_owner,
+                },
+            ));
+        };
+        let selector = event.keys[0];
+        if selector
+            == starknet::core::utils::get_selector_from_name("OwnershipTransferStarted")
+                .unwrap_or_else(|_| panic!("Invalid selector for {}", "OwnershipTransferStarted"))
+        {
+            let mut key_offset = 0 + 1;
+            let mut data_offset = 0;
+            let previous_owner = match cainome::cairo_serde::ContractAddress::cairo_deserialize(
+                &event.keys,
+                key_offset,
+            ) {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(format!(
+                        "Could not deserialize field {} for {}: {:?}",
+                        "previous_owner", "OwnershipTransferStarted", e
+                    ))
+                }
+            };
+            key_offset +=
+                cainome::cairo_serde::ContractAddress::cairo_serialized_size(&previous_owner);
+            let new_owner = match cainome::cairo_serde::ContractAddress::cairo_deserialize(
+                &event.keys,
+                key_offset,
+            ) {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(format!(
+                        "Could not deserialize field {} for {}: {:?}",
+                        "new_owner", "OwnershipTransferStarted", e
+                    ))
+                }
+            };
+            key_offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&new_owner);
+            return Ok(OwnableComponentEvent::OwnershipTransferStarted(
+                OwnershipTransferStarted {
+                    previous_owner,
+                    new_owner,
+                },
+            ));
+        };
+        Err(format!(
+            "Could not match any event from keys {:?}",
+            event.keys
+        ))
+    }
+}
+#[derive(Debug, PartialEq, PartialOrd, Clone, serde :: Serialize, serde :: Deserialize)]
+pub enum ERC20ComponentEvent {
+    Transfer(Transfer),
+    Approval(Approval),
+}
+impl cainome::cairo_serde::CairoSerde for ERC20ComponentEvent {
+    type RustType = Self;
+    const SERIALIZED_SIZE: std::option::Option<usize> = std::option::Option::None;
+    #[inline]
+    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
+        match __rust {
+            ERC20ComponentEvent::Transfer(val) => Transfer::cairo_serialized_size(val) + 1,
+            ERC20ComponentEvent::Approval(val) => Approval::cairo_serialized_size(val) + 1,
+            _ => 0,
+        }
+    }
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
+        match __rust {
+            ERC20ComponentEvent::Transfer(val) => {
+                let mut temp = vec![];
+                temp.extend(usize::cairo_serialize(&0usize));
+                temp.extend(Transfer::cairo_serialize(val));
+                temp
+            }
+            ERC20ComponentEvent::Approval(val) => {
+                let mut temp = vec![];
+                temp.extend(usize::cairo_serialize(&1usize));
+                temp.extend(Approval::cairo_serialize(val));
+                temp
+            }
+            _ => vec![],
+        }
+    }
+    fn cairo_deserialize(
+        __felts: &[starknet::core::types::Felt],
+        __offset: usize,
+    ) -> cainome::cairo_serde::Result<Self::RustType> {
+        let __f = __felts[__offset];
+        let __index = u128::from_be_bytes(__f.to_bytes_be()[16..].try_into().unwrap());
+        match __index as usize {
+            0usize => Ok(ERC20ComponentEvent::Transfer(Transfer::cairo_deserialize(
+                __felts,
+                __offset + 1,
+            )?)),
+            1usize => Ok(ERC20ComponentEvent::Approval(Approval::cairo_deserialize(
+                __felts,
+                __offset + 1,
+            )?)),
+            _ => {
+                return Err(cainome::cairo_serde::Error::Deserialize(format!(
+                    "Index not handle for enum {}",
+                    "ERC20ComponentEvent"
+                )))
+            }
+        }
+    }
+}
+impl TryFrom<starknet::core::types::EmittedEvent> for ERC20ComponentEvent {
+    type Error = String;
+    fn try_from(event: starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
+        use cainome::cairo_serde::CairoSerde;
+        if event.keys.is_empty() {
+            return Err("Event has no key".to_string());
+        }
+        let selector = event.keys[0];
+        if selector
+            == starknet::core::utils::get_selector_from_name("Transfer")
+                .unwrap_or_else(|_| panic!("Invalid selector for {}", "Transfer"))
+        {
+            let mut key_offset = 0 + 1;
+            let mut data_offset = 0;
+            let from = match cainome::cairo_serde::ContractAddress::cairo_deserialize(
+                &event.keys,
+                key_offset,
+            ) {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(format!(
+                        "Could not deserialize field {} for {}: {:?}",
+                        "from", "Transfer", e
+                    ))
+                }
+            };
+            key_offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&from);
+            let to = match cainome::cairo_serde::ContractAddress::cairo_deserialize(
+                &event.keys,
+                key_offset,
+            ) {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(format!(
+                        "Could not deserialize field {} for {}: {:?}",
+                        "to", "Transfer", e
+                    ))
+                }
+            };
+            key_offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&to);
+            let value =
+                match cainome::cairo_serde::U256::cairo_deserialize(&event.data, data_offset) {
+                    Ok(v) => v,
+                    Err(e) => {
+                        return Err(format!(
+                            "Could not deserialize field {} for {}: {:?}",
+                            "value", "Transfer", e
+                        ))
+                    }
+                };
+            data_offset += cainome::cairo_serde::U256::cairo_serialized_size(&value);
+            return Ok(ERC20ComponentEvent::Transfer(Transfer { from, to, value }));
+        };
+        let selector = event.keys[0];
+        if selector
+            == starknet::core::utils::get_selector_from_name("Approval")
+                .unwrap_or_else(|_| panic!("Invalid selector for {}", "Approval"))
+        {
+            let mut key_offset = 0 + 1;
+            let mut data_offset = 0;
+            let owner = match cainome::cairo_serde::ContractAddress::cairo_deserialize(
+                &event.keys,
+                key_offset,
+            ) {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(format!(
+                        "Could not deserialize field {} for {}: {:?}",
+                        "owner", "Approval", e
+                    ))
+                }
+            };
+            key_offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&owner);
+            let spender = match cainome::cairo_serde::ContractAddress::cairo_deserialize(
+                &event.keys,
+                key_offset,
+            ) {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(format!(
+                        "Could not deserialize field {} for {}: {:?}",
+                        "spender", "Approval", e
+                    ))
+                }
+            };
+            key_offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&spender);
+            let value =
+                match cainome::cairo_serde::U256::cairo_deserialize(&event.data, data_offset) {
+                    Ok(v) => v,
+                    Err(e) => {
+                        return Err(format!(
+                            "Could not deserialize field {} for {}: {:?}",
+                            "value", "Approval", e
+                        ))
+                    }
+                };
+            data_offset += cainome::cairo_serde::U256::cairo_serialized_size(&value);
+            return Ok(ERC20ComponentEvent::Approval(Approval {
+                owner,
+                spender,
+                value,
+            }));
+        };
+        Err(format!(
+            "Could not match any event from keys {:?}",
+            event.keys
+        ))
+    }
+}
+#[derive(Debug, PartialEq, PartialOrd, Clone, serde :: Serialize, serde :: Deserialize)]
+pub enum UpgradeEvent {
+    Upgraded(Upgraded),
+}
+impl cainome::cairo_serde::CairoSerde for UpgradeEvent {
+    type RustType = Self;
+    const SERIALIZED_SIZE: std::option::Option<usize> = std::option::Option::None;
+    #[inline]
+    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
+        match __rust {
+            UpgradeEvent::Upgraded(val) => Upgraded::cairo_serialized_size(val) + 1,
+            _ => 0,
+        }
+    }
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
+        match __rust {
+            UpgradeEvent::Upgraded(val) => {
+                let mut temp = vec![];
+                temp.extend(usize::cairo_serialize(&0usize));
+                temp.extend(Upgraded::cairo_serialize(val));
+                temp
+            }
+            _ => vec![],
+        }
+    }
+    fn cairo_deserialize(
+        __felts: &[starknet::core::types::Felt],
+        __offset: usize,
+    ) -> cainome::cairo_serde::Result<Self::RustType> {
+        let __f = __felts[__offset];
+        let __index = u128::from_be_bytes(__f.to_bytes_be()[16..].try_into().unwrap());
+        match __index as usize {
+            0usize => Ok(UpgradeEvent::Upgraded(Upgraded::cairo_deserialize(
+                __felts,
+                __offset + 1,
+            )?)),
+            _ => {
+                return Err(cainome::cairo_serde::Error::Deserialize(format!(
+                    "Index not handle for enum {}",
+                    "UpgradeEvent"
+                )))
+            }
+        }
+    }
+}
+impl TryFrom<starknet::core::types::EmittedEvent> for UpgradeEvent {
+    type Error = String;
+    fn try_from(event: starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
+        use cainome::cairo_serde::CairoSerde;
+        if event.keys.is_empty() {
+            return Err("Event has no key".to_string());
+        }
+        let selector = event.keys[0];
+        if selector
+            == starknet::core::utils::get_selector_from_name("Upgraded")
+                .unwrap_or_else(|_| panic!("Invalid selector for {}", "Upgraded"))
+        {
+            let mut key_offset = 0 + 1;
+            let mut data_offset = 0;
+            let class_hash = match cainome::cairo_serde::ClassHash::cairo_deserialize(
+                &event.data,
+                data_offset,
+            ) {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(format!(
+                        "Could not deserialize field {} for {}: {:?}",
+                        "class_hash", "Upgraded", e
+                    ))
+                }
+            };
+            data_offset += cainome::cairo_serde::ClassHash::cairo_serialized_size(&class_hash);
+            return Ok(UpgradeEvent::Upgraded(Upgraded { class_hash }));
+        };
+        Err(format!(
+            "Could not match any event from keys {:?}",
+            event.keys
+        ))
     }
 }
 #[derive(Debug, PartialEq, PartialOrd, Clone, serde :: Serialize, serde :: Deserialize)]
@@ -536,406 +936,6 @@ impl TryFrom<starknet::core::types::EmittedEvent> for Event {
             return Ok(Event::UpgradeableEvent(UpgradeEvent::Upgraded(Upgraded {
                 class_hash,
             })));
-        };
-        Err(format!(
-            "Could not match any event from keys {:?}",
-            event.keys
-        ))
-    }
-}
-#[derive(Debug, PartialEq, PartialOrd, Clone, serde :: Serialize, serde :: Deserialize)]
-pub enum UpgradeEvent {
-    Upgraded(Upgraded),
-}
-impl cainome::cairo_serde::CairoSerde for UpgradeEvent {
-    type RustType = Self;
-    const SERIALIZED_SIZE: std::option::Option<usize> = std::option::Option::None;
-    #[inline]
-    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
-        match __rust {
-            UpgradeEvent::Upgraded(val) => Upgraded::cairo_serialized_size(val) + 1,
-            _ => 0,
-        }
-    }
-    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
-        match __rust {
-            UpgradeEvent::Upgraded(val) => {
-                let mut temp = vec![];
-                temp.extend(usize::cairo_serialize(&0usize));
-                temp.extend(Upgraded::cairo_serialize(val));
-                temp
-            }
-            _ => vec![],
-        }
-    }
-    fn cairo_deserialize(
-        __felts: &[starknet::core::types::Felt],
-        __offset: usize,
-    ) -> cainome::cairo_serde::Result<Self::RustType> {
-        let __f = __felts[__offset];
-        let __index = u128::from_be_bytes(__f.to_bytes_be()[16..].try_into().unwrap());
-        match __index as usize {
-            0usize => Ok(UpgradeEvent::Upgraded(Upgraded::cairo_deserialize(
-                __felts,
-                __offset + 1,
-            )?)),
-            _ => {
-                return Err(cainome::cairo_serde::Error::Deserialize(format!(
-                    "Index not handle for enum {}",
-                    "UpgradeEvent"
-                )))
-            }
-        }
-    }
-}
-impl TryFrom<starknet::core::types::EmittedEvent> for UpgradeEvent {
-    type Error = String;
-    fn try_from(event: starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
-        use cainome::cairo_serde::CairoSerde;
-        if event.keys.is_empty() {
-            return Err("Event has no key".to_string());
-        }
-        let selector = event.keys[0];
-        if selector
-            == starknet::core::utils::get_selector_from_name("Upgraded")
-                .unwrap_or_else(|_| panic!("Invalid selector for {}", "Upgraded"))
-        {
-            let mut key_offset = 0 + 1;
-            let mut data_offset = 0;
-            let class_hash = match cainome::cairo_serde::ClassHash::cairo_deserialize(
-                &event.data,
-                data_offset,
-            ) {
-                Ok(v) => v,
-                Err(e) => {
-                    return Err(format!(
-                        "Could not deserialize field {} for {}: {:?}",
-                        "class_hash", "Upgraded", e
-                    ))
-                }
-            };
-            data_offset += cainome::cairo_serde::ClassHash::cairo_serialized_size(&class_hash);
-            return Ok(UpgradeEvent::Upgraded(Upgraded { class_hash }));
-        };
-        Err(format!(
-            "Could not match any event from keys {:?}",
-            event.keys
-        ))
-    }
-}
-#[derive(Debug, PartialEq, PartialOrd, Clone, serde :: Serialize, serde :: Deserialize)]
-pub enum ERC20ComponentEvent {
-    Transfer(Transfer),
-    Approval(Approval),
-}
-impl cainome::cairo_serde::CairoSerde for ERC20ComponentEvent {
-    type RustType = Self;
-    const SERIALIZED_SIZE: std::option::Option<usize> = std::option::Option::None;
-    #[inline]
-    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
-        match __rust {
-            ERC20ComponentEvent::Transfer(val) => Transfer::cairo_serialized_size(val) + 1,
-            ERC20ComponentEvent::Approval(val) => Approval::cairo_serialized_size(val) + 1,
-            _ => 0,
-        }
-    }
-    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
-        match __rust {
-            ERC20ComponentEvent::Transfer(val) => {
-                let mut temp = vec![];
-                temp.extend(usize::cairo_serialize(&0usize));
-                temp.extend(Transfer::cairo_serialize(val));
-                temp
-            }
-            ERC20ComponentEvent::Approval(val) => {
-                let mut temp = vec![];
-                temp.extend(usize::cairo_serialize(&1usize));
-                temp.extend(Approval::cairo_serialize(val));
-                temp
-            }
-            _ => vec![],
-        }
-    }
-    fn cairo_deserialize(
-        __felts: &[starknet::core::types::Felt],
-        __offset: usize,
-    ) -> cainome::cairo_serde::Result<Self::RustType> {
-        let __f = __felts[__offset];
-        let __index = u128::from_be_bytes(__f.to_bytes_be()[16..].try_into().unwrap());
-        match __index as usize {
-            0usize => Ok(ERC20ComponentEvent::Transfer(Transfer::cairo_deserialize(
-                __felts,
-                __offset + 1,
-            )?)),
-            1usize => Ok(ERC20ComponentEvent::Approval(Approval::cairo_deserialize(
-                __felts,
-                __offset + 1,
-            )?)),
-            _ => {
-                return Err(cainome::cairo_serde::Error::Deserialize(format!(
-                    "Index not handle for enum {}",
-                    "ERC20ComponentEvent"
-                )))
-            }
-        }
-    }
-}
-impl TryFrom<starknet::core::types::EmittedEvent> for ERC20ComponentEvent {
-    type Error = String;
-    fn try_from(event: starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
-        use cainome::cairo_serde::CairoSerde;
-        if event.keys.is_empty() {
-            return Err("Event has no key".to_string());
-        }
-        let selector = event.keys[0];
-        if selector
-            == starknet::core::utils::get_selector_from_name("Transfer")
-                .unwrap_or_else(|_| panic!("Invalid selector for {}", "Transfer"))
-        {
-            let mut key_offset = 0 + 1;
-            let mut data_offset = 0;
-            let from = match cainome::cairo_serde::ContractAddress::cairo_deserialize(
-                &event.keys,
-                key_offset,
-            ) {
-                Ok(v) => v,
-                Err(e) => {
-                    return Err(format!(
-                        "Could not deserialize field {} for {}: {:?}",
-                        "from", "Transfer", e
-                    ))
-                }
-            };
-            key_offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&from);
-            let to = match cainome::cairo_serde::ContractAddress::cairo_deserialize(
-                &event.keys,
-                key_offset,
-            ) {
-                Ok(v) => v,
-                Err(e) => {
-                    return Err(format!(
-                        "Could not deserialize field {} for {}: {:?}",
-                        "to", "Transfer", e
-                    ))
-                }
-            };
-            key_offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&to);
-            let value =
-                match cainome::cairo_serde::U256::cairo_deserialize(&event.data, data_offset) {
-                    Ok(v) => v,
-                    Err(e) => {
-                        return Err(format!(
-                            "Could not deserialize field {} for {}: {:?}",
-                            "value", "Transfer", e
-                        ))
-                    }
-                };
-            data_offset += cainome::cairo_serde::U256::cairo_serialized_size(&value);
-            return Ok(ERC20ComponentEvent::Transfer(Transfer { from, to, value }));
-        };
-        let selector = event.keys[0];
-        if selector
-            == starknet::core::utils::get_selector_from_name("Approval")
-                .unwrap_or_else(|_| panic!("Invalid selector for {}", "Approval"))
-        {
-            let mut key_offset = 0 + 1;
-            let mut data_offset = 0;
-            let owner = match cainome::cairo_serde::ContractAddress::cairo_deserialize(
-                &event.keys,
-                key_offset,
-            ) {
-                Ok(v) => v,
-                Err(e) => {
-                    return Err(format!(
-                        "Could not deserialize field {} for {}: {:?}",
-                        "owner", "Approval", e
-                    ))
-                }
-            };
-            key_offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&owner);
-            let spender = match cainome::cairo_serde::ContractAddress::cairo_deserialize(
-                &event.keys,
-                key_offset,
-            ) {
-                Ok(v) => v,
-                Err(e) => {
-                    return Err(format!(
-                        "Could not deserialize field {} for {}: {:?}",
-                        "spender", "Approval", e
-                    ))
-                }
-            };
-            key_offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&spender);
-            let value =
-                match cainome::cairo_serde::U256::cairo_deserialize(&event.data, data_offset) {
-                    Ok(v) => v,
-                    Err(e) => {
-                        return Err(format!(
-                            "Could not deserialize field {} for {}: {:?}",
-                            "value", "Approval", e
-                        ))
-                    }
-                };
-            data_offset += cainome::cairo_serde::U256::cairo_serialized_size(&value);
-            return Ok(ERC20ComponentEvent::Approval(Approval {
-                owner,
-                spender,
-                value,
-            }));
-        };
-        Err(format!(
-            "Could not match any event from keys {:?}",
-            event.keys
-        ))
-    }
-}
-#[derive(Debug, PartialEq, PartialOrd, Clone, serde :: Serialize, serde :: Deserialize)]
-pub enum OwnableComponentEvent {
-    OwnershipTransferred(OwnershipTransferred),
-    OwnershipTransferStarted(OwnershipTransferStarted),
-}
-impl cainome::cairo_serde::CairoSerde for OwnableComponentEvent {
-    type RustType = Self;
-    const SERIALIZED_SIZE: std::option::Option<usize> = std::option::Option::None;
-    #[inline]
-    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
-        match __rust {
-            OwnableComponentEvent::OwnershipTransferred(val) => {
-                OwnershipTransferred::cairo_serialized_size(val) + 1
-            }
-            OwnableComponentEvent::OwnershipTransferStarted(val) => {
-                OwnershipTransferStarted::cairo_serialized_size(val) + 1
-            }
-            _ => 0,
-        }
-    }
-    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
-        match __rust {
-            OwnableComponentEvent::OwnershipTransferred(val) => {
-                let mut temp = vec![];
-                temp.extend(usize::cairo_serialize(&0usize));
-                temp.extend(OwnershipTransferred::cairo_serialize(val));
-                temp
-            }
-            OwnableComponentEvent::OwnershipTransferStarted(val) => {
-                let mut temp = vec![];
-                temp.extend(usize::cairo_serialize(&1usize));
-                temp.extend(OwnershipTransferStarted::cairo_serialize(val));
-                temp
-            }
-            _ => vec![],
-        }
-    }
-    fn cairo_deserialize(
-        __felts: &[starknet::core::types::Felt],
-        __offset: usize,
-    ) -> cainome::cairo_serde::Result<Self::RustType> {
-        let __f = __felts[__offset];
-        let __index = u128::from_be_bytes(__f.to_bytes_be()[16..].try_into().unwrap());
-        match __index as usize {
-            0usize => Ok(OwnableComponentEvent::OwnershipTransferred(
-                OwnershipTransferred::cairo_deserialize(__felts, __offset + 1)?,
-            )),
-            1usize => Ok(OwnableComponentEvent::OwnershipTransferStarted(
-                OwnershipTransferStarted::cairo_deserialize(__felts, __offset + 1)?,
-            )),
-            _ => {
-                return Err(cainome::cairo_serde::Error::Deserialize(format!(
-                    "Index not handle for enum {}",
-                    "OwnableComponentEvent"
-                )))
-            }
-        }
-    }
-}
-impl TryFrom<starknet::core::types::EmittedEvent> for OwnableComponentEvent {
-    type Error = String;
-    fn try_from(event: starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
-        use cainome::cairo_serde::CairoSerde;
-        if event.keys.is_empty() {
-            return Err("Event has no key".to_string());
-        }
-        let selector = event.keys[0];
-        if selector
-            == starknet::core::utils::get_selector_from_name("OwnershipTransferred")
-                .unwrap_or_else(|_| panic!("Invalid selector for {}", "OwnershipTransferred"))
-        {
-            let mut key_offset = 0 + 1;
-            let mut data_offset = 0;
-            let previous_owner = match cainome::cairo_serde::ContractAddress::cairo_deserialize(
-                &event.keys,
-                key_offset,
-            ) {
-                Ok(v) => v,
-                Err(e) => {
-                    return Err(format!(
-                        "Could not deserialize field {} for {}: {:?}",
-                        "previous_owner", "OwnershipTransferred", e
-                    ))
-                }
-            };
-            key_offset +=
-                cainome::cairo_serde::ContractAddress::cairo_serialized_size(&previous_owner);
-            let new_owner = match cainome::cairo_serde::ContractAddress::cairo_deserialize(
-                &event.keys,
-                key_offset,
-            ) {
-                Ok(v) => v,
-                Err(e) => {
-                    return Err(format!(
-                        "Could not deserialize field {} for {}: {:?}",
-                        "new_owner", "OwnershipTransferred", e
-                    ))
-                }
-            };
-            key_offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&new_owner);
-            return Ok(OwnableComponentEvent::OwnershipTransferred(
-                OwnershipTransferred {
-                    previous_owner,
-                    new_owner,
-                },
-            ));
-        };
-        let selector = event.keys[0];
-        if selector
-            == starknet::core::utils::get_selector_from_name("OwnershipTransferStarted")
-                .unwrap_or_else(|_| panic!("Invalid selector for {}", "OwnershipTransferStarted"))
-        {
-            let mut key_offset = 0 + 1;
-            let mut data_offset = 0;
-            let previous_owner = match cainome::cairo_serde::ContractAddress::cairo_deserialize(
-                &event.keys,
-                key_offset,
-            ) {
-                Ok(v) => v,
-                Err(e) => {
-                    return Err(format!(
-                        "Could not deserialize field {} for {}: {:?}",
-                        "previous_owner", "OwnershipTransferStarted", e
-                    ))
-                }
-            };
-            key_offset +=
-                cainome::cairo_serde::ContractAddress::cairo_serialized_size(&previous_owner);
-            let new_owner = match cainome::cairo_serde::ContractAddress::cairo_deserialize(
-                &event.keys,
-                key_offset,
-            ) {
-                Ok(v) => v,
-                Err(e) => {
-                    return Err(format!(
-                        "Could not deserialize field {} for {}: {:?}",
-                        "new_owner", "OwnershipTransferStarted", e
-                    ))
-                }
-            };
-            key_offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&new_owner);
-            return Ok(OwnableComponentEvent::OwnershipTransferStarted(
-                OwnershipTransferStarted {
-                    previous_owner,
-                    new_owner,
-                },
-            ));
         };
         Err(format!(
             "Could not match any event from keys {:?}",

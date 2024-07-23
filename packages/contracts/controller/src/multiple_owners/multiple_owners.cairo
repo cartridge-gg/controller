@@ -7,7 +7,7 @@ mod multiple_owners_component {
             SignerStorageTrait, SignerSignature, SignerSignatureTrait, starknet_signer_from_pubkey
         }
     };
-    use controller::account::IAllowedCallerCallback;
+    use controller::account::IAssertOwner;
     use starknet::info::{get_caller_address, get_tx_info};
     use pedersen::PedersenTrait;
     use hash::HashStateTrait;
@@ -41,14 +41,13 @@ mod multiple_owners_component {
     impl ImplMultipleOwners<
         TContractState,
         +HasComponent<TContractState>,
-        +IAllowedCallerCallback<TContractState>,
+        +IAssertOwner<TContractState>,
         +Drop<TContractState>
     > of IMultipleOwners<ComponentState<TContractState>> {
         fn add_owner(
             ref self: ComponentState<TContractState>, owner: Signer, signature: SignerSignature
         ) {
-            let contract = self.get_contract();
-            contract.is_caller_allowed(get_caller_address());
+            self.get_contract().assert_owner();
 
             self.assert_valid_new_owner_signature(signature);
             self.add_owner_internal(owner.storage_value());
@@ -61,8 +60,7 @@ mod multiple_owners_component {
             new_owner: Signer,
             signature: SignerSignature
         ) {
-            let contract = self.get_contract();
-            contract.is_caller_allowed(get_caller_address());
+            self.get_contract().assert_owner();
 
             self.assert_valid_new_owner_signature(signature);
             self.swap_owner_internal(old_owner.storage_value(), new_owner.storage_value());
@@ -71,14 +69,13 @@ mod multiple_owners_component {
         }
 
         fn remove_owner(ref self: ComponentState<TContractState>, owner: Signer) {
-            let contract = self.get_contract();
-            contract.is_caller_allowed(get_caller_address());
+            self.get_contract().assert_owner();
 
             self.remove_owner_internal(owner.storage_value());
             self.emit(OwnerRemoved { owner });
         }
 
-        fn is_valid_owner(self: @ComponentState<TContractState>, owner_guid: felt252) -> bool {
+        fn is_owner(self: @ComponentState<TContractState>, owner_guid: felt252) -> bool {
             self._owners.read(owner_guid) != 0
         }
 
@@ -96,7 +93,7 @@ mod multiple_owners_component {
     impl ImplMultipleOwnersInternal<
         TContractState,
         +HasComponent<TContractState>,
-        +IAllowedCallerCallback<TContractState>,
+        +IAssertOwner<TContractState>,
         +Drop<TContractState>
     > of IMultipleOwnersInternal<ComponentState<TContractState>> {
         fn initialize(ref self: ComponentState<TContractState>, owner: SignerStorageValue) {
@@ -144,6 +141,7 @@ mod multiple_owners_component {
             self._owners_ordered.write(old_pos, last_guid);
             self._owners_count.write(count - 1);
         }
+
         fn assert_valid_new_owner_signature_internal(
             self: @ComponentState<TContractState>,
             signer_signature: SignerSignature,

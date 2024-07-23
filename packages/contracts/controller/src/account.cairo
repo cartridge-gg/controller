@@ -5,8 +5,8 @@ use starknet::ContractAddress;
 use argent::signer::signer_signature::{Signer, SignerSignature, SignerType};
 
 #[starknet::interface]
-trait IAllowedCallerCallback<TState> {
-    fn is_caller_allowed(self: @TState, caller_address: ContractAddress) -> bool;
+trait IAssertOwner<TState> {
+    fn assert_owner(self: @TState);
 }
 
 #[starknet::interface]
@@ -80,7 +80,7 @@ mod CartridgeAccount {
         session::session_component::{InternalImpl, InternalTrait}, session::session_component,
         interface::ISessionCallback
     };
-    use controller::account::{ICartridgeAccount, IAllowedCallerCallback};
+    use controller::account::{ICartridgeAccount, IAssertOwner};
     use controller::multiple_owners::{
         multiple_owners::{
             multiple_owners_component, multiple_owners_component::ImplMultipleOwnersInternal
@@ -304,7 +304,9 @@ mod CartridgeAccount {
     impl CartridgeAccountImpl of ICartridgeAccount<ContractState> {
         fn __validate_declare__(ref self: ContractState, class_hash: felt252) -> felt252 {
             let tx_info = get_tx_info().unbox();
+            assert_correct_declare_version(tx_info.version);
             assert(tx_info.paymaster_data.is_empty(), 'unsupported-paymaster');
+
             if self.session.is_session(tx_info.signature) {
                 let call = Call {
                     to: get_contract_address(),
@@ -333,6 +335,7 @@ mod CartridgeAccount {
             guardian: Option<Signer>,
         ) -> felt252 {
             let tx_info = get_tx_info().unbox();
+            assert_correct_deploy_account_version(tx_info.version);
             assert(tx_info.paymaster_data.is_empty(), 'unsupported-paymaster');
             self
                 .assert_valid_span_signature(
@@ -350,12 +353,12 @@ mod CartridgeAccount {
         }
 
         fn is_valid_authorizer(self: @ContractState, guid_or_address: felt252) -> bool {
-            if self.multiple_owners.is_valid_owner(guid_or_address) {
+            if self.multiple_owners.is_owner(guid_or_address) {
                 return true;
             }
             let address: Option<ContractAddress> = guid_or_address.try_into();
             match address {
-                Option::Some(address) => self.is_registered_external_owner(address),
+                Option::Some(address) => self.is_external_owner(address),
                 Option::None => false,
             }
         }
@@ -372,10 +375,13 @@ mod CartridgeAccount {
         }
     }
 
-    impl IAllowedCallerCallbackImpl of IAllowedCallerCallback<ContractState> {
-        fn is_caller_allowed(self: @ContractState, caller_address: ContractAddress) -> bool {
-            caller_address == get_contract_address()
-                || self.is_registered_external_owner(caller_address)
+    impl IAssertOwnerImpl of IAssertOwner<ContractState> {
+        fn assert_owner(self: @ContractState) {
+            let caller = get_caller_address();
+            assert(
+                caller == get_contract_address() || self.is_external_owner(caller),
+                'caller-not-owner'
+            );
         }
     }
 
@@ -411,7 +417,7 @@ mod CartridgeAccount {
     #[abi(embed_v0)]
     impl UpgradeableImpl of IUpgradeable<ContractState> {
         fn upgrade(ref self: ContractState, new_class_hash: ClassHash) {
-            assert(self.is_caller_allowed(get_caller_address()), 'caller-not-owner');
+            self.assert_owner();
             self.upgradeable._upgrade(new_class_hash);
         }
     }
@@ -435,7 +441,7 @@ mod CartridgeAccount {
             self: @ContractState, hash: felt252, signer_signature: SignerSignature
         ) -> bool {
             let signer = signer_signature.signer().storage_value();
-            if !self.is_valid_owner(signer.into_guid()) {
+            if !self.is_owner(signer.into_guid()) {
                 return false;
             }
             return signer_signature.is_valid_signature(hash);

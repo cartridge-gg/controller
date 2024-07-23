@@ -151,7 +151,7 @@ async fn test_deploy_and_call() {
 
     let contract = Controller::new(deployed_address, account);
     assert!(contract
-        .is_valid_owner(&signer.guid())
+        .is_owner(&signer.guid())
         .call()
         .await
         .unwrap());

@@ -1,7 +1,7 @@
 #[starknet::component]
 mod delegate_account_component {
     use controller::delegate_account::interface::IDelegateAccount;
-    use controller::account::IAllowedCallerCallback;
+    use controller::account::IAssertOwner;
 
     use starknet::{get_caller_address, ContractAddress};
 
@@ -25,14 +25,13 @@ mod delegate_account_component {
     impl ImplDelegateAccount<
         TContractState,
         +HasComponent<TContractState>,
-        +IAllowedCallerCallback<TContractState>,
+        +IAssertOwner<TContractState>,
         +Drop<TContractState>
     > of IDelegateAccount<ComponentState<TContractState>> {
         fn set_delegate_account(
             ref self: ComponentState<TContractState>, delegate_address: ContractAddress
         ) {
-            let contract = self.get_contract();
-            contract.is_caller_allowed(get_caller_address());
+            self.get_contract().assert_owner();
 
             self.delegate_account.write(delegate_address.into());
             self.emit(DelegateAccountChanged { address: delegate_address });
