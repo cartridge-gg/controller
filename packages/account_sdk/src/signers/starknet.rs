@@ -22,6 +22,7 @@ impl HashSigner for SigningKey {
             },
         )))
     }
+
     fn signer(&self) -> Signer {
         Signer::Starknet(StarknetSigner {
             pubkey: NonZero::new(self.verifying_key().scalar()).unwrap(),

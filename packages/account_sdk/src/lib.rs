@@ -1,6 +1,5 @@
 pub mod abigen;
 pub mod account;
-pub mod deploy_contract;
 pub mod hash;
 pub mod signers;
 mod transaction_waiter;

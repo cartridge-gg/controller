@@ -1,8 +1,8 @@
 use crate::{
     abigen::erc_20::Erc20,
     account::CartridgeAccount,
-    deploy_contract::FEE_TOKEN_ADDRESS,
     signers::{webauthn::internal::InternalWebauthnSigner, HashSigner},
+    tests::deploy_contract::FEE_TOKEN_ADDRESS,
     tests::{
         deployment_test::deploy_helper,
         runners::{katana_runner::KatanaRunner, TestnetRunner},

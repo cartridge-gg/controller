@@ -9,7 +9,7 @@ use url::Url;
 
 use lazy_static::lazy_static;
 
-use crate::deploy_contract::single_owner_account_with_encoding;
+use crate::tests::deploy_contract::single_owner_account_with_encoding;
 
 use super::{find_free_port, SubprocessRunner, TestnetConfig, TestnetRunner};
 

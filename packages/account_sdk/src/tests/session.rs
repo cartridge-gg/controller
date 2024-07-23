@@ -4,8 +4,8 @@ use crate::{
         session::{create::SessionCreator, hash::AllowedMethod},
         CartridgeGuardianAccount,
     },
-    deploy_contract::FEE_TOKEN_ADDRESS,
     signers::{webauthn::InternalWebauthnSigner, HashSigner},
+    tests::deploy_contract::FEE_TOKEN_ADDRESS,
     tests::runners::{katana_runner::KatanaRunner, TestnetRunner},
     transaction_waiter::TransactionWaiter,
 };

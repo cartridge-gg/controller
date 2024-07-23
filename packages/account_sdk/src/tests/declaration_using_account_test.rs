@@ -1,7 +1,7 @@
 use crate::account::session::create::SessionCreator;
 use crate::account::session::hash::AllowedMethod;
 use crate::account::DECLARATION_SELECTOR;
-use crate::deploy_contract::AccountDeclaration;
+use crate::tests::deploy_contract::AccountDeclaration;
 use starknet::providers::jsonrpc::HttpTransport;
 use starknet::providers::JsonRpcClient;
 use starknet::{providers::Provider, signers::SigningKey};
