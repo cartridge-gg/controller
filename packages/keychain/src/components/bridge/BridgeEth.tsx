@@ -171,7 +171,7 @@ export function BridgeEth({
               w="full"
               h="42px"
               spacing="0"
-              borderRadius="4px"
+              borderRadius="base"
               overflow="clip"
               opacity={!!ethAddress ? undefined : "0.4"}
               pointerEvents={!!ethAddress ? "auto" : "none"}
@@ -266,7 +266,7 @@ const SelectBox = forwardRef<
     py={4}
     borderBottom="1px solid"
     borderBottomColor="solid.accent"
-    borderRadius="sm"
+    borderRadius="base"
     transition="all 0.2s"
     _hover={{ cursor: "pointer", bg: "solid.accent" }}
     ref={ref}

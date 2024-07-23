@@ -44,10 +44,11 @@ export function Policies({
         {policies.map((p, i) => (
           <AccordionItem
             key={p.target + p.method}
+            borderTopRadius={i === 0 && !!title ? "base" : "none"}
             // The container already set border radius (for top & bottom), but we
             // set the bottom radius for the last item here because for certain
             // browsers' scrolling behaviour (eg Firefox) just to make it look nicer.
-            borderBottomRadius={i === policies.length - 1 ? "md" : "none"}
+            borderBottomRadius={i === policies.length - 1 ? "base" : "none"}
           >
             {({ isExpanded }) => (
               <>

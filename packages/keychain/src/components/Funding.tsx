@@ -179,7 +179,7 @@ function FundingInner({ onComplete }: FundingInnerProps) {
           {isFetching && <Spinner size="xs" color="text.secondary" />}
         </HStack>
 
-        <VStack w="full" borderRadius="md" overflow="hidden" gap={0.25}>
+        <VStack w="full" borderRadius="base" overflow="hidden" gap={0.25}>
           {tokens.map((t) => (
             <HStack
               key={t.address}

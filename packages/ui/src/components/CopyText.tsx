@@ -76,7 +76,7 @@ export const DEFAULT_TOAST_OPTIONS: UseToastOptions = {
 
 function Toaster({ title }: UseToastOptions) {
   return (
-    <Flex bg="translucent.md" borderRadius="md" p={2} justifyContent="center">
+    <Flex bg="translucent.md" borderRadius="base" p={2} justifyContent="center">
       {title}
     </Flex>
   );

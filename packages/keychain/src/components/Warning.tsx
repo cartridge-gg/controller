@@ -12,7 +12,7 @@ export function Warning({
   return (
     <VStack
       w="full"
-      borderRadius="md"
+      borderRadius="base"
       px={5}
       py={3}
       bg="solid.secondary"

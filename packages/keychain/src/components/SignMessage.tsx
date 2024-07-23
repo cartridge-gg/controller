@@ -121,7 +121,7 @@ function DataContainer({
       align="start"
       w="full"
       bg="solid.primary"
-      borderRadius="md"
+      borderRadius="base"
       css={{
         "> p": {
           padding: "12px",
