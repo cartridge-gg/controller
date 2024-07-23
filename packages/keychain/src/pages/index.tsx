@@ -13,16 +13,16 @@ import {
 import { diff } from "utils/controller";
 import { logout } from "utils/connection/logout";
 import { LoginMode } from "components/connect/types";
+import { ErrorPage } from "components/ErrorBoundary";
 
 function Home() {
   const { context, controller, error } = useConnection();
-
   if (window.self === window.top || !context?.origin) {
     return <></>;
   }
 
   if (error) {
-    return <>{error.message}</>;
+    return <ErrorPage error={error} />;
   }
 
   // No controller, send to login

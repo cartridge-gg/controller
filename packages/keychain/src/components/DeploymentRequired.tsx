@@ -10,6 +10,7 @@ import NextLink from "next/link";
 import { useDeploy } from "hooks/deploy";
 import { Status } from "utils/account";
 import { useConnection } from "hooks/connection";
+import { CARTRIDGE_DISCORD_LINK } from "const";
 
 export function DeploymentRequired({
   onClose,
@@ -102,7 +103,7 @@ export function DeploymentRequired({
                   Please come by{" "}
                   <Link
                     as={NextLink}
-                    href="https://discord.gg/cartridge"
+                    href={CARTRIDGE_DISCORD_LINK}
                     isExternal
                     color="link.blue"
                     display="inline-flex"
