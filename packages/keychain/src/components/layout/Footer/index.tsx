@@ -19,10 +19,12 @@ export function Footer({
   isSlot = false,
   isSignup,
   createSession = false,
+  hideTxSummary = false,
 }: React.PropsWithChildren & {
   isSlot?: boolean;
   isSignup?: boolean;
   createSession?: boolean;
+  hideTxSummary?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>();
   const { origin, policies } = useConnection();
@@ -92,11 +94,13 @@ export function Footer({
           onClick={footer.onToggle}
           _hover={{ cursor: "pointer" }}
         >
-          <TransactionSummary
-            isSlot={isSlot}
-            createSession={createSession}
-            hostname={hostname}
-          />
+          {!hideTxSummary && !!policies.length && (
+            <TransactionSummary
+              isSlot={isSlot}
+              createSession={createSession}
+              hostname={hostname}
+            />
+          )}
 
           <Spacer />
 

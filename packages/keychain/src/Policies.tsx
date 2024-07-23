@@ -16,27 +16,29 @@ export function Policies({
   title,
   policies,
 }: {
-  title: string;
+  title?: string;
   policies: Policy[];
 }) {
   return (
     <Box position="relative">
-      <VStack
-        align="flex-start"
-        bg="solid.primary"
-        p={3}
-        position="sticky"
-        top={0}
-      >
-        <Text
-          color="text.secondaryAccent"
-          fontSize="xs"
-          fontWeight="bold"
-          casing="uppercase"
+      {title && (
+        <VStack
+          align="flex-start"
+          bg="solid.primary"
+          p={3}
+          position="sticky"
+          top={0}
         >
-          {title}
-        </Text>
-      </VStack>
+          <Text
+            color="text.secondaryAccent"
+            fontSize="xs"
+            fontWeight="bold"
+            casing="uppercase"
+          >
+            {title}
+          </Text>
+        </VStack>
+      )}
 
       <Accordion w="full" allowMultiple overflowY="auto">
         {policies.map((p, i) => (
