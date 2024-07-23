@@ -4,7 +4,7 @@ export function Toaster({ message }: { message: string }) {
   return (
     <Flex
       bg="solid.primary"
-      borderRadius="md"
+      borderRadius="base"
       p={2}
       justifyContent="center"
       opacity={0.8}

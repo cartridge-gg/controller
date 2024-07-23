@@ -8,7 +8,7 @@ export function SessionDetails() {
 
   return (
     <VStack
-      borderRadius="md"
+      borderRadius="base"
       overflowY="auto"
       rowGap="0.1rem"
       minH="min-content"

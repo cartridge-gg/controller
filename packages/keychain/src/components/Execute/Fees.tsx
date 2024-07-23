@@ -44,7 +44,7 @@ export function Fees({
     <VStack
       w="full"
       overflow="hidden"
-      borderRadius="md"
+      borderRadius="base"
       spacing="1px"
       align="flex-start"
     >

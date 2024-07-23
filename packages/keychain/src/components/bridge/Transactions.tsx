@@ -124,7 +124,7 @@ function Card({
       w="full"
       minH="54px"
       bg="solid.primary"
-      borderRadius="sm"
+      borderRadius="base"
       p={4}
       spacing={4}
     >

@@ -87,7 +87,7 @@ function Wrapper({
             animate={{ opacity: 1 }}
             initial={{ opacity: 0 }}
             centerContent
-            borderRadius="md"
+            borderRadius="lg"
             overflow="hidden"
             position="relative"
             {...rest}

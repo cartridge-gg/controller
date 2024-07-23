@@ -16,36 +16,39 @@ export function Policies({
   title,
   policies,
 }: {
-  title: string;
+  title?: string;
   policies: Policy[];
 }) {
   return (
     <Box position="relative">
-      <VStack
-        align="flex-start"
-        bg="solid.primary"
-        p={3}
-        position="sticky"
-        top={0}
-      >
-        <Text
-          color="text.secondaryAccent"
-          fontSize="xs"
-          fontWeight="bold"
-          casing="uppercase"
+      {title && (
+        <VStack
+          align="flex-start"
+          bg="solid.primary"
+          p={3}
+          position="sticky"
+          top={0}
         >
-          {title}
-        </Text>
-      </VStack>
+          <Text
+            color="text.secondaryAccent"
+            fontSize="xs"
+            fontWeight="bold"
+            casing="uppercase"
+          >
+            {title}
+          </Text>
+        </VStack>
+      )}
 
       <Accordion w="full" allowMultiple overflowY="auto">
         {policies.map((p, i) => (
           <AccordionItem
             key={p.target + p.method}
+            borderTopRadius={i === 0 && !!title ? "base" : "none"}
             // The container already set border radius (for top & bottom), but we
             // set the bottom radius for the last item here because for certain
             // browsers' scrolling behaviour (eg Firefox) just to make it look nicer.
-            borderBottomRadius={i === policies.length - 1 ? "md" : "none"}
+            borderBottomRadius={i === policies.length - 1 ? "base" : "none"}
           >
             {({ isExpanded }) => (
               <>
