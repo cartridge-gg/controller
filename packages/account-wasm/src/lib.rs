@@ -13,18 +13,18 @@ mod tests;
 use std::str::FromStr;
 use std::sync::Arc;
 
-use account_sdk::abigen::controller::WebauthnSigner;
+use account_sdk::abigen::controller::{StarknetSigner, WebauthnSigner};
 use account_sdk::account::outside_execution::OutsideExecutionAccount;
 use account_sdk::account::session::hash::{AllowedMethod, Session};
 use account_sdk::account::session::SessionAccount;
-use account_sdk::account::{AccountHashSigner, CartridgeGuardianAccount, MessageSignerAccount};
+use account_sdk::account::{AccountHashSigner, CartridgeAccount, CartridgeGuardianAccount, MessageSignerAccount};
 use account_sdk::hash::MessageHashRev1;
 use account_sdk::signers::webauthn::device::DeviceSigner;
 use account_sdk::signers::webauthn::WebauthnAccountSigner;
 use account_sdk::signers::HashSigner;
 use account_sdk::wasm_webauthn::CredentialID;
 use base64::{engine::general_purpose, Engine};
-use cainome::cairo_serde::CairoSerde;
+use cainome::cairo_serde::{CairoSerde, NonZero};
 use constants::ACCOUNT_CLASS_HASH;
 use coset::{CborSerializable, CoseKey};
 use errors::{OperationError, SessionError};
@@ -52,20 +52,21 @@ use utils::{policies_match, set_panic_hook};
 use wasm_bindgen::prelude::*;
 
 use crate::types::TryFromJsValue;
+use crate::utils::calculate_account_address;
 
 type Result<T> = std::result::Result<T, JsError>;
 
 #[wasm_bindgen]
-pub struct CartridgeAccount {
-    account: CartridgeGuardianAccount<Arc<JsonRpcClient<HttpTransport>>, DeviceSigner, SigningKey>,
-    device_signer: DeviceSigner,
+pub struct Controller {
+    account: CartridgeAccount<Arc<JsonRpcClient<HttpTransport>>, SigningKey>,
+    signer: SigningKey,
     username: String,
     rpc_url: Url,
 }
 
 #[wasm_bindgen]
-impl CartridgeAccount {
-    /// Creates a new `CartridgeAccount` instance.
+impl Controller {
+    /// Creates a new `Controller` instance.
     ///
     /// # Parameters
     /// - `rpc_url`: The URL of the JSON-RPC endpoint.
@@ -78,48 +79,50 @@ impl CartridgeAccount {
     /// - `public_key`: Base64 encoded bytes of the public key generated during the WebAuthn registration process (COSE format).
     ///
     #[allow(clippy::too_many_arguments)]
-    pub fn new(
-        rpc_url: String,
-        chain_id: String,
-        address: String,
-        rp_id: String,
-        origin: String,
-        username: String,
-        credential_id: String,
-        public_key: String,
-    ) -> Result<CartridgeAccount> {
+    pub fn new(rpc_url: String, chain_id: String, username: String) -> Result<Controller> {
         set_panic_hook();
 
         let rpc_url = Url::parse(&rpc_url)?;
         let provider = JsonRpcClient::new(HttpTransport::new(rpc_url.clone()));
 
-        let credential_id_bytes = general_purpose::URL_SAFE_NO_PAD.decode(credential_id)?;
-        let credential_id = CredentialID(credential_id_bytes);
-
-        let cose_bytes = general_purpose::URL_SAFE_NO_PAD.decode(public_key)?;
-        let cose = CoseKey::from_slice(&cose_bytes)?;
-
-        let device_signer = DeviceSigner::new(rp_id, origin, credential_id, cose);
-
-        let dummy_guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
-        let address = Felt::from_str(&address)?;
+        let signer = SigningKey::from_random();
         let chain_id = Felt::from_str(&chain_id)?;
         let username = username.to_lowercase();
 
-        let account = CartridgeGuardianAccount::new(
-            Arc::new(provider),
-            device_signer.clone(),
-            dummy_guardian,
-            address,
-            chain_id,
-        );
+        // let address = calculate_account_address(&username);
 
-        Ok(CartridgeAccount {
+        let account = CartridgeAccount::new(Arc::new(provider), signer.clone(), address, chain_id);
+
+        Ok(Controller {
             account,
-            device_signer,
+            signer,
             username,
             rpc_url,
         })
+    }
+
+    #[wasm_bindgen(js_name = addWebauthnOwner)]
+    pub async fn add_webauthn_owner(
+        &self,
+        rp_id: String,
+        origin: String,
+        credential_id: String,
+        public_key: String,
+    ) -> Result<JsValue> {
+        let device_signer = DeviceSigner::new(rp_id, origin, credential_id, public_key);
+        let webauthn_signer = device_signer.signer_pub_data();
+
+        let controller = AbigenController::new(self.account.address(), self.account.clone());
+
+        let signature = self
+            .signer
+            .sign_new_owner(&self.account.chain_id(), &self.account.address())
+            .await?;
+
+        let tx = controller.add_owner(&webauthn_signer.into(), &signature);
+        let result = tx.send().await?;
+
+        Ok(to_value(&result)?)
     }
 
     #[wasm_bindgen(js_name = createSession)]
@@ -394,11 +397,12 @@ impl CartridgeAccount {
     }
 
     fn get_constructor_calldata(&self) -> Vec<Felt> {
-        let webauthn = self.device_signer.signer_pub_data();
-        let mut calldata = Vec::<WebauthnSigner>::cairo_serialize(&vec![webauthn]);
-        calldata[0] = Felt::TWO; // incorrect signer enum from serialization
+        let starknet_signer = StarknetSigner {
+            pubkey: NonZero::new(self.signer.verifying_key().scalar()).unwrap(),
+        };
+        let mut calldata = Vec::<StarknetSigner>::cairo_serialize(&vec![starknet_signer]);
+        // calldata[0] = Felt::ONE; // Starknet signer enum value
         calldata.push(Felt::ONE); // no guardian
-
         calldata
     }
 }

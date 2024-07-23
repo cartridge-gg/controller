@@ -2,54 +2,24 @@ use std::fmt::Error;
 
 use crate::{
     constants::ACCOUNT_CLASS_HASH, paymaster::convert_to_snake_case, types::policy::JsPolicy,
-    utils::policies_match, CartridgeAccount,
+    utils::policies_match, Controller,
 };
 use serde_json::{self, json};
 use starknet::{
     accounts::Call,
     core::{
-        crypto::compute_hash_on_elements,
-        types::{Felt, NonZeroFelt},
+        types::Felt,
         utils::{cairo_short_string_to_felt, get_selector_from_name},
     },
 };
-
-const PREFIX_CONTRACT_ADDRESS: Felt = Felt::from_raw([
-    533439743893157637,
-    8635008616843941496,
-    17289941567720117366,
-    3829237882463328880,
-]);
-
-const ADDR_BOUND: NonZeroFelt = NonZeroFelt::from_raw([
-    576459263475590224,
-    18446744073709255680,
-    160989183,
-    18446743986131443745,
-]);
-
-pub fn calculate_contract_address(
-    salt: Felt,
-    class_hash: Felt,
-    constructor_calldata: &[Felt],
-) -> Felt {
-    compute_hash_on_elements(&[
-        PREFIX_CONTRACT_ADDRESS,
-        Felt::ZERO,
-        salt,
-        class_hash,
-        compute_hash_on_elements(constructor_calldata),
-    ])
-    .mod_floor(&ADDR_BOUND)
-}
 
 fn create_test_account(
     username: &str,
     address: &str,
     credential_id: &str,
     public_key: &str,
-) -> CartridgeAccount {
-    CartridgeAccount::new(
+) -> Controller {
+    Controller::new(
         "http://localhost:8000/x/starknet/mainnet".to_string(),
         "0x534e5f4d41494e".to_string(),
         address.to_string(),
