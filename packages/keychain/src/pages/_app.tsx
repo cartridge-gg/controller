@@ -4,7 +4,7 @@ import { CartridgeTheme } from "@cartridge/ui";
 import { Inter, IBM_Plex_Mono } from "next/font/google";
 import { useEffect } from "react";
 import { Provider } from "components/Provider";
-import { ErrorBoundary } from "components/ErrorBooundary";
+import { ErrorBoundary } from "components/ErrorBoundary";
 
 const inter = Inter({ subsets: ["latin"] });
 const ibmPlexMono = IBM_Plex_Mono({
