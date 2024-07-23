@@ -9,7 +9,7 @@ use p256::{
 use rand_core::OsRng;
 
 use super::{
-    credential::{AuthenticatorAssertionResponse, AuthenticatorData, CliendData},
+    credential::{AuthenticatorAssertionResponse, AuthenticatorData, ClientData},
     Secp256r1Point, SignError,
 };
 
@@ -68,7 +68,7 @@ impl WebauthnAccountSigner for InternalWebauthnSigner {
             flags: 0b00000101,
             sign_count: 0,
         };
-        let client_data_json = CliendData::new(challenge, self.origin.clone()).to_json();
+        let client_data_json = ClientData::new(challenge, self.origin.clone()).to_json();
         let client_data_hash = Sha256::new().chain(client_data_json.clone()).finalize();
 
         let mut to_sign = Into::<Vec<u8>>::into(authenticator_data.clone());

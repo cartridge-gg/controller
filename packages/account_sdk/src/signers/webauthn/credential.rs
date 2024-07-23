@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::abigen::controller::Signature;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct CliendData {
+pub struct ClientData {
     #[serde(rename = "type")]
     pub(super) type_: String,
     pub(super) challenge: String,
@@ -13,7 +13,7 @@ pub struct CliendData {
     pub(super) cross_origin: bool,
 }
 
-impl CliendData {
+impl ClientData {
     pub fn new(challenge: impl AsRef<[u8]>, origin: String) -> Self {
         use base64::{engine::general_purpose::URL_SAFE, Engine as _};
         let challenge = URL_SAFE.encode(challenge);
@@ -39,7 +39,7 @@ pub struct AuthenticatorAssertionResponse {
 }
 
 impl AuthenticatorAssertionResponse {
-    pub fn client_data(&self) -> CliendData {
+    pub fn client_data(&self) -> ClientData {
         serde_json::from_str(&self.client_data_json).unwrap()
     }
     pub fn nomalise_signature(mut self) -> AuthenticatorAssertionResponse {

@@ -1,3 +1,5 @@
+mod deploy_contract;
+
 mod account_test;
 mod declaration_using_account_test;
 mod delegate_account_test;

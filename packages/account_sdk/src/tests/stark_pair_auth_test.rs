@@ -5,7 +5,7 @@ use crate::abigen::controller::{Controller, Signer, StarknetSigner};
 use crate::abigen::erc_20::Erc20;
 use crate::signers::SignerTrait;
 use crate::{
-    deploy_contract::{single_owner_account, FEE_TOKEN_ADDRESS},
+    tests::deploy_contract::{single_owner_account, FEE_TOKEN_ADDRESS},
     tests::runners::TestnetRunner,
 };
 

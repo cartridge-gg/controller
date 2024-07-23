@@ -253,6 +253,7 @@ impl WebauthnAccountSigner for DeviceSigner {
             user_handle: None,
         })
     }
+
     fn signer_pub_data(&self) -> WebauthnSigner {
         WebauthnSigner {
             rp_id_hash: NonZero::new(U256::from_bytes_be(&self.rp_id_hash())).unwrap(),
