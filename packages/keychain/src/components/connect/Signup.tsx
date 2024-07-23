@@ -163,7 +163,6 @@ export function Signup({
             isDisabled={isRegistering}
             onClear={() => {
               setError(undefined);
-              setFieldError(usernameField.name, undefined);
               setValue(usernameField.name, "");
             }}
           />
