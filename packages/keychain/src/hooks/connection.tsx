@@ -14,7 +14,7 @@ import {
   ConnectionCtx,
   LogoutCtx,
 } from "utils/connection";
-import { RpcProvider, constants } from "starknet";
+import { RpcProvider, constants, shortString } from "starknet";
 import { Policy, Prefund, ResponseCodes } from "@cartridge/controller";
 import { mergeDefaultETHPrefund } from "utils/token";
 import { isIframe } from "components/connect/utils";
@@ -51,13 +51,17 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
   const [error, setError] = useState<Error>();
 
   const chainName = useMemo(() => {
+    if (!chainId) {
+      return;
+    }
+
     switch (chainId) {
       case constants.StarknetChainId.SN_MAIN:
         return "Mainnet";
       case constants.StarknetChainId.SN_SEPOLIA:
         return "Sepolia";
       default:
-        return chainId;
+        return shortString.decodeShortString(chainId);
     }
   }, [chainId]);
 
