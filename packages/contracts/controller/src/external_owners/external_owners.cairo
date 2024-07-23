@@ -1,7 +1,9 @@
 #[starknet::component]
 mod external_owners_component {
-    use controller::external_owners::interface::IExternalOwners;
     use starknet::{get_caller_address, get_contract_address, ContractAddress};
+
+    use controller::external_owners::interface::IExternalOwners;
+    use controller::account::IAssertOwner;
 
     #[storage]
     struct Storage {
@@ -27,20 +29,21 @@ mod external_owners_component {
 
     #[embeddable_as(ExternalOwnersImpl)]
     impl ImplExternalOwners<
-        TContractState, +HasComponent<TContractState>, +Drop<TContractState>
+        TContractState,
+        +HasComponent<TContractState>,
+        +IAssertOwner<TContractState>,
+        +Drop<TContractState>
     > of IExternalOwners<ComponentState<TContractState>> {
         fn register_external_owner(
             ref self: ComponentState<TContractState>, external_owner_address: ContractAddress
         ) {
-            let caller = get_caller_address();
+            self.get_contract().assert_owner();
+
             assert(
-                caller == get_contract_address() || self.is_registered_external_owner(caller),
-                'caller-not-owner'
-            );
-            assert(
-                self.is_registered_external_owner(external_owner_address) == false,
+                self.is_external_owner(external_owner_address) == false,
                 'ext-owners/already-registered'
             );
+
             self.external_owners.write(external_owner_address.into(), true);
             self.emit(ExternalOwnerRegistered { address: external_owner_address });
         }
@@ -48,16 +51,18 @@ mod external_owners_component {
         fn remove_external_owner(
             ref self: ComponentState<TContractState>, external_owner_address: ContractAddress
         ) {
-            assert(self.is_registered_external_owner(get_caller_address()), 'caller-not-owner');
+            self.get_contract().assert_owner();
+
             assert(
-                self.is_registered_external_owner(external_owner_address),
+                self.is_external_owner(external_owner_address),
                 'ext-owners/not-registered'
             );
+
             self.external_owners.write(external_owner_address.into(), false);
             self.emit(ExternalOwnerRemoved { address: external_owner_address });
         }
 
-        fn is_registered_external_owner(
+        fn is_external_owner(
             self: @ComponentState<TContractState>, external_owner_address: ContractAddress
         ) -> bool {
             self.external_owners.read(external_owner_address.into())
