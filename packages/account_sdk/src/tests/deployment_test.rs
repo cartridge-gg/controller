@@ -25,7 +25,7 @@ pub async fn declare(
     account: &(impl ConnectedAccount + Send + Sync),
 ) -> Felt {
     let DeclareTransactionResult { class_hash, .. } = AccountDeclaration::cartridge_account(client)
-        .declare::<JsonRpcClient<HttpTransport>>(account)
+        .declare(account)
         .await
         .unwrap()
         .wait_for_completion()

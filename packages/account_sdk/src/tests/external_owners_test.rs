@@ -8,8 +8,9 @@ use crate::{
         },
         CartridgeAccount, CartridgeGuardianAccount,
     },
-    signers::{webauthn::internal::InternalWebauthnSigner, HashSigner},
+    signers::HashSigner,
     tests::deploy_contract::FEE_TOKEN_ADDRESS,
+    tests::signers::InternalWebauthnSigner,
     tests::{
         deployment_test::{deploy_two_helper, transfer_helper},
         runners::{katana_runner::KatanaRunner, TestnetRunner},

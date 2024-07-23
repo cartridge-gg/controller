@@ -4,10 +4,8 @@ use crate::{
         session::{create::SessionCreator, hash::AllowedMethod},
         CartridgeAccount, CartridgeGuardianAccount,
     },
-    signers::{
-        webauthn::internal::InternalWebauthnSigner, HashSigner, NewOwnerSigner, SignError,
-        SignerTrait,
-    },
+    signers::{HashSigner, NewOwnerSigner, SignError, SignerTrait},
+    tests::signers::InternalWebauthnSigner,
     tests::{
         deployment_test::deploy_helper,
         runners::{katana_runner::KatanaRunner, TestnetRunner},

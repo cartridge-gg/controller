@@ -42,6 +42,7 @@ impl AuthenticatorAssertionResponse {
     pub fn client_data(&self) -> ClientData {
         serde_json::from_str(&self.client_data_json).unwrap()
     }
+
     pub fn nomalise_signature(mut self) -> AuthenticatorAssertionResponse {
         use p256::{
             elliptic_curve::{

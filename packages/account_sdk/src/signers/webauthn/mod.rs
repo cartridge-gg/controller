@@ -10,10 +10,8 @@ use starknet::core::types::Felt;
 
 pub mod credential;
 pub mod device;
-pub mod internal;
 
 pub use device::{DeviceError, DeviceSigner};
-pub use internal::InternalWebauthnSigner;
 
 pub type Secp256r1Point = (U256, U256);
 
@@ -54,10 +52,12 @@ where
             webauthn_signature,
         )))
     }
+
     fn signer(&self) -> Signer {
         Signer::Webauthn(self.signer_pub_data())
     }
 }
+
 trait Sha256ImplementationEncoder {
     fn encode(&self) -> u8;
 }

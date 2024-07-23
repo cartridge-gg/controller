@@ -7,8 +7,8 @@ use crate::{
         },
         CartridgeGuardianAccount,
     },
-    tests::deploy_contract::FEE_TOKEN_ADDRESS,
     signers::{HashSigner, SignerTrait},
+    tests::deploy_contract::FEE_TOKEN_ADDRESS,
     tests::runners::{katana_runner::KatanaRunner, TestnetRunner},
     transaction_waiter::TransactionWaiter,
 };
