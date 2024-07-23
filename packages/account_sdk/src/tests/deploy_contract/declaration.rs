@@ -64,14 +64,13 @@ impl<'a, T> AccountDeclaration<'a, T> {
 }
 
 impl<'a, T> AccountDeclaration<'a, T> {
-    pub async fn declare<P>(
+    pub async fn declare(
         self,
         account: &(impl ConnectedAccount + Send + Sync),
     ) -> Result<PendingDeclaration<'a, T>, String>
     where
         T: Send + Sync,
         &'a JsonRpcClient<T>: Provider,
-        P: Provider + Send + Sync,
     {
         let casm_class_hash = self
             .compiled_class

@@ -1,7 +1,7 @@
 use crate::{
     abigen::controller::Controller,
     account::{CartridgeAccount, CartridgeGuardianAccount},
-    signers::webauthn::internal::InternalWebauthnSigner,
+    tests::signers::InternalWebauthnSigner,
     tests::{
         deployment_test::{deploy_helper, deploy_two_helper, transfer_helper},
         runners::{katana_runner::KatanaRunner, TestnetRunner},

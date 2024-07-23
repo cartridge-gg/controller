@@ -12,7 +12,7 @@ account-wasm = { path = "packages/account-wasm" }
 
 anyhow = "1"
 async-trait = "0.1"
-base64 = "0.21"
+base64 = "0.22"
 cainome = { git = "https://github.com/cartridge-gg/cainome", rev = "e67d925", features = [
     "abigen-rs",
 ] }
@@ -24,8 +24,9 @@ indexmap = { version = "2.2.6", features = ["serde"] }
 lazy_static = "1"
 p256 = "0.13"
 primitive-types = { version = "0.12", default-features = false }
-rand_core = { version = "0.6", features = ["getrandom"] }
-serde = "1"
+getrandom = { version = "0.2", features = ["js"] }
+rand = { version = "0.8", features = ["getrandom"] }
+serde = "1.0.197"
 serde_json = "1"
 sha2 = "0.10"
 starknet = "0.11.0"
@@ -33,7 +34,7 @@ starknet-crypto = "0.7.1"
 thiserror = "1"
 toml = "0.8"
 u256-literal = "1"
-url = "2"
+url = { version = "2.3.1", default-features = false }
 num-traits = "0.2.19"
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4.42"
@@ -46,3 +47,13 @@ tokio = { version = "1", features = ["macros", "time"] }
 # To enable std feature on `starknet-types-core`.
 # To re-export the entire `felt` module from `starknet-types-core`.
 starknet-core = { git = "https://github.com/kariy/starknet-rs", branch = "dojo-patch" }
+
+# Compiler optimization when running test to prevent ‘locals exceed maximum’ error,
+# where a function is using more that the maximum allowed local variables.
+[profile.dev]
+incremental = true
+opt-level = 1
+
+[profile.release]
+lto = true
+opt-level = 's'
