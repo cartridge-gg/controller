@@ -26,20 +26,14 @@ mod delegate_account_component {
     impl ImplDelegateAccount<
         TContractState,
         +HasComponent<TContractState>,
-        impl ExternalOwners: external_owners_comp::HasComponent<TContractState>,
+        +IAllowedCallerCallback<TContractState>,
         +Drop<TContractState>
     > of IDelegateAccount<ComponentState<TContractState>> {
         fn set_delegate_account(
             ref self: ComponentState<TContractState>, delegate_address: ContractAddress
         ) {
-            let caller = get_caller_address();
-            let external_owners = get_dep_component!(@self, ExternalOwners);
-
-            assert(
-                caller == get_contract_address()
-                    || external_owners.is_registered_external_owner(caller),
-                'caller-not-owner'
-            );
+            let contract = self.get_contract();
+            contract.is_caller_allowed(get_caller_address());
 
             self.delegate_account.write(delegate_address.into());
             self.emit(DelegateAccountChanged { address: delegate_address });
