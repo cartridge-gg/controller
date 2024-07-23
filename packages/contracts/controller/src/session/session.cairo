@@ -1,53 +1,31 @@
-// use alexandria_data_structures::array_ext::ArrayTraitExt;
-// use core::box::BoxTrait;
-use core::array::SpanTrait;
-// use starknet::info::{TxInfo, get_tx_info, get_block_timestamp};
 use starknet::account::Call;
-// use core::result::ResultTrait;
-// use core::option::OptionTrait;
 use core::array::ArrayTrait;
-// use core::{TryInto, Into};
-use starknet::contract_address::ContractAddress;
 use alexandria_merkle_tree::merkle_tree::{
     Hasher, MerkleTree, poseidon::PoseidonHasherImpl, MerkleTreeTrait
 };
 use argent::session::session_hash::MerkleLeafHash;
-use core::ecdsa::check_ecdsa_signature;
-
-
-const SESSION_TOKEN_V1: felt252 = 'session-token';
-const AUTHORIZATION_BY_REGISTERED: felt252 = 'authorization-by-registered';
 
 // Based on https://github.com/argentlabs/starknet-plugin-account/blob/3c14770c3f7734ef208536d91bbd76af56dc2043/contracts/plugins/SessionKey.cairo
 #[starknet::component]
 mod session_component {
-    use core::num::traits::zero::Zero;
-    use core::result::ResultTrait;
-    use core::ecdsa::check_ecdsa_signature;
     use core::poseidon::{hades_permutation, poseidon_hash_span};
     use starknet::account::Call;
-    use starknet::contract_address::ContractAddress;
-    use starknet::info::{TxInfo, get_tx_info, get_block_timestamp, get_caller_address};
+    use starknet::info::get_block_timestamp;
     use starknet::get_contract_address;
-
-    use alexandria_merkle_tree::merkle_tree::{
-        Hasher, MerkleTree, poseidon::PoseidonHasherImpl, MerkleTreeTrait
-    };
 
     use argent::session::interface::{Session, SessionToken};
     use argent::session::session_hash::{StructHashSession, OffChainMessageHashSessionRev1};
     use argent::signer::signer_signature::{
         Signer, SignerSignature, SignerType, SignerSignatureImpl, SignerTraitImpl
     };
-    
+
     use controller::asserts::assert_no_self_call;
-    use controller::session::interface::{
-        ISession, ISessionCallback, SessionState, SessionStateImpl
-    };
+    use controller::session::interface::{ISession, ISessionCallback};
     use controller::session::session::check_policy;
-    use controller::session::session::SESSION_TOKEN_V1;
     use controller::account::IAssertOwner;
-    use controller::session::session::AUTHORIZATION_BY_REGISTERED;
+
+    const SESSION_MAGIC: felt252 = 'session-token';
+    const AUTHORIZATION_BY_REGISTERED: felt252 = 'authorization-by-registered';
 
     #[storage]
     struct Storage {
@@ -135,6 +113,7 @@ mod session_component {
         ) -> felt252 {
             assert(self.is_session(signature), 'session/invalid-magic-value');
             assert_no_self_call(calls, get_contract_address());
+
             let mut signature = signature.slice(1, signature.len() - 1);
             let signature: SessionToken = Serde::<SessionToken>::deserialize(ref signature)
                 .expect('session/deserialize-error');
@@ -148,7 +127,7 @@ mod session_component {
         #[inline(always)]
         fn is_session(self: @ComponentState<TContractState>, signature: Span<felt252>) -> bool {
             match signature.get(0) {
-                Option::Some(session_magic) => *session_magic.unbox() == SESSION_TOKEN_V1,
+                Option::Some(session_magic) => *session_magic.unbox() == SESSION_MAGIC,
                 Option::None => false
             }
         }
