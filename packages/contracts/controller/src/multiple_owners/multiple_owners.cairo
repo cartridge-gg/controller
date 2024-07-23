@@ -68,11 +68,11 @@ mod multiple_owners_component {
         fn assert_valid_owner_signature(
             self: @ComponentState<TContractState>, signer_signature: SignerSignature,
         ) {
-            // We now need to hash message_hash with the size of the array: (change_owner selector,
+            // We now need to hash message_hash with the size of the array: (add_owner selector,
             // chain id, contract address)
             // https://github.com/starkware-libs/cairo-lang/blob/b614d1867c64f3fb2cf4a4879348cfcf87c3a5a7/src/starkware/cairo/common/hash_state.py#L6
             let message_hash = PedersenTrait::new(0)
-                .update(selector!("change_owner"))
+                .update(selector!("add_owner"))
                 .update(get_tx_info().unbox().chain_id)
                 .update(get_contract_address().into())
                 .finalize();

@@ -45,7 +45,6 @@ mod CartridgeAccount {
     use argent::account::interface::{
         IAccount, IArgentAccount, IArgentUserAccount, IDeprecatedArgentAccount, Version
     };
-    use argent::introspection::src5::src5_component;
     use argent::outside_execution::{
         outside_execution::outside_execution_component, interface::{IOutsideExecutionCallback}
     };
@@ -74,13 +73,14 @@ mod CartridgeAccount {
     use openzeppelin::upgrades::UpgradeableComponent;
     use openzeppelin::upgrades::interface::IUpgradeable;
 
+    use controller::account::{ICartridgeAccount, IAssertOwner};
     use controller::external_owners::external_owners::external_owners_component;
     use controller::delegate_account::delegate_account::delegate_account_component;
+    use controller::introspection::src5::src5_component;
     use controller::session::{
         session::session_component::{InternalImpl, InternalTrait}, session::session_component,
         interface::ISessionCallback
     };
-    use controller::account::{ICartridgeAccount, IAssertOwner};
     use controller::multiple_owners::{
         multiple_owners::{multiple_owners_component}, interface::IMultipleOwners
     };
