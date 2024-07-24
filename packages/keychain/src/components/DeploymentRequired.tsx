@@ -45,11 +45,7 @@ export function DeploymentRequired({
       .then((hash) => {
         setDeployHash(hash);
       })
-      .catch((e) => {
-        if (!e.message.includes("account already deployed")) {
-          setError(e);
-        }
-      });
+      .catch((e) => setError(e));
   }, [account.chainId, account.username, account.status]);
 
   if (account.status === Status.DEPLOYED) {
