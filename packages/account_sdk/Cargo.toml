@@ -9,35 +9,31 @@ version.workspace = true
 crate-type = ["lib"]
 
 [dependencies]
-anyhow.workspace = true
 async-trait.workspace = true
 base64.workspace = true
-num-bigint.workspace = true
 cainome.workspace = true
 coset.workspace = true
 ecdsa.workspace = true
 futures.workspace = true
-lazy_static.workspace = true
+indexmap.workspace = true
+num-bigint.workspace = true
+num-traits.workspace = true
 p256.workspace = true
-primitive-types.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-sha2.workspace = true
-starknet.workspace = true
 starknet-crypto.workspace = true
+starknet.workspace = true
 thiserror.workspace = true
-toml.workspace = true
-u256-literal.workspace = true
 url.workspace = true
 wasm-bindgen-futures.workspace = true
 wasm-bindgen.workspace = true
 wasm-webauthn.workspace = true
-web-sys = "0.3.69"
-indexmap.workspace = true
-num-traits.workspace = true
+web-sys.workspace = true
 
 [dev-dependencies]
-hex = "0.4.3"
+hex.workspace = true
+lazy_static.workspace = true
+sha2.workspace = true
 rand_core = { version = "0.6", features = ["getrandom"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]

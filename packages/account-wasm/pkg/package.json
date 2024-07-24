@@ -1,5 +1,6 @@
 {
   "name": "account-wasm",
+  "type": "module",
   "version": "0.1.0",
   "files": [
     "account_wasm_bg.wasm",

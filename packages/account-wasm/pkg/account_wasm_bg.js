@@ -313,13 +313,14 @@ export class CartridgeAccount {
     * @param {string} chain_id
     * @param {string} address
     * @param {string} rp_id
+    * @param {string} rp_id_hash
     * @param {string} origin
     * @param {string} username
     * @param {string} credential_id
     * @param {string} public_key
     * @returns {CartridgeAccount}
     */
-    static new(rpc_url, chain_id, address, rp_id, origin, username, credential_id, public_key) {
+    static new(rpc_url, chain_id, address, rp_id, rp_id_hash, origin, username, credential_id, public_key) {
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
             const ptr0 = passStringToWasm0(rpc_url, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -330,15 +331,17 @@ export class CartridgeAccount {
             const len2 = WASM_VECTOR_LEN;
             const ptr3 = passStringToWasm0(rp_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
             const len3 = WASM_VECTOR_LEN;
-            const ptr4 = passStringToWasm0(origin, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const ptr4 = passStringToWasm0(rp_id_hash, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
             const len4 = WASM_VECTOR_LEN;
-            const ptr5 = passStringToWasm0(username, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const ptr5 = passStringToWasm0(origin, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
             const len5 = WASM_VECTOR_LEN;
-            const ptr6 = passStringToWasm0(credential_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const ptr6 = passStringToWasm0(username, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
             const len6 = WASM_VECTOR_LEN;
-            const ptr7 = passStringToWasm0(public_key, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const ptr7 = passStringToWasm0(credential_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
             const len7 = WASM_VECTOR_LEN;
-            wasm.cartridgeaccount_new(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7);
+            const ptr8 = passStringToWasm0(public_key, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const len8 = WASM_VECTOR_LEN;
+            wasm.cartridgeaccount_new(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7, ptr8, len8);
             var r0 = getInt32Memory0()[retptr / 4 + 0];
             var r1 = getInt32Memory0()[retptr / 4 + 1];
             var r2 = getInt32Memory0()[retptr / 4 + 2];
@@ -1090,8 +1093,8 @@ export function __wbindgen_memory() {
     return addHeapObject(ret);
 };
 
-export function __wbindgen_closure_wrapper2189(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 493, __wbg_adapter_48);
+export function __wbindgen_closure_wrapper2130(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 490, __wbg_adapter_48);
     return addHeapObject(ret);
 };
 

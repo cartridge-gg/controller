@@ -28,6 +28,7 @@ pub enum DeviceError {
 #[derive(Debug, Clone)]
 pub struct DeviceSigner {
     pub rp_id: String,
+    pub rp_id_hash: [u8; 32],
     pub origin: String,
     pub credential_id: CredentialID,
     pub pub_key: CoseKey,
@@ -36,12 +37,14 @@ pub struct DeviceSigner {
 impl DeviceSigner {
     pub fn new(
         rp_id: String,
+        rp_id_hash: [u8; 32],
         origin: String,
         credential_id: CredentialID,
         pub_key: CoseKey,
     ) -> Self {
         Self {
             rp_id,
+            rp_id_hash,
             origin,
             credential_id,
             pub_key,
@@ -50,6 +53,7 @@ impl DeviceSigner {
 
     pub async fn register(
         rp_id: String,
+        rp_id_hash: [u8; 32],
         origin: String,
         user_name: String,
         challenge: &[u8],
@@ -63,52 +67,11 @@ impl DeviceSigner {
 
         Ok(Self {
             rp_id,
+            rp_id_hash,
             credential_id: credential.id,
             pub_key,
             origin,
         })
-    }
-
-    fn extract_pub_key(cose_key: &CoseKey) -> Result<[u8; 64], DeviceError> {
-        if cose_key.kty != KeyType::Assigned(iana::KeyType::EC2) {
-            return Err(DeviceError::CreateCredential(
-                "Invalid key type".to_string(),
-            ));
-        }
-
-        let mut x_coord: Option<Vec<u8>> = None;
-        let mut y_coord: Option<Vec<u8>> = None;
-
-        for (label, value) in &cose_key.params {
-            match label {
-                Label::Int(-2) => {
-                    if let Value::Bytes(vec) = value {
-                        x_coord = Some(vec.clone());
-                    }
-                }
-                Label::Int(-3) => {
-                    if let Value::Bytes(vec) = value {
-                        y_coord = Some(vec.clone());
-                    }
-                }
-                _ => {}
-            }
-        }
-
-        let x = x_coord.ok_or(DeviceError::CreateCredential("No x coord".to_string()))?;
-        let y = y_coord.ok_or(DeviceError::CreateCredential("No y coord".to_string()))?;
-
-        if x.len() != 32 || y.len() != 32 {
-            return Err(DeviceError::CreateCredential(
-                "Invalid key length".to_string(),
-            ));
-        }
-
-        let mut pub_key = [0u8; 64];
-        pub_key[..32].copy_from_slice(&x);
-        pub_key[32..].copy_from_slice(&y);
-
-        Ok(pub_key)
     }
 
     async fn create_credential(
@@ -185,12 +148,48 @@ impl DeviceSigner {
             ))),
         }
     }
-    pub fn rp_id_hash(&self) -> [u8; 32] {
-        use sha2::{digest::Update, Digest, Sha256};
-        Sha256::new().chain(self.rp_id.clone()).finalize().into()
-    }
+
     pub fn pub_key_bytes(&self) -> Result<[u8; 64], DeviceError> {
-        Self::extract_pub_key(&self.pub_key)
+        let cose_key = &self.pub_key;
+        if cose_key.kty != KeyType::Assigned(iana::KeyType::EC2) {
+            return Err(DeviceError::CreateCredential(
+                "Invalid key type".to_string(),
+            ));
+        }
+
+        let mut x_coord: Option<Vec<u8>> = None;
+        let mut y_coord: Option<Vec<u8>> = None;
+
+        for (label, value) in &cose_key.params {
+            match label {
+                Label::Int(-2) => {
+                    if let Value::Bytes(vec) = value {
+                        x_coord = Some(vec.clone());
+                    }
+                }
+                Label::Int(-3) => {
+                    if let Value::Bytes(vec) = value {
+                        y_coord = Some(vec.clone());
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        let x = x_coord.ok_or(DeviceError::CreateCredential("No x coord".to_string()))?;
+        let y = y_coord.ok_or(DeviceError::CreateCredential("No y coord".to_string()))?;
+
+        if x.len() != 32 || y.len() != 32 {
+            return Err(DeviceError::CreateCredential(
+                "Invalid key length".to_string(),
+            ));
+        }
+
+        let mut pub_key = [0u8; 64];
+        pub_key[..32].copy_from_slice(&x);
+        pub_key[32..].copy_from_slice(&y);
+
+        Ok(pub_key)
     }
 }
 
@@ -227,7 +226,7 @@ impl WebauthnAccountSigner for DeviceSigner {
 
     fn signer_pub_data(&self) -> WebauthnSigner {
         WebauthnSigner {
-            rp_id_hash: NonZero::new(U256::from_bytes_be(&self.rp_id_hash())).unwrap(),
+            rp_id_hash: NonZero::new(U256::from_bytes_be(&self.rp_id_hash)).unwrap(),
             origin: self.origin.clone().into_bytes(),
             pubkey: NonZero::new(U256::from_bytes_be(
                 &self.pub_key_bytes().unwrap()[0..32].try_into().unwrap(),
