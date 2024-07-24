@@ -54,6 +54,7 @@ export default class Controller {
       this.signer,
       {
         rpId: process.env.NEXT_PUBLIC_RP_ID,
+        rpIdHash: process.env.NEXT_PUBLIC_RP_ID_HASH,
         origin: process.env.NEXT_PUBLIC_ORIGIN,
         credentialId,
         publicKey,
