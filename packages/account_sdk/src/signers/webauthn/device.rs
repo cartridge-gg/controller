@@ -1,8 +1,10 @@
 use async_trait::async_trait;
 use cainome::cairo_serde::{NonZero, U256};
 use coset::{cbor::Value, iana, CoseKey, KeyType, Label};
+use ecdsa::{RecoveryId, VerifyingKey};
 use futures::channel::oneshot;
 use p256::NistP256;
+use sha2::{digest::Update, Digest, Sha256};
 use std::result::Result;
 use wasm_bindgen_futures::spawn_local;
 use wasm_webauthn::*;
@@ -205,17 +207,40 @@ impl WebauthnAccountSigner for DeviceSigner {
             client_data_json,
             flags,
             counter,
-            authenticator_data: _,
+            authenticator_data: raw_auth_data,
         } = self.get_assertion(challenge).await?;
+
+        let client_data_hash = Sha256::new().chain(client_data_json.clone()).finalize();
+        let mut message = Into::<Vec<u8>>::into(raw_auth_data);
+        message.append(&mut client_data_hash.to_vec());
 
         let ecdsa_sig = ecdsa::Signature::<NistP256>::from_der(&encoded_sig).unwrap();
         let r = U256::from_bytes_be(ecdsa_sig.r().to_bytes().as_slice().try_into().unwrap());
         let s = U256::from_bytes_be(ecdsa_sig.s().to_bytes().as_slice().try_into().unwrap());
 
         let pub_key = self.pub_key_bytes().map_err(SignError::Device)?;
-        let y_parity = pub_key[63] & 1 == 1; // Check if the last byte of y-coordinate is odd
+        let mut sec1_key = Vec::with_capacity(65);
+        sec1_key.push(0x4); // prefix 0x04 for uncompressed SEC1 format
+        sec1_key.extend_from_slice(&pub_key);
 
-        let signature = Signature { r, s, y_parity };
+        let recovery_id = RecoveryId::trial_recovery_from_msg(
+            &VerifyingKey::from_sec1_bytes(&sec1_key).map_err(|_| {
+                SignError::Device(DeviceError::BadAssertion("Invalid public key".to_string()))
+            })?,
+            &message,
+            &ecdsa_sig,
+        )
+        .map_err(|_| {
+            SignError::Device(DeviceError::BadAssertion(
+                "Unable to recover id".to_string(),
+            ))
+        })?;
+
+        let signature = Signature {
+            r,
+            s,
+            y_parity: recovery_id.is_y_odd(),
+        };
 
         Ok(AuthenticatorAssertionResponse {
             authenticator_data: AuthenticatorData {
@@ -228,7 +253,6 @@ impl WebauthnAccountSigner for DeviceSigner {
             user_handle: None,
         })
     }
-
     fn signer_pub_data(&self) -> WebauthnSigner {
         WebauthnSigner {
             rp_id_hash: NonZero::new(U256::from_bytes_be(&self.rp_id_hash())).unwrap(),
