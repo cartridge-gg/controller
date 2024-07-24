@@ -9,6 +9,7 @@ import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 import { PageLoading } from "components/Loading";
 import dynamic from "next/dynamic";
+import { useDeploy } from "hooks/deploy";
 
 type SessionQueryParams = Record<string, string> & {
   callback_uri: string;
@@ -24,6 +25,7 @@ function CreateSession() {
 
   const { controller, setController, policies, origin, chainId, rpcUrl } =
     useConnection();
+  const { deployRequest } = useDeploy();
 
   // Fetching account status for displaying the loading screen
   const [isFetching, setIsFetching] = useState(false);
@@ -74,6 +76,14 @@ function CreateSession() {
       if (!queries.callback_uri) {
         throw new Error("Callback URI is missing");
       }
+
+      // Request for deployment to ensure account exists
+      deployRequest(controller.username).catch((e) => {
+        if (!e.message.includes("account already deployed")) {
+          console.error("failed to request deployment", e);
+          router.replace(`/slot/auth/failure`);
+        }
+      });
 
       onSlotCallback(session);
     },
