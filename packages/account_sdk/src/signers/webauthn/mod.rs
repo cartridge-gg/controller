@@ -36,7 +36,22 @@ where
         let mut challenge = tx_hash.to_bytes_be().to_vec();
 
         challenge.push(self.sha256_version().encode());
-        let assertion = self.sign(&challenge).await?.nomalise_signature();
+        let mut assertion: AuthenticatorAssertionResponse = self.sign(&challenge).await?;
+        use p256::{
+            elliptic_curve::{
+                bigint::{Encoding, Uint},
+                scalar::FromUintUnchecked,
+            },
+            Scalar,
+        };
+        use std::ops::Neg;
+        let s = assertion.signature.s;
+        let s_scalar = Scalar::from_uint_unchecked(Uint::from_be_bytes(s.to_bytes_be()));
+        let s_neg = U256::from_bytes_be(s_scalar.neg().to_bytes().as_slice().try_into().unwrap());
+        if s > s_neg {
+            assertion.signature.s = s_neg;
+            assertion.signature.y_parity = !assertion.signature.y_parity;
+        }
 
         let webauthn_signature = WebauthnSignature {
             flags: assertion.authenticator_data.flags,
