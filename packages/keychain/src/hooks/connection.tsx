@@ -85,15 +85,15 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
   }, [context, parent]);
 
   useEffect(() => {
-    // Set default rpc and origin if we're not embedded (eg Slot auth)
-    if (!isIframe()) {
-      setOrigin(process.env.NEXT_PUBLIC_ORIGIN);
-      setRpcUrl(process.env.NEXT_PUBLIC_RPC_SEPOLIA);
-      return;
-    }
-
     const urlParams = new URLSearchParams(window.location.search);
-    setPolicies(parsePolicies(urlParams.get("policies")));
+
+    // Set rpc and origin if we're not embedded (eg Slot auth/session)
+    if (!isIframe()) {
+      setOrigin(urlParams.get("origin") || process.env.NEXT_PUBLIC_ORIGIN);
+      setRpcUrl(
+        urlParams.get("rpc_url") || process.env.NEXT_PUBLIC_RPC_SEPOLIA,
+      );
+    }
 
     const prefundParam = urlParams.get("prefunds");
     const prefunds: Prefund[] = prefundParam
@@ -101,6 +101,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
       : [];
     setHasPrefundRequest(!!prefundParam);
     setPrefunds(mergeDefaultETHPrefund(prefunds));
+    setPolicies(parsePolicies(urlParams.get("policies")));
 
     const connection = connectToController({
       setOrigin,
