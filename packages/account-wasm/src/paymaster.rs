@@ -1,11 +1,12 @@
 use convert_case::{Case, Casing};
-use reqwest::Client;
+use gloo_net::http::Request;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 use serde_with::serde_as;
 use starknet::core::serde::unsigned_field_element::UfeHex;
 use starknet::core::types::Felt;
 use url::Url;
+use wasm_bindgen::JsError;
 
 use crate::{types::outside_execution::JsOutsideExecution, Result};
 
@@ -61,15 +62,17 @@ impl PaymasterRequest {
 
         let body = serde_json::to_value(&request).map(convert_to_snake_case)?;
 
-        let response = Client::new()
-            .post(rpc_url)
+        let response = Request::post(rpc_url.as_str())
             .header("Content-Type", "application/json")
-            .body(body.to_string())
+            .body(body.to_string())?
             .send()
-            .await?
-            .error_for_status()?;
+            .await?;
 
-        Ok(serde_json::from_str(&response.text().await?)?)
+        if !response.ok() {
+            return Err(JsError::new(&response.status_text()));
+        }
+
+        Ok(response.json().await?)
     }
 }
 

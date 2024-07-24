@@ -8,7 +8,7 @@ use argent::session::session_hash::MerkleLeafHash;
 // Based on https://github.com/argentlabs/starknet-plugin-account/blob/3c14770c3f7734ef208536d91bbd76af56dc2043/contracts/plugins/SessionKey.cairo
 #[starknet::component]
 mod session_component {
-    use core::poseidon::{hades_permutation, poseidon_hash_span};
+    use core::poseidon::hades_permutation;
     use starknet::account::Call;
     use starknet::info::get_block_timestamp;
     use starknet::get_contract_address;

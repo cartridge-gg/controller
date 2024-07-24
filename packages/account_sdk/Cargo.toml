@@ -19,7 +19,6 @@ futures.workspace = true
 lazy_static.workspace = true
 p256.workspace = true
 primitive-types.workspace = true
-rand_core.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 sha2.workspace = true
@@ -35,6 +34,9 @@ wasm-webauthn.workspace = true
 web-sys = "0.3.69"
 indexmap.workspace = true
 num-traits.workspace = true
+
+[dev-dependencies]
+rand_core = { version = "0.6", features = ["getrandom"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tokio.workspace = true

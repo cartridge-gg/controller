@@ -34,9 +34,6 @@ where
             .unwrap();
         self.transaction_result
     }
-    pub fn skip_waiting(self) -> T {
-        self.transaction_result
-    }
 }
 
 pub type PendingDeclaration<'a, T> =

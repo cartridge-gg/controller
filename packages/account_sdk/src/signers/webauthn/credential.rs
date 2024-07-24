@@ -1,10 +1,9 @@
-use cainome::cairo_serde::U256;
 use serde::{Deserialize, Serialize};
 
 use crate::abigen::controller::Signature;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct CliendData {
+pub struct ClientData {
     #[serde(rename = "type")]
     pub(super) type_: String,
     pub(super) challenge: String,
@@ -13,7 +12,7 @@ pub struct CliendData {
     pub(super) cross_origin: bool,
 }
 
-impl CliendData {
+impl ClientData {
     pub fn new(challenge: impl AsRef<[u8]>, origin: String) -> Self {
         use base64::{engine::general_purpose::URL_SAFE, Engine as _};
         let challenge = URL_SAFE.encode(challenge);
@@ -39,26 +38,8 @@ pub struct AuthenticatorAssertionResponse {
 }
 
 impl AuthenticatorAssertionResponse {
-    pub fn client_data(&self) -> CliendData {
+    pub fn client_data(&self) -> ClientData {
         serde_json::from_str(&self.client_data_json).unwrap()
-    }
-    pub fn nomalise_signature(mut self) -> AuthenticatorAssertionResponse {
-        use p256::{
-            elliptic_curve::{
-                bigint::{Encoding, Uint},
-                scalar::FromUintUnchecked,
-            },
-            Scalar,
-        };
-        use std::ops::Neg;
-        let s = self.signature.s;
-        let s_scalar = Scalar::from_uint_unchecked(Uint::from_be_bytes(s.to_bytes_be()));
-        let s_neg = U256::from_bytes_be(s_scalar.neg().to_bytes().as_slice().try_into().unwrap());
-        if s > s_neg {
-            self.signature.s = s_neg;
-            self.signature.y_parity = !self.signature.y_parity;
-        }
-        self
     }
 }
 

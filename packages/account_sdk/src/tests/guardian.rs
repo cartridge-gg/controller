@@ -1,9 +1,10 @@
 use crate::{
     abigen::erc_20::Erc20,
     account::CartridgeGuardianAccount,
-    deploy_contract::FEE_TOKEN_ADDRESS,
-    signers::{webauthn::internal::InternalWebauthnSigner, HashSigner},
+    signers::HashSigner,
+    tests::deploy_contract::FEE_TOKEN_ADDRESS,
     tests::runners::{katana_runner::KatanaRunner, TestnetRunner},
+    tests::signers::InternalWebauthnSigner,
 };
 use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{

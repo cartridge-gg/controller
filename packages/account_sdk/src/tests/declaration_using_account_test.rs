@@ -1,9 +1,7 @@
 use crate::account::session::create::SessionCreator;
 use crate::account::session::hash::AllowedMethod;
 use crate::account::DECLARATION_SELECTOR;
-use crate::deploy_contract::AccountDeclaration;
-use starknet::providers::jsonrpc::HttpTransport;
-use starknet::providers::JsonRpcClient;
+use crate::tests::deploy_contract::AccountDeclaration;
 use starknet::{providers::Provider, signers::SigningKey};
 
 use crate::{
@@ -31,7 +29,7 @@ async fn test_declaration_using_account() {
     );
 
     AccountDeclaration::erc_20(runner.client())
-        .declare::<JsonRpcClient<HttpTransport>>(&account)
+        .declare(&account)
         .await
         .unwrap()
         .wait_for_completion()
@@ -65,7 +63,7 @@ async fn test_declaration_using_session_account() {
     .unwrap();
 
     AccountDeclaration::erc_20(runner.client())
-        .declare::<JsonRpcClient<HttpTransport>>(&account)
+        .declare(&account)
         .await
         .unwrap()
         .wait_for_completion()
