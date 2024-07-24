@@ -1,17 +1,21 @@
 import { Field } from "@cartridge/ui";
 import { Button } from "@chakra-ui/react";
 import { Container, Footer, Content, useLayout } from "components/layout";
-import { SubmitHandler, useForm, useController } from "react-hook-form";
+import {
+  SubmitHandler,
+  useForm,
+  useController as useFormikController,
+} from "react-hook-form";
 import { useCallback, useEffect, useState } from "react";
 import Controller from "utils/controller";
 import { FormInput, LoginMode, LoginProps } from "./types";
-import { useAnalytics } from "hooks/analytics";
 import { fetchAccount, validateUsernameFor } from "./utils";
 import { RegistrationLink } from "./RegistrationLink";
 import { useControllerTheme } from "hooks/theme";
 import { doLogin } from "hooks/account";
 import { useConnection } from "hooks/connection";
 import { ErrorAlert } from "components/ErrorAlert";
+import { useDeploy } from "hooks/deploy";
 
 export function Login(props: LoginProps) {
   const theme = useControllerTheme();
@@ -40,7 +44,7 @@ function Form({
 }: LoginProps) {
   const { footer } = useLayout();
   const { origin, policies, chainId, rpcUrl, setController } = useConnection();
-  const { event: log } = useAnalytics();
+  const { deployRequest } = useDeploy();
   const [isLoading, setIsLoading] = useState(false);
   const [expiresAt] = useState<bigint>(3000000000n);
   const [error, setError] = useState<Error>();
@@ -48,7 +52,7 @@ function Form({
   const { handleSubmit, formState, control, setValue } = useForm<FormInput>({
     defaultValues: { username: prefilledName },
   });
-  const { field: usernameField } = useController({
+  const { field: usernameField } = useFormikController({
     name: "username",
     control,
     rules: {
@@ -97,24 +101,22 @@ function Form({
             break;
         }
 
-        controller.store();
-        setController(controller);
+        if (isSlot) {
+          await deployRequest(values.username);
+        }
 
         if (onSuccess) {
           onSuccess();
         }
 
-        log({ type: "webauthn_login", address });
+        controller.store();
+        setController(controller);
       } catch (e) {
-        setError(e);
+        if (e.message.includes("account already deployed")) {
+          return;
+        }
 
-        log({
-          type: "webauthn_login_error",
-          payload: {
-            error: e?.message,
-          },
-          address,
-        });
+        setError(e);
       }
 
       setIsLoading(false);
@@ -126,7 +128,6 @@ function Form({
       policies,
       expiresAt,
       mode,
-      log,
       onSuccess,
       setController,
     ],

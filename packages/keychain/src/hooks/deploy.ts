@@ -19,7 +19,7 @@ interface DeployInterface {
 }
 
 export const useDeploy = (): DeployInterface => {
-  const { chainId, prefunds, controller } = useConnection();
+  const { chainId, controller } = useConnection();
   const [isDeployed, setIsDeployed] = useState(false);
   const [isDeploying, setIsDeploying] = useState(false);
 
@@ -59,23 +59,26 @@ export const useDeploy = (): DeployInterface => {
         setIsDeploying(false);
       }
     },
-    [prefunds, chainId],
+    [chainId, isDeployed],
   );
 
-  const deploySelf = useCallback(async (maxFee: string) => {
-    if (isDeployed) return;
+  const deploySelf = useCallback(
+    async (maxFee: string) => {
+      if (isDeployed) return;
 
-    try {
-      setIsDeploying(true);
-      const { transaction_hash } =
-        await controller.account.cartridge.deploySelf(num.toHex(maxFee));
+      try {
+        setIsDeploying(true);
+        const { transaction_hash } =
+          await controller.account.cartridge.deploySelf(num.toHex(maxFee));
 
-      setIsDeployed(true);
-      return transaction_hash;
-    } finally {
-      setIsDeploying(false);
-    }
-  }, []);
+        setIsDeployed(true);
+        return transaction_hash;
+      } finally {
+        setIsDeploying(false);
+      }
+    },
+    [isDeployed],
+  );
 
   return {
     deployRequest,

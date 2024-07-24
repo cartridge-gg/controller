@@ -3,12 +3,10 @@ import { Container, Footer, Content } from "components/layout";
 import { useEffect, useState } from "react";
 import { Button, Link, Text } from "@chakra-ui/react";
 import { ExternalIcon, PacmanIcon } from "@cartridge/ui";
-import { useController } from "hooks/controller";
 import { ErrorAlert } from "./ErrorAlert";
 import { Funding } from "./Funding";
 import NextLink from "next/link";
 import { useDeploy } from "hooks/deploy";
-import { Status } from "utils/account";
 import { useConnection } from "hooks/connection";
 import { CARTRIDGE_DISCORD_LINK } from "const";
 
@@ -21,15 +19,15 @@ export function DeploymentRequired({
 }) {
   const {
     controller: { account },
-  } = useController();
-  const { hasPrefundRequest } = useConnection();
-  const { deployRequest } = useDeploy();
+    hasPrefundRequest,
+  } = useConnection();
+  const { deployRequest, isDeployed } = useDeploy();
   const [deployHash, setDeployHash] = useState<string>();
   const [showFunding, setShowFunding] = useState(false);
   const [error, setError] = useState<Error>();
 
   useEffect(() => {
-    if (account.status === Status.DEPLOYED) {
+    if (isDeployed) {
       return;
     }
 
@@ -50,9 +48,9 @@ export function DeploymentRequired({
           setError(e);
         }
       });
-  }, [account.chainId, account.username, account.status]);
+  }, [account.chainId, account.username, account.status, isDeployed]);
 
-  if (account.status === Status.DEPLOYED) {
+  if (isDeployed) {
     return <>{children}</>;
   }
 
