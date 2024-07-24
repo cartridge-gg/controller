@@ -1,2 +1,2 @@
 pub const ACCOUNT_CLASS_HASH: &str =
-    "0x5f0f2ae9301e0468ca3f9218dadd43a448a71acc66b6ef1a5570bb56cf10c6f";
+    "0x5f6ea31cad80f8a95f759506bfd86ad6afcdae147b0ddabe180d14b927eaa2f";

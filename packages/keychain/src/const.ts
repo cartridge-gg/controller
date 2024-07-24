@@ -1,1 +1,1 @@
-export const CARTRIDGE_DISCORD_LINK = "https://discord.gg/ef9pdfEB";
+export const CARTRIDGE_DISCORD_LINK = "https://discord.gg/cartridge";
