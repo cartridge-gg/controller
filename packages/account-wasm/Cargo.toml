@@ -15,12 +15,9 @@ base64.workspace = true
 cainome.workspace = true
 convert_case = "0.6.0"
 coset.workspace = true
-getrandom = { version = "0.2", features = ["js"] }
 gloo-net = "0.6.0"
-hex = "0.4.3"
+hex.workspace = true
 num-traits.workspace = true
-p256.workspace = true
-rand = { version = "0.8", features = ["getrandom"] }
 starknet.workspace = true
 serde = { workspace = true, features = ["derive"] }
 serde-wasm-bindgen = "0.6.5"
@@ -31,7 +28,7 @@ url = { workspace = true, default-features = false }
 wasm-bindgen = { workspace = true, features = ["serde-serialize"] }
 wasm-bindgen-futures.workspace = true
 wasm-webauthn.workspace = true
-web-sys = { version = "0.3.4" }
+web-sys.workspace = true
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires
@@ -40,6 +37,7 @@ web-sys = { version = "0.3.4" }
 console_error_panic_hook = { version = "0.1.7", optional = true }
 
 [dev-dependencies]
+sha2.workspace = true
 wasm-bindgen-test = "0.3.34"
 
 [features]

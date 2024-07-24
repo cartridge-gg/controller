@@ -37,6 +37,7 @@ where
 
         challenge.push(self.sha256_version().encode());
         let mut assertion: AuthenticatorAssertionResponse = self.sign(&challenge).await?;
+
         use p256::{
             elliptic_curve::{
                 bigint::{Encoding, Uint},

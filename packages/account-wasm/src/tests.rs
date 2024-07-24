@@ -5,6 +5,7 @@ use crate::{
     utils::policies_match, CartridgeAccount,
 };
 use serde_json::{self, json};
+use sha2::{digest::Update, Digest, Sha256};
 use starknet::{
     accounts::Call,
     core::{
@@ -49,11 +50,14 @@ fn create_test_account(
     credential_id: &str,
     public_key: &str,
 ) -> CartridgeAccount {
+    let rp_id = "localhost";
+    let rp_id_hash = hex::encode(Sha256::new().chain(rp_id).finalize());
     CartridgeAccount::new(
         "http://localhost:8000/x/starknet/mainnet".to_string(),
         "0x534e5f4d41494e".to_string(),
         address.to_string(),
-        "localhost".to_string(),
+        rp_id.to_string(),
+        rp_id_hash,
         "http://localhost:3001".to_string(),
         username.to_string(),
         credential_id.to_string(),

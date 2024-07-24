@@ -83,12 +83,17 @@ impl CartridgeAccount {
         chain_id: String,
         address: String,
         rp_id: String,
+        rp_id_hash: String,
         origin: String,
         username: String,
         credential_id: String,
         public_key: String,
     ) -> Result<CartridgeAccount> {
         set_panic_hook();
+
+        let rp_id_hash: [u8; 32] = hex::decode(rp_id_hash)?
+            .try_into()
+            .map_err(|_| JsError::new("Invalid rp_id_hash length"))?;
 
         let rpc_url = Url::parse(&rpc_url)?;
         let provider = JsonRpcClient::new(HttpTransport::new(rpc_url.clone()));
@@ -99,7 +104,7 @@ impl CartridgeAccount {
         let cose_bytes = general_purpose::URL_SAFE_NO_PAD.decode(public_key)?;
         let cose = CoseKey::from_slice(&cose_bytes)?;
 
-        let device_signer = DeviceSigner::new(rp_id, origin, credential_id, cose);
+        let device_signer = DeviceSigner::new(rp_id, rp_id_hash, origin, credential_id, cose);
 
         let dummy_guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
         let address = Felt::from_str(&address)?;
