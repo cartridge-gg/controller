@@ -2,7 +2,6 @@ use async_trait::async_trait;
 use cainome::cairo_serde::{NonZero, U256};
 use coset::{cbor::Value, iana, CoseKey, KeyType, Label};
 use futures::channel::oneshot;
-use p256::NistP256;
 use std::result::Result;
 use wasm_bindgen_futures::spawn_local;
 use wasm_webauthn::*;
@@ -208,10 +207,7 @@ impl WebauthnAccountSigner for DeviceSigner {
             authenticator_data: _,
         } = self.get_assertion(challenge).await?;
 
-        let ecdsa_sig = ecdsa::Signature::<NistP256>::from_der(&encoded_sig).unwrap();
-        let r = U256::from_bytes_be(ecdsa_sig.r().to_bytes().as_slice().try_into().unwrap());
-        let s = U256::from_bytes_be(ecdsa_sig.s().to_bytes().as_slice().try_into().unwrap());
-
+        let (r, s) = parse_der_signature(&encoded_sig)?;
         let pub_key = self.pub_key_bytes().map_err(SignError::Device)?;
         let y_parity = pub_key[63] & 1 == 1; // Check if the last byte of y-coordinate is odd
 
@@ -239,4 +235,35 @@ impl WebauthnAccountSigner for DeviceSigner {
             .unwrap(),
         }
     }
+}
+
+fn parse_der_signature(encoded_sig: &[u8]) -> Result<(U256, U256), SignError> {
+    if encoded_sig.len() < 8 || encoded_sig[0] != 0x30 {
+        return Err(SignError::Device(DeviceError::BadAssertion(
+            "Invalid DER signature".to_string(),
+        )));
+    }
+
+    let r_start = 4;
+    let r_len = encoded_sig[3] as usize;
+    let s_start = r_start + r_len + 2;
+    let s_len = encoded_sig[r_start + r_len + 1] as usize;
+
+    if s_start + s_len > encoded_sig.len() {
+        return Err(SignError::Device(DeviceError::BadAssertion(
+            "Invalid DER signature length".to_string(),
+        )));
+    }
+
+    let r = U256::from_bytes_be(&pad_to_32_bytes(&encoded_sig[r_start..r_start + r_len]));
+    let s = U256::from_bytes_be(&pad_to_32_bytes(&encoded_sig[s_start..s_start + s_len]));
+
+    Ok((r, s))
+}
+
+fn pad_to_32_bytes(input: &[u8]) -> [u8; 32] {
+    let mut result = [0u8; 32];
+    let start = 32_usize.saturating_sub(input.len()) as usize;
+    result[start..].copy_from_slice(input);
+    result
 }

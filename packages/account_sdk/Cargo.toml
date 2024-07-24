@@ -12,6 +12,7 @@ crate-type = ["lib"]
 anyhow.workspace = true
 async-trait.workspace = true
 base64.workspace = true
+num-bigint.workspace = true
 cainome.workspace = true
 coset.workspace = true
 ecdsa.workspace = true
