@@ -9,6 +9,7 @@ import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 import { PageLoading } from "components/Loading";
 import dynamic from "next/dynamic";
+import { useDeploy } from "hooks/deploy";
 
 type SessionQueryParams = Record<string, string> & {
   callback_uri: string;
@@ -24,6 +25,7 @@ function CreateSession() {
 
   const { controller, setController, policies, origin, chainId, rpcUrl } =
     useConnection();
+  const { deployRequest } = useDeploy();
 
   // Fetching account status for displaying the loading screen
   const [isFetching, setIsFetching] = useState(false);
@@ -49,7 +51,10 @@ function CreateSession() {
         headers,
         method: "POST",
       })
-        .then((res) => {
+        .then(async (res) => {
+          // request deployment to ensure account exists on chain
+          await deployRequest(controller.username);
+
           return res.status === 200
             ? router.replace(`/slot/auth/success`)
             : new Promise((_, reject) => reject(res));

@@ -55,6 +55,10 @@ export const useDeploy = (): DeployInterface => {
 
         setIsDeployed(true);
         return hash.deployAccount;
+      } catch (e) {
+        if (!e.message.includes("account already deployed")) {
+          throw e;
+        }
       } finally {
         setIsDeploying(false);
       }
@@ -72,6 +76,10 @@ export const useDeploy = (): DeployInterface => {
 
       setIsDeployed(true);
       return transaction_hash;
+    } catch (e) {
+      if (!e.message.includes("account already deployed")) {
+        throw e;
+      }
     } finally {
       setIsDeploying(false);
     }
