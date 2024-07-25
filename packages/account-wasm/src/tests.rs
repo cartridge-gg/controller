@@ -169,7 +169,7 @@ fn test_policy_match() {
 #[test]
 fn test_verify_address() {
     let username = "TestUseR";
-    let address = "0x4f0d535f16a780cf0b47d9b4a5622d5d7fbd6bd895ba2c6c1719e6d9b341e4a";
+    let address = "0x5f530a64149817666a93e45df896d368056b2c680c56c5e23cfffa5fb3591c4";
     let credential_id = "juIx8zbazZbAvJIkyyGXZhlaQhysJqqRau4E9F6K7_uJesonwOd8oBcjNI3xcMSYUFJttmolDw0IIZlp4NXAdR16l8HPmYSQsRx8_Vfb2jGxJe5mtKBX0oH73GAdrXmQ";
     let public_key = "pQECAyYgASFYICgsU0B9_E9r77VDI-mRT8ljHOFK4cLu8zjbJ64X14KVIlgg__E_pfxdQMb_DhKpBdGhmp7VcTetrv5qxNuIVPUutvE";
 
