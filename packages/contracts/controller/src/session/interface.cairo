@@ -1,5 +1,6 @@
 use starknet::account::Call;
-use controller_auth::signer::SignerSignature;
+use argent::signer::signer_signature::{SignerSignature, Signer};
+use argent::session::interface::Session;
 
 
 #[derive(Drop, Serde, Copy, PartialEq)]
@@ -27,34 +28,23 @@ impl SessionStateImpl of SessionStateTrait {
     }
 }
 
-
-#[derive(Drop, Serde, Copy)]
-struct Session {
-    expires_at: u64,
-    allowed_methods_root: felt252,
-    metadata_hash: felt252,
-    session_key_guid: felt252,
-}
-
-#[derive(Drop, Serde, Copy)]
-struct SessionToken {
-    session: Session,
-    session_authorization: Span<felt252>,
-    session_signature: SignerSignature,
-    guardian_signature: SignerSignature,
-    proofs: Span<Span<felt252>>,
-}
-
 #[starknet::interface]
 trait ISession<TContractState> {
     fn revoke_session(ref self: TContractState, session_hash: felt252);
-    fn register_session(ref self: TContractState, session: Session);
+    fn register_session(ref self: TContractState, session: Session, guid_or_address: felt252,);
     fn is_session_revoked(self: @TContractState, session_hash: felt252) -> bool;
 }
 
 #[starknet::interface]
 trait ISessionCallback<TContractState> {
-    fn session_callback(
-        self: @TContractState, session_hash: felt252, authorization_signature: Span<felt252>
+    fn parse_authorization(
+        self: @TContractState, authorization_signature: Span<felt252>
+    ) -> Array<SignerSignature>;
+    fn is_valid_authorizer(
+        self: @TContractState, guid_or_address: felt252
     ) -> bool;
+    fn verify_authorization(
+        self: @TContractState, session_hash: felt252, authorization_signature: Span<SignerSignature>
+    );
 }
+

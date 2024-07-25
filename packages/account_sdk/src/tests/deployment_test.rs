@@ -7,15 +7,17 @@ use starknet::{
 };
 
 use super::runners::katana_runner::KatanaRunner;
+use crate::abigen::erc_20::Erc20;
 use crate::{
     abigen::controller::{self, Controller, Signer, StarknetSigner},
-    signers::HashSigner,
+    signers::{HashSigner, SignerTrait},
 };
 use crate::{
-    abigen::erc_20::Erc20,
-    deploy_contract::{AccountDeclaration, DeployResult, FEE_TOKEN_ADDRESS},
+    tests::deploy_contract::{
+        AccountDeclaration, AccountDeployment, DeployResult, FEE_TOKEN_ADDRESS,
+    },
+    tests::runners::TestnetRunner,
 };
-use crate::{deploy_contract::AccountDeployment, tests::runners::TestnetRunner};
 use cainome::cairo_serde::{CairoSerde, ContractAddress, NonZero, U256};
 
 pub async fn declare(
@@ -23,7 +25,7 @@ pub async fn declare(
     account: &(impl ConnectedAccount + Send + Sync),
 ) -> Felt {
     let DeclareTransactionResult { class_hash, .. } = AccountDeclaration::cartridge_account(client)
-        .declare::<JsonRpcClient<HttpTransport>>(account)
+        .declare(account)
         .await
         .unwrap()
         .wait_for_completion()
@@ -147,8 +149,8 @@ async fn test_deploy_and_call() {
     let signer = Signer::Starknet(StarknetSigner {
         pubkey: NonZero::new(felt!("1337")).unwrap(),
     });
-    let deployed_address = deploy(client, &account, signer, None, class_hash).await;
+    let deployed_address = deploy(client, &account, signer.clone(), None, class_hash).await;
 
     let contract = Controller::new(deployed_address, account);
-    contract.get_owner().call().await.unwrap();
+    assert!(contract.is_owner(&signer.guid()).call().await.unwrap());
 }

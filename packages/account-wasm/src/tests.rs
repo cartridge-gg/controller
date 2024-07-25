@@ -169,7 +169,7 @@ fn test_policy_match() {
 #[test]
 fn test_verify_address() {
     let username = "TestUseR";
-    let address = "0x6bb11c7d905d93785fb80bab144ab47e38ae86289e66067ba60e4a535ae5bc5";
+    let address = "0x5f530a64149817666a93e45df896d368056b2c680c56c5e23cfffa5fb3591c4";
     let credential_id = "juIx8zbazZbAvJIkyyGXZhlaQhysJqqRau4E9F6K7_uJesonwOd8oBcjNI3xcMSYUFJttmolDw0IIZlp4NXAdR16l8HPmYSQsRx8_Vfb2jGxJe5mtKBX0oH73GAdrXmQ";
     let public_key = "pQECAyYgASFYICgsU0B9_E9r77VDI-mRT8ljHOFK4cLu8zjbJ64X14KVIlgg__E_pfxdQMb_DhKpBdGhmp7VcTetrv5qxNuIVPUutvE";
 
@@ -181,8 +181,9 @@ fn test_verify_address() {
         &account.get_constructor_calldata(),
     );
 
-    assert!(
-        calculated_address.eq(&Felt::from_hex(address).unwrap()),
+    assert_eq!(
+        calculated_address,
+        Felt::from_hex(address).unwrap(),
         "Address does not match calculated"
     );
 }

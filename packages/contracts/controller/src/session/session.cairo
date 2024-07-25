@@ -1,59 +1,54 @@
-use alexandria_data_structures::array_ext::ArrayTraitExt;
-use core::box::BoxTrait;
-use core::array::SpanTrait;
-use starknet::info::{TxInfo, get_tx_info, get_block_timestamp};
 use starknet::account::Call;
-use core::result::ResultTrait;
-use core::option::OptionTrait;
 use core::array::ArrayTrait;
-use core::{TryInto, Into};
-use starknet::contract_address::ContractAddress;
 use alexandria_merkle_tree::merkle_tree::{
     Hasher, MerkleTree, poseidon::PoseidonHasherImpl, MerkleTreeTrait
 };
-
-use core::ecdsa::check_ecdsa_signature;
-use controller::session::hash::get_merkle_leaf;
-
-
-const SESSION_TOKEN_V1: felt252 = 'session-token';
+use argent::session::session_hash::MerkleLeafHash;
 
 // Based on https://github.com/argentlabs/starknet-plugin-account/blob/3c14770c3f7734ef208536d91bbd76af56dc2043/contracts/plugins/SessionKey.cairo
 #[starknet::component]
 mod session_component {
-    use core::result::ResultTrait;
-    use controller::session::lib::check_policy;
-    use starknet::info::{TxInfo, get_tx_info, get_block_timestamp, get_caller_address};
+    use core::poseidon::hades_permutation;
     use starknet::account::Call;
-    use controller::session::hash::{get_merkle_leaf, get_message_hash_rev_1, authorization_hash};
-    use core::ecdsa::check_ecdsa_signature;
-    use alexandria_merkle_tree::merkle_tree::{
-        Hasher, MerkleTree, poseidon::PoseidonHasherImpl, MerkleTreeTrait
-    };
-    use starknet::contract_address::ContractAddress;
+    use starknet::info::get_block_timestamp;
     use starknet::get_contract_address;
-    use controller::session::interface::{
-        ISession, SessionToken, Session, ISessionCallback, SessionState, SessionStateImpl
+
+    use argent::session::interface::{Session, SessionToken};
+    use argent::session::session_hash::{StructHashSession, OffChainMessageHashSessionRev1};
+    use argent::signer::signer_signature::{
+        Signer, SignerSignature, SignerType, SignerSignatureImpl, SignerTraitImpl
     };
-    use controller_auth::signer::{SignerSignatureTrait, SignerTrait};
-    use controller_auth::{assert_no_self_call};
-    use controller::session::lib::SESSION_TOKEN_V1;
-    use core::poseidon::{hades_permutation};
-    use controller::account::IAllowedCallerCallback;
+
+    use controller::asserts::assert_no_self_call;
+    use controller::session::interface::{ISession, ISessionCallback};
+    use controller::session::session::check_policy;
+    use controller::account::IAssertOwner;
+
+    const SESSION_MAGIC: felt252 = 'session-token';
+    const AUTHORIZATION_BY_REGISTERED: felt252 = 'authorization-by-registered';
 
     #[storage]
     struct Storage {
-        session_states: LegacyMap::<felt252, felt252>,
+        /// A map of session hashes to a boolean indicating if the session has been revoked.
+        revoked_session: LegacyMap<felt252, bool>,
+        /// A map of (owner_guid, guardian_guid, session_hash) to a len of authorization signature
+        valid_session_cache: LegacyMap<(felt252, felt252, felt252), bool>,
     }
 
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
         SessionRevoked: SessionRevoked,
+        SessionRegistered: SessionRegistered,
     }
 
     #[derive(Drop, starknet::Event)]
     struct SessionRevoked {
+        session_hash: felt252,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct SessionRegistered {
         session_hash: felt252,
     }
 
@@ -68,50 +63,47 @@ mod session_component {
 
     #[embeddable_as(SessionComponent)]
     impl SessionImpl<
-        TContractState, +HasComponent<TContractState>, +ISessionCallback<TContractState>, +IAllowedCallerCallback<TContractState>
+        TContractState,
+        +HasComponent<TContractState>,
+        +ISessionCallback<TContractState>,
+        +IAssertOwner<TContractState>,
     > of ISession<ComponentState<TContractState>> {
         fn revoke_session(ref self: ComponentState<TContractState>, session_hash: felt252) {
-            self.get_contract().is_caller_allowed(get_caller_address());
-            assert(
-                self.session_state(session_hash) != SessionState::Revoked, 'session/already-revoked'
-            );
-            self.session_states.write(session_hash, SessionState::Revoked.into_felt());
-            self.emit(SessionRevoked { session_hash: session_hash });
+            self.get_contract().assert_owner();
+
+            assert(!self.revoked_session.read(session_hash), 'session/already-revoked');
+            self.emit(SessionRevoked { session_hash });
+            self.revoked_session.write(session_hash, true);
         }
+
         fn register_session(
-            ref self: ComponentState<TContractState>,
-            session: Session
+            ref self: ComponentState<TContractState>, session: Session, guid_or_address: felt252,
         ) {
-            self.get_contract().is_caller_allowed(get_caller_address());
+            self.get_contract().assert_owner();
+
             let now = get_block_timestamp();
             assert(session.expires_at > now, 'session/expired');
-            // check validity of token
-            let session_hash = get_message_hash_rev_1(@session);
+            let session_hash = session.get_message_hash_rev_1();
+            assert(!self.revoked_session.read(session_hash), 'session/already-revoked');
 
-            match self.session_state(session_hash) {
-                SessionState::Revoked => { assert(false, 'session/already-revoked'); },
-                SessionState::NotRegistered => {
-                    let authorization_hash = authorization_hash(array![].span());
-                    self
-                        .session_states
-                        .write(
-                            session_hash, SessionState::Validated(authorization_hash).into_felt()
-                        );
-                },
-                SessionState::Validated(_) => { assert(false, 'session/already-registered'); },
-            }
+            let guardian_guid = 0;
+            assert(
+                !self.valid_session_cache.read((guid_or_address, guardian_guid, session_hash)),
+                'session/already-registered'
+            );
+            self.valid_session_cache.write((guid_or_address, guardian_guid, session_hash), true);
         }
+
         fn is_session_revoked(
             self: @ComponentState<TContractState>, session_hash: felt252
         ) -> bool {
-            self.session_state(session_hash) == SessionState::Revoked
+            self.revoked_session.read(session_hash)
         }
     }
 
-
     #[generate_trait]
     impl InternalImpl<
-        TContractState, +HasComponent<TContractState>, +ISessionCallback<TContractState>
+        TContractState, +HasComponent<TContractState>, +ISessionCallback<TContractState>,
     > of InternalTrait<TContractState> {
         fn validate_session_serialized(
             ref self: ComponentState<TContractState>,
@@ -121,9 +113,10 @@ mod session_component {
         ) -> felt252 {
             assert(self.is_session(signature), 'session/invalid-magic-value');
             assert_no_self_call(calls, get_contract_address());
+
             let mut signature = signature.slice(1, signature.len() - 1);
             let signature: SessionToken = Serde::<SessionToken>::deserialize(ref signature)
-                .unwrap();
+                .expect('session/deserialize-error');
 
             match self.validate_signature(signature, calls, transaction_hash) {
                 Result::Ok(_) => { starknet::VALIDATED },
@@ -134,17 +127,18 @@ mod session_component {
         #[inline(always)]
         fn is_session(self: @ComponentState<TContractState>, signature: Span<felt252>) -> bool {
             match signature.get(0) {
-                Option::Some(session_magic) => *session_magic.unbox() == SESSION_TOKEN_V1,
+                Option::Some(session_magic) => *session_magic.unbox() == SESSION_MAGIC,
                 Option::None => false
             }
         }
+
         fn validate_signature(
             ref self: ComponentState<TContractState>,
             signature: SessionToken,
             calls: Span<Call>,
             transaction_hash: felt252,
         ) -> Result<(), felt252> {
-            let state = self.get_contract();
+            let contract = self.get_contract();
             if signature.proofs.len() != calls.len() {
                 return Result::Err(Errors::LENGHT_MISMATCH);
             };
@@ -155,28 +149,36 @@ mod session_component {
             }
 
             // check validity of token
-            let session_hash = get_message_hash_rev_1(@signature.session);
+            let session_hash = signature.session.get_message_hash_rev_1();
 
-            match self.session_state(session_hash) {
-                SessionState::Revoked => { return Result::Err(Errors::SESSION_REVOKED); },
-                SessionState::NotRegistered => {
-                    assert(
-                        state.session_callback(session_hash, signature.session_authorization),
-                        'session/invalid-account-sig'
-                    );
-                    let authorization_hash = authorization_hash(signature.session_authorization);
-                    self
-                        .session_states
-                        .write(
-                            session_hash, SessionState::Validated(authorization_hash).into_felt()
-                        );
-                },
-                SessionState::Validated(authorization_hash) => {
-                    assert(
-                        authorization_hash == authorization_hash(signature.session_authorization),
-                        'session/account-sig-mismatch'
-                    );
-                },
+            assert(!self.revoked_session.read(session_hash), 'session/already-revoked');
+
+            let guardian_guid = 0;
+
+            if (signature.session_authorization.len() == 2
+                && *signature.session_authorization.at(0) == AUTHORIZATION_BY_REGISTERED) {
+                let owner_guid = *signature.session_authorization.at(1);
+                assert(signature.cache_authorization, 'session/cache-missing');
+                assert(
+                    self.valid_session_cache.read((owner_guid, guardian_guid, session_hash)),
+                    'session/not-registered'
+                );
+                assert(contract.is_valid_authorizer(owner_guid), 'session/invalid-authorizer');
+            } else {
+                let parsed = contract.parse_authorization(signature.session_authorization);
+                let owner_guid = parsed.at(0).clone().signer().into_guid();
+                // check validity of token
+                if !signature.cache_authorization
+                    || !self.valid_session_cache.read((owner_guid, guardian_guid, session_hash)) {
+                    contract.verify_authorization(session_hash, parsed.span());
+                    if signature.cache_authorization {
+                        self
+                            .valid_session_cache
+                            .write((owner_guid, guardian_guid, session_hash), true);
+                    }
+                } else {
+                    assert(contract.is_valid_authorizer(owner_guid), 'session/invalid-authorizer');
+                }
             }
 
             let (message_hash, _, _) = hades_permutation(transaction_hash, session_hash, 2);
@@ -198,12 +200,6 @@ mod session_component {
 
             Result::Ok(())
         }
-
-        fn session_state(
-            self: @ComponentState<TContractState>, session_hash: felt252
-        ) -> SessionState {
-            SessionStateImpl::from_felt(self.session_states.read(session_hash))
-        }
     }
 }
 
@@ -215,7 +211,7 @@ fn check_policy(
         if i >= call_array.len() {
             break Result::Ok(());
         }
-        let leaf = get_merkle_leaf(call_array.at(i));
+        let leaf = call_array.at(i).get_merkle_leaf();
         let mut merkle: MerkleTree<Hasher> = MerkleTreeTrait::new();
 
         if merkle.verify(root, leaf, *proofs.at(i)) == false {

@@ -3,8 +3,9 @@ use starknet::{accounts::Account, signers::SigningKey};
 
 use crate::abigen::controller::{Controller, Signer, StarknetSigner};
 use crate::abigen::erc_20::Erc20;
+use crate::signers::SignerTrait;
 use crate::{
-    deploy_contract::{single_owner_account, FEE_TOKEN_ADDRESS},
+    tests::deploy_contract::{single_owner_account, FEE_TOKEN_ADDRESS},
     tests::runners::TestnetRunner,
 };
 
@@ -20,7 +21,14 @@ async fn test_authorize_execute() {
     let signer = Signer::Starknet(StarknetSigner {
         pubkey: NonZero::new(private_key.verifying_key().scalar()).unwrap(),
     });
-    let deployed_address = deploy(runner.client(), &prefunded, signer, None, class_hash).await;
+    let deployed_address = deploy(
+        runner.client(),
+        &prefunded,
+        signer.clone(),
+        None,
+        class_hash,
+    )
+    .await;
 
     let new_account = single_owner_account(runner.client(), private_key, deployed_address).await;
 
@@ -38,5 +46,5 @@ async fn test_authorize_execute() {
         .await
         .unwrap();
 
-    new_account.get_owner().call().await.unwrap();
+    new_account.is_owner(&signer.guid()).call().await.unwrap();
 }

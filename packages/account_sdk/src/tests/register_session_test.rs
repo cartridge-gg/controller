@@ -7,8 +7,8 @@ use crate::{
         },
         CartridgeGuardianAccount,
     },
-    deploy_contract::FEE_TOKEN_ADDRESS,
-    signers::HashSigner,
+    signers::{HashSigner, SignerTrait},
+    tests::deploy_contract::FEE_TOKEN_ADDRESS,
     tests::runners::{katana_runner::KatanaRunner, TestnetRunner},
     transaction_waiter::TransactionWaiter,
 };
@@ -54,7 +54,7 @@ async fn test_verify_execute_session_registered() {
     )
     .unwrap();
 
-    let tx = controller.register_session(&session.raw());
+    let tx = controller.register_session(&session.raw(), &signer.signer().guid());
 
     let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * Felt::from(4u128);
     let tx = tx
@@ -70,13 +70,13 @@ async fn test_verify_execute_session_registered() {
         .await
         .unwrap();
 
-    let account = SessionAccount::new(
+    let account = SessionAccount::new_as_registered(
         runner.client(),
         session_signer,
         guardian,
         address,
         runner.client().chain_id().await.unwrap(),
-        vec![],
+        signer.signer().guid(),
         session,
     );
 

@@ -8,8 +8,9 @@ use crate::{
         },
         CartridgeAccount, CartridgeGuardianAccount,
     },
-    deploy_contract::FEE_TOKEN_ADDRESS,
-    signers::{webauthn::internal::InternalWebauthnSigner, HashSigner},
+    signers::HashSigner,
+    tests::deploy_contract::FEE_TOKEN_ADDRESS,
+    tests::signers::InternalWebauthnSigner,
     tests::{
         deployment_test::{deploy_two_helper, transfer_helper},
         runners::{katana_runner::KatanaRunner, TestnetRunner},
@@ -93,7 +94,11 @@ async fn test_verify_external_owner() {
     let tx = other_account.execute_v1(vec![Call {
         to: address,
         selector: selector!("register_session"),
-        calldata: <RawSession as CairoSerde>::cairo_serialize(&session.raw()),
+        calldata: [
+            <RawSession as CairoSerde>::cairo_serialize(&session.raw()),
+            vec![other_address],
+        ]
+        .concat(),
     }]);
 
     let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * Felt::from(4u128);
@@ -110,13 +115,13 @@ async fn test_verify_external_owner() {
         .await
         .unwrap();
 
-    let account = SessionAccount::new(
+    let account = SessionAccount::new_as_registered(
         runner.client(),
         session_signer,
         guardian_signer,
         address,
         runner.client().chain_id().await.unwrap(),
-        vec![],
+        other_address,
         session,
     );
 

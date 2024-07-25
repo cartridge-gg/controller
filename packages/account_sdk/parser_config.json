@@ -2,16 +2,16 @@
     "sierra_extension": ".contract_class.json",
     "contract_aliases": {},
     "type_aliases": {
+        "argent::outside_execution::outside_execution::outside_execution_component::Event": "OutsideExecutionEvent",
         "controller::Controller::Event": "ControllerEvent",
-        "controller::outside_execution::outside_execution::outside_execution_component::Event": "OutsideExecutionEvent",
         "controller::external_owners::external_owners::external_owners_component::Event": "ExternalOwnersEvent",
         "controller::delegate_account::delegate_account::delegate_account_component::Event": "DelegateAccountEvent",
-        "controller::session::lib::session_component::Event": "SessionEvent",
-        "controller::src5::src5_component::Event": "Src5ComponentEvent",
+        "controller::session::session::session_component::Event": "SessionEvent",
+        "controller::multiple_owners::multiple_owners::multiple_owners_component::Event": "MultipleOwnersEvent",
+        "controller::introspection::src5::src5_component::Event": "Src5ComponentEvent",
         "openzeppelin::token::erc20::erc20::ERC20Component::Event": "ERC20ComponentEvent",
         "openzeppelin::access::ownable::ownable::OwnableComponent::Event": "OwnableComponentEvent",
         "openzeppelin::upgrades::upgradeable::UpgradeableComponent::Event": "UpgradeEvent",
-        "webauthn_session::session_component::Event": "SessionComponentEvent",
-        "webauthn_auth::component::webauthn_component::Event": "WebauthnComponentEvent"
+        "openzeppelin::security::reentrancyguard::ReentrancyGuardComponent::Event": "ReentrancyGuardEvent"
     }
 }

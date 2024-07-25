@@ -94,38 +94,15 @@ pub trait NewOwnerSigner: HashSigner {
         &self,
         chain_id: &Felt,
         contract_address: &Felt,
-        old_owner_guid: &Felt,
     ) -> Result<SignerSignature, SignError> {
-        let message_hash = PedersenHasher::new(Felt::ZERO)
-            .update(&selector!("change_owner"))
-            .update(chain_id)
-            .update(contract_address)
-            .update(old_owner_guid)
-            .update(&4u32.into())
-            .finalize();
-        self.sign(&message_hash).await
+        let mut hasher = PoseidonHasher::new();
+        hasher.update(selector!("add_owner"));
+        hasher.update(*chain_id);
+        hasher.update(*contract_address);
+        self.sign(&hasher.finalize()).await
     }
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 impl<T> NewOwnerSigner for T where T: HashSigner {}
-
-struct PedersenHasher {
-    state: Felt,
-}
-
-impl PedersenHasher {
-    pub fn new(state: Felt) -> Self {
-        Self { state }
-    }
-    pub fn update(&self, data: &Felt) -> Self {
-        use starknet_crypto::pedersen_hash;
-        Self {
-            state: pedersen_hash(&self.state, data),
-        }
-    }
-    pub fn finalize(self) -> Felt {
-        self.state
-    }
-}

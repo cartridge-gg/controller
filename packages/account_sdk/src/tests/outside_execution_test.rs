@@ -7,9 +7,10 @@ use crate::{
         session::{create::SessionCreator, hash::AllowedMethod},
         CartridgeAccount, CartridgeGuardianAccount,
     },
-    deploy_contract::FEE_TOKEN_ADDRESS,
-    signers::{webauthn::internal::InternalWebauthnSigner, HashSigner},
+    signers::HashSigner,
+    tests::deploy_contract::FEE_TOKEN_ADDRESS,
     tests::runners::{katana_runner::KatanaRunner, TestnetRunner},
+    tests::signers::InternalWebauthnSigner,
     transaction_waiter::TransactionWaiter,
 };
 use cainome::cairo_serde::{CairoSerde, ContractAddress, U256};

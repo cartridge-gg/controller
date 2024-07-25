@@ -1,5 +1,7 @@
 use super::{HashSigner, SignError};
-use crate::abigen::controller::{Signer, SignerSignature, WebauthnAssertion, WebauthnSigner};
+use crate::abigen::controller::{
+    Sha256Implementation, Signer, SignerSignature, WebauthnSignature, WebauthnSigner,
+};
 
 use async_trait::async_trait;
 use cainome::cairo_serde::U256;
@@ -8,10 +10,8 @@ use starknet::core::types::Felt;
 
 pub mod credential;
 pub mod device;
-pub mod internal;
 
 pub use device::{DeviceError, DeviceSigner};
-pub use internal::InternalWebauthnSigner;
 
 pub type Secp256r1Point = (U256, U256);
 
@@ -20,8 +20,8 @@ pub type Secp256r1Point = (U256, U256);
 pub trait WebauthnAccountSigner {
     async fn sign(&self, challenge: &[u8]) -> Result<AuthenticatorAssertionResponse, SignError>;
     fn signer_pub_data(&self) -> WebauthnSigner;
-    fn sha256_version(&self) -> Sha256Version {
-        Sha256Version::Cairo1
+    fn sha256_version(&self) -> Sha256Implementation {
+        Sha256Implementation::Cairo1
     }
 }
 
@@ -31,53 +31,57 @@ impl<T> HashSigner for T
 where
     T: WebauthnAccountSigner + Sync,
 {
+    // According to https://www.w3.org/TR/webauthn/#clientdatajson-verification
     async fn sign(&self, tx_hash: &Felt) -> Result<SignerSignature, SignError> {
         let mut challenge = tx_hash.to_bytes_be().to_vec();
 
         challenge.push(self.sha256_version().encode());
-        let assertion = self.sign(&challenge).await?;
-
-        let (type_offset, _) =
-            find_value_index_length(&assertion.client_data_json, "type").unwrap();
-        let (challenge_offset, challenge_length) =
-            find_value_index_length(&assertion.client_data_json, "challenge").unwrap();
-        let (origin_offset, origin_length) =
-            find_value_index_length(&assertion.client_data_json, "origin").unwrap();
-
-        let transformed_assertion = WebauthnAssertion {
-            signature: assertion.signature,
-            type_offset: type_offset as u32,
-            challenge_offset: challenge_offset as u32,
-            challenge_length: challenge_length as u32,
-            origin_offset: origin_offset as u32,
-            origin_length: origin_length as u32,
-            client_data_json: assertion.client_data_json.into_bytes(),
-            authenticator_data: assertion.authenticator_data.into(),
+        let mut assertion: AuthenticatorAssertionResponse = self.sign(&challenge).await?;
+        use p256::{
+            elliptic_curve::{
+                bigint::{Encoding, Uint},
+                scalar::FromUintUnchecked,
+            },
+            Scalar,
         };
+        use std::ops::Neg;
+        let s = assertion.signature.s;
+        let s_scalar = Scalar::from_uint_unchecked(Uint::from_be_bytes(s.to_bytes_be()));
+        let s_neg = U256::from_bytes_be(s_scalar.neg().to_bytes().as_slice().try_into().unwrap());
+        if s > s_neg {
+            assertion.signature.s = s_neg;
+            assertion.signature.y_parity = !assertion.signature.y_parity;
+        }
+
+        let webauthn_signature = WebauthnSignature {
+            flags: assertion.authenticator_data.flags,
+            cross_origin: assertion.client_data().cross_origin,
+            sign_count: assertion.authenticator_data.sign_count,
+            ec_signature: assertion.signature,
+            sha256_implementation: self.sha256_version(),
+            client_data_json_outro: vec![], //TODO: it can theoretically be non-empty
+        };
+
         Ok(SignerSignature::Webauthn((
             self.signer_pub_data(),
-            transformed_assertion,
+            webauthn_signature,
         )))
     }
+
     fn signer(&self) -> Signer {
         Signer::Webauthn(self.signer_pub_data())
     }
 }
 
-/// Represents a version of the sha256 algorithm
-/// that the contract should use when validating the signature
-pub enum Sha256Version {
-    /// A faster implementation, but might not always be available
-    Cairo0,
-    /// A slower implementation, but always available
-    Cairo1,
+trait Sha256ImplementationEncoder {
+    fn encode(&self) -> u8;
 }
 
-impl Sha256Version {
-    pub fn encode(&self) -> u8 {
+impl Sha256ImplementationEncoder for Sha256Implementation {
+    fn encode(&self) -> u8 {
         match self {
-            Sha256Version::Cairo0 => 0,
-            Sha256Version::Cairo1 => 1,
+            Sha256Implementation::Cairo0 => 0,
+            Sha256Implementation::Cairo1 => 1,
         }
     }
 }

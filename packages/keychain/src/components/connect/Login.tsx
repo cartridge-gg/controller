@@ -24,7 +24,7 @@ export function Login(props: LoginProps) {
           ? "Play with Cartridge Controller"
           : `Play ${theme.name}`
       }
-      description="Enter your Controller username"
+      description="Enter your Controller username (yoyo)"
     >
       <Form {...props} />
     </Container>

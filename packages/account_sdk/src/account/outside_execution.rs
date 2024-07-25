@@ -176,7 +176,7 @@ impl MessageHashRev1 for OutsideExecutionRaw {
         // Revision will also be a number for all SNIP12-rev1 signatures because of the same issue
         let domain = StarknetDomain {
             name: short_string!("Account.execute_from_outside"),
-            version: Felt::ONE,
+            version: Felt::TWO,
             chain_id,
             revision: Felt::ONE,
         };
