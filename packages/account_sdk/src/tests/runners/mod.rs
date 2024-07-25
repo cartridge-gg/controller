@@ -5,27 +5,11 @@ use std::{
 };
 
 use serde::Deserialize;
-use starknet::{
-    accounts::SingleOwnerAccount,
-    providers::{jsonrpc::HttpTransport, JsonRpcClient},
-    signers::LocalWallet,
-};
 
 use self::waiter::OutputWaiter;
-use async_trait::async_trait;
 
-pub mod devnet_runner;
-pub mod katana_runner;
+pub mod katana;
 pub mod waiter;
-
-#[async_trait]
-pub trait TestnetRunner {
-    fn load() -> Self;
-    fn client(&self) -> &JsonRpcClient<HttpTransport>;
-    async fn prefunded_single_owner_account(
-        &self,
-    ) -> SingleOwnerAccount<&JsonRpcClient<HttpTransport>, LocalWallet>;
-}
 
 #[derive(Debug)]
 struct SubprocessRunner {

@@ -39,6 +39,7 @@ where
     session_authorization: Vec<Felt>,
     session: Session,
 }
+
 impl<P, S, G> SessionAccount<P, S, G>
 where
     P: Provider + Send,

@@ -3,7 +3,6 @@ use crate::{
         controller::{Signature, WebauthnSigner},
         erc_20::Erc20,
     },
-    account::CartridgeAccount,
     signers::{
         webauthn::{
             credential::{AuthenticatorAssertionResponse, AuthenticatorData, ClientData},
@@ -11,11 +10,7 @@ use crate::{
         },
         HashSigner, SignError,
     },
-    tests::{
-        deploy_contract::FEE_TOKEN_ADDRESS,
-        deployment_test::{deploy_helper, transfer_helper},
-        runners::{katana_runner::KatanaRunner, TestnetRunner},
-    },
+    tests::{account::FEE_TOKEN_ADDRESS, runners::katana::KatanaRunner},
 };
 use async_trait::async_trait;
 use cainome::cairo_serde::{ContractAddress, NonZero, U256};
@@ -28,7 +23,6 @@ use rand_core::OsRng;
 use starknet::{
     core::types::{BlockId, BlockTag},
     macros::felt,
-    providers::Provider,
     signers::SigningKey as StarkSigningKey,
 };
 
@@ -118,20 +112,9 @@ impl WebauthnAccountSigner for InternalWebauthnSigner {
 
 pub async fn test_verify_execute<S: HashSigner + Clone + Sync + Send>(signer: S) {
     let runner = KatanaRunner::load();
-    let address = deploy_helper(&runner, &signer, None as Option<&StarkSigningKey>).await;
-
-    transfer_helper(&runner, &address).await;
-
-    let account = CartridgeAccount::new(
-        runner.client(),
-        signer.clone(),
-        address,
-        runner.client().chain_id().await.unwrap(),
-    );
-
+    let controller = runner.deploy_controller(&signer).await;
     let new_account = ContractAddress(felt!("0x18301129"));
-
-    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &account);
+    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller);
 
     contract_erc20
         .balanceOf(&new_account)

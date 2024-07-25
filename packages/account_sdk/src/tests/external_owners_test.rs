@@ -1,142 +1,87 @@
-use crate::{
-    abigen::{controller::Controller, erc_20::Erc20},
-    account::{
-        session::{
-            hash::{AllowedMethod, Session},
-            raw_session::RawSession,
-            SessionAccount,
-        },
-        CartridgeAccount, CartridgeGuardianAccount,
-    },
-    signers::HashSigner,
-    tests::deploy_contract::FEE_TOKEN_ADDRESS,
-    tests::signers::InternalWebauthnSigner,
-    tests::{
-        deployment_test::{deploy_two_helper, transfer_helper},
-        runners::{katana_runner::KatanaRunner, TestnetRunner},
-    },
-    transaction_waiter::TransactionWaiter,
-};
 use cainome::cairo_serde::{CairoSerde, ContractAddress, U256};
 use starknet::{
     accounts::{Account, Call},
-    core::types::{BlockId, BlockTag, Felt},
     macros::{felt, selector},
     providers::Provider,
     signers::SigningKey,
 };
 
+use crate::{
+    abigen::{controller::Controller, erc_20::Erc20},
+    account::session::{
+        hash::{AllowedMethod, Session},
+        raw_session::RawSession,
+        SessionAccount,
+    },
+    signers::HashSigner,
+    tests::{account::FEE_TOKEN_ADDRESS, runners::katana::KatanaRunner},
+    transaction_waiter::TransactionWaiter,
+};
+
 #[tokio::test]
 async fn test_verify_external_owner() {
-    let other = InternalWebauthnSigner::random("localhost".to_string(), "rp_id".to_string());
+    let runner = KatanaRunner::load();
     let signer = SigningKey::from_random();
     let guardian_signer = SigningKey::from_random();
-    let runner = KatanaRunner::load();
-    let (other_address, address) = deploy_two_helper(
-        &runner,
-        (&other, None as Option<&SigningKey>),
-        (&signer, Some(&guardian_signer)),
-    )
-    .await;
+    let external_account = runner.prefunded_single_owner_account().await;
+    let controller = runner.deploy_controller(&signer).await;
 
-    transfer_helper(&runner, &other_address).await;
+    let account_interface = Controller::new(controller.address, &controller);
 
-    tokio::time::sleep(std::time::Duration::from_secs(3)).await;
-
-    transfer_helper(&runner, &address).await;
-
-    let account = CartridgeGuardianAccount::new(
-        runner.client(),
-        signer.clone(),
-        SigningKey::from_random(),
-        address,
-        runner.client().chain_id().await.unwrap(),
-    );
-
-    let other_account = CartridgeAccount::new(
-        runner.client(),
-        other.clone(),
-        other_address,
-        runner.client().chain_id().await.unwrap(),
-    );
-
-    let account_interface = Controller::new(address, &account);
-
-    let tx = account_interface.register_external_owner(&other_address.into());
-
-    let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * Felt::from(4u128);
-    let tx = tx
-        .nonce(0u32.into())
-        .max_fee(fee_estimate)
-        .prepared()
+    let tx = account_interface
+        .register_external_owner(&external_account.address().into())
+        .send()
+        .await
         .unwrap();
 
-    let tx_hash = tx.transaction_hash(false);
-    tx.send().await.unwrap();
-    TransactionWaiter::new(tx_hash, runner.client())
+    TransactionWaiter::new(tx.transaction_hash, runner.client())
         .wait()
         .await
         .unwrap();
 
     let session_signer = SigningKey::from_random();
-
     let session = Session::new(
-        vec![
-            AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
-            AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("transfds")),
-            AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("transfer")),
-        ],
+        vec![AllowedMethod::with_selector(
+            *FEE_TOKEN_ADDRESS,
+            selector!("transfer"),
+        )],
         u64::MAX,
         &session_signer.signer(),
     )
     .unwrap();
 
-    let tx = other_account.execute_v1(vec![Call {
-        to: address,
-        selector: selector!("register_session"),
-        calldata: [
-            <RawSession as CairoSerde>::cairo_serialize(&session.raw()),
-            vec![other_address],
-        ]
-        .concat(),
-    }]);
-
-    let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * Felt::from(4u128);
-    let tx = tx
-        .nonce(0u32.into())
-        .max_fee(fee_estimate)
-        .prepared()
+    let tx = external_account
+        .execute_v1(vec![Call {
+            to: controller.address,
+            selector: selector!("register_session"),
+            calldata: [
+                <RawSession as CairoSerde>::cairo_serialize(&session.raw()),
+                vec![external_account.address()],
+            ]
+            .concat(),
+        }])
+        .send()
+        .await
         .unwrap();
 
-    let tx_hash = tx.transaction_hash(false);
-    tx.send().await.unwrap();
-    TransactionWaiter::new(tx_hash, runner.client())
+    TransactionWaiter::new(tx.transaction_hash, runner.client())
         .wait()
         .await
         .unwrap();
 
-    let account = SessionAccount::new_as_registered(
+    let session = SessionAccount::new_as_registered(
         runner.client(),
         session_signer,
         guardian_signer,
-        address,
+        controller.address,
         runner.client().chain_id().await.unwrap(),
-        other_address,
+        external_account.address(),
         session,
     );
 
     let new_account = ContractAddress(felt!("0x18301129"));
 
-    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &account);
-
-    contract_erc20
-        .balanceOf(&new_account)
-        .block_id(BlockId::Tag(BlockTag::Latest))
-        .call()
-        .await
-        .expect("failed to call contract");
-
-    contract_erc20
+    Erc20::new(*FEE_TOKEN_ADDRESS, &session)
         .transfer(
             &new_account,
             &U256 {
