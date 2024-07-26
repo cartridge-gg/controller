@@ -1,20 +1,17 @@
 use crate::{
     abigen::erc_20::Erc20,
-    account::CartridgeGuardianAccount,
     signers::HashSigner,
-    tests::deploy_contract::FEE_TOKEN_ADDRESS,
-    tests::runners::{katana_runner::KatanaRunner, TestnetRunner},
-    tests::signers::InternalWebauthnSigner,
+    tests::{
+        account::{signers::InternalWebauthnSigner, FEE_TOKEN_ADDRESS},
+        runners::katana::KatanaRunner,
+    },
 };
 use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{
     core::types::{BlockId, BlockTag},
     macros::felt,
-    providers::Provider,
     signers::SigningKey,
 };
-
-use super::deployment_test::{deploy_helper, transfer_helper};
 
 pub async fn test_verify_execute<
     S: HashSigner + Clone + Sync + Send,
@@ -24,21 +21,13 @@ pub async fn test_verify_execute<
     guardian: G,
 ) {
     let runner = KatanaRunner::load();
-    let address = deploy_helper(&runner, &signer, Some(&guardian)).await;
-
-    transfer_helper(&runner, &address).await;
-
-    let account = CartridgeGuardianAccount::new(
-        runner.client(),
-        signer.clone(),
-        guardian,
-        address,
-        runner.client().chain_id().await.unwrap(),
-    );
+    let controller = runner
+        .deploy_controller_with_guardian(&signer, &guardian)
+        .await;
 
     let new_account = ContractAddress(felt!("0x18301129"));
 
-    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &account);
+    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller);
 
     contract_erc20
         .balanceOf(&new_account)

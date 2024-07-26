@@ -1,47 +1,30 @@
 use crate::{
     abigen::{controller::Controller, erc_20::Erc20},
-    account::{
-        session::{
-            hash::{AllowedMethod, Session},
-            SessionAccount,
-        },
-        CartridgeGuardianAccount,
+    account::session::{
+        hash::{AllowedMethod, Session},
+        SessionAccount,
     },
     signers::{HashSigner, SignerTrait},
-    tests::deploy_contract::FEE_TOKEN_ADDRESS,
-    tests::runners::{katana_runner::KatanaRunner, TestnetRunner},
+    tests::{account::FEE_TOKEN_ADDRESS, runners::katana::KatanaRunner},
     transaction_waiter::TransactionWaiter,
 };
 use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{
-    core::types::{BlockId, BlockTag, Felt},
+    core::types::{BlockId, BlockTag},
     macros::{felt, selector},
     providers::Provider,
     signers::SigningKey,
 };
 
-use super::deployment_test::{deploy_helper, transfer_helper};
-
 #[tokio::test]
 async fn test_verify_execute_session_registered() {
     let signer = SigningKey::from_random();
-    let guardian = SigningKey::from_random();
+    let guardian_signer = SigningKey::from_random();
     let session_signer = SigningKey::from_random();
 
     let runner = KatanaRunner::load();
-    let address = deploy_helper(&runner, &signer, Some(&guardian)).await;
-
-    transfer_helper(&runner, &address).await;
-
-    let guardian_account = CartridgeGuardianAccount::new(
-        runner.client(),
-        signer.clone(),
-        guardian.clone(),
-        address,
-        runner.client().chain_id().await.unwrap(),
-    );
-
-    let controller = Controller::new(address, &guardian_account);
+    let account = runner.deploy_controller(&signer).await;
+    let controller = Controller::new(account.address, account.clone());
 
     let session = Session::new(
         vec![
@@ -54,38 +37,32 @@ async fn test_verify_execute_session_registered() {
     )
     .unwrap();
 
-    let tx = controller.register_session(&session.raw(), &signer.signer().guid());
-
-    let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * Felt::from(4u128);
-    let tx = tx
-        .nonce(0u32.into())
-        .max_fee(fee_estimate)
-        .prepared()
+    let tx = controller
+        .register_session(&session.raw(), &signer.signer().guid())
+        .send()
+        .await
         .unwrap();
 
-    let tx_hash = tx.transaction_hash(false);
-    tx.send().await.unwrap();
-    TransactionWaiter::new(tx_hash, runner.client())
+    TransactionWaiter::new(tx.transaction_hash, runner.client())
         .wait()
         .await
         .unwrap();
 
-    let account = SessionAccount::new_as_registered(
+    let session_account = SessionAccount::new_as_registered(
         runner.client(),
         session_signer,
-        guardian,
-        address,
+        guardian_signer,
+        account.address,
         runner.client().chain_id().await.unwrap(),
         signer.signer().guid(),
         session,
     );
 
-    let new_account = ContractAddress(felt!("0x18301129"));
-
-    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &account);
+    let recipient = ContractAddress(felt!("0x18301129"));
+    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &session_account);
 
     contract_erc20
-        .balanceOf(&new_account)
+        .balanceOf(&recipient)
         .block_id(BlockId::Tag(BlockTag::Latest))
         .call()
         .await
@@ -93,7 +70,7 @@ async fn test_verify_execute_session_registered() {
 
     contract_erc20
         .transfer(
-            &new_account,
+            &recipient,
             &U256 {
                 low: 0x10_u128,
                 high: 0,

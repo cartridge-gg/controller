@@ -1,15 +1,11 @@
 use crate::{
-    abigen::{controller::Controller as AbigenController, erc_20::Erc20},
+    abigen::{controller::Controller, erc_20::Erc20},
     account::{
         session::{create::SessionCreator, hash::AllowedMethod},
         CartridgeAccount, CartridgeGuardianAccount,
     },
     signers::{HashSigner, NewOwnerSigner, SignError, SignerTrait},
-    tests::signers::InternalWebauthnSigner,
-    tests::{
-        deployment_test::deploy_helper,
-        runners::{katana_runner::KatanaRunner, TestnetRunner},
-    },
+    tests::{account::signers::InternalWebauthnSigner, runners::katana::KatanaRunner},
     transaction_waiter::TransactionWaiter,
 };
 use cainome::cairo_serde::{ContractAddress, U256};
@@ -21,30 +17,21 @@ use starknet::{
 };
 use starknet_crypto::Felt;
 
-use super::deploy_contract::FEE_TOKEN_ADDRESS;
-use super::deployment_test::transfer_helper;
+use super::account::FEE_TOKEN_ADDRESS;
 
 #[tokio::test]
 async fn test_change_owner() {
     let signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
-    let address = deploy_helper(&runner, &signer, None as Option<&SigningKey>).await;
+    let account = runner.deploy_controller(&signer).await;
+    let controller = Controller::new(account.address, account.clone());
 
-    transfer_helper(&runner, &address).await;
-
-    let account = CartridgeAccount::new(
-        runner.client(),
-        signer.clone(),
-        address,
-        runner.client().chain_id().await.unwrap(),
-    );
-
-    let controller = AbigenController::new(address, account.clone());
     assert!(controller
         .is_owner(&signer.signer().guid())
         .call()
         .await
         .unwrap());
+
     let new_signer = SigningKey::from_random();
     let new_signer_signature = new_signer
         .sign_new_owner(&account.chain_id, &account.address)
@@ -53,18 +40,13 @@ async fn test_change_owner() {
 
     let add_owner = controller.add_owner_getcall(&new_signer.signer(), &new_signer_signature);
     let remove_owner = controller.remove_owner_getcall(&signer.signer());
-    let tx = account.execute_v1(vec![add_owner, remove_owner]);
-
-    let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * Felt::from(4u128);
-    let tx = tx
-        .nonce(0u32.into())
-        .max_fee(fee_estimate)
-        .prepared()
+    let tx = account
+        .execute_v1(vec![add_owner, remove_owner])
+        .send()
+        .await
         .unwrap();
 
-    let tx_hash = tx.transaction_hash(false);
-    tx.send().await.unwrap();
-    TransactionWaiter::new(tx_hash, runner.client())
+    TransactionWaiter::new(tx.transaction_hash, runner.client())
         .wait()
         .await
         .unwrap();
@@ -74,6 +56,7 @@ async fn test_change_owner() {
         .call()
         .await
         .unwrap());
+
     assert!(controller
         .is_owner(&new_signer.signer().guid())
         .call()
@@ -85,18 +68,9 @@ async fn test_change_owner() {
 async fn test_add_owner() {
     let signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
-    let address = deploy_helper(&runner, &signer, None as Option<&SigningKey>).await;
+    let account = runner.deploy_controller(&signer).await;
+    let controller = Controller::new(account.address, account.clone());
 
-    transfer_helper(&runner, &address).await;
-
-    let account = CartridgeAccount::new(
-        runner.client(),
-        signer.clone(),
-        address,
-        runner.client().chain_id().await.unwrap(),
-    );
-
-    let controller = AbigenController::new(address, account.clone());
     assert!(controller
         .is_owner(&signer.signer().guid())
         .call()
@@ -108,18 +82,13 @@ async fn test_add_owner() {
         .await
         .unwrap();
 
-    let tx = controller.add_owner(&new_signer.signer(), &new_signer_signature);
-
-    let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * Felt::from(4u128);
-    let tx = tx
-        .nonce(0u32.into())
-        .max_fee(fee_estimate)
-        .prepared()
+    let tx = controller
+        .add_owner(&new_signer.signer(), &new_signer_signature)
+        .send()
+        .await
         .unwrap();
 
-    let tx_hash = tx.transaction_hash(false);
-    tx.send().await.unwrap();
-    TransactionWaiter::new(tx_hash, runner.client())
+    TransactionWaiter::new(tx.transaction_hash, runner.client())
         .wait()
         .await
         .unwrap();
@@ -138,10 +107,10 @@ async fn test_add_owner() {
     let account = CartridgeAccount::new(
         runner.client(),
         new_signer.clone(),
-        address,
+        account.address,
         runner.client().chain_id().await.unwrap(),
     );
-    let controller = AbigenController::new(address, account.clone());
+    let controller = Controller::new(account.address, account.clone());
 
     let new_new_signer = SigningKey::from_random();
     let new_signer_signature = new_new_signer
@@ -149,18 +118,13 @@ async fn test_add_owner() {
         .await
         .unwrap();
 
-    let tx = controller.add_owner(&new_new_signer.signer(), &new_signer_signature);
-
-    let fee_estimate = tx.estimate_fee().await.unwrap().overall_fee * Felt::from(4u128);
-    let tx = tx
-        .nonce(1u32.into())
-        .max_fee(fee_estimate)
-        .prepared()
+    let tx = controller
+        .add_owner(&new_new_signer.signer(), &new_signer_signature)
+        .send()
+        .await
         .unwrap();
 
-    let tx_hash = tx.transaction_hash(false);
-    tx.send().await.unwrap();
-    TransactionWaiter::new(tx_hash, runner.client())
+    TransactionWaiter::new(tx.transaction_hash, runner.client())
         .wait()
         .await
         .unwrap();
@@ -170,11 +134,13 @@ async fn test_add_owner() {
         .call()
         .await
         .unwrap());
+
     assert!(controller
         .is_owner(&new_signer.signer().guid())
         .call()
         .await
         .unwrap());
+
     assert!(controller
         .is_owner(&new_new_signer.signer().guid())
         .call()
@@ -187,31 +153,25 @@ async fn test_add_owner() {
 async fn test_change_owner_wrong_signature() {
     let signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
-    let address = deploy_helper(&runner, &signer, None as Option<&SigningKey>).await;
+    let account = runner.deploy_controller(&signer).await;
+    let controller = Controller::new(account.address, account.clone());
 
-    transfer_helper(&runner, &address).await;
-
-    let account = CartridgeAccount::new(
-        runner.client(),
-        signer.clone(),
-        address,
-        runner.client().chain_id().await.unwrap(),
-    );
-
-    let account = AbigenController::new(address, account);
-    assert!(account
+    assert!(controller
         .is_owner(&signer.signer().guid())
         .call()
         .await
         .unwrap());
+
     let new_signer = SigningKey::from_random();
     let old_guid = signer.signer().guid();
+
     // We sign the wrong thing thus the owner change should painc
     let new_signer_signature = (&new_signer as &dyn HashSigner)
         .sign(&old_guid)
         .await
         .unwrap();
-    account
+
+    controller
         .add_owner(&new_signer.signer(), &new_signer_signature)
         .send()
         .await
@@ -222,18 +182,9 @@ async fn test_change_owner_wrong_signature() {
 async fn test_change_owner_execute_after() {
     let signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
-    let address = deploy_helper(&runner, &signer, None as Option<&SigningKey>).await;
+    let account = runner.deploy_controller(&signer).await;
+    let controller = Controller::new(account.address, account.clone());
 
-    transfer_helper(&runner, &address).await;
-
-    let account = CartridgeAccount::new(
-        runner.client(),
-        signer.clone(),
-        address,
-        runner.client().chain_id().await.unwrap(),
-    );
-
-    let controller = AbigenController::new(address, account);
     let new_signer = SigningKey::from_random();
     let new_signer_signature = new_signer
         .sign_new_owner(&controller.account.chain_id, &controller.account.address)
@@ -276,7 +227,7 @@ async fn test_change_owner_execute_after() {
     let account = CartridgeAccount::new(
         runner.client(),
         new_signer.clone(),
-        address,
+        controller.address,
         runner.client().chain_id().await.unwrap(),
     );
 
@@ -300,17 +251,7 @@ async fn test_change_owner_invalidate_old_sessions() {
     let signer = InternalWebauthnSigner::random("localhost".to_string(), "rp_id".to_string());
     let guardian = SigningKey::from_random();
     let runner = KatanaRunner::load();
-    let address = deploy_helper(&runner, &signer, None as Option<&SigningKey>).await;
-
-    transfer_helper(&runner, &address).await;
-
-    let account = CartridgeGuardianAccount::new(
-        runner.client(),
-        signer.clone(),
-        guardian.clone(),
-        address,
-        runner.client().chain_id().await.unwrap(),
-    );
+    let account = runner.deploy_controller(&signer).await;
 
     let transfer_method = AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("transfer"));
 
@@ -326,11 +267,11 @@ async fn test_change_owner_invalidate_old_sessions() {
     let new_signer = SigningKey::from_random();
 
     let new_signer_signature = new_signer
-        .sign_new_owner(&account.account.chain_id, &account.account.address)
+        .sign_new_owner(&account.chain_id, &account.address)
         .await
         .unwrap();
 
-    let controller = AbigenController::new(address, account);
+    let controller = Controller::new(account.address, account.clone());
     let add_owner = controller.add_owner_getcall(&new_signer.signer(), &new_signer_signature);
     let remove_owner = controller.remove_owner_getcall(&signer.signer());
 
@@ -368,7 +309,7 @@ async fn test_change_owner_invalidate_old_sessions() {
         runner.client(),
         new_signer.clone(),
         guardian.clone(),
-        address,
+        account.address,
         runner.client().chain_id().await.unwrap(),
     );
 
@@ -395,18 +336,8 @@ async fn test_change_owner_invalidate_old_sessions() {
 #[tokio::test]
 async fn test_call_unallowed_methods() {
     let signer = InternalWebauthnSigner::random("localhost".to_string(), "rp_id".to_string());
-    let guardian = SigningKey::from_random();
     let runner = KatanaRunner::load();
-    let address = deploy_helper(&runner, &signer, None as Option<&SigningKey>).await;
-    transfer_helper(&runner, &address).await;
-
-    let account = CartridgeGuardianAccount::new(
-        runner.client(),
-        signer.clone(),
-        guardian.clone(),
-        address,
-        runner.client().chain_id().await.unwrap(),
-    );
+    let account = runner.deploy_controller(&signer).await;
 
     // Create random allowed method
     let transfer_method = AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("transfer"));
@@ -422,7 +353,7 @@ async fn test_call_unallowed_methods() {
 
     let contract = Erc20::new(*FEE_TOKEN_ADDRESS, &session_account);
 
-    let address = ContractAddress(address);
+    let address = ContractAddress(account.address);
     let amount = U256 {
         high: 0,
         low: 0x10_u128,
@@ -450,4 +381,47 @@ async fn test_call_unallowed_methods() {
     assert_eq!(selector!("approve"), selector);
     assert_eq!(contract.address, contract_address);
     assert!(e.to_string().contains("Not allowed to call method"));
+}
+
+#[tokio::test]
+async fn test_external_owner() {
+    let signer = SigningKey::from_random();
+    let runner = KatanaRunner::load();
+    let delegate_address = Felt::from_hex("0x1234").unwrap();
+    let external_account = runner.prefunded_single_owner_account().await;
+
+    let account = runner.deploy_controller(&signer).await;
+
+    let controller = Controller::new(account.address, &account);
+    let external_controller = Controller::new(controller.address, &external_account);
+
+    // register_external_owner
+    let tx = controller
+        .register_external_owner(&external_account.address().into())
+        .send()
+        .await
+        .unwrap();
+
+    TransactionWaiter::new(tx.transaction_hash, runner.client())
+        .wait()
+        .await
+        .unwrap();
+
+    // external owner set_delegate_account
+    let tx = external_controller
+        .set_delegate_account(&delegate_address.into())
+        .send()
+        .await
+        .unwrap();
+
+    TransactionWaiter::new(tx.transaction_hash, runner.client())
+        .wait()
+        .await
+        .unwrap();
+
+    let delegate_account = controller.delegate_account().call().await;
+    assert!(
+        delegate_account.is_ok_and(|addr| addr == delegate_address.into()),
+        "should be delegate_address"
+    );
 }

@@ -2,11 +2,14 @@ use std::sync::Arc;
 
 use starknet::{
     accounts::ConnectedAccount,
-    core::types::contract::{CompiledClass, SierraClass},
+    core::types::{
+        contract::{CompiledClass, SierraClass},
+        DeclareTransactionResult,
+    },
     providers::{JsonRpcClient, Provider},
 };
 
-use super::pending::PendingDeclaration;
+use super::pending::PendingTransaction;
 
 pub const SIERRA_STR: &str = include_str!("../../../compiled/controller.contract_class.json");
 // We can store only the class_hash and thus te casm_str would not be needed but for now it is
@@ -91,5 +94,19 @@ impl<'a, T> AccountDeclaration<'a, T> {
             .unwrap();
 
         Ok(PendingDeclaration::from((declaration_result, self.client)))
+    }
+}
+
+pub type PendingDeclaration<'a, T> =
+    PendingTransaction<'a, JsonRpcClient<T>, DeclareTransactionResult>;
+
+impl<'a, T> From<(DeclareTransactionResult, &'a JsonRpcClient<T>)> for PendingDeclaration<'a, T>
+where
+    T: Send + Sync,
+    &'a JsonRpcClient<T>: Provider,
+{
+    fn from((result, client): (DeclareTransactionResult, &'a JsonRpcClient<T>)) -> Self {
+        let transaction_hash = result.transaction_hash;
+        Self::new(result, transaction_hash, client)
     }
 }

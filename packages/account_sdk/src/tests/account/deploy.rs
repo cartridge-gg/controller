@@ -6,7 +6,7 @@ use starknet::{
     signers::Signer,
 };
 
-use super::{pending::PendingDeployment, UDC_ADDRESS};
+use super::{pending::PendingTransaction, UDC_ADDRESS};
 
 pub struct AccountDeployment<'a, T> {
     client: &'a JsonRpcClient<T>,
@@ -55,5 +55,18 @@ impl<'a, T> AccountDeployment<'a, T> {
         };
 
         Ok(PendingDeployment::from((result, self.client)))
+    }
+}
+
+pub type PendingDeployment<'a, T> = PendingTransaction<'a, JsonRpcClient<T>, DeployResult>;
+
+impl<'a, T> From<(DeployResult, &'a JsonRpcClient<T>)> for PendingDeployment<'a, T>
+where
+    T: Send + Sync,
+    &'a JsonRpcClient<T>: Provider,
+{
+    fn from((result, client): (DeployResult, &'a JsonRpcClient<T>)) -> Self {
+        let transaction_hash = result.transaction_hash;
+        Self::new(result, transaction_hash, client)
     }
 }
