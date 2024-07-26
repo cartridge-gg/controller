@@ -59,7 +59,7 @@ where
             sign_count: assertion.authenticator_data.sign_count,
             ec_signature: assertion.signature,
             sha256_implementation: self.sha256_version(),
-            client_data_json_outro: vec![], //TODO: it can theoretically be non-empty
+            client_data_json_outro: extract_client_data_json_outro(&assertion.client_data_json),
         };
 
         Ok(SignerSignature::Webauthn((
@@ -88,11 +88,8 @@ impl Sha256ImplementationEncoder for Sha256Implementation {
 
 pub fn find_value_index_length(json_str: &str, key: &str) -> Option<(usize, usize)> {
     let key_index = json_str.find(&format!("\"{}\"", key))?;
-
     let colon_index = json_str[key_index..].find(':')? + key_index;
-
     let value_start_index = json_str[colon_index + 1..].find('"')?;
-
     let value_length = json_str[colon_index + 1 + value_start_index + 1..]
         .find('"')
         .unwrap();
@@ -100,9 +97,37 @@ pub fn find_value_index_length(json_str: &str, key: &str) -> Option<(usize, usiz
     Some((colon_index + 1 + value_start_index + 1, value_length))
 }
 
+fn extract_client_data_json_outro(client_data_json: &str) -> Vec<u8> {
+    let cross_origin_index = client_data_json.rfind("\"crossOrigin\"");
+    match cross_origin_index {
+        Some(index) => {
+            let outro_sub = client_data_json[index..].to_string();
+            let outro_start = outro_sub.rfind(',').unwrap_or(outro_sub.len());
+            outro_sub[outro_start..].as_bytes().to_vec()
+        }
+        None => vec![],
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::find_value_index_length;
+    use super::{extract_client_data_json_outro, find_value_index_length};
+
+    #[test]
+    fn test_extract_client_data_json_outro() {
+        let json_with_cross_origin = "{\"type\":\"webauthn.get\",\"challenge\":\"BGJcocCMZ8w1AoRN0wAHFsNtNAVJ3fi83s65MW8jUfIB\",\"origin\":\"http://localhost:3001\",\"crossOrigin\":true,\"other_keys_can_be_added_here\":\"do not compare clientDataJSON against a template. See https://goo.gl/yabPex\"}";
+        let expected_outro = ",\"other_keys_can_be_added_here\":\"do not compare clientDataJSON against a template. See https://goo.gl/yabPex\"}";
+        let outro = extract_client_data_json_outro(json_with_cross_origin);
+        let outro_string = String::from_utf8(outro).expect("Invalid UTF-8");
+        assert_eq!(outro_string, expected_outro);
+
+        let json_without_outro =
+        "{\"type\":\"webauthn.get\",\"challenge\":\"BD7mj5jZ_ySvAv7kgFJ1HKRknsHwYuwtWbkjJPqQKi4B\",\"origin\":\"http://localhost:3001\",\"crossOrigin\":true}";
+        let outro = extract_client_data_json_outro(json_without_outro);
+        let outro_string = String::from_utf8(outro).expect("Invalid UTF-8");
+        assert_eq!(outro_string, "");
+    }
+
     #[test]
     fn test_find_value_index() {
         let json_str =
