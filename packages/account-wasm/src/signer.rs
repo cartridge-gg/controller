@@ -1,3 +1,10 @@
+use account_sdk::{
+    abigen::{self, controller::Signature},
+    signers::{
+        webauthn::{AuthenticatorAssertionResponse, AuthenticatorData, WebauthnAccountSigner},
+        DeviceError, SignError,
+    },
+};
 use async_trait::async_trait;
 use cainome::cairo_serde::{NonZero, U256};
 use coset::{cbor::Value, iana, CoseKey, KeyType, Label};
@@ -9,34 +16,15 @@ use std::result::Result;
 use wasm_bindgen_futures::spawn_local;
 use wasm_webauthn::*;
 
-use crate::abigen::controller::{Signature, WebauthnSigner};
-
-use super::{
-    credential::{AuthenticatorAssertionResponse, AuthenticatorData},
-    SignError, WebauthnAccountSigner,
-};
-
-#[derive(Debug, thiserror::Error)]
-pub enum DeviceError {
-    #[error("Create credential error: {0}")]
-    CreateCredential(String),
-    #[error("Get assertion error: {0}")]
-    GetAssertion(String),
-    #[error("Bad assertion error: {0}")]
-    BadAssertion(String),
-    #[error("Channel error: {0}")]
-    Channel(String),
-}
-
 #[derive(Debug, Clone)]
-pub struct DeviceSigner {
+pub struct WebauthnSigner {
     pub rp_id: String,
     pub origin: String,
     pub credential_id: CredentialID,
     pub pub_key: CoseKey,
 }
 
-impl DeviceSigner {
+impl WebauthnSigner {
     pub fn new(
         rp_id: String,
         origin: String,
@@ -51,14 +39,14 @@ impl DeviceSigner {
         }
     }
 
-    pub async fn register(
+    pub async fn _register(
         rp_id: String,
         origin: String,
         user_name: String,
         challenge: &[u8],
     ) -> Result<Self, DeviceError> {
         let MakeCredentialResponse { credential } =
-            Self::create_credential(rp_id.clone(), user_name, challenge).await?;
+            Self::_create_credential(rp_id.clone(), user_name, challenge).await?;
 
         let pub_key = credential
             .public_key
@@ -114,7 +102,7 @@ impl DeviceSigner {
         Ok(pub_key)
     }
 
-    async fn create_credential(
+    async fn _create_credential(
         rp_id: String,
         user_name: String,
         challenge: &[u8],
@@ -199,7 +187,7 @@ impl DeviceSigner {
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl WebauthnAccountSigner for DeviceSigner {
+impl WebauthnAccountSigner for WebauthnSigner {
     async fn sign(&self, challenge: &[u8]) -> Result<AuthenticatorAssertionResponse, SignError> {
         let GetAssertionResponse {
             signature: encoded_sig,
@@ -253,8 +241,9 @@ impl WebauthnAccountSigner for DeviceSigner {
             user_handle: None,
         })
     }
-    fn signer_pub_data(&self) -> WebauthnSigner {
-        WebauthnSigner {
+
+    fn signer_pub_data(&self) -> abigen::controller::WebauthnSigner {
+        abigen::controller::WebauthnSigner {
             rp_id_hash: NonZero::new(U256::from_bytes_be(&self.rp_id_hash())).unwrap(),
             origin: self.origin.clone().into_bytes(),
             pubkey: NonZero::new(U256::from_bytes_be(

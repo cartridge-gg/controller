@@ -5,8 +5,8 @@ use crate::{
     },
     signers::{
         webauthn::{
-            credential::{AuthenticatorAssertionResponse, AuthenticatorData, ClientData},
-            Secp256r1Point, WebauthnAccountSigner,
+            AuthenticatorAssertionResponse, AuthenticatorData, ClientData, Secp256r1Point,
+            WebauthnAccountSigner,
         },
         HashSigner, SignError,
     },

@@ -1,6 +1,7 @@
 mod constants;
 mod errors;
 mod paymaster;
+mod signer;
 mod types;
 mod utils;
 
@@ -19,10 +20,8 @@ use account_sdk::account::session::hash::{AllowedMethod, Session};
 use account_sdk::account::session::SessionAccount;
 use account_sdk::account::{AccountHashSigner, CartridgeAccount as CA, MessageSignerAccount};
 use account_sdk::hash::MessageHashRev1;
-use account_sdk::signers::webauthn::device::DeviceSigner;
 use account_sdk::signers::webauthn::WebauthnAccountSigner;
 use account_sdk::signers::HashSigner;
-use account_sdk::wasm_webauthn::CredentialID;
 use base64::{engine::general_purpose, Engine};
 use cainome::cairo_serde::CairoSerde;
 use constants::ACCOUNT_CLASS_HASH;
@@ -32,6 +31,7 @@ use factory::cartridge::CartridgeAccountFactory;
 use factory::AccountDeployment;
 use paymaster::PaymasterRequest;
 use serde_wasm_bindgen::{from_value, to_value};
+use signer::WebauthnSigner;
 use starknet::accounts::{Account, ConnectedAccount};
 use starknet::core::types::{BlockId, BlockTag, FunctionCall};
 use starknet::core::utils::cairo_short_string_to_felt;
@@ -50,6 +50,7 @@ use types::session::{JsCredentials, JsSession};
 use url::Url;
 use utils::{policies_match, set_panic_hook};
 use wasm_bindgen::prelude::*;
+use wasm_webauthn::CredentialID;
 
 use crate::types::TryFromJsValue;
 
@@ -57,8 +58,8 @@ type Result<T> = std::result::Result<T, JsError>;
 
 #[wasm_bindgen]
 pub struct CartridgeAccount {
-    account: CA<Arc<JsonRpcClient<HttpTransport>>, DeviceSigner, SigningKey>,
-    device_signer: DeviceSigner,
+    account: CA<Arc<JsonRpcClient<HttpTransport>>, WebauthnSigner, SigningKey>,
+    device_signer: WebauthnSigner,
     username: String,
     rpc_url: Url,
 }
@@ -99,7 +100,7 @@ impl CartridgeAccount {
         let cose_bytes = general_purpose::URL_SAFE_NO_PAD.decode(public_key)?;
         let cose = CoseKey::from_slice(&cose_bytes)?;
 
-        let device_signer = DeviceSigner::new(rp_id, origin, credential_id, cose);
+        let device_signer = WebauthnSigner::new(rp_id, origin, credential_id, cose);
 
         let dummy_guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
         let address = Felt::from_str(&address)?;
