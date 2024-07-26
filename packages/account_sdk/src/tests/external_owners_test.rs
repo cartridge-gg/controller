@@ -23,7 +23,7 @@ async fn test_verify_external_owner() {
     let runner = KatanaRunner::load();
     let signer = SigningKey::from_random();
     let guardian_signer = SigningKey::from_random();
-    let external_account = runner.prefunded_single_owner_account().await;
+    let external_account = runner.executor().await;
     let controller = runner.deploy_controller(&signer).await;
 
     let account_interface = Controller::new(controller.address, &controller);

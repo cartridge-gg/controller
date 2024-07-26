@@ -5,7 +5,7 @@ use crate::{
     account::{
         outside_execution::{OutsideExecution, OutsideExecutionAccount, OutsideExecutionCaller},
         session::{create::SessionCreator, hash::AllowedMethod},
-        CartridgeGuardianAccount,
+        CartridgeAccount,
     },
     signers::HashSigner,
     tests::{
@@ -30,7 +30,7 @@ pub async fn test_verify_paymaster_execute<
     session_signer: Option<H>,
 ) {
     let runner = KatanaRunner::load();
-    let paymaster = runner.prefunded_single_owner_account().await;
+    let paymaster = runner.executor().await;
     let controller = runner.deploy_controller(&signer).await;
 
     let account: Box<dyn OutsideExecutionAccount> = match session_signer {
@@ -132,7 +132,7 @@ async fn test_verify_execute_starknet_paymaster_starknet_session() {
 async fn test_verify_execute_paymaster_should_fail() {
     let runner = KatanaRunner::load();
     let signer = SigningKey::from_random();
-    let paymaster = runner.prefunded_single_owner_account().await;
+    let paymaster = runner.executor().await;
     let controller = runner.deploy_controller(&signer).await;
 
     let recipient = ContractAddress(felt!("0x18301129"));
@@ -158,7 +158,7 @@ async fn test_verify_execute_paymaster_should_fail() {
         nonce: controller.random_outside_execution_nonce(),
     };
 
-    let wrong_account = CartridgeGuardianAccount::new(
+    let wrong_account = CartridgeAccount::new(
         runner.client(),
         SigningKey::from_random(),
         SigningKey::from_random(),
@@ -182,7 +182,7 @@ async fn test_verify_execute_paymaster_should_fail() {
 async fn test_verify_execute_paymaster_session() {
     let signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
-    let paymaster = runner.prefunded_single_owner_account().await;
+    let paymaster = runner.executor().await;
     let controller = runner.deploy_controller(&signer).await;
 
     let recipient = ContractAddress(felt!("0x18301129"));
