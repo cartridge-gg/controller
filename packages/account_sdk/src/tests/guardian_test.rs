@@ -13,17 +13,9 @@ use starknet::{
     signers::SigningKey,
 };
 
-pub async fn test_verify_execute<
-    S: HashSigner + Clone + Sync + Send,
-    G: HashSigner + Clone + Sync + Send,
->(
-    signer: S,
-    guardian: G,
-) {
+pub async fn test_verify_execute<S: HashSigner + Clone + Sync + Send>(signer: S) {
     let runner = KatanaRunner::load();
-    let controller = runner
-        .deploy_controller_with_guardian(&signer, &guardian)
-        .await;
+    let controller = runner.deploy_controller(&signer).await;
 
     let new_account = ContractAddress(felt!("0x18301129"));
 
@@ -51,14 +43,14 @@ pub async fn test_verify_execute<
 
 #[tokio::test]
 async fn test_verify_execute_webauthn_guardian_starknet() {
-    test_verify_execute(
-        InternalWebauthnSigner::random("localhost".to_string(), "rp_id".to_string()),
-        SigningKey::from_random(),
-    )
+    test_verify_execute(InternalWebauthnSigner::random(
+        "localhost".to_string(),
+        "rp_id".to_string(),
+    ))
     .await;
 }
 
 #[tokio::test]
 async fn test_verify_execute_starknet_guardian_starknet() {
-    test_verify_execute(SigningKey::from_random(), SigningKey::from_random()).await;
+    test_verify_execute(SigningKey::from_random()).await;
 }

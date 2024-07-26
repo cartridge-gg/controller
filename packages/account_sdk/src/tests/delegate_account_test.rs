@@ -44,7 +44,7 @@ async fn test_set_delegate_account_from_non_owner() {
     let signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
     let delegate_address = Felt::from_hex("0x1234").unwrap();
-    let external_account = runner.prefunded_single_owner_account().await;
+    let external_account = runner.executor().await;
     let controller = runner.deploy_controller(&signer).await;
 
     let account_interface_external_account = Controller::new(controller.address, &external_account);

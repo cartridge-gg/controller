@@ -17,7 +17,7 @@ use account_sdk::abigen::controller::Signer;
 use account_sdk::account::outside_execution::OutsideExecutionAccount;
 use account_sdk::account::session::hash::{AllowedMethod, Session};
 use account_sdk::account::session::SessionAccount;
-use account_sdk::account::{AccountHashSigner, CartridgeGuardianAccount, MessageSignerAccount};
+use account_sdk::account::{AccountHashSigner, CartridgeAccount as CA, MessageSignerAccount};
 use account_sdk::hash::MessageHashRev1;
 use account_sdk::signers::webauthn::device::DeviceSigner;
 use account_sdk::signers::webauthn::WebauthnAccountSigner;
@@ -57,7 +57,7 @@ type Result<T> = std::result::Result<T, JsError>;
 
 #[wasm_bindgen]
 pub struct CartridgeAccount {
-    account: CartridgeGuardianAccount<Arc<JsonRpcClient<HttpTransport>>, DeviceSigner, SigningKey>,
+    account: CA<Arc<JsonRpcClient<HttpTransport>>, DeviceSigner, SigningKey>,
     device_signer: DeviceSigner,
     username: String,
     rpc_url: Url,
@@ -106,7 +106,7 @@ impl CartridgeAccount {
         let chain_id = Felt::from_str(&chain_id)?;
         let username = username.to_lowercase();
 
-        let account = CartridgeGuardianAccount::new(
+        let account = CA::new(
             Arc::new(provider),
             device_signer.clone(),
             dummy_guardian,

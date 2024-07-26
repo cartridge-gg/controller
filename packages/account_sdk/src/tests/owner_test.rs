@@ -2,7 +2,7 @@ use crate::{
     abigen::{controller::Controller, erc_20::Erc20},
     account::{
         session::{create::SessionCreator, hash::AllowedMethod},
-        CartridgeAccount, CartridgeGuardianAccount,
+        CartridgeAccount,
     },
     signers::{HashSigner, NewOwnerSigner, SignError, SignerTrait},
     tests::{account::signers::InternalWebauthnSigner, runners::katana::KatanaRunner},
@@ -68,7 +68,7 @@ async fn test_change_owner() {
 async fn test_add_owner() {
     let signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
-    let account = runner.deploy_controller(&signer).await;
+    let mut account = runner.deploy_controller(&signer).await;
     let controller = Controller::new(account.address, account.clone());
 
     assert!(controller
@@ -104,12 +104,7 @@ async fn test_add_owner() {
         .await
         .unwrap());
 
-    let account = CartridgeAccount::new(
-        runner.client(),
-        new_signer.clone(),
-        account.address,
-        runner.client().chain_id().await.unwrap(),
-    );
+    account.set_signer(new_signer.clone());
     let controller = Controller::new(account.address, account.clone());
 
     let new_new_signer = SigningKey::from_random();
@@ -182,7 +177,7 @@ async fn test_change_owner_wrong_signature() {
 async fn test_change_owner_execute_after() {
     let signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
-    let account = runner.deploy_controller(&signer).await;
+    let mut account = runner.deploy_controller(&signer).await;
     let controller = Controller::new(account.address, account.clone());
 
     let new_signer = SigningKey::from_random();
@@ -224,12 +219,7 @@ async fn test_change_owner_execute_after() {
         panic!("Should have failed");
     };
 
-    let account = CartridgeAccount::new(
-        runner.client(),
-        new_signer.clone(),
-        controller.address,
-        runner.client().chain_id().await.unwrap(),
-    );
+    account.set_signer(new_signer.clone());
 
     let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &account);
 
@@ -305,7 +295,7 @@ async fn test_change_owner_invalidate_old_sessions() {
         panic!("Should have failed");
     };
 
-    let account = CartridgeGuardianAccount::new(
+    let account = CartridgeAccount::new(
         runner.client(),
         new_signer.clone(),
         guardian.clone(),
@@ -388,7 +378,7 @@ async fn test_external_owner() {
     let signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
     let delegate_address = Felt::from_hex("0x1234").unwrap();
-    let external_account = runner.prefunded_single_owner_account().await;
+    let external_account = runner.executor().await;
 
     let account = runner.deploy_controller(&signer).await;
 

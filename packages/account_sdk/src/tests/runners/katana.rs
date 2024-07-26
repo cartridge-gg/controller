@@ -12,7 +12,7 @@ use lazy_static::lazy_static;
 
 use crate::abigen::controller::{self, Signer};
 use crate::abigen::erc_20::Erc20;
-use crate::account::{CartridgeAccount, CartridgeGuardianAccount};
+use crate::account::CartridgeAccount;
 use crate::signers::HashSigner;
 use crate::tests::account::{
     AccountDeclaration, AccountDeployment, DeployResult, FEE_TOKEN_ADDRESS,
@@ -76,9 +76,7 @@ impl KatanaRunner {
         &self.client
     }
 
-    pub async fn prefunded_single_owner_account(
-        &self,
-    ) -> SingleOwnerAccount<&JsonRpcClient<HttpTransport>, LocalWallet> {
+    pub async fn executor(&self) -> SingleOwnerAccount<&JsonRpcClient<HttpTransport>, LocalWallet> {
         single_owner_account_with_encoding(
             &self.client,
             PREFUNDED.0.clone(),
@@ -89,7 +87,7 @@ impl KatanaRunner {
     }
 
     pub async fn fund(&self, address: &Felt) {
-        let prefunded = self.prefunded_single_owner_account().await;
+        let prefunded = self.executor().await;
         let erc20_prefunded = Erc20::new(*FEE_TOKEN_ADDRESS, prefunded);
 
         let tx = erc20_prefunded
@@ -111,7 +109,7 @@ impl KatanaRunner {
     }
 
     pub async fn declare_controller(&self) -> Felt {
-        let prefunded = self.prefunded_single_owner_account().await;
+        let prefunded = self.executor().await;
 
         let DeclareTransactionResult { class_hash, .. } =
             AccountDeclaration::cartridge_account(self.client())
@@ -127,15 +125,16 @@ impl KatanaRunner {
     pub async fn deploy_controller<S>(
         &self,
         signer: &S,
-    ) -> CartridgeAccount<&JsonRpcClient<HttpTransport>, S>
+    ) -> CartridgeAccount<&JsonRpcClient<HttpTransport>, S, SigningKey>
     where
         S: HashSigner + Clone + Send,
     {
-        let prefunded = self.prefunded_single_owner_account().await;
+        let guardian = SigningKey::from_random();
+        let prefunded = self.executor().await;
         let class_hash = self.declare_controller().await;
 
         let mut constructor_calldata = controller::Signer::cairo_serialize(&signer.signer());
-        constructor_calldata.extend(Option::<Signer>::cairo_serialize(&None));
+        constructor_calldata.extend(Option::<Signer>::cairo_serialize(&Some(guardian.signer())));
 
         let DeployResult {
             deployed_address,
@@ -157,41 +156,7 @@ impl KatanaRunner {
         CartridgeAccount::new(
             self.client(),
             signer.clone(),
-            deployed_address,
-            self.client().chain_id().await.unwrap(),
-        )
-    }
-
-    pub async fn deploy_controller_with_guardian<S, G>(
-        &self,
-        signer: &S,
-        guardian: &G,
-    ) -> CartridgeGuardianAccount<&JsonRpcClient<HttpTransport>, S, G>
-    where
-        S: HashSigner + Clone + Send,
-        G: HashSigner + Clone + Send,
-    {
-        let prefunded = self.prefunded_single_owner_account().await;
-        let class_hash = self.declare_controller().await;
-
-        let mut constructor_calldata = controller::Signer::cairo_serialize(&signer.signer());
-        constructor_calldata.extend(Option::<Signer>::cairo_serialize(&Some(guardian.signer())));
-
-        let DeployResult {
-            deployed_address, ..
-        } = AccountDeployment::new(self.client())
-            .deploy(constructor_calldata, Felt::ZERO, &prefunded, class_hash)
-            .await
-            .unwrap()
-            .wait_for_completion()
-            .await;
-
-        self.fund(&deployed_address).await;
-
-        CartridgeGuardianAccount::new(
-            self.client(),
-            signer.clone(),
-            guardian.clone(),
+            guardian,
             deployed_address,
             self.client().chain_id().await.unwrap(),
         )
