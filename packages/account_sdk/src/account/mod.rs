@@ -26,10 +26,10 @@ where
     S: HashSigner + Send,
     G: HashSigner + Send,
 {
-    pub(crate) provider: P,
+    pub provider: P,
     pub(crate) signer: S,
-    pub(crate) address: Felt,
-    pub(crate) chain_id: Felt,
+    pub address: Felt,
+    pub chain_id: Felt,
     pub(crate) block_id: BlockId,
     pub(crate) guardian: G,
 }

@@ -101,7 +101,8 @@ impl WebauthnAccountSigner for InternalWebauthnSigner {
             user_handle: None,
         })
     }
-    fn signer_pub_data(&self) -> WebauthnSigner {
+
+    fn signer(&self) -> WebauthnSigner {
         WebauthnSigner {
             rp_id_hash: NonZero::new(U256::from_bytes_be(&self.rp_id_hash())).unwrap(),
             origin: self.origin.clone().into_bytes(),
