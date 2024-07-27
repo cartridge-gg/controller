@@ -25,6 +25,7 @@ pub struct ClientData {
     pub(super) challenge: String,
     pub(super) origin: String,
     #[serde(rename = "crossOrigin")]
+    #[serde(default)]
     pub(super) cross_origin: bool,
 }
 
@@ -107,7 +108,7 @@ pub trait WebauthnOperations {
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 impl<T> HashSigner for WebauthnSigner<T>
 where
-    T: WebauthnOperations + Sync + Into<abigen::controller::WebauthnSigner>,
+    T: WebauthnOperations + Sync,
 {
     // According to https://www.w3.org/TR/webauthn/#clientdatajson-verification
     async fn sign(&self, tx_hash: &Felt) -> Result<SignerSignature, SignError> {
@@ -122,7 +123,7 @@ where
             flags,
             counter,
         } = self
-            .device
+            .operations
             .get_assertion(self.rp_id.clone(), self.credential_id.clone(), &challenge)
             .await
             .map_err(SignError::Device)?;
@@ -175,13 +176,15 @@ where
             signature.y_parity = !signature.y_parity;
         }
 
+        let client_data: ClientData = serde_json::from_str(&client_data_json).unwrap();
+        let client_data_json_outro = extract_client_data_json_outro(&client_data_json);
         let webauthn_signature = WebauthnSignature {
-            flags: flags,
-            cross_origin: false, // assertion.client_data().cross_origin, serde_json::from_str(&self.client_data_json).unwrap()
+            flags,
+            cross_origin: client_data.cross_origin,
             sign_count: counter,
             ec_signature: signature,
             sha256_implementation: Sha256Implementation::Cairo1,
-            client_data_json_outro: vec![], //TODO: it can theoretically be non-empty
+            client_data_json_outro,
         };
 
         Ok(SignerSignature::Webauthn((
@@ -214,7 +217,7 @@ pub struct WebauthnSigner<T: WebauthnOperations> {
     pub origin: String,
     pub credential_id: CredentialID,
     pub pub_key: CoseKey,
-    pub device: T,
+    pub operations: T,
 }
 
 impl<T: WebauthnOperations> From<&WebauthnSigner<T>> for abigen::controller::WebauthnSigner {
@@ -236,14 +239,14 @@ impl<T: WebauthnOperations> WebauthnSigner<T> {
         origin: String,
         credential_id: CredentialID,
         pub_key: CoseKey,
-        device: T,
+        operations: T,
     ) -> Self {
         Self {
             rp_id,
             origin,
             credential_id,
             pub_key,
-            device,
+            operations,
         }
     }
 
@@ -252,7 +255,7 @@ impl<T: WebauthnOperations> WebauthnSigner<T> {
         origin: String,
         user_name: String,
         challenge: &[u8],
-        device: T,
+        operations: T,
     ) -> Result<Self, DeviceError> {
         let res = T::create_credential(rp_id.clone(), user_name.clone(), challenge).await?;
 
@@ -266,7 +269,7 @@ impl<T: WebauthnOperations> WebauthnSigner<T> {
             credential_id: res.credential.id,
             pub_key,
             origin,
-            device,
+            operations,
         })
     }
 
@@ -319,5 +322,38 @@ impl<T: WebauthnOperations> WebauthnSigner<T> {
 
     pub fn pub_key_bytes(&self) -> Result<[u8; 64], DeviceError> {
         Self::extract_pub_key(&self.pub_key)
+    }
+}
+
+fn extract_client_data_json_outro(client_data_json: &str) -> Vec<u8> {
+    let cross_origin_index = client_data_json.rfind("\"crossOrigin\"");
+    match cross_origin_index {
+        Some(index) => {
+            let outro_sub = client_data_json[index..].to_string();
+            let outro_start = outro_sub.rfind(',').unwrap_or(outro_sub.len());
+            let outro_str = &outro_sub[outro_start..];
+            outro_str.as_bytes().to_vec()
+        }
+        None => vec![],
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::extract_client_data_json_outro;
+
+    #[test]
+    fn test_extract_client_data_json_outro() {
+        let json_with_cross_origin = "{\"type\":\"webauthn.get\",\"challenge\":\"BGJcocCMZ8w1AoRN0wAHFsNtNAVJ3fi83s65MW8jUfIB\",\"origin\":\"http://localhost:3001\",\"crossOrigin\":true,\"other_keys_can_be_added_here\":\"do not compare clientDataJSON against a template. See https://goo.gl/yabPex\"}";
+        let expected_outro = ",\"other_keys_can_be_added_here\":\"do not compare clientDataJSON against a template. See https://goo.gl/yabPex\"}";
+        let outro = extract_client_data_json_outro(json_with_cross_origin);
+        let outro_string = String::from_utf8(outro).expect("Invalid UTF-8");
+        assert_eq!(outro_string, expected_outro);
+
+        let json_without_outro =
+        "{\"type\":\"webauthn.get\",\"challenge\":\"BD7mj5jZ_ySvAv7kgFJ1HKRknsHwYuwtWbkjJPqQKi4B\",\"origin\":\"http://localhost:3001\",\"crossOrigin\":true}";
+        let outro = extract_client_data_json_outro(json_without_outro);
+        let outro_string = String::from_utf8(outro).expect("Invalid UTF-8");
+        assert_eq!(outro_string, "");
     }
 }

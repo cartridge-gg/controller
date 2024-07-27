@@ -18,7 +18,7 @@ use account_sdk::abigen::controller::Signer;
 use account_sdk::account::outside_execution::OutsideExecutionAccount;
 use account_sdk::account::session::hash::{AllowedMethod, Session};
 use account_sdk::account::session::SessionAccount;
-use account_sdk::account::CartridgeAccount as CA;
+use account_sdk::account::{AccountHashSigner, CartridgeAccount as CA, MessageSignerAccount};
 use account_sdk::hash::MessageHashRev1;
 use account_sdk::signers::webauthn::{CredentialID, WebauthnSigner};
 use account_sdk::signers::HashSigner;
@@ -36,6 +36,7 @@ use starknet::accounts::Account;
 use starknet::core::types::{BlockId, BlockTag, FunctionCall};
 use starknet::core::utils::cairo_short_string_to_felt;
 use starknet::macros::{selector, short_string};
+use starknet::providers::Provider;
 use starknet::signers::SigningKey;
 use starknet::{
     accounts::Call,
@@ -316,7 +317,7 @@ impl CartridgeAccount {
             self.account.chain_id,
             self.get_constructor_calldata(),
             self.account.clone(),
-            self.account.provider,
+            self.account.provider.clone(),
         );
 
         let salt = cairo_short_string_to_felt(&self.username)?;
@@ -337,7 +338,7 @@ impl CartridgeAccount {
 
         let res = self
             .account
-            .provider()
+            .provider
             .call(
                 FunctionCall {
                     contract_address: self.account.address,
@@ -395,7 +396,7 @@ impl CartridgeAccount {
     }
 
     fn get_constructor_calldata(&self) -> Vec<Felt> {
-        let webauthn = self.device_signer.into();
+        let webauthn = (&self.device_signer).into();
         let mut calldata = Signer::cairo_serialize(&Signer::Webauthn(webauthn));
         calldata.push(Felt::ONE); // no guardian
 

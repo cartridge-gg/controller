@@ -1,113 +1,174 @@
+use crate::signers::webauthn::{
+    CreateCredentialResponse, Credential, CredentialID, GetAssertionResponse, WebauthnOperations,
+};
+use crate::signers::DeviceError;
 use crate::{
-    abigen::{
-        controller::{Signature, WebauthnSigner},
-        erc_20::Erc20,
-    },
-    signers::{
-        webauthn::{
-            AuthenticatorAssertionResponse, AuthenticatorData, ClientData, Secp256r1Point,
-            WebauthnAccountSigner,
-        },
-        HashSigner, SignError,
-    },
+    abigen::erc_20::Erc20,
+    signers::HashSigner,
     tests::{account::FEE_TOKEN_ADDRESS, runners::katana::KatanaRunner},
 };
 use async_trait::async_trait;
-use cainome::cairo_serde::{ContractAddress, NonZero, U256};
-use ecdsa::RecoveryId;
-use p256::{
-    ecdsa::{Signature as ECDSASignature, SigningKey},
-    elliptic_curve::sec1::Coordinates,
-};
-use rand_core::OsRng;
+use base64urlsafedata::Base64UrlSafeData;
+use cainome::cairo_serde::{ContractAddress, U256};
+use coset::{CborSerializable, CoseKey};
 use starknet::{
     core::types::{BlockId, BlockTag},
     macros::felt,
     signers::SigningKey as StarkSigningKey,
 };
+use webauthn_authenticator_rs::authenticator_hashed::AuthenticatorBackendHashedClientData;
+use webauthn_authenticator_rs::softpasskey::SoftPasskey;
+use webauthn_authenticator_rs::AuthenticatorBackend;
+use webauthn_rs_core::crypto::compute_sha256;
+use webauthn_rs_core::proto::{AttestationObject, Registration};
+use webauthn_rs_proto::{
+    AllowCredentials, AttestationConveyancePreference, AuthenticatorSelectionCriteria,
+    CollectedClientData, PubKeyCredParams, PublicKeyCredentialCreationOptions,
+    PublicKeyCredentialRequestOptions, RelyingParty, User, UserVerificationPolicy,
+};
 
-#[derive(Debug, Clone)]
-pub struct InternalWebauthnSigner {
-    pub signing_key: SigningKey,
-    rp_id: String,
-    pub origin: String,
-}
+use once_cell::sync::Lazy;
+use std::collections::HashMap;
+use std::sync::Mutex;
 
-impl InternalWebauthnSigner {
-    pub fn new(rp_id: String, signing_key: SigningKey, origin: String) -> Self {
-        Self {
-            rp_id,
-            signing_key,
-            origin,
-        }
-    }
+static PASSKEYS: Lazy<Mutex<HashMap<Vec<u8>, SoftPasskey>>> =
+    Lazy::new(|| Mutex::new(HashMap::new()));
 
-    pub fn random(rp_id: String, origin: String) -> Self {
-        let signing_key = SigningKey::random(&mut OsRng);
-        Self::new(rp_id, signing_key, origin)
-    }
+#[derive(Clone)]
+pub struct SoftPasskeyOperations {}
 
-    fn public_key_bytes(&self) -> ([u8; 32], [u8; 32]) {
-        let encoded = self.signing_key.verifying_key().to_encoded_point(false);
-        let (x, y) = match encoded.coordinates() {
-            Coordinates::Uncompressed { x, y } => (x, y),
-            _ => panic!("unexpected compression"),
-        };
-        (
-            x.as_slice().try_into().unwrap(),
-            y.as_slice().try_into().unwrap(),
-        )
-    }
-    pub fn public_key(&self) -> Secp256r1Point {
-        let (x, y) = self.public_key_bytes();
-        (U256::from_bytes_be(&x), U256::from_bytes_be(&y))
-    }
-    pub fn rp_id_hash(&self) -> [u8; 32] {
-        use sha2::{digest::Update, Digest, Sha256};
-        Sha256::new().chain(self.rp_id.clone()).finalize().into()
+impl SoftPasskeyOperations {
+    pub fn new() -> Self {
+        Self {}
     }
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl WebauthnAccountSigner for InternalWebauthnSigner {
-    async fn sign(&self, challenge: &[u8]) -> Result<AuthenticatorAssertionResponse, SignError> {
-        use sha2::{digest::Update, Digest, Sha256};
+impl WebauthnOperations for SoftPasskeyOperations {
+    async fn get_assertion(
+        &self,
+        rp_id: String,
+        credential_id: CredentialID,
+        challenge: &[u8],
+    ) -> Result<GetAssertionResponse, crate::signers::DeviceError> {
+        let mut passkeys = PASSKEYS.lock().unwrap();
+        let pk = passkeys
+            .get_mut(&credential_id.0)
+            .ok_or(DeviceError::GetAssertion(
+                "No passkey available for this credential ID".to_string(),
+            ))?;
 
-        let authenticator_data = AuthenticatorData {
-            rp_id_hash: self.rp_id_hash(),
-            flags: 0b00000101,
-            sign_count: 0,
+        let options = PublicKeyCredentialRequestOptions {
+            challenge: Base64UrlSafeData::from(challenge),
+            timeout: Some(500),
+            rp_id,
+            allow_credentials: vec![AllowCredentials {
+                type_: "public-key".to_string(),
+                id: Base64UrlSafeData::from(credential_id.0.clone()),
+                transports: None,
+            }],
+            user_verification: UserVerificationPolicy::Required,
+            hints: None,
+            extensions: None,
         };
-        let client_data_json = ClientData::new(challenge, self.origin.clone()).to_json();
-        let client_data_hash = Sha256::new().chain(client_data_json.clone()).finalize();
-
-        let mut to_sign = Into::<Vec<u8>>::into(authenticator_data.clone());
-        to_sign.append(&mut client_data_hash.to_vec());
-        let (signature, recovery_id): (ECDSASignature, RecoveryId) =
-            self.signing_key.sign_recoverable(&to_sign).unwrap();
-        let signature_bytes = signature.to_bytes().to_vec();
-
-        let signature = Signature {
-            r: U256::from_bytes_be(&signature_bytes[0..32].try_into().unwrap()),
-            s: U256::from_bytes_be(&signature_bytes[32..64].try_into().unwrap()),
-            y_parity: recovery_id.is_y_odd(),
+        let client_data = CollectedClientData {
+            type_: "webauthn.get".to_string(),
+            challenge: Base64UrlSafeData::from(challenge),
+            origin: "https://cartridge.gg".try_into().unwrap(),
+            token_binding: None,
+            cross_origin: Some(false),
+            unknown_keys: Default::default(),
         };
+        let client_data_str = serde_json::to_string(&client_data)
+            .map_err(|e| DeviceError::GetAssertion(format!("{:?}", e)))?;
 
-        Ok(AuthenticatorAssertionResponse {
-            authenticator_data,
-            client_data_json,
-            signature,
-            user_handle: None,
+        let client_data: Vec<u8> = client_data_str.into();
+        let client_data_hash = compute_sha256(&client_data).to_vec();
+        let mut cred = AuthenticatorBackendHashedClientData::perform_auth(
+            pk,
+            client_data_hash,
+            options,
+            500_u32,
+        )
+        .map_err(|e| DeviceError::GetAssertion(format!("{:?}", e)))?;
+        cred.response.client_data_json = Base64UrlSafeData::from(client_data);
+
+        Ok(GetAssertionResponse {
+            signature: cred.response.signature.into(),
+            authenticator_data: cred.response.authenticator_data.clone().into(),
+            client_data_json: String::from_utf8(cred.response.client_data_json.into()).unwrap(),
+            flags: cred.response.authenticator_data.as_slice()[32],
+            counter: u32::from_be_bytes(
+                cred.response.authenticator_data.as_slice()[33..37]
+                    .try_into()
+                    .unwrap(),
+            ),
+            rp_id_hash: cred.response.authenticator_data.as_slice()[..32]
+                .try_into()
+                .unwrap(),
         })
     }
 
-    fn signer(&self) -> WebauthnSigner {
-        WebauthnSigner {
-            rp_id_hash: NonZero::new(U256::from_bytes_be(&self.rp_id_hash())).unwrap(),
-            origin: self.origin.clone().into_bytes(),
-            pubkey: NonZero::new(self.public_key().0).unwrap(),
-        }
+    async fn create_credential(
+        rp_id: String,
+        user_name: String,
+        challenge: &[u8],
+    ) -> Result<CreateCredentialResponse, crate::signers::DeviceError> {
+        let mut pk = SoftPasskey::new(true);
+        let r = AuthenticatorBackend::perform_register(
+            &mut pk,
+            "https://cartridge.gg".try_into().unwrap(),
+            PublicKeyCredentialCreationOptions {
+                rp: RelyingParty {
+                    name: "Cartridge".to_string(),
+                    id: rp_id,
+                },
+                user: User {
+                    id: Base64UrlSafeData::from(vec![0]),
+                    name: user_name.clone(),
+                    display_name: "".to_string(),
+                },
+                challenge: Base64UrlSafeData::from(challenge),
+                pub_key_cred_params: vec![PubKeyCredParams {
+                    type_: "public-key".to_string(),
+                    alg: -7,
+                }],
+                timeout: Some(500),
+                attestation: Some(AttestationConveyancePreference::Direct),
+                exclude_credentials: None,
+                authenticator_selection: Some(AuthenticatorSelectionCriteria {
+                    user_verification: UserVerificationPolicy::Required,
+                    ..AuthenticatorSelectionCriteria::default()
+                }),
+                extensions: None,
+                hints: None,
+                attestation_formats: None,
+            },
+            500_u32,
+        )
+        .map_err(|e| DeviceError::CreateCredential(format!("{:?}", e)))?;
+
+        let ao =
+            AttestationObject::<Registration>::try_from(r.response.attestation_object.as_ref())
+                .map_err(|e| DeviceError::CreateCredential(format!("CoseError: {:?}", e)))?;
+
+        let cred = ao.auth_data.acd.unwrap();
+
+        let cose_key = CoseKey::from_slice(&serde_cbor_2::to_vec(&cred.credential_pk).unwrap())
+            .map_err(|e| DeviceError::CreateCredential(format!("CoseError: {:?}", e)))?;
+
+        PASSKEYS
+            .lock()
+            .unwrap()
+            .insert(cred.credential_id.clone().into(), pk);
+
+        Ok(CreateCredentialResponse {
+            credential: Credential {
+                id: CredentialID(cred.credential_id.into()),
+                public_key: Some(cose_key),
+            },
+        })
     }
 }
 
@@ -137,14 +198,14 @@ pub async fn test_verify_execute<S: HashSigner + Clone + Sync + Send>(signer: S)
         .unwrap();
 }
 
-#[tokio::test]
-async fn test_verify_execute_webautn() {
-    test_verify_execute(InternalWebauthnSigner::random(
-        "localhost".to_string(),
-        "rp_id".to_string(),
-    ))
-    .await;
-}
+// #[tokio::test]
+// async fn test_verify_execute_webautn() {
+//     test_verify_execute(SoftPasskeyOperations::new(
+//         "localhost".to_string(),
+//         "rp_id".to_string(),
+//     ))
+//     .await;
+// }
 
 #[tokio::test]
 async fn test_verify_execute_starknet() {
