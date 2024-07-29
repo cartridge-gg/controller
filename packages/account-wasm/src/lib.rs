@@ -94,7 +94,7 @@ impl CartridgeAccount {
         let provider = JsonRpcClient::new(HttpTransport::new(rpc_url.clone()));
 
         let credential_id_bytes = general_purpose::URL_SAFE_NO_PAD.decode(credential_id)?;
-        let credential_id = CredentialID(credential_id_bytes);
+        let credential_id = CredentialID::from(credential_id_bytes);
 
         let cose_bytes = general_purpose::URL_SAFE_NO_PAD.decode(public_key)?;
         let cose = CoseKey::from_slice(&cose_bytes)?;

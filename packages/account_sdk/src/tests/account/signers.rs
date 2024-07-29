@@ -1,6 +1,4 @@
-use crate::signers::webauthn::{
-    CreateCredentialResponse, Credential, CredentialID, GetAssertionResponse, WebauthnOperations,
-};
+use crate::signers::webauthn::{CredentialID, WebauthnOperations};
 use crate::signers::DeviceError;
 use crate::{
     abigen::erc_20::Erc20,
@@ -10,7 +8,6 @@ use crate::{
 use async_trait::async_trait;
 use base64urlsafedata::Base64UrlSafeData;
 use cainome::cairo_serde::{ContractAddress, U256};
-use coset::{CborSerializable, CoseKey};
 use starknet::{
     core::types::{BlockId, BlockTag},
     macros::felt,
@@ -23,8 +20,9 @@ use webauthn_rs_core::crypto::compute_sha256;
 use webauthn_rs_core::proto::{AttestationObject, Registration};
 use webauthn_rs_proto::{
     AllowCredentials, AttestationConveyancePreference, AuthenticatorSelectionCriteria,
-    CollectedClientData, PubKeyCredParams, PublicKeyCredentialCreationOptions,
-    PublicKeyCredentialRequestOptions, RelyingParty, User, UserVerificationPolicy,
+    CollectedClientData, PubKeyCredParams, PublicKeyCredential, PublicKeyCredentialCreationOptions,
+    PublicKeyCredentialRequestOptions, RegisterPublicKeyCredential, RelyingParty, User,
+    UserVerificationPolicy,
 };
 
 use once_cell::sync::Lazy;
@@ -51,10 +49,10 @@ impl WebauthnOperations for SoftPasskeyOperations {
         rp_id: String,
         credential_id: CredentialID,
         challenge: &[u8],
-    ) -> Result<GetAssertionResponse, crate::signers::DeviceError> {
+    ) -> Result<PublicKeyCredential, crate::signers::DeviceError> {
         let mut passkeys = PASSKEYS.lock().unwrap();
         let pk = passkeys
-            .get_mut(&credential_id.0)
+            .get_mut(credential_id.as_slice())
             .ok_or(DeviceError::GetAssertion(
                 "No passkey available for this credential ID".to_string(),
             ))?;
@@ -65,7 +63,7 @@ impl WebauthnOperations for SoftPasskeyOperations {
             rp_id,
             allow_credentials: vec![AllowCredentials {
                 type_: "public-key".to_string(),
-                id: Base64UrlSafeData::from(credential_id.0.clone()),
+                id: Base64UrlSafeData::from(credential_id),
                 transports: None,
             }],
             user_verification: UserVerificationPolicy::Required,
@@ -83,7 +81,7 @@ impl WebauthnOperations for SoftPasskeyOperations {
         let client_data_str = serde_json::to_string(&client_data)
             .map_err(|e| DeviceError::GetAssertion(format!("{:?}", e)))?;
 
-        let client_data: Vec<u8> = client_data_str.into();
+        let client_data: Vec<u8> = client_data_str.clone().into();
         let client_data_hash = compute_sha256(&client_data).to_vec();
         let mut cred = AuthenticatorBackendHashedClientData::perform_auth(
             pk,
@@ -94,27 +92,14 @@ impl WebauthnOperations for SoftPasskeyOperations {
         .map_err(|e| DeviceError::GetAssertion(format!("{:?}", e)))?;
         cred.response.client_data_json = Base64UrlSafeData::from(client_data);
 
-        Ok(GetAssertionResponse {
-            signature: cred.response.signature.into(),
-            authenticator_data: cred.response.authenticator_data.clone().into(),
-            client_data_json: String::from_utf8(cred.response.client_data_json.into()).unwrap(),
-            flags: cred.response.authenticator_data.as_slice()[32],
-            counter: u32::from_be_bytes(
-                cred.response.authenticator_data.as_slice()[33..37]
-                    .try_into()
-                    .unwrap(),
-            ),
-            rp_id_hash: cred.response.authenticator_data.as_slice()[..32]
-                .try_into()
-                .unwrap(),
-        })
+        Ok(cred)
     }
 
     async fn create_credential(
         rp_id: String,
         user_name: String,
         challenge: &[u8],
-    ) -> Result<CreateCredentialResponse, crate::signers::DeviceError> {
+    ) -> Result<RegisterPublicKeyCredential, crate::signers::DeviceError> {
         let mut pk = SoftPasskey::new(true);
         let r = AuthenticatorBackend::perform_register(
             &mut pk,
@@ -155,20 +140,12 @@ impl WebauthnOperations for SoftPasskeyOperations {
 
         let cred = ao.auth_data.acd.unwrap();
 
-        let cose_key = CoseKey::from_slice(&serde_cbor_2::to_vec(&cred.credential_pk).unwrap())
-            .map_err(|e| DeviceError::CreateCredential(format!("CoseError: {:?}", e)))?;
-
         PASSKEYS
             .lock()
             .unwrap()
             .insert(cred.credential_id.clone().into(), pk);
 
-        Ok(CreateCredentialResponse {
-            credential: Credential {
-                id: CredentialID(cred.credential_id.into()),
-                public_key: Some(cose_key),
-            },
-        })
+        Ok(r)
     }
 }
 

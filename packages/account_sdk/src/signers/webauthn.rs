@@ -1,7 +1,3 @@
-use crate::abigen::{
-    self,
-    controller::{Sha256Implementation, Signer, SignerSignature, WebauthnSignature},
-};
 use async_trait::async_trait;
 use cainome::cairo_serde::{NonZero, U256};
 use coset::{cbor::Value, iana, CoseKey, KeyType, Label};
@@ -9,14 +5,266 @@ use ecdsa::{RecoveryId, VerifyingKey};
 use p256::NistP256;
 use sha2::{digest::Update, Digest, Sha256};
 use starknet::core::types::Felt;
+use std::collections::BTreeMap;
 use std::result::Result;
+use webauthn_rs_proto::{PublicKeyCredential, RegisterPublicKeyCredential};
 
 use super::{DeviceError, HashSigner, SignError};
 use crate::abigen::controller::Signature;
+use crate::abigen::{
+    self,
+    controller::{Sha256Implementation, Signer, SignerSignature, WebauthnSignature},
+};
 
 pub type Secp256r1Point = (U256, U256);
 
 use serde::{Deserialize, Serialize};
+
+use base64urlsafedata::HumanBinaryData;
+use coset::CborSerializable;
+use nom::{
+    bytes::complete::take,
+    combinator::cond,
+    error::ParseError,
+    number::complete::{be_u16, be_u32},
+};
+use serde::de::DeserializeOwned;
+use serde_cbor_2::error::Error as CBORError;
+use webauthn_rs_proto::*;
+
+/// Marker type parameter for data related to registration ceremony
+#[derive(Debug)]
+pub struct Registration;
+
+/// Marker type parameter for data related to authentication ceremony
+#[derive(Debug)]
+pub struct Authentication;
+
+/// Trait for ceremony marker structs
+pub trait Ceremony {
+    /// The type of the extension outputs of the ceremony
+    type SignedExtensions: DeserializeOwned + std::fmt::Debug + std::default::Default;
+}
+
+impl Ceremony for Registration {
+    type SignedExtensions = RegistrationSignedExtensions;
+}
+
+impl Ceremony for Authentication {
+    type SignedExtensions = AuthenticationSignedExtensions;
+}
+
+/// The client's response to the request that it use the `credProtect` extension
+///
+/// Implemented as wrapper struct to (de)serialize
+/// [CredentialProtectionPolicy] as a number
+#[derive(Debug, Serialize, Clone, Deserialize)]
+#[serde(try_from = "u8", into = "u8")]
+pub struct CredProtectResponse(pub CredentialProtectionPolicy);
+
+impl TryFrom<u8> for CredProtectResponse {
+    type Error = <CredentialProtectionPolicy as TryFrom<u8>>::Error;
+
+    fn try_from(v: u8) -> Result<Self, Self::Error> {
+        CredentialProtectionPolicy::try_from(v).map(CredProtectResponse)
+    }
+}
+
+impl From<CredProtectResponse> for u8 {
+    fn from(policy: CredProtectResponse) -> Self {
+        policy.0 as u8
+    }
+}
+
+/// The output for registration ceremony extensions.
+///
+/// Implements the registration bits of \[AuthenticatorExtensionsClientOutputs\]
+/// from the spec
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct RegistrationSignedExtensions {
+    /// The `credProtect` extension
+    #[serde(rename = "credProtect")]
+    pub cred_protect: Option<CredProtectResponse>,
+    /// The `hmac-secret` extension response to a create request
+    #[serde(rename = "hmac-secret")]
+    pub hmac_secret: Option<bool>,
+    /// Extension key-values that we have parsed, but don't strictly recognise.
+    #[serde(flatten)]
+    pub unknown_keys: BTreeMap<String, serde_cbor_2::Value>,
+}
+
+/// The output for authentication cermeony extensions.
+///
+/// Implements the authentication bits of
+/// \[AuthenticationExtensionsClientOutputs] from the spec
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct AuthenticationSignedExtensions {
+    /// Extension key-values that we have parsed, but don't strictly recognise.
+    #[serde(flatten)]
+    pub unknown_keys: BTreeMap<String, serde_cbor_2::Value>,
+}
+
+/// Representation of an AAGUID
+/// <https://www.w3.org/TR/webauthn/#aaguid>
+pub type Aaguid = [u8; 16];
+
+pub type CredentialID = HumanBinaryData;
+
+/// Attested Credential Data
+#[derive(Debug, Clone)]
+pub struct AttestedCredentialData {
+    /// The guid of the authenticator. May indicate manufacturer.
+    pub aaguid: Aaguid,
+    /// The credential ID.
+    pub credential_id: CredentialID,
+    /// The credentials public Key.
+    pub credential_pk: serde_cbor_2::Value,
+}
+
+/// Data returned by this authenticator during registration.
+#[derive(Debug, Clone)]
+pub struct AuthenticatorData<T: Ceremony> {
+    /// The counter of this credentials activations.
+    pub counter: u32,
+    /// Flag if the user was present.
+    pub user_present: bool,
+    /// Flag is the user verified to the device. Implies presence.
+    pub user_verified: bool,
+    /// Flag defining if the authenticator *could* be backed up OR transferred
+    /// between multiple devices.
+    pub backup_eligible: bool,
+    /// Flag defining if the authenticator *knows* it is currently backed up or
+    /// present on multiple devices.
+    pub backup_state: bool,
+    /// The optional attestation.
+    pub acd: Option<AttestedCredentialData>,
+    /// Extensions supplied by the device.
+    pub extensions: T::SignedExtensions,
+}
+
+/// Possible errors that may occur during Webauthn Operation processing.
+#[derive(Debug, thiserror::Error)]
+pub enum WebauthnError {
+    #[error("A NOM parser failure has occurred")]
+    ParseNOMFailure,
+
+    #[error("A CBOR parser failure has occurred")]
+    ParseCBORFailure(#[from] CBORError),
+}
+
+impl PartialEq for WebauthnError {
+    fn eq(&self, other: &Self) -> bool {
+        std::mem::discriminant(self) == std::mem::discriminant(other)
+    }
+}
+
+fn aaguid_parser(i: &[u8]) -> nom::IResult<&[u8], Aaguid> {
+    let (i, aaguid) = take(16usize)(i)?;
+    Ok((i, aaguid.try_into().expect("took 16 bytes exactly")))
+}
+
+fn cbor_parser(i: &[u8]) -> nom::IResult<&[u8], serde_cbor_2::Value> {
+    let mut deserializer = serde_cbor_2::Deserializer::from_slice(i);
+    let v = serde::de::Deserialize::deserialize(&mut deserializer).map_err(|_| {
+        nom::Err::Failure(nom::error::Error::from_error_kind(
+            i,
+            nom::error::ErrorKind::Fail,
+        ))
+    })?;
+
+    let len = deserializer.byte_offset();
+
+    Ok((&i[len..], v))
+}
+
+fn acd_parser(i: &[u8]) -> nom::IResult<&[u8], AttestedCredentialData> {
+    let (i, aaguid) = aaguid_parser(i)?;
+    let (i, cred_id_len) = be_u16(i)?;
+
+    let (i, cred_id) = take(cred_id_len as usize)(i)?;
+    let (i, cred_pk) = cbor_parser(i)?;
+
+    Ok((
+        i,
+        AttestedCredentialData {
+            aaguid,
+            credential_id: HumanBinaryData::from(cred_id.to_vec()),
+            credential_pk: cred_pk,
+        },
+    ))
+}
+
+#[allow(clippy::type_complexity)]
+fn authenticator_data_flags(i: &[u8]) -> nom::IResult<&[u8], (bool, bool, bool, bool, bool, bool)> {
+    // Using nom for bit fields is shit, do it by hand.
+    let (i, ctrl) = nom::number::complete::u8(i)?;
+    let exten_pres = (ctrl & 0b1000_0000) != 0;
+    let acd_pres = (ctrl & 0b0100_0000) != 0;
+    let bak_st = (ctrl & 0b0001_0000) != 0;
+    let bak_el = (ctrl & 0b0000_1000) != 0;
+    let u_ver = (ctrl & 0b0000_0100) != 0;
+    let u_pres = (ctrl & 0b0000_0001) != 0;
+    Ok((i, (exten_pres, acd_pres, u_ver, u_pres, bak_el, bak_st)))
+}
+
+fn authenticator_data_parser<T: Ceremony>(i: &[u8]) -> nom::IResult<&[u8], AuthenticatorData<T>> {
+    let (i, _) = take(32usize)(i)?;
+    let (i, data_flags) = authenticator_data_flags(i)?;
+    let (i, counter) = be_u32(i)?;
+    let (i, acd) = cond(data_flags.1, acd_parser)(i)?;
+
+    let extensions = Default::default();
+
+    Ok((
+        i,
+        AuthenticatorData {
+            counter,
+            user_verified: data_flags.2,
+            user_present: data_flags.3,
+            backup_eligible: data_flags.4,
+            backup_state: data_flags.5,
+            acd,
+            extensions,
+        },
+    ))
+}
+
+impl<T: Ceremony> TryFrom<&[u8]> for AuthenticatorData<T> {
+    type Error = WebauthnError;
+    fn try_from(auth_data_bytes: &[u8]) -> Result<Self, Self::Error> {
+        authenticator_data_parser(auth_data_bytes)
+            .map_err(|_| WebauthnError::ParseNOMFailure)
+            .map(|(_, ad)| ad)
+    }
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct AttestationObjectInner<'a> {
+    pub(crate) auth_data: &'a [u8],
+}
+
+/// Attestation Object
+#[derive(Debug)]
+pub struct AttestationObject<T: Ceremony> {
+    /// auth_data.
+    pub auth_data: AuthenticatorData<T>,
+}
+
+impl<T: Ceremony> TryFrom<&[u8]> for AttestationObject<T> {
+    type Error = WebauthnError;
+
+    fn try_from(data: &[u8]) -> Result<AttestationObject<T>, WebauthnError> {
+        let aoi: AttestationObjectInner =
+            serde_cbor_2::from_slice(data).map_err(WebauthnError::ParseCBORFailure)?;
+        let auth_data_bytes: &[u8] = aoi.auth_data;
+        let auth_data = AuthenticatorData::try_from(auth_data_bytes)?;
+
+        // Yay! Now we can assemble a reasonably sane structure.
+        Ok(AttestationObject { auth_data })
+    }
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ClientData {
@@ -46,46 +294,46 @@ impl ClientData {
     }
 }
 
-#[derive(Debug, Clone, Serialize)]
-pub struct AuthenticatorData {
-    pub rp_id_hash: [u8; 32],
-    pub flags: u8,
-    pub sign_count: u32,
-}
+// #[derive(Debug, Clone, Serialize)]
+// pub struct AuthenticatorData {
+//     pub rp_id_hash: [u8; 32],
+//     pub flags: u8,
+//     pub sign_count: u32,
+// }
 
-impl From<AuthenticatorData> for Vec<u8> {
-    fn from(value: AuthenticatorData) -> Self {
-        let mut data = Vec::new();
-        data.extend_from_slice(&value.rp_id_hash);
-        data.push(value.flags);
-        data.extend_from_slice(&value.sign_count.to_be_bytes());
-        data
-    }
-}
+// impl From<AuthenticatorData> for Vec<u8> {
+//     fn from(value: AuthenticatorData) -> Self {
+//         let mut data = Vec::new();
+//         data.extend_from_slice(&value.rp_id_hash);
+//         data.push(value.flags);
+//         data.extend_from_slice(&value.sign_count.to_be_bytes());
+//         data
+//     }
+// }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct CredentialID(pub Vec<u8>);
+// #[derive(Debug, Clone, PartialEq, Eq)]
+// pub struct CredentialID(pub Vec<u8>);
 
-#[derive(Debug, Clone)]
-pub struct Credential {
-    pub id: CredentialID,
-    pub public_key: Option<CoseKey>,
-}
+// #[derive(Debug, Clone)]
+// pub struct Credential {
+//     pub id: CredentialID,
+//     pub public_key: Option<CoseKey>,
+// }
 
-#[derive(Debug, Clone)]
-pub struct CreateCredentialResponse {
-    pub credential: Credential,
-}
+// #[derive(Debug, Clone)]
+// pub struct CreateCredentialResponse {
+//     pub credential: Credential,
+// }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct GetAssertionResponse {
-    pub signature: Vec<u8>,
-    pub rp_id_hash: [u8; 32],
-    pub client_data_json: String,
-    pub flags: u8,
-    pub counter: u32,
-    pub authenticator_data: Vec<u8>,
-}
+// #[derive(Debug, Clone, PartialEq, Eq)]
+// pub struct GetAssertionResponse {
+//     pub signature: Vec<u8>,
+//     pub rp_id_hash: [u8; 32],
+//     pub client_data_json: String,
+//     pub flags: u8,
+//     pub counter: u32,
+//     pub authenticator_data: Vec<u8>,
+// }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
@@ -95,13 +343,13 @@ pub trait WebauthnOperations {
         rp_id: String,
         credential_id: CredentialID,
         challenge: &[u8],
-    ) -> Result<GetAssertionResponse, DeviceError>;
+    ) -> Result<PublicKeyCredential, DeviceError>;
 
     async fn create_credential(
         rp_id: String,
         user_name: String,
         challenge: &[u8],
-    ) -> Result<CreateCredentialResponse, DeviceError>;
+    ) -> Result<RegisterPublicKeyCredential, DeviceError>;
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
@@ -115,24 +363,42 @@ where
         let mut challenge = tx_hash.to_bytes_be().to_vec();
 
         challenge.push(Sha256Implementation::Cairo1.encode());
-        let GetAssertionResponse {
-            rp_id_hash: _,
-            signature,
-            client_data_json,
-            authenticator_data,
-            flags,
-            counter,
-        } = self
+        let cred = self
             .operations
             .get_assertion(self.rp_id.clone(), self.credential_id.clone(), &challenge)
             .await
             .map_err(SignError::Device)?;
 
+        // GetAssertionResponse {
+        //     signature: pkc.response.signature.into(),
+        //     authenticator_data: pkc.response.authenticator_data.clone().into(),
+        //     client_data_json: String::from_utf8(pkc.response.client_data_json.to_vec())
+        //         .unwrap(),
+        //     flags: pkc.response.authenticator_data.as_slice()[32],
+        //     counter: u32::from_be_bytes(
+        //         pkc.response.authenticator_data.as_slice()[33..37]
+        //             .try_into()
+        //             .unwrap(),
+        //     ),
+        //     rp_id_hash: pkc.response.authenticator_data.as_slice()[..32]
+        //         .try_into()
+        //         .unwrap(),
+        // }
+
+        let flags = cred.response.authenticator_data.as_slice()[32];
+        let counter = u32::from_be_bytes(
+            cred.response.authenticator_data.as_slice()[33..37]
+                .try_into()
+                .unwrap(),
+        );
+
+        let client_data_json = String::from_utf8(cred.response.client_data_json.to_vec()).unwrap();
         let client_data_hash = Sha256::new().chain(client_data_json.clone()).finalize();
-        let mut message = Into::<Vec<u8>>::into(authenticator_data);
+        let mut message: Vec<u8> = cred.response.authenticator_data.as_slice().into();
         message.append(&mut client_data_hash.to_vec());
 
-        let ecdsa_sig = ecdsa::Signature::<NistP256>::from_der(&signature).unwrap();
+        let ecdsa_sig =
+            ecdsa::Signature::<NistP256>::from_der(cred.response.signature.as_slice()).unwrap();
         let r = U256::from_bytes_be(ecdsa_sig.r().to_bytes().as_slice().try_into().unwrap());
         let s = U256::from_bytes_be(ecdsa_sig.s().to_bytes().as_slice().try_into().unwrap());
 
@@ -258,15 +524,19 @@ impl<T: WebauthnOperations> WebauthnSigner<T> {
         operations: T,
     ) -> Result<Self, DeviceError> {
         let res = T::create_credential(rp_id.clone(), user_name.clone(), challenge).await?;
+        let ao =
+            AttestationObject::<Registration>::try_from(res.response.attestation_object.as_ref())
+                .map_err(|e| DeviceError::CreateCredential(format!("CoseError: {:?}", e)))
+                .unwrap();
 
-        let pub_key = res
-            .credential
-            .public_key
-            .ok_or(DeviceError::CreateCredential("No public key".to_string()))?;
+        let cred = ao.auth_data.acd.unwrap();
+
+        let pub_key =
+            CoseKey::from_slice(&serde_cbor_2::to_vec(&cred.credential_pk).unwrap()).unwrap();
 
         Ok(Self {
             rp_id,
-            credential_id: res.credential.id,
+            credential_id: cred.credential_id,
             pub_key,
             origin,
             operations,
