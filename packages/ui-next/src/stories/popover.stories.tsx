@@ -2,7 +2,7 @@ import {
   Popover as UIPopover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@/components/primitives/popover";
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof Popover> = {

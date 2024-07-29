@@ -1,4 +1,4 @@
-import { Input as UIInput } from "@/components/ui/input";
+import { Input as UIInput } from "@/components/primitives/input";
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof Input> = {
