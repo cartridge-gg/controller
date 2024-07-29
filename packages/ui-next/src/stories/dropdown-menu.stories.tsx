@@ -6,7 +6,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/primitives/dropdown-menu";
 
 const meta: Meta<typeof DropdownMenu> = {
   title: "Dropdown Menu",
