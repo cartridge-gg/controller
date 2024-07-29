@@ -8,7 +8,6 @@ import { ErrorAlert } from "./ErrorAlert";
 import { Funding } from "./Funding";
 import NextLink from "next/link";
 import { useDeploy } from "hooks/deploy";
-import { Status } from "utils/account";
 import { useConnection } from "hooks/connection";
 import { CARTRIDGE_DISCORD_LINK } from "const";
 
@@ -23,13 +22,13 @@ export function DeploymentRequired({
     controller: { account },
   } = useController();
   const { hasPrefundRequest } = useConnection();
-  const { deployRequest } = useDeploy();
+  const { deployRequest, isDeployed } = useDeploy();
   const [deployHash, setDeployHash] = useState<string>();
   const [showFunding, setShowFunding] = useState(false);
   const [error, setError] = useState<Error>();
 
   useEffect(() => {
-    if (account.status === Status.DEPLOYED) {
+    if (isDeployed) {
       return;
     }
 
@@ -46,9 +45,9 @@ export function DeploymentRequired({
         setDeployHash(hash);
       })
       .catch((e) => setError(e));
-  }, [account.chainId, account.username, account.status]);
+  }, [account.chainId, account.username]);
 
-  if (account.status === Status.DEPLOYED) {
+  if (isDeployed) {
     return <>{children}</>;
   }
 
