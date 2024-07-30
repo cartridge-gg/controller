@@ -30,7 +30,7 @@ impl WebauthnOperations for BrowserOperations {
                 .get_with_options(
                     &RequestChallengeResponse {
                         public_key: options,
-                        mediation: Some(Mediation::Conditional),
+                        mediation: None,
                     }
                     .into(),
                 )
