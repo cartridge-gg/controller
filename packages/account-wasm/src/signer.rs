@@ -22,7 +22,6 @@ impl WebauthnOperations for BrowserOperations {
         options: PublicKeyCredentialRequestOptions,
     ) -> Result<PublicKeyCredential, DeviceError> {
         let (tx, rx) = oneshot::channel();
-        // let challenge = challenge.to_vec();
 
         spawn_local(async move {
             let promise = window()
@@ -37,15 +36,11 @@ impl WebauthnOperations for BrowserOperations {
                 )
                 .unwrap_throw();
 
-            let result = JsFuture::from(promise).await;
-
-            match result {
+            match JsFuture::from(promise).await {
                 Ok(jsval) => {
-                    let w_rpkc = web_sys::PublicKeyCredential::from(jsval);
-                    // Serialise the web_sys::pkc into the webauthn proto version, ready to
-                    // handle/transmit.
-                    let pkc = PublicKeyCredential::from(w_rpkc);
-                    let _ = tx.send(Ok(pkc));
+                    let _ = tx.send(Ok(PublicKeyCredential::from(
+                        web_sys::PublicKeyCredential::from(jsval),
+                    )));
                 }
                 Err(e) => {
                     let _ = tx.send(Err(DeviceError::GetAssertion(format!("{:?}", e))));
@@ -53,12 +48,9 @@ impl WebauthnOperations for BrowserOperations {
             }
         });
 
-        match rx.await {
-            Ok(result) => result,
-            Err(_) => Err(DeviceError::Channel(
-                "assertion receiver dropped".to_string(),
-            )),
-        }
+        rx.await.unwrap_or(Err(DeviceError::Channel(
+            "get_assertion receiver dropped".to_string(),
+        )))
     }
 
     async fn create_credential(
@@ -67,7 +59,6 @@ impl WebauthnOperations for BrowserOperations {
         let (tx, rx) = oneshot::channel();
 
         spawn_local(async move {
-            // Create a promise that calls the browsers navigator.credentials.create api.
             let promise = window()
                 .navigator()
                 .credentials()
@@ -77,15 +68,13 @@ impl WebauthnOperations for BrowserOperations {
                     }
                     .into(),
                 )
-                .expect_throw("Unable to create promise");
-            let fut: JsFuture = JsFuture::from(promise);
+                .unwrap_throw();
 
-            match fut.await {
+            match JsFuture::from(promise).await {
                 Ok(jsval) => {
-                    // Convert from the raw js value into the expected PublicKeyCredential
-                    let w_rpkc = web_sys::PublicKeyCredential::from(jsval);
-                    let rpkc = RegisterPublicKeyCredential::from(w_rpkc);
-                    let _ = tx.send(Ok(rpkc));
+                    let _ = tx.send(Ok(RegisterPublicKeyCredential::from(
+                        web_sys::PublicKeyCredential::from(jsval),
+                    )));
                 }
                 Err(_e) => {
                     let _ = tx.send(Err(DeviceError::CreateCredential("".to_string())));
@@ -93,11 +82,8 @@ impl WebauthnOperations for BrowserOperations {
             }
         });
 
-        match rx.await {
-            Ok(result) => result,
-            Err(_) => Err(DeviceError::Channel(
-                "credential receiver dropped".to_string(),
-            )),
-        }
+        rx.await.unwrap_or(Err(DeviceError::Channel(
+            "credential receiver dropped".to_string(),
+        )))
     }
 }

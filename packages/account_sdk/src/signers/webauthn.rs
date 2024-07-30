@@ -6,6 +6,7 @@ use p256::NistP256;
 use sha2::{digest::Update, Digest, Sha256};
 use starknet::core::types::Felt;
 use std::collections::BTreeMap;
+use std::ops::Neg;
 use std::result::Result;
 use webauthn_rs_proto::{PublicKeyCredential, RegisterPublicKeyCredential};
 
@@ -15,8 +16,6 @@ use crate::abigen::{
     self,
     controller::{Sha256Implementation, Signer, SignerSignature, WebauthnSignature},
 };
-
-pub type Secp256r1Point = (U256, U256);
 
 use serde::{Deserialize, Serialize};
 
@@ -125,6 +124,7 @@ pub struct AttestedCredentialData {
 /// Data returned by this authenticator during registration.
 #[derive(Debug, Clone)]
 pub struct AuthenticatorData<T: Ceremony> {
+    pub rp_id_hash: Vec<u8>,
     /// The counter of this credentials activations.
     pub counter: u32,
     /// Flag if the user was present.
@@ -209,7 +209,7 @@ fn authenticator_data_flags(i: &[u8]) -> nom::IResult<&[u8], (bool, bool, bool, 
 }
 
 fn authenticator_data_parser<T: Ceremony>(i: &[u8]) -> nom::IResult<&[u8], AuthenticatorData<T>> {
-    let (i, _) = take(32usize)(i)?;
+    let (i, rp_id_hash) = take(32usize)(i)?;
     let (i, data_flags) = authenticator_data_flags(i)?;
     let (i, counter) = be_u32(i)?;
     let (i, acd) = cond(data_flags.1, acd_parser)(i)?;
@@ -219,6 +219,7 @@ fn authenticator_data_parser<T: Ceremony>(i: &[u8]) -> nom::IResult<&[u8], Authe
     Ok((
         i,
         AuthenticatorData {
+            rp_id_hash: rp_id_hash.to_vec(),
             counter,
             user_verified: data_flags.2,
             user_present: data_flags.3,
@@ -275,23 +276,6 @@ pub struct ClientData {
     #[serde(rename = "crossOrigin")]
     #[serde(default)]
     pub(super) cross_origin: bool,
-}
-
-impl ClientData {
-    pub fn new(challenge: impl AsRef<[u8]>, origin: String) -> Self {
-        use base64::{engine::general_purpose::URL_SAFE, Engine as _};
-        let challenge = URL_SAFE.encode(challenge);
-
-        Self {
-            type_: "webauthn.get".into(),
-            challenge,
-            origin,
-            cross_origin: false,
-        }
-    }
-    pub fn to_json(&self) -> String {
-        serde_json::to_string(self).unwrap()
-    }
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
@@ -352,48 +336,27 @@ where
 
         let ecdsa_sig =
             ecdsa::Signature::<NistP256>::from_der(cred.response.signature.as_slice()).unwrap();
-        let r = U256::from_bytes_be(ecdsa_sig.r().to_bytes().as_slice().try_into().unwrap());
-        let s = U256::from_bytes_be(ecdsa_sig.s().to_bytes().as_slice().try_into().unwrap());
-
+        let (r, mut s) = ecdsa_sig.split_scalars();
         let pub_key = self.pub_key_bytes().map_err(SignError::Device)?;
-        let mut sec1_key = Vec::with_capacity(65);
-        sec1_key.push(0x4); // prefix 0x04 for uncompressed SEC1 format
-        sec1_key.extend_from_slice(&pub_key);
+        let sec1_key = [&[0x4], pub_key.as_slice()].concat();
 
-        let recovery_id = RecoveryId::trial_recovery_from_msg(
-            &VerifyingKey::from_sec1_bytes(&sec1_key).map_err(|_| {
-                SignError::Device(DeviceError::BadAssertion("Invalid public key".to_string()))
-            })?,
-            &message,
-            &ecdsa_sig,
-        )
-        .map_err(|_| {
-            SignError::Device(DeviceError::BadAssertion(
-                "Unable to recover id".to_string(),
-            ))
-        })?;
+        let verifying_key = VerifyingKey::from_sec1_bytes(&sec1_key).unwrap();
+        let mut y_parity =
+            RecoveryId::trial_recovery_from_msg(&verifying_key, &message, &ecdsa_sig)
+                .unwrap()
+                .is_y_odd();
 
-        let mut signature = Signature {
-            r,
-            s,
-            y_parity: recovery_id.is_y_odd(),
-        };
-
-        use p256::{
-            elliptic_curve::{
-                bigint::{Encoding, Uint},
-                scalar::FromUintUnchecked,
-            },
-            Scalar,
-        };
-        use std::ops::Neg;
-        let s = signature.s;
-        let s_scalar = Scalar::from_uint_unchecked(Uint::from_be_bytes(s.to_bytes_be()));
-        let s_neg = U256::from_bytes_be(s_scalar.neg().to_bytes().as_slice().try_into().unwrap());
-        if s > s_neg {
-            signature.s = s_neg;
-            signature.y_parity = !signature.y_parity;
+        let s_neg = s.neg();
+        if s.as_ref() > s_neg.as_ref() {
+            s = s_neg;
+            y_parity = !y_parity;
         }
+
+        let signature = Signature {
+            r: U256::from_bytes_be(r.to_bytes().as_slice().try_into().unwrap()),
+            s: U256::from_bytes_be(s.to_bytes().as_slice().try_into().unwrap()),
+            y_parity,
+        };
 
         let client_data: ClientData = serde_json::from_str(&client_data_json).unwrap();
         let client_data_json_outro = extract_client_data_json_outro(&client_data_json);
@@ -522,55 +485,13 @@ impl<T: WebauthnOperations> WebauthnSigner<T> {
         })
     }
 
-    fn extract_pub_key(cose_key: &CoseKey) -> Result<[u8; 64], DeviceError> {
-        if cose_key.kty != KeyType::Assigned(iana::KeyType::EC2) {
-            return Err(DeviceError::CreateCredential(
-                "Invalid key type".to_string(),
-            ));
-        }
-
-        let mut x_coord: Option<Vec<u8>> = None;
-        let mut y_coord: Option<Vec<u8>> = None;
-
-        for (label, value) in &cose_key.params {
-            match label {
-                Label::Int(-2) => {
-                    if let Value::Bytes(vec) = value {
-                        x_coord = Some(vec.clone());
-                    }
-                }
-                Label::Int(-3) => {
-                    if let Value::Bytes(vec) = value {
-                        y_coord = Some(vec.clone());
-                    }
-                }
-                _ => {}
-            }
-        }
-
-        let x = x_coord.ok_or(DeviceError::CreateCredential("No x coord".to_string()))?;
-        let y = y_coord.ok_or(DeviceError::CreateCredential("No y coord".to_string()))?;
-
-        if x.len() != 32 || y.len() != 32 {
-            return Err(DeviceError::CreateCredential(
-                "Invalid key length".to_string(),
-            ));
-        }
-
-        let mut pub_key = [0u8; 64];
-        pub_key[..32].copy_from_slice(&x);
-        pub_key[32..].copy_from_slice(&y);
-
-        Ok(pub_key)
-    }
-
     pub fn rp_id_hash(&self) -> [u8; 32] {
         use sha2::{digest::Update, Digest, Sha256};
         Sha256::new().chain(self.rp_id.clone()).finalize().into()
     }
 
     pub fn pub_key_bytes(&self) -> Result<[u8; 64], DeviceError> {
-        Self::extract_pub_key(&self.pub_key)
+        extract_pub_key(&self.pub_key)
     }
 }
 
@@ -585,6 +506,48 @@ fn extract_client_data_json_outro(client_data_json: &str) -> Vec<u8> {
         }
         None => vec![],
     }
+}
+
+fn extract_pub_key(cose_key: &CoseKey) -> Result<[u8; 64], DeviceError> {
+    if cose_key.kty != KeyType::Assigned(iana::KeyType::EC2) {
+        return Err(DeviceError::CreateCredential(
+            "Invalid key type".to_string(),
+        ));
+    }
+
+    let mut x_coord: Option<Vec<u8>> = None;
+    let mut y_coord: Option<Vec<u8>> = None;
+
+    for (label, value) in &cose_key.params {
+        match label {
+            Label::Int(-2) => {
+                if let Value::Bytes(vec) = value {
+                    x_coord = Some(vec.clone());
+                }
+            }
+            Label::Int(-3) => {
+                if let Value::Bytes(vec) = value {
+                    y_coord = Some(vec.clone());
+                }
+            }
+            _ => {}
+        }
+    }
+
+    let x = x_coord.ok_or(DeviceError::CreateCredential("No x coord".to_string()))?;
+    let y = y_coord.ok_or(DeviceError::CreateCredential("No y coord".to_string()))?;
+
+    if x.len() != 32 || y.len() != 32 {
+        return Err(DeviceError::CreateCredential(
+            "Invalid key length".to_string(),
+        ));
+    }
+
+    let mut pub_key = [0u8; 64];
+    pub_key[..32].copy_from_slice(&x);
+    pub_key[32..].copy_from_slice(&y);
+
+    Ok(pub_key)
 }
 
 #[cfg(test)]

@@ -1,5 +1,3 @@
-use crate::signers::webauthn::WebauthnSigner;
-use crate::tests::account::signers::SoftPasskeyOperations;
 use crate::{
     abigen::controller::Controller, tests::runners::katana::KatanaRunner,
     transaction_waiter::TransactionWaiter,
@@ -10,15 +8,7 @@ use starknet::signers::SigningKey;
 
 #[tokio::test]
 async fn test_set_delegate_account_from_account() {
-    let signer = WebauthnSigner::register(
-        "cartridge.gg".to_string(),
-        "https://cartridge.gg".to_string(),
-        "dummy_username".to_string(),
-        "dummy_challenge".as_bytes(),
-        SoftPasskeyOperations::new(),
-    )
-    .await
-    .unwrap();
+    let signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
     let delegate_address = Felt::from_hex("0x1234").unwrap();
     let controller = runner.deploy_controller(&signer).await;

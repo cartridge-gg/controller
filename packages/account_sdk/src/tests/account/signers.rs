@@ -8,6 +8,7 @@ use crate::{
 use async_trait::async_trait;
 use base64urlsafedata::Base64UrlSafeData;
 use cainome::cairo_serde::{ContractAddress, U256};
+use sha2::{digest::Update, Digest, Sha256};
 use starknet::{
     core::types::{BlockId, BlockTag},
     macros::felt,
@@ -16,7 +17,6 @@ use starknet::{
 use webauthn_authenticator_rs::authenticator_hashed::AuthenticatorBackendHashedClientData;
 use webauthn_authenticator_rs::softpasskey::SoftPasskey;
 use webauthn_authenticator_rs::AuthenticatorBackend;
-use webauthn_rs_core::crypto::compute_sha256;
 use webauthn_rs_core::proto::{AttestationObject, Registration};
 use webauthn_rs_proto::{
     CollectedClientData, PublicKeyCredential, PublicKeyCredentialCreationOptions,
@@ -30,11 +30,19 @@ use std::sync::Mutex;
 static PASSKEYS: Lazy<Mutex<HashMap<Vec<u8>, SoftPasskey>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
 
+use url::Url;
+
+static ORIGIN: Lazy<Mutex<Url>> =
+    Lazy::new(|| Mutex::new(Url::parse("https://cartridge.gg").unwrap()));
+
 #[derive(Clone)]
 pub struct SoftPasskeyOperations {}
-
 impl SoftPasskeyOperations {
-    pub fn new() -> Self {
+    #[allow(dead_code)]
+    pub fn new(origin: Url) -> Self {
+        let mut global_origin = ORIGIN.lock().unwrap();
+        *global_origin = origin;
+
         Self {}
     }
 }
@@ -56,7 +64,7 @@ impl WebauthnOperations for SoftPasskeyOperations {
         let client_data = CollectedClientData {
             type_: "webauthn.get".to_string(),
             challenge: options.challenge.clone(),
-            origin: "https://cartridge.gg".try_into().unwrap(),
+            origin: ORIGIN.lock().unwrap().clone(),
             token_binding: None,
             cross_origin: Some(false),
             unknown_keys: Default::default(),
@@ -64,10 +72,10 @@ impl WebauthnOperations for SoftPasskeyOperations {
         let client_data_str = serde_json::to_string(&client_data)
             .map_err(|e| DeviceError::GetAssertion(format!("{:?}", e)))?;
 
-        let client_data_hash = compute_sha256(client_data_str.as_bytes()).to_vec();
+        let client_data_hash = Sha256::new().chain(client_data_str.clone()).finalize();
         let mut cred = AuthenticatorBackendHashedClientData::perform_auth(
             pk,
-            client_data_hash,
+            client_data_hash.to_vec(),
             options,
             500_u32,
         )
@@ -83,7 +91,7 @@ impl WebauthnOperations for SoftPasskeyOperations {
         let mut pk = SoftPasskey::new(true);
         let r = AuthenticatorBackend::perform_register(
             &mut pk,
-            "https://cartridge.gg".try_into().unwrap(),
+            ORIGIN.lock().unwrap().clone(),
             options,
             500_u32,
         )
@@ -132,11 +140,16 @@ pub async fn test_verify_execute<S: HashSigner + Clone + Sync + Send>(signer: S)
 
 // #[tokio::test]
 // async fn test_verify_execute_webautn() {
-//     test_verify_execute(SoftPasskeyOperations::new(
-//         "localhost".to_string(),
-//         "rp_id".to_string(),
-//     ))
-//     .await;
+//     let signer = WebauthnSigner::register(
+//         "cartridge.gg".to_string(),
+//         "https://cartridge.gg".to_string(),
+//         "dummy_username".to_string(),
+//         "dummy_challenge".as_bytes(),
+//         SoftPasskeyOperations::new("https://cartridge.gg".try_into().unwrap()),
+//     )
+//     .await
+//     .unwrap();
+//     test_verify_execute(signer).await;
 // }
 
 #[tokio::test]

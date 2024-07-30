@@ -457,13 +457,13 @@ export function __wbindgen_string_get(arg0, arg1) {
     getInt32Memory0()[arg0 / 4 + 0] = ptr1;
 };
 
-export function __wbindgen_object_clone_ref(arg0) {
-    const ret = getObject(arg0);
+export function __wbindgen_string_new(arg0, arg1) {
+    const ret = getStringFromWasm0(arg0, arg1);
     return addHeapObject(ret);
 };
 
-export function __wbindgen_string_new(arg0, arg1) {
-    const ret = getStringFromWasm0(arg0, arg1);
+export function __wbindgen_object_clone_ref(arg0) {
+    const ret = getObject(arg0);
     return addHeapObject(ret);
 };
 
@@ -1058,8 +1058,8 @@ export function __wbindgen_memory() {
     return addHeapObject(ret);
 };
 
-export function __wbindgen_closure_wrapper2227(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 474, __wbg_adapter_48);
+export function __wbindgen_closure_wrapper2220(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 469, __wbg_adapter_48);
     return addHeapObject(ret);
 };
 
