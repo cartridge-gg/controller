@@ -1,4 +1,4 @@
-use crate::signers::webauthn::WebauthnOperations;
+use crate::signers::webauthn::{WebauthnOperations, WebauthnSigner};
 use crate::signers::DeviceError;
 use crate::{
     abigen::erc_20::Erc20,
@@ -138,19 +138,19 @@ pub async fn test_verify_execute<S: HashSigner + Clone + Sync + Send>(signer: S)
         .unwrap();
 }
 
-// #[tokio::test]
-// async fn test_verify_execute_webautn() {
-//     let signer = WebauthnSigner::register(
-//         "cartridge.gg".to_string(),
-//         "https://cartridge.gg".to_string(),
-//         "dummy_username".to_string(),
-//         "dummy_challenge".as_bytes(),
-//         SoftPasskeyOperations::new("https://cartridge.gg".try_into().unwrap()),
-//     )
-//     .await
-//     .unwrap();
-//     test_verify_execute(signer).await;
-// }
+#[tokio::test]
+async fn test_verify_execute_webautn() {
+    let signer = WebauthnSigner::register(
+        "cartridge.gg".to_string(),
+        "https://cartridge.gg".to_string(),
+        "dummy_username".to_string(),
+        "dummy_challenge".as_bytes(),
+        SoftPasskeyOperations::new("https://cartridge.gg".try_into().unwrap()),
+    )
+    .await
+    .unwrap();
+    test_verify_execute(signer).await;
+}
 
 #[tokio::test]
 async fn test_verify_execute_starknet() {

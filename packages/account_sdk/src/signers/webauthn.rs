@@ -405,8 +405,8 @@ pub struct WebauthnSigner<T: WebauthnOperations> {
 impl<T: WebauthnOperations> From<&WebauthnSigner<T>> for abigen::controller::WebauthnSigner {
     fn from(signer: &WebauthnSigner<T>) -> Self {
         Self {
-            rp_id_hash: NonZero::new(U256::from_bytes_be(&signer.rp_id_hash())).unwrap(),
             origin: signer.origin.clone().into_bytes(),
+            rp_id_hash: NonZero::new(U256::from_bytes_be(&signer.rp_id_hash())).unwrap(),
             pubkey: NonZero::new(U256::from_bytes_be(
                 &signer.pub_key_bytes().unwrap()[0..32].try_into().unwrap(),
             ))

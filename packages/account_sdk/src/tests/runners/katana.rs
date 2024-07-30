@@ -203,29 +203,3 @@ async fn test_declare_on_katana() {
     let runner = KatanaRunner::load();
     runner.declare_controller().await;
 }
-
-// #[tokio::test]
-// async fn test_deploy() {
-//     let runner = KatanaRunner::load();
-//     let account = runner.prefunded_single_owner_account().await;
-//     let class_hash = declare(runner.client(), &account).await;
-//     let signer = Signer::Starknet(StarknetSigner {
-//         pubkey: NonZero::new(felt!("1337")).unwrap(),
-//     });
-//     deploy(runner.client(), &account, signer, None, class_hash).await;
-// }
-
-// #[tokio::test]
-// async fn test_deploy_and_call() {
-//     let runner: KatanaRunner = KatanaRunner::load();
-//     let account = runner.prefunded_single_owner_account().await;
-//     let client = runner.client();
-//     let class_hash = declare(client, &account).await;
-//     let signer = Signer::Starknet(StarknetSigner {
-//         pubkey: NonZero::new(felt!("1337")).unwrap(),
-//     });
-//     let deployed_address = deploy(client, &account, signer.clone(), None, class_hash).await;
-
-//     let contract = Controller::new(deployed_address, account);
-//     assert!(contract.is_owner(&signer.guid()).call().await.unwrap());
-// }
