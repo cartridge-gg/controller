@@ -7,7 +7,10 @@
     "outDir": "./dist",
     "paths": {
         "@/*": ["./src/*"]
-    }
+    },
   },
-  "include": ["src"]
+  "include": [
+    "src/components/**/*",
+    "src/utils.ts",
+  ]
 }

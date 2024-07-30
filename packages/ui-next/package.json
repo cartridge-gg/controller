@@ -1,12 +1,24 @@
 {
   "name": "@cartridge/ui-next",
   "version": "0.3.35",
-  "module": "dist/index.js",
+  "description": "Catridge UI component library",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./themes/*": "./dist/themes/*.css"
+  },
   "scripts": {
-    "dev": "tsc",
-    "build": "tsc",
+    "dev": "tsc && pnpm copyThemes",
+    "build": "tsc && pnpm copyThemes",
+    "copyThemes": "cp -R src/themes dist/themes",
     "format": "prettier ./src --write",
     "lint": "eslint . --ext ts,tsx",
     "storybook": "storybook dev -p 6006",
