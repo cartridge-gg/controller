@@ -28,7 +28,7 @@ function CreateSession() {
   const { deployRequest } = useDeploy();
 
   // Fetching account status for displaying the loading screen
-  const [isFetching, setIsFetching] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
 
   // Handler for calling the Slot callback uri.
   // Send the session details to the callback uri in the body of the
@@ -89,15 +89,10 @@ function CreateSession() {
   useEffect(() => {
     const username = queries.username;
 
-    if (isFetching) {
+    if (!username || !chainId || !rpcUrl) {
       return;
     }
 
-    if (!username || !chainId || !rpcUrl || controller) {
-      return;
-    }
-
-    setIsFetching(true);
     fetchAccount(username)
       .then((res) => {
         const {
@@ -125,8 +120,6 @@ function CreateSession() {
   }, [
     rpcUrl,
     chainId,
-    controller,
-    isFetching,
     setController,
     queries.username,
   ]);
