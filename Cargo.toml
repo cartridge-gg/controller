@@ -20,8 +20,10 @@ cairo-lang-starknet = "2.4.0"
 coset = { version = "0.3.4", features = ["std"] }
 ecdsa = "0.16.9"
 futures = "0.3"
+hex = "0.4.3"
 indexmap = { version = "2.2.6", features = ["serde"] }
 lazy_static = "1"
+once_cell = "1.19.0"
 p256 = "0.13"
 primitive-types = { version = "0.12", default-features = false }
 getrandom = { version = "0.2", features = ["js"] }
@@ -40,6 +42,10 @@ wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4.42"
 wasm-webauthn = { git = "https://github.com/cartridge-gg/wasm-webauthn", rev = "972693f" }
 tokio = { version = "1", features = ["macros", "time"] }
+base64urlsafedata = { git = "https://github.com/cartridge-gg/webauthn-rs", rev = "a20501d" }
+serde_cbor_2 = { version = "0.12.0-dev" }
+webauthn-rs-core = { git = "https://github.com/cartridge-gg/webauthn-rs", rev = "a20501d" }
+webauthn-rs-proto = { git = "https://github.com/cartridge-gg/webauthn-rs", rev = "a20501d" }
 
 [patch.crates-io]
 # Remove this patch once the following PR is merged: <https://github.com/xJonathanLEI/starknet-rs/pull/615>

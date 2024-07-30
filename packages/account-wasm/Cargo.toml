@@ -15,11 +15,11 @@ base64.workspace = true
 cainome.workspace = true
 convert_case = "0.6.0"
 coset.workspace = true
+futures.workspace = true
 getrandom = { version = "0.2", features = ["js"] }
 gloo-net = "0.6.0"
 hex = "0.4.3"
 num-traits.workspace = true
-p256.workspace = true
 rand = { version = "0.8", features = ["getrandom"] }
 starknet.workspace = true
 serde = { workspace = true, features = ["derive"] }
@@ -30,8 +30,15 @@ thiserror.workspace = true
 url = { workspace = true, default-features = false }
 wasm-bindgen = { workspace = true, features = ["serde-serialize"] }
 wasm-bindgen-futures.workspace = true
-wasm-webauthn.workspace = true
-web-sys = { version = "0.3.4" }
+webauthn-rs-proto = { workspace = true, features = ["wasm"] }
+web-sys = { version = "0.3", features = [
+    "CredentialCreationOptions",
+    "CredentialRequestOptions",
+    "CredentialsContainer",
+    "Navigator",
+    "PublicKeyCredential",
+    "PublicKeyCredentialCreationOptions",
+] }
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires

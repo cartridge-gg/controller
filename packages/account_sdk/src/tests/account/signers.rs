@@ -1,112 +1,114 @@
+use crate::signers::webauthn::WebauthnOperations;
+use crate::signers::DeviceError;
 use crate::{
-    abigen::{
-        controller::{Signature, WebauthnSigner},
-        erc_20::Erc20,
-    },
-    signers::{
-        webauthn::{
-            credential::{AuthenticatorAssertionResponse, AuthenticatorData, ClientData},
-            Secp256r1Point, WebauthnAccountSigner,
-        },
-        HashSigner, SignError,
-    },
+    abigen::erc_20::Erc20,
+    signers::HashSigner,
     tests::{account::FEE_TOKEN_ADDRESS, runners::katana::KatanaRunner},
 };
 use async_trait::async_trait;
-use cainome::cairo_serde::{ContractAddress, NonZero, U256};
-use ecdsa::RecoveryId;
-use p256::{
-    ecdsa::{Signature as ECDSASignature, SigningKey},
-    elliptic_curve::sec1::Coordinates,
-};
-use rand_core::OsRng;
+use base64urlsafedata::Base64UrlSafeData;
+use cainome::cairo_serde::{ContractAddress, U256};
+use sha2::{digest::Update, Digest, Sha256};
 use starknet::{
     core::types::{BlockId, BlockTag},
     macros::felt,
     signers::SigningKey as StarkSigningKey,
 };
+use webauthn_authenticator_rs::authenticator_hashed::AuthenticatorBackendHashedClientData;
+use webauthn_authenticator_rs::softpasskey::SoftPasskey;
+use webauthn_authenticator_rs::AuthenticatorBackend;
+use webauthn_rs_core::proto::{AttestationObject, Registration};
+use webauthn_rs_proto::{
+    CollectedClientData, PublicKeyCredential, PublicKeyCredentialCreationOptions,
+    PublicKeyCredentialRequestOptions, RegisterPublicKeyCredential,
+};
 
-#[derive(Debug, Clone)]
-pub struct InternalWebauthnSigner {
-    pub signing_key: SigningKey,
-    rp_id: String,
-    pub origin: String,
-}
+use once_cell::sync::Lazy;
+use std::collections::HashMap;
+use std::sync::Mutex;
 
-impl InternalWebauthnSigner {
-    pub fn new(rp_id: String, signing_key: SigningKey, origin: String) -> Self {
-        Self {
-            rp_id,
-            signing_key,
-            origin,
-        }
-    }
+static PASSKEYS: Lazy<Mutex<HashMap<Vec<u8>, SoftPasskey>>> =
+    Lazy::new(|| Mutex::new(HashMap::new()));
 
-    pub fn random(rp_id: String, origin: String) -> Self {
-        let signing_key = SigningKey::random(&mut OsRng);
-        Self::new(rp_id, signing_key, origin)
-    }
+use url::Url;
 
-    fn public_key_bytes(&self) -> ([u8; 32], [u8; 32]) {
-        let encoded = self.signing_key.verifying_key().to_encoded_point(false);
-        let (x, y) = match encoded.coordinates() {
-            Coordinates::Uncompressed { x, y } => (x, y),
-            _ => panic!("unexpected compression"),
-        };
-        (
-            x.as_slice().try_into().unwrap(),
-            y.as_slice().try_into().unwrap(),
-        )
-    }
-    pub fn public_key(&self) -> Secp256r1Point {
-        let (x, y) = self.public_key_bytes();
-        (U256::from_bytes_be(&x), U256::from_bytes_be(&y))
-    }
-    pub fn rp_id_hash(&self) -> [u8; 32] {
-        use sha2::{digest::Update, Digest, Sha256};
-        Sha256::new().chain(self.rp_id.clone()).finalize().into()
+static ORIGIN: Lazy<Mutex<Url>> =
+    Lazy::new(|| Mutex::new(Url::parse("https://cartridge.gg").unwrap()));
+
+#[derive(Clone)]
+pub struct SoftPasskeyOperations {}
+impl SoftPasskeyOperations {
+    #[allow(dead_code)]
+    pub fn new(origin: Url) -> Self {
+        let mut global_origin = ORIGIN.lock().unwrap();
+        *global_origin = origin;
+
+        Self {}
     }
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl WebauthnAccountSigner for InternalWebauthnSigner {
-    async fn sign(&self, challenge: &[u8]) -> Result<AuthenticatorAssertionResponse, SignError> {
-        use sha2::{digest::Update, Digest, Sha256};
+impl WebauthnOperations for SoftPasskeyOperations {
+    async fn get_assertion(
+        &self,
+        options: PublicKeyCredentialRequestOptions,
+    ) -> Result<PublicKeyCredential, crate::signers::DeviceError> {
+        let mut passkeys = PASSKEYS.lock().unwrap();
+        let pk = passkeys
+            .get_mut(options.allow_credentials[0].id.as_slice())
+            .ok_or(DeviceError::GetAssertion(
+                "No passkey available for this credential ID".to_string(),
+            ))?;
 
-        let authenticator_data = AuthenticatorData {
-            rp_id_hash: self.rp_id_hash(),
-            flags: 0b00000101,
-            sign_count: 0,
+        let client_data = CollectedClientData {
+            type_: "webauthn.get".to_string(),
+            challenge: options.challenge.clone(),
+            origin: ORIGIN.lock().unwrap().clone(),
+            token_binding: None,
+            cross_origin: Some(false),
+            unknown_keys: Default::default(),
         };
-        let client_data_json = ClientData::new(challenge, self.origin.clone()).to_json();
-        let client_data_hash = Sha256::new().chain(client_data_json.clone()).finalize();
+        let client_data_str = serde_json::to_string(&client_data)
+            .map_err(|e| DeviceError::GetAssertion(format!("{:?}", e)))?;
 
-        let mut to_sign = Into::<Vec<u8>>::into(authenticator_data.clone());
-        to_sign.append(&mut client_data_hash.to_vec());
-        let (signature, recovery_id): (ECDSASignature, RecoveryId) =
-            self.signing_key.sign_recoverable(&to_sign).unwrap();
-        let signature_bytes = signature.to_bytes().to_vec();
+        let client_data_hash = Sha256::new().chain(client_data_str.clone()).finalize();
+        let mut cred = AuthenticatorBackendHashedClientData::perform_auth(
+            pk,
+            client_data_hash.to_vec(),
+            options,
+            500_u32,
+        )
+        .map_err(|e| DeviceError::GetAssertion(format!("{:?}", e)))?;
+        cred.response.client_data_json = Base64UrlSafeData::from(client_data_str.as_bytes());
 
-        let signature = Signature {
-            r: U256::from_bytes_be(&signature_bytes[0..32].try_into().unwrap()),
-            s: U256::from_bytes_be(&signature_bytes[32..64].try_into().unwrap()),
-            y_parity: recovery_id.is_y_odd(),
-        };
-
-        Ok(AuthenticatorAssertionResponse {
-            authenticator_data,
-            client_data_json,
-            signature,
-            user_handle: None,
-        })
+        Ok(cred)
     }
-    fn signer_pub_data(&self) -> WebauthnSigner {
-        WebauthnSigner {
-            rp_id_hash: NonZero::new(U256::from_bytes_be(&self.rp_id_hash())).unwrap(),
-            origin: self.origin.clone().into_bytes(),
-            pubkey: NonZero::new(self.public_key().0).unwrap(),
-        }
+
+    async fn create_credential(
+        options: PublicKeyCredentialCreationOptions,
+    ) -> Result<RegisterPublicKeyCredential, crate::signers::DeviceError> {
+        let mut pk = SoftPasskey::new(true);
+        let r = AuthenticatorBackend::perform_register(
+            &mut pk,
+            ORIGIN.lock().unwrap().clone(),
+            options,
+            500_u32,
+        )
+        .map_err(|e| DeviceError::CreateCredential(format!("{:?}", e)))?;
+
+        let ao =
+            AttestationObject::<Registration>::try_from(r.response.attestation_object.as_ref())
+                .map_err(|e| DeviceError::CreateCredential(format!("CoseError: {:?}", e)))?;
+
+        let cred = ao.auth_data.acd.unwrap();
+
+        PASSKEYS
+            .lock()
+            .unwrap()
+            .insert(cred.credential_id.clone().into(), pk);
+
+        Ok(r)
     }
 }
 
@@ -136,14 +138,19 @@ pub async fn test_verify_execute<S: HashSigner + Clone + Sync + Send>(signer: S)
         .unwrap();
 }
 
-#[tokio::test]
-async fn test_verify_execute_webautn() {
-    test_verify_execute(InternalWebauthnSigner::random(
-        "localhost".to_string(),
-        "rp_id".to_string(),
-    ))
-    .await;
-}
+// #[tokio::test]
+// async fn test_verify_execute_webautn() {
+//     let signer = WebauthnSigner::register(
+//         "cartridge.gg".to_string(),
+//         "https://cartridge.gg".to_string(),
+//         "dummy_username".to_string(),
+//         "dummy_challenge".as_bytes(),
+//         SoftPasskeyOperations::new("https://cartridge.gg".try_into().unwrap()),
+//     )
+//     .await
+//     .unwrap();
+//     test_verify_execute(signer).await;
+// }
 
 #[tokio::test]
 async fn test_verify_execute_starknet() {

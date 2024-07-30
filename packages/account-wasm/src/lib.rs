@@ -1,6 +1,7 @@
 mod constants;
 mod errors;
 mod paymaster;
+mod signer;
 mod types;
 mod utils;
 
@@ -19,10 +20,8 @@ use account_sdk::account::session::hash::{AllowedMethod, Session};
 use account_sdk::account::session::SessionAccount;
 use account_sdk::account::{AccountHashSigner, CartridgeAccount as CA, MessageSignerAccount};
 use account_sdk::hash::MessageHashRev1;
-use account_sdk::signers::webauthn::device::DeviceSigner;
-use account_sdk::signers::webauthn::WebauthnAccountSigner;
+use account_sdk::signers::webauthn::{CredentialID, WebauthnSigner};
 use account_sdk::signers::HashSigner;
-use account_sdk::wasm_webauthn::CredentialID;
 use base64::{engine::general_purpose, Engine};
 use cainome::cairo_serde::CairoSerde;
 use constants::ACCOUNT_CLASS_HASH;
@@ -32,7 +31,8 @@ use factory::cartridge::CartridgeAccountFactory;
 use factory::AccountDeployment;
 use paymaster::PaymasterRequest;
 use serde_wasm_bindgen::{from_value, to_value};
-use starknet::accounts::{Account, ConnectedAccount};
+use signer::BrowserOperations;
+use starknet::accounts::Account;
 use starknet::core::types::{BlockId, BlockTag, FunctionCall};
 use starknet::core::utils::cairo_short_string_to_felt;
 use starknet::macros::{selector, short_string};
@@ -57,8 +57,8 @@ type Result<T> = std::result::Result<T, JsError>;
 
 #[wasm_bindgen]
 pub struct CartridgeAccount {
-    account: CA<Arc<JsonRpcClient<HttpTransport>>, DeviceSigner, SigningKey>,
-    device_signer: DeviceSigner,
+    account: CA<Arc<JsonRpcClient<HttpTransport>>, WebauthnSigner<BrowserOperations>, SigningKey>,
+    device_signer: WebauthnSigner<BrowserOperations>,
     username: String,
     rpc_url: Url,
 }
@@ -94,12 +94,14 @@ impl CartridgeAccount {
         let provider = JsonRpcClient::new(HttpTransport::new(rpc_url.clone()));
 
         let credential_id_bytes = general_purpose::URL_SAFE_NO_PAD.decode(credential_id)?;
-        let credential_id = CredentialID(credential_id_bytes);
+        let credential_id = CredentialID::from(credential_id_bytes);
 
         let cose_bytes = general_purpose::URL_SAFE_NO_PAD.decode(public_key)?;
         let cose = CoseKey::from_slice(&cose_bytes)?;
 
-        let device_signer = DeviceSigner::new(rp_id, origin, credential_id, cose);
+        let browser_operations = BrowserOperations {};
+        let device_signer =
+            WebauthnSigner::new(rp_id, origin, credential_id, cose, browser_operations);
 
         let dummy_guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
         let address = Felt::from_str(&address)?;
@@ -141,7 +143,7 @@ impl CartridgeAccount {
 
         let hash = session
             .raw()
-            .get_message_hash_rev_1(self.account.chain_id(), self.account.address());
+            .get_message_hash_rev_1(self.account.chain_id, self.account.address);
 
         let authorization = self
             .account
@@ -279,8 +281,8 @@ impl CartridgeAccount {
         let response = PaymasterRequest::send(
             self.rpc_url.clone(),
             outside,
-            self.account.address(),
-            self.account.chain_id(),
+            self.account.address,
+            self.account.chain_id,
             signed.signature,
         )
         .await?;
@@ -312,10 +314,10 @@ impl CartridgeAccount {
 
         let factory = CartridgeAccountFactory::new(
             Felt::from_str(ACCOUNT_CLASS_HASH)?,
-            self.account.chain_id(),
+            self.account.chain_id,
             self.get_constructor_calldata(),
             self.account.clone(),
-            self.account.provider(),
+            self.account.provider.clone(),
         );
 
         let salt = cairo_short_string_to_felt(&self.username)?;
@@ -336,10 +338,10 @@ impl CartridgeAccount {
 
         let res = self
             .account
-            .provider()
+            .provider
             .call(
                 FunctionCall {
-                    contract_address: self.account.address(),
+                    contract_address: self.account.address,
                     entry_point_selector: selector!("delegate_account"),
                     calldata: vec![],
                 },
@@ -384,8 +386,8 @@ impl CartridgeAccount {
             JsonRpcClient::new(HttpTransport::new(self.rpc_url.clone())),
             session_signer,
             dummy_guardian,
-            self.account.address(),
-            self.account.chain_id(),
+            self.account.address,
+            self.account.chain_id,
             session_details.credentials.authorization,
             session,
         );
@@ -394,7 +396,7 @@ impl CartridgeAccount {
     }
 
     fn get_constructor_calldata(&self) -> Vec<Felt> {
-        let webauthn = self.device_signer.signer_pub_data();
+        let webauthn = (&self.device_signer).into();
         let mut calldata = Signer::cairo_serialize(&Signer::Webauthn(webauthn));
         calldata.push(Felt::ONE); // no guardian
 

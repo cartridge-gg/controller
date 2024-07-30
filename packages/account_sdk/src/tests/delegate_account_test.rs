@@ -1,4 +1,3 @@
-use crate::tests::account::signers::InternalWebauthnSigner;
 use crate::{
     abigen::controller::Controller, tests::runners::katana::KatanaRunner,
     transaction_waiter::TransactionWaiter,
@@ -9,7 +8,7 @@ use starknet::signers::SigningKey;
 
 #[tokio::test]
 async fn test_set_delegate_account_from_account() {
-    let signer = InternalWebauthnSigner::random("localhost".to_string(), "rp_id".to_string());
+    let signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
     let delegate_address = Felt::from_hex("0x1234").unwrap();
     let controller = runner.deploy_controller(&signer).await;

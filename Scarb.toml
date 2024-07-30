@@ -1,7 +1,5 @@
 [workspace]
-members = [
-    "packages/contracts/controller",
-]
+members = ["packages/contracts/controller"]
 
 [workspace.package]
 edition = "2023_10"
@@ -15,5 +13,4 @@ alexandria_merkle_tree = { git = "https://github.com/keep-starknet-strange/alexa
 alexandria_data_structures = { git = "https://github.com/keep-starknet-strange/alexandria.git", tag = "cairo-v2.6.0" }
 snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry.git", tag = "v0.20.0" }
 openzeppelin = { git = "https://github.com/OpenZeppelin/cairo-contracts.git", tag = "v0.12.0" }
-argent = {git = "https://github.com/piniom/argent-contracts-starknet.git", branch = "lib-target"}
-
+argent = { git = "https://github.com/cartridge-gg/argent-contracts-starknet.git", branch = "main" }

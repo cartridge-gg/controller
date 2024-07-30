@@ -12,7 +12,17 @@ use starknet_crypto::{poseidon_hash, PoseidonHasher};
 use crate::abigen::controller::{Signer, SignerSignature};
 use async_trait::async_trait;
 
-use self::webauthn::DeviceError;
+#[derive(Debug, thiserror::Error)]
+pub enum DeviceError {
+    #[error("Create credential error: {0}")]
+    CreateCredential(String),
+    #[error("Get assertion error: {0}")]
+    GetAssertion(String),
+    #[error("Bad assertion error: {0}")]
+    BadAssertion(String),
+    #[error("Channel error: {0}")]
+    Channel(String),
+}
 
 #[derive(Debug, thiserror::Error)]
 pub enum SignError {

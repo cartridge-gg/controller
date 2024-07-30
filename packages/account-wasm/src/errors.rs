@@ -1,5 +1,4 @@
 use account_sdk::signers::SignError;
-use base64::DecodeError;
 use coset::CoseError;
 use starknet::{
     accounts::AccountError,
@@ -56,9 +55,6 @@ pub enum EncodingError {
 
     #[error(transparent)]
     NonAsciiName(#[from] NonAsciiNameError),
-
-    #[error("Base64 decoding error: {0}")]
-    Base64Decode(#[from] DecodeError),
 
     #[error("COSE key error: {0}")]
     CoseKey(#[from] CoseError),

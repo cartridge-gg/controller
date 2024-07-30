@@ -11,15 +11,19 @@ crate-type = ["lib"]
 [dependencies]
 anyhow.workspace = true
 async-trait.workspace = true
+base64urlsafedata = { git = "https://github.com/cartridge-gg/webauthn-rs", rev = "a20501d" }
 base64.workspace = true
 cainome.workspace = true
 coset.workspace = true
 ecdsa.workspace = true
 futures.workspace = true
+hex.workspace = true
 lazy_static.workspace = true
+nom = "7.1"
 p256.workspace = true
 primitive-types.workspace = true
 serde.workspace = true
+serde_cbor_2 = { version = "0.12.0-dev" }
 serde_json.workspace = true
 sha2.workspace = true
 starknet.workspace = true
@@ -30,13 +34,18 @@ u256-literal.workspace = true
 url.workspace = true
 wasm-bindgen-futures.workspace = true
 wasm-bindgen.workspace = true
-wasm-webauthn.workspace = true
 web-sys = "0.3.69"
 indexmap.workspace = true
 num-traits.workspace = true
+webauthn-rs-proto = { git = "https://github.com/cartridge-gg/webauthn-rs", rev = "a20501d" }
 
 [dev-dependencies]
 rand_core = { version = "0.6", features = ["getrandom"] }
+once_cell.workspace = true
+webauthn-authenticator-rs = { git = "https://github.com/cartridge-gg/webauthn-rs", rev = "a20501d", features = [
+    "softpasskey",
+] }
+webauthn-rs-core = { git = "https://github.com/cartridge-gg/webauthn-rs", rev = "a20501d" }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tokio.workspace = true
