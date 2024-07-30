@@ -2,6 +2,7 @@ mod constants;
 mod errors;
 mod paymaster;
 mod signer;
+mod storage;
 mod types;
 mod utils;
 
@@ -18,7 +19,8 @@ use account_sdk::abigen::controller::Signer;
 use account_sdk::account::outside_execution::OutsideExecutionAccount;
 use account_sdk::account::session::hash::{AllowedMethod, Session};
 use account_sdk::account::session::SessionAccount;
-use account_sdk::account::{AccountHashSigner, Controller, MessageSignerAccount};
+use account_sdk::account::{AccountHashSigner, MessageSignerAccount, OwnerAccount};
+use account_sdk::controller::Controller;
 use account_sdk::hash::MessageHashRev1;
 use account_sdk::signers::webauthn::{CredentialID, WebauthnSigner};
 use account_sdk::signers::HashSigner;
@@ -51,14 +53,19 @@ use url::Url;
 use utils::{policies_match, set_panic_hook};
 use wasm_bindgen::prelude::*;
 
+use crate::storage::LocalStorage;
 use crate::types::TryFromJsValue;
 
 type Result<T> = std::result::Result<T, JsError>;
 
 #[wasm_bindgen]
 pub struct CartridgeAccount {
-    account:
-        Controller<Arc<JsonRpcClient<HttpTransport>>, WebauthnSigner<BrowserBackend>, SigningKey>,
+    controller: Controller<
+        Arc<JsonRpcClient<HttpTransport>>,
+        WebauthnSigner<BrowserBackend>,
+        SigningKey,
+        LocalStorage,
+    >,
     device_signer: WebauthnSigner<BrowserBackend>,
     username: String,
     rpc_url: Url,
@@ -99,24 +106,24 @@ impl CartridgeAccount {
         let cose_bytes = general_purpose::URL_SAFE_NO_PAD.decode(public_key)?;
         let cose = CoseKey::from_slice(&cose_bytes)?;
 
-        let browser_operations = BrowserBackend {};
-        let device_signer = WebauthnSigner::new(rp_id, credential_id, cose, browser_operations);
+        let device_signer = WebauthnSigner::new(rp_id, credential_id, cose, BrowserBackend);
 
         let dummy_guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
         let address = Felt::from_str(&address)?;
         let chain_id = Felt::from_str(&chain_id)?;
         let username = username.to_lowercase();
 
-        let account = Controller::new(
+        let controller = Controller::new(
             Arc::new(provider),
             device_signer.clone(),
             dummy_guardian,
             address,
             chain_id,
+            LocalStorage,
         );
 
         Ok(CartridgeAccount {
-            account,
+            controller,
             device_signer,
             username,
             rpc_url,
@@ -136,23 +143,12 @@ impl CartridgeAccount {
             .map(AllowedMethod::try_from_js_value)
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
-        let signer = SigningKey::from_random();
-        let session =
-            Session::new(methods, expires_at, &signer.signer()).map_err(SessionError::Creation)?;
-
-        let hash = session
-            .raw()
-            .get_message_hash_rev_1(self.account.chain_id, self.account.address);
-
-        let authorization = self
-            .account
-            .sign_hash(hash)
-            .await
-            .map_err(SessionError::Signing)?;
+        let (authorization, private_key) =
+            self.controller.create_session(methods, expires_at).await?;
 
         Ok(to_value(&JsCredentials {
             authorization,
-            private_key: signer.secret_scalar(),
+            private_key,
         })?)
     }
 
@@ -181,7 +177,7 @@ impl CartridgeAccount {
                     .await
             }
             _ => {
-                self.account
+                self.controller
                     .execute_v1(calls)
                     .fee_estimate_multiplier(multipler)
                     .estimate_fee()
@@ -221,7 +217,7 @@ impl CartridgeAccount {
                     .await
             }
             _ => {
-                self.account
+                self.controller
                     .execute_v1(calls)
                     .max_fee(details.max_fee)
                     .nonce(details.nonce)
@@ -264,24 +260,25 @@ impl CartridgeAccount {
         };
 
         let session_details: Option<JsSession> = from_value(session_details)?;
-        let signed = match self.get_session_account(&rs_calls, session_details).await? {
-            Some(session_account) => {
-                session_account
-                    .sign_outside_execution(outside.clone().try_into()?)
-                    .await?
-            }
-            _ => {
-                self.account
-                    .sign_outside_execution(outside.clone().try_into()?)
-                    .await?
-            }
-        };
+        let signed: account_sdk::account::outside_execution::SignedOutsideExecution =
+            match self.get_session_account(&rs_calls, session_details).await? {
+                Some(session_account) => {
+                    session_account
+                        .sign_outside_execution(outside.clone().try_into()?)
+                        .await?
+                }
+                _ => {
+                    self.controller
+                        .sign_outside_execution(outside.clone().try_into()?)
+                        .await?
+                }
+            };
 
         let response = PaymasterRequest::send(
             self.rpc_url.clone(),
             outside,
-            self.account.address,
-            self.account.chain_id,
+            self.controller.address(),
+            self.controller.chain_id(),
             signed.signature,
         )
         .await?;
@@ -299,7 +296,7 @@ impl CartridgeAccount {
         set_panic_hook();
 
         let signature = self
-            .account
+            .controller
             .sign_message(serde_json::from_str(&typed_data)?)
             .await
             .map_err(OperationError::SignMessage)?;
@@ -313,10 +310,10 @@ impl CartridgeAccount {
 
         let factory = CartridgeAccountFactory::new(
             Felt::from_str(ACCOUNT_CLASS_HASH)?,
-            self.account.chain_id,
+            self.controller.chain_id(),
             self.get_constructor_calldata(),
-            self.account.clone(),
-            self.account.provider.clone(),
+            self.controller.clone(),
+            self.controller.provider.clone(),
         );
 
         let salt = cairo_short_string_to_felt(&self.username)?;
@@ -336,11 +333,11 @@ impl CartridgeAccount {
         set_panic_hook();
 
         let res = self
-            .account
+            .controller
             .provider
             .call(
                 FunctionCall {
-                    contract_address: self.account.address,
+                    contract_address: self.controller.address(),
                     entry_point_selector: selector!("delegate_account"),
                     calldata: vec![],
                 },
@@ -385,8 +382,8 @@ impl CartridgeAccount {
             JsonRpcClient::new(HttpTransport::new(self.rpc_url.clone())),
             session_signer,
             dummy_guardian,
-            self.account.address,
-            self.account.chain_id,
+            self.controller.address(),
+            self.controller.chain_id(),
             session_details.credentials.authorization,
             session,
         );

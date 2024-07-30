@@ -19,7 +19,7 @@ pub struct ProvedMethod {
     pub(crate) proof: Vec<Felt>,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Session {
     expires_at: u64,
     allowed_methods: Vec<ProvedMethod>,
