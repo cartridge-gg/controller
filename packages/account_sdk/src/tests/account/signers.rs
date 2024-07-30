@@ -1,4 +1,4 @@
-use crate::signers::webauthn::{CredentialID, WebauthnOperations};
+use crate::signers::webauthn::WebauthnOperations;
 use crate::signers::DeviceError;
 use crate::{
     abigen::erc_20::Erc20,
@@ -19,10 +19,8 @@ use webauthn_authenticator_rs::AuthenticatorBackend;
 use webauthn_rs_core::crypto::compute_sha256;
 use webauthn_rs_core::proto::{AttestationObject, Registration};
 use webauthn_rs_proto::{
-    AllowCredentials, AttestationConveyancePreference, AuthenticatorSelectionCriteria,
-    CollectedClientData, PubKeyCredParams, PublicKeyCredential, PublicKeyCredentialCreationOptions,
-    PublicKeyCredentialRequestOptions, RegisterPublicKeyCredential, RelyingParty, User,
-    UserVerificationPolicy,
+    CollectedClientData, PublicKeyCredential, PublicKeyCredentialCreationOptions,
+    PublicKeyCredentialRequestOptions, RegisterPublicKeyCredential,
 };
 
 use once_cell::sync::Lazy;
@@ -46,33 +44,18 @@ impl SoftPasskeyOperations {
 impl WebauthnOperations for SoftPasskeyOperations {
     async fn get_assertion(
         &self,
-        rp_id: String,
-        credential_id: CredentialID,
-        challenge: &[u8],
+        options: PublicKeyCredentialRequestOptions,
     ) -> Result<PublicKeyCredential, crate::signers::DeviceError> {
         let mut passkeys = PASSKEYS.lock().unwrap();
         let pk = passkeys
-            .get_mut(credential_id.as_slice())
+            .get_mut(options.allow_credentials[0].id.as_slice())
             .ok_or(DeviceError::GetAssertion(
                 "No passkey available for this credential ID".to_string(),
             ))?;
 
-        let options = PublicKeyCredentialRequestOptions {
-            challenge: Base64UrlSafeData::from(challenge),
-            timeout: Some(500),
-            rp_id,
-            allow_credentials: vec![AllowCredentials {
-                type_: "public-key".to_string(),
-                id: Base64UrlSafeData::from(credential_id),
-                transports: None,
-            }],
-            user_verification: UserVerificationPolicy::Required,
-            hints: None,
-            extensions: None,
-        };
         let client_data = CollectedClientData {
             type_: "webauthn.get".to_string(),
-            challenge: Base64UrlSafeData::from(challenge),
+            challenge: options.challenge.clone(),
             origin: "https://cartridge.gg".try_into().unwrap(),
             token_binding: None,
             cross_origin: Some(false),
@@ -81,8 +64,7 @@ impl WebauthnOperations for SoftPasskeyOperations {
         let client_data_str = serde_json::to_string(&client_data)
             .map_err(|e| DeviceError::GetAssertion(format!("{:?}", e)))?;
 
-        let client_data: Vec<u8> = client_data_str.clone().into();
-        let client_data_hash = compute_sha256(&client_data).to_vec();
+        let client_data_hash = compute_sha256(client_data_str.as_bytes()).to_vec();
         let mut cred = AuthenticatorBackendHashedClientData::perform_auth(
             pk,
             client_data_hash,
@@ -90,46 +72,19 @@ impl WebauthnOperations for SoftPasskeyOperations {
             500_u32,
         )
         .map_err(|e| DeviceError::GetAssertion(format!("{:?}", e)))?;
-        cred.response.client_data_json = Base64UrlSafeData::from(client_data);
+        cred.response.client_data_json = Base64UrlSafeData::from(client_data_str.as_bytes());
 
         Ok(cred)
     }
 
     async fn create_credential(
-        rp_id: String,
-        user_name: String,
-        challenge: &[u8],
+        options: PublicKeyCredentialCreationOptions,
     ) -> Result<RegisterPublicKeyCredential, crate::signers::DeviceError> {
         let mut pk = SoftPasskey::new(true);
         let r = AuthenticatorBackend::perform_register(
             &mut pk,
             "https://cartridge.gg".try_into().unwrap(),
-            PublicKeyCredentialCreationOptions {
-                rp: RelyingParty {
-                    name: "Cartridge".to_string(),
-                    id: rp_id,
-                },
-                user: User {
-                    id: Base64UrlSafeData::from(vec![0]),
-                    name: user_name.clone(),
-                    display_name: "".to_string(),
-                },
-                challenge: Base64UrlSafeData::from(challenge),
-                pub_key_cred_params: vec![PubKeyCredParams {
-                    type_: "public-key".to_string(),
-                    alg: -7,
-                }],
-                timeout: Some(500),
-                attestation: Some(AttestationConveyancePreference::Direct),
-                exclude_credentials: None,
-                authenticator_selection: Some(AuthenticatorSelectionCriteria {
-                    user_verification: UserVerificationPolicy::Required,
-                    ..AuthenticatorSelectionCriteria::default()
-                }),
-                extensions: None,
-                hints: None,
-                attestation_formats: None,
-            },
+            options,
             500_u32,
         )
         .map_err(|e| DeviceError::CreateCredential(format!("{:?}", e)))?;

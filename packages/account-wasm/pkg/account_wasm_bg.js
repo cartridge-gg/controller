@@ -462,6 +462,11 @@ export function __wbindgen_object_clone_ref(arg0) {
     return addHeapObject(ret);
 };
 
+export function __wbindgen_string_new(arg0, arg1) {
+    const ret = getStringFromWasm0(arg0, arg1);
+    return addHeapObject(ret);
+};
+
 export function __wbindgen_is_undefined(arg0) {
     const ret = getObject(arg0) === undefined;
     return ret;
@@ -508,11 +513,6 @@ export function __wbindgen_is_object(arg0) {
 
 export function __wbindgen_bigint_from_u64(arg0) {
     const ret = BigInt.asUintN(64, arg0);
-    return addHeapObject(ret);
-};
-
-export function __wbindgen_string_new(arg0, arg1) {
-    const ret = getStringFromWasm0(arg0, arg1);
     return addHeapObject(ret);
 };
 
@@ -1058,7 +1058,7 @@ export function __wbindgen_memory() {
     return addHeapObject(ret);
 };
 
-export function __wbindgen_closure_wrapper2233(arg0, arg1, arg2) {
+export function __wbindgen_closure_wrapper2227(arg0, arg1, arg2) {
     const ret = makeMutClosure(arg0, arg1, 474, __wbg_adapter_48);
     return addHeapObject(ret);
 };

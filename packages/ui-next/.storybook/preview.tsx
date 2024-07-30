@@ -2,8 +2,8 @@ import React from "react";
 import { Preview, ReactRenderer } from "@storybook/react";
 import { withThemeByClassName } from "@storybook/addon-themes";
 import { themes } from "@storybook/theming";
-import { Toaster as Sonner } from "../src/components/ui/sonner";
-import { Toaster } from "../src/components/ui/toaster";
+import { Toaster as Sonner } from "../src/components/primitives/sonner";
+import { Toaster } from "../src/components/primitives/toaster";
 
 import "../src/index.css";
 

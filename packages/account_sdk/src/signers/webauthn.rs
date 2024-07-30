@@ -20,7 +20,7 @@ pub type Secp256r1Point = (U256, U256);
 
 use serde::{Deserialize, Serialize};
 
-use base64urlsafedata::HumanBinaryData;
+use base64urlsafedata::{Base64UrlSafeData, HumanBinaryData};
 use coset::CborSerializable;
 use nom::{
     bytes::complete::take,
@@ -294,61 +294,16 @@ impl ClientData {
     }
 }
 
-// #[derive(Debug, Clone, Serialize)]
-// pub struct AuthenticatorData {
-//     pub rp_id_hash: [u8; 32],
-//     pub flags: u8,
-//     pub sign_count: u32,
-// }
-
-// impl From<AuthenticatorData> for Vec<u8> {
-//     fn from(value: AuthenticatorData) -> Self {
-//         let mut data = Vec::new();
-//         data.extend_from_slice(&value.rp_id_hash);
-//         data.push(value.flags);
-//         data.extend_from_slice(&value.sign_count.to_be_bytes());
-//         data
-//     }
-// }
-
-// #[derive(Debug, Clone, PartialEq, Eq)]
-// pub struct CredentialID(pub Vec<u8>);
-
-// #[derive(Debug, Clone)]
-// pub struct Credential {
-//     pub id: CredentialID,
-//     pub public_key: Option<CoseKey>,
-// }
-
-// #[derive(Debug, Clone)]
-// pub struct CreateCredentialResponse {
-//     pub credential: Credential,
-// }
-
-// #[derive(Debug, Clone, PartialEq, Eq)]
-// pub struct GetAssertionResponse {
-//     pub signature: Vec<u8>,
-//     pub rp_id_hash: [u8; 32],
-//     pub client_data_json: String,
-//     pub flags: u8,
-//     pub counter: u32,
-//     pub authenticator_data: Vec<u8>,
-// }
-
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 pub trait WebauthnOperations {
     async fn get_assertion(
         &self,
-        rp_id: String,
-        credential_id: CredentialID,
-        challenge: &[u8],
+        options: PublicKeyCredentialRequestOptions,
     ) -> Result<PublicKeyCredential, DeviceError>;
 
     async fn create_credential(
-        rp_id: String,
-        user_name: String,
-        challenge: &[u8],
+        options: PublicKeyCredentialCreationOptions,
     ) -> Result<RegisterPublicKeyCredential, DeviceError>;
 }
 
@@ -361,29 +316,27 @@ where
     // According to https://www.w3.org/TR/webauthn/#clientdatajson-verification
     async fn sign(&self, tx_hash: &Felt) -> Result<SignerSignature, SignError> {
         let mut challenge = tx_hash.to_bytes_be().to_vec();
-
         challenge.push(Sha256Implementation::Cairo1.encode());
+
+        let options = PublicKeyCredentialRequestOptions {
+            challenge: Base64UrlSafeData::from(challenge),
+            timeout: Some(500),
+            rp_id: self.rp_id.clone(),
+            allow_credentials: vec![AllowCredentials {
+                type_: "public-key".to_string(),
+                id: Base64UrlSafeData::from(self.credential_id.clone()),
+                transports: None,
+            }],
+            user_verification: UserVerificationPolicy::Required,
+            hints: None,
+            extensions: None,
+        };
+
         let cred = self
             .operations
-            .get_assertion(self.rp_id.clone(), self.credential_id.clone(), &challenge)
+            .get_assertion(options)
             .await
             .map_err(SignError::Device)?;
-
-        // GetAssertionResponse {
-        //     signature: pkc.response.signature.into(),
-        //     authenticator_data: pkc.response.authenticator_data.clone().into(),
-        //     client_data_json: String::from_utf8(pkc.response.client_data_json.to_vec())
-        //         .unwrap(),
-        //     flags: pkc.response.authenticator_data.as_slice()[32],
-        //     counter: u32::from_be_bytes(
-        //         pkc.response.authenticator_data.as_slice()[33..37]
-        //             .try_into()
-        //             .unwrap(),
-        //     ),
-        //     rp_id_hash: pkc.response.authenticator_data.as_slice()[..32]
-        //         .try_into()
-        //         .unwrap(),
-        // }
 
         let flags = cred.response.authenticator_data.as_slice()[32];
         let counter = u32::from_be_bytes(
@@ -523,7 +476,33 @@ impl<T: WebauthnOperations> WebauthnSigner<T> {
         challenge: &[u8],
         operations: T,
     ) -> Result<Self, DeviceError> {
-        let res = T::create_credential(rp_id.clone(), user_name.clone(), challenge).await?;
+        let options = PublicKeyCredentialCreationOptions {
+            rp: RelyingParty {
+                name: "Cartridge".to_string(),
+                id: rp_id.clone(),
+            },
+            user: User {
+                id: Base64UrlSafeData::from(vec![0]),
+                name: user_name.clone(),
+                display_name: "".to_string(),
+            },
+            challenge: Base64UrlSafeData::from(challenge),
+            pub_key_cred_params: vec![PubKeyCredParams {
+                type_: "public-key".to_string(),
+                alg: -7,
+            }],
+            timeout: Some(500),
+            attestation: Some(AttestationConveyancePreference::Direct),
+            exclude_credentials: None,
+            authenticator_selection: Some(AuthenticatorSelectionCriteria {
+                user_verification: UserVerificationPolicy::Required,
+                ..AuthenticatorSelectionCriteria::default()
+            }),
+            extensions: None,
+            hints: None,
+            attestation_formats: None,
+        };
+        let res = T::create_credential(options).await?;
         let ao =
             AttestationObject::<Registration>::try_from(res.response.attestation_object.as_ref())
                 .map_err(|e| DeviceError::CreateCredential(format!("CoseError: {:?}", e)))

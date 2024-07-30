@@ -1,8 +1,8 @@
-import { Label } from "@/components/ui/label";
+import { Label } from "@/components/primitives/label";
 import {
   RadioGroup as UIRadioGroup,
   RadioGroupItem,
-} from "@/components/ui/radio-group";
+} from "@/components/primitives/radio-group";
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof RadioGroup> = {

@@ -16,20 +16,17 @@ base64urlsafedata.workspace = true
 cainome.workspace = true
 convert_case = "0.6.0"
 coset.workspace = true
-ecdsa.workspace = true
 futures.workspace = true
 getrandom = { version = "0.2", features = ["js"] }
 gloo-net = "0.6.0"
 hex = "0.4.3"
 num-traits.workspace = true
-p256.workspace = true
 rand = { version = "0.8", features = ["getrandom"] }
 starknet.workspace = true
 serde = { workspace = true, features = ["derive"] }
 serde-wasm-bindgen = "0.6.5"
 serde_json.workspace = true
 serde_with = "2.3"
-sha2.workspace = true
 thiserror.workspace = true
 url = { workspace = true, default-features = false }
 wasm-bindgen = { workspace = true, features = ["serde-serialize"] }
@@ -44,7 +41,6 @@ web-sys = { version = "0.3", features = [
     "PublicKeyCredentialCreationOptions",
 ] }
 serde_cbor_2.workspace = true
-# webauthn-rs-core.workspace = true
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires
