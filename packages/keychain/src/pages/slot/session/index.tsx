@@ -117,12 +117,7 @@ function CreateSession() {
       })
       .catch((e) => console.error(e))
       .finally(() => setIsFetching(false));
-  }, [
-    rpcUrl,
-    chainId,
-    setController,
-    queries.username,
-  ]);
+  }, [rpcUrl, chainId, setController, queries.username]);
 
   // Once the controller is created upon start, check if a session already exists.
   // If yes, check if the policies of the session are the same as the ones that are

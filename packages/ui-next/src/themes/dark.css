@@ -1,34 +1,34 @@
 @layer base {
-    .dark {
-        --background: 135 8% 9%; /* bg */
-        --foreground: 0 0% 100%; /* text.primary */
+  .dark {
+    --background: 135 8% 9%; /* bg */
+    --foreground: 0 0% 100%; /* text.primary */
 
-        --card: 135 8% 9%; /* bg */
-        --card-foreground: 0 0% 100%; /* text.primary */
+    --card: 135 8% 9%; /* bg */
+    --card-foreground: 0 0% 100%; /* text.primary */
 
-        --popover: 135 8% 9%; /* bg */
-        --popover-foreground: 0 0% 100%; /* text.primary */
+    --popover: 135 8% 9%; /* bg */
+    --popover-foreground: 0 0% 100%; /* text.primary */
 
-        --primary: 44 96% 61%; /* brand.primary */
-        --primary-foreground: 135 8% 9%; /* bg */
+    --primary: 44 96% 61%; /* brand.primary */
+    --primary-foreground: 135 8% 9%; /* bg */
 
-        --secondary: 136 6% 13%; /* solid.primary */
-        --secondary-foreground: 0 0% 100%; /* text.primary */
+    --secondary: 136 6% 13%; /* solid.primary */
+    --secondary-foreground: 0 0% 100%; /* text.primary */
 
-        --tertiary: 120 57% 78%;
-        --tertiary-foreground: 0 0% 0%;
+    --tertiary: 120 57% 78%;
+    --tertiary-foreground: 0 0% 0%;
 
-        --muted: 132 4% 23%; /* solid.accent */
-        --muted-foreground: 0 0% 50%; /* text.secondary */
+    --muted: 132 4% 23%; /* solid.accent */
+    --muted-foreground: 0 0% 50%; /* text.secondary */
 
-        --accent: 132 4% 23%; /* solid.accent */
-        --accent-foreground: 210 40% 98%; /* text.secondaryAccent */
+    --accent: 132 4% 23%; /* solid.accent */
+    --accent-foreground: 210 40% 98%; /* text.secondaryAccent */
 
-        --destructive: 7 72% 65%; /* text.error */
-        --destructive-foreground: 7 72% 65%; /* text.error */
+    --destructive: 7 72% 65%; /* text.error */
+    --destructive-foreground: 7 72% 65%; /* text.error */
 
-        --border: 0 100% 100%; /* black */
-        --input: 0 100% 100%; /* black */
-        --ring: 0 0% 100%; /* text.primary */
-    }
+    --border: 0 100% 100%; /* black */
+    --input: 0 100% 100%; /* black */
+    --ring: 0 0% 100%; /* text.primary */
+  }
 }

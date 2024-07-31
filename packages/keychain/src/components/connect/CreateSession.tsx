@@ -26,9 +26,9 @@ export function CreateSession({
       await controller.approve(origin, expiresAt, policies, maxFees);
       onConnect(policies);
     } catch (e) {
-      setError(e)
-      setIsConnecting(false)
-    } 
+      setError(e);
+      setIsConnecting(false);
+    }
   }, [controller, origin, expiresAt, policies, maxFees, onConnect]);
 
   return (
@@ -52,13 +52,16 @@ export function CreateSession({
 
       <Footer hideTxSummary>
         {error && (
-          <ErrorAlert title="Create session failed" description={error.message} />
+          <ErrorAlert
+            title="Create session failed"
+            description={error.message}
+          />
         )}
         <Button
           colorScheme="colorful"
           isDisabled={isConnecting}
           isLoading={isConnecting}
-          onClick={()=> onCreateSession()}
+          onClick={() => onCreateSession()}
         >
           create session
         </Button>
