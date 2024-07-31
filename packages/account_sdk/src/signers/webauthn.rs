@@ -8,7 +8,12 @@ use starknet::core::types::Felt;
 use std::collections::BTreeMap;
 use std::ops::Neg;
 use std::result::Result;
-use webauthn_rs_proto::{PublicKeyCredential, RegisterPublicKeyCredential};
+use webauthn_rs_proto::{
+    AllowCredentials, AttestationConveyancePreference, AuthenticatorSelectionCriteria,
+    CredentialProtectionPolicy, PubKeyCredParams, PublicKeyCredential,
+    PublicKeyCredentialCreationOptions, PublicKeyCredentialRequestOptions,
+    RegisterPublicKeyCredential, RelyingParty, User, UserVerificationPolicy,
+};
 
 use super::{DeviceError, HashSigner, SignError};
 use crate::abigen::controller::Signature;
@@ -29,7 +34,6 @@ use nom::{
 };
 use serde::de::DeserializeOwned;
 use serde_cbor_2::error::Error as CBORError;
-use webauthn_rs_proto::*;
 
 /// Marker type parameter for data related to registration ceremony
 #[derive(Debug)]
@@ -306,7 +310,7 @@ where
 
         let options = PublicKeyCredentialRequestOptions {
             challenge: Base64UrlSafeData::from(challenge),
-            timeout: Some(500),
+            timeout: None,
             rp_id: self.rp_id.clone(),
             allow_credentials: vec![AllowCredentials {
                 type_: "public-key".to_string(),

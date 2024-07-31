@@ -42,10 +42,13 @@ wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4.42"
 wasm-webauthn = { git = "https://github.com/cartridge-gg/wasm-webauthn", rev = "972693f" }
 tokio = { version = "1", features = ["macros", "time"] }
-base64urlsafedata = { git = "https://github.com/cartridge-gg/webauthn-rs", rev = "a20501d" }
+base64urlsafedata = { git = "https://github.com/cartridge-gg/webauthn-rs", rev = "a6cea88" }
 serde_cbor_2 = { version = "0.12.0-dev" }
-webauthn-rs-core = { git = "https://github.com/cartridge-gg/webauthn-rs", rev = "a20501d" }
-webauthn-rs-proto = { git = "https://github.com/cartridge-gg/webauthn-rs", rev = "a20501d" }
+webauthn-rs-core = { git = "https://github.com/cartridge-gg/webauthn-rs", rev = "a6cea88" }
+webauthn-rs-proto = { git = "https://github.com/cartridge-gg/webauthn-rs", rev = "a6cea88" }
+webauthn-authenticator-rs = { git = "https://github.com/cartridge-gg/webauthn-rs", rev = "a6cea88", features = [
+    "softpasskey",
+] }
 
 [patch.crates-io]
 # Remove this patch once the following PR is merged: <https://github.com/xJonathanLEI/starknet-rs/pull/615>

@@ -5,7 +5,10 @@ use futures::channel::oneshot;
 use wasm_bindgen::UnwrapThrowExt;
 use wasm_bindgen_futures::{spawn_local, JsFuture};
 use web_sys::Window;
-use webauthn_rs_proto::*;
+use webauthn_rs_proto::{
+    auth::PublicKeyCredentialRequestOptions, CreationChallengeResponse, PublicKeyCredential,
+    PublicKeyCredentialCreationOptions, RegisterPublicKeyCredential, RequestChallengeResponse,
+};
 
 pub fn window() -> Window {
     web_sys::window().expect("Unable to retrieve window")
@@ -15,18 +18,16 @@ pub fn window() -> Window {
 pub struct BrowserBackend {}
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
-#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send), )]
 impl WebauthnBackend for BrowserBackend {
     async fn get_assertion(
         &self,
         options: PublicKeyCredentialRequestOptions,
     ) -> Result<PublicKeyCredential, DeviceError> {
         let (tx, rx) = oneshot::channel();
-
         spawn_local(async move {
-            let promise = window()
-                .navigator()
-                .credentials()
+            let credentials = window().navigator().credentials();
+            let promise = credentials
                 .get_with_options(
                     &RequestChallengeResponse {
                         public_key: options,
