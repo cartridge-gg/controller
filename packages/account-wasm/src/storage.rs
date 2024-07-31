@@ -2,11 +2,11 @@ use account_sdk::storage::{StorageBackend, StorageError, StorageValue};
 use async_trait::async_trait;
 use web_sys::window;
 
-pub struct LocalStorage;
+use crate::signer::BrowserBackend;
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
-#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl StorageBackend for LocalStorage {
+#[cfg_attr(target_arch = "wasm32", async_trait)]
+impl StorageBackend for BrowserBackend {
     async fn set(&mut self, key: &str, value: &StorageValue) -> Result<(), StorageError> {
         let local_storage = Self::local_storage()?;
 
@@ -61,7 +61,7 @@ impl StorageBackend for LocalStorage {
     }
 }
 
-impl LocalStorage {
+impl BrowserBackend {
     fn local_storage() -> Result<web_sys::Storage, StorageError> {
         let window = window()
             .ok_or_else(|| StorageError::OperationFailed("No window object found".into()))?;

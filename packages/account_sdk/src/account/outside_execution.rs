@@ -5,6 +5,7 @@ use crate::{
 };
 use async_trait::async_trait;
 use cainome::cairo_serde::{CairoSerde, ContractAddress};
+use serde::{Deserialize, Serialize};
 use starknet::core::types::Felt;
 use starknet::signers::SigningKey;
 use starknet::{
@@ -77,11 +78,46 @@ impl From<SignedOutsideExecution> for Call {
     }
 }
 
-#[derive(Clone, Debug)]
+mod call_serde {
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+    use starknet::accounts::Call;
+    use starknet_crypto::Felt;
+
+    pub fn serialize<S>(calls: &[Call], serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        // Serialize each Call as a tuple
+        calls
+            .iter()
+            .map(|call| (&call.to, &call.selector, &call.calldata))
+            .collect::<Vec<_>>()
+            .serialize(serializer)
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Vec<Call>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        // Deserialize into a Vec of tuples, then convert to Vec<Call>
+        let tuples: Vec<(Felt, Felt, Vec<Felt>)> = Vec::deserialize(deserializer)?;
+        Ok(tuples
+            .into_iter()
+            .map(|(to, selector, calldata)| Call {
+                to,
+                selector,
+                calldata,
+            })
+            .collect())
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct OutsideExecution {
     pub caller: OutsideExecutionCaller,
     pub execute_after: u64,
     pub execute_before: u64,
+    #[serde(with = "call_serde")]
     pub calls: Vec<Call>,
     pub nonce: Felt,
 }
@@ -130,7 +166,7 @@ impl From<AbigenCall> for Call {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub enum OutsideExecutionCaller {
     Any,
     Specific(ContractAddress),

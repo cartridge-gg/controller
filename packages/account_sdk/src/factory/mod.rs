@@ -2,8 +2,6 @@
 // The problem currently is estimate fee forces us to sign the transaction to generate a deploy transaction payload. This would
 // require two signatures, one for estimate and one for deploy which is not ideal. Updated to skip validation on estimate fee txn.
 
-pub mod cartridge;
-
 use async_trait::async_trait;
 use num_traits::{FromPrimitive, ToPrimitive};
 use starknet::{
@@ -19,6 +17,8 @@ use starknet::{
     providers::{Provider, ProviderError},
 };
 use std::error::Error;
+
+pub mod cartridge;
 
 #[derive(Debug, thiserror::Error)]
 #[error("Not all fields are prepared")]

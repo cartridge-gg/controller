@@ -1,10 +1,10 @@
-use account_sdk::account::AccountHashSigner;
-use account_sdk::signers::SignError;
 use async_trait::async_trait;
 use starknet::{
     core::types::{BlockId, BlockTag, Felt},
     providers::Provider,
 };
+
+use crate::{account::AccountHashSigner, signers::SignError};
 
 use super::{AccountFactory, PreparedAccountDeployment, RawAccountDeployment};
 

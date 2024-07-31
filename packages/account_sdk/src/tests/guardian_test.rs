@@ -1,8 +1,8 @@
 use crate::{
     abigen::erc_20::Erc20,
-    signers::HashSigner,
+    signers::{webauthn::WebauthnSigner, HashSigner},
     tests::{
-        account::{signers::InternalWebauthnSigner, FEE_TOKEN_ADDRESS},
+        account::{webauthn::SoftPasskeySigner, FEE_TOKEN_ADDRESS},
         runners::katana::KatanaRunner,
     },
 };
@@ -43,11 +43,16 @@ pub async fn test_verify_execute<S: HashSigner + Clone + Sync + Send>(signer: S)
 
 #[tokio::test]
 async fn test_verify_execute_webauthn_guardian_starknet() {
-    test_verify_execute(InternalWebauthnSigner::random(
-        "localhost".to_string(),
-        "rp_id".to_string(),
-    ))
-    .await;
+    let signer = WebauthnSigner::register(
+        "cartridge.gg".to_string(),
+        "username".to_string(),
+        "challenge".as_bytes(),
+        SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
+    )
+    .await
+    .unwrap();
+
+    test_verify_execute(signer).await;
 }
 
 #[tokio::test]

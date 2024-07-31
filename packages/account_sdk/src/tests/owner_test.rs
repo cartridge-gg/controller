@@ -1,11 +1,8 @@
 use crate::{
     abigen::{controller::Controller, erc_20::Erc20},
-    account::{
-        session::{create::SessionCreator, hash::AllowedMethod},
-        CartridgeAccount,
-    },
-    signers::{HashSigner, NewOwnerSigner, SignError, SignerTrait},
-    tests::{account::signers::InternalWebauthnSigner, runners::katana::KatanaRunner},
+    account::session::{create::SessionCreator, hash::AllowedMethod},
+    signers::{webauthn::WebauthnSigner, HashSigner, NewOwnerSigner, SignError, SignerTrait},
+    tests::{account::webauthn::SoftPasskeySigner, runners::katana::KatanaRunner},
     transaction_waiter::TransactionWaiter,
 };
 use cainome::cairo_serde::{ContractAddress, U256};
@@ -238,7 +235,15 @@ async fn test_change_owner_execute_after() {
 
 #[tokio::test]
 async fn test_change_owner_invalidate_old_sessions() {
-    let signer = InternalWebauthnSigner::random("localhost".to_string(), "rp_id".to_string());
+    let signer = WebauthnSigner::register(
+        "cartridge.gg".to_string(),
+        "username".to_string(),
+        "challenge".as_bytes(),
+        SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
+    )
+    .await
+    .unwrap();
+
     let guardian = SigningKey::from_random();
     let runner = KatanaRunner::load();
     let account = runner.deploy_controller(&signer).await;
@@ -295,7 +300,7 @@ async fn test_change_owner_invalidate_old_sessions() {
         panic!("Should have failed");
     };
 
-    let account = CartridgeAccount::new(
+    let account = Controller::new(
         runner.client(),
         new_signer.clone(),
         guardian.clone(),
@@ -325,7 +330,15 @@ async fn test_change_owner_invalidate_old_sessions() {
 
 #[tokio::test]
 async fn test_call_unallowed_methods() {
-    let signer = InternalWebauthnSigner::random("localhost".to_string(), "rp_id".to_string());
+    let signer = WebauthnSigner::register(
+        "cartridge.gg".to_string(),
+        "username".to_string(),
+        "challenge".as_bytes(),
+        SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
+    )
+    .await
+    .unwrap();
+
     let runner = KatanaRunner::load();
     let account = runner.deploy_controller(&signer).await;
 

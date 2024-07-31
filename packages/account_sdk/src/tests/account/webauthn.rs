@@ -1,5 +1,6 @@
 use crate::signers::webauthn::{WebauthnBackend, WebauthnSigner};
 use crate::signers::DeviceError;
+use crate::OriginProvider;
 use crate::{
     abigen::erc_20::Erc20,
     signers::HashSigner,
@@ -110,7 +111,9 @@ impl WebauthnBackend for SoftPasskeySigner {
 
         Ok(r)
     }
+}
 
+impl OriginProvider for SoftPasskeySigner {
     fn origin() -> Result<String, DeviceError> {
         Ok(ORIGIN.lock().unwrap().clone().to_string())
     }

@@ -34,25 +34,22 @@ export class CartridgeAccount {
   createSession(policies: any[], expires_at: bigint): Promise<any>;
 /**
 * @param {any[]} calls
-* @param {any} session_details
 * @param {number | undefined} [fee_multiplier]
 * @returns {Promise<any>}
 */
-  estimateInvokeFee(calls: any[], session_details: any, fee_multiplier?: number): Promise<any>;
+  estimateInvokeFee(calls: any[], fee_multiplier?: number): Promise<any>;
 /**
 * @param {any[]} calls
 * @param {any} transaction_details
-* @param {any} session_details
 * @returns {Promise<any>}
 */
-  execute(calls: any[], transaction_details: any, session_details: any): Promise<any>;
+  execute(calls: any[], transaction_details: any): Promise<any>;
 /**
 * @param {any[]} calls
 * @param {any} caller
-* @param {any} session_details
 * @returns {Promise<any>}
 */
-  executeFromOutside(calls: any[], caller: any, session_details: any): Promise<any>;
+  executeFromOutside(calls: any[], caller: any): Promise<any>;
 /**
 */
   revokeSession(): void;

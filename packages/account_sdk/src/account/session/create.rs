@@ -53,11 +53,8 @@ where
     ) -> Result<SessionAccount<P, Q, G>, SignError> {
         let session = Session::new(allowed_methods, expires_at, &signer.signer())?;
         let session_authorization =
-            <OwnerAccount<P, S, G> as SessionCreator<P, Q, G>>::sign_session(
-                self,
-                session.clone(),
-            )
-            .await?;
+            <OwnerAccount<P, S, G> as SessionCreator<P, Q, G>>::sign_session(self, session.clone())
+                .await?;
 
         Ok(SessionAccount::new(
             self.provider.clone(),

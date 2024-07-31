@@ -11,20 +11,24 @@ crate-type = ["lib"]
 [dependencies]
 anyhow.workspace = true
 async-trait.workspace = true
+auto_impl = "1.0"
 base64urlsafedata.workspace = true
 base64.workspace = true
 cainome.workspace = true
 coset.workspace = true
 ecdsa.workspace = true
 futures.workspace = true
+gloo-net = "0.6.0"
 hex.workspace = true
 lazy_static.workspace = true
 nom = "7.1"
 p256.workspace = true
 primitive-types.workspace = true
+reqwest.workspace = true
 serde.workspace = true
 serde_cbor_2 = { version = "0.12.0-dev" }
 serde_json.workspace = true
+serde_with.workspace = true
 sha2.workspace = true
 starknet.workspace = true
 starknet-crypto.workspace = true

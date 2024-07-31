@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use starknet::accounts::Call;
 use starknet::core::types::Felt;
 use starknet::core::utils::{get_selector_from_name, NonAsciiNameError};
 use starknet::macros::selector;
@@ -86,6 +87,17 @@ impl Session {
             .iter()
             .find(|ProvedMethod { method, .. }| method == call)
             .map(|ProvedMethod { proof, .. }| proof.clone())
+    }
+
+    pub fn is_call_allowed(&self, call: &Call) -> bool {
+        let allowed_method = AllowedMethod {
+            contract_address: call.to,
+            selector: call.selector,
+        };
+
+        self.allowed_methods
+            .iter()
+            .any(|proved_method| proved_method.method == allowed_method)
     }
 }
 

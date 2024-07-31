@@ -5,11 +5,12 @@ use crate::{
     account::{
         outside_execution::{OutsideExecution, OutsideExecutionAccount, OutsideExecutionCaller},
         session::{create::SessionCreator, hash::AllowedMethod},
-        CartridgeAccount,
     },
-    signers::HashSigner,
+    controller::Controller,
+    signers::{webauthn::WebauthnSigner, HashSigner},
+    storage::{InMemoryBackend, InMemoryStorage},
     tests::{
-        account::{signers::InternalWebauthnSigner, FEE_TOKEN_ADDRESS},
+        account::{webauthn::SoftPasskeySigner, FEE_TOKEN_ADDRESS},
         runners::katana::KatanaRunner,
     },
     transaction_waiter::TransactionWaiter,
@@ -101,11 +102,16 @@ pub async fn test_verify_paymaster_execute<
 
 #[tokio::test]
 async fn test_verify_execute_webauthn_paymaster_starknet() {
-    test_verify_paymaster_execute(
-        InternalWebauthnSigner::random("localhost".to_string(), "rp_id".to_string()),
-        None as Option<SigningKey>,
+    let signer = WebauthnSigner::register(
+        "cartridge.gg".to_string(),
+        "username".to_string(),
+        "challenge".as_bytes(),
+        SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
     )
-    .await;
+    .await
+    .unwrap();
+
+    test_verify_paymaster_execute(signer, None as Option<SigningKey>).await;
 }
 
 #[tokio::test]
@@ -115,11 +121,16 @@ async fn test_verify_execute_starknet_paymaster_starknet() {
 
 #[tokio::test]
 async fn test_verify_execute_webauthn_paymaster_starknet_session() {
-    test_verify_paymaster_execute(
-        InternalWebauthnSigner::random("localhost".to_string(), "rp_id".to_string()),
-        Some(SigningKey::from_random()),
+    let signer = WebauthnSigner::register(
+        "cartridge.gg".to_string(),
+        "username".to_string(),
+        "challenge".as_bytes(),
+        SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
     )
-    .await;
+    .await
+    .unwrap();
+
+    test_verify_paymaster_execute(signer, Some(SigningKey::from_random())).await;
 }
 
 #[tokio::test]
@@ -158,12 +169,14 @@ async fn test_verify_execute_paymaster_should_fail() {
         nonce: controller.random_outside_execution_nonce(),
     };
 
-    let wrong_account = CartridgeAccount::new(
+    let wrong_account = Controller::new(
+        "username".to_string(),
         runner.client(),
         SigningKey::from_random(),
         SigningKey::from_random(),
         controller.address,
         runner.client().chain_id().await.unwrap(),
+        InMemoryBackend::default(),
     );
 
     let outside_execution = wrong_account

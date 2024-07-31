@@ -2,11 +2,13 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::account::session::hash::Session;
+use crate::{
+    account::session::hash::Session, controller::Backend, signers::DeviceError, OriginProvider,
+};
 use starknet::core::types::Felt;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct StoredSession {
+pub struct SessionMetadata {
     pub session: Session,
     pub max_fee: Option<Felt>,
     pub credentials: Credentials,
@@ -20,7 +22,7 @@ pub struct Credentials {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum StorageValue {
-    Session(StoredSession),
+    Session(SessionMetadata),
 }
 
 #[async_trait]
@@ -40,11 +42,14 @@ pub enum StorageError {
     OperationFailed(String),
 }
 
-pub struct MemoryStorage {
+#[derive(Default)]
+pub struct InMemoryBackend {
     storage: HashMap<String, String>,
 }
 
-impl MemoryStorage {
+impl Backend for InMemoryBackend {}
+
+impl InMemoryBackend {
     pub fn new() -> Self {
         Self {
             storage: HashMap::new(),
@@ -53,7 +58,7 @@ impl MemoryStorage {
 }
 
 #[async_trait]
-impl StorageBackend for MemoryStorage {
+impl StorageBackend for InMemoryBackend {
     async fn set(&mut self, key: &str, value: &StorageValue) -> Result<(), StorageError> {
         let serialized = serde_json::to_string(value)?;
         self.storage.insert(key.to_string(), serialized);
@@ -81,5 +86,35 @@ impl StorageBackend for MemoryStorage {
 
     async fn keys(&self) -> Result<Vec<String>, StorageError> {
         Ok(self.storage.keys().cloned().collect())
+    }
+}
+
+impl OriginProvider for InMemoryBackend {
+    fn origin() -> Result<String, DeviceError> {
+        Ok("https://cartridge.gg".to_string())
+    }
+}
+
+pub struct Selectors;
+
+impl Selectors {
+    pub fn active() -> String {
+        "@cartridge/active".to_string()
+    }
+
+    pub fn account(address: &Felt) -> String {
+        format!("@cartridge/account/{:#}", address)
+    }
+
+    pub fn deployment(address: &Felt, chain_id: &Felt) -> String {
+        format!("@cartridge/deployment/{:#}/{:#}", address, chain_id)
+    }
+
+    pub fn admin(address: &Felt, origin: &str) -> String {
+        format!("@cartridge/admin/{:#}/{}", address, origin)
+    }
+
+    pub fn session(address: &Felt, origin: &str, chain_id: &Felt) -> String {
+        format!("@cartridge/session/{:#}/{}/{:#}", address, origin, chain_id)
     }
 }

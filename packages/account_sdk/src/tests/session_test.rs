@@ -1,9 +1,9 @@
 use crate::{
     abigen::erc_20::Erc20,
     account::session::{create::SessionCreator, hash::AllowedMethod},
-    signers::HashSigner,
+    signers::{webauthn::WebauthnSigner, HashSigner},
     tests::{
-        account::{signers::InternalWebauthnSigner, FEE_TOKEN_ADDRESS},
+        account::{webauthn::SoftPasskeySigner, FEE_TOKEN_ADDRESS},
         runners::katana::KatanaRunner,
     },
     transaction_waiter::TransactionWaiter,
@@ -63,21 +63,16 @@ pub async fn test_verify_execute<
 
 #[tokio::test]
 async fn test_verify_execute_session_webauthn_starknet_starknet() {
-    test_verify_execute(
-        InternalWebauthnSigner::random("localhost".to_string(), "rp_id".to_string()),
-        SigningKey::from_random(),
+    let signer = WebauthnSigner::register(
+        "cartridge.gg".to_string(),
+        "username".to_string(),
+        "challenge".as_bytes(),
+        SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
     )
-    .await;
-}
+    .await
+    .unwrap();
 
-#[ignore = "Not enough resources"]
-#[tokio::test]
-async fn test_verify_execute_session_webauthn_starknet_webauthn() {
-    test_verify_execute(
-        InternalWebauthnSigner::random("localhost".to_string(), "rp_id".to_string()),
-        InternalWebauthnSigner::random("localhost".to_string(), "rp_id".to_string()),
-    )
-    .await;
+    test_verify_execute(signer, SigningKey::from_random()).await;
 }
 
 #[tokio::test]
