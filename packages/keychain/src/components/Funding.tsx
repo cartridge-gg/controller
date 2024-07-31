@@ -154,7 +154,7 @@ function FundingInner({ onComplete }: FundingInnerProps) {
 
       setError(e);
     }
-  }, [onComplete]);
+  }, [onComplete, deploySelf]);
 
   const onCopy = useCallback(() => {
     navigator.clipboard.writeText(controller.address);
