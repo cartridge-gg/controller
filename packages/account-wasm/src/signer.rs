@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 
-use account_sdk::signers::{webauthn::WebauthnOperations, DeviceError};
+use account_sdk::signers::{webauthn::WebauthnBackend, DeviceError};
 use futures::channel::oneshot;
 use wasm_bindgen::UnwrapThrowExt;
 use wasm_bindgen_futures::{spawn_local, JsFuture};
@@ -12,11 +12,11 @@ pub fn window() -> Window {
 }
 
 #[derive(Debug, Clone)]
-pub struct BrowserOperations {}
+pub struct BrowserBackend {}
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl WebauthnOperations for BrowserOperations {
+impl WebauthnBackend for BrowserBackend {
     async fn get_assertion(
         &self,
         options: PublicKeyCredentialRequestOptions,
@@ -85,5 +85,19 @@ impl WebauthnOperations for BrowserOperations {
         rx.await.unwrap_or(Err(DeviceError::Channel(
             "credential receiver dropped".to_string(),
         )))
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    fn origin() -> Result<String, DeviceError> {
+        let origin = window()
+            .location()
+            .origin()
+            .map_err(|_| DeviceError::Origin("Unable to get origin".to_string()))?;
+        Ok(origin)
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    fn origin() -> Result<String, DeviceError> {
+        Ok("http://localhost:3001".to_string())
     }
 }

@@ -1,5 +1,5 @@
 use crate::{
-    account::{session::SessionAccount, AccountHashSigner, CartridgeAccount},
+    account::{session::SessionAccount, AccountHashSigner, Controller},
     hash::MessageHashRev1,
 };
 
@@ -30,7 +30,7 @@ where
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<P, S, Q, G> SessionCreator<P, Q, G> for CartridgeAccount<P, S, G>
+impl<P, S, Q, G> SessionCreator<P, Q, G> for Controller<P, S, G>
 where
     P: Provider + Send + Sync + Clone,
     S: HashSigner + Send + Sync + Clone,
@@ -53,11 +53,8 @@ where
     ) -> Result<SessionAccount<P, Q, G>, SignError> {
         let session = Session::new(allowed_methods, expires_at, &signer.signer())?;
         let session_authorization =
-            <CartridgeAccount<P, S, G> as SessionCreator<P, Q, G>>::sign_session(
-                self,
-                session.clone(),
-            )
-            .await?;
+            <Controller<P, S, G> as SessionCreator<P, Q, G>>::sign_session(self, session.clone())
+                .await?;
 
         Ok(SessionAccount::new(
             self.provider.clone(),

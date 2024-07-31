@@ -20,7 +20,7 @@ use crate::{
 };
 
 #[derive(Clone, Debug)]
-pub struct CartridgeAccount<P, S, G>
+pub struct Controller<P, S, G>
 where
     P: Provider + Send,
     S: HashSigner + Send,
@@ -34,14 +34,14 @@ where
     pub(crate) guardian: G,
 }
 
-impl<P, S, G> CartridgeAccount<P, S, G>
+impl<P, S, G> Controller<P, S, G>
 where
     P: Provider + Send,
     S: HashSigner + Send,
     G: HashSigner + Send,
 {
     pub fn new(provider: P, signer: S, guardian: G, address: Felt, chain_id: Felt) -> Self {
-        CartridgeAccount {
+        Controller {
             provider,
             signer,
             address,
@@ -58,7 +58,7 @@ where
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<P, S, G> AccountHashSigner for CartridgeAccount<P, S, G>
+impl<P, S, G> AccountHashSigner for Controller<P, S, G>
 where
     P: Provider + Send + Sync,
     S: HashSigner + Send + Sync,
@@ -74,7 +74,7 @@ where
     }
 }
 
-impl<P, S, G> SpecificAccount for CartridgeAccount<P, S, G>
+impl<P, S, G> SpecificAccount for Controller<P, S, G>
 where
     P: Provider + Send + Sync,
     S: HashSigner + Send + Sync,
@@ -89,10 +89,10 @@ where
     }
 }
 
-impl_account!(CartridgeAccount<P: Provider, S: HashSigner, G: HashSigner>);
-impl_execution_encoder!(CartridgeAccount<P: Provider, S: HashSigner, G: HashSigner>);
+impl_account!(Controller<P: Provider, S: HashSigner, G: HashSigner>);
+impl_execution_encoder!(Controller<P: Provider, S: HashSigner, G: HashSigner>);
 
-impl<P, S, G> ConnectedAccount for CartridgeAccount<P, S, G>
+impl<P, S, G> ConnectedAccount for Controller<P, S, G>
 where
     P: Provider + Send + Sync,
     S: HashSigner + Send + Sync,

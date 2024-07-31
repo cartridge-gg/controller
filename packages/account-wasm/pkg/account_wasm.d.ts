@@ -20,13 +20,12 @@ export class CartridgeAccount {
 * @param {string} chain_id
 * @param {string} address
 * @param {string} rp_id
-* @param {string} origin
 * @param {string} username
 * @param {string} credential_id
 * @param {string} public_key
 * @returns {CartridgeAccount}
 */
-  static new(rpc_url: string, chain_id: string, address: string, rp_id: string, origin: string, username: string, credential_id: string, public_key: string): CartridgeAccount;
+  static new(rpc_url: string, chain_id: string, address: string, rp_id: string, username: string, credential_id: string, public_key: string): CartridgeAccount;
 /**
 * @param {any[]} policies
 * @param {bigint} expires_at

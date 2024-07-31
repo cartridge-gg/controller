@@ -280,7 +280,7 @@ pub struct ClientData {
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-pub trait WebauthnOperations {
+pub trait WebauthnBackend {
     async fn get_assertion(
         &self,
         options: PublicKeyCredentialRequestOptions,
@@ -289,13 +289,15 @@ pub trait WebauthnOperations {
     async fn create_credential(
         options: PublicKeyCredentialCreationOptions,
     ) -> Result<RegisterPublicKeyCredential, DeviceError>;
+
+    fn origin() -> Result<String, DeviceError>;
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 impl<T> HashSigner for WebauthnSigner<T>
 where
-    T: WebauthnOperations + Sync,
+    T: WebauthnBackend + Sync,
 {
     // According to https://www.w3.org/TR/webauthn/#clientdatajson-verification
     async fn sign(&self, tx_hash: &Felt) -> Result<SignerSignature, SignError> {
@@ -394,19 +396,18 @@ impl Sha256ImplementationEncoder for Sha256Implementation {
 }
 
 #[derive(Debug, Clone)]
-pub struct WebauthnSigner<T: WebauthnOperations> {
+pub struct WebauthnSigner<T: WebauthnBackend> {
     pub rp_id: String,
-    pub origin: String,
     pub credential_id: CredentialID,
     pub pub_key: CoseKey,
     pub operations: T,
 }
 
-impl<T: WebauthnOperations> From<&WebauthnSigner<T>> for abigen::controller::WebauthnSigner {
+impl<T: WebauthnBackend> From<&WebauthnSigner<T>> for abigen::controller::WebauthnSigner {
     fn from(signer: &WebauthnSigner<T>) -> Self {
         Self {
             rp_id_hash: NonZero::new(U256::from_bytes_be(&signer.rp_id_hash())).unwrap(),
-            origin: signer.origin.clone().into_bytes(),
+            origin: T::origin().unwrap().into_bytes(),
             pubkey: NonZero::new(U256::from_bytes_be(
                 &signer.pub_key_bytes().unwrap()[0..32].try_into().unwrap(),
             ))
@@ -415,17 +416,15 @@ impl<T: WebauthnOperations> From<&WebauthnSigner<T>> for abigen::controller::Web
     }
 }
 
-impl<T: WebauthnOperations> WebauthnSigner<T> {
+impl<T: WebauthnBackend> WebauthnSigner<T> {
     pub fn new(
         rp_id: String,
-        origin: String,
         credential_id: CredentialID,
         pub_key: CoseKey,
         operations: T,
     ) -> Self {
         Self {
             rp_id,
-            origin,
             credential_id,
             pub_key,
             operations,
@@ -434,7 +433,6 @@ impl<T: WebauthnOperations> WebauthnSigner<T> {
 
     pub async fn register(
         rp_id: String,
-        origin: String,
         user_name: String,
         challenge: &[u8],
         operations: T,
@@ -480,7 +478,6 @@ impl<T: WebauthnOperations> WebauthnSigner<T> {
             rp_id,
             credential_id: cred.credential_id,
             pub_key,
-            origin,
             operations,
         })
     }

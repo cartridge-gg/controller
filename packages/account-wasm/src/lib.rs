@@ -18,7 +18,7 @@ use account_sdk::abigen::controller::Signer;
 use account_sdk::account::outside_execution::OutsideExecutionAccount;
 use account_sdk::account::session::hash::{AllowedMethod, Session};
 use account_sdk::account::session::SessionAccount;
-use account_sdk::account::{AccountHashSigner, CartridgeAccount as CA, MessageSignerAccount};
+use account_sdk::account::{AccountHashSigner, Controller, MessageSignerAccount};
 use account_sdk::hash::MessageHashRev1;
 use account_sdk::signers::webauthn::{CredentialID, WebauthnSigner};
 use account_sdk::signers::HashSigner;
@@ -31,7 +31,7 @@ use factory::cartridge::CartridgeAccountFactory;
 use factory::AccountDeployment;
 use paymaster::PaymasterRequest;
 use serde_wasm_bindgen::{from_value, to_value};
-use signer::BrowserOperations;
+use signer::BrowserBackend;
 use starknet::accounts::Account;
 use starknet::core::types::{BlockId, BlockTag, FunctionCall};
 use starknet::core::utils::cairo_short_string_to_felt;
@@ -57,8 +57,9 @@ type Result<T> = std::result::Result<T, JsError>;
 
 #[wasm_bindgen]
 pub struct CartridgeAccount {
-    account: CA<Arc<JsonRpcClient<HttpTransport>>, WebauthnSigner<BrowserOperations>, SigningKey>,
-    device_signer: WebauthnSigner<BrowserOperations>,
+    account:
+        Controller<Arc<JsonRpcClient<HttpTransport>>, WebauthnSigner<BrowserBackend>, SigningKey>,
+    device_signer: WebauthnSigner<BrowserBackend>,
     username: String,
     rpc_url: Url,
 }
@@ -83,7 +84,6 @@ impl CartridgeAccount {
         chain_id: String,
         address: String,
         rp_id: String,
-        origin: String,
         username: String,
         credential_id: String,
         public_key: String,
@@ -99,16 +99,15 @@ impl CartridgeAccount {
         let cose_bytes = general_purpose::URL_SAFE_NO_PAD.decode(public_key)?;
         let cose = CoseKey::from_slice(&cose_bytes)?;
 
-        let browser_operations = BrowserOperations {};
-        let device_signer =
-            WebauthnSigner::new(rp_id, origin, credential_id, cose, browser_operations);
+        let browser_operations = BrowserBackend {};
+        let device_signer = WebauthnSigner::new(rp_id, credential_id, cose, browser_operations);
 
         let dummy_guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
         let address = Felt::from_str(&address)?;
         let chain_id = Felt::from_str(&chain_id)?;
         let username = username.to_lowercase();
 
-        let account = CA::new(
+        let account = Controller::new(
             Arc::new(provider),
             device_signer.clone(),
             dummy_guardian,
