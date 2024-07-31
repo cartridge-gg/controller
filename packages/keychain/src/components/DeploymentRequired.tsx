@@ -45,7 +45,7 @@ export function DeploymentRequired({
         setDeployHash(hash);
       })
       .catch((e) => setError(e));
-  }, [account.chainId, account.username]);
+  }, [account.chainId, account.username, hasPrefundRequest, isDeployed, deployRequest]);
 
   if (isDeployed) {
     return <>{children}</>;

@@ -63,7 +63,7 @@ export const useDeploy = (): DeployInterface => {
         setIsDeploying(false);
       }
     },
-    [prefunds, chainId],
+    [chainId, isDeployed],
   );
 
   const deploySelf = useCallback(async (maxFee: string) => {
@@ -83,7 +83,7 @@ export const useDeploy = (): DeployInterface => {
     } finally {
       setIsDeploying(false);
     }
-  }, []);
+  }, [controller.account, isDeployed]);
 
   return {
     deployRequest,

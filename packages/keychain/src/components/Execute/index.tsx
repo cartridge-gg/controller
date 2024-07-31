@@ -128,7 +128,7 @@ export function Execute() {
       transaction_hash,
       code: ResponseCodes.SUCCESS,
     });
-  }, [account, calls, fees, ctx, origin, controller]);
+  }, [account, calls, ctx, origin, controller]);
 
   const policies = useMemo<Policy[]>(
     () =>
