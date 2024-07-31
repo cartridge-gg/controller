@@ -6,7 +6,7 @@ pub(crate) mod declare;
 mod deploy;
 // mod interface;
 mod pending;
-pub(crate) mod signers;
+pub(crate) mod webauthn;
 
 pub use declare::AccountDeclaration;
 pub use deploy::AccountDeployment;

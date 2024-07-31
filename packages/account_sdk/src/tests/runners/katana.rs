@@ -12,7 +12,7 @@ use lazy_static::lazy_static;
 
 use crate::abigen::controller::{self, Signer};
 use crate::abigen::erc_20::Erc20;
-use crate::account::CartridgeAccount;
+use crate::account::Controller;
 use crate::signers::HashSigner;
 use crate::tests::account::{
     AccountDeclaration, AccountDeployment, DeployResult, FEE_TOKEN_ADDRESS,
@@ -125,7 +125,7 @@ impl KatanaRunner {
     pub async fn deploy_controller<S>(
         &self,
         signer: &S,
-    ) -> CartridgeAccount<&JsonRpcClient<HttpTransport>, S, SigningKey>
+    ) -> Controller<&JsonRpcClient<HttpTransport>, S, SigningKey>
     where
         S: HashSigner + Clone + Send,
     {
@@ -153,7 +153,7 @@ impl KatanaRunner {
 
         self.fund(&deployed_address).await;
 
-        CartridgeAccount::new(
+        Controller::new(
             self.client(),
             signer.clone(),
             guardian,

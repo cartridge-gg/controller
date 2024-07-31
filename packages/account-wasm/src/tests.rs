@@ -54,7 +54,6 @@ fn create_test_account(
         "0x534e5f4d41494e".to_string(),
         address.to_string(),
         "localhost".to_string(),
-        "http://localhost:3001".to_string(),
         username.to_string(),
         credential_id.to_string(),
         public_key.to_string(),
@@ -186,27 +185,4 @@ fn test_verify_address() {
         Felt::from_hex(address).unwrap(),
         "Address does not match calculated"
     );
-}
-
-#[cfg(target_arch = "wasm32")]
-#[wasm_bindgen_test]
-async fn test_webauth_wasm() {
-    use account_sdk::signers::webauthn::{
-        DeviceSigner, InternalWebauthnSigner, WebauthnAccountSigner,
-    };
-    use starknet::macros::felt;
-
-    let origin = "localhost".to_string();
-    let rp_id = "cartridge".to_string();
-    let username = "foo".to_string();
-
-    let account = DeviceSigner::register(origin.clone(), rp_id.clone(), username, &[])
-        .await
-        .unwrap();
-
-    let challenge = felt!("0x0169af1f6f99d35e0b80e0140235ec4a2041048868071a8654576223934726f5");
-    let challenge_bytes = challenge.to_bytes_be();
-    let _ = account.sign(&challenge_bytes).await.unwrap();
-    let signer = InternalWebauthnSigner::random(origin.to_string(), rp_id);
-    let _ = signer.sign(&challenge_bytes).await.unwrap();
 }

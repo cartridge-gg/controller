@@ -22,6 +22,8 @@ pub enum DeviceError {
     BadAssertion(String),
     #[error("Channel error: {0}")]
     Channel(String),
+    #[error("Origin error: {0}")]
+    Origin(String),
 }
 
 #[derive(Debug, thiserror::Error)]

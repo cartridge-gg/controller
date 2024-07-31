@@ -41,7 +41,6 @@ class Account extends BaseAccount {
     signer: SignerInterface,
     webauthn: {
       rpId: string;
-      origin: string;
       credentialId: string;
       publicKey: string;
     },
@@ -57,7 +56,6 @@ class Account extends BaseAccount {
       chainId,
       address,
       webauthn.rpId,
-      webauthn.origin,
       username,
       webauthn.credentialId,
       webauthn.publicKey,

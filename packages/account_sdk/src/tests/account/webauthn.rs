@@ -1,4 +1,4 @@
-use crate::signers::webauthn::WebauthnOperations;
+use crate::signers::webauthn::{WebauthnBackend, WebauthnSigner};
 use crate::signers::DeviceError;
 use crate::{
     abigen::erc_20::Erc20,
@@ -36,8 +36,8 @@ static ORIGIN: Lazy<Mutex<Url>> =
     Lazy::new(|| Mutex::new(Url::parse("https://cartridge.gg").unwrap()));
 
 #[derive(Clone)]
-pub struct SoftPasskeyOperations {}
-impl SoftPasskeyOperations {
+pub struct SoftPasskeySigner {}
+impl SoftPasskeySigner {
     #[allow(dead_code)]
     pub fn new(origin: Url) -> Self {
         let mut global_origin = ORIGIN.lock().unwrap();
@@ -49,7 +49,7 @@ impl SoftPasskeyOperations {
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl WebauthnOperations for SoftPasskeyOperations {
+impl WebauthnBackend for SoftPasskeySigner {
     async fn get_assertion(
         &self,
         options: PublicKeyCredentialRequestOptions,
@@ -110,6 +110,10 @@ impl WebauthnOperations for SoftPasskeyOperations {
 
         Ok(r)
     }
+
+    fn origin() -> Result<String, DeviceError> {
+        Ok(ORIGIN.lock().unwrap().clone().to_string())
+    }
 }
 
 pub async fn test_verify_execute<S: HashSigner + Clone + Sync + Send>(signer: S) {
@@ -138,19 +142,19 @@ pub async fn test_verify_execute<S: HashSigner + Clone + Sync + Send>(signer: S)
         .unwrap();
 }
 
-// #[tokio::test]
-// async fn test_verify_execute_webautn() {
-//     let signer = WebauthnSigner::register(
-//         "cartridge.gg".to_string(),
-//         "https://cartridge.gg".to_string(),
-//         "dummy_username".to_string(),
-//         "dummy_challenge".as_bytes(),
-//         SoftPasskeyOperations::new("https://cartridge.gg".try_into().unwrap()),
-//     )
-//     .await
-//     .unwrap();
-//     test_verify_execute(signer).await;
-// }
+#[tokio::test]
+async fn test_verify_execute_webautn() {
+    let signer = WebauthnSigner::register(
+        "cartridge.gg".to_string(),
+        "username".to_string(),
+        "challenge".as_bytes(),
+        SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
+    )
+    .await
+    .unwrap();
+
+    test_verify_execute(signer).await;
+}
 
 #[tokio::test]
 async fn test_verify_execute_starknet() {
