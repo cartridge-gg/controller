@@ -23,6 +23,10 @@ macro_rules! impl_account {
                 $crate::account::SpecificAccount::address(self)
             }
 
+            fn is_signer_interactive(&self) -> bool {
+                true
+            }
+
             fn chain_id(&self) -> starknet::core::types::Felt {
                 $crate::account::SpecificAccount::chain_id(self)
             }

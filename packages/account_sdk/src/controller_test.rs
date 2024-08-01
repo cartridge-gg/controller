@@ -1,31 +1,20 @@
-use cainome::cairo_serde::CairoSerde;
-use starknet::{
-    accounts::{Account, Call},
-    macros::{felt, selector},
-    providers::Provider,
-    signers::SigningKey,
-};
+use starknet::{accounts::Account, macros::felt, providers::Provider, signers::SigningKey};
 
 use crate::{
-    controller::Controller, provider::CartridgeProvider, signers::HashSigner,
-    storage::InMemoryStorage, tests::runners::katana::KatanaRunner,
+    controller::Controller, storage::InMemoryBackend, tests::runners::katana::KatanaRunner,
     transaction_waiter::TransactionWaiter,
 };
 
 #[tokio::test]
 async fn test_deploy_controller() {
-    // Initialize the test runner
     let runner = KatanaRunner::load();
 
     // Create signers
     let owner = SigningKey::from_random();
     let guardian_signer = SigningKey::from_random();
 
-    // Create a provider
     let provider = runner.client();
-
-    // Create an in-memory storage backend
-    let backend = InMemoryStorage::default();
+    let backend = InMemoryBackend::default();
 
     // Create a new Controller instance
     let username = "testuser".to_string();
@@ -43,11 +32,11 @@ async fn test_deploy_controller() {
     );
 
     // Deploy the controller
-    let max_fee = felt!("0x1000000000000000"); // Adjust as needed
+    let max_fee = felt!("0x1000000000000000");
     let deploy_result = controller.deploy(max_fee).await.unwrap();
 
     // Wait for the transaction to be mined
-    TransactionWaiter::new(deploy_result.transaction_hash, provider.clone())
+    TransactionWaiter::new(deploy_result.transaction_hash, &provider.clone())
         .wait()
         .await
         .unwrap();

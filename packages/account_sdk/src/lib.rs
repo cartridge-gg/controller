@@ -17,8 +17,8 @@ pub mod typed_data;
 #[cfg(test)]
 pub mod tests;
 
-// #[cfg(test)]
-// pub mod controller_test;
+#[cfg(test)]
+pub mod controller_test;
 
 pub trait OriginProvider {
     fn origin() -> Result<String, DeviceError>;

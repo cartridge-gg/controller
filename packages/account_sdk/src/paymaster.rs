@@ -2,7 +2,7 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
 use starknet::core::serde::unsigned_field_element::UfeHex;
-use starknet::core::types::Felt;
+use starknet_types_core::felt::Felt;
 use url::Url;
 
 use crate::account::outside_execution::OutsideExecution;

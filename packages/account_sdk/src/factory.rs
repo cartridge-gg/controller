@@ -63,6 +63,10 @@ where
         self.chain_id
     }
 
+    fn is_signer_interactive(&self) -> bool {
+        true
+    }
+
     fn provider(&self) -> &Self::Provider {
         &self.provider
     }
@@ -74,9 +78,10 @@ where
     async fn sign_deployment_v1(
         &self,
         deployment: &RawAccountDeploymentV1,
+        query_only: bool,
     ) -> Result<Vec<Felt>, Self::SignError> {
-        let tx_hash =
-            PreparedAccountDeploymentV1::from_raw(deployment.clone(), self).transaction_hash();
+        let tx_hash = PreparedAccountDeploymentV1::from_raw(deployment.clone(), self)
+            .transaction_hash(query_only);
         let signature = self.signer.sign_hash(tx_hash).await?;
 
         Ok(signature)
@@ -85,9 +90,10 @@ where
     async fn sign_deployment_v3(
         &self,
         deployment: &RawAccountDeploymentV3,
+        query_only: bool,
     ) -> Result<Vec<Felt>, Self::SignError> {
-        let tx_hash =
-            PreparedAccountDeploymentV3::from_raw(deployment.clone(), self).transaction_hash();
+        let tx_hash = PreparedAccountDeploymentV3::from_raw(deployment.clone(), self)
+            .transaction_hash(query_only);
         let signature = self.signer.sign_hash(tx_hash).await?;
 
         Ok(signature)

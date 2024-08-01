@@ -1,10 +1,8 @@
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
 use starknet::core::serde::unsigned_field_element::UfeHex;
-use starknet::{
-    accounts::Call,
-    core::{types::Felt, utils::get_selector_from_name},
-};
+use starknet::{accounts::Call, core::utils::get_selector_from_name};
+use starknet_types_core::felt::Felt;
 use wasm_bindgen::prelude::*;
 
 use crate::errors::EncodingError;
