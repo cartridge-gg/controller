@@ -35,9 +35,19 @@ pub enum CartridgeProviderError {
     PaymasterError(#[from] PaymasterError),
 }
 
+#[derive(Debug)]
 pub struct CartridgeJsonRpcProvider {
     inner: JsonRpcClient<HttpTransport>,
     rpc_url: Url,
+}
+
+impl Clone for CartridgeJsonRpcProvider {
+    fn clone(&self) -> Self {
+        Self {
+            inner: JsonRpcClient::new(HttpTransport::new(self.rpc_url.clone())),
+            rpc_url: self.rpc_url.clone(),
+        }
+    }
 }
 
 impl CartridgeJsonRpcProvider {

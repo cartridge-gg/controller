@@ -8,7 +8,7 @@ use crate::{
     },
     controller::Controller,
     signers::{webauthn::WebauthnSigner, HashSigner},
-    storage::{InMemoryBackend, InMemoryStorage},
+    storage::InMemoryBackend,
     tests::{
         account::{webauthn::SoftPasskeySigner, FEE_TOKEN_ADDRESS},
         runners::katana::KatanaRunner,
@@ -32,11 +32,14 @@ pub async fn test_verify_paymaster_execute<
 ) {
     let runner = KatanaRunner::load();
     let paymaster = runner.executor().await;
-    let controller = runner.deploy_controller(&signer).await;
+    let controller = runner
+        .deploy_controller("username".to_owned(), &signer)
+        .await;
 
     let account: Box<dyn OutsideExecutionAccount> = match session_signer {
         Some(session_signer) => Box::new(
             controller
+                .account
                 .session_account(
                     session_signer,
                     vec![AllowedMethod::with_selector(
@@ -144,7 +147,9 @@ async fn test_verify_execute_paymaster_should_fail() {
     let runner = KatanaRunner::load();
     let signer = SigningKey::from_random();
     let paymaster = runner.executor().await;
-    let controller = runner.deploy_controller(&signer).await;
+    let controller = runner
+        .deploy_controller("username".to_owned(), &signer)
+        .await;
 
     let recipient = ContractAddress(felt!("0x18301129"));
 
@@ -174,7 +179,7 @@ async fn test_verify_execute_paymaster_should_fail() {
         runner.client(),
         SigningKey::from_random(),
         SigningKey::from_random(),
-        controller.address,
+        controller.address(),
         runner.client().chain_id().await.unwrap(),
         InMemoryBackend::default(),
     );
@@ -196,7 +201,9 @@ async fn test_verify_execute_paymaster_session() {
     let signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
     let paymaster = runner.executor().await;
-    let controller = runner.deploy_controller(&signer).await;
+    let controller = runner
+        .deploy_controller("username".to_owned(), &signer)
+        .await;
 
     let recipient = ContractAddress(felt!("0x18301129"));
 
@@ -206,6 +213,7 @@ async fn test_verify_execute_paymaster_session() {
     };
 
     let session_account = controller
+        .account
         .session_account(
             SigningKey::from_random(),
             vec![AllowedMethod::with_selector(

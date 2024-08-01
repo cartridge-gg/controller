@@ -74,8 +74,8 @@ where
 {
     username: String,
     pub provider: P,
-    account: OwnerAccount<P, S, G>,
-    contract: abigen::controller::Controller<OwnerAccount<P, S, G>>,
+    pub(crate) account: OwnerAccount<P, S, G>,
+    pub(crate) contract: abigen::controller::Controller<OwnerAccount<P, S, G>>,
     backend: B,
 }
 
@@ -287,6 +287,17 @@ where
             .await
             .map(|address| address.into())
             .map_err(ControllerError::CairoSerde)
+    }
+
+    pub async fn set_delegate_account(
+        &self,
+        delegate_address: Felt,
+    ) -> Result<InvokeTransactionResult, ControllerError> {
+        self.contract
+            .set_delegate_account(&delegate_address.into())
+            .send()
+            .await
+            .map_err(ControllerError::AccountError)
     }
 }
 

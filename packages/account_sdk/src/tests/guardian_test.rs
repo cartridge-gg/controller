@@ -15,7 +15,7 @@ use starknet::{
 
 pub async fn test_verify_execute<S: HashSigner + Clone + Sync + Send>(signer: S) {
     let runner = KatanaRunner::load();
-    let controller = runner.deploy_controller(&signer).await;
+    let controller = runner.deploy_controller("username".to_owned(), &signer).await;
 
     let new_account = ContractAddress(felt!("0x18301129"));
 

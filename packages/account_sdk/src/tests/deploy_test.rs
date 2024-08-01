@@ -19,7 +19,9 @@ use crate::{
 async fn test_deploy_using_account() {
     let signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
-    let controller = runner.deploy_controller(&signer).await;
+    let controller = runner
+        .deploy_controller("username".to_owned(), &signer)
+        .await;
 
     transfer_helper(&runner, &address).await;
 

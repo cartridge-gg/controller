@@ -7,7 +7,7 @@ use starknet::{
 };
 
 use crate::{
-    abigen::{controller::Controller, erc_20::Erc20},
+    abigen::erc_20::Erc20,
     account::session::{
         hash::{AllowedMethod, Session},
         raw_session::RawSession,
@@ -24,11 +24,12 @@ async fn test_verify_external_owner() {
     let signer = SigningKey::from_random();
     let guardian_signer = SigningKey::from_random();
     let external_account = runner.executor().await;
-    let controller = runner.deploy_controller(&signer).await;
+    let controller = runner
+        .deploy_controller("username".to_owned(), &signer)
+        .await;
 
-    let account_interface = Controller::new(controller.address, &controller);
-
-    let tx = account_interface
+    let tx = controller
+        .contract
         .register_external_owner(&external_account.address().into())
         .send()
         .await
@@ -52,7 +53,7 @@ async fn test_verify_external_owner() {
 
     let tx = external_account
         .execute_v1(vec![Call {
-            to: controller.address,
+            to: controller.address(),
             selector: selector!("register_session"),
             calldata: [
                 <RawSession as CairoSerde>::cairo_serialize(&session.raw()),
@@ -73,7 +74,7 @@ async fn test_verify_external_owner() {
         runner.client(),
         session_signer,
         guardian_signer,
-        controller.address,
+        controller.address(),
         runner.client().chain_id().await.unwrap(),
         external_account.address(),
         session,

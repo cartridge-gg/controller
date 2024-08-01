@@ -23,9 +23,12 @@ pub async fn test_verify_execute<
     session_signer: Q,
 ) {
     let runner = KatanaRunner::load();
-    let account = runner.deploy_controller(&signer).await;
+    let controller = runner
+        .deploy_controller("username".to_owned(), &signer)
+        .await;
 
-    let session_account = account
+    let session_account = controller
+        .account
         .session_account(
             session_signer,
             vec![
@@ -85,9 +88,12 @@ async fn test_verify_execute_session_multiple() {
     let signer = SigningKey::from_random();
     let session_signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
-    let account = runner.deploy_controller(&signer).await;
+    let controller = runner
+        .deploy_controller("username".to_owned(), &signer)
+        .await;
 
-    let session_account = account
+    let session_account = controller
+        .account
         .session_account(
             session_signer,
             vec![

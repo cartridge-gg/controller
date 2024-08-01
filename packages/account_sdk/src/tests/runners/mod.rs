@@ -5,9 +5,11 @@ use std::{
 };
 
 use serde::Deserialize;
+use starknet_crypto::Felt;
 
 use self::waiter::OutputWaiter;
 
+pub mod cartridge;
 pub mod katana;
 pub mod waiter;
 
@@ -50,6 +52,8 @@ pub fn find_free_port() -> u16 {
 #[derive(Debug, Clone, Deserialize)]
 pub struct TestnetConfig {
     pub port: u16,
+    pub chain_id: Felt,
+    pub proxy_port: u16,
     pub exec: String,
     pub log_file_path: String,
 }

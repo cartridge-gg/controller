@@ -1,8 +1,11 @@
 use crate::{
-    abigen::{controller::Controller, erc_20::Erc20},
-    account::session::{
-        hash::{AllowedMethod, Session},
-        SessionAccount,
+    abigen::erc_20::Erc20,
+    account::{
+        session::{
+            hash::{AllowedMethod, Session},
+            SessionAccount,
+        },
+        SpecificAccount,
     },
     signers::{HashSigner, SignerTrait},
     tests::{account::FEE_TOKEN_ADDRESS, runners::katana::KatanaRunner},
@@ -23,8 +26,9 @@ async fn test_verify_execute_session_registered() {
     let session_signer = SigningKey::from_random();
 
     let runner = KatanaRunner::load();
-    let account = runner.deploy_controller(&signer).await;
-    let controller = Controller::new(account.address, account.clone());
+    let controller = runner
+        .deploy_controller("username".to_owned(), &signer)
+        .await;
 
     let session = Session::new(
         vec![
@@ -38,6 +42,7 @@ async fn test_verify_execute_session_registered() {
     .unwrap();
 
     let tx = controller
+        .contract
         .register_session(&session.raw(), &signer.signer().guid())
         .send()
         .await
@@ -52,7 +57,7 @@ async fn test_verify_execute_session_registered() {
         runner.client(),
         session_signer,
         guardian_signer,
-        account.address,
+        controller.address(),
         runner.client().chain_id().await.unwrap(),
         signer.signer().guid(),
         session,

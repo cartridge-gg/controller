@@ -44,6 +44,7 @@ num-traits.workspace = true
 webauthn-rs-proto.workspace = true
 
 [dev-dependencies]
+hyper = { version = "0.14.27", features = ["server"] }
 rand_core = { version = "0.6", features = ["getrandom"] }
 once_cell.workspace = true
 webauthn-authenticator-rs = { workspace = true, features = ["softpasskey"] }

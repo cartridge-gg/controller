@@ -1,7 +1,9 @@
 use crate::{
-    abigen::{controller::Controller, erc_20::Erc20},
+    abigen::erc_20::Erc20,
     account::session::{create::SessionCreator, hash::AllowedMethod},
+    controller::Controller,
     signers::{webauthn::WebauthnSigner, HashSigner, NewOwnerSigner, SignError, SignerTrait},
+    storage::InMemoryBackend,
     tests::{account::webauthn::SoftPasskeySigner, runners::katana::KatanaRunner},
     transaction_waiter::TransactionWaiter,
 };
@@ -20,10 +22,12 @@ use super::account::FEE_TOKEN_ADDRESS;
 async fn test_change_owner() {
     let signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
-    let account = runner.deploy_controller(&signer).await;
-    let controller = Controller::new(account.address, account.clone());
+    let controller = runner
+        .deploy_controller("username".to_owned(), &signer)
+        .await;
 
     assert!(controller
+        .contract
         .is_owner(&signer.signer().guid())
         .call()
         .await
@@ -31,13 +35,15 @@ async fn test_change_owner() {
 
     let new_signer = SigningKey::from_random();
     let new_signer_signature = new_signer
-        .sign_new_owner(&account.chain_id, &account.address)
+        .sign_new_owner(&controller.chain_id(), &controller.address())
         .await
         .unwrap();
 
-    let add_owner = controller.add_owner_getcall(&new_signer.signer(), &new_signer_signature);
-    let remove_owner = controller.remove_owner_getcall(&signer.signer());
-    let tx = account
+    let add_owner = controller
+        .contract
+        .add_owner_getcall(&new_signer.signer(), &new_signer_signature);
+    let remove_owner = controller.contract.remove_owner_getcall(&signer.signer());
+    let tx = controller
         .execute_v1(vec![add_owner, remove_owner])
         .send()
         .await
@@ -49,12 +55,14 @@ async fn test_change_owner() {
         .unwrap();
 
     assert!(!controller
+        .contract
         .is_owner(&signer.signer().guid())
         .call()
         .await
         .unwrap());
 
     assert!(controller
+        .contract
         .is_owner(&new_signer.signer().guid())
         .call()
         .await
@@ -65,21 +73,24 @@ async fn test_change_owner() {
 async fn test_add_owner() {
     let signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
-    let mut account = runner.deploy_controller(&signer).await;
-    let controller = Controller::new(account.address, account.clone());
+    let mut controller = runner
+        .deploy_controller("username".to_owned(), &signer)
+        .await;
 
     assert!(controller
+        .contract
         .is_owner(&signer.signer().guid())
         .call()
         .await
         .unwrap());
     let new_signer = SigningKey::from_random();
     let new_signer_signature = new_signer
-        .sign_new_owner(&account.chain_id, &account.address)
+        .sign_new_owner(&controller.chain_id(), &controller.address())
         .await
         .unwrap();
 
     let tx = controller
+        .contract
         .add_owner(&new_signer.signer(), &new_signer_signature)
         .send()
         .await
@@ -91,26 +102,28 @@ async fn test_add_owner() {
         .unwrap();
 
     assert!(controller
+        .contract
         .is_owner(&signer.signer().guid())
         .call()
         .await
         .unwrap());
     assert!(controller
+        .contract
         .is_owner(&new_signer.signer().guid())
         .call()
         .await
         .unwrap());
 
-    account.set_signer(new_signer.clone());
-    let controller = Controller::new(account.address, account.clone());
+    controller.account.set_signer(new_signer.clone());
 
     let new_new_signer = SigningKey::from_random();
     let new_signer_signature = new_new_signer
-        .sign_new_owner(&account.chain_id, &account.address)
+        .sign_new_owner(&controller.chain_id(), &controller.address())
         .await
         .unwrap();
 
     let tx = controller
+        .contract
         .add_owner(&new_new_signer.signer(), &new_signer_signature)
         .send()
         .await
@@ -122,18 +135,21 @@ async fn test_add_owner() {
         .unwrap();
 
     assert!(controller
+        .contract
         .is_owner(&signer.signer().guid())
         .call()
         .await
         .unwrap());
 
     assert!(controller
+        .contract
         .is_owner(&new_signer.signer().guid())
         .call()
         .await
         .unwrap());
 
     assert!(controller
+        .contract
         .is_owner(&new_new_signer.signer().guid())
         .call()
         .await
@@ -145,10 +161,12 @@ async fn test_add_owner() {
 async fn test_change_owner_wrong_signature() {
     let signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
-    let account = runner.deploy_controller(&signer).await;
-    let controller = Controller::new(account.address, account.clone());
+    let controller = runner
+        .deploy_controller("username".to_owned(), &signer)
+        .await;
 
     assert!(controller
+        .contract
         .is_owner(&signer.signer().guid())
         .call()
         .await
@@ -164,6 +182,7 @@ async fn test_change_owner_wrong_signature() {
         .unwrap();
 
     controller
+        .contract
         .add_owner(&new_signer.signer(), &new_signer_signature)
         .send()
         .await
@@ -174,17 +193,20 @@ async fn test_change_owner_wrong_signature() {
 async fn test_change_owner_execute_after() {
     let signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
-    let mut account = runner.deploy_controller(&signer).await;
-    let controller = Controller::new(account.address, account.clone());
+    let mut controller = runner
+        .deploy_controller("username".to_owned(), &signer)
+        .await;
 
     let new_signer = SigningKey::from_random();
     let new_signer_signature = new_signer
-        .sign_new_owner(&controller.account.chain_id, &controller.account.address)
+        .sign_new_owner(&controller.chain_id(), &controller.address())
         .await
         .unwrap();
 
-    let add_owner = controller.add_owner_getcall(&new_signer.signer(), &new_signer_signature);
-    let remove_owner = controller.remove_owner_getcall(&signer.signer());
+    let add_owner = controller
+        .contract
+        .add_owner_getcall(&new_signer.signer(), &new_signer_signature);
+    let remove_owner = controller.contract.remove_owner_getcall(&signer.signer());
 
     controller
         .account
@@ -216,9 +238,9 @@ async fn test_change_owner_execute_after() {
         panic!("Should have failed");
     };
 
-    account.set_signer(new_signer.clone());
+    controller.account.set_signer(new_signer.clone());
 
-    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &account);
+    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller.account);
 
     contract_erc20
         .transfer(
@@ -246,11 +268,14 @@ async fn test_change_owner_invalidate_old_sessions() {
 
     let guardian = SigningKey::from_random();
     let runner = KatanaRunner::load();
-    let account = runner.deploy_controller(&signer).await;
+    let controller = runner
+        .deploy_controller("username".to_owned(), &signer)
+        .await;
 
     let transfer_method = AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("transfer"));
 
-    let session_account = account
+    let session_account = controller
+        .account
         .session_account(
             SigningKey::from_random(),
             vec![transfer_method.clone()],
@@ -262,13 +287,14 @@ async fn test_change_owner_invalidate_old_sessions() {
     let new_signer = SigningKey::from_random();
 
     let new_signer_signature = new_signer
-        .sign_new_owner(&account.chain_id, &account.address)
+        .sign_new_owner(&controller.chain_id(), &controller.address())
         .await
         .unwrap();
 
-    let controller = Controller::new(account.address, account.clone());
-    let add_owner = controller.add_owner_getcall(&new_signer.signer(), &new_signer_signature);
-    let remove_owner = controller.remove_owner_getcall(&signer.signer());
+    let add_owner = controller
+        .contract
+        .add_owner_getcall(&new_signer.signer(), &new_signer_signature);
+    let remove_owner = controller.contract.remove_owner_getcall(&signer.signer());
 
     controller
         .account
@@ -300,15 +326,18 @@ async fn test_change_owner_invalidate_old_sessions() {
         panic!("Should have failed");
     };
 
-    let account = Controller::new(
+    let controller = Controller::new(
+        "username".to_owned(),
         runner.client(),
         new_signer.clone(),
         guardian.clone(),
-        account.address,
+        controller.address(),
         runner.client().chain_id().await.unwrap(),
+        InMemoryBackend::default(),
     );
 
-    let session_account = account
+    let session_account = controller
+        .account
         .session_account(SigningKey::from_random(), vec![transfer_method], u64::MAX)
         .await
         .unwrap();
@@ -340,12 +369,15 @@ async fn test_call_unallowed_methods() {
     .unwrap();
 
     let runner = KatanaRunner::load();
-    let account = runner.deploy_controller(&signer).await;
+    let controller = runner
+        .deploy_controller("username".to_owned(), &signer)
+        .await;
 
     // Create random allowed method
     let transfer_method = AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("transfer"));
 
-    let session_account = account
+    let session_account = controller
+        .account
         .session_account(
             SigningKey::from_random(),
             vec![transfer_method.clone()],
@@ -356,7 +388,7 @@ async fn test_call_unallowed_methods() {
 
     let contract = Erc20::new(*FEE_TOKEN_ADDRESS, &session_account);
 
-    let address = ContractAddress(account.address);
+    let address = ContractAddress(controller.address());
     let amount = U256 {
         high: 0,
         low: 0x10_u128,
@@ -393,13 +425,16 @@ async fn test_external_owner() {
     let delegate_address = Felt::from_hex("0x1234").unwrap();
     let external_account = runner.executor().await;
 
-    let account = runner.deploy_controller(&signer).await;
+    let controller = runner
+        .deploy_controller("username".to_owned(), &signer)
+        .await;
 
-    let controller = Controller::new(account.address, &account);
-    let external_controller = Controller::new(controller.address, &external_account);
+    let external_controller =
+        crate::abigen::controller::Controller::new(controller.address(), &external_account);
 
     // register_external_owner
     let tx = controller
+        .contract
         .register_external_owner(&external_account.address().into())
         .send()
         .await
@@ -422,7 +457,7 @@ async fn test_external_owner() {
         .await
         .unwrap();
 
-    let delegate_account = controller.delegate_account().call().await;
+    let delegate_account = controller.delegate_account().await;
     assert!(
         delegate_account.is_ok_and(|addr| addr == delegate_address.into()),
         "should be delegate_address"
