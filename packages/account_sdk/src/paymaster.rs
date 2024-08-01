@@ -19,7 +19,7 @@ pub(crate) struct JsonRpcRequest<T> {
 
 #[serde_as]
 #[derive(Debug, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "snake_case")]
 struct OutsideExecutionParams {
     #[serde_as(as = "UfeHex")]
     address: Felt,
