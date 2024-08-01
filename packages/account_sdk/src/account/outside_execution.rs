@@ -112,8 +112,42 @@ mod call_serde {
     }
 }
 
+mod caller_serde {
+    use serde::{Deserialize, Deserializer, Serializer};
+    use starknet_crypto::Felt;
+    use super::OutsideExecutionCaller;
+
+    pub fn serialize<S>(caller: &OutsideExecutionCaller, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match caller {
+            OutsideExecutionCaller::Any => serializer.serialize_str("ANY_CALLER"),
+            OutsideExecutionCaller::Specific(address) => {
+                let hex = format!("0x{:064x}", address.0);
+                serializer.serialize_str(&hex)
+            }
+        }
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<OutsideExecutionCaller, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        if s == "ANY_CALLER" {
+            Ok(OutsideExecutionCaller::Any)
+        } else {
+            Felt::from_hex(&s)
+                .map(|address| OutsideExecutionCaller::Specific(address.into()))
+                .map_err(serde::de::Error::custom)
+        }
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct OutsideExecution {
+    #[serde(with = "caller_serde")]
     pub caller: OutsideExecutionCaller,
     pub execute_after: u64,
     pub execute_before: u64,

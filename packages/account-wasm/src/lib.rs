@@ -10,7 +10,7 @@ mod utils;
 use std::str::FromStr;
 use std::sync::Arc;
 
-use account_sdk::account::outside_execution::OutsideExecution;
+use account_sdk::account::outside_execution::{OutsideExecution, OutsideExecutionCaller};
 use account_sdk::account::session::hash::AllowedMethod;
 use account_sdk::account::MessageSignerAccount;
 use account_sdk::controller::Controller;
@@ -182,10 +182,17 @@ impl CartridgeAccount {
             .map(Call::try_from_js_value)
             .collect::<std::result::Result<_, _>>()?;
 
+        let caller = match from_value::<String>(caller)? {
+            s if s == "ANY_CALLER" => OutsideExecutionCaller::Any,
+            address => {
+                OutsideExecutionCaller::Specific(Felt::from_hex(&address)?.into())
+            }
+        };
+
         let response = self
             .controller
             .execute_from_outside(OutsideExecution {
-                caller: serde_wasm_bindgen::from_value(caller)?,
+                caller,
                 execute_after: 0_u64,
                 execute_before: 3000000000_u64,
                 calls,
