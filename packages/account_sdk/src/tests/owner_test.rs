@@ -459,7 +459,7 @@ async fn test_external_owner() {
 
     let delegate_account = controller.delegate_account().await;
     assert!(
-        delegate_account.is_ok_and(|addr| addr == delegate_address.into()),
+        delegate_account.is_ok_and(|addr| addr == delegate_address),
         "should be delegate_address"
     );
 }
