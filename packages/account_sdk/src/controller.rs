@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use cainome::cairo_serde::{self, CairoSerde};
-use starknet::accounts::AccountError;
+use starknet::accounts::{AccountDeploymentV1, AccountError, AccountFactoryError};
 use starknet::core::types::{DeployAccountTransactionResult, FeeEstimate, InvokeTransactionResult};
 use starknet::core::utils::{cairo_short_string_to_felt, CairoShortStringToFeltError};
 use starknet::{
@@ -17,8 +17,7 @@ use crate::account::session::hash::{AllowedMethod, Session};
 use crate::account::session::SessionAccount;
 use crate::account::{AccountHashAndCallsSigner, SpecificAccount};
 use crate::constants::ACCOUNT_CLASS_HASH;
-use crate::factory::cartridge::CartridgeAccountFactory;
-use crate::factory::{AccountDeployment, AccountFactoryError};
+use crate::factory::ControllerFactory;
 use crate::hash::MessageHashRev1;
 use crate::provider::{CartridgeProvider, CartridgeProviderError};
 use crate::signers::DeviceError;
@@ -112,7 +111,7 @@ where
         let mut calldata = Signer::cairo_serialize(&self.account.signer.signer());
         calldata.push(Felt::ONE); // no guardian
 
-        let factory = CartridgeAccountFactory::new(
+        let factory = ControllerFactory::new(
             ACCOUNT_CLASS_HASH,
             self.account.chain_id,
             calldata,
@@ -121,7 +120,7 @@ where
         );
 
         let salt = cairo_short_string_to_felt(&self.username).map_err(ControllerError::from)?;
-        let deployment = AccountDeployment::new(salt, &factory);
+        let deployment = AccountDeploymentV1::new(salt, &factory);
 
         deployment
             .max_fee(max_fee)

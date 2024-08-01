@@ -116,14 +116,9 @@ export function Execute() {
 
     // TODO: calculate webauthn validation cost separately
     const maxFee = num.toHex(ctx.transactionsDetail?.maxFee || ETH_MIN_PREFUND);
-    const session = controller.session(origin);
-    const { transaction_hash } = await account.execute(
-      calls,
-      {
-        maxFee,
-      },
-      session,
-    );
+    const { transaction_hash } = await account.execute(calls, {
+      maxFee,
+    });
     ctx.resolve({
       transaction_hash,
       code: ResponseCodes.SUCCESS,
