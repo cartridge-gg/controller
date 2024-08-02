@@ -6,7 +6,7 @@ import { useAccountQuery } from "generated/graphql";
 import Controller from "utils/controller";
 import { PopupCenter } from "utils/url";
 import { FormInput, SignupProps } from "./types";
-import { isIframe, validateUsernameFor } from "./utils";
+import { validateUsernameFor } from "./utils";
 import { RegistrationLink } from "./RegistrationLink";
 import { doSignup } from "hooks/account";
 import { useControllerTheme } from "hooks/theme";
@@ -49,38 +49,37 @@ export function Signup({
     },
   });
 
-  const onSubmit = useCallback(() => {
-    setError(undefined);
-    setIsRegistering(true);
-
+  const doPopup = useCallback(() => {
     const searchParams = new URLSearchParams(window.location.search);
     searchParams.set("name", encodeURIComponent(usernameField.value));
     searchParams.set("action", "signup");
 
-    // due to same origin restriction, if we're in iframe, pop up a
-    // window to continue webauthn registration. otherwise,
-    // display modal overlay. in either case, account is created in
-    // authenticate component, so we poll and then deploy
-    if (isIframe()) {
-      PopupCenter(
-        `/authenticate?${searchParams.toString()}`,
-        "Cartridge Signup",
-        480,
-        640,
-      );
+    PopupCenter(
+      `/authenticate?${searchParams.toString()}`,
+      "Cartridge Signup",
+      480,
+      640,
+    );
+  }, [usernameField]);
 
-      return;
-    }
+  const onSubmit = useCallback(() => {
+    setError(undefined);
+    setIsRegistering(true);
 
-    doSignup(decodeURIComponent(usernameField.value))
-      .catch((e) => {
-        setFieldError(usernameField.name, {
-          type: "custom",
-          message: e.message,
-        });
-      })
-      .finally(() => setIsRegistering(false));
-  }, [setFieldError, usernameField]);
+    doSignup(decodeURIComponent(usernameField.value)).catch((e) => {
+      // Backward compat with iframes without this permission-policy
+      if (e.message.includes("publickey-credentials-create")) {
+        doPopup();
+        return;
+      }
+
+      setIsRegistering(false);
+      setFieldError(usernameField.name, {
+        type: "custom",
+        message: e.message,
+      });
+    });
+  }, [usernameField, setFieldError, doPopup]);
 
   // for polling approach when iframe
   useAccountQuery(
