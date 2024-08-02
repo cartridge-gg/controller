@@ -74,7 +74,7 @@ impl KatanaRunner {
         let client = CartridgeJsonRpcProvider::new(rpc_url.clone());
 
         let rpc_client = Arc::new(JsonRpcClient::new(HttpTransport::new(rpc_url.clone())));
-        let proxy = CartridgeProxy::new(rpc_url, proxy_url, config.chain_id);
+        let proxy = CartridgeProxy::new(rpc_url, proxy_url.clone(), config.chain_id);
         let proxy_handle = tokio::spawn(async move {
             proxy.run().await;
         });
