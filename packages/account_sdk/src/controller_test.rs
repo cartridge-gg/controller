@@ -1,24 +1,30 @@
-use starknet::{accounts::Account, macros::felt, providers::Provider, signers::SigningKey};
+use std::time::Duration;
 
 use crate::{
     controller::Controller, storage::InMemoryBackend, tests::runners::katana::KatanaRunner,
     transaction_waiter::TransactionWaiter,
 };
+use starknet::{accounts::Account, macros::felt, providers::Provider, signers::SigningKey};
 
 #[tokio::test]
 async fn test_deploy_controller() {
     let runner = KatanaRunner::load();
+    runner.declare_controller().await;
 
     // Create signers
-    let owner = SigningKey::from_random();
-    let guardian_signer = SigningKey::from_random();
+    let owner = SigningKey::from_secret_scalar(felt!(
+        "0x3e5e410f88f88e77d18a168259a8feb6a68b358c813bdca08c875c8e54d0bf2"
+    ));
+    let guardian_signer = SigningKey::from_secret_scalar(felt!(
+        "0x3e5e410f88f88e77d18a168259a8feb6a68b358c813bdca08c875c8e54d0bf2"
+    ));
 
     let provider = runner.client();
     let backend = InMemoryBackend::default();
 
     // Create a new Controller instance
     let username = "testuser".to_string();
-    let address = felt!("0x1234"); // Example address, you may want to calculate this
+    let address = felt!("0x47b0710252f3eb7bea6124534a41e03b641fddcb48c57e2dc63b009cb2a725a");
     let chain_id = provider.chain_id().await.unwrap();
 
     let controller = Controller::new(
@@ -31,12 +37,17 @@ async fn test_deploy_controller() {
         backend,
     );
 
+    let deploy = controller.deploy();
+    assert_eq!(address, deploy.address());
+
+    runner.fund(&address).await;
+
     // Deploy the controller
-    let max_fee = felt!("0x1000000000000000");
-    let deploy_result = controller.deploy(max_fee).await.unwrap();
+    let deploy_result = deploy.fee_estimate_multiplier(1.5).send().await.unwrap();
 
     // Wait for the transaction to be mined
     TransactionWaiter::new(deploy_result.transaction_hash, &provider.clone())
+        .with_timeout(Duration::from_secs(5))
         .wait()
         .await
         .unwrap();
@@ -46,13 +57,5 @@ async fn test_deploy_controller() {
     assert_eq!(
         deployed_address, address,
         "Deployed address doesn't match expected address"
-    );
-
-    // Optional: You can add more assertions here to verify the deployed controller's state
-    // For example, you could call a method on the deployed controller to check its initial state
-
-    println!(
-        "Controller deployed successfully at address: {}",
-        deployed_address
     );
 }

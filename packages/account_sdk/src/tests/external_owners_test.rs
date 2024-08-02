@@ -14,8 +14,7 @@ use crate::{
         SessionAccount,
     },
     signers::HashSigner,
-    tests::{account::FEE_TOKEN_ADDRESS, runners::katana::KatanaRunner},
-    transaction_waiter::TransactionWaiter,
+    tests::{account::FEE_TOKEN_ADDRESS, ensure_txn, runners::katana::KatanaRunner},
 };
 
 #[tokio::test]
@@ -28,17 +27,14 @@ async fn test_verify_external_owner() {
         .deploy_controller("username".to_owned(), &signer)
         .await;
 
-    let tx = controller
-        .contract
-        .register_external_owner(&external_account.address().into())
-        .send()
-        .await
-        .unwrap();
-
-    TransactionWaiter::new(tx.transaction_hash, runner.client())
-        .wait()
-        .await
-        .unwrap();
+    ensure_txn(
+        controller
+            .contract
+            .register_external_owner(&external_account.address().into()),
+        runner.client(),
+    )
+    .await
+    .unwrap();
 
     let session_signer = SigningKey::from_random();
     let session = Session::new(
@@ -51,8 +47,8 @@ async fn test_verify_external_owner() {
     )
     .unwrap();
 
-    let tx = external_account
-        .execute_v1(vec![Call {
+    ensure_txn(
+        external_account.execute_v1(vec![Call {
             to: controller.address(),
             selector: selector!("register_session"),
             calldata: [
@@ -60,15 +56,11 @@ async fn test_verify_external_owner() {
                 vec![external_account.address()],
             ]
             .concat(),
-        }])
-        .send()
-        .await
-        .unwrap();
-
-    TransactionWaiter::new(tx.transaction_hash, runner.client())
-        .wait()
-        .await
-        .unwrap();
+        }]),
+        runner.client(),
+    )
+    .await
+    .unwrap();
 
     let session = SessionAccount::new_as_registered(
         runner.client(),
@@ -82,15 +74,16 @@ async fn test_verify_external_owner() {
 
     let new_account = ContractAddress(felt!("0x18301129"));
 
-    Erc20::new(*FEE_TOKEN_ADDRESS, &session)
-        .transfer(
+    ensure_txn(
+        Erc20::new(*FEE_TOKEN_ADDRESS, &session).transfer(
             &new_account,
             &U256 {
                 low: 0x10_u128,
                 high: 0,
             },
-        )
-        .send()
-        .await
-        .unwrap();
+        ),
+        runner.client(),
+    )
+    .await
+    .unwrap();
 }

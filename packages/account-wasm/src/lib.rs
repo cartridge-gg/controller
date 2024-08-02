@@ -184,9 +184,7 @@ impl CartridgeAccount {
 
         let caller = match from_value::<String>(caller)? {
             s if s == "ANY_CALLER" => OutsideExecutionCaller::Any,
-            address => {
-                OutsideExecutionCaller::Specific(Felt::from_hex(&address)?.into())
-            }
+            address => OutsideExecutionCaller::Specific(Felt::from_hex(&address)?.into()),
         };
 
         let response = self
@@ -227,7 +225,9 @@ impl CartridgeAccount {
 
         let res = self
             .controller
-            .deploy(from_value(max_fee)?)
+            .deploy()
+            .max_fee(from_value(max_fee)?)
+            .send()
             .await
             .map_err(|e| OperationError::Deployment(format!("{:#?}", e)))?;
 

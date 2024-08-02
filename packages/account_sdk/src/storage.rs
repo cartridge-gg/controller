@@ -42,7 +42,7 @@ pub enum StorageError {
     OperationFailed(String),
 }
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct InMemoryBackend {
     storage: HashMap<String, String>,
 }

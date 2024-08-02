@@ -13,6 +13,8 @@ use starknet::{
     signers::SigningKey,
 };
 
+use super::ensure_txn;
+
 pub async fn test_verify_execute<S: HashSigner + Clone + Sync + Send>(signer: S) {
     let runner = KatanaRunner::load();
     let controller = runner
@@ -30,21 +32,22 @@ pub async fn test_verify_execute<S: HashSigner + Clone + Sync + Send>(signer: S)
         .await
         .expect("failed to call contract");
 
-    contract_erc20
-        .transfer(
+    ensure_txn(
+        contract_erc20.transfer(
             &new_account,
             &U256 {
                 low: 0x10_u128,
                 high: 0,
             },
-        )
-        .send()
-        .await
-        .unwrap();
+        ),
+        runner.client(),
+    )
+    .await
+    .unwrap();
 }
 
 #[tokio::test]
-async fn test_verify_execute_webauthn_guardian_starknet() {
+async fn test_verify_execute_webauthn() {
     let signer = WebauthnSigner::register(
         "cartridge.gg".to_string(),
         "username".to_string(),
@@ -58,6 +61,6 @@ async fn test_verify_execute_webauthn_guardian_starknet() {
 }
 
 #[tokio::test]
-async fn test_verify_execute_starknet_guardian_starknet() {
+async fn test_verify_execute_starpair() {
     test_verify_execute(SigningKey::from_random()).await;
 }

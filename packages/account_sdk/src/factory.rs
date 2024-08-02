@@ -1,8 +1,7 @@
 use async_trait::async_trait;
 use starknet::{
     accounts::{
-        AccountFactory, PreparedAccountDeploymentV1, PreparedAccountDeploymentV3,
-        RawAccountDeploymentV1, RawAccountDeploymentV3,
+        AccountDeploymentV1, AccountFactory, PreparedAccountDeploymentV1, PreparedAccountDeploymentV3, RawAccountDeploymentV1, RawAccountDeploymentV3
     },
     core::types::{BlockId, BlockTag, Felt},
     providers::Provider,
@@ -97,5 +96,9 @@ where
         let signature = self.signer.sign_hash(tx_hash).await?;
 
         Ok(signature)
+    }
+
+    fn deploy_v1(&self, salt: Felt) -> AccountDeploymentV1<'_, Self> {
+        AccountDeploymentV1::new(salt, self)
     }
 }

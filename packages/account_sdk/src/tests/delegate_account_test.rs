@@ -1,8 +1,6 @@
 use crate::account::SpecificAccount;
-use crate::{
-    abigen::controller::Controller, tests::runners::katana::KatanaRunner,
-    transaction_waiter::TransactionWaiter,
-};
+use crate::tests::ensure_txn;
+use crate::{abigen::controller::Controller, tests::runners::katana::KatanaRunner};
 use cainome::cairo_serde::Zeroable;
 use starknet::core::types::Felt;
 use starknet::signers::SigningKey;
@@ -22,15 +20,12 @@ async fn test_set_delegate_account_from_account() {
         "should be zero"
     );
 
-    let tx = controller
-        .set_delegate_account(delegate_address)
-        .await
-        .unwrap();
-
-    TransactionWaiter::new(tx.transaction_hash, runner.client())
-        .wait()
-        .await
-        .unwrap();
+    ensure_txn(
+        controller.set_delegate_account(delegate_address),
+        runner.client(),
+    )
+    .await
+    .unwrap();
 
     let delegate_account = controller.delegate_account().await;
     assert!(
@@ -55,6 +50,7 @@ async fn test_set_delegate_account_from_non_owner() {
     // non owner set_delegate_account
     let tx = account_interface_external_account
         .set_delegate_account(&delegate_address.into())
+        .fee_estimate_multiplier(1.5)
         .send()
         .await;
     assert!(tx.is_err(), "should panic")

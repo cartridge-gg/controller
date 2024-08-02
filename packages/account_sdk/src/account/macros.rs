@@ -15,7 +15,7 @@ macro_rules! impl_account {
     ($type:ident<$($gen:ident : $bound:path),*>) => {
         #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
         #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-        impl<$($gen: $bound + Send + Sync),*> Account for $type<$($gen),*>
+        impl<$($gen: $bound + Send + Sync + Clone),*> Account for $type<$($gen),*>
         {
             type SignError = SignError;
 

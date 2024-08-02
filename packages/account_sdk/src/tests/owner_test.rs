@@ -4,8 +4,7 @@ use crate::{
     controller::Controller,
     signers::{webauthn::WebauthnSigner, HashSigner, NewOwnerSigner, SignError, SignerTrait},
     storage::InMemoryBackend,
-    tests::{account::webauthn::SoftPasskeySigner, runners::katana::KatanaRunner},
-    transaction_waiter::TransactionWaiter,
+    tests::{account::webauthn::SoftPasskeySigner, ensure_txn, runners::katana::KatanaRunner},
 };
 use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{
@@ -43,16 +42,13 @@ async fn test_change_owner() {
         .contract
         .add_owner_getcall(&new_signer.signer(), &new_signer_signature);
     let remove_owner = controller.contract.remove_owner_getcall(&signer.signer());
-    let tx = controller
-        .execute_v1(vec![add_owner, remove_owner])
-        .send()
-        .await
-        .unwrap();
 
-    TransactionWaiter::new(tx.transaction_hash, runner.client())
-        .wait()
-        .await
-        .unwrap();
+    ensure_txn(
+        controller.execute_v1(vec![add_owner, remove_owner]),
+        runner.client(),
+    )
+    .await
+    .unwrap();
 
     assert!(!controller
         .contract
@@ -89,17 +85,14 @@ async fn test_add_owner() {
         .await
         .unwrap();
 
-    let tx = controller
-        .contract
-        .add_owner(&new_signer.signer(), &new_signer_signature)
-        .send()
-        .await
-        .unwrap();
-
-    TransactionWaiter::new(tx.transaction_hash, runner.client())
-        .wait()
-        .await
-        .unwrap();
+    ensure_txn(
+        controller
+            .contract
+            .add_owner(&new_signer.signer(), &new_signer_signature),
+        runner.client(),
+    )
+    .await
+    .unwrap();
 
     assert!(controller
         .contract
@@ -122,17 +115,14 @@ async fn test_add_owner() {
         .await
         .unwrap();
 
-    let tx = controller
-        .contract
-        .add_owner(&new_new_signer.signer(), &new_signer_signature)
-        .send()
-        .await
-        .unwrap();
-
-    TransactionWaiter::new(tx.transaction_hash, runner.client())
-        .wait()
-        .await
-        .unwrap();
+    ensure_txn(
+        controller
+            .contract
+            .add_owner(&new_new_signer.signer(), &new_signer_signature),
+        runner.client(),
+    )
+    .await
+    .unwrap();
 
     assert!(controller
         .contract
@@ -184,6 +174,7 @@ async fn test_change_owner_wrong_signature() {
     controller
         .contract
         .add_owner(&new_signer.signer(), &new_signer_signature)
+        .fee_estimate_multiplier(1.5)
         .send()
         .await
         .unwrap();
@@ -208,64 +199,61 @@ async fn test_change_owner_execute_after() {
         .add_owner_getcall(&new_signer.signer(), &new_signer_signature);
     let remove_owner = controller.contract.remove_owner_getcall(&signer.signer());
 
-    controller
-        .account
-        .execute_v1(vec![add_owner, remove_owner])
-        .send()
-        .await
-        .unwrap();
+    ensure_txn(
+        controller.account.execute_v1(vec![add_owner, remove_owner]),
+        runner.client(),
+    )
+    .await
+    .unwrap();
 
-    // Wait for the owner change to be saved on chain
-    tokio::time::sleep(std::time::Duration::from_secs(10)).await;
-
-    let new_account = felt!("0x18301129");
-
+    let recipient = felt!("0x18301129");
     let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller.account);
 
     // Old signature should fail
-    if contract_erc20
-        .transfer(
-            &ContractAddress(new_account),
+    let result = ensure_txn(
+        contract_erc20.transfer(
+            &ContractAddress(recipient),
             &U256 {
                 low: 0x10_u128,
                 high: 0,
             },
-        )
-        .send()
-        .await
-        .is_ok()
-    {
-        panic!("Should have failed");
-    };
+        ),
+        runner.client(),
+    )
+    .await;
+
+    assert!(result.is_err(), "Transaction should have failed");
 
     controller.account.set_signer(new_signer.clone());
 
     let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller.account);
 
-    contract_erc20
-        .transfer(
-            &ContractAddress(new_account),
+    ensure_txn(
+        contract_erc20.transfer(
+            &ContractAddress(recipient),
             &U256 {
                 low: 0x10_u128,
                 high: 0,
             },
-        )
-        .send()
-        .await
-        .unwrap();
+        ),
+        runner.client(),
+    )
+    .await
+    .unwrap();
 }
 
 #[tokio::test]
 async fn test_change_owner_invalidate_old_sessions() {
-    let signer = WebauthnSigner::register(
-        "cartridge.gg".to_string(),
-        "username".to_string(),
-        "challenge".as_bytes(),
-        SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
-    )
-    .await
-    .unwrap();
+    // let signer = WebauthnSigner::register(
+    //     "cartridge.gg".to_string(),
+    //     "username".to_string(),
+    //     "challenge".as_bytes(),
+    //     SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
+    // )
+    // .await
+    // .unwrap();
 
+    let signer = SigningKey::from_random();
     let guardian = SigningKey::from_random();
     let runner = KatanaRunner::load();
     let controller = runner
@@ -296,29 +284,26 @@ async fn test_change_owner_invalidate_old_sessions() {
         .add_owner_getcall(&new_signer.signer(), &new_signer_signature);
     let remove_owner = controller.contract.remove_owner_getcall(&signer.signer());
 
-    controller
-        .account
-        .execute_v1(vec![add_owner, remove_owner])
-        .send()
-        .await
-        .unwrap();
+    ensure_txn(
+        controller.account.execute_v1(vec![add_owner, remove_owner]),
+        runner.client(),
+    )
+    .await
+    .unwrap();
 
-    // Wait for the owner change to be saved on chain
-    tokio::time::sleep(std::time::Duration::from_secs(10)).await;
-
-    let new_account = felt!("0x18301129");
-
+    let recipient = felt!("0x18301129");
     let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &session_account);
 
     // Old session should fail
     if contract_erc20
         .transfer(
-            &ContractAddress(new_account),
+            &ContractAddress(recipient),
             &U256 {
                 low: 0x10_u128,
                 high: 0,
             },
         )
+        .fee_estimate_multiplier(1.5)
         .send()
         .await
         .is_ok()
@@ -344,17 +329,18 @@ async fn test_change_owner_invalidate_old_sessions() {
     let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &session_account);
 
     // New session should work
-    contract_erc20
-        .transfer(
-            &ContractAddress(new_account),
+    ensure_txn(
+        contract_erc20.transfer(
+            &ContractAddress(recipient),
             &U256 {
                 low: 0x10_u128,
                 high: 0,
             },
-        )
-        .send()
-        .await
-        .unwrap();
+        ),
+        runner.client(),
+    )
+    .await
+    .unwrap();
 }
 
 #[tokio::test]
@@ -395,11 +381,17 @@ async fn test_call_unallowed_methods() {
     };
 
     // calling allowed method should succeed
-    assert!(contract.transfer(&address, &amount).send().await.is_ok());
+    assert!(contract
+        .transfer(&address, &amount)
+        .fee_estimate_multiplier(1.5)
+        .send()
+        .await
+        .is_ok());
 
     // Perform contract invocation that is not part of the allowed methods
     let error = contract
         .approve(&address, &amount)
+        .fee_estimate_multiplier(1.5)
         .send()
         .await
         .unwrap_err();
@@ -433,29 +425,22 @@ async fn test_external_owner() {
         crate::abigen::controller::Controller::new(controller.address(), &external_account);
 
     // register_external_owner
-    let tx = controller
-        .contract
-        .register_external_owner(&external_account.address().into())
-        .send()
-        .await
-        .unwrap();
-
-    TransactionWaiter::new(tx.transaction_hash, runner.client())
-        .wait()
-        .await
-        .unwrap();
+    ensure_txn(
+        controller
+            .contract
+            .register_external_owner(&external_account.address().into()),
+        runner.client(),
+    )
+    .await
+    .unwrap();
 
     // external owner set_delegate_account
-    let tx = external_controller
-        .set_delegate_account(&delegate_address.into())
-        .send()
-        .await
-        .unwrap();
-
-    TransactionWaiter::new(tx.transaction_hash, runner.client())
-        .wait()
-        .await
-        .unwrap();
+    ensure_txn(
+        external_controller.set_delegate_account(&delegate_address.into()),
+        runner.client(),
+    )
+    .await
+    .unwrap();
 
     let delegate_account = controller.delegate_account().await;
     assert!(

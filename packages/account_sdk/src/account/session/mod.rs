@@ -166,9 +166,9 @@ impl_account!(SessionAccount<P: Provider, S: HashSigner, G: HashSigner>);
 
 impl<P, S, G> ConnectedAccount for SessionAccount<P, S, G>
 where
-    P: Provider + Send + Sync,
-    S: HashSigner + Send + Sync,
-    G: HashSigner + Send + Sync,
+    P: Provider + Send + Sync + Clone,
+    S: HashSigner + Send + Sync + Clone,
+    G: HashSigner + Send + Sync + Clone,
 {
     type Provider = P;
 

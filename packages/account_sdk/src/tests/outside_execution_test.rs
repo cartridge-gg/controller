@@ -11,6 +11,7 @@ use crate::{
     storage::InMemoryBackend,
     tests::{
         account::{webauthn::SoftPasskeySigner, FEE_TOKEN_ADDRESS},
+        ensure_txn,
         runners::katana::KatanaRunner,
     },
     transaction_waiter::TransactionWaiter,
@@ -82,16 +83,12 @@ pub async fn test_verify_paymaster_execute<
         .await
         .unwrap();
 
-    let tx = paymaster
-        .execute_v1(vec![outside_execution.into()])
-        .send()
-        .await
-        .unwrap();
-
-    TransactionWaiter::new(tx.transaction_hash, runner.client())
-        .wait()
-        .await
-        .unwrap();
+    ensure_txn(
+        paymaster.execute_v1(vec![outside_execution.into()]),
+        runner.client(),
+    )
+    .await
+    .unwrap();
 
     assert_eq!(
         Erc20::new(*FEE_TOKEN_ADDRESS, &paymaster)
