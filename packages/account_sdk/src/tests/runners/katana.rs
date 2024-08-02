@@ -41,8 +41,6 @@ lazy_static! {
     );
 
     pub static ref CONFIG: TestnetConfig = TestnetConfig{
-        port: 1234,
-        proxy_port: 2345,
         chain_id: short_string!("KATANA"),
         exec: "katana".to_string(),
         log_file_path: "log/katana.log".to_string(),
@@ -60,20 +58,19 @@ pub struct KatanaRunner {
 
 impl KatanaRunner {
     pub fn new(config: TestnetConfig) -> Self {
+        let katana_port = find_free_port();
         let child = Command::new(config.exec)
-            .args(["-p", &config.port.to_string()])
+            .args(["-p", &katana_port.to_string()])
             .args(["--json-log"])
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn()
             .expect("failed to start subprocess");
 
-        let testnet = SubprocessRunner::new(child, config.log_file_path, |l| {
-            l.contains(r#""target":"katana::cli""#)
-        });
+        let testnet = SubprocessRunner::new(child, |l| l.contains(r#""target":"katana::cli""#));
 
-        let rpc_url = Url::parse(&format!("http://0.0.0.0:{}/", config.port)).unwrap();
-        let proxy_url = Url::parse(&format!("http://0.0.0.0:{}/", config.proxy_port)).unwrap();
+        let rpc_url = Url::parse(&format!("http://0.0.0.0:{}/", katana_port)).unwrap();
+        let proxy_url = Url::parse(&format!("http://0.0.0.0:{}/", find_free_port())).unwrap();
         let client = CartridgeJsonRpcProvider::new(rpc_url.clone());
 
         let rpc_client = Arc::new(JsonRpcClient::new(HttpTransport::new(rpc_url.clone())));
@@ -92,7 +89,7 @@ impl KatanaRunner {
     }
 
     pub fn load() -> Self {
-        KatanaRunner::new(CONFIG.clone().port(find_free_port()))
+        KatanaRunner::new(CONFIG.clone())
     }
 
     pub fn client(&self) -> &CartridgeJsonRpcProvider {

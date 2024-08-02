@@ -1,7 +1,8 @@
 use async_trait::async_trait;
 use starknet::{
     accounts::{
-        AccountDeploymentV1, AccountFactory, PreparedAccountDeploymentV1, PreparedAccountDeploymentV3, RawAccountDeploymentV1, RawAccountDeploymentV3
+        AccountDeploymentV1, AccountFactory, PreparedAccountDeploymentV1,
+        PreparedAccountDeploymentV3, RawAccountDeploymentV1, RawAccountDeploymentV3,
     },
     core::types::{BlockId, BlockTag, Felt},
     providers::Provider,

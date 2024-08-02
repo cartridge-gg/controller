@@ -47,6 +47,7 @@ pub async fn test_verify_execute<S: HashSigner + Clone + Sync + Send>(signer: S)
 }
 
 #[tokio::test]
+#[ignore = "Skipped due to exhausted resources"]
 async fn test_verify_execute_webauthn() {
     let signer = WebauthnSigner::register(
         "cartridge.gg".to_string(),

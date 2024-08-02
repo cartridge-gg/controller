@@ -113,9 +113,9 @@ mod call_serde {
 }
 
 mod caller_serde {
+    use super::OutsideExecutionCaller;
     use serde::{Deserialize, Deserializer, Serializer};
     use starknet_crypto::Felt;
-    use super::OutsideExecutionCaller;
 
     pub fn serialize<S>(caller: &OutsideExecutionCaller, serializer: S) -> Result<S::Ok, S::Error>
     where

@@ -244,15 +244,6 @@ async fn test_change_owner_execute_after() {
 
 #[tokio::test]
 async fn test_change_owner_invalidate_old_sessions() {
-    // let signer = WebauthnSigner::register(
-    //     "cartridge.gg".to_string(),
-    //     "username".to_string(),
-    //     "challenge".as_bytes(),
-    //     SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
-    // )
-    // .await
-    // .unwrap();
-
     let signer = SigningKey::from_random();
     let guardian = SigningKey::from_random();
     let runner = KatanaRunner::load();
@@ -295,21 +286,19 @@ async fn test_change_owner_invalidate_old_sessions() {
     let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &session_account);
 
     // Old session should fail
-    if contract_erc20
-        .transfer(
+    let result = ensure_txn(
+        contract_erc20.transfer(
             &ContractAddress(recipient),
             &U256 {
                 low: 0x10_u128,
                 high: 0,
             },
-        )
-        .fee_estimate_multiplier(1.5)
-        .send()
-        .await
-        .is_ok()
-    {
-        panic!("Should have failed");
-    };
+        ),
+        runner.client(),
+    )
+    .await;
+
+    assert!(result.is_err(), "Transaction should have failed");
 
     let controller = Controller::new(
         "username".to_owned(),

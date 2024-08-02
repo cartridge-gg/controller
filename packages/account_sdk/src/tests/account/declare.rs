@@ -87,6 +87,7 @@ impl<'a> AccountDeclaration<'a> {
 
         let declaration_result = account
             .declare_v2(Arc::new(flattened_class), casm_class_hash)
+            .fee_estimate_multiplier(1.5)
             .send()
             .await
             .unwrap();
