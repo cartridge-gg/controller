@@ -5,6 +5,7 @@ use ecdsa::{RecoveryId, VerifyingKey};
 use p256::NistP256;
 use sha2::{digest::Update, Digest, Sha256};
 use starknet::core::types::Felt;
+use web_sys::console;
 use std::collections::BTreeMap;
 use std::ops::Neg;
 use std::result::Result;
@@ -322,6 +323,8 @@ where
             extensions: None,
         };
 
+        console::log_1(&format!("{:#?}", options).into());
+
         let cred = self
             .operations
             .get_assertion(options)
@@ -337,6 +340,7 @@ where
 
         let client_data_json = String::from_utf8(cred.response.client_data_json.to_vec()).unwrap();
         let client_data_hash = Sha256::new().chain(client_data_json.clone()).finalize();
+        console::log_1(&format!("{}", client_data_json).into());
         let mut message: Vec<u8> = cred.response.authenticator_data.as_slice().into();
         message.append(&mut client_data_hash.to_vec());
 
@@ -374,7 +378,7 @@ where
             sha256_implementation: Sha256Implementation::Cairo1,
             client_data_json_outro,
         };
-
+        console::log_1(&format!("{:#?}", webauthn_signature).into());
         Ok(SignerSignature::Webauthn((
             abigen::controller::WebauthnSigner::from(self),
             webauthn_signature,
@@ -505,7 +509,15 @@ fn extract_client_data_json_outro(client_data_json: &str) -> Vec<u8> {
             let outro_str = &outro_sub[outro_start..];
             outro_str.as_bytes().to_vec()
         }
-        None => vec![],
+        None => vec![]
+        // None => {
+        //     let mut outro = String::new();
+        //     if !client_data_json.ends_with('}') {
+        //         outro.push(',');
+        //     }
+        //     outro.push_str("\"crossOrigin\":true}");
+        //     outro.as_bytes().to_vec()
+        // },
     }
 }
 
@@ -568,5 +580,10 @@ mod tests {
         let outro = extract_client_data_json_outro(json_without_outro);
         let outro_string = String::from_utf8(outro).expect("Invalid UTF-8");
         assert_eq!(outro_string, "");
+
+        // let json_without_cross_origin_with_other = r#"{"type":"webauthn.get","challenge":"BD7mj5jZ_ySvAv7kgFJ1HKRknsHwYuwtWbkjJPqQKi4B","origin":"http://localhost:3001","other_field":"value"}"#;
+        // let outro = extract_client_data_json_outro(json_without_cross_origin_with_other);
+        // let outro_string = String::from_utf8(outro).unwrap();
+        // assert_eq!(outro_string, r#","crossOrigin":true}"#);
     }
 }
