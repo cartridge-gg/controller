@@ -135,7 +135,6 @@ export function Signup({
       },
     },
   );
-  console.log(usernameField);
 
   return (
     <Container
