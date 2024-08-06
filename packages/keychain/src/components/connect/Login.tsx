@@ -1,10 +1,9 @@
 import { Field } from "@cartridge/ui";
 import { Button } from "@chakra-ui/react";
 import { Container, Footer, Content, useLayout } from "components/layout";
-import { SubmitHandler, useForm, useController } from "react-hook-form";
 import { useCallback, useEffect, useState } from "react";
 import Controller from "utils/controller";
-import { FormInput, LoginMode, LoginProps } from "./types";
+import { LoginMode, LoginProps } from "./types";
 import { useAnalytics } from "hooks/analytics";
 import { fetchAccount, validateUsernameFor } from "./utils";
 import { RegistrationLink } from "./RegistrationLink";
@@ -44,102 +43,97 @@ function Form({
   const [isLoading, setIsLoading] = useState(false);
   const [expiresAt] = useState<bigint>(3000000000n);
   const [error, setError] = useState<Error>();
-
-  const { handleSubmit, formState, control, setValue } = useForm<FormInput>({
-    defaultValues: { username: prefilledName },
+  const [usernameField, setUsernameField] = useState({
+    value: prefilledName,
+    error: undefined,
   });
-  const { field: usernameField } = useController({
-    name: "username",
-    control,
-    rules: {
-      required: "Username required",
-      minLength: {
-        value: 3,
-        message: "Username must be at least 3 characters",
-      },
-      validate: validateUsernameFor("login"),
-    },
-  });
+  const [isValidating, setIsValidating] = useState(false);
 
-  const onSubmit: SubmitHandler<FormInput> = useCallback(
-    async (values) => {
-      setIsLoading(true);
+  const onSubmit = useCallback(async () => {
+    setIsValidating(true);
+    const error = await validateUsernameFor("login")(usernameField.value);
+    if (error) {
+      setUsernameField((u) => ({ ...u, error }));
+    }
 
-      const {
-        account: {
-          credentials: {
-            webauthn: [{ id: credentialId, publicKey }],
-          },
-          contractAddress: address,
+    setIsValidating(false);
+
+    setIsLoading(true);
+
+    const {
+      account: {
+        credentials: {
+          webauthn: [{ id: credentialId, publicKey }],
         },
-      } = await fetchAccount(values.username);
+        contractAddress: address,
+      },
+    } = await fetchAccount(usernameField.value);
 
-      try {
-        const controller = new Controller({
-          chainId,
-          rpcUrl,
-          address,
-          username: values.username,
-          publicKey,
-          credentialId,
-        });
+    try {
+      const controller = new Controller({
+        chainId,
+        rpcUrl,
+        address,
+        username: usernameField.value,
+        publicKey,
+        credentialId,
+      });
 
-        switch (mode) {
-          case LoginMode.Webauthn:
-            await doLogin(values.username, credentialId);
-            break;
-          case LoginMode.Controller:
-            if (policies.length === 0) {
-              throw new Error("Policies required for controller ");
-            }
+      switch (mode) {
+        case LoginMode.Webauthn:
+          await doLogin(usernameField.value, credentialId);
+          break;
+        case LoginMode.Controller:
+          if (policies.length === 0) {
+            throw new Error("Policies required for controller ");
+          }
 
-            await controller.approve(origin, expiresAt, policies);
-            break;
-        }
-
-        controller.store();
-        setController(controller);
-
-        if (onSuccess) {
-          onSuccess();
-        }
-
-        log({ type: "webauthn_login", address });
-      } catch (e) {
-        setError(e);
-
-        log({
-          type: "webauthn_login_error",
-          payload: {
-            error: e?.message,
-          },
-          address,
-        });
+          await controller.approve(origin, expiresAt, policies);
+          break;
       }
 
-      setIsLoading(false);
-    },
-    [
-      chainId,
-      rpcUrl,
-      origin,
-      policies,
-      expiresAt,
-      mode,
-      log,
-      onSuccess,
-      setController,
-    ],
-  );
+      controller.store();
+      setController(controller);
+
+      if (onSuccess) {
+        onSuccess();
+      }
+
+      log({ type: "webauthn_login", address });
+    } catch (e) {
+      setError(e);
+
+      log({
+        type: "webauthn_login_error",
+        payload: {
+          error: e?.message,
+        },
+        address,
+      });
+    }
+
+    setIsLoading(false);
+  }, [
+    usernameField.value,
+    chainId,
+    rpcUrl,
+    origin,
+    policies,
+    expiresAt,
+    mode,
+    log,
+    onSuccess,
+    setController,
+  ]);
 
   useEffect(() => {
-    if (!formState.isValidating || !footer.isOpen) return;
+    if (!isValidating || !footer.isOpen) return;
     footer.onToggle();
-  }, [formState.isValidating, footer]);
+  }, [isValidating, footer]);
   return (
     <form
       style={{ width: "100%" }}
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={onSubmit}
       onChange={() => setError(undefined)}
     >
       <Content>
@@ -148,16 +142,18 @@ function Form({
           autoFocus
           onChange={(e) => {
             setError(undefined);
-            e.target.value = e.target.value.toLowerCase();
-            usernameField.onChange(e);
+            setUsernameField((u) => ({
+              ...u,
+              value: e.target.value.toLowerCase(),
+            }));
           }}
           placeholder="Username"
-          error={formState.errors.username}
-          isLoading={formState.isValidating}
+          error={usernameField.error}
+          isLoading={isValidating}
           isDisabled={isLoading}
           onClear={() => {
             setError(undefined);
-            setValue(usernameField.name, "");
+            setUsernameField((u) => ({ ...u, value: "" }));
           }}
         />
       </Content>
