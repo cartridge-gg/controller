@@ -32,9 +32,9 @@ async fn test_verify_execute_session_registered() {
 
     let session = Session::new(
         vec![
-            AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
-            AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("transfds")),
-            AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("transfer")),
+            AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
+            AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("transfds")),
+            AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("transfer")),
         ],
         u64::MAX,
         &session_signer.signer(),

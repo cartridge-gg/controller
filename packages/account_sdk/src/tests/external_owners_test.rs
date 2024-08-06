@@ -38,7 +38,7 @@ async fn test_verify_external_owner() {
 
     let session_signer = SigningKey::from_random();
     let session = Session::new(
-        vec![AllowedMethod::with_selector(
+        vec![AllowedMethod::new(
             *FEE_TOKEN_ADDRESS,
             selector!("transfer"),
         )],

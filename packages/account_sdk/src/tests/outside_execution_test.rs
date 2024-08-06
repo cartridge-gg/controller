@@ -46,7 +46,7 @@ pub async fn test_verify_paymaster_execute<
                 .account
                 .session_account(
                     session_signer,
-                    vec![AllowedMethod::with_selector(
+                    vec![AllowedMethod::new(
                         *FEE_TOKEN_ADDRESS,
                         selector!("transfer"),
                     )],
@@ -216,7 +216,7 @@ async fn test_verify_execute_paymaster_session() {
         .account
         .session_account(
             SigningKey::from_random(),
-            vec![AllowedMethod::with_selector(
+            vec![AllowedMethod::new(
                 *FEE_TOKEN_ADDRESS,
                 selector!("transfer"),
             )],
