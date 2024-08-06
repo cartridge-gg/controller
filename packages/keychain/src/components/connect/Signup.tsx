@@ -50,6 +50,8 @@ export function Signup({
         const error = await validateUsernameFor("signup")(username);
         if (error) {
           setUsernameField((u) => ({ ...u, error }));
+        } else {
+          setUsernameField((u) => ({ ...u, error: undefined }));
         }
 
         setIsValidating(false);
@@ -184,7 +186,9 @@ export function Signup({
           <Button
             colorScheme="colorful"
             isLoading={isRegistering}
-            isDisabled={debouncing || !username || isValidating}
+            isDisabled={
+              debouncing || !username || isValidating || !!usernameField.error
+            }
             onClick={onSubmit}
           >
             sign up

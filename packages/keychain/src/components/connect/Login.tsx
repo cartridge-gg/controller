@@ -54,6 +54,8 @@ function Form({
     const error = await validateUsernameFor("login")(usernameField.value);
     if (error) {
       setUsernameField((u) => ({ ...u, error }));
+      setIsValidating(false);
+      return;
     }
 
     setIsValidating(false);
@@ -145,6 +147,7 @@ function Form({
             setUsernameField((u) => ({
               ...u,
               value: e.target.value.toLowerCase(),
+              error: undefined,
             }));
           }}
           placeholder="Username"
@@ -162,7 +165,14 @@ function Form({
         {error && (
           <ErrorAlert title="Login failed" description={error.message} />
         )}
-        <Button onClick={onSubmit} colorScheme="colorful" isLoading={isLoading}>
+        <Button
+          onClick={onSubmit}
+          colorScheme="colorful"
+          isLoading={isLoading}
+          isDisabled={
+            isValidating || !usernameField.value || !!usernameField.error
+          }
+        >
           Log in
         </Button>
         <RegistrationLink
