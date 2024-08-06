@@ -77,16 +77,17 @@ export function Signup({
     setError(undefined);
     setIsRegistering(true);
 
+    // Safari does not allow cross origin iframe to create credentials
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+    if (isSafari) {
+      doPopup();
+      return;
+    }
+
     doSignup(decodeURIComponent(usernameField.value)).catch((e) => {
       // Backward compat with iframes without this permission-policy
-      if (
-        e.message.includes(
-          "The 'publickey-credentials-create' feature is not enabled in this document.",
-        ) ||
-        e.message.includes(
-          "The origin of the document is not the same as its ancestors.",
-        )
-      ) {
+      if (e.message.includes("publickey-credentials-create")) {
         doPopup();
         return;
       }
