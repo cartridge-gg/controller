@@ -1,11 +1,11 @@
 import { Field } from "@cartridge/ui";
 import { Button } from "@chakra-ui/react";
 import { Container, Footer, Content } from "components/layout";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAccountQuery } from "generated/graphql";
 import Controller from "utils/controller";
 import { PopupCenter } from "utils/url";
-import { FormInput, SignupProps } from "./types";
+import { SignupProps } from "./types";
 import { validateUsernameFor } from "./utils";
 import { RegistrationLink } from "./RegistrationLink";
 import { doSignup } from "hooks/account";
@@ -13,8 +13,8 @@ import { useControllerTheme } from "hooks/theme";
 import { useConnection } from "hooks/connection";
 import { ErrorAlert } from "components/ErrorAlert";
 import { useDeploy } from "hooks/deploy";
-import { useController, useForm } from "react-hook-form";
 import { constants } from "starknet";
+import { useDebounce } from "hooks/debounce";
 
 export function Signup({
   prefilledName = "",
@@ -27,27 +27,38 @@ export function Signup({
   const { deployRequest } = useDeploy();
   const [error, setError] = useState<Error>();
   const [isRegistering, setIsRegistering] = useState(false);
-
-  const {
-    handleSubmit,
-    formState,
-    control,
-    setValue,
-    setError: setFieldError,
-  } = useForm<FormInput>({ defaultValues: { username: prefilledName } });
-  const { hasPrefundRequest } = useConnection();
-  const { field: usernameField } = useController({
-    name: "username",
-    control,
-    rules: {
-      required: "Username required",
-      minLength: {
-        value: 3,
-        message: "Username must be at least 3 characters",
-      },
-      validate: validateUsernameFor("signup"),
-    },
+  const [usernameField, setUsernameField] = useState({
+    value: prefilledName,
+    error: undefined,
   });
+  const [isValidating, setIsValidating] = useState(false);
+
+  const { hasPrefundRequest } = useConnection();
+  const { debouncedValue: username, debouncing } = useDebounce(
+    usernameField.value,
+    1000,
+  );
+
+  // In order for Safari to open "Create Passkey" modal successfully, submit handler has to be async.
+  // The workaround is to call async validation function every time when username input changes
+  useEffect(() => {
+    setError(undefined);
+
+    if (username) {
+      const validate = async () => {
+        setIsValidating(true);
+        const error = await validateUsernameFor("signup")(username);
+        if (error) {
+          setUsernameField((u) => ({ ...u, error }));
+        } else {
+          setUsernameField((u) => ({ ...u, error: undefined }));
+        }
+
+        setIsValidating(false);
+      };
+      validate();
+    }
+  }, [username]);
 
   const doPopup = useCallback(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -68,18 +79,22 @@ export function Signup({
 
     doSignup(decodeURIComponent(usernameField.value)).catch((e) => {
       // Backward compat with iframes without this permission-policy
-      if (e.message.includes("publickey-credentials-create")) {
+      if (
+        e.message.includes(
+          "The 'publickey-credentials-create' feature is not enabled in this document.",
+        ) ||
+        e.message.includes(
+          "The origin of the document is not the same as its ancestors.",
+        )
+      ) {
         doPopup();
         return;
       }
 
       setIsRegistering(false);
-      setFieldError(usernameField.name, {
-        type: "custom",
-        message: e.message,
-      });
+      setUsernameField((u) => ({ ...u, error: e.message }));
     });
-  }, [usernameField, setFieldError, doPopup]);
+  }, [usernameField, doPopup]);
 
   // for polling approach when iframe
   useAccountQuery(
@@ -153,16 +168,18 @@ export function Signup({
             autoFocus
             onChange={(e) => {
               setError(undefined);
-              e.target.value = e.target.value.toLowerCase();
-              usernameField.onChange(e);
+              setUsernameField((u) => ({
+                ...u,
+                value: e.target.value.toLowerCase(),
+              }));
             }}
             placeholder="Username"
-            error={formState.errors.username}
-            isLoading={formState.isValidating}
+            error={usernameField.error}
+            isLoading={isValidating}
             isDisabled={isRegistering}
             onClear={() => {
               setError(undefined);
-              setValue(usernameField.name, "");
+              setUsernameField((u) => ({ ...u, value: "" }));
             }}
           />
         </Content>
@@ -176,9 +193,9 @@ export function Signup({
             colorScheme="colorful"
             isLoading={isRegistering}
             isDisabled={
-              !!Object.keys(formState.errors).length || formState.isValidating
+              debouncing || !username || isValidating || !!usernameField.error
             }
-            onClick={handleSubmit(onSubmit)}
+            onClick={onSubmit}
           >
             sign up
           </Button>
