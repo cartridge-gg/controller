@@ -57,7 +57,6 @@ function Form({
     }
 
     setIsValidating(false);
-
     setIsLoading(true);
 
     const {
@@ -133,8 +132,9 @@ function Form({
   return (
     <form
       style={{ width: "100%" }}
-      onSubmit={onSubmit}
-      onChange={() => setError(undefined)}
+      onKeyDown={(e) => {
+        e.key === "Enter" && e.preventDefault();
+      }}
     >
       <Content>
         <Field
@@ -162,7 +162,7 @@ function Form({
         {error && (
           <ErrorAlert title="Login failed" description={error.message} />
         )}
-        <Button type="submit" colorScheme="colorful" isLoading={isLoading}>
+        <Button onClick={onSubmit} colorScheme="colorful" isLoading={isLoading}>
           Log in
         </Button>
         <RegistrationLink
