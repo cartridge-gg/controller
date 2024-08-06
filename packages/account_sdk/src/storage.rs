@@ -103,16 +103,16 @@ impl Selectors {
     }
 
     pub fn account(address: &Felt) -> String {
-        format!("@cartridge/account/{:x}", address)
+        format!("@cartridge/account/0x{:x}", address)
     }
 
     pub fn deployment(address: &Felt, chain_id: &Felt) -> String {
-        format!("@cartridge/deployment/{:x}/{:x}", address, chain_id)
+        format!("@cartridge/deployment/0x{:x}/0x{:x}", address, chain_id)
     }
 
     pub fn admin(address: &Felt, origin: &str) -> String {
         format!(
-            "@cartridge/admin/{:x}/{}",
+            "@cartridge/admin/0x{:x}/{}",
             address,
             urlencoding::encode(origin)
         )
@@ -120,7 +120,7 @@ impl Selectors {
 
     pub fn session(address: &Felt, origin: &str, chain_id: &Felt) -> String {
         format!(
-            "@cartridge/session/{:x}/{}/{:x}",
+            "@cartridge/session/0x{:x}/{}/0x{:x}",
             address,
             urlencoding::encode(origin),
             chain_id

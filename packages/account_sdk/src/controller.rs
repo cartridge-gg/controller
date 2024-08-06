@@ -160,7 +160,6 @@ where
         outside_execution: OutsideExecution,
     ) -> Result<Felt, ControllerError> {
         let signed = self
-            .account
             .sign_outside_execution(outside_execution.clone())
             .await?;
 
@@ -183,8 +182,7 @@ where
         fee_multiplier: Option<f64>,
     ) -> Result<FeeEstimate, ControllerError> {
         let multiplier = fee_multiplier.unwrap_or(1.0);
-        self.account
-            .execute_v1(calls)
+        self.execute_v1(calls)
             .fee_estimate_multiplier(multiplier)
             .estimate_fee()
             .await
