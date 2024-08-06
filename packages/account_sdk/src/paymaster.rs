@@ -71,22 +71,6 @@ impl PaymasterRequest {
             .send()
             .await?;
 
-        // println!("Response status: {:?}", response.status());
-        // println!("Response headers: {:?}", response.headers());
-        // let response_text = response.text().await?;
-        // println!("Response body: {}", response_text);
-
-        // Ok(PaymasterResponse {
-        //     transaction_hash: felt!("0x012"),
-        // })
-
-        // if !response.status().is_success() {
-        //     return Err(PaymasterError::UnexpectedResponse(format!(
-        //         "HTTP error: {}",
-        //         response.status()
-        //     )));
-        // }
-
         let json: PaymasterResponse = response.json().await.map_err(PaymasterError::from)?;
         Ok(json)
     }

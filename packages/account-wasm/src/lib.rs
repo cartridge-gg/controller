@@ -4,9 +4,6 @@ mod storage;
 mod types;
 mod utils;
 
-// #[cfg(test)]
-// mod tests;
-
 use std::str::FromStr;
 use std::sync::Arc;
 
