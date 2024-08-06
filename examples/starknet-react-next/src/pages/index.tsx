@@ -8,8 +8,8 @@ import { DelegateAccount } from "components/DelegateAccount";
 
 const Home: NextPage = () => {
   return (
-    <div>
-      <h2>Wallet</h2>
+    <div className="flex flex-col p-4 gap-2">
+      <h2 className="text-3xl font-bold underline">Wallet</h2>
       <ConnectWallet />
       <DojoSpawnAndMove />
       <TransferEth />
