@@ -46,7 +46,6 @@
     "vite-plugin-dts": "^3.5.3"
   },
   "dependencies": {
-    "@chakra-ui/anatomy": "^2.2.1",
-    "react-hook-form": "^7.52.1"
+    "@chakra-ui/anatomy": "^2.2.1"
   }
 }

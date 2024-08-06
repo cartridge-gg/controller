@@ -33,6 +33,6 @@ export const Normal: Story = {};
 
 export const Error: Story = {
   args: {
-    error: { type: "validate", message: "Cannot contain special characters" },
+    error: "Cannot contain special characters",
   },
 };
