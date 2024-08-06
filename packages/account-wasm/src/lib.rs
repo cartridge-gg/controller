@@ -10,7 +10,8 @@ mod utils;
 use std::str::FromStr;
 use std::sync::Arc;
 
-use account_sdk::account::outside_execution::{OutsideExecution, OutsideExecutionCaller};
+use account_sdk::abigen::controller::OutsideExecution;
+use account_sdk::account::outside_execution::OutsideExecutionCaller;
 use account_sdk::account::session::hash::AllowedMethod;
 use account_sdk::account::MessageSignerAccount;
 use account_sdk::controller::Controller;
@@ -190,10 +191,10 @@ impl CartridgeAccount {
         let response = self
             .controller
             .execute_from_outside(OutsideExecution {
-                caller,
+                caller: caller.into(),
                 execute_after: 0_u64,
                 execute_before: 3000000000_u64,
-                calls,
+                calls: calls.into_iter().map(|call| call.into()).collect(),
                 nonce: SigningKey::from_random().secret_scalar(),
             })
             .await?;

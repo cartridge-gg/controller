@@ -10,8 +10,8 @@
       "execute_after": 0,
       "calls": [
         {
-          "contract_address": "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-          "entrypoint": "approve",
+          "to": "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+          "selector": "0x219209e083275171774dab1df80982e9df2096516f06319c5c6d71ae0a8480c",
           "calldata": [
             "0x352750babeadc9fdecc385d5aac902c680539d8fc1fe0491e082c1fc94d7ca1",
             "0x11c37937e08000",
@@ -19,8 +19,8 @@
           ]
         },
         {
-          "contract_address": "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-          "entrypoint": "transfer",
+          "to": "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+          "selector": "0x83afd3f4caedc6eebf44246fe54e38c95e3179a5ec9ea81740eca5b482d12e",
           "calldata": [
             "0x352750babeadc9fdecc385d5aac902c680539d8fc1fe0491e082c1fc94d7ca1",
             "0x11c37937e08000",

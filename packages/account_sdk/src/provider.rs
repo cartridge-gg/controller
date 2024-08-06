@@ -1,4 +1,4 @@
-use crate::account::outside_execution::OutsideExecution;
+use crate::abigen::controller::OutsideExecution;
 use crate::paymaster::{PaymasterError, PaymasterRequest, PaymasterResponse};
 use async_trait::async_trait;
 use auto_impl::auto_impl;
@@ -24,7 +24,6 @@ pub trait CartridgeProvider: Provider {
         &self,
         outside_execution: OutsideExecution,
         address: Felt,
-        chain_id: Felt,
         signature: Vec<Felt>,
     ) -> Result<PaymasterResponse, CartridgeProviderError>;
 }
@@ -66,18 +65,11 @@ impl CartridgeProvider for CartridgeJsonRpcProvider {
         &self,
         outside_execution: OutsideExecution,
         address: Felt,
-        chain_id: Felt,
         signature: Vec<Felt>,
     ) -> Result<PaymasterResponse, CartridgeProviderError> {
-        PaymasterRequest::send(
-            self.rpc_url.clone(),
-            outside_execution,
-            address,
-            chain_id,
-            signature,
-        )
-        .await
-        .map_err(CartridgeProviderError::PaymasterError)
+        PaymasterRequest::send(self.rpc_url.clone(), outside_execution, address, signature)
+            .await
+            .map_err(CartridgeProviderError::PaymasterError)
     }
 }
 

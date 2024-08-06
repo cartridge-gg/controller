@@ -5,7 +5,7 @@ use starknet::core::serde::unsigned_field_element::UfeHex;
 use starknet_types_core::felt::Felt;
 use url::Url;
 
-use crate::account::outside_execution::OutsideExecution;
+use crate::abigen::controller::OutsideExecution;
 
 pub struct PaymasterRequest {}
 
@@ -20,14 +20,12 @@ pub(crate) struct JsonRpcRequest<T> {
 #[serde_as]
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
-struct OutsideExecutionParams {
+pub struct OutsideExecutionParams {
     #[serde_as(as = "UfeHex")]
-    address: Felt,
-    #[serde_as(as = "UfeHex")]
-    chain_id: Felt,
-    outside_execution: OutsideExecution,
+    pub address: Felt,
+    pub outside_execution: OutsideExecution,
     #[serde_as(as = "Vec<UfeHex>")]
-    signature: Vec<Felt>,
+    pub signature: Vec<Felt>,
 }
 
 #[serde_as]
@@ -52,7 +50,6 @@ impl PaymasterRequest {
         rpc_url: Url,
         outside_execution: OutsideExecution,
         address: Felt,
-        chain_id: Felt,
         signature: Vec<Felt>,
     ) -> Result<PaymasterResponse, PaymasterError> {
         let request = JsonRpcRequest {
@@ -61,7 +58,6 @@ impl PaymasterRequest {
             method: "cartridge_addExecuteOutsideTransaction",
             params: OutsideExecutionParams {
                 address,
-                chain_id,
                 outside_execution,
                 signature,
             },
@@ -75,13 +71,23 @@ impl PaymasterRequest {
             .send()
             .await?;
 
-        if !response.status().is_success() {
-            return Err(PaymasterError::UnexpectedResponse(format!(
-                "HTTP error: {}",
-                response.status()
-            )));
-        }
+        // println!("Response status: {:?}", response.status());
+        // println!("Response headers: {:?}", response.headers());
+        // let response_text = response.text().await?;
+        // println!("Response body: {}", response_text);
 
-        response.json().await.map_err(PaymasterError::from)
+        // Ok(PaymasterResponse {
+        //     transaction_hash: felt!("0x012"),
+        // })
+
+        // if !response.status().is_success() {
+        //     return Err(PaymasterError::UnexpectedResponse(format!(
+        //         "HTTP error: {}",
+        //         response.status()
+        //     )));
+        // }
+
+        let json: PaymasterResponse = response.json().await.map_err(PaymasterError::from)?;
+        Ok(json)
     }
 }

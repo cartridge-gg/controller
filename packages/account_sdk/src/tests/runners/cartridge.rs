@@ -6,7 +6,6 @@ use serde_json::{json, Value};
 use starknet::accounts::single_owner::SignError;
 use starknet::accounts::{Account, AccountError, Call, ExecutionEncoding};
 use starknet::core::types::InvokeTransactionResult;
-use starknet::core::utils::get_selector_from_name;
 use starknet::macros::selector;
 use starknet::providers::jsonrpc::HttpTransport;
 use starknet::providers::JsonRpcClient;
@@ -16,8 +15,8 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 use url::Url;
 
-use crate::abigen;
-use crate::account::outside_execution::OutsideExecutionRaw;
+use crate::abigen::controller::OutsideExecution;
+use crate::paymaster::OutsideExecutionParams;
 
 use super::katana::{single_owner_account_with_encoding, PREFUNDED};
 
@@ -80,6 +79,7 @@ impl CartridgeProxy {
         if let Some(method) = body.get("method") {
             if method == "cartridge_addExecuteOutsideTransaction" {
                 let params = &body["params"];
+                println!("Received params: {:?}", params);
                 match parse_execute_outside_transaction_params(params) {
                     Ok((address, outside_execution, signature)) => {
                         match self
@@ -87,13 +87,12 @@ impl CartridgeProxy {
                             .await
                         {
                             Ok(result) => {
+                                println!("success");
                                 return Ok(Response::builder()
                                     .status(StatusCode::OK)
                                     .body(Body::from(
                                         json!({
-                                            "jsonrpc": "2.0",
-                                            "id": body["id"],
-                                            "result": format!("0x{:x}", result.transaction_hash)
+                                            "transaction_hash": format!("0x{:x}", result.transaction_hash)
                                         })
                                         .to_string(),
                                     ))
@@ -149,14 +148,14 @@ impl CartridgeProxy {
 
     async fn execute_from_outside(
         &self,
-        outside_execution: OutsideExecutionRaw,
+        outside_execution: OutsideExecution,
         signature: Vec<Felt>,
         contract_address: Felt,
     ) -> Result<
         InvokeTransactionResult,
         AccountError<SignError<starknet::signers::local_wallet::SignError>>,
     > {
-        let mut calldata = <OutsideExecutionRaw as CairoSerde>::cairo_serialize(&outside_execution);
+        let mut calldata = <OutsideExecution as CairoSerde>::cairo_serialize(&outside_execution);
         calldata.extend(<Vec<Felt> as CairoSerde>::cairo_serialize(&signature));
 
         let call = Call {
@@ -179,40 +178,12 @@ impl CartridgeProxy {
 
 fn parse_execute_outside_transaction_params(
     params: &Value,
-) -> Result<(Felt, OutsideExecutionRaw, Vec<Felt>), Error> {
-    let address: Felt = serde_json::from_value(params["address"].clone())?;
-    let signature: Vec<Felt> = serde_json::from_value(params["signature"].clone())?;
-
-    let outside_execution_params = &params["outside_execution"];
-    let caller: Felt = serde_json::from_value(outside_execution_params["caller"].clone())?;
-    let nonce: Felt = serde_json::from_value(outside_execution_params["nonce"].clone())?;
-    let execute_after: u64 =
-        serde_json::from_value(outside_execution_params["execute_after"].clone())?;
-    let execute_before: u64 =
-        serde_json::from_value(outside_execution_params["execute_before"].clone())?;
-
-    let calls: Vec<abigen::controller::Call> = outside_execution_params["calls"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .map(|call| {
-            Ok(abigen::controller::Call {
-                to: serde_json::from_value(call["contract_address"].clone())?,
-                selector: get_selector_from_name(&serde_json::from_value::<String>(
-                    call["entrypoint"].clone(),
-                )?)?,
-                calldata: serde_json::from_value(call["calldata"].clone())?,
-            })
-        })
-        .collect::<Result<_, Error>>()?;
-
-    let outside_execution = OutsideExecutionRaw {
-        caller: caller.into(),
-        nonce,
-        execute_after,
-        execute_before,
-        calls,
-    };
+) -> Result<(Felt, OutsideExecution, Vec<Felt>), Error> {
+    let OutsideExecutionParams {
+        address,
+        outside_execution,
+        signature,
+    } = serde_json::from_value(params.clone())?;
 
     Ok((address, outside_execution, signature))
 }

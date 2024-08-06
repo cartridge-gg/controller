@@ -71,7 +71,7 @@ impl KatanaRunner {
 
         let rpc_url = Url::parse(&format!("http://0.0.0.0:{}/", katana_port)).unwrap();
         let proxy_url = Url::parse(&format!("http://0.0.0.0:{}/", find_free_port())).unwrap();
-        let client = CartridgeJsonRpcProvider::new(rpc_url.clone());
+        let client = CartridgeJsonRpcProvider::new(proxy_url.clone());
 
         let rpc_client = Arc::new(JsonRpcClient::new(HttpTransport::new(rpc_url.clone())));
         let proxy = CartridgeProxy::new(rpc_url, proxy_url.clone(), config.chain_id);

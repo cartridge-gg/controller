@@ -1,9 +1,12 @@
 use std::vec;
 
 use crate::{
-    abigen::erc_20::Erc20,
+    abigen::{
+        controller::{Call, OutsideExecution},
+        erc_20::Erc20,
+    },
     account::{
-        outside_execution::{OutsideExecution, OutsideExecutionAccount, OutsideExecutionCaller},
+        outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller},
         session::{create::SessionCreator, hash::AllowedMethod},
     },
     controller::Controller,
@@ -18,7 +21,7 @@ use crate::{
 };
 use cainome::cairo_serde::{CairoSerde, ContractAddress, U256};
 use starknet::{
-    accounts::{Account, Call},
+    accounts::Account,
     macros::{felt, selector},
     providers::Provider,
     signers::SigningKey,
@@ -63,11 +66,11 @@ pub async fn test_verify_paymaster_execute<
     };
 
     let outside_execution = OutsideExecution {
-        caller: OutsideExecutionCaller::Specific(paymaster.address().into()),
+        caller: OutsideExecutionCaller::Specific(paymaster.address().into()).into(),
         execute_after: u64::MIN,
         execute_before: u64::MAX,
         calls: vec![Call {
-            to: *FEE_TOKEN_ADDRESS,
+            to: (*FEE_TOKEN_ADDRESS).into(),
             selector: selector!("transfer"),
             calldata: [
                 <ContractAddress as CairoSerde>::cairo_serialize(&recipient),
@@ -156,11 +159,11 @@ async fn test_verify_execute_paymaster_should_fail() {
     };
 
     let outside_execution = OutsideExecution {
-        caller: OutsideExecutionCaller::Any,
+        caller: OutsideExecutionCaller::Any.into(),
         execute_after: u64::MIN,
         execute_before: u64::MAX,
         calls: vec![Call {
-            to: *FEE_TOKEN_ADDRESS,
+            to: (*FEE_TOKEN_ADDRESS).into(),
             selector: selector!("transfer"),
             calldata: [
                 <ContractAddress as CairoSerde>::cairo_serialize(&recipient),
@@ -223,11 +226,11 @@ async fn test_verify_execute_paymaster_session() {
         .unwrap();
 
     let outside_execution = OutsideExecution {
-        caller: OutsideExecutionCaller::Any,
+        caller: OutsideExecutionCaller::Any.into(),
         execute_after: u64::MIN,
         execute_before: u64::MAX,
         calls: vec![Call {
-            to: *FEE_TOKEN_ADDRESS,
+            to: (*FEE_TOKEN_ADDRESS).into(),
             selector: selector!("transfer"),
             calldata: [
                 <ContractAddress as CairoSerde>::cairo_serialize(&recipient),

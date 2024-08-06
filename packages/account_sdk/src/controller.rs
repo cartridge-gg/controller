@@ -1,5 +1,5 @@
-use crate::abigen::controller::Signer;
-use crate::account::outside_execution::{OutsideExecution, OutsideExecutionAccount};
+use crate::abigen::controller::{OutsideExecution, Signer};
+use crate::account::outside_execution::OutsideExecutionAccount;
 use crate::account::session::hash::{AllowedMethod, Session};
 use crate::account::session::SessionAccount;
 use crate::account::AccountHashAndCallsSigner;
@@ -169,7 +169,6 @@ where
             .add_execute_outside_transaction(
                 outside_execution,
                 self.account.address,
-                self.account.chain_id,
                 signed.signature,
             )
             .await
