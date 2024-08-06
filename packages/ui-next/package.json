@@ -9,11 +9,10 @@
     "dist"
   ],
   "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
-    "./themes/*": "./dist/themes/*.css"
+    ".": "./dist",
+    "./themes/default.css": "./dist/themes/default.css",
+    "./themes/dark.css": "./dist/themes/dark.css",
+    "./themes/fonts.css": "./dist/themes/fonts.css"
   },
   "scripts": {
     "dev": "tsc && pnpm copyThemes",
