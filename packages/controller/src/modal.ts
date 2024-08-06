@@ -7,7 +7,8 @@ export const createModal = (src: string, onClose?: () => void) => {
   iframe.sandbox.add("allow-popups");
   iframe.sandbox.add("allow-scripts");
   iframe.sandbox.add("allow-same-origin");
-  iframe.allow = "publickey-credentials-get *; clipboard-write";
+  iframe.allow =
+    "publickey-credentials-create *; publickey-credentials-get *; clipboard-write";
   if (!!document.hasStorageAccess) {
     iframe.sandbox.add("allow-storage-access-by-user-activation");
   }
