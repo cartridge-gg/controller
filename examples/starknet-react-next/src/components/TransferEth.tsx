@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@cartridge/ui-next";
 import { useAccount, useExplorer } from "@starknet-react/core";
 import { useCallback, useState } from "react";
