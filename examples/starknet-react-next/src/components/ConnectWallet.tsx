@@ -1,6 +1,7 @@
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
 import CartridgeConnector from "@cartridge/connector";
 import { useEffect, useState } from "react";
+import { Button } from "@cartridge/ui-next";
 
 export function ConnectWallet() {
   const { connect, connectors } = useConnect();
@@ -16,7 +17,7 @@ export function ConnectWallet() {
   }, [address, connector]);
 
   return (
-    <>
+    <div>
       {address && (
         <>
           <p>Account: {address} </p>
@@ -24,15 +25,13 @@ export function ConnectWallet() {
         </>
       )}
 
-      <div style={{ display: "flex", gap: "10px" }}>
-        <button
-          onClick={() => {
-            address ? disconnect() : connect({ connector });
-          }}
-        >
-          {address ? "Disconnect" : "Connect"}
-        </button>
-      </div>
-    </>
+      <Button
+        onClick={() => {
+          address ? disconnect() : connect({ connector });
+        }}
+      >
+        {address ? "Disconnect" : "Connect"}
+      </Button>
+    </div>
   );
 }
