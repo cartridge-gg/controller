@@ -1,3 +1,6 @@
+"use client";
+
+import { Button, Textarea } from "@cartridge/ui-next";
 import { useAccount, useSignTypedData } from "@starknet-react/core";
 import { useCallback, useState } from "react";
 import {
@@ -76,27 +79,25 @@ export function SignMessage() {
   if (!account || !address) return <></>;
 
   return (
-    <div style={{ marginTop: "10px" }}>
+    <div className="flex flex-col gap-2">
       <h2>Sign Message</h2>
-      <textarea
-        style={{ height: "200px", width: "500px" }}
+      <Textarea
+        className="h-96"
         value={JSON.stringify(message, null, 2)}
         onChange={(e) => setMessage(JSON.parse(e.target.value))}
       />
-      <div style={{ display: "flex", flexDirection: "row", gap: "10px" }}>
-        <button
+      <div className="flex gap-2">
+        <Button
           onClick={() => {
             setIsValid(null);
             signTypedData(message);
           }}
         >
           Sign Message
-        </button>
+        </Button>
 
         {signature && (
-          <button style={{ paddingLeft: "8px" }} onClick={onValidateSig}>
-            Validate Signature
-          </button>
+          <Button onClick={onValidateSig}>Validate Signature</Button>
         )}
       </div>
 

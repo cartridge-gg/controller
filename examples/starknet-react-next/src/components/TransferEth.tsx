@@ -1,3 +1,6 @@
+"use client";
+
+import { Button } from "@cartridge/ui-next";
 import { useAccount, useExplorer } from "@starknet-react/core";
 import { useCallback, useState } from "react";
 
@@ -40,13 +43,13 @@ export const TransferEth = () => {
   }
 
   return (
-    <>
+    <div>
       <h2>Transfer Eth</h2>
       <p>Address: {ETH_CONTRACT}</p>
 
-      <button onClick={() => execute()} disabled={submitted}>
+      <Button onClick={() => execute()} disabled={submitted}>
         Transfer 0.005 ETH to self
-      </button>
+      </Button>
       {txnHash && (
         <p>
           Transaction hash:{" "}
@@ -59,6 +62,6 @@ export const TransferEth = () => {
           </a>
         </p>
       )}
-    </>
+    </div>
   );
 };

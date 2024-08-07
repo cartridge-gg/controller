@@ -9,11 +9,10 @@
       "@/*": ["./src/*"]
     },
   },
-  "plugins": [
-    { "transform": "typescript-transform-paths" }
-  ],
   "include": [
     "src/components/**/*",
+    "src/index.ts",
+    "src/preset.ts",
     "src/utils.ts",
   ]
 }
