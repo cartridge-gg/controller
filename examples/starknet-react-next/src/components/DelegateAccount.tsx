@@ -2,6 +2,7 @@ import { useAccount } from "@starknet-react/core";
 import { useCallback, useEffect, useState } from "react";
 import { constants } from "starknet";
 import CartridgeConnector from "@cartridge/connector";
+import { Button, Input } from "@cartridge/ui-next";
 
 export const DelegateAccount = () => {
   const [chainId] = useState<constants.StarknetChainId>(
@@ -57,28 +58,31 @@ export const DelegateAccount = () => {
   }
 
   return (
-    <>
+    <div className="flex flex-col gap-2">
       <h2>Delegate account</h2>
       {isDelegateSupported ? (
         <>
           <p>
             Address: {delegateAddress}
-            <button onClick={() => load()}>Load</button>
+            <Button onClick={() => load()}>Load</Button>
           </p>
 
-          <input
-            type="text"
-            min-width="420px"
-            value={delegateAddressInput}
-            onChange={(e) => setDelegateAddressInput(e.target.value)}
-          />
-          <button onClick={() => execute()} disabled={submitted}>
-            Set Delegate
-          </button>
+          <div className="flex gap-2">
+            <Input
+              className="max-w-40"
+              type="text"
+              min-width="420px"
+              value={delegateAddressInput}
+              onChange={(e) => setDelegateAddressInput(e.target.value)}
+            />
+            <Button onClick={() => execute()} disabled={submitted}>
+              Set Delegate
+            </Button>
+          </div>
         </>
       ) : (
         <p>Not supported!</p>
       )}
-    </>
+    </div>
   );
 };

@@ -17,7 +17,7 @@ export function ConnectWallet() {
   }, [address, connector]);
 
   return (
-    <>
+    <div>
       {address && (
         <>
           <p>Account: {address} </p>
@@ -25,15 +25,13 @@ export function ConnectWallet() {
         </>
       )}
 
-      <div style={{ display: "flex", gap: "10px" }}>
-        <Button
-          onClick={() => {
-            address ? disconnect() : connect({ connector });
-          }}
-        >
-          {address ? "Disconnect" : "Connect"}
-        </Button>
-      </div>
-    </>
+      <Button
+        onClick={() => {
+          address ? disconnect() : connect({ connector });
+        }}
+      >
+        {address ? "Disconnect" : "Connect"}
+      </Button>
+    </div>
   );
 }
