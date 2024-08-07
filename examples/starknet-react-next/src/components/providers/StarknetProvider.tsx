@@ -1,3 +1,5 @@
+"use client";
+
 import { Chain, mainnet, sepolia } from "@starknet-react/chains";
 import { Connector, StarknetConfig, starkscan } from "@starknet-react/core";
 import { PropsWithChildren } from "react";

@@ -1,3 +1,5 @@
+"use client";
+
 import { Button, Textarea } from "@cartridge/ui-next";
 import { useAccount, useSignTypedData } from "@starknet-react/core";
 import { useCallback, useState } from "react";

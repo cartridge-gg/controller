@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@cartridge/ui-next";
 import {
   useAccount,

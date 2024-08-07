@@ -1,3 +1,5 @@
+"use client";
+
 import { useAccount } from "@starknet-react/core";
 import { useCallback, useEffect, useState } from "react";
 import { constants } from "starknet";
