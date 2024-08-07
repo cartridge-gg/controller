@@ -74,21 +74,6 @@ where
     }
 }
 
-impl<P, S, G> SpecificAccount for OwnerAccount<P, S, G>
-where
-    P: Provider + Send + Sync,
-    S: HashSigner + Send + Sync,
-    G: HashSigner + Send + Sync,
-{
-    fn address(&self) -> Felt {
-        self.address
-    }
-
-    fn chain_id(&self) -> Felt {
-        self.chain_id
-    }
-}
-
 impl_account!(OwnerAccount<P: Provider, S: HashSigner, G: HashSigner>);
 impl_execution_encoder!(OwnerAccount<P: Provider, S: HashSigner, G: HashSigner>);
 
@@ -145,11 +130,6 @@ pub trait AccountHashAndCallsSigner {
         -> Result<Vec<Felt>, SignError>;
 }
 
-pub trait SpecificAccount {
-    fn address(&self) -> Felt;
-    fn chain_id(&self) -> Felt;
-}
-
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 impl<P, S, G> AccountHashAndCallsSigner for OwnerAccount<P, S, G>
@@ -177,7 +157,7 @@ pub trait MessageSignerAccount {
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 impl<T> MessageSignerAccount for T
 where
-    T: AccountHashSigner + SpecificAccount + Sync,
+    T: AccountHashSigner + Account + Sync,
 {
     async fn sign_message(&self, data: TypedData) -> Result<Vec<Felt>, SignError> {
         let hash = data.encode(self.address())?;

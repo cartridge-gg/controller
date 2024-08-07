@@ -17,7 +17,7 @@ use self::{
     raw_session::RawSessionToken,
 };
 
-use super::{AccountHashAndCallsSigner, SpecificAccount};
+use super::AccountHashAndCallsSigner;
 
 pub mod create;
 pub mod hash;
@@ -143,21 +143,6 @@ where
             RawSessionToken::cairo_serialize(&result),
         ]
         .concat())
-    }
-}
-
-impl<P, S, G> SpecificAccount for SessionAccount<P, S, G>
-where
-    P: Provider + Send + Sync,
-    S: HashSigner + Send + Sync,
-    G: HashSigner + Send + Sync,
-{
-    fn address(&self) -> Felt {
-        self.address
-    }
-
-    fn chain_id(&self) -> Felt {
-        self.chain_id
     }
 }
 

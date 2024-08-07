@@ -6,6 +6,7 @@ use crate::{
 use async_trait::async_trait;
 use cainome::cairo_serde::{CairoSerde, ContractAddress};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use starknet::accounts::Account;
 use starknet::core::types::Felt;
 use starknet::signers::SigningKey;
 use starknet::{
@@ -14,7 +15,7 @@ use starknet::{
 };
 use starknet_crypto::poseidon_hash_many;
 
-use super::{AccountHashAndCallsSigner, SpecificAccount};
+use super::AccountHashAndCallsSigner;
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
@@ -32,7 +33,7 @@ pub trait OutsideExecutionAccount {
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 impl<T> OutsideExecutionAccount for T
 where
-    T: AccountHashAndCallsSigner + Sync + SpecificAccount,
+    T: AccountHashAndCallsSigner + Account + Sync,
 {
     async fn sign_outside_execution(
         &self,

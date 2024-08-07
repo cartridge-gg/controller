@@ -1,7 +1,7 @@
-use crate::account::SpecificAccount;
 use crate::tests::ensure_txn;
 use crate::{abigen::controller::Controller, tests::runners::katana::KatanaRunner};
 use cainome::cairo_serde::Zeroable;
+use starknet::accounts::Account;
 use starknet::core::types::Felt;
 use starknet::signers::SigningKey;
 

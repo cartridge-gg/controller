@@ -1,11 +1,8 @@
 use crate::{
     abigen::erc_20::Erc20,
-    account::{
-        session::{
-            hash::{AllowedMethod, Session},
-            SessionAccount,
-        },
-        SpecificAccount,
+    account::session::{
+        hash::{AllowedMethod, Session},
+        SessionAccount,
     },
     signers::{HashSigner, SignerTrait},
     tests::{account::FEE_TOKEN_ADDRESS, runners::katana::KatanaRunner},
@@ -13,6 +10,7 @@ use crate::{
 };
 use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{
+    accounts::Account,
     core::types::{BlockId, BlockTag},
     macros::{felt, selector},
     providers::Provider,
