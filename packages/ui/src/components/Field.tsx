@@ -80,7 +80,12 @@ export const Field = forwardRef(
           {error && (
             <HStack marginY={3}>
               <AlertIcon fontSize="xl" color="text.error" />
-              <Text color="text.error" fontSize="sm">
+              <Text
+                color="text.error"
+                fontSize="sm"
+                w="full"
+                overflowWrap="anywhere"
+              >
                 {error}
               </Text>
             </HStack>
