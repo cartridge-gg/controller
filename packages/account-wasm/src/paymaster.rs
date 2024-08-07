@@ -22,6 +22,14 @@ pub(crate) struct JsonRpcRequest<T> {
 
 #[serde_as]
 #[derive(Debug, Deserialize, Serialize)]
+pub struct JsonRpcResponse {
+    jsonrpc: String,
+    id: u64,
+    result: PaymasterResponse,
+}
+
+#[serde_as]
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct OutsideExecutionParams {
     #[serde_as(as = "UfeHex")]
@@ -47,7 +55,7 @@ impl PaymasterRequest {
         address: Felt,
         chain_id: Felt,
         signature: Vec<Felt>,
-    ) -> Result<PaymasterResponse> {
+    ) -> Result<JsonRpcResponse> {
         let request = JsonRpcRequest {
             id: 1,
             jsonrpc: "2.0",

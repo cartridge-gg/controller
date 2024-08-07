@@ -119,11 +119,14 @@ async function tryPaymaster(
   session: Session,
 ): Promise<ExecuteReply> {
   try {
-    const { transaction_hash } = await account.cartridge.executeFromOutside(
+    const {
+      result: { transaction_hash },
+    } = await account.cartridge.executeFromOutside(
       calls,
       paymaster.caller,
       session,
     );
+
     return {
       code: ResponseCodes.SUCCESS,
       transaction_hash,
