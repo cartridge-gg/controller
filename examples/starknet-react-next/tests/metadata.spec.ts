@@ -4,6 +4,6 @@ test.beforeEach(async ({ page }) => {
   await page.goto("/");
 });
 
-test("should have a title", async ({ page }) => {
+test("Page Title", async ({ page }) => {
   await expect(page).toHaveTitle(/StarkNet ❤️ React/);
 });

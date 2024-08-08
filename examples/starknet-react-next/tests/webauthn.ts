@@ -1,24 +1,10 @@
 import { CDPSession } from "@playwright/test";
 
-export async function addVirtualAuthenticator(client: CDPSession) {
-  await client.send("WebAuthn.enable");
-  const {} = await client.send("WebAuthn.addVirtualAuthenticator", {
-    options: {
-      protocol: "ctap2",
-      transport: "ble",
-      hasResidentKey: true,
-      hasUserVerification: true,
-      isUserVerified: true,
-      automaticPresenceSimulation: true,
-    },
-  });
-}
-
 export class WebauthnEmulator {
   private client: CDPSession;
   public authenticatorId?: string;
 
-  constructor(client: CDPSession) {
+  constructor({ client }: { client: CDPSession }) {
     this.client = client;
   }
 
