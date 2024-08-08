@@ -4,7 +4,7 @@ import { Chain, mainnet, sepolia } from "@starknet-react/chains";
 import { Connector, StarknetConfig, starkscan } from "@starknet-react/core";
 import { PropsWithChildren } from "react";
 import CartridgeConnector from "@cartridge/connector";
-import { RpcProvider } from "starknet";
+import { RpcProvider, shortString } from "starknet";
 
 export function StarknetProvider({ children }: PropsWithChildren) {
   return (
@@ -79,21 +79,21 @@ const connectors = [
     {
       url,
       rpc: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
-      // paymaster: {
-      //   caller: shortString.encodeShortString("ANY_CALLER"),
-      // },
+      paymaster: {
+        caller: shortString.encodeShortString("ANY_CALLER"),
+      },
       // theme: "dope-wars",
       // colorMode: "light"
-      prefunds: [
-        {
-          address: ETH_TOKEN_ADDRESS,
-          min: "300000000000000",
-        },
-        // {
-        //   address: PAPER_TOKEN_ADDRESS,
-        //   min: "100",
-        // },
-      ],
+      // prefunds: [
+      //   {
+      //     address: ETH_TOKEN_ADDRESS,
+      //     min: "300000000000000",
+      //   },
+      //   {
+      //     address: PAPER_TOKEN_ADDRESS,
+      //     min: "100",
+      //   },
+      // ],
     },
   ) as never as Connector,
 ];
