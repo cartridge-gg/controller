@@ -1,11 +1,5 @@
 import { Button, VStack, Text, HStack, Spacer } from "@chakra-ui/react";
-import {
-  Container,
-  Content,
-  FOOTER_MIN_HEIGHT,
-  Footer,
-  useLayout,
-} from "components/layout";
+import { Container, Content, Footer } from "components/layout";
 import { CopyIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { useEffect, useState } from "react";
@@ -28,11 +22,6 @@ export function Menu({
   const [isCopying, setIsCopying] = useState(false);
   const [isCopyingDelegate, setIsCopyingDelegate] = useState(false);
   const [delegateAccount, setDelegateAccount] = useState("");
-  const { setFooterHeight } = useLayout();
-
-  useEffect(() => {
-    setFooterHeight(FOOTER_MIN_HEIGHT);
-  }, [setFooterHeight]);
 
   useEffect(() => {
     const init = async () => {

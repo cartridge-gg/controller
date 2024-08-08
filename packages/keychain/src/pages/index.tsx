@@ -15,19 +15,13 @@ import {
 import { diff } from "utils/controller";
 import { logout } from "utils/connection/logout";
 import { LoginMode } from "components/connect/types";
-<<<<<<< HEAD
 import { ErrorPage } from "components/ErrorBoundary";
-
-function Home() {
-  const { context, controller, error } = useConnection();
-=======
 import { SetDelegate } from "components/SetDelegate";
 
 function Home() {
   const { context, controller, error, setDelegate, setDelegateTransaction } =
     useConnection();
 
->>>>>>> d2884b5f (setDelegate page)
   if (window.self === window.top || !context?.origin) {
     return <></>;
   }
