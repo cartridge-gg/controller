@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "next dev -p 3002",
     "build": "next build",
-    "test": "playwright test",
-    "test:ui": "playwright test --ui",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui",
     "start": "next start -p 3002",
     "lint": "next lint",
     "format": "prettier --write ."
