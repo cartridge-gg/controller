@@ -11,7 +11,8 @@
         "controller::introspection::src5::src5_component::Event": "Src5ComponentEvent",
         "openzeppelin::token::erc20::erc20::ERC20Component::Event": "ERC20ComponentEvent",
         "openzeppelin::access::ownable::ownable::OwnableComponent::Event": "OwnableComponentEvent",
+        "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Event": "UpgradeEvent",
         "openzeppelin::upgrades::upgradeable::UpgradeableComponent::Event": "UpgradeEvent",
-        "openzeppelin::security::reentrancyguard::ReentrancyGuardComponent::Event": "ReentrancyGuardEvent"
+        "openzeppelin_security::reentrancyguard::ReentrancyGuardComponent::Event": "ReentrancyGuardEvent"
     }
 }
