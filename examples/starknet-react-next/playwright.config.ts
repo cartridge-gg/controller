@@ -26,8 +26,12 @@ export default defineConfig({
     // },
   ],
   webServer: {
-    command: "cd ../../ && pnpm dev",
-    url: "http://localhost:3002",
+    command: "pnpm dev",
+    cwd: "../..",
+    port: 3002,
+    timeout: 1000 * 60 * 3,
     reuseExistingServer: !process.env.CI,
+    stdout: "pipe",
+    stderr: "pipe",
   },
 });
