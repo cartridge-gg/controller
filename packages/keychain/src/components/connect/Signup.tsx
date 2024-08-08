@@ -166,6 +166,7 @@ export function Signup({
         <Content>
           <Field
             {...usernameField}
+            placeholder="Username"
             autoFocus
             onChange={(e) => {
               setError(undefined);
@@ -174,8 +175,6 @@ export function Signup({
                 value: e.target.value.toLowerCase(),
               }));
             }}
-            placeholder="Username"
-            error={usernameField.error}
             isLoading={isValidating}
             isDisabled={isRegistering}
             onClear={() => {
