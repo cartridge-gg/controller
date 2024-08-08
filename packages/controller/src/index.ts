@@ -21,6 +21,7 @@ import {
   ColorMode,
   PaymasterOptions,
   Prefund,
+  ConnectError,
 } from "./types";
 import { createModal } from "./modal";
 import { defaultPresets } from "./presets";
@@ -55,6 +56,20 @@ class Controller {
     }
 
     this.initModal();
+  }
+
+  async openMenu() {
+    if (!this.keychain || !this.modal) {
+      console.error(new NotReadyToConnect().message);
+      return null;
+    }
+    this.modal.open();
+    const res = await this.keychain.openMenu();
+    this.modal.close();
+    if (res && (res as ConnectError).code === ResponseCodes.NOT_CONNECTED) {
+      return false;
+    }
+    return true;
   }
 
   private initModal() {
@@ -223,16 +238,12 @@ class Controller {
   }
 
   async delegateAccount() {
-    if (!this.account) {
+    if (!this.keychain) {
       console.error(new NotReadyToConnect().message);
       return null;
     }
 
-    return this.account.callContract({
-      contractAddress: this.account.address,
-      entrypoint: "delegate_account",
-      calldata: [],
-    });
+    return await this.keychain.delegateAccount();
   }
 }
 

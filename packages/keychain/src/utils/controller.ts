@@ -1,4 +1,9 @@
-import { SignerInterface, BigNumberish, addAddressPadding } from "starknet";
+import {
+  SignerInterface,
+  BigNumberish,
+  addAddressPadding,
+  num,
+} from "starknet";
 
 import { Policy, Session } from "@cartridge/controller";
 
@@ -7,6 +12,8 @@ import Storage from "utils/storage";
 import Account from "./account";
 import { selectors, VERSION } from "./selectors";
 import migrations from "./migrations";
+import { AccountInfoDocument } from "generated/graphql";
+import { client } from "./graphql";
 
 type SerializedController = {
   publicKey: string;
@@ -58,6 +65,29 @@ export default class Controller {
         publicKey,
       },
     );
+  }
+
+  async getUser() {
+    const res = await client.request(AccountInfoDocument, {
+      id: this.address,
+    });
+
+    // @ts-expect-error TODO: fix type error
+    const account = res.accounts?.edges?.[0]?.node;
+    if (!account) {
+      throw new Error("User not found");
+    }
+
+    return {
+      address: this.address,
+      name: account.id,
+      profileUri: `https://cartridge.gg/profile/${this.address}`,
+    };
+  }
+
+  async delegateAccount() {
+    const address = await this.account.cartridge.delegateAccount();
+    return num.toHexString(address);
   }
 
   delete() {
