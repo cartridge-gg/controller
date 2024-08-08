@@ -9,10 +9,8 @@ use argent::session::session_hash::MerkleLeafHash;
 #[starknet::component]
 mod session_component {
     use core::poseidon::hades_permutation;
-    use starknet::account::Call;
-    use starknet::info::get_block_timestamp;
-    use starknet::get_contract_address;
-
+    use starknet::{account::Call, info::get_block_timestamp, get_contract_address, storage::Map};
+    
     use argent::session::interface::{Session, SessionToken};
     use argent::session::session_hash::{StructHashSession, OffChainMessageHashSessionRev1};
     use argent::signer::signer_signature::{
@@ -30,9 +28,9 @@ mod session_component {
     #[storage]
     struct Storage {
         /// A map of session hashes to a boolean indicating if the session has been revoked.
-        revoked_session: LegacyMap<felt252, bool>,
+        revoked_session: Map<felt252, bool>,
         /// A map of (owner_guid, guardian_guid, session_hash) to a len of authorization signature
-        valid_session_cache: LegacyMap<(felt252, felt252, felt252), bool>,
+        valid_session_cache: Map<(felt252, felt252, felt252), bool>,
     }
 
     #[event]

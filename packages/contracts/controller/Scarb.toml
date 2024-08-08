@@ -16,6 +16,5 @@ argent.workspace = true
 
 [[target.starknet-contract]]
 allowed-libfuncs-list.name = "experimental"
-build-external-contracts = ["openzeppelin::presets::erc20::*"]
 sierra = true
 casm = true
