@@ -83,4 +83,13 @@ export const defaultPresets: ControllerThemePresets = {
       primary: "#fce377",
     },
   },
+  "realm-of-ra": {
+    id: "realm-of-ra",
+    name: "Realm of Ra",
+    icon: "/whitelabel/realm-of-ra/icon.png",
+    cover: "/whitelabel/realm-of-ra/cover.png",
+    colors: {
+      primary: "#de9534",
+    },
+  },
 };

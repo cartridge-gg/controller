@@ -1,3 +1,6 @@
+"use client";
+
+import { Button } from "@cartridge/ui-next";
 import {
   useAccount,
   useContractWrite,
@@ -38,11 +41,11 @@ export function DojoSpawnAndMove() {
   }
 
   return (
-    <>
+    <div>
       <h2>Spawn And Move (Dojo example)</h2>
       <p>Actions Address: {DOJO_ACTION_ADDRESS}</p>
-      <div style={{ display: "flex", flexDirection: "row", gap: "10px" }}>
-        <button
+      <div className="flex gap-2">
+        <Button
           onClick={async () => {
             setTxnHash(undefined);
             setSubmitted(true);
@@ -54,8 +57,8 @@ export function DojoSpawnAndMove() {
           disabled={submitted}
         >
           Spawn
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={async () => {
             setTxnHash(undefined);
             setSubmitted(true);
@@ -67,7 +70,7 @@ export function DojoSpawnAndMove() {
           disabled={submitted}
         >
           Move Left
-        </button>
+        </Button>
       </div>
       <div>
         {txnHash && (
@@ -83,6 +86,6 @@ export function DojoSpawnAndMove() {
           </p>
         )}
       </div>
-    </>
+    </div>
   );
 }

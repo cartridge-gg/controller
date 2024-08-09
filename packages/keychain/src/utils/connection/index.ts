@@ -13,6 +13,8 @@ import { revoke, session, sessions } from "./sessions";
 import { signMessageFactory } from "./sign";
 import { username } from "./username";
 import { ConnectionCtx } from "./types";
+import { openMenuFactory } from "./menu";
+import { delegateAccount, setDelegateFactory } from "./delegate";
 
 export function connectToController({
   setOrigin,
@@ -45,10 +47,13 @@ export function connectToController({
       probe: normalize(validate(probeFactory(setController))),
       revoke: normalize(revoke),
       signMessage: normalize(validate(signMessageFactory(setContext))),
+      openMenu: normalize(validate(openMenuFactory(setContext))),
       session: normalize(session),
       sessions: normalize(sessions),
+      setDelegate: normalize(validate(setDelegateFactory(setContext))),
       reset: normalize(() => () => setContext(undefined)),
       username: normalize(username),
+      delegateAccount: normalize(delegateAccount),
     },
   });
 }

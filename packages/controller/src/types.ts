@@ -86,6 +86,7 @@ export interface Keychain {
     paymaster?: PaymasterOptions,
   ): Promise<ExecuteReply | ConnectError>;
   logout(): Promise<void>;
+  openMenu(): Promise<void | ConnectError>;
   session(): Promise<Session>;
   sessions(): Promise<{
     [key: string]: Session;
@@ -105,6 +106,7 @@ export interface Keychain {
   signDeclareTransaction(transaction: DeclareSignerDetails): Promise<Signature>;
 
   username(): string;
+  delegateAccount(): string;
 }
 
 export interface Modal {

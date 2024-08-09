@@ -6,11 +6,13 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "paths": {
-        "@/*": ["./src/*"]
+      "@/*": ["./src/*"]
     },
   },
   "include": [
     "src/components/**/*",
+    "src/index.ts",
+    "src/preset.ts",
     "src/utils.ts",
   ]
 }

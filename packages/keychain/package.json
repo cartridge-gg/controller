@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/keychain",
-  "version": "0.3.37",
+  "version": "0.3.38",
   "private": true,
   "scripts": {
     "dev": "TARGET_ORIGIN=\"*\" next dev -p 3001",
@@ -36,7 +36,6 @@
     "next": "^13.4.19",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-hook-form": "^7.52.1",
     "react-query": "^3.39.2",
     "starknet": "^6.11.0",
     "use-sound": "^4.0.1",

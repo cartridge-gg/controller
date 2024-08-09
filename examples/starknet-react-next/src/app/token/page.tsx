@@ -1,15 +1,17 @@
+"use client";
+
 import {
   useAccount,
   useContractRead,
   useContractWrite,
 } from "@starknet-react/core";
-import type { NextPage } from "next";
 import { useCallback, useMemo, useState } from "react";
 import { cairo, uint256 } from "starknet";
 import { ConnectWallet } from "components/ConnectWallet";
 import { useTokenContract } from "hooks/token";
 import { Abi } from "starknet";
 import Erc20Abi from "abi/erc20.json";
+import { Button, Input } from "@cartridge/ui-next";
 
 function UserBalance() {
   const { account } = useAccount();
@@ -95,14 +97,14 @@ function MintToken() {
       <h2>Mint token</h2>
       <p>
         <span>Amount: </span>
-        <input
+        <Input
           type="number"
           onChange={(evt) => updateAmount(evt.target.value)}
         />
       </p>
-      <button disabled={mintButtonDisabled} onClick={onMint}>
+      <Button disabled={mintButtonDisabled} onClick={onMint}>
         {isPending ? "Submitting" : "Mint"}
-      </button>
+      </Button>
       {error && (
         <p>
           <>Error: {error}</>
@@ -112,7 +114,7 @@ function MintToken() {
   );
 }
 
-const TokenPage: NextPage = () => {
+export default function TokenPage() {
   const { address } = useAccount();
 
   if (!address) {
@@ -130,6 +132,4 @@ const TokenPage: NextPage = () => {
       <MintToken />
     </div>
   );
-};
-
-export default TokenPage;
+}

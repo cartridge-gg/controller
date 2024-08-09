@@ -1,3 +1,6 @@
+"use client";
+
+import { Button } from "@cartridge/ui-next";
 import { useAccount, useContractWrite } from "@starknet-react/core";
 
 export function InvalidTxn() {
@@ -18,11 +21,11 @@ export function InvalidTxn() {
   }
 
   return (
-    <>
+    <div>
       <h2>Invalid Entry Point</h2>
       <div>
-        <button onClick={() => write()}>Invalid Entrypoint</button>
+        <Button onClick={() => write()}>Invalid Entrypoint</Button>
       </div>
-    </>
+    </div>
   );
 }

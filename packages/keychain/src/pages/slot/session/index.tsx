@@ -9,7 +9,6 @@ import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 import { PageLoading } from "components/Loading";
 import dynamic from "next/dynamic";
-import { useDeploy } from "hooks/deploy";
 
 type SessionQueryParams = Record<string, string> & {
   callback_uri: string;
@@ -25,7 +24,6 @@ function CreateSession() {
 
   const { controller, setController, policies, origin, chainId, rpcUrl } =
     useConnection();
-  const { deployRequest } = useDeploy();
 
   // Fetching account status for displaying the loading screen
   const [isFetching, setIsFetching] = useState(true);
@@ -52,9 +50,6 @@ function CreateSession() {
         method: "POST",
       })
         .then(async (res) => {
-          // request deployment to ensure account exists on chain
-          await deployRequest(controller.username);
-
           return res.status === 200
             ? router.replace(`/slot/auth/success`)
             : new Promise((_, reject) => reject(res));
@@ -64,7 +59,7 @@ function CreateSession() {
           router.replace(`/slot/auth/failure`);
         });
     },
-    [router, queries.callback_uri],
+    [router, queries.callback_uri, controller.username],
   );
 
   // Handler when user clicks the Create button
@@ -117,12 +112,7 @@ function CreateSession() {
       })
       .catch((e) => console.error(e))
       .finally(() => setIsFetching(false));
-  }, [
-    rpcUrl,
-    chainId,
-    setController,
-    queries.username,
-  ]);
+  }, [rpcUrl, chainId, setController, queries.username]);
 
   // Once the controller is created upon start, check if a session already exists.
   // If yes, check if the policies of the session are the same as the ones that are

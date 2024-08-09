@@ -190,6 +190,10 @@ class Account extends BaseAccount {
       nonce: undefined,
     });
   }
+
+  async delegateAccount(): Promise<string> {
+    return this.cartridge.delegateAccount();
+  }
 }
 
 export default Account;

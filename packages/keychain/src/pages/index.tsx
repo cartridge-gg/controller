@@ -1,22 +1,27 @@
 import dynamic from "next/dynamic";
 import { Signature } from "starknet";
 import { ResponseCodes } from "@cartridge/controller";
-import { DeploymentRequired, Execute, SignMessage } from "components";
+import { DeploymentRequired, Execute, Menu, SignMessage } from "components";
 import { CreateController, CreateSession, Logout } from "components/connect";
 import { useConnection } from "hooks/connection";
 import {
   ConnectCtx,
   ExecuteCtx,
   LogoutCtx,
+  OpenMenuCtx,
+  SetDelegateCtx,
   SignMessageCtx,
 } from "utils/connection";
 import { diff } from "utils/controller";
 import { logout } from "utils/connection/logout";
 import { LoginMode } from "components/connect/types";
 import { ErrorPage } from "components/ErrorBoundary";
+import { SetDelegate } from "components/SetDelegate";
 
 function Home() {
-  const { context, controller, error } = useConnection();
+  const { context, controller, error, setDelegate, setDelegateTransaction } =
+    useConnection();
+
   if (window.self === window.top || !context?.origin) {
     return <></>;
   }
@@ -113,6 +118,57 @@ function Home() {
           }
         >
           <Execute />
+        </DeploymentRequired>
+      );
+    }
+    case "open-menu": {
+      const ctx = context as OpenMenuCtx;
+      return (
+        <DeploymentRequired
+          onClose={() =>
+            ctx.resolve({
+              code: ResponseCodes.CANCELED,
+              message: "Canceled",
+            })
+          }
+        >
+          <Menu
+            onLogout={() => {
+              logout(ctx.origin)();
+
+              ctx.resolve({
+                code: ResponseCodes.NOT_CONNECTED,
+                message: "User logged out",
+              });
+            }}
+            onSetDelegate={() => setDelegate(ctx)}
+          />
+        </DeploymentRequired>
+      );
+    }
+
+    case "set-delegate": {
+      const ctx = context as SetDelegateCtx;
+      return (
+        <DeploymentRequired
+          onClose={() =>
+            ctx.resolve({
+              code: ResponseCodes.CANCELED,
+              message: "Canceled",
+            })
+          }
+        >
+          <SetDelegate
+            onClose={() =>
+              ctx.resolve({
+                code: ResponseCodes.CANCELED,
+                message: "Canceled",
+              })
+            }
+            onSetDelegate={(delegateAddress) => {
+              setDelegateTransaction(ctx, delegateAddress);
+            }}
+          />
         </DeploymentRequired>
       );
     }
