@@ -71,6 +71,7 @@ function Form({
     } = await fetchAccount(usernameField.value);
 
     try {
+      console.log(origin)
       const controller = new Controller({
         appId: origin,
         chainId,

@@ -255,19 +255,14 @@ where
 }
 
 impl_account!(Controller<P: CartridgeProvider, S: HashSigner, G: HashSigner, B: Backend>, |account: &Controller<P, S, G, B>, context| {
-    println!("Debug: Entered SignerInteractivityContext check");
     if let SignerInteractivityContext::Execution { calls } = context {
-        println!("Debug: Context is Execution with calls: {:?}", calls);
         if let Some(_) = account.session_account(calls) {
-            println!("Debug: Session account found");
-            true
-        } else {
-            println!("Debug: No session account found");
             false
+        } else {
+            true
         }
     } else {
-        println!("Debug: Context is not Execution");
-        false
+        true
     }
 });
 

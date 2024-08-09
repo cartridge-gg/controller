@@ -104,15 +104,6 @@ function getInt32Memory0() {
     return cachedInt32Memory0;
 }
 
-function addHeapObject(obj) {
-    if (heap_next === heap.length) heap.push(heap.length + 1);
-    const idx = heap_next;
-    heap_next = heap[idx];
-
-    heap[idx] = obj;
-    return idx;
-}
-
 const lTextDecoder = typeof TextDecoder === 'undefined' ? (0, module.require)('util').TextDecoder : TextDecoder;
 
 let cachedTextDecoder = new lTextDecoder('utf-8', { ignoreBOM: true, fatal: true });
@@ -122,6 +113,15 @@ cachedTextDecoder.decode();
 function getStringFromWasm0(ptr, len) {
     ptr = ptr >>> 0;
     return cachedTextDecoder.decode(getUint8Memory0().subarray(ptr, ptr + len));
+}
+
+function addHeapObject(obj) {
+    if (heap_next === heap.length) heap.push(heap.length + 1);
+    const idx = heap_next;
+    heap_next = heap[idx];
+
+    heap[idx] = obj;
+    return idx;
 }
 
 let cachedFloat64Memory0 = null;
@@ -450,13 +450,13 @@ export function __wbindgen_string_get(arg0, arg1) {
     getInt32Memory0()[arg0 / 4 + 0] = ptr1;
 };
 
-export function __wbindgen_object_clone_ref(arg0) {
-    const ret = getObject(arg0);
+export function __wbindgen_error_new(arg0, arg1) {
+    const ret = new Error(getStringFromWasm0(arg0, arg1));
     return addHeapObject(ret);
 };
 
-export function __wbindgen_error_new(arg0, arg1) {
-    const ret = new Error(getStringFromWasm0(arg0, arg1));
+export function __wbindgen_object_clone_ref(arg0) {
+    const ret = getObject(arg0);
     return addHeapObject(ret);
 };
 
@@ -1003,8 +1003,8 @@ export function __wbindgen_memory() {
     return addHeapObject(ret);
 };
 
-export function __wbindgen_closure_wrapper2217(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 488, __wbg_adapter_48);
+export function __wbindgen_closure_wrapper2212(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 484, __wbg_adapter_48);
     return addHeapObject(ret);
 };
 
