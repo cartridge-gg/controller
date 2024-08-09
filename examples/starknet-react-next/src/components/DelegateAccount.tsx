@@ -29,7 +29,7 @@ export const DelegateAccount = () => {
       setDelegateAddress(delegate?.toString() || "");
       setIsDelegateSupported(true);
     } catch (e: any) {
-      console.log(e)
+      console.log(e);
       // controller doesnt support delegateAccount, ignore
     }
   }, [account, chainId, cartridgeConnector]);
@@ -76,11 +76,15 @@ export const DelegateAccount = () => {
               type="text"
               min-width="420px"
               value={delegateAddressInput}
-              onChange={(e:any ) => setDelegateAddressInput(e.target.value)}
+              onChange={(e: any) => setDelegateAddressInput(e.target.value)}
             />
             <Button onClick={() => execute()} disabled={submitted}>
               Set Delegate
             </Button>
+          </div>
+
+          <div className="flex gap-2">
+            <Button onClick={() => cartridgeConnector.openSetDelegate(delegateAddressInput)}>Open Set Delegate</Button>
           </div>
         </>
       ) : (
