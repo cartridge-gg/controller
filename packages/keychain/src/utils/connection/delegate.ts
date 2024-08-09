@@ -15,9 +15,9 @@ export function setDelegateFactory(setContext: (ctx: ConnectionCtx) => void) {
   };
 }
 
-export function delegateAccount() {
+export function delegateAccount(origin: string) {
   return async () => {
-    const controller = Controller.fromStore();
+    const controller = Controller.fromStore(origin);
     if (!controller) {
       throw new Error("no controller");
     }

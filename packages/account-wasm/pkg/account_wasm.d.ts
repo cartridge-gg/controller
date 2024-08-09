@@ -8,6 +8,7 @@ export class CartridgeAccount {
 * Creates a new `CartridgeAccount` instance.
 *
 * # Parameters
+* - `app_id`: Application identifier.
 * - `rpc_url`: The URL of the JSON-RPC endpoint.
 * - `chain_id`: Identifier of the blockchain network to interact with.
 * - `address`: The blockchain address associated with the account.

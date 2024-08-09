@@ -88,8 +88,8 @@ export default class Controller {
     };
   }
 
-  async delegateAccount() {
-    const address = await this.account.cartridge.delegateAccount();
+  async delegateAccount(origin: string) {
+    const address = await this.account.cartridge.delegateAccount(origin);
     return num.toHexString(address);
   }
 
