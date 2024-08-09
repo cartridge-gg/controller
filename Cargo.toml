@@ -13,7 +13,7 @@ account-wasm = { path = "packages/account-wasm" }
 anyhow = "1"
 async-trait = "0.1"
 base64 = "0.22"
-cainome = { git = "https://github.com/cartridge-gg/cainome", rev = "f4beb4a", features = [
+cainome = { git = "https://github.com/cartridge-gg/cainome", rev = "deec8d4", features = [
     "abigen-rs",
 ] }
 cairo-lang-starknet = "2.4.0"
@@ -42,8 +42,8 @@ serde_with = { version = "3.9.0", default-features = false, features = [
     "macros",
 ] }
 sha2 = "0.10"
-starknet = { git = "https://github.com/xJonathanLEI/starknet-rs", rev = "af107dd" }
-starknet-crypto = { git = "https://github.com/xJonathanLEI/starknet-rs", rev = "af107dd" }
+starknet = { git = "https://github.com/xJonathanLEI/starknet-rs", rev = "2ddc694" }
+starknet-crypto = { git = "https://github.com/xJonathanLEI/starknet-rs", rev = "2ddc694" }
 starknet-types-core = { version = "0.1.3", default-features = false, features = [
     "curve",
     "hash",
