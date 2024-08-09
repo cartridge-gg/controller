@@ -68,6 +68,10 @@ class ControllerConnector extends Connector {
     return await this.controller.delegateAccount();
   }
 
+  async openSetDelegate(address: string) {
+    return await this.controller.openSetDelegate(address)
+  }
+
   async openMenu() {
     return await this.controller.openMenu();
   }

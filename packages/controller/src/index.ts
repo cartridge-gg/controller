@@ -72,6 +72,20 @@ class Controller {
     return true;
   }
 
+  async openSetDelegate(address: string) {
+    if (!this.keychain || !this.modal) {
+      console.error(new NotReadyToConnect().message);
+      return null;
+    }
+    this.modal.open();
+    const res = await this.keychain.openSetDelegate(address);
+    this.modal.close();
+    if (res && (res as ConnectError).code === ResponseCodes.NOT_CONNECTED) {
+      return false;
+    }
+    return true;
+  }
+
   private initModal() {
     if (typeof document === "undefined") return;
 
