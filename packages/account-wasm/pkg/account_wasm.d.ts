@@ -53,6 +53,11 @@ export class CartridgeAccount {
 */
   executeFromOutside(calls: any[], caller: any): Promise<any>;
 /**
+* @param {any[]} calls
+* @returns {boolean}
+*/
+  hasSession(calls: any[]): boolean;
+/**
 */
   revokeSession(): void;
 /**

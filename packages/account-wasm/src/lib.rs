@@ -202,6 +202,17 @@ impl CartridgeAccount {
         Ok(to_value(&response)?)
     }
 
+    #[wasm_bindgen(js_name = hasSession)]
+    pub fn has_session(&self, calls: Vec<JsValue>) -> Result<bool> {
+        let calls: Vec<Call> = calls
+            .clone()
+            .into_iter()
+            .map(Call::try_from_js_value)
+            .collect::<std::result::Result<_, _>>()?;
+
+        Ok(self.controller.session_account(&calls).is_some())
+    }
+
     #[wasm_bindgen(js_name = revokeSession)]
     pub fn revoke_session(&self) -> Result<()> {
         unimplemented!("Revoke Session not implemented");
