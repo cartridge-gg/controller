@@ -63,7 +63,7 @@ export function executeFactory({
         const calls = normalizeCalls(transactions);
 
         if (paymaster) {
-          const res = await tryPaymaster(account, calls, paymaster, session);
+          const res = await tryPaymaster(account, calls, paymaster);
           if (res) return res;
         }
 
@@ -74,11 +74,7 @@ export function executeFactory({
           session,
         );
 
-        const res = await account.execute(
-          transactions,
-          { nonce, maxFee },
-          session,
-        );
+        const res = await account.execute(transactions, { nonce, maxFee });
 
         return {
           code: ResponseCodes.SUCCESS,
@@ -116,7 +112,6 @@ async function tryPaymaster(
   account: Account,
   calls: Call[],
   paymaster: PaymasterOptions,
-  session: Session,
 ): Promise<ExecuteReply> {
   try {
     const {
@@ -124,7 +119,6 @@ async function tryPaymaster(
     } = await account.cartridge.executeFromOutside(
       calls,
       paymaster.caller,
-      session,
     );
 
     return {
@@ -151,7 +145,6 @@ async function getInvocationDetails(
 
     const estFee = await account.cartridge.estimateInvokeFee(
       calls,
-      session,
       ESTIMATE_FEE_MULTIPLIER,
     );
 

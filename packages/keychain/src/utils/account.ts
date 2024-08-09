@@ -18,7 +18,6 @@ import {
 import { selectors, VERSION } from "./selectors";
 import Storage from "./storage";
 import { CartridgeAccount } from "@cartridge/account-wasm";
-import { Session } from "@cartridge/controller";
 import { normalizeCalls } from "./connection/execute";
 
 export enum Status {
@@ -34,6 +33,7 @@ class Account extends BaseAccount {
   cartridge: CartridgeAccount;
 
   constructor(
+    appId: string,
     chainId: string,
     nodeUrl: string,
     address: string,
@@ -52,6 +52,7 @@ class Account extends BaseAccount {
     this.chainId = chainId;
     this.username = username;
     this.cartridge = CartridgeAccount.new(
+      appId,
       nodeUrl,
       chainId,
       address,
@@ -116,17 +117,12 @@ class Account extends BaseAccount {
   async execute(
     calls: AllowArray<Call>,
     details?: InvocationsDetails,
-    session?: Session,
   ): Promise<InvokeFunctionResponse> {
     this.ensureDeployed();
 
     details.nonce = details.nonce ?? (await super.getNonce("pending"));
 
-    const res = await this.cartridge.execute(
-      normalizeCalls(calls),
-      details,
-      session,
-    );
+    const res = await this.cartridge.execute(normalizeCalls(calls), details);
 
     Storage.update(this.selector, {
       nonce: num.toHex(BigInt(details.nonce) + 1n),

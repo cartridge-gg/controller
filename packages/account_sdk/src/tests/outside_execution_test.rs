@@ -1,22 +1,27 @@
 use std::vec;
 
 use crate::{
-    abigen::erc_20::Erc20,
-    account::{
-        outside_execution::{OutsideExecution, OutsideExecutionAccount, OutsideExecutionCaller},
-        session::{create::SessionCreator, hash::AllowedMethod},
-        CartridgeAccount,
+    abigen::{
+        controller::{Call, OutsideExecution},
+        erc_20::Erc20,
     },
-    signers::HashSigner,
+    account::{
+        outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller},
+        session::{create::SessionCreator, hash::AllowedMethod},
+    },
+    controller::Controller,
+    signers::{webauthn::WebauthnSigner, HashSigner},
+    storage::InMemoryBackend,
     tests::{
-        account::{signers::InternalWebauthnSigner, FEE_TOKEN_ADDRESS},
+        account::{webauthn::SoftPasskeySigner, FEE_TOKEN_ADDRESS},
+        ensure_txn,
         runners::katana::KatanaRunner,
     },
     transaction_waiter::TransactionWaiter,
 };
 use cainome::cairo_serde::{CairoSerde, ContractAddress, U256};
 use starknet::{
-    accounts::{Account, Call},
+    accounts::Account,
     macros::{felt, selector},
     providers::Provider,
     signers::SigningKey,
@@ -31,14 +36,17 @@ pub async fn test_verify_paymaster_execute<
 ) {
     let runner = KatanaRunner::load();
     let paymaster = runner.executor().await;
-    let controller = runner.deploy_controller(&signer).await;
+    let controller = runner
+        .deploy_controller("username".to_owned(), &signer)
+        .await;
 
     let account: Box<dyn OutsideExecutionAccount> = match session_signer {
         Some(session_signer) => Box::new(
             controller
+                .account
                 .session_account(
                     session_signer,
-                    vec![AllowedMethod::with_selector(
+                    vec![AllowedMethod::new(
                         *FEE_TOKEN_ADDRESS,
                         selector!("transfer"),
                     )],
@@ -58,11 +66,11 @@ pub async fn test_verify_paymaster_execute<
     };
 
     let outside_execution = OutsideExecution {
-        caller: OutsideExecutionCaller::Specific(paymaster.address().into()),
+        caller: OutsideExecutionCaller::Specific(paymaster.address().into()).into(),
         execute_after: u64::MIN,
         execute_before: u64::MAX,
         calls: vec![Call {
-            to: *FEE_TOKEN_ADDRESS,
+            to: (*FEE_TOKEN_ADDRESS).into(),
             selector: selector!("transfer"),
             calldata: [
                 <ContractAddress as CairoSerde>::cairo_serialize(&recipient),
@@ -78,16 +86,12 @@ pub async fn test_verify_paymaster_execute<
         .await
         .unwrap();
 
-    let tx = paymaster
-        .execute_v1(vec![outside_execution.into()])
-        .send()
-        .await
-        .unwrap();
-
-    TransactionWaiter::new(tx.transaction_hash, runner.client())
-        .wait()
-        .await
-        .unwrap();
+    ensure_txn(
+        paymaster.execute_v1(vec![outside_execution.into()]),
+        runner.client(),
+    )
+    .await
+    .unwrap();
 
     assert_eq!(
         Erc20::new(*FEE_TOKEN_ADDRESS, &paymaster)
@@ -101,11 +105,16 @@ pub async fn test_verify_paymaster_execute<
 
 #[tokio::test]
 async fn test_verify_execute_webauthn_paymaster_starknet() {
-    test_verify_paymaster_execute(
-        InternalWebauthnSigner::random("localhost".to_string(), "rp_id".to_string()),
-        None as Option<SigningKey>,
+    let signer = WebauthnSigner::register(
+        "cartridge.gg".to_string(),
+        "username".to_string(),
+        "challenge".as_bytes(),
+        SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
     )
-    .await;
+    .await
+    .unwrap();
+
+    test_verify_paymaster_execute(signer, None as Option<SigningKey>).await;
 }
 
 #[tokio::test]
@@ -115,11 +124,16 @@ async fn test_verify_execute_starknet_paymaster_starknet() {
 
 #[tokio::test]
 async fn test_verify_execute_webauthn_paymaster_starknet_session() {
-    test_verify_paymaster_execute(
-        InternalWebauthnSigner::random("localhost".to_string(), "rp_id".to_string()),
-        Some(SigningKey::from_random()),
+    let signer = WebauthnSigner::register(
+        "cartridge.gg".to_string(),
+        "username".to_string(),
+        "challenge".as_bytes(),
+        SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
     )
-    .await;
+    .await
+    .unwrap();
+
+    test_verify_paymaster_execute(signer, Some(SigningKey::from_random())).await;
 }
 
 #[tokio::test]
@@ -133,7 +147,9 @@ async fn test_verify_execute_paymaster_should_fail() {
     let runner = KatanaRunner::load();
     let signer = SigningKey::from_random();
     let paymaster = runner.executor().await;
-    let controller = runner.deploy_controller(&signer).await;
+    let controller = runner
+        .deploy_controller("username".to_owned(), &signer)
+        .await;
 
     let recipient = ContractAddress(felt!("0x18301129"));
 
@@ -143,11 +159,11 @@ async fn test_verify_execute_paymaster_should_fail() {
     };
 
     let outside_execution = OutsideExecution {
-        caller: OutsideExecutionCaller::Any,
+        caller: OutsideExecutionCaller::Any.into(),
         execute_after: u64::MIN,
         execute_before: u64::MAX,
         calls: vec![Call {
-            to: *FEE_TOKEN_ADDRESS,
+            to: (*FEE_TOKEN_ADDRESS).into(),
             selector: selector!("transfer"),
             calldata: [
                 <ContractAddress as CairoSerde>::cairo_serialize(&recipient),
@@ -158,12 +174,15 @@ async fn test_verify_execute_paymaster_should_fail() {
         nonce: controller.random_outside_execution_nonce(),
     };
 
-    let wrong_account = CartridgeAccount::new(
+    let wrong_account = Controller::new(
+        "app_id".to_string(),
+        "username".to_string(),
         runner.client(),
         SigningKey::from_random(),
         SigningKey::from_random(),
-        controller.address,
+        controller.address(),
         runner.client().chain_id().await.unwrap(),
+        InMemoryBackend::default(),
     );
 
     let outside_execution = wrong_account
@@ -183,7 +202,9 @@ async fn test_verify_execute_paymaster_session() {
     let signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
     let paymaster = runner.executor().await;
-    let controller = runner.deploy_controller(&signer).await;
+    let controller = runner
+        .deploy_controller("username".to_owned(), &signer)
+        .await;
 
     let recipient = ContractAddress(felt!("0x18301129"));
 
@@ -193,9 +214,10 @@ async fn test_verify_execute_paymaster_session() {
     };
 
     let session_account = controller
+        .account
         .session_account(
             SigningKey::from_random(),
-            vec![AllowedMethod::with_selector(
+            vec![AllowedMethod::new(
                 *FEE_TOKEN_ADDRESS,
                 selector!("transfer"),
             )],
@@ -205,11 +227,11 @@ async fn test_verify_execute_paymaster_session() {
         .unwrap();
 
     let outside_execution = OutsideExecution {
-        caller: OutsideExecutionCaller::Any,
+        caller: OutsideExecutionCaller::Any.into(),
         execute_after: u64::MIN,
         execute_before: u64::MAX,
         calls: vec![Call {
-            to: *FEE_TOKEN_ADDRESS,
+            to: (*FEE_TOKEN_ADDRESS).into(),
             selector: selector!("transfer"),
             calldata: [
                 <ContractAddress as CairoSerde>::cairo_serialize(&recipient),

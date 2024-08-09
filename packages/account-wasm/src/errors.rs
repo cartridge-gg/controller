@@ -8,23 +8,11 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum CartridgeError {
-    #[error("Session error: {0}")]
-    Session(#[from] SessionError),
-
     #[error("Account operation error: {0}")]
     Operation(#[from] OperationError),
 
     #[error("Encoding error: {0}")]
     Encoding(#[from] EncodingError),
-}
-
-#[derive(Error, Debug)]
-pub enum SessionError {
-    #[error("Failed to create session: {0}")]
-    Creation(SignError),
-
-    #[error("Failed to sign message: {0}")]
-    Signing(SignError),
 }
 
 #[derive(Error, Debug)]

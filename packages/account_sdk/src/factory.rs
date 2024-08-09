@@ -1,14 +1,16 @@
-use account_sdk::account::AccountHashSigner;
-use account_sdk::signers::SignError;
 use async_trait::async_trait;
 use starknet::{
+    accounts::{
+        AccountDeploymentV1, AccountFactory, PreparedAccountDeploymentV1,
+        PreparedAccountDeploymentV3, RawAccountDeploymentV1, RawAccountDeploymentV3,
+    },
     core::types::{BlockId, BlockTag, Felt},
     providers::Provider,
 };
 
-use super::{AccountFactory, PreparedAccountDeployment, RawAccountDeployment};
+use crate::{account::AccountHashSigner, signers::SignError};
 
-pub struct CartridgeAccountFactory<S, P> {
+pub struct ControllerFactory<S, P> {
     class_hash: Felt,
     chain_id: Felt,
     calldata: Vec<Felt>,
@@ -17,7 +19,7 @@ pub struct CartridgeAccountFactory<S, P> {
     block_id: BlockId,
 }
 
-impl<S, P> CartridgeAccountFactory<S, P>
+impl<S, P> ControllerFactory<S, P>
 where
     S: AccountHashSigner,
 {
@@ -41,7 +43,7 @@ where
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<S, P> AccountFactory for CartridgeAccountFactory<S, P>
+impl<S, P> AccountFactory for ControllerFactory<S, P>
 where
     S: AccountHashSigner + Sync + Send,
     P: Provider + Sync + Send,
@@ -61,6 +63,10 @@ where
         self.chain_id
     }
 
+    fn is_signer_interactive(&self) -> bool {
+        true
+    }
+
     fn provider(&self) -> &Self::Provider {
         &self.provider
     }
@@ -69,14 +75,31 @@ where
         self.block_id
     }
 
-    async fn sign_deployment(
+    async fn sign_deployment_v1(
         &self,
-        deployment: &RawAccountDeployment,
+        deployment: &RawAccountDeploymentV1,
+        query_only: bool,
     ) -> Result<Vec<Felt>, Self::SignError> {
-        let tx_hash =
-            PreparedAccountDeployment::from_raw(deployment.clone(), self).transaction_hash();
+        let tx_hash = PreparedAccountDeploymentV1::from_raw(deployment.clone(), self)
+            .transaction_hash(query_only);
         let signature = self.signer.sign_hash(tx_hash).await?;
 
         Ok(signature)
+    }
+
+    async fn sign_deployment_v3(
+        &self,
+        deployment: &RawAccountDeploymentV3,
+        query_only: bool,
+    ) -> Result<Vec<Felt>, Self::SignError> {
+        let tx_hash = PreparedAccountDeploymentV3::from_raw(deployment.clone(), self)
+            .transaction_hash(query_only);
+        let signature = self.signer.sign_hash(tx_hash).await?;
+
+        Ok(signature)
+    }
+
+    fn deploy_v1(&self, salt: Felt) -> AccountDeploymentV1<'_, Self> {
+        AccountDeploymentV1::new(salt, self)
     }
 }

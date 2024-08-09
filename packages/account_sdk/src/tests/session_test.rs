@@ -1,9 +1,9 @@
 use crate::{
     abigen::erc_20::Erc20,
     account::session::{create::SessionCreator, hash::AllowedMethod},
-    signers::HashSigner,
+    signers::{webauthn::WebauthnSigner, HashSigner},
     tests::{
-        account::{signers::InternalWebauthnSigner, FEE_TOKEN_ADDRESS},
+        account::{webauthn::SoftPasskeySigner, FEE_TOKEN_ADDRESS},
         runners::katana::KatanaRunner,
     },
     transaction_waiter::TransactionWaiter,
@@ -23,15 +23,18 @@ pub async fn test_verify_execute<
     session_signer: Q,
 ) {
     let runner = KatanaRunner::load();
-    let account = runner.deploy_controller(&signer).await;
+    let controller = runner
+        .deploy_controller("username".to_owned(), &signer)
+        .await;
 
-    let session_account = account
+    let session_account = controller
+        .account
         .session_account(
             session_signer,
             vec![
-                AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
-                AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("transfds")),
-                AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("transfer")),
+                AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
+                AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("transfds")),
+                AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("transfer")),
             ],
             u64::MAX,
         )
@@ -63,21 +66,16 @@ pub async fn test_verify_execute<
 
 #[tokio::test]
 async fn test_verify_execute_session_webauthn_starknet_starknet() {
-    test_verify_execute(
-        InternalWebauthnSigner::random("localhost".to_string(), "rp_id".to_string()),
-        SigningKey::from_random(),
+    let signer = WebauthnSigner::register(
+        "cartridge.gg".to_string(),
+        "username".to_string(),
+        "challenge".as_bytes(),
+        SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
     )
-    .await;
-}
+    .await
+    .unwrap();
 
-#[ignore = "Not enough resources"]
-#[tokio::test]
-async fn test_verify_execute_session_webauthn_starknet_webauthn() {
-    test_verify_execute(
-        InternalWebauthnSigner::random("localhost".to_string(), "rp_id".to_string()),
-        InternalWebauthnSigner::random("localhost".to_string(), "rp_id".to_string()),
-    )
-    .await;
+    test_verify_execute(signer, SigningKey::from_random()).await;
 }
 
 #[tokio::test]
@@ -90,15 +88,18 @@ async fn test_verify_execute_session_multiple() {
     let signer = SigningKey::from_random();
     let session_signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
-    let account = runner.deploy_controller(&signer).await;
+    let controller = runner
+        .deploy_controller("username".to_owned(), &signer)
+        .await;
 
-    let session_account = account
+    let session_account = controller
+        .account
         .session_account(
             session_signer,
             vec![
-                AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
-                AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("transfds")),
-                AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("transfer")),
+                AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
+                AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("transfds")),
+                AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("transfer")),
             ],
             u64::MAX,
         )

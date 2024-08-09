@@ -33,6 +33,7 @@ export default class Controller {
   protected credentialId: string;
 
   constructor({
+    appId,
     chainId,
     rpcUrl,
     address,
@@ -40,6 +41,7 @@ export default class Controller {
     publicKey,
     credentialId,
   }: {
+    appId: string;
     chainId: string;
     rpcUrl: string;
     address: string;
@@ -54,6 +56,7 @@ export default class Controller {
     this.publicKey = publicKey;
     this.credentialId = credentialId;
     this.account = new Account(
+      appId,
       chainId,
       rpcUrl,
       address,
@@ -173,7 +176,7 @@ export default class Controller {
     });
   }
 
-  static fromStore() {
+  static fromStore(origin: string) {
     try {
       const version = Storage.get("version");
       if (!version) {
@@ -196,6 +199,7 @@ export default class Controller {
       }
 
       return new Controller({
+        appId: origin,
         chainId,
         rpcUrl,
         address,

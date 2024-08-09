@@ -17,15 +17,15 @@ convert_case = "0.6.0"
 coset.workspace = true
 futures.workspace = true
 getrandom = { version = "0.2", features = ["js"] }
-gloo-net = "0.6.0"
 hex = "0.4.3"
 num-traits.workspace = true
 rand = { version = "0.8", features = ["getrandom"] }
-starknet.workspace = true
-serde = { workspace = true, features = ["derive"] }
-serde-wasm-bindgen = "0.6.5"
+serde.workspace = true
 serde_json.workspace = true
-serde_with = "2.3"
+serde-wasm-bindgen = "0.6.5"
+serde_with.workspace = true
+starknet.workspace = true
+starknet-types-core.workspace = true
 thiserror.workspace = true
 url = { workspace = true, default-features = false }
 wasm-bindgen = { workspace = true, features = ["serde-serialize"] }
@@ -38,6 +38,7 @@ web-sys = { version = "0.3", features = [
     "Navigator",
     "PublicKeyCredential",
     "PublicKeyCredentialCreationOptions",
+    "Storage",
 ] }
 
 # The `console_error_panic_hook` crate provides better debugging of panics by

@@ -1,15 +1,18 @@
 use crate::{
-    abigen::{controller::Controller, erc_20::Erc20},
-    account::session::{
-        hash::{AllowedMethod, Session},
-        SessionAccount,
+    abigen::erc_20::Erc20,
+    account::{
+        session::{
+            hash::{AllowedMethod, Session},
+            SessionAccount,
+        },
+        SpecificAccount,
     },
     signers::{HashSigner, SignerTrait},
-    tests::{account::FEE_TOKEN_ADDRESS, runners::katana::KatanaRunner},
-    transaction_waiter::TransactionWaiter,
+    tests::{account::FEE_TOKEN_ADDRESS, ensure_txn, runners::katana::KatanaRunner},
 };
 use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{
+    accounts::ConnectedAccount,
     core::types::{BlockId, BlockTag},
     macros::{felt, selector},
     providers::Provider,
@@ -23,36 +26,35 @@ async fn test_verify_execute_session_registered() {
     let session_signer = SigningKey::from_random();
 
     let runner = KatanaRunner::load();
-    let account = runner.deploy_controller(&signer).await;
-    let controller = Controller::new(account.address, account.clone());
+    let controller = runner
+        .deploy_controller("username".to_owned(), &signer)
+        .await;
 
     let session = Session::new(
         vec![
-            AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
-            AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("transfds")),
-            AllowedMethod::with_selector(*FEE_TOKEN_ADDRESS, selector!("transfer")),
+            AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
+            AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("transfds")),
+            AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("transfer")),
         ],
         u64::MAX,
         &session_signer.signer(),
     )
     .unwrap();
 
-    let tx = controller
-        .register_session(&session.raw(), &signer.signer().guid())
-        .send()
-        .await
-        .unwrap();
-
-    TransactionWaiter::new(tx.transaction_hash, runner.client())
-        .wait()
-        .await
-        .unwrap();
+    ensure_txn(
+        controller
+            .contract
+            .register_session(&session.raw(), &signer.signer().guid()),
+        controller.provider(),
+    )
+    .await
+    .unwrap();
 
     let session_account = SessionAccount::new_as_registered(
         runner.client(),
         session_signer,
         guardian_signer,
-        account.address,
+        controller.address(),
         runner.client().chain_id().await.unwrap(),
         signer.signer().guid(),
         session,
