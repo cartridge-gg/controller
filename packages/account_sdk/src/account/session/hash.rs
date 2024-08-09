@@ -1,12 +1,11 @@
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use starknet::accounts::Call;
+use starknet::core::types::Call;
 use starknet::core::types::Felt;
 use starknet::core::utils::NonAsciiNameError;
 use starknet::macros::selector;
 use starknet_crypto::poseidon_hash_many;
 use starknet_types_core::hash::Poseidon;
-use web_sys::console;
 
 use crate::abigen::controller::Signer;
 
@@ -96,8 +95,6 @@ impl Session {
             contract_address: call.to,
             selector: call.selector,
         };
-
-        console::log_1(&format!("{:?}", self.allowed_methods).into());
 
         self.allowed_methods
             .iter()

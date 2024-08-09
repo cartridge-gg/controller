@@ -19,7 +19,7 @@ use base64::Engine;
 use coset::{CborSerializable, CoseKey};
 use serde_wasm_bindgen::{from_value, to_value};
 use signer::BrowserBackend;
-use starknet::accounts::Call;
+use starknet::core::types::Call;
 use starknet::core::types::Felt;
 use starknet::macros::short_string;
 use starknet::signers::SigningKey;

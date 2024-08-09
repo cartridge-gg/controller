@@ -8,11 +8,11 @@ use crate::{
         SpecificAccount,
     },
     signers::{HashSigner, SignerTrait},
-    tests::{account::FEE_TOKEN_ADDRESS, runners::katana::KatanaRunner},
-    transaction_waiter::TransactionWaiter,
+    tests::{account::FEE_TOKEN_ADDRESS, ensure_txn, runners::katana::KatanaRunner},
 };
 use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{
+    accounts::ConnectedAccount,
     core::types::{BlockId, BlockTag},
     macros::{felt, selector},
     providers::Provider,
@@ -41,17 +41,14 @@ async fn test_verify_execute_session_registered() {
     )
     .unwrap();
 
-    let tx = controller
-        .contract
-        .register_session(&session.raw(), &signer.signer().guid())
-        .send()
-        .await
-        .unwrap();
-
-    TransactionWaiter::new(tx.transaction_hash, runner.client())
-        .wait()
-        .await
-        .unwrap();
+    ensure_txn(
+        controller
+            .contract
+            .register_session(&session.raw(), &signer.signer().guid()),
+        controller.provider(),
+    )
+    .await
+    .unwrap();
 
     let session_account = SessionAccount::new_as_registered(
         runner.client(),

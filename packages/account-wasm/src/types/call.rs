@@ -1,8 +1,8 @@
 use account_sdk::abigen::controller::Call;
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
-use starknet::accounts;
 use starknet::core::serde::unsigned_field_element::UfeHex;
+use starknet::core::types;
 use starknet::core::utils::get_selector_from_name;
 use starknet_types_core::felt::Felt;
 use wasm_bindgen::prelude::*;
@@ -34,11 +34,11 @@ impl TryFrom<JsCall> for Call {
     }
 }
 
-impl TryFrom<JsCall> for accounts::Call {
+impl TryFrom<JsCall> for types::Call {
     type Error = EncodingError;
 
     fn try_from(value: JsCall) -> Result<Self, Self::Error> {
-        Ok(accounts::Call {
+        Ok(types::Call {
             to: value.contract_address,
             selector: get_selector_from_name(&value.entrypoint)?,
             calldata: value.calldata,
@@ -61,7 +61,7 @@ impl TryFromJsValue<Call> for Call {
     }
 }
 
-impl TryFromJsValue<accounts::Call> for accounts::Call {
+impl TryFromJsValue<types::Call> for types::Call {
     fn try_from_js_value(value: JsValue) -> Result<Self, EncodingError> {
         let js_call: JsCall = value.try_into()?;
         js_call.try_into()

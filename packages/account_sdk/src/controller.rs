@@ -21,10 +21,11 @@ use cainome::cairo_serde::{self, CairoSerde};
 use starknet::accounts::{
     AccountDeploymentV1, AccountError, AccountFactory, AccountFactoryError, ExecutionV1,
 };
-use starknet::core::types::{FeeEstimate, InvokeTransactionResult};
+use starknet::core::types::{Call, FeeEstimate, InvokeTransactionResult};
 use starknet::core::utils::{cairo_short_string_to_felt, CairoShortStringToFeltError};
+use starknet::signers::SignerInteractivityContext;
 use starknet::{
-    accounts::{Account, Call, ConnectedAccount, ExecutionEncoder},
+    accounts::{Account, ConnectedAccount, ExecutionEncoder},
     core::types::{BlockId, Felt},
     signers::SigningKey,
 };
@@ -135,23 +136,21 @@ where
             .raw()
             .get_message_hash_rev_1(self.account.chain_id, self.account.address);
         let authorization = self.account.sign_hash(hash).await?;
-        self.backend
-            .set(
-                &Selectors::session(
-                    &self.account.address,
-                    &B::origin().map_err(ControllerError::DeviceError)?,
-                    &self.account.chain_id,
-                ),
-                &StorageValue::Session(SessionMetadata {
-                    session,
-                    max_fee: None,
-                    credentials: Credentials {
-                        authorization: authorization.clone(),
-                        private_key: signer.secret_scalar(),
-                    },
-                }),
-            )
-            .await?;
+        self.backend.set(
+            &Selectors::session(
+                &self.account.address,
+                &B::origin().map_err(ControllerError::DeviceError)?,
+                &self.account.chain_id,
+            ),
+            &StorageValue::Session(SessionMetadata {
+                session,
+                max_fee: None,
+                credentials: Credentials {
+                    authorization: authorization.clone(),
+                    private_key: signer.secret_scalar(),
+                },
+            }),
+        )?;
         Ok((authorization, signer.secret_scalar()))
     }
 
@@ -203,19 +202,19 @@ where
             .map_err(ControllerError::AccountError)
     }
 
-    pub async fn session_account(
-        &self,
-        calls: &[Call],
-    ) -> Result<Option<SessionAccount<P, SigningKey, G>>, ControllerError> {
+    pub fn session_account(&self, calls: &[Call]) -> Option<SessionAccount<P, SigningKey, G>> {
         // Check if there's a valid session stored
         if let Some(StorageValue::Session(metadata)) = self
             .backend
             .get(&Selectors::session(
                 &self.account.address,
-                &B::origin().map_err(ControllerError::DeviceError)?,
+                &match B::origin() {
+                    Ok(origin) => origin,
+                    Err(_) => return None,
+                },
                 &self.account.chain_id,
             ))
-            .await?
+            .ok()?
         {
             // Check if all calls are allowed by the session
             if calls
@@ -234,12 +233,12 @@ where
                     metadata.credentials.authorization,
                     metadata.session,
                 );
-                return Ok(Some(session_account));
+                return Some(session_account);
             }
         }
 
         // Use OwnerAccount if no valid session or not all calls are allowed
-        Ok(None)
+        None
     }
 
     pub async fn delegate_account(&self) -> Result<Felt, ControllerError> {
@@ -259,7 +258,22 @@ where
     }
 }
 
-impl_account!(Controller<P: CartridgeProvider, S: HashSigner, G: HashSigner, B: Backend>);
+impl_account!(Controller<P: CartridgeProvider, S: HashSigner, G: HashSigner, B: Backend>, |account: &Controller<P, S, G, B>, context| {
+    println!("Debug: Entered SignerInteractivityContext check");
+    if let SignerInteractivityContext::Execution { calls } = context {
+        println!("Debug: Context is Execution with calls: {:?}", calls);
+        if let Some(_) = account.session_account(calls) {
+            println!("Debug: Session account found");
+            true
+        } else {
+            println!("Debug: No session account found");
+            false
+        }
+    } else {
+        println!("Debug: Context is not Execution");
+        false
+    }
+});
 
 impl<P, S, G, B> ConnectedAccount for Controller<P, S, G, B>
 where
@@ -293,8 +307,8 @@ where
         hash: Felt,
         calls: &[Call],
     ) -> Result<Vec<Felt>, SignError> {
-        match self.session_account(calls).await {
-            Ok(Some(session_account)) => session_account.sign_hash_and_calls(hash, calls).await,
+        match self.session_account(calls) {
+            Some(session_account) => session_account.sign_hash_and_calls(hash, calls).await,
             _ => self.account.sign_hash_and_calls(hash, calls).await,
         }
     }

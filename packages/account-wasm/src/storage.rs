@@ -7,7 +7,7 @@ use crate::signer::BrowserBackend;
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait)]
 impl StorageBackend for BrowserBackend {
-    async fn set(&mut self, key: &str, value: &StorageValue) -> Result<(), StorageError> {
+    fn set(&mut self, key: &str, value: &StorageValue) -> Result<(), StorageError> {
         let local_storage = Self::local_storage()?;
 
         let serialized = serde_json::to_string(value)?;
@@ -17,7 +17,7 @@ impl StorageBackend for BrowserBackend {
         Ok(())
     }
 
-    async fn get(&self, key: &str) -> Result<Option<StorageValue>, StorageError> {
+    fn get(&self, key: &str) -> Result<Option<StorageValue>, StorageError> {
         let local_storage = Self::local_storage()?;
 
         if let Ok(Some(value)) = local_storage.get_item(key) {
@@ -28,7 +28,7 @@ impl StorageBackend for BrowserBackend {
         }
     }
 
-    async fn remove(&mut self, key: &str) -> Result<(), StorageError> {
+    fn remove(&mut self, key: &str) -> Result<(), StorageError> {
         let local_storage = Self::local_storage()?;
 
         local_storage
@@ -37,7 +37,7 @@ impl StorageBackend for BrowserBackend {
         Ok(())
     }
 
-    async fn clear(&mut self) -> Result<(), StorageError> {
+    fn clear(&mut self) -> Result<(), StorageError> {
         let local_storage = Self::local_storage()?;
 
         local_storage
@@ -46,7 +46,7 @@ impl StorageBackend for BrowserBackend {
         Ok(())
     }
 
-    async fn keys(&self) -> Result<Vec<String>, StorageError> {
+    fn keys(&self) -> Result<Vec<String>, StorageError> {
         let local_storage = Self::local_storage()?;
         let length = local_storage
             .length()

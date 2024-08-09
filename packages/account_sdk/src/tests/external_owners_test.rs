@@ -1,6 +1,7 @@
 use cainome::cairo_serde::{CairoSerde, ContractAddress, U256};
 use starknet::{
-    accounts::{Account, Call},
+    accounts::Account,
+    core::types::Call,
     macros::{felt, selector},
     providers::Provider,
     signers::SigningKey,

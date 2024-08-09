@@ -6,12 +6,9 @@ use crate::{
 use async_trait::async_trait;
 use cainome::cairo_serde::{CairoSerde, ContractAddress};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use starknet::core::types::Felt;
+use starknet::core::types::{Call, Felt};
+use starknet::macros::{selector, short_string};
 use starknet::signers::SigningKey;
-use starknet::{
-    accounts::Call,
-    macros::{selector, short_string},
-};
 use starknet_crypto::poseidon_hash_many;
 
 use super::{AccountHashAndCallsSigner, SpecificAccount};

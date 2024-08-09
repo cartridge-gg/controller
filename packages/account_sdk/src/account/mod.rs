@@ -1,7 +1,8 @@
 use async_trait::async_trait;
 use cainome::cairo_serde::CairoSerde;
 use cainome::cairo_serde::ContractAddress;
-use starknet::{accounts::Call, macros::selector};
+use starknet::core::types::Call;
+use starknet::macros::selector;
 use starknet::{
     accounts::{Account, ConnectedAccount, ExecutionEncoder},
     core::types::{BlockId, BlockTag, Felt},
@@ -89,7 +90,9 @@ where
     }
 }
 
-impl_account!(OwnerAccount<P: Provider, S: HashSigner, G: HashSigner>);
+impl_account!(OwnerAccount<P: Provider, S: HashSigner, G: HashSigner>, |_, _| {
+    true
+});
 impl_execution_encoder!(OwnerAccount<P: Provider, S: HashSigner, G: HashSigner>);
 
 impl<P, S, G> ConnectedAccount for OwnerAccount<P, S, G>

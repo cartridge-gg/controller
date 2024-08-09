@@ -1,8 +1,8 @@
 use async_trait::async_trait;
 use cainome::cairo_serde::CairoSerde;
 use starknet::{
-    accounts::{Account, Call, ConnectedAccount, ExecutionEncoder},
-    core::types::{BlockId, BlockTag, Felt},
+    accounts::{Account, ConnectedAccount, ExecutionEncoder},
+    core::types::{BlockId, BlockTag, Call, Felt},
     macros::short_string,
     providers::Provider,
 };
@@ -162,7 +162,7 @@ where
 }
 
 impl_execution_encoder!(SessionAccount<P: Provider, S: HashSigner, G: HashSigner>);
-impl_account!(SessionAccount<P: Provider, S: HashSigner, G: HashSigner>);
+impl_account!(SessionAccount<P: Provider, S: HashSigner, G: HashSigner>, |_, _| false);
 
 impl<P, S, G> ConnectedAccount for SessionAccount<P, S, G>
 where
