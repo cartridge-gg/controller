@@ -13,7 +13,7 @@ account-wasm = { path = "packages/account-wasm" }
 anyhow = "1"
 async-trait = "0.1"
 base64 = "0.22"
-cainome = { git = "https://github.com/cartridge-gg/cainome", rev = "deec8d4", features = [
+cainome = { git = "https://github.com/cartridge-gg/cainome", branch = "main", features = [
     "abigen-rs",
 ] }
 cairo-lang-starknet = "2.4.0"
