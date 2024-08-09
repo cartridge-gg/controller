@@ -19,12 +19,14 @@ import { ExecuteCtx } from "utils/connection";
 import { TransferAmountExceedsBalance } from "errors";
 import { ETH_MIN_PREFUND } from "utils/token";
 import { num } from "starknet";
+import { useDeploy } from "hooks/deploy";
 
 export const CONTRACT_ETH =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 
 export function Execute() {
   const { chainId, controller, context, origin, cancel } = useConnection();
+  const { isDeployed } = useDeploy();
   const ctx = context as ExecuteCtx;
 
   const [fees, setFees] = useState<{
@@ -73,11 +75,11 @@ export function Execute() {
 
   // Estimate fees
   useEffect(() => {
-    if (!controller || !calls) {
+    if (!controller || !calls || !isDeployed) {
       return;
     }
 
-    if (account.status === Status.DEPLOYED && ctx.transactionsDetail?.maxFee) {
+    if (isDeployed && ctx.transactionsDetail?.maxFee) {
       setFees({
         base: BigInt(ctx.transactionsDetail.maxFee),
         max: BigInt(ctx.transactionsDetail.maxFee),
@@ -99,7 +101,7 @@ export function Execute() {
 
         setError(e);
       });
-  }, [origin, account, controller, setError, setFees, calls, chainId, ctx]);
+  }, [origin, account, controller, setError, setFees, calls, chainId, ctx, isDeployed]);
 
   useEffect(() => {
     if (!ethBalance || !fees) {
