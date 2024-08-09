@@ -118,11 +118,11 @@ impl Selectors {
         )
     }
 
-    pub fn session(address: &Felt, origin: &str, chain_id: &Felt) -> String {
+    pub fn session(address: &Felt, app_id: &str, chain_id: &Felt) -> String {
         format!(
             "@cartridge/session/0x{:x}/{}/0x{:x}",
             address,
-            urlencoding::encode(origin),
+            urlencoding::encode(app_id),
             chain_id
         )
     }

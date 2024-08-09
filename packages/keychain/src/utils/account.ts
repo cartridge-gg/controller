@@ -33,6 +33,7 @@ class Account extends BaseAccount {
   cartridge: CartridgeAccount;
 
   constructor(
+    appId: string,
     chainId: string,
     nodeUrl: string,
     address: string,
@@ -51,6 +52,7 @@ class Account extends BaseAccount {
     this.chainId = chainId;
     this.username = username;
     this.cartridge = CartridgeAccount.new(
+      appId,
       nodeUrl,
       chainId,
       address,

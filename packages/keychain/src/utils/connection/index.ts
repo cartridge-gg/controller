@@ -63,7 +63,7 @@ function validate<T>(
   fn: (controller: Controller, origin: string) => T,
 ): (origin: string) => T | (() => Promise<ConnectError>) {
   return (origin: string) => {
-    const controller = Controller.fromStore();
+    const controller = Controller.fromStore(origin);
     if (!controller) {
       return async () => ({
         code: ResponseCodes.NOT_CONNECTED,

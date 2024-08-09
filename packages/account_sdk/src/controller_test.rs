@@ -28,6 +28,7 @@ async fn test_deploy_controller() {
     let chain_id = provider.chain_id().await.unwrap();
 
     let controller = Controller::new(
+        "app_id".to_string(),
         username.clone(),
         provider.clone(),
         owner.clone(),

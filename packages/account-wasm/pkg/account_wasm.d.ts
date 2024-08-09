@@ -16,6 +16,7 @@ export class CartridgeAccount {
 * - `username`: Username associated with the account.
 * - `credential_id`: Base64 encoded bytes of the raw credential ID generated during the WebAuthn registration process.
 * - `public_key`: Base64 encoded bytes of the public key generated during the WebAuthn registration process (COSE format).
+* @param {string} app_id
 * @param {string} rpc_url
 * @param {string} chain_id
 * @param {string} address
@@ -25,7 +26,7 @@ export class CartridgeAccount {
 * @param {string} public_key
 * @returns {CartridgeAccount}
 */
-  static new(rpc_url: string, chain_id: string, address: string, rp_id: string, username: string, credential_id: string, public_key: string): CartridgeAccount;
+  static new(app_id: string, rpc_url: string, chain_id: string, address: string, rp_id: string, username: string, credential_id: string, public_key: string): CartridgeAccount;
 /**
 * @param {any[]} policies
 * @param {bigint} expires_at

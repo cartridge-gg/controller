@@ -4,7 +4,7 @@ import Storage from "utils/storage";
 
 export function revoke() {
   return (origin: string) => {
-    const controller = Controller.fromStore();
+    const controller = Controller.fromStore(origin);
     if (!controller) {
       throw new Error("no controller");
     }
@@ -20,7 +20,7 @@ export function revoke() {
 
 export function session(origin: string) {
   return () => {
-    const controller = Controller.fromStore();
+    const controller = Controller.fromStore(origin);
     if (!controller) {
       throw new Error("no controller");
     }
@@ -31,7 +31,7 @@ export function session(origin: string) {
 
 export function sessions(origin: string) {
   return () => {
-    const controller = Controller.fromStore();
+    const controller = Controller.fromStore(origin);
     if (!controller) {
       throw new Error("no controller");
     }

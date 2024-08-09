@@ -72,6 +72,7 @@ where
     G: HashSigner + Send + Sync + Clone,
     B: Backend,
 {
+    app_id: String,
     pub username: String,
     salt: Felt,
     pub provider: P,
@@ -89,6 +90,7 @@ where
     B: Backend + Clone,
 {
     pub fn new(
+        app_id: String,
         username: String,
         provider: P,
         signer: S,
@@ -111,6 +113,7 @@ where
         );
 
         Self {
+            app_id,
             username,
             salt,
             provider,
@@ -137,11 +140,7 @@ where
             .get_message_hash_rev_1(self.account.chain_id, self.account.address);
         let authorization = self.account.sign_hash(hash).await?;
         self.backend.set(
-            &Selectors::session(
-                &self.account.address,
-                &B::origin().map_err(ControllerError::DeviceError)?,
-                &self.account.chain_id,
-            ),
+            &Selectors::session(&self.account.address, &self.app_id, &self.account.chain_id),
             &StorageValue::Session(SessionMetadata {
                 session,
                 max_fee: None,
@@ -208,10 +207,7 @@ where
             .backend
             .get(&Selectors::session(
                 &self.account.address,
-                &match B::origin() {
-                    Ok(origin) => origin,
-                    Err(_) => return None,
-                },
+                &self.app_id,
                 &self.account.chain_id,
             ))
             .ok()?

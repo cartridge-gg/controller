@@ -175,6 +175,7 @@ impl KatanaRunner {
         self.fund(&deployed_address).await;
 
         Controller::new(
+            "app_id".to_string(),
             username,
             self.client.clone(),
             signer.clone(),

@@ -301,6 +301,7 @@ async fn test_change_owner_invalidate_old_sessions() {
     assert!(result.is_err(), "Transaction should have failed");
 
     let controller = Controller::new(
+        "app_id".to_string(),
         "username".to_owned(),
         runner.client(),
         new_signer.clone(),

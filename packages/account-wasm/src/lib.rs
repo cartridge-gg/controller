@@ -60,6 +60,7 @@ impl CartridgeAccount {
     ///
     #[allow(clippy::too_many_arguments)]
     pub fn new(
+        app_id: String,
         rpc_url: String,
         chain_id: String,
         address: String,
@@ -87,6 +88,7 @@ impl CartridgeAccount {
         let username = username.to_lowercase();
 
         let controller = Controller::new(
+            app_id,
             username.clone(),
             Arc::new(provider),
             device_signer.clone(),

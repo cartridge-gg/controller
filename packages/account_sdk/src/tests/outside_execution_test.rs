@@ -175,6 +175,7 @@ async fn test_verify_execute_paymaster_should_fail() {
     };
 
     let wrong_account = Controller::new(
+        "app_id".to_string(),
         "username".to_string(),
         runner.client(),
         SigningKey::from_random(),
