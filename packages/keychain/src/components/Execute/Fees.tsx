@@ -7,11 +7,9 @@ import { EthereumIcon } from "@cartridge/ui";
 
 export function Fees({
   fees,
-  balance,
   approved,
 }: {
   fees?: { base: bigint; max: bigint };
-  balance: string;
   approved?: string;
 }) {
   const chainId = useChainId();
@@ -21,7 +19,7 @@ export function Fees({
   }>();
 
   useEffect(() => {
-    if (!fees || !balance) {
+    if (!fees) {
       return;
     }
     async function compute() {
@@ -38,7 +36,7 @@ export function Fees({
       );
     }
     compute();
-  }, [chainId, fees, balance, approved]);
+  }, [chainId, fees, approved]);
 
   return (
     <VStack
