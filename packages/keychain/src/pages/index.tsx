@@ -12,7 +12,6 @@ import {
   SetDelegateCtx,
   SignMessageCtx,
 } from "utils/connection";
-import { diff } from "utils/controller";
 import { logout } from "utils/connection/logout";
 import { LoginMode } from "components/connect/types";
 import { ErrorPage } from "components/ErrorBoundary";
@@ -39,24 +38,18 @@ function Home() {
     case "connect": {
       const ctx = context as ConnectCtx;
 
-      // TODO: support this fund first flow for mainnet
-      // if (
-      //   chainId === constants.StarknetChainId.SN_MAIN &&
-      //   controller.account.status === Status.COUNTERFACTUAL
-      // ) {
-      //   return <Funding />;
+      const session = controller.account.sessionMetadata();
+      console.log({ session });
+      // const session = controller.session(context.origin);
+      // // if no mismatch with existing policies then return success
+      // if (session && diff(session.policies, ctx.policies).length === 0) {
+      //   ctx.resolve({
+      //     code: ResponseCodes.SUCCESS,
+      //     address: controller.address,
+      //     policies: ctx.policies,
+      //   });
+      //   return <></>;
       // }
-
-      const session = controller.session(context.origin);
-      // if no mismatch with existing policies then return success
-      if (session && diff(session.policies, ctx.policies).length === 0) {
-        ctx.resolve({
-          code: ResponseCodes.SUCCESS,
-          address: controller.address,
-          policies: ctx.policies,
-        });
-        return <></>;
-      }
 
       return (
         <CreateSession

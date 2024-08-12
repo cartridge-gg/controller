@@ -143,7 +143,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
 
       update();
     }
-  }, [rpcUrl, controller]);
+  }, [rpcUrl]);
 
   const logout = useCallback((context: ConnectionCtx) => {
     setContext({

@@ -71,7 +71,7 @@ function Form({
     } = await fetchAccount(usernameField.value);
 
     try {
-      console.log(origin)
+      console.log({ origin, rpcUrl, chainId, username: usernameField.value });
       const controller = new Controller({
         appId: origin,
         chainId,

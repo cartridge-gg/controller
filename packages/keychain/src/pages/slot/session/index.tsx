@@ -100,6 +100,7 @@ function CreateSession() {
         } = res;
 
         const controller = new Controller({
+          appId: origin,
           chainId,
           rpcUrl,
           address,

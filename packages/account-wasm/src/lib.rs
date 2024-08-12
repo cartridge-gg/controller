@@ -213,6 +213,15 @@ impl CartridgeAccount {
         Ok(self.controller.session_account(&calls).is_some())
     }
 
+    #[wasm_bindgen(js_name = sessionMetadata)]
+    pub fn session_metadata(&self) -> Result<JsValue> {
+        self.controller
+            .session_metadata()
+            .map(|metadata| to_value(&metadata))
+            .transpose()?
+            .map_or_else(|| Ok(JsValue::NULL), Ok)
+    }
+
     #[wasm_bindgen(js_name = revokeSession)]
     pub fn revoke_session(&self) -> Result<()> {
         unimplemented!("Revoke Session not implemented");

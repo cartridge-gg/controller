@@ -201,36 +201,43 @@ where
             .map_err(ControllerError::AccountError)
     }
 
+    pub fn session_metadata(&self) -> Option<SessionMetadata> {
+        let key = Selectors::session(
+            &self.account.address,
+            &self.app_id,
+            &self.account.chain_id
+        );
+
+        self.backend.get(&key)
+            .ok()
+            .flatten()
+            .map(|value| match value {
+                StorageValue::Session(metadata) => metadata,
+            })
+    }
+
     pub fn session_account(&self, calls: &[Call]) -> Option<SessionAccount<P, SigningKey, G>> {
         // Check if there's a valid session stored
-        if let Some(StorageValue::Session(metadata)) = self
-            .backend
-            .get(&Selectors::session(
-                &self.account.address,
-                &self.app_id,
-                &self.account.chain_id,
-            ))
-            .ok()?
+        let metadata = self.session_metadata()?;
+
+        // Check if all calls are allowed by the session
+        if calls
+            .iter()
+            .all(|call| metadata.session.is_call_allowed(call))
         {
-            // Check if all calls are allowed by the session
-            if calls
-                .iter()
-                .all(|call| metadata.session.is_call_allowed(call))
-            {
-                // Use SessionAccount if all calls are allowed
-                let session_signer =
-                    SigningKey::from_secret_scalar(metadata.credentials.private_key);
-                let session_account = SessionAccount::new(
-                    self.account.provider().clone(),
-                    session_signer,
-                    self.account.guardian.clone(),
-                    self.account.address,
-                    self.account.chain_id,
-                    metadata.credentials.authorization,
-                    metadata.session,
-                );
-                return Some(session_account);
-            }
+            // Use SessionAccount if all calls are allowed
+            let session_signer =
+                SigningKey::from_secret_scalar(metadata.credentials.private_key);
+            let session_account = SessionAccount::new(
+                self.account.provider().clone(),
+                session_signer,
+                self.account.guardian.clone(),
+                self.account.address,
+                self.account.chain_id,
+                metadata.credentials.authorization,
+                metadata.session,
+            );
+            return Some(session_account);
         }
 
         // Use OwnerAccount if no valid session or not all calls are allowed

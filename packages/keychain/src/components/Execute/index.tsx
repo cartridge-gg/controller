@@ -101,7 +101,17 @@ export function Execute() {
 
         setError(e);
       });
-  }, [origin, account, controller, setError, setFees, calls, chainId, ctx, isDeployed]);
+  }, [
+    origin,
+    account,
+    controller,
+    setError,
+    setFees,
+    calls,
+    chainId,
+    ctx,
+    isDeployed,
+  ]);
 
   useEffect(() => {
     if (!ethBalance || !fees) {

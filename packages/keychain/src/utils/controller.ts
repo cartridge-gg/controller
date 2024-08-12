@@ -5,7 +5,7 @@ import {
   num,
 } from "starknet";
 
-import { Policy, Session } from "@cartridge/controller";
+import { Policy } from "@cartridge/controller";
 
 import Storage from "utils/storage";
 
@@ -128,21 +128,6 @@ export default class Controller {
     Storage.remove(
       selectors[VERSION].session(this.address, origin, this.account.chainId),
     );
-  }
-
-  session(origin: string): Session | undefined {
-    return Storage.get(
-      selectors[VERSION].session(this.address, origin, this.account.chainId),
-    );
-  }
-
-  sessions(): { [key: string]: Session } | undefined {
-    return Storage.keys()
-      .filter((k) => k.startsWith(`@session/${this.address}/${origin}`))
-      .reduce((prev, key) => {
-        prev[key.slice(9)] = Storage.get(key);
-        return prev;
-      }, {} as { [key: string]: Session });
   }
 
   store() {
