@@ -1,4 +1,4 @@
-import { Policy, Session } from "@cartridge/controller";
+import { Policy } from "@cartridge/controller";
 import Controller from "utils/controller";
 import { CreateSession as CreateSessionComp } from "components/connect";
 
@@ -57,7 +57,7 @@ function CreateSession() {
         console.error("failed to call the callback url", e);
         router.replace(`/slot/auth/failure`);
       });
-  }, [router, queries.callback_uri, controller.username]);
+  }, [router, queries.callback_uri, controller.account]);
 
   // Handler when user clicks the Create button
   const onConnect = useCallback(
@@ -70,7 +70,7 @@ function CreateSession() {
         throw new Error("Callback URI is missing");
       }
 
-      //onSlotCallback(session);
+      onSlotCallback();
     },
     [queries.callback_uri, origin, controller, onSlotCallback],
   );

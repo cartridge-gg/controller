@@ -63,7 +63,7 @@ export function InsufficientFunds({
               color="text.error"
             >
               <EthereumIcon boxSize="24px" color="inherit" />{" "}
-              <Text color="inherit">{balance}</Text>
+              <Text color="inherit">{balance.toString()}</Text>
             </HStack>
 
             <HStack bg="solid.primary" boxSize="full" flex="1" justify="center">

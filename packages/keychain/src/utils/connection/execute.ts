@@ -1,6 +1,5 @@
 import {
   ExecuteReply,
-  Policy,
   ResponseCodes,
   ConnectError,
   PaymasterOptions,
@@ -13,8 +12,6 @@ import {
   CallData,
   InvocationsDetails,
   addAddressPadding,
-  hash,
-  selector,
 } from "starknet";
 import Account from "utils/account";
 import { ConnectionCtx, ExecuteCtx } from "./types";

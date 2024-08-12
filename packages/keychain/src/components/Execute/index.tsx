@@ -8,7 +8,6 @@ import {
   FOOTER_MIN_HEIGHT,
   Footer,
 } from "components/layout";
-import { Status } from "utils/account";
 import { TransactionDuoIcon } from "@cartridge/ui";
 import { InsufficientFunds } from "./InsufficientFunds";
 import { useConnection } from "hooks/connection";
@@ -135,7 +134,7 @@ export function Execute() {
       transaction_hash,
       code: ResponseCodes.SUCCESS,
     });
-  }, [account, calls, ctx, origin, controller]);
+  }, [account, calls, ctx]);
 
   const policies = useMemo<Policy[]>(
     () =>
