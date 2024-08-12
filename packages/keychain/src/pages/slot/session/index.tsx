@@ -59,7 +59,7 @@ function CreateSession() {
           router.replace(`/slot/auth/failure`);
         });
     },
-    [router, queries.callback_uri, controller.username],
+    [router, queries.callback_uri],
   );
 
   // Handler when user clicks the Create button

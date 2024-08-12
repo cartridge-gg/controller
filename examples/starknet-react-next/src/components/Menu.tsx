@@ -13,7 +13,7 @@ export function Menu() {
     if (!account) return;
     const isConnected = await cartridgeConnector.openMenu();
     if (!isConnected) {
-      disconnect()
+      disconnect();
     }
   };
 

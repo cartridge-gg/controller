@@ -306,7 +306,7 @@ const ethereumConfig = createConfig({
 });
 
 async function fetchEthPrice() {
-  const res = await fetch(process.env.NEXT_PUBLIC_API_URL, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/query`, {
     method: "POST",
     headers: {
       "content-type": "application/json",
