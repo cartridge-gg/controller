@@ -172,7 +172,7 @@ where
             .await
             .map_err(ControllerError::CartridgeProviderError)?;
 
-        Ok(res.transaction_hash)
+        Ok(res.result.transaction_hash)
     }
 
     pub async fn estimate_invoke_fee(

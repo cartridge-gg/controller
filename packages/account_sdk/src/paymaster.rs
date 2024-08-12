@@ -28,9 +28,16 @@ pub struct OutsideExecutionParams {
     pub signature: Vec<Felt>,
 }
 
-#[serde_as]
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PaymasterResponse {
+    pub id: u64,
+    pub jsonrpc: String,
+    pub result: TransactionResult,
+}
+
+#[serde_as]
+#[derive(Debug, Deserialize, Serialize)]
+pub struct TransactionResult {
     #[serde_as(as = "UfeHex")]
     pub transaction_hash: Felt,
 }
@@ -72,6 +79,7 @@ impl PaymasterRequest {
             .await?;
 
         let json: PaymasterResponse = response.json().await.map_err(PaymasterError::from)?;
+
         Ok(json)
     }
 }
