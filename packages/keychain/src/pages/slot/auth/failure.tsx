@@ -4,6 +4,7 @@ import { Link, Text } from "@chakra-ui/react";
 import NextLink from "next/link";
 import dynamic from "next/dynamic";
 import { CARTRIDGE_DISCORD_LINK } from "const";
+import { useParams } from "next/navigation";
 
 function Failure() {
   return (

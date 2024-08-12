@@ -60,7 +60,7 @@ export class CartridgeAccount {
 /**
 * @returns {any}
 */
-  sessionMetadata(): any;
+  sessionJson(): any;
 /**
 */
   revokeSession(): void;

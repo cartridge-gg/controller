@@ -141,8 +141,8 @@ class Account extends BaseAccount {
     return this.cartridge.hasSession(normalizeCalls(calls));
   }
 
-  sessionMetadata(): string {
-    return this.cartridge.sessionMetadata();
+  sessionJson(): string {
+    return this.cartridge.sessionJson();
   }
 
   async estimateInvokeFee(

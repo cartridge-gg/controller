@@ -419,10 +419,10 @@ export class CartridgeAccount {
     /**
     * @returns {any}
     */
-    sessionMetadata() {
+    sessionJson() {
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.cartridgeaccount_sessionMetadata(retptr, this.__wbg_ptr);
+            wasm.cartridgeaccount_sessionJson(retptr, this.__wbg_ptr);
             var r0 = getInt32Memory0()[retptr / 4 + 0];
             var r1 = getInt32Memory0()[retptr / 4 + 1];
             var r2 = getInt32Memory0()[retptr / 4 + 2];

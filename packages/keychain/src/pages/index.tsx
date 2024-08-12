@@ -5,7 +5,6 @@ import { DeploymentRequired, Execute, Menu, SignMessage } from "components";
 import { CreateController, CreateSession, Logout } from "components/connect";
 import { useConnection } from "hooks/connection";
 import {
-  ConnectCtx,
   ExecuteCtx,
   LogoutCtx,
   OpenMenuCtx,
@@ -36,21 +35,6 @@ function Home() {
 
   switch (context.type) {
     case "connect": {
-      const ctx = context as ConnectCtx;
-
-      const session = controller.account.sessionMetadata();
-      console.log({ session });
-      // const session = controller.session(context.origin);
-      // // if no mismatch with existing policies then return success
-      // if (session && diff(session.policies, ctx.policies).length === 0) {
-      //   ctx.resolve({
-      //     code: ResponseCodes.SUCCESS,
-      //     address: controller.address,
-      //     policies: ctx.policies,
-      //   });
-      //   return <></>;
-      // }
-
       return (
         <CreateSession
           onConnect={(policies) => {

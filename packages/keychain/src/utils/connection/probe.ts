@@ -7,8 +7,8 @@ export function probeFactory(setController: (controller: Controller) => void) {
       const controller = Controller.fromStore(origin);
       if (!controller) {
         return Promise.reject({
-          code: ResponseCodes.NOT_CONNECTED
-        })
+          code: ResponseCodes.NOT_CONNECTED,
+        });
       }
 
       if (rpcUrl && rpcUrl !== controller.rpcUrl) {
@@ -18,7 +18,7 @@ export function probeFactory(setController: (controller: Controller) => void) {
           code: ResponseCodes.NOT_CONNECTED,
         });
       }
-
+      console.log(controller.account.sessionMetadata());
       setController(controller);
       return Promise.resolve({
         code: ResponseCodes.SUCCESS,

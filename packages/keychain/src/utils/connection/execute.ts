@@ -13,6 +13,8 @@ import {
   CallData,
   InvocationsDetails,
   addAddressPadding,
+  hash,
+  selector,
 } from "starknet";
 import Account from "utils/account";
 import { ConnectionCtx, ExecuteCtx } from "./types";
@@ -87,15 +89,6 @@ export const normalizeCalls = (calls: AllowArray<Call>): Call[] => {
       contractAddress: addAddressPadding(call.contractAddress),
       calldata: CallData.toHex(call.calldata),
     } as Call;
-  });
-};
-
-export const mapPolicies = (calls: AllowArray<Call>): Policy[] => {
-  return (Array.isArray(calls) ? calls : [calls]).map((call) => {
-    return {
-      target: addAddressPadding(call.contractAddress),
-      method: call.entrypoint,
-    } as Policy;
   });
 };
 

@@ -2,13 +2,13 @@ import { Policy, Session } from "@cartridge/controller";
 import Controller from "utils/controller";
 import { CreateSession as CreateSessionComp } from "components/connect";
 
-import { diff } from "utils/controller";
 import { fetchAccount } from "components/connect/utils";
 import { useConnection } from "hooks/connection";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 import { PageLoading } from "components/Loading";
 import dynamic from "next/dynamic";
+import { Call, hash } from "starknet";
 
 type SessionQueryParams = Record<string, string> & {
   callback_uri: string;
@@ -32,42 +32,37 @@ function CreateSession() {
   // Send the session details to the callback uri in the body of the
   // POST request. If the request is successful, then redirect to the
   // success page. Else, redirect to the failure page.
-  const onSlotCallback = useCallback(
-    (session: Session) => {
-      const url = sanitizeCallbackUrl(decodeURIComponent(queries.callback_uri));
-      const body = JSON.stringify(session);
-      const headers = new Headers();
-      headers.append("Content-Type", "application/json");
+  const onSlotCallback = useCallback(() => {
+    const url = sanitizeCallbackUrl(decodeURIComponent(queries.callback_uri));
+    const session = controller.account.sessionJson();
+    if (!url || !session) {
+      router.replace(`/slot/auth/failure`);
+      return;
+    }
 
-      if (!url) {
-        router.replace(`/slot/auth/failure`);
-        return;
-      }
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
 
-      fetch(url, {
-        body,
-        headers,
-        method: "POST",
+    fetch(url, {
+      body: session,
+      headers,
+      method: "POST",
+    })
+      .then(async (res) => {
+        return res.status === 200
+          ? router.replace(`/slot/auth/success`)
+          : new Promise((_, reject) => reject(res));
       })
-        .then(async (res) => {
-          return res.status === 200
-            ? router.replace(`/slot/auth/success`)
-            : new Promise((_, reject) => reject(res));
-        })
-        .catch((e) => {
-          console.error("failed to call the callback url", e);
-          router.replace(`/slot/auth/failure`);
-        });
-    },
-    [router, queries.callback_uri, controller.username],
-  );
+      .catch((e) => {
+        console.error("failed to call the callback url", e);
+        router.replace(`/slot/auth/failure`);
+      });
+  }, [router, queries.callback_uri, controller.username]);
 
   // Handler when user clicks the Create button
   const onConnect = useCallback(
     (_: Policy[]) => {
-      const session = controller.session(origin);
-
-      if (!session) {
+      if (!controller.account.sessionJson()) {
         throw new Error("Session not found");
       }
 
@@ -75,7 +70,7 @@ function CreateSession() {
         throw new Error("Callback URI is missing");
       }
 
-      onSlotCallback(session);
+      //onSlotCallback(session);
     },
     [queries.callback_uri, origin, controller, onSlotCallback],
   );
@@ -123,12 +118,18 @@ function CreateSession() {
       return;
     }
 
-    const session = controller.session(origin);
+    let calls = policies.map((policy) => {
+      return {
+        contractAddress: policy.target,
+        entrypoint: hash.getSelector(policy.method),
+        calldata: [],
+      } as Call;
+    });
 
     // if the requested policies has no mismatch with existing policies then return
     // the exising session
-    if (session && diff(policies, session.policies).length === 0) {
-      onSlotCallback(session);
+    if (controller.account.hasSession(calls)) {
+      onSlotCallback();
     }
   }, [controller, origin, policies, onSlotCallback]);
 

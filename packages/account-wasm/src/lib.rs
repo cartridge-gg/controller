@@ -213,8 +213,8 @@ impl CartridgeAccount {
         Ok(self.controller.session_account(&calls).is_some())
     }
 
-    #[wasm_bindgen(js_name = sessionMetadata)]
-    pub fn session_metadata(&self) -> Result<JsValue> {
+    #[wasm_bindgen(js_name = sessionJson)]
+    pub fn session_json(&self) -> Result<JsValue> {
         self.controller
             .session_metadata()
             .map(|metadata| to_value(&metadata))
