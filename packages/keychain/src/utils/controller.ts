@@ -98,36 +98,24 @@ export default class Controller {
   }
 
   async approve(
-    origin: string,
+    _origin: string,
     expiresAt: bigint,
     policies: Policy[],
-    maxFee?: BigNumberish,
+    _maxFee?: BigNumberish,
   ) {
     if (!this.account) {
       throw new Error("Account not found");
     }
 
-    const credentials = await this.account.cartridge.createSession(
+    await this.account.cartridge.createSession(
       policies,
       expiresAt,
     );
-
-    Storage.set(
-      selectors[VERSION].session(this.address, origin, this.account.chainId),
-      {
-        policies,
-        maxFee,
-        credentials,
-        expiresAt: expiresAt.toString(),
-      },
-    );
   }
 
-  revoke(origin: string) {
+  revoke(_origin: string) {
     // TODO: Cartridge Account SDK to implement revoke session tokens
-    Storage.remove(
-      selectors[VERSION].session(this.address, origin, this.account.chainId),
-    );
+    console.error("revoke unimplemented");
   }
 
   store() {
