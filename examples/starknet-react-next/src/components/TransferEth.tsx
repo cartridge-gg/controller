@@ -22,11 +22,11 @@ export const TransferEth = () => {
 
     account
       .execute([
-        {
-          contractAddress: ETH_CONTRACT,
-          entrypoint: "approve",
-          calldata: [account?.address, "0x11C37937E08000", "0x0"],
-        },
+        // {
+        //   contractAddress: ETH_CONTRACT,
+        //   entrypoint: "approve",
+        //   calldata: [account?.address, "0x11C37937E08000", "0x0"],
+        // },
         {
           contractAddress: ETH_CONTRACT,
           entrypoint: "transfer",

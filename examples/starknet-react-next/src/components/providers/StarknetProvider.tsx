@@ -4,7 +4,7 @@ import { Chain, mainnet, sepolia } from "@starknet-react/chains";
 import { Connector, StarknetConfig, starkscan } from "@starknet-react/core";
 import { PropsWithChildren } from "react";
 import CartridgeConnector from "@cartridge/connector";
-import { RpcProvider, shortString } from "starknet";
+import { RpcProvider } from "starknet";
 
 export function StarknetProvider({ children }: PropsWithChildren) {
   return (
@@ -20,16 +20,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
   );
 }
 
-const url =
-  !process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ||
-  process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL.split(".")[0] ===
-    "cartridge-starknet-react-next"
-    ? process.env.XFRAME_URL
-    : "https://" +
-      (process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ?? "").replace(
-        "cartridge-starknet-react-next",
-        "keychain",
-      );
+const url = "https://x.cartridge.gg";
 
 function provider(chain: Chain) {
   switch (chain) {
@@ -79,9 +70,9 @@ const connectors = [
     {
       url,
       rpc: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
-      paymaster: {
-        caller: shortString.encodeShortString("ANY_CALLER"),
-      },
+      // paymaster: {
+      //   caller: shortString.encodeShortString("ANY_CALLER"),
+      // },
       // theme: "dope-wars",
       // colorMode: "light"
       // prefunds: [
