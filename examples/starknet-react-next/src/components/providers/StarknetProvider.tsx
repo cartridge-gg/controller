@@ -53,14 +53,15 @@ const cartridge = new CartridgeConnector(
   {
     url:
       !process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ||
-        process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL.split(".")[0] ===
+      process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL.split(".")[0] ===
         "cartridge-starknet-react-next"
         ? process.env.XFRAME_URL
         : "https://" +
-        (process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ?? "").replace(
-          "cartridge-starknet-react-next",
-          "keychain",
-        ),
+          (process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ?? "").replace(
+            "cartridge-starknet-react-next",
+            "keychain",
+          ),
+    rpc: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
     paymaster: {
       caller: shortString.encodeShortString("ANY_CALLER"),
     },
@@ -83,12 +84,12 @@ function provider(chain: Chain) {
   switch (chain) {
     case mainnet:
       return new RpcProvider({
-        nodeUrl: `${process.env.NEXT_PUBLIC_API_URL}/x/starknet/mainnet`,
+        nodeUrl: process.env.NEXT_PUBLIC_RPC_MAINNET,
       });
     case sepolia:
     default:
       return new RpcProvider({
-        nodeUrl: `${process.env.NEXT_PUBLIC_API_URL}/x/starknet/sepolia`,
+        nodeUrl: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
       });
   }
 }
