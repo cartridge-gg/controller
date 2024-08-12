@@ -9,7 +9,7 @@ export async function fetchData<TData, TVariables>(
   query: string,
   variables?: TVariables,
 ): Promise<TData> {
-  const res = await fetch(process.env.NEXT_PUBLIC_API_URL!, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/query`, {
     method: "POST",
     credentials: "include",
     headers: {

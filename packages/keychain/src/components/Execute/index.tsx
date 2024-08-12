@@ -78,7 +78,7 @@ export function Execute() {
       return;
     }
 
-    if (isDeployed && ctx.transactionsDetail?.maxFee) {
+    if (ctx.transactionsDetail?.maxFee) {
       setFees({
         base: BigInt(ctx.transactionsDetail.maxFee),
         max: BigInt(ctx.transactionsDetail.maxFee),
@@ -172,7 +172,7 @@ export function Execute() {
             />
           )
         ) : (
-          <Fees fees={fees} balance={ethBalance && format(ethBalance)} />
+          <Fees fees={fees} />
         )}
         <Button
           colorScheme="colorful"

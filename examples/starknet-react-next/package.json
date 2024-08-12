@@ -9,7 +9,7 @@
     "e2e:ui": "playwright test --ui",
     "start": "next start -p 3002",
     "lint": "next lint",
-    "format": "prettier --write ."
+    "format": "prettier --write ./src"
   },
   "dependencies": {
     "@cartridge/connector": "workspace:^",
