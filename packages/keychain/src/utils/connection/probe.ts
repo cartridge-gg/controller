@@ -18,7 +18,7 @@ export function probeFactory(setController: (controller: Controller) => void) {
           code: ResponseCodes.NOT_CONNECTED,
         });
       }
-      
+
       setController(controller);
       return Promise.resolve({
         code: ResponseCodes.SUCCESS,

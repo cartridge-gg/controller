@@ -75,6 +75,7 @@ export default class Controller {
       id: this.address,
     });
 
+    // @ts-expect-error TODO: fix type error
     const account = res.accounts?.edges?.[0]?.node;
     if (!account) {
       throw new Error("User not found");

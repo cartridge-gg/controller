@@ -89,6 +89,7 @@ where
     G: HashSigner + Send + Sync + Clone,
     B: Backend + Clone,
 {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         app_id: String,
         username: String,
@@ -202,13 +203,10 @@ where
     }
 
     pub fn session_metadata(&self) -> Option<SessionMetadata> {
-        let key = Selectors::session(
-            &self.account.address,
-            &self.app_id,
-            &self.account.chain_id
-        );
+        let key = Selectors::session(&self.account.address, &self.app_id, &self.account.chain_id);
 
-        self.backend.get(&key)
+        self.backend
+            .get(&key)
             .ok()
             .flatten()
             .map(|value| match value {
@@ -226,8 +224,7 @@ where
             .all(|call| metadata.session.is_call_allowed(call))
         {
             // Use SessionAccount if all calls are allowed
-            let session_signer =
-                SigningKey::from_secret_scalar(metadata.credentials.private_key);
+            let session_signer = SigningKey::from_secret_scalar(metadata.credentials.private_key);
             let session_account = SessionAccount::new(
                 self.account.provider().clone(),
                 session_signer,
@@ -263,11 +260,7 @@ where
 
 impl_account!(Controller<P: CartridgeProvider, S: HashSigner, G: HashSigner, B: Backend>, |account: &Controller<P, S, G, B>, context| {
     if let SignerInteractivityContext::Execution { calls } = context {
-        if let Some(_) = account.session_account(calls) {
-            false
-        } else {
-            true
-        }
+        account.session_account(calls).is_some()
     } else {
         true
     }

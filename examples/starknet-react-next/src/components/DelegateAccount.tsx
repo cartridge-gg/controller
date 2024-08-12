@@ -29,10 +29,10 @@ export const DelegateAccount = () => {
       setDelegateAddress(delegate?.toString() || "");
       setIsDelegateSupported(true);
     } catch (e: any) {
-      console.log(e)
+      console.log(e);
       // controller doesnt support delegateAccount, ignore
     }
-  }, [account, chainId, cartridgeConnector]);
+  }, [account, cartridgeConnector]);
 
   const execute = useCallback(async () => {
     if (!account) {
@@ -76,7 +76,7 @@ export const DelegateAccount = () => {
               type="text"
               min-width="420px"
               value={delegateAddressInput}
-              onChange={(e:any ) => setDelegateAddressInput(e.target.value)}
+              onChange={(e: any) => setDelegateAddressInput(e.target.value)}
             />
             <Button onClick={() => execute()} disabled={submitted}>
               Set Delegate
