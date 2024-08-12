@@ -9,7 +9,6 @@ import { executeFactory } from "./execute";
 import { estimateDeclareFee, estimateInvokeFee } from "./estimate";
 import { logout } from "./logout";
 import { probeFactory } from "./probe";
-import { revoke, session, sessions } from "./sessions";
 import { signMessageFactory } from "./sign";
 import { username } from "./username";
 import { ConnectionCtx } from "./types";
@@ -44,12 +43,9 @@ export function connectToController({
       estimateDeclareFee: normalize(validate(estimateDeclareFee)),
       estimateInvokeFee: normalize(validate(estimateInvokeFee)),
       logout: normalize(logout),
-      probe: normalize(validate(probeFactory(setController))),
-      revoke: normalize(revoke),
+      probe: normalize(probeFactory(setController)),
       signMessage: normalize(validate(signMessageFactory(setContext))),
       openMenu: normalize(validate(openMenuFactory(setContext))),
-      session: normalize(session),
-      sessions: normalize(sessions),
       setDelegate: normalize(validate(setDelegateFactory(setContext))),
       reset: normalize(() => () => setContext(undefined)),
       username: normalize(username),
@@ -68,7 +64,7 @@ function validate<T>(
   fn: (controller: Controller, origin: string) => T,
 ): (origin: string) => T | (() => Promise<ConnectError>) {
   return (origin: string) => {
-    const controller = Controller.fromStore();
+    const controller = Controller.fromStore(origin);
     if (!controller) {
       return async () => ({
         code: ResponseCodes.NOT_CONNECTED,

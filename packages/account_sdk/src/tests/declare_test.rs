@@ -12,7 +12,9 @@ use crate::tests::runners::katana::KatanaRunner;
 async fn test_declare_with_account() {
     let signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
-    let controller = runner.deploy_controller(&signer).await;
+    let controller = runner
+        .deploy_controller("username".to_owned(), &signer)
+        .await;
 
     AccountDeclaration::erc_20(runner.client())
         .declare(&controller)
@@ -26,9 +28,12 @@ async fn test_declare_with_account() {
 async fn test_declare_with_session() {
     let signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
-    let controller = runner.deploy_controller(&signer).await;
+    let controller = runner
+        .deploy_controller("username".to_owned(), &signer)
+        .await;
 
     let session = controller
+        .account
         .session_account(
             SigningKey::from_random(),
             vec![AllowedMethod {

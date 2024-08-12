@@ -33,7 +33,7 @@ export function Signup({
   });
   const [isValidating, setIsValidating] = useState(false);
 
-  const { hasPrefundRequest } = useConnection();
+  const { origin, hasPrefundRequest } = useConnection();
   const { debouncedValue: username, debouncing } = useDebounce(
     usernameField.value,
     1000,
@@ -125,7 +125,9 @@ export function Signup({
             },
           } = data;
 
+          console.log(origin);
           const controller = new Controller({
+            appId: origin,
             chainId,
             rpcUrl,
             address,

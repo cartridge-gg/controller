@@ -12,15 +12,19 @@ macro_rules! impl_execution_encoder {
 
 #[macro_export]
 macro_rules! impl_account {
-    ($type:ident<$($gen:ident : $bound:path),*>) => {
+    ($type:ident<$($gen:ident : $bound:path),*>, $is_interactive:expr) => {
         #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
         #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-        impl<$($gen: $bound + Send + Sync),*> Account for $type<$($gen),*>
+        impl<$($gen: $bound + Send + Sync + Clone),*> Account for $type<$($gen),*>
         {
             type SignError = SignError;
 
             fn address(&self) -> starknet::core::types::Felt {
                 $crate::account::SpecificAccount::address(self)
+            }
+
+            fn is_signer_interactive(&self, context: starknet::signers::SignerInteractivityContext) -> bool {
+                ($is_interactive)(self, context)
             }
 
             fn chain_id(&self) -> starknet::core::types::Felt {
@@ -67,7 +71,7 @@ macro_rules! impl_account {
                     $crate::account::SpecificAccount::address(self),
                     query_only,
                 );
-                let calls = vec![starknet::accounts::Call {
+                let calls = vec![starknet::core::types::Call {
                     to: $crate::account::SpecificAccount::address(self),
                     selector: $crate::account::DECLARATION_SELECTOR,
                     calldata: vec![
@@ -87,7 +91,7 @@ macro_rules! impl_account {
                     $crate::account::SpecificAccount::address(self),
                     query_only,
                 );
-                let calls = vec![starknet::accounts::Call {
+                let calls = vec![starknet::core::types::Call {
                     to: $crate::account::SpecificAccount::address(self),
                     selector: $crate::account::DECLARATION_SELECTOR,
                     calldata: vec![
@@ -105,16 +109,16 @@ macro_rules! impl_account {
                 unimplemented!("sign_legacy_declaration")
             }
 
-            fn execute_v1(&self, calls: Vec<starknet::accounts::Call>) -> starknet::accounts::ExecutionV1<Self> {
+            fn execute_v1(&self, calls: Vec<starknet::core::types::Call>) -> starknet::accounts::ExecutionV1<Self> {
                 starknet::accounts::ExecutionV1::new(calls, self)
             }
 
-            fn execute_v3(&self, calls: Vec<starknet::accounts::Call>) -> starknet::accounts::ExecutionV3<Self> {
+            fn execute_v3(&self, calls: Vec<starknet::core::types::Call>) -> starknet::accounts::ExecutionV3<Self> {
                 starknet::accounts::ExecutionV3::new(calls, self)
             }
 
 
-            fn execute(&self, calls: Vec<starknet::accounts::Call>) -> starknet::accounts::ExecutionV1<Self> {
+            fn execute(&self, calls: Vec<starknet::core::types::Call>) -> starknet::accounts::ExecutionV1<Self> {
                 self.execute_v1(calls)
             }
 

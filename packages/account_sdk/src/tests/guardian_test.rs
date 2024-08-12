@@ -1,8 +1,8 @@
 use crate::{
     abigen::erc_20::Erc20,
-    signers::HashSigner,
+    signers::{webauthn::WebauthnSigner, HashSigner},
     tests::{
-        account::{signers::InternalWebauthnSigner, FEE_TOKEN_ADDRESS},
+        account::{webauthn::SoftPasskeySigner, FEE_TOKEN_ADDRESS},
         runners::katana::KatanaRunner,
     },
 };
@@ -13,9 +13,13 @@ use starknet::{
     signers::SigningKey,
 };
 
+use super::ensure_txn;
+
 pub async fn test_verify_execute<S: HashSigner + Clone + Sync + Send>(signer: S) {
     let runner = KatanaRunner::load();
-    let controller = runner.deploy_controller(&signer).await;
+    let controller = runner
+        .deploy_controller("username".to_owned(), &signer)
+        .await;
 
     let new_account = ContractAddress(felt!("0x18301129"));
 
@@ -28,29 +32,36 @@ pub async fn test_verify_execute<S: HashSigner + Clone + Sync + Send>(signer: S)
         .await
         .expect("failed to call contract");
 
-    contract_erc20
-        .transfer(
+    ensure_txn(
+        contract_erc20.transfer(
             &new_account,
             &U256 {
                 low: 0x10_u128,
                 high: 0,
             },
-        )
-        .send()
-        .await
-        .unwrap();
+        ),
+        runner.client(),
+    )
+    .await
+    .unwrap();
 }
 
 #[tokio::test]
-async fn test_verify_execute_webauthn_guardian_starknet() {
-    test_verify_execute(InternalWebauthnSigner::random(
-        "localhost".to_string(),
-        "rp_id".to_string(),
-    ))
-    .await;
+#[ignore = "Skipped due to exhausted resources"]
+async fn test_verify_execute_webauthn() {
+    let signer = WebauthnSigner::register(
+        "cartridge.gg".to_string(),
+        "username".to_string(),
+        "challenge".as_bytes(),
+        SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
+    )
+    .await
+    .unwrap();
+
+    test_verify_execute(signer).await;
 }
 
 #[tokio::test]
-async fn test_verify_execute_starknet_guardian_starknet() {
+async fn test_verify_execute_starpair() {
     test_verify_execute(SigningKey::from_random()).await;
 }

@@ -13,7 +13,7 @@ account-wasm = { path = "packages/account-wasm" }
 anyhow = "1"
 async-trait = "0.1"
 base64 = "0.22"
-cainome = { git = "https://github.com/cartridge-gg/cainome", rev = "e67d925", features = [
+cainome = { git = "https://github.com/cartridge-gg/cainome", branch = "main", features = [
     "abigen-rs",
 ] }
 cairo-lang-starknet = "2.4.0"
@@ -28,11 +28,26 @@ p256 = "0.13"
 primitive-types = { version = "0.12", default-features = false }
 getrandom = { version = "0.2", features = ["js"] }
 rand = { version = "0.8", features = ["getrandom"] }
-serde = "1.0.197"
-serde_json = "1"
+reqwest = { version = "0.11.16", default-features = false, features = [
+    "json",
+    "rustls-tls",
+] }
+serde = { version = "1.0.160", default-features = false, features = ["derive"] }
+serde_json = { version = "1.0.96", default-features = false, features = [
+    "alloc",
+    "raw_value",
+] }
+serde_with = { version = "3.9.0", default-features = false, features = [
+    "alloc",
+    "macros",
+] }
 sha2 = "0.10"
-starknet = "0.11.0"
-starknet-crypto = "0.7.1"
+starknet = { git = "https://github.com/xJonathanLEI/starknet-rs", rev = "2ddc694" }
+starknet-crypto = { git = "https://github.com/xJonathanLEI/starknet-rs", rev = "2ddc694" }
+starknet-types-core = { version = "0.1.3", default-features = false, features = [
+    "curve",
+    "hash",
+] }
 thiserror = "1"
 toml = "0.8"
 u256-literal = "1"
@@ -49,13 +64,6 @@ webauthn-rs-proto = { git = "https://github.com/cartridge-gg/webauthn-rs", rev =
 webauthn-authenticator-rs = { git = "https://github.com/cartridge-gg/webauthn-rs", rev = "a6cea88", features = [
     "softpasskey",
 ] }
-
-[patch.crates-io]
-# Remove this patch once the following PR is merged: <https://github.com/xJonathanLEI/starknet-rs/pull/615>
-#
-# To enable std feature on `starknet-types-core`.
-# To re-export the entire `felt` module from `starknet-types-core`.
-starknet-core = { git = "https://github.com/kariy/starknet-rs", branch = "dojo-patch" }
 
 # Compiler optimization when running test to prevent ‘locals exceed maximum’ error,
 # where a function is using more that the maximum allowed local variables.

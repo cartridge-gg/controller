@@ -1,12 +1,10 @@
 import {
   ExecuteReply,
-  Policy,
   ResponseCodes,
   ConnectError,
   PaymasterOptions,
-  Session,
 } from "@cartridge/controller";
-import Controller, { diff } from "utils/controller";
+import Controller from "utils/controller";
 import {
   Abi,
   AllowArray,
@@ -49,21 +47,14 @@ export function executeFactory({
 
       try {
         const account = controller.account;
-
-        const session = controller.session(origin);
-        if (!session) {
-          throw new Error("No session");
-        }
-
-        const missing = diff(mapPolicies(transactions), session.policies);
-        if (missing.length > 0) {
-          throw new Error(`Missing policies: ${JSON.stringify(missing)}`);
-        }
-
         const calls = normalizeCalls(transactions);
 
+        if (!account.hasSession(calls)) {
+          throw new Error(`No session available`);
+        }
+
         if (paymaster) {
-          const res = await tryPaymaster(account, calls, paymaster, session);
+          const res = await tryPaymaster(account, calls, paymaster);
           if (res) return res;
         }
 
@@ -71,14 +62,9 @@ export function executeFactory({
           transactionsDetail,
           account,
           calls,
-          session,
         );
 
-        const res = await account.execute(
-          transactions,
-          { nonce, maxFee },
-          session,
-        );
+        const res = await account.execute(transactions, { nonce, maxFee });
 
         return {
           code: ResponseCodes.SUCCESS,
@@ -103,29 +89,13 @@ export const normalizeCalls = (calls: AllowArray<Call>): Call[] => {
   });
 };
 
-export const mapPolicies = (calls: AllowArray<Call>): Policy[] => {
-  return (Array.isArray(calls) ? calls : [calls]).map((call) => {
-    return {
-      target: addAddressPadding(call.contractAddress),
-      method: call.entrypoint,
-    } as Policy;
-  });
-};
-
 async function tryPaymaster(
   account: Account,
   calls: Call[],
   paymaster: PaymasterOptions,
-  session: Session,
 ): Promise<ExecuteReply> {
   try {
-    const {
-      result: { transaction_hash },
-    } = await account.cartridge.executeFromOutside(
-      calls,
-      paymaster.caller,
-      session,
-    );
+    const transaction_hash = await account.cartridge.executeFromOutside(calls, paymaster.caller);
 
     return {
       code: ResponseCodes.SUCCESS,
@@ -140,7 +110,6 @@ async function getInvocationDetails(
   details: InvocationsDetails,
   account: Account,
   calls: Call[],
-  session: Session,
 ): Promise<InvocationsDetails> {
   let { nonce, maxFee } = details;
 
@@ -151,18 +120,17 @@ async function getInvocationDetails(
 
     const estFee = await account.cartridge.estimateInvokeFee(
       calls,
-      session,
       ESTIMATE_FEE_MULTIPLIER,
     );
 
     maxFee = estFee.overall_fee;
   }
 
-  if (session.maxFee && BigInt(maxFee) > BigInt(session.maxFee)) {
-    throw new Error(
-      `Max fee exceeded: ${maxFee.toString()} > ${session.maxFee.toString()}`,
-    );
-  }
+  // if (session.maxFee && BigInt(maxFee) > BigInt(session.maxFee)) {
+  //   throw new Error(
+  //     `Max fee exceeded: ${maxFee.toString()} > ${session.maxFee.toString()}`,
+  //   );
+  // }
 
   return { nonce, maxFee };
 }

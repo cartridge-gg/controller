@@ -2,21 +2,22 @@ use starknet::{
     accounts::SingleOwnerAccount,
     contract::ContractFactory,
     core::types::{Felt, InvokeTransactionResult},
-    providers::{JsonRpcClient, Provider},
+    providers::Provider,
     signers::Signer,
 };
 
+use crate::provider::CartridgeJsonRpcProvider;
+
 use super::{pending::PendingTransaction, UDC_ADDRESS};
 
-pub struct AccountDeployment<'a, T> {
-    client: &'a JsonRpcClient<T>,
+pub struct AccountDeployment<'a> {
+    client: &'a CartridgeJsonRpcProvider,
 }
 
-impl<'a, T> AccountDeployment<'a, T> {
-    pub fn new(client: &'a JsonRpcClient<T>) -> Self
+impl<'a> AccountDeployment<'a> {
+    pub fn new(client: &'a CartridgeJsonRpcProvider) -> Self
     where
-        &'a JsonRpcClient<T>: Provider,
-        T: Send + Sync,
+        &'a CartridgeJsonRpcProvider: Provider,
     {
         AccountDeployment { client }
     }
@@ -28,19 +29,18 @@ pub struct DeployResult {
     pub transaction_hash: Felt,
 }
 
-impl<'a, T> AccountDeployment<'a, T> {
+impl<'a> AccountDeployment<'a> {
     pub async fn deploy<P, S>(
         self,
         constructor_calldata: Vec<Felt>,
         salt: Felt,
         account: &SingleOwnerAccount<P, S>,
         class_hash: Felt,
-    ) -> Result<PendingDeployment<'a, T>, String>
+    ) -> Result<PendingDeployment<'a>, String>
     where
         P: Provider + Send + Sync,
         S: Signer + Send + Sync,
-        &'a JsonRpcClient<T>: Provider,
-        T: Send + Sync,
+        &'a CartridgeJsonRpcProvider: Provider,
     {
         let contract_factory = ContractFactory::new_with_udc(class_hash, account, *UDC_ADDRESS);
 
@@ -58,14 +58,13 @@ impl<'a, T> AccountDeployment<'a, T> {
     }
 }
 
-pub type PendingDeployment<'a, T> = PendingTransaction<'a, JsonRpcClient<T>, DeployResult>;
+pub type PendingDeployment<'a> = PendingTransaction<'a, CartridgeJsonRpcProvider, DeployResult>;
 
-impl<'a, T> From<(DeployResult, &'a JsonRpcClient<T>)> for PendingDeployment<'a, T>
+impl<'a> From<(DeployResult, &'a CartridgeJsonRpcProvider)> for PendingDeployment<'a>
 where
-    T: Send + Sync,
-    &'a JsonRpcClient<T>: Provider,
+    &'a CartridgeJsonRpcProvider: Provider,
 {
-    fn from((result, client): (DeployResult, &'a JsonRpcClient<T>)) -> Self {
+    fn from((result, client): (DeployResult, &'a CartridgeJsonRpcProvider)) -> Self {
         let transaction_hash = result.transaction_hash;
         Self::new(result, transaction_hash, client)
     }

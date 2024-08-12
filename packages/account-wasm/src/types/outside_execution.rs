@@ -1,9 +1,10 @@
-use account_sdk::account::outside_execution::{OutsideExecution, OutsideExecutionCaller};
+use account_sdk::abigen::controller::{Call, OutsideExecution};
+use account_sdk::account::outside_execution::OutsideExecutionCaller;
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
 use starknet::core::serde::unsigned_field_element::UfeHex;
+use starknet::core::types::Felt;
 use starknet::macros::short_string;
-use starknet::{accounts::Call, core::types::Felt};
 use wasm_bindgen::prelude::*;
 
 use crate::errors::EncodingError;
@@ -42,7 +43,7 @@ impl TryFrom<JsOutsideExecution> for OutsideExecution {
         };
 
         Ok(OutsideExecution {
-            caller,
+            caller: caller.into(),
             execute_after: value.execute_after,
             execute_before: value.execute_before,
             nonce: value.nonce,

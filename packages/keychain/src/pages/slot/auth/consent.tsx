@@ -23,7 +23,7 @@ function Consent() {
   }, [router.query.callback_uri]);
 
   useEffect(() => {
-    if (!Controller.fromStore()) {
+    if (!Controller.fromStore("https://x.cartridge.gg")) {
       router.replace("/slot/auth");
     }
   }, [router]);

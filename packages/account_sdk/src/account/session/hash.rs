@@ -1,9 +1,11 @@
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use starknet::core::types::Call;
 use starknet::core::types::Felt;
-use starknet::core::utils::{get_selector_from_name, NonAsciiNameError};
+use starknet::core::utils::NonAsciiNameError;
 use starknet::macros::selector;
-use starknet_crypto::{poseidon_hash_many, poseidon_permute_comp};
+use starknet_crypto::poseidon_hash_many;
+use starknet_types_core::hash::Poseidon;
 
 use crate::abigen::controller::Signer;
 
@@ -19,7 +21,7 @@ pub struct ProvedMethod {
     pub(crate) proof: Vec<Felt>,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Session {
     expires_at: u64,
     allowed_methods: Vec<ProvedMethod>,
@@ -78,7 +80,7 @@ impl Session {
     ) -> Result<Felt, NonAsciiNameError> {
         let token_session_hash = self.raw().get_message_hash_rev_1(chain_id, address);
         let mut msg_hash = [tx_hash, token_session_hash, Felt::TWO];
-        poseidon_permute_comp(&mut msg_hash);
+        Poseidon::hades_permutation(&mut msg_hash);
         Ok(msg_hash[0])
     }
     pub fn single_proof(&self, call: &AllowedMethod) -> Option<Vec<Felt>> {
@@ -86,6 +88,17 @@ impl Session {
             .iter()
             .find(|ProvedMethod { method, .. }| method == call)
             .map(|ProvedMethod { proof, .. }| proof.clone())
+    }
+
+    pub fn is_call_allowed(&self, call: &Call) -> bool {
+        let allowed_method = AllowedMethod {
+            contract_address: call.to,
+            selector: call.selector,
+        };
+
+        self.allowed_methods
+            .iter()
+            .any(|proved_method| proved_method.method == allowed_method)
     }
 }
 
@@ -96,21 +109,13 @@ pub struct AllowedMethod {
 }
 
 impl AllowedMethod {
-    pub fn new(contract_address: Felt, name: &str) -> Result<AllowedMethod, NonAsciiNameError> {
-        Ok(Self::with_selector(
-            contract_address,
-            get_selector_from_name(name)?,
-        ))
-    }
-    pub fn with_selector(contract_address: Felt, selector: Felt) -> AllowedMethod {
+    pub fn new(contract_address: Felt, selector: Felt) -> AllowedMethod {
         Self {
             contract_address,
             selector,
         }
     }
-}
 
-impl AllowedMethod {
     pub fn as_merkle_leaf(&self) -> Felt {
         poseidon_hash_many(&[
             Session::allowed_method_hash_rev_1(),

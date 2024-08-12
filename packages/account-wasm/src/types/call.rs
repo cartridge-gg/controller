@@ -1,10 +1,10 @@
+use account_sdk::abigen::controller::Call;
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
 use starknet::core::serde::unsigned_field_element::UfeHex;
-use starknet::{
-    accounts::Call,
-    core::{types::Felt, utils::get_selector_from_name},
-};
+use starknet::core::types;
+use starknet::core::utils::get_selector_from_name;
+use starknet_types_core::felt::Felt;
 use wasm_bindgen::prelude::*;
 
 use crate::errors::EncodingError;
@@ -27,6 +27,18 @@ impl TryFrom<JsCall> for Call {
 
     fn try_from(value: JsCall) -> Result<Self, Self::Error> {
         Ok(Call {
+            to: value.contract_address.into(),
+            selector: get_selector_from_name(&value.entrypoint)?,
+            calldata: value.calldata,
+        })
+    }
+}
+
+impl TryFrom<JsCall> for types::Call {
+    type Error = EncodingError;
+
+    fn try_from(value: JsCall) -> Result<Self, Self::Error> {
+        Ok(types::Call {
             to: value.contract_address,
             selector: get_selector_from_name(&value.entrypoint)?,
             calldata: value.calldata,
@@ -43,6 +55,13 @@ impl TryFrom<JsValue> for JsCall {
 }
 
 impl TryFromJsValue<Call> for Call {
+    fn try_from_js_value(value: JsValue) -> Result<Self, EncodingError> {
+        let js_call: JsCall = value.try_into()?;
+        js_call.try_into()
+    }
+}
+
+impl TryFromJsValue<types::Call> for types::Call {
     fn try_from_js_value(value: JsValue) -> Result<Self, EncodingError> {
         let js_call: JsCall = value.try_into()?;
         js_call.try_into()

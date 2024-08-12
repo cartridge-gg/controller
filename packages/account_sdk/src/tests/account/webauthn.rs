@@ -1,5 +1,6 @@
 use crate::signers::webauthn::{WebauthnBackend, WebauthnSigner};
 use crate::signers::DeviceError;
+use crate::OriginProvider;
 use crate::{
     abigen::erc_20::Erc20,
     signers::HashSigner,
@@ -110,7 +111,9 @@ impl WebauthnBackend for SoftPasskeySigner {
 
         Ok(r)
     }
+}
 
+impl OriginProvider for SoftPasskeySigner {
     fn origin() -> Result<String, DeviceError> {
         Ok(ORIGIN.lock().unwrap().clone().to_string())
     }
@@ -118,7 +121,9 @@ impl WebauthnBackend for SoftPasskeySigner {
 
 pub async fn test_verify_execute<S: HashSigner + Clone + Sync + Send>(signer: S) {
     let runner = KatanaRunner::load();
-    let controller = runner.deploy_controller(&signer).await;
+    let controller = runner
+        .deploy_controller("username".to_owned(), &signer)
+        .await;
     let new_account = ContractAddress(felt!("0x18301129"));
     let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller);
 

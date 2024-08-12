@@ -72,6 +72,7 @@ function Form({
 
     try {
       const controller = new Controller({
+        appId: origin,
         chainId,
         rpcUrl,
         address,

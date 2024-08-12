@@ -52,7 +52,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
   const [rpcUrl, setRpcUrl] = useState<string>();
   const [chainId, setChainId] = useState<string>();
   const [policies, setPolicies] = useState<Policy[]>([]);
-  const [controller, setController] = useState(Controller.fromStore);
+  const [controller, setController] = useState<Controller | undefined>();
   const [prefunds, setPrefunds] = useState<Prefund[]>([]);
   const [hasPrefundRequest, setHasPrefundRequest] = useState<boolean>(false);
   const [error, setError] = useState<Error>();

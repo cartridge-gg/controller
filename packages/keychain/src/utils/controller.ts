@@ -5,7 +5,7 @@ import {
   num,
 } from "starknet";
 
-import { Policy, Session } from "@cartridge/controller";
+import { Policy } from "@cartridge/controller";
 
 import Storage from "utils/storage";
 
@@ -33,6 +33,7 @@ export default class Controller {
   protected credentialId: string;
 
   constructor({
+    appId,
     chainId,
     rpcUrl,
     address,
@@ -40,6 +41,7 @@ export default class Controller {
     publicKey,
     credentialId,
   }: {
+    appId: string;
     chainId: string;
     rpcUrl: string;
     address: string;
@@ -54,6 +56,7 @@ export default class Controller {
     this.publicKey = publicKey;
     this.credentialId = credentialId;
     this.account = new Account(
+      appId,
       chainId,
       rpcUrl,
       address,
@@ -95,51 +98,24 @@ export default class Controller {
   }
 
   async approve(
-    origin: string,
+    _origin: string,
     expiresAt: bigint,
     policies: Policy[],
-    maxFee?: BigNumberish,
+    _maxFee?: BigNumberish,
   ) {
     if (!this.account) {
       throw new Error("Account not found");
     }
 
-    const credentials = await this.account.cartridge.createSession(
+    await this.account.cartridge.createSession(
       policies,
       expiresAt,
     );
-
-    Storage.set(
-      selectors[VERSION].session(this.address, origin, this.account.chainId),
-      {
-        policies,
-        maxFee,
-        credentials,
-        expiresAt: expiresAt.toString(),
-      },
-    );
   }
 
-  revoke(origin: string) {
+  revoke(_origin: string) {
     // TODO: Cartridge Account SDK to implement revoke session tokens
-    Storage.remove(
-      selectors[VERSION].session(this.address, origin, this.account.chainId),
-    );
-  }
-
-  session(origin: string): Session | undefined {
-    return Storage.get(
-      selectors[VERSION].session(this.address, origin, this.account.chainId),
-    );
-  }
-
-  sessions(): { [key: string]: Session } | undefined {
-    return Storage.keys()
-      .filter((k) => k.startsWith(`@session/${this.address}/${origin}`))
-      .reduce((prev, key) => {
-        prev[key.slice(9)] = Storage.get(key);
-        return prev;
-      }, {} as { [key: string]: Session });
+    console.error("revoke unimplemented");
   }
 
   store() {
@@ -173,7 +149,7 @@ export default class Controller {
     });
   }
 
-  static fromStore() {
+  static fromStore(origin: string) {
     try {
       const version = Storage.get("version");
       if (!version) {
@@ -196,6 +172,7 @@ export default class Controller {
       }
 
       return new Controller({
+        appId: origin,
         chainId,
         rpcUrl,
         address,

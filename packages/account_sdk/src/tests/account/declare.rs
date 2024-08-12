@@ -6,8 +6,10 @@ use starknet::{
         contract::{CompiledClass, SierraClass},
         DeclareTransactionResult,
     },
-    providers::{JsonRpcClient, Provider},
+    providers::Provider,
 };
+
+use crate::provider::CartridgeJsonRpcProvider;
 
 use super::pending::PendingTransaction;
 
@@ -20,21 +22,20 @@ pub const ERC_20_SIERRA_STR: &str = include_str!("../../../compiled/erc20.contra
 pub const ERC_20_CASM_STR: &str =
     include_str!("../../../compiled/erc20.compiled_contract_class.json");
 
-pub struct AccountDeclaration<'a, T> {
+pub struct AccountDeclaration<'a> {
     contract_artifact: SierraClass,
     compiled_class: CompiledClass,
-    client: &'a JsonRpcClient<T>,
+    client: &'a CartridgeJsonRpcProvider,
 }
 
-impl<'a, T> AccountDeclaration<'a, T> {
+impl<'a> AccountDeclaration<'a> {
     pub fn new(
         contract_artifact: SierraClass,
         compiled_class: CompiledClass,
-        client: &'a JsonRpcClient<T>,
+        client: &'a CartridgeJsonRpcProvider,
     ) -> Self
     where
-        T: Send + Sync,
-        &'a JsonRpcClient<T>: Provider,
+        &'a CartridgeJsonRpcProvider: Provider,
     {
         Self {
             contract_artifact,
@@ -42,10 +43,9 @@ impl<'a, T> AccountDeclaration<'a, T> {
             client,
         }
     }
-    pub fn cartridge_account(client: &'a JsonRpcClient<T>) -> Self
+    pub fn cartridge_account(client: &'a CartridgeJsonRpcProvider) -> Self
     where
-        T: Send + Sync,
-        &'a JsonRpcClient<T>: Provider,
+        &'a CartridgeJsonRpcProvider: Provider,
     {
         Self::new(
             serde_json::from_str(SIERRA_STR).unwrap(),
@@ -53,10 +53,9 @@ impl<'a, T> AccountDeclaration<'a, T> {
             client,
         )
     }
-    pub fn erc_20(client: &'a JsonRpcClient<T>) -> Self
+    pub fn erc_20(client: &'a CartridgeJsonRpcProvider) -> Self
     where
-        T: Send + Sync,
-        &'a JsonRpcClient<T>: Provider,
+        &'a CartridgeJsonRpcProvider: Provider,
     {
         Self::new(
             serde_json::from_str(ERC_20_SIERRA_STR).unwrap(),
@@ -66,14 +65,13 @@ impl<'a, T> AccountDeclaration<'a, T> {
     }
 }
 
-impl<'a, T> AccountDeclaration<'a, T> {
+impl<'a> AccountDeclaration<'a> {
     pub async fn declare(
         self,
         account: &(impl ConnectedAccount + Send + Sync),
-    ) -> Result<PendingDeclaration<'a, T>, String>
+    ) -> Result<PendingDeclaration<'a>, String>
     where
-        T: Send + Sync,
-        &'a JsonRpcClient<T>: Provider,
+        &'a CartridgeJsonRpcProvider: Provider,
     {
         let casm_class_hash = self
             .compiled_class
@@ -89,6 +87,7 @@ impl<'a, T> AccountDeclaration<'a, T> {
 
         let declaration_result = account
             .declare_v2(Arc::new(flattened_class), casm_class_hash)
+            .fee_estimate_multiplier(1.5)
             .send()
             .await
             .unwrap();
@@ -97,15 +96,14 @@ impl<'a, T> AccountDeclaration<'a, T> {
     }
 }
 
-pub type PendingDeclaration<'a, T> =
-    PendingTransaction<'a, JsonRpcClient<T>, DeclareTransactionResult>;
+pub type PendingDeclaration<'a> =
+    PendingTransaction<'a, CartridgeJsonRpcProvider, DeclareTransactionResult>;
 
-impl<'a, T> From<(DeclareTransactionResult, &'a JsonRpcClient<T>)> for PendingDeclaration<'a, T>
+impl<'a> From<(DeclareTransactionResult, &'a CartridgeJsonRpcProvider)> for PendingDeclaration<'a>
 where
-    T: Send + Sync,
-    &'a JsonRpcClient<T>: Provider,
+    &'a CartridgeJsonRpcProvider: Provider,
 {
-    fn from((result, client): (DeclareTransactionResult, &'a JsonRpcClient<T>)) -> Self {
+    fn from((result, client): (DeclareTransactionResult, &'a CartridgeJsonRpcProvider)) -> Self {
         let transaction_hash = result.transaction_hash;
         Self::new(result, transaction_hash, client)
     }

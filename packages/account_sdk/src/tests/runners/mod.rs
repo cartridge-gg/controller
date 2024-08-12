@@ -1,13 +1,11 @@
-use std::{
-    net::TcpListener,
-    path::{Path, PathBuf},
-    process::Child,
-};
+use std::{net::TcpListener, process::Child};
 
 use serde::Deserialize;
+use starknet_crypto::Felt;
 
 use self::waiter::OutputWaiter;
 
+pub mod cartridge;
 pub mod katana;
 pub mod waiter;
 
@@ -17,16 +15,12 @@ struct SubprocessRunner {
 }
 
 impl SubprocessRunner {
-    pub fn new(
-        mut child: Child,
-        log_file_path: impl Into<String>,
-        line_predicate: impl (Fn(&str) -> bool) + Send + 'static,
-    ) -> Self {
+    pub fn new(mut child: Child, line_predicate: impl (Fn(&str) -> bool) + Send + 'static) -> Self {
         let stdout = child
             .stdout
             .take()
             .expect("failed to take subprocess stdout");
-        OutputWaiter::new(log_file_path.into(), stdout).wait(line_predicate);
+        OutputWaiter::new(stdout).wait(line_predicate);
         Self { child }
     }
     pub fn kill(&mut self) {
@@ -49,30 +43,7 @@ pub fn find_free_port() -> u16 {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct TestnetConfig {
-    pub port: u16,
+    pub chain_id: Felt,
     pub exec: String,
     pub log_file_path: String,
-}
-
-impl TestnetConfig {
-    pub fn port(mut self, port: u16) -> Self {
-        self.port = port;
-        self.log_file_path = TestnetConfig::add_port_to_filename(&self.log_file_path, port);
-        self
-    }
-
-    fn add_port_to_filename(file_path: &str, port: u16) -> String {
-        let path = Path::new(file_path);
-        let stem = path.file_stem().and_then(|s| s.to_str()).unwrap_or("");
-        let extension = path.extension().and_then(|s| s.to_str()).unwrap_or("");
-
-        let new_file_name = if extension.is_empty() {
-            format!("{}_{}", stem, port)
-        } else {
-            format!("{}_{}.{}", stem, port, extension)
-        };
-        let mut new_path = PathBuf::from(path.parent().unwrap_or_else(|| Path::new("")));
-        new_path.push(new_file_name);
-        new_path.to_string_lossy().into_owned()
-    }
 }

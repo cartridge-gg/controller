@@ -1,6 +1,10 @@
 use async_trait::async_trait;
 
-use account_sdk::signers::{webauthn::WebauthnBackend, DeviceError};
+use account_sdk::{
+    controller::Backend,
+    signers::{webauthn::WebauthnBackend, DeviceError},
+    OriginProvider,
+};
 use futures::channel::oneshot;
 use wasm_bindgen::UnwrapThrowExt;
 use wasm_bindgen_futures::{spawn_local, JsFuture};
@@ -15,7 +19,11 @@ pub fn window() -> Window {
 }
 
 #[derive(Debug, Clone)]
-pub struct BrowserBackend {}
+pub struct BrowserBackend;
+
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+impl Backend for BrowserBackend {}
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send), )]
@@ -87,8 +95,10 @@ impl WebauthnBackend for BrowserBackend {
             "credential receiver dropped".to_string(),
         )))
     }
+}
 
-    #[cfg(target_arch = "wasm32")]
+#[cfg(target_arch = "wasm32")]
+impl OriginProvider for BrowserBackend {
     fn origin() -> Result<String, DeviceError> {
         let origin = window()
             .location()
@@ -96,8 +106,10 @@ impl WebauthnBackend for BrowserBackend {
             .map_err(|_| DeviceError::Origin("Unable to get origin".to_string()))?;
         Ok(origin)
     }
+}
 
-    #[cfg(not(target_arch = "wasm32"))]
+#[cfg(not(target_arch = "wasm32"))]
+impl OriginProvider for BrowserBackend {
     fn origin() -> Result<String, DeviceError> {
         Ok("http://localhost:3001".to_string())
     }

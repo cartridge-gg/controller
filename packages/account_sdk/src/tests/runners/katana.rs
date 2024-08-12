@@ -1,24 +1,30 @@
 use cainome::cairo_serde::{CairoSerde, ContractAddress, U256};
 use starknet::accounts::{ExecutionEncoding, SingleOwnerAccount};
 use starknet::core::types::{BlockId, BlockTag, DeclareTransactionResult};
+use starknet::macros::short_string;
 use starknet::providers::jsonrpc::HttpTransport;
 use starknet::providers::{JsonRpcClient, Provider};
 use starknet::signers::LocalWallet;
 use starknet::{core::types::Felt, macros::felt, signers::SigningKey};
 use std::process::{Command, Stdio};
+use std::sync::Arc;
+use tokio::task::JoinHandle;
 use url::Url;
 
 use lazy_static::lazy_static;
 
 use crate::abigen::controller::{self, Signer};
 use crate::abigen::erc_20::Erc20;
-use crate::account::Controller;
+use crate::controller::Controller;
+use crate::provider::CartridgeJsonRpcProvider;
 use crate::signers::HashSigner;
+use crate::storage::InMemoryBackend;
 use crate::tests::account::{
     AccountDeclaration, AccountDeployment, DeployResult, FEE_TOKEN_ADDRESS,
 };
 use crate::transaction_waiter::TransactionWaiter;
 
+use super::cartridge::CartridgeProxy;
 use super::{find_free_port, SubprocessRunner, TestnetConfig};
 
 lazy_static! {
@@ -35,7 +41,7 @@ lazy_static! {
     );
 
     pub static ref CONFIG: TestnetConfig = TestnetConfig{
-        port: 1234,
+        chain_id: short_string!("KATANA"),
         exec: "katana".to_string(),
         log_file_path: "log/katana.log".to_string(),
     };
@@ -43,47 +49,61 @@ lazy_static! {
 
 #[derive(Debug)]
 pub struct KatanaRunner {
+    chain_id: Felt,
     testnet: SubprocessRunner,
-    client: JsonRpcClient<HttpTransport>,
+    client: CartridgeJsonRpcProvider,
+    rpc_client: Arc<JsonRpcClient<HttpTransport>>,
+    proxy_handle: JoinHandle<()>,
 }
 
 impl KatanaRunner {
     pub fn new(config: TestnetConfig) -> Self {
+        let katana_port = find_free_port();
         let child = Command::new(config.exec)
-            .args(["-p", &config.port.to_string()])
+            .args(["-p", &katana_port.to_string()])
             .args(["--json-log"])
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn()
             .expect("failed to start subprocess");
 
-        let testnet = SubprocessRunner::new(child, config.log_file_path, |l| {
-            l.contains(r#""target":"katana::cli""#)
+        let testnet = SubprocessRunner::new(child, |l| l.contains(r#""target":"katana::cli""#));
+
+        let rpc_url = Url::parse(&format!("http://0.0.0.0:{}/", katana_port)).unwrap();
+        let proxy_url = Url::parse(&format!("http://0.0.0.0:{}/", find_free_port())).unwrap();
+        let client = CartridgeJsonRpcProvider::new(proxy_url.clone());
+
+        let rpc_client = Arc::new(JsonRpcClient::new(HttpTransport::new(rpc_url.clone())));
+        let proxy = CartridgeProxy::new(rpc_url, proxy_url.clone(), config.chain_id);
+        let proxy_handle = tokio::spawn(async move {
+            proxy.run().await;
         });
 
-        let client = JsonRpcClient::new(HttpTransport::new(
-            Url::parse(&format!("http://0.0.0.0:{}/", config.port)).unwrap(),
-        ));
-
-        KatanaRunner { testnet, client }
+        KatanaRunner {
+            chain_id: config.chain_id,
+            testnet,
+            client,
+            rpc_client,
+            proxy_handle,
+        }
     }
 
     pub fn load() -> Self {
-        KatanaRunner::new(CONFIG.clone().port(find_free_port()))
+        KatanaRunner::new(CONFIG.clone())
     }
 
-    pub fn client(&self) -> &JsonRpcClient<HttpTransport> {
+    pub fn client(&self) -> &CartridgeJsonRpcProvider {
         &self.client
     }
 
     pub async fn executor(&self) -> SingleOwnerAccount<&JsonRpcClient<HttpTransport>, LocalWallet> {
         single_owner_account_with_encoding(
-            &self.client,
+            &self.rpc_client,
             PREFUNDED.0.clone(),
             PREFUNDED.1,
+            self.chain_id,
             ExecutionEncoding::New,
         )
-        .await
     }
 
     pub async fn fund(&self, address: &Felt) {
@@ -122,12 +142,13 @@ impl KatanaRunner {
         class_hash
     }
 
-    pub async fn deploy_controller<S>(
-        &self,
+    pub async fn deploy_controller<'a, S>(
+        &'a self,
+        username: String,
         signer: &S,
-    ) -> Controller<&JsonRpcClient<HttpTransport>, S, SigningKey>
+    ) -> Controller<CartridgeJsonRpcProvider, S, SigningKey, InMemoryBackend>
     where
-        S: HashSigner + Clone + Send,
+        S: HashSigner + Clone + Send + Sync,
     {
         let guardian = SigningKey::from_random();
         let prefunded = self.executor().await;
@@ -154,11 +175,14 @@ impl KatanaRunner {
         self.fund(&deployed_address).await;
 
         Controller::new(
-            self.client(),
+            "app_id".to_string(),
+            username,
+            self.client.clone(),
             signer.clone(),
             guardian,
             deployed_address,
-            self.client().chain_id().await.unwrap(),
+            self.chain_id,
+            InMemoryBackend::default(),
         )
     }
 }
@@ -166,21 +190,20 @@ impl KatanaRunner {
 impl Drop for KatanaRunner {
     fn drop(&mut self) {
         self.testnet.kill();
+        self.proxy_handle.abort();
     }
 }
 
-pub async fn single_owner_account_with_encoding<'a, T>(
-    client: &'a JsonRpcClient<T>,
+pub fn single_owner_account_with_encoding<'a>(
+    client: &'a JsonRpcClient<HttpTransport>,
     signing_key: SigningKey,
     account_address: Felt,
+    chain_id: Felt,
     encoding: ExecutionEncoding,
-) -> SingleOwnerAccount<&'a JsonRpcClient<T>, LocalWallet>
+) -> SingleOwnerAccount<&'a JsonRpcClient<HttpTransport>, LocalWallet>
 where
-    &'a JsonRpcClient<T>: Provider,
-    T: Send + Sync,
+    &'a JsonRpcClient<HttpTransport>: Provider,
 {
-    let chain_id = client.chain_id().await.unwrap();
-
     let mut account = SingleOwnerAccount::new(
         client,
         LocalWallet::from(signing_key),
@@ -193,8 +216,8 @@ where
     account
 }
 
-#[test]
-fn test_katana_runner() {
+#[tokio::test]
+async fn test_katana_runner() {
     KatanaRunner::load();
 }
 
@@ -203,29 +226,3 @@ async fn test_declare_on_katana() {
     let runner = KatanaRunner::load();
     runner.declare_controller().await;
 }
-
-// #[tokio::test]
-// async fn test_deploy() {
-//     let runner = KatanaRunner::load();
-//     let account = runner.prefunded_single_owner_account().await;
-//     let class_hash = declare(runner.client(), &account).await;
-//     let signer = Signer::Starknet(StarknetSigner {
-//         pubkey: NonZero::new(felt!("1337")).unwrap(),
-//     });
-//     deploy(runner.client(), &account, signer, None, class_hash).await;
-// }
-
-// #[tokio::test]
-// async fn test_deploy_and_call() {
-//     let runner: KatanaRunner = KatanaRunner::load();
-//     let account = runner.prefunded_single_owner_account().await;
-//     let client = runner.client();
-//     let class_hash = declare(client, &account).await;
-//     let signer = Signer::Starknet(StarknetSigner {
-//         pubkey: NonZero::new(felt!("1337")).unwrap(),
-//     });
-//     let deployed_address = deploy(client, &account, signer.clone(), None, class_hash).await;
-
-//     let contract = Controller::new(deployed_address, account);
-//     assert!(contract.is_owner(&signer.guid()).call().await.unwrap());
-// }

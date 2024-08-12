@@ -22,8 +22,6 @@ generate_artifacts:
 	cp ${build}CartridgeAccount${compiled} ${store}controller${compiled}
 	cp ${build}ERC20Upgradeable${compiled} ${store}erc20${compiled}
 
-	cainome --artifacts-path packages/account_sdk/compiled --parser-config packages/account_sdk/parser_config.json --output-dir packages/account_sdk/src/abigen --execution-version v1 --rust&& cargo fmt -p account_sdk
-
 deploy-katana:
 	@set -x; \
 	erc20_class=$$(starkli class-hash ${build}ERC20Upgradeable${sierra}); \

@@ -21,6 +21,7 @@ use crate::abigen::{
     self,
     controller::{Sha256Implementation, Signer, SignerSignature, WebauthnSignature},
 };
+use crate::OriginProvider;
 
 use serde::{Deserialize, Serialize};
 
@@ -293,15 +294,13 @@ pub trait WebauthnBackend {
     async fn create_credential(
         options: PublicKeyCredentialCreationOptions,
     ) -> Result<RegisterPublicKeyCredential, DeviceError>;
-
-    fn origin() -> Result<String, DeviceError>;
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 impl<T> HashSigner for WebauthnSigner<T>
 where
-    T: WebauthnBackend + Sync,
+    T: WebauthnBackend + OriginProvider + Sync,
 {
     // According to https://www.w3.org/TR/webauthn/#clientdatajson-verification
     async fn sign(&self, tx_hash: &Felt) -> Result<SignerSignature, SignError> {
@@ -407,7 +406,9 @@ pub struct WebauthnSigner<T: WebauthnBackend> {
     pub operations: T,
 }
 
-impl<T: WebauthnBackend> From<&WebauthnSigner<T>> for abigen::controller::WebauthnSigner {
+impl<T: WebauthnBackend + OriginProvider> From<&WebauthnSigner<T>>
+    for abigen::controller::WebauthnSigner
+{
     fn from(signer: &WebauthnSigner<T>) -> Self {
         Self {
             rp_id_hash: NonZero::new(U256::from_bytes_be(&signer.rp_id_hash())).unwrap(),
