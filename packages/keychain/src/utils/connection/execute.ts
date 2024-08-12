@@ -1,6 +1,5 @@
 import {
   ExecuteReply,
-  Policy,
   ResponseCodes,
   ConnectError,
   PaymasterOptions,
@@ -87,15 +86,6 @@ export const normalizeCalls = (calls: AllowArray<Call>): Call[] => {
       contractAddress: addAddressPadding(call.contractAddress),
       calldata: CallData.toHex(call.calldata),
     } as Call;
-  });
-};
-
-export const mapPolicies = (calls: AllowArray<Call>): Policy[] => {
-  return (Array.isArray(calls) ? calls : [calls]).map((call) => {
-    return {
-      target: addAddressPadding(call.contractAddress),
-      method: call.entrypoint,
-    } as Policy;
   });
 };
 

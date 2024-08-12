@@ -58,6 +58,10 @@ export class CartridgeAccount {
 */
   hasSession(calls: any[]): boolean;
 /**
+* @returns {any}
+*/
+  sessionJson(): any;
+/**
 */
   revokeSession(): void;
 /**

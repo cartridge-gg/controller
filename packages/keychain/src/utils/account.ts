@@ -141,6 +141,10 @@ class Account extends BaseAccount {
     return this.cartridge.hasSession(normalizeCalls(calls));
   }
 
+  sessionJson(): string {
+    return this.cartridge.sessionJson();
+  }
+
   async estimateInvokeFee(
     calls: AllowArray<Call>,
     details: EstimateFeeDetails = {},
