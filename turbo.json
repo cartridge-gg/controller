@@ -1,27 +1,27 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
   "tasks": {
+    "build:deps": {
+      "dependsOn": ["^build:deps"],
+      "outputs": ["dist/**"]
+    },
     "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        "dist/**"
-      ]
+      "dependsOn": ["^build:deps", "^build"],
+      "outputs": [".next/**", "!.next/cache/**"]
     },
     "dev": {
-      "dependsOn": [
-        "^dev"
-      ],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        "dist/**"
-      ]
+      "persistent": true,
+      "dependsOn": ["^build:deps", "^dev"],
+      "outputs": [".next/**", "!.next/cache/**"]
     },
     "lint": {},
-    "format": {}
+    "format": {},
+    "e2e": {
+      "persistent": true
+    },
+    "e2e:ui": {
+      "persistent": true
+    }
   }
 }

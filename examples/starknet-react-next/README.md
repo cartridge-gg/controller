@@ -16,12 +16,9 @@ pnpm dev
 # Start api server locally
 bin/apidev
 
-# Start example page and keychain
-pnpm dev
-
 # Run test
-pnpm example:next e2e
+pnpm e2e
 
 # or Run test with Playwright UI
-pnpm example:next e2e:ui
+pnpm e2e:ui
 ```

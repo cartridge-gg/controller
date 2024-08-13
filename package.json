@@ -6,6 +6,8 @@
     "preinstall": "npx only-allow pnpm",
     "build": "turbo build",
     "dev": "turbo dev",
+    "e2e": "turbo dev e2e",
+    "e2e:ui": "turbo dev e2e:ui",
     "lint": "turbo lint",
     "format": "turbo format",
     "clean": "git clean -xdf && pnpm store prune",

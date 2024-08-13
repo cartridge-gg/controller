@@ -6,9 +6,8 @@
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "build": "tsc",
-    "prepublish": "pnpm build",
-    "dev": "tsc",
+    "build:deps": "tsc",
+    "prepublish": "pnpm build:deps",
     "format": "prettier --write \"src/**/*.ts\""
   },
   "files": [
