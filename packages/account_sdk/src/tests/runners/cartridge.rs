@@ -92,7 +92,11 @@ impl CartridgeProxy {
                                     .status(StatusCode::OK)
                                     .body(Body::from(
                                         json!({
-                                            "transaction_hash": format!("0x{:x}", result.transaction_hash)
+                                            "id" : 1_u64,
+                                            "jsonrpc": "2.0",
+                                            "result" : {
+                                                "transaction_hash": format!("0x{:x}", result.transaction_hash)
+                                            }
                                         })
                                         .to_string(),
                                     ))
