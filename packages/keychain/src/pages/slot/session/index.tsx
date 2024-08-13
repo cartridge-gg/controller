@@ -83,7 +83,7 @@ function CreateSession() {
       return;
     }
 
-    fetchAccount("broodyii")
+    fetchAccount(username)
       .then((res) => {
         const {
           account: {
