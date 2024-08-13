@@ -13,9 +13,10 @@
 =======
     "build": "turbo build",
     "dev": "turbo dev",
+    "dev:ci": "turbo dev:ci",
     "e2e": "turbo dev e2e",
     "e2e:ui": "turbo dev e2e:ui",
-    "e2e:ci": "turbo dev:ci e2e",
+    "e2e:ci": "turbo e2e",
     "lint": "turbo lint",
 >>>>>>> 7a42470e (Run e2e test against integration api endpoint)
     "format": "turbo format",
