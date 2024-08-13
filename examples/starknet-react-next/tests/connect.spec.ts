@@ -12,7 +12,7 @@ test.beforeEach(async ({ page }) => {
   await webauthn.addVirtualAuthenticator();
 });
 
-test("Sign up -> Disconnect -> Log in", async ({ page }) => {
+test("Sign up -> Create session -> Disconnect -> Log in", async ({ page }) => {
   const keychain = new Keychain({ page });
 
   await keychain.signup();
