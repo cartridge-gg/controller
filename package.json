@@ -19,6 +19,7 @@
     "lint": "turbo lint",
 >>>>>>> 7a42470e (Run e2e test against integration api endpoint)
     "format": "turbo format",
+    "format:check": "turbo format:check",
     "clean": "git clean -xdf && pnpm store prune",
     "release": "pnpm build && pnpm changeset publish",
     "keychain": "pnpm --filter @cartridge/keychain",
