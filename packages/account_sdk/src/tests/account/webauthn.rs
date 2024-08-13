@@ -67,12 +67,11 @@ impl WebauthnBackend for SoftPasskeySigner {
             challenge: options.challenge.clone(),
             origin: ORIGIN.lock().unwrap().clone(),
             token_binding: None,
-            cross_origin: None,
+            cross_origin: Some(false),
             unknown_keys: Default::default(),
         };
         let client_data_str = serde_json::to_string(&client_data)
             .map_err(|e| DeviceError::GetAssertion(format!("{:?}", e)))?;
-        let client_data_str = client_data_str.replace(",\"crossOrigin\":null", "");
 
         let client_data_hash = Sha256::new().chain(client_data_str.clone()).finalize();
         let mut cred = AuthenticatorBackendHashedClientData::perform_auth(
