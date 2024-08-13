@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "TARGET_ORIGIN=\"*\" next dev -p 3001",
+    "dev:ci": "TARGET_ORIGIN=\"*\" NEXT_PUBLIC_API_URL=\"https://integration.cartridge.gg/\" next dev -p 3001",
     "build": "TARGET_ORIGIN=\"https://x.cartridge.gg/\" next build",
     "start": "next start",
     "lint": "next lint",

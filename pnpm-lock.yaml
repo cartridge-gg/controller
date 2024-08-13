@@ -16250,7 +16250,7 @@ snapshots:
   '@graphql-tools/optimize@1.4.0(graphql@16.8.1)':
     dependencies:
       graphql: 16.8.1
-      tslib: 2.4.1
+      tslib: 2.6.2
 
   '@graphql-tools/prisma-loader@7.2.72(@types/node@20.12.7)(bufferutil@4.0.8)(graphql@16.8.1)(utf-8-validate@5.0.10)':
     dependencies:
@@ -16285,7 +16285,7 @@ snapshots:
       '@ardatan/relay-compiler': 12.0.0(graphql@16.8.1)
       '@graphql-tools/utils': 9.2.1(graphql@16.8.1)
       graphql: 16.8.1
-      tslib: 2.4.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -16323,7 +16323,7 @@ snapshots:
   '@graphql-tools/utils@8.13.1(graphql@16.8.1)':
     dependencies:
       graphql: 16.8.1
-      tslib: 2.4.1
+      tslib: 2.6.2
 
   '@graphql-tools/utils@9.2.1(graphql@16.8.1)':
     dependencies:
@@ -21671,7 +21671,7 @@ snapshots:
   capital-case@1.0.4:
     dependencies:
       no-case: 3.0.4
-      tslib: 2.4.1
+      tslib: 2.6.2
       upper-case-first: 2.0.2
 
   cardinal@2.1.1:
@@ -21768,7 +21768,7 @@ snapshots:
       path-case: 3.0.4
       sentence-case: 3.0.4
       snake-case: 3.0.4
-      tslib: 2.4.1
+      tslib: 2.6.2
 
   char-regex@1.0.2: {}
 
@@ -22028,7 +22028,7 @@ snapshots:
   constant-case@3.0.4:
     dependencies:
       no-case: 3.0.4
-      tslib: 2.4.1
+      tslib: 2.6.2
       upper-case: 2.0.2
 
   constants-browserify@1.0.0: {}
@@ -23961,7 +23961,7 @@ snapshots:
   graphql-tag@2.12.6(graphql@16.8.1):
     dependencies:
       graphql: 16.8.1
-      tslib: 2.4.1
+      tslib: 2.6.2
 
   graphql-ws@5.12.1(graphql@16.8.1):
     dependencies:
@@ -24124,7 +24124,7 @@ snapshots:
   header-case@2.0.4:
     dependencies:
       capital-case: 1.0.4
-      tslib: 2.4.1
+      tslib: 2.6.2
 
   hey-listen@1.0.8: {}
 
@@ -24520,7 +24520,7 @@ snapshots:
 
   is-lower-case@2.0.2:
     dependencies:
-      tslib: 2.4.1
+      tslib: 2.6.2
 
   is-map@2.0.3: {}
 
@@ -24610,7 +24610,7 @@ snapshots:
 
   is-upper-case@2.0.2:
     dependencies:
-      tslib: 2.4.1
+      tslib: 2.6.2
 
   is-weakmap@2.0.2: {}
 
@@ -25446,11 +25446,11 @@ snapshots:
 
   lower-case-first@2.0.2:
     dependencies:
-      tslib: 2.4.1
+      tslib: 2.6.2
 
   lower-case@2.0.2:
     dependencies:
-      tslib: 2.4.1
+      tslib: 2.6.2
 
   lowercase-keys@1.0.1: {}
 
@@ -25815,7 +25815,7 @@ snapshots:
   no-case@3.0.4:
     dependencies:
       lower-case: 2.0.2
-      tslib: 2.4.1
+      tslib: 2.6.2
 
   node-abi@3.62.0:
     dependencies:
@@ -26177,7 +26177,7 @@ snapshots:
   path-case@3.0.4:
     dependencies:
       dot-case: 3.0.4
-      tslib: 2.4.1
+      tslib: 2.6.2
 
   path-exists@3.0.0: {}
 
@@ -27564,7 +27564,7 @@ snapshots:
   sentence-case@3.0.4:
     dependencies:
       no-case: 3.0.4
-      tslib: 2.4.1
+      tslib: 2.6.2
       upper-case-first: 2.0.2
 
   serialize-javascript@6.0.2:
@@ -27739,7 +27739,7 @@ snapshots:
   snake-case@3.0.4:
     dependencies:
       dot-case: 3.0.4
-      tslib: 2.4.1
+      tslib: 2.6.2
 
   sockjs@0.3.24:
     dependencies:
@@ -27830,7 +27830,7 @@ snapshots:
 
   sponge-case@1.0.1:
     dependencies:
-      tslib: 2.4.1
+      tslib: 2.6.2
 
   sprintf-js@1.0.3: {}
 
@@ -28111,7 +28111,7 @@ snapshots:
 
   swap-case@2.0.2:
     dependencies:
-      tslib: 2.4.1
+      tslib: 2.6.2
 
   swc-loader@0.2.6(@swc/core@1.4.17(@swc/helpers@0.5.5))(webpack@5.91.0(@swc/core@1.4.17(@swc/helpers@0.5.5))(esbuild@0.18.20)):
     dependencies:
@@ -28293,7 +28293,7 @@ snapshots:
 
   title-case@3.0.3:
     dependencies:
-      tslib: 2.4.1
+      tslib: 2.6.2
 
   tmp@0.0.33:
     dependencies:
@@ -28755,11 +28755,11 @@ snapshots:
 
   upper-case-first@2.0.2:
     dependencies:
-      tslib: 2.4.1
+      tslib: 2.6.2
 
   upper-case@2.0.2:
     dependencies:
-      tslib: 2.4.1
+      tslib: 2.6.2
 
   uqr@0.1.2: {}
 
