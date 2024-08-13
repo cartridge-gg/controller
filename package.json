@@ -11,6 +11,7 @@
     "e2e:ci": "turbo dev:ci e2e",
     "lint": "turbo lint",
     "format": "turbo format",
+    "format:check": "turbo format:check",
     "clean": "git clean -xdf && pnpm store prune",
     "release": "pnpm build && pnpm changeset publish",
     "keychain": "pnpm --filter @cartridge/keychain",

@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "format": "prettier ./src --write",
+    "format:check": "prettier ./src --check",
     "test": "jest --watch",
     "test:ci": "jest --ci",
     "gen": "graphql-codegen --config codegen.yaml"

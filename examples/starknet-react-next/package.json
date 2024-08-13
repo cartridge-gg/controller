@@ -10,7 +10,8 @@
     "e2e:ui": "pnpm e2e --ui",
     "start": "next start -p 3002",
     "lint": "next lint",
-    "format": "prettier --write ./src"
+    "format": "prettier --write ./src",
+    "format:check": "prettier --check ./src"
   },
   "dependencies": {
     "@cartridge/connector": "workspace:^",

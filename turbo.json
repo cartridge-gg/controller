@@ -22,6 +22,7 @@
     },
     "lint": {},
     "format": {},
+    "format:check": {},
     "e2e": {
       "persistent": true
     },
