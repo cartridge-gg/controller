@@ -12,11 +12,12 @@ import {
   CallData,
   InvocationsDetails,
   addAddressPadding,
+  num,
 } from "starknet";
 import Account from "utils/account";
 import { ConnectionCtx, ExecuteCtx } from "./types";
 
-export const ESTIMATE_FEE_MULTIPLIER = 1.5;
+export const ESTIMATE_FEE_PERCENTAGE = 10;
 
 export function executeFactory({
   setContext,
@@ -95,7 +96,10 @@ async function tryPaymaster(
   paymaster: PaymasterOptions,
 ): Promise<ExecuteReply> {
   try {
-    const transaction_hash = await account.cartridge.executeFromOutside(calls, paymaster.caller);
+    const transaction_hash = await account.cartridge.executeFromOutside(
+      calls,
+      paymaster.caller,
+    );
 
     return {
       code: ResponseCodes.SUCCESS,
@@ -118,12 +122,11 @@ async function getInvocationDetails(
   if (!maxFee) {
     await account.ensureDeployed();
 
-    const estFee = await account.cartridge.estimateInvokeFee(
-      calls,
-      ESTIMATE_FEE_MULTIPLIER,
-    );
+    const estFee = await account.cartridge.estimateInvokeFee(calls);
 
-    maxFee = estFee.overall_fee;
+    maxFee = num.toHex(
+      num.addPercent(estFee.overall_fee, ESTIMATE_FEE_PERCENTAGE),
+    );
   }
 
   // if (session.maxFee && BigInt(maxFee) > BigInt(session.maxFee)) {
