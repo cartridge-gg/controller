@@ -107,10 +107,7 @@ export default class Controller {
       throw new Error("Account not found");
     }
 
-    await this.account.cartridge.createSession(
-      policies,
-      expiresAt,
-    );
+    await this.account.cartridge.createSession(policies, expiresAt);
   }
 
   revoke(_origin: string) {
