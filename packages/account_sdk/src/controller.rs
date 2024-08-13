@@ -260,7 +260,7 @@ where
 
 impl_account!(Controller<P: CartridgeProvider, S: HashSigner, G: HashSigner, B: Backend>, |account: &Controller<P, S, G, B>, context| {
     if let SignerInteractivityContext::Execution { calls } = context {
-        account.session_account(calls).is_some()
+        account.session_account(calls).is_none()
     } else {
         true
     }
