@@ -1,7 +1,7 @@
 {
   "name": "starknet-react-next",
   "private": true,
-  "version": "0.3.38",
+  "version": "0.3.39",
   "scripts": {
     "dev": "next dev -p 3002",
     "build": "next build",
