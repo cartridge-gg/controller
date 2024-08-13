@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { KEYCHAIN_URL } from "components/providers/StarknetProvider";
 
 export default defineConfig({
   testDir: "./tests",
@@ -7,7 +8,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? "dot" : "list",
   use: {
-    baseURL: process.env.CI ? "" : "http://localhost:3002",
+    baseURL: process.env.CI ? KEYCHAIN_URL : "http://localhost:3002",
     trace: "on-first-retry",
   },
   projects: [
