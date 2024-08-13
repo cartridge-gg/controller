@@ -25,6 +25,16 @@ const ETH_TOKEN_ADDRESS =
 // const PAPER_TOKEN_ADDRESS =
 //   "0x0410466536b5ae074f7fea81e5533b8134a9fa08b3dd077dd9db08f64997d113";
 
+export const KEYCHAIN_URL = !process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ||
+  process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL.split(".")[0] ===
+  "cartridge-starknet-react-next"
+  ? process.env.XFRAME_URL
+  : "https://" +
+  (process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ?? "").replace(
+    "cartridge-starknet-react-next",
+    "keychain",
+  );
+
 const cartridge = new CartridgeConnector({
   policies: [
     {
@@ -50,16 +60,7 @@ const cartridge = new CartridgeConnector({
       method: "allowance",
     },
   ],
-  url:
-    !process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ||
-    process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL.split(".")[0] ===
-      "cartridge-starknet-react-next"
-      ? process.env.XFRAME_URL
-      : "https://" +
-        (process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ?? "").replace(
-          "cartridge-starknet-react-next",
-          "keychain",
-        ),
+  url: KEYCHAIN_URL,
   rpc: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
   paymaster: {
     caller: shortString.encodeShortString("ANY_CALLER"),

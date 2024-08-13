@@ -4,20 +4,12 @@
   "private": true,
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-<<<<<<< HEAD
     "build": "turbo build:deps build",
     "dev": "turbo build:deps dev",
     "e2e": "turbo build:deps dev e2e",
     "e2e:ui": "turbo build:deps dev e2e:ui",
+    "e2e:ci": "turbo build:deps e2e",
     "lint": "turbo lint format:check",
-=======
-    "build": "turbo build",
-    "dev": "turbo dev",
-    "e2e": "turbo dev e2e",
-    "e2e:ui": "turbo dev e2e:ui",
-    "e2e:ci": "turbo e2e",
-    "lint": "turbo lint",
->>>>>>> 7a42470e (Run e2e test against integration api endpoint)
     "format": "turbo format",
     "format:check": "turbo format:check",
     "clean": "git clean -xdf && pnpm store prune",
