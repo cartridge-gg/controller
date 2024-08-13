@@ -2,7 +2,6 @@ import { TransferEth } from "components/TransferEth";
 import { ConnectWallet } from "components/ConnectWallet";
 import { InvalidTxn } from "components/InvalidTxn";
 import { SignMessage } from "components/SignMessage";
-import { DojoSpawnAndMove } from "components/DojoSpawnAndMove";
 import { DelegateAccount } from "components/DelegateAccount";
 import { ColorModeToggle } from "components/ColorModeToggle";
 import { Menu } from "components/Menu";
@@ -18,7 +17,6 @@ export default function Home() {
       </div>
       <ConnectWallet />
       <Menu />
-      <DojoSpawnAndMove />
       <TransferEth />
       <DelegateAccount />
       <InvalidTxn />
