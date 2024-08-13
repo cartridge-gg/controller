@@ -7,7 +7,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? "dot" : "list",
   use: {
-    baseURL: "http://localhost:3002",
+    baseURL: process.env.CI ? "" : "http://localhost:3002",
     trace: "on-first-retry",
   },
   projects: [

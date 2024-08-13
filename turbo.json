@@ -15,11 +15,6 @@
       "dependsOn": ["^build:deps"],
       "outputs": [".next/**", "!.next/cache/**"]
     },
-    "dev:ci": {
-      "persistent": true,
-      "dependsOn": ["^build:deps", "^dev:ci"],
-      "outputs": [".next/**", "!.next/cache/**"]
-    },
     "lint": {},
     "format": {},
     "format:check": {},
