@@ -22,8 +22,7 @@
     "./themes/fonts.css": "./dist/themes/fonts.css"
   },
   "scripts": {
-    "dev": "pnpm build",
-    "build": "tsc && tsc-alias && pnpm copyThemes",
+    "build:deps": "tsc && tsc-alias && pnpm copyThemes",
     "copyThemes": "cp -R src/themes dist/themes",
     "format": "prettier ./src --write",
     "lint": "eslint . --ext ts,tsx",

@@ -5,8 +5,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: "html",
+  reporter: process.env.CI ? "dot" : "list",
   use: {
     baseURL: "http://localhost:3002",
     trace: "on-first-retry",
@@ -25,12 +24,12 @@ export default defineConfig({
     //   use: { ...devices["Desktop Safari"] },
     // },
   ],
-  webServer: {
-    command: "pnpm dev",
-    cwd: "../..",
-    port: 3002,
-    reuseExistingServer: !process.env.CI,
-    stdout: "pipe",
-    stderr: "pipe",
-  },
+  // webServer: {
+  //   command: "pnpm dev",
+  //   cwd: "../..",
+  //   port: 3002,
+  //   reuseExistingServer: !process.env.CI,
+  //   stdout: "pipe",
+  //   stderr: "pipe",
+  // },
 });
