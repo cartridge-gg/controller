@@ -36,14 +36,14 @@ export function CreateSession({
       variant="connect"
       title="Create Session"
       description={
-        <Text fontSize="sm" color="text.secondary">
+        <>
           Pre-approve{" "}
           <LockIcon fontSize="md" color="text.secondaryAccent" mr={0.5} />
           <Text as="span" color="text.secondaryAccent" fontWeight="bold">
             {origin}
           </Text>{" "}
           to perform the following actions on your behalf
-        </Text>
+        </>
       }
     >
       <Content>
