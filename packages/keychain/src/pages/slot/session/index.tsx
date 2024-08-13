@@ -44,7 +44,7 @@ function CreateSession() {
     headers.append("Content-Type", "application/json");
 
     fetch(url, {
-      body: session,
+      body: JSON.stringify(session),
       headers,
       method: "POST",
     })
@@ -57,7 +57,7 @@ function CreateSession() {
         console.error("failed to call the callback url", e);
         router.replace(`/slot/auth/failure`);
       });
-  }, [router, queries.callback_uri, controller.account]);
+  }, [router, queries.callback_uri, controller]);
 
   // Handler when user clicks the Create button
   const onConnect = useCallback(
@@ -83,7 +83,7 @@ function CreateSession() {
       return;
     }
 
-    fetchAccount(username)
+    fetchAccount("broodyii")
       .then((res) => {
         const {
           account: {
