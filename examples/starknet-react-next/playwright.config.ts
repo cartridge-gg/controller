@@ -24,15 +24,13 @@ export default defineConfig({
     //   use: { ...devices["Desktop Safari"] },
     // },
   ],
-  webServer: process.env.CI
-    ? {
-        command: "pnpm dev:ci",
-        cwd: "../..",
-        port: 3002,
-        reuseExistingServer: !process.env.CI,
-        stdout: "pipe",
-        stderr: "pipe",
-        timeout: 1000 * 60,
-      }
-    : undefined,
+  // webServer: {
+  //   command: "pnpm dev",
+  //   cwd: "../..",
+  //   port: 3002,
+  //   reuseExistingServer: !process.env.CI,
+  //   stdout: "pipe",
+  //   stderr: "pipe",
+  //   timeout: 1000 * 60,
+  // },
 });
