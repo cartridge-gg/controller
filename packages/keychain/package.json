@@ -7,7 +7,8 @@
     "build": "TARGET_ORIGIN=\"https://x.cartridge.gg/\" next build",
     "start": "next start",
     "lint": "next lint",
-    "format": "prettier ./src --write",
+    "format": "prettier --write ./src",
+    "format:check": "prettier --check ./src",
     "test": "jest --watch",
     "test:ci": "jest --ci",
     "gen": "graphql-codegen --config codegen.yaml"
