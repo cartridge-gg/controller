@@ -72,31 +72,33 @@ fn generate_controller_bindings() {
 
 fn generate_erc20_bindings() {
     let abigen = Abigen::new("Erc20", "./compiled/erc20.contract_class.json")
-    .with_types_aliases(HashMap::from([
-        (
-            String::from("openzeppelin::token::erc20::erc20::ERC20Component::Event"),
-            String::from("ERC20ComponentEvent"),
-        ),
-        (
-            String::from("openzeppelin::access::ownable::ownable::OwnableComponent::Event"),
-            String::from("OwnableComponentEvent"),
-        ),
-        (
-            String::from("openzeppelin::upgrades::upgradeable::UpgradeableComponent::Event"),
-            String::from("UpgradeEvent"),
-        ),
-        (
-            String::from("openzeppelin::security::reentrancyguard::ReentrancyGuardComponent::Event"),
-            String::from("ReentrancyGuardEvent"),
-        ),
-    ]))
-    .with_derives(vec![
-        String::from("Clone"),
-        String::from("serde::Serialize"),
-        String::from("serde::Deserialize"),
-        String::from("PartialEq"),
-        String::from("Debug"),
-    ]);
+        .with_types_aliases(HashMap::from([
+            (
+                String::from("openzeppelin::token::erc20::erc20::ERC20Component::Event"),
+                String::from("ERC20ComponentEvent"),
+            ),
+            (
+                String::from("openzeppelin::access::ownable::ownable::OwnableComponent::Event"),
+                String::from("OwnableComponentEvent"),
+            ),
+            (
+                String::from("openzeppelin::upgrades::upgradeable::UpgradeableComponent::Event"),
+                String::from("UpgradeEvent"),
+            ),
+            (
+                String::from(
+                    "openzeppelin::security::reentrancyguard::ReentrancyGuardComponent::Event",
+                ),
+                String::from("ReentrancyGuardEvent"),
+            ),
+        ]))
+        .with_derives(vec![
+            String::from("Clone"),
+            String::from("serde::Serialize"),
+            String::from("serde::Deserialize"),
+            String::from("PartialEq"),
+            String::from("Debug"),
+        ]);
 
     abigen
         .generate()
