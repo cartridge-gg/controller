@@ -76,7 +76,11 @@ jobs:
       - name: Install Playwright Browsers
         run: pnpm example:next e2e:deps
       - name: Run Playwright tests
-        run: pnpm e2e:ci
+        run: |
+          cat <<EOF >examples/starknet-react-next/.env
+          BRANCH_NAME=${{ github.head_ref }}
+          EOF
+          pnpm e2e:ci
       - uses: actions/upload-artifact@v4
         if: always()
         with:

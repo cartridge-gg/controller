@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { TransferEth } from "components/TransferEth";
 import { ConnectWallet } from "components/ConnectWallet";
@@ -13,8 +13,8 @@ import { useEffect, useState } from "react";
 export default function Home() {
   const [debug, setDebug] = useState(false);
   useEffect(() => {
-    setDebug(!!new URLSearchParams(window.location.search).get("debug"))
-  }, [])
+    setDebug(!!new URLSearchParams(window.location.search).get("debug"));
+  }, []);
 
   return (
     <div className="flex flex-col p-4 gap-4">
@@ -28,9 +28,17 @@ export default function Home() {
       {debug && (
         <div>
           <p>Keychain URL: {KEYCHAIN_URL}</p>
-          <p>NEXT_PUBLIC_VERCEL_ENV: {String(process.env.NEXT_PUBLIC_VERCEL_ENV)}</p>
-          <p>NEXT_PUBLIC_VERCEL_BRANCH_URL: {String(process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL)}</p>
-          <p>NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL: {String(process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL)}</p>
+          <p>
+            NEXT_PUBLIC_VERCEL_ENV: {String(process.env.NEXT_PUBLIC_VERCEL_ENV)}
+          </p>
+          <p>
+            NEXT_PUBLIC_VERCEL_BRANCH_URL:{" "}
+            {String(process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL)}
+          </p>
+          <p>
+            NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL:{" "}
+            {String(process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL)}
+          </p>
         </div>
       )}
 
