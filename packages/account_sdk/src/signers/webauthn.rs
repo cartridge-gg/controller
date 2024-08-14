@@ -279,8 +279,7 @@ pub struct ClientData {
     pub(super) challenge: String,
     pub(super) origin: String,
     #[serde(rename = "crossOrigin")]
-    #[serde(default)]
-    pub(super) cross_origin: bool,
+    pub(super) cross_origin: Option<bool>,
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
