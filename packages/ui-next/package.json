@@ -24,7 +24,8 @@
   "scripts": {
     "build:deps": "tsc && tsc-alias && pnpm copyThemes",
     "copyThemes": "cp -R src/themes dist/themes",
-    "format": "prettier ./src --write",
+    "format": "prettier --write ./src",
+    "format:check": "prettier --check ./src",
     "lint": "eslint . --ext ts,tsx",
     "storybook": "storybook dev -p 6006",
     "storybook:build": "storybook build"
