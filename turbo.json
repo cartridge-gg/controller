@@ -12,16 +12,17 @@
     },
     "dev": {
       "persistent": true,
-      "dependsOn": ["^build:deps", "^dev"],
+      "dependsOn": ["^build:deps"],
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "lint": {},
     "format": {},
     "format:check": {},
     "e2e": {
-      "persistent": true
+      "dependsOn": ["^build:deps"]
     },
     "e2e:ui": {
+      "dependsOn": ["^build:deps"],
       "persistent": true
     }
   }
