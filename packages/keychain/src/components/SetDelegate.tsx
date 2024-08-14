@@ -7,11 +7,13 @@ import { CallData, num } from "starknet";
 export function SetDelegate({
   onClose,
   onSetDelegate,
+  defaultAddress,
 }: {
   onClose: () => void;
   onSetDelegate: (address: string) => void;
+  defaultAddress: string;
 }) {
-  const [delegateAddress, setDelegateAddress] = useState("");
+  const [delegateAddress, setDelegateAddress] = useState(defaultAddress);
   const [isValid, setIsValid] = useState(true);
 
   useEffect(() => {

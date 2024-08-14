@@ -145,6 +145,7 @@ function Home() {
             onSetDelegate={(delegateAddress) => {
               setDelegateTransaction(ctx, delegateAddress);
             }}
+            defaultAddress={ctx.account}
           />
         </DeploymentRequired>
       );

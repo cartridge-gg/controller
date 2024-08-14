@@ -82,6 +82,10 @@ export const DelegateAccount = () => {
               Set Delegate
             </Button>
           </div>
+
+          <div className="flex gap-2">
+            <Button onClick={() => cartridgeConnector.openSetDelegate(delegateAddressInput)}>Open Set Delegate</Button>
+          </div>
         </>
       ) : (
         <p>Not supported!</p>
