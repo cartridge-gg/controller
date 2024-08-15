@@ -92,4 +92,13 @@ export const defaultPresets: ControllerThemePresets = {
       primary: "#de9534",
     },
   },
+  "jokers-of-neon": {
+    id: "jokers-of-neon",
+    name: "Jokers of Neon",
+    icon: "/whitelabel/jokers-of-neon/icon.png",
+    cover: "/whitelabel/jokers-of-neon/cover.png",
+    colors: {
+      primary: "#A144B2",
+    },
+  },
 };
