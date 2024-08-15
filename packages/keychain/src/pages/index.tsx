@@ -17,8 +17,14 @@ import { ErrorPage } from "components/ErrorBoundary";
 import { SetDelegate } from "components/SetDelegate";
 
 function Home() {
-  const { context, controller, error, setDelegate, setDelegateTransaction } =
-    useConnection();
+  const {
+    context,
+    policies,
+    controller,
+    error,
+    setDelegate,
+    setDelegateTransaction,
+  } = useConnection();
 
   if (window.self === window.top || !context?.origin) {
     return <></>;
@@ -35,6 +41,15 @@ function Home() {
 
   switch (context.type) {
     case "connect": {
+      // TODO: show missing policies if mismatch
+      if (controller.account.sessionJson()) {
+        context.resolve({
+          code: ResponseCodes.SUCCESS,
+          address: controller.address,
+          policies,
+        });
+      }
+
       return (
         <CreateSession
           onConnect={(policies) => {
