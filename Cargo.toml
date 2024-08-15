@@ -1,69 +1,59 @@
 [workspace]
+members = [ "packages/account_sdk", "packages/account-wasm" ]
 resolver = "2"
-members = ["packages/account_sdk", "packages/account-wasm"]
 
 [workspace.package]
 edition = "2021"
 version = "0.1.0"
 
 [workspace.dependencies]
-account_sdk = { path = "packages/account_sdk" }
 account-wasm = { path = "packages/account-wasm" }
+account_sdk = { path = "packages/account_sdk" }
 
 anyhow = "1"
 async-trait = "0.1"
 base64 = "0.22"
-cainome = { git = "https://github.com/cartridge-gg/cainome", branch = "main", features = [
-    "abigen-rs",
-] }
+base64urlsafedata = { git = "https://github.com/cartridge-gg/webauthn-rs", rev = "a6cea88" }
+cainome = { git = "https://github.com/cartridge-gg/cainome", rev = "fb91215", features = [ "abigen-rs" ] }
 cairo-lang-starknet = "2.4.0"
-coset = { version = "0.3.4", features = ["std"] }
+coset = { version = "0.3.4", features = [ "std" ] }
 ecdsa = "0.16.9"
 futures = "0.3"
+getrandom = { version = "0.2", features = [ "js" ] }
 hex = "0.4.3"
-indexmap = { version = "2.2.6", features = ["serde"] }
+indexmap = { version = "2.2.6", features = [ "serde" ] }
 lazy_static = "1"
+num-traits = "0.2.19"
 once_cell = "1.19.0"
 p256 = "0.13"
 primitive-types = { version = "0.12", default-features = false }
-getrandom = { version = "0.2", features = ["js"] }
-rand = { version = "0.8", features = ["getrandom"] }
-reqwest = { version = "0.11.16", default-features = false, features = [
-    "json",
-    "rustls-tls",
-] }
-serde = { version = "1.0.160", default-features = false, features = ["derive"] }
-serde_json = { version = "1.0.96", default-features = false, features = [
-    "alloc",
-    "raw_value",
-] }
-serde_with = { version = "3.9.0", default-features = false, features = [
-    "alloc",
-    "macros",
-] }
+rand = { version = "0.8", features = [ "getrandom" ] }
+reqwest = { version = "0.11.16", default-features = false, features = [ "json", "rustls-tls" ] }
+serde = { version = "1.0.160", default-features = false, features = [ "derive" ] }
+serde_cbor_2 = { version = "0.12.0-dev" }
+serde_json = { version = "1.0.96", default-features = false, features = [ "alloc", "raw_value" ] }
+serde_with = { version = "3.9.0", default-features = false, features = [ "alloc", "macros" ] }
 sha2 = "0.10"
-starknet = { git = "https://github.com/xJonathanLEI/starknet-rs", rev = "2ddc694" }
-starknet-crypto = { git = "https://github.com/xJonathanLEI/starknet-rs", rev = "2ddc694" }
-starknet-types-core = { version = "0.1.3", default-features = false, features = [
-    "curve",
-    "hash",
-] }
 thiserror = "1"
+tokio = { version = "1", features = [ "macros", "time" ] }
 toml = "0.8"
 u256-literal = "1"
 url = { version = "2.3.1", default-features = false }
-num-traits = "0.2.19"
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4.42"
 wasm-webauthn = { git = "https://github.com/cartridge-gg/wasm-webauthn", rev = "972693f" }
-tokio = { version = "1", features = ["macros", "time"] }
-base64urlsafedata = { git = "https://github.com/cartridge-gg/webauthn-rs", rev = "a6cea88" }
-serde_cbor_2 = { version = "0.12.0-dev" }
+webauthn-authenticator-rs = { git = "https://github.com/cartridge-gg/webauthn-rs", rev = "a6cea88", features = [ "softpasskey" ] }
 webauthn-rs-core = { git = "https://github.com/cartridge-gg/webauthn-rs", rev = "a6cea88" }
 webauthn-rs-proto = { git = "https://github.com/cartridge-gg/webauthn-rs", rev = "a6cea88" }
-webauthn-authenticator-rs = { git = "https://github.com/cartridge-gg/webauthn-rs", rev = "a6cea88", features = [
-    "softpasskey",
-] }
+
+starknet = "0.11.0"
+starknet-crypto = "0.7.1"
+starknet-types-core = { version = "~0.1.4", features = [ "curve", "hash" ] }
+
+[patch.crates-io]
+starknet = { git = "https://github.com/xJonathanLEI/starknet-rs", rev = "2ddc694" }
+starknet-types-core = { git = "https://github.com/starknet-io/types-rs", rev = "f98f048" }
+
 
 # Compiler optimization when running test to prevent ‘locals exceed maximum’ error,
 # where a function is using more that the maximum allowed local variables.

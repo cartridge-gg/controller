@@ -17,17 +17,17 @@ use super::raw_session::RawSession;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ProvedMethod {
-    pub(crate) method: AllowedMethod,
-    pub(crate) proof: Vec<Felt>,
+    pub method: AllowedMethod,
+    pub proof: Vec<Felt>,
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Default)]
 pub struct Session {
-    expires_at: u64,
-    allowed_methods: Vec<ProvedMethod>,
-    allowed_methods_root: Felt,
-    metadata: String,
-    session_key_guid: Felt,
+    pub expires_at: u64,
+    pub allowed_methods: Vec<ProvedMethod>,
+    pub allowed_methods_root: Felt,
+    pub metadata: String,
+    pub session_key_guid: Felt,
 }
 
 impl Session {
