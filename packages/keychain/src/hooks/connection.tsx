@@ -15,6 +15,9 @@ import {
   LogoutCtx,
   SetDelegateCtx,
   ExecuteCtx,
+  SetExternalOwnerCtx,
+  OpenSettingsCtx,
+  OpenMenuCtx,
 } from "utils/connection";
 import { RpcProvider, CallData, constants, shortString } from "starknet";
 import { Policy, Prefund, ResponseCodes } from "@cartridge/controller";
@@ -43,6 +46,17 @@ type ConnectionContextValue = {
     context: ConnectionCtx,
     delegateAddress: string,
   ) => void;
+  setExternalOwnerTransaction: (
+    context: ConnectionCtx,
+    externalOwnerAddress: string,
+  ) => void;
+  removeExternalOwnerTransaction: (
+    context: ConnectionCtx,
+    externalOwnerAddress: string,
+  ) => void;
+  openSettings: (context: ConnectionCtx) => void;
+  openMenu: (context: ConnectionCtx) => void;
+  setExternalOwner: (context: ConnectionCtx) => void;
 };
 
 export function ConnectionProvider({ children }: PropsWithChildren) {
@@ -154,6 +168,24 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
     } as LogoutCtx);
   }, []);
 
+  const openMenu = useCallback((context: ConnectionCtx) => {
+    setContext({
+      origin: context.origin,
+      type: "open-menu",
+      resolve: context.resolve,
+      reject: context.reject,
+    } as OpenMenuCtx);
+  }, []);
+
+  const openSettings = useCallback((context: ConnectionCtx) => {
+    setContext({
+      origin: context.origin,
+      type: "open-settings",
+      resolve: context.resolve,
+      reject: context.reject,
+    } as OpenSettingsCtx);
+  }, []);
+
   const setDelegate = useCallback((context: ConnectionCtx) => {
     setContext({
       origin: context.origin,
@@ -161,6 +193,15 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
       resolve: context.resolve,
       reject: context.reject,
     } as SetDelegateCtx);
+  }, []);
+
+  const setExternalOwner = useCallback((context: ConnectionCtx) => {
+    setContext({
+      origin: context.origin,
+      type: "set-external-owner",
+      resolve: context.resolve,
+      reject: context.reject,
+    } as SetExternalOwnerCtx);
   }, []);
 
   const setDelegateTransaction = useCallback(
@@ -178,9 +219,58 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
         type: "execute",
         resolve: context.resolve,
         reject: context.reject,
+        onCancel: () => {
+          openSettings(context);
+        },
       } as ExecuteCtx);
     },
-    [controller?.address],
+    [controller?.address, openSettings],
+  );
+
+  const setExternalOwnerTransaction = useCallback(
+    (context: ConnectionCtx, externalOwnerAddress: string) => {
+      setContext({
+        origin: context.origin,
+        transactions: [
+          {
+            contractAddress: controller.address,
+            entrypoint: "register_external_owner",
+            calldata: CallData.compile([externalOwnerAddress]),
+          },
+        ],
+        transactionsDetail: {},
+        type: "execute",
+        resolve: context.resolve,
+        reject: context.reject,
+        onCancel: () => {
+          openSettings(context);
+        },
+      } as ExecuteCtx);
+    },
+    [controller?.address, openSettings],
+  );
+
+  const removeExternalOwnerTransaction = useCallback(
+    (context: ConnectionCtx, externalOwnerAddress: string) => {
+      setContext({
+        origin: context.origin,
+        transactions: [
+          {
+            contractAddress: controller.address,
+            entrypoint: "remove_external_owner",
+            calldata: CallData.compile([externalOwnerAddress]),
+          },
+        ],
+        transactionsDetail: {},
+        type: "execute",
+        resolve: context.resolve,
+        reject: context.reject,
+        onCancel: () => {
+          openSettings(context);
+        },
+      } as ExecuteCtx);
+    },
+    [controller?.address, openSettings],
   );
 
   return (
@@ -200,8 +290,13 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
         setContext,
         cancel,
         logout,
+        openMenu,
+        openSettings,
         setDelegate,
         setDelegateTransaction,
+        setExternalOwnerTransaction,
+        removeExternalOwnerTransaction,
+        setExternalOwner,
       }}
     >
       {children}

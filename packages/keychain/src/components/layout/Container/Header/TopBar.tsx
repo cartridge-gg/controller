@@ -1,14 +1,18 @@
-import { Spacer, IconButton, HStack } from "@chakra-ui/react";
-import { ArrowLeftIcon } from "@cartridge/ui";
+import { Spacer, HStack } from "@chakra-ui/react";
 import { CloseButton } from "./CloseButton";
 import { NetworkButton } from "./NetworkButton";
+import { SettingsButton } from "./SettingsButton";
+import { useConnection } from "hooks/connection";
+import { BackButton } from "./BackButton";
 
 export type TopBarProps = {
   onBack?: () => void;
   hideAccount?: boolean;
+  showSettings?: boolean;
 };
 
-export function TopBar({ onBack, hideAccount }: TopBarProps) {
+export function TopBar({ onBack, hideAccount, showSettings }: TopBarProps) {
+  const { context, openSettings } = useConnection();
   return (
     <HStack
       w="full"
@@ -22,17 +26,7 @@ export function TopBar({ onBack, hideAccount }: TopBarProps) {
       h={TOP_BAR_HEIGHT / 4}
       p={2}
     >
-      {onBack ? (
-        <IconButton
-          h={8}
-          size="sm"
-          aria-label="Go back"
-          icon={<ArrowLeftIcon />}
-          onClick={onBack}
-        />
-      ) : (
-        <CloseButton />
-      )}
+      {onBack ? <BackButton onClick={onBack} /> : <CloseButton />}
 
       <Spacer />
 
@@ -47,6 +41,8 @@ export function TopBar({ onBack, hideAccount }: TopBarProps) {
           )} */}
         </>
       )}
+
+      {showSettings && <SettingsButton onClick={() => openSettings(context)} />}
     </HStack>
   );
 }

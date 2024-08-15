@@ -75,6 +75,7 @@ export function Footer({
         height: footer.isOpen ? maxH : "auto",
         transition: { bounce: 0 },
       }}
+      backgroundColor="var(--chakra-colors-solid-bg)"
       overflow="hidden"
       ref={ref}
     >
@@ -135,7 +136,7 @@ export function Footer({
         {children}
       </VStack>
 
-      {(variant === "connect" || variant === "menu") && (
+      {variant === "connect" && (
         <HStack
           justifySelf="flex-end"
           bg="solid.bg"
