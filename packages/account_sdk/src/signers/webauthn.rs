@@ -280,6 +280,8 @@ pub struct ClientData {
     pub(super) origin: String,
     #[serde(rename = "crossOrigin")]
     pub(super) cross_origin: Option<bool>,
+    #[serde(rename = "topOrigin")]
+    pub(super) top_origin: Option<String>,
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
@@ -367,6 +369,7 @@ where
         let webauthn_signature = WebauthnSignature {
             flags,
             cross_origin: client_data.cross_origin,
+            top_origin: client_data.top_origin.map(|s| s.into_bytes()),
             sign_count: counter,
             ec_signature: signature,
             sha256_implementation: Sha256Implementation::Cairo1,
