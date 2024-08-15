@@ -24,7 +24,7 @@ async fn test_deploy_controller() {
 
     // Create a new Controller instance
     let username = "testuser".to_string();
-    let address = felt!("0x52add13c8f4a6d699a2962bf51e90b14fe4ffc60337959e4b19e9c431f4d081");
+    let address = felt!("0xb5079f7da5ef0b85d02b820a2d3853aa175a433e9522619d0acdc599c71ce0");
     let chain_id = provider.chain_id().await.unwrap();
 
     let controller = Controller::new(
