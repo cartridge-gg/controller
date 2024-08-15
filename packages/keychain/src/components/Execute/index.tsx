@@ -183,7 +183,13 @@ export function Execute() {
           submit
         </Button>
 
-        <Button onClick={cancel}>Cancel</Button>
+        <Button
+          onClick={() => {
+            ctx.onCancel ? ctx.onCancel() : cancel();
+          }}
+        >
+          Cancel
+        </Button>
       </Footer>
     </Container>
   );

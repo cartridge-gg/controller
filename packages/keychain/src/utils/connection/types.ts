@@ -19,7 +19,9 @@ export type ConnectionCtx =
   | ExecuteCtx
   | SignMessageCtx
   | OpenMenuCtx
-  | SetDelegateCtx;
+  | OpenSettingsCtx
+  | SetDelegateCtx
+  | SetExternalOwnerCtx;
 
 export type ConnectCtx = {
   origin: string;
@@ -46,6 +48,7 @@ export type ExecuteCtx = {
   };
   resolve: (res: ExecuteReply | ConnectError) => void;
   reject: (reason?: unknown) => void;
+  onCancel: () => void;
 };
 
 export type SignMessageCtx = {
@@ -65,10 +68,26 @@ export type OpenMenuCtx = {
   reject: (reason?: unknown) => void;
 };
 
+export type OpenSettingsCtx = {
+  origin: string;
+  type: "open-settings";
+  account: string;
+  resolve: (res: ConnectError) => void;
+  reject: (reason?: unknown) => void;
+};
+
 export type SetDelegateCtx = {
   origin: string;
   type: "set-delegate";
   account: string;
-  resolve: (res: ConnectError) => void; // ?
-  reject: (reason?: unknown) => void; // ?
+  resolve: (res: ConnectError) => void;
+  reject: (reason?: unknown) => void;
+};
+
+export type SetExternalOwnerCtx = {
+  origin: string;
+  type: "set-external-owner";
+  account: string;
+  resolve: (res: ConnectError) => void;
+  reject: (reason?: unknown) => void;
 };

@@ -8,23 +8,21 @@ import {
   ExecuteCtx,
   LogoutCtx,
   OpenMenuCtx,
+  OpenSettingsCtx,
   SetDelegateCtx,
+  SetExternalOwnerCtx,
   SignMessageCtx,
 } from "utils/connection";
 import { logout } from "utils/connection/logout";
 import { LoginMode } from "components/connect/types";
 import { ErrorPage } from "components/ErrorBoundary";
 import { SetDelegate } from "components/SetDelegate";
+import { SetExternalOwner } from "components/SetExternalOwner";
+import { Settings } from "components/Settings";
 
 function Home() {
-  const {
-    context,
-    policies,
-    controller,
-    error,
-    setDelegate,
-    setDelegateTransaction,
-  } = useConnection();
+  const { context, controller, error, setDelegateTransaction, policies } =
+    useConnection();
 
   if (window.self === window.top || !context?.origin) {
     return <></>;
@@ -133,7 +131,31 @@ function Home() {
                 message: "User logged out",
               });
             }}
-            onSetDelegate={() => setDelegate(ctx)}
+          />
+        </DeploymentRequired>
+      );
+    }
+
+    case "open-settings": {
+      const ctx = context as OpenSettingsCtx;
+      return (
+        <DeploymentRequired
+          onClose={() =>
+            ctx.resolve({
+              code: ResponseCodes.CANCELED,
+              message: "Canceled",
+            })
+          }
+        >
+          <Settings
+            onLogout={() => {
+              logout(ctx.origin)();
+
+              ctx.resolve({
+                code: ResponseCodes.NOT_CONNECTED,
+                message: "User logged out",
+              });
+            }}
           />
         </DeploymentRequired>
       );
@@ -151,16 +173,25 @@ function Home() {
           }
         >
           <SetDelegate
-            onClose={() =>
-              ctx.resolve({
-                code: ResponseCodes.CANCELED,
-                message: "Canceled",
-              })
-            }
             onSetDelegate={(delegateAddress) => {
               setDelegateTransaction(ctx, delegateAddress);
             }}
           />
+        </DeploymentRequired>
+      );
+    }
+    case "set-external-owner": {
+      const ctx = context as SetExternalOwnerCtx;
+      return (
+        <DeploymentRequired
+          onClose={() =>
+            ctx.resolve({
+              code: ResponseCodes.CANCELED,
+              message: "Canceled",
+            })
+          }
+        >
+          <SetExternalOwner />
         </DeploymentRequired>
       );
     }

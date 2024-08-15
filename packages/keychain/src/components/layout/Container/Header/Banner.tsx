@@ -34,7 +34,6 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
   switch (variant) {
     case "connect":
     case "error":
-    case "menu":
       return (
         <VStack w="full" pb={6}>
           <VStack
@@ -92,6 +91,60 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
               </Text>
             )}
           </VStack>
+        </VStack>
+      );
+    case "menu":
+      return (
+        <VStack w="full">
+          <HStack
+            h={TOP_BAR_HEIGHT / 4}
+            w="full"
+            bg={`url('${cover}')`}
+            bgSize="cover"
+            bgPos="center"
+            pb={6}
+          />
+
+          <HStack w="full" p={4} gap={4} minW={0}>
+            {!!Icon ? (
+              <Square size="44px" bg="solid.primary" borderRadius="md">
+                <Icon boxSize={8} />
+              </Square>
+            ) : !!icon ? (
+              <Square size="44px" bg="solid.primary" borderRadius="md">
+                {icon}
+              </Square>
+            ) : (
+              <Image
+                src={theme.icon}
+                boxSize="44px"
+                alt="Controller Icon"
+                borderRadius="md"
+              />
+            )}
+
+            <VStack w="full" align="stretch" gap={1} minW={0}>
+              <Text
+                w="full"
+                fontSize="lg"
+                fontWeight="semibold"
+                whiteSpace="nowrap"
+              >
+                {title}
+              </Text>
+
+              {description && (
+                <Text
+                  w="full"
+                  fontSize="xs"
+                  color="text.secondary"
+                  overflowWrap="break-word"
+                >
+                  {description}
+                </Text>
+              )}
+            </VStack>
+          </HStack>
         </VStack>
       );
     default:

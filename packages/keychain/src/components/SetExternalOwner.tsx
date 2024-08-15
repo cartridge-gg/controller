@@ -5,46 +5,41 @@ import { useConnection } from "hooks/connection";
 import { useEffect, useState } from "react";
 import { CallData, num } from "starknet";
 
-export function SetDelegate({
-  onSetDelegate,
-}: {
-  onSetDelegate: (address: string) => void;
-}) {
-  const { context, openSettings } = useConnection();
-  const [delegateAddress, setDelegateAddress] = useState("");
+export function SetExternalOwner() {
+  const { context, openSettings, setExternalOwnerTransaction } =
+    useConnection();
+  const [externalOwnerAddress, setExternalOwnerAddress] = useState("");
   const [isValid, setIsValid] = useState(true);
 
   useEffect(() => {
     try {
-      CallData.compile([delegateAddress]);
-      setIsValid(num.isHex(delegateAddress));
+      CallData.compile([externalOwnerAddress]);
+      setIsValid(num.isHex(externalOwnerAddress));
     } catch (e: any) {
       setIsValid(false);
     }
-  }, [delegateAddress]);
+  }, [externalOwnerAddress]);
 
   return (
     <Container
       variant="menu"
-      title="Delegate account"
+      title="Recovery Account(s)"
       onBack={() => openSettings(context)}
     >
       <Content>
         <VStack w="full" h="full" justifyContent="space-between" gap={6}>
           <Text color="text.secondary" fontSize="sm">
-            Your controller can be owned by an existing Starknet wallet which
-            can receive the rewards you earn while playing. <br />
-            (This can be updated later)
+            Your controller can be owned by an existing Starknet wallet
           </Text>
           <VStack w="full">
             <Input
               w="full"
               // fontSize="10px"
               placeholder="0x..."
-              value={delegateAddress}
-              onChange={(e) => setDelegateAddress(e.target.value)}
+              value={externalOwnerAddress}
+              onChange={(e) => setExternalOwnerAddress(e.target.value)}
             />
-            {!isValid && delegateAddress !== "" && (
+            {!isValid && externalOwnerAddress !== "" && (
               <HStack w="full" color="red.400">
                 <AlertIcon /> <Text color="red.400">Invalid address!</Text>
               </HStack>
@@ -56,14 +51,13 @@ export function SetDelegate({
         <Button
           colorScheme="colorful"
           w="full"
-          onClick={() => onSetDelegate(delegateAddress)}
+          onClick={() =>
+            setExternalOwnerTransaction(context, externalOwnerAddress)
+          }
           isDisabled={!isValid}
         >
-          Set delegate account
+          Add Recovery Account
         </Button>
-        {/* <Button w="full" onClick={onClose}>
-          Setup later
-        </Button> */}
       </Footer>
     </Container>
   );
