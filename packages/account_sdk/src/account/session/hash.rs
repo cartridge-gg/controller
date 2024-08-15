@@ -21,7 +21,7 @@ pub struct ProvedMethod {
     pub proof: Vec<Felt>,
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Default)]
 pub struct Session {
     pub expires_at: u64,
     pub allowed_methods: Vec<ProvedMethod>,
