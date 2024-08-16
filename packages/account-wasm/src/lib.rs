@@ -25,7 +25,6 @@ use starknet::macros::short_string;
 use starknet::signers::SigningKey;
 use url::Url;
 use wasm_bindgen::prelude::*;
-use web_sys::console;
 
 use crate::errors::OperationError;
 use crate::types::invocation::JsInvocationsDetails;
@@ -210,7 +209,7 @@ impl CartridgeAccount {
             .into_iter()
             .map(Call::try_from_js_value)
             .collect::<std::result::Result<_, _>>()?;
-        console::log_1(&format!("{:#?}", calls).into());
+
         Ok(self.controller.session_account(&calls).is_some())
     }
 
