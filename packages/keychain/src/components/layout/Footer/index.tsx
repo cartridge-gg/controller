@@ -30,8 +30,13 @@ export function Footer({
   const { origin, policies } = useConnection();
   const { variant, footer } = useLayout();
   const isExpandable = useMemo(
-    () => !!origin && !!policies.length && variant === "connect" && !isSignup,
-    [origin, policies, variant, isSignup],
+    () =>
+      !!origin &&
+      !!policies.length &&
+      variant === "connect" &&
+      !isSignup &&
+      !hideTxSummary,
+    [origin, policies, variant, isSignup, hideTxSummary],
   );
   const hostname = useMemo(
     () => (origin ? new URL(origin).hostname : undefined),
