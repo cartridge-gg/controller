@@ -25,8 +25,8 @@ const ETH_TOKEN_ADDRESS =
 // const PAPER_TOKEN_ADDRESS =
 //   "0x0410466536b5ae074f7fea81e5533b8134a9fa08b3dd077dd9db08f64997d113";
 
-const cartridge = new CartridgeConnector(
-  [
+const cartridge = new CartridgeConnector({
+  policies: [
     {
       target: ETH_TOKEN_ADDRESS,
       method: "approve",
@@ -50,35 +50,34 @@ const cartridge = new CartridgeConnector(
       method: "allowance",
     },
   ],
-  {
-    url:
-      !process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ||
-      process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL.split(".")[0] ===
-        "cartridge-starknet-react-next"
-        ? process.env.XFRAME_URL
-        : "https://" +
-          (process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ?? "").replace(
-            "cartridge-starknet-react-next",
-            "keychain",
-          ),
-    rpc: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
-    paymaster: {
-      caller: shortString.encodeShortString("ANY_CALLER"),
-    },
-    // theme: "dope-wars",
-    // colorMode: "light"
-    // prefunds: [
-    //   {
-    //     address: ETH_TOKEN_ADDRESS,
-    //     min: "300000000000000",
-    //   },
-    //   {
-    //     address: PAPER_TOKEN_ADDRESS,
-    //     min: "100",
-    //   },
-    // ],
+  url:
+    !process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ||
+    process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL.split(".")[0] ===
+      "cartridge-starknet-react-next"
+      ? process.env.XFRAME_URL
+      : "https://" +
+        (process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ?? "").replace(
+          "cartridge-starknet-react-next",
+          "keychain",
+        ),
+
+  rpc: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
+  paymaster: {
+    caller: shortString.encodeShortString("ANY_CALLER"),
   },
-);
+  // theme: "dope-wars",
+  // colorMode: "light"
+  // prefunds: [
+  //   {
+  //     address: ETH_TOKEN_ADDRESS,
+  //     min: "300000000000000",
+  //   },
+  //   {
+  //     address: PAPER_TOKEN_ADDRESS,
+  //     min: "100",
+  //   },
+  // ],
+});
 
 function provider(chain: Chain) {
   switch (chain) {

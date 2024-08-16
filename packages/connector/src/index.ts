@@ -1,14 +1,14 @@
 import { Connector } from "@starknet-react/core";
-import Controller, { Policy, ControllerOptions } from "@cartridge/controller";
+import Controller, { ControllerOptions } from "@cartridge/controller";
 import { AccountInterface } from "starknet";
 
 class ControllerConnector extends Connector {
   public controller: Controller;
   private _account: AccountInterface | undefined;
 
-  constructor(policies?: Policy[], options?: ControllerOptions) {
+  constructor(options?: ControllerOptions) {
     super();
-    this.controller = new Controller(policies, options);
+    this.controller = new Controller(options);
   }
 
   readonly id = "cartridge";
