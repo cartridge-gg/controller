@@ -489,18 +489,13 @@ export function __wbindgen_string_get(arg0, arg1) {
     getInt32Memory0()[arg0 / 4 + 0] = ptr1;
 };
 
-export function __wbindgen_string_new(arg0, arg1) {
-    const ret = getStringFromWasm0(arg0, arg1);
+export function __wbindgen_error_new(arg0, arg1) {
+    const ret = new Error(getStringFromWasm0(arg0, arg1));
     return addHeapObject(ret);
 };
 
 export function __wbindgen_object_clone_ref(arg0) {
     const ret = getObject(arg0);
-    return addHeapObject(ret);
-};
-
-export function __wbindgen_error_new(arg0, arg1) {
-    const ret = new Error(getStringFromWasm0(arg0, arg1));
     return addHeapObject(ret);
 };
 
@@ -568,6 +563,11 @@ export function __wbg_String_b9412f8799faab3e(arg0, arg1) {
 
 export function __wbindgen_number_new(arg0) {
     const ret = arg0;
+    return addHeapObject(ret);
+};
+
+export function __wbindgen_string_new(arg0, arg1) {
+    const ret = getStringFromWasm0(arg0, arg1);
     return addHeapObject(ret);
 };
 
@@ -1042,8 +1042,8 @@ export function __wbindgen_memory() {
     return addHeapObject(ret);
 };
 
-export function __wbindgen_closure_wrapper2279(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 490, __wbg_adapter_48);
+export function __wbindgen_closure_wrapper2255(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 489, __wbg_adapter_48);
     return addHeapObject(ret);
 };
 
