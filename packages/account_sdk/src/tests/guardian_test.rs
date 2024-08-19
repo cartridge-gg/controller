@@ -1,10 +1,8 @@
 use crate::{
     abigen::erc_20::Erc20,
+    account::{webauthn::SoftPasskeySigner, FEE_TOKEN_ADDRESS},
     signers::{webauthn::WebauthnSigner, HashSigner},
-    tests::{
-        account::{webauthn::SoftPasskeySigner, FEE_TOKEN_ADDRESS},
-        runners::katana::KatanaRunner,
-    },
+    tests::runners::katana::KatanaRunner,
 };
 use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{

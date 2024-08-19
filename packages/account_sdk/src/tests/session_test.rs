@@ -1,11 +1,9 @@
 use crate::{
     abigen::erc_20::Erc20,
     account::session::{create::SessionCreator, hash::AllowedMethod},
+    account::{webauthn::SoftPasskeySigner, FEE_TOKEN_ADDRESS},
     signers::{webauthn::WebauthnSigner, HashSigner},
-    tests::{
-        account::{webauthn::SoftPasskeySigner, FEE_TOKEN_ADDRESS},
-        runners::katana::KatanaRunner,
-    },
+    tests::runners::katana::KatanaRunner,
     transaction_waiter::TransactionWaiter,
 };
 use cainome::cairo_serde::{ContractAddress, U256};

@@ -4,7 +4,7 @@ use starknet::signers::SigningKey;
 use crate::account::session::create::SessionCreator;
 use crate::account::session::hash::AllowedMethod;
 use crate::account::DECLARATION_SELECTOR;
-use crate::tests::account::AccountDeclaration;
+use crate::account::AccountDeclaration;
 
 use crate::tests::runners::katana::KatanaRunner;
 

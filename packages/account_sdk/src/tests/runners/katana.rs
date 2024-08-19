@@ -15,13 +15,11 @@ use lazy_static::lazy_static;
 
 use crate::abigen::controller::{self, Signer};
 use crate::abigen::erc_20::Erc20;
+use crate::account::{AccountDeclaration, AccountDeployment, DeployResult, FEE_TOKEN_ADDRESS};
 use crate::controller::Controller;
 use crate::provider::CartridgeJsonRpcProvider;
 use crate::signers::HashSigner;
 use crate::storage::InMemoryBackend;
-use crate::tests::account::{
-    AccountDeclaration, AccountDeployment, DeployResult, FEE_TOKEN_ADDRESS,
-};
 use crate::transaction_waiter::TransactionWaiter;
 
 use super::cartridge::CartridgeProxy;

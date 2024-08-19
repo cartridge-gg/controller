@@ -9,7 +9,6 @@ use thiserror::Error;
 
 use crate::transaction_waiter::{TransactionWaiter, TransactionWaitingError};
 
-pub(crate) mod account;
 pub(crate) mod runners;
 
 mod declare_test;

@@ -6,11 +6,11 @@ pub mod constants;
 pub mod controller;
 pub mod factory;
 pub mod hash;
-mod paymaster;
+pub mod paymaster;
 pub mod provider;
 pub mod signers;
 pub mod storage;
-mod transaction_waiter;
+pub mod transaction_waiter;
 pub mod typed_data;
 
 #[cfg(not(target_arch = "wasm32"))]

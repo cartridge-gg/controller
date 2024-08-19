@@ -9,13 +9,13 @@ use starknet::{
 
 use crate::{
     abigen::erc_20::Erc20,
-    account::session::{
+    account::{session::{
         hash::{AllowedMethod, Session},
         raw_session::RawSession,
         SessionAccount,
-    },
+    }, FEE_TOKEN_ADDRESS},
     signers::HashSigner,
-    tests::{account::FEE_TOKEN_ADDRESS, ensure_txn, runners::katana::KatanaRunner},
+    tests::{ensure_txn, runners::katana::KatanaRunner},
 };
 
 #[tokio::test]
