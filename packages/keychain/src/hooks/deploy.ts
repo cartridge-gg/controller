@@ -40,6 +40,10 @@ export const useDeploy = (): DeployInterface => {
     async (username: string) => {
       if (isDeployed) return;
 
+      if (!chainId) {
+        throw new Error("Chain ID not set");
+      }
+
       if (chainId === constants.StarknetChainId.SN_MAIN)
         throw new Error("Mainnet not supported");
 

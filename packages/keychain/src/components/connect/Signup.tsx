@@ -85,7 +85,7 @@ export function Signup({
       return;
     }
 
-    doSignup(decodeURIComponent(usernameField.value)).catch((e) => {
+    doSignup(usernameField.value).catch((e) => {
       // Backward compat with iframes without this permission-policy
       if (e.message.includes("publickey-credentials-create")) {
         doPopup();
@@ -125,7 +125,6 @@ export function Signup({
             },
           } = data;
 
-          console.log(origin);
           const controller = new Controller({
             appId: origin,
             chainId,
