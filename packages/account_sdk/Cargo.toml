@@ -52,6 +52,9 @@ once_cell.workspace = true
 webauthn-authenticator-rs = { workspace = true, features = ["softpasskey"] }
 webauthn-rs-core.workspace = true
 
+[build-dependencies]
+cainome.workspace = true
+
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tokio.workspace = true
 
