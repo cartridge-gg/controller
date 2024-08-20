@@ -13,9 +13,6 @@ account-wasm = { path = "packages/account-wasm" }
 anyhow = "1"
 async-trait = "0.1"
 base64 = "0.22"
-cainome = { git = "https://github.com/cartridge-gg/cainome", branch = "main", features = [
-    "abigen-rs",
-] }
 cairo-lang-starknet = "2.4.0"
 coset = { version = "0.3.4", features = ["std"] }
 ecdsa = "0.16.9"
@@ -42,12 +39,6 @@ serde_with = { version = "3.9.0", default-features = false, features = [
     "macros",
 ] }
 sha2 = "0.10"
-starknet = { git = "https://github.com/xJonathanLEI/starknet-rs", rev = "2ddc694" }
-starknet-crypto = { git = "https://github.com/xJonathanLEI/starknet-rs", rev = "2ddc694" }
-starknet-types-core = { version = "0.1.3", default-features = false, features = [
-    "curve",
-    "hash",
-] }
 thiserror = "1"
 toml = "0.8"
 u256-literal = "1"
@@ -62,8 +53,23 @@ serde_cbor_2 = { version = "0.12.0-dev" }
 webauthn-rs-core = { git = "https://github.com/cartridge-gg/webauthn-rs", rev = "a6cea88" }
 webauthn-rs-proto = { git = "https://github.com/cartridge-gg/webauthn-rs", rev = "a6cea88" }
 webauthn-authenticator-rs = { git = "https://github.com/cartridge-gg/webauthn-rs", rev = "a6cea88", features = [
-    "softpasskey",
+	"softpasskey",
 ] }
+
+# HEAD of the main branch
+cainome = { git = "https://github.com/cartridge-gg/cainome", rev = "fb91215", features = [
+	"abigen-rs",
+] }
+
+
+starknet = "0.11.0"
+starknet-crypto = "0.7.1"
+starknet-types-core = { version = "~0.1.4", features = ["curve", "hash"] }
+
+[patch.crates-io]
+# downstream patch to match cainome version of `starknet-rs`
+starknet = { git = "https://github.com/xJonathanLEI/starknet-rs", rev = "2ddc694" }
+starknet-types-core = { git = "https://github.com/starknet-io/types-rs", rev = "f98f048" }
 
 # Compiler optimization when running test to prevent ‘locals exceed maximum’ error,
 # where a function is using more that the maximum allowed local variables.

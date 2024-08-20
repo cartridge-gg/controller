@@ -7,14 +7,14 @@ use crate::{
 };
 use starknet::core::types::Felt;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
 pub struct SessionMetadata {
     pub session: Session,
     pub max_fee: Option<Felt>,
     pub credentials: Credentials,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
 pub struct Credentials {
     pub authorization: Vec<Felt>,
     pub private_key: Felt,
