@@ -106,18 +106,18 @@ export function DeploymentRequired({
                     as={NextLink}
                     href={CARTRIDGE_DISCORD_LINK}
                     isExternal
-                    color="link.blue"
                     display="inline-flex"
                     flexDir="row"
                     columnGap="0.1rem"
                     alignItems="center"
+                    fontWeight="bold"
                   >
                     Discord
                     <ExternalIcon />
                   </Link>{" "}
                   and report this issue.
                 </Text>
-                <Text color="text.secondary">{error.message}</Text>
+                <Text color="inherit">{error.message}</Text>
               </>
             }
           />
