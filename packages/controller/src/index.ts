@@ -30,7 +30,7 @@ import { KEYCHAIN_URL, RPC_SEPOLIA } from "./constants";
 
 class Controller {
   private url: URL;
-  private policies?: Policy[];
+  private policies: Policy[];
   private paymaster?: PaymasterOptions;
   private connection?: Connection<Keychain>;
   private modal?: Modal;
@@ -38,33 +38,21 @@ class Controller {
   public rpc: URL;
   public account?: AccountInterface;
 
-  constructor({
-    policies,
-    url,
-    rpc,
-    paymaster,
-    theme,
-    config,
-    colorMode,
-    prefunds,
-  }: ControllerOptions = {}) {
-    this.url = new URL(url || KEYCHAIN_URL);
-    this.rpc = new URL(rpc || RPC_SEPOLIA);
-    this.paymaster = paymaster;
+  constructor(policies: Policy[] = [], options: ControllerOptions = {}) {
+    this.url = new URL(options?.url || KEYCHAIN_URL);
+    this.rpc = new URL(options?.rpc || RPC_SEPOLIA);
+    this.paymaster = options.paymaster;
+    this.policies = policies.map((policy) => ({
+      ...policy,
+      target: addAddressPadding(policy.target),
+    }));
 
-    if (policies?.length) {
-      this.policies = policies.map((policy) => ({
-        ...policy,
-        target: addAddressPadding(policy.target),
-      }));
+    this.setTheme(options?.theme, options?.config?.presets);
+    if (options?.colorMode) {
+      this.setColorMode(options.colorMode);
     }
-
-    this.setTheme(theme, config?.presets);
-    if (colorMode) {
-      this.setColorMode(colorMode);
-    }
-    if (prefunds?.length) {
-      this.setPrefunds(prefunds);
+    if (options?.prefunds?.length) {
+      this.setPrefunds(options.prefunds);
     }
 
     this.initModal();
@@ -189,10 +177,10 @@ class Controller {
     this.modal.open();
 
     try {
-      let response = await this.keychain.connect({
-        rpcUrl: this.rpc.toString(),
-        policies: this.policies,
-      });
+      let response = await this.keychain.connect(
+        this.policies,
+        this.rpc.toString(),
+      );
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
       }

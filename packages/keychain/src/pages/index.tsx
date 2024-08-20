@@ -40,7 +40,7 @@ function Home() {
   switch (context.type) {
     case "connect": {
       // TODO: show missing policies if mismatch
-      if (!context.policies?.length || controller.account.sessionJson()) {
+      if (controller.account.sessionJson()) {
         context.resolve({
           code: ResponseCodes.SUCCESS,
           address: controller.address,
