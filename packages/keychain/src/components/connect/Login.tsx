@@ -86,7 +86,7 @@ function Form({
           await doLogin(usernameField.value, credentialId);
           break;
         case LoginMode.Controller:
-          if (policies?.length === 0) {
+          if (!policies?.length) {
             break;
           }
 

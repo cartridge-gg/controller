@@ -48,7 +48,7 @@ export function Policies({
             // The container already set border radius (for top & bottom), but we
             // set the bottom radius for the last item here because for certain
             // browsers' scrolling behaviour (eg Firefox) just to make it look nicer.
-            borderBottomRadius={i === policies.length - 1 ? "base" : "none"}
+            borderBottomRadius={i === policies?.length - 1 ? "base" : "none"}
           >
             {({ isExpanded }) => (
               <>

@@ -60,7 +60,6 @@ const cartridge = new CartridgeConnector({
           "cartridge-starknet-react-next",
           "keychain",
         ),
-
   rpc: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
   paymaster: {
     caller: shortString.encodeShortString("ANY_CALLER"),
