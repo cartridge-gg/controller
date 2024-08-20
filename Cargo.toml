@@ -61,9 +61,10 @@ webauthn-authenticator-rs = { git = "https://github.com/cartridge-gg/webauthn-rs
 
 starknet = "0.11.0"
 starknet-crypto = "0.7.1"
-starknet-types-core = { version = "~0.1.4", features = [ "curve", "hash" ] }
+starknet-types-core = { version = "~0.1.4", features = ["curve", "hash"] }
 
 [patch.crates-io]
+# downstream patch to match cainome version of `starknet-rs`
 starknet = { git = "https://github.com/xJonathanLEI/starknet-rs", rev = "2ddc694" }
 starknet-types-core = { git = "https://github.com/starknet-io/types-rs", rev = "f98f048" }
 
