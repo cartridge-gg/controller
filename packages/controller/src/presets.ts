@@ -101,4 +101,13 @@ export const defaultPresets: ControllerThemePresets = {
       primary: "#A144B2",
     },
   },
+  flippyflop: {
+    id: "flippyflop",
+    name: "FlippyFlop",
+    icon: "/whitelabel/flippyflop/icon.png",
+    cover: "/whitelabel/flippyflop/cover.png",
+    colors: {
+      primary: "#F38332",
+    },
+  }
 };
