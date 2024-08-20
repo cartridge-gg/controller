@@ -81,17 +81,10 @@ function Form({
         credentialId,
       });
 
-      switch (mode) {
-        case LoginMode.Webauthn:
-          await doLogin(usernameField.value, credentialId);
-          break;
-        case LoginMode.Controller:
-          if (policies.length === 0) {
-            throw new Error("Policies required for controller ");
-          }
-
-          await controller.approve(origin, expiresAt, policies);
-          break;
+      if (mode === LoginMode.Controller && policies.length > 0) {
+        await controller.approve(origin, expiresAt, policies);
+      } else {
+        await doLogin(usernameField.value, credentialId);
       }
 
       controller.store();
@@ -100,18 +93,8 @@ function Form({
       if (onSuccess) {
         onSuccess();
       }
-
-      log({ type: "webauthn_login", address });
     } catch (e) {
       setError(e);
-
-      log({
-        type: "webauthn_login_error",
-        payload: {
-          error: e?.message,
-        },
-        address,
-      });
     }
 
     setIsLoading(false);

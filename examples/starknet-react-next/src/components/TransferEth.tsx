@@ -25,12 +25,12 @@ export const TransferEth = () => {
         {
           contractAddress: ETH_CONTRACT,
           entrypoint: "approve",
-          calldata: [account?.address, "0x11C37937E08000", "0x0"],
+          calldata: [account?.address, "0x1C6BF52634000", "0x0"],
         },
         {
           contractAddress: ETH_CONTRACT,
           entrypoint: "transfer",
-          calldata: [account?.address, "0x11C37937E08000", "0x0"],
+          calldata: [account?.address, "0x1C6BF52634000", "0x0"],
         },
       ])
       .then(({ transaction_hash }) => setTxnHash(transaction_hash))

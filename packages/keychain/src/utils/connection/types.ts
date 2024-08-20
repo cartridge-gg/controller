@@ -26,7 +26,7 @@ export type ConnectionCtx =
 export type ConnectCtx = {
   origin: string;
   type: "connect";
-  policies: Policy[];
+  policies?: Policy[];
   resolve: (res: ConnectReply | ConnectError) => void;
   reject: (reason?: unknown) => void;
 };
