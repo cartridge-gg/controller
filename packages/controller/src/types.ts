@@ -61,10 +61,10 @@ export type ProbeReply = {
 
 export interface Keychain {
   probe(rpcUrl?: string): Promise<ProbeReply | ConnectError>;
-  connect(args: {
-    rpcUrl: string;
-    policies?: Policy[];
-  }): Promise<ConnectReply | ConnectError>;
+  connect(
+    policies: Policy[],
+    rpcUrl: string,
+  ): Promise<ConnectReply | ConnectError>;
   disconnect(): void;
 
   reset(): void;

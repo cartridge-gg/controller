@@ -81,7 +81,7 @@ function Form({
         credentialId,
       });
 
-      if (mode === LoginMode.Controller && policies.length > 0) {
+      if (mode === LoginMode.Controller && policies?.length > 0) {
         await controller.approve(origin, expiresAt, policies);
       } else {
         await doLogin(usernameField.value, credentialId);

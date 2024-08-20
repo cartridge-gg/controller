@@ -30,7 +30,7 @@ import { KEYCHAIN_URL, RPC_SEPOLIA } from "./constants";
 
 class Controller {
   private url: URL;
-  private policies?: Policy[];
+  private policies: Policy[];
   private paymaster?: PaymasterOptions;
   private connection?: Connection<Keychain>;
   private modal?: Modal;
@@ -51,13 +51,11 @@ class Controller {
     this.url = new URL(url || KEYCHAIN_URL);
     this.rpc = new URL(rpc || RPC_SEPOLIA);
     this.paymaster = paymaster;
-
-    if (policies?.length) {
-      this.policies = policies.map((policy) => ({
+    this.policies =
+      policies?.map((policy) => ({
         ...policy,
         target: addAddressPadding(policy.target),
-      }));
-    }
+      })) || [];
 
     this.setTheme(theme, config?.presets);
     if (colorMode) {
@@ -189,10 +187,10 @@ class Controller {
     this.modal.open();
 
     try {
-      let response = await this.keychain.connect({
-        rpcUrl: this.rpc.toString(),
-        policies: this.policies,
-      });
+      let response = await this.keychain.connect(
+        this.policies,
+        this.rpc.toString(),
+      );
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
       }

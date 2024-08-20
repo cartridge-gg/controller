@@ -33,7 +33,7 @@ type ConnectionContextValue = {
   rpcUrl: string;
   chainId: string;
   chainName: string;
-  policies?: Policy[];
+  policies: Policy[];
   prefunds: Prefund[];
   hasPrefundRequest: boolean;
   error: Error;

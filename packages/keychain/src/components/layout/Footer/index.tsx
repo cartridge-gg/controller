@@ -32,7 +32,7 @@ export function Footer({
   const isExpandable = useMemo(
     () =>
       !!origin &&
-      !!policies?.length &&
+      !!policies.length &&
       variant === "connect" &&
       !isSignup &&
       !hideTxSummary,
@@ -100,7 +100,7 @@ export function Footer({
           onClick={footer.onToggle}
           _hover={{ cursor: "pointer" }}
         >
-          {!hideTxSummary && !!policies?.length && (
+          {!hideTxSummary && !!policies.length && (
             <TransactionSummary
               isSlot={isSlot}
               createSession={createSession}
