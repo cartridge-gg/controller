@@ -1,7 +1,13 @@
 import { ProbeReply, ResponseCodes } from "@cartridge/controller";
 import Controller from "utils/controller";
 
-export function probeFactory(setController: (controller: Controller) => void) {
+export function probeFactory({
+  setController,
+  setRpcUrl,
+}: {
+  setController: (controller: Controller) => void;
+  setRpcUrl: (rpcUrl: string) => void;
+}) {
   return (origin: string) =>
     (rpcUrl?: string): Promise<ProbeReply> => {
       const controller = Controller.fromStore(origin);
@@ -19,6 +25,7 @@ export function probeFactory(setController: (controller: Controller) => void) {
         });
       }
 
+      setRpcUrl(rpcUrl);
       setController(controller);
       return Promise.resolve({
         code: ResponseCodes.SUCCESS,

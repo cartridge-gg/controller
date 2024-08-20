@@ -44,7 +44,7 @@ export function connectToController({
       estimateDeclareFee: normalize(validate(estimateDeclareFee)),
       estimateInvokeFee: normalize(validate(estimateInvokeFee)),
       logout: normalize(logout),
-      probe: normalize(probeFactory(setController)),
+      probe: normalize(probeFactory({ setController, setRpcUrl })),
       signMessage: normalize(validate(signMessageFactory(setContext))),
       openMenu: normalize(validate(openMenuFactory(setContext))),
       openSettings: normalize(validate(openSettingsFactory(setContext))),
