@@ -61,10 +61,10 @@ export type ProbeReply = {
 
 export interface Keychain {
   probe(rpcUrl?: string): Promise<ProbeReply | ConnectError>;
-  connect(
-    policies: Policy[],
-    rpcUrl: string,
-  ): Promise<ConnectReply | ConnectError>;
+  connect(args: {
+    rpcUrl: string;
+    policies?: Policy[];
+  }): Promise<ConnectReply | ConnectError>;
   disconnect(): void;
 
   reset(): void;
@@ -119,6 +119,7 @@ export interface Modal {
  * Options for configuring the controller
  */
 export type ControllerOptions = {
+  policies?: Policy[];
   /** The URL of keychain */
   url?: string;
   /** The URL of the RPC */

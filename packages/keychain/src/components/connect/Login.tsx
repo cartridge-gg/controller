@@ -86,8 +86,8 @@ function Form({
           await doLogin(usernameField.value, credentialId);
           break;
         case LoginMode.Controller:
-          if (policies.length === 0) {
-            throw new Error("Policies required for controller ");
+          if (policies?.length === 0) {
+            break;
           }
 
           await controller.approve(origin, expiresAt, policies);
