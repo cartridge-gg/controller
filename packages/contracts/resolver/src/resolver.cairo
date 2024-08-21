@@ -1,6 +1,8 @@
 #[starknet::interface]
 trait IControllerResolverDelegation<TContractState> {
     fn set_name(ref self: TContractState, name: felt252, address: starknet::ContractAddress);
+    fn reset_name(ref self: ContractState, name: felt252);
+
     fn set_owner(ref self: TContractState, new_owner: starknet::ContractAddress);
 
     fn grant_executors(ref self: TContractState, executors: Array<felt252>);
@@ -9,7 +11,7 @@ trait IControllerResolverDelegation<TContractState> {
 
 #[starknet::contract]
 mod ControllerResolverDelegation {
-    use starknet::{get_caller_address, ContractAddress, ClassHash ,storage::Map};
+    use starknet::{get_caller_address, ContractAddress, ClassHash, storage::Map};
     use starknet::contract_address::ContractAddressZeroable;
     use resolver::interface::{
         IResolver, IExecutorAccount, IExecutorAccountDispatcher, IExecutorAccountDispatcherTrait
@@ -85,6 +87,16 @@ mod ControllerResolverDelegation {
                 )
         }
 
+        fn reset_name(ref self: ContractState, name: felt252) {
+            self.assert_executor();
+            
+            self.name_owners.write(name, ContractAddressZeroable::zero());
+        }
+
+        //
+        //
+        //
+
         fn set_owner(ref self: ContractState, new_owner: ContractAddress) {
             self.assert_owner();
             self.owner.write(new_owner);
@@ -118,7 +130,6 @@ mod ControllerResolverDelegation {
             self.upgradeable.upgrade(new_class_hash);
         }
     }
-
 
     #[generate_trait]
     impl InternalImpl of InternalTrait {
