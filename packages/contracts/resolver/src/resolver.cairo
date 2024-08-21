@@ -9,7 +9,7 @@ trait IControllerResolverDelegation<TContractState> {
 
 #[starknet::contract]
 mod ControllerResolverDelegation {
-    use starknet::{get_caller_address, ContractAddress, ClassHash};
+    use starknet::{get_caller_address, ContractAddress, ClassHash ,storage::Map};
     use starknet::contract_address::ContractAddressZeroable;
     use resolver::interface::{
         IResolver, IExecutorAccount, IExecutorAccountDispatcher, IExecutorAccountDispatcherTrait
@@ -26,9 +26,9 @@ mod ControllerResolverDelegation {
     #[storage]
     struct Storage {
         // name -> address
-        name_owners: LegacyMap::<felt252, ContractAddress>,
+        name_owners: Map::<felt252, ContractAddress>,
         // public_key -> bool
-        executors: LegacyMap::<felt252, bool>,
+        executors: Map::<felt252, bool>,
         // owner
         owner: ContractAddress,
         // upgradeable
@@ -115,7 +115,7 @@ mod ControllerResolverDelegation {
     impl UpgradeableImpl of IUpgradeable<ContractState> {
         fn upgrade(ref self: ContractState, new_class_hash: ClassHash) {
             self.assert_owner();
-            self.upgradeable._upgrade(new_class_hash);
+            self.upgradeable.upgrade(new_class_hash);
         }
     }
 
