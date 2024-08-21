@@ -8,7 +8,7 @@ export type Transaction = {
 };
 
 export function useUrlTxns(): {
-  chainId: constants.StarknetChainId;
+  chainId?: constants.StarknetChainId;
   txns: Transaction[];
 } {
   const router = useRouter();

@@ -31,12 +31,15 @@ export function SignMessage({
     ) => {
       for (const typeMember of messageType) {
         if (typeMember.type === "felt*") {
+          // @ts-expect-error TODO(#602): Fix type
           const stringArray: Array<string> = initial[typeMember.name].map(
             (hex: string) => shortString.decodeShortString(hex),
           );
+          // @ts-expect-error TODO(#602): Fix type
           initial[typeMember.name] = stringArray.join("");
         } else if (typeMember.type !== "felt" && typeMember.type !== "string") {
           convertFeltArraysToString(
+            // @ts-expect-error TODO(#602): Fix type
             initial[typeMember.name],
             typedData.types[typeMember.type],
           );
@@ -69,6 +72,7 @@ export function SignMessage({
             const ptName = messageData.primaryType;
             const pt = messageData.types[ptName];
             const values = (typeName: string) => {
+              // @ts-expect-error TODO(#602): Fix type
               const v = messageData.message[typeName];
               if (typeof v === "object") {
                 return Object.entries(v).map(([key, value]) => {

@@ -42,7 +42,7 @@ export function Authenticate({
     }
   }, [onSuccess, action, name]);
 
-  if (!isSupported) {
+  if (!isSupported && !!message) {
     return <Unsupported message={message} />;
   }
 

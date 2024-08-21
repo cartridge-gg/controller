@@ -8,7 +8,7 @@ export function TransactionSummary({
 }: {
   isSlot: boolean;
   createSession: boolean;
-  hostname: string;
+  hostname?: string;
 }) {
   return (
     <VStack align="flex-start">

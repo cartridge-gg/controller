@@ -59,7 +59,8 @@ export const useDeploy = (): DeployInterface => {
 
         setIsDeployed(true);
         return hash.deployAccount;
-      } catch (e) {
+      } catch (_e) {
+        const e = _e as Error;
         if (!e.message.includes("account already deployed")) {
           throw e;
         }
@@ -81,7 +82,8 @@ export const useDeploy = (): DeployInterface => {
 
         setIsDeployed(true);
         return transaction_hash;
-      } catch (e) {
+      } catch (_e) {
+        const e = _e as Error;
         if (!e.message.includes("account already deployed")) {
           throw e;
         }
@@ -93,6 +95,7 @@ export const useDeploy = (): DeployInterface => {
   );
 
   return {
+    // @ts-expect-error TODO(#602): Fix type
     deployRequest,
     deploySelf,
     isDeploying,

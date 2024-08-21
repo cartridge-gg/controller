@@ -1,4 +1,4 @@
-import React, { PropsWithChildren } from "react";
+import React, { ErrorInfo, PropsWithChildren } from "react";
 import { Container, Content, Footer } from "./layout";
 import { AlertIcon, ExternalIcon } from "@cartridge/ui";
 import { Button, HStack, Link, Text } from "@chakra-ui/react";
@@ -10,16 +10,16 @@ export class ErrorBoundary extends React.Component<
   PropsWithChildren,
   { error?: Error }
 > {
-  constructor(props) {
+  constructor(props: PropsWithChildren) {
     super(props);
     this.state = {};
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(error: Error) {
     return { error };
   }
 
-  componentDidCatch(error, errorInfo) {
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.log({ error, errorInfo });
   }
 

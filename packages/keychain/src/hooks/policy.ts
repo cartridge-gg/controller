@@ -43,15 +43,20 @@ export function useUrlPolicys(): {
     const requestDict = {};
 
     requests.forEach((policy) => {
+      // @ts-expect-error TODO(#602): Fix type
       requestDict[policy.target] = requestDict[policy.target] || [];
+      // @ts-expect-error TODO(#602): Fix type
       requestDict[policy.target].push(policy.method);
     });
 
+    // @ts-expect-error TODO(#602): Fix type
     const promises = [];
     Object.keys(requestDict).forEach((target) => {
+      // @ts-expect-error TODO(#602): Fix type
       promises.push(getValidPolicys(requestDict[target], target));
     });
 
+    // @ts-expect-error TODO(#602): Fix type
     Promise.all(promises)
       .then((policies) => {
         policies = policies.flat();
@@ -63,6 +68,7 @@ export function useUrlPolicys(): {
       });
   }, [router]);
 
+  // @ts-expect-error TODO(#602): Fix type
   return { isValidating, chainId, validPolicys, invalidPolicys, origin };
 }
 

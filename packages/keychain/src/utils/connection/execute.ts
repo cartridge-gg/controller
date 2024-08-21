@@ -60,6 +60,7 @@ export function executeFactory({
         }
 
         const { nonce, maxFee } = await getInvocationDetails(
+          // @ts-expect-error TODO(#602): Fix type
           transactionsDetail,
           account,
           calls,
@@ -74,7 +75,7 @@ export function executeFactory({
       } catch (e) {
         return {
           code: ResponseCodes.NOT_ALLOWED,
-          message: e.message,
+          message: (e as Error).message,
         };
       }
     };
@@ -94,6 +95,7 @@ async function tryPaymaster(
   account: Account,
   calls: Call[],
   paymaster: PaymasterOptions,
+  // @ts-expect-error TODO(#602): Fix type
 ): Promise<ExecuteReply> {
   try {
     const transaction_hash = await account.cartridge.executeFromOutside(

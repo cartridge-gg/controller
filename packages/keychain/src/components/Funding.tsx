@@ -146,7 +146,8 @@ function FundingInner({ onComplete }: FundingInnerProps) {
     try {
       const transaction_hash = await deploySelf(ETH_MIN_PREFUND);
       onComplete(transaction_hash);
-    } catch (e) {
+    } catch (_e) {
+      const e = _e as Error;
       if (e.message && e.message.includes("DuplicateTx")) {
         onComplete();
         return;

@@ -76,6 +76,7 @@ export function BridgeEth({
       if (chainId === constants.StarknetChainId.SN_MAIN) {
         const { data } = await fetchEthPrice();
         const usdeth = parseFloat(data.price.amount);
+        // @ts-expect-error TODO(#602): Fix type
         const inputValue = parseFloat(debouncedValue);
         const cost = inputValue * usdeth;
         const dollarUSLocale = Intl.NumberFormat("en-US");
@@ -87,7 +88,9 @@ export function BridgeEth({
     }
 
     function validateValue(): boolean {
+      // @ts-expect-error TODO(#602): Fix type
       const inputValue = parseFloat(debouncedValue);
+      // @ts-expect-error TODO(#602): Fix type
       const balance = parseFloat(ethBalance);
       if (inputValue > balance) {
         return false;
@@ -218,6 +221,7 @@ export function BridgeEth({
 
             <TransferButton
               account={controller.account}
+              // @ts-expect-error TODO(#602): Fix type
               value={transferAmount}
               disabled={
                 !!!ethAddress ||
@@ -227,6 +231,7 @@ export function BridgeEth({
               }
               onError={(error) => {
                 if (error === null) {
+                  // @ts-expect-error TODO(#602): Fix type
                   setErrorMessage(null);
                   return;
                 } else if (error.name === "ChainMismatchError") {
@@ -282,13 +287,13 @@ const { chains, publicClient } = configureChains(
   [mainnet, sepolia],
   [
     alchemyProvider({
-      apiKey: process.env.NEXT_PUBLIC_ETH_RPC_MAINNET.replace(
+      apiKey: process.env.NEXT_PUBLIC_ETH_RPC_MAINNET!.replace(
         /^.+\/v2\//,
         "$`",
       ),
     }),
     alchemyProvider({
-      apiKey: process.env.NEXT_PUBLIC_ETH_RPC_SEPOLIA.replace(
+      apiKey: process.env.NEXT_PUBLIC_ETH_RPC_SEPOLIA!.replace(
         /^.+\/v2\//,
         "$`",
       ),

@@ -120,11 +120,13 @@ class Account extends BaseAccount {
   ): Promise<InvokeFunctionResponse> {
     this.ensureDeployed();
 
+    // @ts-expect-error TODO(#602): Fix type
     details.nonce = details.nonce ?? (await super.getNonce("pending"));
 
     const res = await this.cartridge.execute(normalizeCalls(calls), details);
 
     Storage.update(this.selector, {
+      // @ts-expect-error TODO(#602): Fix type
       nonce: num.toHex(BigInt(details.nonce) + 1n),
     });
 
@@ -162,11 +164,13 @@ class Account extends BaseAccount {
     hash: BigNumberish,
     signature: Signature,
   ): Promise<boolean> {
+    // @ts-expect-error TODO(#602): Fix type
     if (BigInt(signature[0]) === 0n) {
       return ec.starkCurve.verify(
         // @ts-expect-error TODO: fix overload type mismatch
         signature,
         BigInt(hash).toString(),
+        // @ts-expect-error TODO(#602): Fix type
         signature[0],
       );
     }
