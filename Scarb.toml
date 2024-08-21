@@ -6,11 +6,11 @@ edition = "2023_10"
 version = "0.1.0"
 
 [workspace.dependencies]
-starknet = "2.6.3"
-alexandria_math = { git = "https://github.com/keep-starknet-strange/alexandria.git", rev = "cairo-v2.6.0" }
-alexandria_encoding = { git = "https://github.com/keep-starknet-strange/alexandria.git", rev = "cairo-v2.6.0" }
-alexandria_merkle_tree = { git = "https://github.com/keep-starknet-strange/alexandria.git", tag = "cairo-v2.6.0" }
-alexandria_data_structures = { git = "https://github.com/keep-starknet-strange/alexandria.git", tag = "cairo-v2.6.0" }
-snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry.git", tag = "v0.20.0" }
-openzeppelin = { git = "https://github.com/OpenZeppelin/cairo-contracts.git", tag = "v0.12.0" }
-argent = { git = "https://github.com/cartridge-gg/argent-contracts-starknet.git", rev = "f6796ba" }
+starknet = "2.7.0"
+alexandria_math = { git = "https://github.com/piniom/quaireaux.git", rev = "b51ccc3" }
+alexandria_encoding = { git = "https://github.com/piniom/quaireaux.git", rev = "b51ccc3" }
+alexandria_merkle_tree = { git = "https://github.com/piniom/quaireaux.git", rev = "b51ccc3" }
+alexandria_data_structures = { git = "https://github.com/piniom/quaireaux.git", rev = "b51ccc3" }
+snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry.git", tag = "v0.27.0" }
+openzeppelin = { git = "https://github.com/OpenZeppelin/cairo-contracts.git", rev = "a13bae3" }
+argent = { git = "https://github.com/cartridge-gg/argent-contracts-starknet.git", rev = "def4c2e" }

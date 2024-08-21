@@ -9,7 +9,7 @@ use starknet::{accounts::Account, macros::felt, providers::Provider, signers::Si
 #[tokio::test]
 async fn test_deploy_controller() {
     let runner = KatanaRunner::load();
-    runner.declare_controller().await;
+    dbg!(runner.declare_controller().await);
 
     // Create signers
     let owner = SigningKey::from_secret_scalar(felt!(
@@ -24,7 +24,8 @@ async fn test_deploy_controller() {
 
     // Create a new Controller instance
     let username = "testuser".to_string();
-    let address = felt!("0xb5079f7da5ef0b85d02b820a2d3853aa175a433e9522619d0acdc599c71ce0");
+    let address = felt!("0x4f5ac058dd58236f18a5188740ce99a6fe962b756b229710c86db04594a5695");
+
     let chain_id = provider.chain_id().await.unwrap();
 
     let controller = Controller::new(

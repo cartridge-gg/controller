@@ -19,7 +19,7 @@ use super::{DeviceError, HashSigner, SignError};
 use crate::abigen::controller::Signature;
 use crate::abigen::{
     self,
-    controller::{Sha256Implementation, Signer, SignerSignature, WebauthnSignature},
+    controller::{Signer, SignerSignature, WebauthnSignature},
 };
 use crate::OriginProvider;
 
@@ -305,8 +305,7 @@ where
 {
     // According to https://www.w3.org/TR/webauthn/#clientdatajson-verification
     async fn sign(&self, tx_hash: &Felt) -> Result<SignerSignature, SignError> {
-        let mut challenge = tx_hash.to_bytes_be().to_vec();
-        challenge.push(Sha256Implementation::Cairo1.encode());
+        let challenge = tx_hash.to_bytes_be().to_vec();
 
         let options = PublicKeyCredentialRequestOptions {
             challenge: Base64UrlSafeData::from(challenge),
@@ -357,7 +356,6 @@ where
             s = s_neg;
             y_parity = !y_parity;
         }
-
         let signature = Signature {
             r: U256::from_bytes_be(r.to_bytes().as_slice().try_into().unwrap()),
             s: U256::from_bytes_be(s.to_bytes().as_slice().try_into().unwrap()),
@@ -372,7 +370,6 @@ where
             top_origin: client_data.top_origin.map(|s| s.into_bytes()),
             sign_count: counter,
             ec_signature: signature,
-            sha256_implementation: Sha256Implementation::Cairo1,
             client_data_json_outro,
         };
 
@@ -384,19 +381,6 @@ where
 
     fn signer(&self) -> Signer {
         Signer::Webauthn(abigen::controller::WebauthnSigner::from(self))
-    }
-}
-
-trait Sha256ImplementationEncoder {
-    fn encode(&self) -> u8;
-}
-
-impl Sha256ImplementationEncoder for Sha256Implementation {
-    fn encode(&self) -> u8 {
-        match self {
-            Sha256Implementation::Cairo0 => 0,
-            Sha256Implementation::Cairo1 => 1,
-        }
     }
 }
 

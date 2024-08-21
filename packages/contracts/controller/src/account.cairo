@@ -23,7 +23,8 @@ trait ICartridgeAccount<TContractState> {
 
 #[starknet::contract(account)]
 mod CartridgeAccount {
-    use core::traits::TryInto;
+    use openzeppelin::upgrades::UpgradeableComponent::InternalTrait;
+use core::traits::TryInto;
     use core::option::OptionTrait;
     use core::array::SpanTrait;
     use core::to_byte_array::FormatAsByteArray;
@@ -78,7 +79,7 @@ mod CartridgeAccount {
     use controller::delegate_account::delegate_account::delegate_account_component;
     use controller::introspection::src5::src5_component;
     use controller::session::{
-        session::session_component::{InternalImpl, InternalTrait}, session::session_component,
+        session::session_component::InternalImpl, session::session_component,
         interface::ISessionCallback
     };
     use controller::multiple_owners::{
@@ -396,7 +397,7 @@ mod CartridgeAccount {
     impl UpgradeableImpl of IUpgradeable<ContractState> {
         fn upgrade(ref self: ContractState, new_class_hash: ClassHash) {
             self.assert_owner();
-            self.upgradeable._upgrade(new_class_hash);
+            self.upgradeable.upgrade(new_class_hash);
         }
     }
 
