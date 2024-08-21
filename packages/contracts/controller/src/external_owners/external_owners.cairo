@@ -1,13 +1,13 @@
 #[starknet::component]
 mod external_owners_component {
-    use starknet::{get_caller_address, get_contract_address, ContractAddress};
+    use starknet::{get_caller_address, get_contract_address, ContractAddress, storage::Map};
 
     use controller::external_owners::interface::IExternalOwners;
     use controller::account::IAssertOwner;
 
     #[storage]
     struct Storage {
-        external_owners: LegacyMap<felt252, bool>,
+        external_owners: Map<felt252, bool>,
     }
 
     #[event]

@@ -3,8 +3,7 @@ mod multiple_owners_component {
     use core::poseidon::poseidon_hash_span;
     use hash::HashStateTrait;
     use starknet::info::{get_caller_address, get_tx_info};
-    use starknet::{ContractAddress, get_contract_address};
-
+    use starknet::{ContractAddress, get_contract_address, storage::Map};
     use argent::signer::{
         signer_signature::{
             Signer, SignerStorageValue, SignerType, StarknetSigner, StarknetSignature, SignerTrait,
@@ -17,7 +16,7 @@ mod multiple_owners_component {
 
     #[storage]
     struct Storage {
-        owners: LegacyMap<felt252, bool>,
+        owners: Map<felt252, bool>,
     }
 
     #[event]
