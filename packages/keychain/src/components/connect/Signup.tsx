@@ -27,7 +27,10 @@ export function Signup({
   const { deployRequest } = useDeploy();
   const [error, setError] = useState<Error>();
   const [isRegistering, setIsRegistering] = useState(false);
-  const [usernameField, setUsernameField] = useState({
+  const [usernameField, setUsernameField] = useState<{
+    value: string;
+    error?: string;
+  }>({
     value: prefilledName,
     error: undefined,
   });
@@ -106,7 +109,7 @@ export function Signup({
       refetchOnWindowFocus: false,
       staleTime: 10000000,
       cacheTime: 10000000,
-      refetchInterval: (data) => (!data ? 1000 : undefined),
+      refetchInterval: (data) => (!data ? 1000 : false),
       onSuccess: async (data) => {
         try {
           if (
@@ -118,9 +121,11 @@ export function Signup({
 
           const {
             account: {
+              // @ts-expect-error TODO(#602): Fix type
               credentials: {
                 webauthn: [{ id: credentialId, publicKey }],
               },
+              // @ts-expect-error TODO(#602): Fix type
               contractAddress: address,
             },
           } = data;
@@ -142,7 +147,7 @@ export function Signup({
             onSuccess();
           }
         } catch (e) {
-          setError(e);
+          setError(e as Error);
         }
       },
     },

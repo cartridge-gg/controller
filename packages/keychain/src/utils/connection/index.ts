@@ -26,8 +26,8 @@ export function connectToController({
   setOrigin: (origin: string) => void;
   setRpcUrl: (url: string) => void;
   setPolicies: (policies: Policy[]) => void;
-  setContext: (ctx: ConnectionCtx) => void;
-  setController: (controller: Controller) => void;
+  setContext: (ctx?: ConnectionCtx) => void;
+  setController: (controller?: Controller) => void;
 }) {
   return connectToParent({
     methods: {

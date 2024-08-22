@@ -28,6 +28,7 @@ export default class Controller {
   public username: string;
   public chainId: string;
   public rpcUrl: string;
+  // @ts-expect-error TODO(#602): Fix type
   public signer: SignerInterface;
   protected publicKey: string;
   protected credentialId: string;
@@ -61,9 +62,10 @@ export default class Controller {
       rpcUrl,
       address,
       username,
+      // @ts-expect-error TODO(#602): Fix type
       this.signer,
       {
-        rpId: process.env.NEXT_PUBLIC_RP_ID,
+        rpId: process.env.NEXT_PUBLIC_RP_ID!,
         credentialId,
         publicKey,
       },
@@ -119,7 +121,10 @@ export default class Controller {
     Storage.set("version", VERSION);
 
     Storage.set(
-      selectors[VERSION].admin(this.address, process.env.NEXT_PUBLIC_ADMIN_URL),
+      selectors[VERSION].admin(
+        this.address,
+        process.env.NEXT_PUBLIC_ADMIN_URL!,
+      ),
       {},
     );
     Storage.set(selectors[VERSION].active(), {
@@ -165,6 +170,7 @@ export default class Controller {
       const { username, publicKey, credentialId } = controller;
 
       if (version !== VERSION) {
+        // @ts-expect-error TODO(#602): Fix type
         migrations[version][VERSION](address);
       }
 

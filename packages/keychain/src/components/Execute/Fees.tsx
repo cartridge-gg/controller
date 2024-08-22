@@ -19,10 +19,10 @@ export function Fees({
   }>();
 
   useEffect(() => {
-    if (!fees) {
-      return;
-    }
     async function compute() {
+      if (!fees) {
+        return;
+      }
       setFormattedFee(
         fees.max > 10000000000000n
           ? {

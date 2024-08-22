@@ -26,18 +26,25 @@ export const createCredentials = async (
   beginRegistration: CredentialCreationOptions,
   hasPlatformAuthenticator: boolean,
 ) => {
-  if (!hasPlatformAuthenticator || navigator.userAgent.indexOf("Win") != -1)
+  if (!hasPlatformAuthenticator || navigator.userAgent.indexOf("Win") != -1) {
+    // @ts-expect-error TODO(#602): Fix type
     beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
       "cross-platform";
-  else
+  } else {
+    // @ts-expect-error TODO(#602): Fix type
     beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
       undefined;
+  }
 
+  // @ts-expect-error TODO(#602): Fix type
   beginRegistration.publicKey.user.id = Buffer.from(name);
+  // @ts-expect-error TODO(#602): Fix type
   beginRegistration.publicKey.challenge = base64url.toBuffer(
+    // @ts-expect-error TODO(#602): Fix type
     beginRegistration.publicKey.challenge as unknown as string,
   );
 
+  // @ts-expect-error TODO(#602): Fix type
   beginRegistration.publicKey.rp.id = process.env.NEXT_PUBLIC_RP_ID;
   const credentials = (await navigator.credentials.create(
     beginRegistration,

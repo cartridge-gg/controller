@@ -1,6 +1,6 @@
 import { HStack, IconButton, Spacer, Text, VStack } from "@chakra-ui/react";
 import { CartridgeLogo, WedgeUpIcon } from "@cartridge/ui";
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { MutableRefObject, useEffect, useMemo, useRef } from "react";
 import {
   FOOTER_HEIGHT,
   PORTAL_WINDOW_HEIGHT,
@@ -82,7 +82,7 @@ export function Footer({
       }}
       backgroundColor="var(--chakra-colors-solid-bg)"
       overflow="hidden"
-      ref={ref}
+      ref={ref as MutableRefObject<HTMLDivElement>}
     >
       <VStack
         w="full"

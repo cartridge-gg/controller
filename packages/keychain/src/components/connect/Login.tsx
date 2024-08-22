@@ -4,7 +4,6 @@ import { Container, Footer, Content, useLayout } from "components/layout";
 import { useCallback, useEffect, useState } from "react";
 import Controller from "utils/controller";
 import { LoginMode, LoginProps } from "./types";
-import { useAnalytics } from "hooks/analytics";
 import { fetchAccount, validateUsernameFor } from "./utils";
 import { RegistrationLink } from "./RegistrationLink";
 import { useControllerTheme } from "hooks/theme";
@@ -39,11 +38,13 @@ function Form({
 }: LoginProps) {
   const { footer } = useLayout();
   const { origin, policies, chainId, rpcUrl, setController } = useConnection();
-  const { event: log } = useAnalytics();
   const [isLoading, setIsLoading] = useState(false);
   const [expiresAt] = useState<bigint>(3000000000n);
   const [error, setError] = useState<Error>();
-  const [usernameField, setUsernameField] = useState({
+  const [usernameField, setUsernameField] = useState<{
+    value: string;
+    error?: string;
+  }>({
     value: prefilledName,
     error: undefined,
   });
@@ -63,9 +64,11 @@ function Form({
 
     const {
       account: {
+        // @ts-expect-error TODO(#602): Fix type
         credentials: {
           webauthn: [{ id: credentialId, publicKey }],
         },
+        // @ts-expect-error TODO(#602): Fix type
         contractAddress: address,
       },
     } = await fetchAccount(usernameField.value);
@@ -93,7 +96,8 @@ function Form({
       if (onSuccess) {
         onSuccess();
       }
-    } catch (e) {
+    } catch (_e) {
+      const e = _e as Error;
       setError(e);
     }
 
@@ -106,7 +110,6 @@ function Form({
     policies,
     expiresAt,
     mode,
-    log,
     onSuccess,
     setController,
   ]);

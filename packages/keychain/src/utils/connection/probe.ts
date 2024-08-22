@@ -5,11 +5,11 @@ export function probeFactory({
   setController,
   setRpcUrl,
 }: {
-  setController: (controller: Controller) => void;
+  setController: (controller?: Controller) => void;
   setRpcUrl: (rpcUrl: string) => void;
 }) {
   return (origin: string) =>
-    (rpcUrl?: string): Promise<ProbeReply> => {
+    (rpcUrl: string): Promise<ProbeReply> => {
       const controller = Controller.fromStore(origin);
       if (!controller) {
         return Promise.reject({

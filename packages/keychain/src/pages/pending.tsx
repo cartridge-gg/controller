@@ -28,6 +28,10 @@ function Pending() {
     //pending
   }, [txnResults, txns]);
 
+  if (!chainId) {
+    return null;
+  }
+
   return (
     <Container Icon={TimerDuoIcon} title={title} description={description}>
       <Content>

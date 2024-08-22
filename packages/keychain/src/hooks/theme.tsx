@@ -15,7 +15,9 @@ import {
   ProviderProps,
 } from "react";
 
-const ControllerThemeContext = createContext<ControllerTheme>(undefined);
+const ControllerThemeContext = createContext<ControllerTheme | undefined>(
+  undefined,
+);
 
 export function ControllerThemeProvider({
   value,
@@ -35,7 +37,7 @@ export function ControllerThemeProvider({
 }
 
 export function useControllerTheme() {
-  const ctx = useContext<ControllerTheme>(ControllerThemeContext);
+  const ctx = useContext<ControllerTheme | undefined>(ControllerThemeContext);
   if (!ctx) {
     throw new Error("ControllerThemeProvider must be placed");
   }

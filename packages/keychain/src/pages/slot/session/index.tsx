@@ -87,9 +87,11 @@ function CreateSession() {
       .then((res) => {
         const {
           account: {
+            // @ts-expect-error TODO(#602): Fix type
             credentials: {
               webauthn: [{ id: credentialId, publicKey }],
             },
+            // @ts-expect-error TODO(#602): Fix type
             contractAddress: address,
           },
         } = res;
@@ -121,6 +123,7 @@ function CreateSession() {
     let calls = policies.map((policy) => {
       return {
         contractAddress: policy.target,
+        // @ts-expect-error TODO(#602): Fix type
         entrypoint: hash.getSelector(policy.method),
         calldata: [],
       } as Call;

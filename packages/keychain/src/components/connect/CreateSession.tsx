@@ -26,7 +26,7 @@ export function CreateSession({
       await controller.approve(origin, expiresAt, policies, maxFees);
       onConnect(policies);
     } catch (e) {
-      setError(e);
+      setError(e as Error);
       setIsConnecting(false);
     }
   }, [controller, origin, expiresAt, policies, maxFees, onConnect]);

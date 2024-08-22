@@ -32,7 +32,7 @@ export function connectFactory({
 }
 
 export function disconnectFactory(
-  setController: (controller: Controller) => void,
+  setController: (controller?: Controller) => void,
 ) {
   return (controller: Controller) => {
     controller.delete();

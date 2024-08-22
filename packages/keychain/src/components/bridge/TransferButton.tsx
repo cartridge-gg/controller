@@ -77,10 +77,11 @@ export function TransferButton({
     abi: EthL1BridgeABI,
     functionName: "deposit",
     args: [parseEther(value?.length ? value : "0"), BigInt(account.address)],
+    // @ts-expect-error TODO(#602): Fix type
     overrides: {
       value: value && l2Fee ? parseEther(value) + BigInt(l2Fee) : undefined,
     },
-    enabled: !disabled && value && !!l2Fee,
+    enabled: !disabled && !!value && !!l2Fee,
   });
 
   const { data, write } = useContractWrite(config);

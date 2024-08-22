@@ -23,8 +23,11 @@ import { RpcProvider, CallData, constants, shortString } from "starknet";
 import { Policy, Prefund, ResponseCodes } from "@cartridge/controller";
 import { mergeDefaultETHPrefund } from "utils/token";
 import { isIframe } from "components/connect/utils";
+import { ControllerNotReady } from "errors";
 
-const ConnectionContext = createContext<ConnectionContextValue>(undefined);
+const ConnectionContext = createContext<ConnectionContextValue | undefined>(
+  undefined,
+);
 
 type ConnectionContextValue = {
   context: ConnectionCtx;
@@ -36,7 +39,7 @@ type ConnectionContextValue = {
   policies: Policy[];
   prefunds: Prefund[];
   hasPrefundRequest: boolean;
-  error: Error;
+  error?: Error;
   setContext: (context: ConnectionCtx) => void;
   setController: (controller: Controller) => void;
   cancel: () => void;
@@ -95,6 +98,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
     if (!parent) return;
 
     try {
+      // @ts-expect-error TODO(#602): Fix type
       context.resolve({
         code: ResponseCodes.CANCELED,
         message: "User aborted",
@@ -206,6 +210,10 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
 
   const setDelegateTransaction = useCallback(
     (context: ConnectionCtx, delegateAddress: string) => {
+      if (!controller) {
+        throw new ControllerNotReady();
+      }
+
       setContext({
         origin: context.origin,
         transactions: [
@@ -224,11 +232,15 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
         },
       } as ExecuteCtx);
     },
-    [controller?.address, openSettings],
+    [controller, openSettings],
   );
 
   const setExternalOwnerTransaction = useCallback(
     (context: ConnectionCtx, externalOwnerAddress: string) => {
+      if (!controller) {
+        throw new ControllerNotReady();
+      }
+
       setContext({
         origin: context.origin,
         transactions: [
@@ -247,11 +259,15 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
         },
       } as ExecuteCtx);
     },
-    [controller?.address, openSettings],
+    [controller, openSettings],
   );
 
   const removeExternalOwnerTransaction = useCallback(
     (context: ConnectionCtx, externalOwnerAddress: string) => {
+      if (!controller) {
+        throw new ControllerNotReady();
+      }
+
       setContext({
         origin: context.origin,
         transactions: [
@@ -270,17 +286,23 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
         },
       } as ExecuteCtx);
     },
-    [controller?.address, openSettings],
+    [controller, openSettings],
   );
 
   return (
     <ConnectionContext.Provider
       value={{
+        // @ts-expect-error TODO(#602): Fix type
         context,
+        // @ts-expect-error TODO(#602): Fix type
         controller,
+        // @ts-expect-error TODO(#602): Fix type
         origin,
+        // @ts-expect-error TODO(#602): Fix type
         rpcUrl,
+        // @ts-expect-error TODO(#602): Fix type
         chainId,
+        // @ts-expect-error TODO(#602): Fix type
         chainName,
         policies,
         prefunds,
@@ -307,7 +329,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
 type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
 
 export function useConnection() {
-  const ctx = useContext<ConnectionContextValue>(ConnectionContext);
+  const ctx = useContext<ConnectionContextValue | undefined>(ConnectionContext);
   if (!ctx) {
     throw new Error("ConnectionProvider must be placed");
   }
