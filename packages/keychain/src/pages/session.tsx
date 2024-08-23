@@ -1,3 +1,5 @@
+"use client";
+
 import { Policy } from "@cartridge/controller";
 import Controller from "utils/controller";
 import { CreateSession as CreateSessionComp } from "components/connect";
@@ -7,7 +9,6 @@ import { useConnection } from "hooks/connection";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 import { PageLoading } from "components/Loading";
-import dynamic from "next/dynamic";
 import { Call, hash } from "starknet";
 
 type SessionQueryParams = Record<string, string> & {
@@ -16,9 +17,9 @@ type SessionQueryParams = Record<string, string> & {
 };
 
 /**
-    This page is for creating session with Slot
+    This page is for creating session
 */
-function CreateSession() {
+export default function CreateRemoteSession() {
   const router = useRouter();
   const queries = router.query as SessionQueryParams;
 
@@ -28,15 +29,15 @@ function CreateSession() {
   // Fetching account status for displaying the loading screen
   const [isFetching, setIsFetching] = useState(true);
 
-  // Handler for calling the Slot callback uri.
+  // Handler for calling the callback uri.
   // Send the session details to the callback uri in the body of the
   // POST request. If the request is successful, then redirect to the
   // success page. Else, redirect to the failure page.
-  const onSlotCallback = useCallback(() => {
+  const onCallback = useCallback(() => {
     const url = sanitizeCallbackUrl(decodeURIComponent(queries.callback_uri));
     const session = controller.account.sessionJson();
     if (!url || !session) {
-      router.replace(`/slot/auth/failure`);
+      router.replace(`/failure`);
       return;
     }
 
@@ -49,13 +50,21 @@ function CreateSession() {
       method: "POST",
     })
       .then(async (res) => {
-        return res.status === 200
-          ? router.replace(`/slot/auth/success`)
-          : new Promise((_, reject) => reject(res));
+        if (res.ok) {
+          return router.replace({
+            pathname: "/success",
+            query: {
+              title: "Seession Created!",
+              description: "Return to your terminal to continue",
+            },
+          });
+        }
+
+        Promise.reject();
       })
       .catch((e) => {
         console.error("failed to call the callback url", e);
-        router.replace(`/slot/auth/failure`);
+        router.replace(`/failure`);
       });
   }, [router, queries.callback_uri, controller]);
 
@@ -70,9 +79,9 @@ function CreateSession() {
         throw new Error("Callback URI is missing");
       }
 
-      onSlotCallback();
+      onCallback();
     },
-    [queries.callback_uri, controller, onSlotCallback],
+    [queries.callback_uri, controller, onCallback],
   );
 
   // Fetch account details from the username, and create the Controller
@@ -129,9 +138,9 @@ function CreateSession() {
     // if the requested policies has no mismatch with existing policies then return
     // the exising session
     if (controller.account.hasSession(calls)) {
-      onSlotCallback();
+      onCallback();
     }
-  }, [controller, origin, policies, onSlotCallback]);
+  }, [controller, origin, policies, onCallback]);
 
   // Show loader if currently fetching account
   if (isFetching) {
@@ -157,5 +166,3 @@ function sanitizeCallbackUrl(url: string): URL | undefined {
     console.error(e);
   }
 }
-
-export default dynamic(() => Promise.resolve(CreateSession), { ssr: false });
