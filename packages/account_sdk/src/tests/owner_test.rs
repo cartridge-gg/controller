@@ -1,10 +1,14 @@
 use crate::{
     abigen::erc_20::Erc20,
-    account::session::{create::SessionCreator, hash::AllowedMethod},
+    account::{
+        session::{create::SessionCreator, hash::AllowedMethod},
+        webauthn::SoftPasskeySigner,
+        FEE_TOKEN_ADDRESS,
+    },
     controller::Controller,
     signers::{webauthn::WebauthnSigner, HashSigner, NewOwnerSigner, SignError, SignerTrait},
     storage::InMemoryBackend,
-    tests::{account::webauthn::SoftPasskeySigner, ensure_txn, runners::katana::KatanaRunner},
+    tests::{ensure_txn, runners::katana::KatanaRunner},
 };
 use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{
@@ -14,8 +18,6 @@ use starknet::{
     signers::SigningKey,
 };
 use starknet_crypto::Felt;
-
-use super::account::FEE_TOKEN_ADDRESS;
 
 #[tokio::test]
 async fn test_change_owner() {

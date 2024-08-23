@@ -1,20 +1,9 @@
-use crate::signers::webauthn::{WebauthnBackend, WebauthnSigner};
+use crate::signers::webauthn::WebauthnBackend;
 use crate::signers::DeviceError;
 use crate::OriginProvider;
-use crate::{
-    abigen::erc_20::Erc20,
-    signers::HashSigner,
-    tests::{account::FEE_TOKEN_ADDRESS, runners::katana::KatanaRunner},
-};
 use async_trait::async_trait;
 use base64urlsafedata::Base64UrlSafeData;
-use cainome::cairo_serde::{ContractAddress, U256};
 use sha2::{digest::Update, Digest, Sha256};
-use starknet::{
-    core::types::{BlockId, BlockTag},
-    macros::felt,
-    signers::SigningKey as StarkSigningKey,
-};
 use webauthn_authenticator_rs::authenticator_hashed::AuthenticatorBackendHashedClientData;
 use webauthn_authenticator_rs::softpasskey::SoftPasskey;
 use webauthn_authenticator_rs::AuthenticatorBackend;
@@ -119,49 +108,63 @@ impl OriginProvider for SoftPasskeySigner {
     }
 }
 
-pub async fn test_verify_execute<S: HashSigner + Clone + Sync + Send>(signer: S) {
-    let runner = KatanaRunner::load();
-    let controller = runner
-        .deploy_controller("username".to_owned(), &signer)
-        .await;
-    let new_account = ContractAddress(felt!("0x18301129"));
-    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller);
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::abigen::erc_20::Erc20;
+    use crate::account::FEE_TOKEN_ADDRESS;
+    use crate::signers::webauthn::WebauthnSigner;
+    use crate::signers::HashSigner;
+    use crate::tests::runners::katana::KatanaRunner;
+    use cainome::cairo_serde::{ContractAddress, U256};
+    use starknet::core::types::{BlockId, BlockTag};
+    use starknet::macros::felt;
+    use starknet::signers::SigningKey;
 
-    contract_erc20
-        .balanceOf(&new_account)
-        .block_id(BlockId::Tag(BlockTag::Latest))
-        .call()
-        .await
-        .expect("failed to call contract");
+    pub async fn test_verify_execute<S: HashSigner + Clone + Sync + Send>(signer: S) {
+        let runner = KatanaRunner::load();
+        let controller = runner
+            .deploy_controller("username".to_owned(), &signer)
+            .await;
+        let new_account = ContractAddress(felt!("0x18301129"));
+        let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller);
 
-    contract_erc20
-        .transfer(
-            &new_account,
-            &U256 {
-                low: 0x10_u128,
-                high: 0,
-            },
+        contract_erc20
+            .balanceOf(&new_account)
+            .block_id(BlockId::Tag(BlockTag::Latest))
+            .call()
+            .await
+            .expect("failed to call contract");
+
+        contract_erc20
+            .transfer(
+                &new_account,
+                &U256 {
+                    low: 0x10_u128,
+                    high: 0,
+                },
+            )
+            .send()
+            .await
+            .unwrap();
+    }
+
+    #[tokio::test]
+    async fn test_verify_execute_webautn() {
+        let signer = WebauthnSigner::register(
+            "cartridge.gg".to_string(),
+            "username".to_string(),
+            "challenge".as_bytes(),
+            SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
         )
-        .send()
         .await
         .unwrap();
-}
 
-#[tokio::test]
-async fn test_verify_execute_webautn() {
-    let signer = WebauthnSigner::register(
-        "cartridge.gg".to_string(),
-        "username".to_string(),
-        "challenge".as_bytes(),
-        SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
-    )
-    .await
-    .unwrap();
+        test_verify_execute(signer).await;
+    }
 
-    test_verify_execute(signer).await;
-}
-
-#[tokio::test]
-async fn test_verify_execute_starknet() {
-    test_verify_execute(StarkSigningKey::from_random()).await;
+    #[tokio::test]
+    async fn test_verify_execute_starknet() {
+        test_verify_execute(SigningKey::from_random()).await;
+    }
 }

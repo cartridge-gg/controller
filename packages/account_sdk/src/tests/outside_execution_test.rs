@@ -9,14 +9,11 @@ use crate::{
         outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller},
         session::{create::SessionCreator, hash::AllowedMethod},
     },
+    account::{webauthn::SoftPasskeySigner, FEE_TOKEN_ADDRESS},
     controller::Controller,
     signers::{webauthn::WebauthnSigner, HashSigner},
     storage::InMemoryBackend,
-    tests::{
-        account::{webauthn::SoftPasskeySigner, FEE_TOKEN_ADDRESS},
-        ensure_txn,
-        runners::katana::KatanaRunner,
-    },
+    tests::{ensure_txn, runners::katana::KatanaRunner},
     transaction_waiter::TransactionWaiter,
 };
 use cainome::cairo_serde::{CairoSerde, ContractAddress, U256};

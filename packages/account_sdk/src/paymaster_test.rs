@@ -5,7 +5,7 @@ use starknet::macros::{felt, selector};
 use crate::abigen::controller::{Call, OutsideExecution};
 use crate::abigen::erc_20::Erc20;
 use crate::account::outside_execution::OutsideExecutionCaller;
-use crate::tests::account::FEE_TOKEN_ADDRESS;
+use crate::account::FEE_TOKEN_ADDRESS;
 use crate::tests::runners::katana::KatanaRunner;
 use crate::transaction_waiter::TransactionWaiter;
 use cainome::cairo_serde::{CairoSerde, ContractAddress, U256};
