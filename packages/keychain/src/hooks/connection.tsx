@@ -23,6 +23,7 @@ import { RpcProvider, CallData, constants, shortString } from "starknet";
 import { Policy, Prefund, ResponseCodes } from "@cartridge/controller";
 import { mergeDefaultETHPrefund } from "utils/token";
 import { isIframe } from "components/connect/utils";
+import { setIsSignedUp } from "utils/cookie";
 
 const ConnectionContext = createContext<ConnectionContextValue>(undefined);
 
@@ -66,7 +67,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
   const [rpcUrl, setRpcUrl] = useState<string>();
   const [chainId, setChainId] = useState<string>();
   const [policies, setPolicies] = useState<Policy[]>([]);
-  const [controller, setController] = useState<Controller | undefined>();
+  const [controller, setControllerRaw] = useState<Controller | undefined>();
   const [prefunds, setPrefunds] = useState<Prefund[]>([]);
   const [hasPrefundRequest, setHasPrefundRequest] = useState<boolean>(false);
   const [error, setError] = useState<Error>();
@@ -105,6 +106,11 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
     }
   }, [context, parent]);
 
+  const setController = useCallback((controller?: Controller) => {
+    setControllerRaw(controller);
+    setIsSignedUp();
+  }, []);
+
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
 
@@ -138,7 +144,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
     return () => {
       connection.destroy();
     };
-  }, []);
+  }, [setController]);
 
   useEffect(() => {
     if (rpcUrl) {
