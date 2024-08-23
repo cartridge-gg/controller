@@ -25,6 +25,7 @@ nom = "7.1"
 once_cell.workspace = true
 p256.workspace = true
 primitive-types.workspace = true
+rand = "0.8"
 reqwest.workspace = true
 serde.workspace = true
 serde_cbor_2 = { version = "0.12.0-dev" }

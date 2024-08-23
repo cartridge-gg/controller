@@ -8,18 +8,18 @@ use account_sdk::signers::HashSigner;
 use account_sdk::storage::InMemoryBackend;
 
 use cainome::cairo_serde::CairoSerde;
+use rand::Rng as _;
 use starknet::core::utils::get_selector_from_name;
 use starknet::macros::{felt, selector};
 use starknet::signers::SigningKey;
 use starknet_crypto::Felt;
 use std::sync::Arc;
-use tokio::sync::Mutex;
-use tokio::time::{self, Duration};
+use tokio::time::Duration;
 use url::Url;
 
 // Constants for TPS and duration
-const TPS: usize = 25;
-const DURATION_SECS: u64 = 30;
+const TPS: usize = 150;
+const DURATION_SECS: u64 = 30 * 60;
 
 const BENCH_ACCOUNT: Felt =
     felt!("0x014679c1478a47f2fb378699f921517b0a4b412c9b7cec7348b1e0bb3efc42cf");
@@ -58,9 +58,6 @@ async fn main() {
 
     let duration = Duration::from_secs(DURATION_SECS);
     let total_transactions = TPS * duration.as_secs() as usize;
-    let interval = Duration::from_secs_f64(1.0 / TPS as f64);
-
-    let mut handles = vec![];
 
     let _ = controller
         .create_session(
@@ -73,7 +70,11 @@ async fn main() {
         .await
         .unwrap();
 
-    let controller = Arc::new(Mutex::new(controller));
+    let controller = Arc::new(controller);
+    let interval = Duration::from_secs_f64(1.0 / TPS as f64);
+
+    let mut handles = vec![];
+
     for i in 0..total_transactions {
         let controller = Arc::clone(&controller);
         let handle = tokio::spawn(async move {
@@ -83,10 +84,20 @@ async fn main() {
                 calldata: vec![],
             };
 
-            let controller = controller.lock().await;
-            let session_account = controller.session_account(&[flop.clone().into()]).unwrap();
+            let x = rand::thread_rng().gen_range(0..=100);
+            let y = rand::thread_rng().gen_range(0..=100);
+            let flip = Call {
+                to: contract_address.into(),
+                selector: get_selector_from_name("flip").unwrap(),
+                calldata: vec![x.into(), y.into()],
+            };
 
-            let outside_execution = OutsideExecution {
+            let session_account = controller
+                .session_account(&[flop.clone().into(), flip.clone().into()])
+                .unwrap();
+
+            // Execute flop
+            let flop_execution = OutsideExecution {
                 caller: OutsideExecutionCaller::Any.into(),
                 execute_after: u64::MIN,
                 execute_before: u32::MAX as u64,
@@ -94,28 +105,64 @@ async fn main() {
                 nonce: SigningKey::from_random().secret_scalar(),
             };
 
-            let signed = session_account
-                .sign_outside_execution(outside_execution.clone())
+            let flop_signed = session_account
+                .sign_outside_execution(flop_execution.clone())
                 .await
                 .unwrap();
 
-            let result = controller
+            let flop_result = controller
                 .provider
-                .add_execute_outside_transaction(outside_execution, BENCH_ACCOUNT, signed.signature)
+                .add_execute_outside_transaction(
+                    flop_execution,
+                    BENCH_ACCOUNT,
+                    flop_signed.signature,
+                )
                 .await;
 
-            match result {
+            match flop_result {
                 Ok(_) => {
-                    println!("Routine {}: Successfully executed flop function", i);
+                    // println!("Routine {}: Successfully executed flop function", i);
                 }
                 Err(err) => {
                     eprintln!("Routine {}: Failed to execute flop function: {:?}", i, err);
                 }
             }
+
+            // Execute flip
+            let flip_execution = OutsideExecution {
+                caller: OutsideExecutionCaller::Any.into(),
+                execute_after: u64::MIN,
+                execute_before: u32::MAX as u64,
+                calls: vec![flip],
+                nonce: SigningKey::from_random().secret_scalar(),
+            };
+
+            let _flip_signed = session_account
+                .sign_outside_execution(flip_execution.clone())
+                .await
+                .unwrap();
+
+            // let flip_result = controller
+            //     .provider
+            //     .add_execute_outside_transaction(
+            //         flip_execution,
+            //         BENCH_ACCOUNT,
+            //         flip_signed.signature,
+            //     )
+            //     .await;
+
+            // match flip_result {
+            //     Ok(_) => {
+            //         println!("Routine {}: Successfully executed flip function", i);
+            //     }
+            //     Err(err) => {
+            //         eprintln!("Routine {}: Failed to execute flip function: {:?}", i, err);
+            //     }
+            // }
         });
 
         handles.push(handle);
-        time::sleep(interval).await;
+        tokio::time::sleep(interval).await;
     }
 
     for handle in handles {

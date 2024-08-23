@@ -78,8 +78,26 @@ impl PaymasterRequest {
             .send()
             .await?;
 
-        let json: PaymasterResponse = response.json().await.map_err(PaymasterError::from)?;
+        let status = response.status().clone();
+        let response_text = response.text().await?;
+        let json: serde_json::Value = serde_json::from_str(&response_text)?;
 
-        Ok(json)
+        if !status.is_success() {
+            println!("Error Status: {}", status);
+            println!("Error Response: {}", response_text);
+            return Err(PaymasterError::UnexpectedResponse(format!(
+                "HTTP Status: {}, Body: {}",
+                status, response_text
+            )));
+        }
+
+        if let Some(error) = json.get("error") {
+            println!("Error Response: {}", response_text);
+            return Err(PaymasterError::UnexpectedResponse(error.to_string()));
+        }
+
+        let paymaster_response: PaymasterResponse = serde_json::from_value(json)?;
+
+        Ok(paymaster_response)
     }
 }
