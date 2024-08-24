@@ -33,7 +33,7 @@ export default function CreateRemoteSession() {
   // Send the session details to the callback uri in the body of the
   // POST request. If the request is successful, then redirect to the
   // success page. Else, redirect to the failure page.
-  const onCallback = useCallback(async () => {
+  const onCallback = useCallback(() => {
     const url = new URL(decodeURIComponent(queries.callback_uri));
     const session = controller.account.sessionJson();
     if (!url || !session) {
