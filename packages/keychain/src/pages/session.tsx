@@ -33,8 +33,8 @@ export default function CreateRemoteSession() {
   // Send the session details to the callback uri in the body of the
   // POST request. If the request is successful, then redirect to the
   // success page. Else, redirect to the failure page.
-  const onCallback = useCallback(() => {
-    const url = sanitizeCallbackUrl(decodeURIComponent(queries.callback_uri));
+  const onCallback = useCallback(async () => {
+    const url = new URL(decodeURIComponent(queries.callback_uri));
     const session = controller.account.sessionJson();
     if (!url || !session) {
       router.replace(`/failure`);
@@ -45,7 +45,14 @@ export default function CreateRemoteSession() {
     headers.append("Content-Type", "application/json");
 
     fetch(url, {
-      body: JSON.stringify(session),
+      body: JSON.stringify({
+        username: controller.username,
+        credentials: {
+          publicKey: controller.publicKey,
+          credentialId: controller.credentialId,
+        },
+        session,
+      }),
       headers,
       method: "POST",
     })
@@ -148,21 +155,4 @@ export default function CreateRemoteSession() {
   }
 
   return <CreateSessionComp onConnect={onConnect} />;
-}
-
-/**
- * Sanitize the callback url to ensure that it is a valid URL. Returns back the URL.
- */
-function sanitizeCallbackUrl(url: string): URL | undefined {
-  try {
-    const parsed = new URL(url);
-
-    if (parsed.hostname !== "localhost" || parsed.pathname !== "/callback") {
-      throw new Error(`Invalid callback url: ${url}`);
-    }
-
-    return parsed;
-  } catch (e) {
-    console.error(e);
-  }
 }

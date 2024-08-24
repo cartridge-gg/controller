@@ -29,8 +29,8 @@ export default class Controller {
   public chainId: string;
   public rpcUrl: string;
   public signer: SignerInterface;
-  protected publicKey: string;
-  protected credentialId: string;
+  public publicKey: string;
+  public credentialId: string;
 
   constructor({
     appId,
