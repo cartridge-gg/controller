@@ -8,9 +8,11 @@ import { isSignedUp } from "../../utils/cookie";
 export function CreateController({
   isSlot,
   loginMode,
+  onCreated,
 }: {
   isSlot?: boolean;
   loginMode?: LoginMode;
+  onCreated?: () => void;
 }) {
   const { error } = useConnection();
   const [showSignup, setShowSignup] = useState(true);
@@ -32,6 +34,7 @@ export function CreateController({
       onLogin={(username) => {
         setPrefilledUsername(username);
         setShowSignup(false);
+        onCreated?.();
       }}
       isSlot={isSlot}
     />
@@ -41,6 +44,7 @@ export function CreateController({
       onSignup={(username) => {
         setPrefilledUsername(username);
         setShowSignup(true);
+        onCreated?.();
       }}
       mode={loginMode}
       isSlot={isSlot}

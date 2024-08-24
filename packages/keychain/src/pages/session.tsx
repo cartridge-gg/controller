@@ -1,19 +1,16 @@
 "use client";
 
 import { Policy } from "@cartridge/controller";
-import Controller from "utils/controller";
-import { CreateSession as CreateSessionComp } from "components/connect";
+import { CreateController, CreateSession as CreateSessionComp } from "components/connect";
 
-import { fetchAccount } from "components/connect/utils";
 import { useConnection } from "hooks/connection";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useState } from "react";
-import { PageLoading } from "components/Loading";
+import { useCallback, useEffect } from "react";
 import { Call, hash } from "starknet";
+import { LoginMode } from "components/connect/types";
 
 type SessionQueryParams = Record<string, string> & {
   callback_uri: string;
-  username: string;
 };
 
 /**
@@ -23,11 +20,15 @@ export default function CreateRemoteSession() {
   const router = useRouter();
   const queries = router.query as SessionQueryParams;
 
-  const { controller, setController, policies, origin, chainId, rpcUrl } =
+  const { controller, policies, origin } =
     useConnection();
 
-  // Fetching account status for displaying the loading screen
-  const [isFetching, setIsFetching] = useState(true);
+  const navigateBackHere = useCallback(() => {
+    router.replace({
+      pathname: "/session",
+      query: router.query,
+    });
+  }, [router]);
 
   // Handler for calling the callback uri.
   // Send the session details to the callback uri in the body of the
@@ -91,42 +92,7 @@ export default function CreateRemoteSession() {
     [queries.callback_uri, controller, onCallback],
   );
 
-  // Fetch account details from the username, and create the Controller
-  useEffect(() => {
-    const username = queries.username;
-
-    if (!username || !chainId || !rpcUrl) {
-      return;
-    }
-
-    fetchAccount(username)
-      .then((res) => {
-        const {
-          account: {
-            credentials: {
-              webauthn: [{ id: credentialId, publicKey }],
-            },
-            contractAddress: address,
-          },
-        } = res;
-
-        const controller = new Controller({
-          appId: origin,
-          chainId,
-          rpcUrl,
-          address,
-          username,
-          publicKey,
-          credentialId,
-        });
-
-        setController(controller);
-      })
-      .catch((e) => console.error(e))
-      .finally(() => setIsFetching(false));
-  }, [rpcUrl, chainId, origin, setController, queries.username]);
-
-  // Once the controller is created upon start, check if a session already exists.
+  // Once we have a connected controller initialized, check if a session already exists.
   // If yes, check if the policies of the session are the same as the ones that are
   // currently being requested. Return existing session to the callback uri if policies match.
   useEffect(() => {
@@ -149,10 +115,9 @@ export default function CreateRemoteSession() {
     }
   }, [controller, origin, policies, onCallback]);
 
-  // Show loader if currently fetching account
-  if (isFetching) {
-    return <PageLoading />;
-  }
-
-  return <CreateSessionComp onConnect={onConnect} />;
+  return controller ? (
+    <CreateController loginMode={LoginMode.Controller} onCreated={navigateBackHere} />
+  ) : (
+    <CreateSessionComp onConnect={onConnect} />
+  );
 }
