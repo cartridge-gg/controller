@@ -1,7 +1,10 @@
 "use client";
 
 import { Policy } from "@cartridge/controller";
-import { CreateController, CreateSession as CreateSessionComp } from "components/connect";
+import {
+  CreateController,
+  CreateSession as CreateSessionComp,
+} from "components/connect";
 
 import { useConnection } from "hooks/connection";
 import { useRouter } from "next/router";
@@ -20,8 +23,7 @@ export default function CreateRemoteSession() {
   const router = useRouter();
   const queries = router.query as SessionQueryParams;
 
-  const { controller, policies, origin } =
-    useConnection();
+  const { controller, policies, origin } = useConnection();
 
   const navigateBackHere = useCallback(() => {
     router.replace({
@@ -116,7 +118,10 @@ export default function CreateRemoteSession() {
   }, [controller, origin, policies, onCallback]);
 
   return controller ? (
-    <CreateController loginMode={LoginMode.Controller} onCreated={navigateBackHere} />
+    <CreateController
+      loginMode={LoginMode.Controller}
+      onCreated={navigateBackHere}
+    />
   ) : (
     <CreateSessionComp onConnect={onConnect} />
   );
@@ -129,7 +134,10 @@ function sanitizeCallbackUrl(url: string): URL | undefined {
   try {
     const parsed = new URL(url);
 
-    if (parsed.hostname.endsWith("cartridge.gg") || (parsed.pathname !== "/" && parsed.pathname !== "/callback")) {
+    if (
+      parsed.hostname.endsWith("cartridge.gg") ||
+      (parsed.pathname !== "/" && parsed.pathname !== "/callback")
+    ) {
       throw new Error(`Invalid callback url: ${url}`);
     }
 
