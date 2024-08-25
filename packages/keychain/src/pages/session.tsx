@@ -90,8 +90,12 @@ export default function CreateRemoteSession() {
         throw new Error("Session not found");
       }
 
-      if (!queries.callback_uri || !queries.redirect_uri) {
-        throw new Error("Callback or redirect URI is missing");
+      if (!queries.callback_uri) {
+        throw new Error("Callback URI is missing");
+      }
+
+      if (!queries.redirect_uri) {
+        throw new Error("Redirect URI is missing");
       }
 
       onCallback();
