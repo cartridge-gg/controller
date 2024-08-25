@@ -25,13 +25,6 @@ export default function CreateRemoteSession() {
 
   const { controller, policies, origin } = useConnection();
 
-  const navigateBackHere = useCallback(() => {
-    router.replace({
-      pathname: "/session",
-      query: router.query,
-    });
-  }, [router]);
-
   // Handler for calling the callback uri.
   // Send the session details to the callback uri in the body of the
   // POST request. If the request is successful, then redirect to the
@@ -120,10 +113,7 @@ export default function CreateRemoteSession() {
   return controller ? (
     <CreateSessionComp onConnect={onConnect} />
   ) : (
-    <CreateController
-      loginMode={LoginMode.Controller}
-      onCreated={navigateBackHere}
-    />
+    <CreateController loginMode={LoginMode.Controller} />
   );
 }
 
