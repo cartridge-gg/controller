@@ -13,7 +13,8 @@ import { Call, hash } from "starknet";
 import { LoginMode } from "components/connect/types";
 
 type SessionQueryParams = Record<string, string> & {
-  callback_uri: string;
+  callback_uri?: string;
+  redirect_uri?: string;
 };
 
 /**
@@ -30,9 +31,8 @@ export default function CreateRemoteSession() {
   // POST request. If the request is successful, then redirect to the
   // success page. Else, redirect to the failure page.
   const onCallback = useCallback(() => {
-    const url = decodeURIComponent(queries.callback_uri);
     const session = controller.account.sessionJson();
-    if (!url || !session) {
+    if ((!queries.callback_uri && !queries.redirect_uri) || !session) {
       router.replace(`/failure`);
       return;
     }
@@ -40,36 +40,48 @@ export default function CreateRemoteSession() {
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
 
-    fetch(sanitizeCallbackUrl(url), {
-      body: JSON.stringify({
-        username: controller.username,
-        credentials: {
-          publicKey: controller.publicKey,
-          credentialId: controller.credentialId,
-        },
-        session,
-      }),
-      headers,
-      method: "POST",
-    })
-      .then(async (res) => {
-        if (res.ok) {
-          return router.replace({
-            pathname: "/success",
-            query: {
-              title: "Seession Created!",
-              description: "Return to your terminal to continue",
-            },
-          });
-        }
+    const credentialsJson = JSON.stringify({
+      username: controller.username,
+      credentials: {
+        publicKey: controller.publicKey,
+        credentialId: controller.credentialId,
+      },
+      session,
+    });
 
-        Promise.reject();
+    if (queries.callback_uri) {
+      fetch(sanitizeCallbackUrl(decodeURIComponent(queries.callback_uri)), {
+        body: credentialsJson,
+        headers,
+        method: "POST",
       })
-      .catch((e) => {
-        console.error("failed to call the callback url", e);
-        router.replace(`/failure`);
-      });
-  }, [router, queries.callback_uri, controller]);
+        .then(async (res) => {
+          if (res.ok) {
+            return router.replace({
+              pathname: "/success",
+              query: {
+                title: "Seession Created!",
+                description: "Return to your terminal to continue",
+              },
+            });
+          }
+
+          Promise.reject();
+        })
+        .catch((e) => {
+          console.error("failed to call the callback url", e);
+          router.replace(`/failure`);
+        });
+    }
+
+    if (queries.redirect_uri) {
+      router.replace(
+        `${decodeURIComponent(
+          queries.redirect_uri,
+        )}?session=${credentialsJson}`,
+      );
+    }
+  }, [router, queries.callback_uri, queries.redirect_uri, controller]);
 
   // Handler when user clicks the Create button
   const onConnect = useCallback(
