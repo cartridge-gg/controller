@@ -118,12 +118,12 @@ export default function CreateRemoteSession() {
   }, [controller, origin, policies, onCallback]);
 
   return controller ? (
+    <CreateSessionComp onConnect={onConnect} />
+  ) : (
     <CreateController
       loginMode={LoginMode.Controller}
       onCreated={navigateBackHere}
     />
-  ) : (
-    <CreateSessionComp onConnect={onConnect} />
   );
 }
 
