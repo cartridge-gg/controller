@@ -35,7 +35,7 @@ export default function CreateRemoteSession() {
   // POST request. If the request is successful, then redirect to the
   // success page. Else, redirect to the failure page.
   const onCallback = useCallback(() => {
-    const url = new URL(decodeURIComponent(queries.callback_uri));
+    const url = decodeURIComponent(queries.callback_uri);
     const session = controller.account.sessionJson();
     if (!url || !session) {
       router.replace(`/failure`);
@@ -45,7 +45,7 @@ export default function CreateRemoteSession() {
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
 
-    fetch(url, {
+    fetch(sanitizeCallbackUrl(url), {
       body: JSON.stringify({
         username: controller.username,
         credentials: {
@@ -120,4 +120,21 @@ export default function CreateRemoteSession() {
   ) : (
     <CreateSessionComp onConnect={onConnect} />
   );
+}
+
+/**
+ * Sanitize the callback url to ensure that it is a valid URL. Returns back the URL.
+ */
+function sanitizeCallbackUrl(url: string): URL | undefined {
+  try {
+    const parsed = new URL(url);
+
+    if (parsed.hostname.endsWith("cartridge.gg")) {
+      throw new Error(`Invalid callback url: ${url}`);
+    }
+
+    return parsed;
+  } catch (e) {
+    console.error(e);
+  }
 }
