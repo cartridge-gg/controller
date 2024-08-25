@@ -20,6 +20,25 @@ const nextConfig = {
     config.experiments = { ...config.experiments, asyncWebAssembly: true };
     return config;
   },
+  redirects: async function () {
+    return [
+      {
+        source: '/slot/auth',
+        destination: '/slot',
+        permanent: true
+      },
+      {
+        source: '/slot/auth/success',
+        destination: '/success',
+        permanent: true
+      },
+      {
+        source: '/slot/auth/failure',
+        destination: '/failure',
+        permanent: true
+      }
+    ]
+  }
 };
 
 module.exports = nextConfig;
