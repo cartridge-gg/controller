@@ -2,7 +2,10 @@ import { Field } from "@cartridge/ui";
 import { Button } from "@chakra-ui/react";
 import { Container, Footer, Content } from "components/layout";
 import { useCallback, useEffect, useState } from "react";
-import { useAccountQuery } from "generated/graphql";
+import {
+  FinalizeRegistrationMutation,
+  useAccountQuery,
+} from "generated/graphql";
 import Controller from "utils/controller";
 import { PopupCenter } from "utils/url";
 import { SignupProps } from "./types";
@@ -27,6 +30,7 @@ export function Signup({
   const { deployRequest } = useDeploy();
   const [error, setError] = useState<Error>();
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isPopup, setIsPopup] = useState(false);
   const [usernameField, setUsernameField] = useState({
     value: prefilledName,
     error: undefined,
@@ -60,6 +64,37 @@ export function Signup({
     }
   }, [username]);
 
+  const initController = useCallback(
+    async (
+      username: string,
+      address: string,
+      credentialId: string,
+      publicKey: string,
+    ) => {
+      if (chainId !== constants.StarknetChainId.SN_MAIN && !hasPrefundRequest) {
+        await deployRequest(username);
+      }
+
+      const controller = new Controller({
+        appId: origin,
+        chainId,
+        rpcUrl,
+        address,
+        username,
+        publicKey,
+        credentialId,
+      });
+
+      controller.store();
+      setController(controller);
+
+      if (onSuccess) {
+        onSuccess();
+      }
+    },
+    [origin, chainId, rpcUrl, onSuccess],
+  );
+
   const doPopup = useCallback(() => {
     const searchParams = new URLSearchParams(window.location.search);
     searchParams.set("name", encodeURIComponent(usernameField.value));
@@ -71,9 +106,11 @@ export function Signup({
       480,
       640,
     );
+
+    setIsPopup(true);
   }, [usernameField]);
 
-  const onSubmit = useCallback(() => {
+  const onSubmit = useCallback(async () => {
     setError(undefined);
     setIsRegistering(true);
 
@@ -85,7 +122,22 @@ export function Signup({
       return;
     }
 
-    doSignup(usernameField.value).catch((e) => {
+    try {
+      const data: FinalizeRegistrationMutation = await doSignup(
+        usernameField.value,
+      );
+      const {
+        finalizeRegistration: {
+          id: username,
+          contractAddress: address,
+          credentials: { webauthn },
+        },
+      } = data;
+
+      const { id: credentialId, publicKey } = webauthn[0];
+
+      initController(username, address, credentialId, publicKey);
+    } catch (e) {
       // Backward compat with iframes without this permission-policy
       if (e.message.includes("publickey-credentials-create")) {
         doPopup();
@@ -94,14 +146,14 @@ export function Signup({
 
       setIsRegistering(false);
       setUsernameField((u) => ({ ...u, error: e.message }));
-    });
+    }
   }, [usernameField, doPopup]);
 
-  // for polling approach when iframe
+  // for polling approach when popup
   useAccountQuery(
     { id: usernameField.value },
     {
-      enabled: isRegistering,
+      enabled: isPopup,
       refetchIntervalInBackground: true,
       refetchOnWindowFocus: false,
       staleTime: 10000000,
@@ -125,22 +177,7 @@ export function Signup({
             },
           } = data;
 
-          const controller = new Controller({
-            appId: origin,
-            chainId,
-            rpcUrl,
-            address,
-            username: usernameField.value,
-            publicKey,
-            credentialId,
-          });
-
-          controller.store();
-          setController(controller);
-
-          if (onSuccess) {
-            onSuccess();
-          }
+          initController(username, address, credentialId, publicKey);
         } catch (e) {
           setError(e);
         }
