@@ -11,6 +11,7 @@ import { useRouter } from "next/router";
 import { useCallback, useEffect } from "react";
 import { Call, hash } from "starknet";
 import { LoginMode } from "components/connect/types";
+import base64url from "base64url";
 
 type SessionQueryParams = Record<string, string> & {
   callback_uri?: string;
@@ -76,9 +77,9 @@ export default function CreateRemoteSession() {
 
     if (queries.redirect_uri) {
       router.replace(
-        `${decodeURIComponent(
-          queries.redirect_uri,
-        )}?session=${credentialsJson}`,
+        `${decodeURIComponent(queries.redirect_uri)}?session=${base64url.encode(
+          credentialsJson,
+        )}`,
       );
     }
   }, [router, queries.callback_uri, queries.redirect_uri, controller]);
