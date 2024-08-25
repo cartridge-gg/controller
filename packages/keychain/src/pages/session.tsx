@@ -16,6 +16,7 @@ import base64url from "base64url";
 type SessionQueryParams = Record<string, string> & {
   callback_uri?: string;
   redirect_uri?: string;
+  redirect_query_name?: string;
 };
 
 /**
@@ -77,12 +78,18 @@ export default function CreateRemoteSession() {
 
     if (queries.redirect_uri) {
       router.replace(
-        `${decodeURIComponent(queries.redirect_uri)}?session=${base64url.encode(
-          credentialsJson,
-        )}`,
+        `${decodeURIComponent(queries.redirect_uri)}?${
+          queries.redirect_query_name ?? "session"
+        }=${base64url.encode(credentialsJson)}`,
       );
     }
-  }, [router, queries.callback_uri, queries.redirect_uri, controller]);
+  }, [
+    router,
+    queries.callback_uri,
+    queries.redirect_uri,
+    queries.redirect_query_name,
+    controller,
+  ]);
 
   // Handler when user clicks the Create button
   const onConnect = useCallback(
@@ -91,12 +98,8 @@ export default function CreateRemoteSession() {
         throw new Error("Session not found");
       }
 
-      if (!queries.callback_uri) {
-        throw new Error("Callback URI is missing");
-      }
-
-      if (!queries.redirect_uri) {
-        throw new Error("Redirect URI is missing");
+      if (!queries.callback_uri && !queries.redirect_uri) {
+        throw new Error("Expected either callback_uri or redirect_uri");
       }
 
       onCallback();
