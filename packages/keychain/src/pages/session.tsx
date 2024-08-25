@@ -129,7 +129,7 @@ function sanitizeCallbackUrl(url: string): URL | undefined {
   try {
     const parsed = new URL(url);
 
-    if (parsed.hostname.endsWith("cartridge.gg")) {
+    if (parsed.hostname.endsWith("cartridge.gg") || (parsed.pathname !== "/" && parsed.pathname !== "/callback")) {
       throw new Error(`Invalid callback url: ${url}`);
     }
 
