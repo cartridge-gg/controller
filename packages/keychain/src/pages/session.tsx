@@ -90,13 +90,13 @@ export default function CreateRemoteSession() {
         throw new Error("Session not found");
       }
 
-      if (!queries.callback_uri) {
-        throw new Error("Callback URI is missing");
+      if (!queries.callback_uri || !queries.redirect_uri) {
+        throw new Error("Callback or redirect URI is missing");
       }
 
       onCallback();
     },
-    [queries.callback_uri, controller, onCallback],
+    [queries.callback_uri, queries.redirect_uri, controller, onCallback],
   );
 
   // Once we have a connected controller initialized, check if a session already exists.
