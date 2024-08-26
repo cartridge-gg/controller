@@ -75,7 +75,10 @@ mod CartridgeAccount {
     use openzeppelin::upgrades::interface::IUpgradeable;
 
     use controller::account::{ICartridgeAccount, IAssertOwner};
-    use controller::external_owners::external_owners::external_owners_component;
+    use controller::external_owners::external_owners::{
+        external_owners_component,
+        external_owners_component::InternalImpl as ExternalOwnersInternalImpl
+    };
     use controller::delegate_account::delegate_account::delegate_account_component;
     use controller::introspection::src5::src5_component;
     use controller::session::{
@@ -213,7 +216,7 @@ mod CartridgeAccount {
             Owner::Signer(signer) => {
                 self.multiple_owners.owners.write(signer.into_guid(), true);
             },
-            Owner::Account(account) => { self.external_owners.register_external_owner(account); },
+            Owner::Account(account) => { self.external_owners._register_external_owner(account); },
         }
     }
 

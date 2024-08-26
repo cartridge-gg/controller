@@ -13,7 +13,6 @@ openzeppelin.workspace = true
 argent.workspace = true
 
 
-
 [[target.starknet-contract]]
 allowed-libfuncs-list.name = "experimental"
 sierra = true

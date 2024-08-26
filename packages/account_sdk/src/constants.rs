@@ -2,10 +2,10 @@ use starknet::macros::felt;
 use starknet_crypto::Felt;
 
 pub const ACCOUNT_CLASS_HASH: Felt =
-    felt!("0x36b86fb56d82aa9c1befdffb062b936b932759f64a5a0c638ba5cda2ebfb9eb");
+    felt!("0x75cce7442de1e8e7c98886f1f30359661a0b561e4a81f02824bfdcbed7e01fd");
 
 pub const ACCOUNT_COMPILED_CLASS_HASH: Felt =
-    felt!("0x4a4bdd68d765f6c91d09b66b1b6eafb5c20115e40fd27f4ff57fa1ea4b50383");
+    felt!("0x72661f41b305af0d5d7807433ebdf5843a45480347e3efd64bcc1dbddb0a986");
 
 pub const ERC_20_COMPILED_CLASS_HASH: Felt =
     felt!("0x732654ca6baa90ff202d2fcc35fb39766eb34842a7e5ac6dbf7714af71f1dab");
