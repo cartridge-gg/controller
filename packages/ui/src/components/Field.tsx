@@ -9,6 +9,7 @@ import {
   HStack,
   Text,
   Spinner,
+  Button,
 } from "@chakra-ui/react";
 import { AlertIcon, TimesCircleIcon } from "./icons";
 import { forwardRef, useCallback, useState } from "react";
@@ -18,12 +19,14 @@ export const Field = forwardRef(
     {
       error,
       onClear,
+      onLogin,
       containerStyles,
       isLoading,
       ...inputProps
     }: InputProps & {
       error?: string;
       onClear?: () => void;
+      onLogin?: () => void;
       containerStyles?: StackProps;
       isLoading?: boolean;
     },
@@ -78,16 +81,41 @@ export const Field = forwardRef(
 
         <FormErrorMessage>
           {error && (
-            <HStack marginY={3}>
-              <AlertIcon fontSize="xl" color="text.error" />
-              <Text
-                color="text.error"
-                fontSize="sm"
-                w="full"
-                overflowWrap="anywhere"
-              >
-                {error}
-              </Text>
+            <HStack w="full" justifyContent="space-between">
+              <HStack marginY={3}>
+                <AlertIcon fontSize="xl" color="text.error" />
+                <Text
+                  color="text.error"
+                  fontSize="sm"
+                  w="full"
+                  overflowWrap="anywhere"
+                >
+                  {error}
+                </Text>
+              </HStack>
+              {error.includes("already exists") && onLogin && (
+                <HStack marginY={3}>
+                  <Text fontSize="sm" color="text.secondary">
+                    Is this you ?
+                  </Text>
+                  <Button
+                    variant="gohst"
+                    textTransform="none"
+                    p={0}
+                    px={1}
+                    height="24px"
+                    fontFamily="Inter"
+                    fontWeight="medium"
+                    color="text.primary"
+                    fontSize="xs"
+                    borderWidth={1}
+                    borderColor="solid.secondary"
+                    onClick={() => onLogin()}
+                  >
+                    Log in
+                  </Button>
+                </HStack>
+              )}
             </HStack>
           )}
         </FormErrorMessage>

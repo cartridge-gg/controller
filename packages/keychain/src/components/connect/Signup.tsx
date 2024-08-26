@@ -1,5 +1,5 @@
 import { Field } from "@cartridge/ui";
-import { Button } from "@chakra-ui/react";
+import { Button, Input } from "@chakra-ui/react";
 import { Container, Footer, Content } from "components/layout";
 import { useCallback, useEffect, useState } from "react";
 import { useAccountQuery } from "generated/graphql";
@@ -15,6 +15,7 @@ import { ErrorAlert } from "components/ErrorAlert";
 import { useDeploy } from "hooks/deploy";
 import { constants } from "starknet";
 import { useDebounce } from "hooks/debounce";
+import { ShadowInput } from "./ShadowInput";
 
 export function Signup({
   prefilledName = "",
@@ -182,7 +183,9 @@ export function Signup({
               setError(undefined);
               setUsernameField((u) => ({ ...u, value: "" }));
             }}
+            onLogin={() => onLogin(usernameField.value)}
           />
+          <ShadowInput value={usernameField.value} />
         </Content>
 
         <Footer isSlot={isSlot} isSignup>

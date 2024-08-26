@@ -20,7 +20,7 @@ export function validateUsernameFor(type: AuthAction) {
       const data = await fetchAccount(val);
 
       if (type === "signup" && data.account) {
-        return "Account already exists";
+        return `Sorry, '${val}' already exists`;
       }
     } catch (error) {
       switch (type) {

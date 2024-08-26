@@ -6,7 +6,7 @@ import {
   UnorderedList,
   ListItem,
 } from "@chakra-ui/react";
-import { Container, Content, Footer } from "components/layout";
+import { Container, Content, Footer, FOOTER_MIN_HEIGHT } from "components/layout";
 import { GearIcon, TrashIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { useEffect, useState } from "react";
@@ -43,7 +43,7 @@ export function Settings({ onLogout }: { onLogout: () => void }) {
       onBack={() => openMenu(context)}
       Icon={GearIcon}
     >
-      <Content>
+      <Content pb="60px">
         <VStack gap="30px" w="full">
           {/* <VStack>
             {controller.account.cartridge.hasSession(
