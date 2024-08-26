@@ -154,7 +154,8 @@ impl KatanaRunner {
         let prefunded = self.executor().await;
         let class_hash = self.declare_controller().await;
 
-        let mut constructor_calldata = controller::Signer::cairo_serialize(&signer.signer());
+        let mut constructor_calldata =
+            controller::Owner::cairo_serialize(&controller::Owner::Signer(signer.signer()));
         constructor_calldata.extend(Option::<Signer>::cairo_serialize(&Some(guardian.signer())));
 
         let DeployResult {

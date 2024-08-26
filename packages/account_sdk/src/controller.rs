@@ -103,7 +103,7 @@ where
         let account = OwnerAccount::new(provider.clone(), signer, guardian, address, chain_id);
         let salt = cairo_short_string_to_felt(&username).unwrap();
 
-        let mut calldata = Signer::cairo_serialize(&account.signer.signer());
+        let mut calldata = Owner::cairo_serialize(&Owner::Signer(account.signer.signer()));
         calldata.push(Felt::ONE); // no guardian
         let factory = ControllerFactory::new(
             ACCOUNT_CLASS_HASH,
