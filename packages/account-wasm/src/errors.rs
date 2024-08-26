@@ -32,6 +32,9 @@ pub enum OperationError {
     #[error("Failed to sign message: {0}")]
     SignMessage(SignError),
 
+    #[error("Unsupported signer type")]
+    UnsupportedSignerType,
+
     #[error(transparent)]
     AccountError(#[from] AccountError<SignError>),
 }

@@ -17,8 +17,10 @@ export const useDeploy = (): DeployInterface => {
     async (maxFee: string) => {
       try {
         setIsDeploying(true);
-        const { transaction_hash } =
-          await controller.account.cartridge.deploySelf(num.toHex(maxFee));
+        const { transaction_hash } = await controller.account.cartridge.deploySelf(
+          controller.account,
+          num.toHex(maxFee)
+        );
 
         return transaction_hash;
       } catch (e) {

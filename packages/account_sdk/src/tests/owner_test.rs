@@ -25,8 +25,9 @@ async fn test_change_owner() {
         .deploy_controller("username".to_owned(), &signer)
         .await;
 
-    assert!(controller
-        .contract
+    let contract = controller.contract.as_ref().unwrap();
+
+    assert!(contract
         .is_owner(&signer.signer().guid())
         .call()
         .await
@@ -38,10 +39,8 @@ async fn test_change_owner() {
         .await
         .unwrap();
 
-    let add_owner = controller
-        .contract
-        .add_owner_getcall(&new_signer.signer(), &new_signer_signature);
-    let remove_owner = controller.contract.remove_owner_getcall(&signer.signer());
+    let add_owner = contract.add_owner_getcall(&new_signer.signer(), &new_signer_signature);
+    let remove_owner = contract.remove_owner_getcall(&signer.signer());
 
     ensure_txn(
         controller.execute_v1(vec![add_owner, remove_owner]),
@@ -50,15 +49,13 @@ async fn test_change_owner() {
     .await
     .unwrap();
 
-    assert!(!controller
-        .contract
+    assert!(!contract
         .is_owner(&signer.signer().guid())
         .call()
         .await
         .unwrap());
 
-    assert!(controller
-        .contract
+    assert!(contract
         .is_owner(&new_signer.signer().guid())
         .call()
         .await
@@ -73,41 +70,40 @@ async fn test_add_owner() {
         .deploy_controller("username".to_owned(), &signer)
         .await;
 
-    assert!(controller
-        .contract
+    let contract = controller.contract.as_ref().unwrap();
+
+    assert!(contract
         .is_owner(&signer.signer().guid())
         .call()
         .await
         .unwrap());
     let new_signer = SigningKey::from_random();
     let new_signer_signature = new_signer
-        .sign_new_owner(&controller.chain_id(), &controller.address())
+        .sign_new_owner(&controller.chain_id, &controller.address)
         .await
         .unwrap();
 
     ensure_txn(
-        controller
-            .contract
-            .add_owner(&new_signer.signer(), &new_signer_signature),
+        contract.add_owner(&new_signer.signer(), &new_signer_signature),
         runner.client(),
     )
     .await
     .unwrap();
 
-    assert!(controller
-        .contract
+    assert!(contract
         .is_owner(&signer.signer().guid())
         .call()
         .await
         .unwrap());
-    assert!(controller
-        .contract
+    assert!(contract
         .is_owner(&new_signer.signer().guid())
         .call()
         .await
         .unwrap());
 
-    controller.account.set_signer(new_signer.clone());
+    controller.set_signer(new_signer.clone());
+
+    let contract = controller.contract.as_ref().unwrap();
 
     let new_new_signer = SigningKey::from_random();
     let new_signer_signature = new_new_signer
@@ -116,30 +112,25 @@ async fn test_add_owner() {
         .unwrap();
 
     ensure_txn(
-        controller
-            .contract
-            .add_owner(&new_new_signer.signer(), &new_signer_signature),
+        contract.add_owner(&new_new_signer.signer(), &new_signer_signature),
         runner.client(),
     )
     .await
     .unwrap();
 
-    assert!(controller
-        .contract
+    assert!(contract
         .is_owner(&signer.signer().guid())
         .call()
         .await
         .unwrap());
 
-    assert!(controller
-        .contract
+    assert!(contract
         .is_owner(&new_signer.signer().guid())
         .call()
         .await
         .unwrap());
 
-    assert!(controller
-        .contract
+    assert!(contract
         .is_owner(&new_new_signer.signer().guid())
         .call()
         .await
@@ -154,9 +145,9 @@ async fn test_change_owner_wrong_signature() {
     let controller = runner
         .deploy_controller("username".to_owned(), &signer)
         .await;
+    let contract = controller.contract.as_ref().unwrap();
 
-    assert!(controller
-        .contract
+    assert!(contract
         .is_owner(&signer.signer().guid())
         .call()
         .await
@@ -171,8 +162,7 @@ async fn test_change_owner_wrong_signature() {
         .await
         .unwrap();
 
-    controller
-        .contract
+    contract
         .add_owner(&new_signer.signer(), &new_signer_signature)
         .fee_estimate_multiplier(1.5)
         .send()
@@ -187,6 +177,7 @@ async fn test_change_owner_execute_after() {
     let mut controller = runner
         .deploy_controller("username".to_owned(), &signer)
         .await;
+    let contract = controller.contract.as_ref().unwrap();
 
     let new_signer = SigningKey::from_random();
     let new_signer_signature = new_signer
@@ -194,20 +185,18 @@ async fn test_change_owner_execute_after() {
         .await
         .unwrap();
 
-    let add_owner = controller
-        .contract
-        .add_owner_getcall(&new_signer.signer(), &new_signer_signature);
-    let remove_owner = controller.contract.remove_owner_getcall(&signer.signer());
+    let add_owner = contract.add_owner_getcall(&new_signer.signer(), &new_signer_signature);
+    let remove_owner = contract.remove_owner_getcall(&signer.signer());
 
     ensure_txn(
-        controller.account.execute_v1(vec![add_owner, remove_owner]),
+        controller.execute_v1(vec![add_owner, remove_owner]),
         runner.client(),
     )
     .await
     .unwrap();
 
     let recipient = felt!("0x18301129");
-    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller.account);
+    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller);
 
     // Old signature should fail
     let result = ensure_txn(
@@ -224,9 +213,9 @@ async fn test_change_owner_execute_after() {
 
     assert!(result.is_err(), "Transaction should have failed");
 
-    controller.account.set_signer(new_signer.clone());
+    controller.set_signer(new_signer.clone());
 
-    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller.account);
+    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller);
 
     ensure_txn(
         contract_erc20.transfer(
@@ -250,12 +239,12 @@ async fn test_change_owner_invalidate_old_sessions() {
     let controller = runner
         .deploy_controller("username".to_owned(), &signer)
         .await;
+    let contract = controller.contract.as_ref().unwrap();
 
     let transfer_method = AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("transfer"));
 
     let session_account = controller
-        .account
-        .session_account(
+        .create_session_account(
             SigningKey::from_random(),
             vec![transfer_method.clone()],
             u64::MAX,
@@ -270,13 +259,11 @@ async fn test_change_owner_invalidate_old_sessions() {
         .await
         .unwrap();
 
-    let add_owner = controller
-        .contract
-        .add_owner_getcall(&new_signer.signer(), &new_signer_signature);
-    let remove_owner = controller.contract.remove_owner_getcall(&signer.signer());
+    let add_owner = contract.add_owner_getcall(&new_signer.signer(), &new_signer_signature);
+    let remove_owner = contract.remove_owner_getcall(&signer.signer());
 
     ensure_txn(
-        controller.account.execute_v1(vec![add_owner, remove_owner]),
+        controller.execute_v1(vec![add_owner, remove_owner]),
         runner.client(),
     )
     .await
@@ -312,8 +299,7 @@ async fn test_change_owner_invalidate_old_sessions() {
     );
 
     let session_account = controller
-        .account
-        .session_account(SigningKey::from_random(), vec![transfer_method], u64::MAX)
+        .create_session_account(SigningKey::from_random(), vec![transfer_method], u64::MAX)
         .await
         .unwrap();
     let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &session_account);
@@ -353,8 +339,7 @@ async fn test_call_unallowed_methods() {
     let transfer_method = AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("transfer"));
 
     let session_account = controller
-        .account
-        .session_account(
+        .create_session_account(
             SigningKey::from_random(),
             vec![transfer_method.clone()],
             u64::MAX,
@@ -410,15 +395,14 @@ async fn test_external_owner() {
     let controller = runner
         .deploy_controller("username".to_owned(), &signer)
         .await;
+    let contract = controller.contract.as_ref().unwrap();
 
     let external_controller =
         crate::abigen::controller::Controller::new(controller.address(), &external_account);
 
     // register_external_owner
     ensure_txn(
-        controller
-            .contract
-            .register_external_owner(&external_account.address().into()),
+        contract.register_external_owner(&external_account.address().into()),
         runner.client(),
     )
     .await

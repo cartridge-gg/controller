@@ -1,28 +1,24 @@
-use crate::abigen::controller::{OutsideExecution, Owner, Signer, StarknetSigner};
+use crate::abigen::controller::{OutsideExecution, Signer, SignerSignature, StarknetSigner};
 use crate::account::outside_execution::OutsideExecutionAccount;
 use crate::account::session::hash::{AllowedMethod, Session};
 use crate::account::session::SessionAccount;
-use crate::account::AccountHashAndCallsSigner;
 use crate::account::SpecificAccount;
-use crate::constants::ACCOUNT_CLASS_HASH;
-use crate::factory::ControllerFactory;
+use crate::account::{AccountHashAndCallsSigner, CallEncoder};
 use crate::hash::MessageHashRev1;
 use crate::provider::{CartridgeProvider, CartridgeProviderError};
-use crate::signers::DeviceError;
+use crate::signers::{DeviceError, SignerTrait};
 use crate::storage::{Credentials, Selectors, SessionMetadata, StorageBackend, StorageValue};
 use crate::{
     abigen::{self},
-    account::{AccountHashSigner, OwnerAccount},
-    signers::{HashSigner, SignError, SignerTrait},
+    account::AccountHashSigner,
+    signers::{HashSigner, SignError},
 };
 use crate::{impl_account, OriginProvider};
 use async_trait::async_trait;
 use cainome::cairo_serde::{self, CairoSerde, NonZero};
-use starknet::accounts::{
-    AccountDeploymentV1, AccountError, AccountFactory, AccountFactoryError, ExecutionV1,
-};
-use starknet::core::types::{Call, FeeEstimate, InvokeTransactionResult};
-use starknet::core::utils::{cairo_short_string_to_felt, CairoShortStringToFeltError};
+use starknet::accounts::{AccountError, AccountFactoryError, ExecutionV1};
+use starknet::core::types::{BlockTag, Call, FeeEstimate, InvokeTransactionResult};
+use starknet::core::utils::CairoShortStringToFeltError;
 use starknet::signers::SignerInteractivityContext;
 use starknet::{
     accounts::{Account, ConnectedAccount, ExecutionEncoder},
@@ -65,28 +61,28 @@ pub enum ControllerError {
     CairoShortStringToFeltEror(#[from] CairoShortStringToFeltError),
 }
 
-pub struct Controller<P, S, G, B>
+pub struct Controller<P, S, B>
 where
     P: CartridgeProvider + Send + Sync + Clone,
     S: HashSigner + Send + Sync + Clone,
-    G: HashSigner + Send + Sync + Clone,
-    B: Backend,
+    B: Backend + Clone,
 {
     app_id: String,
     pub username: String,
-    salt: Felt,
+    pub address: Felt,
+    pub chain_id: Felt,
+    block_id: BlockId,
     pub provider: P,
-    pub(crate) account: OwnerAccount<P, S, G>,
-    pub(crate) contract: abigen::controller::Controller<OwnerAccount<P, S, G>>,
-    pub factory: ControllerFactory<OwnerAccount<P, S, G>, P>,
+    pub owner: S,
+    pub guardian: SigningKey,
+    pub contract: Option<Box<abigen::controller::Controller<Self>>>,
     backend: B,
 }
 
-impl<P, S, G, B> Controller<P, S, G, B>
+impl<P, S, B> Controller<P, S, B>
 where
     P: CartridgeProvider + Send + Sync + Clone,
     S: HashSigner + Send + Sync + Clone,
-    G: HashSigner + Send + Sync + Clone,
     B: Backend + Clone,
 {
     #[allow(clippy::too_many_arguments)]
@@ -94,58 +90,43 @@ where
         app_id: String,
         username: String,
         provider: P,
-        signer: S,
-        guardian: G,
+        owner: S,
+        guardian: SigningKey,
         address: Felt,
         chain_id: Felt,
         backend: B,
     ) -> Self {
-        let account = OwnerAccount::new(provider.clone(), signer, guardian, address, chain_id);
-        let salt = cairo_short_string_to_felt(&username).unwrap();
-
-        let mut calldata = Owner::cairo_serialize(&Owner::Signer(account.signer.signer()));
-        calldata.push(Felt::ONE); // no guardian
-        let factory = ControllerFactory::new(
-            ACCOUNT_CLASS_HASH,
-            account.chain_id,
-            calldata,
-            account.clone(),
-            provider.clone(),
-        );
-
         Self {
             app_id,
             username,
-            salt,
+            address,
+            chain_id,
+            block_id: BlockId::Tag(BlockTag::Pending),
             provider,
-            account: account.clone(),
-            contract: abigen::controller::Controller::new(address, account),
-            factory,
+            owner,
+            guardian,
+            contract: None, //abigen::controller::Controller::new(address, account),
             backend,
         }
     }
 
-    pub fn deploy(&self) -> AccountDeploymentV1<ControllerFactory<OwnerAccount<P, S, G>, P>> {
-        self.factory.deploy_v1(self.salt)
-    }
-
     pub fn owner_guid(&self) -> Felt {
-        self.account.signer.signer().guid()
+        self.owner.signer().guid()
     }
 
     pub async fn create_session(
         &mut self,
-        methods: Vec<AllowedMethod>,
+        allowed_methods: Vec<AllowedMethod>,
         expires_at: u64,
     ) -> Result<(Vec<Felt>, Felt), ControllerError> {
         let signer = SigningKey::from_random();
-        let session = Session::new(methods, expires_at, &signer.signer())?;
+        let session = Session::new(allowed_methods, expires_at, &signer.signer())?;
         let hash = session
             .raw()
-            .get_message_hash_rev_1(self.account.chain_id, self.account.address);
-        let authorization = self.account.sign_hash(hash).await?;
+            .get_message_hash_rev_1(self.chain_id, self.address);
+        let authorization = self.sign_hash(hash).await?;
         self.backend.set(
-            &Selectors::session(&self.account.address, &self.app_id, &self.account.chain_id),
+            &Selectors::session(&self.address, &self.app_id, &self.chain_id),
             &StorageValue::Session(SessionMetadata {
                 session,
                 max_fee: None,
@@ -155,6 +136,7 @@ where
                 },
             }),
         )?;
+
         Ok((authorization, signer.secret_scalar()))
     }
 
@@ -172,6 +154,8 @@ where
         let session = Session::new(methods, expires_at, &signer)?;
         let register_execution = self
             .contract
+            .as_ref()
+            .unwrap()
             .register_session(&session.raw(), &self.owner_guid());
 
         let txn = register_execution
@@ -194,11 +178,7 @@ where
 
         let res = self
             .provider()
-            .add_execute_outside_transaction(
-                outside_execution,
-                self.account.address,
-                signed.signature,
-            )
+            .add_execute_outside_transaction(outside_execution, self.address, signed.signature)
             .await
             .map_err(ControllerError::CartridgeProviderError)?;
 
@@ -233,7 +213,7 @@ where
     }
 
     pub fn session_metadata(&self) -> Option<SessionMetadata> {
-        let key = Selectors::session(&self.account.address, &self.app_id, &self.account.chain_id);
+        let key = Selectors::session(&self.address, &self.app_id, &self.chain_id);
 
         self.backend
             .get(&key)
@@ -244,7 +224,7 @@ where
             })
     }
 
-    pub fn session_account(&self, calls: &[Call]) -> Option<SessionAccount<P, SigningKey, G>> {
+    pub fn session_account(&self, calls: &[Call]) -> Option<SessionAccount<P, SigningKey>> {
         // Check if there's a valid session stored
         let metadata = self.session_metadata()?;
 
@@ -256,11 +236,11 @@ where
             // Use SessionAccount if all calls are allowed
             let session_signer = SigningKey::from_secret_scalar(metadata.credentials.private_key);
             let session_account = SessionAccount::new(
-                self.account.provider().clone(),
+                self.provider.clone(),
                 session_signer,
-                self.account.guardian.clone(),
-                self.account.address,
-                self.account.chain_id,
+                SigningKey::from_random(),
+                self.address,
+                self.chain_id,
                 metadata.credentials.authorization,
                 metadata.session,
             );
@@ -273,6 +253,8 @@ where
 
     pub async fn delegate_account(&self) -> Result<Felt, ControllerError> {
         self.contract
+            .as_ref()
+            .unwrap()
             .delegate_account()
             .call()
             .await
@@ -280,15 +262,19 @@ where
             .map_err(ControllerError::CairoSerde)
     }
 
-    pub fn set_delegate_account(
-        &self,
-        delegate_address: Felt,
-    ) -> ExecutionV1<OwnerAccount<P, S, G>> {
-        self.contract.set_delegate_account(&delegate_address.into())
+    pub fn set_delegate_account(&self, delegate_address: Felt) -> ExecutionV1<Self> {
+        self.contract
+            .as_ref()
+            .unwrap()
+            .set_delegate_account(&delegate_address.into())
+    }
+
+    pub fn set_signer(&mut self, new_owner: S) {
+        self.owner = new_owner;
     }
 }
 
-impl_account!(Controller<P: CartridgeProvider, S: HashSigner, G: HashSigner, B: Backend>, |account: &Controller<P, S, G, B>, context| {
+impl_account!(Controller<P: CartridgeProvider, S: HashSigner, B: Backend>, |account: &Controller<P, S, B>, context| {
     if let SignerInteractivityContext::Execution { calls } = context {
         account.session_account(calls).is_none()
     } else {
@@ -296,31 +282,29 @@ impl_account!(Controller<P: CartridgeProvider, S: HashSigner, G: HashSigner, B: 
     }
 });
 
-impl<P, S, G, B> ConnectedAccount for Controller<P, S, G, B>
+impl<P, S, B> ConnectedAccount for Controller<P, S, B>
 where
     P: CartridgeProvider + Send + Sync + Clone,
     S: HashSigner + Send + Sync + Clone,
-    G: HashSigner + Send + Sync + Clone,
     B: Backend + Clone,
 {
     type Provider = P;
 
     fn provider(&self) -> &Self::Provider {
-        self.account.provider()
+        &self.provider
     }
 
     fn block_id(&self) -> BlockId {
-        self.account.block_id()
+        self.block_id
     }
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<P, S, G, B> AccountHashAndCallsSigner for Controller<P, S, G, B>
+impl<P, S, B> AccountHashAndCallsSigner for Controller<P, S, B>
 where
     P: CartridgeProvider + Send + Sync + Clone,
     S: HashSigner + Send + Sync + Clone,
-    G: HashSigner + Send + Sync + Clone,
     B: Backend + Clone,
 {
     async fn sign_hash_and_calls(
@@ -330,49 +314,51 @@ where
     ) -> Result<Vec<Felt>, SignError> {
         match self.session_account(calls) {
             Some(session_account) => session_account.sign_hash_and_calls(hash, calls).await,
-            _ => self.account.sign_hash_and_calls(hash, calls).await,
+            _ => self.sign_hash_and_calls(hash, calls).await,
         }
     }
 }
 
-impl<P, S, G, B> ExecutionEncoder for Controller<P, S, G, B>
+impl<P, S, B> ExecutionEncoder for Controller<P, S, B>
 where
     P: CartridgeProvider + Send + Sync + Clone,
     S: HashSigner + Send + Sync + Clone,
-    G: HashSigner + Send + Sync + Clone,
-    B: Backend,
+    B: Backend + Clone,
 {
     fn encode_calls(&self, calls: &[Call]) -> Vec<Felt> {
-        self.account.encode_calls(calls)
+        CallEncoder::encode_calls(calls)
     }
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<P, S, G, B> AccountHashSigner for Controller<P, S, G, B>
+impl<P, S, B> AccountHashSigner for Controller<P, S, B>
 where
     P: CartridgeProvider + Send + Sync + Clone,
     S: HashSigner + Send + Sync + Clone,
-    G: HashSigner + Send + Sync + Clone,
-    B: Backend,
+    B: Backend + Clone,
 {
     async fn sign_hash(&self, hash: Felt) -> Result<Vec<Felt>, SignError> {
-        self.account.sign_hash(hash).await
+        let owner_signature = self.owner.sign(&hash).await?;
+        let guardian_signature = HashSigner::sign(&self.guardian, &hash).await?;
+        Ok(Vec::<SignerSignature>::cairo_serialize(&vec![
+            owner_signature,
+            guardian_signature,
+        ]))
     }
 }
 
-impl<P, S, G, B> SpecificAccount for Controller<P, S, G, B>
+impl<P, S, B> SpecificAccount for Controller<P, S, B>
 where
     P: CartridgeProvider + Send + Sync + Clone,
     S: HashSigner + Send + Sync + Clone,
-    G: HashSigner + Send + Sync + Clone,
-    B: Backend,
+    B: Backend + Clone,
 {
     fn address(&self) -> Felt {
-        self.account.address
+        self.address
     }
 
     fn chain_id(&self) -> Felt {
-        self.account.chain_id
+        self.chain_id
     }
 }
