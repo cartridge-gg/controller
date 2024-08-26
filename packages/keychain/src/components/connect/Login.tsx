@@ -1,5 +1,5 @@
 import { Field } from "@cartridge/ui";
-import { Button } from "@chakra-ui/react";
+import { Button, Input } from "@chakra-ui/react";
 import { Container, Footer, Content, useLayout } from "components/layout";
 import { useCallback, useEffect, useState } from "react";
 import Controller from "utils/controller";
@@ -11,6 +11,7 @@ import { useControllerTheme } from "hooks/theme";
 import { doLogin } from "hooks/account";
 import { useConnection } from "hooks/connection";
 import { ErrorAlert } from "components/ErrorAlert";
+import { ShadowInput } from "./ShadowInput";
 
 export function Login(props: LoginProps) {
   const theme = useControllerTheme();
@@ -143,6 +144,8 @@ function Form({
             setUsernameField((u) => ({ ...u, value: "" }));
           }}
         />
+        <ShadowInput value={usernameField.value} />
+       
       </Content>
 
       <Footer isSlot={isSlot} createSession>
