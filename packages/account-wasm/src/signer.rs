@@ -6,9 +6,10 @@ use account_sdk::{
     OriginProvider,
 };
 use futures::channel::oneshot;
+use serde_json::to_value;
 use wasm_bindgen::UnwrapThrowExt;
 use wasm_bindgen_futures::{spawn_local, JsFuture};
-use web_sys::Window;
+use web_sys::{console, Window};
 use webauthn_rs_proto::{
     auth::PublicKeyCredentialRequestOptions, CreationChallengeResponse, PublicKeyCredential,
     PublicKeyCredentialCreationOptions, RegisterPublicKeyCredential, RequestChallengeResponse,
@@ -47,9 +48,12 @@ impl WebauthnBackend for BrowserBackend {
 
             match JsFuture::from(promise).await {
                 Ok(jsval) => {
-                    let _ = tx.send(Ok(PublicKeyCredential::from(
-                        web_sys::PublicKeyCredential::from(jsval),
-                    )));
+                    let result =
+                        PublicKeyCredential::from(web_sys::PublicKeyCredential::from(jsval));
+
+                    let value = to_value(&result.response.client_data_json).unwrap_throw();
+                    console::log_1(&format!("client_data_json: {:#?}", value).into());
+                    let _ = tx.send(Ok(result));
                 }
                 Err(e) => {
                     let _ = tx.send(Err(DeviceError::GetAssertion(format!("{:?}", e))));
@@ -81,9 +85,14 @@ impl WebauthnBackend for BrowserBackend {
 
             match JsFuture::from(promise).await {
                 Ok(jsval) => {
-                    let _ = tx.send(Ok(RegisterPublicKeyCredential::from(
+                    let result = RegisterPublicKeyCredential::from(
                         web_sys::PublicKeyCredential::from(jsval),
-                    )));
+                    );
+
+                    let value = to_value(result.response.client_data_json.clone()).unwrap_throw();
+                    console::log_1(&format!("client_data_json:{:#?}", value).into());
+
+                    let _ = tx.send(Ok(result));
                 }
                 Err(_e) => {
                     let _ = tx.send(Err(DeviceError::CreateCredential("".to_string())));
