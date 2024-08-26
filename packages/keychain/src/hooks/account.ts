@@ -4,6 +4,7 @@ import {
   FinalizeLoginDocument,
   FinalizeRegistrationDocument,
   FinalizeLoginMutation,
+  FinalizeRegistrationMutation,
 } from "generated/graphql";
 
 import { client, ENDPOINT } from "utils/graphql";
@@ -61,7 +62,9 @@ export const onCreateBegin = async (name: string): Promise<Credentials> => {
   return credentials;
 };
 
-export const onCreateFinalize = (credentials: Credentials) => {
+export const onCreateFinalize = (
+  credentials: Credentials,
+): Promise<FinalizeRegistrationMutation> => {
   return client.request(FinalizeRegistrationDocument, {
     credentials: JSON.stringify({
       id: credentials.id,
@@ -146,9 +149,11 @@ export const doXHR = async (json: string): Promise<any> => {
   });
 };
 
-export async function doSignup(name: string) {
+export async function doSignup(
+  name: string,
+): Promise<FinalizeRegistrationMutation> {
   const credentials: Credentials = await onCreateBegin(name);
-  await onCreateFinalize(credentials);
+  return onCreateFinalize(credentials);
 }
 
 export async function doLogin(name: string, credentialId: string) {

@@ -6,6 +6,12 @@ mutation FinalizeRegistration($credentials: String!) {
   finalizeRegistration(credentials: $credentials) {
     id
     contractAddress
+    credentials {
+      webauthn {
+        id
+        publicKey
+      }
+    }
   }
 }
 
