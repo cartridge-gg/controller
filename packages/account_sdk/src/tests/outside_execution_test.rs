@@ -43,8 +43,7 @@ pub async fn test_verify_paymaster_execute<
     let account: Box<dyn OutsideExecutionAccount> = match session_signer {
         Some(session_signer) => Box::new(
             controller
-                .account
-                .session_account(
+                .create_session_account(
                     session_signer,
                     vec![AllowedMethod::new(
                         *FEE_TOKEN_ADDRESS,
@@ -214,8 +213,7 @@ async fn test_verify_execute_paymaster_session() {
     };
 
     let session_account = controller
-        .account
-        .session_account(
+        .create_session_account(
             SigningKey::from_random(),
             vec![AllowedMethod::new(
                 *FEE_TOKEN_ADDRESS,

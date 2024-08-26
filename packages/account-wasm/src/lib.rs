@@ -1,6 +1,7 @@
+mod backend;
 mod errors;
+// mod factory;
 mod signer;
-mod storage;
 mod types;
 mod utils;
 
@@ -16,11 +17,12 @@ use account_sdk::controller::Controller;
 use account_sdk::provider::CartridgeJsonRpcProvider;
 use account_sdk::signers::webauthn::{CredentialID, WebauthnSigner};
 use account_sdk::signers::HashSigner;
+use backend::BrowserBackend;
 use base64::engine::general_purpose;
 use base64::Engine;
 use coset::{CborSerializable, CoseKey};
 use serde_wasm_bindgen::{from_value, to_value};
-use signer::BrowserBackend;
+use signer::{Signer, SignerType};
 use starknet::accounts::Account;
 use starknet::core::types::Call;
 use starknet::macros::short_string;
@@ -42,12 +44,8 @@ type Result<T> = std::result::Result<T, JsError>;
 
 #[wasm_bindgen]
 pub struct CartridgeAccount {
-    controller: Controller<
-        Arc<CartridgeJsonRpcProvider>,
-        WebauthnSigner<BrowserBackend>,
-        SigningKey,
-        BrowserBackend,
-    >,
+    controller:
+        Controller<Arc<CartridgeJsonRpcProvider>, Signer, BrowserBackend>,
 }
 
 #[wasm_bindgen]
@@ -73,21 +71,27 @@ impl CartridgeAccount {
         address: JsFelt,
         rp_id: String,
         username: String,
-        credential_id: String,
-        public_key: String,
+        owner: Signer,
     ) -> Result<CartridgeAccount> {
         set_panic_hook();
 
         let rpc_url = Url::parse(&rpc_url)?;
         let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
 
-        let credential_id_bytes = general_purpose::URL_SAFE_NO_PAD.decode(credential_id)?;
-        let credential_id = CredentialID::from(credential_id_bytes);
+        let device_signer = match owner.signer_type {
+            SignerType::Webauthn => {
+                let credential_id_bytes =
+                    general_purpose::URL_SAFE_NO_PAD.decode(owner.credential_id.unwrap())?;
+                let credential_id = CredentialID::from(credential_id_bytes);
 
-        let cose_bytes = general_purpose::URL_SAFE_NO_PAD.decode(public_key)?;
-        let cose = CoseKey::from_slice(&cose_bytes)?;
+                let cose_bytes =
+                    general_purpose::URL_SAFE_NO_PAD.decode(owner.public_key.unwrap())?;
+                let cose = CoseKey::from_slice(&cose_bytes)?;
 
-        let device_signer = WebauthnSigner::new(rp_id, credential_id, cose, BrowserBackend);
+                WebauthnSigner::new(rp_id, credential_id, cose, BrowserBackend)
+            }
+            _ => return Err(OperationError::UnsupportedSignerType.into()),
+        };
 
         let dummy_guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
         let username = username.to_lowercase();
@@ -267,20 +271,20 @@ impl CartridgeAccount {
         Ok(Felts(signature.into_iter().map(JsFelt).collect()))
     }
 
-    #[wasm_bindgen(js_name = deploySelf)]
-    pub async fn deploy_self(&self, max_fee: JsFelt) -> Result<JsValue> {
-        set_panic_hook();
+    // #[wasm_bindgen(js_name = deploySelf)]
+    // pub async fn deploy_self(&self, max_fee: JsValue) -> Result<JsValue> {
+    //     set_panic_hook();
 
-        let res = self
-            .controller
-            .deploy()
-            .max_fee(max_fee.0)
-            .send()
-            .await
-            .map_err(|e| OperationError::Deployment(format!("{:#?}", e)))?;
+    //     let res = self
+    //         .controller
+    //         .deploy()
+    //         .max_fee(from_value(max_fee)?)
+    //         .send()
+    //         .await
+    //         .map_err(|e| OperationError::Deployment(format!("{:#?}", e)))?;
 
-        Ok(to_value(&res)?)
-    }
+    //     Ok(to_value(&res)?)
+    // }
 
     #[wasm_bindgen(js_name = delegateAccount)]
     pub async fn delegate_account(&self) -> Result<JsFelt> {
@@ -297,9 +301,7 @@ impl CartridgeAccount {
 }
 
 #[wasm_bindgen]
-pub struct CartridgeSessionAccount(
-    SessionAccount<Arc<CartridgeJsonRpcProvider>, SigningKey, SigningKey>,
-);
+pub struct CartridgeSessionAccount(SessionAccount<Arc<CartridgeJsonRpcProvider>, SigningKey>);
 
 #[wasm_bindgen]
 impl CartridgeSessionAccount {

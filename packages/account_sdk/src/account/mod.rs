@@ -3,8 +3,9 @@ use cainome::cairo_serde::CairoSerde;
 use cainome::cairo_serde::ContractAddress;
 use starknet::core::types::Call;
 use starknet::macros::selector;
+use starknet::signers::SigningKey;
 use starknet::{
-    accounts::{Account, ConnectedAccount, ExecutionEncoder},
+    accounts::ConnectedAccount,
     core::types::{BlockId, BlockTag, Felt},
     providers::Provider,
 };
@@ -21,27 +22,31 @@ use crate::{
 };
 
 #[derive(Clone, Debug)]
-pub struct OwnerAccount<P, S, G>
+pub struct OwnerAccount<P, S>
 where
     P: Provider + Send,
     S: HashSigner + Send,
-    G: HashSigner + Send,
 {
     pub provider: P,
     pub(crate) signer: S,
     pub address: Felt,
     pub chain_id: Felt,
     pub(crate) block_id: BlockId,
-    pub(crate) guardian: G,
+    pub(crate) guardian: SigningKey,
 }
 
-impl<P, S, G> OwnerAccount<P, S, G>
+impl<P, S> OwnerAccount<P, S>
 where
     P: Provider + Send,
     S: HashSigner + Send,
-    G: HashSigner + Send,
 {
-    pub fn new(provider: P, signer: S, guardian: G, address: Felt, chain_id: Felt) -> Self {
+    pub fn new(
+        provider: P,
+        signer: S,
+        guardian: SigningKey,
+        address: Felt,
+        chain_id: Felt,
+    ) -> Self {
         OwnerAccount {
             provider,
             signer,
@@ -59,15 +64,14 @@ where
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<P, S, G> AccountHashSigner for OwnerAccount<P, S, G>
+impl<P, S> AccountHashSigner for OwnerAccount<P, S>
 where
     P: Provider + Send + Sync,
     S: HashSigner + Send + Sync,
-    G: HashSigner + Send + Sync,
 {
     async fn sign_hash(&self, hash: Felt) -> Result<Vec<Felt>, SignError> {
         let owner_signature = self.signer.sign(&hash).await?;
-        let guardian_signature = self.guardian.sign(&hash).await?;
+        let guardian_signature = HashSigner::sign(&self.guardian, &hash).await?;
         Ok(Vec::<SignerSignature>::cairo_serialize(&vec![
             owner_signature,
             guardian_signature,
@@ -75,11 +79,10 @@ where
     }
 }
 
-impl<P, S, G> SpecificAccount for OwnerAccount<P, S, G>
+impl<P, S> SpecificAccount for OwnerAccount<P, S>
 where
     P: Provider + Send + Sync,
     S: HashSigner + Send + Sync,
-    G: HashSigner + Send + Sync,
 {
     fn address(&self) -> Felt {
         self.address
@@ -90,16 +93,15 @@ where
     }
 }
 
-impl_account!(OwnerAccount<P: Provider, S: HashSigner, G: HashSigner>, |_, _| {
+impl_account!(OwnerAccount<P: Provider, S: HashSigner>, |_, _| {
     true
 });
-impl_execution_encoder!(OwnerAccount<P: Provider, S: HashSigner, G: HashSigner>);
+impl_execution_encoder!(OwnerAccount<P: Provider, S: HashSigner>);
 
-impl<P, S, G> ConnectedAccount for OwnerAccount<P, S, G>
+impl<P, S> ConnectedAccount for OwnerAccount<P, S>
 where
     P: Provider + Send + Sync + Clone,
     S: HashSigner + Send + Sync + Clone,
-    G: HashSigner + Send + Sync + Clone,
 {
     type Provider = P;
 
@@ -121,7 +123,7 @@ pub trait AccountHashSigner {
 pub enum CallEncoder {}
 
 impl CallEncoder {
-    fn encode_calls(calls: &[Call]) -> Vec<Felt> {
+    pub(crate) fn encode_calls(calls: &[Call]) -> Vec<Felt> {
         <Vec<abigen::controller::Call> as CairoSerde>::cairo_serialize(
             &calls
                 .iter()
@@ -155,11 +157,10 @@ pub trait SpecificAccount {
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<P, S, G> AccountHashAndCallsSigner for OwnerAccount<P, S, G>
+impl<P, S> AccountHashAndCallsSigner for OwnerAccount<P, S>
 where
     P: Provider + Send + Sync,
     S: HashSigner + Send + Sync,
-    G: HashSigner + Send + Sync,
 {
     async fn sign_hash_and_calls(
         &self,

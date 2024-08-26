@@ -4,11 +4,12 @@ use hyper::service::{make_service_fn, service_fn};
 use hyper::{Body, Client, Request, Response, Server, StatusCode};
 use serde_json::{json, Value};
 use starknet::accounts::single_owner::SignError;
-use starknet::accounts::{Account, AccountError, ExecutionEncoding};
+use starknet::accounts::{Account, AccountError, AccountFactory, ExecutionEncoding};
 use starknet::core::types::{Call, InvokeTransactionResult};
 use starknet::macros::selector;
 use starknet::providers::jsonrpc::HttpTransport;
 use starknet::providers::JsonRpcClient;
+use starknet::signers::SigningKey;
 use starknet_crypto::Felt;
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -16,6 +17,8 @@ use tokio::sync::Mutex;
 use url::Url;
 
 use crate::abigen::controller::OutsideExecution;
+use crate::constants::ACCOUNT_CLASS_HASH;
+use crate::factory::ControllerFactory;
 use crate::paymaster::OutsideExecutionParams;
 
 use super::katana::{single_owner_account_with_encoding, PREFUNDED};
@@ -77,68 +80,133 @@ impl CartridgeProxy {
         let body: Value = serde_json::from_slice(&body_bytes).unwrap_or(json!({}));
 
         if let Some(method) = body.get("method") {
-            if method == "cartridge_addExecuteOutsideTransaction" {
-                let params = &body["params"];
-                println!("Received params: {:?}", params);
-                match parse_execute_outside_transaction_params(params) {
-                    Ok((address, outside_execution, signature)) => {
-                        match self
-                            .execute_from_outside(outside_execution, signature, address)
-                            .await
-                        {
-                            Ok(result) => {
-                                println!("success");
-                                return Ok(Response::builder()
-                                    .status(StatusCode::OK)
-                                    .body(Body::from(
-                                        json!({
-                                            "id" : 1_u64,
-                                            "jsonrpc": "2.0",
-                                            "result" : {
-                                                "transaction_hash": format!("0x{:x}", result.transaction_hash)
-                                            }
-                                        })
-                                        .to_string(),
-                                    ))
-                                    .unwrap());
-                            }
-                            Err(e) => {
-                                let error_response = json!({
-                                    "jsonrpc": "2.0",
-                                    "error": {
-                                        "code": -32000,
-                                        "message": "Execution error",
-                                        "data": e.to_string()
-                                    }
-                                });
+            match method.as_str() {
+                Some("cartridge_addExecuteOutsideTransaction") => {
+                    self.handle_execute_outside_transaction(&body).await
+                }
+                Some("cartridge_deployController") => self.handle_deploy_controller(&body).await,
+                _ => self.proxy_request(parts, body).await,
+            }
+        } else {
+            self.proxy_request(parts, body).await
+        }
+    }
 
-                                return Ok(Response::builder()
-                                    .status(StatusCode::OK)
-                                    .header("Content-Type", "application/json")
-                                    .body(Body::from(error_response.to_string()))
-                                    .unwrap());
-                            }
-                        };
-                    }
-                    Err(e) => {
-                        let error_response = json!({
+    async fn handle_execute_outside_transaction(
+        &self,
+        body: &Value,
+    ) -> Result<Response<Body>, hyper::Error> {
+        let params = &body["params"];
+        match parse_execute_outside_transaction_params(params) {
+            Ok((address, outside_execution, signature)) => {
+                match self
+                    .execute_from_outside(outside_execution, signature, address)
+                    .await
+                {
+                    Ok(result) => Ok(Response::builder()
+                        .status(StatusCode::OK)
+                        .body(Body::from(
+                            json!({
+                                "id" : body["id"],
+                                "jsonrpc": "2.0",
+                                "result" : {
+                                    "transaction_hash": format!("0x{:x}", result.transaction_hash)
+                                }
+                            })
+                            .to_string(),
+                        ))
+                        .unwrap()),
+                    Err(e) => Ok(Response::builder()
+                        .status(StatusCode::OK)
+                        .header("Content-Type", "application/json")
+                        .body(Body::from(
+                            json!({
+                                "jsonrpc": "2.0",
+                                "id": body["id"],
+                                "error": {
+                                    "code": -32000,
+                                    "message": "Execution error",
+                                    "data": e.to_string()
+                                }
+                            })
+                            .to_string(),
+                        ))
+                        .unwrap()),
+                }
+            }
+            Err(e) => Ok(Response::builder()
+                .status(StatusCode::OK)
+                .header("Content-Type", "application/json")
+                .body(Body::from(
+                    json!({
+                        "jsonrpc": "2.0",
+                        "id": body["id"],
+                        "error": {
+                            "code": -32602,
+                            "message": e.to_string()
+                        }
+                    })
+                    .to_string(),
+                ))
+                .unwrap()),
+        }
+    }
+
+    async fn handle_deploy_controller(&self, body: &Value) -> Result<Response<Body>, hyper::Error> {
+        let params = &body["params"];
+        match parse_deploy_controller_params(params) {
+            Ok(id) => match self.deploy_controller(id).await {
+                Ok(result) => Ok(Response::builder()
+                    .status(StatusCode::OK)
+                    .body(Body::from(
+                        json!({
+                            "id" : body["id"],
+                            "jsonrpc": "2.0",
+                            "result" : result
+                        })
+                        .to_string(),
+                    ))
+                    .unwrap()),
+                Err(e) => Ok(Response::builder()
+                    .status(StatusCode::OK)
+                    .header("Content-Type", "application/json")
+                    .body(Body::from(
+                        json!({
                             "jsonrpc": "2.0",
                             "id": body["id"],
                             "error": {
-                                "code": -32602,
-                                "message": e.to_string()
+                                "code": -32000,
+                                "message": "Deployment error",
+                                "data": e.to_string()
                             }
-                        });
-                        return Ok(Response::builder()
-                            .status(StatusCode::OK)
-                            .header("Content-Type", "application/json")
-                            .body(Body::from(error_response.to_string()))
-                            .unwrap());
-                    }
-                }
-            }
+                        })
+                        .to_string(),
+                    ))
+                    .unwrap()),
+            },
+            Err(e) => Ok(Response::builder()
+                .status(StatusCode::OK)
+                .header("Content-Type", "application/json")
+                .body(Body::from(
+                    json!({
+                        "jsonrpc": "2.0",
+                        "id": body["id"],
+                        "error": {
+                            "code": -32602,
+                            "message": e.to_string()
+                        }
+                    })
+                    .to_string(),
+                ))
+                .unwrap()),
         }
+    }
 
+    async fn proxy_request(
+        &self,
+        parts: hyper::http::request::Parts,
+        body: Value,
+    ) -> Result<Response<Body>, hyper::Error> {
         let mut proxy_req = Request::builder()
             .method(parts.method)
             .uri(&self.rpc_url.to_string())
@@ -178,6 +246,28 @@ impl CartridgeProxy {
 
         executor.execute_v1(vec![call]).send().await
     }
+
+    async fn deploy_controller(&self, id: String) -> Result<DeployControllerResponse, Error> {
+        let signer = SigningKey::from_random();
+
+        let factory = ControllerFactory::new(
+            ACCOUNT_CLASS_HASH,
+            self.chain_id,
+            signer,
+            None::<SigningKey>,
+            &self.rpc_client,
+        );
+
+        let salt = Felt::from_hex(&id).unwrap();
+        let deployment = factory.deploy_v1(salt);
+
+        let result = deployment.send().await?;
+
+        Ok(DeployControllerResponse {
+            transaction_hash: result.transaction_hash,
+            already_deployed: false,
+        })
+    }
 }
 
 fn parse_execute_outside_transaction_params(
@@ -190,6 +280,22 @@ fn parse_execute_outside_transaction_params(
     } = serde_json::from_value(params.clone())?;
 
     Ok((address, outside_execution, signature))
+}
+
+fn parse_deploy_controller_params(params: &Value) -> Result<String, Error> {
+    #[derive(serde::Deserialize)]
+    struct DeployControllerParams {
+        id: String,
+    }
+
+    let deploy_params: DeployControllerParams = serde_json::from_value(params.clone())?;
+    Ok(deploy_params.id)
+}
+
+#[derive(serde::Serialize)]
+struct DeployControllerResponse {
+    transaction_hash: Felt,
+    already_deployed: bool,
 }
 
 #[cfg(test)]

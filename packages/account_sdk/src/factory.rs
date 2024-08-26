@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use cainome::cairo_serde::CairoSerde;
 use starknet::{
     accounts::{
         AccountDeploymentV1, AccountFactory, PreparedAccountDeploymentV1,
@@ -6,37 +7,39 @@ use starknet::{
     },
     core::types::{BlockId, BlockTag, Felt},
     providers::Provider,
+    signers::SigningKey,
 };
 
-use crate::{account::AccountHashSigner, signers::SignError};
+use crate::abigen::controller::{Owner, Signer, SignerSignature};
+use crate::signers::{HashSigner, SignError};
 
 pub struct ControllerFactory<S, P> {
     class_hash: Felt,
     chain_id: Felt,
-    calldata: Vec<Felt>,
-    signer: S,
+    owner: S,
+    guardian: Option<SigningKey>,
     provider: P,
     block_id: BlockId,
 }
 
 impl<S, P> ControllerFactory<S, P>
 where
-    S: AccountHashSigner,
+    S: HashSigner,
 {
     pub fn new(
         class_hash: Felt,
         chain_id: Felt,
-        calldata: Vec<Felt>,
-        signer: S,
+        owner: S,
+        guardian: Option<SigningKey>,
         provider: P,
     ) -> Self {
         Self {
             class_hash,
             chain_id,
-            calldata,
-            signer,
+            owner,
+            guardian,
             provider,
-            block_id: BlockId::Tag(BlockTag::Latest),
+            block_id: BlockId::Tag(BlockTag::Pending),
         }
     }
 }
@@ -45,7 +48,7 @@ where
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 impl<S, P> AccountFactory for ControllerFactory<S, P>
 where
-    S: AccountHashSigner + Sync + Send,
+    S: HashSigner + Sync + Send,
     P: Provider + Sync + Send,
 {
     type Provider = P;
@@ -56,7 +59,14 @@ where
     }
 
     fn calldata(&self) -> Vec<Felt> {
-        self.calldata.clone()
+        let mut constructor_calldata = Owner::cairo_serialize(&Owner::Signer(self.owner.signer()));
+        if let Some(guardian) = &self.guardian {
+            constructor_calldata
+                .extend(Option::<Signer>::cairo_serialize(&Some(guardian.signer())));
+        } else {
+            constructor_calldata.extend(Option::<Signer>::cairo_serialize(&None));
+        }
+        constructor_calldata
     }
 
     fn chain_id(&self) -> Felt {
@@ -82,9 +92,8 @@ where
     ) -> Result<Vec<Felt>, Self::SignError> {
         let tx_hash = PreparedAccountDeploymentV1::from_raw(deployment.clone(), self)
             .transaction_hash(query_only);
-        let signature = self.signer.sign_hash(tx_hash).await?;
-
-        Ok(signature)
+        let signature = self.owner.sign(&tx_hash).await?;
+        Ok(Vec::<SignerSignature>::cairo_serialize(&vec![signature]))
     }
 
     async fn sign_deployment_v3(
@@ -94,9 +103,8 @@ where
     ) -> Result<Vec<Felt>, Self::SignError> {
         let tx_hash = PreparedAccountDeploymentV3::from_raw(deployment.clone(), self)
             .transaction_hash(query_only);
-        let signature = self.signer.sign_hash(tx_hash).await?;
-
-        Ok(signature)
+        let signature = self.owner.sign(&tx_hash).await?;
+        Ok(Vec::<SignerSignature>::cairo_serialize(&vec![signature]))
     }
 
     fn deploy_v1(&self, salt: Felt) -> AccountDeploymentV1<'_, Self> {

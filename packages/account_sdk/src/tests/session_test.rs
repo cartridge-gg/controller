@@ -28,8 +28,7 @@ pub async fn test_verify_execute<
         .await;
 
     let session_account = controller
-        .account
-        .session_account(
+        .create_session_account(
             session_signer,
             vec![
                 AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
@@ -93,8 +92,7 @@ async fn test_verify_execute_session_multiple() {
         .await;
 
     let session_account = controller
-        .account
-        .session_account(
+        .create_session_account(
             session_signer,
             vec![
                 AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("tdfs")),

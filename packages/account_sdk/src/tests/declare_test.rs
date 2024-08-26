@@ -33,8 +33,7 @@ async fn test_declare_with_session() {
         .await;
 
     let session = controller
-        .account
-        .session_account(
+        .create_session_account(
             SigningKey::from_random(),
             vec![AllowedMethod {
                 contract_address: controller.address(),

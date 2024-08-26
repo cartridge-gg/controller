@@ -167,7 +167,7 @@ impl KatanaRunner {
         &'a self,
         username: String,
         signer: &S,
-    ) -> Controller<CartridgeJsonRpcProvider, S, SigningKey, InMemoryBackend>
+    ) -> Controller<CartridgeJsonRpcProvider, S, InMemoryBackend>
     where
         S: HashSigner + Clone + Send + Sync,
     {
