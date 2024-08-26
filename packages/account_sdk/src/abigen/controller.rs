@@ -702,8 +702,6 @@ impl cainome::cairo_serde::CairoSerde for Upgraded {
 }
 #[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
 pub struct WebauthnSignature {
-    pub cross_origin: Option<bool>,
-    pub top_origin: Option<Vec<u8>>,
     pub client_data_json_outro: Vec<u8>,
     pub flags: u8,
     pub sign_count: u32,
@@ -715,8 +713,6 @@ impl cainome::cairo_serde::CairoSerde for WebauthnSignature {
     #[inline]
     fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
         let mut __size = 0;
-        __size += Option::<bool>::cairo_serialized_size(&__rust.cross_origin);
-        __size += Option::<Vec<u8>>::cairo_serialized_size(&__rust.top_origin);
         __size += Vec::<u8>::cairo_serialized_size(&__rust.client_data_json_outro);
         __size += u8::cairo_serialized_size(&__rust.flags);
         __size += u32::cairo_serialized_size(&__rust.sign_count);
@@ -725,8 +721,6 @@ impl cainome::cairo_serde::CairoSerde for WebauthnSignature {
     }
     fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
         let mut __out: Vec<starknet::core::types::Felt> = vec![];
-        __out.extend(Option::<bool>::cairo_serialize(&__rust.cross_origin));
-        __out.extend(Option::<Vec<u8>>::cairo_serialize(&__rust.top_origin));
         __out.extend(Vec::<u8>::cairo_serialize(&__rust.client_data_json_outro));
         __out.extend(u8::cairo_serialize(&__rust.flags));
         __out.extend(u32::cairo_serialize(&__rust.sign_count));
@@ -738,10 +732,6 @@ impl cainome::cairo_serde::CairoSerde for WebauthnSignature {
         __offset: usize,
     ) -> cainome::cairo_serde::Result<Self::RustType> {
         let mut __offset = __offset;
-        let cross_origin = Option::<bool>::cairo_deserialize(__felts, __offset)?;
-        __offset += Option::<bool>::cairo_serialized_size(&cross_origin);
-        let top_origin = Option::<Vec<u8>>::cairo_deserialize(__felts, __offset)?;
-        __offset += Option::<Vec<u8>>::cairo_serialized_size(&top_origin);
         let client_data_json_outro = Vec::<u8>::cairo_deserialize(__felts, __offset)?;
         __offset += Vec::<u8>::cairo_serialized_size(&client_data_json_outro);
         let flags = u8::cairo_deserialize(__felts, __offset)?;
@@ -751,8 +741,6 @@ impl cainome::cairo_serde::CairoSerde for WebauthnSignature {
         let ec_signature = Signature::cairo_deserialize(__felts, __offset)?;
         __offset += Signature::cairo_serialized_size(&ec_signature);
         Ok(WebauthnSignature {
-            cross_origin,
-            top_origin,
             client_data_json_outro,
             flags,
             sign_count,

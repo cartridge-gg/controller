@@ -362,12 +362,9 @@ where
             y_parity,
         };
 
-        let client_data: ClientData = serde_json::from_str(&client_data_json).unwrap();
         let client_data_json_outro = extract_client_data_json_outro(&client_data_json);
         let webauthn_signature = WebauthnSignature {
             flags,
-            cross_origin: client_data.cross_origin,
-            top_origin: client_data.top_origin.map(|s| s.into_bytes()),
             sign_count: counter,
             ec_signature: signature,
             client_data_json_outro,
@@ -484,11 +481,11 @@ impl<T: WebauthnBackend> WebauthnSigner<T> {
 }
 
 fn extract_client_data_json_outro(client_data_json: &str) -> Vec<u8> {
-    let cross_origin_index = client_data_json.rfind("\"crossOrigin\"");
+    let cross_origin_index = client_data_json.rfind(",\"origin\":");
     match cross_origin_index {
         Some(index) => {
-            let outro_sub = client_data_json[index..].to_string();
-            let outro_start = outro_sub.rfind(',').unwrap_or(outro_sub.len());
+            let outro_sub = client_data_json[index + 1..].to_string();
+            let outro_start = outro_sub.find(',').unwrap_or(outro_sub.len());
             let outro_str = &outro_sub[outro_start..];
             outro_str.as_bytes().to_vec()
         }
@@ -545,7 +542,7 @@ mod tests {
     #[test]
     fn test_extract_client_data_json_outro() {
         let json_with_cross_origin = "{\"type\":\"webauthn.get\",\"challenge\":\"BGJcocCMZ8w1AoRN0wAHFsNtNAVJ3fi83s65MW8jUfIB\",\"origin\":\"http://localhost:3001\",\"crossOrigin\":true,\"other_keys_can_be_added_here\":\"do not compare clientDataJSON against a template. See https://goo.gl/yabPex\"}";
-        let expected_outro = ",\"other_keys_can_be_added_here\":\"do not compare clientDataJSON against a template. See https://goo.gl/yabPex\"}";
+        let expected_outro = ",\"crossOrigin\":true,\"other_keys_can_be_added_here\":\"do not compare clientDataJSON against a template. See https://goo.gl/yabPex\"}";
         let outro = extract_client_data_json_outro(json_with_cross_origin);
         let outro_string = String::from_utf8(outro).expect("Invalid UTF-8");
         assert_eq!(outro_string, expected_outro);
@@ -554,6 +551,12 @@ mod tests {
         "{\"type\":\"webauthn.get\",\"challenge\":\"BD7mj5jZ_ySvAv7kgFJ1HKRknsHwYuwtWbkjJPqQKi4B\",\"origin\":\"http://localhost:3001\",\"crossOrigin\":true}";
         let outro = extract_client_data_json_outro(json_without_outro);
         let outro_string = String::from_utf8(outro).expect("Invalid UTF-8");
-        assert_eq!(outro_string, "");
+        assert_eq!(outro_string, ",\"crossOrigin\":true}");
+
+        let json_with_cross_origin = "{\"type\":\"webauthn.get\",\"challenge\":\"BGJcocCMZ8w1AoRN0wAHFsNtNAVJ3fi83s65MW8jUfIB\",\"origin\":\"http://localhost:3001\",\"other_keys_can_be_added_here\":\"do not compare clientDataJSON against a template. See https://goo.gl/yabPex\"}";
+        let expected_outro = ",\"other_keys_can_be_added_here\":\"do not compare clientDataJSON against a template. See https://goo.gl/yabPex\"}";
+        let outro = extract_client_data_json_outro(json_with_cross_origin);
+        let outro_string = String::from_utf8(outro).expect("Invalid UTF-8");
+        assert_eq!(outro_string, expected_outro);
     }
 }
