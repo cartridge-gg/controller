@@ -238,7 +238,7 @@ function makeMutClosure(arg0, arg1, dtor, f) {
     return real;
 }
 function __wbg_adapter_48(arg0, arg1, arg2) {
-    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__hba4fb360f5c4ef7b(arg0, arg1, addHeapObject(arg2));
+    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h4f854f1ab9269aba(arg0, arg1, addHeapObject(arg2));
 }
 
 let cachedUint32Memory0 = null;
@@ -268,7 +268,7 @@ function handleError(f, args) {
     }
 }
 function __wbg_adapter_176(arg0, arg1, arg2, arg3) {
-    wasm.wasm_bindgen__convert__closures__invoke2_mut__h0e740cd798a04611(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
+    wasm.wasm_bindgen__convert__closures__invoke2_mut__h124d41d3678e7072(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
 }
 
 const CartridgeAccountFinalization = (typeof FinalizationRegistry === 'undefined')
@@ -494,6 +494,11 @@ export function __wbindgen_error_new(arg0, arg1) {
     return addHeapObject(ret);
 };
 
+export function __wbindgen_string_new(arg0, arg1) {
+    const ret = getStringFromWasm0(arg0, arg1);
+    return addHeapObject(ret);
+};
+
 export function __wbindgen_object_clone_ref(arg0) {
     const ret = getObject(arg0);
     return addHeapObject(ret);
@@ -563,11 +568,6 @@ export function __wbg_String_b9412f8799faab3e(arg0, arg1) {
 
 export function __wbindgen_number_new(arg0) {
     const ret = arg0;
-    return addHeapObject(ret);
-};
-
-export function __wbindgen_string_new(arg0, arg1) {
-    const ret = getStringFromWasm0(arg0, arg1);
     return addHeapObject(ret);
 };
 
@@ -1043,7 +1043,7 @@ export function __wbindgen_memory() {
 };
 
 export function __wbindgen_closure_wrapper2261(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 490, __wbg_adapter_48);
+    const ret = makeMutClosure(arg0, arg1, 486, __wbg_adapter_48);
     return addHeapObject(ret);
 };
 

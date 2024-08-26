@@ -1025,6 +1025,133 @@ impl TryFrom<starknet::core::types::EmittedEvent> for DelegateAccountEvent {
 }
 #[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
 pub enum Event {
+    Upgraded(Upgraded),
+}
+impl cainome::cairo_serde::CairoSerde for Event {
+    type RustType = Self;
+    const SERIALIZED_SIZE: std::option::Option<usize> = std::option::Option::None;
+    #[inline]
+    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
+        match __rust {
+            Event::Upgraded(val) => Upgraded::cairo_serialized_size(val) + 1,
+            _ => 0,
+        }
+    }
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
+        match __rust {
+            Event::Upgraded(val) => {
+                let mut temp = vec![];
+                temp.extend(usize::cairo_serialize(&0usize));
+                temp.extend(Upgraded::cairo_serialize(val));
+                temp
+            }
+            _ => vec![],
+        }
+    }
+    fn cairo_deserialize(
+        __felts: &[starknet::core::types::Felt],
+        __offset: usize,
+    ) -> cainome::cairo_serde::Result<Self::RustType> {
+        let __f = __felts[__offset];
+        let __index = u128::from_be_bytes(__f.to_bytes_be()[16..].try_into().unwrap());
+        match __index as usize {
+            0usize => {
+                Ok(Event::Upgraded(Upgraded::cairo_deserialize(__felts, __offset + 1)?))
+            }
+            _ => {
+                return Err(
+                    cainome::cairo_serde::Error::Deserialize(
+                        format!("Index not handle for enum {}", "Event"),
+                    ),
+                );
+            }
+        }
+    }
+}
+impl TryFrom<starknet::core::types::EmittedEvent> for Event {
+    type Error = String;
+    fn try_from(
+        event: starknet::core::types::EmittedEvent,
+    ) -> Result<Self, Self::Error> {
+        use cainome::cairo_serde::CairoSerde;
+        if event.keys.is_empty() {
+            return Err("Event has no key".to_string());
+        }
+        let selector = event.keys[0];
+        if selector
+            == starknet::core::utils::get_selector_from_name("Upgraded")
+                .unwrap_or_else(|_| panic!("Invalid selector for {}", "Upgraded"))
+        {
+            let mut key_offset = 0 + 1;
+            let mut data_offset = 0;
+            let class_hash = match cainome::cairo_serde::ClassHash::cairo_deserialize(
+                &event.data,
+                data_offset,
+            ) {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(
+                        format!(
+                            "Could not deserialize field {} for {}: {:?}", "class_hash",
+                            "Upgraded", e
+                        ),
+                    );
+                }
+            };
+            data_offset
+                += cainome::cairo_serde::ClassHash::cairo_serialized_size(&class_hash);
+            return Ok(Event::Upgraded(Upgraded { class_hash }));
+        }
+        Err(format!("Could not match any event from keys {:?}", event.keys))
+    }
+}
+#[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
+pub enum Event {}
+impl cainome::cairo_serde::CairoSerde for Event {
+    type RustType = Self;
+    const SERIALIZED_SIZE: std::option::Option<usize> = std::option::Option::None;
+    #[inline]
+    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
+        match __rust {
+            _ => 0,
+        }
+    }
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
+        match __rust {
+            _ => vec![],
+        }
+    }
+    fn cairo_deserialize(
+        __felts: &[starknet::core::types::Felt],
+        __offset: usize,
+    ) -> cainome::cairo_serde::Result<Self::RustType> {
+        let __f = __felts[__offset];
+        let __index = u128::from_be_bytes(__f.to_bytes_be()[16..].try_into().unwrap());
+        match __index as usize {
+            _ => {
+                return Err(
+                    cainome::cairo_serde::Error::Deserialize(
+                        format!("Index not handle for enum {}", "Event"),
+                    ),
+                );
+            }
+        }
+    }
+}
+impl TryFrom<starknet::core::types::EmittedEvent> for Event {
+    type Error = String;
+    fn try_from(
+        event: starknet::core::types::EmittedEvent,
+    ) -> Result<Self, Self::Error> {
+        use cainome::cairo_serde::CairoSerde;
+        if event.keys.is_empty() {
+            return Err("Event has no key".to_string());
+        }
+        Err(format!("Could not match any event from keys {:?}", event.keys))
+    }
+}
+#[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
+pub enum Event {
     TransactionExecuted(TransactionExecuted),
     MultipleOwnersEvent(MultipleOwnersEvent),
     ReentrancyGuardEvent(Event),
@@ -1498,133 +1625,6 @@ impl TryFrom<starknet::core::types::EmittedEvent> for Event {
             data_offset
                 += cainome::cairo_serde::ClassHash::cairo_serialized_size(&class_hash);
             return Ok(Event::UpgradeableEvent(Event::Upgraded(Upgraded { class_hash })));
-        }
-        Err(format!("Could not match any event from keys {:?}", event.keys))
-    }
-}
-#[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
-pub enum Event {}
-impl cainome::cairo_serde::CairoSerde for Event {
-    type RustType = Self;
-    const SERIALIZED_SIZE: std::option::Option<usize> = std::option::Option::None;
-    #[inline]
-    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
-        match __rust {
-            _ => 0,
-        }
-    }
-    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
-        match __rust {
-            _ => vec![],
-        }
-    }
-    fn cairo_deserialize(
-        __felts: &[starknet::core::types::Felt],
-        __offset: usize,
-    ) -> cainome::cairo_serde::Result<Self::RustType> {
-        let __f = __felts[__offset];
-        let __index = u128::from_be_bytes(__f.to_bytes_be()[16..].try_into().unwrap());
-        match __index as usize {
-            _ => {
-                return Err(
-                    cainome::cairo_serde::Error::Deserialize(
-                        format!("Index not handle for enum {}", "Event"),
-                    ),
-                );
-            }
-        }
-    }
-}
-impl TryFrom<starknet::core::types::EmittedEvent> for Event {
-    type Error = String;
-    fn try_from(
-        event: starknet::core::types::EmittedEvent,
-    ) -> Result<Self, Self::Error> {
-        use cainome::cairo_serde::CairoSerde;
-        if event.keys.is_empty() {
-            return Err("Event has no key".to_string());
-        }
-        Err(format!("Could not match any event from keys {:?}", event.keys))
-    }
-}
-#[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
-pub enum Event {
-    Upgraded(Upgraded),
-}
-impl cainome::cairo_serde::CairoSerde for Event {
-    type RustType = Self;
-    const SERIALIZED_SIZE: std::option::Option<usize> = std::option::Option::None;
-    #[inline]
-    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
-        match __rust {
-            Event::Upgraded(val) => Upgraded::cairo_serialized_size(val) + 1,
-            _ => 0,
-        }
-    }
-    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
-        match __rust {
-            Event::Upgraded(val) => {
-                let mut temp = vec![];
-                temp.extend(usize::cairo_serialize(&0usize));
-                temp.extend(Upgraded::cairo_serialize(val));
-                temp
-            }
-            _ => vec![],
-        }
-    }
-    fn cairo_deserialize(
-        __felts: &[starknet::core::types::Felt],
-        __offset: usize,
-    ) -> cainome::cairo_serde::Result<Self::RustType> {
-        let __f = __felts[__offset];
-        let __index = u128::from_be_bytes(__f.to_bytes_be()[16..].try_into().unwrap());
-        match __index as usize {
-            0usize => {
-                Ok(Event::Upgraded(Upgraded::cairo_deserialize(__felts, __offset + 1)?))
-            }
-            _ => {
-                return Err(
-                    cainome::cairo_serde::Error::Deserialize(
-                        format!("Index not handle for enum {}", "Event"),
-                    ),
-                );
-            }
-        }
-    }
-}
-impl TryFrom<starknet::core::types::EmittedEvent> for Event {
-    type Error = String;
-    fn try_from(
-        event: starknet::core::types::EmittedEvent,
-    ) -> Result<Self, Self::Error> {
-        use cainome::cairo_serde::CairoSerde;
-        if event.keys.is_empty() {
-            return Err("Event has no key".to_string());
-        }
-        let selector = event.keys[0];
-        if selector
-            == starknet::core::utils::get_selector_from_name("Upgraded")
-                .unwrap_or_else(|_| panic!("Invalid selector for {}", "Upgraded"))
-        {
-            let mut key_offset = 0 + 1;
-            let mut data_offset = 0;
-            let class_hash = match cainome::cairo_serde::ClassHash::cairo_deserialize(
-                &event.data,
-                data_offset,
-            ) {
-                Ok(v) => v,
-                Err(e) => {
-                    return Err(
-                        format!(
-                            "Could not deserialize field {} for {}: {:?}", "class_hash",
-                            "Upgraded", e
-                        ),
-                    );
-                }
-            };
-            data_offset
-                += cainome::cairo_serde::ClassHash::cairo_serialized_size(&class_hash);
-            return Ok(Event::Upgraded(Upgraded { class_hash }));
         }
         Err(format!("Could not match any event from keys {:?}", event.keys))
     }
