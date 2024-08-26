@@ -1,5 +1,5 @@
 import { Field } from "@cartridge/ui";
-import { Button, Input } from "@chakra-ui/react";
+import { Button } from "@chakra-ui/react";
 import { Container, Footer, Content } from "components/layout";
 import { useCallback, useEffect, useState } from "react";
 import { useAccountQuery } from "generated/graphql";
