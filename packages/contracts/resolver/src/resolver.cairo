@@ -1,16 +1,17 @@
 #[starknet::interface]
 trait IControllerResolverDelegation<TContractState> {
     fn set_name(ref self: TContractState, name: felt252, address: starknet::ContractAddress);
-    fn reset_name(ref self: ContractState, name: felt252);
+    fn reset_name(ref self: TContractState, name: felt252);
 
     fn set_owner(ref self: TContractState, new_owner: starknet::ContractAddress);
 
-    fn grant_executors(ref self: TContractState, executors: Array<felt252>);
-    fn revoke_executors(ref self: TContractState, executors: Array<felt252>);
+    fn grant_executors(ref self: TContractState, executor_pub_keys: Span<felt252>);
+    fn revoke_executors(ref self: TContractState, executor_pub_keys: Span<felt252>);
 }
 
 #[starknet::contract]
 mod ControllerResolverDelegation {
+    use core::panics::panic_with_byte_array;
     use starknet::{get_caller_address, ContractAddress, ClassHash, storage::Map};
     use starknet::contract_address::ContractAddressZeroable;
     use resolver::interface::{
@@ -29,8 +30,8 @@ mod ControllerResolverDelegation {
     struct Storage {
         // name -> address
         name_owners: Map::<felt252, ContractAddress>,
-        // public_key -> bool
-        executors: Map::<felt252, bool>,
+        // pub_key -> allowed
+        executor_pub_keys: Map::<felt252, bool>,
         // owner
         owner: ContractAddress,
         // upgradeable
@@ -53,10 +54,17 @@ mod ControllerResolverDelegation {
         address: ContractAddress,
     }
 
+
     #[constructor]
-    fn constructor(ref self: ContractState, owner: ContractAddress, executor_pub_key: felt252) {
+    fn constructor(
+        ref self: ContractState, owner: ContractAddress, mut executor_pub_keys: Span<felt252>
+    ) {
         self.owner.write(owner);
-        self.executors.write(executor_pub_key, true);
+
+        while let Option::Some(pub_key) = executor_pub_keys
+            .pop_front() {
+                self.executor_pub_keys.write(*pub_key, true);
+            }
     }
 
     #[abi(embed_v0)]
@@ -66,7 +74,15 @@ mod ControllerResolverDelegation {
         ) -> felt252 {
             assert(domain.len() == 1, 'Domain must have a length of 1');
             assert(field == 'starknet', 'Not supported');
-            self.name_owners.read(*domain.at(0)).into()
+
+            let name = *domain.at(0);
+            let name_owner: ContractAddress = self.name_owners.read(name);
+
+            if name_owner != ContractAddressZeroable::zero() {
+                return name_owner.into();
+            }
+
+            panic_with_byte_array(@format!("Unknown {}", name))
         }
     }
 
@@ -89,7 +105,7 @@ mod ControllerResolverDelegation {
 
         fn reset_name(ref self: ContractState, name: felt252) {
             self.assert_executor();
-            
+
             self.name_owners.write(name, ContractAddressZeroable::zero());
         }
 
@@ -102,23 +118,22 @@ mod ControllerResolverDelegation {
             self.owner.write(new_owner);
         }
 
-        fn grant_executors(ref self: ContractState, executors: Array<felt252>) {
+
+        fn grant_executors(ref self: ContractState, mut executor_pub_keys: Span<felt252>) {
             self.assert_owner();
 
-            let mut executors = executors.span();
-            while let Option::Some(executor) = executors
+            while let Option::Some(pub_key) = executor_pub_keys
                 .pop_front() {
-                    self.executors.write(*executor, true);
+                    self.executor_pub_keys.write(*pub_key, true);
                 }
         }
 
-        fn revoke_executors(ref self: ContractState, executors: Array<felt252>) {
+        fn revoke_executors(ref self: ContractState, mut executor_pub_keys: Span<felt252>) {
             self.assert_owner();
 
-            let mut executors = executors.span();
-            while let Option::Some(executor) = executors
+            while let Option::Some(pub_key) = executor_pub_keys
                 .pop_front() {
-                    self.executors.write(*executor, false);
+                    self.executor_pub_keys.write(*pub_key, false);
                 }
         }
     }
@@ -144,7 +159,7 @@ mod ControllerResolverDelegation {
             let caller_disp = IExecutorAccountDispatcher { contract_address: get_caller_address() };
             let public_key = caller_disp.get_public_key();
 
-            let is_executor = self.executors.read(public_key);
+            let is_executor = self.executor_pub_keys.read(public_key);
             assert(is_executor, 'caller is not executor');
         }
     }
