@@ -54,6 +54,8 @@ webauthn-rs-core.workspace = true
 
 [build-dependencies]
 cainome.workspace = true
+starknet.workspace = true
+serde_json.workspace = true
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tokio.workspace = true

@@ -5,6 +5,7 @@ use crate::{
     transaction_waiter::TransactionWaiter,
 };
 use starknet::{accounts::Account, macros::felt, providers::Provider, signers::SigningKey};
+use starknet_crypto::Felt;
 
 #[tokio::test]
 async fn test_deploy_controller() {
@@ -21,12 +22,25 @@ async fn test_deploy_controller() {
 
     let provider = runner.client();
     let backend = InMemoryBackend::default();
+    let chain_id = provider.chain_id().await.unwrap();
 
     // Create a new Controller instance
     let username = "testuser".to_string();
-    let address = felt!("0x4b39dbeb3255ddb7985c01587e6238943a880f2ae238b7c81c0d7c72264b997");
 
-    let chain_id = provider.chain_id().await.unwrap();
+    // This is only done to calculate the address
+    // The code duplication allows for the address not to be hardcoded
+    let address = Controller::new(
+        "app_id".to_string(),
+        username.clone(),
+        provider.clone(),
+        owner.clone(),
+        guardian_signer.clone(),
+        Felt::ZERO,
+        chain_id,
+        backend.clone(),
+    )
+    .deploy()
+    .address();
 
     let controller = Controller::new(
         "app_id".to_string(),

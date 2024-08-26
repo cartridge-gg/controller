@@ -1,10 +1,62 @@
 use cainome::rs::Abigen;
-use std::collections::HashMap;
+use starknet::core::types::Felt;
+use std::{collections::HashMap, process::Command};
 
 fn main() {
     println!("cargo:rerun-if-changed=./compiled");
     generate_controller_bindings();
     generate_erc20_bindings();
+    generate_class_hashes();
+    Command::new("cargo")
+        .args(["fmt", "--all"])
+        .status()
+        .expect("Failed to format the code");
+}
+
+fn generate_class_hashes() {
+    let controller_class_hash = extract_class_hash("controller");
+    let controller_compiled_class_hash = extract_compiled_class_hash("controller");
+    let erc20_compiled_class_hash = extract_compiled_class_hash("erc20");
+    let code = format!(
+        r#"use starknet::macros::felt;
+use starknet_crypto::Felt;
+
+pub const ACCOUNT_CLASS_HASH: Felt =
+    felt!("{controller_class_hash:#x}");
+
+pub const ACCOUNT_COMPILED_CLASS_HASH: Felt =
+    felt!("{controller_compiled_class_hash:#x}");
+
+pub const ERC_20_COMPILED_CLASS_HASH: Felt =
+    felt!("{erc20_compiled_class_hash:#x}");
+"#
+    );
+    std::fs::write("./src/constants.rs", code).unwrap();
+}
+
+fn extract_compiled_class_hash(contract_name: &str) -> Felt {
+    use starknet::core::types::contract::CompiledClass;
+    use std::fs::File;
+    use std::io::BufReader;
+    let compiled_class: CompiledClass = serde_json::from_reader(BufReader::new(
+        File::open(format!(
+            "./compiled/{contract_name}.compiled_contract_class.json"
+        ))
+        .unwrap(),
+    ))
+    .unwrap();
+    compiled_class.class_hash().unwrap()
+}
+
+fn extract_class_hash(contract_name: &str) -> Felt {
+    use starknet::core::types::contract::SierraClass;
+    use std::fs::File;
+    use std::io::BufReader;
+    let compiled_class: SierraClass = serde_json::from_reader(BufReader::new(
+        File::open(format!("./compiled/{contract_name}.contract_class.json")).unwrap(),
+    ))
+    .unwrap();
+    compiled_class.class_hash().unwrap()
 }
 
 fn generate_controller_bindings() {
@@ -15,7 +67,7 @@ fn generate_controller_bindings() {
                 String::from("OutsideExecutionEvent"),
             ),
             (
-                String::from("controller::Controller::Event"),
+                String::from("controller::account::CartridgeAccount::Event"),
                 String::from("ControllerEvent"),
             ),
             (
@@ -47,11 +99,11 @@ fn generate_controller_bindings() {
                 String::from("OwnableComponentEvent"),
             ),
             (
-                String::from("openzeppelin::upgrades::upgradeable::UpgradeableComponent::Event"),
+                String::from("openzeppelin_upgrades::upgradeable::UpgradeableComponent::Event"),
                 String::from("UpgradeEvent"),
             ),
             (
-                String::from("openzeppelin::security::reentrancyguard::ReentrancyGuardComponent::Event"),
+                String::from("openzeppelin_security::reentrancyguard::ReentrancyGuardComponent::Event"),
                 String::from("ReentrancyGuardEvent"),
             ),
         ]))
