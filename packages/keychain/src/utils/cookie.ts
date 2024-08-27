@@ -7,5 +7,5 @@ export function setIsSignedUp() {
     return;
   }
 
-  document.cookie = `controller=1;${document.cookie}`;
+  document.cookie = "controller=1; SameSite=None; Secure";
 }
