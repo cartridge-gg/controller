@@ -11,7 +11,6 @@ export async function fetchData<TData, TVariables>(
 ): Promise<TData> {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/query`, {
     method: "POST",
-    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
