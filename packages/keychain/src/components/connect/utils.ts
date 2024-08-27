@@ -44,6 +44,7 @@ export function validateUsernameFor(type: AuthAction) {
 }
 
 export function fetchAccount(username: string) {
+  console.log("fetching: " + username);
   return fetchData<AccountQuery, AccountQueryVariables>(AccountDocument, {
     id: username,
   });
