@@ -4,7 +4,6 @@ import { Container, Footer, Content, useLayout } from "components/layout";
 import { useCallback, useEffect, useState } from "react";
 import Controller from "utils/controller";
 import { LoginMode, LoginProps } from "./types";
-import { useAnalytics } from "hooks/analytics";
 import { fetchAccount, validateUsernameFor } from "./utils";
 import { RegistrationLink } from "./RegistrationLink";
 import { useControllerTheme } from "hooks/theme";
@@ -39,7 +38,6 @@ function Form({
 }: LoginProps) {
   const { footer } = useLayout();
   const { origin, policies, chainId, rpcUrl, setController } = useConnection();
-  const { event: log } = useAnalytics();
   const [isLoading, setIsLoading] = useState(false);
   const [expiresAt] = useState<bigint>(3000000000n);
   const [error, setError] = useState<Error>();
@@ -106,7 +104,6 @@ function Form({
     policies,
     expiresAt,
     mode,
-    log,
     onSuccess,
     setController,
   ]);

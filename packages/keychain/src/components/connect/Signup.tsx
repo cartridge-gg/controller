@@ -92,7 +92,15 @@ export function Signup({
         onSuccess();
       }
     },
-    [origin, chainId, rpcUrl, onSuccess],
+    [
+      origin,
+      chainId,
+      rpcUrl,
+      hasPrefundRequest,
+      onSuccess,
+      deployRequest,
+      setController,
+    ],
   );
 
   const doPopup = useCallback(() => {
@@ -147,7 +155,7 @@ export function Signup({
       setIsRegistering(false);
       setUsernameField((u) => ({ ...u, error: e.message }));
     }
-  }, [usernameField, doPopup]);
+  }, [usernameField, initController, doPopup]);
 
   // for polling approach when popup
   useAccountQuery(
