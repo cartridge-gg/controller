@@ -102,6 +102,26 @@ impl CartridgeAccount {
         Ok(CartridgeAccount { controller })
     }
 
+    #[wasm_bindgen(js_name = registerSession)]
+    pub async fn register_session(
+        &mut self,
+        policies: Vec<JsValue>,
+        expires_at: u64,
+        public_key: String,
+    ) -> Result<JsValue> {
+        let methods = policies
+            .into_iter()
+            .map(AllowedMethod::try_from_js_value)
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+
+        let hash = self
+            .controller
+            .register_session(methods, expires_at, Felt::from_hex(&public_key)?)
+            .await?;
+
+        Ok(to_value(&hash)?)
+    }
+
     #[wasm_bindgen(js_name = createSession)]
     pub async fn create_session(
         &mut self,

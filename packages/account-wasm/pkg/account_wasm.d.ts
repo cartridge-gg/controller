@@ -31,6 +31,13 @@ export class CartridgeAccount {
 /**
 * @param {any[]} policies
 * @param {bigint} expires_at
+* @param {string} public_key
+* @returns {Promise<any>}
+*/
+  registerSession(policies: any[], expires_at: bigint, public_key: string): Promise<any>;
+/**
+* @param {any[]} policies
+* @param {bigint} expires_at
 * @returns {Promise<any>}
 */
   createSession(policies: any[], expires_at: bigint): Promise<any>;
