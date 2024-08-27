@@ -1,18 +1,29 @@
+"use client";
+
 import { useRouter } from "next/router";
 import { Signup as SignupComponent } from "components/connect";
 import { useConnection } from "hooks/connection";
-import dynamic from "next/dynamic";
 
-function Signup() {
+export default function Signup() {
   const router = useRouter();
   const { controller, rpcUrl, chainId, error } = useConnection();
+
+  const navigateToSuccess = (title: string) => {
+    router.replace({
+      pathname: "/success",
+      query: {
+        title,
+        description: "Your controller is ready",
+      },
+    });
+  };
 
   if (error) {
     return <>{error.message}</>;
   }
 
   if (controller) {
-    router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);
+    navigateToSuccess("Already signed up!");
   }
 
   if (!rpcUrl || !chainId) {
@@ -22,11 +33,7 @@ function Signup() {
   return (
     <SignupComponent
       onLogin={() => router.push({ pathname: "/login", query: router.query })}
-      onSuccess={() => {
-        router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);
-      }}
+      onSuccess={() => navigateToSuccess("Signed up!")}
     />
   );
 }
-
-export default dynamic(() => Promise.resolve(Signup), { ssr: false });

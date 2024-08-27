@@ -1,11 +1,12 @@
+"use client";
+
 import { Container } from "components/layout";
 import { AlertIcon, ExternalIcon } from "@cartridge/ui";
 import { Link, Text } from "@chakra-ui/react";
 import NextLink from "next/link";
-import dynamic from "next/dynamic";
 import { CARTRIDGE_DISCORD_LINK } from "const";
 
-function Failure() {
+export default function Failure() {
   return (
     <Container
       variant="connect"
@@ -36,5 +37,3 @@ function Failure() {
     />
   );
 }
-
-export default dynamic(() => Promise.resolve(Failure), { ssr: false });
