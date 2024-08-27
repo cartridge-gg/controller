@@ -129,7 +129,6 @@ export const beginLogin = async (name: string): Promise<any> => {
 export const doXHR = async (json: string): Promise<any> => {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.withCredentials = true;
     xhr.open("POST", ENDPOINT);
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.onload = () => {
