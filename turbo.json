@@ -22,8 +22,8 @@
       "dependsOn": ["^build:deps"]
     },
     "e2e:ui": {
-      "dependsOn": ["^build:deps"],
-      "persistent": true
+      "persistent": true,
+      "dependsOn": ["^build:deps"]
     }
   }
 }

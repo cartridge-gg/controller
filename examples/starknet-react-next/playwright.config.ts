@@ -1,4 +1,12 @@
 import { defineConfig, devices } from "@playwright/test";
+import dotenv from "dotenv";
+import path from "path";
+
+dotenv.config({ path: path.resolve(__dirname, ".env") });
+
+const CI_BASE_URL = process.env.BRANCH_NAME
+  ? `https://cartridge-starknet-react-next-git-${process.env.BRANCH_NAME}.preview.cartridge.gg`
+  : "https://cartridge-starknet-react-next.preview.cartridge.gg";
 
 export default defineConfig({
   testDir: "./tests",
@@ -7,7 +15,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? "dot" : "list",
   use: {
-    baseURL: "http://localhost:3002",
+    baseURL: process.env.CI ? CI_BASE_URL : "http://localhost:3002",
     trace: "on-first-retry",
   },
   projects: [
@@ -31,5 +39,6 @@ export default defineConfig({
   //   reuseExistingServer: !process.env.CI,
   //   stdout: "pipe",
   //   stderr: "pipe",
+  //   timeout: 1000 * 60,
   // },
 });
