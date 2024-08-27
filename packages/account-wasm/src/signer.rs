@@ -52,7 +52,7 @@ impl WebauthnBackend for BrowserBackend {
                         PublicKeyCredential::from(web_sys::PublicKeyCredential::from(jsval));
 
                     let value = to_value(&result.response.client_data_json).unwrap_throw();
-                    console::log_1(&format!("client_data_json: {:#?}", value).into());
+                    console::debug_1(&format!("client_data_json: {:#?}", value).into());
                     let _ = tx.send(Ok(result));
                 }
                 Err(e) => {
@@ -90,7 +90,7 @@ impl WebauthnBackend for BrowserBackend {
                     );
 
                     let value = to_value(result.response.client_data_json.clone()).unwrap_throw();
-                    console::log_1(&format!("client_data_json:{:#?}", value).into());
+                    console::debug_1(&format!("client_data_json:{:#?}", value).into());
 
                     let _ = tx.send(Ok(result));
                 }

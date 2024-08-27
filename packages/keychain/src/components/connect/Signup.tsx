@@ -43,6 +43,8 @@ export function Signup({
     1000,
   );
 
+  console.debug("signup render");
+
   // In order for Safari to open "Create Passkey" modal successfully, submit handler has to be async.
   // The workaround is to call async validation function every time when username input changes
   useEffect(() => {
