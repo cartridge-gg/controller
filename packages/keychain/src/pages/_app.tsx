@@ -44,6 +44,11 @@ export default function Keychain({ Component, pageProps }: AppProps) {
           property="theme-color"
           content={CartridgeTheme.semanticTokens.colors.brand}
         />
+        <script
+          defer
+          data-domain="cartridge.gg"
+          src="https://plausible.io/js/script.js"
+        />
       </NextHead>
 
       <style jsx global>{`
