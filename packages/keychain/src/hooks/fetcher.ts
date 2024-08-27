@@ -18,6 +18,7 @@ export async function fetchData<TData, TVariables>(
       query,
       variables,
     }),
+    credentials: "omit",
   });
 
   const json = await res.json();
