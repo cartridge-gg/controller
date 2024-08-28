@@ -13,6 +13,7 @@ import { Call, hash } from "starknet";
 import { LoginMode } from "components/connect/types";
 
 type SessionResponse = {
+  username: string;
   transaction_hash?: string;
   already_registered?: boolean;
 };
@@ -97,6 +98,7 @@ export default function RegisterSession() {
       }
 
       onCallback({
+        username: controller.account.username,
         transaction_hash,
       });
     },
@@ -123,6 +125,7 @@ export default function RegisterSession() {
     // the exising session
     if (controller.account.hasSession(calls)) {
       onCallback({
+        username: controller.account.username,
         already_registered: true,
       });
     }
