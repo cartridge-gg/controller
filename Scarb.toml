@@ -1,5 +1,8 @@
 [workspace]
-members = ["packages/contracts/controller"]
+members = [
+    "packages/contracts/controller",
+    "packages/contracts/resolver",
+]
 
 [workspace.package]
 edition = "2023_10"
