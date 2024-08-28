@@ -17,7 +17,7 @@ import {
 
 import { selectors, VERSION } from "./selectors";
 import Storage from "./storage";
-import { CartridgeAccount, JsInvocationsDetails } from "@cartridge/account-wasm";
+import { CartridgeAccount, JsCall, JsInvocationsDetails } from "@cartridge/account-wasm";
 import { normalizeCalls } from "./connection/execute";
 import { PaymasterOptions } from "@cartridge/controller";
 
@@ -121,7 +121,7 @@ class Account extends BaseAccount {
     this.ensureDeployed();
 
     return await this.cartridge.executeFromOutside(
-      normalizeCalls(calls),
+      normalizeCalls(calls) as JsCall[],
       paymaster.caller,
     );
   }
@@ -135,7 +135,7 @@ class Account extends BaseAccount {
 
     details.nonce = details.nonce ?? (await super.getNonce("pending"));
 
-    const res = await this.cartridge.execute(normalizeCalls(calls), details as JsInvocationsDetails);
+    const res = await this.cartridge.execute(normalizeCalls(calls) as JsCall[], details as JsInvocationsDetails);
 
     Storage.update(this.selector, {
       nonce: num.toHex(BigInt(details.nonce) + 1n),
@@ -151,7 +151,7 @@ class Account extends BaseAccount {
   }
 
   hasSession(calls: AllowArray<Call>): boolean {
-    return this.cartridge.hasSession(normalizeCalls(calls));
+    return this.cartridge.hasSession(normalizeCalls(calls) as JsCall[]);
   }
 
   sessionJson(): string {
