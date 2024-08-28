@@ -32,7 +32,26 @@ pub struct OutsideExecutionParams {
 pub struct PaymasterResponse {
     pub id: u64,
     pub jsonrpc: String,
-    pub result: TransactionResult,
+    #[serde(flatten)]
+    pub result: PaymasterResponseResult,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum PaymasterResponseResult {
+    Success(TransactionResult),
+    Error(PaymasterErrorResponse),
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct PaymasterErrorResponse {
+    pub error: PaymasterErrorDetails,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct PaymasterErrorDetails {
+    pub code: i32,
+    pub message: String,
 }
 
 #[serde_as]
@@ -50,6 +69,8 @@ pub enum PaymasterError {
     Http(#[from] reqwest::Error),
     #[error("Unexpected response: {0}")]
     UnexpectedResponse(String),
+    #[error("Rpc error: {code} {message}")]
+    RpcError { code: i32, message: String },
 }
 
 impl PaymasterRequest {
@@ -78,8 +99,14 @@ impl PaymasterRequest {
             .send()
             .await?;
 
-        let json: PaymasterResponse = response.json().await.map_err(PaymasterError::from)?;
+        let response: PaymasterResponse = response.json().await.map_err(PaymasterError::from)?;
 
-        Ok(json)
+        match response.result {
+            PaymasterResponseResult::Success(_) => Ok(response),
+            PaymasterResponseResult::Error(error_response) => Err(PaymasterError::RpcError {
+                code: error_response.error.code,
+                message: error_response.error.message,
+            }),
+        }
     }
 }

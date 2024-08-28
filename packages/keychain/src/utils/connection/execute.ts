@@ -14,7 +14,6 @@ import {
   addAddressPadding,
   num,
 } from "starknet";
-import Account from "utils/account";
 import { ConnectionCtx, ExecuteCtx } from "./types";
 
 export const ESTIMATE_FEE_PERCENTAGE = 10;
@@ -56,18 +55,28 @@ export function executeFactory({
 
         if (paymaster) {
           try {
-            const res = await tryPaymaster(account, calls, paymaster);
-            if (res) return res;
+            const transaction_hash = await account.executeFromOutside(
+              calls,
+              paymaster,
+            );
+
+            return {
+              code: ResponseCodes.SUCCESS,
+              transaction_hash,
+            };
           } catch (error) {
-            console.error(error);
-            // Paymaster not supported
-            if (error.code === -32003) {
-              // Handle the specific error, e.g., fallback to non-paymaster execution
-              console.warn(
-                "Paymaster not supported, falling back to regular execution",
-              );
+            if (error instanceof Error) {
+              // Paymaster not supported
+              if (error.message.includes("-32003")) {
+                // Handle the specific error, e.g., fallback to non-paymaster execution
+                console.warn(
+                  "Paymaster not supported, falling back to regular execution",
+                );
+              } else {
+                throw error;
+              }
             } else {
-              throw error; // Re-throw other errors
+              throw error;
             }
           }
         }
@@ -143,20 +152,3 @@ export const normalizeCalls = (calls: AllowArray<Call>): Call[] => {
     } as Call;
   });
 };
-
-async function tryPaymaster(
-  account: Account,
-  calls: Call[],
-  paymaster: PaymasterOptions,
-): Promise<ExecuteReply> {
-  try {
-    const transaction_hash = await account.executeFromOutside(calls, paymaster);
-
-    return {
-      code: ResponseCodes.SUCCESS,
-      transaction_hash,
-    };
-  } catch (e) {
-    /* user pays */
-  }
-}
