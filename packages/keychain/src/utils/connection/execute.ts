@@ -81,13 +81,13 @@ export function executeFactory({
     };
 }
 
-export const normalizeCalls = (calls: AllowArray<Call>): JsCall[] => {
+export const normalizeCalls = (calls: AllowArray<Call>): Call[] => {
   return (Array.isArray(calls) ? calls : [calls]).map((call) => {
     return {
       entrypoint: call.entrypoint,
       contractAddress: addAddressPadding(call.contractAddress),
       calldata: CallData.toHex(call.calldata),
-    };
+    } as Call;
   });
 };
 
@@ -98,7 +98,7 @@ async function tryPaymaster(
 ): Promise<ExecuteReply> {
   try {
     const transaction_hash = await account.cartridge.executeFromOutside(
-      normalizeCalls(calls),
+      calls as JsCall[],
       paymaster.caller,
     );
 
@@ -123,7 +123,7 @@ async function getInvocationDetails(
   if (!maxFee) {
     await account.ensureDeployed();
 
-    const estFee = await account.cartridge.estimateInvokeFee(normalizeCalls(calls));
+    const estFee = await account.cartridge.estimateInvokeFee(calls as JsCall[]);
 
     maxFee = num.toHex(
       num.addPercent(estFee.overall_fee, ESTIMATE_FEE_PERCENTAGE),
