@@ -17,6 +17,7 @@ export function cartridgeaccount_delegateAccount(a: number): number;
 export function __wbg_cartridgesessionaccount_free(a: number): void;
 export function cartridgesessionaccount_new(a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number, n: number): void;
 export function cartridgesessionaccount_new_as_registered(a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number, n: number): void;
+export function cartridgesessionaccount_sign(a: number, b: number, c: number, d: number): number;
 export function cartridgesessionaccount_execute(a: number, b: number, c: number): number;
 export function __wbindgen_malloc(a: number, b: number): number;
 export function __wbindgen_realloc(a: number, b: number, c: number, d: number): number;

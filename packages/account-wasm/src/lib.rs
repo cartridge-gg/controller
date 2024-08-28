@@ -371,10 +371,7 @@ impl CartridgeSessionAccount {
             .map(Call::try_from_js_value)
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
-        let res = self
-            .0
-            .sign_hash_and_calls(hash, &calls)
-            .await?;
+        let res = self.0.sign_hash_and_calls(hash, &calls).await?;
 
         Ok(Felts(res.into_iter().map(JsFelt).collect()))
     }

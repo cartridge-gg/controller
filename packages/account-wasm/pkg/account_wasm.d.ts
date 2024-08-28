@@ -1,13 +1,12 @@
 /* tslint:disable */
 /* eslint-disable */
-export interface JsCall {
-    contract_address: Felt;
-    entrypoint: string;
-    calldata: Felt[];
-}
-
 export interface JsEstimateFeeDetails {
     nonce: Felt;
+}
+
+export interface JsInvocationsDetails {
+    nonce: Felt;
+    max_fee: Felt;
 }
 
 export interface JsOutsideExecution {
@@ -34,10 +33,13 @@ export interface JsCredentials {
     private_key: Felt;
 }
 
-export interface JsInvocationsDetails {
-    nonce: Felt;
-    max_fee: Felt;
+export interface JsCall {
+    contract_address: Felt;
+    entrypoint: string;
+    calldata: Felt[];
 }
+
+export type Felts = JsFelt[];
 
 export type JsFelt = Felt;
 
@@ -114,18 +116,18 @@ export class CartridgeAccount {
   revokeSession(): void;
 /**
 * @param {string} typed_data
-* @returns {Promise<any>}
+* @returns {Promise<Felts>}
 */
-  signMessage(typed_data: string): Promise<any>;
+  signMessage(typed_data: string): Promise<Felts>;
 /**
 * @param {any} max_fee
 * @returns {Promise<any>}
 */
   deploySelf(max_fee: any): Promise<any>;
 /**
-* @returns {Promise<any>}
+* @returns {Promise<JsFelt>}
 */
-  delegateAccount(): Promise<any>;
+  delegateAccount(): Promise<JsFelt>;
 }
 /**
 */
@@ -153,6 +155,12 @@ export class CartridgeSessionAccount {
 * @returns {CartridgeSessionAccount}
 */
   static new_as_registered(rpc_url: string, signer: string, guardian: string, address: string, chain_id: string, owner_guid: string, session: JsSession): CartridgeSessionAccount;
+/**
+* @param {JsFelt} hash
+* @param {any[]} calls
+* @returns {Promise<Felts>}
+*/
+  sign(hash: JsFelt, calls: any[]): Promise<Felts>;
 /**
 * @param {(JsCall)[]} calls
 * @returns {Promise<string>}

@@ -1,8 +1,8 @@
 use account_sdk::account::session::hash::AllowedMethod;
 use serde::{Deserialize, Serialize};
 use starknet::core::{types::Felt, utils::get_selector_from_name};
-use tsify_next::Tsify;
 use std::str::FromStr;
+use tsify_next::Tsify;
 use wasm_bindgen::prelude::*;
 
 use crate::errors::EncodingError;
