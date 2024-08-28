@@ -81,13 +81,13 @@ export function executeFactory({
     };
 }
 
-export const normalizeCalls = (calls: AllowArray<Call>): Call[] => {
+export const normalizeCalls = (calls: AllowArray<Call>): JsCall[] => {
   return (Array.isArray(calls) ? calls : [calls]).map((call) => {
     return {
       entrypoint: call.entrypoint,
       contractAddress: addAddressPadding(call.contractAddress),
       calldata: CallData.toHex(call.calldata),
-    } as Call;
+    };
   });
 };
 

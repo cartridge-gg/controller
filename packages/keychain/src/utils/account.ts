@@ -125,7 +125,7 @@ class Account extends BaseAccount {
     this.ensureDeployed();
 
     return await this.cartridge.executeFromOutside(
-      normalizeCalls(calls) as JsCall[],
+      normalizeCalls(calls),
       paymaster.caller,
     );
   }
@@ -140,7 +140,7 @@ class Account extends BaseAccount {
     details.nonce = details.nonce ?? (await super.getNonce("pending"));
 
     const res = await this.cartridge.execute(
-      normalizeCalls(calls) as JsCall[],
+      normalizeCalls(calls),
       details as JsInvocationsDetails,
     );
 
@@ -158,7 +158,7 @@ class Account extends BaseAccount {
   }
 
   hasSession(calls: AllowArray<Call>): boolean {
-    return this.cartridge.hasSession(normalizeCalls(calls) as JsCall[]);
+    return this.cartridge.hasSession(normalizeCalls(calls));
   }
 
   sessionJson(): string {
