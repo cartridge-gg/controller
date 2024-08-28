@@ -26,7 +26,6 @@ export const CONTRACT_ETH =
 export function Execute() {
   const { chainId, controller, context, origin, paymaster, cancel } =
     useConnection();
-  const { isDeployed } = useDeploy();
   const ctx = context as ExecuteCtx;
 
   const [fees, setFees] = useState<{
@@ -100,17 +99,7 @@ export function Execute() {
 
         setError(e);
       });
-  }, [
-    origin,
-    account,
-    controller,
-    setError,
-    setFees,
-    calls,
-    chainId,
-    ctx,
-    isDeployed,
-  ]);
+  }, [origin, account, controller, setError, setFees, calls, chainId, ctx]);
 
   useEffect(() => {
     if (!ethBalance || !fees) {

@@ -5,7 +5,6 @@ import { Button, Link } from "@chakra-ui/react";
 import { ExternalIcon, PacmanIcon } from "@cartridge/ui";
 import { useController } from "hooks/controller";
 import { Funding } from "./Funding";
-import { useDeploy } from "hooks/deploy";
 import { useConnection } from "hooks/connection";
 
 export function DeploymentRequired({
@@ -19,15 +18,10 @@ export function DeploymentRequired({
     controller: { account },
   } = useController();
   const { hasPrefundRequest } = useConnection();
-  const { isDeployed } = useDeploy();
   const [deployHash, setDeployHash] = useState<string>();
   const [showFunding, setShowFunding] = useState(false);
 
   useEffect(() => {
-    if (isDeployed) {
-      return;
-    }
-
     if (
       account.chainId === constants.StarknetChainId.SN_MAIN ||
       hasPrefundRequest
@@ -35,11 +29,7 @@ export function DeploymentRequired({
       setShowFunding(true);
       return;
     }
-  }, [account.chainId, account.username, hasPrefundRequest, isDeployed]);
-
-  if (isDeployed) {
-    return <>{children}</>;
-  }
+  }, [account.chainId, account.username, hasPrefundRequest]);
 
   if (showFunding)
     return (

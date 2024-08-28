@@ -55,17 +55,71 @@ export function executeFactory({
         }
 
         if (paymaster) {
-          const res = await tryPaymaster(account, calls, paymaster);
-          if (res) return res;
+          try {
+            const res = await tryPaymaster(account, calls, paymaster);
+            if (res) return res;
+          } catch (error) {
+            console.error(error);
+            // Paymaster not supported
+            if (error.code === -32003) {
+              // Handle the specific error, e.g., fallback to non-paymaster execution
+              console.warn(
+                "Paymaster not supported, falling back to regular execution",
+              );
+            } else {
+              throw error; // Re-throw other errors
+            }
+          }
         }
 
-        const { nonce, maxFee } = await getInvocationDetails(
-          transactionsDetail,
-          account,
-          calls,
-        );
+        let { maxFee } = transactionsDetail;
+        if (!maxFee) {
+          let estFee;
+          try {
+            estFee = await account.cartridge.estimateInvokeFee(calls);
+          } catch (error) {
+            if (error instanceof Error) {
+              const errorData = JSON.stringify(error);
+              if (errorData.includes("is not deployed")) {
+                const addressMatch = errorData.match(
+                  /0x[a-fA-F0-9]+(?= is not deployed)/,
+                );
+                if (addressMatch && addressMatch[0] === controller.address) {
+                  // Do deploy screen
+                }
 
-        const res = await account.execute(transactions, { nonce, maxFee });
+                // Display exxecution error to user
+              }
+            }
+
+            throw error;
+          }
+
+          maxFee = num.toHex(
+            num.addPercent(estFee.overall_fee, ESTIMATE_FEE_PERCENTAGE),
+          );
+        }
+
+        let res;
+        try {
+          res = await account.execute(transactions, { maxFee });
+        } catch (error) {
+          if (error instanceof Error) {
+            const errorData = JSON.stringify(error);
+            if (errorData.includes("is not deployed")) {
+              const addressMatch = errorData.match(
+                /0x[a-fA-F0-9]+(?= is not deployed)/,
+              );
+              if (addressMatch && addressMatch[0] === controller.address) {
+                // Do deploy screen
+              }
+
+              // Display exxecution error to user
+            }
+          }
+
+          throw error;
+        }
 
         return {
           code: ResponseCodes.SUCCESS,
@@ -105,32 +159,4 @@ async function tryPaymaster(
   } catch (e) {
     /* user pays */
   }
-}
-
-async function getInvocationDetails(
-  details: InvocationsDetails,
-  account: Account,
-  calls: Call[],
-): Promise<InvocationsDetails> {
-  let { nonce, maxFee } = details;
-
-  nonce = nonce ?? (await account.getNonce("pending"));
-
-  if (!maxFee) {
-    await account.isDeployed();
-
-    const estFee = await account.cartridge.estimateInvokeFee(calls);
-
-    maxFee = num.toHex(
-      num.addPercent(estFee.overall_fee, ESTIMATE_FEE_PERCENTAGE),
-    );
-  }
-
-  // if (session.maxFee && BigInt(maxFee) > BigInt(session.maxFee)) {
-  //   throw new Error(
-  //     `Max fee exceeded: ${maxFee.toString()} > ${session.maxFee.toString()}`,
-  //   );
-  // }
-
-  return { nonce, maxFee };
 }
