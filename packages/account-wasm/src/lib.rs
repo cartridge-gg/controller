@@ -226,11 +226,10 @@ impl CartridgeAccount {
     }
 
     #[wasm_bindgen(js_name = hasSession)]
-    pub fn has_session(&self, calls: Vec<JsValue>) -> Result<bool> {
+    pub fn has_session(&self, calls: Vec<JsCall>) -> Result<bool> {
         let calls: Vec<Call> = calls
-            .clone()
             .into_iter()
-            .map(Call::try_from_js_value)
+            .map(TryFrom::try_from)
             .collect::<std::result::Result<_, _>>()?;
 
         Ok(self.controller.session_account(&calls).is_some())
@@ -264,13 +263,13 @@ impl CartridgeAccount {
     }
 
     #[wasm_bindgen(js_name = deploySelf)]
-    pub async fn deploy_self(&self, max_fee: JsValue) -> Result<JsValue> {
+    pub async fn deploy_self(&self, max_fee: JsFelt) -> Result<JsValue> {
         set_panic_hook();
 
         let res = self
             .controller
             .deploy()
-            .max_fee(from_value(max_fee)?)
+            .max_fee(max_fee.0)
             .send()
             .await
             .map_err(|e| OperationError::Deployment(format!("{:#?}", e)))?;
