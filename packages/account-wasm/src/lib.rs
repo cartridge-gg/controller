@@ -11,7 +11,7 @@ use account_sdk::abigen::controller::OutsideExecution;
 use account_sdk::account::outside_execution::OutsideExecutionCaller;
 use account_sdk::account::session::hash::Session;
 use account_sdk::account::session::SessionAccount;
-use account_sdk::account::MessageSignerAccount;
+use account_sdk::account::{AccountHashAndCallsSigner, MessageSignerAccount};
 use account_sdk::controller::Controller;
 use account_sdk::provider::CartridgeJsonRpcProvider;
 use account_sdk::signers::webauthn::{CredentialID, WebauthnSigner};
@@ -362,6 +362,21 @@ impl CartridgeSessionAccount {
             owner_guid,
             session,
         )))
+    }
+
+    pub async fn sign(&self, hash: JsFelt, calls: Vec<JsValue>) -> Result<Felts> {
+        let hash = hash.0;
+        let calls = calls
+            .into_iter()
+            .map(Call::try_from_js_value)
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+
+        let res = self
+            .0
+            .sign_hash_and_calls(hash, &calls)
+            .await?;
+
+        Ok(Felts(res.into_iter().map(JsFelt).collect()))
     }
 
     pub async fn execute(&self, calls: Vec<JsCall>) -> Result<String> {
