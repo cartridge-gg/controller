@@ -97,7 +97,10 @@ async function tryPaymaster(
   paymaster: PaymasterOptions,
 ): Promise<ExecuteReply> {
   try {
-    const transaction_hash = await account.executeFromOutside(calls as JsCall[], paymaster);
+    const transaction_hash = await account.executeFromOutside(
+      calls as JsCall[],
+      paymaster,
+    );
 
     return {
       code: ResponseCodes.SUCCESS,

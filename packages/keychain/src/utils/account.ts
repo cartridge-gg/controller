@@ -17,7 +17,11 @@ import {
 
 import { selectors, VERSION } from "./selectors";
 import Storage from "./storage";
-import { CartridgeAccount, JsCall, JsInvocationsDetails } from "@cartridge/account-wasm";
+import {
+  CartridgeAccount,
+  JsCall,
+  JsInvocationsDetails,
+} from "@cartridge/account-wasm";
 import { normalizeCalls } from "./connection/execute";
 import { PaymasterOptions } from "@cartridge/controller";
 
@@ -135,7 +139,10 @@ class Account extends BaseAccount {
 
     details.nonce = details.nonce ?? (await super.getNonce("pending"));
 
-    const res = await this.cartridge.execute(normalizeCalls(calls) as JsCall[], details as JsInvocationsDetails);
+    const res = await this.cartridge.execute(
+      normalizeCalls(calls) as JsCall[],
+      details as JsInvocationsDetails,
+    );
 
     Storage.update(this.selector, {
       nonce: num.toHex(BigInt(details.nonce) + 1n),
