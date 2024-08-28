@@ -7,10 +7,9 @@ use starknet::core::types::Felt;
 use starknet::signers::SigningKey;
 use tsify_next::Tsify;
 
-use crate::errors::{CartridgeError, EncodingError, OperationError};
+use crate::errors::{CartridgeError, OperationError};
 
 use super::policy::JsPolicy;
-use super::TryFromJsValue;
 
 #[serde_as]
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]

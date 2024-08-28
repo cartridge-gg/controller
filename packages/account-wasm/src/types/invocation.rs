@@ -5,8 +5,6 @@ use starknet::core::types::Felt;
 use tsify_next::Tsify;
 use wasm_bindgen::prelude::*;
 
-use crate::errors::EncodingError;
-
 #[serde_as]
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
