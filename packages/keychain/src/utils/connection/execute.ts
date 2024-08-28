@@ -93,14 +93,11 @@ export const normalizeCalls = (calls: AllowArray<Call>): JsCall[] => {
 
 async function tryPaymaster(
   account: Account,
-  calls: Call[],
+  calls: JsCall[],
   paymaster: PaymasterOptions,
 ): Promise<ExecuteReply> {
   try {
-    const transaction_hash = await account.executeFromOutside(
-      calls as JsCall[],
-      paymaster,
-    );
+    const transaction_hash = await account.executeFromOutside(calls, paymaster);
 
     return {
       code: ResponseCodes.SUCCESS,
