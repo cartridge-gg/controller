@@ -2,7 +2,7 @@
 /* eslint-disable */
 export const memory: WebAssembly.Memory;
 export function __wbg_cartridgeaccount_free(a: number): void;
-export function cartridgeaccount_new(a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number, n: number, o: number, p: number, q: number): void;
+export function cartridgeaccount_new(a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number, n: number, o: number): void;
 export function cartridgeaccount_registerSession(a: number, b: number, c: number, d: number, e: number, f: number): number;
 export function cartridgeaccount_createSession(a: number, b: number, c: number, d: number): number;
 export function cartridgeaccount_estimateInvokeFee(a: number, b: number, c: number, d: number, e: number): number;
@@ -14,6 +14,10 @@ export function cartridgeaccount_revokeSession(a: number, b: number): void;
 export function cartridgeaccount_signMessage(a: number, b: number, c: number): number;
 export function cartridgeaccount_deploySelf(a: number, b: number): number;
 export function cartridgeaccount_delegateAccount(a: number): number;
+export function __wbg_cartridgesessionaccount_free(a: number): void;
+export function cartridgesessionaccount_new(a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number, n: number): void;
+export function cartridgesessionaccount_new_as_registered(a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number, n: number): void;
+export function cartridgesessionaccount_execute(a: number, b: number, c: number): number;
 export function __wbindgen_malloc(a: number, b: number): number;
 export function __wbindgen_realloc(a: number, b: number, c: number, d: number): number;
 export const __wbindgen_export_2: WebAssembly.Table;

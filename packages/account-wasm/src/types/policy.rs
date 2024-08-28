@@ -1,6 +1,7 @@
 use account_sdk::account::session::hash::AllowedMethod;
 use serde::{Deserialize, Serialize};
 use starknet::core::{types::Felt, utils::get_selector_from_name};
+use tsify_next::Tsify;
 use std::str::FromStr;
 use wasm_bindgen::prelude::*;
 
@@ -8,8 +9,8 @@ use crate::errors::EncodingError;
 
 use super::TryFromJsValue;
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
+#[tsify(into_wasm_abi, from_wasm_abi)]
 pub struct JsPolicy {
     pub target: String,
     pub method: String,

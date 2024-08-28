@@ -9,7 +9,8 @@ use std::sync::Arc;
 
 use account_sdk::abigen::controller::OutsideExecution;
 use account_sdk::account::outside_execution::OutsideExecutionCaller;
-use account_sdk::account::session::hash::AllowedMethod;
+use account_sdk::account::session::hash::Session;
+use account_sdk::account::session::SessionAccount;
 use account_sdk::account::MessageSignerAccount;
 use account_sdk::controller::Controller;
 use account_sdk::provider::CartridgeJsonRpcProvider;
@@ -19,10 +20,15 @@ use base64::Engine;
 use coset::{CborSerializable, CoseKey};
 use serde_wasm_bindgen::{from_value, to_value};
 use signer::BrowserBackend;
+use starknet::accounts::Account;
 use starknet::core::types::Call;
 use starknet::core::types::Felt;
 use starknet::macros::short_string;
 use starknet::signers::SigningKey;
+use types::call::JsCall;
+use types::policy::JsPolicy;
+use types::session::JsSession;
+use types::{Felts, JsFelt};
 use url::Url;
 use wasm_bindgen::prelude::*;
 
@@ -63,8 +69,8 @@ impl CartridgeAccount {
     pub fn new(
         app_id: String,
         rpc_url: String,
-        chain_id: String,
-        address: String,
+        chain_id: JsFelt,
+        address: JsFelt,
         rp_id: String,
         username: String,
         credential_id: String,
@@ -84,8 +90,6 @@ impl CartridgeAccount {
         let device_signer = WebauthnSigner::new(rp_id, credential_id, cose, BrowserBackend);
 
         let dummy_guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
-        let address = Felt::from_str(&address)?;
-        let chain_id = Felt::from_str(&chain_id)?;
         let username = username.to_lowercase();
 
         let controller = Controller::new(
@@ -94,8 +98,8 @@ impl CartridgeAccount {
             Arc::new(provider),
             device_signer.clone(),
             dummy_guardian,
-            address,
-            chain_id,
+            address.0,
+            chain_id.0,
             BrowserBackend,
         );
 
@@ -105,13 +109,13 @@ impl CartridgeAccount {
     #[wasm_bindgen(js_name = registerSession)]
     pub async fn register_session(
         &mut self,
-        policies: Vec<JsValue>,
+        policies: Vec<JsPolicy>,
         expires_at: u64,
         public_key: String,
-    ) -> Result<JsValue> {
+    ) -> Result<String> {
         let methods = policies
             .into_iter()
-            .map(AllowedMethod::try_from_js_value)
+            .map(TryFrom::try_from)
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
         let hash = self
@@ -119,20 +123,20 @@ impl CartridgeAccount {
             .register_session(methods, expires_at, Felt::from_hex(&public_key)?)
             .await?;
 
-        Ok(to_value(&hash)?)
+        Ok(format!("{:#}", hash))
     }
 
     #[wasm_bindgen(js_name = createSession)]
     pub async fn create_session(
         &mut self,
-        policies: Vec<JsValue>,
+        policies: Vec<JsPolicy>,
         expires_at: u64,
     ) -> Result<JsValue> {
         set_panic_hook();
 
         let methods = policies
             .into_iter()
-            .map(AllowedMethod::try_from_js_value)
+            .map(TryFrom::try_from)
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
         let (authorization, private_key) =
@@ -169,17 +173,16 @@ impl CartridgeAccount {
     #[wasm_bindgen(js_name = execute)]
     pub async fn execute(
         &self,
-        calls: Vec<JsValue>,
-        transaction_details: JsValue,
+        calls: Vec<JsCall>,
+        details: JsInvocationsDetails,
     ) -> Result<JsValue> {
         set_panic_hook();
 
         let calls = calls
             .into_iter()
-            .map(Call::try_from_js_value)
+            .map(TryFrom::try_from)
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
-        let details = JsInvocationsDetails::try_from(transaction_details)?;
         let result = self
             .controller
             .execute(calls, details.nonce, details.max_fee)
@@ -192,7 +195,7 @@ impl CartridgeAccount {
     #[wasm_bindgen(js_name = executeFromOutside)]
     pub async fn execute_from_outside(
         &self,
-        calls: Vec<JsValue>,
+        calls: Vec<JsCall>,
         caller: JsValue,
     ) -> Result<JsValue> {
         set_panic_hook();
@@ -200,7 +203,7 @@ impl CartridgeAccount {
         let calls: Vec<Call> = calls
             .clone()
             .into_iter()
-            .map(Call::try_from_js_value)
+            .map(TryFrom::try_from)
             .collect::<std::result::Result<_, _>>()?;
 
         let caller = match from_value::<String>(caller)? {
@@ -248,7 +251,7 @@ impl CartridgeAccount {
     }
 
     #[wasm_bindgen(js_name = signMessage)]
-    pub async fn sign_message(&self, typed_data: String) -> Result<JsValue> {
+    pub async fn sign_message(&self, typed_data: String) -> Result<Felts> {
         set_panic_hook();
 
         let signature = self
@@ -257,7 +260,7 @@ impl CartridgeAccount {
             .await
             .map_err(OperationError::SignMessage)?;
 
-        Ok(to_value(&signature)?)
+        Ok(Felts(signature.into_iter().map(JsFelt).collect()))
     }
 
     #[wasm_bindgen(js_name = deploySelf)]
@@ -276,7 +279,7 @@ impl CartridgeAccount {
     }
 
     #[wasm_bindgen(js_name = delegateAccount)]
-    pub async fn delegate_account(&self) -> Result<JsValue> {
+    pub async fn delegate_account(&self) -> Result<JsFelt> {
         set_panic_hook();
 
         let res: Felt = self
@@ -285,6 +288,95 @@ impl CartridgeAccount {
             .await
             .map_err(|e| OperationError::Delegation(e.to_string()))?;
 
-        Ok(to_value(&res)?)
+        Ok(JsFelt(res))
+    }
+}
+
+#[wasm_bindgen]
+pub struct CartridgeSessionAccount(
+    SessionAccount<Arc<CartridgeJsonRpcProvider>, SigningKey, SigningKey>,
+);
+
+#[wasm_bindgen]
+impl CartridgeSessionAccount {
+    pub fn new(
+        rpc_url: String,
+        signer: String,
+        guardian: String,
+        address: String,
+        chain_id: String,
+        session_authorization: Vec<String>,
+        session: JsSession,
+    ) -> Result<CartridgeSessionAccount> {
+        let rpc_url = Url::parse(&rpc_url)?;
+        let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
+
+        let signer = SigningKey::from_secret_scalar(Felt::from_str(&signer)?);
+        let guardian = SigningKey::from_secret_scalar(Felt::from_str(&guardian)?);
+        let address = Felt::from_str(&address)?;
+        let chain_id = Felt::from_str(&chain_id)?;
+
+        let session_authorization = session_authorization
+            .iter()
+            .map(|s| Felt::from_str(s))
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+        let session = Session::try_from(session).unwrap();
+
+        Ok(CartridgeSessionAccount(SessionAccount::new(
+            Arc::new(provider),
+            signer,
+            guardian,
+            address,
+            chain_id,
+            session_authorization,
+            session,
+        )))
+    }
+
+    pub fn new_as_registered(
+        rpc_url: String,
+        signer: String,
+        guardian: String,
+        address: String,
+        chain_id: String,
+        owner_guid: String,
+        session: JsSession,
+    ) -> Result<CartridgeSessionAccount> {
+        let rpc_url = Url::parse(&rpc_url)?;
+        let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
+
+        let signer = SigningKey::from_secret_scalar(Felt::from_str(&signer)?);
+        let guardian = SigningKey::from_secret_scalar(Felt::from_str(&guardian)?);
+        let address = Felt::from_str(&address)?;
+        let chain_id = Felt::from_str(&chain_id)?;
+        let owner_guid = Felt::from_str(&owner_guid)?;
+
+        let session = Session::try_from(session)?;
+
+        Ok(CartridgeSessionAccount(SessionAccount::new_as_registered(
+            Arc::new(provider),
+            signer,
+            guardian,
+            address,
+            chain_id,
+            owner_guid,
+            session,
+        )))
+    }
+
+    pub async fn execute(&self, calls: Vec<JsCall>) -> Result<String> {
+        let calls = calls
+            .into_iter()
+            .map(TryInto::try_into)
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+
+        let execution = self
+            .0
+            .execute_v1(calls)
+            .send()
+            .await
+            .map_err(|e| OperationError::Execution(format!("{:#?}", e)))?;
+
+        Ok(format!("{:#?}", execution))
     }
 }

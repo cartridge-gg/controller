@@ -5,6 +5,7 @@ use starknet::core::serde::unsigned_field_element::UfeHex;
 use starknet::core::types;
 use starknet::core::utils::get_selector_from_name;
 use starknet_types_core::felt::Felt;
+use tsify_next::Tsify;
 use wasm_bindgen::prelude::*;
 
 use crate::errors::EncodingError;
@@ -12,8 +13,8 @@ use crate::errors::EncodingError;
 use super::TryFromJsValue;
 
 #[serde_as]
-#[derive(Debug, Clone, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
+#[tsify(into_wasm_abi, from_wasm_abi)]
 pub struct JsCall {
     #[serde_as(as = "UfeHex")]
     pub contract_address: Felt,
