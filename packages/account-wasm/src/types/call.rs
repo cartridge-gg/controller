@@ -10,8 +10,6 @@ use wasm_bindgen::prelude::*;
 
 use crate::errors::EncodingError;
 
-use super::TryFromJsValue;
-
 #[serde_as]
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
@@ -44,27 +42,5 @@ impl TryFrom<JsCall> for types::Call {
             selector: get_selector_from_name(&value.entrypoint)?,
             calldata: value.calldata,
         })
-    }
-}
-
-impl TryFrom<JsValue> for JsCall {
-    type Error = EncodingError;
-
-    fn try_from(value: JsValue) -> Result<Self, Self::Error> {
-        Ok(serde_wasm_bindgen::from_value(value)?)
-    }
-}
-
-impl TryFromJsValue<Call> for Call {
-    fn try_from_js_value(value: JsValue) -> Result<Self, EncodingError> {
-        let js_call: JsCall = value.try_into()?;
-        js_call.try_into()
-    }
-}
-
-impl TryFromJsValue<types::Call> for types::Call {
-    fn try_from_js_value(value: JsValue) -> Result<Self, EncodingError> {
-        let js_call: JsCall = value.try_into()?;
-        js_call.try_into()
     }
 }
