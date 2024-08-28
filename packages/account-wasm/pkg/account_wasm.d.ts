@@ -1,26 +1,5 @@
 /* tslint:disable */
 /* eslint-disable */
-export interface JsEstimateFeeDetails {
-    nonce: Felt;
-}
-
-export type Felt = string;
-
-export type Felts = JsFelt[];
-
-export type JsFelt = Felt;
-
-export interface JsSession {
-    policies: JsPolicy[];
-    expiresAt: number;
-    credentials: JsCredentials;
-}
-
-export interface JsCredentials {
-    authorization: Felt[];
-    privateKey: Felt;
-}
-
 export interface JsInvocationsDetails {
     nonce: Felt;
     maxFee: Felt;
@@ -31,12 +10,6 @@ export interface JsPolicy {
     method: string;
 }
 
-export interface JsCall {
-    contractAddress: Felt;
-    entrypoint: string;
-    calldata: Felt[];
-}
-
 export interface JsOutsideExecution {
     caller: Felt;
     executeBefore: number;
@@ -44,6 +17,30 @@ export interface JsOutsideExecution {
     calls: JsCall[];
     nonce: Felt;
 }
+
+export interface JsSession {
+    policies: JsPolicy[];
+    expiresAt: number;
+}
+
+export interface JsCredentials {
+    authorization: Felt[];
+    privateKey: Felt;
+}
+
+export interface JsCall {
+    contractAddress: Felt;
+    entrypoint: string;
+    calldata: Felt[];
+}
+
+export interface JsEstimateFeeDetails {
+    nonce: Felt;
+}
+
+export type Felts = JsFelt[];
+
+export type JsFelt = Felt;
 
 /**
 */
@@ -138,25 +135,23 @@ export class CartridgeSessionAccount {
 /**
 * @param {string} rpc_url
 * @param {JsFelt} signer
-* @param {JsFelt} guardian
 * @param {JsFelt} address
 * @param {JsFelt} chain_id
 * @param {(JsFelt)[]} session_authorization
 * @param {JsSession} session
 * @returns {CartridgeSessionAccount}
 */
-  static new(rpc_url: string, signer: JsFelt, guardian: JsFelt, address: JsFelt, chain_id: JsFelt, session_authorization: (JsFelt)[], session: JsSession): CartridgeSessionAccount;
+  static new(rpc_url: string, signer: JsFelt, address: JsFelt, chain_id: JsFelt, session_authorization: (JsFelt)[], session: JsSession): CartridgeSessionAccount;
 /**
 * @param {string} rpc_url
 * @param {JsFelt} signer
-* @param {JsFelt} guardian
 * @param {JsFelt} address
+* @param {JsFelt} owner_stark_public_key
 * @param {JsFelt} chain_id
-* @param {JsFelt} owner_guid
 * @param {JsSession} session
 * @returns {CartridgeSessionAccount}
 */
-  static new_as_registered(rpc_url: string, signer: JsFelt, guardian: JsFelt, address: JsFelt, chain_id: JsFelt, owner_guid: JsFelt, session: JsSession): CartridgeSessionAccount;
+  static new_as_registered(rpc_url: string, signer: JsFelt, address: JsFelt, owner_stark_public_key: JsFelt, chain_id: JsFelt, session: JsSession): CartridgeSessionAccount;
 /**
 * @param {JsFelt} hash
 * @param {(JsCall)[]} calls
