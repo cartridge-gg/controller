@@ -4,17 +4,24 @@ export interface JsEstimateFeeDetails {
     nonce: Felt;
 }
 
+export type Felts = JsFelt[];
+
+export type JsFelt = Felt;
+
+export interface JsSession {
+    policies: JsPolicy[];
+    expiresAt: number;
+    credentials: JsCredentials;
+}
+
+export interface JsCredentials {
+    authorization: Felt[];
+    privateKey: Felt;
+}
+
 export interface JsInvocationsDetails {
     nonce: Felt;
     max_fee: Felt;
-}
-
-export interface JsOutsideExecution {
-    caller: Felt;
-    execute_before: number;
-    execute_after: number;
-    calls: JsCall[];
-    nonce: Felt;
 }
 
 export interface JsPolicy {
@@ -22,26 +29,19 @@ export interface JsPolicy {
     method: string;
 }
 
-export interface JsSession {
-    policies: JsPolicy[];
-    expires_at: number;
-    credentials: JsCredentials;
-}
-
-export interface JsCredentials {
-    authorization: Felt[];
-    private_key: Felt;
-}
-
 export interface JsCall {
-    contract_address: Felt;
+    contractAddress: Felt;
     entrypoint: string;
     calldata: Felt[];
 }
 
-export type Felts = JsFelt[];
-
-export type JsFelt = Felt;
+export interface JsOutsideExecution {
+    caller: Felt;
+    executeBefore: number;
+    executeAfter: number;
+    calls: JsCall[];
+    nonce: Felt;
+}
 
 /**
 */
@@ -85,11 +85,11 @@ export class CartridgeAccount {
 */
   createSession(policies: (JsPolicy)[], expires_at: bigint): Promise<any>;
 /**
-* @param {any[]} calls
+* @param {(JsCall)[]} calls
 * @param {number | undefined} [fee_multiplier]
 * @returns {Promise<any>}
 */
-  estimateInvokeFee(calls: any[], fee_multiplier?: number): Promise<any>;
+  estimateInvokeFee(calls: (JsCall)[], fee_multiplier?: number): Promise<any>;
 /**
 * @param {(JsCall)[]} calls
 * @param {JsInvocationsDetails} details
@@ -103,10 +103,10 @@ export class CartridgeAccount {
 */
   executeFromOutside(calls: (JsCall)[], caller: any): Promise<any>;
 /**
-* @param {any[]} calls
+* @param {(JsCall)[]} calls
 * @returns {boolean}
 */
-  hasSession(calls: any[]): boolean;
+  hasSession(calls: (JsCall)[]): boolean;
 /**
 * @returns {any}
 */
@@ -120,10 +120,10 @@ export class CartridgeAccount {
 */
   signMessage(typed_data: string): Promise<Felts>;
 /**
-* @param {any} max_fee
+* @param {JsFelt} max_fee
 * @returns {Promise<any>}
 */
-  deploySelf(max_fee: any): Promise<any>;
+  deploySelf(max_fee: JsFelt): Promise<any>;
 /**
 * @returns {Promise<JsFelt>}
 */
@@ -135,32 +135,32 @@ export class CartridgeSessionAccount {
   free(): void;
 /**
 * @param {string} rpc_url
-* @param {string} signer
-* @param {string} guardian
-* @param {string} address
-* @param {string} chain_id
-* @param {(string)[]} session_authorization
+* @param {JsFelt} signer
+* @param {JsFelt} guardian
+* @param {JsFelt} address
+* @param {JsFelt} chain_id
+* @param {(JsFelt)[]} session_authorization
 * @param {JsSession} session
 * @returns {CartridgeSessionAccount}
 */
-  static new(rpc_url: string, signer: string, guardian: string, address: string, chain_id: string, session_authorization: (string)[], session: JsSession): CartridgeSessionAccount;
+  static new(rpc_url: string, signer: JsFelt, guardian: JsFelt, address: JsFelt, chain_id: JsFelt, session_authorization: (JsFelt)[], session: JsSession): CartridgeSessionAccount;
 /**
 * @param {string} rpc_url
-* @param {string} signer
-* @param {string} guardian
-* @param {string} address
-* @param {string} chain_id
-* @param {string} owner_guid
+* @param {JsFelt} signer
+* @param {JsFelt} guardian
+* @param {JsFelt} address
+* @param {JsFelt} chain_id
+* @param {JsFelt} owner_guid
 * @param {JsSession} session
 * @returns {CartridgeSessionAccount}
 */
-  static new_as_registered(rpc_url: string, signer: string, guardian: string, address: string, chain_id: string, owner_guid: string, session: JsSession): CartridgeSessionAccount;
+  static new_as_registered(rpc_url: string, signer: JsFelt, guardian: JsFelt, address: JsFelt, chain_id: JsFelt, owner_guid: JsFelt, session: JsSession): CartridgeSessionAccount;
 /**
 * @param {JsFelt} hash
-* @param {any[]} calls
+* @param {(JsCall)[]} calls
 * @returns {Promise<Felts>}
 */
-  sign(hash: JsFelt, calls: any[]): Promise<Felts>;
+  sign(hash: JsFelt, calls: (JsCall)[]): Promise<Felts>;
 /**
 * @param {(JsCall)[]} calls
 * @returns {Promise<string>}

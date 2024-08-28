@@ -7,8 +7,6 @@ use wasm_bindgen::prelude::*;
 
 use crate::errors::EncodingError;
 
-use super::TryFromJsValue;
-
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
 pub struct JsPolicy {
@@ -32,13 +30,5 @@ impl TryFrom<JsPolicy> for AllowedMethod {
             contract_address: Felt::from_str(&value.target)?,
             selector: get_selector_from_name(&value.method).unwrap(),
         })
-    }
-}
-
-impl TryFromJsValue<AllowedMethod> for AllowedMethod {
-    fn try_from_js_value(value: JsValue) -> Result<Self, EncodingError> {
-        let js_policy: JsPolicy = value.try_into()?;
-        let allowed_method: AllowedMethod = js_policy.try_into()?;
-        Ok(allowed_method)
     }
 }
