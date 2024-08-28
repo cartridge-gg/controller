@@ -20,7 +20,12 @@ import {
   OpenMenuCtx,
 } from "utils/connection";
 import { RpcProvider, CallData, constants, shortString } from "starknet";
-import { Policy, Prefund, ResponseCodes } from "@cartridge/controller";
+import {
+  PaymasterOptions,
+  Policy,
+  Prefund,
+  ResponseCodes,
+} from "@cartridge/controller";
 import { mergeDefaultETHPrefund } from "utils/token";
 import { isIframe } from "components/connect/utils";
 import { setIsSignedUp } from "utils/cookie";
@@ -36,6 +41,7 @@ type ConnectionContextValue = {
   chainName: string;
   policies: Policy[];
   prefunds: Prefund[];
+  paymaster: PaymasterOptions;
   hasPrefundRequest: boolean;
   error: Error;
   setContext: (context: ConnectionCtx) => void;
@@ -67,6 +73,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
   const [rpcUrl, setRpcUrl] = useState<string>();
   const [chainId, setChainId] = useState<string>();
   const [policies, setPolicies] = useState<Policy[]>([]);
+  const [paymaster, setPaymaster] = useState<PaymasterOptions>();
   const [controller, setControllerRaw] = useState<Controller | undefined>();
   const [prefunds, setPrefunds] = useState<Prefund[]>([]);
   const [hasPrefundRequest, setHasPrefundRequest] = useState<boolean>(false);
@@ -90,6 +97,11 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
   const parsePolicies = (policiesStr: string | null): Policy[] => {
     if (!policiesStr) return [];
     return JSON.parse(policiesStr);
+  };
+
+  const parsePaymaster = (paymasterStr: string | null): PaymasterOptions => {
+    if (!paymasterStr) return null;
+    return JSON.parse(decodeURIComponent(paymasterStr));
   };
 
   const cancel = useCallback(async () => {
@@ -129,6 +141,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
     setHasPrefundRequest(!!prefundParam);
     setPrefunds(mergeDefaultETHPrefund(prefunds));
     setPolicies(parsePolicies(urlParams.get("policies")));
+    setPaymaster(parsePaymaster(urlParams.get("paymaster")));
 
     const connection = connectToController({
       setOrigin,
@@ -290,6 +303,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
         chainName,
         policies,
         prefunds,
+        paymaster,
         hasPrefundRequest,
         error,
         setController,
