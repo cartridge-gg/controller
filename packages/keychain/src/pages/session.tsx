@@ -14,6 +14,7 @@ import { LoginMode } from "components/connect/types";
 
 type SessionResponse = {
   username: string;
+  address: string;
   transaction_hash?: string;
   already_registered?: boolean;
 };
@@ -99,6 +100,7 @@ export default function RegisterSession() {
 
       onCallback({
         username: controller.account.username,
+        address: controller.account.address,
         transaction_hash,
       });
     },
@@ -126,6 +128,7 @@ export default function RegisterSession() {
     if (controller.account.hasSession(calls)) {
       onCallback({
         username: controller.account.username,
+        address: controller.account.address,
         already_registered: true,
       });
     }

@@ -15,6 +15,7 @@ use account_sdk::account::{AccountHashAndCallsSigner, MessageSignerAccount};
 use account_sdk::controller::Controller;
 use account_sdk::provider::CartridgeJsonRpcProvider;
 use account_sdk::signers::webauthn::{CredentialID, WebauthnSigner};
+use account_sdk::signers::HashSigner;
 use base64::engine::general_purpose;
 use base64::Engine;
 use coset::{CborSerializable, CoseKey};
@@ -24,7 +25,7 @@ use starknet::accounts::Account;
 use starknet::core::types::Call;
 use starknet::macros::short_string;
 use starknet::signers::SigningKey;
-use tsify_next::declare;
+use starknet_types_core::felt::Felt;
 use types::call::JsCall;
 use types::policy::JsPolicy;
 use types::session::JsSession;
@@ -38,9 +39,6 @@ use crate::types::session::JsCredentials;
 use crate::utils::set_panic_hook;
 
 type Result<T> = std::result::Result<T, JsError>;
-
-#[declare]
-pub type Felt = String;
 
 #[wasm_bindgen]
 pub struct CartridgeAccount {
@@ -210,9 +208,7 @@ impl CartridgeAccount {
 
         let caller = match from_value::<String>(caller)? {
             s if s == "ANY_CALLER" => OutsideExecutionCaller::Any,
-            address => OutsideExecutionCaller::Specific(
-                starknet_types_core::felt::Felt::from_str(&address)?.into(),
-            ),
+            address => OutsideExecutionCaller::Specific(Felt::from_str(&address)?.into())
         };
 
         let response = self
@@ -305,7 +301,6 @@ impl CartridgeSessionAccount {
     pub fn new(
         rpc_url: String,
         signer: JsFelt,
-        guardian: JsFelt,
         address: JsFelt,
         chain_id: JsFelt,
         session_authorization: Vec<JsFelt>,
@@ -315,7 +310,7 @@ impl CartridgeSessionAccount {
         let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
 
         let signer = SigningKey::from_secret_scalar(signer.0);
-        let guardian = SigningKey::from_secret_scalar(guardian.0);
+        let guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
         let address = address.0;
         let chain_id = chain_id.0;
 
@@ -323,7 +318,13 @@ impl CartridgeSessionAccount {
             .into_iter()
             .map(|felt| felt.0)
             .collect::<Vec<_>>();
-        let session = Session::try_from(session).unwrap();
+        let policies = session
+            .policies
+            .into_iter()
+            .map(TryFrom::try_from)
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+
+        let session = Session::new(policies, session.expires_at, &signer.signer())?;
 
         Ok(CartridgeSessionAccount(SessionAccount::new(
             Arc::new(provider),
@@ -339,22 +340,27 @@ impl CartridgeSessionAccount {
     pub fn new_as_registered(
         rpc_url: String,
         signer: JsFelt,
-        guardian: JsFelt,
         address: JsFelt,
+        owner_stark_public_key: JsFelt,
         chain_id: JsFelt,
-        owner_guid: JsFelt,
         session: JsSession,
     ) -> Result<CartridgeSessionAccount> {
         let rpc_url = Url::parse(&rpc_url)?;
         let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
 
         let signer = SigningKey::from_secret_scalar(signer.0);
-        let guardian = SigningKey::from_secret_scalar(guardian.0);
+        let guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
         let address = address.0;
         let chain_id = chain_id.0;
-        let owner_guid = owner_guid.0;
+        let owner_guid = Felt::ZERO;
 
-        let session = Session::try_from(session)?;
+        let policies = session
+            .policies
+            .into_iter()
+            .map(TryFrom::try_from)
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+
+        let session = Session::new(policies, session.expires_at, &signer.signer())?;
 
         Ok(CartridgeSessionAccount(SessionAccount::new_as_registered(
             Arc::new(provider),
