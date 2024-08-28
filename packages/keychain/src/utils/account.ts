@@ -19,6 +19,7 @@ import { selectors, VERSION } from "./selectors";
 import Storage from "./storage";
 import { CartridgeAccount } from "@cartridge/account-wasm";
 import { normalizeCalls } from "./connection/execute";
+import { PaymasterOptions } from "@cartridge/controller";
 
 export enum Status {
   COUNTERFACTUAL = "COUNTERFACTUAL",
@@ -111,6 +112,18 @@ class Account extends BaseAccount {
     if (this.status !== Status.DEPLOYED) {
       throw new Error("Account is deploying");
     }
+  }
+
+  async executeFromOutside(
+    calls: AllowArray<Call>,
+    paymaster: PaymasterOptions,
+  ): Promise<string> {
+    this.ensureDeployed();
+
+    return await this.cartridge.executeFromOutside(
+      normalizeCalls(calls),
+      paymaster.caller,
+    );
   }
 
   // @ts-expect-error TODO: fix overload type mismatch
