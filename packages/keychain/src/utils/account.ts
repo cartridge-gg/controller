@@ -19,7 +19,6 @@ import { selectors, VERSION } from "./selectors";
 import Storage from "./storage";
 import {
   CartridgeAccount,
-  JsCall,
   JsInvocationsDetails,
 } from "@cartridge/account-wasm";
 import { normalizeCalls } from "./connection/execute";
