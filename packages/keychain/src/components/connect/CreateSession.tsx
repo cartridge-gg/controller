@@ -1,5 +1,9 @@
 import { Container, Content, Footer } from "components/layout";
-import { BigNumberish } from "starknet";
+import {
+  BigNumberish,
+  TransactionExecutionStatus,
+  TransactionFinalityStatus,
+} from "starknet";
 import { Policy } from "@cartridge/controller";
 import { Button, Text } from "@chakra-ui/react";
 import { useCallback, useState } from "react";
@@ -10,26 +14,47 @@ import { ErrorAlert } from "components/ErrorAlert";
 
 export function CreateSession({
   onConnect,
+  publicKey,
 }: {
-  onConnect: (policies: Policy[]) => void;
+  onConnect: (policies: Policy[], transaction_hash?: string) => void;
+  publicKey?: string;
 }) {
   const { controller, policies, origin } = useConnection();
   const [isConnecting, setIsConnecting] = useState(false);
   const [expiresAt] = useState<bigint>(3000000000n);
-  const [maxFees] = useState<BigNumberish>();
+  const [maxFee] = useState<BigNumberish>();
   const [error, setError] = useState<Error>();
 
   const onCreateSession = useCallback(async () => {
     try {
       setError(undefined);
       setIsConnecting(true);
-      await controller.approve(origin, expiresAt, policies, maxFees);
+      if (publicKey) {
+        const hash = await controller.registerSession(
+          expiresAt,
+          policies,
+          publicKey,
+          maxFee,
+        );
+
+        await controller.account.waitForTransaction(hash, {
+          retryInterval: 1000,
+          successStates: [
+            TransactionExecutionStatus.SUCCEEDED,
+            TransactionFinalityStatus.ACCEPTED_ON_L2,
+          ],
+        });
+        onConnect(policies, hash);
+        return;
+      }
+
+      await controller.createSession(expiresAt, policies, maxFee);
       onConnect(policies);
     } catch (e) {
       setError(e);
       setIsConnecting(false);
     }
-  }, [controller, origin, expiresAt, policies, maxFees, onConnect]);
+  }, [controller, expiresAt, policies, maxFee, publicKey, onConnect]);
 
   return (
     <Container

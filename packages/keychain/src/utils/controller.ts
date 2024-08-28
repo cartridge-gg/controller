@@ -97,8 +97,7 @@ export default class Controller {
     return Storage.clear();
   }
 
-  async approve(
-    _origin: string,
+  async createSession(
     expiresAt: bigint,
     policies: Policy[],
     _maxFee?: BigNumberish,
@@ -108,6 +107,23 @@ export default class Controller {
     }
 
     await this.account.cartridge.createSession(policies, expiresAt);
+  }
+
+  async registerSession(
+    expiresAt: bigint,
+    policies: Policy[],
+    publicKey: string,
+    _maxFee?: BigNumberish,
+  ): Promise<string> {
+    if (!this.account) {
+      throw new Error("Account not found");
+    }
+
+    return await this.account.cartridge.registerSession(
+      policies,
+      expiresAt,
+      publicKey,
+    );
   }
 
   revoke(_origin: string) {

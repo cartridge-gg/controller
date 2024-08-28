@@ -171,7 +171,8 @@ where
             .register_session(&session.raw(), &signer.guid());
 
         let txn = register_execution
-            .fee_estimate_multiplier(1.1)
+            // FIXME: est fee is not accurate as it does not account for validation cost, so set to some high multiple for now
+            .fee_estimate_multiplier(5.0)
             .send()
             .await
             .map_err(ControllerError::AccountError)?;
