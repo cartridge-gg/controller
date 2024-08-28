@@ -14,6 +14,7 @@ use super::policy::JsPolicy;
 #[serde_as]
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
+#[serde(rename_all = "camelCase")]
 pub struct JsCredentials {
     #[serde_as(as = "Vec<UfeHex>")]
     pub authorization: Vec<Felt>,
@@ -23,6 +24,7 @@ pub struct JsCredentials {
 
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
+#[serde(rename_all = "camelCase")]
 pub struct JsSession {
     pub policies: Vec<JsPolicy>,
     pub expires_at: u64,

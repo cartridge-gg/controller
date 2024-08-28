@@ -13,6 +13,7 @@ use crate::errors::EncodingError;
 #[serde_as]
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
+#[serde(rename_all = "camelCase")]
 pub struct JsCall {
     #[serde_as(as = "UfeHex")]
     pub contract_address: Felt,
