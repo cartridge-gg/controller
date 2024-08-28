@@ -24,7 +24,8 @@ export const CONTRACT_ETH =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 
 export function Execute() {
-  const { chainId, controller, context, origin, cancel } = useConnection();
+  const { chainId, controller, context, origin, paymaster, cancel } =
+    useConnection();
   const { isDeployed } = useDeploy();
   const ctx = context as ExecuteCtx;
 
@@ -125,16 +126,29 @@ export function Execute() {
   const onSubmit = useCallback(async () => {
     setLoading(true);
 
-    // TODO: calculate webauthn validation cost separately
-    const maxFee = num.toHex(ctx.transactionsDetail?.maxFee || ETH_MIN_PREFUND);
-    const { transaction_hash } = await account.execute(calls, {
-      maxFee,
-    });
-    ctx.resolve({
-      transaction_hash,
-      code: ResponseCodes.SUCCESS,
-    });
-  }, [account, calls, ctx]);
+    try {
+      let transaction_hash;
+
+      if (paymaster) {
+        transaction_hash = await account.executeFromOutside(calls, paymaster);
+      } else {
+        // TODO: calculate webauthn validation cost separately
+        const maxFee = num.toHex(
+          ctx.transactionsDetail?.maxFee || ETH_MIN_PREFUND,
+        );
+        ({ transaction_hash } = await account.execute(calls, { maxFee }));
+      }
+
+      ctx.resolve({
+        transaction_hash,
+        code: ResponseCodes.SUCCESS,
+      });
+    } catch (error) {
+      setError(error);
+    } finally {
+      setLoading(false);
+    }
+  }, [account, calls, ctx, paymaster, setError, setLoading]);
 
   const policies = useMemo<Policy[]>(
     () =>
