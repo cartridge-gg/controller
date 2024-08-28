@@ -9,7 +9,6 @@ import { useConnection } from "hooks/connection";
 
 export function DeploymentRequired({
   onClose,
-  children,
 }: {
   onClose: () => void;
   children: React.ReactNode;
