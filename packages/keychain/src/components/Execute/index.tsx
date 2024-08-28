@@ -46,12 +46,11 @@ export function Execute() {
   }, [ctx.transactions]);
 
   const format = (val: bigint) => {
-    return (
-      Number(formatEther(val))
-        .toFixed(5)
-        // strips trailing 0s
-        .replace(/0*$/, "$'")
-    );
+    const formatted = Number(formatEther(val)).toFixed(5);
+    if (formatted === "0.00000") {
+      return "0.0";
+    }
+    return formatted.replace(/\.?0+$/, "");
   };
 
   useEffect(() => {
@@ -75,7 +74,7 @@ export function Execute() {
 
   // Estimate fees
   useEffect(() => {
-    if (!controller || !calls || !isDeployed) {
+    if (!controller || !calls) {
       return;
     }
 

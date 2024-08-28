@@ -15,8 +15,6 @@ import { doSignup } from "hooks/account";
 import { useControllerTheme } from "hooks/theme";
 import { useConnection } from "hooks/connection";
 import { ErrorAlert } from "components/ErrorAlert";
-import { useDeploy } from "hooks/deploy";
-import { constants } from "starknet";
 import { useDebounce } from "hooks/debounce";
 
 export function Signup({
@@ -27,7 +25,6 @@ export function Signup({
 }: SignupProps) {
   const theme = useControllerTheme();
   const { chainId, rpcUrl, setController } = useConnection();
-  const { deployRequest } = useDeploy();
   const [error, setError] = useState<Error>();
   const [isRegistering, setIsRegistering] = useState(false);
   const [isPopup, setIsPopup] = useState(false);
@@ -73,10 +70,6 @@ export function Signup({
       credentialId: string,
       publicKey: string,
     ) => {
-      if (chainId !== constants.StarknetChainId.SN_MAIN && !hasPrefundRequest) {
-        await deployRequest(username);
-      }
-
       const controller = new Controller({
         appId: origin,
         chainId,
@@ -94,15 +87,7 @@ export function Signup({
         onSuccess();
       }
     },
-    [
-      origin,
-      chainId,
-      rpcUrl,
-      hasPrefundRequest,
-      onSuccess,
-      deployRequest,
-      setController,
-    ],
+    [origin, chainId, rpcUrl, hasPrefundRequest, onSuccess, setController],
   );
 
   const doPopup = useCallback(() => {
@@ -171,13 +156,6 @@ export function Signup({
       refetchInterval: (data) => (!data ? 1000 : undefined),
       onSuccess: async (data) => {
         try {
-          if (
-            chainId !== constants.StarknetChainId.SN_MAIN &&
-            !hasPrefundRequest
-          ) {
-            await deployRequest(usernameField.value);
-          }
-
           const {
             account: {
               credentials: {

@@ -117,7 +117,7 @@ async function getInvocationDetails(
   nonce = nonce ?? (await account.getNonce("pending"));
 
   if (!maxFee) {
-    await account.ensureDeployed();
+    await account.isDeployed();
 
     const estFee = await account.cartridge.estimateInvokeFee(calls);
 

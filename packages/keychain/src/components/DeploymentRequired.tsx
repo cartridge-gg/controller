@@ -1,15 +1,12 @@
 import { constants } from "starknet";
 import { Container, Footer, Content } from "components/layout";
 import { useEffect, useState } from "react";
-import { Button, Link, Text } from "@chakra-ui/react";
+import { Button, Link } from "@chakra-ui/react";
 import { ExternalIcon, PacmanIcon } from "@cartridge/ui";
 import { useController } from "hooks/controller";
-import { ErrorAlert } from "./ErrorAlert";
 import { Funding } from "./Funding";
-import NextLink from "next/link";
 import { useDeploy } from "hooks/deploy";
 import { useConnection } from "hooks/connection";
-import { CARTRIDGE_DISCORD_LINK } from "const";
 
 export function DeploymentRequired({
   onClose,
@@ -22,10 +19,9 @@ export function DeploymentRequired({
     controller: { account },
   } = useController();
   const { hasPrefundRequest } = useConnection();
-  const { deployRequest, isDeployed } = useDeploy();
+  const { isDeployed } = useDeploy();
   const [deployHash, setDeployHash] = useState<string>();
   const [showFunding, setShowFunding] = useState(false);
-  const [error, setError] = useState<Error>();
 
   useEffect(() => {
     if (isDeployed) {
@@ -39,19 +35,7 @@ export function DeploymentRequired({
       setShowFunding(true);
       return;
     }
-
-    deployRequest(account.username)
-      .then((hash) => {
-        setDeployHash(hash);
-      })
-      .catch((e) => setError(e));
-  }, [
-    account.chainId,
-    account.username,
-    hasPrefundRequest,
-    isDeployed,
-    deployRequest,
-  ]);
+  }, [account.chainId, account.username, hasPrefundRequest, isDeployed]);
 
   if (isDeployed) {
     return <>{children}</>;
@@ -95,33 +79,6 @@ export function DeploymentRequired({
           )}
       </Content>
       <Footer>
-        {error && (
-          <ErrorAlert
-            title="Account deployment error"
-            description={
-              <>
-                <Text mb={4} color="inherit">
-                  Please come by{" "}
-                  <Link
-                    as={NextLink}
-                    href={CARTRIDGE_DISCORD_LINK}
-                    isExternal
-                    display="inline-flex"
-                    flexDir="row"
-                    columnGap="0.1rem"
-                    alignItems="center"
-                    fontWeight="bold"
-                  >
-                    Discord
-                    <ExternalIcon />
-                  </Link>{" "}
-                  and report this issue.
-                </Text>
-                <Text color="inherit">{error.message}</Text>
-              </>
-            }
-          />
-        )}
         <Button onClick={onClose}>Close</Button>
       </Footer>
     </Container>

@@ -107,11 +107,9 @@ class Account extends BaseAccount {
     return this.status;
   }
 
-  async ensureDeployed() {
+  async isDeployed() {
     await this.sync();
-    if (this.status !== Status.DEPLOYED) {
-      throw new Error("Account is deploying");
-    }
+    return this.status !== Status.DEPLOYED;
   }
 
   async executeFromOutside(
@@ -131,8 +129,6 @@ class Account extends BaseAccount {
     calls: AllowArray<Call>,
     details?: InvocationsDetails,
   ): Promise<InvokeFunctionResponse> {
-    this.ensureDeployed();
-
     details.nonce = details.nonce ?? (await super.getNonce("pending"));
 
     const res = await this.cartridge.execute(normalizeCalls(calls), details);
@@ -162,8 +158,6 @@ class Account extends BaseAccount {
     calls: AllowArray<Call>,
     details: EstimateFeeDetails = {},
   ): Promise<EstimateFee> {
-    this.ensureDeployed();
-
     details.blockIdentifier = details.blockIdentifier ?? "pending";
     details.nonce = details.nonce ?? (await super.getNonce("pending"));
 

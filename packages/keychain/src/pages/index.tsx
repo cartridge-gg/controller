@@ -99,18 +99,18 @@ function Home() {
       );
     }
     case "execute": {
-      const ctx = context as ExecuteCtx;
+      // const ctx = context as ExecuteCtx;
       return (
-        <DeploymentRequired
-          onClose={() =>
-            ctx.resolve({
-              code: ResponseCodes.CANCELED,
-              message: "Canceled",
-            })
-          }
-        >
-          <Execute />
-        </DeploymentRequired>
+        // <DeploymentRequired
+        //   onClose={() =>
+        //     ctx.resolve({
+        //       code: ResponseCodes.CANCELED,
+        //       message: "Canceled",
+        //     })
+        //   }
+        // >
+        <Execute />
+        // </DeploymentRequired>
       );
     }
     case "open-menu": {
