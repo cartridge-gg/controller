@@ -208,7 +208,7 @@ impl CartridgeAccount {
 
         let caller = match from_value::<String>(caller)? {
             s if s == "ANY_CALLER" => OutsideExecutionCaller::Any,
-            address => OutsideExecutionCaller::Specific(Felt::from_str(&address)?.into())
+            address => OutsideExecutionCaller::Specific(Felt::from_str(&address)?.into()),
         };
 
         let response = self

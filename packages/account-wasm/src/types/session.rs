@@ -1,13 +1,8 @@
-use account_sdk::account::session::hash::Session;
-use account_sdk::signers::HashSigner;
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
 use starknet::core::serde::unsigned_field_element::UfeHex;
 use starknet::core::types::Felt;
-use starknet::signers::SigningKey;
 use tsify_next::Tsify;
-
-use crate::errors::{CartridgeError, OperationError};
 
 use super::policy::JsPolicy;
 
