@@ -4,6 +4,7 @@ mod storage;
 mod types;
 mod utils;
 
+use std::str::FromStr;
 use std::sync::Arc;
 
 use account_sdk::abigen::controller::OutsideExecution;
@@ -21,9 +22,9 @@ use serde_wasm_bindgen::{from_value, to_value};
 use signer::BrowserBackend;
 use starknet::accounts::Account;
 use starknet::core::types::Call;
-use starknet::core::types::Felt;
 use starknet::macros::short_string;
 use starknet::signers::SigningKey;
+use tsify_next::declare;
 use types::call::JsCall;
 use types::policy::JsPolicy;
 use types::session::JsSession;
@@ -37,6 +38,9 @@ use crate::types::session::JsCredentials;
 use crate::utils::set_panic_hook;
 
 type Result<T> = std::result::Result<T, JsError>;
+
+#[declare]
+pub type Felt = String;
 
 #[wasm_bindgen]
 pub struct CartridgeAccount {
@@ -109,7 +113,7 @@ impl CartridgeAccount {
         &mut self,
         policies: Vec<JsPolicy>,
         expires_at: u64,
-        public_key: String,
+        public_key: JsFelt,
     ) -> Result<String> {
         let methods = policies
             .into_iter()
@@ -118,7 +122,7 @@ impl CartridgeAccount {
 
         let hash = self
             .controller
-            .register_session(methods, expires_at, Felt::from_hex(&public_key)?)
+            .register_session(methods, expires_at, public_key.0)
             .await?;
 
         Ok(format!("{:#}", hash))
@@ -206,7 +210,9 @@ impl CartridgeAccount {
 
         let caller = match from_value::<String>(caller)? {
             s if s == "ANY_CALLER" => OutsideExecutionCaller::Any,
-            address => OutsideExecutionCaller::Specific(Felt::from_hex(&address)?.into()),
+            address => OutsideExecutionCaller::Specific(
+                starknet_types_core::felt::Felt::from_str(&address)?.into(),
+            ),
         };
 
         let response = self
@@ -279,7 +285,7 @@ impl CartridgeAccount {
     pub async fn delegate_account(&self) -> Result<JsFelt> {
         set_panic_hook();
 
-        let res: Felt = self
+        let res = self
             .controller
             .delegate_account()
             .await

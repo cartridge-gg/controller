@@ -341,15 +341,13 @@ export class CartridgeAccount {
     /**
     * @param {(JsPolicy)[]} policies
     * @param {bigint} expires_at
-    * @param {string} public_key
+    * @param {JsFelt} public_key
     * @returns {Promise<string>}
     */
     registerSession(policies, expires_at, public_key) {
         const ptr0 = passArrayJsValueToWasm0(policies, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
-        const ptr1 = passStringToWasm0(public_key, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len1 = WASM_VECTOR_LEN;
-        const ret = wasm.cartridgeaccount_registerSession(this.__wbg_ptr, ptr0, len0, expires_at, ptr1, len1);
+        const ret = wasm.cartridgeaccount_registerSession(this.__wbg_ptr, ptr0, len0, expires_at, addHeapObject(public_key));
         return takeObject(ret);
     }
     /**

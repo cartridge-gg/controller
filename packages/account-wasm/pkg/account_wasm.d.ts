@@ -4,6 +4,8 @@ export interface JsEstimateFeeDetails {
     nonce: Felt;
 }
 
+export type Felt = string;
+
 export type Felts = JsFelt[];
 
 export type JsFelt = Felt;
@@ -21,7 +23,7 @@ export interface JsCredentials {
 
 export interface JsInvocationsDetails {
     nonce: Felt;
-    max_fee: Felt;
+    maxFee: Felt;
 }
 
 export interface JsPolicy {
@@ -74,10 +76,10 @@ export class CartridgeAccount {
 /**
 * @param {(JsPolicy)[]} policies
 * @param {bigint} expires_at
-* @param {string} public_key
+* @param {JsFelt} public_key
 * @returns {Promise<string>}
 */
-  registerSession(policies: (JsPolicy)[], expires_at: bigint, public_key: string): Promise<string>;
+  registerSession(policies: (JsPolicy)[], expires_at: bigint, public_key: JsFelt): Promise<string>;
 /**
 * @param {(JsPolicy)[]} policies
 * @param {bigint} expires_at

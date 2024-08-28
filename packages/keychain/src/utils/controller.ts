@@ -14,6 +14,7 @@ import { selectors, VERSION } from "./selectors";
 import migrations from "./migrations";
 import { AccountInfoDocument } from "generated/graphql";
 import { client } from "./graphql";
+import { JsPolicy } from "@cartridge/account-wasm";
 
 type SerializedController = {
   publicKey: string;
@@ -106,7 +107,7 @@ export default class Controller {
       throw new Error("Account not found");
     }
 
-    await this.account.cartridge.createSession(policies, expiresAt);
+    await this.account.cartridge.createSession(policies as JsPolicy[], expiresAt);
   }
 
   async registerSession(
@@ -120,7 +121,7 @@ export default class Controller {
     }
 
     return await this.account.cartridge.registerSession(
-      policies,
+      policies as JsPolicy[],
       expiresAt,
       publicKey,
     );
