@@ -24,10 +24,10 @@ import {
   useAccount,
   useConnect,
   useInjectedConnectors,
+  useProvider,
   voyager,
 } from "@starknet-react/core";
 import {
-  Account,
   CallData,
   RpcProvider,
   cairo,
@@ -365,6 +365,7 @@ function ExternalWalletProvider({ children }: PropsWithChildren) {
 
 function useTokens() {
   const { account: extAccount } = useAccount();
+  const { provider } = useProvider();
   const { controller, prefunds } = useConnection();
   const [tokens, setTokens] = useState<TokenInfo[]>([]);
   const [isChecked, setIsChecked] = useState(false);
@@ -379,14 +380,14 @@ function useTokens() {
   const checkFunds = useCallback(async () => {
     setIsFetching(true);
 
-    const checked = await updateBalance(tokens, extAccount as Account);
+    const checked = await updateBalance(tokens, provider, extAccount?.address);
     setTokens(checked);
 
     setIsFetching(false);
     if (!isChecked) {
       setIsChecked(true);
     }
-  }, [tokens, controller, isChecked, extAccount]);
+  }, [tokens, controller, isChecked, extAccount?.address]);
 
   useInterval(checkFunds, 3000);
 

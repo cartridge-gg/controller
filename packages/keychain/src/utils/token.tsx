@@ -3,7 +3,7 @@ import { EthereumIcon } from "@cartridge/ui";
 import { Image } from "@chakra-ui/react";
 import { formatEther } from "viem";
 import { formatAddress } from "./contracts";
-import { Account, uint256 } from "starknet";
+import { ProviderInterface, uint256 } from "starknet";
 
 export const ETH_CONTRACT_ADDRESS =
   "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
@@ -65,16 +65,17 @@ export async function fetchTokenInfo(prefunds: Prefund[]) {
   return tokens;
 }
 
-export async function updateBalance(tokens: TokenInfo[], account: Account) {
-  if (!account) return tokens;
+export async function updateBalance(tokens: TokenInfo[], provider: ProviderInterface, address: string) {
+  if (!provider) return tokens;
 
   const res = await Promise.allSettled(
     tokens.map(async (t) => {
       try {
-        let balance = await account.callContract({
+       
+        let balance = await provider.callContract({
           contractAddress: t.address,
           entrypoint: "balanceOf",
-          calldata: [account.address],
+          calldata: [address],
         });
 
         /* @ts-ignore */
