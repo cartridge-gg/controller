@@ -96,7 +96,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
 
   const parsePolicies = (policiesStr: string | null): Policy[] => {
     if (!policiesStr) return [];
-    return JSON.parse(policiesStr);
+    return JSON.parse(decodeURIComponent(policiesStr));
   };
 
   const parsePaymaster = (paymasterStr: string | null): PaymasterOptions => {
