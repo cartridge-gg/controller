@@ -23,6 +23,7 @@ type SessionQueryParams = Record<string, string> & {
   public_key: string;
   callback_uri?: string;
   redirect_uri?: string;
+  redirect_query_name?: string;
 };
 
 /**
@@ -82,7 +83,10 @@ export default function RegisterSession() {
 
       if (queries.redirect_uri) {
         const url = new URL(decodeURIComponent(queries.redirect_uri));
-        url.searchParams.append("response", encodedResponse);
+        url.searchParams.append(
+          queries.redirect_query_name ?? "session",
+          encodedResponse,
+        );
         router.replace(url.toString());
       }
     },
