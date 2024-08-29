@@ -3,20 +3,7 @@ import { Container, Content, Footer } from "components/layout";
 import { CopyIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { useState } from "react";
-
-export const shortAddress = (address: string) => {
-  return `${address.slice(0, 6)}...${address.slice(
-    address.length - 4,
-    address.length,
-  )}`;
-};
-
-export const mediumAddress = (address: string) => {
-  return `${address.slice(0, 20)}...${address.slice(
-    address.length - 20,
-    address.length,
-  )}`;
-};
+import { formatAddress } from "utils/contracts";
 
 export function Menu({ onLogout }: { onLogout: () => void }) {
   const { controller } = useConnection();
@@ -46,7 +33,9 @@ export function Menu({ onLogout }: { onLogout: () => void }) {
         >
           {!isCopying ? (
             <HStack>
-              <Text>{shortAddress(controller.address)}</Text>
+              <Text>
+                {formatAddress(controller.address, { first: 6, last: 4 })}
+              </Text>
               <Spacer />
               <CopyIcon color="currentColor" />
             </HStack>
