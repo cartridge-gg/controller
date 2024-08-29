@@ -11,14 +11,13 @@ export function DeploymentRequired({
   onClose,
 }: {
   onClose: () => void;
-  children: React.ReactNode;
 }) {
   const {
     controller: { account },
   } = useController();
   const { hasPrefundRequest } = useConnection();
   const [deployHash, setDeployHash] = useState<string>();
-  const [showFunding, setShowFunding] = useState(false);
+  const [showFunding, setShowFunding] = useState(true);
 
   useEffect(() => {
     if (

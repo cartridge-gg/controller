@@ -3,6 +3,7 @@ import {
   ExecuteReply,
   Policy,
   ConnectError,
+  DeployReply,
 } from "@cartridge/controller";
 import {
   Abi,
@@ -15,6 +16,7 @@ import {
 
 export type ConnectionCtx =
   | ConnectCtx
+  | DeployCtx
   | LogoutCtx
   | ExecuteCtx
   | SignMessageCtx
@@ -89,5 +91,13 @@ export type SetExternalOwnerCtx = {
   type: "set-external-owner";
   account: string;
   resolve: (res: ConnectError) => void;
+  reject: (reason?: unknown) => void;
+};
+
+export type DeployCtx = {
+  origin: string;
+  type: "deploy";
+  account: string;
+  resolve: (res: DeployReply | ConnectError) => void;
   reject: (reason?: unknown) => void;
 };

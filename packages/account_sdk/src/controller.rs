@@ -7,7 +7,6 @@ use crate::account::SpecificAccount;
 use crate::constants::ACCOUNT_CLASS_HASH;
 use crate::factory::ControllerFactory;
 use crate::hash::MessageHashRev1;
-use crate::paymaster::{self, PaymasterError, PaymasterResponse, PaymasterResponseResult};
 use crate::provider::{CartridgeProvider, CartridgeProviderError};
 use crate::signers::DeviceError;
 use crate::storage::{Credentials, Selectors, SessionMetadata, StorageBackend, StorageValue};
@@ -173,20 +172,7 @@ where
             .await
             .map_err(ControllerError::CartridgeProviderError)?;
 
-        match res.result {
-            PaymasterResponseResult::Success(transaction_result) => {
-                Ok(transaction_result.transaction_hash)
-            }
-            PaymasterResponseResult::Error(error) => {
-                Err(ControllerError::CartridgeProviderError(
-                    PaymasterError::RpcError {
-                        code: error.error.code,
-                        message: error.error.message,
-                    }
-                    .into(),
-                ))
-            }
-        }
+        Ok(res.result.transaction_hash)
     }
 
     pub async fn estimate_invoke_fee(

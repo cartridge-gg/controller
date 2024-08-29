@@ -54,6 +54,7 @@ export function executeFactory({
         }
 
         if (paymaster) {
+          console.log("try paymaster")
           try {
             const transaction_hash = await account.executeFromOutside(
               calls,
@@ -65,19 +66,7 @@ export function executeFactory({
               transaction_hash,
             };
           } catch (error) {
-            if (error instanceof Error) {
-              // Paymaster not supported
-              if (error.message.includes("-32003")) {
-                // Handle the specific error, e.g., fallback to non-paymaster execution
-                console.warn(
-                  "Paymaster not supported, falling back to regular execution",
-                );
-              } else {
-                throw error;
-              }
-            } else {
-              throw error;
-            }
+            /* user pays */
           }
         }
 
@@ -87,18 +76,14 @@ export function executeFactory({
           try {
             estFee = await account.cartridge.estimateInvokeFee(calls);
           } catch (error) {
-            if (error instanceof Error) {
-              const errorData = JSON.stringify(error);
-              if (errorData.includes("is not deployed")) {
-                const addressMatch = errorData.match(
-                  /0x[a-fA-F0-9]+(?= is not deployed)/,
-                );
-                if (addressMatch && addressMatch[0] === controller.address) {
-                  // Do deploy screen
-                }
-
-                // Display exxecution error to user
-              }
+            if (
+              error instanceof Error &&
+              error.message.includes("ContractNotFound")
+            ) {
+              return {
+                code: ResponseCodes.NOT_DEPLOYED,
+                message: error.message,
+              };
             }
 
             throw error;
@@ -109,27 +94,7 @@ export function executeFactory({
           );
         }
 
-        let res;
-        try {
-          res = await account.execute(transactions, { maxFee });
-        } catch (error) {
-          if (error instanceof Error) {
-            const errorData = JSON.stringify(error);
-            if (errorData.includes("is not deployed")) {
-              const addressMatch = errorData.match(
-                /0x[a-fA-F0-9]+(?= is not deployed)/,
-              );
-              if (addressMatch && addressMatch[0] === controller.address) {
-                // Do deploy screen
-              }
-
-              // Display exxecution error to user
-            }
-          }
-
-          throw error;
-        }
-
+        let res = await account.execute(transactions, { maxFee });
         return {
           code: ResponseCodes.SUCCESS,
           ...res,
