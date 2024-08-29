@@ -15,6 +15,7 @@ import { LoginMode } from "components/connect/types";
 type SessionResponse = {
   username: string;
   address: string;
+  ownerGuid: string;
   transactionHash?: string;
   alreadyRegistered?: boolean;
 };
@@ -104,6 +105,7 @@ export default function RegisterSession() {
       onCallback({
         username: controller.username,
         address: controller.address,
+        ownerGuid: controller.account.cartridge.ownerGuid(),
         transactionHash: transaction_hash,
       });
     },
@@ -132,6 +134,7 @@ export default function RegisterSession() {
       onCallback({
         username: controller.username,
         address: controller.address,
+        ownerGuid: controller.account.cartridge.ownerGuid(),
         alreadyRegistered: true,
       });
     }

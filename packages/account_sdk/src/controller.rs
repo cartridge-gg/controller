@@ -129,6 +129,10 @@ where
         self.factory.deploy_v1(self.salt)
     }
 
+    pub fn owner_guid(&self) -> Felt {
+        self.account.signer.signer().guid()
+    }
+
     pub async fn create_session(
         &mut self,
         methods: Vec<AllowedMethod>,
@@ -168,7 +172,7 @@ where
         let session = Session::new(methods, expires_at, &signer)?;
         let register_execution = self
             .contract
-            .register_session(&session.raw(), &signer.guid());
+            .register_session(&session.raw(), &self.owner_guid());
 
         let txn = register_execution
             // FIXME: est fee is not accurate as it does not account for validation cost, so set to some high multiple for now

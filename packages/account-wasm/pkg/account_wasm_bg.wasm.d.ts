@@ -3,6 +3,7 @@
 export const memory: WebAssembly.Memory;
 export function __wbg_cartridgeaccount_free(a: number): void;
 export function cartridgeaccount_new(a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number, n: number, o: number): void;
+export function cartridgeaccount_ownerGuid(a: number): number;
 export function cartridgeaccount_registerSession(a: number, b: number, c: number, d: number, e: number): number;
 export function cartridgeaccount_createSession(a: number, b: number, c: number, d: number): number;
 export function cartridgeaccount_estimateInvokeFee(a: number, b: number, c: number, d: number, e: number): number;
