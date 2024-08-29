@@ -98,9 +98,7 @@ function Home() {
       );
     }
     case "execute": {
-      return (
-        <Execute />
-      );
+      return <Execute />;
     }
     case "deploy": {
       const ctx = context as DeployCtx;
@@ -110,56 +108,55 @@ function Home() {
             ctx.resolve({
               code: ResponseCodes.CANCELED,
               message: "Canceled",
-            })}
+            })
+          }
         />
       );
     }
     case "open-menu": {
       const ctx = context as OpenMenuCtx;
       return (
-          <Menu
-            onLogout={() => {
-              logout(ctx.origin)();
+        <Menu
+          onLogout={() => {
+            logout(ctx.origin)();
 
-              ctx.resolve({
-                code: ResponseCodes.NOT_CONNECTED,
-                message: "User logged out",
-              });
-            }}
-          />
+            ctx.resolve({
+              code: ResponseCodes.NOT_CONNECTED,
+              message: "User logged out",
+            });
+          }}
+        />
       );
     }
 
     case "open-settings": {
       const ctx = context as OpenSettingsCtx;
       return (
-          <Settings
-            onLogout={() => {
-              logout(ctx.origin)();
+        <Settings
+          onLogout={() => {
+            logout(ctx.origin)();
 
-              ctx.resolve({
-                code: ResponseCodes.NOT_CONNECTED,
-                message: "User logged out",
-              });
-            }}
-          />
+            ctx.resolve({
+              code: ResponseCodes.NOT_CONNECTED,
+              message: "User logged out",
+            });
+          }}
+        />
       );
     }
 
     case "set-delegate": {
       const ctx = context as SetDelegateCtx;
       return (
-          <SetDelegate
-            onSetDelegate={(delegateAddress) => {
-              setDelegateTransaction(ctx, delegateAddress);
-            }}
-          />
+        <SetDelegate
+          onSetDelegate={(delegateAddress) => {
+            setDelegateTransaction(ctx, delegateAddress);
+          }}
+        />
       );
     }
     case "set-external-owner": {
-      return (
-          <SetExternalOwner />
-      );
+      return <SetExternalOwner />;
     }
     default:
       return <>*Waves*</>;

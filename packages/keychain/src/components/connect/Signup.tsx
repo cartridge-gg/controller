@@ -34,7 +34,7 @@ export function Signup({
   });
   const [isValidating, setIsValidating] = useState(false);
 
-  const { origin, hasPrefundRequest } = useConnection();
+  const { origin } = useConnection();
   const { debouncedValue: username, debouncing } = useDebounce(
     usernameField.value,
     1000,
@@ -87,7 +87,7 @@ export function Signup({
         onSuccess();
       }
     },
-    [origin, chainId, rpcUrl, hasPrefundRequest, onSuccess, setController],
+    [origin, chainId, rpcUrl, onSuccess, setController],
   );
 
   const doPopup = useCallback(() => {

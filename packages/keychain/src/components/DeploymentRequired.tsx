@@ -7,11 +7,7 @@ import { useController } from "hooks/controller";
 import { Funding } from "./Funding";
 import { useConnection } from "hooks/connection";
 
-export function DeploymentRequired({
-  onClose,
-}: {
-  onClose: () => void;
-}) {
+export function DeploymentRequired({ onClose }: { onClose: () => void }) {
   const {
     controller: { account },
   } = useController();
