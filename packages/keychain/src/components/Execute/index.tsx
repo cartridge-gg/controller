@@ -199,12 +199,7 @@ export function Execute() {
   );
 
   if (isInsufficient) {
-    return (
-      <InsufficientFunds
-        address={controller.address}
-        balance={format(ethBalance)}
-      />
-    );
+    return <InsufficientFunds balance={format(ethBalance)} />;
   }
 
   return (

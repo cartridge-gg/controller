@@ -81,7 +81,7 @@ function Form({
       });
 
       if (mode === LoginMode.Controller && policies?.length > 0) {
-        await controller.approve(origin, expiresAt, policies);
+        await controller.createSession(expiresAt, policies);
       } else {
         await doLogin(usernameField.value, credentialId);
       }
@@ -143,7 +143,7 @@ function Form({
         />
       </Content>
 
-      <Footer isSlot={isSlot} createSession>
+      <Footer isSlot={isSlot}>
         {error && (
           <ErrorAlert title="Login failed" description={error.message} />
         )}

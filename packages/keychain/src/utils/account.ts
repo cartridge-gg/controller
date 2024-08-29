@@ -17,7 +17,10 @@ import {
 
 import { selectors, VERSION } from "./selectors";
 import Storage from "./storage";
-import { CartridgeAccount } from "@cartridge/account-wasm";
+import {
+  CartridgeAccount,
+  JsInvocationsDetails,
+} from "@cartridge/account-wasm";
 import { normalizeCalls } from "./connection/execute";
 import { PaymasterOptions } from "@cartridge/controller";
 
@@ -76,7 +79,10 @@ class Account extends BaseAccount {
   ): Promise<InvokeFunctionResponse> {
     details.nonce = details.nonce ?? (await super.getNonce("pending"));
 
-    const res = await this.cartridge.execute(normalizeCalls(calls), details);
+    const res = await this.cartridge.execute(
+      normalizeCalls(calls),
+      details as JsInvocationsDetails,
+    );
 
     Storage.update(this.selector, {
       nonce: num.toHex(BigInt(details.nonce) + 1n),
