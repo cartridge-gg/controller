@@ -168,7 +168,7 @@ where
         let session = Session::new(methods, expires_at, &signer)?;
         let register_execution = self
             .contract
-            .register_session(&session.raw(), &signer.guid());
+            .register_session(&session.raw(), &self.account.signer.signer().guid());
 
         let txn = register_execution
             // FIXME: est fee is not accurate as it does not account for validation cost, so set to some high multiple for now
