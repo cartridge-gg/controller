@@ -1,5 +1,5 @@
 export const verified: { id: string; url: string }[] = [
-  { id: "flippyflop", url: "https://flippyflop.vercel.app" },
+  { id: "flippyflop", url: "https://flippyflop.gg" },
 ];
 
 export function isVerified(url: string) {
