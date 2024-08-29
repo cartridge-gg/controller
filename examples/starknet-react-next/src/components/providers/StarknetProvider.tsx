@@ -66,16 +66,16 @@ const cartridge = new CartridgeConnector({
   },
   // theme: "dope-wars",
   // colorMode: "light"
-  // prefunds: [
-  //   {
-  //     address: ETH_TOKEN_ADDRESS,
-  //     min: "300000000000000",
-  //   },
-  //   {
-  //     address: PAPER_TOKEN_ADDRESS,
-  //     min: "100",
-  //   },
-  // ],
+  prefunds: [
+    {
+      address: ETH_TOKEN_ADDRESS,
+      min: "300000000000000",
+    },
+    // {
+    //   address: PAPER_TOKEN_ADDRESS,
+    //   min: "100",
+    // },
+  ],
 });
 
 function provider(chain: Chain) {

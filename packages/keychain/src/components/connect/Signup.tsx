@@ -1,5 +1,5 @@
-import { Field } from "@cartridge/ui";
-import { Button } from "@chakra-ui/react";
+import { ArgentIcon, Field } from "@cartridge/ui";
+import { Button, HStack } from "@chakra-ui/react";
 import { Container, Footer, Content } from "components/layout";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -24,7 +24,8 @@ export function Signup({
   onLogin,
 }: SignupProps) {
   const theme = useControllerTheme();
-  const { chainId, rpcUrl, setController } = useConnection();
+  const { chainId, rpcUrl, setController, argentOwner, context } =
+    useConnection();
   const [error, setError] = useState<Error>();
   const [isRegistering, setIsRegistering] = useState(false);
   const [isPopup, setIsPopup] = useState(false);
@@ -34,7 +35,7 @@ export function Signup({
   });
   const [isValidating, setIsValidating] = useState(false);
 
-  const { origin } = useConnection();
+  const { origin, policies } = useConnection();
   const { debouncedValue: username, debouncing } = useDebounce(
     usernameField.value,
     1000,
@@ -66,9 +67,9 @@ export function Signup({
   const initController = useCallback(
     async (
       username: string,
-      address: string,
-      credentialId: string,
-      publicKey: string,
+      address?: string,
+      credentialId?: string,
+      publicKey?: string,
     ) => {
       const controller = new Controller({
         appId: origin,
@@ -144,6 +145,10 @@ export function Signup({
     }
   }, [usernameField, initController, doPopup]);
 
+  const onSubmitArgent = useCallback(async () => {
+    argentOwner(context, usernameField.value, policies);
+  }, [usernameField, doPopup, argentOwner]);
+
   // for polling approach when popup
   useAccountQuery(
     { id: usernameField.value },
@@ -215,16 +220,34 @@ export function Signup({
             <ErrorAlert title="Login failed" description={error.message} />
           )}
 
-          <Button
-            colorScheme="colorful"
-            isLoading={isRegistering}
-            isDisabled={
-              debouncing || !username || isValidating || !!usernameField.error
-            }
-            onClick={onSubmit}
-          >
-            sign up
-          </Button>
+          <HStack>
+            <Button
+              w="100%"
+              colorScheme="colorful"
+              isLoading={isRegistering}
+              isDisabled={
+                debouncing || !username || isValidating || !!usernameField.error
+              }
+              onClick={onSubmit}
+            >
+              sign up
+            </Button>
+            {window["starknet_argentX"] && (
+              <Button
+                colorScheme="colorful"
+                isLoading={isRegistering}
+                isDisabled={
+                  debouncing ||
+                  !username ||
+                  isValidating ||
+                  !!usernameField.error
+                }
+                onClick={onSubmitArgent}
+              >
+                <ArgentIcon />
+              </Button>
+            )}
+          </HStack>
           <RegistrationLink
             description="Already have a Controller?"
             onClick={() => onLogin(usernameField.value)}

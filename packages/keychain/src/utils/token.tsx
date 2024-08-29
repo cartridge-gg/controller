@@ -3,8 +3,7 @@ import { EthereumIcon } from "@cartridge/ui";
 import { Image } from "@chakra-ui/react";
 import { formatEther } from "viem";
 import { formatAddress } from "./contracts";
-import { uint256 } from "starknet";
-import Controller from "./controller";
+import { Account, uint256 } from "starknet";
 
 export const ETH_CONTRACT_ADDRESS =
   "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
@@ -66,28 +65,32 @@ export async function fetchTokenInfo(prefunds: Prefund[]) {
   return tokens;
 }
 
-export async function updateBalance(
-  tokens: TokenInfo[],
-  controller: Controller,
-) {
+export async function updateBalance(tokens: TokenInfo[], account: Account) {
+  if (!account) return tokens;
+
   const res = await Promise.allSettled(
     tokens.map(async (t) => {
       try {
-        const balance = await controller.account.callContract({
+        let balance = await account.callContract({
           contractAddress: t.address,
           entrypoint: "balanceOf",
-          calldata: [controller.account.address],
+          calldata: [account.address],
         });
 
+        /* @ts-ignore */
+        balance = "result" in balance ? balance["result"] : balance;
+
+        const balanceBn = uint256.uint256ToBN({
+          low: balance[0],
+          high: balance[1],
+        });
         return {
           ...t,
-          balance: uint256.uint256ToBN({
-            low: balance[0],
-            high: balance[1],
-          }),
+          balance: balanceBn,
           error: undefined,
         };
-      } catch {
+      } catch (e) {
+        console.log(e);
         return {
           ...t,
           error: new Error("Failed to update balance"),

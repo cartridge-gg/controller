@@ -36,8 +36,9 @@ export function Footer({
       !hideTxSummary,
     [origin, policies, variant, isSignup, hideTxSummary],
   );
+
   const maxH = `${
-    (isIframe() ? window.innerHeight : PORTAL_WINDOW_HEIGHT) - TOP_BAR_HEIGHT
+    (isIframe() ? PORTAL_WINDOW_HEIGHT : window.innerHeight) - TOP_BAR_HEIGHT
   }px`;
 
   useEffect(() => {

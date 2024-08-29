@@ -115,6 +115,13 @@ export class CartridgeAccount {
 */
   sessionJson(): any;
 /**
+* @param {any[]} policies
+* @param {bigint} expires_at
+* @param {any} external_account
+* @returns {any}
+*/
+  static registerSessionCalldata(policies: any[], expires_at: bigint, external_account: any): any;
+/**
 */
   revokeSession(): void;
 /**

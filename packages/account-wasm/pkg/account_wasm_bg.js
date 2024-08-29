@@ -441,6 +441,29 @@ export class CartridgeAccount {
         }
     }
     /**
+    * @param {any[]} policies
+    * @param {bigint} expires_at
+    * @param {any} external_account
+    * @returns {any}
+    */
+    static registerSessionCalldata(policies, expires_at, external_account) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            const ptr0 = passArrayJsValueToWasm0(policies, wasm.__wbindgen_malloc);
+            const len0 = WASM_VECTOR_LEN;
+            wasm.cartridgeaccount_registerSessionCalldata(retptr, ptr0, len0, expires_at, addHeapObject(external_account));
+            var r0 = getInt32Memory0()[retptr / 4 + 0];
+            var r1 = getInt32Memory0()[retptr / 4 + 1];
+            var r2 = getInt32Memory0()[retptr / 4 + 2];
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return takeObject(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
     */
     revokeSession() {
         try {
@@ -653,6 +676,21 @@ export function __wbindgen_is_object(arg0) {
 
 export function __wbindgen_bigint_from_u64(arg0) {
     const ret = BigInt.asUintN(64, arg0);
+    return addHeapObject(ret);
+};
+
+export function __wbindgen_error_new(arg0, arg1) {
+    const ret = new Error(getStringFromWasm0(arg0, arg1));
+    return addHeapObject(ret);
+};
+
+export function __wbindgen_string_new(arg0, arg1) {
+    const ret = getStringFromWasm0(arg0, arg1);
+    return addHeapObject(ret);
+};
+
+export function __wbindgen_object_clone_ref(arg0) {
+    const ret = getObject(arg0);
     return addHeapObject(ret);
 };
 

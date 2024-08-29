@@ -10,6 +10,7 @@ pub(crate) mod invocation;
 pub(crate) mod outside_execution;
 pub(crate) mod policy;
 pub(crate) mod session;
+pub(crate) mod deployment;
 
 #[serde_as]
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]

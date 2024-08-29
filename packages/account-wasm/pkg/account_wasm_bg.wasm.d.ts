@@ -11,6 +11,7 @@ export function cartridgeaccount_execute(a: number, b: number, c: number, d: num
 export function cartridgeaccount_executeFromOutside(a: number, b: number, c: number, d: number): number;
 export function cartridgeaccount_hasSession(a: number, b: number, c: number, d: number): void;
 export function cartridgeaccount_sessionJson(a: number, b: number): void;
+export function cartridgeaccount_registerSessionCalldata(a: number, b: number, c: number, d: number, e: number): void;
 export function cartridgeaccount_revokeSession(a: number, b: number): void;
 export function cartridgeaccount_signMessage(a: number, b: number, c: number): number;
 export function cartridgeaccount_deploySelf(a: number, b: number): number;

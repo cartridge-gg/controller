@@ -11,6 +11,7 @@ import {
   OpenSettingsCtx,
   SetDelegateCtx,
   SignMessageCtx,
+  ArgentOwnerCtx,
 } from "utils/connection";
 import { logout } from "utils/connection/logout";
 import { LoginMode } from "components/connect/types";
@@ -18,6 +19,7 @@ import { ErrorPage } from "components/ErrorBoundary";
 import { SetDelegate } from "components/SetDelegate";
 import { SetExternalOwner } from "components/SetExternalOwner";
 import { Settings } from "components/Settings";
+import { SignupArgent } from "components/connect/SignupArgent";
 
 function Home() {
   const { context, controller, error, setDelegateTransaction, policies } =
@@ -32,12 +34,14 @@ function Home() {
   }
 
   // No controller, send to login
+  if (!controller && context.type === "argent-owner") {
+    return <SignupArgent />;
+  }
+
+  // No controller, send to login
   if (!controller) {
     return <CreateController loginMode={LoginMode.Controller} />;
   }
-
-  console.debug({ context_type: context.type });
-
   switch (context.type) {
     case "connect": {
       // TODO: show missing policies if mismatch
@@ -157,6 +161,9 @@ function Home() {
     }
     case "set-external-owner": {
       return <SetExternalOwner />;
+    }
+    case "argent-owner": {
+      return <SignupArgent />;
     }
     default:
       return <>*Waves*</>;
