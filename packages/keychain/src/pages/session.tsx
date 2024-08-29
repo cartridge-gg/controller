@@ -15,8 +15,9 @@ import { LoginMode } from "components/connect/types";
 type SessionResponse = {
   username: string;
   address: string;
-  transaction_hash?: string;
-  already_registered?: boolean;
+  webauthnPublicKey: string;
+  transactionHash?: string;
+  alreadyRegistered?: boolean;
 };
 
 type SessionQueryParams = Record<string, string> & {
@@ -105,9 +106,10 @@ export default function RegisterSession() {
       }
 
       onCallback({
-        username: controller.account.username,
-        address: controller.account.address,
-        transaction_hash,
+        username: controller.username,
+        address: controller.address,
+        webauthnPublicKey: controller.publicKey,
+        transactionHash: transaction_hash,
       });
     },
     [queries.callback_uri, queries.redirect_uri, controller, onCallback],
@@ -133,9 +135,10 @@ export default function RegisterSession() {
     // the exising session
     if (controller.account.hasSession(calls)) {
       onCallback({
-        username: controller.account.username,
-        address: controller.account.address,
-        already_registered: true,
+        username: controller.username,
+        address: controller.address,
+        webauthnPublicKey: controller.publicKey,
+        alreadyRegistered: true,
       });
     }
   }, [controller, origin, policies, onCallback]);
