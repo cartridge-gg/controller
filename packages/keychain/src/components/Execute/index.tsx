@@ -110,77 +110,86 @@ export function Execute() {
     }
   }, [ethBalance, fees]);
 
+  const execute = useCallback(async () => {
+    if (!paymaster) {
+      const maxFee = num.toHex(
+        ctx.transactionsDetail?.maxFee || ETH_MIN_PREFUND,
+      );
+      let { transaction_hash } = await account.execute(calls, { maxFee });
+
+      return transaction_hash;
+    }
+
+    try {
+      return await account.executeFromOutside(calls, paymaster);
+    } catch (error) {
+      if (error instanceof Error) {
+        // Handle outside execution validation errors
+        // NOTE: These should probably never happen.
+        if (error.message.includes("-32602")) {
+          if (error.message.includes("execution time not yet reached")) {
+            console.warn(
+              "Execution time not yet reached. Please try again later.",
+            );
+            setError(
+              new Error(
+                "Execution time not yet reached. Please try again later.",
+              ),
+            );
+            return;
+          }
+
+          if (error.message.includes("execution time has passed")) {
+            console.warn(
+              "Execution time has passed. This transaction is no longer valid.",
+            );
+            setError(
+              new Error(
+                "Execution time has passed. This transaction is no longer valid.",
+              ),
+            );
+            return;
+          }
+
+          if (error.message.includes("invalid caller")) {
+            console.warn("Invalid caller for this transaction.");
+            setError(new Error("Invalid caller for this transaction."));
+            return;
+          }
+        }
+
+        // Rate limit error, fallback to manual flow and let user know with info banner.
+        if (error.message.includes("-32005")) {
+          console.warn("Rate limit exceeded. Please try again later.");
+          setError(new Error("Rate limit exceeded. Please try again later."));
+          return;
+        }
+
+        // Paymaster not supported
+        if (error.message.includes("-32003")) {
+          // Handle the specific error, e.g., fallback to non-paymaster execution
+          console.warn(
+            "Paymaster not supported, falling back to regular execution",
+          );
+          const maxFee = num.toHex(
+            ctx.transactionsDetail?.maxFee || ETH_MIN_PREFUND,
+          );
+          let { transaction_hash } = await account.execute(calls, { maxFee });
+          return transaction_hash;
+        } else {
+          throw error; // Re-throw other errors
+        }
+      } else {
+        throw error;
+      }
+    }
+  }, [account, calls, paymaster, ctx.transactionsDetail]);
+
   const onSubmit = useCallback(async () => {
     setLoading(true);
 
     try {
-      let transaction_hash;
-
-      if (paymaster) {
-        try {
-          transaction_hash = await account.executeFromOutside(calls, paymaster);
-        } catch (error) {
-          console.error(error);
-
-          // Handle outside execution validation errors
-          // NOTE: These should probably never happen.
-          if (error.code === -32602) {
-            if (error.message.includes("execution time not yet reached")) {
-              console.warn(
-                "Execution time not yet reached. Please try again later.",
-              );
-              setError(
-                new Error(
-                  "Execution time not yet reached. Please try again later.",
-                ),
-              );
-              return;
-            }
-
-            if (error.message.includes("execution time has passed")) {
-              console.warn(
-                "Execution time has passed. This transaction is no longer valid.",
-              );
-              setError(
-                new Error(
-                  "Execution time has passed. This transaction is no longer valid.",
-                ),
-              );
-              return;
-            }
-
-            if (error.message.includes("invalid caller")) {
-              console.warn("Invalid caller for this transaction.");
-              setError(new Error("Invalid caller for this transaction."));
-              return;
-            }
-          }
-
-          // Rate limit error, fallback to manual flow and let user know with info banner.
-          if (error.code === -32005) {
-            console.warn("Rate limit exceeded. Please try again later.");
-            setError(new Error("Rate limit exceeded. Please try again later."));
-            return;
-          }
-
-          // Paymaster not supported
-          if (error.code === -32003) {
-            // Handle the specific error, e.g., fallback to non-paymaster execution
-            console.warn(
-              "Paymaster not supported, falling back to regular execution",
-            );
-          } else {
-            throw error; // Re-throw other errors
-          }
-        }
-      } else {
-        // TODO: calculate webauthn validation cost separately
-        const maxFee = num.toHex(
-          ctx.transactionsDetail?.maxFee || ETH_MIN_PREFUND,
-        );
-        ({ transaction_hash } = await account.execute(calls, { maxFee }));
-      }
-
+      let transaction_hash = await execute();
       ctx.resolve({
         transaction_hash,
         code: ResponseCodes.SUCCESS,
@@ -190,7 +199,7 @@ export function Execute() {
     } finally {
       setLoading(false);
     }
-  }, [account, calls, ctx, paymaster, setError, setLoading]);
+  }, [ctx, execute, setError, setLoading]);
 
   const policies = useMemo<Policy[]>(
     () =>

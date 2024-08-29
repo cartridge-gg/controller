@@ -55,7 +55,6 @@ export function executeFactory({
         }
 
         if (paymaster) {
-          console.log("try paymaster");
           try {
             const transaction_hash = await account.executeFromOutside(
               calls,
