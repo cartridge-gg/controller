@@ -1,5 +1,23 @@
 /* tslint:disable */
 /* eslint-disable */
+export interface JsOutsideExecution {
+    caller: Felt;
+    executeBefore: number;
+    executeAfter: number;
+    calls: JsCall[];
+    nonce: Felt;
+}
+
+export interface JsEstimateFeeDetails {
+    nonce: Felt;
+}
+
+export interface JsCall {
+    contractAddress: Felt;
+    entrypoint: string;
+    calldata: Felt[];
+}
+
 export interface JsInvocationsDetails {
     nonce: Felt;
     maxFee: Felt;
@@ -10,13 +28,9 @@ export interface JsPolicy {
     method: string;
 }
 
-export interface JsOutsideExecution {
-    caller: Felt;
-    executeBefore: number;
-    executeAfter: number;
-    calls: JsCall[];
-    nonce: Felt;
-}
+export type Felts = JsFelt[];
+
+export type JsFelt = Felt;
 
 export interface JsSession {
     policies: JsPolicy[];
@@ -27,20 +41,6 @@ export interface JsCredentials {
     authorization: Felt[];
     privateKey: Felt;
 }
-
-export interface JsCall {
-    contractAddress: Felt;
-    entrypoint: string;
-    calldata: Felt[];
-}
-
-export interface JsEstimateFeeDetails {
-    nonce: Felt;
-}
-
-export type Felts = JsFelt[];
-
-export type JsFelt = Felt;
 
 /**
 */
@@ -70,6 +70,10 @@ export class CartridgeAccount {
 * @returns {CartridgeAccount}
 */
   static new(app_id: string, rpc_url: string, chain_id: JsFelt, address: JsFelt, rp_id: string, username: string, credential_id: string, public_key: string): CartridgeAccount;
+/**
+* @returns {JsFelt}
+*/
+  ownerGuid(): JsFelt;
 /**
 * @param {(JsPolicy)[]} policies
 * @param {bigint} expires_at
@@ -146,12 +150,12 @@ export class CartridgeSessionAccount {
 * @param {string} rpc_url
 * @param {JsFelt} signer
 * @param {JsFelt} address
-* @param {JsFelt} owner_stark_public_key
+* @param {JsFelt} owner_guid
 * @param {JsFelt} chain_id
 * @param {JsSession} session
 * @returns {CartridgeSessionAccount}
 */
-  static new_as_registered(rpc_url: string, signer: JsFelt, address: JsFelt, owner_stark_public_key: JsFelt, chain_id: JsFelt, session: JsSession): CartridgeSessionAccount;
+  static new_as_registered(rpc_url: string, signer: JsFelt, address: JsFelt, owner_guid: JsFelt, chain_id: JsFelt, session: JsSession): CartridgeSessionAccount;
 /**
 * @param {JsFelt} hash
 * @param {(JsCall)[]} calls
