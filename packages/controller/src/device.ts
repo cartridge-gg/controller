@@ -95,11 +95,20 @@ class DeviceAccount extends Account {
         false,
         this.paymaster,
       );
+
       if (res.code === ResponseCodes.SUCCESS) {
         return res as InvokeFunctionResponse;
       }
 
       this.modal.open();
+
+      if (res.code === ResponseCodes.NOT_DEPLOYED) {
+        res = await this.keychain.deploy();
+        if (res.code !== ResponseCodes.SUCCESS) {
+          return Promise.reject(res.message);
+        }
+      }
+
       res = await this.keychain.execute(
         calls,
         abis,
@@ -107,7 +116,6 @@ class DeviceAccount extends Account {
         true,
         this.paymaster,
       );
-      this.modal.close();
 
       if (res.code !== ResponseCodes.SUCCESS) {
         return Promise.reject(res.message);
@@ -116,6 +124,8 @@ class DeviceAccount extends Account {
       return res as InvokeFunctionResponse;
     } catch (e) {
       throw e;
+    } finally {
+      this.modal.close();
     }
   }
 

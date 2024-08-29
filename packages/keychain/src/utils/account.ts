@@ -24,11 +24,6 @@ import {
 import { normalizeCalls } from "./connection/execute";
 import { PaymasterOptions } from "@cartridge/controller";
 
-export enum Status {
-  COUNTERFACTUAL = "COUNTERFACTUAL",
-  DEPLOYED = "DEPLOYED",
-}
-
 class Account extends BaseAccount {
   rpc: RpcProvider;
   private selector: string;
@@ -65,64 +60,12 @@ class Account extends BaseAccount {
       webauthn.credentialId,
       webauthn.publicKey,
     );
-
-    this.sync();
-  }
-
-  get status() {
-    const state = Storage.get(this.selector);
-    if (!state || !state.status) {
-      return Status.COUNTERFACTUAL;
-    }
-
-    return state.status;
-  }
-
-  set status(status: Status) {
-    Storage.update(this.selector, {
-      status,
-    });
-  }
-
-  async sync() {
-    if (this.status != Status.DEPLOYED) {
-      try {
-        const classHash = await this.rpc.getClassHashAt(
-          this.address,
-          "pending",
-        );
-        Storage.update(this.selector, {
-          classHash,
-        });
-        this.status = Status.DEPLOYED;
-      } catch (error) {
-        if (
-          error instanceof Error &&
-          error.message.includes("Contract not found")
-        ) {
-          this.status = Status.COUNTERFACTUAL;
-        } else {
-          throw error;
-        }
-      }
-    }
-
-    return this.status;
-  }
-
-  async ensureDeployed() {
-    await this.sync();
-    if (this.status !== Status.DEPLOYED) {
-      throw new Error("Account is deploying");
-    }
   }
 
   async executeFromOutside(
     calls: AllowArray<Call>,
     paymaster: PaymasterOptions,
   ): Promise<string> {
-    this.ensureDeployed();
-
     return await this.cartridge.executeFromOutside(
       normalizeCalls(calls),
       paymaster.caller,
@@ -134,8 +77,6 @@ class Account extends BaseAccount {
     calls: AllowArray<Call>,
     details?: InvocationsDetails,
   ): Promise<InvokeFunctionResponse> {
-    this.ensureDeployed();
-
     details.nonce = details.nonce ?? (await super.getNonce("pending"));
 
     const res = await this.cartridge.execute(
@@ -168,8 +109,6 @@ class Account extends BaseAccount {
     calls: AllowArray<Call>,
     details: EstimateFeeDetails = {},
   ): Promise<EstimateFee> {
-    this.ensureDeployed();
-
     details.blockIdentifier = details.blockIdentifier ?? "pending";
     details.nonce = details.nonce ?? (await super.getNonce("pending"));
 
