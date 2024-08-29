@@ -143,7 +143,7 @@ function Form({
         />
       </Content>
 
-      <Footer isSlot={isSlot} createSession>
+      <Footer isSlot={isSlot}>
         {error && (
           <ErrorAlert title="Login failed" description={error.message} />
         )}

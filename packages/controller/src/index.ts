@@ -1,5 +1,6 @@
 export * from "./types";
 export { defaultPresets } from "./presets";
+export * from "./verified";
 
 import { AccountInterface, addAddressPadding } from "starknet";
 import {
