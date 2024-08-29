@@ -15,7 +15,7 @@ import { LoginMode } from "components/connect/types";
 type SessionResponse = {
   username: string;
   address: string;
-  webauthnPublicKey: string;
+  starkPubKey: string;
   transactionHash?: string;
   alreadyRegistered?: boolean;
 };
@@ -96,7 +96,7 @@ export default function RegisterSession() {
 
   // Handler when user clicks the Create button
   const onConnect = useCallback(
-    (_: Policy[], transaction_hash: string) => {
+    async (_: Policy[], transaction_hash: string) => {
       if (!controller.account.sessionJson()) {
         throw new Error("Session not found");
       }
@@ -108,7 +108,7 @@ export default function RegisterSession() {
       onCallback({
         username: controller.username,
         address: controller.address,
-        webauthnPublicKey: controller.publicKey,
+        starkPubKey: await controller.signer.getPubKey(),
         transactionHash: transaction_hash,
       });
     },
@@ -134,12 +134,14 @@ export default function RegisterSession() {
     // if the requested policies has no mismatch with existing policies then return
     // the exising session
     if (controller.account.hasSession(calls)) {
-      onCallback({
-        username: controller.username,
-        address: controller.address,
-        webauthnPublicKey: controller.publicKey,
-        alreadyRegistered: true,
-      });
+      controller.signer.getPubKey().then((starkPubKey) =>
+        onCallback({
+          username: controller.username,
+          address: controller.address,
+          starkPubKey,
+          alreadyRegistered: true,
+        }),
+      );
     }
   }, [controller, origin, policies, onCallback]);
 
