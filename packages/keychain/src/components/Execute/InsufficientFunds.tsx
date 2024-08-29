@@ -8,17 +8,13 @@ import { useCallback } from "react";
 import { BigNumberish } from "starknet";
 import { formatAddress } from "utils/contracts";
 
-export function InsufficientFunds({
-  address,
-  balance,
-}: {
-  address: BigNumberish;
-  balance: BigNumberish;
-}) {
+export function InsufficientFunds({ balance }: { balance: BigNumberish }) {
   const { controller } = useConnection();
   const { toast } = useToast();
   const onCopy = useCallback(() => {
-    navigator.clipboard.writeText(controller.address);
+    navigator.clipboard.writeText(
+      formatAddress(controller.address, { fullLength: true }),
+    );
     toast("Copied!");
   }, [controller.address, toast]);
 
@@ -148,7 +144,7 @@ export function InsufficientFunds({
               onClick={onCopy}
             >
               <Text color="inherit">
-                {formatAddress(address, { first: 20, last: 10 })}
+                {formatAddress(controller.address, { first: 20, last: 10 })}
               </Text>
               <Spacer />
               <CopyIcon boxSize={6} />

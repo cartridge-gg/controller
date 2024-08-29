@@ -10,7 +10,9 @@ export function CopyAddress({ address }: { address: string }) {
     <HStack
       _hover={{ cursor: "pointer" }}
       onClick={() => {
-        navigator.clipboard.writeText(address);
+        navigator.clipboard.writeText(
+          formatAddress(address, { fullLength: true }),
+        );
         toast("Copied");
       }}
     >
