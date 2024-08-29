@@ -53,9 +53,11 @@ export default function RegisterSession() {
       const headers = new Headers();
       headers.append("Content-Type", "application/json");
 
+      const encodedResponse = btoa(JSON.stringify(response));
+
       if (queries.callback_uri) {
         fetch(sanitizeCallbackUrl(decodeURIComponent(queries.callback_uri)), {
-          body: JSON.stringify(response),
+          body: encodedResponse,
           headers,
           method: "POST",
         })
@@ -80,7 +82,7 @@ export default function RegisterSession() {
 
       if (queries.redirect_uri) {
         const url = new URL(decodeURIComponent(queries.redirect_uri));
-        url.searchParams.append("response", JSON.stringify(response));
+        url.searchParams.append("response", encodedResponse);
         router.replace(url.toString());
       }
     },
