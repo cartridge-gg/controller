@@ -32,9 +32,6 @@ pub enum OperationError {
     #[error("Failed to sign message: {0}")]
     SignMessage(SignError),
 
-    #[error("Expected non zero felt")]
-    ZeroFelt,
-
     #[error(transparent)]
     AccountError(#[from] AccountError<SignError>),
 }
