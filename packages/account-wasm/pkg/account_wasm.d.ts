@@ -62,6 +62,13 @@ export class CartridgeAccount {
 */
   sessionJson(): any;
 /**
+* @param {any[]} policies
+* @param {bigint} expires_at
+* @param {any} external_account
+* @returns {any}
+*/
+  static registerSessionCalldata(policies: any[], expires_at: bigint, external_account: any): any;
+/**
 */
   revokeSession(): void;
 /**
@@ -78,4 +85,18 @@ export class CartridgeAccount {
 * @returns {Promise<any>}
 */
   delegateAccount(): Promise<any>;
+/**
+* @param {any} salt
+* @param {any} external_owner
+* @returns {any}
+*/
+  static getUdcDeployedAddress(salt: any, external_owner: any): any;
+/**
+* @returns {any}
+*/
+  static getAccountClassHash(): any;
+/**
+* @returns {any}
+*/
+  static getUdcAddress(): any;
 }

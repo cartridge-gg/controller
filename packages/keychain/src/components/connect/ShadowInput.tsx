@@ -8,6 +8,7 @@ export function ShadowInput({ value }: { value: string }) {
       opacity={0.5}
       pointerEvents="none"
       value={value.length > 0 ? value + ".gg" : ""}
+      readOnly
     />
   );
 }

@@ -17,20 +17,20 @@ import { client } from "./graphql";
 
 type SerializedController = {
   publicKey: string;
-  credentialId: string;
+  credentialId?: string;
   address: string;
   username: string;
 };
 
 export default class Controller {
   public account: Account;
-  public address: string;
+  public address?: string;
   public username: string;
   public chainId: string;
   public rpcUrl: string;
   public signer: SignerInterface;
-  protected publicKey: string;
-  protected credentialId: string;
+  protected publicKey?: string;
+  protected credentialId?: string;
 
   constructor({
     appId,
@@ -44,10 +44,10 @@ export default class Controller {
     appId: string;
     chainId: string;
     rpcUrl: string;
-    address: string;
-    username: string;
+    address?: string;
+    username?: string;
     publicKey: string;
-    credentialId: string;
+    credentialId?: string;
   }) {
     this.address = address;
     this.username = username;

@@ -18,6 +18,7 @@ import {
   SetExternalOwnerCtx,
   OpenSettingsCtx,
   OpenMenuCtx,
+  ArgentOwnerCtx,
 } from "utils/connection";
 import { RpcProvider, CallData, constants, shortString } from "starknet";
 import { Policy, Prefund, ResponseCodes } from "@cartridge/controller";
@@ -58,6 +59,7 @@ type ConnectionContextValue = {
   openSettings: (context: ConnectionCtx) => void;
   openMenu: (context: ConnectionCtx) => void;
   setExternalOwner: (context: ConnectionCtx) => void;
+  argentOwner: (context: ConnectionCtx, username: string, policies: Policy[]) => void;
 };
 
 export function ConnectionProvider({ children }: PropsWithChildren) {
@@ -279,6 +281,17 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
     [controller?.address, openSettings],
   );
 
+  const argentOwner = useCallback((context: ConnectionCtx, username: string, policies: Policy[]) => {
+    setContext({
+      origin: context.origin,
+      type: "argent-owner",
+      username,
+      policies,
+      resolve: context.resolve,
+      reject: context.reject,
+    } as ArgentOwnerCtx);
+  }, []);
+
   return (
     <ConnectionContext.Provider
       value={{
@@ -303,6 +316,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
         setExternalOwnerTransaction,
         removeExternalOwnerTransaction,
         setExternalOwner,
+        argentOwner,
       }}
     >
       {children}
@@ -340,6 +354,8 @@ export function usePolicies() {
   const { context } = useConnection();
   switch (context?.type) {
     case "connect":
+      return context.policies;
+    case "argent-owner":
       return context.policies;
     default:
       return [];

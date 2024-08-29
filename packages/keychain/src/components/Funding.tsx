@@ -26,7 +26,7 @@ import {
   useInjectedConnectors,
   voyager,
 } from "@starknet-react/core";
-import { CallData, cairo, num } from "starknet";
+import { Account, CallData, cairo, num } from "starknet";
 import { AlertIcon, CheckIcon, CoinsIcon, DotsIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { useToast } from "hooks/toast";
@@ -324,7 +324,7 @@ function useTokens() {
   const checkFunds = useCallback(async () => {
     setIsFetching(true);
 
-    const checked = await updateBalance(tokens, controller);
+    const checked = await updateBalance(tokens, controller.account as Account);
     setTokens(checked);
 
     setIsFetching(false);
