@@ -24,6 +24,15 @@ function takeObject(idx) {
     return ret;
 }
 
+function addHeapObject(obj) {
+    if (heap_next === heap.length) heap.push(heap.length + 1);
+    const idx = heap_next;
+    heap_next = heap[idx];
+
+    heap[idx] = obj;
+    return idx;
+}
+
 let WASM_VECTOR_LEN = 0;
 
 let cachedUint8Memory0 = null;
@@ -115,15 +124,6 @@ function getStringFromWasm0(ptr, len) {
     return cachedTextDecoder.decode(getUint8Memory0().subarray(ptr, ptr + len));
 }
 
-function addHeapObject(obj) {
-    if (heap_next === heap.length) heap.push(heap.length + 1);
-    const idx = heap_next;
-    heap_next = heap[idx];
-
-    heap[idx] = obj;
-    return idx;
-}
-
 let cachedFloat64Memory0 = null;
 
 function getFloat64Memory0() {
@@ -131,15 +131,6 @@ function getFloat64Memory0() {
         cachedFloat64Memory0 = new Float64Array(wasm.memory.buffer);
     }
     return cachedFloat64Memory0;
-}
-
-let cachedBigInt64Memory0 = null;
-
-function getBigInt64Memory0() {
-    if (cachedBigInt64Memory0 === null || cachedBigInt64Memory0.byteLength === 0) {
-        cachedBigInt64Memory0 = new BigInt64Array(wasm.memory.buffer);
-    }
-    return cachedBigInt64Memory0;
 }
 
 function debugString(val) {
@@ -237,8 +228,8 @@ function makeMutClosure(arg0, arg1, dtor, f) {
     CLOSURE_DTORS.register(real, state, state);
     return real;
 }
-function __wbg_adapter_48(arg0, arg1, arg2) {
-    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h4f854f1ab9269aba(arg0, arg1, addHeapObject(arg2));
+function __wbg_adapter_42(arg0, arg1, arg2) {
+    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h18209be10352b66c(arg0, arg1, addHeapObject(arg2));
 }
 
 let cachedUint32Memory0 = null;
@@ -267,8 +258,8 @@ function handleError(f, args) {
         wasm.__wbindgen_exn_store(addHeapObject(e));
     }
 }
-function __wbg_adapter_178(arg0, arg1, arg2, arg3) {
-    wasm.wasm_bindgen__convert__closures__invoke2_mut__h124d41d3678e7072(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
+function __wbg_adapter_163(arg0, arg1, arg2, arg3) {
+    wasm.wasm_bindgen__convert__closures__invoke2_mut__h09491c54862df783(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
 }
 
 const CartridgeAccountFinalization = (typeof FinalizationRegistry === 'undefined')
@@ -312,8 +303,8 @@ export class CartridgeAccount {
     * - `public_key`: Base64 encoded bytes of the public key generated during the WebAuthn registration process (COSE format).
     * @param {string} app_id
     * @param {string} rpc_url
-    * @param {string} chain_id
-    * @param {string} address
+    * @param {JsFelt} chain_id
+    * @param {JsFelt} address
     * @param {string} rp_id
     * @param {string} username
     * @param {string} credential_id
@@ -327,19 +318,15 @@ export class CartridgeAccount {
             const len0 = WASM_VECTOR_LEN;
             const ptr1 = passStringToWasm0(rpc_url, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
             const len1 = WASM_VECTOR_LEN;
-            const ptr2 = passStringToWasm0(chain_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const ptr2 = passStringToWasm0(rp_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
             const len2 = WASM_VECTOR_LEN;
-            const ptr3 = passStringToWasm0(address, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const ptr3 = passStringToWasm0(username, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
             const len3 = WASM_VECTOR_LEN;
-            const ptr4 = passStringToWasm0(rp_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const ptr4 = passStringToWasm0(credential_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
             const len4 = WASM_VECTOR_LEN;
-            const ptr5 = passStringToWasm0(username, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const ptr5 = passStringToWasm0(public_key, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
             const len5 = WASM_VECTOR_LEN;
-            const ptr6 = passStringToWasm0(credential_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-            const len6 = WASM_VECTOR_LEN;
-            const ptr7 = passStringToWasm0(public_key, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-            const len7 = WASM_VECTOR_LEN;
-            wasm.cartridgeaccount_new(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7);
+            wasm.cartridgeaccount_new(retptr, ptr0, len0, ptr1, len1, addHeapObject(chain_id), addHeapObject(address), ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5);
             var r0 = getInt32Memory0()[retptr / 4 + 0];
             var r1 = getInt32Memory0()[retptr / 4 + 1];
             var r2 = getInt32Memory0()[retptr / 4 + 2];
@@ -352,7 +339,19 @@ export class CartridgeAccount {
         }
     }
     /**
-    * @param {any[]} policies
+    * @param {(JsPolicy)[]} policies
+    * @param {bigint} expires_at
+    * @param {JsFelt} public_key
+    * @returns {Promise<string>}
+    */
+    registerSession(policies, expires_at, public_key) {
+        const ptr0 = passArrayJsValueToWasm0(policies, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.cartridgeaccount_registerSession(this.__wbg_ptr, ptr0, len0, expires_at, addHeapObject(public_key));
+        return takeObject(ret);
+    }
+    /**
+    * @param {(JsPolicy)[]} policies
     * @param {bigint} expires_at
     * @returns {Promise<any>}
     */
@@ -363,7 +362,7 @@ export class CartridgeAccount {
         return takeObject(ret);
     }
     /**
-    * @param {any[]} calls
+    * @param {(JsCall)[]} calls
     * @param {number | undefined} [fee_multiplier]
     * @returns {Promise<any>}
     */
@@ -374,18 +373,18 @@ export class CartridgeAccount {
         return takeObject(ret);
     }
     /**
-    * @param {any[]} calls
-    * @param {any} transaction_details
+    * @param {(JsCall)[]} calls
+    * @param {JsInvocationsDetails} details
     * @returns {Promise<any>}
     */
-    execute(calls, transaction_details) {
+    execute(calls, details) {
         const ptr0 = passArrayJsValueToWasm0(calls, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.cartridgeaccount_execute(this.__wbg_ptr, ptr0, len0, addHeapObject(transaction_details));
+        const ret = wasm.cartridgeaccount_execute(this.__wbg_ptr, ptr0, len0, addHeapObject(details));
         return takeObject(ret);
     }
     /**
-    * @param {any[]} calls
+    * @param {(JsCall)[]} calls
     * @param {any} caller
     * @returns {Promise<any>}
     */
@@ -396,7 +395,7 @@ export class CartridgeAccount {
         return takeObject(ret);
     }
     /**
-    * @param {any[]} calls
+    * @param {(JsCall)[]} calls
     * @returns {boolean}
     */
     hasSession(calls) {
@@ -451,7 +450,7 @@ export class CartridgeAccount {
     }
     /**
     * @param {string} typed_data
-    * @returns {Promise<any>}
+    * @returns {Promise<Felts>}
     */
     signMessage(typed_data) {
         const ptr0 = passStringToWasm0(typed_data, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -460,7 +459,7 @@ export class CartridgeAccount {
         return takeObject(ret);
     }
     /**
-    * @param {any} max_fee
+    * @param {JsFelt} max_fee
     * @returns {Promise<any>}
     */
     deploySelf(max_fee) {
@@ -468,7 +467,7 @@ export class CartridgeAccount {
         return takeObject(ret);
     }
     /**
-    * @returns {Promise<any>}
+    * @returns {Promise<JsFelt>}
     */
     delegateAccount() {
         const ret = wasm.cartridgeaccount_delegateAccount(this.__wbg_ptr);
@@ -476,8 +475,116 @@ export class CartridgeAccount {
     }
 }
 
+const CartridgeSessionAccountFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_cartridgesessionaccount_free(ptr >>> 0));
+/**
+*/
+export class CartridgeSessionAccount {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(CartridgeSessionAccount.prototype);
+        obj.__wbg_ptr = ptr;
+        CartridgeSessionAccountFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        CartridgeSessionAccountFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_cartridgesessionaccount_free(ptr);
+    }
+    /**
+    * @param {string} rpc_url
+    * @param {JsFelt} signer
+    * @param {JsFelt} address
+    * @param {JsFelt} chain_id
+    * @param {(JsFelt)[]} session_authorization
+    * @param {JsSession} session
+    * @returns {CartridgeSessionAccount}
+    */
+    static new(rpc_url, signer, address, chain_id, session_authorization, session) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            const ptr0 = passStringToWasm0(rpc_url, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const len0 = WASM_VECTOR_LEN;
+            const ptr1 = passArrayJsValueToWasm0(session_authorization, wasm.__wbindgen_malloc);
+            const len1 = WASM_VECTOR_LEN;
+            wasm.cartridgesessionaccount_new(retptr, ptr0, len0, addHeapObject(signer), addHeapObject(address), addHeapObject(chain_id), ptr1, len1, addHeapObject(session));
+            var r0 = getInt32Memory0()[retptr / 4 + 0];
+            var r1 = getInt32Memory0()[retptr / 4 + 1];
+            var r2 = getInt32Memory0()[retptr / 4 + 2];
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return CartridgeSessionAccount.__wrap(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+    * @param {string} rpc_url
+    * @param {JsFelt} signer
+    * @param {JsFelt} address
+    * @param {JsFelt} owner_stark_public_key
+    * @param {JsFelt} chain_id
+    * @param {JsSession} session
+    * @returns {CartridgeSessionAccount}
+    */
+    static new_as_registered(rpc_url, signer, address, owner_stark_public_key, chain_id, session) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            const ptr0 = passStringToWasm0(rpc_url, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const len0 = WASM_VECTOR_LEN;
+            wasm.cartridgesessionaccount_new_as_registered(retptr, ptr0, len0, addHeapObject(signer), addHeapObject(address), addHeapObject(owner_stark_public_key), addHeapObject(chain_id), addHeapObject(session));
+            var r0 = getInt32Memory0()[retptr / 4 + 0];
+            var r1 = getInt32Memory0()[retptr / 4 + 1];
+            var r2 = getInt32Memory0()[retptr / 4 + 2];
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return CartridgeSessionAccount.__wrap(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+    * @param {JsFelt} hash
+    * @param {(JsCall)[]} calls
+    * @returns {Promise<Felts>}
+    */
+    sign(hash, calls) {
+        const ptr0 = passArrayJsValueToWasm0(calls, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.cartridgesessionaccount_sign(this.__wbg_ptr, addHeapObject(hash), ptr0, len0);
+        return takeObject(ret);
+    }
+    /**
+    * @param {(JsCall)[]} calls
+    * @returns {Promise<string>}
+    */
+    execute(calls) {
+        const ptr0 = passArrayJsValueToWasm0(calls, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.cartridgesessionaccount_execute(this.__wbg_ptr, ptr0, len0);
+        return takeObject(ret);
+    }
+}
+
 export function __wbindgen_object_drop_ref(arg0) {
     takeObject(arg0);
+};
+
+export function __wbindgen_object_clone_ref(arg0) {
+    const ret = getObject(arg0);
+    return addHeapObject(ret);
 };
 
 export function __wbindgen_string_get(arg0, arg1) {
@@ -494,13 +601,13 @@ export function __wbindgen_error_new(arg0, arg1) {
     return addHeapObject(ret);
 };
 
-export function __wbindgen_is_undefined(arg0) {
-    const ret = getObject(arg0) === undefined;
-    return ret;
+export function __wbindgen_string_new(arg0, arg1) {
+    const ret = getStringFromWasm0(arg0, arg1);
+    return addHeapObject(ret);
 };
 
-export function __wbindgen_in(arg0, arg1) {
-    const ret = getObject(arg0) in getObject(arg1);
+export function __wbindgen_is_undefined(arg0) {
+    const ret = getObject(arg0) === undefined;
     return ret;
 };
 
@@ -510,26 +617,11 @@ export function __wbindgen_boolean_get(arg0) {
     return ret;
 };
 
-export function __wbindgen_is_bigint(arg0) {
-    const ret = typeof(getObject(arg0)) === 'bigint';
-    return ret;
-};
-
 export function __wbindgen_number_get(arg0, arg1) {
     const obj = getObject(arg1);
     const ret = typeof(obj) === 'number' ? obj : undefined;
     getFloat64Memory0()[arg0 / 8 + 1] = isLikeNone(ret) ? 0 : ret;
     getInt32Memory0()[arg0 / 4 + 0] = !isLikeNone(ret);
-};
-
-export function __wbindgen_bigint_from_i64(arg0) {
-    const ret = arg0;
-    return addHeapObject(ret);
-};
-
-export function __wbindgen_jsval_eq(arg0, arg1) {
-    const ret = getObject(arg0) === getObject(arg1);
-    return ret;
 };
 
 export function __wbindgen_is_object(arg0) {
@@ -543,14 +635,18 @@ export function __wbindgen_bigint_from_u64(arg0) {
     return addHeapObject(ret);
 };
 
-export function __wbindgen_string_new(arg0, arg1) {
-    const ret = getStringFromWasm0(arg0, arg1);
+export function __wbindgen_json_parse(arg0, arg1) {
+    const ret = JSON.parse(getStringFromWasm0(arg0, arg1));
     return addHeapObject(ret);
 };
 
-export function __wbindgen_object_clone_ref(arg0) {
-    const ret = getObject(arg0);
-    return addHeapObject(ret);
+export function __wbindgen_json_serialize(arg0, arg1) {
+    const obj = getObject(arg1);
+    const ret = JSON.stringify(obj === undefined ? null : obj);
+    const ptr1 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len1 = WASM_VECTOR_LEN;
+    getInt32Memory0()[arg0 / 4 + 1] = len1;
+    getInt32Memory0()[arg0 / 4 + 0] = ptr1;
 };
 
 export function __wbindgen_jsval_loose_eq(arg0, arg1) {
@@ -568,11 +664,6 @@ export function __wbg_String_b9412f8799faab3e(arg0, arg1) {
 
 export function __wbindgen_number_new(arg0) {
     const ret = arg0;
-    return addHeapObject(ret);
-};
-
-export function __wbg_getwithrefkey_edc2c8960f0f1191(arg0, arg1) {
-    const ret = getObject(arg0)[getObject(arg1)];
     return addHeapObject(ret);
 };
 
@@ -797,16 +888,6 @@ export function __wbg_getRandomValues_3aa56aa6edec874c() { return handleError(fu
     getObject(arg0).getRandomValues(getObject(arg1));
 }, arguments) };
 
-export function __wbg_get_bd8e338fbd5f5cc8(arg0, arg1) {
-    const ret = getObject(arg0)[arg1 >>> 0];
-    return addHeapObject(ret);
-};
-
-export function __wbg_length_cd7af8117672b8b8(arg0) {
-    const ret = getObject(arg0).length;
-    return ret;
-};
-
 export function __wbg_new_16b304a2cfa7ff4a() {
     const ret = new Array();
     return addHeapObject(ret);
@@ -881,11 +962,6 @@ export function __wbg_set_d4638f722068f043(arg0, arg1, arg2) {
     getObject(arg0)[arg1 >>> 0] = takeObject(arg2);
 };
 
-export function __wbg_isArray_2ab64d95e09ea0ae(arg0) {
-    const ret = Array.isArray(getObject(arg0));
-    return ret;
-};
-
 export function __wbg_push_a5b05aedc7234f9f(arg0, arg1) {
     const ret = getObject(arg0).push(getObject(arg1));
     return ret;
@@ -907,27 +983,6 @@ export function __wbg_call_b3ca7c6051f9bec1() { return handleError(function (arg
     return addHeapObject(ret);
 }, arguments) };
 
-export function __wbg_instanceof_Map_87917e0a7aaf4012(arg0) {
-    let result;
-    try {
-        result = getObject(arg0) instanceof Map;
-    } catch (_) {
-        result = false;
-    }
-    const ret = result;
-    return ret;
-};
-
-export function __wbg_isSafeInteger_f7b04ef02296c4d2(arg0) {
-    const ret = Number.isSafeInteger(getObject(arg0));
-    return ret;
-};
-
-export function __wbg_entries_95cc2c823b285a09(arg0) {
-    const ret = Object.entries(getObject(arg0));
-    return addHeapObject(ret);
-};
-
 export function __wbg_new_81740750da40724f(arg0, arg1) {
     try {
         var state0 = {a: arg0, b: arg1};
@@ -935,7 +990,7 @@ export function __wbg_new_81740750da40724f(arg0, arg1) {
             const a = state0.a;
             state0.a = 0;
             try {
-                return __wbg_adapter_178(a, state0.b, arg0, arg1);
+                return __wbg_adapter_163(a, state0.b, arg0, arg1);
             } finally {
                 state0.a = a;
             }
@@ -1022,13 +1077,6 @@ export function __wbg_set_1f9b04f170055d33() { return handleError(function (arg0
     return ret;
 }, arguments) };
 
-export function __wbindgen_bigint_get_as_i64(arg0, arg1) {
-    const v = getObject(arg1);
-    const ret = typeof(v) === 'bigint' ? v : undefined;
-    getBigInt64Memory0()[arg0 / 8 + 1] = isLikeNone(ret) ? BigInt(0) : ret;
-    getInt32Memory0()[arg0 / 4 + 0] = !isLikeNone(ret);
-};
-
 export function __wbindgen_debug_string(arg0, arg1) {
     const ret = debugString(getObject(arg1));
     const ptr1 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -1046,8 +1094,8 @@ export function __wbindgen_memory() {
     return addHeapObject(ret);
 };
 
-export function __wbindgen_closure_wrapper2254(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 484, __wbg_adapter_48);
+export function __wbindgen_closure_wrapper2348(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 509, __wbg_adapter_42);
     return addHeapObject(ret);
 };
 

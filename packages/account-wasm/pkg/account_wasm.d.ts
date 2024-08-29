@@ -1,5 +1,47 @@
 /* tslint:disable */
 /* eslint-disable */
+export interface JsInvocationsDetails {
+    nonce: Felt;
+    maxFee: Felt;
+}
+
+export interface JsPolicy {
+    target: string;
+    method: string;
+}
+
+export interface JsOutsideExecution {
+    caller: Felt;
+    executeBefore: number;
+    executeAfter: number;
+    calls: JsCall[];
+    nonce: Felt;
+}
+
+export interface JsSession {
+    policies: JsPolicy[];
+    expiresAt: number;
+}
+
+export interface JsCredentials {
+    authorization: Felt[];
+    privateKey: Felt;
+}
+
+export interface JsCall {
+    contractAddress: Felt;
+    entrypoint: string;
+    calldata: Felt[];
+}
+
+export interface JsEstimateFeeDetails {
+    nonce: Felt;
+}
+
+export type Felts = JsFelt[];
+
+export type JsFelt = Felt;
+
 /**
 */
 export class CartridgeAccount {
@@ -19,44 +61,51 @@ export class CartridgeAccount {
 * - `public_key`: Base64 encoded bytes of the public key generated during the WebAuthn registration process (COSE format).
 * @param {string} app_id
 * @param {string} rpc_url
-* @param {string} chain_id
-* @param {string} address
+* @param {JsFelt} chain_id
+* @param {JsFelt} address
 * @param {string} rp_id
 * @param {string} username
 * @param {string} credential_id
 * @param {string} public_key
 * @returns {CartridgeAccount}
 */
-  static new(app_id: string, rpc_url: string, chain_id: string, address: string, rp_id: string, username: string, credential_id: string, public_key: string): CartridgeAccount;
+  static new(app_id: string, rpc_url: string, chain_id: JsFelt, address: JsFelt, rp_id: string, username: string, credential_id: string, public_key: string): CartridgeAccount;
 /**
-* @param {any[]} policies
+* @param {(JsPolicy)[]} policies
+* @param {bigint} expires_at
+* @param {JsFelt} public_key
+* @returns {Promise<string>}
+*/
+  registerSession(policies: (JsPolicy)[], expires_at: bigint, public_key: JsFelt): Promise<string>;
+/**
+* @param {(JsPolicy)[]} policies
 * @param {bigint} expires_at
 * @returns {Promise<any>}
 */
-  createSession(policies: any[], expires_at: bigint): Promise<any>;
+  createSession(policies: (JsPolicy)[], expires_at: bigint): Promise<any>;
 /**
-* @param {any[]} calls
+* @param {(JsCall)[]} calls
 * @param {number | undefined} [fee_multiplier]
 * @returns {Promise<any>}
 */
-  estimateInvokeFee(calls: any[], fee_multiplier?: number): Promise<any>;
+  estimateInvokeFee(calls: (JsCall)[], fee_multiplier?: number): Promise<any>;
 /**
-* @param {any[]} calls
-* @param {any} transaction_details
+* @param {(JsCall)[]} calls
+* @param {JsInvocationsDetails} details
 * @returns {Promise<any>}
 */
-  execute(calls: any[], transaction_details: any): Promise<any>;
+  execute(calls: (JsCall)[], details: JsInvocationsDetails): Promise<any>;
 /**
-* @param {any[]} calls
+* @param {(JsCall)[]} calls
 * @param {any} caller
 * @returns {Promise<any>}
 */
-  executeFromOutside(calls: any[], caller: any): Promise<any>;
+  executeFromOutside(calls: (JsCall)[], caller: any): Promise<any>;
 /**
-* @param {any[]} calls
+* @param {(JsCall)[]} calls
 * @returns {boolean}
 */
-  hasSession(calls: any[]): boolean;
+  hasSession(calls: (JsCall)[]): boolean;
 /**
 * @returns {any}
 */
@@ -66,16 +115,52 @@ export class CartridgeAccount {
   revokeSession(): void;
 /**
 * @param {string} typed_data
-* @returns {Promise<any>}
+* @returns {Promise<Felts>}
 */
-  signMessage(typed_data: string): Promise<any>;
+  signMessage(typed_data: string): Promise<Felts>;
 /**
-* @param {any} max_fee
+* @param {JsFelt} max_fee
 * @returns {Promise<any>}
 */
-  deploySelf(max_fee: any): Promise<any>;
+  deploySelf(max_fee: JsFelt): Promise<any>;
 /**
-* @returns {Promise<any>}
+* @returns {Promise<JsFelt>}
 */
-  delegateAccount(): Promise<any>;
+  delegateAccount(): Promise<JsFelt>;
+}
+/**
+*/
+export class CartridgeSessionAccount {
+  free(): void;
+/**
+* @param {string} rpc_url
+* @param {JsFelt} signer
+* @param {JsFelt} address
+* @param {JsFelt} chain_id
+* @param {(JsFelt)[]} session_authorization
+* @param {JsSession} session
+* @returns {CartridgeSessionAccount}
+*/
+  static new(rpc_url: string, signer: JsFelt, address: JsFelt, chain_id: JsFelt, session_authorization: (JsFelt)[], session: JsSession): CartridgeSessionAccount;
+/**
+* @param {string} rpc_url
+* @param {JsFelt} signer
+* @param {JsFelt} address
+* @param {JsFelt} owner_stark_public_key
+* @param {JsFelt} chain_id
+* @param {JsSession} session
+* @returns {CartridgeSessionAccount}
+*/
+  static new_as_registered(rpc_url: string, signer: JsFelt, address: JsFelt, owner_stark_public_key: JsFelt, chain_id: JsFelt, session: JsSession): CartridgeSessionAccount;
+/**
+* @param {JsFelt} hash
+* @param {(JsCall)[]} calls
+* @returns {Promise<Felts>}
+*/
+  sign(hash: JsFelt, calls: (JsCall)[]): Promise<Felts>;
+/**
+* @param {(JsCall)[]} calls
+* @returns {Promise<string>}
+*/
+  execute(calls: (JsCall)[]): Promise<string>;
 }

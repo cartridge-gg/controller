@@ -1,4 +1,4 @@
-use crate::abigen::controller::{OutsideExecution, Owner};
+use crate::abigen::controller::{OutsideExecution, Owner, Signer, StarknetSigner};
 use crate::account::outside_execution::OutsideExecutionAccount;
 use crate::account::session::hash::{AllowedMethod, Session};
 use crate::account::session::SessionAccount;
@@ -13,11 +13,11 @@ use crate::storage::{Credentials, Selectors, SessionMetadata, StorageBackend, St
 use crate::{
     abigen::{self},
     account::{AccountHashSigner, OwnerAccount},
-    signers::{HashSigner, SignError},
+    signers::{HashSigner, SignError, SignerTrait},
 };
 use crate::{impl_account, OriginProvider};
 use async_trait::async_trait;
-use cainome::cairo_serde::{self, CairoSerde};
+use cainome::cairo_serde::{self, CairoSerde, NonZero};
 use starknet::accounts::{
     AccountDeploymentV1, AccountError, AccountFactory, AccountFactoryError, ExecutionV1,
 };
@@ -27,7 +27,7 @@ use starknet::signers::SignerInteractivityContext;
 use starknet::{
     accounts::{Account, ConnectedAccount, ExecutionEncoder},
     core::types::{BlockId, Felt},
-    signers::SigningKey,
+    signers::{SigningKey, VerifyingKey},
 };
 
 pub trait Backend: StorageBackend + OriginProvider {}
@@ -152,6 +152,32 @@ where
             }),
         )?;
         Ok((authorization, signer.secret_scalar()))
+    }
+
+    pub async fn register_session(
+        &mut self,
+        methods: Vec<AllowedMethod>,
+        expires_at: u64,
+        public_key: Felt,
+    ) -> Result<Felt, ControllerError> {
+        let pubkey = VerifyingKey::from_scalar(public_key);
+        let signer = Signer::Starknet(StarknetSigner {
+            pubkey: NonZero::new(pubkey.scalar()).unwrap(),
+        });
+
+        let session = Session::new(methods, expires_at, &signer)?;
+        let register_execution = self
+            .contract
+            .register_session(&session.raw(), &signer.guid());
+
+        let txn = register_execution
+            // FIXME: est fee is not accurate as it does not account for validation cost, so set to some high multiple for now
+            .fee_estimate_multiplier(5.0)
+            .send()
+            .await
+            .map_err(ControllerError::AccountError)?;
+
+        Ok(txn.transaction_hash)
     }
 
     pub async fn execute_from_outside(

@@ -16,6 +16,7 @@ import {
 } from "starknet";
 import Account from "utils/account";
 import { ConnectionCtx, ExecuteCtx } from "./types";
+import { JsCall } from "@cartridge/account-wasm";
 
 export const ESTIMATE_FEE_PERCENTAGE = 10;
 
@@ -80,19 +81,19 @@ export function executeFactory({
     };
 }
 
-export const normalizeCalls = (calls: AllowArray<Call>): Call[] => {
+export const normalizeCalls = (calls: AllowArray<Call>): JsCall[] => {
   return (Array.isArray(calls) ? calls : [calls]).map((call) => {
     return {
       entrypoint: call.entrypoint,
       contractAddress: addAddressPadding(call.contractAddress),
       calldata: CallData.toHex(call.calldata),
-    } as Call;
+    };
   });
 };
 
 async function tryPaymaster(
   account: Account,
-  calls: Call[],
+  calls: JsCall[],
   paymaster: PaymasterOptions,
 ): Promise<ExecuteReply> {
   try {
@@ -119,7 +120,7 @@ async function getInvocationDetails(
   if (!maxFee) {
     await account.ensureDeployed();
 
-    const estFee = await account.cartridge.estimateInvokeFee(calls);
+    const estFee = await account.cartridge.estimateInvokeFee(calls as JsCall[]);
 
     maxFee = num.toHex(
       num.addPercent(estFee.overall_fee, ESTIMATE_FEE_PERCENTAGE),
