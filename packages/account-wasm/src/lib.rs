@@ -7,7 +7,7 @@ mod utils;
 use std::str::FromStr;
 use std::sync::Arc;
 
-use account_sdk::abigen::controller::{OutsideExecution, Signer, StarknetSigner};
+use account_sdk::abigen::controller::OutsideExecution;
 use account_sdk::account::outside_execution::OutsideExecutionCaller;
 use account_sdk::account::session::hash::Session;
 use account_sdk::account::session::SessionAccount;
@@ -15,10 +15,9 @@ use account_sdk::account::{AccountHashAndCallsSigner, MessageSignerAccount};
 use account_sdk::controller::Controller;
 use account_sdk::provider::CartridgeJsonRpcProvider;
 use account_sdk::signers::webauthn::{CredentialID, WebauthnSigner};
-use account_sdk::signers::{HashSigner, SignerTrait};
+use account_sdk::signers::HashSigner;
 use base64::engine::general_purpose;
 use base64::Engine;
-use cainome::cairo_serde::NonZero;
 use coset::{CborSerializable, CoseKey};
 use serde_wasm_bindgen::{from_value, to_value};
 use signer::BrowserBackend;
@@ -105,6 +104,11 @@ impl CartridgeAccount {
         );
 
         Ok(CartridgeAccount { controller })
+    }
+
+    #[wasm_bindgen(js_name = ownerGuid)]
+    pub fn owner_guid(&self) -> JsFelt {
+        JsFelt(self.controller.owner_guid())
     }
 
     #[wasm_bindgen(js_name = registerSession)]
@@ -342,7 +346,7 @@ impl CartridgeSessionAccount {
         rpc_url: String,
         signer: JsFelt,
         address: JsFelt,
-        owner_stark_public_key: JsFelt,
+        owner_guid: JsFelt,
         chain_id: JsFelt,
         session: JsSession,
     ) -> Result<CartridgeSessionAccount> {
@@ -353,10 +357,6 @@ impl CartridgeSessionAccount {
         let guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
         let address = address.0;
         let chain_id = chain_id.0;
-        let owner_guid = Signer::Starknet(StarknetSigner {
-            pubkey: NonZero::new(owner_stark_public_key.0).ok_or(OperationError::ZeroFelt)?,
-        })
-        .guid();
 
         let policies = session
             .policies
@@ -372,7 +372,7 @@ impl CartridgeSessionAccount {
             guardian,
             address,
             chain_id,
-            owner_guid,
+            owner_guid.0,
             session,
         )))
     }
