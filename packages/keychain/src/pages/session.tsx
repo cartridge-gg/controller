@@ -83,7 +83,10 @@ export default function RegisterSession() {
 
       if (queries.redirect_uri) {
         const url = new URL(decodeURIComponent(queries.redirect_uri));
-        url.searchParams.append(queries.redirect_query_name ?? "session", encodedResponse);
+        url.searchParams.append(
+          queries.redirect_query_name ?? "session",
+          encodedResponse,
+        );
         router.replace(url.toString());
       }
     },
