@@ -8,8 +8,8 @@ import {
 } from "components/layout";
 import { motion } from "framer-motion";
 import { SessionDetails } from "./SessionDetails";
-import { TransactionSummary } from "./TransactionSummary";
 import { isIframe } from "components/connect/utils";
+import { SessionConsent } from "components/connect";
 import { useConnection } from "hooks/connection";
 import { TOP_BAR_HEIGHT } from "../Container/Header/TopBar";
 import NextLink from "next/link";
@@ -18,12 +18,10 @@ export function Footer({
   children,
   isSlot = false,
   isSignup,
-  createSession = false,
   hideTxSummary = false,
 }: React.PropsWithChildren & {
   isSlot?: boolean;
   isSignup?: boolean;
-  createSession?: boolean;
   hideTxSummary?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>();
@@ -37,10 +35,6 @@ export function Footer({
       !isSignup &&
       !hideTxSummary,
     [origin, policies, variant, isSignup, hideTxSummary],
-  );
-  const hostname = useMemo(
-    () => (origin ? new URL(origin).hostname : undefined),
-    [origin],
   );
   const maxH = `${
     (isIframe() ? window.innerHeight : PORTAL_WINDOW_HEIGHT) - TOP_BAR_HEIGHT
@@ -101,10 +95,8 @@ export function Footer({
           _hover={{ cursor: "pointer" }}
         >
           {!hideTxSummary && !!policies.length && (
-            <TransactionSummary
-              isSlot={isSlot}
-              createSession={createSession}
-              hostname={hostname}
+            <SessionConsent
+              variant={isSlot ? "slot" : isSignup ? "signup" : undefined}
             />
           )}
 
