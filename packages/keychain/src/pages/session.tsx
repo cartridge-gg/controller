@@ -15,7 +15,6 @@ import { LoginMode } from "components/connect/types";
 type SessionResponse = {
   username: string;
   address: string;
-  starkPubKey: string;
   transactionHash?: string;
   alreadyRegistered?: boolean;
 };
@@ -105,7 +104,6 @@ export default function RegisterSession() {
       onCallback({
         username: controller.username,
         address: controller.address,
-        starkPubKey: await controller.signer.getPubKey(),
         transactionHash: transaction_hash,
       });
     },
@@ -131,14 +129,11 @@ export default function RegisterSession() {
     // if the requested policies has no mismatch with existing policies then return
     // the exising session
     if (controller.account.hasSession(calls)) {
-      controller.signer.getPubKey().then((starkPubKey) =>
-        onCallback({
-          username: controller.username,
-          address: controller.address,
-          starkPubKey,
-          alreadyRegistered: true,
-        }),
-      );
+      onCallback({
+        username: controller.username,
+        address: controller.address,
+        alreadyRegistered: true,
+      });
     }
   }, [controller, origin, policies, onCallback]);
 
