@@ -400,7 +400,7 @@ impl CartridgeSessionAccount {
             caller: caller.into(),
             execute_after: 0_u64,
             execute_before: 3000000000_u64,
-            calls: calls,
+            calls,
             nonce: SigningKey::from_random().secret_scalar(),
         };
 
