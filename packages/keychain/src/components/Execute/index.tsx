@@ -19,6 +19,7 @@ import { TransferAmountExceedsBalance } from "errors";
 import { ETH_MIN_PREFUND } from "utils/token";
 import { num } from "starknet";
 
+export const WEBAUTHN_GAS = 3300n;
 export const CONTRACT_ETH =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 
@@ -112,9 +113,16 @@ export function Execute() {
 
   const execute = useCallback(async () => {
     if (!paymaster) {
-      const maxFee = num.toHex(
-        ctx.transactionsDetail?.maxFee || ETH_MIN_PREFUND,
-      );
+      let maxFee;
+      if (ctx.transactionsDetail?.maxFee) {
+        maxFee = BigInt(ctx.transactionsDetail.maxFee);
+      } else {
+        const pending_block = await account.getBlock();
+        const gas_price = pending_block.l1_gas_price.price_in_wei;
+        const est_webauthn_fee = WEBAUTHN_GAS * BigInt(gas_price);
+        maxFee = num.toHex(est_webauthn_fee + fees.max);
+      }
+      
       let { transaction_hash } = await account.execute(calls, { maxFee });
 
       return transaction_hash;
