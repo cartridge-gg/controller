@@ -27,13 +27,7 @@ import {
   useProvider,
   voyager,
 } from "@starknet-react/core";
-import {
-  CallData,
-  RpcProvider,
-  cairo,
-  num,
-  shortString,
-} from "starknet";
+import { CallData, RpcProvider, cairo, num, shortString } from "starknet";
 import { AlertIcon, CheckIcon, CoinsIcon, DotsIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { useToast } from "hooks/toast";
