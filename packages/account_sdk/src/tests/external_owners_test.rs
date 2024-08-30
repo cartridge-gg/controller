@@ -31,6 +31,7 @@ async fn test_verify_external_owner() {
     ensure_txn(
         controller
             .contract
+            .unwrap()
             .register_external_owner(&external_account.address().into()),
         runner.client(),
     )
@@ -50,7 +51,7 @@ async fn test_verify_external_owner() {
 
     ensure_txn(
         external_account.execute_v1(vec![Call {
-            to: controller.address(),
+            to: controller.address,
             selector: selector!("register_session"),
             calldata: [
                 <RawSession as CairoSerde>::cairo_serialize(&session.raw()),
@@ -67,7 +68,7 @@ async fn test_verify_external_owner() {
         runner.client(),
         session_signer,
         guardian_signer,
-        controller.address(),
+        controller.address,
         runner.client().chain_id().await.unwrap(),
         external_account.address(),
         session,

@@ -1,10 +1,11 @@
 use async_trait::async_trait;
 use cainome::cairo_serde::CairoSerde;
 use starknet::{
-    accounts::{Account, ConnectedAccount, ExecutionEncoder},
+    accounts::ConnectedAccount,
     core::types::{BlockId, BlockTag, Call, Felt},
     macros::short_string,
     providers::Provider,
+    signers::SigningKey,
 };
 
 use crate::{
@@ -24,15 +25,14 @@ pub mod hash;
 pub mod merkle;
 pub mod raw_session;
 
-pub struct SessionAccount<P, S, G>
+pub struct SessionAccount<P, S>
 where
     P: Provider + Send,
     S: HashSigner + Send,
-    G: HashSigner + Send,
 {
     provider: P,
     signer: S,
-    guardian: G,
+    guardian: SigningKey,
     address: Felt,
     chain_id: Felt,
     block_id: BlockId,
@@ -40,16 +40,15 @@ where
     session: Session,
 }
 
-impl<P, S, G> SessionAccount<P, S, G>
+impl<P, S> SessionAccount<P, S>
 where
     P: Provider + Send,
     S: HashSigner + Send,
-    G: HashSigner + Send,
 {
     pub fn new(
         provider: P,
         signer: S,
-        guardian: G,
+        guardian: SigningKey,
         address: Felt,
         chain_id: Felt,
         session_authorization: Vec<Felt>,
@@ -70,7 +69,7 @@ where
     pub fn new_as_registered(
         provider: P,
         signer: S,
-        guardian: G,
+        guardian: SigningKey,
         address: Felt,
         chain_id: Felt,
         owner_guid: Felt,
@@ -111,7 +110,7 @@ where
             cache_authorization: true,
             session_authorization: self.session_authorization.clone(),
             session_signature: self.signer.sign(&hash).await?,
-            guardian_signature: self.guardian.sign(&hash).await?,
+            guardian_signature: HashSigner::sign(&self.guardian, &hash).await?,
             proofs,
         })
     }
@@ -123,11 +122,10 @@ where
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<P, S, G> AccountHashAndCallsSigner for SessionAccount<P, S, G>
+impl<P, S> AccountHashAndCallsSigner for SessionAccount<P, S>
 where
     P: Provider + Send + Sync,
     S: HashSigner + Send + Sync,
-    G: HashSigner + Send + Sync,
 {
     async fn sign_hash_and_calls(
         &self,
@@ -146,11 +144,10 @@ where
     }
 }
 
-impl<P, S, G> SpecificAccount for SessionAccount<P, S, G>
+impl<P, S> SpecificAccount for SessionAccount<P, S>
 where
     P: Provider + Send + Sync,
     S: HashSigner + Send + Sync,
-    G: HashSigner + Send + Sync,
 {
     fn address(&self) -> Felt {
         self.address
@@ -161,14 +158,13 @@ where
     }
 }
 
-impl_execution_encoder!(SessionAccount<P: Provider, S: HashSigner, G: HashSigner>);
-impl_account!(SessionAccount<P: Provider, S: HashSigner, G: HashSigner>, |_, _| false);
+impl_execution_encoder!(SessionAccount<P: Provider, S: HashSigner>);
+impl_account!(SessionAccount<P: Provider, S: HashSigner>, |_, _| false);
 
-impl<P, S, G> ConnectedAccount for SessionAccount<P, S, G>
+impl<P, S> ConnectedAccount for SessionAccount<P, S>
 where
     P: Provider + Send + Sync + Clone,
     S: HashSigner + Send + Sync + Clone,
-    G: HashSigner + Send + Sync + Clone,
 {
     type Provider = P;
 

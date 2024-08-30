@@ -44,6 +44,8 @@ async fn test_verify_execute_session_registered() {
     ensure_txn(
         controller
             .contract
+            .as_ref()
+            .unwrap()
             .register_session(&session.raw(), &signer.signer().guid()),
         controller.provider(),
     )
