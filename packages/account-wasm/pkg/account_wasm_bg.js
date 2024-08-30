@@ -349,7 +349,7 @@ export class CartridgeAccount {
     * @param {(JsPolicy)[]} policies
     * @param {bigint} expires_at
     * @param {JsFelt} public_key
-    * @returns {Promise<string>}
+    * @returns {Promise<JsFelt>}
     */
     registerSession(policies, expires_at, public_key) {
         const ptr0 = passArrayJsValueToWasm0(policies, wasm.__wbindgen_malloc);
@@ -575,7 +575,7 @@ export class CartridgeSessionAccount {
     }
     /**
     * @param {(JsCall)[]} calls
-    * @returns {Promise<string>}
+    * @returns {Promise<any>}
     */
     execute(calls) {
         const ptr0 = passArrayJsValueToWasm0(calls, wasm.__wbindgen_malloc);
@@ -610,11 +610,6 @@ export function __wbindgen_json_serialize(arg0, arg1) {
 
 export function __wbindgen_error_new(arg0, arg1) {
     const ret = new Error(getStringFromWasm0(arg0, arg1));
-    return addHeapObject(ret);
-};
-
-export function __wbindgen_string_new(arg0, arg1) {
-    const ret = getStringFromWasm0(arg0, arg1);
     return addHeapObject(ret);
 };
 
@@ -653,6 +648,11 @@ export function __wbindgen_is_object(arg0) {
 
 export function __wbindgen_bigint_from_u64(arg0) {
     const ret = BigInt.asUintN(64, arg0);
+    return addHeapObject(ret);
+};
+
+export function __wbindgen_string_new(arg0, arg1) {
+    const ret = getStringFromWasm0(arg0, arg1);
     return addHeapObject(ret);
 };
 
@@ -1101,8 +1101,8 @@ export function __wbindgen_memory() {
     return addHeapObject(ret);
 };
 
-export function __wbindgen_closure_wrapper2350(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 514, __wbg_adapter_42);
+export function __wbindgen_closure_wrapper2360(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 509, __wbg_adapter_42);
     return addHeapObject(ret);
 };
 

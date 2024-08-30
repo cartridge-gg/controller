@@ -1,31 +1,13 @@
 /* tslint:disable */
 /* eslint-disable */
-export interface JsOutsideExecution {
-    caller: Felt;
-    executeBefore: number;
-    executeAfter: number;
-    calls: JsCall[];
-    nonce: Felt;
-}
-
-export interface JsEstimateFeeDetails {
-    nonce: Felt;
-}
-
 export interface JsCall {
     contractAddress: Felt;
     entrypoint: string;
     calldata: Felt[];
 }
 
-export interface JsInvocationsDetails {
+export interface JsEstimateFeeDetails {
     nonce: Felt;
-    maxFee: Felt;
-}
-
-export interface JsPolicy {
-    target: string;
-    method: string;
 }
 
 export type Felts = JsFelt[];
@@ -40,6 +22,24 @@ export interface JsSession {
 export interface JsCredentials {
     authorization: Felt[];
     privateKey: Felt;
+}
+
+export interface JsInvocationsDetails {
+    nonce: Felt;
+    maxFee: Felt;
+}
+
+export interface JsOutsideExecution {
+    caller: Felt;
+    executeBefore: number;
+    executeAfter: number;
+    calls: JsCall[];
+    nonce: Felt;
+}
+
+export interface JsPolicy {
+    target: string;
+    method: string;
 }
 
 /**
@@ -78,9 +78,9 @@ export class CartridgeAccount {
 * @param {(JsPolicy)[]} policies
 * @param {bigint} expires_at
 * @param {JsFelt} public_key
-* @returns {Promise<string>}
+* @returns {Promise<JsFelt>}
 */
-  registerSession(policies: (JsPolicy)[], expires_at: bigint, public_key: JsFelt): Promise<string>;
+  registerSession(policies: (JsPolicy)[], expires_at: bigint, public_key: JsFelt): Promise<JsFelt>;
 /**
 * @param {(JsPolicy)[]} policies
 * @param {bigint} expires_at
@@ -164,7 +164,7 @@ export class CartridgeSessionAccount {
   sign(hash: JsFelt, calls: (JsCall)[]): Promise<Felts>;
 /**
 * @param {(JsCall)[]} calls
-* @returns {Promise<string>}
+* @returns {Promise<any>}
 */
-  execute(calls: (JsCall)[]): Promise<string>;
+  execute(calls: (JsCall)[]): Promise<any>;
 }

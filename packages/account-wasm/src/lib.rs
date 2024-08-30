@@ -8,12 +8,12 @@ use std::str::FromStr;
 use std::sync::Arc;
 
 use account_sdk::abigen::controller::OutsideExecution;
-use account_sdk::account::outside_execution::OutsideExecutionCaller;
+use account_sdk::account::outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller};
 use account_sdk::account::session::hash::Session;
 use account_sdk::account::session::SessionAccount;
 use account_sdk::account::{AccountHashAndCallsSigner, MessageSignerAccount};
 use account_sdk::controller::Controller;
-use account_sdk::provider::CartridgeJsonRpcProvider;
+use account_sdk::provider::{CartridgeJsonRpcProvider, CartridgeProvider};
 use account_sdk::signers::webauthn::{CredentialID, WebauthnSigner};
 use account_sdk::signers::HashSigner;
 use base64::engine::general_purpose;
@@ -21,7 +21,7 @@ use base64::Engine;
 use coset::{CborSerializable, CoseKey};
 use serde_wasm_bindgen::{from_value, to_value};
 use signer::BrowserBackend;
-use starknet::accounts::Account;
+use starknet::accounts::{Account, ConnectedAccount};
 use starknet::core::types::Call;
 use starknet::macros::short_string;
 use starknet::signers::SigningKey;
@@ -117,7 +117,7 @@ impl CartridgeAccount {
         policies: Vec<JsPolicy>,
         expires_at: u64,
         public_key: JsFelt,
-    ) -> Result<String> {
+    ) -> Result<JsFelt> {
         let methods = policies
             .into_iter()
             .map(TryFrom::try_from)
@@ -128,7 +128,7 @@ impl CartridgeAccount {
             .register_session(methods, expires_at, public_key.0)
             .await?;
 
-        Ok(format!("{:#}", hash))
+        Ok(JsFelt(hash))
     }
 
     #[wasm_bindgen(js_name = createSession)]
@@ -389,19 +389,32 @@ impl CartridgeSessionAccount {
         Ok(Felts(res.into_iter().map(JsFelt).collect()))
     }
 
-    pub async fn execute(&self, calls: Vec<JsCall>) -> Result<String> {
+    pub async fn execute(&self, calls: Vec<JsCall>) -> Result<JsValue> {
+        let caller = OutsideExecutionCaller::Any;
         let calls = calls
             .into_iter()
             .map(TryInto::try_into)
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
-        let execution = self
-            .0
-            .execute_v1(calls)
-            .send()
-            .await
-            .map_err(|e| OperationError::Execution(format!("{:#?}", e)))?;
+        let outside_execution = OutsideExecution {
+            caller: caller.into(),
+            execute_after: 0_u64,
+            execute_before: 3000000000_u64,
+            calls,
+            nonce: SigningKey::from_random().secret_scalar(),
+        };
 
-        Ok(format!("{:#?}", execution))
+        let signed = self
+            .0
+            .sign_outside_execution(outside_execution.clone())
+            .await?;
+
+        let res = self
+            .0
+            .provider()
+            .add_execute_outside_transaction(outside_execution, self.0.address(), signed.signature)
+            .await?;
+
+        Ok(to_value(&res)?)
     }
 }
