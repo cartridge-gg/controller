@@ -390,6 +390,17 @@ impl CartridgeSessionAccount {
     }
 
     pub async fn execute(&self, calls: Vec<JsCall>) -> Result<JsValue> {
+        let calls = calls
+            .into_iter()
+            .map(TryInto::try_into)
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+
+        let res = self.0.execute_v1(calls).send().await?;
+
+        Ok(to_value(&res)?)
+    }
+
+    pub async fn execute_from_outside(&self, calls: Vec<JsCall>) -> Result<JsValue> {
         let caller = OutsideExecutionCaller::Any;
         let calls = calls
             .into_iter()
