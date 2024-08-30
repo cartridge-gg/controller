@@ -16,7 +16,6 @@ import { Policies } from "Policies";
 import { Fees } from "./Fees";
 import { ExecuteCtx } from "utils/connection";
 import { TransferAmountExceedsBalance } from "errors";
-import { ETH_MIN_PREFUND } from "utils/token";
 import { num } from "starknet";
 
 export const WEBAUTHN_GAS = 3300n;
@@ -88,7 +87,12 @@ export function Execute() {
     account
       .estimateInvokeFee(calls, ctx.transactionsDetail)
       .then((fees) => {
-        setFees({ base: fees.overall_fee, max: fees.suggestedMaxFee });
+        let webauthn_fee = WEBAUTHN_GAS * BigInt(fees.gas_price);
+
+        setFees({
+          base: fees.overall_fee + webauthn_fee,
+          max: fees.suggestedMaxFee + webauthn_fee,
+        });
       })
       .catch((e) => {
         if (e.message.includes("ERC20: transfer amount exceeds balance")) {
@@ -113,21 +117,12 @@ export function Execute() {
 
   const execute = useCallback(async () => {
     if (!paymaster) {
-      let maxFee;
-      if (ctx.transactionsDetail?.maxFee) {
-        maxFee = BigInt(ctx.transactionsDetail.maxFee);
-      } else {
-        const pending_block = await account.getBlock();
-        const gas_price = pending_block.l1_gas_price.price_in_wei;
-        const est_webauthn_fee = WEBAUTHN_GAS * BigInt(gas_price);
-        maxFee = num.toHex(est_webauthn_fee + fees.max);
-      }
-      
-      let { transaction_hash } = await account.execute(calls, { maxFee });
+      let { transaction_hash } = await account.execute(calls, {
+        maxFee: num.toHex(fees.max),
+      });
 
       return transaction_hash;
     }
-
     try {
       return await account.executeFromOutside(calls, paymaster);
     } catch (error) {
@@ -179,10 +174,10 @@ export function Execute() {
           console.warn(
             "Paymaster not supported, falling back to regular execution",
           );
-          const maxFee = num.toHex(
-            ctx.transactionsDetail?.maxFee || ETH_MIN_PREFUND,
-          );
-          let { transaction_hash } = await account.execute(calls, { maxFee });
+          let { transaction_hash } = await account.execute(calls, {
+            maxFee: num.toHex(fees.max),
+          });
+
           return transaction_hash;
         } else {
           throw error; // Re-throw other errors
@@ -191,7 +186,7 @@ export function Execute() {
         throw error;
       }
     }
-  }, [account, calls, paymaster, ctx.transactionsDetail]);
+  }, [account, calls, paymaster, fees, ctx.transactionsDetail]);
 
   const onSubmit = useCallback(async () => {
     setLoading(true);
