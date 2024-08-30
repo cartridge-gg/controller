@@ -1,6 +1,9 @@
 use starknet::macros::felt;
 use starknet_crypto::Felt;
 
+pub const UDC_ADDRESS: Felt =
+    felt!("0x041a78e741e5af2fec34b695679bc6891742439f7afb8484ecd7766661ad02bf");
+
 pub const ACCOUNT_CLASS_HASH: Felt =
     felt!("0x24a9edbfa7082accfceabf6a92d7160086f346d622f28741bf1c651c412c9ab");
 
@@ -9,6 +12,3 @@ pub const ACCOUNT_COMPILED_CLASS_HASH: Felt =
 
 pub const ERC_20_COMPILED_CLASS_HASH: Felt =
     felt!("0x732654ca6baa90ff202d2fcc35fb39766eb34842a7e5ac6dbf7714af71f1dab");
-pub const UDC_ADDRESS: Felt =
-    felt!("0x041a78e741e5af2fec34b695679bc6891742439f7afb8484ecd7766661ad02bf");
-

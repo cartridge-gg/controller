@@ -11,7 +11,6 @@ import {
   OpenSettingsCtx,
   SetDelegateCtx,
   SignMessageCtx,
-  ArgentOwnerCtx,
 } from "utils/connection";
 import { logout } from "utils/connection/logout";
 import { LoginMode } from "components/connect/types";

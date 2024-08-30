@@ -147,7 +147,7 @@ export function Signup({
 
   const onSubmitArgent = useCallback(async () => {
     argentOwner(context, usernameField.value, policies);
-  }, [usernameField, doPopup, argentOwner]);
+  }, [usernameField, doPopup, argentOwner, context, policies]);
 
   // for polling approach when popup
   useAccountQuery(
@@ -232,7 +232,7 @@ export function Signup({
             >
               sign up
             </Button>
-            {window["starknet_argentX"] && (
+            {typeof window !== "undefined" && window["starknet_argentX"] && (
               <Button
                 colorScheme="colorful"
                 isLoading={isRegistering}

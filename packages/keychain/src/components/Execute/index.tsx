@@ -221,7 +221,7 @@ export function Execute() {
         <Policies title="Transaction Details" policies={policies} />
       </Content>
 
-      <Footer>
+      <Footer hideTxSummary>
         {error ? (
           error.name === "TransferAmountExceedsBalance" ? (
             <ErrorAlert title={error.message} />

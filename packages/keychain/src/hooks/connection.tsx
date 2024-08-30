@@ -65,7 +65,11 @@ type ConnectionContextValue = {
   openSettings: (context: ConnectionCtx) => void;
   openMenu: (context: ConnectionCtx) => void;
   setExternalOwner: (context: ConnectionCtx) => void;
-  argentOwner: (context: ConnectionCtx, username: string, policies: Policy[]) => void;
+  argentOwner: (
+    context: ConnectionCtx,
+    username: string,
+    policies: Policy[],
+  ) => void;
 };
 
 export function ConnectionProvider({ children }: PropsWithChildren) {
@@ -294,16 +298,19 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
     [controller?.address, openSettings],
   );
 
-  const argentOwner = useCallback((context: ConnectionCtx, username: string, policies: Policy[]) => {
-    setContext({
-      origin: context.origin,
-      type: "argent-owner",
-      username,
-      policies,
-      resolve: context.resolve,
-      reject: context.reject,
-    } as ArgentOwnerCtx);
-  }, []);
+  const argentOwner = useCallback(
+    (context: ConnectionCtx, username: string, policies: Policy[]) => {
+      setContext({
+        origin: context.origin,
+        type: "argent-owner",
+        username,
+        policies,
+        resolve: context.resolve,
+        reject: context.reject,
+      } as ArgentOwnerCtx);
+    },
+    [],
+  );
 
   return (
     <ConnectionContext.Provider

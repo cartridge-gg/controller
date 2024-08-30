@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 use account_sdk::abigen::controller::{self, OutsideExecution, Signer};
 use account_sdk::account::outside_execution::OutsideExecutionCaller;
-use account_sdk::account::session::hash::{AllowedMethod, Session};
+use account_sdk::account::session::hash::Session;
 use account_sdk::account::session::raw_session::RawSession;
 use account_sdk::account::session::SessionAccount;
 use account_sdk::account::{AccountHashAndCallsSigner, MessageSignerAccount};
@@ -256,13 +256,13 @@ impl CartridgeAccount {
 
     #[wasm_bindgen(js_name = registerSessionCalldata)]
     pub fn register_session_calldata(
-        policies: Vec<JsValue>,
+        policies: Vec<JsPolicy>,
         expires_at: u64,
         external_account: JsValue,
     ) -> Result<JsValue> {
         let methods = policies
             .into_iter()
-            .map(AllowedMethod::try_from_js_value)
+            .map(TryFrom::try_from)
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
         let signer = SigningKey::from_random();
@@ -320,6 +320,41 @@ impl CartridgeAccount {
             .map_err(|e| OperationError::Delegation(e.to_string()))?;
 
         Ok(JsFelt(res))
+    }
+
+    #[wasm_bindgen(js_name = getUdcDeployedAddress)]
+    pub fn get_udc_deployed_address(salt: JsValue, external_owner: JsValue) -> Result<JsValue> {
+        set_panic_hook();
+
+        let salt = from_value::<Felt>(salt)?;
+        let external_owner = from_value::<ContractAddress>(external_owner)?;
+
+        let guardian = SigningKey::from_random();
+        let mut constructor_calldata =
+            controller::Owner::cairo_serialize(&controller::Owner::Account(external_owner));
+        constructor_calldata.extend(Option::<Signer>::cairo_serialize(&Some(guardian.signer())));
+
+        let res = get_udc_deployed_address(
+            salt,
+            ACCOUNT_CLASS_HASH,
+            &UdcUniqueness::NotUnique,
+            &constructor_calldata,
+        );
+
+        Ok(to_value(&JsDeployment {
+            address: res,
+            calldata: constructor_calldata,
+        })?)
+    }
+
+    #[wasm_bindgen(js_name = getAccountClassHash)]
+    pub fn get_account_class_hash() -> JsValue {
+        to_value(&ACCOUNT_CLASS_HASH).unwrap()
+    }
+
+    #[wasm_bindgen(js_name = getUdcAddress)]
+    pub fn get_udc_address() -> JsValue {
+        to_value(&UDC_ADDRESS).unwrap()
     }
 }
 
@@ -430,41 +465,5 @@ impl CartridgeSessionAccount {
             .map_err(|e| OperationError::Execution(format!("{:#?}", e)))?;
 
         Ok(format!("{:#?}", execution))
-    }
-
-    #[wasm_bindgen(js_name = getUdcDeployedAddress)]
-    pub fn get_udc_deployed_address(salt: JsValue, external_owner: JsValue) -> Result<JsValue> {
-        set_panic_hook();
-
-        let salt = from_value::<Felt>(salt)?;
-        let external_owner = from_value::<ContractAddress>(external_owner)?;
-
-        // let constructor_calldata = vec![];
-        let guardian = SigningKey::from_random();
-        let mut constructor_calldata =
-            controller::Owner::cairo_serialize(&controller::Owner::Account(external_owner));
-        constructor_calldata.extend(Option::<Signer>::cairo_serialize(&Some(guardian.signer())));
-
-        let res = get_udc_deployed_address(
-            salt,
-            ACCOUNT_CLASS_HASH,
-            &UdcUniqueness::NotUnique,
-            &constructor_calldata,
-        );
-
-        Ok(to_value(&JsDeployment {
-            address: res,
-            calldata: constructor_calldata,
-        })?)
-    }
-
-    #[wasm_bindgen(js_name = getAccountClassHash)]
-    pub fn get_account_class_hash() -> JsValue {
-        to_value(&ACCOUNT_CLASS_HASH).unwrap()
-    }
-
-    #[wasm_bindgen(js_name = getUdcAddress)]
-    pub fn get_udc_address() -> JsValue {
-        to_value(&UDC_ADDRESS).unwrap()
     }
 }

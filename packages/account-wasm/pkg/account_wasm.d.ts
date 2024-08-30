@@ -1,22 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
-export interface JsOutsideExecution {
-    caller: Felt;
-    executeBefore: number;
-    executeAfter: number;
-    calls: JsCall[];
-    nonce: Felt;
-}
+export type Felts = JsFelt[];
 
-export interface JsEstimateFeeDetails {
-    nonce: Felt;
-}
-
-export interface JsCall {
-    contractAddress: Felt;
-    entrypoint: string;
-    calldata: Felt[];
-}
+export type JsFelt = Felt;
 
 export interface JsInvocationsDetails {
     nonce: Felt;
@@ -28,9 +14,19 @@ export interface JsPolicy {
     method: string;
 }
 
-export type Felts = JsFelt[];
+export interface JsCall {
+    contractAddress: Felt;
+    entrypoint: string;
+    calldata: Felt[];
+}
 
-export type JsFelt = Felt;
+export interface JsOutsideExecution {
+    caller: Felt;
+    executeBefore: number;
+    executeAfter: number;
+    calls: JsCall[];
+    nonce: Felt;
+}
 
 export interface JsSession {
     policies: JsPolicy[];
@@ -40,6 +36,10 @@ export interface JsSession {
 export interface JsCredentials {
     authorization: Felt[];
     privateKey: Felt;
+}
+
+export interface JsEstimateFeeDetails {
+    nonce: Felt;
 }
 
 /**
@@ -115,12 +115,12 @@ export class CartridgeAccount {
 */
   sessionJson(): any;
 /**
-* @param {any[]} policies
+* @param {(JsPolicy)[]} policies
 * @param {bigint} expires_at
 * @param {any} external_account
 * @returns {any}
 */
-  static registerSessionCalldata(policies: any[], expires_at: bigint, external_account: any): any;
+  static registerSessionCalldata(policies: (JsPolicy)[], expires_at: bigint, external_account: any): any;
 /**
 */
   revokeSession(): void;
@@ -138,6 +138,20 @@ export class CartridgeAccount {
 * @returns {Promise<JsFelt>}
 */
   delegateAccount(): Promise<JsFelt>;
+/**
+* @param {any} salt
+* @param {any} external_owner
+* @returns {any}
+*/
+  static getUdcDeployedAddress(salt: any, external_owner: any): any;
+/**
+* @returns {any}
+*/
+  static getAccountClassHash(): any;
+/**
+* @returns {any}
+*/
+  static getUdcAddress(): any;
 }
 /**
 */

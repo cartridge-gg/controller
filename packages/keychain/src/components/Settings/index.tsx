@@ -140,7 +140,7 @@ export function Settings({ onLogout }: { onLogout: () => void }) {
           </VStack>
         </VStack>
       </Content>
-      <Footer>
+      <Footer hideTxSummary>
         <Button w="full" onClick={onLogout}>
           Log out
         </Button>

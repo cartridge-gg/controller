@@ -79,7 +79,7 @@ function SignupArgentInner() {
     if (extAccount && isAllFunded && isChecked) {
       setState(FundingState.DEPLOY);
     }
-  }, [isAllFunded, isChecked]);
+  }, [isAllFunded, isChecked, extAccount]);
 
   const onConnect = useCallback(
     (c: Connector) => {
@@ -162,7 +162,9 @@ function SignupArgentInner() {
       contractAddress: controllerAddress,
       entrypoint: "register_session",
       calldata: CartridgeAccount.registerSessionCalldata(
-        policies,
+        policies.map((p) => {
+          return { target: p.target, method: p.method };
+        }),
         3000000000n,
         extAccount.address,
       ),
@@ -290,7 +292,7 @@ function SignupArgentInner() {
         )}
       </Content>
 
-      <Footer isSignup={!extAccount} createSession={!!extAccount}>
+      <Footer isSignup={!extAccount} /*createSession={!!extAccount}*/>
         {error && (
           <ErrorAlert
             title="Account deployment error"
@@ -330,6 +332,7 @@ function SignupArgentInner() {
                 colorScheme="colorful"
                 onClick={onDeploy}
                 isLoading={isDeploying}
+                // isDisabled={!(isAllFunded && isChecked && extAccount)}
               >
                 Create & Play
               </Button>
@@ -381,7 +384,7 @@ function useTokens() {
     if (!isChecked) {
       setIsChecked(true);
     }
-  }, [tokens, controller, isChecked, extAccount?.address]);
+  }, [tokens, controller, isChecked, extAccount?.address, provider]);
 
   useInterval(checkFunds, 3000);
 

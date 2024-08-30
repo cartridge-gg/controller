@@ -9,6 +9,7 @@ import {
   useColorMode,
   Square,
   HStack,
+  Box,
 } from "@chakra-ui/react";
 import { useControllerTheme } from "hooks/theme";
 import { useMemo } from "react";
@@ -85,10 +86,15 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
               {title}
             </Text>
 
-            {description && (
+            {description && typeof description === "string" && (
               <Text fontSize="sm" color="text.secondary" align="center">
                 {description}
               </Text>
+            )}
+            {description && typeof description !== "string" && (
+              <Box fontSize="sm" color="text.secondary" alignItems="center">
+                {description}
+              </Box>
             )}
           </VStack>
         </VStack>
@@ -133,7 +139,7 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
                 {title}
               </Text>
 
-              {description && (
+              {description && typeof description === "string" && (
                 <Text
                   w="full"
                   fontSize="xs"
@@ -142,6 +148,16 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
                 >
                   {description}
                 </Text>
+              )}
+              {description && typeof description !== "string" && (
+                <Box
+                  w="full"
+                  fontSize="xs"
+                  color="text.secondary"
+                  overflowWrap="break-word"
+                >
+                  {description}
+                </Box>
               )}
             </VStack>
           </HStack>
@@ -187,7 +203,7 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
                 {title}
               </Text>
 
-              {description && (
+              {description && typeof description === "string" && (
                 <Text
                   w="full"
                   fontSize="xs"
@@ -196,6 +212,16 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
                 >
                   {description}
                 </Text>
+              )}
+              {description && typeof description !== "string" && (
+                <Box
+                  w="full"
+                  fontSize="xs"
+                  color="text.secondary"
+                  overflowWrap="break-word"
+                >
+                  {description}
+                </Box>
               )}
             </VStack>
           </HStack>

@@ -158,8 +158,6 @@ export async function doSignup(
   return onCreateFinalize(credentials);
 }
 
-
-
 export async function doLogin(name: string, credentialId: string) {
   console.debug("login begin");
   const { data: beginLoginData } = await beginLogin(name);

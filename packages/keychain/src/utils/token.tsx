@@ -38,11 +38,13 @@ export async function fetchTokenInfo(prefunds: Prefund[]) {
   const data: TokenInfoRaw[] = await res.json();
   const tokens = prefunds.map((t) => {
     const info = data.find(
-      ({ l2_token_address }) => l2_token_address === formatAddress(t.address),
+      ({ l2_token_address }) => BigInt(l2_token_address) === BigInt(t.address),
     );
 
     if (!info) {
-      throw new Error(`Cannot find token info for: ${t.address}`);
+      throw new Error(
+        `Cannot find token info for: ${formatAddress(t.address)}`,
+      );
     }
 
     return {
@@ -65,13 +67,16 @@ export async function fetchTokenInfo(prefunds: Prefund[]) {
   return tokens;
 }
 
-export async function updateBalance(tokens: TokenInfo[], provider: ProviderInterface, address: string) {
+export async function updateBalance(
+  tokens: TokenInfo[],
+  provider: ProviderInterface,
+  address: string,
+) {
   if (!provider) return tokens;
 
   const res = await Promise.allSettled(
     tokens.map(async (t) => {
       try {
-       
         let balance = await provider.callContract({
           contractAddress: t.address,
           entrypoint: "balanceOf",
@@ -91,7 +96,6 @@ export async function updateBalance(tokens: TokenInfo[], provider: ProviderInter
           error: undefined,
         };
       } catch (e) {
-        console.log(e);
         return {
           ...t,
           error: new Error("Failed to update balance"),

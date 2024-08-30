@@ -324,7 +324,11 @@ function useTokens() {
   const checkFunds = useCallback(async () => {
     setIsFetching(true);
 
-    const checked = await updateBalance(tokens, controller.account.rpc, controller.address );
+    const checked = await updateBalance(
+      tokens,
+      controller.account.rpc,
+      controller.address,
+    );
     setTokens(checked);
 
     setIsFetching(false);
