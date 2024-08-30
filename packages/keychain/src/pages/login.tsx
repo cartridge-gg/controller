@@ -1,18 +1,29 @@
+"use client";
+
 import { useRouter } from "next/router";
 import { Login as LoginComponent } from "components/connect";
 import { useConnection } from "hooks/connection";
-import dynamic from "next/dynamic";
 
-function Login() {
+export default function Login() {
   const router = useRouter();
   const { controller, rpcUrl, chainId, error } = useConnection();
+
+  const navigateToSuccess = () => {
+    router.replace({
+      pathname: "/success",
+      query: {
+        title: "Logged in!",
+        description: "Your controller is ready",
+      },
+    });
+  };
 
   if (error) {
     return <>{error.message}</>;
   }
 
   if (controller) {
-    router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);
+    navigateToSuccess();
   }
 
   if (!rpcUrl || !chainId) {
@@ -22,11 +33,7 @@ function Login() {
   return (
     <LoginComponent
       onSignup={() => router.push({ pathname: "/signup", query: router.query })}
-      onSuccess={async () => {
-        router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);
-      }}
+      onSuccess={navigateToSuccess}
     />
   );
 }
-
-export default dynamic(() => Promise.resolve(Login), { ssr: false });

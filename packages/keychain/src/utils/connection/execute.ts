@@ -14,8 +14,8 @@ import {
   addAddressPadding,
   num,
 } from "starknet";
-import Account from "utils/account";
 import { ConnectionCtx, ExecuteCtx } from "./types";
+import { JsCall } from "@cartridge/account-wasm";
 
 export const ESTIMATE_FEE_PERCENTAGE = 10;
 
@@ -55,18 +55,46 @@ export function executeFactory({
         }
 
         if (paymaster) {
-          const res = await tryPaymaster(account, calls, paymaster);
-          if (res) return res;
+          try {
+            const transaction_hash = await account.executeFromOutside(
+              calls,
+              paymaster,
+            );
+
+            return {
+              code: ResponseCodes.SUCCESS,
+              transaction_hash,
+            };
+          } catch (error) {
+            /* user pays */
+          }
         }
 
-        const { nonce, maxFee } = await getInvocationDetails(
-          transactionsDetail,
-          account,
-          calls,
-        );
+        let { maxFee } = transactionsDetail;
+        if (!maxFee) {
+          let estFee;
+          try {
+            estFee = await account.cartridge.estimateInvokeFee(calls);
+          } catch (error) {
+            if (
+              error instanceof Error &&
+              error.message.includes("ContractNotFound")
+            ) {
+              return {
+                code: ResponseCodes.NOT_DEPLOYED,
+                message: error.message,
+              };
+            }
 
-        const res = await account.execute(transactions, { nonce, maxFee });
+            throw error;
+          }
 
+          maxFee = num.toHex(
+            num.addPercent(estFee.overall_fee, ESTIMATE_FEE_PERCENTAGE),
+          );
+        }
+
+        let res = await account.execute(transactions, { maxFee });
         return {
           code: ResponseCodes.SUCCESS,
           ...res,
@@ -80,60 +108,12 @@ export function executeFactory({
     };
 }
 
-export const normalizeCalls = (calls: AllowArray<Call>): Call[] => {
+export const normalizeCalls = (calls: AllowArray<Call>): JsCall[] => {
   return (Array.isArray(calls) ? calls : [calls]).map((call) => {
     return {
       entrypoint: call.entrypoint,
       contractAddress: addAddressPadding(call.contractAddress),
       calldata: CallData.toHex(call.calldata),
-    } as Call;
+    };
   });
 };
-
-async function tryPaymaster(
-  account: Account,
-  calls: Call[],
-  paymaster: PaymasterOptions,
-): Promise<ExecuteReply> {
-  try {
-    const transaction_hash = await account.cartridge.executeFromOutside(
-      calls,
-      paymaster.caller,
-    );
-
-    return {
-      code: ResponseCodes.SUCCESS,
-      transaction_hash,
-    };
-  } catch (e) {
-    /* user pays */
-  }
-}
-
-async function getInvocationDetails(
-  details: InvocationsDetails,
-  account: Account,
-  calls: Call[],
-): Promise<InvocationsDetails> {
-  let { nonce, maxFee } = details;
-
-  nonce = nonce ?? (await account.getNonce("pending"));
-
-  if (!maxFee) {
-    await account.ensureDeployed();
-
-    const estFee = await account.cartridge.estimateInvokeFee(calls);
-
-    maxFee = num.toHex(
-      num.addPercent(estFee.overall_fee, ESTIMATE_FEE_PERCENTAGE),
-    );
-  }
-
-  // if (session.maxFee && BigInt(maxFee) > BigInt(session.maxFee)) {
-  //   throw new Error(
-  //     `Max fee exceeded: ${maxFee.toString()} > ${session.maxFee.toString()}`,
-  //   );
-  // }
-
-  return { nonce, maxFee };
-}

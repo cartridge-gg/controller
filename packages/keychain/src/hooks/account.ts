@@ -4,6 +4,7 @@ import {
   FinalizeLoginDocument,
   FinalizeRegistrationDocument,
   FinalizeLoginMutation,
+  FinalizeRegistrationMutation,
 } from "generated/graphql";
 
 import { client, ENDPOINT } from "utils/graphql";
@@ -61,7 +62,9 @@ export const onCreateBegin = async (name: string): Promise<Credentials> => {
   return credentials;
 };
 
-export const onCreateFinalize = (credentials: Credentials) => {
+export const onCreateFinalize = (
+  credentials: Credentials,
+): Promise<FinalizeRegistrationMutation> => {
   return client.request(FinalizeRegistrationDocument, {
     credentials: JSON.stringify({
       id: credentials.id,
@@ -146,12 +149,17 @@ export const doXHR = async (json: string): Promise<any> => {
   });
 };
 
-export async function doSignup(name: string) {
+export async function doSignup(
+  name: string,
+): Promise<FinalizeRegistrationMutation> {
+  console.debug("signup begin");
   const credentials: Credentials = await onCreateBegin(name);
-  await onCreateFinalize(credentials);
+  console.debug("signup finalize");
+  return onCreateFinalize(credentials);
 }
 
 export async function doLogin(name: string, credentialId: string) {
+  console.debug("login begin");
   const { data: beginLoginData } = await beginLogin(name);
 
   // TODO: replace with account_sdk device signer
@@ -171,7 +179,7 @@ export async function doLogin(name: string, credentialId: string) {
       userVerification: "required",
     },
   })) as RawAssertion;
-
+  console.debug("login finalize");
   const res = await onLoginFinalize(assertion);
   if (!res.finalizeLogin) {
     throw Error("login failed");

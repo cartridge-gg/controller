@@ -16,7 +16,7 @@ trait ICartridgeAccount<TContractState> {
         ref self: TContractState,
         class_hash: felt252,
         contract_address_salt: felt252,
-        owner: Signer,
+        owner: CartridgeAccount::Owner,
         guardian: Option<Signer>
     ) -> felt252;
 }
@@ -24,7 +24,7 @@ trait ICartridgeAccount<TContractState> {
 #[starknet::contract(account)]
 mod CartridgeAccount {
     use openzeppelin::upgrades::UpgradeableComponent::InternalTrait;
-use core::traits::TryInto;
+    use core::traits::TryInto;
     use core::option::OptionTrait;
     use core::array::SpanTrait;
     use core::to_byte_array::FormatAsByteArray;
@@ -75,7 +75,10 @@ use core::traits::TryInto;
     use openzeppelin::upgrades::interface::IUpgradeable;
 
     use controller::account::{ICartridgeAccount, IAssertOwner};
-    use controller::external_owners::external_owners::external_owners_component;
+    use controller::external_owners::external_owners::{
+        external_owners_component,
+        external_owners_component::InternalImpl as ExternalOwnersInternalImpl
+    };
     use controller::delegate_account::delegate_account::delegate_account_component;
     use controller::introspection::src5::src5_component;
     use controller::session::{
@@ -184,6 +187,12 @@ use core::traits::TryInto;
         UpgradeableEvent: UpgradeableComponent::Event
     }
 
+    #[derive(Drop, Copy, Serde)]
+    enum Owner {
+        Signer: Signer,
+        Account: ContractAddress,
+    }
+
     /// @notice Emitted when the account executes a transaction
     /// @param hash The transaction hash
     /// @param response The data returned by the methods called
@@ -202,8 +211,13 @@ use core::traits::TryInto;
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState, owner: Signer, guardian: Option<Signer>) {
-        self.multiple_owners.owners.write(owner.into_guid(), true);
+    fn constructor(ref self: ContractState, owner: Owner, guardian: Option<Signer>) {
+        match owner {
+            Owner::Signer(signer) => {
+                self.multiple_owners.owners.write(signer.into_guid(), true);
+            },
+            Owner::Account(account) => { self.external_owners._register_external_owner(account); },
+        }
     }
 
     //
@@ -309,7 +323,7 @@ use core::traits::TryInto;
             ref self: ContractState,
             class_hash: felt252,
             contract_address_salt: felt252,
-            owner: Signer,
+            owner: Owner,
             guardian: Option<Signer>,
         ) -> felt252 {
             let tx_info = get_tx_info().unbox();

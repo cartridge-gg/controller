@@ -15,6 +15,7 @@ import { ConnectionCtx } from "./types";
 import { openMenuFactory } from "./menu";
 import { delegateAccount, setDelegateFactory } from "./delegate";
 import { openSettingsFactory } from "./settings";
+import { deployFactory } from "./deploy";
 
 export function connectToController({
   setOrigin,
@@ -40,6 +41,7 @@ export function connectToController({
         }),
       ),
       disconnect: normalize(validate(disconnectFactory(setController))),
+      deploy: normalize(validate(deployFactory(setContext))),
       execute: normalize(validate(executeFactory({ setContext }))),
       estimateDeclareFee: normalize(validate(estimateDeclareFee)),
       estimateInvokeFee: normalize(validate(estimateInvokeFee)),

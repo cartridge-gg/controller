@@ -38,14 +38,7 @@ mod external_owners_component {
             ref self: ComponentState<TContractState>, external_owner_address: ContractAddress
         ) {
             self.get_contract().assert_owner();
-
-            assert(
-                self.is_external_owner(external_owner_address) == false,
-                'ext-owners/already-registered'
-            );
-
-            self.external_owners.write(external_owner_address.into(), true);
-            self.emit(ExternalOwnerRegistered { address: external_owner_address });
+            self._register_external_owner(external_owner_address);
         }
 
         fn remove_external_owner(
@@ -66,6 +59,26 @@ mod external_owners_component {
             self: @ComponentState<TContractState>, external_owner_address: ContractAddress
         ) -> bool {
             self.external_owners.read(external_owner_address.into())
+        }
+    }
+
+    #[generate_trait]
+    impl InternalImpl<
+        TContractState,
+        +HasComponent<TContractState>,
+        +IAssertOwner<TContractState>,
+        +Drop<TContractState>
+    > of InternalTrait<TContractState> {
+        fn _register_external_owner(
+            ref self: ComponentState<TContractState>, external_owner_address: ContractAddress
+        ) {
+            assert(
+                self.is_external_owner(external_owner_address) == false,
+                'ext-owners/already-registered'
+            );
+
+            self.external_owners.write(external_owner_address.into(), true);
+            self.emit(ExternalOwnerRegistered { address: external_owner_address });
         }
     }
 }

@@ -40,7 +40,12 @@ export function useExternalOwners() {
     };
 
     init();
-  }, [controller.address]);
+  }, [
+    controller.address,
+    provider,
+    externalOwnerRegisteredSelector,
+    externalOwnerRemovedSelector,
+  ]);
 
   return { externalOwners };
 }

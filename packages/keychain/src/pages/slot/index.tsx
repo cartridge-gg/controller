@@ -19,7 +19,7 @@ function Auth() {
         "",
       );
 
-      router.replace(`/slot/auth/consent${query}`);
+      router.replace(`/slot/consent${query}`);
     }
   }, [user, controller, router]);
 

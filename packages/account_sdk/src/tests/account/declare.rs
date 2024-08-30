@@ -2,36 +2,29 @@ use std::sync::Arc;
 
 use starknet::{
     accounts::ConnectedAccount,
-    core::types::{
-        contract::{CompiledClass, SierraClass},
-        DeclareTransactionResult,
-    },
+    core::types::{contract::SierraClass, DeclareTransactionResult},
     providers::Provider,
 };
+use starknet_crypto::Felt;
 
+use crate::constants::{ACCOUNT_COMPILED_CLASS_HASH, ERC_20_COMPILED_CLASS_HASH};
 use crate::provider::CartridgeJsonRpcProvider;
 
 use super::pending::PendingTransaction;
 
 pub const SIERRA_STR: &str = include_str!("../../../compiled/controller.contract_class.json");
-// We can store only the class_hash and thus te casm_str would not be needed but for now it is
-pub const CASM_STR: &str =
-    include_str!("../../../compiled/controller.compiled_contract_class.json");
-
 pub const ERC_20_SIERRA_STR: &str = include_str!("../../../compiled/erc20.contract_class.json");
-pub const ERC_20_CASM_STR: &str =
-    include_str!("../../../compiled/erc20.compiled_contract_class.json");
 
 pub struct AccountDeclaration<'a> {
     contract_artifact: SierraClass,
-    compiled_class: CompiledClass,
+    compiled_class_hash: Felt,
     client: &'a CartridgeJsonRpcProvider,
 }
 
 impl<'a> AccountDeclaration<'a> {
     pub fn new(
         contract_artifact: SierraClass,
-        compiled_class: CompiledClass,
+        compiled_class_hash: Felt,
         client: &'a CartridgeJsonRpcProvider,
     ) -> Self
     where
@@ -39,7 +32,7 @@ impl<'a> AccountDeclaration<'a> {
     {
         Self {
             contract_artifact,
-            compiled_class,
+            compiled_class_hash,
             client,
         }
     }
@@ -49,7 +42,7 @@ impl<'a> AccountDeclaration<'a> {
     {
         Self::new(
             serde_json::from_str(SIERRA_STR).unwrap(),
-            serde_json::from_str(CASM_STR).unwrap(),
+            ACCOUNT_COMPILED_CLASS_HASH,
             client,
         )
     }
@@ -59,7 +52,7 @@ impl<'a> AccountDeclaration<'a> {
     {
         Self::new(
             serde_json::from_str(ERC_20_SIERRA_STR).unwrap(),
-            serde_json::from_str(ERC_20_CASM_STR).unwrap(),
+            ERC_20_COMPILED_CLASS_HASH,
             client,
         )
     }
@@ -73,11 +66,6 @@ impl<'a> AccountDeclaration<'a> {
     where
         &'a CartridgeJsonRpcProvider: Provider,
     {
-        let casm_class_hash = self
-            .compiled_class
-            .class_hash()
-            .map_err(|e| e.to_string())?;
-
         // We need to flatten the ABI into a string first
         let flattened_class = self
             .contract_artifact
@@ -86,7 +74,7 @@ impl<'a> AccountDeclaration<'a> {
             .map_err(|e| e.to_string())?;
 
         let declaration_result = account
-            .declare_v2(Arc::new(flattened_class), casm_class_hash)
+            .declare_v2(Arc::new(flattened_class), self.compiled_class_hash)
             .fee_estimate_multiplier(1.5)
             .send()
             .await

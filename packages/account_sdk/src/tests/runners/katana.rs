@@ -142,6 +142,27 @@ impl KatanaRunner {
         class_hash
     }
 
+    async fn deploy_with_calldata(&self, constructor_calldata: Vec<Felt>) -> DeployResult {
+        let prefunded = self.executor().await;
+        let class_hash = self.declare_controller().await;
+
+        let deploy_result = AccountDeployment::new(self.client())
+            .deploy(constructor_calldata, Felt::ZERO, &prefunded, class_hash)
+            .await
+            .unwrap()
+            .wait_for_completion()
+            .await;
+
+        TransactionWaiter::new(deploy_result.transaction_hash, self.client())
+            .wait()
+            .await
+            .unwrap();
+
+        self.fund(&deploy_result.deployed_address).await;
+
+        deploy_result
+    }
+
     pub async fn deploy_controller<'a, S>(
         &'a self,
         username: String,
@@ -151,28 +172,13 @@ impl KatanaRunner {
         S: HashSigner + Clone + Send + Sync,
     {
         let guardian = SigningKey::from_random();
-        let prefunded = self.executor().await;
-        let class_hash = self.declare_controller().await;
-
-        let mut constructor_calldata = controller::Signer::cairo_serialize(&signer.signer());
+        let mut constructor_calldata =
+            controller::Owner::cairo_serialize(&controller::Owner::Signer(signer.signer()));
         constructor_calldata.extend(Option::<Signer>::cairo_serialize(&Some(guardian.signer())));
 
         let DeployResult {
-            deployed_address,
-            transaction_hash,
-        } = AccountDeployment::new(self.client())
-            .deploy(constructor_calldata, Felt::ZERO, &prefunded, class_hash)
-            .await
-            .unwrap()
-            .wait_for_completion()
-            .await;
-
-        TransactionWaiter::new(transaction_hash, self.client())
-            .wait()
-            .await
-            .unwrap();
-
-        self.fund(&deployed_address).await;
+            deployed_address, ..
+        } = self.deploy_with_calldata(constructor_calldata).await;
 
         Controller::new(
             "app_id".to_string(),
@@ -184,6 +190,22 @@ impl KatanaRunner {
             self.chain_id,
             InMemoryBackend::default(),
         )
+    }
+
+    pub async fn deploy_controller_with_external_owner(
+        &self,
+        external_owner: ContractAddress,
+    ) -> ContractAddress {
+        let guardian = SigningKey::from_random();
+        let mut constructor_calldata =
+            controller::Owner::cairo_serialize(&controller::Owner::Account(external_owner));
+        constructor_calldata.extend(Option::<Signer>::cairo_serialize(&Some(guardian.signer())));
+
+        let DeployResult {
+            deployed_address, ..
+        } = self.deploy_with_calldata(constructor_calldata).await;
+
+        deployed_address.into()
     }
 }
 

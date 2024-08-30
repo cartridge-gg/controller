@@ -35,6 +35,7 @@ export type Policy = {
 export enum ResponseCodes {
   SUCCESS = "SUCCESS",
   NOT_CONNECTED = "NOT_CONNECTED",
+  NOT_DEPLOYED = "NOT_DEPLOYED",
   NOT_ALLOWED = "NOT_ALLOWED",
   CANCELED = "CANCELED",
 }
@@ -59,6 +60,11 @@ export type ProbeReply = {
   address: string;
 };
 
+export type DeployReply = {
+  code: ResponseCodes.SUCCESS;
+  transaction_hash: string;
+};
+
 export interface Keychain {
   probe(rpcUrl?: string): Promise<ProbeReply | ConnectError>;
   connect(
@@ -70,6 +76,7 @@ export interface Keychain {
   reset(): void;
   revoke(origin: string): void;
 
+  deploy(): Promise<DeployReply | ConnectError>;
   estimateDeclareFee(
     payload: DeclareContractPayload,
     details?: EstimateFeeDetails,

@@ -20,9 +20,15 @@ import {
   OpenMenuCtx,
 } from "utils/connection";
 import { RpcProvider, CallData, constants, shortString } from "starknet";
-import { Policy, Prefund, ResponseCodes } from "@cartridge/controller";
+import {
+  PaymasterOptions,
+  Policy,
+  Prefund,
+  ResponseCodes,
+} from "@cartridge/controller";
 import { mergeDefaultETHPrefund } from "utils/token";
 import { isIframe } from "components/connect/utils";
+import { setIsSignedUp } from "utils/cookie";
 
 const ConnectionContext = createContext<ConnectionContextValue>(undefined);
 
@@ -35,6 +41,7 @@ type ConnectionContextValue = {
   chainName: string;
   policies: Policy[];
   prefunds: Prefund[];
+  paymaster: PaymasterOptions;
   hasPrefundRequest: boolean;
   error: Error;
   setContext: (context: ConnectionCtx) => void;
@@ -66,7 +73,8 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
   const [rpcUrl, setRpcUrl] = useState<string>();
   const [chainId, setChainId] = useState<string>();
   const [policies, setPolicies] = useState<Policy[]>([]);
-  const [controller, setController] = useState<Controller | undefined>();
+  const [paymaster, setPaymaster] = useState<PaymasterOptions>();
+  const [controller, setControllerRaw] = useState<Controller | undefined>();
   const [prefunds, setPrefunds] = useState<Prefund[]>([]);
   const [hasPrefundRequest, setHasPrefundRequest] = useState<boolean>(false);
   const [error, setError] = useState<Error>();
@@ -88,7 +96,12 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
 
   const parsePolicies = (policiesStr: string | null): Policy[] => {
     if (!policiesStr) return [];
-    return JSON.parse(policiesStr);
+    return JSON.parse(decodeURIComponent(policiesStr));
+  };
+
+  const parsePaymaster = (paymasterStr: string | null): PaymasterOptions => {
+    if (!paymasterStr) return null;
+    return JSON.parse(decodeURIComponent(paymasterStr));
   };
 
   const cancel = useCallback(async () => {
@@ -104,6 +117,11 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
       // Always fails for some reason
     }
   }, [context, parent]);
+
+  const setController = useCallback((controller?: Controller) => {
+    setControllerRaw(controller);
+    setIsSignedUp();
+  }, []);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -123,6 +141,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
     setHasPrefundRequest(!!prefundParam);
     setPrefunds(mergeDefaultETHPrefund(prefunds));
     setPolicies(parsePolicies(urlParams.get("policies")));
+    setPaymaster(parsePaymaster(urlParams.get("paymaster")));
 
     const connection = connectToController({
       setOrigin,
@@ -138,7 +157,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
     return () => {
       connection.destroy();
     };
-  }, []);
+  }, [setController]);
 
   useEffect(() => {
     if (rpcUrl) {
@@ -284,6 +303,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
         chainName,
         policies,
         prefunds,
+        paymaster,
         hasPrefundRequest,
         error,
         setController,

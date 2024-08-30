@@ -2,7 +2,10 @@ import { Field } from "@cartridge/ui";
 import { Button } from "@chakra-ui/react";
 import { Container, Footer, Content } from "components/layout";
 import { useCallback, useEffect, useState } from "react";
-import { useAccountQuery } from "generated/graphql";
+import {
+  FinalizeRegistrationMutation,
+  useAccountQuery,
+} from "generated/graphql";
 import Controller from "utils/controller";
 import { PopupCenter } from "utils/url";
 import { SignupProps } from "./types";
@@ -12,8 +15,6 @@ import { doSignup } from "hooks/account";
 import { useControllerTheme } from "hooks/theme";
 import { useConnection } from "hooks/connection";
 import { ErrorAlert } from "components/ErrorAlert";
-import { useDeploy } from "hooks/deploy";
-import { constants } from "starknet";
 import { useDebounce } from "hooks/debounce";
 
 export function Signup({
@@ -24,20 +25,22 @@ export function Signup({
 }: SignupProps) {
   const theme = useControllerTheme();
   const { chainId, rpcUrl, setController } = useConnection();
-  const { deployRequest } = useDeploy();
   const [error, setError] = useState<Error>();
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isPopup, setIsPopup] = useState(false);
   const [usernameField, setUsernameField] = useState({
     value: prefilledName,
     error: undefined,
   });
   const [isValidating, setIsValidating] = useState(false);
 
-  const { origin, hasPrefundRequest } = useConnection();
+  const { origin } = useConnection();
   const { debouncedValue: username, debouncing } = useDebounce(
     usernameField.value,
     1000,
   );
+
+  console.debug("signup render");
 
   // In order for Safari to open "Create Passkey" modal successfully, submit handler has to be async.
   // The workaround is to call async validation function every time when username input changes
@@ -60,6 +63,33 @@ export function Signup({
     }
   }, [username]);
 
+  const initController = useCallback(
+    async (
+      username: string,
+      address: string,
+      credentialId: string,
+      publicKey: string,
+    ) => {
+      const controller = new Controller({
+        appId: origin,
+        chainId,
+        rpcUrl,
+        address,
+        username,
+        publicKey,
+        credentialId,
+      });
+
+      controller.store();
+      setController(controller);
+
+      if (onSuccess) {
+        onSuccess();
+      }
+    },
+    [origin, chainId, rpcUrl, onSuccess, setController],
+  );
+
   const doPopup = useCallback(() => {
     const searchParams = new URLSearchParams(window.location.search);
     searchParams.set("name", encodeURIComponent(usernameField.value));
@@ -71,9 +101,11 @@ export function Signup({
       480,
       640,
     );
+
+    setIsPopup(true);
   }, [usernameField]);
 
-  const onSubmit = useCallback(() => {
+  const onSubmit = useCallback(async () => {
     setError(undefined);
     setIsRegistering(true);
 
@@ -85,7 +117,22 @@ export function Signup({
       return;
     }
 
-    doSignup(usernameField.value).catch((e) => {
+    try {
+      const data: FinalizeRegistrationMutation = await doSignup(
+        usernameField.value,
+      );
+      const {
+        finalizeRegistration: {
+          id: username,
+          contractAddress: address,
+          credentials: { webauthn },
+        },
+      } = data;
+
+      const { id: credentialId, publicKey } = webauthn[0];
+
+      initController(username, address, credentialId, publicKey);
+    } catch (e) {
       // Backward compat with iframes without this permission-policy
       if (e.message.includes("publickey-credentials-create")) {
         doPopup();
@@ -94,14 +141,14 @@ export function Signup({
 
       setIsRegistering(false);
       setUsernameField((u) => ({ ...u, error: e.message }));
-    });
-  }, [usernameField, doPopup]);
+    }
+  }, [usernameField, initController, doPopup]);
 
-  // for polling approach when iframe
+  // for polling approach when popup
   useAccountQuery(
     { id: usernameField.value },
     {
-      enabled: isRegistering,
+      enabled: isPopup,
       refetchIntervalInBackground: true,
       refetchOnWindowFocus: false,
       staleTime: 10000000,
@@ -109,13 +156,6 @@ export function Signup({
       refetchInterval: (data) => (!data ? 1000 : undefined),
       onSuccess: async (data) => {
         try {
-          if (
-            chainId !== constants.StarknetChainId.SN_MAIN &&
-            !hasPrefundRequest
-          ) {
-            await deployRequest(usernameField.value);
-          }
-
           const {
             account: {
               credentials: {
@@ -125,22 +165,7 @@ export function Signup({
             },
           } = data;
 
-          const controller = new Controller({
-            appId: origin,
-            chainId,
-            rpcUrl,
-            address,
-            username: usernameField.value,
-            publicKey,
-            credentialId,
-          });
-
-          controller.store();
-          setController(controller);
-
-          if (onSuccess) {
-            onSuccess();
-          }
+          initController(username, address, credentialId, publicKey);
         } catch (e) {
           setError(e);
         }

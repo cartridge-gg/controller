@@ -362,12 +362,9 @@ where
             y_parity,
         };
 
-        let client_data: ClientData = serde_json::from_str(&client_data_json).unwrap();
         let client_data_json_outro = extract_client_data_json_outro(&client_data_json);
         let webauthn_signature = WebauthnSignature {
             flags,
-            cross_origin: client_data.cross_origin,
-            top_origin: client_data.top_origin.map(|s| s.into_bytes()),
             sign_count: counter,
             ec_signature: signature,
             client_data_json_outro,
@@ -484,16 +481,13 @@ impl<T: WebauthnBackend> WebauthnSigner<T> {
 }
 
 fn extract_client_data_json_outro(client_data_json: &str) -> Vec<u8> {
-    let cross_origin_index = client_data_json.rfind("\"crossOrigin\"");
-    match cross_origin_index {
-        Some(index) => {
-            let outro_sub = client_data_json[index..].to_string();
-            let outro_start = outro_sub.rfind(',').unwrap_or(outro_sub.len());
-            let outro_str = &outro_sub[outro_start..];
-            outro_str.as_bytes().to_vec()
-        }
-        None => vec![],
-    }
+    client_data_json
+        .split_once(",\"origin\":")
+        .map_or("", |(_, rest)| rest)
+        .split_once("\",")
+        .map(|(_, rest)| format!(",{rest}"))
+        .unwrap_or("".to_string())
+        .into_bytes()
 }
 
 fn extract_pub_key(cose_key: &CoseKey) -> Result<[u8; 64], DeviceError> {
@@ -542,18 +536,40 @@ fn extract_pub_key(cose_key: &CoseKey) -> Result<[u8; 64], DeviceError> {
 mod tests {
     use super::extract_client_data_json_outro;
 
-    #[test]
-    fn test_extract_client_data_json_outro() {
-        let json_with_cross_origin = "{\"type\":\"webauthn.get\",\"challenge\":\"BGJcocCMZ8w1AoRN0wAHFsNtNAVJ3fi83s65MW8jUfIB\",\"origin\":\"http://localhost:3001\",\"crossOrigin\":true,\"other_keys_can_be_added_here\":\"do not compare clientDataJSON against a template. See https://goo.gl/yabPex\"}";
-        let expected_outro = ",\"other_keys_can_be_added_here\":\"do not compare clientDataJSON against a template. See https://goo.gl/yabPex\"}";
-        let outro = extract_client_data_json_outro(json_with_cross_origin);
+    fn validate_extraction(input: &str, expected: &str) {
+        let outro = extract_client_data_json_outro(input);
         let outro_string = String::from_utf8(outro).expect("Invalid UTF-8");
-        assert_eq!(outro_string, expected_outro);
+        assert_eq!(outro_string, expected);
+    }
 
-        let json_without_outro =
-        "{\"type\":\"webauthn.get\",\"challenge\":\"BD7mj5jZ_ySvAv7kgFJ1HKRknsHwYuwtWbkjJPqQKi4B\",\"origin\":\"http://localhost:3001\",\"crossOrigin\":true}";
-        let outro = extract_client_data_json_outro(json_without_outro);
-        let outro_string = String::from_utf8(outro).expect("Invalid UTF-8");
-        assert_eq!(outro_string, "");
+    #[test]
+    fn test_extract_client_data_json_outro_1() {
+        validate_extraction(
+            "{\"type\":\"webauthn.get\",\"challenge\":\"BGJcocCMZ8w1AoRN0wAHFsNtNAVJ3fi83s65MW8jUfIB\",\"origin\":\"http://localhost:3001\",\"crossOrigin\":true,\"other_keys_can_be_added_here\":\"do not compare clientDataJSON against a template. See https://goo.gl/yabPex\"}", 
+            ",\"crossOrigin\":true,\"other_keys_can_be_added_here\":\"do not compare clientDataJSON against a template. See https://goo.gl/yabPex\"}"
+        );
+    }
+
+    #[test]
+    fn test_extract_client_data_json_outro_2() {
+        validate_extraction(
+            "{\"type\":\"webauthn.get\",\"challenge\":\"BD7mj5jZ_ySvAv7kgFJ1HKRknsHwYuwtWbkjJPqQKi4B\",\"origin\":\"http://localhost:3001\",\"crossOrigin\":true}",
+            ",\"crossOrigin\":true}"
+        );
+    }
+
+    #[test]
+    fn test_extract_client_data_json_outro_3() {
+        validate_extraction(
+            "{\"type\":\"webauthn.get\",\"challenge\":\"BGJcocCMZ8w1AoRN0wAHFsNtNAVJ3fi83s65MW8jUfIB\",\"origin\":\"http://localhost:3001\",\"other_keys_can_be_added_here\":\"do not compare clientDataJSON against a template. See https://goo.gl/yabPex\"}",
+            ",\"other_keys_can_be_added_here\":\"do not compare clientDataJSON against a template. See https://goo.gl/yabPex\"}"
+        );
+    }
+    #[test]
+    fn test_extract_client_data_json_outro_4() {
+        validate_extraction(
+            "{\"type\":\"webauthn.get\",\"challenge\":\"BGJcocCMZ8w1AoRN0wAHFsNtNAVJ3fi83s65MW8jUfIB\",\"origin\":\"http://localhost:3001\"}",
+            ""
+        );
     }
 }

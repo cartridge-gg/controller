@@ -11,7 +11,7 @@ import { GearIcon, TrashIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { useEffect, useState } from "react";
 import { useExternalOwners } from "hooks/external";
-import { mediumAddress } from "components/Menu";
+import { formatAddress } from "utils/contracts";
 
 export function Settings({ onLogout }: { onLogout: () => void }) {
   const {
@@ -82,7 +82,13 @@ export function Settings({ onLogout }: { onLogout: () => void }) {
                     key={`ext-${externalOwner}`}
                   >
                     <HStack w="full">
-                      <Text w="340px"> {mediumAddress(externalOwner)} </Text>
+                      <Text w="340px">
+                        {" "}
+                        {formatAddress(externalOwner, {
+                          first: 20,
+                          last: 20,
+                        })}{" "}
+                      </Text>
                       <Button
                         onClick={() => {
                           removeExternalOwnerTransaction(
@@ -114,7 +120,10 @@ export function Settings({ onLogout }: { onLogout: () => void }) {
             </Text>
             {delegateAccount && BigInt(delegateAccount) != 0n ? (
               <HStack w="full">
-                <Text w="340px"> {mediumAddress(delegateAccount)} </Text>
+                <Text w="340px">
+                  {" "}
+                  {formatAddress(delegateAccount, { first: 20, last: 20 })}{" "}
+                </Text>
                 <Button
                   onClick={() => {
                     setDelegateTransaction(context, "0x0");

@@ -1,5 +1,6 @@
 export * from "./types";
 export { defaultPresets } from "./presets";
+export * from "./verified";
 
 import { AccountInterface, addAddressPadding } from "starknet";
 import {
@@ -63,6 +64,9 @@ class Controller {
     }
     if (prefunds?.length) {
       this.setPrefunds(prefunds);
+    }
+    if (paymaster) {
+      this.setPaymaster(paymaster);
     }
 
     this.initModal();
@@ -128,6 +132,13 @@ class Controller {
 
   private setColorMode(colorMode: ColorMode) {
     this.url.searchParams.set("colorMode", colorMode);
+  }
+
+  private setPaymaster(paymaster: PaymasterOptions) {
+    this.url.searchParams.set(
+      "paymaster",
+      encodeURIComponent(JSON.stringify(paymaster)),
+    );
   }
 
   ready() {

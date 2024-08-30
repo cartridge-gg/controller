@@ -1472,6 +1472,7 @@ export type Deployment = Node & {
   logs: Logs;
   project: Scalars["String"];
   region: Scalars["String"];
+  regions: Array<Scalars["String"]>;
   service: Service;
   serviceID: Scalars["ID"];
   spinDownAt?: Maybe<Scalars["Time"]>;
@@ -2501,6 +2502,7 @@ export type MutationCreateAchievementArgs = {
 
 export type MutationCreateDeploymentArgs = {
   name: Scalars["String"];
+  regions?: InputMaybe<Array<Scalars["String"]>>;
   service: CreateServiceInput;
   tier?: InputMaybe<DeploymentTier>;
   wait?: InputMaybe<Scalars["Boolean"]>;
@@ -4667,6 +4669,14 @@ export type FinalizeRegistrationMutation = {
     __typename?: "Account";
     id: string;
     contractAddress?: string | null;
+    credentials: {
+      __typename?: "Credentials";
+      webauthn?: Array<{
+        __typename?: "WebauthnCredential";
+        id: string;
+        publicKey: string;
+      }> | null;
+    };
   };
 };
 
@@ -4857,6 +4867,12 @@ export const FinalizeRegistrationDocument = `
   finalizeRegistration(credentials: $credentials) {
     id
     contractAddress
+    credentials {
+      webauthn {
+        id
+        publicKey
+      }
+    }
   }
 }
     `;

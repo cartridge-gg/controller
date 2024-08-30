@@ -17,13 +17,12 @@ import {
 
 import { selectors, VERSION } from "./selectors";
 import Storage from "./storage";
-import { CartridgeAccount } from "@cartridge/account-wasm";
+import {
+  CartridgeAccount,
+  JsInvocationsDetails,
+} from "@cartridge/account-wasm";
 import { normalizeCalls } from "./connection/execute";
-
-export enum Status {
-  COUNTERFACTUAL = "COUNTERFACTUAL",
-  DEPLOYED = "DEPLOYED",
-}
+import { PaymasterOptions } from "@cartridge/controller";
 
 class Account extends BaseAccount {
   rpc: RpcProvider;
@@ -61,56 +60,16 @@ class Account extends BaseAccount {
       webauthn.credentialId,
       webauthn.publicKey,
     );
-
-    this.sync();
   }
 
-  get status() {
-    const state = Storage.get(this.selector);
-    if (!state || !state.status) {
-      return Status.COUNTERFACTUAL;
-    }
-
-    return state.status;
-  }
-
-  set status(status: Status) {
-    Storage.update(this.selector, {
-      status,
-    });
-  }
-
-  async sync() {
-    if (this.status != Status.DEPLOYED) {
-      try {
-        const classHash = await this.rpc.getClassHashAt(
-          this.address,
-          "pending",
-        );
-        Storage.update(this.selector, {
-          classHash,
-        });
-        this.status = Status.DEPLOYED;
-      } catch (error) {
-        if (
-          error instanceof Error &&
-          error.message.includes("Contract not found")
-        ) {
-          this.status = Status.COUNTERFACTUAL;
-        } else {
-          throw error;
-        }
-      }
-    }
-
-    return this.status;
-  }
-
-  async ensureDeployed() {
-    await this.sync();
-    if (this.status !== Status.DEPLOYED) {
-      throw new Error("Account is deploying");
-    }
+  async executeFromOutside(
+    calls: AllowArray<Call>,
+    paymaster: PaymasterOptions,
+  ): Promise<string> {
+    return await this.cartridge.executeFromOutside(
+      normalizeCalls(calls),
+      paymaster.caller,
+    );
   }
 
   // @ts-expect-error TODO: fix overload type mismatch
@@ -118,11 +77,12 @@ class Account extends BaseAccount {
     calls: AllowArray<Call>,
     details?: InvocationsDetails,
   ): Promise<InvokeFunctionResponse> {
-    this.ensureDeployed();
-
     details.nonce = details.nonce ?? (await super.getNonce("pending"));
 
-    const res = await this.cartridge.execute(normalizeCalls(calls), details);
+    const res = await this.cartridge.execute(
+      normalizeCalls(calls),
+      details as JsInvocationsDetails,
+    );
 
     Storage.update(this.selector, {
       nonce: num.toHex(BigInt(details.nonce) + 1n),
@@ -149,8 +109,6 @@ class Account extends BaseAccount {
     calls: AllowArray<Call>,
     details: EstimateFeeDetails = {},
   ): Promise<EstimateFee> {
-    this.ensureDeployed();
-
     details.blockIdentifier = details.blockIdentifier ?? "pending";
     details.nonce = details.nonce ?? (await super.getNonce("pending"));
 

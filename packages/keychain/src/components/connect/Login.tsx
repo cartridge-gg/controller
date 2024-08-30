@@ -4,7 +4,6 @@ import { Container, Footer, Content, useLayout } from "components/layout";
 import { useCallback, useEffect, useState } from "react";
 import Controller from "utils/controller";
 import { LoginMode, LoginProps } from "./types";
-import { useAnalytics } from "hooks/analytics";
 import { fetchAccount, validateUsernameFor } from "./utils";
 import { RegistrationLink } from "./RegistrationLink";
 import { useControllerTheme } from "hooks/theme";
@@ -14,6 +13,7 @@ import { ErrorAlert } from "components/ErrorAlert";
 
 export function Login(props: LoginProps) {
   const theme = useControllerTheme();
+  console.debug("login render");
 
   return (
     <Container
@@ -39,7 +39,6 @@ function Form({
 }: LoginProps) {
   const { footer } = useLayout();
   const { origin, policies, chainId, rpcUrl, setController } = useConnection();
-  const { event: log } = useAnalytics();
   const [isLoading, setIsLoading] = useState(false);
   const [expiresAt] = useState<bigint>(3000000000n);
   const [error, setError] = useState<Error>();
@@ -82,7 +81,7 @@ function Form({
       });
 
       if (mode === LoginMode.Controller && policies?.length > 0) {
-        await controller.approve(origin, expiresAt, policies);
+        await controller.createSession(expiresAt, policies);
       } else {
         await doLogin(usernameField.value, credentialId);
       }
@@ -106,7 +105,6 @@ function Form({
     policies,
     expiresAt,
     mode,
-    log,
     onSuccess,
     setController,
   ]);
@@ -145,7 +143,7 @@ function Form({
         />
       </Content>
 
-      <Footer isSlot={isSlot} createSession>
+      <Footer isSlot={isSlot}>
         {error && (
           <ErrorAlert title="Login failed" description={error.message} />
         )}
