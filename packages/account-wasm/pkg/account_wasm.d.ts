@@ -6,8 +6,14 @@ export interface JsCall {
     calldata: Felt[];
 }
 
-export interface JsEstimateFeeDetails {
+export interface JsInvocationsDetails {
     nonce: Felt;
+    maxFee: Felt;
+}
+
+export interface JsPolicy {
+    target: string;
+    method: string;
 }
 
 export type Felts = JsFelt[];
@@ -24,9 +30,8 @@ export interface JsCredentials {
     privateKey: Felt;
 }
 
-export interface JsInvocationsDetails {
+export interface JsEstimateFeeDetails {
     nonce: Felt;
-    maxFee: Felt;
 }
 
 export interface JsOutsideExecution {
@@ -35,11 +40,6 @@ export interface JsOutsideExecution {
     executeAfter: number;
     calls: JsCall[];
     nonce: Felt;
-}
-
-export interface JsPolicy {
-    target: string;
-    method: string;
 }
 
 /**
@@ -167,4 +167,9 @@ export class CartridgeSessionAccount {
 * @returns {Promise<any>}
 */
   execute(calls: (JsCall)[]): Promise<any>;
+/**
+* @param {(JsCall)[]} calls
+* @returns {Promise<any>}
+*/
+  execute_from_outside(calls: (JsCall)[]): Promise<any>;
 }

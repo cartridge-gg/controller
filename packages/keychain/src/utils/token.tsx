@@ -3,7 +3,7 @@ import { EthereumIcon } from "@cartridge/ui";
 import { Image } from "@chakra-ui/react";
 import { formatEther } from "viem";
 import { formatAddress } from "./contracts";
-import { Account, Provider, hash, uint256 } from "starknet";
+import { uint256 } from "starknet";
 import Controller from "./controller";
 
 export const ETH_CONTRACT_ADDRESS =
@@ -43,7 +43,7 @@ export async function fetchTokenInfo(prefunds: Prefund[]) {
         address: ETH_CONTRACT_ADDRESS,
         min: BigInt(t.min),
         name: "Ether",
-        symbo: "ETH",
+        symbol: "ETH",
         decimals: 18,
         logo: <EthereumIcon fontSize={20} color="currentColor" />,
       };
