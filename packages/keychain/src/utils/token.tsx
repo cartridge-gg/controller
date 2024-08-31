@@ -3,7 +3,7 @@ import { EthereumIcon } from "@cartridge/ui";
 import { Image } from "@chakra-ui/react";
 import { formatEther } from "viem";
 import { formatAddress } from "./contracts";
-import { uint256 } from "starknet";
+import { Account, Provider, hash, uint256 } from "starknet";
 import Controller from "./controller";
 
 export const ETH_CONTRACT_ADDRESS =
@@ -38,6 +38,17 @@ export async function fetchTokenInfo(prefunds: Prefund[]) {
   const res = await fetch("https://mainnet-api.ekubo.org/tokens");
   const data: TokenInfoRaw[] = await res.json();
   const tokens = prefunds.map((t) => {
+    if (isEther(t)) {
+      return {
+        address: ETH_CONTRACT_ADDRESS,
+        min: BigInt(t.min),
+        name: "Ether",
+        symbo: "ETH",
+        decimals: 18,
+        logo: <EthereumIcon fontSize={20} color="currentColor" />,
+      };
+    }
+
     const info = data.find(
       ({ l2_token_address }) => l2_token_address === formatAddress(t.address),
     );
@@ -52,9 +63,7 @@ export async function fetchTokenInfo(prefunds: Prefund[]) {
       name: info.name,
       symbol: info.symbol,
       decimals: info.decimals,
-      logo: isEther(t) ? (
-        <EthereumIcon fontSize={20} color="currentColor" />
-      ) : (
+      logo: (
         <Image
           src={info.logo_url}
           alt={`${info.name} ERC-20 Token Logo`}
