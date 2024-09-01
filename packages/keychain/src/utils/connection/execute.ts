@@ -78,7 +78,8 @@ export function executeFactory({
           } catch (error) {
             if (
               error instanceof Error &&
-              error.message.includes("ContractNotFound")
+              (error.message.includes("ContractNotFound") ||
+                error.message.includes("is not deployed"))
             ) {
               return {
                 code: ResponseCodes.NOT_DEPLOYED,
