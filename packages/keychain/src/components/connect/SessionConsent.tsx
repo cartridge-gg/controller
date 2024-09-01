@@ -1,5 +1,5 @@
 import { HStack, Text } from "@chakra-ui/react";
-import { LockIcon, VerifiedIcon } from "@cartridge/ui";
+import { VerifiedIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { useMemo } from "react";
 import Link from "next/link";
@@ -44,8 +44,8 @@ export function SessionConsent({
             </Link>
           )}
           <Text color="text.secondary" fontSize="xs" fontWeight="bold">
-            Pre-approve{" "}
-            <LockIcon fontSize="md" color="text.secondaryAccent" mr={0.5} />
+            Authorize{" "}
+            {/* <LockIcon fontSize="md" color="text.secondaryAccent" mr={0.5} /> */}
             <Text as="span" color="text.secondaryAccent" fontWeight="bold">
               {origin}
             </Text>{" "}
