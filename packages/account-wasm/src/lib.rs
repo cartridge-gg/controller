@@ -42,12 +42,7 @@ type Result<T> = std::result::Result<T, JsError>;
 
 #[wasm_bindgen]
 pub struct CartridgeAccount {
-    controller: Controller<
-        Arc<CartridgeJsonRpcProvider>,
-        WebauthnSigner<BrowserBackend>,
-        SigningKey,
-        BrowserBackend,
-    >,
+    controller: Controller<Arc<CartridgeJsonRpcProvider>, Signer, BrowserBackend>,
 }
 
 #[wasm_bindgen]

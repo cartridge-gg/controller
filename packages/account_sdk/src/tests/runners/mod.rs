@@ -45,5 +45,6 @@ pub fn find_free_port() -> u16 {
 pub struct TestnetConfig {
     pub chain_id: Felt,
     pub exec: String,
+    #[allow(dead_code)]
     pub log_file_path: String,
 }

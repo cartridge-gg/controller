@@ -36,7 +36,7 @@ use url::Url;
 static ORIGIN: Lazy<Mutex<Url>> =
     Lazy::new(|| Mutex::new(Url::parse("https://cartridge.gg").unwrap()));
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SoftPasskeySigner {}
 impl SoftPasskeySigner {
     #[allow(dead_code)]
@@ -87,6 +87,7 @@ impl WebauthnBackend for SoftPasskeySigner {
     }
 
     async fn create_credential(
+        &self,
         options: PublicKeyCredentialCreationOptions,
     ) -> Result<RegisterPublicKeyCredential, crate::signers::DeviceError> {
         let mut pk = SoftPasskey::new(true);
@@ -114,7 +115,7 @@ impl WebauthnBackend for SoftPasskeySigner {
 }
 
 impl OriginProvider for SoftPasskeySigner {
-    fn origin() -> Result<String, DeviceError> {
+    fn origin(&self) -> Result<String, DeviceError> {
         Ok(ORIGIN.lock().unwrap().clone().to_string())
     }
 }

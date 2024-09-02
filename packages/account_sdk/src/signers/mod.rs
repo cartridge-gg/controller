@@ -2,15 +2,22 @@ pub mod starknet;
 pub mod webauthn;
 
 use ::starknet::{
-    core::types::Felt,
-    core::{crypto::EcdsaSignError, utils::NonAsciiNameError},
+    core::{crypto::EcdsaSignError, types::Felt, utils::NonAsciiNameError},
     macros::{selector, short_string},
+    signers::SigningKey,
 };
 
 use starknet_crypto::{poseidon_hash, PoseidonHasher};
+use webauthn::WebauthnSigner;
 
-use crate::abigen::controller::{Signer, SignerSignature};
+use crate::abigen::controller::{Signer as AbigenSigner, SignerSignature};
 use async_trait::async_trait;
+
+#[derive(Debug, Clone)]
+pub enum Signer {
+    Starknet(SigningKey),
+    Webauthn(WebauthnSigner),
+}
 
 #[derive(Debug, thiserror::Error)]
 pub enum DeviceError {
@@ -60,7 +67,7 @@ pub enum SignError {
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 pub trait HashSigner {
     async fn sign(&self, tx_hash: &Felt) -> Result<SignerSignature, SignError>;
-    fn signer(&self) -> Signer;
+    fn signer(&self) -> AbigenSigner;
 }
 
 pub trait SignerTrait {
@@ -68,11 +75,11 @@ pub trait SignerTrait {
     fn magic(&self) -> Felt;
 }
 
-impl SignerTrait for Signer {
+impl SignerTrait for AbigenSigner {
     fn guid(&self) -> Felt {
         match self {
-            Signer::Starknet(signer) => poseidon_hash(self.magic(), *signer.pubkey.inner()),
-            Signer::Webauthn(signer) => {
+            AbigenSigner::Starknet(signer) => poseidon_hash(self.magic(), *signer.pubkey.inner()),
+            AbigenSigner::Webauthn(signer) => {
                 let mut state = PoseidonHasher::new();
                 state.update(self.magic());
                 state.update(signer.origin.len().into());
@@ -92,8 +99,8 @@ impl SignerTrait for Signer {
     }
     fn magic(&self) -> Felt {
         match self {
-            Signer::Starknet(_) => short_string!("Starknet Signer"),
-            Signer::Webauthn(_) => short_string!("Webauthn Signer"),
+            AbigenSigner::Starknet(_) => short_string!("Starknet Signer"),
+            AbigenSigner::Webauthn(_) => short_string!("Webauthn Signer"),
             _ => unimplemented!(),
         }
     }
