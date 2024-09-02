@@ -1,9 +1,8 @@
 use crate::signers::webauthn::{WebauthnBackend, WebauthnSigner};
-use crate::signers::DeviceError;
+use crate::signers::{DeviceError, Signer};
 use crate::OriginProvider;
 use crate::{
     abigen::erc_20::Erc20,
-    signers::HashSigner,
     tests::{account::FEE_TOKEN_ADDRESS, runners::katana::KatanaRunner},
 };
 use async_trait::async_trait;
@@ -120,10 +119,10 @@ impl OriginProvider for SoftPasskeySigner {
     }
 }
 
-pub async fn test_verify_execute<S: HashSigner + Clone + Sync + Send>(signer: S) {
+pub async fn test_verify_execute(signer: impl Into<Signer>) {
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("username".to_owned(), &signer)
+        .deploy_controller("username".to_owned(), signer)
         .await;
     let new_account = ContractAddress(felt!("0x18301129"));
     let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller);

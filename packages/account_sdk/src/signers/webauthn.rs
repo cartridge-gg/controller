@@ -16,11 +16,11 @@ use webauthn_rs_proto::{
     RegisterPublicKeyCredential, RelyingParty, User, UserVerificationPolicy,
 };
 
-use super::{DeviceError, HashSigner, SignError};
+use super::{DeviceError, HashSigner, SignError, Signer};
 use crate::abigen::controller::Signature;
 use crate::abigen::{
     self,
-    controller::{Signer, SignerSignature, WebauthnSignature},
+    controller::{Signer as AbigenSigner, SignerSignature, WebauthnSignature},
 };
 use crate::OriginProvider;
 
@@ -383,8 +383,8 @@ impl HashSigner for WebauthnSigner {
         )))
     }
 
-    fn signer(&self) -> Signer {
-        Signer::Webauthn(abigen::controller::WebauthnSigner::from(self))
+    fn signer(&self) -> AbigenSigner {
+        AbigenSigner::Webauthn(abigen::controller::WebauthnSigner::from(self))
     }
 }
 
@@ -409,6 +409,12 @@ impl From<&WebauthnSigner> for abigen::controller::WebauthnSigner {
             ))
             .unwrap(),
         }
+    }
+}
+
+impl From<WebauthnSigner> for Signer {
+    fn from(value: WebauthnSigner) -> Self {
+        Signer::Webauthn(value)
     }
 }
 

@@ -27,7 +27,7 @@ async fn test_verify_execute_session_registered() {
 
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("username".to_owned(), &signer)
+        .deploy_controller("username".to_owned(), signer.clone())
         .await;
 
     let session = Session::new(

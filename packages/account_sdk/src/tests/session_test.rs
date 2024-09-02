@@ -1,7 +1,7 @@
 use crate::{
     abigen::erc_20::Erc20,
     account::session::{create::SessionCreator, hash::AllowedMethod},
-    signers::{webauthn::WebauthnSigner, HashSigner},
+    signers::{webauthn::WebauthnSigner, Signer},
     tests::{
         account::{webauthn::SoftPasskeySigner, FEE_TOKEN_ADDRESS},
         runners::katana::KatanaRunner,
@@ -15,22 +15,16 @@ use starknet::{
     signers::SigningKey,
 };
 
-pub async fn test_verify_execute<
-    S: HashSigner + Clone + Sync + Send,
-    Q: HashSigner + Clone + Sync + Send + 'static,
->(
-    signer: S,
-    session_signer: Q,
-) {
+pub async fn test_verify_execute(signer: impl Into<Signer>, session_signer: impl Into<Signer>) {
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("username".to_owned(), &signer)
+        .deploy_controller("username".to_owned(), signer)
         .await;
 
     let session_account = controller
         .account
         .session_account(
-            session_signer,
+            session_signer.into(),
             vec![
                 AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
                 AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("transfds")),
@@ -89,13 +83,13 @@ async fn test_verify_execute_session_multiple() {
     let session_signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("username".to_owned(), &signer)
+        .deploy_controller("username".to_owned(), signer)
         .await;
 
     let session_account = controller
         .account
         .session_account(
-            session_signer,
+            session_signer.into(),
             vec![
                 AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
                 AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("transfds")),

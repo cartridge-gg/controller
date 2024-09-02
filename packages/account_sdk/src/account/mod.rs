@@ -13,6 +13,7 @@ pub mod macros;
 pub mod outside_execution;
 pub mod session;
 
+use crate::signers::Signer;
 use crate::{abigen, typed_data::TypedData};
 use crate::{
     abigen::controller::SignerSignature,
@@ -21,27 +22,29 @@ use crate::{
 };
 
 #[derive(Clone, Debug)]
-pub struct OwnerAccount<P, S, G>
+pub struct OwnerAccount<P>
 where
     P: Provider + Send,
-    S: HashSigner + Send,
-    G: HashSigner + Send,
 {
     pub provider: P,
-    pub(crate) signer: S,
+    pub(crate) signer: Signer,
     pub address: Felt,
     pub chain_id: Felt,
     pub(crate) block_id: BlockId,
-    pub(crate) guardian: G,
+    pub(crate) guardian: Signer,
 }
 
-impl<P, S, G> OwnerAccount<P, S, G>
+impl<P> OwnerAccount<P>
 where
     P: Provider + Send,
-    S: HashSigner + Send,
-    G: HashSigner + Send,
 {
-    pub fn new(provider: P, signer: S, guardian: G, address: Felt, chain_id: Felt) -> Self {
+    pub fn new(
+        provider: P,
+        signer: Signer,
+        guardian: Signer,
+        address: Felt,
+        chain_id: Felt,
+    ) -> Self {
         OwnerAccount {
             provider,
             signer,
@@ -52,18 +55,16 @@ where
         }
     }
 
-    pub fn set_signer(&mut self, new_signer: S) {
+    pub fn set_signer(&mut self, new_signer: Signer) {
         self.signer = new_signer;
     }
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<P, S, G> AccountHashSigner for OwnerAccount<P, S, G>
+impl<P> AccountHashSigner for OwnerAccount<P>
 where
     P: Provider + Send + Sync,
-    S: HashSigner + Send + Sync,
-    G: HashSigner + Send + Sync,
 {
     async fn sign_hash(&self, hash: Felt) -> Result<Vec<Felt>, SignError> {
         let owner_signature = self.signer.sign(&hash).await?;
@@ -75,11 +76,9 @@ where
     }
 }
 
-impl<P, S, G> SpecificAccount for OwnerAccount<P, S, G>
+impl<P> SpecificAccount for OwnerAccount<P>
 where
     P: Provider + Send + Sync,
-    S: HashSigner + Send + Sync,
-    G: HashSigner + Send + Sync,
 {
     fn address(&self) -> Felt {
         self.address
@@ -90,16 +89,14 @@ where
     }
 }
 
-impl_account!(OwnerAccount<P: Provider, S: HashSigner, G: HashSigner>, |_, _| {
+impl_account!(OwnerAccount<P: Provider>, |_, _| {
     true
 });
-impl_execution_encoder!(OwnerAccount<P: Provider, S: HashSigner, G: HashSigner>);
+impl_execution_encoder!(OwnerAccount<P: Provider>);
 
-impl<P, S, G> ConnectedAccount for OwnerAccount<P, S, G>
+impl<P> ConnectedAccount for OwnerAccount<P>
 where
     P: Provider + Send + Sync + Clone,
-    S: HashSigner + Send + Sync + Clone,
-    G: HashSigner + Send + Sync + Clone,
 {
     type Provider = P;
 
@@ -155,11 +152,9 @@ pub trait SpecificAccount {
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<P, S, G> AccountHashAndCallsSigner for OwnerAccount<P, S, G>
+impl<P> AccountHashAndCallsSigner for OwnerAccount<P>
 where
     P: Provider + Send + Sync,
-    S: HashSigner + Send + Sync,
-    G: HashSigner + Send + Sync,
 {
     async fn sign_hash_and_calls(
         &self,

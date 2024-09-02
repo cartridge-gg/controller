@@ -19,6 +19,23 @@ pub enum Signer {
     Webauthn(WebauthnSigner),
 }
 
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+impl HashSigner for Signer {
+    async fn sign(&self, tx_hash: &Felt) -> Result<SignerSignature, SignError> {
+        match self {
+            Signer::Starknet(s) => HashSigner::sign(s, tx_hash).await,
+            Signer::Webauthn(s) => HashSigner::sign(s, tx_hash).await,
+        }
+    }
+    fn signer(&self) -> AbigenSigner {
+        match self {
+            Signer::Starknet(s) => s.signer(),
+            Signer::Webauthn(s) => s.signer(),
+        }
+    }
+}
+
 #[derive(Debug, thiserror::Error)]
 pub enum DeviceError {
     #[error("Create credential error: {0}")]

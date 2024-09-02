@@ -25,7 +25,7 @@ async fn test_verify_external_owner() {
     let guardian_signer = SigningKey::from_random();
     let external_account = runner.executor().await;
     let controller = runner
-        .deploy_controller("username".to_owned(), &signer)
+        .deploy_controller("username".to_owned(), signer)
         .await;
 
     ensure_txn(

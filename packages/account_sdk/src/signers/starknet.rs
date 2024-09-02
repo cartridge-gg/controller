@@ -2,9 +2,9 @@ use cainome::cairo_serde::NonZero;
 use starknet::core::types::Felt;
 use starknet::signers::SigningKey;
 
-use crate::abigen::controller::{Signer, SignerSignature, StarknetSignature, StarknetSigner};
+use crate::abigen::controller::{Signer as AbigenSigner, SignerSignature, StarknetSignature, StarknetSigner};
 
-use super::{HashSigner, SignError};
+use super::{HashSigner, SignError, Signer};
 
 use async_trait::async_trait;
 
@@ -23,9 +23,15 @@ impl HashSigner for SigningKey {
         )))
     }
 
-    fn signer(&self) -> Signer {
-        Signer::Starknet(StarknetSigner {
+    fn signer(&self) -> AbigenSigner {
+        AbigenSigner::Starknet(StarknetSigner {
             pubkey: NonZero::new(self.verifying_key().scalar()).unwrap(),
         })
+    }
+}
+
+impl From<SigningKey> for Signer {
+    fn from(value: SigningKey) -> Self {
+        Signer::Starknet(value)
     }
 }

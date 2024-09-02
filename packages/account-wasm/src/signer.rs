@@ -67,6 +67,7 @@ impl WebauthnBackend for BrowserBackend {
     }
 
     async fn create_credential(
+        &self,
         options: PublicKeyCredentialCreationOptions,
     ) -> Result<RegisterPublicKeyCredential, DeviceError> {
         let (tx, rx) = oneshot::channel();

@@ -22,7 +22,7 @@ async fn test_change_owner() {
     let signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("username".to_owned(), &signer)
+        .deploy_controller("username".to_owned(), signer.clone())
         .await;
 
     assert!(controller
@@ -70,7 +70,7 @@ async fn test_add_owner() {
     let signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
     let mut controller = runner
-        .deploy_controller("username".to_owned(), &signer)
+        .deploy_controller("username".to_owned(), signer.clone())
         .await;
 
     assert!(controller
@@ -107,7 +107,7 @@ async fn test_add_owner() {
         .await
         .unwrap());
 
-    controller.account.set_signer(new_signer.clone());
+    controller.account.set_signer(new_signer.clone().into());
 
     let new_new_signer = SigningKey::from_random();
     let new_signer_signature = new_new_signer
@@ -152,7 +152,7 @@ async fn test_change_owner_wrong_signature() {
     let signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("username".to_owned(), &signer)
+        .deploy_controller("username".to_owned(), signer.clone())
         .await;
 
     assert!(controller
@@ -185,7 +185,7 @@ async fn test_change_owner_execute_after() {
     let signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
     let mut controller = runner
-        .deploy_controller("username".to_owned(), &signer)
+        .deploy_controller("username".to_owned(), signer.clone())
         .await;
 
     let new_signer = SigningKey::from_random();
@@ -224,7 +224,7 @@ async fn test_change_owner_execute_after() {
 
     assert!(result.is_err(), "Transaction should have failed");
 
-    controller.account.set_signer(new_signer.clone());
+    controller.account.set_signer(new_signer.clone().into());
 
     let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller.account);
 
@@ -248,7 +248,7 @@ async fn test_change_owner_invalidate_old_sessions() {
     let guardian = SigningKey::from_random();
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("username".to_owned(), &signer)
+        .deploy_controller("username".to_owned(), signer.clone())
         .await;
 
     let transfer_method = AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("transfer"));
@@ -256,7 +256,7 @@ async fn test_change_owner_invalidate_old_sessions() {
     let session_account = controller
         .account
         .session_account(
-            SigningKey::from_random(),
+            SigningKey::from_random().into(),
             vec![transfer_method.clone()],
             u64::MAX,
         )
@@ -313,7 +313,11 @@ async fn test_change_owner_invalidate_old_sessions() {
 
     let session_account = controller
         .account
-        .session_account(SigningKey::from_random(), vec![transfer_method], u64::MAX)
+        .session_account(
+            SigningKey::from_random().into(),
+            vec![transfer_method],
+            u64::MAX,
+        )
         .await
         .unwrap();
     let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &session_account);
@@ -346,7 +350,7 @@ async fn test_call_unallowed_methods() {
 
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("username".to_owned(), &signer)
+        .deploy_controller("username".to_owned(), signer)
         .await;
 
     // Create random allowed method
@@ -355,7 +359,7 @@ async fn test_call_unallowed_methods() {
     let session_account = controller
         .account
         .session_account(
-            SigningKey::from_random(),
+            SigningKey::from_random().into(),
             vec![transfer_method.clone()],
             u64::MAX,
         )
@@ -408,7 +412,7 @@ async fn test_external_owner() {
     let external_account = runner.executor().await;
 
     let controller = runner
-        .deploy_controller("username".to_owned(), &signer)
+        .deploy_controller("username".to_owned(), signer)
         .await;
 
     let external_controller =

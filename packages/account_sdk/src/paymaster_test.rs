@@ -16,7 +16,7 @@ async fn test_paymaster_request_success() {
     let signer = SigningKey::from_random();
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("testuser".to_owned(), &signer)
+        .deploy_controller("testuser".to_owned(), signer)
         .await;
 
     let recipient = ContractAddress(felt!("0x18301129"));

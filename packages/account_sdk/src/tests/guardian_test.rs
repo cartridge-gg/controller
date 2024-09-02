@@ -1,6 +1,6 @@
 use crate::{
     abigen::erc_20::Erc20,
-    signers::{webauthn::WebauthnSigner, HashSigner},
+    signers::{webauthn::WebauthnSigner, Signer},
     tests::{
         account::{webauthn::SoftPasskeySigner, FEE_TOKEN_ADDRESS},
         runners::katana::KatanaRunner,
@@ -15,10 +15,10 @@ use starknet::{
 
 use super::ensure_txn;
 
-pub async fn test_verify_execute<S: HashSigner + Clone + Sync + Send>(signer: S) {
+pub async fn test_verify_execute(signer: impl Into<Signer>) {
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("username".to_owned(), &signer)
+        .deploy_controller("username".to_owned(), signer)
         .await;
 
     let new_account = ContractAddress(felt!("0x18301129"));
