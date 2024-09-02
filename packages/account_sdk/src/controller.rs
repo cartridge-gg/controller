@@ -1,4 +1,4 @@
-use crate::abigen::controller::{Signer as AbigenSigner, OutsideExecution, Owner, StarknetSigner};
+use crate::abigen::controller::{OutsideExecution, Owner, Signer as AbigenSigner, StarknetSigner};
 use crate::account::outside_execution::OutsideExecutionAccount;
 use crate::account::session::hash::{AllowedMethod, Session};
 use crate::account::session::SessionAccount;

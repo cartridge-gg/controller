@@ -2,7 +2,9 @@ use cainome::cairo_serde::NonZero;
 use starknet::core::types::Felt;
 use starknet::signers::SigningKey;
 
-use crate::abigen::controller::{Signer as AbigenSigner, SignerSignature, StarknetSignature, StarknetSigner};
+use crate::abigen::controller::{
+    Signer as AbigenSigner, SignerSignature, StarknetSignature, StarknetSigner,
+};
 
 use super::{HashSigner, SignError, Signer};
 
