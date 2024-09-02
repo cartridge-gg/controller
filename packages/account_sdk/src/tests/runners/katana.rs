@@ -163,8 +163,8 @@ impl KatanaRunner {
         deploy_result
     }
 
-    pub async fn deploy_controller<'a>(
-        &'a self,
+    pub async fn deploy_controller(
+        &self,
         username: String,
         signer: impl Into<Signer>,
     ) -> Controller<CartridgeJsonRpcProvider, InMemoryBackend>
