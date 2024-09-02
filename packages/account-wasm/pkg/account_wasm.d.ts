@@ -6,14 +6,14 @@ export interface JsCall {
     calldata: Felt[];
 }
 
-export interface JsInvocationsDetails {
-    nonce: Felt;
-    maxFee: Felt;
-}
-
 export interface JsPolicy {
     target: string;
     method: string;
+}
+
+export interface JsInvocationsDetails {
+    nonce: Felt;
+    maxFee: Felt;
 }
 
 export type Felts = JsFelt[];

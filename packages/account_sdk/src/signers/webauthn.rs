@@ -393,10 +393,7 @@ pub struct WebauthnSigner {
     pub rp_id: String,
     pub credential_id: CredentialID,
     pub pub_key: CoseKey,
-    #[cfg(not(target_arch = "wasm32"))]
     pub operations: Arc<dyn WebauthnBackendWithOrigin + Sync + Send>,
-    #[cfg(target_arch = "wasm32")]
-    pub operations: Arc<dyn WebauthnBackendWithOrigin + Sync>,
 }
 
 impl From<&WebauthnSigner> for abigen::controller::WebauthnSigner {
