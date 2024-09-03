@@ -7,8 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "format": "prettier --write ./src",
-    "format:check": "prettier --check ./src",
+    "format": "prettier --write ./src index.html",
+    "format:check": "prettier --check ./src index.html",
     "preview": "vite preview"
   },
   "dependencies": {

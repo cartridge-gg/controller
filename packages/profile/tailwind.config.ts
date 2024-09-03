@@ -3,7 +3,7 @@ import { Config } from "tailwindcss";
 
 const config = {
   content: [
-    "./src/**/*.{ts,tsx}",
+    "./src/**/*.{html,ts,tsx}",
     "./node_modules/@cartridge/ui-next/dist/**/*.{js,jsx}",
   ],
   presets: [cartridgeTWPreset],
