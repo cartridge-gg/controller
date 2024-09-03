@@ -5,7 +5,8 @@
   "main": "./pkg/account_wasm.js",
   "type": "module",
   "scripts": {
-    "build-wasm": "./build.sh"
+    "build-wasm": "./build.sh",
+    "postinstall": "./build.sh"
   },
   "files": [
     "./pkg/account_wasm_bg.wasm",
