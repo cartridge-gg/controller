@@ -1,0 +1,7 @@
+@import "@cartridge/ui-next/themes/default.css";
+@import "@cartridge/ui-next/themes/dark.css";
+@import "@cartridge/ui-next/themes/fonts.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
