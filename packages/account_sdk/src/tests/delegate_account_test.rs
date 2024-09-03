@@ -1,17 +1,17 @@
 use crate::account::SpecificAccount;
+use crate::signers::Signer;
 use crate::tests::ensure_txn;
 use crate::{abigen::controller::Controller, tests::runners::katana::KatanaRunner};
 use cainome::cairo_serde::Zeroable;
 use starknet::core::types::Felt;
-use starknet::signers::SigningKey;
 
 #[tokio::test]
 async fn test_set_delegate_account_from_account() {
-    let signer = SigningKey::from_random();
+    let signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let delegate_address = Felt::from_hex("0x1234").unwrap();
     let controller = runner
-        .deploy_controller("username".to_owned(), &signer)
+        .deploy_controller("username".to_owned(), signer)
         .await;
 
     let delegate_account = controller.delegate_account().await;
@@ -36,12 +36,12 @@ async fn test_set_delegate_account_from_account() {
 
 #[tokio::test]
 async fn test_set_delegate_account_from_non_owner() {
-    let signer = SigningKey::from_random();
+    let signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let delegate_address = Felt::from_hex("0x1234").unwrap();
     let external_account = runner.executor().await;
     let controller = runner
-        .deploy_controller("username".to_owned(), &signer)
+        .deploy_controller("username".to_owned(), signer)
         .await;
 
     let account_interface_external_account =

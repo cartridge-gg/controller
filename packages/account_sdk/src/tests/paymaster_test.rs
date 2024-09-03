@@ -5,6 +5,7 @@ use starknet::macros::{felt, selector};
 use crate::abigen::controller::{Call, OutsideExecution};
 use crate::abigen::erc_20::Erc20;
 use crate::account::outside_execution::OutsideExecutionCaller;
+use crate::signers::Signer;
 use crate::tests::account::FEE_TOKEN_ADDRESS;
 use crate::tests::runners::katana::KatanaRunner;
 use crate::transaction_waiter::TransactionWaiter;
@@ -13,10 +14,10 @@ use starknet::signers::SigningKey;
 
 #[tokio::test]
 async fn test_paymaster_request_success() {
-    let signer = SigningKey::from_random();
+    let signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("testuser".to_owned(), &signer)
+        .deploy_controller("testuser".to_owned(), signer)
         .await;
 
     let recipient = ContractAddress(felt!("0x18301129"));

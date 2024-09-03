@@ -1,19 +1,20 @@
 /* tslint:disable */
 /* eslint-disable */
-export interface JsCall {
-    contractAddress: Felt;
-    entrypoint: string;
-    calldata: Felt[];
+export interface JsEstimateFeeDetails {
+    nonce: Felt;
+}
+
+export interface JsOutsideExecution {
+    caller: Felt;
+    executeBefore: number;
+    executeAfter: number;
+    calls: JsCall[];
+    nonce: Felt;
 }
 
 export interface JsInvocationsDetails {
     nonce: Felt;
     maxFee: Felt;
-}
-
-export interface JsPolicy {
-    target: string;
-    method: string;
 }
 
 export type Felts = JsFelt[];
@@ -30,16 +31,15 @@ export interface JsCredentials {
     privateKey: Felt;
 }
 
-export interface JsEstimateFeeDetails {
-    nonce: Felt;
+export interface JsCall {
+    contractAddress: Felt;
+    entrypoint: string;
+    calldata: Felt[];
 }
 
-export interface JsOutsideExecution {
-    caller: Felt;
-    executeBefore: number;
-    executeAfter: number;
-    calls: JsCall[];
-    nonce: Felt;
+export interface JsPolicy {
+    target: string;
+    method: string;
 }
 
 /**

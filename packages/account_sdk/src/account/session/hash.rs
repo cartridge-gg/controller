@@ -7,7 +7,7 @@ use starknet::macros::selector;
 use starknet_crypto::poseidon_hash_many;
 use starknet_types_core::hash::Poseidon;
 
-use crate::abigen::controller::Signer;
+use crate::abigen::controller::Signer as AbigenSigner;
 
 use crate::hash::MessageHashRev1;
 use crate::signers::{SignError, SignerTrait};
@@ -34,7 +34,7 @@ impl Session {
     pub fn new(
         allowed_methods: Vec<AllowedMethod>,
         expires_at: u64,
-        signer: &Signer,
+        signer: &AbigenSigner,
     ) -> Result<Self, SignError> {
         if allowed_methods.is_empty() {
             return Err(SignError::NoAllowedSessionMethods);

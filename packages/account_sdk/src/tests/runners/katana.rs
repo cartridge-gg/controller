@@ -13,11 +13,11 @@ use url::Url;
 
 use lazy_static::lazy_static;
 
-use crate::abigen::controller::{self, Signer};
+use crate::abigen::controller::{self, Signer as AbigenSigner};
 use crate::abigen::erc_20::Erc20;
 use crate::controller::Controller;
 use crate::provider::CartridgeJsonRpcProvider;
-use crate::signers::HashSigner;
+use crate::signers::{HashSigner, Signer};
 use crate::storage::InMemoryBackend;
 use crate::tests::account::{
     AccountDeclaration, AccountDeployment, DeployResult, FEE_TOKEN_ADDRESS,
@@ -163,18 +163,17 @@ impl KatanaRunner {
         deploy_result
     }
 
-    pub async fn deploy_controller<'a, S>(
-        &'a self,
+    pub async fn deploy_controller(
+        &self,
         username: String,
-        signer: &S,
-    ) -> Controller<CartridgeJsonRpcProvider, S, SigningKey, InMemoryBackend>
-    where
-        S: HashSigner + Clone + Send + Sync,
-    {
-        let guardian = SigningKey::from_random();
+        signer: Signer,
+    ) -> Controller<CartridgeJsonRpcProvider, InMemoryBackend> {
+        let guardian = Signer::new_starknet_random();
         let mut constructor_calldata =
             controller::Owner::cairo_serialize(&controller::Owner::Signer(signer.signer()));
-        constructor_calldata.extend(Option::<Signer>::cairo_serialize(&Some(guardian.signer())));
+        constructor_calldata.extend(Option::<AbigenSigner>::cairo_serialize(&Some(
+            guardian.signer(),
+        )));
 
         let DeployResult {
             deployed_address, ..
@@ -184,7 +183,7 @@ impl KatanaRunner {
             "app_id".to_string(),
             username,
             self.client.clone(),
-            signer.clone(),
+            signer,
             guardian,
             deployed_address,
             self.chain_id,
@@ -199,7 +198,9 @@ impl KatanaRunner {
         let guardian = SigningKey::from_random();
         let mut constructor_calldata =
             controller::Owner::cairo_serialize(&controller::Owner::Account(external_owner));
-        constructor_calldata.extend(Option::<Signer>::cairo_serialize(&Some(guardian.signer())));
+        constructor_calldata.extend(Option::<AbigenSigner>::cairo_serialize(&Some(
+            guardian.signer(),
+        )));
 
         let DeployResult {
             deployed_address, ..
