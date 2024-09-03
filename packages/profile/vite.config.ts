@@ -8,4 +8,9 @@ export default defineConfig({
   server: {
     port: process.env.NODE_ENV === "development" ? 3003 : undefined,
   },
+  resolve: {
+    alias: {
+      "@": "/src",
+    },
+  },
 });
