@@ -36,6 +36,12 @@ impl HashSigner for Signer {
     }
 }
 
+impl Signer {
+    pub fn new_starknet_random() -> Self {
+        Self::Starknet(SigningKey::from_random())
+    }
+}
+
 #[derive(Debug, thiserror::Error)]
 pub enum DeviceError {
     #[error("Create credential error: {0}")]

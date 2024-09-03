@@ -7,7 +7,7 @@ use crate::{
         },
         SpecificAccount,
     },
-    signers::{HashSigner, SignerTrait},
+    signers::{HashSigner, Signer, SignerTrait},
     tests::{account::FEE_TOKEN_ADDRESS, ensure_txn, runners::katana::KatanaRunner},
 };
 use cainome::cairo_serde::{ContractAddress, U256};
@@ -16,14 +16,13 @@ use starknet::{
     core::types::{BlockId, BlockTag},
     macros::{felt, selector},
     providers::Provider,
-    signers::SigningKey,
 };
 
 #[tokio::test]
 async fn test_verify_execute_session_registered() {
-    let signer = SigningKey::from_random();
-    let guardian_signer = SigningKey::from_random();
-    let session_signer = SigningKey::from_random();
+    let signer = Signer::new_starknet_random();
+    let guardian_signer = Signer::new_starknet_random();
+    let session_signer = Signer::new_starknet_random();
 
     let runner = KatanaRunner::load();
     let controller = runner

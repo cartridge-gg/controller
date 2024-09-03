@@ -10,12 +10,11 @@ use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{
     core::types::{BlockId, BlockTag},
     macros::felt,
-    signers::SigningKey,
 };
 
 use super::ensure_txn;
 
-pub async fn test_verify_execute(signer: impl Into<Signer>) {
+pub async fn test_verify_execute(signer: Signer) {
     let runner = KatanaRunner::load();
     let controller = runner
         .deploy_controller("username".to_owned(), signer)
@@ -49,19 +48,21 @@ pub async fn test_verify_execute(signer: impl Into<Signer>) {
 #[tokio::test]
 #[ignore = "Skipped due to exhausted resources"]
 async fn test_verify_execute_webauthn() {
-    let signer = WebauthnSigner::register(
-        "cartridge.gg".to_string(),
-        "username".to_string(),
-        "challenge".as_bytes(),
-        SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
-    )
-    .await
-    .unwrap();
+    let signer = Signer::Webauthn(
+        WebauthnSigner::register(
+            "cartridge.gg".to_string(),
+            "username".to_string(),
+            "challenge".as_bytes(),
+            SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
+        )
+        .await
+        .unwrap(),
+    );
 
     test_verify_execute(signer).await;
 }
 
 #[tokio::test]
 async fn test_verify_execute_starpair() {
-    test_verify_execute(SigningKey::from_random()).await;
+    test_verify_execute(Signer::new_starknet_random()).await;
 }

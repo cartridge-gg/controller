@@ -44,8 +44,8 @@ where
 {
     pub fn new(
         provider: P,
-        signer: impl Into<Signer>,
-        guardian: impl Into<Signer>,
+        signer: Signer,
+        guardian: Signer,
         address: Felt,
         chain_id: Felt,
         session_authorization: Vec<Felt>,
@@ -53,8 +53,8 @@ where
     ) -> Self {
         Self {
             provider,
-            signer: signer.into(),
-            guardian: guardian.into(),
+            signer,
+            guardian,
             address,
             chain_id,
             block_id: BlockId::Tag(BlockTag::Pending),
@@ -65,8 +65,8 @@ where
 
     pub fn new_as_registered(
         provider: P,
-        signer: impl Into<Signer>,
-        guardian: impl Into<Signer>,
+        signer: Signer,
+        guardian: Signer,
         address: Felt,
         chain_id: Felt,
         owner_guid: Felt,

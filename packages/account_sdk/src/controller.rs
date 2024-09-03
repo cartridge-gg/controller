@@ -90,19 +90,13 @@ where
         app_id: String,
         username: String,
         provider: P,
-        signer: impl Into<Signer>,
-        guardian: impl Into<Signer>,
+        signer: Signer,
+        guardian: Signer,
         address: Felt,
         chain_id: Felt,
         backend: B,
     ) -> Self {
-        let account = OwnerAccount::new(
-            provider.clone(),
-            signer.into(),
-            guardian.into(),
-            address,
-            chain_id,
-        );
+        let account = OwnerAccount::new(provider.clone(), signer, guardian, address, chain_id);
         let salt = cairo_short_string_to_felt(&username).unwrap();
 
         let mut calldata = Owner::cairo_serialize(&Owner::Signer(account.signer.signer()));
@@ -256,7 +250,9 @@ where
             .all(|call| metadata.session.is_call_allowed(call))
         {
             // Use SessionAccount if all calls are allowed
-            let session_signer = SigningKey::from_secret_scalar(metadata.credentials.private_key);
+            let session_signer = Signer::Starknet(SigningKey::from_secret_scalar(
+                metadata.credentials.private_key,
+            ));
             let session_account = SessionAccount::new(
                 self.account.provider().clone(),
                 session_signer,

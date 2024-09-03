@@ -11,7 +11,7 @@ use crate::tests::runners::katana::KatanaRunner;
 
 #[tokio::test]
 async fn test_declare_with_account() {
-    let signer = SigningKey::from_random();
+    let signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let controller = runner
         .deploy_controller("username".to_owned(), signer)
@@ -27,7 +27,7 @@ async fn test_declare_with_account() {
 
 #[tokio::test]
 async fn test_declare_with_session() {
-    let signer = SigningKey::from_random();
+    let signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let controller = runner
         .deploy_controller("username".to_owned(), signer)

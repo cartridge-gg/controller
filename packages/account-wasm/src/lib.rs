@@ -15,7 +15,7 @@ use account_sdk::account::{AccountHashAndCallsSigner, MessageSignerAccount};
 use account_sdk::controller::Controller;
 use account_sdk::provider::{CartridgeJsonRpcProvider, CartridgeProvider};
 use account_sdk::signers::webauthn::{CredentialID, WebauthnSigner};
-use account_sdk::signers::HashSigner;
+use account_sdk::signers::{HashSigner, Signer};
 use base64::engine::general_purpose;
 use base64::Engine;
 use coset::{CborSerializable, CoseKey};
@@ -82,9 +82,16 @@ impl CartridgeAccount {
         let cose_bytes = general_purpose::URL_SAFE_NO_PAD.decode(public_key)?;
         let cose = CoseKey::from_slice(&cose_bytes)?;
 
-        let device_signer = WebauthnSigner::new(rp_id, credential_id, cose, BrowserBackend);
+        let device_signer = Signer::Webauthn(WebauthnSigner::new(
+            rp_id,
+            credential_id,
+            cose,
+            BrowserBackend,
+        ));
 
-        let dummy_guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
+        let dummy_guardian = Signer::Starknet(SigningKey::from_secret_scalar(short_string!(
+            "CARTRIDGE_GUARDIAN"
+        )));
         let username = username.to_lowercase();
 
         let controller = Controller::new(
@@ -307,8 +314,10 @@ impl CartridgeSessionAccount {
         let rpc_url = Url::parse(&rpc_url)?;
         let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
 
-        let signer = SigningKey::from_secret_scalar(signer.0);
-        let guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
+        let signer = Signer::Starknet(SigningKey::from_secret_scalar(signer.0));
+        let guardian = Signer::Starknet(SigningKey::from_secret_scalar(short_string!(
+            "CARTRIDGE_GUARDIAN"
+        )));
         let address = address.0;
         let chain_id = chain_id.0;
 
@@ -346,8 +355,10 @@ impl CartridgeSessionAccount {
         let rpc_url = Url::parse(&rpc_url)?;
         let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
 
-        let signer = SigningKey::from_secret_scalar(signer.0);
-        let guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
+        let signer = Signer::Starknet(SigningKey::from_secret_scalar(signer.0));
+        let guardian = Signer::Starknet(SigningKey::from_secret_scalar(short_string!(
+            "CARTRIDGE_GUARDIAN"
+        )));
         let address = address.0;
         let chain_id = chain_id.0;
 

@@ -6,7 +6,7 @@ use crate::abigen::controller::{
     Signer as AbigenSigner, SignerSignature, StarknetSignature, StarknetSigner,
 };
 
-use super::{HashSigner, SignError, Signer};
+use super::{HashSigner, SignError};
 
 use async_trait::async_trait;
 
@@ -29,11 +29,5 @@ impl HashSigner for SigningKey {
         AbigenSigner::Starknet(StarknetSigner {
             pubkey: NonZero::new(self.verifying_key().scalar()).unwrap(),
         })
-    }
-}
-
-impl From<SigningKey> for Signer {
-    fn from(value: SigningKey) -> Self {
-        Signer::Starknet(value)
     }
 }

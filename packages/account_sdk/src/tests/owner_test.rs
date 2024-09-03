@@ -2,7 +2,9 @@ use crate::{
     abigen::erc_20::Erc20,
     account::session::{create::SessionCreator, hash::AllowedMethod},
     controller::Controller,
-    signers::{webauthn::WebauthnSigner, HashSigner, NewOwnerSigner, SignError, SignerTrait},
+    signers::{
+        webauthn::WebauthnSigner, HashSigner, NewOwnerSigner, SignError, Signer, SignerTrait,
+    },
     storage::InMemoryBackend,
     tests::{account::webauthn::SoftPasskeySigner, ensure_txn, runners::katana::KatanaRunner},
 };
@@ -11,7 +13,6 @@ use starknet::{
     accounts::{Account, AccountError},
     macros::{felt, selector},
     providers::Provider,
-    signers::SigningKey,
 };
 use starknet_crypto::Felt;
 
@@ -19,7 +20,7 @@ use super::account::FEE_TOKEN_ADDRESS;
 
 #[tokio::test]
 async fn test_change_owner() {
-    let signer = SigningKey::from_random();
+    let signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let controller = runner
         .deploy_controller("username".to_owned(), signer.clone())
@@ -32,7 +33,7 @@ async fn test_change_owner() {
         .await
         .unwrap());
 
-    let new_signer = SigningKey::from_random();
+    let new_signer = Signer::new_starknet_random();
     let new_signer_signature = new_signer
         .sign_new_owner(&controller.chain_id(), &controller.address())
         .await
@@ -67,7 +68,7 @@ async fn test_change_owner() {
 
 #[tokio::test]
 async fn test_add_owner() {
-    let signer = SigningKey::from_random();
+    let signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let mut controller = runner
         .deploy_controller("username".to_owned(), signer.clone())
@@ -79,7 +80,7 @@ async fn test_add_owner() {
         .call()
         .await
         .unwrap());
-    let new_signer = SigningKey::from_random();
+    let new_signer = Signer::new_starknet_random();
     let new_signer_signature = new_signer
         .sign_new_owner(&controller.chain_id(), &controller.address())
         .await
@@ -107,9 +108,9 @@ async fn test_add_owner() {
         .await
         .unwrap());
 
-    controller.account.set_signer(new_signer.clone().into());
+    controller.account.set_signer(new_signer.clone());
 
-    let new_new_signer = SigningKey::from_random();
+    let new_new_signer = Signer::new_starknet_random();
     let new_signer_signature = new_new_signer
         .sign_new_owner(&controller.chain_id(), &controller.address())
         .await
@@ -149,7 +150,7 @@ async fn test_add_owner() {
 #[tokio::test]
 #[should_panic]
 async fn test_change_owner_wrong_signature() {
-    let signer = SigningKey::from_random();
+    let signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let controller = runner
         .deploy_controller("username".to_owned(), signer.clone())
@@ -162,7 +163,7 @@ async fn test_change_owner_wrong_signature() {
         .await
         .unwrap());
 
-    let new_signer = SigningKey::from_random();
+    let new_signer = Signer::new_starknet_random();
     let old_guid = signer.signer().guid();
 
     // We sign the wrong thing thus the owner change should painc
@@ -182,13 +183,13 @@ async fn test_change_owner_wrong_signature() {
 
 #[tokio::test]
 async fn test_change_owner_execute_after() {
-    let signer = SigningKey::from_random();
+    let signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let mut controller = runner
         .deploy_controller("username".to_owned(), signer.clone())
         .await;
 
-    let new_signer = SigningKey::from_random();
+    let new_signer = Signer::new_starknet_random();
     let new_signer_signature = new_signer
         .sign_new_owner(&controller.chain_id(), &controller.address())
         .await
@@ -224,7 +225,7 @@ async fn test_change_owner_execute_after() {
 
     assert!(result.is_err(), "Transaction should have failed");
 
-    controller.account.set_signer(new_signer.clone().into());
+    controller.account.set_signer(new_signer.clone());
 
     let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller.account);
 
@@ -244,8 +245,8 @@ async fn test_change_owner_execute_after() {
 
 #[tokio::test]
 async fn test_change_owner_invalidate_old_sessions() {
-    let signer = SigningKey::from_random();
-    let guardian = SigningKey::from_random();
+    let signer = Signer::new_starknet_random();
+    let guardian = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let controller = runner
         .deploy_controller("username".to_owned(), signer.clone())
@@ -256,14 +257,14 @@ async fn test_change_owner_invalidate_old_sessions() {
     let session_account = controller
         .account
         .session_account(
-            SigningKey::from_random().into(),
+            Signer::new_starknet_random(),
             vec![transfer_method.clone()],
             u64::MAX,
         )
         .await
         .unwrap();
 
-    let new_signer = SigningKey::from_random();
+    let new_signer = Signer::new_starknet_random();
 
     let new_signer_signature = new_signer
         .sign_new_owner(&controller.chain_id(), &controller.address())
@@ -314,7 +315,7 @@ async fn test_change_owner_invalidate_old_sessions() {
     let session_account = controller
         .account
         .session_account(
-            SigningKey::from_random().into(),
+            Signer::new_starknet_random(),
             vec![transfer_method],
             u64::MAX,
         )
@@ -339,14 +340,16 @@ async fn test_change_owner_invalidate_old_sessions() {
 
 #[tokio::test]
 async fn test_call_unallowed_methods() {
-    let signer = WebauthnSigner::register(
-        "cartridge.gg".to_string(),
-        "username".to_string(),
-        "challenge".as_bytes(),
-        SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
-    )
-    .await
-    .unwrap();
+    let signer = Signer::Webauthn(
+        WebauthnSigner::register(
+            "cartridge.gg".to_string(),
+            "username".to_string(),
+            "challenge".as_bytes(),
+            SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
+        )
+        .await
+        .unwrap(),
+    );
 
     let runner = KatanaRunner::load();
     let controller = runner
@@ -359,7 +362,7 @@ async fn test_call_unallowed_methods() {
     let session_account = controller
         .account
         .session_account(
-            SigningKey::from_random().into(),
+            Signer::new_starknet_random(),
             vec![transfer_method.clone()],
             u64::MAX,
         )
@@ -406,7 +409,7 @@ async fn test_call_unallowed_methods() {
 
 #[tokio::test]
 async fn test_external_owner() {
-    let signer = SigningKey::from_random();
+    let signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let delegate_address = Felt::from_hex("0x1234").unwrap();
     let external_account = runner.executor().await;

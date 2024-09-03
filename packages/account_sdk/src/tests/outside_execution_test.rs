@@ -24,7 +24,6 @@ use starknet::{
     accounts::Account,
     macros::{felt, selector},
     providers::Provider,
-    signers::SigningKey,
 };
 
 pub async fn test_verify_paymaster_execute(signer: Signer, session_signer: Option<Signer>) {
@@ -99,42 +98,46 @@ pub async fn test_verify_paymaster_execute(signer: Signer, session_signer: Optio
 
 #[tokio::test]
 async fn test_verify_execute_webauthn_paymaster_starknet() {
-    let signer = WebauthnSigner::register(
-        "cartridge.gg".to_string(),
-        "username".to_string(),
-        "challenge".as_bytes(),
-        SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
-    )
-    .await
-    .unwrap();
+    let signer = Signer::Webauthn(
+        WebauthnSigner::register(
+            "cartridge.gg".to_string(),
+            "username".to_string(),
+            "challenge".as_bytes(),
+            SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
+        )
+        .await
+        .unwrap(),
+    );
 
-    test_verify_paymaster_execute(signer.into(), None as Option<Signer>).await;
+    test_verify_paymaster_execute(signer, None as Option<Signer>).await;
 }
 
 #[tokio::test]
 async fn test_verify_execute_starknet_paymaster_starknet() {
-    test_verify_paymaster_execute(SigningKey::from_random().into(), None as Option<Signer>).await;
+    test_verify_paymaster_execute(Signer::new_starknet_random(), None as Option<Signer>).await;
 }
 
 #[tokio::test]
 async fn test_verify_execute_webauthn_paymaster_starknet_session() {
-    let signer = WebauthnSigner::register(
-        "cartridge.gg".to_string(),
-        "username".to_string(),
-        "challenge".as_bytes(),
-        SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
-    )
-    .await
-    .unwrap();
+    let signer = Signer::Webauthn(
+        WebauthnSigner::register(
+            "cartridge.gg".to_string(),
+            "username".to_string(),
+            "challenge".as_bytes(),
+            SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
+        )
+        .await
+        .unwrap(),
+    );
 
-    test_verify_paymaster_execute(signer.into(), Some(SigningKey::from_random().into())).await;
+    test_verify_paymaster_execute(signer, Some(Signer::new_starknet_random())).await;
 }
 
 #[tokio::test]
 async fn test_verify_execute_starknet_paymaster_starknet_session() {
     test_verify_paymaster_execute(
-        SigningKey::from_random().into(),
-        Some(SigningKey::from_random().into()),
+        Signer::new_starknet_random(),
+        Some(Signer::new_starknet_random()),
     )
     .await;
 }
@@ -143,7 +146,7 @@ async fn test_verify_execute_starknet_paymaster_starknet_session() {
 #[should_panic]
 async fn test_verify_execute_paymaster_should_fail() {
     let runner = KatanaRunner::load();
-    let signer = SigningKey::from_random();
+    let signer = Signer::new_starknet_random();
     let paymaster = runner.executor().await;
     let controller = runner
         .deploy_controller("username".to_owned(), signer)
@@ -176,8 +179,8 @@ async fn test_verify_execute_paymaster_should_fail() {
         "app_id".to_string(),
         "username".to_string(),
         runner.client(),
-        SigningKey::from_random(),
-        SigningKey::from_random(),
+        Signer::new_starknet_random(),
+        Signer::new_starknet_random(),
         controller.address(),
         runner.client().chain_id().await.unwrap(),
         InMemoryBackend::default(),
@@ -197,7 +200,7 @@ async fn test_verify_execute_paymaster_should_fail() {
 
 #[tokio::test]
 async fn test_verify_execute_paymaster_session() {
-    let signer = SigningKey::from_random();
+    let signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let paymaster = runner.executor().await;
     let controller = runner
@@ -214,7 +217,7 @@ async fn test_verify_execute_paymaster_session() {
     let session_account = controller
         .account
         .session_account(
-            SigningKey::from_random().into(),
+            Signer::new_starknet_random(),
             vec![AllowedMethod::new(
                 *FEE_TOKEN_ADDRESS,
                 selector!("transfer"),

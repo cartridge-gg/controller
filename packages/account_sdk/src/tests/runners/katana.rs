@@ -166,11 +166,9 @@ impl KatanaRunner {
     pub async fn deploy_controller(
         &self,
         username: String,
-        signer: impl Into<Signer>,
-    ) -> Controller<CartridgeJsonRpcProvider, InMemoryBackend>
-where {
-        let signer = signer.into();
-        let guardian = SigningKey::from_random();
+        signer: Signer,
+    ) -> Controller<CartridgeJsonRpcProvider, InMemoryBackend> {
+        let guardian = Signer::new_starknet_random();
         let mut constructor_calldata =
             controller::Owner::cairo_serialize(&controller::Owner::Signer(signer.signer()));
         constructor_calldata.extend(Option::<AbigenSigner>::cairo_serialize(&Some(

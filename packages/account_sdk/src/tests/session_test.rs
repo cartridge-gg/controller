@@ -12,10 +12,9 @@ use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{
     core::types::{BlockId, BlockTag},
     macros::{felt, selector},
-    signers::SigningKey,
 };
 
-pub async fn test_verify_execute(signer: impl Into<Signer>, session_signer: impl Into<Signer>) {
+pub async fn test_verify_execute(signer: Signer, session_signer: Signer) {
     let runner = KatanaRunner::load();
     let controller = runner
         .deploy_controller("username".to_owned(), signer)
@@ -24,7 +23,7 @@ pub async fn test_verify_execute(signer: impl Into<Signer>, session_signer: impl
     let session_account = controller
         .account
         .session_account(
-            session_signer.into(),
+            session_signer,
             vec![
                 AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
                 AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("transfds")),
@@ -60,27 +59,29 @@ pub async fn test_verify_execute(signer: impl Into<Signer>, session_signer: impl
 
 #[tokio::test]
 async fn test_verify_execute_session_webauthn_starknet_starknet() {
-    let signer = WebauthnSigner::register(
-        "cartridge.gg".to_string(),
-        "username".to_string(),
-        "challenge".as_bytes(),
-        SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
-    )
-    .await
-    .unwrap();
+    let signer = Signer::Webauthn(
+        WebauthnSigner::register(
+            "cartridge.gg".to_string(),
+            "username".to_string(),
+            "challenge".as_bytes(),
+            SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
+        )
+        .await
+        .unwrap(),
+    );
 
-    test_verify_execute(signer, SigningKey::from_random()).await;
+    test_verify_execute(signer, Signer::new_starknet_random()).await;
 }
 
 #[tokio::test]
 async fn test_verify_execute_session_starknet_x3() {
-    test_verify_execute(SigningKey::from_random(), SigningKey::from_random()).await;
+    test_verify_execute(Signer::new_starknet_random(), Signer::new_starknet_random()).await;
 }
 
 #[tokio::test]
 async fn test_verify_execute_session_multiple() {
-    let signer = SigningKey::from_random();
-    let session_signer = SigningKey::from_random();
+    let signer = Signer::new_starknet_random();
+    let session_signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let controller = runner
         .deploy_controller("username".to_owned(), signer)
@@ -89,7 +90,7 @@ async fn test_verify_execute_session_multiple() {
     let session_account = controller
         .account
         .session_account(
-            session_signer.into(),
+            session_signer,
             vec![
                 AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
                 AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("transfds")),
