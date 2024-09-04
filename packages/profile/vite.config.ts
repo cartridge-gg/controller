@@ -13,4 +13,17 @@ export default defineConfig({
       "@": "/src",
     },
   },
+  // Ref: https://github.com/vitejs/vite/issues/15012#issuecomment-1948550039
+  build: {
+    sourcemap: true,
+    rollupOptions: {
+      onwarn(warning, defaultHandler) {
+        if (warning.code === "SOURCEMAP_ERROR") {
+          return;
+        }
+
+        defaultHandler(warning);
+      },
+    },
+  },
 });
