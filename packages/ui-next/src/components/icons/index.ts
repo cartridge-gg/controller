@@ -4,6 +4,7 @@ export * from "./directional";
 export * from "./duotone";
 export * from "./state";
 export * from "./utility";
+export * from "./types";
 
 export * as brandIcons from "./brand";
 export * as brandColorIcons from "./brand-color";

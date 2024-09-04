@@ -19,6 +19,7 @@
     "book": "pnpm --filter @cartridge/docs",
     "ui": "pnpm --filter @cartridge/ui",
     "ui:next": "pnpm --filter @cartridge/ui-next",
+    "profil": "pnpm --filter @cartridge/profile",
     "example:next": "pnpm --filter starknet-react-next",
     "test": "pnpm keychain test",
     "test:ci": "pnpm keychain test:ci"

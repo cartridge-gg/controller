@@ -1,5 +1,7 @@
+import React from "react";
 import { Meta, StoryObj } from "@storybook/react";
 import { Button } from "@/components/primitives/button";
+import { TimesIcon } from "@/components/icons/utility/times";
 
 const meta: Meta<typeof Button> = {
   title: "Button",
@@ -86,5 +88,13 @@ export const Large: Story = {
   args: {
     children: "continue",
     size: "lg",
+  },
+};
+
+export const Icon: Story = {
+  args: {
+    children: <TimesIcon />,
+    size: "icon",
+    variant: "icon",
   },
 };
