@@ -1,12 +1,12 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 
 type QueryParamsContextType = {
   searchParams: URLSearchParams;
 };
 
-const QueryParamsContext = createContext<QueryParamsContextType | undefined>(
-  undefined,
-);
+export const QueryParamsContext = createContext<
+  QueryParamsContextType | undefined
+>(undefined);
 
 export function QueryParamsProvider({
   children,
@@ -31,12 +31,4 @@ export function QueryParamsProvider({
       {children}
     </QueryParamsContext.Provider>
   );
-}
-
-export function useQueryParams() {
-  const context = useContext(QueryParamsContext);
-  if (context === undefined) {
-    throw new Error("useQueryParams must be used within a QueryParamsProvider");
-  }
-  return context.searchParams;
 }
