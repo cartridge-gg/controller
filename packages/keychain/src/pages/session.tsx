@@ -55,7 +55,9 @@ export default function RegisterSession() {
       const headers = new Headers();
       headers.append("Content-Type", "application/json");
 
-      const encodedResponse = btoa(JSON.stringify(response));
+      // Remove any trailing '=' characters from the encoded response
+      // Telegram doesnt seem to be able to decode the response if there are any
+      const encodedResponse = btoa(JSON.stringify(response)).replace(/=+$/, "");
 
       if (queries.callback_uri) {
         fetch(sanitizeCallbackUrl(decodeURIComponent(queries.callback_uri)), {
