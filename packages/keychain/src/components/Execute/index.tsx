@@ -15,7 +15,6 @@ import { ErrorAlert } from "components/ErrorAlert";
 import { Policies } from "Policies";
 import { Fees } from "./Fees";
 import { ExecuteCtx } from "utils/connection";
-import { TransferAmountExceedsBalance } from "errors";
 import { num } from "starknet";
 
 export const WEBAUTHN_GAS = 3300n;
@@ -23,14 +22,11 @@ export const CONTRACT_ETH =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 
 export function Execute() {
-  const { chainId, controller, context, origin, paymaster, cancel } =
+  const { controller, context, origin, paymaster, cancel } =
     useConnection();
   const ctx = context as ExecuteCtx;
 
-  const [fees, setFees] = useState<{
-    base: bigint;
-    max: bigint;
-  }>();
+  const [maxFee, setMaxFee] = useState<bigint>(0n);
   const [error, setError] = useState<Error>();
   const [isLoading, setLoading] = useState<boolean>(false);
   const [ethBalance, setEthBalance] = useState<bigint>(0n);
@@ -50,75 +46,62 @@ export function Execute() {
     }
     return formatted.replace(/\.?0+$/, "");
   };
-
-  useEffect(() => {
-    account
-      .callContract({
-        contractAddress: CONTRACT_ETH,
-        entrypoint: "balanceOf",
-        calldata: [BigInt(controller.address).toString()],
-      })
-      .then((res) => {
-        setEthBalance(
-          BigInt(
-            `0x${res
-              .map((r) => r.replace("0x", ""))
-              .reverse()
-              .join("")}`,
-          ),
-        );
-      });
-  }, [account, controller]);
-
   // Estimate fees
   useEffect(() => {
-    if (!controller || !calls) {
-      return;
-    }
+    if (!controller || !calls) return;
 
-    if (ctx.transactionsDetail?.maxFee) {
-      setFees({
-        base: BigInt(ctx.transactionsDetail.maxFee),
-        max: BigInt(ctx.transactionsDetail.maxFee),
-      });
-      return;
-    }
+    const estimateFees = async () => {
+      try {
+        const balance = await getEthBalance(
+          account,
+          controller.address,
+        );
+        setEthBalance(balance);
 
-    account
-      .estimateInvokeFee(calls, ctx.transactionsDetail)
-      .then((fees) => {
-        let webauthn_fee = WEBAUTHN_GAS * BigInt(fees.gas_price);
-
-        setFees({
-          base: fees.overall_fee + webauthn_fee,
-          max: fees.suggestedMaxFee + webauthn_fee,
-        });
-      })
-      .catch((e) => {
-        if (e.message.includes("ERC20: transfer amount exceeds balance")) {
+        const maxFee = await calculateMaxFee(ctx, account, calls, balance);
+        setMaxFee(maxFee);
+      } catch (e) {
+        if (e instanceof Error && e.message === "Insufficient funds") {
           setIsInsufficient(true);
-          setError(new TransferAmountExceedsBalance());
-          return;
         }
-
         setError(e);
-      });
-  }, [origin, account, controller, setError, setFees, calls, chainId, ctx]);
+      }
+    };
 
-  useEffect(() => {
-    if (!ethBalance || !fees) {
-      return;
+    estimateFees();
+  }, [controller, calls, account, ctx, setError, setMaxFee]);
+
+  const getEthBalance = async (account, address) => {
+    const res = await account.callContract({
+      contractAddress:CONTRACT_ETH,
+      entrypoint: "balanceOf",
+      calldata: [BigInt(address).toString()],
+    });
+    return BigInt(
+      `0x${res
+        .map((r) => r.replace("0x", ""))
+        .reverse()
+        .join("")}`,
+    );
+  };
+
+  const calculateMaxFee = async (ctx, account, calls, balance) => {
+    if (ctx.transactionsDetail?.maxFee) {
+      const requested = BigInt(ctx.transactionsDetail.maxFee);
+      if (requested > balance) throw Error("Insufficient funds");
+      return requested;
     }
 
-    if (ethBalance < fees.max) {
-      setIsInsufficient(true);
-    }
-  }, [ethBalance, fees]);
+    const est = await account.estimateInvokeFee(calls, ctx.transactionsDetail);
+    const maxFee = est.suggestedMaxFee + WEBAUTHN_GAS * BigInt(est.gas_price);
+    if (maxFee > balance) throw Error("Insufficient funds");
+    return maxFee;
+  };
 
   const execute = useCallback(async () => {
     if (!paymaster) {
       let { transaction_hash } = await account.execute(calls, {
-        maxFee: num.toHex(fees.max),
+        maxFee: num.toHex(maxFee),
       });
 
       return transaction_hash;
@@ -175,7 +158,7 @@ export function Execute() {
             "Paymaster not supported, falling back to regular execution",
           );
           let { transaction_hash } = await account.execute(calls, {
-            maxFee: num.toHex(fees.max),
+            maxFee: num.toHex(maxFee),
           });
 
           return transaction_hash;
@@ -186,7 +169,7 @@ export function Execute() {
         throw error;
       }
     }
-  }, [account, calls, paymaster, fees, ctx.transactionsDetail]);
+  }, [account, calls, paymaster, maxFee]);
 
   const onSubmit = useCallback(async () => {
     setLoading(true);
@@ -235,13 +218,13 @@ export function Execute() {
             />
           )
         ) : (
-          <Fees fees={fees} />
+          <Fees maxFee={maxFee} />
         )}
         <Button
           colorScheme="colorful"
           onClick={onSubmit}
           isLoading={isLoading}
-          isDisabled={!fees}
+          isDisabled={!maxFee}
         >
           submit
         </Button>
