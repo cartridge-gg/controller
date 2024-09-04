@@ -1,4 +1,8 @@
-import { LayoutContainer, LayoutHeader } from "@/components/layout";
+import {
+  LayoutContainer,
+  LayoutContent,
+  LayoutHeader,
+} from "@/components/layout";
 
 export function Inventory() {
   return (
@@ -8,9 +12,11 @@ export function Inventory() {
         description={"0x0000000...0000000000"}
       />
 
-      {Array.from({ length: 30 }).map((_, i) => (
-        <div>line: {i}</div>
-      ))}
+      <LayoutContent>
+        {Array.from({ length: 30 }).map((_, i) => (
+          <div>line: {i}</div>
+        ))}
+      </LayoutContent>
     </LayoutContainer>
   );
 }
