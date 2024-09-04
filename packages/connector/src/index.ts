@@ -11,9 +11,9 @@ class ControllerConnector extends Connector {
     this.controller = new Controller(options);
   }
 
-  readonly id = "cartridge";
+  readonly id = "controller";
 
-  readonly name = "Cartridge";
+  readonly name = "Controller";
 
   readonly icon = {
     dark: icon,
