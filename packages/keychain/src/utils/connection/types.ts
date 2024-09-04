@@ -23,8 +23,7 @@ export type ConnectionCtx =
   | OpenMenuCtx
   | OpenSettingsCtx
   | SetDelegateCtx
-  | SetExternalOwnerCtx
-  | ArgentOwnerCtx;
+  | SetExternalOwnerCtx;
 
 export type ConnectCtx = {
   origin: string;
@@ -100,14 +99,5 @@ export type DeployCtx = {
   type: "deploy";
   account: string;
   resolve: (res: DeployReply | ConnectError) => void;
-  reject: (reason?: unknown) => void;
-};
-
-export type ArgentOwnerCtx = {
-  origin: string;
-  type: "argent-owner";
-  username: string;
-  policies: Policy[];
-  resolve: (res: ConnectError) => void;
   reject: (reason?: unknown) => void;
 };

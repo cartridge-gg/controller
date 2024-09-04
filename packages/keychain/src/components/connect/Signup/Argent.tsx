@@ -28,10 +28,9 @@ import {
   voyager,
 } from "@starknet-react/core";
 import { CallData, RpcProvider, cairo, num, shortString } from "starknet";
-import { AlertIcon, CheckIcon, CoinsIcon, DotsIcon } from "@cartridge/ui";
+import { AlertIcon, CheckIcon, DotsIcon, PacmanIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { useToast } from "hooks/toast";
-import { AlphaWarning } from "../Warning";
 import {
   TokenInfo,
   fetchTokenInfo,
@@ -41,43 +40,41 @@ import {
   isFunded,
   updateBalance,
 } from "utils/token";
-import { ErrorAlert } from "../ErrorAlert";
-import { CopyAddress } from "../CopyAddress";
-import { ArgentOwnerCtx } from "utils/connection";
+import { ErrorAlert } from "../../ErrorAlert";
+import { CopyAddress } from "../../CopyAddress";
 import { CartridgeAccount } from "@cartridge/account-wasm";
 
-enum FundingState {
+enum SignupState {
   CONNECT,
+  SIGN_MESSAGE,
   DEPLOY,
 }
 
-export function SignupArgent() {
+export function SignupArgent({ username }: { username: string }) {
   return (
     <ExternalWalletProvider>
-      <SignupArgentInner />
+      <SignupArgentInner username={username} />
     </ExternalWalletProvider>
   );
 }
 
-function SignupArgentInner() {
+function SignupArgentInner({ username }: { username: string }) {
   const { account: extAccount } = useAccount();
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
-  const { chainId, chainName, context, policies } = useConnection();
+  const { chainId, chainName, policies } = useConnection();
   const { tokens, isAllFunded, isChecked, isFetching } = useTokens();
   const [isDeploying, setIsDeploying] = useState(false);
   const [error, setError] = useState<Error>();
-  const [state, setState] = useState<FundingState>(FundingState.CONNECT);
+  const [state, setState] = useState<SignupState>(SignupState.CONNECT);
   const [controllerAddress, setControllerAddress] = useState("");
   const [controllerCalldata, setControllerCalldata] = useState([]);
   const [title, setTitle] = useState("");
 
   const { toast } = useToast();
 
-  const ctx = context as ArgentOwnerCtx;
-
   useEffect(() => {
     if (extAccount && isAllFunded && isChecked) {
-      setState(FundingState.DEPLOY);
+      setState(SignupState.DEPLOY);
     }
   }, [isAllFunded, isChecked, extAccount]);
 
@@ -92,7 +89,7 @@ function SignupArgentInner() {
             return;
           }
 
-          setState(FundingState.DEPLOY);
+          setState(SignupState.DEPLOY);
         })
         .catch((e) => {
           /* user abort */
@@ -103,11 +100,11 @@ function SignupArgentInner() {
   );
 
   useEffect(() => {
-    if (state == FundingState.CONNECT) {
+    if (state == SignupState.CONNECT) {
       setControllerAddress("");
     }
-    if (state == FundingState.DEPLOY && extAccount?.address) {
-      const salt = shortString.encodeShortString(ctx.username);
+    if (state == SignupState.DEPLOY && extAccount?.address) {
+      const salt = shortString.encodeShortString(username);
 
       const { address, calldata } = CartridgeAccount.getUdcDeployedAddress(
         salt,
@@ -117,7 +114,7 @@ function SignupArgentInner() {
       setControllerAddress(address);
       setControllerCalldata(calldata);
     }
-  }, [state, extAccount?.address, ctx.username]);
+  }, [state, extAccount?.address, username]);
 
   const onDeploy = useCallback(async () => {
     if (!extAccount) return;
@@ -145,7 +142,7 @@ function SignupArgentInner() {
     });
 
     // deployContract
-    const salt = shortString.encodeShortString(ctx.username);
+    const salt = shortString.encodeShortString(username);
     calls.push({
       contractAddress: CartridgeAccount.getUdcAddress(),
       entrypoint: "deployContract",
@@ -197,7 +194,7 @@ function SignupArgentInner() {
     controllerCalldata,
     policies,
     tokens,
-    ctx.username,
+    username,
   ]);
 
   const onCopy = useCallback(() => {
@@ -206,8 +203,8 @@ function SignupArgentInner() {
   }, [controllerAddress, toast]);
 
   useEffect(() => {
-    setTitle(!!extAccount ? `Create ${ctx.username}.gg` : `Create with Argent`);
-  }, [extAccount, ctx.username]);
+    setTitle(!!extAccount ? `Create ${username}.gg` : `Create with Argent`);
+  }, [extAccount, username]);
 
   return (
     <Container
@@ -221,7 +218,7 @@ function SignupArgentInner() {
         )
       }
       // TODO: Add line icons
-      Icon={CoinsIcon}
+      icon={<PacmanIcon color="brand.primary" fontSize="3xl" />}
     >
       <Content gap={6}>
         {extAccount && (
@@ -299,12 +296,11 @@ function SignupArgentInner() {
             description={error.message}
           />
         )}
-        <AlphaWarning />
         {!isChecked ? (
           <Button colorScheme="colorful" isLoading />
         ) : (
           <>
-            {state === FundingState.CONNECT && (
+            {state === SignupState.CONNECT && (
               <>
                 {connectors.length ? (
                   connectors
@@ -327,7 +323,7 @@ function SignupArgentInner() {
               </>
             )}
 
-            {state === FundingState.DEPLOY && (
+            {state === SignupState.DEPLOY && (
               <Button
                 colorScheme="colorful"
                 onClick={onDeploy}

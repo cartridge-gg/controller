@@ -8,14 +8,21 @@ import {
 } from "generated/graphql";
 import Controller from "utils/controller";
 import { PopupCenter } from "utils/url";
-import { SignupProps } from "./types";
-import { validateUsernameFor } from "./utils";
-import { RegistrationLink } from "./RegistrationLink";
+import { SignupProps } from "../types";
+import { validateUsernameFor } from "../utils";
+import { RegistrationLink } from "../RegistrationLink";
 import { doSignup } from "hooks/account";
 import { useControllerTheme } from "hooks/theme";
 import { useConnection } from "hooks/connection";
 import { ErrorAlert } from "components/ErrorAlert";
 import { useDebounce } from "hooks/debounce";
+import { SignupArgent } from "./Argent";
+
+enum SignupMethod {
+  WEBAUTHN,
+  ARGENT,
+  SOCIAL,
+}
 
 export function Signup({
   prefilledName = "",
@@ -24,8 +31,7 @@ export function Signup({
   onLogin,
 }: SignupProps) {
   const theme = useControllerTheme();
-  const { chainId, rpcUrl, setController, argentOwner, context } =
-    useConnection();
+  const { chainId, rpcUrl, setController } = useConnection();
   const [error, setError] = useState<Error>();
   const [isRegistering, setIsRegistering] = useState(false);
   const [isPopup, setIsPopup] = useState(false);
@@ -34,8 +40,11 @@ export function Signup({
     error: undefined,
   });
   const [isValidating, setIsValidating] = useState(false);
+  const [signupMethod, setSignupMethod] = useState<SignupMethod>(
+    SignupMethod.WEBAUTHN,
+  );
 
-  const { origin, policies } = useConnection();
+  const { origin } = useConnection();
   const { debouncedValue: username, debouncing } = useDebounce(
     usernameField.value,
     1000,
@@ -145,10 +154,6 @@ export function Signup({
     }
   }, [usernameField, initController, doPopup]);
 
-  const onSubmitArgent = useCallback(async () => {
-    argentOwner(context, usernameField.value, policies);
-  }, [usernameField, doPopup, argentOwner, context, policies]);
-
   // for polling approach when popup
   useAccountQuery(
     { id: usernameField.value },
@@ -177,6 +182,10 @@ export function Signup({
       },
     },
   );
+
+  if (signupMethod === SignupMethod.ARGENT) {
+    return <SignupArgent username={usernameField.value} />;
+  }
 
   return (
     <Container
@@ -242,7 +251,7 @@ export function Signup({
                   isValidating ||
                   !!usernameField.error
                 }
-                onClick={onSubmitArgent}
+                onClick={() => setSignupMethod(SignupMethod.ARGENT)}
               >
                 <ArgentIcon />
               </Button>

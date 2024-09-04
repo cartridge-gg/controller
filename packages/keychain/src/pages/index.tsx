@@ -18,7 +18,6 @@ import { ErrorPage } from "components/ErrorBoundary";
 import { SetDelegate } from "components/SetDelegate";
 import { SetExternalOwner } from "components/SetExternalOwner";
 import { Settings } from "components/Settings";
-import { SignupArgent } from "components/connect/SignupArgent";
 
 function Home() {
   const { context, controller, error, setDelegateTransaction, policies } =
@@ -30,11 +29,6 @@ function Home() {
 
   if (error) {
     return <ErrorPage error={error} />;
-  }
-
-  // No controller, send to login
-  if (!controller && context.type === "argent-owner") {
-    return <SignupArgent />;
   }
 
   // No controller, send to login
@@ -160,9 +154,6 @@ function Home() {
     }
     case "set-external-owner": {
       return <SetExternalOwner />;
-    }
-    case "argent-owner": {
-      return <SignupArgent />;
     }
     default:
       return <>*Waves*</>;
