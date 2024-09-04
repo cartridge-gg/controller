@@ -10,25 +10,16 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  MoonIcon,
-  SunIcon,
 } from "@cartridge/ui-next";
 
 export function ColorModeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { setTheme } = useTheme();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="icon" className="text-foreground">
-          {theme === "system" ? (
-            <DesktopIcon className="fill-foreground" />
-          ) : theme === "light" ? (
-            <SunIcon variant="line" className="fill-foreground" />
-          ) : (
-            <MoonIcon variant="line" className="fill-foreground" />
-          )}
-          <span className="sr-only">Toggle theme</span>
+          <DesktopIcon className="fill-foreground" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

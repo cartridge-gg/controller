@@ -4,7 +4,6 @@ use starknet::{
     core::types::Call,
     macros::{felt, selector},
     providers::Provider,
-    signers::SigningKey,
 };
 
 use crate::{
@@ -14,18 +13,18 @@ use crate::{
         raw_session::RawSession,
         SessionAccount,
     },
-    signers::HashSigner,
+    signers::{HashSigner, Signer},
     tests::{account::FEE_TOKEN_ADDRESS, ensure_txn, runners::katana::KatanaRunner},
 };
 
 #[tokio::test]
 async fn test_verify_external_owner() {
     let runner = KatanaRunner::load();
-    let signer = SigningKey::from_random();
-    let guardian_signer = SigningKey::from_random();
+    let signer = Signer::new_starknet_random();
+    let guardian_signer = Signer::new_starknet_random();
     let external_account = runner.executor().await;
     let controller = runner
-        .deploy_controller("username".to_owned(), &signer)
+        .deploy_controller("username".to_owned(), signer)
         .await;
 
     ensure_txn(
@@ -37,7 +36,7 @@ async fn test_verify_external_owner() {
     .await
     .unwrap();
 
-    let session_signer = SigningKey::from_random();
+    let session_signer = Signer::new_starknet_random();
     let session = Session::new(
         vec![AllowedMethod::new(
             *FEE_TOKEN_ADDRESS,
@@ -92,13 +91,13 @@ async fn test_verify_external_owner() {
 #[tokio::test]
 async fn test_verify_constructor_external_owner() {
     let runner = KatanaRunner::load();
-    let guardian_signer = SigningKey::from_random();
+    let guardian_signer = Signer::new_starknet_random();
     let external_account = runner.executor().await;
     let controller_address = runner
         .deploy_controller_with_external_owner(external_account.address().into())
         .await;
 
-    let session_signer = SigningKey::from_random();
+    let session_signer = Signer::new_starknet_random();
     let session = Session::new(
         vec![AllowedMethod::new(
             *FEE_TOKEN_ADDRESS,

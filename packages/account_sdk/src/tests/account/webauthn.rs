@@ -1,9 +1,8 @@
 use crate::signers::webauthn::{WebauthnBackend, WebauthnSigner};
-use crate::signers::DeviceError;
+use crate::signers::{DeviceError, Signer};
 use crate::OriginProvider;
 use crate::{
     abigen::erc_20::Erc20,
-    signers::HashSigner,
     tests::{account::FEE_TOKEN_ADDRESS, runners::katana::KatanaRunner},
 };
 use async_trait::async_trait;
@@ -13,7 +12,6 @@ use sha2::{digest::Update, Digest, Sha256};
 use starknet::{
     core::types::{BlockId, BlockTag},
     macros::felt,
-    signers::SigningKey as StarkSigningKey,
 };
 use webauthn_authenticator_rs::authenticator_hashed::AuthenticatorBackendHashedClientData;
 use webauthn_authenticator_rs::softpasskey::SoftPasskey;
@@ -36,7 +34,7 @@ use url::Url;
 static ORIGIN: Lazy<Mutex<Url>> =
     Lazy::new(|| Mutex::new(Url::parse("https://cartridge.gg").unwrap()));
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SoftPasskeySigner {}
 impl SoftPasskeySigner {
     #[allow(dead_code)]
@@ -87,6 +85,7 @@ impl WebauthnBackend for SoftPasskeySigner {
     }
 
     async fn create_credential(
+        &self,
         options: PublicKeyCredentialCreationOptions,
     ) -> Result<RegisterPublicKeyCredential, crate::signers::DeviceError> {
         let mut pk = SoftPasskey::new(true);
@@ -114,15 +113,15 @@ impl WebauthnBackend for SoftPasskeySigner {
 }
 
 impl OriginProvider for SoftPasskeySigner {
-    fn origin() -> Result<String, DeviceError> {
+    fn origin(&self) -> Result<String, DeviceError> {
         Ok(ORIGIN.lock().unwrap().clone().to_string())
     }
 }
 
-pub async fn test_verify_execute<S: HashSigner + Clone + Sync + Send>(signer: S) {
+pub async fn test_verify_execute(signer: Signer) {
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("username".to_owned(), &signer)
+        .deploy_controller("username".to_owned(), signer)
         .await;
     let new_account = ContractAddress(felt!("0x18301129"));
     let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller);
@@ -158,10 +157,10 @@ async fn test_verify_execute_webautn() {
     .await
     .unwrap();
 
-    test_verify_execute(signer).await;
+    test_verify_execute(Signer::Webauthn(signer)).await;
 }
 
 #[tokio::test]
 async fn test_verify_execute_starknet() {
-    test_verify_execute(StarkSigningKey::from_random()).await;
+    test_verify_execute(Signer::new_starknet_random()).await;
 }

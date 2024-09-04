@@ -1,11 +1,16 @@
-import { constants } from "starknet";
+import {
+  constants,
+  TransactionExecutionStatus,
+  TransactionFinalityStatus,
+} from "starknet";
 import { Container, Footer, Content } from "components/layout";
 import { useEffect, useState } from "react";
 import { Button, Link } from "@chakra-ui/react";
-import { ExternalIcon, PacmanIcon } from "@cartridge/ui";
+import { CartridgeIcon, ExternalIcon, PacmanIcon } from "@cartridge/ui";
 import { useController } from "hooks/controller";
 import { Funding } from "./Funding";
 import { useConnection } from "hooks/connection";
+import { ErrorAlert } from "./ErrorAlert";
 
 export function DeploymentRequired({ onClose }: { onClose: () => void }) {
   const {
@@ -14,7 +19,8 @@ export function DeploymentRequired({ onClose }: { onClose: () => void }) {
   const { hasPrefundRequest } = useConnection();
   const [deployHash, setDeployHash] = useState<string>();
   const [showFunding, setShowFunding] = useState(true);
-
+  const [isDeployed, setIsDeployed] = useState(false);
+  const [error, setError] = useState<Error>();
   useEffect(() => {
     if (
       account.chainId === constants.StarknetChainId.SN_MAIN ||
@@ -24,6 +30,21 @@ export function DeploymentRequired({ onClose }: { onClose: () => void }) {
       return;
     }
   }, [account.chainId, account.username, hasPrefundRequest]);
+
+  useEffect(() => {
+    if (deployHash) {
+      account
+        .waitForTransaction(deployHash, {
+          retryInterval: 1000,
+          successStates: [
+            TransactionExecutionStatus.SUCCEEDED,
+            TransactionFinalityStatus.ACCEPTED_ON_L2,
+          ],
+        })
+        .then(() => setIsDeployed(true))
+        .catch((e) => setError(e));
+    }
+  }, [deployHash, account]);
 
   if (showFunding)
     return (
@@ -38,9 +59,17 @@ export function DeploymentRequired({ onClose }: { onClose: () => void }) {
   return (
     <Container
       variant="connect"
-      icon={<PacmanIcon color="brand.primary" fontSize="3xl" />}
-      title="Deploying your account"
-      description="This may take a second"
+      icon={
+        isDeployed ? (
+          <CartridgeIcon color="brand.primary" fontSize="5xl" />
+        ) : (
+          <PacmanIcon color="brand.primary" fontSize="3xl" />
+        )
+      }
+      title={isDeployed ? "Controller ready!" : "Deploying your controller"}
+      description={
+        isDeployed ? "You can now close this window" : "This may take a second"
+      }
     >
       <Content alignItems="center">
         {deployHash &&
@@ -63,6 +92,12 @@ export function DeploymentRequired({ onClose }: { onClose: () => void }) {
           )}
       </Content>
       <Footer>
+        {error && (
+          <ErrorAlert
+            title="Something went wrong"
+            description={error.message}
+          />
+        )}
         <Button onClick={onClose}>Close</Button>
       </Footer>
     </Container>

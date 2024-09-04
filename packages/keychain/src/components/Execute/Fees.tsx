@@ -5,38 +5,21 @@ import { formatUnits } from "viem";
 import { useChainId } from "hooks/connection";
 import { EthereumIcon } from "@cartridge/ui";
 
-export function Fees({
-  fees,
-  approved,
-}: {
-  fees?: { base: bigint; max: bigint };
-  approved?: string;
-}) {
+export function Fees({ maxFee }: { maxFee?: bigint }) {
   const chainId = useChainId();
-  const [formattedFee, setFormattedFee] = useState<{
-    base: string;
-    max: string;
-  }>();
+  const [formattedFee, setFormattedFee] = useState<string>();
 
   useEffect(() => {
-    if (!fees) {
+    if (!maxFee) {
       return;
     }
-    async function compute() {
-      setFormattedFee(
-        fees.max > 10000000000000n
-          ? {
-              base: `~${parseFloat(formatUnits(fees.base, 18)).toFixed(5)} eth`,
-              max: `~${parseFloat(formatUnits(fees.max, 18)).toFixed(5)} eth`,
-            }
-          : {
-              base: "<0.00001",
-              max: "<0.00001",
-            },
-      );
-    }
-    compute();
-  }, [chainId, fees, approved]);
+
+    setFormattedFee(
+      maxFee > 10000000000000n
+        ? `~${parseFloat(formatUnits(maxFee, 18)).toFixed(5)} eth`
+        : "<0.00001",
+    );
+  }, [chainId, maxFee]);
 
   return (
     <VStack
@@ -48,20 +31,11 @@ export function Fees({
     >
       {formattedFee ? (
         <>
-          {approved && <LineItem name="Cost" value={approved} />}
-
           <LineItem
             name="Network Fee"
-            value={formattedFee?.base}
+            value={formattedFee}
             isLoading={!formattedFee}
           />
-
-          {approved && (
-            <LineItem
-              name="Total"
-              value={approved ? approved : formattedFee?.base}
-            />
-          )}
         </>
       ) : (
         <LineItem name="Calculating Fees" isLoading />

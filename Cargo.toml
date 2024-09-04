@@ -11,7 +11,7 @@ account_sdk = { path = "packages/account_sdk" }
 account-wasm = { path = "packages/account-wasm" }
 
 anyhow = "1"
-async-trait = "0.1"
+async-trait = "0.1.82"
 base64 = "0.22"
 cairo-lang-starknet = "2.4.0"
 coset = { version = "0.3.4", features = ["std"] }

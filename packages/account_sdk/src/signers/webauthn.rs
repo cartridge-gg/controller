@@ -8,6 +8,7 @@ use starknet::core::types::Felt;
 use std::collections::BTreeMap;
 use std::ops::Neg;
 use std::result::Result;
+use std::sync::Arc;
 use webauthn_rs_proto::{
     AllowCredentials, AttestationConveyancePreference, AuthenticatorSelectionCriteria,
     CredentialProtectionPolicy, PubKeyCredParams, PublicKeyCredential,
@@ -19,7 +20,7 @@ use super::{DeviceError, HashSigner, SignError};
 use crate::abigen::controller::Signature;
 use crate::abigen::{
     self,
-    controller::{Signer, SignerSignature, WebauthnSignature},
+    controller::{Signer as AbigenSigner, SignerSignature, WebauthnSignature},
 };
 use crate::OriginProvider;
 
@@ -286,23 +287,29 @@ pub struct ClientData {
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-pub trait WebauthnBackend {
+pub trait WebauthnBackend: std::fmt::Debug {
     async fn get_assertion(
         &self,
         options: PublicKeyCredentialRequestOptions,
     ) -> Result<PublicKeyCredential, DeviceError>;
 
     async fn create_credential(
+        &self,
         options: PublicKeyCredentialCreationOptions,
     ) -> Result<RegisterPublicKeyCredential, DeviceError>;
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<T> HashSigner for WebauthnSigner<T>
-where
-    T: WebauthnBackend + OriginProvider + Sync,
-{
+pub trait WebauthnBackendWithOrigin: WebauthnBackend + OriginProvider + Sync {}
+
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+impl<T> WebauthnBackendWithOrigin for T where T: WebauthnBackend + OriginProvider + Sync {}
+
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+impl HashSigner for WebauthnSigner {
     // According to https://www.w3.org/TR/webauthn/#clientdatajson-verification
     async fn sign(&self, tx_hash: &Felt) -> Result<SignerSignature, SignError> {
         let challenge = tx_hash.to_bytes_be().to_vec();
@@ -376,26 +383,24 @@ where
         )))
     }
 
-    fn signer(&self) -> Signer {
-        Signer::Webauthn(abigen::controller::WebauthnSigner::from(self))
+    fn signer(&self) -> AbigenSigner {
+        AbigenSigner::Webauthn(abigen::controller::WebauthnSigner::from(self))
     }
 }
 
 #[derive(Debug, Clone)]
-pub struct WebauthnSigner<T: WebauthnBackend> {
+pub struct WebauthnSigner {
     pub rp_id: String,
     pub credential_id: CredentialID,
     pub pub_key: CoseKey,
-    pub operations: T,
+    pub operations: Arc<dyn WebauthnBackendWithOrigin + Sync + Send>,
 }
 
-impl<T: WebauthnBackend + OriginProvider> From<&WebauthnSigner<T>>
-    for abigen::controller::WebauthnSigner
-{
-    fn from(signer: &WebauthnSigner<T>) -> Self {
+impl From<&WebauthnSigner> for abigen::controller::WebauthnSigner {
+    fn from(signer: &WebauthnSigner) -> Self {
         Self {
             rp_id_hash: NonZero::new(U256::from_bytes_be(&signer.rp_id_hash())).unwrap(),
-            origin: T::origin().unwrap().into_bytes(),
+            origin: signer.operations.origin().unwrap().into_bytes(),
             pubkey: NonZero::new(U256::from_bytes_be(
                 &signer.pub_key_bytes().unwrap()[0..32].try_into().unwrap(),
             ))
@@ -404,18 +409,18 @@ impl<T: WebauthnBackend + OriginProvider> From<&WebauthnSigner<T>>
     }
 }
 
-impl<T: WebauthnBackend> WebauthnSigner<T> {
+impl WebauthnSigner {
     pub fn new(
         rp_id: String,
         credential_id: CredentialID,
         pub_key: CoseKey,
-        operations: T,
+        operations: impl WebauthnBackendWithOrigin + Send + 'static,
     ) -> Self {
         Self {
             rp_id,
             credential_id,
             pub_key,
-            operations,
+            operations: Arc::from(operations),
         }
     }
 
@@ -423,7 +428,7 @@ impl<T: WebauthnBackend> WebauthnSigner<T> {
         rp_id: String,
         user_name: String,
         challenge: &[u8],
-        operations: T,
+        operations: impl WebauthnBackendWithOrigin + Send + 'static,
     ) -> Result<Self, DeviceError> {
         let options = PublicKeyCredentialCreationOptions {
             rp: RelyingParty {
@@ -451,7 +456,7 @@ impl<T: WebauthnBackend> WebauthnSigner<T> {
             hints: None,
             attestation_formats: None,
         };
-        let res = T::create_credential(options).await?;
+        let res = operations.create_credential(options).await?;
         let ao =
             AttestationObject::<Registration>::try_from(res.response.attestation_object.as_ref())
                 .map_err(|e| DeviceError::CreateCredential(format!("CoseError: {:?}", e)))
@@ -466,7 +471,7 @@ impl<T: WebauthnBackend> WebauthnSigner<T> {
             rp_id,
             credential_id: cred.credential_id,
             pub_key,
-            operations,
+            operations: Arc::from(operations),
         })
     }
 

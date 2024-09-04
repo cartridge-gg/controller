@@ -67,6 +67,7 @@ impl WebauthnBackend for BrowserBackend {
     }
 
     async fn create_credential(
+        &self,
         options: PublicKeyCredentialCreationOptions,
     ) -> Result<RegisterPublicKeyCredential, DeviceError> {
         let (tx, rx) = oneshot::channel();
@@ -108,7 +109,7 @@ impl WebauthnBackend for BrowserBackend {
 
 #[cfg(target_arch = "wasm32")]
 impl OriginProvider for BrowserBackend {
-    fn origin() -> Result<String, DeviceError> {
+    fn origin(&self) -> Result<String, DeviceError> {
         let origin = window()
             .location()
             .origin()
@@ -119,7 +120,7 @@ impl OriginProvider for BrowserBackend {
 
 #[cfg(not(target_arch = "wasm32"))]
 impl OriginProvider for BrowserBackend {
-    fn origin() -> Result<String, DeviceError> {
+    fn origin(&self) -> Result<String, DeviceError> {
         Ok("http://localhost:3001".to_string())
     }
 }

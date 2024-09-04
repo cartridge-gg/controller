@@ -1,6 +1,6 @@
 use crate::{
     abigen::erc_20::Erc20,
-    signers::{webauthn::WebauthnSigner, HashSigner},
+    signers::{webauthn::WebauthnSigner, Signer},
     tests::{
         account::{webauthn::SoftPasskeySigner, FEE_TOKEN_ADDRESS},
         runners::katana::KatanaRunner,
@@ -10,15 +10,14 @@ use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{
     core::types::{BlockId, BlockTag},
     macros::felt,
-    signers::SigningKey,
 };
 
 use super::ensure_txn;
 
-pub async fn test_verify_execute<S: HashSigner + Clone + Sync + Send>(signer: S) {
+pub async fn test_verify_execute(signer: Signer) {
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("username".to_owned(), &signer)
+        .deploy_controller("username".to_owned(), signer)
         .await;
 
     let new_account = ContractAddress(felt!("0x18301129"));
@@ -49,19 +48,21 @@ pub async fn test_verify_execute<S: HashSigner + Clone + Sync + Send>(signer: S)
 #[tokio::test]
 #[ignore = "Skipped due to exhausted resources"]
 async fn test_verify_execute_webauthn() {
-    let signer = WebauthnSigner::register(
-        "cartridge.gg".to_string(),
-        "username".to_string(),
-        "challenge".as_bytes(),
-        SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
-    )
-    .await
-    .unwrap();
+    let signer = Signer::Webauthn(
+        WebauthnSigner::register(
+            "cartridge.gg".to_string(),
+            "username".to_string(),
+            "challenge".as_bytes(),
+            SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
+        )
+        .await
+        .unwrap(),
+    );
 
     test_verify_execute(signer).await;
 }
 
 #[tokio::test]
 async fn test_verify_execute_starpair() {
-    test_verify_execute(SigningKey::from_random()).await;
+    test_verify_execute(Signer::new_starknet_random()).await;
 }

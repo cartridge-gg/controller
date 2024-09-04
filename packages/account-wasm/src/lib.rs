@@ -7,24 +7,24 @@ mod utils;
 use std::str::FromStr;
 use std::sync::Arc;
 
-use account_sdk::abigen::controller::{self, OutsideExecution, Signer};
-use account_sdk::account::outside_execution::OutsideExecutionCaller;
+use account_sdk::abigen::controller::{self, OutsideExecution, Signer as AbigenSigner};
+use account_sdk::account::outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller};
 use account_sdk::account::session::hash::Session;
 use account_sdk::account::session::raw_session::RawSession;
 use account_sdk::account::session::SessionAccount;
 use account_sdk::account::{AccountHashAndCallsSigner, MessageSignerAccount};
 use account_sdk::constants::{ACCOUNT_CLASS_HASH, UDC_ADDRESS};
 use account_sdk::controller::Controller;
-use account_sdk::provider::CartridgeJsonRpcProvider;
+use account_sdk::provider::{CartridgeJsonRpcProvider, CartridgeProvider};
 use account_sdk::signers::webauthn::{CredentialID, WebauthnSigner};
-use account_sdk::signers::HashSigner;
+use account_sdk::signers::{HashSigner, Signer};
 use base64::engine::general_purpose;
 use base64::Engine;
 use cainome::cairo_serde::{CairoSerde, ContractAddress};
 use coset::{CborSerializable, CoseKey};
 use serde_wasm_bindgen::{from_value, to_value};
 use signer::BrowserBackend;
-use starknet::accounts::Account;
+use starknet::accounts::{Account, ConnectedAccount};
 use starknet::core::types::Call;
 use starknet::core::utils::{get_udc_deployed_address, UdcUniqueness};
 use starknet::macros::short_string;
@@ -47,12 +47,7 @@ type Result<T> = std::result::Result<T, JsError>;
 
 #[wasm_bindgen]
 pub struct CartridgeAccount {
-    controller: Controller<
-        Arc<CartridgeJsonRpcProvider>,
-        WebauthnSigner<BrowserBackend>,
-        SigningKey,
-        BrowserBackend,
-    >,
+    controller: Controller<Arc<CartridgeJsonRpcProvider>, BrowserBackend>,
 }
 
 #[wasm_bindgen]
@@ -92,9 +87,16 @@ impl CartridgeAccount {
         let cose_bytes = general_purpose::URL_SAFE_NO_PAD.decode(public_key)?;
         let cose = CoseKey::from_slice(&cose_bytes)?;
 
-        let device_signer = WebauthnSigner::new(rp_id, credential_id, cose, BrowserBackend);
+        let device_signer = Signer::Webauthn(WebauthnSigner::new(
+            rp_id,
+            credential_id,
+            cose,
+            BrowserBackend,
+        ));
 
-        let dummy_guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
+        let dummy_guardian = Signer::Starknet(SigningKey::from_secret_scalar(short_string!(
+            "CARTRIDGE_GUARDIAN"
+        )));
         let username = username.to_lowercase();
 
         let controller = Controller::new(
@@ -122,7 +124,7 @@ impl CartridgeAccount {
         policies: Vec<JsPolicy>,
         expires_at: u64,
         public_key: JsFelt,
-    ) -> Result<String> {
+    ) -> Result<JsFelt> {
         let methods = policies
             .into_iter()
             .map(TryFrom::try_from)
@@ -133,7 +135,7 @@ impl CartridgeAccount {
             .register_session(methods, expires_at, public_key.0)
             .await?;
 
-        Ok(format!("{:#}", hash))
+        Ok(JsFelt(hash))
     }
 
     #[wasm_bindgen(js_name = createSession)]
@@ -332,7 +334,7 @@ impl CartridgeAccount {
         let guardian = SigningKey::from_random();
         let mut constructor_calldata =
             controller::Owner::cairo_serialize(&controller::Owner::Account(external_owner));
-        constructor_calldata.extend(Option::<Signer>::cairo_serialize(&Some(guardian.signer())));
+        constructor_calldata.extend(Option::<AbigenSigner>::cairo_serialize(&Some(guardian.signer())));
 
         let res = get_udc_deployed_address(
             salt,
@@ -359,9 +361,7 @@ impl CartridgeAccount {
 }
 
 #[wasm_bindgen]
-pub struct CartridgeSessionAccount(
-    SessionAccount<Arc<CartridgeJsonRpcProvider>, SigningKey, SigningKey>,
-);
+pub struct CartridgeSessionAccount(SessionAccount<Arc<CartridgeJsonRpcProvider>>);
 
 #[wasm_bindgen]
 impl CartridgeSessionAccount {
@@ -376,8 +376,10 @@ impl CartridgeSessionAccount {
         let rpc_url = Url::parse(&rpc_url)?;
         let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
 
-        let signer = SigningKey::from_secret_scalar(signer.0);
-        let guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
+        let signer = Signer::Starknet(SigningKey::from_secret_scalar(signer.0));
+        let guardian = Signer::Starknet(SigningKey::from_secret_scalar(short_string!(
+            "CARTRIDGE_GUARDIAN"
+        )));
         let address = address.0;
         let chain_id = chain_id.0;
 
@@ -415,8 +417,10 @@ impl CartridgeSessionAccount {
         let rpc_url = Url::parse(&rpc_url)?;
         let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
 
-        let signer = SigningKey::from_secret_scalar(signer.0);
-        let guardian = SigningKey::from_secret_scalar(short_string!("CARTRIDGE_GUARDIAN"));
+        let signer = Signer::Starknet(SigningKey::from_secret_scalar(signer.0));
+        let guardian = Signer::Starknet(SigningKey::from_secret_scalar(short_string!(
+            "CARTRIDGE_GUARDIAN"
+        )));
         let address = address.0;
         let chain_id = chain_id.0;
 
@@ -451,19 +455,43 @@ impl CartridgeSessionAccount {
         Ok(Felts(res.into_iter().map(JsFelt).collect()))
     }
 
-    pub async fn execute(&self, calls: Vec<JsCall>) -> Result<String> {
+    pub async fn execute(&self, calls: Vec<JsCall>) -> Result<JsValue> {
         let calls = calls
             .into_iter()
             .map(TryInto::try_into)
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
-        let execution = self
-            .0
-            .execute_v1(calls)
-            .send()
-            .await
-            .map_err(|e| OperationError::Execution(format!("{:#?}", e)))?;
+        let res = self.0.execute_v1(calls).send().await?;
 
-        Ok(format!("{:#?}", execution))
+        Ok(to_value(&res)?)
+    }
+
+    pub async fn execute_from_outside(&self, calls: Vec<JsCall>) -> Result<JsValue> {
+        let caller = OutsideExecutionCaller::Any;
+        let calls = calls
+            .into_iter()
+            .map(TryInto::try_into)
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+
+        let outside_execution = OutsideExecution {
+            caller: caller.into(),
+            execute_after: 0_u64,
+            execute_before: 3000000000_u64,
+            calls,
+            nonce: SigningKey::from_random().secret_scalar(),
+        };
+
+        let signed = self
+            .0
+            .sign_outside_execution(outside_execution.clone())
+            .await?;
+
+        let res = self
+            .0
+            .provider()
+            .add_execute_outside_transaction(outside_execution, self.0.address(), signed.signature)
+            .await?;
+
+        Ok(to_value(&res)?)
     }
 }

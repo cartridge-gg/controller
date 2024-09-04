@@ -1,8 +1,8 @@
 use std::time::Duration;
 
 use crate::{
-    controller::Controller, storage::InMemoryBackend, tests::runners::katana::KatanaRunner,
-    transaction_waiter::TransactionWaiter,
+    controller::Controller, signers::Signer, storage::InMemoryBackend,
+    tests::runners::katana::KatanaRunner, transaction_waiter::TransactionWaiter,
 };
 use starknet::{accounts::Account, macros::felt, providers::Provider, signers::SigningKey};
 use starknet_crypto::Felt;
@@ -13,12 +13,12 @@ async fn test_deploy_controller() {
     dbg!(runner.declare_controller().await);
 
     // Create signers
-    let owner = SigningKey::from_secret_scalar(felt!(
+    let owner = Signer::Starknet(SigningKey::from_secret_scalar(felt!(
         "0x3e5e410f88f88e77d18a168259a8feb6a68b358c813bdca08c875c8e54d0bf2"
-    ));
-    let guardian_signer = SigningKey::from_secret_scalar(felt!(
+    )));
+    let guardian_signer = Signer::Starknet(SigningKey::from_secret_scalar(felt!(
         "0x3e5e410f88f88e77d18a168259a8feb6a68b358c813bdca08c875c8e54d0bf2"
-    ));
+    )));
 
     let provider = runner.client();
     let backend = InMemoryBackend::default();

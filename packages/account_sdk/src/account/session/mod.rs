@@ -9,7 +9,7 @@ use starknet::{
 
 use crate::{
     impl_account, impl_execution_encoder,
-    signers::{HashSigner, SignError},
+    signers::{HashSigner, SignError, Signer},
 };
 
 use self::{
@@ -24,15 +24,13 @@ pub mod hash;
 pub mod merkle;
 pub mod raw_session;
 
-pub struct SessionAccount<P, S, G>
+pub struct SessionAccount<P>
 where
     P: Provider + Send,
-    S: HashSigner + Send,
-    G: HashSigner + Send,
 {
     provider: P,
-    signer: S,
-    guardian: G,
+    signer: Signer,
+    guardian: Signer,
     address: Felt,
     chain_id: Felt,
     block_id: BlockId,
@@ -40,16 +38,14 @@ where
     session: Session,
 }
 
-impl<P, S, G> SessionAccount<P, S, G>
+impl<P> SessionAccount<P>
 where
     P: Provider + Send,
-    S: HashSigner + Send,
-    G: HashSigner + Send,
 {
     pub fn new(
         provider: P,
-        signer: S,
-        guardian: G,
+        signer: Signer,
+        guardian: Signer,
         address: Felt,
         chain_id: Felt,
         session_authorization: Vec<Felt>,
@@ -69,8 +65,8 @@ where
 
     pub fn new_as_registered(
         provider: P,
-        signer: S,
-        guardian: G,
+        signer: Signer,
+        guardian: Signer,
         address: Felt,
         chain_id: Felt,
         owner_guid: Felt,
@@ -123,11 +119,9 @@ where
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<P, S, G> AccountHashAndCallsSigner for SessionAccount<P, S, G>
+impl<P> AccountHashAndCallsSigner for SessionAccount<P>
 where
     P: Provider + Send + Sync,
-    S: HashSigner + Send + Sync,
-    G: HashSigner + Send + Sync,
 {
     async fn sign_hash_and_calls(
         &self,
@@ -146,11 +140,9 @@ where
     }
 }
 
-impl<P, S, G> SpecificAccount for SessionAccount<P, S, G>
+impl<P> SpecificAccount for SessionAccount<P>
 where
     P: Provider + Send + Sync,
-    S: HashSigner + Send + Sync,
-    G: HashSigner + Send + Sync,
 {
     fn address(&self) -> Felt {
         self.address
@@ -161,14 +153,12 @@ where
     }
 }
 
-impl_execution_encoder!(SessionAccount<P: Provider, S: HashSigner, G: HashSigner>);
-impl_account!(SessionAccount<P: Provider, S: HashSigner, G: HashSigner>, |_, _| false);
+impl_execution_encoder!(SessionAccount<P: Provider>);
+impl_account!(SessionAccount<P: Provider>, |_, _| false);
 
-impl<P, S, G> ConnectedAccount for SessionAccount<P, S, G>
+impl<P> ConnectedAccount for SessionAccount<P>
 where
     P: Provider + Send + Sync + Clone,
-    S: HashSigner + Send + Sync + Clone,
-    G: HashSigner + Send + Sync + Clone,
 {
     type Provider = P;
 

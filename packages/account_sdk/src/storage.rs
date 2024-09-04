@@ -42,7 +42,7 @@ pub enum StorageError {
     OperationFailed(String),
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct InMemoryBackend {
     storage: HashMap<String, String>,
 }
@@ -90,7 +90,7 @@ impl StorageBackend for InMemoryBackend {
 }
 
 impl OriginProvider for InMemoryBackend {
-    fn origin() -> Result<String, DeviceError> {
+    fn origin(&self) -> Result<String, DeviceError> {
         Ok("https://cartridge.gg".to_string())
     }
 }

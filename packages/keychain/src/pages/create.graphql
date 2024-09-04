@@ -15,10 +15,6 @@ mutation FinalizeRegistration($credentials: String!) {
   }
 }
 
-mutation DeployAccount($id: ID!, $chainId: ChainID!, $starterpackIds: [ID!]) {
-  deployAccount(id: $id, chainId: $chainId, starterpackIds: $starterpackIds)
-}
-
 query Account($id: ID!) {
   account(id: $id) {
     id

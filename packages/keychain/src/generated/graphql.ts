@@ -1442,8 +1442,9 @@ export type CreateServiceInput = {
 
 export type CreateToriiConfigInput = {
   indexPending?: InputMaybe<Scalars["Boolean"]>;
+  pollingInterval?: InputMaybe<Scalars["Long"]>;
   rpc?: InputMaybe<Scalars["String"]>;
-  startBlock?: InputMaybe<Scalars["Int"]>;
+  startBlock?: InputMaybe<Scalars["Long"]>;
   world: Scalars["String"];
 };
 
@@ -4150,8 +4151,9 @@ export type ToriiConfig = {
   graphql: Scalars["String"];
   grpc: Scalars["String"];
   indexPending?: Maybe<Scalars["Boolean"]>;
+  pollingInterval?: Maybe<Scalars["Long"]>;
   rpc: Scalars["String"];
-  startBlock: Scalars["Long"];
+  startBlock?: Maybe<Scalars["Long"]>;
   version: Scalars["String"];
   world: Scalars["String"];
 };
@@ -4680,17 +4682,6 @@ export type FinalizeRegistrationMutation = {
   };
 };
 
-export type DeployAccountMutationVariables = Exact<{
-  id: Scalars["ID"];
-  chainId: Scalars["ChainID"];
-  starterpackIds?: InputMaybe<Array<Scalars["ID"]> | Scalars["ID"]>;
-}>;
-
-export type DeployAccountMutation = {
-  __typename?: "Mutation";
-  deployAccount: string;
-};
-
 export type AccountQueryVariables = Exact<{
   id: Scalars["ID"];
 }>;
@@ -4898,31 +4889,6 @@ export const useFinalizeRegistrationMutation = <
       FinalizeRegistrationMutation,
       FinalizeRegistrationMutationVariables
     >(FinalizeRegistrationDocument),
-    options,
-  );
-export const DeployAccountDocument = `
-    mutation DeployAccount($id: ID!, $chainId: ChainID!, $starterpackIds: [ID!]) {
-  deployAccount(id: $id, chainId: $chainId, starterpackIds: $starterpackIds)
-}
-    `;
-export const useDeployAccountMutation = <TError = unknown, TContext = unknown>(
-  options?: UseMutationOptions<
-    DeployAccountMutation,
-    TError,
-    DeployAccountMutationVariables,
-    TContext
-  >,
-) =>
-  useMutation<
-    DeployAccountMutation,
-    TError,
-    DeployAccountMutationVariables,
-    TContext
-  >(
-    ["DeployAccount"],
-    useFetchData<DeployAccountMutation, DeployAccountMutationVariables>(
-      DeployAccountDocument,
-    ),
     options,
   );
 export const AccountDocument = `
