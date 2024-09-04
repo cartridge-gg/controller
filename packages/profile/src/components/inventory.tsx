@@ -3,8 +3,11 @@ import { LayoutContainer, LayoutHeader } from "@/components/layout";
 export function Inventory() {
   return (
     <LayoutContainer>
-      <LayoutHeader title="" />
-      <h1 className="text-3xl font-bold underline text-primary">Inventory</h1>
+      <LayoutHeader
+        title={"click.ctrl"}
+        description={"0x0000000...0000000000"}
+      />
+
       {Array.from({ length: 30 }).map((_, i) => (
         <div>line: {i}</div>
       ))}
