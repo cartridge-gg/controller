@@ -9,7 +9,7 @@ import { BigNumberish } from "starknet";
 import { formatAddress } from "utils/contracts";
 
 export function InsufficientFunds({ balance }: { balance: BigNumberish }) {
-  const { controller } = useConnection();
+  const { controller, chainName } = useConnection();
   const { toast } = useToast();
   const onCopy = useCallback(() => {
     navigator.clipboard.writeText(
@@ -63,7 +63,7 @@ export function InsufficientFunds({ balance }: { balance: BigNumberish }) {
             </HStack>
 
             <HStack bg="solid.primary" boxSize="full" flex="1" justify="center">
-              <StarknetIcon boxSize="24px" /> <Text>Sepolia</Text>
+              <StarknetIcon boxSize="24px" /> <Text>{chainName}</Text>
             </HStack>
           </HStack>
         </VStack>
