@@ -1,5 +1,5 @@
-import { Field } from "@cartridge/ui";
-import { Button } from "@chakra-ui/react";
+import { ArgentIcon, Field } from "@cartridge/ui";
+import { Button, HStack } from "@chakra-ui/react";
 import { Container, Footer, Content } from "components/layout";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -8,14 +8,21 @@ import {
 } from "generated/graphql";
 import Controller from "utils/controller";
 import { PopupCenter } from "utils/url";
-import { SignupProps } from "./types";
-import { validateUsernameFor } from "./utils";
-import { RegistrationLink } from "./RegistrationLink";
+import { SignupProps } from "../types";
+import { validateUsernameFor } from "../utils";
+import { RegistrationLink } from "../RegistrationLink";
 import { doSignup } from "hooks/account";
 import { useControllerTheme } from "hooks/theme";
 import { useConnection } from "hooks/connection";
 import { ErrorAlert } from "components/ErrorAlert";
 import { useDebounce } from "hooks/debounce";
+import { SignupArgent } from "./Argent";
+
+enum SignupMethod {
+  WEBAUTHN,
+  ARGENT,
+  SOCIAL,
+}
 
 export function Signup({
   prefilledName = "",
@@ -33,6 +40,9 @@ export function Signup({
     error: undefined,
   });
   const [isValidating, setIsValidating] = useState(false);
+  const [signupMethod, setSignupMethod] = useState<SignupMethod>(
+    SignupMethod.WEBAUTHN,
+  );
 
   const { origin } = useConnection();
   const { debouncedValue: username, debouncing } = useDebounce(
@@ -66,9 +76,9 @@ export function Signup({
   const initController = useCallback(
     async (
       username: string,
-      address: string,
-      credentialId: string,
-      publicKey: string,
+      address?: string,
+      credentialId?: string,
+      publicKey?: string,
     ) => {
       const controller = new Controller({
         appId: origin,
@@ -173,6 +183,10 @@ export function Signup({
     },
   );
 
+  if (signupMethod === SignupMethod.ARGENT) {
+    return <SignupArgent username={usernameField.value} />;
+  }
+
   return (
     <Container
       variant="connect"
@@ -215,16 +229,34 @@ export function Signup({
             <ErrorAlert title="Login failed" description={error.message} />
           )}
 
-          <Button
-            colorScheme="colorful"
-            isLoading={isRegistering}
-            isDisabled={
-              debouncing || !username || isValidating || !!usernameField.error
-            }
-            onClick={onSubmit}
-          >
-            sign up
-          </Button>
+          <HStack>
+            <Button
+              w="100%"
+              colorScheme="colorful"
+              isLoading={isRegistering}
+              isDisabled={
+                debouncing || !username || isValidating || !!usernameField.error
+              }
+              onClick={onSubmit}
+            >
+              sign up
+            </Button>
+            {typeof window !== "undefined" && window["starknet_argentX"] && (
+              <Button
+                colorScheme="colorful"
+                isLoading={isRegistering}
+                isDisabled={
+                  debouncing ||
+                  !username ||
+                  isValidating ||
+                  !!usernameField.error
+                }
+                onClick={() => setSignupMethod(SignupMethod.ARGENT)}
+              >
+                <ArgentIcon />
+              </Button>
+            )}
+          </HStack>
           <RegistrationLink
             description="Already have a Controller?"
             onClick={() => onLogin(usernameField.value)}

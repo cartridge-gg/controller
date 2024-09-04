@@ -21,6 +21,9 @@ fn generate_class_hashes() {
         r#"use starknet::macros::felt;
 use starknet_crypto::Felt;
 
+pub const UDC_ADDRESS: Felt =
+    felt!("0x041a78e741e5af2fec34b695679bc6891742439f7afb8484ecd7766661ad02bf");
+    
 pub const ACCOUNT_CLASS_HASH: Felt =
     felt!("{controller_class_hash:#x}");
 

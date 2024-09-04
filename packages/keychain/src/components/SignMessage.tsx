@@ -97,7 +97,7 @@ export function SignMessage({
         </Flex>
       </Content>
 
-      <Footer>
+      <Footer hideTxSummary>
         <Button colorScheme="colorful" onClick={onConfirm}>
           sign
         </Button>

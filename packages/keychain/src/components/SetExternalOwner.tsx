@@ -47,7 +47,7 @@ export function SetExternalOwner() {
           </VStack>
         </VStack>
       </Content>
-      <Footer>
+      <Footer hideTxSummary>
         <Button
           colorScheme="colorful"
           w="full"

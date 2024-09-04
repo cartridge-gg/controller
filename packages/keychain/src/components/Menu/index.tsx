@@ -13,7 +13,7 @@ export function Menu({ onLogout }: { onLogout: () => void }) {
       description={<CopyAddress address={controller.address} />}
     >
       <Content h="350px"></Content>
-      <Footer>
+      <Footer hideTxSummary>
         <Button w="full" onClick={onLogout}>
           Log out
         </Button>

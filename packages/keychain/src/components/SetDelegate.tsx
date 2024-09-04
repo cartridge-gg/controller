@@ -52,7 +52,7 @@ export function SetDelegate({
           </VStack>
         </VStack>
       </Content>
-      <Footer>
+      <Footer hideTxSummary>
         <Button
           colorScheme="colorful"
           w="full"

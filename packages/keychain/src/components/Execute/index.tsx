@@ -22,8 +22,7 @@ export const CONTRACT_ETH =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 
 export function Execute() {
-  const { controller, context, origin, paymaster, cancel } =
-    useConnection();
+  const { controller, context, origin, paymaster, cancel } = useConnection();
   const ctx = context as ExecuteCtx;
 
   const [maxFee, setMaxFee] = useState<bigint>(0n);
@@ -52,10 +51,7 @@ export function Execute() {
 
     const estimateFees = async () => {
       try {
-        const balance = await getEthBalance(
-          account,
-          controller.address,
-        );
+        const balance = await getEthBalance(account, controller.address);
         setEthBalance(balance);
 
         const maxFee = await calculateMaxFee(ctx, account, calls, balance);
@@ -73,7 +69,7 @@ export function Execute() {
 
   const getEthBalance = async (account, address) => {
     const res = await account.callContract({
-      contractAddress:CONTRACT_ETH,
+      contractAddress: CONTRACT_ETH,
       entrypoint: "balanceOf",
       calldata: [BigInt(address).toString()],
     });
@@ -207,7 +203,7 @@ export function Execute() {
         <Policies title="Transaction Details" policies={policies} />
       </Content>
 
-      <Footer>
+      <Footer hideTxSummary>
         {error ? (
           error.name === "TransferAmountExceedsBalance" ? (
             <ErrorAlert title={error.message} />
