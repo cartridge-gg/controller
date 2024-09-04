@@ -1,78 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@600&family=Inter:wght@100..900&display=swap");
+@import "@cartridge/ui-next/themes/default.css";
+@import "@cartridge/ui-next/themes/dark.css";
+@import "@cartridge/ui-next/themes/fonts.css";
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@layer base {
-  :root {
-    --background: 220 60% 99%;
-    --foreground: 0 0% 0%;
-
-    --card: 220 60% 99%;
-    --card-foreground: 0 0% 0%;
-
-    --popover: 220 60% 99%;
-    --popover-foreground: 0 0% 0%;
-
-    --primary: 255 73% 61%;
-    --primary-foreground: 220 60% 99%;
-
-    --secondary: 210 22% 96%;
-    --secondary-foreground: 0 0% 0%;
-
-    --tertiary: 255 73% 61%;
-    --tertiary-foreground: 220 60% 99%;
-
-    --muted: 207 15% 85%;
-    --muted-foreground: 0 0% 50%;
-
-    --accent: 207 15% 85%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 7 72% 65%;
-    --destructive-foreground: 7 72% 65%;
-
-    --border: 0 0% 0%;
-    --input: 0 0% 0%;
-    --ring: 0 0% 0%;
-
-    --radius: 0.5rem;
-  }
-
-  .dark {
-    --background: 135 8% 9%; /* bg */
-    --foreground: 0 0% 100%; /* text.primary */
-
-    --card: 135 8% 9%; /* bg */
-    --card-foreground: 0 0% 100%; /* text.primary */
-
-    --popover: 135 8% 9%; /* bg */
-    --popover-foreground: 0 0% 100%; /* text.primary */
-
-    --primary: 44 96% 61%; /* brand.primary */
-    --primary-foreground: 135 8% 9%; /* bg */
-
-    --secondary: 136 6% 13%; /* solid.primary */
-    --secondary-foreground: 0 0% 100%; /* text.primary */
-
-    --tertiary: 120 57% 78%;
-    --tertiary-foreground: 0 0% 0%;
-
-    --muted: 132 4% 23%; /* solid.accent */
-    --muted-foreground: 0 0% 50%; /* text.secondary */
-
-    --accent: 132 4% 23%; /* solid.accent */
-    --accent-foreground: 210 40% 98%; /* text.secondaryAccent */
-
-    --destructive: 7 72% 65%; /* text.error */
-    --destructive-foreground: 7 72% 65%; /* text.error */
-
-    --border: 0 100% 100%; /* black */
-    --input: 0 100% 100%; /* black */
-    --ring: 0 0% 100%; /* text.primary */
-  }
-}
 
 @layer base {
   * {

@@ -7,6 +7,16 @@ const config = {
     "./node_modules/@cartridge/ui-next/dist/**/*.{js,jsx}",
   ],
   presets: [cartridgeTWPreset],
+  theme: {
+    extend: {
+      width: {
+        desktop: "432px",
+      },
+      height: {
+        desktop: "600px",
+      },
+    },
+  },
 } satisfies Config;
 
 export default config;
