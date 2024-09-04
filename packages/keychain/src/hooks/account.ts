@@ -18,6 +18,12 @@ type RawAttestation = PublicKeyCredential & {
   response: AuthenticatorAttestationResponse;
 };
 
+type SignedMessage = {
+  type: string;
+  account: string;
+  signature: string[];
+};
+
 type Credentials = RawAttestation & {
   getPublicKey(): ArrayBuffer | null;
 };
@@ -58,7 +64,7 @@ export const onCreateBegin = async (name: string): Promise<Credentials> => {
     data.beginRegistration,
     hasPlatformAuthenticator,
   );
-
+  console.log({ credentials });
   return credentials;
 };
 
@@ -148,6 +154,25 @@ export const doXHR = async (json: string): Promise<any> => {
     xhr.send(json);
   });
 };
+
+export async function beginAccountSignup(username: string): Promise<string> {
+  const { data } = await beginRegistration(username);
+  return data.beginRegistration.publicKey.challenge;
+}
+
+export async function finalizeAccountSignup(
+  address: string,
+  signature: string[],
+): Promise<FinalizeRegistrationMutation> {
+  const signedMessage: SignedMessage = {
+    type: "starknet_account",
+    account: address,
+    signature: signature,
+  };
+  return client.request(FinalizeRegistrationDocument, {
+    credentials: JSON.stringify(signedMessage),
+  });
+}
 
 export async function doSignup(
   name: string,

@@ -1,15 +1,5 @@
 import { Container, Content, Footer } from "components/layout";
-import {
-  Box,
-  Button,
-  HStack,
-  Spacer,
-  Spinner,
-  Text,
-  Tooltip,
-  VStack,
-  useInterval,
-} from "@chakra-ui/react";
+import { Button, useInterval } from "@chakra-ui/react";
 import {
   PropsWithChildren,
   useCallback,
@@ -27,28 +17,60 @@ import {
   useProvider,
   voyager,
 } from "@starknet-react/core";
-import { CallData, RpcProvider, cairo, num, shortString } from "starknet";
-import { AlertIcon, CheckIcon, DotsIcon, PacmanIcon } from "@cartridge/ui";
+import { RpcProvider, TypedData, Uint256, num } from "starknet";
+import { PacmanIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { useToast } from "hooks/toast";
 import {
   TokenInfo,
   fetchTokenInfo,
-  getBalanceStr,
-  getMinStr,
-  isEther,
   isFunded,
   updateBalance,
 } from "utils/token";
 import { ErrorAlert } from "../../ErrorAlert";
-import { CopyAddress } from "../../CopyAddress";
-import { CartridgeAccount } from "@cartridge/account-wasm";
+import { beginAccountSignup, finalizeAccountSignup } from "hooks/account";
+import base64url from "base64url";
 
 enum SignupState {
   CONNECT,
   SIGN_MESSAGE,
   DEPLOY,
 }
+
+const registerTypedData = (
+  username: string,
+  challenge: Uint256,
+  chainId: string,
+): TypedData => {
+  return {
+    types: {
+      StarknetDomain: [
+        { name: "name", type: "shortstring" },
+        { name: "version", type: "shortstring" },
+        { name: "chainId", type: "shortstring" },
+        { name: "revision", type: "shortstring" },
+      ],
+      Register: [
+        { name: "username", type: "felt" },
+        { name: "challenge", type: "u256" },
+      ],
+    },
+    primaryType: "Register",
+    domain: {
+      name: "Cartridge",
+      chainId: chainId,
+      version: "1",
+      revision: "1",
+    },
+    message: {
+      username: username,
+      challenge: {
+        low: challenge.low,
+        high: challenge.high,
+      },
+    },
+  };
+};
 
 export function SignupArgent({ username }: { username: string }) {
   return (
@@ -61,22 +83,22 @@ export function SignupArgent({ username }: { username: string }) {
 function SignupArgentInner({ username }: { username: string }) {
   const { account: extAccount } = useAccount();
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
-  const { chainId, chainName, policies } = useConnection();
-  const { tokens, isAllFunded, isChecked, isFetching } = useTokens();
-  const [isDeploying, setIsDeploying] = useState(false);
+  const { chainId, chainName } = useConnection();
+  const { isChecked } = useTokens();
+  const [isDeploying] = useState(false);
   const [error, setError] = useState<Error>();
   const [state, setState] = useState<SignupState>(SignupState.CONNECT);
-  const [controllerAddress, setControllerAddress] = useState("");
-  const [controllerCalldata, setControllerCalldata] = useState([]);
-  const [title, setTitle] = useState("");
+  //const [controllerAddress, setControllerAddress] = useState("");
+  //const [controllerCalldata, setControllerCalldata] = useState([]);
+  //const [title, setTitle] = useState("");
 
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (extAccount && isAllFunded && isChecked) {
-      setState(SignupState.DEPLOY);
-    }
-  }, [isAllFunded, isChecked, extAccount]);
+  // useEffect(() => {
+  //   if (extAccount && isAllFunded && isChecked) {
+  //     setState(SignupState.DEPLOY);
+  //   }
+  // }, [isAllFunded, isChecked, extAccount]);
 
   const onConnect = useCallback(
     (c: Connector) => {
@@ -89,7 +111,7 @@ function SignupArgentInner({ username }: { username: string }) {
             return;
           }
 
-          setState(SignupState.DEPLOY);
+          setState(SignupState.SIGN_MESSAGE);
         })
         .catch((e) => {
           /* user abort */
@@ -99,129 +121,168 @@ function SignupArgentInner({ username }: { username: string }) {
     [connectAsync, chainId, chainName, toast],
   );
 
-  useEffect(() => {
-    if (state == SignupState.CONNECT) {
-      setControllerAddress("");
-    }
-    if (state == SignupState.DEPLOY && extAccount?.address) {
-      const salt = shortString.encodeShortString(username);
+  // useEffect(() => {
+  //   if (state == SignupState.CONNECT) {
+  //     setControllerAddress("");
+  //   }
+  //   if (state == SignupState.DEPLOY && extAccount?.address) {
+  //     const salt = shortString.encodeShortString(username);
 
-      const { address, calldata } = CartridgeAccount.getUdcDeployedAddress(
-        salt,
-        extAccount.address,
+  //     const { address, calldata } = CartridgeAccount.getUdcDeployedAddress(
+  //       salt,
+  //       extAccount.address,
+  //     );
+
+  //     setControllerAddress(address);
+  //     setControllerCalldata(calldata);
+  //   }
+  // }, [state, extAccount?.address, username]);
+
+  const onSignMessage = useCallback(async () => {
+    if (!extAccount) return;
+    try {
+      const challenge = await beginAccountSignup(username);
+      const decoded = base64url.decode(challenge);
+      const paddedDecoded = decoded.padEnd(32, "\0");
+
+      const uint8Array = new Uint8Array(
+        paddedDecoded.split("").map((c) => c.charCodeAt(0)),
+      );
+      const low =
+        "0x" +
+        Array.from(uint8Array.slice(0, 16), (byte) =>
+          byte.toString(16).padStart(2, "0"),
+        ).join("");
+      const high =
+        "0x" +
+        Array.from(uint8Array.slice(16), (byte) =>
+          byte.toString(16).padStart(2, "0"),
+        ).join("");
+
+      const sig = await extAccount.signMessage(
+        registerTypedData(
+          username,
+          {
+            low,
+            high,
+          },
+          chainId,
+        ),
       );
 
-      setControllerAddress(address);
-      setControllerCalldata(calldata);
-    }
-  }, [state, extAccount?.address, username]);
-
-  const onDeploy = useCallback(async () => {
-    if (!extAccount) return;
-
-    const calls = tokens.flatMap((t) => {
-      const amount = cairo.uint256(t.min);
-      return [
-        {
-          contractAddress: t.address,
-          entrypoint: "approve",
-          calldata: CallData.compile({
-            recipient: controllerAddress,
-            amount,
-          }),
-        },
-        {
-          contractAddress: t.address,
-          entrypoint: "transfer",
-          calldata: CallData.compile({
-            recipient: controllerAddress,
-            amount,
-          }),
-        },
-      ];
-    });
-
-    // deployContract
-    const salt = shortString.encodeShortString(username);
-    calls.push({
-      contractAddress: CartridgeAccount.getUdcAddress(),
-      entrypoint: "deployContract",
-      calldata: CallData.compile({
-        classHash: CartridgeAccount.getAccountClassHash(),
-        salt,
-        unique: false,
-        calldata: controllerCalldata,
-      }),
-    });
-
-    // registerSession
-    calls.push({
-      contractAddress: controllerAddress,
-      entrypoint: "register_session",
-      calldata: CartridgeAccount.registerSessionCalldata(
-        policies.map((p) => {
-          return { target: p.target, method: p.method };
-        }),
-        3000000000n,
+      const finalizeMutation = await finalizeAccountSignup(
         extAccount.address,
-      ),
-    });
+        sig as string[],
+      );
+      console.log({ finalizeMutation });
 
-    console.log(
-      calls
-        .map((call) => {
-          return CallData.compile(call)
-            .map((i) => `0x${BigInt(i).toString(16)}`)
-            .join(" ");
-        })
-        .join(" / "),
-    );
-
-    try {
-      setIsDeploying(true);
-      const res = await extAccount.execute(calls);
-      await extAccount.waitForTransaction(res.transaction_hash, {
-        retryInterval: 1000,
-      });
+      setState(SignupState.DEPLOY);
     } catch (e) {
       console.log(e);
       setError(e);
     }
-    setIsDeploying(false);
-  }, [
-    extAccount,
-    controllerAddress,
-    controllerCalldata,
-    policies,
-    tokens,
-    username,
-  ]);
+  }, [extAccount, username, chainId]);
 
-  const onCopy = useCallback(() => {
-    navigator.clipboard.writeText(controllerAddress);
-    toast("Copied");
-  }, [controllerAddress, toast]);
+  // const onDeploy = useCallback(async () => {
+  //   if (!extAccount) return;
 
-  useEffect(() => {
-    setTitle(!!extAccount ? `Create ${username}.gg` : `Create with Argent`);
-  }, [extAccount, username]);
+  //   const calls = tokens.flatMap((t) => {
+  //     const amount = cairo.uint256(t.min);
+  //     return [
+  //       {
+  //         contractAddress: t.address,
+  //         entrypoint: "approve",
+  //         calldata: CallData.compile({
+  //           recipient: controllerAddress,
+  //           amount,
+  //         }),
+  //       },
+  //       {
+  //         contractAddress: t.address,
+  //         entrypoint: "transfer",
+  //         calldata: CallData.compile({
+  //           recipient: controllerAddress,
+  //           amount,
+  //         }),
+  //       },
+  //     ];
+  //   });
+
+  //   // deployContract
+  //   const salt = shortString.encodeShortString(username);
+  //   calls.push({
+  //     contractAddress: CartridgeAccount.getUdcAddress(),
+  //     entrypoint: "deployContract",
+  //     calldata: CallData.compile({
+  //       classHash: CartridgeAccount.getAccountClassHash(),
+  //       salt,
+  //       unique: false,
+  //       calldata: controllerCalldata,
+  //     }),
+  //   });
+
+  //   // registerSession
+  //   calls.push({
+  //     contractAddress: controllerAddress,
+  //     entrypoint: "register_session",
+  //     calldata: CartridgeAccount.registerSessionCalldata(
+  //       policies.map((p) => {
+  //         return { target: p.target, method: p.method };
+  //       }),
+  //       3000000000n,
+  //       extAccount.address,
+  //     ),
+  //   });
+
+  //   console.log(
+  //     calls
+  //       .map((call) => {
+  //         return CallData.compile(call)
+  //           .map((i) => `0x${BigInt(i).toString(16)}`)
+  //           .join(" ");
+  //       })
+  //       .join(" / "),
+  //   );
+
+  //   try {
+  //     setIsDeploying(true);
+  //     const res = await extAccount.execute(calls);
+  //     await extAccount.waitForTransaction(res.transaction_hash, {
+  //       retryInterval: 1000,
+  //     });
+  //   } catch (e) {
+  //     console.log(e);
+  //     setError(e);
+  //   }
+  //   setIsDeploying(false);
+  // }, [
+  //   extAccount,
+  //   controllerAddress,
+  //   controllerCalldata,
+  //   policies,
+  //   tokens,
+  //   username,
+  // ]);
+
+  // const onCopy = useCallback(() => {
+  //   navigator.clipboard.writeText(controllerAddress);
+  //   toast("Copied");
+  // }, [controllerAddress, toast]);
+
+  // useEffect(() => {
+  //   setTitle(!!extAccount ? `Create ${username}.gg` : `Create to Argent`);
+  // }, [extAccount, username]);
 
   return (
     <Container
       variant="connect"
-      title={title}
-      description={
-        controllerAddress ? (
-          <CopyAddress address={controllerAddress} />
-        ) : (
-          <>Please connect your ArgentX wallet</>
-        )
-      }
+      title={"Connect to Argent"}
+      description={"Sign message to create your account"}
       // TODO: Add line icons
-      icon={<PacmanIcon color="brand.primary" fontSize="3xl" />}
+      icon={<PacmanIcon color="brand.primary" fontSize="5xl" />}
     >
       <Content gap={6}>
-        {extAccount && (
+        {/* {extAccount && (
           <>
             <HStack w="full">
               <Text color="text.secondary" fontSize="sm">
@@ -286,7 +347,7 @@ function SignupArgentInner({ username }: { username: string }) {
               ))}
             </VStack>
           </>
-        )}
+        )} */}
       </Content>
 
       <Footer isSignup={!extAccount} /*createSession={!!extAccount}*/>
@@ -316,17 +377,30 @@ function SignupArgentInner({ username }: { username: string }) {
                       </Button>
                     ))
                 ) : (
-                  <Button colorScheme="colorful" onClick={onCopy}>
+                  <Button
+                    colorScheme="colorful"
+                    onClick={() => {
+                      console.log("copy address");
+                    }}
+                  >
                     copy address
                   </Button>
                 )}
               </>
             )}
 
+            {state === SignupState.SIGN_MESSAGE && (
+              <Button colorScheme="colorful" onClick={onSignMessage}>
+                Sign Message
+              </Button>
+            )}
+
             {state === SignupState.DEPLOY && (
               <Button
                 colorScheme="colorful"
-                onClick={onDeploy}
+                onClick={() => {
+                  console.log("deploy");
+                }}
                 isLoading={isDeploying}
                 // isDisabled={!(isAllFunded && isChecked && extAccount)}
               >
