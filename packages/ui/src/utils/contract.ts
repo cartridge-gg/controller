@@ -1,6 +1,10 @@
-export function truncateHash(hash: string) {
-  return `${hash.substring(0, 6)}...${hash.substring(
-    hash.length - 4,
+export function truncateHash(
+  hash: string,
+  startLength: number = 6,
+  endLength: number = 4,
+) {
+  return `${hash.substring(0, startLength)}...${hash.substring(
+    hash.length - endLength,
     hash.length,
   )}`;
 }

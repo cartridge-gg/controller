@@ -208,6 +208,7 @@ where
     ) -> Result<FeeEstimate, ControllerError> {
         let multiplier = fee_multiplier.unwrap_or(1.0);
         self.execute_v1(calls)
+            .nonce(Felt::from(u64::MAX))
             .fee_estimate_multiplier(multiplier)
             .estimate_fee()
             .await
