@@ -219,8 +219,22 @@ function makeMutClosure(arg0, arg1, dtor, f) {
     CLOSURE_DTORS.register(real, state, state);
     return real;
 }
+<<<<<<< HEAD
 function __wbg_adapter_44(arg0, arg1, arg2) {
     wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__hab75a3c637f96005(arg0, arg1, addHeapObject(arg2));
+=======
+function __wbg_adapter_42(arg0, arg1, arg2) {
+    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h4f854f1ab9269aba(arg0, arg1, addHeapObject(arg2));
+}
+
+let cachedUint32Memory0 = null;
+
+function getUint32Memory0() {
+    if (cachedUint32Memory0 === null || cachedUint32Memory0.byteLength === 0) {
+        cachedUint32Memory0 = new Uint32Array(wasm.memory.buffer);
+    }
+    return cachedUint32Memory0;
+>>>>>>> e71a0c26 (build wasm)
 }
 
 function passArrayJsValueToWasm0(array, malloc) {
@@ -240,8 +254,13 @@ function handleError(f, args) {
         wasm.__wbindgen_exn_store(addHeapObject(e));
     }
 }
+<<<<<<< HEAD
 function __wbg_adapter_185(arg0, arg1, arg2, arg3) {
     wasm.wasm_bindgen__convert__closures__invoke2_mut__h47b629288504f118(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
+=======
+function __wbg_adapter_165(arg0, arg1, arg2, arg3) {
+    wasm.wasm_bindgen__convert__closures__invoke2_mut__h124d41d3678e7072(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
+>>>>>>> e71a0c26 (build wasm)
 }
 
 const CartridgeAccountFinalization = (typeof FinalizationRegistry === 'undefined')
@@ -1137,8 +1156,13 @@ export function __wbindgen_memory() {
     return addHeapObject(ret);
 };
 
+<<<<<<< HEAD
 export function __wbindgen_closure_wrapper2417(arg0, arg1, arg2) {
     const ret = makeMutClosure(arg0, arg1, 474, __wbg_adapter_44);
+=======
+export function __wbindgen_closure_wrapper2393(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 512, __wbg_adapter_42);
+>>>>>>> e71a0c26 (build wasm)
     return addHeapObject(ret);
 };
 
