@@ -39,20 +39,24 @@ enum SignupState {
 
 const registerTypedData = (
   username: string,
-  challenge: Uint256,
+  challenge: { low: string; high: string },
   chainId: string,
 ): TypedData => {
   return {
     types: {
-      StarknetDomain: [
-        { name: "name", type: "shortstring" },
-        { name: "version", type: "shortstring" },
-        { name: "chainId", type: "shortstring" },
-        { name: "revision", type: "shortstring" },
+      StarkNetDomain: [
+        { name: "name", type: "felt" },
+        { name: "version", type: "felt" },
+        { name: "chainId", type: "felt" },
+        { name: "revision", type: "felt" },
       ],
       Register: [
         { name: "username", type: "felt" },
-        { name: "challenge", type: "u256" },
+        { name: "challenge", type: "Challenge" },
+      ],
+      Challenge: [
+        { name: "low", type: "felt" },
+        { name: "high", type: "felt" },
       ],
     },
     primaryType: "Register",
@@ -60,7 +64,7 @@ const registerTypedData = (
       name: "Cartridge",
       chainId: chainId,
       version: "1",
-      revision: "1",
+      revision: "0",
     },
     message: {
       username: username,
@@ -142,36 +146,22 @@ function SignupArgentInner({ username }: { username: string }) {
     if (!extAccount) return;
     try {
       const challenge = await beginAccountSignup(username);
-      const decoded = base64url.decode(challenge);
-      const paddedDecoded = decoded.padEnd(32, "\0");
+      const buffer = base64url.toBuffer(challenge);
+      const high = "0x" + buffer.subarray(0, 16).toString("hex");
+      const low = "0x" + buffer.subarray(16, 32).toString("hex");
+      console.log({ high, low });
+      console.log({ challenge: "0x" + buffer.toString("hex") });
 
-      const uint8Array = new Uint8Array(
-        paddedDecoded.split("").map((c) => c.charCodeAt(0)),
-      );
-      const low =
-        "0x" +
-        Array.from(uint8Array.slice(0, 16), (byte) =>
-          byte.toString(16).padStart(2, "0"),
-        ).join("");
-      const high =
-        "0x" +
-        Array.from(uint8Array.slice(16), (byte) =>
-          byte.toString(16).padStart(2, "0"),
-        ).join("");
+      const typedData = registerTypedData(username, { low, high }, chainId);
 
-      const sig = await extAccount.signMessage(
-        registerTypedData(
-          username,
-          {
-            low,
-            high,
-          },
-          chainId,
-        ),
-      );
+      const hash = await extAccount.hashMessage(typedData);
+      console.log({ hash });
 
+      const sig = await extAccount.signMessage(typedData);
+      const pubkey = await extAccount.signer.getPubKey();
       const finalizeMutation = await finalizeAccountSignup(
         extAccount.address,
+        pubkey,
         sig as string[],
       );
       console.log({ finalizeMutation });

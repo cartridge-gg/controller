@@ -21,6 +21,7 @@ type RawAttestation = PublicKeyCredential & {
 type SignedMessage = {
   type: string;
   account: string;
+  public_key: string;
   signature: string[];
 };
 
@@ -162,12 +163,14 @@ export async function beginAccountSignup(username: string): Promise<string> {
 
 export async function finalizeAccountSignup(
   address: string,
+  public_key: string,
   signature: string[],
 ): Promise<FinalizeRegistrationMutation> {
   const signedMessage: SignedMessage = {
     type: "starknet_account",
     account: address,
-    signature: signature,
+    public_key,
+    signature,
   };
   return client.request(FinalizeRegistrationDocument, {
     credentials: JSON.stringify(signedMessage),
