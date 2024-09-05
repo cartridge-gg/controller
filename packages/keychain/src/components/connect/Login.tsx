@@ -143,7 +143,7 @@ function Form({
         />
       </Content>
 
-      <Footer isSlot={isSlot}>
+      <Footer isSlot={isSlot} showCatridgeLogo>
         {error && (
           <ErrorAlert title="Login failed" description={error.message} />
         )}
