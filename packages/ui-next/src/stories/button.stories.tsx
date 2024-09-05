@@ -70,12 +70,12 @@ export const Loading: Story = {
   },
 };
 
-export const Small: Story = {
-  args: {
-    children: "continue",
-    size: "sm",
-  },
-};
+// export const Small: Story = {
+//   args: {
+//     children: "continue",
+//     size: "sm",
+//   },
+// };
 
 export const Medium: Story = {
   args: {
@@ -84,12 +84,12 @@ export const Medium: Story = {
   },
 };
 
-export const Large: Story = {
-  args: {
-    children: "continue",
-    size: "lg",
-  },
-};
+// export const Large: Story = {
+//   args: {
+//     children: "continue",
+//     size: "lg",
+//   },
+// };
 
 export const Icon: Story = {
   args: {

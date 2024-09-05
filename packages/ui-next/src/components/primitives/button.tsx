@@ -22,9 +22,9 @@ const buttonVariants = cva(
         icon: "bg-background text-foreground",
       },
       size: {
-        default: "h-10 px-4 py-2 tracking-wide",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8 tracking-widest",
+        default: "h-10 px-4 tracking-wide text-base",
+        // sm: "h-9 px-3 text-sm",
+        // lg: "h-11 px-8 tracking-widest text-lg",
         icon: "h-10 w-10",
       },
     },
