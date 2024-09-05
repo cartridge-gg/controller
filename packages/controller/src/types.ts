@@ -83,8 +83,9 @@ export type IFrames = {
 };
 
 export type IFrame<T extends {}> = {
+  url: URL;
   connection?: Connection<T>;
-  modal: Modal;
+  modal?: Modal;
 };
 
 export interface Keychain {
@@ -154,6 +155,7 @@ export type ControllerOptions = {
   policies?: Policy[];
   /** The URL of keychain */
   url?: string;
+  profileUrl?: string;
   /** The URL of the RPC */
   rpc?: string;
   /** The origin of keychain */

@@ -25,10 +25,9 @@ import {
 import { createModal } from "./modal";
 import { defaultPresets } from "./presets";
 import { NotReadyToConnect, ProfileNotReady } from "./errors";
-import { KEYCHAIN_URL, RPC_SEPOLIA } from "./constants";
+import { KEYCHAIN_URL, PROFILE_URL, RPC_SEPOLIA } from "./constants";
 
 class Controller {
-  private url: URL;
   private policies: Policy[];
   private paymaster?: PaymasterOptions;
   public keychain?: AsyncMethodReturns<Keychain>;
@@ -40,13 +39,13 @@ class Controller {
   constructor({
     policies,
     url,
+    profileUrl,
     rpc,
     paymaster,
     theme,
     config,
     colorMode,
   }: ControllerOptions = {}) {
-    this.url = new URL(url || KEYCHAIN_URL);
     this.rpc = new URL(rpc || RPC_SEPOLIA);
     this.paymaster = paymaster;
     if (this.paymaster) {
@@ -71,27 +70,42 @@ class Controller {
       this.setPolicies(policies);
     }
 
-    this.iframes = this.initIFrames();
+    this.iframes = this.initIFrames({ url, profileUrl });
   }
 
-  private initIFrames(): IFrames {
+  private initIFrames({
+    url,
+    profileUrl,
+  }: Pick<ControllerOptions, "url" | "profileUrl">): IFrames {
+    const defaultIframes = {
+      keychain: {
+        url: new URL(url || KEYCHAIN_URL),
+      },
+      profile: {
+        url: new URL(profileUrl || PROFILE_URL),
+      },
+    };
+    if (typeof document === "undefined") {
+      return defaultIframes;
+    }
+
     const iframes: IFrames = {
       keychain: {
+        ...defaultIframes.keychain,
         modal: createModal({
           id: "controller-keychain",
-          src: this.url.toString(),
+          src: defaultIframes.keychain.url.toString(),
           onClose: () => this.keychain?.reset(),
         }),
       },
       profile: {
+        ...defaultIframes.profile,
         modal: createModal({
           id: "controller-profile",
-          src: this.url.toString(),
+          src: defaultIframes.profile.url.toString(),
         }),
       },
     };
-
-    if (typeof document === "undefined") return iframes;
 
     const appendModal = () => {
       Object.values(iframes).map((iframe) => {
@@ -109,12 +123,12 @@ class Controller {
     }
 
     iframes.keychain.connection = connectToChild<Keychain>({
-      iframe: iframes.keychain.modal.element.children[0] as HTMLIFrameElement,
+      iframe: iframes.keychain.modal?.element.children[0] as HTMLIFrameElement,
       methods: { close: () => iframes.keychain.modal?.close() },
     });
 
     iframes.profile.connection = connectToChild<Profile>({
-      iframe: iframes.profile.modal.element.children[0] as HTMLIFrameElement,
+      iframe: iframes.profile.modal?.element.children[0] as HTMLIFrameElement,
       methods: { close: () => iframes.profile.modal?.close() },
     });
 
@@ -149,18 +163,18 @@ class Controller {
     presets: ControllerThemePresets = defaultPresets,
   ) {
     const theme = presets[id] ?? defaultPresets.cartridge;
-    this.url.searchParams.set(
+    this.iframes.keychain.url.searchParams.set(
       "theme",
       encodeURIComponent(JSON.stringify(theme)),
     );
   }
 
   private setColorMode(colorMode: ColorMode) {
-    this.url.searchParams.set("colorMode", colorMode);
+    this.iframes.keychain.url.searchParams.set("colorMode", colorMode);
   }
 
   private setPaymaster(paymaster: PaymasterOptions) {
-    this.url.searchParams.set(
+    this.iframes.keychain.url.searchParams.set(
       "paymaster",
       encodeURIComponent(JSON.stringify(paymaster)),
     );

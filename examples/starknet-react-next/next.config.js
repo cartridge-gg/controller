@@ -6,7 +6,8 @@ const nextConfig = {
     externalDir: true,
   },
   env: {
-    XFRAME_URL: process.env.XFRAME_URL,
+    KEYCHAIN_FRAME_URL: process.env.KEYCHAIN_FRAME_URL,
+    PROFILE_FRAME_URL: process.env.PROFILE_FRAME_URL,
   },
 };
 
