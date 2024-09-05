@@ -1,3 +1,4 @@
+export * from "./errors";
 export * from "./types";
 export { defaultPresets } from "./presets";
 export * from "./verified";

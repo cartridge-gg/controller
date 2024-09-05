@@ -31,7 +31,22 @@ export function executeFactory({
       transactionsDetail?: InvocationsDetails,
       sync?: boolean,
       paymaster?: PaymasterOptions,
+      paymasterError?: Error,
     ): Promise<ExecuteReply | ConnectError> => {
+      if (paymasterError) {
+        return await new Promise((resolve, reject) => {
+          setContext({
+            type: "execute",
+            origin,
+            transactions,
+            abis,
+            transactionsDetail,
+            paymasterError,
+            resolve,
+            reject,
+          } as ExecuteCtx);
+        });
+      }
       if (sync) {
         return await new Promise((resolve, reject) => {
           setContext({
@@ -67,7 +82,10 @@ export function executeFactory({
             };
           } catch (error) {
             /* user pays */
-            console.error(error);
+            return {
+              code: ResponseCodes.PAYMASTER_ERROR,
+              message: error.message,
+            };
           }
         }
 

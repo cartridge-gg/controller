@@ -53,7 +53,6 @@ export function Execute() {
       try {
         const balance = await getEthBalance(account, controller.address);
         setEthBalance(balance);
-
         const maxFee = await calculateMaxFee(ctx, account, calls, balance);
         setMaxFee(maxFee);
       } catch (e) {
@@ -207,7 +206,12 @@ export function Execute() {
       </Content>
 
       <Footer>
-        {error ? (
+        {ctx.paymasterError ? (
+          <ErrorAlert
+            title="Something went wrong with the Paymaster"
+            description={ctx.paymasterError.message}
+          />
+        ) : error ? (
           error.name === "TransferAmountExceedsBalance" ? (
             <ErrorAlert title={error.message} />
           ) : (
@@ -219,6 +223,7 @@ export function Execute() {
         ) : (
           <Fees maxFee={maxFee} />
         )}
+
         <Button
           colorScheme="colorful"
           onClick={onSubmit}
