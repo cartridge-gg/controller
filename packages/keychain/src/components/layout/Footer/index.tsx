@@ -16,13 +16,15 @@ import NextLink from "next/link";
 
 export function Footer({
   children,
-  isSlot = false,
+  isSlot,
   isSignup,
-  hideTxSummary = false,
+  hideTxSummary,
+  showCatridgeLogo,
 }: React.PropsWithChildren & {
   isSlot?: boolean;
   isSignup?: boolean;
   hideTxSummary?: boolean;
+  showCatridgeLogo?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>();
   const { origin, policies } = useConnection();
@@ -133,7 +135,7 @@ export function Footer({
         {children}
       </VStack>
 
-      {variant === "connect" && (
+      {showCatridgeLogo && (
         <HStack
           justifySelf="flex-end"
           bg="solid.bg"

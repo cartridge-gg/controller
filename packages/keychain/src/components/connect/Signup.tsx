@@ -216,7 +216,7 @@ export function Signup({
           />
         </Content>
 
-        <Footer isSlot={isSlot} isSignup>
+        <Footer isSlot={isSlot} isSignup showCatridgeLogo>
           {error && (
             <ErrorAlert title="Login failed" description={error.message} />
           )}
