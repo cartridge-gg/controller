@@ -22,7 +22,7 @@ export function Menu() {
   }
 
   return (
-    <div style={{ marginTop: "10px" }}>
+    <div>
       <h2>Open Menu</h2>
       <Button onClick={onOpenMenu}>Open Menu</Button>
     </div>

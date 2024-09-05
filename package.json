@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "preinstall": "npx only-allow pnpm",
+    "build:deps": "turbo build:deps",
     "build": "turbo build:deps build",
     "build:deps": "turbo build:deps",
     "dev": "turbo build:deps dev",

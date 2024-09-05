@@ -4,11 +4,7 @@ export { defaultPresets } from "./presets";
 export * from "./verified";
 
 import { AccountInterface, addAddressPadding } from "starknet";
-import {
-  AsyncMethodReturns,
-  Connection,
-  connectToChild,
-} from "@cartridge/penpal";
+import { AsyncMethodReturns, connectToChild } from "@cartridge/penpal";
 
 import DeviceAccount from "./device";
 import {
@@ -17,26 +13,27 @@ import {
   ResponseCodes,
   ConnectReply,
   ProbeReply,
-  Modal,
   ControllerOptions,
   ControllerThemePresets,
   ColorMode,
   PaymasterOptions,
   // Prefund,
   ConnectError,
+  Profile,
+  IFrames,
 } from "./types";
 import { createModal } from "./modal";
 import { defaultPresets } from "./presets";
-import { NotReadyToConnect } from "./errors";
+import { NotReadyToConnect, ProfileNotReady } from "./errors";
 import { KEYCHAIN_URL, RPC_SEPOLIA } from "./constants";
 
 class Controller {
   private url: URL;
   private policies: Policy[];
   private paymaster?: PaymasterOptions;
-  private connection?: Connection<Keychain>;
-  private modal?: Modal;
   public keychain?: AsyncMethodReturns<Keychain>;
+  public profile?: AsyncMethodReturns<Profile>;
+  private iframes: IFrames;
   public rpc: URL;
   public account?: AccountInterface;
 
@@ -74,28 +71,33 @@ class Controller {
       this.setPolicies(policies);
     }
 
-    this.initModal();
+    this.iframes = this.initIFrames();
   }
 
-  async openMenu() {
-    if (!this.keychain || !this.modal) {
-      console.error(new NotReadyToConnect().message);
-      return null;
-    }
-    this.modal.open();
-    const res = await this.keychain.openMenu();
-    this.modal.close();
-    if (res && (res as ConnectError).code === ResponseCodes.NOT_CONNECTED) {
-      return false;
-    }
-    return true;
-  }
+  private initIFrames(): IFrames {
+    const iframes: IFrames = {
+      keychain: {
+        modal: createModal({
+          id: "controller-keychain",
+          src: this.url.toString(),
+          onClose: () => this.keychain?.reset(),
+        }),
+      },
+      profile: {
+        modal: createModal({
+          id: "controller-profile",
+          src: this.url.toString(),
+        }),
+      },
+    };
 
-  private initModal() {
-    if (typeof document === "undefined") return;
+    if (typeof document === "undefined") return iframes;
 
-    this.modal = createModal(this.url.toString(), () => this.keychain?.reset());
-    const appendModal = () => document.body.appendChild(this.modal!.element);
+    const appendModal = () => {
+      Object.values(iframes).map((iframe) => {
+        document.body.appendChild(iframe.modal!.element);
+      });
+    };
 
     if (
       document.readyState === "complete" ||
@@ -106,15 +108,40 @@ class Controller {
       document.addEventListener("DOMContentLoaded", appendModal);
     }
 
-    this.connection = connectToChild<Keychain>({
-      iframe: this.modal.element.children[0] as HTMLIFrameElement,
-      methods: { close: () => this.modal?.close() },
+    iframes.keychain.connection = connectToChild<Keychain>({
+      iframe: iframes.keychain.modal.element.children[0] as HTMLIFrameElement,
+      methods: { close: () => iframes.keychain.modal?.close() },
     });
 
-    this.connection.promise.then((keychain) => {
+    iframes.profile.connection = connectToChild<Profile>({
+      iframe: iframes.profile.modal.element.children[0] as HTMLIFrameElement,
+      methods: { close: () => iframes.profile.modal?.close() },
+    });
+
+    Promise.all([
+      iframes.keychain.connection.promise,
+      iframes.profile.connection.promise,
+    ]).then(([keychain, profile]) => {
       this.keychain = keychain;
+      this.profile = profile;
       return this.probe();
     });
+
+    return iframes;
+  }
+
+  async openMenu() {
+    if (!this.keychain || !this.iframes.keychain.modal) {
+      console.error(new NotReadyToConnect().message);
+      return null;
+    }
+    this.iframes.keychain.modal.open();
+    const res = await this.keychain.openMenu();
+    this.iframes.keychain.modal.close();
+    if (res && (res as ConnectError).code === ResponseCodes.NOT_CONNECTED) {
+      return false;
+    }
+    return true;
   }
 
   private setTheme(
@@ -148,8 +175,15 @@ class Controller {
 
   ready() {
     return (
-      this.connection?.promise
-        .then(() => this.probe())
+      Promise.all([
+        this.iframes.keychain.connection?.promise,
+        this.iframes.profile.connection?.promise,
+      ])
+        // .then(() => this.probe())
+        .then((a) => {
+          console.log("!!!!!!!!!!!!!", a);
+          return this.probe();
+        })
         .then(
           (res) => !!res,
           () => false,
@@ -158,7 +192,12 @@ class Controller {
   }
 
   async probe() {
-    if (!this.keychain || !this.modal) {
+    if (
+      !this.keychain ||
+      !this.iframes.keychain.modal ||
+      !this.iframes.profile ||
+      !this.iframes.profile.modal
+    ) {
       console.error(new NotReadyToConnect().message);
       return null;
     }
@@ -172,7 +211,7 @@ class Controller {
         this.rpc.toString(),
         response.address,
         this.keychain,
-        this.modal,
+        this.iframes.keychain.modal,
         this.paymaster,
       ) as AccountInterface;
     } catch (e) {
@@ -188,7 +227,7 @@ class Controller {
       return this.account;
     }
 
-    if (!this.keychain || !this.modal) {
+    if (!this.keychain || !this.iframes.keychain.modal) {
       console.error(new NotReadyToConnect().message);
       return;
     }
@@ -200,7 +239,7 @@ class Controller {
       }
     }
 
-    this.modal.open();
+    this.iframes.keychain.modal.open();
 
     try {
       let response = await this.keychain.connect(
@@ -216,7 +255,7 @@ class Controller {
         this.rpc.toString(),
         response.address,
         this.keychain,
-        this.modal,
+        this.iframes.keychain.modal,
         this.paymaster,
       ) as AccountInterface;
 
@@ -224,8 +263,17 @@ class Controller {
     } catch (e) {
       console.log(e);
     } finally {
-      this.modal.close();
+      this.iframes.keychain.modal.close();
     }
+  }
+
+  openProfile() {
+    if (!this.profile || !this.iframes.profile.modal) {
+      console.error(new ProfileNotReady().message);
+      return;
+    }
+
+    this.iframes.profile.modal.open();
   }
 
   async disconnect() {

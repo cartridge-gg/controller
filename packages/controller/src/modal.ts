@@ -1,7 +1,15 @@
-export const createModal = (src: string, onClose?: () => void) => {
+export function createModal({
+  src,
+  id,
+  onClose,
+}: {
+  src: string;
+  id: string;
+  onClose?: () => void;
+}) {
   const iframe = document.createElement("iframe");
   iframe.src = src;
-  iframe.id = "cartridge-modal";
+  iframe.id = id;
   iframe.style.border = "none";
   iframe.sandbox.add("allow-forms");
   iframe.sandbox.add("allow-popups");
@@ -55,7 +63,7 @@ export const createModal = (src: string, onClose?: () => void) => {
     open,
     close,
   };
-};
+}
 
 const resize = (el: HTMLElement) => {
   if (window.innerWidth < 768) {

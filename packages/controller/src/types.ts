@@ -1,3 +1,4 @@
+import { Connection } from "@cartridge/penpal";
 import {
   constants,
   Abi,
@@ -76,6 +77,16 @@ export type DeployReply = {
   transaction_hash: string;
 };
 
+export type IFrames = {
+  keychain: IFrame<Keychain>;
+  profile: IFrame<Profile>;
+};
+
+export type IFrame<T extends {}> = {
+  connection?: Connection<T>;
+  modal: Modal;
+};
+
 export interface Keychain {
   probe(rpcUrl?: string): Promise<ProbeReply | ConnectError>;
   connect(
@@ -127,6 +138,8 @@ export interface Keychain {
   username(): string;
   delegateAccount(): string;
 }
+
+export interface Profile {}
 
 export interface Modal {
   element: HTMLDivElement;

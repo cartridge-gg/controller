@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { QueryParamsContext } from "./query";
 import { ThemeProviderContext } from "./theme";
+import { ConnectionContext } from "./connection";
 
 export function useQueryParams() {
   const context = useContext(QueryParamsContext);
@@ -17,4 +18,8 @@ export function useTheme() {
     throw new Error("useTheme must be used within a ThemeProvider");
 
   return context;
+}
+
+export function useConnection() {
+  return useContext(ConnectionContext);
 }

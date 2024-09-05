@@ -385,6 +385,9 @@ importers:
 
   packages/profile:
     dependencies:
+      '@cartridge/penpal':
+        specifier: ^6.2.3
+        version: 6.2.3
       '@cartridge/ui-next':
         specifier: workspace:^
         version: link:../ui-next

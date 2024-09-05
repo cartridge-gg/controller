@@ -12,6 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@cartridge/penpal": "^6.2.3",
     "@cartridge/ui-next": "workspace:^",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

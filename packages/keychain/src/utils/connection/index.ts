@@ -17,7 +17,7 @@ import { delegateAccount, setDelegateFactory } from "./delegate";
 import { openSettingsFactory } from "./settings";
 import { deployFactory } from "./deploy";
 
-export function connectToController({
+export function connectToController<ParentMethods extends {}>({
   setOrigin,
   setRpcUrl,
   setPolicies,
@@ -30,7 +30,7 @@ export function connectToController({
   setContext: (ctx: ConnectionCtx) => void;
   setController: (controller: Controller) => void;
 }) {
-  return connectToParent({
+  return connectToParent<ParentMethods>({
     methods: {
       connect: normalize(
         connectFactory({

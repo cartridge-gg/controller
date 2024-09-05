@@ -3,7 +3,7 @@
 import { Chain, mainnet, sepolia } from "@starknet-react/chains";
 import { StarknetConfig, starkscan } from "@starknet-react/core";
 import { PropsWithChildren } from "react";
-import CartridgeConnector from "@cartridge/connector";
+import ControllerConnector from "@cartridge/connector";
 import { RpcProvider, shortString } from "starknet";
 
 export function StarknetProvider({ children }: PropsWithChildren) {
@@ -23,7 +23,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
 const ETH_TOKEN_ADDRESS =
   "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 
-const controller = new CartridgeConnector({
+const controller = new ControllerConnector({
   policies: [
     {
       target: ETH_TOKEN_ADDRESS,
