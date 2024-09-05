@@ -61,9 +61,10 @@ export function Funding(innerProps: FundingInnerProps) {
 
 type FundingInnerProps = {
   onComplete: (deployHash?: string) => void;
+  title?: React.ReactElement;
 };
 
-function FundingInner({ onComplete }: FundingInnerProps) {
+function FundingInner({ onComplete, title }: FundingInnerProps) {
   const { account: extAccount } = useAccount();
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
   const { controller, chainId, chainName } = useConnection();
@@ -163,7 +164,14 @@ function FundingInner({ onComplete }: FundingInnerProps) {
 
   return (
     <Container
-      title={`Fund ${controller.username}`}
+      title={
+        title || (
+          <>
+            Fund{" "}
+            <b style={{ color: "brand.primary" }}>${controller.username}</b>
+          </>
+        )
+      }
       description={<CopyAddress address={controller.address} />}
       // TODO: Add line icons
       Icon={CoinsIcon}
@@ -171,7 +179,7 @@ function FundingInner({ onComplete }: FundingInnerProps) {
       <Content gap={6}>
         <HStack w="full">
           <Text color="text.secondary" fontSize="sm">
-            Send assets below to your controller address.
+            Send funds below to your controller address.
           </Text>
 
           <Spacer />

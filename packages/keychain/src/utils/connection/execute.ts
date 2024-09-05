@@ -19,7 +19,7 @@ import { JsCall } from "@cartridge/account-wasm";
 
 export const ESTIMATE_FEE_PERCENTAGE = 10;
 
-export function executeFactory({
+export function execute({
   setContext,
 }: {
   setContext: (context: ConnectionCtx) => void;
@@ -31,37 +31,22 @@ export function executeFactory({
       transactionsDetail?: InvocationsDetails,
       sync?: boolean,
       paymaster?: PaymasterOptions,
-      paymasterError?: Error,
     ): Promise<ExecuteReply | ConnectError> => {
-      if (paymasterError) {
-        return await new Promise((resolve, reject) => {
-          setContext({
-            type: "execute",
-            origin,
-            transactions,
-            abis,
-            transactionsDetail,
-            paymasterError,
-            resolve,
-            reject,
-          } as ExecuteCtx);
-        });
-      }
-      if (sync) {
-        return await new Promise((resolve, reject) => {
-          setContext({
-            type: "execute",
-            origin,
-            transactions,
-            abis,
-            transactionsDetail,
-            resolve,
-            reject,
-          } as ExecuteCtx);
-        });
-      }
-
       try {
+        if (sync) {
+          return await new Promise((resolve, reject) => {
+            setContext({
+              type: "execute",
+              origin,
+              transactions,
+              abis,
+              transactionsDetail,
+              resolve,
+              reject,
+            } as ExecuteCtx);
+          });
+        }
+
         const account = controller.account;
         const calls = normalizeCalls(transactions);
 
@@ -70,47 +55,22 @@ export function executeFactory({
         }
 
         if (paymaster) {
-          try {
-            const transaction_hash = await account.executeFromOutside(
-              calls,
-              paymaster,
-            );
+          const transaction_hash = await account.executeFromOutside(
+            calls,
+            paymaster,
+          );
 
-            return {
-              code: ResponseCodes.SUCCESS,
-              transaction_hash,
-            };
-          } catch (error) {
-            /* user pays */
-            return {
-              code: ResponseCodes.PAYMASTER_ERROR,
-              message: error.message,
-            };
-          }
+          return {
+            code: ResponseCodes.SUCCESS,
+            transaction_hash,
+          };
         }
 
         let { maxFee } = transactionsDetail;
         if (!maxFee) {
-          let estFee;
-          try {
-            estFee = await account.cartridge.estimateInvokeFee(calls);
-          } catch (error) {
-            if (
-              error instanceof Error &&
-              (error.message.includes("ContractNotFound") ||
-                error.message.includes("is not deployed"))
-            ) {
-              return {
-                code: ResponseCodes.NOT_DEPLOYED,
-                message: error.message,
-              };
-            }
-
-            throw error;
-          }
-
+          let res = await account.cartridge.estimateInvokeFee(calls);
           maxFee = num.toHex(
-            num.addPercent(estFee.overall_fee, ESTIMATE_FEE_PERCENTAGE),
+            num.addPercent(res.overall_fee, ESTIMATE_FEE_PERCENTAGE),
           );
         }
 
@@ -121,8 +81,9 @@ export function executeFactory({
         };
       } catch (e) {
         return {
-          code: ResponseCodes.NOT_ALLOWED,
+          code: ResponseCodes.ERROR,
           message: e.message,
+          error: e,
         };
       }
     };

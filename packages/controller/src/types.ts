@@ -14,7 +14,6 @@ import {
   DeployAccountSignerDetails,
   DeclareSignerDetails,
 } from "starknet";
-import { PaymasterError } from "./errors";
 
 export type Session = {
   chainId: constants.StarknetChainId;
@@ -36,22 +35,14 @@ export type Policy = {
 export enum ResponseCodes {
   SUCCESS = "SUCCESS",
   NOT_CONNECTED = "NOT_CONNECTED",
-  NOT_DEPLOYED = "NOT_DEPLOYED",
-  NOT_ALLOWED = "NOT_ALLOWED",
-  EXECUTION_ERROR = "EXECUTION_ERROR",
-  PAYMASTER_ERROR = "PAYMASTER_ERROR",
+  ERROR = "ERROR",
   CANCELED = "CANCELED",
 }
-
-export type ExecutionErrorData = {
-  execution_error: string;
-  transaction_index: number;
-};
 
 export type ConnectError = {
   code: ResponseCodes;
   message: string;
-  data?: ExecutionErrorData;
+  error?: Error;
 };
 
 export type ConnectReply = {
@@ -100,7 +91,6 @@ export interface Keychain {
     transactionsDetail?: InvocationsDetails,
     sync?: boolean,
     paymaster?: PaymasterOptions,
-    paymasterError?: PaymasterError,
   ): Promise<ExecuteReply | ConnectError>;
   logout(): Promise<void>;
   openMenu(): Promise<void | ConnectError>;

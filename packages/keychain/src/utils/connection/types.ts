@@ -4,7 +4,6 @@ import {
   Policy,
   ConnectError,
   DeployReply,
-  PaymasterError,
 } from "@cartridge/controller";
 import {
   Abi,
@@ -49,7 +48,6 @@ export type ExecuteCtx = {
   transactionsDetail?: InvocationsDetails & {
     chainId?: constants.StarknetChainId;
   };
-  paymasterError?: PaymasterError;
   resolve: (res: ExecuteReply | ConnectError) => void;
   reject: (reason?: unknown) => void;
   onCancel: () => void;

@@ -38,7 +38,20 @@ export function InvalidTxn() {
             ])
           }
         >
-          Invalid Paymaster Transfer
+          Invalid Session Invoke Calldata
+        </Button>
+        <Button
+          onClick={() =>
+            account.execute([
+              {
+                contractAddress: ETH_CONTRACT,
+                entrypoint: "register_governance_admin",
+                calldata: [],
+              },
+            ])
+          }
+        >
+          Invalid Manual Invoke Calldata
         </Button>
         <Button onClick={() => invalidEntrypoint()}>Invalid Entrypoint</Button>
       </div>

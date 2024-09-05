@@ -8,16 +8,28 @@ import {
   Spacer,
   HStack,
   Box,
+  VStack,
+  Link,
+  Table,
+  Tbody,
+  Tr,
+  Td,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { ReactElement } from "react";
+import { ErrorType, JsControllerError } from "@cartridge/account-wasm";
+import { formatAddress } from "utils/contracts";
 
 export function ErrorAlert({
   title,
   description,
+  variant = "error",
+  isExpanded = false,
 }: {
   title: string;
   description?: string | ReactElement;
+  variant?: string;
+  isExpanded?: boolean;
 }) {
   return (
     <Accordion
@@ -25,15 +37,19 @@ export function ErrorAlert({
       w="full"
       initial={{ height: 0 }}
       animate={{ height: "auto" }}
-      allowToggle
-      variant="error"
+      allowToggle={!isExpanded}
+      defaultIndex={isExpanded ? [0] : undefined}
+      variant={variant}
       color="solid.bg"
       fontSize="sm"
     >
       <AccordionItem position="relative">
-        {({ isExpanded }) => (
+        {({ isExpanded: itemExpanded }) => (
           <>
-            <AccordionButton disabled={!description} color="solid.bg">
+            <AccordionButton
+              disabled={!description || isExpanded}
+              color="solid.bg"
+            >
               <HStack>
                 <AlertIcon />
                 <Text
@@ -48,11 +64,11 @@ export function ErrorAlert({
 
               <Spacer />
 
-              {description && (
+              {description && !isExpanded && (
                 <Box
                   as={motion.div}
                   animate={{
-                    rotate: isExpanded ? 180 : 0,
+                    rotate: itemExpanded ? 180 : 0,
                   }}
                 >
                   <WedgeDownIcon boxSize={5} color="solid.bg" />
@@ -62,12 +78,209 @@ export function ErrorAlert({
 
             {description && (
               <AccordionPanel maxH={200}>
-                <Text color="solid.bg">{description}</Text>
+                {typeof description === "string" ? (
+                  <Text color="solid.bg">{description}</Text>
+                ) : (
+                  description
+                )}
               </AccordionPanel>
             )}
           </>
         )}
       </AccordionItem>
     </Accordion>
+  );
+}
+
+export function ControllerErrorAlert({ error }: { error: JsControllerError }) {
+  let title = "An error occurred";
+  let description: string | React.ReactElement = error.message;
+  let isExpanded = false;
+  let variant = "error";
+
+  switch (error.error_type) {
+    case ErrorType.SignError:
+      title = "Signing Error";
+      break;
+    case ErrorType.StorageError:
+      title = "Storage Error";
+      break;
+    case ErrorType.AccountFactoryError:
+      title = "Account Creation Error";
+      break;
+    case ErrorType.CartridgeControllerNotDeployed:
+      title = "Your Controller is not deployed";
+      description =
+        "Lets fund your Controller and deploy it before we can start executing transactions.";
+      isExpanded = true;
+      variant = "error";
+      break;
+    case ErrorType.CartridgeProviderError:
+      title = "Provider Error";
+      break;
+    case ErrorType.OriginError:
+      title = "Origin Error";
+      break;
+    case ErrorType.EncodingError:
+      title = "Encoding Error";
+      break;
+    case ErrorType.SerdeWasmBindgenError:
+      title = "Serialization Error";
+      break;
+    case ErrorType.CairoSerdeError:
+      title = "Cairo Serialization Error";
+      break;
+    case ErrorType.CairoShortStringToFeltError:
+      title = "Cairo String Conversion Error";
+      break;
+    case ErrorType.DeviceCreateCredential:
+    case ErrorType.DeviceGetAssertion:
+    case ErrorType.DeviceBadAssertion:
+    case ErrorType.DeviceChannel:
+    case ErrorType.DeviceOrigin:
+      title = "Device Error";
+      break;
+    case ErrorType.AccountSigning:
+    case ErrorType.AccountProvider:
+    case ErrorType.AccountClassHashCalculation:
+    case ErrorType.AccountClassCompression:
+    case ErrorType.AccountFeeOutOfRange:
+      title = "Account Error";
+      break;
+    case ErrorType.ProviderRateLimited:
+    case ErrorType.ProviderArrayLengthMismatch:
+    case ErrorType.ProviderOther:
+      title = "Provider Error";
+      break;
+    // Starknet errors
+    case ErrorType.StarknetFailedToReceiveTransaction:
+    case ErrorType.StarknetContractNotFound:
+    case ErrorType.StarknetClassHashNotFound:
+    case ErrorType.StarknetTransactionHashNotFound:
+    case ErrorType.StarknetNoBlocks:
+    case ErrorType.StarknetInvalidContinuationToken:
+    case ErrorType.StarknetTooManyKeysInFilter:
+    case ErrorType.StarknetContractError:
+    case ErrorType.StarknetClassAlreadyDeclared:
+    case ErrorType.StarknetInvalidTransactionNonce:
+    case ErrorType.StarknetInsufficientMaxFee:
+    case ErrorType.StarknetInsufficientAccountBalance:
+    case ErrorType.StarknetValidationFailure:
+    case ErrorType.StarknetCompilationFailed:
+    case ErrorType.StarknetContractClassSizeIsTooLarge:
+    case ErrorType.StarknetNonAccount:
+    case ErrorType.StarknetDuplicateTx:
+    case ErrorType.StarknetCompiledClassHashMismatch:
+    case ErrorType.StarknetUnsupportedTxVersion:
+    case ErrorType.StarknetUnsupportedContractClassVersion:
+    case ErrorType.StarknetUnexpectedError:
+    case ErrorType.StarknetNoTraceAvailable:
+      title = "Starknet Error";
+      break;
+    case ErrorType.StarknetTransactionExecutionError:
+      title = "Execution error expected";
+      description = (() => {
+        try {
+          const errorDetails = JSON.parse(error.details);
+          let executionError: string = errorDetails.execution_error;
+
+          if (!executionError) {
+            return <Text>{error.details}</Text>;
+          }
+
+          // Remove the "Transaction reverted: Transaction execution has failed:\n" prefix
+          executionError = executionError.replace(
+            /^Transaction reverted: Transaction execution has failed:\n/,
+            "",
+          );
+
+          const stackTrace = executionError.split(/\n\d+: /);
+
+          return <StackTraceDisplay stackTrace={stackTrace} />;
+        } catch (e) {
+          return <Text>{error.details}</Text>;
+        }
+      })();
+      break;
+    default:
+      title = "Unknown Error";
+  }
+
+  return (
+    <ErrorAlert
+      title={title}
+      description={description}
+      variant={variant}
+      isExpanded={isExpanded}
+    />
+  );
+}
+
+function StackTraceDisplay({ stackTrace }: { stackTrace: string[] }) {
+  return (
+    <VStack align="start" spacing={2}>
+      {stackTrace.map((trace, index) => {
+        const extractedInfo = {
+          ["Address"]: trace.match(/contract address: (0x[a-fA-F0-9]+)/)?.[1],
+          ["Class"]: trace.match(/class hash: (0x[a-fA-F0-9]+)/)?.[1],
+          ["Selector"]: trace.match(/selector: (0x[a-fA-F0-9]+)/)?.[1],
+          Error:
+            trace.match(/Error at pc=.*:\n(.*)/)?.[1] ||
+            trace.match(/Entry point .* not found in contract./)?.[0] ||
+            trace.split("\n").slice(1).join("\n").trim() ||
+            "Unknown error",
+        };
+
+        // Map "Entry point not found" error to a more human-readable message
+        if (
+          extractedInfo.Error &&
+          extractedInfo.Error.includes("Entry point")
+        ) {
+          extractedInfo.Error = "Function not found in the contract";
+        }
+
+        return (
+          <VStack key={index} align="start" spacing={1}>
+            <VStack align="start" spacing={1} width="100%">
+              {Object.entries(extractedInfo).map(
+                ([key, value]) =>
+                  value && (
+                    <HStack
+                      key={key}
+                      width="100%"
+                      justifyContent="space-between"
+                    >
+                      <Text fontWeight="bold" fontSize="sm">
+                        {key}
+                      </Text>
+                      {key === "Address" || key === "Class" ? (
+                        <Link
+                          href={`https://starkscan.co/${
+                            key === "Address" ? "contract" : "class"
+                          }/${value}`}
+                          isExternal
+                          color="blue.500"
+                          fontSize="sm"
+                          wordBreak="break-all"
+                        >
+                          {formatAddress(value, { first: 10, last: 10 })}
+                        </Link>
+                      ) : key === "Selector" ? (
+                        <Text fontSize="sm" wordBreak="break-all">
+                          {formatAddress(value, { first: 10, last: 10 })}
+                        </Text>
+                      ) : (
+                        <Text fontSize="sm" wordBreak="break-all">
+                          {value}
+                        </Text>
+                      )}
+                    </HStack>
+                  ),
+              )}
+            </VStack>
+          </VStack>
+        );
+      })}
+    </VStack>
   );
 }

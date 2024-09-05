@@ -20,12 +20,3 @@ export class NotReadyToConnect extends Error {
     Object.setPrototypeOf(this, NotReadyToConnect.prototype);
   }
 }
-
-export class PaymasterError extends Error {
-  constructor(message: string) {
-    super(message);
-
-    this.name = "PaymasterError";
-    this.message = message;
-  }
-}

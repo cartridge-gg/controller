@@ -1,7 +1,61 @@
 /* tslint:disable */
 /* eslint-disable */
-export interface JsEstimateFeeDetails {
+/**
+*/
+export enum ErrorType {
+  SignError = 0,
+  StorageError = 1,
+  AccountFactoryError = 2,
+  CartridgeProviderError = 3,
+  CartridgeControllerNotDeployed = 4,
+  OriginError = 5,
+  EncodingError = 6,
+  SerdeWasmBindgenError = 7,
+  CairoSerdeError = 8,
+  CairoShortStringToFeltError = 9,
+  DeviceCreateCredential = 10,
+  DeviceGetAssertion = 11,
+  DeviceBadAssertion = 12,
+  DeviceChannel = 13,
+  DeviceOrigin = 14,
+  AccountSigning = 15,
+  AccountProvider = 16,
+  AccountClassHashCalculation = 17,
+  AccountClassCompression = 18,
+  AccountFeeOutOfRange = 19,
+  ProviderRateLimited = 20,
+  ProviderArrayLengthMismatch = 21,
+  ProviderOther = 22,
+  StarknetFailedToReceiveTransaction = 23,
+  StarknetContractNotFound = 24,
+  StarknetBlockNotFound = 25,
+  StarknetInvalidTransactionIndex = 26,
+  StarknetClassHashNotFound = 27,
+  StarknetTransactionHashNotFound = 28,
+  StarknetPageSizeTooBig = 29,
+  StarknetNoBlocks = 30,
+  StarknetInvalidContinuationToken = 31,
+  StarknetTooManyKeysInFilter = 32,
+  StarknetContractError = 33,
+  StarknetTransactionExecutionError = 34,
+  StarknetClassAlreadyDeclared = 35,
+  StarknetInvalidTransactionNonce = 36,
+  StarknetInsufficientMaxFee = 37,
+  StarknetInsufficientAccountBalance = 38,
+  StarknetValidationFailure = 39,
+  StarknetCompilationFailed = 40,
+  StarknetContractClassSizeIsTooLarge = 41,
+  StarknetNonAccount = 42,
+  StarknetDuplicateTx = 43,
+  StarknetCompiledClassHashMismatch = 44,
+  StarknetUnsupportedTxVersion = 45,
+  StarknetUnsupportedContractClassVersion = 46,
+  StarknetUnexpectedError = 47,
+  StarknetNoTraceAvailable = 48,
+}
+export interface JsInvocationsDetails {
     nonce: Felt;
+    maxFee: Felt;
 }
 
 export interface JsOutsideExecution {
@@ -12,9 +66,14 @@ export interface JsOutsideExecution {
     nonce: Felt;
 }
 
-export interface JsInvocationsDetails {
+export interface JsCall {
+    contractAddress: Felt;
+    entrypoint: string;
+    calldata: Felt[];
+}
+
+export interface JsEstimateFeeDetails {
     nonce: Felt;
-    maxFee: Felt;
 }
 
 export type Felts = JsFelt[];
@@ -29,12 +88,6 @@ export interface JsSession {
 export interface JsCredentials {
     authorization: Felt[];
     privateKey: Felt;
-}
-
-export interface JsCall {
-    contractAddress: Felt;
-    entrypoint: string;
-    calldata: Felt[];
 }
 
 export interface JsPolicy {
@@ -172,4 +225,18 @@ export class CartridgeSessionAccount {
 * @returns {Promise<any>}
 */
   execute_from_outside(calls: (JsCall)[]): Promise<any>;
+}
+/**
+*/
+export class JsControllerError {
+  free(): void;
+/**
+*/
+  details?: string;
+/**
+*/
+  error_type: ErrorType;
+/**
+*/
+  message: string;
 }

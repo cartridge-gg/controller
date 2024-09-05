@@ -11,11 +11,13 @@ import {
 import { TransactionDuoIcon } from "@cartridge/ui";
 import { InsufficientFunds } from "./InsufficientFunds";
 import { useConnection } from "hooks/connection";
-import { ErrorAlert } from "components/ErrorAlert";
+import { ControllerErrorAlert } from "components/ErrorAlert";
 import { Policies } from "Policies";
 import { Fees } from "./Fees";
 import { ExecuteCtx } from "utils/connection";
 import { num } from "starknet";
+import { ErrorType, JsControllerError } from "@cartridge/account-wasm";
+import { DeploymentRequired } from "components/DeploymentRequired";
 
 export const WEBAUTHN_GAS = 3300n;
 export const CONTRACT_ETH =
@@ -26,10 +28,11 @@ export function Execute() {
   const ctx = context as ExecuteCtx;
 
   const [maxFee, setMaxFee] = useState<bigint>(0n);
-  const [error, setError] = useState<Error>();
+  const [error, setError] = useState<JsControllerError>();
   const [isLoading, setLoading] = useState<boolean>(false);
   const [ethBalance, setEthBalance] = useState<bigint>(0n);
   const [isInsufficient, setIsInsufficient] = useState<boolean>(false);
+  const [isDeploy, setIsDeploy] = useState<boolean>(false);
 
   const account = controller.account;
   const calls = useMemo(() => {
@@ -53,11 +56,17 @@ export function Execute() {
       try {
         const balance = await getEthBalance(account, controller.address);
         setEthBalance(balance);
-        const maxFee = await calculateMaxFee(ctx, account, calls, balance);
+        const maxFee = await calculateMaxFee(
+          ctx,
+          controller.account,
+          calls,
+          balance,
+        );
         setMaxFee(maxFee);
       } catch (e) {
         if (e instanceof Error && e.message === "Insufficient funds") {
           setIsInsufficient(true);
+          return;
         }
         setError(e);
       }
@@ -195,6 +204,11 @@ export function Execute() {
     return <InsufficientFunds balance={format(ethBalance)} />;
   }
 
+  if (isDeploy) {
+    console.log("do deploy");
+    return <DeploymentRequired onClose={() => { }} />;
+  }
+
   return (
     <Container
       Icon={TransactionDuoIcon}
@@ -206,32 +220,32 @@ export function Execute() {
       </Content>
 
       <Footer>
-        {ctx.paymasterError ? (
-          <ErrorAlert
-            title="Something went wrong with the Paymaster"
-            description={ctx.paymasterError.message}
-          />
-        ) : error ? (
-          error.name === "TransferAmountExceedsBalance" ? (
-            <ErrorAlert title={error.message} />
-          ) : (
-            <ErrorAlert
-              title="Something went wrong"
-              description={error.message}
-            />
-          )
+        {error ? (
+          <ControllerErrorAlert error={error} />
         ) : (
           <Fees maxFee={maxFee} />
         )}
 
-        <Button
-          colorScheme="colorful"
-          onClick={onSubmit}
-          isLoading={isLoading}
-          isDisabled={!maxFee}
-        >
-          submit
-        </Button>
+        {error &&
+          error.error_type == ErrorType.CartridgeControllerNotDeployed ? (
+          <Button
+            colorScheme="colorful"
+            onClick={() => {
+              setIsDeploy(true);
+            }}
+          >
+            DEPLOY ACCOUNT
+          </Button>
+        ) : (
+          <Button
+            colorScheme="colorful"
+            onClick={onSubmit}
+            isLoading={isLoading}
+            isDisabled={!maxFee}
+          >
+            submit
+          </Button>
+        )}
 
         <Button
           onClick={() => {

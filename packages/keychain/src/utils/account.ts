@@ -107,13 +107,9 @@ class Account extends BaseAccount {
 
   async estimateInvokeFee(
     calls: AllowArray<Call>,
-    details: EstimateFeeDetails = {},
+    _: EstimateFeeDetails = {},
   ): Promise<EstimateFee> {
-    details.blockIdentifier = details.blockIdentifier ?? "pending";
-    details.nonce = details.nonce ?? (await super.getNonce("pending"));
-
-    // TODO: use estimateInvokeFee from wasm once it can return full rpc errors
-    return await super.estimateInvokeFee(calls, details);
+    return await this.cartridge.estimateInvokeFee(normalizeCalls(calls), 1.5);
   }
 
   async verifyMessageHash(

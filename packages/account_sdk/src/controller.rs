@@ -8,7 +8,7 @@ use crate::constants::ACCOUNT_CLASS_HASH;
 use crate::factory::ControllerFactory;
 use crate::hash::MessageHashRev1;
 use crate::provider::{CartridgeProvider, CartridgeProviderError};
-use crate::signers::{DeviceError, Signer};
+use crate::signers::Signer;
 use crate::storage::{Credentials, Selectors, SessionMetadata, StorageBackend, StorageValue};
 use crate::{
     abigen::{self},
@@ -21,8 +21,9 @@ use cainome::cairo_serde::{self, CairoSerde, NonZero};
 use starknet::accounts::{
     AccountDeploymentV1, AccountError, AccountFactory, AccountFactoryError, ExecutionV1,
 };
-use starknet::core::types::{Call, FeeEstimate, InvokeTransactionResult};
-use starknet::core::utils::{cairo_short_string_to_felt, CairoShortStringToFeltError};
+use starknet::core::types::{Call, FeeEstimate, InvokeTransactionResult, StarknetError};
+use starknet::core::utils::cairo_short_string_to_felt;
+use starknet::providers::ProviderError;
 use starknet::signers::SignerInteractivityContext;
 use starknet::{
     accounts::{Account, ConnectedAccount, ExecutionEncoder},
@@ -35,19 +36,16 @@ pub trait Backend: StorageBackend + OriginProvider {}
 #[derive(Debug, thiserror::Error)]
 pub enum ControllerError {
     #[error(transparent)]
-    DeviceError(#[from] DeviceError),
-
-    #[error(transparent)]
     SignError(#[from] SignError),
 
     #[error(transparent)]
     StorageError(#[from] crate::storage::StorageError),
 
     #[error(transparent)]
-    ProviderError(#[from] starknet::providers::ProviderError),
-
-    #[error(transparent)]
     AccountError(#[from] AccountError<SignError>),
+
+    #[error("Controller is not deployed")]
+    NotDeployed,
 
     #[error(transparent)]
     AccountFactoryError(#[from] AccountFactoryError<SignError>),
@@ -55,14 +53,8 @@ pub enum ControllerError {
     #[error(transparent)]
     CartridgeProviderError(#[from] CartridgeProviderError),
 
-    #[error("Origin error: {0}")]
-    OriginError(String),
-
     #[error(transparent)]
     CairoSerde(#[from] cairo_serde::Error),
-
-    #[error(transparent)]
-    CairoShortStringToFeltEror(#[from] CairoShortStringToFeltError),
 }
 
 pub struct Controller<P, B>
@@ -212,7 +204,20 @@ where
             .fee_estimate_multiplier(multiplier)
             .estimate_fee()
             .await
-            .map_err(ControllerError::AccountError)
+            .map_err(|e| {
+                if let AccountError::Provider(ProviderError::StarknetError(
+                    StarknetError::TransactionExecutionError(data),
+                )) = &e
+                {
+                    if data
+                        .execution_error
+                        .contains(&format!("{:x} is not deployed.", self.account.address))
+                    {
+                        return ControllerError::NotDeployed;
+                    }
+                }
+                ControllerError::AccountError(e)
+            })
     }
 
     pub async fn execute(
@@ -226,7 +231,20 @@ where
             .nonce(nonce)
             .send()
             .await
-            .map_err(ControllerError::AccountError)
+            .map_err(|e| {
+                if let AccountError::Provider(ProviderError::StarknetError(
+                    StarknetError::TransactionExecutionError(data),
+                )) = &e
+                {
+                    if data
+                        .execution_error
+                        .contains(&format!("{:x} is not deployed.", self.account.address))
+                    {
+                        return ControllerError::NotDeployed;
+                    }
+                }
+                ControllerError::AccountError(e)
+            })
     }
 
     pub fn session_metadata(&self) -> Option<SessionMetadata> {

@@ -15,7 +15,6 @@ import {
 import { Keychain, ResponseCodes, Modal, PaymasterOptions } from "./types";
 import { Signer } from "./signer";
 import { AsyncMethodReturns } from "@cartridge/penpal";
-import { PaymasterError } from "./errors";
 
 class DeviceAccount extends Account {
   address: string;
@@ -87,49 +86,36 @@ class DeviceAccount extends Account {
     calls: Call | Call[],
     abis?: Abi[],
     transactionsDetail: InvocationsDetails = {},
-    paymasterError?: PaymasterError,
   ): Promise<InvokeFunctionResponse> {
     try {
-      if (paymasterError) {
-        this.modal.open();
-      }
       let res = await this.keychain.execute(
         calls,
         abis,
         transactionsDetail,
         false,
         this.paymaster,
-        paymasterError,
       );
 
       if (res.code === ResponseCodes.SUCCESS) {
         return res as InvokeFunctionResponse;
       }
 
-      if (res.code === ResponseCodes.PAYMASTER_ERROR) {
-        return await this.execute(
-          calls,
-          abis,
-          transactionsDetail,
-          new PaymasterError(res.message),
-        );
-      }
-
       this.modal.open();
 
-      if (res.code === ResponseCodes.EXECUTION_ERROR) {
-        return Promise.reject(res.data);
-      }
+      // if (res.code === ResponseCodes.ERROR) {
+      //   return Promise.reject(res.error);
+      // }
 
-      if (res.code === ResponseCodes.NOT_DEPLOYED) {
-        res = await this.keychain.deploy();
-        if (res.code !== ResponseCodes.SUCCESS) {
-          return Promise.reject(res.message);
-        }
-      }
+      res = await this.keychain.execute(
+        calls,
+        abis,
+        transactionsDetail,
+        true,
+        this.paymaster,
+      );
 
       if (res.code !== ResponseCodes.SUCCESS) {
-        return Promise.reject(res.message);
+        return Promise.reject(res.error);
       }
 
       return res as InvokeFunctionResponse;

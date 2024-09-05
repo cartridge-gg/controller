@@ -8,7 +8,7 @@ use starknet_types_core::felt::Felt;
 use tsify_next::Tsify;
 use wasm_bindgen::prelude::*;
 
-use crate::errors::EncodingError;
+use super::EncodingError;
 
 #[serde_as]
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]

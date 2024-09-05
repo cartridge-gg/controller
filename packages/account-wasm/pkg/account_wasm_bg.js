@@ -33,7 +33,11 @@ function addHeapObject(obj) {
     return idx;
 }
 
-let WASM_VECTOR_LEN = 0;
+const lTextDecoder = typeof TextDecoder === 'undefined' ? (0, module.require)('util').TextDecoder : TextDecoder;
+
+let cachedTextDecoder = new lTextDecoder('utf-8', { ignoreBOM: true, fatal: true });
+
+cachedTextDecoder.decode();
 
 let cachedUint8ArrayMemory0 = null;
 
@@ -43,6 +47,13 @@ function getUint8ArrayMemory0() {
     }
     return cachedUint8ArrayMemory0;
 }
+
+function getStringFromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return cachedTextDecoder.decode(getUint8ArrayMemory0().subarray(ptr, ptr + len));
+}
+
+let WASM_VECTOR_LEN = 0;
 
 const lTextEncoder = typeof TextEncoder === 'undefined' ? (0, module.require)('util').TextEncoder : TextEncoder;
 
@@ -100,10 +111,6 @@ function passStringToWasm0(arg, malloc, realloc) {
     return ptr;
 }
 
-function isLikeNone(x) {
-    return x === undefined || x === null;
-}
-
 let cachedDataViewMemory0 = null;
 
 function getDataViewMemory0() {
@@ -113,15 +120,8 @@ function getDataViewMemory0() {
     return cachedDataViewMemory0;
 }
 
-const lTextDecoder = typeof TextDecoder === 'undefined' ? (0, module.require)('util').TextDecoder : TextDecoder;
-
-let cachedTextDecoder = new lTextDecoder('utf-8', { ignoreBOM: true, fatal: true });
-
-cachedTextDecoder.decode();
-
-function getStringFromWasm0(ptr, len) {
-    ptr = ptr >>> 0;
-    return cachedTextDecoder.decode(getUint8ArrayMemory0().subarray(ptr, ptr + len));
+function isLikeNone(x) {
+    return x === undefined || x === null;
 }
 
 function debugString(val) {
@@ -240,9 +240,13 @@ function handleError(f, args) {
         wasm.__wbindgen_exn_store(addHeapObject(e));
     }
 }
-function __wbg_adapter_185(arg0, arg1, arg2, arg3) {
+function __wbg_adapter_193(arg0, arg1, arg2, arg3) {
     wasm.wasm_bindgen__convert__closures__invoke2_mut__h06f5a6b5a9886359(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
 }
+
+/**
+*/
+export const ErrorType = Object.freeze({ SignError:0,"0":"SignError",StorageError:1,"1":"StorageError",AccountFactoryError:2,"2":"AccountFactoryError",CartridgeProviderError:3,"3":"CartridgeProviderError",CartridgeControllerNotDeployed:4,"4":"CartridgeControllerNotDeployed",OriginError:5,"5":"OriginError",EncodingError:6,"6":"EncodingError",SerdeWasmBindgenError:7,"7":"SerdeWasmBindgenError",CairoSerdeError:8,"8":"CairoSerdeError",CairoShortStringToFeltError:9,"9":"CairoShortStringToFeltError",DeviceCreateCredential:10,"10":"DeviceCreateCredential",DeviceGetAssertion:11,"11":"DeviceGetAssertion",DeviceBadAssertion:12,"12":"DeviceBadAssertion",DeviceChannel:13,"13":"DeviceChannel",DeviceOrigin:14,"14":"DeviceOrigin",AccountSigning:15,"15":"AccountSigning",AccountProvider:16,"16":"AccountProvider",AccountClassHashCalculation:17,"17":"AccountClassHashCalculation",AccountClassCompression:18,"18":"AccountClassCompression",AccountFeeOutOfRange:19,"19":"AccountFeeOutOfRange",ProviderRateLimited:20,"20":"ProviderRateLimited",ProviderArrayLengthMismatch:21,"21":"ProviderArrayLengthMismatch",ProviderOther:22,"22":"ProviderOther",StarknetFailedToReceiveTransaction:23,"23":"StarknetFailedToReceiveTransaction",StarknetContractNotFound:24,"24":"StarknetContractNotFound",StarknetBlockNotFound:25,"25":"StarknetBlockNotFound",StarknetInvalidTransactionIndex:26,"26":"StarknetInvalidTransactionIndex",StarknetClassHashNotFound:27,"27":"StarknetClassHashNotFound",StarknetTransactionHashNotFound:28,"28":"StarknetTransactionHashNotFound",StarknetPageSizeTooBig:29,"29":"StarknetPageSizeTooBig",StarknetNoBlocks:30,"30":"StarknetNoBlocks",StarknetInvalidContinuationToken:31,"31":"StarknetInvalidContinuationToken",StarknetTooManyKeysInFilter:32,"32":"StarknetTooManyKeysInFilter",StarknetContractError:33,"33":"StarknetContractError",StarknetTransactionExecutionError:34,"34":"StarknetTransactionExecutionError",StarknetClassAlreadyDeclared:35,"35":"StarknetClassAlreadyDeclared",StarknetInvalidTransactionNonce:36,"36":"StarknetInvalidTransactionNonce",StarknetInsufficientMaxFee:37,"37":"StarknetInsufficientMaxFee",StarknetInsufficientAccountBalance:38,"38":"StarknetInsufficientAccountBalance",StarknetValidationFailure:39,"39":"StarknetValidationFailure",StarknetCompilationFailed:40,"40":"StarknetCompilationFailed",StarknetContractClassSizeIsTooLarge:41,"41":"StarknetContractClassSizeIsTooLarge",StarknetNonAccount:42,"42":"StarknetNonAccount",StarknetDuplicateTx:43,"43":"StarknetDuplicateTx",StarknetCompiledClassHashMismatch:44,"44":"StarknetCompiledClassHashMismatch",StarknetUnsupportedTxVersion:45,"45":"StarknetUnsupportedTxVersion",StarknetUnsupportedContractClassVersion:46,"46":"StarknetUnsupportedContractClassVersion",StarknetUnexpectedError:47,"47":"StarknetUnexpectedError",StarknetNoTraceAvailable:48,"48":"StarknetNoTraceAvailable", });
 
 const CartridgeAccountFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
@@ -577,6 +581,101 @@ export class CartridgeSessionAccount {
     }
 }
 
+const JsControllerErrorFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_jscontrollererror_free(ptr >>> 0, 1));
+/**
+*/
+export class JsControllerError {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(JsControllerError.prototype);
+        obj.__wbg_ptr = ptr;
+        JsControllerErrorFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        JsControllerErrorFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_jscontrollererror_free(ptr, 0);
+    }
+    /**
+    * @returns {ErrorType}
+    */
+    get error_type() {
+        const ret = wasm.__wbg_get_jscontrollererror_error_type(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+    * @param {ErrorType} arg0
+    */
+    set error_type(arg0) {
+        wasm.__wbg_set_jscontrollererror_error_type(this.__wbg_ptr, arg0);
+    }
+    /**
+    * @returns {string}
+    */
+    get message() {
+        let deferred1_0;
+        let deferred1_1;
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.__wbg_get_jscontrollererror_message(retptr, this.__wbg_ptr);
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            deferred1_0 = r0;
+            deferred1_1 = r1;
+            return getStringFromWasm0(r0, r1);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+            wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+        }
+    }
+    /**
+    * @param {string} arg0
+    */
+    set message(arg0) {
+        const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_jscontrollererror_message(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+    * @returns {string | undefined}
+    */
+    get details() {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.__wbg_get_jscontrollererror_details(retptr, this.__wbg_ptr);
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            let v1;
+            if (r0 !== 0) {
+                v1 = getStringFromWasm0(r0, r1).slice();
+                wasm.__wbindgen_free(r0, r1 * 1, 1);
+            }
+            return v1;
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+    * @param {string | undefined} [arg0]
+    */
+    set details(arg0) {
+        var ptr0 = isLikeNone(arg0) ? 0 : passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_jscontrollererror_details(this.__wbg_ptr, ptr0, len0);
+    }
+}
+
 export function __wbindgen_object_drop_ref(arg0) {
     takeObject(arg0);
 };
@@ -586,17 +685,13 @@ export function __wbindgen_object_clone_ref(arg0) {
     return addHeapObject(ret);
 };
 
-export function __wbindgen_string_get(arg0, arg1) {
-    const obj = getObject(arg1);
-    const ret = typeof(obj) === 'string' ? obj : undefined;
-    var ptr1 = isLikeNone(ret) ? 0 : passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    var len1 = WASM_VECTOR_LEN;
-    getDataViewMemory0().setInt32(arg0 + 4 * 1, len1, true);
-    getDataViewMemory0().setInt32(arg0 + 4 * 0, ptr1, true);
+export function __wbindgen_number_new(arg0) {
+    const ret = arg0;
+    return addHeapObject(ret);
 };
 
-export function __wbindgen_error_new(arg0, arg1) {
-    const ret = new Error(getStringFromWasm0(arg0, arg1));
+export function __wbg_jscontrollererror_new(arg0) {
+    const ret = JsControllerError.__wrap(arg0);
     return addHeapObject(ret);
 };
 
@@ -612,6 +707,11 @@ export function __wbindgen_json_serialize(arg0, arg1) {
     const len1 = WASM_VECTOR_LEN;
     getDataViewMemory0().setInt32(arg0 + 4 * 1, len1, true);
     getDataViewMemory0().setInt32(arg0 + 4 * 0, ptr1, true);
+};
+
+export function __wbindgen_error_new(arg0, arg1) {
+    const ret = new Error(getStringFromWasm0(arg0, arg1));
+    return addHeapObject(ret);
 };
 
 export function __wbindgen_is_undefined(arg0) {
@@ -635,6 +735,15 @@ export function __wbindgen_number_get(arg0, arg1) {
 export function __wbindgen_bigint_from_i64(arg0) {
     const ret = arg0;
     return addHeapObject(ret);
+};
+
+export function __wbindgen_string_get(arg0, arg1) {
+    const obj = getObject(arg1);
+    const ret = typeof(obj) === 'string' ? obj : undefined;
+    var ptr1 = isLikeNone(ret) ? 0 : passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    var len1 = WASM_VECTOR_LEN;
+    getDataViewMemory0().setInt32(arg0 + 4 * 1, len1, true);
+    getDataViewMemory0().setInt32(arg0 + 4 * 0, ptr1, true);
 };
 
 export function __wbindgen_is_object(arg0) {
@@ -664,11 +773,6 @@ export function __wbg_String_b9412f8799faab3e(arg0, arg1) {
     const len1 = WASM_VECTOR_LEN;
     getDataViewMemory0().setInt32(arg0 + 4 * 1, len1, true);
     getDataViewMemory0().setInt32(arg0 + 4 * 0, ptr1, true);
-};
-
-export function __wbindgen_number_new(arg0) {
-    const ret = arg0;
-    return addHeapObject(ret);
 };
 
 export function __wbg_set_f975102236d3c502(arg0, arg1, arg2) {
@@ -1033,7 +1137,7 @@ export function __wbg_new_b85e72ed1bfd57f9(arg0, arg1) {
             const a = state0.a;
             state0.a = 0;
             try {
-                return __wbg_adapter_185(a, state0.b, arg0, arg1);
+                return __wbg_adapter_193(a, state0.b, arg0, arg1);
             } finally {
                 state0.a = a;
             }
@@ -1137,8 +1241,8 @@ export function __wbindgen_memory() {
     return addHeapObject(ret);
 };
 
-export function __wbindgen_closure_wrapper2479(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 489, __wbg_adapter_44);
+export function __wbindgen_closure_wrapper2488(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 462, __wbg_adapter_44);
     return addHeapObject(ret);
 };
 

@@ -49,6 +49,12 @@ export function DeploymentRequired({ onClose }: { onClose: () => void }) {
   if (showFunding)
     return (
       <Funding
+        title={
+          <>
+            Fund <b style={{ color: "brand.primary" }}>{account.username}</b>{" "}
+            for deployment
+          </>
+        }
         onComplete={(hash) => {
           if (hash) setDeployHash(hash);
           setShowFunding(false);
