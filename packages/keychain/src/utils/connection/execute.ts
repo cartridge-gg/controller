@@ -67,6 +67,7 @@ export function executeFactory({
             };
           } catch (error) {
             /* user pays */
+            console.error(error);
           }
         }
 

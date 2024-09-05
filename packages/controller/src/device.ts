@@ -102,6 +102,12 @@ class DeviceAccount extends Account {
 
       this.modal.open();
 
+      console.log(res);
+
+      if (res.code === ResponseCodes.EXECUTION_ERROR) {
+        return Promise.reject(res.data);
+      }
+
       if (res.code === ResponseCodes.NOT_DEPLOYED) {
         res = await this.keychain.deploy();
         if (res.code !== ResponseCodes.SUCCESS) {

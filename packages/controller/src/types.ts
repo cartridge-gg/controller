@@ -37,12 +37,19 @@ export enum ResponseCodes {
   NOT_CONNECTED = "NOT_CONNECTED",
   NOT_DEPLOYED = "NOT_DEPLOYED",
   NOT_ALLOWED = "NOT_ALLOWED",
+  EXECUTION_ERROR = "EXECUTION_ERROR",
   CANCELED = "CANCELED",
 }
+
+export type ExecutionErrorData = {
+  execution_error: string;
+  transaction_index: number;
+};
 
 export type ConnectError = {
   code: ResponseCodes;
   message: string;
+  data?: ExecutionErrorData;
 };
 
 export type ConnectReply = {

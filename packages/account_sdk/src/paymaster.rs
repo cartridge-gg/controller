@@ -42,14 +42,33 @@ pub struct TransactionResult {
     pub transaction_hash: Felt,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct ExecutionError {
+    pub code: u32,
+    pub message: String,
+    pub data: Option<ExecutionErrorData>,
+}
+
+impl std::fmt::Display for ExecutionError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Code: {}, Message: {}", self.code, self.message)
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct ExecutionErrorData {
+    pub execution_error: String,
+    pub transaction_index: u32,
+}
+
 #[derive(Debug, thiserror::Error)]
 pub enum PaymasterError {
     #[error("Serialization error: {0}")]
     Serialization(#[from] serde_json::Error),
     #[error("HTTP error: {0}")]
     Http(#[from] reqwest::Error),
-    #[error("Unexpected response: {0}")]
-    UnexpectedResponse(String),
+    #[error("Execution error: {0}")]
+    Execution(ExecutionError),
 }
 
 impl PaymasterRequest {
@@ -78,8 +97,15 @@ impl PaymasterRequest {
             .send()
             .await?;
 
-        let json: PaymasterResponse = response.json().await.map_err(PaymasterError::from)?;
+        let json: serde_json::Value = response.json().await?;
 
-        Ok(json)
+        if let Some(error) = json.get("error") {
+            let execution_error: ExecutionError = serde_json::from_value(error.clone())?;
+            return Err(PaymasterError::Execution(execution_error));
+        }
+
+        let paymaster_response: PaymasterResponse = serde_json::from_value(json)?;
+
+        Ok(paymaster_response)
     }
 }
