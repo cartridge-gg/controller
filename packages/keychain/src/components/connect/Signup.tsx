@@ -133,8 +133,14 @@ export function Signup({
 
       initController(username, address, credentialId, publicKey);
     } catch (e) {
-      // Backward compat with iframes without this permission-policy
-      if (e.message.includes("publickey-credentials-create")) {
+      if (
+        // Backward compat with iframes without this permission-policy
+        e.message.includes("publickey-credentials-create") ||
+        // Bitwarden extension
+        e.message.includes("Invalid 'sameOriginWithAncestors' value") ||
+        // Other password manager
+        e.message.includes("document which is same-origin")
+      ) {
         doPopup();
         return;
       }
