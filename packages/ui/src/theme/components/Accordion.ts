@@ -36,32 +36,20 @@ export const Accordion: ComponentStyleConfig = defineMultiStyleConfig({
   variants: {
     info: {
       container: {
+        color: "black",
         bgColor: "info.background",
-        color: "info.foreground",
       },
-      // button: {
-      // bgColor: "info.background",
-      //   _expanded: {
-      //     bgColor: "red.200",
-      //   },
-      // _hover: {
-      //   bgColor: "info.background",
-      // },
-      // },
-      // panel: {
-      //   bgColor: "info.background",
-      // },
     },
     warning: {
       container: {
+        color: "black",
         bgColor: "warning.background",
-        color: "warning.foreground",
       },
     },
     error: {
       container: {
+        color: "black",
         bgColor: "error.background",
-        color: "error.foreground",
       },
     },
   },
