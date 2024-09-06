@@ -6,52 +6,59 @@ export enum ErrorType {
   SignError = 0,
   StorageError = 1,
   AccountFactoryError = 2,
-  CartridgeProviderError = 3,
-  CartridgeControllerNotDeployed = 4,
-  OriginError = 5,
-  EncodingError = 6,
-  SerdeWasmBindgenError = 7,
-  CairoSerdeError = 8,
-  CairoShortStringToFeltError = 9,
-  DeviceCreateCredential = 10,
-  DeviceGetAssertion = 11,
-  DeviceBadAssertion = 12,
-  DeviceChannel = 13,
-  DeviceOrigin = 14,
-  AccountSigning = 15,
-  AccountProvider = 16,
-  AccountClassHashCalculation = 17,
-  AccountClassCompression = 18,
-  AccountFeeOutOfRange = 19,
-  ProviderRateLimited = 20,
-  ProviderArrayLengthMismatch = 21,
-  ProviderOther = 22,
-  StarknetFailedToReceiveTransaction = 23,
-  StarknetContractNotFound = 24,
-  StarknetBlockNotFound = 25,
-  StarknetInvalidTransactionIndex = 26,
-  StarknetClassHashNotFound = 27,
-  StarknetTransactionHashNotFound = 28,
-  StarknetPageSizeTooBig = 29,
-  StarknetNoBlocks = 30,
-  StarknetInvalidContinuationToken = 31,
-  StarknetTooManyKeysInFilter = 32,
-  StarknetContractError = 33,
-  StarknetTransactionExecutionError = 34,
-  StarknetClassAlreadyDeclared = 35,
-  StarknetInvalidTransactionNonce = 36,
-  StarknetInsufficientMaxFee = 37,
-  StarknetInsufficientAccountBalance = 38,
-  StarknetValidationFailure = 39,
-  StarknetCompilationFailed = 40,
-  StarknetContractClassSizeIsTooLarge = 41,
-  StarknetNonAccount = 42,
-  StarknetDuplicateTx = 43,
-  StarknetCompiledClassHashMismatch = 44,
-  StarknetUnsupportedTxVersion = 45,
-  StarknetUnsupportedContractClassVersion = 46,
-  StarknetUnexpectedError = 47,
-  StarknetNoTraceAvailable = 48,
+  PaymasterExecutionTimeNotReached = 3,
+  PaymasterExecutionTimePassed = 4,
+  PaymasterInvalidCaller = 5,
+  PaymasterRateLimitExceeded = 6,
+  PaymasterNotSupported = 7,
+  PaymasterHttp = 8,
+  PaymasterExcecution = 9,
+  PaymasterSerialization = 10,
+  CartridgeControllerNotDeployed = 11,
+  OriginError = 12,
+  EncodingError = 13,
+  SerdeWasmBindgenError = 14,
+  CairoSerdeError = 15,
+  CairoShortStringToFeltError = 16,
+  DeviceCreateCredential = 17,
+  DeviceGetAssertion = 18,
+  DeviceBadAssertion = 19,
+  DeviceChannel = 20,
+  DeviceOrigin = 21,
+  AccountSigning = 22,
+  AccountProvider = 23,
+  AccountClassHashCalculation = 24,
+  AccountClassCompression = 25,
+  AccountFeeOutOfRange = 26,
+  ProviderRateLimited = 27,
+  ProviderArrayLengthMismatch = 28,
+  ProviderOther = 29,
+  StarknetFailedToReceiveTransaction = 30,
+  StarknetContractNotFound = 31,
+  StarknetBlockNotFound = 32,
+  StarknetInvalidTransactionIndex = 33,
+  StarknetClassHashNotFound = 34,
+  StarknetTransactionHashNotFound = 35,
+  StarknetPageSizeTooBig = 36,
+  StarknetNoBlocks = 37,
+  StarknetInvalidContinuationToken = 38,
+  StarknetTooManyKeysInFilter = 39,
+  StarknetContractError = 40,
+  StarknetTransactionExecutionError = 41,
+  StarknetClassAlreadyDeclared = 42,
+  StarknetInvalidTransactionNonce = 43,
+  StarknetInsufficientMaxFee = 44,
+  StarknetInsufficientAccountBalance = 45,
+  StarknetValidationFailure = 46,
+  StarknetCompilationFailed = 47,
+  StarknetContractClassSizeIsTooLarge = 48,
+  StarknetNonAccount = 49,
+  StarknetDuplicateTx = 50,
+  StarknetCompiledClassHashMismatch = 51,
+  StarknetUnsupportedTxVersion = 52,
+  StarknetUnsupportedContractClassVersion = 53,
+  StarknetUnexpectedError = 54,
+  StarknetNoTraceAvailable = 55,
 }
 export interface JsInvocationsDetails {
     nonce: Felt;
@@ -66,14 +73,19 @@ export interface JsOutsideExecution {
     nonce: Felt;
 }
 
-export interface JsCall {
-    contractAddress: Felt;
-    entrypoint: string;
-    calldata: Felt[];
+export interface JsPolicy {
+    target: string;
+    method: string;
 }
 
 export interface JsEstimateFeeDetails {
     nonce: Felt;
+}
+
+export interface JsCall {
+    contractAddress: Felt;
+    entrypoint: string;
+    calldata: Felt[];
 }
 
 export type Felts = JsFelt[];
@@ -88,11 +100,6 @@ export interface JsSession {
 export interface JsCredentials {
     authorization: Felt[];
     privateKey: Felt;
-}
-
-export interface JsPolicy {
-    target: string;
-    method: string;
 }
 
 /**

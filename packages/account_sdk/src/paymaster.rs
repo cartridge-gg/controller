@@ -1,7 +1,7 @@
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
-use starknet::core::serde::unsigned_field_element::UfeHex;
+use starknet::core::{serde::unsigned_field_element::UfeHex, types::StarknetError};
 use starknet_types_core::felt::Felt;
 use url::Url;
 
@@ -43,22 +43,15 @@ pub struct TransactionResult {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct ExecutionError {
+pub struct PaymasterRPCError {
     pub code: u32,
     pub message: String,
-    pub data: Option<ExecutionErrorData>,
 }
 
-impl std::fmt::Display for ExecutionError {
+impl std::fmt::Display for PaymasterRPCError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "Code: {}, Message: {}", self.code, self.message)
     }
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct ExecutionErrorData {
-    pub execution_error: String,
-    pub transaction_index: u32,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -67,8 +60,18 @@ pub enum PaymasterError {
     Serialization(#[from] serde_json::Error),
     #[error("HTTP error: {0}")]
     Http(#[from] reqwest::Error),
-    #[error("Execution error: {0}")]
-    Execution(ExecutionError),
+    #[error(transparent)]
+    StarknetError(StarknetError),
+    #[error("Execution time not yet reached")]
+    ExecutionTimeNotReached,
+    #[error("Execution time has passed")]
+    ExecutionTimePassed,
+    #[error("Invalid caller for this transaction")]
+    InvalidCaller,
+    #[error("Rate limit exceeded")]
+    RateLimitExceeded,
+    #[error("Paymaster not supported")]
+    PaymasterNotSupported,
 }
 
 impl PaymasterRequest {
@@ -100,8 +103,24 @@ impl PaymasterRequest {
         let json: serde_json::Value = response.json().await?;
 
         if let Some(error) = json.get("error") {
-            let execution_error: ExecutionError = serde_json::from_value(error.clone())?;
-            return Err(PaymasterError::Execution(execution_error));
+            let rpc_err: PaymasterRPCError = serde_json::from_value(error.clone())?;
+
+            // Map specific error messages to corresponding PaymasterError variants
+            return Err(match rpc_err.message.as_str() {
+                msg if msg.contains("execution time not yet reached") => {
+                    PaymasterError::ExecutionTimeNotReached
+                }
+                msg if msg.contains("execution time has passed") => {
+                    PaymasterError::ExecutionTimePassed
+                }
+                msg if msg.contains("invalid caller") => PaymasterError::InvalidCaller,
+                msg if msg.contains("-32005") => PaymasterError::RateLimitExceeded,
+                msg if msg.contains("-32003") => PaymasterError::PaymasterNotSupported,
+                _ => {
+                    let sn_err: StarknetError = serde_json::from_value(error.clone())?;
+                    PaymasterError::StarknetError(sn_err)
+                }
+            });
         }
 
         let paymaster_response: PaymasterResponse = serde_json::from_value(json)?;

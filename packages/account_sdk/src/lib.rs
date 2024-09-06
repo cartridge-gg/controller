@@ -6,7 +6,7 @@ pub mod constants;
 pub mod controller;
 pub mod factory;
 pub mod hash;
-mod paymaster;
+pub mod paymaster;
 pub mod provider;
 pub mod signers;
 pub mod storage;

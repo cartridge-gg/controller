@@ -7,7 +7,8 @@ use crate::account::SpecificAccount;
 use crate::constants::ACCOUNT_CLASS_HASH;
 use crate::factory::ControllerFactory;
 use crate::hash::MessageHashRev1;
-use crate::provider::{CartridgeProvider, CartridgeProviderError};
+use crate::paymaster::PaymasterError;
+use crate::provider::CartridgeProvider;
 use crate::signers::Signer;
 use crate::storage::{Credentials, Selectors, SessionMetadata, StorageBackend, StorageValue};
 use crate::{
@@ -51,7 +52,7 @@ pub enum ControllerError {
     AccountFactoryError(#[from] AccountFactoryError<SignError>),
 
     #[error(transparent)]
-    CartridgeProviderError(#[from] CartridgeProviderError),
+    PaymasterError(#[from] PaymasterError),
 
     #[error(transparent)]
     CairoSerde(#[from] cairo_serde::Error),
@@ -188,7 +189,7 @@ where
                 signed.signature,
             )
             .await
-            .map_err(ControllerError::CartridgeProviderError)?;
+            .map_err(ControllerError::PaymasterError)?;
 
         Ok(res.result.transaction_hash)
     }

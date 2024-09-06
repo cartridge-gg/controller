@@ -1,6 +1,6 @@
 use std::fmt;
 
-use account_sdk::{controller::ControllerError, signers::DeviceError};
+use account_sdk::{controller::ControllerError, paymaster::PaymasterError, signers::DeviceError};
 use serde::Serialize;
 use starknet::{accounts::AccountError, core::types::StarknetError, providers::ProviderError};
 use wasm_bindgen::prelude::*;
@@ -31,7 +31,14 @@ pub enum ErrorType {
     SignError,
     StorageError,
     AccountFactoryError,
-    CartridgeProviderError,
+    PaymasterExecutionTimeNotReached,
+    PaymasterExecutionTimePassed,
+    PaymasterInvalidCaller,
+    PaymasterRateLimitExceeded,
+    PaymasterNotSupported,
+    PaymasterHttp,
+    PaymasterExcecution,
+    PaymasterSerialization,
     CartridgeControllerNotDeployed,
     OriginError,
     EncodingError,
@@ -98,11 +105,7 @@ impl From<ControllerError> for JsControllerError {
                 message: e.to_string(),
                 details: None,
             },
-            ControllerError::CartridgeProviderError(e) => JsControllerError {
-                error_type: ErrorType::CartridgeProviderError,
-                message: e.to_string(),
-                details: None,
-            },
+            ControllerError::PaymasterError(e) => e.into(),
             ControllerError::CairoSerde(e) => JsControllerError {
                 error_type: ErrorType::CairoSerdeError,
                 message: e.to_string(),
@@ -113,6 +116,42 @@ impl From<ControllerError> for JsControllerError {
                 message: "Controller not deployed".to_string(),
                 details: None,
             },
+        }
+    }
+}
+
+impl From<PaymasterError> for JsControllerError {
+    fn from(error: PaymasterError) -> Self {
+        let (error_type, message) = match error {
+            PaymasterError::ExecutionTimeNotReached => (
+                ErrorType::PaymasterExecutionTimeNotReached,
+                "Execution time not yet reached".to_string(),
+            ),
+            PaymasterError::ExecutionTimePassed => (
+                ErrorType::PaymasterExecutionTimePassed,
+                "Execution time has passed".to_string(),
+            ),
+            PaymasterError::InvalidCaller => (
+                ErrorType::PaymasterInvalidCaller,
+                "Invalid caller".to_string(),
+            ),
+            PaymasterError::RateLimitExceeded => (
+                ErrorType::PaymasterRateLimitExceeded,
+                "Rate limit exceeded".to_string(),
+            ),
+            PaymasterError::PaymasterNotSupported => (
+                ErrorType::PaymasterNotSupported,
+                "Paymaster not supported".to_string(),
+            ),
+            PaymasterError::Http(e) => (ErrorType::PaymasterHttp, e.to_string()),
+            PaymasterError::Serialization(e) => (ErrorType::PaymasterSerialization, e.to_string()),
+            PaymasterError::StarknetError(e) => return e.into(),
+        };
+
+        JsControllerError {
+            error_type,
+            message,
+            details: None,
         }
     }
 }
