@@ -9,7 +9,7 @@ import {
   AccordionPanel,
   Box,
 } from "@chakra-ui/react";
-import { CodeUtilIcon, CopyHash, WedgeRightIcon } from "@cartridge/ui";
+import { CopyHash, FnIcon, WedgeRightIcon } from "@cartridge/ui";
 import { Policy } from "@cartridge/controller";
 
 export function Policies({
@@ -59,7 +59,7 @@ export function Policies({
                   }}
                 >
                   <HStack>
-                    <CodeUtilIcon boxSize={4} />
+                    <FnIcon boxSize={5} />
                     <Text>{p.method}</Text>
                   </HStack>
 
