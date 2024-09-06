@@ -32,7 +32,6 @@ export function Signup({
 }: SignupProps) {
   const theme = useControllerTheme();
   const { chainId, rpcUrl, setController } = useConnection();
-  console.log({ chainId, rpcUrl });
   const [error, setError] = useState<Error>();
   const [isRegistering, setIsRegistering] = useState(false);
   const [isPopup, setIsPopup] = useState(false);
@@ -242,22 +241,23 @@ export function Signup({
             >
               sign up
             </Button>
-            {document.cookie.includes("argent") && (
-              // {typeof window !== "undefined" && window["starknet_argentX"] && (
-              <Button
-                colorScheme="colorful"
-                isLoading={isRegistering}
-                isDisabled={
-                  debouncing ||
-                  !username ||
-                  isValidating ||
-                  !!usernameField.error
-                }
-                onClick={() => setSignupMethod(SignupMethod.ARGENT)}
-              >
-                <ArgentIcon />
-              </Button>
-            )}
+            {typeof window !== "undefined" &&
+              window["starknet_argentX"] &&
+              window.document.cookie.includes("argent") && (
+                <Button
+                  colorScheme="colorful"
+                  isLoading={isRegistering}
+                  isDisabled={
+                    debouncing ||
+                    !username ||
+                    isValidating ||
+                    !!usernameField.error
+                  }
+                  onClick={() => setSignupMethod(SignupMethod.ARGENT)}
+                >
+                  <ArgentIcon />
+                </Button>
+              )}
           </HStack>
           <RegistrationLink
             description="Already have a Controller?"

@@ -149,21 +149,9 @@ function SignupArgentInner({ username }: { username: string }) {
       const buffer = base64url.toBuffer(challenge);
       const high = "0x" + buffer.subarray(0, 16).toString("hex");
       const low = "0x" + buffer.subarray(16, 32).toString("hex");
-      console.log({ high, low });
-      console.log({ challenge: "0x" + buffer.toString("hex") });
-
       const typedData = registerTypedData(username, { low, high }, chainId);
-
-      const hash = await extAccount.hashMessage(typedData);
-      console.log({ hash });
-
       const sig = await extAccount.signMessage(typedData);
-      const finalizeMutation = await finalizeAccountSignup(
-        extAccount.address,
-        chainId,
-        sig as string[],
-      );
-      console.log({ finalizeMutation });
+      await finalizeAccountSignup(extAccount.address, chainId, sig as string[]);
 
       // set controller address & calldata
       const salt = shortString.encodeShortString(username);
@@ -283,7 +271,7 @@ function SignupArgentInner({ username }: { username: string }) {
         break;
       }
     }
-  });
+  }, [state, username, setTitle]);
 
   return (
     <Container
@@ -419,9 +407,8 @@ function SignupArgentInner({ username }: { username: string }) {
               <Button
                 colorScheme="colorful"
                 onClick={() => {
-
                   console.log("deploy");
-                  onDeploy()
+                  onDeploy();
                 }}
                 isLoading={isDeploying}
                 isDisabled={!(isAllFunded && isChecked && extAccount)}
@@ -455,7 +442,7 @@ function ExternalWalletProvider({ children }: PropsWithChildren) {
 function useTokens() {
   const { account: extAccount } = useAccount();
   const { provider } = useProvider();
-  const { controller, prefunds } = useConnection();
+  const { prefunds } = useConnection();
   const [tokens, setTokens] = useState<TokenInfo[]>([]);
   const [isChecked, setIsChecked] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
@@ -476,7 +463,7 @@ function useTokens() {
     if (!isChecked) {
       setIsChecked(true);
     }
-  }, [tokens, controller, isChecked, extAccount?.address, provider]);
+  }, [tokens, isChecked, extAccount?.address, provider]);
 
   useInterval(checkFunds, 3000);
 
