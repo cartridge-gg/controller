@@ -16,4 +16,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
 
 export const metadata: Metadata = {
   title: "StarkNet ❤️ React",
+  icons: {
+    icon: "favicon.ico",
+  },
 };
