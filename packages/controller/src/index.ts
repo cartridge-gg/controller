@@ -127,6 +127,7 @@ class Controller {
       this.iframes.keychain.connection.promise,
       this.iframes.profile.connection.promise,
     ]).then(([keychain, profile]) => {
+      console.log("connected", keychain);
       this.keychain = keychain;
       this.profile = profile;
       return this.probe();
@@ -182,11 +183,7 @@ class Controller {
         this.iframes.keychain.connection?.promise,
         this.iframes.profile.connection?.promise,
       ])
-        // .then(() => this.probe())
-        .then((a) => {
-          console.log("!!!!!!!!!!!!!", a);
-          return this.probe();
-        })
+        .then(() => this.probe())
         .then(
           (res) => !!res,
           () => false,
