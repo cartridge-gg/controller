@@ -1,4 +1,11 @@
-import { AlertIcon, InfoIcon, WedgeDownIcon, WarningIcon } from "@cartridge/ui";
+import {
+  AlertIcon,
+  InfoIcon,
+  WedgeDownIcon,
+  WarningIcon,
+  CopyIcon,
+  CheckIcon,
+} from "@cartridge/ui";
 import {
   Text,
   Accordion,
@@ -10,9 +17,10 @@ import {
   Box,
   VStack,
   Link,
+  IconButton,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import { ReactElement } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import { ErrorType, JsControllerError } from "@cartridge/account-wasm";
 import { formatAddress } from "utils/contracts";
 
@@ -21,18 +29,27 @@ export function ErrorAlert({
   description,
   variant = "error",
   isExpanded = false,
+  copyText,
 }: {
   title: string;
   description?: string | ReactElement;
   variant?: string;
   isExpanded?: boolean;
+  copyText?: string;
 }) {
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!copied) return;
+
+    setTimeout(() => {
+      setCopied(false);
+    }, 3000);
+  }, [copied]);
+
   return (
     <Accordion
-      as={motion.div}
       w="full"
-      initial={{ height: 0 }}
-      animate={{ height: "auto" }}
       allowToggle={!isExpanded}
       defaultIndex={isExpanded ? [0] : undefined}
       variant={variant}
@@ -67,19 +84,43 @@ export function ErrorAlert({
               <Spacer />
 
               {description && !isExpanded && (
-                <Box
-                  as={motion.div}
-                  animate={{
-                    rotate: itemExpanded ? 180 : 0,
-                  }}
-                >
-                  <WedgeDownIcon boxSize={5} />
-                </Box>
+                <HStack>
+                  <Box
+                    as={motion.div}
+                    animate={{
+                      rotate: itemExpanded ? 180 : 0,
+                    }}
+                  >
+                    <WedgeDownIcon boxSize={5} />
+                  </Box>
+                </HStack>
               )}
             </AccordionButton>
 
             {description && (
-              <AccordionPanel maxH={200}>{description}</AccordionPanel>
+              <AccordionPanel maxH={200} position="relative">
+                {itemExpanded && copyText && (
+                  <IconButton
+                    w={6}
+                    h={7}
+                    position="absolute"
+                    right={1}
+                    aria-label="Copy stacktrace"
+                    icon={
+                      copied ? (
+                        <CheckIcon fontSize="lg" color="black" />
+                      ) : (
+                        <CopyIcon fontSize="lg" color="black" />
+                      )
+                    }
+                    onClick={() => {
+                      setCopied(true);
+                      navigator.clipboard.writeText(copyText);
+                    }}
+                  />
+                )}
+                {description}
+              </AccordionPanel>
             )}
           </>
         )}
@@ -93,6 +134,7 @@ export function ControllerErrorAlert({ error }: { error: JsControllerError }) {
   let description: string | React.ReactElement = error.message;
   let isExpanded = false;
   let variant = "error";
+  let copyText: string;
 
   switch (error.error_type) {
     case ErrorType.SignError:
@@ -218,6 +260,7 @@ export function ControllerErrorAlert({ error }: { error: JsControllerError }) {
           return <Text>{error.details}</Text>;
         }
       })();
+      copyText = error.message;
       break;
     default:
       title = "Unknown Error";
@@ -229,6 +272,7 @@ export function ControllerErrorAlert({ error }: { error: JsControllerError }) {
       description={description}
       variant={variant}
       isExpanded={isExpanded}
+      copyText={copyText}
     />
   );
 }
@@ -272,8 +316,9 @@ function StackTraceDisplay({ stackTrace }: { stackTrace: string[] }) {
                       </Text>
                       {key === "Address" || key === "Class" ? (
                         <Link
-                          href={`https://starkscan.co/${key === "Address" ? "contract" : "class"
-                            }/${value}`}
+                          href={`https://starkscan.co/${
+                            key === "Address" ? "contract" : "class"
+                          }/${value}`}
                           isExternal
                           color="link.blue"
                           fontSize="sm"
