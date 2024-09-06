@@ -14,7 +14,7 @@ export function Inventory() {
 
       <LayoutContent>
         {Array.from({ length: 30 }).map((_, i) => (
-          <div>line: {i}</div>
+          <div key={i}>line: {i}</div>
         ))}
       </LayoutContent>
     </LayoutContainer>

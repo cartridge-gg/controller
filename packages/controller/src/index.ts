@@ -58,6 +58,14 @@ class Controller {
         ...policy,
         target: addAddressPadding(policy.target),
       })) || [];
+    this.iframes = {
+      keychain: {
+        url: new URL(url || KEYCHAIN_URL),
+      },
+      profile: {
+        url: new URL(profileUrl || PROFILE_URL),
+      },
+    };
 
     this.setTheme(theme, config?.presets);
     if (colorMode) {
@@ -70,45 +78,26 @@ class Controller {
       this.setPolicies(policies);
     }
 
-    this.iframes = this.initIFrames({ url, profileUrl });
+    this.initIFrames();
   }
 
-  private initIFrames({
-    url,
-    profileUrl,
-  }: Pick<ControllerOptions, "url" | "profileUrl">): IFrames {
-    const defaultIframes = {
-      keychain: {
-        url: new URL(url || KEYCHAIN_URL),
-      },
-      profile: {
-        url: new URL(profileUrl || PROFILE_URL),
-      },
-    };
+  private initIFrames() {
     if (typeof document === "undefined") {
-      return defaultIframes;
+      return this.iframes;
     }
 
-    const iframes: IFrames = {
-      keychain: {
-        ...defaultIframes.keychain,
-        modal: createModal({
-          id: "controller-keychain",
-          src: defaultIframes.keychain.url.toString(),
-          onClose: () => this.keychain?.reset(),
-        }),
-      },
-      profile: {
-        ...defaultIframes.profile,
-        modal: createModal({
-          id: "controller-profile",
-          src: defaultIframes.profile.url.toString(),
-        }),
-      },
-    };
+    this.iframes.keychain.modal = createModal({
+      id: "controller-keychain",
+      src: this.iframes.keychain.url.toString(),
+      onClose: () => this.keychain?.reset(),
+    });
+    this.iframes.profile.modal = createModal({
+      id: "controller-profile",
+      src: this.iframes.profile.url.toString(),
+    });
 
     const appendModal = () => {
-      Object.values(iframes).map((iframe) => {
+      Object.values(this.iframes).map((iframe) => {
         document.body.appendChild(iframe.modal!.element);
       });
     };
@@ -122,26 +111,26 @@ class Controller {
       document.addEventListener("DOMContentLoaded", appendModal);
     }
 
-    iframes.keychain.connection = connectToChild<Keychain>({
-      iframe: iframes.keychain.modal?.element.children[0] as HTMLIFrameElement,
-      methods: { close: () => iframes.keychain.modal?.close() },
+    this.iframes.keychain.connection = connectToChild<Keychain>({
+      iframe: this.iframes.keychain.modal?.element
+        .children[0] as HTMLIFrameElement,
+      methods: { close: () => this.iframes.keychain.modal?.close() },
     });
 
-    iframes.profile.connection = connectToChild<Profile>({
-      iframe: iframes.profile.modal?.element.children[0] as HTMLIFrameElement,
-      methods: { close: () => iframes.profile.modal?.close() },
+    this.iframes.profile.connection = connectToChild<Profile>({
+      iframe: this.iframes.profile.modal?.element
+        .children[0] as HTMLIFrameElement,
+      methods: { close: () => this.iframes.profile.modal?.close() },
     });
 
     Promise.all([
-      iframes.keychain.connection.promise,
-      iframes.profile.connection.promise,
+      this.iframes.keychain.connection.promise,
+      this.iframes.profile.connection.promise,
     ]).then(([keychain, profile]) => {
       this.keychain = keychain;
       this.profile = profile;
       return this.probe();
     });
-
-    return iframes;
   }
 
   async openMenu() {
