@@ -158,10 +158,9 @@ function SignupArgentInner({ username }: { username: string }) {
       console.log({ hash });
 
       const sig = await extAccount.signMessage(typedData);
-      const pubkey = await extAccount.signer.getPubKey();
       const finalizeMutation = await finalizeAccountSignup(
         extAccount.address,
-        pubkey,
+        chainId,
         sig as string[],
       );
       console.log({ finalizeMutation });
