@@ -9,7 +9,12 @@ import {
   Box,
   AccordionPanel,
 } from "@chakra-ui/react";
-import { AlertIcon, WedgeDownIcon } from "src/components";
+import {
+  AlertIcon,
+  InfoIcon,
+  WarningIcon,
+  WedgeDownIcon,
+} from "src/components";
 import { motion } from "framer-motion";
 
 const meta: Meta<typeof Accordion> = {
@@ -77,7 +82,16 @@ function Accordion({
           <>
             <AccordionButton disabled={!description || isExpanded}>
               <HStack>
-                <AlertIcon />
+                {(() => {
+                  switch (variant) {
+                    case "info":
+                      return <InfoIcon color="info.foreground" />;
+                    case "warning":
+                      return <WarningIcon />;
+                    case "error":
+                      return <AlertIcon color="error.foreground" />;
+                  }
+                })()}
                 <Text
                   as="b"
                   fontSize="2xs"

@@ -1,4 +1,4 @@
-import { AlertIcon, WedgeDownIcon } from "@cartridge/ui";
+import { AlertIcon, InfoIcon, WedgeDownIcon } from "@cartridge/ui";
 import {
   Text,
   Accordion,
@@ -44,7 +44,16 @@ export function ErrorAlert({
           <>
             <AccordionButton disabled={!description || isExpanded}>
               <HStack>
-                <AlertIcon />
+                {(() => {
+                  switch (variant) {
+                    case "info":
+                      return <InfoIcon color="info.foreground" />;
+                    case "warning":
+                      return <AlertIcon />;
+                    case "error":
+                      return <AlertIcon color="error.foreground" />;
+                  }
+                })()}
                 <Text
                   as="b"
                   fontSize="2xs"
