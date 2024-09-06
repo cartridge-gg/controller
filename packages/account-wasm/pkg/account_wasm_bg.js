@@ -246,7 +246,7 @@ function __wbg_adapter_193(arg0, arg1, arg2, arg3) {
 
 /**
 */
-export const ErrorType = Object.freeze({ SignError:0,"0":"SignError",StorageError:1,"1":"StorageError",AccountFactoryError:2,"2":"AccountFactoryError",PaymasterExecutionTimeNotReached:3,"3":"PaymasterExecutionTimeNotReached",PaymasterExecutionTimePassed:4,"4":"PaymasterExecutionTimePassed",PaymasterInvalidCaller:5,"5":"PaymasterInvalidCaller",PaymasterRateLimitExceeded:6,"6":"PaymasterRateLimitExceeded",PaymasterNotSupported:7,"7":"PaymasterNotSupported",PaymasterHttp:8,"8":"PaymasterHttp",PaymasterExcecution:9,"9":"PaymasterExcecution",PaymasterSerialization:10,"10":"PaymasterSerialization",CartridgeControllerNotDeployed:11,"11":"CartridgeControllerNotDeployed",OriginError:12,"12":"OriginError",EncodingError:13,"13":"EncodingError",SerdeWasmBindgenError:14,"14":"SerdeWasmBindgenError",CairoSerdeError:15,"15":"CairoSerdeError",CairoShortStringToFeltError:16,"16":"CairoShortStringToFeltError",DeviceCreateCredential:17,"17":"DeviceCreateCredential",DeviceGetAssertion:18,"18":"DeviceGetAssertion",DeviceBadAssertion:19,"19":"DeviceBadAssertion",DeviceChannel:20,"20":"DeviceChannel",DeviceOrigin:21,"21":"DeviceOrigin",AccountSigning:22,"22":"AccountSigning",AccountProvider:23,"23":"AccountProvider",AccountClassHashCalculation:24,"24":"AccountClassHashCalculation",AccountClassCompression:25,"25":"AccountClassCompression",AccountFeeOutOfRange:26,"26":"AccountFeeOutOfRange",ProviderRateLimited:27,"27":"ProviderRateLimited",ProviderArrayLengthMismatch:28,"28":"ProviderArrayLengthMismatch",ProviderOther:29,"29":"ProviderOther",StarknetFailedToReceiveTransaction:30,"30":"StarknetFailedToReceiveTransaction",StarknetContractNotFound:31,"31":"StarknetContractNotFound",StarknetBlockNotFound:32,"32":"StarknetBlockNotFound",StarknetInvalidTransactionIndex:33,"33":"StarknetInvalidTransactionIndex",StarknetClassHashNotFound:34,"34":"StarknetClassHashNotFound",StarknetTransactionHashNotFound:35,"35":"StarknetTransactionHashNotFound",StarknetPageSizeTooBig:36,"36":"StarknetPageSizeTooBig",StarknetNoBlocks:37,"37":"StarknetNoBlocks",StarknetInvalidContinuationToken:38,"38":"StarknetInvalidContinuationToken",StarknetTooManyKeysInFilter:39,"39":"StarknetTooManyKeysInFilter",StarknetContractError:40,"40":"StarknetContractError",StarknetTransactionExecutionError:41,"41":"StarknetTransactionExecutionError",StarknetClassAlreadyDeclared:42,"42":"StarknetClassAlreadyDeclared",StarknetInvalidTransactionNonce:43,"43":"StarknetInvalidTransactionNonce",StarknetInsufficientMaxFee:44,"44":"StarknetInsufficientMaxFee",StarknetInsufficientAccountBalance:45,"45":"StarknetInsufficientAccountBalance",StarknetValidationFailure:46,"46":"StarknetValidationFailure",StarknetCompilationFailed:47,"47":"StarknetCompilationFailed",StarknetContractClassSizeIsTooLarge:48,"48":"StarknetContractClassSizeIsTooLarge",StarknetNonAccount:49,"49":"StarknetNonAccount",StarknetDuplicateTx:50,"50":"StarknetDuplicateTx",StarknetCompiledClassHashMismatch:51,"51":"StarknetCompiledClassHashMismatch",StarknetUnsupportedTxVersion:52,"52":"StarknetUnsupportedTxVersion",StarknetUnsupportedContractClassVersion:53,"53":"StarknetUnsupportedContractClassVersion",StarknetUnexpectedError:54,"54":"StarknetUnexpectedError",StarknetNoTraceAvailable:55,"55":"StarknetNoTraceAvailable", });
+export const ErrorType = Object.freeze({ SignError:0,"0":"SignError",StorageError:1,"1":"StorageError",AccountFactoryError:2,"2":"AccountFactoryError",PaymasterExecutionTimeNotReached:3,"3":"PaymasterExecutionTimeNotReached",PaymasterExecutionTimePassed:4,"4":"PaymasterExecutionTimePassed",PaymasterInvalidCaller:5,"5":"PaymasterInvalidCaller",PaymasterRateLimitExceeded:6,"6":"PaymasterRateLimitExceeded",PaymasterNotSupported:7,"7":"PaymasterNotSupported",PaymasterHttp:8,"8":"PaymasterHttp",PaymasterExcecution:9,"9":"PaymasterExcecution",PaymasterSerialization:10,"10":"PaymasterSerialization",CartridgeControllerNotDeployed:11,"11":"CartridgeControllerNotDeployed",InsufficientBalance:12,"12":"InsufficientBalance",OriginError:13,"13":"OriginError",EncodingError:14,"14":"EncodingError",SerdeWasmBindgenError:15,"15":"SerdeWasmBindgenError",CairoSerdeError:16,"16":"CairoSerdeError",CairoShortStringToFeltError:17,"17":"CairoShortStringToFeltError",DeviceCreateCredential:18,"18":"DeviceCreateCredential",DeviceGetAssertion:19,"19":"DeviceGetAssertion",DeviceBadAssertion:20,"20":"DeviceBadAssertion",DeviceChannel:21,"21":"DeviceChannel",DeviceOrigin:22,"22":"DeviceOrigin",AccountSigning:23,"23":"AccountSigning",AccountProvider:24,"24":"AccountProvider",AccountClassHashCalculation:25,"25":"AccountClassHashCalculation",AccountClassCompression:26,"26":"AccountClassCompression",AccountFeeOutOfRange:27,"27":"AccountFeeOutOfRange",ProviderRateLimited:28,"28":"ProviderRateLimited",ProviderArrayLengthMismatch:29,"29":"ProviderArrayLengthMismatch",ProviderOther:30,"30":"ProviderOther",StarknetFailedToReceiveTransaction:31,"31":"StarknetFailedToReceiveTransaction",StarknetContractNotFound:32,"32":"StarknetContractNotFound",StarknetBlockNotFound:33,"33":"StarknetBlockNotFound",StarknetInvalidTransactionIndex:34,"34":"StarknetInvalidTransactionIndex",StarknetClassHashNotFound:35,"35":"StarknetClassHashNotFound",StarknetTransactionHashNotFound:36,"36":"StarknetTransactionHashNotFound",StarknetPageSizeTooBig:37,"37":"StarknetPageSizeTooBig",StarknetNoBlocks:38,"38":"StarknetNoBlocks",StarknetInvalidContinuationToken:39,"39":"StarknetInvalidContinuationToken",StarknetTooManyKeysInFilter:40,"40":"StarknetTooManyKeysInFilter",StarknetContractError:41,"41":"StarknetContractError",StarknetTransactionExecutionError:42,"42":"StarknetTransactionExecutionError",StarknetClassAlreadyDeclared:43,"43":"StarknetClassAlreadyDeclared",StarknetInvalidTransactionNonce:44,"44":"StarknetInvalidTransactionNonce",StarknetInsufficientMaxFee:45,"45":"StarknetInsufficientMaxFee",StarknetInsufficientAccountBalance:46,"46":"StarknetInsufficientAccountBalance",StarknetValidationFailure:47,"47":"StarknetValidationFailure",StarknetCompilationFailed:48,"48":"StarknetCompilationFailed",StarknetContractClassSizeIsTooLarge:49,"49":"StarknetContractClassSizeIsTooLarge",StarknetNonAccount:50,"50":"StarknetNonAccount",StarknetDuplicateTx:51,"51":"StarknetDuplicateTx",StarknetCompiledClassHashMismatch:52,"52":"StarknetCompiledClassHashMismatch",StarknetUnsupportedTxVersion:53,"53":"StarknetUnsupportedTxVersion",StarknetUnsupportedContractClassVersion:54,"54":"StarknetUnsupportedContractClassVersion",StarknetUnexpectedError:55,"55":"StarknetUnexpectedError",StarknetNoTraceAvailable:56,"56":"StarknetNoTraceAvailable", });
 
 const CartridgeAccountFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
@@ -685,13 +685,18 @@ export function __wbindgen_object_clone_ref(arg0) {
     return addHeapObject(ret);
 };
 
+export function __wbg_jscontrollererror_new(arg0) {
+    const ret = JsControllerError.__wrap(arg0);
+    return addHeapObject(ret);
+};
+
 export function __wbindgen_number_new(arg0) {
     const ret = arg0;
     return addHeapObject(ret);
 };
 
-export function __wbg_jscontrollererror_new(arg0) {
-    const ret = JsControllerError.__wrap(arg0);
+export function __wbindgen_string_new(arg0, arg1) {
+    const ret = getStringFromWasm0(arg0, arg1);
     return addHeapObject(ret);
 };
 
@@ -754,11 +759,6 @@ export function __wbindgen_is_object(arg0) {
 
 export function __wbindgen_bigint_from_u64(arg0) {
     const ret = BigInt.asUintN(64, arg0);
-    return addHeapObject(ret);
-};
-
-export function __wbindgen_string_new(arg0, arg1) {
-    const ret = getStringFromWasm0(arg0, arg1);
     return addHeapObject(ret);
 };
 
@@ -1241,8 +1241,8 @@ export function __wbindgen_memory() {
     return addHeapObject(ret);
 };
 
-export function __wbindgen_closure_wrapper2512(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 458, __wbg_adapter_44);
+export function __wbindgen_closure_wrapper2528(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 461, __wbg_adapter_44);
     return addHeapObject(ret);
 };
 

@@ -40,6 +40,7 @@ pub enum ErrorType {
     PaymasterExcecution,
     PaymasterSerialization,
     CartridgeControllerNotDeployed,
+    InsufficientBalance,
     OriginError,
     EncodingError,
     SerdeWasmBindgenError,
@@ -106,6 +107,7 @@ impl From<ControllerError> for JsControllerError {
                 details: None,
             },
             ControllerError::PaymasterError(e) => e.into(),
+            ControllerError::ProviderError(e) => e.into(),
             ControllerError::CairoSerde(e) => JsControllerError {
                 error_type: ErrorType::CairoSerdeError,
                 message: e.to_string(),
@@ -115,6 +117,20 @@ impl From<ControllerError> for JsControllerError {
                 error_type: ErrorType::CartridgeControllerNotDeployed,
                 message: "Controller not deployed".to_string(),
                 details: None,
+            },
+            ControllerError::InsufficientBalance {
+                fee_estimate,
+                balance,
+            } => JsControllerError {
+                error_type: ErrorType::InsufficientBalance,
+                message: "Insufficient balance for transaction".to_string(),
+                details: Some(
+                    serde_json::to_string(&serde_json::json!({
+                        "fee_estimate": fee_estimate,
+                        "balance": balance
+                    }))
+                    .unwrap(),
+                ),
             },
         }
     }

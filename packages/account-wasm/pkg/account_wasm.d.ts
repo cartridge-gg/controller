@@ -15,51 +15,77 @@ export enum ErrorType {
   PaymasterExcecution = 9,
   PaymasterSerialization = 10,
   CartridgeControllerNotDeployed = 11,
-  OriginError = 12,
-  EncodingError = 13,
-  SerdeWasmBindgenError = 14,
-  CairoSerdeError = 15,
-  CairoShortStringToFeltError = 16,
-  DeviceCreateCredential = 17,
-  DeviceGetAssertion = 18,
-  DeviceBadAssertion = 19,
-  DeviceChannel = 20,
-  DeviceOrigin = 21,
-  AccountSigning = 22,
-  AccountProvider = 23,
-  AccountClassHashCalculation = 24,
-  AccountClassCompression = 25,
-  AccountFeeOutOfRange = 26,
-  ProviderRateLimited = 27,
-  ProviderArrayLengthMismatch = 28,
-  ProviderOther = 29,
-  StarknetFailedToReceiveTransaction = 30,
-  StarknetContractNotFound = 31,
-  StarknetBlockNotFound = 32,
-  StarknetInvalidTransactionIndex = 33,
-  StarknetClassHashNotFound = 34,
-  StarknetTransactionHashNotFound = 35,
-  StarknetPageSizeTooBig = 36,
-  StarknetNoBlocks = 37,
-  StarknetInvalidContinuationToken = 38,
-  StarknetTooManyKeysInFilter = 39,
-  StarknetContractError = 40,
-  StarknetTransactionExecutionError = 41,
-  StarknetClassAlreadyDeclared = 42,
-  StarknetInvalidTransactionNonce = 43,
-  StarknetInsufficientMaxFee = 44,
-  StarknetInsufficientAccountBalance = 45,
-  StarknetValidationFailure = 46,
-  StarknetCompilationFailed = 47,
-  StarknetContractClassSizeIsTooLarge = 48,
-  StarknetNonAccount = 49,
-  StarknetDuplicateTx = 50,
-  StarknetCompiledClassHashMismatch = 51,
-  StarknetUnsupportedTxVersion = 52,
-  StarknetUnsupportedContractClassVersion = 53,
-  StarknetUnexpectedError = 54,
-  StarknetNoTraceAvailable = 55,
+  InsufficientBalance = 12,
+  OriginError = 13,
+  EncodingError = 14,
+  SerdeWasmBindgenError = 15,
+  CairoSerdeError = 16,
+  CairoShortStringToFeltError = 17,
+  DeviceCreateCredential = 18,
+  DeviceGetAssertion = 19,
+  DeviceBadAssertion = 20,
+  DeviceChannel = 21,
+  DeviceOrigin = 22,
+  AccountSigning = 23,
+  AccountProvider = 24,
+  AccountClassHashCalculation = 25,
+  AccountClassCompression = 26,
+  AccountFeeOutOfRange = 27,
+  ProviderRateLimited = 28,
+  ProviderArrayLengthMismatch = 29,
+  ProviderOther = 30,
+  StarknetFailedToReceiveTransaction = 31,
+  StarknetContractNotFound = 32,
+  StarknetBlockNotFound = 33,
+  StarknetInvalidTransactionIndex = 34,
+  StarknetClassHashNotFound = 35,
+  StarknetTransactionHashNotFound = 36,
+  StarknetPageSizeTooBig = 37,
+  StarknetNoBlocks = 38,
+  StarknetInvalidContinuationToken = 39,
+  StarknetTooManyKeysInFilter = 40,
+  StarknetContractError = 41,
+  StarknetTransactionExecutionError = 42,
+  StarknetClassAlreadyDeclared = 43,
+  StarknetInvalidTransactionNonce = 44,
+  StarknetInsufficientMaxFee = 45,
+  StarknetInsufficientAccountBalance = 46,
+  StarknetValidationFailure = 47,
+  StarknetCompilationFailed = 48,
+  StarknetContractClassSizeIsTooLarge = 49,
+  StarknetNonAccount = 50,
+  StarknetDuplicateTx = 51,
+  StarknetCompiledClassHashMismatch = 52,
+  StarknetUnsupportedTxVersion = 53,
+  StarknetUnsupportedContractClassVersion = 54,
+  StarknetUnexpectedError = 55,
+  StarknetNoTraceAvailable = 56,
 }
+export interface JsCall {
+    contractAddress: Felt;
+    entrypoint: string;
+    calldata: Felt[];
+}
+
+export interface JsSession {
+    policies: JsPolicy[];
+    expiresAt: number;
+}
+
+export interface JsCredentials {
+    authorization: Felt[];
+    privateKey: Felt;
+}
+
+export interface JsEstimateFeeDetails {
+    nonce: Felt;
+}
+
+export interface JsPolicy {
+    target: string;
+    method: string;
+}
+
 export interface JsInvocationsDetails {
     nonce: Felt;
     maxFee: Felt;
@@ -73,34 +99,9 @@ export interface JsOutsideExecution {
     nonce: Felt;
 }
 
-export interface JsPolicy {
-    target: string;
-    method: string;
-}
-
-export interface JsEstimateFeeDetails {
-    nonce: Felt;
-}
-
-export interface JsCall {
-    contractAddress: Felt;
-    entrypoint: string;
-    calldata: Felt[];
-}
-
 export type Felts = JsFelt[];
 
 export type JsFelt = Felt;
-
-export interface JsSession {
-    policies: JsPolicy[];
-    expiresAt: number;
-}
-
-export interface JsCredentials {
-    authorization: Felt[];
-    privateKey: Felt;
-}
 
 /**
 */

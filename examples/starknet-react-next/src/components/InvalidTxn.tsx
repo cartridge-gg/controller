@@ -54,6 +54,22 @@ export function InvalidTxn() {
           Invalid Manual Invoke Calldata
         </Button>
         <Button onClick={() => invalidEntrypoint()}>Invalid Entrypoint</Button>
+        <Button
+          onClick={() =>
+            account.execute(
+              [
+                {
+                  contractAddress: ETH_CONTRACT,
+                  entrypoint: "approve",
+                  calldata: [account.address, "0x0", "0x0"],
+                },
+              ],
+              { maxFee: 1000000000000000000n },
+            )
+          }
+        >
+          Manual high fee
+        </Button>
       </div>
     </div>
   );

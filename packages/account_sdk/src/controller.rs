@@ -18,12 +18,15 @@ use crate::{
 };
 use crate::{impl_account, OriginProvider};
 use async_trait::async_trait;
-use cainome::cairo_serde::{self, CairoSerde, NonZero};
+use cainome::cairo_serde::{self, CairoSerde, NonZero, U256};
 use starknet::accounts::{
     AccountDeploymentV1, AccountError, AccountFactory, AccountFactoryError, ExecutionV1,
 };
-use starknet::core::types::{Call, FeeEstimate, InvokeTransactionResult, StarknetError};
+use starknet::core::types::{
+    BlockTag, Call, FeeEstimate, FunctionCall, InvokeTransactionResult, StarknetError,
+};
 use starknet::core::utils::cairo_short_string_to_felt;
+use starknet::macros::{felt, selector};
 use starknet::providers::ProviderError;
 use starknet::signers::SignerInteractivityContext;
 use starknet::{
@@ -31,6 +34,8 @@ use starknet::{
     core::types::{BlockId, Felt},
     signers::{SigningKey, VerifyingKey},
 };
+
+const WEBAUTHN_GAS: Felt = felt!("3300");
 
 pub trait Backend: StorageBackend + OriginProvider {}
 
@@ -56,6 +61,15 @@ pub enum ControllerError {
 
     #[error(transparent)]
     CairoSerde(#[from] cairo_serde::Error),
+
+    #[error(transparent)]
+    ProviderError(#[from] ProviderError),
+
+    #[error("Insufficient balance for transaction. Required fee: {fee_estimate:?}")]
+    InsufficientBalance {
+        fee_estimate: FeeEstimate,
+        balance: u128,
+    },
 }
 
 pub struct Controller<P, B>
@@ -200,25 +214,40 @@ where
         fee_multiplier: Option<f64>,
     ) -> Result<FeeEstimate, ControllerError> {
         let multiplier = fee_multiplier.unwrap_or(1.0);
-        self.execute_v1(calls)
+        let est = self
+            .execute_v1(calls)
             .nonce(Felt::from(u64::MAX))
             .fee_estimate_multiplier(multiplier)
             .estimate_fee()
-            .await
-            .map_err(|e| {
-                if let AccountError::Provider(ProviderError::StarknetError(
-                    StarknetError::TransactionExecutionError(data),
-                )) = &e
-                {
-                    if data
-                        .execution_error
-                        .contains(&format!("{:x} is not deployed.", self.account.address))
-                    {
-                        return ControllerError::NotDeployed;
-                    }
+            .await;
+
+        let balance = self.eth_balance().await?;
+
+        match est {
+            Ok(mut fee_estimate) => {
+                fee_estimate.overall_fee =
+                    fee_estimate.overall_fee + WEBAUTHN_GAS * fee_estimate.gas_price;
+                if fee_estimate.overall_fee > Felt::from(balance.low) {
+                    Err(ControllerError::InsufficientBalance {
+                        fee_estimate,
+                        balance: balance.low,
+                    })
+                } else {
+                    Ok(fee_estimate)
                 }
-                ControllerError::AccountError(e)
-            })
+            }
+            Err(e) => match &e {
+                AccountError::Provider(ProviderError::StarknetError(
+                    StarknetError::TransactionExecutionError(data),
+                )) if data
+                    .execution_error
+                    .contains(&format!("{:x} is not deployed.", self.account.address)) =>
+                {
+                    Err(ControllerError::NotDeployed)
+                }
+                _ => Err(ControllerError::AccountError(e)),
+            },
+        }
     }
 
     pub async fn execute(
@@ -300,6 +329,27 @@ where
 
     pub fn set_delegate_account(&self, delegate_address: Felt) -> ExecutionV1<OwnerAccount<P>> {
         self.contract.set_delegate_account(&delegate_address.into())
+    }
+
+    pub async fn eth_balance(&self) -> Result<U256, ControllerError> {
+        let address = self.account.address;
+        let contract_address =
+            felt!("0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7");
+
+        let result = self
+            .provider
+            .call(
+                FunctionCall {
+                    contract_address,
+                    entry_point_selector: selector!("balanceOf"),
+                    calldata: vec![address.into()],
+                },
+                BlockId::Tag(BlockTag::Pending),
+            )
+            .await
+            .map_err(ControllerError::ProviderError)?;
+
+        U256::cairo_deserialize(&result, 0).map_err(ControllerError::CairoSerde)
     }
 }
 

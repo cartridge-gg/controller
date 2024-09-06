@@ -1,3 +1,4 @@
+import { JsControllerError } from "@cartridge/account-wasm";
 import { CopyIcon, EthereumIcon, StarknetIcon } from "@cartridge/ui";
 import { Button, HStack, Spacer, Text, VStack } from "@chakra-ui/react";
 import { AlphaWarning } from "components/Warning";
@@ -5,10 +6,9 @@ import { Container, Content, Footer } from "components/layout";
 import { useConnection } from "hooks/connection";
 import { useToast } from "hooks/toast";
 import { useCallback } from "react";
-import { BigNumberish } from "starknet";
 import { formatAddress } from "utils/contracts";
 
-export function InsufficientFunds({ balance }: { balance: BigNumberish }) {
+export function InsufficientFunds({ error }: { error: JsControllerError }) {
   const { controller, chainName } = useConnection();
   const { toast } = useToast();
   const onCopy = useCallback(() => {
@@ -17,6 +17,15 @@ export function InsufficientFunds({ balance }: { balance: BigNumberish }) {
     );
     toast("Copied!");
   }, [controller.address, toast]);
+
+  const details = error.details ? JSON.parse(error.details) : null;
+  const feeEstimate = details?.fee_estimate;
+  const balance = details?.balance;
+
+  if (!feeEstimate || balance === undefined) {
+    console.error("Failed to parse error details", error);
+    return null;
+  }
 
   return (
     <Container

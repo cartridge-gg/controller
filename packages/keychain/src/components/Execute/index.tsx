@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@chakra-ui/react";
-import { formatEther } from "viem";
 import { Policy, ResponseCodes } from "@cartridge/controller";
 import {
   Container,
@@ -24,15 +23,14 @@ export const CONTRACT_ETH =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 
 export function Execute() {
-  const { controller, context, origin, paymaster, cancel } = useConnection();
+  const { controller, context, origin, paymaster } = useConnection();
   const ctx = context as ExecuteCtx;
 
   const [maxFee, setMaxFee] = useState<bigint>(0n);
   const [error, setError] = useState<JsControllerError>();
   const [isLoading, setLoading] = useState<boolean>(false);
-  const [ethBalance, setEthBalance] = useState<bigint>(0n);
-  const [isInsufficient, setIsInsufficient] = useState<boolean>(false);
   const [isDeploy, setIsDeploy] = useState<boolean>(false);
+  const [isFunding, setIsFunding] = useState<boolean>(false);
 
   const account = controller.account;
   const calls = useMemo(() => {
@@ -41,66 +39,34 @@ export function Execute() {
       : [ctx.transactions];
   }, [ctx.transactions]);
 
-  const format = (val: bigint) => {
-    const formatted = Number(formatEther(val)).toFixed(5);
-    if (formatted === "0.00000") {
-      return "0.0";
-    }
-    return formatted.replace(/\.?0+$/, "");
-  };
+  // const format = (val: bigint) => {
+  //   const formatted = Number(formatEther(val)).toFixed(5);
+  //   if (formatted === "0.00000") {
+  //     return "0.0";
+  //   }
+  //   return formatted.replace(/\.?0+$/, "");
+  // };
+
   // Estimate fees
   useEffect(() => {
     if (!controller || !calls) return;
 
     const estimateFees = async () => {
       try {
-        const balance = await getEthBalance(account, controller.address);
-        setEthBalance(balance);
-        const maxFee = await calculateMaxFee(
-          ctx,
-          controller.account,
+        const est = await account.estimateInvokeFee(
           calls,
-          balance,
+          ctx.transactionsDetail,
         );
-        setMaxFee(maxFee);
+        console.log(est)
+        setMaxFee(est.overall_fee);
       } catch (e) {
-        if (e instanceof Error && e.message === "Insufficient funds") {
-          setIsInsufficient(true);
-          return;
-        }
+        console.error(e)
         setError(e);
       }
     };
 
     estimateFees();
   }, [controller, calls, account, ctx, setError, setMaxFee]);
-
-  const getEthBalance = async (account, address) => {
-    const res = await account.callContract({
-      contractAddress: CONTRACT_ETH,
-      entrypoint: "balanceOf",
-      calldata: [BigInt(address).toString()],
-    });
-    return BigInt(
-      `0x${res
-        .map((r) => r.replace("0x", ""))
-        .reverse()
-        .join("")}`,
-    );
-  };
-
-  const calculateMaxFee = async (ctx, account, calls, balance) => {
-    if (ctx.transactionsDetail?.maxFee) {
-      const requested = BigInt(ctx.transactionsDetail.maxFee);
-      if (requested > balance) throw Error("Insufficient funds");
-      return requested;
-    }
-
-    const est = await account.estimateInvokeFee(calls, ctx.transactionsDetail);
-    const maxFee = est.overall_fee + WEBAUTHN_GAS * BigInt(est.gas_price);
-    if (maxFee > balance) throw Error("Insufficient funds");
-    return maxFee;
-  };
 
   const execute = useCallback(async () => {
     if (!paymaster) {
@@ -144,12 +110,11 @@ export function Execute() {
     [calls],
   );
 
-  if (isInsufficient) {
-    return <InsufficientFunds balance={format(ethBalance)} />;
+  if (isFunding && error.error_type === ErrorType.InsufficientBalance) {
+    return <InsufficientFunds error={error} />;
   }
 
   if (isDeploy) {
-    console.log("do deploy");
     return <DeploymentRequired onClose={() => {}} />;
   }
 
@@ -163,42 +128,53 @@ export function Execute() {
         <Policies title="Transaction Details" policies={policies} />
       </Content>
 
-      <Footer>
-        {error ? (
-          <ControllerErrorAlert error={error} />
-        ) : (
-          <Fees maxFee={maxFee} />
-        )}
-
-        {error &&
-        error.error_type == ErrorType.CartridgeControllerNotDeployed ? (
-          <Button
-            colorScheme="colorful"
-            onClick={() => {
-              setIsDeploy(true);
-            }}
-          >
-            DEPLOY ACCOUNT
-          </Button>
-        ) : (
-          <Button
-            colorScheme="colorful"
-            onClick={onSubmit}
-            isLoading={isLoading}
-            isDisabled={!maxFee}
-          >
-            submit
-          </Button>
-        )}
-
-        <Button
-          onClick={() => {
-            ctx.onCancel ? ctx.onCancel() : cancel();
-          }}
-        >
-          Cancel
-        </Button>
-      </Footer>
+      {error &&
+      error.error_type === ErrorType.CartridgeControllerNotDeployed ? (
+        <DeployFooter setIsDeploy={setIsDeploy} error={error} />
+      ) : error && error.error_type === ErrorType.InsufficientBalance ? (
+        <FundingFooter maxFee={maxFee} setIsFunding={setIsFunding} />
+      ) : (
+        <ExecuteFooter
+          error={error}
+          maxFee={maxFee}
+          onSubmit={onSubmit}
+          isLoading={isLoading}
+        />
+      )}
     </Container>
   );
 }
+
+const DeployFooter = ({ setIsDeploy, error }) => (
+  <Footer>
+    <ControllerErrorAlert error={error} />
+    <Button colorScheme="colorful" onClick={() => setIsDeploy(true)}>
+      DEPLOY ACCOUNT
+    </Button>
+  </Footer>
+);
+
+const FundingFooter = ({ maxFee, setIsFunding }) => (
+  <Footer>
+    <Fees maxFee={maxFee} />
+
+    <Button colorScheme="colorful" onClick={() => setIsFunding(true)}>
+      ADD FUNDS
+    </Button>
+  </Footer>
+);
+
+const ExecuteFooter = ({ error, maxFee, onSubmit, isLoading }) => (
+  <Footer>
+    {error ? <ControllerErrorAlert error={error} /> : <Fees maxFee={maxFee} />}
+
+    <Button
+      colorScheme="colorful"
+      onClick={onSubmit}
+      isLoading={isLoading}
+      isDisabled={!maxFee}
+    >
+      SUBMIT
+    </Button>
+  </Footer>
+);
