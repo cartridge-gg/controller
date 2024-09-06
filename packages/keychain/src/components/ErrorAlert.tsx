@@ -102,9 +102,6 @@ export function ControllerErrorAlert({ error }: { error: JsControllerError }) {
       isExpanded = true;
       variant = "info";
       break;
-    case ErrorType.CartridgeProviderError:
-      title = "Provider Error";
-      break;
     case ErrorType.OriginError:
       title = "Origin Error";
       break;
@@ -122,6 +119,30 @@ export function ControllerErrorAlert({ error }: { error: JsControllerError }) {
       break;
     case ErrorType.DeviceCreateCredential:
     case ErrorType.DeviceGetAssertion:
+    case ErrorType.PaymasterExecutionTimeNotReached:
+      title = "Paymaster Execution Time Not Reached";
+      break;
+    case ErrorType.PaymasterExecutionTimePassed:
+      title = "Paymaster Execution Time Passed";
+      break;
+    case ErrorType.PaymasterInvalidCaller:
+      title = "Invalid Paymaster Caller";
+      break;
+    case ErrorType.PaymasterRateLimitExceeded:
+      title = "Paymaster Rate Limit Exceeded";
+      break;
+    case ErrorType.PaymasterNotSupported:
+      title = "Paymaster Not Supported";
+      break;
+    case ErrorType.PaymasterHttp:
+      title = "Paymaster HTTP Error";
+      break;
+    case ErrorType.PaymasterExcecution:
+      title = "Paymaster Execution Error";
+      break;
+    case ErrorType.PaymasterSerialization:
+      title = "Paymaster Serialization Error";
+      break;
     case ErrorType.DeviceBadAssertion:
     case ErrorType.DeviceChannel:
     case ErrorType.DeviceOrigin:
