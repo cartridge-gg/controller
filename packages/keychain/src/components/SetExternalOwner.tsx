@@ -40,8 +40,9 @@ export function SetExternalOwner() {
               onChange={(e) => setExternalOwnerAddress(e.target.value)}
             />
             {!isValid && externalOwnerAddress !== "" && (
-              <HStack w="full" color="red.400">
-                <AlertIcon /> <Text color="red.400">Invalid address!</Text>
+              <HStack w="full" color="alert.foreground">
+                <AlertIcon />{" "}
+                <Text color="alert.foreground">Invalid address!</Text>
               </HStack>
             )}
           </VStack>

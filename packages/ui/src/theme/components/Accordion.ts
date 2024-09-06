@@ -14,6 +14,7 @@ export const Accordion: ComponentStyleConfig = defineMultiStyleConfig({
       bg: "solid.primary",
       borderColor: "solid.bg",
       pb: "0",
+      borderRadius: "6px",
     },
     button: {
       p: 3,
@@ -21,69 +22,46 @@ export const Accordion: ComponentStyleConfig = defineMultiStyleConfig({
       height: "auto",
       paddingY: "12px",
       paddingX: "18px",
-      borderRadius: "6px",
-      // color: "text.primary",
       _expanded: {
         borderRadius: "6px 6px 0 0",
         cursor: "default",
-        // bgColor: "solid.primary",
       },
-      transition: "border-radius 0.2s ease",
-      // bgColor: "solid.primary",
-      _hover: {
-        // bgColor: "solid.primary",
-      },
+      _hover: {},
     },
     panel: {
       fontSize: "xs",
-      // color: "text.primary",
-      // bgColor: "solid.primary",
     },
-    icon: {
-      // color: "text.primary",
-    },
+    icon: {},
   }),
   variants: {
     info: {
+      container: {
+        bgColor: "info.background",
+        color: "info.foreground",
+      },
       // button: {
-      //   bgColor: "red.200",
+      // bgColor: "info.background",
       //   _expanded: {
       //     bgColor: "red.200",
       //   },
-      //   _hover: {
-      //     bgColor: "red.200",
-      //   },
+      // _hover: {
+      //   bgColor: "info.background",
+      // },
       // },
       // panel: {
-      //   bgColor: "red.200",
+      //   bgColor: "info.background",
       // },
     },
     warning: {
-      button: {
-        bgColor: "yellow.200",
-        _expanded: {
-          bgColor: "yellow.200",
-        },
-        _hover: {
-          bgColor: "yellow.200",
-        },
-      },
-      panel: {
-        bgColor: "yellow.200",
+      container: {
+        bgColor: "warning.background",
+        color: "warning.foreground",
       },
     },
     error: {
-      button: {
-        bgColor: "red.200",
-        _expanded: {
-          bgColor: "red.200",
-        },
-        _hover: {
-          bgColor: "red.200",
-        },
-      },
-      panel: {
-        bgColor: "red.200",
+      container: {
+        bgColor: "error.background",
+        color: "error.foreground",
       },
     },
   },

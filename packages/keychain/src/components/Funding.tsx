@@ -220,7 +220,7 @@ function FundingInner({ onComplete, title }: FundingInnerProps) {
                     color="text.primary"
                   >
                     <Box>
-                      <AlertIcon color="text.error" />
+                      <AlertIcon color="alert.foreground" />
                     </Box>
                   </Tooltip>
                 )}

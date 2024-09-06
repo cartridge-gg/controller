@@ -22,36 +22,47 @@ export const semanticTokens = {
     },
     link: {
       blue: {
-        default: "blue.200",
-        _light: "blue.400",
+        default: "#73C4FF",
+        _light: "#007FDB",
       },
     },
     brand: {
       primary: {
-        default: "yellow.400",
-        _light: "purple.400",
+        default: "#FBCB4A",
+        _light: "#7954E4",
       },
       secondary: {
-        default: "yellow.600",
-        _light: "purple.600",
+        default: "#DEAE2B",
+        _light: "#5F41B4",
       },
       muted: {
-        default: "yellow.800",
-        _light: "purple.200",
+        default: "#85702D",
+        _light: "#AC8FFF",
       },
       accent: {
         default: "green.200",
-        _light: "purple.400",
+        _light: "#7954E4",
       },
       // Nested sematic color doesn't seem to work
       accentHighlight: {
         default: "green.100",
-        _light: "purple.200",
+        _light: "#AC8FFF",
       },
       colorGradient: {
-        default: "yellow.400",
-        _light: "purple.200",
+        default: "#FBCB4A",
+        _light: "#AC8FFF",
       },
+    },
+    info: {
+      background: "#95c1ea",
+      foreground: "#005299",
+    },
+    warning: {
+      background: "#fac400",
+    },
+    error: {
+      background: "#f9b9b9",
+      foreground: "#e66565",
     },
     solid: {
       bg: {

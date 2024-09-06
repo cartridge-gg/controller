@@ -56,7 +56,7 @@ export function InsufficientFunds({ balance }: { balance: BigNumberish }) {
               flex="2"
               px="10px"
               bg="solid.primary"
-              color="text.error"
+              color="alert.foreground"
             >
               <EthereumIcon boxSize="24px" color="inherit" />{" "}
               <Text color="inherit">{balance.toString()}</Text>

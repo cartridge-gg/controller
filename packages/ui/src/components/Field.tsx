@@ -79,9 +79,9 @@ export const Field = forwardRef(
         <FormErrorMessage>
           {error && (
             <HStack marginY={3}>
-              <AlertIcon fontSize="xl" color="text.error" />
+              <AlertIcon fontSize="xl" color="alert.foreground" />
               <Text
-                color="text.error"
+                color="alert.foreground"
                 fontSize="sm"
                 w="full"
                 overflowWrap="anywhere"

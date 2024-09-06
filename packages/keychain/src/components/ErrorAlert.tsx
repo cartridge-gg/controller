@@ -246,7 +246,7 @@ function StackTraceDisplay({ stackTrace }: { stackTrace: string[] }) {
                             key === "Address" ? "contract" : "class"
                           }/${value}`}
                           isExternal
-                          color="blue.500"
+                          color="link.blue"
                           fontSize="sm"
                           wordBreak="break-all"
                         >
