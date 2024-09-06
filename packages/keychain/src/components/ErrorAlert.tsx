@@ -1,4 +1,4 @@
-import { AlertIcon, InfoIcon, WedgeDownIcon } from "@cartridge/ui";
+import { AlertIcon, InfoIcon, WedgeDownIcon, WarningIcon } from "@cartridge/ui";
 import {
   Text,
   Accordion,
@@ -49,7 +49,7 @@ export function ErrorAlert({
                     case "info":
                       return <InfoIcon color="info.foreground" />;
                     case "warning":
-                      return <AlertIcon />;
+                      return <WarningIcon />;
                     case "error":
                       return <AlertIcon color="error.foreground" />;
                   }
@@ -272,9 +272,8 @@ function StackTraceDisplay({ stackTrace }: { stackTrace: string[] }) {
                       </Text>
                       {key === "Address" || key === "Class" ? (
                         <Link
-                          href={`https://starkscan.co/${
-                            key === "Address" ? "contract" : "class"
-                          }/${value}`}
+                          href={`https://starkscan.co/${key === "Address" ? "contract" : "class"
+                            }/${value}`}
                           isExternal
                           color="link.blue"
                           fontSize="sm"
