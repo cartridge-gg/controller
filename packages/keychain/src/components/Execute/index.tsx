@@ -206,7 +206,7 @@ export function Execute() {
 
   if (isDeploy) {
     console.log("do deploy");
-    return <DeploymentRequired onClose={() => { }} />;
+    return <DeploymentRequired onClose={() => {}} />;
   }
 
   return (
@@ -227,7 +227,7 @@ export function Execute() {
         )}
 
         {error &&
-          error.error_type == ErrorType.CartridgeControllerNotDeployed ? (
+        error.error_type == ErrorType.CartridgeControllerNotDeployed ? (
           <Button
             colorScheme="colorful"
             onClick={() => {

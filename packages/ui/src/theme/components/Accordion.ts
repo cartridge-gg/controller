@@ -10,73 +10,80 @@ const { defineMultiStyleConfig, definePartsStyle } =
 export const Accordion: ComponentStyleConfig = defineMultiStyleConfig({
   baseStyle: definePartsStyle({
     container: {
+      color: "text.primary",
       bg: "solid.primary",
       borderColor: "solid.bg",
-    },
-    panel: {
-      fontSize: "xs",
-      color: "text.secondary",
+      pb: "0",
     },
     button: {
       p: 3,
       fontSize: "sm",
+      height: "auto",
+      paddingY: "12px",
+      paddingX: "18px",
+      borderRadius: "6px",
+      // color: "text.primary",
+      _expanded: {
+        borderRadius: "6px 6px 0 0",
+        cursor: "default",
+        // bgColor: "solid.primary",
+      },
+      transition: "border-radius 0.2s ease",
+      // bgColor: "solid.primary",
+      _hover: {
+        // bgColor: "solid.primary",
+      },
+    },
+    panel: {
+      fontSize: "xs",
+      // color: "text.primary",
+      // bgColor: "solid.primary",
     },
     icon: {
-      color: "text.secondary",
+      // color: "text.primary",
     },
   }),
   variants: {
-    access: {},
-    inventory: {},
-    tokens: {},
-    bridge: {
-      container: {
-        pb: "0",
-        mt: "1px",
+    info: {
+      // button: {
+      //   bgColor: "red.200",
+      //   _expanded: {
+      //     bgColor: "red.200",
+      //   },
+      //   _hover: {
+      //     bgColor: "red.200",
+      //   },
+      // },
+      // panel: {
+      //   bgColor: "red.200",
+      // },
+    },
+    warning: {
+      button: {
+        bgColor: "yellow.200",
+        _expanded: {
+          bgColor: "yellow.200",
+        },
+        _hover: {
+          bgColor: "yellow.200",
+        },
       },
       panel: {
-        bgColor: "gray.700",
-        padding: "0 16px 16px 16px",
-        borderRadius: "0",
-      },
-      button: {
-        paddingX: "16px",
-        borderRadius: "0",
-        bgColor: "gray.700",
-        _expanded: {
-          bgColor: "gray.700",
-        },
-        _disabled: {
-          opacity: "1",
-          bgColor: "gray.700",
-          cursor: "auto",
-        },
+        bgColor: "yellow.200",
       },
     },
     error: {
-      container: {
-        pb: "0",
-      },
       button: {
-        height: "auto",
-        paddingY: "12px",
-        paddingX: "18px",
         bgColor: "red.200",
-        borderRadius: "6px",
         _expanded: {
           bgColor: "red.200",
-          borderRadius: "6px 6px 0 0",
         },
         _hover: {
           bgColor: "red.200",
         },
-        transition: "border-radius 0.2s ease",
       },
       panel: {
-        padding: "12px 18px 12px 18px",
         bgColor: "red.200",
-        borderRadius: "0 0 6px 6px",
-        overflowX: "auto",
       },
     },
   },

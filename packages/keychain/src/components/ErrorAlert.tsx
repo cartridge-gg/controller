@@ -10,10 +10,6 @@ import {
   Box,
   VStack,
   Link,
-  Table,
-  Tbody,
-  Tr,
-  Td,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { ReactElement } from "react";
@@ -46,10 +42,7 @@ export function ErrorAlert({
       <AccordionItem position="relative">
         {({ isExpanded: itemExpanded }) => (
           <>
-            <AccordionButton
-              disabled={!description || isExpanded}
-              color="solid.bg"
-            >
+            <AccordionButton disabled={!description || isExpanded}>
               <HStack>
                 <AlertIcon />
                 <Text
@@ -71,19 +64,13 @@ export function ErrorAlert({
                     rotate: itemExpanded ? 180 : 0,
                   }}
                 >
-                  <WedgeDownIcon boxSize={5} color="solid.bg" />
+                  <WedgeDownIcon boxSize={5} />
                 </Box>
               )}
             </AccordionButton>
 
             {description && (
-              <AccordionPanel maxH={200}>
-                {typeof description === "string" ? (
-                  <Text color="solid.bg">{description}</Text>
-                ) : (
-                  description
-                )}
-              </AccordionPanel>
+              <AccordionPanel maxH={200}>{description}</AccordionPanel>
             )}
           </>
         )}
@@ -113,7 +100,7 @@ export function ControllerErrorAlert({ error }: { error: JsControllerError }) {
       description =
         "Lets fund your Controller and deploy it before we can start executing transactions.";
       isExpanded = true;
-      variant = "error";
+      variant = "info";
       break;
     case ErrorType.CartridgeProviderError:
       title = "Provider Error";
