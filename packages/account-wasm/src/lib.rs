@@ -331,12 +331,9 @@ impl CartridgeAccount {
         let salt = from_value::<Felt>(salt)?;
         let external_owner = from_value::<ContractAddress>(external_owner)?;
 
-        let guardian = SigningKey::from_random();
         let mut constructor_calldata =
             controller::Owner::cairo_serialize(&controller::Owner::Account(external_owner));
-        constructor_calldata.extend(Option::<AbigenSigner>::cairo_serialize(&Some(
-            guardian.signer(),
-        )));
+        constructor_calldata.extend(Option::<AbigenSigner>::cairo_serialize(&None));
 
         let res = get_udc_deployed_address(
             salt,

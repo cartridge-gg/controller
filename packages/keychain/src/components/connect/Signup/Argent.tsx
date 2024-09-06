@@ -1,5 +1,16 @@
 import { Container, Content, Footer } from "components/layout";
-import { Button, useInterval } from "@chakra-ui/react";
+import {
+  Button,
+  HStack,
+  Spinner,
+  useInterval,
+  VStack,
+  Text,
+  Spacer,
+  Box,
+  AlertIcon,
+  Tooltip,
+} from "@chakra-ui/react";
 import {
   PropsWithChildren,
   useCallback,
@@ -17,19 +28,30 @@ import {
   useProvider,
   voyager,
 } from "@starknet-react/core";
-import { RpcProvider, TypedData, Uint256, num } from "starknet";
-import { PacmanIcon } from "@cartridge/ui";
+import {
+  CallData,
+  RpcProvider,
+  TypedData,
+  cairo,
+  num,
+  shortString,
+} from "starknet";
+import { CheckIcon, CopyAddress, DotsIcon, PacmanIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { useToast } from "hooks/toast";
 import {
   TokenInfo,
   fetchTokenInfo,
+  getBalanceStr,
+  getMinStr,
+  isEther,
   isFunded,
   updateBalance,
 } from "utils/token";
 import { ErrorAlert } from "../../ErrorAlert";
 import { beginAccountSignup, finalizeAccountSignup } from "hooks/account";
 import base64url from "base64url";
+import { CartridgeAccount } from "@cartridge/account-wasm";
 
 enum SignupState {
   CONNECT,
@@ -87,22 +109,17 @@ export function SignupArgent({ username }: { username: string }) {
 function SignupArgentInner({ username }: { username: string }) {
   const { account: extAccount } = useAccount();
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
-  const { chainId, chainName } = useConnection();
-  const { isChecked } = useTokens();
-  const [isDeploying] = useState(false);
+  const { chainId, chainName, policies } = useConnection();
+  const { isChecked, tokens, isFetching, isAllFunded } = useTokens();
+  const [isDeploying, setIsDeploying] = useState(false);
   const [error, setError] = useState<Error>();
   const [state, setState] = useState<SignupState>(SignupState.CONNECT);
-  //const [controllerAddress, setControllerAddress] = useState("");
-  //const [controllerCalldata, setControllerCalldata] = useState([]);
-  //const [title, setTitle] = useState("");
+  const [controllerAddress, setControllerAddress] = useState("");
+  const [controllerCalldata, setControllerCalldata] = useState([]);
+
+  const [title, setTitle] = useState("");
 
   const { toast } = useToast();
-
-  // useEffect(() => {
-  //   if (extAccount && isAllFunded && isChecked) {
-  //     setState(SignupState.DEPLOY);
-  //   }
-  // }, [isAllFunded, isChecked, extAccount]);
 
   const onConnect = useCallback(
     (c: Connector) => {
@@ -124,23 +141,6 @@ function SignupArgentInner({ username }: { username: string }) {
     },
     [connectAsync, chainId, chainName, toast],
   );
-
-  // useEffect(() => {
-  //   if (state == SignupState.CONNECT) {
-  //     setControllerAddress("");
-  //   }
-  //   if (state == SignupState.DEPLOY && extAccount?.address) {
-  //     const salt = shortString.encodeShortString(username);
-
-  //     const { address, calldata } = CartridgeAccount.getUdcDeployedAddress(
-  //       salt,
-  //       extAccount.address,
-  //     );
-
-  //     setControllerAddress(address);
-  //     setControllerCalldata(calldata);
-  //   }
-  // }, [state, extAccount?.address, username]);
 
   const onSignMessage = useCallback(async () => {
     if (!extAccount) return;
@@ -165,6 +165,16 @@ function SignupArgentInner({ username }: { username: string }) {
       );
       console.log({ finalizeMutation });
 
+      // set controller address & calldata
+      const salt = shortString.encodeShortString(username);
+      const { address, calldata } = CartridgeAccount.getUdcDeployedAddress(
+        salt,
+        extAccount.address,
+      );
+
+      setControllerAddress(address);
+      setControllerCalldata(calldata);
+
       setState(SignupState.DEPLOY);
     } catch (e) {
       console.log(e);
@@ -172,114 +182,135 @@ function SignupArgentInner({ username }: { username: string }) {
     }
   }, [extAccount, username, chainId]);
 
-  // const onDeploy = useCallback(async () => {
-  //   if (!extAccount) return;
+  const onDeploy = useCallback(async () => {
+    if (!extAccount) return;
 
-  //   const calls = tokens.flatMap((t) => {
-  //     const amount = cairo.uint256(t.min);
-  //     return [
-  //       {
-  //         contractAddress: t.address,
-  //         entrypoint: "approve",
-  //         calldata: CallData.compile({
-  //           recipient: controllerAddress,
-  //           amount,
-  //         }),
-  //       },
-  //       {
-  //         contractAddress: t.address,
-  //         entrypoint: "transfer",
-  //         calldata: CallData.compile({
-  //           recipient: controllerAddress,
-  //           amount,
-  //         }),
-  //       },
-  //     ];
-  //   });
+    const calls = tokens.flatMap((t) => {
+      const amount = cairo.uint256(t.min);
+      return [
+        {
+          contractAddress: t.address,
+          entrypoint: "approve",
+          calldata: CallData.compile({
+            recipient: controllerAddress,
+            amount,
+          }),
+        },
+        {
+          contractAddress: t.address,
+          entrypoint: "transfer",
+          calldata: CallData.compile({
+            recipient: controllerAddress,
+            amount,
+          }),
+        },
+      ];
+    });
 
-  //   // deployContract
-  //   const salt = shortString.encodeShortString(username);
-  //   calls.push({
-  //     contractAddress: CartridgeAccount.getUdcAddress(),
-  //     entrypoint: "deployContract",
-  //     calldata: CallData.compile({
-  //       classHash: CartridgeAccount.getAccountClassHash(),
-  //       salt,
-  //       unique: false,
-  //       calldata: controllerCalldata,
-  //     }),
-  //   });
+    // deployContract
+    const salt = shortString.encodeShortString(username);
+    calls.push({
+      contractAddress: CartridgeAccount.getUdcAddress(),
+      entrypoint: "deployContract",
+      calldata: CallData.compile({
+        classHash: CartridgeAccount.getAccountClassHash(),
+        salt,
+        unique: false,
+        calldata: controllerCalldata,
+      }),
+    });
 
-  //   // registerSession
-  //   calls.push({
-  //     contractAddress: controllerAddress,
-  //     entrypoint: "register_session",
-  //     calldata: CartridgeAccount.registerSessionCalldata(
-  //       policies.map((p) => {
-  //         return { target: p.target, method: p.method };
-  //       }),
-  //       3000000000n,
-  //       extAccount.address,
-  //     ),
-  //   });
+    // registerSession
+    calls.push({
+      contractAddress: controllerAddress,
+      entrypoint: "register_session",
+      calldata: CartridgeAccount.registerSessionCalldata(
+        policies.map((p) => {
+          return { target: p.target, method: p.method };
+        }),
+        3000000000n,
+        extAccount.address,
+      ),
+    });
 
-  //   console.log(
-  //     calls
-  //       .map((call) => {
-  //         return CallData.compile(call)
-  //           .map((i) => `0x${BigInt(i).toString(16)}`)
-  //           .join(" ");
-  //       })
-  //       .join(" / "),
-  //   );
+    console.log(
+      calls
+        .map((call) => {
+          return CallData.compile(call)
+            .map((i) => `0x${BigInt(i).toString(16)}`)
+            .join(" ");
+        })
+        .join(" / "),
+    );
 
-  //   try {
-  //     setIsDeploying(true);
-  //     const res = await extAccount.execute(calls);
-  //     await extAccount.waitForTransaction(res.transaction_hash, {
-  //       retryInterval: 1000,
-  //     });
-  //   } catch (e) {
-  //     console.log(e);
-  //     setError(e);
-  //   }
-  //   setIsDeploying(false);
-  // }, [
-  //   extAccount,
-  //   controllerAddress,
-  //   controllerCalldata,
-  //   policies,
-  //   tokens,
-  //   username,
-  // ]);
+    try {
+      setIsDeploying(true);
+      const res = await extAccount.execute(calls);
+      await extAccount.waitForTransaction(res.transaction_hash, {
+        retryInterval: 1000,
+      });
+    } catch (e) {
+      console.log(e);
+      setError(e);
+    }
+    setIsDeploying(false);
+  }, [
+    extAccount,
+    controllerAddress,
+    controllerCalldata,
+    policies,
+    tokens,
+    username,
+  ]);
 
   // const onCopy = useCallback(() => {
   //   navigator.clipboard.writeText(controllerAddress);
   //   toast("Copied");
   // }, [controllerAddress, toast]);
 
-  // useEffect(() => {
-  //   setTitle(!!extAccount ? `Create ${username}.gg` : `Create to Argent`);
-  // }, [extAccount, username]);
+  useEffect(() => {
+    switch (state) {
+      case SignupState.CONNECT: {
+        setTitle("Connect to ArgentX");
+        break;
+      }
+      case SignupState.SIGN_MESSAGE: {
+        setTitle("Sign Message");
+        break;
+      }
+      case SignupState.DEPLOY: {
+        setTitle(`Create ${username}.gg`);
+        break;
+      }
+    }
+  });
 
   return (
     <Container
       variant="connect"
-      title={"Connect to Argent"}
-      description={"Sign message to create your account"}
+      title={title}
+      description={
+        <>
+          {state === SignupState.CONNECT &&
+            "Please connect your ArgentX wallet"}
+          {state === SignupState.SIGN_MESSAGE &&
+            "Sign message to create your controller"}
+          {state === SignupState.DEPLOY && (
+            <CopyAddress address={controllerAddress} />
+          )}
+        </>
+      }
       // TODO: Add line icons
       icon={<PacmanIcon color="brand.primary" fontSize="5xl" />}
     >
       <Content gap={6}>
-        {/* {extAccount && (
+        {state === SignupState.DEPLOY && (
           <>
             <HStack w="full">
               <Text color="text.secondary" fontSize="sm">
                 Assets below will be send to your controller address.
               </Text>
-
               <Spacer />
-
               {isFetching && <Spinner size="xs" color="text.secondary" />}
             </HStack>
 
@@ -336,10 +367,10 @@ function SignupArgentInner({ username }: { username: string }) {
               ))}
             </VStack>
           </>
-        )} */}
+        )}
       </Content>
 
-      <Footer isSignup={!extAccount} /*createSession={!!extAccount}*/>
+      <Footer isSignup={!extAccount}>
         {error && (
           <ErrorAlert
             title="Account deployment error"
@@ -388,10 +419,12 @@ function SignupArgentInner({ username }: { username: string }) {
               <Button
                 colorScheme="colorful"
                 onClick={() => {
+
                   console.log("deploy");
+                  onDeploy()
                 }}
                 isLoading={isDeploying}
-                // isDisabled={!(isAllFunded && isChecked && extAccount)}
+                isDisabled={!(isAllFunded && isChecked && extAccount)}
               >
                 Create & Play
               </Button>
