@@ -39,6 +39,11 @@ export const createCredentials = async (
     beginRegistration.publicKey.challenge as unknown as string,
   );
 
+  // https://chromium.googlesource.com/chromium/src/+/main/content/browser/webauth/pub_key_cred_params.md
+  beginRegistration.publicKey.pubKeyCredParams = [
+    { alg: -257, type: "public-key" },
+    { alg: -7, type: "public-key" },
+  ];
   beginRegistration.publicKey.rp.id = process.env.NEXT_PUBLIC_RP_ID;
   const credentials = (await navigator.credentials.create(
     beginRegistration,
