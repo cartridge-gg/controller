@@ -42,7 +42,11 @@ export enum ResponseCodes {
 export type ConnectError = {
   code: ResponseCodes;
   message: string;
-  error?: Error;
+  error?: {
+    details?: string;
+    error_type: string;
+    message: string;
+  };
 };
 
 export type ConnectReply = {

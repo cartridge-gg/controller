@@ -100,13 +100,14 @@ class DeviceAccount extends Account {
         return res as InvokeFunctionResponse;
       }
 
+      console.log("open");
       this.modal.open();
 
-      console.log(res);
+      console.log(res.error);
 
-      if (res.code === ResponseCodes.ERROR) {
-        return Promise.reject(res.error);
-      }
+      // if (res.code === ResponseCodes.ERROR) {
+      //   return Promise.reject(res.error);
+      // }
 
       res = await this.keychain.execute(
         calls,
@@ -122,8 +123,10 @@ class DeviceAccount extends Account {
 
       return res as InvokeFunctionResponse;
     } catch (e) {
+      console.error(e);
       throw e;
     } finally {
+      console.log("close");
       this.modal.close();
     }
   }

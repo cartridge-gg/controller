@@ -15,7 +15,7 @@ import {
   num,
 } from "starknet";
 import { ConnectionCtx, ExecuteCtx } from "./types";
-import { JsCall } from "@cartridge/account-wasm";
+import { ErrorType, JsCall } from "@cartridge/account-wasm";
 
 export const ESTIMATE_FEE_PERCENTAGE = 10;
 
@@ -32,21 +32,21 @@ export function execute({
       sync?: boolean,
       paymaster?: PaymasterOptions,
     ): Promise<ExecuteReply | ConnectError> => {
-      try {
-        if (sync) {
-          return await new Promise((resolve, reject) => {
-            setContext({
-              type: "execute",
-              origin,
-              transactions,
-              abis,
-              transactionsDetail,
-              resolve,
-              reject,
-            } as ExecuteCtx);
-          });
-        }
+      if (sync) {
+        return await new Promise((resolve, reject) => {
+          setContext({
+            type: "execute",
+            origin,
+            transactions,
+            abis,
+            transactionsDetail,
+            resolve,
+            reject,
+          } as ExecuteCtx);
+        });
+      }
 
+      try {
         const account = controller.account;
         const calls = normalizeCalls(transactions);
 
@@ -55,15 +55,22 @@ export function execute({
         }
 
         if (paymaster) {
-          const transaction_hash = await account.executeFromOutside(
-            calls,
-            paymaster,
-          );
+          try {
+            const transaction_hash = await account.executeFromOutside(
+              calls,
+              paymaster,
+            );
 
-          return {
-            code: ResponseCodes.SUCCESS,
-            transaction_hash,
-          };
+            return {
+              code: ResponseCodes.SUCCESS,
+              transaction_hash,
+            };
+          } catch (e) {
+            // User only pays if the error is ErrorType.PaymasterNotSupported
+            if (e.error_type !== ErrorType.PaymasterNotSupported) {
+              throw e;
+            }
+          }
         }
 
         let { maxFee } = transactionsDetail;
@@ -84,7 +91,11 @@ export function execute({
         return {
           code: ResponseCodes.ERROR,
           message: e.message,
-          error: e,
+          error: {
+            error_type: e.error_type,
+            message: e.message,
+            details: e.details,
+          },
         };
       }
     };

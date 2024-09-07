@@ -39,14 +39,6 @@ export function Execute() {
       : [ctx.transactions];
   }, [ctx.transactions]);
 
-  // const format = (val: bigint) => {
-  //   const formatted = Number(formatEther(val)).toFixed(5);
-  //   if (formatted === "0.00000") {
-  //     return "0.0";
-  //   }
-  //   return formatted.replace(/\.?0+$/, "");
-  // };
-
   // Estimate fees
   useEffect(() => {
     if (!controller || !calls) return;
