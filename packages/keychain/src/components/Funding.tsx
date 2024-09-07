@@ -273,7 +273,7 @@ function FundingInner({ onComplete, title, ctrlError }: FundingInnerProps) {
 
               {countervalue && (
                 <Text fontSize="sm" fontWeight="500" color="text.secondary">
-                  ~${countervalue.price.amount}
+                  ~ ${countervalue.price.amount}
                 </Text>
               )}
             </>
@@ -296,6 +296,10 @@ function FundingInner({ onComplete, title, ctrlError }: FundingInnerProps) {
 
           switch (state) {
             case "connect":
+              if (isConnecting) {
+                return <Button colorScheme="colorful" isLoading />;
+              }
+
               return (
                 <>
                   {connectors.length ? (
@@ -306,7 +310,6 @@ function FundingInner({ onComplete, title, ctrlError }: FundingInnerProps) {
                           key={c.id}
                           colorScheme="colorful"
                           onClick={() => onConnect(c)}
-                          isLoading={isConnecting}
                         >
                           Connect {c.name}
                         </Button>
