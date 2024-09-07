@@ -18,6 +18,7 @@ import {
   VStack,
   Link,
   IconButton,
+  Divider,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { ReactElement, useEffect, useState } from "react";
@@ -98,13 +99,14 @@ export function ErrorAlert({
             </AccordionButton>
 
             {description && (
-              <AccordionPanel maxH={200} position="relative">
-                {itemExpanded && copyText && (
+              <AccordionPanel w="full" position="relative">
+                {copyText && (
                   <IconButton
+                    size="icon"
                     w={6}
-                    h={7}
+                    h={6}
                     position="absolute"
-                    right={1}
+                    right={3}
                     aria-label="Copy stacktrace"
                     icon={
                       copied ? (
@@ -119,7 +121,16 @@ export function ErrorAlert({
                     }}
                   />
                 )}
-                {description}
+
+                <Box
+                  h="full"
+                  maxH={200}
+                  p={3}
+                  overflowY="auto"
+                  pr={copyText ? 10 : undefined}
+                >
+                  {description}
+                </Box>
               </AccordionPanel>
             )}
           </>
@@ -244,7 +255,7 @@ export function ControllerErrorAlert({ error }: { error: JsControllerError }) {
           let executionError: string = errorDetails.execution_error;
 
           if (!executionError) {
-            return <Text>{error.details}</Text>;
+            return <Text color="inherit">{error.details}</Text>;
           }
 
           // Remove the "Transaction reverted: Transaction execution has failed:\n" prefix
@@ -252,15 +263,15 @@ export function ControllerErrorAlert({ error }: { error: JsControllerError }) {
             /^Transaction reverted: Transaction execution has failed:\n/,
             "",
           );
+          copyText = executionError;
 
           const stackTrace = executionError.split(/\n\d+: /);
 
           return <StackTraceDisplay stackTrace={stackTrace} />;
         } catch (e) {
-          return <Text>{error.details}</Text>;
+          return <Text color="inherit">{error.details}</Text>;
         }
       })();
-      copyText = error.message;
       break;
     default:
       title = "Unknown Error";
@@ -279,8 +290,8 @@ export function ControllerErrorAlert({ error }: { error: JsControllerError }) {
 
 function StackTraceDisplay({ stackTrace }: { stackTrace: string[] }) {
   return (
-    <VStack align="start" spacing={2}>
-      {stackTrace.map((trace, index) => {
+    <VStack align="start" spacing={2} w="full">
+      {stackTrace.map((trace, i, arr) => {
         const extractedInfo = {
           ["Address"]: trace.match(/contract address: (0x[a-fA-F0-9]+)/)?.[1],
           ["Class"]: trace.match(/class hash: (0x[a-fA-F0-9]+)/)?.[1],
@@ -301,37 +312,33 @@ function StackTraceDisplay({ stackTrace }: { stackTrace: string[] }) {
         }
 
         return (
-          <VStack key={index} align="start" spacing={1}>
-            <VStack align="start" spacing={1} width="100%">
+          <>
+            <VStack key={i} align="start" spacing={1} w="full">
               {Object.entries(extractedInfo).map(
                 ([key, value]) =>
                   value && (
                     <HStack
                       key={key}
-                      width="100%"
+                      w="full"
                       justifyContent="space-between"
+                      fontSize="xs"
                     >
-                      <Text fontWeight="bold" fontSize="sm">
-                        {key}
-                      </Text>
+                      <Text color="darkGray.400">{key}</Text>
                       {key === "Address" || key === "Class" ? (
                         <Link
-                          href={`https://starkscan.co/${
-                            key === "Address" ? "contract" : "class"
-                          }/${value}`}
+                          href={`https://starkscan.co/${key === "Address" ? "contract" : "class"
+                            }/${value}`}
                           isExternal
-                          color="link.blue"
-                          fontSize="sm"
                           wordBreak="break-all"
                         >
                           {formatAddress(value, { first: 10, last: 10 })}
                         </Link>
                       ) : key === "Selector" ? (
-                        <Text fontSize="sm" wordBreak="break-all">
+                        <Text wordBreak="break-all" color="inherit">
                           {formatAddress(value, { first: 10, last: 10 })}
                         </Text>
                       ) : (
-                        <Text fontSize="sm" wordBreak="break-all">
+                        <Text wordBreak="break-all" color="inherit">
                           {value}
                         </Text>
                       )}
@@ -339,7 +346,8 @@ function StackTraceDisplay({ stackTrace }: { stackTrace: string[] }) {
                   ),
               )}
             </VStack>
-          </VStack>
+            {i !== arr.length - 1 && <Divider borderColor="darkGray.100" />}
+          </>
         );
       })}
     </VStack>

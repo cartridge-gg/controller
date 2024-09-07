@@ -96,7 +96,7 @@ export function Footer({
           onClick={footer.onToggle}
           _hover={{ cursor: "pointer" }}
         >
-          {!hideTxSummary && !!policies.length && (
+          {!hideTxSummary && !!policies.length && variant === "connect" && (
             <SessionConsent
               variant={isSlot ? "slot" : isSignup ? "signup" : undefined}
             />

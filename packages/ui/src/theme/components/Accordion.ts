@@ -13,7 +13,7 @@ export const Accordion: ComponentStyleConfig = defineMultiStyleConfig({
       color: "text.primary",
       bg: "solid.primary",
       borderColor: "solid.bg",
-      pb: "0",
+      pb: 0,
       borderRadius: "6px",
     },
     button: {
@@ -30,6 +30,7 @@ export const Accordion: ComponentStyleConfig = defineMultiStyleConfig({
     },
     panel: {
       fontSize: "xs",
+      p: 0,
     },
     icon: {},
   }),
