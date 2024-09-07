@@ -40,7 +40,6 @@ import {
 } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { useToast } from "hooks/toast";
-import { AlphaWarning } from "./Warning";
 import {
   ETH_MIN_PREFUND,
   TokenInfo,
@@ -288,7 +287,13 @@ function FundingInner({ onComplete, title, ctrlError }: FundingInnerProps) {
             description={error.message}
           />
         )}
-        <AlphaWarning />
+        <ErrorAlert
+          variant="info"
+          isExpanded
+          title="Controller is in Alpha"
+          description="Exercise caution when depositing funds"
+        />
+
         {(() => {
           if (!isChecked) {
             return <Button colorScheme="colorful" isLoading />;

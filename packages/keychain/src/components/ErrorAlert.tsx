@@ -126,6 +126,7 @@ export function ErrorAlert({
                   h="full"
                   maxH={200}
                   p={3}
+                  pt={0}
                   overflowY="auto"
                   pr={copyText ? 10 : undefined}
                 >
@@ -326,8 +327,9 @@ function StackTraceDisplay({ stackTrace }: { stackTrace: string[] }) {
                       <Text color="darkGray.400">{key}</Text>
                       {key === "Address" || key === "Class" ? (
                         <Link
-                          href={`https://starkscan.co/${key === "Address" ? "contract" : "class"
-                            }/${value}`}
+                          href={`https://starkscan.co/${
+                            key === "Address" ? "contract" : "class"
+                          }/${value}`}
                           isExternal
                           wordBreak="break-all"
                         >

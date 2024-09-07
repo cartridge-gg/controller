@@ -25,8 +25,10 @@ export const Accordion: ComponentStyleConfig = defineMultiStyleConfig({
       _expanded: {
         borderRadius: "6px 6px 0 0",
         cursor: "default",
+        _hover: {
+          bg: "solid.primary",
+        },
       },
-      _hover: {},
     },
     panel: {
       fontSize: "xs",
@@ -38,19 +40,40 @@ export const Accordion: ComponentStyleConfig = defineMultiStyleConfig({
     info: {
       container: {
         color: "black",
-        bgColor: "info.background",
+        bg: "info.background",
+      },
+      button: {
+        _expanded: {
+          _hover: {
+            bg: "info.background",
+          },
+        },
       },
     },
     warning: {
       container: {
         color: "black",
-        bgColor: "warning.background",
+        bg: "warning.background",
+      },
+      button: {
+        _expanded: {
+          _hover: {
+            bg: "warning.background",
+          },
+        },
       },
     },
     error: {
       container: {
         color: "black",
-        bgColor: "error.background",
+        bg: "error.background",
+      },
+      button: {
+        _expanded: {
+          _hover: {
+            bg: "error.background",
+          },
+        },
       },
     },
   },

@@ -75,7 +75,7 @@ export function Policies({
                 </AccordionButton>
 
                 <AccordionPanel>
-                  <VStack align="flex-start" w="full">
+                  <VStack align="flex-start" w="full" p={3}>
                     <CopyHash hash={p.target} />
                     {p.description && (
                       <Text w="full" color="inherit">
