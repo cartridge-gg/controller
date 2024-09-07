@@ -11,8 +11,15 @@ import { useController } from "hooks/controller";
 import { Funding } from "./Funding";
 import { useConnection } from "hooks/connection";
 import { ErrorAlert } from "./ErrorAlert";
+import { JsControllerError } from "@cartridge/account-wasm";
 
-export function DeploymentRequired({ onClose }: { onClose: () => void }) {
+export function DeploymentRequired({
+  onClose,
+  controllerError,
+}: {
+  onClose: () => void;
+  controllerError?: JsControllerError;
+}) {
   const {
     controller: { account },
   } = useController();
@@ -59,6 +66,7 @@ export function DeploymentRequired({ onClose }: { onClose: () => void }) {
           if (hash) setDeployHash(hash);
           setShowFunding(false);
         }}
+        controllerError={controllerError}
       />
     );
 

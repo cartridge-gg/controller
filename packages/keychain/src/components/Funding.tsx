@@ -3,12 +3,16 @@ import {
   Box,
   Button,
   HStack,
+  Input,
+  InputGroup,
+  InputLeftElement,
   Spacer,
   Spinner,
   Text,
   Tooltip,
   VStack,
   useInterval,
+  Divider,
 } from "@chakra-ui/react";
 import {
   PropsWithChildren,
@@ -27,7 +31,13 @@ import {
   voyager,
 } from "@starknet-react/core";
 import { CallData, cairo, num } from "starknet";
-import { AlertIcon, CheckIcon, CoinsIcon, DotsIcon } from "@cartridge/ui";
+import {
+  AlertIcon,
+  ArrowLineDownIcon,
+  CheckIcon,
+  DotsIcon,
+  EthereumIcon,
+} from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { useToast } from "hooks/toast";
 import { AlphaWarning } from "./Warning";
@@ -36,20 +46,13 @@ import {
   TokenInfo,
   fetchTokenInfo,
   getBalanceStr,
-  getMinStr,
-  isEther,
   isFunded,
   updateBalance,
 } from "utils/token";
 import { ErrorAlert } from "./ErrorAlert";
 import { CopyAddress } from "./CopyAddress";
 import { useDeploy } from "hooks/deploy";
-
-enum FundingState {
-  CONNECT,
-  PREFUND,
-  DEPLOY,
-}
+import { JsControllerError } from "@cartridge/account-wasm";
 
 export function Funding(innerProps: FundingInnerProps) {
   return (
@@ -62,9 +65,10 @@ export function Funding(innerProps: FundingInnerProps) {
 type FundingInnerProps = {
   onComplete: (deployHash?: string) => void;
   title?: React.ReactElement;
+  ctrlError?: JsControllerError;
 };
 
-function FundingInner({ onComplete, title }: FundingInnerProps) {
+function FundingInner({ onComplete, title, ctrlError }: FundingInnerProps) {
   const { account: extAccount } = useAccount();
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
   const { controller, chainId, chainName } = useConnection();
@@ -72,11 +76,22 @@ function FundingInner({ onComplete, title }: FundingInnerProps) {
   const { deploySelf, isDeploying } = useDeploy();
   const [error, setError] = useState<Error>();
   const [isSending, setIsSending] = useState(false);
-  const [state, setState] = useState<FundingState>(FundingState.CONNECT);
+  const [state, setState] = useState<"connect" | "fund" | "deploy">("connect");
+
+  const details = ctrlError?.details ? JSON.parse(ctrlError?.details) : null;
+  const feeEstimate = details?.fee_estimate;
+  const balance = details?.balance;
+
+  // if (!feeEstimate || balance === undefined) {
+  //   console.error("Failed to parse error details", error);
+  //   return null;
+  // }
+  const [fundingAmount, setFundingAmount] = useState(() => balance ?? 0);
+
   const { toast } = useToast();
   useEffect(() => {
     if (isAllFunded && isChecked) {
-      setState(FundingState.DEPLOY);
+      setState("deploy");
     }
   }, [isAllFunded, isChecked]);
 
@@ -91,7 +106,7 @@ function FundingInner({ onComplete, title }: FundingInnerProps) {
             return;
           }
 
-          setState(FundingState.PREFUND);
+          setState("fund");
         })
         .catch(() => {
           /* user abort */
@@ -173,8 +188,7 @@ function FundingInner({ onComplete, title }: FundingInnerProps) {
         )
       }
       description={<CopyAddress address={controller.address} />}
-      // TODO: Add line icons
-      Icon={CoinsIcon}
+      Icon={ArrowLineDownIcon}
     >
       <Content gap={6}>
         <HStack w="full">
@@ -199,48 +213,59 @@ function FundingInner({ onComplete, title }: FundingInnerProps) {
               fontWeight="semibold"
             >
               <HStack>
-                <HStack>
-                  {t.logo}
-                  {typeof t.balance === "bigint" ? (
-                    <Text>{getBalanceStr(t)}</Text>
-                  ) : !!t.error ? (
-                    // <Text>...</Text>
-                    <DotsIcon />
-                  ) : (
-                    <Spinner size="xs" />
-                  )}
-                  <Text>{t.symbol}</Text>
-                </HStack>
-                {isFunded(t) && <CheckIcon color="text.success" />}
-                {!!t.error && (
-                  <Tooltip
-                    label={t.error.message}
-                    fontSize="xs"
-                    bg="solid.bg"
-                    color="text.primary"
-                  >
-                    <Box>
-                      <AlertIcon color="alert.foreground" />
-                    </Box>
-                  </Tooltip>
+                {t.logo}
+                {typeof t.balance === "bigint" ? (
+                  <Text>{getBalanceStr(t)}</Text>
+                ) : !!t.error ? (
+                  <DotsIcon />
+                ) : (
+                  <Spinner size="xs" />
                 )}
+                <Text>{t.symbol}</Text>
               </HStack>
-
-              <Spacer />
-
-              <HStack gap={isEther(t) ? 2 : 3} color="text.secondary">
-                <Text color="inherit">min:</Text>
-                <HStack gap={isEther(t) ? 0 : 1}>
-                  {t.logo}
-                  <Text color="inherit">{getMinStr(t)}</Text>
-                </HStack>
-              </HStack>
+              {isFunded(t) && <CheckIcon color="text.success" />}
+              {!!t.error && (
+                <Tooltip
+                  label={t.error.message}
+                  fontSize="xs"
+                  bg="solid.bg"
+                  color="text.primary"
+                >
+                  <Box>
+                    <AlertIcon color="alert.foreground" />
+                  </Box>
+                </Tooltip>
+              )}
             </HStack>
           ))}
         </VStack>
       </Content>
 
       <Footer>
+        <HStack>
+          <Text fontSize="xs" fontWeight="bold" textTransform="uppercase">
+            Amount
+          </Text>
+          <InputGroup size="sm" w={200}>
+            <InputLeftElement>
+              <EthereumIcon />
+            </InputLeftElement>
+            <Input
+              type="number"
+              value={fundingAmount}
+              onChange={(e) => {
+                setFundingAmount(e.target.value);
+              }}
+            />
+          </InputGroup>
+
+          <Spacer />
+
+          {feeEstimate && <Text>~`{}</Text>}
+        </HStack>
+
+        <Divider />
+
         {error && (
           <ErrorAlert
             title="Account deployment error"
@@ -248,54 +273,55 @@ function FundingInner({ onComplete, title }: FundingInnerProps) {
           />
         )}
         <AlphaWarning />
-        {!isChecked ? (
-          <Button colorScheme="colorful" isLoading />
-        ) : (
-          <>
-            {state === FundingState.CONNECT && (
-              <>
-                {connectors.length ? (
-                  connectors
-                    .filter((c) => ["argentX", "braavos"].includes(c.id))
-                    .map((c) => (
-                      <Button
-                        key={c.id}
-                        colorScheme="colorful"
-                        onClick={() => onConnect(c)}
-                        isLoading={isConnecting}
-                      >
-                        Connect {c.name}
-                      </Button>
-                    ))
-                ) : (
-                  <Button colorScheme="colorful" onClick={onCopy}>
-                    copy address
-                  </Button>
-                )}
-              </>
-            )}
+        {(() => {
+          if (!isChecked) {
+            return <Button colorScheme="colorful" isLoading />;
+          }
 
-            {state === FundingState.PREFUND && (
-              <Button
-                colorScheme="colorful"
-                onClick={onPrefund}
-                isLoading={isSending}
-              >
-                Send Funds
-              </Button>
-            )}
-
-            {state === FundingState.DEPLOY && (
+          switch (state) {
+            case "connect":
+              return (
+                <>
+                  {connectors.length ? (
+                    connectors
+                      .filter((c) => ["argentX", "braavos"].includes(c.id))
+                      .map((c) => (
+                        <Button
+                          key={c.id}
+                          colorScheme="colorful"
+                          onClick={() => onConnect(c)}
+                          isLoading={isConnecting}
+                        >
+                          Connect {c.name}
+                        </Button>
+                      ))
+                  ) : (
+                    <Button colorScheme="colorful" onClick={onCopy}>
+                      copy address
+                    </Button>
+                  )}
+                </>
+              );
+            case "fund":
+              return (
+                <Button
+                  colorScheme="colorful"
+                  onClick={onPrefund}
+                  isLoading={isSending}
+                >
+                  Send Funds
+                </Button>
+              );
+            case "deploy":
               <Button
                 colorScheme="colorful"
                 onClick={onDeploy}
                 isLoading={isDeploying}
               >
                 Deploy Controller
-              </Button>
-            )}
-          </>
-        )}
+              </Button>;
+          }
+        })()}
       </Footer>
     </Container>
   );

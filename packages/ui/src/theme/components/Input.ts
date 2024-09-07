@@ -10,7 +10,10 @@ export const Input: ComponentStyleConfig = defineStyleConfig({
   sizes: {
     md: {
       field: {
-        height: 12,
+        h: 12,
+      },
+      addon: {
+        h: 12,
       },
     },
   },

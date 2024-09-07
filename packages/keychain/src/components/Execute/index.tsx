@@ -26,9 +26,11 @@ export function Execute() {
   const ctx = context as ExecuteCtx;
 
   const [maxFee, setMaxFee] = useState<bigint>(0n);
-  const [error, setError] = useState<JsControllerError>();
+  const [ctrlError, setCtrlError] = useState<JsControllerError>();
   const [isLoading, setLoading] = useState<boolean>(false);
-  const [accountState, setAccountState] = useState<"prefund" | "deploy">();
+  const [ctaState, setCTAState] = useState<"prefund" | "deploy" | "execute">(
+    "execute",
+  );
 
   const account = controller.account;
   const calls = useMemo(() => {
@@ -49,12 +51,12 @@ export function Execute() {
         );
         setMaxFee(est.overall_fee);
       } catch (e) {
-        setError(e);
+        setCtrlError(e);
       }
     };
 
     estimateFees();
-  }, [controller, calls, account, ctx, setError, setMaxFee]);
+  }, [controller, calls, account, ctx, setMaxFee]);
 
   const execute = useCallback(async () => {
     if (!paymaster) {
@@ -86,11 +88,11 @@ export function Execute() {
         code: ResponseCodes.SUCCESS,
       });
     } catch (error) {
-      setError(error);
+      setCtrlError(error);
     } finally {
       setLoading(false);
     }
-  }, [ctx, execute, setError, setLoading]);
+  }, [ctx, execute]);
 
   const policies = useMemo<Policy[]>(
     () =>
@@ -99,13 +101,20 @@ export function Execute() {
   );
 
   if (
-    ["prefund", "deploy"].includes(accountState) &&
+    ["prefund", "deploy"].includes(ctaState) &&
     [
       ErrorType.InsufficientBalance,
       ErrorType.CartridgeControllerNotDeployed,
-    ].includes(error.error_type)
+    ].includes(ctrlError.error_type)
   ) {
-    return <DeploymentRequired onClose={() => {}} />;
+    return (
+      <DeploymentRequired
+        onClose={() => {
+          setCTAState("execute");
+        }}
+        ctrlError={ctrlError}
+      />
+    );
   }
 
   return (
@@ -119,14 +128,14 @@ export function Execute() {
       </Content>
 
       {(() => {
-        switch (error?.error_type) {
+        switch (ctrlError?.error_type) {
           case ErrorType.CartridgeControllerNotDeployed:
             return (
               <Footer>
-                <ControllerErrorAlert error={error} />
+                <ControllerErrorAlert error={ctrlError} />
                 <Button
                   colorScheme="colorful"
-                  onClick={() => setAccountState("deploy")}
+                  onClick={() => setCTAState("deploy")}
                 >
                   DEPLOY ACCOUNT
                 </Button>
@@ -139,7 +148,7 @@ export function Execute() {
 
                 <Button
                   colorScheme="colorful"
-                  onClick={() => setAccountState("prefund")}
+                  onClick={() => setCTAState("prefund")}
                 >
                   ADD FUNDS
                 </Button>
@@ -148,8 +157,8 @@ export function Execute() {
           default:
             return (
               <Footer>
-                {error ? (
-                  <ControllerErrorAlert error={error} />
+                {ctrlError ? (
+                  <ControllerErrorAlert error={ctrlError} />
                 ) : (
                   <Fees maxFee={maxFee} />
                 )}
