@@ -102,9 +102,9 @@ class DeviceAccount extends Account {
 
       this.modal.open();
 
-      // if (res.code === ResponseCodes.ERROR) {
-      //   return Promise.reject(res.error);
-      // }
+      if (res.code === ResponseCodes.ERROR) {
+        return Promise.reject(res.error);
+      }
 
       res = await this.keychain.execute(
         calls,
