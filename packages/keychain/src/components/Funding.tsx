@@ -367,6 +367,41 @@ function ExternalWalletProvider({ children }: PropsWithChildren) {
   );
 }
 
+// function useTokens() {
+//   const { controller, prefunds } = useConnection();
+//   const [tokens, setTokens] = useState<TokenInfo[]>([]);
+//   const [isChecked, setIsChecked] = useState(false);
+//   const [isFetching, setIsFetching] = useState(true);
+
+//   const remaining = useMemo(() => tokens.filter((t) => !isFunded(t)), [tokens]);
+
+//   useEffect(() => {
+//     fetchTokenInfo(prefunds).then(setTokens);
+//   }, [prefunds, controller.account.address]);
+
+//   const checkFunds = useCallback(async () => {
+//     setIsFetching(true);
+
+//     const checked = await updateBalance(tokens, controller);
+//     setTokens(checked);
+
+//     setIsFetching(false);
+//     if (!isChecked) {
+//       setIsChecked(true);
+//     }
+//   }, [tokens, controller, isChecked]);
+
+//   useInterval(checkFunds, 3000);
+
+//   return {
+//     tokens,
+//     remaining,
+//     isAllFunded: remaining.length === 0,
+//     isChecked,
+//     isFetching,
+//   };
+// }
+
 function useTokens() {
   const { controller, prefunds } = useConnection();
   const [tokens, setTokens] = useState<TokenInfo[]>([]);

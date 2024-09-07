@@ -151,7 +151,7 @@ export type ControllerOptions = {
     presets?: ControllerThemePresets;
   };
   /** List of ERC20 tokens to pre-fund */
-  prefunds?: Prefund[];
+  // prefunds?: Prefund[];
 };
 
 /**
