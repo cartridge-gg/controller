@@ -14,7 +14,9 @@ export function validateUsernameFor(type: AuthAction) {
       return "Username must be at least 3 characters";
     } else if (val.split(" ").length > 1) {
       return "Username cannot contain spaces";
-    } else if (!/^[a-zA-Z0-9-]+$/.test(val)) {
+    }
+
+    if (type == "signup" && !/^[a-zA-Z0-9-]+$/.test(val)) {
       return "Username can only contain letters, numbers, and hyphens";
     }
 
