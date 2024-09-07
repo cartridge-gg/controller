@@ -102,6 +102,8 @@ class DeviceAccount extends Account {
 
       this.modal.open();
 
+      console.log(res);
+
       if (res.code === ResponseCodes.ERROR) {
         return Promise.reject(res.error);
       }

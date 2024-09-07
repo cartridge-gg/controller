@@ -205,7 +205,7 @@ where
             .await
             .map_err(ControllerError::PaymasterError)?;
 
-        Ok(res.result.transaction_hash)
+        Ok(res.transaction_hash)
     }
 
     pub async fn estimate_invoke_fee(

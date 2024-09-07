@@ -80,6 +80,7 @@ export function execute({
           ...res,
         };
       } catch (e) {
+        console.error(e);
         return {
           code: ResponseCodes.ERROR,
           message: e.message,

@@ -3,6 +3,7 @@ use std::fmt;
 use account_sdk::{controller::ControllerError, paymaster::PaymasterError, signers::DeviceError};
 use serde::Serialize;
 use starknet::{accounts::AccountError, core::types::StarknetError, providers::ProviderError};
+use starknet_types_core::felt::FromStrError;
 use wasm_bindgen::prelude::*;
 
 use crate::types::EncodingError;
@@ -159,9 +160,8 @@ impl From<PaymasterError> for JsControllerError {
                 ErrorType::PaymasterNotSupported,
                 "Paymaster not supported".to_string(),
             ),
-            PaymasterError::Http(e) => (ErrorType::PaymasterHttp, e.to_string()),
             PaymasterError::Serialization(e) => (ErrorType::PaymasterSerialization, e.to_string()),
-            PaymasterError::StarknetError(e) => return e.into(),
+            PaymasterError::ProviderError(e) => return e.into(),
         };
 
         JsControllerError {
@@ -393,6 +393,16 @@ impl From<serde_wasm_bindgen::Error> for JsControllerError {
             error_type: ErrorType::SerdeWasmBindgenError,
             message: error.to_string(),
             details: None,
+        }
+    }
+}
+
+impl From<FromStrError> for JsControllerError {
+    fn from(error: FromStrError) -> Self {
+        JsControllerError {
+            error_type: ErrorType::EncodingError,
+            message: "Failed to parse string to Felt".to_string(),
+            details: Some(error.to_string()),
         }
     }
 }

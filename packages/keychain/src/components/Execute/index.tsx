@@ -57,10 +57,8 @@ export function Execute() {
           calls,
           ctx.transactionsDetail,
         );
-        console.log(est)
         setMaxFee(est.overall_fee);
       } catch (e) {
-        console.error(e)
         setError(e);
       }
     };

@@ -202,7 +202,7 @@ impl CartridgeAccount {
         &self,
         calls: Vec<JsCall>,
         caller: JsValue,
-    ) -> Result<JsValue> {
+    ) -> std::result::Result<JsValue, JsControllerError> {
         set_panic_hook();
 
         let calls: Vec<Call> = calls
