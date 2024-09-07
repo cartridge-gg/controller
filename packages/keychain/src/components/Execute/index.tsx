@@ -8,7 +8,6 @@ import {
   Footer,
 } from "components/layout";
 import { TransactionDuoIcon } from "@cartridge/ui";
-import { InsufficientFunds } from "./InsufficientFunds";
 import { useConnection } from "hooks/connection";
 import { ControllerErrorAlert } from "components/ErrorAlert";
 import { Policies } from "Policies";
@@ -29,8 +28,7 @@ export function Execute() {
   const [maxFee, setMaxFee] = useState<bigint>(0n);
   const [error, setError] = useState<JsControllerError>();
   const [isLoading, setLoading] = useState<boolean>(false);
-  const [isDeploy, setIsDeploy] = useState<boolean>(false);
-  const [isFunding, setIsFunding] = useState<boolean>(false);
+  const [accountState, setAccountState] = useState<"prefund" | "deploy">();
 
   const account = controller.account;
   const calls = useMemo(() => {
@@ -100,11 +98,13 @@ export function Execute() {
     [calls],
   );
 
-  if (isFunding && error.error_type === ErrorType.InsufficientBalance) {
-    return <InsufficientFunds error={error} />;
-  }
-
-  if (isDeploy) {
+  if (
+    ["prefund", "deploy"].includes(accountState) &&
+    [
+      ErrorType.InsufficientBalance,
+      ErrorType.CartridgeControllerNotDeployed,
+    ].includes(error.error_type)
+  ) {
     return <DeploymentRequired onClose={() => {}} />;
   }
 
@@ -118,53 +118,54 @@ export function Execute() {
         <Policies title="Transaction Details" policies={policies} />
       </Content>
 
-      {error &&
-      error.error_type === ErrorType.CartridgeControllerNotDeployed ? (
-        <DeployFooter setIsDeploy={setIsDeploy} error={error} />
-      ) : error && error.error_type === ErrorType.InsufficientBalance ? (
-        <FundingFooter maxFee={maxFee} setIsFunding={setIsFunding} />
-      ) : (
-        <ExecuteFooter
-          error={error}
-          maxFee={maxFee}
-          onSubmit={onSubmit}
-          isLoading={isLoading}
-        />
-      )}
+      {(() => {
+        switch (error?.error_type) {
+          case ErrorType.CartridgeControllerNotDeployed:
+            return (
+              <Footer>
+                <ControllerErrorAlert error={error} />
+                <Button
+                  colorScheme="colorful"
+                  onClick={() => setAccountState("deploy")}
+                >
+                  DEPLOY ACCOUNT
+                </Button>
+              </Footer>
+            );
+          case ErrorType.InsufficientBalance:
+            return (
+              <Footer>
+                <Fees maxFee={maxFee} />
+
+                <Button
+                  colorScheme="colorful"
+                  onClick={() => setAccountState("prefund")}
+                >
+                  ADD FUNDS
+                </Button>
+              </Footer>
+            );
+          default:
+            return (
+              <Footer>
+                {error ? (
+                  <ControllerErrorAlert error={error} />
+                ) : (
+                  <Fees maxFee={maxFee} />
+                )}
+
+                <Button
+                  colorScheme="colorful"
+                  onClick={onSubmit}
+                  isLoading={isLoading}
+                  isDisabled={!maxFee}
+                >
+                  SUBMIT
+                </Button>
+              </Footer>
+            );
+        }
+      })()}
     </Container>
   );
 }
-
-const DeployFooter = ({ setIsDeploy, error }) => (
-  <Footer>
-    <ControllerErrorAlert error={error} />
-    <Button colorScheme="colorful" onClick={() => setIsDeploy(true)}>
-      DEPLOY ACCOUNT
-    </Button>
-  </Footer>
-);
-
-const FundingFooter = ({ maxFee, setIsFunding }) => (
-  <Footer>
-    <Fees maxFee={maxFee} />
-
-    <Button colorScheme="colorful" onClick={() => setIsFunding(true)}>
-      ADD FUNDS
-    </Button>
-  </Footer>
-);
-
-const ExecuteFooter = ({ error, maxFee, onSubmit, isLoading }) => (
-  <Footer>
-    {error ? <ControllerErrorAlert error={error} /> : <Fees maxFee={maxFee} />}
-
-    <Button
-      colorScheme="colorful"
-      onClick={onSubmit}
-      isLoading={isLoading}
-      isDisabled={!maxFee}
-    >
-      SUBMIT
-    </Button>
-  </Footer>
-);
