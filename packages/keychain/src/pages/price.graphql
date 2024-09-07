@@ -1,0 +1,6 @@
+query Price($quote: CurrencyQuote!, $base: CurrencyBase!) {
+  price(quote: $quote, base: $base) {
+    amount
+    currency
+  }
+}

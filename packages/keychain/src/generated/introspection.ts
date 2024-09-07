@@ -7,7 +7,12 @@ const result: PossibleTypesResultData = {
   possibleTypes: {
     Attribute: ["NumberAttribute", "StringAttribute"],
     ContractMetadata: ["ERC20Metadata", "ERC721Metadata"],
-    DeploymentConfig: ["KatanaConfig", "MadaraConfig", "ToriiConfig"],
+    DeploymentConfig: [
+      "KatanaConfig",
+      "MadaraConfig",
+      "SayaConfig",
+      "ToriiConfig",
+    ],
     Node: [
       "Account",
       "AccountQuest",

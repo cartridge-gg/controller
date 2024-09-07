@@ -53,6 +53,8 @@ import { ErrorAlert } from "./ErrorAlert";
 import { CopyAddress } from "./CopyAddress";
 import { useDeploy } from "hooks/deploy";
 import { JsControllerError } from "@cartridge/account-wasm";
+import { CurrencyBase, CurrencyQuote, usePriceQuery } from "generated/graphql";
+import { formatEther } from "viem";
 
 export function Funding(innerProps: FundingInnerProps) {
   return (
@@ -79,14 +81,20 @@ function FundingInner({ onComplete, title, ctrlError }: FundingInnerProps) {
   const [state, setState] = useState<"connect" | "fund" | "deploy">("connect");
 
   const details = ctrlError?.details ? JSON.parse(ctrlError?.details) : null;
-  const feeEstimate = details?.fee_estimate;
-  const balance = details?.balance;
+  // const feeEstimate: string = details?.fee_estimate;
+  const balance: string = details?.balance;
 
   // if (!feeEstimate || balance === undefined) {
   //   console.error("Failed to parse error details", error);
   //   return null;
   // }
-  const [fundingAmount, setFundingAmount] = useState(() => balance ?? 0);
+  const [fundingAmount, setFundingAmount] = useState(() =>
+    formatEther(BigInt(balance)),
+  );
+  const { data: countervalue } = usePriceQuery(
+    { quote: CurrencyQuote.Eth, base: CurrencyBase.Usd },
+    { enabled: !!balance },
+  );
 
   const { toast } = useToast();
   useEffect(() => {
@@ -259,9 +267,17 @@ function FundingInner({ onComplete, title, ctrlError }: FundingInnerProps) {
             />
           </InputGroup>
 
-          <Spacer />
+          {countervalue && (
+            <>
+              <Spacer />
 
-          {feeEstimate && <Text>~`{}</Text>}
+              {countervalue && (
+                <Text fontSize="sm" fontWeight="500" color="text.secondary">
+                  ~${countervalue.price.amount}
+                </Text>
+              )}
+            </>
+          )}
         </HStack>
 
         <Divider />

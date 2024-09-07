@@ -15,10 +15,10 @@ import { JsControllerError } from "@cartridge/account-wasm";
 
 export function DeploymentRequired({
   onClose,
-  controllerError,
+  ctrlError,
 }: {
   onClose: () => void;
-  controllerError?: JsControllerError;
+  ctrlError?: JsControllerError;
 }) {
   const {
     controller: { account },
@@ -66,7 +66,7 @@ export function DeploymentRequired({
           if (hash) setDeployHash(hash);
           setShowFunding(false);
         }}
-        controllerError={controllerError}
+        ctrlError={ctrlError}
       />
     );
 
