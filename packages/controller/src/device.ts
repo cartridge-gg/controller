@@ -100,7 +100,6 @@ class DeviceAccount extends Account {
         return res as InvokeFunctionResponse;
       }
 
-      console.log("open");
       this.modal.open();
 
       console.log(res.error);
@@ -126,7 +125,6 @@ class DeviceAccount extends Account {
       console.error(e);
       throw e;
     } finally {
-      console.log("close");
       this.modal.close();
     }
   }
