@@ -16,6 +16,7 @@ import { ExecuteCtx } from "utils/connection";
 import { num } from "starknet";
 import { ErrorType, JsControllerError } from "@cartridge/account-wasm";
 import { DeploymentRequired } from "components/DeploymentRequired";
+import { Funding } from "components/Funding";
 
 export const WEBAUTHN_GAS = 3300n;
 export const CONTRACT_ETH =
@@ -28,7 +29,7 @@ export function Execute() {
   const [maxFee, setMaxFee] = useState<bigint>(0n);
   const [ctrlError, setCtrlError] = useState<JsControllerError>();
   const [isLoading, setLoading] = useState<boolean>(false);
-  const [ctaState, setCTAState] = useState<"prefund" | "deploy" | "execute">(
+  const [ctaState, setCTAState] = useState<"fund" | "deploy" | "execute">(
     "execute",
   );
 
@@ -101,11 +102,25 @@ export function Execute() {
   );
 
   if (
-    ["prefund", "deploy"].includes(ctaState) &&
-    [
-      ErrorType.InsufficientBalance,
-      ErrorType.CartridgeControllerNotDeployed,
-    ].includes(ctrlError.error_type)
+    ctaState === "fund" &&
+    ctrlError.error_type === ErrorType.InsufficientBalance
+  ) {
+    const details = ctrlError?.details ? JSON.parse(ctrlError?.details) : null;
+    const targetBalance: string = details?.targetBalance;
+
+    return (
+      <Funding
+        onComplete={() => {
+          setCTAState("execute");
+        }}
+        defaultAmount={targetBalance}
+      />
+    );
+  }
+
+  if (
+    ctaState === "deploy" &&
+    ctrlError.error_type === ErrorType.CartridgeControllerNotDeployed
   ) {
     return (
       <DeploymentRequired
@@ -148,7 +163,7 @@ export function Execute() {
 
                 <Button
                   colorScheme="colorful"
-                  onClick={() => setCTAState("prefund")}
+                  onClick={() => setCTAState("fund")}
                 >
                   ADD FUNDS
                 </Button>

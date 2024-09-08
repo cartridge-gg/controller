@@ -4,14 +4,16 @@ import {
   TransactionFinalityStatus,
 } from "starknet";
 import { Container, Footer, Content } from "components/layout";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button, Link } from "@chakra-ui/react";
 import { CartridgeIcon, ExternalIcon, PacmanIcon } from "@cartridge/ui";
 import { useController } from "hooks/controller";
 import { Funding } from "./Funding";
 import { useConnection } from "hooks/connection";
-import { ErrorAlert } from "./ErrorAlert";
+import { ControllerErrorAlert, ErrorAlert } from "./ErrorAlert";
 import { JsControllerError } from "@cartridge/account-wasm";
+import { ETH_MIN_PREFUND } from "utils/token";
+import { useDeploy } from "hooks/deploy";
 
 export function DeploymentRequired({
   onClose,
@@ -24,10 +26,13 @@ export function DeploymentRequired({
     controller: { account },
   } = useController();
   const { hasPrefundRequest } = useConnection();
+  const { deploySelf, isDeploying } = useDeploy();
+  const [fundHash, setFundHash] = useState<string>();
   const [deployHash, setDeployHash] = useState<string>();
   const [showFunding, setShowFunding] = useState(true);
   const [isDeployed, setIsDeployed] = useState(false);
   const [error, setError] = useState<Error>();
+
   useEffect(() => {
     if (
       account.chainId === constants.StarknetChainId.SN_MAIN ||
@@ -52,8 +57,23 @@ export function DeploymentRequired({
         .catch((e) => setError(e));
     }
   }, [deployHash, account]);
+  const details = ctrlError?.details ? JSON.parse(ctrlError?.details) : null;
+  const feeEstimate: string = details?.fee_estimate;
 
-  if (showFunding)
+  const onDeploy = useCallback(async () => {
+    try {
+      const hash = await deploySelf(feeEstimate);
+      setDeployHash(hash);
+    } catch (e) {
+      if (e.message && e.message.includes("DuplicateTx")) {
+        return;
+      }
+
+      setError(e);
+    }
+  }, [deploySelf, feeEstimate]);
+
+  if (showFunding) {
     return (
       <Funding
         title={
@@ -63,12 +83,13 @@ export function DeploymentRequired({
           </>
         }
         onComplete={(hash) => {
-          if (hash) setDeployHash(hash);
+          if (hash) setFundHash(hash);
           setShowFunding(false);
         }}
-        ctrlError={ctrlError}
+        defaultAmount={feeEstimate ?? ETH_MIN_PREFUND}
       />
     );
+  }
 
   return (
     <Container
@@ -112,6 +133,10 @@ export function DeploymentRequired({
             description={error.message}
           />
         )}
+        {ctrlError && <ControllerErrorAlert error={ctrlError} />}
+        <Button colorScheme="colorful" onClick={onDeploy}>
+          DEPLOY ACCOUNT
+        </Button>
         <Button onClick={onClose}>Close</Button>
       </Footer>
     </Container>

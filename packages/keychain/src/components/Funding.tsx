@@ -11,7 +11,7 @@ import {
   Divider,
   useInterval,
 } from "@chakra-ui/react";
-import { PropsWithChildren, useCallback, useEffect, useState } from "react";
+import { PropsWithChildren, useCallback, useState } from "react";
 import { mainnet, sepolia } from "@starknet-react/chains";
 import {
   Connector,
@@ -28,10 +28,8 @@ import { useToast } from "hooks/toast";
 import { ETH_CONTRACT_ADDRESS } from "utils/token";
 import { ErrorAlert } from "./ErrorAlert";
 import { CopyAddress } from "./CopyAddress";
-import { useDeploy } from "hooks/deploy";
-import { JsControllerError } from "@cartridge/account-wasm";
 import { CurrencyBase, CurrencyQuote, usePriceQuery } from "generated/graphql";
-import { formatEther } from "viem";
+import { formatEther, parseEther } from "viem";
 
 export function Funding(innerProps: FundingInnerProps) {
   return (
@@ -44,29 +42,23 @@ export function Funding(innerProps: FundingInnerProps) {
 type FundingInnerProps = {
   onComplete: (deployHash?: string) => void;
   title?: React.ReactElement;
-  ctrlError?: JsControllerError;
+  defaultAmount: string;
 };
 
-function FundingInner({ onComplete, title, ctrlError }: FundingInnerProps) {
+function FundingInner({ onComplete, title, defaultAmount }: FundingInnerProps) {
   const { account: extAccount } = useAccount();
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
   const { controller, chainId } = useConnection();
-  const { deploySelf, isDeploying } = useDeploy();
-  const [error, setError] = useState<Error>();
   const [isLoading, setIsLoading] = useState(false);
-  const [state, setState] = useState<"connect" | "fund" | "deploy">("connect");
+  const [state, setState] = useState<"connect" | "fund">("connect");
 
-  const details = ctrlError?.details ? JSON.parse(ctrlError?.details) : null;
-  const feeEstimate: string = details?.fee_estimate;
-  const balance: string = details?.balance;
-
-  const [fundingAmount, setFundingAmount] = useState(() =>
-    formatEther(BigInt(feeEstimate)),
+  const [amount, setAmount] = useState(() =>
+    formatEther(BigInt(defaultAmount)),
   );
-  const priceQuery = usePriceQuery(
-    { quote: CurrencyQuote.Eth, base: CurrencyBase.Usd },
-    { enabled: !!feeEstimate },
-  );
+  const priceQuery = usePriceQuery({
+    quote: CurrencyQuote.Eth,
+    base: CurrencyBase.Usd,
+  });
   const price = priceQuery.data?.price;
 
   const { toast } = useToast();
@@ -96,53 +88,30 @@ function FundingInner({ onComplete, title, ctrlError }: FundingInnerProps) {
 
     try {
       setIsLoading(true);
-      const amount = cairo.uint256(feeEstimate);
+      const calldata = CallData.compile({
+        recipient: controller.account.address,
+        amount: cairo.uint256(parseEther(amount)),
+      });
       const calls = [
         {
           contractAddress: ETH_CONTRACT_ADDRESS,
           entrypoint: "approve",
-          calldata: CallData.compile({
-            recipient: controller.account.address,
-            amount,
-          }),
+          calldata,
         },
         {
           contractAddress: ETH_CONTRACT_ADDRESS,
           entrypoint: "transfer",
-          calldata: CallData.compile({
-            recipient: controller.account.address,
-            amount,
-          }),
+          calldata,
         },
       ];
       const res = await extAccount.execute(calls);
-      await extAccount.waitForTransaction(res.transaction_hash, {
-        retryInterval: 1000,
-      });
+      onComplete(res.transaction_hash);
     } catch (e) {
       setIsLoading(false);
     }
-  }, [extAccount, controller, feeEstimate]);
+  }, [extAccount, controller, amount, onComplete]);
 
   const { balance: currentBalance } = useBalance();
-  useEffect(() => {
-    if (currentBalance !== BigInt(feeEstimate)) return;
-    setState("deploy");
-  }, [currentBalance, feeEstimate]);
-
-  const onDeploy = useCallback(async () => {
-    try {
-      const transaction_hash = await deploySelf(feeEstimate);
-      onComplete(transaction_hash);
-    } catch (e) {
-      if (e.message && e.message.includes("DuplicateTx")) {
-        onComplete();
-        return;
-      }
-
-      setError(e);
-    }
-  }, [onComplete, deploySelf, feeEstimate]);
 
   const onCopy = useCallback(() => {
     navigator.clipboard.writeText(controller.address);
@@ -190,7 +159,7 @@ function FundingInner({ onComplete, title, ctrlError }: FundingInnerProps) {
           >
             <HStack>
               <EthereumIcon fontSize={20} color="currentColor" />
-              {<Text>{formatEther(currentBalance ?? BigInt(balance))}</Text>}
+              {<Text>{formatEther(currentBalance)}</Text>}
             </HStack>
           </HStack>
         </VStack>
@@ -207,9 +176,9 @@ function FundingInner({ onComplete, title, ctrlError }: FundingInnerProps) {
             </InputLeftElement>
             <Input
               type="number"
-              value={fundingAmount}
+              value={amount}
               onChange={(e) => {
-                setFundingAmount(e.target.value);
+                setAmount(e.target.value);
               }}
             />
           </InputGroup>
@@ -221,9 +190,7 @@ function FundingInner({ onComplete, title, ctrlError }: FundingInnerProps) {
               <Text fontSize="sm" fontWeight="500" color="text.secondary">
                 ~ $
                 {Math.round(
-                  parseFloat(formatEther(BigInt(feeEstimate))) *
-                  parseFloat(price.amount) *
-                  100,
+                  parseFloat(amount) * parseFloat(price.amount) * 100,
                 ) / 100}
               </Text>
             </>
@@ -231,13 +198,6 @@ function FundingInner({ onComplete, title, ctrlError }: FundingInnerProps) {
         </HStack>
 
         <Divider />
-
-        {error && (
-          <ErrorAlert
-            title="Account deployment error"
-            description={error.message}
-          />
-        )}
         <ErrorAlert
           variant="info"
           isExpanded
@@ -281,16 +241,6 @@ function FundingInner({ onComplete, title, ctrlError }: FundingInnerProps) {
                   isLoading={isLoading}
                 >
                   Send Funds
-                </Button>
-              );
-            case "deploy":
-              return (
-                <Button
-                  colorScheme="colorful"
-                  onClick={onDeploy}
-                  isLoading={isDeploying}
-                >
-                  Deploy Controller
                 </Button>
               );
           }
