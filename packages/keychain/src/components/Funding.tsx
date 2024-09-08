@@ -9,8 +9,9 @@ import {
   Text,
   VStack,
   Divider,
+  useInterval,
 } from "@chakra-ui/react";
-import { PropsWithChildren, useCallback, useState } from "react";
+import { PropsWithChildren, useCallback, useEffect, useState } from "react";
 import { mainnet, sepolia } from "@starknet-react/chains";
 import {
   Connector,
@@ -20,14 +21,14 @@ import {
   useInjectedConnectors,
   voyager,
 } from "@starknet-react/core";
-import { CallData, cairo, num } from "starknet";
+import { CallData, cairo, num, uint256, wallet } from "starknet";
 import { ArrowLineDownIcon, EthereumIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { useToast } from "hooks/toast";
 import { ETH_CONTRACT_ADDRESS } from "utils/token";
 import { ErrorAlert } from "./ErrorAlert";
 import { CopyAddress } from "./CopyAddress";
-// import { useDeploy } from "hooks/deploy";
+import { useDeploy } from "hooks/deploy";
 import { JsControllerError } from "@cartridge/account-wasm";
 import { CurrencyBase, CurrencyQuote, usePriceQuery } from "generated/graphql";
 import { formatEther } from "viem";
@@ -49,20 +50,16 @@ type FundingInnerProps = {
 function FundingInner({ onComplete, title, ctrlError }: FundingInnerProps) {
   const { account: extAccount } = useAccount();
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
-  const { controller, chainId, chainName } = useConnection();
-  // const { deploySelf, isDeploying } = useDeploy();
-  // const [error, setError] = useState<Error>();
-  const [isSending, setIsSending] = useState(false);
-  const [state, setState] = useState<"connect" | "fund">("connect");
+  const { controller, chainId } = useConnection();
+  const { deploySelf, isDeploying } = useDeploy();
+  const [error, setError] = useState<Error>();
+  const [isLoading, setIsLoading] = useState(false);
+  const [state, setState] = useState<"connect" | "fund" | "deploy">("connect");
 
   const details = ctrlError?.details ? JSON.parse(ctrlError?.details) : null;
   const feeEstimate: string = details?.fee_estimate;
   const balance: string = details?.balance;
 
-  // if (!feeEstimate || balance === undefined) {
-  //   console.error("Failed to parse error details", error);
-  //   return null;
-  // }
   const [fundingAmount, setFundingAmount] = useState(() =>
     formatEther(BigInt(feeEstimate)),
   );
@@ -80,9 +77,7 @@ function FundingInner({ onComplete, title, ctrlError }: FundingInnerProps) {
         .then(async () => {
           const connectedChain = await c.chainId();
           if (num.toHex(connectedChain) !== chainId) {
-            c.disconnect();
-            toast("Please switch chain to: " + chainName);
-            return;
+            await wallet.switchStarknetChain(window.starknet, chainId);
           }
 
           setState("fund");
@@ -91,16 +86,16 @@ function FundingInner({ onComplete, title, ctrlError }: FundingInnerProps) {
           /* user abort */
         });
     },
-    [connectAsync, chainId, chainName, toast],
+    [connectAsync, chainId],
   );
 
-  const onPrefund = useCallback(async () => {
+  const onFund = useCallback(async () => {
     if (!extAccount) {
       throw new Error("External account is not connected");
     }
 
     try {
-      setIsSending(true);
+      setIsLoading(true);
       const amount = cairo.uint256(feeEstimate);
       const calls = [
         {
@@ -125,23 +120,29 @@ function FundingInner({ onComplete, title, ctrlError }: FundingInnerProps) {
         retryInterval: 1000,
       });
     } catch (e) {
-      setIsSending(false);
+      setIsLoading(false);
     }
   }, [extAccount, controller, feeEstimate]);
 
-  // const onDeploy = useCallback(async () => {
-  //   try {
-  //     const transaction_hash = await deploySelf(ETH_MIN_PREFUND);
-  //     onComplete(transaction_hash);
-  //   } catch (e) {
-  //     if (e.message && e.message.includes("DuplicateTx")) {
-  //       onComplete();
-  //       return;
-  //     }
+  const { balance: currentBalance } = useBalance();
+  useEffect(() => {
+    if (currentBalance !== BigInt(feeEstimate)) return;
+    setState("deploy");
+  }, [currentBalance, feeEstimate]);
 
-  //     setError(e);
-  //   }
-  // }, [onComplete, deploySelf]);
+  const onDeploy = useCallback(async () => {
+    try {
+      const transaction_hash = await deploySelf(feeEstimate);
+      onComplete(transaction_hash);
+    } catch (e) {
+      if (e.message && e.message.includes("DuplicateTx")) {
+        onComplete();
+        return;
+      }
+
+      setError(e);
+    }
+  }, [onComplete, deploySelf, feeEstimate]);
 
   const onCopy = useCallback(() => {
     navigator.clipboard.writeText(controller.address);
@@ -189,7 +190,7 @@ function FundingInner({ onComplete, title, ctrlError }: FundingInnerProps) {
           >
             <HStack>
               <EthereumIcon fontSize={20} color="currentColor" />
-              <Text>{formatEther(BigInt(balance))}</Text>
+              {<Text>{formatEther(currentBalance ?? BigInt(balance))}</Text>}
             </HStack>
           </HStack>
         </VStack>
@@ -221,8 +222,8 @@ function FundingInner({ onComplete, title, ctrlError }: FundingInnerProps) {
                 ~ $
                 {Math.round(
                   parseFloat(formatEther(BigInt(feeEstimate))) *
-                    parseFloat(price.amount) *
-                    100,
+                  parseFloat(price.amount) *
+                  100,
                 ) / 100}
               </Text>
             </>
@@ -231,12 +232,12 @@ function FundingInner({ onComplete, title, ctrlError }: FundingInnerProps) {
 
         <Divider />
 
-        {/* {error && (
+        {error && (
           <ErrorAlert
             title="Account deployment error"
             description={error.message}
           />
-        )} */}
+        )}
         <ErrorAlert
           variant="info"
           isExpanded
@@ -276,10 +277,20 @@ function FundingInner({ onComplete, title, ctrlError }: FundingInnerProps) {
               return (
                 <Button
                   colorScheme="colorful"
-                  onClick={onPrefund}
-                  isLoading={isSending}
+                  onClick={onFund}
+                  isLoading={isLoading}
                 >
                   Send Funds
+                </Button>
+              );
+            case "deploy":
+              return (
+                <Button
+                  colorScheme="colorful"
+                  onClick={onDeploy}
+                  isLoading={isDeploying}
+                >
+                  Deploy Controller
                 </Button>
               );
           }
@@ -340,3 +351,35 @@ function ExternalWalletProvider({ children }: PropsWithChildren) {
 //   };
 // }
 //
+
+function useBalance() {
+  const { controller } = useConnection();
+  const [isFetching, setIsFetching] = useState(true);
+  const [balance, setBalance] = useState(0n);
+
+  const fetchBalance = useCallback(async () => {
+    setIsFetching(true);
+
+    const balance = await controller.account.callContract({
+      contractAddress: ETH_CONTRACT_ADDRESS,
+      entrypoint: "balanceOf",
+      calldata: [controller.account.address],
+    });
+
+    setBalance(
+      uint256.uint256ToBN({
+        low: balance[0],
+        high: balance[1],
+      }),
+    );
+  }, [controller]);
+
+  useInterval(fetchBalance, 3000);
+  return { balance, isFetching };
+}
+
+declare global {
+  interface Window {
+    starknet: any;
+  }
+}

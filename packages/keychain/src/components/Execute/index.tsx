@@ -183,7 +183,7 @@ const MOCKED_CARTRIDGE_CONTROLLER_NOT_DEPLOYED_ERROR = {
   error_type: ErrorType.CartridgeControllerNotDeployed,
   details: JSON.stringify({
     balance: "0",
-    fee_estimate: "10000000000000000",
+    fee_estimate: "1000000000000000",
   }),
   message: "blah blah blah...",
   free: () => {},
