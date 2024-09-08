@@ -12,7 +12,7 @@ export function CloseButton() {
 
   return (
     <IconButton
-      aria-label="Close Controller"
+      aria-label="Close Keychain"
       bg="solid.bg"
       _hover={{
         bg: "solid.bg",

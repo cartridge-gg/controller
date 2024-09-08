@@ -87,25 +87,27 @@ class DeviceAccount extends Account {
     abis?: Abi[],
     transactionsDetail: InvocationsDetails = {},
   ): Promise<InvokeFunctionResponse> {
-    let res = await this.keychain.execute(
-      calls,
-      abis,
-      transactionsDetail,
-      false,
-      this.paymaster,
-    );
-
-    if (res.code === ResponseCodes.SUCCESS) {
-      return res as InvokeFunctionResponse;
-    }
-
-    this.modal.open();
-
-    if (res.code === ResponseCodes.ERROR) {
-      await new Promise(() => {}); // This will block indefinitely
-    }
-
     try {
+      let res = await this.keychain.execute(
+        calls,
+        abis,
+        transactionsDetail,
+        false,
+        this.paymaster,
+      );
+
+      if (res.code === ResponseCodes.SUCCESS) {
+        return res as InvokeFunctionResponse;
+      }
+
+      this.modal.open();
+
+      console.log(res.error);
+
+      // if (res.code === ResponseCodes.ERROR) {
+      //   return Promise.reject(res.error);
+      // }
+
       res = await this.keychain.execute(
         calls,
         abis,
@@ -120,6 +122,7 @@ class DeviceAccount extends Account {
 
       return res as InvokeFunctionResponse;
     } catch (e) {
+      console.error(e);
       throw e;
     } finally {
       this.modal.close();
