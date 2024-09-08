@@ -19,6 +19,7 @@ mod AvatarNft {
     use super::{MINTER_ROLE};
 
     use tokens::avatar::metadata::{generate_metadata, NftMetadata, NftAttribute};
+    use tokens::avatar::renderer::{default_renderer};
 
     component!(path: ERC721Component, storage: erc721, event: ERC721Event);
     component!(path: SRC5Component, storage: src5, event: SRC5Event);
@@ -120,6 +121,13 @@ mod AvatarNft {
     }
 
     #[abi(embed_v0)]
+    impl ERC721MetadataCamelOnlyImpl of IERC721MetadataCamelOnly<ContractState> {
+        fn tokenURI(self: @ContractState, tokenId: u256) -> ByteArray {
+            ERC721MetadataImpl::token_uri(self, tokenId)
+        }
+    }
+
+    #[abi(embed_v0)]
     impl ERC721MetadataImpl of IERC721Metadata<ContractState> {
         fn name(self: @ContractState,) -> ByteArray {
             self.erc721.name()
@@ -130,27 +138,25 @@ mod AvatarNft {
         }
 
         fn token_uri(self: @ContractState, token_id: u256) -> ByteArray {
+            let owner = self.owner_of(token_id);
+            let level = 2;
+
             let attributes = array![
-                NftAttribute { trait_type: "Rarity", value: "Epic", },
-                NftAttribute { trait_type: "Level", value: "1", }
+                NftAttribute { trait_type: "Rarity", value: "Epic" },
+                NftAttribute { trait_type: "Level", value: format!("{level}") }
             ];
+
+            let image = default_renderer(token_id, owner, level);
 
             let metadata = NftMetadata {
                 name: self.name(),
                 description: "Cartridge Controller Avatar",
                 external_url: "https://cartridge.gg/",
-                image: "",
+                image,
                 attributes
             };
 
             generate_metadata(metadata)
-        }
-    }
-
-    #[abi(embed_v0)]
-    impl ERC721MetadataCamelOnlyImpl of IERC721MetadataCamelOnly<ContractState> {
-        fn tokenURI(self: @ContractState, tokenId: u256) -> ByteArray {
-            ERC721MetadataImpl::token_uri(self, tokenId)
         }
     }
 }

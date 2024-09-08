@@ -5,24 +5,33 @@ pushd $(dirname "$0")/..
 source ./scripts/.env.controller .
 
 echo "--------------------------------"
-echo "RPC     : " $RPC_URL
-echo "ACCOUNT : " $ACCOUNT
-echo "ACCOUNT_KEYSTORE : " $ACCOUNT_KEYSTORE
+echo "RPC     : " $STARKNET_RPC
+echo "STARKNET_ACCOUNT : " $STARKNET_ACCOUNT
+echo "STARKNET_ACCOUNT_KEYSTORE : " $STARKNET_ACCOUNT_KEYSTORE
 
+scarb build -p tokens
 
-CLASS_HASH=$(starkli declare -w --rpc $RPC_URL --account $ACCOUNT --keystore $ACCOUNT_KEYSTORE --keystore-password $ACCOUNT_PASSWORD  \
+CLASS_HASH=$(starkli declare -w --rpc $STARKNET_RPC --account $STARKNET_ACCOUNT --keystore $STARKNET_ACCOUNT_KEYSTORE --keystore-password $STARKNET_ACCOUNT_PASSWORD  \
  ../../../target/dev/tokens_AvatarNft.contract_class.json | tail -1)
 
 
 echo "CLASS_HASH : " $CLASS_HASH
 
-# export CLASS_HASH="0x02df5bca656ab7070c233c2e46a200421e2666e7a425a740e075bceb2ab05bf8"
+# CONTRACT_ADDRESS=$(starkli deploy -w --rpc $STARKNET_RPC --account $STARKNET_ACCOUNT --keystore $STARKNET_ACCOUNT_KEYSTORE --keystore-password $STARKNET_ACCOUNT_PASSWORD $CLASS_HASH \
+#  $STARKNET_ACCOUNT_ADDRESS $STARKNET_ACCOUNT_ADDRESS | 
+# tail -1)
 
-CONTRACT_ADDRESS=$(starkli deploy -w --rpc $RPC_URL --account $ACCOUNT --keystore $ACCOUNT_KEYSTORE --keystore-password $ACCOUNT_PASSWORD $CLASS_HASH \
- $ACCOUNT_ADDRESS $ACCOUNT_ADDRESS | 
-tail -1)
+# echo "CONTRACT_ADDRESS : " $CONTRACT_ADDRESS
 
-echo "CONTRACT_ADDRESS : " $CONTRACT_ADDRESS
+starkli invoke $UDC_ADDRESS -w  --rpc $STARKNET_RPC \
+    --account $STARKNET_ACCOUNT \
+    --keystore $STARKNET_ACCOUNT_KEYSTORE \
+    --keystore-password $STARKNET_ACCOUNT_PASSWORD \
+    deployContract \
+    $CLASS_HASH \
+    0x0 \
+    0x0 \
+    0x2 \
+    $STARKNET_ACCOUNT_ADDRESS $STARKNET_ACCOUNT_ADDRESS
 
-# export CONTRACT_ADDRESS="0x02015f554d4cedd37506e789d5fcd9178774b96096e8acde7ae657c79bceed61"
 

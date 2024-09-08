@@ -11,6 +11,10 @@ openzeppelin.workspace = true
 graffiti.workspace = true
 alexandria_encoding.workspace = true
 
+[dev-dependencies]
+cairo_test = "2.7.0"
+
+
 [[target.starknet-contract]]
 sierra = true
 casm = true
