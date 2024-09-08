@@ -26,7 +26,7 @@ export function Execute() {
   const ctx = context as ExecuteCtx;
 
   const [maxFee, setMaxFee] = useState<bigint>(0n);
-  const [ctrlError, setCtrlError] = useState<JsControllerError>();
+  const [ctrlError, setCtrlError] = useState<JsControllerError>(ctx.error);
   const [isLoading, setLoading] = useState<boolean>(false);
   const [ctaState, setCTAState] = useState<"prefund" | "deploy" | "execute">(
     "execute",
@@ -41,7 +41,7 @@ export function Execute() {
 
   // Estimate fees
   useEffect(() => {
-    if (!controller || !calls) return;
+    if (!controller || !calls || ctx.error) return;
 
     const estimateFees = async () => {
       try {

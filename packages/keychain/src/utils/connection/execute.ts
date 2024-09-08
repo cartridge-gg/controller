@@ -68,6 +68,14 @@ export function execute({
           } catch (e) {
             // User only pays if the error is ErrorType.PaymasterNotSupported
             if (e.error_type !== ErrorType.PaymasterNotSupported) {
+              setContext({
+                type: "execute",
+                origin,
+                transactions,
+                abis,
+                transactionsDetail,
+                error: e,
+              } as ExecuteCtx);
               throw e;
             }
           }
@@ -87,7 +95,6 @@ export function execute({
           ...res,
         };
       } catch (e) {
-        console.error(e);
         return {
           code: ResponseCodes.ERROR,
           message: e.message,

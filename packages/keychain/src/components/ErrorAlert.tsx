@@ -21,7 +21,7 @@ import {
   Divider,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import { ReactElement, useEffect, useState } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import { ErrorType, JsControllerError } from "@cartridge/account-wasm";
 import { formatAddress } from "utils/contracts";
 
@@ -313,8 +313,8 @@ function StackTraceDisplay({ stackTrace }: { stackTrace: string[] }) {
         }
 
         return (
-          <>
-            <VStack key={i} align="start" spacing={1} w="full">
+          <React.Fragment key={i}>
+            <VStack align="start" spacing={1} w="full">
               {Object.entries(extractedInfo).map(
                 ([key, value]) =>
                   value && (
@@ -349,7 +349,7 @@ function StackTraceDisplay({ stackTrace }: { stackTrace: string[] }) {
               )}
             </VStack>
             {i !== arr.length - 1 && <Divider borderColor="darkGray.100" />}
-          </>
+          </React.Fragment>
         );
       })}
     </VStack>
