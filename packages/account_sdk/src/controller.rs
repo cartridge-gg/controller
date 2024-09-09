@@ -228,7 +228,10 @@ where
 
         match est {
             Ok(mut fee_estimate) => {
-                fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
+                if self.session_metadata().is_none() {
+                    fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
+                }
+
                 if fee_estimate.overall_fee > Felt::from(balance) {
                     Err(ControllerError::InsufficientBalance {
                         fee_estimate,
@@ -246,7 +249,8 @@ where
                     .contains(&format!("{:x} is not deployed.", self.account.address)) =>
                 {
                     let balance = self.eth_balance().await?;
-                    let fee_estimate = self.deploy().estimate_fee().await?;
+                    let mut fee_estimate = self.deploy().estimate_fee().await?;
+                    fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
                     Err(ControllerError::NotDeployed {
                         fee_estimate,
                         balance,
@@ -282,7 +286,8 @@ where
                         .contains(&format!("{:x} is not deployed.", self.account.address))
                     {
                         let balance = self.eth_balance().await?;
-                        let fee_estimate = self.deploy().estimate_fee().await?;
+                        let mut fee_estimate = self.deploy().estimate_fee().await?;
+                        fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
                         Err(ControllerError::NotDeployed {
                             fee_estimate,
                             balance,
