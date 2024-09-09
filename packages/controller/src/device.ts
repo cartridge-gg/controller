@@ -109,32 +109,33 @@ class DeviceAccount extends Account {
       }
 
       // Session call or Paymaster flow failed.
-      if (sessionExecute.code === ResponseCodes.ERROR) {
-        this.modal.open();
-        reject((sessionExecute as ConnectError).error);
-        return;
-      }
+      // if (sessionExecute.code === ResponseCodes.ERROR) {
+      //   this.modal.open();
+      //   reject((sessionExecute as ConnectError).error);
+      //   return;
+      // }
 
       // Session not avaialble, manual flow fallback
-      if (sessionExecute.code === ResponseCodes.USER_INTERACTION_REQUIRED) {
-        this.modal.open();
-        const manualExecute = await this.keychain.execute(
-          calls,
-          abis,
-          transactionsDetail,
-          true,
-          this.paymaster,
-        );
+      //if (sessionExecute.code === ResponseCodes.USER_INTERACTION_REQUIRED) {
+      this.modal.open();
+      const manualExecute = await this.keychain.execute(
+        calls,
+        abis,
+        transactionsDetail,
+        true,
+        this.paymaster,
+      );
 
-        // Manual call succeeded
-        if (manualExecute.code === ResponseCodes.SUCCESS) {
-          resolve(manualExecute as InvokeFunctionResponse);
-          return;
-        }
-
-        reject((manualExecute as ConnectError).error);
+      // Manual call succeeded
+      if (manualExecute.code === ResponseCodes.SUCCESS) {
+        resolve(manualExecute as InvokeFunctionResponse);
+        this.modal.close();
         return;
       }
+
+      reject((manualExecute as ConnectError).error);
+      return;
+      //}
     });
   }
 

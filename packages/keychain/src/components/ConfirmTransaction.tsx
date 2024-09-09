@@ -19,8 +19,7 @@ import { Funding } from "./Funding";
 import { DeployController } from "./DeployController";
 
 export function ConfirmTransaction() {
-  const { controller, context, origin, paymaster, closeModal } =
-    useConnection();
+  const { controller, context, origin, paymaster } = useConnection();
   const ctx = context as ExecuteCtx;
 
   const [maxFee, setMaxFee] = useState<bigint>(0n);
@@ -133,7 +132,9 @@ export function ConfirmTransaction() {
       <DeployController
         onClose={() => {
           setCTAState("execute");
-          closeModal();
+          setCtrlError(undefined);
+          setLoading(false);
+          estimateFees();
         }}
         ctrlError={ctrlError}
       />
@@ -179,9 +180,6 @@ export function ConfirmTransaction() {
               </Footer>
             );
           default:
-            // NOTE: Context is lost at this point, submitting trasnaction will go through
-            // but dapp will not receive transaction_hash. So currently, modal is just dimissed
-            // on successful deployment
             return (
               <Footer>
                 {ctrlError ? (
