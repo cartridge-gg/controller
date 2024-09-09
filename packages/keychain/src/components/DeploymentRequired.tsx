@@ -27,18 +27,18 @@ export function DeploymentRequired({
   } = useController();
   const { hasPrefundRequest } = useConnection();
   const { deploySelf, isDeploying } = useDeploy();
-  const [fundHash, setFundHash] = useState<string>();
   const [deployHash, setDeployHash] = useState<string>();
-  const [showFunding, setShowFunding] = useState(true);
-  const [isDeployed, setIsDeployed] = useState(false);
   const [error, setError] = useState<Error>();
+  const [accountState, setAccountState] = useState<
+    "fund" | "deploy" | "deployed"
+  >("fund");
 
   useEffect(() => {
     if (
       account.chainId === constants.StarknetChainId.SN_MAIN ||
       hasPrefundRequest
     ) {
-      setShowFunding(true);
+      setAccountState("fund");
       return;
     }
   }, [account.chainId, account.username, hasPrefundRequest]);
@@ -53,7 +53,7 @@ export function DeploymentRequired({
             TransactionFinalityStatus.ACCEPTED_ON_L2,
           ],
         })
-        .then(() => setIsDeployed(true))
+        .then(() => setAccountState("deployed"))
         .catch((e) => setError(e));
     }
   }, [deployHash, account]);
@@ -73,7 +73,7 @@ export function DeploymentRequired({
     }
   }, [deploySelf, feeEstimate]);
 
-  if (showFunding) {
+  if (accountState === "fund") {
     return (
       <Funding
         title={
@@ -82,9 +82,8 @@ export function DeploymentRequired({
             for deployment
           </>
         }
-        onComplete={(hash) => {
-          if (hash) setFundHash(hash);
-          setShowFunding(false);
+        onComplete={() => {
+          setAccountState("deploy");
         }}
         defaultAmount={feeEstimate ?? ETH_MIN_PREFUND}
       />
@@ -95,15 +94,21 @@ export function DeploymentRequired({
     <Container
       variant="connect"
       icon={
-        isDeployed ? (
+        accountState === "deployed" ? (
           <CartridgeIcon color="brand.primary" fontSize="5xl" />
         ) : (
           <PacmanIcon color="brand.primary" fontSize="3xl" />
         )
       }
-      title={isDeployed ? "Controller ready!" : "Deploying your controller"}
+      title={
+        accountState === "deployed"
+          ? "Controller ready!"
+          : "Deploying your controller"
+      }
       description={
-        isDeployed ? "You can now close this window" : "This may take a second"
+        accountState === "deployed"
+          ? "You can now close this window"
+          : "This may take a second"
       }
     >
       <Content alignItems="center">
@@ -134,7 +139,11 @@ export function DeploymentRequired({
           />
         )}
         {ctrlError && <ControllerErrorAlert error={ctrlError} />}
-        <Button colorScheme="colorful" onClick={onDeploy}>
+        <Button
+          colorScheme="colorful"
+          onClick={onDeploy}
+          isLoading={isDeploying}
+        >
           DEPLOY ACCOUNT
         </Button>
         <Button onClick={onClose}>Close</Button>

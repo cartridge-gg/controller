@@ -21,7 +21,15 @@ import {
   useInjectedConnectors,
   voyager,
 } from "@starknet-react/core";
-import { CallData, cairo, num, uint256, wallet } from "starknet";
+import {
+  CallData,
+  TransactionExecutionStatus,
+  TransactionFinalityStatus,
+  cairo,
+  num,
+  uint256,
+  wallet,
+} from "starknet";
 import { ArrowLineDownIcon, EthereumIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { useToast } from "hooks/toast";
@@ -49,6 +57,7 @@ function FundingInner({ onComplete, title, defaultAmount }: FundingInnerProps) {
   const { account: extAccount } = useAccount();
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
   const { controller, chainId } = useConnection();
+  const [error, setError] = useState<Error>();
   const [isLoading, setIsLoading] = useState(false);
   const [state, setState] = useState<"connect" | "fund">("connect");
 
@@ -105,9 +114,17 @@ function FundingInner({ onComplete, title, defaultAmount }: FundingInnerProps) {
         },
       ];
       const res = await extAccount.execute(calls);
+      await extAccount.waitForTransaction(res.transaction_hash, {
+        retryInterval: 1000,
+        successStates: [
+          TransactionExecutionStatus.SUCCEEDED,
+          TransactionFinalityStatus.ACCEPTED_ON_L2,
+        ],
+      });
       onComplete(res.transaction_hash);
     } catch (e) {
       setIsLoading(false);
+      setError(e);
     }
   }, [extAccount, controller, amount, onComplete]);
 
@@ -198,6 +215,12 @@ function FundingInner({ onComplete, title, defaultAmount }: FundingInnerProps) {
         </HStack>
 
         <Divider />
+        {error && (
+          <ErrorAlert
+            title="Account deployment error"
+            description={error.message}
+          />
+        )}
         <ErrorAlert
           variant="info"
           isExpanded
