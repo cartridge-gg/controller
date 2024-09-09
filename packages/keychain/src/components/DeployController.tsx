@@ -150,24 +150,9 @@ export function DeployController({
           description={`Your controller is being deployed on ${chainName}`}
         >
           <Content alignItems="center">
-            {deployHash &&
-              [
-                constants.StarknetChainId.SN_SEPOLIA,
-                constants.StarknetChainId.SN_MAIN,
-              ].includes(account.chainId as constants.StarknetChainId) && (
-                <Link
-                  href={`https://${
-                    account.chainId === constants.StarknetChainId.SN_SEPOLIA
-                      ? "sepolia."
-                      : ""
-                  }starkscan.co/tx/${deployHash}`}
-                  isExternal
-                >
-                  <Button variant="link" mt={10} rightIcon={<ExternalIcon />}>
-                    View on Starkscan
-                  </Button>
-                </Link>
-              )}
+            {deployHash && (
+              <ExplorerLink chainId={account.chainId} deployHash={deployHash} />
+            )}
           </Content>
           <Footer>
             {error ? (
@@ -197,24 +182,9 @@ export function DeployController({
           description={`Your controller has been deployed on ${chainName}`}
         >
           <Content alignItems="center">
-            {deployHash &&
-              [
-                constants.StarknetChainId.SN_SEPOLIA,
-                constants.StarknetChainId.SN_MAIN,
-              ].includes(account.chainId as constants.StarknetChainId) && (
-                <Link
-                  href={`https://${
-                    account.chainId === constants.StarknetChainId.SN_SEPOLIA
-                      ? "sepolia."
-                      : ""
-                  }starkscan.co/tx/${deployHash}`}
-                  isExternal
-                >
-                  <Button variant="link" mt={10} rightIcon={<ExternalIcon />}>
-                    View on Starkscan
-                  </Button>
-                </Link>
-              )}
+            {deployHash && (
+              <ExplorerLink chainId={account.chainId} deployHash={deployHash} />
+            )}
           </Content>
           <Footer>
             {error ? (
@@ -232,4 +202,42 @@ export function DeployController({
         </Container>
       );
   }
+}
+
+function ExplorerLink({
+  deployHash,
+  chainId,
+}: {
+  deployHash: string;
+  chainId: string;
+}) {
+  if (
+    ![
+      constants.StarknetChainId.SN_SEPOLIA,
+      constants.StarknetChainId.SN_MAIN,
+    ].includes(chainId as constants.StarknetChainId)
+  ) {
+    return null;
+  }
+
+  return (
+    <Link
+      href={`https://${
+        chainId === constants.StarknetChainId.SN_SEPOLIA ? "sepolia." : ""
+      }starkscan.co/tx/${deployHash}`}
+      isExternal
+    >
+      <Button
+        variant="goast"
+        mt={10}
+        rightIcon={<ExternalIcon />}
+        textTransform="none"
+        fontWeight="normal"
+        fontSize="sm"
+        fontFamily="Inter"
+      >
+        View on Starkscan
+      </Button>
+    </Link>
+  );
 }
