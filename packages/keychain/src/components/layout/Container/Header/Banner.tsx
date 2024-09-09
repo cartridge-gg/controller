@@ -182,7 +182,8 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
                 w="full"
                 fontSize="lg"
                 fontWeight="semibold"
-                whiteSpace="nowrap"
+                noOfLines={1}
+                textOverflow='ellipsis'
               >
                 {title}
               </Text>
