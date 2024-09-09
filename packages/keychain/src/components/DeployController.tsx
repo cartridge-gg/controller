@@ -5,16 +5,8 @@ import {
 } from "starknet";
 import { Container, Footer, Content } from "components/layout";
 import { useCallback, useEffect, useState } from "react";
-import {
-  Box,
-  Button,
-  HStack,
-  Link,
-  Spinner,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
-import { CheckIcon, ExternalIcon, FnIcon, WandIcon } from "@cartridge/ui";
+import { Button, Link, Spinner } from "@chakra-ui/react";
+import { CheckIcon, ExternalIcon, WandIcon } from "@cartridge/ui";
 import { Funding } from "./Funding";
 import { useConnection } from "hooks/connection";
 import { ControllerErrorAlert, ErrorAlert } from "./ErrorAlert";
@@ -23,6 +15,7 @@ import { useDeploy } from "hooks/deploy";
 import { Fees } from "./Fees";
 import { ControllerError } from "utils/connection";
 import { useBalance } from "hooks/token";
+import { Policies } from "Policies";
 
 export function DeployController({
   onClose,
@@ -148,22 +141,16 @@ export function DeployController({
           description="This will initialize your controller on the new network"
         >
           <Content>
-            <VStack borderRadius="sm" bg="solid.bg" gap={1}>
-              <Box bg="solid.primary" w="full" p={3}>
-                <Text
-                  textTransform="uppercase"
-                  fontSize="xs"
-                  fontWeight="bold"
-                  color="text.secondary"
-                >
-                  transaction data
-                </Text>
-              </Box>
-              <HStack bg="solid.primary" w="full" p={3}>
-                <FnIcon boxSize={5} color="text.secondary" />
-                <Text fontSize="sm">deploy</Text>
-              </HStack>
-            </VStack>
+            <Policies
+              title="Transaction Details"
+              policies={[
+                {
+                  target:
+                    "0x24a9edbfa7082accfceabf6a92d7160086f346d622f28741bf1c651c412c9ab",
+                  method: "deploy",
+                },
+              ]}
+            />
           </Content>
 
           <Footer>
