@@ -15,14 +15,14 @@ import { Fees } from "./Fees";
 import { ExecuteCtx } from "utils/connection";
 import { num } from "starknet";
 import { ErrorType, JsControllerError } from "@cartridge/account-wasm";
-import { Funding } from "../Funding";
-import { DeployController } from "../DeployController";
+import { Funding } from "./Funding";
+import { DeployController } from "./DeployController";
 
 export const WEBAUTHN_GAS = 3300n;
 export const CONTRACT_ETH =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 
-export function Execute() {
+export function ConfirmTransaction() {
   const { controller, context, origin, paymaster } = useConnection();
   const ctx = context as ExecuteCtx;
 
@@ -100,20 +100,19 @@ export function Execute() {
       calls.map((c) => ({ target: c.contractAddress, method: c.entrypoint })),
     [calls],
   );
+  const details = ctrlError?.details ? JSON.parse(ctrlError?.details) : null;
+  const feeEstimate: string = details?.fee_estimate.overall_fee;
 
   if (
     ctaState === "fund" &&
     ctrlError.error_type === ErrorType.InsufficientBalance
   ) {
-    const details = ctrlError?.details ? JSON.parse(ctrlError?.details) : null;
-    const targetBalance: string = details?.targetBalance;
-
     return (
       <Funding
         onComplete={() => {
           setCTAState("execute");
         }}
-        defaultAmount={targetBalance}
+        defaultAmount={feeEstimate}
       />
     );
   }
@@ -147,6 +146,7 @@ export function Execute() {
           case ErrorType.CartridgeControllerNotDeployed:
             return (
               <Footer>
+                <Fees maxFee={BigInt(feeEstimate)} variant="info" />
                 <ControllerErrorAlert error={ctrlError} />
                 <Button
                   colorScheme="colorful"
@@ -159,7 +159,7 @@ export function Execute() {
           case ErrorType.InsufficientBalance:
             return (
               <Footer>
-                <Fees maxFee={maxFee} />
+                <Fees maxFee={maxFee} variant="info" />
 
                 <Button
                   colorScheme="colorful"

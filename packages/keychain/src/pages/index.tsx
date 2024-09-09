@@ -1,7 +1,12 @@
 import dynamic from "next/dynamic";
 import { Signature } from "starknet";
 import { ResponseCodes } from "@cartridge/controller";
-import { DeployController, Execute, Menu, SignMessage } from "components";
+import {
+  DeployController,
+  ConfirmTransaction,
+  Menu,
+  SignMessage,
+} from "components";
 import { CreateController, CreateSession, Logout } from "components/connect";
 import { useConnection } from "hooks/connection";
 import {
@@ -98,7 +103,7 @@ function Home() {
       );
     }
     case "execute": {
-      return <Execute />;
+      return <ConfirmTransaction />;
     }
     case "deploy": {
       const ctx = context as DeployCtx;

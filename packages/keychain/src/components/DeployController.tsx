@@ -21,6 +21,7 @@ import { ControllerErrorAlert, ErrorAlert } from "./ErrorAlert";
 import { JsControllerError } from "@cartridge/account-wasm";
 import { ETH_MIN_PREFUND } from "utils/token";
 import { useDeploy } from "hooks/deploy";
+import { Fees } from "./Fees";
 
 export function DeployController({
   onClose,
@@ -125,11 +126,13 @@ export function DeployController({
           </Content>
 
           <Footer>
-            {error && (
+            {error ? (
               <ErrorAlert
                 title="Something went wrong"
                 description={error.message}
               />
+            ) : (
+              <Fees maxFee={BigInt(feeEstimate)} />
             )}
             <Button
               colorScheme="colorful"
