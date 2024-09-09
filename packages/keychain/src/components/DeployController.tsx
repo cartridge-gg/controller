@@ -43,16 +43,20 @@ export function DeployController({
   const [accountState, setAccountState] = useState<
     "fund" | "funding" | "deploy" | "deploying" | "deployed"
   >("fund");
+  const feeEstimate: string | undefined =
+    ctrlError.data?.fee_estimate.overall_fee;
 
   useEffect(() => {
     if (
-      account.chainId === constants.StarknetChainId.SN_MAIN ||
-      hasPrefundRequest
+      account.chainId !== constants.StarknetChainId.SN_MAIN ||
+      !hasPrefundRequest ||
+      !feeEstimate
     ) {
-      setAccountState("fund");
       return;
     }
-  }, [account.chainId, account.username, hasPrefundRequest]);
+
+    setAccountState("deploy");
+  }, [account.chainId, account.username, hasPrefundRequest, feeEstimate]);
 
   useEffect(() => {
     if (deployHash) {
@@ -68,9 +72,6 @@ export function DeployController({
         .catch((e) => setError(e));
     }
   }, [deployHash, account]);
-
-  const feeEstimate: string | undefined =
-    ctrlError.data?.fee_estimate.overall_fee;
 
   const { balance } = useBalance({ address: account.address });
   useEffect(() => {
