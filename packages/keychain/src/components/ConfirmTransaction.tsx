@@ -18,12 +18,9 @@ import { ErrorCode } from "@cartridge/account-wasm";
 import { Funding } from "./Funding";
 import { DeployController } from "./DeployController";
 
-export const WEBAUTHN_GAS = 3300n;
-export const CONTRACT_ETH =
-  "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
-
 export function ConfirmTransaction() {
-  const { controller, context, origin, paymaster } = useConnection();
+  const { controller, context, origin, paymaster, closeModal } =
+    useConnection();
   const ctx = context as ExecuteCtx;
 
   const [maxFee, setMaxFee] = useState<bigint>(0n);
@@ -35,26 +32,27 @@ export function ConfirmTransaction() {
 
   const account = controller.account;
 
+  const estimateFees = useCallback(async () => {
+    console.log(ctx.transactions);
+    console.log(ctx.transactionsDetail);
+    try {
+      const est = await account.estimateInvokeFee(
+        ctx.transactions,
+        ctx.transactionsDetail,
+      );
+      setMaxFee(est.overall_fee);
+    } catch (e) {
+      setCtrlError({
+        code: e.code,
+        message: e.message,
+        data: e.data ? JSON.parse(e.data) : undefined,
+      });
+    }
+  }, [ctx, account]);
+
   // Estimate fees
   useEffect(() => {
     if (!controller || !ctx.transactions || ctx.error) return;
-
-    const estimateFees = async () => {
-      try {
-        const est = await account.estimateInvokeFee(
-          ctx.transactions,
-          ctx.transactionsDetail,
-        );
-        setMaxFee(est.overall_fee);
-      } catch (e) {
-        setCtrlError({
-          code: e.code,
-          message: e.message,
-          data: e.data ? JSON.parse(e.data) : undefined,
-        });
-      }
-    };
-
     estimateFees();
   }, [
     controller,
@@ -135,6 +133,7 @@ export function ConfirmTransaction() {
       <DeployController
         onClose={() => {
           setCTAState("execute");
+          closeModal();
         }}
         ctrlError={ctrlError}
       />
@@ -180,6 +179,9 @@ export function ConfirmTransaction() {
               </Footer>
             );
           default:
+            // NOTE: Context is lost at this point, submitting trasnaction will go through
+            // but dapp will not receive transaction_hash. So currently, modal is just dimissed
+            // on successful deployment
             return (
               <Footer>
                 {ctrlError ? (

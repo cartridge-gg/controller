@@ -33,7 +33,7 @@ export class ErrorBoundary extends React.Component<
 }
 
 export function ErrorPage({ error }: { error: Error }) {
-  const { cancel } = useConnection();
+  const { closeModal } = useConnection();
 
   return (
     <Container
@@ -80,7 +80,7 @@ export function ErrorPage({ error }: { error: Error }) {
       </Content>
 
       <Footer>
-        <Button onClick={cancel}>close</Button>
+        <Button onClick={closeModal}>close</Button>
       </Footer>
     </Container>
   );

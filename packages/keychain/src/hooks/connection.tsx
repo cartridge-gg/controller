@@ -46,7 +46,7 @@ type ConnectionContextValue = {
   error: Error;
   setContext: (context: ConnectionCtx) => void;
   setController: (controller: Controller) => void;
-  cancel: () => void;
+  closeModal: () => void;
   openModal: () => void;
   logout: (context: ConnectionCtx) => void;
   setDelegate: (context: ConnectionCtx) => void;
@@ -105,7 +105,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
     return JSON.parse(decodeURIComponent(paymasterStr));
   };
 
-  const cancel = useCallback(async () => {
+  const closeModal = useCallback(async () => {
     if (!parent) return;
 
     try {
@@ -323,7 +323,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
         error,
         setController,
         setContext,
-        cancel,
+        closeModal,
         openModal,
         logout,
         openMenu,

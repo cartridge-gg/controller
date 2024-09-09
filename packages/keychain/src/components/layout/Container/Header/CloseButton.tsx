@@ -4,7 +4,7 @@ import { isIframe } from "components/connect/utils";
 import { useConnection } from "hooks/connection";
 
 export function CloseButton() {
-  const { cancel } = useConnection();
+  const { closeModal } = useConnection();
 
   if (!isIframe()) {
     return null;
@@ -19,7 +19,7 @@ export function CloseButton() {
         opacity: 0.75,
       }}
       icon={<TimesIcon fontSize={24} />}
-      onClick={cancel}
+      onClick={closeModal}
     />
   );
 }
