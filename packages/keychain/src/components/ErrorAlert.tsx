@@ -27,6 +27,7 @@ import { formatAddress } from "utils/contracts";
 import { ControllerError } from "utils/connection";
 import { useConnection } from "hooks/connection";
 import { constants } from "starknet";
+import { parseExecutionError } from "utils/errors";
 
 export function ErrorAlert({
   title,
@@ -255,22 +256,9 @@ export function ControllerErrorAlert({ error }: { error: ControllerError }) {
       title = "Execution error expected";
       description = (() => {
         try {
-          let executionError: string = error.data.execution_error;
-          if (!executionError) {
-            console.log(typeof error.data);
-            return <Text color="inherit">{JSON.stringify(error.data)}</Text>;
-          }
-
-          // Remove the "Transaction reverted: Transaction execution has failed:\n" prefix
-          executionError = executionError.replace(
-            /^Transaction reverted: Transaction execution has failed:\n/,
-            "",
-          );
-          copyText = executionError;
-
-          const stackTrace = executionError.split(/\n\d+: /);
-
-          return <StackTraceDisplay stackTrace={stackTrace} />;
+          const parsedError = parseExecutionError(error);
+          copyText = parsedError.raw;
+          return <StackTraceDisplay stackTrace={parsedError.stack} />;
         } catch (e) {
           return <Text color="inherit">{error.data}</Text>;
         }
@@ -290,8 +278,11 @@ export function ControllerErrorAlert({ error }: { error: ControllerError }) {
     />
   );
 }
-
-function StackTraceDisplay({ stackTrace }: { stackTrace: string[] }) {
+function StackTraceDisplay({
+  stackTrace,
+}: {
+  stackTrace: ReturnType<typeof parseExecutionError>["stack"];
+}) {
   const { chainId } = useConnection();
 
   const getExplorerUrl = (type: "contract" | "class", value: string) => {
@@ -310,67 +301,46 @@ function StackTraceDisplay({ stackTrace }: { stackTrace: string[] }) {
 
   return (
     <VStack align="start" spacing={2} w="full">
-      {stackTrace.map((trace, i, arr) => {
-        const extractedInfo = {
-          ["Address"]: trace.match(/contract address: (0x[a-fA-F0-9]+)/)?.[1],
-          ["Class"]: trace.match(/class hash: (0x[a-fA-F0-9]+)/)?.[1],
-          ["Selector"]: trace.match(/selector: (0x[a-fA-F0-9]+)/)?.[1],
-          Error:
-            trace.match(/Error at pc=.*:\n(.*)/)?.[1] ||
-            trace.match(/Entry point .* not found in contract./)?.[0] ||
-            trace.split("\n").slice(1).join("\n").trim() ||
-            "Unknown error",
-        };
-
-        // Map "Entry point not found" error to a more human-readable message
-        if (
-          extractedInfo.Error &&
-          extractedInfo.Error.includes("Entry point")
-        ) {
-          extractedInfo.Error = "Function not found in the contract";
-        }
-
-        return (
-          <React.Fragment key={i}>
-            <VStack align="start" spacing={1} w="full">
-              {Object.entries(extractedInfo).map(
-                ([key, value]) =>
-                  value && (
-                    <HStack
-                      key={key}
-                      w="full"
-                      justifyContent="space-between"
-                      fontSize="xs"
-                    >
-                      <Text color="darkGray.400">{key}</Text>
-                      {key === "Address" || key === "Class" ? (
-                        <Link
-                          href={getExplorerUrl(
-                            key === "Address" ? "contract" : "class",
-                            value,
-                          )}
-                          isExternal={isExternalLink}
-                          wordBreak="break-all"
-                        >
-                          {formatAddress(value, { first: 10, last: 10 })}
-                        </Link>
-                      ) : key === "Selector" ? (
-                        <Text wordBreak="break-all" color="inherit">
-                          {formatAddress(value, { first: 10, last: 10 })}
-                        </Text>
-                      ) : (
-                        <Text wordBreak="break-all" color="inherit">
-                          {value}
-                        </Text>
-                      )}
-                    </HStack>
-                  ),
-              )}
-            </VStack>
-            {i !== arr.length - 1 && <Divider borderColor="darkGray.100" />}
-          </React.Fragment>
-        );
-      })}
+      {stackTrace.map((trace, i, arr) => (
+        <React.Fragment key={i}>
+          <VStack align="start" spacing={1} w="full">
+            {Object.entries(trace).map(
+              ([key, value]) =>
+                value && (
+                  <HStack
+                    key={key}
+                    w="full"
+                    justifyContent="space-between"
+                    fontSize="xs"
+                  >
+                    <Text color="darkGray.400">{key}</Text>
+                    {key === "address" || key === "class" ? (
+                      <Link
+                        href={getExplorerUrl(
+                          key === "address" ? "contract" : "class",
+                          value,
+                        )}
+                        isExternal={isExternalLink}
+                        wordBreak="break-all"
+                      >
+                        {formatAddress(value, { first: 10, last: 10 })}
+                      </Link>
+                    ) : key === "selector" ? (
+                      <Text wordBreak="break-all" color="inherit">
+                        {formatAddress(value, { first: 10, last: 10 })}
+                      </Text>
+                    ) : (
+                      <Text wordBreak="break-all" color="inherit">
+                        {value}
+                      </Text>
+                    )}
+                  </HStack>
+                ),
+            )}
+          </VStack>
+          {i !== arr.length - 1 && <Divider borderColor="darkGray.100" />}
+        </React.Fragment>
+      ))}
     </VStack>
   );
 }
