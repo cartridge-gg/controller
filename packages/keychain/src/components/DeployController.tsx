@@ -28,7 +28,7 @@ export function DeployController({
   ctrlError,
 }: {
   onClose: () => void;
-  ctrlError?: ControllerError;
+  ctrlError: ControllerError;
 }) {
   const {
     controller: { account },
@@ -66,8 +66,8 @@ export function DeployController({
         .catch((e) => setError(e));
     }
   }, [deployHash, account]);
-  const data = ctrlError?.data ? JSON.parse(ctrlError?.data) : null;
-  const feeEstimate: string = data?.fee_estimate?.overall_fee;
+  
+  const feeEstimate: string = ctrlError.data?.fee_estimate.overall_fee;
 
   const onDeploy = useCallback(async () => {
     try {
