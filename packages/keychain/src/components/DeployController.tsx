@@ -106,7 +106,10 @@ export function DeployController({
             </>
           }
           defaultAmount={feeEstimate ?? ETH_MIN_PREFUND}
-          onComplete={setFundHash}
+          onComplete={(hash) => {
+            setFundHash(hash)
+            setAccountState("funding")
+          }}
         />
       );
     case "funding":
@@ -251,9 +254,8 @@ function ExplorerLink({
 
   return (
     <Link
-      href={`https://${
-        chainId === constants.StarknetChainId.SN_SEPOLIA ? "sepolia." : ""
-      }starkscan.co/tx/${txHash}`}
+      href={`https://${chainId === constants.StarknetChainId.SN_SEPOLIA ? "sepolia." : ""
+        }starkscan.co/tx/${txHash}`}
       isExternal
     >
       <Button
