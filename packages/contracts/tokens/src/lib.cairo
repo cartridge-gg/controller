@@ -9,6 +9,10 @@ mod avatar {
     pub mod test_avatar;
 }
 
+mod components {
+    pub mod executable;
+}
+
 #[cfg(test)]
 mod tests {
     #[test]

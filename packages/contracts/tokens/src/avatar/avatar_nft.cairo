@@ -1,13 +1,10 @@
 // SPDX-License-Identifier: MIT
 // Compatible with OpenZeppelin Contracts for Cairo ^0.15.0
 
-const MINTER_ROLE: felt252 = selector!("MINTER_ROLE");
-
 #[starknet::contract]
 mod AvatarNft {
     use core::num::traits::Zero;
-    use openzeppelin::access::accesscontrol::AccessControlComponent;
-    use openzeppelin::access::accesscontrol::DEFAULT_ADMIN_ROLE;
+    use openzeppelin::access::ownable::OwnableComponent;
     use openzeppelin::introspection::src5::SRC5Component;
     use openzeppelin::token::erc721::ERC721Component;
     use openzeppelin::token::erc721::interface::{IERC721Metadata, IERC721MetadataCamelOnly};
@@ -16,30 +13,30 @@ mod AvatarNft {
     use starknet::ClassHash;
     use starknet::ContractAddress;
     use starknet::get_caller_address;
-    use super::{MINTER_ROLE};
 
     use tokens::avatar::metadata::{generate_metadata, NftMetadata, NftAttribute};
     use tokens::avatar::renderer::{default_renderer};
+    use tokens::components::executable::ExecutableComponent;
 
     component!(path: ERC721Component, storage: erc721, event: ERC721Event);
     component!(path: SRC5Component, storage: src5, event: SRC5Event);
-    component!(path: AccessControlComponent, storage: accesscontrol, event: AccessControlEvent);
+    component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
     component!(path: UpgradeableComponent, storage: upgradeable, event: UpgradeableEvent);
+    component!(path: ExecutableComponent, storage: executable, event: ExecutableEvent);
 
     #[abi(embed_v0)]
     impl ERC721Impl = ERC721Component::ERC721Impl<ContractState>;
     #[abi(embed_v0)]
     impl ERC721CamelOnlyImpl = ERC721Component::ERC721CamelOnlyImpl<ContractState>;
     #[abi(embed_v0)]
-    impl AccessControlImpl =
-        AccessControlComponent::AccessControlImpl<ContractState>;
+    impl OwnableMixinImpl = OwnableComponent::OwnableMixinImpl<ContractState>;
     #[abi(embed_v0)]
-    impl AccessControlCamelImpl =
-        AccessControlComponent::AccessControlCamelImpl<ContractState>;
+    impl ExecutableImpl = ExecutableComponent::ExecutableImpl<ContractState>;
 
     impl ERC721InternalImpl = ERC721Component::InternalImpl<ContractState>;
-    impl AccessControlInternalImpl = AccessControlComponent::InternalImpl<ContractState>;
     impl UpgradeableInternalImpl = UpgradeableComponent::InternalImpl<ContractState>;
+    impl OwnableInternalImpl = OwnableComponent::InternalImpl<ContractState>;
+    impl ExecutableInternalImpl = ExecutableComponent::InternalImpl<ContractState>;
 
     #[storage]
     struct Storage {
@@ -48,9 +45,11 @@ mod AvatarNft {
         #[substorage(v0)]
         src5: SRC5Component::Storage,
         #[substorage(v0)]
-        accesscontrol: AccessControlComponent::Storage,
+        ownable: OwnableComponent::Storage,
         #[substorage(v0)]
         upgradeable: UpgradeableComponent::Storage,
+        #[substorage(v0)]
+        executable: ExecutableComponent::Storage,
     }
 
     #[event]
@@ -61,26 +60,26 @@ mod AvatarNft {
         #[flat]
         SRC5Event: SRC5Component::Event,
         #[flat]
-        AccessControlEvent: AccessControlComponent::Event,
+        OwnableEvent: OwnableComponent::Event,
         #[flat]
         UpgradeableEvent: UpgradeableComponent::Event,
+        #[flat]
+        ExecutableEvent: ExecutableComponent::Event,
     }
 
     #[constructor]
-    fn constructor(
-        ref self: ContractState, default_admin: ContractAddress, minter: ContractAddress,
-    ) {
+    fn constructor(ref self: ContractState, owner: ContractAddress, mut executors: Span<felt252>,) {
         self.erc721.initializer("Controller Avatar", "GG", "");
-        self.accesscontrol.initializer();
 
-        self.accesscontrol._grant_role(DEFAULT_ADMIN_ROLE, default_admin);
-        self.accesscontrol._grant_role(MINTER_ROLE, minter);
+        self.ownable.initializer(owner);
+        self.executable.initializer(executors);
     }
 
     #[abi(embed_v0)]
     impl UpgradeableImpl of IUpgradeable<ContractState> {
         fn upgrade(ref self: ContractState, new_class_hash: ClassHash) {
-            self.accesscontrol.assert_only_role(DEFAULT_ADMIN_ROLE);
+            self.ownable.assert_only_owner();
+
             self.upgradeable.upgrade(new_class_hash);
         }
     }
@@ -108,15 +107,10 @@ mod AvatarNft {
     #[abi(per_item)]
     impl ExternalImpl of ExternalTrait {
         #[external(v0)]
-        fn mint(
-            ref self: ContractState,
-            recipient: ContractAddress,
-            token_id: u256,
-            data: Span<felt252>,
-        ) {
-            self.accesscontrol.assert_only_role(MINTER_ROLE);
+        fn mint(ref self: ContractState, recipient: ContractAddress, token_id: u256,) {
+            self.executable.assert_only_executor();
+
             self.erc721.mint(recipient, token_id);
-            // self.erc721.safe_mint(recipient, token_id, data);
         }
     }
 
