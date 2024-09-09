@@ -73,12 +73,14 @@ export function DeployController({
     }
   }, [deployHash, account]);
 
-  const { balance } = useBalance({ address: account.address });
+  const { balance, isLoading } = useBalance({ address: account.address });
   useEffect(() => {
     if (!feeEstimate || !["fund", "funding"].includes(accountState)) return;
 
     if (balance >= BigInt(feeEstimate)) {
       setAccountState("deploy");
+    } else {
+      setAccountState("fund");
     }
   }, [balance, feeEstimate, accountState]);
 
@@ -94,6 +96,16 @@ export function DeployController({
       setError(e);
     }
   }, [deploySelf, feeEstimate]);
+
+  if (isLoading) {
+    return (
+      <Container
+        variant="connect"
+        title="Checking account balance..."
+        icon={<Spinner />}
+      />
+    );
+  }
 
   switch (accountState) {
     case "fund":

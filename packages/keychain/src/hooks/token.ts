@@ -8,6 +8,7 @@ export function useBalance({ address }: { address: string }) {
   const { controller } = useConnection();
   const [isFetching, setIsFetching] = useState(true);
   const [balance, setBalance] = useState(0n);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchBalance = useCallback(async () => {
     setIsFetching(true);
@@ -24,8 +25,10 @@ export function useBalance({ address }: { address: string }) {
         high: balance[1],
       }),
     );
+    setIsLoading(false);
+    setIsFetching(false);
   }, [controller, address]);
 
   useInterval(fetchBalance, 3000);
-  return { balance, isFetching };
+  return { balance, isFetching, isLoading };
 }
