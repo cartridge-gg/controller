@@ -5,7 +5,6 @@ use starknet_types_core::felt::Felt;
 use tsify_next::Tsify;
 
 pub(crate) mod call;
-pub(crate) mod deployment;
 pub(crate) mod estimate;
 pub(crate) mod invocation;
 pub(crate) mod outside_execution;

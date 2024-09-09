@@ -126,7 +126,7 @@ function SignupArgentInner({ username }: { username: string }) {
             toast("Please switch chain to: " + chainName);
             return;
           }
-
+          console.log("connecting!")
           setState(SignupState.SIGN_MESSAGE);
         })
         .catch((e) => {
