@@ -37,10 +37,11 @@ export function DeployController({
     hasPrefundRequest,
   } = useConnection();
   const { deploySelf, isDeploying } = useDeploy();
+  const [fundHash, setFundHash] = useState<string>();
   const [deployHash, setDeployHash] = useState<string>();
   const [error, setError] = useState<Error>();
   const [accountState, setAccountState] = useState<
-    "fund" | "deploy" | "deploying" | "deployed"
+    "fund" | "funding" | "deploy" | "deploying" | "deployed"
   >("fund");
 
   useEffect(() => {
@@ -73,7 +74,7 @@ export function DeployController({
 
   const { balance } = useBalance({ address: account.address });
   useEffect(() => {
-    if (!feeEstimate || accountState !== "fund") return;
+    if (!feeEstimate || !["fund", "funding"].includes(accountState)) return;
 
     if (balance >= BigInt(feeEstimate)) {
       setAccountState("deploy");
@@ -104,7 +105,23 @@ export function DeployController({
             </>
           }
           defaultAmount={feeEstimate ?? ETH_MIN_PREFUND}
+          onComplete={setFundHash}
         />
+      );
+    case "funding":
+      return (
+        <Container
+          variant="connect"
+          icon={<Spinner />}
+          title="Funding Controller"
+          description={`Your controller is being funded on ${chainName}`}
+        >
+          <Content alignItems="center">
+            {fundHash && (
+              <ExplorerLink chainId={account.chainId} txHash={fundHash} />
+            )}
+          </Content>
+        </Container>
       );
     case "deploy":
       return (
@@ -162,7 +179,7 @@ export function DeployController({
         >
           <Content alignItems="center">
             {deployHash && (
-              <ExplorerLink chainId={account.chainId} deployHash={deployHash} />
+              <ExplorerLink chainId={account.chainId} txHash={deployHash} />
             )}
           </Content>
           <Footer>
@@ -194,7 +211,7 @@ export function DeployController({
         >
           <Content alignItems="center">
             {deployHash && (
-              <ExplorerLink chainId={account.chainId} deployHash={deployHash} />
+              <ExplorerLink chainId={account.chainId} txHash={deployHash} />
             )}
           </Content>
           <Footer>
@@ -216,10 +233,10 @@ export function DeployController({
 }
 
 function ExplorerLink({
-  deployHash,
+  txHash,
   chainId,
 }: {
-  deployHash: string;
+  txHash: string;
   chainId: string;
 }) {
   if (
@@ -235,7 +252,7 @@ function ExplorerLink({
     <Link
       href={`https://${
         chainId === constants.StarknetChainId.SN_SEPOLIA ? "sepolia." : ""
-      }starkscan.co/tx/${deployHash}`}
+      }starkscan.co/tx/${txHash}`}
       isExternal
     >
       <Button
