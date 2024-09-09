@@ -12,7 +12,13 @@ import {
   InvocationsDetails,
 } from "starknet";
 
-import { Keychain, ResponseCodes, Modal, PaymasterOptions } from "./types";
+import {
+  ConnectError,
+  Keychain,
+  Modal,
+  PaymasterOptions,
+  ResponseCodes,
+} from "./types";
 import { Signer } from "./signer";
 import { AsyncMethodReturns } from "@cartridge/penpal";
 
@@ -87,43 +93,49 @@ class DeviceAccount extends Account {
     abis?: Abi[],
     transactionsDetail: InvocationsDetails = {},
   ): Promise<InvokeFunctionResponse> {
-    let res = await this.keychain.execute(
-      calls,
-      abis,
-      transactionsDetail,
-      false,
-      this.paymaster,
-    );
-
-    if (res.code === ResponseCodes.SUCCESS) {
-      return res as InvokeFunctionResponse;
-    }
-
-    this.modal.open();
-
-    if (res.code === ResponseCodes.ERROR) {
-      await new Promise(() => {}); // This will block indefinitely
-    }
-
-    try {
-      res = await this.keychain.execute(
+    return new Promise(async (resolve, reject) => {
+      const sessionExecute = await this.keychain.execute(
         calls,
         abis,
         transactionsDetail,
-        true,
+        false,
         this.paymaster,
       );
 
-      if (res.code !== ResponseCodes.SUCCESS) {
-        return Promise.reject(res.error);
+      // Session call succeeded
+      if (sessionExecute.code === ResponseCodes.SUCCESS) {
+        resolve(sessionExecute as InvokeFunctionResponse);
+        return;
       }
 
-      return res as InvokeFunctionResponse;
-    } catch (e) {
-      throw e;
-    } finally {
-      this.modal.close();
-    }
+      // Session call or Paymaster flow failed.
+      if (sessionExecute.code === ResponseCodes.ERROR) {
+        this.modal.open();
+        reject((sessionExecute as ConnectError).error);
+        return;
+      }
+
+      // Session not avaialble, manual flow fallback
+      if (sessionExecute.code === ResponseCodes.USER_INTERACTION_REQUIRED) {
+        this.modal.open();
+        const manualExecute = await this.keychain.execute(
+          calls,
+          abis,
+          transactionsDetail,
+          true,
+          this.paymaster,
+        );
+
+        // Manual call succeeded
+        if (manualExecute.code === ResponseCodes.SUCCESS) {
+          resolve(manualExecute as InvokeFunctionResponse);
+          return;
+        }
+
+        reject((manualExecute as ConnectError).error);
+        return;
+      }
+    });
   }
 
   /**

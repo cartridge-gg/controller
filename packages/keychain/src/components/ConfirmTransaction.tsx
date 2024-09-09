@@ -34,20 +34,15 @@ export function ConfirmTransaction() {
   );
 
   const account = controller.account;
-  const calls = useMemo(() => {
-    return Array.isArray(ctx.transactions)
-      ? ctx.transactions
-      : [ctx.transactions];
-  }, [ctx.transactions]);
 
   // Estimate fees
   useEffect(() => {
-    if (!controller || !calls || ctx.error) return;
+    if (!controller || !ctx.transactions || ctx.error) return;
 
     const estimateFees = async () => {
       try {
         const est = await account.estimateInvokeFee(
-          calls,
+          ctx.transactions,
           ctx.transactionsDetail,
         );
         setMaxFee(est.overall_fee);
@@ -57,11 +52,19 @@ export function ConfirmTransaction() {
     };
 
     estimateFees();
-  }, [controller, calls, account, ctx, setMaxFee]);
+  }, [
+    controller,
+    account,
+    ctx.transactions,
+    ctx.transactionsDetail,
+    ctx.error,
+    setMaxFee,
+    setCtrlError,
+  ]);
 
   const execute = useCallback(async () => {
     if (!paymaster) {
-      let { transaction_hash } = await account.execute(calls, {
+      let { transaction_hash } = await account.execute(ctx.transactions, {
         maxFee: num.toHex(maxFee),
       });
 
@@ -69,15 +72,15 @@ export function ConfirmTransaction() {
     }
 
     try {
-      return await account.executeFromOutside(calls, paymaster);
+      return await account.executeFromOutside(ctx.transactions, paymaster);
     } catch (e) {
-      let { transaction_hash } = await account.execute(calls, {
+      let { transaction_hash } = await account.execute(ctx.transactions, {
         maxFee: num.toHex(maxFee),
       });
 
       return transaction_hash;
     }
-  }, [account, calls, paymaster, maxFee]);
+  }, [account, ctx.transactions, paymaster, maxFee]);
 
   const onSubmit = useCallback(async () => {
     setLoading(true);
@@ -85,8 +88,8 @@ export function ConfirmTransaction() {
     try {
       let transaction_hash = await execute();
       ctx.resolve({
-        transaction_hash,
         code: ResponseCodes.SUCCESS,
+        transaction_hash,
       });
     } catch (error) {
       setCtrlError(error);
@@ -97,11 +100,14 @@ export function ConfirmTransaction() {
 
   const policies = useMemo<Policy[]>(
     () =>
-      calls.map((c) => ({ target: c.contractAddress, method: c.entrypoint })),
-    [calls],
+      (Array.isArray(ctx.transactions)
+        ? ctx.transactions
+        : [ctx.transactions]
+      ).map((c) => ({ target: c.contractAddress, method: c.entrypoint })),
+    [ctx.transactions],
   );
   const details = ctrlError?.details ? JSON.parse(ctrlError?.details) : null;
-  const feeEstimate: string = details?.fee_estimate.overall_fee;
+  const feeEstimate: string = details?.fee_estimate?.overall_fee;
 
   if (
     ctaState === "fund" &&

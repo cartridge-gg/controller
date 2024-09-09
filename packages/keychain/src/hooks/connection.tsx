@@ -47,6 +47,7 @@ type ConnectionContextValue = {
   setContext: (context: ConnectionCtx) => void;
   setController: (controller: Controller) => void;
   cancel: () => void;
+  openModal: () => void;
   logout: (context: ConnectionCtx) => void;
   setDelegate: (context: ConnectionCtx) => void;
   setDelegateTransaction: (
@@ -111,6 +112,20 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
       context.resolve({
         code: ResponseCodes.CANCELED,
         message: "User aborted",
+      });
+      await parent.close();
+    } catch (e) {
+      // Always fails for some reason
+    }
+  }, [context, parent]);
+
+  const openModal = useCallback(async () => {
+    if (!parent) return;
+
+    try {
+      context.resolve({
+        code: ResponseCodes.USER_INTERACTION_REQUIRED,
+        message: "User interaction required",
       });
       await parent.close();
     } catch (e) {
@@ -309,6 +324,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
         setController,
         setContext,
         cancel,
+        openModal,
         logout,
         openMenu,
         openSettings,

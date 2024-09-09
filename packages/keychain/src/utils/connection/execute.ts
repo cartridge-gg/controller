@@ -1,5 +1,4 @@
 import {
-  ExecuteReply,
   ResponseCodes,
   ConnectError,
   PaymasterOptions,
@@ -11,6 +10,7 @@ import {
   Call,
   CallData,
   InvocationsDetails,
+  InvokeFunctionResponse,
   addAddressPadding,
   num,
 } from "starknet";
@@ -31,7 +31,10 @@ export function execute({
       transactionsDetail?: InvocationsDetails,
       sync?: boolean,
       paymaster?: PaymasterOptions,
-    ): Promise<ExecuteReply | ConnectError> => {
+    ): Promise<InvokeFunctionResponse | ConnectError> => {
+      const account = controller.account;
+      const calls = normalizeCalls(transactions);
+
       if (sync) {
         return await new Promise((resolve, reject) => {
           setContext({
@@ -46,14 +49,27 @@ export function execute({
         });
       }
 
-      try {
-        const account = controller.account;
-        const calls = normalizeCalls(transactions);
-
+      return await new Promise(async (resolve, reject) => {
+        // If a session call and there is no session available
+        // fallback to manual apporval flow
         if (!account.hasSession(calls)) {
-          throw new Error(`No session available`);
+          setContext({
+            type: "execute",
+            origin,
+            transactions,
+            abis,
+            transactionsDetail,
+            resolve,
+            reject,
+          } as ExecuteCtx);
+
+          return resolve({
+            code: ResponseCodes.USER_INTERACTION_REQUIRED,
+            message: "User interaction required",
+          });
         }
 
+        // Try paymaster if it is enabled. If it fails, fallback to user pays session flow.
         if (paymaster) {
           try {
             const transaction_hash = await account.executeFromOutside(
@@ -61,10 +77,10 @@ export function execute({
               paymaster,
             );
 
-            return {
+            return resolve({
               code: ResponseCodes.SUCCESS,
               transaction_hash,
-            };
+            });
           } catch (e) {
             // User only pays if the error is ErrorType.PaymasterNotSupported
             if (e.error_type !== ErrorType.PaymasterNotSupported) {
@@ -74,37 +90,67 @@ export function execute({
                 transactions,
                 abis,
                 transactionsDetail,
-                error: e,
+                error: {
+                  error_type: e.error_type,
+                  message: e.message,
+                  details: e.details,
+                },
+                resolve,
+                reject,
               } as ExecuteCtx);
-              throw e;
+              return resolve({
+                code: ResponseCodes.ERROR,
+                message: e.message,
+                error: {
+                  error_type: e.error_type,
+                  message: e.message,
+                  details: e.details,
+                },
+              });
             }
           }
         }
 
-        let { maxFee } = transactionsDetail;
-        if (!maxFee) {
-          let res = await account.cartridge.estimateInvokeFee(calls);
-          maxFee = num.toHex(
-            num.addPercent(res.overall_fee, ESTIMATE_FEE_PERCENTAGE),
-          );
-        }
+        try {
+          let { maxFee } = transactionsDetail;
+          if (!maxFee) {
+            let estimate = await account.cartridge.estimateInvokeFee(calls);
+            maxFee = num.toHex(
+              num.addPercent(estimate.overall_fee, ESTIMATE_FEE_PERCENTAGE),
+            );
+          }
 
-        let res = await account.execute(transactions, { maxFee });
-        return {
-          code: ResponseCodes.SUCCESS,
-          ...res,
-        };
-      } catch (e) {
-        return {
-          code: ResponseCodes.ERROR,
-          message: e.message,
-          error: {
-            error_type: e.error_type,
+          let res = await account.execute(transactions, { maxFee });
+          return resolve({
+            code: ResponseCodes.SUCCESS,
+            transaction_hash: res.transaction_hash,
+          });
+        } catch (e) {
+          setContext({
+            type: "execute",
+            origin,
+            transactions,
+            abis,
+            transactionsDetail,
+            error: {
+              error_type: e.error_type,
+              message: e.message,
+              details: e.details,
+            },
+            resolve,
+            reject,
+          } as ExecuteCtx);
+          return resolve({
+            code: ResponseCodes.ERROR,
             message: e.message,
-            details: e.details,
-          },
-        };
-      }
+            error: {
+              error_type: e.error_type,
+              message: e.message,
+              details: e.details,
+            },
+          });
+        }
+      });
     };
 }
 

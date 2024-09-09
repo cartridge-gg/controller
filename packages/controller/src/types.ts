@@ -37,6 +37,7 @@ export enum ResponseCodes {
   NOT_CONNECTED = "NOT_CONNECTED",
   ERROR = "ERROR",
   CANCELED = "CANCELED",
+  USER_INTERACTION_REQUIRED = "USER_INTERACTION_REQUIRED",
 }
 
 export type ConnectError = {
@@ -55,9 +56,13 @@ export type ConnectReply = {
   policies: Policy[];
 };
 
-export type ExecuteReply = InvokeFunctionResponse & {
-  code: ResponseCodes.SUCCESS;
-};
+export type ExecuteReply =
+  | (InvokeFunctionResponse & {
+      code: ResponseCodes.SUCCESS;
+    })
+  | {
+      code: ResponseCodes.USER_INTERACTION_REQUIRED;
+    };
 
 export type ProbeReply = {
   code: ResponseCodes.SUCCESS;
