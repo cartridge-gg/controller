@@ -97,20 +97,22 @@ function FundingInner({ onComplete, title, defaultAmount }: FundingInnerProps) {
 
     try {
       setIsLoading(true);
-      const calldata = CallData.compile({
-        recipient: controller.account.address,
-        amount: cairo.uint256(parseEther(amount)),
-      });
       const calls = [
         {
           contractAddress: ETH_CONTRACT_ADDRESS,
           entrypoint: "approve",
-          calldata,
+          calldata: CallData.compile({
+            recipient: controller.account.address,
+            amount: cairo.uint256(parseEther(amount)),
+          }),
         },
         {
           contractAddress: ETH_CONTRACT_ADDRESS,
           entrypoint: "transfer",
-          calldata,
+          calldata: CallData.compile({
+            sender: extAccount.address,
+            amount: cairo.uint256(parseEther(amount)),
+          }),
         },
       ];
       const res = await extAccount.execute(calls);
