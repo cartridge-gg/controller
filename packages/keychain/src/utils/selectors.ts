@@ -4,6 +4,7 @@ export const selectors = {
   [VERSION]: {
     active: () => `@cartridge/active`,
     account: (address: string) => `@cartridge/account/${address}`,
+    avatar: (address: string) => `@cartridge/avatar/${address}`,
     deployment: (address: string, chainId: string) =>
       `@cartridge/deployment/${address}/${chainId}`,
     admin: (address: string, origin: string) =>

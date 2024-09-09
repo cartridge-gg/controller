@@ -14,6 +14,7 @@ import { useControllerTheme } from "hooks/theme";
 import { useMemo } from "react";
 import { useLayoutVariant } from "../";
 import { TOP_BAR_HEIGHT } from "./TopBar";
+import { Avatar } from "components/avatar";
 
 export type BannerProps = {
   Icon?: React.ComponentType<IconProps>;
@@ -106,23 +107,24 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
           />
 
           <HStack w="full" p={4} gap={4} minW={0}>
-            {!!Icon ? (
-              <Square size="44px" bg="solid.primary" borderRadius="md">
-                <Icon boxSize={8} />
-              </Square>
-            ) : !!icon ? (
-              <Square size="44px" bg="solid.primary" borderRadius="md">
-                {icon}
-              </Square>
-            ) : (
-              <Image
-                src={theme.icon}
-                boxSize="44px"
-                alt="Controller Icon"
-                borderRadius="md"
-              />
-            )}
-
+            <Avatar>
+              {!!Icon ? (
+                <Square size="48px" bg="solid.primary" borderRadius="md">
+                  <Icon boxSize={8} />
+                </Square>
+              ) : !!icon ? (
+                <Square size="48px" bg="solid.primary" borderRadius="md">
+                  {icon}
+                </Square>
+              ) : (
+                <Image
+                  src={theme.icon}
+                  boxSize="48px"
+                  alt="Controller Icon"
+                  borderRadius="md"
+                />
+              )}
+            </Avatar>
             <VStack w="full" align="stretch" gap={1} minW={0}>
               <Text
                 w="full"
@@ -160,22 +162,24 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
           />
 
           <HStack w="full" p={4} gap={4} minW={0}>
-            {!!Icon ? (
-              <Square size="44px" bg="solid.primary" borderRadius="md">
-                <Icon boxSize={8} />
-              </Square>
-            ) : !!icon ? (
-              <Square size="44px" bg="solid.primary" borderRadius="md">
-                {icon}
-              </Square>
-            ) : (
-              <Image
-                src={theme.icon}
-                boxSize="44px"
-                alt="Controller Icon"
-                borderRadius="md"
-              />
-            )}
+            <Avatar>
+              {!!Icon ? (
+                <Square size="48px" bg="solid.primary" borderRadius="md">
+                  <Icon boxSize={8} />
+                </Square>
+              ) : !!icon ? (
+                <Square size="48px" bg="solid.primary" borderRadius="md">
+                  {icon}
+                </Square>
+              ) : (
+                <Image
+                  src={theme.icon}
+                  boxSize="48px"
+                  alt="Controller Icon"
+                  borderRadius="md"
+                />
+              )}
+            </Avatar>
 
             <VStack w="full" align="stretch" gap={1} minW={0}>
               <Text
