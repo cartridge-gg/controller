@@ -58,7 +58,7 @@ export function DeploymentRequired({
     }
   }, [deployHash, account]);
   const details = ctrlError?.details ? JSON.parse(ctrlError?.details) : null;
-  const feeEstimate: string = details?.fee_estimate;
+  const feeEstimate: string = details?.fee_estimate.overall_fee;
 
   const onDeploy = useCallback(async () => {
     try {

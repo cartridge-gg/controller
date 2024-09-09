@@ -61,18 +61,18 @@ export enum ErrorType {
   StarknetUnexpectedError = 55,
   StarknetNoTraceAvailable = 56,
 }
-export interface JsEstimateFeeDetails {
+export interface JsOutsideExecution {
+    caller: Felt;
+    executeBefore: number;
+    executeAfter: number;
+    calls: JsCall[];
     nonce: Felt;
 }
 
-export interface JsPolicy {
-    target: string;
-    method: string;
-}
-
-export interface JsInvocationsDetails {
-    nonce: Felt;
-    maxFee: Felt;
+export interface JsCall {
+    contractAddress: Felt;
+    entrypoint: string;
+    calldata: Felt[];
 }
 
 export interface JsSession {
@@ -85,23 +85,23 @@ export interface JsCredentials {
     privateKey: Felt;
 }
 
-export interface JsCall {
-    contractAddress: Felt;
-    entrypoint: string;
-    calldata: Felt[];
-}
-
-export interface JsOutsideExecution {
-    caller: Felt;
-    executeBefore: number;
-    executeAfter: number;
-    calls: JsCall[];
+export interface JsInvocationsDetails {
     nonce: Felt;
+    maxFee: Felt;
 }
 
 export type Felts = JsFelt[];
 
 export type JsFelt = Felt;
+
+export interface JsEstimateFeeDetails {
+    nonce: Felt;
+}
+
+export interface JsPolicy {
+    target: string;
+    method: string;
+}
 
 /**
 */

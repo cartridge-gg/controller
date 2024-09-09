@@ -50,8 +50,11 @@ pub enum ControllerError {
     #[error(transparent)]
     AccountError(#[from] AccountError<SignError>),
 
-    #[error("Controller is not deployed")]
-    NotDeployed,
+    #[error("Controller is not deployed. Required fee: {fee_estimate:?}")]
+    NotDeployed {
+        fee_estimate: FeeEstimate,
+        balance: u128,
+    },
 
     #[error(transparent)]
     AccountFactoryError(#[from] AccountFactoryError<SignError>),
@@ -227,10 +230,10 @@ where
             Ok(mut fee_estimate) => {
                 fee_estimate.overall_fee =
                     fee_estimate.overall_fee + WEBAUTHN_GAS * fee_estimate.gas_price;
-                if fee_estimate.overall_fee > Felt::from(balance.low) {
+                if fee_estimate.overall_fee > Felt::from(balance) {
                     Err(ControllerError::InsufficientBalance {
                         fee_estimate,
-                        balance: balance.low,
+                        balance,
                     })
                 } else {
                     Ok(fee_estimate)
@@ -243,7 +246,12 @@ where
                     .execution_error
                     .contains(&format!("{:x} is not deployed.", self.account.address)) =>
                 {
-                    Err(ControllerError::NotDeployed)
+                    let balance = self.eth_balance().await?;
+                    let fee_estimate = self.deploy().estimate_fee().await?;
+                    Err(ControllerError::NotDeployed {
+                        fee_estimate,
+                        balance,
+                    })
                 }
                 _ => Err(ControllerError::AccountError(e)),
             },
@@ -256,12 +264,15 @@ where
         nonce: Felt,
         max_fee: Felt,
     ) -> Result<InvokeTransactionResult, ControllerError> {
-        self.execute_v1(calls)
+        let result = self.execute_v1(calls)
             .max_fee(max_fee)
             .nonce(nonce)
             .send()
-            .await
-            .map_err(|e| {
+            .await;
+
+        match result {
+            Ok(tx_result) => Ok(tx_result),
+            Err(e) => {
                 if let AccountError::Provider(ProviderError::StarknetError(
                     StarknetError::TransactionExecutionError(data),
                 )) = &e
@@ -270,11 +281,20 @@ where
                         .execution_error
                         .contains(&format!("{:x} is not deployed.", self.account.address))
                     {
-                        return ControllerError::NotDeployed;
+                        let balance = self.eth_balance().await?;
+                        let fee_estimate = self.deploy().estimate_fee().await?;
+                        Err(ControllerError::NotDeployed {
+                            fee_estimate,
+                            balance,
+                        })
+                    } else {
+                        Err(ControllerError::AccountError(e))
                     }
+                } else {
+                    Err(ControllerError::AccountError(e))
                 }
-                ControllerError::AccountError(e)
-            })
+            }
+        }
     }
 
     pub fn session_metadata(&self) -> Option<SessionMetadata> {
@@ -331,7 +351,7 @@ where
         self.contract.set_delegate_account(&delegate_address.into())
     }
 
-    pub async fn eth_balance(&self) -> Result<U256, ControllerError> {
+    pub async fn eth_balance(&self) -> Result<u128, ControllerError> {
         let address = self.account.address;
         let contract_address =
             felt!("0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7");
@@ -349,7 +369,9 @@ where
             .await
             .map_err(ControllerError::ProviderError)?;
 
-        U256::cairo_deserialize(&result, 0).map_err(ControllerError::CairoSerde)
+        U256::cairo_deserialize(&result, 0)
+            .map_err(ControllerError::CairoSerde)
+            .map(|v| v.low)
     }
 }
 

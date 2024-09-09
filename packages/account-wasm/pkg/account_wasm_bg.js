@@ -685,23 +685,18 @@ export function __wbindgen_object_clone_ref(arg0) {
     return addHeapObject(ret);
 };
 
-export function __wbg_jscontrollererror_new(arg0) {
-    const ret = JsControllerError.__wrap(arg0);
-    return addHeapObject(ret);
-};
-
 export function __wbindgen_number_new(arg0) {
     const ret = arg0;
     return addHeapObject(ret);
 };
 
-export function __wbindgen_string_new(arg0, arg1) {
-    const ret = getStringFromWasm0(arg0, arg1);
+export function __wbg_jscontrollererror_new(arg0) {
+    const ret = JsControllerError.__wrap(arg0);
     return addHeapObject(ret);
 };
 
-export function __wbindgen_error_new(arg0, arg1) {
-    const ret = new Error(getStringFromWasm0(arg0, arg1));
+export function __wbindgen_string_new(arg0, arg1) {
+    const ret = getStringFromWasm0(arg0, arg1);
     return addHeapObject(ret);
 };
 
@@ -717,6 +712,11 @@ export function __wbindgen_json_serialize(arg0, arg1) {
     const len1 = WASM_VECTOR_LEN;
     getDataViewMemory0().setInt32(arg0 + 4 * 1, len1, true);
     getDataViewMemory0().setInt32(arg0 + 4 * 0, ptr1, true);
+};
+
+export function __wbindgen_error_new(arg0, arg1) {
+    const ret = new Error(getStringFromWasm0(arg0, arg1));
+    return addHeapObject(ret);
 };
 
 export function __wbindgen_is_undefined(arg0) {
@@ -1241,7 +1241,7 @@ export function __wbindgen_memory() {
     return addHeapObject(ret);
 };
 
-export function __wbindgen_closure_wrapper2502(arg0, arg1, arg2) {
+export function __wbindgen_closure_wrapper2508(arg0, arg1, arg2) {
     const ret = makeMutClosure(arg0, arg1, 469, __wbg_adapter_44);
     return addHeapObject(ret);
 };

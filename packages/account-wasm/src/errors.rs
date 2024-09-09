@@ -114,10 +114,19 @@ impl From<ControllerError> for JsControllerError {
                 message: e.to_string(),
                 details: None,
             },
-            ControllerError::NotDeployed => JsControllerError {
+            ControllerError::NotDeployed {
+                fee_estimate,
+                balance,
+            } => JsControllerError {
                 error_type: ErrorType::CartridgeControllerNotDeployed,
                 message: "Controller not deployed".to_string(),
-                details: None,
+                details: Some(
+                    serde_json::to_string(&serde_json::json!({
+                        "fee_estimate": fee_estimate,
+                        "balance": balance
+                    }))
+                    .unwrap(),
+                ),
             },
             ControllerError::InsufficientBalance {
                 fee_estimate,
