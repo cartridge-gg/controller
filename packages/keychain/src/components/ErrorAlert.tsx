@@ -25,6 +25,8 @@ import React, { ReactElement, useEffect, useState } from "react";
 import { ErrorCode } from "@cartridge/account-wasm";
 import { formatAddress } from "utils/contracts";
 import { ControllerError } from "utils/connection";
+import { useConnection } from "hooks/connection";
+import { constants } from "starknet";
 
 export function ErrorAlert({
   title,
@@ -290,6 +292,7 @@ export function ControllerErrorAlert({ error }: { error: ControllerError }) {
 }
 
 function StackTraceDisplay({ stackTrace }: { stackTrace: string[] }) {
+  const { chainId } = useConnection();
   return (
     <VStack align="start" spacing={2} w="full">
       {stackTrace.map((trace, i, arr) => {
@@ -327,10 +330,21 @@ function StackTraceDisplay({ stackTrace }: { stackTrace: string[] }) {
                       <Text color="darkGray.400">{key}</Text>
                       {key === "Address" || key === "Class" ? (
                         <Link
-                          href={`https://starkscan.co/${
-                            key === "Address" ? "contract" : "class"
-                          }/${value}`}
-                          isExternal
+                          href={
+                            chainId === constants.StarknetChainId.SN_SEPOLIA
+                              ? `https://sepolia.starkscan.co/${
+                                  key === "Address" ? "contract" : "class"
+                                }/${value}`
+                              : chainId === constants.StarknetChainId.SN_MAIN
+                              ? `https://starkscan.co/${
+                                  key === "Address" ? "contract" : "class"
+                                }/${value}`
+                              : undefined // TODO: slot deployments link to worlds.dev
+                          }
+                          isExternal={
+                            chainId === constants.StarknetChainId.SN_SEPOLIA ||
+                            chainId === constants.StarknetChainId.SN_MAIN
+                          }
                           wordBreak="break-all"
                         >
                           {formatAddress(value, { first: 10, last: 10 })}

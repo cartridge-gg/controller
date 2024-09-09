@@ -66,7 +66,7 @@ export function DeployController({
         .catch((e) => setError(e));
     }
   }, [deployHash, account]);
-  
+
   const feeEstimate: string = ctrlError.data?.fee_estimate.overall_fee;
 
   const onDeploy = useCallback(async () => {
