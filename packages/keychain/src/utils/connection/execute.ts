@@ -15,7 +15,7 @@ import {
   num,
 } from "starknet";
 import { ConnectionCtx, ExecuteCtx } from "./types";
-import { ErrorType, JsCall } from "@cartridge/account-wasm";
+import { ErrorCode, JsCall } from "@cartridge/account-wasm";
 
 export const ESTIMATE_FEE_PERCENTAGE = 10;
 
@@ -82,8 +82,8 @@ export function execute({
               transaction_hash,
             });
           } catch (e) {
-            // User only pays if the error is ErrorType.PaymasterNotSupported
-            if (e.error_type !== ErrorType.PaymasterNotSupported) {
+            // User only pays if the error is ErrorCode.PaymasterNotSupported
+            if (e.code !== ErrorCode.PaymasterNotSupported) {
               setContext({
                 type: "execute",
                 origin,
@@ -91,9 +91,9 @@ export function execute({
                 abis,
                 transactionsDetail,
                 error: {
-                  error_type: e.error_type,
+                  code: e.code,
                   message: e.message,
-                  details: e.details,
+                  data: e.data ? JSON.parse(e.data) : undefined,
                 },
                 resolve,
                 reject,
@@ -102,9 +102,9 @@ export function execute({
                 code: ResponseCodes.ERROR,
                 message: e.message,
                 error: {
-                  error_type: e.error_type,
+                  code: e.code,
                   message: e.message,
-                  details: e.details,
+                  data: e.data ? JSON.parse(e.data) : undefined,
                 },
               });
             }
@@ -133,9 +133,9 @@ export function execute({
             abis,
             transactionsDetail,
             error: {
-              error_type: e.error_type,
+              code: e.code,
               message: e.message,
-              details: e.details,
+              data: e.data ? JSON.parse(e.data) : undefined,
             },
             resolve,
             reject,
@@ -144,9 +144,9 @@ export function execute({
             code: ResponseCodes.ERROR,
             message: e.message,
             error: {
-              error_type: e.error_type,
+              code: e.code,
               message: e.message,
-              details: e.details,
+              data: e.data ? JSON.parse(e.data) : undefined,
             },
           });
         }

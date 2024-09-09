@@ -12,9 +12,9 @@ import { useConnection } from "hooks/connection";
 import { ControllerErrorAlert } from "components/ErrorAlert";
 import { Policies } from "Policies";
 import { Fees } from "./Fees";
-import { ExecuteCtx } from "utils/connection";
+import { ControllerError, ExecuteCtx } from "utils/connection";
 import { num } from "starknet";
-import { ErrorType, JsControllerError } from "@cartridge/account-wasm";
+import { ErrorCode } from "@cartridge/account-wasm";
 import { Funding } from "./Funding";
 import { DeployController } from "./DeployController";
 
@@ -27,7 +27,7 @@ export function ConfirmTransaction() {
   const ctx = context as ExecuteCtx;
 
   const [maxFee, setMaxFee] = useState<bigint>(0n);
-  const [ctrlError, setCtrlError] = useState<JsControllerError>(ctx.error);
+  const [ctrlError, setCtrlError] = useState<ControllerError>(ctx.error);
   const [isLoading, setLoading] = useState<boolean>(false);
   const [ctaState, setCTAState] = useState<"fund" | "deploy" | "execute">(
     "execute",
@@ -47,7 +47,11 @@ export function ConfirmTransaction() {
         );
         setMaxFee(est.overall_fee);
       } catch (e) {
-        setCtrlError(e);
+        setCtrlError({
+          code: e.code,
+          message: e.message,
+          data: e.data ? JSON.parse(e.data) : undefined,
+        });
       }
     };
 
@@ -91,8 +95,12 @@ export function ConfirmTransaction() {
         code: ResponseCodes.SUCCESS,
         transaction_hash,
       });
-    } catch (error) {
-      setCtrlError(error);
+    } catch (e) {
+      setCtrlError({
+        code: e.code,
+        message: e.message,
+        data: e.data ? JSON.parse(e.data) : undefined,
+      });
     } finally {
       setLoading(false);
     }
@@ -106,13 +114,9 @@ export function ConfirmTransaction() {
       ).map((c) => ({ target: c.contractAddress, method: c.entrypoint })),
     [ctx.transactions],
   );
-  const details = ctrlError?.details ? JSON.parse(ctrlError?.details) : null;
-  const feeEstimate: string = details?.fee_estimate?.overall_fee;
+  const feeEstimate: string = ctrlError?.data?.fee_estimate?.overall_fee;
 
-  if (
-    ctaState === "fund" &&
-    ctrlError.error_type === ErrorType.InsufficientBalance
-  ) {
+  if (ctaState === "fund" && ctrlError.code === ErrorCode.InsufficientBalance) {
     return (
       <Funding
         onComplete={() => {
@@ -125,7 +129,7 @@ export function ConfirmTransaction() {
 
   if (
     ctaState === "deploy" &&
-    ctrlError.error_type === ErrorType.CartridgeControllerNotDeployed
+    ctrlError.code === ErrorCode.CartridgeControllerNotDeployed
   ) {
     return (
       <DeployController
@@ -148,8 +152,8 @@ export function ConfirmTransaction() {
       </Content>
 
       {(() => {
-        switch (ctrlError?.error_type) {
-          case ErrorType.CartridgeControllerNotDeployed:
+        switch (ctrlError?.code) {
+          case ErrorCode.CartridgeControllerNotDeployed:
             return (
               <Footer>
                 <Fees maxFee={BigInt(feeEstimate)} variant="info" />
@@ -162,7 +166,7 @@ export function ConfirmTransaction() {
                 </Button>
               </Footer>
             );
-          case ErrorType.InsufficientBalance:
+          case ErrorCode.InsufficientBalance:
             return (
               <Footer>
                 <Fees maxFee={maxFee} variant="info" />

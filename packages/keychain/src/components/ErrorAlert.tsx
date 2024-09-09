@@ -22,8 +22,9 @@ import {
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import React, { ReactElement, useEffect, useState } from "react";
-import { ErrorType, JsControllerError } from "@cartridge/account-wasm";
+import { ErrorCode } from "@cartridge/account-wasm";
 import { formatAddress } from "utils/contracts";
+import { ControllerError } from "utils/connection";
 
 export function ErrorAlert({
   title,
@@ -141,122 +142,121 @@ export function ErrorAlert({
   );
 }
 
-export function ControllerErrorAlert({ error }: { error: JsControllerError }) {
+export function ControllerErrorAlert({ error }: { error: ControllerError }) {
   let title = "An error occurred";
   let description: string | React.ReactElement = error.message;
   let isExpanded = false;
   let variant = "error";
   let copyText: string;
 
-  switch (error.error_type) {
-    case ErrorType.SignError:
+  switch (error.code) {
+    case ErrorCode.SignError:
       title = "Signing Error";
       break;
-    case ErrorType.StorageError:
+    case ErrorCode.StorageError:
       title = "Storage Error";
       break;
-    case ErrorType.AccountFactoryError:
+    case ErrorCode.AccountFactoryError:
       title = "Account Creation Error";
       break;
-    case ErrorType.CartridgeControllerNotDeployed:
+    case ErrorCode.CartridgeControllerNotDeployed:
       title = "Your Controller is not deployed";
       description =
         "Lets fund your Controller and deploy it before we can start executing transactions.";
       isExpanded = true;
       variant = "info";
       break;
-    case ErrorType.OriginError:
+    case ErrorCode.OriginError:
       title = "Origin Error";
       break;
-    case ErrorType.EncodingError:
+    case ErrorCode.EncodingError:
       title = "Encoding Error";
       break;
-    case ErrorType.SerdeWasmBindgenError:
+    case ErrorCode.SerdeWasmBindgenError:
       title = "Serialization Error";
       break;
-    case ErrorType.CairoSerdeError:
+    case ErrorCode.CairoSerdeError:
       title = "Cairo Serialization Error";
       break;
-    case ErrorType.CairoShortStringToFeltError:
+    case ErrorCode.CairoShortStringToFeltError:
       title = "Cairo String Conversion Error";
       break;
-    case ErrorType.DeviceCreateCredential:
-    case ErrorType.DeviceGetAssertion:
-    case ErrorType.PaymasterExecutionTimeNotReached:
+    case ErrorCode.DeviceCreateCredential:
+    case ErrorCode.DeviceGetAssertion:
+    case ErrorCode.PaymasterExecutionTimeNotReached:
       title = "Paymaster Execution Time Not Reached";
       break;
-    case ErrorType.PaymasterExecutionTimePassed:
+    case ErrorCode.PaymasterExecutionTimePassed:
       title = "Paymaster Execution Time Passed";
       break;
-    case ErrorType.PaymasterInvalidCaller:
+    case ErrorCode.PaymasterInvalidCaller:
       title = "Invalid Paymaster Caller";
       break;
-    case ErrorType.PaymasterRateLimitExceeded:
+    case ErrorCode.PaymasterRateLimitExceeded:
       title = "Paymaster Rate Limit Exceeded";
       break;
-    case ErrorType.PaymasterNotSupported:
+    case ErrorCode.PaymasterNotSupported:
       title = "Paymaster Not Supported";
       break;
-    case ErrorType.PaymasterHttp:
+    case ErrorCode.PaymasterHttp:
       title = "Paymaster HTTP Error";
       break;
-    case ErrorType.PaymasterExcecution:
+    case ErrorCode.PaymasterExcecution:
       title = "Paymaster Execution Error";
       break;
-    case ErrorType.PaymasterSerialization:
+    case ErrorCode.PaymasterSerialization:
       title = "Paymaster Serialization Error";
       break;
-    case ErrorType.DeviceBadAssertion:
-    case ErrorType.DeviceChannel:
-    case ErrorType.DeviceOrigin:
+    case ErrorCode.DeviceBadAssertion:
+    case ErrorCode.DeviceChannel:
+    case ErrorCode.DeviceOrigin:
       title = "Device Error";
       break;
-    case ErrorType.AccountSigning:
-    case ErrorType.AccountProvider:
-    case ErrorType.AccountClassHashCalculation:
-    case ErrorType.AccountClassCompression:
-    case ErrorType.AccountFeeOutOfRange:
+    case ErrorCode.AccountSigning:
+    case ErrorCode.AccountProvider:
+    case ErrorCode.AccountClassHashCalculation:
+    case ErrorCode.AccountClassCompression:
+    case ErrorCode.AccountFeeOutOfRange:
       title = "Account Error";
       break;
-    case ErrorType.ProviderRateLimited:
-    case ErrorType.ProviderArrayLengthMismatch:
-    case ErrorType.ProviderOther:
+    case ErrorCode.ProviderRateLimited:
+    case ErrorCode.ProviderArrayLengthMismatch:
+    case ErrorCode.ProviderOther:
       title = "Provider Error";
       break;
     // Starknet errors
-    case ErrorType.StarknetFailedToReceiveTransaction:
-    case ErrorType.StarknetContractNotFound:
-    case ErrorType.StarknetClassHashNotFound:
-    case ErrorType.StarknetTransactionHashNotFound:
-    case ErrorType.StarknetNoBlocks:
-    case ErrorType.StarknetInvalidContinuationToken:
-    case ErrorType.StarknetTooManyKeysInFilter:
-    case ErrorType.StarknetContractError:
-    case ErrorType.StarknetClassAlreadyDeclared:
-    case ErrorType.StarknetInvalidTransactionNonce:
-    case ErrorType.StarknetInsufficientMaxFee:
-    case ErrorType.StarknetInsufficientAccountBalance:
-    case ErrorType.StarknetValidationFailure:
-    case ErrorType.StarknetCompilationFailed:
-    case ErrorType.StarknetContractClassSizeIsTooLarge:
-    case ErrorType.StarknetNonAccount:
-    case ErrorType.StarknetDuplicateTx:
-    case ErrorType.StarknetCompiledClassHashMismatch:
-    case ErrorType.StarknetUnsupportedTxVersion:
-    case ErrorType.StarknetUnsupportedContractClassVersion:
-    case ErrorType.StarknetUnexpectedError:
-    case ErrorType.StarknetNoTraceAvailable:
+    case ErrorCode.StarknetFailedToReceiveTransaction:
+    case ErrorCode.StarknetContractNotFound:
+    case ErrorCode.StarknetClassHashNotFound:
+    case ErrorCode.StarknetTransactionHashNotFound:
+    case ErrorCode.StarknetNoBlocks:
+    case ErrorCode.StarknetInvalidContinuationToken:
+    case ErrorCode.StarknetTooManyKeysInFilter:
+    case ErrorCode.StarknetContractError:
+    case ErrorCode.StarknetClassAlreadyDeclared:
+    case ErrorCode.StarknetInvalidTransactionNonce:
+    case ErrorCode.StarknetInsufficientMaxFee:
+    case ErrorCode.StarknetInsufficientAccountBalance:
+    case ErrorCode.StarknetValidationFailure:
+    case ErrorCode.StarknetCompilationFailed:
+    case ErrorCode.StarknetContractClassSizeIsTooLarge:
+    case ErrorCode.StarknetNonAccount:
+    case ErrorCode.StarknetDuplicateTx:
+    case ErrorCode.StarknetCompiledClassHashMismatch:
+    case ErrorCode.StarknetUnsupportedTxVersion:
+    case ErrorCode.StarknetUnsupportedContractClassVersion:
+    case ErrorCode.StarknetUnexpectedError:
+    case ErrorCode.StarknetNoTraceAvailable:
       title = "Starknet Error";
       break;
-    case ErrorType.StarknetTransactionExecutionError:
+    case ErrorCode.StarknetTransactionExecutionError:
       title = "Execution error expected";
       description = (() => {
         try {
-          const errorDetails = JSON.parse(error.details);
-          let executionError: string = errorDetails.execution_error;
-
+          let executionError: string = error.data.execution_error;
           if (!executionError) {
-            return <Text color="inherit">{error.details}</Text>;
+            console.log(typeof error.data);
+            return <Text color="inherit">{JSON.stringify(error.data)}</Text>;
           }
 
           // Remove the "Transaction reverted: Transaction execution has failed:\n" prefix
@@ -270,7 +270,7 @@ export function ControllerErrorAlert({ error }: { error: JsControllerError }) {
 
           return <StackTraceDisplay stackTrace={stackTrace} />;
         } catch (e) {
-          return <Text color="inherit">{error.details}</Text>;
+          return <Text color="inherit">{error.data}</Text>;
         }
       })();
       break;

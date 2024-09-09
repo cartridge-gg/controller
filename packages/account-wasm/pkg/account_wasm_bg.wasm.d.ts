@@ -22,12 +22,12 @@ export function cartridgesessionaccount_sign(a: number, b: number, c: number, d:
 export function cartridgesessionaccount_execute(a: number, b: number, c: number): number;
 export function cartridgesessionaccount_execute_from_outside(a: number, b: number, c: number): number;
 export function __wbg_jscontrollererror_free(a: number, b: number): void;
-export function __wbg_get_jscontrollererror_error_type(a: number): number;
-export function __wbg_set_jscontrollererror_error_type(a: number, b: number): void;
+export function __wbg_get_jscontrollererror_code(a: number): number;
+export function __wbg_set_jscontrollererror_code(a: number, b: number): void;
 export function __wbg_get_jscontrollererror_message(a: number, b: number): void;
 export function __wbg_set_jscontrollererror_message(a: number, b: number, c: number): void;
-export function __wbg_get_jscontrollererror_details(a: number, b: number): void;
-export function __wbg_set_jscontrollererror_details(a: number, b: number, c: number): void;
+export function __wbg_get_jscontrollererror_data(a: number, b: number): void;
+export function __wbg_set_jscontrollererror_data(a: number, b: number, c: number): void;
 export function __wbindgen_malloc(a: number, b: number): number;
 export function __wbindgen_realloc(a: number, b: number, c: number, d: number): number;
 export const __wbindgen_export_2: WebAssembly.Table;

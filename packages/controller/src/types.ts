@@ -44,9 +44,9 @@ export type ConnectError = {
   code: ResponseCodes;
   message: string;
   error?: {
-    details?: string;
-    error_type: string;
+    code: string;
     message: string;
+    data?: any;
   };
 };
 

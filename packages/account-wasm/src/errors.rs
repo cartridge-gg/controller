@@ -11,116 +11,119 @@ use crate::types::EncodingError;
 #[wasm_bindgen(getter_with_clone)]
 #[derive(Debug, Serialize)]
 pub struct JsControllerError {
-    pub error_type: ErrorType,
+    pub code: ErrorCode,
     pub message: String,
-    pub details: Option<String>,
+    pub data: Option<String>,
 }
 
 impl From<JsError> for JsControllerError {
     fn from(error: JsError) -> Self {
         JsControllerError {
-            error_type: ErrorType::StarknetUnexpectedError,
+            code: ErrorCode::StarknetUnexpectedError,
             message: JsValue::from(error).as_string().unwrap(),
-            details: None,
+            data: None,
         }
     }
 }
 
 #[wasm_bindgen]
 #[derive(Clone, Debug, Serialize)]
-pub enum ErrorType {
-    SignError,
-    StorageError,
-    AccountFactoryError,
-    PaymasterExecutionTimeNotReached,
-    PaymasterExecutionTimePassed,
-    PaymasterInvalidCaller,
-    PaymasterRateLimitExceeded,
-    PaymasterNotSupported,
-    PaymasterHttp,
-    PaymasterExcecution,
-    PaymasterSerialization,
-    CartridgeControllerNotDeployed,
-    InsufficientBalance,
-    OriginError,
-    EncodingError,
-    SerdeWasmBindgenError,
-    CairoSerdeError,
-    CairoShortStringToFeltError,
-    DeviceCreateCredential,
-    DeviceGetAssertion,
-    DeviceBadAssertion,
-    DeviceChannel,
-    DeviceOrigin,
-    AccountSigning,
-    AccountProvider,
-    AccountClassHashCalculation,
-    AccountClassCompression,
-    AccountFeeOutOfRange,
-    ProviderRateLimited,
-    ProviderArrayLengthMismatch,
-    ProviderOther,
-    StarknetFailedToReceiveTransaction,
-    StarknetContractNotFound,
-    StarknetBlockNotFound,
-    StarknetInvalidTransactionIndex,
-    StarknetClassHashNotFound,
-    StarknetTransactionHashNotFound,
-    StarknetPageSizeTooBig,
-    StarknetNoBlocks,
-    StarknetInvalidContinuationToken,
-    StarknetTooManyKeysInFilter,
-    StarknetContractError,
-    StarknetTransactionExecutionError,
-    StarknetClassAlreadyDeclared,
-    StarknetInvalidTransactionNonce,
-    StarknetInsufficientMaxFee,
-    StarknetInsufficientAccountBalance,
-    StarknetValidationFailure,
-    StarknetCompilationFailed,
-    StarknetContractClassSizeIsTooLarge,
-    StarknetNonAccount,
-    StarknetDuplicateTx,
-    StarknetCompiledClassHashMismatch,
-    StarknetUnsupportedTxVersion,
-    StarknetUnsupportedContractClassVersion,
-    StarknetUnexpectedError,
-    StarknetNoTraceAvailable,
+pub enum ErrorCode {
+    // Starknet-specific errors (0-100)
+    StarknetFailedToReceiveTransaction = 1,
+    StarknetContractNotFound = 20,
+    StarknetBlockNotFound = 24,
+    StarknetInvalidTransactionIndex = 27,
+    StarknetClassHashNotFound = 28,
+    StarknetTransactionHashNotFound = 29,
+    StarknetPageSizeTooBig = 31,
+    StarknetNoBlocks = 32,
+    StarknetInvalidContinuationToken = 33,
+    StarknetTooManyKeysInFilter = 34,
+    StarknetContractError = 40,
+    StarknetTransactionExecutionError = 41,
+    StarknetClassAlreadyDeclared = 51,
+    StarknetInvalidTransactionNonce = 52,
+    StarknetInsufficientMaxFee = 53,
+    StarknetInsufficientAccountBalance = 54,
+    StarknetValidationFailure = 55,
+    StarknetCompilationFailed = 56,
+    StarknetContractClassSizeIsTooLarge = 57,
+    StarknetNonAccount = 58,
+    StarknetDuplicateTx = 59,
+    StarknetCompiledClassHashMismatch = 60,
+    StarknetUnsupportedTxVersion = 61,
+    StarknetUnsupportedContractClassVersion = 62,
+    StarknetUnexpectedError = 63,
+    StarknetNoTraceAvailable = 10,
+
+    // Custom errors (101 and onwards)
+    SignError = 101,
+    StorageError = 102,
+    AccountFactoryError = 103,
+    PaymasterExecutionTimeNotReached = 104,
+    PaymasterExecutionTimePassed = 105,
+    PaymasterInvalidCaller = 106,
+    PaymasterRateLimitExceeded = 107,
+    PaymasterNotSupported = 108,
+    PaymasterHttp = 109,
+    PaymasterExcecution = 110,
+    PaymasterSerialization = 111,
+    CartridgeControllerNotDeployed = 112,
+    InsufficientBalance = 113,
+    OriginError = 114,
+    EncodingError = 115,
+    SerdeWasmBindgenError = 116,
+    CairoSerdeError = 117,
+    CairoShortStringToFeltError = 118,
+    DeviceCreateCredential = 119,
+    DeviceGetAssertion = 120,
+    DeviceBadAssertion = 121,
+    DeviceChannel = 122,
+    DeviceOrigin = 123,
+    AccountSigning = 124,
+    AccountProvider = 125,
+    AccountClassHashCalculation = 126,
+    AccountClassCompression = 127,
+    AccountFeeOutOfRange = 128,
+    ProviderRateLimited = 129,
+    ProviderArrayLengthMismatch = 130,
+    ProviderOther = 131,
 }
 
 impl From<ControllerError> for JsControllerError {
     fn from(error: ControllerError) -> Self {
         match error {
             ControllerError::SignError(e) => JsControllerError {
-                error_type: ErrorType::SignError,
+                code: ErrorCode::SignError,
                 message: e.to_string(),
-                details: None,
+                data: None,
             },
             ControllerError::StorageError(e) => JsControllerError {
-                error_type: ErrorType::StorageError,
+                code: ErrorCode::StorageError,
                 message: e.to_string(),
-                details: None,
+                data: None,
             },
             ControllerError::AccountError(e) => e.into(),
             ControllerError::AccountFactoryError(e) => JsControllerError {
-                error_type: ErrorType::AccountFactoryError,
+                code: ErrorCode::AccountFactoryError,
                 message: e.to_string(),
-                details: None,
+                data: None,
             },
             ControllerError::PaymasterError(e) => e.into(),
             ControllerError::ProviderError(e) => e.into(),
             ControllerError::CairoSerde(e) => JsControllerError {
-                error_type: ErrorType::CairoSerdeError,
+                code: ErrorCode::CairoSerdeError,
                 message: e.to_string(),
-                details: None,
+                data: None,
             },
             ControllerError::NotDeployed {
                 fee_estimate,
                 balance,
             } => JsControllerError {
-                error_type: ErrorType::CartridgeControllerNotDeployed,
+                code: ErrorCode::CartridgeControllerNotDeployed,
                 message: "Controller not deployed".to_string(),
-                details: Some(
+                data: Some(
                     serde_json::to_string(&serde_json::json!({
                         "fee_estimate": fee_estimate,
                         "balance": balance
@@ -132,9 +135,9 @@ impl From<ControllerError> for JsControllerError {
                 fee_estimate,
                 balance,
             } => JsControllerError {
-                error_type: ErrorType::InsufficientBalance,
+                code: ErrorCode::InsufficientBalance,
                 message: "Insufficient balance for transaction".to_string(),
-                details: Some(
+                data: Some(
                     serde_json::to_string(&serde_json::json!({
                         "fee_estimate": fee_estimate,
                         "balance": balance
@@ -148,240 +151,240 @@ impl From<ControllerError> for JsControllerError {
 
 impl From<PaymasterError> for JsControllerError {
     fn from(error: PaymasterError) -> Self {
-        let (error_type, message) = match error {
+        let (code, message) = match error {
             PaymasterError::ExecutionTimeNotReached => (
-                ErrorType::PaymasterExecutionTimeNotReached,
+                ErrorCode::PaymasterExecutionTimeNotReached,
                 "Execution time not yet reached".to_string(),
             ),
             PaymasterError::ExecutionTimePassed => (
-                ErrorType::PaymasterExecutionTimePassed,
+                ErrorCode::PaymasterExecutionTimePassed,
                 "Execution time has passed".to_string(),
             ),
             PaymasterError::InvalidCaller => (
-                ErrorType::PaymasterInvalidCaller,
+                ErrorCode::PaymasterInvalidCaller,
                 "Invalid caller".to_string(),
             ),
             PaymasterError::RateLimitExceeded => (
-                ErrorType::PaymasterRateLimitExceeded,
+                ErrorCode::PaymasterRateLimitExceeded,
                 "Rate limit exceeded".to_string(),
             ),
             PaymasterError::PaymasterNotSupported => (
-                ErrorType::PaymasterNotSupported,
+                ErrorCode::PaymasterNotSupported,
                 "Paymaster not supported".to_string(),
             ),
-            PaymasterError::Serialization(e) => (ErrorType::PaymasterSerialization, e.to_string()),
+            PaymasterError::Serialization(e) => (ErrorCode::PaymasterSerialization, e.to_string()),
             PaymasterError::ProviderError(e) => return e.into(),
         };
 
         JsControllerError {
-            error_type,
+            code,
             message,
-            details: None,
+            data: None,
         }
     }
 }
 
 impl From<DeviceError> for JsControllerError {
     fn from(e: DeviceError) -> Self {
-        let (error_type, message) = match e {
-            DeviceError::CreateCredential(msg) => (ErrorType::DeviceCreateCredential, msg),
-            DeviceError::GetAssertion(msg) => (ErrorType::DeviceGetAssertion, msg),
-            DeviceError::BadAssertion(msg) => (ErrorType::DeviceBadAssertion, msg),
-            DeviceError::Channel(msg) => (ErrorType::DeviceChannel, msg),
-            DeviceError::Origin(msg) => (ErrorType::DeviceOrigin, msg),
+        let (code, message) = match e {
+            DeviceError::CreateCredential(msg) => (ErrorCode::DeviceCreateCredential, msg),
+            DeviceError::GetAssertion(msg) => (ErrorCode::DeviceGetAssertion, msg),
+            DeviceError::BadAssertion(msg) => (ErrorCode::DeviceBadAssertion, msg),
+            DeviceError::Channel(msg) => (ErrorCode::DeviceChannel, msg),
+            DeviceError::Origin(msg) => (ErrorCode::DeviceOrigin, msg),
         };
         JsControllerError {
-            error_type,
+            code,
             message,
-            details: None,
+            data: None,
         }
     }
 }
 
 impl From<AccountError<account_sdk::signers::SignError>> for JsControllerError {
     fn from(e: AccountError<account_sdk::signers::SignError>) -> Self {
-        let (error_type, message) = match e {
+        let (code, message) = match e {
             AccountError::Signing(sign_error) => {
-                (ErrorType::AccountSigning, sign_error.to_string())
+                (ErrorCode::AccountSigning, sign_error.to_string())
             }
             AccountError::Provider(provider_error) => return provider_error.into(),
             AccountError::ClassHashCalculation(calc_error) => (
-                ErrorType::AccountClassHashCalculation,
+                ErrorCode::AccountClassHashCalculation,
                 calc_error.to_string(),
             ),
             AccountError::ClassCompression(compression_error) => (
-                ErrorType::AccountClassCompression,
+                ErrorCode::AccountClassCompression,
                 compression_error.to_string(),
             ),
             AccountError::FeeOutOfRange => (
-                ErrorType::AccountFeeOutOfRange,
+                ErrorCode::AccountFeeOutOfRange,
                 "Fee calculation overflow".to_string(),
             ),
         };
 
         JsControllerError {
-            error_type,
+            code,
             message,
-            details: None,
+            data: None,
         }
     }
 }
 
 impl From<ProviderError> for JsControllerError {
     fn from(e: ProviderError) -> Self {
-        let (error_type, message) = match e {
+        let (code, message) = match e {
             ProviderError::StarknetError(se) => return se.into(),
             ProviderError::RateLimited => (
-                ErrorType::ProviderRateLimited,
+                ErrorCode::ProviderRateLimited,
                 "Request rate limited".to_string(),
             ),
             ProviderError::ArrayLengthMismatch => (
-                ErrorType::ProviderArrayLengthMismatch,
+                ErrorCode::ProviderArrayLengthMismatch,
                 "Array length mismatch".to_string(),
             ),
-            ProviderError::Other(o) => (ErrorType::ProviderOther, o.to_string()),
+            ProviderError::Other(o) => (ErrorCode::ProviderOther, o.to_string()),
         };
         JsControllerError {
-            error_type,
+            code,
             message,
-            details: None,
+            data: None,
         }
     }
 }
 
 impl From<StarknetError> for JsControllerError {
     fn from(e: StarknetError) -> Self {
-        let (error_type, message, details) = match e {
+        let (code, message, data) = match e {
             StarknetError::FailedToReceiveTransaction => (
-                ErrorType::StarknetFailedToReceiveTransaction,
+                ErrorCode::StarknetFailedToReceiveTransaction,
                 "Failed to write transaction",
                 None,
             ),
             StarknetError::ContractNotFound => (
-                ErrorType::StarknetContractNotFound,
+                ErrorCode::StarknetContractNotFound,
                 "Contract not found",
                 None,
             ),
             StarknetError::BlockNotFound => {
-                (ErrorType::StarknetBlockNotFound, "Block not found", None)
+                (ErrorCode::StarknetBlockNotFound, "Block not found", None)
             }
             StarknetError::InvalidTransactionIndex => (
-                ErrorType::StarknetInvalidTransactionIndex,
+                ErrorCode::StarknetInvalidTransactionIndex,
                 "Invalid transaction index in a block",
                 None,
             ),
             StarknetError::ClassHashNotFound => (
-                ErrorType::StarknetClassHashNotFound,
+                ErrorCode::StarknetClassHashNotFound,
                 "Class hash not found",
                 None,
             ),
             StarknetError::TransactionHashNotFound => (
-                ErrorType::StarknetTransactionHashNotFound,
+                ErrorCode::StarknetTransactionHashNotFound,
                 "Transaction hash not found",
                 None,
             ),
             StarknetError::PageSizeTooBig => (
-                ErrorType::StarknetPageSizeTooBig,
+                ErrorCode::StarknetPageSizeTooBig,
                 "Requested page size is too big",
                 None,
             ),
-            StarknetError::NoBlocks => (ErrorType::StarknetNoBlocks, "There are no blocks", None),
+            StarknetError::NoBlocks => (ErrorCode::StarknetNoBlocks, "There are no blocks", None),
             StarknetError::InvalidContinuationToken => (
-                ErrorType::StarknetInvalidContinuationToken,
+                ErrorCode::StarknetInvalidContinuationToken,
                 "The supplied continuation token is invalid or unknown",
                 None,
             ),
             StarknetError::TooManyKeysInFilter => (
-                ErrorType::StarknetTooManyKeysInFilter,
+                ErrorCode::StarknetTooManyKeysInFilter,
                 "Too many keys provided in a filter",
                 None,
             ),
             StarknetError::ContractError(data) => (
-                ErrorType::StarknetContractError,
+                ErrorCode::StarknetContractError,
                 "Contract error",
                 Some(data.revert_error),
             ),
             StarknetError::TransactionExecutionError(data) => (
-                ErrorType::StarknetTransactionExecutionError,
+                ErrorCode::StarknetTransactionExecutionError,
                 "Transaction execution error",
                 Some(serde_json::to_string(&data).unwrap_or_default()),
             ),
             StarknetError::ClassAlreadyDeclared => (
-                ErrorType::StarknetClassAlreadyDeclared,
+                ErrorCode::StarknetClassAlreadyDeclared,
                 "Class already declared",
                 None,
             ),
             StarknetError::InvalidTransactionNonce => (
-                ErrorType::StarknetInvalidTransactionNonce,
+                ErrorCode::StarknetInvalidTransactionNonce,
                 "Invalid transaction nonce",
                 None,
             ),
             StarknetError::InsufficientMaxFee => (
-                ErrorType::StarknetInsufficientMaxFee,
+                ErrorCode::StarknetInsufficientMaxFee,
                 "Max fee is smaller than the minimal transaction cost",
                 None,
             ),
             StarknetError::InsufficientAccountBalance => (
-                ErrorType::StarknetInsufficientAccountBalance,
+                ErrorCode::StarknetInsufficientAccountBalance,
                 "Account balance is smaller than the transaction's max_fee",
                 None,
             ),
             StarknetError::ValidationFailure(msg) => (
-                ErrorType::StarknetValidationFailure,
+                ErrorCode::StarknetValidationFailure,
                 "Validation failure",
                 Some(msg),
             ),
             StarknetError::CompilationFailed => (
-                ErrorType::StarknetCompilationFailed,
+                ErrorCode::StarknetCompilationFailed,
                 "Compilation failed",
                 None,
             ),
             StarknetError::ContractClassSizeIsTooLarge => (
-                ErrorType::StarknetContractClassSizeIsTooLarge,
+                ErrorCode::StarknetContractClassSizeIsTooLarge,
                 "Contract class size is too large",
                 None,
             ),
             StarknetError::NonAccount => (
-                ErrorType::StarknetNonAccount,
+                ErrorCode::StarknetNonAccount,
                 "Sender address is not an account contract",
                 None,
             ),
             StarknetError::DuplicateTx => (
-                ErrorType::StarknetDuplicateTx,
+                ErrorCode::StarknetDuplicateTx,
                 "A transaction with the same hash already exists in the mempool",
                 None,
             ),
             StarknetError::CompiledClassHashMismatch => (
-                ErrorType::StarknetCompiledClassHashMismatch,
+                ErrorCode::StarknetCompiledClassHashMismatch,
                 "The compiled class hash did not match the one supplied in the transaction",
                 None,
             ),
             StarknetError::UnsupportedTxVersion => (
-                ErrorType::StarknetUnsupportedTxVersion,
+                ErrorCode::StarknetUnsupportedTxVersion,
                 "The transaction version is not supported",
                 None,
             ),
             StarknetError::UnsupportedContractClassVersion => (
-                ErrorType::StarknetUnsupportedContractClassVersion,
+                ErrorCode::StarknetUnsupportedContractClassVersion,
                 "The contract class version is not supported",
                 None,
             ),
             StarknetError::UnexpectedError(msg) => (
-                ErrorType::StarknetUnexpectedError,
+                ErrorCode::StarknetUnexpectedError,
                 "Unexpected error",
                 Some(msg),
             ),
             StarknetError::NoTraceAvailable(data) => (
-                ErrorType::StarknetNoTraceAvailable,
+                ErrorCode::StarknetNoTraceAvailable,
                 "No trace available",
                 Some(serde_json::to_string(&data).unwrap()),
             ),
         };
 
         JsControllerError {
-            error_type,
+            code,
             message: message.to_string(),
-            details,
+            data,
         }
     }
 }
@@ -389,9 +392,9 @@ impl From<StarknetError> for JsControllerError {
 impl From<EncodingError> for JsControllerError {
     fn from(error: EncodingError) -> Self {
         JsControllerError {
-            error_type: ErrorType::EncodingError,
+            code: ErrorCode::EncodingError,
             message: error.to_string(),
-            details: None,
+            data: None,
         }
     }
 }
@@ -399,9 +402,9 @@ impl From<EncodingError> for JsControllerError {
 impl From<serde_wasm_bindgen::Error> for JsControllerError {
     fn from(error: serde_wasm_bindgen::Error) -> Self {
         JsControllerError {
-            error_type: ErrorType::SerdeWasmBindgenError,
+            code: ErrorCode::SerdeWasmBindgenError,
             message: error.to_string(),
-            details: None,
+            data: None,
         }
     }
 }
@@ -409,9 +412,9 @@ impl From<serde_wasm_bindgen::Error> for JsControllerError {
 impl From<FromStrError> for JsControllerError {
     fn from(error: FromStrError) -> Self {
         JsControllerError {
-            error_type: ErrorType::EncodingError,
+            code: ErrorCode::EncodingError,
             message: "Failed to parse string to Felt".to_string(),
-            details: Some(error.to_string()),
+            data: Some(error.to_string()),
         }
     }
 }
@@ -419,9 +422,9 @@ impl From<FromStrError> for JsControllerError {
 impl fmt::Display for JsControllerError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let json = serde_json::json!({
-            "error_type": self.error_type,
+            "code": self.code,
             "message": self.message,
-            "details": self.details
+            "data": self.data
         });
         write!(f, "{}", json)
     }

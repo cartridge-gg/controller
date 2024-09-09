@@ -18,17 +18,17 @@ import { CheckIcon, ExternalIcon, FnIcon, WandIcon } from "@cartridge/ui";
 import { Funding } from "./Funding";
 import { useConnection } from "hooks/connection";
 import { ControllerErrorAlert, ErrorAlert } from "./ErrorAlert";
-import { JsControllerError } from "@cartridge/account-wasm";
 import { ETH_MIN_PREFUND } from "utils/token";
 import { useDeploy } from "hooks/deploy";
 import { Fees } from "./Fees";
+import { ControllerError } from "utils/connection";
 
 export function DeployController({
   onClose,
   ctrlError,
 }: {
   onClose: () => void;
-  ctrlError?: JsControllerError;
+  ctrlError?: ControllerError;
 }) {
   const {
     controller: { account },
@@ -66,8 +66,8 @@ export function DeployController({
         .catch((e) => setError(e));
     }
   }, [deployHash, account]);
-  const details = ctrlError?.details ? JSON.parse(ctrlError?.details) : null;
-  const feeEstimate: string = details?.fee_estimate.overall_fee;
+  const data = ctrlError?.data ? JSON.parse(ctrlError?.data) : null;
+  const feeEstimate: string = data?.fee_estimate?.overall_fee;
 
   const onDeploy = useCallback(async () => {
     try {
@@ -115,7 +115,7 @@ export function DeployController({
                   fontWeight="bold"
                   color="text.secondary"
                 >
-                  transaction details
+                  transaction data
                 </Text>
               </Box>
               <HStack bg="solid.primary" w="full" p={3}>

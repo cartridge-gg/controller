@@ -1,4 +1,4 @@
-import { JsControllerError } from "@cartridge/account-wasm";
+import { ErrorCode } from "@cartridge/account-wasm";
 import {
   ConnectReply,
   ExecuteReply,
@@ -41,6 +41,12 @@ export type LogoutCtx = {
   reject: (reason?: unknown) => void;
 };
 
+export type ControllerError = {
+  code: ErrorCode;
+  message: string;
+  data?: any;
+};
+
 export type ExecuteCtx = {
   origin: string;
   type: "execute";
@@ -49,7 +55,7 @@ export type ExecuteCtx = {
   transactionsDetail?: InvocationsDetails & {
     chainId?: constants.StarknetChainId;
   };
-  error?: JsControllerError;
+  error?: ControllerError;
   resolve?: (res: ExecuteReply | ConnectError) => void;
   reject?: (reason?: unknown) => void;
   onCancel: () => void;

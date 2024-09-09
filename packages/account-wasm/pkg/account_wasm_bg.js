@@ -246,7 +246,7 @@ function __wbg_adapter_193(arg0, arg1, arg2, arg3) {
 
 /**
 */
-export const ErrorType = Object.freeze({ SignError:0,"0":"SignError",StorageError:1,"1":"StorageError",AccountFactoryError:2,"2":"AccountFactoryError",PaymasterExecutionTimeNotReached:3,"3":"PaymasterExecutionTimeNotReached",PaymasterExecutionTimePassed:4,"4":"PaymasterExecutionTimePassed",PaymasterInvalidCaller:5,"5":"PaymasterInvalidCaller",PaymasterRateLimitExceeded:6,"6":"PaymasterRateLimitExceeded",PaymasterNotSupported:7,"7":"PaymasterNotSupported",PaymasterHttp:8,"8":"PaymasterHttp",PaymasterExcecution:9,"9":"PaymasterExcecution",PaymasterSerialization:10,"10":"PaymasterSerialization",CartridgeControllerNotDeployed:11,"11":"CartridgeControllerNotDeployed",InsufficientBalance:12,"12":"InsufficientBalance",OriginError:13,"13":"OriginError",EncodingError:14,"14":"EncodingError",SerdeWasmBindgenError:15,"15":"SerdeWasmBindgenError",CairoSerdeError:16,"16":"CairoSerdeError",CairoShortStringToFeltError:17,"17":"CairoShortStringToFeltError",DeviceCreateCredential:18,"18":"DeviceCreateCredential",DeviceGetAssertion:19,"19":"DeviceGetAssertion",DeviceBadAssertion:20,"20":"DeviceBadAssertion",DeviceChannel:21,"21":"DeviceChannel",DeviceOrigin:22,"22":"DeviceOrigin",AccountSigning:23,"23":"AccountSigning",AccountProvider:24,"24":"AccountProvider",AccountClassHashCalculation:25,"25":"AccountClassHashCalculation",AccountClassCompression:26,"26":"AccountClassCompression",AccountFeeOutOfRange:27,"27":"AccountFeeOutOfRange",ProviderRateLimited:28,"28":"ProviderRateLimited",ProviderArrayLengthMismatch:29,"29":"ProviderArrayLengthMismatch",ProviderOther:30,"30":"ProviderOther",StarknetFailedToReceiveTransaction:31,"31":"StarknetFailedToReceiveTransaction",StarknetContractNotFound:32,"32":"StarknetContractNotFound",StarknetBlockNotFound:33,"33":"StarknetBlockNotFound",StarknetInvalidTransactionIndex:34,"34":"StarknetInvalidTransactionIndex",StarknetClassHashNotFound:35,"35":"StarknetClassHashNotFound",StarknetTransactionHashNotFound:36,"36":"StarknetTransactionHashNotFound",StarknetPageSizeTooBig:37,"37":"StarknetPageSizeTooBig",StarknetNoBlocks:38,"38":"StarknetNoBlocks",StarknetInvalidContinuationToken:39,"39":"StarknetInvalidContinuationToken",StarknetTooManyKeysInFilter:40,"40":"StarknetTooManyKeysInFilter",StarknetContractError:41,"41":"StarknetContractError",StarknetTransactionExecutionError:42,"42":"StarknetTransactionExecutionError",StarknetClassAlreadyDeclared:43,"43":"StarknetClassAlreadyDeclared",StarknetInvalidTransactionNonce:44,"44":"StarknetInvalidTransactionNonce",StarknetInsufficientMaxFee:45,"45":"StarknetInsufficientMaxFee",StarknetInsufficientAccountBalance:46,"46":"StarknetInsufficientAccountBalance",StarknetValidationFailure:47,"47":"StarknetValidationFailure",StarknetCompilationFailed:48,"48":"StarknetCompilationFailed",StarknetContractClassSizeIsTooLarge:49,"49":"StarknetContractClassSizeIsTooLarge",StarknetNonAccount:50,"50":"StarknetNonAccount",StarknetDuplicateTx:51,"51":"StarknetDuplicateTx",StarknetCompiledClassHashMismatch:52,"52":"StarknetCompiledClassHashMismatch",StarknetUnsupportedTxVersion:53,"53":"StarknetUnsupportedTxVersion",StarknetUnsupportedContractClassVersion:54,"54":"StarknetUnsupportedContractClassVersion",StarknetUnexpectedError:55,"55":"StarknetUnexpectedError",StarknetNoTraceAvailable:56,"56":"StarknetNoTraceAvailable", });
+export const ErrorCode = Object.freeze({ StarknetFailedToReceiveTransaction:1,"1":"StarknetFailedToReceiveTransaction",StarknetContractNotFound:20,"20":"StarknetContractNotFound",StarknetBlockNotFound:24,"24":"StarknetBlockNotFound",StarknetInvalidTransactionIndex:27,"27":"StarknetInvalidTransactionIndex",StarknetClassHashNotFound:28,"28":"StarknetClassHashNotFound",StarknetTransactionHashNotFound:29,"29":"StarknetTransactionHashNotFound",StarknetPageSizeTooBig:31,"31":"StarknetPageSizeTooBig",StarknetNoBlocks:32,"32":"StarknetNoBlocks",StarknetInvalidContinuationToken:33,"33":"StarknetInvalidContinuationToken",StarknetTooManyKeysInFilter:34,"34":"StarknetTooManyKeysInFilter",StarknetContractError:40,"40":"StarknetContractError",StarknetTransactionExecutionError:41,"41":"StarknetTransactionExecutionError",StarknetClassAlreadyDeclared:51,"51":"StarknetClassAlreadyDeclared",StarknetInvalidTransactionNonce:52,"52":"StarknetInvalidTransactionNonce",StarknetInsufficientMaxFee:53,"53":"StarknetInsufficientMaxFee",StarknetInsufficientAccountBalance:54,"54":"StarknetInsufficientAccountBalance",StarknetValidationFailure:55,"55":"StarknetValidationFailure",StarknetCompilationFailed:56,"56":"StarknetCompilationFailed",StarknetContractClassSizeIsTooLarge:57,"57":"StarknetContractClassSizeIsTooLarge",StarknetNonAccount:58,"58":"StarknetNonAccount",StarknetDuplicateTx:59,"59":"StarknetDuplicateTx",StarknetCompiledClassHashMismatch:60,"60":"StarknetCompiledClassHashMismatch",StarknetUnsupportedTxVersion:61,"61":"StarknetUnsupportedTxVersion",StarknetUnsupportedContractClassVersion:62,"62":"StarknetUnsupportedContractClassVersion",StarknetUnexpectedError:63,"63":"StarknetUnexpectedError",StarknetNoTraceAvailable:10,"10":"StarknetNoTraceAvailable",SignError:101,"101":"SignError",StorageError:102,"102":"StorageError",AccountFactoryError:103,"103":"AccountFactoryError",PaymasterExecutionTimeNotReached:104,"104":"PaymasterExecutionTimeNotReached",PaymasterExecutionTimePassed:105,"105":"PaymasterExecutionTimePassed",PaymasterInvalidCaller:106,"106":"PaymasterInvalidCaller",PaymasterRateLimitExceeded:107,"107":"PaymasterRateLimitExceeded",PaymasterNotSupported:108,"108":"PaymasterNotSupported",PaymasterHttp:109,"109":"PaymasterHttp",PaymasterExcecution:110,"110":"PaymasterExcecution",PaymasterSerialization:111,"111":"PaymasterSerialization",CartridgeControllerNotDeployed:112,"112":"CartridgeControllerNotDeployed",InsufficientBalance:113,"113":"InsufficientBalance",OriginError:114,"114":"OriginError",EncodingError:115,"115":"EncodingError",SerdeWasmBindgenError:116,"116":"SerdeWasmBindgenError",CairoSerdeError:117,"117":"CairoSerdeError",CairoShortStringToFeltError:118,"118":"CairoShortStringToFeltError",DeviceCreateCredential:119,"119":"DeviceCreateCredential",DeviceGetAssertion:120,"120":"DeviceGetAssertion",DeviceBadAssertion:121,"121":"DeviceBadAssertion",DeviceChannel:122,"122":"DeviceChannel",DeviceOrigin:123,"123":"DeviceOrigin",AccountSigning:124,"124":"AccountSigning",AccountProvider:125,"125":"AccountProvider",AccountClassHashCalculation:126,"126":"AccountClassHashCalculation",AccountClassCompression:127,"127":"AccountClassCompression",AccountFeeOutOfRange:128,"128":"AccountFeeOutOfRange",ProviderRateLimited:129,"129":"ProviderRateLimited",ProviderArrayLengthMismatch:130,"130":"ProviderArrayLengthMismatch",ProviderOther:131,"131":"ProviderOther", });
 
 const CartridgeAccountFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
@@ -608,17 +608,17 @@ export class JsControllerError {
         wasm.__wbg_jscontrollererror_free(ptr, 0);
     }
     /**
-    * @returns {ErrorType}
+    * @returns {ErrorCode}
     */
-    get error_type() {
-        const ret = wasm.__wbg_get_jscontrollererror_error_type(this.__wbg_ptr);
+    get code() {
+        const ret = wasm.__wbg_get_jscontrollererror_code(this.__wbg_ptr);
         return ret;
     }
     /**
-    * @param {ErrorType} arg0
+    * @param {ErrorCode} arg0
     */
-    set error_type(arg0) {
-        wasm.__wbg_set_jscontrollererror_error_type(this.__wbg_ptr, arg0);
+    set code(arg0) {
+        wasm.__wbg_set_jscontrollererror_code(this.__wbg_ptr, arg0);
     }
     /**
     * @returns {string}
@@ -650,10 +650,10 @@ export class JsControllerError {
     /**
     * @returns {string | undefined}
     */
-    get details() {
+    get data() {
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.__wbg_get_jscontrollererror_details(retptr, this.__wbg_ptr);
+            wasm.__wbg_get_jscontrollererror_data(retptr, this.__wbg_ptr);
             var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
             var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
             let v1;
@@ -669,10 +669,10 @@ export class JsControllerError {
     /**
     * @param {string | undefined} [arg0]
     */
-    set details(arg0) {
+    set data(arg0) {
         var ptr0 = isLikeNone(arg0) ? 0 : passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_jscontrollererror_details(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_jscontrollererror_data(this.__wbg_ptr, ptr0, len0);
     }
 }
 
