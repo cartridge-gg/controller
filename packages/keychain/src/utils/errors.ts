@@ -1,10 +1,13 @@
-export function parseExecutionError(error: any): {
+export function parseExecutionError(
+  error: any,
+  stackOffset: number = 1,
+): {
   raw: string;
   stack: {
     address?: string;
     class?: string;
     selector?: string;
-    error: string;
+    error: string[];
   }[];
 } {
   let executionError: string = error.data.execution_error;
@@ -27,16 +30,27 @@ export function parseExecutionError(error: any): {
       address: trace.match(/contract address: (0x[a-fA-F0-9]+)/)?.[1],
       class: trace.match(/class hash: (0x[a-fA-F0-9]+)/)?.[1],
       selector: trace.match(/selector: (0x[a-fA-F0-9]+)/)?.[1],
-      error:
-        trace.match(/Error at pc=.*:\n([\s\S]*?)(?=\n\d+:|$)/)?.[1]?.trim() ||
-        trace.match(/Entry point .* not found in contract./)?.[0] ||
-        trace.split("\n").slice(1).join("\n").trim() ||
-        "Unknown error",
+      error: [],
     };
 
-    // Map "Entry point not found" error to a more human-readable message
-    if (extractedInfo.error && extractedInfo.error.includes("Entry point")) {
-      extractedInfo.error = "Function not found in the contract";
+    const errorLines = trace
+      .split("\n")
+      .slice(1)
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+
+    if (errorLines.length > 0) {
+      if (errorLines[0].startsWith("Error at pc=")) {
+        extractedInfo.error = errorLines.slice(1);
+      } else if (errorLines[0].includes("Entry point")) {
+        extractedInfo.error = ["Function not found in the contract"];
+      } else {
+        extractedInfo.error = errorLines;
+      }
+    }
+
+    if (extractedInfo.error.length === 0) {
+      extractedInfo.error = ["Unknown error"];
     }
 
     return extractedInfo;
@@ -44,6 +58,6 @@ export function parseExecutionError(error: any): {
 
   return {
     raw: executionError,
-    stack,
+    stack: stack.slice(stackOffset),
   };
 }

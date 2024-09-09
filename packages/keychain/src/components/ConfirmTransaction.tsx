@@ -157,7 +157,10 @@ export function ConfirmTransaction() {
             return (
               <Footer>
                 <Fees maxFee={BigInt(feeEstimate)} variant="warning" />
-                <ControllerErrorAlert error={ctrlError} />
+                <ControllerErrorAlert
+                  error={ctrlError}
+                  isPaymaster={!!paymaster}
+                />
                 <Button
                   colorScheme="colorful"
                   onClick={() => setCTAState("deploy")}

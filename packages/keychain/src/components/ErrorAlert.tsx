@@ -145,7 +145,13 @@ export function ErrorAlert({
   );
 }
 
-export function ControllerErrorAlert({ error }: { error: ControllerError }) {
+export function ControllerErrorAlert({
+  error,
+  isPaymaster = false,
+}: {
+  error: ControllerError;
+  isPaymaster?: boolean;
+}) {
   let title = "An error occurred";
   let description: string | React.ReactElement = error.message;
   let isExpanded = false;
@@ -256,7 +262,7 @@ export function ControllerErrorAlert({ error }: { error: ControllerError }) {
       title = "Execution error expected";
       description = (() => {
         try {
-          const parsedError = parseExecutionError(error);
+          const parsedError = parseExecutionError(error, isPaymaster ? 2 : 1);
           copyText = parsedError.raw;
           return <StackTraceDisplay stackTrace={parsedError.stack} />;
         } catch (e) {
@@ -313,26 +319,47 @@ function StackTraceDisplay({
                     justifyContent="space-between"
                     fontSize="xs"
                   >
-                    <Text color="darkGray.400">{key}</Text>
+                    <Text
+                      color="darkGray.400"
+                      textTransform="capitalize"
+                      alignSelf="flex-start"
+                    >
+                      {key}
+                    </Text>
                     {key === "address" || key === "class" ? (
                       <Link
                         href={getExplorerUrl(
                           key === "address" ? "contract" : "class",
-                          value,
+                          value as string,
                         )}
                         isExternal={isExternalLink}
                         wordBreak="break-all"
                       >
-                        {formatAddress(value, { first: 10, last: 10 })}
+                        {formatAddress(value as string, {
+                          first: 10,
+                          last: 10,
+                        })}
                       </Link>
                     ) : key === "selector" ? (
                       <Text wordBreak="break-all" color="inherit">
-                        {formatAddress(value, { first: 10, last: 10 })}
+                        {formatAddress(value as string, {
+                          first: 10,
+                          last: 10,
+                        })}
                       </Text>
                     ) : (
-                      <Text wordBreak="break-all" color="inherit">
-                        {value}
-                      </Text>
+                      <VStack align="end" spacing={1} w="full">
+                        {(value as string[]).map((line, index) => (
+                          <Text
+                            key={index}
+                            wordBreak="break-all"
+                            color="inherit"
+                            textAlign="right"
+                          >
+                            {line}
+                          </Text>
+                        ))}
+                      </VStack>
                     )}
                   </HStack>
                 ),
