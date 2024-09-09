@@ -5,7 +5,7 @@ import { RpcProvider, CallData, cairo, shortString } from "starknet";
 const rpcUrl = "http://localhost:8001/x/starknet/sepolia";
 
 const avatarAddress =
-  "0x63735a2869d362487b442c87050cb2e10c3759864fbef304968fb58b622b78c";
+  "0x56be7d500bd759ac4f96f786f15e9e4702c1ae0582091b20c90546e44ba42fc";
 
 const provider = new RpcProvider({ nodeUrl: `${rpcUrl}` });
 

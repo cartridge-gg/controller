@@ -133,7 +133,7 @@ mod AvatarNft {
 
         fn token_uri(self: @ContractState, token_id: u256) -> ByteArray {
             let owner = self.owner_of(token_id);
-            let level = 2;
+            let level = 3;
 
             let attributes = array![
                 NftAttribute { trait_type: "Rarity", value: "Epic" },
