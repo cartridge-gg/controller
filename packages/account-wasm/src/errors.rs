@@ -423,7 +423,7 @@ impl fmt::Display for JsControllerError {
             "message": self.message,
             "details": self.details
         });
-        write!(f, "{}", json.to_string())
+        write!(f, "{}", json)
     }
 }
 

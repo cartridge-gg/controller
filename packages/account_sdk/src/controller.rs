@@ -228,8 +228,7 @@ where
 
         match est {
             Ok(mut fee_estimate) => {
-                fee_estimate.overall_fee =
-                    fee_estimate.overall_fee + WEBAUTHN_GAS * fee_estimate.gas_price;
+                fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
                 if fee_estimate.overall_fee > Felt::from(balance) {
                     Err(ControllerError::InsufficientBalance {
                         fee_estimate,
@@ -264,7 +263,8 @@ where
         nonce: Felt,
         max_fee: Felt,
     ) -> Result<InvokeTransactionResult, ControllerError> {
-        let result = self.execute_v1(calls)
+        let result = self
+            .execute_v1(calls)
             .max_fee(max_fee)
             .nonce(nonce)
             .send()
@@ -362,7 +362,7 @@ where
                 FunctionCall {
                     contract_address,
                     entry_point_selector: selector!("balanceOf"),
-                    calldata: vec![address.into()],
+                    calldata: vec![address],
                 },
                 BlockId::Tag(BlockTag::Pending),
             )
