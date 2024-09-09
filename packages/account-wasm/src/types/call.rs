@@ -45,3 +45,13 @@ impl TryFrom<JsCall> for types::Call {
         })
     }
 }
+
+impl From<types::Call> for JsCall {
+    fn from(value: types::Call) -> Self {
+        JsCall {
+            contract_address: value.to.into(),
+            entrypoint: value.selector.to_string(),
+            calldata: value.calldata,
+        }
+    }
+}

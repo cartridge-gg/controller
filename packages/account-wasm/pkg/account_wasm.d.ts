@@ -1,10 +1,5 @@
 /* tslint:disable */
 /* eslint-disable */
-export interface JsInvocationsDetails {
-    nonce: Felt;
-    maxFee: Felt;
-}
-
 export interface JsOutsideExecution {
     caller: Felt;
     executeBefore: number;
@@ -13,10 +8,9 @@ export interface JsOutsideExecution {
     nonce: Felt;
 }
 
-export interface JsPolicy {
-    target: string;
-    method: string;
-}
+export type Felts = JsFelt[];
+
+export type JsFelt = Felt;
 
 export interface JsCall {
     contractAddress: Felt;
@@ -24,13 +18,19 @@ export interface JsCall {
     calldata: Felt[];
 }
 
+export interface JsInvocationsDetails {
+    nonce: Felt;
+    maxFee: Felt;
+}
+
+export interface JsPolicy {
+    target: string;
+    method: string;
+}
+
 export interface JsEstimateFeeDetails {
     nonce: Felt;
 }
-
-export type Felts = JsFelt[];
-
-export type JsFelt = Felt;
 
 export interface JsSession {
     policies: JsPolicy[];
@@ -115,13 +115,6 @@ export class CartridgeAccount {
 */
   sessionJson(): any;
 /**
-* @param {(JsPolicy)[]} policies
-* @param {bigint} expires_at
-* @param {any} external_account
-* @returns {any}
-*/
-  static registerSessionCalldata(policies: (JsPolicy)[], expires_at: bigint, external_account: any): any;
-/**
 */
   revokeSession(): void;
 /**
@@ -139,19 +132,14 @@ export class CartridgeAccount {
 */
   delegateAccount(): Promise<JsFelt>;
 /**
-* @param {any} salt
-* @param {any} external_owner
+* @param {any} owner
+* @param {any} username
+* @param {(JsPolicy)[]} policies
+* @param {bigint} expires_at
+* @param {bigint} initial_deposit
 * @returns {any}
 */
-  static getUdcDeployedAddress(salt: any, external_owner: any): any;
-/**
-* @returns {any}
-*/
-  static getAccountClassHash(): any;
-/**
-* @returns {any}
-*/
-  static getUdcAddress(): any;
+  static externalDeploymentCalls(owner: any, username: any, policies: (JsPolicy)[], expires_at: bigint, initial_deposit: bigint): any;
 }
 /**
 */

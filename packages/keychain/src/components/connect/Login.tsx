@@ -13,7 +13,6 @@ import { ErrorAlert } from "components/ErrorAlert";
 
 export function Login(props: LoginProps) {
   const theme = useControllerTheme();
-  console.debug("login render");
 
   return (
     <Container

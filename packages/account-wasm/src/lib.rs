@@ -13,11 +13,11 @@ use account_sdk::account::session::hash::Session;
 use account_sdk::account::session::raw_session::RawSession;
 use account_sdk::account::session::SessionAccount;
 use account_sdk::account::{AccountHashAndCallsSigner, MessageSignerAccount};
-use account_sdk::constants::{ACCOUNT_CLASS_HASH, UDC_ADDRESS};
+use account_sdk::constants::{ACCOUNT_CLASS_HASH, ETH_CONTRACT_ADDRESS, UDC_ADDRESS};
 use account_sdk::controller::Controller;
 use account_sdk::provider::{CartridgeJsonRpcProvider, CartridgeProvider};
 use account_sdk::signers::webauthn::{CredentialID, WebauthnSigner};
-use account_sdk::signers::{HashSigner, Signer};
+use account_sdk::signers::{HashSigner, Signer, SignerTrait};
 use base64::engine::general_purpose;
 use base64::Engine;
 use cainome::cairo_serde::{CairoSerde, ContractAddress};
@@ -37,6 +37,7 @@ use types::session::JsSession;
 use types::{Felts, JsFelt};
 use url::Url;
 use wasm_bindgen::prelude::*;
+use web_sys::console;
 
 use crate::errors::OperationError;
 use crate::types::invocation::JsInvocationsDetails;
@@ -256,28 +257,6 @@ impl CartridgeAccount {
             .map_or_else(|| Ok(JsValue::NULL), Ok)
     }
 
-    #[wasm_bindgen(js_name = registerSessionCalldata)]
-    pub fn register_session_calldata(
-        policies: Vec<JsPolicy>,
-        expires_at: u64,
-        external_account: JsValue,
-    ) -> Result<JsValue> {
-        let methods = policies
-            .into_iter()
-            .map(TryFrom::try_from)
-            .collect::<std::result::Result<Vec<_>, _>>()?;
-
-        let signer = SigningKey::from_random();
-        let session = Session::new(methods, expires_at, &signer.signer())?;
-
-        let calldata = [
-            <RawSession as CairoSerde>::cairo_serialize(&session.raw()),
-            vec![from_value(external_account)?],
-        ]
-        .concat();
-        Ok(to_value(&calldata)?)
-    }
-
     #[wasm_bindgen(js_name = revokeSession)]
     pub fn revoke_session(&self) -> Result<()> {
         unimplemented!("Revoke Session not implemented");
@@ -324,38 +303,89 @@ impl CartridgeAccount {
         Ok(JsFelt(res))
     }
 
-    #[wasm_bindgen(js_name = getUdcDeployedAddress)]
-    pub fn get_udc_deployed_address(salt: JsValue, external_owner: JsValue) -> Result<JsValue> {
-        set_panic_hook();
-
-        let salt = from_value::<Felt>(salt)?;
-        let external_owner = from_value::<ContractAddress>(external_owner)?;
+    #[wasm_bindgen(js_name = externalDeploymentCalls)]
+    pub fn external_deployment_calls(
+        owner: JsValue,
+        username: JsValue,
+        policies: Vec<JsPolicy>,
+        expires_at: u64,
+        initial_deposit: u64,
+    ) -> Result<JsValue> {
+        let mut js_calls: Vec<JsCall> = vec![];
+        let salt = from_value::<Felt>(username)?;
+        let owner = from_value::<ContractAddress>(owner)?;
 
         let mut constructor_calldata =
-            controller::Owner::cairo_serialize(&controller::Owner::Account(external_owner));
+            controller::Owner::cairo_serialize(&controller::Owner::Account(owner));
         constructor_calldata.extend(Option::<AbigenSigner>::cairo_serialize(&None));
 
-        let res = get_udc_deployed_address(
+        let address = get_udc_deployed_address(
             salt,
             ACCOUNT_CLASS_HASH,
             &UdcUniqueness::NotUnique,
             &constructor_calldata,
         );
 
+        let mut udc_deploy_calldata = vec![
+            ACCOUNT_CLASS_HASH,
+            salt,
+            Felt::ZERO, // unique false
+        ];
+        udc_deploy_calldata.push(constructor_calldata.len().into());
+        udc_deploy_calldata.extend(constructor_calldata);
+
+        // Universal Deployer Contract calldata
+        js_calls.push(JsCall {
+            contract_address: UDC_ADDRESS,
+            entrypoint: "deployContract".to_string(),
+            calldata: udc_deploy_calldata,
+        });
+
+        // Set Delegate account
+        js_calls.push(JsCall {
+            contract_address: address,
+            entrypoint: "set_delegate_account".to_string(),
+            calldata: vec![owner.into()],
+        });
+
+        // Register new session
+        let methods = policies
+            .into_iter()
+            .map(TryFrom::try_from)
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+        let session_signer = SigningKey::from_random();
+        let session = Session::new(methods, expires_at, &session_signer.signer())?;
+
+        js_calls.push(JsCall {
+            contract_address: address,
+            entrypoint: "register_session".to_string(),
+            calldata: [
+                <RawSession as CairoSerde>::cairo_serialize(&session.raw()),
+                vec![owner.into()],
+            ]
+            .concat(),
+        });
+
+        // Transfer ETH calldata
+        if initial_deposit > 0 {
+            js_calls.push(JsCall {
+                contract_address: ETH_CONTRACT_ADDRESS,
+                entrypoint: "approve".to_string(),
+                calldata: vec![address, initial_deposit.into(), Felt::ZERO],
+            });
+
+            js_calls.push(JsCall {
+                contract_address: ETH_CONTRACT_ADDRESS,
+                entrypoint: "transfer".to_string(),
+                calldata: vec![address, initial_deposit.into(), Felt::ZERO],
+            });
+        }
+
         Ok(to_value(&JsDeployment {
-            address: res,
-            calldata: constructor_calldata,
+            address: address,
+            calls: js_calls,
+            session_key: session_signer.secret_scalar(),
         })?)
-    }
-
-    #[wasm_bindgen(js_name = getAccountClassHash)]
-    pub fn get_account_class_hash() -> JsValue {
-        to_value(&ACCOUNT_CLASS_HASH).unwrap()
-    }
-
-    #[wasm_bindgen(js_name = getUdcAddress)]
-    pub fn get_udc_address() -> JsValue {
-        to_value(&UDC_ADDRESS).unwrap()
     }
 }
 

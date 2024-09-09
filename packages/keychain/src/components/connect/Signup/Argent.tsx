@@ -28,18 +28,12 @@ import {
   useProvider,
   voyager,
 } from "@starknet-react/core";
-import {
-  CallData,
-  RpcProvider,
-  TypedData,
-  cairo,
-  num,
-  shortString,
-} from "starknet";
-import { CheckIcon, CopyAddress, DotsIcon, PacmanIcon } from "@cartridge/ui";
+import { RpcProvider, TypedData, num, shortString } from "starknet";
+import { CheckIcon, DotsIcon, PacmanIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { useToast } from "hooks/toast";
 import {
+  ETH_CONTRACT_ADDRESS,
   TokenInfo,
   fetchTokenInfo,
   getBalanceStr,
@@ -51,7 +45,10 @@ import {
 import { ErrorAlert } from "../../ErrorAlert";
 import { beginAccountSignup, finalizeAccountSignup } from "hooks/account";
 import base64url from "base64url";
-import { CartridgeAccount } from "@cartridge/account-wasm";
+import {
+  CartridgeAccount,
+  CartridgeSessionAccount,
+} from "@cartridge/account-wasm";
 
 enum SignupState {
   CONNECT,
@@ -109,13 +106,11 @@ export function SignupArgent({ username }: { username: string }) {
 function SignupArgentInner({ username }: { username: string }) {
   const { account: extAccount } = useAccount();
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
-  const { chainId, chainName, policies } = useConnection();
+  const { chainId, chainName, policies, rpcUrl } = useConnection();
   const { isChecked, tokens, isFetching, isAllFunded } = useTokens();
   const [isDeploying, setIsDeploying] = useState(false);
   const [error, setError] = useState<Error>();
   const [state, setState] = useState<SignupState>(SignupState.CONNECT);
-  const [controllerAddress, setControllerAddress] = useState("");
-  const [controllerCalldata, setControllerCalldata] = useState([]);
 
   const [title, setTitle] = useState("");
 
@@ -152,17 +147,6 @@ function SignupArgentInner({ username }: { username: string }) {
       const typedData = registerTypedData(username, { low, high }, chainId);
       const sig = await extAccount.signMessage(typedData);
       await finalizeAccountSignup(extAccount.address, chainId, sig as string[]);
-
-      // set controller address & calldata
-      const salt = shortString.encodeShortString(username);
-      const { address, calldata } = CartridgeAccount.getUdcDeployedAddress(
-        salt,
-        extAccount.address,
-      );
-
-      setControllerAddress(address);
-      setControllerCalldata(calldata);
-
       setState(SignupState.DEPLOY);
     } catch (e) {
       console.log(e);
@@ -173,83 +157,59 @@ function SignupArgentInner({ username }: { username: string }) {
   const onDeploy = useCallback(async () => {
     if (!extAccount) return;
 
-    const calls = tokens.flatMap((t) => {
-      const amount = cairo.uint256(t.min);
-      return [
-        {
-          contractAddress: t.address,
-          entrypoint: "approve",
-          calldata: CallData.compile({
-            recipient: controllerAddress,
-            amount,
-          }),
-        },
-        {
-          contractAddress: t.address,
-          entrypoint: "transfer",
-          calldata: CallData.compile({
-            recipient: controllerAddress,
-            amount,
-          }),
-        },
-      ];
-    });
+    try {
+      setIsDeploying(true);
 
-    // deployContract
-    const salt = shortString.encodeShortString(username);
-    calls.push({
-      contractAddress: CartridgeAccount.getUdcAddress(),
-      entrypoint: "deployContract",
-      calldata: CallData.compile({
-        classHash: CartridgeAccount.getAccountClassHash(),
-        salt,
-        unique: false,
-        calldata: controllerCalldata,
-      }),
-    });
-
-    // registerSession
-    calls.push({
-      contractAddress: controllerAddress,
-      entrypoint: "register_session",
-      calldata: CartridgeAccount.registerSessionCalldata(
+      const {
+        address: controllerAddress,
+        calls: deploymentCalls,
+        sessionKey,
+      } = CartridgeAccount.externalDeploymentCalls(
+        extAccount.address,
+        shortString.encodeShortString(username),
         policies.map((p) => {
           return { target: p.target, method: p.method };
         }),
         3000000000n,
-        extAccount.address,
-      ),
-    });
+        100000000000000000n,
+      );
 
-    console.log(
-      calls
-        .map((call) => {
-          return CallData.compile(call)
-            .map((i) => `0x${BigInt(i).toString(16)}`)
-            .join(" ");
-        })
-        .join(" / "),
-    );
-
-    try {
-      setIsDeploying(true);
-      const res = await extAccount.execute(calls);
+      const res = await extAccount.execute(deploymentCalls);
       await extAccount.waitForTransaction(res.transaction_hash, {
         retryInterval: 1000,
       });
+
+      // Test session account
+      const sessionAccount = CartridgeSessionAccount.new_as_registered(
+        rpcUrl,
+        sessionKey,
+        controllerAddress,
+        extAccount.address,
+        chainId,
+        {
+          policies: policies.map((p) => {
+            return { target: p.target, method: p.method };
+          }),
+          expiresAt: 3000000000,
+        },
+      );
+
+      const res2 = await sessionAccount.execute([
+        {
+          contractAddress: ETH_CONTRACT_ADDRESS,
+          entrypoint: "transfer",
+          calldata: [extAccount.address, "0x2386F26FC10000", "0"],
+        },
+      ]);
+
+      console.log(res2);
     } catch (e) {
       console.log(e);
       setError(e);
+    } finally {
+      setIsDeploying(false);
     }
-    setIsDeploying(false);
-  }, [
-    extAccount,
-    controllerAddress,
-    controllerCalldata,
-    policies,
-    tokens,
-    username,
-  ]);
+  }, [extAccount, policies, tokens, username]);
 
   // const onCopy = useCallback(() => {
   //   navigator.clipboard.writeText(controllerAddress);
@@ -283,9 +243,7 @@ function SignupArgentInner({ username }: { username: string }) {
             "Please connect your ArgentX wallet"}
           {state === SignupState.SIGN_MESSAGE &&
             "Sign message to create your controller"}
-          {state === SignupState.DEPLOY && (
-            <CopyAddress address={controllerAddress} />
-          )}
+          {state === SignupState.DEPLOY && <></>}
         </>
       }
       // TODO: Add line icons
@@ -407,7 +365,6 @@ function SignupArgentInner({ username }: { username: string }) {
               <Button
                 colorScheme="colorful"
                 onClick={() => {
-                  console.log("deploy");
                   onDeploy();
                 }}
                 isLoading={isDeploying}
