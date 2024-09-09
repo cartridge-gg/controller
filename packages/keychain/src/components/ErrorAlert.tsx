@@ -166,7 +166,7 @@ export function ControllerErrorAlert({ error }: { error: ControllerError }) {
       description =
         "Lets fund your Controller and deploy it before we can start executing transactions.";
       isExpanded = true;
-      variant = "info";
+      variant = "warning";
       break;
     case ErrorCode.OriginError:
       title = "Origin Error";

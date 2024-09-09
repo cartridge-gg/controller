@@ -156,7 +156,7 @@ export function ConfirmTransaction() {
           case ErrorCode.CartridgeControllerNotDeployed:
             return (
               <Footer>
-                <Fees maxFee={BigInt(feeEstimate)} variant="info" />
+                <Fees maxFee={BigInt(feeEstimate)} variant="warning" />
                 <ControllerErrorAlert error={ctrlError} />
                 <Button
                   colorScheme="colorful"
