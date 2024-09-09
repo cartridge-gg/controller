@@ -15,8 +15,8 @@ import { Fees } from "./Fees";
 import { ExecuteCtx } from "utils/connection";
 import { num } from "starknet";
 import { ErrorType, JsControllerError } from "@cartridge/account-wasm";
-import { DeploymentRequired } from "components/DeploymentRequired";
-import { Funding } from "components/Funding";
+import { Funding } from "../Funding";
+import { DeployController } from "../DeployController";
 
 export const WEBAUTHN_GAS = 3300n;
 export const CONTRACT_ETH =
@@ -123,7 +123,7 @@ export function Execute() {
     ctrlError.error_type === ErrorType.CartridgeControllerNotDeployed
   ) {
     return (
-      <DeploymentRequired
+      <DeployController
         onClose={() => {
           setCTAState("execute");
         }}

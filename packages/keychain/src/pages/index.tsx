@@ -1,7 +1,7 @@
 import dynamic from "next/dynamic";
 import { Signature } from "starknet";
 import { ResponseCodes } from "@cartridge/controller";
-import { DeploymentRequired, Execute, Menu, SignMessage } from "components";
+import { DeployController, Execute, Menu, SignMessage } from "components";
 import { CreateController, CreateSession, Logout } from "components/connect";
 import { useConnection } from "hooks/connection";
 import {
@@ -103,7 +103,7 @@ function Home() {
     case "deploy": {
       const ctx = context as DeployCtx;
       return (
-        <DeploymentRequired
+        <DeployController
           onClose={() =>
             ctx.resolve({
               code: ResponseCodes.CANCELED,

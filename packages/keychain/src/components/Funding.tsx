@@ -215,18 +215,19 @@ function FundingInner({ onComplete, title, defaultAmount }: FundingInnerProps) {
         </HStack>
 
         <Divider />
-        {error && (
+        {error ? (
           <ErrorAlert
             title="Account deployment error"
             description={error.message}
           />
+        ) : (
+          <ErrorAlert
+            variant="info"
+            isExpanded
+            title="Controller is in Alpha"
+            description="Exercise caution when depositing funds"
+          />
         )}
-        <ErrorAlert
-          variant="info"
-          isExpanded
-          title="Controller is in Alpha"
-          description="Exercise caution when depositing funds"
-        />
 
         {(() => {
           switch (state) {

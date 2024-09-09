@@ -29,4 +29,5 @@ export * from "./Sun";
 export * from "./Terminal";
 export * from "./Trophy";
 export * from "./Wallet";
+export * from "./Wand";
 export * from "./Wrench";
