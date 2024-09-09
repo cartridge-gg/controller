@@ -293,6 +293,21 @@ export function ControllerErrorAlert({ error }: { error: ControllerError }) {
 
 function StackTraceDisplay({ stackTrace }: { stackTrace: string[] }) {
   const { chainId } = useConnection();
+
+  const getExplorerUrl = (type: "contract" | "class", value: string) => {
+    const baseUrl = {
+      [constants.StarknetChainId.SN_SEPOLIA]: "https://sepolia.starkscan.co",
+      [constants.StarknetChainId.SN_MAIN]: "https://starkscan.co",
+    }[chainId];
+
+    return baseUrl ? `${baseUrl}/${type}/${value}` : undefined;
+  };
+
+  const isExternalLink = [
+    constants.StarknetChainId.SN_SEPOLIA,
+    constants.StarknetChainId.SN_MAIN,
+  ].includes(chainId as constants.StarknetChainId);
+
   return (
     <VStack align="start" spacing={2} w="full">
       {stackTrace.map((trace, i, arr) => {
@@ -330,21 +345,11 @@ function StackTraceDisplay({ stackTrace }: { stackTrace: string[] }) {
                       <Text color="darkGray.400">{key}</Text>
                       {key === "Address" || key === "Class" ? (
                         <Link
-                          href={
-                            chainId === constants.StarknetChainId.SN_SEPOLIA
-                              ? `https://sepolia.starkscan.co/${
-                                  key === "Address" ? "contract" : "class"
-                                }/${value}`
-                              : chainId === constants.StarknetChainId.SN_MAIN
-                              ? `https://starkscan.co/${
-                                  key === "Address" ? "contract" : "class"
-                                }/${value}`
-                              : undefined // TODO: slot deployments link to worlds.dev
-                          }
-                          isExternal={
-                            chainId === constants.StarknetChainId.SN_SEPOLIA ||
-                            chainId === constants.StarknetChainId.SN_MAIN
-                          }
+                          href={getExplorerUrl(
+                            key === "Address" ? "contract" : "class",
+                            value,
+                          )}
+                          isExternal={isExternalLink}
                           wordBreak="break-all"
                         >
                           {formatAddress(value, { first: 10, last: 10 })}
