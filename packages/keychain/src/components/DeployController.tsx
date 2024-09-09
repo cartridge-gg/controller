@@ -22,13 +22,14 @@ import { ETH_MIN_PREFUND } from "utils/token";
 import { useDeploy } from "hooks/deploy";
 import { Fees } from "./Fees";
 import { ControllerError } from "utils/connection";
+import { useBalance } from "hooks/token";
 
 export function DeployController({
   onClose,
   ctrlError,
 }: {
   onClose: () => void;
-  ctrlError: ControllerError;
+  ctrlError?: ControllerError;
 }) {
   const {
     controller: { account },
@@ -67,7 +68,17 @@ export function DeployController({
     }
   }, [deployHash, account]);
 
-  const feeEstimate: string = ctrlError.data?.fee_estimate.overall_fee;
+  const feeEstimate: string | undefined =
+    ctrlError.data?.fee_estimate.overall_fee;
+
+  const { balance } = useBalance({ address: account.address });
+  useEffect(() => {
+    if (!feeEstimate || accountState !== "fund") return;
+
+    if (balance >= BigInt(feeEstimate)) {
+      setAccountState("deploy");
+    }
+  }, [balance, feeEstimate, accountState]);
 
   const onDeploy = useCallback(async () => {
     try {
@@ -92,9 +103,6 @@ export function DeployController({
               for deployment
             </>
           }
-          onComplete={() => {
-            setAccountState("deploy");
-          }}
           defaultAmount={feeEstimate ?? ETH_MIN_PREFUND}
         />
       );

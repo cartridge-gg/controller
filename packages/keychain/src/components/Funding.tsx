@@ -9,7 +9,6 @@ import {
   Text,
   VStack,
   Divider,
-  useInterval,
 } from "@chakra-ui/react";
 import { PropsWithChildren, useCallback, useState } from "react";
 import { mainnet, sepolia } from "@starknet-react/chains";
@@ -27,7 +26,6 @@ import {
   TransactionFinalityStatus,
   cairo,
   num,
-  uint256,
   wallet,
 } from "starknet";
 import { ArrowLineDownIcon, EthereumIcon } from "@cartridge/ui";
@@ -38,6 +36,7 @@ import { ErrorAlert } from "./ErrorAlert";
 import { CopyAddress } from "./CopyAddress";
 import { CurrencyBase, CurrencyQuote, usePriceQuery } from "generated/graphql";
 import { formatEther, parseEther } from "viem";
+import { useBalance } from "hooks/token";
 
 export function Funding(innerProps: FundingInnerProps) {
   return (
@@ -48,9 +47,9 @@ export function Funding(innerProps: FundingInnerProps) {
 }
 
 type FundingInnerProps = {
-  onComplete: (deployHash?: string) => void;
   title?: React.ReactElement;
   defaultAmount: string;
+  onComplete?: (deployHash?: string) => void;
 };
 
 function FundingInner({ onComplete, title, defaultAmount }: FundingInnerProps) {
@@ -130,7 +129,9 @@ function FundingInner({ onComplete, title, defaultAmount }: FundingInnerProps) {
     }
   }, [extAccount, controller, amount, onComplete]);
 
-  const { balance: currentBalance } = useBalance();
+  const { balance: currentBalance } = useBalance({
+    address: controller.address,
+  });
 
   const onCopy = useCallback(() => {
     navigator.clipboard.writeText(controller.address);
@@ -327,32 +328,6 @@ function ExternalWalletProvider({ children }: PropsWithChildren) {
 //   };
 // }
 //
-
-function useBalance() {
-  const { controller } = useConnection();
-  const [isFetching, setIsFetching] = useState(true);
-  const [balance, setBalance] = useState(0n);
-
-  const fetchBalance = useCallback(async () => {
-    setIsFetching(true);
-
-    const balance = await controller.account.callContract({
-      contractAddress: ETH_CONTRACT_ADDRESS,
-      entrypoint: "balanceOf",
-      calldata: [controller.account.address],
-    });
-
-    setBalance(
-      uint256.uint256ToBN({
-        low: balance[0],
-        high: balance[1],
-      }),
-    );
-  }, [controller]);
-
-  useInterval(fetchBalance, 3000);
-  return { balance, isFetching };
-}
 
 declare global {
   interface Window {
