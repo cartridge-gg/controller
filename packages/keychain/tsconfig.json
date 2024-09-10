@@ -7,6 +7,9 @@
     "types": [
       "@emotion/react/types/css-prop"
     ],
+    "paths": {
+      "/*": ["./src/*"]
+    },
     "noEmit": true,
     // TODO(#262): Enable these options (too many errors for this scope)
     "strict": false,

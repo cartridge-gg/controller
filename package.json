@@ -4,8 +4,10 @@
   "private": true,
   "scripts": {
     "preinstall": "npx only-allow pnpm",
+    "build:deps": "turbo build:deps",
     "build": "turbo build:deps build",
     "dev": "turbo build:deps dev",
+    "storybook": "turbo build:deps storybook",
     "e2e": "turbo build:deps dev e2e",
     "e2e:ui": "turbo build:deps dev e2e:ui",
     "lint": "turbo lint format:check",
