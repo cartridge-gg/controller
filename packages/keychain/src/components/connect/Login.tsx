@@ -19,11 +19,9 @@ export function Login(props: LoginProps) {
     <Container
       variant="connect"
       title={
-        theme.id === "cartridge"
-          ? "Play with Cartridge Controller"
-          : `Play ${theme.name}`
+        theme.id === "cartridge" ? "Play with Controller" : `Play ${theme.name}`
       }
-      description="Enter your Controller username"
+      description="Enter your username"
     >
       <Form {...props} />
     </Container>
@@ -145,7 +143,17 @@ function Form({
 
       <Footer isSlot={isSlot} showCatridgeLogo>
         {error && (
-          <ErrorAlert title="Login failed" description={error.message} />
+          <ErrorAlert
+            title="Login failed"
+            description={
+              error.message.includes(
+                "The operation either timed out or was not allowed",
+              )
+                ? "Passkey signing timed out or was canceled. Please try again."
+                : error.message
+            }
+            isExpanded
+          />
         )}
         <Button
           onClick={onSubmit}

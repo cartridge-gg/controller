@@ -180,5 +180,3 @@ describe("parseExecutionError", () => {
     });
   });
 });
-
-// The operation either timed out or was not allowed. See: https://www.w3.org/TR/webauthn-2/#sctn-privacy-considerations-client.
