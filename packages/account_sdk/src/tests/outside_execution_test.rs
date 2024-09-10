@@ -184,7 +184,8 @@ async fn test_verify_execute_paymaster_should_fail() {
         controller.address(),
         runner.client().chain_id().await.unwrap(),
         InMemoryBackend::default(),
-    );
+    )
+    .unwrap();
 
     let outside_execution = wrong_account
         .sign_outside_execution(outside_execution.clone())

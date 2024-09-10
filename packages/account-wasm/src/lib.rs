@@ -103,7 +103,7 @@ impl CartridgeAccount {
             address.0,
             chain_id.0,
             BrowserBackend,
-        );
+        )?;
 
         Ok(CartridgeAccount { controller })
     }

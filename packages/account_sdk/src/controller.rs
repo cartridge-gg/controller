@@ -97,7 +97,7 @@ where
     P: CartridgeProvider + Send + Sync + Clone,
     B: Backend + Clone,
 {
-    #[allow(clippy::too_many_arguments)]
+    #[allow(clippy::too_many_arguments, clippy::result_large_err)]
     pub fn new(
         app_id: String,
         username: String,
@@ -106,8 +106,8 @@ where
         guardian: Signer,
         address: Felt,
         chain_id: Felt,
-        backend: B,
-    ) -> Self {
+        mut backend: B,
+    ) -> Result<Self, ControllerError> {
         let account = OwnerAccount::new(provider.clone(), signer, guardian, address, chain_id);
         let salt = cairo_short_string_to_felt(&username).unwrap();
 
@@ -121,7 +121,12 @@ where
             provider.clone(),
         );
 
-        Self {
+        backend.set(
+            &Selectors::version(),
+            &StorageValue::Version("1.0.0".to_string()),
+        )?;
+
+        Ok(Self {
             app_id,
             username,
             salt,
@@ -130,7 +135,7 @@ where
             contract: abigen::controller::Controller::new(address, account),
             factory,
             backend,
-        }
+        })
     }
 
     pub fn deploy(&self) -> AccountDeploymentV1<ControllerFactory<OwnerAccount<P>, P>> {
@@ -311,8 +316,9 @@ where
             .get(&key)
             .ok()
             .flatten()
-            .map(|value| match value {
-                StorageValue::Session(metadata) => metadata,
+            .and_then(|value| match value {
+                StorageValue::Session(metadata) => Some(metadata),
+                _ => None,
             })
     }
 

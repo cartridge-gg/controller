@@ -22,6 +22,7 @@ pub struct Credentials {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum StorageValue {
+    Version(String),
     Session(SessionMetadata),
 }
 
@@ -125,5 +126,9 @@ impl Selectors {
             urlencoding::encode(app_id),
             chain_id
         )
+    }
+
+    pub fn version() -> String {
+        "@cartridge/version".to_string()
     }
 }
