@@ -17,7 +17,6 @@ import { num } from "starknet";
 import { ErrorCode } from "@cartridge/account-wasm";
 import { Funding } from "./Funding";
 import { DeployController } from "./DeployController";
-import { ETH_MIN_PREFUND } from "utils/token";
 
 export function ConfirmTransaction() {
   const { controller, context, origin, paymaster } = useConnection();
@@ -121,7 +120,7 @@ export function ConfirmTransaction() {
           setLoading(false);
           estimateFees();
         }}
-        defaultAmount={ETH_MIN_PREFUND}
+        defaultAmount={feeEstimate}
       />
     );
   }
