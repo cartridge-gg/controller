@@ -109,7 +109,7 @@ function FundingInner({ onComplete, title, defaultAmount }: FundingInnerProps) {
           contractAddress: ETH_CONTRACT_ADDRESS,
           entrypoint: "transfer",
           calldata: CallData.compile({
-            sender: controller.account.address,
+            recipient: controller.account.address,
             amount: cairo.uint256(parseEther(amount)),
           }),
         },

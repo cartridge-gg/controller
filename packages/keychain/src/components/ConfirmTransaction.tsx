@@ -116,6 +116,9 @@ export function ConfirmTransaction() {
       <Funding
         onComplete={() => {
           setCTAState("execute");
+          setCtrlError(undefined);
+          setLoading(false);
+          estimateFees();
         }}
         defaultAmount={feeEstimate}
       />
