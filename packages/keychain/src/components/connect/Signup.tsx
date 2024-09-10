@@ -231,11 +231,7 @@ export function Signup({
             colorScheme="colorful"
             isLoading={isRegistering}
             isDisabled={
-              debouncing ||
-              !username ||
-              isValidating ||
-              !!usernameField.error ||
-              !!error
+              debouncing || !username || isValidating || !!usernameField.error
             }
             onClick={onSubmit}
           >
