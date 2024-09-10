@@ -148,13 +148,13 @@ importers:
       starknet:
         specifier: ^6.11.0
         version: 6.11.0
-      typescript:
-        specifier: ^5.4.5
-        version: 5.4.5
     devDependencies:
       '@cartridge/tsconfig':
         specifier: workspace:^
         version: link:../tsconfig
+      typescript:
+        specifier: ^5.4.5
+        version: 5.4.5
 
   packages/controller:
     dependencies:

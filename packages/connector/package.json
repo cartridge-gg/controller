@@ -17,10 +17,10 @@
   "dependencies": {
     "@cartridge/controller": "workspace:^",
     "@starknet-react/core": "^2.1.5",
-    "starknet": "^6.11.0",
-    "typescript": "^5.4.5"
+    "starknet": "^6.11.0"
   },
   "devDependencies": {
-    "@cartridge/tsconfig": "workspace:^"
+    "@cartridge/tsconfig": "workspace:^",
+    "typescript": "^5.4.5"
   }
 }
