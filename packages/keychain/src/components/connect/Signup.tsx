@@ -40,8 +40,6 @@ export function Signup({
     1000,
   );
 
-  console.debug("signup render");
-
   // In order for Safari to open "Create Passkey" modal successfully, submit handler has to be async.
   // The workaround is to call async validation function every time when username input changes
   useEffect(() => {
@@ -146,7 +144,7 @@ export function Signup({
       }
 
       setIsRegistering(false);
-      setUsernameField((u) => ({ ...u, error: e.message }));
+      setError(e);
     }
   }, [usernameField, initController, doPopup]);
 
@@ -183,11 +181,9 @@ export function Signup({
     <Container
       variant="connect"
       title={
-        theme.id === "cartridge"
-          ? "Play with Cartridge Controller"
-          : `Play ${theme.name}`
+        theme.id === "cartridge" ? "Play with Controller" : `Play ${theme.name}`
       }
-      description="Create your Cartridge Controller"
+      description="Create your onchain player identity"
     >
       <form
         style={{ width: "100%" }}
@@ -218,14 +214,28 @@ export function Signup({
 
         <Footer isSlot={isSlot} isSignup showCatridgeLogo>
           {error && (
-            <ErrorAlert title="Login failed" description={error.message} />
+            <ErrorAlert
+              title="Signup failed"
+              description={
+                error.message.includes(
+                  "The operation either timed out or was not allowed",
+                )
+                  ? "Passkey signing timed out or was canceled. Please try again."
+                  : error.message
+              }
+              isExpanded
+            />
           )}
 
           <Button
             colorScheme="colorful"
             isLoading={isRegistering}
             isDisabled={
-              debouncing || !username || isValidating || !!usernameField.error
+              debouncing ||
+              !username ||
+              isValidating ||
+              !!usernameField.error ||
+              !!error
             }
             onClick={onSubmit}
           >
