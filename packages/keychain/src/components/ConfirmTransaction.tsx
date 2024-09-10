@@ -32,8 +32,6 @@ export function ConfirmTransaction() {
   const account = controller.account;
 
   const estimateFees = useCallback(async () => {
-    console.log(ctx.transactions);
-    console.log(ctx.transactionsDetail);
     try {
       const est = await account.estimateInvokeFee(
         ctx.transactions,

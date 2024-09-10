@@ -43,11 +43,13 @@ export enum ResponseCodes {
 export type ConnectError = {
   code: ResponseCodes;
   message: string;
-  error?: {
-    code: string;
-    message: string;
-    data?: any;
-  };
+  error?: ControllerError;
+};
+
+export type ControllerError = {
+  code: Number;
+  message: string;
+  data?: any;
 };
 
 export type ConnectReply = {
@@ -100,6 +102,7 @@ export interface Keychain {
     transactionsDetail?: InvocationsDetails,
     sync?: boolean,
     paymaster?: PaymasterOptions,
+    error?: ControllerError,
   ): Promise<ExecuteReply | ConnectError>;
   logout(): Promise<void>;
   openMenu(): Promise<void | ConnectError>;

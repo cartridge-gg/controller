@@ -14,7 +14,7 @@ import {
   addAddressPadding,
   num,
 } from "starknet";
-import { ConnectionCtx, ExecuteCtx } from "./types";
+import { ConnectionCtx, ControllerError, ExecuteCtx } from "./types";
 import { ErrorCode, JsCall } from "@cartridge/account-wasm";
 
 export const ESTIMATE_FEE_PERCENTAGE = 10;
@@ -31,6 +31,7 @@ export function execute({
       transactionsDetail?: InvocationsDetails,
       sync?: boolean,
       paymaster?: PaymasterOptions,
+      error?: ControllerError,
     ): Promise<InvokeFunctionResponse | ConnectError> => {
       const account = controller.account;
       const calls = normalizeCalls(transactions);
@@ -43,6 +44,7 @@ export function execute({
             transactions,
             abis,
             transactionsDetail,
+            error,
             resolve,
             reject,
           } as ExecuteCtx);

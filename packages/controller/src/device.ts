@@ -109,14 +109,7 @@ class DeviceAccount extends Account {
       }
 
       // Session call or Paymaster flow failed.
-      // if (sessionExecute.code === ResponseCodes.ERROR) {
-      //   this.modal.open();
-      //   reject((sessionExecute as ConnectError).error);
-      //   return;
-      // }
-
       // Session not avaialble, manual flow fallback
-      //if (sessionExecute.code === ResponseCodes.USER_INTERACTION_REQUIRED) {
       this.modal.open();
       const manualExecute = await this.keychain.execute(
         calls,
@@ -124,6 +117,7 @@ class DeviceAccount extends Account {
         transactionsDetail,
         true,
         this.paymaster,
+        (sessionExecute as ConnectError).error,
       );
 
       // Manual call succeeded
@@ -135,7 +129,6 @@ class DeviceAccount extends Account {
 
       reject((manualExecute as ConnectError).error);
       return;
-      //}
     });
   }
 
