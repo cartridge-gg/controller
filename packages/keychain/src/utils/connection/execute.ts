@@ -85,7 +85,11 @@ export function execute({
             });
           } catch (e) {
             // User only pays if the error is ErrorCode.PaymasterNotSupported
-            if (e.code !== ErrorCode.PaymasterNotSupported) {
+            if (
+              e.code !== ErrorCode.PaymasterNotSupported ||
+              // e.code !== ErrorCode.InsufficientBalance // Error code returned is 41 so this doesn't trigger
+              e.data?.includes("insufficient balance") // TEMP FIX: to fall back on paymaster out of funds
+            ) {
               setContext({
                 type: "execute",
                 origin,
