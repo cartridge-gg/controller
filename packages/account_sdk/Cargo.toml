@@ -62,4 +62,4 @@ tokio.workspace = true
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen-test = "0.3.34"
-js-sys = "0.3.69"
+js-sys = "0.3.70"
