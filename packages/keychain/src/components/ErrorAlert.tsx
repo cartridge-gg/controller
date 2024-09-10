@@ -254,9 +254,12 @@ export function ControllerErrorAlert({
     case ErrorCode.StarknetCompiledClassHashMismatch:
     case ErrorCode.StarknetUnsupportedTxVersion:
     case ErrorCode.StarknetUnsupportedContractClassVersion:
-    case ErrorCode.StarknetUnexpectedError:
     case ErrorCode.StarknetNoTraceAvailable:
       title = "Starknet Error";
+      break;
+    case ErrorCode.StarknetUnexpectedError:
+      title = "Unexpected Error";
+      description = error.data?.reason || JSON.stringify(error);
       break;
     case ErrorCode.StarknetTransactionExecutionError:
       title = "Execution error expected";
