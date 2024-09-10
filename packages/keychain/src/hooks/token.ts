@@ -29,7 +29,6 @@ export function useBalance({ address }: { address: string }) {
     setIsFetching(false);
   }, [controller, address]);
 
-  useInterval(fetchBalance, 1500);
-  fetchBalance();
+  useInterval(fetchBalance, 3000);
   return { balance, isFetching, isLoading };
 }
