@@ -4,7 +4,7 @@ use crate::account::session::hash::{AllowedMethod, Session};
 use crate::account::session::SessionAccount;
 use crate::account::AccountHashAndCallsSigner;
 use crate::account::SpecificAccount;
-use crate::constants::{ACCOUNT_CLASS_HASH, ETH_CONTRACT_ADDRESS};
+use crate::constants::ACCOUNT_CLASS_HASH;
 use crate::factory::ControllerFactory;
 use crate::hash::MessageHashRev1;
 use crate::paymaster::PaymasterError;
@@ -35,6 +35,8 @@ use starknet::{
     signers::{SigningKey, VerifyingKey},
 };
 
+const ETH_CONTRACT_ADDRESS: Felt =
+    felt!("0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7");
 const WEBAUTHN_GAS: Felt = felt!("3300");
 
 pub trait Backend: StorageBackend + OriginProvider {}
