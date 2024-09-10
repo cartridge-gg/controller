@@ -103,7 +103,7 @@ function getColorIcon(state: TransactionState): {
       };
     case "error":
       return {
-        color: "red.400",
+        color: "alert.foreground",
         icon: <></>,
       };
   }

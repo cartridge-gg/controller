@@ -1,10 +1,67 @@
 /* tslint:disable */
 /* eslint-disable */
-export interface JsOutsideExecution {
-    caller: Felt;
-    executeBefore: number;
-    executeAfter: number;
-    calls: JsCall[];
+/**
+*/
+export enum ErrorCode {
+  StarknetFailedToReceiveTransaction = 1,
+  StarknetContractNotFound = 20,
+  StarknetBlockNotFound = 24,
+  StarknetInvalidTransactionIndex = 27,
+  StarknetClassHashNotFound = 28,
+  StarknetTransactionHashNotFound = 29,
+  StarknetPageSizeTooBig = 31,
+  StarknetNoBlocks = 32,
+  StarknetInvalidContinuationToken = 33,
+  StarknetTooManyKeysInFilter = 34,
+  StarknetContractError = 40,
+  StarknetTransactionExecutionError = 41,
+  StarknetClassAlreadyDeclared = 51,
+  StarknetInvalidTransactionNonce = 52,
+  StarknetInsufficientMaxFee = 53,
+  StarknetInsufficientAccountBalance = 54,
+  StarknetValidationFailure = 55,
+  StarknetCompilationFailed = 56,
+  StarknetContractClassSizeIsTooLarge = 57,
+  StarknetNonAccount = 58,
+  StarknetDuplicateTx = 59,
+  StarknetCompiledClassHashMismatch = 60,
+  StarknetUnsupportedTxVersion = 61,
+  StarknetUnsupportedContractClassVersion = 62,
+  StarknetUnexpectedError = 63,
+  StarknetNoTraceAvailable = 10,
+  SignError = 101,
+  StorageError = 102,
+  AccountFactoryError = 103,
+  PaymasterExecutionTimeNotReached = 104,
+  PaymasterExecutionTimePassed = 105,
+  PaymasterInvalidCaller = 106,
+  PaymasterRateLimitExceeded = 107,
+  PaymasterNotSupported = 108,
+  PaymasterHttp = 109,
+  PaymasterExcecution = 110,
+  PaymasterSerialization = 111,
+  CartridgeControllerNotDeployed = 112,
+  InsufficientBalance = 113,
+  OriginError = 114,
+  EncodingError = 115,
+  SerdeWasmBindgenError = 116,
+  CairoSerdeError = 117,
+  CairoShortStringToFeltError = 118,
+  DeviceCreateCredential = 119,
+  DeviceGetAssertion = 120,
+  DeviceBadAssertion = 121,
+  DeviceChannel = 122,
+  DeviceOrigin = 123,
+  AccountSigning = 124,
+  AccountProvider = 125,
+  AccountClassHashCalculation = 126,
+  AccountClassCompression = 127,
+  AccountFeeOutOfRange = 128,
+  ProviderRateLimited = 129,
+  ProviderArrayLengthMismatch = 130,
+  ProviderOther = 131,
+}
+export interface JsEstimateFeeDetails {
     nonce: Felt;
 }
 
@@ -13,18 +70,10 @@ export interface JsPolicy {
     method: string;
 }
 
-export interface JsEstimateFeeDetails {
-    nonce: Felt;
-}
-
 export interface JsInvocationsDetails {
     nonce: Felt;
     maxFee: Felt;
 }
-
-export type Felts = JsFelt[];
-
-export type JsFelt = Felt;
 
 export interface JsSession {
     policies: JsPolicy[];
@@ -40,6 +89,18 @@ export interface JsCall {
     contractAddress: Felt;
     entrypoint: string;
     calldata: Felt[];
+}
+
+export type Felts = JsFelt[];
+
+export type JsFelt = Felt;
+
+export interface JsOutsideExecution {
+    caller: Felt;
+    executeBefore: number;
+    executeAfter: number;
+    calls: JsCall[];
+    nonce: Felt;
 }
 
 /**
@@ -172,4 +233,18 @@ export class CartridgeSessionAccount {
 * @returns {Promise<any>}
 */
   execute_from_outside(calls: (JsCall)[]): Promise<any>;
+}
+/**
+*/
+export class JsControllerError {
+  free(): void;
+/**
+*/
+  code: ErrorCode;
+/**
+*/
+  data?: string;
+/**
+*/
+  message: string;
 }

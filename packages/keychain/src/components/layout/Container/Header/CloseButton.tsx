@@ -4,7 +4,7 @@ import { isIframe } from "components/connect/utils";
 import { useConnection } from "hooks/connection";
 
 export function CloseButton() {
-  const { cancel } = useConnection();
+  const { closeModal } = useConnection();
 
   if (!isIframe()) {
     return null;
@@ -12,14 +12,14 @@ export function CloseButton() {
 
   return (
     <IconButton
-      aria-label="Close Keychain"
+      aria-label="Close Controller"
       bg="solid.bg"
       _hover={{
         bg: "solid.bg",
         opacity: 0.75,
       }}
       icon={<TimesIcon fontSize={24} />}
-      onClick={cancel}
+      onClick={closeModal}
     />
   );
 }

@@ -1,5 +1,5 @@
 export * from "./Animation";
-export * from "./DeploymentRequired";
-export * from "./Execute";
+export * from "./DeployController";
+export * from "./ConfirmTransaction";
 export * from "./SignMessage";
 export * from "./Menu";

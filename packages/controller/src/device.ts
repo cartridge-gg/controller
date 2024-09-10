@@ -12,7 +12,13 @@ import {
   InvocationsDetails,
 } from "starknet";
 
-import { Keychain, ResponseCodes, Modal, PaymasterOptions } from "./types";
+import {
+  ConnectError,
+  Keychain,
+  Modal,
+  PaymasterOptions,
+  ResponseCodes,
+} from "./types";
 import { Signer } from "./signer";
 import { AsyncMethodReturns } from "@cartridge/penpal";
 
@@ -87,8 +93,8 @@ class DeviceAccount extends Account {
     abis?: Abi[],
     transactionsDetail: InvocationsDetails = {},
   ): Promise<InvokeFunctionResponse> {
-    try {
-      let res = await this.keychain.execute(
+    return new Promise(async (resolve, reject) => {
+      const sessionExecute = await this.keychain.execute(
         calls,
         abis,
         transactionsDetail,
@@ -96,37 +102,34 @@ class DeviceAccount extends Account {
         this.paymaster,
       );
 
-      if (res.code === ResponseCodes.SUCCESS) {
-        return res as InvokeFunctionResponse;
+      // Session call succeeded
+      if (sessionExecute.code === ResponseCodes.SUCCESS) {
+        resolve(sessionExecute as InvokeFunctionResponse);
+        return;
       }
 
+      // Session call or Paymaster flow failed.
+      // Session not avaialble, manual flow fallback
       this.modal.open();
-
-      if (res.code === ResponseCodes.NOT_DEPLOYED) {
-        res = await this.keychain.deploy();
-        if (res.code !== ResponseCodes.SUCCESS) {
-          return Promise.reject(res.message);
-        }
-      }
-
-      res = await this.keychain.execute(
+      const manualExecute = await this.keychain.execute(
         calls,
         abis,
         transactionsDetail,
         true,
         this.paymaster,
+        (sessionExecute as ConnectError).error,
       );
 
-      if (res.code !== ResponseCodes.SUCCESS) {
-        return Promise.reject(res.message);
+      // Manual call succeeded
+      if (manualExecute.code === ResponseCodes.SUCCESS) {
+        resolve(manualExecute as InvokeFunctionResponse);
+        this.modal.close();
+        return;
       }
 
-      return res as InvokeFunctionResponse;
-    } catch (e) {
-      throw e;
-    } finally {
-      this.modal.close();
-    }
+      reject((manualExecute as ConnectError).error);
+      return;
+    });
   }
 
   /**

@@ -25,13 +25,7 @@ pub trait CartridgeProvider: Provider {
         outside_execution: OutsideExecution,
         address: Felt,
         signature: Vec<Felt>,
-    ) -> Result<PaymasterResponse, CartridgeProviderError>;
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum CartridgeProviderError {
-    #[error("Paymaster error: {0}")]
-    PaymasterError(#[from] PaymasterError),
+    ) -> Result<PaymasterResponse, PaymasterError>;
 }
 
 #[derive(Debug)]
@@ -66,10 +60,8 @@ impl CartridgeProvider for CartridgeJsonRpcProvider {
         outside_execution: OutsideExecution,
         address: Felt,
         signature: Vec<Felt>,
-    ) -> Result<PaymasterResponse, CartridgeProviderError> {
-        PaymasterRequest::send(self.rpc_url.clone(), outside_execution, address, signature)
-            .await
-            .map_err(CartridgeProviderError::PaymasterError)
+    ) -> Result<PaymasterResponse, PaymasterError> {
+        PaymasterRequest::send(self.rpc_url.clone(), outside_execution, address, signature).await
     }
 }
 

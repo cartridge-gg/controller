@@ -5,6 +5,7 @@ import {
   UseQueryOptions,
   UseInfiniteQueryOptions,
   UseMutationOptions,
+  // QueryFunctionContext,
 } from "react-query";
 import { useFetchData } from "hooks/fetcher";
 export type Maybe<T> = T | null;
@@ -377,6 +378,7 @@ export type AccountTeamWhereInput = {
 export enum AccountType {
   Discord = "discord",
   Injected = "injected",
+  StarknetAccount = "starknet_account",
   Webauthn = "webauthn",
 }
 
@@ -1428,9 +1430,26 @@ export type CreateMadaraConfigInput = {
   validator?: InputMaybe<Scalars["Boolean"]>;
 };
 
+export type CreateSayaConfigInput = {
+  batchSize: Scalars["Int"];
+  mode: Scalars["String"];
+  privateKey: Scalars["String"];
+  proverUrl: Scalars["String"];
+  registry: Scalars["String"];
+  rpcUrl: Scalars["String"];
+  settlementContract: Scalars["String"];
+  signerAddress: Scalars["String"];
+  signerKey: Scalars["String"];
+  starknetUrl: Scalars["String"];
+  startBlock: Scalars["Int"];
+  storeProofs: Scalars["Boolean"];
+  world: Scalars["String"];
+};
+
 export type CreateServiceConfigInput = {
   katana?: InputMaybe<CreateKatanaConfigInput>;
   madara?: InputMaybe<CreateMadaraConfigInput>;
+  saya?: InputMaybe<CreateSayaConfigInput>;
   torii?: InputMaybe<CreateToriiConfigInput>;
 };
 
@@ -1498,7 +1517,11 @@ export type DeploymentTeamsArgs = {
   where?: InputMaybe<TeamWhereInput>;
 };
 
-export type DeploymentConfig = KatanaConfig | MadaraConfig | ToriiConfig;
+export type DeploymentConfig =
+  | KatanaConfig
+  | MadaraConfig
+  | SayaConfig
+  | ToriiConfig;
 
 /** A connection to a list of items. */
 export type DeploymentConnection = {
@@ -1623,6 +1646,7 @@ export enum DeploymentOrderField {
 export enum DeploymentService {
   Katana = "katana",
   Madara = "madara",
+  Saya = "saya",
   Torii = "torii",
 }
 
@@ -2449,8 +2473,6 @@ export type Mutation = {
   createScopes: Scalars["Boolean"];
   createStarterpack?: Maybe<Scalars["ID"]>;
   deleteDeployment: Scalars["Boolean"];
-  deployAccount: Scalars["String"];
-  discordRevoke: Scalars["Boolean"];
   finalizeLogin: Scalars["String"];
   finalizeRegistration: Account;
   forkDeployment: DeploymentConfig;
@@ -2549,16 +2571,6 @@ export type MutationCreateStarterpackArgs = {
 export type MutationDeleteDeploymentArgs = {
   name: Scalars["String"];
   service: DeploymentService;
-};
-
-export type MutationDeployAccountArgs = {
-  chainId: Scalars["ChainID"];
-  id: Scalars["ID"];
-  starterpackIds?: InputMaybe<Array<Scalars["ID"]>>;
-};
-
-export type MutationDiscordRevokeArgs = {
-  token: Scalars["String"];
 };
 
 export type MutationFinalizeLoginArgs = {
@@ -3326,6 +3338,24 @@ export enum Role {
   Admin = "ADMIN",
   User = "USER",
 }
+
+export type SayaConfig = {
+  __typename?: "SayaConfig";
+  batchSize: Scalars["Int"];
+  mode: Scalars["String"];
+  privateKey: Scalars["String"];
+  proverUrl: Scalars["String"];
+  registry: Scalars["String"];
+  rpcUrl: Scalars["String"];
+  settlementContract: Scalars["String"];
+  signerAddress: Scalars["String"];
+  signerKey: Scalars["String"];
+  starknetUrl: Scalars["String"];
+  startBlock: Scalars["Int"];
+  storeProofs: Scalars["Boolean"];
+  version: Scalars["String"];
+  world: Scalars["String"];
+};
 
 export type Scope = Node & {
   __typename?: "Scope";
@@ -4719,13 +4749,18 @@ export type FinalizeLoginMutation = {
   finalizeLogin: string;
 };
 
-export type DiscordRevokeMutationVariables = Exact<{
-  token: Scalars["String"];
+export type PriceQueryVariables = Exact<{
+  quote: CurrencyQuote;
+  base: CurrencyBase;
 }>;
 
-export type DiscordRevokeMutation = {
-  __typename?: "Mutation";
-  discordRevoke: boolean;
+export type PriceQuery = {
+  __typename?: "Query";
+  price?: {
+    __typename?: "Price";
+    amount?: string | null;
+    currency?: string | null;
+  } | null;
 };
 
 export type MeQueryVariables = Exact<{ [key: string]: never }>;
@@ -4991,31 +5026,44 @@ export const useFinalizeLoginMutation = <TError = unknown, TContext = unknown>(
     ),
     options,
   );
-export const DiscordRevokeDocument = `
-    mutation DiscordRevoke($token: String!) {
-  discordRevoke(token: $token)
+export const PriceDocument = `
+    query Price($quote: CurrencyQuote!, $base: CurrencyBase!) {
+  price(quote: $quote, base: $base) {
+    amount
+    currency
+  }
 }
     `;
-export const useDiscordRevokeMutation = <TError = unknown, TContext = unknown>(
-  options?: UseMutationOptions<
-    DiscordRevokeMutation,
-    TError,
-    DiscordRevokeMutationVariables,
-    TContext
-  >,
+export const usePriceQuery = <TData = PriceQuery, TError = unknown>(
+  variables: PriceQueryVariables,
+  options?: UseQueryOptions<PriceQuery, TError, TData>,
 ) =>
-  useMutation<
-    DiscordRevokeMutation,
-    TError,
-    DiscordRevokeMutationVariables,
-    TContext
-  >(
-    ["DiscordRevoke"],
-    useFetchData<DiscordRevokeMutation, DiscordRevokeMutationVariables>(
-      DiscordRevokeDocument,
+  useQuery<PriceQuery, TError, TData>(
+    ["Price", variables],
+    useFetchData<PriceQuery, PriceQueryVariables>(PriceDocument).bind(
+      null,
+      variables,
     ),
     options,
   );
+
+usePriceQuery.getKey = (variables: PriceQueryVariables) => ["Price", variables];
+export const useInfinitePriceQuery = <TData = PriceQuery, TError = unknown>(
+  variables: PriceQueryVariables,
+  options?: UseInfiniteQueryOptions<PriceQuery, TError, TData>,
+) => {
+  const query = useFetchData<PriceQuery, PriceQueryVariables>(PriceDocument);
+  return useInfiniteQuery<PriceQuery, TError, TData>(
+    ["Price.infinite", variables],
+    (metaData) => query({ ...variables, ...(metaData.pageParam ?? {}) }),
+    options,
+  );
+};
+
+useInfinitePriceQuery.getKey = (variables: PriceQueryVariables) => [
+  "Price.infinite",
+  variables,
+];
 export const MeDocument = `
     query Me {
   me {

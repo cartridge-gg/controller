@@ -4,11 +4,12 @@ use crate::account::session::hash::{AllowedMethod, Session};
 use crate::account::session::SessionAccount;
 use crate::account::AccountHashAndCallsSigner;
 use crate::account::SpecificAccount;
-use crate::constants::ACCOUNT_CLASS_HASH;
+use crate::constants::{ACCOUNT_CLASS_HASH, ETH_CONTRACT_ADDRESS};
 use crate::factory::ControllerFactory;
 use crate::hash::MessageHashRev1;
-use crate::provider::{CartridgeProvider, CartridgeProviderError};
-use crate::signers::{DeviceError, Signer};
+use crate::paymaster::PaymasterError;
+use crate::provider::CartridgeProvider;
+use crate::signers::Signer;
 use crate::storage::{Credentials, Selectors, SessionMetadata, StorageBackend, StorageValue};
 use crate::{
     abigen::{self},
@@ -17,12 +18,16 @@ use crate::{
 };
 use crate::{impl_account, OriginProvider};
 use async_trait::async_trait;
-use cainome::cairo_serde::{self, CairoSerde, NonZero};
+use cainome::cairo_serde::{self, CairoSerde, NonZero, U256};
 use starknet::accounts::{
     AccountDeploymentV1, AccountError, AccountFactory, AccountFactoryError, ExecutionV1,
 };
-use starknet::core::types::{Call, FeeEstimate, InvokeTransactionResult};
-use starknet::core::utils::{cairo_short_string_to_felt, CairoShortStringToFeltError};
+use starknet::core::types::{
+    BlockTag, Call, FeeEstimate, FunctionCall, InvokeTransactionResult, StarknetError,
+};
+use starknet::core::utils::cairo_short_string_to_felt;
+use starknet::macros::{felt, selector};
+use starknet::providers::ProviderError;
 use starknet::signers::SignerInteractivityContext;
 use starknet::{
     accounts::{Account, ConnectedAccount, ExecutionEncoder},
@@ -30,13 +35,12 @@ use starknet::{
     signers::{SigningKey, VerifyingKey},
 };
 
+const WEBAUTHN_GAS: Felt = felt!("3300");
+
 pub trait Backend: StorageBackend + OriginProvider {}
 
 #[derive(Debug, thiserror::Error)]
 pub enum ControllerError {
-    #[error(transparent)]
-    DeviceError(#[from] DeviceError),
-
     #[error(transparent)]
     SignError(#[from] SignError),
 
@@ -44,25 +48,31 @@ pub enum ControllerError {
     StorageError(#[from] crate::storage::StorageError),
 
     #[error(transparent)]
-    ProviderError(#[from] starknet::providers::ProviderError),
-
-    #[error(transparent)]
     AccountError(#[from] AccountError<SignError>),
+
+    #[error("Controller is not deployed. Required fee: {fee_estimate:?}")]
+    NotDeployed {
+        fee_estimate: FeeEstimate,
+        balance: u128,
+    },
 
     #[error(transparent)]
     AccountFactoryError(#[from] AccountFactoryError<SignError>),
 
     #[error(transparent)]
-    CartridgeProviderError(#[from] CartridgeProviderError),
-
-    #[error("Origin error: {0}")]
-    OriginError(String),
+    PaymasterError(#[from] PaymasterError),
 
     #[error(transparent)]
     CairoSerde(#[from] cairo_serde::Error),
 
     #[error(transparent)]
-    CairoShortStringToFeltEror(#[from] CairoShortStringToFeltError),
+    ProviderError(#[from] ProviderError),
+
+    #[error("Insufficient balance for transaction. Required fee: {fee_estimate:?}")]
+    InsufficientBalance {
+        fee_estimate: FeeEstimate,
+        balance: u128,
+    },
 }
 
 pub struct Controller<P, B>
@@ -196,9 +206,9 @@ where
                 signed.signature,
             )
             .await
-            .map_err(ControllerError::CartridgeProviderError)?;
+            .map_err(ControllerError::PaymasterError)?;
 
-        Ok(res.result.transaction_hash)
+        Ok(res.transaction_hash)
     }
 
     pub async fn estimate_invoke_fee(
@@ -207,12 +217,48 @@ where
         fee_multiplier: Option<f64>,
     ) -> Result<FeeEstimate, ControllerError> {
         let multiplier = fee_multiplier.unwrap_or(1.0);
-        self.execute_v1(calls)
+        let est = self
+            .execute_v1(calls)
             .nonce(Felt::from(u64::MAX))
             .fee_estimate_multiplier(multiplier)
             .estimate_fee()
-            .await
-            .map_err(ControllerError::AccountError)
+            .await;
+
+        let balance = self.eth_balance().await?;
+
+        match est {
+            Ok(mut fee_estimate) => {
+                if self.session_metadata().is_none() {
+                    fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
+                }
+
+                if fee_estimate.overall_fee > Felt::from(balance) {
+                    Err(ControllerError::InsufficientBalance {
+                        fee_estimate,
+                        balance,
+                    })
+                } else {
+                    Ok(fee_estimate)
+                }
+            }
+            Err(e) => match &e {
+                AccountError::Provider(ProviderError::StarknetError(
+                    StarknetError::TransactionExecutionError(data),
+                )) if data
+                    .execution_error
+                    .contains(&format!("{:x} is not deployed.", self.account.address)) =>
+                {
+                    let balance = self.eth_balance().await?;
+                    let mut fee_estimate = self.deploy().estimate_fee().await?;
+                    fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
+                    Err(ControllerError::NotDeployed {
+                        fee_estimate,
+                        balance,
+                    })
+                }
+                _ => Err(ControllerError::AccountError(e)),
+            },
+        }
     }
 
     pub async fn execute(
@@ -221,12 +267,39 @@ where
         nonce: Felt,
         max_fee: Felt,
     ) -> Result<InvokeTransactionResult, ControllerError> {
-        self.execute_v1(calls)
+        let result = self
+            .execute_v1(calls)
             .max_fee(max_fee)
             .nonce(nonce)
             .send()
-            .await
-            .map_err(ControllerError::AccountError)
+            .await;
+
+        match result {
+            Ok(tx_result) => Ok(tx_result),
+            Err(e) => {
+                if let AccountError::Provider(ProviderError::StarknetError(
+                    StarknetError::TransactionExecutionError(data),
+                )) = &e
+                {
+                    if data
+                        .execution_error
+                        .contains(&format!("{:x} is not deployed.", self.account.address))
+                    {
+                        let balance = self.eth_balance().await?;
+                        let mut fee_estimate = self.deploy().estimate_fee().await?;
+                        fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
+                        Err(ControllerError::NotDeployed {
+                            fee_estimate,
+                            balance,
+                        })
+                    } else {
+                        Err(ControllerError::AccountError(e))
+                    }
+                } else {
+                    Err(ControllerError::AccountError(e))
+                }
+            }
+        }
     }
 
     pub fn session_metadata(&self) -> Option<SessionMetadata> {
@@ -281,6 +354,26 @@ where
 
     pub fn set_delegate_account(&self, delegate_address: Felt) -> ExecutionV1<OwnerAccount<P>> {
         self.contract.set_delegate_account(&delegate_address.into())
+    }
+
+    pub async fn eth_balance(&self) -> Result<u128, ControllerError> {
+        let address = self.account.address;
+        let result = self
+            .provider
+            .call(
+                FunctionCall {
+                    contract_address: ETH_CONTRACT_ADDRESS,
+                    entry_point_selector: selector!("balanceOf"),
+                    calldata: vec![address],
+                },
+                BlockId::Tag(BlockTag::Pending),
+            )
+            .await
+            .map_err(ControllerError::ProviderError)?;
+
+        U256::cairo_deserialize(&result, 0)
+            .map_err(ControllerError::CairoSerde)
+            .map(|v| v.low)
     }
 }
 

@@ -17,7 +17,7 @@ export function CopyAddress({ address }: { address: string }) {
       }}
     >
       <Text color="text.secondaryAccent">
-        {formatAddress(address, { first: 20, last: 10 })}
+        {formatAddress(address, { first: 15, last: 15 })}
       </Text>
       <CopyIcon fontSize="md" />
     </HStack>

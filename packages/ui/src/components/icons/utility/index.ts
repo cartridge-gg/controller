@@ -36,4 +36,5 @@ export * from "./TimesCircle";
 export * from "./Transfer";
 export * from "./Trash";
 export * from "./Verified";
+export * from "./Warning";
 export * from "./Website";

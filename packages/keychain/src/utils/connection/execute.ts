@@ -1,5 +1,4 @@
 import {
-  ExecuteReply,
   ResponseCodes,
   ConnectError,
   PaymasterOptions,
@@ -11,15 +10,16 @@ import {
   Call,
   CallData,
   InvocationsDetails,
+  InvokeFunctionResponse,
   addAddressPadding,
   num,
 } from "starknet";
-import { ConnectionCtx, ExecuteCtx } from "./types";
-import { JsCall } from "@cartridge/account-wasm";
+import { ConnectionCtx, ControllerError, ExecuteCtx } from "./types";
+import { ErrorCode, JsCall } from "@cartridge/account-wasm";
 
 export const ESTIMATE_FEE_PERCENTAGE = 10;
 
-export function executeFactory({
+export function execute({
   setContext,
 }: {
   setContext: (context: ConnectionCtx) => void;
@@ -31,9 +31,30 @@ export function executeFactory({
       transactionsDetail?: InvocationsDetails,
       sync?: boolean,
       paymaster?: PaymasterOptions,
-    ): Promise<ExecuteReply | ConnectError> => {
+      error?: ControllerError,
+    ): Promise<InvokeFunctionResponse | ConnectError> => {
+      const account = controller.account;
+      const calls = normalizeCalls(transactions);
+
       if (sync) {
         return await new Promise((resolve, reject) => {
+          setContext({
+            type: "execute",
+            origin,
+            transactions,
+            abis,
+            transactionsDetail,
+            error,
+            resolve,
+            reject,
+          } as ExecuteCtx);
+        });
+      }
+
+      return await new Promise(async (resolve, reject) => {
+        // If a session call and there is no session available
+        // fallback to manual apporval flow
+        if (!account.hasSession(calls)) {
           setContext({
             type: "execute",
             origin,
@@ -43,17 +64,14 @@ export function executeFactory({
             resolve,
             reject,
           } as ExecuteCtx);
-        });
-      }
 
-      try {
-        const account = controller.account;
-        const calls = normalizeCalls(transactions);
-
-        if (!account.hasSession(calls)) {
-          throw new Error(`No session available`);
+          return resolve({
+            code: ResponseCodes.USER_INTERACTION_REQUIRED,
+            message: "User interaction required",
+          });
         }
 
+        // Try paymaster if it is enabled. If it fails, fallback to user pays session flow.
         if (paymaster) {
           try {
             const transaction_hash = await account.executeFromOutside(
@@ -61,51 +79,80 @@ export function executeFactory({
               paymaster,
             );
 
-            return {
+            return resolve({
               code: ResponseCodes.SUCCESS,
               transaction_hash,
-            };
-          } catch (error) {
-            /* user pays */
-          }
-        }
-
-        let { maxFee } = transactionsDetail;
-        if (!maxFee) {
-          let estFee;
-          try {
-            estFee = await account.cartridge.estimateInvokeFee(calls);
-          } catch (error) {
-            if (
-              error instanceof Error &&
-              (error.message.includes("ContractNotFound") ||
-                error.message.includes("is not deployed"))
-            ) {
-              return {
-                code: ResponseCodes.NOT_DEPLOYED,
-                message: error.message,
-              };
+            });
+          } catch (e) {
+            // User only pays if the error is ErrorCode.PaymasterNotSupported
+            if (e.code !== ErrorCode.PaymasterNotSupported) {
+              setContext({
+                type: "execute",
+                origin,
+                transactions,
+                abis,
+                transactionsDetail,
+                error: {
+                  code: e.code,
+                  message: e.message,
+                  data: e.data ? JSON.parse(e.data) : undefined,
+                },
+                resolve,
+                reject,
+              } as ExecuteCtx);
+              return resolve({
+                code: ResponseCodes.ERROR,
+                message: e.message,
+                error: {
+                  code: e.code,
+                  message: e.message,
+                  data: e.data ? JSON.parse(e.data) : undefined,
+                },
+              });
             }
-
-            throw error;
           }
-
-          maxFee = num.toHex(
-            num.addPercent(estFee.overall_fee, ESTIMATE_FEE_PERCENTAGE),
-          );
         }
 
-        let res = await account.execute(transactions, { maxFee });
-        return {
-          code: ResponseCodes.SUCCESS,
-          ...res,
-        };
-      } catch (e) {
-        return {
-          code: ResponseCodes.NOT_ALLOWED,
-          message: e.message,
-        };
-      }
+        try {
+          let { maxFee } = transactionsDetail;
+          if (!maxFee) {
+            let estimate = await account.cartridge.estimateInvokeFee(calls);
+            maxFee = num.toHex(
+              num.addPercent(estimate.overall_fee, ESTIMATE_FEE_PERCENTAGE),
+            );
+          }
+
+          let res = await account.execute(transactions, { maxFee });
+          return resolve({
+            code: ResponseCodes.SUCCESS,
+            transaction_hash: res.transaction_hash,
+          });
+        } catch (e) {
+          setContext({
+            type: "execute",
+            origin,
+            transactions,
+            abis,
+            transactionsDetail,
+            error: {
+              code: e.code,
+              message: e.message,
+              data: e.data ? JSON.parse(e.data) : undefined,
+            },
+            resolve,
+            reject,
+          } as ExecuteCtx);
+          return resolve({
+            code: ResponseCodes.ERROR,
+            message: e.message,
+            error: {
+              code: e.code,
+              message: e.message,
+              data: e.data ? JSON.parse(e.data) : undefined,
+            },
+          });
+        }
+      });
     };
 }
 

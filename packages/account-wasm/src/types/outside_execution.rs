@@ -8,7 +8,7 @@ use starknet::macros::short_string;
 use tsify_next::Tsify;
 use wasm_bindgen::prelude::*;
 
-use crate::errors::EncodingError;
+use super::EncodingError;
 
 use super::call::JsCall;
 

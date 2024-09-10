@@ -1,3 +1,4 @@
+export * from "./errors";
 export * from "./types";
 export { defaultPresets } from "./presets";
 export * from "./verified";
@@ -21,7 +22,7 @@ import {
   ControllerThemePresets,
   ColorMode,
   PaymasterOptions,
-  Prefund,
+  // Prefund,
   ConnectError,
 } from "./types";
 import { createModal } from "./modal";
@@ -47,8 +48,8 @@ class Controller {
     theme,
     config,
     colorMode,
-    prefunds,
-  }: ControllerOptions = {}) {
+  }: // prefunds,
+  ControllerOptions = {}) {
     this.url = new URL(url || KEYCHAIN_URL);
     this.rpc = new URL(rpc || RPC_SEPOLIA);
     this.paymaster = paymaster;
@@ -62,9 +63,9 @@ class Controller {
     if (colorMode) {
       this.setColorMode(colorMode);
     }
-    if (prefunds?.length) {
-      this.setPrefunds(prefunds);
-    }
+    // if (prefunds?.length) {
+    //   this.setPrefunds(prefunds);
+    // }
     if (paymaster) {
       this.setPaymaster(paymaster);
     }
@@ -123,12 +124,12 @@ class Controller {
     );
   }
 
-  private setPrefunds(prefunds: Prefund[]) {
-    this.url.searchParams.set(
-      "prefunds",
-      encodeURIComponent(JSON.stringify(prefunds)),
-    );
-  }
+  // private setPrefunds(prefunds: Prefund[]) {
+  //   this.url.searchParams.set(
+  //     "prefunds",
+  //     encodeURIComponent(JSON.stringify(prefunds)),
+  //   );
+  // }
 
   private setColorMode(colorMode: ColorMode) {
     this.url.searchParams.set("colorMode", colorMode);

@@ -28,6 +28,7 @@ export function Policies({
           p={3}
           position="sticky"
           top={0}
+          borderTopRadius="base"
         >
           <Text
             color="text.secondaryAccent"
@@ -44,7 +45,7 @@ export function Policies({
         {policies.map((p, i) => (
           <AccordionItem
             key={p.target + p.method}
-            borderTopRadius={i === 0 && !!title ? "base" : "none"}
+            borderTopRadius={i === 0 && !title ? "base" : "none"}
             // The container already set border radius (for top & bottom), but we
             // set the bottom radius for the last item here because for certain
             // browsers' scrolling behaviour (eg Firefox) just to make it look nicer.
@@ -74,7 +75,7 @@ export function Policies({
                 </AccordionButton>
 
                 <AccordionPanel>
-                  <VStack align="flex-start" w="full">
+                  <VStack align="flex-start" w="full" p={3}>
                     <CopyHash hash={p.target} />
                     {p.description && (
                       <Text w="full" color="inherit">

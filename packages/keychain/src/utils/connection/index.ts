@@ -5,7 +5,7 @@ import { connectToParent } from "@cartridge/penpal";
 import { normalize as normalizeOrigin } from "utils/url";
 import Controller from "utils/controller";
 import { connectFactory, disconnectFactory } from "./connect";
-import { executeFactory } from "./execute";
+import { execute } from "./execute";
 import { estimateDeclareFee, estimateInvokeFee } from "./estimate";
 import { logout } from "./logout";
 import { probeFactory } from "./probe";
@@ -42,7 +42,7 @@ export function connectToController({
       ),
       disconnect: normalize(validate(disconnectFactory(setController))),
       deploy: normalize(validate(deployFactory(setContext))),
-      execute: normalize(validate(executeFactory({ setContext }))),
+      execute: normalize(validate(execute({ setContext }))),
       estimateDeclareFee: normalize(validate(estimateDeclareFee)),
       estimateInvokeFee: normalize(validate(estimateInvokeFee)),
       logout: normalize(logout),

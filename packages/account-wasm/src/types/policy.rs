@@ -5,7 +5,7 @@ use std::str::FromStr;
 use tsify_next::Tsify;
 use wasm_bindgen::prelude::*;
 
-use crate::errors::EncodingError;
+use super::EncodingError;
 
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
 #[tsify(into_wasm_abi, from_wasm_abi)]

@@ -25,8 +25,6 @@ export const useDeploy = (): DeployInterface => {
         if (!e.message.includes("account already deployed")) {
           throw e;
         }
-      } finally {
-        setIsDeploying(false);
       }
     },
     [controller],

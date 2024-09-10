@@ -25,18 +25,6 @@ export default meta;
 
 type Story = StoryObj<typeof Palette>;
 
-export const Yellow: Story = {
-  args: {
-    colorName: "yellow",
-  },
-};
-
-export const Purple: Story = {
-  args: {
-    colorName: "purple",
-  },
-};
-
 export const Green: Story = {
   args: {
     colorName: "green",

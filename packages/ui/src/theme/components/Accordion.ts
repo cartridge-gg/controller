@@ -10,73 +10,70 @@ const { defineMultiStyleConfig, definePartsStyle } =
 export const Accordion: ComponentStyleConfig = defineMultiStyleConfig({
   baseStyle: definePartsStyle({
     container: {
+      color: "text.primary",
       bg: "solid.primary",
       borderColor: "solid.bg",
-    },
-    panel: {
-      fontSize: "xs",
-      color: "text.secondary",
+      pb: 0,
+      borderRadius: "6px",
     },
     button: {
       p: 3,
       fontSize: "sm",
+      height: "auto",
+      paddingY: "12px",
+      paddingX: "18px",
+      _expanded: {
+        borderRadius: "6px 6px 0 0",
+        cursor: "default",
+        _hover: {
+          bg: "solid.primary",
+        },
+      },
     },
-    icon: {
-      color: "text.secondary",
+    panel: {
+      fontSize: "xs",
+      p: 0,
     },
+    icon: {},
   }),
   variants: {
-    access: {},
-    inventory: {},
-    tokens: {},
-    bridge: {
+    info: {
       container: {
-        pb: "0",
-        mt: "1px",
-      },
-      panel: {
-        bgColor: "gray.700",
-        padding: "0 16px 16px 16px",
-        borderRadius: "0",
+        color: "black",
+        bg: "info.background",
       },
       button: {
-        paddingX: "16px",
-        borderRadius: "0",
-        bgColor: "gray.700",
         _expanded: {
-          bgColor: "gray.700",
+          _hover: {
+            bg: "info.background",
+          },
         },
-        _disabled: {
-          opacity: "1",
-          bgColor: "gray.700",
-          cursor: "auto",
+      },
+    },
+    warning: {
+      container: {
+        color: "black",
+        bg: "warning.background",
+      },
+      button: {
+        _expanded: {
+          _hover: {
+            bg: "warning.background",
+          },
         },
       },
     },
     error: {
       container: {
-        pb: "0",
+        color: "black",
+        bg: "error.background",
       },
       button: {
-        height: "auto",
-        paddingY: "12px",
-        paddingX: "18px",
-        bgColor: "red.200",
-        borderRadius: "6px",
         _expanded: {
-          bgColor: "red.200",
-          borderRadius: "6px 6px 0 0",
+          _hover: {
+            bg: "error.background",
+          },
         },
-        _hover: {
-          bgColor: "red.200",
-        },
-        transition: "border-radius 0.2s ease",
-      },
-      panel: {
-        padding: "12px 18px 12px 18px",
-        bgColor: "red.200",
-        borderRadius: "0 0 6px 6px",
-        overflowX: "auto",
       },
     },
   },

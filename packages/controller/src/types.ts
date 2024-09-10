@@ -35,14 +35,21 @@ export type Policy = {
 export enum ResponseCodes {
   SUCCESS = "SUCCESS",
   NOT_CONNECTED = "NOT_CONNECTED",
-  NOT_DEPLOYED = "NOT_DEPLOYED",
-  NOT_ALLOWED = "NOT_ALLOWED",
+  ERROR = "ERROR",
   CANCELED = "CANCELED",
+  USER_INTERACTION_REQUIRED = "USER_INTERACTION_REQUIRED",
 }
 
 export type ConnectError = {
   code: ResponseCodes;
   message: string;
+  error?: ControllerError;
+};
+
+export type ControllerError = {
+  code: Number;
+  message: string;
+  data?: any;
 };
 
 export type ConnectReply = {
@@ -51,9 +58,13 @@ export type ConnectReply = {
   policies: Policy[];
 };
 
-export type ExecuteReply = InvokeFunctionResponse & {
-  code: ResponseCodes.SUCCESS;
-};
+export type ExecuteReply =
+  | (InvokeFunctionResponse & {
+      code: ResponseCodes.SUCCESS;
+    })
+  | {
+      code: ResponseCodes.USER_INTERACTION_REQUIRED;
+    };
 
 export type ProbeReply = {
   code: ResponseCodes.SUCCESS;
@@ -91,6 +102,7 @@ export interface Keychain {
     transactionsDetail?: InvocationsDetails,
     sync?: boolean,
     paymaster?: PaymasterOptions,
+    error?: ControllerError,
   ): Promise<ExecuteReply | ConnectError>;
   logout(): Promise<void>;
   openMenu(): Promise<void | ConnectError>;
@@ -147,7 +159,7 @@ export type ControllerOptions = {
     presets?: ControllerThemePresets;
   };
   /** List of ERC20 tokens to pre-fund */
-  prefunds?: Prefund[];
+  // prefunds?: Prefund[];
 };
 
 /**

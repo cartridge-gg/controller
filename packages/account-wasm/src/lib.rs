@@ -12,13 +12,14 @@ use account_sdk::account::outside_execution::{OutsideExecutionAccount, OutsideEx
 use account_sdk::account::session::hash::Session;
 use account_sdk::account::session::SessionAccount;
 use account_sdk::account::{AccountHashAndCallsSigner, MessageSignerAccount};
-use account_sdk::controller::Controller;
+use account_sdk::controller::{Controller, ControllerError};
 use account_sdk::provider::{CartridgeJsonRpcProvider, CartridgeProvider};
 use account_sdk::signers::webauthn::{CredentialID, WebauthnSigner};
 use account_sdk::signers::{HashSigner, Signer};
 use base64::engine::general_purpose;
 use base64::Engine;
 use coset::{CborSerializable, CoseKey};
+use errors::JsControllerError;
 use serde_wasm_bindgen::{from_value, to_value};
 use signer::BrowserBackend;
 use starknet::accounts::{Account, ConnectedAccount};
@@ -33,7 +34,6 @@ use types::{Felts, JsFelt};
 use url::Url;
 use wasm_bindgen::prelude::*;
 
-use crate::errors::OperationError;
 use crate::types::invocation::JsInvocationsDetails;
 use crate::types::session::JsCredentials;
 use crate::utils::set_panic_hook;
@@ -160,7 +160,7 @@ impl CartridgeAccount {
         &self,
         calls: Vec<JsCall>,
         fee_multiplier: Option<f64>,
-    ) -> Result<JsValue> {
+    ) -> std::result::Result<JsValue, JsControllerError> {
         set_panic_hook();
 
         let calls = calls
@@ -171,8 +171,7 @@ impl CartridgeAccount {
         let fee_estimate = self
             .controller
             .estimate_invoke_fee(calls, fee_multiplier)
-            .await
-            .map_err(|e| OperationError::FeeEstimation(format!("{:#?}", e)))?;
+            .await?;
 
         Ok(to_value(&fee_estimate)?)
     }
@@ -182,7 +181,7 @@ impl CartridgeAccount {
         &self,
         calls: Vec<JsCall>,
         details: JsInvocationsDetails,
-    ) -> Result<JsValue> {
+    ) -> std::result::Result<JsValue, JsControllerError> {
         set_panic_hook();
 
         let calls = calls
@@ -193,8 +192,7 @@ impl CartridgeAccount {
         let result = self
             .controller
             .execute(calls, details.nonce, details.max_fee)
-            .await
-            .map_err(|e| OperationError::Execution(format!("{:#?}", e)))?;
+            .await?;
 
         Ok(to_value(&result)?)
     }
@@ -204,7 +202,7 @@ impl CartridgeAccount {
         &self,
         calls: Vec<JsCall>,
         caller: JsValue,
-    ) -> Result<JsValue> {
+    ) -> std::result::Result<JsValue, JsControllerError> {
         set_panic_hook();
 
         let calls: Vec<Call> = calls
@@ -264,7 +262,7 @@ impl CartridgeAccount {
             .controller
             .sign_message(serde_json::from_str(&typed_data)?)
             .await
-            .map_err(OperationError::SignMessage)?;
+            .map_err(|e| JsControllerError::from(ControllerError::SignError(e)))?;
 
         Ok(Felts(signature.into_iter().map(JsFelt).collect()))
     }
@@ -279,7 +277,7 @@ impl CartridgeAccount {
             .max_fee(max_fee.0)
             .send()
             .await
-            .map_err(|e| OperationError::Deployment(format!("{:#?}", e)))?;
+            .map_err(|e| JsControllerError::from(ControllerError::AccountFactoryError(e)))?;
 
         Ok(to_value(&res)?)
     }
@@ -292,7 +290,7 @@ impl CartridgeAccount {
             .controller
             .delegate_account()
             .await
-            .map_err(|e| OperationError::Delegation(e.to_string()))?;
+            .map_err(JsControllerError::from)?;
 
         Ok(JsFelt(res))
     }

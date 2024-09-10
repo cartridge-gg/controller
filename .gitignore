@@ -182,3 +182,6 @@ Cargo.lock
 **/log/
 
 lcov.info
+
+account.json
+keystore.json

@@ -18,7 +18,7 @@ import { TOP_BAR_HEIGHT } from "./TopBar";
 export type BannerProps = {
   Icon?: React.ComponentType<IconProps>;
   icon?: React.ReactElement;
-  title: string;
+  title: string | React.ReactElement;
   description?: string | React.ReactElement;
 };
 export function Banner({ Icon, icon, title, description }: BannerProps) {
@@ -182,7 +182,8 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
                 w="full"
                 fontSize="lg"
                 fontWeight="semibold"
-                whiteSpace="nowrap"
+                noOfLines={1}
+                textOverflow="ellipsis"
               >
                 {title}
               </Text>

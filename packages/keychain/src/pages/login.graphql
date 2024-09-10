@@ -6,6 +6,6 @@ mutation FinalizeLogin($credentials: String!) {
   finalizeLogin(credentials: $credentials)
 }
 
-mutation DiscordRevoke($token: String!) {
-  discordRevoke(token: $token)
-}
+# mutation DiscordRevoke($token: String!) {
+#   discordRevoke(token: $token)
+# }

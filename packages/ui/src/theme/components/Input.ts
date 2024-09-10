@@ -5,12 +5,15 @@ export const Input: ComponentStyleConfig = defineStyleConfig({
     variant: "filled",
     // @ts-expect-error TODO: Seems style theme props only
     focusBorderColor: "solid.accent",
-    errorBorderColor: "red.500",
+    errorBorderColor: "alert.foreground",
   },
   sizes: {
     md: {
       field: {
-        height: 12,
+        h: 12,
+      },
+      addon: {
+        h: 12,
       },
     },
   },

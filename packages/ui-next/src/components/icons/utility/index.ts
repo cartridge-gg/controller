@@ -36,4 +36,5 @@ export * from "./times";
 export * from "./transfer";
 export * from "./trash";
 export * from "./verified";
+export * from "./warning";
 export * from "./website";

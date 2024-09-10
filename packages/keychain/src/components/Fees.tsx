@@ -1,11 +1,24 @@
 import { useEffect, useState } from "react";
-import { HStack, Spacer, Spinner, Text, VStack } from "@chakra-ui/react";
+import {
+  AlertIcon,
+  HStack,
+  Spacer,
+  Spinner,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
 
 import { formatUnits } from "viem";
 import { useChainId } from "hooks/connection";
-import { EthereumIcon } from "@cartridge/ui";
+import { EthereumIcon, InfoIcon, WarningIcon } from "@cartridge/ui";
 
-export function Fees({ maxFee }: { maxFee?: bigint }) {
+export function Fees({
+  maxFee,
+  variant,
+}: {
+  maxFee?: bigint;
+  variant?: Variant;
+}) {
   const chainId = useChainId();
   const [formattedFee, setFormattedFee] = useState<string>();
 
@@ -16,7 +29,7 @@ export function Fees({ maxFee }: { maxFee?: bigint }) {
 
     setFormattedFee(
       maxFee > 10000000000000n
-        ? `~${parseFloat(formatUnits(maxFee, 18)).toFixed(5)} eth`
+        ? `~${parseFloat(formatUnits(maxFee, 18)).toFixed(5)}`
         : "<0.00001",
     );
   }, [chainId, maxFee]);
@@ -35,6 +48,7 @@ export function Fees({ maxFee }: { maxFee?: bigint }) {
             name="Network Fee"
             value={formattedFee}
             isLoading={!formattedFee}
+            variant={variant}
           />
         </>
       ) : (
@@ -48,11 +62,13 @@ function LineItem({
   name,
   value,
   isLoading = false,
+  variant,
 }: {
   name: string;
   description?: string;
   value?: string;
   isLoading?: boolean;
+  variant?: Variant;
 }) {
   return (
     <HStack w="full" h="40px" p={4} bg="solid.primary" color="text.secondary">
@@ -69,7 +85,19 @@ function LineItem({
       {isLoading ? (
         <Spinner size="sm" />
       ) : (
-        <HStack>
+        <HStack gap={0}>
+          {(() => {
+            switch (variant) {
+              case "info":
+                return <InfoIcon color="info.foreground" />;
+              case "warning":
+                return <WarningIcon color="warning.background" />;
+              case "error":
+                return <AlertIcon color="error.foreground" />;
+              default:
+                return null;
+            }
+          })()}
           <EthereumIcon color="text.primary" />
           <Text fontSize={13}>{value}</Text>
         </HStack>
@@ -77,3 +105,5 @@ function LineItem({
     </HStack>
   );
 }
+
+type Variant = "info" | "warning" | "error";
