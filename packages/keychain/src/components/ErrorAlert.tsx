@@ -262,16 +262,15 @@ export function ControllerErrorAlert({
       description = error.data?.reason || JSON.stringify(error);
       break;
     case ErrorCode.StarknetTransactionExecutionError:
-      title = "Execution error expected";
-      description = (() => {
-        try {
-          const parsedError = parseExecutionError(error, isPaymaster ? 2 : 1);
-          copyText = parsedError.raw;
-          return <StackTraceDisplay stackTrace={parsedError.stack} />;
-        } catch (e) {
-          return <Text color="inherit">{error.data}</Text>;
-        }
-      })();
+      try {
+        const parsedError = parseExecutionError(error, isPaymaster ? 2 : 1);
+        title = parsedError.summary;
+        copyText = parsedError.raw;
+        description = <StackTraceDisplay stackTrace={parsedError.stack} />;
+      } catch (e) {
+        title = "Execution error";
+        description = <Text color="inherit">{error.data}</Text>;
+      }
       break;
     default:
       title = "Unknown Error";
@@ -319,13 +318,14 @@ function StackTraceDisplay({
                   <HStack
                     key={key}
                     w="full"
-                    justifyContent="space-between"
                     fontSize="xs"
+                    alignItems="flex-start"
                   >
                     <Text
-                      color="darkGray.400"
+                      color="opacityBlack.700"
                       textTransform="capitalize"
-                      alignSelf="flex-start"
+                      w="80px"
+                      flexShrink={0}
                     >
                       {key}
                     </Text>
@@ -337,6 +337,7 @@ function StackTraceDisplay({
                         )}
                         isExternal={isExternalLink}
                         wordBreak="break-all"
+                        textAlign="left"
                       >
                         {formatAddress(value as string, {
                           first: 10,
@@ -344,20 +345,24 @@ function StackTraceDisplay({
                         })}
                       </Link>
                     ) : key === "selector" ? (
-                      <Text wordBreak="break-all" color="inherit">
+                      <Text
+                        wordBreak="break-all"
+                        color="inherit"
+                        textAlign="left"
+                      >
                         {formatAddress(value as string, {
                           first: 10,
                           last: 10,
                         })}
                       </Text>
                     ) : (
-                      <VStack align="end" spacing={1} w="full">
+                      <VStack align="start" spacing={1} w="full">
                         {(value as string[]).map((line, index) => (
                           <Text
                             key={index}
                             wordBreak="break-all"
                             color="inherit"
-                            textAlign="right"
+                            textAlign="left"
                           >
                             {line}
                           </Text>
