@@ -166,7 +166,7 @@ function FundingInner({ onComplete, title, defaultAmount }: FundingInnerProps) {
               fontSize="xs"
               color="text.secondary"
             >
-              Controller Balance
+              Current Balance
             </Text>
           </HStack>
           <HStack
