@@ -1,5 +1,5 @@
 import { useInterval } from "@chakra-ui/react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { uint256 } from "starknet";
 import { useConnection } from "hooks/connection";
 import { ETH_CONTRACT_ADDRESS } from "utils/token";
@@ -28,6 +28,10 @@ export function useBalance({ address }: { address: string }) {
     setIsLoading(false);
     setIsFetching(false);
   }, [controller, address]);
+
+  useEffect(() => {
+    fetchBalance();
+  }, []);
 
   useInterval(fetchBalance, 3000);
   return { balance, isFetching, isLoading };
