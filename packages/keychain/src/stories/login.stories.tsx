@@ -31,7 +31,5 @@ export const Default: Story = {
 };
 
 function Login() {
-  return (
-    <div>Login</div>
-  )
+  return <div>Login</div>;
 }
