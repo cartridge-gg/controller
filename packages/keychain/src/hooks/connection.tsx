@@ -1,13 +1,5 @@
 import { AsyncMethodReturns } from "@cartridge/penpal";
-import {
-  useContext,
-  createContext,
-  useState,
-  useEffect,
-  PropsWithChildren,
-  useCallback,
-  useMemo,
-} from "react";
+import { useContext, useState, useEffect, useCallback, useMemo } from "react";
 import Controller from "utils/controller";
 import {
   connectToController,
@@ -29,45 +21,14 @@ import {
 import { mergeDefaultETHPrefund } from "utils/token";
 import { isIframe } from "components/connect/utils";
 import { setIsSignedUp } from "utils/cookie";
+import {
+  ConnectionContext,
+  ConnectionContextValue,
+} from "components/Provider/connection";
 
-const ConnectionContext = createContext<ConnectionContextValue>(undefined);
+type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
 
-type ConnectionContextValue = {
-  context: ConnectionCtx;
-  controller: Controller;
-  origin: string;
-  rpcUrl: string;
-  chainId: string;
-  chainName: string;
-  policies: Policy[];
-  prefunds: Prefund[];
-  paymaster: PaymasterOptions;
-  hasPrefundRequest: boolean;
-  error: Error;
-  setContext: (context: ConnectionCtx) => void;
-  setController: (controller: Controller) => void;
-  closeModal: () => void;
-  openModal: () => void;
-  logout: (context: ConnectionCtx) => void;
-  setDelegate: (context: ConnectionCtx) => void;
-  setDelegateTransaction: (
-    context: ConnectionCtx,
-    delegateAddress: string,
-  ) => void;
-  setExternalOwnerTransaction: (
-    context: ConnectionCtx,
-    externalOwnerAddress: string,
-  ) => void;
-  removeExternalOwnerTransaction: (
-    context: ConnectionCtx,
-    externalOwnerAddress: string,
-  ) => void;
-  openSettings: (context: ConnectionCtx) => void;
-  openMenu: (context: ConnectionCtx) => void;
-  setExternalOwner: (context: ConnectionCtx) => void;
-};
-
-export function ConnectionProvider({ children }: PropsWithChildren) {
+export function useConnectionValue() {
   const [parent, setParent] = useState<ParentMethods>();
   const [context, setContext] = useState<ConnectionCtx>();
   const [origin, setOrigin] = useState<string>();
@@ -307,40 +268,32 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
     [controller?.address, openSettings],
   );
 
-  return (
-    <ConnectionContext.Provider
-      value={{
-        context,
-        controller,
-        origin,
-        rpcUrl,
-        chainId,
-        chainName,
-        policies,
-        prefunds,
-        paymaster,
-        hasPrefundRequest,
-        error,
-        setController,
-        setContext,
-        closeModal,
-        openModal,
-        logout,
-        openMenu,
-        openSettings,
-        setDelegate,
-        setDelegateTransaction,
-        setExternalOwnerTransaction,
-        removeExternalOwnerTransaction,
-        setExternalOwner,
-      }}
-    >
-      {children}
-    </ConnectionContext.Provider>
-  );
+  return {
+    context,
+    controller,
+    origin,
+    rpcUrl,
+    chainId,
+    chainName,
+    policies,
+    prefunds,
+    paymaster,
+    hasPrefundRequest,
+    error,
+    setController,
+    setContext,
+    closeModal,
+    openModal,
+    logout,
+    openMenu,
+    openSettings,
+    setDelegate,
+    setDelegateTransaction,
+    setExternalOwnerTransaction,
+    removeExternalOwnerTransaction,
+    setExternalOwner,
+  };
 }
-
-type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
 
 export function useConnection() {
   const ctx = useContext<ConnectionContextValue>(ConnectionContext);

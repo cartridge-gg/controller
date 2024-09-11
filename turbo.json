@@ -15,6 +15,10 @@
       "dependsOn": ["^build:deps"],
       "outputs": [".next/**", "!.next/cache/**"]
     },
+    "storybook": {
+      "persistent": true,
+      "dependsOn": ["^build:deps"]
+    },
     "lint": {},
     "format": {},
     "format:check": {},
