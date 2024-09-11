@@ -1,17 +1,10 @@
 {
-  "extends": [
-    "next/core-web-vitals",
-    "plugin:storybook/recommended"
-  ],
+  "extends": ["next/core-web-vitals", "plugin:storybook/recommended"],
   "rules": {
     "react/no-unknown-property": [
       "error",
       {
-        "ignore": [
-          "css",
-          "jsx",
-          "global"
-        ]
+        "ignore": ["css", "jsx", "global"]
       }
     ]
   }

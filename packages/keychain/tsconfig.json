@@ -4,9 +4,7 @@
   "compilerOptions": {
     "baseUrl": "./src",
     "rootDir": ".",
-    "types": [
-      "@emotion/react/types/css-prop"
-    ],
+    "types": ["@emotion/react/types/css-prop"],
     "paths": {
       "/*": ["./src/*"]
     },
@@ -24,7 +22,5 @@
     "../ui/src/components/icons/StarknetGray.tsx",
     "src/components/bridge/abis/EthL1Bridge.json"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }
