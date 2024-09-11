@@ -11,7 +11,6 @@ import {
   TypedData,
   BigNumberish,
   InvocationsDetails,
-  num,
   AllowArray,
 } from "starknet";
 
@@ -83,16 +82,6 @@ class Account extends BaseAccount {
       normalizeCalls(calls),
       details as JsInvocationsDetails,
     );
-
-    Storage.update(this.selector, {
-      nonce: num.toHex(BigInt(details.nonce) + 1n),
-    });
-
-    this.rpc
-      .waitForTransaction(res.transaction_hash, {
-        retryInterval: 1000,
-      })
-      .catch(() => this.resetNonce());
 
     return res;
   }

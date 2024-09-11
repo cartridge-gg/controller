@@ -189,10 +189,7 @@ impl CartridgeAccount {
             .map(TryFrom::try_from)
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
-        let result = self
-            .controller
-            .execute(calls, details.nonce, details.max_fee)
-            .await?;
+        let result = Controller::execute(&mut self.controller, calls, details.max_fee).await?;
 
         Ok(to_value(&result)?)
     }

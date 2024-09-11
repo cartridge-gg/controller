@@ -121,10 +121,10 @@ where
             provider.clone(),
         );
 
-        backend.set(
+        backend.set(&[(
             &Selectors::version(),
             &StorageValue::Version("1.0.0".to_string()),
-        )?;
+        )])?;
 
         Ok(Self {
             app_id,
@@ -157,7 +157,7 @@ where
             .raw()
             .get_message_hash_rev_1(self.account.chain_id, self.account.address);
         let authorization = self.account.sign_hash(hash).await?;
-        self.backend.set(
+        self.backend.set(&[(
             &Selectors::session(&self.account.address, &self.app_id, &self.account.chain_id),
             &StorageValue::Session(SessionMetadata {
                 session,
@@ -167,7 +167,7 @@ where
                     private_key: signer.secret_scalar(),
                 },
             }),
-        )?;
+        )])?;
         Ok((authorization, signer.secret_scalar()))
     }
 
@@ -269,11 +269,23 @@ where
     }
 
     pub async fn execute(
-        &self,
+        &mut self,
         calls: Vec<Call>,
-        nonce: Felt,
         max_fee: Felt,
     ) -> Result<InvokeTransactionResult, ControllerError> {
+        let nonce = match self.backend.get(&Selectors::nonce())? {
+            Some(StorageValue::Nonce(nonce)) => nonce,
+            _ => {
+                let provider_nonce = self
+                    .provider
+                    .get_nonce(BlockId::Tag(BlockTag::Pending), self.account.address)
+                    .await?;
+                self.backend
+                    .set(&[(&Selectors::nonce(), &StorageValue::Nonce(provider_nonce))])?;
+                provider_nonce
+            }
+        };
+
         let result = self
             .execute_v1(calls)
             .max_fee(max_fee)
@@ -282,7 +294,12 @@ where
             .await;
 
         match result {
-            Ok(tx_result) => Ok(tx_result),
+            Ok(tx_result) => {
+                let new_nonce = nonce + Felt::ONE;
+                self.backend
+                    .set(&[(&Selectors::nonce(), &StorageValue::Nonce(new_nonce))])?;
+                Ok(tx_result)
+            }
             Err(e) => {
                 if let AccountError::Provider(ProviderError::StarknetError(
                     StarknetError::TransactionExecutionError(data),

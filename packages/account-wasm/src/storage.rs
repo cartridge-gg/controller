@@ -7,13 +7,14 @@ use crate::signer::BrowserBackend;
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait)]
 impl StorageBackend for BrowserBackend {
-    fn set(&mut self, key: &str, value: &StorageValue) -> Result<(), StorageError> {
+    fn set(&mut self, kvs: &[(&str, &StorageValue)]) -> Result<(), StorageError> {
         let local_storage = Self::local_storage()?;
-
-        let serialized = serde_json::to_string(value)?;
-        local_storage
-            .set_item(key, &serialized)
-            .map_err(|_| StorageError::OperationFailed("setting item in localStorage".into()))?;
+        for (key, value) in kvs {
+            let serialized = serde_json::to_string(value)?;
+            local_storage.set_item(key, &serialized).map_err(|_| {
+                StorageError::OperationFailed("setting item in localStorage".into())
+            })?;
+        }
         Ok(())
     }
 
