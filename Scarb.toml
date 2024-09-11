@@ -2,6 +2,7 @@
 members = [
     "packages/contracts/controller",
     "packages/contracts/resolver",
+    "packages/contracts/tokens",
 ]
 
 [workspace.package]
@@ -17,3 +18,7 @@ alexandria_data_structures = { git = "https://github.com/piniom/quaireaux.git", 
 snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry.git", tag = "v0.27.0" }
 openzeppelin = { git = "https://github.com/OpenZeppelin/cairo-contracts.git", rev = "a13bae3" }
 argent = { git = "https://github.com/cartridge-gg/argent-contracts-starknet.git", rev = "daa8200" }
+graffiti = { git = "https://github.com/ponderingdemocritus/graffiti.git" }
+
+[dev-dependencies]
+cairo_test = "2.7.0"

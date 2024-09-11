@@ -3,7 +3,8 @@ config := --account katana-0 \
 	--rpc http://0.0.0.0:5050
 
 # Build files helpers.
-build := ./target/dev/controller_
+build_controller := ./target/dev/controller_
+build_tokens := ./target/dev/tokens_
 sierra := .contract_class.json
 compiled := .compiled_contract_class.json
 store := ./packages/account_sdk/compiled/
@@ -16,17 +17,23 @@ generate_artifacts:
 	scarb --manifest-path ./packages/contracts/controller/Scarb.toml build
 	mkdir -p ${store}
 
-	jq . ${build}CartridgeAccount${sierra} > ${store}controller${sierra}
+	jq . ${build_controller}CartridgeAccount${sierra} > ${store}controller${sierra}
+	cp ${build_controller}CartridgeAccount${compiled} ${store}controller${compiled}
 
-	cp ${build}CartridgeAccount${compiled} ${store}controller${compiled}
+	scarb --manifest-path ./packages/contracts/tokens/Scarb.toml build
+	mkdir -p ${store}
+
+	jq . ${build_tokens}AvatarNft${sierra} > ${store}avatar${sierra}
+	cp ${build_tokens}AvatarNft${compiled} ${store}avatar${compiled}
+
 
 deploy-katana:
 	@set -x; \
-	erc20_class=$$(starkli class-hash ${build}ERC20Upgradeable${sierra}); \
-	account_class=$$(starkli class-hash ${build}Account${sierra}); \
-	starkli declare ${build}Account${sierra} ${config}; \
+	erc20_class=$$(starkli class-hash ${build_controller}ERC20Upgradeable${sierra}); \
+	account_class=$$(starkli class-hash ${build_controller}Account${sierra}); \
+	starkli declare ${build_controller}Account${sierra} ${config}; \
 	starkli deploy "$${account_class}" ${test_pubkey} --salt 0x1234 ${config}; \
-	starkli declare ${build}ERC20Upgradeable${sierra} ${config}; \
+	starkli declare ${build_controller}ERC20Upgradeable${sierra} ${config}; \
 	starkli deploy "$${erc20_class}" str:token str:tkn u256:1 ${katana_0} --salt 0x1234 ${config};
 
 test-session: generate_artifacts
