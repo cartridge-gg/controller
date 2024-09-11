@@ -109,6 +109,7 @@ function Form({
     mode,
     onSuccess,
     setController,
+    isSlot,
   ]);
 
   useEffect(() => {
@@ -157,6 +158,7 @@ function Form({
                 : error.message
             }
             isExpanded
+            allowToggle
           />
         )}
         <Button
