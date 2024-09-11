@@ -27,7 +27,7 @@
     "format": "prettier --write ./src",
     "format:check": "prettier --check ./src",
     "lint": "eslint . --ext ts,tsx",
-    "storybook": "storybook dev -p 6006",
+    "storybook": "storybook dev -p 6003",
     "storybook:build": "storybook build"
   },
   "dependencies": {

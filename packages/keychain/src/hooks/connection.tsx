@@ -32,7 +32,7 @@ import { setIsSignedUp } from "utils/cookie";
 
 const ConnectionContext = createContext<ConnectionContextValue>(undefined);
 
-type ConnectionContextValue = {
+export type ConnectionContextValue = {
   context: ConnectionCtx;
   controller: Controller;
   origin: string;
@@ -41,9 +41,9 @@ type ConnectionContextValue = {
   chainName: string;
   policies: Policy[];
   prefunds: Prefund[];
-  paymaster: PaymasterOptions;
+  paymaster?: PaymasterOptions;
   hasPrefundRequest: boolean;
-  error: Error;
+  error?: Error;
   setContext: (context: ConnectionCtx) => void;
   setController: (controller: Controller) => void;
   closeModal: () => void;
@@ -67,7 +67,20 @@ type ConnectionContextValue = {
   setExternalOwner: (context: ConnectionCtx) => void;
 };
 
-export function ConnectionProvider({ children }: PropsWithChildren) {
+export function ConnectionProvider({
+  children,
+  value,
+}: { value: ConnectionContextValue } & PropsWithChildren) {
+  return (
+    <ConnectionContext.Provider value={value}>
+      {children}
+    </ConnectionContext.Provider>
+  );
+}
+
+type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
+
+export function useConnectionValue() {
   const [parent, setParent] = useState<ParentMethods>();
   const [context, setContext] = useState<ConnectionCtx>();
   const [origin, setOrigin] = useState<string>();
@@ -306,41 +319,32 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
     },
     [controller?.address, openSettings],
   );
-
-  return (
-    <ConnectionContext.Provider
-      value={{
-        context,
-        controller,
-        origin,
-        rpcUrl,
-        chainId,
-        chainName,
-        policies,
-        prefunds,
-        paymaster,
-        hasPrefundRequest,
-        error,
-        setController,
-        setContext,
-        closeModal,
-        openModal,
-        logout,
-        openMenu,
-        openSettings,
-        setDelegate,
-        setDelegateTransaction,
-        setExternalOwnerTransaction,
-        removeExternalOwnerTransaction,
-        setExternalOwner,
-      }}
-    >
-      {children}
-    </ConnectionContext.Provider>
-  );
+  return {
+    context,
+    controller,
+    origin,
+    rpcUrl,
+    chainId,
+    chainName,
+    policies,
+    prefunds,
+    paymaster,
+    hasPrefundRequest,
+    error,
+    setController,
+    setContext,
+    closeModal,
+    openModal,
+    logout,
+    openMenu,
+    openSettings,
+    setDelegate,
+    setDelegateTransaction,
+    setExternalOwnerTransaction,
+    removeExternalOwnerTransaction,
+    setExternalOwner,
+  };
 }
-
-type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
 
 export function useConnection() {
   const ctx = useContext<ConnectionContextValue>(ConnectionContext);

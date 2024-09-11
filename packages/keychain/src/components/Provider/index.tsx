@@ -7,7 +7,7 @@ import {
   useControllerThemePreset,
 } from "hooks/theme";
 import { useRouter } from "next/router";
-import { ConnectionProvider } from "hooks/connection";
+import { ConnectionProvider, useConnectionValue } from "hooks/connection";
 
 export function Provider({ children }: PropsWithChildren) {
   const preset = useControllerThemePreset();
@@ -24,12 +24,13 @@ export function Provider({ children }: PropsWithChildren) {
     }),
     [preset, router.query],
   );
+  const connection = useConnectionValue();
 
   return (
     <ChakraProvider theme={chakraTheme}>
       <QueryClientProvider client={queryClient}>
         <ControllerThemeProvider value={controllerTheme}>
-          <ConnectionProvider>{children}</ConnectionProvider>
+          <ConnectionProvider value={connection}>{children}</ConnectionProvider>
         </ControllerThemeProvider>
       </QueryClientProvider>
     </ChakraProvider>
