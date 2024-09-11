@@ -11,7 +11,7 @@ import {
   OpenSettingsCtx,
   OpenMenuCtx,
 } from "utils/connection";
-import { RpcProvider, CallData, constants, shortString } from "starknet";
+import { RpcProvider, CallData, constants } from "starknet";
 import {
   PaymasterOptions,
   Policy,
@@ -52,7 +52,7 @@ export function useConnectionValue() {
       case constants.StarknetChainId.SN_SEPOLIA:
         return "Sepolia";
       default:
-        return shortString.decodeShortString(chainId);
+        return "Slot";
     }
   }, [chainId]);
 

@@ -1,20 +1,10 @@
+import { StarknetColorIcon, StarknetIcon, SlotIcon } from "@cartridge/ui";
 import { Circle, HStack, Text } from "@chakra-ui/react";
 import { useConnection } from "hooks/connection";
-import { useMemo } from "react";
 import { constants } from "starknet";
 
 export function NetworkButton() {
-  const { controller, chainName, chainId } = useConnection();
-
-  const bg = useMemo(() => {
-    switch (chainId) {
-      case constants.StarknetChainId.SN_MAIN:
-        return "#A7E7A7";
-      default:
-      case constants.StarknetChainId.SN_SEPOLIA:
-        return "#73C4FF";
-    }
-  }, [chainId]);
+  const { chainName, chainId } = useConnection();
 
   if (!chainName) {
     return;
@@ -22,12 +12,20 @@ export function NetworkButton() {
 
   return (
     <HStack bg="solid.bg" borderRadius="base" p={3}>
-      <Circle bg={bg} opacity={controller ? 1 : 0.3} size={2} />
-      <Text
-        fontSize="xs"
-        fontWeight={600}
-        textTransform={chainName.startsWith("0x") ? "initial" : "uppercase"}
-      >
+      <Circle size={5} bg="solid.primary">
+        <StarknetColorIcon fontSize="xl" />
+        {(() => {
+          switch (chainId) {
+            case constants.StarknetChainId.SN_MAIN:
+              return <StarknetColorIcon fontSize="xl" />;
+            case constants.StarknetChainId.SN_SEPOLIA:
+              return <StarknetIcon fontSize="xl" />;
+            default:
+              return <SlotIcon fontSize="xl" />;
+          }
+        })()}
+      </Circle>
+      <Text fontSize="xs" fontWeight={600} textTransform="uppercase">
         {chainName}
       </Text>
     </HStack>
