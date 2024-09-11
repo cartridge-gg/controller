@@ -1,4 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react";
+import { Login } from "../components/connect";
 
 const meta: Meta<typeof Login> = {
   title: "Login",
@@ -16,7 +17,3 @@ type Story = StoryObj<typeof Login>;
 export const Default: Story = {
   args: {},
 };
-
-function Login() {
-  return <div>Login</div>;
-}

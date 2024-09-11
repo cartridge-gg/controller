@@ -21,17 +21,17 @@ const config: StorybookConfig = {
     name: getAbsolutePath("@storybook/nextjs"),
     options: {},
   },
-  // webpackFinal: (config) => {
-  //   config.output = {
-  //     ...config.output,
-  //     webassemblyModuleFilename: "../static/wasm/webauthn.wasm",
-  //   };
-  //   config.experiments = {
-  //     ...config.experiments,
-  //     asyncWebAssembly: true,
-  //   };
-  //   return config;
-  // },
+  webpackFinal: (config) => {
+    // config.output = {
+    //   ...config.output,
+    //   webassemblyModuleFilename: "../static/wasm/webauthn.wasm",
+    // };
+    config.experiments = {
+      ...config.experiments,
+      asyncWebAssembly: true,
+    };
+    return config;
+  },
   staticDirs: ["../public"],
 };
 export default config;
