@@ -81,7 +81,11 @@ function Form({
       if (mode === LoginMode.Controller && policies?.length > 0) {
         await controller.createSession(expiresAt, policies);
       } else {
-        await doLogin(usernameField.value, credentialId);
+        await doLogin({
+          name: usernameField.value,
+          credentialId,
+          finalize: isSlot,
+        });
       }
 
       controller.store();

@@ -157,14 +157,19 @@ export const doXHR = async (json: string): Promise<any> => {
 export async function doSignup(
   name: string,
 ): Promise<FinalizeRegistrationMutation> {
-  console.debug("signup begin");
   const credentials: Credentials = await onCreateBegin(name);
-  console.debug("signup finalize");
   return onCreateFinalize(credentials);
 }
 
-export async function doLogin(name: string, credentialId: string) {
-  console.debug("login begin");
+export async function doLogin({
+  name,
+  credentialId,
+  finalize,
+}: {
+  name: string;
+  credentialId: string;
+  finalize: boolean;
+}) {
   const { data: beginLoginData } = await beginLogin(name);
 
   // TODO: replace with account_sdk device signer
@@ -184,9 +189,11 @@ export async function doLogin(name: string, credentialId: string) {
       userVerification: "required",
     },
   })) as RawAssertion;
-  console.debug("login finalize");
-  const res = await onLoginFinalize(assertion);
-  if (!res.finalizeLogin) {
-    throw Error("login failed");
+
+  if (finalize) {
+    const res = await onLoginFinalize(assertion);
+    if (!res.finalizeLogin) {
+      throw Error("login failed");
+    }
   }
 }
