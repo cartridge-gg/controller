@@ -70,6 +70,16 @@ export interface JsPolicy {
     method: string;
 }
 
+export interface JsCall {
+    contractAddress: Felt;
+    entrypoint: string;
+    calldata: Felt[];
+}
+
+export type Felts = JsFelt[];
+
+export type JsFelt = Felt;
+
 export interface JsInvocationsDetails {
     nonce: Felt;
     maxFee: Felt;
@@ -84,16 +94,6 @@ export interface JsCredentials {
     authorization: Felt[];
     privateKey: Felt;
 }
-
-export interface JsCall {
-    contractAddress: Felt;
-    entrypoint: string;
-    calldata: Felt[];
-}
-
-export type Felts = JsFelt[];
-
-export type JsFelt = Felt;
 
 export interface JsOutsideExecution {
     caller: Felt;
@@ -139,9 +139,10 @@ export class CartridgeAccount {
 * @param {(JsPolicy)[]} policies
 * @param {bigint} expires_at
 * @param {JsFelt} public_key
+* @param {JsFelt} max_fee
 * @returns {Promise<JsFelt>}
 */
-  registerSession(policies: (JsPolicy)[], expires_at: bigint, public_key: JsFelt): Promise<JsFelt>;
+  registerSession(policies: (JsPolicy)[], expires_at: bigint, public_key: JsFelt, max_fee: JsFelt): Promise<JsFelt>;
 /**
 * @param {(JsPolicy)[]} policies
 * @param {bigint} expires_at
@@ -162,10 +163,9 @@ export class CartridgeAccount {
   execute(calls: (JsCall)[], details: JsInvocationsDetails): Promise<any>;
 /**
 * @param {(JsCall)[]} calls
-* @param {any} caller
 * @returns {Promise<any>}
 */
-  executeFromOutside(calls: (JsCall)[], caller: any): Promise<any>;
+  executeFromOutside(calls: (JsCall)[]): Promise<any>;
 /**
 * @param {(JsCall)[]} calls
 * @returns {boolean}

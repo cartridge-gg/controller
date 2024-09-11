@@ -10,9 +10,10 @@ import {
   InvokeFunctionResponse,
   TypedData,
   BigNumberish,
-  InvocationsDetails,
   num,
   AllowArray,
+  UniversalDetails,
+  Abi,
 } from "starknet";
 
 import { selectors, VERSION } from "./selectors";
@@ -64,24 +65,22 @@ class Account extends BaseAccount {
 
   async executeFromOutside(
     calls: AllowArray<Call>,
-    paymaster: PaymasterOptions,
-  ): Promise<string> {
-    return await this.cartridge.executeFromOutside(
-      normalizeCalls(calls),
-      paymaster.caller,
-    );
+    _: PaymasterOptions,
+  ): Promise<InvokeFunctionResponse> {
+    return await this.cartridge.executeFromOutside(normalizeCalls(calls));
   }
 
-  // @ts-expect-error TODO: fix overload type mismatch
   async execute(
-    calls: AllowArray<Call>,
-    details?: InvocationsDetails,
+    transactions: AllowArray<Call>,
+    abisOrDetails?: Abi[] | UniversalDetails,
+    details?: UniversalDetails,
   ): Promise<InvokeFunctionResponse> {
-    details.nonce = details.nonce ?? (await super.getNonce("pending"));
+    const executionDetails =
+      (Array.isArray(abisOrDetails) ? details : abisOrDetails) || {};
 
     const res = await this.cartridge.execute(
-      normalizeCalls(calls),
-      details as JsInvocationsDetails,
+      normalizeCalls(transactions),
+      executionDetails as JsInvocationsDetails,
     );
 
     Storage.update(this.selector, {

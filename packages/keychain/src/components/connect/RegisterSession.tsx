@@ -1,18 +1,24 @@
 import { Container, Content, Footer } from "components/layout";
-import { BigNumberish } from "starknet";
+import {
+  BigNumberish,
+  TransactionExecutionStatus,
+  TransactionFinalityStatus,
+} from "starknet";
 import { Policy } from "@cartridge/controller";
 import { ControllerError } from "utils/connection";
 import { Button } from "@chakra-ui/react";
 import { useCallback, useState } from "react";
 import { useConnection } from "hooks/connection";
-import { Policies } from "components/Policies";
+import { Policies } from "Policies";
 import { ControllerErrorAlert } from "components/ErrorAlert";
 import { SessionConsent } from "components/connect";
 
-export function CreateSession({
+export function RegisterSession({
   onConnect,
+  publicKey,
 }: {
   onConnect: (policies: Policy[], transaction_hash?: string) => void;
+  publicKey?: string;
 }) {
   const { controller, policies } = useConnection();
   const [isConnecting, setIsConnecting] = useState(false);
@@ -20,20 +26,35 @@ export function CreateSession({
   const [maxFee] = useState<BigNumberish>();
   const [error, setError] = useState<ControllerError>();
 
-  const onCreateSession = useCallback(async () => {
+  const onRegisterSession = useCallback(async () => {
     try {
       setError(undefined);
       setIsConnecting(true);
+      const hash = await controller.registerSession(
+        expiresAt,
+        policies,
+        publicKey,
+        maxFee,
+      );
+
+      await controller.account.waitForTransaction(hash, {
+        retryInterval: 1000,
+        successStates: [
+          TransactionExecutionStatus.SUCCEEDED,
+          TransactionFinalityStatus.ACCEPTED_ON_L2,
+        ],
+      });
+      onConnect(policies, hash);
       await controller.createSession(expiresAt, policies, maxFee);
       onConnect(policies);
     } catch (e) {
       setError(e);
       setIsConnecting(false);
     }
-  }, [controller, expiresAt, policies, maxFee, onConnect]);
+  }, [controller, expiresAt, policies, maxFee, publicKey, onConnect]);
 
   return (
-    <Container title="Create Session">
+    <Container title="Register Session">
       <Content>
         <SessionConsent />
         <Policies policies={policies} />
@@ -45,9 +66,9 @@ export function CreateSession({
           colorScheme="colorful"
           isDisabled={isConnecting}
           isLoading={isConnecting}
-          onClick={() => onCreateSession()}
+          onClick={() => onRegisterSession()}
         >
-          create session
+          Register Session
         </Button>
       </Footer>
     </Container>

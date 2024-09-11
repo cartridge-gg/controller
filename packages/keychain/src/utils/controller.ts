@@ -117,7 +117,7 @@ export default class Controller {
     expiresAt: bigint,
     policies: Policy[],
     publicKey: string,
-    _maxFee?: BigNumberish,
+    maxFee?: BigNumberish,
   ): Promise<string> {
     if (!this.account) {
       throw new Error("Account not found");
@@ -127,6 +127,7 @@ export default class Controller {
       policies as JsPolicy[],
       expiresAt,
       publicKey,
+      maxFee,
     );
   }
 

@@ -3,7 +3,8 @@
 import { Policy } from "@cartridge/controller";
 import {
   CreateController,
-  CreateSession as CreateSessionComp,
+  CreateSession,
+  RegisterSession,
 } from "components/connect";
 
 import { useConnection } from "hooks/connection";
@@ -30,7 +31,7 @@ type SessionQueryParams = Record<string, string> & {
 /**
     This page is for registering session
 */
-export default function RegisterSession() {
+export default function Session() {
   const router = useRouter();
   const queries = router.query as SessionQueryParams;
 
@@ -143,7 +144,11 @@ export default function RegisterSession() {
   }, [controller, origin, policies, onCallback]);
 
   return controller ? (
-    <CreateSessionComp onConnect={onConnect} publicKey={queries.public_key} />
+    queries.public_key ? (
+      <RegisterSession onConnect={onConnect} publicKey={queries.public_key} />
+    ) : (
+      <CreateSession onConnect={onConnect} />
+    )
   ) : (
     <CreateController loginMode={LoginMode.Controller} />
   );

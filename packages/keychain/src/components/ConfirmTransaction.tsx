@@ -19,10 +19,10 @@ import { Funding } from "./Funding";
 import { DeployController } from "./DeployController";
 
 export function ConfirmTransaction() {
-  const { controller, context, origin, paymaster } = useConnection();
+  const { controller, context, origin } = useConnection();
   const ctx = context as ExecuteCtx;
 
-  const [maxFee, setMaxFee] = useState<bigint>(0n);
+  const [maxFee, setMaxFee] = useState<bigint>(undefined);
   const [ctrlError, setCtrlError] = useState<ControllerError>(ctx.error);
   const [isLoading, setLoading] = useState<boolean>(false);
   const [ctaState, setCTAState] = useState<"fund" | "deploy" | "execute">(
@@ -61,31 +61,13 @@ export function ConfirmTransaction() {
     setCtrlError,
   ]);
 
-  const execute = useCallback(async () => {
-    if (!paymaster) {
-      let { transaction_hash } = await account.execute(ctx.transactions, {
-        maxFee: num.toHex(maxFee),
-      });
-
-      return transaction_hash;
-    }
-
-    try {
-      return await account.executeFromOutside(ctx.transactions, paymaster);
-    } catch (e) {
-      let { transaction_hash } = await account.execute(ctx.transactions, {
-        maxFee: num.toHex(maxFee),
-      });
-
-      return transaction_hash;
-    }
-  }, [account, ctx.transactions, paymaster, maxFee]);
-
   const onSubmit = useCallback(async () => {
     setLoading(true);
 
     try {
-      let transaction_hash = await execute();
+      let { transaction_hash } = await account.execute(ctx.transactions, {
+        maxFee: num.toHex(maxFee),
+      });
       ctx.resolve({
         code: ResponseCodes.SUCCESS,
         transaction_hash,
@@ -99,7 +81,7 @@ export function ConfirmTransaction() {
     } finally {
       setLoading(false);
     }
-  }, [ctx, execute]);
+  }, [account, ctx.resolve, ctx.transactions, maxFee]);
 
   const policies = useMemo<Policy[]>(
     () =>
