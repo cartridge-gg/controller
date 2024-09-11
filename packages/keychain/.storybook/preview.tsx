@@ -12,6 +12,13 @@ import {
 } from "../src/components/Provider/connection";
 import { ChakraProvider } from "@chakra-ui/react";
 import { ControllerTheme } from "@cartridge/controller";
+import { Inter, IBM_Plex_Mono } from "next/font/google";
+
+const inter = Inter({ subsets: ["latin"] });
+const ibmPlexMono = IBM_Plex_Mono({
+  weight: "600",
+  subsets: ["latin"],
+});
 
 const preview: Preview = {
   parameters: {
@@ -24,9 +31,35 @@ const preview: Preview = {
   },
   decorators: [
     (Story) => (
-      <Provider>
-        <Story />
-      </Provider>
+      <>
+        <style
+          // @ts-expect-error type error
+          jsx
+          global
+        >{`
+          :root {
+            --font-inter: ${inter.style.fontFamily};
+            --font-ibm-plex-mono: ${ibmPlexMono.style.fontFamily};
+          }
+
+          body {
+            background: var(--chakra-colors-solid-bg);
+          }
+
+          html,
+          body {
+            -ms-overflow-style: none; /* Internet Explorer 10+ */
+            scrollbar-width: none; /* Firefox */
+          }
+          body::-webkit-scrollbar {
+            display: none; /* Safari and Chrome */
+          }
+        `}</style>
+
+        <Provider>
+          <Story />
+        </Provider>
+      </>
     ),
   ],
 };
