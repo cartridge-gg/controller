@@ -10,7 +10,7 @@ import {
 import { TransactionDuoIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { ControllerErrorAlert } from "components/ErrorAlert";
-import { Policies } from "Policies";
+import { Policies } from "components/Policies";
 import { Fees } from "./Fees";
 import { ControllerError, ExecuteCtx } from "utils/connection";
 import { num } from "starknet";
