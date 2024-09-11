@@ -34,12 +34,14 @@ export function ErrorAlert({
   description,
   variant = "error",
   isExpanded = false,
+  allowToggle = false,
   copyText,
 }: {
   title: string;
   description?: string | ReactElement;
   variant?: string;
   isExpanded?: boolean;
+  allowToggle?: boolean;
   copyText?: string;
 }) {
   const [copied, setCopied] = useState(false);
@@ -55,7 +57,7 @@ export function ErrorAlert({
   return (
     <Accordion
       w="full"
-      allowToggle={!isExpanded}
+      allowToggle={!isExpanded || allowToggle}
       defaultIndex={isExpanded ? [0] : undefined}
       variant={variant}
       color="solid.bg"
@@ -64,7 +66,9 @@ export function ErrorAlert({
       <AccordionItem position="relative">
         {({ isExpanded: itemExpanded }) => (
           <>
-            <AccordionButton disabled={!description || isExpanded}>
+            <AccordionButton
+              disabled={!description || (isExpanded && !allowToggle)}
+            >
               <HStack>
                 {(() => {
                   switch (variant) {
@@ -88,7 +92,7 @@ export function ErrorAlert({
 
               <Spacer />
 
-              {description && !isExpanded && (
+              {description && (!isExpanded || allowToggle) && (
                 <HStack>
                   <Box
                     as={motion.div}
