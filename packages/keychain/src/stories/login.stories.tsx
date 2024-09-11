@@ -7,20 +7,7 @@ const meta: Meta<typeof Login> = {
     layout: "centered",
   },
   tags: ["autodocs"],
-  argTypes: {
-    children: {
-      control: "text",
-      description: "label",
-    },
-    disabled: {
-      control: "boolean",
-      description: "Gray out a button when disabled",
-    },
-    isLoading: {
-      control: "boolean",
-      description: "Show loading indicator.",
-    },
-  },
+  argTypes: {},
 };
 
 export default meta;

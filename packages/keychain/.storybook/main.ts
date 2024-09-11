@@ -12,7 +12,6 @@ function getAbsolutePath(value: string): any {
 const config: StorybookConfig = {
   stories: ["../src/**/*.mdx", "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
   addons: [
-    getAbsolutePath("@storybook/addon-onboarding"),
     getAbsolutePath("@storybook/addon-links"),
     getAbsolutePath("@storybook/addon-essentials"),
     getAbsolutePath("@chromatic-com/storybook"),
@@ -22,13 +21,17 @@ const config: StorybookConfig = {
     name: getAbsolutePath("@storybook/nextjs"),
     options: {},
   },
-  webpackFinal: async (config) => {
-    config.experiments = {
-      ...config.experiments,
-      asyncWebAssembly: true,
-    };
-    return config;
-  },
+  // webpackFinal: (config) => {
+  //   config.output = {
+  //     ...config.output,
+  //     webassemblyModuleFilename: "../static/wasm/webauthn.wasm",
+  //   };
+  //   config.experiments = {
+  //     ...config.experiments,
+  //     asyncWebAssembly: true,
+  //   };
+  //   return config;
+  // },
   staticDirs: ["../public"],
 };
 export default config;

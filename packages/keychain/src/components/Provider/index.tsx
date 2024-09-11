@@ -7,7 +7,8 @@ import {
   useControllerThemePreset,
 } from "hooks/theme";
 import { useRouter } from "next/router";
-import { ConnectionProvider, useConnectionValue } from "hooks/connection";
+import { useConnectionValue } from "hooks/connection";
+import { ConnectionProvider } from "./connection";
 
 export function Provider({ children }: PropsWithChildren) {
   const preset = useControllerThemePreset();

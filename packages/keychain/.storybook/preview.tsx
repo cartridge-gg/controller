@@ -9,7 +9,7 @@ import {
 import {
   ConnectionContextValue,
   ConnectionProvider,
-} from "../src/hooks/connection";
+} from "../src/components/Provider/connection";
 import { ChakraProvider } from "@chakra-ui/react";
 import { ControllerTheme } from "@cartridge/controller";
 
