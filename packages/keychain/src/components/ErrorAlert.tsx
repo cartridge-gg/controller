@@ -179,6 +179,13 @@ export function ControllerErrorAlert({
       isExpanded = true;
       variant = "warning";
       break;
+    case ErrorCode.InsufficientBalance:
+      title = "Insufficient funds";
+      description =
+        "Your controller does not have enough gas to complete this transaction";
+      isExpanded = true;
+      variant = "warning";
+      break;
     case ErrorCode.OriginError:
       title = "Origin Error";
       break;
