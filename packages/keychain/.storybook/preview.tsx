@@ -2,7 +2,7 @@ import React, { PropsWithChildren, useMemo } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import type { Parameters, Preview } from "@storybook/react";
 import { ChakraProvider } from "@chakra-ui/react";
-import { ControllerTheme } from "@cartridge/controller";
+import Controller, { ControllerTheme } from "@cartridge/controller";
 import { Inter, IBM_Plex_Mono } from "next/font/google";
 import {
   ControllerThemeProvider,
@@ -97,6 +97,7 @@ function Provider({
 interface StoryParameters extends Parameters {
   connection?: {
     context?: ConnectionCtx;
+    controller?: Controller;
     chainId?: string;
   };
 }
@@ -110,12 +111,13 @@ function useMockedConnection({
     resolve: () => {},
     reject: () => {},
   } as ConnectCtx,
+  controller,
 }: StoryParameters["connection"] = {}): ConnectionContextValue {
   const chainName = getChainName(chainId);
 
   return {
     context,
-    controller: {},
+    controller,
     origin: "http://localhost:3002",
     rpcUrl: "http://api.cartridge.gg/x/sepolia",
     chainId,

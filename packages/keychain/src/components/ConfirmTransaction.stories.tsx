@@ -7,6 +7,13 @@ const meta = {
   component: ConfirmTransaction,
   parameters: {
     connection: {
+      controller: {
+        account: {
+          estimateInvokeFee: () => ({
+            overall_fee: "100",
+          }),
+        },
+      },
       context: {
         origin: "http://localhost:3002",
         type: "execute",

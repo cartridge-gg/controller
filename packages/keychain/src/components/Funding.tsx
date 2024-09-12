@@ -143,8 +143,7 @@ function FundingInner({ onComplete, title, defaultAmount }: FundingInnerProps) {
       title={
         title || (
           <>
-            Fund{" "}
-            <b style={{ color: "brand.primary" }}>${controller.username}</b>
+            Fund <b style={{ color: "brand.primary" }}>{controller.username}</b>
           </>
         )
       }
