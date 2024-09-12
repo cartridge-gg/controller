@@ -4,8 +4,6 @@ trait IControllerResolverDelegation<TContractState> {
     fn reset_name(ref self: TContractState, name: felt252);
 }
 
-const EXECUTOR_ROLE: felt252 = selector!("EXECUTOR_ROLE");
-
 #[starknet::contract]
 mod ControllerResolverDelegation {
     use core::panics::panic_with_byte_array;
@@ -13,34 +11,41 @@ mod ControllerResolverDelegation {
     use starknet::contract_address::ContractAddressZeroable;
     use resolver::interface::IResolver;
 
+    use openzeppelin::access::ownable::OwnableComponent;
     use openzeppelin::upgrades::UpgradeableComponent;
     use openzeppelin::upgrades::interface::IUpgradeable;
     use openzeppelin::introspection::src5::SRC5Component;
-    use openzeppelin::access::accesscontrol::AccessControlComponent;
-    use openzeppelin::access::accesscontrol::DEFAULT_ADMIN_ROLE;
-    use super::EXECUTOR_ROLE;
+   
+    use registry::registry_component::RegistryComponent;
 
-    
+    component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
     component!(path: UpgradeableComponent, storage: upgradeable, event: UpgradeableEvent);
-    component!(path: AccessControlComponent, storage: accesscontrol, event: AccessControlEvent);
     component!(path: SRC5Component, storage: src5, event: SRC5Event);
+    component!(path: RegistryComponent, storage: registry, event: RegistryEvent);
     
     #[abi(embed_v0)]
-    impl AccessControlMixinImpl = AccessControlComponent::AccessControlMixinImpl<ContractState>;
-    
+    impl OwnableMixinImpl = OwnableComponent::OwnableMixinImpl<ContractState>;
+
+    #[abi(embed_v0)]
+    impl RegistryImpl = RegistryComponent::RegistryImpl<ContractState>;
+
     impl UpgradeableInternalImpl = UpgradeableComponent::InternalImpl<ContractState>;
-    impl AccessControlInternalImpl = AccessControlComponent::InternalImpl<ContractState>;
+    impl OwnableInternalImpl = OwnableComponent::InternalImpl<ContractState>;
+    impl RegistryInternalImpl = RegistryComponent::InternalImpl<ContractState>;
 
     #[storage]
     struct Storage {
         // name -> address
         name_owners: Map::<felt252, ContractAddress>,
+        // components
         #[substorage(v0)]
         upgradeable: UpgradeableComponent::Storage,
         #[substorage(v0)]
-        accesscontrol: AccessControlComponent::Storage,
-        #[substorage(v0)]
         src5: SRC5Component::Storage,
+        #[substorage(v0)]
+        ownable: OwnableComponent::Storage,
+        #[substorage(v0)]
+        registry: RegistryComponent::Storage,
     }
 
     #[event]
@@ -50,9 +55,11 @@ mod ControllerResolverDelegation {
         #[flat]
         UpgradeableEvent: UpgradeableComponent::Event,
         #[flat]
-        AccessControlEvent: AccessControlComponent::Event,
-        #[flat]
         SRC5Event: SRC5Component::Event,
+        #[flat]
+        OwnableEvent: OwnableComponent::Event,
+        #[flat]
+        RegistryEvent: RegistryComponent::Event,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -65,20 +72,14 @@ mod ControllerResolverDelegation {
 
     #[constructor]
     fn constructor(
-        ref self: ContractState, admin: ContractAddress, mut executors: Span<ContractAddress>
+        ref self: ContractState, owner: ContractAddress, registry: ContractAddress
     ) {
-        self.accesscontrol.initializer();
-
-        self.accesscontrol._grant_role(DEFAULT_ADMIN_ROLE, admin);
-       
-        while let Option::Some(executor) = executors.pop_front() {
-            self.accesscontrol._grant_role(EXECUTOR_ROLE, *executor);
-        }
-       
+        self.ownable.initializer(owner);
+        self.registry.initializer(registry);
     }
 
     #[abi(embed_v0)]
-    impl AdditionResolveImpl of IResolver<ContractState> {
+    impl ResolverImpl of IResolver<ContractState> {
         fn resolve(
             self: @ContractState, mut domain: Span<felt252>, field: felt252, hint: Span<felt252>
         ) -> felt252 {
@@ -99,7 +100,7 @@ mod ControllerResolverDelegation {
     #[abi(embed_v0)]
     impl ControllerResolverDelegationImpl of super::IControllerResolverDelegation<ContractState> {
         fn set_name(ref self: ContractState, name: felt252, address: ContractAddress) {
-            self.accesscontrol.assert_only_role(EXECUTOR_ROLE);
+            self.registry.assert_only_executor();
 
             let owner = self.name_owners.read(name);
             assert(owner == ContractAddressZeroable::zero(), 'Name is already taken');
@@ -114,7 +115,7 @@ mod ControllerResolverDelegation {
         }
 
         fn reset_name(ref self: ContractState, name: felt252) {
-            self.accesscontrol.assert_only_role(EXECUTOR_ROLE);
+            self.registry.assert_only_executor();
 
             self.name_owners.write(name, ContractAddressZeroable::zero());
         }
@@ -124,7 +125,7 @@ mod ControllerResolverDelegation {
     #[abi(embed_v0)]
     impl UpgradeableImpl of IUpgradeable<ContractState> {
         fn upgrade(ref self: ContractState, new_class_hash: ClassHash) {
-            self.accesscontrol.assert_only_role(DEFAULT_ADMIN_ROLE);
+            self.ownable.assert_only_owner();
 
             self.upgradeable.upgrade(new_class_hash);
         }
