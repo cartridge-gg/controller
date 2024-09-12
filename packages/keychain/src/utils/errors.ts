@@ -20,9 +20,17 @@ export function parseExecutionError(
     };
   }
 
+  let executionErrorRaw = executionError;
+
   // Remove the "Transaction reverted: Transaction execution has failed:\n" prefix
   executionError = executionError.replace(
     /^Transaction reverted: Transaction execution has failed:\n/,
+    "",
+  );
+
+  // Remove the "Transaction validation error:" prefix if it exists
+  executionError = executionError.replace(
+    /^Transaction validation error: /,
     "",
   );
 
@@ -34,7 +42,9 @@ export function parseExecutionError(
       selector?: string;
       error: string[];
     } = {
-      address: trace.match(/contract address: (0x[a-fA-F0-9]+)/)?.[1],
+      address:
+        trace.match(/contract address: (0x[a-fA-F0-9]+)/)?.[1] ||
+        trace.match(/Requested contract address (0x[a-fA-F0-9]+)/)?.[1],
       class: trace.match(/class hash: (0x[a-fA-F0-9]+)/)?.[1],
       selector: trace.match(/selector: (0x[a-fA-F0-9]+)/)?.[1],
       error: [],
@@ -67,7 +77,7 @@ export function parseExecutionError(
     }
 
     if (extractedInfo.error.length === 0) {
-      extractedInfo.error = ["Unknown error"];
+      extractedInfo.error = [trace.trim()];
     }
 
     return extractedInfo;
@@ -104,7 +114,7 @@ export function parseExecutionError(
   }
 
   return {
-    raw: executionError,
+    raw: executionErrorRaw,
     summary,
     stack: processedStack,
   };
