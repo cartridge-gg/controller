@@ -237,7 +237,6 @@ export function ControllerErrorAlert({
     case ErrorCode.AccountClassHashCalculation:
     case ErrorCode.AccountClassCompression:
     case ErrorCode.AccountFeeOutOfRange:
-    case ErrorCode.InsufficientBalance:
       title = "Account Error";
       break;
     case ErrorCode.ProviderRateLimited:
