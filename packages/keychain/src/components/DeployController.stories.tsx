@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 
 import { DeployController } from "./DeployController";
 import { constants, num, RpcProvider } from "starknet";
+import { JsControllerError } from "@cartridge/account-wasm";
 
 const meta = {
   component: DeployController,
@@ -9,7 +10,7 @@ const meta = {
     connection: {
       controller: {
         account: {
-          chainId: constants.StarknetChainId.SN_SEPOLIA,
+          chainId: constants.StarknetChainId.SN_SEPOLIA as string,
           callContract: () =>
             Promise.resolve([num.toHex("2000000000000000000"), "0x0"]),
           rpc: new RpcProvider({ nodeUrl: "https://api.cartridge/x/sepolia" }),
@@ -32,6 +33,6 @@ export const Default: Story = {
           overall_fee: "1000000000000000000",
         },
       },
-    },
+    } as unknown as JsControllerError,
   },
 };
