@@ -140,7 +140,17 @@ export function useConnectionValue() {
       const update = async () => {
         try {
           let provider = new RpcProvider({ nodeUrl: rpcUrl });
-          let chainId = await provider.getChainId();
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(
+              () => reject(new Error("Chain ID fetch timed out")),
+              3000,
+            ),
+          );
+          const chainIdPromise = provider.getChainId();
+          let chainId = (await Promise.race([
+            chainIdPromise,
+            timeoutPromise,
+          ])) as constants.StarknetChainId;
           setChainId(chainId);
 
           controller?.updateChain(rpcUrl, chainId);
