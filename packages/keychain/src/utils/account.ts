@@ -10,13 +10,11 @@ import {
   InvokeFunctionResponse,
   TypedData,
   BigNumberish,
-  InvocationsDetails,
-  num,
   AllowArray,
+  UniversalDetails,
+  Abi,
 } from "starknet";
 
-import { selectors, VERSION } from "./selectors";
-import Storage from "./storage";
 import {
   CartridgeAccount,
   JsInvocationsDetails,
@@ -26,7 +24,6 @@ import { PaymasterOptions } from "@cartridge/controller";
 
 class Account extends BaseAccount {
   rpc: RpcProvider;
-  private selector: string;
   chainId: string;
   username: string;
   cartridge: CartridgeAccount;
@@ -47,7 +44,6 @@ class Account extends BaseAccount {
     super({ nodeUrl }, address, signer);
 
     this.rpc = new RpcProvider({ nodeUrl });
-    this.selector = selectors[VERSION].deployment(address, chainId);
     this.chainId = chainId;
     this.username = username;
     this.cartridge = CartridgeAccount.new(
@@ -64,35 +60,23 @@ class Account extends BaseAccount {
 
   async executeFromOutside(
     calls: AllowArray<Call>,
-    paymaster: PaymasterOptions,
-  ): Promise<string> {
-    return await this.cartridge.executeFromOutside(
-      normalizeCalls(calls),
-      paymaster.caller,
-    );
+    _?: PaymasterOptions,
+  ): Promise<InvokeFunctionResponse> {
+    return await this.cartridge.executeFromOutside(normalizeCalls(calls));
   }
 
-  // @ts-expect-error TODO: fix overload type mismatch
   async execute(
-    calls: AllowArray<Call>,
-    details?: InvocationsDetails,
+    transactions: AllowArray<Call>,
+    abisOrDetails?: Abi[] | UniversalDetails,
+    details?: UniversalDetails,
   ): Promise<InvokeFunctionResponse> {
-    details.nonce = details.nonce ?? (await super.getNonce("pending"));
+    const executionDetails =
+      (Array.isArray(abisOrDetails) ? details : abisOrDetails) || {};
 
     const res = await this.cartridge.execute(
-      normalizeCalls(calls),
-      details as JsInvocationsDetails,
+      normalizeCalls(transactions),
+      executionDetails as JsInvocationsDetails,
     );
-
-    Storage.update(this.selector, {
-      nonce: num.toHex(BigInt(details.nonce) + 1n),
-    });
-
-    this.rpc
-      .waitForTransaction(res.transaction_hash, {
-        retryInterval: 1000,
-      })
-      .catch(() => this.resetNonce());
 
     return res;
   }
@@ -132,25 +116,8 @@ class Account extends BaseAccount {
     return this.cartridge.signMessage(JSON.stringify(typedData));
   }
 
-  async getNonce(blockIdentifier?: any): Promise<string> {
-    const chainNonce = await super.getNonce(blockIdentifier);
-
-    if (blockIdentifier !== "pending") {
-      return chainNonce;
-    }
-
-    const state = Storage.get(this.selector);
-    if (!state || !state.nonce || BigInt(chainNonce) > BigInt(state.nonce)) {
-      return chainNonce;
-    }
-
-    return state.nonce;
-  }
-
-  resetNonce() {
-    Storage.update(this.selector, {
-      nonce: undefined,
-    });
+  async getNonce(_?: any): Promise<string> {
+    return await this.cartridge.getNonce();
   }
 
   async delegateAccount(): Promise<string> {

@@ -1,16 +1,16 @@
 use std::time::Duration;
 
-use starknet::macros::{felt, selector};
+use starknet::{
+    core::types::Call,
+    macros::{felt, selector},
+};
 
-use crate::abigen::controller::{Call, OutsideExecution};
 use crate::abigen::erc_20::Erc20;
-use crate::account::outside_execution::OutsideExecutionCaller;
 use crate::signers::Signer;
 use crate::tests::account::FEE_TOKEN_ADDRESS;
 use crate::tests::runners::katana::KatanaRunner;
 use crate::transaction_waiter::TransactionWaiter;
 use cainome::cairo_serde::{CairoSerde, ContractAddress, U256};
-use starknet::signers::SigningKey;
 
 #[tokio::test]
 async fn test_paymaster_request_success() {
@@ -26,26 +26,20 @@ async fn test_paymaster_request_success() {
         high: 0,
     };
 
-    let outside_execution = OutsideExecution {
-        caller: OutsideExecutionCaller::Any.into(),
-        execute_after: u64::MIN,
-        execute_before: u64::MAX,
-        calls: vec![Call {
-            to: (*FEE_TOKEN_ADDRESS).into(),
-            selector: selector!("transfer"),
-            calldata: [
-                <ContractAddress as CairoSerde>::cairo_serialize(&recipient),
-                <U256 as CairoSerde>::cairo_serialize(&amount),
-            ]
-            .concat(),
-        }],
-        nonce: SigningKey::from_random().secret_scalar(),
-    };
+    let calls = vec![Call {
+        to: *FEE_TOKEN_ADDRESS,
+        selector: selector!("transfer"),
+        calldata: [
+            <ContractAddress as CairoSerde>::cairo_serialize(&recipient),
+            <U256 as CairoSerde>::cairo_serialize(&amount),
+        ]
+        .concat(),
+    }];
 
-    let result = controller.execute_from_outside(outside_execution).await;
+    let result = controller.execute_from_outside(calls).await;
     let response = result.expect("Failed to execute from outside");
 
-    TransactionWaiter::new(response, runner.client())
+    TransactionWaiter::new(response.transaction_hash, runner.client())
         .with_timeout(Duration::from_secs(5))
         .wait()
         .await

@@ -74,9 +74,8 @@ export function execute({
         // Try paymaster if it is enabled. If it fails, fallback to user pays session flow.
         if (paymaster) {
           try {
-            const transaction_hash = await account.executeFromOutside(
+            const { transaction_hash } = await account.executeFromOutside(
               calls,
-              paymaster,
             );
 
             return resolve({
@@ -122,10 +121,12 @@ export function execute({
             );
           }
 
-          let res = await account.execute(transactions, { maxFee });
+          let { transaction_hash } = await account.execute(transactions, {
+            maxFee,
+          });
           return resolve({
             code: ResponseCodes.SUCCESS,
-            transaction_hash: res.transaction_hash,
+            transaction_hash,
           });
         } catch (e) {
           setContext({

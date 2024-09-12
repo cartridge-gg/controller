@@ -3,6 +3,7 @@ import {
   BigNumberish,
   addAddressPadding,
   num,
+  InvokeFunctionResponse,
 } from "starknet";
 
 import { Policy } from "@cartridge/controller";
@@ -117,8 +118,8 @@ export default class Controller {
     expiresAt: bigint,
     policies: Policy[],
     publicKey: string,
-    _maxFee?: BigNumberish,
-  ): Promise<string> {
+    maxFee: BigNumberish,
+  ): Promise<InvokeFunctionResponse> {
     if (!this.account) {
       throw new Error("Account not found");
     }
@@ -127,6 +128,7 @@ export default class Controller {
       policies as JsPolicy[],
       expiresAt,
       publicKey,
+      num.toHex(maxFee),
     );
   }
 

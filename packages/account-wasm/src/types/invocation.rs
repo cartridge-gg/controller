@@ -11,7 +11,5 @@ use wasm_bindgen::prelude::*;
 #[serde(rename_all = "camelCase")]
 pub struct JsInvocationsDetails {
     #[serde_as(as = "UfeHex")]
-    pub nonce: Felt,
-    #[serde_as(as = "UfeHex")]
     pub max_fee: Felt,
 }

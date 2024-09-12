@@ -4,7 +4,7 @@ import { Chain, mainnet, sepolia } from "@starknet-react/chains";
 import { StarknetConfig, starkscan } from "@starknet-react/core";
 import { PropsWithChildren } from "react";
 import CartridgeConnector from "@cartridge/connector";
-import { RpcProvider /*, shortString */ } from "starknet";
+import { RpcProvider, shortString } from "starknet";
 
 export function StarknetProvider({ children }: PropsWithChildren) {
   return (
@@ -61,9 +61,9 @@ const cartridge = new CartridgeConnector({
           "keychain",
         ),
   rpc: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
-  // paymaster: {
-  //   caller: shortString.encodeShortString("ANY_CALLER"),
-  // },
+  paymaster: {
+    caller: shortString.encodeShortString("ANY_CALLER"),
+  },
   // theme: "dope-wars",
   // colorMode: "light"
   // prefunds: [

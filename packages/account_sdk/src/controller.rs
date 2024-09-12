@@ -1,5 +1,5 @@
 use crate::abigen::controller::{OutsideExecution, Owner, Signer as AbigenSigner, StarknetSigner};
-use crate::account::outside_execution::OutsideExecutionAccount;
+use crate::account::outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller};
 use crate::account::session::hash::{AllowedMethod, Session};
 use crate::account::session::SessionAccount;
 use crate::account::AccountHashAndCallsSigner;
@@ -34,6 +34,9 @@ use starknet::{
     core::types::{BlockId, Felt},
     signers::{SigningKey, VerifyingKey},
 };
+
+#[cfg(target_arch = "wasm32")]
+use js_sys::Date;
 
 const ETH_CONTRACT_ADDRESS: Felt =
     felt!("0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7");
@@ -171,28 +174,25 @@ where
         methods: Vec<AllowedMethod>,
         expires_at: u64,
         public_key: Felt,
-    ) -> Result<Felt, ControllerError> {
+        max_fee: Felt,
+    ) -> Result<InvokeTransactionResult, ControllerError> {
         let pubkey = VerifyingKey::from_scalar(public_key);
         let signer = AbigenSigner::Starknet(StarknetSigner {
             pubkey: NonZero::new(pubkey.scalar()).unwrap(),
         });
 
         let session = Session::new(methods, expires_at, &signer)?;
-        let register_execution = self
+
+        let call = self
             .contract
-            .register_session(&session.raw(), &self.owner_guid());
+            .register_session_getcall(&session.raw(), &self.owner_guid());
+        let calls = vec![call];
+        let txn = self.execute(calls, max_fee).await?;
 
-        let txn = register_execution
-            // FIXME: est fee is not accurate as it does not account for validation cost, so set to some high multiple for now
-            .fee_estimate_multiplier(5.0)
-            .send()
-            .await
-            .map_err(ControllerError::AccountError)?;
-
-        Ok(txn.transaction_hash)
+        Ok(txn)
     }
 
-    pub async fn execute_from_outside(
+    pub async fn execute_from_outside_raw(
         &self,
         outside_execution: OutsideExecution,
     ) -> Result<Felt, ControllerError> {
@@ -211,6 +211,39 @@ where
             .map_err(ControllerError::PaymasterError)?;
 
         Ok(res.transaction_hash)
+    }
+
+    pub async fn execute_from_outside(
+        &self,
+        calls: Vec<Call>,
+    ) -> Result<InvokeTransactionResult, ControllerError> {
+        let now = get_current_timestamp();
+
+        let outside_execution = OutsideExecution {
+            caller: OutsideExecutionCaller::Any.into(),
+            execute_after: 0,
+            execute_before: now + 600,
+            calls: calls.into_iter().map(|call| call.into()).collect(),
+            nonce: SigningKey::from_random().secret_scalar(),
+        };
+
+        let signed = self
+            .sign_outside_execution(outside_execution.clone())
+            .await?;
+
+        let res = self
+            .provider()
+            .add_execute_outside_transaction(
+                outside_execution,
+                self.account.address,
+                signed.signature,
+            )
+            .await
+            .map_err(ControllerError::PaymasterError)?;
+
+        Ok(InvokeTransactionResult {
+            transaction_hash: res.transaction_hash,
+        })
     }
 
     pub async fn estimate_invoke_fee(
@@ -266,15 +299,13 @@ where
     pub async fn execute(
         &self,
         calls: Vec<Call>,
-        nonce: Felt,
         max_fee: Felt,
     ) -> Result<InvokeTransactionResult, ControllerError> {
-        let result = self
-            .execute_v1(calls)
-            .max_fee(max_fee)
-            .nonce(nonce)
-            .send()
-            .await;
+        if max_fee == Felt::ZERO {
+            return self.execute_from_outside(calls).await;
+        }
+
+        let result = self.execute_v1(calls).max_fee(max_fee).send().await;
 
         match result {
             Ok(tx_result) => Ok(tx_result),
@@ -379,6 +410,19 @@ where
     }
 }
 
+#[cfg(not(target_arch = "wasm32"))]
+fn get_current_timestamp() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .expect("Time went backwards")
+        .as_secs()
+}
+
+#[cfg(target_arch = "wasm32")]
+fn get_current_timestamp() -> u64 {
+    (Date::now() / 1000.0) as u64
+}
+
 impl_account!(Controller<P: CartridgeProvider, B: Backend>, |account: &Controller<P, B>, context| {
     if let SignerInteractivityContext::Execution { calls } = context {
         account.session_account(calls).is_none()
@@ -387,6 +431,8 @@ impl_account!(Controller<P: CartridgeProvider, B: Backend>, |account: &Controlle
     }
 });
 
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 impl<P, B> ConnectedAccount for Controller<P, B>
 where
     P: CartridgeProvider + Send + Sync + Clone,
@@ -395,11 +441,17 @@ where
     type Provider = P;
 
     fn provider(&self) -> &Self::Provider {
-        self.account.provider()
+        &self.provider
     }
 
     fn block_id(&self) -> BlockId {
         self.account.block_id()
+    }
+
+    async fn get_nonce(&self) -> Result<Felt, ProviderError> {
+        self.provider
+            .get_nonce(self.block_id(), SpecificAccount::address(self))
+            .await
     }
 }
 
