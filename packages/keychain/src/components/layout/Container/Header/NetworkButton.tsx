@@ -13,7 +13,6 @@ export function NetworkButton() {
   return (
     <HStack bg="solid.bg" borderRadius="base" p={3}>
       <Circle size={5} bg="solid.primary">
-        <StarknetColorIcon fontSize="xl" />
         {(() => {
           switch (chainId) {
             case constants.StarknetChainId.SN_MAIN:
