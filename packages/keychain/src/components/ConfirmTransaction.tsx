@@ -60,6 +60,7 @@ export function ConfirmTransaction() {
     ctx.error,
     setMaxFee,
     setCtrlError,
+    estimateFees,
   ]);
 
   const onSubmit = useCallback(async () => {

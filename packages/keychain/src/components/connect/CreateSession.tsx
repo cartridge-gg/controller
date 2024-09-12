@@ -2,7 +2,7 @@ import { Container, Content, Footer } from "components/layout";
 import { BigNumberish } from "starknet";
 import { Policy } from "@cartridge/controller";
 import { ControllerError } from "utils/connection";
-import { Button } from "@chakra-ui/react";
+import { Box, Button } from "@chakra-ui/react";
 import { useCallback, useState } from "react";
 import { useConnection } from "hooks/connection";
 import { Policies } from "components/Policies";
@@ -36,7 +36,9 @@ export function CreateSession({
     <Container title="Create Session">
       <Content>
         <SessionConsent />
-        <Policies policies={policies} />
+        <Box maxH={340} overflowY="auto">
+          <Policies policies={policies} />
+        </Box>
       </Content>
 
       <Footer hideTxSummary>
