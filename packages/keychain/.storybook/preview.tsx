@@ -16,6 +16,7 @@ import {
 import { constants } from "starknet";
 import { getChainName } from "../src/utils/network";
 import { ETH_CONTRACT_ADDRESS } from "../src/utils/token";
+import { ConnectCtx, ConnectionCtx } from "../src/utils/connection/types";
 
 const inter = Inter({ subsets: ["latin"] });
 const ibmPlexMono = IBM_Plex_Mono({
@@ -67,12 +68,6 @@ const preview: Preview = {
   ],
 };
 
-interface StoryParameters extends Parameters {
-  connection?: {
-    chainId?: string;
-  };
-}
-
 function Provider({
   children,
   parameters,
@@ -99,13 +94,27 @@ function Provider({
   );
 }
 
+interface StoryParameters extends Parameters {
+  connection?: {
+    context?: ConnectionCtx;
+    chainId?: string;
+  };
+}
+
 function useMockedConnection({
   chainId = constants.StarknetChainId.SN_SEPOLIA,
+  context = {
+    type: "connect",
+    origin: "http://localhost:3002",
+    policies: [],
+    resolve: () => {},
+    reject: () => {},
+  } as ConnectCtx,
 }: StoryParameters["connection"] = {}): ConnectionContextValue {
   const chainName = getChainName(chainId);
 
   return {
-    context: undefined,
+    context,
     controller: {},
     origin: "http://localhost:3002",
     rpcUrl: "http://api.cartridge.gg/x/sepolia",
