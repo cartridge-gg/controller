@@ -121,6 +121,9 @@ export function parseExecutionError(
       } else if (lastErrorMessage === "argent/invalid-timestamp") {
         summary = "Invalid paymaster transaction timestamp";
         lastError[lastError.length - 1] = summary;
+      } else if (lastErrorMessage === "session/already-registered") {
+        summary = "Session already registered";
+        lastError[lastError.length - 1] = summary;
       } else {
         summary = "Execution error.";
       }

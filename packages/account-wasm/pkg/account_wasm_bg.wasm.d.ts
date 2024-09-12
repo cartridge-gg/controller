@@ -20,6 +20,7 @@ export function cartridgeaccount_hasSession(a: number, b: number, c: number, d: 
 export function cartridgeaccount_sessionJson(a: number, b: number): void;
 export function cartridgeaccount_revokeSession(a: number, b: number): void;
 export function cartridgeaccount_signMessage(a: number, b: number, c: number): number;
+export function cartridgeaccount_getNonce(a: number): number;
 export function cartridgeaccount_deploySelf(a: number, b: number): number;
 export function cartridgeaccount_delegateAccount(a: number): number;
 export function __wbg_cartridgesessionaccount_free(a: number, b: number): void;

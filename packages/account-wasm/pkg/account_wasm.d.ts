@@ -61,13 +61,16 @@ export enum ErrorCode {
   ProviderArrayLengthMismatch = 130,
   ProviderOther = 131,
 }
-export interface JsEstimateFeeDetails {
+export interface JsOutsideExecution {
+    caller: Felt;
+    executeBefore: number;
+    executeAfter: number;
+    calls: JsCall[];
     nonce: Felt;
 }
 
-export interface JsPolicy {
-    target: string;
-    method: string;
+export interface JsEstimateFeeDetails {
+    nonce: Felt;
 }
 
 export interface JsCall {
@@ -81,8 +84,12 @@ export type Felts = JsFelt[];
 export type JsFelt = Felt;
 
 export interface JsInvocationsDetails {
-    nonce: Felt;
     maxFee: Felt;
+}
+
+export interface JsPolicy {
+    target: string;
+    method: string;
 }
 
 export interface JsSession {
@@ -93,14 +100,6 @@ export interface JsSession {
 export interface JsCredentials {
     authorization: Felt[];
     privateKey: Felt;
-}
-
-export interface JsOutsideExecution {
-    caller: Felt;
-    executeBefore: number;
-    executeAfter: number;
-    calls: JsCall[];
-    nonce: Felt;
 }
 
 /**
@@ -140,9 +139,9 @@ export class CartridgeAccount {
 * @param {bigint} expires_at
 * @param {JsFelt} public_key
 * @param {JsFelt} max_fee
-* @returns {Promise<JsFelt>}
+* @returns {Promise<any>}
 */
-  registerSession(policies: (JsPolicy)[], expires_at: bigint, public_key: JsFelt, max_fee: JsFelt): Promise<JsFelt>;
+  registerSession(policies: (JsPolicy)[], expires_at: bigint, public_key: JsFelt, max_fee: JsFelt): Promise<any>;
 /**
 * @param {(JsPolicy)[]} policies
 * @param {bigint} expires_at
@@ -183,6 +182,10 @@ export class CartridgeAccount {
 * @returns {Promise<Felts>}
 */
   signMessage(typed_data: string): Promise<Felts>;
+/**
+* @returns {Promise<any>}
+*/
+  getNonce(): Promise<any>;
 /**
 * @param {JsFelt} max_fee
 * @returns {Promise<any>}

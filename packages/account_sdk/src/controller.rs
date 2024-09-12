@@ -175,7 +175,7 @@ where
         expires_at: u64,
         public_key: Felt,
         max_fee: Felt,
-    ) -> Result<Felt, ControllerError> {
+    ) -> Result<InvokeTransactionResult, ControllerError> {
         let pubkey = VerifyingKey::from_scalar(public_key);
         let signer = AbigenSigner::Starknet(StarknetSigner {
             pubkey: NonZero::new(pubkey.scalar()).unwrap(),
@@ -189,7 +189,7 @@ where
         let calls = vec![call];
         let txn = self.execute(calls, max_fee).await?;
 
-        Ok(txn.transaction_hash)
+        Ok(txn)
     }
 
     pub async fn execute_from_outside_raw(

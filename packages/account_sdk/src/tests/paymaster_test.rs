@@ -27,7 +27,7 @@ async fn test_paymaster_request_success() {
     };
 
     let calls = vec![Call {
-        to: (*FEE_TOKEN_ADDRESS).into(),
+        to: *FEE_TOKEN_ADDRESS,
         selector: selector!("transfer"),
         calldata: [
             <ContractAddress as CairoSerde>::cairo_serialize(&recipient),

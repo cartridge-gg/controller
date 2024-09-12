@@ -23,32 +23,45 @@ export function RegisterSession({
   const { controller, policies } = useConnection();
   const [isConnecting, setIsConnecting] = useState(false);
   const [expiresAt] = useState<bigint>(3000000000n);
-  const [maxFee] = useState<BigNumberish>();
+  const [maxFee] = useState<BigNumberish>(0);
   const [error, setError] = useState<ControllerError>();
 
   const onRegisterSession = useCallback(async () => {
     try {
       setError(undefined);
       setIsConnecting(true);
-      const hash = await controller.registerSession(
+      const { transaction_hash } = await controller.registerSession(
         expiresAt,
         policies,
         publicKey,
         maxFee,
       );
 
-      await controller.account.waitForTransaction(hash, {
+      await controller.account.waitForTransaction(transaction_hash, {
         retryInterval: 1000,
         successStates: [
           TransactionExecutionStatus.SUCCEEDED,
           TransactionFinalityStatus.ACCEPTED_ON_L2,
         ],
       });
-      onConnect(policies, hash);
+      onConnect(policies, transaction_hash);
       await controller.createSession(expiresAt, policies, maxFee);
       onConnect(policies);
     } catch (e) {
-      setError(e);
+      if (
+        e.data &&
+        typeof e.data === "string" &&
+        e.data.includes("session/already-registered")
+      ) {
+        onConnect(policies);
+        return;
+      }
+
+      setError({
+        code: e.code,
+        message: e.message,
+        data: e.data ? JSON.parse(e.data) : undefined,
+      });
       setIsConnecting(false);
     }
   }, [controller, expiresAt, policies, maxFee, publicKey, onConnect]);

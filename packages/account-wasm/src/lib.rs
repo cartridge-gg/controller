@@ -118,18 +118,19 @@ impl CartridgeAccount {
         expires_at: u64,
         public_key: JsFelt,
         max_fee: JsFelt,
-    ) -> Result<JsFelt> {
+    ) -> std::result::Result<JsValue, JsControllerError> {
         let methods = policies
             .into_iter()
             .map(TryFrom::try_from)
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
-        let hash = self
+        let res = self
             .controller
             .register_session(methods, expires_at, public_key.0, max_fee.0)
-            .await?;
+            .await
+            .map_err(JsControllerError::from)?;
 
-        Ok(JsFelt(hash))
+        Ok(to_value(&res)?)
     }
 
     #[wasm_bindgen(js_name = createSession)]
@@ -244,6 +245,17 @@ impl CartridgeAccount {
             .map_err(|e| JsControllerError::from(ControllerError::SignError(e)))?;
 
         Ok(Felts(signature.into_iter().map(JsFelt).collect()))
+    }
+
+    #[wasm_bindgen(js_name = getNonce)]
+    pub async fn get_nonce(&self) -> std::result::Result<JsValue, JsControllerError> {
+        let nonce = self
+            .controller
+            .get_nonce()
+            .await
+            .map_err(|e| JsControllerError::from(ControllerError::ProviderError(e)))?;
+
+        Ok(to_value(&nonce)?)
     }
 
     #[wasm_bindgen(js_name = deploySelf)]
