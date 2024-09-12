@@ -118,9 +118,9 @@ macro_rules! impl_account {
             }
 
 
-            fn execute(&self, calls: Vec<starknet::core::types::Call>) -> starknet::accounts::ExecutionV1<Self> {
-                self.execute_v1(calls)
-            }
+            // fn execute(&self, calls: Vec<starknet::core::types::Call>) -> starknet::accounts::ExecutionV1<Self> {
+            //     self.execute_v1(calls)
+            // }
 
             fn declare_v2(
                 &self,

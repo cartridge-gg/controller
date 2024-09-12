@@ -22,12 +22,14 @@ pub struct Credentials {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum StorageValue {
+    Version(String),
     Session(SessionMetadata),
+    Nonce(Felt),
 }
 
 #[async_trait]
 pub trait StorageBackend: Send + Sync {
-    fn set(&mut self, key: &str, value: &StorageValue) -> Result<(), StorageError>;
+    fn set(&mut self, kvs: &[(&String, &StorageValue)]) -> Result<(), StorageError>;
     fn get(&self, key: &str) -> Result<Option<StorageValue>, StorageError>;
     fn remove(&mut self, key: &str) -> Result<(), StorageError>;
     fn clear(&mut self) -> Result<(), StorageError>;
@@ -59,9 +61,11 @@ impl InMemoryBackend {
 
 #[async_trait]
 impl StorageBackend for InMemoryBackend {
-    fn set(&mut self, key: &str, value: &StorageValue) -> Result<(), StorageError> {
-        let serialized = serde_json::to_string(value)?;
-        self.storage.insert(key.to_string(), serialized);
+    fn set(&mut self, kvs: &[(&str, &StorageValue)]) -> Result<(), StorageError> {
+        for (key, value) in kvs {
+            let serialized = serde_json::to_string(value)?;
+            self.storage.insert(key.to_string(), serialized);
+        }
         Ok(())
     }
 
@@ -125,5 +129,13 @@ impl Selectors {
             urlencoding::encode(app_id),
             chain_id
         )
+    }
+
+    pub fn nonce() -> String {
+        "@cartridge/nonce".to_string()
+    }
+
+    pub fn version() -> String {
+        "@cartridge/version".to_string()
     }
 }

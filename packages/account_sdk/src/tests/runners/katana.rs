@@ -189,6 +189,7 @@ impl KatanaRunner {
             self.chain_id,
             InMemoryBackend::default(),
         )
+        .unwrap()
     }
 
     pub async fn deploy_controller_with_external_owner(

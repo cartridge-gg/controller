@@ -39,6 +39,7 @@ async fn test_deploy_controller() {
         chain_id,
         backend.clone(),
     )
+    .unwrap()
     .deploy()
     .address();
 
@@ -51,7 +52,8 @@ async fn test_deploy_controller() {
         address,
         chain_id,
         backend,
-    );
+    )
+    .unwrap();
 
     let deploy = controller.deploy();
     assert_eq!(address, deploy.address());

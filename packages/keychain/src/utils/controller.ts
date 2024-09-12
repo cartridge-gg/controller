@@ -137,7 +137,6 @@ export default class Controller {
 
   store() {
     Storage.set("version", VERSION);
-
     Storage.set(
       selectors[VERSION].admin(this.address, process.env.NEXT_PUBLIC_ADMIN_URL),
       {},
@@ -147,7 +146,6 @@ export default class Controller {
       rpcUrl: this.rpcUrl,
       chainId: this.chainId,
     });
-
     return Storage.set(selectors[VERSION].account(this.address), {
       username: this.username,
       publicKey: this.publicKey,

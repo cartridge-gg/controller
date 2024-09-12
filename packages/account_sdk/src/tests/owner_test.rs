@@ -310,7 +310,8 @@ async fn test_change_owner_invalidate_old_sessions() {
         controller.address(),
         runner.client().chain_id().await.unwrap(),
         InMemoryBackend::default(),
-    );
+    )
+    .unwrap();
 
     let session_account = controller
         .account

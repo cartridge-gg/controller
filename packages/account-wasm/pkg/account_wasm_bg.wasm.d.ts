@@ -1,6 +1,13 @@
 /* tslint:disable */
 /* eslint-disable */
 export const memory: WebAssembly.Memory;
+export function __wbg_jscontrollererror_free(a: number, b: number): void;
+export function __wbg_get_jscontrollererror_code(a: number): number;
+export function __wbg_set_jscontrollererror_code(a: number, b: number): void;
+export function __wbg_get_jscontrollererror_message(a: number, b: number): void;
+export function __wbg_set_jscontrollererror_message(a: number, b: number, c: number): void;
+export function __wbg_get_jscontrollererror_data(a: number, b: number): void;
+export function __wbg_set_jscontrollererror_data(a: number, b: number, c: number): void;
 export function __wbg_cartridgeaccount_free(a: number, b: number): void;
 export function cartridgeaccount_new(a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number, n: number, o: number): void;
 export function cartridgeaccount_ownerGuid(a: number): number;
@@ -21,13 +28,6 @@ export function cartridgesessionaccount_new_as_registered(a: number, b: number, 
 export function cartridgesessionaccount_sign(a: number, b: number, c: number, d: number): number;
 export function cartridgesessionaccount_execute(a: number, b: number, c: number): number;
 export function cartridgesessionaccount_execute_from_outside(a: number, b: number, c: number): number;
-export function __wbg_jscontrollererror_free(a: number, b: number): void;
-export function __wbg_get_jscontrollererror_code(a: number): number;
-export function __wbg_set_jscontrollererror_code(a: number, b: number): void;
-export function __wbg_get_jscontrollererror_message(a: number, b: number): void;
-export function __wbg_set_jscontrollererror_message(a: number, b: number, c: number): void;
-export function __wbg_get_jscontrollererror_data(a: number, b: number): void;
-export function __wbg_set_jscontrollererror_data(a: number, b: number, c: number): void;
 export function __wbindgen_malloc(a: number, b: number): number;
 export function __wbindgen_realloc(a: number, b: number, c: number, d: number): number;
 export const __wbindgen_export_2: WebAssembly.Table;

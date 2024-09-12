@@ -61,6 +61,16 @@ export enum ErrorCode {
   ProviderArrayLengthMismatch = 130,
   ProviderOther = 131,
 }
+export interface JsCall {
+    contractAddress: Felt;
+    entrypoint: string;
+    calldata: Felt[];
+}
+
+export type Felts = JsFelt[];
+
+export type JsFelt = Felt;
+
 export interface JsEstimateFeeDetails {
     nonce: Felt;
 }
@@ -68,11 +78,6 @@ export interface JsEstimateFeeDetails {
 export interface JsPolicy {
     target: string;
     method: string;
-}
-
-export interface JsInvocationsDetails {
-    nonce: Felt;
-    maxFee: Felt;
 }
 
 export interface JsSession {
@@ -85,22 +90,17 @@ export interface JsCredentials {
     privateKey: Felt;
 }
 
-export interface JsCall {
-    contractAddress: Felt;
-    entrypoint: string;
-    calldata: Felt[];
-}
-
-export type Felts = JsFelt[];
-
-export type JsFelt = Felt;
-
 export interface JsOutsideExecution {
     caller: Felt;
     executeBefore: number;
     executeAfter: number;
     calls: JsCall[];
     nonce: Felt;
+}
+
+export interface JsInvocationsDetails {
+    nonce: Felt;
+    maxFee: Felt;
 }
 
 /**
