@@ -32,6 +32,7 @@ export function ConfirmTransaction() {
   const account = controller.account;
 
   const estimateFees = useCallback(async () => {
+    console.log("est fee");
     try {
       const est = await account.estimateInvokeFee(
         ctx.transactions,
@@ -39,6 +40,7 @@ export function ConfirmTransaction() {
       );
       setMaxFee(est.overall_fee);
     } catch (e) {
+      console.log({ e });
       setCtrlError({
         code: e.code,
         message: e.message,
@@ -49,7 +51,7 @@ export function ConfirmTransaction() {
 
   // Estimate fees
   useEffect(() => {
-    if (!controller || !ctx.transactions || ctx.error) return;
+    if (!controller || !ctx.transactions) return;
     estimateFees();
   }, [
     controller,
@@ -170,7 +172,11 @@ export function ConfirmTransaction() {
           case ErrorCode.InsufficientBalance:
             return (
               <Footer>
-                <Fees maxFee={maxFee} variant="info" />
+                {ctrlError ? (
+                  <ControllerErrorAlert error={ctrlError} />
+                ) : (
+                  <Fees maxFee={maxFee} />
+                )}
 
                 <Button
                   colorScheme="colorful"

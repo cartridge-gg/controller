@@ -30,11 +30,10 @@ export function DeployController({
     hasPrefundRequest,
   } = useConnection();
   const { deploySelf, isDeploying } = useDeploy();
-  const [fundHash, setFundHash] = useState<string>();
   const [deployHash, setDeployHash] = useState<string>();
   const [error, setError] = useState<Error>();
   const [accountState, setAccountState] = useState<
-    "fund" | "funding" | "deploy" | "deploying" | "deployed"
+    "fund" | "deploy" | "deploying" | "deployed"
   >("fund");
   const feeEstimate: string | undefined =
     ctrlError.data?.fee_estimate.overall_fee;
@@ -68,7 +67,7 @@ export function DeployController({
 
   const { balance, isLoading } = useBalance({ address: account.address });
   useEffect(() => {
-    if (!feeEstimate || !["fund", "funding"].includes(accountState)) return;
+    if (!feeEstimate || accountState != "fund") return;
 
     if (balance >= BigInt(feeEstimate)) {
       setAccountState("deploy");
@@ -111,26 +110,10 @@ export function DeployController({
             </>
           }
           defaultAmount={feeEstimate ?? ETH_MIN_PREFUND}
-          onComplete={(hash) => {
-            setFundHash(hash);
-            setAccountState("funding");
+          onComplete={() => {
+            setAccountState("deploy");
           }}
         />
-      );
-    case "funding":
-      return (
-        <Container
-          variant="connect"
-          icon={<Spinner />}
-          title="Funding Controller"
-          description={`Your controller is being funded on ${chainName}`}
-        >
-          <Content alignItems="center">
-            {fundHash && (
-              <ExplorerLink chainId={account.chainId} txHash={fundHash} />
-            )}
-          </Content>
-        </Container>
       );
     case "deploy":
       return (

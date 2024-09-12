@@ -9,6 +9,7 @@ export * from "./fn";
 export * from "./copy";
 export * from "./deployer";
 export * from "./desktop";
+export * from "./dollar";
 export * from "./dots";
 export * from "./double-wedge";
 export * from "./external";
