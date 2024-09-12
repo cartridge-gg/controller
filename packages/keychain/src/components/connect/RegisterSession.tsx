@@ -45,8 +45,6 @@ export function RegisterSession({
         ],
       });
       onConnect(policies, transaction_hash);
-      await controller.createSession(expiresAt, policies, maxFee);
-      onConnect(policies);
     } catch (e) {
       if (
         e.data &&
