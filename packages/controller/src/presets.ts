@@ -127,5 +127,5 @@ export const defaultPresets: ControllerThemePresets = {
     colors: {
       primary: "#F59100",
     },
-  }
+  },
 };
