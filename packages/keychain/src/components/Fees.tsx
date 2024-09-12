@@ -28,7 +28,9 @@ export function Fees({
     }
 
     setFormattedFee(
-      maxFee > 10000000000000n
+      maxFee === 0n
+        ? "FREE"
+        : maxFee > 10000000000000n
         ? `~${parseFloat(formatUnits(maxFee, 18)).toFixed(5)}`
         : "<0.00001",
     );

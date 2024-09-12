@@ -23,7 +23,5 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  args: {
-    defaultAmount: "10000000000000000",
-  },
+  args: {},
 };

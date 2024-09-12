@@ -60,7 +60,6 @@ export function Funding(innerProps: FundingInnerProps) {
 
 type FundingInnerProps = {
   title?: React.ReactElement;
-  defaultAmount: string;
   onComplete?: (deployHash?: string) => void;
 };
 

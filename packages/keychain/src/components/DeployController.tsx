@@ -10,7 +10,6 @@ import { CheckIcon, ExternalIcon, WandIcon } from "@cartridge/ui";
 import { Funding } from "./Funding";
 import { useConnection } from "hooks/connection";
 import { ControllerErrorAlert, ErrorAlert } from "./ErrorAlert";
-import { ETH_MIN_PREFUND } from "utils/token";
 import { useDeploy } from "hooks/deploy";
 import { Fees } from "./Fees";
 import { ControllerError } from "utils/connection";
@@ -109,7 +108,6 @@ export function DeployController({
               for deployment
             </>
           }
-          defaultAmount={feeEstimate ?? ETH_MIN_PREFUND}
           onComplete={() => {
             setAccountState("deploy");
           }}
