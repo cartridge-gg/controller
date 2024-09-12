@@ -224,6 +224,7 @@ export function Signup({
                   : error.message
               }
               isExpanded
+              allowToggle
             />
           )}
 

@@ -15,7 +15,7 @@ import { useDeploy } from "hooks/deploy";
 import { Fees } from "./Fees";
 import { ControllerError } from "utils/connection";
 import { useBalance } from "hooks/token";
-import { Policies } from "Policies";
+import { Policies } from "components/Policies";
 
 export function DeployController({
   onClose,

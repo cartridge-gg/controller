@@ -10,7 +10,7 @@ import {
 import { TransactionDuoIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { ControllerErrorAlert } from "components/ErrorAlert";
-import { Policies } from "Policies";
+import { Policies } from "components/Policies";
 import { Fees } from "./Fees";
 import { ControllerError, ExecuteCtx } from "utils/connection";
 import { num } from "starknet";
@@ -32,7 +32,6 @@ export function ConfirmTransaction() {
   const account = controller.account;
 
   const estimateFees = useCallback(async () => {
-    console.log("est fee");
     try {
       const est = await account.estimateInvokeFee(
         ctx.transactions,
@@ -40,7 +39,6 @@ export function ConfirmTransaction() {
       );
       setMaxFee(est.overall_fee);
     } catch (e) {
-      console.log({ e });
       setCtrlError({
         code: e.code,
         message: e.message,
@@ -51,7 +49,7 @@ export function ConfirmTransaction() {
 
   // Estimate fees
   useEffect(() => {
-    if (!controller || !ctx.transactions) return;
+    if (!controller || !ctx.transactions || ctx.error) return;
     estimateFees();
   }, [
     controller,

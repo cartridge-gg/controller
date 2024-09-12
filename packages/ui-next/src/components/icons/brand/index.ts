@@ -27,6 +27,7 @@ export * from "./quixotic";
 export * from "./realms";
 export * from "./redline";
 export * from "./safari";
+export * from "./slot";
 export * from "./starknet";
 export * from "./telegram";
 export * from "./x";
