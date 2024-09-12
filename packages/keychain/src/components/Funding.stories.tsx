@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
 import { Funding } from "./Funding";
+import { RpcProvider } from "starknet";
 
 const meta = {
   component: Funding,
@@ -10,7 +11,7 @@ const meta = {
         address:
           "0x0000000000000000000000000000000000000000000000000000000000000000",
         account: {
-          rpc: "http://localhost:3002",
+          rpc: new RpcProvider({ nodeUrl: "https://api.cartridge/x/sepolia" }),
         },
       },
     },

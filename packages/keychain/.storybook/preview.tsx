@@ -81,7 +81,7 @@ function Provider({
     cover: preset.cover,
     colorMode: "dark",
   };
-  const connection = useMockedConnection(parameters["connection"]);
+  const connection = useMockedConnection(parameters.connection);
 
   return (
     <ChakraProvider theme={chakraTheme}>

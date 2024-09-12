@@ -1,0 +1,37 @@
+import type { Meta, StoryObj } from "@storybook/react";
+
+import { DeployController } from "./DeployController";
+import { constants, num, RpcProvider } from "starknet";
+
+const meta = {
+  component: DeployController,
+  parameters: {
+    connection: {
+      controller: {
+        account: {
+          chainId: constants.StarknetChainId.SN_SEPOLIA,
+          callContract: () =>
+            Promise.resolve([num.toHex("2000000000000000000"), "0x0"]),
+          rpc: new RpcProvider({ nodeUrl: "https://api.cartridge/x/sepolia" }),
+        },
+      },
+    },
+  },
+} satisfies Meta<typeof DeployController>;
+
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {
+  args: {
+    onClose: () => {},
+    ctrlError: {
+      data: {
+        fee_estimate: {
+          overall_fee: "1000000000000000000",
+        },
+      },
+    },
+  },
+};

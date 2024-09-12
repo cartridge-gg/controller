@@ -34,3 +34,4 @@ npm-debug.log*
 next-env.d.ts
 
 *storybook.log
+/storybook-static
