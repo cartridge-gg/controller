@@ -54,6 +54,7 @@ export function ConfirmTransaction() {
   }, [
     controller,
     account,
+    estimateFees,
     ctx.transactions,
     ctx.transactionsDetail,
     ctx.error,
@@ -81,7 +82,7 @@ export function ConfirmTransaction() {
     } finally {
       setLoading(false);
     }
-  }, [account, ctx.resolve, ctx.transactions, maxFee]);
+  }, [account, ctx, maxFee]);
 
   const policies = useMemo<Policy[]>(
     () =>

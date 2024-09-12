@@ -9,7 +9,7 @@ import { ControllerError } from "utils/connection";
 import { Button } from "@chakra-ui/react";
 import { useCallback, useState } from "react";
 import { useConnection } from "hooks/connection";
-import { Policies } from "Policies";
+import { Policies } from "components/Policies";
 import { ControllerErrorAlert } from "components/ErrorAlert";
 import { SessionConsent } from "components/connect";
 

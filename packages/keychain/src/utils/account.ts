@@ -65,7 +65,7 @@ class Account extends BaseAccount {
 
   async executeFromOutside(
     calls: AllowArray<Call>,
-    _: PaymasterOptions,
+    _?: PaymasterOptions,
   ): Promise<InvokeFunctionResponse> {
     return await this.cartridge.executeFromOutside(normalizeCalls(calls));
   }

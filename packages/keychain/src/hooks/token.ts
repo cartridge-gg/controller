@@ -31,7 +31,7 @@ export function useBalance({ address }: { address: string }) {
 
   useEffect(() => {
     fetchBalance();
-  }, []);
+  }, [fetchBalance]);
 
   useInterval(fetchBalance, 3000);
   return { balance, isFetching, isLoading };
