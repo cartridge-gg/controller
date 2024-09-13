@@ -26,6 +26,8 @@ import {
   ConnectionContextValue,
 } from "components/Provider/connection";
 
+const CHAIN_ID_TIMEOUT = 3000;
+
 type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
 
 export function useConnectionValue() {
@@ -143,7 +145,7 @@ export function useConnectionValue() {
           const timeoutPromise = new Promise((_, reject) =>
             setTimeout(
               () => reject(new Error("Chain ID fetch timed out")),
-              3000,
+              CHAIN_ID_TIMEOUT,
             ),
           );
           const chainIdPromise = provider.getChainId();

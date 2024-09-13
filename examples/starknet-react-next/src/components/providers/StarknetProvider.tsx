@@ -61,9 +61,9 @@ const cartridge = new CartridgeConnector({
           "keychain",
         ),
   rpc: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
-  // paymaster: {
-  //   caller: shortString.encodeShortString("ANY_CALLER"),
-  // },
+  paymaster: {
+    caller: shortString.encodeShortString("ANY_CALLER"),
+  },
   // theme: "dope-wars",
   // colorMode: "light"
   // prefunds: [
