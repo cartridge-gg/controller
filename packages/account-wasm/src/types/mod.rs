@@ -53,7 +53,7 @@ mod tests {
         let jsfelt: JsFelt = serde_wasm_bindgen::from_value(jsstr).unwrap();
 
         let str = serde_wasm_bindgen::to_value(&jsfelt).unwrap();
-        assert_eq!(hex_str, str.as_string().unwrap());
+        assert_eq!(hex_str, str.as_string().unwrap(), "Serialize as hex string");
     }
 
     #[wasm_bindgen_test]
