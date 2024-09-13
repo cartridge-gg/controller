@@ -75,12 +75,5 @@ jobs:
           scarb --version
           sncast --version
       - run: pnpm install --frozen-lockfile
-      - run: |
-          git init || true
-          git config --global --add safe.directory '*'
-          git config --global user.email "bot@cartridge.gg"
-          git config --global user.name "Cartridge Bot"
-          git add .
-          git commit -m "init" || true
-      - run: pnpm build build-wasm
-      - run: git diff --exit-code
+      - run: pnpm build-wasm
+      - run: pnpm build
