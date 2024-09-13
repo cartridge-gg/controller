@@ -1,0 +1,49 @@
+name: keychain
+
+on: push
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_VERSION: 1.80.1
+  VERCEL_ORG_ID: "team_NUTC231jG0oZ9YFUfHjoXCu7"
+  VERCEL_PROJECT_ID: "keychain"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/dojoengine/dojo-dev:v1.0.0-alpha.4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install apps
+        uses: asdf-vm/actions/install@v3
+#      - run: |
+#          export v=$(cat .tool-versions | grep rust | cut -d ' ' -f 2)
+#          echo "using version $v"
+#          rustup toolchain install $v
+#          rustup target add --toolchain $v wasm32-unknown-unknown
+      - name: Versions
+        run: |
+          cargo --version
+          rustc --version
+          node --version
+          pnpm --version
+          scarb --version
+          sncast --version
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build WASM
+        run: pnpm build-wasm
+      - name: Build
+        run: pnpm build
+      - name: Pull Vercel Environment Information
+        run: pnpm vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build Project Artifacts
+        run: pnpm vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy to Vercel (Preview)
+        if: github.ref != 'refs/heads/main'
+        run: pnpm vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy to Vercel (Production)
+        if: github.ref == 'refs/heads/main'
+        run: pnpm vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
