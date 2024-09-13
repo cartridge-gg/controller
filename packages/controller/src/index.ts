@@ -48,8 +48,7 @@ class Controller {
     theme,
     config,
     colorMode,
-  }: // prefunds,
-  ControllerOptions = {}) {
+  }: ControllerOptions = {}) {
     this.url = new URL(url || KEYCHAIN_URL);
     this.rpc = new URL(rpc || RPC_SEPOLIA);
     this.paymaster = paymaster;
@@ -66,9 +65,6 @@ class Controller {
     if (colorMode) {
       this.setColorMode(colorMode);
     }
-    // if (prefunds?.length) {
-    //   this.setPrefunds(prefunds);
-    // }
     if (paymaster) {
       this.setPaymaster(paymaster);
     }
@@ -126,13 +122,6 @@ class Controller {
       encodeURIComponent(JSON.stringify(theme)),
     );
   }
-
-  // private setPrefunds(prefunds: Prefund[]) {
-  //   this.url.searchParams.set(
-  //     "prefunds",
-  //     encodeURIComponent(JSON.stringify(prefunds)),
-  //   );
-  // }
 
   private setColorMode(colorMode: ColorMode) {
     this.url.searchParams.set("colorMode", colorMode);
