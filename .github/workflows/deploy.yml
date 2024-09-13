@@ -43,10 +43,18 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build
         run: pnpm build
-      - name: Pull Vercel Environment Information
+      - name: Pull Vercel Environment Information (Preview)
+        if: github.ref != 'refs/heads/main'
         run: pnpm vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-      - name: Build Project Artifacts
+      - name: Pull Vercel Environment Information (Production)
+        if: github.ref == 'refs/heads/main'
+        run: pnpm vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build Project Artifacts (Preview)
+        if: github.ref != 'refs/heads/main'
         run: pnpm vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build Project Artifacts (Production)
+        if: github.ref == 'refs/heads/main'
+        run: pnpm vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy to Vercel (Preview)
         if: github.ref != 'refs/heads/main'
         run: pnpm vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
@@ -89,10 +97,18 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build
         run: pnpm build
-      - name: Pull Vercel Environment Information
+      - name: Pull Vercel Environment Information (Preview)
+        if: github.ref != 'refs/heads/main'
         run: pnpm vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-      - name: Build Project Artifacts
+      - name: Pull Vercel Environment Information (Production)
+        if: github.ref == 'refs/heads/main'
+        run: pnpm vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build Project Artifacts (Preview)
+        if: github.ref != 'refs/heads/main'
         run: pnpm vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build Project Artifacts (Production)
+        if: github.ref == 'refs/heads/main'
+        run: pnpm vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy to Vercel (Preview)
         if: github.ref != 'refs/heads/main'
         run: pnpm vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
@@ -135,10 +151,18 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build
         run: pnpm build
-      - name: Pull Vercel Environment Information
+      - name: Pull Vercel Environment Information (Preview)
+        if: github.ref != 'refs/heads/main'
         run: pnpm vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-      - name: Build Project Artifacts
+      - name: Pull Vercel Environment Information (Production)
+        if: github.ref == 'refs/heads/main'
+        run: pnpm vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build Project Artifacts (Preview)
+        if: github.ref != 'refs/heads/main'
         run: pnpm vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build Project Artifacts (Production)
+        if: github.ref == 'refs/heads/main'
+        run: pnpm vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy to Vercel (Preview)
         if: github.ref != 'refs/heads/main'
         run: pnpm vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
