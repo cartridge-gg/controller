@@ -41,8 +41,6 @@ function Home() {
     return <CreateController loginMode={LoginMode.Controller} />;
   }
 
-  console.debug({ context_type: context.type });
-
   switch (context.type) {
     case "connect": {
       // TODO: show missing policies if mismatch

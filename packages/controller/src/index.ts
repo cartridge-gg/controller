@@ -55,6 +55,8 @@ class Controller {
     if (this.paymaster) {
       this.rpc.searchParams.append("paymaster", "true");
     }
+
+    // TODO: remove this on the next major breaking change. pass everthing by url
     this.policies =
       policies?.map((policy) => ({
         ...policy,
@@ -67,6 +69,9 @@ class Controller {
     }
     if (paymaster) {
       this.setPaymaster(paymaster);
+    }
+    if (policies) {
+      this.setPolicies(policies);
     }
 
     this.initModal();
@@ -131,6 +136,13 @@ class Controller {
     this.url.searchParams.set(
       "paymaster",
       encodeURIComponent(JSON.stringify(paymaster)),
+    );
+  }
+
+  private setPolicies(policies: Policy[]) {
+    this.url.searchParams.set(
+      "policies",
+      encodeURIComponent(JSON.stringify(policies)),
     );
   }
 
