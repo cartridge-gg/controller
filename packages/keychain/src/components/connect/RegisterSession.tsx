@@ -1,5 +1,9 @@
 import { Container, Content, Footer } from "components/layout";
-import { BigNumberish } from "starknet";
+import {
+  BigNumberish,
+  TransactionExecutionStatus,
+  TransactionFinalityStatus,
+} from "starknet";
 import { Policy } from "@cartridge/controller";
 import { ControllerError } from "utils/connection";
 import { Button } from "@chakra-ui/react";
@@ -9,31 +13,59 @@ import { Policies } from "components/Policies";
 import { ControllerErrorAlert } from "components/ErrorAlert";
 import { SessionConsent } from "components/connect";
 
-export function CreateSession({
+export function RegisterSession({
   onConnect,
+  publicKey,
 }: {
   onConnect: (policies: Policy[], transaction_hash?: string) => void;
+  publicKey?: string;
 }) {
   const { controller, policies } = useConnection();
   const [isConnecting, setIsConnecting] = useState(false);
   const [expiresAt] = useState<bigint>(3000000000n);
-  const [maxFee] = useState<BigNumberish>();
+  const [maxFee] = useState<BigNumberish>(0);
   const [error, setError] = useState<ControllerError>();
 
-  const onCreateSession = useCallback(async () => {
+  const onRegisterSession = useCallback(async () => {
     try {
       setError(undefined);
       setIsConnecting(true);
-      await controller.createSession(expiresAt, policies, maxFee);
-      onConnect(policies);
+      const { transaction_hash } = await controller.registerSession(
+        expiresAt,
+        policies,
+        publicKey,
+        maxFee,
+      );
+
+      await controller.account.waitForTransaction(transaction_hash, {
+        retryInterval: 1000,
+        successStates: [
+          TransactionExecutionStatus.SUCCEEDED,
+          TransactionFinalityStatus.ACCEPTED_ON_L2,
+        ],
+      });
+      onConnect(policies, transaction_hash);
     } catch (e) {
-      setError(e);
+      if (
+        e.data &&
+        typeof e.data === "string" &&
+        e.data.includes("session/already-registered")
+      ) {
+        onConnect(policies);
+        return;
+      }
+
+      setError({
+        code: e.code,
+        message: e.message,
+        data: e.data ? JSON.parse(e.data) : undefined,
+      });
       setIsConnecting(false);
     }
-  }, [controller, expiresAt, policies, maxFee, onConnect]);
+  }, [controller, expiresAt, policies, maxFee, publicKey, onConnect]);
 
   return (
-    <Container title="Create Session">
+    <Container title="Register Session">
       <Content>
         <SessionConsent />
         <Policies policies={policies} />
@@ -45,9 +77,9 @@ export function CreateSession({
           colorScheme="colorful"
           isDisabled={isConnecting}
           isLoading={isConnecting}
-          onClick={() => onCreateSession()}
+          onClick={() => onRegisterSession()}
         >
-          create session
+          Register Session
         </Button>
       </Footer>
     </Container>

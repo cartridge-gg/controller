@@ -27,7 +27,7 @@ import { formatAddress } from "utils/contracts";
 import { ControllerError } from "utils/connection";
 import { useConnection } from "hooks/connection";
 import { constants } from "starknet";
-import { parseExecutionError } from "utils/errors";
+import { parseExecutionError, parseValidationError } from "utils/errors";
 
 export function ErrorAlert({
   title,
@@ -283,6 +283,27 @@ export function ControllerErrorAlert({
         description = <Text color="inherit">{error.data}</Text>;
       }
       break;
+    case ErrorCode.StarknetValidationFailure:
+      const parsedError = parseValidationError(error);
+      title = parsedError.summary;
+      copyText = parsedError.raw;
+      description = (
+        <VStack align="start" spacing={1} w="full">
+          {Object.entries(parsedError.details).map(([key, value]) => (
+            <Text
+              key={key}
+              wordBreak="break-all"
+              color="inherit"
+              textAlign="left"
+            >
+              {key}: {typeof value === "bigint" ? value.toString() : value}
+            </Text>
+          ))}
+        </VStack>
+      );
+      variant = "warning";
+      isExpanded = true;
+      break;
     default:
       title = "Unknown Error";
   }
@@ -297,6 +318,7 @@ export function ControllerErrorAlert({
     />
   );
 }
+
 function StackTraceDisplay({
   stackTrace,
 }: {

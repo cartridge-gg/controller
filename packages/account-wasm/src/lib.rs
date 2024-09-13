@@ -4,7 +4,6 @@ mod storage;
 mod types;
 mod utils;
 
-use std::str::FromStr;
 use std::sync::Arc;
 
 use account_sdk::abigen::controller::OutsideExecution;
@@ -20,13 +19,12 @@ use base64::engine::general_purpose;
 use base64::Engine;
 use coset::{CborSerializable, CoseKey};
 use errors::JsControllerError;
-use serde_wasm_bindgen::{from_value, to_value};
+use serde_wasm_bindgen::to_value;
 use signer::BrowserBackend;
 use starknet::accounts::{Account, ConnectedAccount};
 use starknet::core::types::Call;
 use starknet::macros::short_string;
 use starknet::signers::SigningKey;
-use starknet_types_core::felt::Felt;
 use types::call::JsCall;
 use types::policy::JsPolicy;
 use types::session::JsSession;
@@ -119,18 +117,20 @@ impl CartridgeAccount {
         policies: Vec<JsPolicy>,
         expires_at: u64,
         public_key: JsFelt,
-    ) -> Result<JsFelt> {
+        max_fee: JsFelt,
+    ) -> std::result::Result<JsValue, JsControllerError> {
         let methods = policies
             .into_iter()
             .map(TryFrom::try_from)
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
-        let hash = self
+        let res = self
             .controller
-            .register_session(methods, expires_at, public_key.0)
-            .await?;
+            .register_session(methods, expires_at, public_key.0, max_fee.0)
+            .await
+            .map_err(JsControllerError::from)?;
 
-        Ok(JsFelt(hash))
+        Ok(to_value(&res)?)
     }
 
     #[wasm_bindgen(js_name = createSession)]
@@ -189,10 +189,7 @@ impl CartridgeAccount {
             .map(TryFrom::try_from)
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
-        let result = self
-            .controller
-            .execute(calls, details.nonce, details.max_fee)
-            .await?;
+        let result = self.controller.execute(calls, details.max_fee).await?;
 
         Ok(to_value(&result)?)
     }
@@ -201,32 +198,15 @@ impl CartridgeAccount {
     pub async fn execute_from_outside(
         &self,
         calls: Vec<JsCall>,
-        caller: JsValue,
     ) -> std::result::Result<JsValue, JsControllerError> {
         set_panic_hook();
 
-        let calls: Vec<Call> = calls
-            .clone()
+        let calls = calls
             .into_iter()
-            .map(TryFrom::try_from)
+            .map(TryInto::try_into)
             .collect::<std::result::Result<_, _>>()?;
 
-        let caller = match from_value::<String>(caller)? {
-            s if s == "ANY_CALLER" => OutsideExecutionCaller::Any,
-            address => OutsideExecutionCaller::Specific(Felt::from_str(&address)?.into()),
-        };
-
-        let response = self
-            .controller
-            .execute_from_outside(OutsideExecution {
-                caller: caller.into(),
-                execute_after: 0_u64,
-                execute_before: 3000000000_u64,
-                calls: calls.into_iter().map(|call| call.into()).collect(),
-                nonce: SigningKey::from_random().secret_scalar(),
-            })
-            .await?;
-
+        let response = self.controller.execute_from_outside(calls).await?;
         Ok(to_value(&response)?)
     }
 
@@ -265,6 +245,17 @@ impl CartridgeAccount {
             .map_err(|e| JsControllerError::from(ControllerError::SignError(e)))?;
 
         Ok(Felts(signature.into_iter().map(JsFelt).collect()))
+    }
+
+    #[wasm_bindgen(js_name = getNonce)]
+    pub async fn get_nonce(&self) -> std::result::Result<JsValue, JsControllerError> {
+        let nonce = self
+            .controller
+            .get_nonce()
+            .await
+            .map_err(|e| JsControllerError::from(ControllerError::ProviderError(e)))?;
+
+        Ok(to_value(&nonce)?)
     }
 
     #[wasm_bindgen(js_name = deploySelf)]

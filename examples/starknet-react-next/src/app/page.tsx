@@ -5,6 +5,7 @@ import { SignMessage } from "components/SignMessage";
 import { DelegateAccount } from "components/DelegateAccount";
 import { ColorModeToggle } from "components/ColorModeToggle";
 import { Menu } from "components/Menu";
+import { RegisterSession } from "components/RegisterSession";
 
 export default function Home() {
   return (
@@ -21,6 +22,7 @@ export default function Home() {
       <DelegateAccount />
       <InvalidTxn />
       <SignMessage />
+      <RegisterSession />
     </div>
   );
 }

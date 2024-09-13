@@ -53,6 +53,9 @@ class Controller {
     this.url = new URL(url || KEYCHAIN_URL);
     this.rpc = new URL(rpc || RPC_SEPOLIA);
     this.paymaster = paymaster;
+    if (this.paymaster) {
+      this.rpc.searchParams.append("paymaster", "true");
+    }
     this.policies =
       policies?.map((policy) => ({
         ...policy,
@@ -269,6 +272,4 @@ class Controller {
   }
 }
 
-export * from "./types";
-export * from "./errors";
 export default Controller;
