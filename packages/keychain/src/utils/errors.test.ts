@@ -285,6 +285,110 @@ describe("parseExecutionError", () => {
         ],
       },
     },
+    {
+      input: {
+        code: 41,
+        message: "Transaction execution error",
+        data: {
+          execution_error:
+            "Transaction reverted: Transaction execution has failed:\n0: Error in the called contract (contract address: 0x0457af6b611a8d3672b72188619a9959d7e3dc74282b6a94c008b252f03226c1, class hash: 0x00e2eb8f5672af4e6a4e8a8f1b44989685e668489b0a25437733756c5a34a1d6, selector: 0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad):\nError at pc=0:4302:\nCairo traceback (most recent call last):\nUnknown location (pc=0:290)\nUnknown location (pc=0:3037)\n\n1: Error in the called contract (contract address: 0x052cc7e8d2e145f306c05509b954e7e63bdb9298a89f2068d528e3bdbde48b3c, class hash: 0x024a9edbfa7082accfceabf6a92d7160086f346d622f28741bf1c651c412c9ab, selector: 0x034cc13b274446654ca3233ed2c1620d4c5d1d32fd20b47146a3371064bdc57d):\nError at pc=0:14785:\nCairo traceback (most recent call last):\nUnknown location (pc=0:3273)\nUnknown location (pc=0:12490)\n\n2: Error in the called contract (contract address: 0x018108b32cea514a78ef1b0e4a0753e855cdf620bc0565202c02456f618c4dc4, class hash: 0x026b25c3a9bf7582cc8a9e6fff378cb649fc5cba404f93633ed41d59053dcd31, selector: 0x02d1af4265f4530c75b41282ed3b71617d3d435e96fe13b08848482173692f4f):\nExecution failed. Failure reason: 0x4e6f7420617574686f72697a656420746f20616374 ('Not authorized to act').\n",
+          transaction_index: 0,
+        },
+      },
+      expected: {
+        raw: "Transaction reverted: Transaction execution has failed:\n0: Error in the called contract (contract address: 0x0457af6b611a8d3672b72188619a9959d7e3dc74282b6a94c008b252f03226c1, class hash: 0x00e2eb8f5672af4e6a4e8a8f1b44989685e668489b0a25437733756c5a34a1d6, selector: 0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad):\nError at pc=0:4302:\nCairo traceback (most recent call last):\nUnknown location (pc=0:290)\nUnknown location (pc=0:3037)\n\n1: Error in the called contract (contract address: 0x052cc7e8d2e145f306c05509b954e7e63bdb9298a89f2068d528e3bdbde48b3c, class hash: 0x024a9edbfa7082accfceabf6a92d7160086f346d622f28741bf1c651c412c9ab, selector: 0x034cc13b274446654ca3233ed2c1620d4c5d1d32fd20b47146a3371064bdc57d):\nError at pc=0:14785:\nCairo traceback (most recent call last):\nUnknown location (pc=0:3273)\nUnknown location (pc=0:12490)\n\n2: Error in the called contract (contract address: 0x018108b32cea514a78ef1b0e4a0753e855cdf620bc0565202c02456f618c4dc4, class hash: 0x026b25c3a9bf7582cc8a9e6fff378cb649fc5cba404f93633ed41d59053dcd31, selector: 0x02d1af4265f4530c75b41282ed3b71617d3d435e96fe13b08848482173692f4f):\nExecution failed. Failure reason: 0x4e6f7420617574686f72697a656420746f20616374 ('Not authorized to act').\n",
+        summary: "Not authorized to act",
+        stack: [
+          {
+            address:
+              "0x0457af6b611a8d3672b72188619a9959d7e3dc74282b6a94c008b252f03226c1",
+            class:
+              "0x00e2eb8f5672af4e6a4e8a8f1b44989685e668489b0a25437733756c5a34a1d6",
+            error: [
+              "Cairo traceback (most recent call last):",
+              "Unknown location (pc=0:290)",
+              "Unknown location (pc=0:3037)",
+            ],
+            selector:
+              "0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
+          },
+          {
+            address:
+              "0x052cc7e8d2e145f306c05509b954e7e63bdb9298a89f2068d528e3bdbde48b3c",
+            class:
+              "0x024a9edbfa7082accfceabf6a92d7160086f346d622f28741bf1c651c412c9ab",
+            error: [
+              "Cairo traceback (most recent call last):",
+              "Unknown location (pc=0:3273)",
+              "Unknown location (pc=0:12490)",
+            ],
+            selector:
+              "0x034cc13b274446654ca3233ed2c1620d4c5d1d32fd20b47146a3371064bdc57d",
+          },
+          {
+            address:
+              "0x018108b32cea514a78ef1b0e4a0753e855cdf620bc0565202c02456f618c4dc4",
+            class:
+              "0x026b25c3a9bf7582cc8a9e6fff378cb649fc5cba404f93633ed41d59053dcd31",
+            error: ["Not authorized to act"],
+            selector:
+              "0x02d1af4265f4530c75b41282ed3b71617d3d435e96fe13b08848482173692f4f",
+          },
+        ],
+      },
+    },
+    {
+      input: {
+        code: 41,
+        message: "Transaction execution error",
+        data: {
+          execution_error:
+            "Transaction execution has failed:\n0: Error in the called contract (contract address: 0x01432eafe3cc07b269b1ef34f0438ff9cbbc4384fa3fe78f53e0eb3352f4ce10, class hash: 0x00e2eb8f5672af4e6a4e8a8f1b44989685e668489b0a25437733756c5a34a1d6, selector: 0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad):\nError at pc=0:4302:\nCairo traceback (most recent call last):\nUnknown location (pc=0:290)\nUnknown location (pc=0:3037)\n\n1: Error in the called contract (contract address: 0x076bd69406bce444e6f872e3939a4230e7a5dd73cbd50f0ec7d2a304f7d1c1b7, class hash: 0x024a9edbfa7082accfceabf6a92d7160086f346d622f28741bf1c651c412c9ab, selector: 0x034cc13b274446654ca3233ed2c1620d4c5d1d32fd20b47146a3371064bdc57d):\nError at pc=0:14785:\nCairo traceback (most recent call last):\nUnknown location (pc=0:3273)\nUnknown location (pc=0:12490)\n\n2: Error in the called contract (contract address: 0x018108b32cea514a78ef1b0e4a0753e855cdf620bc0565202c02456f618c4dc4, class hash: 0x026b25c3a9bf7582cc8a9e6fff378cb649fc5cba404f93633ed41d59053dcd31, selector: 0x00f2f7c15cbe06c8d94597cd91fd7f3369eae842359235712def5584f8d270cd):\nExecution failed. Failure reason: 0x4261672069732066756c6c ('Bag is full').\n",
+          transaction_index: 0,
+        },
+      },
+      expected: {
+        raw: "Transaction execution has failed:\n0: Error in the called contract (contract address: 0x01432eafe3cc07b269b1ef34f0438ff9cbbc4384fa3fe78f53e0eb3352f4ce10, class hash: 0x00e2eb8f5672af4e6a4e8a8f1b44989685e668489b0a25437733756c5a34a1d6, selector: 0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad):\nError at pc=0:4302:\nCairo traceback (most recent call last):\nUnknown location (pc=0:290)\nUnknown location (pc=0:3037)\n\n1: Error in the called contract (contract address: 0x076bd69406bce444e6f872e3939a4230e7a5dd73cbd50f0ec7d2a304f7d1c1b7, class hash: 0x024a9edbfa7082accfceabf6a92d7160086f346d622f28741bf1c651c412c9ab, selector: 0x034cc13b274446654ca3233ed2c1620d4c5d1d32fd20b47146a3371064bdc57d):\nError at pc=0:14785:\nCairo traceback (most recent call last):\nUnknown location (pc=0:3273)\nUnknown location (pc=0:12490)\n\n2: Error in the called contract (contract address: 0x018108b32cea514a78ef1b0e4a0753e855cdf620bc0565202c02456f618c4dc4, class hash: 0x026b25c3a9bf7582cc8a9e6fff378cb649fc5cba404f93633ed41d59053dcd31, selector: 0x00f2f7c15cbe06c8d94597cd91fd7f3369eae842359235712def5584f8d270cd):\nExecution failed. Failure reason: 0x4261672069732066756c6c ('Bag is full').\n",
+        summary: "Bag is full",
+        stack: [
+          {
+            address:
+              "0x01432eafe3cc07b269b1ef34f0438ff9cbbc4384fa3fe78f53e0eb3352f4ce10",
+            class:
+              "0x00e2eb8f5672af4e6a4e8a8f1b44989685e668489b0a25437733756c5a34a1d6",
+            error: [
+              "Cairo traceback (most recent call last):",
+              "Unknown location (pc=0:290)",
+              "Unknown location (pc=0:3037)",
+            ],
+            selector:
+              "0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
+          },
+          {
+            address:
+              "0x076bd69406bce444e6f872e3939a4230e7a5dd73cbd50f0ec7d2a304f7d1c1b7",
+            class:
+              "0x024a9edbfa7082accfceabf6a92d7160086f346d622f28741bf1c651c412c9ab",
+            error: [
+              "Cairo traceback (most recent call last):",
+              "Unknown location (pc=0:3273)",
+              "Unknown location (pc=0:12490)",
+            ],
+            selector:
+              "0x034cc13b274446654ca3233ed2c1620d4c5d1d32fd20b47146a3371064bdc57d",
+          },
+          {
+            address:
+              "0x018108b32cea514a78ef1b0e4a0753e855cdf620bc0565202c02456f618c4dc4",
+            class:
+              "0x026b25c3a9bf7582cc8a9e6fff378cb649fc5cba404f93633ed41d59053dcd31",
+            error: ["Bag is full"],
+            selector:
+              "0x00f2f7c15cbe06c8d94597cd91fd7f3369eae842359235712def5584f8d270cd",
+          },
+        ],
+      },
+    },
   ];
 
   testCases.forEach(({ input, expected }, i) => {
