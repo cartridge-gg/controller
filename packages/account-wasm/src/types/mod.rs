@@ -32,7 +32,7 @@ pub enum EncodingError {
     Serialization(#[from] serde_wasm_bindgen::Error),
 }
 
-// need this in order to be able to deserialize from BOTH decimal and hex (0x-prefixed)e string.
+// need this in order to be able to deserialize from BOTH decimal and hex (0x-prefixed) string.
 // the default Deserialize implementation of Felt only supports deserializing from hex strings.
 fn deserialize_felt<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<Felt, D::Error> {
     let s = String::deserialize(deserializer)?;
