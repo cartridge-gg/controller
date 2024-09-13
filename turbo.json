@@ -2,6 +2,9 @@
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
   "tasks": {
+    "build-wasm": {
+      "outputs": ["packages/account-wasm/pkg/**"]
+    },
     "build:deps": {
       "dependsOn": ["^build:deps"],
       "outputs": ["dist/**"]
