@@ -20,18 +20,15 @@ jobs:
       - name: Cache turbo build setup
         uses: actions/cache@v4
         with:
-          path: .turbo
-          key: ${{ runner.os }}-turbo-${{ github.ref_name }}-${{ github.sha }}
+          path: |
+            .turbo
+            packages/account-wasm/pkg
+          key: ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-turbo-${{ github.ref_name }}-
-            ${{ runner.os }}-turbo-
+            ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-
+            ${{ runner.os }}-turbo-cache-
       - name: Install apps
         uses: asdf-vm/actions/install@v3
-#      - run: |
-#          export v=$(cat .tool-versions | grep rust | cut -d ' ' -f 2)
-#          echo "using version $v"
-#          rustup toolchain install $v
-#          rustup target add --toolchain $v wasm32-unknown-unknown
       - name: Versions
         run: |
           cargo --version
@@ -67,18 +64,15 @@ jobs:
       - name: Cache turbo build setup
         uses: actions/cache@v4
         with:
-          path: .turbo
-          key: ${{ runner.os }}-turbo-${{ github.ref_name }}-${{ github.sha }}
+          path: |
+            .turbo
+            packages/account-wasm/pkg
+          key: ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-turbo-${{ github.ref_name }}-
-            ${{ runner.os }}-turbo-
+            ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-
+            ${{ runner.os }}-turbo-cache-
       - name: Install apps
         uses: asdf-vm/actions/install@v3
-#      - run: |
-#          export v=$(cat .tool-versions | grep rust | cut -d ' ' -f 2)
-#          echo "using version $v"
-#          rustup toolchain install $v
-#          rustup target add --toolchain $v wasm32-unknown-unknown
       - name: Versions
         run: |
           cargo --version
@@ -114,18 +108,15 @@ jobs:
       - name: Cache turbo build setup
         uses: actions/cache@v4
         with:
-          path: .turbo
-          key: ${{ runner.os }}-turbo-${{ github.ref_name }}-${{ github.sha }}
+          path: |
+            .turbo
+            packages/account-wasm/pkg
+          key: ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-turbo-${{ github.ref_name }}-
-            ${{ runner.os }}-turbo-
+            ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-
+            ${{ runner.os }}-turbo-cache-
       - name: Install apps
         uses: asdf-vm/actions/install@v3
-#      - run: |
-#          export v=$(cat .tool-versions | grep rust | cut -d ' ' -f 2)
-#          echo "using version $v"
-#          rustup toolchain install $v
-#          rustup target add --toolchain $v wasm32-unknown-unknown
       - name: Versions
         run: |
           cargo --version
