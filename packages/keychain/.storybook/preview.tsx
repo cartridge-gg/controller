@@ -1,6 +1,9 @@
-import React from "react";
-import { PropsWithChildren } from "react";
-import type { Preview } from "@storybook/react";
+import React, { PropsWithChildren, useMemo } from "react";
+import { QueryClient, QueryClientProvider } from "react-query";
+import type { Parameters, Preview } from "@storybook/react";
+import { ChakraProvider } from "@chakra-ui/react";
+import Controller, { ControllerTheme } from "@cartridge/controller";
+import { Inter, IBM_Plex_Mono } from "next/font/google";
 import {
   ControllerThemeProvider,
   useChakraTheme,
@@ -10,9 +13,10 @@ import {
   ConnectionContextValue,
   ConnectionProvider,
 } from "../src/components/Provider/connection";
-import { ChakraProvider } from "@chakra-ui/react";
-import { ControllerTheme } from "@cartridge/controller";
-import { Inter, IBM_Plex_Mono } from "next/font/google";
+import { constants } from "starknet";
+import { getChainName } from "../src/utils/network";
+import { ETH_CONTRACT_ADDRESS } from "../src/utils/token";
+import { ConnectCtx, ConnectionCtx } from "../src/utils/connection/types";
 
 const inter = Inter({ subsets: ["latin"] });
 const ibmPlexMono = IBM_Plex_Mono({
@@ -30,7 +34,7 @@ const preview: Preview = {
     },
   },
   decorators: [
-    (Story) => (
+    (Story, { parameters }) => (
       <>
         <style
           // @ts-expect-error type error
@@ -56,7 +60,7 @@ const preview: Preview = {
           }
         `}</style>
 
-        <Provider>
+        <Provider parameters={parameters as StoryParameters}>
           <Story />
         </Provider>
       </>
@@ -64,7 +68,10 @@ const preview: Preview = {
   ],
 };
 
-function Provider({ children }: PropsWithChildren) {
+function Provider({
+  children,
+  parameters,
+}: { parameters: StoryParameters } & PropsWithChildren) {
   const preset = useControllerThemePreset();
   const chakraTheme = useChakraTheme(preset);
   const ctrlTheme: ControllerTheme = {
@@ -74,14 +81,71 @@ function Provider({ children }: PropsWithChildren) {
     cover: preset.cover,
     colorMode: "dark",
   };
-  const connection: ConnectionContextValue = {
-    context: undefined,
-    controller: {},
-    origin: "origin",
-    rpcUrl: "rpcUrl",
-    chainId: "chainId",
-    chainName: "chainName",
+  const connection = useMockedConnection(parameters.connection);
+
+  return (
+    <ChakraProvider theme={chakraTheme}>
+      <QueryClientProvider client={queryClient}>
+        <ControllerThemeProvider value={ctrlTheme}>
+          <ConnectionProvider value={connection}>{children}</ConnectionProvider>
+        </ControllerThemeProvider>
+      </QueryClientProvider>
+    </ChakraProvider>
+  );
+}
+
+interface StoryParameters extends Parameters {
+  connection?: {
+    context?: ConnectionCtx;
+    controller?: Controller;
+    chainId?: string;
+  };
+}
+
+function useMockedConnection({
+  chainId = constants.StarknetChainId.SN_SEPOLIA,
+  context = {
+    type: "connect",
+    origin: "http://localhost:3002",
     policies: [],
+    resolve: () => {},
+    reject: () => {},
+  } as ConnectCtx,
+  controller,
+}: StoryParameters["connection"] = {}): ConnectionContextValue {
+  const chainName = getChainName(chainId);
+
+  return {
+    context,
+    controller,
+    origin: "http://localhost:3002",
+    rpcUrl: "http://api.cartridge.gg/x/sepolia",
+    chainId,
+    chainName,
+    policies: [
+      {
+        target: ETH_CONTRACT_ADDRESS,
+        method: "approve",
+        description:
+          "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
+      },
+      {
+        target: ETH_CONTRACT_ADDRESS,
+        method: "transfer",
+      },
+      {
+        target: ETH_CONTRACT_ADDRESS,
+        method: "mint",
+      },
+      {
+        target: ETH_CONTRACT_ADDRESS,
+        method: "burn",
+      },
+      {
+        target: ETH_CONTRACT_ADDRESS,
+        method: "allowance",
+      },
+    ],
     prefunds: [],
     paymaster: undefined,
     hasPrefundRequest: false,
@@ -99,14 +163,8 @@ function Provider({ children }: PropsWithChildren) {
     openMenu: () => {},
     setExternalOwner: () => {},
   };
-
-  return (
-    <ChakraProvider theme={chakraTheme}>
-      <ControllerThemeProvider value={ctrlTheme}>
-        <ConnectionProvider value={connection}>{children}</ConnectionProvider>
-      </ControllerThemeProvider>
-    </ChakraProvider>
-  );
 }
+
+const queryClient = new QueryClient();
 
 export default preview;

@@ -11,7 +11,8 @@ import {
   OpenSettingsCtx,
   OpenMenuCtx,
 } from "utils/connection";
-import { RpcProvider, CallData, constants } from "starknet";
+import { getChainName } from "utils/network";
+import { RpcProvider, CallData } from "starknet";
 import {
   PaymasterOptions,
   Policy,
@@ -47,15 +48,7 @@ export function useConnectionValue() {
     if (!chainId) {
       return;
     }
-
-    switch (chainId) {
-      case constants.StarknetChainId.SN_MAIN:
-        return "Mainnet";
-      case constants.StarknetChainId.SN_SEPOLIA:
-        return "Sepolia";
-      default:
-        return "Slot";
-    }
+    return getChainName(chainId);
   }, [chainId]);
 
   const parsePolicies = (policiesStr: string | null): Policy[] => {

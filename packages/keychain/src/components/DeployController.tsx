@@ -36,7 +36,7 @@ export function DeployController({
     "fund" | "deploy" | "deploying" | "deployed"
   >("fund");
   const feeEstimate: string | undefined =
-    ctrlError.data?.fee_estimate.overall_fee;
+    ctrlError?.data?.fee_estimate.overall_fee;
 
   useEffect(() => {
     if (
