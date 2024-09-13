@@ -9,6 +9,7 @@ import {
   TransactionExecutionStatus,
   TransactionFinalityStatus,
 } from "starknet";
+import { SESSION_EXPIRATION } from "const";
 
 export function RegisterSession({
   onConnect,
@@ -18,7 +19,7 @@ export function RegisterSession({
   publicKey?: string;
 }) {
   const { controller, policies } = useConnection();
-  const [expiresAt] = useState<bigint>(3000000000n);
+  const [expiresAt] = useState<bigint>(SESSION_EXPIRATION);
 
   const transactions = [
     {

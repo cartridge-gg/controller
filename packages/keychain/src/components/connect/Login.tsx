@@ -10,6 +10,7 @@ import { useControllerTheme } from "hooks/theme";
 import { doLogin } from "hooks/account";
 import { useConnection } from "hooks/connection";
 import { ErrorAlert } from "components/ErrorAlert";
+import { SESSION_EXPIRATION } from "const";
 
 export function Login(props: LoginProps) {
   const theme = useControllerTheme();
@@ -38,7 +39,7 @@ function Form({
   const { footer } = useLayout();
   const { origin, policies, chainId, rpcUrl, setController } = useConnection();
   const [isLoading, setIsLoading] = useState(false);
-  const [expiresAt] = useState<bigint>(3000000000n);
+  const [expiresAt] = useState<bigint>(SESSION_EXPIRATION);
   const [error, setError] = useState<Error>();
   const [usernameField, setUsernameField] = useState({
     value: prefilledName,
