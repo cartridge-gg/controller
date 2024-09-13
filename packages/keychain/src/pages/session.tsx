@@ -71,7 +71,7 @@ export default function Session() {
               return router.replace({
                 pathname: "/success",
                 query: {
-                  title: "Seession Registered!",
+                  title: "Session Registered!",
                   description: "Return to your terminal to continue",
                 },
               });
