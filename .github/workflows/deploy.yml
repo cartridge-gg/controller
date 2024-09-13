@@ -29,6 +29,8 @@ jobs:
             ${{ runner.os }}-turbo-cache-
       - name: Install apps
         uses: asdf-vm/actions/install@v3
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Versions
         run: |
           cargo --version
@@ -73,6 +75,8 @@ jobs:
             ${{ runner.os }}-turbo-cache-
       - name: Install apps
         uses: asdf-vm/actions/install@v3
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Versions
         run: |
           cargo --version
@@ -117,6 +121,8 @@ jobs:
             ${{ runner.os }}-turbo-cache-
       - name: Install apps
         uses: asdf-vm/actions/install@v3
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Versions
         run: |
           cargo --version
