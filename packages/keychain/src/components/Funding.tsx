@@ -72,7 +72,7 @@ function FundingInner({ onComplete, title }: FundingInnerProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [state, setState] = useState<"connect" | "fund">("connect");
 
-  const [dollarAmount, setDollarAmount] = useState(5);
+  const [dollarAmount, setDollarAmount] = useState(1);
   const [ethAmount, setEthAmount] = useState<string>();
 
   const priceQuery = usePriceQuery({
@@ -327,7 +327,7 @@ function AmountSelection({
   setAmount: (number) => void;
 }) {
   const amounts = [1, 5, 10];
-  const [selected, setSelected] = useState<number>(1);
+  const [selected, setSelected] = useState<number>(amount);
   const [custom, setCustom] = useState<boolean>(false);
   const { onOpen, onClose, isOpen } = useDisclosure();
 
