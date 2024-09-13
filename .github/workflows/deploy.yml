@@ -34,8 +34,6 @@ jobs:
           sncast --version
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Build WASM
-        run: pnpm build-wasm
       - name: Build
         run: pnpm build
       - name: Pull Vercel Environment Information
@@ -75,8 +73,6 @@ jobs:
           sncast --version
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Build WASM
-        run: pnpm build-wasm
       - name: Build
         run: pnpm build
       - name: Pull Vercel Environment Information
