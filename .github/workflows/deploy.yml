@@ -1,0 +1,147 @@
+name: deploy
+
+on: push
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  CARGO_TERM_COLOR: always
+  RUST_VERSION: 1.80.1
+
+jobs:
+  keychain:
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_PROJECT_ID: "keychain"
+    container:
+      image: ghcr.io/dojoengine/dojo-dev:v1.0.0-alpha.4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Cache turbo build setup
+        uses: actions/cache@v4
+        with:
+          path: |
+            .turbo
+            packages/account-wasm/pkg
+          key: ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-
+            ${{ runner.os }}-turbo-cache-
+      - name: Install apps
+        uses: asdf-vm/actions/install@v3
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Versions
+        run: |
+          cargo --version
+          rustc --version
+          node --version
+          pnpm --version
+          scarb --version
+          sncast --version
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build
+        run: pnpm build
+      - name: Pull Vercel Environment Information
+        run: pnpm vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build Project Artifacts
+        run: pnpm vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy to Vercel (Preview)
+        if: github.ref != 'refs/heads/main'
+        run: pnpm vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy to Vercel (Production)
+        if: github.ref == 'refs/heads/main'
+        run: pnpm vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+  keychain-storybook:
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_PROJECT_ID: "keychain-storybook"
+    container:
+      image: ghcr.io/dojoengine/dojo-dev:v1.0.0-alpha.4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Cache turbo build setup
+        uses: actions/cache@v4
+        with:
+          path: |
+            .turbo
+            packages/account-wasm/pkg
+          key: ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-
+            ${{ runner.os }}-turbo-cache-
+      - name: Install apps
+        uses: asdf-vm/actions/install@v3
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Versions
+        run: |
+          cargo --version
+          rustc --version
+          node --version
+          pnpm --version
+          scarb --version
+          sncast --version
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build
+        run: pnpm build
+      - name: Pull Vercel Environment Information
+        run: pnpm vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build Project Artifacts
+        run: pnpm vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy to Vercel (Preview)
+        if: github.ref != 'refs/heads/main'
+        run: pnpm vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy to Vercel (Production)
+        if: github.ref == 'refs/heads/main'
+        run: pnpm vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+  cartridge-starknet-react-next:
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_PROJECT_ID: "cartridge-starknet-react-next"
+    container:
+      image: ghcr.io/dojoengine/dojo-dev:v1.0.0-alpha.4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Cache turbo build setup
+        uses: actions/cache@v4
+        with:
+          path: |
+            .turbo
+            packages/account-wasm/pkg
+          key: ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-
+            ${{ runner.os }}-turbo-cache-
+      - name: Install apps
+        uses: asdf-vm/actions/install@v3
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Versions
+        run: |
+          cargo --version
+          rustc --version
+          node --version
+          pnpm --version
+          scarb --version
+          sncast --version
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build
+        run: pnpm build
+      - name: Pull Vercel Environment Information
+        run: pnpm vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build Project Artifacts
+        run: pnpm vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy to Vercel (Preview)
+        if: github.ref != 'refs/heads/main'
+        run: pnpm vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy to Vercel (Production)
+        if: github.ref == 'refs/heads/main'
+        run: pnpm vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
