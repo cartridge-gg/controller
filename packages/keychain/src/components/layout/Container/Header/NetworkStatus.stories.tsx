@@ -31,10 +31,10 @@ export const Slot: Story = {
   },
 };
 
-export const Unknwon: Story = {
+export const Unknown: Story = {
   parameters: {
     connection: {
-      chainId: toHex("UNKNWON_CHAIN"),
+      chainId: toHex("UNKNOWN_CHAIN"),
     },
   },
 };
