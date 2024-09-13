@@ -2,7 +2,7 @@
 
 set -ex
 
-pnpm dlx wasm-pack build --target bundler --out-dir ./pkg --release --features console-error-panic
+pnpm wasm-pack build --target bundler --out-dir ./pkg --release --features console-error-panic
 
 # Workaround for ESM `import` error in NextJS.
 # This removes `"type": "module"` field from `./pkg/packages.json`

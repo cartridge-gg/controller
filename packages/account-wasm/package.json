@@ -5,7 +5,7 @@
   "main": "./pkg/account_wasm.js",
   "type": "module",
   "scripts": {
-    "build-wasm": "./build.sh"
+    "build:deps": "./build.sh"
   },
   "files": [
     "./pkg/account_wasm_bg.wasm",
