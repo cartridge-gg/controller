@@ -5,7 +5,7 @@ on: push
 env:
   CARGO_TERM_COLOR: always
   RUST_VERSION: 1.80.1
-  VERCEL_ORG_ID: "team_NUTC231jG0oZ9YFUfHjoXCu7"
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
 
 jobs:
   keychain:
