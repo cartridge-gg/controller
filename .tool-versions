@@ -2,3 +2,4 @@ scarb 2.7.0
 starknet-foundry 0.18.0
 nodejs v20.11.1
 pnpm 9.7.0
+rust 1.80.1

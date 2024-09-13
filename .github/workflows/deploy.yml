@@ -27,11 +27,10 @@ jobs:
             ${{ runner.os }}-turbo-
       - name: Install apps
         uses: asdf-vm/actions/install@v3
-#      - run: |
-#          export v=$(cat .tool-versions | grep rust | cut -d ' ' -f 2)
-#          echo "using version $v"
-#          rustup toolchain install $v
-#          rustup target add --toolchain $v wasm32-unknown-unknown
+      - run: |
+          export v=$(cat .tool-versions | grep rust | cut -d ' ' -f 2)
+          rustup toolchain install $v
+          rustup target add --toolchain $v wasm32-unknown-unknown
       - name: Versions
         run: |
           cargo --version
@@ -76,11 +75,10 @@ jobs:
             ${{ runner.os }}-turbo-
       - name: Install apps
         uses: asdf-vm/actions/install@v3
-#      - run: |
-#          export v=$(cat .tool-versions | grep rust | cut -d ' ' -f 2)
-#          echo "using version $v"
-#          rustup toolchain install $v
-#          rustup target add --toolchain $v wasm32-unknown-unknown
+      - run: |
+          export v=$(cat .tool-versions | grep rust | cut -d ' ' -f 2)
+          rustup toolchain install $v
+          rustup target add --toolchain $v wasm32-unknown-unknown
       - name: Versions
         run: |
           cargo --version
