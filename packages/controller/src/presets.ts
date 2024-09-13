@@ -110,4 +110,22 @@ export const defaultPresets: ControllerThemePresets = {
       primary: "#F38332",
     },
   },
+  "savage-summit": {
+    id: "savage-summit",
+    name: "Savage Summit",
+    icon: "/whitelabel/savage-summit/icon.png",
+    cover: "/whitelabel/savage-summit/cover.png",
+    colors: {
+      primary: "#fbf7da",
+    },
+  },
+  "dark-shuffle": {
+    id: "dark-shuffle",
+    name: "Dark Shuffle",
+    icon: "/whitelabel/dark-shuffle/icon.svg",
+    cover: "/whitelabel/dark-shuffle/cover.png",
+    colors: {
+      primary: "#F59100",
+    },
+  },
 };
