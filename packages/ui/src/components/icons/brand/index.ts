@@ -1,4 +1,5 @@
 export * from "./Argent";
+export * from "./Bravos";
 export * from "./Briq";
 export * from "./Cartridge";
 export * from "./CartridgeFace";

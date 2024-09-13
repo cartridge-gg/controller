@@ -153,7 +153,11 @@ export function ConfirmTransaction() {
           case ErrorCode.InsufficientBalance:
             return (
               <Footer>
-                <Fees maxFee={maxFee} variant="info" />
+                {ctrlError ? (
+                  <ControllerErrorAlert error={ctrlError} />
+                ) : (
+                  <Fees maxFee={maxFee} />
+                )}
 
                 <Button
                   colorScheme="colorful"

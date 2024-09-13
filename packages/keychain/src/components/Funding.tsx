@@ -3,14 +3,20 @@ import {
   Button,
   HStack,
   Input,
-  InputGroup,
-  InputLeftElement,
   Spacer,
   Text,
   VStack,
   Divider,
+  Box,
+  useDisclosure,
 } from "@chakra-ui/react";
-import { PropsWithChildren, useCallback, useState } from "react";
+import {
+  PropsWithChildren,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { mainnet, sepolia } from "@starknet-react/chains";
 import {
   Connector,
@@ -28,7 +34,13 @@ import {
   num,
   wallet,
 } from "starknet";
-import { ArrowLineDownIcon, EthereumIcon } from "@cartridge/ui";
+import {
+  ArgentIcon,
+  ArrowLineDownIcon,
+  BravosIcon,
+  DollarIcon,
+  EthereumIcon,
+} from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { useToast } from "hooks/toast";
 import { ETH_CONTRACT_ADDRESS } from "utils/token";
@@ -52,7 +64,7 @@ type FundingInnerProps = {
   onComplete?: (deployHash?: string) => void;
 };
 
-function FundingInner({ onComplete, title, defaultAmount }: FundingInnerProps) {
+function FundingInner({ onComplete, title }: FundingInnerProps) {
   const { account: extAccount } = useAccount();
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
   const { controller, chainId } = useConnection();
@@ -60,14 +72,25 @@ function FundingInner({ onComplete, title, defaultAmount }: FundingInnerProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [state, setState] = useState<"connect" | "fund">("connect");
 
-  const [amount, setAmount] = useState(() =>
-    formatEther(BigInt(defaultAmount)),
-  );
+  const [dollarAmount, setDollarAmount] = useState(1);
+  const [ethAmount, setEthAmount] = useState<string>();
+
   const priceQuery = usePriceQuery({
     quote: CurrencyQuote.Eth,
     base: CurrencyBase.Usd,
   });
   const price = priceQuery.data?.price;
+
+  const { balance: currentBalance, isLoading: isLoadingBalance } = useBalance({
+    address: controller.address,
+  });
+
+  useEffect(() => {
+    if (!price) return;
+
+    const ethAmount = dollarAmount / parseFloat(price.amount);
+    setEthAmount(ethAmount.toString());
+  }, [dollarAmount, price]);
 
   const { toast } = useToast();
 
@@ -102,7 +125,7 @@ function FundingInner({ onComplete, title, defaultAmount }: FundingInnerProps) {
           entrypoint: "approve",
           calldata: CallData.compile({
             recipient: controller.account.address,
-            amount: cairo.uint256(parseEther(amount)),
+            amount: cairo.uint256(parseEther(ethAmount)),
           }),
         },
         {
@@ -110,7 +133,7 @@ function FundingInner({ onComplete, title, defaultAmount }: FundingInnerProps) {
           entrypoint: "transfer",
           calldata: CallData.compile({
             recipient: controller.account.address,
-            amount: cairo.uint256(parseEther(amount)),
+            amount: cairo.uint256(parseEther(ethAmount)),
           }),
         },
       ];
@@ -122,21 +145,31 @@ function FundingInner({ onComplete, title, defaultAmount }: FundingInnerProps) {
           TransactionFinalityStatus.ACCEPTED_ON_L2,
         ],
       });
+
       onComplete(res.transaction_hash);
     } catch (e) {
-      setIsLoading(false);
       setError(e);
+    } finally {
+      setIsLoading(false);
     }
-  }, [extAccount, controller, amount, onComplete]);
+  }, [extAccount, controller, ethAmount, onComplete]);
 
-  const { balance: currentBalance } = useBalance({
-    address: controller.address,
-  });
+  const usdBalance = useMemo(() => {
+    if (!price || !currentBalance) {
+      return 0;
+    }
+
+    return parseFloat(formatEther(currentBalance)) * parseFloat(price.amount);
+  }, [currentBalance, price]);
 
   const onCopy = useCallback(() => {
     navigator.clipboard.writeText(controller.address);
     toast("Copied");
   }, [controller.address, toast]);
+
+  if (isLoadingBalance) {
+    return <></>;
+  }
 
   return (
     <Container
@@ -152,7 +185,7 @@ function FundingInner({ onComplete, title, defaultAmount }: FundingInnerProps) {
       Icon={ArrowLineDownIcon}
     >
       <Content gap={6}>
-        <VStack w="full" borderRadius="base" overflow="hidden" gap={0.25}>
+        <VStack w="full" borderRadius="base" overflow="hidden" spacing="1px">
           <HStack
             w="full"
             align="center"
@@ -166,7 +199,7 @@ function FundingInner({ onComplete, title, defaultAmount }: FundingInnerProps) {
               fontSize="xs"
               color="text.secondary"
             >
-              Current Balance
+              Balance
             </Text>
           </HStack>
           <HStack
@@ -178,46 +211,27 @@ function FundingInner({ onComplete, title, defaultAmount }: FundingInnerProps) {
             fontWeight="semibold"
           >
             <HStack>
+              <DollarIcon fontSize={20} />
+              <Text>{usdBalance?.toFixed(2)}</Text>
+            </HStack>
+            <Spacer />
+            <HStack color="text.secondary">
               <EthereumIcon fontSize={20} color="currentColor" />
-              {<Text>{formatEther(currentBalance)}</Text>}
+              <Text color="inherit">
+                {parseFloat(formatEther(currentBalance)).toFixed(5)}
+              </Text>
             </HStack>
           </HStack>
         </VStack>
       </Content>
 
       <Footer>
-        <HStack>
-          <Text fontSize="xs" fontWeight="bold" textTransform="uppercase">
-            Amount
-          </Text>
-          <InputGroup size="sm" w={200}>
-            <InputLeftElement>
-              <EthereumIcon />
-            </InputLeftElement>
-            <Input
-              type="number"
-              value={amount}
-              onChange={(e) => {
-                setAmount(e.target.value);
-              }}
-            />
-          </InputGroup>
-
-          {price && (
-            <>
-              <Spacer />
-
-              <Text fontSize="sm" fontWeight="500" color="text.secondary">
-                ~ $
-                {Math.round(
-                  parseFloat(amount) * parseFloat(price.amount) * 100,
-                ) / 100}
-              </Text>
-            </>
-          )}
-        </HStack>
-
-        <Divider />
+        <AmountSelection
+          amount={dollarAmount}
+          isLoading={isLoading}
+          setAmount={setDollarAmount}
+        />
+        <Divider my="5px" borderColor="darkGray.900" />
         {error ? (
           <ErrorAlert
             title="Account deployment error"
@@ -241,23 +255,33 @@ function FundingInner({ onComplete, title, defaultAmount }: FundingInnerProps) {
 
               return (
                 <>
-                  {connectors.length ? (
-                    connectors
-                      .filter((c) => ["argentX", "braavos"].includes(c.id))
-                      .map((c) => (
-                        <Button
-                          key={c.id}
-                          colorScheme="colorful"
-                          onClick={() => onConnect(c)}
-                        >
-                          Connect {c.name}
-                        </Button>
-                      ))
-                  ) : (
-                    <Button colorScheme="colorful" onClick={onCopy}>
-                      copy address
-                    </Button>
-                  )}
+                  <HStack w="full">
+                    {connectors.length ? (
+                      connectors
+                        .filter((c) => ["argentX", "braavos"].includes(c.id))
+                        .map((c) => (
+                          <Button
+                            key={c.id}
+                            gap="5px"
+                            flex="1"
+                            colorScheme="colorful"
+                            onClick={() => onConnect(c)}
+                          >
+                            {c.name === "argentX" && (
+                              <ArgentIcon fontSize={20} />
+                            )}
+                            {c.name === "braavos" && (
+                              <BravosIcon fontSize={20} />
+                            )}
+                            {c.name}
+                          </Button>
+                        ))
+                    ) : (
+                      <Button flex="1" colorScheme="colorful" onClick={onCopy}>
+                        copy address
+                      </Button>
+                    )}
+                  </HStack>
                 </>
               );
             case "fund":
@@ -290,6 +314,89 @@ function ExternalWalletProvider({ children }: PropsWithChildren) {
     >
       {children}
     </StarknetConfig>
+  );
+}
+
+function AmountSelection({
+  amount,
+  isLoading,
+  setAmount,
+}: {
+  amount: number;
+  isLoading: boolean;
+  setAmount: (number) => void;
+}) {
+  const amounts = [1, 5, 10];
+  const [selected, setSelected] = useState<number>(amount);
+  const [custom, setCustom] = useState<boolean>(false);
+  const { onOpen, onClose, isOpen } = useDisclosure();
+
+  return (
+    <HStack>
+      <Text
+        textTransform="uppercase"
+        fontSize="xs"
+        fontWeight="semibold"
+        color="text.secondary"
+      >
+        Amount
+      </Text>
+      <Spacer />
+      <VStack>
+        <HStack>
+          {amounts.map((value) => (
+            <Button
+              key={value}
+              fontSize="sm"
+              fontWeight="semibold"
+              color={value === selected && !custom ? "white" : "text.secondary"}
+              isDisabled={isLoading}
+              onClick={() => {
+                setCustom(false);
+                setSelected(value);
+                setAmount(value);
+                onClose();
+              }}
+            >
+              {`$${value}`}
+            </Button>
+          ))}
+          <Button
+            fontSize="sm"
+            color={custom ? "white" : "text.secondary"}
+            isDisabled={isLoading}
+            onClick={() => {
+              setCustom(true);
+              onOpen();
+            }}
+          >
+            Custom
+          </Button>
+        </HStack>
+        {isOpen && (
+          <Box position="relative" w="full">
+            <Input
+              pl="32px"
+              h="40px"
+              type="number"
+              step={0.01}
+              min={0.01}
+              fontSize="sm"
+              value={amount}
+              isDisabled={isLoading}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+            <DollarIcon
+              position="absolute"
+              color="text.secondary"
+              top="10px"
+              left="10px"
+              boxSize="20px"
+            />
+          </Box>
+        )}
+      </VStack>
+    </HStack>
   );
 }
 
