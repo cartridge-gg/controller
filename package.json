@@ -5,6 +5,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "build": "turbo build:deps build",
+    "build-wasm": "turbo build-wasm",
     "dev": "turbo build:deps dev",
     "storybook": "pnpm turbo build:deps storybook",
     "e2e": "turbo build:deps dev e2e",

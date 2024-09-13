@@ -8,7 +8,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  RUST_VERSION: 1.80.0
+  RUST_VERSION: 1.80.1
 
 jobs:
   rust:
@@ -54,3 +54,33 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage/lcov.info
+
+  generate:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/dojoengine/dojo-dev:v1.0.0-alpha.4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: asdf-vm/actions/install@v3
+#      - run: |
+#          export v=$(cat .tool-versions | grep rust | cut -d ' ' -f 2)
+#          echo "using version $v"
+#          rustup toolchain install $v
+#          rustup target add --toolchain $v wasm32-unknown-unknown
+      - run: |
+          cargo --version
+          rustc --version
+          node --version
+          pnpm --version
+          scarb --version
+          sncast --version
+      - run: pnpm install --frozen-lockfile
+      - run: |
+          git init || true
+          git config --global --add safe.directory '*'
+          git config --global user.email "bot@cartridge.gg"
+          git config --global user.name "Cartridge Bot"
+          git add .
+          git commit -m "init" || true
+      - run: pnpm build build-wasm
+      - run: git diff --exit-code
