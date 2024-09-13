@@ -25,8 +25,11 @@ export function parseExecutionError(
   let executionErrorRaw = executionError;
 
   // Remove the "Transaction reverted: Transaction execution has failed:\n" prefix
+  executionError = executionError.replace(/^Transaction reverted: /, "");
+
+  // Remove the "Transaction reverted: Transaction execution has failed:\n" prefix
   executionError = executionError.replace(
-    /^Transaction reverted: Transaction execution has failed:\n/,
+    /^Transaction execution has failed:\n/,
     "",
   );
 
@@ -125,7 +128,8 @@ export function parseExecutionError(
         summary = "Session already registered";
         lastError[lastError.length - 1] = summary;
       } else {
-        summary = "Execution error.";
+        summary = lastErrorMessage;
+        lastError[lastError.length - 1] = summary;
       }
     }
   }
