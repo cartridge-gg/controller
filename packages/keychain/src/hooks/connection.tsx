@@ -12,7 +12,7 @@ import {
   OpenMenuCtx,
 } from "utils/connection";
 import { getChainName } from "utils/network";
-import { RpcProvider, CallData } from "starknet";
+import { RpcProvider, CallData, constants } from "starknet";
 import {
   PaymasterOptions,
   Policy,
