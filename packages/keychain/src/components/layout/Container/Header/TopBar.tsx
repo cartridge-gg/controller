@@ -1,6 +1,6 @@
 import { Spacer, HStack } from "@chakra-ui/react";
 import { CloseButton } from "./CloseButton";
-import { NetworkButton } from "./NetworkButton";
+import { NetworkStatus } from "./NetworkStatus";
 import { SettingsButton } from "./SettingsButton";
 import { useConnection } from "hooks/connection";
 import { BackButton } from "./BackButton";
@@ -32,7 +32,7 @@ export function TopBar({ onBack, hideAccount, showSettings }: TopBarProps) {
 
       {!hideAccount && (
         <>
-          <NetworkButton />
+          <NetworkStatus />
           {/* {!!address && (
             <>
               <EthBalance chainId={chainId} address={address} />

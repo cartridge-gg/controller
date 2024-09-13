@@ -1,4 +1,5 @@
 import { constants } from "starknet";
+import { Hex, hexToString } from "viem";
 
 export function getChainName(chainId: string) {
   switch (chainId) {
@@ -7,6 +8,6 @@ export function getChainName(chainId: string) {
     case constants.StarknetChainId.SN_SEPOLIA:
       return "Sepolia";
     default:
-      return "Slot";
+      return hexToString(chainId as Hex).replace("SN_", "") || "Slot";
   }
 }

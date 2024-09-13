@@ -3,7 +3,7 @@ import { Circle, HStack, Text } from "@chakra-ui/react";
 import { useConnection } from "hooks/connection";
 import { constants } from "starknet";
 
-export function NetworkButton() {
+export function NetworkStatus() {
   const { chainName, chainId } = useConnection();
 
   if (!chainName) {
