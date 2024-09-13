@@ -6,6 +6,7 @@ import { toHex } from "viem";
 
 const meta = {
   component: NetworkStatus,
+  tags: ["autodocs"],
 } satisfies Meta<typeof NetworkStatus>;
 
 export default meta;
@@ -25,7 +26,15 @@ export const Sepolia: Story = {};
 export const Slot: Story = {
   parameters: {
     connection: {
-      chainId: toHex("SN_RYO"),
+      chainId: toHex("WP_RYO"),
+    },
+  },
+};
+
+export const Unknwon: Story = {
+  parameters: {
+    connection: {
+      chainId: toHex("UNKNWON_CHAIN"),
     },
   },
 };

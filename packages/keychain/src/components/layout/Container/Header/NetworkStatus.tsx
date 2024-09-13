@@ -1,7 +1,13 @@
-import { StarknetColorIcon, StarknetIcon, SlotIcon } from "@cartridge/ui";
+import {
+  StarknetColorIcon,
+  StarknetIcon,
+  SlotIcon,
+  AlertIcon,
+} from "@cartridge/ui";
 import { Circle, HStack, Text } from "@chakra-ui/react";
 import { useConnection } from "hooks/connection";
 import { constants } from "starknet";
+import { isSlotChain } from "utils/network";
 
 export function NetworkStatus() {
   const { chainName, chainId } = useConnection();
@@ -20,7 +26,11 @@ export function NetworkStatus() {
             case constants.StarknetChainId.SN_SEPOLIA:
               return <StarknetIcon fontSize="xl" />;
             default:
-              return <SlotIcon fontSize="xl" />;
+              return isSlotChain(chainId) ? (
+                <SlotIcon fontSize="xl" />
+              ) : (
+                <AlertIcon fontSize="xl" />
+              );
           }
         })()}
       </Circle>
