@@ -53,10 +53,7 @@ export function ConfirmTransaction() {
 
   if (updateSession) {
     return (
-      <CreateSession
-        isUpdate={true}
-        onConnect={() => setIsPoliciesUpdated(true)}
-      />
+      <CreateSession isUpdate onConnect={() => setIsPoliciesUpdated(true)} />
     );
   }
 
