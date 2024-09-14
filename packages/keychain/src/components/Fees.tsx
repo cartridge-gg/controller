@@ -23,7 +23,7 @@ export function Fees({
   const [formattedFee, setFormattedFee] = useState<string>();
 
   useEffect(() => {
-    if (!maxFee) {
+    if (maxFee === undefined) {
       return;
     }
 
@@ -100,7 +100,7 @@ function LineItem({
                 return null;
             }
           })()}
-          <EthereumIcon color="text.primary" />
+          {value !== "FREE" && <EthereumIcon color="text.primary" />}
           <Text fontSize={13}>{value}</Text>
         </HStack>
       )}
