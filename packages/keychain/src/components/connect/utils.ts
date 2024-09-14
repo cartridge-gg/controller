@@ -24,7 +24,7 @@ export function validateUsernameFor(type: AuthAction) {
       const data = await fetchAccount(val);
 
       if (type === "signup" && data.account) {
-        return "Account already exists";
+        return `Sorry, ${val} already exists.`;
       }
     } catch (error) {
       switch (type) {
@@ -37,7 +37,7 @@ export function validateUsernameFor(type: AuthAction) {
         }
         case "login": {
           if ((error as Error).message === "ent: account not found") {
-            return "Controller with username not found";
+            return "Username not found";
           } else {
             return "An error occured.";
           }
