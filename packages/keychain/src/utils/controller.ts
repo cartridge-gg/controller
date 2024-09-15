@@ -13,7 +13,7 @@ import Storage from "utils/storage";
 import Account from "./account";
 import { selectors, VERSION } from "./selectors";
 import migrations from "./migrations";
-import { JsCall, JsFelt, JsPolicy } from "@cartridge/account-wasm";
+import { JsCall, JsFelt } from "@cartridge/account-wasm";
 
 type SerializedController = {
   publicKey: string;
@@ -88,12 +88,7 @@ export default class Controller {
       throw new Error("Account not found");
     }
 
-    await this.account.cartridge.createSession(
-      policies as JsPolicy[],
-      expiresAt,
-    );
-
-    this.store();
+    await this.account.cartridge.createSession(policies, expiresAt);
   }
 
   registerSessionCalldata(
@@ -102,7 +97,7 @@ export default class Controller {
     publicKey: string,
   ): Array<string> {
     return this.account.cartridge.registerSessionCalldata(
-      policies as JsPolicy[],
+      policies,
       expiresAt,
       publicKey,
     );
@@ -119,7 +114,7 @@ export default class Controller {
     }
 
     return await this.account.cartridge.registerSession(
-      policies as JsPolicy[],
+      policies,
       expiresAt,
       publicKey,
       num.toHex(maxFee),

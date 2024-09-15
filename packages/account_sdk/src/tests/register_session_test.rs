@@ -2,7 +2,7 @@ use crate::{
     abigen::erc_20::Erc20,
     account::{
         session::{
-            hash::{AllowedMethod, Session},
+            hash::{Policy, Session},
             SessionAccount,
         },
         SpecificAccount,
@@ -32,9 +32,9 @@ async fn test_verify_execute_session_registered() {
 
     let session = Session::new(
         vec![
-            AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
-            AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("transfds")),
-            AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("transfer")),
+            Policy::new(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
+            Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfds")),
+            Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer")),
         ],
         u64::MAX,
         &session_signer.signer(),

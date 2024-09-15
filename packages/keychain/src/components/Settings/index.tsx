@@ -47,7 +47,7 @@ export function Settings({ onLogout }: { onLogout: () => void }) {
         <VStack gap="30px" w="full">
           {/* <VStack>
             {controller.account.cartridge.hasSession(
-              controller.account.cartridge.sessionJson(),
+              controller.account.cartridge.session(),
             ) ? (
               <Text>Session active</Text>
             ) : (

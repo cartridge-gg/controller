@@ -19,9 +19,10 @@ import {
 import {
   CartridgeAccount,
   JsInvocationsDetails,
+  SessionMetadata,
 } from "@cartridge/account-wasm";
 import { normalizeCalls } from "./connection/execute";
-import { PaymasterOptions } from "@cartridge/controller";
+import { PaymasterOptions, Policy } from "@cartridge/controller";
 
 class Account extends BaseAccount {
   rpc: RpcProvider;
@@ -89,8 +90,8 @@ class Account extends BaseAccount {
     return this.cartridge.hasSession(normalizeCalls(calls));
   }
 
-  sessionJson(): string {
-    return this.cartridge.sessionJson();
+  session(policies: Policy[]): SessionMetadata | undefined {
+    return this.cartridge.session(policies);
   }
 
   async estimateInvokeFee(

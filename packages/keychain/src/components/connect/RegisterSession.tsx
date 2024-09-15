@@ -35,7 +35,7 @@ export function RegisterSession({
         calldata,
       },
     ];
-  }, [expiresAt, policies, publicKey]);
+  }, [controller, expiresAt, policies, publicKey]);
 
   const onRegisterSession = useCallback(
     async (maxFee: bigint) => {
@@ -53,6 +53,7 @@ export function RegisterSession({
           TransactionFinalityStatus.ACCEPTED_ON_L2,
         ],
       });
+
       onConnect(policies, transaction_hash);
     },
     [controller, expiresAt, policies, publicKey, onConnect],
