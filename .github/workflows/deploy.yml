@@ -57,10 +57,16 @@ jobs:
         run: pnpm vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy to Vercel (Preview)
         if: github.ref != 'refs/heads/main'
-        run: pnpm vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+        run: echo "url=$(pnpm vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})" > "$GITHUB_OUTPUT"
+        id: deploy
       - name: Deploy to Vercel (Production)
         if: github.ref == 'refs/heads/main'
         run: pnpm vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Assign Alias
+        if: github.ref != 'refs/heads/main'
+        run: |
+          pnpm vercel switch cartridge --token=${{ secrets.VERCEL_TOKEN }}
+          pnpm vercel alias set ${{ steps.deploy.outputs.url }} ${{ github.sha }}.preview.cartridge.gg --token=${{ secrets.VERCEL_TOKEN }}
 
   keychain-storybook:
     runs-on: ubuntu-latest
@@ -111,10 +117,16 @@ jobs:
         run: pnpm vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy to Vercel (Preview)
         if: github.ref != 'refs/heads/main'
-        run: pnpm vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+        run: echo "url=$(pnpm vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})" > "$GITHUB_OUTPUT"
+        id: deploy
       - name: Deploy to Vercel (Production)
         if: github.ref == 'refs/heads/main'
         run: pnpm vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Assign Alias
+        if: github.ref != 'refs/heads/main'
+        run: |
+          pnpm vercel switch cartridge --token=${{ secrets.VERCEL_TOKEN }}
+          pnpm vercel alias set ${{ steps.deploy.outputs.url }} ${{ github.sha }}.preview.cartridge.gg --token=${{ secrets.VERCEL_TOKEN }}
 
   cartridge-starknet-react-next:
     runs-on: ubuntu-latest
@@ -160,6 +172,8 @@ jobs:
       - name: Build Project Artifacts (Preview)
         if: github.ref != 'refs/heads/main'
         run: pnpm vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          NEXT_PUBLIC_DEPLOYMENT_URL: ${{ github.sha }}.preview.cartridge.gg
       - name: Build Project Artifacts (Production)
         if: github.ref == 'refs/heads/main'
         run: pnpm vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
