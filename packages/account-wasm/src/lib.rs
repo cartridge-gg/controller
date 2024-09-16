@@ -133,6 +133,24 @@ impl CartridgeAccount {
         Ok(to_value(&res)?)
     }
 
+    #[wasm_bindgen(js_name = registerSessionCalldata)]
+    pub fn register_session_calldata(
+        &mut self,
+        policies: Vec<JsPolicy>,
+        expires_at: u64,
+        public_key: JsFelt,
+    ) -> std::result::Result<JsValue, JsControllerError> {
+        let methods = policies
+            .into_iter()
+            .map(TryFrom::try_from)
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+        let call = self
+            .controller
+            .register_session_call(methods, expires_at, public_key.0)?;
+
+        Ok(to_value(&call.calldata)?)
+    }
+
     #[wasm_bindgen(js_name = createSession)]
     pub async fn create_session(
         &mut self,

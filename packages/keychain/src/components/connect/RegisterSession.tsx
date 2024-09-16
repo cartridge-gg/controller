@@ -1,6 +1,6 @@
 import { Content } from "components/layout";
 import { Policy } from "@cartridge/controller";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useConnection } from "hooks/connection";
 import { Policies } from "components/Policies";
 import { SessionConsent } from "components/connect";
@@ -21,13 +21,21 @@ export function RegisterSession({
   const { controller, policies } = useConnection();
   const [expiresAt] = useState<bigint>(SESSION_EXPIRATION);
 
-  const transactions = [
-    {
-      contractAddress: controller.address,
-      entrypoint: "register_session",
-      calldata: [expiresAt, ...policies.flatMap((p) => [p.target, p.method])],
-    },
-  ];
+  const transactions = useMemo(() => {
+    const calldata = controller.registerSessionCalldata(
+      expiresAt,
+      policies,
+      publicKey,
+    );
+
+    return [
+      {
+        contractAddress: controller.address,
+        entrypoint: "register_session",
+        calldata,
+      },
+    ];
+  }, [expiresAt, policies, publicKey]);
 
   const onRegisterSession = useCallback(
     async (maxFee: bigint) => {

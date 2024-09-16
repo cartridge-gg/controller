@@ -114,6 +114,18 @@ export default class Controller {
     );
   }
 
+  registerSessionCalldata(
+    expiresAt: bigint,
+    policies: Policy[],
+    publicKey: string,
+  ): Array<string> {
+    return this.account.cartridge.registerSessionCalldata(
+      policies as JsPolicy[],
+      expiresAt,
+      publicKey,
+    );
+  }
+
   async registerSession(
     expiresAt: bigint,
     policies: Policy[],

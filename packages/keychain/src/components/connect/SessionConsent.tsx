@@ -10,7 +10,7 @@ export function SessionConsent({
 }: {
   variant?: "default" | "slot" | "signup";
 }) {
-  const { origin } = useConnection();
+  const { origin, policies } = useConnection();
   const hostname = useMemo(
     () => (origin ? new URL(origin).hostname : undefined),
     [origin],
@@ -49,7 +49,7 @@ export function SessionConsent({
             <Text as="span" color="text.secondaryAccent" fontWeight="bold">
               {origin}
             </Text>{" "}
-            to perform the following actions on your behalf
+            to perform the following actions ({policies.length}) on your behalf
           </Text>
         </HStack>
       ) : null;
