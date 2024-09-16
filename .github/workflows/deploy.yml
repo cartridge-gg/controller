@@ -178,7 +178,7 @@ jobs:
       - name: Build Project Artifacts (Preview)
         if: github.ref != 'refs/heads/main'
         run: |
-          echo "NEXT_PUBLIC_KEYCHAIN_DEPLOYMENT_URL=keychain-${{ github.sha }}.preview.cartridge.gg" >> ./examples/starknet-react-next/.env.local
+          echo "NEXT_PUBLIC_KEYCHAIN_DEPLOYMENT_URL=https://keychain-${{ github.sha }}.preview.cartridge.gg" >> ./examples/starknet-react-next/.env.local
           pnpm vercel build --token=${{ secrets.VERCEL_TOKEN }}
       - name: Build Project Artifacts (Production)
         if: github.ref == 'refs/heads/main'
