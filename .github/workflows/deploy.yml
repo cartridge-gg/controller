@@ -175,10 +175,15 @@ jobs:
       - name: Pull Vercel Environment Information (Production)
         if: github.ref == 'refs/heads/main'
         run: pnpm vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Set outputs
+        id: vars
+        run: |
+          git config --global --add safe.directory '*'
+          echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       - name: Build Project Artifacts (Preview)
         if: github.ref != 'refs/heads/main'
         run: |
-          echo "NEXT_PUBLIC_KEYCHAIN_DEPLOYMENT_URL=https://keychain-${{ github.sha }}.preview.cartridge.gg" >> ./examples/starknet-react-next/.env.local
+          echo "NEXT_PUBLIC_KEYCHAIN_DEPLOYMENT_URL=https://keychain-${{ steps.vars.outputs.sha_short }}.preview.cartridge.gg" >> ./examples/starknet-react-next/.env.local
           pnpm vercel build --token=${{ secrets.VERCEL_TOKEN }}
       - name: Build Project Artifacts (Production)
         if: github.ref == 'refs/heads/main'
