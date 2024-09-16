@@ -57,7 +57,7 @@ pub enum ControllerError {
 
     #[error("Controller is not deployed. Required fee: {fee_estimate:?}")]
     NotDeployed {
-        fee_estimate: FeeEstimate,
+        fee_estimate: Box<FeeEstimate>,
         balance: u128,
     },
 
@@ -75,7 +75,7 @@ pub enum ControllerError {
 
     #[error("Insufficient balance for transaction. Required fee: {fee_estimate:?}")]
     InsufficientBalance {
-        fee_estimate: FeeEstimate,
+        fee_estimate: Box<FeeEstimate>,
         balance: u128,
     },
 }
@@ -277,7 +277,7 @@ where
 
                 if fee_estimate.overall_fee > Felt::from(balance) {
                     Err(ControllerError::InsufficientBalance {
-                        fee_estimate,
+                        fee_estimate: Box::new(fee_estimate),
                         balance,
                     })
                 } else {
@@ -295,7 +295,7 @@ where
                     let mut fee_estimate = self.deploy().estimate_fee().await?;
                     fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
                     Err(ControllerError::NotDeployed {
-                        fee_estimate,
+                        fee_estimate: Box::new(fee_estimate),
                         balance,
                     })
                 }
@@ -330,7 +330,7 @@ where
                         let mut fee_estimate = self.deploy().estimate_fee().await?;
                         fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
                         Err(ControllerError::NotDeployed {
-                            fee_estimate,
+                            fee_estimate: Box::new(fee_estimate),
                             balance,
                         })
                     } else {
