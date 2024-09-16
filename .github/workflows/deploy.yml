@@ -183,7 +183,7 @@ jobs:
         run: pnpm vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy to Vercel (Preview)
         if: github.ref != 'refs/heads/main'
-        run: pnpm vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --env NEXT_PUBLIC_KEYCHAIN_DEPLOYMENT_URL=keychain-${{ github.sha }}.preview.cartridge.gg
+        run: pnpm vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --env NEXT_PUBLIC_KEYCHAIN_DEPLOYMENT_URL=keychain-${{ github.sha }}.preview.cartridge.gg --build-env NEXT_PUBLIC_KEYCHAIN_DEPLOYMENT_URL=keychain-${{ github.sha }}.preview.cartridge.gg
       - name: Deploy to Vercel (Production)
         if: github.ref == 'refs/heads/main'
         run: pnpm vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
