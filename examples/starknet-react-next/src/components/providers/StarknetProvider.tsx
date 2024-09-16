@@ -11,7 +11,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
     <StarknetConfig
       autoConnect
       chains={[sepolia]}
-      connectors={[cartridge]}
+      connectors={[controller]}
       explorer={starkscan}
       provider={provider}
     >
@@ -23,7 +23,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
 const ETH_TOKEN_ADDRESS =
   "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 
-const cartridge = new CartridgeConnector({
+const controller = new CartridgeConnector({
   policies: [
     {
       target: ETH_TOKEN_ADDRESS,
@@ -48,7 +48,8 @@ const cartridge = new CartridgeConnector({
       method: "allowance",
     },
   ],
-  url: getKeychainUrl(),
+  url:
+    process.env.NEXT_PUBLIC_KEYCHAIN_DEPLOYMENT_URL ?? process.env.XFRAME_URL,
   rpc: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
   paymaster: {
     caller: shortString.encodeShortString("ANY_CALLER"),
@@ -56,16 +57,6 @@ const cartridge = new CartridgeConnector({
   // theme: "dope-wars",
   // colorMode: "light"
 });
-
-function getKeychainUrl() {
-  switch (window.location.hostname) {
-    case "localhost":
-    case "cartridge-starknet-react-next.preview.cartridge.gg":
-      return process.env.XFRAME_URL;
-    default:
-      process.env.NEXT_PUBLIC_KEYCHAIN_DEPLOYMENT_URL;
-  }
-}
 
 function provider(chain: Chain) {
   switch (chain) {
