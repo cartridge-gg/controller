@@ -64,7 +64,7 @@ jobs:
         run: pnpm vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Assign Alias
         if: github.ref != 'refs/heads/main'
-        run: pnpm vercel alias set ${{ steps.deploy.outputs.url }} ${{ github.sha }}.preview.cartridge.gg --scope=cartridge --token=${{ secrets.VERCEL_TOKEN }}
+        run: pnpm vercel alias set ${{ steps.deploy.outputs.url }} keychain-${{ github.sha }}.preview.cartridge.gg --scope=cartridge --token=${{ secrets.VERCEL_TOKEN }}
 
   keychain-storybook:
     runs-on: ubuntu-latest
@@ -122,7 +122,7 @@ jobs:
         run: pnpm vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Assign Alias
         if: github.ref != 'refs/heads/main'
-        run: pnpm vercel alias set ${{ steps.deploy.outputs.url }} ${{ github.sha }}.preview.cartridge.gg --scope=cartridge --token=${{ secrets.VERCEL_TOKEN }}
+        run: pnpm vercel alias set ${{ steps.deploy.outputs.url }} keychain-storybook-${{ github.sha }}.preview.cartridge.gg --scope=cartridge --token=${{ secrets.VERCEL_TOKEN }}
 
   cartridge-starknet-react-next:
     runs-on: ubuntu-latest
