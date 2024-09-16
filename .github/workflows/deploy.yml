@@ -169,7 +169,7 @@ jobs:
         if: github.ref != 'refs/heads/main'
         run: pnpm vercel build --token=${{ secrets.VERCEL_TOKEN }}
         env:
-          NEXT_PUBLIC_DEPLOYMENT_URL: ${{ github.sha }}.preview.cartridge.gg
+          NEXT_PUBLIC_KEYCHAIN_DEPLOYMENT_URL: ${{ github.sha }}.preview.cartridge.gg
       - name: Build Project Artifacts (Production)
         if: github.ref == 'refs/heads/main'
         run: pnpm vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}

@@ -48,16 +48,7 @@ const cartridge = new CartridgeConnector({
       method: "allowance",
     },
   ],
-  url:
-    !process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ||
-    process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL.split(".")[0] ===
-      "cartridge-starknet-react-next"
-      ? process.env.XFRAME_URL
-      : "https://" +
-        (process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ?? "").replace(
-          "cartridge-starknet-react-next",
-          "keychain",
-        ),
+  url: getKeychainUrl(),
   rpc: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
   paymaster: {
     caller: shortString.encodeShortString("ANY_CALLER"),
@@ -65,6 +56,16 @@ const cartridge = new CartridgeConnector({
   // theme: "dope-wars",
   // colorMode: "light"
 });
+
+function getKeychainUrl() {
+  switch (window.location.hostname) {
+    case "localhost":
+    case "cartridge-starknet-react-next.preview.cartridge.gg":
+      return process.env.XFRAME_URL;
+    default:
+      process.env.NEXT_PUBLIC_KEYCHAIN_DEPLOYMENT_URL;
+  }
+}
 
 function provider(chain: Chain) {
   switch (chain) {

@@ -8,7 +8,6 @@ import { Menu } from "components/Menu";
 import { RegisterSession } from "components/RegisterSession";
 
 export default function Home() {
-  console.log("preview url", process.env.NEXT_PUBLIC_DEPLOYMENT_URL);
   return (
     <div className="flex flex-col p-4 gap-4">
       <div className="flex justify-between">
