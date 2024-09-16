@@ -169,6 +169,24 @@ where
         Ok((authorization, signer.secret_scalar()))
     }
 
+    pub fn register_session_call(
+        &mut self,
+        methods: Vec<AllowedMethod>,
+        expires_at: u64,
+        public_key: Felt,
+    ) -> Result<Call, ControllerError> {
+        let pubkey = VerifyingKey::from_scalar(public_key);
+        let signer = AbigenSigner::Starknet(StarknetSigner {
+            pubkey: NonZero::new(pubkey.scalar()).unwrap(),
+        });
+        let session = Session::new(methods, expires_at, &signer)?;
+        let call = self
+            .contract
+            .register_session_getcall(&session.raw(), &self.owner_guid());
+
+        Ok(call)
+    }
+
     pub async fn register_session(
         &mut self,
         methods: Vec<AllowedMethod>,
@@ -176,18 +194,8 @@ where
         public_key: Felt,
         max_fee: Felt,
     ) -> Result<InvokeTransactionResult, ControllerError> {
-        let pubkey = VerifyingKey::from_scalar(public_key);
-        let signer = AbigenSigner::Starknet(StarknetSigner {
-            pubkey: NonZero::new(pubkey.scalar()).unwrap(),
-        });
-
-        let session = Session::new(methods, expires_at, &signer)?;
-
-        let call = self
-            .contract
-            .register_session_getcall(&session.raw(), &self.owner_guid());
-        let calls = vec![call];
-        let txn = self.execute(calls, max_fee).await?;
+        let call = self.register_session_call(methods, expires_at, public_key)?;
+        let txn = self.execute(vec![call], max_fee).await?;
 
         Ok(txn)
     }
