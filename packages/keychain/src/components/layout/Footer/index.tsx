@@ -69,7 +69,7 @@ export function Footer({
       w="full"
       zIndex={1}
       gap={0}
-      as={motion.div}
+      as={isExpandable ? motion.div : undefined}
       layout="position"
       className="whatever"
       animate={{
