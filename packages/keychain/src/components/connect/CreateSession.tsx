@@ -2,7 +2,7 @@ import { Container, Content, Footer } from "components/layout";
 import { BigNumberish } from "starknet";
 import { Policy } from "@cartridge/controller";
 import { ControllerError } from "utils/connection";
-import { Box, Button } from "@chakra-ui/react";
+import { Button } from "@chakra-ui/react";
 import { useCallback, useState } from "react";
 import { useConnection } from "hooks/connection";
 import { Policies } from "components/Policies";
@@ -12,8 +12,10 @@ import { SESSION_EXPIRATION } from "const";
 
 export function CreateSession({
   onConnect,
+  isUpdate,
 }: {
   onConnect: (policies: Policy[], transaction_hash?: string) => void;
+  isUpdate?: boolean;
 }) {
   const { controller, policies } = useConnection();
   const [isConnecting, setIsConnecting] = useState(false);
@@ -34,12 +36,15 @@ export function CreateSession({
   }, [controller, expiresAt, policies, maxFee, onConnect]);
 
   return (
-    <Container title="Create Session">
+    <Container
+      title={!isUpdate ? "Create Session" : "Update Session"}
+      description={
+        isUpdate && "The policies were updated, please update existing session"
+      }
+    >
       <Content>
         <SessionConsent />
-        <Box maxH={340} overflowY="auto">
-          <Policies policies={policies} />
-        </Box>
+        <Policies policies={policies} />
       </Content>
 
       <Footer hideTxSummary>
@@ -50,7 +55,7 @@ export function CreateSession({
           isLoading={isConnecting}
           onClick={() => onCreateSession()}
         >
-          create session
+          {isUpdate ? "update" : "create"} session
         </Button>
       </Footer>
     </Container>
