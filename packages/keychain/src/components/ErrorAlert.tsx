@@ -78,6 +78,8 @@ export function ErrorAlert({
                       return <WarningIcon />;
                     case "error":
                       return <AlertIcon color="error.foreground" />;
+                    default:
+                      return null;
                   }
                 })()}
                 <Text
@@ -92,7 +94,7 @@ export function ErrorAlert({
 
               <Spacer />
 
-              {description && (!isExpanded || allowToggle) && (
+              {description && !isExpanded && (
                 <HStack>
                   <Box
                     as={motion.div}
