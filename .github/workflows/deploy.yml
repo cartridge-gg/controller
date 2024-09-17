@@ -16,6 +16,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Get pnpm store directory
         shell: bash
         run: |
@@ -37,8 +39,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-
             ${{ runner.os }}-turbo-cache-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build
@@ -79,6 +79,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Get pnpm store directory
         shell: bash
         run: |
@@ -100,8 +102,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-
             ${{ runner.os }}-turbo-cache-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build
@@ -142,6 +142,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Get pnpm store directory
         shell: bash
         run: |
@@ -163,8 +165,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-
             ${{ runner.os }}-turbo-cache-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build
