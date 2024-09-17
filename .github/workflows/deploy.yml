@@ -12,12 +12,21 @@ jobs:
     runs-on: ubuntu-latest
     env:
       VERCEL_PROJECT_ID: "keychain"
-    container:
-      image: ghcr.io/dojoengine/dojo-dev:v1.0.0-alpha.4
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      - name: Cache pnpm modules
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
       - name: Cache turbo build setup
         uses: actions/cache@v4
         with:
@@ -28,22 +37,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-
             ${{ runner.os }}-turbo-cache-
-      - name: Install apps
-        uses: asdf-vm/actions/install@v3
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-      - name: Versions
-        run: |
-          cargo --version
-          rustc --version
-          node --version
-          pnpm --version
-          scarb --version
-          sncast --version
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build
-        run: pnpm build
+        run: |
+          pnpm build:deps
+          pnpm --filter "keychain" build
       - name: Pull Vercel Environment Information (Preview)
         if: github.ref != 'refs/heads/main'
         run: pnpm vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
@@ -76,12 +77,21 @@ jobs:
     runs-on: ubuntu-latest
     env:
       VERCEL_PROJECT_ID: "keychain-storybook"
-    container:
-      image: ghcr.io/dojoengine/dojo-dev:v1.0.0-alpha.4
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      - name: Cache pnpm modules
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
       - name: Cache turbo build setup
         uses: actions/cache@v4
         with:
@@ -92,22 +102,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-
             ${{ runner.os }}-turbo-cache-
-      - name: Install apps
-        uses: asdf-vm/actions/install@v3
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-      - name: Versions
-        run: |
-          cargo --version
-          rustc --version
-          node --version
-          pnpm --version
-          scarb --version
-          sncast --version
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build
-        run: pnpm build
+        run: |
+          pnpm build:deps
+          pnpm --filter "keychain-storybook" build
       - name: Pull Vercel Environment Information (Preview)
         if: github.ref != 'refs/heads/main'
         run: pnpm vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
@@ -140,12 +142,21 @@ jobs:
     runs-on: ubuntu-latest
     env:
       VERCEL_PROJECT_ID: "cartridge-starknet-react-next"
-    container:
-      image: ghcr.io/dojoengine/dojo-dev:v1.0.0-alpha.4
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      - name: Cache pnpm modules
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
       - name: Cache turbo build setup
         uses: actions/cache@v4
         with:
@@ -156,22 +167,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-
             ${{ runner.os }}-turbo-cache-
-      - name: Install apps
-        uses: asdf-vm/actions/install@v3
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-      - name: Versions
-        run: |
-          cargo --version
-          rustc --version
-          node --version
-          pnpm --version
-          scarb --version
-          sncast --version
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build
-        run: pnpm build
+        run: |
+          pnpm build:deps
+          pnpm --filter "starknet-react-next" build
       - name: Pull Vercel Environment Information (Preview)
         if: github.ref != 'refs/heads/main'
         run: pnpm vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
