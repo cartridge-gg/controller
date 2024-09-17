@@ -38,7 +38,6 @@ class Controller {
     profileUrl,
     rpc,
     paymaster,
-    prefunds,
     ...options
   }: ControllerOptions = {}) {
     this.rpc = new URL(rpc || RPC_SEPOLIA);
@@ -58,7 +57,6 @@ class Controller {
         ...options,
         url,
         paymaster,
-        prefunds,
         onClose: this.keychain?.reset,
         onConnect: (keychain) => {
           this.keychain = keychain;
