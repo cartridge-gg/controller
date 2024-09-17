@@ -37,18 +37,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-
             ${{ runner.os }}-turbo-cache-
-      - name: Install apps
-        uses: asdf-vm/actions/install@v3
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-      - name: Versions
-        run: |
-          cargo --version
-          rustc --version
-          node --version
-          pnpm --version
-          scarb --version
-          sncast --version
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build
@@ -110,18 +100,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-
             ${{ runner.os }}-turbo-cache-
-      - name: Install apps
-        uses: asdf-vm/actions/install@v3
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-      - name: Versions
-        run: |
-          cargo --version
-          rustc --version
-          node --version
-          pnpm --version
-          scarb --version
-          sncast --version
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build
@@ -183,18 +163,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-
             ${{ runner.os }}-turbo-cache-
-      - name: Install apps
-        uses: asdf-vm/actions/install@v3
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-      - name: Versions
-        run: |
-          cargo --version
-          rustc --version
-          node --version
-          pnpm --version
-          scarb --version
-          sncast --version
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build
