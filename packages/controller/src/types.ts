@@ -1,4 +1,3 @@
-import { Connection } from "@cartridge/penpal";
 import {
   constants,
   Abi,
@@ -15,6 +14,7 @@ import {
   DeployAccountSignerDetails,
   DeclareSignerDetails,
 } from "starknet";
+import { IFrame } from "./iframe";
 
 export type Session = {
   chainId: constants.StarknetChainId;
@@ -82,12 +82,6 @@ export type IFrames = {
   profile: IFrame<Profile>;
 };
 
-export type IFrame<T extends {}> = {
-  url: URL;
-  connection?: Connection<T>;
-  modal?: Modal;
-};
-
 export interface Keychain {
   probe(rpcUrl?: string): Promise<ProbeReply | ConnectError>;
   connect(
@@ -143,7 +137,6 @@ export interface Keychain {
 export interface Profile {}
 
 export interface Modal {
-  element: HTMLDivElement;
   open: () => void;
   close: () => void;
 }
