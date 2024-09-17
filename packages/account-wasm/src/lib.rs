@@ -25,6 +25,7 @@ use starknet::accounts::{Account, ConnectedAccount};
 use starknet::core::types::Call;
 use starknet::macros::short_string;
 use starknet::signers::SigningKey;
+use starknet_types_core::felt::Felt;
 use types::call::JsCall;
 use types::policy::JsPolicy;
 use types::session::JsSession;
@@ -164,12 +165,11 @@ impl CartridgeAccount {
             .map(TryFrom::try_from)
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
-        let (authorization, private_key) =
-            self.controller.create_session(methods, expires_at).await?;
+        let (authorization, _) = self.controller.create_session(methods, expires_at).await?;
 
         Ok(to_value(&JsCredentials {
             authorization,
-            private_key,
+            private_key: Felt::ZERO,
         })?)
     }
 
