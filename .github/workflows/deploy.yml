@@ -12,8 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       VERCEL_PROJECT_ID: "keychain"
-    container:
-      image: ghcr.io/dojoengine/dojo-dev:v1.0.0-alpha.4
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -76,8 +74,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       VERCEL_PROJECT_ID: "keychain-storybook"
-    container:
-      image: ghcr.io/dojoengine/dojo-dev:v1.0.0-alpha.4
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -140,8 +136,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       VERCEL_PROJECT_ID: "cartridge-starknet-react-next"
-    container:
-      image: ghcr.io/dojoengine/dojo-dev:v1.0.0-alpha.4
     steps:
       - name: Checkout
         uses: actions/checkout@v4
