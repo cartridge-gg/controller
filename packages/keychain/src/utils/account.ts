@@ -13,6 +13,7 @@ import {
   AllowArray,
   UniversalDetails,
   Abi,
+  num,
 } from "starknet";
 
 import {
@@ -93,15 +94,6 @@ class Account extends BaseAccount {
     calls: AllowArray<Call>,
     _: EstimateFeeDetails = {},
   ): Promise<EstimateFee> {
-    // For doing bigint multiplication with floating point numbers.
-    function bigint_mul_float(bigIntValue: bigint, floatValue: number) {
-      // Scale factor (e.g., 1e6 for 6 decimal places of precision)
-      const scaleFactor = 1000000;
-      const scaledFloat = BigInt(Math.round(floatValue * scaleFactor));
-      const result = bigIntValue * scaledFloat;
-      return BigInt(result) / BigInt(scaleFactor);
-    }
-
     const res = await this.cartridge.estimateInvokeFee(normalizeCalls(calls));
 
     // The reason why we set the multiplier unseemingly high is to account
@@ -109,10 +101,12 @@ class Account extends BaseAccount {
     //
     // Setting it lower might cause the actual transaction to fail due to
     // insufficient max fee.
-    const ESTIMATE_FEE_MULITPLIER = 1.7;
-    const suggestedMaxFee = bigint_mul_float(
+    const MULTIPLIER_PERCENTAGE = 170; // x1.7
+
+    // This will essentially multiply the estimated fee by 1.7
+    const suggestedMaxFee = num.addPercent(
       BigInt(res.overall_fee),
-      ESTIMATE_FEE_MULITPLIER,
+      MULTIPLIER_PERCENTAGE,
     );
 
     return { suggestedMaxFee, ...res };
