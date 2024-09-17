@@ -27,7 +27,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: asdf-vm/actions/install@v3
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: ${{ env.RUST_VERSION }}
@@ -61,7 +60,6 @@ jobs:
       - uses: pnpm/action-setup@v4
         id: pnpm-install
         with:
-          version: 9.7.0
           run_install: false
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
