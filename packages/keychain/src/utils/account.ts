@@ -93,7 +93,29 @@ class Account extends BaseAccount {
     calls: AllowArray<Call>,
     _: EstimateFeeDetails = {},
   ): Promise<EstimateFee> {
-    return await this.cartridge.estimateInvokeFee(normalizeCalls(calls), 1.5);
+    // For doing bigint multiplication with floating point numbers.
+    function bigint_mul_float(bigIntValue: bigint, floatValue: number) {
+      // Scale factor (e.g., 1e6 for 6 decimal places of precision)
+      const scaleFactor = 1000000;
+      const scaledFloat = BigInt(Math.round(floatValue * scaleFactor));
+      const result = bigIntValue * scaledFloat;
+      return BigInt(result) / BigInt(scaleFactor);
+    }
+
+    // The reason why we set the multiplier unseemingly high is to account
+    // for the fact that the estimate is done without validation.
+    //
+    // Setting it lower might cause the actual transaction to fail due to
+    // insufficient max fee.
+    const res = await this.cartridge.estimateInvokeFee(normalizeCalls(calls));
+
+    const ESTIMATE_FEE_MULITPLIER = 1.7;
+    const suggestedMaxFee = bigint_mul_float(
+      BigInt(res.overall_fee),
+      ESTIMATE_FEE_MULITPLIER,
+    );
+
+    return { suggestedMaxFee, ...res };
   }
 
   async verifyMessageHash(
