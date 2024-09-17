@@ -51,7 +51,7 @@ mod session_component {
     }
 
     mod Errors {
-        const LENGHT_MISMATCH: felt252 = 'Length of proofs mismatched';
+        const LENGTH_MISMATCH: felt252 = 'Length of proofs mismatched';
         const SESSION_EXPIRED: felt252 = 'Session expired';
         const SESSION_REVOKED: felt252 = 'Session has been revoked';
         const SESSION_SIGNATURE_INVALID: felt252 = 'Session signature is invalid';
@@ -103,12 +103,12 @@ mod session_component {
     impl InternalImpl<
         TContractState, +HasComponent<TContractState>, +ISessionCallback<TContractState>,
     > of InternalTrait<TContractState> {
-        fn validate_session_serialized(
+        fn assert_valid_session(
             ref self: ComponentState<TContractState>,
             mut signature: Span<felt252>,
             calls: Span<Call>,
             transaction_hash: felt252,
-        ) -> felt252 {
+        ) {
             assert(self.is_session(signature), 'session/invalid-magic-value');
             assert_no_self_call(calls, get_contract_address());
 
@@ -116,10 +116,7 @@ mod session_component {
             let signature: SessionToken = Serde::<SessionToken>::deserialize(ref signature)
                 .expect('session/deserialize-error');
 
-            match self.validate_signature(signature, calls, transaction_hash) {
-                Result::Ok(_) => { starknet::VALIDATED },
-                Result::Err(e) => { e }
-            }
+            self.validate_signature(signature, calls, transaction_hash).expect('session/invalid-signature');
         }
 
         #[inline(always)]
@@ -138,7 +135,7 @@ mod session_component {
         ) -> Result<(), felt252> {
             let contract = self.get_contract();
             if signature.proofs.len() != calls.len() {
-                return Result::Err(Errors::LENGHT_MISMATCH);
+                return Result::Err(Errors::LENGTH_MISMATCH);
             };
 
             let now = get_block_timestamp();

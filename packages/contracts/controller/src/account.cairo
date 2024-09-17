@@ -235,7 +235,7 @@ mod CartridgeAccount {
             if self.session.is_session(tx_info.signature) {
                 self
                     .session
-                    .validate_session_serialized(
+                    .assert_valid_session(
                         tx_info.signature, calls.span(), tx_info.transaction_hash
                     );
             } else {
@@ -307,7 +307,7 @@ mod CartridgeAccount {
                 };
                 self
                     .session
-                    .validate_session_serialized(
+                    .assert_valid_session(
                         tx_info.signature, array![call].span(), tx_info.transaction_hash
                     );
             } else {
@@ -387,7 +387,7 @@ mod CartridgeAccount {
             signature: Span<felt252>,
         ) -> Array<Span<felt252>> {
             if self.session.is_session(signature) {
-                self.session.validate_session_serialized(signature, calls, outside_execution_hash);
+                self.session.assert_valid_session(signature, calls, outside_execution_hash);
             } else {
                 self
                     .assert_valid_calls_and_signature(
