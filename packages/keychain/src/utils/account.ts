@@ -105,7 +105,7 @@ class Account extends BaseAccount {
     const res = await this.cartridge.estimateInvokeFee(normalizeCalls(calls));
 
     // The reason why we set the multiplier unseemingly high is to account
-    // for the fact that the estimatation above is done without validation (SKIP_VALIDATE).
+    // for the fact that the estimation above is done without validation (ie SKIP_VALIDATE).
     //
     // Setting it lower might cause the actual transaction to fail due to
     // insufficient max fee.
