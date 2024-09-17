@@ -79,6 +79,7 @@ export class IFrame<CallSender extends {}> implements Modal {
     container.appendChild(iframe);
 
     this.iframe = iframe;
+    this.container = container;
 
     this.resize();
     window.addEventListener("resize", this.resize);
@@ -92,7 +93,6 @@ export class IFrame<CallSender extends {}> implements Modal {
       document.addEventListener("DOMContentLoaded", this.append);
     }
 
-    this.container = container;
     this.onClose = onClose;
 
     const connection = connectToChild<CallSender>({

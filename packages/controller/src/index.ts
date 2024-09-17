@@ -170,6 +170,7 @@ class Controller {
   }
 
   openProfile() {
+    console.log(this.iframes.profile, this.profile);
     if (!this.profile || !this.iframes.profile) {
       console.error(new ProfileNotReady().message);
       return;
