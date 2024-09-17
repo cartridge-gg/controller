@@ -437,6 +437,7 @@ impl CartridgeSessionAccount {
             .add_execute_outside_transaction(outside_execution, self.0.address(), signed.signature)
             .await?;
 
+
         Ok(to_value(&res)?)
     }
 }
