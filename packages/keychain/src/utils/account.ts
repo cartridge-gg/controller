@@ -102,13 +102,13 @@ class Account extends BaseAccount {
       return BigInt(result) / BigInt(scaleFactor);
     }
 
+    const res = await this.cartridge.estimateInvokeFee(normalizeCalls(calls));
+
     // The reason why we set the multiplier unseemingly high is to account
-    // for the fact that the estimate is done without validation.
+    // for the fact that the estimatation above is done without validation (SKIP_VALIDATE).
     //
     // Setting it lower might cause the actual transaction to fail due to
     // insufficient max fee.
-    const res = await this.cartridge.estimateInvokeFee(normalizeCalls(calls));
-
     const ESTIMATE_FEE_MULITPLIER = 1.7;
     const suggestedMaxFee = bigint_mul_float(
       BigInt(res.overall_fee),
