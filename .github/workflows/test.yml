@@ -17,14 +17,26 @@ jobs:
       image: ghcr.io/dojoengine/dojo-dev:v1.0.0-alpha.4
     steps:
       - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            rust:
+              - '**/*.rs'
+              - '**/*.toml'
+              - '**/*.lock'
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: ${{ env.RUST_VERSION }}
           components: llvm-tools-preview
       - uses: Swatinem/rust-cache@v2
+        if: steps.changes.outputs.rust == 'true'
       - uses: taiki-e/install-action@cargo-llvm-cov
+        if: steps.changes.outputs.rust == 'true'
       - run: cargo llvm-cov --all-features --lcov --output-path lcov.info
+        if: steps.changes.outputs.rust == 'true'
       - uses: codecov/codecov-action@v3
+        if: steps.changes.outputs.rust == 'true'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: lcov.info
