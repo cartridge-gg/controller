@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { QueryParamsContext } from "./query";
-import { ThemeProviderContext } from "./theme";
 import { ConnectionContext } from "./connection";
+import { ColorSchemeProviderContext } from "./colorScheme";
 
 export function useQueryParams() {
   const context = useContext(QueryParamsContext);
@@ -11,11 +11,11 @@ export function useQueryParams() {
   return context.searchParams;
 }
 
-export function useTheme() {
-  const context = useContext(ThemeProviderContext);
+export function useColorScheme() {
+  const context = useContext(ColorSchemeProviderContext);
 
   if (context === undefined)
-    throw new Error("useTheme must be used within a ThemeProvider");
+    throw new Error("useColorScheme must be used within a ColorSchemeProvider");
 
   return context;
 }

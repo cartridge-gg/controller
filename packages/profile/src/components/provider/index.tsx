@@ -1,4 +1,4 @@
-import { ThemeProvider } from "./theme";
+import { ColorSchemeProvider } from "./colorScheme";
 import { QueryParamsProvider } from "./query";
 import { PropsWithChildren } from "react";
 import { ConnectionProvider } from "./connection";
@@ -6,9 +6,9 @@ import { ConnectionProvider } from "./connection";
 export function Provider({ children }: PropsWithChildren) {
   return (
     <QueryParamsProvider>
-      <ThemeProvider defaultTheme="system">
+      <ColorSchemeProvider defaultScheme="system">
         <ConnectionProvider>{children}</ConnectionProvider>
-      </ThemeProvider>
+      </ColorSchemeProvider>
     </QueryParamsProvider>
   );
 }

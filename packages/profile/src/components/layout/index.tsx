@@ -1,12 +1,21 @@
 import { Button, DotsIcon, TimesIcon } from "@cartridge/ui-next";
 import { PropsWithChildren } from "react";
+import { useConnection } from "../provider/hooks";
 
 export function LayoutContainer({ children }: PropsWithChildren) {
+  const { parent } = useConnection();
+
   return (
     <ResponsiveWrapper>
       <div className="h-16 sticky top-0 flex items-center bg-[url('https://x.cartridge.gg/whitelabel/cartridge/cover.png')] bg-center bg-cover px-3 justify-between">
         <Button variant="icon" size="icon">
-          <TimesIcon />
+          <TimesIcon
+            onClick={() =>
+              parent.close().catch(() => {
+                /* Always fails for some reason */
+              })
+            }
+          />
         </Button>
 
         <div>
