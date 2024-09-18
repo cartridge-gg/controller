@@ -4,6 +4,7 @@ export * from "./coins";
 export * from "./credit-card";
 export * from "./ethereum";
 export * from "./face-id";
+// Not sure why but it breaks Profile app
 // export * from "./fingerprint";
 export * from "./gem";
 export * from "./layer-details";
