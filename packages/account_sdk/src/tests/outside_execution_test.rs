@@ -9,6 +9,7 @@ use crate::{
         outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller},
         session::{create::SessionCreator, hash::AllowedMethod},
     },
+    constants::{Version, CONTROLLERS},
     controller::Controller,
     signers::{webauthn::WebauthnSigner, Signer},
     storage::InMemoryBackend,
@@ -30,7 +31,7 @@ pub async fn test_verify_paymaster_execute(signer: Signer, session_signer: Optio
     let runner = KatanaRunner::load();
     let paymaster = runner.executor().await;
     let controller = runner
-        .deploy_controller("username".to_owned(), signer)
+        .deploy_controller("username".to_owned(), signer, Version::LATEST)
         .await;
 
     let account: Box<dyn OutsideExecutionAccount> = match session_signer {
@@ -149,7 +150,7 @@ async fn test_verify_execute_paymaster_should_fail() {
     let signer = Signer::new_starknet_random();
     let paymaster = runner.executor().await;
     let controller = runner
-        .deploy_controller("username".to_owned(), signer)
+        .deploy_controller("username".to_owned(), signer, Version::LATEST)
         .await;
 
     let recipient = ContractAddress(felt!("0x18301129"));
@@ -178,6 +179,7 @@ async fn test_verify_execute_paymaster_should_fail() {
     let wrong_account = Controller::new(
         "app_id".to_string(),
         "username".to_string(),
+        CONTROLLERS[&Version::LATEST].hash,
         runner.client(),
         Signer::new_starknet_random(),
         Signer::new_starknet_random(),
@@ -204,7 +206,7 @@ async fn test_verify_execute_paymaster_session() {
     let runner = KatanaRunner::load();
     let paymaster = runner.executor().await;
     let controller = runner
-        .deploy_controller("username".to_owned(), signer)
+        .deploy_controller("username".to_owned(), signer, Version::LATEST)
         .await;
 
     let recipient = ContractAddress(felt!("0x18301129"));

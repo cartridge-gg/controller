@@ -1,6 +1,7 @@
 use crate::{
     abigen::erc_20::Erc20,
     account::session::{create::SessionCreator, hash::AllowedMethod},
+    constants::Version,
     signers::{webauthn::WebauthnSigner, Signer},
     tests::{
         account::{webauthn::SoftPasskeySigner, FEE_TOKEN_ADDRESS},
@@ -17,7 +18,7 @@ use starknet::{
 pub async fn test_verify_execute(signer: Signer, session_signer: Signer) {
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("username".to_owned(), signer)
+        .deploy_controller("username".to_owned(), signer, Version::LATEST)
         .await;
 
     let session_account = controller
@@ -84,7 +85,7 @@ async fn test_verify_execute_session_multiple() {
     let session_signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("username".to_owned(), signer)
+        .deploy_controller("username".to_owned(), signer, Version::LATEST)
         .await;
 
     let session_account = controller

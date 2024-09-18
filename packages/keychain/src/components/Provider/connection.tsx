@@ -2,6 +2,7 @@ import { createContext, PropsWithChildren } from "react";
 import Controller from "utils/controller";
 import { ConnectionCtx } from "utils/connection";
 import { PaymasterOptions, Policy, Prefund } from "@cartridge/controller";
+import { UpgradeInterface } from "hooks/upgrade";
 
 export const ConnectionContext =
   createContext<ConnectionContextValue>(undefined);
@@ -18,6 +19,7 @@ export type ConnectionContextValue = {
   paymaster?: PaymasterOptions;
   hasPrefundRequest: boolean;
   error?: Error;
+  upgrade: UpgradeInterface;
   setContext: (context: ConnectionCtx) => void;
   setController: (controller: Controller) => void;
   closeModal: () => void;

@@ -1,5 +1,6 @@
 use crate::{
     abigen::erc_20::Erc20,
+    constants::Version,
     signers::{webauthn::WebauthnSigner, Signer},
     tests::{
         account::{webauthn::SoftPasskeySigner, FEE_TOKEN_ADDRESS},
@@ -17,7 +18,7 @@ use super::ensure_txn;
 pub async fn test_verify_execute(signer: Signer) {
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("username".to_owned(), signer)
+        .deploy_controller("username".to_owned(), signer, Version::LATEST)
         .await;
 
     let new_account = ContractAddress(felt!("0x18301129"));

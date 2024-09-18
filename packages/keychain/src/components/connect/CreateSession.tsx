@@ -9,6 +9,7 @@ import { Policies } from "components/Policies";
 import { ControllerErrorAlert } from "components/ErrorAlert";
 import { SessionConsent } from "components/connect";
 import { SESSION_EXPIRATION } from "const";
+import { Upgrade } from "./Upgrade";
 
 export function CreateSession({
   onConnect,
@@ -17,7 +18,7 @@ export function CreateSession({
   onConnect: (policies: Policy[], transaction_hash?: string) => void;
   isUpdate?: boolean;
 }) {
-  const { controller, policies } = useConnection();
+  const { controller, policies, upgrade } = useConnection();
   const [isConnecting, setIsConnecting] = useState(false);
   const [expiresAt] = useState<bigint>(SESSION_EXPIRATION);
   const [maxFee] = useState<BigNumberish>();
@@ -34,6 +35,10 @@ export function CreateSession({
       setIsConnecting(false);
     }
   }, [controller, expiresAt, policies, maxFee, onConnect]);
+
+  if (upgrade.available) {
+    return <Upgrade />;
+  }
 
   return (
     <Container

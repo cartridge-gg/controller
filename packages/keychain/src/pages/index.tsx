@@ -25,7 +25,7 @@ import { SetExternalOwner } from "components/SetExternalOwner";
 import { Settings } from "components/Settings";
 
 function Home() {
-  const { context, controller, error, setDelegateTransaction, policies } =
+  const { context, controller, error, policies, setDelegateTransaction } =
     useConnection();
 
   if (window.self === window.top || !context?.origin) {

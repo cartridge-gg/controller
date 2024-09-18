@@ -4,7 +4,6 @@ use crate::account::session::hash::{AllowedMethod, Session};
 use crate::account::session::SessionAccount;
 use crate::account::AccountHashAndCallsSigner;
 use crate::account::SpecificAccount;
-use crate::constants::ACCOUNT_CLASS_HASH;
 use crate::factory::ControllerFactory;
 use crate::hash::MessageHashRev1;
 use crate::paymaster::PaymasterError;
@@ -104,6 +103,7 @@ where
     pub fn new(
         app_id: String,
         username: String,
+        class_hash: Felt,
         provider: P,
         signer: Signer,
         guardian: Signer,
@@ -117,7 +117,7 @@ where
         let mut calldata = Owner::cairo_serialize(&Owner::Signer(account.signer.signer()));
         calldata.push(Felt::ONE); // no guardian
         let factory = ControllerFactory::new(
-            ACCOUNT_CLASS_HASH,
+            class_hash,
             account.chain_id,
             calldata,
             account.clone(),
@@ -185,6 +185,10 @@ where
             .register_session_getcall(&session.raw(), &self.owner_guid());
 
         Ok(call)
+    }
+
+    pub fn upgrade(&self, new_class_hash: Felt) -> Call {
+        self.contract.upgrade_getcall(&new_class_hash.into())
     }
 
     pub async fn register_session(

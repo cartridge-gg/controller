@@ -7,6 +7,7 @@ use crate::{
         },
         SpecificAccount,
     },
+    constants::Version,
     signers::{HashSigner, Signer, SignerTrait},
     tests::{account::FEE_TOKEN_ADDRESS, ensure_txn, runners::katana::KatanaRunner},
 };
@@ -26,7 +27,7 @@ async fn test_verify_execute_session_registered() {
 
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("username".to_owned(), signer.clone())
+        .deploy_controller("username".to_owned(), signer.clone(), Version::LATEST)
         .await;
 
     let session = Session::new(
