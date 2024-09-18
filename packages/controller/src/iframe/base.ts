@@ -11,8 +11,8 @@ export type IFrameOptions<CallSender> = Omit<
 };
 
 export class IFrame<CallSender extends {}> implements Modal {
-  private iframe: HTMLIFrameElement;
-  private container: HTMLDivElement;
+  private iframe?: HTMLIFrameElement;
+  private container?: HTMLDivElement;
   private onClose?: () => void;
 
   constructor({
@@ -30,9 +30,7 @@ export class IFrame<CallSender extends {}> implements Modal {
     onConnect: (child: AsyncMethodReturns<CallSender>) => void;
   }) {
     if (typeof document === "undefined") {
-      throw new Error(
-        "Controller does not work on NodeJS environment. Make sure to render on client side.",
-      );
+      return;
     }
 
     url.searchParams.set(
@@ -81,6 +79,11 @@ export class IFrame<CallSender extends {}> implements Modal {
     this.iframe = iframe;
     this.container = container;
 
+    connectToChild<CallSender>({
+      iframe: this.iframe,
+      methods: { close: () => this.close() },
+    }).promise.then(onConnect);
+
     this.resize();
     window.addEventListener("resize", () => this.resize());
 
@@ -94,16 +97,10 @@ export class IFrame<CallSender extends {}> implements Modal {
     }
 
     this.onClose = onClose;
-
-    const connection = connectToChild<CallSender>({
-      iframe: this.iframe,
-      methods: { close: () => this.close() },
-    });
-
-    connection.promise.then(onConnect);
   }
 
   open() {
+    if (!this.container) return;
     document.body.style.overflow = "hidden";
 
     this.container.style.visibility = "visible";
@@ -111,6 +108,7 @@ export class IFrame<CallSender extends {}> implements Modal {
   }
 
   close() {
+    if (!this.container) return;
     this.onClose?.();
 
     document.body.style.overflow = "auto";
@@ -120,10 +118,12 @@ export class IFrame<CallSender extends {}> implements Modal {
   }
 
   private append() {
+    if (!this.container) return;
     document.body.appendChild(this.container);
   }
 
   private resize() {
+    if (!this.iframe) return;
     if (window.innerWidth < 768) {
       this.iframe.style.height = "100%";
       this.iframe.style.width = "100%";

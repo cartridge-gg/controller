@@ -40,18 +40,6 @@ class Controller {
     paymaster,
     ...options
   }: ControllerOptions = {}) {
-    this.rpc = new URL(rpc || RPC_SEPOLIA);
-    this.paymaster = paymaster;
-    if (this.paymaster) {
-      this.rpc.searchParams.append("paymaster", "true");
-    }
-
-    // TODO: remove this on the next major breaking change. pass everthing by url
-    this.policies =
-      policies?.map((policy) => ({
-        ...policy,
-        target: addAddressPadding(policy.target),
-      })) || [];
     this.iframes = {
       keychain: new KeychainIFrame({
         ...options,
@@ -70,6 +58,19 @@ class Controller {
         },
       }),
     };
+
+    this.rpc = new URL(rpc || RPC_SEPOLIA);
+    this.paymaster = paymaster;
+    if (this.paymaster) {
+      this.rpc.searchParams.append("paymaster", "true");
+    }
+
+    // TODO: remove this on the next major breaking change. pass everthing by url
+    this.policies =
+      policies?.map((policy) => ({
+        ...policy,
+        target: addAddressPadding(policy.target),
+      })) || [];
   }
 
   async openMenu() {
@@ -94,12 +95,7 @@ class Controller {
   }
 
   async probe() {
-    if (
-      !this.keychain ||
-      !this.iframes.keychain ||
-      !this.profile ||
-      !this.iframes.profile
-    ) {
+    if (!this.keychain) {
       console.error(new NotReadyToConnect().message);
       return null;
     }
