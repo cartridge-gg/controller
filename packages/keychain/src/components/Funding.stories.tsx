@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
 import { Funding } from "./Funding";
-import { RpcProvider } from "starknet";
+import { num, RpcProvider } from "starknet";
 
 const meta = {
   component: Funding,
@@ -12,6 +12,8 @@ const meta = {
           "0x0000000000000000000000000000000000000000000000000000000000000000",
         account: {
           rpc: new RpcProvider({ nodeUrl: "https://api.cartridge/x/sepolia" }),
+          callContract: () =>
+            Promise.resolve([num.toHex("2000000000000000000"), "0x0"]),
         },
       },
     },
