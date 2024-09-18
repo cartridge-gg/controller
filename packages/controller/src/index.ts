@@ -95,12 +95,14 @@ class Controller {
   }
 
   async probe() {
-    if (!this.keychain) {
-      console.error(new NotReadyToConnect().message);
-      return null;
-    }
-
     try {
+      await this.waitForKeychain();
+
+      if (!this.keychain) {
+        console.error(new NotReadyToConnect().message);
+        return null;
+      }
+
       const response = (await this.keychain.probe(
         this.rpc.toString(),
       )) as ProbeReply;
@@ -216,6 +218,30 @@ class Controller {
     }
 
     return await this.keychain.delegateAccount();
+  }
+
+  private waitForKeychain({
+    timeout = 3000,
+    interval = 100,
+  }:
+    | {
+        timeout?: number;
+        interval?: number;
+      }
+    | undefined = {}) {
+    return new Promise<void>((resolve, reject) => {
+      const startTime = Date.now();
+      const id = setInterval(() => {
+        if (Date.now() - startTime > timeout) {
+          clearInterval(id);
+          reject(new Error("Timeout waiting for keychain"));
+        }
+        if (!this.keychain) return;
+
+        clearInterval(id);
+        resolve();
+      }, interval);
+    });
   }
 }
 
