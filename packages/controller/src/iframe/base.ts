@@ -82,7 +82,7 @@ export class IFrame<CallSender extends {}> implements Modal {
     this.container = container;
 
     this.resize();
-    window.addEventListener("resize", this.resize);
+    window.addEventListener("resize", () => this.resize());
 
     if (
       document.readyState === "complete" ||
