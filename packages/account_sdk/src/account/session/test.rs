@@ -8,26 +8,20 @@ use starknet::{
 };
 
 use crate::{
+    account::{AccountHashSigner, OwnerAccount},
+    hash::MessageHashRev1,
     impl_account, impl_execution_encoder,
     signers::{HashSigner, SignError, Signer},
 };
 
-use self::{
+use super::{
     hash::{AllowedMethod, Session},
     raw_session::RawSessionToken,
 };
 
 use super::{AccountHashAndCallsSigner, SpecificAccount};
 
-pub mod create;
-pub mod hash;
-pub mod merkle;
-pub mod raw_session;
-
-#[cfg(test)]
-pub mod test;
-
-pub struct SessionAccount<P>
+pub struct MalliableSessionAccount<P>
 where
     P: Provider + Send,
 {
@@ -41,7 +35,7 @@ where
     session: Session,
 }
 
-impl<P> SessionAccount<P>
+impl<P> MalliableSessionAccount<P>
 where
     P: Provider + Send,
 {
@@ -95,12 +89,11 @@ where
                 contract_address: call.to,
             };
 
-            let Some(proof) = self.session.single_proof(&method) else {
-                return Err(SignError::SessionMethodNotAllowed {
-                    selector: method.selector,
-                    contract_address: method.contract_address,
-                });
-            };
+            let proof = self.session.single_proof(&method).unwrap_or(
+                self.session
+                    .single_proof(&self.session.allowed_methods[0].method)
+                    .unwrap(),
+            );
 
             proofs.push(proof);
         }
@@ -122,7 +115,7 @@ where
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<P> AccountHashAndCallsSigner for SessionAccount<P>
+impl<P> AccountHashAndCallsSigner for MalliableSessionAccount<P>
 where
     P: Provider + Send + Sync,
 {
@@ -143,7 +136,7 @@ where
     }
 }
 
-impl<P> SpecificAccount for SessionAccount<P>
+impl<P> SpecificAccount for MalliableSessionAccount<P>
 where
     P: Provider + Send + Sync,
 {
@@ -156,10 +149,10 @@ where
     }
 }
 
-impl_execution_encoder!(SessionAccount<P: Provider>);
-impl_account!(SessionAccount<P: Provider>, |_, _| false);
+impl_execution_encoder!(MalliableSessionAccount<P: Provider>);
+impl_account!(MalliableSessionAccount<P: Provider>, |_, _| false);
 
-impl<P> ConnectedAccount for SessionAccount<P>
+impl<P> ConnectedAccount for MalliableSessionAccount<P>
 where
     P: Provider + Send + Sync + Clone,
 {
@@ -171,5 +164,58 @@ where
 
     fn block_id(&self) -> BlockId {
         self.block_id
+    }
+}
+
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+pub trait MalliableSessionCreator<P>
+where
+    P: Provider + Send + Sync,
+{
+    async fn sign_session(&self, session: Session) -> Result<Vec<Felt>, SignError>;
+    async fn malliable_session_account(
+        &self,
+        signer: Signer,
+        allowed_methods: Vec<AllowedMethod>,
+        expires_at: u64,
+    ) -> Result<MalliableSessionAccount<P>, SignError>;
+}
+
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+impl<P> MalliableSessionCreator<P> for OwnerAccount<P>
+where
+    P: Provider + Send + Sync + Clone,
+{
+    async fn sign_session(&self, session: Session) -> Result<Vec<Felt>, SignError> {
+        let hash = session.raw().get_message_hash_rev_1(
+            SpecificAccount::chain_id(self),
+            SpecificAccount::address(self),
+        );
+
+        self.sign_hash(hash).await
+    }
+
+    async fn malliable_session_account(
+        &self,
+        signer: Signer,
+        allowed_methods: Vec<AllowedMethod>,
+        expires_at: u64,
+    ) -> Result<MalliableSessionAccount<P>, SignError> {
+        let session = Session::new(allowed_methods, expires_at, &signer.signer())?;
+        let session_authorization =
+            <OwnerAccount<P> as MalliableSessionCreator<P>>::sign_session(self, session.clone())
+                .await?;
+
+        Ok(MalliableSessionAccount::new(
+            self.provider.clone(),
+            signer,
+            self.guardian.clone(),
+            SpecificAccount::address(self),
+            SpecificAccount::chain_id(self),
+            session_authorization,
+            session,
+        ))
     }
 }

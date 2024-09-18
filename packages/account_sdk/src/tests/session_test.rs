@@ -1,3 +1,4 @@
+use crate::account::session::test::MalliableSessionCreator;
 use crate::{
     abigen::erc_20::Erc20,
     account::session::{create::SessionCreator, hash::AllowedMethod},
@@ -134,7 +135,7 @@ async fn test_verify_execute_session_multiple() {
 }
 
 #[tokio::test]
-async fn test_session_account_unauthorized_transaction() {
+async fn test_session_account_unauthorized_transaction_offchain() {
     let signer = Signer::new_starknet_random();
     let session_signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
@@ -184,4 +185,66 @@ async fn test_session_account_unauthorized_transaction() {
             SignError::SessionMethodNotAllowed { .. }
         ))
     ));
+}
+
+#[tokio::test]
+async fn test_session_account_unauthorized_transaction_onchain() {
+    let signer = Signer::new_starknet_random();
+    let session_signer = Signer::new_starknet_random();
+    let runner = KatanaRunner::load();
+    let controller = runner
+        .deploy_controller("username".to_owned(), signer, Version::LATEST)
+        .await;
+
+    let session_account = controller
+        .account
+        .malliable_session_account(
+            session_signer,
+            vec![
+                AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("not_transfer")),
+                AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("still_not_transfer")),
+                AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("no_transfer_here_as_well")),
+                AllowedMethod::new(short_string!("wrong_address"), selector!("transfer")), // but wrong address
+            ],
+            u64::MAX,
+        )
+        .await
+        .unwrap();
+
+    let recipient = ContractAddress(felt!("0x18301129"));
+    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &session_account);
+
+    contract_erc20
+        .balanceOf(&recipient)
+        .block_id(BlockId::Tag(BlockTag::Latest))
+        .call()
+        .await
+        .expect("failed to call contract");
+
+    let result = contract_erc20
+        .transfer(
+            &recipient,
+            &U256 {
+                low: 0x10_u128,
+                high: 0,
+            },
+        )
+        .send()
+        .await;
+
+    // Assert that the transaction failed
+    assert!(
+        result.is_err(),
+        "Transaction should have failed due to lack of permission"
+    );
+
+    // Optionally, check for a specific error message
+    if let Err(e) = result {
+        dbg!(&e);
+        assert!(
+            format!("{e:?}").contains("session/unauthorized-calls"),
+            "Unexpected error message: {}",
+            e
+        );
+    }
 }
