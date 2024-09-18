@@ -15,6 +15,7 @@ use lazy_static::lazy_static;
 
 use crate::abigen::controller::{self, Signer as AbigenSigner};
 use crate::abigen::erc_20::Erc20;
+use crate::constants::{Version, CONTROLLERS};
 use crate::controller::Controller;
 use crate::provider::CartridgeJsonRpcProvider;
 use crate::signers::{HashSigner, Signer};
@@ -128,11 +129,11 @@ impl KatanaRunner {
             .unwrap();
     }
 
-    pub async fn declare_controller(&self) -> Felt {
+    pub async fn declare_controller(&self, version: Version) -> Felt {
         let prefunded = self.executor().await;
 
         let DeclareTransactionResult { class_hash, .. } =
-            AccountDeclaration::cartridge_account(self.client())
+            AccountDeclaration::cartridge_account(self.client(), version)
                 .declare(&prefunded)
                 .await
                 .unwrap()
@@ -142,9 +143,14 @@ impl KatanaRunner {
         class_hash
     }
 
-    async fn deploy_with_calldata(&self, constructor_calldata: Vec<Felt>) -> DeployResult {
-        let prefunded = self.executor().await;
-        let class_hash = self.declare_controller().await;
+    async fn deploy_with_calldata(
+        &self,
+        constructor_calldata: Vec<Felt>,
+        version: Version,
+    ) -> DeployResult {
+        let prefunded: SingleOwnerAccount<&JsonRpcClient<HttpTransport>, LocalWallet> =
+            self.executor().await;
+        let class_hash = self.declare_controller(version).await;
 
         let deploy_result = AccountDeployment::new(self.client())
             .deploy(constructor_calldata, Felt::ZERO, &prefunded, class_hash)
@@ -167,6 +173,7 @@ impl KatanaRunner {
         &self,
         username: String,
         signer: Signer,
+        version: Version,
     ) -> Controller<CartridgeJsonRpcProvider, InMemoryBackend> {
         let guardian = Signer::new_starknet_random();
         let mut constructor_calldata =
@@ -177,11 +184,14 @@ impl KatanaRunner {
 
         let DeployResult {
             deployed_address, ..
-        } = self.deploy_with_calldata(constructor_calldata).await;
+        } = self
+            .deploy_with_calldata(constructor_calldata, version)
+            .await;
 
         Controller::new(
             "app_id".to_string(),
             username,
+            CONTROLLERS[&version].hash,
             self.client.clone(),
             signer,
             guardian,
@@ -194,6 +204,7 @@ impl KatanaRunner {
     pub async fn deploy_controller_with_external_owner(
         &self,
         external_owner: ContractAddress,
+        version: Version,
     ) -> ContractAddress {
         let guardian = SigningKey::from_random();
         let mut constructor_calldata =
@@ -204,7 +215,9 @@ impl KatanaRunner {
 
         let DeployResult {
             deployed_address, ..
-        } = self.deploy_with_calldata(constructor_calldata).await;
+        } = self
+            .deploy_with_calldata(constructor_calldata, version)
+            .await;
 
         deployed_address.into()
     }
@@ -247,5 +260,5 @@ async fn test_katana_runner() {
 #[tokio::test]
 async fn test_declare_on_katana() {
     let runner = KatanaRunner::load();
-    runner.declare_controller().await;
+    runner.declare_controller(Version::LATEST).await;
 }

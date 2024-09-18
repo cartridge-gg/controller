@@ -3,16 +3,18 @@ use std::sync::Arc;
 use starknet::{
     accounts::ConnectedAccount,
     core::types::{contract::SierraClass, DeclareTransactionResult},
+    macros::felt,
     providers::Provider,
 };
 use starknet_crypto::Felt;
 
-use crate::constants::{ACCOUNT_COMPILED_CLASS_HASH, ERC_20_COMPILED_CLASS_HASH};
+use crate::constants::{Version, CONTROLLERS};
 use crate::provider::CartridgeJsonRpcProvider;
 
 use super::pending::PendingTransaction;
 
-pub const SIERRA_STR: &str = include_str!("../../../compiled/controller.contract_class.json");
+pub const ERC_20_COMPILED_CLASS_HASH: Felt =
+    felt!("0x732654ca6baa90ff202d2fcc35fb39766eb34842a7e5ac6dbf7714af71f1dab");
 pub const ERC_20_SIERRA_STR: &str = include_str!("../../../compiled/erc20.contract_class.json");
 
 pub struct AccountDeclaration<'a> {
@@ -36,15 +38,15 @@ impl<'a> AccountDeclaration<'a> {
             client,
         }
     }
-    pub fn cartridge_account(client: &'a CartridgeJsonRpcProvider) -> Self
+    pub fn cartridge_account(client: &'a CartridgeJsonRpcProvider, version: Version) -> Self
     where
         &'a CartridgeJsonRpcProvider: Provider,
     {
-        Self::new(
-            serde_json::from_str(SIERRA_STR).unwrap(),
-            ACCOUNT_COMPILED_CLASS_HASH,
-            client,
-        )
+        let contract_class = CONTROLLERS[&version];
+
+        let contract_artifact: SierraClass = serde_json::from_str(contract_class.content).unwrap();
+
+        Self::new(contract_artifact, contract_class.casm_hash, client)
     }
     pub fn erc_20(client: &'a CartridgeJsonRpcProvider) -> Self
     where

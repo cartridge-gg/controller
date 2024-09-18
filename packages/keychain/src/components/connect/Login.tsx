@@ -14,7 +14,6 @@ import { SESSION_EXPIRATION } from "const";
 
 export function Login(props: LoginProps) {
   const theme = useControllerTheme();
-  console.debug("login render");
 
   return (
     <Container
@@ -33,7 +32,6 @@ function Form({
   prefilledName = "",
   isSlot,
   mode = LoginMode.Webauthn,
-  onSuccess,
   onSignup,
 }: LoginProps) {
   const { footer } = useLayout();
@@ -79,22 +77,17 @@ function Form({
         credentialId,
       });
 
-      if (mode === LoginMode.Controller && policies?.length > 0) {
-        await controller.createSession(expiresAt, policies);
-      } else {
+      if (mode === LoginMode.Webauthn || policies?.length === 0) {
         await doLogin({
           name: usernameField.value,
           credentialId,
           finalize: isSlot,
         });
+
+        controller.store();
       }
 
-      controller.store();
       setController(controller);
-
-      if (onSuccess) {
-        onSuccess();
-      }
     } catch (e) {
       setError(e);
     }
@@ -108,7 +101,6 @@ function Form({
     policies,
     expiresAt,
     mode,
-    onSuccess,
     setController,
     isSlot,
   ]);

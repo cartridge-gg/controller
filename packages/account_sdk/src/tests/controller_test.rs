@@ -1,8 +1,12 @@
 use std::time::Duration;
 
 use crate::{
-    controller::Controller, signers::Signer, storage::InMemoryBackend,
-    tests::runners::katana::KatanaRunner, transaction_waiter::TransactionWaiter,
+    constants::{Version, CONTROLLERS},
+    controller::Controller,
+    signers::Signer,
+    storage::InMemoryBackend,
+    tests::runners::katana::KatanaRunner,
+    transaction_waiter::TransactionWaiter,
 };
 use starknet::{accounts::Account, macros::felt, providers::Provider, signers::SigningKey};
 use starknet_crypto::Felt;
@@ -10,7 +14,7 @@ use starknet_crypto::Felt;
 #[tokio::test]
 async fn test_deploy_controller() {
     let runner = KatanaRunner::load();
-    dbg!(runner.declare_controller().await);
+    dbg!(runner.declare_controller(Version::V1_0_4).await);
 
     // Create signers
     let owner = Signer::Starknet(SigningKey::from_secret_scalar(felt!(
@@ -32,6 +36,7 @@ async fn test_deploy_controller() {
     let address = Controller::new(
         "app_id".to_string(),
         username.clone(),
+        CONTROLLERS[&Version::V1_0_4].hash,
         provider.clone(),
         owner.clone(),
         guardian_signer.clone(),
@@ -45,6 +50,7 @@ async fn test_deploy_controller() {
     let controller = Controller::new(
         "app_id".to_string(),
         username.clone(),
+        CONTROLLERS[&Version::V1_0_4].hash,
         provider.clone(),
         owner.clone(),
         guardian_signer.clone(),

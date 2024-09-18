@@ -13,6 +13,7 @@ use crate::{
         raw_session::RawSession,
         SessionAccount,
     },
+    constants::Version,
     signers::{HashSigner, Signer},
     tests::{account::FEE_TOKEN_ADDRESS, ensure_txn, runners::katana::KatanaRunner},
 };
@@ -24,7 +25,7 @@ async fn test_verify_external_owner() {
     let guardian_signer = Signer::new_starknet_random();
     let external_account = runner.executor().await;
     let controller = runner
-        .deploy_controller("username".to_owned(), signer)
+        .deploy_controller("username".to_owned(), signer, Version::LATEST)
         .await;
 
     ensure_txn(
@@ -94,7 +95,7 @@ async fn test_verify_constructor_external_owner() {
     let guardian_signer = Signer::new_starknet_random();
     let external_account = runner.executor().await;
     let controller_address = runner
-        .deploy_controller_with_external_owner(external_account.address().into())
+        .deploy_controller_with_external_owner(external_account.address().into(), Version::LATEST)
         .await;
 
     let session_signer = Signer::new_starknet_random();

@@ -26,6 +26,7 @@ import {
   ConnectionContext,
   ConnectionContextValue,
 } from "components/Provider/connection";
+import { UpgradeInterface, useUpgrade } from "./upgrade";
 
 const CHAIN_ID_TIMEOUT = 3000;
 
@@ -42,6 +43,7 @@ export function useConnectionValue() {
   const [controller, setControllerRaw] = useState<Controller | undefined>();
   const [prefunds, setPrefunds] = useState<Prefund[]>([]);
   const [hasPrefundRequest, setHasPrefundRequest] = useState<boolean>(false);
+  const upgrade: UpgradeInterface = useUpgrade(controller);
   const [error, setError] = useState<Error>();
 
   const chainName = useMemo(() => {
@@ -285,6 +287,7 @@ export function useConnectionValue() {
     paymaster,
     hasPrefundRequest,
     error,
+    upgrade,
     setController,
     setContext,
     closeModal,

@@ -1,4 +1,5 @@
 use crate::account::SpecificAccount;
+use crate::constants::Version;
 use crate::signers::Signer;
 use crate::tests::ensure_txn;
 use crate::{abigen::controller::Controller, tests::runners::katana::KatanaRunner};
@@ -11,7 +12,7 @@ async fn test_set_delegate_account_from_account() {
     let runner = KatanaRunner::load();
     let delegate_address = Felt::from_hex("0x1234").unwrap();
     let controller = runner
-        .deploy_controller("username".to_owned(), signer)
+        .deploy_controller("username".to_owned(), signer, Version::LATEST)
         .await;
 
     let delegate_account = controller.delegate_account().await;
@@ -41,7 +42,7 @@ async fn test_set_delegate_account_from_non_owner() {
     let delegate_address = Felt::from_hex("0x1234").unwrap();
     let external_account = runner.executor().await;
     let controller = runner
-        .deploy_controller("username".to_owned(), signer)
+        .deploy_controller("username".to_owned(), signer, Version::LATEST)
         .await;
 
     let account_interface_external_account =

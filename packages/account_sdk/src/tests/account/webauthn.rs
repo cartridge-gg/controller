@@ -1,3 +1,4 @@
+use crate::constants::Version;
 use crate::signers::webauthn::{WebauthnBackend, WebauthnSigner};
 use crate::signers::{DeviceError, Signer};
 use crate::OriginProvider;
@@ -121,7 +122,7 @@ impl OriginProvider for SoftPasskeySigner {
 pub async fn test_verify_execute(signer: Signer) {
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("username".to_owned(), signer)
+        .deploy_controller("username".to_owned(), signer, Version::LATEST)
         .await;
     let new_account = ContractAddress(felt!("0x18301129"));
     let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller);

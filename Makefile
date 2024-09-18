@@ -16,18 +16,9 @@ generate_artifacts:
 	scarb --manifest-path ./packages/contracts/controller/Scarb.toml build
 	mkdir -p ${store}
 
-	jq . ${build}CartridgeAccount${sierra} > ${store}controller${sierra}
+	jq . ${build}CartridgeAccount${sierra} > ${store}controller.latest.contract_class.json
 
-	cp ${build}CartridgeAccount${compiled} ${store}controller${compiled}
-
-deploy-katana:
-	@set -x; \
-	erc20_class=$$(starkli class-hash ${build}ERC20Upgradeable${sierra}); \
-	account_class=$$(starkli class-hash ${build}Account${sierra}); \
-	starkli declare ${build}Account${sierra} ${config}; \
-	starkli deploy "$${account_class}" ${test_pubkey} --salt 0x1234 ${config}; \
-	starkli declare ${build}ERC20Upgradeable${sierra} ${config}; \
-	starkli deploy "$${erc20_class}" str:token str:tkn u256:1 ${katana_0} --salt 0x1234 ${config};
+	cp ${build}CartridgeAccount${compiled} ${store}controller.latest.compiled_contract_class.json
 
 test-session: generate_artifacts
 	rm -rf ./account_sdk/log

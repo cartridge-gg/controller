@@ -4,6 +4,7 @@ use starknet::signers::SigningKey;
 use crate::account::session::create::SessionCreator;
 use crate::account::session::hash::AllowedMethod;
 use crate::account::DECLARATION_SELECTOR;
+use crate::constants::Version;
 use crate::signers::Signer;
 use crate::tests::account::AccountDeclaration;
 
@@ -14,7 +15,7 @@ async fn test_declare_with_account() {
     let signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("username".to_owned(), signer)
+        .deploy_controller("username".to_owned(), signer, Version::LATEST)
         .await;
 
     AccountDeclaration::erc_20(runner.client())
@@ -30,7 +31,7 @@ async fn test_declare_with_session() {
     let signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("username".to_owned(), signer)
+        .deploy_controller("username".to_owned(), signer, Version::LATEST)
         .await;
 
     let session = controller

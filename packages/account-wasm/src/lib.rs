@@ -11,6 +11,7 @@ use account_sdk::account::outside_execution::{OutsideExecutionAccount, OutsideEx
 use account_sdk::account::session::hash::Session;
 use account_sdk::account::session::SessionAccount;
 use account_sdk::account::{AccountHashAndCallsSigner, MessageSignerAccount};
+use account_sdk::constants::{Version, CONTROLLERS};
 use account_sdk::controller::{Controller, ControllerError};
 use account_sdk::provider::{CartridgeJsonRpcProvider, CartridgeProvider};
 use account_sdk::signers::webauthn::{CredentialID, WebauthnSigner};
@@ -96,6 +97,7 @@ impl CartridgeAccount {
         let controller = Controller::new(
             app_id,
             username.clone(),
+            CONTROLLERS[&Version::V1_0_4].hash,
             Arc::new(provider),
             device_signer.clone(),
             dummy_guardian,
@@ -150,6 +152,19 @@ impl CartridgeAccount {
             .register_session_call(methods, expires_at, public_key.0)?;
 
         Ok(to_value(&call.calldata)?)
+    }
+
+    #[wasm_bindgen(js_name = upgrade)]
+    pub fn upgrade(
+        &self,
+        new_class_hash: JsFelt,
+    ) -> std::result::Result<JsCall, JsControllerError> {
+        let call = self.controller.upgrade(new_class_hash.0);
+        Ok(JsCall {
+            contract_address: call.to,
+            entrypoint: "upgrade".to_string(),
+            calldata: call.calldata,
+        })
     }
 
     #[wasm_bindgen(js_name = createSession)]

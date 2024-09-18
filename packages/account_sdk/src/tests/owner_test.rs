@@ -1,6 +1,7 @@
 use crate::{
     abigen::erc_20::Erc20,
     account::session::{create::SessionCreator, hash::AllowedMethod},
+    constants::{Version, CONTROLLERS},
     controller::Controller,
     signers::{
         webauthn::WebauthnSigner, HashSigner, NewOwnerSigner, SignError, Signer, SignerTrait,
@@ -23,7 +24,7 @@ async fn test_change_owner() {
     let signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("username".to_owned(), signer.clone())
+        .deploy_controller("username".to_owned(), signer.clone(), Version::LATEST)
         .await;
 
     assert!(controller
@@ -71,7 +72,7 @@ async fn test_add_owner() {
     let signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let mut controller = runner
-        .deploy_controller("username".to_owned(), signer.clone())
+        .deploy_controller("username".to_owned(), signer.clone(), Version::LATEST)
         .await;
 
     assert!(controller
@@ -153,7 +154,7 @@ async fn test_change_owner_wrong_signature() {
     let signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("username".to_owned(), signer.clone())
+        .deploy_controller("username".to_owned(), signer.clone(), Version::LATEST)
         .await;
 
     assert!(controller
@@ -186,7 +187,7 @@ async fn test_change_owner_execute_after() {
     let signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let mut controller = runner
-        .deploy_controller("username".to_owned(), signer.clone())
+        .deploy_controller("username".to_owned(), signer.clone(), Version::LATEST)
         .await;
 
     let new_signer = Signer::new_starknet_random();
@@ -249,7 +250,7 @@ async fn test_change_owner_invalidate_old_sessions() {
     let guardian = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("username".to_owned(), signer.clone())
+        .deploy_controller("username".to_owned(), signer.clone(), Version::LATEST)
         .await;
 
     let transfer_method = AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("transfer"));
@@ -304,6 +305,7 @@ async fn test_change_owner_invalidate_old_sessions() {
     let controller = Controller::new(
         "app_id".to_string(),
         "username".to_owned(),
+        CONTROLLERS[&Version::LATEST].hash,
         runner.client(),
         new_signer.clone(),
         guardian.clone(),
@@ -353,7 +355,7 @@ async fn test_call_unallowed_methods() {
 
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("username".to_owned(), signer)
+        .deploy_controller("username".to_owned(), signer, Version::LATEST)
         .await;
 
     // Create random allowed method
@@ -415,7 +417,7 @@ async fn test_external_owner() {
     let external_account = runner.executor().await;
 
     let controller = runner
-        .deploy_controller("username".to_owned(), signer)
+        .deploy_controller("username".to_owned(), signer, Version::LATEST)
         .await;
 
     let external_controller =

@@ -40,7 +40,7 @@ export function ExecutionContainer({
   children,
 }: ExecutionContainerProps & BannerProps) {
   const { controller } = useConnection();
-  const [maxFee, setMaxFee] = useState<BigNumberish>();
+  const [maxFee, setMaxFee] = useState<BigNumberish | null>(null);
   const [ctrlError, setCtrlError] = useState<ControllerError>(executionError);
   const [isLoading, setIsLoading] = useState(false);
   const [ctaState, setCTAState] = useState<"fund" | "deploy" | "execute">(
@@ -50,6 +50,9 @@ export function ExecutionContainer({
 
   const estimateFees = useCallback(
     async (transactions: any, transactionsDetail?: any) => {
+      if (!controller) {
+        return;
+      }
       try {
         const est = await controller.account.estimateInvokeFee(
           transactions,
@@ -70,7 +73,7 @@ export function ExecutionContainer({
   );
 
   useEffect(() => {
-    if (ctrlError || maxFee) return;
+    if (ctrlError || maxFee !== null) return;
 
     const estimateFeesAsync = async () => {
       if (isEstimated.current) return;
@@ -173,12 +176,12 @@ export function ExecutionContainer({
               return (
                 <>
                   {ctrlError && <ControllerErrorAlert error={ctrlError} />}
-                  {maxFee && <Fees maxFee={BigInt(maxFee)} />}
+                  {maxFee !== null && <Fees maxFee={BigInt(maxFee)} />}
                   <Button
                     colorScheme="colorful"
                     onClick={handleSubmit}
                     isLoading={isLoading}
-                    isDisabled={!maxFee}
+                    isDisabled={maxFee === null}
                   >
                     {buttonText}
                   </Button>
