@@ -41,14 +41,14 @@ export const useUpgrade = (controller: Controller): UpgradeInterface => {
   const [latest, setLatest] = useState<ControllerVersionInfo>();
 
   useEffect(() => {
+    if (!window.document.cookie.includes("check-upgrade")) {
+      setIsSynced(true);
+      return;
+    }
+
     if (!controller) {
       return;
     }
-
-    if (!window.document.cookie.includes("check-upgrade")) {
-      return;
-    }
-
     setIsSynced(false);
 
     controller.account
@@ -62,12 +62,12 @@ export const useUpgrade = (controller: Controller): UpgradeInterface => {
         setCurrent(current);
         setLatest(latest);
         setAvailable(current?.version !== latest.version);
-        setIsSynced(true);
       })
       .catch((e) => {
         console.log(e);
         setError(e);
-      });
+      })
+      .finally(() => setIsSynced(true));
   }, [controller]);
 
   const calls = useMemo(() => {
