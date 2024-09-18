@@ -13,6 +13,7 @@ import {
   AllowArray,
   UniversalDetails,
   Abi,
+  num,
 } from "starknet";
 
 import {
@@ -93,7 +94,22 @@ class Account extends BaseAccount {
     calls: AllowArray<Call>,
     _: EstimateFeeDetails = {},
   ): Promise<EstimateFee> {
-    return await this.cartridge.estimateInvokeFee(normalizeCalls(calls), 1.5);
+    const res = await this.cartridge.estimateInvokeFee(normalizeCalls(calls));
+
+    // The reason why we set the multiplier unseemingly high is to account
+    // for the fact that the estimation above is done without validation (ie SKIP_VALIDATE).
+    //
+    // Setting it lower might cause the actual transaction to fail due to
+    // insufficient max fee.
+    const MULTIPLIER_PERCENTAGE = 170; // x1.7
+
+    // This will essentially multiply the estimated fee by 1.7
+    const suggestedMaxFee = num.addPercent(
+      BigInt(res.overall_fee),
+      MULTIPLIER_PERCENTAGE,
+    );
+
+    return { suggestedMaxFee, ...res };
   }
 
   async verifyMessageHash(

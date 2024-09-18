@@ -177,7 +177,6 @@ impl CartridgeAccount {
     pub async fn estimate_invoke_fee(
         &self,
         calls: Vec<JsCall>,
-        fee_multiplier: Option<f64>,
     ) -> std::result::Result<JsValue, JsControllerError> {
         set_panic_hook();
 
@@ -186,11 +185,7 @@ impl CartridgeAccount {
             .map(TryFrom::try_from)
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
-        let fee_estimate = self
-            .controller
-            .estimate_invoke_fee(calls, fee_multiplier)
-            .await?;
-
+        let fee_estimate = self.controller.estimate_invoke_fee(calls).await?;
         Ok(to_value(&fee_estimate)?)
     }
 

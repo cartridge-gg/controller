@@ -55,7 +55,7 @@ export function ExecutionContainer({
           transactions,
           transactionsDetail,
         );
-        setMaxFee(est.overall_fee);
+        setMaxFee(est.suggestedMaxFee);
       } catch (e) {
         const error = {
           code: e.code,
