@@ -36,6 +36,10 @@ export function CreateSession({
     }
   }, [controller, expiresAt, policies, maxFee, onConnect]);
 
+  if (!upgrade.isSynced) {
+    return <></>;
+  }
+
   if (upgrade.available) {
     return <Upgrade />;
   }
