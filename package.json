@@ -24,7 +24,8 @@
     "profil": "pnpm --filter @cartridge/profile",
     "example:next": "pnpm --filter starknet-react-next",
     "test": "pnpm keychain test",
-    "test:ci": "pnpm keychain test:ci"
+    "test:ci": "pnpm keychain test:ci",
+    "test:storybook": "pnpm turbo build:deps test:storybook"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.4.2",

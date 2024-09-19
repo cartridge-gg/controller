@@ -17,6 +17,7 @@ import { constants } from "starknet";
 import { getChainName } from "../src/utils/network";
 import { ETH_CONTRACT_ADDRESS } from "../src/utils/token";
 import { ConnectCtx, ConnectionCtx } from "../src/utils/connection/types";
+import { UpgradeInterface } from "../src/hooks/upgrade";
 
 const inter = Inter({ subsets: ["latin"] });
 const ibmPlexMono = IBM_Plex_Mono({
@@ -99,6 +100,7 @@ interface StoryParameters extends Parameters {
     context?: ConnectionCtx;
     controller?: Controller;
     chainId?: string;
+    upgrade?: UpgradeInterface;
   };
 }
 
@@ -111,13 +113,12 @@ function useMockedConnection({
     resolve: () => {},
     reject: () => {},
   } as ConnectCtx,
-  controller,
+  ...rest
 }: StoryParameters["connection"] = {}): ConnectionContextValue {
   const chainName = getChainName(chainId);
 
   return {
     context,
-    controller,
     origin: "http://localhost:3002",
     rpcUrl: "http://api.cartridge.gg/x/sepolia",
     chainId,
@@ -162,6 +163,9 @@ function useMockedConnection({
     openSettings: () => {},
     openMenu: () => {},
     setExternalOwner: () => {},
+    controller: {},
+    upgrade: {},
+    ...rest,
   };
 }
 

@@ -19,6 +19,9 @@
       "persistent": true,
       "dependsOn": ["^build:deps"]
     },
+    "test:storybook": {
+      "dependsOn": ["^build:deps"]
+    },
     "lint": {},
     "format": {},
     "format:check": {},
