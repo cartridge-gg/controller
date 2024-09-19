@@ -41,11 +41,6 @@ export const useUpgrade = (controller: Controller): UpgradeInterface => {
   const [latest, setLatest] = useState<ControllerVersionInfo>();
 
   useEffect(() => {
-    if (!window.document.cookie.includes("check-upgrade")) {
-      setIsSynced(true);
-      return;
-    }
-
     if (!controller) {
       return;
     }
