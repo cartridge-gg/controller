@@ -235,6 +235,7 @@ class Controller {
         if (Date.now() - startTime > timeout) {
           clearInterval(id);
           reject(new Error("Timeout waiting for keychain"));
+          return;
         }
         if (!this.keychain) return;
 
