@@ -11,7 +11,7 @@ export const Upgrade = () => {
       Icon={BoltIcon}
       title={"Upgrade " + controller?.username}
       description={""}
-      transactions={upgrade.calls}
+      transactions={[]} // Disables estimate fee since upgrade is free
       buttonText="Upgrade"
       onSubmit={upgrade.onUpgrade}
     >

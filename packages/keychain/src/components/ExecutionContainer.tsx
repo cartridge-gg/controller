@@ -73,7 +73,7 @@ export function ExecutionContainer({
   );
 
   useEffect(() => {
-    if (ctrlError || maxFee !== null) return;
+    if (ctrlError || maxFee !== null || !transactions.length) return;
 
     const estimateFeesAsync = async () => {
       if (isEstimated.current) return;
@@ -181,7 +181,7 @@ export function ExecutionContainer({
                     colorScheme="colorful"
                     onClick={handleSubmit}
                     isLoading={isLoading}
-                    isDisabled={maxFee === null}
+                    isDisabled={maxFee === null && transactions.length}
                   >
                     {buttonText}
                   </Button>
