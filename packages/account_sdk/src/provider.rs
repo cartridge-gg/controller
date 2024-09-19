@@ -13,7 +13,9 @@ use starknet::core::types::{
     TransactionStatus, TransactionTrace, TransactionTraceWithHash,
 };
 use starknet::providers::jsonrpc::HttpTransport;
-use starknet::providers::{JsonRpcClient, Provider, ProviderError};
+use starknet::providers::{
+    JsonRpcClient, Provider, ProviderError, ProviderRequestData, ProviderResponseData,
+};
 use url::Url;
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
@@ -355,5 +357,15 @@ impl Provider for CartridgeJsonRpcProvider {
         B: AsRef<BlockId> + Send + Sync,
     {
         self.inner.trace_block_transactions(block_id).await
+    }
+
+    async fn batch_requests<R>(
+        &self,
+        requests: R,
+    ) -> Result<Vec<ProviderResponseData>, ProviderError>
+    where
+        R: AsRef<[ProviderRequestData]> + Send + Sync,
+    {
+        self.inner.batch_requests(requests).await
     }
 }
