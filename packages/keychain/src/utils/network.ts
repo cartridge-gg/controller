@@ -8,8 +8,7 @@ export function getChainName(chainId: string) {
     case constants.StarknetChainId.SN_SEPOLIA:
       return "Sepolia";
     default:
-      const decoded = hexToString(chainId as Hex);
-      return isSlotChain(chainId) ? decoded.replace("WP_", "") : decoded;
+      return isSlotChain(chainId) ? "Slot" : "Unknown";
   }
 }
 
