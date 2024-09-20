@@ -164,6 +164,7 @@ where
                     authorization: authorization.clone(),
                     private_key: signer.secret_scalar(),
                 },
+                cached: false,
             }),
         )?;
         Ok((authorization, signer.secret_scalar()))
@@ -245,7 +246,7 @@ where
     }
 
     pub async fn estimate_invoke_fee(
-        &self,
+        &mut self,
         calls: Vec<Call>,
     ) -> Result<FeeEstimate, ControllerError> {
         let est = self
@@ -258,8 +259,19 @@ where
 
         match est {
             Ok(mut fee_estimate) => {
-                if self.session_metadata().is_none() {
+                let metadata = self.session_metadata();
+                if metadata.as_ref().map_or(true, |m| !m.cached) {
+                    // Add WEBAUTHN_GAS fee if there is no metadata or if the session is not cached
                     fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
+                    
+                    // If there is metadata, update its cached status and store it
+                    if let Some(mut m) = metadata {
+                        m.cached = true;
+                        self.backend.set(
+                            &Selectors::session(&self.account.address, &self.app_id, &self.account.chain_id),
+                            &StorageValue::Session(m)
+                        )?;
+                    }
                 }
 
                 if fee_estimate.overall_fee > Felt::from(balance) {

@@ -190,7 +190,7 @@ impl CartridgeAccount {
 
     #[wasm_bindgen(js_name = estimateInvokeFee)]
     pub async fn estimate_invoke_fee(
-        &self,
+        &mut self,
         calls: Vec<JsCall>,
     ) -> std::result::Result<JsValue, JsControllerError> {
         set_panic_hook();
