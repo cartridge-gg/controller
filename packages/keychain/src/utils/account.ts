@@ -74,6 +74,7 @@ class Account extends BaseAccount {
   ): Promise<InvokeFunctionResponse> {
     const executionDetails =
       (Array.isArray(abisOrDetails) ? details : abisOrDetails) || {};
+
     if (executionDetails.maxFee !== undefined) {
       executionDetails.maxFee = num.toHex(executionDetails.maxFee);
     }

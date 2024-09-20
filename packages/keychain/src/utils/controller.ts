@@ -89,6 +89,8 @@ export default class Controller {
     }
 
     await this.account.cartridge.createSession(policies, expiresAt);
+
+    this.store();
   }
 
   registerSessionCalldata(
