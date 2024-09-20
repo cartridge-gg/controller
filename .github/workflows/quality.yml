@@ -24,7 +24,6 @@ jobs:
           cargo build -r --target wasm32-unknown-unknown -p account_sdk
 
   ensure-windows:
-    needs: ensure-docker
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
