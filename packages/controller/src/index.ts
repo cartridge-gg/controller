@@ -23,11 +23,11 @@ import { KeychainIFrame, ProfileIFrame } from "./iframe";
 import { NotReadyToConnect, ProfileNotReady } from "./errors";
 import { RPC_SEPOLIA } from "./constants";
 
-class Controller {
+export default class Controller {
   private policies: Policy[];
   private paymaster?: PaymasterOptions;
-  public keychain?: AsyncMethodReturns<Keychain>;
-  public profile?: AsyncMethodReturns<Profile>;
+  private keychain?: AsyncMethodReturns<Keychain>;
+  private profile?: AsyncMethodReturns<Profile>;
   private iframes: IFrames;
   public rpc: URL;
   public account?: AccountInterface;
@@ -245,5 +245,3 @@ class Controller {
     });
   }
 }
-
-export default Controller;
