@@ -41,7 +41,9 @@ export function ExecutionContainer({
 }: ExecutionContainerProps & BannerProps) {
   const { controller } = useConnection();
   const [maxFee, setMaxFee] = useState<BigNumberish | null>(null);
-  const [ctrlError, setCtrlError] = useState<ControllerError>(executionError);
+  const [ctrlError, setCtrlError] = useState<ControllerError>(
+    () => executionError,
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [ctaState, setCTAState] = useState<"fund" | "deploy" | "execute">(
     "execute",
@@ -84,6 +86,10 @@ export function ExecutionContainer({
 
     estimateFeesAsync();
   }, [ctrlError, maxFee, transactions, transactionsDetail, estimateFees]);
+
+  useEffect(() => {
+    setCtrlError(executionError);
+  }, [executionError]);
 
   const handleSubmit = async () => {
     setIsLoading(true);
