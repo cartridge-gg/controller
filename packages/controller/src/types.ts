@@ -14,6 +14,7 @@ import {
   DeployAccountSignerDetails,
   DeclareSignerDetails,
 } from "starknet";
+import { IFrame } from "./iframe";
 
 export type Session = {
   chainId: constants.StarknetChainId;
@@ -76,6 +77,11 @@ export type DeployReply = {
   transaction_hash: string;
 };
 
+export type IFrames = {
+  keychain: IFrame<Keychain>;
+  profile: IFrame<Profile>;
+};
+
 export interface Keychain {
   probe(rpcUrl?: string): Promise<ProbeReply | ConnectError>;
   connect(
@@ -128,8 +134,9 @@ export interface Keychain {
   delegateAccount(): string;
 }
 
+export interface Profile {}
+
 export interface Modal {
-  element: HTMLDivElement;
   open: () => void;
   close: () => void;
 }
@@ -141,6 +148,8 @@ export type ControllerOptions = {
   policies?: Policy[];
   /** The URL of keychain */
   url?: string;
+  /** The URL of profile. Mainly for internal development purpose */
+  profileUrl?: string;
   /** The URL of the RPC */
   rpc?: string;
   /** The origin of keychain */

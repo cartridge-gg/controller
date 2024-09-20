@@ -116,16 +116,14 @@ export function useConnectionValue() {
     setPolicies(parsePolicies(urlParams.get("policies")));
     setPaymaster(parsePaymaster(urlParams.get("paymaster")));
 
-    const connection = connectToController({
+    const connection = connectToController<ParentMethods>({
       setOrigin,
       setRpcUrl,
       setPolicies,
       setContext,
       setController,
     });
-    connection.promise.then((parent) =>
-      setParent(parent as unknown as ParentMethods),
-    );
+    connection.promise.then(setParent);
 
     return () => {
       connection.destroy();

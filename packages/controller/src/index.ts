@@ -4,11 +4,7 @@ export { defaultPresets } from "./presets";
 export * from "./verified";
 
 import { AccountInterface, addAddressPadding } from "starknet";
-import {
-  AsyncMethodReturns,
-  Connection,
-  connectToChild,
-} from "@cartridge/penpal";
+import { AsyncMethodReturns } from "@cartridge/penpal";
 
 import DeviceAccount from "./device";
 import {
@@ -17,39 +13,52 @@ import {
   ResponseCodes,
   ConnectReply,
   ProbeReply,
-  Modal,
   ControllerOptions,
-  ControllerThemePresets,
-  ColorMode,
   PaymasterOptions,
-  // Prefund,
   ConnectError,
+  Profile,
+  IFrames,
 } from "./types";
-import { createModal } from "./modal";
-import { defaultPresets } from "./presets";
-import { NotReadyToConnect } from "./errors";
-import { KEYCHAIN_URL, RPC_SEPOLIA } from "./constants";
+import { KeychainIFrame, ProfileIFrame } from "./iframe";
+import { NotReadyToConnect, ProfileNotReady } from "./errors";
+import { RPC_SEPOLIA } from "./constants";
 
-class Controller {
-  private url: URL;
+export default class Controller {
   private policies: Policy[];
   private paymaster?: PaymasterOptions;
-  private connection?: Connection<Keychain>;
-  private modal?: Modal;
-  public keychain?: AsyncMethodReturns<Keychain>;
+  private keychain?: AsyncMethodReturns<Keychain>;
+  private profile?: AsyncMethodReturns<Profile>;
+  private iframes: IFrames;
   public rpc: URL;
   public account?: AccountInterface;
 
   constructor({
     policies,
     url,
+    profileUrl,
     rpc,
     paymaster,
-    theme,
-    config,
-    colorMode,
+    ...options
   }: ControllerOptions = {}) {
-    this.url = new URL(url || KEYCHAIN_URL);
+    this.iframes = {
+      keychain: new KeychainIFrame({
+        ...options,
+        url,
+        paymaster,
+        onClose: this.keychain?.reset,
+        onConnect: (keychain) => {
+          this.keychain = keychain;
+        },
+      }),
+      profile: new ProfileIFrame({
+        ...options,
+        url: profileUrl,
+        onConnect: (profile) => {
+          this.profile = profile;
+        },
+      }),
+    };
+
     this.rpc = new URL(rpc || RPC_SEPOLIA);
     this.paymaster = paymaster;
     if (this.paymaster) {
@@ -62,108 +71,38 @@ class Controller {
         ...policy,
         target: addAddressPadding(policy.target),
       })) || [];
-
-    this.setTheme(theme, config?.presets);
-    if (colorMode) {
-      this.setColorMode(colorMode);
-    }
-    if (paymaster) {
-      this.setPaymaster(paymaster);
-    }
-    if (policies) {
-      this.setPolicies(policies);
-    }
-
-    this.initModal();
   }
 
   async openMenu() {
-    if (!this.keychain || !this.modal) {
+    if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return null;
     }
-    this.modal.open();
+    this.iframes.keychain.open();
     const res = await this.keychain.openMenu();
-    this.modal.close();
+    this.iframes.keychain.close();
     if (res && (res as ConnectError).code === ResponseCodes.NOT_CONNECTED) {
       return false;
     }
     return true;
   }
 
-  private initModal() {
-    if (typeof document === "undefined") return;
-
-    this.modal = createModal(this.url.toString(), () => this.keychain?.reset());
-    const appendModal = () => document.body.appendChild(this.modal!.element);
-
-    if (
-      document.readyState === "complete" ||
-      document.readyState === "interactive"
-    ) {
-      appendModal();
-    } else {
-      document.addEventListener("DOMContentLoaded", appendModal);
-    }
-
-    this.connection = connectToChild<Keychain>({
-      iframe: this.modal.element.children[0] as HTMLIFrameElement,
-      methods: { close: () => this.modal?.close() },
-    });
-
-    this.connection.promise.then((keychain) => {
-      this.keychain = keychain;
-      return this.probe();
-    });
-  }
-
-  private setTheme(
-    id: string = "cartridge",
-    presets: ControllerThemePresets = defaultPresets,
-  ) {
-    const theme = presets[id] ?? defaultPresets.cartridge;
-    this.url.searchParams.set(
-      "theme",
-      encodeURIComponent(JSON.stringify(theme)),
-    );
-  }
-
-  private setColorMode(colorMode: ColorMode) {
-    this.url.searchParams.set("colorMode", colorMode);
-  }
-
-  private setPaymaster(paymaster: PaymasterOptions) {
-    this.url.searchParams.set(
-      "paymaster",
-      encodeURIComponent(JSON.stringify(paymaster)),
-    );
-  }
-
-  private setPolicies(policies: Policy[]) {
-    this.url.searchParams.set(
-      "policies",
-      encodeURIComponent(JSON.stringify(policies)),
-    );
-  }
-
   ready() {
-    return (
-      this.connection?.promise
-        .then(() => this.probe())
-        .then(
-          (res) => !!res,
-          () => false,
-        ) ?? Promise.resolve(false)
+    return this.probe().then(
+      (res) => !!res,
+      () => false,
     );
   }
 
   async probe() {
-    if (!this.keychain || !this.modal) {
-      console.error(new NotReadyToConnect().message);
-      return null;
-    }
-
     try {
+      await this.waitForKeychain();
+
+      if (!this.keychain) {
+        console.error(new NotReadyToConnect().message);
+        return null;
+      }
+
       const response = (await this.keychain.probe(
         this.rpc.toString(),
       )) as ProbeReply;
@@ -172,7 +111,7 @@ class Controller {
         this.rpc.toString(),
         response.address,
         this.keychain,
-        this.modal,
+        this.iframes.keychain,
         this.paymaster,
       ) as AccountInterface;
     } catch (e) {
@@ -188,7 +127,7 @@ class Controller {
       return this.account;
     }
 
-    if (!this.keychain || !this.modal) {
+    if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
     }
@@ -200,7 +139,7 @@ class Controller {
       }
     }
 
-    this.modal.open();
+    this.iframes.keychain.open();
 
     try {
       let response = await this.keychain.connect(
@@ -216,7 +155,7 @@ class Controller {
         this.rpc.toString(),
         response.address,
         this.keychain,
-        this.modal,
+        this.iframes.keychain,
         this.paymaster,
       ) as AccountInterface;
 
@@ -224,8 +163,17 @@ class Controller {
     } catch (e) {
       console.log(e);
     } finally {
-      this.modal.close();
+      this.iframes.keychain.close();
     }
+  }
+
+  openProfile() {
+    if (!this.profile || !this.iframes.profile) {
+      console.error(new ProfileNotReady().message);
+      return;
+    }
+
+    this.iframes.profile.open();
   }
 
   async disconnect() {
@@ -271,6 +219,29 @@ class Controller {
 
     return await this.keychain.delegateAccount();
   }
-}
 
-export default Controller;
+  private waitForKeychain({
+    timeout = 3000,
+    interval = 100,
+  }:
+    | {
+        timeout?: number;
+        interval?: number;
+      }
+    | undefined = {}) {
+    return new Promise<void>((resolve, reject) => {
+      const startTime = Date.now();
+      const id = setInterval(() => {
+        if (Date.now() - startTime > timeout) {
+          clearInterval(id);
+          reject(new Error("Timeout waiting for keychain"));
+          return;
+        }
+        if (!this.keychain) return;
+
+        clearInterval(id);
+        resolve();
+      }, interval);
+    });
+  }
+}

@@ -6,6 +6,7 @@ import { DelegateAccount } from "components/DelegateAccount";
 import { ColorModeToggle } from "components/ColorModeToggle";
 import { Menu } from "components/Menu";
 import { RegisterSession } from "components/RegisterSession";
+import { Profile } from "components/Profile";
 
 export default function Home() {
   return (
@@ -18,6 +19,7 @@ export default function Home() {
       </div>
       <ConnectWallet />
       <Menu />
+      <Profile />
       <TransferEth />
       <DelegateAccount />
       <InvalidTxn />
