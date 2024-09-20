@@ -1,13 +1,34 @@
 import { PROFILE_URL } from "../constants";
-import { Profile } from "../types";
+import { Profile, ProfileOptions } from "../types";
 import { IFrame, IFrameOptions } from "./base";
 
+export type ProfileIFrameOptions = IFrameOptions<Profile> &
+  ProfileOptions & {
+    address: string;
+    indexerUrl: string;
+  };
+
 export class ProfileIFrame extends IFrame<Profile> {
-  constructor(options: IFrameOptions<Profile>) {
+  constructor({
+    profileUrl,
+    address,
+    indexerUrl,
+    ...iframeOptions
+  }: ProfileIFrameOptions) {
+    const _url = new URL(profileUrl ?? PROFILE_URL);
+    _url.searchParams.set(
+      "address",
+      encodeURIComponent(JSON.stringify(address)),
+    );
+    _url.searchParams.set(
+      "indexerUrl",
+      encodeURIComponent(JSON.stringify(indexerUrl)),
+    );
+
     super({
-      ...options,
+      ...iframeOptions,
       id: "controller-profile",
-      url: new URL(options.url ?? PROFILE_URL),
+      url: _url,
     });
   }
 }

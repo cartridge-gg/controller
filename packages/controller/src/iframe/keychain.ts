@@ -1,15 +1,16 @@
 import { KEYCHAIN_URL } from "../constants";
-import { ControllerOptions, Keychain } from "../types";
+import { Keychain, KeychainOptions } from "../types";
 import { IFrame, IFrameOptions } from "./base";
+
+type KeychainIframeOptions = IFrameOptions<Keychain> & KeychainOptions;
 
 export class KeychainIFrame extends IFrame<Keychain> {
   constructor({
     url,
     paymaster,
     policies,
-    ...options
-  }: IFrameOptions<Keychain> &
-    Pick<ControllerOptions, "paymaster" | "policies">) {
+    ...iframeOptions
+  }: KeychainIframeOptions) {
     const _url = new URL(url ?? KEYCHAIN_URL);
     if (paymaster) {
       _url.searchParams.set(
@@ -25,7 +26,7 @@ export class KeychainIFrame extends IFrame<Keychain> {
     }
 
     super({
-      ...options,
+      ...iframeOptions,
       id: "controller-keychain",
       url: _url,
     });
