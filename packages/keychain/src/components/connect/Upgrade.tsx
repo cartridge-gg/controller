@@ -14,6 +14,7 @@ export const Upgrade = () => {
       transactions={[]} // Disables estimate fee since upgrade is free
       buttonText="Upgrade"
       onSubmit={upgrade.onUpgrade}
+      executionError={upgrade.error}
     >
       <Content>
         <Text color="text.secondary" fontSize="sm" pb="10px">
