@@ -71,10 +71,6 @@ class ControllerConnector extends Connector {
   async openMenu() {
     return await this.controller.openMenu();
   }
-
-  openProfile() {
-    return this.controller.openProfile();
-  }
 }
 
 export default ControllerConnector;

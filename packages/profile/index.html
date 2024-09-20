@@ -30,6 +30,17 @@
       data-domain="cartridge.gg"
       src="https://plausible.io/js/script.js"
     ></script>
+    <script>
+      if (
+        localStorage.getItem("vite-ui-colorScheme") === "dark" ||
+        (!("vite-ui-colorScheme" in localStorage) &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches)
+      ) {
+        document.querySelector("html").classList.add("dark");
+      } else {
+        document.querySelector("html").classList.remove("dark");
+      }
+    </script>
   </head>
   <body class="bg-background text-foreground">
     <div id="root"></div>

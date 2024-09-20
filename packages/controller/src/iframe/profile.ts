@@ -1,5 +1,5 @@
 import { PROFILE_URL } from "../constants";
-import { Profile, ProfileOptions } from "../types";
+import { Profile, ProfileOptions, ProfileTabVariant } from "../types";
 import { IFrame, IFrameOptions } from "./base";
 
 export type ProfileIFrameOptions = IFrameOptions<Profile> &
@@ -30,5 +30,15 @@ export class ProfileIFrame extends IFrame<Profile> {
       id: "controller-profile",
       url: _url,
     });
+  }
+
+  openTab(tab: ProfileTabVariant) {
+    const url = super.currentUrl();
+    if (!url) return;
+
+    url.searchParams.set("tab", tab);
+
+    super.updateUrl(url);
+    super.open();
   }
 }

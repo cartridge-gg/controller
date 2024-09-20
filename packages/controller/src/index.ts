@@ -174,8 +174,8 @@ export default class Controller {
     }
   }
 
-  openProfile() {
-    if (this.profileOptions.indexerUrl) {
+  openProfile(tab: "quest" | "inventory" | "history" = "inventory") {
+    if (!this.profileOptions.indexerUrl) {
       console.error("`indexerUrl` option is required to open profile");
       return;
     }
@@ -184,7 +184,7 @@ export default class Controller {
       return;
     }
 
-    this.iframes.profile.open();
+    this.iframes.profile.openTab(tab);
   }
 
   async disconnect() {

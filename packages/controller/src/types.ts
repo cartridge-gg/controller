@@ -14,7 +14,7 @@ import {
   DeployAccountSignerDetails,
   DeclareSignerDetails,
 } from "starknet";
-import { IFrame } from "./iframe";
+import { KeychainIFrame, ProfileIFrame } from "./iframe";
 
 export type Session = {
   chainId: constants.StarknetChainId;
@@ -78,8 +78,8 @@ export type DeployReply = {
 };
 
 export type IFrames = {
-  keychain: IFrame<Keychain>;
-  profile?: IFrame<Profile>;
+  keychain: KeychainIFrame;
+  profile?: ProfileIFrame;
 };
 
 export interface Keychain {
@@ -180,6 +180,8 @@ export type ProfileOptions = IFrameOptions & {
   /** The URL of Torii indexer. Will be mandatory once profile page is in production */
   indexerUrl?: string;
 };
+
+export type ProfileTabVariant = "quest" | "inventory" | "history";
 
 /**
  * Options for configuring a paymaster

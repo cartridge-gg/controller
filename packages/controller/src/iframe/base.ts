@@ -99,6 +99,15 @@ export class IFrame<CallSender extends {}> implements Modal {
     this.onClose = onClose;
   }
 
+  currentUrl() {
+    return this.iframe ? new URL(this.iframe.src) : undefined;
+  }
+
+  updateUrl(url: URL) {
+    if (!this.iframe) return;
+    this.iframe.src = url.toString();
+  }
+
   open() {
     if (!this.container) return;
     document.body.style.overflow = "hidden";

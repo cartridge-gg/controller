@@ -4,7 +4,7 @@ import {
   LayoutHeader,
 } from "@/components/layout";
 
-export function Inventory() {
+export function Quest() {
   return (
     <LayoutContainer>
       <LayoutHeader
@@ -13,7 +13,7 @@ export function Inventory() {
       />
 
       <LayoutContent>
-        <div>Inventory</div>
+        <div>Quest</div>
       </LayoutContent>
     </LayoutContainer>
   );
