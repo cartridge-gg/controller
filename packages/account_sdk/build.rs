@@ -37,7 +37,9 @@ fn generate_constants() {
             casm_hash: felt!("{:#x}"),
         }});"#,
                     version.replace('.', "_").to_uppercase(),
-                    path.display(),
+                    // Replace the '\' with '/' on Windows, meaning the path is always the same
+                    // on all platforms. Windows also accepts '/' as a path separator.
+                    path.display().to_string().replace("\\", "/"),
                     extract_class_hash(&path),
                     extract_compiled_class_hash(version)
                 ));
