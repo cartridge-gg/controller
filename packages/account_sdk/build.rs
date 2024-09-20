@@ -32,7 +32,7 @@ fn generate_constants() {
 
                 controllers.push_str(&format!(
                     r#"m.insert(Version::{}, ContractClass {{
-            content: include_str!(".{}"),
+            content: include_str!(r".{}"),
             hash: felt!("{:#x}"),
             casm_hash: felt!("{:#x}"),
         }});"#,

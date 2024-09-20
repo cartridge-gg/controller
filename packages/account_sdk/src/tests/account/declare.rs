@@ -15,7 +15,7 @@ use super::pending::PendingTransaction;
 
 pub const ERC_20_COMPILED_CLASS_HASH: Felt =
     felt!("0x732654ca6baa90ff202d2fcc35fb39766eb34842a7e5ac6dbf7714af71f1dab");
-pub const ERC_20_SIERRA_STR: &str = include_str!("../../../compiled/erc20.contract_class.json");
+pub const ERC_20_SIERRA_STR: &str = include_str!(r"../../../compiled/erc20.contract_class.json");
 
 pub struct AccountDeclaration<'a> {
     contract_artifact: SierraClass,
