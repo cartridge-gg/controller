@@ -37,7 +37,7 @@ fn generate_constants() {
             casm_hash: felt!("{:#x}"),
         }});"#,
                     version.replace('.', "_").to_uppercase(),
-                    path.display(),
+                    path.display().to_string().replace("\\", "/"),
                     extract_class_hash(&path),
                     extract_compiled_class_hash(version)
                 ));
