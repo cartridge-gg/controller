@@ -115,7 +115,7 @@ export default class Controller {
       return;
     }
 
-    if (this.profileOptions.indexerUrl) {
+    if (this.profileOptions.profileUrl && this.profileOptions.indexerUrl) {
       this.iframes.profile = new ProfileIFrame({
         profileUrl: this.profileOptions.profileUrl,
         indexerUrl: this.profileOptions.indexerUrl,
@@ -175,6 +175,10 @@ export default class Controller {
   }
 
   openProfile() {
+    if (this.profileOptions.indexerUrl) {
+      console.error("`indexerUrl` option is required to open profile");
+      return;
+    }
     if (!this.profile || !this.iframes.profile) {
       console.error(new ProfileNotReady().message);
       return;

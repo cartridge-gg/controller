@@ -177,6 +177,7 @@ export type KeychainOptions = IFrameOptions & {
 export type ProfileOptions = IFrameOptions & {
   /** The URL of profile. Mainly for internal development purpose */
   profileUrl?: string;
+  /** The URL of Torii indexer. Will be mandatory once profile page is in production */
   indexerUrl?: string;
 };
 
