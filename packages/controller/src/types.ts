@@ -148,6 +148,7 @@ export type ControllerOptions = {
   policies?: Policy[];
   /** The URL of keychain */
   url?: string;
+  /** The URL of profile. Mainly for internal development purpose */
   profileUrl?: string;
   /** The URL of the RPC */
   rpc?: string;
