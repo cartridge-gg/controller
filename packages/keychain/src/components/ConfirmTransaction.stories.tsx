@@ -10,8 +10,9 @@ const meta = {
       controller: {
         account: {
           estimateInvokeFee: () => ({
-            overall_fee: "100",
+            suggestedMaxFee: "100",
           }),
+          hasSession: () => true,
         },
       },
       context: {

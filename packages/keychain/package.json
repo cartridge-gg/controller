@@ -13,7 +13,8 @@
     "test:ci": "jest --ci",
     "gen": "graphql-codegen --config codegen.yaml",
     "storybook": "storybook dev -p 6001",
-    "storybook:build": "storybook build"
+    "storybook:build": "storybook build",
+    "test:storybook": "pnpm concurrently -k -s first -n \"SB,TEST\" -c \"magenta,blue\" \"pnpm storybook:build --quiet && pnpm http-server storybook-static --port 6006 --silent\" \"pnpm wait-on tcp:6006 && pnpm test-storybook\""
   },
   "dependencies": {
     "@cartridge/account-wasm": "workspace:^",
@@ -60,25 +61,30 @@
     "@storybook/addon-essentials": "^8.2.9",
     "@storybook/addon-interactions": "^8.2.9",
     "@storybook/addon-links": "^8.2.9",
-    "@storybook/addon-onboarding": "^8.2.9",
     "@storybook/blocks": "^8.2.9",
+    "@storybook/jest": "^0.2.3",
     "@storybook/nextjs": "^8.2.9",
     "@storybook/react": "^8.2.9",
     "@storybook/test": "^8.2.5",
+    "@storybook/test-runner": "^0.19.1",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@types/js-cookie": "^3.0.2",
     "@types/node": "^20.6.0",
     "@types/react": "^18.2.21",
     "@types/react-dom": "^18.2.7",
+    "concurrently": "^9.0.1",
     "eslint": "^8.23.0",
     "eslint-config-next": "^12.2.5",
     "eslint-plugin-storybook": "^0.6.13",
+    "http-server": "^14.1.1",
     "jest": "^29.3.1",
     "jest-environment-jsdom": "^29.3.1",
+    "playwright": "^1.47.1",
     "prettier": "^2.7.1",
     "storybook": "^8.2.9",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "wait-on": "^8.0.1"
   },
   "peerDependencies": {
     "@chakra-ui/react": "^2.8.1"

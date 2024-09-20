@@ -4,6 +4,11 @@ import { CreateSession } from "./CreateSession";
 
 const meta = {
   component: CreateSession,
+  parameters: {
+    upgrade: {
+      isSynced: true,
+    },
+  },
 } satisfies Meta<typeof CreateSession>;
 
 export default meta;
