@@ -111,7 +111,7 @@ pub trait AccountHashSigner {
 pub enum CallEncoder {}
 
 impl CallEncoder {
-    fn encode_calls(calls: &[Call]) -> Vec<Felt> {
+    pub fn encode_calls(calls: &[Call]) -> Vec<Felt> {
         <Vec<abigen::controller::Call> as CairoSerde>::cairo_serialize(
             &calls
                 .iter()

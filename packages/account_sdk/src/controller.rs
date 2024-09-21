@@ -2,8 +2,8 @@ use crate::abigen::controller::{OutsideExecution, Owner, Signer as AbigenSigner,
 use crate::account::outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller};
 use crate::account::session::hash::{Policy, Session};
 use crate::account::session::SessionAccount;
-use crate::account::AccountHashAndCallsSigner;
 use crate::account::SpecificAccount;
+use crate::account::{AccountHashAndCallsSigner, CallEncoder};
 use crate::factory::ControllerFactory;
 use crate::hash::MessageHashRev1;
 use crate::paymaster::PaymasterError;
@@ -457,7 +457,7 @@ where
     }
 
     fn block_id(&self) -> BlockId {
-        self.account.block_id()
+        BlockId::Tag(BlockTag::Pending)
     }
 
     async fn get_nonce(&self) -> Result<Felt, ProviderError> {
@@ -492,7 +492,7 @@ where
     B: Backend,
 {
     fn encode_calls(&self, calls: &[Call]) -> Vec<Felt> {
-        self.account.encode_calls(calls)
+        CallEncoder::encode_calls(calls)
     }
 }
 
