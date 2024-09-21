@@ -85,6 +85,8 @@ where
     B: Backend,
 {
     app_id: String,
+    address: Felt,
+    chain_id: Felt,
     pub username: String,
     salt: Felt,
     pub provider: P,
@@ -126,6 +128,8 @@ where
 
         Self {
             app_id,
+            address,
+            chain_id,
             username,
             salt,
             provider,
@@ -153,10 +157,10 @@ where
         let session = Session::new(methods, expires_at, &signer.signer())?;
         let hash = session
             .raw()
-            .get_message_hash_rev_1(self.account.chain_id, self.account.address);
+            .get_message_hash_rev_1(self.chain_id, self.address);
         let authorization = self.account.sign_hash(hash).await?;
         self.backend.set(
-            &Selectors::session(&self.account.address, &self.app_id, &self.account.chain_id),
+            &Selectors::session(&self.address, &self.app_id, &self.chain_id),
             &StorageValue::Session(SessionMetadata {
                 session,
                 max_fee: None,
@@ -215,11 +219,7 @@ where
 
         let res = self
             .provider()
-            .add_execute_outside_transaction(
-                outside_execution,
-                self.account.address,
-                signed.signature,
-            )
+            .add_execute_outside_transaction(outside_execution, self.address, signed.signature)
             .await
             .map_err(ControllerError::PaymasterError)?;
 
@@ -280,7 +280,7 @@ where
                     StarknetError::TransactionExecutionError(data),
                 )) if data
                     .execution_error
-                    .contains(&format!("{:x} is not deployed.", self.account.address)) =>
+                    .contains(&format!("{:x} is not deployed.", self.address)) =>
                 {
                     let balance = self.eth_balance().await?;
                     let mut fee_estimate = self.deploy().estimate_fee().await?;
@@ -326,7 +326,7 @@ where
                 {
                     if data
                         .execution_error
-                        .contains(&format!("{:x} is not deployed.", self.account.address))
+                        .contains(&format!("{:x} is not deployed.", self.address))
                     {
                         let balance = self.eth_balance().await?;
                         let mut fee_estimate = self.deploy().estimate_fee().await?;
@@ -399,7 +399,7 @@ where
     }
 
     pub async fn eth_balance(&self) -> Result<u128, ControllerError> {
-        let address = self.account.address;
+        let address = self.address;
         let result = self
             .provider
             .call(
@@ -511,10 +511,10 @@ where
     B: Backend,
 {
     fn address(&self) -> Felt {
-        self.account.address
+        self.address
     }
 
     fn chain_id(&self) -> Felt {
-        self.account.chain_id
+        self.chain_id
     }
 }
