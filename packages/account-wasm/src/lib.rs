@@ -338,9 +338,6 @@ impl CartridgeSessionAccount {
         let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
 
         let signer = Signer::Starknet(SigningKey::from_secret_scalar(signer.0));
-        let guardian = Signer::Starknet(SigningKey::from_secret_scalar(short_string!(
-            "CARTRIDGE_GUARDIAN"
-        )));
         let address = address.0;
         let chain_id = chain_id.0;
 
@@ -363,7 +360,6 @@ impl CartridgeSessionAccount {
         Ok(CartridgeSessionAccount(SessionAccount::new(
             Arc::new(provider),
             signer,
-            guardian,
             address,
             chain_id,
             session_authorization,
@@ -383,9 +379,6 @@ impl CartridgeSessionAccount {
         let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
 
         let signer = Signer::Starknet(SigningKey::from_secret_scalar(signer.0));
-        let guardian = Signer::Starknet(SigningKey::from_secret_scalar(short_string!(
-            "CARTRIDGE_GUARDIAN"
-        )));
         let address = address.0;
         let chain_id = chain_id.0;
 
@@ -404,7 +397,6 @@ impl CartridgeSessionAccount {
         Ok(CartridgeSessionAccount(SessionAccount::new_as_registered(
             Arc::new(provider),
             signer,
-            guardian,
             address,
             chain_id,
             owner_guid.0,

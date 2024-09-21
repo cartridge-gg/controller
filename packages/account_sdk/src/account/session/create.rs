@@ -54,7 +54,6 @@ where
         Ok(SessionAccount::new(
             self.provider.clone(),
             signer,
-            self.guardian.clone(),
             self.address(),
             self.chain_id(),
             session_authorization,

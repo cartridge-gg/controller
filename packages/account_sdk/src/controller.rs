@@ -376,7 +376,6 @@ where
         let session_account = SessionAccount::new(
             self.account.provider().clone(),
             session_signer,
-            self.account.guardian.clone(),
             self.account.address,
             self.account.chain_id,
             metadata.credentials.authorization,
