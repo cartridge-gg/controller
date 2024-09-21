@@ -5,10 +5,10 @@ use starknet::{
     core::types::{BlockId, BlockTag, Call, Felt},
     macros::short_string,
     providers::Provider,
-    signers::SigningKey,
 };
 
 use crate::{
+    controller::GUARDIAN_SIGNER,
     impl_account, impl_execution_encoder,
     signers::{HashSigner, SignError, Signer},
 };
@@ -24,10 +24,6 @@ pub mod create;
 pub mod hash;
 pub mod merkle;
 pub mod raw_session;
-
-const GUARDIAN_SIGNER: Signer = Signer::Starknet(SigningKey::from_secret_scalar(short_string!(
-    "CARTRIDGE_GUARDIAN"
-)));
 
 pub struct SessionAccount<P>
 where

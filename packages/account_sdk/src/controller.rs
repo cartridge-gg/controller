@@ -25,7 +25,7 @@ use starknet::core::types::{
     BlockTag, Call, FeeEstimate, FunctionCall, InvokeTransactionResult, StarknetError,
 };
 use starknet::core::utils::cairo_short_string_to_felt;
-use starknet::macros::{felt, selector};
+use starknet::macros::{felt, selector, short_string};
 use starknet::providers::ProviderError;
 use starknet::signers::SignerInteractivityContext;
 use starknet::{
@@ -40,6 +40,10 @@ use js_sys::Date;
 const ETH_CONTRACT_ADDRESS: Felt =
     felt!("0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7");
 const WEBAUTHN_GAS: Felt = felt!("3300");
+
+pub const GUARDIAN_SIGNER: Signer = Signer::Starknet(SigningKey::from_secret_scalar(
+    short_string!("CARTRIDGE_GUARDIAN"),
+));
 
 pub trait Backend: StorageBackend + OriginProvider {}
 
@@ -108,12 +112,11 @@ where
         class_hash: Felt,
         provider: P,
         signer: Signer,
-        guardian: Signer,
         address: Felt,
         chain_id: Felt,
         backend: B,
     ) -> Self {
-        let account = OwnerAccount::new(provider.clone(), signer, guardian, address, chain_id);
+        let account = OwnerAccount::new(provider.clone(), signer, address, chain_id);
         let salt = cairo_short_string_to_felt(&username).unwrap();
 
         let mut calldata = Owner::cairo_serialize(&Owner::Signer(account.signer.signer()));

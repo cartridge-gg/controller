@@ -23,7 +23,6 @@ use serde_wasm_bindgen::to_value;
 use signer::BrowserBackend;
 use starknet::accounts::{Account, ConnectedAccount};
 use starknet::core::types::Call;
-use starknet::macros::short_string;
 use starknet::signers::SigningKey;
 use starknet_types_core::felt::Felt;
 use types::call::JsCall;
@@ -88,9 +87,6 @@ impl CartridgeAccount {
             BrowserBackend,
         ));
 
-        let dummy_guardian = Signer::Starknet(SigningKey::from_secret_scalar(short_string!(
-            "CARTRIDGE_GUARDIAN"
-        )));
         let username = username.to_lowercase();
 
         let controller = Controller::new(
@@ -99,7 +95,6 @@ impl CartridgeAccount {
             CONTROLLERS[&Version::V1_0_4].hash,
             Arc::new(provider),
             device_signer.clone(),
-            dummy_guardian,
             address.0,
             chain_id.0,
             BrowserBackend,
