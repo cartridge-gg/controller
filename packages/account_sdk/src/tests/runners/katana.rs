@@ -175,12 +175,9 @@ impl KatanaRunner {
         signer: Signer,
         version: Version,
     ) -> Controller<CartridgeJsonRpcProvider, InMemoryBackend> {
-        let guardian = Signer::new_starknet_random();
         let mut constructor_calldata =
             controller::Owner::cairo_serialize(&controller::Owner::Signer(signer.signer()));
-        constructor_calldata.extend(Option::<AbigenSigner>::cairo_serialize(&Some(
-            guardian.signer(),
-        )));
+        constructor_calldata.extend(Option::<AbigenSigner>::cairo_serialize(&None));
 
         let DeployResult {
             deployed_address, ..
@@ -194,7 +191,6 @@ impl KatanaRunner {
             CONTROLLERS[&version].hash,
             self.client.clone(),
             signer,
-            guardian,
             deployed_address,
             self.chain_id,
             InMemoryBackend::default(),

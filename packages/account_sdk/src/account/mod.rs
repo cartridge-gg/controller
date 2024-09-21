@@ -13,6 +13,7 @@ pub mod macros;
 pub mod outside_execution;
 pub mod session;
 
+use crate::controller::GUARDIAN_SIGNER;
 use crate::signers::Signer;
 use crate::{abigen, typed_data::TypedData};
 use crate::{
@@ -31,27 +32,19 @@ where
     pub address: Felt,
     pub chain_id: Felt,
     pub(crate) block_id: BlockId,
-    pub(crate) guardian: Signer,
 }
 
 impl<P> OwnerAccount<P>
 where
     P: Provider + Send,
 {
-    pub fn new(
-        provider: P,
-        signer: Signer,
-        guardian: Signer,
-        address: Felt,
-        chain_id: Felt,
-    ) -> Self {
+    pub fn new(provider: P, signer: Signer, address: Felt, chain_id: Felt) -> Self {
         OwnerAccount {
             provider,
             signer,
             address,
             chain_id,
             block_id: BlockId::Tag(BlockTag::Pending),
-            guardian,
         }
     }
 
@@ -68,7 +61,7 @@ where
 {
     async fn sign_hash(&self, hash: Felt) -> Result<Vec<Felt>, SignError> {
         let owner_signature = self.signer.sign(&hash).await?;
-        let guardian_signature = self.guardian.sign(&hash).await?;
+        let guardian_signature = GUARDIAN_SIGNER.sign(&hash).await?;
         Ok(Vec::<SignerSignature>::cairo_serialize(&vec![
             owner_signature,
             guardian_signature,
