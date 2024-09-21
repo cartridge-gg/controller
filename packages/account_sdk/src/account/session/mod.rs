@@ -5,6 +5,7 @@ use starknet::{
     core::types::{BlockId, BlockTag, Call, Felt},
     macros::short_string,
     providers::Provider,
+    signers::SigningKey,
 };
 
 use crate::{
@@ -24,13 +25,16 @@ pub mod hash;
 pub mod merkle;
 pub mod raw_session;
 
+const GUARDIAN_SIGNER: Signer = Signer::Starknet(SigningKey::from_secret_scalar(short_string!(
+    "CARTRIDGE_GUARDIAN"
+)));
+
 pub struct SessionAccount<P>
 where
     P: Provider + Send,
 {
     provider: P,
     signer: Signer,
-    guardian: Signer,
     address: Felt,
     chain_id: Felt,
     block_id: BlockId,
@@ -45,7 +49,6 @@ where
     pub fn new(
         provider: P,
         signer: Signer,
-        guardian: Signer,
         address: Felt,
         chain_id: Felt,
         session_authorization: Vec<Felt>,
@@ -54,7 +57,6 @@ where
         Self {
             provider,
             signer,
-            guardian,
             address,
             chain_id,
             block_id: BlockId::Tag(BlockTag::Pending),
@@ -66,7 +68,6 @@ where
     pub fn new_as_registered(
         provider: P,
         signer: Signer,
-        guardian: Signer,
         address: Felt,
         chain_id: Felt,
         owner_guid: Felt,
@@ -75,7 +76,6 @@ where
         Self::new(
             provider,
             signer,
-            guardian,
             address,
             chain_id,
             vec![short_string!("authorization-by-registered"), owner_guid],
@@ -107,7 +107,7 @@ where
             cache_authorization: true,
             session_authorization: self.session_authorization.clone(),
             session_signature: self.signer.sign(&hash).await?,
-            guardian_signature: self.guardian.sign(&hash).await?,
+            guardian_signature: GUARDIAN_SIGNER.sign(&hash).await?,
             proofs,
         })
     }

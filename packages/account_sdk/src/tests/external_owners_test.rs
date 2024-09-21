@@ -22,7 +22,6 @@ use crate::{
 async fn test_verify_external_owner() {
     let runner = KatanaRunner::load();
     let signer = Signer::new_starknet_random();
-    let guardian_signer = Signer::new_starknet_random();
     let external_account = runner.executor().await;
     let controller = runner
         .deploy_controller("username".to_owned(), signer, Version::LATEST)
@@ -66,7 +65,6 @@ async fn test_verify_external_owner() {
     let session = SessionAccount::new_as_registered(
         runner.client(),
         session_signer,
-        guardian_signer,
         controller.address(),
         runner.client().chain_id().await.unwrap(),
         external_account.address(),
@@ -92,7 +90,6 @@ async fn test_verify_external_owner() {
 #[tokio::test]
 async fn test_verify_constructor_external_owner() {
     let runner = KatanaRunner::load();
-    let guardian_signer = Signer::new_starknet_random();
     let external_account = runner.executor().await;
     let controller_address = runner
         .deploy_controller_with_external_owner(external_account.address().into(), Version::LATEST)
@@ -127,7 +124,6 @@ async fn test_verify_constructor_external_owner() {
     let session = SessionAccount::new_as_registered(
         runner.client(),
         session_signer,
-        guardian_signer,
         controller_address.into(),
         runner.client().chain_id().await.unwrap(),
         external_account.address(),
