@@ -96,7 +96,7 @@ where
     pub provider: P,
     pub(crate) account: OwnerAccount<P>,
     pub(crate) contract: abigen::controller::Controller<OwnerAccount<P>>,
-    pub factory: ControllerFactory<OwnerAccount<P>, P>,
+    pub factory: ControllerFactory<P>,
     backend: B,
 }
 
@@ -116,7 +116,7 @@ where
         chain_id: Felt,
         backend: B,
     ) -> Self {
-        let account = OwnerAccount::new(provider.clone(), signer, address, chain_id);
+        let account = OwnerAccount::new(provider.clone(), signer.clone(), address, chain_id);
         let salt = cairo_short_string_to_felt(&username).unwrap();
 
         let mut calldata = Owner::cairo_serialize(&Owner::Signer(account.signer.signer()));
@@ -125,7 +125,7 @@ where
             class_hash,
             account.chain_id,
             calldata,
-            account.clone(),
+            signer,
             provider.clone(),
         );
 
@@ -143,7 +143,7 @@ where
         }
     }
 
-    pub fn deploy(&self) -> AccountDeploymentV1<ControllerFactory<OwnerAccount<P>, P>> {
+    pub fn deploy(&self) -> AccountDeploymentV1<'_, ControllerFactory<P>> {
         self.factory.deploy_v1(self.salt)
     }
 
