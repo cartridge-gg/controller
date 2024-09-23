@@ -207,6 +207,9 @@ importers:
       '@cartridge/ui':
         specifier: workspace:^
         version: link:../ui
+      '@cartridge/utils':
+        specifier: workspace:^
+        version: link:../utils
       '@chakra-ui/react':
         specifier: ^2.8.1
         version: 2.8.2(@emotion/react@11.11.4(@types/react@18.3.1)(react@18.3.1))(@emotion/styled@11.11.5(@emotion/react@11.11.4(@types/react@18.3.1)(react@18.3.1))(@types/react@18.3.1)(react@18.3.1))(@types/react@18.3.1)(framer-motion@6.5.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -406,6 +409,9 @@ importers:
       '@cartridge/ui-next':
         specifier: workspace:^
         version: link:../ui-next
+      '@cartridge/utils':
+        specifier: workspace:^
+        version: link:../utils
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -726,6 +732,22 @@ importers:
       vite:
         specifier: ^5.1.4
         version: 5.2.10(@types/node@20.12.7)(terser@5.31.0)
+
+  packages/utils:
+    dependencies:
+      starknet:
+        specifier: ^6.11.0
+        version: 6.11.0
+    devDependencies:
+      '@cartridge/tsconfig':
+        specifier: workspace:^
+        version: link:../tsconfig
+      '@types/node':
+        specifier: ^20.6.0
+        version: 20.12.7
+      typescript:
+        specifier: ^5.4.5
+        version: 5.5.4
 
 packages:
 

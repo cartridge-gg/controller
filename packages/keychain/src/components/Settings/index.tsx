@@ -11,7 +11,7 @@ import { GearIcon, TrashIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { useEffect, useState } from "react";
 import { useExternalOwners } from "hooks/external";
-import { formatAddress } from "utils/contracts";
+import { formatAddress } from "@cartridge/utils";
 
 export function Settings({ onLogout }: { onLogout: () => void }) {
   const {

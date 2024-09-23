@@ -21,6 +21,7 @@
     "@cartridge/controller": "workspace:^",
     "@cartridge/penpal": "^6.2.3",
     "@cartridge/ui": "workspace:^",
+    "@cartridge/utils": "workspace:^",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@starknet-react/chains": "^0.1.3",
