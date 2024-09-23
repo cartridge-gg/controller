@@ -120,10 +120,12 @@ export default class Controller {
       this.profileOptions.indexerUrl &&
       !this.iframes.profile
     ) {
+      const username = await this.keychain.username();
       this.iframes.profile = new ProfileIFrame({
         profileUrl: this.profileOptions.profileUrl,
         indexerUrl: this.profileOptions.indexerUrl,
         address: this.account.address,
+        username,
         onConnect: (profile) => {
           this.profile = profile;
         },
