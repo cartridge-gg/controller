@@ -188,7 +188,8 @@ fn generate_controller_bindings() {
         String::from("serde::Deserialize"),
         String::from("PartialEq"),
         String::from("Debug"),
-    ]);
+    ])
+    .with_contract_derives(vec![String::from("Clone"), String::from("Debug")]);
 
     abigen
         .generate()
@@ -225,7 +226,8 @@ fn generate_erc20_bindings() {
             String::from("serde::Deserialize"),
             String::from("PartialEq"),
             String::from("Debug"),
-        ]);
+        ])
+        .with_contract_derives(vec![String::from("Debug")]);
 
     abigen
         .generate()

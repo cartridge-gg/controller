@@ -12,6 +12,7 @@ use super::EncodingError;
 
 use super::call::JsCall;
 
+#[allow(non_snake_case)]
 #[serde_as]
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
 #[tsify(into_wasm_abi, from_wasm_abi)]

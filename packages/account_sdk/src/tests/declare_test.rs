@@ -1,7 +1,5 @@
 use starknet::accounts::Account;
-use starknet::signers::SigningKey;
 
-use crate::account::session::create::SessionCreator;
 use crate::account::session::hash::Policy;
 use crate::account::DECLARATION_SELECTOR;
 use crate::constants::Version;
@@ -30,14 +28,12 @@ async fn test_declare_with_account() {
 async fn test_declare_with_session() {
     let signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
-    let controller = runner
+    let mut controller = runner
         .deploy_controller("username".to_owned(), signer, Version::LATEST)
         .await;
 
-    let session = controller
-        .account
-        .session_account(
-            Signer::Starknet(SigningKey::from_random()),
+    let session_account = controller
+        .create_session(
             vec![Policy {
                 contract_address: controller.address(),
                 selector: DECLARATION_SELECTOR,
@@ -48,7 +44,7 @@ async fn test_declare_with_session() {
         .unwrap();
 
     AccountDeclaration::erc_20(runner.client())
-        .declare(&session)
+        .declare(&session_account)
         .await
         .unwrap()
         .wait_for_completion()

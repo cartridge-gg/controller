@@ -29,7 +29,7 @@ async fn test_verify_external_owner() {
 
     ensure_txn(
         controller
-            .contract
+            .contract()
             .register_external_owner(&external_account.address().into()),
         runner.client(),
     )

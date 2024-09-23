@@ -24,7 +24,6 @@ use signer::BrowserBackend;
 use starknet::accounts::{Account, ConnectedAccount};
 use starknet::core::types::Call;
 use starknet::signers::SigningKey;
-use starknet_types_core::felt::Felt;
 use types::call::JsCall;
 use types::policy::Policy;
 use types::session::{Session, SessionMetadata};
@@ -33,7 +32,6 @@ use url::Url;
 use wasm_bindgen::prelude::*;
 
 use crate::types::invocation::JsInvocationsDetails;
-use crate::types::session::Credentials;
 use crate::utils::set_panic_hook;
 
 type Result<T> = std::result::Result<T, JsError>;
@@ -162,11 +160,7 @@ impl CartridgeAccount {
     }
 
     #[wasm_bindgen(js_name = createSession)]
-    pub async fn create_session(
-        &mut self,
-        policies: Vec<Policy>,
-        expires_at: u64,
-    ) -> std::result::Result<Credentials, JsControllerError> {
+    pub async fn create_session(&mut self, policies: Vec<Policy>, expires_at: u64) -> Result<()> {
         set_panic_hook();
 
         let methods = policies
@@ -174,12 +168,9 @@ impl CartridgeAccount {
             .map(TryFrom::try_from)
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
-        let (authorization, _) = self.controller.create_session(methods, expires_at).await?;
+        self.controller.create_session(methods, expires_at).await?;
 
-        Ok(Credentials {
-            authorization,
-            private_key: Felt::ZERO,
-        })
+        Ok(())
     }
 
     #[wasm_bindgen(js_name = estimateInvokeFee)]

@@ -4,6 +4,7 @@ use starknet::core::{serde::unsigned_field_element::UfeHex, types::Felt};
 use tsify_next::Tsify;
 use wasm_bindgen::prelude::*;
 
+#[allow(non_snake_case)]
 #[serde_as]
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
