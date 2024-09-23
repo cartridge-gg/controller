@@ -1,4 +1,6 @@
-use crate::abigen::controller::{OutsideExecution, Owner, Signer as AbigenSigner, StarknetSigner};
+use crate::abigen::controller::{
+    OutsideExecution, Owner, Signer as AbigenSigner, SignerSignature, StarknetSigner,
+};
 use crate::account::outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller};
 use crate::account::session::hash::{AllowedMethod, Session};
 use crate::account::session::SessionAccount;
@@ -12,7 +14,7 @@ use crate::signers::Signer;
 use crate::storage::{Credentials, Selectors, SessionMetadata, StorageBackend, StorageValue};
 use crate::{
     abigen::{self},
-    account::{AccountHashSigner, OwnerAccount},
+    account::AccountHashSigner,
     signers::{HashSigner, SignError, SignerTrait},
 };
 use crate::{impl_account, OriginProvider};
@@ -83,10 +85,11 @@ pub enum ControllerError {
     },
 }
 
+// #[derive(Clone)]
 pub struct Controller<P, B>
 where
     P: CartridgeProvider + Send + Sync + Clone,
-    B: Backend,
+    B: Backend + Clone,
 {
     app_id: String,
     address: Felt,
@@ -94,8 +97,8 @@ where
     pub username: String,
     salt: Felt,
     pub provider: P,
-    pub(crate) account: OwnerAccount<P>,
-    pub(crate) contract: abigen::controller::Controller<OwnerAccount<P>>,
+    owner: Signer,
+    contract: Option<Box<abigen::controller::Controller<Self>>>,
     pub factory: ControllerFactory<P>,
     backend: B,
 }
@@ -111,61 +114,74 @@ where
         username: String,
         class_hash: Felt,
         provider: P,
-        signer: Signer,
+        owner: Signer,
         address: Felt,
         chain_id: Felt,
         backend: B,
     ) -> Self {
-        let account = OwnerAccount::new(provider.clone(), signer.clone(), address, chain_id);
         let salt = cairo_short_string_to_felt(&username).unwrap();
 
-        let mut calldata = Owner::cairo_serialize(&Owner::Signer(account.signer.signer()));
+        let mut calldata = Owner::cairo_serialize(&Owner::Signer(owner.signer()));
         calldata.push(Felt::ONE); // no guardian
         let factory = ControllerFactory::new(
             class_hash,
-            account.chain_id,
+            chain_id,
             calldata,
-            signer,
+            owner.clone(),
             provider.clone(),
         );
 
-        Self {
+        let mut controller = Self {
             app_id,
             address,
             chain_id,
             username,
             salt,
             provider,
-            account: account.clone(),
-            contract: abigen::controller::Controller::new(address, account),
+            owner,
+            contract: None,
             factory,
             backend,
-        }
+        };
+
+        let contract = Box::new(abigen::controller::Controller::new(address, controller));
+        controller.contract = Some(contract);
+
+        controller
     }
 
     pub fn deploy(&self) -> AccountDeploymentV1<'_, ControllerFactory<P>> {
         self.factory.deploy_v1(self.salt)
     }
 
+    pub fn contract(&self) -> &abigen::controller::Controller<Self> {
+        self.contract.as_ref().unwrap()
+    }
+
+    pub fn set_owner(&mut self, signer: Signer) {
+        self.owner = signer;
+    }
+
     pub fn owner_guid(&self) -> Felt {
-        self.account.signer.signer().guid()
+        self.owner.signer().guid()
     }
 
     pub async fn create_session(
         &mut self,
         methods: Vec<AllowedMethod>,
         expires_at: u64,
-    ) -> Result<(Vec<Felt>, Felt), ControllerError> {
+    ) -> Result<SessionAccount<P>, ControllerError> {
         let signer = SigningKey::from_random();
         let session = Session::new(methods, expires_at, &signer.signer())?;
         let hash = session
             .raw()
             .get_message_hash_rev_1(self.chain_id, self.address);
-        let authorization = self.account.sign_hash(hash).await?;
+        let authorization = self.owner.sign(&hash).await?;
+        let authorization = Vec::<SignerSignature>::cairo_serialize(&vec![authorization.clone()]);
         self.backend.set(
             &Selectors::session(&self.address, &self.app_id, &self.chain_id),
             &StorageValue::Session(SessionMetadata {
-                session,
+                session: session.clone(),
                 max_fee: None,
                 credentials: Credentials {
                     authorization: authorization.clone(),
@@ -173,7 +189,18 @@ where
                 },
             }),
         )?;
-        Ok((authorization, signer.secret_scalar()))
+
+        let session_signer = Signer::Starknet(signer);
+        let session_account = SessionAccount::new(
+            self.provider().clone(),
+            session_signer,
+            self.address,
+            self.chain_id,
+            authorization,
+            session,
+        );
+
+        Ok(session_account)
     }
 
     pub fn register_session_call(
@@ -188,14 +215,14 @@ where
         });
         let session = Session::new(methods, expires_at, &signer)?;
         let call = self
-            .contract
+            .contract()
             .register_session_getcall(&session.raw(), &self.owner_guid());
 
         Ok(call)
     }
 
     pub fn upgrade(&self, new_class_hash: Felt) -> Call {
-        self.contract.upgrade_getcall(&new_class_hash.into())
+        self.contract().upgrade_getcall(&new_class_hash.into())
     }
 
     pub async fn register_session(
@@ -374,7 +401,7 @@ where
     }
 
     pub async fn delegate_account(&self) -> Result<Felt, ControllerError> {
-        self.contract
+        self.contract()
             .delegate_account()
             .call()
             .await
@@ -382,8 +409,9 @@ where
             .map_err(ControllerError::CairoSerde)
     }
 
-    pub fn set_delegate_account(&self, delegate_address: Felt) -> ExecutionV1<OwnerAccount<P>> {
-        self.contract.set_delegate_account(&delegate_address.into())
+    pub fn set_delegate_account(&self, delegate_address: Felt) -> ExecutionV1<Self> {
+        self.contract()
+            .set_delegate_account(&delegate_address.into())
     }
 
     pub async fn eth_balance(&self) -> Result<u128, ControllerError> {
@@ -466,7 +494,10 @@ where
     ) -> Result<Vec<Felt>, SignError> {
         match self.session_account(calls) {
             Some(session_account) => session_account.sign_hash_and_calls(hash, calls).await,
-            _ => self.account.sign_hash_and_calls(hash, calls).await,
+            _ => {
+                let signature = self.owner.sign(&hash).await?;
+                Ok(Vec::<SignerSignature>::cairo_serialize(&vec![signature]))
+            }
         }
     }
 }
@@ -474,7 +505,7 @@ where
 impl<P, B> ExecutionEncoder for Controller<P, B>
 where
     P: CartridgeProvider + Send + Sync + Clone,
-    B: Backend,
+    B: Backend + Clone,
 {
     fn encode_calls(&self, calls: &[Call]) -> Vec<Felt> {
         CallEncoder::encode_calls(calls)
@@ -486,17 +517,18 @@ where
 impl<P, B> AccountHashSigner for Controller<P, B>
 where
     P: CartridgeProvider + Send + Sync + Clone,
-    B: Backend,
+    B: Backend + Clone,
 {
     async fn sign_hash(&self, hash: Felt) -> Result<Vec<Felt>, SignError> {
-        self.account.sign_hash(hash).await
+        let signature = self.owner.sign(&hash).await?;
+        Ok(Vec::<SignerSignature>::cairo_serialize(&vec![signature]))
     }
 }
 
 impl<P, B> SpecificAccount for Controller<P, B>
 where
     P: CartridgeProvider + Send + Sync + Clone,
-    B: Backend,
+    B: Backend + Clone,
 {
     fn address(&self) -> Felt {
         self.address

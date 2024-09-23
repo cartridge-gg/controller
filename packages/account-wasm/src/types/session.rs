@@ -6,6 +6,7 @@ use tsify_next::Tsify;
 
 use super::policy::JsPolicy;
 
+#[allow(non_snake_case)]
 #[serde_as]
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
@@ -17,6 +18,7 @@ pub struct JsCredentials {
     pub private_key: Felt,
 }
 
+#[allow(non_snake_case)]
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
 #[serde(rename_all = "camelCase")]
