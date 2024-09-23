@@ -80,10 +80,6 @@ export const useUpgrade = (controller: Controller): UpgradeInterface => {
         return;
       }
 
-      // WORKAROUND: Hardcode for now because we know upgrade is free, but
-      // paymaster=true is not appended rpc url yet
-      maxFee = 0n;
-
       try {
         setIsUpgrading(true);
         const { transaction_hash } = await controller.account.execute(calls, {

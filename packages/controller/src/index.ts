@@ -61,9 +61,6 @@ export default class Controller {
 
     this.rpc = new URL(rpc || RPC_SEPOLIA);
     this.paymaster = paymaster;
-    if (this.paymaster) {
-      this.rpc.searchParams.append("paymaster", "true");
-    }
 
     // TODO: remove this on the next major breaking change. pass everthing by url
     this.policies =
