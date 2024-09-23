@@ -1,4 +1,4 @@
-import { createContext, useCallback, useEffect, useState } from "react";
+import { createContext, useCallback, useState } from "react";
 import { useQueryParams } from "./hooks";
 
 type ColorScheme = "dark" | "light" | "system";
@@ -53,26 +53,6 @@ export function ColorSchemeProvider({
     },
     [storageKey],
   );
-
-  useEffect(() => {
-    const root = window.document.documentElement;
-
-    root.classList.remove("light", "dark");
-
-    if (colorScheme === "system") {
-      const systemScheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light";
-
-      root.classList.add(systemScheme);
-      setColorScheme(colorScheme);
-      return;
-    }
-
-    root.classList.add(colorScheme);
-    setColorScheme(colorScheme);
-  }, [colorScheme, setColorScheme]);
 
   const value = {
     colorScheme,

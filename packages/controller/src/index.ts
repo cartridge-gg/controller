@@ -115,7 +115,11 @@ export default class Controller {
       return;
     }
 
-    if (this.profileOptions.profileUrl && this.profileOptions.indexerUrl) {
+    if (
+      this.profileOptions.profileUrl &&
+      this.profileOptions.indexerUrl &&
+      !this.iframes.profile
+    ) {
       this.iframes.profile = new ProfileIFrame({
         profileUrl: this.profileOptions.profileUrl,
         indexerUrl: this.profileOptions.indexerUrl,
