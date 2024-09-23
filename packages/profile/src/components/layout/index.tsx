@@ -65,10 +65,12 @@ export function LayoutHeader({ title, description }: LayoutHeaderProps) {
         />
       </div>
 
-      <div>
-        <div className="text-lg font-semibold">{title}</div>
+      <div className="overflow-hidden">
+        <div className="text-lg font-semibold truncate">{title}</div>
         {description && (
-          <div className="text-xs text-accent-foreground">{description}</div>
+          <div className="text-xs text-accent-foreground truncate">
+            {description}
+          </div>
         )}
       </div>
     </div>
