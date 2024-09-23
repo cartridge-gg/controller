@@ -18,6 +18,7 @@ import {
   ConnectError,
   Profile,
   IFrames,
+  ProfileOptions,
 } from "./types";
 import { KeychainIFrame, ProfileIFrame } from "./iframe";
 import { NotReadyToConnect, ProfileNotReady } from "./errors";
@@ -31,11 +32,11 @@ export default class Controller {
   private iframes: IFrames;
   public rpc: URL;
   public account?: AccountInterface;
+  private profileOptions: ProfileOptions;
 
   constructor({
     policies,
     url,
-    profileUrl,
     rpc,
     paymaster,
     ...options
@@ -50,13 +51,6 @@ export default class Controller {
           this.keychain = keychain;
         },
       }),
-      profile: new ProfileIFrame({
-        ...options,
-        url: profileUrl,
-        onConnect: (profile) => {
-          this.profile = profile;
-        },
-      }),
     };
 
     this.rpc = new URL(rpc || RPC_SEPOLIA);
@@ -68,6 +62,8 @@ export default class Controller {
         ...policy,
         target: addAddressPadding(policy.target),
       })) || [];
+
+    this.profileOptions = options;
   }
 
   async openMenu() {
@@ -114,6 +110,23 @@ export default class Controller {
     } catch (e) {
       console.error(new NotReadyToConnect().message);
       return;
+    }
+
+    if (
+      this.profileOptions.profileUrl &&
+      this.profileOptions.indexerUrl &&
+      !this.iframes.profile
+    ) {
+      const username = await this.keychain.username();
+      this.iframes.profile = new ProfileIFrame({
+        profileUrl: this.profileOptions.profileUrl,
+        indexerUrl: this.profileOptions.indexerUrl,
+        address: this.account.address,
+        username,
+        onConnect: (profile) => {
+          this.profile = profile;
+        },
+      });
     }
 
     return !!this.account;
@@ -164,13 +177,17 @@ export default class Controller {
     }
   }
 
-  openProfile() {
+  openProfile(tab: "quest" | "inventory" | "history" = "inventory") {
+    if (!this.profileOptions.indexerUrl) {
+      console.error("`indexerUrl` option is required to open profile");
+      return;
+    }
     if (!this.profile || !this.iframes.profile) {
       console.error(new ProfileNotReady().message);
       return;
     }
 
-    this.iframes.profile.open();
+    this.iframes.profile.openTab(tab);
   }
 
   async disconnect() {

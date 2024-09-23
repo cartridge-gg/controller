@@ -1,13 +1,41 @@
 import { PROFILE_URL } from "../constants";
-import { Profile } from "../types";
+import { Profile, ProfileOptions, ProfileTabVariant } from "../types";
 import { IFrame, IFrameOptions } from "./base";
 
+export type ProfileIFrameOptions = IFrameOptions<Profile> &
+  ProfileOptions & {
+    address: string;
+    username: string;
+    indexerUrl: string;
+  };
+
 export class ProfileIFrame extends IFrame<Profile> {
-  constructor(options: IFrameOptions<Profile>) {
+  constructor({
+    profileUrl,
+    address,
+    username,
+    indexerUrl,
+    ...iframeOptions
+  }: ProfileIFrameOptions) {
+    const _url = new URL(profileUrl ?? PROFILE_URL);
+    _url.searchParams.set("address", encodeURIComponent(address));
+    _url.searchParams.set("username", encodeURIComponent(username));
+    _url.searchParams.set("indexerUrl", encodeURIComponent(indexerUrl));
+
     super({
-      ...options,
+      ...iframeOptions,
       id: "controller-profile",
-      url: new URL(options.url ?? PROFILE_URL),
+      url: _url,
     });
+  }
+
+  openTab(tab: ProfileTabVariant) {
+    const url = super.currentUrl();
+    if (!url) return;
+
+    url.searchParams.set("tab", tab);
+
+    super.updateUrl(url);
+    super.open();
   }
 }

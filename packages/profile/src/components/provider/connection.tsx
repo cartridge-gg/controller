@@ -1,13 +1,18 @@
 import { AsyncMethodReturns, connectToParent } from "@cartridge/penpal";
 import { createContext, useState, ReactNode, useEffect } from "react";
+import { useQueryParams } from "./hooks";
 
 type ConnectionContextType = {
   parent: ParentMethods;
+  address: string;
+  username: string;
 };
 type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
 
 const initialState: ConnectionContextType = {
   parent: { close: async () => {} },
+  address: "",
+  username: "",
 };
 
 export const ConnectionContext =
@@ -28,6 +33,15 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
       connection.destroy();
     };
   }, []);
+
+  const searchParams = useQueryParams();
+  useEffect(() => {
+    setState((state) => ({
+      ...state,
+      address: decodeURIComponent(searchParams.get("address")!),
+      username: decodeURIComponent(searchParams.get("username")!),
+    }));
+  }, [searchParams]);
 
   return (
     <ConnectionContext.Provider value={state}>

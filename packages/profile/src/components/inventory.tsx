@@ -3,19 +3,17 @@ import {
   LayoutContent,
   LayoutHeader,
 } from "@/components/layout";
+import { useConnection } from "./provider/hooks";
 
 export function Inventory() {
+  const { username, address } = useConnection();
+
   return (
     <LayoutContainer>
-      <LayoutHeader
-        title={"click.ctrl"}
-        description={"0x0000000...0000000000"}
-      />
+      <LayoutHeader title={username} description={address} />
 
       <LayoutContent>
-        {Array.from({ length: 30 }).map((_, i) => (
-          <div key={i}>line: {i}</div>
-        ))}
+        <div>Inventory</div>
       </LayoutContent>
     </LayoutContainer>
   );

@@ -14,7 +14,7 @@ import {
   DeployAccountSignerDetails,
   DeclareSignerDetails,
 } from "starknet";
-import { IFrame } from "./iframe";
+import { KeychainIFrame, ProfileIFrame } from "./iframe";
 
 export type Session = {
   chainId: constants.StarknetChainId;
@@ -78,8 +78,8 @@ export type DeployReply = {
 };
 
 export type IFrames = {
-  keychain: IFrame<Keychain>;
-  profile: IFrame<Profile>;
+  keychain: KeychainIFrame;
+  profile?: ProfileIFrame;
 };
 
 export interface Keychain {
@@ -144,18 +144,9 @@ export interface Modal {
 /**
  * Options for configuring the controller
  */
-export type ControllerOptions = {
-  policies?: Policy[];
-  /** The URL of keychain */
-  url?: string;
-  /** The URL of profile. Mainly for internal development purpose */
-  profileUrl?: string;
-  /** The URL of the RPC */
-  rpc?: string;
-  /** The origin of keychain */
-  origin?: string;
-  /** Paymaster options for transaction fee management */
-  paymaster?: PaymasterOptions;
+export type ControllerOptions = KeychainOptions & ProfileOptions;
+
+export type IFrameOptions = {
   /** The ID of the starter pack to use */
   starterPackId?: string;
   /** The theme to use */
@@ -167,9 +158,30 @@ export type ControllerOptions = {
     /** Preset themes for the controller */
     presets?: ControllerThemePresets;
   };
+};
+
+export type KeychainOptions = IFrameOptions & {
+  policies?: Policy[];
+  /** The URL of keychain */
+  url?: string;
+  /** The URL of the RPC */
+  rpc?: string;
+  /** The origin of keychain */
+  origin?: string;
+  /** Paymaster options for transaction fee management */
+  paymaster?: PaymasterOptions;
   /** List of ERC20 tokens to pre-fund */
   // prefunds?: Prefund[];
 };
+
+export type ProfileOptions = IFrameOptions & {
+  /** The URL of profile. Mainly for internal development purpose */
+  profileUrl?: string;
+  /** The URL of Torii indexer. Will be mandatory once profile page is in production */
+  indexerUrl?: string;
+};
+
+export type ProfileTabVariant = "quest" | "inventory" | "history";
 
 /**
  * Options for configuring a paymaster
