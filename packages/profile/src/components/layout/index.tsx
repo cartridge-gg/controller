@@ -58,17 +58,17 @@ type LayoutHeaderProps = {
 export function LayoutHeader({ title, description }: LayoutHeaderProps) {
   return (
     <div className="flex gap-2 px-4 py-6 sticky top-16 bg-background">
-      <div className="w-11 h-11 bg-secondary rounded flex items-center justify-center">
+      <div className="w-11 h-11 bg-secondary rounded flex shrink-0 items-center justify-center">
         <img
           className="w-8 h-8"
           src={"https://x.cartridge.gg/whitelabel/cartridge/icon.svg"}
         />
       </div>
 
-      <div className="overflow-hidden">
+      <div className="flex flex-col gap-1 overflow-hidden">
         <div className="text-lg font-semibold truncate">{title}</div>
         {description && (
-          <div className="text-xs text-accent-foreground truncate">
+          <div className="text-xs text-muted-foreground truncate">
             {description}
           </div>
         )}
