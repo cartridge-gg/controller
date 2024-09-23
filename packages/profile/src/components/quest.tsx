@@ -4,7 +4,7 @@ import {
   LayoutHeader,
 } from "@/components/layout";
 import { useConnection } from "./provider/hooks";
-import { formatAddress } from "@cartridge/utils";
+import { CopyAddress } from "@cartridge/ui-next";
 
 export function Quest() {
   const { username, address } = useConnection();
@@ -13,7 +13,7 @@ export function Quest() {
     <LayoutContainer>
       <LayoutHeader
         title={username}
-        description={formatAddress(address, { first: 15, last: 15 })}
+        description={<CopyAddress address={address} />}
       />
 
       <LayoutContent>

@@ -1,10 +1,10 @@
+import { CopyAddress } from "@cartridge/ui-next";
 import {
   LayoutContainer,
   LayoutContent,
   LayoutHeader,
 } from "@/components/layout";
 import { useConnection } from "./provider/hooks";
-import { formatAddress } from "@cartridge/utils";
 
 export function Inventory() {
   const { username, address } = useConnection();
@@ -13,7 +13,7 @@ export function Inventory() {
     <LayoutContainer>
       <LayoutHeader
         title={username}
-        description={formatAddress(address, { first: 15, last: 15 })}
+        description={<CopyAddress address={address} />}
       />
 
       <LayoutContent>

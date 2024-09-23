@@ -67,10 +67,12 @@ export function LayoutHeader({ title, description }: LayoutHeaderProps) {
 
       <div className="flex flex-col gap-1 overflow-hidden">
         <div className="text-lg font-semibold truncate">{title}</div>
-        {description && (
+        {description && typeof description === "string" ? (
           <div className="text-xs text-muted-foreground truncate">
             {description}
           </div>
+        ) : (
+          description
         )}
       </div>
     </div>
