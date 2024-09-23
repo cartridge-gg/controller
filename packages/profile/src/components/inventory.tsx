@@ -5,7 +5,6 @@ import {
   LayoutHeader,
 } from "@/components/layout";
 import { useConnection } from "./provider/hooks";
-import { formatAddress } from "@cartridge/utils";
 
 export function Inventory() {
   const { username, address } = useConnection();

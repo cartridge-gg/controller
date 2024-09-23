@@ -1,6 +1,5 @@
 export * from "./errors";
 export * from "./types";
-export * from "./utils";
 export { defaultPresets } from "./presets";
 export * from "./verified";
 
