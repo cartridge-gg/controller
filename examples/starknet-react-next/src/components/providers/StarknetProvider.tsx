@@ -4,7 +4,7 @@ import { Chain, mainnet, sepolia } from "@starknet-react/chains";
 import { StarknetConfig, starkscan } from "@starknet-react/core";
 import { PropsWithChildren } from "react";
 import ControllerConnector from "@cartridge/connector";
-import { RpcProvider, shortString } from "starknet";
+import { RpcProvider } from "starknet";
 
 export function StarknetProvider({ children }: PropsWithChildren) {
   return (
@@ -48,16 +48,14 @@ const controller = new ControllerConnector({
       method: "allowance",
     },
   ],
-  url:
-    process.env.NEXT_PUBLIC_KEYCHAIN_DEPLOYMENT_URL ??
-    process.env.KEYCHAIN_FRAME_URL,
+  url: "https://x.cartridge.gg",
   profileUrl:
     process.env.NEXT_PUBLIC_PROFILE_DEPLOYMENT_URL ??
     process.env.PROFILE_FRAME_URL,
-  rpc: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
-  paymaster: {
-    caller: shortString.encodeShortString("ANY_CALLER"),
-  },
+  rpc: process.env.NEXT_PUBLIC_RPC_MAINNET,
+  // paymaster: {
+  //   caller: shortString.encodeShortString("ANY_CALLER"),
+  // },
   // theme: "dope-wars",
   // colorMode: "light"
 });
@@ -71,7 +69,7 @@ function provider(chain: Chain) {
     case sepolia:
     default:
       return new RpcProvider({
-        nodeUrl: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
+        nodeUrl: process.env.NEXT_PUBLIC_RPC_MAINNET,
       });
   }
 }
