@@ -19,6 +19,23 @@ import { ErrorCode, JsCall } from "@cartridge/account-wasm";
 
 export const ESTIMATE_FEE_PERCENTAGE = 10;
 
+export function parseControllerError(controllerError: any) {
+  try {
+    const data = JSON.parse(controllerError.data);
+    return {
+      code: controllerError.code,
+      message: controllerError.message,
+      data,
+    };
+  } catch (e: any) {
+    return {
+      code: controllerError.code,
+      message: controllerError.message,
+      data: { execution_error: controllerError.data },
+    };
+  }
+}
+
 export function execute({
   setContext,
 }: {
@@ -91,22 +108,14 @@ export function execute({
                 transactions,
                 abis,
                 transactionsDetail,
-                error: {
-                  code: e.code,
-                  message: e.message,
-                  data: e.data ? JSON.parse(e.data) : undefined,
-                },
+                error: parseControllerError(e),
                 resolve,
                 reject,
               } as ExecuteCtx);
               return resolve({
                 code: ResponseCodes.ERROR,
                 message: e.message,
-                error: {
-                  code: e.code,
-                  message: e.message,
-                  data: e.data ? JSON.parse(e.data) : undefined,
-                },
+                error: parseControllerError(e),
               });
             }
           }
@@ -135,22 +144,14 @@ export function execute({
             transactions,
             abis,
             transactionsDetail,
-            error: {
-              code: e.code,
-              message: e.message,
-              data: e.data ? JSON.parse(e.data) : undefined,
-            },
+            error: parseControllerError(e),
             resolve,
             reject,
           } as ExecuteCtx);
           return resolve({
             code: ResponseCodes.ERROR,
             message: e.message,
-            error: {
-              code: e.code,
-              message: e.message,
-              data: e.data ? JSON.parse(e.data) : undefined,
-            },
+            error: parseControllerError(e),
           });
         }
       });
