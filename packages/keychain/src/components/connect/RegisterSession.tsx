@@ -65,11 +65,7 @@ export function RegisterSession({
       transactions={transactions}
       onSubmit={onRegisterSession}
       onError={(e) => {
-        if (
-          e.data &&
-          typeof e.data === "string" &&
-          e.data.includes("session/already-registered")
-        ) {
+        if (e.data?.execution_error.includes("session/already-registered")) {
           onConnect(policies);
           return;
         }

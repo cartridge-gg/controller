@@ -11,7 +11,7 @@ use starknet::core::types::Felt;
 pub struct SessionMetadata {
     pub session: Session,
     pub max_fee: Option<Felt>,
-    pub credentials: Credentials,
+    pub credentials: Option<Credentials>,
     pub is_registered: bool,
 }
 

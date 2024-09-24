@@ -186,10 +186,10 @@ where
             &StorageValue::Session(SessionMetadata {
                 session: session.clone(),
                 max_fee: None,
-                credentials: Credentials {
+                credentials: Some(Credentials {
                     authorization: authorization.clone(),
                     private_key: signer.secret_scalar(),
-                },
+                }),
                 is_registered: false,
             }),
         )?;
@@ -231,14 +231,30 @@ where
 
     pub async fn register_session(
         &mut self,
-        methods: Vec<Policy>,
+        policies: Vec<Policy>,
         expires_at: u64,
         public_key: Felt,
         max_fee: Felt,
     ) -> Result<InvokeTransactionResult, ControllerError> {
-        let call = self.register_session_call(methods, expires_at, public_key)?;
+        let call = self.register_session_call(policies.clone(), expires_at, public_key)?;
         let txn = self.execute(vec![call], max_fee).await?;
+        let session = Session::new(
+            policies,
+            expires_at,
+            &AbigenSigner::Starknet(StarknetSigner {
+                pubkey: NonZero::new(public_key).unwrap(),
+            }),
+        )?;
 
+        self.backend.set(
+            &Selectors::session(&self.address, &self.app_id, &self.chain_id),
+            &StorageValue::Session(SessionMetadata {
+                session: session.clone(),
+                max_fee: None,
+                credentials: None,
+                is_registered: false,
+            }),
+        )?;
         Ok(txn)
     }
 
@@ -401,16 +417,15 @@ where
     pub fn session_account(&self, calls: &[Call]) -> Option<SessionAccount<P>> {
         // Check if there's a valid session stored
         let (_, metadata) = self.session_metadata(&Policy::from_calls(calls))?;
-
-        let session_signer = Signer::Starknet(SigningKey::from_secret_scalar(
-            metadata.credentials.private_key,
-        ));
+        let credentials = metadata.credentials.as_ref()?;
+        let session_signer =
+            Signer::Starknet(SigningKey::from_secret_scalar(credentials.private_key));
         let session_account = SessionAccount::new(
             self.provider().clone(),
             session_signer,
             self.address,
             self.chain_id,
-            metadata.credentials.authorization,
+            credentials.authorization.clone(),
             metadata.session,
         );
 
