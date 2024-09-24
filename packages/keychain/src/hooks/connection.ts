@@ -67,11 +67,12 @@ export function useConnectionValue() {
         code: ResponseCodes.CANCELED,
         message: "User aborted",
       });
+      setContext(undefined); // clears context
       await parent.close();
     } catch (e) {
       // Always fails for some reason
     }
-  }, [context, parent]);
+  }, [context, parent, setContext]);
 
   const openModal = useCallback(async () => {
     if (!parent) return;
