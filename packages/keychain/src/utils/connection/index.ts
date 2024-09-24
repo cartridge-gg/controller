@@ -48,6 +48,7 @@ export function connectToController<ParentMethods extends {}>({
       probe: normalize(probeFactory({ setController, setRpcUrl })),
       signMessage: normalize(validate(signMessageFactory(setContext))),
       openSettings: normalize(validate(openSettingsFactory(setContext))),
+      openMenu: normalize(validate(openSettingsFactory(setContext))), // Deprecated in v0.3.44, calls openSettings
       reset: normalize(() => () => setContext(undefined)),
       username: normalize(username),
       delegateAccount: normalize(delegateAccount),
