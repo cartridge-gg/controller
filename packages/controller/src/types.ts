@@ -110,7 +110,7 @@ export interface Keychain {
     error?: ControllerError,
   ): Promise<ExecuteReply | ConnectError>;
   logout(): Promise<void>;
-  openMenu(): Promise<void | ConnectError>;
+  openSettings(): Promise<void | ConnectError>;
   session(): Promise<Session>;
   sessions(): Promise<{
     [key: string]: Session;

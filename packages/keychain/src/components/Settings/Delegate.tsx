@@ -2,15 +2,12 @@ import { AlertIcon } from "@cartridge/ui";
 import { Button, VStack, Text, HStack, Input } from "@chakra-ui/react";
 import { Container, Content, Footer } from "components/layout";
 import { useConnection } from "hooks/connection";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CallData, num } from "starknet";
+import { ExecuteCtx } from "utils/connection";
 
-export function SetDelegate({
-  onSetDelegate,
-}: {
-  onSetDelegate: (address: string) => void;
-}) {
-  const { context, openSettings } = useConnection();
+export function Delegate({ onBack }: { onBack: () => void }) {
+  const { controller, context, setContext } = useConnection();
   const [delegateAddress, setDelegateAddress] = useState("");
   const [isValid, setIsValid] = useState(true);
 
@@ -23,15 +20,31 @@ export function SetDelegate({
     }
   }, [delegateAddress]);
 
+  const onSetDelegate = useCallback(() => {
+    setContext({
+      origin: context.origin,
+      transactions: [
+        {
+          contractAddress: controller.address,
+          entrypoint: "set_delegate_account",
+          calldata: CallData.compile([delegateAddress]),
+        },
+      ],
+      type: "execute",
+      resolve: context.resolve,
+      reject: context.reject,
+    } as ExecuteCtx);
+  }, [controller, delegateAddress, context, setContext]);
+
   return (
     <Container
-      variant="menu"
+      variant="connect"
       title="Delegate account"
-      onBack={() => openSettings(context)}
+      onBack={() => onBack()}
     >
       <Content>
         <VStack w="full" h="full" justifyContent="space-between" gap={6}>
-          <Text color="text.secondary" fontSize="sm">
+          <Text color="text.secondary" fontSize="sm" align="center">
             Your controller can be owned by an existing Starknet wallet which
             can receive the rewards you earn while playing. <br />
             (This can be updated later)
@@ -57,7 +70,7 @@ export function SetDelegate({
         <Button
           colorScheme="colorful"
           w="full"
-          onClick={() => onSetDelegate(delegateAddress)}
+          onClick={() => onSetDelegate()}
           isDisabled={!isValid}
         >
           Set delegate account

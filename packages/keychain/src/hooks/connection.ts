@@ -5,14 +5,10 @@ import {
   connectToController,
   ConnectionCtx,
   LogoutCtx,
-  SetDelegateCtx,
-  ExecuteCtx,
-  SetExternalOwnerCtx,
   OpenSettingsCtx,
-  OpenMenuCtx,
 } from "utils/connection";
 import { getChainName } from "utils/network";
-import { RpcProvider, CallData, constants } from "starknet";
+import { RpcProvider, constants } from "starknet";
 import {
   PaymasterOptions,
   Policy,
@@ -168,110 +164,14 @@ export function useConnectionValue() {
     } as LogoutCtx);
   }, []);
 
-  const openMenu = useCallback((context: ConnectionCtx) => {
+  const openSettings = useCallback(() => {
     setContext({
-      origin: context.origin,
-      type: "open-menu",
-      resolve: context.resolve,
-      reject: context.reject,
-    } as OpenMenuCtx);
-  }, []);
-
-  const openSettings = useCallback((context: ConnectionCtx) => {
-    setContext({
-      origin: context.origin,
+      origin,
       type: "open-settings",
       resolve: context.resolve,
       reject: context.reject,
     } as OpenSettingsCtx);
-  }, []);
-
-  const setDelegate = useCallback((context: ConnectionCtx) => {
-    setContext({
-      origin: context.origin,
-      type: "set-delegate",
-      resolve: context.resolve,
-      reject: context.reject,
-    } as SetDelegateCtx);
-  }, []);
-
-  const setExternalOwner = useCallback((context: ConnectionCtx) => {
-    setContext({
-      origin: context.origin,
-      type: "set-external-owner",
-      resolve: context.resolve,
-      reject: context.reject,
-    } as SetExternalOwnerCtx);
-  }, []);
-
-  const setDelegateTransaction = useCallback(
-    (context: ConnectionCtx, delegateAddress: string) => {
-      setContext({
-        origin: context.origin,
-        transactions: [
-          {
-            contractAddress: controller.address,
-            entrypoint: "set_delegate_account",
-            calldata: CallData.compile([delegateAddress]),
-          },
-        ],
-        transactionsDetail: {},
-        type: "execute",
-        resolve: context.resolve,
-        reject: context.reject,
-        onCancel: () => {
-          openSettings(context);
-        },
-      } as ExecuteCtx);
-    },
-    [controller?.address, openSettings],
-  );
-
-  const setExternalOwnerTransaction = useCallback(
-    (context: ConnectionCtx, externalOwnerAddress: string) => {
-      setContext({
-        origin: context.origin,
-        transactions: [
-          {
-            contractAddress: controller.address,
-            entrypoint: "register_external_owner",
-            calldata: CallData.compile([externalOwnerAddress]),
-          },
-        ],
-        transactionsDetail: {},
-        type: "execute",
-        resolve: context.resolve,
-        reject: context.reject,
-        onCancel: () => {
-          openSettings(context);
-        },
-      } as ExecuteCtx);
-    },
-    [controller?.address, openSettings],
-  );
-
-  const removeExternalOwnerTransaction = useCallback(
-    (context: ConnectionCtx, externalOwnerAddress: string) => {
-      setContext({
-        origin: context.origin,
-        transactions: [
-          {
-            contractAddress: controller.address,
-            entrypoint: "remove_external_owner",
-            calldata: CallData.compile([externalOwnerAddress]),
-          },
-        ],
-        transactionsDetail: {},
-        type: "execute",
-        resolve: context.resolve,
-        reject: context.reject,
-        onCancel: () => {
-          openSettings(context);
-        },
-      } as ExecuteCtx);
-    },
-    [controller?.address, openSettings],
-  );
+  }, [origin, context]);
 
   return {
     context,
@@ -291,13 +191,7 @@ export function useConnectionValue() {
     closeModal,
     openModal,
     logout,
-    openMenu,
     openSettings,
-    setDelegate,
-    setDelegateTransaction,
-    setExternalOwnerTransaction,
-    removeExternalOwnerTransaction,
-    setExternalOwner,
   };
 }
 

@@ -2,8 +2,8 @@ import { Spacer, HStack } from "@chakra-ui/react";
 import { CloseButton } from "./CloseButton";
 import { NetworkStatus } from "./NetworkStatus";
 import { SettingsButton } from "./SettingsButton";
-import { useConnection } from "hooks/connection";
 import { BackButton } from "./BackButton";
+import { useConnection } from "hooks/connection";
 
 export type TopBarProps = {
   onBack?: () => void;
@@ -12,7 +12,7 @@ export type TopBarProps = {
 };
 
 export function TopBar({ onBack, hideAccount, showSettings }: TopBarProps) {
-  const { context, openSettings } = useConnection();
+  const { openSettings } = useConnection();
   return (
     <HStack
       w="full"
@@ -42,7 +42,7 @@ export function TopBar({ onBack, hideAccount, showSettings }: TopBarProps) {
         </>
       )}
 
-      {showSettings && <SettingsButton onClick={() => openSettings(context)} />}
+      {showSettings && <SettingsButton onClick={() => openSettings()} />}
     </HStack>
   );
 }

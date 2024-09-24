@@ -67,13 +67,13 @@ export default class Controller {
     this.profileOptions = options;
   }
 
-  async openMenu() {
+  async openSettings() {
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return null;
     }
     this.iframes.keychain.open();
-    const res = await this.keychain.openMenu();
+    const res = await this.keychain.openSettings();
     this.iframes.keychain.close();
     if (res && (res as ConnectError).code === ResponseCodes.NOT_CONNECTED) {
       return false;
