@@ -42,7 +42,7 @@ function Item({
         <TooltipTrigger asChild>
           <div
             className={cn(
-              "px-4 py-3 flex items-center justify-center cursor-pointer hover:opacity-[0.8]",
+              "px-4 py-3 cursor-pointer hover:opacity-[0.8]",
               context.type === variant ? "bg-secondary" : "bg-background",
             )}
             onClick={onClick}

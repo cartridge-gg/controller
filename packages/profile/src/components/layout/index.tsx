@@ -1,4 +1,4 @@
-import { Button, DotsIcon, TimesIcon } from "@cartridge/ui-next";
+import { Button, cn, DotsIcon, TimesIcon } from "@cartridge/ui-next";
 import { PropsWithChildren, useCallback } from "react";
 import { useConnection } from "../provider/hooks";
 
@@ -83,6 +83,18 @@ export function LayoutHeader({ title, description, right }: LayoutHeaderProps) {
   );
 }
 
-export function LayoutContent({ children }: PropsWithChildren) {
-  return <div className="h-full flex-1 overflow-auto px-4">{children}</div>;
+export function LayoutContent({
+  children,
+  className,
+}: PropsWithChildren & { className?: string }) {
+  return (
+    <div
+      className={cn(
+        "flex flex-col h-full flex-1 overflow-y-auto px-4 gap-y-4",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
 }

@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Card as UICard,
   CardContent,
@@ -18,14 +19,25 @@ export default meta;
 
 type Story = StoryObj<typeof Card>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  args: {
+    title: "Card Title",
+    description: "Card Description",
+  },
+};
 
-function Card() {
+export const OnlyTitle: Story = {
+  args: {
+    title: "Card Title",
+  },
+};
+
+function Card({ title, description }: { title: string; description?: string }) {
   return (
-    <UICard className="radius">
+    <UICard>
       <CardHeader>
-        <CardTitle>Card Title</CardTitle>
-        <CardDescription>Card Description</CardDescription>
+        <CardTitle>{title}</CardTitle>
+        {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
       <CardContent>
         <p>Card Content</p>
