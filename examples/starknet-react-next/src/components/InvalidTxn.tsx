@@ -41,15 +41,15 @@ export function InvalidTxn() {
           Invalid Session Invoke Calldata
         </Button>
         <Button
-          onClick={() =>
+          onClick={() => {
             account.execute([
               {
                 contractAddress: ETH_CONTRACT,
                 entrypoint: "register_governance_admin",
                 calldata: [],
               },
-            ])
-          }
+            ]);
+          }}
         >
           Invalid Manual Invoke Calldata
         </Button>
