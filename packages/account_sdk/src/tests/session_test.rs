@@ -1,6 +1,6 @@
 use crate::{
     abigen::erc_20::Erc20,
-    account::session::{create::SessionCreator, hash::Policy},
+    account::session::hash::Policy,
     constants::Version,
     signers::{webauthn::WebauthnSigner, Signer},
     tests::{
@@ -15,23 +15,20 @@ use starknet::{
     macros::{felt, selector},
 };
 
-pub async fn test_verify_execute(signer: Signer, session_signer: Signer) {
+pub async fn test_verify_execute(signer: Signer) {
     let runner = KatanaRunner::load();
-    let controller = runner
+    let mut controller = runner
         .deploy_controller("username".to_owned(), signer, Version::LATEST)
         .await;
 
+    let policies = vec![
+        Policy::new(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
+        Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfds")),
+        Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer")),
+    ];
+
     let session_account = controller
-        .account
-        .session_account(
-            session_signer,
-            vec![
-                Policy::new(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
-                Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfds")),
-                Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer")),
-            ],
-            u64::MAX,
-        )
+        .create_session(policies.clone(), u64::MAX)
         .await
         .unwrap();
 
@@ -71,27 +68,24 @@ async fn test_verify_execute_session_webauthn_starknet_starknet() {
         .unwrap(),
     );
 
-    test_verify_execute(signer, Signer::new_starknet_random()).await;
+    test_verify_execute(signer).await;
 }
 
 #[tokio::test]
 async fn test_verify_execute_session_starknet_x3() {
-    test_verify_execute(Signer::new_starknet_random(), Signer::new_starknet_random()).await;
+    test_verify_execute(Signer::new_starknet_random()).await;
 }
 
 #[tokio::test]
 async fn test_verify_execute_session_multiple() {
     let signer = Signer::new_starknet_random();
-    let session_signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
-    let controller = runner
+    let mut controller = runner
         .deploy_controller("username".to_owned(), signer, Version::LATEST)
         .await;
 
     let session_account = controller
-        .account
-        .session_account(
-            session_signer,
+        .create_session(
             vec![
                 Policy::new(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
                 Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfds")),

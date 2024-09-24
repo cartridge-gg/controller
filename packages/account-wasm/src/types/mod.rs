@@ -12,10 +12,12 @@ pub(crate) mod outside_execution;
 pub(crate) mod policy;
 pub(crate) mod session;
 
+#[allow(non_snake_case)]
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
 pub struct JsFelt(#[serde(deserialize_with = "deserialize_felt")] pub Felt);
 
+#[allow(non_snake_case)]
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
 pub struct Felts(pub Vec<JsFelt>);

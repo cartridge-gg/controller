@@ -20,9 +20,6 @@ async fn test_deploy_controller() {
     let owner = Signer::Starknet(SigningKey::from_secret_scalar(felt!(
         "0x3e5e410f88f88e77d18a168259a8feb6a68b358c813bdca08c875c8e54d0bf2"
     )));
-    let guardian_signer = Signer::Starknet(SigningKey::from_secret_scalar(felt!(
-        "0x3e5e410f88f88e77d18a168259a8feb6a68b358c813bdca08c875c8e54d0bf2"
-    )));
 
     let provider = runner.client();
     let backend = InMemoryBackend::default();
@@ -39,7 +36,6 @@ async fn test_deploy_controller() {
         CONTROLLERS[&Version::V1_0_4].hash,
         provider.clone(),
         owner.clone(),
-        guardian_signer.clone(),
         Felt::ZERO,
         chain_id,
         backend.clone(),
@@ -53,7 +49,6 @@ async fn test_deploy_controller() {
         CONTROLLERS[&Version::V1_0_4].hash,
         provider.clone(),
         owner.clone(),
-        guardian_signer.clone(),
         address,
         chain_id,
         backend,

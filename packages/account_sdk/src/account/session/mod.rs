@@ -8,6 +8,7 @@ use starknet::{
 };
 
 use crate::{
+    controller::GUARDIAN_SIGNER,
     impl_account, impl_execution_encoder,
     signers::{HashSigner, SignError, Signer},
 };
@@ -19,7 +20,6 @@ use self::{
 
 use super::{AccountHashAndCallsSigner, SpecificAccount};
 
-pub mod create;
 pub mod hash;
 pub mod merkle;
 pub mod raw_session;
@@ -30,7 +30,6 @@ where
 {
     provider: P,
     signer: Signer,
-    guardian: Signer,
     address: Felt,
     chain_id: Felt,
     block_id: BlockId,
@@ -45,7 +44,6 @@ where
     pub fn new(
         provider: P,
         signer: Signer,
-        guardian: Signer,
         address: Felt,
         chain_id: Felt,
         session_authorization: Vec<Felt>,
@@ -54,7 +52,6 @@ where
         Self {
             provider,
             signer,
-            guardian,
             address,
             chain_id,
             block_id: BlockId::Tag(BlockTag::Pending),
@@ -66,7 +63,6 @@ where
     pub fn new_as_registered(
         provider: P,
         signer: Signer,
-        guardian: Signer,
         address: Felt,
         chain_id: Felt,
         owner_guid: Felt,
@@ -75,7 +71,6 @@ where
         Self::new(
             provider,
             signer,
-            guardian,
             address,
             chain_id,
             vec![short_string!("authorization-by-registered"), owner_guid],
@@ -107,7 +102,7 @@ where
             cache_authorization: true,
             session_authorization: self.session_authorization.clone(),
             session_signature: self.signer.sign(&hash).await?,
-            guardian_signature: self.guardian.sign(&hash).await?,
+            guardian_signature: GUARDIAN_SIGNER.sign(&hash).await?,
             proofs,
         })
     }

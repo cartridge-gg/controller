@@ -8,6 +8,7 @@ use wasm_bindgen::JsValue;
 use super::policy::Policy;
 use super::EncodingError;
 
+#[allow(non_snake_case)]
 #[serde_as]
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
@@ -36,6 +37,7 @@ impl From<account_sdk::storage::Credentials> for Credentials {
     }
 }
 
+#[allow(non_snake_case)]
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
 #[serde(rename_all = "camelCase")]

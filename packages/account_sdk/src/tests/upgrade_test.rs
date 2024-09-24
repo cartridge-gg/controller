@@ -30,7 +30,7 @@ async fn test_controller_upgrade() {
 
     ensure_txn(
         controller
-            .contract
+            .contract()
             .upgrade(&CONTROLLERS[&Version::LATEST].hash.into()),
         runner.client(),
     )

@@ -7,7 +7,7 @@ use crate::{
     },
     account::{
         outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller},
-        session::{create::SessionCreator, hash::Policy},
+        session::hash::Policy,
     },
     constants::{Version, CONTROLLERS},
     controller::Controller,
@@ -27,26 +27,25 @@ use starknet::{
     providers::Provider,
 };
 
-pub async fn test_verify_paymaster_execute(signer: Signer, session_signer: Option<Signer>) {
+pub async fn test_verify_paymaster_execute(signer: Signer, use_session: bool) {
     let runner = KatanaRunner::load();
     let paymaster = runner.executor().await;
-    let controller = runner
+    let mut controller = runner
         .deploy_controller("username".to_owned(), signer, Version::LATEST)
         .await;
 
-    let account: Box<dyn OutsideExecutionAccount> = match session_signer {
-        Some(session_signer) => Box::new(
-            controller
-                .account
-                .session_account(
-                    session_signer,
-                    vec![Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer"))],
-                    u64::MAX,
-                )
-                .await
-                .unwrap(),
-        ),
-        None => Box::new(controller),
+    let account: Box<dyn OutsideExecutionAccount> = if use_session {
+        let session_account = controller
+            .create_session(
+                vec![Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer"))],
+                u64::MAX,
+            )
+            .await
+            .unwrap();
+
+        Box::new(session_account)
+    } else {
+        Box::new(controller)
     };
 
     let recipient = ContractAddress(felt!("0x18301129"));
@@ -107,12 +106,12 @@ async fn test_verify_execute_webauthn_paymaster_starknet() {
         .unwrap(),
     );
 
-    test_verify_paymaster_execute(signer, None as Option<Signer>).await;
+    test_verify_paymaster_execute(signer, false).await;
 }
 
 #[tokio::test]
 async fn test_verify_execute_starknet_paymaster_starknet() {
-    test_verify_paymaster_execute(Signer::new_starknet_random(), None as Option<Signer>).await;
+    test_verify_paymaster_execute(Signer::new_starknet_random(), false).await;
 }
 
 #[tokio::test]
@@ -128,16 +127,12 @@ async fn test_verify_execute_webauthn_paymaster_starknet_session() {
         .unwrap(),
     );
 
-    test_verify_paymaster_execute(signer, Some(Signer::new_starknet_random())).await;
+    test_verify_paymaster_execute(signer, true).await;
 }
 
 #[tokio::test]
 async fn test_verify_execute_starknet_paymaster_starknet_session() {
-    test_verify_paymaster_execute(
-        Signer::new_starknet_random(),
-        Some(Signer::new_starknet_random()),
-    )
-    .await;
+    test_verify_paymaster_execute(Signer::new_starknet_random(), true).await;
 }
 
 #[tokio::test]
@@ -179,7 +174,6 @@ async fn test_verify_execute_paymaster_should_fail() {
         CONTROLLERS[&Version::LATEST].hash,
         runner.client(),
         Signer::new_starknet_random(),
-        Signer::new_starknet_random(),
         controller.address(),
         runner.client().chain_id().await.unwrap(),
         InMemoryBackend::default(),
@@ -202,7 +196,7 @@ async fn test_verify_execute_paymaster_session() {
     let signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let paymaster = runner.executor().await;
-    let controller = runner
+    let mut controller = runner
         .deploy_controller("username".to_owned(), signer, Version::LATEST)
         .await;
 
@@ -214,9 +208,7 @@ async fn test_verify_execute_paymaster_session() {
     };
 
     let session_account = controller
-        .account
-        .session_account(
-            Signer::new_starknet_random(),
+        .create_session(
             vec![Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer"))],
             u64::MAX,
         )
