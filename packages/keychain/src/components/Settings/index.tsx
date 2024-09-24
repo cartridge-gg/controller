@@ -85,8 +85,7 @@ export function Settings({ onLogout }: { onLogout: () => void }) {
                       <Text w="340px">
                         {" "}
                         {formatAddress(externalOwner, {
-                          first: 20,
-                          last: 20,
+                          size: "lg",
                         })}{" "}
                       </Text>
                       <Button
@@ -122,7 +121,7 @@ export function Settings({ onLogout }: { onLogout: () => void }) {
               <HStack w="full">
                 <Text w="340px">
                   {" "}
-                  {formatAddress(delegateAccount, { first: 20, last: 20 })}{" "}
+                  {formatAddress(delegateAccount, { size: "lg" })}{" "}
                 </Text>
                 <Button
                   onClick={() => {

@@ -375,8 +375,7 @@ function StackTraceDisplay({
                         textAlign="left"
                       >
                         {formatAddress(value as string, {
-                          first: 10,
-                          last: 10,
+                          size: "sm",
                         })}
                       </Link>
                     ) : key === "selector" ? (
@@ -386,8 +385,7 @@ function StackTraceDisplay({
                         textAlign="left"
                       >
                         {formatAddress(value as string, {
-                          first: 10,
-                          last: 10,
+                          size: "sm",
                         })}
                       </Text>
                     ) : (

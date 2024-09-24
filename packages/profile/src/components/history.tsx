@@ -5,6 +5,7 @@ import {
 } from "@/components/layout";
 import { useConnection } from "./provider/hooks";
 import { CopyAddress } from "@cartridge/ui-next";
+import { Navigation } from "./navigation";
 
 export function History() {
   const { username, address } = useConnection();
@@ -12,7 +13,8 @@ export function History() {
     <LayoutContainer>
       <LayoutHeader
         title={username}
-        description={<CopyAddress address={address} />}
+        description={<CopyAddress address={address} size="sm" />}
+        right={<Navigation />}
       />
 
       <LayoutContent>

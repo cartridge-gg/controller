@@ -7,8 +7,9 @@ import { useCallback } from "react";
 export function CopyAddress({
   address,
   className,
-  first = 15,
-  last = 15,
+  size,
+  first,
+  last,
 }: { address: string; className?: string } & FormatAddressOptions) {
   const onCopy = useCallback(() => {
     navigator.clipboard.writeText(formatAddress(address, { padding: true }));
@@ -16,18 +17,16 @@ export function CopyAddress({
   }, [address]);
 
   return (
-    <>
-      <div
-        className={cn(
-          "text-xs text-muted-foreground flex items-center gap-1 cursor-pointer",
-          className,
-        )}
-        onClick={onCopy}
-      >
-        {formatAddress(address, { first, last })}
+    <div
+      className={cn(
+        "text-xs text-muted-foreground flex items-center gap-1 cursor-pointer",
+        className,
+      )}
+      onClick={onCopy}
+    >
+      {formatAddress(address, { first, last, size })}
 
-        <CopyIcon size="sm" />
-      </div>
-    </>
+      <CopyIcon size="xs" />
+    </div>
   );
 }

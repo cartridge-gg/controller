@@ -19,6 +19,7 @@ import {
   Profile,
   IFrames,
   ProfileOptions,
+  ProfileContextTypeVariant,
 } from "./types";
 import { KeychainIFrame, ProfileIFrame } from "./iframe";
 import { NotReadyToConnect, ProfileNotReady } from "./errors";
@@ -177,7 +178,7 @@ export default class Controller {
     }
   }
 
-  openProfile(tab: "quest" | "inventory" | "history" = "inventory") {
+  openProfile(tab: ProfileContextTypeVariant = "inventory") {
     if (!this.profileOptions.indexerUrl) {
       console.error("`indexerUrl` option is required to open profile");
       return;

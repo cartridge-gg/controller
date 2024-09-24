@@ -12,6 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@cartridge/controller": "workspace:^",
     "@cartridge/penpal": "^6.2.3",
     "@cartridge/ui-next": "workspace:^",
     "@cartridge/utils": "workspace:^",
