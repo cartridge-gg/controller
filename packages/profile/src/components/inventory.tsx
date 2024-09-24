@@ -1,3 +1,4 @@
+import { CopyAddress } from "@cartridge/ui-next";
 import {
   LayoutContainer,
   LayoutContent,
@@ -10,7 +11,10 @@ export function Inventory() {
 
   return (
     <LayoutContainer>
-      <LayoutHeader title={username} description={address} />
+      <LayoutHeader
+        title={username}
+        description={<CopyAddress address={address} />}
+      />
 
       <LayoutContent>
         <div>Inventory</div>

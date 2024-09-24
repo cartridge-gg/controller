@@ -3,13 +3,16 @@ import {
   LayoutContent,
   LayoutHeader,
 } from "@/components/layout";
+import { useConnection } from "./provider/hooks";
+import { CopyAddress } from "@cartridge/ui-next";
 
 export function History() {
+  const { username, address } = useConnection();
   return (
     <LayoutContainer>
       <LayoutHeader
-        title={"click.ctrl"}
-        description={"0x0000000...0000000000"}
+        title={username}
+        description={<CopyAddress address={address} />}
       />
 
       <LayoutContent>
