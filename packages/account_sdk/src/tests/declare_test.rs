@@ -2,7 +2,7 @@ use starknet::accounts::Account;
 use starknet::signers::SigningKey;
 
 use crate::account::session::create::SessionCreator;
-use crate::account::session::hash::AllowedMethod;
+use crate::account::session::hash::Policy;
 use crate::account::DECLARATION_SELECTOR;
 use crate::constants::Version;
 use crate::signers::Signer;
@@ -38,7 +38,7 @@ async fn test_declare_with_session() {
         .account
         .session_account(
             Signer::Starknet(SigningKey::from_random()),
-            vec![AllowedMethod {
+            vec![Policy {
                 contract_address: controller.address(),
                 selector: DECLARATION_SELECTOR,
             }],

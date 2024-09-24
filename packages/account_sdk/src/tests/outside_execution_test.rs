@@ -7,7 +7,7 @@ use crate::{
     },
     account::{
         outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller},
-        session::{create::SessionCreator, hash::AllowedMethod},
+        session::{create::SessionCreator, hash::Policy},
     },
     constants::{Version, CONTROLLERS},
     controller::Controller,
@@ -40,10 +40,7 @@ pub async fn test_verify_paymaster_execute(signer: Signer, session_signer: Optio
                 .account
                 .session_account(
                     session_signer,
-                    vec![AllowedMethod::new(
-                        *FEE_TOKEN_ADDRESS,
-                        selector!("transfer"),
-                    )],
+                    vec![Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer"))],
                     u64::MAX,
                 )
                 .await
@@ -220,10 +217,7 @@ async fn test_verify_execute_paymaster_session() {
         .account
         .session_account(
             Signer::new_starknet_random(),
-            vec![AllowedMethod::new(
-                *FEE_TOKEN_ADDRESS,
-                selector!("transfer"),
-            )],
+            vec![Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer"))],
             u64::MAX,
         )
         .await

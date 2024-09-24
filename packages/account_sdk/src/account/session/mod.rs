@@ -13,7 +13,7 @@ use crate::{
 };
 
 use self::{
-    hash::{AllowedMethod, Session},
+    hash::{Policy, Session},
     raw_session::RawSessionToken,
 };
 
@@ -87,7 +87,7 @@ where
         let mut proofs = Vec::new();
 
         for call in calls {
-            let method = AllowedMethod {
+            let method = Policy {
                 selector: call.selector,
                 contract_address: call.to,
             };

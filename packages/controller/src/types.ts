@@ -15,6 +15,7 @@ import {
   DeclareSignerDetails,
 } from "starknet";
 import { KeychainIFrame, ProfileIFrame } from "./iframe";
+import wasm from "@cartridge/account-wasm";
 
 export type Session = {
   chainId: constants.StarknetChainId;
@@ -27,9 +28,7 @@ export type Session = {
   };
 };
 
-export type Policy = {
-  target: string;
-  method?: string;
+export type Policy = wasm.Policy & {
   description?: string;
 };
 

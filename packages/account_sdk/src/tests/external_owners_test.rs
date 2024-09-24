@@ -9,7 +9,7 @@ use starknet::{
 use crate::{
     abigen::erc_20::Erc20,
     account::session::{
-        hash::{AllowedMethod, Session},
+        hash::{Policy, Session},
         raw_session::RawSession,
         SessionAccount,
     },
@@ -39,10 +39,7 @@ async fn test_verify_external_owner() {
 
     let session_signer = Signer::new_starknet_random();
     let session = Session::new(
-        vec![AllowedMethod::new(
-            *FEE_TOKEN_ADDRESS,
-            selector!("transfer"),
-        )],
+        vec![Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer"))],
         u64::MAX,
         &session_signer.signer(),
     )
@@ -100,10 +97,7 @@ async fn test_verify_constructor_external_owner() {
 
     let session_signer = Signer::new_starknet_random();
     let session = Session::new(
-        vec![AllowedMethod::new(
-            *FEE_TOKEN_ADDRESS,
-            selector!("transfer"),
-        )],
+        vec![Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer"))],
         u64::MAX,
         &session_signer.signer(),
     )

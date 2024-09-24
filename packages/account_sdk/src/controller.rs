@@ -1,6 +1,6 @@
 use crate::abigen::controller::{OutsideExecution, Owner, Signer as AbigenSigner, StarknetSigner};
 use crate::account::outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller};
-use crate::account::session::hash::{AllowedMethod, Session};
+use crate::account::session::hash::{Policy, Session};
 use crate::account::session::SessionAccount;
 use crate::account::AccountHashAndCallsSigner;
 use crate::account::SpecificAccount;
@@ -146,7 +146,7 @@ where
 
     pub async fn create_session(
         &mut self,
-        methods: Vec<AllowedMethod>,
+        methods: Vec<Policy>,
         expires_at: u64,
     ) -> Result<(Vec<Felt>, Felt), ControllerError> {
         let signer = SigningKey::from_random();
@@ -164,6 +164,7 @@ where
                     authorization: authorization.clone(),
                     private_key: signer.secret_scalar(),
                 },
+                is_registered: false,
             }),
         )?;
         Ok((authorization, signer.secret_scalar()))
@@ -171,7 +172,7 @@ where
 
     pub fn register_session_call(
         &mut self,
-        methods: Vec<AllowedMethod>,
+        methods: Vec<Policy>,
         expires_at: u64,
         public_key: Felt,
     ) -> Result<Call, ControllerError> {
@@ -193,7 +194,7 @@ where
 
     pub async fn register_session(
         &mut self,
-        methods: Vec<AllowedMethod>,
+        methods: Vec<Policy>,
         expires_at: u64,
         public_key: Felt,
         max_fee: Felt,
@@ -249,7 +250,7 @@ where
         calls: Vec<Call>,
     ) -> Result<FeeEstimate, ControllerError> {
         let est = self
-            .execute_v1(calls)
+            .execute_v1(calls.clone())
             .nonce(Felt::from(u64::MAX))
             .estimate_fee()
             .await;
@@ -258,7 +259,10 @@ where
 
         match est {
             Ok(mut fee_estimate) => {
-                if self.session_metadata().is_none() {
+                if self
+                    .session_metadata(&Policy::from_calls(&calls))
+                    .map_or(true, |(_, metadata)| !metadata.is_registered)
+                {
                     fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
                 }
 
@@ -292,7 +296,7 @@ where
     }
 
     pub async fn execute(
-        &self,
+        &mut self,
         calls: Vec<Call>,
         max_fee: Felt,
     ) -> Result<InvokeTransactionResult, ControllerError> {
@@ -300,10 +304,21 @@ where
             return self.execute_from_outside(calls).await;
         }
 
-        let result = self.execute_v1(calls).max_fee(max_fee).send().await;
+        let result = self.execute_v1(calls.clone()).max_fee(max_fee).send().await;
 
         match result {
-            Ok(tx_result) => Ok(tx_result),
+            Ok(tx_result) => {
+                // Update is_registered to true after successful execution with a session
+                if let Some((key, metadata)) = self.session_metadata(&Policy::from_calls(&calls)) {
+                    if !metadata.is_registered {
+                        let mut updated_metadata = metadata;
+                        updated_metadata.is_registered = true;
+                        self.backend
+                            .set(&key, &StorageValue::Session(updated_metadata))?;
+                    }
+                }
+                Ok(tx_result)
+            }
             Err(e) => {
                 if let AccountError::Provider(ProviderError::StarknetError(
                     StarknetError::TransactionExecutionError(data),
@@ -330,45 +345,45 @@ where
         }
     }
 
-    pub fn session_metadata(&self) -> Option<SessionMetadata> {
-        let key = Selectors::session(&self.account.address, &self.app_id, &self.account.chain_id);
-
+    pub fn session_metadata(&self, policies: &[Policy]) -> Option<(String, SessionMetadata)> {
+        let key: String =
+            Selectors::session(&self.account.address, &self.app_id, &self.account.chain_id);
         self.backend
             .get(&key)
             .ok()
             .flatten()
-            .map(|value| match value {
-                StorageValue::Session(metadata) => metadata,
+            .and_then(|value| match value {
+                StorageValue::Session(metadata) => {
+                    if policies
+                        .iter()
+                        .all(|policy| metadata.session.is_authorized(policy))
+                    {
+                        Some((key, metadata))
+                    } else {
+                        None
+                    }
+                }
             })
     }
 
     pub fn session_account(&self, calls: &[Call]) -> Option<SessionAccount<P>> {
         // Check if there's a valid session stored
-        let metadata = self.session_metadata()?;
+        let (_, metadata) = self.session_metadata(&Policy::from_calls(calls))?;
 
-        // Check if all calls are allowed by the session
-        if calls
-            .iter()
-            .all(|call| metadata.session.is_call_allowed(call))
-        {
-            // Use SessionAccount if all calls are allowed
-            let session_signer = Signer::Starknet(SigningKey::from_secret_scalar(
-                metadata.credentials.private_key,
-            ));
-            let session_account = SessionAccount::new(
-                self.account.provider().clone(),
-                session_signer,
-                self.account.guardian.clone(),
-                self.account.address,
-                self.account.chain_id,
-                metadata.credentials.authorization,
-                metadata.session,
-            );
-            return Some(session_account);
-        }
+        let session_signer = Signer::Starknet(SigningKey::from_secret_scalar(
+            metadata.credentials.private_key,
+        ));
+        let session_account = SessionAccount::new(
+            self.account.provider().clone(),
+            session_signer,
+            self.account.guardian.clone(),
+            self.account.address,
+            self.account.chain_id,
+            metadata.credentials.authorization,
+            metadata.session,
+        );
 
-        // Use OwnerAccount if no valid session or not all calls are allowed
-        None
+        Some(session_account)
     }
 
     pub async fn delegate_account(&self) -> Result<Felt, ControllerError> {

@@ -22,6 +22,7 @@ export function parseExecutionError(
     };
   }
 
+  let summaryOveride;
   let executionErrorRaw = executionError;
 
   // Remove the "Transaction reverted: Transaction execution has failed:\n" prefix
@@ -39,6 +40,15 @@ export function parseExecutionError(
     "",
   );
 
+  // Remove the "Contract constructor execution error:" prefix if it exists
+  if (executionError.startsWith("Contract constructor execution error:")) {
+    executionError = executionError.replace(
+      /^Contract constructor execution error: /,
+      "",
+    );
+    summaryOveride = "Contract constructor error";
+  }
+
   const rawStackTrace = executionError.split(/\n\d+: /);
   const stack = rawStackTrace.map((trace) => {
     const extractedInfo: {
@@ -49,9 +59,21 @@ export function parseExecutionError(
     } = {
       address:
         trace.match(/contract address: (0x[a-fA-F0-9]+)/)?.[1] ||
-        trace.match(/Requested contract address (0x[a-fA-F0-9]+)/)?.[1],
-      class: trace.match(/class hash: (0x[a-fA-F0-9]+)/)?.[1],
-      selector: trace.match(/selector: (0x[a-fA-F0-9]+)/)?.[1],
+        trace.match(/Requested contract address (0x[a-fA-F0-9]+)/)?.[1] ||
+        trace.match(
+          /address: ContractAddress\(PatriciaKey\((0x[a-fA-F0-9]+)\)\)/,
+        )?.[1],
+      class:
+        trace.match(/class hash: (0x[a-fA-F0-9]+)/)?.[1] ||
+        (() => {
+          const match = trace.match(/contract class (\d+)/);
+          return match?.[1] ? "0x" + BigInt(match[1]).toString(16) : undefined;
+        })(),
+      selector:
+        trace.match(/selector: (0x[a-fA-F0-9]+)/)?.[1] ||
+        trace.match(
+          /selector: Some\(EntryPointSelector\((0x[a-fA-F0-9]+)\)\)/,
+        )?.[1],
       error: [],
     };
 
@@ -61,10 +83,9 @@ export function parseExecutionError(
     ) {
       delete extractedInfo.class;
     }
-
     const errorLines = trace
       .split("\n")
-      .slice(1)
+      .slice(trace.split("\n").length > 1 ? 1 : 0)
       .map((line) => line.trim())
       .filter((line) => line.length > 0);
 
@@ -76,9 +97,7 @@ export function parseExecutionError(
         errorLines[0].includes("not found in contract")
       ) {
         extractedInfo.error = ["Function not found in the contract."];
-      } else if (
-        errorLines[0].startsWith("Execution failed. Failure reason:")
-      ) {
+      } else if (errorLines[0].includes("Failure reason:")) {
         const failureReason = errorLines[0].match(/'([^']+)'/)?.[1];
         if (failureReason) {
           extractedInfo.error = [failureReason];
@@ -136,7 +155,7 @@ export function parseExecutionError(
 
   return {
     raw: executionErrorRaw,
-    summary,
+    summary: summaryOveride ? summaryOveride : summary,
     stack: processedStack,
   };
 }
@@ -560,6 +579,31 @@ export const starknetTransactionExecutionErrorTestCases = [
           error: ["Bag is full"],
           selector:
             "0x00f2f7c15cbe06c8d94597cd91fd7f3369eae842359235712def5584f8d270cd",
+        },
+      ],
+    },
+  },
+  {
+    input: {
+      message: "Transaction execution error",
+      data: {
+        execution_error:
+          "Contract constructor execution error: Error in the contract class 1036468786485603263651305108470035619564775139775542482344058180278592653739 constructor (selector: Some(EntryPointSelector(0x28ffe4ff0f226a9107253e17a904099aa4f63a02a5621de0576e5aa71bc5194)), address: ContractAddress(PatriciaKey(0x5bc6a67cfd7edef68c10eb2100091a01ea7e5b9f01443e1d3cf7c23a084d7da))): Execution failed. Failure reason: 0x4661696c656420746f20646573657269616c697a6520706172616d202331 ('Failed to deserialize param #1').",
+        transaction_index: 0,
+      },
+    },
+    expected: {
+      raw: "Contract constructor execution error: Error in the contract class 1036468786485603263651305108470035619564775139775542482344058180278592653739 constructor (selector: Some(EntryPointSelector(0x28ffe4ff0f226a9107253e17a904099aa4f63a02a5621de0576e5aa71bc5194)), address: ContractAddress(PatriciaKey(0x5bc6a67cfd7edef68c10eb2100091a01ea7e5b9f01443e1d3cf7c23a084d7da))): Execution failed. Failure reason: 0x4661696c656420746f20646573657269616c697a6520706172616d202331 ('Failed to deserialize param #1').",
+      summary: "Contract constructor error",
+      stack: [
+        {
+          address:
+            "0x5bc6a67cfd7edef68c10eb2100091a01ea7e5b9f01443e1d3cf7c23a084d7da",
+          class:
+            "0x24a9edbfa7082accfceabf6a92d7160086f346d622f28741bf1c651c412c9ab",
+          error: ["Failed to deserialize param #1"],
+          selector:
+            "0x28ffe4ff0f226a9107253e17a904099aa4f63a02a5621de0576e5aa71bc5194",
         },
       ],
     },

@@ -16,47 +16,47 @@ use super::merkle::MerkleTree;
 use super::raw_session::RawSession;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct ProvedMethod {
-    pub method: AllowedMethod,
+pub struct ProvedPolicy {
+    pub policy: Policy,
     pub proof: Vec<Felt>,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Default)]
 pub struct Session {
     pub expires_at: u64,
-    pub allowed_methods: Vec<ProvedMethod>,
-    pub allowed_methods_root: Felt,
+    pub policies: Vec<ProvedPolicy>,
+    pub authorization_root: Felt,
     pub metadata: String,
     pub session_key_guid: Felt,
 }
 
 impl Session {
     pub fn new(
-        allowed_methods: Vec<AllowedMethod>,
+        policies: Vec<Policy>,
         expires_at: u64,
         signer: &AbigenSigner,
     ) -> Result<Self, SignError> {
-        if allowed_methods.is_empty() {
+        if policies.is_empty() {
             return Err(SignError::NoAllowedSessionMethods);
         }
         let metadata = json!({ "metadata": "metadata", "max_fee": 0 });
-        let hashes = allowed_methods
+        let hashes = policies
             .iter()
-            .map(AllowedMethod::as_merkle_leaf)
+            .map(Policy::as_merkle_leaf)
             .collect::<Vec<Felt>>();
-        let allowed_methods: Vec<_> = allowed_methods
+        let policies: Vec<_> = policies
             .into_iter()
             .enumerate()
-            .map(|(i, method)| ProvedMethod {
-                method,
+            .map(|(i, method)| ProvedPolicy {
+                policy: method,
                 proof: MerkleTree::compute_proof(hashes.clone(), i),
             })
             .collect();
-        let root = MerkleTree::compute_root(hashes[0], allowed_methods[0].proof.clone());
+        let root = MerkleTree::compute_root(hashes[0], policies[0].proof.clone());
         Ok(Self {
             expires_at,
-            allowed_methods,
-            allowed_methods_root: root,
+            policies,
+            authorization_root: root,
             metadata: serde_json::to_string(&metadata).unwrap(),
             session_key_guid: signer.guid(),
         })
@@ -67,7 +67,7 @@ impl Session {
     pub fn raw(&self) -> RawSession {
         RawSession {
             expires_at: self.expires_at,
-            allowed_methods_root: self.allowed_methods_root,
+            allowed_methods_root: self.authorization_root,
             metadata_hash: Felt::ZERO,
             session_key_guid: self.session_key_guid,
         }
@@ -83,33 +83,37 @@ impl Session {
         Poseidon::hades_permutation(&mut msg_hash);
         Ok(msg_hash[0])
     }
-    pub fn single_proof(&self, call: &AllowedMethod) -> Option<Vec<Felt>> {
-        self.allowed_methods
+    pub fn single_proof(&self, policy: &Policy) -> Option<Vec<Felt>> {
+        self.policies
             .iter()
-            .find(|ProvedMethod { method, .. }| method == call)
-            .map(|ProvedMethod { proof, .. }| proof.clone())
+            .find(|ProvedPolicy { policy: method, .. }| method == policy)
+            .map(|ProvedPolicy { proof, .. }| proof.clone())
     }
 
-    pub fn is_call_allowed(&self, call: &Call) -> bool {
-        let allowed_method = AllowedMethod {
-            contract_address: call.to,
-            selector: call.selector,
-        };
-
-        self.allowed_methods
+    pub fn is_authorized(&self, policy: &Policy) -> bool {
+        self.policies
             .iter()
-            .any(|proved_method| proved_method.method == allowed_method)
+            .any(|proved_policy| proved_policy.policy == *policy)
     }
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct AllowedMethod {
+pub struct Policy {
     pub contract_address: Felt,
     pub selector: Felt,
 }
 
-impl AllowedMethod {
-    pub fn new(contract_address: Felt, selector: Felt) -> AllowedMethod {
+impl From<&Call> for Policy {
+    fn from(call: &Call) -> Self {
+        Policy {
+            contract_address: call.to,
+            selector: call.selector,
+        }
+    }
+}
+
+impl Policy {
+    pub fn new(contract_address: Felt, selector: Felt) -> Policy {
         Self {
             contract_address,
             selector,
@@ -122,5 +126,9 @@ impl AllowedMethod {
             self.contract_address,
             self.selector,
         ])
+    }
+
+    pub fn from_calls(calls: &[Call]) -> Vec<Self> {
+        calls.iter().map(Policy::from).collect()
     }
 }

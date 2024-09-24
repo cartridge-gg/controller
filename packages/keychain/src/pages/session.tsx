@@ -10,7 +10,6 @@ import {
 import { useConnection } from "hooks/connection";
 import { useRouter } from "next/router";
 import { useCallback, useEffect } from "react";
-import { Call, hash } from "starknet";
 import { LoginMode } from "components/connect/types";
 
 type SessionResponse = {
@@ -43,7 +42,7 @@ export default function Session() {
   // success page. Else, redirect to the failure page.
   const onCallback = useCallback(
     (response: SessionResponse) => {
-      const session = controller.account.sessionJson();
+      const session = controller.account.session(policies);
       if (
         (!queries.callback_uri && !queries.redirect_uri) ||
         !queries.public_key ||
@@ -96,8 +95,8 @@ export default function Session() {
 
   // Handler when user clicks the Create button
   const onConnect = useCallback(
-    async (_: Policy[], transaction_hash: string) => {
-      if (!controller.account.sessionJson()) {
+    async (policies: Policy[], transaction_hash: string) => {
+      if (!controller.account.session(policies)) {
         throw new Error("Session not found");
       }
 
@@ -112,7 +111,13 @@ export default function Session() {
         transactionHash: transaction_hash,
       });
     },
-    [queries.callback_uri, queries.redirect_uri, controller, onCallback],
+    [
+      policies,
+      queries.callback_uri,
+      queries.redirect_uri,
+      controller,
+      onCallback,
+    ],
   );
 
   // Once we have a connected controller initialized, check if a session already exists.
@@ -123,17 +128,9 @@ export default function Session() {
       return;
     }
 
-    let calls = policies.map((policy) => {
-      return {
-        contractAddress: policy.target,
-        entrypoint: hash.getSelector(policy.method),
-        calldata: [],
-      } as Call;
-    });
-
     // if the requested policies has no mismatch with existing policies then return
     // the exising session
-    if (controller.account.hasSession(calls)) {
+    if (controller.account.session(policies)) {
       onCallback({
         username: controller.username,
         address: controller.address,

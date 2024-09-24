@@ -22,7 +22,7 @@ num-traits.workspace = true
 rand = { version = "0.8", features = ["getrandom"] }
 serde.workspace = true
 serde_json.workspace = true
-serde-wasm-bindgen = "0.6.5"
+serde-wasm-bindgen.workspace = true
 serde_with.workspace = true
 starknet.workspace = true
 starknet-types-core.workspace = true

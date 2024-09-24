@@ -12,6 +12,7 @@ pub struct SessionMetadata {
     pub session: Session,
     pub max_fee: Option<Felt>,
     pub credentials: Credentials,
+    pub is_registered: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]

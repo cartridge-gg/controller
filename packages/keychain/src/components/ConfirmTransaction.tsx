@@ -36,6 +36,7 @@ export function ConfirmTransaction() {
       })),
     [ctx.transactions],
   );
+
   const updateSession = useMemo(() => {
     if (policiesUpdated) return false;
 
