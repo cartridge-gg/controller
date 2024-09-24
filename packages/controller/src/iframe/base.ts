@@ -23,11 +23,13 @@ export class IFrame<CallSender extends {}> implements Modal {
     colorMode,
     onClose,
     onConnect,
+    methods = {},
   }: Pick<ControllerOptions, "theme" | "config" | "colorMode"> & {
     id: string;
     url: URL;
     onClose?: () => void;
     onConnect: (child: AsyncMethodReturns<CallSender>) => void;
+    methods?: { [key: string]: (...args: any[]) => void };
   }) {
     if (typeof document === "undefined") {
       return;
@@ -81,7 +83,7 @@ export class IFrame<CallSender extends {}> implements Modal {
 
     connectToChild<CallSender>({
       iframe: this.iframe,
-      methods: { close: () => this.close() },
+      methods: { close: () => this.close(), ...methods },
     }).promise.then(onConnect);
 
     this.resize();
@@ -97,15 +99,6 @@ export class IFrame<CallSender extends {}> implements Modal {
     }
 
     this.onClose = onClose;
-  }
-
-  currentUrl() {
-    return this.iframe ? new URL(this.iframe.src) : undefined;
-  }
-
-  updateUrl(url: URL) {
-    if (!this.iframe) return;
-    this.iframe.src = url.toString();
   }
 
   open() {
