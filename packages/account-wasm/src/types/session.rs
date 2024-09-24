@@ -73,7 +73,7 @@ impl From<account_sdk::account::session::hash::Session> for Session {
 pub struct SessionMetadata {
     pub session: Session,
     pub max_fee: Option<Felt>,
-    pub credentials: Credentials,
+    pub credentials: Option<Credentials>,
     pub is_registered: bool,
 }
 
@@ -90,7 +90,7 @@ impl From<account_sdk::storage::SessionMetadata> for SessionMetadata {
         SessionMetadata {
             session: value.session.into(),
             max_fee: value.max_fee,
-            credentials: value.credentials.into(),
+            credentials: value.credentials.map(Into::into),
             is_registered: value.is_registered,
         }
     }
