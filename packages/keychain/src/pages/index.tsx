@@ -1,32 +1,22 @@
 import dynamic from "next/dynamic";
 import { Signature } from "starknet";
 import { ResponseCodes } from "@cartridge/controller";
-import {
-  DeployController,
-  ConfirmTransaction,
-  Menu,
-  SignMessage,
-} from "components";
+import { DeployController, ConfirmTransaction, SignMessage } from "components";
 import { CreateController, CreateSession, Logout } from "components/connect";
 import { useConnection } from "hooks/connection";
 import {
   DeployCtx,
   LogoutCtx,
-  OpenMenuCtx,
   OpenSettingsCtx,
-  SetDelegateCtx,
   SignMessageCtx,
 } from "utils/connection";
 import { logout } from "utils/connection/logout";
 import { LoginMode } from "components/connect/types";
 import { ErrorPage } from "components/ErrorBoundary";
-import { SetDelegate } from "components/SetDelegate";
-import { SetExternalOwner } from "components/SetExternalOwner";
 import { Settings } from "components/Settings";
 
 function Home() {
-  const { context, controller, error, policies, setDelegateTransaction } =
-    useConnection();
+  const { context, controller, error, policies } = useConnection();
 
   if (window.self === window.top || !context?.origin) {
     return <></>;
@@ -116,22 +106,6 @@ function Home() {
         />
       );
     }
-    case "open-menu": {
-      const ctx = context as OpenMenuCtx;
-      return (
-        <Menu
-          onLogout={() => {
-            logout(ctx.origin)();
-
-            ctx.resolve({
-              code: ResponseCodes.NOT_CONNECTED,
-              message: "User logged out",
-            });
-          }}
-        />
-      );
-    }
-
     case "open-settings": {
       const ctx = context as OpenSettingsCtx;
       return (
@@ -148,19 +122,6 @@ function Home() {
       );
     }
 
-    case "set-delegate": {
-      const ctx = context as SetDelegateCtx;
-      return (
-        <SetDelegate
-          onSetDelegate={(delegateAddress) => {
-            setDelegateTransaction(ctx, delegateAddress);
-          }}
-        />
-      );
-    }
-    case "set-external-owner": {
-      return <SetExternalOwner />;
-    }
     default:
       return <>*Waves*</>;
   }

@@ -12,10 +12,9 @@ import { probeFactory } from "./probe";
 import { signMessageFactory } from "./sign";
 import { username } from "./username";
 import { ConnectionCtx } from "./types";
-import { openMenuFactory } from "./menu";
-import { delegateAccount, setDelegateFactory } from "./delegate";
-import { openSettingsFactory } from "./settings";
 import { deployFactory } from "./deploy";
+import { openSettingsFactory } from "./settings";
+import { delegateAccount } from "./delegate";
 
 export function connectToController<ParentMethods extends {}>({
   setOrigin,
@@ -48,9 +47,7 @@ export function connectToController<ParentMethods extends {}>({
       logout: normalize(logout),
       probe: normalize(probeFactory({ setController, setRpcUrl })),
       signMessage: normalize(validate(signMessageFactory(setContext))),
-      openMenu: normalize(validate(openMenuFactory(setContext))),
       openSettings: normalize(validate(openSettingsFactory(setContext))),
-      setDelegate: normalize(validate(setDelegateFactory(setContext))),
       reset: normalize(() => () => setContext(undefined)),
       username: normalize(username),
       delegateAccount: normalize(delegateAccount),

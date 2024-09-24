@@ -122,7 +122,7 @@ type LayoutContextValue = {
   };
 };
 
-type LayoutVariant = "default" | "connect" | "menu" | "error";
+type LayoutVariant = "default" | "connect" | "settings" | "error";
 
 export function useLayout() {
   return useContext(LayoutContext);

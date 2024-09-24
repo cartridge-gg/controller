@@ -25,22 +25,7 @@ export type ConnectionContextValue = {
   closeModal: () => void;
   openModal: () => void;
   logout: (context: ConnectionCtx) => void;
-  setDelegate: (context: ConnectionCtx) => void;
-  setDelegateTransaction: (
-    context: ConnectionCtx,
-    delegateAddress: string,
-  ) => void;
-  setExternalOwnerTransaction: (
-    context: ConnectionCtx,
-    externalOwnerAddress: string,
-  ) => void;
-  removeExternalOwnerTransaction: (
-    context: ConnectionCtx,
-    externalOwnerAddress: string,
-  ) => void;
-  openSettings: (context: ConnectionCtx) => void;
-  openMenu: (context: ConnectionCtx) => void;
-  setExternalOwner: (context: ConnectionCtx) => void;
+  openSettings: () => void;
 };
 
 export function ConnectionProvider({

@@ -2,12 +2,12 @@ import { AlertIcon } from "@cartridge/ui";
 import { Button, VStack, Text, HStack, Input } from "@chakra-ui/react";
 import { Container, Content, Footer } from "components/layout";
 import { useConnection } from "hooks/connection";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CallData, num } from "starknet";
+import { ExecuteCtx } from "utils/connection";
 
-export function SetExternalOwner() {
-  const { context, openSettings, setExternalOwnerTransaction } =
-    useConnection();
+export function Recovery({ onBack }: { onBack: () => void }) {
+  const { controller, context, setContext } = useConnection();
   const [externalOwnerAddress, setExternalOwnerAddress] = useState("");
   const [isValid, setIsValid] = useState(true);
 
@@ -20,15 +20,31 @@ export function SetExternalOwner() {
     }
   }, [externalOwnerAddress]);
 
+  const onSetRecovery = useCallback(async () => {
+    setContext({
+      origin: context.origin,
+      transactions: [
+        {
+          contractAddress: controller.address,
+          entrypoint: "register_external_owner",
+          calldata: CallData.compile([externalOwnerAddress]),
+        },
+      ],
+      type: "execute",
+      resolve: context.resolve,
+      reject: context.reject,
+    } as ExecuteCtx);
+  }, [controller, externalOwnerAddress, context, setContext]);
+
   return (
     <Container
-      variant="menu"
+      variant="connect"
       title="Recovery Account(s)"
-      onBack={() => openSettings(context)}
+      onBack={() => onBack()}
     >
       <Content>
         <VStack w="full" h="full" justifyContent="space-between" gap={6}>
-          <Text color="text.secondary" fontSize="sm">
+          <Text color="text.secondary" fontSize="sm" align="center">
             Your controller can be owned by an existing Starknet wallet
           </Text>
           <VStack w="full">
@@ -52,9 +68,7 @@ export function SetExternalOwner() {
         <Button
           colorScheme="colorful"
           w="full"
-          onClick={() =>
-            setExternalOwnerTransaction(context, externalOwnerAddress)
-          }
+          onClick={() => onSetRecovery()}
           isDisabled={!isValid}
         >
           Add Recovery Account

@@ -93,7 +93,7 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
           </VStack>
         </VStack>
       );
-    case "menu":
+    case "settings":
       return (
         <VStack w="full">
           <HStack

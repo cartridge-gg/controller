@@ -4,9 +4,9 @@ import { InvalidTxn } from "components/InvalidTxn";
 import { SignMessage } from "components/SignMessage";
 import { DelegateAccount } from "components/DelegateAccount";
 import { ColorModeToggle } from "components/ColorModeToggle";
-import { Menu } from "components/Menu";
 import { RegisterSession } from "components/RegisterSession";
 import { Profile } from "components/Profile";
+import { Settings } from "components/Settings";
 
 export default function Home() {
   return (
@@ -18,7 +18,7 @@ export default function Home() {
         <ColorModeToggle />
       </div>
       <ConnectWallet />
-      <Menu />
+      <Settings />
       <Profile />
       <TransferEth />
       <DelegateAccount />

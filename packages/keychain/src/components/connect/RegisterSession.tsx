@@ -35,7 +35,7 @@ export function RegisterSession({
         calldata,
       },
     ];
-  }, [expiresAt, policies, publicKey]);
+  }, [controller, expiresAt, policies, publicKey]);
 
   const onRegisterSession = useCallback(
     async (maxFee: bigint) => {

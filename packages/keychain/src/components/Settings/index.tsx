@@ -9,21 +9,23 @@ import {
 import { Container, Content, Footer } from "components/layout";
 import { GearIcon, TrashIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useExternalOwners } from "hooks/external";
 import { formatAddress } from "utils/contracts";
+import { Recovery } from "./Recovery";
+import { Delegate } from "./Delegate";
+import { CallData } from "starknet";
+import { ExecuteCtx } from "utils/connection";
+
+enum State {
+  SETTINGS,
+  RECOVERY,
+  DELEGATE,
+}
 
 export function Settings({ onLogout }: { onLogout: () => void }) {
-  const {
-    context,
-    controller,
-    openMenu,
-    setDelegate,
-    setExternalOwner,
-    setDelegateTransaction,
-    removeExternalOwnerTransaction,
-  } = useConnection();
-
+  const { controller, context, setContext } = useConnection();
+  const [state, setState] = useState<State>(State.SETTINGS);
   const [delegateAccount, setDelegateAccount] = useState("");
 
   useEffect(() => {
@@ -36,13 +38,51 @@ export function Settings({ onLogout }: { onLogout: () => void }) {
 
   const { externalOwners } = useExternalOwners();
 
+  const onRemoveExternalOwner = useCallback(
+    (externalOwnerAddress: string) => {
+      setContext({
+        origin: context.origin,
+        transactions: [
+          {
+            contractAddress: controller.address,
+            entrypoint: "remove_external_owner",
+            calldata: CallData.compile([externalOwnerAddress]),
+          },
+        ],
+        type: "execute",
+        resolve: context.resolve,
+        reject: context.reject,
+      } as ExecuteCtx);
+    },
+    [controller, context, setContext],
+  );
+
+  const onRemoveDelegate = useCallback(() => {
+    setContext({
+      origin: context.origin,
+      transactions: [
+        {
+          contractAddress: controller.address,
+          entrypoint: "set_delegate_account",
+          calldata: CallData.compile(["0x0"]),
+        },
+      ],
+      type: "execute",
+      resolve: context.resolve,
+      reject: context.reject,
+    } as ExecuteCtx);
+  }, [controller, context, setContext]);
+
+  if (state === State.RECOVERY) {
+    return <Recovery onBack={() => setState(State.SETTINGS)} />;
+  }
+
+  if (state === State.DELEGATE) {
+    return <Delegate onBack={() => setState(State.SETTINGS)} />;
+  }
+
   return (
-    <Container
-      variant="menu"
-      title="Controller Settings"
-      onBack={() => openMenu(context)}
-      Icon={GearIcon}
-    >
+    <Container variant="settings" title="Controller Settings" Icon={GearIcon}>
       <Content>
         <VStack gap="30px" w="full">
           {/* <VStack>
@@ -90,12 +130,7 @@ export function Settings({ onLogout }: { onLogout: () => void }) {
                         })}{" "}
                       </Text>
                       <Button
-                        onClick={() => {
-                          removeExternalOwnerTransaction(
-                            context,
-                            externalOwner,
-                          );
-                        }}
+                        onClick={() => onRemoveExternalOwner(externalOwner)}
                       >
                         <TrashIcon />
                       </Button>
@@ -105,8 +140,8 @@ export function Settings({ onLogout }: { onLogout: () => void }) {
               })}
             </UnorderedList>
 
-            <Button w="full" onClick={() => setExternalOwner(context)}>
-              Add Recovery Account
+            <Button w="full" onClick={() => setState(State.RECOVERY)}>
+              Set Recovery Account
             </Button>
           </VStack>
 
@@ -124,16 +159,12 @@ export function Settings({ onLogout }: { onLogout: () => void }) {
                   {" "}
                   {formatAddress(delegateAccount, { first: 20, last: 20 })}{" "}
                 </Text>
-                <Button
-                  onClick={() => {
-                    setDelegateTransaction(context, "0x0");
-                  }}
-                >
+                <Button onClick={() => onRemoveDelegate()}>
                   <TrashIcon />
                 </Button>
               </HStack>
             ) : (
-              <Button w="full" onClick={() => setDelegate(context)}>
+              <Button w="full" onClick={() => setState(State.DELEGATE)}>
                 Set Delegate Account
               </Button>
             )}

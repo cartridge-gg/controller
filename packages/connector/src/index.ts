@@ -68,8 +68,14 @@ class ControllerConnector extends Connector {
     return await this.controller.delegateAccount();
   }
 
+  /**
+   * @deprecated Use controller.openSettings() instead.
+   */
   async openMenu() {
-    return await this.controller.openMenu();
+    console.warn(
+      "openMenu() is deprecated. Please use controller.openSettings() instead.",
+    );
+    return await this.controller.openSettings();
   }
 }
 
