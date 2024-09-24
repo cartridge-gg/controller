@@ -11,7 +11,7 @@ import { GearIcon, TrashIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { useCallback, useEffect, useState } from "react";
 import { useExternalOwners } from "hooks/external";
-import { formatAddress } from "utils/contracts";
+import { formatAddress } from "@cartridge/utils";
 import { Recovery } from "./Recovery";
 import { Delegate } from "./Delegate";
 import { CallData } from "starknet";
@@ -87,7 +87,7 @@ export function Settings({ onLogout }: { onLogout: () => void }) {
         <VStack gap="30px" w="full">
           {/* <VStack>
             {controller.account.cartridge.hasSession(
-              controller.account.cartridge.sessionJson(),
+              controller.account.cartridge.session(),
             ) ? (
               <Text>Session active</Text>
             ) : (
@@ -125,8 +125,7 @@ export function Settings({ onLogout }: { onLogout: () => void }) {
                       <Text w="340px">
                         {" "}
                         {formatAddress(externalOwner, {
-                          first: 20,
-                          last: 20,
+                          size: "lg",
                         })}{" "}
                       </Text>
                       <Button
@@ -157,7 +156,7 @@ export function Settings({ onLogout }: { onLogout: () => void }) {
               <HStack w="full">
                 <Text w="340px">
                   {" "}
-                  {formatAddress(delegateAccount, { first: 20, last: 20 })}{" "}
+                  {formatAddress(delegateAccount, { size: "lg" })}{" "}
                 </Text>
                 <Button onClick={() => onRemoveDelegate()}>
                   <TrashIcon />

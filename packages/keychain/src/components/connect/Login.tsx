@@ -125,6 +125,11 @@ function Form({
               error: undefined,
             }));
           }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              onSubmit();
+            }
+          }}
           placeholder="Username"
           error={usernameField.error}
           isLoading={isValidating}

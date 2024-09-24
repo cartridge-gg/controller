@@ -10,6 +10,7 @@ import { DeployController } from "./DeployController";
 import { ErrorCode } from "@cartridge/account-wasm";
 import { BigNumberish } from "starknet";
 import { BannerProps } from "./layout/Container/Header/Banner";
+import { parseControllerError } from "utils/connection/execute";
 
 interface ExecutionContainerProps {
   transactions: any;
@@ -62,11 +63,7 @@ export function ExecutionContainer({
         );
         setMaxFee(est.suggestedMaxFee);
       } catch (e) {
-        const error = {
-          code: e.code,
-          message: e.message,
-          data: e.data ? JSON.parse(e.data) : undefined,
-        };
+        const error = parseControllerError(e);
         onError?.(error);
         setCtrlError(error);
       }
@@ -96,11 +93,7 @@ export function ExecutionContainer({
     try {
       await onSubmit(maxFee);
     } catch (e) {
-      const error = {
-        code: e.code,
-        message: e.message,
-        data: e.data ? JSON.parse(e.data) : undefined,
-      };
+      const error = parseControllerError(e);
       onError?.(error);
       setCtrlError(error);
     } finally {

@@ -4,7 +4,7 @@ use crate::{
     signers::Signer,
 };
 
-use super::hash::{AllowedMethod, Session};
+use super::hash::{Policy, Session};
 
 use async_trait::async_trait;
 use starknet::core::types::Felt;
@@ -22,7 +22,7 @@ where
     async fn session_account(
         &self,
         signer: Signer,
-        allowed_methods: Vec<AllowedMethod>,
+        allowed_methods: Vec<Policy>,
         expires_at: u64,
     ) -> Result<SessionAccount<P>, SignError>;
 }
@@ -44,7 +44,7 @@ where
     async fn session_account(
         &self,
         signer: Signer,
-        allowed_methods: Vec<AllowedMethod>,
+        allowed_methods: Vec<Policy>,
         expires_at: u64,
     ) -> Result<SessionAccount<P>, SignError> {
         let session = Session::new(allowed_methods, expires_at, &signer.signer())?;
@@ -54,7 +54,6 @@ where
         Ok(SessionAccount::new(
             self.provider.clone(),
             signer,
-            self.guardian.clone(),
             self.address(),
             self.chain_id(),
             session_authorization,

@@ -23,11 +23,11 @@ import {
 import { motion } from "framer-motion";
 import React, { ReactElement, useEffect, useState } from "react";
 import { ErrorCode } from "@cartridge/account-wasm";
-import { formatAddress } from "utils/contracts";
 import { ControllerError } from "utils/connection";
 import { useConnection } from "hooks/connection";
 import { constants } from "starknet";
 import { parseExecutionError, parseValidationError } from "utils/errors";
+import { formatAddress } from "@cartridge/utils";
 
 export function ErrorAlert({
   title,
@@ -375,8 +375,7 @@ function StackTraceDisplay({
                         textAlign="left"
                       >
                         {formatAddress(value as string, {
-                          first: 10,
-                          last: 10,
+                          size: "sm",
                         })}
                       </Link>
                     ) : key === "selector" ? (
@@ -386,8 +385,7 @@ function StackTraceDisplay({
                         textAlign="left"
                       >
                         {formatAddress(value as string, {
-                          first: 10,
-                          last: 10,
+                          size: "sm",
                         })}
                       </Text>
                     ) : (

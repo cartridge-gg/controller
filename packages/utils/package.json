@@ -1,0 +1,23 @@
+{
+  "name": "@cartridge/utils",
+  "version": "0.3.44",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build:deps": "tsc",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\""
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "starknet": "^6.11.0"
+  },
+  "devDependencies": {
+    "@cartridge/tsconfig": "workspace:^",
+    "@types/node": "^20.6.0",
+    "typescript": "^5.4.5"
+  }
+}

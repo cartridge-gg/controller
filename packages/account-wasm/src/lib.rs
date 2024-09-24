@@ -8,7 +8,6 @@ use std::sync::Arc;
 
 use account_sdk::abigen::controller::OutsideExecution;
 use account_sdk::account::outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller};
-use account_sdk::account::session::hash::Session;
 use account_sdk::account::session::SessionAccount;
 use account_sdk::account::{AccountHashAndCallsSigner, MessageSignerAccount};
 use account_sdk::constants::{Version, CONTROLLERS};
@@ -24,18 +23,15 @@ use serde_wasm_bindgen::to_value;
 use signer::BrowserBackend;
 use starknet::accounts::{Account, ConnectedAccount};
 use starknet::core::types::Call;
-use starknet::macros::short_string;
 use starknet::signers::SigningKey;
-use starknet_types_core::felt::Felt;
 use types::call::JsCall;
-use types::policy::JsPolicy;
-use types::session::JsSession;
+use types::policy::Policy;
+use types::session::{Session, SessionMetadata};
 use types::{Felts, JsFelt};
 use url::Url;
 use wasm_bindgen::prelude::*;
 
 use crate::types::invocation::JsInvocationsDetails;
-use crate::types::session::JsCredentials;
 use crate::utils::set_panic_hook;
 
 type Result<T> = std::result::Result<T, JsError>;
@@ -89,9 +85,6 @@ impl CartridgeAccount {
             BrowserBackend,
         ));
 
-        let dummy_guardian = Signer::Starknet(SigningKey::from_secret_scalar(short_string!(
-            "CARTRIDGE_GUARDIAN"
-        )));
         let username = username.to_lowercase();
 
         let controller = Controller::new(
@@ -100,7 +93,6 @@ impl CartridgeAccount {
             CONTROLLERS[&Version::V1_0_4].hash,
             Arc::new(provider),
             device_signer.clone(),
-            dummy_guardian,
             address.0,
             chain_id.0,
             BrowserBackend,
@@ -117,7 +109,7 @@ impl CartridgeAccount {
     #[wasm_bindgen(js_name = registerSession)]
     pub async fn register_session(
         &mut self,
-        policies: Vec<JsPolicy>,
+        policies: Vec<Policy>,
         expires_at: u64,
         public_key: JsFelt,
         max_fee: JsFelt,
@@ -139,7 +131,7 @@ impl CartridgeAccount {
     #[wasm_bindgen(js_name = registerSessionCalldata)]
     pub fn register_session_calldata(
         &mut self,
-        policies: Vec<JsPolicy>,
+        policies: Vec<Policy>,
         expires_at: u64,
         public_key: JsFelt,
     ) -> std::result::Result<JsValue, JsControllerError> {
@@ -168,11 +160,7 @@ impl CartridgeAccount {
     }
 
     #[wasm_bindgen(js_name = createSession)]
-    pub async fn create_session(
-        &mut self,
-        policies: Vec<JsPolicy>,
-        expires_at: u64,
-    ) -> Result<JsValue> {
+    pub async fn create_session(&mut self, policies: Vec<Policy>, expires_at: u64) -> Result<()> {
         set_panic_hook();
 
         let methods = policies
@@ -180,12 +168,9 @@ impl CartridgeAccount {
             .map(TryFrom::try_from)
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
-        let (authorization, _) = self.controller.create_session(methods, expires_at).await?;
+        self.controller.create_session(methods, expires_at).await?;
 
-        Ok(to_value(&JsCredentials {
-            authorization,
-            private_key: Felt::ZERO,
-        })?)
+        Ok(())
     }
 
     #[wasm_bindgen(js_name = estimateInvokeFee)]
@@ -206,7 +191,7 @@ impl CartridgeAccount {
 
     #[wasm_bindgen(js_name = execute)]
     pub async fn execute(
-        &self,
+        &mut self,
         calls: Vec<JsCall>,
         details: JsInvocationsDetails,
     ) -> std::result::Result<JsValue, JsControllerError> {
@@ -217,7 +202,7 @@ impl CartridgeAccount {
             .map(TryFrom::try_from)
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
-        let result = self.controller.execute(calls, details.max_fee).await?;
+        let result = Controller::execute(&mut self.controller, calls, details.max_fee).await?;
 
         Ok(to_value(&result)?)
     }
@@ -248,13 +233,20 @@ impl CartridgeAccount {
         Ok(self.controller.session_account(&calls).is_some())
     }
 
-    #[wasm_bindgen(js_name = sessionJson)]
-    pub fn session_json(&self) -> Result<JsValue> {
-        self.controller
-            .session_metadata()
-            .map(|metadata| to_value(&metadata))
-            .transpose()?
-            .map_or_else(|| Ok(JsValue::NULL), Ok)
+    #[wasm_bindgen(js_name = session)]
+    pub fn session_metadata(
+        &self,
+        policies: Vec<Policy>,
+    ) -> std::result::Result<Option<SessionMetadata>, JsControllerError> {
+        let policies = policies
+            .into_iter()
+            .map(TryFrom::try_from)
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+
+        Ok(self
+            .controller
+            .session_metadata(&policies)
+            .map(|(_, metadata)| SessionMetadata::from(metadata)))
     }
 
     #[wasm_bindgen(js_name = revokeSession)]
@@ -326,15 +318,12 @@ impl CartridgeSessionAccount {
         address: JsFelt,
         chain_id: JsFelt,
         session_authorization: Vec<JsFelt>,
-        session: JsSession,
+        session: Session,
     ) -> Result<CartridgeSessionAccount> {
         let rpc_url = Url::parse(&rpc_url)?;
         let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
 
         let signer = Signer::Starknet(SigningKey::from_secret_scalar(signer.0));
-        let guardian = Signer::Starknet(SigningKey::from_secret_scalar(short_string!(
-            "CARTRIDGE_GUARDIAN"
-        )));
         let address = address.0;
         let chain_id = chain_id.0;
 
@@ -348,12 +337,15 @@ impl CartridgeSessionAccount {
             .map(TryFrom::try_from)
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
-        let session = Session::new(policies, session.expires_at, &signer.signer())?;
+        let session = account_sdk::account::session::hash::Session::new(
+            policies,
+            session.expires_at,
+            &signer.signer(),
+        )?;
 
         Ok(CartridgeSessionAccount(SessionAccount::new(
             Arc::new(provider),
             signer,
-            guardian,
             address,
             chain_id,
             session_authorization,
@@ -367,15 +359,12 @@ impl CartridgeSessionAccount {
         address: JsFelt,
         owner_guid: JsFelt,
         chain_id: JsFelt,
-        session: JsSession,
+        session: Session,
     ) -> Result<CartridgeSessionAccount> {
         let rpc_url = Url::parse(&rpc_url)?;
         let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
 
         let signer = Signer::Starknet(SigningKey::from_secret_scalar(signer.0));
-        let guardian = Signer::Starknet(SigningKey::from_secret_scalar(short_string!(
-            "CARTRIDGE_GUARDIAN"
-        )));
         let address = address.0;
         let chain_id = chain_id.0;
 
@@ -385,12 +374,15 @@ impl CartridgeSessionAccount {
             .map(TryFrom::try_from)
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
-        let session = Session::new(policies, session.expires_at, &signer.signer())?;
+        let session = account_sdk::account::session::hash::Session::new(
+            policies,
+            session.expires_at,
+            &signer.signer(),
+        )?;
 
         Ok(CartridgeSessionAccount(SessionAccount::new_as_registered(
             Arc::new(provider),
             signer,
-            guardian,
             address,
             chain_id,
             owner_guid.0,

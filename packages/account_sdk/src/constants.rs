@@ -6,9 +6,9 @@ use std::collections::HashMap;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Version {
-    LATEST,
     V1_0_5,
     V1_0_4,
+    LATEST,
 }
 
 #[derive(Clone, Copy)]
@@ -23,16 +23,6 @@ unsafe impl Sync for ContractClass {}
 lazy_static! {
     pub static ref CONTROLLERS: HashMap<Version, ContractClass> = {
         let mut m = HashMap::new();
-        m.insert(
-            Version::LATEST,
-            ContractClass {
-                content: include_str!("../compiled/controller.latest.contract_class.json"),
-                hash: felt!("0x32e17891b6cc89e0c3595a3df7cee760b5993744dc8dfef2bd4d443e65c0f40"),
-                casm_hash: felt!(
-                    "0x46b6264bd23cdea881b1b1110d7e1e5408507fa847f053ca9b272f4cbe1d55c"
-                ),
-            },
-        );
         m.insert(
             Version::V1_0_5,
             ContractClass {
@@ -53,9 +43,19 @@ lazy_static! {
                 ),
             },
         );
+        m.insert(
+            Version::LATEST,
+            ContractClass {
+                content: include_str!("../compiled/controller.latest.contract_class.json"),
+                hash: felt!("0x32e17891b6cc89e0c3595a3df7cee760b5993744dc8dfef2bd4d443e65c0f40"),
+                casm_hash: felt!(
+                    "0x46b6264bd23cdea881b1b1110d7e1e5408507fa847f053ca9b272f4cbe1d55c"
+                ),
+            },
+        );
         m
     };
     pub static ref DEFAULT_CONTROLLER: &'static ContractClass =
         CONTROLLERS.get(&Version::V1_0_5).unwrap();
-    pub static ref VERSIONS: Vec<Version> = vec![Version::LATEST, Version::V1_0_5, Version::V1_0_4];
+    pub static ref VERSIONS: Vec<Version> = vec![Version::V1_0_5, Version::V1_0_4, Version::LATEST];
 }

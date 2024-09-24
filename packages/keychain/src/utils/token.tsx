@@ -1,8 +1,8 @@
 import { Prefund } from "@cartridge/controller";
 import { EthereumIcon } from "@cartridge/ui";
+import { formatAddress } from "@cartridge/utils";
 import { Image } from "@chakra-ui/react";
 import { formatEther } from "viem";
-import { formatAddress } from "./contracts";
 import { uint256 } from "starknet";
 import Controller from "./controller";
 
@@ -12,7 +12,10 @@ export const ETH_CONTRACT_ADDRESS =
 export const ETH_MIN_PREFUND = "100000000000000";
 
 export function isEther(t: TokenInfo | Prefund) {
-  return formatAddress(t.address) === formatAddress(ETH_CONTRACT_ADDRESS);
+  return (
+    formatAddress(t.address, { padding: true }) ===
+    formatAddress(ETH_CONTRACT_ADDRESS, { padding: true })
+  );
 }
 
 export function isFunded(t: TokenInfo) {
@@ -50,7 +53,9 @@ export async function fetchTokenInfo(prefunds: Prefund[]) {
     }
 
     const info = data.find(
-      ({ l2_token_address }) => l2_token_address === formatAddress(t.address),
+      ({ l2_token_address }) =>
+        formatAddress(l2_token_address, { padding: true }) ===
+        formatAddress(t.address, { padding: true }),
     );
 
     if (!info) {

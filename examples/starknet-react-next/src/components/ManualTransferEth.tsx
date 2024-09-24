@@ -7,7 +7,7 @@ import { useCallback, useState } from "react";
 const ETH_CONTRACT =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 
-export const TransferEth = () => {
+export const ManualTransferEth = () => {
   const [submitted, setSubmitted] = useState<boolean>(false);
   const { account } = useAccount();
   const explorer = useExplorer();
@@ -25,7 +25,7 @@ export const TransferEth = () => {
         .execute([
           {
             contractAddress: ETH_CONTRACT,
-            entrypoint: "approve",
+            entrypoint: "increaseAllowance",
             calldata: [account?.address, amount, "0x0"],
           },
           {
@@ -47,7 +47,7 @@ export const TransferEth = () => {
 
   return (
     <div>
-      <h2>Session Transfer Eth</h2>
+      <h2>Manual Transfer Eth</h2>
       <p>Address: {ETH_CONTRACT}</p>
       <Button onClick={() => execute("0x0")} disabled={submitted}>
         Transfer 0 ETH to self

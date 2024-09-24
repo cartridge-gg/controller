@@ -22,6 +22,7 @@
     "ui": "pnpm --filter @cartridge/ui",
     "ui:next": "pnpm --filter @cartridge/ui-next",
     "profil": "pnpm --filter @cartridge/profile",
+    "utils": "pnpm --filter @cartridge/utils",
     "example:next": "pnpm --filter starknet-react-next",
     "test": "pnpm keychain test",
     "test:ci": "pnpm keychain test:ci",

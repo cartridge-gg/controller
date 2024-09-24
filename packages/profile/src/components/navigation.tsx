@@ -1,0 +1,62 @@
+import {
+  ClockIcon,
+  cn,
+  ScrollIcon,
+  ShieldIcon,
+  StateIconProps,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@cartridge/ui-next";
+import { ProfileContextTypeVariant } from "@cartridge/controller";
+import { useConnection } from "./provider/hooks";
+import { useCallback } from "react";
+
+export function Navigation() {
+  return (
+    <div className="flex rounded border border-1 border-border overflow-hidden shrink-0">
+      <Item Icon={ScrollIcon} variant="quest" />
+      <Item Icon={ShieldIcon} variant="inventory" />
+      <Item Icon={ClockIcon} variant="history" />
+    </div>
+  );
+}
+
+function Item({
+  Icon,
+  variant,
+}: {
+  Icon: React.ComponentType<StateIconProps>;
+  variant: ProfileContextTypeVariant;
+}) {
+  const { context, setContext } = useConnection();
+
+  const onClick = useCallback(() => {
+    setContext({ type: variant });
+  }, [variant, setContext]);
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div
+            className={cn(
+              "px-4 py-3 flex items-center justify-center cursor-pointer hover:opacity-[0.8]",
+              context.type === variant ? "bg-secondary" : "bg-background",
+            )}
+            onClick={onClick}
+          >
+            <Icon
+              size="sm"
+              variant={context.type === variant ? "solid" : "line"}
+            />
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          <p className="capitalize">{variant}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}

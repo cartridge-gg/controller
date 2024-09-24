@@ -171,7 +171,7 @@ export function useConnectionValue() {
       resolve: context.resolve,
       reject: context.reject,
     } as OpenSettingsCtx);
-  }, []);
+  }, [origin, context]);
 
   return {
     context,

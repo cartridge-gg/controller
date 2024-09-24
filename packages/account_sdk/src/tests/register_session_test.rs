@@ -2,7 +2,7 @@ use crate::{
     abigen::erc_20::Erc20,
     account::{
         session::{
-            hash::{AllowedMethod, Session},
+            hash::{Policy, Session},
             SessionAccount,
         },
         SpecificAccount,
@@ -22,7 +22,6 @@ use starknet::{
 #[tokio::test]
 async fn test_verify_execute_session_registered() {
     let signer = Signer::new_starknet_random();
-    let guardian_signer = Signer::new_starknet_random();
     let session_signer = Signer::new_starknet_random();
 
     let runner = KatanaRunner::load();
@@ -32,9 +31,9 @@ async fn test_verify_execute_session_registered() {
 
     let session = Session::new(
         vec![
-            AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
-            AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("transfds")),
-            AllowedMethod::new(*FEE_TOKEN_ADDRESS, selector!("transfer")),
+            Policy::new(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
+            Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfds")),
+            Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer")),
         ],
         u64::MAX,
         &session_signer.signer(),
@@ -43,7 +42,7 @@ async fn test_verify_execute_session_registered() {
 
     ensure_txn(
         controller
-            .contract
+            .contract()
             .register_session(&session.raw(), &signer.signer().guid()),
         controller.provider(),
     )
@@ -53,7 +52,6 @@ async fn test_verify_execute_session_registered() {
     let session_account = SessionAccount::new_as_registered(
         runner.client(),
         session_signer,
-        guardian_signer,
         controller.address(),
         runner.client().chain_id().await.unwrap(),
         signer.signer().guid(),

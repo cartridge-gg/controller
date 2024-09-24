@@ -1,0 +1,12 @@
+githubRepoOwner: cartridge-gg
+githubRepoName: controller
+githubHost: github.com
+githubRemote: origin
+githubBranch: harcodeguard
+requireChecks: true
+requireApproval: true
+mergeMethod: rebase
+mergeQueue: false
+forceFetchTags: false
+showPrTitlesInStack: false
+branchPushIndividually: false

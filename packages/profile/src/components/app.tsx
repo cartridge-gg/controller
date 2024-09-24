@@ -1,12 +1,12 @@
-import { useQueryParams } from "@/components/provider/hooks";
+import { useConnection } from "@/components/provider/hooks";
 import { Inventory } from "@/components/inventory";
 import { Quest } from "@/components/quest";
 import { History } from "@/components/history";
 
 export function App() {
-  const searchParams = useQueryParams();
+  const { context } = useConnection();
 
-  switch (searchParams.get("tab")) {
+  switch (context.type) {
     case "quest":
       return <Quest />;
     case "history":

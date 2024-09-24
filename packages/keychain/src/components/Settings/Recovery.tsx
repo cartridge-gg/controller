@@ -20,7 +20,7 @@ export function Recovery({ onBack }: { onBack: () => void }) {
     }
   }, [externalOwnerAddress]);
 
-  const onSetRecovery = useCallback(async () => {
+  const onSetRecovery = useCallback(() => {
     setContext({
       origin: context.origin,
       transactions: [

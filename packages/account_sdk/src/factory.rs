@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use cainome::cairo_serde::CairoSerde;
 use starknet::{
     accounts::{
         AccountDeploymentV1, AccountFactory, PreparedAccountDeploymentV1,
@@ -8,26 +9,27 @@ use starknet::{
     providers::Provider,
 };
 
-use crate::{account::AccountHashSigner, signers::SignError};
+use crate::{
+    abigen::controller::SignerSignature,
+    signers::{HashSigner, SignError, Signer},
+};
 
-pub struct ControllerFactory<S, P> {
+#[derive(Clone)]
+pub struct ControllerFactory<P> {
     class_hash: Felt,
     chain_id: Felt,
     calldata: Vec<Felt>,
-    signer: S,
+    signer: Signer,
     provider: P,
     block_id: BlockId,
 }
 
-impl<S, P> ControllerFactory<S, P>
-where
-    S: AccountHashSigner,
-{
+impl<P> ControllerFactory<P> {
     pub fn new(
         class_hash: Felt,
         chain_id: Felt,
         calldata: Vec<Felt>,
-        signer: S,
+        signer: Signer,
         provider: P,
     ) -> Self {
         Self {
@@ -36,16 +38,15 @@ where
             calldata,
             signer,
             provider,
-            block_id: BlockId::Tag(BlockTag::Latest),
+            block_id: BlockId::Tag(BlockTag::Pending),
         }
     }
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<S, P> AccountFactory for ControllerFactory<S, P>
+impl<P> AccountFactory for ControllerFactory<P>
 where
-    S: AccountHashSigner + Sync + Send,
     P: Provider + Sync + Send,
 {
     type Provider = P;
@@ -82,9 +83,8 @@ where
     ) -> Result<Vec<Felt>, Self::SignError> {
         let tx_hash = PreparedAccountDeploymentV1::from_raw(deployment.clone(), self)
             .transaction_hash(query_only);
-        let signature = self.signer.sign_hash(tx_hash).await?;
-
-        Ok(signature)
+        let signature = self.signer.sign(&tx_hash).await?;
+        Ok(Vec::<SignerSignature>::cairo_serialize(&vec![signature]))
     }
 
     async fn sign_deployment_v3(
@@ -94,9 +94,8 @@ where
     ) -> Result<Vec<Felt>, Self::SignError> {
         let tx_hash = PreparedAccountDeploymentV3::from_raw(deployment.clone(), self)
             .transaction_hash(query_only);
-        let signature = self.signer.sign_hash(tx_hash).await?;
-
-        Ok(signature)
+        let signature = self.signer.sign(&tx_hash).await?;
+        Ok(Vec::<SignerSignature>::cairo_serialize(&vec![signature]))
     }
 
     fn deploy_v1(&self, salt: Felt) -> AccountDeploymentV1<'_, Self> {

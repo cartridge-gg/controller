@@ -53,6 +53,7 @@ export function RegisterSession({
           TransactionFinalityStatus.ACCEPTED_ON_L2,
         ],
       });
+
       onConnect(policies, transaction_hash);
     },
     [controller, expiresAt, policies, publicKey, onConnect],

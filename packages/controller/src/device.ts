@@ -107,7 +107,6 @@ class DeviceAccount extends Account {
         resolve(sessionExecute as InvokeFunctionResponse);
         return;
       }
-
       // Session call or Paymaster flow failed.
       // Session not avaialble, manual flow fallback
       this.modal.open();

@@ -1,5 +1,5 @@
 import { PROFILE_URL } from "../constants";
-import { Profile, ProfileOptions, ProfileTabVariant } from "../types";
+import { Profile, ProfileOptions, ProfileContextTypeVariant } from "../types";
 import { IFrame, IFrameOptions } from "./base";
 
 export type ProfileIFrameOptions = IFrameOptions<Profile> &
@@ -29,7 +29,7 @@ export class ProfileIFrame extends IFrame<Profile> {
     });
   }
 
-  openTab(tab: ProfileTabVariant) {
+  openTab(tab: ProfileContextTypeVariant) {
     const url = super.currentUrl();
     if (!url) return;
 
