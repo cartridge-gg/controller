@@ -403,6 +403,9 @@ importers:
 
   packages/profile:
     dependencies:
+      '@cartridge/controller':
+        specifier: workspace:^
+        version: link:../controller
       '@cartridge/penpal':
         specifier: ^6.2.3
         version: 6.2.3

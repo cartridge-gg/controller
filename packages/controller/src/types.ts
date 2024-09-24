@@ -180,7 +180,7 @@ export type ProfileOptions = IFrameOptions & {
   indexerUrl?: string;
 };
 
-export type ProfileTabVariant = "quest" | "inventory" | "history";
+export type ProfileContextTypeVariant = "quest" | "inventory" | "history";
 
 /**
  * Options for configuring a paymaster

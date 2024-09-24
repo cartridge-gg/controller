@@ -16,6 +16,7 @@ export * from "./metrics";
 export * from "./moon";
 export * from "./pencil";
 export * from "./scroll";
+export * from "./shield";
 export * from "./singular-diamond";
 export * from "./singular-oval";
 export * from "./singular-shape";
