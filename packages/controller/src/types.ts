@@ -171,8 +171,8 @@ export type KeychainOptions = IFrameOptions & {
   origin?: string;
   /** Paymaster options for transaction fee management */
   paymaster?: PaymasterOptions;
-  /** List of ERC20 tokens to pre-fund */
-  // prefunds?: Prefund[];
+  /** Propagate transaction errors back to caller instead of showing modal */
+  propagateSessionErrors?: boolean;
 };
 
 export type ProfileOptions = IFrameOptions & {

@@ -14,11 +14,9 @@ import {
   ConnectReply,
   ProbeReply,
   ControllerOptions,
-  PaymasterOptions,
   ConnectError,
   Profile,
   IFrames,
-  ProfileOptions,
   ProfileContextTypeVariant,
 } from "./types";
 import { KeychainIFrame, ProfileIFrame } from "./iframe";
@@ -27,13 +25,12 @@ import { RPC_SEPOLIA } from "./constants";
 
 export default class Controller {
   private policies: Policy[];
-  private paymaster?: PaymasterOptions;
   private keychain?: AsyncMethodReturns<Keychain>;
   private profile?: AsyncMethodReturns<Profile>;
+  private options: ControllerOptions;
   private iframes: IFrames;
   public rpc: URL;
   public account?: AccountInterface;
-  private profileOptions: ProfileOptions;
 
   constructor({
     policies,
@@ -55,7 +52,6 @@ export default class Controller {
     };
 
     this.rpc = new URL(rpc || RPC_SEPOLIA);
-    this.paymaster = paymaster;
 
     // TODO: remove this on the next major breaking change. pass everthing by url
     this.policies =
@@ -64,7 +60,7 @@ export default class Controller {
         target: addAddressPadding(policy.target),
       })) || [];
 
-    this.profileOptions = options;
+    this.options = options;
   }
 
   async openSettings() {
@@ -105,8 +101,8 @@ export default class Controller {
         this.rpc.toString(),
         response.address,
         this.keychain,
+        this.options,
         this.iframes.keychain,
-        this.paymaster,
       ) as AccountInterface;
     } catch (e) {
       console.error(new NotReadyToConnect().message);
@@ -114,14 +110,14 @@ export default class Controller {
     }
 
     if (
-      this.profileOptions.profileUrl &&
-      this.profileOptions.indexerUrl &&
+      this.options.profileUrl &&
+      this.options.indexerUrl &&
       !this.iframes.profile
     ) {
       const username = await this.keychain.username();
       this.iframes.profile = new ProfileIFrame({
-        profileUrl: this.profileOptions.profileUrl,
-        indexerUrl: this.profileOptions.indexerUrl,
+        profileUrl: this.options.profileUrl,
+        indexerUrl: this.options.indexerUrl,
         address: this.account.address,
         username,
         onConnect: (profile) => {
@@ -166,8 +162,8 @@ export default class Controller {
         this.rpc.toString(),
         response.address,
         this.keychain,
+        this.options,
         this.iframes.keychain,
-        this.paymaster,
       ) as AccountInterface;
 
       return this.account;
@@ -179,7 +175,7 @@ export default class Controller {
   }
 
   openProfile(tab: ProfileContextTypeVariant = "inventory") {
-    if (!this.profileOptions.indexerUrl) {
+    if (!this.options.indexerUrl) {
       console.error("`indexerUrl` option is required to open profile");
       return;
     }

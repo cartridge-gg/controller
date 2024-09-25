@@ -15,8 +15,8 @@ import {
 import {
   ConnectError,
   Keychain,
+  KeychainOptions,
   Modal,
-  PaymasterOptions,
   ResponseCodes,
 } from "./types";
 import { Signer } from "./signer";
@@ -26,14 +26,14 @@ class DeviceAccount extends Account {
   address: string;
   private keychain: AsyncMethodReturns<Keychain>;
   private modal: Modal;
-  private paymaster?: PaymasterOptions;
+  private options?: KeychainOptions;
 
   constructor(
     rpcUrl: string,
     address: string,
     keychain: AsyncMethodReturns<Keychain>,
+    options: KeychainOptions,
     modal: Modal,
-    paymaster?: PaymasterOptions,
   ) {
     super(
       new RpcProvider({ nodeUrl: rpcUrl }),
@@ -42,8 +42,8 @@ class DeviceAccount extends Account {
     );
     this.address = address;
     this.keychain = keychain;
+    this.options = options;
     this.modal = modal;
-    this.paymaster = paymaster;
   }
 
   /**
@@ -99,7 +99,7 @@ class DeviceAccount extends Account {
         abis,
         transactionsDetail,
         false,
-        this.paymaster,
+        this.options?.paymaster,
       );
 
       // Session call succeeded
@@ -107,6 +107,13 @@ class DeviceAccount extends Account {
         resolve(sessionExecute as InvokeFunctionResponse);
         return;
       }
+
+      // Propagates session txn error back to caller
+      if (this.options?.propagateSessionErrors) {
+        reject((sessionExecute as ConnectError).error);
+        return;
+      }
+
       // Session call or Paymaster flow failed.
       // Session not avaialble, manual flow fallback
       this.modal.open();
@@ -115,7 +122,7 @@ class DeviceAccount extends Account {
         abis,
         transactionsDetail,
         true,
-        this.paymaster,
+        this.options?.paymaster,
         (sessionExecute as ConnectError).error,
       );
 
