@@ -120,6 +120,7 @@ export default class Controller {
         indexerUrl: this.options.indexerUrl,
         address: this.account.address,
         username,
+        rpcUrl: this.rpc.toString(),
         onConnect: (profile) => {
           this.profile = profile;
         },

@@ -9,6 +9,7 @@ import {
 import { useQueryParams } from "./hooks";
 import { ProfileContextTypeVariant } from "@cartridge/controller";
 import { normalize } from "@cartridge/utils";
+import { RpcProvider } from "starknet";
 
 type ConnectionContextType = {
   parent: ParentMethods;
@@ -16,6 +17,7 @@ type ConnectionContextType = {
   username: string;
   context: ContextVariant;
   setContext: (context: ContextVariant) => void;
+  provider: RpcProvider;
 };
 
 type ProfileContext<Variant extends ProfileContextTypeVariant> = {
@@ -35,6 +37,7 @@ const initialState: ConnectionContextType = {
   username: "",
   context: { type: "inventory" },
   setContext: () => {},
+  provider: new RpcProvider(),
 };
 
 export const ConnectionContext =
@@ -49,6 +52,7 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
       ...state,
       address: decodeURIComponent(searchParams.get("address")!),
       username: decodeURIComponent(searchParams.get("username")!),
+      provider: new RpcProvider({ nodeUrl: searchParams.get("rpcUrl")! }),
     }));
   }, [searchParams]);
 

@@ -17,7 +17,8 @@
     "@cartridge/ui-next": "workspace:^",
     "@cartridge/utils": "workspace:^",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "starknet": "^6.11.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
