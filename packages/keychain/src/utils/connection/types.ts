@@ -21,7 +21,8 @@ export type ConnectionCtx =
   | LogoutCtx
   | ExecuteCtx
   | SignMessageCtx
-  | OpenSettingsCtx;
+  | OpenSettingsCtx
+  | undefined;
 
 export type ConnectCtx = {
   origin: string;
