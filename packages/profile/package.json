@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/profile",
-  "version": "0.3.44",
+  "version": "0.3.45",
   "private": true,
   "type": "module",
   "scripts": {
