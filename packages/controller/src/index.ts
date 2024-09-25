@@ -121,7 +121,7 @@ export default class Controller {
         address: this.account.address,
         username,
         rpcUrl: this.rpc.toString(),
-        tokens: this.profileOptions.tokens,
+        tokens: this.options.tokens,
         onConnect: (profile) => {
           this.profile = profile;
         },

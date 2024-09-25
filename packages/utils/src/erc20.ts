@@ -24,6 +24,8 @@ export type EkuboTokenInfo = {
 
 export const ETH_CONTRACT_ADDRESS =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
+export const STRK_CONTRACT_ADDRESS =
+  "0x04718f5a0Fc34cC1AF16A1cdee98fFB20C31f5cD61D6Ab07201858f4287c938D";
 
 export class ERC20 {
   private address: string;

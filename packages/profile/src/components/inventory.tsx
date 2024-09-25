@@ -34,6 +34,7 @@ export function Inventory() {
           }).info(),
         ),
       );
+
       setErc20s(
         res.filter((res) => res.status === "fulfilled").map((res) => res.value),
       );

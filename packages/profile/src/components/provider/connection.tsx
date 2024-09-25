@@ -12,7 +12,7 @@ import {
   ERC1155,
   ProfileContextTypeVariant,
 } from "@cartridge/controller";
-import { normalize } from "@cartridge/utils";
+import { normalize, STRK_CONTRACT_ADDRESS } from "@cartridge/utils";
 import { RpcProvider } from "starknet";
 import { ETH_CONTRACT_ADDRESS } from "@cartridge/utils";
 
@@ -56,13 +56,14 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
 
   const searchParams = useQueryParams();
   useEffect(() => {
-    const erc20: ERC20[] = JSON.parse(
-      decodeURIComponent(searchParams.get("erc20")!) ?? [],
+    const erc20 = (
+      JSON.parse(decodeURIComponent(searchParams.get("erc20")!)) as ERC20[]
+    ).filter(
+      (t) =>
+        [ETH_CONTRACT_ADDRESS, STRK_CONTRACT_ADDRESS].includes(t.address) ?? [],
     );
-
-    if (!erc20.find((t) => t.address === ETH_CONTRACT_ADDRESS)) {
-      erc20.push({ address: ETH_CONTRACT_ADDRESS });
-    }
+    erc20.unshift({ address: STRK_CONTRACT_ADDRESS });
+    erc20.unshift({ address: ETH_CONTRACT_ADDRESS });
 
     setState((state) => ({
       ...state,
