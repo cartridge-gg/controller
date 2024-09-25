@@ -147,6 +147,10 @@ export interface Modal {
  */
 export type ControllerOptions = KeychainOptions & ProfileOptions;
 
+export type TokenOptions = {
+  tokens: Tokens;
+};
+
 export type IFrameOptions = {
   /** The ID of the starter pack to use */
   starterPackId?: string;
@@ -180,6 +184,8 @@ export type ProfileOptions = IFrameOptions & {
   profileUrl?: string;
   /** The URL of Torii indexer. Will be mandatory once profile page is in production */
   indexerUrl?: string;
+  /** The tokens to be listed on Inventory modal */
+  tokens?: Tokens;
 };
 
 export type ProfileContextTypeVariant = "quest" | "inventory" | "history";
@@ -225,3 +231,17 @@ export type ControllerColor = ThemeValue<string>;
 export type ThemeValue<T> = T | { dark: T; light: T };
 
 export type Prefund = { address: string; min: string };
+
+export type Tokens = {
+  erc20?: ERC20[];
+  erc1155?: ERC1155[];
+};
+
+export type ERC20 = {
+  address: string;
+  logoUrl?: string;
+};
+
+export type ERC1155 = {
+  address: string;
+};
