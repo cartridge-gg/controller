@@ -133,7 +133,9 @@ export interface Keychain {
   delegateAccount(): string;
 }
 
-export interface Profile {}
+export interface Profile {
+  goTo(tab: ProfileContextTypeVariant): void;
+}
 
 export interface Modal {
   open: () => void;

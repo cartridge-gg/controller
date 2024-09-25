@@ -2,7 +2,6 @@ export * from "./types";
 
 import { ConnectError, Policy, ResponseCodes } from "@cartridge/controller";
 import { connectToParent } from "@cartridge/penpal";
-import { normalize as normalizeOrigin } from "utils/url";
 import Controller from "utils/controller";
 import { connectFactory, disconnectFactory } from "./connect";
 import { execute } from "./execute";
@@ -15,6 +14,7 @@ import { ConnectionCtx } from "./types";
 import { deployFactory } from "./deploy";
 import { openSettingsFactory } from "./settings";
 import { delegateAccount } from "./delegate";
+import { normalize } from "@cartridge/utils";
 
 export function connectToController<ParentMethods extends {}>({
   setOrigin,
@@ -54,12 +54,6 @@ export function connectToController<ParentMethods extends {}>({
       delegateAccount: normalize(delegateAccount),
     },
   });
-}
-
-function normalize<Promise>(
-  fn: (origin: string) => Promise,
-): (origin: string) => Promise {
-  return (origin: string) => fn(normalizeOrigin(origin));
 }
 
 function validate<T>(

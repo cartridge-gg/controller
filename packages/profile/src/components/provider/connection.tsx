@@ -8,6 +8,7 @@ import {
 } from "react";
 import { useQueryParams } from "./hooks";
 import { ProfileContextTypeVariant } from "@cartridge/controller";
+import { normalize } from "@cartridge/utils";
 
 type ConnectionContextType = {
   parent: ParentMethods;
@@ -42,30 +43,12 @@ export const ConnectionContext =
 export function ConnectionProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ConnectionContextType>(initialState);
 
-  useEffect(() => {
-    const connection = connectToParent<ParentMethods>({
-      // methods: {}
-    });
-    connection.promise.then((parent) => {
-      setState((state) => ({ ...state, parent }));
-    });
-
-    return () => {
-      connection.destroy();
-    };
-  }, []);
-
   const searchParams = useQueryParams();
   useEffect(() => {
     setState((state) => ({
       ...state,
       address: decodeURIComponent(searchParams.get("address")!),
       username: decodeURIComponent(searchParams.get("username")!),
-      context: {
-        type:
-          (searchParams.get("tab") as ProfileContextTypeVariant) ??
-          state.context,
-      },
     }));
   }, [searchParams]);
 
@@ -75,6 +58,23 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
       context,
     }));
   }, []);
+
+  useEffect(() => {
+    const connection = connectToParent<ParentMethods>({
+      methods: {
+        goTo: normalize(() => (tab: ProfileContextTypeVariant) => {
+          setContext({ type: tab });
+        }),
+      },
+    });
+    connection.promise.then((parent) => {
+      setState((state) => ({ ...state, parent }));
+    });
+
+    return () => {
+      connection.destroy();
+    };
+  }, [setContext]);
 
   return (
     <ConnectionContext.Provider value={{ ...state, setContext }}>

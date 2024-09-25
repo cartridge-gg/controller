@@ -5,7 +5,7 @@ import { constants } from "starknet";
 import { Policy } from "@cartridge/controller";
 
 import { diff } from "utils/controller";
-import { normalize as normalizeOrigin } from "utils/url";
+import { normalizeOrigin } from "@cartridge/utils";
 
 export function useUrlPolicys(): {
   chainId?: constants.StarknetChainId;

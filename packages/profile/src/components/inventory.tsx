@@ -29,9 +29,9 @@ export function Inventory() {
           <CardHeader>
             <CardTitle>Token</CardTitle>
           </CardHeader>
-          {ERC_20_TOKENS.map((t) => (
+          {ERC_20_TOKENS.map((t, i) => (
             <CardContent
-              key={t.address}
+              key={t.address + i}
               className="flex gap-x-1.5 items-center"
             >
               <img src={t.logoUrl} className="w-5 h-5" />
@@ -49,9 +49,8 @@ export function Inventory() {
 
           <CardContent className="grid grid-cols-3 gap-2 place-items-center">
             {Array.from({ length: 28 }).map((_, i) => (
-              <div className="w-32 h-32">
+              <div className="w-32 h-32" key={i}>
                 <img
-                  key={i}
                   src={
                     "https://github.com/BibliothecaDAO/loot-survivor/blob/main/ui/public/golden-token.png?raw=true"
                   }
