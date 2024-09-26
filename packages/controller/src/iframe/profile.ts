@@ -33,13 +33,6 @@ export class ProfileIFrame extends IFrame<Profile> {
       );
     }
 
-    if (tokens?.erc1155) {
-      _url.searchParams.set(
-        "erc20",
-        encodeURIComponent(JSON.stringify(tokens.erc1155)),
-      );
-    }
-
     super({
       ...iframeOptions,
       id: "controller-profile",

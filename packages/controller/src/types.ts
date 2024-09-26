@@ -234,14 +234,9 @@ export type Prefund = { address: string; min: string };
 
 export type Tokens = {
   erc20?: ERC20[];
-  erc1155?: ERC1155[];
 };
 
 export type ERC20 = {
   address: string;
   logoUrl?: string;
-};
-
-export type ERC1155 = {
-  address: string;
 };

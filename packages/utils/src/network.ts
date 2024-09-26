@@ -1,5 +1,5 @@
 import { constants } from "starknet";
-import { Hex, hexToString } from "viem";
+import { hexToString, Hex } from "viem";
 
 export function getChainName(chainId: string) {
   switch (chainId) {

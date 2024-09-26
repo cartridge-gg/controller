@@ -7,13 +7,9 @@ import {
   useCallback,
 } from "react";
 import { useQueryParams } from "./hooks";
-import {
-  ERC20,
-  ERC1155,
-  ProfileContextTypeVariant,
-} from "@cartridge/controller";
+import { ERC20, ProfileContextTypeVariant } from "@cartridge/controller";
 import { normalize, STRK_CONTRACT_ADDRESS } from "@cartridge/utils";
-import { RpcProvider } from "starknet";
+import { constants, RpcProvider } from "starknet";
 import { ETH_CONTRACT_ADDRESS } from "@cartridge/utils";
 
 type ConnectionContextType = {
@@ -23,8 +19,8 @@ type ConnectionContextType = {
   context?: ContextVariant;
   setContext: (context: ContextVariant) => void;
   provider: RpcProvider;
+  chainId: string;
   erc20: ERC20[];
-  erc1155: ERC1155[];
 };
 
 type ProfileContext<Variant extends ProfileContextTypeVariant> = {
@@ -44,8 +40,8 @@ const initialState: ConnectionContextType = {
   username: "",
   setContext: () => {},
   provider: new RpcProvider(),
+  chainId: "",
   erc20: [],
-  erc1155: [],
 };
 
 export const ConnectionContext =
@@ -73,11 +69,28 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
         nodeUrl: decodeURIComponent(searchParams.get("rpcUrl")!),
       }),
       erc20,
-      erc1155: JSON.parse(
-        decodeURIComponent(searchParams.get("erc1155")!) ?? [],
-      ),
     }));
   }, [searchParams]);
+
+  useEffect(() => {
+    updateChainId();
+
+    async function updateChainId() {
+      try {
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Chain ID fetch timed out")), 3000),
+        );
+        const chainIdPromise = state.provider.getChainId();
+        const chainId = (await Promise.race([
+          chainIdPromise,
+          timeoutPromise,
+        ])) as constants.StarknetChainId;
+        setState((state) => ({ ...state, chainId }));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, [state.provider]);
 
   const setContext = useCallback((context: ContextVariant) => {
     setState((state) => ({
