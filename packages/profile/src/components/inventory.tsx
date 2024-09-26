@@ -4,7 +4,9 @@ import {
   CardHeader,
   CardTitle,
   CopyAddress,
+  SpinnerIcon,
 } from "@cartridge/ui-next";
+import { ERC20, ERC20Info } from "@cartridge/utils";
 import {
   LayoutContainer,
   LayoutContent,
@@ -12,9 +14,60 @@ import {
 } from "@/components/layout";
 import { useConnection } from "./provider/hooks";
 import { Navigation } from "./navigation";
+import { useEffect, useState } from "react";
 
 export function Inventory() {
-  const { username, address } = useConnection();
+  const { username, address, provider, erc20: erc20Params } = useConnection();
+  const [erc20s, setErc20s] = useState<ERC20Info[]>([]);
+  const [isFetching, setIsFetching] = useState(true);
+
+  useEffect(() => {
+    setupErc20Info();
+
+    async function setupErc20Info() {
+      const res = await Promise.allSettled(
+        erc20Params.map((t) =>
+          new ERC20({
+            address: t.address,
+            provider,
+            logoUrl: t.logoUrl,
+          }).info(),
+        ),
+      );
+
+      setErc20s(
+        res.filter((res) => res.status === "fulfilled").map((res) => res.value),
+      );
+    }
+  }, [erc20Params, provider]);
+
+  useEffect(() => {
+    const id = setInterval(updateBalance, 3000);
+
+    async function updateBalance() {
+      setIsFetching(true);
+
+      const tokens = await Promise.all(
+        erc20s.map(async (t) => {
+          try {
+            return {
+              ...t,
+              balance: await t.class.balanceOf(address),
+            };
+          } catch (e) {
+            return { ...t, error: e as Error };
+          }
+        }),
+      );
+
+      setErc20s(tokens);
+      setIsFetching(false);
+    }
+
+    return () => {
+      clearInterval(id);
+    };
+  }, [address, erc20s, provider]);
 
   return (
     <LayoutContainer>
@@ -26,17 +79,18 @@ export function Inventory() {
 
       <LayoutContent className="pb-4">
         <Card>
-          <CardHeader>
+          <CardHeader className="h-10 flex flex-row items-center justify-between">
             <CardTitle>Token</CardTitle>
+            {isFetching && <SpinnerIcon className="animate-spin" />}
           </CardHeader>
-          {ERC_20_TOKENS.map((t, i) => (
+          {erc20s.map((t, i) => (
             <CardContent
               key={t.address + i}
               className="flex gap-x-1.5 items-center"
             >
               <img src={t.logoUrl} className="w-5 h-5" />
               <div>
-                {t.balance} {t.symbol}
+                {t.balance ? t.balance.toString() : "---"} {t.symbol}
               </div>
             </CardContent>
           ))}
@@ -63,16 +117,3 @@ export function Inventory() {
     </LayoutContainer>
   );
 }
-
-const ERC_20_TOKENS = [
-  {
-    name: "Ether",
-    symbol: "ETH",
-    decimals: 18,
-    address:
-      "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-    logoUrl:
-      "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo",
-    balance: "0.01",
-  },
-].flatMap((t) => [t, t, t]);

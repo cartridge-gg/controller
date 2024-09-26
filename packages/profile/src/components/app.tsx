@@ -6,13 +6,14 @@ import { History } from "@/components/history";
 export function App() {
   const { context } = useConnection();
 
-  switch (context.type) {
+  switch (context?.type) {
     case "quest":
       return <Quest />;
     case "history":
       return <History />;
-    default:
     case "inventory":
       return <Inventory />;
+    default:
+      return null;
   }
 }

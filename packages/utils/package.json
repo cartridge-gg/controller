@@ -13,7 +13,8 @@
     "dist"
   ],
   "dependencies": {
-    "starknet": "^6.11.0"
+    "starknet": "^6.11.0",
+    "viem": "^1.20.2"
   },
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:^",

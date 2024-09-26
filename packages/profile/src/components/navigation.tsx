@@ -36,6 +36,10 @@ function Item({
     setContext({ type: variant });
   }, [variant, setContext]);
 
+  if (!context) {
+    return null;
+  }
+
   return (
     <TooltipProvider>
       <Tooltip>
