@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { CopyAddress } from "./copy-address";
 
 const meta = {
+  title: "CopyAddress",
   component: CopyAddress,
   tags: ["autodocs"],
 } satisfies Meta<typeof CopyAddress>;
