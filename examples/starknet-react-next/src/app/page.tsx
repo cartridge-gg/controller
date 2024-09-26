@@ -8,6 +8,7 @@ import { ColorModeToggle } from "components/ColorModeToggle";
 import { RegisterSession } from "components/RegisterSession";
 import { Profile } from "components/Profile";
 import { Settings } from "components/Settings";
+import { FetchControllers } from "components/FetchControllers";
 
 export default function Home() {
   return (
@@ -27,6 +28,7 @@ export default function Home() {
       <InvalidTxn />
       <SignMessage />
       <RegisterSession />
+      <FetchControllers />
     </div>
   );
 }

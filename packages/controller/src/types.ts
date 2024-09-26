@@ -81,6 +81,10 @@ export type IFrames = {
   profile?: ProfileIFrame;
 };
 
+type ContractAddress = string;
+type CartridgeID = string;
+export type ControllerAccounts = Record<ContractAddress, CartridgeID>;
+
 export interface Keychain {
   probe(rpcUrl?: string): Promise<ProbeReply | ConnectError>;
   connect(
@@ -128,9 +132,9 @@ export interface Keychain {
     transaction: DeployAccountSignerDetails,
   ): Promise<Signature>;
   signDeclareTransaction(transaction: DeclareSignerDetails): Promise<Signature>;
-
-  username(): string;
   delegateAccount(): string;
+  username(): string;
+  fetchControllers(contractAddresses: string[]): Promise<ControllerAccounts>;
 }
 
 export interface Profile {

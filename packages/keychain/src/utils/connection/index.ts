@@ -10,6 +10,7 @@ import { logout } from "./logout";
 import { probeFactory } from "./probe";
 import { signMessageFactory } from "./sign";
 import { username } from "./username";
+import { fetchControllers } from "./fetchControllers";
 import { ConnectionCtx } from "./types";
 import { deployFactory } from "./deploy";
 import { openSettingsFactory } from "./settings";
@@ -51,6 +52,7 @@ export function connectToController<ParentMethods extends {}>({
       openMenu: normalize(validate(openSettingsFactory(setContext))), // Deprecated in v0.3.44, calls openSettings
       reset: normalize(() => () => setContext(undefined)),
       username: normalize(username),
+      fetchControllers: normalize(fetchControllers),
       delegateAccount: normalize(delegateAccount),
     },
   });
