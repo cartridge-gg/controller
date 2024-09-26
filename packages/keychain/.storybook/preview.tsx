@@ -14,7 +14,7 @@ import {
   ConnectionProvider,
 } from "../src/components/Provider/connection";
 import { constants } from "starknet";
-import { getChainName } from "../src/utils/network";
+import { getChainName } from "@cartridge/utils";
 import { ETH_CONTRACT_ADDRESS } from "../src/utils/token";
 import { ConnectCtx, ConnectionCtx } from "../src/utils/connection/types";
 import { UpgradeInterface } from "../src/hooks/upgrade";
