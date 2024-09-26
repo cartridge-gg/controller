@@ -1,6 +1,5 @@
 "use client";
 
-import { Policy } from "@cartridge/controller";
 import {
   CreateController,
   CreateSession,
@@ -42,12 +41,7 @@ export default function Session() {
   // success page. Else, redirect to the failure page.
   const onCallback = useCallback(
     (response: SessionResponse) => {
-      const session = controller.account.session(policies);
-      if (
-        (!queries.callback_uri && !queries.redirect_uri) ||
-        !queries.public_key ||
-        !session
-      ) {
+      if (!queries.callback_uri && !queries.redirect_uri) {
         router.replace(`/failure`);
         return;
       }
@@ -95,11 +89,7 @@ export default function Session() {
 
   // Handler when user clicks the Create button
   const onConnect = useCallback(
-    async (policies: Policy[], transaction_hash: string) => {
-      if (!controller.account.session(policies)) {
-        throw new Error("Session not found");
-      }
-
+    async (transaction_hash?: string) => {
       if (!queries.callback_uri && !queries.redirect_uri) {
         throw new Error("Expected either callback_uri or redirect_uri");
       }
@@ -128,9 +118,9 @@ export default function Session() {
       return;
     }
 
-    // if the requested policies has no mismatch with existing policies then return
+    // If the requested policies has no mismatch with existing policies then return
     // the exising session
-    if (controller.account.session(policies)) {
+    if (controller.account.session(policies, queries.public_key)) {
       onCallback({
         username: controller.username,
         address: controller.address,
@@ -138,7 +128,7 @@ export default function Session() {
         alreadyRegistered: true,
       });
     }
-  }, [controller, origin, policies, onCallback]);
+  }, [controller, origin, policies, queries.public_key, onCallback]);
 
   return controller ? (
     queries.public_key ? (

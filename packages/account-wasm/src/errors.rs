@@ -89,6 +89,7 @@ pub enum ErrorCode {
     ProviderRateLimited = 129,
     ProviderArrayLengthMismatch = 130,
     ProviderOther = 131,
+    SessionAlreadyRegistered = 132,
 }
 
 impl From<ControllerError> for JsControllerError {
@@ -144,6 +145,11 @@ impl From<ControllerError> for JsControllerError {
                     }))
                     .unwrap(),
                 ),
+            },
+            ControllerError::SessionAlreadyRegistered => JsControllerError {
+                code: ErrorCode::SessionAlreadyRegistered,
+                message: "Session already registered".to_string(),
+                data: None,
             },
         }
     }

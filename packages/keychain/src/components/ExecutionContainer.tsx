@@ -3,7 +3,7 @@ import { Container, Footer } from "components/layout";
 import { Button } from "@chakra-ui/react";
 import { useConnection } from "hooks/connection";
 import { ControllerError } from "utils/connection";
-import { ControllerErrorAlert } from "components/ErrorAlert";
+import { ControllerErrorAlert, ErrorAlert } from "components/ErrorAlert";
 import { Fees } from "./Fees";
 import { Funding } from "./Funding";
 import { DeployController } from "./DeployController";
@@ -16,7 +16,7 @@ interface ExecutionContainerProps {
   transactions: any;
   transactionsDetail?: any;
   executionError?: ControllerError;
-  onSubmit: (maxFee: BigNumberish) => Promise<void>;
+  onSubmit: (maxFee?: BigNumberish) => Promise<void>;
   onDeploy?: () => void;
   onFund?: () => void;
   onError?: (error: ControllerError) => void;
@@ -169,6 +169,22 @@ export function ExecutionContainer({
                     onClick={() => setCTAState("fund")}
                   >
                     ADD FUNDS
+                  </Button>
+                </>
+              );
+            case ErrorCode.SessionAlreadyRegistered:
+              return (
+                <>
+                  <ErrorAlert
+                    variant="info"
+                    title="Session Already Registered"
+                  />
+                  <Button
+                    colorScheme="colorful"
+                    onClick={() => onSubmit()}
+                    isLoading={false}
+                  >
+                    CONTINUE
                   </Button>
                 </>
               );

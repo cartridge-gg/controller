@@ -237,6 +237,7 @@ impl CartridgeAccount {
     pub fn session_metadata(
         &self,
         policies: Vec<Policy>,
+        public_key: Option<JsFelt>,
     ) -> std::result::Result<Option<SessionMetadata>, JsControllerError> {
         let policies = policies
             .into_iter()
@@ -245,7 +246,7 @@ impl CartridgeAccount {
 
         Ok(self
             .controller
-            .session_metadata(&policies)
+            .session_metadata(&policies, public_key.map(|f| f.0))
             .map(|(_, metadata)| SessionMetadata::from(metadata)))
     }
 
