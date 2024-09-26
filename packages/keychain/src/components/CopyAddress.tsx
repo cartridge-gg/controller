@@ -2,6 +2,7 @@ import { CopyIcon } from "@cartridge/ui";
 import { HStack, Text } from "@chakra-ui/react";
 import { formatAddress } from "@cartridge/utils";
 import { useToast } from "hooks/toast";
+import { addAddressPadding } from "starknet";
 
 export function CopyAddress({ address }: { address: string }) {
   const { toast } = useToast();
@@ -10,9 +11,7 @@ export function CopyAddress({ address }: { address: string }) {
     <HStack
       _hover={{ cursor: "pointer" }}
       onClick={() => {
-        navigator.clipboard.writeText(
-          formatAddress(address, { padding: true }),
-        );
+        navigator.clipboard.writeText(addAddressPadding(address));
         toast("Copied");
       }}
     >
