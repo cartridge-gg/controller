@@ -225,6 +225,16 @@ export default class Controller {
     return this.keychain.username();
   }
 
+  fetchControllers(
+    contractAddresses: string[],
+  ): Promise<Record<string, string>> {
+    if (!this.keychain) {
+      throw new NotReadyToConnect().message;
+    }
+
+    return this.keychain.fetchControllers(contractAddresses);
+  }
+
   async delegateAccount() {
     if (!this.keychain) {
       console.error(new NotReadyToConnect().message);

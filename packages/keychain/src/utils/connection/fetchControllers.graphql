@@ -1,0 +1,10 @@
+query FetchControllers($addresses: [String!]!, $first: Int) {
+  accounts(where: { contractAddressIn: $addresses }, first: $first) {
+    edges {
+      node {
+        id
+        contractAddress
+      }
+    }
+  }
+}

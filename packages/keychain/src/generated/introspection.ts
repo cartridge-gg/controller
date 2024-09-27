@@ -5,8 +5,6 @@ export interface PossibleTypesResultData {
 }
 const result: PossibleTypesResultData = {
   possibleTypes: {
-    Attribute: ["NumberAttribute", "StringAttribute"],
-    ContractMetadata: ["ERC20Metadata", "ERC721Metadata"],
     DeploymentConfig: [
       "KatanaConfig",
       "MadaraConfig",
@@ -15,35 +13,13 @@ const result: PossibleTypesResultData = {
     ],
     Node: [
       "Account",
-      "AccountQuest",
-      "AccountStarterPack",
       "AccountTeam",
-      "Achievement",
-      "Attestation",
-      "Balance",
-      "Block",
-      "Class",
-      "Contract",
       "Deployment",
       "DeploymentLog",
-      "DiscordGuild",
-      "Event",
       "File",
-      "Game",
-      "Quest",
-      "QuestEvent",
-      "Scope",
       "Service",
-      "StarterPack",
-      "StarterPackContract",
-      "StarterPackToken",
       "Team",
-      "Token",
-      "Transaction",
-      "TransactionReceipt",
-      "TwitterQuest",
     ],
-    TransactionMetadata: ["Call", "MultiCall"],
   },
 };
 export default result;
