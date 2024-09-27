@@ -1,10 +1,10 @@
 import { StarknetColorIcon, StarknetIcon, SlotIcon } from "@cartridge/ui";
-import { QuestionIcon } from "@cartridge/ui/src/components/icons/utility/Question";
+import { QuestionIcon } from "@cartridge/ui";
 import { Button, Circle, Tooltip } from "@chakra-ui/react";
 import { useConnection } from "hooks/connection";
 import { useToast } from "hooks/toast";
 import { constants } from "starknet";
-import { isSlotChain } from "utils/network";
+import { isSlotChain } from "@cartridge/utils";
 import { Hex, hexToString } from "viem";
 
 export function NetworkStatus() {

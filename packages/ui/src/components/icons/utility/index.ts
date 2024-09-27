@@ -26,6 +26,7 @@ export * from "./Mystery";
 export * from "./Pacman";
 export * from "./Play";
 export * from "./Plus";
+export * from "./Question";
 export * from "./Robot";
 export * from "./ScanQR";
 export * from "./ScanSelf";

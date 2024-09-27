@@ -7,7 +7,7 @@ import {
   LogoutCtx,
   OpenSettingsCtx,
 } from "utils/connection";
-import { getChainName } from "utils/network";
+import { getChainName } from "@cartridge/utils";
 import { RpcProvider, constants } from "starknet";
 import {
   PaymasterOptions,
