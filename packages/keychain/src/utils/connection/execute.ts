@@ -19,7 +19,9 @@ import { ErrorCode, JsCall } from "@cartridge/account-wasm";
 
 export const ESTIMATE_FEE_PERCENTAGE = 10;
 
-export function parseControllerError(controllerError: any) {
+export function parseControllerError(
+  controllerError: ControllerError,
+): ControllerError {
   try {
     const data = JSON.parse(controllerError.data);
     return {

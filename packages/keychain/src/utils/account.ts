@@ -91,8 +91,11 @@ class Account extends BaseAccount {
     return this.cartridge.hasSession(normalizeCalls(calls));
   }
 
-  session(policies: Policy[]): SessionMetadata | undefined {
-    return this.cartridge.session(policies);
+  session(
+    policies: Policy[],
+    public_key?: string,
+  ): SessionMetadata | undefined {
+    return this.cartridge.session(policies, public_key);
   }
 
   async estimateInvokeFee(

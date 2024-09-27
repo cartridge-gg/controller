@@ -83,6 +83,9 @@ pub enum ControllerError {
         fee_estimate: Box<FeeEstimate>,
         balance: u128,
     },
+
+    #[error("Session already registered. ")]
+    SessionAlreadyRegistered,
 }
 
 #[derive(Clone)]
@@ -309,7 +312,7 @@ where
         match est {
             Ok(mut fee_estimate) => {
                 if self
-                    .session_metadata(&Policy::from_calls(&calls))
+                    .session_metadata(&Policy::from_calls(&calls), None)
                     .map_or(true, |(_, metadata)| !metadata.is_registered)
                 {
                     fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
@@ -324,23 +327,30 @@ where
                     Ok(fee_estimate)
                 }
             }
-            Err(e) => match &e {
-                AccountError::Provider(ProviderError::StarknetError(
+            Err(e) => {
+                if let AccountError::Provider(ProviderError::StarknetError(
                     StarknetError::TransactionExecutionError(data),
-                )) if data
-                    .execution_error
-                    .contains(&format!("{:x} is not deployed.", self.address)) =>
+                )) = &e
                 {
-                    let balance = self.eth_balance().await?;
-                    let mut fee_estimate = self.deploy().estimate_fee().await?;
-                    fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
-                    Err(ControllerError::NotDeployed {
-                        fee_estimate: Box::new(fee_estimate),
-                        balance,
-                    })
+                    if data.execution_error.contains("session/already-registered") {
+                        return Err(ControllerError::SessionAlreadyRegistered);
+                    }
+
+                    if data
+                        .execution_error
+                        .contains(&format!("{:x} is not deployed.", self.address))
+                    {
+                        let balance = self.eth_balance().await?;
+                        let mut fee_estimate = self.deploy().estimate_fee().await?;
+                        fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
+                        return Err(ControllerError::NotDeployed {
+                            fee_estimate: Box::new(fee_estimate),
+                            balance,
+                        });
+                    }
                 }
-                _ => Err(ControllerError::AccountError(e)),
-            },
+                Err(ControllerError::AccountError(e))
+            }
         }
     }
 
@@ -358,7 +368,9 @@ where
         match result {
             Ok(tx_result) => {
                 // Update is_registered to true after successful execution with a session
-                if let Some((key, metadata)) = self.session_metadata(&Policy::from_calls(&calls)) {
+                if let Some((key, metadata)) =
+                    self.session_metadata(&Policy::from_calls(&calls), None)
+                {
                     if !metadata.is_registered {
                         let mut updated_metadata = metadata;
                         updated_metadata.is_registered = true;
@@ -394,7 +406,11 @@ where
         }
     }
 
-    pub fn session_metadata(&self, policies: &[Policy]) -> Option<(String, SessionMetadata)> {
+    pub fn session_metadata(
+        &self,
+        policies: &[Policy],
+        public_key: Option<Felt>,
+    ) -> Option<(String, SessionMetadata)> {
         let key: String = Selectors::session(&self.address, &self.app_id, &self.chain_id);
         self.backend
             .get(&key)
@@ -402,9 +418,29 @@ where
             .flatten()
             .and_then(|value| match value {
                 StorageValue::Session(metadata) => {
-                    if policies
-                        .iter()
-                        .all(|policy| metadata.session.is_authorized(policy))
+                    let current_timestamp = get_current_timestamp();
+
+                    let session_key_guid = if let Some(public_key) = public_key {
+                        let pubkey = VerifyingKey::from_scalar(public_key);
+                        AbigenSigner::Starknet(StarknetSigner {
+                            pubkey: NonZero::new(pubkey.scalar()).unwrap(),
+                        })
+                        .guid()
+                    } else if let Some(credentials) = &metadata.credentials {
+                        let signer = SigningKey::from_secret_scalar(credentials.private_key);
+                        AbigenSigner::Starknet(StarknetSigner {
+                            pubkey: NonZero::new(signer.verifying_key().scalar()).unwrap(),
+                        })
+                        .guid()
+                    } else {
+                        return None;
+                    };
+
+                    if metadata.session.expires_at > current_timestamp
+                        && metadata.session.session_key_guid == session_key_guid
+                        && policies
+                            .iter()
+                            .all(|policy| metadata.session.is_authorized(policy))
                     {
                         Some((key, metadata))
                     } else {
@@ -416,7 +452,7 @@ where
 
     pub fn session_account(&self, calls: &[Call]) -> Option<SessionAccount<P>> {
         // Check if there's a valid session stored
-        let (_, metadata) = self.session_metadata(&Policy::from_calls(calls))?;
+        let (_, metadata) = self.session_metadata(&Policy::from_calls(calls), None)?;
         let credentials = metadata.credentials.as_ref()?;
         let session_signer =
             Signer::Starknet(SigningKey::from_secret_scalar(credentials.private_key));

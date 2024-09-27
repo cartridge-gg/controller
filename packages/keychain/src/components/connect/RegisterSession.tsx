@@ -1,5 +1,4 @@
 import { Content } from "components/layout";
-import { Policy } from "@cartridge/controller";
 import { useCallback, useMemo, useState } from "react";
 import { useConnection } from "hooks/connection";
 import { Policies } from "components/Policies";
@@ -15,7 +14,7 @@ export function RegisterSession({
   onConnect,
   publicKey,
 }: {
-  onConnect: (policies: Policy[], transaction_hash?: string) => void;
+  onConnect: (transaction_hash?: string) => void;
   publicKey?: string;
 }) {
   const { controller, policies } = useConnection();
@@ -38,7 +37,12 @@ export function RegisterSession({
   }, [controller, expiresAt, policies, publicKey]);
 
   const onRegisterSession = useCallback(
-    async (maxFee: bigint) => {
+    async (maxFee?: bigint) => {
+      if (!maxFee) {
+        onConnect();
+        return;
+      }
+
       const { transaction_hash } = await controller.registerSession(
         expiresAt,
         policies,
@@ -54,7 +58,7 @@ export function RegisterSession({
         ],
       });
 
-      onConnect(policies, transaction_hash);
+      onConnect(transaction_hash);
     },
     [controller, expiresAt, policies, publicKey, onConnect],
   );
@@ -64,12 +68,6 @@ export function RegisterSession({
       title="Register Session"
       transactions={transactions}
       onSubmit={onRegisterSession}
-      onError={(e) => {
-        if (e.data?.execution_error.includes("session/already-registered")) {
-          onConnect(policies);
-          return;
-        }
-      }}
       buttonText="Register Session"
       hideTxSummary
     >
