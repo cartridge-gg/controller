@@ -2,8 +2,8 @@ use crate::abigen::controller::{OutsideExecution, Owner, SignerSignature};
 use crate::account::outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller};
 use crate::account::session::hash::Policy;
 use crate::account::{AccountHashAndCallsSigner, CallEncoder};
+use crate::errors::ControllerError;
 use crate::factory::ControllerFactory;
-use crate::paymaster::PaymasterError;
 use crate::provider::CartridgeProvider;
 use crate::signers::Signer;
 use crate::storage::{StorageBackend, StorageValue};
@@ -16,10 +16,8 @@ use crate::{
 };
 use crate::{impl_account, OriginProvider};
 use async_trait::async_trait;
-use cainome::cairo_serde::{self, CairoSerde, U256};
-use starknet::accounts::{
-    AccountDeploymentV1, AccountError, AccountFactory, AccountFactoryError, ExecutionV1,
-};
+use cainome::cairo_serde::{CairoSerde, U256};
+use starknet::accounts::{AccountDeploymentV1, AccountError, AccountFactory, ExecutionV1};
 use starknet::core::types::{
     BlockTag, Call, FeeEstimate, FunctionCall, InvokeTransactionResult, StarknetError,
 };
@@ -42,45 +40,6 @@ pub const GUARDIAN_SIGNER: Signer = Signer::Starknet(SigningKey::from_secret_sca
 ));
 
 pub trait Backend: StorageBackend + OriginProvider {}
-
-#[derive(Debug, thiserror::Error)]
-pub enum ControllerError {
-    #[error(transparent)]
-    SignError(#[from] SignError),
-
-    #[error(transparent)]
-    StorageError(#[from] crate::storage::StorageError),
-
-    #[error(transparent)]
-    AccountError(#[from] AccountError<SignError>),
-
-    #[error("Controller is not deployed. Required fee: {fee_estimate:?}")]
-    NotDeployed {
-        fee_estimate: Box<FeeEstimate>,
-        balance: u128,
-    },
-
-    #[error(transparent)]
-    AccountFactoryError(#[from] AccountFactoryError<SignError>),
-
-    #[error(transparent)]
-    PaymasterError(#[from] PaymasterError),
-
-    #[error(transparent)]
-    CairoSerde(#[from] cairo_serde::Error),
-
-    #[error(transparent)]
-    ProviderError(#[from] ProviderError),
-
-    #[error("Insufficient balance for transaction. Required fee: {fee_estimate:?}")]
-    InsufficientBalance {
-        fee_estimate: Box<FeeEstimate>,
-        balance: u128,
-    },
-
-    #[error("Session already registered. ")]
-    SessionAlreadyRegistered,
-}
 
 #[derive(Clone)]
 pub struct Controller<P, B>

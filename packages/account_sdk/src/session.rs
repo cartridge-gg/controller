@@ -1,16 +1,18 @@
+use cainome::cairo_serde::{CairoSerde, NonZero};
+use starknet::accounts::ConnectedAccount;
+use starknet::core::types::{Call, Felt, InvokeTransactionResult};
+use starknet::signers::{SigningKey, VerifyingKey};
+
 use crate::abigen::controller::{Signer as AbigenSigner, SignerSignature, StarknetSigner};
 use crate::account::session::hash::{Policy, Session};
 use crate::account::session::SessionAccount;
-use crate::controller::{Backend, Controller, ControllerError};
+use crate::controller::{Backend, Controller};
+use crate::errors::ControllerError;
 use crate::hash::MessageHashRev1;
 use crate::provider::CartridgeProvider;
 use crate::signers::{HashSigner, Signer, SignerTrait};
 use crate::storage::{Credentials, Selectors, SessionMetadata, StorageValue};
 use crate::utils::time::get_current_timestamp;
-use cainome::cairo_serde::{CairoSerde, NonZero};
-use starknet::accounts::ConnectedAccount;
-use starknet::core::types::{Call, Felt, InvokeTransactionResult};
-use starknet::signers::{SigningKey, VerifyingKey};
 
 impl<P, B> Controller<P, B>
 where

@@ -4,6 +4,7 @@ pub mod abigen;
 pub mod account;
 pub mod constants;
 pub mod controller;
+pub mod errors;
 pub mod factory;
 pub mod hash;
 pub mod paymaster;
