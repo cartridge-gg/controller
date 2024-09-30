@@ -48,9 +48,4 @@ pub trait AccountHashAndCallsSigner {
         -> Result<Vec<Felt>, SignError>;
 }
 
-// pub trait SpecificAccount {
-//     fn address(&self) -> Felt;
-//     fn chain_id(&self) -> Felt;
-// }
-
 pub const DECLARATION_SELECTOR: Felt = selector!("__declare_transaction__");
