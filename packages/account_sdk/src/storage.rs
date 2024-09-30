@@ -2,9 +2,7 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::{
-    account::session::hash::Session, controller::Backend, signers::DeviceError, OriginProvider,
-};
+use crate::{account::session::hash::Session, signers::DeviceError, Backend, OriginProvider};
 use starknet::core::types::Felt;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]

@@ -1,7 +1,9 @@
 use signers::DeviceError;
+use storage::StorageBackend;
 
 pub mod abigen;
 pub mod account;
+pub mod artifacts;
 pub mod constants;
 pub mod controller;
 pub mod errors;
@@ -19,6 +21,8 @@ pub mod utils;
 #[cfg(not(target_arch = "wasm32"))]
 #[cfg(test)]
 pub mod tests;
+
+pub trait Backend: StorageBackend + OriginProvider {}
 
 pub trait OriginProvider: std::fmt::Debug {
     fn origin(&self) -> Result<String, DeviceError>;

@@ -1,4 +1,4 @@
-use crate::constants::Version;
+use crate::artifacts::Version;
 use crate::signers::webauthn::{WebauthnBackend, WebauthnSigner};
 use crate::signers::{DeviceError, Signer};
 use crate::OriginProvider;

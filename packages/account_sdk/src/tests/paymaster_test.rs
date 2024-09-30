@@ -9,7 +9,7 @@ use crate::abigen::erc_20::Erc20;
 use crate::tests::account::FEE_TOKEN_ADDRESS;
 use crate::tests::runners::katana::KatanaRunner;
 use crate::transaction_waiter::TransactionWaiter;
-use crate::{constants::Version, signers::Signer};
+use crate::{artifacts::Version, signers::Signer};
 use cainome::cairo_serde::{CairoSerde, ContractAddress, U256};
 
 #[tokio::test]

@@ -9,7 +9,7 @@ use crate::{
         outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller},
         session::hash::Policy,
     },
-    constants::{Version, CONTROLLERS},
+    artifacts::{Version, CONTROLLERS},
     controller::Controller,
     signers::{webauthn::WebauthnSigner, Signer},
     storage::InMemoryBackend,

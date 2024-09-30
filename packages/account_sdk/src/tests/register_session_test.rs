@@ -4,7 +4,7 @@ use crate::{
         hash::{Policy, Session},
         SessionAccount,
     },
-    constants::Version,
+    artifacts::Version,
     signers::{HashSigner, Signer, SignerTrait},
     tests::{account::FEE_TOKEN_ADDRESS, ensure_txn, runners::katana::KatanaRunner},
 };

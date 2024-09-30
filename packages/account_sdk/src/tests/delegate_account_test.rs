@@ -1,4 +1,4 @@
-use crate::constants::Version;
+use crate::artifacts::Version;
 use crate::signers::Signer;
 use crate::tests::ensure_txn;
 use crate::{abigen::controller::Controller, tests::runners::katana::KatanaRunner};

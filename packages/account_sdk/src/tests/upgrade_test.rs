@@ -5,7 +5,7 @@ use starknet::{
 };
 
 use crate::{
-    constants::{Version, CONTROLLERS},
+    artifacts::{Version, CONTROLLERS},
     signers::Signer,
     tests::{ensure_txn, runners::katana::KatanaRunner},
 };

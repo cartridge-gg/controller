@@ -10,7 +10,7 @@ use account_sdk::abigen::controller::OutsideExecution;
 use account_sdk::account::outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller};
 use account_sdk::account::session::SessionAccount;
 use account_sdk::account::AccountHashAndCallsSigner;
-use account_sdk::constants::{Version, CONTROLLERS};
+use account_sdk::artifacts::{Version, CONTROLLERS};
 use account_sdk::controller::Controller;
 use account_sdk::errors::ControllerError;
 use account_sdk::provider::{CartridgeJsonRpcProvider, CartridgeProvider};

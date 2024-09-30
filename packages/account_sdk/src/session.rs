@@ -6,13 +6,14 @@ use starknet::signers::{SigningKey, VerifyingKey};
 use crate::abigen::controller::{Signer as AbigenSigner, SignerSignature, StarknetSigner};
 use crate::account::session::hash::{Policy, Session};
 use crate::account::session::SessionAccount;
-use crate::controller::{Backend, Controller};
+use crate::controller::Controller;
 use crate::errors::ControllerError;
 use crate::hash::MessageHashRev1;
 use crate::provider::CartridgeProvider;
 use crate::signers::{HashSigner, Signer, SignerTrait};
 use crate::storage::{Credentials, Selectors, SessionMetadata, StorageValue};
 use crate::utils::time::get_current_timestamp;
+use crate::Backend;
 
 impl<P, B> Controller<P, B>
 where

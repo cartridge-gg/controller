@@ -8,7 +8,7 @@ use starknet::{
 };
 
 use crate::{
-    controller::GUARDIAN_SIGNER,
+    constants::GUARDIAN_SIGNER,
     impl_account, impl_execution_encoder,
     signers::{HashSigner, SignError, Signer},
 };

@@ -2,11 +2,12 @@ use crate::abigen::controller::{OutsideExecution, Owner, SignerSignature};
 use crate::account::outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller};
 use crate::account::session::hash::Policy;
 use crate::account::{AccountHashAndCallsSigner, CallEncoder};
+use crate::constants::{ETH_CONTRACT_ADDRESS, WEBAUTHN_GAS};
 use crate::errors::ControllerError;
 use crate::factory::ControllerFactory;
 use crate::provider::CartridgeProvider;
 use crate::signers::Signer;
-use crate::storage::{StorageBackend, StorageValue};
+use crate::storage::StorageValue;
 use crate::typed_data::TypedData;
 use crate::utils::time::get_current_timestamp;
 use crate::{
@@ -14,7 +15,7 @@ use crate::{
     account::AccountHashSigner,
     signers::{HashSigner, SignError, SignerTrait},
 };
-use crate::{impl_account, OriginProvider};
+use crate::{impl_account, Backend};
 use async_trait::async_trait;
 use cainome::cairo_serde::{CairoSerde, U256};
 use starknet::accounts::{AccountDeploymentV1, AccountError, AccountFactory, ExecutionV1};
@@ -22,7 +23,7 @@ use starknet::core::types::{
     BlockTag, Call, FeeEstimate, FunctionCall, InvokeTransactionResult, StarknetError,
 };
 use starknet::core::utils::cairo_short_string_to_felt;
-use starknet::macros::{felt, selector, short_string};
+use starknet::macros::selector;
 use starknet::providers::ProviderError;
 use starknet::signers::SignerInteractivityContext;
 use starknet::{
@@ -30,16 +31,6 @@ use starknet::{
     core::types::{BlockId, Felt},
     signers::SigningKey,
 };
-
-const ETH_CONTRACT_ADDRESS: Felt =
-    felt!("0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7");
-const WEBAUTHN_GAS: Felt = felt!("3300");
-
-pub const GUARDIAN_SIGNER: Signer = Signer::Starknet(SigningKey::from_secret_scalar(
-    short_string!("CARTRIDGE_GUARDIAN"),
-));
-
-pub trait Backend: StorageBackend + OriginProvider {}
 
 #[derive(Clone)]
 pub struct Controller<P, B>
@@ -125,7 +116,7 @@ where
         self.owner.signer().guid()
     }
 
-    pub async fn execute_from_outside_raw(
+    async fn execute_from_outside_raw(
         &self,
         outside_execution: OutsideExecution,
     ) -> Result<InvokeTransactionResult, ControllerError> {

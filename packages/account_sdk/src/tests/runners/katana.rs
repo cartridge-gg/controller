@@ -15,7 +15,7 @@ use lazy_static::lazy_static;
 
 use crate::abigen::controller::{self, Signer as AbigenSigner};
 use crate::abigen::erc_20::Erc20;
-use crate::constants::{Version, CONTROLLERS};
+use crate::artifacts::{Version, CONTROLLERS};
 use crate::controller::Controller;
 use crate::provider::CartridgeJsonRpcProvider;
 use crate::signers::{HashSigner, Signer};
