@@ -12,6 +12,7 @@ use crate::paymaster::PaymasterError;
 use crate::provider::CartridgeProvider;
 use crate::signers::Signer;
 use crate::storage::{Credentials, Selectors, SessionMetadata, StorageBackend, StorageValue};
+use crate::typed_data::TypedData;
 use crate::{
     abigen::{self},
     account::AccountHashSigner,
@@ -500,6 +501,11 @@ where
         U256::cairo_deserialize(&result, 0)
             .map_err(ControllerError::CairoSerde)
             .map(|v| v.low)
+    }
+
+    pub async fn sign_message(&self, data: TypedData) -> Result<Vec<Felt>, SignError> {
+        let hash = data.encode(self.address)?;
+        self.sign_hash(hash).await
     }
 }
 
