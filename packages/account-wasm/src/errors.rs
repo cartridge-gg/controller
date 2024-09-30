@@ -1,6 +1,6 @@
 use std::fmt;
 
-use account_sdk::{controller::ControllerError, paymaster::PaymasterError, signers::DeviceError};
+use account_sdk::{errors::ControllerError, paymaster::PaymasterError, signers::DeviceError};
 use serde::Serialize;
 use starknet::{accounts::AccountError, core::types::StarknetError, providers::ProviderError};
 use starknet_types_core::felt::FromStrError;

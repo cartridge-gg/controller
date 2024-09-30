@@ -1,9 +1,8 @@
 use async_trait::async_trait;
 
 use account_sdk::{
-    controller::Backend,
     signers::{webauthn::WebauthnBackend, DeviceError},
-    OriginProvider,
+    Backend, OriginProvider,
 };
 use futures::channel::oneshot;
 use serde_json::to_value;

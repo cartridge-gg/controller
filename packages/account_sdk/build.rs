@@ -3,21 +3,21 @@ use starknet::core::types::Felt;
 use std::{collections::HashMap, fs, path::PathBuf, process::Command};
 
 fn main() {
-    println!("cargo:rerun-if-changed=./compiled");
+    println!("cargo:rerun-if-changed=./artifacts");
     generate_controller_bindings();
     generate_erc20_bindings();
-    generate_constants();
+    generate_artifacts();
     Command::new("cargo")
         .args(["fmt", "--all"])
         .status()
         .expect("Failed to format the code");
 }
 
-fn generate_constants() {
+fn generate_artifacts() {
     let mut controllers = String::new();
     let mut versions = Vec::new();
 
-    for entry in fs::read_dir("./compiled").unwrap() {
+    for entry in fs::read_dir("./artifacts").unwrap() {
         let entry = entry.unwrap();
         let path = entry.path();
         if path.is_file() && path.extension().unwrap_or_default() == "json" {
@@ -47,8 +47,29 @@ fn generate_constants() {
         }
     }
 
+    // Sort to ensure output is deterministic
+    versions.sort_by(|a, b| {
+        if a == "latest" {
+            std::cmp::Ordering::Greater
+        } else if b == "latest" {
+            std::cmp::Ordering::Less
+        } else {
+            let a_parts: Vec<&str> = a.trim_start_matches('v').split('.').collect();
+            let b_parts: Vec<&str> = b.trim_start_matches('v').split('.').collect();
+            for (a_part, b_part) in a_parts.iter().zip(b_parts.iter()) {
+                let a_num: u32 = a_part.parse().unwrap();
+                let b_num: u32 = b_part.parse().unwrap();
+                match a_num.cmp(&b_num) {
+                    std::cmp::Ordering::Equal => continue,
+                    other => return other,
+                }
+            }
+            a_parts.len().cmp(&b_parts.len())
+        }
+    });
+
     let latest_version = versions.iter().max().unwrap();
-    let constants = format!(
+    let artifacts = format!(
         r#"// This file is auto-generated. Do not modify manually.
 use lazy_static::lazy_static;
 use std::collections::HashMap;
@@ -97,7 +118,7 @@ lazy_static! {{
             .join(", ")
     );
 
-    fs::write("./src/constants.rs", constants).unwrap();
+    fs::write("./src/artifacts.rs", artifacts).unwrap();
 }
 
 fn extract_compiled_class_hash(version: &str) -> Felt {
@@ -106,7 +127,7 @@ fn extract_compiled_class_hash(version: &str) -> Felt {
     use std::io::BufReader;
     let compiled_class: CompiledClass = serde_json::from_reader(BufReader::new(
         File::open(format!(
-            "./compiled/controller.{version}.compiled_contract_class.json"
+            "./artifacts/controller.{version}.compiled_contract_class.json"
         ))
         .unwrap(),
     ))
@@ -126,7 +147,7 @@ fn extract_class_hash(path: &PathBuf) -> Felt {
 fn generate_controller_bindings() {
     let abigen = Abigen::new(
         "Controller",
-        "./compiled/controller.latest.contract_class.json",
+        "./artifacts/controller.latest.contract_class.json",
     )
     .with_types_aliases(HashMap::from([
         (
@@ -199,7 +220,7 @@ fn generate_controller_bindings() {
 }
 
 fn generate_erc20_bindings() {
-    let abigen = Abigen::new("Erc20", "./compiled/erc20.contract_class.json")
+    let abigen = Abigen::new("Erc20", "./artifacts/erc20.contract_class.json")
         .with_types_aliases(HashMap::from([
             (
                 String::from("openzeppelin::token::erc20::erc20::ERC20Component::Event"),

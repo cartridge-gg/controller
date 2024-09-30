@@ -1,6 +1,6 @@
 use crate::{
     abigen::erc_20::Erc20,
-    constants::Version,
+    artifacts::Version,
     signers::{webauthn::WebauthnSigner, Signer},
     tests::{
         account::{webauthn::SoftPasskeySigner, FEE_TOKEN_ADDRESS},

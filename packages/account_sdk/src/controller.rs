@@ -1,92 +1,36 @@
-use crate::abigen::controller::{
-    OutsideExecution, Owner, Signer as AbigenSigner, SignerSignature, StarknetSigner,
-};
+use crate::abigen::controller::{OutsideExecution, Owner, SignerSignature};
 use crate::account::outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller};
-use crate::account::session::hash::{Policy, Session};
-use crate::account::session::SessionAccount;
-use crate::account::SpecificAccount;
+use crate::account::session::hash::Policy;
 use crate::account::{AccountHashAndCallsSigner, CallEncoder};
+use crate::constants::{ETH_CONTRACT_ADDRESS, WEBAUTHN_GAS};
+use crate::errors::ControllerError;
 use crate::factory::ControllerFactory;
-use crate::hash::MessageHashRev1;
-use crate::paymaster::PaymasterError;
 use crate::provider::CartridgeProvider;
 use crate::signers::Signer;
-use crate::storage::{Credentials, Selectors, SessionMetadata, StorageBackend, StorageValue};
+use crate::storage::StorageValue;
+use crate::typed_data::TypedData;
+use crate::utils::time::get_current_timestamp;
 use crate::{
     abigen::{self},
     account::AccountHashSigner,
     signers::{HashSigner, SignError, SignerTrait},
 };
-use crate::{impl_account, OriginProvider};
+use crate::{impl_account, Backend};
 use async_trait::async_trait;
-use cainome::cairo_serde::{self, CairoSerde, NonZero, U256};
-use starknet::accounts::{
-    AccountDeploymentV1, AccountError, AccountFactory, AccountFactoryError, ExecutionV1,
-};
+use cainome::cairo_serde::{CairoSerde, U256};
+use starknet::accounts::{AccountDeploymentV1, AccountError, AccountFactory, ExecutionV1};
 use starknet::core::types::{
     BlockTag, Call, FeeEstimate, FunctionCall, InvokeTransactionResult, StarknetError,
 };
 use starknet::core::utils::cairo_short_string_to_felt;
-use starknet::macros::{felt, selector, short_string};
+use starknet::macros::selector;
 use starknet::providers::ProviderError;
 use starknet::signers::SignerInteractivityContext;
 use starknet::{
     accounts::{Account, ConnectedAccount, ExecutionEncoder},
     core::types::{BlockId, Felt},
-    signers::{SigningKey, VerifyingKey},
+    signers::SigningKey,
 };
-
-#[cfg(target_arch = "wasm32")]
-use js_sys::Date;
-
-const ETH_CONTRACT_ADDRESS: Felt =
-    felt!("0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7");
-const WEBAUTHN_GAS: Felt = felt!("3300");
-
-pub const GUARDIAN_SIGNER: Signer = Signer::Starknet(SigningKey::from_secret_scalar(
-    short_string!("CARTRIDGE_GUARDIAN"),
-));
-
-pub trait Backend: StorageBackend + OriginProvider {}
-
-#[derive(Debug, thiserror::Error)]
-pub enum ControllerError {
-    #[error(transparent)]
-    SignError(#[from] SignError),
-
-    #[error(transparent)]
-    StorageError(#[from] crate::storage::StorageError),
-
-    #[error(transparent)]
-    AccountError(#[from] AccountError<SignError>),
-
-    #[error("Controller is not deployed. Required fee: {fee_estimate:?}")]
-    NotDeployed {
-        fee_estimate: Box<FeeEstimate>,
-        balance: u128,
-    },
-
-    #[error(transparent)]
-    AccountFactoryError(#[from] AccountFactoryError<SignError>),
-
-    #[error(transparent)]
-    PaymasterError(#[from] PaymasterError),
-
-    #[error(transparent)]
-    CairoSerde(#[from] cairo_serde::Error),
-
-    #[error(transparent)]
-    ProviderError(#[from] ProviderError),
-
-    #[error("Insufficient balance for transaction. Required fee: {fee_estimate:?}")]
-    InsufficientBalance {
-        fee_estimate: Box<FeeEstimate>,
-        balance: u128,
-    },
-
-    #[error("Session already registered. ")]
-    SessionAlreadyRegistered,
-}
 
 #[derive(Clone)]
 pub struct Controller<P, B>
@@ -94,16 +38,16 @@ where
     P: CartridgeProvider + Send + Sync + Clone,
     B: Backend + Clone,
 {
-    app_id: String,
-    address: Felt,
-    chain_id: Felt,
+    pub(crate) app_id: String,
+    pub(crate) address: Felt,
+    pub(crate) chain_id: Felt,
     pub username: String,
     salt: Felt,
-    pub provider: P,
-    owner: Signer,
+    provider: P,
+    pub(crate) owner: Signer,
     contract: Option<Box<abigen::controller::Controller<Self>>>,
     pub factory: ControllerFactory<P>,
-    backend: B,
+    pub(crate) backend: B,
 }
 
 impl<P, B> Controller<P, B>
@@ -172,96 +116,7 @@ where
         self.owner.signer().guid()
     }
 
-    pub async fn create_session(
-        &mut self,
-        methods: Vec<Policy>,
-        expires_at: u64,
-    ) -> Result<SessionAccount<P>, ControllerError> {
-        let signer = SigningKey::from_random();
-        let session = Session::new(methods, expires_at, &signer.signer())?;
-        let hash = session
-            .raw()
-            .get_message_hash_rev_1(self.chain_id, self.address);
-        let authorization = self.owner.sign(&hash).await?;
-        let authorization = Vec::<SignerSignature>::cairo_serialize(&vec![authorization.clone()]);
-        self.backend.set(
-            &Selectors::session(&self.address, &self.app_id, &self.chain_id),
-            &StorageValue::Session(SessionMetadata {
-                session: session.clone(),
-                max_fee: None,
-                credentials: Some(Credentials {
-                    authorization: authorization.clone(),
-                    private_key: signer.secret_scalar(),
-                }),
-                is_registered: false,
-            }),
-        )?;
-
-        let session_signer = Signer::Starknet(signer);
-        let session_account = SessionAccount::new(
-            self.provider().clone(),
-            session_signer,
-            self.address,
-            self.chain_id,
-            authorization,
-            session,
-        );
-
-        Ok(session_account)
-    }
-
-    pub fn register_session_call(
-        &mut self,
-        methods: Vec<Policy>,
-        expires_at: u64,
-        public_key: Felt,
-    ) -> Result<Call, ControllerError> {
-        let pubkey = VerifyingKey::from_scalar(public_key);
-        let signer = AbigenSigner::Starknet(StarknetSigner {
-            pubkey: NonZero::new(pubkey.scalar()).unwrap(),
-        });
-        let session = Session::new(methods, expires_at, &signer)?;
-        let call = self
-            .contract()
-            .register_session_getcall(&session.raw(), &self.owner_guid());
-
-        Ok(call)
-    }
-
-    pub fn upgrade(&self, new_class_hash: Felt) -> Call {
-        self.contract().upgrade_getcall(&new_class_hash.into())
-    }
-
-    pub async fn register_session(
-        &mut self,
-        policies: Vec<Policy>,
-        expires_at: u64,
-        public_key: Felt,
-        max_fee: Felt,
-    ) -> Result<InvokeTransactionResult, ControllerError> {
-        let call = self.register_session_call(policies.clone(), expires_at, public_key)?;
-        let txn = self.execute(vec![call], max_fee).await?;
-        let session = Session::new(
-            policies,
-            expires_at,
-            &AbigenSigner::Starknet(StarknetSigner {
-                pubkey: NonZero::new(public_key).unwrap(),
-            }),
-        )?;
-
-        self.backend.set(
-            &Selectors::session(&self.address, &self.app_id, &self.chain_id),
-            &StorageValue::Session(SessionMetadata {
-                session: session.clone(),
-                max_fee: None,
-                credentials: None,
-                is_registered: false,
-            }),
-        )?;
-        Ok(txn)
-    }
-
-    pub async fn execute_from_outside_raw(
+    async fn execute_from_outside_raw(
         &self,
         outside_execution: OutsideExecution,
     ) -> Result<InvokeTransactionResult, ControllerError> {
@@ -406,68 +261,6 @@ where
         }
     }
 
-    pub fn session_metadata(
-        &self,
-        policies: &[Policy],
-        public_key: Option<Felt>,
-    ) -> Option<(String, SessionMetadata)> {
-        let key: String = Selectors::session(&self.address, &self.app_id, &self.chain_id);
-        self.backend
-            .get(&key)
-            .ok()
-            .flatten()
-            .and_then(|value| match value {
-                StorageValue::Session(metadata) => {
-                    let current_timestamp = get_current_timestamp();
-
-                    let session_key_guid = if let Some(public_key) = public_key {
-                        let pubkey = VerifyingKey::from_scalar(public_key);
-                        AbigenSigner::Starknet(StarknetSigner {
-                            pubkey: NonZero::new(pubkey.scalar()).unwrap(),
-                        })
-                        .guid()
-                    } else if let Some(credentials) = &metadata.credentials {
-                        let signer = SigningKey::from_secret_scalar(credentials.private_key);
-                        AbigenSigner::Starknet(StarknetSigner {
-                            pubkey: NonZero::new(signer.verifying_key().scalar()).unwrap(),
-                        })
-                        .guid()
-                    } else {
-                        return None;
-                    };
-
-                    if metadata.session.expires_at > current_timestamp
-                        && metadata.session.session_key_guid == session_key_guid
-                        && policies
-                            .iter()
-                            .all(|policy| metadata.session.is_authorized(policy))
-                    {
-                        Some((key, metadata))
-                    } else {
-                        None
-                    }
-                }
-            })
-    }
-
-    pub fn session_account(&self, calls: &[Call]) -> Option<SessionAccount<P>> {
-        // Check if there's a valid session stored
-        let (_, metadata) = self.session_metadata(&Policy::from_calls(calls), None)?;
-        let credentials = metadata.credentials.as_ref()?;
-        let session_signer =
-            Signer::Starknet(SigningKey::from_secret_scalar(credentials.private_key));
-        let session_account = SessionAccount::new(
-            self.provider().clone(),
-            session_signer,
-            self.address,
-            self.chain_id,
-            credentials.authorization.clone(),
-            metadata.session,
-        );
-
-        Some(session_account)
-    }
-
     pub async fn delegate_account(&self) -> Result<Felt, ControllerError> {
         self.contract()
             .delegate_account()
@@ -501,19 +294,15 @@ where
             .map_err(ControllerError::CairoSerde)
             .map(|v| v.low)
     }
-}
 
-#[cfg(not(target_arch = "wasm32"))]
-fn get_current_timestamp() -> u64 {
-    std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .expect("Time went backwards")
-        .as_secs()
-}
+    pub async fn sign_message(&self, data: TypedData) -> Result<Vec<Felt>, SignError> {
+        let hash = data.encode(self.address)?;
+        self.sign_hash(hash).await
+    }
 
-#[cfg(target_arch = "wasm32")]
-fn get_current_timestamp() -> u64 {
-    (Date::now() / 1000.0) as u64
+    pub fn upgrade(&self, new_class_hash: Felt) -> Call {
+        self.contract().upgrade_getcall(&new_class_hash.into())
+    }
 }
 
 impl_account!(Controller<P: CartridgeProvider, B: Backend>, |account: &Controller<P, B>, context| {
@@ -543,7 +332,7 @@ where
 
     async fn get_nonce(&self) -> Result<Felt, ProviderError> {
         self.provider
-            .get_nonce(self.block_id(), SpecificAccount::address(self))
+            .get_nonce(self.block_id(), self.address())
             .await
     }
 }
@@ -590,19 +379,5 @@ where
     async fn sign_hash(&self, hash: Felt) -> Result<Vec<Felt>, SignError> {
         let signature = self.owner.sign(&hash).await?;
         Ok(Vec::<SignerSignature>::cairo_serialize(&vec![signature]))
-    }
-}
-
-impl<P, B> SpecificAccount for Controller<P, B>
-where
-    P: CartridgeProvider + Send + Sync + Clone,
-    B: Backend + Clone,
-{
-    fn address(&self) -> Felt {
-        self.address
-    }
-
-    fn chain_id(&self) -> Felt {
-        self.chain_id
     }
 }

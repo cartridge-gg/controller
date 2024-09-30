@@ -2,7 +2,7 @@ use starknet::accounts::Account;
 
 use crate::account::session::hash::Policy;
 use crate::account::DECLARATION_SELECTOR;
-use crate::constants::Version;
+use crate::artifacts::Version;
 use crate::signers::Signer;
 use crate::tests::account::AccountDeclaration;
 

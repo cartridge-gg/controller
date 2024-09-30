@@ -13,7 +13,7 @@ use crate::{
         raw_session::RawSession,
         SessionAccount,
     },
-    constants::Version,
+    artifacts::Version,
     signers::{HashSigner, Signer},
     tests::{account::FEE_TOKEN_ADDRESS, ensure_txn, runners::katana::KatanaRunner},
 };

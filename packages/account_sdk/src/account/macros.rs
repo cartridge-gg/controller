@@ -20,7 +20,7 @@ macro_rules! impl_account {
             type SignError = SignError;
 
             fn address(&self) -> starknet::core::types::Felt {
-                $crate::account::SpecificAccount::address(self)
+                self.address
             }
 
             fn is_signer_interactive(&self, context: starknet::signers::SignerInteractivityContext) -> bool {
@@ -28,7 +28,7 @@ macro_rules! impl_account {
             }
 
             fn chain_id(&self) -> starknet::core::types::Felt {
-                $crate::account::SpecificAccount::chain_id(self)
+                self.chain_id
             }
 
             async fn sign_execution_v1(
@@ -37,8 +37,8 @@ macro_rules! impl_account {
                 query_only: bool,
             ) -> Result<Vec<starknet::core::types::Felt>, Self::SignError> {
                 let tx_hash = execution.transaction_hash(
-                    $crate::account::SpecificAccount::chain_id(self),
-                    $crate::account::SpecificAccount::address(self),
+                    starknet::accounts::Account::chain_id(self),
+                    starknet::accounts::Account::address(self),
                     query_only,
                     self
                 );
@@ -52,8 +52,8 @@ macro_rules! impl_account {
                 query_only: bool,
             ) -> Result<Vec<starknet::core::types::Felt>, Self::SignError> {
                 let tx_hash = execution.transaction_hash(
-                    $crate::account::SpecificAccount::chain_id(self),
-                    $crate::account::SpecificAccount::address(self),
+                    starknet::accounts::Account::chain_id(self),
+                    starknet::accounts::Account::address(self),
                     query_only,
                     self
                 );
@@ -67,12 +67,12 @@ macro_rules! impl_account {
                 query_only: bool,
             ) -> Result<Vec<starknet::core::types::Felt>, Self::SignError> {
                 let tx_hash = declaration.transaction_hash(
-                    $crate::account::SpecificAccount::chain_id(self),
-                    $crate::account::SpecificAccount::address(self),
+                    starknet::accounts::Account::chain_id(self),
+                    starknet::accounts::Account::address(self),
                     query_only,
                 );
                 let calls = vec![starknet::core::types::Call {
-                    to: $crate::account::SpecificAccount::address(self),
+                    to: starknet::accounts::Account::address(self),
                     selector: $crate::account::DECLARATION_SELECTOR,
                     calldata: vec![
                         declaration.compiled_class_hash(),
@@ -87,12 +87,12 @@ macro_rules! impl_account {
                 query_only: bool,
             ) -> Result<Vec<starknet::core::types::Felt>, Self::SignError> {
                 let tx_hash = declaration.transaction_hash(
-                    $crate::account::SpecificAccount::chain_id(self),
-                    $crate::account::SpecificAccount::address(self),
+                    starknet::accounts::Account::chain_id(self),
+                    starknet::accounts::Account::address(self),
                     query_only,
                 );
                 let calls = vec![starknet::core::types::Call {
-                    to: $crate::account::SpecificAccount::address(self),
+                    to: starknet::accounts::Account::address(self),
                     selector: $crate::account::DECLARATION_SELECTOR,
                     calldata: vec![
                         declaration.compiled_class_hash(),

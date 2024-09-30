@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use crate::{
-    constants::{Version, CONTROLLERS},
+    artifacts::{Version, CONTROLLERS},
     controller::Controller,
     signers::Signer,
     storage::InMemoryBackend,

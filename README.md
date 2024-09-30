@@ -78,7 +78,7 @@ in the root directory.
 
 #### Commiting changes 
 
-The compiled account is stored in the git repository in the `crates/account_sdk/compiled/` folder. To make sure that the tests are run against the most reacent version of the code run `make` in the root repository. The `make` command should also be run before commiting any changes to ensure a valid state of the compiled code. 
+The compiled account is stored in the git repository in the `crates/account_sdk/artifacts/` folder. To make sure that the tests are run against the most reacent version of the code run `make` in the root repository. The `make` command should also be run before commiting any changes to ensure a valid state of the compiled code. 
 
 #### Running the tests
 

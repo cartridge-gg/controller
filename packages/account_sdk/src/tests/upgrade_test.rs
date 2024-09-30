@@ -1,11 +1,11 @@
 use starknet::{
-    accounts::Account,
+    accounts::{Account, ConnectedAccount},
     core::types::{BlockId, BlockTag},
     providers::Provider,
 };
 
 use crate::{
-    constants::{Version, CONTROLLERS},
+    artifacts::{Version, CONTROLLERS},
     signers::Signer,
     tests::{ensure_txn, runners::katana::KatanaRunner},
 };
@@ -21,7 +21,7 @@ async fn test_controller_upgrade() {
     runner.declare_controller(Version::LATEST).await;
 
     let hash = controller
-        .provider
+        .provider()
         .get_class_hash_at(BlockId::Tag(BlockTag::Pending), controller.address())
         .await
         .unwrap();
@@ -38,7 +38,7 @@ async fn test_controller_upgrade() {
     .unwrap();
 
     let hash = controller
-        .provider
+        .provider()
         .get_class_hash_at(BlockId::Tag(BlockTag::Pending), controller.address())
         .await
         .unwrap();

@@ -1,7 +1,7 @@
 use crate::{
     abigen::erc_20::Erc20,
     account::session::hash::Policy,
-    constants::{Version, CONTROLLERS},
+    artifacts::{Version, CONTROLLERS},
     controller::Controller,
     signers::{
         webauthn::WebauthnSigner, HashSigner, NewOwnerSigner, SignError, Signer, SignerTrait,

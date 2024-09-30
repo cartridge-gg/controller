@@ -8,7 +8,7 @@ use starknet::{
 };
 
 use crate::{
-    controller::GUARDIAN_SIGNER,
+    constants::GUARDIAN_SIGNER,
     impl_account, impl_execution_encoder,
     signers::{HashSigner, SignError, Signer},
 };
@@ -18,7 +18,7 @@ use self::{
     raw_session::RawSessionToken,
 };
 
-use super::{AccountHashAndCallsSigner, SpecificAccount};
+use super::AccountHashAndCallsSigner;
 
 pub mod hash;
 pub mod merkle;
@@ -132,19 +132,6 @@ where
             RawSessionToken::cairo_serialize(&result),
         ]
         .concat())
-    }
-}
-
-impl<P> SpecificAccount for SessionAccount<P>
-where
-    P: Provider + Send + Sync,
-{
-    fn address(&self) -> Felt {
-        self.address
-    }
-
-    fn chain_id(&self) -> Felt {
-        self.chain_id
     }
 }
 
