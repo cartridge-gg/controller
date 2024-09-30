@@ -4,7 +4,6 @@ use crate::abigen::controller::{
 use crate::account::outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller};
 use crate::account::session::hash::{Policy, Session};
 use crate::account::session::SessionAccount;
-use crate::account::SpecificAccount;
 use crate::account::{AccountHashAndCallsSigner, CallEncoder};
 use crate::factory::ControllerFactory;
 use crate::hash::MessageHashRev1;
@@ -549,7 +548,7 @@ where
 
     async fn get_nonce(&self) -> Result<Felt, ProviderError> {
         self.provider
-            .get_nonce(self.block_id(), SpecificAccount::address(self))
+            .get_nonce(self.block_id(), self.address())
             .await
     }
 }
@@ -596,19 +595,5 @@ where
     async fn sign_hash(&self, hash: Felt) -> Result<Vec<Felt>, SignError> {
         let signature = self.owner.sign(&hash).await?;
         Ok(Vec::<SignerSignature>::cairo_serialize(&vec![signature]))
-    }
-}
-
-impl<P, B> SpecificAccount for Controller<P, B>
-where
-    P: CartridgeProvider + Send + Sync + Clone,
-    B: Backend + Clone,
-{
-    fn address(&self) -> Felt {
-        self.address
-    }
-
-    fn chain_id(&self) -> Felt {
-        self.chain_id
     }
 }
