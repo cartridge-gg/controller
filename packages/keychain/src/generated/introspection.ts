@@ -14,10 +14,12 @@ const result: PossibleTypesResultData = {
     Node: [
       "Account",
       "AccountTeam",
+      "Controller",
       "Deployment",
       "DeploymentLog",
       "File",
       "Service",
+      "Signer",
       "Team",
     ],
   },
