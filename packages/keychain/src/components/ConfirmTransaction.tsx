@@ -51,14 +51,19 @@ export function ConfirmTransaction() {
       ),
     );
 
-    // If transactions are approved by dapp specified policies but not stored session 
+    // If transactions are approved by dapp specified policies but not stored session
     // then prompt user to update session. This also accounts for expired sessions.
-    return txnsApproved && !account.session(transactions.map((t) => {
-      return {
-        target: t.target,
-        method: t.method
-      } as Policy
-    }));
+    return (
+      txnsApproved &&
+      !account.session(
+        transactions.map((t) => {
+          return {
+            target: t.target,
+            method: t.method,
+          } as Policy;
+        }),
+      )
+    );
   }, [transactions, policiesUpdated, policies, account, ctx.transactions]);
 
   if (updateSession) {
