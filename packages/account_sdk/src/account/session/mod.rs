@@ -127,11 +127,12 @@ where
             .session
             .message_hash(hash, self.chain_id, self.address)?;
         let result = self.sign(tx_hash, calls).await?;
-        Ok([
+        let sig = [
             vec![Self::session_magic()],
             RawSessionToken::cairo_serialize(&result),
         ]
-        .concat())
+        .concat();
+        Ok(sig)
     }
 }
 
