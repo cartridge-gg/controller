@@ -5,17 +5,13 @@ use crate::signer::BrowserBackend;
 use crate::types::call::JsCall;
 use crate::types::policy::Policy;
 use crate::types::session::SessionMetadata;
+use crate::types::signer::Signer;
 use crate::types::{Felts, JsFelt};
 
 use account_sdk::artifacts::{Version, CONTROLLERS};
 use account_sdk::controller::Controller;
 use account_sdk::errors::ControllerError;
 use account_sdk::provider::CartridgeJsonRpcProvider;
-use account_sdk::signers::webauthn::{CredentialID, WebauthnSigner};
-use account_sdk::signers::Signer;
-use base64::engine::general_purpose;
-use base64::Engine;
-use coset::{CborSerializable, CoseKey};
 use serde_wasm_bindgen::to_value;
 use starknet::accounts::ConnectedAccount;
 use starknet::core::types::Call;
@@ -41,40 +37,21 @@ impl CartridgeAccount {
     /// - `rpc_url`: The URL of the JSON-RPC endpoint.
     /// - `chain_id`: Identifier of the blockchain network to interact with.
     /// - `address`: The blockchain address associated with the account.
-    /// - `rp_id`: Relying Party Identifier, a string that uniquely identifies the WebAuthn relying party.
-    /// - `origin`: The origin of the WebAuthn request. Example https://cartridge.gg
     /// - `username`: Username associated with the account.
-    /// - `credential_id`: Base64 encoded bytes of the raw credential ID generated during the WebAuthn registration process.
-    /// - `public_key`: Base64 encoded bytes of the public key generated during the WebAuthn registration process (COSE format).
+    /// - `signer`: A Signer struct containing the signer type and associated data.
     ///
-    #[allow(clippy::too_many_arguments)]
     pub fn new(
         app_id: String,
         rpc_url: String,
         chain_id: JsFelt,
         address: JsFelt,
-        rp_id: String,
         username: String,
-        credential_id: String,
-        public_key: String,
+        signer: Signer,
     ) -> Result<CartridgeAccount> {
         set_panic_hook();
 
         let rpc_url = Url::parse(&rpc_url)?;
         let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
-
-        let credential_id_bytes = general_purpose::URL_SAFE_NO_PAD.decode(credential_id)?;
-        let credential_id = CredentialID::from(credential_id_bytes);
-
-        let cose_bytes = general_purpose::URL_SAFE_NO_PAD.decode(public_key)?;
-        let cose = CoseKey::from_slice(&cose_bytes)?;
-
-        let device_signer = Signer::Webauthn(WebauthnSigner::new(
-            rp_id,
-            credential_id,
-            cose,
-            BrowserBackend,
-        ));
 
         let username = username.to_lowercase();
 
@@ -83,7 +60,7 @@ impl CartridgeAccount {
             username.clone(),
             CONTROLLERS[&Version::V1_0_4].hash,
             Arc::new(provider),
-            device_signer.clone(),
+            signer.try_into()?,
             address.0,
             chain_id.0,
             BrowserBackend,
