@@ -15,6 +15,10 @@ use crate::storage::{Credentials, Selectors, SessionMetadata, StorageValue};
 use crate::utils::time::get_current_timestamp;
 use crate::Backend;
 
+#[cfg(test)]
+#[path = "session_test.rs"]
+mod session_test;
+
 impl<P, B> Controller<P, B>
 where
     P: CartridgeProvider + Send + Sync + Clone,
@@ -83,8 +87,6 @@ where
         public_key: Felt,
         max_fee: Felt,
     ) -> Result<InvokeTransactionResult, ControllerError> {
-        let call = self.register_session_call(policies.clone(), expires_at, public_key)?;
-        let txn = self.execute(vec![call], max_fee).await?;
         let session = Session::new(
             policies,
             expires_at,
@@ -93,15 +95,23 @@ where
             }),
         )?;
 
+        let txn = self
+            .contract()
+            .register_session(&session.raw(), &self.owner_guid())
+            .max_fee(max_fee)
+            .send()
+            .await?;
+
         self.backend.set(
             &Selectors::session(&self.address, &self.app_id, &self.chain_id),
             &StorageValue::Session(SessionMetadata {
                 session: session.clone(),
                 max_fee: None,
                 credentials: None,
-                is_registered: false,
+                is_registered: true,
             }),
         )?;
+
         Ok(txn)
     }
 
