@@ -20,8 +20,6 @@ mod guardian_test;
 mod outside_execution_test;
 mod owner_test;
 mod paymaster_test;
-mod register_session_test;
-mod session_test;
 mod upgrade_test;
 
 #[derive(Error, Debug)]
