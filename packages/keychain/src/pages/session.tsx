@@ -10,10 +10,12 @@ import { useConnection } from "hooks/connection";
 import { useRouter } from "next/router";
 import { useCallback, useEffect } from "react";
 import { LoginMode } from "components/connect/types";
+import { SESSION_EXPIRATION } from "const";
 
 type SessionResponse = {
   username: string;
   address: string;
+  expires_at: string;
   ownerGuid: string;
   transactionHash?: string;
   alreadyRegistered?: boolean;
@@ -99,6 +101,7 @@ export default function Session() {
         address: controller.address,
         ownerGuid: controller.account.cartridge.ownerGuid(),
         transactionHash: transaction_hash,
+        expires_at: String(SESSION_EXPIRATION),
       });
     },
     [
@@ -126,6 +129,7 @@ export default function Session() {
         address: controller.address,
         ownerGuid: controller.account.cartridge.ownerGuid(),
         alreadyRegistered: true,
+        expires_at: String(SESSION_EXPIRATION),
       });
     }
   }, [controller, origin, policies, queries.public_key, onCallback]);
