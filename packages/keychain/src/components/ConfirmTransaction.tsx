@@ -10,7 +10,7 @@ import { ExecutionContainer } from "components/ExecutionContainer";
 import { CreateSession } from "./connect";
 
 export function ConfirmTransaction() {
-  const { controller, context, origin, policies } = useConnection();
+  const { controller, context, origin, policies, setContext } = useConnection();
   const [policiesUpdated, setIsPoliciesUpdated] = useState<boolean>(false);
   const ctx = context as ExecuteCtx;
   const account = controller.account;
@@ -23,6 +23,8 @@ export function ConfirmTransaction() {
       code: ResponseCodes.SUCCESS,
       transaction_hash,
     });
+    // resets execute ui
+    setContext(undefined);
   };
 
   const transactions = useMemo<Policy[]>(
@@ -49,7 +51,19 @@ export function ConfirmTransaction() {
       ),
     );
 
-    return !account.hasSession(ctx.transactions) && txnsApproved;
+    // If transactions are approved by dapp specified policies but not stored session
+    // then prompt user to update session. This also accounts for expired sessions.
+    return (
+      txnsApproved &&
+      !account.session(
+        transactions.map((t) => {
+          return {
+            target: t.target,
+            method: t.method,
+          } as Policy;
+        }),
+      )
+    );
   }, [transactions, policiesUpdated, policies, account, ctx.transactions]);
 
   if (updateSession) {

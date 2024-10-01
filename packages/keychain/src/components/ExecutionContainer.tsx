@@ -98,7 +98,6 @@ export function ExecutionContainer({
       setCtrlError(error);
     } finally {
       setIsLoading(false);
-      setMaxFee(null);
     }
   };
 

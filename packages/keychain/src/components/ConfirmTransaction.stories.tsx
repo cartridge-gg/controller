@@ -13,6 +13,7 @@ const meta = {
             suggestedMaxFee: "100",
           }),
           hasSession: () => true,
+          session: () => true,
         },
       },
       context: {
