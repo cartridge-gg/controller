@@ -8,7 +8,6 @@ import {
   TransactionExecutionStatus,
   TransactionFinalityStatus,
 } from "starknet";
-import { SESSION_EXPIRATION } from "const";
 
 export function RegisterSession({
   onConnect,
@@ -17,8 +16,7 @@ export function RegisterSession({
   onConnect: (transaction_hash?: string) => void;
   publicKey?: string;
 }) {
-  const { controller, policies } = useConnection();
-  const [expiresAt] = useState<bigint>(SESSION_EXPIRATION);
+  const { controller, policies, expiresAt } = useConnection();
 
   const transactions = useMemo(() => {
     const calldata = controller.registerSessionCalldata(

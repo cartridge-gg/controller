@@ -23,6 +23,7 @@ import {
   ConnectionContextValue,
 } from "components/Provider/connection";
 import { UpgradeInterface, useUpgrade } from "./upgrade";
+import { SESSION_EXPIRATION } from "const";
 
 const CHAIN_ID_TIMEOUT = 3000;
 
@@ -35,6 +36,7 @@ export function useConnectionValue() {
   const [rpcUrl, setRpcUrl] = useState<string>();
   const [chainId, setChainId] = useState<string>();
   const [policies, setPolicies] = useState<Policy[]>([]);
+  const [expiresAt, setExpiresAt] = useState<bigint>(SESSION_EXPIRATION);
   const [paymaster, setPaymaster] = useState<PaymasterOptions>();
   const [controller, setControllerRaw] = useState<Controller | undefined>();
   const [prefunds, setPrefunds] = useState<Prefund[]>([]);
@@ -111,6 +113,10 @@ export function useConnectionValue() {
     setHasPrefundRequest(!!prefundParam);
     setPrefunds(mergeDefaultETHPrefund(prefunds));
     setPolicies(parsePolicies(urlParams.get("policies")));
+    const expiresAtParam = urlParams.get("expires_at");
+    if (expiresAtParam) {
+      setExpiresAt(BigInt(expiresAtParam));
+    }
     setPaymaster(parsePaymaster(urlParams.get("paymaster")));
 
     const connection = connectToController<ParentMethods>({
@@ -182,6 +188,7 @@ export function useConnectionValue() {
     chainId,
     chainName,
     policies,
+    expiresAt,
     prefunds,
     paymaster,
     hasPrefundRequest,

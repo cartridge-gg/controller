@@ -7,7 +7,6 @@ import { useConnection } from "hooks/connection";
 import { Policies } from "components/Policies";
 import { ControllerErrorAlert } from "components/ErrorAlert";
 import { SessionConsent } from "components/connect";
-import { SESSION_EXPIRATION } from "const";
 import { Upgrade } from "./Upgrade";
 
 export function CreateSession({
@@ -17,9 +16,8 @@ export function CreateSession({
   onConnect: (transaction_hash?: string) => void;
   isUpdate?: boolean;
 }) {
-  const { controller, policies, upgrade } = useConnection();
+  const { controller, expiresAt, policies, upgrade } = useConnection();
   const [isConnecting, setIsConnecting] = useState(false);
-  const [expiresAt] = useState<bigint>(SESSION_EXPIRATION);
   const [maxFee] = useState<BigNumberish>();
   const [error, setError] = useState<ControllerError>();
 

@@ -15,6 +15,7 @@ export type ConnectionContextValue = {
   chainId: string;
   chainName: string;
   policies: Policy[];
+  expiresAt: bigint;
   prefunds: Prefund[];
   paymaster?: PaymasterOptions;
   hasPrefundRequest: boolean;
