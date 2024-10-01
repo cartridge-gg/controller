@@ -53,10 +53,8 @@ class Account extends BaseAccount {
       nodeUrl,
       chainId,
       address,
-      webauthn.rpId,
       username,
-      webauthn.credentialId,
-      webauthn.publicKey,
+      { webauthn },
     );
   }
 

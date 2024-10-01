@@ -11,6 +11,7 @@ pub(crate) mod invocation;
 pub(crate) mod outside_execution;
 pub(crate) mod policy;
 pub(crate) mod session;
+pub(crate) mod signer;
 
 #[allow(non_snake_case)]
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
