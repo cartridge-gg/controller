@@ -60,7 +60,7 @@ async fn test_verify_external_owner() {
     .unwrap();
 
     let session = SessionAccount::new_as_registered(
-        runner.client(),
+        runner.client().clone(),
         session_signer,
         controller.address(),
         runner.client().chain_id().await.unwrap(),
@@ -116,7 +116,7 @@ async fn test_verify_constructor_external_owner() {
     .unwrap();
 
     let session = SessionAccount::new_as_registered(
-        runner.client(),
+        runner.client().clone(),
         session_signer,
         controller_address.into(),
         runner.client().chain_id().await.unwrap(),

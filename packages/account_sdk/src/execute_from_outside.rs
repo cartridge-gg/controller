@@ -18,9 +18,8 @@ use crate::{
 #[path = "execute_from_outside_test.rs"]
 mod execute_from_outside_test;
 
-impl<P, B> Controller<P, B>
+impl<B> Controller<B>
 where
-    P: CartridgeProvider + Send + Sync + Clone,
     B: Backend + Clone,
 {
     async fn execute_from_outside_raw(

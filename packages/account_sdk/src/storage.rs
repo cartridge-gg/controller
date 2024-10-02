@@ -3,6 +3,7 @@ use base64::Engine;
 use coset::CborSerializable;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use url::Url;
 
 use crate::{account::session::hash::Session, signers::DeviceError, Backend, OriginProvider};
 use starknet::core::types::Felt;
@@ -38,21 +39,25 @@ pub enum Signer {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ControllerMetadata {
     pub address: Felt,
+    pub class_hash: Felt,
+    pub rpc_url: Url,
+    pub chain_id: Felt,
     pub salt: Felt,
     pub owner: Signer,
 }
 
 use crate::controller::Controller;
-use crate::provider::CartridgeProvider;
 
-impl<P, B> From<&Controller<P, B>> for ControllerMetadata
+impl<B> From<&Controller<B>> for ControllerMetadata
 where
-    P: CartridgeProvider + Send + Sync + Clone,
     B: Backend + Clone,
 {
-    fn from(controller: &Controller<P, B>) -> Self {
+    fn from(controller: &Controller<B>) -> Self {
         ControllerMetadata {
             address: controller.address,
+            class_hash: controller.class_hash,
+            chain_id: controller.chain_id,
+            rpc_url: controller.rpc_url.clone(),
             salt: controller.salt,
             owner: match &controller.owner {
                 crate::signers::Signer::Starknet(signer) => Signer::Starknet(StarknetSigner {
@@ -125,10 +130,13 @@ pub trait StorageBackend: Send + Sync {
 
     fn set_controller(
         &mut self,
-        key: &str,
+        address: Felt,
         metadata: ControllerMetadata,
     ) -> Result<(), StorageError> {
-        self.set(key, &StorageValue::Controller(metadata))
+        self.set(
+            &Selectors::account(&address),
+            &StorageValue::Controller(metadata),
+        )
     }
 }
 

@@ -6,31 +6,31 @@ use starknet::{
         PreparedAccountDeploymentV3, RawAccountDeploymentV1, RawAccountDeploymentV3,
     },
     core::types::{BlockId, BlockTag, Felt},
-    providers::Provider,
 };
 
 use crate::{
     abigen::controller::SignerSignature,
+    provider::CartridgeJsonRpcProvider,
     signers::{HashSigner, SignError, Signer},
 };
 
 #[derive(Clone)]
-pub struct ControllerFactory<P> {
+pub struct ControllerFactory {
     class_hash: Felt,
     chain_id: Felt,
     calldata: Vec<Felt>,
     signer: Signer,
-    provider: P,
+    provider: CartridgeJsonRpcProvider,
     block_id: BlockId,
 }
 
-impl<P> ControllerFactory<P> {
+impl ControllerFactory {
     pub fn new(
         class_hash: Felt,
         chain_id: Felt,
         calldata: Vec<Felt>,
         signer: Signer,
-        provider: P,
+        provider: CartridgeJsonRpcProvider,
     ) -> Self {
         Self {
             class_hash,
@@ -45,11 +45,8 @@ impl<P> ControllerFactory<P> {
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<P> AccountFactory for ControllerFactory<P>
-where
-    P: Provider + Sync + Send,
-{
-    type Provider = P;
+impl AccountFactory for ControllerFactory {
+    type Provider = CartridgeJsonRpcProvider;
     type SignError = SignError;
 
     fn class_hash(&self) -> Felt {

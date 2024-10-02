@@ -9,7 +9,6 @@ use crate::account::session::SessionAccount;
 use crate::controller::Controller;
 use crate::errors::ControllerError;
 use crate::hash::MessageHashRev1;
-use crate::provider::CartridgeProvider;
 use crate::signers::{HashSigner, Signer, SignerTrait};
 use crate::storage::{Credentials, Selectors, SessionMetadata};
 use crate::utils::time::get_current_timestamp;
@@ -19,16 +18,15 @@ use crate::Backend;
 #[path = "session_test.rs"]
 mod session_test;
 
-impl<P, B> Controller<P, B>
+impl<B> Controller<B>
 where
-    P: CartridgeProvider + Send + Sync + Clone,
     B: Backend + Clone,
 {
     pub async fn create_session(
         &mut self,
         methods: Vec<Policy>,
         expires_at: u64,
-    ) -> Result<SessionAccount<P>, ControllerError> {
+    ) -> Result<SessionAccount, ControllerError> {
         let signer = SigningKey::from_random();
         let session = Session::new(methods, expires_at, &signer.signer())?;
         let hash = session
@@ -157,7 +155,7 @@ where
             })
     }
 
-    pub fn session_account(&self, calls: &[Call]) -> Option<SessionAccount<P>> {
+    pub fn session_account(&self, calls: &[Call]) -> Option<SessionAccount> {
         // Check if there's a valid session stored
         let (_, metadata) = self.session_metadata(&Policy::from_calls(calls), None)?;
         let credentials = metadata.credentials.as_ref()?;

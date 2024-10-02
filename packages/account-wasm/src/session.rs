@@ -7,7 +7,6 @@ use account_sdk::signers::{HashSigner, Signer};
 use serde_wasm_bindgen::to_value;
 use starknet::accounts::{Account, ConnectedAccount};
 use starknet::signers::SigningKey;
-use std::sync::Arc;
 use url::Url;
 use wasm_bindgen::prelude::*;
 
@@ -18,7 +17,7 @@ use crate::types::{Felts, JsFelt};
 type Result<T> = std::result::Result<T, JsError>;
 
 #[wasm_bindgen]
-pub struct CartridgeSessionAccount(SessionAccount<Arc<CartridgeJsonRpcProvider>>);
+pub struct CartridgeSessionAccount(SessionAccount);
 
 #[wasm_bindgen]
 impl CartridgeSessionAccount {
@@ -54,7 +53,7 @@ impl CartridgeSessionAccount {
         )?;
 
         Ok(CartridgeSessionAccount(SessionAccount::new(
-            Arc::new(provider),
+            provider,
             signer,
             address,
             chain_id,
@@ -91,7 +90,7 @@ impl CartridgeSessionAccount {
         )?;
 
         Ok(CartridgeSessionAccount(SessionAccount::new_as_registered(
-            Arc::new(provider),
+            provider,
             signer,
             address,
             chain_id,
