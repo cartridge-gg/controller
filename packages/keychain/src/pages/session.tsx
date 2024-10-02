@@ -15,7 +15,7 @@ import { SESSION_EXPIRATION } from "const";
 type SessionResponse = {
   username: string;
   address: string;
-  expires_at: string;
+  expiresAt: string;
   ownerGuid: string;
   transactionHash?: string;
   alreadyRegistered?: boolean;
@@ -86,7 +86,7 @@ export default function Session() {
         router.replace(`${url}?${query_name}=${encodedResponse}`);
       }
     },
-    [router, queries, controller],
+    [router, queries],
   );
 
   // Handler when user clicks the Create button
@@ -101,11 +101,10 @@ export default function Session() {
         address: controller.address,
         ownerGuid: controller.account.cartridge.ownerGuid(),
         transactionHash: transaction_hash,
-        expires_at: String(SESSION_EXPIRATION),
+        expiresAt: String(SESSION_EXPIRATION),
       });
     },
     [
-      policies,
       queries.callback_uri,
       queries.redirect_uri,
       controller,
@@ -129,7 +128,7 @@ export default function Session() {
         address: controller.address,
         ownerGuid: controller.account.cartridge.ownerGuid(),
         alreadyRegistered: true,
-        expires_at: String(SESSION_EXPIRATION),
+        expiresAt: String(SESSION_EXPIRATION),
       });
     }
   }, [controller, origin, policies, queries.public_key, onCallback]);

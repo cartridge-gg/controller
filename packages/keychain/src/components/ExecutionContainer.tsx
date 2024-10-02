@@ -88,7 +88,7 @@ export function ExecutionContainer({
     setCtrlError(executionError);
   }, [executionError]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     setIsLoading(true);
     try {
       await onSubmit(maxFee);
@@ -99,7 +99,7 @@ export function ExecutionContainer({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [onSubmit, maxFee, onError, setCtrlError]);
 
   const resetState = () => {
     setCTAState("execute");
