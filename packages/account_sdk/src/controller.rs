@@ -6,7 +6,6 @@ use crate::errors::ControllerError;
 use crate::factory::ControllerFactory;
 use crate::provider::CartridgeProvider;
 use crate::signers::Signer;
-use crate::storage::StorageValue;
 use crate::typed_data::TypedData;
 use crate::{
     abigen::{self},
@@ -42,7 +41,7 @@ where
     pub(crate) address: Felt,
     pub(crate) chain_id: Felt,
     pub username: String,
-    salt: Felt,
+    pub(crate) salt: Felt,
     provider: P,
     pub(crate) owner: Signer,
     contract: Option<Box<abigen::controller::Controller<Self>>>,
@@ -193,8 +192,7 @@ where
                     if !metadata.is_registered {
                         let mut updated_metadata = metadata;
                         updated_metadata.is_registered = true;
-                        self.backend
-                            .set(&key, &StorageValue::Session(updated_metadata))?;
+                        self.backend.set_session(&key, updated_metadata)?;
                     }
                 }
                 Ok(tx_result)
