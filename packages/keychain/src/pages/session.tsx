@@ -101,7 +101,7 @@ export default function Session() {
         address: controller.address,
         ownerGuid: controller.account.cartridge.ownerGuid(),
         transactionHash: transaction_hash,
-        expires_at: String(SESSION_EXPIRATION),
+        expiresAt: String(SESSION_EXPIRATION),
       });
     },
     [
