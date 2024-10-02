@@ -1,25 +1,27 @@
-export interface PossibleTypesResultData {
-  possibleTypes: {
-    [key: string]: string[];
-  };
-}
-const result: PossibleTypesResultData = {
-  possibleTypes: {
-    DeploymentConfig: [
+
+      export interface PossibleTypesResultData {
+        possibleTypes: {
+          [key: string]: string[]
+        }
+      }
+      const result: PossibleTypesResultData = {
+  "possibleTypes": {
+    "DeploymentConfig": [
       "KatanaConfig",
-      "MadaraConfig",
       "SayaConfig",
-      "ToriiConfig",
+      "ToriiConfig"
     ],
-    Node: [
+    "Node": [
       "Account",
       "AccountTeam",
       "Deployment",
       "DeploymentLog",
       "File",
       "Service",
-      "Team",
-    ],
-  },
+      "StripePayments",
+      "Team"
+    ]
+  }
 };
-export default result;
+      export default result;
+    

@@ -3,6 +3,7 @@ query AccountInfo($address: String!) {
     edges {
       node {
         id
+        credits
       }
     }
   }
