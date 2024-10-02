@@ -23,7 +23,7 @@ use crate::storage::InMemoryBackend;
 use crate::tests::account::{
     AccountDeclaration, AccountDeployment, DeployResult, FEE_TOKEN_ADDRESS,
 };
-use crate::transaction_waiter::TransactionWaiter;
+use crate::tests::transaction_waiter::TransactionWaiter;
 
 use super::cartridge::CartridgeProxy;
 use super::{find_free_port, SubprocessRunner, TestnetConfig};

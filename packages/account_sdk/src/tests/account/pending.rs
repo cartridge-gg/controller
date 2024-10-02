@@ -1,6 +1,6 @@
 use starknet::{core::types::Felt, providers::Provider};
 
-use crate::transaction_waiter::TransactionWaiter;
+use crate::tests::transaction_waiter::TransactionWaiter;
 
 pub struct PendingTransaction<'a, P, T>
 where

@@ -16,7 +16,7 @@ use tokio::sync::Mutex;
 use url::Url;
 
 use crate::abigen::controller::OutsideExecution;
-use crate::paymaster::OutsideExecutionParams;
+use crate::provider::OutsideExecutionParams;
 
 use super::katana::{single_owner_account_with_encoding, PREFUNDED};
 

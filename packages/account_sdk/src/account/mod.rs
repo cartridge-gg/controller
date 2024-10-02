@@ -12,12 +12,6 @@ pub mod session;
 use crate::abigen;
 use crate::signers::SignError;
 
-#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
-#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-pub trait AccountHashSigner {
-    async fn sign_hash(&self, hash: Felt) -> Result<Vec<Felt>, SignError>;
-}
-
 pub enum CallEncoder {}
 
 impl CallEncoder {

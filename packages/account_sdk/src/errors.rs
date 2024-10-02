@@ -5,7 +5,7 @@ use starknet::{
     providers::ProviderError,
 };
 
-use crate::{paymaster::PaymasterError, signers::SignError};
+use crate::{provider::ExecuteFromOutsideError, signers::SignError};
 
 #[derive(Debug, thiserror::Error)]
 pub enum ControllerError {
@@ -28,7 +28,7 @@ pub enum ControllerError {
     AccountFactoryError(#[from] AccountFactoryError<SignError>),
 
     #[error(transparent)]
-    PaymasterError(#[from] PaymasterError),
+    PaymasterError(#[from] ExecuteFromOutsideError),
 
     #[error(transparent)]
     CairoSerde(#[from] cairo_serde::Error),
