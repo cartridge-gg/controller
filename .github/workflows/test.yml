@@ -81,12 +81,14 @@ jobs:
           key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
+
       - run: corepack enable pnpm
+
       - uses: pnpm/action-setup@v4
         id: pnpm-install
         with:
-          version: 9.7.0
           run_install: false
+
       - run: pnpm install --frozen-lockfile
-      - run: pnpm keychain exec playwright install 
+      - run: pnpm keychain exec playwright install
       - run: pnpm test:storybook
