@@ -5,6 +5,7 @@ export * from "./Chess";
 export * from "./Chest";
 export * from "./CircleCheck";
 export * from "./CircleNoCheck";
+export * from "./Credits";
 export * from "./Fn";
 export * from "./Copy";
 export * from "./Deployer";
