@@ -129,7 +129,7 @@ export default function Session() {
         address: controller.address,
         ownerGuid: controller.account.cartridge.ownerGuid(),
         alreadyRegistered: true,
-        expires_at: String(SESSION_EXPIRATION),
+        expiresAt: String(SESSION_EXPIRATION),
       });
     }
   }, [controller, origin, policies, queries.public_key, onCallback]);
