@@ -5,7 +5,6 @@ import { InvalidTxn } from "components/InvalidTxn";
 import { SignMessage } from "components/SignMessage";
 import { DelegateAccount } from "components/DelegateAccount";
 import { ColorModeToggle } from "components/ColorModeToggle";
-import { RegisterSession } from "components/RegisterSession";
 import { Profile } from "components/Profile";
 import { Settings } from "components/Settings";
 import { FetchControllers } from "components/FetchControllers";
@@ -27,7 +26,6 @@ export default function Home() {
       <DelegateAccount />
       <InvalidTxn />
       <SignMessage />
-      <RegisterSession />
       <FetchControllers />
     </div>
   );

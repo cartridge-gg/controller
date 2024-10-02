@@ -2,6 +2,7 @@ export * from "./errors";
 export * from "./types";
 export { defaultPresets } from "./presets";
 export * from "./verified";
+export * from "./session";
 
 import { AccountInterface, addAddressPadding } from "starknet";
 import { AsyncMethodReturns } from "@cartridge/penpal";
