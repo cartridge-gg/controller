@@ -264,10 +264,6 @@ where
         let signature = self.owner.sign(&hash).await?;
         Ok(Vec::<SignerSignature>::cairo_serialize(&vec![signature]))
     }
-
-    pub fn upgrade(&self, new_class_hash: Felt) -> Call {
-        self.contract().upgrade_getcall(&new_class_hash.into())
-    }
 }
 
 impl_account!(Controller<P: CartridgeProvider, B: Backend>, |account: &Controller<P, B>, context| {

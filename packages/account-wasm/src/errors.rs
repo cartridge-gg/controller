@@ -1,6 +1,8 @@
 use std::fmt;
 
-use account_sdk::{errors::ControllerError, provider::ExecuteFromOutsideError, signers::DeviceError};
+use account_sdk::{
+    errors::ControllerError, provider::ExecuteFromOutsideError, signers::DeviceError,
+};
 use serde::Serialize;
 use starknet::{accounts::AccountError, core::types::StarknetError, providers::ProviderError};
 use starknet_types_core::felt::FromStrError;
@@ -178,7 +180,9 @@ impl From<ExecuteFromOutsideError> for JsControllerError {
                 ErrorCode::PaymasterNotSupported,
                 "Paymaster not supported".to_string(),
             ),
-            ExecuteFromOutsideError::Serialization(e) => (ErrorCode::PaymasterSerialization, e.to_string()),
+            ExecuteFromOutsideError::Serialization(e) => {
+                (ErrorCode::PaymasterSerialization, e.to_string())
+            }
             ExecuteFromOutsideError::ProviderError(e) => return e.into(),
         };
 

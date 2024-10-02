@@ -19,7 +19,6 @@ mod external_owners_test;
 mod guardian_test;
 mod outside_execution_test;
 mod owner_test;
-mod upgrade_test;
 
 #[derive(Error, Debug)]
 pub enum EnsureTxnError<S> {
