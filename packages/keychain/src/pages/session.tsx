@@ -15,7 +15,7 @@ import { SESSION_EXPIRATION } from "const";
 type SessionResponse = {
   username: string;
   address: string;
-  expires_at: string;
+  expiresAt: string;
   ownerGuid: string;
   transactionHash?: string;
   alreadyRegistered?: boolean;
