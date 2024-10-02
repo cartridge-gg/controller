@@ -9,15 +9,34 @@ const nextConfig = {
     domains: ["static.cartridge.gg", "static.localhost"],
   },
   webpack: function (config, { isServer, dev }) {
-    // Use the client static directory in the server bundle and prod mode
-    // Fixes `Error occurred prerendering page "/"`
-    config.output.webassemblyModuleFilename =
-      isServer && !dev
+    config.experiments = { ...config.experiments, asyncWebAssembly: true };
+
+    if (!isServer && !dev) {
+      config.plugins.push({
+        apply: (compiler) => {
+          compiler.hooks.afterEmit.tapAsync('FingerprintWasmPlugin', (compilation, callback) => {
+            const wasmFile = path.resolve(__dirname, '.next/static/wasm/webauthn.wasm');
+            if (fs.existsSync(wasmFile)) {
+              const fileBuffer = fs.readFileSync(wasmFile);
+              const hashSum = crypto.createHash('sha256');
+              hashSum.update(fileBuffer);
+              const hash = hashSum.digest('hex').slice(0, 8);
+              const newFileName = `webauthn.${hash}.wasm`;
+              fs.renameSync(wasmFile, path.resolve(__dirname, '.next/static/wasm', newFileName));
+              
+              // Update the webassemblyModuleFilename to use the new file name
+              config.output.webassemblyModuleFilename = `static/wasm/${newFileName}`;
+            }
+            callback();
+          });
+        },
+      });
+    } else {
+      config.output.webassemblyModuleFilename = isServer
         ? "../static/wasm/webauthn.wasm"
         : "static/wasm/webauthn.wasm";
+    }
 
-    // Since Webpack 5 doesn't enable WebAssembly by default, we should do it manually
-    config.experiments = { ...config.experiments, asyncWebAssembly: true };
     return config;
   },
   redirects: async function () {
