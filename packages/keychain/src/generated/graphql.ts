@@ -5,7 +5,6 @@ import {
   UseQueryOptions,
   UseInfiniteQueryOptions,
   UseMutationOptions,
-  QueryFunctionContext,
 } from "react-query";
 import { useFetchData } from "hooks/fetcher";
 export type Maybe<T> = T | null;
