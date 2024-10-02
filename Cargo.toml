@@ -63,7 +63,7 @@ cainome = { git = "https://github.com/cartridge-gg/cainome", tag = "v0.4.2", fea
 
 starknet = "0.12.0"
 starknet-crypto = "0.7.1"
-starknet-types-core = { version = "0.1.5", features = ["curve", "hash"] }
+starknet-types-core = { version = "0.1", features = ["curve", "hash"] }
 
 # Compiler optimization when running test to prevent ‘locals exceed maximum’ error,
 # where a function is using more that the maximum allowed local variables.
