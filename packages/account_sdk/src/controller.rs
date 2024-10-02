@@ -6,7 +6,6 @@ use crate::errors::ControllerError;
 use crate::factory::ControllerFactory;
 use crate::provider::CartridgeJsonRpcProvider;
 use crate::signers::Signer;
-use crate::storage::ControllerMetadata;
 use crate::typed_data::TypedData;
 use crate::{
     abigen::{self},
@@ -101,10 +100,11 @@ where
         ));
         controller.contract = Some(contract);
 
-        controller
-            .backend
-            .set_controller(address, ControllerMetadata::from(&controller))
-            .expect("Should store controller");
+        // TODO: Renenable once we remove js storage busting
+        // controller
+        //     .backend
+        //     .set_controller(address, ControllerMetadata::from(&controller))
+        //     .expect("Should store controller");
 
         controller
     }
