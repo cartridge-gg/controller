@@ -6,7 +6,7 @@ use crate::{
     signers::Signer,
     storage::InMemoryBackend,
     tests::runners::katana::KatanaRunner,
-    transaction_waiter::TransactionWaiter,
+    tests::transaction_waiter::TransactionWaiter,
 };
 use starknet::{accounts::Account, macros::felt, providers::Provider, signers::SigningKey};
 use starknet_crypto::Felt;

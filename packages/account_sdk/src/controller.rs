@@ -1,5 +1,4 @@
-use crate::abigen::controller::{OutsideExecution, Owner, SignerSignature};
-use crate::account::outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller};
+use crate::abigen::controller::{Owner, SignerSignature};
 use crate::account::session::hash::Policy;
 use crate::account::{AccountHashAndCallsSigner, CallEncoder};
 use crate::constants::{ETH_CONTRACT_ADDRESS, WEBAUTHN_GAS};
@@ -9,10 +8,8 @@ use crate::provider::CartridgeProvider;
 use crate::signers::Signer;
 use crate::storage::StorageValue;
 use crate::typed_data::TypedData;
-use crate::utils::time::get_current_timestamp;
 use crate::{
     abigen::{self},
-    account::AccountHashSigner,
     signers::{HashSigner, SignError, SignerTrait},
 };
 use crate::{impl_account, Backend};
@@ -29,8 +26,11 @@ use starknet::signers::SignerInteractivityContext;
 use starknet::{
     accounts::{Account, ConnectedAccount, ExecutionEncoder},
     core::types::{BlockId, Felt},
-    signers::SigningKey,
 };
+
+#[cfg(test)]
+#[path = "controller_test.rs"]
+mod controller_test;
 
 #[derive(Clone)]
 pub struct Controller<P, B>
@@ -114,42 +114,6 @@ where
 
     pub fn owner_guid(&self) -> Felt {
         self.owner.signer().guid()
-    }
-
-    async fn execute_from_outside_raw(
-        &self,
-        outside_execution: OutsideExecution,
-    ) -> Result<InvokeTransactionResult, ControllerError> {
-        let signed = self
-            .sign_outside_execution(outside_execution.clone())
-            .await?;
-
-        let res = self
-            .provider()
-            .add_execute_outside_transaction(outside_execution, self.address, signed.signature)
-            .await
-            .map_err(ControllerError::PaymasterError)?;
-
-        Ok(InvokeTransactionResult {
-            transaction_hash: res.transaction_hash,
-        })
-    }
-
-    pub async fn execute_from_outside(
-        &self,
-        calls: Vec<Call>,
-    ) -> Result<InvokeTransactionResult, ControllerError> {
-        let now = get_current_timestamp();
-
-        let outside_execution = OutsideExecution {
-            caller: OutsideExecutionCaller::Any.into(),
-            execute_after: 0,
-            execute_before: now + 600,
-            calls: calls.into_iter().map(|call| call.into()).collect(),
-            nonce: SigningKey::from_random().secret_scalar(),
-        };
-
-        self.execute_from_outside_raw(outside_execution).await
     }
 
     pub async fn estimate_invoke_fee(
@@ -297,11 +261,8 @@ where
 
     pub async fn sign_message(&self, data: TypedData) -> Result<Vec<Felt>, SignError> {
         let hash = data.encode(self.address)?;
-        self.sign_hash(hash).await
-    }
-
-    pub fn upgrade(&self, new_class_hash: Felt) -> Call {
-        self.contract().upgrade_getcall(&new_class_hash.into())
+        let signature = self.owner.sign(&hash).await?;
+        Ok(Vec::<SignerSignature>::cairo_serialize(&vec![signature]))
     }
 }
 
@@ -366,18 +327,5 @@ where
 {
     fn encode_calls(&self, calls: &[Call]) -> Vec<Felt> {
         CallEncoder::encode_calls(calls)
-    }
-}
-
-#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
-#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<P, B> AccountHashSigner for Controller<P, B>
-where
-    P: CartridgeProvider + Send + Sync + Clone,
-    B: Backend + Clone,
-{
-    async fn sign_hash(&self, hash: Felt) -> Result<Vec<Felt>, SignError> {
-        let signature = self.owner.sign(&hash).await?;
-        Ok(Vec::<SignerSignature>::cairo_serialize(&vec![signature]))
     }
 }

@@ -1,6 +1,8 @@
 use std::fmt;
 
-use account_sdk::{errors::ControllerError, paymaster::PaymasterError, signers::DeviceError};
+use account_sdk::{
+    errors::ControllerError, provider::ExecuteFromOutsideError, signers::DeviceError,
+};
 use serde::Serialize;
 use starknet::{accounts::AccountError, core::types::StarknetError, providers::ProviderError};
 use starknet_types_core::felt::FromStrError;
@@ -155,31 +157,33 @@ impl From<ControllerError> for JsControllerError {
     }
 }
 
-impl From<PaymasterError> for JsControllerError {
-    fn from(error: PaymasterError) -> Self {
+impl From<ExecuteFromOutsideError> for JsControllerError {
+    fn from(error: ExecuteFromOutsideError) -> Self {
         let (code, message) = match error {
-            PaymasterError::ExecutionTimeNotReached => (
+            ExecuteFromOutsideError::ExecutionTimeNotReached => (
                 ErrorCode::PaymasterExecutionTimeNotReached,
                 "Execution time not yet reached".to_string(),
             ),
-            PaymasterError::ExecutionTimePassed => (
+            ExecuteFromOutsideError::ExecutionTimePassed => (
                 ErrorCode::PaymasterExecutionTimePassed,
                 "Execution time has passed".to_string(),
             ),
-            PaymasterError::InvalidCaller => (
+            ExecuteFromOutsideError::InvalidCaller => (
                 ErrorCode::PaymasterInvalidCaller,
                 "Invalid caller".to_string(),
             ),
-            PaymasterError::RateLimitExceeded => (
+            ExecuteFromOutsideError::RateLimitExceeded => (
                 ErrorCode::PaymasterRateLimitExceeded,
                 "Rate limit exceeded".to_string(),
             ),
-            PaymasterError::PaymasterNotSupported => (
+            ExecuteFromOutsideError::ExecuteFromOutsideNotSupported => (
                 ErrorCode::PaymasterNotSupported,
                 "Paymaster not supported".to_string(),
             ),
-            PaymasterError::Serialization(e) => (ErrorCode::PaymasterSerialization, e.to_string()),
-            PaymasterError::ProviderError(e) => return e.into(),
+            ExecuteFromOutsideError::Serialization(e) => {
+                (ErrorCode::PaymasterSerialization, e.to_string())
+            }
+            ExecuteFromOutsideError::ProviderError(e) => return e.into(),
         };
 
         JsControllerError {

@@ -17,8 +17,8 @@ use crate::{
         account::{webauthn::SoftPasskeySigner, FEE_TOKEN_ADDRESS},
         ensure_txn,
         runners::katana::KatanaRunner,
+        transaction_waiter::TransactionWaiter,
     },
-    transaction_waiter::TransactionWaiter,
 };
 use cainome::cairo_serde::{CairoSerde, ContractAddress, U256};
 use starknet::{

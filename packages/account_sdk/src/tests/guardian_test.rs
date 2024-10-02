@@ -47,7 +47,6 @@ pub async fn test_verify_execute(signer: Signer) {
 }
 
 #[tokio::test]
-#[ignore = "Skipped due to exhausted resources"]
 async fn test_verify_execute_webauthn() {
     let signer = Signer::Webauthn(
         WebauthnSigner::register(
@@ -64,6 +63,6 @@ async fn test_verify_execute_webauthn() {
 }
 
 #[tokio::test]
-async fn test_verify_execute_starpair() {
+async fn test_verify_execute_starkpair() {
     test_verify_execute(Signer::new_starknet_random()).await;
 }

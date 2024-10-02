@@ -28,6 +28,7 @@ impl HashSigner for Signer {
             Signer::Webauthn(s) => HashSigner::sign(s, tx_hash).await,
         }
     }
+
     fn signer(&self) -> AbigenSigner {
         match self {
             Signer::Starknet(s) => s.signer(),
@@ -120,6 +121,7 @@ impl SignerTrait for AbigenSigner {
             _ => unimplemented!(),
         }
     }
+
     fn magic(&self) -> Felt {
         match self {
             AbigenSigner::Starknet(_) => short_string!("Starknet Signer"),
