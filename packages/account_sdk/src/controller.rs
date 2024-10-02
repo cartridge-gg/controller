@@ -4,9 +4,9 @@ use crate::account::{AccountHashAndCallsSigner, CallEncoder};
 use crate::constants::{ETH_CONTRACT_ADDRESS, WEBAUTHN_GAS};
 use crate::errors::ControllerError;
 use crate::factory::ControllerFactory;
-use crate::provider::CartridgeProvider;
+use crate::provider::CartridgeJsonRpcProvider;
 use crate::signers::Signer;
-use crate::storage::StorageValue;
+use crate::storage::ControllerMetadata;
 use crate::typed_data::TypedData;
 use crate::{
     abigen::{self},
@@ -21,38 +21,39 @@ use starknet::core::types::{
 };
 use starknet::core::utils::cairo_short_string_to_felt;
 use starknet::macros::selector;
-use starknet::providers::ProviderError;
+use starknet::providers::{Provider, ProviderError};
 use starknet::signers::SignerInteractivityContext;
 use starknet::{
     accounts::{Account, ConnectedAccount, ExecutionEncoder},
     core::types::{BlockId, Felt},
 };
+use url::Url;
 
 #[cfg(test)]
 #[path = "controller_test.rs"]
 mod controller_test;
 
 #[derive(Clone)]
-pub struct Controller<P, B>
+pub struct Controller<B>
 where
-    P: CartridgeProvider + Send + Sync + Clone,
     B: Backend + Clone,
 {
     pub(crate) app_id: String,
     pub(crate) address: Felt,
     pub(crate) chain_id: Felt,
+    pub(crate) class_hash: Felt,
+    pub(crate) rpc_url: Url,
     pub username: String,
-    salt: Felt,
-    provider: P,
+    pub(crate) salt: Felt,
+    provider: CartridgeJsonRpcProvider,
     pub(crate) owner: Signer,
     contract: Option<Box<abigen::controller::Controller<Self>>>,
-    pub factory: ControllerFactory<P>,
+    pub factory: ControllerFactory,
     pub(crate) backend: B,
 }
 
-impl<P, B> Controller<P, B>
+impl<B> Controller<B>
 where
-    P: CartridgeProvider + Send + Sync + Clone,
     B: Backend + Clone,
 {
     #[allow(clippy::too_many_arguments)]
@@ -60,12 +61,13 @@ where
         app_id: String,
         username: String,
         class_hash: Felt,
-        provider: P,
+        rpc_url: Url,
         owner: Signer,
         address: Felt,
         chain_id: Felt,
         backend: B,
     ) -> Self {
+        let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
         let salt = cairo_short_string_to_felt(&username).unwrap();
 
         let mut calldata = Owner::cairo_serialize(&Owner::Signer(owner.signer()));
@@ -82,6 +84,8 @@ where
             app_id,
             address,
             chain_id,
+            class_hash,
+            rpc_url,
             username,
             salt,
             provider,
@@ -98,9 +102,14 @@ where
         controller.contract = Some(contract);
 
         controller
+            .backend
+            .set_controller(address, ControllerMetadata::from(&controller))
+            .expect("Should store controller");
+
+        controller
     }
 
-    pub fn deploy(&self) -> AccountDeploymentV1<'_, ControllerFactory<P>> {
+    pub fn deploy(&self) -> AccountDeploymentV1<'_, ControllerFactory> {
         self.factory.deploy_v1(self.salt)
     }
 
@@ -193,8 +202,7 @@ where
                     if !metadata.is_registered {
                         let mut updated_metadata = metadata;
                         updated_metadata.is_registered = true;
-                        self.backend
-                            .set(&key, &StorageValue::Session(updated_metadata))?;
+                        self.backend.set_session(&key, updated_metadata)?;
                     }
                 }
                 Ok(tx_result)
@@ -266,7 +274,7 @@ where
     }
 }
 
-impl_account!(Controller<P: CartridgeProvider, B: Backend>, |account: &Controller<P, B>, context| {
+impl_account!(Controller<B: Backend>, |account: &Controller<B>, context| {
     if let SignerInteractivityContext::Execution { calls } = context {
         account.session_account(calls).is_none()
     } else {
@@ -276,12 +284,11 @@ impl_account!(Controller<P: CartridgeProvider, B: Backend>, |account: &Controlle
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<P, B> ConnectedAccount for Controller<P, B>
+impl<B> ConnectedAccount for Controller<B>
 where
-    P: CartridgeProvider + Send + Sync + Clone,
     B: Backend + Clone,
 {
-    type Provider = P;
+    type Provider = CartridgeJsonRpcProvider;
 
     fn provider(&self) -> &Self::Provider {
         &self.provider
@@ -300,9 +307,8 @@ where
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<P, B> AccountHashAndCallsSigner for Controller<P, B>
+impl<B> AccountHashAndCallsSigner for Controller<B>
 where
-    P: CartridgeProvider + Send + Sync + Clone,
     B: Backend + Clone,
 {
     async fn sign_hash_and_calls(
@@ -320,9 +326,8 @@ where
     }
 }
 
-impl<P, B> ExecutionEncoder for Controller<P, B>
+impl<B> ExecutionEncoder for Controller<B>
 where
-    P: CartridgeProvider + Send + Sync + Clone,
     B: Backend + Clone,
 {
     fn encode_calls(&self, calls: &[Call]) -> Vec<Felt> {

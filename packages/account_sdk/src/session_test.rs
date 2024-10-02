@@ -165,7 +165,7 @@ async fn test_verify_execute_session_registered() {
     .unwrap();
 
     let session_account = SessionAccount::new_as_registered(
-        runner.client(),
+        runner.client().clone(),
         session_signer,
         controller.address(),
         runner.client().chain_id().await.unwrap(),
@@ -230,7 +230,7 @@ async fn test_create_and_use_registered_session() {
 
     // Create a SessionAccount using new_from_registered
     let session_account = SessionAccount::new_as_registered(
-        runner.client(),
+        runner.client().clone(),
         session_signer.clone(),
         controller.address(),
         controller.chain_id(),

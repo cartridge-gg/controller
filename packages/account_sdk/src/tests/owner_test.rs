@@ -300,7 +300,7 @@ async fn test_change_owner_invalidate_old_sessions() {
         "app_id".to_string(),
         "username".to_owned(),
         CONTROLLERS[&Version::LATEST].hash,
-        runner.client(),
+        runner.rpc_url.clone(),
         new_signer.clone(),
         controller.address(),
         runner.client().chain_id().await.unwrap(),

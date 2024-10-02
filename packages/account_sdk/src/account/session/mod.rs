@@ -4,12 +4,12 @@ use starknet::{
     accounts::{Account, ConnectedAccount, ExecutionEncoder},
     core::types::{BlockId, BlockTag, Call, Felt},
     macros::short_string,
-    providers::Provider,
 };
 
 use crate::{
     constants::GUARDIAN_SIGNER,
     impl_account, impl_execution_encoder,
+    provider::CartridgeJsonRpcProvider,
     signers::{HashSigner, SignError, Signer},
 };
 
@@ -24,11 +24,8 @@ pub mod hash;
 pub mod merkle;
 pub mod raw_session;
 
-pub struct SessionAccount<P>
-where
-    P: Provider + Send,
-{
-    provider: P,
+pub struct SessionAccount {
+    provider: CartridgeJsonRpcProvider,
     signer: Signer,
     address: Felt,
     chain_id: Felt,
@@ -37,12 +34,9 @@ where
     session: Session,
 }
 
-impl<P> SessionAccount<P>
-where
-    P: Provider + Send,
-{
+impl SessionAccount {
     pub fn new(
-        provider: P,
+        provider: CartridgeJsonRpcProvider,
         signer: Signer,
         address: Felt,
         chain_id: Felt,
@@ -61,7 +55,7 @@ where
     }
 
     pub fn new_as_registered(
-        provider: P,
+        provider: CartridgeJsonRpcProvider,
         signer: Signer,
         address: Felt,
         chain_id: Felt,
@@ -114,10 +108,7 @@ where
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<P> AccountHashAndCallsSigner for SessionAccount<P>
-where
-    P: Provider + Send + Sync,
-{
+impl AccountHashAndCallsSigner for SessionAccount {
     async fn sign_hash_and_calls(
         &self,
         hash: Felt,
@@ -136,14 +127,11 @@ where
     }
 }
 
-impl_execution_encoder!(SessionAccount<P: Provider>);
-impl_account!(SessionAccount<P: Provider>, |_, _| false);
+impl_execution_encoder!(SessionAccount);
+impl_account!(SessionAccount, |_, _| false);
 
-impl<P> ConnectedAccount for SessionAccount<P>
-where
-    P: Provider + Send + Sync + Clone,
-{
-    type Provider = P;
+impl ConnectedAccount for SessionAccount {
+    type Provider = CartridgeJsonRpcProvider;
 
     fn provider(&self) -> &Self::Provider {
         &self.provider

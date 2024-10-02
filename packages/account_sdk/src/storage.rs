@@ -1,9 +1,84 @@
 use async_trait::async_trait;
+use base64::Engine;
+use coset::CborSerializable;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use url::Url;
 
 use crate::{account::session::hash::Session, signers::DeviceError, Backend, OriginProvider};
 use starknet::core::types::Felt;
+
+#[derive(Debug, thiserror::Error)]
+pub enum StorageError {
+    #[error("Serialization error: {0}")]
+    Serialization(#[from] serde_json::Error),
+    #[error("Storage operation failed: {0}")]
+    OperationFailed(String),
+    #[error("Type mismatch in storage")]
+    TypeMismatch,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct WebauthnSigner {
+    pub rp_id: String,
+    pub credential_id: String,
+    pub public_key: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StarknetSigner {
+    pub private_key: Felt,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum Signer {
+    Starknet(StarknetSigner),
+    Webauthn(WebauthnSigner),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ControllerMetadata {
+    pub address: Felt,
+    pub class_hash: Felt,
+    pub rpc_url: Url,
+    pub chain_id: Felt,
+    pub salt: Felt,
+    pub owner: Signer,
+}
+
+use crate::controller::Controller;
+
+impl<B> From<&Controller<B>> for ControllerMetadata
+where
+    B: Backend + Clone,
+{
+    fn from(controller: &Controller<B>) -> Self {
+        ControllerMetadata {
+            address: controller.address,
+            class_hash: controller.class_hash,
+            chain_id: controller.chain_id,
+            rpc_url: controller.rpc_url.clone(),
+            salt: controller.salt,
+            owner: match &controller.owner {
+                crate::signers::Signer::Starknet(signer) => Signer::Starknet(StarknetSigner {
+                    private_key: signer.secret_scalar(),
+                }),
+                crate::signers::Signer::Webauthn(signer) => Signer::Webauthn(WebauthnSigner {
+                    rp_id: signer.rp_id.clone(),
+                    credential_id: base64::engine::general_purpose::URL_SAFE_NO_PAD
+                        .encode(signer.credential_id.as_ref()),
+                    public_key: base64::engine::general_purpose::URL_SAFE_NO_PAD.encode(
+                        signer
+                            .pub_key
+                            .clone()
+                            .to_vec()
+                            .expect("Public Key serilaize to bytes"),
+                    ),
+                }),
+            },
+        }
+    }
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
 pub struct SessionMetadata {
@@ -21,6 +96,7 @@ pub struct Credentials {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum StorageValue {
+    Controller(ControllerMetadata),
     Session(SessionMetadata),
 }
 
@@ -31,14 +107,37 @@ pub trait StorageBackend: Send + Sync {
     fn remove(&mut self, key: &str) -> Result<(), StorageError>;
     fn clear(&mut self) -> Result<(), StorageError>;
     fn keys(&self) -> Result<Vec<String>, StorageError>;
-}
 
-#[derive(Debug, thiserror::Error)]
-pub enum StorageError {
-    #[error("Serialization error: {0}")]
-    Serialization(#[from] serde_json::Error),
-    #[error("Storage operation failed: {0}")]
-    OperationFailed(String),
+    fn session(&self, key: &str) -> Result<Option<SessionMetadata>, StorageError> {
+        self.get(key).and_then(|value| match value {
+            Some(StorageValue::Session(metadata)) => Ok(Some(metadata)),
+            Some(_) => Err(StorageError::TypeMismatch),
+            None => Ok(None),
+        })
+    }
+
+    fn set_session(&mut self, key: &str, metadata: SessionMetadata) -> Result<(), StorageError> {
+        self.set(key, &StorageValue::Session(metadata))
+    }
+
+    fn controller(&self, key: &str) -> Result<Option<ControllerMetadata>, StorageError> {
+        self.get(key).and_then(|value| match value {
+            Some(StorageValue::Controller(metadata)) => Ok(Some(metadata)),
+            Some(_) => Err(StorageError::TypeMismatch),
+            None => Ok(None),
+        })
+    }
+
+    fn set_controller(
+        &mut self,
+        address: Felt,
+        metadata: ControllerMetadata,
+    ) -> Result<(), StorageError> {
+        self.set(
+            &Selectors::account(&address),
+            &StorageValue::Controller(metadata),
+        )
+    }
 }
 
 #[derive(Clone, Debug, Default)]

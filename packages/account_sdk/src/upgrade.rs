@@ -1,15 +1,14 @@
 use starknet::core::types::Call;
 use starknet_crypto::Felt;
 
-use crate::{controller::Controller, provider::CartridgeProvider, Backend};
+use crate::{controller::Controller, Backend};
 
 #[cfg(test)]
 #[path = "upgrade_test.rs"]
 mod upgrade_test;
 
-impl<P, B> Controller<P, B>
+impl<B> Controller<B>
 where
-    P: CartridgeProvider + Send + Sync + Clone,
     B: Backend + Clone,
 {
     pub fn upgrade(&self, new_class_hash: Felt) -> Call {

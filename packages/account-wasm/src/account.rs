@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use crate::errors::JsControllerError;
 use crate::signer::BrowserBackend;
 use crate::types::call::JsCall;
@@ -11,7 +9,6 @@ use crate::types::{Felts, JsFelt};
 use account_sdk::artifacts::{Version, CONTROLLERS};
 use account_sdk::controller::Controller;
 use account_sdk::errors::ControllerError;
-use account_sdk::provider::CartridgeJsonRpcProvider;
 use serde_wasm_bindgen::to_value;
 use starknet::accounts::ConnectedAccount;
 use starknet::core::types::Call;
@@ -25,7 +22,7 @@ type Result<T> = std::result::Result<T, JsError>;
 
 #[wasm_bindgen]
 pub struct CartridgeAccount {
-    controller: Controller<Arc<CartridgeJsonRpcProvider>, BrowserBackend>,
+    controller: Controller<BrowserBackend>,
 }
 
 #[wasm_bindgen]
@@ -51,7 +48,6 @@ impl CartridgeAccount {
         set_panic_hook();
 
         let rpc_url = Url::parse(&rpc_url)?;
-        let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
 
         let username = username.to_lowercase();
 
@@ -59,7 +55,7 @@ impl CartridgeAccount {
             app_id,
             username.clone(),
             CONTROLLERS[&Version::V1_0_4].hash,
-            Arc::new(provider),
+            rpc_url,
             signer.try_into()?,
             address.0,
             chain_id.0,

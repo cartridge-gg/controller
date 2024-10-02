@@ -53,6 +53,7 @@ pub struct KatanaRunner {
     chain_id: Felt,
     testnet: SubprocessRunner,
     client: CartridgeJsonRpcProvider,
+    pub rpc_url: Url,
     rpc_client: Arc<JsonRpcClient<HttpTransport>>,
     proxy_handle: JoinHandle<()>,
 }
@@ -84,6 +85,7 @@ impl KatanaRunner {
             chain_id: config.chain_id,
             testnet,
             client,
+            rpc_url: proxy_url,
             rpc_client,
             proxy_handle,
         }
@@ -174,7 +176,7 @@ impl KatanaRunner {
         username: String,
         signer: Signer,
         version: Version,
-    ) -> Controller<CartridgeJsonRpcProvider, InMemoryBackend> {
+    ) -> Controller<InMemoryBackend> {
         let mut constructor_calldata =
             controller::Owner::cairo_serialize(&controller::Owner::Signer(signer.signer()));
         constructor_calldata.extend(Option::<AbigenSigner>::cairo_serialize(&None));
@@ -189,7 +191,7 @@ impl KatanaRunner {
             "app_id".to_string(),
             username,
             CONTROLLERS[&version].hash,
-            self.client.clone(),
+            self.rpc_url.clone(),
             signer,
             deployed_address,
             self.chain_id,
