@@ -8,9 +8,10 @@ import {
 
 import { useConnection } from "hooks/connection";
 import { useRouter } from "next/router";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { LoginMode } from "components/connect/types";
 import { SESSION_EXPIRATION } from "const";
+import { PageLoading } from "components/Loading";
 
 type SessionResponse = {
   username: string;
@@ -36,13 +37,14 @@ export default function Session() {
   const queries = router.query as SessionQueryParams;
 
   const { controller, policies, origin } = useConnection();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Handler for calling the callback uri.
   // Send the session details to the callback uri in the body of the
   // POST request. If the request is successful, then redirect to the
   // success page. Else, redirect to the failure page.
   const onCallback = useCallback(
-    (response: SessionResponse) => {
+    async (response: SessionResponse) => {
       if (!queries.callback_uri && !queries.redirect_uri) {
         router.replace(`/failure`);
         return;
@@ -56,28 +58,31 @@ export default function Session() {
       const encodedResponse = btoa(JSON.stringify(response)).replace(/=+$/, "");
 
       if (queries.callback_uri) {
-        fetch(sanitizeCallbackUrl(decodeURIComponent(queries.callback_uri)), {
-          body: encodedResponse,
-          headers,
-          method: "POST",
-        })
-          .then(async (res) => {
-            if (res.ok) {
-              return router.replace({
-                pathname: "/success",
-                query: {
-                  title: "Session Registered!",
-                  description: "Return to your terminal to continue",
-                },
-              });
-            }
+        try {
+          const res = await fetch(
+            sanitizeCallbackUrl(decodeURIComponent(queries.callback_uri)),
+            {
+              body: encodedResponse,
+              headers,
+              method: "POST",
+            },
+          );
 
-            Promise.reject();
-          })
-          .catch((e) => {
-            console.error("failed to call the callback url", e);
-            router.replace(`/failure`);
-          });
+          if (res.ok) {
+            return router.replace({
+              pathname: "/success",
+              query: {
+                title: "Session Registered!",
+                description: "Return to your terminal to continue",
+              },
+            });
+          }
+        } catch (e) {
+          console.error("failed to call the callback url", e);
+          router.replace(`/failure`);
+        }
+
+        return;
       }
 
       if (queries.redirect_uri) {
@@ -121,8 +126,8 @@ export default function Session() {
       return;
     }
 
-    // If the requested policies has no mismatch with existing policies then return
-    // the exising session
+    // If the requested policies has no mismatch with existing policies and public key already
+    // registered then return the exising session
     if (controller.account.session(policies, queries.public_key)) {
       onCallback({
         username: controller.username,
@@ -131,17 +136,29 @@ export default function Session() {
         alreadyRegistered: true,
         expiresAt: String(SESSION_EXPIRATION),
       });
+
+      return;
     }
+
+    setIsLoading(false);
   }, [controller, origin, policies, queries.public_key, onCallback]);
 
-  return controller ? (
-    queries.public_key ? (
-      <RegisterSession onConnect={onConnect} publicKey={queries.public_key} />
-    ) : (
-      <CreateSession onConnect={onConnect} />
-    )
-  ) : (
-    <CreateController loginMode={LoginMode.Controller} />
+  if (!controller) {
+    return <CreateController loginMode={LoginMode.Controller} />;
+  }
+
+  if (isLoading) {
+    return <PageLoading />;
+  }
+
+  return (
+    <>
+      {queries.public_key ? (
+        <RegisterSession onConnect={onConnect} publicKey={queries.public_key} />
+      ) : (
+        <CreateSession onConnect={onConnect} />
+      )}
+    </>
   );
 }
 
