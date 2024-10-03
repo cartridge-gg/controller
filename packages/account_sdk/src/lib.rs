@@ -1,5 +1,4 @@
 use signers::DeviceError;
-use storage::StorageBackend;
 
 pub mod abigen;
 pub mod account;
@@ -22,7 +21,7 @@ pub mod utils;
 #[cfg(test)]
 pub mod tests;
 
-pub trait Backend: StorageBackend + OriginProvider {}
+pub trait Backend: OriginProvider {}
 
 pub trait OriginProvider: std::fmt::Debug {
     fn origin(&self) -> Result<String, DeviceError>;

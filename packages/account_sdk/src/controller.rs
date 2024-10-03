@@ -4,14 +4,15 @@ use crate::account::{AccountHashAndCallsSigner, CallEncoder};
 use crate::constants::{ETH_CONTRACT_ADDRESS, WEBAUTHN_GAS};
 use crate::errors::ControllerError;
 use crate::factory::ControllerFactory;
+use crate::impl_account;
 use crate::provider::CartridgeJsonRpcProvider;
 use crate::signers::Signer;
+use crate::storage::{Storage, StorageBackend};
 use crate::typed_data::TypedData;
 use crate::{
     abigen::{self},
     signers::{HashSigner, SignError, SignerTrait},
 };
-use crate::{impl_account, Backend};
 use async_trait::async_trait;
 use cainome::cairo_serde::{CairoSerde, U256};
 use starknet::accounts::{AccountDeploymentV1, AccountError, AccountFactory, ExecutionV1};
@@ -33,10 +34,7 @@ use url::Url;
 mod controller_test;
 
 #[derive(Clone)]
-pub struct Controller<B>
-where
-    B: Backend + Clone,
-{
+pub struct Controller {
     pub(crate) app_id: String,
     pub(crate) address: Felt,
     pub(crate) chain_id: Felt,
@@ -48,14 +46,10 @@ where
     pub(crate) owner: Signer,
     contract: Option<Box<abigen::controller::Controller<Self>>>,
     pub factory: ControllerFactory,
-    pub(crate) backend: B,
+    pub(crate) storage: Storage,
 }
 
-impl<B> Controller<B>
-where
-    B: Backend + Clone,
-{
-    #[allow(clippy::too_many_arguments)]
+impl Controller {
     pub fn new(
         app_id: String,
         username: String,
@@ -64,7 +58,6 @@ where
         owner: Signer,
         address: Felt,
         chain_id: Felt,
-        backend: B,
     ) -> Self {
         let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
         let salt = cairo_short_string_to_felt(&username).unwrap();
@@ -91,7 +84,7 @@ where
             owner,
             contract: None,
             factory,
-            backend,
+            storage: Storage::default(),
         };
 
         let contract = Box::new(abigen::controller::Controller::new(
@@ -102,7 +95,7 @@ where
 
         // TODO: Renenable once we remove js storage busting
         // controller
-        //     .backend
+        //     .storage
         //     .set_controller(address, ControllerMetadata::from(&controller))
         //     .expect("Should store controller");
 
@@ -202,7 +195,7 @@ where
                     if !metadata.is_registered {
                         let mut updated_metadata = metadata;
                         updated_metadata.is_registered = true;
-                        self.backend.set_session(&key, updated_metadata)?;
+                        self.storage.set_session(&key, updated_metadata)?;
                     }
                 }
                 Ok(tx_result)
@@ -274,7 +267,7 @@ where
     }
 }
 
-impl_account!(Controller<B: Backend>, |account: &Controller<B>, context| {
+impl_account!(Controller, |account: &Controller, context| {
     if let SignerInteractivityContext::Execution { calls } = context {
         account.session_account(calls).is_none()
     } else {
@@ -284,10 +277,7 @@ impl_account!(Controller<B: Backend>, |account: &Controller<B>, context| {
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<B> ConnectedAccount for Controller<B>
-where
-    B: Backend + Clone,
-{
+impl ConnectedAccount for Controller {
     type Provider = CartridgeJsonRpcProvider;
 
     fn provider(&self) -> &Self::Provider {
@@ -307,10 +297,7 @@ where
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<B> AccountHashAndCallsSigner for Controller<B>
-where
-    B: Backend + Clone,
-{
+impl AccountHashAndCallsSigner for Controller {
     async fn sign_hash_and_calls(
         &self,
         hash: Felt,
@@ -326,10 +313,7 @@ where
     }
 }
 
-impl<B> ExecutionEncoder for Controller<B>
-where
-    B: Backend + Clone,
-{
+impl ExecutionEncoder for Controller {
     fn encode_calls(&self, calls: &[Call]) -> Vec<Felt> {
         CallEncoder::encode_calls(calls)
     }
