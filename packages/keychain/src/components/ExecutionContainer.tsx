@@ -89,6 +89,10 @@ export function ExecutionContainer({
   }, [executionError]);
 
   const handleSubmit = async () => {
+    if (!maxFee) {
+      return;
+    }
+
     setIsLoading(true);
     try {
       await onSubmit(maxFee);
@@ -196,7 +200,7 @@ export function ExecutionContainer({
                     colorScheme="colorful"
                     onClick={handleSubmit}
                     isLoading={isLoading}
-                    isDisabled={maxFee === null && transactions.length}
+                    isDisabled={maxFee === null && transactions.length > 0}
                   >
                     {buttonText}
                   </Button>

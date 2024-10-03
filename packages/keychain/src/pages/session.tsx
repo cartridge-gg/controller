@@ -86,7 +86,7 @@ export default function Session() {
         router.replace(`${url}?${query_name}=${encodedResponse}`);
       }
     },
-    [router, queries, controller],
+    [router, queries],
   );
 
   // Handler when user clicks the Create button
@@ -101,11 +101,11 @@ export default function Session() {
         address: controller.address,
         ownerGuid: controller.account.cartridge.ownerGuid(),
         transactionHash: transaction_hash,
+        alreadyRegistered: !transaction_hash,
         expiresAt: String(SESSION_EXPIRATION),
       });
     },
     [
-      policies,
       queries.callback_uri,
       queries.redirect_uri,
       controller,
