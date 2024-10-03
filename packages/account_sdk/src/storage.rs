@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use url::Url;
 
 use crate::{account::session::hash::Session, signers::DeviceError, Backend, OriginProvider};
-use starknet::core::types::Felt;
+use starknet::{core::types::Felt, signers::SigningKey};
 
 #[derive(Debug, thiserror::Error)]
 pub enum StorageError {
@@ -59,23 +59,41 @@ where
             chain_id: controller.chain_id,
             rpc_url: controller.rpc_url.clone(),
             salt: controller.salt,
-            owner: match &controller.owner {
-                crate::signers::Signer::Starknet(signer) => Signer::Starknet(StarknetSigner {
-                    private_key: signer.secret_scalar(),
-                }),
-                crate::signers::Signer::Webauthn(signer) => Signer::Webauthn(WebauthnSigner {
-                    rp_id: signer.rp_id.clone(),
-                    credential_id: base64::engine::general_purpose::URL_SAFE_NO_PAD
-                        .encode(signer.credential_id.as_ref()),
-                    public_key: base64::engine::general_purpose::URL_SAFE_NO_PAD.encode(
-                        signer
-                            .pub_key
-                            .clone()
-                            .to_vec()
-                            .expect("Public Key serilaize to bytes"),
-                    ),
-                }),
-            },
+            owner: (&controller.owner).into(),
+        }
+    }
+}
+
+impl From<&crate::signers::Signer> for Signer {
+    fn from(signer: &crate::signers::Signer) -> Self {
+        match signer {
+            crate::signers::Signer::Starknet(s) => Signer::Starknet(s.into()),
+            crate::signers::Signer::Webauthn(s) => Signer::Webauthn(s.into()),
+        }
+    }
+}
+
+impl From<&SigningKey> for StarknetSigner {
+    fn from(signer: &SigningKey) -> Self {
+        StarknetSigner {
+            private_key: signer.secret_scalar(),
+        }
+    }
+}
+
+impl From<&crate::signers::webauthn::WebauthnSigner> for WebauthnSigner {
+    fn from(signer: &crate::signers::webauthn::WebauthnSigner) -> Self {
+        WebauthnSigner {
+            rp_id: signer.rp_id.clone(),
+            credential_id: base64::engine::general_purpose::URL_SAFE_NO_PAD
+                .encode(signer.credential_id.as_ref()),
+            public_key: base64::engine::general_purpose::URL_SAFE_NO_PAD.encode(
+                signer
+                    .pub_key
+                    .clone()
+                    .to_vec()
+                    .expect("Public Key serialize to bytes"),
+            ),
         }
     }
 }
