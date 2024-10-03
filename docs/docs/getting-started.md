@@ -1,7 +1,7 @@
 ---
 title: Getting Started
 sidebar_position: 0
-slug: /controller/getting-started
+slug: /getting-started
 ---
 
 Cartridge Controller is a gaming specific smart contract wallet plugin that enables seamless player onboarding and game interactions while maintaining compatibility with other wallets that implement the plugin account architecture (e.g. Argent).
@@ -19,23 +19,6 @@ const controller = new Controller();
 const account = controller.connect();
 
 account.execute({ ... });
-```
-
-## Usage with `starknet-react`
-
-```sh
-pnpm add @cartridge/connector @cartridge/controller @starknet-react/core starknet
-```
-
-```ts
-import ControllerConnector from "@cartridge/connector";
-const connector = new CartridgeConnector()
-
-...
-<StarknetProvider autoConnect connectors={[connector]}>
-    ...
-</StarknetProvider>
-...
 ```
 
 ## Preapproving interactions
