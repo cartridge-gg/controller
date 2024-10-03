@@ -38,8 +38,7 @@ export function RegisterSession({
 
   const onRegisterSession = useCallback(
     async (maxFee?: bigint) => {
-      if (!maxFee) {
-        onConnect();
+      if (maxFee === null) {
         return;
       }
 
