@@ -1,10 +1,7 @@
 ---
 title: Getting Started
 sidebar_position: 0
-slug: /getting-started
 ---
-
-Cartridge Controller is a gaming specific smart contract wallet plugin that enables seamless player onboarding and game interactions while maintaining compatibility with other wallets that implement the plugin account architecture (e.g. Argent).
 
 Controller implements a standard account interface and can be integrated the same way as existing wallets.
 
@@ -21,20 +18,12 @@ const account = controller.connect();
 account.execute({ ... });
 ```
 
-## Preapproving interactions
+## Examples
 
-Catridge Controller supports requesting preapproval for a set of `policies`. When a policy is preapproved, games can perform the interaction seamlessly without requesting approval from the player each time. Policys are requested during connection. Executing transactions follows the same pattern and controller will take care of requesting player approval only when necessary.
+For more detailed examples of how to use Cartridge Controller in different environments, please check out our examples:
 
-```ts
-// Using the controller directly.
-const controller = new Controller([{
-    target: "0xdead",
-    method: "have_turn",
-}]);
+1.  [Using starknet-react](./examples/starknet-react.md): Learn how to integrate Cartridge Controller with the popular `starknet-react` library for React applications.
 
-// Using starknet-react connector
-const connector = new CartridgeConnector([{
-    target: "0xdead",
-    method: "have_turn",
-}])
-```
+2.  [Using Rust](./examples/rust.md): Explore how to use Cartridge Controller in a Rust environment, including setup and basic operations.
+
+These examples provide step-by-step guidance on setting up the controller, configuring it, and performing common operations in different programming environments. They should help you get started quickly with integrating Cartridge Controller into your project.

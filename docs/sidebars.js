@@ -4,7 +4,11 @@
 const sidebars = {
   // By default, Docusaurus generates a sidebar from the docs folder structure
   controller: [
+    "overview",
     "getting-started",
+    "configuration",
+    "sessions",
+    "theming",
     {
       type: "category",
       label: "Examples",
