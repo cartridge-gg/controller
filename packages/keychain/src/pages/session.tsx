@@ -105,12 +105,7 @@ export default function Session() {
         expiresAt: String(SESSION_EXPIRATION),
       });
     },
-    [
-      queries.callback_uri,
-      queries.redirect_uri,
-      controller,
-      onCallback,
-    ],
+    [queries.callback_uri, queries.redirect_uri, controller, onCallback],
   );
 
   // Once we have a connected controller initialized, check if a session already exists.
