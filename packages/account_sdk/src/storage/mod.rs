@@ -2,11 +2,16 @@ use async_trait::async_trait;
 use base64::Engine;
 use coset::CborSerializable;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use url::Url;
 
-use crate::{account::session::hash::Session, signers::DeviceError, Backend, OriginProvider};
+use crate::account::session::hash::Session;
 use starknet::{core::types::Felt, signers::SigningKey};
+
+#[cfg(not(target_arch = "wasm32"))]
+pub mod inmemory;
+#[cfg(target_arch = "wasm32")]
+pub mod localstorage;
+pub mod selectors;
 
 #[derive(Debug, thiserror::Error)]
 pub enum StorageError {
@@ -48,11 +53,8 @@ pub struct ControllerMetadata {
 
 use crate::controller::Controller;
 
-impl<B> From<&Controller<B>> for ControllerMetadata
-where
-    B: Backend + Clone,
-{
-    fn from(controller: &Controller<B>) -> Self {
+impl From<&Controller> for ControllerMetadata {
+    fn from(controller: &Controller) -> Self {
         ControllerMetadata {
             address: controller.address,
             class_hash: controller.class_hash,
@@ -152,94 +154,14 @@ pub trait StorageBackend: Send + Sync {
         metadata: ControllerMetadata,
     ) -> Result<(), StorageError> {
         self.set(
-            &Selectors::account(&address),
+            &selectors::Selectors::account(&address),
             &StorageValue::Controller(metadata),
         )
     }
 }
 
-#[derive(Clone, Debug, Default)]
-pub struct InMemoryBackend {
-    storage: HashMap<String, String>,
-}
+#[cfg(not(target_arch = "wasm32"))]
+pub type Storage = inmemory::InMemoryBackend;
 
-impl Backend for InMemoryBackend {}
-
-impl InMemoryBackend {
-    pub fn new() -> Self {
-        Self {
-            storage: HashMap::new(),
-        }
-    }
-}
-
-#[async_trait]
-impl StorageBackend for InMemoryBackend {
-    fn set(&mut self, key: &str, value: &StorageValue) -> Result<(), StorageError> {
-        let serialized = serde_json::to_string(value)?;
-        self.storage.insert(key.to_string(), serialized);
-        Ok(())
-    }
-
-    fn get(&self, key: &str) -> Result<Option<StorageValue>, StorageError> {
-        if let Some(value) = self.storage.get(key) {
-            let deserialized = serde_json::from_str(value)?;
-            Ok(Some(deserialized))
-        } else {
-            Ok(None)
-        }
-    }
-
-    fn remove(&mut self, key: &str) -> Result<(), StorageError> {
-        self.storage.remove(key);
-        Ok(())
-    }
-
-    fn clear(&mut self) -> Result<(), StorageError> {
-        self.storage.clear();
-        Ok(())
-    }
-
-    fn keys(&self) -> Result<Vec<String>, StorageError> {
-        Ok(self.storage.keys().cloned().collect())
-    }
-}
-
-impl OriginProvider for InMemoryBackend {
-    fn origin(&self) -> Result<String, DeviceError> {
-        Ok("https://cartridge.gg".to_string())
-    }
-}
-
-pub struct Selectors;
-
-impl Selectors {
-    pub fn active() -> String {
-        "@cartridge/active".to_string()
-    }
-
-    pub fn account(address: &Felt) -> String {
-        format!("@cartridge/account-v2/0x{:x}", address)
-    }
-
-    pub fn deployment(address: &Felt, chain_id: &Felt) -> String {
-        format!("@cartridge/deployment/0x{:x}/0x{:x}", address, chain_id)
-    }
-
-    pub fn admin(address: &Felt, origin: &str) -> String {
-        format!(
-            "@cartridge/admin/0x{:x}/{}",
-            address,
-            urlencoding::encode(origin)
-        )
-    }
-
-    pub fn session(address: &Felt, app_id: &str, chain_id: &Felt) -> String {
-        format!(
-            "@cartridge/session/0x{:x}/{}/0x{:x}",
-            address,
-            urlencoding::encode(app_id),
-            chain_id
-        )
-    }
-}
+#[cfg(target_arch = "wasm32")]
+pub type Storage = localstorage::LocalStorage;

@@ -12,7 +12,6 @@ use crate::{
     artifacts::{Version, CONTROLLERS},
     controller::Controller,
     signers::{webauthn::WebauthnSigner, Signer},
-    storage::InMemoryBackend,
     tests::{
         account::{webauthn::SoftPasskeySigner, FEE_TOKEN_ADDRESS},
         ensure_txn,
@@ -176,7 +175,6 @@ async fn test_verify_execute_paymaster_should_fail() {
         Signer::new_starknet_random(),
         controller.address(),
         runner.client().chain_id().await.unwrap(),
-        InMemoryBackend::default(),
     );
 
     let outside_execution = wrong_account
