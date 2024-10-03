@@ -13,7 +13,7 @@ use crate::{
     utils::time::get_current_timestamp,
 };
 
-#[cfg(test)]
+#[cfg(all(test, not(target_arch = "wasm32")))]
 #[path = "execute_from_outside_test.rs"]
 mod execute_from_outside_test;
 

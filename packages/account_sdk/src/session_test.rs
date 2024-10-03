@@ -1,18 +1,3 @@
-use crate::{
-    abigen::erc_20::Erc20,
-    account::session::{
-        hash::{Policy, Session},
-        SessionAccount,
-    },
-    artifacts::Version,
-    signers::{webauthn::WebauthnSigner, HashSigner, Signer, SignerTrait},
-    tests::{
-        account::{webauthn::SoftPasskeySigner, FEE_TOKEN_ADDRESS},
-        ensure_txn,
-        runners::katana::KatanaRunner,
-        transaction_waiter::TransactionWaiter,
-    },
-};
 use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{
     accounts::{Account, ConnectedAccount},
@@ -22,6 +7,20 @@ use starknet::{
     signers::SigningKey,
 };
 use starknet_crypto::Felt;
+
+use crate::{
+    abigen::erc_20::Erc20,
+    account::session::{
+        hash::{Policy, Session},
+        SessionAccount,
+    },
+    artifacts::Version,
+    signers::{webauthn::WebauthnSigner, HashSigner, Signer, SignerTrait},
+    tests::{
+        account::FEE_TOKEN_ADDRESS, ensure_txn, runners::katana::KatanaRunner,
+        transaction_waiter::TransactionWaiter,
+    },
+};
 
 pub async fn test_verify_execute(signer: Signer) {
     let runner = KatanaRunner::load();
@@ -70,7 +69,6 @@ async fn test_verify_execute_session_webauthn_starknet_starknet() {
             "cartridge.gg".to_string(),
             "username".to_string(),
             "challenge".as_bytes(),
-            SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
         )
         .await
         .unwrap(),

@@ -1,5 +1,3 @@
-use signers::DeviceError;
-
 pub mod abigen;
 pub mod account;
 pub mod artifacts;
@@ -20,9 +18,3 @@ pub mod utils;
 #[cfg(not(target_arch = "wasm32"))]
 #[cfg(test)]
 pub mod tests;
-
-pub trait Backend: OriginProvider {}
-
-pub trait OriginProvider: std::fmt::Debug {
-    fn origin(&self) -> Result<String, DeviceError>;
-}

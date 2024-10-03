@@ -9,6 +9,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
   RUST_VERSION: 1.80.0
+  VCPKG_ROOT: "${{ github.workspace }}/vcpkg"
 
 jobs:
   ensure-wasm:
@@ -27,10 +28,16 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: johnwason/vcpkg-action@v4
+        with:
+          pkgs: openssl
+          triplet: x64-windows-static-md
+          token: ${{ github.token }}
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: ${{ env.RUST_VERSION }}
           target: x86_64-pc-windows-msvc
+      - run: choco install openssl
       - run: cargo build --target x86_64-pc-windows-msvc -p account_sdk
 
   clippy:

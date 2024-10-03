@@ -14,7 +14,7 @@ use crate::storage::StorageBackend;
 use crate::storage::{selectors::Selectors, Credentials, SessionMetadata};
 use crate::utils::time::get_current_timestamp;
 
-#[cfg(test)]
+#[cfg(all(test, not(target_arch = "wasm32")))]
 #[path = "session_test.rs"]
 mod session_test;
 

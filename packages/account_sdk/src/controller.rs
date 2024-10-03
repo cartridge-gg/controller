@@ -29,7 +29,7 @@ use starknet::{
 };
 use url::Url;
 
-#[cfg(test)]
+#[cfg(all(test, not(target_arch = "wasm32")))]
 #[path = "controller_test.rs"]
 mod controller_test;
 
