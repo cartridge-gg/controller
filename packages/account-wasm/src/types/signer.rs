@@ -9,8 +9,6 @@ use starknet::signers::SigningKey;
 use tsify_next::Tsify;
 use wasm_bindgen::prelude::*;
 
-use crate::signer::BrowserBackend;
-
 use super::EncodingError;
 use super::JsFelt;
 
@@ -64,12 +62,7 @@ impl TryFrom<WebauthnSigner> for account_sdk::signers::webauthn::WebauthnSigner 
             EncodingError::Serialization(serde_wasm_bindgen::Error::new("Invalid CoseKey"))
         })?;
 
-        Ok(Self::new(
-            webauthn.rp_id,
-            credential_id,
-            cose,
-            BrowserBackend,
-        ))
+        Ok(Self::new(webauthn.rp_id, credential_id, cose))
     }
 }
 

@@ -6,7 +6,7 @@ use crate::{
     signers::{
         webauthn::WebauthnSigner, HashSigner, NewOwnerSigner, SignError, Signer, SignerTrait,
     },
-    tests::{account::webauthn::SoftPasskeySigner, ensure_txn, runners::katana::KatanaRunner},
+    tests::{ensure_txn, runners::katana::KatanaRunner},
 };
 use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{
@@ -333,7 +333,6 @@ async fn test_call_unallowed_methods() {
             "cartridge.gg".to_string(),
             "username".to_string(),
             "challenge".as_bytes(),
-            SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
         )
         .await
         .unwrap(),

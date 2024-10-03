@@ -3,7 +3,7 @@ use starknet_crypto::Felt;
 
 use crate::controller::Controller;
 
-#[cfg(test)]
+#[cfg(all(test, not(target_arch = "wasm32")))]
 #[path = "upgrade_test.rs"]
 mod upgrade_test;
 

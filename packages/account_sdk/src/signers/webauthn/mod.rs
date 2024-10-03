@@ -1,14 +1,25 @@
 use async_trait::async_trait;
+use base64urlsafedata::{Base64UrlSafeData, HumanBinaryData};
 use cainome::cairo_serde::{NonZero, U256};
+use coset::CborSerializable;
 use coset::{cbor::Value, iana, CoseKey, KeyType, Label};
 use ecdsa::{RecoveryId, VerifyingKey};
+use nom::{
+    bytes::complete::take,
+    combinator::cond,
+    error::ParseError,
+    number::complete::{be_u16, be_u32},
+};
+use once_cell::sync::Lazy;
 use p256::NistP256;
+use serde::de::DeserializeOwned;
+use serde::{Deserialize, Serialize};
+use serde_cbor_2::error::Error as CBORError;
 use sha2::{digest::Update, Digest, Sha256};
 use starknet::core::types::Felt;
 use std::collections::BTreeMap;
 use std::ops::Neg;
 use std::result::Result;
-use std::sync::Arc;
 use webauthn_rs_proto::{
     AllowCredentials, AttestationConveyancePreference, AuthenticatorSelectionCriteria,
     CredentialProtectionPolicy, PubKeyCredParams, PublicKeyCredential,
@@ -22,20 +33,25 @@ use crate::abigen::{
     self,
     controller::{Signer as AbigenSigner, SignerSignature, WebauthnSignature},
 };
-use crate::OriginProvider;
 
-use serde::{Deserialize, Serialize};
+#[cfg(target_arch = "wasm32")]
+pub mod browser;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod softpasskey;
 
-use base64urlsafedata::{Base64UrlSafeData, HumanBinaryData};
-use coset::CborSerializable;
-use nom::{
-    bytes::complete::take,
-    combinator::cond,
-    error::ParseError,
-    number::complete::{be_u16, be_u32},
-};
-use serde::de::DeserializeOwned;
-use serde_cbor_2::error::Error as CBORError;
+#[cfg(not(target_arch = "wasm32"))]
+pub type Operations = softpasskey::SoftPasskeyOperations;
+
+#[cfg(target_arch = "wasm32")]
+pub type Operations = browser::BrowserOperations;
+
+#[cfg(not(target_arch = "wasm32"))]
+pub static OPERATIONS: Lazy<Operations> = Lazy::new(|| {
+    softpasskey::SoftPasskeyOperations::new("https://cartridge.gg".try_into().unwrap())
+});
+
+#[cfg(target_arch = "wasm32")]
+pub static OPERATIONS: Lazy<Operations> = Lazy::new(|| browser::BrowserOperations {});
 
 /// Marker type parameter for data related to registration ceremony
 #[derive(Debug)]
@@ -287,7 +303,7 @@ pub struct ClientData {
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-pub trait WebauthnBackend: std::fmt::Debug {
+pub trait WebauthnOperations: std::fmt::Debug {
     async fn get_assertion(
         &self,
         options: PublicKeyCredentialRequestOptions,
@@ -297,15 +313,9 @@ pub trait WebauthnBackend: std::fmt::Debug {
         &self,
         options: PublicKeyCredentialCreationOptions,
     ) -> Result<RegisterPublicKeyCredential, DeviceError>;
+
+    fn origin(&self) -> Result<String, DeviceError>;
 }
-
-#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
-#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-pub trait WebauthnBackendWithOrigin: WebauthnBackend + OriginProvider + Sync {}
-
-#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
-#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<T> WebauthnBackendWithOrigin for T where T: WebauthnBackend + OriginProvider + Sync {}
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
@@ -328,8 +338,7 @@ impl HashSigner for WebauthnSigner {
             extensions: None,
         };
 
-        let cred = self
-            .operations
+        let cred = OPERATIONS
             .get_assertion(options)
             .await
             .map_err(SignError::Device)?;
@@ -393,14 +402,13 @@ pub struct WebauthnSigner {
     pub rp_id: String,
     pub credential_id: CredentialID,
     pub pub_key: CoseKey,
-    pub operations: Arc<dyn WebauthnBackendWithOrigin + Sync + Send>,
 }
 
 impl From<&WebauthnSigner> for abigen::controller::WebauthnSigner {
     fn from(signer: &WebauthnSigner) -> Self {
         Self {
             rp_id_hash: NonZero::new(U256::from_bytes_be(&signer.rp_id_hash())).unwrap(),
-            origin: signer.operations.origin().unwrap().into_bytes(),
+            origin: OPERATIONS.origin().unwrap().into_bytes(),
             pubkey: NonZero::new(U256::from_bytes_be(
                 &signer.pub_key_bytes().unwrap()[0..32].try_into().unwrap(),
             ))
@@ -410,17 +418,11 @@ impl From<&WebauthnSigner> for abigen::controller::WebauthnSigner {
 }
 
 impl WebauthnSigner {
-    pub fn new(
-        rp_id: String,
-        credential_id: CredentialID,
-        pub_key: CoseKey,
-        operations: impl WebauthnBackendWithOrigin + Send + 'static,
-    ) -> Self {
+    pub fn new(rp_id: String, credential_id: CredentialID, pub_key: CoseKey) -> Self {
         Self {
             rp_id,
             credential_id,
             pub_key,
-            operations: Arc::from(operations),
         }
     }
 
@@ -428,7 +430,6 @@ impl WebauthnSigner {
         rp_id: String,
         user_name: String,
         challenge: &[u8],
-        operations: impl WebauthnBackendWithOrigin + Send + 'static,
     ) -> Result<Self, DeviceError> {
         let options = PublicKeyCredentialCreationOptions {
             rp: RelyingParty {
@@ -456,7 +457,7 @@ impl WebauthnSigner {
             hints: None,
             attestation_formats: None,
         };
-        let res = operations.create_credential(options).await?;
+        let res = OPERATIONS.create_credential(options).await?;
         let ao =
             AttestationObject::<Registration>::try_from(res.response.attestation_object.as_ref())
                 .map_err(|e| DeviceError::CreateCredential(format!("CoseError: {:?}", e)))
@@ -471,7 +472,6 @@ impl WebauthnSigner {
             rp_id,
             credential_id: cred.credential_id,
             pub_key,
-            operations: Arc::from(operations),
         })
     }
 
