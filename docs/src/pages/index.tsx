@@ -1,21 +1,6 @@
 import React from 'react';
-import Layout from '@theme/Layout';
+import { Redirect } from '@docusaurus/router';
 
-export default function Hello() {
-    return (
-        <Layout title="Hello" description="Hello React Page">
-            <div
-                style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    height: '50vh',
-                    fontSize: '20px',
-                }}>
-                <p>
-                    Welcome to Cartridge
-                </p>
-            </div>
-        </Layout>
-    );
+export default function Home() {
+    return <Redirect to="/getting-started" />;
 }

@@ -1,3 +1,9 @@
+use cainome::cairo_serde::{CairoSerde, ContractAddress, U256};
+use starknet::{
+    accounts::Account,
+    macros::{felt, selector},
+    providers::Provider,
+};
 use std::vec;
 
 use crate::{
@@ -12,19 +18,10 @@ use crate::{
     artifacts::{Version, CONTROLLERS},
     controller::Controller,
     signers::{webauthn::WebauthnSigner, Signer},
-    storage::InMemoryBackend,
     tests::{
-        account::{webauthn::SoftPasskeySigner, FEE_TOKEN_ADDRESS},
-        ensure_txn,
-        runners::katana::KatanaRunner,
+        account::FEE_TOKEN_ADDRESS, ensure_txn, runners::katana::KatanaRunner,
         transaction_waiter::TransactionWaiter,
     },
-};
-use cainome::cairo_serde::{CairoSerde, ContractAddress, U256};
-use starknet::{
-    accounts::Account,
-    macros::{felt, selector},
-    providers::Provider,
 };
 
 pub async fn test_verify_paymaster_execute(signer: Signer, use_session: bool) {
@@ -100,7 +97,6 @@ async fn test_verify_execute_webauthn_paymaster_starknet() {
             "cartridge.gg".to_string(),
             "username".to_string(),
             "challenge".as_bytes(),
-            SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
         )
         .await
         .unwrap(),
@@ -121,7 +117,6 @@ async fn test_verify_execute_webauthn_paymaster_starknet_session() {
             "cartridge.gg".to_string(),
             "username".to_string(),
             "challenge".as_bytes(),
-            SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
         )
         .await
         .unwrap(),
@@ -176,7 +171,6 @@ async fn test_verify_execute_paymaster_should_fail() {
         Signer::new_starknet_random(),
         controller.address(),
         runner.client().chain_id().await.unwrap(),
-        InMemoryBackend::default(),
     );
 
     let outside_execution = wrong_account

@@ -1,8 +1,8 @@
 ---
 title: Using starknet-react
-sidebar_position: 2
-slug: /controller/starknet-react
+sidebar_position: 1
 ---
+
 
 ```sh
 yarn add @cartridge/connector @cartridge/controller @starknet-react/core starknet

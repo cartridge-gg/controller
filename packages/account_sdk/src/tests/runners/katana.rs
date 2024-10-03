@@ -19,7 +19,6 @@ use crate::artifacts::{Version, CONTROLLERS};
 use crate::controller::Controller;
 use crate::provider::CartridgeJsonRpcProvider;
 use crate::signers::{HashSigner, Signer};
-use crate::storage::InMemoryBackend;
 use crate::tests::account::{
     AccountDeclaration, AccountDeployment, DeployResult, FEE_TOKEN_ADDRESS,
 };
@@ -176,7 +175,7 @@ impl KatanaRunner {
         username: String,
         signer: Signer,
         version: Version,
-    ) -> Controller<InMemoryBackend> {
+    ) -> Controller {
         let mut constructor_calldata =
             controller::Owner::cairo_serialize(&controller::Owner::Signer(signer.signer()));
         constructor_calldata.extend(Option::<AbigenSigner>::cairo_serialize(&None));
@@ -195,7 +194,6 @@ impl KatanaRunner {
             signer,
             deployed_address,
             self.chain_id,
-            InMemoryBackend::default(),
         )
     }
 

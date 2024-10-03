@@ -4,9 +4,7 @@ use crate::{
     artifacts::{Version, CONTROLLERS},
     controller::Controller,
     signers::Signer,
-    storage::InMemoryBackend,
-    tests::runners::katana::KatanaRunner,
-    tests::transaction_waiter::TransactionWaiter,
+    tests::{runners::katana::KatanaRunner, transaction_waiter::TransactionWaiter},
 };
 use starknet::{accounts::Account, macros::felt, providers::Provider, signers::SigningKey};
 use starknet_crypto::Felt;
@@ -22,7 +20,6 @@ async fn test_deploy_controller() {
     )));
 
     let provider = runner.client();
-    let backend = InMemoryBackend::default();
     let chain_id = provider.chain_id().await.unwrap();
 
     // Create a new Controller instance
@@ -38,7 +35,6 @@ async fn test_deploy_controller() {
         owner.clone(),
         Felt::ZERO,
         chain_id,
-        backend.clone(),
     )
     .deploy()
     .address();
@@ -51,7 +47,6 @@ async fn test_deploy_controller() {
         owner.clone(),
         address,
         chain_id,
-        backend,
     );
 
     let deploy = controller.deploy();

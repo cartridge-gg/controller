@@ -1,11 +1,3 @@
-use crate::errors::JsControllerError;
-use crate::signer::BrowserBackend;
-use crate::types::call::JsCall;
-use crate::types::policy::Policy;
-use crate::types::session::SessionMetadata;
-use crate::types::signer::Signer;
-use crate::types::{Felts, JsFelt};
-
 use account_sdk::artifacts::{Version, CONTROLLERS};
 use account_sdk::controller::Controller;
 use account_sdk::errors::ControllerError;
@@ -15,14 +7,20 @@ use starknet::core::types::Call;
 use url::Url;
 use wasm_bindgen::prelude::*;
 
+use crate::errors::JsControllerError;
+use crate::types::call::JsCall;
 use crate::types::invocation::JsInvocationsDetails;
+use crate::types::policy::Policy;
+use crate::types::session::SessionMetadata;
+use crate::types::signer::Signer;
+use crate::types::{Felts, JsFelt};
 use crate::utils::set_panic_hook;
 
 type Result<T> = std::result::Result<T, JsError>;
 
 #[wasm_bindgen]
 pub struct CartridgeAccount {
-    controller: Controller<BrowserBackend>,
+    controller: Controller,
 }
 
 #[wasm_bindgen]
@@ -59,7 +57,6 @@ impl CartridgeAccount {
             signer.try_into()?,
             address.0,
             chain_id.0,
-            BrowserBackend,
         );
 
         Ok(CartridgeAccount { controller })
