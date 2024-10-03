@@ -1,10 +1,7 @@
-* * *
-
-title: Using Controller in Rust
-
-## sidebar_position: 2
-
-## Using Controller in Rust
+---
+title: Rust
+sidebar_position: 2
+---
 
 ### Installation
 
@@ -40,8 +37,9 @@ Initialize the controller with necessary parameters:
 async fn main() {
     // Create a signer (replace with your own private key)
     let owner = Signer::Starknet(SigningKey::from_secret_scalar(FieldElement::from_hex_be("0xYourPrivateKey").unwrap()));
+
     // Initialize the provider (replace with your RPC URL)
-    let provider = Provider::try_from("https://api.cartridge.gg/x/starknet/sepolia").unwrap();
+    let provider = Provider::try_from("http://localhost:5050").unwrap();
     let chain_id = provider.chain_id().await.unwrap();
 
     // Create a new Controller instance
@@ -50,7 +48,7 @@ async fn main() {
         "your_app_id".to_string(),
         username.clone(),
         FieldElement::from_hex_be("0xYourClassHash").unwrap(), // Class hash
-        "https://api.cartridge.gg/x/starknet/sepolia".parse().unwrap(), // RPC URL
+        "http://localhost:5050".parse().unwrap(), // RPC URL
         owner.clone(),
         FieldElement::from_hex_be("0xYourControllerAddress").unwrap(), // Controller address
         chain_id,

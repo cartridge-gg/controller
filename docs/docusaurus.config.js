@@ -1,7 +1,6 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
-
-const darkCodeTheme = require("prism-react-renderer/themes/dracula");
+import {themes as prismThemes} from 'prism-react-renderer';
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -85,8 +84,8 @@ const config = {
         copyright: `Copyright © ${new Date().getFullYear()} Cartridge Gaming Company.`,
       },
       prism: {
-        theme: darkCodeTheme,
-        darkTheme: darkCodeTheme,
+        theme: prismThemes.dracula,
+        additionalLanguages: ["rust"],
       },
       colorMode: {
         defaultMode: "dark",
