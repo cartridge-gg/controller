@@ -4,7 +4,7 @@
   "tasks": {
     "build:deps": {
       "dependsOn": ["^build:deps"],
-      "outputs": ["dist/**"]
+      "outputs": ["dist/**", "pkg/**"]
     },
     "build": {
       "dependsOn": ["^build:deps", "^build"],
@@ -32,5 +32,13 @@
       "dependsOn": ["^build:deps"],
       "persistent": true
     }
-  }
+  },
+  "globalDependencies": [
+    "package.json",
+    "pnpm-lock.yaml",
+    "Cargo.lock",
+    "Cargo.toml",
+    "packages/account_sdk",
+    "packages/account-wasm"
+  ]
 }
