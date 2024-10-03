@@ -1,41 +1,14 @@
-# Website
+# Documentation
 
-This website is built using [Docusaurus 2](https://docusaurus.io/), a modern static website generator.
+Welcome to the documentation for the Cartridge Account SDK.
 
-### Installation
+## New Guides
 
-```
-$ pnpm i
-```
+- [Using the Controller in Rust](docs/controller/using_controller_rust.md)
+- [Using the Controller in TypeScript](docs/controller/using_controller_typescript.md)
+- [Sessions and Configuration](docs/controller/sessions_and_configuration.md)
+- [Examples](docs/controller/examples.md)
 
-### Local Development
+## Contributing
 
-```
-$ pnpm book start
-```
-
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
-
-### Build
-
-```
-$ pnpm book build
-```
-
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
-
-### Deployment
-
-Using SSH:
-
-```
-$ USE_SSH=true pnpm book deploy
-```
-
-Not using SSH:
-
-```
-$ GIT_USER=<Your GitHub username> pnpm book deploy
-```
-
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+We welcome contributions! Please refer to the [contribution guidelines](CONTRIBUTING.md).
