@@ -165,8 +165,11 @@ pub trait StorageBackend: Send + Sync {
     }
 }
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(all(not(target_arch = "wasm32"), not(feature = "filestorage")))]
 pub type Storage = inmemory::InMemoryBackend;
 
 #[cfg(target_arch = "wasm32")]
 pub type Storage = localstorage::LocalStorage;
+
+#[cfg(all(not(target_arch = "wasm32"), feature = "filestorage"))]
+pub type Storage = fs::FileSystemBackend;

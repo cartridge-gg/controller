@@ -34,6 +34,7 @@ tsify-next = "0.5.4"
 urlencoding = "2.1.3"
 once_cell.workspace = true
 
+# Webauthn deps
 base64 = { workspace = true, optional = true }
 base64urlsafedata = { workspace = true, optional = true }
 coset = { workspace = true, optional = true }
@@ -42,6 +43,9 @@ nom = { version = "7.1", optional = true }
 p256 = { workspace = true, optional = true }
 serde_cbor_2 = { version = "0.12.0-dev", optional = true }
 sha2 = { workspace = true, optional = true }
+
+# Filestorage deps
+dirs = { version = "5", optional = true }
 
 [dev-dependencies]
 hyper = { version = "0.14.27", features = ["server"] }
@@ -94,3 +98,4 @@ webauthn = [
     "web-sys/PublicKeyCredential",
     "web-sys/PublicKeyCredentialCreationOptions",
 ]
+filestorage = ["dirs"]
