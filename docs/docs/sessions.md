@@ -9,17 +9,13 @@ Policies allow your application to define permissions that can be pre-approved b
 ```typescript
 const policies: Policy[] = [
   {
-    selector: {
-      target: "0xYourContractAddress",
-      method: "incrementCounter",
-    },
+    target: "0xYourContractAddress",
+    method: "incrementCounter",
     description: "Allows incrementing the counter",
   },
   {
-    selector: {
-      target: "0xAnotherContractAddress",
-      method: "transferTokens",
-    },
+    target: "0xAnotherContractAddress",
+    method: "transferTokens",
     description: "Allows transferring tokens",
   },
 ];
