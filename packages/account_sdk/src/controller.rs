@@ -47,6 +47,7 @@ pub struct Controller {
     contract: Option<Box<abigen::controller::Controller<Self>>>,
     pub factory: ControllerFactory,
     pub(crate) storage: Storage,
+    nonce: Felt,
 }
 
 impl Controller {
@@ -85,6 +86,7 @@ impl Controller {
             contract: None,
             factory,
             storage: Storage::default(),
+            nonce: Felt::ZERO,
         };
 
         let contract = Box::new(abigen::controller::Controller::new(
@@ -184,43 +186,68 @@ impl Controller {
             return self.execute_from_outside(calls).await;
         }
 
-        let result = self.execute_v1(calls.clone()).max_fee(max_fee).send().await;
+        let mut retry_count = 0;
+        let max_retries = 1;
 
-        match result {
-            Ok(tx_result) => {
-                // Update is_registered to true after successful execution with a session
-                if let Some((key, metadata)) =
-                    self.session_metadata(&Policy::from_calls(&calls), None)
-                {
-                    if !metadata.is_registered {
-                        let mut updated_metadata = metadata;
-                        updated_metadata.is_registered = true;
-                        self.storage.set_session(&key, updated_metadata)?;
-                    }
-                }
-                Ok(tx_result)
-            }
-            Err(e) => {
-                if let AccountError::Provider(ProviderError::StarknetError(
-                    StarknetError::TransactionExecutionError(data),
-                )) = &e
-                {
-                    if data
-                        .execution_error
-                        .contains(&format!("{:x} is not deployed.", self.address))
+        loop {
+            let nonce = self.get_nonce().await?;
+            let result = self
+                .execute_v1(calls.clone())
+                .nonce(nonce)
+                .max_fee(max_fee)
+                .send()
+                .await;
+
+            match result {
+                Ok(tx_result) => {
+                    // Update nonce
+                    self.nonce = self.nonce + 1;
+
+                    // Update is_registered to true after successful execution with a session
+                    if let Some((key, metadata)) =
+                        self.session_metadata(&Policy::from_calls(&calls), None)
                     {
-                        let balance = self.eth_balance().await?;
-                        let mut fee_estimate = self.deploy().estimate_fee().await?;
-                        fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
-                        Err(ControllerError::NotDeployed {
-                            fee_estimate: Box::new(fee_estimate),
-                            balance,
-                        })
-                    } else {
-                        Err(ControllerError::AccountError(e))
+                        if !metadata.is_registered {
+                            let mut updated_metadata = metadata;
+                            updated_metadata.is_registered = true;
+                            self.storage.set_session(&key, updated_metadata)?;
+                        }
                     }
-                } else {
-                    Err(ControllerError::AccountError(e))
+                    return Ok(tx_result);
+                }
+                Err(e) => {
+                    match &e {
+                        AccountError::Provider(ProviderError::StarknetError(
+                            StarknetError::TransactionExecutionError(data),
+                        )) if data
+                            .execution_error
+                            .contains(&format!("{:x} is not deployed.", self.address)) =>
+                        {
+                            let balance = self.eth_balance().await?;
+                            let mut fee_estimate = self.deploy().estimate_fee().await?;
+                            fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
+                            return Err(ControllerError::NotDeployed {
+                                fee_estimate: Box::new(fee_estimate),
+                                balance,
+                            });
+                        }
+                        AccountError::Provider(ProviderError::StarknetError(
+                            StarknetError::InvalidTransactionNonce,
+                        )) => {
+                            if retry_count < max_retries {
+                                // Refetch nonce from the provider
+                                let new_nonce = self
+                                    .provider
+                                    .get_nonce(self.block_id(), self.address())
+                                    .await?;
+                                self.nonce = new_nonce;
+                                retry_count += 1;
+                                continue;
+                            }
+                        }
+                        _ => {}
+                    }
+                    return Err(ControllerError::AccountError(e));
                 }
             }
         }
@@ -265,6 +292,26 @@ impl Controller {
         let signature = self.owner.sign(&hash).await?;
         Ok(Vec::<SignerSignature>::cairo_serialize(&vec![signature]))
     }
+
+    async fn get_nonce(&self) -> Result<Felt, ProviderError> {
+        let current_nonce = self.nonce;
+
+        if current_nonce == Felt::ZERO {
+            match self
+                .provider
+                .get_nonce(self.block_id(), self.address())
+                .await
+            {
+                Ok(nonce) => Ok(nonce),
+                Err(ProviderError::StarknetError(StarknetError::ContractNotFound)) => {
+                    Ok(Felt::ZERO)
+                }
+                Err(e) => Err(e),
+            }
+        } else {
+            Ok(current_nonce)
+        }
+    }
 }
 
 impl_account!(Controller, |account: &Controller, context| {
@@ -289,9 +336,7 @@ impl ConnectedAccount for Controller {
     }
 
     async fn get_nonce(&self) -> Result<Felt, ProviderError> {
-        self.provider
-            .get_nonce(self.block_id(), self.address())
-            .await
+        self.get_nonce().await
     }
 }
 

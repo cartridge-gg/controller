@@ -90,12 +90,10 @@ impl Controller {
             }),
         )?;
 
-        let txn = self
+        let call = self
             .contract()
-            .register_session(&session.raw(), &self.owner_guid())
-            .max_fee(max_fee)
-            .send()
-            .await?;
+            .register_session_getcall(&session.raw(), &self.owner_guid());
+        let txn = self.execute(vec![call], max_fee).await?;
 
         self.storage.set_session(
             &Selectors::session(&self.address, &self.app_id, &self.chain_id),
