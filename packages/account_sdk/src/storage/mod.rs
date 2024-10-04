@@ -1,8 +1,10 @@
 use async_trait::async_trait;
-use base64::Engine;
-use coset::CborSerializable;
 use serde::{Deserialize, Serialize};
-use url::Url;
+
+#[cfg(feature = "webauthn")]
+use base64::Engine;
+#[cfg(feature = "webauthn")]
+use coset::CborSerializable;
 
 use crate::account::session::hash::Session;
 use starknet::{core::types::Felt, signers::SigningKey};
@@ -38,6 +40,7 @@ pub struct StarknetSigner {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Signer {
     Starknet(StarknetSigner),
+    #[cfg(feature = "webauthn")]
     Webauthn(WebauthnSigner),
 }
 
@@ -45,7 +48,7 @@ pub enum Signer {
 pub struct ControllerMetadata {
     pub address: Felt,
     pub class_hash: Felt,
-    pub rpc_url: Url,
+    pub rpc_url: String,
     pub chain_id: Felt,
     pub salt: Felt,
     pub owner: Signer,
@@ -59,7 +62,7 @@ impl From<&Controller> for ControllerMetadata {
             address: controller.address,
             class_hash: controller.class_hash,
             chain_id: controller.chain_id,
-            rpc_url: controller.rpc_url.clone(),
+            rpc_url: controller.rpc_url.to_string(),
             salt: controller.salt,
             owner: (&controller.owner).into(),
         }
@@ -70,6 +73,7 @@ impl From<&crate::signers::Signer> for Signer {
     fn from(signer: &crate::signers::Signer) -> Self {
         match signer {
             crate::signers::Signer::Starknet(s) => Signer::Starknet(s.into()),
+            #[cfg(feature = "webauthn")]
             crate::signers::Signer::Webauthn(s) => Signer::Webauthn(s.into()),
         }
     }
@@ -83,6 +87,7 @@ impl From<&SigningKey> for StarknetSigner {
     }
 }
 
+#[cfg(feature = "webauthn")]
 impl From<&crate::signers::webauthn::WebauthnSigner> for WebauthnSigner {
     fn from(signer: &crate::signers::webauthn::WebauthnSigner) -> Self {
         WebauthnSigner {

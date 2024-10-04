@@ -1,4 +1,6 @@
 pub mod starknet;
+
+#[cfg(feature = "webauthn")]
 pub mod webauthn;
 
 use ::starknet::{
@@ -8,6 +10,8 @@ use ::starknet::{
 };
 
 use starknet_crypto::{poseidon_hash, PoseidonHasher};
+
+#[cfg(feature = "webauthn")]
 use webauthn::WebauthnSigner;
 
 use crate::abigen::controller::{Signer as AbigenSigner, SignerSignature};
@@ -16,6 +20,7 @@ use async_trait::async_trait;
 #[derive(Debug, Clone)]
 pub enum Signer {
     Starknet(SigningKey),
+    #[cfg(feature = "webauthn")]
     Webauthn(WebauthnSigner),
 }
 
@@ -25,6 +30,7 @@ impl HashSigner for Signer {
     async fn sign(&self, tx_hash: &Felt) -> Result<SignerSignature, SignError> {
         match self {
             Signer::Starknet(s) => HashSigner::sign(s, tx_hash).await,
+            #[cfg(feature = "webauthn")]
             Signer::Webauthn(s) => HashSigner::sign(s, tx_hash).await,
         }
     }
@@ -32,6 +38,7 @@ impl HashSigner for Signer {
     fn signer(&self) -> AbigenSigner {
         match self {
             Signer::Starknet(s) => s.signer(),
+            #[cfg(feature = "webauthn")]
             Signer::Webauthn(s) => s.signer(),
         }
     }
@@ -103,6 +110,7 @@ impl SignerTrait for AbigenSigner {
     fn guid(&self) -> Felt {
         match self {
             AbigenSigner::Starknet(signer) => poseidon_hash(self.magic(), *signer.pubkey.inner()),
+            #[cfg(feature = "webauthn")]
             AbigenSigner::Webauthn(signer) => {
                 let mut state = PoseidonHasher::new();
                 state.update(self.magic());
@@ -125,6 +133,7 @@ impl SignerTrait for AbigenSigner {
     fn magic(&self) -> Felt {
         match self {
             AbigenSigner::Starknet(_) => short_string!("Starknet Signer"),
+            #[cfg(feature = "webauthn")]
             AbigenSigner::Webauthn(_) => short_string!("Webauthn Signer"),
             _ => unimplemented!(),
         }

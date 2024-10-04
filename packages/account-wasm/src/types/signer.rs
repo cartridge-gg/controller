@@ -1,5 +1,4 @@
 use account_sdk::signers::webauthn::CredentialID;
-// use account_sdk::signers::webauthn::WebauthnSigner;
 use base64::engine::general_purpose;
 use base64::Engine;
 use coset::CborSerializable;

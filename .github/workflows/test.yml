@@ -34,7 +34,9 @@ jobs:
         if: steps.changes.outputs.rust == 'true'
       - uses: taiki-e/install-action@cargo-llvm-cov
         if: steps.changes.outputs.rust == 'true'
-      - run: cargo llvm-cov --all-features --lcov --output-path lcov.info
+      - run:
+          cargo llvm-cov --features webauthn --all-features --lcov --output-path
+          lcov.info
         if: steps.changes.outputs.rust == 'true'
       - uses: codecov/codecov-action@v3
         if: steps.changes.outputs.rust == 'true'
