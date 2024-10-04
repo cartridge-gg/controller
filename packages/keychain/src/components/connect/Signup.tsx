@@ -148,7 +148,7 @@ export function Signup({
       setIsRegistering(false);
       setError(e);
     }
-  }, [usernameField, initController, doPopup]);
+  }, [usernameField, chainId, initController, doPopup]);
 
   // for polling approach when popup
   useAccountQuery(
