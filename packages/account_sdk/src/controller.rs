@@ -7,7 +7,7 @@ use crate::factory::ControllerFactory;
 use crate::impl_account;
 use crate::provider::CartridgeJsonRpcProvider;
 use crate::signers::Signer;
-use crate::storage::{Storage, StorageBackend};
+use crate::storage::{ControllerMetadata, Storage, StorageBackend};
 use crate::typed_data::TypedData;
 use crate::{
     abigen::{self},
@@ -74,7 +74,7 @@ impl Controller {
         );
 
         let mut controller = Self {
-            app_id,
+            app_id: app_id.clone(),
             address,
             chain_id,
             class_hash,
@@ -95,13 +95,35 @@ impl Controller {
         ));
         controller.contract = Some(contract);
 
-        // TODO: Renenable once we remove js storage busting
-        // controller
-        //     .storage
-        //     .set_controller(address, ControllerMetadata::from(&controller))
-        //     .expect("Should store controller");
+        controller
+            .storage
+            .set_controller(
+                app_id.as_str(),
+                address,
+                ControllerMetadata::from(&controller),
+            )
+            .expect("Should store controller");
 
         controller
+    }
+
+    pub fn from_storage(app_id: String) -> Result<Option<Self>, ControllerError> {
+        let storage = Storage::default();
+        let metadata = storage.controller(&app_id).map_err(ControllerError::from)?;
+        if let Some(m) = metadata {
+            let rpc_url = Url::parse(&m.rpc_url).map_err(ControllerError::from)?;
+            Ok(Some(Controller::new(
+                app_id,
+                m.username,
+                m.class_hash,
+                rpc_url,
+                m.owner.try_into().map_err(ControllerError::from)?,
+                m.address,
+                m.chain_id,
+            )))
+        } else {
+            Ok(None)
+        }
     }
 
     pub fn deploy(&self) -> AccountDeploymentV1<'_, ControllerFactory> {

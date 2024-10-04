@@ -1,13 +1,15 @@
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
-
-#[cfg(feature = "webauthn")]
-use base64::Engine;
-#[cfg(feature = "webauthn")]
-use coset::CborSerializable;
-
-use crate::account::session::hash::Session;
 use starknet::{core::types::Felt, signers::SigningKey};
+
+use crate::{account::session::hash::Session, errors::ControllerError};
+
+#[cfg(feature = "webauthn")]
+use {
+    crate::signers::webauthn::CredentialID,
+    base64::{engine::general_purpose, Engine},
+    coset::{CborSerializable, CoseKey},
+};
 
 #[cfg(all(not(target_arch = "wasm32"), feature = "filestorage"))]
 pub mod filestorage;
@@ -48,12 +50,13 @@ pub enum Signer {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ControllerMetadata {
-    pub address: Felt,
+    pub username: String,
     pub class_hash: Felt,
     pub rpc_url: String,
-    pub chain_id: Felt,
     pub salt: Felt,
     pub owner: Signer,
+    pub address: Felt,
+    pub chain_id: Felt,
 }
 
 use crate::controller::Controller;
@@ -67,6 +70,7 @@ impl From<&Controller> for ControllerMetadata {
             rpc_url: controller.rpc_url.to_string(),
             salt: controller.salt,
             owner: (&controller.owner).into(),
+            username: controller.username.clone(),
         }
     }
 }
@@ -107,6 +111,31 @@ impl From<&crate::signers::webauthn::WebauthnSigner> for WebauthnSigner {
     }
 }
 
+impl TryFrom<Signer> for crate::signers::Signer {
+    type Error = ControllerError;
+
+    fn try_from(signer: Signer) -> Result<Self, Self::Error> {
+        match signer {
+            Signer::Starknet(s) => Ok(Self::Starknet(SigningKey::from_secret_scalar(
+                s.private_key,
+            ))),
+            #[cfg(feature = "webauthn")]
+            Signer::Webauthn(w) => {
+                let credential_id_bytes =
+                    general_purpose::URL_SAFE_NO_PAD.decode(w.credential_id)?;
+                let credential_id = CredentialID::from(credential_id_bytes);
+
+                let cose_bytes = general_purpose::URL_SAFE_NO_PAD.decode(w.public_key)?;
+                let cose = CoseKey::from_slice(&cose_bytes)?;
+
+                Ok(Self::Webauthn(
+                    crate::signers::webauthn::WebauthnSigner::new(w.rp_id, credential_id, cose),
+                ))
+            }
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
 pub struct SessionMetadata {
     pub session: Session,
@@ -121,8 +150,14 @@ pub struct Credentials {
     pub private_key: Felt,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
+pub struct ActiveMetadata {
+    address: Felt,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum StorageValue {
+    Active(ActiveMetadata),
     Controller(ControllerMetadata),
     Session(SessionMetadata),
 }
@@ -147,19 +182,31 @@ pub trait StorageBackend: Send + Sync {
         self.set(key, &StorageValue::Session(metadata))
     }
 
-    fn controller(&self, key: &str) -> Result<Option<ControllerMetadata>, StorageError> {
-        self.get(key).and_then(|value| match value {
-            Some(StorageValue::Controller(metadata)) => Ok(Some(metadata)),
-            Some(_) => Err(StorageError::TypeMismatch),
-            None => Ok(None),
-        })
+    fn controller(&self, app_id: &str) -> Result<Option<ControllerMetadata>, StorageError> {
+        self.get(&selectors::Selectors::active(app_id))
+            .and_then(|value| match value {
+                Some(StorageValue::Active(metadata)) => self
+                    .get(&selectors::Selectors::account(&metadata.address))
+                    .and_then(|value| match value {
+                        Some(StorageValue::Controller(metadata)) => Ok(Some(metadata)),
+                        Some(_) => Err(StorageError::TypeMismatch),
+                        None => Ok(None),
+                    }),
+                Some(_) => Err(StorageError::TypeMismatch),
+                None => Ok(None),
+            })
     }
 
     fn set_controller(
         &mut self,
+        app_id: &str,
         address: Felt,
         metadata: ControllerMetadata,
     ) -> Result<(), StorageError> {
+        self.set(
+            &selectors::Selectors::active(app_id),
+            &StorageValue::Active(ActiveMetadata { address }),
+        )?;
         self.set(
             &selectors::Selectors::account(&address),
             &StorageValue::Controller(metadata),

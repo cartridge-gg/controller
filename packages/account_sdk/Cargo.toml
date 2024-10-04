@@ -50,6 +50,7 @@ dirs = { version = "5", optional = true }
 [dev-dependencies]
 hyper = { version = "0.14.27", features = ["server"] }
 rand_core = { version = "0.6", features = ["getrandom"] }
+tempfile = "3.8"
 
 [build-dependencies]
 cainome.workspace = true

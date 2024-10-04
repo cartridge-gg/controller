@@ -156,3 +156,51 @@ async fn test_controller_nonce_mismatch_recovery() {
         tx2_result.err()
     );
 }
+
+#[cfg(feature = "filestorage")]
+#[tokio::test]
+async fn test_controller_storage() {
+    use crate::controller::Controller;
+    use crate::signers::Signer;
+    use crate::tests::ensure_txn;
+
+    // Setup temporary directory for file storage
+    let temp_dir = tempfile::tempdir().unwrap();
+    let storage_path = temp_dir.path().to_path_buf();
+    std::env::set_var("CARTRIDGE_STORAGE_PATH", storage_path.to_str().unwrap());
+
+    // Create a new controller
+    let app_id = "app_id".to_string();
+    let username = "test_user".to_string();
+    let owner = Signer::new_starknet_random();
+
+    let runner = KatanaRunner::load();
+    let controller = runner
+        .deploy_controller(username.clone(), owner.clone(), Version::LATEST)
+        .await;
+
+    // Verify that the controller was stored
+    let storage_file = storage_path.join(format!("@cartridge/{}/active", app_id));
+    assert!(storage_file.exists(), "Storage file was not created");
+
+    // Initialize a new controller from storage
+    let loaded_controller = Controller::from_storage(app_id).unwrap().unwrap();
+
+    // Verify that the loaded controller matches the original
+    assert_eq!(loaded_controller.username, controller.username);
+    assert_eq!(loaded_controller.address, controller.address);
+    assert_eq!(loaded_controller.chain_id, controller.chain_id);
+    assert_eq!(loaded_controller.class_hash, controller.class_hash);
+    assert_eq!(loaded_controller.rpc_url, controller.rpc_url);
+
+    let erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &loaded_controller);
+
+    let recipient = ContractAddress(felt!("0x18301129"));
+    let amount = U256 { low: 0, high: 0 };
+    let transfer = erc20.transfer(&recipient, &amount);
+
+    ensure_txn(transfer, runner.client()).await.unwrap();
+
+    // Clean up
+    temp_dir.close().unwrap();
+}
