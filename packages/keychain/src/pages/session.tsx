@@ -168,11 +168,12 @@ export default function Session() {
 function sanitizeCallbackUrl(url: string): URL | undefined {
   try {
     const parsed = new URL(url);
+    const allowedHostnames = ["localhost"];
+    const allowedPaths = ["/callback"];
 
     if (
-      parsed.hostname.endsWith("cartridge.gg") &&
-      parsed.pathname !== "/" &&
-      parsed.pathname !== "/callback"
+      !allowedHostnames.includes(parsed.hostname) ||
+      !allowedPaths.includes(parsed.pathname)
     ) {
       throw new Error(`Invalid callback url: ${url}`);
     }
