@@ -5,6 +5,7 @@ import {
   UseQueryOptions,
   UseInfiniteQueryOptions,
   UseMutationOptions,
+  QueryFunctionContext,
 } from "react-query";
 import { useFetchData } from "hooks/fetcher";
 export type Maybe<T> = T | null;
@@ -224,16 +225,10 @@ export type Controller = Node & {
   address: Scalars["String"];
   createdAt: Scalars["Time"];
   id: Scalars["ID"];
-  network: ControllerNetwork;
+  network: Scalars["String"];
   signers?: Maybe<Array<Signer>>;
   updatedAt: Scalars["Time"];
 };
-
-/** ControllerNetwork is enum for the field network */
-export enum ControllerNetwork {
-  SnMain = "SN_MAIN",
-  SnSepolia = "SN_SEPOLIA",
-}
 
 /** Ordering options for Controller connections */
 export type ControllerOrder = {
@@ -307,10 +302,19 @@ export type ControllerWhereInput = {
   idNEQ?: InputMaybe<Scalars["ID"]>;
   idNotIn?: InputMaybe<Array<Scalars["ID"]>>;
   /** network field predicates */
-  network?: InputMaybe<ControllerNetwork>;
-  networkIn?: InputMaybe<Array<ControllerNetwork>>;
-  networkNEQ?: InputMaybe<ControllerNetwork>;
-  networkNotIn?: InputMaybe<Array<ControllerNetwork>>;
+  network?: InputMaybe<Scalars["String"]>;
+  networkContains?: InputMaybe<Scalars["String"]>;
+  networkContainsFold?: InputMaybe<Scalars["String"]>;
+  networkEqualFold?: InputMaybe<Scalars["String"]>;
+  networkGT?: InputMaybe<Scalars["String"]>;
+  networkGTE?: InputMaybe<Scalars["String"]>;
+  networkHasPrefix?: InputMaybe<Scalars["String"]>;
+  networkHasSuffix?: InputMaybe<Scalars["String"]>;
+  networkIn?: InputMaybe<Array<Scalars["String"]>>;
+  networkLT?: InputMaybe<Scalars["String"]>;
+  networkLTE?: InputMaybe<Scalars["String"]>;
+  networkNEQ?: InputMaybe<Scalars["String"]>;
+  networkNotIn?: InputMaybe<Array<Scalars["String"]>>;
   not?: InputMaybe<ControllerWhereInput>;
   or?: InputMaybe<Array<ControllerWhereInput>>;
   /** updated_at field predicates */
@@ -338,16 +342,6 @@ export type CreateKatanaConfigInput = {
   validateMaxSteps?: InputMaybe<Scalars["Long"]>;
 };
 
-export type CreateMadaraConfigInput = {
-  basePath?: InputMaybe<Scalars["String"]>;
-  chain?: InputMaybe<Scalars["String"]>;
-  dev?: InputMaybe<Scalars["Boolean"]>;
-  name?: InputMaybe<Scalars["String"]>;
-  noGrandpa?: InputMaybe<Scalars["Boolean"]>;
-  sealing?: InputMaybe<Scalars["String"]>;
-  validator?: InputMaybe<Scalars["Boolean"]>;
-};
-
 export type CreateSayaConfigInput = {
   batchSize: Scalars["Int"];
   mode: Scalars["String"];
@@ -366,7 +360,6 @@ export type CreateSayaConfigInput = {
 
 export type CreateServiceConfigInput = {
   katana?: InputMaybe<CreateKatanaConfigInput>;
-  madara?: InputMaybe<CreateMadaraConfigInput>;
   saya?: InputMaybe<CreateSayaConfigInput>;
   torii?: InputMaybe<CreateToriiConfigInput>;
 };
@@ -434,11 +427,7 @@ export type DeploymentTeamsArgs = {
   where?: InputMaybe<TeamWhereInput>;
 };
 
-export type DeploymentConfig =
-  | KatanaConfig
-  | MadaraConfig
-  | SayaConfig
-  | ToriiConfig;
+export type DeploymentConfig = KatanaConfig | SayaConfig | ToriiConfig;
 
 /** A connection to a list of items. */
 export type DeploymentConnection = {
@@ -562,7 +551,6 @@ export enum DeploymentOrderField {
 
 export enum DeploymentService {
   Katana = "katana",
-  Madara = "madara",
   Saya = "saya",
   Torii = "torii",
 }
@@ -892,19 +880,6 @@ export type Logs = {
   until: Scalars["Time"];
 };
 
-export type MadaraConfig = {
-  __typename?: "MadaraConfig";
-  basePath?: Maybe<Scalars["String"]>;
-  chain?: Maybe<Scalars["String"]>;
-  dev?: Maybe<Scalars["Boolean"]>;
-  name?: Maybe<Scalars["String"]>;
-  noGrandpa?: Maybe<Scalars["Boolean"]>;
-  rpc: Scalars["String"];
-  sealing?: Maybe<Scalars["String"]>;
-  validator?: Maybe<Scalars["Boolean"]>;
-  version: Scalars["String"];
-};
-
 export type Mutation = {
   __typename?: "Mutation";
   addToTeam: Scalars["Boolean"];
@@ -953,6 +928,7 @@ export type MutationFinalizeLoginArgs = {
 
 export type MutationFinalizeRegistrationArgs = {
   credentials: Scalars["String"];
+  network: Scalars["String"];
 };
 
 export type MutationForkDeploymentArgs = {
@@ -1500,6 +1476,7 @@ export type BeginRegistrationMutation = {
 
 export type FinalizeRegistrationMutationVariables = Exact<{
   credentials: Scalars["String"];
+  network: Scalars["String"];
 }>;
 
 export type FinalizeRegistrationMutation = {
@@ -1684,8 +1661,8 @@ export const useBeginRegistrationMutation = <
     options,
   );
 export const FinalizeRegistrationDocument = `
-    mutation FinalizeRegistration($credentials: String!) {
-  finalizeRegistration(credentials: $credentials) {
+    mutation FinalizeRegistration($credentials: String!, $network: String!) {
+  finalizeRegistration(credentials: $credentials, network: $network) {
     id
     controllers {
       address

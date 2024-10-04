@@ -69,8 +69,10 @@ export const onCreateBegin = async (name: string): Promise<Credentials> => {
 
 export const onCreateFinalize = (
   credentials: Credentials,
+  network: string,
 ): Promise<FinalizeRegistrationMutation> => {
   return client.request(FinalizeRegistrationDocument, {
+    network,
     credentials: JSON.stringify({
       id: credentials.id,
       rawId: base64url(Buffer.from(credentials.rawId)),
@@ -156,9 +158,10 @@ export const doXHR = async (json: string): Promise<any> => {
 
 export async function doSignup(
   name: string,
+  network: string,
 ): Promise<FinalizeRegistrationMutation> {
   const credentials: Credentials = await onCreateBegin(name);
-  return onCreateFinalize(credentials);
+  return onCreateFinalize(credentials, network);
 }
 
 export async function doLogin({

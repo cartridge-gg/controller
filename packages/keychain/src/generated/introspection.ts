@@ -5,12 +5,7 @@ export interface PossibleTypesResultData {
 }
 const result: PossibleTypesResultData = {
   possibleTypes: {
-    DeploymentConfig: [
-      "KatanaConfig",
-      "MadaraConfig",
-      "SayaConfig",
-      "ToriiConfig",
-    ],
+    DeploymentConfig: ["KatanaConfig", "SayaConfig", "ToriiConfig"],
     Node: [
       "Account",
       "AccountTeam",

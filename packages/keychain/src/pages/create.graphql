@@ -2,8 +2,8 @@ mutation BeginRegistration($id: String!) {
   beginRegistration(id: $id)
 }
 
-mutation FinalizeRegistration($credentials: String!) {
-  finalizeRegistration(credentials: $credentials) {
+mutation FinalizeRegistration($credentials: String!, $network: String!) {
+  finalizeRegistration(credentials: $credentials, network: $network) {
     id
     controllers {
       address
