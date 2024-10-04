@@ -1,7 +1,4 @@
----
-title: Overview
-sidebar_position: 0
----
+# Overview
 
 ![Cartridge Controller Overview](./img/controller.png)
 

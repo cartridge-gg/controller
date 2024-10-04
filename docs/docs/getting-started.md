@@ -1,7 +1,4 @@
----
-title: Getting Started
-sidebar_position: 0
----
+# Getting Started
 
 Controller implements a standard account interface and can be integrated the same way as existing wallets.
 
@@ -22,8 +19,10 @@ account.execute({ ... });
 
 For more detailed examples of how to use Cartridge Controller in different environments, please check out our examples:
 
-1.  [Using starknet-react](./examples/starknet-react.md): Learn how to integrate Cartridge Controller with the popular `starknet-react` library for React applications.
+1.  [React](./examples/react.md): Learn how to integrate Cartridge Controller with the popular `starknet-react` library for React applications.
 
-2.  [Using Rust](./examples/rust.md): Explore how to use Cartridge Controller in a Rust environment, including setup and basic operations.
+2.  [Svelte](./examples/svelte.md): Discover how to implement Cartridge Controller in Svelte applications, including setup and usage with Svelte's reactive paradigm.
+
+3.  [Rust](./examples/rust.md): Explore how to use Cartridge Controller in a Rust environment, including setup and basic operations.
 
 These examples provide step-by-step guidance on setting up the controller, configuring it, and performing common operations in different programming environments. They should help you get started quickly with integrating Cartridge Controller into your project.
