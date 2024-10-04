@@ -90,6 +90,7 @@ pub async fn test_verify_paymaster_execute(signer: Signer, use_session: bool) {
     );
 }
 
+#[cfg(feature = "webauthn")]
 #[tokio::test]
 async fn test_verify_execute_webauthn_paymaster_starknet() {
     let signer = Signer::Webauthn(
@@ -110,6 +111,7 @@ async fn test_verify_execute_starknet_paymaster_starknet() {
     test_verify_paymaster_execute(Signer::new_starknet_random(), false).await;
 }
 
+#[cfg(feature = "webauthn")]
 #[tokio::test]
 async fn test_verify_execute_webauthn_paymaster_starknet_session() {
     let signer = Signer::Webauthn(

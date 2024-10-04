@@ -44,6 +44,7 @@ pub async fn test_verify_execute(signer: Signer) {
     .unwrap();
 }
 
+#[cfg(feature = "webauthn")]
 #[tokio::test]
 async fn test_verify_execute_webauthn() {
     let signer = Signer::Webauthn(
