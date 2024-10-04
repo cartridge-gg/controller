@@ -13,7 +13,12 @@ const sidebars = {
       type: "category",
       label: "Examples",
       collapsed: false,
-      items: ["examples/react", "examples/svelte", "examples/rust"],
+      items: [
+        "examples/react",
+        "examples/svelte",
+        // "examples/rust",
+        "examples/telegram",
+      ],
     },
   ],
 };
