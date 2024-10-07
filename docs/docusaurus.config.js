@@ -1,6 +1,6 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
-import {themes as prismThemes} from 'prism-react-renderer';
+import { themes as prismThemes } from "prism-react-renderer";
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -45,9 +45,19 @@ const config = {
       navbar: {
         logo: {
           alt: "Cartridge Gaming Company",
-          src: "img/logo.svg",
+          src: "img/cartridge.svg",
         },
         items: [
+          {
+            to: "/controller/overview",
+            label: "Controller",
+            position: "left",
+          },
+          {
+            to: "/slot/getting-started",
+            label: "Slot",
+            position: "left",
+          },
           {
             href: "https://github.com/cartridge-gg/cartridge",
             label: "GitHub",
