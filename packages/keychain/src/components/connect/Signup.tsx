@@ -16,7 +16,7 @@ import { useControllerTheme } from "hooks/theme";
 import { useConnection } from "hooks/connection";
 import { ErrorAlert } from "components/ErrorAlert";
 import { useDebounce } from "hooks/debounce";
-import { shortString } from "starknet";
+import { constants, shortString } from "starknet";
 
 export function Signup({
   prefilledName = "",
@@ -119,7 +119,8 @@ export function Signup({
     try {
       const data: FinalizeRegistrationMutation = await doSignup(
         usernameField.value,
-        shortString.decodeShortString(chainId),
+        //shortString.decodeShortString(chainId),
+        constants.NetworkName.SN_MAIN // hardcode to main till multi-signers is complete
       );
       const {
         finalizeRegistration: {
