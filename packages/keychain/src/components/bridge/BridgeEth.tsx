@@ -217,7 +217,7 @@ export function BridgeEth({
             )}
 
             <TransferButton
-              account={controller.account}
+              account={controller}
               value={transferAmount}
               disabled={
                 !!!ethAddress ||

@@ -9,7 +9,7 @@ export const Upgrade = () => {
   return (
     <ExecutionContainer
       Icon={BoltIcon}
-      title={"Upgrade " + controller?.username}
+      title={"Upgrade " + controller?.username()}
       description={""}
       transactions={upgrade.calls}
       buttonText="Upgrade"

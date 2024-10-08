@@ -87,10 +87,10 @@ export async function updateBalance(
   const res = await Promise.allSettled(
     tokens.map(async (t) => {
       try {
-        const balance = await controller.account.callContract({
+        const balance = await controller.callContract({
           contractAddress: t.address,
           entrypoint: "balanceOf",
-          calldata: [controller.account.address],
+          calldata: [controller.address],
         });
 
         return {

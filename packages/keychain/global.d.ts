@@ -2,7 +2,7 @@ import { Controller } from "utils/controller";
 
 declare global {
   interface Window {
-    controller: Controller;
+    controller: Controller?;
   }
 }
 

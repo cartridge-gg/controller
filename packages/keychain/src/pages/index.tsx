@@ -10,7 +10,6 @@ import {
   OpenSettingsCtx,
   SignMessageCtx,
 } from "utils/connection";
-import { logout } from "utils/connection/logout";
 import { LoginMode } from "components/connect/types";
 import { ErrorPage } from "components/ErrorBoundary";
 import { Settings } from "components/Settings";
@@ -34,10 +33,7 @@ function Home() {
   switch (context.type) {
     case "connect": {
       // TODO: show missing policies if mismatch
-      if (
-        !context.policies?.length ||
-        controller.account.session(context.policies)
-      ) {
+      if (!context.policies?.length || controller.session(context.policies)) {
         context.resolve({
           code: ResponseCodes.SUCCESS,
           address: controller.address,
@@ -62,7 +58,7 @@ function Home() {
       return (
         <Logout
           onConfirm={() => {
-            logout(ctx.origin)();
+            window.controller?.disconnect();
             ctx.resolve({
               code: ResponseCodes.NOT_CONNECTED,
               message: "User logged out",
@@ -114,7 +110,7 @@ function Home() {
       return (
         <Settings
           onLogout={() => {
-            logout(ctx.origin)();
+            window.controller?.disconnect();
 
             ctx.resolve({
               code: ResponseCodes.NOT_CONNECTED,

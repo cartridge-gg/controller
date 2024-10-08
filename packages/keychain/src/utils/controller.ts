@@ -17,8 +17,6 @@ import {
 
 import { PaymasterOptions, Policy } from "@cartridge/controller";
 
-import Storage from "utils/storage";
-
 import {
   CartridgeAccount,
   JsCall,
@@ -66,8 +64,21 @@ export default class Controller extends Account {
     );
   }
 
-  delete() {
-    return Storage.clear();
+  username() {
+    return this.cartridge.username();
+  }
+
+  rpcUrl() {
+    return this.cartridge.rpcUrl();
+  }
+
+  chainId() {
+    return this.cartridge.chainId();
+  }
+
+  disconnect() {
+    this.cartridge.disconnect();
+    delete window.controller;
   }
 
   async createSession(
@@ -209,25 +220,21 @@ export default class Controller extends Account {
     console.error("revoke unimplemented");
   }
 
-  // updateChain(rpcUrl: string, chainId: string) {
-  //   this.rpcUrl = rpcUrl;
-  //   this.chainId = chainId;
-
-  //   Storage.set(selectors[VERSION].active(), {
-  //     address: this.address,
-  //     rpcUrl,
-  //     chainId,
-  //   });
-  // }
-
-  static fromStore(origin: string) {
-    try {
-      return CartridgeAccount.fromStorage(origin);
-    } catch (e) {
-      // If the current storage is incompatible, clear it so it gets recreated.
-      Storage.clear();
+  static fromStore(appId: string) {
+    let cartridge = CartridgeAccount.fromStorage(appId);
+    if (!cartridge) {
       return;
     }
+
+    const controller = new Account(
+      { nodeUrl: cartridge.rpcUrl() },
+      cartridge.address(),
+      "",
+    ) as Controller;
+
+    Object.setPrototypeOf(controller, Controller.prototype);
+    controller.cartridge = cartridge;
+    return controller;
   }
 }
 

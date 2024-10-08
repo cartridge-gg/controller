@@ -36,17 +36,17 @@ mod controller_test;
 #[derive(Clone)]
 pub struct Controller {
     pub(crate) app_id: String,
-    pub(crate) address: Felt,
-    pub(crate) chain_id: Felt,
+    pub address: Felt,
+    pub chain_id: Felt,
     pub(crate) class_hash: Felt,
-    pub(crate) rpc_url: Url,
+    pub rpc_url: Url,
     pub username: String,
     pub(crate) salt: Felt,
     provider: CartridgeJsonRpcProvider,
     pub(crate) owner: Signer,
     contract: Option<Box<abigen::controller::Controller<Self>>>,
     pub factory: ControllerFactory,
-    pub(crate) storage: Storage,
+    pub storage: Storage,
     nonce: Felt,
 }
 
@@ -128,6 +128,10 @@ impl Controller {
 
     pub fn deploy(&self) -> AccountDeploymentV1<'_, ControllerFactory> {
         self.factory.deploy_v1(self.salt)
+    }
+
+    pub fn disconnect(&mut self) -> Result<(), ControllerError> {
+        self.storage.clear().map_err(ControllerError::from)
     }
 
     pub fn contract(&self) -> &abigen::controller::Controller<Self> {

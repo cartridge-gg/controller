@@ -75,6 +75,33 @@ impl CartridgeAccount {
         }
     }
 
+    #[wasm_bindgen(js_name = username)]
+    pub fn username(&self) -> String {
+        self.controller.username.clone()
+    }
+
+    #[wasm_bindgen(js_name = address)]
+    pub fn address(&self) -> String {
+        self.controller.address.to_hex_string()
+    }
+
+    #[wasm_bindgen(js_name = rpcUrl)]
+    pub fn rpc_url(&self) -> String {
+        self.controller.rpc_url.to_string()
+    }
+
+    #[wasm_bindgen(js_name = chainId)]
+    pub fn chain_id(&self) -> String {
+        self.controller.chain_id.to_string()
+    }
+
+    #[wasm_bindgen(js_name = disconnect)]
+    pub fn disconnect(&mut self) -> std::result::Result<(), JsControllerError> {
+        self.controller
+            .disconnect()
+            .map_err(JsControllerError::from)
+    }
+
     #[wasm_bindgen(js_name = ownerGuid)]
     pub fn owner_guid(&self) -> JsFelt {
         JsFelt(self.controller.owner_guid())

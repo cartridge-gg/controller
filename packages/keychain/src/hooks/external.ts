@@ -7,7 +7,7 @@ export function useExternalOwners() {
 
   const [externalOwners, setExternalOwners] = useState<Array<string>>([]);
 
-  const provider = controller.account.rpc;
+  const provider = controller;
 
   const externalOwnerRegisteredSelector = num.toHex(
     hash.starknetKeccak("ExternalOwnerRegistered"),
