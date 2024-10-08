@@ -62,6 +62,19 @@ impl CartridgeAccount {
         Ok(CartridgeAccount { controller })
     }
 
+    #[wasm_bindgen(js_name = fromStorage)]
+    pub fn from_storage(app_id: String) -> Result<Option<CartridgeAccount>> {
+        set_panic_hook();
+
+        let controller =
+            Controller::from_storage(app_id).map_err(|e| JsError::new(&e.to_string()))?;
+
+        match controller {
+            Some(c) => Ok(Some(CartridgeAccount { controller: c })),
+            None => Ok(None),
+        }
+    }
+
     #[wasm_bindgen(js_name = ownerGuid)]
     pub fn owner_guid(&self) -> JsFelt {
         JsFelt(self.controller.owner_guid())
