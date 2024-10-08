@@ -1,0 +1,6 @@
+query StripePayment($referenceId: String!) {
+  stripePayment(referenceId: $referenceId) {
+    referenceId
+    amount
+  }
+}

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Funding } from "./Funding";
+import { Funding } from ".";
 import { num, RpcProvider } from "starknet";
 
 const meta = {
