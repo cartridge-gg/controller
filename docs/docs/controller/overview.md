@@ -1,6 +1,6 @@
 # Overview
 
-![Cartridge Controller Overview](./img/controller.png)
+![Cartridge Controller Overview](../img/controller.png)
 
 Cartridge Controller is a gaming-specific smart contract wallet designed to provide seamless player onboarding and game interactions while maintaining compatibility with other wallets that implement the plugin account architecture.
 

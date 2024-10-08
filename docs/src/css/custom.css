@@ -53,8 +53,12 @@ body {
   color: var(--ifm-color-primary-hover);
 }
 .navbar__logo img {
-  content: url('/img/logo.svg');
+  content: url('/img/cartridge.svg');
   padding: 5px;
+}
+
+.navbar__link:hover, .navbar__link--active {
+  font-weight: bold;
 }
 
 /* Footer Styling */

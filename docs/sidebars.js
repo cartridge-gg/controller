@@ -4,23 +4,24 @@
 const sidebars = {
   // By default, Docusaurus generates a sidebar from the docs folder structure
   controller: [
-    "overview",
-    "getting-started",
-    "configuration",
-    "sessions",
-    "theming",
+    "controller/overview",
+    "controller/getting-started",
+    "controller/configuration",
+    "controller/sessions",
+    "controller/theming",
     {
       type: "category",
       label: "Examples",
       collapsed: false,
       items: [
-        "examples/react",
-        "examples/svelte",
-        // "examples/rust",
-        "examples/telegram",
+        "controller/examples/react",
+        "controller/examples/svelte",
+        // "controller/examples/rust",
+        "controller/examples/telegram",
       ],
     },
   ],
+  slot: ["slot/getting-started"],
 };
 
 module.exports = sidebars;
