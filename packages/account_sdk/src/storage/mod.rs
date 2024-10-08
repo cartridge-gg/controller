@@ -9,6 +9,8 @@ use coset::CborSerializable;
 use crate::account::session::hash::Session;
 use starknet::{core::types::Felt, signers::SigningKey};
 
+#[cfg(all(not(target_arch = "wasm32"), feature = "filestorage"))]
+pub mod filestorage;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod inmemory;
 #[cfg(target_arch = "wasm32")]
@@ -165,8 +167,11 @@ pub trait StorageBackend: Send + Sync {
     }
 }
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(all(not(target_arch = "wasm32"), not(feature = "filestorage")))]
 pub type Storage = inmemory::InMemoryBackend;
 
 #[cfg(target_arch = "wasm32")]
 pub type Storage = localstorage::LocalStorage;
+
+#[cfg(all(not(target_arch = "wasm32"), feature = "filestorage"))]
+pub type Storage = filestorage::FileSystemBackend;
