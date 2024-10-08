@@ -90,7 +90,8 @@ export function Inventory() {
             >
               <img src={t.logoUrl} className="w-5 h-5" />
               <div>
-                {t.balance ? t.balance.toString() : "---"} {t.symbol}
+                {t.balance === undefined ? "---" : t.balance.toString()}{" "}
+                {t.symbol}
               </div>
             </CardContent>
           ))}
