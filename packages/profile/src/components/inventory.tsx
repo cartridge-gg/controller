@@ -96,7 +96,7 @@ export function Inventory() {
           ))}
         </Card>
 
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Golden Token (2)</CardTitle>
           </CardHeader>
@@ -112,7 +112,7 @@ export function Inventory() {
               </div>
             ))}
           </CardContent>
-        </Card>
+        </Card> */}
       </LayoutContent>
     </LayoutContainer>
   );
