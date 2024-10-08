@@ -1,4 +1,4 @@
-import { Button, cn, DotsIcon, TimesIcon } from "@cartridge/ui-next";
+import { Button, cn, TimesIcon } from "@cartridge/ui-next";
 import { Network } from "@cartridge/ui-next";
 import { PropsWithChildren, useCallback } from "react";
 import { useConnection } from "../provider/hooks";
@@ -20,9 +20,9 @@ export function LayoutContainer({ children }: PropsWithChildren) {
 
         <div className="flex gap-2">
           <Network chainId={chainId} />
-          <Button variant="icon" size="icon">
+          {/* <Button variant="icon" size="icon">
             <DotsIcon />
-          </Button>
+          </Button> */}
         </div>
       </div>
 
