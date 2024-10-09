@@ -9,12 +9,10 @@ const meta = {
   parameters: {
     connection: {
       controller: {
-        account: {
-          chainId: constants.StarknetChainId.SN_SEPOLIA as string,
-          callContract: () =>
-            Promise.resolve([num.toHex("2000000000000000000"), "0x0"]),
-          rpc: new RpcProvider({ nodeUrl: "https://api.cartridge/x/sepolia" }),
-        },
+        chainId: () => constants.StarknetChainId.SN_SEPOLIA as string,
+        callContract: () =>
+          Promise.resolve([num.toHex("2000000000000000000"), "0x0"]),
+        rpc: new RpcProvider({ nodeUrl: "https://api.cartridge/x/sepolia" }),
       },
     },
   },

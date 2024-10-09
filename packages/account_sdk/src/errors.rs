@@ -44,4 +44,15 @@ pub enum ControllerError {
 
     #[error("Session already registered. ")]
     SessionAlreadyRegistered,
+
+    #[error(transparent)]
+    UrlParseError(#[from] url::ParseError),
+
+    #[cfg(feature = "webauthn")]
+    #[error(transparent)]
+    Base64DecodeError(#[from] base64::DecodeError),
+
+    #[cfg(feature = "webauthn")]
+    #[error(transparent)]
+    CoseError(#[from] coset::CoseError),
 }

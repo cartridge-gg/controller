@@ -39,7 +39,7 @@
 		try {
 			const res = await controller.connect();
 			if (res) {
-				account.set(controller.account);
+				account.set(controller);
 				username.set(await controller.username());
 			}
 		} catch (e) {

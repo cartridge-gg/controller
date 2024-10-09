@@ -14,7 +14,7 @@ const Main = () => {
 
   const onConnect = useCallback(async () => {
     const controller = await connect();
-    setAccount(controller.account);
+    setAccount(controller);
   }, []);
 
   const onIncrement = useCallback(() => {

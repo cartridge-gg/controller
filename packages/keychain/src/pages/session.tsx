@@ -102,9 +102,9 @@ export default function Session() {
       }
 
       onCallback({
-        username: controller.username,
+        username: controller.username(),
         address: controller.address,
-        ownerGuid: controller.account.cartridge.ownerGuid(),
+        ownerGuid: controller.cartridge.ownerGuid(),
         transactionHash: transaction_hash,
         expiresAt: String(SESSION_EXPIRATION),
       });
@@ -128,11 +128,11 @@ export default function Session() {
 
     // If the requested policies has no mismatch with existing policies and public key already
     // registered then return the exising session
-    if (controller.account.session(policies, queries.public_key)) {
+    if (controller.session(policies, queries.public_key)) {
       onCallback({
-        username: controller.username,
+        username: controller.username(),
         address: controller.address,
-        ownerGuid: controller.account.cartridge.ownerGuid(),
+        ownerGuid: controller.cartridge.ownerGuid(),
         alreadyRegistered: true,
         expiresAt: String(SESSION_EXPIRATION),
       });

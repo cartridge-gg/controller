@@ -47,7 +47,7 @@ export const useUpgrade = (controller: Controller): UpgradeInterface => {
     }
     setIsSynced(false);
 
-    controller.account
+    controller
       .getClassHashAt(controller.address)
       .then((classHash) => {
         const current = CONTROLLER_VERSIONS.find(
@@ -71,7 +71,7 @@ export const useUpgrade = (controller: Controller): UpgradeInterface => {
       return [];
     }
 
-    return [controller.account.cartridge.upgrade(latest.hash)];
+    return [controller.cartridge.upgrade(latest.hash)];
   }, [controller, latest]);
 
   const onUpgrade = useCallback(
@@ -82,11 +82,11 @@ export const useUpgrade = (controller: Controller): UpgradeInterface => {
 
       try {
         setIsUpgrading(true);
-        const { transaction_hash } = await controller.account.execute(calls, {
+        const { transaction_hash } = await controller.execute(calls, {
           maxFee,
         });
 
-        await controller.account.waitForTransaction(transaction_hash, {
+        await controller.waitForTransaction(transaction_hash, {
           retryInterval: 1000,
         });
 

@@ -86,7 +86,7 @@ type CartridgeID = string;
 export type ControllerAccounts = Record<ContractAddress, CartridgeID>;
 
 export interface Keychain {
-  probe(rpcUrl?: string): Promise<ProbeReply | ConnectError>;
+  probe(rpcUrl: string): Promise<ProbeReply | ConnectError>;
   connect(
     policies: Policy[],
     rpcUrl: string,
