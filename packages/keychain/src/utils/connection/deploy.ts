@@ -1,8 +1,7 @@
 import { ConnectionCtx, DeployCtx } from "./types";
-import Controller from "utils/controller";
 
 export function deployFactory(setContext: (ctx: ConnectionCtx) => void) {
-  return (_: Controller, origin: string) => (account: string) => {
+  return (account: string) => {
     return new Promise((resolve, reject) => {
       setContext({
         type: "deploy",

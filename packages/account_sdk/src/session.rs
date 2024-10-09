@@ -10,18 +10,15 @@ use crate::controller::Controller;
 use crate::errors::ControllerError;
 use crate::hash::MessageHashRev1;
 use crate::signers::{HashSigner, Signer, SignerTrait};
-use crate::storage::{Credentials, Selectors, SessionMetadata};
+use crate::storage::StorageBackend;
+use crate::storage::{selectors::Selectors, Credentials, SessionMetadata};
 use crate::utils::time::get_current_timestamp;
-use crate::Backend;
 
-#[cfg(test)]
+#[cfg(all(test, not(target_arch = "wasm32")))]
 #[path = "session_test.rs"]
 mod session_test;
 
-impl<B> Controller<B>
-where
-    B: Backend + Clone,
-{
+impl Controller {
     pub async fn create_session(
         &mut self,
         methods: Vec<Policy>,
@@ -34,7 +31,7 @@ where
             .get_message_hash_rev_1(self.chain_id, self.address);
         let authorization = self.owner.sign(&hash).await?;
         let authorization = Vec::<SignerSignature>::cairo_serialize(&vec![authorization.clone()]);
-        self.backend.set_session(
+        self.storage.set_session(
             &Selectors::session(&self.address, &self.app_id, &self.chain_id),
             SessionMetadata {
                 session: session.clone(),
@@ -93,14 +90,12 @@ where
             }),
         )?;
 
-        let txn = self
+        let call = self
             .contract()
-            .register_session(&session.raw(), &self.owner_guid())
-            .max_fee(max_fee)
-            .send()
-            .await?;
+            .register_session_getcall(&session.raw(), &self.owner_guid());
+        let txn = self.execute(vec![call], max_fee).await?;
 
-        self.backend.set_session(
+        self.storage.set_session(
             &Selectors::session(&self.address, &self.app_id, &self.chain_id),
             SessionMetadata {
                 session: session.clone(),
@@ -119,7 +114,7 @@ where
         public_key: Option<Felt>,
     ) -> Option<(String, SessionMetadata)> {
         let key: String = Selectors::session(&self.address, &self.app_id, &self.chain_id);
-        self.backend
+        self.storage
             .session(&key)
             .ok()
             .flatten()

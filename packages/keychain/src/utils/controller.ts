@@ -1,36 +1,33 @@
 import {
-  SignerInterface,
+  Account,
   BigNumberish,
   addAddressPadding,
   num,
   InvokeFunctionResponse,
+  Signature,
+  AllowArray,
+  Call,
+  UniversalDetails,
+  Abi,
+  EstimateFeeDetails,
+  EstimateFee,
+  ec,
+  TypedData,
 } from "starknet";
 
-import { Policy } from "@cartridge/controller";
+import { PaymasterOptions, Policy } from "@cartridge/controller";
 
-import Storage from "utils/storage";
+import {
+  CartridgeAccount,
+  JsCall,
+  JsFelt,
+  JsInvocationsDetails,
+  SessionMetadata,
+} from "@cartridge/account-wasm";
+import { normalizeCalls } from "./connection/execute";
 
-import Account from "./account";
-import { selectors, VERSION } from "./selectors";
-import migrations from "./migrations";
-import { JsCall, JsFelt } from "@cartridge/account-wasm";
-
-type SerializedController = {
-  publicKey: string;
-  credentialId: string;
-  address: string;
-  username: string;
-};
-
-export default class Controller {
-  public account: Account;
-  public address: string;
-  public username: string;
-  public chainId: string;
-  public rpcUrl: string;
-  public signer: SignerInterface;
-  public publicKey: string;
-  public credentialId: string;
+export default class Controller extends Account {
+  cartridge: CartridgeAccount;
 
   constructor({
     appId,
@@ -49,34 +46,39 @@ export default class Controller {
     publicKey: string;
     credentialId: string;
   }) {
-    this.address = address;
-    this.username = username;
-    this.chainId = chainId;
-    this.rpcUrl = rpcUrl;
-    this.publicKey = publicKey;
-    this.credentialId = credentialId;
-    this.account = new Account(
+    super({ nodeUrl: rpcUrl }, address, "");
+
+    this.cartridge = CartridgeAccount.new(
       appId,
-      chainId,
       rpcUrl,
+      chainId,
       address,
       username,
-      this.signer,
       {
-        rpId: process.env.NEXT_PUBLIC_RP_ID,
-        credentialId,
-        publicKey,
+        webauthn: {
+          rpId: process.env.NEXT_PUBLIC_RP_ID,
+          credentialId,
+          publicKey,
+        },
       },
     );
   }
 
-  async delegateAccount() {
-    const address = await this.account.cartridge.delegateAccount();
-    return num.toHexString(address);
+  username() {
+    return this.cartridge.username();
   }
 
-  delete() {
-    return Storage.clear();
+  rpcUrl() {
+    return this.cartridge.rpcUrl();
+  }
+
+  chainId() {
+    return this.cartridge.chainId();
+  }
+
+  disconnect() {
+    this.cartridge.disconnect();
+    delete window.controller;
   }
 
   async createSession(
@@ -84,13 +86,11 @@ export default class Controller {
     policies: Policy[],
     _maxFee?: BigNumberish,
   ) {
-    if (!this.account) {
+    if (!this.cartridge) {
       throw new Error("Account not found");
     }
 
-    await this.account.cartridge.createSession(policies, expiresAt);
-
-    this.store();
+    await this.cartridge.createSession(policies, expiresAt);
   }
 
   registerSessionCalldata(
@@ -98,7 +98,7 @@ export default class Controller {
     policies: Policy[],
     publicKey: string,
   ): Array<string> {
-    return this.account.cartridge.registerSessionCalldata(
+    return this.cartridge.registerSessionCalldata(
       policies,
       expiresAt,
       publicKey,
@@ -111,11 +111,11 @@ export default class Controller {
     publicKey: string,
     maxFee: BigNumberish,
   ): Promise<InvokeFunctionResponse> {
-    if (!this.account) {
+    if (!this.cartridge) {
       throw new Error("Account not found");
     }
 
-    return await this.account.cartridge.registerSession(
+    return await this.cartridge.registerSession(
       policies,
       expiresAt,
       publicKey,
@@ -124,7 +124,95 @@ export default class Controller {
   }
 
   upgrade(new_class_hash: JsFelt): JsCall {
-    return this.account.cartridge.upgrade(new_class_hash);
+    return this.cartridge.upgrade(new_class_hash);
+  }
+
+  async executeFromOutside(
+    calls: AllowArray<Call>,
+    _?: PaymasterOptions,
+  ): Promise<InvokeFunctionResponse> {
+    return await this.cartridge.executeFromOutside(normalizeCalls(calls));
+  }
+
+  async execute(
+    transactions: AllowArray<Call>,
+    abisOrDetails?: Abi[] | UniversalDetails,
+    details?: UniversalDetails,
+  ): Promise<InvokeFunctionResponse> {
+    const executionDetails =
+      (Array.isArray(abisOrDetails) ? details : abisOrDetails) || {};
+
+    if (executionDetails.maxFee !== undefined) {
+      executionDetails.maxFee = num.toHex(executionDetails.maxFee);
+    }
+
+    const res = await this.cartridge.execute(
+      normalizeCalls(transactions),
+      executionDetails as JsInvocationsDetails,
+    );
+
+    return res;
+  }
+
+  hasSession(calls: AllowArray<Call>): boolean {
+    return this.cartridge.hasSession(normalizeCalls(calls));
+  }
+
+  session(
+    policies: Policy[],
+    public_key?: string,
+  ): SessionMetadata | undefined {
+    return this.cartridge.session(policies, public_key);
+  }
+
+  async estimateInvokeFee(
+    calls: AllowArray<Call>,
+    _: EstimateFeeDetails = {},
+  ): Promise<EstimateFee> {
+    const res = await this.cartridge.estimateInvokeFee(normalizeCalls(calls));
+
+    // The reason why we set the multiplier unseemingly high is to account
+    // for the fact that the estimation above is done without validation (ie SKIP_VALIDATE).
+    //
+    // Setting it lower might cause the actual transaction to fail due to
+    // insufficient max fee.
+    const MULTIPLIER_PERCENTAGE = 170; // x1.7
+
+    // This will essentially multiply the estimated fee by 1.7
+    const suggestedMaxFee = num.addPercent(
+      BigInt(res.overall_fee),
+      MULTIPLIER_PERCENTAGE,
+    );
+
+    return { suggestedMaxFee, ...res };
+  }
+
+  async verifyMessageHash(
+    hash: BigNumberish,
+    signature: Signature,
+  ): Promise<boolean> {
+    if (BigInt(signature[0]) === 0n) {
+      return ec.starkCurve.verify(
+        // @ts-expect-error TODO: fix overload type mismatch
+        signature,
+        BigInt(hash).toString(),
+        signature[0],
+      );
+    }
+
+    return super.verifyMessageHash(hash, signature);
+  }
+
+  async signMessage(typedData: TypedData): Promise<Signature> {
+    return this.cartridge.signMessage(JSON.stringify(typedData));
+  }
+
+  async getNonce(_?: any): Promise<string> {
+    return await this.cartridge.getNonce();
+  }
+
+  async delegateAccount(): Promise<string> {
+    return this.cartridge.delegateAccount();
   }
 
   revoke(_origin: string) {
@@ -132,73 +220,21 @@ export default class Controller {
     console.error("revoke unimplemented");
   }
 
-  store() {
-    Storage.set("version", VERSION);
-
-    Storage.set(
-      selectors[VERSION].admin(this.address, process.env.NEXT_PUBLIC_ADMIN_URL),
-      {},
-    );
-    Storage.set(selectors[VERSION].active(), {
-      address: this.address,
-      rpcUrl: this.rpcUrl,
-      chainId: this.chainId,
-    });
-
-    return Storage.set(selectors[VERSION].account(this.address), {
-      username: this.username,
-      publicKey: this.publicKey,
-      credentialId: this.credentialId,
-    });
-  }
-
-  updateChain(rpcUrl: string, chainId: string) {
-    this.rpcUrl = rpcUrl;
-    this.chainId = chainId;
-
-    Storage.set(selectors[VERSION].active(), {
-      address: this.address,
-      rpcUrl,
-      chainId,
-    });
-  }
-
-  static fromStore(origin: string) {
-    try {
-      const version = Storage.get("version");
-      if (!version) {
-        return;
-      }
-
-      let controller: SerializedController;
-      const { address, chainId, rpcUrl } = Storage.get(
-        selectors[VERSION].active(),
-      );
-      controller = Storage.get(selectors[VERSION].account(address));
-      if (!controller) {
-        return;
-      }
-
-      const { username, publicKey, credentialId } = controller;
-
-      if (version !== VERSION) {
-        migrations[version][VERSION](address);
-      }
-
-      return new Controller({
-        appId: origin,
-        chainId,
-        rpcUrl,
-        address,
-        username,
-        publicKey,
-        credentialId,
-      });
-    } catch (e) {
-      // If the current storage is incompatible, clear it so it gets recreated.
-      Storage.clear();
+  static fromStore(appId: string) {
+    let cartridge = CartridgeAccount.fromStorage(appId);
+    if (!cartridge) {
       return;
     }
+
+    const controller = new Account(
+      { nodeUrl: cartridge.rpcUrl() },
+      cartridge.address(),
+      "",
+    ) as Controller;
+
+    Object.setPrototypeOf(controller, Controller.prototype);
+    controller.cartridge = cartridge;
+    return controller;
   }
 }
 

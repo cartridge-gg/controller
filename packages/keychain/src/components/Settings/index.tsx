@@ -86,8 +86,8 @@ export function Settings({ onLogout }: { onLogout: () => void }) {
       <Content>
         <VStack gap="30px" w="full">
           {/* <VStack>
-            {controller.account.cartridge.hasSession(
-              controller.account.cartridge.session(),
+            {controller.cartridge.hasSession(
+              controller.cartridge.session(),
             ) ? (
               <Text>Session active</Text>
             ) : (
@@ -96,7 +96,7 @@ export function Settings({ onLogout }: { onLogout: () => void }) {
            <Button
               onClick={() => {
                 // zzz not implemented
-                controller.account.cartridge.revokeSession();
+                controller.cartridge.revokeSession();
               }}
             >
               Clear Session

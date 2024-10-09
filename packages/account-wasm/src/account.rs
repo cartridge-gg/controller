@@ -1,11 +1,3 @@
-use crate::errors::JsControllerError;
-use crate::signer::BrowserBackend;
-use crate::types::call::JsCall;
-use crate::types::policy::Policy;
-use crate::types::session::SessionMetadata;
-use crate::types::signer::Signer;
-use crate::types::{Felts, JsFelt};
-
 use account_sdk::artifacts::{Version, CONTROLLERS};
 use account_sdk::controller::Controller;
 use account_sdk::errors::ControllerError;
@@ -15,14 +7,20 @@ use starknet::core::types::Call;
 use url::Url;
 use wasm_bindgen::prelude::*;
 
+use crate::errors::JsControllerError;
+use crate::types::call::JsCall;
 use crate::types::invocation::JsInvocationsDetails;
+use crate::types::policy::Policy;
+use crate::types::session::SessionMetadata;
+use crate::types::signer::Signer;
+use crate::types::{Felts, JsFelt};
 use crate::utils::set_panic_hook;
 
 type Result<T> = std::result::Result<T, JsError>;
 
 #[wasm_bindgen]
 pub struct CartridgeAccount {
-    controller: Controller<BrowserBackend>,
+    controller: Controller,
 }
 
 #[wasm_bindgen]
@@ -59,10 +57,49 @@ impl CartridgeAccount {
             signer.try_into()?,
             address.0,
             chain_id.0,
-            BrowserBackend,
         );
 
         Ok(CartridgeAccount { controller })
+    }
+
+    #[wasm_bindgen(js_name = fromStorage)]
+    pub fn from_storage(app_id: String) -> Result<Option<CartridgeAccount>> {
+        set_panic_hook();
+
+        let controller =
+            Controller::from_storage(app_id).map_err(|e| JsError::new(&e.to_string()))?;
+
+        match controller {
+            Some(c) => Ok(Some(CartridgeAccount { controller: c })),
+            None => Ok(None),
+        }
+    }
+
+    #[wasm_bindgen(js_name = username)]
+    pub fn username(&self) -> String {
+        self.controller.username.clone()
+    }
+
+    #[wasm_bindgen(js_name = address)]
+    pub fn address(&self) -> String {
+        self.controller.address.to_hex_string()
+    }
+
+    #[wasm_bindgen(js_name = rpcUrl)]
+    pub fn rpc_url(&self) -> String {
+        self.controller.rpc_url.to_string()
+    }
+
+    #[wasm_bindgen(js_name = chainId)]
+    pub fn chain_id(&self) -> String {
+        self.controller.chain_id.to_string()
+    }
+
+    #[wasm_bindgen(js_name = disconnect)]
+    pub fn disconnect(&mut self) -> std::result::Result<(), JsControllerError> {
+        self.controller
+            .disconnect()
+            .map_err(JsControllerError::from)
     }
 
     #[wasm_bindgen(js_name = ownerGuid)]

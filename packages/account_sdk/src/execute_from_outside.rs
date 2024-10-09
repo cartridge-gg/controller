@@ -11,17 +11,13 @@ use crate::{
     errors::ControllerError,
     provider::CartridgeProvider,
     utils::time::get_current_timestamp,
-    Backend,
 };
 
-#[cfg(test)]
+#[cfg(all(test, not(target_arch = "wasm32")))]
 #[path = "execute_from_outside_test.rs"]
 mod execute_from_outside_test;
 
-impl<B> Controller<B>
-where
-    B: Backend + Clone,
-{
+impl Controller {
     async fn execute_from_outside_raw(
         &self,
         outside_execution: OutsideExecution,

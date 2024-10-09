@@ -2,16 +2,49 @@
 
 import { useAccount } from "@starknet-react/core";
 import { Button } from "@cartridge/ui-next";
+import { ec, stark } from "starknet";
+import { Policy } from "@cartridge/controller";
+import { useCallback, useState } from "react";
+
+const HIT_THING_ADDRESS =
+  "0x03661Ea5946211b312e8eC71B94550928e8Fd3D3806e43c6d60F41a6c5203645";
+const redirectUri = encodeURIComponent("https://t.me/hitthingbot/hitthing");
+const redirectQueryName = "startapp";
+const encodedPolicies = encodeURIComponent(
+  JSON.stringify([
+    {
+      target: HIT_THING_ADDRESS,
+      method: "attack",
+    },
+    {
+      target: HIT_THING_ADDRESS,
+      method: "claim",
+    },
+  ] as Policy[]),
+);
 
 export function RegisterSession() {
   const { account } = useAccount();
+  const [sessionKey, setSessionKey] = useState<string>();
 
-  const registerSessionUrl =
-    "http://localhost:3001/session?public_key=0x2cb057c18198ae4555a144bfdace051433b9a545dc88224de58fa04e323f269&redirect_uri=https://t.me/hitthingbot/hitthing&redirect_query_name=startapp&policies=%5B%7B%22target%22:%220x03661Ea5946211b312e8eC71B94550928e8Fd3D3806e43c6d60F41a6c5203645%22,%22method%22:%22attack%22,%22description%22:%22Attack%20the%20beast%22%7D,%7B%22target%22:%220x03661Ea5946211b312e8eC71B94550928e8Fd3D3806e43c6d60F41a6c5203645%22,%22method%22:%22claim%22,%22description%22:%22Claim%20your%20tokens%22%7D%5D&rpc_url=http://localhost:8001/x/starknet/sepolia";
+  const onRegister = useCallback(() => {
+    const privkey = stark.randomAddress();
+    const pubkey = ec.starkCurve.getStarkKey(privkey);
+    setSessionKey(privkey);
 
-  const openRegisterSessionUrl = () => {
+    const registerSessionUrl = `${process.env.KEYCHAIN_FRAME_URL}/session?public_key=${pubkey}&redirect_uri=${redirectUri}&redirect_query_name=${redirectQueryName}&policies=${encodedPolicies}&rpc_url=${process.env.NEXT_PUBLIC_RPC_SEPOLIA}`;
     window.open(registerSessionUrl, "_blank", "noopener,noreferrer");
-  };
+  }, []);
+
+  const onRegisterSame = useCallback(() => {
+    if (!sessionKey) {
+      return;
+    }
+
+    const pubkey = ec.starkCurve.getStarkKey(sessionKey);
+    const registerSessionUrl = `${process.env.KEYCHAIN_FRAME_URL}/session?public_key=${pubkey}&redirect_uri=${redirectUri}&redirect_query_name=${redirectQueryName}&policies=${encodedPolicies}&rpc_url=${process.env.NEXT_PUBLIC_RPC_SEPOLIA}`;
+    window.open(registerSessionUrl, "_blank", "noopener,noreferrer");
+  }, [sessionKey]);
 
   if (!account) {
     return null;
@@ -20,7 +53,11 @@ export function RegisterSession() {
   return (
     <div style={{ marginTop: "10px" }}>
       <h2>Register Session</h2>
-      <Button onClick={openRegisterSessionUrl}>Register Session</Button>
+      {sessionKey && <p>Session Key: {sessionKey}</p>}
+      <Button onClick={onRegister}>Register New Session</Button>
+      {sessionKey && (
+        <Button onClick={onRegisterSame}>Register same key</Button>
+      )}
     </div>
   );
 }

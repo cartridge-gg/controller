@@ -51,7 +51,7 @@ export function SignMessage({
   const hostname = useMemo(() => new URL(origin).hostname, [origin]);
 
   const onConfirm = useCallback(async () => {
-    const account = controller.account;
+    const account = controller;
     const sig = await account.signMessage(typedData);
     onSign(sig);
   }, [controller, onSign, typedData]);

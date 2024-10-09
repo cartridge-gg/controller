@@ -105,6 +105,7 @@ export default class Controller {
         this.iframes.keychain,
       ) as AccountInterface;
     } catch (e) {
+      console.log(e);
       console.error(new NotReadyToConnect().message);
       return;
     }
@@ -245,7 +246,7 @@ export default class Controller {
   }
 
   private waitForKeychain({
-    timeout = 3000,
+    timeout = 5000,
     interval = 100,
   }:
     | {

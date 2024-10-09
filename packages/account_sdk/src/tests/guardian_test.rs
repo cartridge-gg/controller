@@ -1,16 +1,14 @@
-use crate::{
-    abigen::erc_20::Erc20,
-    artifacts::Version,
-    signers::{webauthn::WebauthnSigner, Signer},
-    tests::{
-        account::{webauthn::SoftPasskeySigner, FEE_TOKEN_ADDRESS},
-        runners::katana::KatanaRunner,
-    },
-};
 use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{
     core::types::{BlockId, BlockTag},
     macros::felt,
+};
+
+use crate::{
+    abigen::erc_20::Erc20,
+    artifacts::Version,
+    signers::{webauthn::WebauthnSigner, Signer},
+    tests::{account::FEE_TOKEN_ADDRESS, runners::katana::KatanaRunner},
 };
 
 use super::ensure_txn;
@@ -46,6 +44,7 @@ pub async fn test_verify_execute(signer: Signer) {
     .unwrap();
 }
 
+#[cfg(feature = "webauthn")]
 #[tokio::test]
 async fn test_verify_execute_webauthn() {
     let signer = Signer::Webauthn(
@@ -53,7 +52,6 @@ async fn test_verify_execute_webauthn() {
             "cartridge.gg".to_string(),
             "username".to_string(),
             "challenge".as_bytes(),
-            SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
         )
         .await
         .unwrap(),
