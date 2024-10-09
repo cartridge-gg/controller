@@ -227,7 +227,7 @@ impl Controller {
             match result {
                 Ok(tx_result) => {
                     // Update nonce
-                    self.nonce = self.nonce + 1;
+                    self.nonce += Felt::ONE;
 
                     // Update is_registered to true after successful execution with a session
                     if let Some((key, metadata)) =
@@ -261,6 +261,22 @@ impl Controller {
                             StarknetError::InvalidTransactionNonce,
                         )) => {
                             if retry_count < max_retries {
+                                // Refetch nonce from the provider
+                                let new_nonce = self
+                                    .provider
+                                    .get_nonce(self.block_id(), self.address())
+                                    .await?;
+                                self.nonce = new_nonce;
+                                retry_count += 1;
+                                continue;
+                            }
+                        }
+                        AccountError::Provider(ProviderError::StarknetError(
+                            StarknetError::ValidationFailure(data),
+                        )) => {
+                            if data.starts_with("Invalid transaction nonce of contract at address")
+                                && retry_count < max_retries
+                            {
                                 // Refetch nonce from the provider
                                 let new_nonce = self
                                     .provider

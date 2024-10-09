@@ -204,3 +204,32 @@ async fn test_controller_storage() {
     // Clean up
     temp_dir.close().unwrap();
 }
+
+#[tokio::test]
+async fn test_multiple_transactions() {
+    use crate::signers::Signer;
+    use crate::tests::ensure_txn;
+    use cainome::cairo_serde::U256;
+
+    let runner = KatanaRunner::load();
+    let owner = Signer::new_starknet_random();
+    let controller = runner
+        .deploy_controller("test_user".to_string(), owner.clone(), Version::LATEST)
+        .await;
+
+    let erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller);
+
+    // First transaction
+    let recipient1 = ContractAddress(felt!("0x18301129"));
+    let amount1 = U256 { low: 100, high: 0 };
+    let transfer1 = erc20.transfer(&recipient1, &amount1);
+    let result1 = ensure_txn(transfer1, runner.client()).await;
+    assert!(result1.is_ok(), "First transaction failed");
+
+    // Second transaction
+    let recipient2 = ContractAddress(felt!("0x29301130"));
+    let amount2 = U256 { low: 200, high: 0 };
+    let transfer2 = erc20.transfer(&recipient2, &amount2);
+    let result2 = ensure_txn(transfer2, runner.client()).await;
+    assert!(result2.is_ok(), "Second transaction failed");
+}
