@@ -197,6 +197,36 @@ impl KatanaRunner {
         )
     }
 
+    pub async fn deploy_controller_with_guardian(
+        &self,
+        username: String,
+        signer: Signer,
+        guardian: Signer,
+        version: Version,
+    ) -> Controller {
+        let mut constructor_calldata =
+            controller::Owner::cairo_serialize(&controller::Owner::Signer(signer.signer()));
+        constructor_calldata.extend(Option::<AbigenSigner>::cairo_serialize(&Some(
+            guardian.signer(),
+        )));
+
+        let DeployResult {
+            deployed_address, ..
+        } = self
+            .deploy_with_calldata(constructor_calldata, version)
+            .await;
+
+        Controller::new(
+            "app_id".to_string(),
+            username,
+            CONTROLLERS[&version].hash,
+            self.rpc_url.clone(),
+            signer,
+            deployed_address,
+            self.chain_id,
+        )
+    }
+
     pub async fn deploy_controller_with_external_owner(
         &self,
         external_owner: ContractAddress,

@@ -25,7 +25,7 @@ mod provider_test;
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 #[auto_impl(&, Arc)]
-pub trait CartridgeProvider: Provider {
+pub trait CartridgeProvider: Provider + Clone {
     async fn add_execute_outside_transaction(
         &self,
         outside_execution: OutsideExecution,
