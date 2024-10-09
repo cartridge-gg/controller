@@ -11,6 +11,7 @@
     "e2e": "turbo build:deps dev e2e",
     "e2e:ui": "turbo build:deps dev e2e:ui",
     "lint": "turbo lint format:check",
+    "fix": "turbo lint format:fix",
     "format": "turbo format",
     "clean": "git clean -xdf && pnpm store prune",
     "release": "pnpm build && pnpm changeset publish",

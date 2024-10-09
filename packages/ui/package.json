@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build:deps": "tsc",
-    "format": "prettier --write ./src",
+    "format:fix": "prettier --write ./src",
     "format:check": "prettier --check ./src",
     "storybook": "storybook dev -p 6002",
     "storybook:build": "storybook build"
