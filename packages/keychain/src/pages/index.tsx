@@ -15,7 +15,8 @@ import { ErrorPage } from "components/ErrorBoundary";
 import { Settings } from "components/Settings";
 
 function Home() {
-  const { context, controller, error, policies } = useConnection();
+  const { context, controller, setController, error, policies } =
+    useConnection();
 
   if (window.self === window.top || !context?.origin) {
     return <></>;
@@ -59,6 +60,8 @@ function Home() {
         <Logout
           onConfirm={() => {
             window.controller?.disconnect();
+            setController(undefined);
+
             ctx.resolve({
               code: ResponseCodes.NOT_CONNECTED,
               message: "User logged out",
@@ -111,6 +114,7 @@ function Home() {
         <Settings
           onLogout={() => {
             window.controller?.disconnect();
+            setController(undefined);
 
             ctx.resolve({
               code: ResponseCodes.NOT_CONNECTED,

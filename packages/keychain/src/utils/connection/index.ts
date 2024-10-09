@@ -46,8 +46,14 @@ export function connectToController<ParentMethods extends {}>({
       openSettings: () => openSettingsFactory(setContext),
       reset: () => () => setContext(undefined),
       fetchControllers: fetchControllers,
-      disconnect: () => () => window.controller?.disconnect(),
-      logout: () => () => window.controller?.disconnect(),
+      disconnect: () => () => {
+        window.controller?.disconnect();
+        setController(undefined);
+      },
+      logout: () => () => {
+        window.controller?.disconnect();
+        setController(undefined);
+      },
       username: () => () => window.controller?.username(),
       delegateAccount: () => () => window.controller?.delegateAccount(),
     },
