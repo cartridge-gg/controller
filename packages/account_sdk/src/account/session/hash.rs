@@ -61,9 +61,11 @@ impl Session {
             session_key_guid: signer.guid(),
         })
     }
+
     fn allowed_method_hash_rev_1() -> Felt {
         selector!("\"Allowed Method\"(\"Contract Address\":\"ContractAddress\",\"selector\":\"selector\")")
     }
+
     pub fn raw(&self) -> RawSession {
         RawSession {
             expires_at: self.expires_at,
@@ -72,6 +74,7 @@ impl Session {
             session_key_guid: self.session_key_guid,
         }
     }
+
     pub fn message_hash(
         &self,
         tx_hash: Felt,
@@ -83,6 +86,7 @@ impl Session {
         Poseidon::hades_permutation(&mut msg_hash);
         Ok(msg_hash[0])
     }
+
     pub fn single_proof(&self, policy: &Policy) -> Option<Vec<Felt>> {
         self.policies
             .iter()

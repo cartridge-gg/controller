@@ -64,10 +64,7 @@ impl<'a> AccountDeclaration<'a> {
     pub async fn declare(
         self,
         account: &(impl ConnectedAccount + Send + Sync),
-    ) -> Result<PendingDeclaration<'a>, String>
-    where
-        &'a CartridgeJsonRpcProvider: Provider,
-    {
+    ) -> Result<PendingDeclaration<'a>, String> {
         // We need to flatten the ABI into a string first
         let flattened_class = self
             .contract_artifact

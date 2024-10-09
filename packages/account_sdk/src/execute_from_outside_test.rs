@@ -8,12 +8,12 @@ use starknet::{
 use crate::abigen::erc_20::Erc20;
 use crate::tests::account::FEE_TOKEN_ADDRESS;
 use crate::tests::runners::katana::KatanaRunner;
-use crate::transaction_waiter::TransactionWaiter;
+use crate::tests::transaction_waiter::TransactionWaiter;
 use crate::{artifacts::Version, signers::Signer};
 use cainome::cairo_serde::{CairoSerde, ContractAddress, U256};
 
 #[tokio::test]
-async fn test_paymaster_request_success() {
+async fn test_execute_from_outside() {
     let signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let controller = runner

@@ -25,8 +25,7 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 9.7.0
+
       - name: Update Workspace Packages Version
         run: |
           VERSION=${{ github.event.inputs.version }}

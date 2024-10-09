@@ -6,8 +6,7 @@ use crate::{
     signers::{
         webauthn::WebauthnSigner, HashSigner, NewOwnerSigner, SignError, Signer, SignerTrait,
     },
-    storage::InMemoryBackend,
-    tests::{account::webauthn::SoftPasskeySigner, ensure_txn, runners::katana::KatanaRunner},
+    tests::{ensure_txn, runners::katana::KatanaRunner},
 };
 use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{
@@ -300,11 +299,10 @@ async fn test_change_owner_invalidate_old_sessions() {
         "app_id".to_string(),
         "username".to_owned(),
         CONTROLLERS[&Version::LATEST].hash,
-        runner.client(),
+        runner.rpc_url.clone(),
         new_signer.clone(),
         controller.address(),
         runner.client().chain_id().await.unwrap(),
-        InMemoryBackend::default(),
     );
 
     let session_account = controller
@@ -335,7 +333,6 @@ async fn test_call_unallowed_methods() {
             "cartridge.gg".to_string(),
             "username".to_string(),
             "challenge".as_bytes(),
-            SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
         )
         .await
         .unwrap(),

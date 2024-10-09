@@ -1,9 +1,4 @@
 use async_trait::async_trait;
-
-use account_sdk::{
-    signers::{webauthn::WebauthnBackend, DeviceError},
-    Backend, OriginProvider,
-};
 use futures::channel::oneshot;
 use serde_json::to_value;
 use wasm_bindgen::UnwrapThrowExt;
@@ -14,20 +9,18 @@ use webauthn_rs_proto::{
     PublicKeyCredentialCreationOptions, RegisterPublicKeyCredential, RequestChallengeResponse,
 };
 
+use crate::signers::{webauthn::WebauthnOperations, DeviceError};
+
 pub fn window() -> Window {
     web_sys::window().expect("Unable to retrieve window")
 }
 
 #[derive(Debug, Clone)]
-pub struct BrowserBackend;
-
-#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
-#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl Backend for BrowserBackend {}
+pub struct BrowserOperations;
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send), )]
-impl WebauthnBackend for BrowserBackend {
+impl WebauthnOperations for BrowserOperations {
     async fn get_assertion(
         &self,
         options: PublicKeyCredentialRequestOptions,
@@ -104,22 +97,12 @@ impl WebauthnBackend for BrowserBackend {
             "credential receiver dropped".to_string(),
         )))
     }
-}
 
-#[cfg(target_arch = "wasm32")]
-impl OriginProvider for BrowserBackend {
     fn origin(&self) -> Result<String, DeviceError> {
         let origin = window()
             .location()
             .origin()
             .map_err(|_| DeviceError::Origin("Unable to get origin".to_string()))?;
         Ok(origin)
-    }
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-impl OriginProvider for BrowserBackend {
-    fn origin(&self) -> Result<String, DeviceError> {
-        Ok("http://localhost:3001".to_string())
     }
 }

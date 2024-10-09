@@ -1,6 +1,6 @@
 #[macro_export]
 macro_rules! impl_execution_encoder {
-    ($type:ident<$($gen:ident : $bound:path),*>) => {
+    ($type:ident $(< $($gen:ident : $bound:path),* >)?) => {
         impl<$($gen: $bound + Send),*> ExecutionEncoder for $type<$($gen),*>
         {
             fn encode_calls(&self, calls: &[Call]) -> Vec<starknet::core::types::Felt> {
@@ -12,10 +12,10 @@ macro_rules! impl_execution_encoder {
 
 #[macro_export]
 macro_rules! impl_account {
-    ($type:ident<$($gen:ident : $bound:path),*>, $is_interactive:expr) => {
+    ($type:ident $(< $($gen:ident : $bound:path),* >)?, $is_interactive:expr) => {
         #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
         #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-        impl<$($gen: $bound + Send + Sync + Clone),*> Account for $type<$($gen),*>
+        impl$(<$($gen:$bound + Send + Sync + Clone),*>)* Account for $type$(<$($gen),*>)*
         {
             type SignError = SignError;
 

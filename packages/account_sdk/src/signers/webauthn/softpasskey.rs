@@ -1,19 +1,12 @@
-use crate::artifacts::Version;
-use crate::signers::webauthn::{WebauthnBackend, WebauthnSigner};
-use crate::signers::{DeviceError, Signer};
-use crate::OriginProvider;
-use crate::{
-    abigen::erc_20::Erc20,
-    tests::{account::FEE_TOKEN_ADDRESS, runners::katana::KatanaRunner},
-};
+use crate::signers::webauthn::WebauthnOperations;
+use crate::signers::DeviceError;
+
 use async_trait::async_trait;
 use base64urlsafedata::Base64UrlSafeData;
-use cainome::cairo_serde::{ContractAddress, U256};
+use once_cell::sync::Lazy;
 use sha2::{digest::Update, Digest, Sha256};
-use starknet::{
-    core::types::{BlockId, BlockTag},
-    macros::felt,
-};
+use std::collections::HashMap;
+use std::sync::Mutex;
 use webauthn_authenticator_rs::authenticator_hashed::AuthenticatorBackendHashedClientData;
 use webauthn_authenticator_rs::softpasskey::SoftPasskey;
 use webauthn_authenticator_rs::AuthenticatorBackend;
@@ -23,9 +16,9 @@ use webauthn_rs_proto::{
     PublicKeyCredentialRequestOptions, RegisterPublicKeyCredential,
 };
 
-use once_cell::sync::Lazy;
-use std::collections::HashMap;
-use std::sync::Mutex;
+#[cfg(test)]
+#[path = "softpasskey_test.rs"]
+mod softpasskey_test;
 
 static PASSKEYS: Lazy<Mutex<HashMap<Vec<u8>, SoftPasskey>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
@@ -36,9 +29,9 @@ static ORIGIN: Lazy<Mutex<Url>> =
     Lazy::new(|| Mutex::new(Url::parse("https://cartridge.gg").unwrap()));
 
 #[derive(Clone, Debug)]
-pub struct SoftPasskeySigner {}
-impl SoftPasskeySigner {
-    #[allow(dead_code)]
+pub struct SoftPasskeyOperations {}
+
+impl SoftPasskeyOperations {
     pub fn new(origin: Url) -> Self {
         let mut global_origin = ORIGIN.lock().unwrap();
         *global_origin = origin;
@@ -49,7 +42,7 @@ impl SoftPasskeySigner {
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl WebauthnBackend for SoftPasskeySigner {
+impl WebauthnOperations for SoftPasskeyOperations {
     async fn get_assertion(
         &self,
         options: PublicKeyCredentialRequestOptions,
@@ -111,57 +104,8 @@ impl WebauthnBackend for SoftPasskeySigner {
 
         Ok(r)
     }
-}
 
-impl OriginProvider for SoftPasskeySigner {
     fn origin(&self) -> Result<String, DeviceError> {
         Ok(ORIGIN.lock().unwrap().clone().to_string())
     }
-}
-
-pub async fn test_verify_execute(signer: Signer) {
-    let runner = KatanaRunner::load();
-    let controller = runner
-        .deploy_controller("username".to_owned(), signer, Version::LATEST)
-        .await;
-    let new_account = ContractAddress(felt!("0x18301129"));
-    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller);
-
-    contract_erc20
-        .balanceOf(&new_account)
-        .block_id(BlockId::Tag(BlockTag::Latest))
-        .call()
-        .await
-        .expect("failed to call contract");
-
-    contract_erc20
-        .transfer(
-            &new_account,
-            &U256 {
-                low: 0x10_u128,
-                high: 0,
-            },
-        )
-        .send()
-        .await
-        .unwrap();
-}
-
-#[tokio::test]
-async fn test_verify_execute_webautn() {
-    let signer = WebauthnSigner::register(
-        "cartridge.gg".to_string(),
-        "username".to_string(),
-        "challenge".as_bytes(),
-        SoftPasskeySigner::new("https://cartridge.gg".try_into().unwrap()),
-    )
-    .await
-    .unwrap();
-
-    test_verify_execute(Signer::Webauthn(signer)).await;
-}
-
-#[tokio::test]
-async fn test_verify_execute_starknet() {
-    test_verify_execute(Signer::new_starknet_random()).await;
 }

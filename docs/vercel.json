@@ -1,0 +1,9 @@
+{
+    "redirects": [
+        {
+            "source": "/examples/telegram",
+            "destination": "/controller/examples/telegram",
+            "permanent": true
+        }
+    ]
+}

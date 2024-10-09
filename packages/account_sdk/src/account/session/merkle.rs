@@ -21,6 +21,7 @@ impl MerkleTree {
             };
         }
     }
+
     pub fn compute_proof(leaves: Vec<Felt>, index: usize) -> Vec<Felt> {
         let mut proof = vec![];
         compute_proof(leaves, index, &mut proof);

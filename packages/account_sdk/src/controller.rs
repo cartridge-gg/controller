@@ -1,21 +1,18 @@
-use crate::abigen::controller::{OutsideExecution, Owner, SignerSignature};
-use crate::account::outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller};
+use crate::abigen::controller::{Owner, SignerSignature};
 use crate::account::session::hash::Policy;
 use crate::account::{AccountHashAndCallsSigner, CallEncoder};
 use crate::constants::{ETH_CONTRACT_ADDRESS, WEBAUTHN_GAS};
 use crate::errors::ControllerError;
 use crate::factory::ControllerFactory;
-use crate::provider::CartridgeProvider;
+use crate::impl_account;
+use crate::provider::CartridgeJsonRpcProvider;
 use crate::signers::Signer;
-use crate::storage::StorageValue;
+use crate::storage::{Storage, StorageBackend};
 use crate::typed_data::TypedData;
-use crate::utils::time::get_current_timestamp;
 use crate::{
     abigen::{self},
-    account::AccountHashSigner,
     signers::{HashSigner, SignError, SignerTrait},
 };
-use crate::{impl_account, Backend};
 use async_trait::async_trait;
 use cainome::cairo_serde::{CairoSerde, U256};
 use starknet::accounts::{AccountDeploymentV1, AccountError, AccountFactory, ExecutionV1};
@@ -24,48 +21,46 @@ use starknet::core::types::{
 };
 use starknet::core::utils::cairo_short_string_to_felt;
 use starknet::macros::selector;
-use starknet::providers::ProviderError;
+use starknet::providers::{Provider, ProviderError};
 use starknet::signers::SignerInteractivityContext;
 use starknet::{
     accounts::{Account, ConnectedAccount, ExecutionEncoder},
     core::types::{BlockId, Felt},
-    signers::SigningKey,
 };
+use url::Url;
+
+#[cfg(all(test, not(target_arch = "wasm32")))]
+#[path = "controller_test.rs"]
+mod controller_test;
 
 #[derive(Clone)]
-pub struct Controller<P, B>
-where
-    P: CartridgeProvider + Send + Sync + Clone,
-    B: Backend + Clone,
-{
+pub struct Controller {
     pub(crate) app_id: String,
     pub(crate) address: Felt,
     pub(crate) chain_id: Felt,
+    pub(crate) class_hash: Felt,
+    pub(crate) rpc_url: Url,
     pub username: String,
-    salt: Felt,
-    provider: P,
+    pub(crate) salt: Felt,
+    provider: CartridgeJsonRpcProvider,
     pub(crate) owner: Signer,
     contract: Option<Box<abigen::controller::Controller<Self>>>,
-    pub factory: ControllerFactory<P>,
-    pub(crate) backend: B,
+    pub factory: ControllerFactory,
+    pub(crate) storage: Storage,
+    nonce: Felt,
 }
 
-impl<P, B> Controller<P, B>
-where
-    P: CartridgeProvider + Send + Sync + Clone,
-    B: Backend + Clone,
-{
-    #[allow(clippy::too_many_arguments)]
+impl Controller {
     pub fn new(
         app_id: String,
         username: String,
         class_hash: Felt,
-        provider: P,
+        rpc_url: Url,
         owner: Signer,
         address: Felt,
         chain_id: Felt,
-        backend: B,
     ) -> Self {
+        let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
         let salt = cairo_short_string_to_felt(&username).unwrap();
 
         let mut calldata = Owner::cairo_serialize(&Owner::Signer(owner.signer()));
@@ -82,13 +77,16 @@ where
             app_id,
             address,
             chain_id,
+            class_hash,
+            rpc_url,
             username,
             salt,
             provider,
             owner,
             contract: None,
             factory,
-            backend,
+            storage: Storage::default(),
+            nonce: Felt::ZERO,
         };
 
         let contract = Box::new(abigen::controller::Controller::new(
@@ -97,10 +95,16 @@ where
         ));
         controller.contract = Some(contract);
 
+        // TODO: Renenable once we remove js storage busting
+        // controller
+        //     .storage
+        //     .set_controller(address, ControllerMetadata::from(&controller))
+        //     .expect("Should store controller");
+
         controller
     }
 
-    pub fn deploy(&self) -> AccountDeploymentV1<'_, ControllerFactory<P>> {
+    pub fn deploy(&self) -> AccountDeploymentV1<'_, ControllerFactory> {
         self.factory.deploy_v1(self.salt)
     }
 
@@ -114,42 +118,6 @@ where
 
     pub fn owner_guid(&self) -> Felt {
         self.owner.signer().guid()
-    }
-
-    async fn execute_from_outside_raw(
-        &self,
-        outside_execution: OutsideExecution,
-    ) -> Result<InvokeTransactionResult, ControllerError> {
-        let signed = self
-            .sign_outside_execution(outside_execution.clone())
-            .await?;
-
-        let res = self
-            .provider()
-            .add_execute_outside_transaction(outside_execution, self.address, signed.signature)
-            .await
-            .map_err(ControllerError::PaymasterError)?;
-
-        Ok(InvokeTransactionResult {
-            transaction_hash: res.transaction_hash,
-        })
-    }
-
-    pub async fn execute_from_outside(
-        &self,
-        calls: Vec<Call>,
-    ) -> Result<InvokeTransactionResult, ControllerError> {
-        let now = get_current_timestamp();
-
-        let outside_execution = OutsideExecution {
-            caller: OutsideExecutionCaller::Any.into(),
-            execute_after: 0,
-            execute_before: now + 600,
-            calls: calls.into_iter().map(|call| call.into()).collect(),
-            nonce: SigningKey::from_random().secret_scalar(),
-        };
-
-        self.execute_from_outside_raw(outside_execution).await
     }
 
     pub async fn estimate_invoke_fee(
@@ -218,44 +186,68 @@ where
             return self.execute_from_outside(calls).await;
         }
 
-        let result = self.execute_v1(calls.clone()).max_fee(max_fee).send().await;
+        let mut retry_count = 0;
+        let max_retries = 1;
 
-        match result {
-            Ok(tx_result) => {
-                // Update is_registered to true after successful execution with a session
-                if let Some((key, metadata)) =
-                    self.session_metadata(&Policy::from_calls(&calls), None)
-                {
-                    if !metadata.is_registered {
-                        let mut updated_metadata = metadata;
-                        updated_metadata.is_registered = true;
-                        self.backend
-                            .set(&key, &StorageValue::Session(updated_metadata))?;
-                    }
-                }
-                Ok(tx_result)
-            }
-            Err(e) => {
-                if let AccountError::Provider(ProviderError::StarknetError(
-                    StarknetError::TransactionExecutionError(data),
-                )) = &e
-                {
-                    if data
-                        .execution_error
-                        .contains(&format!("{:x} is not deployed.", self.address))
+        loop {
+            let nonce = self.get_nonce().await?;
+            let result = self
+                .execute_v1(calls.clone())
+                .nonce(nonce)
+                .max_fee(max_fee)
+                .send()
+                .await;
+
+            match result {
+                Ok(tx_result) => {
+                    // Update nonce
+                    self.nonce = self.nonce + 1;
+
+                    // Update is_registered to true after successful execution with a session
+                    if let Some((key, metadata)) =
+                        self.session_metadata(&Policy::from_calls(&calls), None)
                     {
-                        let balance = self.eth_balance().await?;
-                        let mut fee_estimate = self.deploy().estimate_fee().await?;
-                        fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
-                        Err(ControllerError::NotDeployed {
-                            fee_estimate: Box::new(fee_estimate),
-                            balance,
-                        })
-                    } else {
-                        Err(ControllerError::AccountError(e))
+                        if !metadata.is_registered {
+                            let mut updated_metadata = metadata;
+                            updated_metadata.is_registered = true;
+                            self.storage.set_session(&key, updated_metadata)?;
+                        }
                     }
-                } else {
-                    Err(ControllerError::AccountError(e))
+                    return Ok(tx_result);
+                }
+                Err(e) => {
+                    match &e {
+                        AccountError::Provider(ProviderError::StarknetError(
+                            StarknetError::TransactionExecutionError(data),
+                        )) if data
+                            .execution_error
+                            .contains(&format!("{:x} is not deployed.", self.address)) =>
+                        {
+                            let balance = self.eth_balance().await?;
+                            let mut fee_estimate = self.deploy().estimate_fee().await?;
+                            fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
+                            return Err(ControllerError::NotDeployed {
+                                fee_estimate: Box::new(fee_estimate),
+                                balance,
+                            });
+                        }
+                        AccountError::Provider(ProviderError::StarknetError(
+                            StarknetError::InvalidTransactionNonce,
+                        )) => {
+                            if retry_count < max_retries {
+                                // Refetch nonce from the provider
+                                let new_nonce = self
+                                    .provider
+                                    .get_nonce(self.block_id(), self.address())
+                                    .await?;
+                                self.nonce = new_nonce;
+                                retry_count += 1;
+                                continue;
+                            }
+                        }
+                        _ => {}
+                    }
+                    return Err(ControllerError::AccountError(e));
                 }
             }
         }
@@ -297,15 +289,32 @@ where
 
     pub async fn sign_message(&self, data: TypedData) -> Result<Vec<Felt>, SignError> {
         let hash = data.encode(self.address)?;
-        self.sign_hash(hash).await
+        let signature = self.owner.sign(&hash).await?;
+        Ok(Vec::<SignerSignature>::cairo_serialize(&vec![signature]))
     }
 
-    pub fn upgrade(&self, new_class_hash: Felt) -> Call {
-        self.contract().upgrade_getcall(&new_class_hash.into())
+    async fn get_nonce(&self) -> Result<Felt, ProviderError> {
+        let current_nonce = self.nonce;
+
+        if current_nonce == Felt::ZERO {
+            match self
+                .provider
+                .get_nonce(self.block_id(), self.address())
+                .await
+            {
+                Ok(nonce) => Ok(nonce),
+                Err(ProviderError::StarknetError(StarknetError::ContractNotFound)) => {
+                    Ok(Felt::ZERO)
+                }
+                Err(e) => Err(e),
+            }
+        } else {
+            Ok(current_nonce)
+        }
     }
 }
 
-impl_account!(Controller<P: CartridgeProvider, B: Backend>, |account: &Controller<P, B>, context| {
+impl_account!(Controller, |account: &Controller, context| {
     if let SignerInteractivityContext::Execution { calls } = context {
         account.session_account(calls).is_none()
     } else {
@@ -315,12 +324,8 @@ impl_account!(Controller<P: CartridgeProvider, B: Backend>, |account: &Controlle
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<P, B> ConnectedAccount for Controller<P, B>
-where
-    P: CartridgeProvider + Send + Sync + Clone,
-    B: Backend + Clone,
-{
-    type Provider = P;
+impl ConnectedAccount for Controller {
+    type Provider = CartridgeJsonRpcProvider;
 
     fn provider(&self) -> &Self::Provider {
         &self.provider
@@ -331,19 +336,13 @@ where
     }
 
     async fn get_nonce(&self) -> Result<Felt, ProviderError> {
-        self.provider
-            .get_nonce(self.block_id(), self.address())
-            .await
+        self.get_nonce().await
     }
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<P, B> AccountHashAndCallsSigner for Controller<P, B>
-where
-    P: CartridgeProvider + Send + Sync + Clone,
-    B: Backend + Clone,
-{
+impl AccountHashAndCallsSigner for Controller {
     async fn sign_hash_and_calls(
         &self,
         hash: Felt,
@@ -359,25 +358,8 @@ where
     }
 }
 
-impl<P, B> ExecutionEncoder for Controller<P, B>
-where
-    P: CartridgeProvider + Send + Sync + Clone,
-    B: Backend + Clone,
-{
+impl ExecutionEncoder for Controller {
     fn encode_calls(&self, calls: &[Call]) -> Vec<Felt> {
         CallEncoder::encode_calls(calls)
-    }
-}
-
-#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
-#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-impl<P, B> AccountHashSigner for Controller<P, B>
-where
-    P: CartridgeProvider + Send + Sync + Clone,
-    B: Backend + Clone,
-{
-    async fn sign_hash(&self, hash: Felt) -> Result<Vec<Felt>, SignError> {
-        let signature = self.owner.sign(&hash).await?;
-        Ok(Vec::<SignerSignature>::cairo_serialize(&vec![signature]))
     }
 }
