@@ -13,7 +13,7 @@ export function useBalance({ address }: { address: string }) {
   const fetchBalance = useCallback(async () => {
     setIsFetching(true);
 
-    const balance = await controller.account.callContract({
+    const balance = await controller.callContract({
       contractAddress: ETH_CONTRACT_ADDRESS,
       entrypoint: "balanceOf",
       calldata: [address],

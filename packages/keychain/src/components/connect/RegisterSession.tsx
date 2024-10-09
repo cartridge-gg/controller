@@ -49,7 +49,7 @@ export function RegisterSession({
         maxFee,
       );
 
-      await controller.account.waitForTransaction(transaction_hash, {
+      await controller.waitForTransaction(transaction_hash, {
         retryInterval: 1000,
         successStates: [
           TransactionExecutionStatus.SUCCEEDED,

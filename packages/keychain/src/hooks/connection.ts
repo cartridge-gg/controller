@@ -144,8 +144,6 @@ export function useConnectionValue() {
             timeoutPromise,
           ])) as constants.StarknetChainId;
           setChainId(chainId);
-
-          controller?.updateChain(rpcUrl, chainId);
         } catch (e) {
           console.error(e);
           setError(new Error("Unable to fetch Chain ID from provided RPC URL"));

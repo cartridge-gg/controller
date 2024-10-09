@@ -92,6 +92,9 @@ pub enum ErrorCode {
     ProviderArrayLengthMismatch = 130,
     ProviderOther = 131,
     SessionAlreadyRegistered = 132,
+    UrlParseError = 133,
+    Base64DecodeError = 134,
+    CoseError = 135,
 }
 
 impl From<ControllerError> for JsControllerError {
@@ -151,6 +154,21 @@ impl From<ControllerError> for JsControllerError {
             ControllerError::SessionAlreadyRegistered => JsControllerError {
                 code: ErrorCode::SessionAlreadyRegistered,
                 message: "Session already registered".to_string(),
+                data: None,
+            },
+            ControllerError::UrlParseError(e) => JsControllerError {
+                code: ErrorCode::UrlParseError,
+                message: format!("Failed to parse URL: {}", e),
+                data: None,
+            },
+            ControllerError::Base64DecodeError(e) => JsControllerError {
+                code: ErrorCode::Base64DecodeError,
+                message: format!("Failed to decode Base64: {}", e),
+                data: None,
+            },
+            ControllerError::CoseError(e) => JsControllerError {
+                code: ErrorCode::CoseError,
+                message: format!("COSE error: {}", e),
                 data: None,
             },
         }

@@ -1,6 +1,5 @@
 import { ConnectReply, Policy } from "@cartridge/controller";
 import { ConnectCtx, ConnectionCtx } from "./types";
-import Controller from "utils/controller";
 
 export function connectFactory({
   setOrigin,
@@ -29,14 +28,4 @@ export function connectFactory({
         } as ConnectCtx);
       });
     };
-}
-
-export function disconnectFactory(
-  setController: (controller: Controller) => void,
-) {
-  return (controller: Controller) => {
-    controller.delete();
-    setController(undefined);
-    return;
-  };
 }

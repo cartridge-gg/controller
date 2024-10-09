@@ -12,16 +12,24 @@ pub struct FileSystemBackend {
 
 impl Default for FileSystemBackend {
     fn default() -> Self {
-        let config_dir = dirs::config_dir()
-            .unwrap_or_else(|| std::env::current_dir().expect("Failed to get current directory"));
-
-        let base_path = config_dir.join("cartridge");
+        let base_path = if let Ok(path) = std::env::var("CARTRIDGE_STORAGE_PATH") {
+            PathBuf::from(path)
+        } else {
+            let config_dir = dirs::config_dir().unwrap_or_else(|| {
+                std::env::current_dir().expect("Failed to get current directory")
+            });
+            config_dir.join("cartridge")
+        };
 
         Self { base_path }
     }
 }
 
 impl FileSystemBackend {
+    pub fn new(base_path: PathBuf) -> Self {
+        Self { base_path }
+    }
+
     fn file_path(&self, key: &str) -> PathBuf {
         self.base_path.join(key)
     }

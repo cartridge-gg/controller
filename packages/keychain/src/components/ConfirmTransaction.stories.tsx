@@ -8,13 +8,11 @@ const meta = {
   parameters: {
     connection: {
       controller: {
-        account: {
-          estimateInvokeFee: () => ({
-            suggestedMaxFee: "100",
-          }),
-          hasSession: () => true,
-          session: () => true,
-        },
+        estimateInvokeFee: () => ({
+          suggestedMaxFee: "100",
+        }),
+        hasSession: () => true,
+        session: () => true,
       },
       context: {
         origin: "http://localhost:3002",

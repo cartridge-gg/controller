@@ -57,7 +57,7 @@ export function ExecutionContainer({
         return;
       }
       try {
-        const est = await controller.account.estimateInvokeFee(
+        const est = await controller.estimateInvokeFee(
           transactions,
           transactionsDetail,
         );

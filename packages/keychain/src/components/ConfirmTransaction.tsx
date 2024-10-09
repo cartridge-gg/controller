@@ -13,7 +13,7 @@ export function ConfirmTransaction() {
   const { controller, context, origin, policies, setContext } = useConnection();
   const [policiesUpdated, setIsPoliciesUpdated] = useState<boolean>(false);
   const ctx = context as ExecuteCtx;
-  const account = controller.account;
+  const account = controller;
 
   const onSubmit = async (maxFee: bigint) => {
     let { transaction_hash } = await account.execute(ctx.transactions, {

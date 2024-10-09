@@ -79,7 +79,7 @@ export function Signup({
         credentialId,
       });
 
-      controller.store();
+      window.controller = controller;
       setController(controller);
 
       if (onSuccess) {

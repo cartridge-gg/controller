@@ -123,7 +123,7 @@ function FundingInner({ onComplete, title }: FundingInnerProps) {
           contractAddress: ETH_CONTRACT_ADDRESS,
           entrypoint: "approve",
           calldata: CallData.compile({
-            recipient: controller.account.address,
+            recipient: controller.address,
             amount: cairo.uint256(parseEther(ethAmount)),
           }),
         },
@@ -131,7 +131,7 @@ function FundingInner({ onComplete, title }: FundingInnerProps) {
           contractAddress: ETH_CONTRACT_ADDRESS,
           entrypoint: "transfer",
           calldata: CallData.compile({
-            recipient: controller.account.address,
+            recipient: controller.address,
             amount: cairo.uint256(parseEther(ethAmount)),
           }),
         },
@@ -175,7 +175,8 @@ function FundingInner({ onComplete, title }: FundingInnerProps) {
       title={
         title || (
           <>
-            Fund <b style={{ color: "brand.primary" }}>{controller.username}</b>
+            Fund{" "}
+            <b style={{ color: "brand.primary" }}>{controller.username()}</b>
           </>
         )
       }
@@ -306,7 +307,7 @@ function ExternalWalletProvider({ children }: PropsWithChildren) {
   return (
     <StarknetConfig
       chains={[sepolia, mainnet]}
-      provider={() => controller.account.rpc}
+      provider={() => controller}
       connectors={connectors}
       explorer={voyager}
     >
@@ -408,7 +409,7 @@ function AmountSelection({
 
 //   useEffect(() => {
 //     fetchTokenInfo(prefunds).then(setTokens);
-//   }, [prefunds, controller.account.address]);
+//   }, [prefunds, controller.address]);
 
 //   const checkFunds = useCallback(async () => {
 //     setIsFetching(true);

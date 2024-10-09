@@ -81,10 +81,9 @@ function Form({
           credentialId,
           finalize: isSlot,
         });
-
-        controller.store();
       }
 
+      window.controller = controller;
       setController(controller);
     } catch (e) {
       setError(e);

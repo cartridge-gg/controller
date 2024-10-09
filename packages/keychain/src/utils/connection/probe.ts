@@ -9,7 +9,7 @@ export function probeFactory({
   setRpcUrl: (rpcUrl: string) => void;
 }) {
   return (origin: string) =>
-    (rpcUrl?: string): Promise<ProbeReply> => {
+    (rpcUrl: string): Promise<ProbeReply> => {
       const controller = Controller.fromStore(origin);
       if (!controller) {
         return Promise.reject({
@@ -17,8 +17,8 @@ export function probeFactory({
         });
       }
 
-      if (rpcUrl && rpcUrl !== controller.rpcUrl) {
-        controller.delete();
+      if (rpcUrl !== controller.rpcUrl()) {
+        controller.disconnect();
         setController(undefined);
         return Promise.reject({
           code: ResponseCodes.NOT_CONNECTED,
@@ -27,6 +27,7 @@ export function probeFactory({
 
       setRpcUrl(rpcUrl);
       setController(controller);
+      window.controller = controller;
       return Promise.resolve({
         code: ResponseCodes.SUCCESS,
         address: controller.address,
