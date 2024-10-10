@@ -25,7 +25,7 @@ class SessionConnector extends Connector {
   private _rpcUrl: string;
   private _policies: Policy[];
   private _username?: string;
-  private controller?: SessionAccount & AccountInterface;
+  private _account?: SessionAccount & AccountInterface;
 
   constructor({
     rpcUrl,
@@ -74,9 +74,9 @@ class SessionConnector extends Connector {
 
   async connect() {
     await this.tryRetrieveFromQueryOrStorage();
-    if (this.controller) {
+    if (this._account) {
       return {
-        account: this.controller.address,
+        account: this._account.address,
         chainId: await this.chainId(),
       };
     }
@@ -116,11 +116,11 @@ class SessionConnector extends Connector {
   async account() {
     await this.tryRetrieveFromQueryOrStorage();
 
-    if (!this.controller) {
+    if (!this._account) {
       return Promise.reject("Session not registered");
     }
 
-    return Promise.resolve(this.controller);
+    return Promise.resolve(this._account);
   }
 
   async tryRetrieveFromQueryOrStorage() {
@@ -161,7 +161,7 @@ class SessionConnector extends Connector {
     }
 
     this._username = sessionRegistration.username;
-    this.controller = new SessionAccount({
+    this._account = new SessionAccount({
       rpcUrl: this._rpcUrl,
       privateKey: signer.privKey,
       address: sessionRegistration.address,
@@ -171,7 +171,7 @@ class SessionConnector extends Connector {
       policies: this._policies,
     });
 
-    return this.controller;
+    return this._account;
   }
 }
 
