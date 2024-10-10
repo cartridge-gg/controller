@@ -118,6 +118,11 @@ class SessionConnector extends Connector {
       if (session) {
         sessionRegistration = JSON.parse(atob(session));
         this._storageBackend.set("session", JSON.stringify(sessionRegistration));
+
+        // Remove the session query parameter
+        params.delete("session");
+        const newUrl = window.location.pathname + (params.toString() ? `?${params.toString()}` : '') + window.location.hash;
+        window.history.replaceState({}, document.title, newUrl);
       }
     }
 
