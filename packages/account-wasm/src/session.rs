@@ -112,6 +112,26 @@ impl CartridgeSessionAccount {
         Ok(Felts(res.into_iter().map(JsFelt).collect()))
     }
 
+    pub async fn sign_transaction(&self, calls: Vec<JsCall>, max_fee: JsFelt) -> Result<Felts> {
+        let calls = calls
+            .into_iter()
+            .map(TryInto::try_into)
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+
+        let nonce = self.0.get_nonce().await?;
+        let tx_hash = self
+            .0
+            .execute_v1(calls.clone())
+            .nonce(nonce)
+            .max_fee(max_fee.0)
+            .prepared()?
+            .transaction_hash(false);
+
+        let signature = self.0.sign_hash_and_calls(tx_hash, &calls).await?;
+
+        Ok(Felts(signature.into_iter().map(JsFelt).collect()))
+    }
+
     pub async fn execute(&self, calls: Vec<JsCall>) -> Result<JsValue> {
         let calls = calls
             .into_iter()
