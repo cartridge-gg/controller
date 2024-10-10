@@ -25,6 +25,10 @@
     "lint": {},
     "format": {},
     "format:check": {},
+    "test": {
+      "persistent": true
+    },
+    "test:ci": {},
     "e2e": {
       "dependsOn": ["^build:deps"]
     },
