@@ -16,7 +16,7 @@ function Authenticate() {
     <AuthComponent
       name={decodeURIComponent(name)}
       action={decodeURIComponent(action) as AuthAction}
-      network={network ?? constants.NetworkName.SN_SEPOLIA}
+      network={network ?? constants.NetworkName.SN_MAIN}
       onSuccess={() => {
         if (window.opener) {
           return window.close();
