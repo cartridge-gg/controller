@@ -182,13 +182,22 @@ mod session_component {
             let (message_hash, _, _) = hades_permutation(transaction_hash, session_hash, 2);
 
             let session_guid_from_sig = signature.session_signature.signer().into_guid();
+            
             assert(
                 signature.session.session_key_guid == session_guid_from_sig,
                 'session/session-key-mismatch'
             );
+            
             assert(
                 signature.session_signature.is_valid_signature(message_hash),
                 'session/invalid-session-sig'
+            );
+
+            // let guardian_guid_from_sig = signature.guardian_signature.signer().into_guid();
+            // TODO: Validate guardian is valid
+            assert(
+                signature.guardian_signature.is_valid_signature(message_hash),
+                'session/invalid-guardian-sig'
             );
 
             if check_policy(calls, signature.session.allowed_methods_root, signature.proofs)

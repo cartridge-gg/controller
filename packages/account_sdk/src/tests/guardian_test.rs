@@ -8,15 +8,16 @@ use crate::{
     abigen::erc_20::Erc20,
     artifacts::Version,
     signers::{webauthn::WebauthnSigner, Signer},
-    tests::{account::FEE_TOKEN_ADDRESS, runners::katana::KatanaRunner},
+    tests::{account::FEE_TOKEN_ADDRESS, runners::katana::KatanaRunner, EnsureTxnError},
 };
 
 use super::ensure_txn;
 
 pub async fn test_verify_execute(signer: Signer) {
     let runner = KatanaRunner::load();
+    let guardian = Signer::new_starknet_random();
     let controller = runner
-        .deploy_controller("username".to_owned(), signer, Version::LATEST)
+        .deploy_controller_with_guardian("username".to_owned(), signer, guardian, Version::LATEST)
         .await;
 
     let new_account = ContractAddress(felt!("0x18301129"));
@@ -46,7 +47,7 @@ pub async fn test_verify_execute(signer: Signer) {
 
 #[cfg(feature = "webauthn")]
 #[tokio::test]
-async fn test_verify_execute_webauthn() {
+async fn test_verify_execute_guardian_owner_webauthn() {
     let signer = Signer::Webauthn(
         WebauthnSigner::register(
             "cartridge.gg".to_string(),
@@ -61,6 +62,39 @@ async fn test_verify_execute_webauthn() {
 }
 
 #[tokio::test]
-async fn test_verify_execute_starkpair() {
+async fn test_verify_execute_guardian_owner_starknet() {
     test_verify_execute(Signer::new_starknet_random()).await;
+}
+
+#[tokio::test]
+async fn test_verify_execute_guardian_should_fail_no_guardian() {
+    let runner = KatanaRunner::load();
+    let signer = Signer::new_starknet_random();
+    let controller = runner
+        .deploy_controller("username".to_owned(), signer, Version::LATEST)
+        .await;
+
+    let new_account = ContractAddress(felt!("0x18301129"));
+
+    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller);
+
+    contract_erc20
+        .balanceOf(&new_account)
+        .block_id(BlockId::Tag(BlockTag::Latest))
+        .call()
+        .await
+        .expect("failed to call contract");
+
+    let result = ensure_txn(
+        contract_erc20.transfer(
+            &new_account,
+            &U256 {
+                low: 0x10_u128,
+                high: 0,
+            },
+        ),
+        runner.client(),
+    )
+    .await;
+    matches!(result, Err(EnsureTxnError::TransactionWaitingError(_)));
 }
