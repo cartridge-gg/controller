@@ -1,7 +1,7 @@
 import { Connector } from "@starknet-react/core";
 import { Policy } from "@cartridge/controller";
 import { icon } from "./icon";
-import { AccountInterface, ec, stark } from "starknet";
+import { ec, stark } from "starknet";
 import SessionAccount from "@cartridge/controller/dist/session";
 import { KEYCHAIN_URL } from "./constants";
 
@@ -25,7 +25,7 @@ class SessionConnector extends Connector {
   private _rpcUrl: string;
   private _policies: Policy[];
   private _username?: string;
-  private _account?: SessionAccount & AccountInterface;
+  private _account?: SessionAccount;
 
   constructor({
     rpcUrl,
@@ -110,6 +110,10 @@ class SessionConnector extends Connector {
   }
 
   disconnect(): Promise<void> {
+    this._storageBackend.delete("sessionSigner");
+    this._storageBackend.delete("session");
+    this._account = undefined;
+    this._username = undefined;
     return Promise.resolve();
   }
 
@@ -120,7 +124,7 @@ class SessionConnector extends Connector {
       return Promise.reject("Session not registered");
     }
 
-    return Promise.resolve(this._account);
+    return this._account;
   }
 
   async tryRetrieveFromQueryOrStorage() {
