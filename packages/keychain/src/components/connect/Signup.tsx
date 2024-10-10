@@ -16,6 +16,7 @@ import { useControllerTheme } from "hooks/theme";
 import { useConnection } from "hooks/connection";
 import { ErrorAlert } from "components/ErrorAlert";
 import { useDebounce } from "hooks/debounce";
+import { constants } from "starknet";
 
 export function Signup({
   prefilledName = "",
@@ -118,18 +119,20 @@ export function Signup({
     try {
       const data: FinalizeRegistrationMutation = await doSignup(
         usernameField.value,
+        //shortString.decodeShortString(chainId),
+        constants.NetworkName.SN_MAIN, // hardcode to main till multi-signers is complete
       );
       const {
         finalizeRegistration: {
           id: username,
-          contractAddress: address,
+          controllers,
           credentials: { webauthn },
         },
       } = data;
 
       const { id: credentialId, publicKey } = webauthn[0];
 
-      initController(username, address, credentialId, publicKey);
+      initController(username, controllers[0].address, credentialId, publicKey);
     } catch (e) {
       if (
         // Backward compat with iframes without this permission-policy
@@ -146,7 +149,7 @@ export function Signup({
       setIsRegistering(false);
       setError(e);
     }
-  }, [usernameField, initController, doPopup]);
+  }, [usernameField, chainId, initController, doPopup]);
 
   // for polling approach when popup
   useAccountQuery(
@@ -165,11 +168,16 @@ export function Signup({
               credentials: {
                 webauthn: [{ id: credentialId, publicKey }],
               },
-              contractAddress: address,
+              controllers,
             },
           } = data;
 
-          initController(username, address, credentialId, publicKey);
+          initController(
+            username,
+            controllers[0].address,
+            credentialId,
+            publicKey,
+          );
         } catch (e) {
           setError(e);
         }

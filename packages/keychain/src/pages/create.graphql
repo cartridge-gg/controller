@@ -2,10 +2,15 @@ mutation BeginRegistration($id: String!) {
   beginRegistration(id: $id)
 }
 
-mutation FinalizeRegistration($credentials: String!) {
-  finalizeRegistration(credentials: $credentials) {
+mutation FinalizeRegistration($credentials: String!, $network: String!) {
+  finalizeRegistration(credentials: $credentials, network: $network) {
     id
-    contractAddress
+    controllers {
+      address
+      signers {
+        type
+      }
+    }
     credentials {
       webauthn {
         id
@@ -18,13 +23,17 @@ mutation FinalizeRegistration($credentials: String!) {
 query Account($id: ID!) {
   account(id: $id) {
     id
-    type
     credentials {
       webauthn {
         id
         publicKey
       }
     }
-    contractAddress
+    controllers {
+      address
+      signers {
+        type
+      }
+    }
   }
 }

@@ -57,8 +57,8 @@ export function fetchControllers(_: string) {
       });
 
       response.accounts?.edges?.forEach((edge) => {
-        if (edge?.node?.contractAddress && edge.node.id) {
-          const addr = addAddressPadding(edge.node.contractAddress);
+        if (edge?.node?.controllers[0] && edge.node.id) {
+          const addr = addAddressPadding(edge.node.controllers[0].address);
           result[addr] = edge.node.id;
           cache[addr] = edge.node.id;
         }
