@@ -24,7 +24,7 @@ class SessionConnector extends Connector {
   private _storageBackend: StorageBackend;
   private _rpcUrl: string;
   private _policies: Policy[];
-  private _publicKey: string;
+  private _username?: string;
   private controller?: SessionAccount & AccountInterface;
 
   constructor({
@@ -43,19 +43,6 @@ class SessionConnector extends Connector {
     this._rpcUrl = rpcUrl;
     this._policies = policies;
     this._storageBackend = storageBackend;
-
-    // Generate a random local key pair
-    const pk = stark.randomAddress();
-    this._publicKey = ec.starkCurve.getStarkKey(pk);
-
-    this._storageBackend.set(
-      "sessionSigner",
-      JSON.stringify({
-        privKey: pk,
-        pubKey: this._publicKey,
-      }),
-    );
-
     this._chainId = chainId;
   }
 
@@ -80,14 +67,31 @@ class SessionConnector extends Connector {
     return Promise.resolve(true);
   }
 
+  async username() {
+    await this.tryRetrieveFromQueryOrStorage();
+    return this._username;
+  }
+
   async connect() {
     await this.tryRetrieveFromQueryOrStorage();
     if (this.controller) {
       return this.controller;
     }
 
+    // Generate a random local key pair
+    const pk = stark.randomAddress();
+    const publicKey = ec.starkCurve.getStarkKey(pk);
+
+    this._storageBackend.set(
+      "sessionSigner",
+      JSON.stringify({
+        privKey: pk,
+        pubKey: publicKey,
+      }),
+    );
+
     const url = new URL(`${KEYCHAIN_URL}/session`);
-    url.searchParams.set("public_key", this._publicKey);
+    url.searchParams.set("public_key", publicKey);
     url.searchParams.set("redirect_uri", window.location.href);
     url.searchParams.set("redirect_query_name", "session");
     url.searchParams.set("policies", JSON.stringify(this._policies));
