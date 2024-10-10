@@ -1,8 +1,7 @@
 import {
   ClockIcon,
   cn,
-  ScrollIcon,
-  ShieldIcon,
+  CoinsIcon,
   StateIconProps,
   Tooltip,
   TooltipContent,
@@ -15,10 +14,10 @@ import { useCallback } from "react";
 
 export function Navigation() {
   return (
-    <div className="flex rounded border border-1 border-border overflow-hidden shrink-0">
-      <Item Icon={ScrollIcon} variant="quest" />
-      <Item Icon={ShieldIcon} variant="inventory" />
+    <div className="flex rounded border border-1 border-secondary overflow-hidden shrink-0 gap-[1px] bg-secondary">
+      <Item Icon={CoinsIcon} variant="inventory" />
       <Item Icon={ClockIcon} variant="history" />
+      {/* <Item Icon={ScrollIcon} variant="quest" /> */}
     </div>
   );
 }
