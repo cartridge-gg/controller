@@ -85,6 +85,7 @@ class SessionConnector extends Connector {
     url.searchParams.set("policies", JSON.stringify(this._policies));
     url.searchParams.set("rpc_url", this._rpcUrl);
 
+    localStorage.setItem('lastUsedConnector', this.id);
     window.location.replace(url.toString());
 
     return {
