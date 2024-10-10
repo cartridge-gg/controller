@@ -48,10 +48,13 @@ class SessionConnector extends Connector {
     const pk = stark.randomAddress();
     this._publicKey = ec.starkCurve.getStarkKey(pk);
 
-    this._storageBackend.set("sessionSigner", JSON.stringify({
-      privKey: pk,
-      pubKey: this._publicKey,
-    }));
+    this._storageBackend.set(
+      "sessionSigner",
+      JSON.stringify({
+        privKey: pk,
+        pubKey: this._publicKey,
+      }),
+    );
 
     this._chainId = chainId;
   }
@@ -78,6 +81,11 @@ class SessionConnector extends Connector {
   }
 
   async connect() {
+    await this.tryRetrieveFromQueryOrStorage();
+    if (this.controller) {
+      return this.controller;
+    }
+
     const url = new URL(`${KEYCHAIN_URL}/session`);
     url.searchParams.set("public_key", this._publicKey);
     url.searchParams.set("redirect_uri", window.location.href);
@@ -85,13 +93,13 @@ class SessionConnector extends Connector {
     url.searchParams.set("policies", JSON.stringify(this._policies));
     url.searchParams.set("rpc_url", this._rpcUrl);
 
-    localStorage.setItem('lastUsedConnector', this.id);
+    localStorage.setItem("lastUsedConnector", this.id);
     window.location.replace(url.toString());
 
     return {
-      account: '',
+      account: "",
       chainId: await this.chainId(),
-    };
+    } as any;
   }
 
   disconnect(): Promise<void> {
@@ -109,7 +117,9 @@ class SessionConnector extends Connector {
   }
 
   async tryRetrieveFromQueryOrStorage() {
-    const signer = JSON.parse((await this._storageBackend.get("sessionSigner"))!);
+    const signer = JSON.parse(
+      (await this._storageBackend.get("sessionSigner"))!,
+    );
     let sessionRegistration: SessionRegistration | null = null;
 
     if (window.location.search.includes("session")) {
@@ -117,11 +127,17 @@ class SessionConnector extends Connector {
       const session = params.get("session");
       if (session) {
         sessionRegistration = JSON.parse(atob(session));
-        this._storageBackend.set("session", JSON.stringify(sessionRegistration));
+        this._storageBackend.set(
+          "session",
+          JSON.stringify(sessionRegistration),
+        );
 
         // Remove the session query parameter
         params.delete("session");
-        const newUrl = window.location.pathname + (params.toString() ? `?${params.toString()}` : '') + window.location.hash;
+        const newUrl =
+          window.location.pathname +
+          (params.toString() ? `?${params.toString()}` : "") +
+          window.location.hash;
         window.history.replaceState({}, document.title, newUrl);
       }
     }
@@ -134,7 +150,7 @@ class SessionConnector extends Connector {
     }
 
     if (!sessionRegistration) {
-      return
+      return;
     }
 
     this.controller = new SessionAccount({
@@ -147,7 +163,7 @@ class SessionConnector extends Connector {
       policies: this._policies,
     });
 
-    return this.controller;    
+    return this.controller;
   }
 }
 
