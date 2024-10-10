@@ -56,9 +56,9 @@ class SessionConnector extends Connector {
     this._chainId = chainId;
   }
 
-  readonly id = "controller";
+  readonly id = "session";
 
-  readonly name = "Controller";
+  readonly name = "Session";
 
   readonly icon = {
     dark: icon,
