@@ -98,7 +98,7 @@ class SessionConnector extends Connector {
   }
 
   async account() {
-    await this.retrieveFromQueryOrStorage();
+    await this.tryRetrieveFromQueryOrStorage();
 
     if (!this.controller) {
       return Promise.reject("Session not registered");
@@ -107,7 +107,7 @@ class SessionConnector extends Connector {
     return Promise.resolve(this.controller);
   }
 
-  async retrieveFromQueryOrStorage() {
+  async tryRetrieveFromQueryOrStorage() {
     const signer = JSON.parse((await this._storageBackend.get("sessionSigner"))!);
     let sessionRegistration: SessionRegistration | null = null;
 
@@ -125,10 +125,10 @@ class SessionConnector extends Connector {
     }
 
     if (!sessionRegistration) {
-      throw new Error("No session registration found");
+      return
     }
 
-    const account = new SessionAccount({
+    this.controller = new SessionAccount({
       rpcUrl: this._rpcUrl,
       privateKey: signer.privKey,
       address: sessionRegistration.address,
@@ -138,8 +138,7 @@ class SessionConnector extends Connector {
       policies: this._policies,
     });
 
-    this.controller = account;
-    return account;    
+    return this.controller;    
   }
 }
 
