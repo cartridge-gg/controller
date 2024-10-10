@@ -5,9 +5,3 @@ trait IResolver<TContractState> {
     ) -> felt252;
 }
 
-
-
-#[starknet::interface]
-trait IExecutorAccount<TContractState> {
-    fn get_public_key(self: @TContractState) -> felt252;
-}

@@ -1,0 +1,22 @@
+[package]
+name = "_deployment"
+version = "0.1.0"
+
+
+[dependencies]
+starknet.workspace = true
+sncast_std.workspace = true
+
+registry = { path = "../registry"}
+resolver = { path = "../resolver"}
+
+[script]
+setup = "sncast script run --package _deployment setup "
+
+
+
+[[target.starknet-contract]]
+build-external-contracts = [
+    "registry::registry::Registry",
+    "resolver::resolver::ControllerResolverDelegation",
+]

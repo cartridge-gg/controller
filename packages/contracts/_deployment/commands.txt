@@ -1,0 +1,11 @@
+
+# in dev remove artifacts before redeploying
+
+# from /
+sncast -p dev_admin script run --package _deployment setup
+
+# from /packages/contracts
+
+source ./_accounts/dev_admin.sh && ./_accounts/print-env.sh
+source ./_accounts/dev_executor.sh && ./_accounts/print-env.sh
+

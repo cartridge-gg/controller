@@ -1,0 +1,13 @@
+# genesis dev accounts
+
+[sncast.dev_admin]
+# password : admin
+account = "./packages/contracts/_accounts/dev_admin.json"
+keystore = "./packages/contracts/_accounts/dev_admin_keystore.json"
+url = "http://localhost:8001/x/starknet/sepolia"
+
+[sncast.dev_executor]
+# password : executor
+account = "./packages/contracts/_accounts/dev_executor.json"
+keystore = "./packages/contracts/_accounts/dev_executor_keystore.json"
+url = "http://localhost:8001/x/starknet/sepolia"
