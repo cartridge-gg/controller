@@ -75,7 +75,10 @@ class SessionConnector extends Connector {
   async connect() {
     await this.tryRetrieveFromQueryOrStorage();
     if (this.controller) {
-      return this.controller;
+      return {
+        account: this.controller.address,
+        chainId: await this.chainId(),
+      };
     }
 
     // Generate a random local key pair
@@ -103,7 +106,7 @@ class SessionConnector extends Connector {
     return {
       account: "",
       chainId: await this.chainId(),
-    } as any;
+    };
   }
 
   disconnect(): Promise<void> {
