@@ -5,10 +5,37 @@ import { ec, stark } from "starknet";
 import SessionAccount from "@cartridge/controller/dist/session";
 import { KEYCHAIN_URL } from "./constants";
 
-interface StorageBackend {
+/**
+ * Represents a unified backend for storage operations and link handling.
+ */
+interface UnifiedBackend {
+  /**
+   * Retrieves the value associated with the specified key.
+   * @param key - The key to look up in the storage.
+   * @returns A promise that resolves to the stored value as a string, or null if the key doesn't exist.
+   */
   get: (key: string) => Promise<string | null>;
+
+  /**
+   * Stores a key-value pair in the storage.
+   * @param key - The key under which to store the value.
+   * @param value - The value to be stored.
+   * @returns A promise that resolves when the value has been successfully stored.
+   */
   set: (key: string, value: string) => Promise<void>;
+
+  /**
+   * Removes the key-value pair associated with the specified key from the storage.
+   * @param key - The key of the item to be removed.
+   * @returns A promise that resolves when the item has been successfully removed.
+   */
   delete: (key: string) => Promise<void>;
+
+  /**
+   * Opens the specified URL.
+   * @param url - The URL to open.
+   */
+  openLink: (url: string) => void;
 }
 
 interface SessionRegistration {
@@ -21,29 +48,33 @@ interface SessionRegistration {
 
 class SessionConnector extends Connector {
   private _chainId: string;
-  private _storageBackend: StorageBackend;
+  private _backend: UnifiedBackend;
   private _rpcUrl: string;
   private _policies: Policy[];
   private _username?: string;
+  private _redirectUrl: string;
   private _account?: SessionAccount;
 
   constructor({
     rpcUrl,
     chainId,
     policies,
-    storageBackend,
+    backend,
+    redirectUrl,
   }: {
     rpcUrl: string;
     chainId: string;
     policies: Policy[];
-    storageBackend: StorageBackend;
+    redirectUrl: string;
+    backend: UnifiedBackend;
   }) {
     super();
 
     this._rpcUrl = rpcUrl;
     this._policies = policies;
-    this._storageBackend = storageBackend;
+    this._backend = backend;
     this._chainId = chainId;
+    this._redirectUrl = redirectUrl;
   }
 
   readonly id = "session";
@@ -85,7 +116,7 @@ class SessionConnector extends Connector {
     const pk = stark.randomAddress();
     const publicKey = ec.starkCurve.getStarkKey(pk);
 
-    this._storageBackend.set(
+    this._backend.set(
       "sessionSigner",
       JSON.stringify({
         privKey: pk,
@@ -95,13 +126,13 @@ class SessionConnector extends Connector {
 
     const url = new URL(`${KEYCHAIN_URL}/session`);
     url.searchParams.set("public_key", publicKey);
-    url.searchParams.set("redirect_uri", window.location.href);
-    url.searchParams.set("redirect_query_name", "session");
+    url.searchParams.set("redirect_uri", this._redirectUrl);
+    url.searchParams.set("redirect_query_name", "startapp");
     url.searchParams.set("policies", JSON.stringify(this._policies));
     url.searchParams.set("rpc_url", this._rpcUrl);
 
     localStorage.setItem("lastUsedConnector", this.id);
-    window.location.replace(url.toString());
+    this._backend.openLink(url.toString());
 
     return {
       account: "",
@@ -110,8 +141,8 @@ class SessionConnector extends Connector {
   }
 
   disconnect(): Promise<void> {
-    this._storageBackend.delete("sessionSigner");
-    this._storageBackend.delete("session");
+    this._backend.delete("sessionSigner");
+    this._backend.delete("session");
     this._account = undefined;
     this._username = undefined;
     return Promise.resolve();
@@ -129,22 +160,22 @@ class SessionConnector extends Connector {
 
   async tryRetrieveFromQueryOrStorage() {
     const signer = JSON.parse(
-      (await this._storageBackend.get("sessionSigner"))!,
+      (await this._backend.get("sessionSigner"))!,
     );
     let sessionRegistration: SessionRegistration | null = null;
 
-    if (window.location.search.includes("session")) {
+    if (window.location.search.includes("startapp")) {
       const params = new URLSearchParams(window.location.search);
-      const session = params.get("session");
+      const session = params.get("startapp");
       if (session) {
         sessionRegistration = JSON.parse(atob(session));
-        this._storageBackend.set(
+        this._backend.set(
           "session",
           JSON.stringify(sessionRegistration),
         );
 
         // Remove the session query parameter
-        params.delete("session");
+        params.delete("startapp");
         const newUrl =
           window.location.pathname +
           (params.toString() ? `?${params.toString()}` : "") +
@@ -154,7 +185,7 @@ class SessionConnector extends Connector {
     }
 
     if (!sessionRegistration) {
-      const session = await this._storageBackend.get("session");
+      const session = await this._backend.get("session");
       if (session) {
         sessionRegistration = JSON.parse(session);
       }
