@@ -157,6 +157,7 @@ class SessionConnector extends Connector {
       return;
     }
 
+    this._username = sessionRegistration.username;
     this.controller = new SessionAccount({
       rpcUrl: this._rpcUrl,
       privateKey: signer.privKey,
