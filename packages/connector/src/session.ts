@@ -115,7 +115,7 @@ class SessionConnector extends Connector {
       const params = new URLSearchParams(window.location.search);
       const session = params.get("session");
       if (session) {
-        sessionRegistration = JSON.parse(session);
+        sessionRegistration = JSON.parse(atob(session));
         this._storageBackend.set("session", JSON.stringify(sessionRegistration));
       }
     }
