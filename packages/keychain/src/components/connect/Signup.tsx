@@ -210,6 +210,19 @@ export function Signup({
               setUsernameField((u) => ({ ...u, value: "" }));
             }}
           />
+          {usernameField.error && usernameField.error.includes(
+            `Sorry, ${usernameField.value} already exists.`
+          ) && (
+            <div>
+              {usernameField.error}
+              <RegistrationLink
+                description="Is this you?"
+                onClick={() => onLogin(usernameField.value)}
+              >
+                Sign Up
+              </RegistrationLink>
+            </div>
+          )}
         </Content>
 
         <Footer isSlot={isSlot} isSignup showCatridgeLogo>
