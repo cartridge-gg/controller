@@ -19,6 +19,7 @@ type ConnectionContextType = {
   context?: ContextVariant;
   setContext: (context: ContextVariant) => void;
   provider: RpcProvider;
+  indexerUrl: string;
   chainId: string;
   erc20: ERC20[];
 };
@@ -40,6 +41,7 @@ const initialState: ConnectionContextType = {
   username: "",
   setContext: () => {},
   provider: new RpcProvider(),
+  indexerUrl: "",
   chainId: "",
   erc20: [],
 };
@@ -68,6 +70,7 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
       provider: new RpcProvider({
         nodeUrl: decodeURIComponent(searchParams.get("rpcUrl")!),
       }),
+      indexerUrl: decodeURIComponent(searchParams.get("indexerUrl")!),
       erc20,
     }));
   }, [searchParams]);

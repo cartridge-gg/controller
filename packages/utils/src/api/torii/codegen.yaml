@@ -1,0 +1,9 @@
+overwrite: true
+schema: src/api/torii/schema.graphql
+documents: "src/api/torii/**/*.graphql"
+generates:
+  src/api/torii/index.ts:
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+      - "typescript-react-query"
