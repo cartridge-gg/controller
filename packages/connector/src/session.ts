@@ -121,7 +121,10 @@ class SessionConnector extends Connector {
     }
 
     if (!sessionRegistration) {
-      sessionRegistration = JSON.parse((await this._storageBackend.get("session"))!);
+      const session = await this._storageBackend.get("session");
+      if (session) {
+        sessionRegistration = JSON.parse(session);
+      }
     }
 
     if (!sessionRegistration) {
