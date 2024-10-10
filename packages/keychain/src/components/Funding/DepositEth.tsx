@@ -1,13 +1,6 @@
 import { Container, Content, Footer } from "components/layout";
-import {
-  Button,
-  HStack,
-  Spacer,
-  Text,
-  VStack,
-  Divider,
-} from "@chakra-ui/react";
-import { PropsWithChildren, useCallback, useMemo, useState } from "react";
+import { Button, HStack, Text, VStack, Divider } from "@chakra-ui/react";
+import { PropsWithChildren, useCallback, useState } from "react";
 import { mainnet, sepolia } from "@starknet-react/chains";
 import {
   Connector,

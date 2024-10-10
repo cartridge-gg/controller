@@ -4,30 +4,20 @@ import { useCallback, useState } from "react";
 import { CheckIcon, CreditsIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { CopyAddress } from "../CopyAddress";
-import base64url from "base64url";
 import AmountSelection, { DEFAULT_AMOUNT } from "./AmountSelection";
 import { ErrorAlert } from "components/ErrorAlert";
-import { useStripePaymentQuery } from "generated/graphql";
+import { Elements } from "@stripe/react-stripe-js";
+import { Appearance, loadStripe } from "@stripe/stripe-js";
 import { Balance } from "./Balance";
+import CheckoutForm from "./StripeCheckout";
 
-const MAX_RETRIES = 30;
-const REFETCH_INTERVAL = 1000;
-
-const STRIPE_PRODUCTS = (dollarAmount: number) => {
-  switch (dollarAmount) {
-    case 1:
-      return "https://buy.stripe.com/test_8wMg1XgEj5wi3XacMN?client_reference_id="; // $1 Dollar item
-    case 5:
-      return "https://buy.stripe.com/test_00g3fb73J9My79m288?client_reference_id="; // $5 Dollar item
-    case 10:
-      return "https://buy.stripe.com/test_28o02Z3Rx8IuctGeUW?client_reference_id="; // $10 Dollar item
-    default:
-      return "https://buy.stripe.com/test_8wMg1XgEj5wi3XacMN?client_reference_id=";
-  }
-};
+const STRIPE_API_PUBKEY =
+  "pk_test_51Kr6IXIS6lliDpf33KnwWDtIjRPWt3eAI9CuSLR6Vvc3GxHEwmSU0iszYbUlgUadSRluGKAFphe3JzltyjPAKiBK00al4RAFQu";
+const stripePromise = loadStripe(STRIPE_API_PUBKEY);
 
 enum PurchaseState {
-  PENDING,
+  SELECTION,
+  STRIPE_CHECKOUT,
   SUCCESS,
 }
 
@@ -38,41 +28,98 @@ type PurchaseCreditsProps = {
 export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
   const { controller, closeModal } = useConnection();
 
-  const [state, setState] = useState<PurchaseState>(PurchaseState.PENDING);
-  const [dollarAmount, setDollarAmount] = useState<number>(DEFAULT_AMOUNT);
-  const [referenceId, setReferenceId] = useState<string>(null);
+  const [clientSecret, setClientSecret] = useState("");
+  const [isLoading, setisLoading] = useState<boolean>(false);
+  const [state, setState] = useState<PurchaseState>(PurchaseState.SELECTION);
+  const [creditsAmount, setCreditsAmount] = useState<number>(DEFAULT_AMOUNT);
   const [error, setError] = useState<Error>();
 
   const onAmountChanged = useCallback(
-    (amount: number) => setDollarAmount(amount),
-    [setDollarAmount],
+    (amount: number) => setCreditsAmount(amount),
+    [setCreditsAmount],
   );
 
-  useStripePaymentQuery(
-    { referenceId },
-    {
-      enabled: !!referenceId && !error,
-      refetchInterval: REFETCH_INTERVAL,
-      retry: MAX_RETRIES,
-      onSuccess: () => setState(PurchaseState.SUCCESS),
-      onError: () => {
-        setError(
-          new Error(
-            `Payment not received. Please try again. Reference ID: ${referenceId}`,
-          ),
-        );
-      },
+  const createPaymentIntent = useCallback(async () => {
+    if (!controller) {
+      return;
+    }
+
+    setisLoading(true);
+
+    try {
+      const res = await fetch(process.env.NEXT_PUBLIC_STRIPE_PAYMENT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          credits: creditsAmount,
+          username: controller.username,
+        }),
+      });
+      if (!res.ok) {
+        setError(new Error("Payment intent endpoint failure"));
+        return;
+      }
+      const data = await res.json();
+      setClientSecret(data.clientSecret);
+      setState(PurchaseState.STRIPE_CHECKOUT);
+    } catch (e) {
+      setError(e);
+    } finally {
+      setisLoading(false);
+    }
+  }, [controller, creditsAmount]);
+
+  const appearance = {
+    theme: "night",
+    variables: {
+      colorPrimary: "#FBCB4A",
+      colorBackground: "#161A17",
+      focusBoxShadow: "none",
     },
-  );
+  } as Appearance;
+
+  // For when we need to support Payment Links
+  // useStripePaymentQuery(
+  //   { referenceId },
+  //   {
+  //     enabled: !!referenceId && !error,
+  //     refetchInterval: REFETCH_INTERVAL,
+  //     retry: MAX_RETRIES,
+  //     onSuccess: () => setState(PurchaseState.SUCCESS),
+  //     onError: () => {
+  //       setError(
+  //         new Error(
+  //           `Payment not received. Please try again. Reference ID: ${referenceId}`,
+  //         ),
+  //       );
+  //     },
+  //   },
+  // );
+
+  if (state === PurchaseState.STRIPE_CHECKOUT) {
+    return (
+      <Elements
+        options={{ clientSecret, appearance, loader: "auto" }}
+        stripe={stripePromise}
+      >
+        <CheckoutForm
+          onBack={() => setState(PurchaseState.SELECTION)}
+          onComplete={() => setState(PurchaseState.SUCCESS)}
+          creditsAmount={creditsAmount}
+        />
+      </Elements>
+    );
+  }
 
   return (
     <Container
       title={
-        "Purchase " + (state === PurchaseState.PENDING ? "Credits" : "Complete")
+        "Purchase " +
+        (state === PurchaseState.SELECTION ? "Credits" : "Complete")
       }
       description={<CopyAddress address={controller.address} />}
-      Icon={state === PurchaseState.PENDING ? CreditsIcon : CheckIcon}
-      onBack={state === PurchaseState.PENDING && onBack}
+      Icon={state === PurchaseState.SELECTION ? CreditsIcon : CheckIcon}
+      onBack={state === PurchaseState.SELECTION && onBack}
     >
       <Content gap={6}>
         <Balance showBalances={["credits"]} />
@@ -99,12 +146,12 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
           </Button>
         )}
 
-        {state === PurchaseState.PENDING && (
+        {state === PurchaseState.SELECTION && (
           <>
             <AmountSelection
-              amount={dollarAmount}
+              amount={creditsAmount}
               onChange={onAmountChanged}
-              lockSelection={!!referenceId && !error}
+              lockSelection={isLoading}
             />
             <Divider my="5px" borderColor="darkGray.900" />
 
@@ -112,22 +159,8 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
               w="full"
               gap="5px"
               colorScheme="colorful"
-              isLoading={!!referenceId && !error}
-              onClick={() => {
-                const refId = crypto.randomUUID();
-                const reference = {
-                  username: controller.username,
-                  uuid: refId,
-                };
-                setReferenceId(refId);
-                setError(null);
-
-                window.open(
-                  STRIPE_PRODUCTS(dollarAmount) +
-                    base64url(JSON.stringify(reference)),
-                  "_blank",
-                );
-              }}
+              isLoading={isLoading}
+              onClick={() => createPaymentIntent()}
             >
               <CreditsIcon fontSize={20} />
               Stripe

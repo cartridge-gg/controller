@@ -21,7 +21,8 @@ export function useBalance() {
       enabled: false,
       onSuccess: async (data: AccountInfoQuery) => {
         try {
-          const credits = data.accounts?.edges?.[0]?.node?.credits;
+          // credits are retrieved as positive integers dominated in cents
+          const credits = data.accounts?.edges?.[0]?.node?.credits / 100;
           setCreditsBalance(credits ?? 0);
         } catch (e) {
           setError(e);

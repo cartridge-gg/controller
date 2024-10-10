@@ -1,11 +1,8 @@
 import { Container, Content, Footer } from "components/layout";
-import { Button, HStack, Spacer, Text, VStack } from "@chakra-ui/react";
-import { useMemo, useState } from "react";
+import { Button } from "@chakra-ui/react";
+import { useState } from "react";
 import { useConnection } from "hooks/connection";
 import { CopyAddress } from "../CopyAddress";
-import { CurrencyBase, CurrencyQuote, usePriceQuery } from "generated/graphql";
-import { formatEther } from "viem";
-import { useBalance } from "hooks/token";
 import { ArrowLineDownIcon, CreditsIcon, EthereumIcon } from "@cartridge/ui";
 import { DepositEth } from "./DepositEth";
 import { PurchaseCredits } from "./PurchaseCredits";
