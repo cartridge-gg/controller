@@ -42,7 +42,7 @@ fn deserialize_felt<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result
     Felt::from_str(&s).map_err(serde::de::Error::custom)
 }
 
-#[cfg(test)]
+#[cfg(all(test, target_arch = "wasm32"))]
 mod tests {
     use super::*;
     use wasm_bindgen::JsValue;
