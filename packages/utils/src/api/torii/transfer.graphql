@@ -1,0 +1,16 @@
+query Transfer($address: String!, $limit: Int!) {
+  ercTransfer(accountAddress: $address, limit: $limit) {
+    amount
+    from
+    to
+    token_metadata {
+      contract_address
+      decimals
+      name
+      symbol
+      token_id
+    }
+    type
+    executed_at
+  }
+}
