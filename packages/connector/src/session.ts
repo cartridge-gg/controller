@@ -124,15 +124,10 @@ export default class SessionConnector extends Connector {
       }),
     );
 
-    const url = new URL(`${KEYCHAIN_URL}/session`);
-    url.searchParams.set("public_key", publicKey);
-    url.searchParams.set("redirect_uri", this._redirectUrl);
-    url.searchParams.set("redirect_query_name", "startapp");
-    url.searchParams.set("policies", JSON.stringify(this._policies));
-    url.searchParams.set("rpc_url", this._rpcUrl);
+    const url = `${KEYCHAIN_URL}/session?public_key=${publicKey}&redirect_uri=${this._redirectUrl}&redirect_query_name=startapp&policies=${JSON.stringify(this._policies)}&rpc_url=${this._rpcUrl}`;
 
     localStorage.setItem("lastUsedConnector", this.id);
-    this._backend.openLink(url.toString());
+    this._backend.openLink(url);
 
     return {
       account: "",
