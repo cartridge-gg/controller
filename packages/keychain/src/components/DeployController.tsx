@@ -23,11 +23,7 @@ export function DeployController({
   onClose: () => void;
   ctrlError?: ControllerError;
 }) {
-  const {
-    controller: { account },
-    chainName,
-    hasPrefundRequest,
-  } = useConnection();
+  const { controller, chainName, hasPrefundRequest } = useConnection();
   const { deploySelf, isDeploying } = useDeploy();
   const [deployHash, setDeployHash] = useState<string>();
   const [error, setError] = useState<Error>();
@@ -39,7 +35,7 @@ export function DeployController({
 
   useEffect(() => {
     if (
-      account.chainId !== constants.StarknetChainId.SN_MAIN ||
+      controller.chainId() !== constants.StarknetChainId.SN_MAIN ||
       !hasPrefundRequest ||
       !feeEstimate
     ) {
@@ -47,11 +43,11 @@ export function DeployController({
     }
 
     setAccountState("deploy");
-  }, [account.chainId, account.username, hasPrefundRequest, feeEstimate]);
+  }, [controller, hasPrefundRequest, feeEstimate]);
 
   useEffect(() => {
     if (deployHash) {
-      account
+      controller
         .waitForTransaction(deployHash, {
           retryInterval: 1000,
           successStates: [
@@ -62,7 +58,7 @@ export function DeployController({
         .then(() => setAccountState("deployed"))
         .catch((e) => setError(e));
     }
-  }, [deployHash, account]);
+  }, [deployHash, controller]);
 
   const { ethBalance, isLoading } = useBalance();
   useEffect(() => {
@@ -104,7 +100,8 @@ export function DeployController({
         <Funding
           title={
             <>
-              Fund <b style={{ color: "brand.primary" }}>{account.username}</b>{" "}
+              Fund{" "}
+              <b style={{ color: "brand.primary" }}>{controller.username()}</b>{" "}
               for deployment
             </>
           }
@@ -163,7 +160,10 @@ export function DeployController({
         >
           <Content alignItems="center">
             {deployHash && (
-              <ExplorerLink chainId={account.chainId} txHash={deployHash} />
+              <ExplorerLink
+                chainId={controller.chainId()}
+                txHash={deployHash}
+              />
             )}
           </Content>
           <Footer>
@@ -195,7 +195,10 @@ export function DeployController({
         >
           <Content alignItems="center">
             {deployHash && (
-              <ExplorerLink chainId={account.chainId} txHash={deployHash} />
+              <ExplorerLink
+                chainId={controller.chainId()}
+                txHash={deployHash}
+              />
             )}
           </Content>
           <Footer>
@@ -234,9 +237,8 @@ function ExplorerLink({
 
   return (
     <Link
-      href={`https://${
-        chainId === constants.StarknetChainId.SN_SEPOLIA ? "sepolia." : ""
-      }starkscan.co/tx/${txHash}`}
+      href={`https://${chainId === constants.StarknetChainId.SN_SEPOLIA ? "sepolia." : ""
+        }starkscan.co/tx/${txHash}`}
       isExternal
     >
       <Button

@@ -9,10 +9,12 @@ export type AuthAction = "signup" | "login";
 
 export function Authenticate({
   name,
+  network,
   action,
   onSuccess,
 }: {
   name: string;
+  network: string;
   action: AuthAction;
   onSuccess: () => void;
 }) {
@@ -25,7 +27,7 @@ export function Authenticate({
     try {
       switch (action) {
         case "signup":
-          await doSignup(decodeURIComponent(name));
+          await doSignup(decodeURIComponent(name), network);
           break;
         case "login":
           break;
@@ -40,7 +42,7 @@ export function Authenticate({
     } finally {
       setIsLoading(false);
     }
-  }, [onSuccess, action, name]);
+  }, [onSuccess, action, name, network]);
 
   if (!isSupported) {
     return <Unsupported message={message} />;

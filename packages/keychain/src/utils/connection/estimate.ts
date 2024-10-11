@@ -5,22 +5,20 @@ import {
   EstimateFeeDetails,
 } from "starknet";
 
-import Controller from "utils/controller";
-
-export function estimateInvokeFee(controller: Controller) {
+export function estimateInvokeFee() {
   return async (
     transactions: Call | Call[],
     details?: EstimateFeeDetails,
   ): Promise<EstimateFee> => {
-    return await controller.account.estimateInvokeFee(transactions, details);
+    return await window.controller?.estimateInvokeFee(transactions, details);
   };
 }
 
-export function estimateDeclareFee(controller: Controller) {
+export function estimateDeclareFee() {
   return async (
     payload: DeclareContractPayload,
     details?: EstimateFeeDetails,
   ): Promise<EstimateFee> => {
-    return await controller.account.estimateDeclareFee(payload, details);
+    return await window.controller?.estimateDeclareFee(payload, details);
   };
 }

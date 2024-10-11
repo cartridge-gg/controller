@@ -38,7 +38,7 @@ export function useBalance() {
     setIsFetching(true);
 
     try {
-      const balance = await controller.account.callContract({
+      const balance = await controller.callContract({
         contractAddress: ETH_CONTRACT_ADDRESS,
         entrypoint: "balanceOf",
         calldata: [controller.address],

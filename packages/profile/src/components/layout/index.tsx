@@ -1,4 +1,4 @@
-import { Button, cn, DotsIcon, TimesIcon } from "@cartridge/ui-next";
+import { Button, cn, TimesIcon } from "@cartridge/ui-next";
 import { Network } from "@cartridge/ui-next";
 import { PropsWithChildren, useCallback } from "react";
 import { useConnection } from "../provider/hooks";
@@ -20,9 +20,9 @@ export function LayoutContainer({ children }: PropsWithChildren) {
 
         <div className="flex gap-2">
           <Network chainId={chainId} />
-          <Button variant="icon" size="icon">
+          {/* <Button variant="icon" size="icon">
             <DotsIcon />
-          </Button>
+          </Button> */}
         </div>
       </div>
 
@@ -59,8 +59,7 @@ type LayoutHeaderProps = {
 
 export function LayoutHeader({ title, description, right }: LayoutHeaderProps) {
   return (
-    // z-[-1]: Workaround for network tooltip to be visible.
-    <div className="flex gap-2 px-4 py-6 sticky top-16 bg-background justify-between z-[-1]">
+    <div className="flex gap-2 px-4 py-6 sticky top-16 bg-background justify-between">
       <div className="flex min-w-0 gap-2 items-center">
         <div className="w-11 h-11 bg-secondary rounded flex shrink-0 items-center justify-center">
           <img

@@ -52,7 +52,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           credits: creditsAmount,
-          username: controller.username,
+          username: controller.username(),
         }),
       });
       if (!res.ok) {

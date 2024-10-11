@@ -3,12 +3,12 @@ use starknet_crypto::Felt;
 pub struct Selectors;
 
 impl Selectors {
-    pub fn active() -> String {
-        "@cartridge/active".to_string()
+    pub fn active(app_id: &str) -> String {
+        format!("@cartridge/{}/active", app_id)
     }
 
     pub fn account(address: &Felt) -> String {
-        format!("@cartridge/account-v2/0x{:x}", address)
+        format!("@cartridge/account/0x{:x}", address)
     }
 
     pub fn deployment(address: &Felt, chain_id: &Felt) -> String {

@@ -1,4 +1,4 @@
-import { Provider, uint256 } from "starknet";
+import { getChecksumAddress, Provider, uint256 } from "starknet";
 import { hexToString, Hex } from "viem";
 
 export type ERC20Info = {
@@ -59,6 +59,9 @@ export class ERC20 {
       this.callSymbol(),
       this.callDecimals(),
     ]);
+    if (symbol === "STRK") {
+      console.log(this.address);
+    }
     if (!this.logoUrl) {
       this.logoUrl = await this.fetchLogoUrl();
     }
@@ -134,6 +137,10 @@ export class ERC20 {
     const res = await fetch("https://mainnet-api.ekubo.org/tokens");
     const data: EkuboTokenInfo[] = await res.json();
 
-    return data.find((t) => t.l2_token_address === this.address)?.logo_url;
+    return data.find(
+      (t) =>
+        getChecksumAddress(t.l2_token_address) ===
+        getChecksumAddress(this.address),
+    )?.logo_url;
   }
 }

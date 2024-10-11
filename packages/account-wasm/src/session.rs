@@ -4,6 +4,7 @@ use account_sdk::account::session::SessionAccount;
 use account_sdk::account::AccountHashAndCallsSigner;
 use account_sdk::provider::{CartridgeJsonRpcProvider, CartridgeProvider};
 use account_sdk::signers::{HashSigner, Signer};
+use account_sdk::utils::time::get_current_timestamp;
 use serde_wasm_bindgen::to_value;
 use starknet::accounts::{Account, ConnectedAccount};
 use starknet::signers::SigningKey;
@@ -129,10 +130,11 @@ impl CartridgeSessionAccount {
             .map(TryInto::try_into)
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
+        let now = get_current_timestamp();
         let outside_execution = OutsideExecution {
             caller: caller.into(),
             execute_after: 0_u64,
-            execute_before: 3000000000_u64,
+            execute_before: now + 600,
             calls,
             nonce: SigningKey::from_random().secret_scalar(),
         };

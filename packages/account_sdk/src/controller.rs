@@ -7,7 +7,7 @@ use crate::factory::ControllerFactory;
 use crate::impl_account;
 use crate::provider::CartridgeJsonRpcProvider;
 use crate::signers::Signer;
-use crate::storage::{Storage, StorageBackend};
+use crate::storage::{ControllerMetadata, Storage, StorageBackend};
 use crate::typed_data::TypedData;
 use crate::{
     abigen::{self},
@@ -36,17 +36,17 @@ mod controller_test;
 #[derive(Clone)]
 pub struct Controller {
     pub(crate) app_id: String,
-    pub(crate) address: Felt,
-    pub(crate) chain_id: Felt,
+    pub address: Felt,
+    pub chain_id: Felt,
     pub(crate) class_hash: Felt,
-    pub(crate) rpc_url: Url,
+    pub rpc_url: Url,
     pub username: String,
     pub(crate) salt: Felt,
     provider: CartridgeJsonRpcProvider,
     pub(crate) owner: Signer,
     contract: Option<Box<abigen::controller::Controller<Self>>>,
     pub factory: ControllerFactory,
-    pub(crate) storage: Storage,
+    pub storage: Storage,
     nonce: Felt,
 }
 
@@ -74,7 +74,7 @@ impl Controller {
         );
 
         let mut controller = Self {
-            app_id,
+            app_id: app_id.clone(),
             address,
             chain_id,
             class_hash,
@@ -95,17 +95,43 @@ impl Controller {
         ));
         controller.contract = Some(contract);
 
-        // TODO: Renenable once we remove js storage busting
-        // controller
-        //     .storage
-        //     .set_controller(address, ControllerMetadata::from(&controller))
-        //     .expect("Should store controller");
+        controller
+            .storage
+            .set_controller(
+                app_id.as_str(),
+                address,
+                ControllerMetadata::from(&controller),
+            )
+            .expect("Should store controller");
 
         controller
     }
 
+    pub fn from_storage(app_id: String) -> Result<Option<Self>, ControllerError> {
+        let storage = Storage::default();
+        let metadata = storage.controller(&app_id).map_err(ControllerError::from)?;
+        if let Some(m) = metadata {
+            let rpc_url = Url::parse(&m.rpc_url).map_err(ControllerError::from)?;
+            Ok(Some(Controller::new(
+                app_id,
+                m.username,
+                m.class_hash,
+                rpc_url,
+                m.owner.try_into().map_err(ControllerError::from)?,
+                m.address,
+                m.chain_id,
+            )))
+        } else {
+            Ok(None)
+        }
+    }
+
     pub fn deploy(&self) -> AccountDeploymentV1<'_, ControllerFactory> {
         self.factory.deploy_v1(self.salt)
+    }
+
+    pub fn disconnect(&mut self) -> Result<(), ControllerError> {
+        self.storage.clear().map_err(ControllerError::from)
     }
 
     pub fn contract(&self) -> &abigen::controller::Controller<Self> {
@@ -201,7 +227,7 @@ impl Controller {
             match result {
                 Ok(tx_result) => {
                     // Update nonce
-                    self.nonce = self.nonce + 1;
+                    self.nonce += Felt::ONE;
 
                     // Update is_registered to true after successful execution with a session
                     if let Some((key, metadata)) =
@@ -235,6 +261,22 @@ impl Controller {
                             StarknetError::InvalidTransactionNonce,
                         )) => {
                             if retry_count < max_retries {
+                                // Refetch nonce from the provider
+                                let new_nonce = self
+                                    .provider
+                                    .get_nonce(self.block_id(), self.address())
+                                    .await?;
+                                self.nonce = new_nonce;
+                                retry_count += 1;
+                                continue;
+                            }
+                        }
+                        AccountError::Provider(ProviderError::StarknetError(
+                            StarknetError::ValidationFailure(data),
+                        )) => {
+                            if data.starts_with("Invalid transaction nonce of contract at address")
+                                && retry_count < max_retries
+                            {
                                 // Refetch nonce from the provider
                                 let new_nonce = self
                                     .provider

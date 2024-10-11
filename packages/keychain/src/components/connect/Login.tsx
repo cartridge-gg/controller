@@ -60,7 +60,7 @@ function Form({
         credentials: {
           webauthn: [{ id: credentialId, publicKey }],
         },
-        contractAddress: address,
+        controllers,
       },
     } = await fetchAccount(usernameField.value);
 
@@ -69,7 +69,7 @@ function Form({
         appId: origin,
         chainId,
         rpcUrl,
-        address,
+        address: controllers[0].address,
         username: usernameField.value,
         publicKey,
         credentialId,
@@ -81,10 +81,9 @@ function Form({
           credentialId,
           finalize: isSlot,
         });
-
-        controller.store();
       }
 
+      window.controller = controller;
       setController(controller);
     } catch (e) {
       setError(e);

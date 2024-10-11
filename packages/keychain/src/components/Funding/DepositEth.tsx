@@ -107,7 +107,7 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
           contractAddress: ETH_CONTRACT_ADDRESS,
           entrypoint: "approve",
           calldata: CallData.compile({
-            recipient: controller.account.address,
+            recipient: controller.address,
             amount: cairo.uint256(parseEther(ethAmount)),
           }),
         },
@@ -115,7 +115,7 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
           contractAddress: ETH_CONTRACT_ADDRESS,
           entrypoint: "transfer",
           calldata: CallData.compile({
-            recipient: controller.account.address,
+            recipient: controller.address,
             amount: cairo.uint256(parseEther(ethAmount)),
           }),
         },
@@ -254,7 +254,7 @@ function ExternalWalletProvider({ children }: PropsWithChildren) {
   return (
     <StarknetConfig
       chains={[sepolia, mainnet]}
-      provider={() => controller.account.rpc}
+      provider={() => controller}
       connectors={connectors}
       explorer={voyager}
     >
