@@ -46,7 +46,7 @@ interface SessionRegistration {
   expiresAt: string;
 }
 
-class SessionConnector extends Connector {
+export default class SessionConnector extends Connector {
   private _chainId: string;
   private _backend: UnifiedBackend;
   private _rpcUrl: string;
@@ -209,5 +209,3 @@ class SessionConnector extends Connector {
     return this._account;
   }
 }
-
-export default SessionConnector;

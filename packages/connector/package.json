@@ -17,6 +17,7 @@
   "dependencies": {
     "@cartridge/controller": "workspace:^",
     "@starknet-react/core": "^2.1.5",
+    "@telegram-apps/sdk": "^2.4.0",
     "starknet": "^6.11.0"
   },
   "devDependencies": {
