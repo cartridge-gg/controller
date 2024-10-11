@@ -15,7 +15,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
 }
 
 export const metadata: Metadata = {
-  title: "StarkNet ❤️ React",
+  title: "Cartridge Controller - Example (Next.js)",
   icons: {
     icon: "favicon.ico",
   },
