@@ -22,6 +22,8 @@ export type FundingProps = {
 export function Funding({ onComplete, title }: FundingProps) {
   const { controller } = useConnection();
   const [state, setState] = useState<FundingState>(FundingState.SHOW_OPTIONS);
+  const showCredits =
+    typeof document !== "undefined" && document.cookie.includes("credits=");
 
   if (state === FundingState.FUND_ETH) {
     return (
@@ -40,7 +42,7 @@ export function Funding({ onComplete, title }: FundingProps) {
 
   return (
     <Container
-      title={title || `Fund ${controller.username}`}
+      title={title || `Fund ${controller.username()}`}
       description={<CopyAddress address={controller.address} />}
       Icon={ArrowLineDownIcon}
     >
@@ -48,12 +50,14 @@ export function Funding({ onComplete, title }: FundingProps) {
         <Balance showBalances={["credits", "eth"]} />
       </Content>
       <Footer>
-        <Button
-          colorScheme="colorful"
-          onClick={() => setState(FundingState.FUND_CREDITS)}
-        >
-          <CreditsIcon fontSize={20} mr="5px" /> Purchase Credits
-        </Button>
+        {showCredits && (
+          <Button
+            colorScheme="colorful"
+            onClick={() => setState(FundingState.FUND_CREDITS)}
+          >
+            <CreditsIcon fontSize={20} mr="5px" /> Purchase Credits
+          </Button>
+        )}
         <Button onClick={() => setState(FundingState.FUND_ETH)}>
           <EthereumIcon fontSize={20} mr="5px" /> Deposit Eth
         </Button>

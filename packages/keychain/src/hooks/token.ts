@@ -58,7 +58,7 @@ export function useBalance() {
       setIsLoading(false);
       setIsFetching(false);
     }
-  }, [controller]);
+  }, [controller, refetchCredits]);
 
   useEffect(() => {
     fetchBalances();
