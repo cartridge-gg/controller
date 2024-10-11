@@ -124,7 +124,11 @@ export default class SessionConnector extends Connector {
       }),
     );
 
-    const url = `${KEYCHAIN_URL}/session?public_key=${publicKey}&redirect_uri=${this._redirectUrl}&redirect_query_name=startapp&policies=${JSON.stringify(this._policies)}&rpc_url=${this._rpcUrl}`;
+    const url = `${KEYCHAIN_URL}/session?public_key=${publicKey}&redirect_uri=${
+      this._redirectUrl
+    }&redirect_query_name=startapp&policies=${JSON.stringify(
+      this._policies,
+    )}&rpc_url=${this._rpcUrl}`;
 
     localStorage.setItem("lastUsedConnector", this.id);
     this._backend.openLink(url);
@@ -154,9 +158,7 @@ export default class SessionConnector extends Connector {
   }
 
   async tryRetrieveFromQueryOrStorage() {
-    const signer = JSON.parse(
-      (await this._backend.get("sessionSigner"))!,
-    );
+    const signer = JSON.parse((await this._backend.get("sessionSigner"))!);
     let sessionRegistration: SessionRegistration | null = null;
 
     if (window.location.search.includes("startapp")) {
@@ -164,10 +166,7 @@ export default class SessionConnector extends Connector {
       const session = params.get("startapp");
       if (session) {
         sessionRegistration = JSON.parse(atob(session));
-        this._backend.set(
-          "session",
-          JSON.stringify(sessionRegistration),
-        );
+        this._backend.set("session", JSON.stringify(sessionRegistration));
 
         // Remove the session query parameter
         params.delete("startapp");
