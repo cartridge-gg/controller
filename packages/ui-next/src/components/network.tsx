@@ -45,7 +45,7 @@ export function Network({ chainId }: { chainId: string }) {
             <div>{getChainName(chainId)}</div>
           </Button>
         </TooltipTrigger>
-        <TooltipContent side="bottom" className="bg-background">
+        <TooltipContent>
           <div>{hexToString(chainId as Hex)}</div>
         </TooltipContent>
       </Tooltip>

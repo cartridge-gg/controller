@@ -56,7 +56,7 @@ function Item({
             />
           </div>
         </TooltipTrigger>
-        <TooltipContent side="bottom">
+        <TooltipContent>
           <p className="capitalize">{variant}</p>
         </TooltipContent>
       </Tooltip>
