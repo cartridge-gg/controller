@@ -1,5 +1,9 @@
-mod account;
+#[cfg(feature = "controller_account")]
+pub mod account;
+
+#[cfg(feature = "session_account")]
+pub mod session;
+
 mod errors;
-mod session;
 mod types;
 mod utils;

@@ -7,7 +7,7 @@ import { ControllerErrorAlert, ErrorAlert } from "components/ErrorAlert";
 import { Fees } from "./Fees";
 import { Funding } from "./Funding";
 import { DeployController } from "./DeployController";
-import { ErrorCode } from "@cartridge/account-wasm";
+import { ErrorCode } from "@cartridge/account-wasm/controller";
 import { BigNumberish } from "starknet";
 import { BannerProps } from "./layout/Container/Header/Banner";
 import { parseControllerError } from "utils/connection/execute";

@@ -23,7 +23,7 @@ import {
   JsFelt,
   JsInvocationsDetails,
   SessionMetadata,
-} from "@cartridge/account-wasm";
+} from "@cartridge/account-wasm/controller";
 import { normalizeCalls } from "./connection/execute";
 
 export default class Controller extends Account {
