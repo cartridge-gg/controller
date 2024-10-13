@@ -54,3 +54,5 @@ wasm-bindgen-test = "0.3.34"
 [features]
 console-error-panic = ["dep:console_error_panic_hook"]
 console_error_panic_hook = []
+controller_account = []
+session_account = []

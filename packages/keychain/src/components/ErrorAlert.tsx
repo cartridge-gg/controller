@@ -22,7 +22,7 @@ import {
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import React, { ReactElement, useEffect, useState } from "react";
-import { ErrorCode } from "@cartridge/account-wasm";
+import { ErrorCode } from "@cartridge/account-wasm/controller";
 import { ControllerError } from "utils/connection";
 import { useConnection } from "hooks/connection";
 import { constants } from "starknet";

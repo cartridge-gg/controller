@@ -1,23 +1,41 @@
 {
   "name": "@cartridge/account-wasm",
   "version": "0.3.45",
-  "description": "Wasm bindings for Cartridge Account",
-  "main": "./pkg/account_wasm.js",
+  "description": "Wasm bindings for Cartridge Controller and Session Account",
+  "main": "./pkg-controller/account_wasm.js",
   "type": "module",
   "scripts": {
     "build:deps": "./build.sh"
   },
   "files": [
-    "./pkg/account_wasm_bg.wasm",
-    "./pkg/account_wasm.js",
-    "./pkg/account_wasm_bg.js",
-    "./pkg/account_wasm.d.ts"
+    "./pkg-controller/account_wasm_bg.wasm",
+    "./pkg-controller/account_wasm.js",
+    "./pkg-controller/account_wasm_bg.js",
+    "./pkg-controller/account_wasm.d.ts",
+    "./pkg-session/account_wasm_bg.wasm",
+    "./pkg-session/account_wasm.js",
+    "./pkg-session/account_wasm_bg.js",
+    "./pkg-session/account_wasm.d.ts"
   ],
-  "module": "./pkg/account_wasm.js",
-  "types": "./pkg/account_wasm.d.ts",
+  "exports": {
+    ".": {
+      "types": "./pkg-controller/account_wasm.d.ts",
+      "default": "./pkg-controller/account_wasm.js"
+    },
+    "./controller": {
+      "types": "./pkg-controller/account_wasm.d.ts",
+      "default": "./pkg-controller/account_wasm.js"
+    },
+    "./session": {
+      "types": "./pkg-session/account_wasm.d.ts",
+      "default": "./pkg-session/account_wasm.js"
+    }
+  },
   "sideEffects": [
-    "./pkg/account_wasm.js",
-    "./pkg/snippets/*"
+    "./pkg-controller/account_wasm.js",
+    "./pkg-session/account_wasm.js",
+    "./pkg-controller/snippets/*",
+    "./pkg-session/snippets/*"
   ],
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:^",

@@ -14,7 +14,7 @@ import {
   num,
 } from "starknet";
 import { ConnectionCtx, ControllerError, ExecuteCtx } from "./types";
-import { ErrorCode, JsCall } from "@cartridge/account-wasm";
+import { ErrorCode, JsCall } from "@cartridge/account-wasm/controller";
 
 export const ESTIMATE_FEE_PERCENTAGE = 10;
 

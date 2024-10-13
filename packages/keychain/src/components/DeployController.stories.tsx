@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 
 import { DeployController } from "./DeployController";
 import { constants, num, RpcProvider } from "starknet";
-import { JsControllerError } from "@cartridge/account-wasm";
+import { JsControllerError } from "@cartridge/account-wasm/controller";
 
 const meta = {
   component: DeployController,

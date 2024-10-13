@@ -15,7 +15,7 @@ import {
   DeclareSignerDetails,
 } from "starknet";
 import { KeychainIFrame, ProfileIFrame } from "./iframe";
-import wasm from "@cartridge/account-wasm";
+import wasm from "@cartridge/account-wasm/controller";
 
 export type Session = {
   chainId: constants.StarknetChainId;
