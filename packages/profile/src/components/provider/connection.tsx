@@ -1,37 +1,21 @@
 import { AsyncMethodReturns, connectToParent } from "@cartridge/penpal";
-import {
-  createContext,
-  useState,
-  ReactNode,
-  useEffect,
-  useCallback,
-} from "react";
+import { createContext, useState, ReactNode, useEffect } from "react";
 import { useQueryParams } from "./hooks";
 import { ERC20, ProfileContextTypeVariant } from "@cartridge/controller";
 import { normalize, STRK_CONTRACT_ADDRESS } from "@cartridge/utils";
 import { constants, RpcProvider } from "starknet";
 import { ETH_CONTRACT_ADDRESS } from "@cartridge/utils";
+import { useNavigate } from "react-router-dom";
 
 type ConnectionContextType = {
   parent: ParentMethods;
   address: string;
   username: string;
-  context?: ContextVariant;
-  setContext: (context: ContextVariant) => void;
   provider: RpcProvider;
   indexerUrl: string;
   chainId: string;
   erc20: ERC20[];
 };
-
-type ProfileContext<Variant extends ProfileContextTypeVariant> = {
-  type: Variant;
-};
-
-export type ContextVariant =
-  | ProfileContext<"quest">
-  | ProfileContext<"inventory">
-  | ProfileContext<"history">;
 
 type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
 
@@ -39,7 +23,6 @@ const initialState: ConnectionContextType = {
   parent: { close: async () => {} },
   address: "",
   username: "",
-  setContext: () => {},
   provider: new RpcProvider(),
   indexerUrl: "",
   chainId: "",
@@ -95,18 +78,13 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     }
   }, [state.provider]);
 
-  const setContext = useCallback((context: ContextVariant) => {
-    setState((state) => ({
-      ...state,
-      context,
-    }));
-  }, []);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const connection = connectToParent<ParentMethods>({
       methods: {
-        goTo: normalize(() => (tab: ProfileContextTypeVariant) => {
-          setContext({ type: tab });
+        navigate: normalize(() => (tab: ProfileContextTypeVariant) => {
+          navigate(tab);
         }),
       },
     });
@@ -117,10 +95,10 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     return () => {
       connection.destroy();
     };
-  }, [setContext]);
+  }, [navigate]);
 
   return (
-    <ConnectionContext.Provider value={{ ...state, setContext }}>
+    <ConnectionContext.Provider value={state}>
       {children}
     </ConnectionContext.Provider>
   );

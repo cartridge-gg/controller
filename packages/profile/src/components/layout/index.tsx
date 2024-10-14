@@ -52,19 +52,22 @@ function ResponsiveWrapper({ children }: PropsWithChildren) {
 type LayoutHeaderProps = {
   title: string;
   description?: string | React.ReactElement;
-  // Icon?: React.ComponentType<IconProps>;
-  // icon?: React.ReactElement;
+  icon?: string;
   right?: React.ReactElement;
 };
 
-export function LayoutHeader({ title, description, right }: LayoutHeaderProps) {
+export function LayoutHeader({
+  title,
+  description,
+  icon,
+  right,
+}: LayoutHeaderProps) {
   return (
     <div className="flex gap-2 px-4 py-6 sticky top-16 bg-background justify-between">
       <div className="flex min-w-0 gap-2 items-center">
-        <div className="w-11 h-11 bg-secondary rounded flex shrink-0 items-center justify-center">
+        <div className="w-11 h-11 bg-secondary rounded flex shrink-0 items-center justify-center overflow-hidden">
           <img
-            className="w-8 h-8"
-            src={"https://x.cartridge.gg/whitelabel/cartridge/icon.svg"}
+            src={icon ?? "https://x.cartridge.gg/whitelabel/cartridge/icon.svg"}
           />
         </div>
 

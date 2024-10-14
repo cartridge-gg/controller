@@ -187,7 +187,7 @@ export default class Controller {
       return;
     }
 
-    this.profile.goTo(tab);
+    this.profile.navigate(tab);
     this.iframes.profile.open();
   }
 
