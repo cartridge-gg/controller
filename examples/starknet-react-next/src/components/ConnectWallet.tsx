@@ -1,7 +1,7 @@
 "use client";
 
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
-import CartridgeConnector from "@cartridge/connector";
+import { ControllerConnector } from "@cartridge/connector";
 import React, { useEffect, useState } from "react";
 import { Button } from "@cartridge/ui-next";
 
@@ -10,7 +10,7 @@ export function ConnectWallet() {
   const { disconnect } = useDisconnect();
   const { address } = useAccount();
 
-  const connector = connectors[0] as CartridgeConnector;
+  const connector = connectors[0] as ControllerConnector;
 
   const [username, setUsername] = useState<string>();
   useEffect(() => {

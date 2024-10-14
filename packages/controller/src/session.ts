@@ -1,4 +1,5 @@
-import { CartridgeSessionAccount, Policy } from "@cartridge/account-wasm";
+import { Policy } from "@cartridge/account-wasm";
+import { CartridgeSessionAccount } from "@cartridge/account-wasm/session";
 import {
   Abi,
   Account,

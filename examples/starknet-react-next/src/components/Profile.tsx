@@ -1,7 +1,7 @@
 "use client";
 
 import { useAccount } from "@starknet-react/core";
-import ControllerConnector from "@cartridge/connector";
+import { ControllerConnector } from "@cartridge/connector";
 import { Button } from "@cartridge/ui-next";
 
 export function Profile() {

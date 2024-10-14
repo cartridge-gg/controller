@@ -12,7 +12,7 @@ import {
 
 import { Keychain, Modal } from "./types";
 import { AsyncMethodReturns } from "@cartridge/penpal";
-import { CartridgeSessionAccount } from "@cartridge/account-wasm";
+import { CartridgeSessionAccount } from "@cartridge/account-wasm/session";
 import { normalizeCalls } from "./utils";
 
 export class Signer implements SignerInterface {

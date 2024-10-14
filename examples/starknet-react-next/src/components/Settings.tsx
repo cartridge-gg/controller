@@ -1,13 +1,13 @@
 "use client";
 
 import { useAccount, useDisconnect } from "@starknet-react/core";
-import CartridgeConnector from "@cartridge/connector";
+import { ControllerConnector } from "@cartridge/connector";
 import { Button } from "@cartridge/ui-next";
 
 export function Settings() {
   const { account, connector } = useAccount();
   const { disconnect } = useDisconnect();
-  const cartridgeConnector = connector as unknown as CartridgeConnector;
+  const cartridgeConnector = connector as unknown as ControllerConnector;
 
   const onOpenSettings = async () => {
     if (!account) return;
