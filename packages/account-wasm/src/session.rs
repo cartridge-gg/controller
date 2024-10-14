@@ -8,6 +8,7 @@ use account_sdk::utils::time::get_current_timestamp;
 use serde_wasm_bindgen::to_value;
 use starknet::accounts::{Account, ConnectedAccount};
 use starknet::signers::SigningKey;
+use starknet_types_core::felt::Felt;
 use url::Url;
 use wasm_bindgen::prelude::*;
 
@@ -156,7 +157,7 @@ impl CartridgeSessionAccount {
             execute_after: 0_u64,
             execute_before: now + 600,
             calls,
-            nonce: SigningKey::from_random().secret_scalar(),
+            nonce: (SigningKey::from_random().secret_scalar(), Felt::ZERO),
         };
 
         let signed = self

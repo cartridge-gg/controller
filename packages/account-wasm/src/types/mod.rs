@@ -8,7 +8,6 @@ use tsify_next::Tsify;
 pub(crate) mod call;
 pub(crate) mod estimate;
 pub(crate) mod invocation;
-pub(crate) mod outside_execution;
 pub(crate) mod policy;
 pub(crate) mod session;
 pub(crate) mod signer;

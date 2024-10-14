@@ -28,7 +28,7 @@
           ]
         }
       ],
-      "nonce": "0x564b73282b2fb5f201cf2070bf0ca2526871cb7daa06e0e805521ef5d907b33"
+      "nonce": ["0x564b73282b2fb5f201cf2070bf0ca2526871cb7daa06e0e805521ef5d907b33", "0x0"]
     },
     "signature": [
       "0x73657373696f6e2d746f6b656e",
