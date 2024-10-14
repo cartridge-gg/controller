@@ -15,6 +15,7 @@ const result: PossibleTypesResultData = {
       "File",
       "Service",
       "Signer",
+      "StripePayments",
       "Team",
     ],
   },

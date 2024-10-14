@@ -60,16 +60,16 @@ export function DeployController({
     }
   }, [deployHash, controller]);
 
-  const { balance, isLoading } = useBalance({ address: controller.address });
+  const { ethBalance, isLoading } = useBalance();
   useEffect(() => {
     if (!feeEstimate || accountState != "fund") return;
 
-    if (balance >= BigInt(feeEstimate)) {
+    if (ethBalance >= BigInt(feeEstimate)) {
       setAccountState("deploy");
     } else {
       setAccountState("fund");
     }
-  }, [balance, feeEstimate, accountState]);
+  }, [ethBalance, feeEstimate, accountState]);
 
   const onDeploy = useCallback(async () => {
     try {
