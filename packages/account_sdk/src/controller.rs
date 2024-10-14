@@ -42,7 +42,7 @@ pub struct Controller {
     pub rpc_url: Url,
     pub username: String,
     pub(crate) salt: Felt,
-    provider: CartridgeJsonRpcProvider,
+    pub provider: CartridgeJsonRpcProvider,
     pub(crate) owner: Signer,
     contract: Option<Box<abigen::controller::Controller<Self>>>,
     pub factory: ControllerFactory,
