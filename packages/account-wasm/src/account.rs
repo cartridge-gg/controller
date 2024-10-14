@@ -52,7 +52,7 @@ impl CartridgeAccount {
         let controller = Controller::new(
             app_id,
             username.clone(),
-            CONTROLLERS[&Version::V1_0_4].hash,
+            CONTROLLERS[&Version::V1_0_5].hash,
             rpc_url,
             signer.try_into()?,
             address.0,

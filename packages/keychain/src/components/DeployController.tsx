@@ -131,7 +131,7 @@ export function DeployController({
             />
           </Content>
 
-          <Footer>
+          <Footer hideTxSummary>
             {error ? (
               <ErrorAlert
                 title="Something went wrong"
@@ -201,7 +201,7 @@ export function DeployController({
               />
             )}
           </Content>
-          <Footer>
+          <Footer hideTxSummary>
             {error ? (
               <ErrorAlert
                 title="Something went wrong"

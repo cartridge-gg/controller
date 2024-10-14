@@ -4,6 +4,7 @@ use crate::{
     abigen::erc_20::Erc20,
     artifacts::{Version, CONTROLLERS},
     controller::Controller,
+    errors::ControllerError,
     signers::Signer,
     tests::{
         account::FEE_TOKEN_ADDRESS, runners::katana::KatanaRunner,
@@ -11,13 +12,13 @@ use crate::{
     },
 };
 use cainome::cairo_serde::{ContractAddress, U256};
-use starknet::{accounts::Account, macros::felt, providers::Provider, signers::SigningKey};
+use starknet::{macros::felt, providers::Provider, signers::SigningKey};
 use starknet_crypto::Felt;
 
 #[tokio::test]
 async fn test_deploy_controller() {
     let runner = KatanaRunner::load();
-    dbg!(runner.declare_controller(Version::V1_0_4).await);
+    dbg!(runner.declare_controller(Version::LATEST).await);
 
     // Create signers
     let owner = Signer::Starknet(SigningKey::from_secret_scalar(felt!(
@@ -35,7 +36,7 @@ async fn test_deploy_controller() {
     let address = Controller::new(
         "app_id".to_string(),
         username.clone(),
-        CONTROLLERS[&Version::V1_0_4].hash,
+        CONTROLLERS[&Version::LATEST].hash,
         runner.rpc_url.clone(),
         owner.clone(),
         Felt::ZERO,
@@ -47,7 +48,7 @@ async fn test_deploy_controller() {
     let controller = Controller::new(
         "app_id".to_string(),
         username.clone(),
-        CONTROLLERS[&Version::V1_0_4].hash,
+        CONTROLLERS[&Version::LATEST].hash,
         runner.rpc_url.clone(),
         owner.clone(),
         address,
@@ -70,11 +71,46 @@ async fn test_deploy_controller() {
         .unwrap();
 
     // Verify the deployment
-    let deployed_address = controller.address();
+    let deployed_address = controller.address;
     assert_eq!(
         deployed_address, address,
         "Deployed address doesn't match expected address"
     );
+}
+
+#[tokio::test]
+async fn test_controller_not_deployed() {
+    let runner = KatanaRunner::load();
+    let signer = Signer::new_starknet_random();
+    let _ = runner
+        .deploy_controller("deployed".to_string(), signer.clone(), Version::LATEST)
+        .await;
+    let chain_id = runner.client().chain_id().await.unwrap();
+
+    // Create a controller that is not deployed
+    let undeployed_controller = Controller::new(
+        "app_id".to_string(),
+        "testuser".to_string(),
+        CONTROLLERS[&Version::LATEST].hash,
+        runner.rpc_url.clone(),
+        signer.clone(),
+        felt!("0xdeadbeef"),
+        chain_id,
+    );
+
+    let recipient = ContractAddress(felt!("0x18301129"));
+    let amount = U256 { low: 0, high: 0 };
+    let erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &undeployed_controller);
+    let tx1 = erc20.transfer_getcall(&recipient, &amount);
+    let result = undeployed_controller
+        .estimate_invoke_fee(vec![tx1.clone()])
+        .await;
+
+    // Assert that the result is a NotDeployed error
+    match result {
+        Err(ControllerError::NotDeployed { .. }) => {}
+        _ => panic!("Expected NotDeployed error, got: {:?}", result),
+    }
 }
 
 #[tokio::test]
