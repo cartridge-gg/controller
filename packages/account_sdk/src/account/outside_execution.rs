@@ -21,8 +21,8 @@ pub trait OutsideExecutionAccount {
         &self,
         outside_execution: OutsideExecution,
     ) -> Result<SignedOutsideExecution, SignError>;
-    fn random_outside_execution_nonce(&self) -> Felt {
-        SigningKey::from_random().secret_scalar()
+    fn random_outside_execution_nonce(&self) -> (Felt, Felt) {
+        (SigningKey::from_random().secret_scalar(), Felt::ZERO)
     }
 }
 
@@ -67,7 +67,7 @@ impl From<SignedOutsideExecution> for Call {
     fn from(value: SignedOutsideExecution) -> Self {
         Call {
             to: value.contract_address,
-            selector: selector!("execute_from_outside_v2"),
+            selector: selector!("execute_from_outside_v3"),
             calldata: [
                 <OutsideExecution as CairoSerde>::cairo_serialize(&value.outside_execution),
                 <Vec<Felt> as CairoSerde>::cairo_serialize(&value.signature),
@@ -160,7 +160,8 @@ impl StructHashRev1 for crate::abigen::controller::OutsideExecution {
         poseidon_hash_many(&[
             Self::TYPE_HASH_REV_1,
             self.caller.into(),
-            self.nonce,
+            self.nonce.0,
+            self.nonce.1,
             self.execute_after.into(),
             self.execute_before.into(),
             poseidon_hash_many(&hashed_calls),
@@ -168,7 +169,7 @@ impl StructHashRev1 for crate::abigen::controller::OutsideExecution {
     }
 
     const TYPE_HASH_REV_1: Felt = selector!(
-        "\"OutsideExecution\"(\"Caller\":\"ContractAddress\",\"Nonce\":\"felt\",\"Execute After\":\"u128\",\"Execute Before\":\"u128\",\"Calls\":\"Call*\")\"Call\"(\"To\":\"ContractAddress\",\"Selector\":\"selector\",\"Calldata\":\"felt*\")"
+        "\"OutsideExecution\"(\"Caller\":\"ContractAddress\",\"Nonce\":\"(felt,felt)\",\"Execute After\":\"u128\",\"Execute Before\":\"u128\",\"Calls\":\"Call*\")\"Call\"(\"To\":\"ContractAddress\",\"Selector\":\"selector\",\"Calldata\":\"felt*\")"
     );
 }
 
@@ -181,7 +182,7 @@ impl MessageHashRev1 for OutsideExecution {
             name: short_string!("Account.execute_from_outside"),
             version: Felt::TWO,
             chain_id,
-            revision: Felt::ONE,
+            revision: Felt::TWO,
         };
         poseidon_hash_many(&[
             short_string!("StarkNet Message"),
@@ -226,7 +227,10 @@ mod tests {
                     ],
                 },
             ],
-            nonce: felt!("0x564b73282b2fb5f201cf2070bf0ca2526871cb7daa06e0e805521ef5d907b33"),
+            nonce: (
+                felt!("0x564b73282b2fb5f201cf2070bf0ca2526871cb7daa06e0e805521ef5d907b33"),
+                Felt::ZERO,
+            ),
         };
 
         let serialized = serde_json::to_value(outside_execution).unwrap();
@@ -255,7 +259,7 @@ mod tests {
                     ]
                 }
             ],
-            "nonce": "0x564b73282b2fb5f201cf2070bf0ca2526871cb7daa06e0e805521ef5d907b33"
+            "nonce": ["0x564b73282b2fb5f201cf2070bf0ca2526871cb7daa06e0e805521ef5d907b33", "0x0"],
         });
 
         assert_eq!(serialized, expected);

@@ -164,7 +164,7 @@ impl CartridgeProxy {
 
         let call = Call {
             to: contract_address,
-            selector: selector!("execute_from_outside_v2"),
+            selector: selector!("execute_from_outside_v3"),
             calldata,
         };
 
