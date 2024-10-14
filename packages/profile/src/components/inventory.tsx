@@ -132,7 +132,7 @@ export function Inventory() {
           {collections.map((c) => (
             <Link
               className="w-full"
-              to={`/collections/${c.address}`}
+              to={`/collection/${c.address}`}
               key={c.address}
             >
               <Card className="w-full aspect-square hover:cursor-pointer">

@@ -44,7 +44,7 @@ export function Collection() {
           {c.assets.map((a) => (
             <Link
               className="w-full"
-              to={`/collections/${c.address}/tokenId/${a.tokenId}`}
+              to={`/collection/${c.address}/${a.tokenId}`}
               key={a.tokenId}
             >
               <Card className="w-full aspect-square hover:cursor-pointer">

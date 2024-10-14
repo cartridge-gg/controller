@@ -53,6 +53,9 @@ export const cartridgeTWPreset: Partial<Config> = {
         sans: ["Inter", ...defaultTheme.fontFamily.sans],
         mono: ["IBM Plex Mono", ...defaultTheme.fontFamily.mono],
       },
+      fontSize: {
+        ["2xs"]: "10px",
+      },
       borderRadius: {
         xl: "calc(var(--radius) + 4px)",
         lg: "var(--radius)",
