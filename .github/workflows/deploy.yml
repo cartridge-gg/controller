@@ -34,7 +34,8 @@ jobs:
         with:
           path: |
             .turbo
-            packages/account-wasm/pkg
+            packages/account-wasm/pkg-controller
+            packages/account-wasm/pkg-session
           key: ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-
@@ -97,7 +98,8 @@ jobs:
         with:
           path: |
             .turbo
-            packages/account-wasm/pkg
+            packages/account-wasm/pkg-controller
+            packages/account-wasm/pkg-session
           key: ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-
@@ -160,7 +162,8 @@ jobs:
         with:
           path: |
             .turbo
-            packages/account-wasm/pkg
+            packages/account-wasm/pkg-controller
+            packages/account-wasm/pkg-session
           key: ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-
@@ -224,7 +227,8 @@ jobs:
         with:
           path: |
             .turbo
-            packages/account-wasm/pkg
+            packages/account-wasm/pkg-controller
+            packages/account-wasm/pkg-session
           key: ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-
