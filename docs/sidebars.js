@@ -21,7 +21,8 @@ const sidebars = {
       ],
     },
   ],
-  slot: ["slot/getting-started"],
+  // slot: ["slot/getting-started"],
+  // vrf: ["vrf/overview", "vrf/getting-started"],
 };
 
 module.exports = sidebars;

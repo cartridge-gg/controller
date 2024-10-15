@@ -59,6 +59,11 @@ const config = {
             position: "left",
           },
           {
+            to: "/vrf/overview",
+            label: "vrf",
+            position: "left",
+          },
+          {
             href: "https://github.com/cartridge-gg/cartridge",
             label: "GitHub",
             position: "right",
