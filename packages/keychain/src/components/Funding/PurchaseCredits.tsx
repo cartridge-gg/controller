@@ -1,19 +1,18 @@
 import { Container, Content, Footer } from "components/layout";
 import { Button, Divider } from "@chakra-ui/react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CheckIcon, CreditsIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { CopyAddress } from "../CopyAddress";
 import AmountSelection, { DEFAULT_AMOUNT } from "./AmountSelection";
 import { ErrorAlert } from "components/ErrorAlert";
 import { Elements } from "@stripe/react-stripe-js";
-import { Appearance, loadStripe } from "@stripe/stripe-js";
+import { Appearance, Stripe, loadStripe } from "@stripe/stripe-js";
 import { Balance } from "./Balance";
 import CheckoutForm from "./StripeCheckout";
 
 const STRIPE_API_PUBKEY =
   "pk_test_51Kr6IXIS6lliDpf33KnwWDtIjRPWt3eAI9CuSLR6Vvc3GxHEwmSU0iszYbUlgUadSRluGKAFphe3JzltyjPAKiBK00al4RAFQu";
-const stripePromise = loadStripe(STRIPE_API_PUBKEY);
 
 enum PurchaseState {
   SELECTION,
@@ -32,7 +31,12 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
   const [isLoading, setisLoading] = useState<boolean>(false);
   const [state, setState] = useState<PurchaseState>(PurchaseState.SELECTION);
   const [creditsAmount, setCreditsAmount] = useState<number>(DEFAULT_AMOUNT);
+  const [stripePromise, setStripePromise] = useState<Promise<Stripe>>();
   const [error, setError] = useState<Error>();
+
+  useEffect(() => {
+    setStripePromise(loadStripe(STRIPE_API_PUBKEY));
+  }, []);
 
   const onAmountChanged = useCallback(
     (amount: number) => setCreditsAmount(amount),
