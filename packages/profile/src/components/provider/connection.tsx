@@ -38,7 +38,9 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
   const searchParams = useQueryParams();
   useEffect(() => {
     const erc20 = (
-      JSON.parse(decodeURIComponent(searchParams.get("erc20")!)) as ERC20[]
+      JSON.parse(
+        decodeURIComponent(searchParams.get("erc20") ?? "[]"),
+      ) as ERC20[]
     ).filter(
       (t) =>
         [ETH_CONTRACT_ADDRESS, STRK_CONTRACT_ADDRESS].includes(t.address) ?? [],
@@ -46,17 +48,29 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     erc20.unshift({ address: STRK_CONTRACT_ADDRESS });
     erc20.unshift({ address: ETH_CONTRACT_ADDRESS });
 
-    setState((state) => ({
-      ...state,
-      address: decodeURIComponent(searchParams.get("address")!),
-      username: decodeURIComponent(searchParams.get("username")!),
-      provider: new RpcProvider({
+    const newState = state;
+    newState.erc20 = erc20;
+
+    if (searchParams.get("address")) {
+      newState.address = decodeURIComponent(searchParams.get("address")!);
+    }
+
+    if (searchParams.get("username")) {
+      newState.username = decodeURIComponent(searchParams.get("username")!);
+    }
+
+    if (searchParams.get("rpcUrl")) {
+      newState.provider = new RpcProvider({
         nodeUrl: decodeURIComponent(searchParams.get("rpcUrl")!),
-      }),
-      indexerUrl: decodeURIComponent(searchParams.get("indexerUrl")!),
-      erc20,
-    }));
-  }, [searchParams]);
+      });
+    }
+
+    if (searchParams.get("indexerUrl")) {
+      newState.indexerUrl = decodeURIComponent(searchParams.get("indexerUrl")!);
+    }
+
+    setState(newState);
+  }, [searchParams, state]);
 
   useEffect(() => {
     updateChainId();

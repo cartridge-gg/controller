@@ -1,13 +1,20 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   LayoutContainer,
   LayoutContent,
   LayoutHeader,
 } from "@/components/layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@cartridge/ui-next";
+import {
+  ArrowIcon,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@cartridge/ui-next";
 
 export function Asset() {
-  const { tokenId } = useParams<{
+  const { address, tokenId } = useParams<{
     address: string;
     tokenId: string;
   }>();
@@ -24,9 +31,22 @@ export function Asset() {
       { type: "property", name: "Weapon", value: "Banner of Rage" },
     ],
   };
+  const navigate = useNavigate();
 
   return (
-    <LayoutContainer>
+    <LayoutContainer
+      left={
+        <Button
+          variant="icon"
+          size="icon"
+          onClick={() => {
+            navigate(`/collection/${address}`);
+          }}
+        >
+          <ArrowIcon variant="left" />
+        </Button>
+      }
+    >
       <LayoutHeader
         title={asset.name}
         description={asset.tokenId}
@@ -45,7 +65,10 @@ export function Asset() {
 
           <CardContent className="bg-background grid grid-cols-2 gap-0.5 p-0">
             {asset.attributes.map((a) => (
-              <div className="bg-secondary p-3 flex flex-col gap-1">
+              <div
+                key={`${a.type}-${a.name}`}
+                className="bg-secondary p-3 flex flex-col gap-1"
+              >
                 <div className="uppercase text-muted-foreground text-2xs font-bold">
                   {a.name}
                 </div>

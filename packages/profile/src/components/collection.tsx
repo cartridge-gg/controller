@@ -1,5 +1,6 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import {
+  ArrowIcon,
   Button,
   Card,
   CardContent,
@@ -33,9 +34,22 @@ export function Collection() {
   };
 
   const [selected, setSelected] = useState<string[]>([]);
+  const navigate = useNavigate();
 
   return (
-    <LayoutContainer>
+    <LayoutContainer
+      left={
+        <Button
+          variant="icon"
+          size="icon"
+          onClick={() => {
+            navigate("/inventory");
+          }}
+        >
+          <ArrowIcon variant="left" />
+        </Button>
+      }
+    >
       <LayoutHeader
         title={c.name}
         description={<CopyAddress address={address!} size="sm" />}
@@ -44,7 +58,7 @@ export function Collection() {
 
       <LayoutContent className="pb-4">
         <div
-          className="flex items-center gap-2 text-sm cursor-pointer"
+          className="flex items-center gap-2 text-sm cursor-pointer self-start"
           onClick={() => {
             setSelected(selected.length ? [] : c.assets.map((a) => a.tokenId));
           }}

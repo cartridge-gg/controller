@@ -3,8 +3,12 @@ import { Network } from "@cartridge/ui-next";
 import { PropsWithChildren, useCallback } from "react";
 import { useConnection } from "../provider/hooks";
 
-export function LayoutContainer({ children }: PropsWithChildren) {
+export function LayoutContainer({
+  children,
+  left,
+}: PropsWithChildren & { left?: React.ReactNode }) {
   const { parent, chainId } = useConnection();
+
   const onClose = useCallback(() => {
     parent.close().catch(() => {
       /* Always fails for some reason */
@@ -14,9 +18,11 @@ export function LayoutContainer({ children }: PropsWithChildren) {
   return (
     <ResponsiveWrapper>
       <div className="h-16 sticky top-0 flex items-center bg-[url('https://x.cartridge.gg/whitelabel/cartridge/cover.png')] bg-center bg-cover px-3 justify-between">
-        <Button variant="icon" size="icon" onClick={onClose}>
-          <TimesIcon />
-        </Button>
+        {left ?? (
+          <Button variant="icon" size="icon" onClick={onClose}>
+            <TimesIcon />
+          </Button>
+        )}
 
         <div className="flex gap-2">
           <Network chainId={chainId} />
