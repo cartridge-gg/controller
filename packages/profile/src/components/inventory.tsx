@@ -152,11 +152,9 @@ export function Inventory() {
               key={c.address}
             >
               <Card className="w-full h-full">
-                <CardHeader className="flex flex-row gap-1 group-hover:opacity-70">
-                  <div className="truncate flex-1 uppercase text-sm text-bold">
-                    {c.name}
-                  </div>
-                  <div className="truncate rounded-full min-w-5 h-5 flex place-content-center text-sm text-bold bg-accent px-1.5">
+                <CardHeader className="flex flex-row gap-1 group-hover:opacity-70 items-center justify-between">
+                  <CardTitle className="truncate">{c.name}</CardTitle>
+                  <div className="truncate rounded-full min-w-5 h-5 flex justify-center items-center text-xs font-bold bg-accent px-1.5">
                     {c.totalCount}
                   </div>
                 </CardHeader>

@@ -5,7 +5,7 @@ import {
   Card,
   CardContent,
   CardHeader,
-  Checkbox,
+  CardTitle,
   CheckboxIcon,
   cn,
   CopyAddress,
@@ -83,29 +83,36 @@ export function Collection() {
               >
                 <Card
                   className={cn(
-                    "w-full h-full border-2 border-solid transition",
+                    "w-full h-full border-2 border-solid transition overflow-scroll",
                     isSelected ? "border-foreground" : "border-transparent",
                   )}
                 >
-                  <CardHeader className="flex flex-row gap-1 group-hover:opacity-70">
-                    <div className="truncate flex-1 uppercase text-sm text-bold">
-                      {a.name}
-                    </div>
-                    <Checkbox
-                      checked={isSelected}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
+                  <CardHeader className="flex flex-row items-center group-hover:opacity-70 p-0 justify-between">
+                    <CardTitle className="truncate p-3">{a.name}</CardTitle>
 
-                        setSelected((selected) =>
-                          isSelected
-                            ? selected.filter(
-                                (tokenId) => tokenId !== a.tokenId,
-                              )
-                            : [...selected, a.tokenId],
-                        );
-                      }}
-                    />
+                    <div className="h-full place-content-center">
+                      <Button
+                        size="icon"
+                        variant="icon"
+                        className="h-full w-auto aspect-square bg-transparent hover:bg-transparent"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+
+                          setSelected((selected) =>
+                            isSelected
+                              ? selected.filter(
+                                  (tokenId) => tokenId !== a.tokenId,
+                                )
+                              : [...selected, a.tokenId],
+                          );
+                        }}
+                      >
+                        <CheckboxIcon
+                          variant={isSelected ? "line" : "unchecked-line"}
+                        />
+                      </Button>
+                    </div>
                   </CardHeader>
                   <CardContent
                     className="bg-cover bg-center flex py-4 h-full place-content-center overflow-hidden"
