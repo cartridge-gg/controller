@@ -20,7 +20,7 @@ type ConnectionContextType = {
 type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
 
 const initialState: ConnectionContextType = {
-  parent: { close: async () => { } },
+  parent: { close: async () => {} },
   address: "",
   username: "",
   provider: new RpcProvider(),

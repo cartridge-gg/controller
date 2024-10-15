@@ -74,11 +74,11 @@ export function Collection() {
         <div className="grid grid-cols-2 gap-2 place-items-center">
           {c.assets.map((a) => (
             <Link
-              className="w-full"
+              className="w-full aspect-square"
               to={`/collection/${c.address}/${a.tokenId}`}
               key={a.tokenId}
             >
-              <Card className="w-full aspect-square hover:cursor-pointer">
+              <Card className="w-full h-full">
                 <CardHeader className="flex flex-row gap-1">
                   <div className="truncate flex-1 uppercase text-sm text-bold">
                     {a.name}
@@ -99,24 +99,19 @@ export function Collection() {
                     }}
                   />
                 </CardHeader>
-
-                {c.imageUrl ? (
-                  <CardContent
-                    className="bg-cover bg-center flex py-4 h-full place-content-center"
-                    style={{
-                      backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${c.imageUrl})`,
-                    }}
-                  >
-                    <div
-                      className="h-full aspect-square bg-cover bg-center"
-                      style={{ backgroundImage: `url(${c.imageUrl})` }}
-                    />
-                  </CardContent>
-                ) : (
-                  <CardContent className="h-full place-content-center text-center">
-                    No image available
-                  </CardContent>
-                )}
+                <CardContent
+                  className="bg-cover bg-center flex py-4 h-full place-content-center overflow-hidden"
+                  style={{
+                    backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${
+                      c.imageUrl ?? "/public/placeholder.svg"
+                    })`,
+                  }}
+                >
+                  <img
+                    className="object-contain"
+                    src={c.imageUrl ?? "/public/placeholder.svg"}
+                  />
+                </CardContent>
               </Card>
             </Link>
           ))}

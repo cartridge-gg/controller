@@ -72,8 +72,13 @@ export function LayoutHeader({
     <div className="flex gap-2 px-4 py-6 sticky top-16 bg-background justify-between">
       <div className="flex min-w-0 gap-2 items-center">
         <div className="w-11 h-11 bg-secondary rounded flex shrink-0 items-center justify-center overflow-hidden">
-          <img
-            src={icon ?? "https://x.cartridge.gg/whitelabel/cartridge/icon.svg"}
+          <div
+            className="w-full bg-cover bg-center h-full place-content-center"
+            style={{
+              backgroundImage: `url(${
+                icon ?? "https://x.cartridge.gg/whitelabel/cartridge/icon.svg"
+              })`,
+            }}
           />
         </div>
 
