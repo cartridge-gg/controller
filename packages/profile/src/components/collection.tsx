@@ -7,6 +7,7 @@ import {
   CardHeader,
   Checkbox,
   CheckboxIcon,
+  cn,
   CopyAddress,
 } from "@cartridge/ui-next";
 import {
@@ -72,49 +73,57 @@ export function Collection() {
         </div>
 
         <div className="grid grid-cols-2 gap-2 place-items-center">
-          {c.assets.map((a) => (
-            <Link
-              className="w-full aspect-square"
-              to={`/collection/${c.address}/${a.tokenId}`}
-              key={a.tokenId}
-            >
-              <Card className="w-full h-full">
-                <CardHeader className="flex flex-row gap-1">
-                  <div className="truncate flex-1 uppercase text-sm text-bold">
-                    {a.name}
-                  </div>
-                  <Checkbox
-                    checked={selected.includes(a.tokenId)}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-
-                      if (selected.includes(a.tokenId)) {
-                        setSelected((selected) =>
-                          selected.filter((tokenId) => tokenId !== a.tokenId),
-                        );
-                      } else {
-                        setSelected((selected) => [...selected, a.tokenId]);
-                      }
-                    }}
-                  />
-                </CardHeader>
-                <CardContent
-                  className="bg-cover bg-center flex py-4 h-full place-content-center overflow-hidden"
-                  style={{
-                    backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${
-                      c.imageUrl ?? "/public/placeholder.svg"
-                    })`,
-                  }}
+          {c.assets.map((a) => {
+            const isSelected = selected.includes(a.tokenId);
+            return (
+              <Link
+                className="w-full aspect-square"
+                to={`/collection/${c.address}/${a.tokenId}`}
+                key={a.tokenId}
+              >
+                <Card
+                  className={cn(
+                    "w-full h-full border-2 border-solid transition",
+                    isSelected ? "border-foreground" : "border-transparent",
+                  )}
                 >
-                  <img
-                    className="object-contain"
-                    src={c.imageUrl ?? "/public/placeholder.svg"}
-                  />
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+                  <CardHeader className="flex flex-row gap-1">
+                    <div className="truncate flex-1 uppercase text-sm text-bold">
+                      {a.name}
+                    </div>
+                    <Checkbox
+                      checked={isSelected}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        setSelected((selected) =>
+                          isSelected
+                            ? selected.filter(
+                                (tokenId) => tokenId !== a.tokenId,
+                              )
+                            : [...selected, a.tokenId],
+                        );
+                      }}
+                    />
+                  </CardHeader>
+                  <CardContent
+                    className="bg-cover bg-center flex py-4 h-full place-content-center overflow-hidden"
+                    style={{
+                      backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${
+                        c.imageUrl ?? "/public/placeholder.svg"
+                      })`,
+                    }}
+                  >
+                    <img
+                      className="object-contain"
+                      src={c.imageUrl ?? "/public/placeholder.svg"}
+                    />
+                  </CardContent>
+                </Card>
+              </Link>
+            );
+          })}
         </div>
       </LayoutContent>
 

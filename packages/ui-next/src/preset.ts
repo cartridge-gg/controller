@@ -13,6 +13,7 @@ export const cartridgeTWPreset: Partial<Config> = {
       },
     },
     colors: {
+      transparent: "transparent",
       current: "currentColor",
       border: "hsl(var(--border)/0.12)",
       input: "hsl(var(--input)/0.12)",
