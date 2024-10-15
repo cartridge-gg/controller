@@ -11,13 +11,19 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CopyText,
 } from "@cartridge/ui-next";
+import { addAddressPadding } from "starknet";
 
 export function Asset() {
   const { address, tokenId } = useParams<{
     address: string;
     tokenId: string;
   }>();
+  const collection = {
+    address: address!,
+    name: "Blobert",
+  };
   const asset = {
     tokenId,
     name: "Blobert #196",
@@ -40,7 +46,7 @@ export function Asset() {
           variant="icon"
           size="icon"
           onClick={() => {
-            navigate(`/collection/${address}`);
+            navigate(`/collection/${collection.address}`);
           }}
         >
           <ArrowIcon variant="left" />
@@ -49,7 +55,12 @@ export function Asset() {
     >
       <LayoutHeader
         title={asset.name}
-        description={asset.tokenId}
+        description={
+          <CopyText
+            value={collection.name}
+            copyValue={addAddressPadding(collection.address)}
+          />
+        }
         icon={asset.imageUrl}
       />
 
