@@ -1,4 +1,4 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import {
   ArrowIcon,
   Button,
@@ -16,10 +16,10 @@ import {
   LayoutFooter,
   LayoutHeader,
 } from "@/components/layout";
-import { useState } from "react";
 
 export function Collection() {
   const { address } = useParams<{ address: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
   const c = {
     address,
     name: "Blobert",
@@ -31,24 +31,23 @@ export function Collection() {
         name: "Blobert #46",
         imageUrl: `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaW5ZTWluIG1lZXQiIHN0eWxlPSJpbWFnZS1yZW5kZXJpbmc6IHBpeGVsYXRlZCIgdmlld0JveD0iMCAwIDM1MCAzNTAiPjxpbWFnZSBocmVmPSJkYXRhOmltYWdlL3BuZztiYXNlNjQsaVZCT1J3MEtHZ29BQUFBTlNVaEVVZ0FBQURBQUFBQXdBZ01BQUFBcWJCRVVBQUFBQ1ZCTVZFWHI3ZXdCcmJYR3pjNFpPSkJKQUFBQWcwbEVRVlFvejMzTndRMURJUXdEVURoa0JKYm9GSXlRU25oSnBpeXBnYnF0d0tmLzlIR2MvbUlWUUpzb1Q0eU1qOTRYcXNJSnE0RkdzS2l3SHpEeXJPQWRBb3dIOGtRTjJFUUtyQXJ4ZGRPUGFBcU1MQmhIbUJ6WXZiV2lwUjFUNUNNTXVnTTkxaFN1cU5wSmx6eDZ2Nks0QU8yRERBaTg3QjdCUDFjQWg5TTZxbmtCZnh4UTRkMEphMndBQUFBQVNVVk9SSzVDWUlJPSIgeD0iMCIgeT0iMCIgd2lkdGg9IjM1MHB4IiBoZWlnaHQ9IjM1MHB4IiAvPjxpbWFnZSBocmVmPSJkYXRhOmltYWdlL3BuZztiYXNlNjQsaVZCT1J3MEtHZ29BQUFBTlNVaEVVZ0FBQURBQUFBQXdCQU1BQUFDbExPUzBBQUFBSjFCTVZFVUFBQUFWSFNzT0ZCN2F0NUU0U1ZFZkxqaFViM2wrbFpmalVpYTFlMWJHemM3cjdleCtUVDhlaGd4VEFBQUFBWFJTVGxNQVFPYllaZ0FBQUxsSlJFRlVPTXZ0MExFS3dqQVFnT0hnNXVZVnU3ZXhndnVCRkxmQ1llZUMwUmNvMlNXMm9xdExSaDA3bGdydXZvVDRWdHExdVlLam9EK1o4bkhEbmZqMnBKUUIrMDg3OEJnWkVLVUplQzVFT3FldGdzQVpXR3BOdGNxOGp5RWluYmNBZ1FOcFNmVllPekNsdzJOZjZtZlNnWUZQNWo1NVB4NlFnNVhCTmhlVVFXdFBMTVJTempoWXg5YmFlZFlGOE5VUmNWRTRlNFRnYnhxOEtYQnVGWUpxOEpxTmhOUEZOMWlBWUtvcVJNRTJyRVJQdlhBVy8zNmdGL3BSTWFOSWl5VmRBQUFBQUVsRlRrU3VRbUNDIiB4PSIwIiB5PSIwIiB3aWR0aD0iMzUwcHgiIGhlaWdodD0iMzUwcHgiIC8+PGltYWdlIGhyZWY9ImRhdGE6aW1hZ2UvcG5nO2Jhc2U2NCxpVkJPUncwS0dnb0FBQUFOU1VoRVVnQUFBREFBQUFBd0JBTUFBQUNsTE9TMEFBQUFJVkJNVkVVQUFBRDZNbGFnSVVZT0ZCNWhKRVIrVFQrMWUxYmF0NUUySGlhT1R5bGxNU3ZMdU4rcEFBQUFBWFJTVGxNQVFPYllaZ0FBQU5kSlJFRlVPTXZ0ajhFTndqQVFCQzFvZ0QwYTRBNFhFSEpCNGgxU0FZZ1VBQThLb0FuK1ZFR1hyQlVJc2VEQmswZldrblhhOFdwOVlkU29YK1hGY3lpTHpKL2FjalY3RGhrb3pRd0xEcXJMSWd0QVRDV0VDZFI4R0ZEQWhCRVZTT2tEQU13SlpJSUV6djFQcGp1QUlTVlFUcWYyOGdLdHptdEZkN0Erdk1IK1dKbENtQUhnaC9iVXIrZDFBZ0lDY2U4N21Lbk5BSU1TRlBubUJGMkZmUURhZ3ErZ3E0ZzVhRWdFK2dXd3ZTWVFhekpRTlExQnBCOEpoZ0VxV2pUNlErQVYvYTBuVlFUWmUvcjNXOWhjODdVOWlYZEk3bC9vQWVsWEtndXFVV09aQUFBQUFFbEZUa1N1UW1DQyIgeD0iMCIgeT0iMCIgd2lkdGg9IjM1MHB4IiBoZWlnaHQ9IjM1MHB4IiAvPjxpbWFnZSBocmVmPSJkYXRhOmltYWdlL3BuZztiYXNlNjQsaVZCT1J3MEtHZ29BQUFBTlNVaEVVZ0FBQURBQUFBQXdCQU1BQUFDbExPUzBBQUFBSkZCTVZFVUFBQUFPRkI3cjdlelExSXp0d0cybndWVGtuejVDZURFZ1R5MXluVC9HZVNlT1R5bURyL1pIQUFBQUFYUlNUbE1BUU9iWVpnQUFBRk5KUkVGVU9NdGpHQVdqZ0dRZ0tJQXV3aWdJSmpkaXFwVVNBRWtzeEpSZ2RBUVNZZ0pZakJjU0ZCUk14R1l2bzVLTG13QjJGeGtIWW5lcXNKSzVBQTZKQ093U2txRXpzRXN3bGpmaURvOVJRQmNBQUNHYkIxdTNJU0VHQUFBQUFFbEZUa1N1UW1DQyIgeD0iMCIgeT0iMCIgd2lkdGg9IjM1MHB4IiBoZWlnaHQ9IjM1MHB4IiAvPjxpbWFnZSBocmVmPSJkYXRhOmltYWdlL3BuZztiYXNlNjQsaVZCT1J3MEtHZ29BQUFBTlNVaEVVZ0FBQURBQUFBQXdCQU1BQUFDbExPUzBBQUFBSjFCTVZFVUFBQUFPRkI3dDhpTEd6YzZtdExOeW5UOStsWmRVYjNtMWUxYmF0NUU0U1ZGK1RUL1p2QjRMelBQV0FBQUFBWFJTVGxNQVFPYllaZ0FBQUVaSlJFRlVPTXRqR0FXakFCOFFCQUpzNG94S1NrcHVBamdrekxCS0FFMHlvWTVFcDVCcUtGYUp4a05LMkNVMktpa0ttV0YzcnFDUU8xWUpvSTRxQVp4Qk1nb0dCQUFBbjJZSmU4MU9WMElBQUFBT1pWaEpaazFOQUNvQUFBQUlBQUFBQUFBQUFOSlRrd0FBQUFCSlJVNUVya0pnZ2c9PSIgeD0iMCIgeT0iMCIgd2lkdGg9IjM1MHB4IiBoZWlnaHQ9IjM1MHB4IiAvPjwvc3ZnPg==`,
       },
+      {
+        tokenId: "47",
+        name: "Blobert #46",
+        imageUrl: `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaW5ZTWluIG1lZXQiIHN0eWxlPSJpbWFnZS1yZW5kZXJpbmc6IHBpeGVsYXRlZCIgdmlld0JveD0iMCAwIDM1MCAzNTAiPjxpbWFnZSBocmVmPSJkYXRhOmltYWdlL3BuZztiYXNlNjQsaVZCT1J3MEtHZ29BQUFBTlNVaEVVZ0FBQURBQUFBQXdBZ01BQUFBcWJCRVVBQUFBQ1ZCTVZFWHI3ZXdCcmJYR3pjNFpPSkJKQUFBQWcwbEVRVlFvejMzTndRMURJUXdEVURoa0JKYm9GSXlRU25oSnBpeXBnYnF0d0tmLzlIR2MvbUlWUUpzb1Q0eU1qOTRYcXNJSnE0RkdzS2l3SHpEeXJPQWRBb3dIOGtRTjJFUUtyQXJ4ZGRPUGFBcU1MQmhIbUJ6WXZiV2lwUjFUNUNNTXVnTTkxaFN1cU5wSmx6eDZ2Nks0QU8yRERBaTg3QjdCUDFjQWg5TTZxbmtCZnh4UTRkMEphMndBQUFBQVNVVk9SSzVDWUlJPSIgeD0iMCIgeT0iMCIgd2lkdGg9IjM1MHB4IiBoZWlnaHQ9IjM1MHB4IiAvPjxpbWFnZSBocmVmPSJkYXRhOmltYWdlL3BuZztiYXNlNjQsaVZCT1J3MEtHZ29BQUFBTlNVaEVVZ0FBQURBQUFBQXdCQU1BQUFDbExPUzBBQUFBSjFCTVZFVUFBQUFWSFNzT0ZCN2F0NUU0U1ZFZkxqaFViM2wrbFpmalVpYTFlMWJHemM3cjdleCtUVDhlaGd4VEFBQUFBWFJTVGxNQVFPYllaZ0FBQUxsSlJFRlVPTXZ0MExFS3dqQVFnT0hnNXVZVnU3ZXhndnVCRkxmQ1llZUMwUmNvMlNXMm9xdExSaDA3bGdydXZvVDRWdHExdVlLam9EK1o4bkhEbmZqMnBKUUIrMDg3OEJnWkVLVUplQzVFT3FldGdzQVpXR3BOdGNxOGp5RWluYmNBZ1FOcFNmVllPekNsdzJOZjZtZlNnWUZQNWo1NVB4NlFnNVhCTmhlVVFXdFBMTVJTempoWXg5YmFlZFlGOE5VUmNWRTRlNFRnYnhxOEtYQnVGWUpxOEpxTmhOUEZOMWlBWUtvcVJNRTJyRVJQdlhBVy8zNmdGL3BSTWFOSWl5VmRBQUFBQUVsRlRrU3VRbUNDIiB4PSIwIiB5PSIwIiB3aWR0aD0iMzUwcHgiIGhlaWdodD0iMzUwcHgiIC8+PGltYWdlIGhyZWY9ImRhdGE6aW1hZ2UvcG5nO2Jhc2U2NCxpVkJPUncwS0dnb0FBQUFOU1VoRVVnQUFBREFBQUFBd0JBTUFBQUNsTE9TMEFBQUFJVkJNVkVVQUFBRDZNbGFnSVVZT0ZCNWhKRVIrVFQrMWUxYmF0NUUySGlhT1R5bGxNU3ZMdU4rcEFBQUFBWFJTVGxNQVFPYllaZ0FBQU5kSlJFRlVPTXZ0ajhFTndqQVFCQzFvZ0QwYTRBNFhFSEpCNGgxU0FZZ1VBQThLb0FuK1ZFR1hyQlVJc2VEQmswZldrblhhOFdwOVlkU29YK1hGY3lpTHpKL2FjalY3RGhrb3pRd0xEcXJMSWd0QVRDV0VDZFI4R0ZEQWhCRVZTT2tEQU13SlpJSUV6djFQcGp1QUlTVlFUcWYyOGdLdHptdEZkN0Erdk1IK1dKbENtQUhnaC9iVXIrZDFBZ0lDY2U4N21Lbk5BSU1TRlBubUJGMkZmUURhZ3ErZ3E0ZzVhRWdFK2dXd3ZTWVFhekpRTlExQnBCOEpoZ0VxV2pUNlErQVYvYTBuVlFUWmUvcjNXOWhjODdVOWlYZEk3bC9vQWVsWEtndXFVV09aQUFBQUFFbEZUa1N1UW1DQyIgeD0iMCIgeT0iMCIgd2lkdGg9IjM1MHB4IiBoZWlnaHQ9IjM1MHB4IiAvPjxpbWFnZSBocmVmPSJkYXRhOmltYWdlL3BuZztiYXNlNjQsaVZCT1J3MEtHZ29BQUFBTlNVaEVVZ0FBQURBQUFBQXdCQU1BQUFDbExPUzBBQUFBSkZCTVZFVUFBQUFPRkI3cjdlelExSXp0d0cybndWVGtuejVDZURFZ1R5MXluVC9HZVNlT1R5bURyL1pIQUFBQUFYUlNUbE1BUU9iWVpnQUFBRk5KUkVGVU9NdGpHQVdqZ0dRZ0tJQXV3aWdJSmpkaXFwVVNBRWtzeEpSZ2RBUVNZZ0pZakJjU0ZCUk14R1l2bzVLTG13QjJGeGtIWW5lcXNKSzVBQTZKQ093U2txRXpzRXN3bGpmaURvOVJRQmNBQUNHYkIxdTNJU0VHQUFBQUFFbEZUa1N1UW1DQyIgeD0iMCIgeT0iMCIgd2lkdGg9IjM1MHB4IiBoZWlnaHQ9IjM1MHB4IiAvPjxpbWFnZSBocmVmPSJkYXRhOmltYWdlL3BuZztiYXNlNjQsaVZCT1J3MEtHZ29BQUFBTlNVaEVVZ0FBQURBQUFBQXdCQU1BQUFDbExPUzBBQUFBSjFCTVZFVUFBQUFPRkI3dDhpTEd6YzZtdExOeW5UOStsWmRVYjNtMWUxYmF0NUU0U1ZGK1RUL1p2QjRMelBQV0FBQUFBWFJTVGxNQVFPYllaZ0FBQUVaSlJFRlVPTXRqR0FXakFCOFFCQUpzNG94S1NrcHVBamdrekxCS0FFMHlvWTVFcDVCcUtGYUp4a05LMkNVMktpa0ttV0YzcnFDUU8xWUpvSTRxQVp4Qk1nb0dCQUFBbjJZSmU4MU9WMElBQUFBT1pWaEpaazFOQUNvQUFBQUlBQUFBQUFBQUFOSlRrd0FBQUFCSlJVNUVya0pnZ2c9PSIgeD0iMCIgeT0iMCIgd2lkdGg9IjM1MHB4IiBoZWlnaHQ9IjM1MHB4IiAvPjwvc3ZnPg==`,
+      },
     ],
   };
-
-  const [selected, setSelected] = useState<string[]>([]);
-  const navigate = useNavigate();
+  const tokenIds = searchParams.getAll("tokenIds");
 
   return (
     <LayoutContainer
       left={
-        <Button
-          variant="icon"
-          size="icon"
-          onClick={() => {
-            navigate("/inventory");
-          }}
-        >
-          <ArrowIcon variant="left" />
-        </Button>
+        <Link to="/inventory">
+          <Button variant="icon" size="icon">
+            <ArrowIcon variant="left" />
+          </Button>
+        </Link>
       }
     >
       <LayoutHeader
@@ -61,20 +60,22 @@ export function Collection() {
         <div
           className="flex items-center gap-2 text-sm cursor-pointer self-start"
           onClick={() => {
-            setSelected(selected.length ? [] : c.assets.map((a) => a.tokenId));
+            setSearchParams({
+              tokenIds: tokenIds.length ? [] : c.assets.map((a) => a.tokenId),
+            });
           }}
         >
           <CheckboxIcon
-            variant={selected.length ? "minus-line" : "unchecked-line"}
+            variant={tokenIds.length ? "minus-line" : "unchecked-line"}
           />
           <div className="text-muted-foreground font-semibold uppercase">
-            {selected.length ? `${selected.length} selected` : "Select All"}
+            {tokenIds.length ? `${tokenIds.length} selected` : "Select all"}
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-2 place-items-center">
           {c.assets.map((a) => {
-            const isSelected = selected.includes(a.tokenId);
+            const isSelected = tokenIds.includes(a.tokenId);
             return (
               <Link
                 className="w-full aspect-square group"
@@ -99,13 +100,13 @@ export function Collection() {
                           e.preventDefault();
                           e.stopPropagation();
 
-                          setSelected((selected) =>
-                            isSelected
-                              ? selected.filter(
+                          setSearchParams({
+                            tokenIds: isSelected
+                              ? tokenIds.filter(
                                   (tokenId) => tokenId !== a.tokenId,
                                 )
-                              : [...selected, a.tokenId],
-                          );
+                              : [...tokenIds, a.tokenId],
+                          });
                         }}
                       >
                         <CheckboxIcon
@@ -134,17 +135,11 @@ export function Collection() {
         </div>
       </LayoutContent>
 
-      {!!selected.length && (
+      {!!tokenIds.length && (
         <LayoutFooter>
-          <Button
-            onClick={() => {
-              navigate(
-                `/collection/${c.address}/send?tokenIds=${selected.join(",")}`,
-              );
-            }}
-          >
-            Send ({selected.length})
-          </Button>
+          <Link to={`/collection/${c.address}/send?${searchParams.toString()}`}>
+            <Button className="w-full">Send ({tokenIds.length})</Button>
+          </Link>
         </LayoutFooter>
       )}
     </LayoutContainer>

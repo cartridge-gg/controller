@@ -1,12 +1,11 @@
 import { ArrowIcon, Button, CopyAddress } from "@cartridge/ui-next";
 import { LayoutContainer, LayoutContent, LayoutHeader } from "./layout";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 
 export function Send() {
   const { address } = useParams<{ address: string }>();
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const tokenIds = (searchParams.get("tokenIds") ?? "").split(",");
+  const tokenIds = searchParams.getAll("tokenIds");
 
   const c = {
     address,
@@ -18,15 +17,11 @@ export function Send() {
   return (
     <LayoutContainer
       left={
-        <Button
-          variant="icon"
-          size="icon"
-          onClick={() => {
-            navigate(`/collection/${c.address}`);
-          }}
-        >
-          <ArrowIcon variant="left" />
-        </Button>
+        <Link to={`/collection/${c.address}?${searchParams.toString()}`}>
+          <Button variant="icon" size="icon">
+            <ArrowIcon variant="left" />
+          </Button>
+        </Link>
       }
     >
       <LayoutHeader

@@ -9,8 +9,7 @@ import {
   TooltipTrigger,
 } from "@cartridge/ui-next";
 import { ProfileContextTypeVariant } from "@cartridge/controller";
-import { useCallback } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 export function Navigation() {
   return (
@@ -29,12 +28,7 @@ function Item({
   Icon: React.ComponentType<StateIconProps>;
   variant: ProfileContextTypeVariant;
 }) {
-  const navigate = useNavigate();
   const location = useLocation();
-
-  const onClick = useCallback(() => {
-    navigate(`/${variant}`);
-  }, [variant, navigate]);
 
   const isActive =
     location.pathname == `/${variant}` ||
@@ -44,15 +38,15 @@ function Item({
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div
+          <Link
             className={cn(
               "px-4 py-3 cursor-pointer hover:opacity-[0.8]",
               isActive ? "bg-secondary" : "bg-background",
             )}
-            onClick={onClick}
+            to={`/${variant}`}
           >
             <Icon size="sm" variant={isActive ? "solid" : "line"} />
-          </div>
+          </Link>
         </TooltipTrigger>
         <TooltipContent>
           <p className="capitalize">{variant}</p>

@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import {
   LayoutContainer,
   LayoutContent,
@@ -38,20 +38,15 @@ export function Asset() {
       { type: "property", name: "Weapon", value: "Banner of Rage" },
     ],
   };
-  const navigate = useNavigate();
 
   return (
     <LayoutContainer
       left={
-        <Button
-          variant="icon"
-          size="icon"
-          onClick={() => {
-            navigate(`/collection/${collection.address}`);
-          }}
-        >
-          <ArrowIcon variant="left" />
-        </Button>
+        <Link to={`/collection/${collection.address}`}>
+          <Button variant="icon" size="icon">
+            <ArrowIcon variant="left" />
+          </Button>
+        </Link>
       }
     >
       <LayoutHeader
