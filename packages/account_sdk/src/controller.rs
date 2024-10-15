@@ -285,6 +285,15 @@ impl Controller {
                                 self.nonce = new_nonce;
                                 retry_count += 1;
                                 continue;
+                            } else if data.contains(&format!("{:x} is not deployed.", self.address))
+                            {
+                                let balance = self.eth_balance().await?;
+                                let mut fee_estimate = self.deploy().estimate_fee().await?;
+                                fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
+                                return Err(ControllerError::NotDeployed {
+                                    fee_estimate: Box::new(fee_estimate),
+                                    balance,
+                                });
                             }
                         }
                         _ => {}

@@ -9,6 +9,16 @@ type BalanceProps = {
   showBalances: ("credits" | "eth" | "strk")[];
 };
 
+function formatEthBalance(ethBalance: bigint): string {
+  const formattedBalance = parseFloat(formatEther(ethBalance));
+  if (ethBalance === 0n) {
+    return "0.00";
+  }
+  return formattedBalance < 0.01
+    ? `~${formattedBalance.toFixed(2)}`
+    : formattedBalance.toFixed(2);
+}
+
 export function Balance({ showBalances }: BalanceProps) {
   const { ethBalance, creditsBalance } = useBalance();
 
@@ -52,6 +62,7 @@ export function Balance({ showBalances }: BalanceProps) {
           <HStack>
             <CreditsIcon fontSize={20} />
             <Text>{creditsBalance?.toFixed(2)}</Text>
+            <Text color="text.secondary">${creditsBalance?.toFixed(2)}</Text>
           </HStack>
           <Spacer />
           <HStack color="text.secondary">
@@ -72,7 +83,8 @@ export function Balance({ showBalances }: BalanceProps) {
         >
           <HStack>
             <EthereumIcon fontSize={20} />
-            <Text>{usdBalance?.toFixed(2)}</Text>
+            <Text>{formatEthBalance(ethBalance)}</Text>
+            <Text color="text.secondary">${usdBalance?.toFixed(2)}</Text>
           </HStack>
           <Spacer />
           <HStack color="text.secondary">
