@@ -102,8 +102,9 @@ export function Collection() {
                 <CardContent
                   className="bg-cover bg-center flex py-4 h-full place-content-center overflow-hidden"
                   style={{
-                    backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${c.imageUrl ?? "/public/placeholder.svg"
-                      })`,
+                    backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${
+                      c.imageUrl ?? "/public/placeholder.svg"
+                    })`,
                   }}
                 >
                   <img

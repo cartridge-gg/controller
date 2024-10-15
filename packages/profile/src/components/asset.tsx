@@ -70,8 +70,9 @@ export function Asset() {
           <div
             className="w-[60%] aspect-square rounded-lg bg-cover bg-center flex py-4 place-content-center overflow-hidden p-4"
             style={{
-              backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${asset.imageUrl ?? "/public/placeholder.svg"
-                })`,
+              backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${
+                asset.imageUrl ?? "/public/placeholder.svg"
+              })`,
             }}
           >
             <img
@@ -87,9 +88,7 @@ export function Asset() {
               <CardTitle>Description</CardTitle>
             </CardHeader>
 
-            <CardContent>
-              {asset.description}
-            </CardContent>
+            <CardContent>{asset.description}</CardContent>
           </Card>
         )}
 
