@@ -1,14 +1,17 @@
 import { useParams, Link } from "react-router-dom";
 import {
+  Button,
   Card,
   CardContent,
   CardHeader,
   Checkbox,
+  CheckboxIcon,
   CopyAddress,
 } from "@cartridge/ui-next";
 import {
   LayoutContainer,
   LayoutContent,
+  LayoutFooter,
   LayoutHeader,
 } from "@/components/layout";
 import { useState } from "react";
@@ -40,6 +43,20 @@ export function Collection() {
       />
 
       <LayoutContent className="pb-4">
+        <div
+          className="flex items-center gap-2 text-sm cursor-pointer"
+          onClick={() => {
+            setSelected(selected.length ? [] : c.assets.map((a) => a.tokenId));
+          }}
+        >
+          <CheckboxIcon
+            variant={selected.length ? "minus-line" : "unchecked-line"}
+          />
+          <div className="text-muted-foreground font-semibold uppercase">
+            {selected.length ? `${selected.length} selected` : "Select All"}
+          </div>
+        </div>
+
         <div className="grid grid-cols-2 gap-2 place-items-center">
           {c.assets.map((a) => (
             <Link
@@ -91,6 +108,12 @@ export function Collection() {
           ))}
         </div>
       </LayoutContent>
+
+      {selected.length && (
+        <LayoutFooter>
+          <Button>Send ({selected.length})</Button>
+        </LayoutFooter>
+      )}
     </LayoutContainer>
   );
 }

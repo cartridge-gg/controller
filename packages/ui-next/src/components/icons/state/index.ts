@@ -1,4 +1,5 @@
 export * from "./bolt";
+export * from "./checkbox";
 export * from "./clock";
 export * from "./clone";
 export * from "./code";

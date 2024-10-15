@@ -103,3 +103,19 @@ export function LayoutContent({
     </div>
   );
 }
+
+export function LayoutFooter({
+  children,
+  className,
+}: PropsWithChildren & { className?: string }) {
+  return (
+    <div
+      className={cn(
+        "fixed bottom-0 left-0 right-0 flex flex-col px-6 py-4 gap-y-4 ",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+}
