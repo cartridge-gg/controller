@@ -77,7 +77,7 @@ export function Collection() {
             const isSelected = selected.includes(a.tokenId);
             return (
               <Link
-                className="w-full aspect-square"
+                className="w-full aspect-square group"
                 to={`/collection/${c.address}/${a.tokenId}`}
                 key={a.tokenId}
               >
@@ -87,7 +87,7 @@ export function Collection() {
                     isSelected ? "border-foreground" : "border-transparent",
                   )}
                 >
-                  <CardHeader className="flex flex-row gap-1">
+                  <CardHeader className="flex flex-row gap-1 group-hover:opacity-70">
                     <div className="truncate flex-1 uppercase text-sm text-bold">
                       {a.name}
                     </div>
@@ -116,7 +116,7 @@ export function Collection() {
                     }}
                   >
                     <img
-                      className="object-contain"
+                      className="object-contain transition group-hover:scale-110"
                       src={c.imageUrl ?? "/public/placeholder.svg"}
                     />
                   </CardContent>

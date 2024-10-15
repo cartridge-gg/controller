@@ -147,12 +147,12 @@ export function Inventory() {
         <div className="grid grid-cols-2 gap-2 place-items-center">
           {collections.map((c) => (
             <Link
-              className="w-full aspect-square"
+              className="w-full aspect-square group"
               to={`/collection/${c.address}`}
               key={c.address}
             >
               <Card className="w-full h-full">
-                <CardHeader className="flex flex-row gap-1">
+                <CardHeader className="flex flex-row gap-1 group-hover:opacity-70">
                   <div className="truncate flex-1 uppercase text-sm text-bold">
                     {c.name}
                   </div>
@@ -170,7 +170,7 @@ export function Inventory() {
                   }}
                 >
                   <img
-                    className="object-contain"
+                    className="object-contain transition group-hover:scale-110"
                     src={c.imageUrl ?? "/public/placeholder.svg"}
                   />
                 </CardContent>
