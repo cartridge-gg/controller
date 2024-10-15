@@ -28,6 +28,14 @@ This Cartridge Verfiable Random Function (VRF) is designed to provide cheap, ato
 - **Cost-effectiveness**: Potential cost savings through Paymaster integration.
 - **Security**: Cryptographically secure randomness that's fully verifiable onchain.
 
+## Deployments
+
+| Network | Class Hash                                                                                                                                                                    | Contract Address                                                                                                                                                                 |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Mainnet | [0x00be3edf412dd5982aa102524c0b8a0bcee584c5a627ed1db6a7c36922047257](https://voyager.online/class/0x00be3edf412dd5982aa102524c0b8a0bcee584c5a627ed1db6a7c36922047257)         | [0x051fea4450da9d6aee758bdeba88b2f665bcbf549d2c61421aa724e9ac0ced8f](https://voyager.online/contract/0x051fea4450da9d6aee758bdeba88b2f665bcbf549d2c61421aa724e9ac0ced8f) |
+| Sepolia | [0x00be3edf412dd5982aa102524c0b8a0bcee584c5a627ed1db6a7c36922047257](https://sepolia.voyager.online/class/0x00be3edf412dd5982aa102524c0b8a0bcee584c5a627ed1db6a7c36922047257) | [0x051fea4450da9d6aee758bdeba88b2f665bcbf549d2c61421aa724e9ac0ced8f](https://sepolia.voyager.online/contract/0x051fea4450da9d6aee758bdeba88b2f665bcbf549d2c61421aa724e9ac0ced8f) |
+
+
 For detailed implementation and usage, refer to the [GitHub repository](https://github.com/cartridge-gg/vrf).
 
 ## Using the VRF Provider
