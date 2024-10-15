@@ -62,7 +62,7 @@ export function Asset() {
             copyValue={addAddressPadding(collection.address)}
           />
         }
-        icon={asset.imageUrl}
+        icon={asset.imageUrl ?? "/public/placeholder.svg"}
       />
 
       <LayoutContent className="pb-4">

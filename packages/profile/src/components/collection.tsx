@@ -53,7 +53,7 @@ export function Collection() {
       <LayoutHeader
         title={c.name}
         description={<CopyAddress address={address!} size="sm" />}
-        icon={c.imageUrl}
+        icon={c.imageUrl ?? "/public/placeholder.svg"}
       />
 
       <LayoutContent className="pb-4">
@@ -102,9 +102,8 @@ export function Collection() {
                 <CardContent
                   className="bg-cover bg-center flex py-4 h-full place-content-center overflow-hidden"
                   style={{
-                    backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${
-                      c.imageUrl ?? "/public/placeholder.svg"
-                    })`,
+                    backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${c.imageUrl ?? "/public/placeholder.svg"
+                      })`,
                   }}
                 >
                   <img
@@ -118,7 +117,7 @@ export function Collection() {
         </div>
       </LayoutContent>
 
-      {selected.length && (
+      {!!selected.length && (
         <LayoutFooter>
           <Button>Send ({selected.length})</Button>
         </LayoutFooter>
