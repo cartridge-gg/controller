@@ -42,7 +42,7 @@ function ResponsiveWrapper({ children }: PropsWithChildren) {
     <>
       {/* for desktop */}
       <div className="hidden md:flex h-screen flex-col items-center justify-center overflow-x-hidden">
-        <div className="w-desktop h-desktop border border-border rounded-xl overflow-hidden flex flex-col">
+        <div className="w-desktop h-desktop border border-border rounded-xl overflow-hidden flex flex-col relative">
           {children}
         </div>
       </div>
@@ -122,7 +122,7 @@ export function LayoutFooter({
   return (
     <div
       className={cn(
-        "fixed bottom-0 left-0 right-0 flex flex-col px-6 py-4 gap-y-4 ",
+        "flex flex-col px-6 py-4 gap-y-4 w-full absolute left-0 bottom-0",
         className,
       )}
     >
