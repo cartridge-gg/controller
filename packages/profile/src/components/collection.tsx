@@ -52,7 +52,7 @@ export function Collection() {
     >
       <LayoutHeader
         title={c.name}
-        description={<CopyAddress address={address!} size="sm" />}
+        description={<CopyAddress address={c.address!} size="sm" />}
         icon={c.imageUrl ?? "/public/placeholder.svg"}
       />
 
@@ -120,7 +120,15 @@ export function Collection() {
 
       {!!selected.length && (
         <LayoutFooter>
-          <Button>Send ({selected.length})</Button>
+          <Button
+            onClick={() => {
+              navigate(
+                `/collection/${c.address}/send?tokenIds=${selected.join(",")}`,
+              );
+            }}
+          >
+            Send ({selected.length})
+          </Button>
         </LayoutFooter>
       )}
     </LayoutContainer>
