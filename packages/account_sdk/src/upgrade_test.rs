@@ -22,8 +22,6 @@ async fn test_controller_upgrade() {
         )
         .await;
 
-    runner.declare_controller(Version::LATEST).await;
-
     let hash = controller
         .provider()
         .get_class_hash_at(BlockId::Tag(BlockTag::Pending), controller.address())
@@ -32,6 +30,7 @@ async fn test_controller_upgrade() {
 
     assert_eq!(hash, CONTROLLERS[&Version::V1_0_4].hash);
 
+    runner.declare_controller(Version::LATEST).await;
     ensure_txn(
         controller
             .contract()

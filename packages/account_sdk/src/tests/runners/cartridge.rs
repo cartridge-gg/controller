@@ -181,9 +181,6 @@ impl CartridgeProxy {
     }
 
     async fn add_guardian_authorization(&self, session_token: &mut RawSessionToken, address: Felt) {
-        println!("\n\n----\n\n");
-        dbg!(&session_token.session_authorization);
-        println!("\n\n----\n\n");
         if session_token.session_authorization.len() == 2 {
             // Authorization by registered
             return;
