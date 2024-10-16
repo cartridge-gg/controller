@@ -50,11 +50,11 @@ const controller = new ControllerConnector({
   ],
   url:
     process.env.NEXT_PUBLIC_KEYCHAIN_DEPLOYMENT_URL ??
-    process.env.KEYCHAIN_FRAME_URL,
+    process.env.NEXT_PUBLIC_KEYCHAIN_FRAME_URL,
   profileUrl:
     process.env.NEXT_PUBLIC_PROFILE_DEPLOYMENT_URL ??
-    process.env.PROFILE_FRAME_URL,
-  indexerUrl: "https://api.cartridge.gg/x/ls-erc/torii/graphql",
+    process.env.NEXT_PUBLIC_PROFILE_FRAME_URL,
+  indexerUrl: process.env.NEXT_PUBLIC_INDEXER_URL,
   rpc: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
   paymaster: {
     caller: shortString.encodeShortString("ANY_CALLER"),
