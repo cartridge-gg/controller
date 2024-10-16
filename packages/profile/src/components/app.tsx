@@ -1,10 +1,7 @@
 import { Route, Routes, Navigate } from "react-router-dom";
-import { Inventory } from "@/components/inventory";
+import { Inventory, Collection, Asset, Send } from "@/components/inventory";
 import { Quest } from "@/components/quest";
 import { History } from "@/components/history";
-import { Collection } from "@/components/collection";
-import { Asset } from "./asset";
-import { Send } from "./send";
 
 export function App() {
   return (

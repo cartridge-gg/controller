@@ -1,5 +1,5 @@
 import { createContext, useCallback, useState } from "react";
-import { useQueryParams } from "./hooks";
+import { useQueryParams } from "@/hooks/provider";
 
 type ColorScheme = "dark" | "light" | "system";
 

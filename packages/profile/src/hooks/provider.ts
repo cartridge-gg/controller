@@ -1,7 +1,7 @@
 import { useContext } from "react";
-import { QueryParamsContext } from "./query";
-import { ConnectionContext } from "./connection";
-import { ColorSchemeProviderContext } from "./colorScheme";
+import { QueryParamsContext } from "@/components/provider/query";
+import { ConnectionContext } from "@/components/provider/connection";
+import { ColorSchemeProviderContext } from "@/components/provider/colorScheme";
 
 export function useQueryParams() {
   const context = useContext(QueryParamsContext);

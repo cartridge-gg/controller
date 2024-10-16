@@ -1,6 +1,6 @@
 import { AsyncMethodReturns, connectToParent } from "@cartridge/penpal";
 import { createContext, useState, ReactNode, useEffect } from "react";
-import { useQueryParams } from "./hooks";
+import { useQueryParams } from "@/hooks/provider";
 import { ERC20, ProfileContextTypeVariant } from "@cartridge/controller";
 import { normalize, STRK_CONTRACT_ADDRESS } from "@cartridge/utils";
 import { constants, RpcProvider } from "starknet";

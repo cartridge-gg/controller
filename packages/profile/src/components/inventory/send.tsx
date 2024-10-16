@@ -1,6 +1,10 @@
 import { ArrowIcon, Button, CopyAddress } from "@cartridge/ui-next";
-import { LayoutContainer, LayoutContent, LayoutHeader } from "./layout";
 import { Link, useParams, useSearchParams } from "react-router-dom";
+import {
+  LayoutContainer,
+  LayoutContent,
+  LayoutHeader,
+} from "@/components/layout";
 
 export function Send() {
   const { address } = useParams<{ address: string }>();
