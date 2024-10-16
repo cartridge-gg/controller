@@ -25,7 +25,6 @@ trait ICartridgeAccount<TContractState> {
 mod CartridgeAccount {
     use openzeppelin::upgrades::UpgradeableComponent::InternalTrait;
     use core::traits::TryInto;
-    use core::option::OptionTrait;
     use core::array::SpanTrait;
     use core::to_byte_array::FormatAsByteArray;
     use core::array::ArrayTrait;
@@ -147,6 +146,7 @@ mod CartridgeAccount {
 
     #[storage]
     struct Storage {
+        guardian_guid: Option<felt252>,
         #[substorage(v0)]
         multiple_owners: multiple_owners_component::Storage,
         #[substorage(v0)]
@@ -218,6 +218,11 @@ mod CartridgeAccount {
             },
             Owner::Account(account) => { self.external_owners._register_external_owner(account); },
         }
+        let guardian_guid = match guardian {
+            Option::Some(guardian) => Option::Some(guardian.into_guid()),
+            Option::None => Option::None,
+        };
+        self.guardian_guid.write(guardian_guid);
     }
 
     //
@@ -425,8 +430,21 @@ mod CartridgeAccount {
         fn is_valid_span_signature(
             self: @ContractState, hash: felt252, signer_signatures: Span<SignerSignature>
         ) -> bool {
-            assert(signer_signatures.len() <= 2, 'invalid-signature-length');
-            self.is_valid_owner_signature(hash, *signer_signatures.at(0))
+            if signer_signatures.is_empty() {
+                return false;
+            }
+            if !self.is_valid_owner_signature(hash, *signer_signatures.at(0)){
+                return false;
+            } 
+            match self.guardian_guid.read() {
+                Option::Some(_) => {
+                    if signer_signatures.len() != 2 {
+                        return false;
+                    }
+                    self.is_valid_guardian_signature(hash, *signer_signatures.at(1)) 
+                },
+                Option::None => { signer_signatures.len() == 1 }
+            }
         }
 
         #[must_use]
@@ -437,6 +455,23 @@ mod CartridgeAccount {
             if !self.is_owner(signer.into_guid()) {
                 return false;
             }
+            return signer_signature.is_valid_signature(hash);
+        }
+
+        #[must_use]
+        fn is_valid_guardian_signature(
+            self: @ContractState, hash: felt252, signer_signature: SignerSignature
+        ) -> bool {
+            match self.guardian_guid.read() {
+                Option::Some(guid) => {
+                    let signer = signer_signature.signer().storage_value();
+                    if signer.into_guid() != guid {
+                        return false;
+                    }
+                },
+                Option::None => { return false; }
+            };
+
             return signer_signature.is_valid_signature(hash);
         }
 
@@ -454,10 +489,20 @@ mod CartridgeAccount {
         fn assert_valid_span_signature(
             self: @ContractState, hash: felt252, signer_signatures: Array<SignerSignature>
         ) {
-            assert(signer_signatures.len() <= 2, 'invalid-signature-length');
+            assert(signer_signatures.len() >= 1, 'empty-signatures');
             assert(
                 self.is_valid_owner_signature(hash, *signer_signatures.at(0)), 'invalid-owner-sig'
             );
+            match self.guardian_guid.read() {
+                Option::Some(_) => {
+                    assert(signer_signatures.len() == 2, 'no-guardian-sig');
+                    assert(
+                        self.is_valid_guardian_signature(hash, *signer_signatures.at(1)),
+                        'invalid-guardian-sig'
+                    );
+                },
+                Option::None => { assert(signer_signatures.len() == 1, 'unexpected-guardian-sig'); }
+            };
         }
 
         fn assert_valid_calls_and_signature(
