@@ -5,12 +5,12 @@ use alexandria_merkle_tree::merkle_tree::{
 };
 use argent::session::session_hash::MerkleLeafHash;
 
-// Based on https://github.com/argentlabs/starknet-plugin-account/blob/3c14770c3f7734ef208536d91bbd76af56dc2043/contracts/plugins/SessionKey.cairo
+// Based on
+// https://github.com/argentlabs/starknet-plugin-account/blob/3c14770c3f7734ef208536d91bbd76af56dc2043/contracts/plugins/SessionKey.cairo
 #[starknet::component]
 mod session_component {
     use core::poseidon::hades_permutation;
     use starknet::{account::Call, info::get_block_timestamp, get_contract_address, storage::Map};
-    
     use argent::session::interface::{Session, SessionToken};
     use argent::session::session_hash::{StructHashSession, OffChainMessageHashSessionRev1};
     use argent::signer::signer_signature::{
@@ -20,7 +20,7 @@ mod session_component {
     use controller::asserts::assert_no_self_call;
     use controller::session::interface::{ISession, ISessionCallback};
     use controller::session::session::check_policy;
-    use controller::account::IAssertOwner;
+    use controller::account::{IAssertOwner, IIsGuardian};
 
     const SESSION_MAGIC: felt252 = 'session-token';
     const AUTHORIZATION_BY_REGISTERED: felt252 = 'authorization-by-registered';
@@ -65,6 +65,7 @@ mod session_component {
         +HasComponent<TContractState>,
         +ISessionCallback<TContractState>,
         +IAssertOwner<TContractState>,
+        +IIsGuardian<TContractState>,
     > of ISession<ComponentState<TContractState>> {
         fn revoke_session(ref self: ComponentState<TContractState>, session_hash: felt252) {
             self.get_contract().assert_owner();
@@ -77,14 +78,15 @@ mod session_component {
         fn register_session(
             ref self: ComponentState<TContractState>, session: Session, guid_or_address: felt252,
         ) {
-            self.get_contract().assert_owner();
+            let contract = self.get_contract();
+            contract.assert_owner();
 
             let now = get_block_timestamp();
             assert(session.expires_at > now, 'session/expired');
             let session_hash = session.get_message_hash_rev_1();
             assert(!self.revoked_session.read(session_hash), 'session/already-revoked');
 
-            let guardian_guid = 0;
+            let guardian_guid = contract.get_guardian_guid().unwrap_or(0);
             assert(
                 !self.valid_session_cache.read((guid_or_address, guardian_guid, session_hash)),
                 'session/already-registered'
@@ -101,7 +103,10 @@ mod session_component {
 
     #[generate_trait]
     impl InternalImpl<
-        TContractState, +HasComponent<TContractState>, +ISessionCallback<TContractState>,
+        TContractState,
+        +HasComponent<TContractState>,
+        +ISessionCallback<TContractState>,
+        +IIsGuardian<TContractState>,
     > of InternalTrait<TContractState> {
         fn validate_session_serialized(
             ref self: ComponentState<TContractState>,
@@ -151,11 +156,10 @@ mod session_component {
 
             assert(!self.revoked_session.read(session_hash), 'session/already-revoked');
 
-            let guardian_guid = 0;
-
             if (signature.session_authorization.len() == 2
                 && *signature.session_authorization.at(0) == AUTHORIZATION_BY_REGISTERED) {
                 let owner_guid = *signature.session_authorization.at(1);
+                let guardian_guid = contract.get_guardian_guid().unwrap_or(0);
                 assert(signature.cache_authorization, 'session/cache-missing');
                 assert(
                     self.valid_session_cache.read((owner_guid, guardian_guid, session_hash)),
@@ -165,6 +169,10 @@ mod session_component {
             } else {
                 let parsed = contract.parse_authorization(signature.session_authorization);
                 let owner_guid = parsed.at(0).clone().signer().into_guid();
+                let guardian_guid = match parsed.get(1) {
+                    Option::Some(guardian) => guardian.unbox().clone().signer().into_guid(),
+                    Option::None => 0
+                };
                 // check validity of token
                 if !signature.cache_authorization
                     || !self.valid_session_cache.read((owner_guid, guardian_guid, session_hash)) {
@@ -176,25 +184,28 @@ mod session_component {
                     }
                 } else {
                     assert(contract.is_valid_authorizer(owner_guid), 'session/invalid-authorizer');
+                    assert(contract.is_valid_guardian(guardian_guid), 'session/invalid-guardian-auth');
                 }
-            }
+            };
 
             let (message_hash, _, _) = hades_permutation(transaction_hash, session_hash, 2);
 
             let session_guid_from_sig = signature.session_signature.signer().into_guid();
-            
+
             assert(
                 signature.session.session_key_guid == session_guid_from_sig,
                 'session/session-key-mismatch'
             );
-            
+
             assert(
                 signature.session_signature.is_valid_signature(message_hash),
                 'session/invalid-session-sig'
             );
 
-            // let guardian_guid_from_sig = signature.guardian_signature.signer().into_guid();
-            // TODO: Validate guardian is valid
+            assert(
+                contract.is_valid_guardian(signature.guardian_signature.signer().into_guid()),
+                'session/invalid-guardian'
+            );
             assert(
                 signature.guardian_signature.is_valid_signature(message_hash),
                 'session/invalid-guardian-sig'
