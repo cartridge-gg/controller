@@ -99,6 +99,16 @@ mod session_component {
         ) -> bool {
             self.revoked_session.read(session_hash)
         }
+
+        fn is_session_registered(
+            self: @ComponentState<TContractState>, session_hash: felt252, guid_or_address: felt252,
+        ) -> bool {
+            if self.is_session_revoked(session_hash) {
+                return false;
+            }
+            let guardian_guid = self.get_contract().get_guardian_guid().unwrap_or(0);
+            self.valid_session_cache.read((guid_or_address, guardian_guid, session_hash))
+        }
     }
 
     #[generate_trait]
@@ -159,13 +169,13 @@ mod session_component {
             if (signature.session_authorization.len() == 2
                 && *signature.session_authorization.at(0) == AUTHORIZATION_BY_REGISTERED) {
                 let owner_guid = *signature.session_authorization.at(1);
+                assert(contract.is_valid_authorizer(owner_guid), 'session/invalid-authorizer');
                 let guardian_guid = contract.get_guardian_guid().unwrap_or(0);
                 assert(signature.cache_authorization, 'session/cache-missing');
                 assert(
                     self.valid_session_cache.read((owner_guid, guardian_guid, session_hash)),
                     'session/not-registered'
                 );
-                assert(contract.is_valid_authorizer(owner_guid), 'session/invalid-authorizer');
             } else {
                 let parsed = contract.parse_authorization(signature.session_authorization);
                 let owner_guid = parsed.at(0).clone().signer().into_guid();
@@ -184,7 +194,9 @@ mod session_component {
                     }
                 } else {
                     assert(contract.is_valid_authorizer(owner_guid), 'session/invalid-authorizer');
-                    assert(contract.is_valid_guardian(guardian_guid), 'session/invalid-guardian-auth');
+                    assert(
+                        contract.is_valid_guardian(guardian_guid), 'session/invalid-guardian-auth'
+                    );
                 }
             };
 
