@@ -32,7 +32,7 @@ export function RegisterSession() {
     const pubkey = ec.starkCurve.getStarkKey(privkey);
     setSessionKey(privkey);
 
-    const registerSessionUrl = `${process.env.KEYCHAIN_FRAME_URL}/session?public_key=${pubkey}&redirect_uri=${redirectUri}&redirect_query_name=${redirectQueryName}&policies=${encodedPolicies}&rpc_url=${process.env.NEXT_PUBLIC_RPC_SEPOLIA}`;
+    const registerSessionUrl = `${process.env.NEXT_PUBLIC_KEYCHAIN_FRAME_URL}/session?public_key=${pubkey}&redirect_uri=${redirectUri}&redirect_query_name=${redirectQueryName}&policies=${encodedPolicies}&rpc_url=${process.env.NEXT_PUBLIC_RPC_SEPOLIA}`;
     window.open(registerSessionUrl, "_blank", "noopener,noreferrer");
   }, []);
 
@@ -42,7 +42,7 @@ export function RegisterSession() {
     }
 
     const pubkey = ec.starkCurve.getStarkKey(sessionKey);
-    const registerSessionUrl = `${process.env.KEYCHAIN_FRAME_URL}/session?public_key=${pubkey}&redirect_uri=${redirectUri}&redirect_query_name=${redirectQueryName}&policies=${encodedPolicies}&rpc_url=${process.env.NEXT_PUBLIC_RPC_SEPOLIA}`;
+    const registerSessionUrl = `${process.env.NEXT_PUBLIC_KEYCHAIN_FRAME_URL}/session?public_key=${pubkey}&redirect_uri=${redirectUri}&redirect_query_name=${redirectQueryName}&policies=${encodedPolicies}&rpc_url=${process.env.NEXT_PUBLIC_RPC_SEPOLIA}`;
     window.open(registerSessionUrl, "_blank", "noopener,noreferrer");
   }, [sessionKey]);
 
