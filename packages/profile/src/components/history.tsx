@@ -6,7 +6,7 @@ import {
   LayoutHeader,
 } from "@/components/layout";
 import { Navigation } from "@/components/navigation";
-import { useConnection } from "@/hooks/provider";
+import { useConnection } from "@/hooks/context";
 
 export function History() {
   const { username, address, indexerUrl } = useConnection();

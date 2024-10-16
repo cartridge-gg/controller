@@ -1,6 +1,6 @@
 import { Button, cn, TimesIcon, Network } from "@cartridge/ui-next";
 import { PropsWithChildren, useCallback } from "react";
-import { useConnection } from "@/hooks/provider";
+import { useConnection } from "@/hooks/context";
 
 export function LayoutContainer({
   children,

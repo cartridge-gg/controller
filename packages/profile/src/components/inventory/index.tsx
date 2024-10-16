@@ -8,7 +8,7 @@ import {
   LayoutContent,
   LayoutHeader,
 } from "@/components/layout";
-import { useConnection } from "@/hooks/provider";
+import { useConnection } from "@/hooks/context";
 // import { Collections } from "./collections";
 import { Tokens } from "./tokens";
 // import { Navigation } from "@/components/navigation";

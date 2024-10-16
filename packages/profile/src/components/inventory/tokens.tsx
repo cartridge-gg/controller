@@ -7,7 +7,7 @@ import {
 } from "@cartridge/ui-next";
 import { ERC20, ERC20Info } from "@cartridge/utils";
 import { useEffect, useState } from "react";
-import { useConnection } from "@/hooks/provider";
+import { useConnection } from "@/hooks/context";
 
 export function Tokens() {
   const { address, provider, erc20: erc20Params } = useConnection();
