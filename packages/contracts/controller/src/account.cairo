@@ -433,18 +433,11 @@ mod CartridgeAccount {
             if signer_signatures.is_empty() {
                 return false;
             }
-            if !self.is_valid_owner_signature(hash, *signer_signatures.at(0)){
+            if signer_signatures.len() > 2 {
                 return false;
-            } 
-            match self.guardian_guid.read() {
-                Option::Some(_) => {
-                    if signer_signatures.len() != 2 {
-                        return false;
-                    }
-                    self.is_valid_guardian_signature(hash, *signer_signatures.at(1)) 
-                },
-                Option::None => { signer_signatures.len() == 1 }
             }
+            self.is_valid_owner_signature(hash, *signer_signatures.at(0)) &&
+                self.is_valid_guardian_signature(hash, signer_signatures.get(1))
         }
 
         #[must_use]
@@ -460,19 +453,22 @@ mod CartridgeAccount {
 
         #[must_use]
         fn is_valid_guardian_signature(
-            self: @ContractState, hash: felt252, signer_signature: SignerSignature
+            self: @ContractState, hash: felt252, guardian_signature: Option<Box<@SignerSignature>>
         ) -> bool {
-            match self.guardian_guid.read() {
-                Option::Some(guid) => {
-                    let signer = signer_signature.signer().storage_value();
-                    if signer.into_guid() != guid {
-                        return false;
-                    }
+            match guardian_signature {
+                Option::Some(signature) => {
+                    let signer = (*signature.unbox()).signer().storage_value();
+                    (*signature.unbox()).is_valid_signature(hash)
+                        && match self.guardian_guid.read() {
+                            Option::Some(guid) => signer.into_guid() == guid,
+                            Option::None => true
+                        }
                 },
-                Option::None => { return false; }
-            };
-
-            return signer_signature.is_valid_signature(hash);
+                Option::None => match self.guardian_guid.read() {
+                    Option::Some(_) => false,
+                    Option::None => true
+                }
+            }
         }
 
         #[inline(always)]
@@ -495,14 +491,15 @@ mod CartridgeAccount {
             );
             match self.guardian_guid.read() {
                 Option::Some(_) => {
-                    assert(signer_signatures.len() == 2, 'no-guardian-sig');
-                    assert(
-                        self.is_valid_guardian_signature(hash, *signer_signatures.at(1)),
-                        'invalid-guardian-sig'
-                    );
+                    assert(signer_signatures.len() >= 2, 'no-guardian-sig');
+                    assert(signer_signatures.len() == 2, 'too-many-signatures');
                 },
-                Option::None => { assert(signer_signatures.len() == 1, 'unexpected-guardian-sig'); }
+                Option::None => { assert(signer_signatures.len() <= 2, 'too-many-signatures'); }
             };
+            assert(
+                self.is_valid_guardian_signature(hash, signer_signatures.get(1)),
+                'invalid-guradian-sig'
+            );
         }
 
         fn assert_valid_calls_and_signature(
