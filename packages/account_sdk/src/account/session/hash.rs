@@ -5,15 +5,14 @@ use starknet::core::types::Felt;
 use starknet::core::utils::NonAsciiNameError;
 use starknet::macros::selector;
 use starknet_crypto::poseidon_hash_many;
-use starknet_types_core::hash::Poseidon;
 
 use crate::abigen::controller::Signer as AbigenSigner;
 
-use crate::hash::MessageHashRev1;
 use crate::signers::{SignError, SignerTrait};
 
 use super::merkle::MerkleTree;
 use super::raw_session::RawSession;
+use super::raw_session::SessionHash;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ProvedPolicy {
@@ -81,10 +80,7 @@ impl Session {
         chain_id: Felt,
         address: Felt,
     ) -> Result<Felt, NonAsciiNameError> {
-        let token_session_hash = self.raw().get_message_hash_rev_1(chain_id, address);
-        let mut msg_hash = [tx_hash, token_session_hash, Felt::TWO];
-        Poseidon::hades_permutation(&mut msg_hash);
-        Ok(msg_hash[0])
+        self.raw().get_session_hash(chain_id, address, tx_hash)
     }
 
     pub fn single_proof(&self, policy: &Policy) -> Option<Vec<Felt>> {

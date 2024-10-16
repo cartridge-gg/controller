@@ -1,7 +1,9 @@
 use cainome::cairo_serde::CairoSerde;
 use starknet::core::types::Felt;
+use starknet::core::utils::NonAsciiNameError;
 use starknet::macros::{selector, short_string};
 use starknet_crypto::poseidon_hash_many;
+use starknet_types_core::hash::Poseidon;
 
 use crate::{
     abigen::controller::SignerSignature,
@@ -40,6 +42,29 @@ impl MessageHashRev1 for RawSession {
             contract_address,
             self.get_struct_hash_rev_1(),
         ])
+    }
+}
+
+pub trait SessionHash {
+    fn get_session_hash(
+        &self,
+        chain_id: Felt,
+        address: Felt,
+        tx_hash: Felt,
+    ) -> Result<Felt, NonAsciiNameError>;
+}
+
+impl SessionHash for RawSession {
+    fn get_session_hash(
+        &self,
+        chain_id: Felt,
+        address: Felt,
+        tx_hash: Felt,
+    ) -> Result<Felt, NonAsciiNameError> {
+        let token_session_hash = self.get_message_hash_rev_1(chain_id, address);
+        let mut msg_hash = [tx_hash, token_session_hash, Felt::TWO];
+        Poseidon::hades_permutation(&mut msg_hash);
+        Ok(msg_hash[0])
     }
 }
 
