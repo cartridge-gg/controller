@@ -1,15 +1,17 @@
-import { Connector } from "@starknet-react/core";
-import { Policy } from "@cartridge/controller";
-import { icon } from "./icon";
-import { ec, stark } from "starknet";
-import SessionAccount from "@cartridge/controller/dist/session";
-import { KEYCHAIN_URL } from "./constants";
 import {
   cloudStorage,
   miniApp,
   openLink,
   retrieveLaunchParams,
 } from "@telegram-apps/sdk";
+import { Connector } from "@starknet-react/core";
+import { ec, stark } from "starknet";
+
+import { Policy } from "@cartridge/controller";
+import SessionAccount from "@cartridge/controller/session";
+
+import { icon } from "./icon";
+import { KEYCHAIN_URL } from "./constants";
 
 interface SessionRegistration {
   username: string;

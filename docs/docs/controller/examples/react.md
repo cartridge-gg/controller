@@ -99,7 +99,7 @@ Use the `useConnect`, `useDisconnect`, and `useAccount` hooks to manage wallet c
 
 ```typescript
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
-import { ControllerConnector } from "@cartridge/connector";
+import ControllerConnector from "@cartridge/connector/controller";
 import { useEffect, useState } from "react";
 
 export function ConnectWallet() {

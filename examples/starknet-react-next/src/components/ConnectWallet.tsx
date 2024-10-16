@@ -1,7 +1,7 @@
 "use client";
 
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
-import { ControllerConnector } from "@cartridge/connector";
+import ControllerConnector from "@cartridge/connector/controller";
 import React, { useEffect, useState } from "react";
 import { Button } from "@cartridge/ui-next";
 

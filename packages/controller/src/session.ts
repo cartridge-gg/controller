@@ -13,6 +13,10 @@ import {
 import { SessionSigner } from "./signer";
 import { normalizeCalls } from "./utils";
 
+export * from "./errors";
+export * from "./types";
+export { defaultPresets } from "./presets";
+
 export default class SessionAccount extends Account {
   public controller: CartridgeSessionAccount;
 

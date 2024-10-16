@@ -1,5 +1,3 @@
-import ControllerConnector from "./controller";
-import SessionConnector from "./session";
-import TelegramConnector from "./telegram";
-
-export { ControllerConnector, SessionConnector, TelegramConnector };
+export { default as ControllerConnector } from "./controller";
+export { default as SessionConnector } from "./session";
+export { default as TelegramConnector } from "./telegram";

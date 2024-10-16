@@ -1,9 +1,3 @@
-export * from "./errors";
-export * from "./types";
-export { defaultPresets } from "./presets";
-export * from "./verified";
-export * from "./session";
-
 import { AccountInterface, addAddressPadding } from "starknet";
 import { AsyncMethodReturns } from "@cartridge/penpal";
 
@@ -23,6 +17,10 @@ import {
 import { KeychainIFrame, ProfileIFrame } from "./iframe";
 import { NotReadyToConnect, ProfileNotReady } from "./errors";
 import { RPC_SEPOLIA } from "./constants";
+
+export * from "./errors";
+export * from "./types";
+export { defaultPresets } from "./presets";
 
 export default class Controller {
   private policies: Policy[];

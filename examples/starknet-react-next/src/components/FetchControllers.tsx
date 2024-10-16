@@ -2,7 +2,7 @@
 
 import { useAccount } from "@starknet-react/core";
 import { useCallback, useState } from "react";
-import { ControllerConnector } from "@cartridge/connector";
+import ControllerConnector from "@cartridge/connector/controller";
 import { ControllerAccounts } from "@cartridge/controller";
 import { Button } from "@cartridge/ui-next";
 
