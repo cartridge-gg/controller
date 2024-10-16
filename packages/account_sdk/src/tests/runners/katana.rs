@@ -55,6 +55,7 @@ pub struct KatanaRunner {
     pub rpc_url: Url,
     rpc_client: Arc<JsonRpcClient<HttpTransport>>,
     proxy_handle: JoinHandle<()>,
+    guardian: Signer,
 }
 
 impl KatanaRunner {
@@ -74,8 +75,14 @@ impl KatanaRunner {
         let proxy_url = Url::parse(&format!("http://0.0.0.0:{}/", find_free_port())).unwrap();
         let client = CartridgeJsonRpcProvider::new(proxy_url.clone());
 
+        let guardian = Signer::new_starknet_random();
         let rpc_client = Arc::new(JsonRpcClient::new(HttpTransport::new(rpc_url.clone())));
-        let proxy = CartridgeProxy::new(rpc_url, proxy_url.clone(), config.chain_id);
+        let proxy = CartridgeProxy::new(
+            rpc_url,
+            proxy_url.clone(),
+            config.chain_id,
+            guardian.clone(),
+        );
         let proxy_handle = tokio::spawn(async move {
             proxy.run().await;
         });
@@ -87,6 +94,7 @@ impl KatanaRunner {
             rpc_url: proxy_url,
             rpc_client,
             proxy_handle,
+            guardian,
         }
     }
 
@@ -201,13 +209,12 @@ impl KatanaRunner {
         &self,
         username: String,
         signer: Signer,
-        guardian: Signer,
         version: Version,
     ) -> Controller {
         let mut constructor_calldata =
             controller::Owner::cairo_serialize(&controller::Owner::Signer(signer.signer()));
         constructor_calldata.extend(Option::<AbigenSigner>::cairo_serialize(&Some(
-            guardian.signer(),
+            self.guardian.signer(),
         )));
 
         let DeployResult {
