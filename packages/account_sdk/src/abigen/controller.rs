@@ -2118,6 +2118,20 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
+    pub fn get_guardian_guid(
+        &self,
+    ) -> cainome::cairo_serde::call::FCall<A::Provider, Option<Signer>> {
+        use cainome::cairo_serde::CairoSerde;
+        let mut __calldata = vec![];
+        let __call = starknet::core::types::FunctionCall {
+            contract_address: self.address,
+            entry_point_selector: starknet::macros::selector!("get_guardian_guid"),
+            calldata: __calldata,
+        };
+        cainome::cairo_serde::call::FCall::new(__call, self.provider())
+    }
+    #[allow(clippy::ptr_arg)]
+    #[allow(clippy::too_many_arguments)]
     pub fn get_outside_execution_message_hash_rev_0(
         &self,
         outside_execution: &OutsideExecution,
@@ -2198,6 +2212,22 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
             entry_point_selector: starknet::macros::selector!("is_session_revoked"),
+            calldata: __calldata,
+        };
+        cainome::cairo_serde::call::FCall::new(__call, self.provider())
+    }
+    #[allow(clippy::ptr_arg)]
+    #[allow(clippy::too_many_arguments)]
+    pub fn is_valid_guardian(
+        &self,
+        guardian_guid: &starknet::core::types::Felt,
+    ) -> cainome::cairo_serde::call::FCall<A::Provider, bool> {
+        use cainome::cairo_serde::CairoSerde;
+        let mut __calldata = vec![];
+        __calldata.extend(starknet::core::types::Felt::cairo_serialize(guardian_guid));
+        let __call = starknet::core::types::FunctionCall {
+            contract_address: self.address,
+            entry_point_selector: starknet::macros::selector!("is_valid_guardian"),
             calldata: __calldata,
         };
         cainome::cairo_serde::call::FCall::new(__call, self.provider())
@@ -2764,6 +2794,18 @@ impl<P: starknet::providers::Provider + Sync> ControllerReader<P> {
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
+    pub fn get_guardian_guid(&self) -> cainome::cairo_serde::call::FCall<P, Option<Signer>> {
+        use cainome::cairo_serde::CairoSerde;
+        let mut __calldata = vec![];
+        let __call = starknet::core::types::FunctionCall {
+            contract_address: self.address,
+            entry_point_selector: starknet::macros::selector!("get_guardian_guid"),
+            calldata: __calldata,
+        };
+        cainome::cairo_serde::call::FCall::new(__call, self.provider())
+    }
+    #[allow(clippy::ptr_arg)]
+    #[allow(clippy::too_many_arguments)]
     pub fn get_outside_execution_message_hash_rev_0(
         &self,
         outside_execution: &OutsideExecution,
@@ -2844,6 +2886,22 @@ impl<P: starknet::providers::Provider + Sync> ControllerReader<P> {
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
             entry_point_selector: starknet::macros::selector!("is_session_revoked"),
+            calldata: __calldata,
+        };
+        cainome::cairo_serde::call::FCall::new(__call, self.provider())
+    }
+    #[allow(clippy::ptr_arg)]
+    #[allow(clippy::too_many_arguments)]
+    pub fn is_valid_guardian(
+        &self,
+        guardian_guid: &starknet::core::types::Felt,
+    ) -> cainome::cairo_serde::call::FCall<P, bool> {
+        use cainome::cairo_serde::CairoSerde;
+        let mut __calldata = vec![];
+        __calldata.extend(starknet::core::types::Felt::cairo_serialize(guardian_guid));
+        let __call = starknet::core::types::FunctionCall {
+            contract_address: self.address,
+            entry_point_selector: starknet::macros::selector!("is_valid_guardian"),
             calldata: __calldata,
         };
         cainome::cairo_serde::call::FCall::new(__call, self.provider())

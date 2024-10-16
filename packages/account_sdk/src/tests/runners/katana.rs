@@ -239,12 +239,9 @@ impl KatanaRunner {
         external_owner: ContractAddress,
         version: Version,
     ) -> ContractAddress {
-        let guardian = SigningKey::from_random();
         let mut constructor_calldata =
             controller::Owner::cairo_serialize(&controller::Owner::Account(external_owner));
-        constructor_calldata.extend(Option::<AbigenSigner>::cairo_serialize(&Some(
-            guardian.signer(),
-        )));
+        constructor_calldata.extend(Option::<AbigenSigner>::cairo_serialize(&None));
 
         let DeployResult {
             deployed_address, ..

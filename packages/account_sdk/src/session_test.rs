@@ -4,7 +4,6 @@ use starknet::{
     core::types::{BlockId, BlockTag},
     macros::{felt, selector},
     providers::Provider,
-    signers::SigningKey,
 };
 use starknet_crypto::Felt;
 
@@ -197,6 +196,7 @@ async fn test_verify_execute_session_registered() {
 #[tokio::test]
 async fn test_create_and_use_registered_session() {
     let owner_signer = Signer::new_starknet_random();
+    let session_signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let mut controller = runner
         .deploy_controller("username".to_owned(), owner_signer.clone(), Version::LATEST)
@@ -208,16 +208,13 @@ async fn test_create_and_use_registered_session() {
         Policy::new(*FEE_TOKEN_ADDRESS, selector!("approve")),
     ];
 
-    // Generate a new key pair for the session
-    let session_key = SigningKey::from_random();
-    let session_signer = Signer::Starknet(session_key.clone());
-    let public_key = session_key.verifying_key().scalar();
-
     // Register the session
     let expires_at = u64::MAX;
     let max_fee = Felt::from(277600000000000_u128);
+
+    let session = Session::new(policies, expires_at, &session_signer.signer()).unwrap();
     let txn = controller
-        .register_session(policies.clone(), expires_at, public_key, max_fee)
+        .register_session(&session, max_fee)
         .await
         .expect("Failed to register session");
 
@@ -229,16 +226,23 @@ async fn test_create_and_use_registered_session() {
     // Create a SessionAccount using new_from_registered
     let session_account = SessionAccount::new_as_registered(
         runner.client().clone(),
-        session_signer.clone(),
+        session_signer,
         controller.address(),
-        controller.chain_id(),
+        runner.client().chain_id().await.unwrap(),
         owner_signer.signer().guid(),
-        Session::new(policies, expires_at, &session_signer.signer()).unwrap(),
+        session,
     );
 
     // Use the session account to perform a transfer
     let recipient = ContractAddress(felt!("0x18301129"));
     let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &session_account);
+
+    contract_erc20
+        .balanceOf(&recipient)
+        .block_id(BlockId::Tag(BlockTag::Latest))
+        .call()
+        .await
+        .expect("failed to call contract");
 
     let tx = contract_erc20.transfer(
         &recipient,
