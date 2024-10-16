@@ -1,7 +1,7 @@
 use anyhow::Error;
 use cainome::cairo_serde::CairoSerde;
 use hyper::service::{make_service_fn, service_fn};
-use hyper::{Body, Client, Request, Response, Server, StatusCode};
+use hyper::{http::request::Parts, Body, Client, Request, Response, Server, StatusCode};
 use serde_json::{json, Value};
 use starknet::accounts::single_owner::SignError;
 use starknet::accounts::{Account, AccountError, ExecutionEncoding};
@@ -21,6 +21,7 @@ use url::Url;
 
 use crate::abigen::controller::{OutsideExecution, SignerSignature};
 use crate::account::session::raw_session::{RawSessionToken, SessionHash};
+use crate::hash::MessageHashRev1;
 use crate::provider::OutsideExecutionParams;
 use crate::signers::{HashSigner, Signer};
 
@@ -80,16 +81,18 @@ impl CartridgeProxy {
     }
 
     async fn handle_request(&self, req: Request<Body>) -> Result<Response<Body>, hyper::Error> {
-        let (parts, body) = req.into_parts();
+        let (mut parts, body) = req.into_parts();
         let body_bytes = hyper::body::to_bytes(body).await?;
         let mut body: Value = serde_json::from_slice(&body_bytes).unwrap_or(json!({}));
 
         if let Some(method) = body.get("method") {
             if method == "cartridge_addExecuteOutsideTransaction" {
                 return self.handle_add_execute_outside_transaction(&body).await;
-            }
-            if method == "starknet_addInvokeTransaction" {
-                self.handle_add_invoke_transaction(&mut body).await;
+            } else if method == "starknet_addInvokeTransaction" {
+                self.handle_add_invoke_transaction(&mut parts, &mut body)
+                    .await;
+            } else if method == "starknet_estimateFee" {
+                self.handle_estimate_fee(&mut parts, &mut body).await;
             }
         }
 
@@ -101,19 +104,15 @@ impl CartridgeProxy {
             .body(body)
             .unwrap();
 
-        dbg!(proxy_req.headers());
-
         *proxy_req.headers_mut() = parts.headers;
-        proxy_req.headers_mut().remove("content-length");
-
-        dbg!(proxy_req.headers());
 
         self.client.request(proxy_req).await
     }
 
-    async fn handle_add_invoke_transaction(&self, body: &mut Value) {
+    async fn handle_add_invoke_transaction(&self, parts: &mut Parts, body: &mut Value) {
         let mut txs: Vec<BroadcastedTransaction> =
             serde_json::from_value(body["params"].clone()).unwrap();
+
         for tx in &mut txs {
             if let BroadcastedTransaction::Invoke(BroadcastedInvokeTransaction::V1(ref mut tx)) = tx
             {
@@ -124,6 +123,27 @@ impl CartridgeProxy {
             }
         }
         body["params"] = serde_json::to_value(txs).unwrap();
+        parts.headers.remove("content-length");
+    }
+
+    async fn handle_estimate_fee(&self, parts: &mut Parts, body: &mut Value) {
+        let mut txs: Vec<BroadcastedTransaction> =
+            serde_json::from_value(body["params"][0].clone()).unwrap();
+
+        for tx in &mut txs {
+            if let BroadcastedTransaction::Invoke(BroadcastedInvokeTransaction::V1(ref mut tx)) = tx
+            {
+                if tx.signature.is_empty() {
+                    continue;
+                }
+                let tx_hash = self.transaction_hash(tx);
+                tx.signature = self
+                    .add_guardian_signature(tx.sender_address, tx_hash, &tx.signature)
+                    .await;
+            }
+        }
+        body["params"][0] = serde_json::to_value(txs).unwrap();
+        parts.headers.remove("content-length");
     }
 
     async fn add_guardian_signature(
@@ -230,6 +250,11 @@ impl CartridgeProxy {
         InvokeTransactionResult,
         AccountError<SignError<starknet::signers::local_wallet::SignError>>,
     > {
+        let outside_execution_hash =
+            outside_execution.get_message_hash_rev_1(self.chain_id, contract_address);
+        let signature = self
+            .add_guardian_signature(contract_address, outside_execution_hash, &signature)
+            .await;
         let mut calldata = <OutsideExecution as CairoSerde>::cairo_serialize(&outside_execution);
         calldata.extend(<Vec<Felt> as CairoSerde>::cairo_serialize(&signature));
 
