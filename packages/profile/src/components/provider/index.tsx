@@ -1,7 +1,6 @@
 import { PropsWithChildren } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ColorSchemeProvider } from "./colorScheme";
-import { QueryParamsProvider } from "./query";
 import { ConnectionProvider } from "./connection";
 import { BrowserRouter } from "react-router-dom";
 
@@ -9,14 +8,12 @@ export function Provider({ children }: PropsWithChildren) {
   const queryClient = new QueryClient();
 
   return (
-    <QueryParamsProvider>
+    <BrowserRouter>
       <ColorSchemeProvider defaultScheme="system">
         <QueryClientProvider client={queryClient}>
-          <BrowserRouter>
-            <ConnectionProvider>{children}</ConnectionProvider>
-          </BrowserRouter>
+          <ConnectionProvider>{children}</ConnectionProvider>
         </QueryClientProvider>
       </ColorSchemeProvider>
-    </QueryParamsProvider>
+    </BrowserRouter>
   );
 }

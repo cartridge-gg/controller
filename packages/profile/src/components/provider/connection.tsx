@@ -1,11 +1,10 @@
 import { AsyncMethodReturns, connectToParent } from "@cartridge/penpal";
 import { createContext, useState, ReactNode, useEffect } from "react";
-import { useQueryParams } from "@/hooks/provider";
 import { ERC20, ProfileContextTypeVariant } from "@cartridge/controller";
 import { normalize, STRK_CONTRACT_ADDRESS } from "@cartridge/utils";
 import { constants, RpcProvider } from "starknet";
 import { ETH_CONTRACT_ADDRESS } from "@cartridge/utils";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 type ConnectionContextType = {
   parent: ParentMethods;
@@ -35,7 +34,7 @@ export const ConnectionContext =
 export function ConnectionProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ConnectionContextType>(initialState);
 
-  const searchParams = useQueryParams();
+  const [searchParams] = useSearchParams();
   useEffect(() => {
     const erc20 = (
       JSON.parse(
