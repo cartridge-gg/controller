@@ -15,9 +15,8 @@ use super::ensure_txn;
 
 pub async fn test_verify_execute(signer: Signer) {
     let runner = KatanaRunner::load();
-    let guardian = Signer::new_starknet_random();
     let controller = runner
-        .deploy_controller_with_guardian("username".to_owned(), signer, guardian, Version::LATEST)
+        .deploy_controller_with_guardian("username".to_owned(), signer, Version::LATEST)
         .await;
 
     let new_account = ContractAddress(felt!("0x18301129"));
