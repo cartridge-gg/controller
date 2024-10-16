@@ -12,6 +12,8 @@ pnpm wasm-pack build --target bundler --out-dir ./pkg-session --release --featur
 # This removes `"type": "module"` field from the package.json files
 for dir in pkg-controller pkg-session; do
     mv $dir/package.json $dir/temp.json
-    jq -r 'del(.type)' $dir/temp.json >$dir/package.json
-    rm $dir/temp.json
+    # replace package.json name with the directory name
+    jq ".name = \"@cartridge/$dir\"" $dir/temp.json >$dir/temp2.json
+    jq -r 'del(.type)' $dir/temp2.json >$dir/temp3.json
+    mv $dir/temp3.json $dir/package.json
 done
