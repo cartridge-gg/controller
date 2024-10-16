@@ -1,5 +1,3 @@
-use std::time::Duration;
-
 use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{
     accounts::{Account, ConnectedAccount},
@@ -14,10 +12,10 @@ use crate::{
     abigen::{self, erc_20::Erc20},
     account::session::{
         hash::{Policy, Session},
-        raw_session::SessionHash,
         SessionAccount,
     },
     artifacts::Version,
+    hash::MessageHashRev1,
     signers::{webauthn::WebauthnSigner, HashSigner, Signer, SignerTrait},
     tests::{
         account::FEE_TOKEN_ADDRESS, ensure_txn, runners::katana::KatanaRunner,
@@ -217,8 +215,8 @@ async fn test_create_and_use_registered_session() {
     let public_key = session_key.verifying_key().scalar();
 
     // Register the session
-    let expires_at = 0;
-    let max_fee = Felt::from(277600000000000_u128);
+    let expires_at = u64::MAX;
+    let max_fee = Felt::from(277800000000000_u128);
     let txn = controller
         .register_session(policies.clone(), expires_at, public_key, max_fee)
         .await
@@ -243,7 +241,12 @@ async fn test_create_and_use_registered_session() {
 
     let is_registered =
         abigen::controller::ControllerReader::new(controller.address(), runner.client())
-            .is_session_registered(&session.raw(), &session_account.address())
+            .is_session_registered(
+                &session
+                    .raw()
+                    .get_message_hash_rev_1(controller.chain_id, controller.address),
+                &owner_signer.signer().guid(),
+            )
             .call()
             .await
             .unwrap();
