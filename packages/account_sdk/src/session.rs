@@ -77,9 +77,19 @@ impl Controller {
 
     pub async fn register_session(
         &mut self,
-        session: &Session,
+        policies: Vec<Policy>,
+        expires_at: u64,
+        public_key: Felt,
         max_fee: Felt,
     ) -> Result<InvokeTransactionResult, ControllerError> {
+        let session = Session::new(
+            policies,
+            expires_at,
+            &AbigenSigner::Starknet(StarknetSigner {
+                pubkey: NonZero::new(public_key).unwrap(),
+            }),
+        )?;
+
         let call = self
             .contract()
             .register_session_getcall(&session.raw(), &self.owner_guid());
