@@ -14,7 +14,7 @@ use crate::{
     signers::{HashSigner, SignError, Signer},
 };
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ControllerFactory {
     class_hash: Felt,
     chain_id: Felt,
