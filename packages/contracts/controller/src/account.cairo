@@ -10,6 +10,12 @@ trait IAssertOwner<TState> {
 }
 
 #[starknet::interface]
+trait IIsGuardian<TState> {
+    fn is_valid_guardian(self: @TState, guardian_guid: felt252) -> bool;
+    fn get_guardian_guid(self: @TState) -> Option<felt252>;
+}
+
+#[starknet::interface]
 trait ICartridgeAccount<TContractState> {
     fn __validate_declare__(ref self: TContractState, class_hash: felt252) -> felt252;
     fn __validate_deploy__(
@@ -73,7 +79,7 @@ mod CartridgeAccount {
     use openzeppelin::upgrades::UpgradeableComponent;
     use openzeppelin::upgrades::interface::IUpgradeable;
 
-    use controller::account::{ICartridgeAccount, IAssertOwner};
+    use controller::account::{ICartridgeAccount, IAssertOwner, IIsGuardian};
     use controller::external_owners::external_owners::{
         external_owners_component,
         external_owners_component::InternalImpl as ExternalOwnersInternalImpl
@@ -380,6 +386,19 @@ mod CartridgeAccount {
                 caller == get_contract_address() || self.is_external_owner(caller),
                 'caller-not-owner'
             );
+        }
+    }
+
+    #[abi(embed_v0)]
+    impl IIsGuardianImpl of IIsGuardian<ContractState> {
+        fn is_valid_guardian(self: @ContractState, guardian_guid: felt252) -> bool {
+            match self.guardian_guid.read() {
+                Option::Some(guid) => guid == guardian_guid,
+                Option::None => true
+            }
+        }
+        fn get_guardian_guid(self: @ContractState) -> Option<felt252> {
+            self.guardian_guid.read()
         }
     }
 
