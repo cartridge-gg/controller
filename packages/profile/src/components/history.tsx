@@ -15,9 +15,7 @@ export function History() {
       endpoint: indexerUrl,
     },
     {
-      // [TODO]: Remove mocked address
-      address:
-        "0x04645f67e3e195420b2b4e63742153623e50c143ed8b89c91e3fb908fe87b168",
+      address,
       limit: 100,
     },
   );
