@@ -13,7 +13,7 @@ import {
   LayoutHeader,
 } from "@/components/layout";
 import { useConnection } from "./provider/hooks";
-import { Navigation } from "./navigation";
+// import { Navigation } from "./navigation";
 import { useEffect, useState } from "react";
 
 export function Inventory() {
@@ -74,7 +74,7 @@ export function Inventory() {
       <LayoutHeader
         title={username}
         description={<CopyAddress address={address} size="sm" />}
-        right={<Navigation />}
+        // right={<Navigation />}
       />
 
       <LayoutContent className="pb-4">
