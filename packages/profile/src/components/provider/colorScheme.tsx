@@ -1,5 +1,5 @@
 import { createContext, useCallback, useState } from "react";
-import { useQueryParams } from "./hooks";
+import { useSearchParams } from "react-router-dom";
 
 type ColorScheme = "dark" | "light" | "system";
 
@@ -28,8 +28,9 @@ export function ColorSchemeProvider({
   storageKey = "vite-ui-colorScheme",
   ...props
 }: ColorSchemeProviderProps) {
-  const params = useQueryParams();
-  const colorSchemeParam = (params.get("colorMode") as ColorScheme) || null;
+  const [searchParams] = useSearchParams();
+  const colorSchemeParam =
+    (searchParams.get("colorMode") as ColorScheme) || null;
   if (
     colorSchemeParam &&
     !["light", "dark", "system"].includes(colorSchemeParam)

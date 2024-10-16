@@ -1,5 +1,6 @@
 import {
   Button,
+  Skeleton,
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -18,6 +19,10 @@ export function Network({ chainId }: { chainId: string }) {
     navigator.clipboard.writeText(chainId);
     toast.success("Chain ID copied");
   }, [chainId]);
+
+  if (!chainId) {
+    return <Skeleton className="h-[40px] w-[120px] rounded" />;
+  }
 
   return (
     <TooltipProvider>

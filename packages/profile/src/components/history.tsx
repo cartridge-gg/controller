@@ -1,12 +1,12 @@
 import { Card, CardContent, CheckIcon, CopyAddress } from "@cartridge/ui-next";
+import { useTransferQuery } from "@cartridge/utils";
 import {
   LayoutContainer,
   LayoutContent,
   LayoutHeader,
 } from "@/components/layout";
-import { useConnection } from "@/components/provider/hooks";
 import { Navigation } from "@/components/navigation";
-import { useTransferQuery } from "@cartridge/utils";
+import { useConnection } from "@/hooks/context";
 
 export function History() {
   const { username, address, indexerUrl } = useConnection();

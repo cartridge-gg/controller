@@ -1,37 +1,20 @@
 import { AsyncMethodReturns, connectToParent } from "@cartridge/penpal";
-import {
-  createContext,
-  useState,
-  ReactNode,
-  useEffect,
-  useCallback,
-} from "react";
-import { useQueryParams } from "./hooks";
+import { createContext, useState, ReactNode, useEffect } from "react";
 import { ERC20, ProfileContextTypeVariant } from "@cartridge/controller";
 import { normalize, STRK_CONTRACT_ADDRESS } from "@cartridge/utils";
 import { constants, RpcProvider } from "starknet";
 import { ETH_CONTRACT_ADDRESS } from "@cartridge/utils";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 type ConnectionContextType = {
   parent: ParentMethods;
   address: string;
   username: string;
-  context?: ContextVariant;
-  setContext: (context: ContextVariant) => void;
   provider: RpcProvider;
   indexerUrl: string;
   chainId: string;
   erc20: ERC20[];
 };
-
-type ProfileContext<Variant extends ProfileContextTypeVariant> = {
-  type: Variant;
-};
-
-export type ContextVariant =
-  | ProfileContext<"quest">
-  | ProfileContext<"inventory">
-  | ProfileContext<"history">;
 
 type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
 
@@ -39,7 +22,6 @@ const initialState: ConnectionContextType = {
   parent: { close: async () => {} },
   address: "",
   username: "",
-  setContext: () => {},
   provider: new RpcProvider(),
   indexerUrl: "",
   chainId: "",
@@ -52,10 +34,12 @@ export const ConnectionContext =
 export function ConnectionProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ConnectionContextType>(initialState);
 
-  const searchParams = useQueryParams();
+  const [searchParams] = useSearchParams();
   useEffect(() => {
     const erc20 = (
-      JSON.parse(decodeURIComponent(searchParams.get("erc20")!)) as ERC20[]
+      JSON.parse(
+        decodeURIComponent(searchParams.get("erc20") ?? "[]"),
+      ) as ERC20[]
     ).filter(
       (t) =>
         [ETH_CONTRACT_ADDRESS, STRK_CONTRACT_ADDRESS].includes(t.address) ?? [],
@@ -63,17 +47,29 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     erc20.unshift({ address: STRK_CONTRACT_ADDRESS });
     erc20.unshift({ address: ETH_CONTRACT_ADDRESS });
 
-    setState((state) => ({
-      ...state,
-      address: decodeURIComponent(searchParams.get("address")!),
-      username: decodeURIComponent(searchParams.get("username")!),
-      provider: new RpcProvider({
+    const newState = state;
+    newState.erc20 = erc20;
+
+    if (searchParams.get("address")) {
+      newState.address = decodeURIComponent(searchParams.get("address")!);
+    }
+
+    if (searchParams.get("username")) {
+      newState.username = decodeURIComponent(searchParams.get("username")!);
+    }
+
+    if (searchParams.get("rpcUrl")) {
+      newState.provider = new RpcProvider({
         nodeUrl: decodeURIComponent(searchParams.get("rpcUrl")!),
-      }),
-      indexerUrl: decodeURIComponent(searchParams.get("indexerUrl")!),
-      erc20,
-    }));
-  }, [searchParams]);
+      });
+    }
+
+    if (searchParams.get("indexerUrl")) {
+      newState.indexerUrl = decodeURIComponent(searchParams.get("indexerUrl")!);
+    }
+
+    setState(newState);
+  }, [searchParams, state]);
 
   useEffect(() => {
     updateChainId();
@@ -95,18 +91,13 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     }
   }, [state.provider]);
 
-  const setContext = useCallback((context: ContextVariant) => {
-    setState((state) => ({
-      ...state,
-      context,
-    }));
-  }, []);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const connection = connectToParent<ParentMethods>({
       methods: {
-        goTo: normalize(() => (tab: ProfileContextTypeVariant) => {
-          setContext({ type: tab });
+        navigate: normalize(() => (tab: ProfileContextTypeVariant) => {
+          navigate(tab);
         }),
       },
     });
@@ -117,10 +108,10 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     return () => {
       connection.destroy();
     };
-  }, [setContext]);
+  }, [navigate]);
 
   return (
-    <ConnectionContext.Provider value={{ ...state, setContext }}>
+    <ConnectionContext.Provider value={state}>
       {children}
     </ConnectionContext.Provider>
   );
