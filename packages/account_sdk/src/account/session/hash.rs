@@ -80,7 +80,7 @@ impl Session {
         chain_id: Felt,
         address: Felt,
     ) -> Result<Felt, NonAsciiNameError> {
-        self.raw().get_session_hash(chain_id, address, tx_hash)
+        self.raw().hash(chain_id, address, tx_hash)
     }
 
     pub fn single_proof(&self, policy: &Policy) -> Option<Vec<Felt>> {

@@ -2120,7 +2120,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
     #[allow(clippy::too_many_arguments)]
     pub fn get_guardian_guid(
         &self,
-    ) -> cainome::cairo_serde::call::FCall<A::Provider, Option<Signer>> {
+    ) -> cainome::cairo_serde::call::FCall<A::Provider, starknet::core::types::Felt> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         let __call = starknet::core::types::FunctionCall {
@@ -2814,7 +2814,9 @@ impl<P: starknet::providers::Provider + Sync> ControllerReader<P> {
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
-    pub fn get_guardian_guid(&self) -> cainome::cairo_serde::call::FCall<P, Option<Signer>> {
+    pub fn get_guardian_guid(
+        &self,
+    ) -> cainome::cairo_serde::call::FCall<P, starknet::core::types::Felt> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         let __call = starknet::core::types::FunctionCall {

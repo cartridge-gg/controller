@@ -162,7 +162,7 @@ impl CartridgeProxy {
                     <RawSessionToken as CairoSerde>::cairo_deserialize(old_signature, 1).unwrap();
                 let session_hash = session_token
                     .session
-                    .get_session_hash(self.chain_id, address, tx_hash)
+                    .hash(self.chain_id, address, tx_hash)
                     .unwrap();
                 let guardian_signature = self.guardian_signer.sign(&session_hash).await.unwrap();
                 session_token.guardian_signature = guardian_signature;

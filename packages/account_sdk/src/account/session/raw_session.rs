@@ -46,16 +46,12 @@ impl MessageHashRev1 for RawSession {
 }
 
 pub trait SessionHash {
-    fn get_session_hash(
-        &self,
-        chain_id: Felt,
-        address: Felt,
-        tx_hash: Felt,
-    ) -> Result<Felt, NonAsciiNameError>;
+    fn hash(&self, chain_id: Felt, address: Felt, tx_hash: Felt)
+        -> Result<Felt, NonAsciiNameError>;
 }
 
 impl SessionHash for RawSession {
-    fn get_session_hash(
+    fn hash(
         &self,
         chain_id: Felt,
         address: Felt,
