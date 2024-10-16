@@ -21,7 +21,6 @@ use url::Url;
 
 use crate::abigen::controller::{OutsideExecution, SignerSignature};
 use crate::account::session::raw_session::{RawSessionToken, SessionHash};
-use crate::hash::MessageHashRev1;
 use crate::provider::OutsideExecutionParams;
 use crate::signers::{HashSigner, Signer};
 
@@ -250,11 +249,6 @@ impl CartridgeProxy {
         InvokeTransactionResult,
         AccountError<SignError<starknet::signers::local_wallet::SignError>>,
     > {
-        let outside_execution_hash =
-            outside_execution.get_message_hash_rev_1(self.chain_id, contract_address);
-        let signature = self
-            .add_guardian_signature(contract_address, outside_execution_hash, &signature)
-            .await;
         let mut calldata = <OutsideExecution as CairoSerde>::cairo_serialize(&outside_execution);
         calldata.extend(<Vec<Felt> as CairoSerde>::cairo_serialize(&signature));
 
