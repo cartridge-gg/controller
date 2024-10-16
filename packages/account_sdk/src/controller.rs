@@ -33,7 +33,7 @@ use url::Url;
 #[path = "controller_test.rs"]
 mod controller_test;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Controller {
     pub(crate) app_id: String,
     pub address: Felt,
