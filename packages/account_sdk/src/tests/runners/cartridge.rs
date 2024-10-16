@@ -117,8 +117,10 @@ impl CartridgeProxy {
         for tx in &mut txs {
             if let BroadcastedTransaction::Invoke(BroadcastedInvokeTransaction::V1(ref mut tx)) = tx
             {
-                let tx_hash = self.transaction_hash(&tx);
-                tx.signature = self.add_guardian_signature(tx.sender_address, tx_hash, &tx.signature).await;
+                let tx_hash = self.transaction_hash(tx);
+                tx.signature = self
+                    .add_guardian_signature(tx.sender_address, tx_hash, &tx.signature)
+                    .await;
             }
         }
         body["params"] = serde_json::to_value(txs).unwrap();
@@ -128,9 +130,9 @@ impl CartridgeProxy {
         &self,
         address: Felt,
         tx_hash: Felt,
-        old_signature: &Vec<Felt>,
+        old_signature: &[Felt],
     ) -> Vec<Felt> {
-        match <Vec<SignerSignature> as CairoSerde>::cairo_deserialize(&old_signature, 0) {
+        match <Vec<SignerSignature> as CairoSerde>::cairo_deserialize(old_signature, 0) {
             Ok(mut signature) => {
                 let guardian_signature = self.guardian_signer.sign(&tx_hash).await.unwrap();
                 signature.push(guardian_signature);
@@ -138,7 +140,7 @@ impl CartridgeProxy {
             }
             Err(_) => {
                 let mut session_token =
-                    <RawSessionToken as CairoSerde>::cairo_deserialize(&old_signature, 1).unwrap();
+                    <RawSessionToken as CairoSerde>::cairo_deserialize(old_signature, 1).unwrap();
                 let session_hash = session_token
                     .session
                     .get_session_hash(self.chain_id, address, tx_hash)
@@ -160,7 +162,7 @@ impl CartridgeProxy {
     ) -> Result<Response<Body>, hyper::Error> {
         let params = &body["params"];
         println!("Received params: {:?}", params);
-        let result = match parse_execute_outside_transaction_params(&params) {
+        let result = match parse_execute_outside_transaction_params(params) {
             Ok((address, outside_execution, signature)) => {
                 match self
                     .execute_from_outside(outside_execution, signature, address)
