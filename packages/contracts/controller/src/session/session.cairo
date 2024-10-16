@@ -86,7 +86,7 @@ mod session_component {
             let session_hash = session.get_message_hash_rev_1();
             assert(!self.revoked_session.read(session_hash), 'session/already-revoked');
 
-            let guardian_guid = contract.get_guardian_guid().unwrap_or(0);
+            let guardian_guid = contract.get_guardian_guid();
             assert(
                 !self.valid_session_cache.read((guid_or_address, guardian_guid, session_hash)),
                 'session/already-registered'
@@ -106,7 +106,7 @@ mod session_component {
             if self.is_session_revoked(session_hash) {
                 return false;
             }
-            let guardian_guid = self.get_contract().get_guardian_guid().unwrap_or(0);
+            let guardian_guid = self.get_contract().get_guardian_guid();
             self.valid_session_cache.read((guid_or_address, guardian_guid, session_hash))
         }
     }
@@ -170,7 +170,7 @@ mod session_component {
                 && *signature.session_authorization.at(0) == AUTHORIZATION_BY_REGISTERED) {
                 let owner_guid = *signature.session_authorization.at(1);
                 assert(contract.is_valid_authorizer(owner_guid), 'session/invalid-authorizer');
-                let guardian_guid = contract.get_guardian_guid().unwrap_or(0);
+                let guardian_guid = contract.get_guardian_guid();
                 assert(signature.cache_authorization, 'session/cache-missing');
                 assert(
                     self.valid_session_cache.read((owner_guid, guardian_guid, session_hash)),
