@@ -3,7 +3,7 @@
 import { Chain, mainnet, sepolia } from "@starknet-react/chains";
 import { StarknetConfig, starkscan } from "@starknet-react/core";
 import { PropsWithChildren } from "react";
-import ControllerConnector from "@cartridge/connector";
+import ControllerConnector from "@cartridge/connector/controller";
 import { RpcProvider, shortString } from "starknet";
 
 export function StarknetProvider({ children }: PropsWithChildren) {

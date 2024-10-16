@@ -2,7 +2,7 @@
 
 import { useAccount } from "@starknet-react/core";
 import { useCallback, useState } from "react";
-import CartridgeConnector from "@cartridge/connector";
+import ControllerConnector from "@cartridge/connector/controller";
 import { ControllerAccounts } from "@cartridge/controller";
 import { Button } from "@cartridge/ui-next";
 
@@ -10,7 +10,7 @@ export function FetchControllers() {
   const { address, connector } = useAccount();
   const [error, setError] = useState<Error>();
   const [controllers, setControllers] = useState<ControllerAccounts>();
-  const cartridgeConnector = connector as never as CartridgeConnector;
+  const cartridgeConnector = connector as never as ControllerConnector;
 
   const onFetch = useCallback(async () => {
     if (!address) {

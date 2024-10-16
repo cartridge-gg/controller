@@ -1,7 +1,8 @@
----
+* * *
+
 title: React
-sidebar_position: 1
----
+
+## sidebar_position: 1
 
 ### Installation
 
@@ -23,19 +24,19 @@ pnpm add @cartridge/connector @cartridge/controller @starknet-react/core starkne
 Import the `CartridgeConnector` and create an instance:
 
 ```typescript
-import CartridgeConnector from "@cartridge/connector";
+import {ControllerConnector} from "@cartridge/connector";
 
-const connector = new CartridgeConnector();
+const connector = new ControllerConnector();
 ```
 
 ### Configuring the Connector
 
-You can customize the `CartridgeConnector` by providing configuration options during instantiation. The `CartridgeConnector` accepts an options object that allows you to configure various settings such as policies, RPC URLs, theme, and more.
+You can customize the `ControllerConnector` by providing configuration options during instantiation. The `ControllerConnector` accepts an options object that allows you to configure various settings such as policies, RPC URLs, theme, and more.
 
 Here's an example:
 
 ```typescript
-import CartridgeConnector from "@cartridge/connector";
+import {ControllerConnector} from "@cartridge/connector";
 import { shortString } from "starknet";
 
 const ETH_TOKEN_ADDRESS =
@@ -98,7 +99,7 @@ Use the `useConnect`, `useDisconnect`, and `useAccount` hooks to manage wallet c
 
 ```typescript
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
-import CartridgeConnector from "@cartridge/connector";
+import ControllerConnector from "@cartridge/connector/controller";
 import { useEffect, useState } from "react";
 
 export function ConnectWallet() {
@@ -106,7 +107,7 @@ export function ConnectWallet() {
   const { disconnect } = useDisconnect();
   const { address } = useAccount();
 
-  const connector = connectors[0] as CartridgeConnector;
+  const connector = connectors[0] as ControllerConnector;
 
   const [username, setUsername] = useState<string>();
   useEffect(() => {
