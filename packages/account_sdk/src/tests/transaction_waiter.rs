@@ -109,13 +109,13 @@ impl<'a, P> TransactionWaiter<'a, P>
 where
     P: Provider + Send + Sync,
 {
-    const DEFAULT_TIMEOUT: Duration = Duration::from_secs(300);
+    const DEFAULT_TIMEOUT: Duration = Duration::from_secs(10);
     const DEFAULT_INTERVAL: Duration = Duration::from_millis(2500);
 
-    pub fn new(tx: Felt, provider: &'a P) -> Self {
+    pub fn new(tx_hash: Felt, provider: &'a P) -> Self {
         Self {
             provider,
-            tx_hash: tx,
+            tx_hash,
             must_succeed: true,
             finality_status: None,
             timeout: Self::DEFAULT_TIMEOUT,
@@ -173,27 +173,22 @@ where
                     }
 
                     ReceiptBlock::Block { .. } => {
-                        if let Some(finality_status) = self.finality_status {
-                            match finality_status_from_receipt(&receipt.receipt) {
-                                status if status == finality_status => {
+                        if self.finality_status.is_none()
+                            || Some(finality_status_from_receipt(&receipt.receipt))
+                                == self.finality_status
+                        {
+                            return match execution_status_from_receipt(&receipt.receipt) {
+                                ExecutionResult::Succeeded => Ok(receipt),
+                                ExecutionResult::Reverted { reason } => {
                                     if self.must_succeed {
-                                        return match execution_status_from_receipt(&receipt.receipt)
-                                        {
-                                            ExecutionResult::Succeeded => Ok(receipt),
-                                            ExecutionResult::Reverted { reason } => {
-                                                Err(TransactionWaitingError::TransactionReverted(
-                                                    reason.clone(),
-                                                ))
-                                            }
-                                        };
+                                        Err(TransactionWaitingError::TransactionReverted(
+                                            reason.clone(),
+                                        ))
+                                    } else {
+                                        Ok(receipt)
                                     }
-                                    return Ok(receipt);
                                 }
-
-                                _ => {}
-                            }
-                        } else {
-                            return Ok(receipt);
+                            };
                         }
                     }
                 },
