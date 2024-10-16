@@ -9,7 +9,7 @@ import {
   LayoutHeader,
 } from "@/components/layout";
 import { useConnection } from "@/hooks/provider";
-import { Collections } from "./collections";
+// import { Collections } from "./collections";
 import { Tokens } from "./tokens";
 // import { Navigation } from "@/components/navigation";
 
@@ -26,7 +26,7 @@ export function Inventory() {
 
       <LayoutContent className="pb-4">
         <Tokens />
-        <Collections />
+        {/* <Collections /> */}
       </LayoutContent>
     </LayoutContainer>
   );
