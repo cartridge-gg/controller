@@ -12,7 +12,7 @@ trait IAssertOwner<TState> {
 #[starknet::interface]
 trait IIsGuardian<TState> {
     fn is_valid_guardian(self: @TState, guardian_guid: felt252) -> bool;
-    fn get_guardian_guid(self: @TState) -> Option<felt252>;
+    fn get_guardian_guid(self: @TState) -> felt252;
 }
 
 #[starknet::interface]
@@ -152,7 +152,7 @@ mod CartridgeAccount {
 
     #[storage]
     struct Storage {
-        guardian_guid: Option<felt252>,
+        guardian_guid: felt252,
         #[substorage(v0)]
         multiple_owners: multiple_owners_component::Storage,
         #[substorage(v0)]
@@ -225,8 +225,8 @@ mod CartridgeAccount {
             Owner::Account(account) => { self.external_owners._register_external_owner(account); },
         }
         let guardian_guid = match guardian {
-            Option::Some(guardian) => Option::Some(guardian.into_guid()),
-            Option::None => Option::None,
+            Option::Some(guardian) => guardian.into_guid(),
+            Option::None => 0,
         };
         self.guardian_guid.write(guardian_guid);
     }
@@ -392,12 +392,10 @@ mod CartridgeAccount {
     #[abi(embed_v0)]
     impl IIsGuardianImpl of IIsGuardian<ContractState> {
         fn is_valid_guardian(self: @ContractState, guardian_guid: felt252) -> bool {
-            match self.guardian_guid.read() {
-                Option::Some(guid) => guid == guardian_guid,
-                Option::None => true
-            }
+            let storage_guid = self.guardian_guid.read();
+            storage_guid == 0 || storage_guid == guardian_guid
         }
-        fn get_guardian_guid(self: @ContractState) -> Option<felt252> {
+        fn get_guardian_guid(self: @ContractState) -> felt252 {
             self.guardian_guid.read()
         }
     }
@@ -455,8 +453,8 @@ mod CartridgeAccount {
             if signer_signatures.len() > 2 {
                 return false;
             }
-            self.is_valid_owner_signature(hash, *signer_signatures.at(0)) &&
-                self.is_valid_guardian_signature(hash, signer_signatures.get(1))
+            self.is_valid_owner_signature(hash, *signer_signatures.at(0))
+                && self.is_valid_guardian_signature(hash, signer_signatures.get(1))
         }
 
         #[must_use]
@@ -478,14 +476,12 @@ mod CartridgeAccount {
                 Option::Some(signature) => {
                     let signer = (*signature.unbox()).signer().storage_value();
                     (*signature.unbox()).is_valid_signature(hash)
-                        && match self.guardian_guid.read() {
-                            Option::Some(guid) => signer.into_guid() == guid,
-                            Option::None => true
-                        }
+                        && self.is_valid_guardian(signer.into_guid())
                 },
-                Option::None => match self.guardian_guid.read() {
-                    Option::Some(_) => false,
-                    Option::None => true
+                Option::None => if self.guardian_guid.read() == 0 {
+                    true
+                } else {
+                    false
                 }
             }
         }
@@ -508,12 +504,11 @@ mod CartridgeAccount {
             assert(
                 self.is_valid_owner_signature(hash, *signer_signatures.at(0)), 'invalid-owner-sig'
             );
-            match self.guardian_guid.read() {
-                Option::Some(_) => {
-                    assert(signer_signatures.len() >= 2, 'no-guardian-sig');
-                    assert(signer_signatures.len() == 2, 'too-many-signatures');
-                },
-                Option::None => { assert(signer_signatures.len() <= 2, 'too-many-signatures'); }
+            if self.guardian_guid.read() == 0 {
+                assert(signer_signatures.len() <= 2, 'too-many-signatures');
+            } else {
+                assert(signer_signatures.len() >= 2, 'no-guardian-sig');
+                assert(signer_signatures.len() == 2, 'too-many-signatures');
             };
             assert(
                 self.is_valid_guardian_signature(hash, signer_signatures.get(1)),
