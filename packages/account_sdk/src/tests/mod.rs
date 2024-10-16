@@ -37,7 +37,7 @@ where
     P: Provider + Sync + Send,
 {
     let tx = execution
-        .fee_estimate_multiplier(1.5)
+        .fee_estimate_multiplier(1.6)
         .send()
         .await
         .map_err(EnsureTxnError::from)?;
