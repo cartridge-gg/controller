@@ -1,7 +1,9 @@
 [workspace]
 members = [
+    "packages/contracts/_deployment",
     "packages/contracts/controller",
     "packages/contracts/resolver",
+    "packages/contracts/registry",
 ]
 
 [workspace.package]
@@ -15,5 +17,6 @@ alexandria_encoding = { git = "https://github.com/piniom/quaireaux.git", rev = "
 alexandria_merkle_tree = { git = "https://github.com/piniom/quaireaux.git", rev = "b51ccc3" }
 alexandria_data_structures = { git = "https://github.com/piniom/quaireaux.git", rev = "b51ccc3" }
 snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry.git", tag = "v0.27.0" }
+sncast_std = { git = "https://github.com/foundry-rs/starknet-foundry.git", tag = "v0.27.0" }
 openzeppelin = { git = "https://github.com/OpenZeppelin/cairo-contracts.git", rev = "a13bae3" }
 argent = { git = "https://github.com/cartridge-gg/argent-contracts-starknet.git", rev = "daa8200" }

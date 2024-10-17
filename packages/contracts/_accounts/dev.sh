@@ -1,0 +1,4 @@
+export STARKNET_RPC="http://localhost:8001/x/starknet/sepolia"
+
+export REGISTRY_ADDRESS=0x7b3e2237ea5db4d6d92eb2d5659c3225f56fb3b20ace75bd8c528b6346cfb9b
+export RESOLVER_ADDRESS=0x9c6b9be3c25084f720ad9a8a75690a2f067633c5c5ef39a0e5257e7bf9463d
