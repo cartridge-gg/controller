@@ -20,7 +20,7 @@ mod session_component {
     use controller::asserts::assert_no_self_call;
     use controller::session::interface::{ISession, ISessionCallback};
     use controller::session::session::check_policy;
-    use controller::account::{IAssertOwner, IIsGuardian};
+    use controller::account::IAssertOwner;
 
     const SESSION_MAGIC: felt252 = 'session-token';
     const AUTHORIZATION_BY_REGISTERED: felt252 = 'authorization-by-registered';
@@ -29,8 +29,8 @@ mod session_component {
     struct Storage {
         /// A map of session hashes to a boolean indicating if the session has been revoked.
         revoked_session: Map<felt252, bool>,
-        /// A map of (owner_guid, guardian_guid, session_hash) to a len of authorization signature
-        valid_session_cache: Map<(felt252, felt252, felt252), bool>,
+        /// A map of (owner_guid, session_hash) to a len of authorization signature
+        valid_session_cache: Map<(felt252, felt252), bool>,
     }
 
     #[event]
@@ -65,7 +65,6 @@ mod session_component {
         +HasComponent<TContractState>,
         +ISessionCallback<TContractState>,
         +IAssertOwner<TContractState>,
-        +IIsGuardian<TContractState>,
     > of ISession<ComponentState<TContractState>> {
         fn revoke_session(ref self: ComponentState<TContractState>, session_hash: felt252) {
             self.get_contract().assert_owner();
@@ -83,15 +82,15 @@ mod session_component {
 
             let now = get_block_timestamp();
             assert(session.expires_at > now, 'session/expired');
+
             let session_hash = session.get_message_hash_rev_1();
             assert(!self.revoked_session.read(session_hash), 'session/already-revoked');
-
-            let guardian_guid = contract.get_guardian_guid();
             assert(
-                !self.valid_session_cache.read((guid_or_address, guardian_guid, session_hash)),
+                !self.valid_session_cache.read((guid_or_address, session_hash)),
                 'session/already-registered'
             );
-            self.valid_session_cache.write((guid_or_address, guardian_guid, session_hash), true);
+
+            self.valid_session_cache.write((guid_or_address, session_hash), true);
         }
 
         fn is_session_revoked(
@@ -106,17 +105,14 @@ mod session_component {
             if self.is_session_revoked(session_hash) {
                 return false;
             }
-            let guardian_guid = self.get_contract().get_guardian_guid();
-            self.valid_session_cache.read((guid_or_address, guardian_guid, session_hash))
+
+            self.valid_session_cache.read((guid_or_address, session_hash))
         }
     }
 
     #[generate_trait]
     impl InternalImpl<
-        TContractState,
-        +HasComponent<TContractState>,
-        +ISessionCallback<TContractState>,
-        +IIsGuardian<TContractState>,
+        TContractState, +HasComponent<TContractState>, +ISessionCallback<TContractState>,
     > of InternalTrait<TContractState> {
         fn validate_session_serialized(
             ref self: ComponentState<TContractState>,
@@ -170,33 +166,26 @@ mod session_component {
                 && *signature.session_authorization.at(0) == AUTHORIZATION_BY_REGISTERED) {
                 let owner_guid = *signature.session_authorization.at(1);
                 assert(contract.is_valid_authorizer(owner_guid), 'session/invalid-authorizer');
-                let guardian_guid = contract.get_guardian_guid();
                 assert(signature.cache_authorization, 'session/cache-missing');
+
                 assert(
-                    self.valid_session_cache.read((owner_guid, guardian_guid, session_hash)),
+                    self.valid_session_cache.read((owner_guid, session_hash)),
                     'session/not-registered'
                 );
             } else {
                 let parsed = contract.parse_authorization(signature.session_authorization);
                 let owner_guid = parsed.at(0).clone().signer().into_guid();
-                let guardian_guid = match parsed.get(1) {
-                    Option::Some(guardian) => guardian.unbox().clone().signer().into_guid(),
-                    Option::None => 0
-                };
+
                 // check validity of token
                 if !signature.cache_authorization
-                    || !self.valid_session_cache.read((owner_guid, guardian_guid, session_hash)) {
+                    || !self.valid_session_cache.read((owner_guid, session_hash)) {
                     contract.verify_authorization(session_hash, parsed.span());
+
                     if signature.cache_authorization {
-                        self
-                            .valid_session_cache
-                            .write((owner_guid, guardian_guid, session_hash), true);
+                        self.valid_session_cache.write((owner_guid, session_hash), true);
                     }
                 } else {
                     assert(contract.is_valid_authorizer(owner_guid), 'session/invalid-authorizer');
-                    assert(
-                        contract.is_valid_guardian(guardian_guid), 'session/invalid-guardian-auth'
-                    );
                 }
             };
 
@@ -214,14 +203,22 @@ mod session_component {
                 'session/invalid-session-sig'
             );
 
-            assert(
-                contract.is_valid_guardian(signature.guardian_signature.signer().into_guid()),
-                'session/invalid-guardian'
-            );
-            assert(
-                signature.guardian_signature.is_valid_signature(message_hash),
-                'session/invalid-guardian-sig'
-            );
+            if signature.session.guardian_key_guid != 0 {
+                assert(
+                    signature
+                        .session
+                        .guardian_key_guid == signature
+                        .guardian_signature
+                        .signer()
+                        .into_guid(),
+                    'session/invalid-guardian'
+                );
+
+                assert(
+                    signature.guardian_signature.is_valid_signature(message_hash),
+                    'session/invalid-guardian-sig'
+                );
+            }
 
             if check_policy(calls, signature.session.allowed_methods_root, signature.proofs)
                 .is_err() {
