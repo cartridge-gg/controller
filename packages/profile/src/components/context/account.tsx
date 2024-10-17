@@ -106,6 +106,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     };
 
     async function updateBalance() {
+      setState((state) => ({ ...state, isFetching: true }));
       const res = await Promise.allSettled(
         erc20.map((t) => t.balanceOf(state.address)),
       );
@@ -120,6 +121,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       setState((state) => ({
         ...state,
         erc20: newValue,
+        isFetching: false,
       }));
     }
   }, [isVisible, erc20, state.address]);
