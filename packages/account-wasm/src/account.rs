@@ -5,6 +5,7 @@ use account_sdk::signers::Owner;
 use serde_wasm_bindgen::to_value;
 use starknet::accounts::ConnectedAccount;
 use starknet::core::types::Call;
+use starknet_types_core::felt::Felt;
 use url::Url;
 use wasm_bindgen::prelude::*;
 
@@ -123,7 +124,7 @@ impl CartridgeAccount {
 
         let res = self
             .controller
-            .register_session(methods, expires_at, public_key.0, max_fee.0)
+            .register_session(methods, expires_at, public_key.0, Felt::ZERO, max_fee.0)
             .await
             .map_err(JsControllerError::from)?;
 
@@ -141,9 +142,9 @@ impl CartridgeAccount {
             .into_iter()
             .map(TryFrom::try_from)
             .collect::<std::result::Result<Vec<_>, _>>()?;
-        let call = self
-            .controller
-            .register_session_call(methods, expires_at, public_key.0)?;
+        let call =
+            self.controller
+                .register_session_call(methods, expires_at, public_key.0, Felt::ZERO)?;
 
         Ok(to_value(&call.calldata)?)
     }

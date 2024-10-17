@@ -52,6 +52,7 @@ impl CartridgeSessionAccount {
             policies,
             session.expires_at,
             &signer.clone().into(),
+            Felt::ZERO,
         )?;
 
         Ok(CartridgeSessionAccount(SessionAccount::new(
@@ -89,6 +90,7 @@ impl CartridgeSessionAccount {
             policies,
             session.expires_at,
             &signer.clone().into(),
+            Felt::ZERO,
         )?;
 
         Ok(CartridgeSessionAccount(SessionAccount::new_as_registered(

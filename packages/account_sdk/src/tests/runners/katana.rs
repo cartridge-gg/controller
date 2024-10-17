@@ -19,7 +19,7 @@ use crate::artifacts::{Version, CONTROLLERS};
 use crate::controller::Controller;
 use crate::factory::ControllerFactory;
 use crate::provider::CartridgeJsonRpcProvider;
-use crate::signers::{Owner, Signer};
+use crate::signers::Owner;
 use crate::tests::account::{AccountDeclaration, FEE_TOKEN_ADDRESS, UDC_ADDRESS};
 use crate::tests::transaction_waiter::TransactionWaiter;
 
@@ -73,14 +73,8 @@ impl KatanaRunner {
         let proxy_url = Url::parse(&format!("http://0.0.0.0:{}/", find_free_port())).unwrap();
         let client = CartridgeJsonRpcProvider::new(proxy_url.clone());
 
-        let guardian = Signer::new_starknet_random();
         let rpc_client = Arc::new(JsonRpcClient::new(HttpTransport::new(rpc_url.clone())));
-        let proxy = CartridgeProxy::new(
-            rpc_url,
-            proxy_url.clone(),
-            config.chain_id,
-            guardian.clone(),
-        );
+        let proxy = CartridgeProxy::new(rpc_url, proxy_url.clone(), config.chain_id);
         let proxy_handle = tokio::spawn(async move {
             proxy.run().await;
         });

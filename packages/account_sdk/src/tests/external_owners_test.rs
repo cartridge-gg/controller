@@ -5,6 +5,7 @@ use starknet::{
     macros::{felt, selector},
     providers::Provider,
 };
+use starknet_crypto::Felt;
 
 use crate::{
     abigen::erc_20::Erc20,
@@ -45,6 +46,7 @@ async fn test_verify_external_owner() {
         vec![Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer"))],
         u64::MAX,
         &session_signer.clone().into(),
+        Felt::ZERO,
     )
     .unwrap();
 
@@ -105,6 +107,7 @@ async fn test_verify_constructor_external_owner() {
         vec![Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer"))],
         u64::MAX,
         &session_signer.clone().into(),
+        Felt::ZERO,
     )
     .unwrap();
 

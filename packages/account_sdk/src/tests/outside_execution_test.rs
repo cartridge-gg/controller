@@ -4,7 +4,6 @@ use starknet::{
     macros::{felt, selector},
     providers::Provider,
 };
-use std::vec;
 
 use crate::{
     abigen::{
@@ -19,7 +18,7 @@ use crate::{
     controller::Controller,
     signers::{webauthn::WebauthnSigner, Owner, Signer},
     tests::{
-        account::FEE_TOKEN_ADDRESS, ensure_txn, runners::katana::KatanaRunner,
+        account::FEE_TOKEN_ADDRESS, runners::katana::KatanaRunner,
         transaction_waiter::TransactionWaiter,
     },
 };
@@ -35,18 +34,14 @@ pub async fn test_verify_paymaster_execute(signer: Signer, use_session: bool) {
         )
         .await;
 
-    let account: Box<dyn OutsideExecutionAccount> = if use_session {
-        let session_account = controller
+    if use_session {
+        controller
             .create_session(
                 vec![Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer"))],
                 u64::MAX,
             )
             .await
             .unwrap();
-
-        Box::new(session_account)
-    } else {
-        Box::new(controller)
     };
 
     let recipient = ContractAddress(felt!("0x18301129"));
@@ -56,33 +51,22 @@ pub async fn test_verify_paymaster_execute(signer: Signer, use_session: bool) {
         high: 0,
     };
 
-    let outside_execution = OutsideExecution {
-        caller: OutsideExecutionCaller::Specific(paymaster.address().into()).into(),
-        execute_after: u64::MIN,
-        execute_before: u64::MAX,
-        calls: vec![Call {
-            to: (*FEE_TOKEN_ADDRESS).into(),
-            selector: selector!("transfer"),
-            calldata: [
-                <ContractAddress as CairoSerde>::cairo_serialize(&recipient),
-                <U256 as CairoSerde>::cairo_serialize(&amount),
-            ]
-            .concat(),
-        }],
-        nonce: account.random_outside_execution_nonce(),
-    };
+    let calls = vec![starknet::core::types::Call {
+        to: (*FEE_TOKEN_ADDRESS),
+        selector: selector!("transfer"),
+        calldata: [
+            <ContractAddress as CairoSerde>::cairo_serialize(&recipient),
+            <U256 as CairoSerde>::cairo_serialize(&amount),
+        ]
+        .concat(),
+    }];
 
-    let outside_execution = account
-        .sign_outside_execution(outside_execution.clone())
+    let tx = controller.execute_from_outside(calls).await.unwrap();
+
+    TransactionWaiter::new(tx.transaction_hash, runner.client())
+        .wait()
         .await
         .unwrap();
-
-    ensure_txn(
-        paymaster.execute_v1(vec![outside_execution.into()]),
-        runner.client(),
-    )
-    .await
-    .unwrap();
 
     assert_eq!(
         Erc20::new(*FEE_TOKEN_ADDRESS, &paymaster)
