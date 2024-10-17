@@ -161,11 +161,20 @@ impl CartridgeProxy {
             Err(_) => {
                 let mut session_token =
                     <RawSessionToken as CairoSerde>::cairo_deserialize(old_signature, 1).unwrap();
-                let session_hash = session_token
+                let session_token_hash = session_token
                     .session
                     .hash(self.chain_id, address, tx_hash)
                     .unwrap();
-                let guardian_signature = self.guardian_signer.sign(&session_hash).await.unwrap();
+
+                // This is different from the transaction signature
+                self.add_guardian_authorization(&mut session_token, address)
+                    .await;
+
+                let guardian_signature = self
+                    .guardian_signer
+                    .sign(&session_token_hash)
+                    .await
+                    .unwrap();
                 session_token.guardian_signature = guardian_signature;
 
                 let mut serialized =
@@ -173,6 +182,32 @@ impl CartridgeProxy {
                 serialized.insert(0, old_signature[0]);
                 serialized
             }
+        }
+    }
+
+    async fn add_guardian_authorization(&self, session_token: &mut RawSessionToken, address: Felt) {
+        println!("\n\n----\n\n");
+        dbg!(&session_token.session_authorization);
+        println!("\n\n----\n\n");
+        if session_token.session_authorization.len() == 2 {
+            // Authorization by registered
+            return;
+        }
+        let authorization = <Vec<SignerSignature> as CairoSerde>::cairo_deserialize(
+            &session_token.session_authorization,
+            0,
+        )
+        .unwrap();
+        if authorization.len() == 1 {
+            let session_hash = session_token
+                .session
+                .get_message_hash_rev_1(self.chain_id, address);
+            let guardian_authorization = self.guardian_signer.sign(&session_hash).await.unwrap();
+            session_token.session_authorization =
+                <Vec<SignerSignature> as CairoSerde>::cairo_serialize(&vec![
+                    authorization[0].clone(),
+                    guardian_authorization,
+                ]);
         }
     }
 

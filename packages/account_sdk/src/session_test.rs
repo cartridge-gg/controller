@@ -26,7 +26,7 @@ use crate::{
 pub async fn test_verify_execute(signer: Signer) {
     let runner = KatanaRunner::load();
     let mut controller = runner
-        .deploy_controller("username".to_owned(), signer, Version::LATEST)
+        .deploy_controller_with_guardian("username".to_owned(), signer, Version::LATEST)
         .await;
 
     let policies = vec![
@@ -200,7 +200,11 @@ async fn test_create_and_use_registered_session() {
     let owner_signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let mut controller = runner
-        .deploy_controller("username".to_owned(), owner_signer.clone(), Version::LATEST)
+        .deploy_controller_with_guardian(
+            "username".to_owned(),
+            owner_signer.clone(),
+            Version::LATEST,
+        )
         .await;
 
     // Create policies for the session
