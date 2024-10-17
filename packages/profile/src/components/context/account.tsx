@@ -95,7 +95,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   }, [provider, searchParams]);
 
   useEffect(() => {
-    updateBalance();
+    if (!state.erc20.find(t => t.balance === undefined)) return
 
     if (!isVisible) return;
 
