@@ -128,4 +128,13 @@ export const defaultPresets: ControllerThemePresets = {
       primary: "#F59100",
     },
   },
+  "blob-arena": {
+    id: "blob-arena",
+    name: "Blob Arena",
+    icon: "/whitelabel/blob-arena/icon.png",
+    cover: "/whitelabel/blob-arena/cover.png",
+    colors: {
+      primary: "#980f06",
+    },
+  },
 };
