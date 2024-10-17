@@ -1,11 +1,13 @@
 import { useContext } from "react";
-import { ConnectionContext } from "@/components/provider/connection";
-import { ColorSchemeProviderContext } from "@/components/provider/colorScheme";
-import { AccountContext } from "@/components/provider/account";
+import {
+  AccountContext,
+  ColorSchemeContext,
+  ConnectionContext,
+} from "@/components/context";
 import { getChecksumAddress } from "starknet";
 
 export function useColorScheme() {
-  const context = useContext(ColorSchemeProviderContext);
+  const context = useContext(ColorSchemeContext);
 
   if (context === undefined)
     throw new Error("useColorScheme must be used within a ColorSchemeProvider");

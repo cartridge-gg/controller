@@ -97,9 +97,10 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   }, [searchParams, provider, state.erc20.length]);
 
   useEffect(() => {
-    updateBalance();
+    if (!state.erc20.find(t => t.balance === undefined)) return
 
-    const id = setInterval(updateBalance, 3000);
+    updateBalance();
+    setInterval(updateBalance, 3000);
 
     async function updateBalance() {
       const res = await Promise.allSettled(
@@ -118,10 +119,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         erc20,
       }));
     }
-
-    return () => {
-      clearInterval(id);
-    };
   }, [state.erc20, state.address]);
 
   return (
