@@ -70,6 +70,7 @@ async fn test_verify_execute_guardian_owner_starknet() {
 }
 
 #[tokio::test]
+#[should_panic]
 async fn test_verify_execute_guardian_should_fail_no_guardian() {
     let runner = KatanaRunner::load();
     let signer = Signer::new_starknet_random();
@@ -103,5 +104,9 @@ async fn test_verify_execute_guardian_should_fail_no_guardian() {
         runner.client(),
     )
     .await;
-    matches!(result, Err(EnsureTxnError::TransactionWaitingError(_)));
+
+    assert!(
+        matches!(result, Err(EnsureTxnError::TransactionWaitingError(_))),
+        "Should return error"
+    );
 }

@@ -16,7 +16,7 @@ use crate::{
     },
     artifacts::Version,
     hash::MessageHashRev1,
-    signers::{webauthn::WebauthnSigner, HashSigner, Owner, Signer},
+    signers::{Owner, Signer},
     tests::{
         account::FEE_TOKEN_ADDRESS, ensure_txn, runners::katana::KatanaRunner,
         transaction_waiter::TransactionWaiter,
@@ -240,7 +240,7 @@ async fn test_create_and_use_registered_session() {
         .await
         .unwrap();
 
-    let session = Session::new(policies, expires_at, &session_signer.signer()).unwrap();
+    let session = Session::new(policies, expires_at, &session_signer.clone().into()).unwrap();
 
     // Create a SessionAccount using new_from_registered
     let session_account = SessionAccount::new_as_registered(
@@ -248,7 +248,7 @@ async fn test_create_and_use_registered_session() {
         session_signer.clone(),
         controller.address(),
         controller.chain_id(),
-        owner_signer.into(),
+        owner_signer.clone().into(),
         session.clone(),
     );
 
@@ -258,7 +258,7 @@ async fn test_create_and_use_registered_session() {
                 &session
                     .raw()
                     .get_message_hash_rev_1(controller.chain_id, controller.address),
-                &owner_signer.signer().guid(),
+                &owner_signer.into(),
             )
             .call()
             .await

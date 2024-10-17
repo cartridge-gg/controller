@@ -54,7 +54,6 @@ pub struct KatanaRunner {
     pub rpc_url: Url,
     rpc_client: Arc<JsonRpcClient<HttpTransport>>,
     proxy_handle: JoinHandle<()>,
-    guardian: Signer,
 }
 
 impl KatanaRunner {
@@ -93,7 +92,6 @@ impl KatanaRunner {
             rpc_url: proxy_url,
             rpc_client,
             proxy_handle,
-            guardian,
         }
     }
 
