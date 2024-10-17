@@ -3,12 +3,12 @@ import {
   LayoutContent,
   LayoutHeader,
 } from "@/components/layout";
-import { useConnection } from "@/hooks/context";
+import { useAccount } from "@/hooks/context";
 import { CopyAddress } from "@cartridge/ui-next";
 import { Navigation } from "./navigation";
 
 export function Quest() {
-  const { username, address } = useConnection();
+  const { username, address } = useAccount();
 
   return (
     <LayoutContainer>
