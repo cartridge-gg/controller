@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  '@cartridge/account-wasm': 0.4.0
+
 importers:
 
   .:
@@ -238,8 +241,8 @@ importers:
   packages/controller:
     dependencies:
       '@cartridge/account-wasm':
-        specifier: workspace:^
-        version: link:../account-wasm
+        specifier: 0.4.0
+        version: 0.4.0
       '@cartridge/penpal':
         specifier: ^6.2.3
         version: 6.2.3
@@ -272,8 +275,8 @@ importers:
   packages/keychain:
     dependencies:
       '@cartridge/account-wasm':
-        specifier: workspace:^
-        version: link:../account-wasm
+        specifier: 0.4.0
+        version: 0.4.0
       '@cartridge/controller':
         specifier: workspace:^
         version: link:../controller
@@ -1688,6 +1691,9 @@ packages:
 
   '@bcoe/v8-coverage@0.2.3':
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
+
+  '@cartridge/account-wasm@0.4.0':
+    resolution: {integrity: sha512-slkZhkgAPMhh2sXa2GNeidighPjjjiTA4hpi5yqEJIbMV7SnoHZGBqBZC9oDiDWGnCGVeClwF5+YPdkxZMGhYA==}
 
   '@cartridge/penpal@6.2.3':
     resolution: {integrity: sha512-K8h9VqBfFPXcAFQNnvgBnejF/dp7249pS4jXu3NhNYR6JqMQxtcrDqfnPmJvbF4ECEBs+8Z2UiwlRQiKt5nNsg==}
@@ -15712,6 +15718,8 @@ snapshots:
   '@base2/pretty-print-object@1.0.1': {}
 
   '@bcoe/v8-coverage@0.2.3': {}
+
+  '@cartridge/account-wasm@0.4.0': {}
 
   '@cartridge/penpal@6.2.3': {}
 
