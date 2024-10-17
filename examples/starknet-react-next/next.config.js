@@ -5,10 +5,6 @@ const nextConfig = {
   experimental: {
     externalDir: true,
   },
-  env: {
-    KEYCHAIN_FRAME_URL: process.env.KEYCHAIN_FRAME_URL,
-    PROFILE_FRAME_URL: process.env.PROFILE_FRAME_URL,
-  },
   webpack: (config, { isServer, dev }) => {
     // Use the client static directory in the server bundle and prod mode
     // Fixes `Error occurred prerendering page "/"`

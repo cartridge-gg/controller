@@ -13,6 +13,7 @@ export const cartridgeTWPreset: Partial<Config> = {
       },
     },
     colors: {
+      transparent: "transparent",
       current: "currentColor",
       border: "hsl(var(--border)/0.12)",
       input: "hsl(var(--input)/0.12)",
@@ -52,6 +53,9 @@ export const cartridgeTWPreset: Partial<Config> = {
       fontFamily: {
         sans: ["Inter", ...defaultTheme.fontFamily.sans],
         mono: ["IBM Plex Mono", ...defaultTheme.fontFamily.mono],
+      },
+      fontSize: {
+        ["2xs"]: "10px",
       },
       borderRadius: {
         xl: "calc(var(--radius) + 4px)",

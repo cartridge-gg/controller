@@ -1,0 +1,20 @@
+type Query {
+  ercTransfer(accountAddress: String!, limit: Int!): [ERC__Transfer!]
+}
+
+type ERC__Transfer {
+  amount: String
+  executed_at: String
+  from: String
+  to: String
+  type: String
+  token_metadata: ERC__Token
+}
+
+type ERC__Token {
+  contract_address: String
+  decimals: String
+  name: String
+  symbol: String
+  token_id: String
+}
