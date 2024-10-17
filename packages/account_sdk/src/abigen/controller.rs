@@ -227,7 +227,7 @@ impl cainome::cairo_serde::CairoSerde for ExternalOwnerRemoved {
 #[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
 pub struct OutsideExecution {
     pub caller: cainome::cairo_serde::ContractAddress,
-    pub nonce: starknet::core::types::Felt,
+    pub nonce: (starknet::core::types::Felt, starknet::core::types::Felt),
     pub execute_after: u64,
     pub execute_before: u64,
     pub calls: Vec<Call>,
@@ -239,7 +239,10 @@ impl cainome::cairo_serde::CairoSerde for OutsideExecution {
     fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
         let mut __size = 0;
         __size += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&__rust.caller);
-        __size += starknet::core::types::Felt::cairo_serialized_size(&__rust.nonce);
+        __size +=
+            <(starknet::core::types::Felt, starknet::core::types::Felt)>::cairo_serialized_size(
+                &__rust.nonce,
+            );
         __size += u64::cairo_serialized_size(&__rust.execute_after);
         __size += u64::cairo_serialized_size(&__rust.execute_before);
         __size += Vec::<Call>::cairo_serialized_size(&__rust.calls);
@@ -250,7 +253,11 @@ impl cainome::cairo_serde::CairoSerde for OutsideExecution {
         __out.extend(cainome::cairo_serde::ContractAddress::cairo_serialize(
             &__rust.caller,
         ));
-        __out.extend(starknet::core::types::Felt::cairo_serialize(&__rust.nonce));
+        __out.extend(
+            <(starknet::core::types::Felt, starknet::core::types::Felt)>::cairo_serialize(
+                &__rust.nonce,
+            ),
+        );
         __out.extend(u64::cairo_serialize(&__rust.execute_after));
         __out.extend(u64::cairo_serialize(&__rust.execute_before));
         __out.extend(Vec::<Call>::cairo_serialize(&__rust.calls));
@@ -263,8 +270,14 @@ impl cainome::cairo_serde::CairoSerde for OutsideExecution {
         let mut __offset = __offset;
         let caller = cainome::cairo_serde::ContractAddress::cairo_deserialize(__felts, __offset)?;
         __offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&caller);
-        let nonce = starknet::core::types::Felt::cairo_deserialize(__felts, __offset)?;
-        __offset += starknet::core::types::Felt::cairo_serialized_size(&nonce);
+        let nonce =
+            <(starknet::core::types::Felt, starknet::core::types::Felt)>::cairo_deserialize(
+                __felts, __offset,
+            )?;
+        __offset +=
+            <(starknet::core::types::Felt, starknet::core::types::Felt)>::cairo_serialized_size(
+                &nonce,
+            );
         let execute_after = u64::cairo_deserialize(__felts, __offset)?;
         __offset += u64::cairo_serialized_size(&execute_after);
         let execute_before = u64::cairo_deserialize(__felts, __offset)?;
@@ -2118,7 +2131,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
-    pub fn get_outside_execution_message_hash_rev_0(
+    pub fn get_outside_execution_message_hash_rev_2(
         &self,
         outside_execution: &OutsideExecution,
     ) -> cainome::cairo_serde::call::FCall<A::Provider, starknet::core::types::Felt> {
@@ -2128,7 +2141,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
             entry_point_selector: starknet::macros::selector!(
-                "get_outside_execution_message_hash_rev_0"
+                "get_outside_execution_message_hash_rev_2"
             ),
             calldata: __calldata,
         };
@@ -2136,17 +2149,17 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
-    pub fn get_outside_execution_message_hash_rev_1(
+    pub fn get_outside_execution_v3_channel_nonce(
         &self,
-        outside_execution: &OutsideExecution,
+        channel: &starknet::core::types::Felt,
     ) -> cainome::cairo_serde::call::FCall<A::Provider, starknet::core::types::Felt> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
-        __calldata.extend(OutsideExecution::cairo_serialize(outside_execution));
+        __calldata.extend(starknet::core::types::Felt::cairo_serialize(channel));
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
             entry_point_selector: starknet::macros::selector!(
-                "get_outside_execution_message_hash_rev_1"
+                "get_outside_execution_v3_channel_nonce"
             ),
             calldata: __calldata,
         };
@@ -2204,16 +2217,20 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
-    pub fn is_valid_outside_execution_nonce(
+    pub fn is_valid_outside_execution_v3_nonce(
         &self,
-        nonce: &starknet::core::types::Felt,
+        nonce: &(starknet::core::types::Felt, starknet::core::types::Felt),
     ) -> cainome::cairo_serde::call::FCall<A::Provider, bool> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
-        __calldata.extend(starknet::core::types::Felt::cairo_serialize(nonce));
+        __calldata.extend(
+            <(starknet::core::types::Felt, starknet::core::types::Felt)>::cairo_serialize(nonce),
+        );
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
-            entry_point_selector: starknet::macros::selector!("is_valid_outside_execution_nonce"),
+            entry_point_selector: starknet::macros::selector!(
+                "is_valid_outside_execution_v3_nonce"
+            ),
             calldata: __calldata,
         };
         cainome::cairo_serde::call::FCall::new(__call, self.provider())
@@ -2419,7 +2436,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
-    pub fn execute_from_outside_getcall(
+    pub fn execute_from_outside_v3_getcall(
         &self,
         outside_execution: &OutsideExecution,
         signature: &Vec<starknet::core::types::Felt>,
@@ -2432,13 +2449,13 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
         ));
         starknet::core::types::Call {
             to: self.address,
-            selector: starknet::macros::selector!("execute_from_outside"),
+            selector: starknet::macros::selector!("execute_from_outside_v3"),
             calldata: __calldata,
         }
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
-    pub fn execute_from_outside(
+    pub fn execute_from_outside_v3(
         &self,
         outside_execution: &OutsideExecution,
         signature: &Vec<starknet::core::types::Felt>,
@@ -2451,46 +2468,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
         ));
         let __call = starknet::core::types::Call {
             to: self.address,
-            selector: starknet::macros::selector!("execute_from_outside"),
-            calldata: __calldata,
-        };
-        self.account.execute_v1(vec![__call])
-    }
-    #[allow(clippy::ptr_arg)]
-    #[allow(clippy::too_many_arguments)]
-    pub fn execute_from_outside_v2_getcall(
-        &self,
-        outside_execution: &OutsideExecution,
-        signature: &Vec<starknet::core::types::Felt>,
-    ) -> starknet::core::types::Call {
-        use cainome::cairo_serde::CairoSerde;
-        let mut __calldata = vec![];
-        __calldata.extend(OutsideExecution::cairo_serialize(outside_execution));
-        __calldata.extend(Vec::<starknet::core::types::Felt>::cairo_serialize(
-            signature,
-        ));
-        starknet::core::types::Call {
-            to: self.address,
-            selector: starknet::macros::selector!("execute_from_outside_v2"),
-            calldata: __calldata,
-        }
-    }
-    #[allow(clippy::ptr_arg)]
-    #[allow(clippy::too_many_arguments)]
-    pub fn execute_from_outside_v2(
-        &self,
-        outside_execution: &OutsideExecution,
-        signature: &Vec<starknet::core::types::Felt>,
-    ) -> starknet::accounts::ExecutionV1<A> {
-        use cainome::cairo_serde::CairoSerde;
-        let mut __calldata = vec![];
-        __calldata.extend(OutsideExecution::cairo_serialize(outside_execution));
-        __calldata.extend(Vec::<starknet::core::types::Felt>::cairo_serialize(
-            signature,
-        ));
-        let __call = starknet::core::types::Call {
-            to: self.address,
-            selector: starknet::macros::selector!("execute_from_outside_v2"),
+            selector: starknet::macros::selector!("execute_from_outside_v3"),
             calldata: __calldata,
         };
         self.account.execute_v1(vec![__call])
@@ -2764,7 +2742,7 @@ impl<P: starknet::providers::Provider + Sync> ControllerReader<P> {
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
-    pub fn get_outside_execution_message_hash_rev_0(
+    pub fn get_outside_execution_message_hash_rev_2(
         &self,
         outside_execution: &OutsideExecution,
     ) -> cainome::cairo_serde::call::FCall<P, starknet::core::types::Felt> {
@@ -2774,7 +2752,7 @@ impl<P: starknet::providers::Provider + Sync> ControllerReader<P> {
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
             entry_point_selector: starknet::macros::selector!(
-                "get_outside_execution_message_hash_rev_0"
+                "get_outside_execution_message_hash_rev_2"
             ),
             calldata: __calldata,
         };
@@ -2782,17 +2760,17 @@ impl<P: starknet::providers::Provider + Sync> ControllerReader<P> {
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
-    pub fn get_outside_execution_message_hash_rev_1(
+    pub fn get_outside_execution_v3_channel_nonce(
         &self,
-        outside_execution: &OutsideExecution,
+        channel: &starknet::core::types::Felt,
     ) -> cainome::cairo_serde::call::FCall<P, starknet::core::types::Felt> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
-        __calldata.extend(OutsideExecution::cairo_serialize(outside_execution));
+        __calldata.extend(starknet::core::types::Felt::cairo_serialize(channel));
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
             entry_point_selector: starknet::macros::selector!(
-                "get_outside_execution_message_hash_rev_1"
+                "get_outside_execution_v3_channel_nonce"
             ),
             calldata: __calldata,
         };
@@ -2850,16 +2828,20 @@ impl<P: starknet::providers::Provider + Sync> ControllerReader<P> {
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
-    pub fn is_valid_outside_execution_nonce(
+    pub fn is_valid_outside_execution_v3_nonce(
         &self,
-        nonce: &starknet::core::types::Felt,
+        nonce: &(starknet::core::types::Felt, starknet::core::types::Felt),
     ) -> cainome::cairo_serde::call::FCall<P, bool> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
-        __calldata.extend(starknet::core::types::Felt::cairo_serialize(nonce));
+        __calldata.extend(
+            <(starknet::core::types::Felt, starknet::core::types::Felt)>::cairo_serialize(nonce),
+        );
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
-            entry_point_selector: starknet::macros::selector!("is_valid_outside_execution_nonce"),
+            entry_point_selector: starknet::macros::selector!(
+                "is_valid_outside_execution_v3_nonce"
+            ),
             calldata: __calldata,
         };
         cainome::cairo_serde::call::FCall::new(__call, self.provider())
