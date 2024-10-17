@@ -10,12 +10,6 @@ trait IAssertOwner<TState> {
 }
 
 #[starknet::interface]
-trait IIsGuardian<TState> {
-    fn is_valid_guardian(self: @TState, guardian_guid: felt252) -> bool;
-    fn get_guardian_guid(self: @TState) -> felt252;
-}
-
-#[starknet::interface]
 trait ICartridgeAccount<TContractState> {
     fn __validate_declare__(ref self: TContractState, class_hash: felt252) -> felt252;
     fn __validate_deploy__(
@@ -31,6 +25,7 @@ trait ICartridgeAccount<TContractState> {
 mod CartridgeAccount {
     use openzeppelin::upgrades::UpgradeableComponent::InternalTrait;
     use core::traits::TryInto;
+    use core::option::OptionTrait;
     use core::array::SpanTrait;
     use core::to_byte_array::FormatAsByteArray;
     use core::array::ArrayTrait;
@@ -79,7 +74,7 @@ mod CartridgeAccount {
     use openzeppelin::upgrades::UpgradeableComponent;
     use openzeppelin::upgrades::interface::IUpgradeable;
 
-    use controller::account::{ICartridgeAccount, IAssertOwner, IIsGuardian};
+    use controller::account::{ICartridgeAccount, IAssertOwner};
     use controller::external_owners::external_owners::{
         external_owners_component,
         external_owners_component::InternalImpl as ExternalOwnersInternalImpl
@@ -152,7 +147,6 @@ mod CartridgeAccount {
 
     #[storage]
     struct Storage {
-        guardian_guid: felt252,
         #[substorage(v0)]
         multiple_owners: multiple_owners_component::Storage,
         #[substorage(v0)]
@@ -224,11 +218,6 @@ mod CartridgeAccount {
             },
             Owner::Account(account) => { self.external_owners._register_external_owner(account); },
         }
-        let guardian_guid = match guardian {
-            Option::Some(guardian) => guardian.into_guid(),
-            Option::None => 0,
-        };
-        self.guardian_guid.write(guardian_guid);
     }
 
     //
@@ -389,17 +378,6 @@ mod CartridgeAccount {
         }
     }
 
-    #[abi(embed_v0)]
-    impl IIsGuardianImpl of IIsGuardian<ContractState> {
-        fn is_valid_guardian(self: @ContractState, guardian_guid: felt252) -> bool {
-            let storage_guid = self.guardian_guid.read();
-            storage_guid == 0 || storage_guid == guardian_guid
-        }
-        fn get_guardian_guid(self: @ContractState) -> felt252 {
-            self.guardian_guid.read()
-        }
-    }
-
     impl OutsideExecutionCallbackImpl of IOutsideExecutionCallback<ContractState> {
         #[inline(always)]
         fn execute_from_outside_callback(
@@ -447,14 +425,8 @@ mod CartridgeAccount {
         fn is_valid_span_signature(
             self: @ContractState, hash: felt252, signer_signatures: Span<SignerSignature>
         ) -> bool {
-            if signer_signatures.is_empty() {
-                return false;
-            }
-            if signer_signatures.len() > 2 {
-                return false;
-            }
+            assert(signer_signatures.len() <= 2, 'invalid-signature-length');
             self.is_valid_owner_signature(hash, *signer_signatures.at(0))
-                && self.is_valid_guardian_signature(hash, signer_signatures.get(1))
         }
 
         #[must_use]
@@ -466,24 +438,6 @@ mod CartridgeAccount {
                 return false;
             }
             return signer_signature.is_valid_signature(hash);
-        }
-
-        #[must_use]
-        fn is_valid_guardian_signature(
-            self: @ContractState, hash: felt252, guardian_signature: Option<Box<@SignerSignature>>
-        ) -> bool {
-            match guardian_signature {
-                Option::Some(signature) => {
-                    let signer = (*signature.unbox()).signer().storage_value();
-                    (*signature.unbox()).is_valid_signature(hash)
-                        && self.is_valid_guardian(signer.into_guid())
-                },
-                Option::None => if self.guardian_guid.read() == 0 {
-                    true
-                } else {
-                    false
-                }
-            }
         }
 
         #[inline(always)]
@@ -500,19 +454,9 @@ mod CartridgeAccount {
         fn assert_valid_span_signature(
             self: @ContractState, hash: felt252, signer_signatures: Array<SignerSignature>
         ) {
-            assert(signer_signatures.len() >= 1, 'empty-signatures');
+            assert(signer_signatures.len() <= 2, 'invalid-signature-length');
             assert(
                 self.is_valid_owner_signature(hash, *signer_signatures.at(0)), 'invalid-owner-sig'
-            );
-            if self.guardian_guid.read() == 0 {
-                assert(signer_signatures.len() <= 2, 'too-many-signatures');
-            } else {
-                assert(signer_signatures.len() >= 2, 'no-guardian-sig');
-                assert(signer_signatures.len() == 2, 'too-many-signatures');
-            };
-            assert(
-                self.is_valid_guardian_signature(hash, signer_signatures.get(1)),
-                'invalid-guradian-sig'
             );
         }
 
