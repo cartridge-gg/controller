@@ -413,6 +413,7 @@ pub struct Session {
     pub allowed_methods_root: starknet::core::types::Felt,
     pub metadata_hash: starknet::core::types::Felt,
     pub session_key_guid: starknet::core::types::Felt,
+    pub guardian_key_guid: starknet::core::types::Felt,
 }
 impl cainome::cairo_serde::CairoSerde for Session {
     type RustType = Self;
@@ -424,6 +425,7 @@ impl cainome::cairo_serde::CairoSerde for Session {
         __size += starknet::core::types::Felt::cairo_serialized_size(&__rust.allowed_methods_root);
         __size += starknet::core::types::Felt::cairo_serialized_size(&__rust.metadata_hash);
         __size += starknet::core::types::Felt::cairo_serialized_size(&__rust.session_key_guid);
+        __size += starknet::core::types::Felt::cairo_serialized_size(&__rust.guardian_key_guid);
         __size
     }
     fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
@@ -437,6 +439,9 @@ impl cainome::cairo_serde::CairoSerde for Session {
         ));
         __out.extend(starknet::core::types::Felt::cairo_serialize(
             &__rust.session_key_guid,
+        ));
+        __out.extend(starknet::core::types::Felt::cairo_serialize(
+            &__rust.guardian_key_guid,
         ));
         __out
     }
@@ -454,11 +459,14 @@ impl cainome::cairo_serde::CairoSerde for Session {
         __offset += starknet::core::types::Felt::cairo_serialized_size(&metadata_hash);
         let session_key_guid = starknet::core::types::Felt::cairo_deserialize(__felts, __offset)?;
         __offset += starknet::core::types::Felt::cairo_serialized_size(&session_key_guid);
+        let guardian_key_guid = starknet::core::types::Felt::cairo_deserialize(__felts, __offset)?;
+        __offset += starknet::core::types::Felt::cairo_serialized_size(&guardian_key_guid);
         Ok(Session {
             expires_at,
             allowed_methods_root,
             metadata_hash,
             session_key_guid,
+            guardian_key_guid,
         })
     }
 }
@@ -2118,20 +2126,6 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
-    pub fn get_guardian_guid(
-        &self,
-    ) -> cainome::cairo_serde::call::FCall<A::Provider, starknet::core::types::Felt> {
-        use cainome::cairo_serde::CairoSerde;
-        let mut __calldata = vec![];
-        let __call = starknet::core::types::FunctionCall {
-            contract_address: self.address,
-            entry_point_selector: starknet::macros::selector!("get_guardian_guid"),
-            calldata: __calldata,
-        };
-        cainome::cairo_serde::call::FCall::new(__call, self.provider())
-    }
-    #[allow(clippy::ptr_arg)]
-    #[allow(clippy::too_many_arguments)]
     pub fn get_outside_execution_message_hash_rev_0(
         &self,
         outside_execution: &OutsideExecution,
@@ -2232,22 +2226,6 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
             entry_point_selector: starknet::macros::selector!("is_session_revoked"),
-            calldata: __calldata,
-        };
-        cainome::cairo_serde::call::FCall::new(__call, self.provider())
-    }
-    #[allow(clippy::ptr_arg)]
-    #[allow(clippy::too_many_arguments)]
-    pub fn is_valid_guardian(
-        &self,
-        guardian_guid: &starknet::core::types::Felt,
-    ) -> cainome::cairo_serde::call::FCall<A::Provider, bool> {
-        use cainome::cairo_serde::CairoSerde;
-        let mut __calldata = vec![];
-        __calldata.extend(starknet::core::types::Felt::cairo_serialize(guardian_guid));
-        let __call = starknet::core::types::FunctionCall {
-            contract_address: self.address,
-            entry_point_selector: starknet::macros::selector!("is_valid_guardian"),
             calldata: __calldata,
         };
         cainome::cairo_serde::call::FCall::new(__call, self.provider())
@@ -2814,20 +2792,6 @@ impl<P: starknet::providers::Provider + Sync> ControllerReader<P> {
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
-    pub fn get_guardian_guid(
-        &self,
-    ) -> cainome::cairo_serde::call::FCall<P, starknet::core::types::Felt> {
-        use cainome::cairo_serde::CairoSerde;
-        let mut __calldata = vec![];
-        let __call = starknet::core::types::FunctionCall {
-            contract_address: self.address,
-            entry_point_selector: starknet::macros::selector!("get_guardian_guid"),
-            calldata: __calldata,
-        };
-        cainome::cairo_serde::call::FCall::new(__call, self.provider())
-    }
-    #[allow(clippy::ptr_arg)]
-    #[allow(clippy::too_many_arguments)]
     pub fn get_outside_execution_message_hash_rev_0(
         &self,
         outside_execution: &OutsideExecution,
@@ -2928,22 +2892,6 @@ impl<P: starknet::providers::Provider + Sync> ControllerReader<P> {
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
             entry_point_selector: starknet::macros::selector!("is_session_revoked"),
-            calldata: __calldata,
-        };
-        cainome::cairo_serde::call::FCall::new(__call, self.provider())
-    }
-    #[allow(clippy::ptr_arg)]
-    #[allow(clippy::too_many_arguments)]
-    pub fn is_valid_guardian(
-        &self,
-        guardian_guid: &starknet::core::types::Felt,
-    ) -> cainome::cairo_serde::call::FCall<P, bool> {
-        use cainome::cairo_serde::CairoSerde;
-        let mut __calldata = vec![];
-        __calldata.extend(starknet::core::types::Felt::cairo_serialize(guardian_guid));
-        let __call = starknet::core::types::FunctionCall {
-            contract_address: self.address,
-            entry_point_selector: starknet::macros::selector!("is_valid_guardian"),
             calldata: __calldata,
         };
         cainome::cairo_serde::call::FCall::new(__call, self.provider())

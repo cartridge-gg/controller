@@ -27,6 +27,7 @@ pub struct Session {
     pub authorization_root: Felt,
     pub metadata: String,
     pub session_key_guid: Felt,
+    pub guardian_key_guid: Felt,
 }
 
 impl Session {
@@ -58,6 +59,7 @@ impl Session {
             authorization_root: root,
             metadata: serde_json::to_string(&metadata).unwrap(),
             session_key_guid: signer.guid(),
+            guardian_key_guid: Felt::ZERO,
         })
     }
 
@@ -71,6 +73,7 @@ impl Session {
             allowed_methods_root: self.authorization_root,
             metadata_hash: Felt::ZERO,
             session_key_guid: self.session_key_guid,
+            guardian_key_guid: self.guardian_key_guid,
         }
     }
 
