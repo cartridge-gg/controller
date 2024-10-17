@@ -5,10 +5,10 @@ use starknet::{
     macros::{felt, selector},
 };
 
-use crate::abigen::erc_20::Erc20;
 use crate::tests::account::FEE_TOKEN_ADDRESS;
 use crate::tests::runners::katana::KatanaRunner;
 use crate::tests::transaction_waiter::TransactionWaiter;
+use crate::{abigen::erc_20::Erc20, signers::Owner};
 use crate::{artifacts::Version, signers::Signer};
 use cainome::cairo_serde::{CairoSerde, ContractAddress, U256};
 
@@ -17,7 +17,11 @@ async fn test_execute_from_outside() {
     let signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("testuser".to_owned(), signer, Version::LATEST)
+        .deploy_controller(
+            "testuser".to_owned(),
+            Owner::Signer(signer),
+            Version::LATEST,
+        )
         .await;
 
     let recipient = ContractAddress(felt!("0x18301129"));

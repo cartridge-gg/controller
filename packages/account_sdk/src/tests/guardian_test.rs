@@ -7,7 +7,7 @@ use starknet::{
 use crate::{
     abigen::erc_20::Erc20,
     artifacts::Version,
-    signers::{webauthn::WebauthnSigner, Signer},
+    signers::{webauthn::WebauthnSigner, Owner, Signer},
     tests::{account::FEE_TOKEN_ADDRESS, runners::katana::KatanaRunner},
 };
 
@@ -16,7 +16,11 @@ use super::ensure_txn;
 pub async fn test_verify_execute(signer: Signer) {
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("username".to_owned(), signer, Version::LATEST)
+        .deploy_controller(
+            "username".to_owned(),
+            Owner::Signer(signer),
+            Version::LATEST,
+        )
         .await;
 
     let new_account = ContractAddress(felt!("0x18301129"));

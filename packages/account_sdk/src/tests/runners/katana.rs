@@ -1,5 +1,6 @@
-use cainome::cairo_serde::{CairoSerde, ContractAddress, U256};
-use starknet::accounts::{ExecutionEncoding, SingleOwnerAccount};
+use cainome::cairo_serde::{ContractAddress, U256};
+use starknet::accounts::{AccountFactory, ExecutionEncoding, SingleOwnerAccount};
+use starknet::contract::ContractFactory;
 use starknet::core::types::{BlockId, BlockTag, DeclareTransactionResult};
 use starknet::macros::short_string;
 use starknet::providers::jsonrpc::HttpTransport;
@@ -13,15 +14,13 @@ use url::Url;
 
 use lazy_static::lazy_static;
 
-use crate::abigen::controller::{self, Signer as AbigenSigner};
 use crate::abigen::erc_20::Erc20;
 use crate::artifacts::{Version, CONTROLLERS};
 use crate::controller::Controller;
+use crate::factory::ControllerFactory;
 use crate::provider::CartridgeJsonRpcProvider;
-use crate::signers::{HashSigner, Signer};
-use crate::tests::account::{
-    AccountDeclaration, AccountDeployment, DeployResult, FEE_TOKEN_ADDRESS,
-};
+use crate::signers::Owner;
+use crate::tests::account::{AccountDeclaration, FEE_TOKEN_ADDRESS, UDC_ADDRESS};
 use crate::tests::transaction_waiter::TransactionWaiter;
 
 use super::cartridge::CartridgeProxy;
@@ -144,78 +143,48 @@ impl KatanaRunner {
         class_hash
     }
 
-    async fn deploy_with_calldata(
-        &self,
-        constructor_calldata: Vec<Felt>,
-        version: Version,
-    ) -> DeployResult {
-        let prefunded: SingleOwnerAccount<&JsonRpcClient<HttpTransport>, LocalWallet> =
-            self.executor().await;
-        let class_hash = self.declare_controller(version).await;
-
-        let deploy_result = AccountDeployment::new(self.client())
-            .deploy(constructor_calldata, Felt::ZERO, &prefunded, class_hash)
-            .await
-            .unwrap()
-            .wait_for_completion()
-            .await;
-
-        TransactionWaiter::new(deploy_result.transaction_hash, self.client())
-            .wait()
-            .await
-            .unwrap();
-
-        self.fund(&deploy_result.deployed_address).await;
-
-        deploy_result
-    }
-
     pub async fn deploy_controller(
         &self,
         username: String,
-        signer: Signer,
+        owner: Owner,
         version: Version,
     ) -> Controller {
-        let mut constructor_calldata =
-            controller::Owner::cairo_serialize(&controller::Owner::Signer(signer.signer()));
-        constructor_calldata.extend(Option::<AbigenSigner>::cairo_serialize(&None));
+        let prefunded: SingleOwnerAccount<&JsonRpcClient<HttpTransport>, LocalWallet> =
+            self.executor().await;
+        let class_hash = self.declare_controller(version).await;
+        let salt = Felt::ZERO;
 
-        let DeployResult {
-            deployed_address, ..
-        } = self
-            .deploy_with_calldata(constructor_calldata, version)
-            .await;
+        let contract_factory = ContractFactory::new_with_udc(class_hash, prefunded, *UDC_ADDRESS);
+        let factory = ControllerFactory::new(
+            class_hash,
+            self.chain_id,
+            owner.clone(),
+            self.client.clone(),
+        );
+
+        let tx = contract_factory
+            .deploy_v1(factory.calldata(), salt, false)
+            .send()
+            .await
+            .expect("Unable to deploy contract");
+
+        let address = factory.address(salt);
+        self.fund(&address).await;
+
+        TransactionWaiter::new(tx.transaction_hash, self.client())
+            .wait()
+            .await
+            .unwrap();
 
         Controller::new(
             "app_id".to_string(),
             username,
             CONTROLLERS[&version].hash,
             self.rpc_url.clone(),
-            signer,
-            deployed_address,
+            owner,
+            address,
             self.chain_id,
         )
-    }
-
-    pub async fn deploy_controller_with_external_owner(
-        &self,
-        external_owner: ContractAddress,
-        version: Version,
-    ) -> ContractAddress {
-        let guardian = SigningKey::from_random();
-        let mut constructor_calldata =
-            controller::Owner::cairo_serialize(&controller::Owner::Account(external_owner));
-        constructor_calldata.extend(Option::<AbigenSigner>::cairo_serialize(&Some(
-            guardian.signer(),
-        )));
-
-        let DeployResult {
-            deployed_address, ..
-        } = self
-            .deploy_with_calldata(constructor_calldata, version)
-            .await;
-
-        deployed_address.into()
     }
 }
 

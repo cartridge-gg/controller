@@ -5,17 +5,53 @@ pub mod webauthn;
 
 use ::starknet::{
     core::{crypto::EcdsaSignError, types::Felt, utils::NonAsciiNameError},
-    macros::{selector, short_string},
+    macros::selector,
     signers::SigningKey,
 };
+use cainome::cairo_serde::NonZero;
 
-use starknet_crypto::{poseidon_hash, PoseidonHasher};
+use starknet_crypto::PoseidonHasher;
 
 #[cfg(feature = "webauthn")]
 use webauthn::WebauthnSigner;
 
-use crate::abigen::controller::{Signer as AbigenSigner, SignerSignature};
+use crate::abigen::controller::SignerSignature;
 use async_trait::async_trait;
+
+#[derive(Debug, Clone)]
+pub enum Owner {
+    Signer(Signer),
+    Account(Felt),
+}
+
+impl From<Owner> for crate::abigen::controller::Owner {
+    fn from(owner: Owner) -> Self {
+        match owner {
+            Owner::Signer(signer) => crate::abigen::controller::Owner::Signer(signer.into()),
+            Owner::Account(address) => crate::abigen::controller::Owner::Account(address.into()),
+        }
+    }
+}
+
+impl From<Owner> for Felt {
+    fn from(owner: Owner) -> Self {
+        match owner {
+            Owner::Signer(signer) => Felt::from(crate::abigen::controller::Signer::from(signer)),
+            Owner::Account(address) => address,
+        }
+    }
+}
+
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+impl HashSigner for Owner {
+    async fn sign(&self, tx_hash: &Felt) -> Result<SignerSignature, SignError> {
+        match self {
+            Owner::Signer(signer) => signer.sign(tx_hash).await,
+            Owner::Account(_) => Err(SignError::AccountOwnerCannotSign),
+        }
+    }
+}
 
 #[derive(Debug, Clone)]
 pub enum Signer {
@@ -34,13 +70,36 @@ impl HashSigner for Signer {
             Signer::Webauthn(s) => HashSigner::sign(s, tx_hash).await,
         }
     }
+}
 
-    fn signer(&self) -> AbigenSigner {
-        match self {
-            Signer::Starknet(s) => s.signer(),
+impl From<Signer> for crate::abigen::controller::Signer {
+    fn from(signer: Signer) -> Self {
+        match signer {
+            Signer::Starknet(s) => crate::abigen::controller::Signer::Starknet(
+                crate::abigen::controller::StarknetSigner {
+                    pubkey: NonZero::new(s.verifying_key().scalar()).unwrap(),
+                },
+            ),
             #[cfg(feature = "webauthn")]
-            Signer::Webauthn(s) => s.signer(),
+            Signer::Webauthn(s) => crate::abigen::controller::Signer::Webauthn(s.into()),
         }
+    }
+}
+
+impl From<crate::abigen::controller::Signer> for Felt {
+    fn from(signer: crate::abigen::controller::Signer) -> Self {
+        match signer {
+            crate::abigen::controller::Signer::Starknet(s) => s.into(),
+            #[cfg(feature = "webauthn")]
+            crate::abigen::controller::Signer::Webauthn(s) => s.into(),
+            _ => panic!("not implemented"),
+        }
+    }
+}
+
+impl From<Signer> for Felt {
+    fn from(signer: Signer) -> Self {
+        crate::abigen::controller::Signer::from(signer).into()
     }
 }
 
@@ -92,52 +151,15 @@ pub enum SignError {
 
     #[error("Invalid message provided: {0}")]
     InvalidMessageError(String),
+
+    #[error("Account owner cannot sign")]
+    AccountOwnerCannotSign,
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 pub trait HashSigner {
     async fn sign(&self, tx_hash: &Felt) -> Result<SignerSignature, SignError>;
-    fn signer(&self) -> AbigenSigner;
-}
-
-pub trait SignerTrait {
-    fn guid(&self) -> Felt;
-    fn magic(&self) -> Felt;
-}
-
-impl SignerTrait for AbigenSigner {
-    fn guid(&self) -> Felt {
-        match self {
-            AbigenSigner::Starknet(signer) => poseidon_hash(self.magic(), *signer.pubkey.inner()),
-            #[cfg(feature = "webauthn")]
-            AbigenSigner::Webauthn(signer) => {
-                let mut state = PoseidonHasher::new();
-                state.update(self.magic());
-                state.update(signer.origin.len().into());
-                for b in &signer.origin {
-                    state.update((*b).into())
-                }
-                let rp_id_hash = signer.rp_id_hash.inner();
-                state.update(rp_id_hash.low.into());
-                state.update(rp_id_hash.high.into());
-                let pub_key = signer.pubkey.inner();
-                state.update(pub_key.low.into());
-                state.update(pub_key.high.into());
-                state.finalize()
-            }
-            _ => unimplemented!(),
-        }
-    }
-
-    fn magic(&self) -> Felt {
-        match self {
-            AbigenSigner::Starknet(_) => short_string!("Starknet Signer"),
-            #[cfg(feature = "webauthn")]
-            AbigenSigner::Webauthn(_) => short_string!("Webauthn Signer"),
-            _ => unimplemented!(),
-        }
-    }
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]

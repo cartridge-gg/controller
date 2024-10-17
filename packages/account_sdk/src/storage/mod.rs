@@ -49,12 +49,18 @@ pub enum Signer {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum Owner {
+    Signer(Signer),
+    Account(Felt),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ControllerMetadata {
     pub username: String,
     pub class_hash: Felt,
     pub rpc_url: String,
     pub salt: Felt,
-    pub owner: Signer,
+    pub owner: Owner,
     pub address: Felt,
     pub chain_id: Felt,
 }
@@ -71,6 +77,15 @@ impl From<&Controller> for ControllerMetadata {
             salt: controller.salt,
             owner: (&controller.owner).into(),
             username: controller.username.clone(),
+        }
+    }
+}
+
+impl From<&crate::signers::Owner> for Owner {
+    fn from(owner: &crate::signers::Owner) -> Self {
+        match owner {
+            crate::signers::Owner::Signer(signer) => Owner::Signer(signer.into()),
+            crate::signers::Owner::Account(address) => Owner::Account(*address),
         }
     }
 }
@@ -132,6 +147,17 @@ impl TryFrom<Signer> for crate::signers::Signer {
                     crate::signers::webauthn::WebauthnSigner::new(w.rp_id, credential_id, cose),
                 ))
             }
+        }
+    }
+}
+
+impl TryFrom<Owner> for crate::signers::Owner {
+    type Error = ControllerError;
+
+    fn try_from(owner: Owner) -> Result<Self, Self::Error> {
+        match owner {
+            Owner::Signer(signer) => Ok(crate::signers::Owner::Signer(signer.try_into()?)),
+            Owner::Account(address) => Ok(crate::signers::Owner::Account(address)),
         }
     }
 }

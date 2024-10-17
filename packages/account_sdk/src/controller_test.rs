@@ -5,15 +5,18 @@ use crate::{
     artifacts::{Version, CONTROLLERS},
     controller::Controller,
     errors::ControllerError,
-    signers::Signer,
+    factory::ControllerFactory,
+    signers::{Owner, Signer},
     tests::{
         account::FEE_TOKEN_ADDRESS, runners::katana::KatanaRunner,
         transaction_waiter::TransactionWaiter,
     },
 };
 use cainome::cairo_serde::{ContractAddress, U256};
-use starknet::{macros::felt, providers::Provider, signers::SigningKey};
-use starknet_crypto::Felt;
+use starknet::{
+    accounts::AccountFactory, core::utils::cairo_short_string_to_felt, macros::felt,
+    providers::Provider, signers::SigningKey,
+};
 
 #[tokio::test]
 async fn test_deploy_controller() {
@@ -21,29 +24,24 @@ async fn test_deploy_controller() {
     dbg!(runner.declare_controller(Version::LATEST).await);
 
     // Create signers
-    let owner = Signer::Starknet(SigningKey::from_secret_scalar(felt!(
+    let owner = Owner::Signer(Signer::Starknet(SigningKey::from_secret_scalar(felt!(
         "0x3e5e410f88f88e77d18a168259a8feb6a68b358c813bdca08c875c8e54d0bf2"
-    )));
+    ))));
 
     let provider = runner.client();
     let chain_id = provider.chain_id().await.unwrap();
 
     // Create a new Controller instance
     let username = "testuser".to_string();
+    let salt = cairo_short_string_to_felt(&username).unwrap();
 
-    // This is only done to calculate the address
-    // The code duplication allows for the address not to be hardcoded
-    let address = Controller::new(
-        "app_id".to_string(),
-        username.clone(),
+    let factory = ControllerFactory::new(
         CONTROLLERS[&Version::LATEST].hash,
-        runner.rpc_url.clone(),
-        owner.clone(),
-        Felt::ZERO,
         chain_id,
-    )
-    .deploy()
-    .address();
+        owner.clone(),
+        provider.clone(),
+    );
+    let address = factory.address(salt);
 
     let controller = Controller::new(
         "app_id".to_string(),
@@ -55,13 +53,15 @@ async fn test_deploy_controller() {
         chain_id,
     );
 
-    let deploy = controller.deploy();
-    assert_eq!(address, deploy.address());
-
     runner.fund(&address).await;
 
     // Deploy the controller
-    let deploy_result = deploy.fee_estimate_multiplier(1.5).send().await.unwrap();
+    let deploy_result = factory
+        .deploy_v1(salt)
+        .fee_estimate_multiplier(1.5)
+        .send()
+        .await
+        .unwrap();
 
     // Wait for the transaction to be mined
     TransactionWaiter::new(deploy_result.transaction_hash, &provider.clone())
@@ -83,7 +83,11 @@ async fn test_controller_not_deployed() {
     let runner = KatanaRunner::load();
     let signer = Signer::new_starknet_random();
     let _ = runner
-        .deploy_controller("deployed".to_string(), signer.clone(), Version::LATEST)
+        .deploy_controller(
+            "deployed".to_string(),
+            Owner::Signer(signer.clone()),
+            Version::LATEST,
+        )
         .await;
     let chain_id = runner.client().chain_id().await.unwrap();
 
@@ -93,7 +97,7 @@ async fn test_controller_not_deployed() {
         "testuser".to_string(),
         CONTROLLERS[&Version::LATEST].hash,
         runner.rpc_url.clone(),
-        signer.clone(),
+        Owner::Signer(signer.clone()),
         felt!("0xdeadbeef"),
         chain_id,
     );
@@ -120,7 +124,11 @@ async fn test_controller_nonce_mismatch_recovery() {
 
     let runner = KatanaRunner::load();
     let mut controller1 = runner
-        .deploy_controller(username.clone(), signer.clone(), Version::LATEST)
+        .deploy_controller(
+            username.clone(),
+            Owner::Signer(signer.clone()),
+            Version::LATEST,
+        )
         .await;
 
     let chain_id = runner.client().chain_id().await.unwrap();
@@ -131,7 +139,7 @@ async fn test_controller_nonce_mismatch_recovery() {
         username.clone(),
         controller1.class_hash,
         runner.rpc_url.clone(),
-        signer.clone(),
+        Owner::Signer(signer.clone()),
         controller1.address,
         chain_id,
     );
@@ -212,7 +220,11 @@ async fn test_controller_storage() {
 
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller(username.clone(), owner.clone(), Version::LATEST)
+        .deploy_controller(
+            username.clone(),
+            Owner::Signer(owner.clone()),
+            Version::LATEST,
+        )
         .await;
 
     // Verify that the controller was stored
@@ -250,7 +262,11 @@ async fn test_multiple_transactions() {
     let runner = KatanaRunner::load();
     let owner = Signer::new_starknet_random();
     let controller = runner
-        .deploy_controller("test_user".to_string(), owner.clone(), Version::LATEST)
+        .deploy_controller(
+            "test_user".to_string(),
+            Owner::Signer(owner.clone()),
+            Version::LATEST,
+        )
         .await;
 
     let erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller);

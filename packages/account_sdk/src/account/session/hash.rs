@@ -10,7 +10,7 @@ use starknet_types_core::hash::Poseidon;
 use crate::abigen::controller::Signer as AbigenSigner;
 
 use crate::hash::MessageHashRev1;
-use crate::signers::{SignError, SignerTrait};
+use crate::signers::SignError;
 
 use super::merkle::MerkleTree;
 use super::raw_session::RawSession;
@@ -58,7 +58,7 @@ impl Session {
             policies,
             authorization_root: root,
             metadata: serde_json::to_string(&metadata).unwrap(),
-            session_key_guid: signer.guid(),
+            session_key_guid: signer.clone().into(),
         })
     }
 

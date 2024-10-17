@@ -14,7 +14,7 @@ use crate::{
         SessionAccount,
     },
     artifacts::Version,
-    signers::{HashSigner, Signer},
+    signers::{Owner, Signer},
     tests::{account::FEE_TOKEN_ADDRESS, ensure_txn, runners::katana::KatanaRunner},
 };
 
@@ -24,7 +24,11 @@ async fn test_verify_external_owner() {
     let signer = Signer::new_starknet_random();
     let external_account = runner.executor().await;
     let controller = runner
-        .deploy_controller("username".to_owned(), signer, Version::LATEST)
+        .deploy_controller(
+            "username".to_owned(),
+            Owner::Signer(signer),
+            Version::LATEST,
+        )
         .await;
 
     ensure_txn(
@@ -40,7 +44,7 @@ async fn test_verify_external_owner() {
     let session = Session::new(
         vec![Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer"))],
         u64::MAX,
-        &session_signer.signer(),
+        &session_signer.clone().into(),
     )
     .unwrap();
 
@@ -88,21 +92,25 @@ async fn test_verify_external_owner() {
 async fn test_verify_constructor_external_owner() {
     let runner = KatanaRunner::load();
     let external_account = runner.executor().await;
-    let controller_address = runner
-        .deploy_controller_with_external_owner(external_account.address().into(), Version::LATEST)
+    let controller = runner
+        .deploy_controller(
+            "external_owner".to_string(),
+            Owner::Account(external_account.address()),
+            Version::LATEST,
+        )
         .await;
 
     let session_signer = Signer::new_starknet_random();
     let session = Session::new(
         vec![Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer"))],
         u64::MAX,
-        &session_signer.signer(),
+        &session_signer.clone().into(),
     )
     .unwrap();
 
     ensure_txn(
         external_account.execute_v1(vec![Call {
-            to: controller_address.into(),
+            to: controller.address(),
             selector: selector!("register_session"),
             calldata: [
                 <RawSession as CairoSerde>::cairo_serialize(&session.raw()),
@@ -118,7 +126,7 @@ async fn test_verify_constructor_external_owner() {
     let session = SessionAccount::new_as_registered(
         runner.client().clone(),
         session_signer,
-        controller_address.into(),
+        controller.address(),
         runner.client().chain_id().await.unwrap(),
         external_account.address(),
         session,
