@@ -3,7 +3,7 @@
 import { useAccount } from "@starknet-react/core";
 import { useCallback, useEffect, useState } from "react";
 import { constants } from "starknet";
-import CartridgeConnector from "@cartridge/connector";
+import ControllerConnector from "@cartridge/connector/controller";
 import { Button, Input } from "@cartridge/ui-next";
 
 export const DelegateAccount = () => {
@@ -17,7 +17,7 @@ export const DelegateAccount = () => {
   const [delegateAddressInput, setDelegateAddressInput] = useState("");
   const [isDelegateSupported, setIsDelegateSupported] = useState(false);
 
-  const cartridgeConnector = connector as unknown as CartridgeConnector;
+  const controller = connector as unknown as ControllerConnector;
 
   const load = useCallback(async () => {
     if (!account) {
@@ -25,14 +25,14 @@ export const DelegateAccount = () => {
     }
 
     try {
-      const delegate = await cartridgeConnector.delegateAccount();
+      const delegate = await controller.delegateAccount();
       setDelegateAddress(delegate?.toString() || "");
       setIsDelegateSupported(true);
     } catch (e: any) {
       console.log(e);
       // controller doesnt support delegateAccount, ignore
     }
-  }, [account, cartridgeConnector]);
+  }, [account, controller]);
 
   const execute = useCallback(async () => {
     if (!account) {

@@ -3,11 +3,12 @@ use account_sdk::account::outside_execution::{OutsideExecutionAccount, OutsideEx
 use account_sdk::account::session::SessionAccount;
 use account_sdk::account::AccountHashAndCallsSigner;
 use account_sdk::provider::{CartridgeJsonRpcProvider, CartridgeProvider};
-use account_sdk::signers::{HashSigner, Signer};
+use account_sdk::signers::Signer;
 use account_sdk::utils::time::get_current_timestamp;
 use serde_wasm_bindgen::to_value;
 use starknet::accounts::{Account, ConnectedAccount};
 use starknet::signers::SigningKey;
+use starknet_types_core::felt::Felt;
 use url::Url;
 use wasm_bindgen::prelude::*;
 
@@ -50,7 +51,8 @@ impl CartridgeSessionAccount {
         let session = account_sdk::account::session::hash::Session::new(
             policies,
             session.expires_at,
-            &signer.signer(),
+            &signer.clone().into(),
+            Felt::ZERO,
         )?;
 
         Ok(CartridgeSessionAccount(SessionAccount::new(
@@ -87,7 +89,8 @@ impl CartridgeSessionAccount {
         let session = account_sdk::account::session::hash::Session::new(
             policies,
             session.expires_at,
-            &signer.signer(),
+            &signer.clone().into(),
+            Felt::ZERO,
         )?;
 
         Ok(CartridgeSessionAccount(SessionAccount::new_as_registered(
@@ -110,6 +113,26 @@ impl CartridgeSessionAccount {
         let res = self.0.sign_hash_and_calls(hash, &calls).await?;
 
         Ok(Felts(res.into_iter().map(JsFelt).collect()))
+    }
+
+    pub async fn sign_transaction(&self, calls: Vec<JsCall>, max_fee: JsFelt) -> Result<Felts> {
+        let calls = calls
+            .into_iter()
+            .map(TryInto::try_into)
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+
+        let nonce = self.0.get_nonce().await?;
+        let tx_hash = self
+            .0
+            .execute_v1(calls.clone())
+            .nonce(nonce)
+            .max_fee(max_fee.0)
+            .prepared()?
+            .transaction_hash(false);
+
+        let signature = self.0.sign_hash_and_calls(tx_hash, &calls).await?;
+
+        Ok(Felts(signature.into_iter().map(JsFelt).collect()))
     }
 
     pub async fn execute(&self, calls: Vec<JsCall>) -> Result<JsValue> {
@@ -136,7 +159,7 @@ impl CartridgeSessionAccount {
             execute_after: 0_u64,
             execute_before: now + 600,
             calls,
-            nonce: SigningKey::from_random().secret_scalar(),
+            nonce: (SigningKey::from_random().secret_scalar(), Felt::ZERO),
         };
 
         let signed = self

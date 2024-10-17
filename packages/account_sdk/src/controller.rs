@@ -1,4 +1,4 @@
-use crate::abigen::controller::{Owner, SignerSignature};
+use crate::abigen::controller::SignerSignature;
 use crate::account::session::hash::Policy;
 use crate::account::{AccountHashAndCallsSigner, CallEncoder};
 use crate::constants::{ETH_CONTRACT_ADDRESS, WEBAUTHN_GAS};
@@ -6,12 +6,12 @@ use crate::errors::ControllerError;
 use crate::factory::ControllerFactory;
 use crate::impl_account;
 use crate::provider::CartridgeJsonRpcProvider;
-use crate::signers::Signer;
+use crate::signers::Owner;
 use crate::storage::{ControllerMetadata, Storage, StorageBackend};
 use crate::typed_data::TypedData;
 use crate::{
     abigen::{self},
-    signers::{HashSigner, SignError, SignerTrait},
+    signers::{HashSigner, SignError},
 };
 use async_trait::async_trait;
 use cainome::cairo_serde::{CairoSerde, U256};
@@ -22,7 +22,7 @@ use starknet::core::types::{
 use starknet::core::utils::cairo_short_string_to_felt;
 use starknet::macros::selector;
 use starknet::providers::{Provider, ProviderError};
-use starknet::signers::SignerInteractivityContext;
+use starknet::signers::{SignerInteractivityContext, SigningKey};
 use starknet::{
     accounts::{Account, ConnectedAccount, ExecutionEncoder},
     core::types::{BlockId, Felt},
@@ -43,11 +43,12 @@ pub struct Controller {
     pub username: String,
     pub(crate) salt: Felt,
     pub provider: CartridgeJsonRpcProvider,
-    pub(crate) owner: Signer,
+    pub(crate) owner: Owner,
     contract: Option<Box<abigen::controller::Controller<Self>>>,
-    pub factory: ControllerFactory,
+    factory: ControllerFactory,
     pub storage: Storage,
     nonce: Felt,
+    pub(crate) execute_from_outside_nonce: (Felt, Felt),
 }
 
 impl Controller {
@@ -56,22 +57,14 @@ impl Controller {
         username: String,
         class_hash: Felt,
         rpc_url: Url,
-        owner: Signer,
+        owner: Owner,
         address: Felt,
         chain_id: Felt,
     ) -> Self {
         let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
         let salt = cairo_short_string_to_felt(&username).unwrap();
 
-        let mut calldata = Owner::cairo_serialize(&Owner::Signer(owner.signer()));
-        calldata.push(Felt::ONE); // no guardian
-        let factory = ControllerFactory::new(
-            class_hash,
-            chain_id,
-            calldata,
-            owner.clone(),
-            provider.clone(),
-        );
+        let factory = ControllerFactory::new(salt, chain_id, owner.clone(), provider.clone());
 
         let mut controller = Self {
             app_id: app_id.clone(),
@@ -87,6 +80,7 @@ impl Controller {
             factory,
             storage: Storage::default(),
             nonce: Felt::ZERO,
+            execute_from_outside_nonce: (SigningKey::from_random().secret_scalar(), Felt::ZERO),
         };
 
         let contract = Box::new(abigen::controller::Controller::new(
@@ -138,12 +132,39 @@ impl Controller {
         self.contract.as_ref().unwrap()
     }
 
-    pub fn set_owner(&mut self, signer: Signer) {
-        self.owner = signer;
+    pub fn set_owner(&mut self, owner: Owner) {
+        self.owner = owner;
     }
 
     pub fn owner_guid(&self) -> Felt {
-        self.owner.signer().guid()
+        self.owner.clone().into()
+    }
+
+    async fn build_not_deployed_err(&self) -> ControllerError {
+        let balance = match self.eth_balance().await {
+            Ok(balance) => balance,
+            Err(e) => return e,
+        };
+
+        let mut fee_estimate = match ControllerFactory::new(
+            self.class_hash,
+            self.chain_id,
+            self.owner.clone(),
+            self.provider.clone(),
+        )
+        .deploy_v1(self.salt)
+        .estimate_fee()
+        .await
+        {
+            Ok(estimate) => estimate,
+            Err(e) => return ControllerError::from(e),
+        };
+
+        fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
+        ControllerError::NotDeployed {
+            fee_estimate: Box::new(fee_estimate),
+            balance,
+        }
     }
 
     pub async fn estimate_invoke_fee(
@@ -189,13 +210,7 @@ impl Controller {
                         .execution_error
                         .contains(&format!("{:x} is not deployed.", self.address))
                     {
-                        let balance = self.eth_balance().await?;
-                        let mut fee_estimate = self.deploy().estimate_fee().await?;
-                        fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
-                        return Err(ControllerError::NotDeployed {
-                            fee_estimate: Box::new(fee_estimate),
-                            balance,
-                        });
+                        return Err(self.build_not_deployed_err().await);
                     }
                 }
                 Err(ControllerError::AccountError(e))
@@ -249,13 +264,7 @@ impl Controller {
                             .execution_error
                             .contains(&format!("{:x} is not deployed.", self.address)) =>
                         {
-                            let balance = self.eth_balance().await?;
-                            let mut fee_estimate = self.deploy().estimate_fee().await?;
-                            fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
-                            return Err(ControllerError::NotDeployed {
-                                fee_estimate: Box::new(fee_estimate),
-                                balance,
-                            });
+                            return Err(self.build_not_deployed_err().await);
                         }
                         AccountError::Provider(ProviderError::StarknetError(
                             StarknetError::InvalidTransactionNonce,
@@ -287,13 +296,7 @@ impl Controller {
                                 continue;
                             } else if data.contains(&format!("{:x} is not deployed.", self.address))
                             {
-                                let balance = self.eth_balance().await?;
-                                let mut fee_estimate = self.deploy().estimate_fee().await?;
-                                fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
-                                return Err(ControllerError::NotDeployed {
-                                    fee_estimate: Box::new(fee_estimate),
-                                    balance,
-                                });
+                                return Err(self.build_not_deployed_err().await);
                             }
                         }
                         _ => {}

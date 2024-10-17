@@ -138,7 +138,7 @@ export interface Keychain {
 }
 
 export interface Profile {
-  goTo(tab: ProfileContextTypeVariant): void;
+  navigate(tab: ProfileContextTypeVariant): void;
 }
 
 export interface Modal {

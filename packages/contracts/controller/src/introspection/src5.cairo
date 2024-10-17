@@ -5,9 +5,7 @@ mod src5_component {
     };
     use argent::introspection::interface::{ISRC5, ISRC5Legacy};
     use argent::introspection::interface::{SRC5_INTERFACE_ID, SRC5_INTERFACE_ID_OLD};
-    use argent::outside_execution::interface::{
-        ERC165_OUTSIDE_EXECUTION_INTERFACE_ID_REV_0, ERC165_OUTSIDE_EXECUTION_INTERFACE_ID_REV_1
-    };
+    use argent::outside_execution::interface::{ERC165_OUTSIDE_EXECUTION_INTERFACE_ID_REV_2};
 
     use controller::delegate_account::interface::SRC5_DELEGATE_ACCOUNT_INTERFACE_ID;
     use controller::external_owners::interface::SRC5_EXTERNAL_OWNERS_INTERFACE_ID;
@@ -26,9 +24,7 @@ mod src5_component {
                 true
             } else if interface_id == SRC5_ACCOUNT_INTERFACE_ID {
                 true
-            } else if interface_id == ERC165_OUTSIDE_EXECUTION_INTERFACE_ID_REV_0 {
-                true
-            } else if interface_id == ERC165_OUTSIDE_EXECUTION_INTERFACE_ID_REV_1 {
+            } else if interface_id == ERC165_OUTSIDE_EXECUTION_INTERFACE_ID_REV_2 {
                 true
             } else if interface_id == SRC5_INTERFACE_ID_OLD {
                 true

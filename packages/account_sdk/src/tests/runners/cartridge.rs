@@ -21,9 +21,10 @@ use url::Url;
 
 use crate::abigen::controller::{OutsideExecution, SignerSignature};
 use crate::account::session::raw_session::{RawSessionToken, SessionHash};
+use crate::constants::GUARDIAN_SIGNER;
 use crate::hash::MessageHashRev1;
 use crate::provider::OutsideExecutionParams;
-use crate::signers::{HashSigner, Signer};
+use crate::signers::HashSigner;
 
 use super::katana::{single_owner_account_with_encoding, PREFUNDED};
 
@@ -33,11 +34,10 @@ pub struct CartridgeProxy {
     proxy_url: Url,
     rpc_client: JsonRpcClient<HttpTransport>,
     client: Client<hyper::client::HttpConnector>,
-    guardian_signer: Signer,
 }
 
 impl CartridgeProxy {
-    pub fn new(rpc_url: Url, proxy_url: Url, chain_id: Felt, guardian_signer: Signer) -> Self {
+    pub fn new(rpc_url: Url, proxy_url: Url, chain_id: Felt) -> Self {
         let rpc_client = JsonRpcClient::new(HttpTransport::new(rpc_url.clone()));
 
         CartridgeProxy {
@@ -46,7 +46,6 @@ impl CartridgeProxy {
             rpc_client,
             proxy_url,
             client: Client::new(),
-            guardian_signer,
         }
     }
 
@@ -154,7 +153,7 @@ impl CartridgeProxy {
     ) -> Vec<Felt> {
         match <Vec<SignerSignature> as CairoSerde>::cairo_deserialize(old_signature, 0) {
             Ok(mut signature) => {
-                let guardian_signature = self.guardian_signer.sign(&tx_hash).await.unwrap();
+                let guardian_signature = GUARDIAN_SIGNER.sign(&tx_hash).await.unwrap();
                 signature.push(guardian_signature);
                 <Vec<SignerSignature> as CairoSerde>::cairo_serialize(&signature)
             }
@@ -170,11 +169,7 @@ impl CartridgeProxy {
                 self.add_guardian_authorization(&mut session_token, address)
                     .await;
 
-                let guardian_signature = self
-                    .guardian_signer
-                    .sign(&session_token_hash)
-                    .await
-                    .unwrap();
+                let guardian_signature = GUARDIAN_SIGNER.sign(&session_token_hash).await.unwrap();
                 session_token.guardian_signature = guardian_signature;
 
                 let mut serialized =
@@ -202,7 +197,7 @@ impl CartridgeProxy {
             let session_hash = session_token
                 .session
                 .get_message_hash_rev_1(self.chain_id, address);
-            let guardian_authorization = self.guardian_signer.sign(&session_hash).await.unwrap();
+            let guardian_authorization = GUARDIAN_SIGNER.sign(&session_hash).await.unwrap();
             session_token.session_authorization =
                 <Vec<SignerSignature> as CairoSerde>::cairo_serialize(&vec![
                     authorization[0].clone(),
@@ -295,7 +290,7 @@ impl CartridgeProxy {
 
         let call = Call {
             to: contract_address,
-            selector: selector!("execute_from_outside_v2"),
+            selector: selector!("execute_from_outside_v3"),
             calldata,
         };
 

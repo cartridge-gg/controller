@@ -3,7 +3,7 @@ use starknet::accounts::Account;
 use crate::account::session::hash::Policy;
 use crate::account::DECLARATION_SELECTOR;
 use crate::artifacts::Version;
-use crate::signers::Signer;
+use crate::signers::{Owner, Signer};
 use crate::tests::account::AccountDeclaration;
 
 use crate::tests::runners::katana::KatanaRunner;
@@ -13,7 +13,11 @@ async fn test_declare_with_account() {
     let signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("username".to_owned(), signer, Version::LATEST)
+        .deploy_controller(
+            "username".to_owned(),
+            Owner::Signer(signer),
+            Version::LATEST,
+        )
         .await;
 
     AccountDeclaration::erc_20(runner.client())
@@ -29,7 +33,11 @@ async fn test_declare_with_session() {
     let signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let mut controller = runner
-        .deploy_controller("username".to_owned(), signer, Version::LATEST)
+        .deploy_controller(
+            "username".to_owned(),
+            Owner::Signer(signer),
+            Version::LATEST,
+        )
         .await;
 
     let session_account = controller

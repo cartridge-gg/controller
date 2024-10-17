@@ -20,6 +20,7 @@ impl StructHashRev1 for RawSession {
             self.allowed_methods_root,
             self.metadata_hash,
             self.session_key_guid,
+            self.guardian_key_guid,
         ])
     }
 

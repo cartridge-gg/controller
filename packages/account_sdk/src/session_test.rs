@@ -1,9 +1,9 @@
 use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{
-    accounts::{Account, ConnectedAccount},
-    core::types::{BlockId, BlockTag},
+    accounts::{Account, AccountError, ConnectedAccount},
+    core::types::{BlockId, BlockTag, StarknetError, TransactionExecutionErrorData},
     macros::{felt, selector},
-    providers::Provider,
+    providers::{Provider, ProviderError},
     signers::SigningKey,
 };
 use starknet_crypto::Felt;
@@ -15,18 +15,19 @@ use crate::{
         SessionAccount,
     },
     artifacts::Version,
+    constants::GUARDIAN_SIGNER,
     hash::MessageHashRev1,
-    signers::{webauthn::WebauthnSigner, HashSigner, Signer, SignerTrait},
+    signers::{Owner, Signer},
     tests::{
         account::FEE_TOKEN_ADDRESS, ensure_txn, runners::katana::KatanaRunner,
         transaction_waiter::TransactionWaiter,
     },
 };
 
-pub async fn test_verify_execute(signer: Signer) {
+pub async fn test_verify_execute(owner: Owner) {
     let runner = KatanaRunner::load();
     let mut controller = runner
-        .deploy_controller_with_guardian("username".to_owned(), signer, Version::LATEST)
+        .deploy_controller("username".to_owned(), owner, Version::LATEST)
         .await;
 
     let policies = vec![
@@ -64,9 +65,10 @@ pub async fn test_verify_execute(signer: Signer) {
 }
 
 #[tokio::test]
+#[cfg(feature = "webauthn")]
 async fn test_verify_execute_session_webauthn_starknet_starknet() {
     let signer = Signer::Webauthn(
-        WebauthnSigner::register(
+        crate::signers::webauthn::WebauthnSigner::register(
             "cartridge.gg".to_string(),
             "username".to_string(),
             "challenge".as_bytes(),
@@ -75,12 +77,12 @@ async fn test_verify_execute_session_webauthn_starknet_starknet() {
         .unwrap(),
     );
 
-    test_verify_execute(signer).await;
+    test_verify_execute(Owner::Signer(signer)).await;
 }
 
 #[tokio::test]
 async fn test_verify_execute_session_starknet_x3() {
-    test_verify_execute(Signer::new_starknet_random()).await;
+    test_verify_execute(Owner::Signer(Signer::new_starknet_random())).await;
 }
 
 #[tokio::test]
@@ -88,7 +90,11 @@ async fn test_verify_execute_session_multiple() {
     let signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let mut controller = runner
-        .deploy_controller("username".to_owned(), signer, Version::LATEST)
+        .deploy_controller(
+            "username".to_owned(),
+            Owner::Signer(signer),
+            Version::LATEST,
+        )
         .await;
 
     let session_account = controller
@@ -140,7 +146,11 @@ async fn test_verify_execute_session_registered() {
 
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("username".to_owned(), owner_signer.clone(), Version::LATEST)
+        .deploy_controller(
+            "username".to_owned(),
+            Owner::Signer(owner_signer.clone()),
+            Version::LATEST,
+        )
         .await;
 
     let session = Session::new(
@@ -150,14 +160,15 @@ async fn test_verify_execute_session_registered() {
             Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer")),
         ],
         u64::MAX,
-        &session_signer.signer(),
+        &session_signer.clone().into(),
+        Felt::ZERO,
     )
     .unwrap();
 
     ensure_txn(
         controller
             .contract()
-            .register_session(&session.raw(), &owner_signer.signer().guid()),
+            .register_session(&session.raw(), &owner_signer.clone().into()),
         controller.provider(),
     )
     .await
@@ -168,7 +179,7 @@ async fn test_verify_execute_session_registered() {
         session_signer,
         controller.address(),
         runner.client().chain_id().await.unwrap(),
-        owner_signer.signer().guid(),
+        owner_signer.into(),
         session,
     );
 
@@ -200,9 +211,9 @@ async fn test_create_and_use_registered_session() {
     let owner_signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let mut controller = runner
-        .deploy_controller_with_guardian(
+        .deploy_controller(
             "username".to_owned(),
-            owner_signer.clone(),
+            Owner::Signer(owner_signer.clone()),
             Version::LATEST,
         )
         .await;
@@ -222,7 +233,13 @@ async fn test_create_and_use_registered_session() {
     let expires_at = u64::MAX;
     let max_fee = Felt::from(277800000000000_u128);
     let txn = controller
-        .register_session(policies.clone(), expires_at, public_key, max_fee)
+        .register_session(
+            policies.clone(),
+            expires_at,
+            public_key,
+            Felt::ZERO,
+            max_fee,
+        )
         .await
         .expect("Failed to register session");
 
@@ -231,7 +248,13 @@ async fn test_create_and_use_registered_session() {
         .await
         .unwrap();
 
-    let session = Session::new(policies, expires_at, &session_signer.signer()).unwrap();
+    let session = Session::new(
+        policies,
+        expires_at,
+        &session_signer.clone().into(),
+        Felt::ZERO,
+    )
+    .unwrap();
 
     // Create a SessionAccount using new_from_registered
     let session_account = SessionAccount::new_as_registered(
@@ -239,7 +262,7 @@ async fn test_create_and_use_registered_session() {
         session_signer.clone(),
         controller.address(),
         controller.chain_id(),
-        owner_signer.signer().guid(),
+        owner_signer.clone().into(),
         session.clone(),
     );
 
@@ -249,7 +272,7 @@ async fn test_create_and_use_registered_session() {
                 &session
                     .raw()
                     .get_message_hash_rev_1(controller.chain_id, controller.address),
-                &owner_signer.signer().guid(),
+                &owner_signer.into(),
             )
             .call()
             .await
@@ -269,4 +292,100 @@ async fn test_create_and_use_registered_session() {
     );
 
     ensure_txn(tx, controller.provider()).await.unwrap();
+}
+
+#[tokio::test]
+pub async fn test_verify_execute_with_guardian() {
+    let owner = Owner::Signer(Signer::new_starknet_random());
+    let runner = KatanaRunner::load();
+    let mut controller = runner
+        .deploy_controller("username".to_owned(), owner, Version::LATEST)
+        .await;
+
+    let policies = vec![
+        Policy::new(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
+        Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfds")),
+        Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer")),
+    ];
+
+    let session_account = controller
+        .create_session_with_guardian(policies.clone(), u64::MAX, GUARDIAN_SIGNER.into())
+        .await
+        .unwrap();
+
+    let recipient = ContractAddress(felt!("0x18301129"));
+    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &session_account);
+
+    contract_erc20
+        .balanceOf(&recipient)
+        .block_id(BlockId::Tag(BlockTag::Latest))
+        .call()
+        .await
+        .expect("failed to call contract");
+
+    contract_erc20
+        .transfer(
+            &recipient,
+            &U256 {
+                low: 0x10_u128,
+                high: 0,
+            },
+        )
+        .send()
+        .await
+        .unwrap();
+}
+
+#[tokio::test]
+pub async fn test_verify_execute_with_invalid_guardian() {
+    let owner = Owner::Signer(Signer::new_starknet_random());
+    let runner = KatanaRunner::load();
+    let mut controller = runner
+        .deploy_controller("username".to_owned(), owner, Version::LATEST)
+        .await;
+
+    let policies = vec![
+        Policy::new(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
+        Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfds")),
+        Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer")),
+    ];
+
+    let session_account = controller
+        .create_session_with_guardian(policies.clone(), u64::MAX, Felt::ONE)
+        .await
+        .unwrap();
+
+    let recipient = ContractAddress(felt!("0x18301129"));
+    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &session_account);
+
+    contract_erc20
+        .balanceOf(&recipient)
+        .block_id(BlockId::Tag(BlockTag::Latest))
+        .call()
+        .await
+        .expect("failed to call contract");
+
+    let res = contract_erc20
+        .transfer(
+            &recipient,
+            &U256 {
+                low: 0x10_u128,
+                high: 0,
+            },
+        )
+        .send()
+        .await;
+
+    assert!(
+        matches!(
+            res,
+            Err(AccountError::Provider(ProviderError::StarknetError(
+                StarknetError::TransactionExecutionError(TransactionExecutionErrorData {
+                    execution_error,
+                    ..
+                })
+            ))) if execution_error.contains("session/invalid-guardian")
+        ),
+        "Should return error"
+    );
 }

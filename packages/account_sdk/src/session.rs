@@ -9,7 +9,7 @@ use crate::account::session::SessionAccount;
 use crate::controller::Controller;
 use crate::errors::ControllerError;
 use crate::hash::MessageHashRev1;
-use crate::signers::{HashSigner, Signer, SignerTrait};
+use crate::signers::{HashSigner, Signer};
 use crate::storage::StorageBackend;
 use crate::storage::{selectors::Selectors, Credentials, SessionMetadata};
 use crate::utils::time::get_current_timestamp;
@@ -24,8 +24,25 @@ impl Controller {
         methods: Vec<Policy>,
         expires_at: u64,
     ) -> Result<SessionAccount, ControllerError> {
+        self.create_session_with_guardian(methods, expires_at, Felt::ZERO)
+            .await
+    }
+
+    pub async fn create_session_with_guardian(
+        &mut self,
+        methods: Vec<Policy>,
+        expires_at: u64,
+        guardian: Felt,
+    ) -> Result<SessionAccount, ControllerError> {
         let signer = SigningKey::from_random();
-        let session = Session::new(methods, expires_at, &signer.signer())?;
+        let session_signer = Signer::Starknet(signer.clone());
+
+        let session = Session::new(
+            methods,
+            expires_at,
+            &session_signer.clone().into(),
+            guardian,
+        )?;
         let hash = session
             .raw()
             .get_message_hash_rev_1(self.chain_id, self.address);
@@ -44,7 +61,6 @@ impl Controller {
             },
         )?;
 
-        let session_signer = Signer::Starknet(signer);
         let session_account = SessionAccount::new(
             self.provider().clone(),
             session_signer,
@@ -62,12 +78,13 @@ impl Controller {
         methods: Vec<Policy>,
         expires_at: u64,
         public_key: Felt,
+        guardian: Felt,
     ) -> Result<Call, ControllerError> {
         let pubkey = VerifyingKey::from_scalar(public_key);
         let signer = AbigenSigner::Starknet(StarknetSigner {
             pubkey: NonZero::new(pubkey.scalar()).unwrap(),
         });
-        let session = Session::new(methods, expires_at, &signer)?;
+        let session = Session::new(methods, expires_at, &signer, guardian)?;
         let call = self
             .contract()
             .register_session_getcall(&session.raw(), &self.owner_guid());
@@ -80,6 +97,7 @@ impl Controller {
         policies: Vec<Policy>,
         expires_at: u64,
         public_key: Felt,
+        guardian: Felt,
         max_fee: Felt,
     ) -> Result<InvokeTransactionResult, ControllerError> {
         let session = Session::new(
@@ -88,6 +106,7 @@ impl Controller {
             &AbigenSigner::Starknet(StarknetSigner {
                 pubkey: NonZero::new(public_key).unwrap(),
             }),
+            guardian,
         )?;
 
         let call = self
@@ -126,13 +145,13 @@ impl Controller {
                     AbigenSigner::Starknet(StarknetSigner {
                         pubkey: NonZero::new(pubkey.scalar()).unwrap(),
                     })
-                    .guid()
+                    .into()
                 } else if let Some(credentials) = &metadata.credentials {
                     let signer = SigningKey::from_secret_scalar(credentials.private_key);
                     AbigenSigner::Starknet(StarknetSigner {
                         pubkey: NonZero::new(signer.verifying_key().scalar()).unwrap(),
                     })
-                    .guid()
+                    .into()
                 } else {
                     return None;
                 };

@@ -1,10 +1,13 @@
-import { Button, cn, TimesIcon } from "@cartridge/ui-next";
-import { Network } from "@cartridge/ui-next";
+import { Button, cn, TimesIcon, Network } from "@cartridge/ui-next";
 import { PropsWithChildren, useCallback } from "react";
-import { useConnection } from "../provider/hooks";
+import { useConnection } from "@/hooks/context";
 
-export function LayoutContainer({ children }: PropsWithChildren) {
+export function LayoutContainer({
+  children,
+  left,
+}: PropsWithChildren & { left?: React.ReactNode }) {
   const { parent, chainId } = useConnection();
+
   const onClose = useCallback(() => {
     parent.close().catch(() => {
       /* Always fails for some reason */
@@ -14,9 +17,11 @@ export function LayoutContainer({ children }: PropsWithChildren) {
   return (
     <ResponsiveWrapper>
       <div className="h-16 sticky top-0 flex items-center bg-[url('https://x.cartridge.gg/whitelabel/cartridge/cover.png')] bg-center bg-cover px-3 justify-between">
-        <Button variant="icon" size="icon" onClick={onClose}>
-          <TimesIcon />
-        </Button>
+        {left ?? (
+          <Button variant="icon" size="icon" onClick={onClose}>
+            <TimesIcon />
+          </Button>
+        )}
 
         <div className="flex gap-2">
           <Network chainId={chainId} />
@@ -36,7 +41,7 @@ function ResponsiveWrapper({ children }: PropsWithChildren) {
     <>
       {/* for desktop */}
       <div className="hidden md:flex h-screen flex-col items-center justify-center overflow-x-hidden">
-        <div className="w-desktop h-desktop border border-border rounded-xl overflow-hidden flex flex-col">
+        <div className="w-desktop h-desktop border border-border rounded-xl overflow-hidden flex flex-col relative">
           {children}
         </div>
       </div>
@@ -52,19 +57,27 @@ function ResponsiveWrapper({ children }: PropsWithChildren) {
 type LayoutHeaderProps = {
   title: string;
   description?: string | React.ReactElement;
-  // Icon?: React.ComponentType<IconProps>;
-  // icon?: React.ReactElement;
+  icon?: string;
   right?: React.ReactElement;
 };
 
-export function LayoutHeader({ title, description, right }: LayoutHeaderProps) {
+export function LayoutHeader({
+  title,
+  description,
+  icon,
+  right,
+}: LayoutHeaderProps) {
   return (
     <div className="flex gap-2 px-4 py-6 sticky top-16 bg-background justify-between">
       <div className="flex min-w-0 gap-2 items-center">
-        <div className="w-11 h-11 bg-secondary rounded flex shrink-0 items-center justify-center">
-          <img
-            className="w-8 h-8"
-            src={"https://x.cartridge.gg/whitelabel/cartridge/icon.svg"}
+        <div className="w-11 h-11 bg-secondary rounded flex shrink-0 items-center justify-center overflow-hidden">
+          <div
+            className="w-full bg-cover bg-center h-full place-content-center"
+            style={{
+              backgroundImage: `url(${
+                icon ?? "https://x.cartridge.gg/whitelabel/cartridge/icon.svg"
+              })`,
+            }}
           />
         </div>
 
@@ -93,6 +106,22 @@ export function LayoutContent({
     <div
       className={cn(
         "flex flex-col h-full flex-1 overflow-y-auto px-4 gap-y-4",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function LayoutFooter({
+  children,
+  className,
+}: PropsWithChildren & { className?: string }) {
+  return (
+    <div
+      className={cn(
+        "flex flex-col px-6 py-4 gap-y-4 w-full absolute left-0 bottom-0",
         className,
       )}
     >

@@ -3,7 +3,14 @@ import { VerifiedIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { useMemo } from "react";
 import Link from "next/link";
-import { isVerified } from "@cartridge/controller";
+
+const verified: { id: string; url: string }[] = [
+  { id: "flippyflop", url: "https://flippyflop.gg" },
+];
+
+function isVerified(url: string) {
+  return !!verified.find((v) => new URL(v.url).host === new URL(url).host);
+}
 
 export function SessionConsent({
   variant = "default",

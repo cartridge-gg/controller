@@ -59,9 +59,6 @@ export class ERC20 {
       this.callSymbol(),
       this.callDecimals(),
     ]);
-    if (symbol === "STRK") {
-      console.log(this.address);
-    }
     if (!this.logoUrl) {
       this.logoUrl = await this.fetchLogoUrl();
     }

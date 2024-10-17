@@ -7,8 +7,7 @@ use starknet::macros::selector;
 use starknet_crypto::poseidon_hash_many;
 
 use crate::abigen::controller::Signer as AbigenSigner;
-
-use crate::signers::{SignError, SignerTrait};
+use crate::signers::SignError;
 
 use super::merkle::MerkleTree;
 use super::raw_session::RawSession;
@@ -34,7 +33,8 @@ impl Session {
     pub fn new(
         policies: Vec<Policy>,
         expires_at: u64,
-        signer: &AbigenSigner,
+        session_signer: &AbigenSigner,
+        guardian_guid: Felt,
     ) -> Result<Self, SignError> {
         if policies.is_empty() {
             return Err(SignError::NoAllowedSessionMethods);
@@ -58,8 +58,8 @@ impl Session {
             policies,
             authorization_root: root,
             metadata: serde_json::to_string(&metadata).unwrap(),
-            session_key_guid: signer.guid(),
-            guardian_key_guid: Felt::ZERO,
+            session_key_guid: session_signer.clone().into(),
+            guardian_key_guid: guardian_guid,
         })
     }
 

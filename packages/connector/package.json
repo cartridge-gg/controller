@@ -1,22 +1,39 @@
 {
   "name": "@cartridge/connector",
-  "version": "0.3.47",
+  "version": "0.4.0",
   "description": "Cartridge Controler Connector",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
+  "sideEffects": false,
   "scripts": {
     "build:deps": "tsc",
     "prepublish": "pnpm build:deps",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\""
   },
-  "files": [
-    "dist"
-  ],
+  "exports": {
+    "./controller": "./dist/controller.js",
+    "./session": "./dist/session.js",
+    "./telegram": "./dist/telegram.js"
+  },
+  "typesVersions": {
+    "*": {
+      "controller": [
+        "./dist/controller.d.ts"
+      ],
+      "session": [
+        "./dist/session.d.ts"
+      ],
+      "telegram": [
+        "./dist/telegram.d.ts"
+      ]
+    }
+  },
   "dependencies": {
     "@cartridge/controller": "workspace:^",
     "@starknet-react/core": "^2.1.5",
+    "@telegram-apps/sdk": "^2.4.0",
     "starknet": "^6.11.0"
   },
   "devDependencies": {

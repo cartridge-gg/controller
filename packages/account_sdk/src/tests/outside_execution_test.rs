@@ -16,7 +16,7 @@ use crate::{
     },
     artifacts::{Version, CONTROLLERS},
     controller::Controller,
-    signers::{webauthn::WebauthnSigner, Signer},
+    signers::{webauthn::WebauthnSigner, Owner, Signer},
     tests::{
         account::FEE_TOKEN_ADDRESS, runners::katana::KatanaRunner,
         transaction_waiter::TransactionWaiter,
@@ -27,7 +27,11 @@ pub async fn test_verify_paymaster_execute(signer: Signer, use_session: bool) {
     let runner = KatanaRunner::load();
     let paymaster = runner.executor().await;
     let mut controller = runner
-        .deploy_controller_with_guardian("username".to_owned(), signer, Version::LATEST)
+        .deploy_controller(
+            "username".to_owned(),
+            Owner::Signer(signer),
+            Version::LATEST,
+        )
         .await;
 
     if use_session {
@@ -123,7 +127,11 @@ async fn test_verify_execute_paymaster_should_fail() {
     let signer = Signer::new_starknet_random();
     let paymaster = runner.executor().await;
     let controller = runner
-        .deploy_controller("username".to_owned(), signer, Version::LATEST)
+        .deploy_controller(
+            "username".to_owned(),
+            Owner::Signer(signer),
+            Version::LATEST,
+        )
         .await;
 
     let recipient = ContractAddress(felt!("0x18301129"));
@@ -154,7 +162,7 @@ async fn test_verify_execute_paymaster_should_fail() {
         "username".to_string(),
         CONTROLLERS[&Version::LATEST].hash,
         runner.rpc_url.clone(),
-        Signer::new_starknet_random(),
+        Owner::Signer(Signer::new_starknet_random()),
         controller.address(),
         runner.client().chain_id().await.unwrap(),
     );
@@ -177,7 +185,11 @@ async fn test_verify_execute_paymaster_session() {
     let runner = KatanaRunner::load();
     let paymaster = runner.executor().await;
     let mut controller = runner
-        .deploy_controller("username".to_owned(), signer, Version::LATEST)
+        .deploy_controller(
+            "username".to_owned(),
+            Owner::Signer(signer),
+            Version::LATEST,
+        )
         .await;
 
     let recipient = ContractAddress(felt!("0x18301129"));

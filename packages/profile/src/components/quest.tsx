@@ -3,7 +3,7 @@ import {
   LayoutContent,
   LayoutHeader,
 } from "@/components/layout";
-import { useConnection } from "./provider/hooks";
+import { useConnection } from "@/hooks/context";
 import { CopyAddress } from "@cartridge/ui-next";
 import { Navigation } from "./navigation";
 

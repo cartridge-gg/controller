@@ -1,18 +1,29 @@
 {
   "name": "@cartridge/controller",
-  "version": "0.3.47",
+  "version": "0.4.0",
   "description": "Cartridge Controller",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "module": "dist/controller.js",
+  "types": "dist/controller.d.ts",
   "type": "module",
   "scripts": {
     "build:deps": "tsc",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\""
   },
-  "files": [
-    "dist"
-  ],
+  "exports": {
+    ".": "./dist/controller.js",
+    "./session": "./dist/session.js"
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/controller.d.ts"
+      ],
+      "session": [
+        "./dist/session.d.ts"
+      ]
+    }
+  },
   "dependencies": {
     "@cartridge/account-wasm": "workspace:^",
     "@cartridge/penpal": "^6.2.3",

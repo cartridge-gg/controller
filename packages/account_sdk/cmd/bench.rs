@@ -5,7 +5,7 @@ use account_sdk::account::session::hash::Policy;
 use account_sdk::artifacts::{Version, CONTROLLERS};
 use account_sdk::controller::Controller;
 use account_sdk::provider::CartridgeProvider;
-use account_sdk::signers::{HashSigner, Signer};
+use account_sdk::signers::{Owner, Signer};
 
 use cainome::cairo_serde::CairoSerde;
 use rand::Rng as _;
@@ -35,7 +35,7 @@ async fn main() {
     let username = "bench".to_owned();
 
     let mut controller = {
-        let mut constructor_calldata = controller::Signer::cairo_serialize(&owner.signer());
+        let mut constructor_calldata = controller::Signer::cairo_serialize(&owner.clone().into());
         constructor_calldata.extend(Option::<controller::Signer>::cairo_serialize(&None));
 
         Controller::new(
@@ -43,7 +43,7 @@ async fn main() {
             username,
             CONTROLLERS[&Version::LATEST].hash,
             rpc_url,
-            owner.clone(),
+            Owner::Signer(owner.clone()),
             BENCH_ACCOUNT,
             chain_id,
         )
@@ -98,7 +98,7 @@ async fn main() {
                 execute_after: u64::MIN,
                 execute_before: u32::MAX as u64,
                 calls: vec![flip],
-                nonce: SigningKey::from_random().secret_scalar(),
+                nonce: (SigningKey::from_random().secret_scalar(), Felt::ZERO),
             };
 
             let flip_signed = session_account
