@@ -62,7 +62,7 @@ export class ERC20 {
     this.symbol = symbol;
     this.decimals = decimals;
 
-    return this.metadata();
+    return this;
   }
 
   metadata(): ERC20Metadata {

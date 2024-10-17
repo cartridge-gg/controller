@@ -36,8 +36,9 @@ export const AccountContext = createContext<AccountContextType>(initialState);
 
 export function AccountProvider({ children }: { children: ReactNode }) {
   const [searchParams] = useSearchParams();
-  const { provider } = useConnection();
+  const { provider, isVisible } = useConnection();
   const [state, setState] = useState<AccountContextType>(initialState);
+  const [erc20, setERC20] = useState<ERC20[]>([]);
 
   useEffect(() => {
     setState((state) => {
@@ -56,11 +57,9 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   }, [searchParams]);
 
   useEffect(() => {
-    fetchERC20Metadata();
-
-    async function fetchERC20Metadata() {
+    (async function () {
       const erc20Param = searchParams.get("erc20");
-      if (!provider || state.erc20.length || !erc20Param) return;
+      if (!erc20Param || !provider) return;
 
       const options = (
         JSON.parse(decodeURIComponent(erc20Param)) as ERC20Option[]
@@ -87,39 +86,43 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         ),
       );
 
-      const erc20 = res
+      const newValue = res
         .filter((res) => res.status === "fulfilled")
         .map((res) => res.value);
-      if (!erc20.length) return;
 
-      setState((state) => ({ ...state, erc20 }));
-    }
-  }, [searchParams, provider, state.erc20.length]);
+      setERC20(newValue);
+    })();
+  }, [provider, searchParams]);
 
   useEffect(() => {
-    if (!state.erc20.find(t => t.balance === undefined)) return
-
     updateBalance();
-    setInterval(updateBalance, 3000);
+
+    if (!isVisible) return;
+
+    const id = setInterval(updateBalance, 3000);
+
+    return () => {
+      clearInterval(id);
+    };
 
     async function updateBalance() {
       const res = await Promise.allSettled(
-        state.erc20.map((t) => t.instance.balanceOf(state.address)),
+        erc20.map((t) => t.balanceOf(state.address)),
       );
-      const erc20 = res.reduce<ERC20Status[]>(
+      const newValue = res.reduce<ERC20Status[]>(
         (prev, res, i) =>
           res.status === "fulfilled"
-            ? [...prev, { ...state.erc20[i], balance: res.value }]
-            : [...prev, state.erc20[i]],
+            ? [...prev, { ...erc20[i].metadata(), balance: res.value }]
+            : prev,
         [],
       );
 
       setState((state) => ({
         ...state,
-        erc20,
+        erc20: newValue,
       }));
     }
-  }, [state.erc20, state.address]);
+  }, [isVisible, erc20, state.address]);
 
   return (
     <AccountContext.Provider value={state}>{children}</AccountContext.Provider>

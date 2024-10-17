@@ -1,5 +1,11 @@
 import { AsyncMethodReturns, connectToParent } from "@cartridge/penpal";
-import { createContext, useState, ReactNode, useEffect } from "react";
+import {
+  createContext,
+  useState,
+  ReactNode,
+  useEffect,
+  useCallback,
+} from "react";
 import { ProfileContextTypeVariant } from "@cartridge/controller";
 import { normalize } from "@cartridge/utils";
 import { constants, RpcProvider } from "starknet";
@@ -10,6 +16,8 @@ type ConnectionContextType = {
   provider?: RpcProvider;
   indexerUrl: string;
   chainId: string;
+  isVisible: boolean;
+  setIsVisible: (isVisible: boolean) => void;
 };
 
 type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
@@ -18,6 +26,8 @@ const initialState: ConnectionContextType = {
   parent: { close: async () => {} },
   indexerUrl: "",
   chainId: "",
+  isVisible: false,
+  setIsVisible: () => {},
 };
 
 export const ConnectionContext =
@@ -66,12 +76,16 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
   }, [state.provider]);
 
   const navigate = useNavigate();
+  const setIsVisible = useCallback((isVisible: boolean) => {
+    setState((state) => ({ ...state, isVisible }));
+  }, []);
 
   useEffect(() => {
     const connection = connectToParent<ParentMethods>({
       methods: {
         navigate: normalize(() => (tab: ProfileContextTypeVariant) => {
           navigate(tab);
+          setIsVisible(true);
         }),
       },
     });
@@ -82,10 +96,10 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     return () => {
       connection.destroy();
     };
-  }, [navigate]);
+  }, [navigate, setIsVisible]);
 
   return (
-    <ConnectionContext.Provider value={state}>
+    <ConnectionContext.Provider value={{ ...state, setIsVisible }}>
       {children}
     </ConnectionContext.Provider>
   );
