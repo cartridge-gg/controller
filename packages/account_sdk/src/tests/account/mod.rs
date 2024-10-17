@@ -3,12 +3,9 @@ use starknet::core::types::Felt;
 use starknet::macros::felt;
 
 pub(crate) mod declare;
-mod deploy;
 mod pending;
 
 pub use declare::AccountDeclaration;
-pub use deploy::AccountDeployment;
-pub use deploy::DeployResult;
 
 lazy_static! {
     pub static ref UDC_ADDRESS: Felt =

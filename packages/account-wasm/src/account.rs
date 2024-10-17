@@ -1,6 +1,7 @@
 use account_sdk::artifacts::{Version, CONTROLLERS};
 use account_sdk::controller::Controller;
 use account_sdk::errors::ControllerError;
+use account_sdk::signers::Owner;
 use serde_wasm_bindgen::to_value;
 use starknet::accounts::ConnectedAccount;
 use starknet::core::types::Call;
@@ -54,7 +55,7 @@ impl CartridgeAccount {
             username.clone(),
             CONTROLLERS[&Version::V1_0_5].hash,
             rpc_url,
-            signer.try_into()?,
+            Owner::Signer(signer.try_into()?),
             address.0,
             chain_id.0,
         );

@@ -1,10 +1,9 @@
 use cainome::cairo_serde::NonZero;
-use starknet::core::types::Felt;
 use starknet::signers::SigningKey;
+use starknet::{core::types::Felt, macros::short_string};
+use starknet_crypto::poseidon_hash;
 
-use crate::abigen::controller::{
-    Signer as AbigenSigner, SignerSignature, StarknetSignature, StarknetSigner,
-};
+use crate::abigen::controller::{SignerSignature, StarknetSignature, StarknetSigner};
 
 use super::{HashSigner, SignError};
 
@@ -24,10 +23,10 @@ impl HashSigner for SigningKey {
             },
         )))
     }
+}
 
-    fn signer(&self) -> AbigenSigner {
-        AbigenSigner::Starknet(StarknetSigner {
-            pubkey: NonZero::new(self.verifying_key().scalar()).unwrap(),
-        })
+impl From<StarknetSigner> for Felt {
+    fn from(signer: StarknetSigner) -> Self {
+        poseidon_hash(short_string!("Starknet Signer"), *signer.pubkey.inner())
     }
 }

@@ -11,15 +11,14 @@ use starknet::{
 use crate::{
     abigen::controller::SignerSignature,
     provider::CartridgeJsonRpcProvider,
-    signers::{HashSigner, SignError, Signer},
+    signers::{HashSigner, Owner, SignError},
 };
 
 #[derive(Clone)]
 pub struct ControllerFactory {
     class_hash: Felt,
     chain_id: Felt,
-    calldata: Vec<Felt>,
-    signer: Signer,
+    owner: Owner,
     provider: CartridgeJsonRpcProvider,
     block_id: BlockId,
 }
@@ -28,18 +27,20 @@ impl ControllerFactory {
     pub fn new(
         class_hash: Felt,
         chain_id: Felt,
-        calldata: Vec<Felt>,
-        signer: Signer,
+        owner: Owner,
         provider: CartridgeJsonRpcProvider,
     ) -> Self {
         Self {
             class_hash,
             chain_id,
-            calldata,
-            signer,
+            owner,
             provider,
             block_id: BlockId::Tag(BlockTag::Pending),
         }
+    }
+
+    pub fn address(&self, salt: Felt) -> Felt {
+        self.deploy_v1(salt).address()
     }
 }
 
@@ -54,7 +55,10 @@ impl AccountFactory for ControllerFactory {
     }
 
     fn calldata(&self) -> Vec<Felt> {
-        self.calldata.clone()
+        let mut calldata =
+            crate::abigen::controller::Owner::cairo_serialize(&self.owner.clone().into());
+        calldata.push(Felt::ONE); // no guardian
+        calldata
     }
 
     fn chain_id(&self) -> Felt {
@@ -80,7 +84,7 @@ impl AccountFactory for ControllerFactory {
     ) -> Result<Vec<Felt>, Self::SignError> {
         let tx_hash = PreparedAccountDeploymentV1::from_raw(deployment.clone(), self)
             .transaction_hash(query_only);
-        let signature = self.signer.sign(&tx_hash).await?;
+        let signature = self.owner.sign(&tx_hash).await?;
         Ok(Vec::<SignerSignature>::cairo_serialize(&vec![signature]))
     }
 
@@ -91,7 +95,7 @@ impl AccountFactory for ControllerFactory {
     ) -> Result<Vec<Felt>, Self::SignError> {
         let tx_hash = PreparedAccountDeploymentV3::from_raw(deployment.clone(), self)
             .transaction_hash(query_only);
-        let signature = self.signer.sign(&tx_hash).await?;
+        let signature = self.owner.sign(&tx_hash).await?;
         Ok(Vec::<SignerSignature>::cairo_serialize(&vec![signature]))
     }
 

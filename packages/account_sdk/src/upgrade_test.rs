@@ -6,7 +6,7 @@ use starknet::{
 
 use crate::{
     artifacts::{Version, CONTROLLERS},
-    signers::Signer,
+    signers::{Owner, Signer},
     tests::{ensure_txn, runners::katana::KatanaRunner},
 };
 
@@ -15,7 +15,11 @@ async fn test_controller_upgrade() {
     let runner = KatanaRunner::load();
     let signer = Signer::new_starknet_random();
     let controller = runner
-        .deploy_controller("username".to_owned(), signer, Version::V1_0_4)
+        .deploy_controller(
+            "username".to_owned(),
+            Owner::Signer(signer),
+            Version::V1_0_4,
+        )
         .await;
 
     runner.declare_controller(Version::LATEST).await;

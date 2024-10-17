@@ -3,7 +3,7 @@ use account_sdk::account::outside_execution::{OutsideExecutionAccount, OutsideEx
 use account_sdk::account::session::SessionAccount;
 use account_sdk::account::AccountHashAndCallsSigner;
 use account_sdk::provider::{CartridgeJsonRpcProvider, CartridgeProvider};
-use account_sdk::signers::{HashSigner, Signer};
+use account_sdk::signers::Signer;
 use account_sdk::utils::time::get_current_timestamp;
 use serde_wasm_bindgen::to_value;
 use starknet::accounts::{Account, ConnectedAccount};
@@ -50,7 +50,7 @@ impl CartridgeSessionAccount {
         let session = account_sdk::account::session::hash::Session::new(
             policies,
             session.expires_at,
-            &signer.signer(),
+            &signer.clone().into(),
         )?;
 
         Ok(CartridgeSessionAccount(SessionAccount::new(
@@ -87,7 +87,7 @@ impl CartridgeSessionAccount {
         let session = account_sdk::account::session::hash::Session::new(
             policies,
             session.expires_at,
-            &signer.signer(),
+            &signer.clone().into(),
         )?;
 
         Ok(CartridgeSessionAccount(SessionAccount::new_as_registered(

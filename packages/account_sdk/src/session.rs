@@ -9,7 +9,7 @@ use crate::account::session::SessionAccount;
 use crate::controller::Controller;
 use crate::errors::ControllerError;
 use crate::hash::MessageHashRev1;
-use crate::signers::{HashSigner, Signer, SignerTrait};
+use crate::signers::{HashSigner, Signer};
 use crate::storage::StorageBackend;
 use crate::storage::{selectors::Selectors, Credentials, SessionMetadata};
 use crate::utils::time::get_current_timestamp;
@@ -25,7 +25,9 @@ impl Controller {
         expires_at: u64,
     ) -> Result<SessionAccount, ControllerError> {
         let signer = SigningKey::from_random();
-        let session = Session::new(methods, expires_at, &signer.signer())?;
+        let session_signer = Signer::Starknet(signer.clone());
+
+        let session = Session::new(methods, expires_at, &session_signer.clone().into())?;
         let hash = session
             .raw()
             .get_message_hash_rev_1(self.chain_id, self.address);
@@ -44,7 +46,6 @@ impl Controller {
             },
         )?;
 
-        let session_signer = Signer::Starknet(signer);
         let session_account = SessionAccount::new(
             self.provider().clone(),
             session_signer,
@@ -126,13 +127,13 @@ impl Controller {
                     AbigenSigner::Starknet(StarknetSigner {
                         pubkey: NonZero::new(pubkey.scalar()).unwrap(),
                     })
-                    .guid()
+                    .into()
                 } else if let Some(credentials) = &metadata.credentials {
                     let signer = SigningKey::from_secret_scalar(credentials.private_key);
                     AbigenSigner::Starknet(StarknetSigner {
                         pubkey: NonZero::new(signer.verifying_key().scalar()).unwrap(),
                     })
-                    .guid()
+                    .into()
                 } else {
                     return None;
                 };

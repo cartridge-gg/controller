@@ -17,6 +17,8 @@ use serde::{Deserialize, Serialize};
 use serde_cbor_2::error::Error as CBORError;
 use sha2::{digest::Update, Digest, Sha256};
 use starknet::core::types::Felt;
+use starknet::macros::short_string;
+use starknet_crypto::PoseidonHasher;
 use std::collections::BTreeMap;
 use std::ops::Neg;
 use std::result::Result;
@@ -31,7 +33,7 @@ use super::{DeviceError, HashSigner, SignError};
 use crate::abigen::controller::Signature;
 use crate::abigen::{
     self,
-    controller::{Signer as AbigenSigner, SignerSignature, WebauthnSignature},
+    controller::{SignerSignature, WebauthnSignature},
 };
 
 #[cfg(target_arch = "wasm32")]
@@ -387,13 +389,9 @@ impl HashSigner for WebauthnSigner {
         };
 
         Ok(SignerSignature::Webauthn((
-            abigen::controller::WebauthnSigner::from(self),
+            abigen::controller::WebauthnSigner::from(self.clone()),
             webauthn_signature,
         )))
-    }
-
-    fn signer(&self) -> AbigenSigner {
-        AbigenSigner::Webauthn(abigen::controller::WebauthnSigner::from(self))
     }
 }
 
@@ -404,8 +402,8 @@ pub struct WebauthnSigner {
     pub pub_key: CoseKey,
 }
 
-impl From<&WebauthnSigner> for abigen::controller::WebauthnSigner {
-    fn from(signer: &WebauthnSigner) -> Self {
+impl From<WebauthnSigner> for abigen::controller::WebauthnSigner {
+    fn from(signer: WebauthnSigner) -> Self {
         Self {
             rp_id_hash: NonZero::new(U256::from_bytes_be(&signer.rp_id_hash())).unwrap(),
             origin: OPERATIONS.origin().unwrap().into_bytes(),
@@ -414,6 +412,24 @@ impl From<&WebauthnSigner> for abigen::controller::WebauthnSigner {
             ))
             .unwrap(),
         }
+    }
+}
+
+impl From<abigen::controller::WebauthnSigner> for Felt {
+    fn from(signer: abigen::controller::WebauthnSigner) -> Self {
+        let mut state = PoseidonHasher::new();
+        state.update(short_string!("Webauthn Signer"));
+        state.update(signer.origin.len().into());
+        for b in &signer.origin {
+            state.update((*b).into())
+        }
+        let rp_id_hash = signer.rp_id_hash.inner();
+        state.update(rp_id_hash.low.into());
+        state.update(rp_id_hash.high.into());
+        let pub_key = signer.pubkey.inner();
+        state.update(pub_key.low.into());
+        state.update(pub_key.high.into());
+        state.finalize()
     }
 }
 

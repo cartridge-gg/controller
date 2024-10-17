@@ -15,17 +15,17 @@ use crate::{
         SessionAccount,
     },
     artifacts::Version,
-    signers::{webauthn::WebauthnSigner, HashSigner, Signer, SignerTrait},
+    signers::{Owner, Signer},
     tests::{
         account::FEE_TOKEN_ADDRESS, ensure_txn, runners::katana::KatanaRunner,
         transaction_waiter::TransactionWaiter,
     },
 };
 
-pub async fn test_verify_execute(signer: Signer) {
+pub async fn test_verify_execute(owner: Owner) {
     let runner = KatanaRunner::load();
     let mut controller = runner
-        .deploy_controller("username".to_owned(), signer, Version::LATEST)
+        .deploy_controller("username".to_owned(), owner, Version::LATEST)
         .await;
 
     let policies = vec![
@@ -63,9 +63,10 @@ pub async fn test_verify_execute(signer: Signer) {
 }
 
 #[tokio::test]
+#[cfg(feature = "webauthn")]
 async fn test_verify_execute_session_webauthn_starknet_starknet() {
     let signer = Signer::Webauthn(
-        WebauthnSigner::register(
+        crate::signers::webauthn::WebauthnSigner::register(
             "cartridge.gg".to_string(),
             "username".to_string(),
             "challenge".as_bytes(),
@@ -74,12 +75,12 @@ async fn test_verify_execute_session_webauthn_starknet_starknet() {
         .unwrap(),
     );
 
-    test_verify_execute(signer).await;
+    test_verify_execute(Owner::Signer(signer)).await;
 }
 
 #[tokio::test]
 async fn test_verify_execute_session_starknet_x3() {
-    test_verify_execute(Signer::new_starknet_random()).await;
+    test_verify_execute(Owner::Signer(Signer::new_starknet_random())).await;
 }
 
 #[tokio::test]
@@ -87,7 +88,11 @@ async fn test_verify_execute_session_multiple() {
     let signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let mut controller = runner
-        .deploy_controller("username".to_owned(), signer, Version::LATEST)
+        .deploy_controller(
+            "username".to_owned(),
+            Owner::Signer(signer),
+            Version::LATEST,
+        )
         .await;
 
     let session_account = controller
@@ -139,7 +144,11 @@ async fn test_verify_execute_session_registered() {
 
     let runner = KatanaRunner::load();
     let controller = runner
-        .deploy_controller("username".to_owned(), owner_signer.clone(), Version::LATEST)
+        .deploy_controller(
+            "username".to_owned(),
+            Owner::Signer(owner_signer.clone()),
+            Version::LATEST,
+        )
         .await;
 
     let session = Session::new(
@@ -149,14 +158,14 @@ async fn test_verify_execute_session_registered() {
             Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer")),
         ],
         u64::MAX,
-        &session_signer.signer(),
+        &session_signer.clone().into(),
     )
     .unwrap();
 
     ensure_txn(
         controller
             .contract()
-            .register_session(&session.raw(), &owner_signer.signer().guid()),
+            .register_session(&session.raw(), &owner_signer.clone().into()),
         controller.provider(),
     )
     .await
@@ -167,7 +176,7 @@ async fn test_verify_execute_session_registered() {
         session_signer,
         controller.address(),
         runner.client().chain_id().await.unwrap(),
-        owner_signer.signer().guid(),
+        owner_signer.into(),
         session,
     );
 
@@ -199,7 +208,11 @@ async fn test_create_and_use_registered_session() {
     let owner_signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
     let mut controller = runner
-        .deploy_controller("username".to_owned(), owner_signer.clone(), Version::LATEST)
+        .deploy_controller(
+            "username".to_owned(),
+            Owner::Signer(owner_signer.clone()),
+            Version::LATEST,
+        )
         .await;
 
     // Create policies for the session
@@ -232,8 +245,8 @@ async fn test_create_and_use_registered_session() {
         session_signer.clone(),
         controller.address(),
         controller.chain_id(),
-        owner_signer.signer().guid(),
-        Session::new(policies, expires_at, &session_signer.signer()).unwrap(),
+        owner_signer.into(),
+        Session::new(policies, expires_at, &session_signer.into()).unwrap(),
     );
 
     // Use the session account to perform a transfer
