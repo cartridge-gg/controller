@@ -5,15 +5,13 @@ use starknet::core::types::Felt;
 use starknet::core::utils::NonAsciiNameError;
 use starknet::macros::selector;
 use starknet_crypto::poseidon_hash_many;
-use starknet_types_core::hash::Poseidon;
 
 use crate::abigen::controller::Signer as AbigenSigner;
-
-use crate::hash::MessageHashRev1;
 use crate::signers::SignError;
 
 use super::merkle::MerkleTree;
 use super::raw_session::RawSession;
+use super::raw_session::SessionHash;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ProvedPolicy {
@@ -28,6 +26,7 @@ pub struct Session {
     pub authorization_root: Felt,
     pub metadata: String,
     pub session_key_guid: Felt,
+    pub guardian_key_guid: Felt,
 }
 
 impl Session {
@@ -59,6 +58,7 @@ impl Session {
             authorization_root: root,
             metadata: serde_json::to_string(&metadata).unwrap(),
             session_key_guid: signer.clone().into(),
+            guardian_key_guid: Felt::ZERO,
         })
     }
 
@@ -72,6 +72,7 @@ impl Session {
             allowed_methods_root: self.authorization_root,
             metadata_hash: Felt::ZERO,
             session_key_guid: self.session_key_guid,
+            guardian_key_guid: self.guardian_key_guid,
         }
     }
 
@@ -81,10 +82,7 @@ impl Session {
         chain_id: Felt,
         address: Felt,
     ) -> Result<Felt, NonAsciiNameError> {
-        let token_session_hash = self.raw().get_message_hash_rev_1(chain_id, address);
-        let mut msg_hash = [tx_hash, token_session_hash, Felt::TWO];
-        Poseidon::hades_permutation(&mut msg_hash);
-        Ok(msg_hash[0])
+        self.raw().hash(chain_id, address, tx_hash)
     }
 
     pub fn single_proof(&self, policy: &Policy) -> Option<Vec<Felt>> {

@@ -1,11 +1,15 @@
 use anyhow::Error;
 use cainome::cairo_serde::CairoSerde;
 use hyper::service::{make_service_fn, service_fn};
-use hyper::{Body, Client, Request, Response, Server, StatusCode};
+use hyper::{http::request::Parts, Body, Client, Request, Response, Server, StatusCode};
 use serde_json::{json, Value};
 use starknet::accounts::single_owner::SignError;
 use starknet::accounts::{Account, AccountError, ExecutionEncoding};
-use starknet::core::types::{Call, InvokeTransactionResult};
+use starknet::core::crypto::compute_hash_on_elements;
+use starknet::core::types::{
+    BroadcastedInvokeTransaction, BroadcastedInvokeTransactionV1, BroadcastedTransaction, Call,
+    InvokeTransactionResult,
+};
 use starknet::macros::selector;
 use starknet::providers::jsonrpc::HttpTransport;
 use starknet::providers::JsonRpcClient;
@@ -15,8 +19,10 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 use url::Url;
 
-use crate::abigen::controller::OutsideExecution;
+use crate::abigen::controller::{OutsideExecution, SignerSignature};
+use crate::account::session::raw_session::{RawSessionToken, SessionHash};
 use crate::provider::OutsideExecutionParams;
+use crate::signers::{HashSigner, Signer};
 
 use super::katana::{single_owner_account_with_encoding, PREFUNDED};
 
@@ -26,10 +32,11 @@ pub struct CartridgeProxy {
     proxy_url: Url,
     rpc_client: JsonRpcClient<HttpTransport>,
     client: Client<hyper::client::HttpConnector>,
+    guardian_signer: Signer,
 }
 
 impl CartridgeProxy {
-    pub fn new(rpc_url: Url, proxy_url: Url, chain_id: Felt) -> Self {
+    pub fn new(rpc_url: Url, proxy_url: Url, chain_id: Felt, guardian_signer: Signer) -> Self {
         let rpc_client = JsonRpcClient::new(HttpTransport::new(rpc_url.clone()));
 
         CartridgeProxy {
@@ -38,6 +45,7 @@ impl CartridgeProxy {
             rpc_client,
             proxy_url,
             client: Client::new(),
+            guardian_signer,
         }
     }
 
@@ -72,82 +80,164 @@ impl CartridgeProxy {
     }
 
     async fn handle_request(&self, req: Request<Body>) -> Result<Response<Body>, hyper::Error> {
-        let (parts, body) = req.into_parts();
+        let (mut parts, body) = req.into_parts();
         let body_bytes = hyper::body::to_bytes(body).await?;
-        let body: Value = serde_json::from_slice(&body_bytes).unwrap_or(json!({}));
+        let mut body: Value = serde_json::from_slice(&body_bytes).unwrap_or(json!({}));
 
         if let Some(method) = body.get("method") {
             if method == "cartridge_addExecuteOutsideTransaction" {
-                let params = &body["params"];
-                println!("Received params: {:?}", params);
-                match parse_execute_outside_transaction_params(params) {
-                    Ok((address, outside_execution, signature)) => {
-                        match self
-                            .execute_from_outside(outside_execution, signature, address)
-                            .await
-                        {
-                            Ok(result) => {
-                                println!("success");
-                                return Ok(Response::builder()
-                                    .status(StatusCode::OK)
-                                    .body(Body::from(
-                                        json!({
-                                            "id" : 1_u64,
-                                            "jsonrpc": "2.0",
-                                            "result" : {
-                                                "transaction_hash": format!("0x{:x}", result.transaction_hash)
-                                            }
-                                        })
-                                        .to_string(),
-                                    ))
-                                    .unwrap());
-                            }
-                            Err(e) => {
-                                let error_response = json!({
-                                    "jsonrpc": "2.0",
-                                    "error": {
-                                        "code": -32000,
-                                        "message": "Execution error",
-                                        "data": e.to_string()
-                                    }
-                                });
-
-                                return Ok(Response::builder()
-                                    .status(StatusCode::OK)
-                                    .header("Content-Type", "application/json")
-                                    .body(Body::from(error_response.to_string()))
-                                    .unwrap());
-                            }
-                        };
-                    }
-                    Err(e) => {
-                        let error_response = json!({
-                            "jsonrpc": "2.0",
-                            "id": body["id"],
-                            "error": {
-                                "code": -32602,
-                                "message": e.to_string()
-                            }
-                        });
-                        return Ok(Response::builder()
-                            .status(StatusCode::OK)
-                            .header("Content-Type", "application/json")
-                            .body(Body::from(error_response.to_string()))
-                            .unwrap());
-                    }
-                }
+                return self.handle_add_execute_outside_transaction(&body).await;
+            } else if method == "starknet_addInvokeTransaction" {
+                self.handle_add_invoke_transaction(&mut parts, &mut body)
+                    .await;
+            } else if method == "starknet_estimateFee" {
+                self.handle_estimate_fee(&mut parts, &mut body).await;
             }
         }
+
+        let body = Body::from(serde_json::to_vec(&body).unwrap());
 
         let mut proxy_req = Request::builder()
             .method(parts.method)
             .uri(&self.rpc_url.to_string())
-            .body(Body::from(serde_json::to_vec(&body).unwrap()))
+            .body(body)
             .unwrap();
 
         *proxy_req.headers_mut() = parts.headers;
 
         self.client.request(proxy_req).await
+    }
+
+    async fn handle_add_invoke_transaction(&self, parts: &mut Parts, body: &mut Value) {
+        let mut txs: Vec<BroadcastedTransaction> =
+            serde_json::from_value(body["params"].clone()).unwrap();
+
+        for tx in &mut txs {
+            if let BroadcastedTransaction::Invoke(BroadcastedInvokeTransaction::V1(ref mut tx)) = tx
+            {
+                let tx_hash = self.transaction_hash(tx);
+                tx.signature = self
+                    .add_guardian_signature(tx.sender_address, tx_hash, &tx.signature)
+                    .await;
+            }
+        }
+        body["params"] = serde_json::to_value(txs).unwrap();
+        parts.headers.remove("content-length");
+    }
+
+    async fn handle_estimate_fee(&self, parts: &mut Parts, body: &mut Value) {
+        let mut txs: Vec<BroadcastedTransaction> =
+            serde_json::from_value(body["params"][0].clone()).unwrap();
+
+        for tx in &mut txs {
+            if let BroadcastedTransaction::Invoke(BroadcastedInvokeTransaction::V1(ref mut tx)) = tx
+            {
+                if tx.signature.is_empty() {
+                    continue;
+                }
+                let tx_hash = self.transaction_hash(tx);
+                tx.signature = self
+                    .add_guardian_signature(tx.sender_address, tx_hash, &tx.signature)
+                    .await;
+            }
+        }
+        body["params"][0] = serde_json::to_value(txs).unwrap();
+        parts.headers.remove("content-length");
+    }
+
+    async fn add_guardian_signature(
+        &self,
+        address: Felt,
+        tx_hash: Felt,
+        old_signature: &[Felt],
+    ) -> Vec<Felt> {
+        match <Vec<SignerSignature> as CairoSerde>::cairo_deserialize(old_signature, 0) {
+            Ok(mut signature) => {
+                let guardian_signature = self.guardian_signer.sign(&tx_hash).await.unwrap();
+                signature.push(guardian_signature);
+                <Vec<SignerSignature> as CairoSerde>::cairo_serialize(&signature)
+            }
+            Err(_) => {
+                let mut session_token =
+                    <RawSessionToken as CairoSerde>::cairo_deserialize(old_signature, 1).unwrap();
+                let session_hash = session_token
+                    .session
+                    .hash(self.chain_id, address, tx_hash)
+                    .unwrap();
+                let guardian_signature = self.guardian_signer.sign(&session_hash).await.unwrap();
+                session_token.guardian_signature = guardian_signature;
+
+                let mut serialized =
+                    <RawSessionToken as CairoSerde>::cairo_serialize(&session_token);
+                serialized.insert(0, old_signature[0]);
+                serialized
+            }
+        }
+    }
+
+    async fn handle_add_execute_outside_transaction(
+        &self,
+        body: &Value,
+    ) -> Result<Response<Body>, hyper::Error> {
+        let params = &body["params"];
+        println!("Received params: {:?}", params);
+        let result = match parse_execute_outside_transaction_params(params) {
+            Ok((address, outside_execution, signature)) => {
+                match self
+                    .execute_from_outside(outside_execution, signature, address)
+                    .await
+                {
+                    Ok(result) => {
+                        println!("success");
+                        Response::builder()
+                            .status(StatusCode::OK)
+                            .body(Body::from(
+                                json!({
+                                    "id" : 1_u64,
+                                    "jsonrpc": "2.0",
+                                    "result" : {
+                                        "transaction_hash": format!("0x{:x}", result.transaction_hash)
+                                    }
+                                })
+                                .to_string(),
+                            ))
+                            .unwrap()
+                    }
+                    Err(e) => {
+                        let error_response = json!({
+                            "jsonrpc": "2.0",
+                            "error": {
+                                "code": -32000,
+                                "message": "Execution error",
+                                "data": e.to_string()
+                            }
+                        });
+
+                        Response::builder()
+                            .status(StatusCode::OK)
+                            .header("Content-Type", "application/json")
+                            .body(Body::from(error_response.to_string()))
+                            .unwrap()
+                    }
+                }
+            }
+            Err(e) => {
+                let error_response = json!({
+                    "jsonrpc": "2.0",
+                    "id": body["id"],
+                    "error": {
+                        "code": -32602,
+                        "message": e.to_string()
+                    }
+                });
+                Response::builder()
+                    .status(StatusCode::OK)
+                    .header("Content-Type", "application/json")
+                    .body(Body::from(error_response.to_string()))
+                    .unwrap()
+            }
+        };
+        Ok(result)
     }
 
     async fn execute_from_outside(
@@ -177,6 +267,38 @@ impl CartridgeProxy {
         );
 
         executor.execute_v1(vec![call]).send().await
+    }
+
+    pub fn transaction_hash(&self, tx: &BroadcastedInvokeTransactionV1) -> Felt {
+        /// Cairo string for "invoke"
+        const PREFIX_INVOKE: Felt = Felt::from_raw([
+            513398556346534256,
+            18446744073709551615,
+            18446744073709551615,
+            18443034532770911073,
+        ]);
+
+        /// 2 ^ 128 + 1
+        const QUERY_VERSION_ONE: Felt = Felt::from_raw([
+            576460752142433776,
+            18446744073709551584,
+            17407,
+            18446744073700081633,
+        ]);
+        compute_hash_on_elements(&[
+            PREFIX_INVOKE,
+            if tx.is_query {
+                QUERY_VERSION_ONE
+            } else {
+                Felt::ONE
+            }, // version
+            tx.sender_address,
+            Felt::ZERO, // entry_point_selector
+            compute_hash_on_elements(&tx.calldata),
+            tx.max_fee,
+            self.chain_id,
+            tx.nonce,
+        ])
     }
 }
 
