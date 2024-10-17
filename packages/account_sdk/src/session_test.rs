@@ -9,12 +9,13 @@ use starknet::{
 use starknet_crypto::Felt;
 
 use crate::{
-    abigen::erc_20::Erc20,
+    abigen::{self, erc_20::Erc20},
     account::session::{
         hash::{Policy, Session},
         SessionAccount,
     },
     artifacts::Version,
+    hash::MessageHashRev1,
     signers::{Owner, Signer},
     tests::{
         account::FEE_TOKEN_ADDRESS, ensure_txn, runners::katana::KatanaRunner,
@@ -228,7 +229,7 @@ async fn test_create_and_use_registered_session() {
 
     // Register the session
     let expires_at = u64::MAX;
-    let max_fee = Felt::from(277600000000000_u128);
+    let max_fee = Felt::from(277800000000000_u128);
     let txn = controller
         .register_session(policies.clone(), expires_at, public_key, max_fee)
         .await
@@ -239,15 +240,30 @@ async fn test_create_and_use_registered_session() {
         .await
         .unwrap();
 
+    let session = Session::new(policies, expires_at, &session_signer.clone().into()).unwrap();
+
     // Create a SessionAccount using new_from_registered
     let session_account = SessionAccount::new_as_registered(
         runner.client().clone(),
         session_signer.clone(),
         controller.address(),
         controller.chain_id(),
-        owner_signer.into(),
-        Session::new(policies, expires_at, &session_signer.into()).unwrap(),
+        owner_signer.clone().into(),
+        session.clone(),
     );
+
+    let is_registered =
+        abigen::controller::ControllerReader::new(controller.address(), runner.client())
+            .is_session_registered(
+                &session
+                    .raw()
+                    .get_message_hash_rev_1(controller.chain_id, controller.address),
+                &owner_signer.into(),
+            )
+            .call()
+            .await
+            .unwrap();
+    assert!(is_registered);
 
     // Use the session account to perform a transfer
     let recipient = ContractAddress(felt!("0x18301129"));

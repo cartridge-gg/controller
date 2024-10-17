@@ -5,12 +5,12 @@ use alexandria_merkle_tree::merkle_tree::{
 };
 use argent::session::session_hash::MerkleLeafHash;
 
-// Based on https://github.com/argentlabs/starknet-plugin-account/blob/3c14770c3f7734ef208536d91bbd76af56dc2043/contracts/plugins/SessionKey.cairo
+// Based on
+// https://github.com/argentlabs/starknet-plugin-account/blob/3c14770c3f7734ef208536d91bbd76af56dc2043/contracts/plugins/SessionKey.cairo
 #[starknet::component]
 mod session_component {
     use core::poseidon::hades_permutation;
     use starknet::{account::Call, info::get_block_timestamp, get_contract_address, storage::Map};
-    
     use argent::session::interface::{Session, SessionToken};
     use argent::session::session_hash::{StructHashSession, OffChainMessageHashSessionRev1};
     use argent::signer::signer_signature::{
@@ -29,8 +29,8 @@ mod session_component {
     struct Storage {
         /// A map of session hashes to a boolean indicating if the session has been revoked.
         revoked_session: Map<felt252, bool>,
-        /// A map of (owner_guid, guardian_guid, session_hash) to a len of authorization signature
-        valid_session_cache: Map<(felt252, felt252, felt252), bool>,
+        /// A map of (owner_guid, session_hash) to a len of authorization signature
+        valid_session_cache: Map<(felt252, felt252), bool>,
     }
 
     #[event]
@@ -77,25 +77,36 @@ mod session_component {
         fn register_session(
             ref self: ComponentState<TContractState>, session: Session, guid_or_address: felt252,
         ) {
-            self.get_contract().assert_owner();
+            let contract = self.get_contract();
+            contract.assert_owner();
 
             let now = get_block_timestamp();
             assert(session.expires_at > now, 'session/expired');
+
             let session_hash = session.get_message_hash_rev_1();
             assert(!self.revoked_session.read(session_hash), 'session/already-revoked');
-
-            let guardian_guid = 0;
             assert(
-                !self.valid_session_cache.read((guid_or_address, guardian_guid, session_hash)),
+                !self.valid_session_cache.read((guid_or_address, session_hash)),
                 'session/already-registered'
             );
-            self.valid_session_cache.write((guid_or_address, guardian_guid, session_hash), true);
+
+            self.valid_session_cache.write((guid_or_address, session_hash), true);
         }
 
         fn is_session_revoked(
             self: @ComponentState<TContractState>, session_hash: felt252
         ) -> bool {
             self.revoked_session.read(session_hash)
+        }
+
+        fn is_session_registered(
+            self: @ComponentState<TContractState>, session_hash: felt252, guid_or_address: felt252,
+        ) -> bool {
+            if self.is_session_revoked(session_hash) {
+                return false;
+            }
+
+            self.valid_session_cache.read((guid_or_address, session_hash))
         }
     }
 
@@ -151,45 +162,63 @@ mod session_component {
 
             assert(!self.revoked_session.read(session_hash), 'session/already-revoked');
 
-            let guardian_guid = 0;
-
             if (signature.session_authorization.len() == 2
                 && *signature.session_authorization.at(0) == AUTHORIZATION_BY_REGISTERED) {
                 let owner_guid = *signature.session_authorization.at(1);
+                assert(contract.is_valid_authorizer(owner_guid), 'session/invalid-authorizer');
                 assert(signature.cache_authorization, 'session/cache-missing');
+
                 assert(
-                    self.valid_session_cache.read((owner_guid, guardian_guid, session_hash)),
+                    self.valid_session_cache.read((owner_guid, session_hash)),
                     'session/not-registered'
                 );
-                assert(contract.is_valid_authorizer(owner_guid), 'session/invalid-authorizer');
             } else {
                 let parsed = contract.parse_authorization(signature.session_authorization);
                 let owner_guid = parsed.at(0).clone().signer().into_guid();
+
                 // check validity of token
                 if !signature.cache_authorization
-                    || !self.valid_session_cache.read((owner_guid, guardian_guid, session_hash)) {
+                    || !self.valid_session_cache.read((owner_guid, session_hash)) {
                     contract.verify_authorization(session_hash, parsed.span());
+
                     if signature.cache_authorization {
-                        self
-                            .valid_session_cache
-                            .write((owner_guid, guardian_guid, session_hash), true);
+                        self.valid_session_cache.write((owner_guid, session_hash), true);
                     }
                 } else {
                     assert(contract.is_valid_authorizer(owner_guid), 'session/invalid-authorizer');
                 }
-            }
+            };
 
             let (message_hash, _, _) = hades_permutation(transaction_hash, session_hash, 2);
 
             let session_guid_from_sig = signature.session_signature.signer().into_guid();
+
             assert(
                 signature.session.session_key_guid == session_guid_from_sig,
                 'session/session-key-mismatch'
             );
+
             assert(
                 signature.session_signature.is_valid_signature(message_hash),
                 'session/invalid-session-sig'
             );
+
+            if signature.session.guardian_key_guid != 0 {
+                assert(
+                    signature
+                        .session
+                        .guardian_key_guid == signature
+                        .guardian_signature
+                        .signer()
+                        .into_guid(),
+                    'session/invalid-guardian'
+                );
+
+                assert(
+                    signature.guardian_signature.is_valid_signature(message_hash),
+                    'session/invalid-guardian-sig'
+                );
+            }
 
             if check_policy(calls, signature.session.allowed_methods_root, signature.proofs)
                 .is_err() {
