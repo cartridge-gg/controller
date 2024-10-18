@@ -23,7 +23,7 @@ pub struct ProvedPolicy {
 pub struct Session {
     pub expires_at: u64,
     pub policies: Vec<ProvedPolicy>,
-    pub authorization_root: Felt,
+    pub allowed_policies_root: Felt,
     pub metadata: String,
     pub session_key_guid: Felt,
     pub guardian_key_guid: Felt,
@@ -56,7 +56,7 @@ impl Session {
         Ok(Self {
             expires_at,
             policies,
-            authorization_root: root,
+            allowed_policies_root: root,
             metadata: serde_json::to_string(&metadata).unwrap(),
             session_key_guid: session_signer.clone().into(),
             guardian_key_guid: guardian_guid,
@@ -70,7 +70,7 @@ impl Session {
     pub fn raw(&self) -> RawSession {
         RawSession {
             expires_at: self.expires_at,
-            allowed_policies_root: self.authorization_root,
+            allowed_policies_root: self.allowed_policies_root,
             metadata_hash: Felt::ZERO,
             session_key_guid: self.session_key_guid,
             guardian_key_guid: self.guardian_key_guid,
@@ -101,14 +101,25 @@ impl Session {
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct Policy {
+pub enum Policy {
+    Call(CallPolicy),
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct CallPolicy {
     pub contract_address: Felt,
     pub selector: Felt,
 }
 
-impl From<&Call> for Policy {
+impl From<CallPolicy> for Policy {
+    fn from(call: CallPolicy) -> Self {
+        Policy::Call(call)
+    }
+}
+
+impl From<&Call> for CallPolicy {
     fn from(call: &Call) -> Self {
-        Policy {
+        CallPolicy {
             contract_address: call.to,
             selector: call.selector,
         }
@@ -116,7 +127,18 @@ impl From<&Call> for Policy {
 }
 
 impl Policy {
-    pub fn new(contract_address: Felt, selector: Felt) -> Policy {
+    pub fn from_calls(calls: &[Call]) -> Vec<Self> {
+        calls.iter().map(CallPolicy::from).map(Self::from).collect()
+    }
+    pub fn as_merkle_leaf(&self) -> Felt {
+        match self {
+            Self::Call(call) => call.as_merkle_leaf(),
+        }
+    }
+}
+
+impl CallPolicy {
+    pub fn new(contract_address: Felt, selector: Felt) -> Self {
         Self {
             contract_address,
             selector,
@@ -129,9 +151,5 @@ impl Policy {
             self.contract_address,
             self.selector,
         ])
-    }
-
-    pub fn from_calls(calls: &[Call]) -> Vec<Self> {
-        calls.iter().map(Policy::from).collect()
     }
 }

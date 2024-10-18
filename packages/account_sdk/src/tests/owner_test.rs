@@ -1,6 +1,6 @@
 use crate::{
     abigen::erc_20::Erc20,
-    account::session::hash::Policy,
+    account::session::hash::{CallPolicy, Policy},
     artifacts::{Version, CONTROLLERS},
     controller::Controller,
     signers::{webauthn::WebauthnSigner, HashSigner, NewOwnerSigner, Owner, SignError, Signer},
@@ -267,10 +267,10 @@ async fn test_change_owner_invalidate_old_sessions() {
         )
         .await;
 
-    let transfer_method = Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer"));
+    let transfer_method = CallPolicy::new(*FEE_TOKEN_ADDRESS, selector!("transfer"));
 
     let session_account = controller
-        .create_session(vec![transfer_method.clone()], u64::MAX)
+        .create_session(vec![transfer_method.clone().into()], u64::MAX)
         .await
         .unwrap();
 
@@ -322,7 +322,7 @@ async fn test_change_owner_invalidate_old_sessions() {
     );
 
     let session_account = controller
-        .create_session(vec![transfer_method], u64::MAX)
+        .create_session(vec![transfer_method.into()], u64::MAX)
         .await
         .unwrap();
     let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &session_account);
@@ -364,10 +364,10 @@ async fn test_call_unallowed_methods() {
         .await;
 
     // Create random allowed method
-    let transfer_method = Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer"));
+    let transfer_method = CallPolicy::new(*FEE_TOKEN_ADDRESS, selector!("transfer"));
 
     let session_account = controller
-        .create_session(vec![transfer_method.clone()], u64::MAX)
+        .create_session(vec![Policy::Call(transfer_method.clone())], u64::MAX)
         .await
         .unwrap();
 
