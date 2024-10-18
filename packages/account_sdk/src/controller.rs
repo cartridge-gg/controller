@@ -22,7 +22,7 @@ use starknet::core::types::{
 use starknet::core::utils::cairo_short_string_to_felt;
 use starknet::macros::selector;
 use starknet::providers::{Provider, ProviderError};
-use starknet::signers::{SignerInteractivityContext, SigningKey};
+use starknet::signers::SignerInteractivityContext;
 use starknet::{
     accounts::{Account, ConnectedAccount, ExecutionEncoder},
     core::types::{BlockId, Felt},
@@ -48,6 +48,7 @@ pub struct Controller {
     factory: ControllerFactory,
     pub storage: Storage,
     nonce: Felt,
+    pub(crate) execute_from_outside_nonce: (Felt, u128),
 }
 
 impl Controller {
@@ -79,6 +80,10 @@ impl Controller {
             factory,
             storage: Storage::default(),
             nonce: Felt::ZERO,
+            execute_from_outside_nonce: (
+                starknet::signers::SigningKey::from_random().secret_scalar(),
+                0,
+            ),
         };
 
         let contract = Box::new(abigen::controller::Controller::new(
