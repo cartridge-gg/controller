@@ -153,7 +153,10 @@ impl KatanaRunner {
     ) -> Controller {
         let prefunded: SingleOwnerAccount<&JsonRpcClient<HttpTransport>, LocalWallet> =
             self.executor().await;
-        let class_hash = self.declare_controller(version).await;
+
+        let class_hash = CONTROLLERS[&version].hash;
+        self.declare_controller(version).await;
+
         let salt = cairo_short_string_to_felt(&username).unwrap();
 
         let contract_factory = ContractFactory::new_with_udc(class_hash, prefunded, *UDC_ADDRESS);
