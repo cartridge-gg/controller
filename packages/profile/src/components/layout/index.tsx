@@ -6,13 +6,14 @@ export function LayoutContainer({
   children,
   left,
 }: PropsWithChildren & { left?: React.ReactNode }) {
-  const { parent, chainId } = useConnection();
+  const { parent, chainId, setIsVisible } = useConnection();
 
   const onClose = useCallback(() => {
+    setIsVisible(false);
     parent.close().catch(() => {
       /* Always fails for some reason */
     });
-  }, [parent]);
+  }, [parent, setIsVisible]);
 
   return (
     <ResponsiveWrapper>

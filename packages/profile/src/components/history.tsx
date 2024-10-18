@@ -6,10 +6,11 @@ import {
   LayoutHeader,
 } from "@/components/layout";
 import { Navigation } from "@/components/navigation";
-import { useConnection } from "@/hooks/context";
+import { useAccount, useConnection } from "@/hooks/context";
 
 export function History() {
-  const { username, address, indexerUrl } = useConnection();
+  const { indexerUrl } = useConnection();
+  const { address, username } = useAccount();
   const { data } = useTransferQuery(
     {
       endpoint: indexerUrl,
