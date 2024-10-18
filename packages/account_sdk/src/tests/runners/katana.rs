@@ -2,7 +2,7 @@ use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::accounts::{AccountFactory, ExecutionEncoding, SingleOwnerAccount};
 use starknet::contract::ContractFactory;
 use starknet::core::types::{BlockId, BlockTag, DeclareTransactionResult};
-use starknet::macros::short_string;
+use starknet::core::utils::cairo_short_string_to_felt;
 use starknet::providers::jsonrpc::HttpTransport;
 use starknet::providers::{JsonRpcClient, Provider};
 use starknet::signers::LocalWallet;
@@ -40,7 +40,7 @@ lazy_static! {
     );
 
     pub static ref CONFIG: TestnetConfig = TestnetConfig{
-        chain_id: short_string!("KATANA"),
+        chain_id: "SN_SEPOLIA".to_string(),
         exec: "katana".to_string(),
         log_file_path: "log/katana.log".to_string(),
     };
@@ -60,6 +60,7 @@ impl KatanaRunner {
     pub fn new(config: TestnetConfig) -> Self {
         let katana_port = find_free_port();
         let child = Command::new(config.exec)
+            .args(["--chain-id", &config.chain_id])
             .args(["-p", &katana_port.to_string()])
             .args(["--json-log"])
             .stdout(Stdio::piped())
@@ -73,14 +74,15 @@ impl KatanaRunner {
         let proxy_url = Url::parse(&format!("http://0.0.0.0:{}/", find_free_port())).unwrap();
         let client = CartridgeJsonRpcProvider::new(proxy_url.clone());
 
+        let chain_id = cairo_short_string_to_felt(&config.chain_id).expect("Should convert");
         let rpc_client = Arc::new(JsonRpcClient::new(HttpTransport::new(rpc_url.clone())));
-        let proxy = CartridgeProxy::new(rpc_url, proxy_url.clone(), config.chain_id);
+        let proxy = CartridgeProxy::new(rpc_url, proxy_url.clone(), chain_id);
         let proxy_handle = tokio::spawn(async move {
             proxy.run().await;
         });
 
         KatanaRunner {
-            chain_id: config.chain_id,
+            chain_id,
             testnet,
             client,
             rpc_url: proxy_url,
@@ -152,7 +154,7 @@ impl KatanaRunner {
         let prefunded: SingleOwnerAccount<&JsonRpcClient<HttpTransport>, LocalWallet> =
             self.executor().await;
         let class_hash = self.declare_controller(version).await;
-        let salt = Felt::ZERO;
+        let salt = cairo_short_string_to_felt(&username).unwrap();
 
         let contract_factory = ContractFactory::new_with_udc(class_hash, prefunded, *UDC_ADDRESS);
         let factory = ControllerFactory::new(

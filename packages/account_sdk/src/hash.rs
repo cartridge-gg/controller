@@ -50,3 +50,31 @@ impl StructHashRev1 for StarknetDomain {
         "\"StarknetDomain\"(\"name\":\"shortstring\",\"version\":\"shortstring\",\"chainId\":\"shortstring\",\"revision\":\"shortstring\")"
     );
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use starknet::{core::utils::cairo_short_string_to_felt, macros::short_string};
+    use starknet_types_core::hash::Poseidon;
+
+    // Used for recomputing domain hashes for the cairo contracts.
+    #[test]
+    fn test_starknet_domain_hash() {
+        let chain_id = cairo_short_string_to_felt("SN_MAIN").unwrap();
+        let domain = StarknetDomain {
+            name: cairo_short_string_to_felt("Account.execute_from_outside").unwrap(),
+            version: Felt::TWO,
+            chain_id,
+            revision: Felt::TWO,
+        };
+
+        let hash = domain.get_struct_hash_rev_1();
+        let mut state = [short_string!("StarkNet Message"), hash, Felt::ZERO];
+        Poseidon::hades_permutation(&mut state);
+
+        println!("State after Hades permutation:");
+        println!("state[0]: {}", state[0]);
+        println!("state[1]: {}", state[1]);
+        println!("state[2]: {}", state[2]);
+    }
+}
