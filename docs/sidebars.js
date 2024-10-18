@@ -8,6 +8,7 @@ const sidebars = {
     "controller/getting-started",
     "controller/configuration",
     "controller/sessions",
+    "controller/usernames",
     "controller/theming",
     {
       type: "category",
