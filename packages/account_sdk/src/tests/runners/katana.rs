@@ -1,4 +1,5 @@
 use cainome::cairo_serde::{ContractAddress, U256};
+use katana_runner::{KatanaRunner as DojoKatanaRunner, KatanaRunnerConfig};
 use starknet::accounts::{AccountFactory, ExecutionEncoding, SingleOwnerAccount};
 use starknet::contract::ContractFactory;
 use starknet::core::types::{BlockId, BlockTag, DeclareTransactionResult};
@@ -7,7 +8,6 @@ use starknet::providers::jsonrpc::HttpTransport;
 use starknet::providers::{JsonRpcClient, Provider};
 use starknet::signers::LocalWallet;
 use starknet::{core::types::Felt, macros::felt, signers::SigningKey};
-use std::process::{Command, Stdio};
 use std::sync::Arc;
 use tokio::task::JoinHandle;
 use url::Url;
@@ -24,7 +24,7 @@ use crate::tests::account::{AccountDeclaration, FEE_TOKEN_ADDRESS, UDC_ADDRESS};
 use crate::tests::transaction_waiter::TransactionWaiter;
 
 use super::cartridge::CartridgeProxy;
-use super::{find_free_port, SubprocessRunner, TestnetConfig};
+use super::find_free_port;
 
 lazy_static! {
     // Signing key and address of the katana prefunded account.
@@ -38,18 +38,11 @@ lazy_static! {
             "0xb3ff441a68610b30fd5e2abbf3a1548eb6ba6f3559f2862bf2dc757e5828ca"
         )
     );
-
-    pub static ref CONFIG: TestnetConfig = TestnetConfig{
-        chain_id: short_string!("KATANA"),
-        exec: "katana".to_string(),
-        log_file_path: "log/katana.log".to_string(),
-    };
 }
 
 #[derive(Debug)]
 pub struct KatanaRunner {
     chain_id: Felt,
-    testnet: SubprocessRunner,
     client: CartridgeJsonRpcProvider,
     pub rpc_url: Url,
     rpc_client: Arc<JsonRpcClient<HttpTransport>>,
@@ -57,31 +50,22 @@ pub struct KatanaRunner {
 }
 
 impl KatanaRunner {
-    pub fn new(config: TestnetConfig) -> Self {
-        let katana_port = find_free_port();
-        let child = Command::new(config.exec)
-            .args(["-p", &katana_port.to_string()])
-            .args(["--json-log"])
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .spawn()
-            .expect("failed to start subprocess");
+    pub fn new(config: KatanaRunnerConfig) -> Self {
+        let chain_id = config.chain_id.unwrap_or(short_string!("KATANA"));
+        let katana = DojoKatanaRunner::new_with_config(config).expect("Katana started");
 
-        let testnet = SubprocessRunner::new(child, |l| l.contains(r#""target":"katana::cli""#));
-
-        let rpc_url = Url::parse(&format!("http://0.0.0.0:{}/", katana_port)).unwrap();
+        let rpc_url = katana.url();
         let proxy_url = Url::parse(&format!("http://0.0.0.0:{}/", find_free_port())).unwrap();
         let client = CartridgeJsonRpcProvider::new(proxy_url.clone());
 
         let rpc_client = Arc::new(JsonRpcClient::new(HttpTransport::new(rpc_url.clone())));
-        let proxy = CartridgeProxy::new(rpc_url, proxy_url.clone(), config.chain_id);
+        let proxy = CartridgeProxy::new(rpc_url, proxy_url.clone(), chain_id);
         let proxy_handle = tokio::spawn(async move {
             proxy.run().await;
         });
 
         KatanaRunner {
-            chain_id: config.chain_id,
-            testnet,
+            chain_id,
             client,
             rpc_url: proxy_url,
             rpc_client,
@@ -90,7 +74,10 @@ impl KatanaRunner {
     }
 
     pub fn load() -> Self {
-        KatanaRunner::new(CONFIG.clone())
+        KatanaRunner::new(KatanaRunnerConfig {
+            chain_id: Some(short_string!("SN_SEPOLIA")),
+            ..KatanaRunnerConfig::default()
+        })
     }
 
     pub fn client(&self) -> &CartridgeJsonRpcProvider {
@@ -190,7 +177,6 @@ impl KatanaRunner {
 
 impl Drop for KatanaRunner {
     fn drop(&mut self) {
-        self.testnet.kill();
         self.proxy_handle.abort();
     }
 }
