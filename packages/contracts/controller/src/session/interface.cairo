@@ -1,6 +1,6 @@
 use starknet::account::Call;
 use argent::signer::signer_signature::{SignerSignature, Signer};
-use argent::session::interface::Session;
+use argent::session::interface::{Session, TypedData, SessionToken};
 
 
 #[derive(Drop, Serde, Copy, PartialEq)]
@@ -36,6 +36,7 @@ trait ISession<TContractState> {
     fn is_session_registered(
         self: @TContractState, session_hash: felt252, guid_or_address: felt252,
     ) -> bool;
+    fn is_session_sigature_valid(self: @TContractState, data: Span<TypedData>, token: SessionToken) -> bool;
 }
 
 #[starknet::interface]

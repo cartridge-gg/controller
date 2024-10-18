@@ -17,7 +17,7 @@ impl StructHashRev1 for RawSession {
         poseidon_hash_many(&[
             Self::TYPE_HASH_REV_1,
             self.expires_at.into(),
-            self.allowed_methods_root,
+            self.allowed_policies_root,
             self.metadata_hash,
             self.session_key_guid,
             self.guardian_key_guid,

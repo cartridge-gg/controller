@@ -3,16 +3,18 @@ use core::array::ArrayTrait;
 use alexandria_merkle_tree::merkle_tree::{
     Hasher, MerkleTree, poseidon::PoseidonHasherImpl, MerkleTreeTrait
 };
-use argent::session::session_hash::MerkleLeafHash;
+use argent::session::{session_hash::MerkleLeafHashPolicy, interface::Policy};
 
 // Based on
 // https://github.com/argentlabs/starknet-plugin-account/blob/3c14770c3f7734ef208536d91bbd76af56dc2043/contracts/plugins/SessionKey.cairo
 #[starknet::component]
 mod session_component {
-    use core::poseidon::hades_permutation;
+    use core::poseidon::{hades_permutation, poseidon_hash_span};
     use starknet::{account::Call, info::get_block_timestamp, get_contract_address, storage::Map};
-    use argent::session::interface::{Session, SessionToken};
-    use argent::session::session_hash::{StructHashSession, OffChainMessageHashSessionRev1};
+    use argent::session::interface::{Session, SessionToken, Policy, TypedData};
+    use argent::session::session_hash::{
+        StructHashSession, OffChainMessageHashSessionRev1, StructHashTypedData
+    };
     use argent::signer::signer_signature::{
         Signer, SignerSignature, SignerType, SignerSignatureImpl, SignerTraitImpl
     };
@@ -108,6 +110,24 @@ mod session_component {
 
             self.valid_session_cache.read((guid_or_address, session_hash))
         }
+        fn is_session_sigature_valid(
+            self: @ComponentState<TContractState>, data: Span<TypedData>, token: SessionToken
+        ) -> bool {
+            let mut data = data;
+            let mut policies: Array<Policy> = array![];
+            let mut hashes: Array<felt252> = array![];
+            while let Option::Some(d) = data.pop_front() {
+                hashes.append(d.get_struct_hash_rev_1());
+                let policy = Policy::TypedData(*d);
+
+                policies.append(policy);
+            };
+            let hash = poseidon_hash_span(hashes.span());
+            let policies = policies.span();
+
+            let _ = self.assert_validate_policy_signature(token, policies, hash);
+            true
+        }
     }
 
     #[generate_trait]
@@ -127,10 +147,8 @@ mod session_component {
             let signature: SessionToken = Serde::<SessionToken>::deserialize(ref signature)
                 .expect('session/deserialize-error');
 
-            match self.validate_signature(signature, calls, transaction_hash) {
-                Result::Ok(_) => { starknet::VALIDATED },
-                Result::Err(e) => { e }
-            }
+            self.validate_signature(signature, calls, transaction_hash);
+            starknet::VALIDATED
         }
 
         #[inline(always)]
@@ -146,19 +164,35 @@ mod session_component {
             signature: SessionToken,
             calls: Span<Call>,
             transaction_hash: felt252,
-        ) -> Result<(), felt252> {
-            let contract = self.get_contract();
-            if signature.proofs.len() != calls.len() {
-                return Result::Err(Errors::LENGHT_MISMATCH);
+        ) {
+            let mut calls = calls;
+            let mut policies: Array<Policy> = array![];
+            while let Option::Some(call) = calls.pop_front() {
+                policies.append(Policy::Call(*call));
             };
+            let policies = policies.span();
+            if let Option::Some(cached) = self
+                .assert_validate_policy_signature(signature, policies, transaction_hash) {
+                self.valid_session_cache.write(cached, true);
+            };
+        }
+
+        fn assert_validate_policy_signature(
+            self: @ComponentState<TContractState>,
+            signature: SessionToken,
+            calls: Span<Policy>,
+            transaction_hash: felt252,
+        ) -> Option<(felt252, felt252)> {
+            let contract = self.get_contract();
+            assert(signature.proofs.len() == calls.len(), 'session/length-mismatch');
 
             let now = get_block_timestamp();
-            if signature.session.expires_at <= now {
-                return Result::Err(Errors::SESSION_EXPIRED);
-            }
+            assert(signature.session.expires_at > now, 'session/expired');
 
             // check validity of token
             let session_hash = signature.session.get_message_hash_rev_1();
+
+            let mut to_be_cached = Option::None;
 
             assert(!self.revoked_session.read(session_hash), 'session/already-revoked');
 
@@ -182,7 +216,7 @@ mod session_component {
                     contract.verify_authorization(session_hash, parsed.span());
 
                     if signature.cache_authorization {
-                        self.valid_session_cache.write((owner_guid, session_hash), true);
+                        to_be_cached = Option::Some((owner_guid, session_hash));
                     }
                 } else {
                     assert(contract.is_valid_authorizer(owner_guid), 'session/invalid-authorizer');
@@ -220,29 +254,27 @@ mod session_component {
                 );
             }
 
-            if check_policy(calls, signature.session.allowed_methods_root, signature.proofs)
-                .is_err() {
-                return Result::Err(Errors::POLICY_CHECK_FAILED);
-            }
+            assert(
+                check_policy(calls, signature.session.allowed_policies_root, signature.proofs),
+                'session/policy-check-failed'
+            );
 
-            Result::Ok(())
+            to_be_cached
         }
     }
 }
 
-fn check_policy(
-    call_array: Span<Call>, root: felt252, proofs: Span<Span<felt252>>,
-) -> Result<(), ()> {
+fn check_policy(array: Span<Policy>, root: felt252, proofs: Span<Span<felt252>>,) -> bool {
     let mut i = 0_usize;
     loop {
-        if i >= call_array.len() {
-            break Result::Ok(());
+        if i >= array.len() {
+            break true;
         }
-        let leaf = call_array.at(i).get_merkle_leaf();
+        let leaf = array.at(i).get_merkle_leaf();
         let mut merkle: MerkleTree<Hasher> = MerkleTreeTrait::new();
 
         if merkle.verify(root, leaf, *proofs.at(i)) == false {
-            break Result::Err(());
+            break false;
         };
         i += 1;
     }
