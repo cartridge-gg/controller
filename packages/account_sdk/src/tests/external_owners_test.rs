@@ -10,7 +10,7 @@ use starknet_crypto::Felt;
 use crate::{
     abigen::erc_20::Erc20,
     account::session::{
-        hash::{Policy, Session},
+        hash::{CallPolicy, Session},
         raw_session::RawSession,
         SessionAccount,
     },
@@ -43,7 +43,7 @@ async fn test_verify_external_owner() {
 
     let session_signer = Signer::new_starknet_random();
     let session = Session::new(
-        vec![Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer"))],
+        vec![CallPolicy::new(*FEE_TOKEN_ADDRESS, selector!("transfer")).into()],
         u64::MAX,
         &session_signer.clone().into(),
         Felt::ZERO,
@@ -104,7 +104,7 @@ async fn test_verify_constructor_external_owner() {
 
     let session_signer = Signer::new_starknet_random();
     let session = Session::new(
-        vec![Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer"))],
+        vec![CallPolicy::new(*FEE_TOKEN_ADDRESS, selector!("transfer")).into()],
         u64::MAX,
         &session_signer.clone().into(),
         Felt::ZERO,

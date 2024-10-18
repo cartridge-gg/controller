@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use cainome::cairo_serde::CairoSerde;
+use hash::CallPolicy;
 use starknet::{
     accounts::{Account, ConnectedAccount, ExecutionEncoder},
     core::types::{BlockId, BlockTag, Call, Felt},
@@ -76,12 +77,8 @@ impl SessionAccount {
         let mut proofs = Vec::new();
 
         for call in calls {
-            let method = Policy {
-                selector: call.selector,
-                contract_address: call.to,
-            };
-
-            let Some(proof) = self.session.single_proof(&method) else {
+            let method = CallPolicy::from(call);
+            let Some(proof) = self.session.single_proof(&Policy::Call(method.clone())) else {
                 return Err(SignError::SessionMethodNotAllowed {
                     selector: method.selector,
                     contract_address: method.contract_address,
