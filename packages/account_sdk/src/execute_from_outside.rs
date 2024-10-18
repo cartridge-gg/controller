@@ -1,7 +1,9 @@
 use starknet::{
     accounts::ConnectedAccount,
     core::types::{Call, InvokeTransactionResult},
+    signers::SigningKey,
 };
+use starknet_crypto::Felt;
 
 use crate::{
     abigen::controller::OutsideExecution,
@@ -47,7 +49,7 @@ impl Controller {
             execute_after: 0,
             execute_before: now + 600,
             calls: calls.into_iter().map(|call| call.into()).collect(),
-            nonce: self.execute_from_outside_nonce,
+            nonce: (SigningKey::from_random().secret_scalar(), Felt::ZERO),
         };
 
         self.execute_from_outside_raw(outside_execution).await

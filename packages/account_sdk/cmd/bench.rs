@@ -1,5 +1,6 @@
 use account_sdk::abigen::controller::{Call, OutsideExecution};
 use account_sdk::account::outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller};
+use account_sdk::account::session::hash::Policy;
 use account_sdk::artifacts::{Version, CONTROLLERS};
 use account_sdk::controller::Controller;
 use account_sdk::factory::ControllerFactory;
@@ -28,8 +29,7 @@ const DURATION_SECS: u64 = 30 * 60;
 
 #[tokio::main]
 async fn main() {
-    let rpc_url = Url::parse("http://localhost:8001/x/starknet/sepolia").unwrap();
-    // let rpc_url = Url::parse("https://api.cartridge.gg/x/starknet/sepolia").unwrap();
+    let rpc_url = Url::parse("https://api.cartridge.gg/x/starknet/sepolia").unwrap();
     let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
 
     let chain_id = felt!("0x534e5f5345504f4c4941"); // Hex for "SN_SEPOLIA"
@@ -50,7 +50,9 @@ async fn main() {
 
     let address = factory.address(salt);
 
-    let controller = Controller::new(
+    println!("Controller address: {:#x}", address);
+
+    let mut controller = Controller::new(
         "app_id".to_string(),
         username,
         CONTROLLERS[&Version::LATEST].hash,
@@ -90,18 +92,31 @@ async fn main() {
     let duration = Duration::from_secs(DURATION_SECS);
     let total_transactions = TPS * duration.as_secs() as usize;
 
+    let _ = controller
+        .create_session(
+            vec![Policy::new(contract_address, selector!("flip"))],
+            u32::MAX as u64,
+        )
+        .await
+        .unwrap();
+
     let controller = Arc::new(controller);
     let interval = Duration::from_secs_f64(1.0 / TPS as f64);
+    let nonce_channel = SigningKey::from_random().secret_scalar();
+    let nonce_counter = Arc::new(std::sync::atomic::AtomicU64::new(0));
 
     let mut handles = vec![];
 
     for i in 0..total_transactions {
         let controller = Arc::clone(&controller);
+        let nonce_counter = Arc::clone(&nonce_counter);
         let handle = tokio::spawn(async move {
             let x = rand::thread_rng().gen_range(0..=100);
             let y = rand::thread_rng().gen_range(0..=100);
+            let nonce_increment = nonce_counter.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            let nonce = (nonce_channel, Felt::from(nonce_increment));
 
-            match flip(&controller, contract_address.into(), x, y).await {
+            match flip(&controller, contract_address.into(), x, y, nonce).await {
                 Ok(_) => {
                     println!("Routine {}: Successfully executed flip function", i);
                 }
@@ -125,6 +140,7 @@ async fn flip(
     contract_address: ContractAddress,
     x: u64,
     y: u64,
+    nonce: (Felt, Felt),
 ) -> Result<ExecuteFromOutsideResponse, ExecuteFromOutsideError> {
     let flip = Call {
         to: contract_address,
@@ -139,7 +155,7 @@ async fn flip(
         execute_after: 0,
         execute_before: u32::MAX as u64,
         calls: vec![flip],
-        nonce: (Felt::ONE, Felt::ZERO),
+        nonce,
     };
 
     let flip_signed = session_account
