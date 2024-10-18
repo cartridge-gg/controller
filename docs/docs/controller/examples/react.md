@@ -24,7 +24,7 @@ pnpm add @cartridge/connector @cartridge/controller @starknet-react/core starkne
 Import the `CartridgeConnector` and create an instance:
 
 ```typescript
-import {ControllerConnector} from "@cartridge/connector";
+import ControllerConnector from "@cartridge/connector";
 
 const connector = new ControllerConnector();
 ```
@@ -36,13 +36,13 @@ You can customize the `ControllerConnector` by providing configuration options d
 Here's an example:
 
 ```typescript
-import {ControllerConnector} from "@cartridge/connector";
+import ControllerConnector from "@cartridge/connector";
 import { shortString } from "starknet";
 
 const ETH_TOKEN_ADDRESS =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 
-const connector = new CartridgeConnector({
+const connector = new ControllerConnector({
   policies: [
     {
       target: ETH_TOKEN_ADDRESS,
