@@ -78,11 +78,6 @@ impl CartridgeProvider for CartridgeJsonRpcProvider {
             },
         };
 
-        println!(
-            "JSON-RPC request: {}",
-            serde_json::to_string_pretty(&request).unwrap()
-        );
-
         let client = Client::new();
         let response = client
             .post(self.rpc_url.as_str())
@@ -92,7 +87,6 @@ impl CartridgeProvider for CartridgeJsonRpcProvider {
             .await?;
 
         let json_response: Value = response.json().await?;
-        println!("json_rpc_response: {:?}", json_response);
         let json_rpc_response: JsonRpcResponse<ExecuteFromOutsideResponse> =
             serde_json::from_value(json_response)?;
 
