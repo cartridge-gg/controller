@@ -1,7 +1,6 @@
 use std::{net::TcpListener, process::Child};
 
 use serde::Deserialize;
-use starknet_crypto::Felt;
 
 use self::waiter::OutputWaiter;
 
@@ -43,7 +42,7 @@ pub fn find_free_port() -> u16 {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct TestnetConfig {
-    pub chain_id: Felt,
+    pub chain_id: String,
     pub exec: String,
     #[allow(dead_code)]
     pub log_file_path: String,
