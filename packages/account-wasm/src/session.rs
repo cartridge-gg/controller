@@ -159,7 +159,7 @@ impl CartridgeSessionAccount {
             execute_after: 0_u64,
             execute_before: now + 600,
             calls,
-            nonce: (SigningKey::from_random().secret_scalar(), Felt::ZERO),
+            nonce: (SigningKey::from_random().secret_scalar(), 1),
         };
 
         let signed = self

@@ -3,7 +3,6 @@ use starknet::{
     core::types::{Call, InvokeTransactionResult},
     signers::SigningKey,
 };
-use starknet_crypto::Felt;
 
 use crate::{
     abigen::controller::OutsideExecution,
@@ -39,17 +38,37 @@ impl Controller {
     }
 
     pub async fn execute_from_outside(
-        &self,
+        &mut self,
         calls: Vec<Call>,
     ) -> Result<InvokeTransactionResult, ControllerError> {
         let now = get_current_timestamp();
+
+        // Get the current namespace and bitmask
+        let (mut namespace, mut bitmask) = self.execute_from_outside_nonce;
+
+        // Find the next available bit
+        let nonce_bitmask = if bitmask == u64::MAX.into() {
+            // All bits are used, create new namespace and reset bitmask
+            namespace = SigningKey::from_random().secret_scalar();
+            bitmask = 1;
+            1u128
+        } else {
+            // Find the least significant zero bit
+            let next_bit = bitmask.trailing_ones();
+            let new_bit = 1u128 << next_bit;
+            bitmask |= new_bit;
+            new_bit
+        };
+
+        // Update self.execute_from_outside_nonce with the new namespace and bitmask
+        self.execute_from_outside_nonce = (namespace, bitmask);
 
         let outside_execution = OutsideExecution {
             caller: OutsideExecutionCaller::Any.into(),
             execute_after: 0,
             execute_before: now + 600,
             calls: calls.into_iter().map(|call| call.into()).collect(),
-            nonce: (SigningKey::from_random().secret_scalar(), Felt::ZERO),
+            nonce: (namespace, nonce_bitmask),
         };
 
         self.execute_from_outside_raw(outside_execution).await

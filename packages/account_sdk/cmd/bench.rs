@@ -102,19 +102,36 @@ async fn main() {
 
     let controller = Arc::new(controller);
     let interval = Duration::from_secs_f64(1.0 / TPS as f64);
-    let nonce_channel = SigningKey::from_random().secret_scalar();
-    let nonce_counter = Arc::new(std::sync::atomic::AtomicU64::new(0));
+    let (namespace, bitmask) = (SigningKey::from_random().secret_scalar(), 0u128);
+    let nonce_mutex = Arc::new(tokio::sync::Mutex::new((namespace, bitmask)));
 
     let mut handles = vec![];
 
     for i in 0..total_transactions {
         let controller = Arc::clone(&controller);
-        let nonce_counter = Arc::clone(&nonce_counter);
+        let nonce_mutex = Arc::clone(&nonce_mutex);
         let handle = tokio::spawn(async move {
             let x = rand::thread_rng().gen_range(0..=100);
             let y = rand::thread_rng().gen_range(0..=100);
-            let nonce_increment = nonce_counter.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-            let nonce = (nonce_channel, Felt::from(nonce_increment));
+
+            let mut nonce_lock = nonce_mutex.lock().await;
+            let (mut namespace, mut bitmask) = *nonce_lock;
+
+            let nonce_bitmask = if bitmask == u64::MAX.into() {
+                namespace = SigningKey::from_random().secret_scalar();
+                bitmask = 1;
+                1u128
+            } else {
+                let next_bit = bitmask.trailing_ones();
+                let new_bit = 1u128 << next_bit;
+                bitmask |= new_bit;
+                new_bit
+            };
+
+            *nonce_lock = (namespace, bitmask);
+            drop(nonce_lock);
+
+            let nonce = (namespace, nonce_bitmask);
 
             match flip(&controller, contract_address.into(), x, y, nonce).await {
                 Ok(_) => {
@@ -140,7 +157,7 @@ async fn flip(
     contract_address: ContractAddress,
     x: u64,
     y: u64,
-    nonce: (Felt, Felt),
+    nonce: (Felt, u128),
 ) -> Result<ExecuteFromOutsideResponse, ExecuteFromOutsideError> {
     let flip = Call {
         to: contract_address,
