@@ -22,7 +22,7 @@ use starknet::core::types::{
 use starknet::core::utils::cairo_short_string_to_felt;
 use starknet::macros::selector;
 use starknet::providers::{Provider, ProviderError};
-use starknet::signers::{SignerInteractivityContext, SigningKey};
+use starknet::signers::SignerInteractivityContext;
 use starknet::{
     accounts::{Account, ConnectedAccount, ExecutionEncoder},
     core::types::{BlockId, Felt},
