@@ -11,7 +11,7 @@ export function useBalance() {
   const { controller } = useConnection();
   const [isFetching, setIsFetching] = useState(true);
   const [ethBalance, setEthBalance] = useState<bigint>(0n);
-  const [creditsBalance, setCreditsBalance] = useState<number>(0);
+  const [creditsBalance, setCreditsBalance] = useState<bigint>(0n);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error>();
 
@@ -21,9 +21,7 @@ export function useBalance() {
       enabled: false,
       onSuccess: async (data: AccountInfoQuery) => {
         try {
-          // credits are retrieved as positive integers dominated in cents
-          const credits = data.accounts?.edges?.[0]?.node?.credits / 100;
-          setCreditsBalance(credits ?? 0);
+          setCreditsBalance(data.accounts?.edges?.[0]?.node?.credits ?? 0);
         } catch (e) {
           setError(e);
         }

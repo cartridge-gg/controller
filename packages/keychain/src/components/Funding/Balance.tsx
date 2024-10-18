@@ -2,21 +2,25 @@ import { CreditsIcon, EthereumIcon } from "@cartridge/ui";
 import { HStack, Spacer, Text, VStack } from "@chakra-ui/react";
 import { CurrencyBase, CurrencyQuote, usePriceQuery } from "generated/graphql";
 import { useBalance } from "hooks/token";
-import { useMemo } from "react";
 import { formatEther } from "viem";
 
 type BalanceProps = {
   showBalances: ("credits" | "eth" | "strk")[];
 };
 
-function formatEthBalance(ethBalance: bigint): string {
-  const formattedBalance = parseFloat(formatEther(ethBalance));
-  if (ethBalance === 0n) {
+function formatTokenBalance(balance: bigint): string {
+  const formattedBalance = parseFloat(formatEther(balance));
+  if (formattedBalance === 0) {
     return "0.00";
   }
+
   return formattedBalance < 0.01
     ? `~${formattedBalance.toFixed(2)}`
     : formattedBalance.toFixed(2);
+}
+
+function formatUsdBalance(balance: bigint, price: number) {
+  return parseFloat(formatEther(balance)) * price
 }
 
 export function Balance({ showBalances }: BalanceProps) {
@@ -26,15 +30,7 @@ export function Balance({ showBalances }: BalanceProps) {
     quote: CurrencyQuote.Eth,
     base: CurrencyBase.Usd,
   });
-  const price = priceQuery.data?.price;
-
-  const usdBalance = useMemo(() => {
-    if (!price || !ethBalance) {
-      return 0;
-    }
-
-    return parseFloat(formatEther(ethBalance)) * parseFloat(price.amount);
-  }, [ethBalance, price]);
+  const price = parseFloat(priceQuery.data?.price?.amount || "");
 
   return (
     <VStack w="full" borderRadius="base" overflow="hidden" spacing="1px">
@@ -61,8 +57,8 @@ export function Balance({ showBalances }: BalanceProps) {
         >
           <HStack>
             <CreditsIcon fontSize={20} />
-            <Text>{creditsBalance?.toFixed(2)}</Text>
-            <Text color="text.secondary">${creditsBalance?.toFixed(2)}</Text>
+            <Text>{formatTokenBalance(creditsBalance)}</Text>
+            <Text color="text.secondary">${formatUsdBalance(creditsBalance, 1).toFixed(2)}</Text>
           </HStack>
           <Spacer />
           <HStack color="text.secondary">
@@ -83,8 +79,8 @@ export function Balance({ showBalances }: BalanceProps) {
         >
           <HStack>
             <EthereumIcon fontSize={20} />
-            <Text>{formatEthBalance(ethBalance)}</Text>
-            <Text color="text.secondary">${usdBalance?.toFixed(2)}</Text>
+            <Text>{formatTokenBalance(ethBalance)}</Text>
+            <Text color="text.secondary">${formatUsdBalance(ethBalance, price).toFixed(2)}</Text>
           </HStack>
           <Spacer />
           <HStack color="text.secondary">
