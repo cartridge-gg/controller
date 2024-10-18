@@ -25064,7 +25064,7 @@
       ],
       [
         588,
-        "function_call<user@controller::session::session::session_component::InternalImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl>::validate_policy_signature_view>"
+        "function_call<user@controller::session::session::session_component::InternalImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl>::assert_validate_policy_signature>"
       ],
       [
         589,
@@ -30186,7 +30186,7 @@
       ],
       [
         73,
-        "controller::session::session::session_component::InternalImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl>::validate_policy_signature_view"
+        "controller::session::session::session_component::InternalImpl::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl>::assert_validate_policy_signature"
       ],
       [
         74,
