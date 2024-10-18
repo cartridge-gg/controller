@@ -70,7 +70,7 @@ impl Session {
     pub fn raw(&self) -> RawSession {
         RawSession {
             expires_at: self.expires_at,
-            allowed_methods_root: self.authorization_root,
+            allowed_policies_root: self.authorization_root,
             metadata_hash: Felt::ZERO,
             session_key_guid: self.session_key_guid,
             guardian_key_guid: self.guardian_key_guid,

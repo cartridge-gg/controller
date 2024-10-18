@@ -12,7 +12,9 @@ mod session_component {
     use core::poseidon::{hades_permutation, poseidon_hash_span};
     use starknet::{account::Call, info::get_block_timestamp, get_contract_address, storage::Map};
     use argent::session::interface::{Session, SessionToken, Policy, TypedData};
-    use argent::session::session_hash::{StructHashSession, OffChainMessageHashSessionRev1, StructHashTypedData};
+    use argent::session::session_hash::{
+        StructHashSession, OffChainMessageHashSessionRev1, StructHashTypedData
+    };
     use argent::signer::signer_signature::{
         Signer, SignerSignature, SignerType, SignerSignatureImpl, SignerTraitImpl
     };
@@ -108,22 +110,22 @@ mod session_component {
 
             self.valid_session_cache.read((guid_or_address, session_hash))
         }
-        fn is_session_sigature_valid(self: @ComponentState<TContractState>, data: Span<TypedData>, token: SessionToken) -> bool {
+        fn is_session_sigature_valid(
+            self: @ComponentState<TContractState>, data: Span<TypedData>, token: SessionToken
+        ) -> bool {
             let mut data = data;
             let mut policies: Array<Policy> = array![];
             let mut hashes: Array<felt252> = array![];
             while let Option::Some(d) = data.pop_front() {
                 hashes.append(d.get_struct_hash_rev_1());
                 let policy = Policy::TypedData(*d);
-                
+
                 policies.append(policy);
-                
             };
             let hash = poseidon_hash_span(hashes.span());
             let policies = policies.span();
-            
-            let _ = self
-                .validate_policy_signature_view(token, policies, hash);
+
+            let _ = self.assert_validate_policy_signature(token, policies, hash);
             true
         }
     }
@@ -170,12 +172,12 @@ mod session_component {
             };
             let policies = policies.span();
             if let Option::Some(cached) = self
-                .validate_policy_signature_view(signature, policies, transaction_hash) {
+                .assert_validate_policy_signature(signature, policies, transaction_hash) {
                 self.valid_session_cache.write(cached, true);
             };
         }
 
-        fn validate_policy_signature_view(
+        fn assert_validate_policy_signature(
             self: @ComponentState<TContractState>,
             signature: SessionToken,
             calls: Span<Policy>,
