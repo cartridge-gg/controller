@@ -90,14 +90,16 @@ In order to execute a transaction that includes a `consume_random` call, you nee
 
 ```js
 const call = await account.execute([
-  // Prefix the multicall with the 
+  // Prefix the multicall with the request_random call
   {
     contractAddress: VRF_PROVIDER_ADDRESS,
     entrypoint: 'request_random',
     calldata: CallData.compile({
       caller: GAME_CONTRACT,
       // Using Source::Nonce(address)
-      source: [0, address],
+      source: {type: 0, address: account.address},
+      // Using Source::Salt(felt252)
+      // source: {type: 1, salt: 0x123}
     }),
   },
   {
@@ -110,7 +112,27 @@ const call = await account.execute([
 
 **Ensure that you call `consume_random` with the same `Source` as used in `request_random`.**
 
-By following these steps, you can integrate the VRF Provider into your Starknet contract and generate verifiable random numbers for your onchain game or application.
+### Important: Adding VRF to Policies
+
+When using the Cartridge Controller with VRF, make sure to add the VRF contract address and the `request_random` method to your policies. This allows the controller to pre-approve VRF-related transactions, ensuring a seamless experience for your users.
+
+Add the following policy to your existing policies:
+
+```typescript
+const policies: Policy[] = [
+  // ... your existing policies ...
+  {
+    target: VRF_PROVIDER_ADDRESS,
+    method: "request_random",
+    description: "Allows requesting random numbers from the VRF provider",
+  },
+];
+```
+
+This ensures that VRF-related transactions can be executed without requiring additional user approval each time.
+
+By following these steps, you can integrate the VRF Provider into your Starknet contract and generate verifiable random 
+numbers for your onchain game or application.
 
 ## Security Assumptions
 
