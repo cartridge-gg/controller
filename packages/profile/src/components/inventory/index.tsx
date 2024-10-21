@@ -8,13 +8,13 @@ import {
   LayoutContent,
   LayoutHeader,
 } from "@/components/layout";
-import { useConnection } from "@/hooks/context";
+import { useAccount } from "@/hooks/context";
 // import { Collections } from "./collections";
 import { Tokens } from "./tokens";
 // import { Navigation } from "@/components/navigation";
 
 export function Inventory() {
-  const { username, address } = useConnection();
+  const { username, address } = useAccount();
 
   return (
     <LayoutContainer>

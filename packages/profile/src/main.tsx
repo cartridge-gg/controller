@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { SonnerToaster } from "@cartridge/ui-next";
 import { App } from "@/components/app";
-import { Provider } from "@/components/provider";
+import { Provider } from "@/components/context";
 
 import "./index.css";
 
