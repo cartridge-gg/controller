@@ -29,10 +29,11 @@ const DURATION_SECS: u64 = 30 * 60;
 
 #[tokio::main]
 async fn main() {
-    let rpc_url = Url::parse("https://api.cartridge.gg/x/starknet/sepolia").unwrap();
+    let rpc_url = Url::parse("https://api.cartridge.gg/x/starknet/mainnet").unwrap();
     let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
 
-    let chain_id = felt!("0x534e5f5345504f4c4941"); // Hex for "SN_SEPOLIA"
+    // let chain_id = felt!("0x534e5f5345504f4c4941"); // Hex for "SN_SEPOLIA"
+    let chain_id = felt!("0x534e5f4d41494e"); // Hex for "SN_SEPOLIA"
 
     let signer = SigningKey::from_secret_scalar(felt!(
         "0x6b80fcafbecee2c7ddff50c9a09b529c8f65b2fdb457ea134e76ee17640d768"
@@ -87,7 +88,7 @@ async fn main() {
     }
 
     let contract_address =
-        felt!("0x165a91f138a5c5f5016a0afe3412b551559b3de4d89357282fe145e3e3c404b");
+        felt!("0x73d81392edc741306bfdef1fce47ce55d5fd1b18914db4ac4257172ddb0f427");
 
     let duration = Duration::from_secs(DURATION_SECS);
     let total_transactions = TPS * duration.as_secs() as usize;
@@ -102,19 +103,36 @@ async fn main() {
 
     let controller = Arc::new(controller);
     let interval = Duration::from_secs_f64(1.0 / TPS as f64);
-    let nonce_channel = SigningKey::from_random().secret_scalar();
-    let nonce_counter = Arc::new(std::sync::atomic::AtomicU64::new(0));
+    let (namespace, bitmask) = (SigningKey::from_random().secret_scalar(), 0u128);
+    let nonce_mutex = Arc::new(tokio::sync::Mutex::new((namespace, bitmask)));
 
     let mut handles = vec![];
 
     for i in 0..total_transactions {
         let controller = Arc::clone(&controller);
-        let nonce_counter = Arc::clone(&nonce_counter);
+        let nonce_mutex = Arc::clone(&nonce_mutex);
         let handle = tokio::spawn(async move {
             let x = rand::thread_rng().gen_range(0..=100);
-            let y = rand::thread_rng().gen_range(0..=100);
-            let nonce_increment = nonce_counter.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-            let nonce = (nonce_channel, Felt::from(nonce_increment));
+            let y: u64 = rand::thread_rng().gen_range(0..=100);
+
+            let mut nonce_lock = nonce_mutex.lock().await;
+            let (mut namespace, mut bitmask) = *nonce_lock;
+
+            let nonce_bitmask = if bitmask == u64::MAX.into() {
+                namespace = SigningKey::from_random().secret_scalar();
+                bitmask = 1;
+                1u128
+            } else {
+                let next_bit = bitmask.trailing_ones();
+                let new_bit = 1u128 << next_bit;
+                bitmask |= new_bit;
+                new_bit
+            };
+
+            *nonce_lock = (namespace, bitmask);
+            drop(nonce_lock);
+
+            let nonce = (namespace, nonce_bitmask);
 
             match flip(&controller, contract_address.into(), x, y, nonce).await {
                 Ok(_) => {
@@ -140,12 +158,13 @@ async fn flip(
     contract_address: ContractAddress,
     x: u64,
     y: u64,
-    nonce: (Felt, Felt),
+    nonce: (Felt, u128),
 ) -> Result<ExecuteFromOutsideResponse, ExecuteFromOutsideError> {
+    let team: u64 = rand::thread_rng().gen_range(0..=5);
     let flip = Call {
         to: contract_address,
         selector: selector!("flip"),
-        calldata: vec![x.into(), y.into()],
+        calldata: vec![x.into(), y.into(), team.into()],
     };
 
     let session_account = controller.session_account(&[flip.clone().into()]).unwrap();

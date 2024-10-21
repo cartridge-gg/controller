@@ -48,6 +48,7 @@ pub struct Controller {
     factory: ControllerFactory,
     pub storage: Storage,
     nonce: Felt,
+    pub(crate) execute_from_outside_nonce: (Felt, u128),
 }
 
 impl Controller {
@@ -79,6 +80,10 @@ impl Controller {
             factory,
             storage: Storage::default(),
             nonce: Felt::ZERO,
+            execute_from_outside_nonce: (
+                starknet::signers::SigningKey::from_random().secret_scalar(),
+                0,
+            ),
         };
 
         let contract = Box::new(abigen::controller::Controller::new(
