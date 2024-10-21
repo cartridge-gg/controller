@@ -1,23 +1,13 @@
 import { Policy } from "@cartridge/account-wasm";
 import { CartridgeSessionAccount } from "@cartridge/account-wasm/session";
-import {
-  Abi,
-  Account,
-  Call,
-  InvokeFunctionResponse,
-  RpcProvider,
-  Signature,
-  TypedData,
-  UniversalDetails,
-} from "starknet";
-import { SessionSigner } from "./signer";
+import { Call, InvokeFunctionResponse, Signature, TypedData } from "starknet";
 import { normalizeCalls } from "./utils";
 
 export * from "./errors";
 export * from "./types";
 export { defaultPresets } from "./presets";
 
-export default class SessionAccount extends Account {
+export default class SessionAccount {
   public controller: CartridgeSessionAccount;
 
   constructor({
@@ -37,7 +27,7 @@ export default class SessionAccount extends Account {
     expiresAt: number;
     policies: Policy[];
   }) {
-    const controller = CartridgeSessionAccount.new_as_registered(
+    this.controller = CartridgeSessionAccount.new_as_registered(
       rpcUrl,
       privateKey,
       address,
@@ -48,14 +38,6 @@ export default class SessionAccount extends Account {
         policies,
       },
     );
-
-    super(
-      new RpcProvider({ nodeUrl: rpcUrl }),
-      address,
-      new SessionSigner(controller),
-    );
-
-    this.controller = controller;
   }
 
   /**
@@ -70,11 +52,7 @@ export default class SessionAccount extends Account {
    *
    * @returns response from addTransaction
    */
-  async execute(
-    calls: Call | Call[],
-    _abisOrDetails?: Abi[] | UniversalDetails,
-    _transactionsDetail?: UniversalDetails,
-  ): Promise<InvokeFunctionResponse> {
+  async execute(calls: Call | Call[]): Promise<InvokeFunctionResponse> {
     return this.controller.execute(normalizeCalls(calls));
   }
 

@@ -5,7 +5,6 @@ import { connectToParent } from "@cartridge/penpal";
 import Controller from "utils/controller";
 import { connectFactory } from "./connect";
 import { execute } from "./execute";
-import { estimateDeclareFee, estimateInvokeFee } from "./estimate";
 import { probeFactory } from "./probe";
 import { signMessageFactory } from "./sign";
 import { fetchControllers } from "./fetchControllers";
@@ -38,11 +37,11 @@ export function connectToController<ParentMethods extends {}>({
         }),
       ),
       deploy: () => deployFactory(setContext),
+
       execute: () => execute({ setContext }),
-      estimateDeclareFee: () => estimateDeclareFee,
-      estimateInvokeFee: () => estimateInvokeFee,
-      probe: normalize(probeFactory({ setController, setRpcUrl })),
       signMessage: () => signMessageFactory(setContext),
+
+      probe: normalize(probeFactory({ setController, setRpcUrl })),
       openSettings: () => openSettingsFactory(setContext),
       reset: () => () => setContext(undefined),
       fetchControllers: fetchControllers,

@@ -10,8 +10,8 @@ import { ec, stark } from "starknet";
 import { Policy } from "@cartridge/controller";
 import SessionAccount from "@cartridge/controller/session";
 
-import { icon } from "./icon";
-import { KEYCHAIN_URL } from "./constants";
+import { icon } from "../src/icon";
+import { KEYCHAIN_URL } from "../src/constants";
 
 interface SessionRegistration {
   username: string;

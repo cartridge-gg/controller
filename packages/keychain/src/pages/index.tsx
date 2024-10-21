@@ -13,9 +13,10 @@ import {
 import { LoginMode } from "components/connect/types";
 import { ErrorPage } from "components/ErrorBoundary";
 import { Settings } from "components/Settings";
+import { Upgrade } from "components/connect/Upgrade";
 
 function Home() {
-  const { context, controller, setController, error, policies } =
+  const { context, controller, setController, error, policies, upgrade } =
     useConnection();
 
   if (window.self === window.top || !context?.origin) {
@@ -29,6 +30,14 @@ function Home() {
   // No controller, send to login
   if (!controller) {
     return <CreateController loginMode={LoginMode.Controller} />;
+  }
+
+  if (!upgrade.isSynced) {
+    return <></>;
+  }
+
+  if (upgrade.available) {
+    return <Upgrade />;
   }
 
   switch (context.type) {

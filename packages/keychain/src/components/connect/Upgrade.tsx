@@ -3,6 +3,7 @@ import { ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react";
 import { ExecutionContainer } from "components/ExecutionContainer";
 import { Content } from "components/layout";
 import { useConnection } from "hooks/connection";
+
 export const Upgrade = () => {
   const { upgrade, controller } = useConnection();
 

@@ -3,18 +3,9 @@ import {
   ConnectError,
   PaymasterOptions,
 } from "@cartridge/controller";
-import {
-  Abi,
-  AllowArray,
-  Call,
-  CallData,
-  InvocationsDetails,
-  InvokeFunctionResponse,
-  addAddressPadding,
-  num,
-} from "starknet";
+import { Call, InvokeFunctionResponse, num } from "starknet";
 import { ConnectionCtx, ControllerError, ExecuteCtx } from "./types";
-import { ErrorCode, JsCall } from "@cartridge/account-wasm/controller";
+import { ErrorCode } from "@cartridge/account-wasm/controller";
 
 export const ESTIMATE_FEE_PERCENTAGE = 10;
 
@@ -43,24 +34,19 @@ export function execute({
   setContext: (context: ConnectionCtx) => void;
 }) {
   return async (
-    transactions: AllowArray<Call>,
-    abis: Abi[],
-    transactionsDetail?: InvocationsDetails,
+    calls: Call[],
     sync?: boolean,
     paymaster?: PaymasterOptions,
     error?: ControllerError,
   ): Promise<InvokeFunctionResponse | ConnectError> => {
     const account = window.controller;
-    const calls = normalizeCalls(transactions);
 
     if (sync) {
       return await new Promise((resolve, reject) => {
         setContext({
           type: "execute",
           origin,
-          transactions,
-          abis,
-          transactionsDetail,
+          calls,
           error,
           resolve,
           reject,
@@ -75,9 +61,7 @@ export function execute({
         setContext({
           type: "execute",
           origin,
-          transactions,
-          abis,
-          transactionsDetail,
+          calls,
           resolve,
           reject,
         } as ExecuteCtx);
@@ -105,9 +89,7 @@ export function execute({
             setContext({
               type: "execute",
               origin,
-              transactions,
-              abis,
-              transactionsDetail,
+              calls,
               error: parseControllerError(e),
               resolve,
               reject,
@@ -122,15 +104,12 @@ export function execute({
       }
 
       try {
-        let { maxFee } = transactionsDetail;
-        if (!maxFee) {
-          let estimate = await account.cartridge.estimateInvokeFee(calls);
-          maxFee = num.toHex(
-            num.addPercent(estimate.overall_fee, ESTIMATE_FEE_PERCENTAGE),
-          );
-        }
+        let estimate = await account.cartridge.estimateInvokeFee(calls);
+        let maxFee = num.toHex(
+          num.addPercent(estimate.overall_fee, ESTIMATE_FEE_PERCENTAGE),
+        );
 
-        let { transaction_hash } = await account.execute(transactions, {
+        let { transaction_hash } = await account.execute(calls, {
           maxFee,
         });
         return resolve({
@@ -141,9 +120,7 @@ export function execute({
         setContext({
           type: "execute",
           origin,
-          transactions,
-          abis,
-          transactionsDetail,
+          calls,
           error: parseControllerError(e),
           resolve,
           reject,
@@ -157,13 +134,3 @@ export function execute({
     });
   };
 }
-
-export const normalizeCalls = (calls: AllowArray<Call>): JsCall[] => {
-  return (Array.isArray(calls) ? calls : [calls]).map((call) => {
-    return {
-      entrypoint: call.entrypoint,
-      contractAddress: addAddressPadding(call.contractAddress),
-      calldata: CallData.toHex(call.calldata),
-    };
-  });
-};

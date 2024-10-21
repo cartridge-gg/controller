@@ -3,8 +3,8 @@
 import { Chain, mainnet, sepolia } from "@starknet-react/chains";
 import { StarknetConfig, starkscan } from "@starknet-react/core";
 import { PropsWithChildren } from "react";
-import ControllerConnector from "@cartridge/connector/controller";
 import { RpcProvider, shortString } from "starknet";
+import ControllerConnector from "@cartridge/connector/controller";
 
 export function StarknetProvider({ children }: PropsWithChildren) {
   return (
@@ -55,7 +55,7 @@ const controller = new ControllerConnector({
     process.env.NEXT_PUBLIC_PROFILE_DEPLOYMENT_URL ??
     process.env.NEXT_PUBLIC_PROFILE_FRAME_URL,
   indexerUrl: process.env.NEXT_PUBLIC_INDEXER_URL,
-  rpc: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
+  rpc: process.env.NEXT_PUBLIC_RPC_SEPOLIA!,
   paymaster: {
     caller: shortString.encodeShortString("ANY_CALLER"),
   },

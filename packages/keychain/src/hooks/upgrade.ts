@@ -14,6 +14,15 @@ export const CONTROLLER_VERSIONS: Array<ControllerVersionInfo> = [
     hash: "0x32e17891b6cc89e0c3595a3df7cee760b5993744dc8dfef2bd4d443e65c0f40",
     changes: ["Improved session token implementation"],
   },
+  {
+    version: "1.0.6",
+    hash: "0x220fafd2163c285f26a981772d96b0ce130ae1e4502ce45cc127ab87df295b0",
+    changes: [
+      "Support session key message signing",
+      "Support session guardians",
+      "Improve paymaster nonce management",
+    ],
+  },
 ];
 
 type ControllerVersionInfo = {
@@ -74,30 +83,25 @@ export const useUpgrade = (controller: Controller): UpgradeInterface => {
     return [controller.cartridge.upgrade(latest.hash)];
   }, [controller, latest]);
 
-  const onUpgrade = useCallback(
-    async (maxFee: BigNumberish) => {
-      if (!controller || !latest) {
-        return;
-      }
+  const onUpgrade = useCallback(async () => {
+    if (!controller || !latest) {
+      return;
+    }
 
-      try {
-        setIsUpgrading(true);
-        const { transaction_hash } = await controller.execute(calls, {
-          maxFee,
-        });
+    try {
+      setIsUpgrading(true);
+      const { transaction_hash } = await controller.executeFromOutsideV2(calls);
 
-        await controller.waitForTransaction(transaction_hash, {
-          retryInterval: 1000,
-        });
+      await controller.waitForTransaction(transaction_hash, {
+        retryInterval: 1000,
+      });
 
-        setAvailable(false);
-      } catch (e) {
-        console.log({ e });
-        setError(e);
-      }
-    },
-    [controller, latest, calls],
-  );
+      setAvailable(false);
+    } catch (e) {
+      console.log({ e });
+      setError(e);
+    }
+  }, [controller, latest, calls]);
 
   return {
     available,

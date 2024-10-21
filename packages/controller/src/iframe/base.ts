@@ -63,6 +63,7 @@ export class IFrame<CallSender extends {}> implements Modal {
     }
 
     const container = document.createElement("div");
+    container.id = "controller";
     container.style.position = "fixed";
     container.style.height = "100%";
     container.style.width = "100%";
@@ -89,13 +90,22 @@ export class IFrame<CallSender extends {}> implements Modal {
     this.resize();
     window.addEventListener("resize", () => this.resize());
 
-    if (
-      document.readyState === "complete" ||
-      document.readyState === "interactive"
-    ) {
-      this.append();
-    } else {
-      document.addEventListener("DOMContentLoaded", this.append);
+    const observer = new MutationObserver(() => {
+      const existingController = document.getElementById("controller");
+      if (document.body && !existingController) {
+        document.body.appendChild(container);
+        observer.disconnect();
+      }
+    });
+
+    observer.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+    });
+
+    const existingController = document.getElementById("controller");
+    if (document.body && !existingController) {
+      document.body.appendChild(container);
     }
 
     this.onClose = onClose;
@@ -117,11 +127,6 @@ export class IFrame<CallSender extends {}> implements Modal {
 
     this.container.style.visibility = "hidden";
     this.container.style.opacity = "0";
-  }
-
-  private append() {
-    if (!this.container) return;
-    document.body.appendChild(this.container);
   }
 
   private resize() {

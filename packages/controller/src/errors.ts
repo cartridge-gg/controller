@@ -5,11 +5,3 @@ export class NotReadyToConnect extends Error {
     Object.setPrototypeOf(this, NotReadyToConnect.prototype);
   }
 }
-
-export class ProfileNotReady extends Error {
-  constructor() {
-    super("Profile is not ready");
-
-    Object.setPrototypeOf(this, NotReadyToConnect.prototype);
-  }
-}
