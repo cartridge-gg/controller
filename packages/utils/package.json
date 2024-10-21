@@ -7,10 +7,10 @@
   "exports": {
     ".": "./dist/index.js",
     "./api/cartridge": "./dist/api/cartridge/index.js",
-    "./api/torii": "./dist/api/torii/index.js"
+    "./api/indexer": "./dist/api/indexer/index.js"
   },
   "scripts": {
-    "build:deps": "graphql-codegen --config src/api/cartridge/codegen.yaml && graphql-codegen --config src/api/torii/codegen.yaml && tsc",
+    "build:deps": "graphql-codegen --config src/api/cartridge/codegen.yaml && graphql-codegen --config src/api/indexer/codegen.yaml && tsc",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\""
   },

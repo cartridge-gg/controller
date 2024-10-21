@@ -1,10 +1,10 @@
-import { useCartridgeAPI } from "../../hooks";
+import { useIndexerAPI } from "../../hooks";
 
 export function useFetchData<TData, TVariables>(
   query: string,
   options?: RequestInit["headers"],
 ): (variables?: TVariables) => Promise<TData> {
-  const { url, headers } = useCartridgeAPI();
+  const { url, headers } = useIndexerAPI();
 
   return async (variables?: TVariables) => {
     const res = await fetch(url, {
