@@ -10,10 +10,9 @@
     "./api/torii": "./dist/api/torii/index.js"
   },
   "scripts": {
-    "build:deps": "tsc",
+    "build:deps": "graphql-codegen --config src/api/cartridge/codegen.yaml && graphql-codegen --config src/api/torii/codegen.yaml && tsc",
     "format": "prettier --write \"src/**/*.ts\"",
-    "format:check": "prettier --check \"src/**/*.ts\"",
-    "gql": "graphql-codegen --config src/api/cartridge/codegen.yaml && graphql-codegen --config src/api/torii/codegen.yaml"
+    "format:check": "prettier --check \"src/**/*.ts\""
   },
   "files": [
     "dist"

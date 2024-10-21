@@ -1,9 +1,13 @@
 overwrite: true
-schema: "https://api.cartridge.gg/query"
-documents: "src/api/cartridge/**/*.graphql"
+schema: https://api.cartridge.gg/query
+documents: src/api/cartridge/**/*.graphql
 generates:
-  src/api/cartridge/index.ts:
+  src/api/cartridge/generated.ts:
     plugins:
-      - "typescript"
-      - "typescript-operations"
-      - "typescript-react-query"
+      - typescript
+      - typescript-operations
+      - typescript-react-query
+    config:
+      fetcher:
+        func: ./fetcher#useFetchData
+        isReactHook: true

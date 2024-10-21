@@ -12,7 +12,6 @@ type BalanceProps = {
 export function Balance({ showBalances }: BalanceProps) {
   const { ethBalance, creditsBalance } = useBalance();
   const { countervalue } = useCountervalue({
-    endpoint: process.env.NEXT_PUBLIC_API_URL,
     balance: formatEther(ethBalance.value),
     quote: CurrencyQuote.Eth,
     base: CurrencyBase.Usd,

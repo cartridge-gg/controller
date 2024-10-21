@@ -9,17 +9,20 @@ export async function fetchData<TData, TVariables>(
   query: string,
   variables?: TVariables,
 ): Promise<TData> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/query`, {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_CARTRIDGE_API_URL}/query`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query,
+        variables,
+      }),
     },
-    body: JSON.stringify({
-      query,
-      variables,
-    }),
-  });
+  );
 
   const json = await res.json();
 
