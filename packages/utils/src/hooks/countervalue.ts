@@ -2,25 +2,18 @@ import { useMemo } from "react";
 import { CurrencyBase, CurrencyQuote, usePriceQuery } from "../api/cartridge";
 
 export function useCountervalue({
-  endpoint,
   balance,
   quote,
   base,
 }: {
-  endpoint: string;
   balance: string;
   quote: CurrencyQuote;
   base: CurrencyBase;
 }) {
-  const { data, ...rest } = usePriceQuery(
-    {
-      endpoint,
-    },
-    {
-      quote,
-      base,
-    },
-  );
+  const { data, ...rest } = usePriceQuery({
+    quote,
+    base,
+  });
 
   const countervalue = useMemo(() => {
     if (!data?.price?.amount || !balance) {

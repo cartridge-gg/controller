@@ -9,6 +9,7 @@ import {
 import { useRouter } from "next/router";
 import { useConnectionValue } from "hooks/connection";
 import { ConnectionProvider } from "./connection";
+import { CartridgeAPIProvider } from "@cartridge/utils/api/cartridge";
 
 export function Provider({ children }: PropsWithChildren) {
   const preset = useControllerThemePreset();
@@ -29,11 +30,17 @@ export function Provider({ children }: PropsWithChildren) {
 
   return (
     <ChakraProvider theme={chakraTheme}>
-      <QueryClientProvider client={queryClient}>
-        <ControllerThemeProvider value={controllerTheme}>
-          <ConnectionProvider value={connection}>{children}</ConnectionProvider>
-        </ControllerThemeProvider>
-      </QueryClientProvider>
+      <CartridgeAPIProvider
+        url={`${process.env.NEXT_PUBLIC_CARTRIDGE_API_URL!}/query`}
+      >
+        <QueryClientProvider client={queryClient}>
+          <ControllerThemeProvider value={controllerTheme}>
+            <ConnectionProvider value={connection}>
+              {children}
+            </ConnectionProvider>
+          </ControllerThemeProvider>
+        </QueryClientProvider>
+      </CartridgeAPIProvider>
     </ChakraProvider>
   );
 }

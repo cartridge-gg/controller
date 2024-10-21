@@ -26,7 +26,6 @@ export function Token() {
   const { address } = useParams<{ address: string }>();
   const t = useToken(address!);
   const { countervalue: usdBalance } = useCountervalue({
-    endpoint: `${import.meta.env.VITE_CARTRIDGE_API_URL!}/query`,
     balance: formatEther(BigInt(t?.balance ?? 0)),
     quote: CurrencyQuote.Eth,
     base: CurrencyBase.Usd,

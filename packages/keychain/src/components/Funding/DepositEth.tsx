@@ -61,15 +61,10 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error>();
 
-  const priceQuery = usePriceQuery(
-    {
-      endpoint: process.env.NEXT_PUBLIC_API_URL,
-    },
-    {
-      quote: CurrencyQuote.Eth,
-      base: CurrencyBase.Usd,
-    },
-  );
+  const priceQuery = usePriceQuery({
+    quote: CurrencyQuote.Eth,
+    base: CurrencyBase.Usd,
+  });
   const price = priceQuery.data?.price;
 
   const onAmountChagned = useCallback(

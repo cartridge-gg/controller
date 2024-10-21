@@ -22,7 +22,6 @@ function formatEthBalance(ethBalance: bigint): string {
 export function Balance({ showBalances }: BalanceProps) {
   const { ethBalance, creditsBalance } = useBalance();
   const { countervalue: usdBalance } = useCountervalue({
-    endpoint: process.env.NEXT_PUBLIC_API_URL,
     balance: formatEther(ethBalance),
     quote: CurrencyQuote.Eth,
     base: CurrencyBase.Usd,
