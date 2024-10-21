@@ -7,14 +7,13 @@ import {
   useCallback,
 } from "react";
 import { ProfileContextTypeVariant } from "@cartridge/controller";
-import { normalize } from "@cartridge/utils";
+import { normalize, useIndexerAPI } from "@cartridge/utils";
 import { constants, RpcProvider } from "starknet";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 type ConnectionContextType = {
   parent: ParentMethods;
   provider?: RpcProvider;
-  indexerUrl: string;
   chainId: string;
   isVisible: boolean;
   setIsVisible: (isVisible: boolean) => void;
@@ -24,7 +23,6 @@ type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
 
 const initialState: ConnectionContextType = {
   parent: { close: async () => {} },
-  indexerUrl: "",
   chainId: "",
   isVisible: false,
   setIsVisible: () => {},
@@ -35,6 +33,7 @@ export const ConnectionContext =
 
 export function ConnectionProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ConnectionContextType>(initialState);
+  const { setUrl } = useIndexerAPI();
 
   const [searchParams] = useSearchParams();
   useEffect(() => {
@@ -45,13 +44,13 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
         });
       }
 
-      if (searchParams.get("indexerUrl")) {
-        state.indexerUrl = decodeURIComponent(searchParams.get("indexerUrl")!);
-      }
-
       return state;
     });
-  }, [searchParams]);
+
+    if (searchParams.get("indexerUrl")) {
+      setUrl(decodeURIComponent(searchParams.get("indexerUrl")!));
+    }
+  }, [searchParams, setUrl]);
 
   useEffect(() => {
     updateChainId();
