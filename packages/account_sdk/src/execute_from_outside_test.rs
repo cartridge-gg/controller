@@ -5,7 +5,6 @@ use starknet::{
     macros::{felt, selector},
     signers::SigningKey,
 };
-use starknet_crypto::Felt;
 
 use crate::tests::runners::katana::KatanaRunner;
 use crate::tests::transaction_waiter::TransactionWaiter;
@@ -25,7 +24,7 @@ use cainome::cairo_serde::{CairoSerde, ContractAddress, U256};
 async fn test_execute_from_outside() {
     let signer = Signer::new_starknet_random();
     let runner = KatanaRunner::load();
-    let controller = runner
+    let mut controller = runner
         .deploy_controller(
             "testuser".to_owned(),
             Owner::Signer(signer),
@@ -49,7 +48,8 @@ async fn test_execute_from_outside() {
         .concat(),
     }];
 
-    let result = controller.execute_from_outside(calls).await;
+    // First execution
+    let result = controller.execute_from_outside(calls.clone()).await;
     let response = result.expect("Failed to execute from outside");
 
     TransactionWaiter::new(response.transaction_hash, runner.client())
@@ -58,15 +58,22 @@ async fn test_execute_from_outside() {
         .await
         .unwrap();
 
-    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller);
+    {
+        let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller);
 
-    let balance = contract_erc20
-        .balanceOf(&recipient)
-        .call()
-        .await
-        .expect("failed to call contract");
+        let balance = contract_erc20
+            .balanceOf(&recipient)
+            .call()
+            .await
+            .expect("failed to call contract");
 
-    assert_eq!(balance, amount);
+        assert_eq!(balance, amount);
+    }
+
+    for _ in 0..128 {
+        let result = controller.execute_from_outside(calls.clone()).await;
+        result.expect("Failed to execute from outside");
+    }
 }
 
 #[tokio::test]
@@ -115,7 +122,7 @@ async fn test_execute_from_outside_with_session() {
         execute_after: 0,
         execute_before: u32::MAX as u64,
         calls: vec![call.into()],
-        nonce: (SigningKey::from_random().secret_scalar(), Felt::ZERO),
+        nonce: (SigningKey::from_random().secret_scalar(), 1),
     };
 
     // Sign the outside execution with the session account

@@ -57,7 +57,7 @@ webauthn-authenticator-rs = { git = "https://github.com/cartridge-gg/webauthn-rs
     "softpasskey",
 ] }
 
-cainome = { git = "https://github.com/cartridge-gg/cainome", tag = "v0.4.2", features = [
+cainome = { git = "https://github.com/cartridge-gg/cainome", tag = "v0.4.5", features = [
     "abigen-rs",
 ] }
 

@@ -21,8 +21,8 @@ pub trait OutsideExecutionAccount {
         &self,
         outside_execution: OutsideExecution,
     ) -> Result<SignedOutsideExecution, SignError>;
-    fn random_outside_execution_nonce(&self) -> (Felt, Felt) {
-        (SigningKey::from_random().secret_scalar(), Felt::ZERO)
+    fn random_outside_execution_nonce(&self) -> (Felt, u128) {
+        (SigningKey::from_random().secret_scalar(), 1)
     }
 }
 
@@ -161,7 +161,7 @@ impl StructHashRev1 for crate::abigen::controller::OutsideExecution {
             Self::TYPE_HASH_REV_1,
             self.caller.into(),
             self.nonce.0,
-            self.nonce.1,
+            self.nonce.1.into(),
             self.execute_after.into(),
             self.execute_before.into(),
             poseidon_hash_many(&hashed_calls),
@@ -169,7 +169,7 @@ impl StructHashRev1 for crate::abigen::controller::OutsideExecution {
     }
 
     const TYPE_HASH_REV_1: Felt = selector!(
-        "\"OutsideExecution\"(\"Caller\":\"ContractAddress\",\"Nonce\":\"(felt,felt)\",\"Execute After\":\"u128\",\"Execute Before\":\"u128\",\"Calls\":\"Call*\")\"Call\"(\"To\":\"ContractAddress\",\"Selector\":\"selector\",\"Calldata\":\"felt*\")"
+        "\"OutsideExecution\"(\"Caller\":\"ContractAddress\",\"Nonce\":\"(felt,u128)\",\"Execute After\":\"u128\",\"Execute Before\":\"u128\",\"Calls\":\"Call*\")\"Call\"(\"To\":\"ContractAddress\",\"Selector\":\"selector\",\"Calldata\":\"felt*\")"
     );
 }
 
@@ -229,7 +229,7 @@ mod tests {
             ],
             nonce: (
                 felt!("0x564b73282b2fb5f201cf2070bf0ca2526871cb7daa06e0e805521ef5d907b33"),
-                Felt::ZERO,
+                0,
             ),
         };
 
@@ -237,8 +237,8 @@ mod tests {
 
         let expected = json!({
             "caller": "0x414e595f43414c4c4552",
-            "execute_after": 0,
-            "execute_before": 3000000000_u32,
+            "execute_after": "0x0",
+            "execute_before": "0xb2d05e00",
             "calls": [
                 {
                     "to": "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
