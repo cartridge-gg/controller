@@ -11,7 +11,6 @@
     "format:check": "prettier --check --ignore-path .gitignore .",
     "test": "jest --watch",
     "test:ci": "jest --ci",
-    "gen": "graphql-codegen --config codegen.yaml",
     "storybook": "storybook dev -p 6001",
     "storybook:build": "storybook build",
     "test:storybook": "pnpm concurrently -k -s first -n \"SB,TEST\" -c \"magenta,blue\" \"pnpm storybook:build --quiet && pnpm http-server storybook-static --port 6006 --silent\" \"pnpm wait-on tcp:6006 && pnpm test-storybook\""
@@ -54,13 +53,6 @@
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:^",
     "@chromatic-com/storybook": "^1.9.0",
-    "@graphql-codegen/cli": "^2.6.2",
-    "@graphql-codegen/fragment-matcher": "^3.2.1",
-    "@graphql-codegen/introspection": "^2.1.1",
-    "@graphql-codegen/schema-ast": "^2.4.1",
-    "@graphql-codegen/typescript": "^2.4.8",
-    "@graphql-codegen/typescript-operations": "^2.3.5",
-    "@graphql-codegen/typescript-react-query": "^3.5.9",
     "@jest/globals": "^29.7.0",
     "@storybook/addon-essentials": "^8.2.9",
     "@storybook/addon-interactions": "^8.2.9",

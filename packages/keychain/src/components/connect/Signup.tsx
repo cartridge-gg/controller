@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   FinalizeRegistrationMutation,
   useAccountQuery,
-} from "generated/graphql";
+} from "@cartridge/utils/api/cartridge";
 import Controller from "utils/controller";
 import { PopupCenter } from "utils/url";
 import { SignupProps } from "./types";

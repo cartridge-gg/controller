@@ -2,7 +2,7 @@ import {
   FetchControllersDocument,
   FetchControllersQuery,
   FetchControllersQueryVariables,
-} from "generated/graphql";
+} from "@cartridge/utils/api/cartridge";
 import { ControllerAccounts } from "@cartridge/controller";
 import { fetchData } from "hooks/fetcher";
 import pThrottle from "p-throttle";

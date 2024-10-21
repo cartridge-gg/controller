@@ -2,7 +2,7 @@ import {
   AccountDocument,
   AccountQuery,
   AccountQueryVariables,
-} from "generated/graphql";
+} from "@cartridge/utils/api/cartridge";
 import { fetchData } from "hooks/fetcher";
 import { AuthAction } from "./Authenticate";
 
