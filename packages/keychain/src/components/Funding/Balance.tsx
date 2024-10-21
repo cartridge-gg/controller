@@ -20,7 +20,7 @@ function formatTokenBalance(balance: bigint): string {
 }
 
 function formatUsdBalance(balance: bigint, price: number) {
-  return parseFloat(formatEther(balance)) * price
+  return parseFloat(formatEther(balance)) * price;
 }
 
 export function Balance({ showBalances }: BalanceProps) {
@@ -58,7 +58,9 @@ export function Balance({ showBalances }: BalanceProps) {
           <HStack>
             <CreditsIcon fontSize={20} />
             <Text>{formatTokenBalance(creditsBalance)}</Text>
-            <Text color="text.secondary">${formatUsdBalance(creditsBalance, 1).toFixed(2)}</Text>
+            <Text color="text.secondary">
+              ${formatUsdBalance(creditsBalance, 1).toFixed(2)}
+            </Text>
           </HStack>
           <Spacer />
           <HStack color="text.secondary">
@@ -80,7 +82,9 @@ export function Balance({ showBalances }: BalanceProps) {
           <HStack>
             <EthereumIcon fontSize={20} />
             <Text>{formatTokenBalance(ethBalance)}</Text>
-            <Text color="text.secondary">${formatUsdBalance(ethBalance, price).toFixed(2)}</Text>
+            <Text color="text.secondary">
+              ${formatUsdBalance(ethBalance, price).toFixed(2)}
+            </Text>
           </HStack>
           <Spacer />
           <HStack color="text.secondary">
