@@ -7,18 +7,30 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CopyAddress,
   ExternalIcon,
   Skeleton,
 } from "@cartridge/ui-next";
 import { useConnection, useToken } from "@/hooks/context";
-import { formatAddress, isPublicChain, StarkscanUrl } from "@cartridge/utils";
+import {
+  formatAddress,
+  isPublicChain,
+  StarkscanUrl,
+  useCountervalue,
+} from "@cartridge/utils";
 import { constants } from "starknet";
+import { formatEther } from "viem";
+import { CurrencyBase, CurrencyQuote } from "@cartridge/utils/api/cartridge";
 
 export function Token() {
   const { chainId } = useConnection();
   const { address } = useParams<{ address: string }>();
   const t = useToken(address!);
+  const { countervalue: usdBalance } = useCountervalue({
+    endpoint: `${import.meta.env.VITE_CARTRIDGE_API_URL!}/query`,
+    balance: formatEther(BigInt(t?.balance ?? 0)),
+    quote: CurrencyQuote.Eth,
+    base: CurrencyBase.Usd,
+  });
 
   if (!t) {
     return;
@@ -42,7 +54,7 @@ export function Token() {
             t.balance.toString()
           )
         } ${t.symbol}`}
-        description={<CopyAddress address={t.address} size="sm" />}
+        description={`${usdBalance} ${CurrencyBase.Usd}`}
         icon={
           <img
             className="w-8 h-8"
@@ -62,7 +74,7 @@ export function Token() {
               <Link
                 to={`${StarkscanUrl(
                   chainId as constants.StarknetChainId,
-                ).contract(t.address)}`}
+                ).contract(t.address)} `}
                 className="flex items-center gap-1 text-sm"
                 target="_blank"
               >

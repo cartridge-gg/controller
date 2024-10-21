@@ -1,9 +1,10 @@
 import { useInterval } from "@chakra-ui/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { uint256 } from "starknet";
 import { useConnection } from "hooks/connection";
 import { ETH_CONTRACT_ADDRESS } from "utils/token";
 import { AccountInfoQuery, useAccountInfoQuery } from "generated/graphql";
+import { formatBalance } from "@cartridge/utils";
 
 const REFRESH_INTERVAL = 3000;
 
@@ -63,5 +64,25 @@ export function useBalance() {
   }, [fetchBalances]);
 
   useInterval(fetchBalances, REFRESH_INTERVAL);
-  return { ethBalance, creditsBalance, isFetching, isLoading, error };
+
+  const ethFormattedBalance = useMemo(
+    () => formatBalance(ethBalance),
+    [ethBalance],
+  );
+
+  const creditsFormattedBalance = useMemo(
+    () => formatBalance(ethBalance),
+    [ethBalance],
+  );
+
+  return {
+    ethBalance: { value: ethBalance, formatted: ethFormattedBalance },
+    creditsBalance: {
+      value: creditsBalance,
+      formatted: creditsFormattedBalance,
+    },
+    isFetching,
+    isLoading,
+    error,
+  };
 }

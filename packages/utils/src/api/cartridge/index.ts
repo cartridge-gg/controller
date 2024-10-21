@@ -1,12 +1,4 @@
-import {
-  useQuery,
-  useInfiniteQuery,
-  useMutation,
-  UseQueryOptions,
-  UseInfiniteQueryOptions,
-  UseMutationOptions,
-} from "react-query";
-import { useFetchData } from "hooks/fetcher";
+import { useQuery, UseQueryOptions } from "react-query";
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = {
@@ -18,6 +10,31 @@ export type MakeOptional<T, K extends keyof T> = Omit<T, K> & {
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & {
   [SubKey in K]: Maybe<T[SubKey]>;
 };
+
+function fetcher<TData, TVariables>(
+  endpoint: string,
+  requestInit: RequestInit,
+  query: string,
+  variables?: TVariables,
+) {
+  return async (): Promise<TData> => {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      ...requestInit,
+      body: JSON.stringify({ query, variables }),
+    });
+
+    const json = await res.json();
+
+    if (json.errors) {
+      const { message } = json.errors[0];
+
+      throw new Error(message);
+    }
+
+    return json.data;
+  };
+}
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -394,26 +411,6 @@ export type CreditsHistory = Node & {
   /** Type of transaction: credit or debit */
   transactionType: CreditsHistoryTransactionType;
   updatedAt: Scalars["Time"];
-};
-
-/** A connection to a list of items. */
-export type CreditsHistoryConnection = {
-  __typename?: "CreditsHistoryConnection";
-  /** A list of edges. */
-  edges?: Maybe<Array<Maybe<CreditsHistoryEdge>>>;
-  /** Information to aid in pagination. */
-  pageInfo: PageInfo;
-  /** Identifies the total count of items in the connection. */
-  totalCount: Scalars["Int"];
-};
-
-/** An edge in a connection. */
-export type CreditsHistoryEdge = {
-  __typename?: "CreditsHistoryEdge";
-  /** A cursor for use in pagination. */
-  cursor: Scalars["Cursor"];
-  /** The item at the end of the edge. */
-  node?: Maybe<CreditsHistory>;
 };
 
 /** Ordering options for CreditsHistory connections */
@@ -1727,493 +1724,40 @@ export type WebauthnCredential = {
   publicKey: Scalars["String"];
 };
 
-export type StripePaymentQueryVariables = Exact<{
-  referenceId: Scalars["String"];
+export type PriceQueryVariables = Exact<{
+  quote: CurrencyQuote;
+  base: CurrencyBase;
 }>;
 
-export type StripePaymentQuery = {
+export type PriceQuery = {
   __typename?: "Query";
-  stripePayment?: {
-    __typename?: "StripePayment";
-    referenceId: string;
-    amount: number;
+  price?: {
+    __typename?: "Price";
+    amount?: string | null;
+    currency?: string | null;
   } | null;
 };
 
-export type AccountInfoQueryVariables = Exact<{
-  address: Scalars["String"];
-}>;
-
-export type AccountInfoQuery = {
-  __typename?: "Query";
-  accounts?: {
-    __typename?: "AccountConnection";
-    edges?: Array<{
-      __typename?: "AccountEdge";
-      node?: { __typename?: "Account"; id: string; credits: any } | null;
-    } | null> | null;
-  } | null;
-};
-
-export type BeginRegistrationMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type BeginRegistrationMutation = {
-  __typename?: "Mutation";
-  beginRegistration: any;
-};
-
-export type FinalizeRegistrationMutationVariables = Exact<{
-  credentials: Scalars["String"];
-  network: Scalars["String"];
-}>;
-
-export type FinalizeRegistrationMutation = {
-  __typename?: "Mutation";
-  finalizeRegistration: {
-    __typename?: "Account";
-    id: string;
-    controllers?: Array<{
-      __typename?: "Controller";
-      address: string;
-      signers?: Array<{ __typename?: "Signer"; type: SignerType }> | null;
-    }> | null;
-    credentials: {
-      __typename?: "Credentials";
-      webauthn?: Array<{
-        __typename?: "WebauthnCredential";
-        id: string;
-        publicKey: string;
-      }> | null;
-    };
-  };
-};
-
-export type AccountQueryVariables = Exact<{
-  id: Scalars["ID"];
-}>;
-
-export type AccountQuery = {
-  __typename?: "Query";
-  account?: {
-    __typename?: "Account";
-    id: string;
-    credentials: {
-      __typename?: "Credentials";
-      webauthn?: Array<{
-        __typename?: "WebauthnCredential";
-        id: string;
-        publicKey: string;
-      }> | null;
-    };
-    controllers?: Array<{
-      __typename?: "Controller";
-      address: string;
-      signers?: Array<{ __typename?: "Signer"; type: SignerType }> | null;
-    }> | null;
-  } | null;
-};
-
-export type BeginLoginMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type BeginLoginMutation = { __typename?: "Mutation"; beginLogin: any };
-
-export type FinalizeLoginMutationVariables = Exact<{
-  credentials: Scalars["String"];
-}>;
-
-export type FinalizeLoginMutation = {
-  __typename?: "Mutation";
-  finalizeLogin: string;
-};
-
-export type MeQueryVariables = Exact<{ [key: string]: never }>;
-
-export type MeQuery = {
-  __typename?: "Query";
-  me?: { __typename?: "Account"; id: string } | null;
-};
-
-export type FetchControllersQueryVariables = Exact<{
-  addresses: Array<Scalars["String"]> | Scalars["String"];
-  first?: InputMaybe<Scalars["Int"]>;
-}>;
-
-export type FetchControllersQuery = {
-  __typename?: "Query";
-  accounts?: {
-    __typename?: "AccountConnection";
-    edges?: Array<{
-      __typename?: "AccountEdge";
-      node?: {
-        __typename?: "Account";
-        id: string;
-        controllers?: Array<{
-          __typename?: "Controller";
-          address: string;
-        }> | null;
-      } | null;
-    } | null> | null;
-  } | null;
-};
-
-export const StripePaymentDocument = `
-    query StripePayment($referenceId: String!) {
-  stripePayment(referenceId: $referenceId) {
-    referenceId
+export const PriceDocument = `
+    query Price($quote: CurrencyQuote!, $base: CurrencyBase!) {
+  price(quote: $quote, base: $base) {
     amount
+    currency
   }
 }
     `;
-export const useStripePaymentQuery = <
-  TData = StripePaymentQuery,
-  TError = unknown,
->(
-  variables: StripePaymentQueryVariables,
-  options?: UseQueryOptions<StripePaymentQuery, TError, TData>,
+export const usePriceQuery = <TData = PriceQuery, TError = unknown>(
+  dataSource: { endpoint: string; fetchParams?: RequestInit },
+  variables: PriceQueryVariables,
+  options?: UseQueryOptions<PriceQuery, TError, TData>,
 ) =>
-  useQuery<StripePaymentQuery, TError, TData>(
-    ["StripePayment", variables],
-    useFetchData<StripePaymentQuery, StripePaymentQueryVariables>(
-      StripePaymentDocument,
-    ).bind(null, variables),
-    options,
-  );
-
-useStripePaymentQuery.getKey = (variables: StripePaymentQueryVariables) => [
-  "StripePayment",
-  variables,
-];
-export const useInfiniteStripePaymentQuery = <
-  TData = StripePaymentQuery,
-  TError = unknown,
->(
-  variables: StripePaymentQueryVariables,
-  options?: UseInfiniteQueryOptions<StripePaymentQuery, TError, TData>,
-) => {
-  const query = useFetchData<StripePaymentQuery, StripePaymentQueryVariables>(
-    StripePaymentDocument,
-  );
-  return useInfiniteQuery<StripePaymentQuery, TError, TData>(
-    ["StripePayment.infinite", variables],
-    (metaData) => query({ ...variables, ...(metaData.pageParam ?? {}) }),
-    options,
-  );
-};
-
-useInfiniteStripePaymentQuery.getKey = (
-  variables: StripePaymentQueryVariables,
-) => ["StripePayment.infinite", variables];
-export const AccountInfoDocument = `
-    query AccountInfo($address: String!) {
-  accounts(where: {hasControllersWith: {address: $address}}, first: 1) {
-    edges {
-      node {
-        id
-        credits
-      }
-    }
-  }
-}
-    `;
-export const useAccountInfoQuery = <TData = AccountInfoQuery, TError = unknown>(
-  variables: AccountInfoQueryVariables,
-  options?: UseQueryOptions<AccountInfoQuery, TError, TData>,
-) =>
-  useQuery<AccountInfoQuery, TError, TData>(
-    ["AccountInfo", variables],
-    useFetchData<AccountInfoQuery, AccountInfoQueryVariables>(
-      AccountInfoDocument,
-    ).bind(null, variables),
-    options,
-  );
-
-useAccountInfoQuery.getKey = (variables: AccountInfoQueryVariables) => [
-  "AccountInfo",
-  variables,
-];
-export const useInfiniteAccountInfoQuery = <
-  TData = AccountInfoQuery,
-  TError = unknown,
->(
-  variables: AccountInfoQueryVariables,
-  options?: UseInfiniteQueryOptions<AccountInfoQuery, TError, TData>,
-) => {
-  const query = useFetchData<AccountInfoQuery, AccountInfoQueryVariables>(
-    AccountInfoDocument,
-  );
-  return useInfiniteQuery<AccountInfoQuery, TError, TData>(
-    ["AccountInfo.infinite", variables],
-    (metaData) => query({ ...variables, ...(metaData.pageParam ?? {}) }),
-    options,
-  );
-};
-
-useInfiniteAccountInfoQuery.getKey = (variables: AccountInfoQueryVariables) => [
-  "AccountInfo.infinite",
-  variables,
-];
-export const BeginRegistrationDocument = `
-    mutation BeginRegistration($id: String!) {
-  beginRegistration(id: $id)
-}
-    `;
-export const useBeginRegistrationMutation = <
-  TError = unknown,
-  TContext = unknown,
->(
-  options?: UseMutationOptions<
-    BeginRegistrationMutation,
-    TError,
-    BeginRegistrationMutationVariables,
-    TContext
-  >,
-) =>
-  useMutation<
-    BeginRegistrationMutation,
-    TError,
-    BeginRegistrationMutationVariables,
-    TContext
-  >(
-    ["BeginRegistration"],
-    useFetchData<BeginRegistrationMutation, BeginRegistrationMutationVariables>(
-      BeginRegistrationDocument,
-    ),
-    options,
-  );
-export const FinalizeRegistrationDocument = `
-    mutation FinalizeRegistration($credentials: String!, $network: String!) {
-  finalizeRegistration(credentials: $credentials, network: $network) {
-    id
-    controllers {
-      address
-      signers {
-        type
-      }
-    }
-    credentials {
-      webauthn {
-        id
-        publicKey
-      }
-    }
-  }
-}
-    `;
-export const useFinalizeRegistrationMutation = <
-  TError = unknown,
-  TContext = unknown,
->(
-  options?: UseMutationOptions<
-    FinalizeRegistrationMutation,
-    TError,
-    FinalizeRegistrationMutationVariables,
-    TContext
-  >,
-) =>
-  useMutation<
-    FinalizeRegistrationMutation,
-    TError,
-    FinalizeRegistrationMutationVariables,
-    TContext
-  >(
-    ["FinalizeRegistration"],
-    useFetchData<
-      FinalizeRegistrationMutation,
-      FinalizeRegistrationMutationVariables
-    >(FinalizeRegistrationDocument),
-    options,
-  );
-export const AccountDocument = `
-    query Account($id: ID!) {
-  account(id: $id) {
-    id
-    credentials {
-      webauthn {
-        id
-        publicKey
-      }
-    }
-    controllers {
-      address
-      signers {
-        type
-      }
-    }
-  }
-}
-    `;
-export const useAccountQuery = <TData = AccountQuery, TError = unknown>(
-  variables: AccountQueryVariables,
-  options?: UseQueryOptions<AccountQuery, TError, TData>,
-) =>
-  useQuery<AccountQuery, TError, TData>(
-    ["Account", variables],
-    useFetchData<AccountQuery, AccountQueryVariables>(AccountDocument).bind(
-      null,
+  useQuery<PriceQuery, TError, TData>(
+    ["Price", variables],
+    fetcher<PriceQuery, PriceQueryVariables>(
+      dataSource.endpoint,
+      dataSource.fetchParams || {},
+      PriceDocument,
       variables,
     ),
     options,
   );
-
-useAccountQuery.getKey = (variables: AccountQueryVariables) => [
-  "Account",
-  variables,
-];
-export const useInfiniteAccountQuery = <TData = AccountQuery, TError = unknown>(
-  variables: AccountQueryVariables,
-  options?: UseInfiniteQueryOptions<AccountQuery, TError, TData>,
-) => {
-  const query = useFetchData<AccountQuery, AccountQueryVariables>(
-    AccountDocument,
-  );
-  return useInfiniteQuery<AccountQuery, TError, TData>(
-    ["Account.infinite", variables],
-    (metaData) => query({ ...variables, ...(metaData.pageParam ?? {}) }),
-    options,
-  );
-};
-
-useInfiniteAccountQuery.getKey = (variables: AccountQueryVariables) => [
-  "Account.infinite",
-  variables,
-];
-export const BeginLoginDocument = `
-    mutation BeginLogin($id: String!) {
-  beginLogin(id: $id)
-}
-    `;
-export const useBeginLoginMutation = <TError = unknown, TContext = unknown>(
-  options?: UseMutationOptions<
-    BeginLoginMutation,
-    TError,
-    BeginLoginMutationVariables,
-    TContext
-  >,
-) =>
-  useMutation<
-    BeginLoginMutation,
-    TError,
-    BeginLoginMutationVariables,
-    TContext
-  >(
-    ["BeginLogin"],
-    useFetchData<BeginLoginMutation, BeginLoginMutationVariables>(
-      BeginLoginDocument,
-    ),
-    options,
-  );
-export const FinalizeLoginDocument = `
-    mutation FinalizeLogin($credentials: String!) {
-  finalizeLogin(credentials: $credentials)
-}
-    `;
-export const useFinalizeLoginMutation = <TError = unknown, TContext = unknown>(
-  options?: UseMutationOptions<
-    FinalizeLoginMutation,
-    TError,
-    FinalizeLoginMutationVariables,
-    TContext
-  >,
-) =>
-  useMutation<
-    FinalizeLoginMutation,
-    TError,
-    FinalizeLoginMutationVariables,
-    TContext
-  >(
-    ["FinalizeLogin"],
-    useFetchData<FinalizeLoginMutation, FinalizeLoginMutationVariables>(
-      FinalizeLoginDocument,
-    ),
-    options,
-  );
-export const MeDocument = `
-    query Me {
-  me {
-    id
-  }
-}
-    `;
-export const useMeQuery = <TData = MeQuery, TError = unknown>(
-  variables?: MeQueryVariables,
-  options?: UseQueryOptions<MeQuery, TError, TData>,
-) =>
-  useQuery<MeQuery, TError, TData>(
-    variables === undefined ? ["Me"] : ["Me", variables],
-    useFetchData<MeQuery, MeQueryVariables>(MeDocument).bind(null, variables),
-    options,
-  );
-
-useMeQuery.getKey = (variables?: MeQueryVariables) =>
-  variables === undefined ? ["Me"] : ["Me", variables];
-export const useInfiniteMeQuery = <TData = MeQuery, TError = unknown>(
-  variables?: MeQueryVariables,
-  options?: UseInfiniteQueryOptions<MeQuery, TError, TData>,
-) => {
-  const query = useFetchData<MeQuery, MeQueryVariables>(MeDocument);
-  return useInfiniteQuery<MeQuery, TError, TData>(
-    variables === undefined ? ["Me.infinite"] : ["Me.infinite", variables],
-    (metaData) => query({ ...variables, ...(metaData.pageParam ?? {}) }),
-    options,
-  );
-};
-
-useInfiniteMeQuery.getKey = (variables?: MeQueryVariables) =>
-  variables === undefined ? ["Me.infinite"] : ["Me.infinite", variables];
-export const FetchControllersDocument = `
-    query FetchControllers($addresses: [String!]!, $first: Int) {
-  accounts(where: {hasControllersWith: [{addressIn: $addresses}]}, first: $first) {
-    edges {
-      node {
-        id
-        controllers {
-          address
-        }
-      }
-    }
-  }
-}
-    `;
-export const useFetchControllersQuery = <
-  TData = FetchControllersQuery,
-  TError = unknown,
->(
-  variables: FetchControllersQueryVariables,
-  options?: UseQueryOptions<FetchControllersQuery, TError, TData>,
-) =>
-  useQuery<FetchControllersQuery, TError, TData>(
-    ["FetchControllers", variables],
-    useFetchData<FetchControllersQuery, FetchControllersQueryVariables>(
-      FetchControllersDocument,
-    ).bind(null, variables),
-    options,
-  );
-
-useFetchControllersQuery.getKey = (
-  variables: FetchControllersQueryVariables,
-) => ["FetchControllers", variables];
-export const useInfiniteFetchControllersQuery = <
-  TData = FetchControllersQuery,
-  TError = unknown,
->(
-  variables: FetchControllersQueryVariables,
-  options?: UseInfiniteQueryOptions<FetchControllersQuery, TError, TData>,
-) => {
-  const query = useFetchData<
-    FetchControllersQuery,
-    FetchControllersQueryVariables
-  >(FetchControllersDocument);
-  return useInfiniteQuery<FetchControllersQuery, TError, TData>(
-    ["FetchControllers.infinite", variables],
-    (metaData) => query({ ...variables, ...(metaData.pageParam ?? {}) }),
-    options,
-  );
-};
-
-useInfiniteFetchControllersQuery.getKey = (
-  variables: FetchControllersQueryVariables,
-) => ["FetchControllers.infinite", variables];

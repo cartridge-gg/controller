@@ -23,11 +23,11 @@ type ConnectionContextType = {
 type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
 
 const initialState: ConnectionContextType = {
-  parent: { close: async () => { } },
+  parent: { close: async () => {} },
   indexerUrl: "",
   chainId: "",
   isVisible: false,
-  setIsVisible: () => { },
+  setIsVisible: () => {},
 };
 
 export const ConnectionContext =
