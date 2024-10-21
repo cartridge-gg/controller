@@ -10,6 +10,7 @@ const result: PossibleTypesResultData = {
       "Account",
       "AccountTeam",
       "Controller",
+      "CreditsHistory",
       "Deployment",
       "DeploymentLog",
       "File",
