@@ -1,9 +1,9 @@
 import { CreditsIcon, EthereumIcon } from "@cartridge/ui";
 import { HStack, Spacer, Text, VStack } from "@chakra-ui/react";
-import { CurrencyBase, CurrencyQuote, usePriceQuery } from "generated/graphql";
+import { CurrencyBase, CurrencyQuote } from "@cartridge/utils/api/cartridge";
 import { useBalance } from "hooks/token";
-import { useMemo } from "react";
 import { formatEther } from "viem";
+import { useCountervalue } from "@cartridge/utils";
 
 type BalanceProps = {
   showBalances: ("credits" | "eth" | "strk")[];
@@ -21,20 +21,11 @@ function formatEthBalance(ethBalance: bigint): string {
 
 export function Balance({ showBalances }: BalanceProps) {
   const { ethBalance, creditsBalance } = useBalance();
-
-  const priceQuery = usePriceQuery({
+  const { countervalue: usdBalance } = useCountervalue({
+    balance: formatEther(ethBalance),
     quote: CurrencyQuote.Eth,
     base: CurrencyBase.Usd,
   });
-  const price = priceQuery.data?.price;
-
-  const usdBalance = useMemo(() => {
-    if (!price || !ethBalance) {
-      return 0;
-    }
-
-    return parseFloat(formatEther(ethBalance)) * parseFloat(price.amount);
-  }, [ethBalance, price]);
 
   return (
     <VStack w="full" borderRadius="base" overflow="hidden" spacing="1px">

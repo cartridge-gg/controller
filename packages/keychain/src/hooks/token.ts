@@ -3,7 +3,10 @@ import { useCallback, useEffect, useState } from "react";
 import { uint256 } from "starknet";
 import { useConnection } from "hooks/connection";
 import { ETH_CONTRACT_ADDRESS } from "utils/token";
-import { AccountInfoQuery, useAccountInfoQuery } from "generated/graphql";
+import {
+  AccountInfoQuery,
+  useAccountInfoQuery,
+} from "@cartridge/utils/api/cartridge";
 
 const REFRESH_INTERVAL = 3000;
 

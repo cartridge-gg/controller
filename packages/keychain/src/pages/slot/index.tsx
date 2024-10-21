@@ -1,6 +1,6 @@
 import { PageLoading } from "components/Loading";
 import { CreateController } from "components/connect";
-import { useMeQuery } from "generated/graphql";
+import { useMeQuery } from "@cartridge/utils/api/cartridge";
 import { useController } from "hooks/controller";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";

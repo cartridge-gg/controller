@@ -5,7 +5,7 @@ import {
   FinalizeRegistrationDocument,
   FinalizeLoginMutation,
   FinalizeRegistrationMutation,
-} from "generated/graphql";
+} from "@cartridge/utils/api/cartridge";
 
 import { client, ENDPOINT } from "utils/graphql";
 import base64url from "base64url";
@@ -22,7 +22,7 @@ type Credentials = RawAttestation & {
   getPublicKey(): ArrayBuffer | null;
 };
 
-export const createCredentials = async (
+const createCredentials = async (
   name: string,
   beginRegistration: CredentialCreationOptions,
   hasPlatformAuthenticator: boolean,
@@ -54,7 +54,7 @@ export const createCredentials = async (
   return credentials;
 };
 
-export const onCreateBegin = async (name: string): Promise<Credentials> => {
+const onCreateBegin = async (name: string): Promise<Credentials> => {
   const hasPlatformAuthenticator =
     await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
   const { data } = await beginRegistration(name);
@@ -67,7 +67,7 @@ export const onCreateBegin = async (name: string): Promise<Credentials> => {
   return credentials;
 };
 
-export const onCreateFinalize = (
+const onCreateFinalize = (
   credentials: Credentials,
   network: string,
 ): Promise<FinalizeRegistrationMutation> => {
@@ -89,7 +89,7 @@ export const onCreateFinalize = (
   });
 };
 
-export const onLoginFinalize = (
+const onLoginFinalize = (
   assertion: RawAssertion,
 ): Promise<FinalizeLoginMutation> => {
   return client.request(FinalizeLoginDocument, {
@@ -111,7 +111,7 @@ export const onLoginFinalize = (
   });
 };
 
-export const beginRegistration = async (name: string): Promise<any> => {
+const beginRegistration = async (name: string): Promise<any> => {
   return doXHR(
     JSON.stringify({
       operationName: "BeginRegistration",
@@ -123,7 +123,7 @@ export const beginRegistration = async (name: string): Promise<any> => {
   );
 };
 
-export const beginLogin = async (name: string): Promise<any> => {
+const beginLogin = async (name: string): Promise<any> => {
   return doXHR(
     JSON.stringify({
       operationName: "BeginLogin",
@@ -136,7 +136,7 @@ export const beginLogin = async (name: string): Promise<any> => {
 };
 
 // We use XHR since fetch + webauthn causes issues with safari
-export const doXHR = async (json: string): Promise<any> => {
+const doXHR = async (json: string): Promise<any> => {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.withCredentials = true;

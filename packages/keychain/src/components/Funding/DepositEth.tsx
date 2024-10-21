@@ -30,10 +30,11 @@ import { useToast } from "hooks/toast";
 import { ETH_CONTRACT_ADDRESS } from "utils/token";
 import { ErrorAlert } from "../ErrorAlert";
 import { CopyAddress } from "components/CopyAddress";
-import { CurrencyBase, CurrencyQuote, usePriceQuery } from "generated/graphql";
+import { CurrencyBase, CurrencyQuote } from "@cartridge/utils/api/cartridge";
 import { parseEther } from "viem";
 import AmountSelection, { DEFAULT_AMOUNT } from "./AmountSelection";
 import { Balance } from "./Balance";
+import { usePriceQuery } from "@cartridge/utils/api/cartridge";
 
 type DepositEthProps = {
   onComplete?: (deployHash?: string) => void;

@@ -10,10 +10,10 @@ import {
 } from "@chakra-ui/react";
 
 import { constants } from "starknet";
-import { StarkscanUrl } from "utils/url";
 import { CheckIcon, ExternalIcon, StarknetIcon } from "@cartridge/ui";
 import { useController } from "hooks/controller";
 import { useChainName } from "hooks/chain";
+import { StarkscanUrl } from "@cartridge/utils";
 
 export type TransactionState = "pending" | "success" | "error";
 

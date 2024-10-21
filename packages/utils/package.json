@@ -4,19 +4,24 @@
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
+  "exports": {
+    ".": "./dist/index.js",
+    "./api/cartridge": "./dist/api/cartridge/index.js",
+    "./api/indexer": "./dist/api/indexer/index.js"
+  },
   "scripts": {
-    "build:deps": "tsc",
+    "build:deps": "graphql-codegen --config src/api/cartridge/codegen.yaml && graphql-codegen --config src/api/indexer/codegen.yaml && tsc",
     "format": "prettier --write \"src/**/*.ts\"",
-    "format:check": "prettier --check \"src/**/*.ts\"",
-    "gql": "graphql-codegen --config src/api/torii/codegen.yaml"
+    "format:check": "prettier --check \"src/**/*.ts\""
   },
   "files": [
     "dist"
   ],
   "dependencies": {
+    "react": "^18.3.1",
     "react-query": "^3.39.2",
     "starknet": "^6.11.0",
-    "viem": "^1.20.2"
+    "viem": "^1.21.4"
   },
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:^",
@@ -25,6 +30,7 @@
     "@graphql-codegen/typescript-operations": "^2.3.5",
     "@graphql-codegen/typescript-react-query": "^3.5.9",
     "@types/node": "^20.6.0",
+    "@types/react": "^18.3.11",
     "typescript": "^5.4.5"
   }
 }

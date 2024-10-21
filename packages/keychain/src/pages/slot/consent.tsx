@@ -12,7 +12,7 @@ function Consent() {
     const redirect_uri = encodeURIComponent(
       router.query.callback_uri as string,
     );
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/oauth2/auth?client_id=cartridge&redirect_uri=${redirect_uri}`;
+    const url = `${process.env.NEXT_PUBLIC_CARTRIDGE_API_URL}/oauth2/auth?client_id=cartridge&redirect_uri=${redirect_uri}`;
 
     window.location.href = url;
   }, [router.query.callback_uri]);

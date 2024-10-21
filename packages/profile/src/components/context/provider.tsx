@@ -4,6 +4,8 @@ import { ColorSchemeProvider } from "./colorScheme";
 import { ConnectionProvider } from "./connection";
 import { BrowserRouter } from "react-router-dom";
 import { AccountProvider } from "./account";
+import { CartridgeAPIProvider } from "@cartridge/utils/api/cartridge";
+import { IndexerAPIProvider } from "@cartridge/utils/api/indexer";
 
 export function Provider({ children }: PropsWithChildren) {
   const queryClient = new QueryClient();
@@ -11,11 +13,17 @@ export function Provider({ children }: PropsWithChildren) {
   return (
     <BrowserRouter>
       <ColorSchemeProvider defaultScheme="system">
-        <QueryClientProvider client={queryClient}>
-          <ConnectionProvider>
-            <AccountProvider>{children}</AccountProvider>
-          </ConnectionProvider>
-        </QueryClientProvider>
+        <CartridgeAPIProvider
+          url={`${import.meta.env.VITE_CARTRIDGE_API_URL!}/query`}
+        >
+          <IndexerAPIProvider>
+            <QueryClientProvider client={queryClient}>
+              <ConnectionProvider>
+                <AccountProvider>{children}</AccountProvider>
+              </ConnectionProvider>
+            </QueryClientProvider>
+          </IndexerAPIProvider>
+        </CartridgeAPIProvider>
       </ColorSchemeProvider>
     </BrowserRouter>
   );

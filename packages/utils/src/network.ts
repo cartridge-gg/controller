@@ -12,6 +12,15 @@ export function getChainName(chainId: string) {
   }
 }
 
+export function isPublicChain(chainId: string) {
+  return (
+    [
+      constants.StarknetChainId.SN_MAIN,
+      constants.StarknetChainId.SN_SEPOLIA,
+    ] as string[]
+  ).includes(chainId);
+}
+
 export function isSlotChain(chainId: string) {
   return hexToString(chainId as Hex).startsWith("WP_");
 }
