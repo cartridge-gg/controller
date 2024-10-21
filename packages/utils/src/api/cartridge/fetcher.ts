@@ -1,4 +1,5 @@
 import { useCartridgeAPI } from "../../hooks";
+import { fetchDataCreator } from "../fetcher";
 
 export function useFetchData<TData, TVariables>(
   query: string,
@@ -6,28 +7,10 @@ export function useFetchData<TData, TVariables>(
 ): (variables?: TVariables) => Promise<TData> {
   const { url, headers } = useCartridgeAPI();
 
-  return async (variables?: TVariables) => {
-    const res = await fetch(url, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        ...headers,
-        ...options,
-      },
-      body: JSON.stringify({
-        query,
-        variables,
-      }),
-    });
+  const fetchData = fetchDataCreator(url, {
+    ...headers,
+    ...options,
+  });
 
-    const json = await res.json();
-
-    if (json.errors) {
-      const { message } = json.errors[0];
-      throw new Error(message);
-    }
-
-    return json.data;
-  };
+  return (variables?: TVariables) => fetchData(query, variables);
 }

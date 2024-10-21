@@ -3,8 +3,8 @@ import {
   AccountQuery,
   AccountQueryVariables,
 } from "@cartridge/utils/api/cartridge";
-import { fetchData } from "hooks/fetcher";
 import { AuthAction } from "./Authenticate";
+import { fetchData } from "utils/graphql";
 
 export function validateUsernameFor(type: AuthAction) {
   return async (val: string) => {
