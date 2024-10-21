@@ -1,5 +1,5 @@
 import { Card, CardContent, CheckIcon, CopyAddress } from "@cartridge/ui-next";
-import { useTransferQuery } from "@cartridge/utils";
+import { useTransferQuery } from "@cartridge/utils/api/torii";
 import {
   LayoutContainer,
   LayoutContent,

@@ -1,0 +1,9 @@
+overwrite: true
+schema: "https://api.cartridge.gg/query"
+documents: "src/api/cartridge/**/*.graphql"
+generates:
+  src/api/cartridge/index.ts:
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+      - "typescript-react-query"
