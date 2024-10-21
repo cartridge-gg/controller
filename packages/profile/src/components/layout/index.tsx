@@ -56,9 +56,9 @@ function ResponsiveWrapper({ children }: PropsWithChildren) {
 }
 
 type LayoutHeaderProps = {
-  title: string;
+  title: string | React.ReactElement;
   description?: string | React.ReactElement;
-  icon?: string;
+  icon?: string | React.ReactElement;
   right?: React.ReactElement;
 };
 
@@ -72,18 +72,26 @@ export function LayoutHeader({
     <div className="flex gap-2 px-4 py-6 sticky top-16 bg-background justify-between">
       <div className="flex min-w-0 gap-2 items-center">
         <div className="w-11 h-11 bg-secondary rounded flex shrink-0 items-center justify-center overflow-hidden">
-          <div
-            className="w-full bg-cover bg-center h-full place-content-center"
-            style={{
-              backgroundImage: `url(${
-                icon ?? "https://x.cartridge.gg/whitelabel/cartridge/icon.svg"
-              })`,
-            }}
-          />
+          {typeof icon === "object" ? (
+            icon
+          ) : (
+            <div
+              className="w-full bg-cover bg-center h-full place-content-center"
+              style={{
+                backgroundImage: `url(${
+                  icon ?? "https://x.cartridge.gg/whitelabel/cartridge/icon.svg"
+                })`,
+              }}
+            />
+          )}
         </div>
 
         <div className="flex flex-col gap-1 overflow-hidden">
-          <div className="text-lg font-semibold truncate">{title}</div>
+          {typeof title === "object" ? (
+            title
+          ) : (
+            <div className="text-lg font-semibold truncate">{title}</div>
+          )}
           {description && typeof description === "string" ? (
             <div className="text-xs text-muted-foreground truncate">
               {description}
