@@ -23,6 +23,14 @@ export function useAccount() {
   return useContext(AccountContext);
 }
 
+export function useToken(address: string) {
+  const { erc20 } = useAccount();
+
+  return erc20.find(
+    (t) => getChecksumAddress(t.address) === getChecksumAddress(address),
+  );
+}
+
 export function useTokenBalance(address: string) {
   const { erc20 } = useAccount();
 

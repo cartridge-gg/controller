@@ -1,6 +1,7 @@
 export { Asset } from "./asset";
 export { Collection } from "./collection";
 export { Send } from "./send";
+export { Token } from "./token";
 
 import { CopyAddress } from "@cartridge/ui-next";
 import {
