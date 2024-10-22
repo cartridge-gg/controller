@@ -14,7 +14,7 @@ export function Leaderboard({
   address: string;
 }) {
   return (
-    <div className="flex flex-col gap-y-px rounded-md overflow-hidden mb-2">
+    <div className="flex flex-col gap-y-px rounded-md overflow-hidden">
       {players
         .sort((a, b) => a.rank - b.rank)
         .map((player) => (

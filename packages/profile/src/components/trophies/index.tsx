@@ -37,7 +37,7 @@ export interface Player {
   Icon: React.ComponentType<StateIconProps> | undefined;
 }
 
-export function Quest() {
+export function Trophies() {
   const { username, address } = useConnection();
   const [achievements, setAchievements] = useState<Item[]>([]);
   const [activeTab, setActiveTab] = useState<"trophies" | "leaderboard">(
@@ -62,7 +62,12 @@ export function Quest() {
   }, [players, address]);
 
   useEffect(() => {
-    setAchievements(items);
+    // Sort by id, timestamp, and completion
+    const achievements = items
+      .sort((a, b) => (a.id < b.id ? 1 : -1))
+      .sort((a, b) => b.timestamp - a.timestamp)
+      .sort((a, b) => (b.completed ? 1 : 0) - (a.completed ? 1 : 0));
+    setAchievements(achievements);
   }, [items]);
 
   const onPin = useCallback(
@@ -85,7 +90,7 @@ export function Quest() {
       />
 
       {items.length ? (
-        <LayoutContent>
+        <LayoutContent className="pb-4">
           <div className="flex justify-between gap-4">
             <TrophiesTab
               active={activeTab === "trophies"}
@@ -102,7 +107,7 @@ export function Quest() {
           </div>
           <ScrollArea className="overflow-auto">
             {activeTab === "trophies" && (
-              <div className="flex flex-col h-full flex-1 overflow-y-auto gap-4 mb-4">
+              <div className="flex flex-col h-full flex-1 overflow-y-auto gap-4">
                 <Pinneds achievements={pinneds} />
                 <Achievements
                   achievements={achievements}
@@ -117,7 +122,7 @@ export function Quest() {
           </ScrollArea>
         </LayoutContent>
       ) : (
-        <LayoutContent>
+        <LayoutContent className="pb-4">
           <div className="flex justify-center items-center h-full border border-dashed rounded-md text-muted-foreground/10 mb-4">
             <p className="text-muted-foreground/30">No trophies available</p>
           </div>
