@@ -58,14 +58,19 @@ export function AccountProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     (async function () {
-      const erc20Param = searchParams.get("erc20");
-      if (!erc20Param || !provider) return;
+      if (!provider) return;
 
-      const options = (
-        JSON.parse(decodeURIComponent(erc20Param)) as ERC20Option[]
-      ).filter((t) =>
-        [ETH_CONTRACT_ADDRESS, STRK_CONTRACT_ADDRESS].includes(t.address),
-      );
+      const erc20Param = searchParams.get("erc20");
+
+      const options = erc20Param
+        ? (JSON.parse(decodeURIComponent(erc20Param)) as ERC20Option[]).filter(
+            (t) =>
+              ![
+                getChecksumAddress(ETH_CONTRACT_ADDRESS),
+                getChecksumAddress(STRK_CONTRACT_ADDRESS),
+              ].includes(getChecksumAddress(t.address)),
+          )
+        : [];
       options.unshift({ address: STRK_CONTRACT_ADDRESS });
       options.unshift({ address: ETH_CONTRACT_ADDRESS });
 
@@ -95,8 +100,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   }, [provider, searchParams]);
 
   useEffect(() => {
-    if (!state.erc20.find((t) => t.balance === undefined)) return;
-
+    updateBalance();
     if (!isVisible) return;
 
     const id = setInterval(updateBalance, 3000);
@@ -106,7 +110,11 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     };
 
     async function updateBalance() {
+      if (!erc20.length) return;
+      console.log("Update balance");
+
       setState((state) => ({ ...state, isFetching: true }));
+
       const res = await Promise.allSettled(
         erc20.map((t) => t.balanceOf(state.address)),
       );
