@@ -100,7 +100,7 @@ export function Quest() {
           {activeTab === "trophies" && (
             <div className="flex flex-col h-full flex-1 overflow-y-auto gap-4 mb-4">
               <Pinneds achievements={pinneds} />
-              <Achievements achievements={achievements} onPin={onPin} />
+              <Achievements achievements={achievements} enabled={pinneds.length < 3} onPin={onPin} />
             </div>
           )}
           {activeTab === "leaderboard" && (

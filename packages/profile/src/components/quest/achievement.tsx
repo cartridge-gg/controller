@@ -18,6 +18,7 @@ export function Achievement({
   completed,
   pinned,
   id,
+  enabled,
   onPin,
 }: {
   Icon: React.ComponentType<StateIconProps> | undefined;
@@ -29,6 +30,7 @@ export function Achievement({
   completed: boolean;
   pinned: boolean;
   id: string;
+  enabled: boolean;
   onPin: (id: string) => void;
 }) {
   const AchievementIcon = useMemo(() => {
@@ -62,7 +64,7 @@ export function Achievement({
         </div>
         <Description description={description} />
       </div>
-      {completed && <Track pinned={pinned} id={id} onPin={onPin} />}
+      {completed && <Track enabled={enabled} pinned={pinned} id={id} onPin={onPin} />}
     </div>
   );
 }
@@ -151,10 +153,12 @@ function Timestamp({ timestamp }: { timestamp: number }) {
 function Track({
   pinned,
   id,
+  enabled,
   onPin,
 }: {
   pinned: boolean;
   id: string;
+  enabled: boolean;
   onPin: (id: string) => void;
 }) {
   const [hovered, setHovered] = useState(false);
@@ -163,13 +167,14 @@ function Track({
     <div
       className={cn(
         "bg-secondary h-full p-2 flex items-center transition-all duration-200",
-        hovered && "opacity-90 bg-secondary/50 cursor-pointer",
+        hovered && (enabled || pinned) && "opacity-90 bg-secondary/50 cursor-pointer",
+        !enabled && !pinned && "cursor-not-allowed",
       )}
-      onClick={() => onPin(id)}
+      onClick={() => (enabled || pinned) &&onPin(id)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <TrackIcon size="sm" variant={pinned ? "solid" : "line"} />
+      <TrackIcon className={cn(!enabled && !pinned && "opacity-25")} size="sm" variant={pinned ? "solid" : "line"} />
     </div>
   );
 }

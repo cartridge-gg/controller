@@ -5,9 +5,11 @@ import { useMemo } from "react";
 
 export function Achievements({
   achievements,
+  enabled,
   onPin,
 }: {
   achievements: Item[];
+  enabled: boolean;
   onPin: (id: string) => void;
 }) {
   const { completed, total } = useMemo(
@@ -54,6 +56,7 @@ export function Achievements({
           completed={achievement.completed}
           pinned={achievement.pinned}
           id={achievement.id}
+          enabled={enabled}
           onPin={onPin}
         />
       ))}
