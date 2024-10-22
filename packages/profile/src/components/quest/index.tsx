@@ -52,7 +52,10 @@ export function Quest() {
   }, [achievements]);
 
   const { rank, earnings } = useMemo(() => {
-    const rank = players.findIndex((player) => player.address === address);
+    const rank =
+      players
+        .sort((a, b) => a.rank - b.rank)
+        .findIndex((player) => player.address === address) + 1;
     const earnings =
       players.find((player) => player.address === address)?.earnings || 0;
     return { rank, earnings };
@@ -81,33 +84,45 @@ export function Quest() {
         right={<Navigation />}
       />
 
-      <LayoutContent>
-        <div className="flex justify-between gap-4">
-          <TrophiesTab
-            active={activeTab === "trophies"}
-            completed={completed}
-            total={total}
-            onClick={() => setActiveTab("trophies")}
-          />
-          <LeaderboardTab
-            active={activeTab === "leaderboard"}
-            rank={rank}
-            earnings={earnings}
-            onClick={() => setActiveTab("leaderboard")}
-          />
-        </div>
-        <ScrollArea className="overflow-auto">
-          {activeTab === "trophies" && (
-            <div className="flex flex-col h-full flex-1 overflow-y-auto gap-4 mb-4">
-              <Pinneds achievements={pinneds} />
-              <Achievements achievements={achievements} enabled={pinneds.length < 3} onPin={onPin} />
-            </div>
-          )}
-          {activeTab === "leaderboard" && (
-            <Leaderboard players={players} address={address} />
-          )}
-        </ScrollArea>
-      </LayoutContent>
+      {items.length ? (
+        <LayoutContent>
+          <div className="flex justify-between gap-4">
+            <TrophiesTab
+              active={activeTab === "trophies"}
+              completed={completed}
+              total={total}
+              onClick={() => setActiveTab("trophies")}
+            />
+            <LeaderboardTab
+              active={activeTab === "leaderboard"}
+              rank={rank}
+              earnings={earnings}
+              onClick={() => setActiveTab("leaderboard")}
+            />
+          </div>
+          <ScrollArea className="overflow-auto">
+            {activeTab === "trophies" && (
+              <div className="flex flex-col h-full flex-1 overflow-y-auto gap-4 mb-4">
+                <Pinneds achievements={pinneds} />
+                <Achievements
+                  achievements={achievements}
+                  enabled={pinneds.length < 3}
+                  onPin={onPin}
+                />
+              </div>
+            )}
+            {activeTab === "leaderboard" && (
+              <Leaderboard players={players} address={address} />
+            )}
+          </ScrollArea>
+        </LayoutContent>
+      ) : (
+        <LayoutContent>
+          <div className="flex justify-center items-center h-full border border-dashed rounded-md text-muted-foreground/10 mb-4">
+            <p className="text-muted-foreground/30">No trophies available</p>
+          </div>
+        </LayoutContent>
+      )}
     </LayoutContainer>
   );
 }

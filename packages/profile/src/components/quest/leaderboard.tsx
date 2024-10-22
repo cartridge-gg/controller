@@ -45,7 +45,7 @@ function Row({
         )}
       >
         <div className="flex items-center gap-x-4">
-          <p className="text-muted-foreground">{`${rank}.`}</p>
+          <p className="text-muted-foreground w-6">{`${rank}.`}</p>
           <User username={username} self={self} Icon={Icon} />
         </div>
         <Earnings earnings={earnings} self={self} />

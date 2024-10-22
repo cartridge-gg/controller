@@ -64,7 +64,9 @@ export function Achievement({
         </div>
         <Description description={description} />
       </div>
-      {completed && <Track enabled={enabled} pinned={pinned} id={id} onPin={onPin} />}
+      {completed && (
+        <Track enabled={enabled} pinned={pinned} id={id} onPin={onPin} />
+      )}
     </div>
   );
 }
@@ -100,7 +102,10 @@ function Description({ description }: { description: string }) {
       {content}
       {visible && (
         <span
-          className={cn("text-muted-foreground", full && "block")}
+          className={cn(
+            "text-muted-foreground cursor-pointer",
+            full && "block",
+          )}
           onClick={() => setFull(!full)}
         >
           {full ? " read less" : " read more"}
@@ -167,14 +172,20 @@ function Track({
     <div
       className={cn(
         "bg-secondary h-full p-2 flex items-center transition-all duration-200",
-        hovered && (enabled || pinned) && "opacity-90 bg-secondary/50 cursor-pointer",
+        hovered &&
+          (enabled || pinned) &&
+          "opacity-90 bg-secondary/50 cursor-pointer",
         !enabled && !pinned && "cursor-not-allowed",
       )}
-      onClick={() => (enabled || pinned) &&onPin(id)}
+      onClick={() => (enabled || pinned) && onPin(id)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <TrackIcon className={cn(!enabled && !pinned && "opacity-25")} size="sm" variant={pinned ? "solid" : "line"} />
+      <TrackIcon
+        className={cn(!enabled && !pinned && "opacity-25")}
+        size="sm"
+        variant={pinned ? "solid" : "line"}
+      />
     </div>
   );
 }
