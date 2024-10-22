@@ -28,7 +28,7 @@ const ScrollArea = React.forwardRef<
     if (opacity === 0) {
       hiddenTimeout.current = setTimeout(() => setHidden(true), 300);
     }
-  },[opacity]);
+  }, [opacity]);
 
   // Cleanup the timeout if the component unmounts
   React.useEffect(() => {
