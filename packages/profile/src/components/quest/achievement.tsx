@@ -16,7 +16,6 @@ export function Achievement({
   earning,
   timestamp,
   completed,
-  last,
 }: {
   Icon: React.ComponentType<StateIconProps> | undefined;
   title: string;
@@ -25,15 +24,9 @@ export function Achievement({
   earning: number;
   timestamp: number;
   completed: boolean;
-  last: boolean;
 }) {
   return (
-    <div
-      className={cn(
-        "flex items-center gap-x-px",
-        last && "rounded-b-md overflow-clip",
-      )}
-    >
+    <div className="flex items-center gap-x-px">
       <div className="grow flex-col items-stretch gap-2 bg-secondary p-2">
         <div className="flex items-center gap-2">
           {!!Icon && (
@@ -58,9 +51,9 @@ export function Achievement({
             <div className="flex justify-between items-center">
               <div className="flex gap-2">
                 <Title title={title} completed={completed} />
-                <Timestamp timestamp={timestamp} />
+                {completed && <Timestamp timestamp={timestamp} />}
               </div>
-              <div className={cn("flex gap-2", !completed && "hidden")}>
+              <div className="flex gap-2">
                 <Earning amount={earning.toLocaleString()} />
               </div>
             </div>
@@ -93,13 +86,10 @@ function Description({ description }: { description: string }) {
   const content = useMemo(() => {
     if (!visible || full) {
       return description.slice(0, 1).toUpperCase() + description.slice(1);
-    } else {
-      return (
-        description.slice(0, 1).toUpperCase() +
-        description.slice(1, 100) +
-        "..."
-      );
     }
+    return (
+      description.slice(0, 1).toUpperCase() + description.slice(1, 100) + "..."
+    );
   }, [description, full]);
 
   if (description.length === 0) return null;
@@ -107,7 +97,10 @@ function Description({ description }: { description: string }) {
     <p className="text-xs text-muted-foreground">
       {content}
       {visible && (
-        <span className="text-muted-foreground" onClick={() => setFull(!full)}>
+        <span
+          className={cn("text-muted-foreground", full && "block")}
+          onClick={() => setFull(!full)}
+        >
           {full ? " read less" : " read more"}
         </span>
       )}

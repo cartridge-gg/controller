@@ -13,8 +13,8 @@ export function Achievements({ achievements }: { achievements: Item[] }) {
   );
 
   return (
-    <div className="flex flex-col gap-y-px">
-      <div className="bg-secondary p-3 rounded-t-md">
+    <div className="flex flex-col gap-y-px rounded-md overflow-hidden">
+      <div className="bg-secondary p-3">
         <p className="uppercase text-xs text-muted-foreground font-semibold tracking-wider">
           Progression
         </p>
@@ -46,7 +46,6 @@ export function Achievements({ achievements }: { achievements: Item[] }) {
           earning={achievement.earning}
           timestamp={achievement.timestamp}
           completed={achievement.completed}
-          last={index === achievements.length - 1}
         />
       ))}
     </div>
