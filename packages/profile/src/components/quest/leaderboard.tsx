@@ -41,7 +41,7 @@ function Row({
       <div
         className={cn(
           "grow flex justify-between items-center px-3 py-2 text-sm",
-          self ? "bg-muted/50" : "bg-secondary",
+          self ? "bg-quaternary" : "bg-secondary",
         )}
       >
         <div className="flex items-center gap-x-4">

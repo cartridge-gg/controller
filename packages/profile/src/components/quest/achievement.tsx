@@ -45,7 +45,7 @@ export function Achievement({
           <AchievementIcon
             className={cn(
               "min-w-8 min-h-8",
-              completed ? "text-primary" : "text-muted-foreground",
+              completed ? "text-primary" : "text-quaternary-foreground",
             )}
             variant="solid"
           />
@@ -75,8 +75,8 @@ function Title({ title, completed }: { title: string; completed: boolean }) {
   return (
     <p
       className={cn(
-        "text-xs text-muted-foreground capitalize",
-        completed && "text-priamry-foreground",
+        "text-xs text-accent-foreground capitalize",
+        completed && "text-foreground",
       )}
     >
       {title}
@@ -98,12 +98,12 @@ function Description({ description }: { description: string }) {
 
   if (description.length === 0) return null;
   return (
-    <p className="text-xs text-muted-foreground">
+    <p className="text-xs text-accent-foreground">
       {content}
       {visible && (
         <span
           className={cn(
-            "text-muted-foreground cursor-pointer",
+            "text-quaternary-foreground cursor-pointer",
             full && "block",
           )}
           onClick={() => setFull(!full)}
@@ -117,13 +117,13 @@ function Description({ description }: { description: string }) {
 
 function Details({ percentage }: { percentage: number }) {
   return (
-    <p className="text-[0.65rem] text-muted-foreground tracking-wider">{`${percentage}% of players earned`}</p>
+    <p className="text-[0.65rem] text-quaternary-foreground tracking-wider">{`${percentage}% of players earned`}</p>
   );
 }
 
 function Earning({ amount }: { amount: string }) {
   return (
-    <div className="flex items-center gap-1 text-muted-foreground">
+    <div className="flex items-center gap-1 text-quaternary-foreground">
       <SparklesIcon size="xs" variant="solid" />
       <p className="text-xs">{amount}</p>
     </div>
@@ -148,7 +148,7 @@ function Timestamp({ timestamp }: { timestamp: number }) {
   }, [timestamp]);
 
   return (
-    <div className="flex items-center gap-1 text-muted-foreground">
+    <div className="flex items-center gap-1 text-quaternary-foreground">
       <CalendarIcon size="xs" variant="line" />
       <p className="text-[0.65rem]">{date}</p>
     </div>
@@ -171,7 +171,8 @@ function Track({
   return (
     <div
       className={cn(
-        "bg-secondary h-full p-2 flex items-center transition-all duration-200",
+        "bg-quaternary h-full p-2 flex items-center transition-all duration-200",
+        pinned ? "bg-quaternary" : "bg-secondary",
         hovered &&
           (enabled || pinned) &&
           "opacity-90 bg-secondary/50 cursor-pointer",

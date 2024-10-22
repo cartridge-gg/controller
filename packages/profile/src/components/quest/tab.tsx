@@ -21,7 +21,7 @@ export function TrophiesTab({
   return (
     <Tab active={active} onClick={onClick}>
       <Item Icon={TrophyIcon} active={active} label={"Trophies"} />
-      <p className="bg-accent text-xs rounded-2xl px-2 py-1 font-bold">
+      <p className="bg-quinary text-xs rounded-2xl px-2 py-1 font-bold">
         {`${completed}/${total}`}
       </p>
     </Tab>
