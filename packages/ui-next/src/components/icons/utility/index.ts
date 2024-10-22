@@ -7,6 +7,7 @@ export * from "./circle-check";
 export * from "./circle-no-check";
 export * from "./fn";
 export * from "./copy";
+export * from "./credits";
 export * from "./deployer";
 export * from "./desktop";
 export * from "./dollar";

@@ -13,13 +13,15 @@ export function useERC20Balance({
 }: {
   address: string;
   contractAddress: string;
-  provider: Provider;
+  provider?: Provider;
   interval?: number;
 }) {
   const [value, setValue] = useState<bigint>(0n);
   const { isValidating, isLoading, error } = useSWR(
     `balance:${contractAddress}:${address}`,
     async () => {
+      if (!provider) return;
+
       const balance = await provider.callContract({
         contractAddress,
         entrypoint: "balanceOf",
