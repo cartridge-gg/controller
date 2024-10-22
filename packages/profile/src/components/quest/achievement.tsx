@@ -17,6 +17,8 @@ export function Achievement({
   timestamp,
   completed,
   pinned,
+  id,
+  onPin,
 }: {
   Icon: React.ComponentType<StateIconProps> | undefined;
   title: string;
@@ -26,29 +28,25 @@ export function Achievement({
   timestamp: number;
   completed: boolean;
   pinned: boolean;
+  id: string;
+  onPin: (id: string) => void;
 }) {
+  const AchievementIcon = useMemo(() => {
+    if (!!Icon) return Icon;
+    return TrophyIcon;
+  }, [Icon, completed]);
+
   return (
     <div className="flex items-center gap-x-px">
       <div className="grow flex-col items-stretch gap-2 bg-secondary p-2">
         <div className="flex items-center gap-2">
-          {!!Icon && (
-            <Icon
-              className={cn(
-                "min-w-8 min-h-8",
-                completed ? "text-primary" : "text-muted-foreground",
-              )}
-              variant="solid"
-            />
-          )}
-          {!Icon && (
-            <TrophyIcon
-              className={cn(
-                "min-w-8 min-h-8",
-                completed ? "text-primary" : "text-muted-foreground",
-              )}
-              variant="solid"
-            />
-          )}
+          <AchievementIcon
+            className={cn(
+              "min-w-8 min-h-8",
+              completed ? "text-primary" : "text-muted-foreground",
+            )}
+            variant="solid"
+          />
           <div className="grow flex flex-col">
             <div className="flex justify-between items-center">
               <div className="flex gap-2">
@@ -64,7 +62,7 @@ export function Achievement({
         </div>
         <Description description={description} />
       </div>
-      {completed && <Track pinned={pinned} />}
+      {completed && <Track pinned={pinned} id={id} onPin={onPin} />}
     </div>
   );
 }
@@ -150,9 +148,27 @@ function Timestamp({ timestamp }: { timestamp: number }) {
   );
 }
 
-function Track({ pinned }: { pinned: boolean }) {
+function Track({
+  pinned,
+  id,
+  onPin,
+}: {
+  pinned: boolean;
+  id: string;
+  onPin: (id: string) => void;
+}) {
+  const [hovered, setHovered] = useState(false);
+
   return (
-    <div className="bg-secondary h-full p-2 flex items-center">
+    <div
+      className={cn(
+        "bg-secondary h-full p-2 flex items-center transition-all duration-200",
+        hovered && "opacity-90 bg-secondary/50 cursor-pointer",
+      )}
+      onClick={() => onPin(id)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
       <TrackIcon size="sm" variant={pinned ? "solid" : "line"} />
     </div>
   );

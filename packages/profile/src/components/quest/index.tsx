@@ -3,25 +3,19 @@ import {
   LayoutContent,
   LayoutHeader,
 } from "@/components/layout";
-import {
-  BoltIcon,
-  BookIcon,
-  DoveIcon,
-  ScrollArea,
-  StateIconProps,
-  OlmechIcon,
-  ChessIcon,
-} from "@cartridge/ui-next";
+import { ScrollArea, StateIconProps } from "@cartridge/ui-next";
 import { TrophiesTab, LeaderboardTab } from "./tab";
 import { useConnection } from "@/hooks/context";
 import { CopyAddress } from "@cartridge/ui-next";
 import { Navigation } from "../navigation";
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Achievements } from "./achievements";
 import { Pinneds } from "./pinneds";
 import { Leaderboard } from "./leaderboard";
+import { items, players } from "./data";
 
 export interface Item {
+  id: string;
   title: string;
   hidden_title: string;
   description: string;
@@ -45,257 +39,40 @@ export interface Player {
 
 export function Quest() {
   const { username, address } = useConnection();
+  const [achievements, setAchievements] = useState<Item[]>([]);
   const [activeTab, setActiveTab] = useState<"trophies" | "leaderboard">(
     "trophies",
   );
 
-  const achivements: Item[] = [
-    {
-      title: "pacifist path",
-      hidden_title: "hidden trophy",
-      description: "finish a run without killing any monsters",
-      hidden_description: "",
-      percentage: 24,
-      earning: 50,
-      timestamp: 1729328800,
-      completed: true,
-      hidden: false,
-      pinned: true,
-      Icon: DoveIcon,
-    },
-    {
-      title: "rogue scholar",
-      hidden_title: "hidden trophy",
-      description: "lorem ipsum dolor sit amet",
-      hidden_description: "",
-      percentage: 12,
-      earning: 10000,
-      timestamp: 1729527062,
-      completed: true,
-      hidden: false,
-      pinned: true,
-      Icon: BookIcon,
-    },
-    {
-      title: "speed runner",
-      hidden_title: "hidden trophy",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-      hidden_description: "",
-      percentage: 12,
-      earning: 1,
-      timestamp: 1729433462,
-      completed: true,
-      hidden: false,
-      pinned: false,
-      Icon: undefined,
-    },
-    {
-      title: "Lightning Reflexes",
-      hidden_title: "",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      hidden_description: "",
-      percentage: 12,
-      earning: 100,
-      timestamp: 0,
-      completed: false,
-      hidden: false,
-      pinned: false,
-      Icon: BoltIcon,
-    },
-    {
-      title: "",
-      hidden_title: "hidden trophy",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      hidden_description: "",
-      percentage: 6,
-      earning: 100,
-      timestamp: 0,
-      completed: false,
-      hidden: true,
-      pinned: false,
-      Icon: undefined,
-    },
-    {
-      title: "",
-      hidden_title: "hidden trophy",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      hidden_description: "",
-      percentage: 42,
-      earning: 100,
-      timestamp: 0,
-      completed: false,
-      hidden: true,
-      pinned: false,
-      Icon: undefined,
-    },
-    {
-      title: "",
-      hidden_title: "hidden trophy",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      hidden_description: "This is an hidden description for an hidden trophy",
-      percentage: 12,
-      earning: 100,
-      timestamp: 0,
-      completed: false,
-      hidden: true,
-      pinned: false,
-      Icon: undefined,
-    },
-    {
-      title: "",
-      hidden_title: "hidden trophy",
-      description: "",
-      hidden_description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      percentage: 21,
-      earning: 100,
-      timestamp: 0,
-      completed: false,
-      hidden: true,
-      pinned: false,
-      Icon: undefined,
-    },
-  ];
+  const { pinneds, completed, total } = useMemo(() => {
+    const pinneds = achievements.filter((item) => item.pinned).slice(0, 3);
+    const completed = achievements.filter((item) => item.completed).length;
+    const total = achievements.length;
+    return { pinneds, completed, total };
+  }, [achievements]);
 
-  const players: Player[] = [
-    {
-      username: "shinobo",
-      address: "0x123",
-      earnings: 400,
-      rank: 7,
-      Icon: undefined,
-    },
-    {
-      username: "suvasquez80",
-      address: "0x1234",
-      earnings: 950,
-      rank: 2,
-      Icon: undefined,
-    },
-    {
-      username: "shinobi",
-      address: "0x1235",
-      earnings: 750,
-      rank: 3,
-      Icon: undefined,
-    },
-    {
-      username: "shinoby",
-      address: "0x1236",
-      earnings: 200,
-      rank: 9,
-      Icon: undefined,
-    },
-    {
-      username: "shinoba",
-      address: "0x1237",
-      earnings: 750,
-      rank: 4,
-      Icon: undefined,
-    },
-    {
-      username: "click",
-      address: "0x1238",
-      earnings: 400,
-      rank: 6,
-      Icon: ChessIcon,
-    },
-    {
-      username: "shinobe",
-      address: "0x1239",
-      earnings: 650,
-      rank: 5,
-      Icon: undefined,
-    },
-    {
-      username: "shinobu",
-      address: "0x1230",
-      earnings: 350,
-      rank: 8,
-      Icon: undefined,
-    },
-    {
-      username: "Bal7hazar",
-      address:
-        "0x7f17483a7b2d7da9146813c31da830d284e4a2c06cd804f7c0c4ecfcfec2f52",
-      earnings: 950,
-      rank: 1,
-      Icon: OlmechIcon,
-    },
-    {
-      username: "shinoby",
-      address: "0x12361",
-      earnings: 150,
-      rank: 10,
-      Icon: undefined,
-    },
-    {
-      username: "lorem",
-      address: "0x12362",
-      earnings: 150,
-      rank: 11,
-      Icon: undefined,
-    },
-    {
-      username: "ipsum",
-      address: "0x12363",
-      earnings: 150,
-      rank: 12,
-      Icon: undefined,
-    },
-    {
-      username: "dolor",
-      address: "0x12364",
-      earnings: 150,
-      rank: 13,
-      Icon: undefined,
-    },
-    {
-      username: "sit",
-      address: "0x12365",
-      earnings: 150,
-      rank: 14,
-      Icon: undefined,
-    },
-    {
-      username: "amet",
-      address: "0x12366",
-      earnings: 150,
-      rank: 15,
-      Icon: undefined,
-    },
-    {
-      username: "consectetur",
-      address: "0x12367",
-      earnings: 150,
-      rank: 16,
-      Icon: undefined,
-    },
-    {
-      username: "adipiscing",
-      address: "0x12368",
-      earnings: 0,
-      rank: 17,
-      Icon: undefined,
-    },
-    {
-      username: "elit",
-      address: "0x12369",
-      earnings: 0,
-      rank: 18,
-      Icon: undefined,
-    },
-    {
-      username: "sed",
-      address: "0x12360",
-      earnings: 0,
-      rank: 19,
-      Icon: undefined,
-    },
-  ];
+  const { rank, earnings } = useMemo(() => {
+    const rank = players.findIndex((player) => player.address === address);
+    const earnings =
+      players.find((player) => player.address === address)?.earnings || 0;
+    return { rank, earnings };
+  }, [players, address]);
 
-  const pinneds = achivements.filter((item) => item.pinned).slice(0, 3);
+  useEffect(() => {
+    setAchievements(items);
+  }, [items]);
+
+  const onPin = useCallback(
+    (id: string) => {
+      const updated = achievements.map((item) => ({
+        ...item,
+        pinned: item.id === id ? !item.pinned : item.pinned,
+      }));
+      console.log(updated);
+      setAchievements(updated);
+    },
+    [achievements],
+  );
 
   return (
     <LayoutContainer>
@@ -309,10 +86,14 @@ export function Quest() {
         <div className="flex justify-between gap-4">
           <TrophiesTab
             active={activeTab === "trophies"}
+            completed={completed}
+            total={total}
             onClick={() => setActiveTab("trophies")}
           />
           <LeaderboardTab
             active={activeTab === "leaderboard"}
+            rank={rank}
+            earnings={earnings}
             onClick={() => setActiveTab("leaderboard")}
           />
         </div>
@@ -320,7 +101,7 @@ export function Quest() {
           {activeTab === "trophies" && (
             <div className="flex flex-col h-full flex-1 overflow-y-auto gap-4 mb-4">
               <Pinneds achievements={pinneds} />
-              <Achievements achievements={achivements} />
+              <Achievements achievements={achievements} onPin={onPin} />
             </div>
           )}
           {activeTab === "leaderboard" && (

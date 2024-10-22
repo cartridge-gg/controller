@@ -3,7 +3,13 @@ import { Achievement } from "./achievement";
 import { Item } from ".";
 import { useMemo } from "react";
 
-export function Achievements({ achievements }: { achievements: Item[] }) {
+export function Achievements({
+  achievements,
+  onPin,
+}: {
+  achievements: Item[];
+  onPin: (id: string) => void;
+}) {
   const { completed, total } = useMemo(
     () => ({
       completed: achievements.filter((item) => item.completed).length,
@@ -47,6 +53,8 @@ export function Achievements({ achievements }: { achievements: Item[] }) {
           timestamp={achievement.timestamp}
           completed={achievement.completed}
           pinned={achievement.pinned}
+          id={achievement.id}
+          onPin={onPin}
         />
       ))}
     </div>

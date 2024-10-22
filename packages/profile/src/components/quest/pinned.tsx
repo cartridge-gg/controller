@@ -19,7 +19,7 @@ export function Pinned({
     <Card>
       <CardHeader
         className={cn(
-          "flex flex-col justify-between items-center h-full py-6",
+          "flex flex-col justify-between items-center h-36 py-6",
           empty && "bg-background border border-dashed border-secondary",
         )}
       >

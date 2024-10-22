@@ -9,30 +9,44 @@ import { useState } from "react";
 
 export function TrophiesTab({
   active,
+  completed,
+  total,
   onClick,
 }: {
   active: boolean;
+  completed: number;
+  total: number;
   onClick: () => void;
 }) {
   return (
     <Tab active={active} onClick={onClick}>
       <Item Icon={TrophyIcon} active={active} label={"Trophies"} />
-      <p className="bg-accent text-xs rounded-2xl px-2 py-1 font-bold">4/9</p>
+      <p className="bg-accent text-xs rounded-2xl px-2 py-1 font-bold">
+        {`${completed}/${total}`}
+      </p>
     </Tab>
   );
 }
 
 export function LeaderboardTab({
   active,
+  rank,
+  earnings,
   onClick,
 }: {
   active: boolean;
+  rank: number;
+  earnings: number;
   onClick: () => void;
 }) {
   return (
     <Tab active={active} onClick={onClick}>
-      <Item Icon={LeaderboardIcon} active={active} label={`#6`} />
-      <Item Icon={SparklesIcon} active={active} label={`400`} />
+      <Item
+        Icon={LeaderboardIcon}
+        active={active}
+        label={rank !== -1 ? `#${rank}` : "∞"}
+      />
+      <Item Icon={SparklesIcon} active={active} label={`${earnings}`} />
     </Tab>
   );
 }
