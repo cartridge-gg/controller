@@ -13,6 +13,9 @@ const meta = {
         callContract: () =>
           Promise.resolve([num.toHex("2000000000000000000"), "0x0"]),
         rpc: new RpcProvider({ nodeUrl: "https://api.cartridge/x/sepolia" }),
+        username: () => "test-account",
+        address:
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
       },
     },
   },
