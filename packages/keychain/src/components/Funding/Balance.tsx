@@ -1,16 +1,17 @@
 import { CreditsIcon, EthereumIcon } from "@cartridge/ui";
 import { HStack, Spacer, Text, VStack } from "@chakra-ui/react";
 import { CurrencyBase, CurrencyQuote } from "@cartridge/utils/api/cartridge";
-import { useBalance } from "hooks/token";
 import { formatEther } from "viem";
 import { useCountervalue } from "@cartridge/utils";
+import { useCreditBalance, useEthBalance } from "hooks/token";
 
 type BalanceProps = {
   showBalances: ("credits" | "eth" | "strk")[];
 };
 
 export function Balance({ showBalances }: BalanceProps) {
-  const { ethBalance, creditsBalance } = useBalance();
+  const { balance: creditBalance } = useCreditBalance();
+  const { balance: ethBalance } = useEthBalance();
   const { countervalue } = useCountervalue({
     balance: formatEther(ethBalance.value),
     quote: CurrencyQuote.Eth,
@@ -42,8 +43,8 @@ export function Balance({ showBalances }: BalanceProps) {
         >
           <HStack>
             <CreditsIcon fontSize={20} />
-            <Text>{creditsBalance.formatted}</Text>
-            <Text color="text.secondary">${creditsBalance.formatted}</Text>
+            <Text>{creditBalance.formatted}</Text>
+            <Text color="text.secondary">${creditBalance.formatted}</Text>
           </HStack>
           <Spacer />
           <HStack color="text.secondary">

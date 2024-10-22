@@ -13,7 +13,7 @@ import { ControllerErrorAlert, ErrorAlert } from "./ErrorAlert";
 import { useDeploy } from "hooks/deploy";
 import { Fees } from "./Fees";
 import { ControllerError } from "utils/connection";
-import { useBalance } from "hooks/token";
+import { useEthBalance } from "hooks/token";
 import { Policies } from "components/Policies";
 
 export function DeployController({
@@ -60,7 +60,7 @@ export function DeployController({
     }
   }, [deployHash, controller]);
 
-  const { ethBalance, isLoading } = useBalance();
+  const { balance: ethBalance, isLoading } = useEthBalance();
   useEffect(() => {
     if (!feeEstimate || accountState != "fund") return;
 
