@@ -15,13 +15,9 @@ const ScrollArea = React.forwardRef<
 
   // Set visible each time the scrollbar is used
   const onScrollCapture = React.useCallback(() => {
-    if (timeout.current) {
-      clearTimeout(timeout.current);
-    }
+    if (timeout.current) clearTimeout(timeout.current);
     setOpacity(100);
-    timeout.current = setTimeout(() => {
-      setOpacity(0);
-    }, 500);
+    timeout.current = setTimeout(() => setOpacity(0), 500);
   }, []);
 
   // Cleanup the timeout if the component unmounts
