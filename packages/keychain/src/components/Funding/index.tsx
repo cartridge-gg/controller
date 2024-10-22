@@ -3,7 +3,7 @@ import { Button } from "@chakra-ui/react";
 import { useState } from "react";
 import { useConnection } from "hooks/connection";
 import { CopyAddress } from "../CopyAddress";
-import { ArrowLineDownIcon, CreditsIcon, EthereumIcon } from "@cartridge/ui";
+import { ArrowLineDownIcon, CoinsIcon, EthereumIcon } from "@cartridge/ui";
 import { DepositEth } from "./DepositEth";
 import { PurchaseCredits } from "./PurchaseCredits";
 import { Balance } from "./Balance";
@@ -55,7 +55,7 @@ export function Funding({ onComplete, title }: FundingProps) {
             colorScheme="colorful"
             onClick={() => setState(FundingState.FUND_CREDITS)}
           >
-            <CreditsIcon fontSize={20} mr="5px" /> Purchase Credits
+            <CoinsIcon fontSize={20} mr="5px" /> Purchase Credits
           </Button>
         )}
         <Button onClick={() => setState(FundingState.FUND_ETH)}>

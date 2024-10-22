@@ -4,7 +4,7 @@ import {
   CardHeader,
   CardTitle,
   SpinnerIcon,
-  CreditsIcon,
+  CoinsIcon,
 } from "@cartridge/ui-next";
 import { useAccount, useConnection } from "@/hooks/context";
 import { Link } from "react-router-dom";
@@ -34,7 +34,7 @@ export function Tokens() {
       <Link to={`/token/credit`}>
         <CardContent className="flex items-center justify-between">
           <div className="flex gap-x-1.5 items-center">
-            <CreditsIcon size="sm" />
+            <CoinsIcon variant="solid" size="sm" />
             <div>{balance.formatted}</div>
             <div className="text-muted-foreground">${balance.formatted}</div>
           </div>

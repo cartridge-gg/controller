@@ -1,4 +1,4 @@
-import { CreditsIcon, EthereumIcon } from "@cartridge/ui";
+import { CoinsIcon, EthereumIcon } from "@cartridge/ui";
 import { HStack, Spacer, Text, VStack } from "@chakra-ui/react";
 import { CurrencyBase, CurrencyQuote } from "@cartridge/utils/api/cartridge";
 import { formatEther } from "viem";
@@ -42,7 +42,7 @@ export function Balance({ showBalances }: BalanceProps) {
           fontWeight="semibold"
         >
           <HStack>
-            <CreditsIcon fontSize={20} />
+            <CoinsIcon fontSize={20} />
             <Text>{creditBalance.formatted}</Text>
             <Text color="text.secondary">${creditBalance.formatted}</Text>
           </HStack>

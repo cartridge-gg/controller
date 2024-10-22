@@ -7,7 +7,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CreditsIcon,
+  CoinsIcon,
   ExternalIcon,
   Skeleton,
 } from "@cartridge/ui-next";
@@ -55,7 +55,7 @@ function Credits() {
       <LayoutHeader
         title={`${balance.formatted} CREDITS`}
         description={`$${balance.formatted}`}
-        icon={<CreditsIcon size="lg" />}
+        icon={<CoinsIcon variant="solid" size="lg" />}
       />
 
       <LayoutContent className="pb-4">
