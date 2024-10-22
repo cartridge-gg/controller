@@ -68,7 +68,6 @@ export function Quest() {
         ...item,
         pinned: item.id === id ? !item.pinned : item.pinned,
       }));
-      console.log(updated);
       setAchievements(updated);
     },
     [achievements],
