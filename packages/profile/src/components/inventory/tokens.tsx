@@ -6,21 +6,14 @@ import {
   SpinnerIcon,
   CoinsIcon,
 } from "@cartridge/ui-next";
-import { useAccount, useConnection } from "@/hooks/context";
+import { useAccount } from "@/hooks/context";
 import { Link } from "react-router-dom";
-import {
-  ETH_CONTRACT_ADDRESS,
-  formatBalance,
-  useERC20Balance,
-} from "@cartridge/utils";
+import { formatBalance, useCreditBalance } from "@cartridge/utils";
 
 export function Tokens() {
-  const { provider } = useConnection();
   const { address, erc20, isFetching } = useAccount();
-  const { balance } = useERC20Balance({
+  const { balance } = useCreditBalance({
     address,
-    contractAddress: ETH_CONTRACT_ADDRESS,
-    provider,
     interval: 3000,
   });
 

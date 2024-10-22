@@ -1,8 +1,8 @@
 import { useInterval } from "usehooks-ts";
 import { useMemo, useState } from "react";
-import { Provider, uint256 } from "starknet";
+import { Provider } from "starknet";
 import useSWR from "swr";
-import { formatBalance } from "@cartridge/utils";
+import { ERC20, ERC20Metadata, formatBalance } from "@cartridge/utils";
 import { AccountInfoQuery, useAccountInfoQuery } from "../api/cartridge";
 
 export function useERC20Balance({
@@ -16,24 +16,29 @@ export function useERC20Balance({
   provider?: Provider;
   interval?: number;
 }) {
+  const [meta, setMeta] = useState<ERC20Metadata>();
+
   const [value, setValue] = useState<bigint>(0n);
   const { isValidating, isLoading, error } = useSWR(
     `balance:${contractAddress}:${address}`,
     async () => {
       if (!provider) return;
 
-      const balance = await provider.callContract({
-        contractAddress,
-        entrypoint: "balanceOf",
-        calldata: [address],
-      });
+      let m = meta;
+      if (!m) {
+        m = (
+          await new ERC20({
+            address,
+            provider,
+            // TODO logoUrl
+          }).init()
+        ).metadata();
+        setMeta(m);
+      }
 
-      setValue(
-        uint256.uint256ToBN({
-          low: balance[0],
-          high: balance[1],
-        }),
-      );
+      const balance = await m.instance.balanceOf(address);
+
+      setValue(BigInt(balance));
     },
     { refreshInterval: interval },
   );
@@ -42,6 +47,7 @@ export function useERC20Balance({
 
   return {
     balance: { value, formatted },
+    meta,
     isFetching: isValidating,
     isLoading,
     error,
