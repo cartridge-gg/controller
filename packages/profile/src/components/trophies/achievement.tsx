@@ -6,7 +6,9 @@ import {
   StateIconProps,
   TrophyIcon,
 } from "@cartridge/ui-next";
+import { toast } from "sonner";
 import { useMemo, useState } from "react";
+import { useCallback } from "react";
 
 export function Achievement({
   Icon,
@@ -176,6 +178,11 @@ function Track({
   onPin: (id: string) => void;
 }) {
   const [hovered, setHovered] = useState(false);
+  const onClick = useCallback(() => {
+    if (!enabled && !pinned) return;
+    onPin(id);
+    toast.success(`Trophy ${pinned ? "unpinned" : "pinned"} successfully`);
+  }, [enabled, pinned, id, onPin]);
 
   return (
     <div
@@ -187,7 +194,7 @@ function Track({
           "opacity-90 bg-secondary/50 cursor-pointer",
         !enabled && !pinned && "cursor-not-allowed",
       )}
-      onClick={() => (enabled || pinned) && onPin(id)}
+      onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
