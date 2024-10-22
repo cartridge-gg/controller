@@ -184,7 +184,7 @@ export const players: Player[] = [
   {
     username: "Bal7hazar",
     address:
-      "0x7f17483a7b2d7da9146813c31da830d284e4a2c06cd804f7c0c4ecfcfec2f52",
+      "0x124d62c58a3e8cbc735c0738a5fa107dee486f2c0f6fe60617e04f4272e7fba",
     earnings: 950,
     rank: 1,
     Icon: OlmechIcon,

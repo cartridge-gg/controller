@@ -36,33 +36,38 @@ function Row({
   Icon,
 }: Player & { self: boolean }) {
   return (
-    <div
-      className={cn(
-        "flex justify-between items-center px-3 py-2 text-sm",
-        self ? "bg-muted" : "bg-secondary",
-      )}
-    >
-      <div className="flex items-center gap-x-4">
-        <p className="text-muted-foreground">{`${rank}.`}</p>
-        <User username={username} Icon={Icon} />
+    <div className="flex">
+      {self && <div className="w-[4px] bg-muted" />}
+      <div
+        className={cn(
+          "grow flex justify-between items-center px-3 py-2 text-sm",
+          self ? "bg-muted/50" : "bg-secondary",
+        )}
+      >
+        <div className="flex items-center gap-x-4">
+          <p className="text-muted-foreground">{`${rank}.`}</p>
+          <User username={username} self={self} Icon={Icon} />
+        </div>
+        <Earnings earnings={earnings} self={self} />
       </div>
-      <Earnings earnings={earnings} self={self} />
     </div>
   );
 }
 
 function User({
   username,
+  self,
   Icon,
 }: {
   username: string;
+  self: boolean;
   Icon: React.ComponentType<StateIconProps> | undefined;
 }) {
   return (
     <div className="flex items-center gap-x-2">
       {!!Icon && <Icon size="default" variant="line" />}
       {!Icon && <SpaceInvaderIcon size="default" variant="line" />}
-      <p>{username}</p>
+      <p>{self ? `${username} (you)` : username}</p>
     </div>
   );
 }
