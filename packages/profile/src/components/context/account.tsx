@@ -111,7 +111,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
 
     async function updateBalance() {
       if (!erc20.length) return;
-      console.log("Update balance");
 
       setState((state) => ({ ...state, isFetching: true }));
 
