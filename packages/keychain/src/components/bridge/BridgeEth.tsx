@@ -35,6 +35,11 @@ import {
 } from "@cartridge/ui";
 import { Container, Content } from "components/layout";
 import { ErrorAlert } from "components/ErrorAlert";
+import {
+  CurrencyBase,
+  CurrencyQuote,
+  usePriceQuery,
+} from "@cartridge/utils/api/cartridge";
 
 export function BridgeEth({
   chainId,
@@ -71,10 +76,13 @@ export function BridgeEth({
     }
   }, [ethAddress, setEthBalance, chainId]);
 
+  const { data } = usePriceQuery({
+    quote: CurrencyQuote.Eth,
+    base: CurrencyBase.Usd,
+  });
   useEffect(() => {
     async function compute() {
       if (chainId === constants.StarknetChainId.SN_MAIN) {
-        const { data } = await fetchEthPrice();
         const usdeth = parseFloat(data.price.amount);
         const inputValue = parseFloat(debouncedValue);
         const cost = inputValue * usdeth;
@@ -104,7 +112,7 @@ export function BridgeEth({
       const valid = validateValue();
       setTransferAmountInvalid(!valid);
     }
-  }, [debouncing, debouncedValue, chainId, ethBalance]);
+  }, [debouncing, debouncedValue, chainId, ethBalance, data]);
 
   if (transferHash) {
     return (
@@ -304,14 +312,3 @@ const ethereumConfig = createConfig({
     }),
   ],
 });
-
-async function fetchEthPrice() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/query`, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-    },
-    body: `{"query":"query { price(quote: ETH, base: USD) { amount }}"}`,
-  });
-  return res.json();
-}

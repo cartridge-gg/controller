@@ -2,11 +2,11 @@ import {
   FetchControllersDocument,
   FetchControllersQuery,
   FetchControllersQueryVariables,
-} from "generated/graphql";
+} from "@cartridge/utils/api/cartridge";
 import { ControllerAccounts } from "@cartridge/controller";
-import { fetchData } from "hooks/fetcher";
 import pThrottle from "p-throttle";
 import { addAddressPadding, validateAndParseAddress } from "starknet";
+import { fetchData } from "utils/graphql";
 
 const MAX_ADDRESSES = 1000;
 const RATE_LIMIT = 1; // 1 requests per second
