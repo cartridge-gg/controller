@@ -5,6 +5,7 @@ import {
   TrophyIcon,
 } from "@cartridge/ui-next";
 import { Card, CardHeader, CardTitle } from "@cartridge/ui-next";
+import { useMemo } from "react";
 
 export function Pinned({
   Icon,
@@ -15,6 +16,11 @@ export function Pinned({
   title: string;
   empty?: boolean;
 }) {
+  const AchievementIcon = useMemo(() => {
+    if (!!Icon) return Icon;
+    return TrophyIcon;
+  }, [Icon]);
+
   return (
     <Card>
       <CardHeader
@@ -23,24 +29,13 @@ export function Pinned({
           empty && "bg-background border border-dashed border-secondary",
         )}
       >
-        {Icon && (
-          <Icon
-            className={cn(
-              "min-w-12 min-h-12",
-              empty ? "opacity-10" : "text-primary",
-            )}
-            variant="solid"
-          />
-        )}
-        {!Icon && (
-          <TrophyIcon
-            className={cn(
-              "min-w-12 min-h-12",
-              empty ? "opacity-10" : "text-primary",
-            )}
-            variant="solid"
-          />
-        )}
+        <AchievementIcon
+          className={cn(
+            "min-w-12 min-h-12",
+            empty ? "opacity-10" : "text-primary",
+          )}
+          variant="solid"
+        />
         <CardTitle
           className={cn(
             "grow flex flex-col justify-center items-center capitalize font-normal text-xs",
