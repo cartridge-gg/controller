@@ -7,25 +7,76 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CreditsIcon,
   ExternalIcon,
   Skeleton,
 } from "@cartridge/ui-next";
-import { useConnection, useToken } from "@/hooks/context";
+import { useAccount, useConnection, useToken } from "@/hooks/context";
 import {
   formatAddress,
   isPublicChain,
   StarkscanUrl,
   useCountervalue,
+  useCreditBalance,
 } from "@cartridge/utils";
 import { constants } from "starknet";
 import { formatEther } from "viem";
 import { CurrencyBase, CurrencyQuote } from "@cartridge/utils/api/cartridge";
 
 export function Token() {
+  const { address } = useParams<{ address: string }>();
+
+  switch (address) {
+    case "credit":
+      return <Credits />;
+    default:
+      return <ERC20 />
+  }
+}
+
+function Credits() {
+  const { isVisible } = useConnection();
+  const { address } = useAccount();
+  const { balance } = useCreditBalance({
+    address: address ?? "",
+    interval: isVisible ? 3000 : null,
+  });
+
+  return (
+    <LayoutContainer
+      left={
+        <Link to="/inventory">
+          <Button variant="icon" size="icon">
+            <ArrowIcon variant="left" />
+          </Button>
+        </Link>
+      }
+    >
+      <LayoutHeader
+        title={`${balance.formatted} CREDITS`}
+        description={`$${balance.formatted}`}
+        icon={<CreditsIcon size="lg" />}
+      />
+
+      <LayoutContent className="pb-4">
+        <Card>
+          <CardContent className="flex items-center justify-between">
+            <div className="text-muted-foreground">
+              Credits are used to pay for network activity. They are not tokens
+              and cannot be transferred or refunded.
+            </div>
+          </CardContent>
+        </Card>
+      </LayoutContent>
+    </LayoutContainer>
+  );
+}
+
+function ERC20() {
   const { chainId } = useConnection();
   const { address } = useParams<{ address: string }>();
   const t = useToken(address!);
-  const { countervalue: usdBalance } = useCountervalue({
+  const { countervalue } = useCountervalue({
     balance: formatEther(BigInt(t?.balance ?? 0)),
     quote: CurrencyQuote.Eth,
     base: CurrencyBase.Usd,
@@ -46,14 +97,13 @@ export function Token() {
       }
     >
       <LayoutHeader
-        title={`${
-          t.balance === undefined ? (
+        title={`${t.balance === undefined ? (
             <Skeleton className="h-[20px] w-[120px] rounded" />
           ) : (
             t.balance.toString()
           )
-        } ${t.symbol}`}
-        description={`${usdBalance} ${CurrencyBase.Usd}`}
+          } ${t.symbol}`}
+        description={`${countervalue.formatted} ${CurrencyBase.Usd}`}
         icon={
           <img
             className="w-8 h-8"

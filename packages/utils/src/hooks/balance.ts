@@ -58,7 +58,7 @@ export function useCreditBalance({
   const [value, setValue] = useState<bigint>(0n);
 
   const { refetch, isFetching, isLoading, error } = useAccountInfoQuery(
-    { address: address },
+    { address },
     {
       enabled: false,
       onSuccess: async (data: AccountInfoQuery) => {
