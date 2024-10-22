@@ -1,4 +1,3 @@
-
 import {
   cn,
   TrackIcon,
@@ -9,13 +8,52 @@ import {
 } from "@cartridge/ui-next";
 import { useMemo, useState } from "react";
 
-export function Achievement({ Icon, title, description, percentage, earning, timestamp, completed, last }: { Icon: React.ComponentType<StateIconProps> | undefined, title: string, description: string, percentage: number, earning: number, timestamp: number, completed: boolean, last: boolean }) {
+export function Achievement({
+  Icon,
+  title,
+  description,
+  percentage,
+  earning,
+  timestamp,
+  completed,
+  last,
+}: {
+  Icon: React.ComponentType<StateIconProps> | undefined;
+  title: string;
+  description: string;
+  percentage: number;
+  earning: number;
+  timestamp: number;
+  completed: boolean;
+  last: boolean;
+}) {
   return (
-    <div className={cn("flex items-center gap-x-px", last && "rounded-b-md overflow-clip")}>
+    <div
+      className={cn(
+        "flex items-center gap-x-px",
+        last && "rounded-b-md overflow-clip",
+      )}
+    >
       <div className="grow flex-col items-stretch gap-2 bg-secondary p-2">
         <div className="flex items-center gap-2">
-          {!!Icon && <Icon className={cn("min-w-8 min-h-8", completed ? "text-primary" : "text-muted-foreground")} variant="solid" />}
-          {!Icon && <TrophyIcon className={cn("min-w-8 min-h-8", completed ? "text-primary" : "text-muted-foreground")} variant="solid" />}
+          {!!Icon && (
+            <Icon
+              className={cn(
+                "min-w-8 min-h-8",
+                completed ? "text-primary" : "text-muted-foreground",
+              )}
+              variant="solid"
+            />
+          )}
+          {!Icon && (
+            <TrophyIcon
+              className={cn(
+                "min-w-8 min-h-8",
+                completed ? "text-primary" : "text-muted-foreground",
+              )}
+              variant="solid"
+            />
+          )}
           <div className="grow flex flex-col">
             <div className="flex justify-between items-center">
               <div className="flex gap-2">
@@ -33,11 +71,20 @@ export function Achievement({ Icon, title, description, percentage, earning, tim
       </div>
       <Track pinned={false} />
     </div>
-  )
+  );
 }
 
-function Title({ title, completed }: { title: string, completed: boolean }) {
-  return <p className={cn("text-xs text-muted-foreground capitalize", completed && "text-priamry-foreground")}>{title}</p>
+function Title({ title, completed }: { title: string; completed: boolean }) {
+  return (
+    <p
+      className={cn(
+        "text-xs text-muted-foreground capitalize",
+        completed && "text-priamry-foreground",
+      )}
+    >
+      {title}
+    </p>
+  );
 }
 
 function Description({ description }: { description: string }) {
@@ -47,23 +94,31 @@ function Description({ description }: { description: string }) {
     if (!visible || full) {
       return description.slice(0, 1).toUpperCase() + description.slice(1);
     } else {
-      return description.slice(0, 1).toUpperCase() + description.slice(1, 100) + "...";
+      return (
+        description.slice(0, 1).toUpperCase() +
+        description.slice(1, 100) +
+        "..."
+      );
     }
   }, [description, full]);
 
   if (description.length === 0) return null;
   return (
-    <p
-      className="text-xs text-muted-foreground"
-    >
+    <p className="text-xs text-muted-foreground">
       {content}
-      {visible && <span className="text-muted-foreground" onClick={() => setFull(!full)}>{full ? " read less" : " read more"}</span>}
+      {visible && (
+        <span className="text-muted-foreground" onClick={() => setFull(!full)}>
+          {full ? " read less" : " read more"}
+        </span>
+      )}
     </p>
-  )
+  );
 }
 
 function Details({ percentage }: { percentage: number }) {
-  return <p className="text-[0.65rem] text-muted-foreground tracking-wider">{`${percentage}% of players earned`}</p>
+  return (
+    <p className="text-[0.65rem] text-muted-foreground tracking-wider">{`${percentage}% of players earned`}</p>
+  );
 }
 
 function Earning({ amount }: { amount: string }) {
@@ -72,7 +127,7 @@ function Earning({ amount }: { amount: string }) {
       <SparklesIcon size="xs" variant="solid" />
       <p className="text-xs">{amount}</p>
     </div>
-  )
+  );
 }
 
 function Timestamp({ timestamp }: { timestamp: number }) {
@@ -80,11 +135,15 @@ function Timestamp({ timestamp }: { timestamp: number }) {
     const date = new Date(timestamp * 1000);
     const today = new Date();
     if (date.getDate() === today.getDate()) {
-      return 'Today';
+      return "Today";
     } else if (date.getDate() === today.getDate() - 1) {
-      return 'Yesterday';
+      return "Yesterday";
     } else {
-      return date.toLocaleDateString(undefined, { month: "numeric", day: "numeric", year: "2-digit" });
+      return date.toLocaleDateString(undefined, {
+        month: "numeric",
+        day: "numeric",
+        year: "2-digit",
+      });
     }
   }, [timestamp]);
 
@@ -93,7 +152,7 @@ function Timestamp({ timestamp }: { timestamp: number }) {
       <CalendarIcon size="xs" variant="line" />
       <p className="text-[0.65rem]">{date}</p>
     </div>
-  )
+  );
 }
 
 function Track({ pinned }: { pinned: boolean }) {
@@ -101,5 +160,5 @@ function Track({ pinned }: { pinned: boolean }) {
     <div className="bg-secondary h-full p-2 flex items-center text-">
       <TrackIcon size="sm" variant={pinned ? "solid" : "line"} />
     </div>
-  )
+  );
 }

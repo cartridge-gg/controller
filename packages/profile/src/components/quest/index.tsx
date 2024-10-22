@@ -34,7 +34,9 @@ export interface Item {
 
 export function Quest() {
   const { username, address } = useConnection();
-  const [activeTab, setActiveTab] = useState<"trophies" | "leaderboard">("trophies");
+  const [activeTab, setActiveTab] = useState<"trophies" | "leaderboard">(
+    "trophies",
+  );
 
   const achivements: Item[] = [
     {
@@ -66,7 +68,8 @@ export function Quest() {
     {
       title: "speed runner",
       hidden_title: "hidden trophy",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      description:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
       hidden_description: "",
       percentage: 12,
       earning: 1,
@@ -132,7 +135,8 @@ export function Quest() {
       title: "",
       hidden_title: "hidden trophy",
       description: "",
-      hidden_description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      hidden_description:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
       percentage: 21,
       earning: 100,
       timestamp: 0,
@@ -140,10 +144,10 @@ export function Quest() {
       hidden: true,
       pinned: false,
       Icon: undefined,
-    }
+    },
   ];
 
-  const pinneds = achivements.filter(item => item.pinned).slice(0, 3);
+  const pinneds = achivements.filter((item) => item.pinned).slice(0, 3);
 
   return (
     <LayoutContainer>
@@ -155,8 +159,14 @@ export function Quest() {
 
       <LayoutContent>
         <div className="flex justify-between gap-4">
-          <TrophiesTab active={activeTab === "trophies"} onClick={() => setActiveTab("trophies")} />
-          <LeaderboardTab active={activeTab === "leaderboard"} onClick={() => setActiveTab("leaderboard")} />
+          <TrophiesTab
+            active={activeTab === "trophies"}
+            onClick={() => setActiveTab("trophies")}
+          />
+          <LeaderboardTab
+            active={activeTab === "leaderboard"}
+            onClick={() => setActiveTab("leaderboard")}
+          />
         </div>
         <ScrollArea className="overflow-auto">
           <div className="flex flex-col h-full flex-1 overflow-y-auto gap-4 mb-4">

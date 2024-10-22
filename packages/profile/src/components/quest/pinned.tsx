@@ -1,29 +1,52 @@
-
 import {
   cn,
   SpiderWebIcon,
   StateIconProps,
   TrophyIcon,
 } from "@cartridge/ui-next";
-import { 
-  Card,
-  CardHeader,
-  CardTitle,
- } from "@cartridge/ui-next";
+import { Card, CardHeader, CardTitle } from "@cartridge/ui-next";
 
-export function Pinned({ Icon, title, empty }: { Icon: React.ComponentType<StateIconProps> | undefined, title: string, empty?: boolean }) {
+export function Pinned({
+  Icon,
+  title,
+  empty,
+}: {
+  Icon: React.ComponentType<StateIconProps> | undefined;
+  title: string;
+  empty?: boolean;
+}) {
   return (
     <Card>
-      <CardHeader className={cn(
-        "flex flex-col justify-between items-center h-full py-6",
-        empty && "bg-background border border-dashed border-secondary"
-      )}>
-        {Icon && <Icon className={cn("min-w-12 min-h-12", empty ? "opacity-10" : "text-primary")} variant="solid" />}
-        {!Icon && <TrophyIcon className={cn("min-w-12 min-h-12", empty ? "opacity-10" : "text-primary")} variant="solid" />}
-        <CardTitle className={cn(
-          "grow flex flex-col justify-center items-center capitalize font-normal text-xs",
-          empty ? "opacity-50" : "text-secondary-foreground"
-        )}>
+      <CardHeader
+        className={cn(
+          "flex flex-col justify-between items-center h-full py-6",
+          empty && "bg-background border border-dashed border-secondary",
+        )}
+      >
+        {Icon && (
+          <Icon
+            className={cn(
+              "min-w-12 min-h-12",
+              empty ? "opacity-10" : "text-primary",
+            )}
+            variant="solid"
+          />
+        )}
+        {!Icon && (
+          <TrophyIcon
+            className={cn(
+              "min-w-12 min-h-12",
+              empty ? "opacity-10" : "text-primary",
+            )}
+            variant="solid"
+          />
+        )}
+        <CardTitle
+          className={cn(
+            "grow flex flex-col justify-center items-center capitalize font-normal text-xs",
+            empty ? "opacity-50" : "text-secondary-foreground",
+          )}
+        >
           <p className="capitalize break-words text-center">{title}</p>
         </CardTitle>
       </CardHeader>
