@@ -32,12 +32,14 @@ export function Tokens() {
       </CardHeader>
 
       <Link to={`/token/credit`}>
-        <CardContent className="flex gap-x-1.5 items-center">
-          <CreditsIcon size="sm" />
-          <div>
-            {balance.formatted}
-            {" CREDITS"}
+        <CardContent className="flex items-center justify-between">
+          <div className="flex gap-x-1.5 items-center">
+            <CreditsIcon size="sm" />
+            <div>{balance.formatted}</div>
+            <div className="text-muted-foreground">${balance.formatted}</div>
           </div>
+
+          <div className="text-xs text-muted-foreground">CREDITS</div>
         </CardContent>
       </Link>
 
@@ -45,12 +47,14 @@ export function Tokens() {
         <Link key={t.address} to={`/token/${t.address}`}>
           <CardContent
             key={t.address + i}
-            className="flex gap-x-1.5 items-center"
+            className="flex items-center justify-between"
           >
-            <img src={t.logoUrl} className="w-5 h-5" />
-            <div>
-              {formatBalance(BigInt(t.balance ?? 0))} {t.symbol}
+            <div className="flex gap-x-1.5 items-center">
+              <img src={t.logoUrl} className="w-5 h-5" />
+              <div>{formatBalance(BigInt(t.balance ?? 0))}</div>
+              {/* <div>{formatBalance(BigInt(t.balance ?? 0))}</div> */}
             </div>
+            <div className="text-xs text-muted-foreground">{t.symbol}</div>
           </CardContent>
         </Link>
       ))}

@@ -30,7 +30,7 @@ export function Token() {
     case "credit":
       return <Credits />;
     default:
-      return <ERC20 />
+      return <ERC20 />;
   }
 }
 
@@ -97,12 +97,13 @@ function ERC20() {
       }
     >
       <LayoutHeader
-        title={`${t.balance === undefined ? (
+        title={`${
+          t.balance === undefined ? (
             <Skeleton className="h-[20px] w-[120px] rounded" />
           ) : (
             t.balance.toString()
           )
-          } ${t.symbol}`}
+        } ${t.symbol}`}
         description={`${countervalue.formatted} ${CurrencyBase.Usd}`}
         icon={
           <img
