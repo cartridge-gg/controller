@@ -46,6 +46,7 @@ export function Achievements({ achievements }: { achievements: Item[] }) {
           earning={achievement.earning}
           timestamp={achievement.timestamp}
           completed={achievement.completed}
+          pinned={achievement.pinned}
         />
       ))}
     </div>

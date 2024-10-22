@@ -16,6 +16,7 @@ export function Achievement({
   earning,
   timestamp,
   completed,
+  pinned,
 }: {
   Icon: React.ComponentType<StateIconProps> | undefined;
   title: string;
@@ -24,6 +25,7 @@ export function Achievement({
   earning: number;
   timestamp: number;
   completed: boolean;
+  pinned: boolean;
 }) {
   return (
     <div className="flex items-center gap-x-px">
@@ -62,7 +64,7 @@ export function Achievement({
         </div>
         <Description description={description} />
       </div>
-      <Track pinned={false} />
+      {completed && <Track pinned={pinned} />}
     </div>
   );
 }
@@ -150,7 +152,7 @@ function Timestamp({ timestamp }: { timestamp: number }) {
 
 function Track({ pinned }: { pinned: boolean }) {
   return (
-    <div className="bg-secondary h-full p-2 flex items-center text-">
+    <div className="bg-secondary h-full p-2 flex items-center">
       <TrackIcon size="sm" variant={pinned ? "solid" : "line"} />
     </div>
   );
