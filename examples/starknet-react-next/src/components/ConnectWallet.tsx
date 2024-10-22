@@ -36,10 +36,10 @@ export function ConnectWallet() {
       {address ? (
         <Button onClick={() => disconnect()}>Disconnect</Button>
       ) : (
-        <>
+        <div className="flex gap-1">
           <Button onClick={() => connect({ connector })}>Connect</Button>
           <Button onClick={openRegisterSessionUrl}>Register Session</Button>
-        </>
+        </div>
       )}
     </div>
   );
