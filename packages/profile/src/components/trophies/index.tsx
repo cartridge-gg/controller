@@ -64,7 +64,7 @@ export function Trophies() {
   useEffect(() => {
     // Sort by id, timestamp, and completion
     const achievements = items
-      .sort((a, b) => (a.id < b.id ? 1 : -1))
+      .sort((a, b) => (a.id > b.id ? 1 : -1))
       .sort((a, b) => b.timestamp - a.timestamp)
       .sort((a, b) => (b.completed ? 1 : 0) - (a.completed ? 1 : 0));
     setAchievements(achievements);
