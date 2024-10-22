@@ -13,7 +13,7 @@ import { ControllerErrorAlert, ErrorAlert } from "./ErrorAlert";
 import { useDeploy } from "hooks/deploy";
 import { Fees } from "./Fees";
 import { ControllerError } from "utils/connection";
-import { useEthBalance } from "hooks/token";
+import { useEthBalance } from "hooks/balance";
 import { Policies } from "components/Policies";
 
 export function DeployController({

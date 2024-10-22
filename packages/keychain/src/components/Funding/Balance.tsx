@@ -3,7 +3,7 @@ import { HStack, Spacer, Text, VStack } from "@chakra-ui/react";
 import { CurrencyBase, CurrencyQuote } from "@cartridge/utils/api/cartridge";
 import { formatEther } from "viem";
 import { useCountervalue } from "@cartridge/utils";
-import { useCreditBalance, useEthBalance } from "hooks/token";
+import { useCreditBalance, useEthBalance } from "hooks/balance";
 
 type BalanceProps = {
   showBalances: ("credits" | "eth" | "strk")[];
