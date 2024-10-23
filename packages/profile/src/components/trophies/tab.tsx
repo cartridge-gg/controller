@@ -44,7 +44,7 @@ export function LeaderboardTab({
       <Item
         Icon={LeaderboardIcon}
         active={active}
-        label={!!rank ? `#${rank}` : "---"}
+        label={!rank ? "---" : `#${rank}`}
       />
       <Item Icon={SparklesIcon} active={active} label={`${earnings}`} />
     </Tab>

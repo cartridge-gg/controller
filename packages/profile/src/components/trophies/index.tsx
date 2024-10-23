@@ -59,7 +59,7 @@ export function Trophies() {
     const earnings =
       players.find((player) => player.address === address)?.earnings || 0;
     return { rank, earnings };
-  }, [players, address]);
+  }, [address]);
 
   useEffect(() => {
     // Sort by id, timestamp, and completion
@@ -68,7 +68,7 @@ export function Trophies() {
       .sort((a, b) => b.timestamp - a.timestamp)
       .sort((a, b) => (b.completed ? 1 : 0) - (a.completed ? 1 : 0));
     setAchievements(achievements);
-  }, [items]);
+  }, []);
 
   const onPin = useCallback(
     (id: string) => {

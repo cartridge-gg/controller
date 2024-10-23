@@ -26,6 +26,7 @@ export function App() {
       <Route path="/collection/:address/:tokenId" element={<Asset />} />
       <Route path="/collection/:address/send" element={<Send />} />
       <Route path="/trophies" element={<Trophies />} />
+      <Route path="/trophies/:address" element={<Trophies />} />
       <Route path="/history" element={<History />} />
     </Routes>
   );

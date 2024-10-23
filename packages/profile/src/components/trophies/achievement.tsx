@@ -36,9 +36,9 @@ export function Achievement({
   onPin: (id: string) => void;
 }) {
   const AchievementIcon = useMemo(() => {
-    if (!!Icon) return Icon;
+    if (Icon) return Icon;
     return TrophyIcon;
-  }, [Icon, completed]);
+  }, [Icon]);
 
   return (
     <div className="flex items-center gap-x-px">

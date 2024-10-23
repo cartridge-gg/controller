@@ -17,7 +17,7 @@ export function Pinned({
   empty?: boolean;
 }) {
   const AchievementIcon = useMemo(() => {
-    if (!!Icon) return Icon;
+    if (Icon) return Icon;
     return TrophyIcon;
   }, [Icon]);
 
