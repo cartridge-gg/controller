@@ -63,7 +63,7 @@ export function Authenticate({
 
   return (
     <Container
-      variant="connect"
+      variant="full"
       hideAccount
       title={title}
       description={description}

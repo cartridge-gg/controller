@@ -9,7 +9,7 @@ import { CARTRIDGE_DISCORD_LINK } from "const";
 export default function Failure() {
   return (
     <Container
-      variant="connect"
+      variant="full"
       hideAccount
       icon={<AlertIcon boxSize={9} />}
       title="Uh-oh something went wrong"

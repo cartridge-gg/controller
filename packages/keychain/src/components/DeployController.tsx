@@ -87,7 +87,7 @@ export function DeployController({
   if (isLoading) {
     return (
       <Container
-        variant="connect"
+        variant="full"
         title="Checking account balance..."
         icon={<Spinner />}
       />
@@ -113,7 +113,7 @@ export function DeployController({
     case "deploy":
       return (
         <Container
-          variant="connect"
+          variant="full"
           icon={<WandIcon fontSize="5xl" variant="line" />}
           title="Deploy Controller"
           description="This will initialize your controller on the new network"
@@ -153,7 +153,7 @@ export function DeployController({
     case "deploying":
       return (
         <Container
-          variant="connect"
+          variant="full"
           icon={<Spinner />}
           title="Deploying Controller"
           description={`Your controller is being deployed on ${chainName}`}
@@ -188,7 +188,7 @@ export function DeployController({
     case "deployed":
       return (
         <Container
-          variant="connect"
+          variant="full"
           icon={<CheckIcon fontSize="5xl" />}
           title="Success!"
           description={`Your controller has been deployed on ${chainName}`}

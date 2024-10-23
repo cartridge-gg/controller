@@ -37,11 +37,7 @@ export function Delegate({ onBack }: { onBack: () => void }) {
   }, [controller, delegateAddress, context, setContext]);
 
   return (
-    <Container
-      variant="connect"
-      title="Delegate account"
-      onBack={() => onBack()}
-    >
+    <Container variant="full" title="Delegate account" onBack={() => onBack()}>
       <Content>
         <VStack w="full" h="full" justifyContent="space-between" gap={6}>
           <Text color="text.secondary" fontSize="sm" align="center">
