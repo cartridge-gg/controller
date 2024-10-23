@@ -210,8 +210,24 @@ impl CartridgeAccount {
         Ok(to_value(&result)?)
     }
 
-    #[wasm_bindgen(js_name = executeFromOutside)]
-    pub async fn execute_from_outside(
+    #[wasm_bindgen(js_name = executeFromOutsideV2)]
+    pub async fn execute_from_outside_v2(
+        &mut self,
+        calls: Vec<JsCall>,
+    ) -> std::result::Result<JsValue, JsControllerError> {
+        set_panic_hook();
+
+        let calls = calls
+            .into_iter()
+            .map(TryInto::try_into)
+            .collect::<std::result::Result<_, _>>()?;
+
+        let response = self.controller.execute_from_outside_v2(calls).await?;
+        Ok(to_value(&response)?)
+    }
+
+    #[wasm_bindgen(js_name = executeFromOutsideV3)]
+    pub async fn execute_from_outside_v3(
         &mut self,
         calls: Vec<JsCall>,
     ) -> std::result::Result<JsValue, JsControllerError> {

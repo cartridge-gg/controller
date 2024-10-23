@@ -127,11 +127,18 @@ export default class Controller extends Account {
     return this.cartridge.upgrade(new_class_hash);
   }
 
-  async executeFromOutside(
+  async executeFromOutsideV2(
     calls: AllowArray<Call>,
     _?: PaymasterOptions,
   ): Promise<InvokeFunctionResponse> {
-    return await this.cartridge.executeFromOutside(normalizeCalls(calls));
+    return await this.cartridge.executeFromOutsideV2(normalizeCalls(calls));
+  }
+
+  async executeFromOutsideV3(
+    calls: AllowArray<Call>,
+    _?: PaymasterOptions,
+  ): Promise<InvokeFunctionResponse> {
+    return await this.cartridge.executeFromOutsideV3(normalizeCalls(calls));
   }
 
   async execute(
