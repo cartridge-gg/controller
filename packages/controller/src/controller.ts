@@ -13,6 +13,9 @@ import {
 import { AsyncMethodReturns } from "@cartridge/penpal";
 
 import ControllerAccount from "./account";
+import { icon } from "./icon";
+import { KeychainIFrame, ProfileIFrame } from "./iframe";
+import { NotReadyToConnect } from "./errors";
 import {
   Keychain,
   Policy,
@@ -25,19 +28,18 @@ import {
   IFrames,
   ProfileContextTypeVariant,
 } from "./types";
-import { KeychainIFrame, ProfileIFrame } from "./iframe";
-import { NotReadyToConnect } from "./errors";
 
 export * from "./errors";
+export * from "./inject";
 export * from "./types";
+
 export { defaultPresets } from "./presets";
 
-export default class Controller implements StarknetWindowObject {
+export default class ControllerProvider implements StarknetWindowObject {
   public id = "Controller";
   public name = "Controller";
   public version = "0.4.0";
-  public icon =
-    "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTIiIGhlaWdodD0iNDQiIHZpZXdCb3g9IjAgMCA1MiA0NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE4LjE2MzIgMTguNTcxMUgzMy42NzM0VjE0LjY1MzFIMTguMTY3MUMxOC4xNjcxIDE1LjA1MzQgMTguMTYzMiAxOC42MDggMTguMTYzMiAxOC41NzExWiIgZmlsbD0iIzBGMTQxMCIvPgo8cGF0aCBkPSJNNDQuNDIwMyAxMC41TDM0Ljk0MjkgNi41QzM0LjMyIDYuMTk1NzQgMzMuNjQwNCA2LjAyNTQzIDMyLjk0OCA2SDE5LjA1MTlDMTguMzU5IDYuMDI1NDggMTcuNjc5IDYuMTk1NzkgMTcuMDU1NiA2LjVMNy41Nzk1MyAxMC41QzcuMTIxMDggMTAuNzMzOCA2LjczNzUzIDExLjA5MjMgNi40NzI3MSAxMS41MzQ0QzYuMjA3OSAxMS45NzY1IDYuMDcyNSAxMi40ODQzIDYuMDgyMDEgMTIuOTk5OVYyOS4wMDI0QzYuMDgyMDEgMjkuNTAyNCA2LjA4MjAxIDMwLjAwMjQgNi41ODA3NSAzMC41MDI0TDkuNTc0NDkgMzMuNTAyM0MxMC4wNzMyIDM0LjAwMjMgMTAuNDQ3NiAzNC4wMDIzIDExLjA3MDcgMzQuMDAyM0gxNy45MjYxQzE3LjkyNjEgMzQuNDMyMiAxNy45MjYxIDM4LjAzODYgMTcuOTI2MSAzNy45OTk3SDM0LjEzMlYzMy45OTcxSDE3LjkzOTFWMzAuMDAyNEgxMC41NzJDMTAuMDczMiAzMC4wMDI0IDEwLjA3MzIgMjkuNTAyNCAxMC4wNzMyIDI5LjUwMjRWMTAuNUMxMC4wNzMyIDEwLjUgMTAuMDczMiA5Ljk5OTk2IDEwLjU3MiA5Ljk5OTk2SDQxLjQyOTJDNDEuOTI3OSA5Ljk5OTk2IDQxLjkyNzkgMTAuNSA0MS45Mjc5IDEwLjVWMjkuNTAyNEM0MS45Mjc5IDI5LjUwMjQgNDEuOTI3OSAzMC4wMDI0IDQxLjQyOTIgMzAuMDAyNEgzNC4xMzU5VjM0LjAwMjNINDAuOTMwNEM0MS41NTM1IDM0LjAwMjMgNDEuOTI3OSAzNC4wMDIzIDQyLjQyNjYgMzMuNTAyM0w0NS40MTkxIDMwLjUwMjRDNDUuOTE3OCAzMC4wMDI0IDQ1LjkxNzggMjkuNTAyNCA0NS45MTc4IDI5LjAwMjRWMTIuOTk5OUM0NS45MjcyIDEyLjQ4NDQgNDUuNzkxNyAxMS45NzY2IDQ1LjUyNjkgMTEuNTM0NUM0NS4yNjIxIDExLjA5MjQgNDQuODc4NyAxMC43MzM5IDQ0LjQyMDMgMTAuNVoiIGZpbGw9IiMwRjE0MTAiLz4KPC9zdmc+Cg==";
+  public icon = icon;
 
   private policies: Policy[];
   private keychain?: AsyncMethodReturns<Keychain>;
@@ -409,15 +411,5 @@ export default class Controller implements StarknetWindowObject {
         resolve();
       }, interval);
     });
-  }
-}
-
-export class InjectedController extends Controller {
-  constructor(options: ControllerOptions) {
-    super(options);
-
-    if (typeof window !== "undefined") {
-      (window as any).starknet_controller = this;
-    }
   }
 }

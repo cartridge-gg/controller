@@ -4,14 +4,13 @@ import {
   openLink,
   retrieveLaunchParams,
 } from "@telegram-apps/sdk";
-import { Connector } from "@starknet-react/core";
 import { ec, stark } from "starknet";
 
-import { Policy } from "@cartridge/controller";
-import SessionAccount from "@cartridge/controller/session";
-
-import { icon } from "../src/icon";
-import { KEYCHAIN_URL } from "../src/constants";
+import { KEYCHAIN_URL } from "src/constants";
+import { Policy } from "src/types";
+import SessionAccount from "src/session/account";
+import SessionProvider from "src/session/provider";
+import { TelegramBackend } from "./backend";
 
 interface SessionRegistration {
   username: string;
@@ -21,13 +20,8 @@ interface SessionRegistration {
   expiresAt: string;
 }
 
-export default class SessionConnector extends Connector {
-  private _chainId: string;
-  private _rpcUrl: string;
-  private _policies: Policy[];
-  private _username?: string;
+export default class TelegramProvider extends SessionProvider {
   private _tmaUrl: string;
-  private _account?: SessionAccount;
 
   constructor({
     rpcUrl,
@@ -40,38 +34,15 @@ export default class SessionConnector extends Connector {
     policies: Policy[];
     tmaUrl: string;
   }) {
-    super();
+    super({
+      rpcUrl,
+      chainId,
+      policies,
+      redirectUrl: "",
+      backend: new TelegramBackend(),
+    });
 
-    this._rpcUrl = rpcUrl;
-    this._policies = policies;
-    this._chainId = chainId;
     this._tmaUrl = tmaUrl;
-  }
-
-  readonly id = "session";
-
-  readonly name = "Session";
-
-  readonly icon = {
-    dark: icon,
-    light: icon,
-  };
-
-  async chainId() {
-    return Promise.resolve(BigInt(this._chainId));
-  }
-
-  available(): boolean {
-    return true;
-  }
-
-  ready(): Promise<boolean> {
-    return Promise.resolve(true);
-  }
-
-  async username() {
-    await this.tryRetrieveFromQueryOrStorage();
-    return this._username;
   }
 
   async connect() {
@@ -152,7 +123,7 @@ export default class SessionConnector extends Connector {
     }
 
     this._username = sessionRegistration.username;
-    this._account = new SessionAccount({
+    this._account = new SessionAccount(this, {
       rpcUrl: this._rpcUrl,
       privateKey: signer.privKey,
       address: sessionRegistration.address,

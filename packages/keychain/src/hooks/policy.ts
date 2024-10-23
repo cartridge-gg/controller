@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { constants } from "starknet";
+import equal from "fast-deep-equal";
 
 import { Policy } from "@cartridge/controller";
-
-import { diff } from "utils/controller";
 import { normalizeOrigin } from "@cartridge/utils";
 
 export function useUrlPolicys(): {
@@ -103,3 +102,11 @@ async function getValidPolicys(
 //   const json = await res.json();
 //   return json.data.contract.policies.edges.map(({ node }) => node.selector);
 // }
+
+function diff(a: Policy[], b: Policy[]): Policy[] {
+  return a.reduce(
+    (prev, policyA) =>
+      b.some((policyB) => equal(policyB, policyA)) ? prev : [...prev, policyA],
+    [] as Policy[],
+  );
+}

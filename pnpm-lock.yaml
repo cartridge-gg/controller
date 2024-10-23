@@ -221,9 +221,6 @@ importers:
       '@starknet-react/core':
         specifier: ^3.0.2
         version: 3.0.3(get-starknet-core@4.0.0)(react@18.3.1)(starknet@6.11.0)(typescript@5.5.4)
-      '@telegram-apps/sdk':
-        specifier: ^2.4.0
-        version: 2.4.0
       starknet:
         specifier: ^6.11.0
         version: 6.11.0
@@ -246,6 +243,9 @@ importers:
       '@starknet-io/types-js':
         specifier: ^0.7.7
         version: 0.7.7
+      '@telegram-apps/sdk':
+        specifier: ^2.4.0
+        version: 2.4.0
       base64url:
         specifier: ^3.0.1
         version: 3.0.1
