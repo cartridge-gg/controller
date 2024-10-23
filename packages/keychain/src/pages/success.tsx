@@ -10,7 +10,7 @@ export default function Success() {
 
   return (
     <Container
-      variant="full"
+      variant="expanded"
       hideAccount
       Icon={SparklesDuoIcon}
       title={title ? (title as string) : "Success!"}

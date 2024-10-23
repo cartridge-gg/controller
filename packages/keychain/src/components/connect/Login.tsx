@@ -17,7 +17,7 @@ export function Login(props: LoginProps) {
 
   return (
     <Container
-      variant={isHeightOver600 ? "full" : "reduced"}
+      variant={isHeightOver600 ? "expanded" : "compressed"}
       title={
         theme.id === "cartridge" ? "Play with Controller" : `Play ${theme.name}`
       }

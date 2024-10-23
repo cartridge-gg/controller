@@ -37,7 +37,7 @@ export function ErrorPage({ error }: { error: Error }) {
 
   return (
     <Container
-      variant="reduced"
+      variant="expanded"
       title="Oops! Something went wrong!"
       icon={<AlertIcon fontSize={48} />}
     >
