@@ -1,24 +1,19 @@
 import { Card, CardContent, CheckIcon, CopyAddress } from "@cartridge/ui-next";
-import { useTransferQuery } from "@cartridge/utils";
+import { useTransferQuery } from "@cartridge/utils/api/indexer";
 import {
   LayoutContainer,
   LayoutContent,
   LayoutHeader,
 } from "@/components/layout";
 import { Navigation } from "@/components/navigation";
-import { useConnection } from "@/hooks/context";
+import { useAccount } from "@/hooks/context";
 
 export function History() {
-  const { username, address, indexerUrl } = useConnection();
-  const { data } = useTransferQuery(
-    {
-      endpoint: indexerUrl,
-    },
-    {
-      address,
-      limit: 100,
-    },
-  );
+  const { address, username } = useAccount();
+  const { data } = useTransferQuery({
+    address,
+    limit: 100,
+  });
 
   return (
     <LayoutContainer>

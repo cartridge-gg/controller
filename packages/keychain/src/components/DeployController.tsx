@@ -64,7 +64,7 @@ export function DeployController({
   useEffect(() => {
     if (!feeEstimate || accountState != "fund") return;
 
-    if (ethBalance >= BigInt(feeEstimate)) {
+    if (ethBalance.value >= BigInt(feeEstimate)) {
       setAccountState("deploy");
     } else {
       setAccountState("fund");

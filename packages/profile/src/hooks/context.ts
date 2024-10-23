@@ -1,9 +1,13 @@
 import { useContext } from "react";
-import { ConnectionContext } from "@/components/provider/connection";
-import { ColorSchemeProviderContext } from "@/components/provider/colorScheme";
+import {
+  AccountContext,
+  ColorSchemeContext,
+  ConnectionContext,
+} from "@/components/context";
+import { getChecksumAddress } from "starknet";
 
 export function useColorScheme() {
-  const context = useContext(ColorSchemeProviderContext);
+  const context = useContext(ColorSchemeContext);
 
   if (context === undefined)
     throw new Error("useColorScheme must be used within a ColorSchemeProvider");
@@ -13,4 +17,24 @@ export function useColorScheme() {
 
 export function useConnection() {
   return useContext(ConnectionContext);
+}
+
+export function useAccount() {
+  return useContext(AccountContext);
+}
+
+export function useToken(address: string) {
+  const { erc20 } = useAccount();
+
+  return erc20.find(
+    (t) => getChecksumAddress(t.address) === getChecksumAddress(address),
+  );
+}
+
+export function useTokenBalance(address: string) {
+  const { erc20 } = useAccount();
+
+  return erc20.find(
+    (t) => getChecksumAddress(t.address) === getChecksumAddress(address),
+  )?.balance;
 }

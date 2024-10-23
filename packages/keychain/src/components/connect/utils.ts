@@ -2,9 +2,9 @@ import {
   AccountDocument,
   AccountQuery,
   AccountQueryVariables,
-} from "generated/graphql";
-import { fetchData } from "hooks/fetcher";
+} from "@cartridge/utils/api/cartridge";
 import { AuthAction } from "./Authenticate";
+import { fetchData } from "utils/graphql";
 
 export function validateUsernameFor(type: AuthAction) {
   return async (val: string) => {

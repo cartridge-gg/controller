@@ -1,9 +1,13 @@
 import { useInterval } from "@chakra-ui/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { uint256 } from "starknet";
 import { useConnection } from "hooks/connection";
 import { ETH_CONTRACT_ADDRESS } from "utils/token";
-import { AccountInfoQuery, useAccountInfoQuery } from "generated/graphql";
+import { formatBalance } from "@cartridge/utils";
+import {
+  AccountInfoQuery,
+  useAccountInfoQuery,
+} from "@cartridge/utils/api/cartridge";
 
 const REFRESH_INTERVAL = 3000;
 
@@ -11,7 +15,7 @@ export function useBalance() {
   const { controller } = useConnection();
   const [isFetching, setIsFetching] = useState(true);
   const [ethBalance, setEthBalance] = useState<bigint>(0n);
-  const [creditsBalance, setCreditsBalance] = useState<number>(0);
+  const [creditsBalance, setCreditsBalance] = useState<bigint>(0n);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error>();
 
@@ -21,9 +25,7 @@ export function useBalance() {
       enabled: false,
       onSuccess: async (data: AccountInfoQuery) => {
         try {
-          // credits are retrieved as positive integers dominated in cents
-          const credits = data.accounts?.edges?.[0]?.node?.credits / 100;
-          setCreditsBalance(credits ?? 0);
+          setCreditsBalance(data.accounts?.edges?.[0]?.node?.credits ?? 0);
         } catch (e) {
           setError(e);
         }
@@ -65,5 +67,25 @@ export function useBalance() {
   }, [fetchBalances]);
 
   useInterval(fetchBalances, REFRESH_INTERVAL);
-  return { ethBalance, creditsBalance, isFetching, isLoading, error };
+
+  const ethFormattedBalance = useMemo(
+    () => formatBalance(ethBalance),
+    [ethBalance],
+  );
+
+  const creditsFormattedBalance = useMemo(
+    () => formatBalance(ethBalance),
+    [ethBalance],
+  );
+
+  return {
+    ethBalance: { value: ethBalance, formatted: ethFormattedBalance },
+    creditsBalance: {
+      value: creditsBalance,
+      formatted: creditsFormattedBalance,
+    },
+    isFetching,
+    isLoading,
+    error,
+  };
 }

@@ -1,18 +1,16 @@
-import { getChecksumAddress, Provider, uint256 } from "starknet";
+import { Provider, uint256 } from "starknet";
 import { hexToString, Hex } from "viem";
 
-export type ERC20Info = {
+export type ERC20Metadata = {
   name: string;
   logoUrl?: string;
   symbol: string;
-  decimals: bigint;
+  decimals: number;
   address: string;
-  balance?: number;
-  class: ERC20;
-  error?: Error;
+  instance: ERC20;
 };
 
-export type EkuboTokenInfo = {
+export type EkuboERC20Metadata = {
   name: string;
   symbol: string;
   decimals: number;
@@ -32,9 +30,9 @@ export class ERC20 {
   private logoUrl?: string;
   private provider: Provider;
 
-  private name: string = "";
-  private symbol: string = "";
-  private decimals: bigint = 0n;
+  private name?: string;
+  private symbol?: string;
+  private decimals?: number;
 
   // TODO: Utilize Contract class with ABI
   // private contract: Contract;
@@ -53,18 +51,26 @@ export class ERC20 {
     this.provider = provider;
   }
 
-  async info(): Promise<ERC20Info> {
+  async init() {
     const [name, symbol, decimals] = await Promise.all([
       this.callName(),
       this.callSymbol(),
       this.callDecimals(),
     ]);
-    if (!this.logoUrl) {
-      this.logoUrl = await this.fetchLogoUrl();
-    }
+
     this.name = name;
     this.symbol = symbol;
     this.decimals = decimals;
+
+    return this;
+  }
+
+  metadata(): ERC20Metadata {
+    if (!this.name || !this.symbol || !this.decimals) {
+      throw new Error(
+        "Token metadata is missing. Make sure to call `.init()` method",
+      );
+    }
 
     return {
       address: this.address,
@@ -72,12 +78,17 @@ export class ERC20 {
       symbol: this.symbol,
       decimals: this.decimals,
       logoUrl: this.logoUrl,
-      class: this as ERC20,
-      error: undefined,
+      instance: this,
     };
   }
 
   async balanceOf(address: string) {
+    if (!this.decimals) {
+      throw new Error(
+        "Token metadata is missing. Make sure to call `.init()` method",
+      );
+    }
+
     const balance = await this.provider.callContract({
       contractAddress: this.address,
       entrypoint: "balanceOf",
@@ -88,7 +99,7 @@ export class ERC20 {
       low: balance[0],
       high: balance[1],
     });
-    return Number(rawBalance) / Number(10n ** this.decimals);
+    return Number(rawBalance) / Number(10 ** this.decimals);
   }
 
   private async callName() {
@@ -124,20 +135,22 @@ export class ERC20 {
         entrypoint: "decimals",
       })) as Hex[];
 
-      return BigInt(decimals[0]);
+      return Number(decimals[0]);
     } catch {
       throw new Error(`Failed to fetch decimals for token: ${this.address}`);
     }
   }
 
-  private async fetchLogoUrl() {
+  static async fetchAllMetadata(): Promise<Omit<ERC20Metadata, "instance">[]> {
     const res = await fetch("https://mainnet-api.ekubo.org/tokens");
-    const data: EkuboTokenInfo[] = await res.json();
+    const data = (await res.json()) as EkuboERC20Metadata[];
 
-    return data.find(
-      (t) =>
-        getChecksumAddress(t.l2_token_address) ===
-        getChecksumAddress(this.address),
-    )?.logo_url;
+    return data.map((d) => ({
+      name: d.name,
+      logoUrl: d.logo_url,
+      symbol: d.symbol,
+      decimals: d.decimals,
+      address: d.l2_token_address,
+    }));
   }
 }
