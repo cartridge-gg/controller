@@ -5,7 +5,7 @@ import {
 } from "@/components/layout";
 import { ScrollArea, StateIconProps } from "@cartridge/ui-next";
 import { TrophiesTab, LeaderboardTab } from "./tab";
-import { useConnection } from "@/hooks/context";
+import { useAccount } from "@/hooks/context";
 import { CopyAddress } from "@cartridge/ui-next";
 import { Navigation } from "../navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -38,7 +38,7 @@ export interface Player {
 }
 
 export function Trophies() {
-  const { username, address } = useConnection();
+  const { username, address } = useAccount();
   const [achievements, setAchievements] = useState<Item[]>([]);
   const [activeTab, setActiveTab] = useState<"trophies" | "leaderboard">(
     "trophies",
