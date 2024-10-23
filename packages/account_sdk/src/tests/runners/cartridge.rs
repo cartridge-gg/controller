@@ -19,7 +19,8 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 use url::Url;
 
-use crate::abigen::controller::{OutsideExecution, SignerSignature};
+use crate::abigen::controller::SignerSignature;
+use crate::account::outside_execution::OutsideExecution;
 use crate::account::session::raw_session::{RawSessionToken, SessionHash};
 use crate::constants::GUARDIAN_SIGNER;
 use crate::hash::MessageHashRev1;
@@ -208,7 +209,6 @@ impl CartridgeProxy {
         body: &Value,
     ) -> Result<Response<Body>, hyper::Error> {
         let params = &body["params"];
-        println!("Received params: {:?}", params);
         let result = match parse_execute_outside_transaction_params(params) {
             Ok((address, outside_execution, signature)) => {
                 match self
@@ -379,7 +379,7 @@ mod tests {
         let expected_caller =
             Felt::from_str(params["outside_execution"]["caller"].as_str().unwrap()).unwrap();
         assert_eq!(
-            outside_execution.caller,
+            outside_execution.caller(),
             expected_caller.into(),
             "Caller mismatch"
         );

@@ -227,7 +227,7 @@ impl Controller {
         max_fee: Felt,
     ) -> Result<InvokeTransactionResult, ControllerError> {
         if max_fee == Felt::ZERO {
-            return self.execute_from_outside(calls).await;
+            return self.execute_from_outside_v3(calls).await;
         }
 
         let mut retry_count = 0;
