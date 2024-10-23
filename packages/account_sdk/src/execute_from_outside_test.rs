@@ -6,15 +6,16 @@ use starknet::{
     signers::SigningKey,
 };
 
-use crate::tests::runners::katana::KatanaRunner;
-use crate::tests::transaction_waiter::TransactionWaiter;
 use crate::{
-    abigen::{controller::OutsideExecution, erc_20::Erc20},
-    account::{
-        outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller},
-        session::hash::Policy,
-    },
+    abigen::{controller::OutsideExecutionV3, erc_20::Erc20},
+    account::{outside_execution::OutsideExecutionAccount, session::hash::Policy},
     provider::CartridgeProvider,
+};
+use crate::{
+    account::outside_execution::OutsideExecution, tests::transaction_waiter::TransactionWaiter,
+};
+use crate::{
+    account::outside_execution::OutsideExecutionCaller, tests::runners::katana::KatanaRunner,
 };
 use crate::{artifacts::Version, signers::Signer};
 use crate::{signers::Owner, tests::account::FEE_TOKEN_ADDRESS};
@@ -49,7 +50,7 @@ async fn test_execute_from_outside() {
     }];
 
     // First execution
-    let result = controller.execute_from_outside(calls.clone()).await;
+    let result = controller.execute_from_outside_v3(calls.clone()).await;
     let response = result.expect("Failed to execute from outside");
 
     TransactionWaiter::new(response.transaction_hash, runner.client())
@@ -71,7 +72,7 @@ async fn test_execute_from_outside() {
     }
 
     for _ in 0..128 {
-        let result = controller.execute_from_outside(calls.clone()).await;
+        let result = controller.execute_from_outside_v3(calls.clone()).await;
         result.expect("Failed to execute from outside");
     }
 }
@@ -117,7 +118,7 @@ async fn test_execute_from_outside_with_session() {
     };
 
     // Create OutsideExecution
-    let outside_execution = OutsideExecution {
+    let outside_execution = OutsideExecutionV3 {
         caller: OutsideExecutionCaller::Any.into(),
         execute_after: 0,
         execute_before: u32::MAX as u64,
@@ -127,7 +128,7 @@ async fn test_execute_from_outside_with_session() {
 
     // Sign the outside execution with the session account
     let signed_execution = session_account
-        .sign_outside_execution(outside_execution.clone())
+        .sign_outside_execution(OutsideExecution::V3(outside_execution.clone()))
         .await
         .expect("Failed to sign outside execution");
 
@@ -135,7 +136,7 @@ async fn test_execute_from_outside_with_session() {
     let result = controller
         .provider
         .add_execute_outside_transaction(
-            outside_execution,
+            OutsideExecution::V3(outside_execution),
             controller.address,
             signed_execution.signature,
         )

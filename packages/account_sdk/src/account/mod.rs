@@ -7,6 +7,8 @@ use starknet::macros::selector;
 
 pub mod macros;
 pub mod outside_execution;
+pub mod outside_execution_v2;
+pub mod outside_execution_v3;
 pub mod session;
 
 use crate::abigen;

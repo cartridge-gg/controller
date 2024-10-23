@@ -154,7 +154,11 @@ fn generate_controller_bindings() {
             String::from(
                 "argent::outside_execution::outside_execution::outside_execution_component::Event",
             ),
-            String::from("OutsideExecutionEvent"),
+            String::from("OutsideExecutionV3Event"),
+        ),
+        (
+            String::from("argent::outside_execution::interface::OutsideExecution"),
+            String::from("OutsideExecutionV3"),
         ),
         (
             String::from("controller::account::CartridgeAccount::Event"),
