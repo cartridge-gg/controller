@@ -137,7 +137,6 @@ export type IFrameOptions = {
 };
 
 export type ProviderOptions = {
-  policies?: Policy[];
   /** The URL of the RPC */
   rpc: string;
 };

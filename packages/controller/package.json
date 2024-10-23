@@ -12,7 +12,7 @@
   },
   "exports": {
     ".": "./dist/index.js",
-    "./session": "./dist/session.js"
+    "./session": "./dist/session/index.js"
   },
   "typesVersions": {
     "*": {
@@ -20,7 +20,7 @@
         "./dist/index.d.ts"
       ],
       "session": [
-        "./dist/session.d.ts"
+        "./dist/session/index.d.ts"
       ]
     }
   },

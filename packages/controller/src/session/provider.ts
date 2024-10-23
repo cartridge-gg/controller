@@ -2,8 +2,8 @@ import { Policy } from "@cartridge/controller";
 import { ec, stark, WalletAccount } from "starknet";
 
 import SessionAccount from "./account";
-import { KEYCHAIN_URL } from "src/constants";
-import BaseProvider from "src/provider";
+import { KEYCHAIN_URL } from "../constants";
+import BaseProvider from "../provider";
 
 interface SessionRegistration {
   username: string;
@@ -13,38 +13,34 @@ interface SessionRegistration {
   expiresAt: string;
 }
 
+export type SessionOptions = {
+  rpc: string;
+  chainId: string;
+  policies: Policy[];
+  redirectUrl: string;
+};
+
 export default class SessionProvider extends BaseProvider {
+  public id = "controller_session";
+  public name = "Controller Session";
+
   protected _chainId: string;
-  protected backend: UnifiedBackend;
 
   protected _username?: string;
   protected _redirectUrl: string;
   protected _policies: Policy[];
   public account?: SessionAccount;
 
-  constructor({
-    rpc,
-    chainId,
-    policies,
-    backend,
-    redirectUrl,
-  }: {
-    rpc: string;
-    chainId: string;
-    policies: Policy[];
-    redirectUrl: string;
-    backend: UnifiedBackend;
-  }) {
-    super({ policies, rpc });
+  constructor({ rpc, chainId, policies, redirectUrl }: SessionOptions) {
+    super({ rpc });
 
-    this.backend = backend;
     this._chainId = chainId;
     this._redirectUrl = redirectUrl;
     this._policies = policies;
-  }
 
-  async chainId() {
-    return Promise.resolve(BigInt(this._chainId));
+    if (typeof window !== "undefined") {
+      (window as any).starknet_controller_session = this;
+    }
   }
 
   async username() {
@@ -59,6 +55,7 @@ export default class SessionProvider extends BaseProvider {
 
   async connect(): Promise<WalletAccount | undefined> {
     await this.tryRetrieveFromQueryOrStorage();
+
     if (this.account) {
       return;
     }
@@ -67,7 +64,7 @@ export default class SessionProvider extends BaseProvider {
     const pk = stark.randomAddress();
     const publicKey = ec.starkCurve.getStarkKey(pk);
 
-    this.backend.set(
+    localStorage.setItem(
       "sessionSigner",
       JSON.stringify({
         privKey: pk,
@@ -82,21 +79,22 @@ export default class SessionProvider extends BaseProvider {
     )}&rpc_url=${this.rpc}`;
 
     localStorage.setItem("lastUsedConnector", this.id);
-    this.backend.openLink(url);
+    window.open(url, "_blank");
 
     return;
   }
 
   disconnect(): Promise<void> {
-    this.backend.delete("sessionSigner");
-    this.backend.delete("session");
+    localStorage.removeItem("sessionSigner");
+    localStorage.removeItem("session");
     this.account = undefined;
     this._username = undefined;
     return Promise.resolve();
   }
 
   async tryRetrieveFromQueryOrStorage() {
-    const signer = JSON.parse((await this.backend.get("sessionSigner"))!);
+    const signerString = localStorage.getItem("sessionSigner");
+    const signer = signerString ? JSON.parse(signerString) : null;
     let sessionRegistration: SessionRegistration | null = null;
 
     if (window.location.search.includes("startapp")) {
@@ -104,7 +102,7 @@ export default class SessionProvider extends BaseProvider {
       const session = params.get("startapp");
       if (session) {
         sessionRegistration = JSON.parse(atob(session));
-        this.backend.set("session", JSON.stringify(sessionRegistration));
+        localStorage.setItem("session", JSON.stringify(sessionRegistration));
 
         // Remove the session query parameter
         params.delete("startapp");
@@ -117,13 +115,13 @@ export default class SessionProvider extends BaseProvider {
     }
 
     if (!sessionRegistration) {
-      const session = await this.backend.get("session");
-      if (session) {
-        sessionRegistration = JSON.parse(session);
+      const sessionString = localStorage.getItem("session");
+      if (sessionString) {
+        sessionRegistration = JSON.parse(sessionString);
       }
     }
 
-    if (!sessionRegistration) {
+    if (!sessionRegistration || !signer) {
       return;
     }
 

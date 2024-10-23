@@ -116,7 +116,6 @@ export function useConnectionValue() {
     const connection = connectToController<ParentMethods>({
       setOrigin,
       setRpcUrl,
-      setPolicies,
       setContext,
       setController,
     });
@@ -216,14 +215,4 @@ export function useRpcUrl() {
 export function useOrigin() {
   const { context } = useConnection();
   return context?.origin;
-}
-
-export function usePolicies() {
-  const { context } = useConnection();
-  switch (context?.type) {
-    case "connect":
-      return context.policies;
-    default:
-      return [];
-  }
 }

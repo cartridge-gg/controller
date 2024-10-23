@@ -1,18 +1,20 @@
-import { InjectedController, ControllerOptions } from "@cartridge/controller";
+import ControllerProvider, { ControllerOptions } from "@cartridge/controller";
 import { InjectedConnector } from "@starknet-react/core";
 
 export default class ControllerConnector extends InjectedConnector {
-  public controller: InjectedController;
+  public controller: ControllerProvider;
 
   constructor(options: ControllerOptions) {
+    const controller = new ControllerProvider(options);
+
     super({
       options: {
-        id: "controller",
-        name: "Controller",
+        id: controller.id,
+        name: controller.name,
       },
     });
 
-    this.controller = new InjectedController(options);
+    this.controller = controller;
   }
 
   username() {

@@ -1,4 +1,5 @@
 import { cloudStorage, openLink } from "@telegram-apps/sdk";
+import { UnifiedBackend } from "src/session/backend";
 
 /**
  * Implements the UnifiedBackend interface for Telegram storage operations.

@@ -6,6 +6,7 @@ import {
   RequestAccountsParameters,
   RequestFn,
   StarknetWindowObject,
+  TypedData,
   WalletEventHandlers,
   WalletEventListener,
   WalletEvents,
@@ -15,7 +16,7 @@ import { icon } from "./icon";
 import { ProviderOptions } from "./types";
 
 export default abstract class BaseProvider implements StarknetWindowObject {
-  public id = "Controller";
+  public id = "controller";
   public name = "Controller";
   public version = "0.4.0";
   public icon = icon;
@@ -28,10 +29,6 @@ export default abstract class BaseProvider implements StarknetWindowObject {
     const { rpc } = options;
 
     this.rpc = new URL(rpc);
-
-    if (typeof window !== "undefined") {
-      (window as any).starknet_controller = this;
-    }
   }
 
   request: RequestFn = async (call) => {
@@ -129,12 +126,18 @@ export default abstract class BaseProvider implements StarknetWindowObject {
           data: "wallet_addDeclareTransaction not implemented",
         } as Errors.UNEXPECTED_ERROR;
 
-      case "wallet_signTypedData":
-        throw {
-          code: 63,
-          message: "An unexpected error occurred",
-          data: "wallet_signTypedData not implemented",
-        } as Errors.UNEXPECTED_ERROR;
+      case "wallet_signTypedData": {
+        if (!this.account) {
+          throw {
+            code: 63,
+            message: "An unexpected error occurred",
+            data: "Account not initialized",
+          } as Errors.UNEXPECTED_ERROR;
+        }
+
+        return await this.account.signMessage(call.params as TypedData);
+      }
+
       case "wallet_supportedSpecs":
         return [];
       case "wallet_supportedWalletApi":
