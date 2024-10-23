@@ -2,7 +2,8 @@ import { useInterval } from "usehooks-ts";
 import { useMemo, useState } from "react";
 import { Provider } from "starknet";
 import useSWR from "swr";
-import { ERC20, ERC20Metadata, formatBalance } from "@cartridge/utils";
+import { ERC20, ERC20Metadata } from "../erc20";
+import { formatBalance } from "../currency";
 import { AccountInfoQuery, useAccountInfoQuery } from "../api/cartridge";
 
 export function useERC20Balance({
