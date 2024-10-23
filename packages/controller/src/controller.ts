@@ -1,19 +1,6 @@
-import { addAddressPadding } from "starknet";
-import {
-  AddInvokeTransactionParameters,
-  Errors,
-  Permission,
-  RequestAccountsParameters,
-  RequestFn,
-  StarknetWindowObject,
-  WalletEventHandlers,
-  WalletEventListener,
-  WalletEvents,
-} from "@starknet-io/types-js";
 import { AsyncMethodReturns } from "@cartridge/penpal";
 
 import ControllerAccount from "./account";
-import { icon } from "./icon";
 import { KeychainIFrame, ProfileIFrame } from "./iframe";
 import { NotReadyToConnect } from "./errors";
 import {
@@ -28,24 +15,17 @@ import {
   IFrames,
   ProfileContextTypeVariant,
 } from "./types";
+import BaseProvider from "./provider";
 
-export default class ControllerProvider implements StarknetWindowObject {
-  public id = "Controller";
-  public name = "Controller";
-  public version = "0.4.0";
-  public icon = icon;
-
-  private policies: Policy[];
+export default class ControllerProvider extends BaseProvider {
   private keychain?: AsyncMethodReturns<Keychain>;
   private profile?: AsyncMethodReturns<Profile>;
   private options: ControllerOptions;
   private iframes: IFrames;
-  public rpc: URL;
-  public account?: ControllerAccount;
-  public subscriptions: WalletEvents[] = [];
 
   constructor(options: ControllerOptions) {
-    const { policies, rpc } = options;
+    const { rpc } = options;
+    super({ rpc });
 
     this.iframes = {
       keychain: new KeychainIFrame({
@@ -57,169 +37,11 @@ export default class ControllerProvider implements StarknetWindowObject {
       }),
     };
 
-    this.rpc = new URL(rpc);
-
-    // TODO: remove this on the next major breaking change. pass everthing by url
-    this.policies =
-      policies?.map((policy) => ({
-        ...policy,
-        target: addAddressPadding(policy.target),
-      })) || [];
-
     this.options = options;
-  }
 
-  request: RequestFn = async (call) => {
-    switch (call.type) {
-      case "wallet_getPermissions":
-        await this.probe();
-
-        if (this.account) {
-          return [Permission.ACCOUNTS];
-        }
-
-        return [];
-
-      case "wallet_requestAccounts": {
-        if (this.account) {
-          return [this.account.address];
-        }
-
-        const params = call.params as RequestAccountsParameters;
-
-        if (params?.silent_mode) {
-          this.account = await this.probe();
-        } else {
-          this.account = await this.connect();
-        }
-
-        if (this.account) {
-          return [this.account.address];
-        }
-
-        return [];
-      }
-
-      case "wallet_watchAsset":
-        throw {
-          code: 63,
-          message: "An unexpected error occurred",
-          data: "wallet_watchAsset not implemented",
-        } as Errors.UNEXPECTED_ERROR;
-
-      case "wallet_addStarknetChain":
-        throw {
-          code: 63,
-          message: "An unexpected error occurred",
-          data: "wallet_addStarknetChain not implemented",
-        } as Errors.UNEXPECTED_ERROR;
-
-      case "wallet_switchStarknetChain":
-        throw {
-          code: 63,
-          message: "An unexpected error occurred",
-          data: "wallet_switchStarknetChain not implemented",
-        } as Errors.UNEXPECTED_ERROR;
-
-      case "wallet_requestChainId":
-        if (!this.account) {
-          throw {
-            code: 63,
-            message: "An unexpected error occurred",
-            data: "wallet_deploymentData not implemented",
-          } as Errors.UNEXPECTED_ERROR;
-        }
-
-        return await this.account.getChainId();
-
-      case "wallet_deploymentData":
-        throw {
-          code: 63,
-          message: "An unexpected error occurred",
-          data: "wallet_deploymentData not implemented",
-        } as Errors.UNEXPECTED_ERROR;
-
-      case "wallet_addInvokeTransaction":
-        if (!this.account) {
-          throw {
-            code: 63,
-            message: "An unexpected error occurred",
-            data: "wallet_deploymentData not implemented",
-          } as Errors.UNEXPECTED_ERROR;
-        }
-
-        let params = call.params as AddInvokeTransactionParameters;
-        return await this.account.execute(
-          params.calls.map((call) => ({
-            contractAddress: call.contract_address,
-            entrypoint: call.entry_point,
-            calldata: call.calldata,
-          })),
-        );
-
-      case "wallet_addDeclareTransaction":
-        throw {
-          code: 63,
-          message: "An unexpected error occurred",
-          data: "wallet_addDeclareTransaction not implemented",
-        } as Errors.UNEXPECTED_ERROR;
-
-      case "wallet_signTypedData":
-        throw {
-          code: 63,
-          message: "An unexpected error occurred",
-          data: "wallet_signTypedData not implemented",
-        } as Errors.UNEXPECTED_ERROR;
-      case "wallet_supportedSpecs":
-        return [];
-      case "wallet_supportedWalletApi":
-        return [];
-      default:
-        throw {
-          code: 63,
-          message: "An unexpected error occurred",
-          data: `Unknown RPC call type: ${call.type}`,
-        } as Errors.UNEXPECTED_ERROR;
+    if (typeof window !== "undefined") {
+      (window as any).starknet_controller = this;
     }
-  };
-
-  on: WalletEventListener = <E extends keyof WalletEventHandlers>(
-    event: E,
-    handler: WalletEventHandlers[E],
-  ): void => {
-    if (event !== "accountsChanged" && event !== "networkChanged") {
-      throw new Error(`Unknown event: ${event}`);
-    }
-    this.subscriptions.push({ type: event, handler } as WalletEvents);
-  };
-
-  off: WalletEventListener = <E extends keyof WalletEventHandlers>(
-    event: E,
-    handler: WalletEventHandlers[E],
-  ): void => {
-    if (event !== "accountsChanged" && event !== "networkChanged") {
-      throw new Error(`Unknown event: ${event}`);
-    }
-    const idx = this.subscriptions.findIndex(
-      (sub) => sub.type === event && sub.handler === handler,
-    );
-    if (idx >= 0) {
-      this.subscriptions.splice(idx, 1);
-    }
-  };
-
-  async openSettings() {
-    if (!this.keychain || !this.iframes.keychain) {
-      console.error(new NotReadyToConnect().message);
-      return null;
-    }
-    this.iframes.keychain.open();
-    const res = await this.keychain.openSettings();
-    this.iframes.keychain.close();
-    if (res && (res as ConnectError).code === ResponseCodes.NOT_CONNECTED) {
-      return false;
-    }
-    return true;
   }
 
   async probe() {
@@ -289,10 +111,7 @@ export default class ControllerProvider implements StarknetWindowObject {
     this.iframes.keychain.open();
 
     try {
-      let response = await this.keychain.connect(
-        this.policies,
-        this.rpc.toString(),
-      );
+      let response = await this.keychain.connect(this.rpc.toString());
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
       }
@@ -314,20 +133,6 @@ export default class ControllerProvider implements StarknetWindowObject {
     }
   }
 
-  openProfile(tab: ProfileContextTypeVariant = "inventory") {
-    if (!this.options.indexerUrl) {
-      console.error("`indexerUrl` option is required to open profile");
-      return;
-    }
-    if (!this.profile || !this.iframes.profile) {
-      console.error("Profile is not ready");
-      return;
-    }
-
-    this.profile.navigate(tab);
-    this.iframes.profile.open();
-  }
-
   async disconnect() {
     if (!this.keychain) {
       console.error(new NotReadyToConnect().message);
@@ -343,6 +148,34 @@ export default class ControllerProvider implements StarknetWindowObject {
 
     this.account = undefined;
     return this.keychain.disconnect();
+  }
+
+  openProfile(tab: ProfileContextTypeVariant = "inventory") {
+    if (!this.options.indexerUrl) {
+      console.error("`indexerUrl` option is required to open profile");
+      return;
+    }
+    if (!this.profile || !this.iframes.profile) {
+      console.error("Profile is not ready");
+      return;
+    }
+
+    this.profile.navigate(tab);
+    this.iframes.profile.open();
+  }
+
+  async openSettings() {
+    if (!this.keychain || !this.iframes.keychain) {
+      console.error(new NotReadyToConnect().message);
+      return null;
+    }
+    this.iframes.keychain.open();
+    const res = await this.keychain.openSettings();
+    this.iframes.keychain.close();
+    if (res && (res as ConnectError).code === ResponseCodes.NOT_CONNECTED) {
+      return false;
+    }
+    return true;
   }
 
   revoke(origin: string, _policy: Policy[]) {

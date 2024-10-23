@@ -1,18 +1,19 @@
 import { Policy } from "@cartridge/account-wasm";
 import { CartridgeSessionAccount } from "@cartridge/account-wasm/session";
 import { Call, InvokeFunctionResponse, WalletAccount } from "starknet";
-import { normalizeCalls } from "../utils";
-import { StarknetWindowObject } from "@starknet-io/types-js";
 
-export * from "../errors";
-export * from "../types";
-export { defaultPresets } from "../presets";
+import { normalizeCalls } from "src/utils";
+import BaseProvider from "src/provider";
+
+export * from "src/errors";
+export * from "src/types";
+export { defaultPresets } from "src/presets";
 
 export default class SessionAccount extends WalletAccount {
   public controller: CartridgeSessionAccount;
 
   constructor(
-    provider: StarknetWindowObject,
+    provider: BaseProvider,
     {
       rpcUrl,
       privateKey,

@@ -4,13 +4,12 @@ import {
   openLink,
   retrieveLaunchParams,
 } from "@telegram-apps/sdk";
-import { ec, stark } from "starknet";
+import { ec, stark, WalletAccount } from "starknet";
 
 import { KEYCHAIN_URL } from "src/constants";
 import { Policy } from "src/types";
 import SessionAccount from "src/session/account";
-import SessionProvider from "src/session/provider";
-import { TelegramBackend } from "./backend";
+import BaseProvider from "src/provider";
 
 interface SessionRegistration {
   username: string;
@@ -20,38 +19,45 @@ interface SessionRegistration {
   expiresAt: string;
 }
 
-export default class TelegramProvider extends SessionProvider {
+export default class TelegramProvider extends BaseProvider {
   private _tmaUrl: string;
+  protected _chainId: string;
+  protected _username?: string;
+  protected _policies: Policy[];
 
   constructor({
-    rpcUrl,
+    rpc,
     chainId,
     policies,
     tmaUrl,
   }: {
-    rpcUrl: string;
+    rpc: string;
     chainId: string;
     policies: Policy[];
     tmaUrl: string;
   }) {
     super({
-      rpcUrl,
-      chainId,
-      policies,
-      redirectUrl: "",
-      backend: new TelegramBackend(),
+      rpc,
     });
 
     this._tmaUrl = tmaUrl;
+    this._chainId = chainId;
+    this._policies = policies;
+
+    if (typeof window !== "undefined") {
+      (window as any).starknet_controller = this;
+    }
   }
 
-  async connect() {
+  async probe(): Promise<WalletAccount | undefined> {
     await this.tryRetrieveFromQueryOrStorage();
-    if (this._account) {
-      return {
-        account: this._account.address,
-        chainId: await this.chainId(),
-      };
+    return;
+  }
+
+  async connect(): Promise<WalletAccount | undefined> {
+    await this.tryRetrieveFromQueryOrStorage();
+    if (this.account) {
+      return;
     }
 
     // Generate a random local key pair
@@ -70,22 +76,19 @@ export default class TelegramProvider extends SessionProvider {
       this._tmaUrl
     }&redirect_query_name=startapp&policies=${JSON.stringify(
       this._policies,
-    )}&rpc_url=${this._rpcUrl}`;
+    )}&rpc_url=${this.rpc}`;
 
     localStorage.setItem("lastUsedConnector", this.id);
     openLink(url);
     miniApp.close();
 
-    return {
-      account: "",
-      chainId: await this.chainId(),
-    };
+    return;
   }
 
   disconnect(): Promise<void> {
     cloudStorage.deleteItem("sessionSigner");
     cloudStorage.deleteItem("session");
-    this._account = undefined;
+    this.account = undefined;
     this._username = undefined;
     return Promise.resolve();
   }
@@ -113,8 +116,8 @@ export default class TelegramProvider extends SessionProvider {
     }
 
     this._username = sessionRegistration.username;
-    this._account = new SessionAccount(this, {
-      rpcUrl: this._rpcUrl,
+    this.account = new SessionAccount(this, {
+      rpcUrl: this.rpc.toString(),
       privateKey: signer.privKey,
       address: sessionRegistration.address,
       ownerGuid: sessionRegistration.ownerGuid,
@@ -123,6 +126,6 @@ export default class TelegramProvider extends SessionProvider {
       policies: this._policies,
     });
 
-    return this._account;
+    return this.account;
   }
 }

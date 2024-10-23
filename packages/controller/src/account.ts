@@ -6,7 +6,7 @@ import {
   AllowArray,
 } from "starknet";
 
-import { SPEC, StarknetWindowObject } from "@starknet-io/types-js";
+import { SPEC } from "@starknet-io/types-js";
 
 import {
   ConnectError,
@@ -16,6 +16,7 @@ import {
   ResponseCodes,
 } from "./types";
 import { AsyncMethodReturns } from "@cartridge/penpal";
+import BaseProvider from "./provider";
 
 class ControllerAccount extends WalletAccount {
   address: string;
@@ -24,13 +25,13 @@ class ControllerAccount extends WalletAccount {
   private options?: KeychainOptions;
 
   constructor(
-    provider: StarknetWindowObject,
+    provider: BaseProvider,
     address: string,
     keychain: AsyncMethodReturns<Keychain>,
     options: KeychainOptions,
     modal: Modal,
   ) {
-    super({ nodeUrl: options.rpc }, provider);
+    super({ nodeUrl: provider.rpc.toString() }, provider);
 
     this.address = address;
     this.keychain = keychain;

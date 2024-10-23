@@ -1,20 +1,9 @@
 import { Policy } from "@cartridge/controller";
-import { ec, stark } from "starknet";
-import {
-  AddInvokeTransactionParameters,
-  Errors,
-  Permission,
-  RequestAccountsParameters,
-  RequestFn,
-  StarknetWindowObject,
-  WalletEventHandlers,
-  WalletEventListener,
-  WalletEvents,
-} from "@starknet-io/types-js";
+import { ec, stark, WalletAccount } from "starknet";
 
 import SessionAccount from "./account";
-import { icon } from "../icon";
 import { KEYCHAIN_URL } from "src/constants";
+import BaseProvider from "src/provider";
 
 interface SessionRegistration {
   username: string;
@@ -24,175 +13,35 @@ interface SessionRegistration {
   expiresAt: string;
 }
 
-export default class SessionProvider implements StarknetWindowObject {
-  readonly id = "ControllerSession";
-  readonly name = "Controller";
-  readonly version = "0.4.0";
-  readonly icon = icon;
-
+export default class SessionProvider extends BaseProvider {
   protected _chainId: string;
-  protected _backend: UnifiedBackend;
-  protected _rpcUrl: string;
-  protected _policies: Policy[];
+  protected backend: UnifiedBackend;
+
   protected _username?: string;
   protected _redirectUrl: string;
-  protected _account?: SessionAccount;
-  protected subscriptions: WalletEvents[] = [];
+  protected _policies: Policy[];
+  public account?: SessionAccount;
 
   constructor({
-    rpcUrl,
+    rpc,
     chainId,
     policies,
     backend,
     redirectUrl,
   }: {
-    rpcUrl: string;
+    rpc: string;
     chainId: string;
     policies: Policy[];
     redirectUrl: string;
     backend: UnifiedBackend;
   }) {
-    this._rpcUrl = rpcUrl;
-    this._policies = policies;
-    this._backend = backend;
+    super({ policies, rpc });
+
+    this.backend = backend;
     this._chainId = chainId;
     this._redirectUrl = redirectUrl;
+    this._policies = policies;
   }
-
-  request: RequestFn = async (call) => {
-    switch (call.type) {
-      case "wallet_getPermissions":
-        await this.tryRetrieveFromQueryOrStorage();
-
-        if (this._account) {
-          return [Permission.ACCOUNTS];
-        }
-
-        return [];
-
-      case "wallet_requestAccounts": {
-        await this.tryRetrieveFromQueryOrStorage();
-
-        if (this._account) {
-          return [this._account.address];
-        }
-
-        const params = call.params as RequestAccountsParameters;
-
-        if (!params?.silent_mode) {
-          await this.connect();
-        }
-
-        return [];
-      }
-
-      case "wallet_watchAsset":
-        throw {
-          code: 63,
-          message: "An unexpected error occurred",
-          data: "wallet_watchAsset not implemented",
-        } as Errors.UNEXPECTED_ERROR;
-
-      case "wallet_addStarknetChain":
-        throw {
-          code: 63,
-          message: "An unexpected error occurred",
-          data: "wallet_addStarknetChain not implemented",
-        } as Errors.UNEXPECTED_ERROR;
-
-      case "wallet_switchStarknetChain":
-        throw {
-          code: 63,
-          message: "An unexpected error occurred",
-          data: "wallet_switchStarknetChain not implemented",
-        } as Errors.UNEXPECTED_ERROR;
-
-      case "wallet_requestChainId":
-        if (!this._account) {
-          throw {
-            code: 63,
-            message: "An unexpected error occurred",
-            data: "wallet_deploymentData not implemented",
-          } as Errors.UNEXPECTED_ERROR;
-        }
-
-        return this._chainId;
-
-      case "wallet_deploymentData":
-        throw {
-          code: 63,
-          message: "An unexpected error occurred",
-          data: "wallet_deploymentData not implemented",
-        } as Errors.UNEXPECTED_ERROR;
-
-      case "wallet_addInvokeTransaction":
-        if (!this._account) {
-          throw {
-            code: 63,
-            message: "An unexpected error occurred",
-            data: "wallet_deploymentData not implemented",
-          } as Errors.UNEXPECTED_ERROR;
-        }
-
-        let params = call.params as AddInvokeTransactionParameters;
-        return await this._account.execute(
-          params.calls.map((call) => ({
-            contractAddress: call.contract_address,
-            entrypoint: call.entry_point,
-            calldata: call.calldata,
-          })),
-        );
-
-      case "wallet_addDeclareTransaction":
-        throw {
-          code: 63,
-          message: "An unexpected error occurred",
-          data: "wallet_addDeclareTransaction not implemented",
-        } as Errors.UNEXPECTED_ERROR;
-
-      case "wallet_signTypedData":
-        throw {
-          code: 63,
-          message: "An unexpected error occurred",
-          data: "wallet_signTypedData not implemented",
-        } as Errors.UNEXPECTED_ERROR;
-      case "wallet_supportedSpecs":
-        return [];
-      case "wallet_supportedWalletApi":
-        return [];
-      default:
-        throw {
-          code: 63,
-          message: "An unexpected error occurred",
-          data: `Unknown RPC call type: ${call.type}`,
-        } as Errors.UNEXPECTED_ERROR;
-    }
-  };
-
-  on: WalletEventListener = <E extends keyof WalletEventHandlers>(
-    event: E,
-    handler: WalletEventHandlers[E],
-  ): void => {
-    if (event !== "accountsChanged" && event !== "networkChanged") {
-      throw new Error(`Unknown event: ${event}`);
-    }
-    this.subscriptions.push({ type: event, handler } as WalletEvents);
-  };
-
-  off: WalletEventListener = <E extends keyof WalletEventHandlers>(
-    event: E,
-    handler: WalletEventHandlers[E],
-  ): void => {
-    if (event !== "accountsChanged" && event !== "networkChanged") {
-      throw new Error(`Unknown event: ${event}`);
-    }
-    const idx = this.subscriptions.findIndex(
-      (sub) => sub.type === event && sub.handler === handler,
-    );
-    if (idx >= 0) {
-      this.subscriptions.splice(idx, 1);
-    }
-  };
 
   async chainId() {
     return Promise.resolve(BigInt(this._chainId));
@@ -203,20 +52,22 @@ export default class SessionProvider implements StarknetWindowObject {
     return this._username;
   }
 
-  async connect() {
+  async probe(): Promise<WalletAccount | undefined> {
     await this.tryRetrieveFromQueryOrStorage();
-    if (this._account) {
-      return {
-        account: this._account.address,
-        chainId: await this.chainId(),
-      };
+    return;
+  }
+
+  async connect(): Promise<WalletAccount | undefined> {
+    await this.tryRetrieveFromQueryOrStorage();
+    if (this.account) {
+      return;
     }
 
     // Generate a random local key pair
     const pk = stark.randomAddress();
     const publicKey = ec.starkCurve.getStarkKey(pk);
 
-    this._backend.set(
+    this.backend.set(
       "sessionSigner",
       JSON.stringify({
         privKey: pk,
@@ -228,37 +79,24 @@ export default class SessionProvider implements StarknetWindowObject {
       this._redirectUrl
     }&redirect_query_name=startapp&policies=${JSON.stringify(
       this._policies,
-    )}&rpc_url=${this._rpcUrl}`;
+    )}&rpc_url=${this.rpc}`;
 
     localStorage.setItem("lastUsedConnector", this.id);
-    this._backend.openLink(url);
+    this.backend.openLink(url);
 
-    return {
-      account: "",
-      chainId: await this.chainId(),
-    };
+    return;
   }
 
   disconnect(): Promise<void> {
-    this._backend.delete("sessionSigner");
-    this._backend.delete("session");
-    this._account = undefined;
+    this.backend.delete("sessionSigner");
+    this.backend.delete("session");
+    this.account = undefined;
     this._username = undefined;
     return Promise.resolve();
   }
 
-  async account() {
-    await this.tryRetrieveFromQueryOrStorage();
-
-    if (!this._account) {
-      return Promise.reject("Session not registered");
-    }
-
-    return this._account;
-  }
-
   async tryRetrieveFromQueryOrStorage() {
-    const signer = JSON.parse((await this._backend.get("sessionSigner"))!);
+    const signer = JSON.parse((await this.backend.get("sessionSigner"))!);
     let sessionRegistration: SessionRegistration | null = null;
 
     if (window.location.search.includes("startapp")) {
@@ -266,7 +104,7 @@ export default class SessionProvider implements StarknetWindowObject {
       const session = params.get("startapp");
       if (session) {
         sessionRegistration = JSON.parse(atob(session));
-        this._backend.set("session", JSON.stringify(sessionRegistration));
+        this.backend.set("session", JSON.stringify(sessionRegistration));
 
         // Remove the session query parameter
         params.delete("startapp");
@@ -279,7 +117,7 @@ export default class SessionProvider implements StarknetWindowObject {
     }
 
     if (!sessionRegistration) {
-      const session = await this._backend.get("session");
+      const session = await this.backend.get("session");
       if (session) {
         sessionRegistration = JSON.parse(session);
       }
@@ -290,8 +128,8 @@ export default class SessionProvider implements StarknetWindowObject {
     }
 
     this._username = sessionRegistration.username;
-    this._account = new SessionAccount(this, {
-      rpcUrl: this._rpcUrl,
+    this.account = new SessionAccount(this, {
+      rpcUrl: this.rpc.toString(),
       privateKey: signer.privKey,
       address: sessionRegistration.address,
       ownerGuid: sessionRegistration.ownerGuid,
@@ -300,6 +138,6 @@ export default class SessionProvider implements StarknetWindowObject {
       policies: this._policies,
     });
 
-    return this._account;
+    return this.account;
   }
 }

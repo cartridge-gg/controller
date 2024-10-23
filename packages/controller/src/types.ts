@@ -77,10 +77,7 @@ export type ControllerAccounts = Record<ContractAddress, CartridgeID>;
 
 export interface Keychain {
   probe(rpcUrl: string): Promise<ProbeReply | ConnectError>;
-  connect(
-    policies: Policy[],
-    rpcUrl: string,
-  ): Promise<ConnectReply | ConnectError>;
+  connect(rpcUrl: string): Promise<ConnectReply | ConnectError>;
   disconnect(): void;
 
   reset(): void;
@@ -117,7 +114,9 @@ export interface Modal {
 /**
  * Options for configuring the controller
  */
-export type ControllerOptions = KeychainOptions & ProfileOptions;
+export type ControllerOptions = ProviderOptions &
+  KeychainOptions &
+  ProfileOptions;
 
 export type TokenOptions = {
   tokens: Tokens;
@@ -137,12 +136,16 @@ export type IFrameOptions = {
   };
 };
 
+export type ProviderOptions = {
+  policies?: Policy[];
+  /** The URL of the RPC */
+  rpc: string;
+};
+
 export type KeychainOptions = IFrameOptions & {
   policies?: Policy[];
   /** The URL of keychain */
   url?: string;
-  /** The URL of the RPC */
-  rpc: string;
   /** The origin of keychain */
   origin?: string;
   /** Paymaster options for transaction fee management */
