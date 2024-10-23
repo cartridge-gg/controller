@@ -222,7 +222,7 @@ impl CartridgeAccount {
             .map(TryInto::try_into)
             .collect::<std::result::Result<_, _>>()?;
 
-        let response = self.controller.execute_from_outside(calls).await?;
+        let response = self.controller.execute_from_outside_v3(calls).await?;
         Ok(to_value(&response)?)
     }
 

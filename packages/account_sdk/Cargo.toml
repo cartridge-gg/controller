@@ -13,6 +13,7 @@ anyhow.workspace = true
 async-trait.workspace = true
 auto_impl = "1.0"
 cainome.workspace = true
+cainome-cairo-serde.workspace = true
 futures.workspace = true
 hex.workspace = true
 lazy_static.workspace = true

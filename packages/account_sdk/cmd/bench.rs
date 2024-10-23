@@ -1,5 +1,7 @@
-use account_sdk::abigen::controller::{Call, OutsideExecution};
-use account_sdk::account::outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller};
+use account_sdk::abigen::controller::{Call, OutsideExecutionV3};
+use account_sdk::account::outside_execution::{
+    OutsideExecution, OutsideExecutionAccount, OutsideExecutionCaller,
+};
 use account_sdk::account::session::hash::Policy;
 use account_sdk::artifacts::{Version, CONTROLLERS};
 use account_sdk::controller::Controller;
@@ -169,7 +171,7 @@ async fn flip(
 
     let session_account = controller.session_account(&[flip.clone().into()]).unwrap();
 
-    let flip_execution = OutsideExecution {
+    let flip_execution = OutsideExecutionV3 {
         caller: OutsideExecutionCaller::Any.into(),
         execute_after: 0,
         execute_before: u32::MAX as u64,
@@ -178,14 +180,14 @@ async fn flip(
     };
 
     let flip_signed = session_account
-        .sign_outside_execution(flip_execution.clone())
+        .sign_outside_execution(OutsideExecution::V3(flip_execution.clone()))
         .await
         .unwrap();
 
     controller
         .provider
         .add_execute_outside_transaction(
-            flip_execution,
+            OutsideExecution::V3(flip_execution),
             controller.address(),
             flip_signed.signature,
         )

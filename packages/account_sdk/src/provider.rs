@@ -16,7 +16,7 @@ use starknet::providers::{
 };
 use url::Url;
 
-use crate::abigen::controller::OutsideExecution;
+use crate::account::outside_execution::OutsideExecution;
 
 #[cfg(test)]
 #[path = "provider_test.rs"]

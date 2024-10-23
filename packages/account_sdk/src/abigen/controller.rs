@@ -228,7 +228,7 @@ impl cainome::cairo_serde::CairoSerde for ExternalOwnerRemoved {
     }
 }
 #[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
-pub struct OutsideExecution {
+pub struct OutsideExecutionV3 {
     pub caller: cainome::cairo_serde::ContractAddress,
     #[serde(
         serialize_with = "cainome::cairo_serde::serialize_as_hex_t2",
@@ -247,7 +247,7 @@ pub struct OutsideExecution {
     pub execute_before: u64,
     pub calls: Vec<Call>,
 }
-impl cainome::cairo_serde::CairoSerde for OutsideExecution {
+impl cainome::cairo_serde::CairoSerde for OutsideExecutionV3 {
     type RustType = Self;
     const SERIALIZED_SIZE: std::option::Option<usize> = None;
     #[inline]
@@ -288,7 +288,7 @@ impl cainome::cairo_serde::CairoSerde for OutsideExecution {
         __offset += u64::cairo_serialized_size(&execute_before);
         let calls = Vec::<Call>::cairo_deserialize(__felts, __offset)?;
         __offset += Vec::<Call>::cairo_serialized_size(&calls);
-        Ok(OutsideExecution {
+        Ok(OutsideExecutionV3 {
             caller,
             nonce,
             execute_after,
@@ -960,7 +960,7 @@ pub enum ControllerEvent {
     ReentrancyGuardEvent(ReentrancyGuardEvent),
     SessionEvent(SessionEvent),
     ExternalOwnersEvent(ExternalOwnersEvent),
-    ExecuteFromOutsideEvents(OutsideExecutionEvent),
+    ExecuteFromOutsideEvents(OutsideExecutionV3Event),
     DelegateAccountEvents(DelegateAccountEvent),
     SRC5Events(Src5ComponentEvent),
     UpgradeableEvent(UpgradeEvent),
@@ -985,7 +985,7 @@ impl cainome::cairo_serde::CairoSerde for ControllerEvent {
                 ExternalOwnersEvent::cairo_serialized_size(val) + 1
             }
             ControllerEvent::ExecuteFromOutsideEvents(val) => {
-                OutsideExecutionEvent::cairo_serialized_size(val) + 1
+                OutsideExecutionV3Event::cairo_serialized_size(val) + 1
             }
             ControllerEvent::DelegateAccountEvents(val) => {
                 DelegateAccountEvent::cairo_serialized_size(val) + 1
@@ -1030,7 +1030,7 @@ impl cainome::cairo_serde::CairoSerde for ControllerEvent {
             ControllerEvent::ExecuteFromOutsideEvents(val) => {
                 let mut temp = vec![];
                 temp.extend(usize::cairo_serialize(&5usize));
-                temp.extend(OutsideExecutionEvent::cairo_serialize(val));
+                temp.extend(OutsideExecutionV3Event::cairo_serialize(val));
                 temp
             }
             ControllerEvent::DelegateAccountEvents(val) => {
@@ -1077,7 +1077,7 @@ impl cainome::cairo_serde::CairoSerde for ControllerEvent {
                 ExternalOwnersEvent::cairo_deserialize(__felts, __offset + 1)?,
             )),
             5usize => Ok(ControllerEvent::ExecuteFromOutsideEvents(
-                OutsideExecutionEvent::cairo_deserialize(__felts, __offset + 1)?,
+                OutsideExecutionV3Event::cairo_deserialize(__felts, __offset + 1)?,
             )),
             6usize => Ok(ControllerEvent::DelegateAccountEvents(
                 DelegateAccountEvent::cairo_deserialize(__felts, __offset + 1)?,
@@ -1639,8 +1639,8 @@ impl TryFrom<starknet::core::types::EmittedEvent> for MultipleOwnersEvent {
     }
 }
 #[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
-pub enum OutsideExecutionEvent {}
-impl cainome::cairo_serde::CairoSerde for OutsideExecutionEvent {
+pub enum OutsideExecutionV3Event {}
+impl cainome::cairo_serde::CairoSerde for OutsideExecutionV3Event {
     type RustType = Self;
     const SERIALIZED_SIZE: std::option::Option<usize> = std::option::Option::None;
     #[inline]
@@ -1664,13 +1664,13 @@ impl cainome::cairo_serde::CairoSerde for OutsideExecutionEvent {
             _ => {
                 return Err(cainome::cairo_serde::Error::Deserialize(format!(
                     "Index not handle for enum {}",
-                    "OutsideExecutionEvent"
+                    "OutsideExecutionV3Event"
                 )));
             }
         }
     }
 }
-impl TryFrom<starknet::core::types::EmittedEvent> for OutsideExecutionEvent {
+impl TryFrom<starknet::core::types::EmittedEvent> for OutsideExecutionV3Event {
     type Error = String;
     fn try_from(event: starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
         use cainome::cairo_serde::CairoSerde;
@@ -2257,11 +2257,11 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
     #[allow(clippy::too_many_arguments)]
     pub fn get_outside_execution_message_hash_rev_2(
         &self,
-        outside_execution: &OutsideExecution,
+        outside_execution: &OutsideExecutionV3,
     ) -> cainome::cairo_serde::call::FCall<A::Provider, starknet::core::types::Felt> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
-        __calldata.extend(OutsideExecution::cairo_serialize(outside_execution));
+        __calldata.extend(OutsideExecutionV3::cairo_serialize(outside_execution));
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
             entry_point_selector: starknet::macros::selector!(
@@ -2600,12 +2600,12 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
     #[allow(clippy::too_many_arguments)]
     pub fn execute_from_outside_v3_getcall(
         &self,
-        outside_execution: &OutsideExecution,
+        outside_execution: &OutsideExecutionV3,
         signature: &Vec<starknet::core::types::Felt>,
     ) -> starknet::core::types::Call {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
-        __calldata.extend(OutsideExecution::cairo_serialize(outside_execution));
+        __calldata.extend(OutsideExecutionV3::cairo_serialize(outside_execution));
         __calldata.extend(Vec::<starknet::core::types::Felt>::cairo_serialize(
             signature,
         ));
@@ -2619,12 +2619,12 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
     #[allow(clippy::too_many_arguments)]
     pub fn execute_from_outside_v3(
         &self,
-        outside_execution: &OutsideExecution,
+        outside_execution: &OutsideExecutionV3,
         signature: &Vec<starknet::core::types::Felt>,
     ) -> starknet::accounts::ExecutionV1<A> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
-        __calldata.extend(OutsideExecution::cairo_serialize(outside_execution));
+        __calldata.extend(OutsideExecutionV3::cairo_serialize(outside_execution));
         __calldata.extend(Vec::<starknet::core::types::Felt>::cairo_serialize(
             signature,
         ));
@@ -2906,11 +2906,11 @@ impl<P: starknet::providers::Provider + Sync> ControllerReader<P> {
     #[allow(clippy::too_many_arguments)]
     pub fn get_outside_execution_message_hash_rev_2(
         &self,
-        outside_execution: &OutsideExecution,
+        outside_execution: &OutsideExecutionV3,
     ) -> cainome::cairo_serde::call::FCall<P, starknet::core::types::Felt> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
-        __calldata.extend(OutsideExecution::cairo_serialize(outside_execution));
+        __calldata.extend(OutsideExecutionV3::cairo_serialize(outside_execution));
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
             entry_point_selector: starknet::macros::selector!(

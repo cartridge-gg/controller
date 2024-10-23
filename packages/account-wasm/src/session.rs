@@ -1,5 +1,7 @@
-use account_sdk::abigen::controller::OutsideExecution;
-use account_sdk::account::outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller};
+use account_sdk::abigen::controller::OutsideExecutionV3;
+use account_sdk::account::outside_execution::{
+    OutsideExecution, OutsideExecutionAccount, OutsideExecutionCaller,
+};
 use account_sdk::account::session::SessionAccount;
 use account_sdk::account::AccountHashAndCallsSigner;
 use account_sdk::provider::{CartridgeJsonRpcProvider, CartridgeProvider};
@@ -154,7 +156,7 @@ impl CartridgeSessionAccount {
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
         let now = get_current_timestamp();
-        let outside_execution = OutsideExecution {
+        let outside_execution = OutsideExecutionV3 {
             caller: caller.into(),
             execute_after: 0_u64,
             execute_before: now + 600,
@@ -164,13 +166,17 @@ impl CartridgeSessionAccount {
 
         let signed = self
             .0
-            .sign_outside_execution(outside_execution.clone())
+            .sign_outside_execution(OutsideExecution::V3(outside_execution.clone()))
             .await?;
 
         let res = self
             .0
             .provider()
-            .add_execute_outside_transaction(outside_execution, self.0.address(), signed.signature)
+            .add_execute_outside_transaction(
+                OutsideExecution::V3(outside_execution),
+                self.0.address(),
+                signed.signature,
+            )
             .await?;
 
         Ok(to_value(&res)?)

@@ -3,15 +3,16 @@ use starknet::{
     accounts::Account,
     macros::{felt, selector},
     providers::Provider,
+    signers::SigningKey,
 };
 
 use crate::{
     abigen::{
-        controller::{Call, OutsideExecution},
+        controller::{Call, OutsideExecutionV3},
         erc_20::Erc20,
     },
     account::{
-        outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller},
+        outside_execution::{OutsideExecution, OutsideExecutionAccount, OutsideExecutionCaller},
         session::hash::Policy,
     },
     artifacts::{Version, CONTROLLERS},
@@ -61,7 +62,7 @@ pub async fn test_verify_paymaster_execute(signer: Signer, use_session: bool) {
         .concat(),
     }];
 
-    let tx = controller.execute_from_outside(calls).await.unwrap();
+    let tx = controller.execute_from_outside_v3(calls).await.unwrap();
 
     TransactionWaiter::new(tx.transaction_hash, runner.client())
         .wait()
@@ -141,7 +142,7 @@ async fn test_verify_execute_paymaster_should_fail() {
         high: 0,
     };
 
-    let outside_execution = OutsideExecution {
+    let outside_execution = OutsideExecutionV3 {
         caller: OutsideExecutionCaller::Any.into(),
         execute_after: u64::MIN,
         execute_before: u64::MAX,
@@ -154,7 +155,7 @@ async fn test_verify_execute_paymaster_should_fail() {
             ]
             .concat(),
         }],
-        nonce: controller.random_outside_execution_nonce(),
+        nonce: (SigningKey::from_random().secret_scalar(), 1),
     };
 
     let wrong_account = Controller::new(
@@ -168,7 +169,7 @@ async fn test_verify_execute_paymaster_should_fail() {
     );
 
     let outside_execution = wrong_account
-        .sign_outside_execution(outside_execution.clone())
+        .sign_outside_execution(OutsideExecution::V3(outside_execution.clone()))
         .await
         .unwrap();
 
@@ -207,7 +208,7 @@ async fn test_verify_execute_paymaster_session() {
         .await
         .unwrap();
 
-    let outside_execution = OutsideExecution {
+    let outside_execution = OutsideExecutionV3 {
         caller: OutsideExecutionCaller::Any.into(),
         execute_after: u64::MIN,
         execute_before: u64::MAX,
@@ -220,11 +221,11 @@ async fn test_verify_execute_paymaster_session() {
             ]
             .concat(),
         }],
-        nonce: session_account.random_outside_execution_nonce(),
+        nonce: (SigningKey::from_random().secret_scalar(), 1),
     };
 
     let outside_execution = session_account
-        .sign_outside_execution(outside_execution)
+        .sign_outside_execution(OutsideExecution::V3(outside_execution))
         .await
         .unwrap();
 
