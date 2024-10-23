@@ -20,6 +20,7 @@ export function Achievement({
   completed,
   pinned,
   id,
+  softview,
   enabled,
   onPin,
 }: {
@@ -32,6 +33,7 @@ export function Achievement({
   completed: boolean;
   pinned: boolean;
   id: string;
+  softview: boolean;
   enabled: boolean;
   onPin: (id: string) => void;
 }) {
@@ -66,7 +68,7 @@ export function Achievement({
         </div>
         <Description description={description} />
       </div>
-      {completed && (
+      {completed && !softview && (
         <Track enabled={enabled} pinned={pinned} id={id} onPin={onPin} />
       )}
     </div>

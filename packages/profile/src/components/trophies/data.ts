@@ -156,7 +156,8 @@ export const players: Player[] = [
   },
   {
     username: "shinoba",
-    address: "0x1237",
+    address:
+      "0x1dd5efe9183068f561b848cc88517f3f2e82a2cf8f74eb168e2d2e7463ddf47",
     earnings: 750,
     rank: 4,
     Icon: undefined,
@@ -185,7 +186,7 @@ export const players: Player[] = [
   {
     username: "Bal7hazar",
     address:
-      "0x36f0afcccd4ae57a279602a829709779de48007e9d49634b53518018c99bb82",
+      "0x23b5fc37f0a0f9961d4a6818e902e1064b2f74dd671c9434658fbc45f817a77",
     earnings: 950,
     rank: 1,
     Icon: OlmechIcon,

@@ -51,6 +51,29 @@ export function LeaderboardTab({
   );
 }
 
+export function Scoreboard({
+  rank,
+  earnings,
+}: {
+  rank: number;
+  earnings: number;
+}) {
+  return (
+    <div className="flex gap-3">
+      <div className="flex items-center border border-secondary rounded-md py-2 px-3">
+        <Item
+          Icon={LeaderboardIcon}
+          active={true}
+          label={!rank ? "---" : `#${rank}`}
+        />
+      </div>
+      <div className="flex items-center border border-secondary rounded-md py-2 px-3">
+        <Item Icon={SparklesIcon} active={true} label={`${earnings}`} />
+      </div>
+    </div>
+  );
+}
+
 export function Tab({
   active,
   onClick,

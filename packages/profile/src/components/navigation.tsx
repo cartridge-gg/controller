@@ -32,7 +32,7 @@ function Item({
   const location = useLocation();
 
   const isActive =
-    location.pathname == `/${variant}` ||
+    location.pathname.includes(`/${variant}`) ||
     (variant === "inventory" && location.pathname === "/");
 
   return (

@@ -3,16 +3,27 @@ import {
   LayoutContent,
   LayoutHeader,
 } from "@/components/layout";
-import { ScrollArea, StateIconProps } from "@cartridge/ui-next";
-import { TrophiesTab, LeaderboardTab } from "./tab";
+import { Link } from "react-router-dom";
+import {
+  ScrollArea,
+  StateIconProps,
+  Button,
+  ArrowIcon,
+} from "@cartridge/ui-next";
+import { TrophiesTab, LeaderboardTab, Scoreboard } from "./tab";
 import { useAccount } from "@/hooks/context";
 import { CopyAddress } from "@cartridge/ui-next";
 import { Navigation } from "../navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 import { Achievements } from "./achievements";
 import { Pinneds } from "./pinneds";
 import { Leaderboard } from "./leaderboard";
 import { items, players } from "./data";
+import {
+  AccountNameQuery,
+  useAccountNameQuery,
+} from "@cartridge/utils/api/cartridge";
 
 export interface Item {
   id: string;
@@ -38,7 +49,9 @@ export interface Player {
 }
 
 export function Trophies() {
-  const { username, address } = useAccount();
+  const { address: self } = useAccount();
+  const { address } = useParams<{ address: string }>();
+  const [username, setUsername] = useState<string>("");
   const [achievements, setAchievements] = useState<Item[]>([]);
   const [activeTab, setActiveTab] = useState<"trophies" | "leaderboard">(
     "trophies",
@@ -55,11 +68,16 @@ export function Trophies() {
     const rank =
       players
         .sort((a, b) => a.rank - b.rank)
-        .findIndex((player) => player.address === address) + 1;
+        .findIndex((player) => player.address === (address || self)) + 1;
     const earnings =
-      players.find((player) => player.address === address)?.earnings || 0;
+      players.find((player) => player.address === (address || self))
+        ?.earnings || 0;
     return { rank, earnings };
-  }, [address]);
+  }, [address, self]);
+
+  const isSelf = useMemo(() => {
+    return !address || address === self;
+  }, [address, self]);
 
   useEffect(() => {
     // Sort by id, timestamp, and completion
@@ -81,45 +99,84 @@ export function Trophies() {
     [achievements],
   );
 
+  const { refetch: refetchName } = useAccountNameQuery(
+    { address: address || self },
+    {
+      enabled: false,
+      onSuccess: async (data: AccountNameQuery) => {
+        setUsername(data.accounts?.edges?.[0]?.node?.id ?? "Anonymous");
+      },
+    },
+  );
+
+  const fetchName = useCallback(async () => {
+    await refetchName();
+  }, [refetchName]);
+
+  useEffect(() => {
+    fetchName();
+  }, [fetchName, address]);
+
   return (
-    <LayoutContainer>
+    <LayoutContainer
+      left={
+        !isSelf ? (
+          <Link to="/trophies">
+            <Button variant="icon" size="icon">
+              <ArrowIcon variant="left" />
+            </Button>
+          </Link>
+        ) : undefined
+      }
+    >
       <LayoutHeader
         title={username}
-        description={<CopyAddress address={address} size="sm" />}
-        right={<Navigation />}
+        description={<CopyAddress address={address || self} size="sm" />}
+        right={
+          isSelf ? (
+            <Navigation />
+          ) : (
+            <Scoreboard rank={rank} earnings={earnings} />
+          )
+        }
       />
 
       {items.length ? (
         <LayoutContent className="pb-4">
-          <div className="flex justify-between gap-4">
-            <TrophiesTab
-              active={activeTab === "trophies"}
-              completed={completed}
-              total={total}
-              onClick={() => setActiveTab("trophies")}
-            />
-            <LeaderboardTab
-              active={activeTab === "leaderboard"}
-              rank={rank}
-              earnings={earnings}
-              onClick={() => setActiveTab("leaderboard")}
-            />
-          </div>
-          <ScrollArea className="overflow-auto">
-            {activeTab === "trophies" && (
+          {isSelf && (
+            <div className="flex justify-between gap-4">
+              <TrophiesTab
+                active={activeTab === "trophies"}
+                completed={completed}
+                total={total}
+                onClick={() => setActiveTab("trophies")}
+              />
+              <LeaderboardTab
+                active={activeTab === "leaderboard"}
+                rank={rank}
+                earnings={earnings}
+                onClick={() => setActiveTab("leaderboard")}
+              />
+            </div>
+          )}
+          {(!isSelf || activeTab === "trophies") && (
+            <ScrollArea className="overflow-auto">
               <div className="flex flex-col h-full flex-1 overflow-y-auto gap-4">
                 <Pinneds achievements={pinneds} />
                 <Achievements
                   achievements={achievements}
+                  softview={!isSelf}
                   enabled={pinneds.length < 3}
                   onPin={onPin}
                 />
               </div>
-            )}
-            {activeTab === "leaderboard" && (
-              <Leaderboard players={players} address={address} />
-            )}
-          </ScrollArea>
+            </ScrollArea>
+          )}
+          {isSelf && activeTab === "leaderboard" && (
+            <ScrollArea className="overflow-auto">
+              <Leaderboard players={players} address={self} />
+            </ScrollArea>
+          )}
         </LayoutContent>
       ) : (
         <LayoutContent className="pb-4">

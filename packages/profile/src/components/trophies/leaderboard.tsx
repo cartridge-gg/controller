@@ -4,6 +4,7 @@ import {
   SparklesIcon,
   StateIconProps,
 } from "@cartridge/ui-next";
+import { Link } from "react-router-dom";
 import { Player } from ".";
 
 export function Leaderboard({
@@ -31,12 +32,13 @@ export function Leaderboard({
 function Row({
   self,
   username,
+  address,
   earnings,
   rank,
   Icon,
 }: Player & { self: boolean }) {
   return (
-    <div className="flex">
+    <Link className="flex" to={`/trophies/${address}`} key={address}>
       {self && <div className="w-[4px] bg-muted" />}
       <div
         className={cn(
@@ -50,7 +52,7 @@ function Row({
         </div>
         <Earnings earnings={earnings} self={self} />
       </div>
-    </div>
+    </Link>
   );
 }
 

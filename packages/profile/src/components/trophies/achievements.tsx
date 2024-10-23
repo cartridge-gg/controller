@@ -5,10 +5,12 @@ import { useMemo } from "react";
 
 export function Achievements({
   achievements,
+  softview,
   enabled,
   onPin,
 }: {
   achievements: Item[];
+  softview: boolean;
   enabled: boolean;
   onPin: (id: string) => void;
 }) {
@@ -38,28 +40,31 @@ export function Achievements({
           {`${completed} of ${total}`}
         </p>
       </div>
-      {achievements.map((achievement, index) => (
-        <Achievement
-          key={index}
-          Icon={achievement.Icon}
-          title={
-            achievement.hidden ? achievement.hidden_title : achievement.title
-          }
-          description={
-            achievement.hidden
-              ? achievement.hidden_description
-              : achievement.description
-          }
-          percentage={achievement.percentage}
-          earning={achievement.earning}
-          timestamp={achievement.timestamp}
-          completed={achievement.completed}
-          pinned={achievement.pinned}
-          id={achievement.id}
-          enabled={enabled}
-          onPin={onPin}
-        />
-      ))}
+      {achievements
+        .filter((a) => a.completed || !softview)
+        .map((achievement, index) => (
+          <Achievement
+            key={index}
+            Icon={achievement.Icon}
+            title={
+              achievement.hidden ? achievement.hidden_title : achievement.title
+            }
+            description={
+              achievement.hidden
+                ? achievement.hidden_description
+                : achievement.description
+            }
+            percentage={achievement.percentage}
+            earning={achievement.earning}
+            timestamp={achievement.timestamp}
+            completed={achievement.completed}
+            pinned={achievement.pinned}
+            id={achievement.id}
+            softview={softview}
+            enabled={enabled}
+            onPin={onPin}
+          />
+        ))}
     </div>
   );
 }
