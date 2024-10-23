@@ -39,7 +39,7 @@ export function useERC20Balance({
 
       const balance = await m.instance.balanceOf(address);
 
-      setValue(BigInt(balance));
+      setValue(balance);
     },
     { refreshInterval: interval },
   );
