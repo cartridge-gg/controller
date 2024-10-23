@@ -90,16 +90,6 @@ export default class TelegramProvider extends SessionProvider {
     return Promise.resolve();
   }
 
-  async account() {
-    await this.tryRetrieveFromQueryOrStorage();
-
-    if (!this._account) {
-      return Promise.reject("Session not registered");
-    }
-
-    return this._account;
-  }
-
   async tryRetrieveFromQueryOrStorage() {
     const signer = JSON.parse((await cloudStorage.getItem("sessionSigner"))!);
     let sessionRegistration: SessionRegistration | null = null;

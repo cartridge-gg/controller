@@ -29,12 +29,6 @@ import {
   ProfileContextTypeVariant,
 } from "./types";
 
-export * from "./errors";
-export * from "./inject";
-export * from "./types";
-
-export { defaultPresets } from "./presets";
-
 export default class ControllerProvider implements StarknetWindowObject {
   public id = "Controller";
   public name = "Controller";

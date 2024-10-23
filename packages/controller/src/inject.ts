@@ -1,4 +1,5 @@
-import ControllerProvider, { ControllerOptions } from "./controller";
+import { ControllerOptions } from "./";
+import ControllerProvider from "./controller";
 
 export class InjectedController extends ControllerProvider {
   constructor(options: ControllerOptions) {
