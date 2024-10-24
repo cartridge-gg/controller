@@ -11,7 +11,7 @@ import { ERC20 as ERC20Option } from "@cartridge/controller";
 import { getChecksumAddress } from "starknet";
 
 type ERC20Status = ERC20Metadata & {
-  balance?: number;
+  balance?: bigint;
   error?: Error;
 };
 
@@ -19,7 +19,7 @@ type AccountContextType = {
   address: string;
   username: string;
   erc20: (ERC20Status & {
-    balance?: number;
+    balance?: bigint;
     error?: Error;
   })[];
   isFetching: boolean;
