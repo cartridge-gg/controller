@@ -32,6 +32,9 @@ pub enum EncodingError {
 
     #[error("Serialization error: {0}")]
     Serialization(#[from] serde_wasm_bindgen::Error),
+
+    #[error("Unexpected option: {0}")]
+    UnexpectedOption(String),
 }
 
 // need this in order to be able to deserialize from BOTH decimal and hex (0x-prefixed) string.
