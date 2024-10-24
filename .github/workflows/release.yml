@@ -31,6 +31,11 @@ jobs:
         run: pnpm install
 
       - name: Publish to npm
-        run: pnpm release
+        run: |
+          if [[ $(npm pkg get version) == *"-alpha"* ]]; then
+            pnpm publish --tag alpha
+          else
+            pnpm publish
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
