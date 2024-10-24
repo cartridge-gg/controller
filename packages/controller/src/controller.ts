@@ -119,7 +119,7 @@ export default class ControllerProvider extends BaseProvider {
       }
 
       response = response as ConnectReply;
-      this.account = this.account = new ControllerAccount(
+      this.account = new ControllerAccount(
         this,
         response.address,
         this.keychain,
