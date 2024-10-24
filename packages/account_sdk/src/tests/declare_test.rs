@@ -1,6 +1,6 @@
 use starknet::accounts::Account;
 
-use crate::account::session::hash::Policy;
+use crate::account::session::hash::CallPolicy;
 use crate::account::DECLARATION_SELECTOR;
 use crate::artifacts::Version;
 use crate::signers::{Owner, Signer};
@@ -42,10 +42,11 @@ async fn test_declare_with_session() {
 
     let session_account = controller
         .create_session(
-            vec![Policy {
+            vec![CallPolicy {
                 contract_address: controller.address(),
                 selector: DECLARATION_SELECTOR,
-            }],
+            }
+            .into()],
             u64::MAX,
         )
         .await

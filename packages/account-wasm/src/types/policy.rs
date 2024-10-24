@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
-use starknet::core::{types::Felt, utils::get_selector_from_name};
-use std::str::FromStr;
+// use starknet::core::{types::Felt, utils::get_selector_from_name};
+// use std::str::FromStr;
 use tsify_next::Tsify;
 use wasm_bindgen::prelude::*;
 
@@ -25,19 +25,21 @@ impl TryFrom<JsValue> for Policy {
 impl TryFrom<Policy> for account_sdk::account::session::hash::Policy {
     type Error = EncodingError;
 
-    fn try_from(value: Policy) -> Result<Self, Self::Error> {
-        Ok(Self {
-            contract_address: Felt::from_str(&value.target)?,
-            selector: get_selector_from_name(&value.method).unwrap(),
-        })
+    fn try_from(_value: Policy) -> Result<Self, Self::Error> {
+        todo!();
+        // Ok(Self {
+        //     contract_address: Felt::from_str(&value.target)?,
+        //     selector: get_selector_from_name(&value.method).unwrap(),
+        // })
     }
 }
 
 impl From<account_sdk::account::session::hash::Policy> for Policy {
-    fn from(value: account_sdk::account::session::hash::Policy) -> Self {
-        Self {
-            target: value.contract_address.to_string(),
-            method: value.selector.to_string(),
-        }
+    fn from(_value: account_sdk::account::session::hash::Policy) -> Self {
+        todo!();
+        // Self {
+        //     target: value.contract_address.to_string(),
+        //     method: value.selector.to_string(),
+        // }
     }
 }
