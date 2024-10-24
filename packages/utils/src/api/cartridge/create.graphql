@@ -9,6 +9,7 @@ mutation FinalizeRegistration($credentials: String!, $network: String!) {
       edges {
         node {
           address
+          constructorCalldata
           signers {
             type
           }
@@ -37,6 +38,7 @@ query Account($id: ID!) {
       edges {
         node {
           address
+          constructorCalldata
           signers {
             type
           }
