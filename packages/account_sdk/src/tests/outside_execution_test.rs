@@ -12,7 +12,7 @@ use crate::{
         erc_20::Erc20,
     },
     account::{
-        outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller},
+        outside_execution::{OutsideExecution, OutsideExecutionAccount, OutsideExecutionCaller},
         session::hash::Policy,
     },
     artifacts::{Version, CONTROLLERS},
