@@ -2,6 +2,7 @@ import { ResponseCodes, ConnectError } from "@cartridge/controller";
 import { Call, InvokeFunctionResponse, num } from "starknet";
 import { ConnectionCtx, ControllerError, ExecuteCtx } from "./types";
 import { ErrorCode } from "@cartridge/account-wasm/controller";
+import Controller from "utils/controller";
 
 export const ESTIMATE_FEE_PERCENTAGE = 10;
 
@@ -34,7 +35,7 @@ export function execute({
     sync?: boolean,
     error?: ControllerError,
   ): Promise<InvokeFunctionResponse | ConnectError> => {
-    const account = window.controller;
+    const account: Controller = window.controller;
 
     if (sync) {
       return await new Promise((resolve, reject) => {
@@ -95,7 +96,7 @@ export function execute({
       }
 
       try {
-        let estimate = await account.cartridge.estimateInvokeFee(calls);
+        let estimate = await account.estimateInvokeFee(calls);
         let maxFee = num.toHex(
           num.addPercent(estimate.overall_fee, ESTIMATE_FEE_PERCENTAGE),
         );
