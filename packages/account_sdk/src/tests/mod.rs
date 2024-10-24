@@ -18,6 +18,7 @@ mod delegate_account_test;
 mod external_owners_test;
 mod outside_execution_test;
 mod owner_test;
+mod session_off_chain_sig_test;
 
 #[derive(Error, Debug)]
 pub enum EnsureTxnError<S> {

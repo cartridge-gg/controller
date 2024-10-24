@@ -1,11 +1,15 @@
 use async_trait::async_trait;
 use cainome::cairo_serde::CairoSerde;
-use hash::CallPolicy;
+use hash::{CallPolicy, TypedDataPolicy};
 use starknet::{
     accounts::{Account, ConnectedAccount, ExecutionEncoder},
-    core::types::{BlockId, BlockTag, Call, Felt},
-    macros::short_string,
+    core::{
+        types::{BlockId, BlockTag, Call, Felt},
+        utils::NonAsciiNameError,
+    },
+    macros::{selector, short_string},
 };
+use starknet_crypto::poseidon_hash_many;
 
 use crate::{
     constants::GUARDIAN_SIGNER,
@@ -73,11 +77,30 @@ impl SessionAccount {
         )
     }
 
-    pub async fn sign(
+    pub async fn sign_typed_data(
         &self,
-        hash: Felt,
-        policies: &[Policy],
+        typed_data: &[TypedData],
     ) -> Result<RawSessionToken, SignError> {
+        let hash = poseidon_hash_many(
+            typed_data
+                .iter()
+                .map(TypedData::struct_hash_rev_1)
+                .collect::<Vec<_>>()
+                .iter(),
+        );
+        self.sign(
+            hash,
+            &typed_data
+                .iter()
+                .map(TypedDataPolicy::from)
+                .map(Policy::from)
+                .collect::<Vec<_>>(),
+        )
+        .await
+    }
+
+    async fn sign(&self, hash: Felt, policies: &[Policy]) -> Result<RawSessionToken, SignError> {
+        let hash = self.message_hash(hash)?;
         let mut proofs = Vec::new();
 
         for policy in policies {
@@ -89,6 +112,13 @@ impl SessionAccount {
                             contract_address: method.contract_address,
                         },
                     )),
+                    Policy::TypedData(typed_data_policy) => {
+                        Err(SignError::SessionPolicyNotAllowed(
+                            SessionPolicyError::TypedDataNotAllowed {
+                                type_hash: typed_data_policy.type_hash,
+                            },
+                        ))
+                    }
                 };
             };
 
@@ -108,6 +138,10 @@ impl SessionAccount {
     fn session_magic() -> Felt {
         short_string!("session-token")
     }
+
+    fn message_hash(&self, hash: Felt) -> Result<Felt, NonAsciiNameError> {
+        self.session.message_hash(hash, self.chain_id, self.address)
+    }
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
@@ -118,12 +152,9 @@ impl AccountHashAndCallsSigner for SessionAccount {
         hash: Felt,
         calls: &[Call],
     ) -> Result<Vec<Felt>, SignError> {
-        let tx_hash = self
-            .session
-            .message_hash(hash, self.chain_id, self.address)?;
         let result = self
             .sign(
-                tx_hash,
+                hash,
                 &calls
                     .iter()
                     .map(CallPolicy::from)
@@ -152,5 +183,15 @@ impl ConnectedAccount for SessionAccount {
 
     fn block_id(&self) -> BlockId {
         self.block_id
+    }
+}
+
+pub type TypedData = crate::abigen::controller::TypedData;
+impl TypedData {
+    fn hash_rev_1() -> Felt {
+        selector!("\"Allowed Type\"(\"Type Hash\":\"felt\", \"Typed Data Hash\":\"felt\")")
+    }
+    pub fn struct_hash_rev_1(&self) -> Felt {
+        poseidon_hash_many([&Self::hash_rev_1(), &self.type_hash, &self.typed_data_hash])
     }
 }
