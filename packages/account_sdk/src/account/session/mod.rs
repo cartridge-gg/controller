@@ -11,7 +11,7 @@ use crate::{
     constants::GUARDIAN_SIGNER,
     impl_account, impl_execution_encoder,
     provider::CartridgeJsonRpcProvider,
-    signers::{HashSigner, SignError, Signer},
+    signers::{HashSigner, SessionPolicyError, SignError, Signer},
 };
 
 use self::{
@@ -73,16 +73,23 @@ impl SessionAccount {
         )
     }
 
-    pub async fn sign(&self, hash: Felt, calls: &[Call]) -> Result<RawSessionToken, SignError> {
+    pub async fn sign(
+        &self,
+        hash: Felt,
+        policies: &[Policy],
+    ) -> Result<RawSessionToken, SignError> {
         let mut proofs = Vec::new();
 
-        for call in calls {
-            let method = CallPolicy::from(call);
-            let Some(proof) = self.session.single_proof(&Policy::Call(method.clone())) else {
-                return Err(SignError::SessionMethodNotAllowed {
-                    selector: method.selector,
-                    contract_address: method.contract_address,
-                });
+        for policy in policies {
+            let Some(proof) = self.session.single_proof(policy) else {
+                return match policy {
+                    Policy::Call(method) => Err(SignError::SessionPolicyNotAllowed(
+                        SessionPolicyError::MethodNotAllowed {
+                            selector: method.selector,
+                            contract_address: method.contract_address,
+                        },
+                    )),
+                };
             };
 
             proofs.push(proof);
@@ -114,7 +121,16 @@ impl AccountHashAndCallsSigner for SessionAccount {
         let tx_hash = self
             .session
             .message_hash(hash, self.chain_id, self.address)?;
-        let result = self.sign(tx_hash, calls).await?;
+        let result = self
+            .sign(
+                tx_hash,
+                &calls
+                    .iter()
+                    .map(CallPolicy::from)
+                    .map(Policy::from)
+                    .collect::<Vec<_>>(),
+            )
+            .await?;
         let sig = [
             vec![Self::session_magic()],
             RawSessionToken::cairo_serialize(&result),

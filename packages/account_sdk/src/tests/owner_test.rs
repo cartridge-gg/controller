@@ -3,7 +3,10 @@ use crate::{
     account::session::hash::{CallPolicy, Policy},
     artifacts::{Version, CONTROLLERS},
     controller::Controller,
-    signers::{webauthn::WebauthnSigner, HashSigner, NewOwnerSigner, Owner, SignError, Signer},
+    signers::{
+        webauthn::WebauthnSigner, HashSigner, NewOwnerSigner, Owner, SessionPolicyError, SignError,
+        Signer,
+    },
     tests::{ensure_txn, runners::katana::KatanaRunner},
 };
 use cainome::cairo_serde::{ContractAddress, U256};
@@ -396,10 +399,12 @@ async fn test_call_unallowed_methods() {
         .unwrap_err();
 
     // calling unallowed method should fail with `SessionMethodNotAllowed` error
-    let e @ AccountError::Signing(SignError::SessionMethodNotAllowed {
-        selector,
-        contract_address,
-    }) = error
+    let e @ AccountError::Signing(SignError::SessionPolicyNotAllowed(
+        SessionPolicyError::MethodNotAllowed {
+            selector,
+            contract_address,
+        },
+    )) = error
     else {
         panic!("Expected `SessionMethodNotAllowed` error, got: {error:?}")
     };
