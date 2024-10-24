@@ -1,5 +1,5 @@
 import { Field } from "@cartridge/ui";
-import { Button } from "@chakra-ui/react";
+import { Button, useMediaQuery } from "@chakra-ui/react";
 import { Container, Footer, Content } from "components/layout";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -40,6 +40,7 @@ export function Signup({
     usernameField.value,
     1000,
   );
+  const [isHeightOver600] = useMediaQuery("(min-height: 600px)");
 
   // In order for Safari to open "Create Passkey" modal successfully, submit handler has to be async.
   // The workaround is to call async validation function every time when username input changes
@@ -192,7 +193,7 @@ export function Signup({
 
   return (
     <Container
-      variant="connect"
+      variant={isHeightOver600 ? "expanded" : "compressed"}
       title={
         theme.id === "cartridge" ? "Play with Controller" : `Play ${theme.name}`
       }

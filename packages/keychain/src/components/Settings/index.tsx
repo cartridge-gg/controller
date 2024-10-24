@@ -82,7 +82,7 @@ export function Settings({ onLogout }: { onLogout: () => void }) {
   }
 
   return (
-    <Container variant="settings" title="Controller Settings" Icon={GearIcon}>
+    <Container variant="compressed" title="Controller Settings" Icon={GearIcon}>
       <Content>
         <VStack gap="30px" w="full">
           {/* <VStack>

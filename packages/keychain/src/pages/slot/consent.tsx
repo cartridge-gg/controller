@@ -30,7 +30,7 @@ function Consent() {
 
   return (
     <Container
-      variant="connect"
+      variant="expanded"
       hideAccount
       title="Requesting Permission"
       description={
