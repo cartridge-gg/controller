@@ -37,7 +37,7 @@ export type Scalars = {
 
 export type Account = Node & {
   __typename?: "Account";
-  controllers?: Maybe<Array<Controller>>;
+  controllers: ControllerConnection;
   createdAt: Scalars["Time"];
   credentials: Credentials;
   credits: Scalars["BigInt"];
@@ -46,6 +46,15 @@ export type Account = Node & {
   name?: Maybe<Scalars["String"]>;
   teams: TeamConnection;
   updatedAt: Scalars["Time"];
+};
+
+export type AccountControllersArgs = {
+  after?: InputMaybe<Scalars["Cursor"]>;
+  before?: InputMaybe<Scalars["Cursor"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<ControllerOrder>;
+  where?: InputMaybe<ControllerWhereInput>;
 };
 
 export type AccountMembershipArgs = {
@@ -223,11 +232,32 @@ export type Controller = Node & {
   account: Account;
   accountID: Scalars["ID"];
   address: Scalars["String"];
+  constructorCalldata: Array<Scalars["String"]>;
   createdAt: Scalars["Time"];
   id: Scalars["ID"];
   network: Scalars["String"];
   signers?: Maybe<Array<Signer>>;
   updatedAt: Scalars["Time"];
+};
+
+/** A connection to a list of items. */
+export type ControllerConnection = {
+  __typename?: "ControllerConnection";
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<ControllerEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars["Int"];
+};
+
+/** An edge in a connection. */
+export type ControllerEdge = {
+  __typename?: "ControllerEdge";
+  /** A cursor for use in pagination. */
+  cursor: Scalars["Cursor"];
+  /** The item at the end of the edge. */
+  node?: Maybe<Controller>;
 };
 
 /** Ordering options for Controller connections */
@@ -394,26 +424,6 @@ export type CreditsHistory = Node & {
   /** Type of transaction: credit or debit */
   transactionType: CreditsHistoryTransactionType;
   updatedAt: Scalars["Time"];
-};
-
-/** A connection to a list of items. */
-export type CreditsHistoryConnection = {
-  __typename?: "CreditsHistoryConnection";
-  /** A list of edges. */
-  edges?: Maybe<Array<Maybe<CreditsHistoryEdge>>>;
-  /** Information to aid in pagination. */
-  pageInfo: PageInfo;
-  /** Identifies the total count of items in the connection. */
-  totalCount: Scalars["Int"];
-};
-
-/** An edge in a connection. */
-export type CreditsHistoryEdge = {
-  __typename?: "CreditsHistoryEdge";
-  /** A cursor for use in pagination. */
-  cursor: Scalars["Cursor"];
-  /** The item at the end of the edge. */
-  node?: Maybe<CreditsHistory>;
 };
 
 /** Ordering options for CreditsHistory connections */
@@ -1774,11 +1784,17 @@ export type FinalizeRegistrationMutation = {
   finalizeRegistration: {
     __typename?: "Account";
     id: string;
-    controllers?: Array<{
-      __typename?: "Controller";
-      address: string;
-      signers?: Array<{ __typename?: "Signer"; type: SignerType }> | null;
-    }> | null;
+    controllers: {
+      __typename?: "ControllerConnection";
+      edges?: Array<{
+        __typename?: "ControllerEdge";
+        node?: {
+          __typename?: "Controller";
+          address: string;
+          signers?: Array<{ __typename?: "Signer"; type: SignerType }> | null;
+        } | null;
+      } | null> | null;
+    };
     credentials: {
       __typename?: "Credentials";
       webauthn?: Array<{
@@ -1807,11 +1823,17 @@ export type AccountQuery = {
         publicKey: string;
       }> | null;
     };
-    controllers?: Array<{
-      __typename?: "Controller";
-      address: string;
-      signers?: Array<{ __typename?: "Signer"; type: SignerType }> | null;
-    }> | null;
+    controllers: {
+      __typename?: "ControllerConnection";
+      edges?: Array<{
+        __typename?: "ControllerEdge";
+        node?: {
+          __typename?: "Controller";
+          address: string;
+          signers?: Array<{ __typename?: "Signer"; type: SignerType }> | null;
+        } | null;
+      } | null> | null;
+    };
   } | null;
 };
 
@@ -1865,10 +1887,13 @@ export type FetchControllersQuery = {
       node?: {
         __typename?: "Account";
         id: string;
-        controllers?: Array<{
-          __typename?: "Controller";
-          address: string;
-        }> | null;
+        controllers: {
+          __typename?: "ControllerConnection";
+          edges?: Array<{
+            __typename?: "ControllerEdge";
+            node?: { __typename?: "Controller"; address: string } | null;
+          } | null> | null;
+        };
       } | null;
     } | null> | null;
   } | null;
@@ -2003,9 +2028,13 @@ export const FinalizeRegistrationDocument = `
   finalizeRegistration(credentials: $credentials, network: $network) {
     id
     controllers {
-      address
-      signers {
-        type
+      edges {
+        node {
+          address
+          signers {
+            type
+          }
+        }
       }
     }
     credentials {
@@ -2052,9 +2081,13 @@ export const AccountDocument = `
       }
     }
     controllers {
-      address
-      signers {
-        type
+      edges {
+        node {
+          address
+          signers {
+            type
+          }
+        }
       }
     }
   }
@@ -2223,7 +2256,11 @@ export const FetchControllersDocument = `
       node {
         id
         controllers {
-          address
+          edges {
+            node {
+              address
+            }
+          }
         }
       }
     }

@@ -132,7 +132,12 @@ export function Signup({
 
       const { id: credentialId, publicKey } = webauthn[0];
 
-      initController(username, controllers[0].address, credentialId, publicKey);
+      initController(
+        username,
+        controllers.edges?.[0]?.node?.address,
+        credentialId,
+        publicKey,
+      );
     } catch (e) {
       if (
         // Backward compat with iframes without this permission-policy
@@ -174,7 +179,7 @@ export function Signup({
 
           initController(
             username,
-            controllers[0].address,
+            controllers.edges?.[0]?.node?.address,
             credentialId,
             publicKey,
           );
