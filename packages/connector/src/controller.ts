@@ -17,6 +17,10 @@ export default class ControllerConnector extends InjectedConnector {
     this.controller = controller;
   }
 
+  async disconnect() {
+    this.controller.disconnect();
+  }
+
   username() {
     return this.controller.username();
   }
