@@ -92,7 +92,7 @@ export function Asset() {
             <CardTitle>Properties</CardTitle>
           </CardHeader>
 
-          <CardContent className="bg-background grid grid-cols-2 gap-0.5 p-0">
+          <CardContent className="bg-background grid grid-cols-3 gap-0.5 p-0">
             {asset.attributes.map((a) => (
               <div
                 key={`${a.type}-${a.name}`}
@@ -104,6 +104,14 @@ export function Asset() {
                 <div className="text-xs font-medium">{a.value}</div>
               </div>
             ))}
+            {Array.from({ length: 3 - (asset.attributes.length % 3) }).map(
+              (_, i) => (
+                <div
+                  key={`placeholder-${i}`}
+                  className="bg-secondary p-3 flex flex-col gap-1"
+                />
+              ),
+            )}
           </CardContent>
         </Card>
       </LayoutContent>
