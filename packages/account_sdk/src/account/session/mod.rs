@@ -1,6 +1,5 @@
 use async_trait::async_trait;
 use cainome::cairo_serde::CairoSerde;
-use hash::{CallPolicy, TypedDataPolicy};
 use starknet::{
     accounts::{Account, ConnectedAccount, ExecutionEncoder},
     core::{
@@ -13,6 +12,7 @@ use starknet_crypto::poseidon_hash_many;
 
 use crate::{
     constants::GUARDIAN_SIGNER,
+    hash::StructHashRev1,
     impl_account, impl_execution_encoder,
     provider::CartridgeJsonRpcProvider,
     signers::{HashSigner, SessionPolicyError, SignError, Signer},
@@ -84,17 +84,13 @@ impl SessionAccount {
         let hash = poseidon_hash_many(
             typed_data
                 .iter()
-                .map(TypedData::struct_hash_rev_1)
+                .map(StructHashRev1::get_struct_hash_rev_1)
                 .collect::<Vec<_>>()
                 .iter(),
         );
         self.sign(
             hash,
-            &typed_data
-                .iter()
-                .map(TypedDataPolicy::from)
-                .map(Policy::from)
-                .collect::<Vec<_>>(),
+            &typed_data.iter().map(Policy::from).collect::<Vec<_>>(),
         )
         .await
     }
@@ -153,14 +149,7 @@ impl AccountHashAndCallsSigner for SessionAccount {
         calls: &[Call],
     ) -> Result<Vec<Felt>, SignError> {
         let result = self
-            .sign(
-                hash,
-                &calls
-                    .iter()
-                    .map(CallPolicy::from)
-                    .map(Policy::from)
-                    .collect::<Vec<_>>(),
-            )
+            .sign(hash, &calls.iter().map(Policy::from).collect::<Vec<_>>())
             .await?;
         let sig = [
             vec![Self::session_magic()],
@@ -187,11 +176,16 @@ impl ConnectedAccount for SessionAccount {
 }
 
 pub type TypedData = crate::abigen::controller::TypedData;
-impl TypedData {
-    fn hash_rev_1() -> Felt {
-        selector!("\"Allowed Type\"(\"Type Hash\":\"felt\", \"Typed Data Hash\":\"felt\")")
-    }
-    pub fn struct_hash_rev_1(&self) -> Felt {
-        poseidon_hash_many([&Self::hash_rev_1(), &self.type_hash, &self.typed_data_hash])
+
+impl StructHashRev1 for TypedData {
+    const TYPE_HASH_REV_1: Felt =
+        selector!("\"Allowed Type\"(\"Type Hash\":\"felt\", \"Typed Data Hash\":\"felt\")");
+
+    fn get_struct_hash_rev_1(&self) -> Felt {
+        poseidon_hash_many([
+            &Self::TYPE_HASH_REV_1,
+            &self.type_hash,
+            &self.typed_data_hash,
+        ])
     }
 }

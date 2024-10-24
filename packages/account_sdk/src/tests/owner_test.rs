@@ -1,6 +1,6 @@
 use crate::{
     abigen::erc_20::Erc20,
-    account::session::hash::{CallPolicy, Policy},
+    account::session::hash::Policy,
     artifacts::{Version, CONTROLLERS},
     controller::Controller,
     signers::{
@@ -270,10 +270,10 @@ async fn test_change_owner_invalidate_old_sessions() {
         )
         .await;
 
-    let transfer_method = CallPolicy::new(*FEE_TOKEN_ADDRESS, selector!("transfer"));
+    let transfer_method = Policy::new_call(*FEE_TOKEN_ADDRESS, selector!("transfer"));
 
     let session_account = controller
-        .create_session(vec![transfer_method.clone().into()], u64::MAX)
+        .create_session(vec![transfer_method.clone()], u64::MAX)
         .await
         .unwrap();
 
@@ -366,11 +366,11 @@ async fn test_call_unallowed_methods() {
         )
         .await;
 
-    // Create random allowed method
-    let transfer_method = CallPolicy::new(*FEE_TOKEN_ADDRESS, selector!("transfer"));
-
     let session_account = controller
-        .create_session(vec![Policy::Call(transfer_method.clone())], u64::MAX)
+        .create_session(
+            vec![Policy::new_call(*FEE_TOKEN_ADDRESS, selector!("transfer"))],
+            u64::MAX,
+        )
         .await
         .unwrap();
 
