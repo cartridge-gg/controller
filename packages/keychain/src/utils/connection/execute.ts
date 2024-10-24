@@ -31,7 +31,7 @@ export function execute({
   setContext: (context: ConnectionCtx) => void;
 }) {
   return async (
-    calls: Call[],
+    transactions: Call[],
     sync?: boolean,
     error?: ControllerError,
   ): Promise<InvokeFunctionResponse | ConnectError> => {
@@ -42,7 +42,7 @@ export function execute({
         setContext({
           type: "execute",
           origin,
-          calls,
+          transactions,
           error,
           resolve,
           reject,
@@ -53,11 +53,11 @@ export function execute({
     return await new Promise(async (resolve, reject) => {
       // If a session call and there is no session available
       // fallback to manual apporval flow
-      if (!account.hasSession(calls)) {
+      if (!account.hasSession(transactions)) {
         setContext({
           type: "execute",
           origin,
-          calls,
+          transactions,
           resolve,
           reject,
         } as ExecuteCtx);
@@ -70,7 +70,9 @@ export function execute({
 
       // Try paymaster if it is enabled. If it fails, fallback to user pays session flow.
       try {
-        const { transaction_hash } = await account.executeFromOutsideV3(calls);
+        const { transaction_hash } = await account.executeFromOutsideV3(
+          transactions,
+        );
 
         return resolve({
           code: ResponseCodes.SUCCESS,
@@ -82,7 +84,7 @@ export function execute({
           setContext({
             type: "execute",
             origin,
-            calls,
+            transactions,
             error: parseControllerError(e),
             resolve,
             reject,
@@ -96,12 +98,12 @@ export function execute({
       }
 
       try {
-        let estimate = await account.estimateInvokeFee(calls);
+        let estimate = await account.estimateInvokeFee(transactions);
         let maxFee = num.toHex(
           num.addPercent(estimate.overall_fee, ESTIMATE_FEE_PERCENTAGE),
         );
 
-        let { transaction_hash } = await account.execute(calls, {
+        let { transaction_hash } = await account.execute(transactions, {
           maxFee,
         });
         return resolve({
@@ -112,7 +114,7 @@ export function execute({
         setContext({
           type: "execute",
           origin,
-          calls,
+          transactions,
           error: parseControllerError(e),
           resolve,
           reject,
