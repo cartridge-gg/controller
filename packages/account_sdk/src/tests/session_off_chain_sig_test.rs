@@ -9,10 +9,7 @@ use starknet_crypto::{poseidon_hash_many, Felt};
 
 use crate::{
     abigen::controller::ControllerReader,
-    account::session::{
-        hash::{Policy, TypedDataPolicy},
-        TypedData,
-    },
+    account::session::{hash::Policy, TypedData},
     artifacts::Version,
     signers::{Owner, Signer},
     tests::runners::katana::KatanaRunner,
@@ -31,11 +28,7 @@ pub async fn test_verify_session_off_chain_sig(owner: Owner) {
         })
         .collect::<Vec<_>>();
 
-    let policies = typed_data
-        .iter()
-        .map(TypedDataPolicy::from)
-        .map(Policy::from)
-        .collect::<Vec<_>>();
+    let policies = typed_data.iter().map(Policy::from).collect::<Vec<_>>();
 
     let session_account = controller
         .create_session(policies.clone(), u64::MAX)
@@ -91,11 +84,7 @@ pub async fn test_verify_session_off_chain_sig_invalid_policy() {
         },
     ];
 
-    let policies = typed_data
-        .iter()
-        .map(TypedDataPolicy::from)
-        .map(Policy::from)
-        .collect::<Vec<_>>();
+    let policies = typed_data.iter().map(Policy::from).collect::<Vec<_>>();
 
     let session_account = controller
         .create_session(policies.clone(), u64::MAX)
