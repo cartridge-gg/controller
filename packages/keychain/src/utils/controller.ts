@@ -12,7 +12,7 @@ import {
   Abi,
 } from "starknet";
 
-import { PaymasterOptions, Policy } from "@cartridge/controller";
+import { Policy } from "@cartridge/controller";
 
 import {
   CartridgeAccount,
@@ -123,17 +123,11 @@ export default class Controller extends Account {
     return this.cartridge.upgrade(new_class_hash);
   }
 
-  async executeFromOutsideV2(
-    calls: JsCall[],
-    _?: PaymasterOptions,
-  ): Promise<InvokeFunctionResponse> {
+  async executeFromOutsideV2(calls: JsCall[]): Promise<InvokeFunctionResponse> {
     return await this.cartridge.executeFromOutsideV2(calls);
   }
 
-  async executeFromOutsideV3(
-    calls: JsCall[],
-    _?: PaymasterOptions,
-  ): Promise<InvokeFunctionResponse> {
+  async executeFromOutsideV3(calls: JsCall[]): Promise<InvokeFunctionResponse> {
     return await this.cartridge.executeFromOutsideV3(calls);
   }
 

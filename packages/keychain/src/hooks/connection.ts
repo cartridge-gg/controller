@@ -9,12 +9,7 @@ import {
 } from "utils/connection";
 import { getChainName } from "@cartridge/utils";
 import { RpcProvider, constants } from "starknet";
-import {
-  PaymasterOptions,
-  Policy,
-  Prefund,
-  ResponseCodes,
-} from "@cartridge/controller";
+import { Policy, Prefund, ResponseCodes } from "@cartridge/controller";
 import { mergeDefaultETHPrefund } from "utils/token";
 import { isIframe } from "components/connect/utils";
 import { setIsSignedUp } from "utils/cookie";
@@ -35,7 +30,6 @@ export function useConnectionValue() {
   const [rpcUrl, setRpcUrl] = useState<string>();
   const [chainId, setChainId] = useState<string>();
   const [policies, setPolicies] = useState<Policy[]>([]);
-  const [paymaster, setPaymaster] = useState<PaymasterOptions>();
   const [controller, setControllerRaw] = useState<Controller | undefined>();
   const [prefunds, setPrefunds] = useState<Prefund[]>([]);
   const [hasPrefundRequest, setHasPrefundRequest] = useState<boolean>(false);
@@ -52,11 +46,6 @@ export function useConnectionValue() {
   const parsePolicies = (policiesStr: string | null): Policy[] => {
     if (!policiesStr) return [];
     return JSON.parse(decodeURIComponent(policiesStr));
-  };
-
-  const parsePaymaster = (paymasterStr: string | null): PaymasterOptions => {
-    if (!paymasterStr) return null;
-    return JSON.parse(decodeURIComponent(paymasterStr));
   };
 
   const closeModal = useCallback(async () => {
@@ -111,7 +100,6 @@ export function useConnectionValue() {
     setHasPrefundRequest(!!prefundParam);
     setPrefunds(mergeDefaultETHPrefund(prefunds));
     setPolicies(parsePolicies(urlParams.get("policies")));
-    setPaymaster(parsePaymaster(urlParams.get("paymaster")));
 
     const connection = connectToController<ParentMethods>({
       setOrigin,
@@ -180,7 +168,6 @@ export function useConnectionValue() {
     chainName,
     policies,
     prefunds,
-    paymaster,
     hasPrefundRequest,
     error,
     upgrade,

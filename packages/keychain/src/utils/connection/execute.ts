@@ -1,8 +1,4 @@
-import {
-  ResponseCodes,
-  ConnectError,
-  PaymasterOptions,
-} from "@cartridge/controller";
+import { ResponseCodes, ConnectError } from "@cartridge/controller";
 import { Call, InvokeFunctionResponse, num } from "starknet";
 import { ConnectionCtx, ControllerError, ExecuteCtx } from "./types";
 import { ErrorCode } from "@cartridge/account-wasm/controller";
@@ -36,7 +32,6 @@ export function execute({
   return async (
     calls: Call[],
     sync?: boolean,
-    paymaster?: PaymasterOptions,
     error?: ControllerError,
   ): Promise<InvokeFunctionResponse | ConnectError> => {
     const account = window.controller;
@@ -73,33 +68,29 @@ export function execute({
       }
 
       // Try paymaster if it is enabled. If it fails, fallback to user pays session flow.
-      if (paymaster) {
-        try {
-          const { transaction_hash } = await account.executeFromOutsideV3(
-            calls,
-          );
+      try {
+        const { transaction_hash } = await account.executeFromOutsideV3(calls);
 
+        return resolve({
+          code: ResponseCodes.SUCCESS,
+          transaction_hash,
+        });
+      } catch (e) {
+        // User only pays if the error is ErrorCode.PaymasterNotSupported
+        if (e.code !== ErrorCode.PaymasterNotSupported) {
+          setContext({
+            type: "execute",
+            origin,
+            calls,
+            error: parseControllerError(e),
+            resolve,
+            reject,
+          } as ExecuteCtx);
           return resolve({
-            code: ResponseCodes.SUCCESS,
-            transaction_hash,
+            code: ResponseCodes.ERROR,
+            message: e.message,
+            error: parseControllerError(e),
           });
-        } catch (e) {
-          // User only pays if the error is ErrorCode.PaymasterNotSupported
-          if (e.code !== ErrorCode.PaymasterNotSupported) {
-            setContext({
-              type: "execute",
-              origin,
-              calls,
-              error: parseControllerError(e),
-              resolve,
-              reject,
-            } as ExecuteCtx);
-            return resolve({
-              code: ResponseCodes.ERROR,
-              message: e.message,
-              error: parseControllerError(e),
-            });
-          }
         }
       }
 
