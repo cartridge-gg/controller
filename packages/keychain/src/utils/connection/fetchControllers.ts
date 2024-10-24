@@ -57,10 +57,13 @@ export function fetchControllers(_: string) {
       });
 
       response.accounts?.edges?.forEach((edge) => {
-        if (edge?.node?.controllers[0] && edge.node.id) {
-          const addr = addAddressPadding(edge.node.controllers[0].address);
-          result[addr] = edge.node.id;
-          cache[addr] = edge.node.id;
+        if (edge?.node?.controllers.edges && edge.node.id) {
+          const controllerEdge = edge.node.controllers.edges[0];
+          if (controllerEdge?.node?.address) {
+            const addr = addAddressPadding(controllerEdge.node.address);
+            result[addr] = edge.node.id;
+            cache[addr] = edge.node.id;
+          }
         }
       });
     }
