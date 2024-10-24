@@ -25,14 +25,10 @@ type Credentials = RawAttestation & {
 const createCredentials = async (
   name: string,
   beginRegistration: CredentialCreationOptions,
-  hasPlatformAuthenticator: boolean,
+  _hasPlatformAuthenticator: boolean,
 ) => {
-  if (!hasPlatformAuthenticator || navigator.userAgent.indexOf("Win") != -1)
-    beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
-      "cross-platform";
-  else
-    beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
-      undefined;
+  beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
+      "platform"
 
   beginRegistration.publicKey.user.id = Buffer.from(name);
   beginRegistration.publicKey.challenge = base64url.toBuffer(
