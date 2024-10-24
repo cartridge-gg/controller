@@ -162,7 +162,7 @@ export type ProfileOptions = IFrameOptions & {
   tokens?: Tokens;
 };
 
-export type ProfileContextTypeVariant = "trophies" | "inventory" | "history";
+export type ProfileContextTypeVariant = "trophies" | "inventory" | "activity";
 
 /**
  * Options for configuring a paymaster

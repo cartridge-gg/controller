@@ -7,7 +7,7 @@ import {
   Token,
 } from "@/components/inventory";
 import { Trophies } from "@/components/trophies";
-import { History } from "@/components/history";
+import { Activity } from "@/components/activity";
 
 export function App() {
   const [searchParams] = useSearchParams();
@@ -27,7 +27,7 @@ export function App() {
       <Route path="/collection/:address/send" element={<Send />} />
       <Route path="/trophies" element={<Trophies />} />
       <Route path="/trophies/:address" element={<Trophies />} />
-      <Route path="/history" element={<History />} />
+      <Route path="/activity" element={<Activity />} />
     </Routes>
   );
 }
