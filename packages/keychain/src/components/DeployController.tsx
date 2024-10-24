@@ -13,8 +13,8 @@ import { ControllerErrorAlert, ErrorAlert } from "./ErrorAlert";
 import { useDeploy } from "hooks/deploy";
 import { Fees } from "./Fees";
 import { ControllerError } from "utils/connection";
-import { useEthBalance } from "hooks/balance";
 import { Policies } from "components/Policies";
+import { ETH_CONTRACT_ADDRESS, useERC20Balance } from "@cartridge/utils";
 
 export function DeployController({
   onClose,
@@ -60,7 +60,12 @@ export function DeployController({
     }
   }, [deployHash, controller]);
 
-  const { balance: ethBalance, isLoading } = useEthBalance();
+  const { balance: ethBalance, isLoading } = useERC20Balance({
+    address: controller.address,
+    contractAddress: ETH_CONTRACT_ADDRESS,
+    provider: controller,
+    interval: 3000,
+  });
   useEffect(() => {
     if (!feeEstimate || accountState != "fund") return;
 
