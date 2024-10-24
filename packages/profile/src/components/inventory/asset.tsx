@@ -12,17 +12,23 @@ import {
   CardHeader,
   CardTitle,
   CopyText,
+  ExternalIcon,
 } from "@cartridge/ui-next";
-import { addAddressPadding } from "starknet";
+import { addAddressPadding, constants } from "starknet";
+import { formatAddress, isPublicChain, StarkscanUrl } from "@cartridge/utils";
+import { useConnection } from "@/hooks/context";
 
 export function Asset() {
   const { address, tokenId } = useParams<{
     address: string;
     tokenId: string;
   }>();
+  const { chainId } = useConnection();
+
   const collection = {
     address: address!,
     name: "Blobert",
+    type: "ERC-721",
   };
   const asset = {
     tokenId,
@@ -112,6 +118,41 @@ export function Asset() {
                 />
               ),
             )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>details</CardTitle>
+          </CardHeader>
+          <CardContent className="flex items-center justify-between">
+            <div className="text-muted-foreground">Contract</div>
+            {isPublicChain(chainId) ? (
+              <Link
+                to={`${StarkscanUrl(
+                  chainId as constants.StarknetChainId,
+                ).contract(collection.address)} `}
+                className="flex items-center gap-1 text-sm"
+                target="_blank"
+              >
+                <div className="font-medium">
+                  {formatAddress(collection.address, { size: "sm" })}
+                </div>
+                <ExternalIcon size="sm" />
+              </Link>
+            ) : (
+              <div>{formatAddress(collection.address)}</div>
+            )}
+          </CardContent>
+
+          <CardContent className="flex items-center justify-between">
+            <div className="text-muted-foreground">Token ID</div>
+            <div className="font-medium">{asset.tokenId}</div>
+          </CardContent>
+
+          <CardContent className="flex items-center justify-between">
+            <div className="text-muted-foreground">Token Standard</div>
+            <div className="font-medium">{collection.type}</div>
           </CardContent>
         </Card>
       </LayoutContent>
