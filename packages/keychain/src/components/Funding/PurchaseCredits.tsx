@@ -21,7 +21,7 @@ enum PurchaseState {
 }
 
 type PurchaseCreditsProps = {
-  onBack: () => void;
+  onBack?: () => void;
 };
 
 export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
@@ -123,7 +123,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
       }
       description={<CopyAddress address={controller.address} />}
       Icon={state === PurchaseState.SELECTION ? CoinsIcon : CheckIcon}
-      onBack={state === PurchaseState.SELECTION && onBack}
+      onBack={state === PurchaseState.SELECTION ? onBack : undefined}
     >
       <Content gap={6}>
         <Balance showBalances={["credits"]} />

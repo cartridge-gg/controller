@@ -51,6 +51,14 @@ export function connectToController<ParentMethods extends {}>({
       },
       username: () => () => window.controller?.username(),
       delegateAccount: () => () => window.controller?.delegateAccount(),
+      openPurchaseCredits: () => () => {
+        setContext({
+          origin,
+          type: "open-purchase-credits",
+          resolve: () => Promise.resolve(),
+          reject: () => Promise.reject(),
+        });
+      },
     },
   });
 }
