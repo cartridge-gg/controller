@@ -137,4 +137,13 @@ export const defaultPresets: ControllerThemePresets = {
       primary: "#980f06",
     },
   },
+  zkube: {
+    id: "zkube",
+    name: "zKube",
+    icon: "/whitelabel/zkube/icon.png",
+    cover: "/whitelabel/zkube/cover.png",
+    colors: {
+      primary: "##5bc3e6",
+    },
+  }
 };
