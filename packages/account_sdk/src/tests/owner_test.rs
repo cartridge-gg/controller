@@ -325,7 +325,7 @@ async fn test_change_owner_invalidate_old_sessions() {
     );
 
     let session_account = controller
-        .create_session(vec![transfer_method.into()], u64::MAX)
+        .create_session(vec![transfer_method], u64::MAX)
         .await
         .unwrap();
     let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &session_account);
