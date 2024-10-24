@@ -65,8 +65,11 @@ function User({
 }) {
   return (
     <div className="flex items-center gap-x-2">
-      {!!Icon && <Icon size="default" variant="line" />}
-      {!Icon && <SpaceInvaderIcon size="default" variant="line" />}
+      {!Icon ? (
+        <SpaceInvaderIcon size="default" variant="line" />
+      ) : (
+        <Icon size="default" variant="line" />
+      )}
       <p>{self ? `${username} (you)` : username}</p>
     </div>
   );

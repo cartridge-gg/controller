@@ -43,11 +43,6 @@ export function Pinned({
 }
 
 function Title({ title, empty }: { title: string; empty?: boolean }) {
-  const overflow = useMemo(() => title.length > 27, [title]);
-  const content = useMemo(() => {
-    if (!overflow) return title;
-    return title.slice(0, 24) + "...";
-  }, [title, overflow]);
   return (
     <CardTitle
       className={cn(
@@ -55,7 +50,9 @@ function Title({ title, empty }: { title: string; empty?: boolean }) {
         empty ? "opacity-50" : "text-secondary-foreground",
       )}
     >
-      <p className="capitalize break-words text-center">{content}</p>
+      <p className="capitalize break-words text-center text-ellipsis line-clamp-2">
+        {title}
+      </p>
     </CardTitle>
   );
 }
