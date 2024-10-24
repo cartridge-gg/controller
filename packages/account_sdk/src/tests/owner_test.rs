@@ -3,7 +3,10 @@ use crate::{
     account::session::hash::Policy,
     artifacts::{Version, CONTROLLERS},
     controller::Controller,
-    signers::{webauthn::WebauthnSigner, HashSigner, NewOwnerSigner, Owner, SignError, Signer},
+    signers::{
+        webauthn::WebauthnSigner, HashSigner, NewOwnerSigner, Owner, SessionPolicyError, SignError,
+        Signer,
+    },
     tests::{ensure_txn, runners::katana::KatanaRunner},
 };
 use cainome::cairo_serde::{ContractAddress, U256};
@@ -267,7 +270,7 @@ async fn test_change_owner_invalidate_old_sessions() {
         )
         .await;
 
-    let transfer_method = Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer"));
+    let transfer_method = Policy::new_call(*FEE_TOKEN_ADDRESS, selector!("transfer"));
 
     let session_account = controller
         .create_session(vec![transfer_method.clone()], u64::MAX)
@@ -363,11 +366,11 @@ async fn test_call_unallowed_methods() {
         )
         .await;
 
-    // Create random allowed method
-    let transfer_method = Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer"));
-
     let session_account = controller
-        .create_session(vec![transfer_method.clone()], u64::MAX)
+        .create_session(
+            vec![Policy::new_call(*FEE_TOKEN_ADDRESS, selector!("transfer"))],
+            u64::MAX,
+        )
         .await
         .unwrap();
 
@@ -396,10 +399,12 @@ async fn test_call_unallowed_methods() {
         .unwrap_err();
 
     // calling unallowed method should fail with `SessionMethodNotAllowed` error
-    let e @ AccountError::Signing(SignError::SessionMethodNotAllowed {
-        selector,
-        contract_address,
-    }) = error
+    let e @ AccountError::Signing(SignError::SessionPolicyNotAllowed(
+        SessionPolicyError::MethodNotAllowed {
+            selector,
+            contract_address,
+        },
+    )) = error
     else {
         panic!("Expected `SessionMethodNotAllowed` error, got: {error:?}")
     };
