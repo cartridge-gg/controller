@@ -33,7 +33,7 @@ export const ConnectionContext =
 
 export function ConnectionProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ConnectionContextType>(initialState);
-  const { setUrl } = useIndexerAPI();
+  const { setUrl, setNamespace } = useIndexerAPI();
 
   const [searchParams] = useSearchParams();
   useEffect(() => {
@@ -49,6 +49,9 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
 
     if (searchParams.get("indexerUrl")) {
       setUrl(decodeURIComponent(searchParams.get("indexerUrl")!));
+    }
+    if (searchParams.get("namespace")) {
+      setNamespace(decodeURIComponent(searchParams.get("namespace")!));
     }
   }, [searchParams, setUrl]);
 

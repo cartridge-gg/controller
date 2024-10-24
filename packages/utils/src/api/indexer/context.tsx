@@ -2,13 +2,17 @@ import { createContext, ReactNode, useCallback, useState } from "react";
 
 type IndexerAPIContextType = {
   url: string;
+  namespace?: string;
   headers?: RequestInit["headers"],
   setUrl: (url: string) => void
+  setNamespace: (namespace: string) => void
 };
 
 const initialState: IndexerAPIContextType = {
   url: "",
-  setUrl: () => { }
+  namespace: undefined,
+  setUrl: () => { },
+  setNamespace: () => { }
 };
 
 export const IndexerAPIContext = createContext<IndexerAPIContextType>(initialState);
@@ -20,7 +24,11 @@ export function IndexerAPIProvider({ headers, children }: { headers?: RequestIni
     setState(state => ({ ...state, url }))
   }, [])
 
+  const setNamespace = useCallback((namespace: string) => {
+    setState(state => ({ ...state, namespace }))
+  }, [])
+
   return (
-    <IndexerAPIContext.Provider value={{ ...state, setUrl }}>{children}</IndexerAPIContext.Provider>
+    <IndexerAPIContext.Provider value={{ ...state, setUrl, setNamespace }}>{children}</IndexerAPIContext.Provider>
   );
 }
