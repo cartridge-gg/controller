@@ -65,12 +65,15 @@ function Form({
       },
     } = await fetchAccount(usernameField.value);
 
+    const controllerNode = controllers.edges?.[0].node;
+
     try {
       const controller = new Controller({
         appId: origin,
+        classHash: controllerNode.constructorCalldata[0],
         chainId,
         rpcUrl,
-        address: controllers.edges?.[0].node?.address,
+        address: controllerNode?.address,
         username: usernameField.value,
         publicKey,
         credentialId,

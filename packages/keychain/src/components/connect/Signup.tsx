@@ -66,12 +66,14 @@ export function Signup({
   const initController = useCallback(
     async (
       username: string,
+      classHash: string,
       address: string,
       credentialId: string,
       publicKey: string,
     ) => {
       const controller = new Controller({
         appId: origin,
+        classHash,
         chainId,
         rpcUrl,
         address,
@@ -132,10 +134,12 @@ export function Signup({
       } = data;
 
       const { id: credentialId, publicKey } = webauthn[0];
+      const controllerNode = controllers.edges?.[0].node;
 
       initController(
         username,
-        controllers.edges?.[0]?.node?.address,
+        controllerNode.constructorCalldata[0],
+        controllerNode.address,
         credentialId,
         publicKey,
       );
@@ -178,9 +182,12 @@ export function Signup({
             },
           } = data;
 
+          const controllerNode = controllers.edges?.[0].node;
+
           initController(
             username,
-            controllers.edges?.[0]?.node?.address,
+            controllerNode.constructorCalldata[0],
+            controllerNode.address,
             credentialId,
             publicKey,
           );

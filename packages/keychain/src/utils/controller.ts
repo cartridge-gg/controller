@@ -27,6 +27,7 @@ export default class Controller extends Account {
 
   constructor({
     appId,
+    classHash,
     chainId,
     rpcUrl,
     address,
@@ -35,6 +36,7 @@ export default class Controller extends Account {
     credentialId,
   }: {
     appId: string;
+    classHash: string;
     chainId: string;
     rpcUrl: string;
     address: string;
@@ -46,6 +48,7 @@ export default class Controller extends Account {
 
     this.cartridge = CartridgeAccount.new(
       appId,
+      classHash,
       rpcUrl,
       chainId,
       address,
