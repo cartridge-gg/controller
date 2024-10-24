@@ -10,6 +10,8 @@ import {
   TypedData,
   UniversalDetails,
   Abi,
+  Call,
+  CallData,
 } from "starknet";
 
 import { Policy } from "@cartridge/controller";
@@ -126,16 +128,16 @@ export default class Controller extends Account {
     return this.cartridge.upgrade(new_class_hash);
   }
 
-  async executeFromOutsideV2(calls: JsCall[]): Promise<InvokeFunctionResponse> {
-    return await this.cartridge.executeFromOutsideV2(calls);
+  async executeFromOutsideV2(calls: Call[]): Promise<InvokeFunctionResponse> {
+    return await this.cartridge.executeFromOutsideV2(toJsCalls(calls));
   }
 
-  async executeFromOutsideV3(calls: JsCall[]): Promise<InvokeFunctionResponse> {
-    return await this.cartridge.executeFromOutsideV3(calls);
+  async executeFromOutsideV3(calls: Call[]): Promise<InvokeFunctionResponse> {
+    return await this.cartridge.executeFromOutsideV3(toJsCalls(calls));
   }
 
   async execute(
-    calls: JsCall[],
+    calls: Call[],
     abisOrDetails?: Abi[] | UniversalDetails,
     details?: UniversalDetails,
   ): Promise<InvokeFunctionResponse> {
@@ -147,13 +149,13 @@ export default class Controller extends Account {
     }
 
     return await this.cartridge.execute(
-      calls,
+      toJsCalls(calls),
       executionDetails as JsInvocationsDetails,
     );
   }
 
-  hasSession(calls: JsCall[]): boolean {
-    return this.cartridge.hasSession(calls);
+  hasSession(calls: Call[]): boolean {
+    return this.cartridge.hasSession(toJsCalls(calls));
   }
 
   session(
@@ -164,10 +166,10 @@ export default class Controller extends Account {
   }
 
   async estimateInvokeFee(
-    calls: JsCall[],
+    calls: Call[],
     _: EstimateFeeDetails = {},
   ): Promise<EstimateFee> {
-    const res = await this.cartridge.estimateInvokeFee(calls);
+    const res = await this.cartridge.estimateInvokeFee(toJsCalls(calls));
 
     // The reason why we set the multiplier unseemingly high is to account
     // for the fact that the estimation above is done without validation (ie SKIP_VALIDATE).
@@ -234,4 +236,12 @@ export default class Controller extends Account {
     controller.cartridge = cartridge;
     return controller;
   }
+}
+
+// wasm expects calldata as hex
+function toJsCalls(calls: Call[]): JsCall[] {
+  return calls.map((call) => ({
+    ...call,
+    calldata: CallData.toHex(call.calldata),
+  }));
 }
