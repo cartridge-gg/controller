@@ -16,7 +16,7 @@ export function ConfirmTransaction() {
   const account = controller;
 
   const onSubmit = async (maxFee: bigint) => {
-    let { transaction_hash } = await account.execute(ctx.transactions, {
+    let { transaction_hash } = await account.execute(ctx.calls, {
       maxFee: num.toHex(maxFee),
     });
     ctx.resolve({
@@ -27,22 +27,19 @@ export function ConfirmTransaction() {
     setContext(undefined);
   };
 
-  const transactions = useMemo<Policy[]>(
+  const calls = useMemo<Policy[]>(
     () =>
-      (Array.isArray(ctx.transactions)
-        ? ctx.transactions
-        : [ctx.transactions]
-      ).map((c) => ({
+      (Array.isArray(ctx.calls) ? ctx.calls : [ctx.calls]).map((c) => ({
         target: c.contractAddress,
         method: c.entrypoint,
       })),
-    [ctx.transactions],
+    [ctx.calls],
   );
 
   const updateSession = useMemo(() => {
     if (policiesUpdated) return false;
 
-    const txnsApproved = transactions.every((transaction) =>
+    const txnsApproved = calls.every((transaction) =>
       policies.some(
         (policy) =>
           addAddressPadding(policy.target) ===
@@ -51,12 +48,12 @@ export function ConfirmTransaction() {
       ),
     );
 
-    // If transactions are approved by dapp specified policies but not stored session
+    // If calls are approved by dapp specified policies but not stored session
     // then prompt user to update session. This also accounts for expired sessions.
     return (
       txnsApproved &&
       !account.session(
-        transactions.map((t) => {
+        calls.map((t) => {
           return {
             target: t.target,
             method: t.method,
@@ -64,7 +61,7 @@ export function ConfirmTransaction() {
         }),
       )
     );
-  }, [transactions, policiesUpdated, policies, account, ctx.transactions]);
+  }, [calls, policiesUpdated, policies, account]);
 
   if (updateSession) {
     return (
@@ -78,12 +75,12 @@ export function ConfirmTransaction() {
       title="Confirm Transaction"
       description={origin}
       executionError={ctx.error}
-      transactions={ctx.transactions}
+      transactions={ctx.calls}
       transactionsDetail={ctx.transactionsDetail}
       onSubmit={onSubmit}
     >
       <Content pb={FOOTER_MIN_HEIGHT}>
-        <Policies title="Transaction Details" policies={transactions} />
+        <Policies title="Transaction Details" policies={calls} />
       </Content>
     </ExecutionContainer>
   );

@@ -1,7 +1,8 @@
-import { AccountInterface, addAddressPadding } from "starknet";
 import { AsyncMethodReturns } from "@cartridge/penpal";
 
-import DeviceAccount from "./device";
+import ControllerAccount from "./account";
+import { KeychainIFrame, ProfileIFrame } from "./iframe";
+import { NotReadyToConnect } from "./errors";
 import {
   Keychain,
   Policy,
@@ -14,35 +15,21 @@ import {
   IFrames,
   ProfileContextTypeVariant,
 } from "./types";
-import { KeychainIFrame, ProfileIFrame } from "./iframe";
-import { NotReadyToConnect, ProfileNotReady } from "./errors";
-import { RPC_SEPOLIA } from "./constants";
+import BaseProvider from "./provider";
 
-export * from "./errors";
-export * from "./types";
-export { defaultPresets } from "./presets";
-
-export default class Controller {
-  private policies: Policy[];
+export default class ControllerProvider extends BaseProvider {
   private keychain?: AsyncMethodReturns<Keychain>;
   private profile?: AsyncMethodReturns<Profile>;
   private options: ControllerOptions;
   private iframes: IFrames;
-  public rpc: URL;
-  public account?: AccountInterface;
 
-  constructor({
-    policies,
-    url,
-    rpc,
-    paymaster,
-    ...options
-  }: ControllerOptions = {}) {
+  constructor(options: ControllerOptions) {
+    const { rpc } = options;
+    super({ rpc });
+
     this.iframes = {
       keychain: new KeychainIFrame({
         ...options,
-        url,
-        paymaster,
         onClose: this.keychain?.reset,
         onConnect: (keychain) => {
           this.keychain = keychain;
@@ -50,37 +37,11 @@ export default class Controller {
       }),
     };
 
-    this.rpc = new URL(rpc || RPC_SEPOLIA);
-
-    // TODO: remove this on the next major breaking change. pass everthing by url
-    this.policies =
-      policies?.map((policy) => ({
-        ...policy,
-        target: addAddressPadding(policy.target),
-      })) || [];
-
     this.options = options;
-  }
 
-  async openSettings() {
-    if (!this.keychain || !this.iframes.keychain) {
-      console.error(new NotReadyToConnect().message);
-      return null;
+    if (typeof window !== "undefined") {
+      (window as any).starknet_controller = this;
     }
-    this.iframes.keychain.open();
-    const res = await this.keychain.openSettings();
-    this.iframes.keychain.close();
-    if (res && (res as ConnectError).code === ResponseCodes.NOT_CONNECTED) {
-      return false;
-    }
-    return true;
-  }
-
-  ready() {
-    return this.probe().then(
-      (res) => !!res,
-      () => false,
-    );
   }
 
   async probe() {
@@ -89,23 +50,22 @@ export default class Controller {
 
       if (!this.keychain) {
         console.error(new NotReadyToConnect().message);
-        return null;
+        return;
       }
 
       const response = (await this.keychain.probe(
         this.rpc.toString(),
       )) as ProbeReply;
 
-      this.account = new DeviceAccount(
-        this.rpc.toString(),
+      this.account = new ControllerAccount(
+        this,
         response.address,
         this.keychain,
         this.options,
         this.iframes.keychain,
-      ) as AccountInterface;
+      );
     } catch (e) {
-      console.log(e);
-      console.error(new NotReadyToConnect().message);
+      console.error(e);
       return;
     }
 
@@ -118,7 +78,7 @@ export default class Controller {
       this.iframes.profile = new ProfileIFrame({
         profileUrl: this.options.profileUrl,
         indexerUrl: this.options.indexerUrl,
-        address: this.account.address,
+        address: this.account?.address,
         username,
         rpcUrl: this.rpc.toString(),
         tokens: this.options.tokens,
@@ -128,7 +88,7 @@ export default class Controller {
       });
     }
 
-    return !!this.account;
+    return this.account;
   }
 
   async connect() {
@@ -151,22 +111,19 @@ export default class Controller {
     this.iframes.keychain.open();
 
     try {
-      let response = await this.keychain.connect(
-        this.policies,
-        this.rpc.toString(),
-      );
+      let response = await this.keychain.connect(this.rpc.toString());
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
       }
 
       response = response as ConnectReply;
-      this.account = new DeviceAccount(
-        this.rpc.toString(),
+      this.account = this.account = new ControllerAccount(
+        this,
         response.address,
         this.keychain,
         this.options,
         this.iframes.keychain,
-      ) as AccountInterface;
+      );
 
       return this.account;
     } catch (e) {
@@ -174,20 +131,6 @@ export default class Controller {
     } finally {
       this.iframes.keychain.close();
     }
-  }
-
-  openProfile(tab: ProfileContextTypeVariant = "inventory") {
-    if (!this.options.indexerUrl) {
-      console.error("`indexerUrl` option is required to open profile");
-      return;
-    }
-    if (!this.profile || !this.iframes.profile) {
-      console.error(new ProfileNotReady().message);
-      return;
-    }
-
-    this.profile.navigate(tab);
-    this.iframes.profile.open();
   }
 
   async disconnect() {
@@ -205,6 +148,34 @@ export default class Controller {
 
     this.account = undefined;
     return this.keychain.disconnect();
+  }
+
+  openProfile(tab: ProfileContextTypeVariant = "inventory") {
+    if (!this.options.indexerUrl) {
+      console.error("`indexerUrl` option is required to open profile");
+      return;
+    }
+    if (!this.profile || !this.iframes.profile) {
+      console.error("Profile is not ready");
+      return;
+    }
+
+    this.profile.navigate(tab);
+    this.iframes.profile.open();
+  }
+
+  async openSettings() {
+    if (!this.keychain || !this.iframes.keychain) {
+      console.error(new NotReadyToConnect().message);
+      return null;
+    }
+    this.iframes.keychain.open();
+    const res = await this.keychain.openSettings();
+    this.iframes.keychain.close();
+    if (res && (res as ConnectError).code === ResponseCodes.NOT_CONNECTED) {
+      return false;
+    }
+    return true;
   }
 
   revoke(origin: string, _policy: Policy[]) {

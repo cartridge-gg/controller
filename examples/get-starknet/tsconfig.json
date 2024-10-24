@@ -4,6 +4,6 @@
   "compilerOptions": {
     "baseUrl": ".",
     "rootDir": "./src",
-    "noEmit": true,
-  },
+    "noEmit": true
+  }
 }

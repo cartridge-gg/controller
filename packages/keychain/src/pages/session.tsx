@@ -91,7 +91,7 @@ export default function Session() {
         router.replace(`${url}?${query_name}=${encodedResponse}`);
       }
     },
-    [router, queries, controller],
+    [router, queries],
   );
 
   // Handler when user clicks the Create button
@@ -109,13 +109,7 @@ export default function Session() {
         expiresAt: String(SESSION_EXPIRATION),
       });
     },
-    [
-      policies,
-      queries.callback_uri,
-      queries.redirect_uri,
-      controller,
-      onCallback,
-    ],
+    [queries.callback_uri, queries.redirect_uri, controller, onCallback],
   );
 
   // Once we have a connected controller initialized, check if a session already exists.

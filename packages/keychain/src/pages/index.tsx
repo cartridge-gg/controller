@@ -13,9 +13,10 @@ import {
 import { LoginMode } from "components/connect/types";
 import { ErrorPage } from "components/ErrorBoundary";
 import { Settings } from "components/Settings";
+import { Upgrade } from "components/connect/Upgrade";
 
 function Home() {
-  const { context, controller, setController, error, policies } =
+  const { context, controller, setController, error, policies, upgrade } =
     useConnection();
 
   if (window.self === window.top || !context?.origin) {
@@ -31,10 +32,18 @@ function Home() {
     return <CreateController loginMode={LoginMode.Controller} />;
   }
 
+  if (!upgrade.isSynced) {
+    return <></>;
+  }
+
+  if (upgrade.available) {
+    return <Upgrade />;
+  }
+
   switch (context.type) {
     case "connect": {
       // TODO: show missing policies if mismatch
-      if (!context.policies?.length || controller.session(context.policies)) {
+      if (!policies?.length || controller.session(policies)) {
         context.resolve({
           code: ResponseCodes.SUCCESS,
           address: controller.address,

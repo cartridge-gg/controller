@@ -17,7 +17,7 @@ const meta = {
       context: {
         origin: "http://localhost:3002",
         type: "execute",
-        transactions: [
+        calls: [
           {
             contractAddress: ETH_CONTRACT_ADDRESS,
             entrypoint: "approve",

@@ -12,12 +12,7 @@ export class KeychainIFrame extends IFrame<Keychain> {
     ...iframeOptions
   }: KeychainIframeOptions) {
     const _url = new URL(url ?? KEYCHAIN_URL);
-    if (paymaster) {
-      _url.searchParams.set(
-        "paymaster",
-        encodeURIComponent(JSON.stringify(paymaster)),
-      );
-    }
+
     if (policies) {
       _url.searchParams.set(
         "policies",

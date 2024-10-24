@@ -1,4 +1,4 @@
-import { ErrorCode } from "@cartridge/account-wasm/controller";
+import { ErrorCode, JsCall } from "@cartridge/account-wasm/controller";
 import {
   ConnectReply,
   ExecuteReply,
@@ -6,14 +6,7 @@ import {
   ConnectError,
   DeployReply,
 } from "@cartridge/controller";
-import {
-  Abi,
-  Call,
-  InvocationsDetails,
-  Signature,
-  TypedData,
-  constants,
-} from "starknet";
+import { InvocationsDetails, Signature, TypedData } from "starknet";
 
 export type ConnectionCtx =
   | ConnectCtx
@@ -48,15 +41,12 @@ export type ControllerError = {
 export type ExecuteCtx = {
   origin: string;
   type: "execute";
-  transactions: Call | Call[];
-  abis?: Abi[];
-  transactionsDetail?: InvocationsDetails & {
-    chainId?: constants.StarknetChainId;
-  };
+  calls: JsCall[];
+  transactionsDetail?: InvocationsDetails;
   error?: ControllerError;
   resolve?: (res: ExecuteReply | ConnectError) => void;
   reject?: (reason?: unknown) => void;
-  onCancel: () => void;
+  onCancel?: () => void;
 };
 
 export type SignMessageCtx = {
