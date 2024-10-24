@@ -7,6 +7,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
+  TrophyIcon,
 } from "@cartridge/ui-next";
 import { ProfileContextTypeVariant } from "@cartridge/controller";
 import { Link, useLocation } from "react-router-dom";
@@ -15,8 +16,8 @@ export function Navigation() {
   return (
     <div className="flex rounded border border-1 border-secondary overflow-hidden shrink-0 gap-[1px] bg-secondary">
       <Item Icon={CoinsIcon} variant="inventory" />
+      <Item Icon={TrophyIcon} variant="trophies" />
       <Item Icon={ClockIcon} variant="history" />
-      {/* <Item Icon={ScrollIcon} variant="quest" /> */}
     </div>
   );
 }
@@ -31,7 +32,7 @@ function Item({
   const location = useLocation();
 
   const isActive =
-    location.pathname == `/${variant}` ||
+    location.pathname.startsWith(`/${variant}`) ||
     (variant === "inventory" && location.pathname === "/");
 
   return (

@@ -6,7 +6,7 @@ import {
   Send,
   Token,
 } from "@/components/inventory";
-import { Quest } from "@/components/quest";
+import { Trophies } from "@/components/trophies";
 import { History } from "@/components/history";
 
 export function App() {
@@ -25,7 +25,8 @@ export function App() {
       <Route path="/collection/:address" element={<Collection />} />
       <Route path="/collection/:address/:tokenId" element={<Asset />} />
       <Route path="/collection/:address/send" element={<Send />} />
-      <Route path="/quest" element={<Quest />} />
+      <Route path="/trophies" element={<Trophies />} />
+      <Route path="/trophies/:address" element={<Trophies />} />
       <Route path="/history" element={<History />} />
     </Routes>
   );

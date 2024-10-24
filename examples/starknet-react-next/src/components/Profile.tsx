@@ -16,8 +16,10 @@ export function Profile() {
     <div>
       <h2>Open Profile</h2>
       <div className="flex gap-1">
-        <Button onClick={() => ctrlConnector.controller.openProfile("quest")}>
-          Quest
+        <Button
+          onClick={() => ctrlConnector.controller.openProfile("trophies")}
+        >
+          Trophies
         </Button>
         <Button onClick={() => ctrlConnector.controller.openProfile()}>
           Inventory
