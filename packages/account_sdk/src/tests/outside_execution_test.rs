@@ -12,8 +12,8 @@ use crate::{
         erc_20::Erc20,
     },
     account::{
-        outside_execution::{OutsideExecution, OutsideExecutionAccount, OutsideExecutionCaller},
-        session::hash::Policy,
+        outside_execution::{OutsideExecutionAccount, OutsideExecutionCaller},
+        session::hash::CallPolicy,
     },
     artifacts::{Version, CONTROLLERS},
     controller::Controller,
@@ -38,7 +38,7 @@ pub async fn test_verify_paymaster_execute(signer: Signer, use_session: bool) {
     if use_session {
         controller
             .create_session(
-                vec![Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer"))],
+                vec![CallPolicy::new(*FEE_TOKEN_ADDRESS, selector!("transfer")).into()],
                 u64::MAX,
             )
             .await
@@ -202,7 +202,7 @@ async fn test_verify_execute_paymaster_session() {
 
     let session_account = controller
         .create_session(
-            vec![Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer"))],
+            vec![CallPolicy::new(*FEE_TOKEN_ADDRESS, selector!("transfer")).into()],
             u64::MAX,
         )
         .await
