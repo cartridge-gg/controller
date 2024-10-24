@@ -1,16 +1,12 @@
 import {
-  Account,
-  Abi,
-  Call,
-  EstimateFeeDetails,
-  Signature,
   InvokeFunctionResponse,
-  EstimateFee,
-  DeclareContractPayload,
-  RpcProvider,
   TypedData,
-  InvocationsDetails,
+  WalletAccount,
+  Call,
+  AllowArray,
 } from "starknet";
+
+import { SPEC } from "@starknet-io/types-js";
 
 import {
   ConnectError,
@@ -19,60 +15,28 @@ import {
   Modal,
   ResponseCodes,
 } from "./types";
-import { Signer } from "./signer";
 import { AsyncMethodReturns } from "@cartridge/penpal";
+import BaseProvider from "./provider";
 
-class DeviceAccount extends Account {
+class ControllerAccount extends WalletAccount {
   address: string;
   private keychain: AsyncMethodReturns<Keychain>;
   private modal: Modal;
   private options?: KeychainOptions;
 
   constructor(
-    rpcUrl: string,
+    provider: BaseProvider,
     address: string,
     keychain: AsyncMethodReturns<Keychain>,
     options: KeychainOptions,
     modal: Modal,
   ) {
-    super(
-      new RpcProvider({ nodeUrl: rpcUrl }),
-      address,
-      new Signer(keychain, modal),
-    );
+    super({ nodeUrl: provider.rpc.toString() }, provider);
+
     this.address = address;
     this.keychain = keychain;
     this.options = options;
     this.modal = modal;
-  }
-
-  /**
-   * Estimate Fee for a method on starknet
-   *
-   * @param calls the invocation object containing:
-   * - contractAddress - the address of the contract
-   * - entrypoint - the entrypoint of the contract
-   * - calldata - (defaults to []) the calldata
-   * - signature - (defaults to []) the signature
-   *
-   * @returns response from addTransaction
-   */
-  async estimateInvokeFee(
-    calls: Call | Call[],
-    details?: EstimateFeeDetails,
-  ): Promise<EstimateFee> {
-    return this.keychain.estimateInvokeFee(calls, {
-      ...details,
-    });
-  }
-
-  async estimateDeclareFee(
-    payload: DeclareContractPayload,
-    details?: EstimateFeeDetails,
-  ): Promise<EstimateFee> {
-    return this.keychain.estimateDeclareFee(payload, {
-      ...details,
-    });
   }
 
   /**
@@ -87,17 +51,12 @@ class DeviceAccount extends Account {
    *
    * @returns response from addTransaction
    */
-  // @ts-expect-error TODO: fix overload type mismatch
-  async execute(
-    calls: Call | Call[],
-    abis?: Abi[],
-    transactionsDetail: InvocationsDetails = {},
-  ): Promise<InvokeFunctionResponse> {
+  async execute(calls: AllowArray<Call>): Promise<InvokeFunctionResponse> {
+    calls = Array.isArray(calls) ? calls : [calls];
+
     return new Promise(async (resolve, reject) => {
       const sessionExecute = await this.keychain.execute(
         calls,
-        abis,
-        transactionsDetail,
         false,
         this.options?.paymaster,
       );
@@ -119,8 +78,6 @@ class DeviceAccount extends Account {
       this.modal.open();
       const manualExecute = await this.keychain.execute(
         calls,
-        abis,
-        transactionsDetail,
         true,
         this.options?.paymaster,
         (sessionExecute as ConnectError).error,
@@ -146,12 +103,17 @@ class DeviceAccount extends Account {
    * @returns the signature of the JSON object
    * @throws {Error} if the JSON object is not a valid JSON
    */
-  async signMessage(typedData: TypedData): Promise<Signature> {
+  async signMessage(typedData: TypedData): Promise<SPEC.SIGNATURE> {
     try {
       this.modal.open();
-      const res = await this.keychain.signMessage(typedData, this.address);
+      const res = await this.keychain.signMessage(typedData);
       this.modal.close();
-      return res as Signature;
+
+      if ("code" in res) {
+        throw res;
+      }
+
+      return res;
     } catch (e) {
       console.error(e);
       throw e;
@@ -159,4 +121,4 @@ class DeviceAccount extends Account {
   }
 }
 
-export default DeviceAccount;
+export default ControllerAccount;

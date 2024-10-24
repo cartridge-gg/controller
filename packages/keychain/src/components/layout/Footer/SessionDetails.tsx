@@ -1,10 +1,10 @@
 import { VStack } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import { usePolicies } from "hooks/connection";
+import { useConnection } from "hooks/connection";
 import { Policies } from "components/Policies";
 
 export function SessionDetails() {
-  const policies = usePolicies();
+  const { policies } = useConnection();
 
   return (
     <VStack

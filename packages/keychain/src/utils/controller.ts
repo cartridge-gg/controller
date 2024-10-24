@@ -1,18 +1,15 @@
 import {
   Account,
   BigNumberish,
-  addAddressPadding,
   num,
   InvokeFunctionResponse,
   Signature,
-  AllowArray,
-  Call,
-  UniversalDetails,
-  Abi,
   EstimateFeeDetails,
   EstimateFee,
   ec,
   TypedData,
+  UniversalDetails,
+  Abi,
 } from "starknet";
 
 import { PaymasterOptions, Policy } from "@cartridge/controller";
@@ -24,7 +21,6 @@ import {
   JsInvocationsDetails,
   SessionMetadata,
 } from "@cartridge/account-wasm/controller";
-import { normalizeCalls } from "./connection/execute";
 
 export default class Controller extends Account {
   cartridge: CartridgeAccount;
@@ -128,21 +124,21 @@ export default class Controller extends Account {
   }
 
   async executeFromOutsideV2(
-    calls: AllowArray<Call>,
+    calls: JsCall[],
     _?: PaymasterOptions,
   ): Promise<InvokeFunctionResponse> {
-    return await this.cartridge.executeFromOutsideV2(normalizeCalls(calls));
+    return await this.cartridge.executeFromOutsideV2(calls);
   }
 
   async executeFromOutsideV3(
-    calls: AllowArray<Call>,
+    calls: JsCall[],
     _?: PaymasterOptions,
   ): Promise<InvokeFunctionResponse> {
-    return await this.cartridge.executeFromOutsideV3(normalizeCalls(calls));
+    return await this.cartridge.executeFromOutsideV3(calls);
   }
 
   async execute(
-    transactions: AllowArray<Call>,
+    calls: JsCall[],
     abisOrDetails?: Abi[] | UniversalDetails,
     details?: UniversalDetails,
   ): Promise<InvokeFunctionResponse> {
@@ -153,16 +149,14 @@ export default class Controller extends Account {
       executionDetails.maxFee = num.toHex(executionDetails.maxFee);
     }
 
-    const res = await this.cartridge.execute(
-      normalizeCalls(transactions),
+    return await this.cartridge.execute(
+      calls,
       executionDetails as JsInvocationsDetails,
     );
-
-    return res;
   }
 
-  hasSession(calls: AllowArray<Call>): boolean {
-    return this.cartridge.hasSession(normalizeCalls(calls));
+  hasSession(calls: JsCall[]): boolean {
+    return this.cartridge.hasSession(calls);
   }
 
   session(
@@ -173,10 +167,10 @@ export default class Controller extends Account {
   }
 
   async estimateInvokeFee(
-    calls: AllowArray<Call>,
+    calls: JsCall[],
     _: EstimateFeeDetails = {},
   ): Promise<EstimateFee> {
-    const res = await this.cartridge.estimateInvokeFee(normalizeCalls(calls));
+    const res = await this.cartridge.estimateInvokeFee(calls);
 
     // The reason why we set the multiplier unseemingly high is to account
     // for the fact that the estimation above is done without validation (ie SKIP_VALIDATE).
@@ -243,19 +237,4 @@ export default class Controller extends Account {
     controller.cartridge = cartridge;
     return controller;
   }
-}
-
-export function diff(a: Policy[], b: Policy[]): Policy[] {
-  return a.reduce(
-    (prev, policy) =>
-      b.some(
-        (approval) =>
-          addAddressPadding(approval.target) ===
-            addAddressPadding(policy.target) &&
-          approval.method === policy.method,
-      )
-        ? prev
-        : [...prev, policy],
-    [] as Policy[],
-  );
 }

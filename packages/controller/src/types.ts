@@ -1,19 +1,9 @@
+import { constants, BigNumberish, Call, AllowArray } from "starknet";
 import {
-  constants,
-  Abi,
-  Call,
-  InvocationsDetails,
-  TypedData,
-  InvokeFunctionResponse,
+  AddInvokeTransactionResult,
   Signature,
-  EstimateFeeDetails,
-  EstimateFee,
-  DeclareContractPayload,
-  BigNumberish,
-  InvocationsSignerDetails,
-  DeployAccountSignerDetails,
-  DeclareSignerDetails,
-} from "starknet";
+  TypedData,
+} from "@starknet-io/types-js";
 import { KeychainIFrame, ProfileIFrame } from "./iframe";
 import wasm from "@cartridge/account-wasm/controller";
 
@@ -59,7 +49,7 @@ export type ConnectReply = {
 };
 
 export type ExecuteReply =
-  | (InvokeFunctionResponse & {
+  | (AddInvokeTransactionResult & {
       code: ResponseCodes.SUCCESS;
     })
   | {
@@ -87,51 +77,26 @@ export type ControllerAccounts = Record<ContractAddress, CartridgeID>;
 
 export interface Keychain {
   probe(rpcUrl: string): Promise<ProbeReply | ConnectError>;
-  connect(
-    policies: Policy[],
-    rpcUrl: string,
-  ): Promise<ConnectReply | ConnectError>;
+  connect(rpcUrl: string): Promise<ConnectReply | ConnectError>;
   disconnect(): void;
 
   reset(): void;
   revoke(origin: string): void;
 
-  deploy(): Promise<DeployReply | ConnectError>;
-  estimateDeclareFee(
-    payload: DeclareContractPayload,
-    details?: EstimateFeeDetails,
-  ): Promise<EstimateFee>;
-  estimateInvokeFee(
-    calls: Call | Call[],
-    estimateFeeDetails?: EstimateFeeDetails,
-  ): Promise<EstimateFee>;
   execute(
-    calls: Call | Call[],
-    abis?: Abi[],
-    transactionsDetail?: InvocationsDetails,
+    calls: AllowArray<Call>,
     sync?: boolean,
     paymaster?: PaymasterOptions,
     error?: ControllerError,
   ): Promise<ExecuteReply | ConnectError>;
+  signMessage(typedData: TypedData): Promise<Signature | ConnectError>;
+
   logout(): Promise<void>;
   openSettings(): Promise<void | ConnectError>;
   session(): Promise<Session>;
   sessions(): Promise<{
     [key: string]: Session;
   }>;
-  signMessage(
-    typedData: TypedData,
-    account: string,
-  ): Promise<Signature | ConnectError>;
-  signTransaction(
-    transactions: Call[],
-    transactionsDetail: InvocationsSignerDetails,
-    abis?: Abi[],
-  ): Promise<Signature>;
-  signDeployAccountTransaction(
-    transaction: DeployAccountSignerDetails,
-  ): Promise<Signature>;
-  signDeclareTransaction(transaction: DeclareSignerDetails): Promise<Signature>;
   delegateAccount(): string;
   username(): string;
   fetchControllers(contractAddresses: string[]): Promise<ControllerAccounts>;
@@ -149,7 +114,9 @@ export interface Modal {
 /**
  * Options for configuring the controller
  */
-export type ControllerOptions = KeychainOptions & ProfileOptions;
+export type ControllerOptions = ProviderOptions &
+  KeychainOptions &
+  ProfileOptions;
 
 export type TokenOptions = {
   tokens: Tokens;
@@ -169,12 +136,15 @@ export type IFrameOptions = {
   };
 };
 
+export type ProviderOptions = {
+  /** The URL of the RPC */
+  rpc: string;
+};
+
 export type KeychainOptions = IFrameOptions & {
   policies?: Policy[];
   /** The URL of keychain */
   url?: string;
-  /** The URL of the RPC */
-  rpc?: string;
   /** The origin of keychain */
   origin?: string;
   /** Paymaster options for transaction fee management */

@@ -26,7 +26,7 @@ use tokio::time::Duration;
 use url::Url;
 
 // Constants for TPS and duration
-const TPS: usize = 1;
+const TPS: usize = 75;
 const DURATION_SECS: u64 = 30 * 60;
 
 #[tokio::main]
@@ -35,7 +35,7 @@ async fn main() {
     let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
 
     // let chain_id = felt!("0x534e5f5345504f4c4941"); // Hex for "SN_SEPOLIA"
-    let chain_id = felt!("0x534e5f4d41494e"); // Hex for "SN_SEPOLIA"
+    let chain_id = felt!("0x534e5f4d41494e"); // Hex for "SN_MAIN"
 
     let signer = SigningKey::from_secret_scalar(felt!(
         "0x6b80fcafbecee2c7ddff50c9a09b529c8f65b2fdb457ea134e76ee17640d768"
@@ -114,8 +114,8 @@ async fn main() {
         let controller = Arc::clone(&controller);
         let nonce_mutex = Arc::clone(&nonce_mutex);
         let handle = tokio::spawn(async move {
-            let x = rand::thread_rng().gen_range(0..=100);
-            let y: u64 = rand::thread_rng().gen_range(0..=100);
+            let x = rand::thread_rng().gen_range(0..=256);
+            let y: u64 = rand::thread_rng().gen_range(0..=256);
 
             let mut nonce_lock = nonce_mutex.lock().await;
             let (mut namespace, mut bitmask) = *nonce_lock;

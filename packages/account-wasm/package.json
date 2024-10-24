@@ -41,6 +41,6 @@
     "@cartridge/tsconfig": "workspace:^",
     "tsup": "^8.0.1",
     "typescript": "^5.0.3",
-    "wasm-pack": "^0.12.1"
+    "wasm-pack": "^0.13.0"
   }
 }
