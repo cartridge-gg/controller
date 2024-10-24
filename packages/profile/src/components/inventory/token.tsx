@@ -70,7 +70,7 @@ function ERC20() {
   const { address } = useParams<{ address: string }>();
   const t = useToken(address!);
   const { countervalue } = useCountervalue({
-    balance: formatEther(BigInt(t?.balance ?? 0)),
+    balance: formatEther(t?.balance.value ?? 0n),
     quote: CurrencyQuote.Eth,
     base: CurrencyBase.Usd,
   });
@@ -90,12 +90,13 @@ function ERC20() {
       }
     >
       <LayoutHeader
-        title={`${t.balance === undefined ? (
-          <Skeleton className="h-[20px] w-[120px] rounded" />
-        ) : (
-          t.balance.toString()
-        )
-          } ${t.symbol}`}
+        title={`${
+          t.balance === undefined ? (
+            <Skeleton className="h-[20px] w-[120px] rounded" />
+          ) : (
+            t.balance.formatted
+          )
+        } ${t.symbol}`}
         description={`${countervalue.formatted} ${CurrencyBase.Usd}`}
         icon={
           <img

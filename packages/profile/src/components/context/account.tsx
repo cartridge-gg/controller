@@ -1,8 +1,10 @@
 import { createContext, useState, ReactNode, useEffect } from "react";
 import {
+  Balance,
   ERC20,
   ERC20Metadata,
   ETH_CONTRACT_ADDRESS,
+  formatBalance,
   STRK_CONTRACT_ADDRESS,
   useCreditBalance,
   UseCreditBalanceReturn,
@@ -13,7 +15,7 @@ import { ERC20 as ERC20Option } from "@cartridge/controller";
 import { getChecksumAddress } from "starknet";
 
 type ERC20Status = ERC20Metadata & {
-  balance?: bigint;
+  balance: Balance;
   error?: Error;
 };
 
@@ -22,7 +24,6 @@ type AccountContextType = {
   username: string;
   credit: UseCreditBalanceReturn;
   erc20: (ERC20Status & {
-    balance?: bigint;
     error?: Error;
   })[];
   isFetching: boolean;
@@ -133,7 +134,16 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       const newValue = res.reduce<ERC20Status[]>(
         (prev, res, i) =>
           res.status === "fulfilled"
-            ? [...prev, { ...erc20[i].metadata(), balance: res.value }]
+            ? [
+                ...prev,
+                {
+                  ...erc20[i].metadata(),
+                  balance: {
+                    value: res.value,
+                    formatted: formatBalance(res.value),
+                  },
+                },
+              ]
             : prev,
         [],
       );

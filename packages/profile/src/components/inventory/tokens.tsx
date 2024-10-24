@@ -8,7 +8,6 @@ import {
 } from "@cartridge/ui-next";
 import { useAccount } from "@/hooks/context";
 import { Link } from "react-router-dom";
-import { formatBalance } from "@cartridge/utils";
 
 export function Tokens() {
   const { credit, erc20, isFetching } = useAccount();
@@ -42,7 +41,7 @@ export function Tokens() {
           >
             <div className="flex gap-x-1.5 items-center">
               <img src={t.logoUrl} className="w-5 h-5" />
-              <div>{formatBalance(BigInt(t.balance ?? 0))}</div>
+              <div>{t.balance.formatted}</div>
               {/* <div>{formatBalance(BigInt(t.balance ?? 0))}</div> */}
             </div>
             <div className="text-xs text-muted-foreground">{t.symbol}</div>
