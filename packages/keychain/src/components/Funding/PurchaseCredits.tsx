@@ -1,7 +1,7 @@
 import { Container, Content, Footer } from "components/layout";
 import { Button, Divider } from "@chakra-ui/react";
 import { useCallback, useEffect, useState } from "react";
-import { CheckIcon, CreditsIcon } from "@cartridge/ui";
+import { CheckIcon, CoinsIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { CopyAddress } from "../CopyAddress";
 import AmountSelection, { DEFAULT_AMOUNT } from "./AmountSelection";
@@ -122,7 +122,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
         (state === PurchaseState.SELECTION ? "Credits" : "Complete")
       }
       description={<CopyAddress address={controller.address} />}
-      Icon={state === PurchaseState.SELECTION ? CreditsIcon : CheckIcon}
+      Icon={state === PurchaseState.SELECTION ? CoinsIcon : CheckIcon}
       onBack={state === PurchaseState.SELECTION && onBack}
     >
       <Content gap={6}>
@@ -166,7 +166,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
               isLoading={isLoading}
               onClick={() => createPaymentIntent()}
             >
-              <CreditsIcon fontSize={20} />
+              <CoinsIcon fontSize={20} />
               Stripe
             </Button>
           </>

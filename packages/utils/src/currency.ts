@@ -1,5 +1,7 @@
+import { formatEther } from "viem";
+
 export function formatBalance(balance: bigint): string {
-  const formattedBalance = parseFloat(balance.toString());
+  const formattedBalance = parseFloat(formatEther(balance));
   if (formattedBalance === 0) {
     return "0.00";
   }

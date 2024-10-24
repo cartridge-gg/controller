@@ -82,7 +82,7 @@ export class ERC20 {
     };
   }
 
-  async balanceOf(address: string) {
+  async balanceOf(address: string): Promise<bigint> {
     if (!this.decimals) {
       throw new Error(
         "Token metadata is missing. Make sure to call `.init()` method",
@@ -99,7 +99,8 @@ export class ERC20 {
       low: balance[0],
       high: balance[1],
     });
-    return Number(rawBalance) / Number(10 ** this.decimals);
+
+    return rawBalance;
   }
 
   private async callName() {
