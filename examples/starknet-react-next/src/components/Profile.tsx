@@ -24,8 +24,10 @@ export function Profile() {
         <Button onClick={() => ctrlConnector.controller.openProfile()}>
           Inventory
         </Button>
-        <Button onClick={() => ctrlConnector.controller.openProfile("history")}>
-          History
+        <Button
+          onClick={() => ctrlConnector.controller.openProfile("activity")}
+        >
+          Activity
         </Button>
       </div>
     </div>
