@@ -66,9 +66,7 @@ export function Trophies() {
 
   const { rank, earnings } = useMemo(() => {
     const rank =
-      players
-        .sort((a, b) => a.rank - b.rank)
-        .findIndex((player) => player.address === (address || self)) + 1;
+      players.findIndex((player) => player.address === (address || self)) + 1;
     const earnings =
       players.find((player) => player.address === (address || self))
         ?.earnings || 0;
@@ -80,11 +78,7 @@ export function Trophies() {
   }, [address, self]);
 
   useEffect(() => {
-    // Sort by id, timestamp, and completion
-    const achievements = items
-      .sort((a, b) => (a.id > b.id ? 1 : -1))
-      .sort((a, b) => b.timestamp - a.timestamp)
-      .sort((a, b) => (b.completed ? 1 : 0) - (a.completed ? 1 : 0));
+    const achievements = items;
     setAchievements(achievements);
   }, []);
 
@@ -99,7 +93,7 @@ export function Trophies() {
     [achievements],
   );
 
-  const { refetch: refetchName } = useAccountNameQuery(
+  const { refetch: fetchName } = useAccountNameQuery(
     { address: address || self },
     {
       enabled: false,
@@ -108,10 +102,6 @@ export function Trophies() {
       },
     },
   );
-
-  const fetchName = useCallback(async () => {
-    await refetchName();
-  }, [refetchName]);
 
   useEffect(() => {
     fetchName();

@@ -123,7 +123,10 @@ export const items: Item[] = [
     pinned: false,
     Icon: undefined,
   },
-];
+]
+  .sort((a, b) => (a.id > b.id ? 1 : -1))
+  .sort((a, b) => b.timestamp - a.timestamp)
+  .sort((a, b) => (b.completed ? 1 : 0) - (a.completed ? 1 : 0));
 
 export const players: Player[] = [
   {
@@ -186,7 +189,7 @@ export const players: Player[] = [
   {
     username: "Bal7hazar",
     address:
-      "0x23b5fc37f0a0f9961d4a6818e902e1064b2f74dd671c9434658fbc45f817a77",
+      "0x3fe94d5424dad5c26a0e509f32eab28d93d87f51506db0754c54f7bc4621baf",
     earnings: 950,
     rank: 1,
     Icon: OlmechIcon,
@@ -261,4 +264,4 @@ export const players: Player[] = [
     rank: 19,
     Icon: undefined,
   },
-];
+].sort((a, b) => a.rank - b.rank);

@@ -16,15 +16,13 @@ export function Leaderboard({
 }) {
   return (
     <div className="flex flex-col gap-y-px rounded-md overflow-hidden">
-      {players
-        .sort((a, b) => a.rank - b.rank)
-        .map((player) => (
-          <Row
-            key={player.address}
-            self={BigInt(player.address || 0) === BigInt(address || 1)}
-            {...player}
-          />
-        ))}
+      {players.map((player) => (
+        <Row
+          key={player.address}
+          self={BigInt(player.address || 0) === BigInt(address || 1)}
+          {...player}
+        />
+      ))}
     </div>
   );
 }
