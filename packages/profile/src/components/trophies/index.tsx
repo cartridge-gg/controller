@@ -24,6 +24,33 @@ import {
   AccountNameQuery,
   useAccountNameQuery,
 } from "@cartridge/utils/api/cartridge";
+import {
+  useEventsQuery,
+} from "@cartridge/utils/api/indexer";
+import { hash, byteArray, ByteArray } from "starknet";
+
+
+// Computes dojo selector from namespace and event name
+export function getSelectorFromTag(namespace: string, event: string): string {
+  return hash.computePoseidonHashOnElements([computeByteArrayHash(namespace), computeByteArrayHash(event)]);
+}
+
+// Serializes a ByteArray to a bigint array
+function serializeByteArray(byteArray: ByteArray): bigint[] {
+  const result: bigint[] = [
+    BigInt(byteArray.data.length),
+    ...byteArray.data.map((word) => BigInt(word.toString())),
+    BigInt(byteArray.pending_word),
+    BigInt(byteArray.pending_word_len),
+  ];
+  return result;
+}
+
+// Poseidon hash of a string representated as a ByteArray
+export function computeByteArrayHash(str: string): string {
+    const bytes = byteArray.byteArrayFromString(str);
+    return hash.computePoseidonHashOnElements(serializeByteArray(bytes));
+}
 
 export interface Item {
   id: string;
@@ -103,9 +130,31 @@ export function Trophies() {
     },
   );
 
+  const { refetch: fetchAchievementCreations } = useEventsQuery(
+    { keys: [getSelectorFromTag("conquest", "AchievementCreation")], limit: 100, offset: 0 },
+    {
+      enabled: false,
+      onSuccess: (data) => {
+        console.log('creations', data);
+      },
+    }
+  );
+
+  const { refetch: fetchAchievementCompletions } = useEventsQuery(
+    { keys: [getSelectorFromTag("conquest", "AchievementCompletion")], limit: 100, offset: 0 },
+    {
+      enabled: false,
+      onSuccess: (data) => {
+        console.log('completions', data);
+      },
+    }
+  );
+
   useEffect(() => {
     fetchName();
-  }, [fetchName, address]);
+    fetchAchievementCreations();
+    fetchAchievementCompletions();
+  }, [fetchName, fetchAchievementCreations, fetchAchievementCompletions, address]);
 
   return (
     <LayoutContainer
