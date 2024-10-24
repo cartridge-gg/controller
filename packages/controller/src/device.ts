@@ -1,12 +1,16 @@
 import {
-  InvokeFunctionResponse,
-  TypedData,
-  WalletAccount,
+  Account,
+  Abi,
   Call,
-  AllowArray,
+  EstimateFeeDetails,
+  Signature,
+  InvokeFunctionResponse,
+  EstimateFee,
+  DeclareContractPayload,
+  RpcProvider,
+  TypedData,
+  InvocationsDetails,
 } from "starknet";
-
-import { SPEC } from "@starknet-io/types-js";
 
 import {
   ConnectError,
@@ -15,28 +19,60 @@ import {
   Modal,
   ResponseCodes,
 } from "./types";
+import { Signer } from "./signer";
 import { AsyncMethodReturns } from "@cartridge/penpal";
-import BaseProvider from "./provider";
 
-class ControllerAccount extends WalletAccount {
+class DeviceAccount extends Account {
   address: string;
   private keychain: AsyncMethodReturns<Keychain>;
   private modal: Modal;
   private options?: KeychainOptions;
 
   constructor(
-    provider: BaseProvider,
+    rpcUrl: string,
     address: string,
     keychain: AsyncMethodReturns<Keychain>,
     options: KeychainOptions,
     modal: Modal,
   ) {
-    super({ nodeUrl: provider.rpc.toString() }, provider);
-
+    super(
+      new RpcProvider({ nodeUrl: rpcUrl }),
+      address,
+      new Signer(keychain, modal),
+    );
     this.address = address;
     this.keychain = keychain;
     this.options = options;
     this.modal = modal;
+  }
+
+  /**
+   * Estimate Fee for a method on starknet
+   *
+   * @param calls the invocation object containing:
+   * - contractAddress - the address of the contract
+   * - entrypoint - the entrypoint of the contract
+   * - calldata - (defaults to []) the calldata
+   * - signature - (defaults to []) the signature
+   *
+   * @returns response from addTransaction
+   */
+  async estimateInvokeFee(
+    calls: Call | Call[],
+    details?: EstimateFeeDetails,
+  ): Promise<EstimateFee> {
+    return this.keychain.estimateInvokeFee(calls, {
+      ...details,
+    });
+  }
+
+  async estimateDeclareFee(
+    payload: DeclareContractPayload,
+    details?: EstimateFeeDetails,
+  ): Promise<EstimateFee> {
+    return this.keychain.estimateDeclareFee(payload, {
+      ...details,
+    });
   }
 
   /**
@@ -51,11 +87,20 @@ class ControllerAccount extends WalletAccount {
    *
    * @returns response from addTransaction
    */
-  async execute(calls: AllowArray<Call>): Promise<InvokeFunctionResponse> {
-    calls = Array.isArray(calls) ? calls : [calls];
-
+  // @ts-expect-error TODO: fix overload type mismatch
+  async execute(
+    calls: Call | Call[],
+    abis?: Abi[],
+    transactionsDetail: InvocationsDetails = {},
+  ): Promise<InvokeFunctionResponse> {
     return new Promise(async (resolve, reject) => {
-      const sessionExecute = await this.keychain.execute(calls, false);
+      const sessionExecute = await this.keychain.execute(
+        calls,
+        abis,
+        transactionsDetail,
+        false,
+        this.options?.paymaster,
+      );
 
       // Session call succeeded
       if (sessionExecute.code === ResponseCodes.SUCCESS) {
@@ -74,7 +119,10 @@ class ControllerAccount extends WalletAccount {
       this.modal.open();
       const manualExecute = await this.keychain.execute(
         calls,
+        abis,
+        transactionsDetail,
         true,
+        this.options?.paymaster,
         (sessionExecute as ConnectError).error,
       );
 
@@ -98,17 +146,12 @@ class ControllerAccount extends WalletAccount {
    * @returns the signature of the JSON object
    * @throws {Error} if the JSON object is not a valid JSON
    */
-  async signMessage(typedData: TypedData): Promise<SPEC.SIGNATURE> {
+  async signMessage(typedData: TypedData): Promise<Signature> {
     try {
       this.modal.open();
-      const res = await this.keychain.signMessage(typedData);
+      const res = await this.keychain.signMessage(typedData, this.address);
       this.modal.close();
-
-      if ("code" in res) {
-        throw res;
-      }
-
-      return res;
+      return res as Signature;
     } catch (e) {
       console.error(e);
       throw e;
@@ -116,4 +159,4 @@ class ControllerAccount extends WalletAccount {
   }
 }
 
-export default ControllerAccount;
+export default DeviceAccount;

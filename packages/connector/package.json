@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/connector",
-  "version": "0.5.0-alpha.0",
+  "version": "0.4.0",
   "description": "Cartridge Controler Connector",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -32,7 +32,8 @@
   },
   "dependencies": {
     "@cartridge/controller": "workspace:^",
-    "@starknet-react/core": "^3.0.2",
+    "@starknet-react/core": "^2.1.5",
+    "@telegram-apps/sdk": "^2.4.0",
     "starknet": "^6.11.0"
   },
   "devDependencies": {

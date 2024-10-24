@@ -9,18 +9,18 @@ type ColorSchemeProviderProps = {
   storageKey?: string;
 };
 
-type ColorSchemeContextType = {
+type ColorSchemeProviderState = {
   colorScheme: ColorScheme;
   setColorScheme: (colorMode: ColorScheme) => void;
 };
 
-const initialState: ColorSchemeContextType = {
+const initialState: ColorSchemeProviderState = {
   colorScheme: "system",
   setColorScheme: () => null,
 };
 
-export const ColorSchemeContext =
-  createContext<ColorSchemeContextType>(initialState);
+export const ColorSchemeProviderContext =
+  createContext<ColorSchemeProviderState>(initialState);
 
 export function ColorSchemeProvider({
   children,
@@ -61,8 +61,8 @@ export function ColorSchemeProvider({
   };
 
   return (
-    <ColorSchemeContext.Provider {...props} value={value}>
+    <ColorSchemeProviderContext.Provider {...props} value={value}>
       {children}
-    </ColorSchemeContext.Provider>
+    </ColorSchemeProviderContext.Provider>
   );
 }

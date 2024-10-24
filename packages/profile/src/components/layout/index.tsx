@@ -6,14 +6,13 @@ export function LayoutContainer({
   children,
   left,
 }: PropsWithChildren & { left?: React.ReactNode }) {
-  const { parent, chainId, setIsVisible } = useConnection();
+  const { parent, chainId } = useConnection();
 
   const onClose = useCallback(() => {
-    setIsVisible(false);
     parent.close().catch(() => {
       /* Always fails for some reason */
     });
-  }, [parent, setIsVisible]);
+  }, [parent]);
 
   return (
     <ResponsiveWrapper>
@@ -56,9 +55,9 @@ function ResponsiveWrapper({ children }: PropsWithChildren) {
 }
 
 type LayoutHeaderProps = {
-  title: string | React.ReactElement;
+  title: string;
   description?: string | React.ReactElement;
-  icon?: string | React.ReactElement;
+  icon?: string;
   right?: React.ReactElement;
 };
 
@@ -72,26 +71,18 @@ export function LayoutHeader({
     <div className="flex gap-2 px-4 py-6 sticky top-16 bg-background justify-between">
       <div className="flex min-w-0 gap-2 items-center">
         <div className="w-11 h-11 bg-secondary rounded flex shrink-0 items-center justify-center overflow-hidden">
-          {typeof icon === "object" ? (
-            icon
-          ) : (
-            <div
-              className="w-full bg-cover bg-center h-full place-content-center"
-              style={{
-                backgroundImage: `url(${
-                  icon ?? "https://x.cartridge.gg/whitelabel/cartridge/icon.svg"
-                })`,
-              }}
-            />
-          )}
+          <div
+            className="w-full bg-cover bg-center h-full place-content-center"
+            style={{
+              backgroundImage: `url(${
+                icon ?? "https://x.cartridge.gg/whitelabel/cartridge/icon.svg"
+              })`,
+            }}
+          />
         </div>
 
         <div className="flex flex-col gap-1 overflow-hidden">
-          {typeof title === "object" ? (
-            title
-          ) : (
-            <div className="text-lg font-semibold truncate">{title}</div>
-          )}
+          <div className="text-lg font-semibold truncate">{title}</div>
           {description && typeof description === "string" ? (
             <div className="text-xs text-muted-foreground truncate">
               {description}

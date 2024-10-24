@@ -1,9 +1,19 @@
-import { constants, BigNumberish, Call, AllowArray } from "starknet";
 import {
-  AddInvokeTransactionResult,
-  Signature,
+  constants,
+  Abi,
+  Call,
+  InvocationsDetails,
   TypedData,
-} from "@starknet-io/types-js";
+  InvokeFunctionResponse,
+  Signature,
+  EstimateFeeDetails,
+  EstimateFee,
+  DeclareContractPayload,
+  BigNumberish,
+  InvocationsSignerDetails,
+  DeployAccountSignerDetails,
+  DeclareSignerDetails,
+} from "starknet";
 import { KeychainIFrame, ProfileIFrame } from "./iframe";
 import wasm from "@cartridge/account-wasm/controller";
 
@@ -49,7 +59,7 @@ export type ConnectReply = {
 };
 
 export type ExecuteReply =
-  | (AddInvokeTransactionResult & {
+  | (InvokeFunctionResponse & {
       code: ResponseCodes.SUCCESS;
     })
   | {
@@ -77,25 +87,51 @@ export type ControllerAccounts = Record<ContractAddress, CartridgeID>;
 
 export interface Keychain {
   probe(rpcUrl: string): Promise<ProbeReply | ConnectError>;
-  connect(rpcUrl: string): Promise<ConnectReply | ConnectError>;
+  connect(
+    policies: Policy[],
+    rpcUrl: string,
+  ): Promise<ConnectReply | ConnectError>;
   disconnect(): void;
 
   reset(): void;
   revoke(origin: string): void;
 
+  deploy(): Promise<DeployReply | ConnectError>;
+  estimateDeclareFee(
+    payload: DeclareContractPayload,
+    details?: EstimateFeeDetails,
+  ): Promise<EstimateFee>;
+  estimateInvokeFee(
+    calls: Call | Call[],
+    estimateFeeDetails?: EstimateFeeDetails,
+  ): Promise<EstimateFee>;
   execute(
-    calls: AllowArray<Call>,
+    calls: Call | Call[],
+    abis?: Abi[],
+    transactionsDetail?: InvocationsDetails,
     sync?: boolean,
+    paymaster?: PaymasterOptions,
     error?: ControllerError,
   ): Promise<ExecuteReply | ConnectError>;
-  signMessage(typedData: TypedData): Promise<Signature | ConnectError>;
-
   logout(): Promise<void>;
   openSettings(): Promise<void | ConnectError>;
   session(): Promise<Session>;
   sessions(): Promise<{
     [key: string]: Session;
   }>;
+  signMessage(
+    typedData: TypedData,
+    account: string,
+  ): Promise<Signature | ConnectError>;
+  signTransaction(
+    transactions: Call[],
+    transactionsDetail: InvocationsSignerDetails,
+    abis?: Abi[],
+  ): Promise<Signature>;
+  signDeployAccountTransaction(
+    transaction: DeployAccountSignerDetails,
+  ): Promise<Signature>;
+  signDeclareTransaction(transaction: DeclareSignerDetails): Promise<Signature>;
   delegateAccount(): string;
   username(): string;
   fetchControllers(contractAddresses: string[]): Promise<ControllerAccounts>;
@@ -113,9 +149,7 @@ export interface Modal {
 /**
  * Options for configuring the controller
  */
-export type ControllerOptions = ProviderOptions &
-  KeychainOptions &
-  ProfileOptions;
+export type ControllerOptions = KeychainOptions & ProfileOptions;
 
 export type TokenOptions = {
   tokens: Tokens;
@@ -135,17 +169,16 @@ export type IFrameOptions = {
   };
 };
 
-export type ProviderOptions = {
-  /** The URL of the RPC */
-  rpc: string;
-};
-
 export type KeychainOptions = IFrameOptions & {
   policies?: Policy[];
   /** The URL of keychain */
   url?: string;
+  /** The URL of the RPC */
+  rpc?: string;
   /** The origin of keychain */
   origin?: string;
+  /** Paymaster options for transaction fee management */
+  paymaster?: PaymasterOptions;
   /** Propagate transaction errors back to caller instead of showing modal */
   propagateSessionErrors?: boolean;
 };
@@ -159,7 +192,22 @@ export type ProfileOptions = IFrameOptions & {
   tokens?: Tokens;
 };
 
-export type ProfileContextTypeVariant = "trophies" | "inventory" | "activity";
+export type ProfileContextTypeVariant = "quest" | "inventory" | "history";
+
+/**
+ * Options for configuring a paymaster
+ */
+export type PaymasterOptions = {
+  /**
+   * The address of the account paying for the transaction.
+   * This should be a valid Starknet address or "ANY_CALLER" short string.
+   */
+  caller: string;
+  /**
+   * The URL of the paymaster. Currently not used.
+   */
+  url?: string;
+};
 
 export type ColorMode = "light" | "dark";
 

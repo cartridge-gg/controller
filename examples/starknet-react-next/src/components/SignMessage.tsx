@@ -52,9 +52,7 @@ export function SignMessage() {
   const { address, account } = useAccount();
   const [message, setMessage] = useState(MESSAGE);
   const [isValid, setIsValid] = useState<boolean | null>(null);
-  const { signTypedData, data: signature } = useSignTypedData({
-    params: message,
-  });
+  const { signTypedData, data: signature } = useSignTypedData(message);
 
   const onValidateSig = useCallback(async () => {
     if (!account || !address) {

@@ -1,7 +1,6 @@
 export { Asset } from "./asset";
 export { Collection } from "./collection";
 export { Send } from "./send";
-export { Token } from "./token";
 
 import { CopyAddress } from "@cartridge/ui-next";
 import {
@@ -9,13 +8,13 @@ import {
   LayoutContent,
   LayoutHeader,
 } from "@/components/layout";
-import { useAccount } from "@/hooks/context";
+import { useConnection } from "@/hooks/context";
 // import { Collections } from "./collections";
 import { Tokens } from "./tokens";
 // import { Navigation } from "@/components/navigation";
 
 export function Inventory() {
-  const { username, address } = useAccount();
+  const { username, address } = useConnection();
 
   return (
     <LayoutContainer>

@@ -2,8 +2,8 @@
 
 import {
   useAccount,
-  useReadContract,
-  useSendTransaction,
+  useContractRead,
+  useContractWrite,
 } from "@starknet-react/core";
 import { useCallback, useMemo, useState } from "react";
 import { cairo, uint256 } from "starknet";
@@ -16,7 +16,7 @@ import { Button, Input } from "@cartridge/ui-next";
 function UserBalance() {
   const { account } = useAccount();
 
-  const { data, isLoading, error } = useReadContract({
+  const { data, isLoading, error } = useContractRead({
     abi: Erc20Abi as Abi,
     address:
       "0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10",
@@ -34,6 +34,7 @@ function UserBalance() {
       return <div>Error!</div>;
     }
 
+    // @ts-expect-error TODO: fix type
     const balance = uint256.uint256ToBN(cairo.uint256(data[0]));
     return <div>{balance.toString(10)}</div>;
   }, [data, isLoading, error]);
@@ -60,7 +61,7 @@ function MintToken() {
     return contract.populateTransaction["mint"]!(address, [address, amountBn]);
   }, [address, contract, amount]);
 
-  const { sendAsync, isPending, error, reset } = useSendTransaction({
+  const { writeAsync, isPending, error, reset } = useContractWrite({
     calls,
   });
 
@@ -82,9 +83,9 @@ function MintToken() {
   const onMint = useCallback(() => {
     reset();
     if (account && !amountError) {
-      sendAsync();
+      writeAsync();
     }
-  }, [account, amountError, reset, sendAsync]);
+  }, [account, amountError, reset, writeAsync]);
 
   const mintButtonDisabled = useMemo(() => {
     if (isPending) return true;

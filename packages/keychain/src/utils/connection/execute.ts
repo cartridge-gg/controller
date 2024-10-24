@@ -1,7 +1,20 @@
-import { ResponseCodes, ConnectError } from "@cartridge/controller";
-import { Call, InvokeFunctionResponse, num } from "starknet";
+import {
+  ResponseCodes,
+  ConnectError,
+  PaymasterOptions,
+} from "@cartridge/controller";
+import {
+  Abi,
+  AllowArray,
+  Call,
+  CallData,
+  InvocationsDetails,
+  InvokeFunctionResponse,
+  addAddressPadding,
+  num,
+} from "starknet";
 import { ConnectionCtx, ControllerError, ExecuteCtx } from "./types";
-import { ErrorCode } from "@cartridge/account-wasm/controller";
+import { ErrorCode, JsCall } from "@cartridge/account-wasm/controller";
 
 export const ESTIMATE_FEE_PERCENTAGE = 10;
 
@@ -30,18 +43,24 @@ export function execute({
   setContext: (context: ConnectionCtx) => void;
 }) {
   return async (
-    calls: Call[],
+    transactions: AllowArray<Call>,
+    abis: Abi[],
+    transactionsDetail?: InvocationsDetails,
     sync?: boolean,
+    paymaster?: PaymasterOptions,
     error?: ControllerError,
   ): Promise<InvokeFunctionResponse | ConnectError> => {
     const account = window.controller;
+    const calls = normalizeCalls(transactions);
 
     if (sync) {
       return await new Promise((resolve, reject) => {
         setContext({
           type: "execute",
           origin,
-          calls,
+          transactions,
+          abis,
+          transactionsDetail,
           error,
           resolve,
           reject,
@@ -56,7 +75,9 @@ export function execute({
         setContext({
           type: "execute",
           origin,
-          calls,
+          transactions,
+          abis,
+          transactionsDetail,
           resolve,
           reject,
         } as ExecuteCtx);
@@ -68,39 +89,46 @@ export function execute({
       }
 
       // Try paymaster if it is enabled. If it fails, fallback to user pays session flow.
-      try {
-        const { transaction_hash } = await account.executeFromOutsideV3(calls);
+      if (paymaster) {
+        try {
+          const { transaction_hash } = await account.executeFromOutside(calls);
 
-        return resolve({
-          code: ResponseCodes.SUCCESS,
-          transaction_hash,
-        });
-      } catch (e) {
-        // User only pays if the error is ErrorCode.PaymasterNotSupported
-        if (e.code !== ErrorCode.PaymasterNotSupported) {
-          setContext({
-            type: "execute",
-            origin,
-            calls,
-            error: parseControllerError(e),
-            resolve,
-            reject,
-          } as ExecuteCtx);
           return resolve({
-            code: ResponseCodes.ERROR,
-            message: e.message,
-            error: parseControllerError(e),
+            code: ResponseCodes.SUCCESS,
+            transaction_hash,
           });
+        } catch (e) {
+          // User only pays if the error is ErrorCode.PaymasterNotSupported
+          if (e.code !== ErrorCode.PaymasterNotSupported) {
+            setContext({
+              type: "execute",
+              origin,
+              transactions,
+              abis,
+              transactionsDetail,
+              error: parseControllerError(e),
+              resolve,
+              reject,
+            } as ExecuteCtx);
+            return resolve({
+              code: ResponseCodes.ERROR,
+              message: e.message,
+              error: parseControllerError(e),
+            });
+          }
         }
       }
 
       try {
-        let estimate = await account.cartridge.estimateInvokeFee(calls);
-        let maxFee = num.toHex(
-          num.addPercent(estimate.overall_fee, ESTIMATE_FEE_PERCENTAGE),
-        );
+        let { maxFee } = transactionsDetail;
+        if (!maxFee) {
+          let estimate = await account.cartridge.estimateInvokeFee(calls);
+          maxFee = num.toHex(
+            num.addPercent(estimate.overall_fee, ESTIMATE_FEE_PERCENTAGE),
+          );
+        }
 
-        let { transaction_hash } = await account.execute(calls, {
+        let { transaction_hash } = await account.execute(transactions, {
           maxFee,
         });
         return resolve({
@@ -111,7 +139,9 @@ export function execute({
         setContext({
           type: "execute",
           origin,
-          calls,
+          transactions,
+          abis,
+          transactionsDetail,
           error: parseControllerError(e),
           resolve,
           reject,
@@ -125,3 +155,13 @@ export function execute({
     });
   };
 }
+
+export const normalizeCalls = (calls: AllowArray<Call>): JsCall[] => {
+  return (Array.isArray(calls) ? calls : [calls]).map((call) => {
+    return {
+      entrypoint: call.entrypoint,
+      contractAddress: addAddressPadding(call.contractAddress),
+      calldata: CallData.toHex(call.calldata),
+    };
+  });
+};

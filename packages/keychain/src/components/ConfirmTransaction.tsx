@@ -8,6 +8,7 @@ import { ExecuteCtx } from "utils/connection";
 import { addAddressPadding, num } from "starknet";
 import { ExecutionContainer } from "components/ExecutionContainer";
 import { CreateSession } from "./connect";
+import { JsCall } from "@cartridge/account-wasm";
 
 export function ConfirmTransaction() {
   const { controller, context, origin, policies, setContext } = useConnection();
@@ -16,7 +17,10 @@ export function ConfirmTransaction() {
   const account = controller;
 
   const onSubmit = async (maxFee: bigint) => {
-    let { transaction_hash } = await account.execute(ctx.calls, {
+    let calls = Array.isArray(ctx.transactions)
+      ? ctx.transactions
+      : [ctx.transactions];
+    let { transaction_hash } = await account.execute(calls as JsCall[], {
       maxFee: num.toHex(maxFee),
     });
     ctx.resolve({
@@ -29,11 +33,14 @@ export function ConfirmTransaction() {
 
   const calls = useMemo<Policy[]>(
     () =>
-      (Array.isArray(ctx.calls) ? ctx.calls : [ctx.calls]).map((c) => ({
+      (Array.isArray(ctx.transactions)
+        ? ctx.transactions
+        : [ctx.transactions]
+      ).map((c) => ({
         target: c.contractAddress,
         method: c.entrypoint,
       })),
-    [ctx.calls],
+    [ctx.transactions],
   );
 
   const updateSession = useMemo(() => {
@@ -75,7 +82,7 @@ export function ConfirmTransaction() {
       title="Confirm Transaction"
       description={origin}
       executionError={ctx.error}
-      transactions={ctx.calls}
+      transactions={ctx.transactions}
       transactionsDetail={ctx.transactionsDetail}
       onSubmit={onSubmit}
     >

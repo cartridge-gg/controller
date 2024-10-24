@@ -8,55 +8,19 @@ import { cn } from "@/utils";
 const ScrollArea = React.forwardRef<
   React.ElementRef<typeof ScrollAreaPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root>
->(({ className, children, ...props }, ref) => {
-  // If the scrollbar is not hidden, it remains visible for 500ms before fading out
-  const [opacity, setOpacity] = React.useState<number>(0);
-  const [hidden, setHidden] = React.useState<boolean>(true);
-  const opacityTimeout = React.useRef<NodeJS.Timeout | null>(null);
-  const hiddenTimeout = React.useRef<NodeJS.Timeout | null>(null);
-
-  // Set visible each time the scrollbar is used
-  const onScrollCapture = React.useCallback(() => {
-    if (opacityTimeout.current) clearTimeout(opacityTimeout.current);
-    if (hiddenTimeout.current) clearTimeout(hiddenTimeout.current);
-    setOpacity(100);
-    setHidden(false);
-    opacityTimeout.current = setTimeout(() => setOpacity(0), 500);
-  }, []);
-
-  React.useEffect(() => {
-    if (opacity === 0) {
-      hiddenTimeout.current = setTimeout(() => setHidden(true), 300);
-    }
-  }, [opacity]);
-
-  // Cleanup the timeout if the component unmounts
-  React.useEffect(() => {
-    return () => {
-      if (opacityTimeout.current) {
-        clearTimeout(opacityTimeout.current);
-      }
-      if (hiddenTimeout.current) {
-        clearTimeout(hiddenTimeout.current);
-      }
-    };
-  }, []);
-
-  return (
-    <ScrollAreaPrimitive.Root
-      ref={ref}
-      onScrollCapture={onScrollCapture}
-      className={cn("relative overflow-hidden", className)}
-      {...props}
-    >
-      <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit]">
-        {children}
-      </ScrollAreaPrimitive.Viewport>
-      <ScrollBar className={cn(`opacity-${opacity}`, hidden && "hidden")} />
-      <ScrollAreaPrimitive.Corner />
-    </ScrollAreaPrimitive.Root>
-  );
-});
+>(({ className, children, ...props }, ref) => (
+  <ScrollAreaPrimitive.Root
+    ref={ref}
+    className={cn("relative overflow-hidden", className)}
+    {...props}
+  >
+    <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit]">
+      {children}
+    </ScrollAreaPrimitive.Viewport>
+    <ScrollBar />
+    <ScrollAreaPrimitive.Corner />
+  </ScrollAreaPrimitive.Root>
+));
 ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName;
 
 const ScrollBar = React.forwardRef<
@@ -67,7 +31,7 @@ const ScrollBar = React.forwardRef<
     ref={ref}
     orientation={orientation}
     className={cn(
-      "flex touch-none select-none transition-opacity duration-300",
+      "flex touch-none select-none transition-colors",
       orientation === "vertical" &&
         "h-full w-2.5 border-l border-l-transparent p-[1px]",
       orientation === "horizontal" &&

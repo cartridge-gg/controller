@@ -4,13 +4,63 @@ import {
   CardHeader,
   CardTitle,
   SpinnerIcon,
-  CoinsIcon,
 } from "@cartridge/ui-next";
-import { useAccount } from "@/hooks/context";
-import { Link } from "react-router-dom";
+import { ERC20, ERC20Info } from "@cartridge/utils";
+import { useEffect, useState } from "react";
+import { useConnection } from "@/hooks/context";
 
 export function Tokens() {
-  const { credit, erc20, isFetching } = useAccount();
+  const { address, provider, erc20: erc20Params } = useConnection();
+  const [erc20s, setErc20s] = useState<ERC20Info[]>([]);
+  const [isFetching, setIsFetching] = useState(true);
+
+  useEffect(() => {
+    setupErc20Info();
+
+    async function setupErc20Info() {
+      const res = await Promise.allSettled(
+        erc20Params.map((t) =>
+          new ERC20({
+            address: t.address,
+            provider,
+            logoUrl: t.logoUrl,
+          }).info(),
+        ),
+      );
+
+      setErc20s(
+        res.filter((res) => res.status === "fulfilled").map((res) => res.value),
+      );
+    }
+  }, [erc20Params, provider]);
+
+  useEffect(() => {
+    const id = setInterval(updateBalance, 3000);
+
+    async function updateBalance() {
+      setIsFetching(true);
+
+      const tokens = await Promise.all(
+        erc20s.map(async (t) => {
+          try {
+            return {
+              ...t,
+              balance: await t.class.balanceOf(address),
+            };
+          } catch (e) {
+            return { ...t, error: e as Error };
+          }
+        }),
+      );
+
+      setErc20s(tokens);
+      setIsFetching(false);
+    }
+
+    return () => {
+      clearInterval(id);
+    };
+  }, [address, erc20s, provider]);
 
   return (
     <Card>
@@ -18,35 +68,16 @@ export function Tokens() {
         <CardTitle>Token</CardTitle>
         {isFetching && <SpinnerIcon className="animate-spin" />}
       </CardHeader>
-
-      <Link to={`/token/credit`}>
-        <CardContent className="flex items-center justify-between">
-          <div className="flex gap-x-1.5 items-center">
-            <CoinsIcon variant="solid" size="sm" />
-            <div>{credit.balance.formatted}</div>
-            <div className="text-muted-foreground">
-              ${credit.balance.formatted}
-            </div>
+      {erc20s.map((t, i) => (
+        <CardContent
+          key={t.address + i}
+          className="flex gap-x-1.5 items-center"
+        >
+          <img src={t.logoUrl} className="w-5 h-5" />
+          <div>
+            {t.balance === undefined ? "---" : t.balance.toString()} {t.symbol}
           </div>
-
-          <div className="text-xs text-muted-foreground">CREDITS</div>
         </CardContent>
-      </Link>
-
-      {erc20.map((t, i) => (
-        <Link key={t.address} to={`/token/${t.address}`}>
-          <CardContent
-            key={t.address + i}
-            className="flex items-center justify-between"
-          >
-            <div className="flex gap-x-1.5 items-center">
-              <img src={t.logoUrl} className="w-5 h-5" />
-              <div>{t.balance.formatted}</div>
-              {/* <div>{formatBalance(BigInt(t.balance ?? 0))}</div> */}
-            </div>
-            <div className="text-xs text-muted-foreground">{t.symbol}</div>
-          </CardContent>
-        </Link>
       ))}
     </Card>
   );

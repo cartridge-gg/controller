@@ -5,9 +5,19 @@ import { IFrame, IFrameOptions } from "./base";
 type KeychainIframeOptions = IFrameOptions<Keychain> & KeychainOptions;
 
 export class KeychainIFrame extends IFrame<Keychain> {
-  constructor({ url, policies, ...iframeOptions }: KeychainIframeOptions) {
+  constructor({
+    url,
+    paymaster,
+    policies,
+    ...iframeOptions
+  }: KeychainIframeOptions) {
     const _url = new URL(url ?? KEYCHAIN_URL);
-
+    if (paymaster) {
+      _url.searchParams.set(
+        "paymaster",
+        encodeURIComponent(JSON.stringify(paymaster)),
+      );
+    }
     if (policies) {
       _url.searchParams.set(
         "policies",
