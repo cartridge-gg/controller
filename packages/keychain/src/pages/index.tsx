@@ -14,6 +14,7 @@ import { LoginMode } from "components/connect/types";
 import { ErrorPage } from "components/ErrorBoundary";
 import { Settings } from "components/Settings";
 import { Upgrade } from "components/connect/Upgrade";
+import { PurchaseCredits } from "components/Funding/PurchaseCredits";
 
 function Home() {
   const { context, controller, setController, error, policies, upgrade } =
@@ -133,7 +134,9 @@ function Home() {
         />
       );
     }
-
+    case "open-purchase-credits": {
+      return <PurchaseCredits />;
+    }
     default:
       return <>*Waves*</>;
   }
