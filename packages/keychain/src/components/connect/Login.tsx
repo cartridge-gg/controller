@@ -69,7 +69,7 @@ function Form({
         appId: origin,
         chainId,
         rpcUrl,
-        address: controllers[0].address,
+        address: controllers.edges?.[0].node?.address,
         username: usernameField.value,
         publicKey,
         credentialId,
