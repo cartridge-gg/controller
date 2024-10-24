@@ -105,6 +105,12 @@ pub enum Policy {
     Call(CallPolicy),
 }
 
+impl Policy {
+    pub fn new_call(contract_address: Felt, selector: Felt) -> Self {
+        Policy::Call(CallPolicy::new(contract_address, selector))
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct CallPolicy {
     pub contract_address: Felt,

@@ -160,12 +160,8 @@ pub enum SessionPolicyError {
         /// The contract address the method was called on.
         contract_address: Felt,
     },
-    #[error(
-        "Not allowed to sign TypedData with hash `{type_hash:#x}`"
-    )]
-    TypedDataNotAllowed {
-        type_hash: Felt,
-    },
+    #[error("Not allowed to sign TypedData with hash `{type_hash:#x}`")]
+    TypedDataNotAllowed { type_hash: Felt },
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
