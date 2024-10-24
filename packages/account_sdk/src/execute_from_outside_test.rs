@@ -82,8 +82,8 @@ async fn test_execute_from_outside_with_session() {
 
     // Create policies for the session
     let policies = vec![
-        Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer")),
-        Policy::new(*FEE_TOKEN_ADDRESS, selector!("approve")),
+        Policy::new_call(*FEE_TOKEN_ADDRESS, selector!("transfer")),
+        Policy::new_call(*FEE_TOKEN_ADDRESS, selector!("approve")),
     ];
 
     // Create a session
