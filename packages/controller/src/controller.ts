@@ -153,8 +153,6 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   openProfile(tab: ProfileContextTypeVariant = "inventory") {
-    console.log("this.profile", this.profile);
-    console.log("this.iframes.profile", this.iframes.profile);
     if (!this.options.indexerUrl) {
       console.error("`indexerUrl` option is required to open profile");
       return;
