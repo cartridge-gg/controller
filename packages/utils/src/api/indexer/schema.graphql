@@ -1,5 +1,6 @@
 type Query {
   ercTransfer(accountAddress: String!, limit: Int!): [ERC__Transfer!]
+  events(keys: [String!]!, limit: Int!, offset: Int!): [Event!]
 }
 
 type ERC__Transfer {
@@ -17,4 +18,22 @@ type ERC__Token {
   name: String
   symbol: String
   token_id: String
+}
+
+type Event {
+  edges: [EventEdge!]
+  totalCount: Int!
+}
+
+type EventEdge {
+  node: EventNode!
+}
+
+type EventNode {
+  id: String!
+  keys: [String!]!
+  data: [String!]!
+  transactionHash: String!
+  executedAt: String!
+  createdAt: String!
 }
