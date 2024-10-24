@@ -1,14 +1,10 @@
-use cainome::cairo_serde::CairoSerde;
 use starknet::core::types::Felt;
 use starknet::core::utils::NonAsciiNameError;
 use starknet::macros::{selector, short_string};
 use starknet_crypto::poseidon_hash_many;
 use starknet_types_core::hash::Poseidon;
 
-use crate::{
-    abigen::controller::SignerSignature,
-    hash::{MessageHashRev1, StarknetDomain, StructHashRev1},
-};
+use crate::hash::{MessageHashRev1, StarknetDomain, StructHashRev1};
 
 pub type RawSession = crate::abigen::controller::Session;
 
@@ -65,63 +61,4 @@ impl SessionHash for RawSession {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
-pub struct RawSessionToken {
-    pub(crate) session: RawSession,
-    pub(crate) cache_authorization: bool,
-    pub(crate) session_authorization: Vec<Felt>,
-    pub(crate) session_signature: SignerSignature,
-    pub(crate) guardian_signature: SignerSignature,
-    pub(crate) proofs: Vec<Vec<Felt>>,
-}
-
-impl CairoSerde for RawSessionToken {
-    type RustType = Self;
-
-    fn cairo_serialized_size(rust: &Self::RustType) -> usize {
-        RawSession::cairo_serialized_size(&rust.session)
-            + <bool>::cairo_serialized_size(&rust.cache_authorization)
-            + <Vec<Felt>>::cairo_serialized_size(&rust.session_authorization)
-            + SignerSignature::cairo_serialized_size(&rust.session_signature)
-            + SignerSignature::cairo_serialized_size(&rust.guardian_signature)
-            + <Vec<Vec<Felt>>>::cairo_serialized_size(&rust.proofs)
-    }
-
-    fn cairo_serialize(rust: &Self::RustType) -> Vec<Felt> {
-        [
-            RawSession::cairo_serialize(&rust.session),
-            <bool>::cairo_serialize(&rust.cache_authorization),
-            <Vec<Felt>>::cairo_serialize(&rust.session_authorization),
-            SignerSignature::cairo_serialize(&rust.session_signature),
-            SignerSignature::cairo_serialize(&rust.guardian_signature),
-            <Vec<Vec<Felt>>>::cairo_serialize(&rust.proofs),
-        ]
-        .concat()
-    }
-
-    fn cairo_deserialize(
-        felts: &[Felt],
-        mut offset: usize,
-    ) -> cainome::cairo_serde::Result<Self::RustType> {
-        let session = RawSession::cairo_deserialize(felts, offset)?;
-        offset += RawSession::cairo_serialized_size(&session);
-        let cache_authorization = <bool>::cairo_deserialize(felts, offset)?;
-        offset += <bool>::cairo_serialized_size(&cache_authorization);
-        let session_authorization = <Vec<Felt>>::cairo_deserialize(felts, offset)?;
-        offset += <Vec<Felt>>::cairo_serialized_size(&session_authorization);
-        let session_signature = SignerSignature::cairo_deserialize(felts, offset)?;
-        offset += SignerSignature::cairo_serialized_size(&session_signature);
-        let guardian_signature = SignerSignature::cairo_deserialize(felts, offset)?;
-        offset += SignerSignature::cairo_serialized_size(&guardian_signature);
-        let proofs = <Vec<Vec<Felt>>>::cairo_deserialize(felts, offset)?;
-
-        Ok(Self {
-            session,
-            cache_authorization,
-            session_authorization,
-            session_signature,
-            guardian_signature,
-            proofs,
-        })
-    }
-}
+pub type RawSessionToken = crate::abigen::controller::SessionToken;

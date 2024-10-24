@@ -12,6 +12,7 @@ use crate::signers::SignError;
 use super::merkle::MerkleTree;
 use super::raw_session::RawSession;
 use super::raw_session::SessionHash;
+use super::TypedData;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ProvedPolicy {
@@ -67,6 +68,10 @@ impl Session {
         selector!("\"Allowed Method\"(\"Contract Address\":\"ContractAddress\",\"selector\":\"selector\")")
     }
 
+    fn allowed_data_type_hash_rev_1() -> Felt {
+        selector!("\"Allowed Type\"(\"Type Hash\":\"felt\")")
+    }
+
     pub fn raw(&self) -> RawSession {
         RawSession {
             expires_at: self.expires_at,
@@ -103,11 +108,15 @@ impl Session {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Policy {
     Call(CallPolicy),
+    TypedData(TypedDataPolicy),
 }
 
 impl Policy {
     pub fn new_call(contract_address: Felt, selector: Felt) -> Self {
         Policy::Call(CallPolicy::new(contract_address, selector))
+    }
+    pub fn new_typed_data(type_hash: Felt) -> Self {
+        Policy::TypedData(TypedDataPolicy { type_hash })
     }
 }
 
@@ -115,6 +124,11 @@ impl Policy {
 pub struct CallPolicy {
     pub contract_address: Felt,
     pub selector: Felt,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct TypedDataPolicy {
+    pub type_hash: Felt,
 }
 
 impl From<CallPolicy> for Policy {
@@ -132,13 +146,28 @@ impl From<&Call> for CallPolicy {
     }
 }
 
+impl From<&TypedData> for TypedDataPolicy {
+    fn from(typed_data: &TypedData) -> Self {
+        TypedDataPolicy {
+            type_hash: typed_data.type_hash,
+        }
+    }
+}
+
+impl From<TypedDataPolicy> for Policy {
+    fn from(typed_data: TypedDataPolicy) -> Self {
+        Policy::TypedData(typed_data)
+    }
+}
+
 impl Policy {
     pub fn from_calls(calls: &[Call]) -> Vec<Self> {
         calls.iter().map(CallPolicy::from).map(Self::from).collect()
     }
     pub fn as_merkle_leaf(&self) -> Felt {
         match self {
-            Self::Call(call) => call.as_merkle_leaf(),
+            Policy::Call(call_policy) => call_policy.as_merkle_leaf(),
+            Policy::TypedData(typed_data_policy) => typed_data_policy.as_merkle_leaf(),
         }
     }
 }
@@ -157,5 +186,11 @@ impl CallPolicy {
             self.contract_address,
             self.selector,
         ])
+    }
+}
+
+impl TypedDataPolicy {
+    pub fn as_merkle_leaf(&self) -> Felt {
+        poseidon_hash_many([&Session::allowed_data_type_hash_rev_1(), &self.type_hash])
     }
 }
