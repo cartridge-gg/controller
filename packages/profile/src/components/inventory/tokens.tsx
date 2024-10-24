@@ -8,14 +8,10 @@ import {
 } from "@cartridge/ui-next";
 import { useAccount } from "@/hooks/context";
 import { Link } from "react-router-dom";
-import { formatBalance, useCreditBalance } from "@cartridge/utils";
+import { formatBalance } from "@cartridge/utils";
 
 export function Tokens() {
-  const { address, erc20, isFetching } = useAccount();
-  const { balance } = useCreditBalance({
-    address,
-    interval: 3000,
-  });
+  const { credit, erc20, isFetching } = useAccount();
 
   return (
     <Card>
@@ -28,8 +24,10 @@ export function Tokens() {
         <CardContent className="flex items-center justify-between">
           <div className="flex gap-x-1.5 items-center">
             <CoinsIcon variant="solid" size="sm" />
-            <div>{balance.formatted}</div>
-            <div className="text-muted-foreground">${balance.formatted}</div>
+            <div>{credit.balance.formatted}</div>
+            <div className="text-muted-foreground">
+              ${credit.balance.formatted}
+            </div>
           </div>
 
           <div className="text-xs text-muted-foreground">CREDITS</div>

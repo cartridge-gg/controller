@@ -4,6 +4,8 @@ import {
   ERC20Metadata,
   ETH_CONTRACT_ADDRESS,
   STRK_CONTRACT_ADDRESS,
+  useCreditBalance,
+  UseCreditBalanceReturn,
 } from "@cartridge/utils";
 import { useConnection } from "@/hooks/context";
 import { useSearchParams } from "react-router-dom";
@@ -18,6 +20,7 @@ type ERC20Status = ERC20Metadata & {
 type AccountContextType = {
   address: string;
   username: string;
+  credit: UseCreditBalanceReturn;
   erc20: (ERC20Status & {
     balance?: bigint;
     error?: Error;
@@ -28,6 +31,12 @@ type AccountContextType = {
 const initialState: AccountContextType = {
   address: "",
   username: "",
+  credit: {
+    balance: { value: 0n, formatted: "0.00" },
+    isFetching: false,
+    isLoading: true,
+    error: null,
+  },
   erc20: [],
   isFetching: false,
 };
@@ -38,6 +47,10 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const [searchParams] = useSearchParams();
   const { provider, isVisible } = useConnection();
   const [state, setState] = useState<AccountContextType>(initialState);
+  const credit = useCreditBalance({
+    address: state.address,
+    interval: isVisible ? 3000 : null,
+  });
   const [erc20, setERC20] = useState<ERC20[]>([]);
 
   useEffect(() => {
@@ -134,6 +147,14 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   }, [isVisible, erc20, state.address]);
 
   return (
-    <AccountContext.Provider value={state}>{children}</AccountContext.Provider>
+    <AccountContext.Provider
+      value={{
+        ...state,
+        credit,
+        isFetching: state.isFetching || credit.isFetching,
+      }}
+    >
+      {children}
+    </AccountContext.Provider>
   );
 }

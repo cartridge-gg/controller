@@ -55,16 +55,34 @@ export function useERC20Balance({
   };
 }
 
+export type Balance = {
+  value: bigint;
+  formatted: string;
+};
+
+export type FetchState = {
+  isFetching: boolean;
+  isLoading: boolean;
+  error: Error | null;
+};
+
+export type UseCreditBalanceReturn = {
+  balance: Balance;
+} & FetchState;
+
 export function useCreditBalance({
   address,
   interval,
 }: {
   address: string;
   interval: number | null;
-}) {
+}): UseCreditBalanceReturn {
   const [value, setValue] = useState<bigint>(0n);
 
-  const { refetch, isFetching, isLoading, error } = useAccountInfoQuery(
+  const { refetch, isFetching, isLoading, error } = useAccountInfoQuery<
+    AccountInfoQuery,
+    Error
+  >(
     { address },
     {
       enabled: false,

@@ -17,7 +17,6 @@ import {
   isPublicChain,
   StarkscanUrl,
   useCountervalue,
-  useCreditBalance,
 } from "@cartridge/utils";
 import { constants } from "starknet";
 import { formatEther } from "viem";
@@ -35,13 +34,7 @@ export function Token() {
 }
 
 function Credits() {
-  const { isVisible } = useConnection();
-  const { address } = useAccount();
-  const { balance } = useCreditBalance({
-    address: address ?? "",
-    interval: isVisible ? 3000 : null,
-  });
-
+  const { credit } = useAccount();
   return (
     <LayoutContainer
       left={
@@ -53,8 +46,8 @@ function Credits() {
       }
     >
       <LayoutHeader
-        title={`${balance.formatted} CREDITS`}
-        description={`$${balance.formatted}`}
+        title={`${credit.balance.formatted} CREDITS`}
+        description={`$${credit.balance.formatted}`}
         icon={<CoinsIcon variant="solid" size="lg" />}
       />
 
@@ -97,13 +90,12 @@ function ERC20() {
       }
     >
       <LayoutHeader
-        title={`${
-          t.balance === undefined ? (
-            <Skeleton className="h-[20px] w-[120px] rounded" />
-          ) : (
-            t.balance.toString()
-          )
-        } ${t.symbol}`}
+        title={`${t.balance === undefined ? (
+          <Skeleton className="h-[20px] w-[120px] rounded" />
+        ) : (
+          t.balance.toString()
+        )
+          } ${t.symbol}`}
         description={`${countervalue.formatted} ${CurrencyBase.Usd}`}
         icon={
           <img
