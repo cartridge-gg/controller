@@ -69,13 +69,13 @@ export function ErrorAlert({
             <AccordionButton
               disabled={!description || (isExpanded && !allowToggle)}
             >
-              <HStack>
+              <HStack alignItems="flex-start">
                 {(() => {
                   switch (variant) {
                     case "info":
                       return <InfoIcon color="info.foreground" />;
                     case "warning":
-                      return <WarningIcon />;
+                      return <WarningIcon color="warning.foreground" />;
                     case "error":
                       return <AlertIcon color="error.foreground" />;
                     default:
@@ -87,6 +87,7 @@ export function ErrorAlert({
                   fontSize="2xs"
                   color="inherit"
                   textTransform="uppercase"
+                  align="left"
                 >
                   {title}
                 </Text>

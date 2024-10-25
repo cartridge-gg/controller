@@ -1,4 +1,10 @@
-import { constants, BigNumberish, Call, AllowArray } from "starknet";
+import {
+  constants,
+  BigNumberish,
+  Call,
+  Abi,
+  InvocationsDetails,
+} from "starknet";
 import {
   AddInvokeTransactionResult,
   Signature,
@@ -77,19 +83,28 @@ export type ControllerAccounts = Record<ContractAddress, CartridgeID>;
 
 export interface Keychain {
   probe(rpcUrl: string): Promise<ProbeReply | ConnectError>;
-  connect(rpcUrl: string): Promise<ConnectReply | ConnectError>;
+  connect(
+    policies: Policy[],
+    rpcUrl: string,
+  ): Promise<ConnectReply | ConnectError>;
   disconnect(): void;
 
   reset(): void;
   revoke(origin: string): void;
 
+  deploy(): Promise<DeployReply | ConnectError>;
   execute(
-    calls: AllowArray<Call>,
+    calls: Call | Call[],
+    abis?: Abi[],
+    transactionsDetail?: InvocationsDetails,
     sync?: boolean,
+    paymaster?: any,
     error?: ControllerError,
   ): Promise<ExecuteReply | ConnectError>;
-  signMessage(typedData: TypedData): Promise<Signature | ConnectError>;
-
+  signMessage(
+    typedData: TypedData,
+    account: string,
+  ): Promise<Signature | ConnectError>;
   logout(): Promise<void>;
   openSettings(): Promise<void | ConnectError>;
   session(): Promise<Session>;
@@ -101,7 +116,6 @@ export interface Keychain {
   fetchControllers(contractAddresses: string[]): Promise<ControllerAccounts>;
   openPurchaseCredits(): void;
 }
-
 export interface Profile {
   navigate(tab: ProfileContextTypeVariant): void;
 }

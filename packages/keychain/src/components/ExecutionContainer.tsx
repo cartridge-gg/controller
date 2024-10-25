@@ -21,7 +21,6 @@ interface ExecutionContainerProps {
   onFund?: () => void;
   onError?: (error: ControllerError) => void;
   buttonText?: string;
-  hideTxSummary?: boolean;
   children: React.ReactNode;
 }
 
@@ -37,7 +36,6 @@ export function ExecutionContainer({
   onFund,
   onError,
   buttonText = "SUBMIT",
-  hideTxSummary = false,
   children,
 }: ExecutionContainerProps & BannerProps) {
   const { controller } = useConnection();
@@ -140,7 +138,7 @@ export function ExecutionContainer({
   return (
     <Container Icon={Icon} title={title} description={description}>
       {children}
-      <Footer hideTxSummary={hideTxSummary}>
+      <Footer>
         {(() => {
           switch (ctrlError?.code) {
             case ErrorCode.CartridgeControllerNotDeployed:

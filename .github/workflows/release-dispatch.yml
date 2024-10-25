@@ -31,6 +31,7 @@ jobs:
           VERSION=${{ github.event.inputs.version }}
           pnpm -r exec -- bash -c "npm version $VERSION --no-git-tag-version"
       - name: Create Pull Request
+        id: cpr
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.CREATE_PR_TOKEN }}
