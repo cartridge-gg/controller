@@ -7,10 +7,11 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CoinsIcon,
   ExternalIcon,
   Skeleton,
 } from "@cartridge/ui-next";
-import { useConnection, useToken } from "@/hooks/context";
+import { useAccount, useConnection, useToken } from "@/hooks/context";
 import {
   formatAddress,
   isPublicChain,
@@ -22,11 +23,54 @@ import { formatEther } from "viem";
 import { CurrencyBase, CurrencyQuote } from "@cartridge/utils/api/cartridge";
 
 export function Token() {
+  const { address } = useParams<{ address: string }>();
+
+  switch (address) {
+    case "credit":
+      return <Credits />;
+    default:
+      return <ERC20 />;
+  }
+}
+
+function Credits() {
+  const { credit } = useAccount();
+  return (
+    <LayoutContainer
+      left={
+        <Link to="/inventory">
+          <Button variant="icon" size="icon">
+            <ArrowIcon variant="left" />
+          </Button>
+        </Link>
+      }
+    >
+      <LayoutHeader
+        title={`${credit.balance.formatted} CREDITS`}
+        description={`$${credit.balance.formatted}`}
+        icon={<CoinsIcon variant="solid" size="lg" />}
+      />
+
+      <LayoutContent className="pb-4">
+        <Card>
+          <CardContent className="flex items-center justify-between">
+            <div className="text-muted-foreground">
+              Credits are used to pay for network activity. They are not tokens
+              and cannot be transferred or refunded.
+            </div>
+          </CardContent>
+        </Card>
+      </LayoutContent>
+    </LayoutContainer>
+  );
+}
+
+function ERC20() {
   const { chainId } = useConnection();
   const { address } = useParams<{ address: string }>();
   const t = useToken(address!);
-  const { countervalue: usdBalance } = useCountervalue({
-    balance: formatEther(BigInt(t?.balance ?? 0)),
+  const { countervalue } = useCountervalue({
+    balance: formatEther(t?.balance.value ?? 0n),
     quote: CurrencyQuote.Eth,
     base: CurrencyBase.Usd,
   });
@@ -50,10 +94,10 @@ export function Token() {
           t.balance === undefined ? (
             <Skeleton className="h-[20px] w-[120px] rounded" />
           ) : (
-            t.balance.toString()
+            t.balance.formatted
           )
         } ${t.symbol}`}
-        description={`${usdBalance} ${CurrencyBase.Usd}`}
+        description={`${countervalue.formatted} ${CurrencyBase.Usd}`}
         icon={
           <img
             className="w-8 h-8"

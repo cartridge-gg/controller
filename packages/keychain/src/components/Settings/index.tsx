@@ -42,7 +42,7 @@ export function Settings({ onLogout }: { onLogout: () => void }) {
     (externalOwnerAddress: string) => {
       setContext({
         origin: context.origin,
-        calls: [
+        transactions: [
           {
             contractAddress: controller.address,
             entrypoint: "remove_external_owner",
@@ -60,7 +60,7 @@ export function Settings({ onLogout }: { onLogout: () => void }) {
   const onRemoveDelegate = useCallback(() => {
     setContext({
       origin: context.origin,
-      calls: [
+      transactions: [
         {
           contractAddress: controller.address,
           entrypoint: "set_delegate_account",
@@ -82,7 +82,7 @@ export function Settings({ onLogout }: { onLogout: () => void }) {
   }
 
   return (
-    <Container variant="settings" title="Controller Settings" Icon={GearIcon}>
+    <Container variant="compressed" title="Controller Settings" Icon={GearIcon}>
       <Content>
         <VStack gap="30px" w="full">
           {/* <VStack>

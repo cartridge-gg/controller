@@ -31,6 +31,7 @@ export * from "./robot";
 export * from "./scan-qr";
 export * from "./scan-self";
 export * from "./search";
+export * from "./spider-web";
 export * from "./spinner-pixel";
 export * from "./spinner";
 export * from "./times-circle";

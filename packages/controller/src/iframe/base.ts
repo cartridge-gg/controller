@@ -92,9 +92,14 @@ export class IFrame<CallSender extends {}> implements Modal {
 
     const observer = new MutationObserver(() => {
       const existingController = document.getElementById("controller");
-      if (document.body && !existingController) {
-        document.body.appendChild(container);
-        observer.disconnect();
+      if (document.body) {
+        if (
+          (id === "controller-keychain" && !existingController) ||
+          id === "controller-profile"
+        ) {
+          document.body.appendChild(container);
+          observer.disconnect();
+        }
       }
     });
 
@@ -104,8 +109,13 @@ export class IFrame<CallSender extends {}> implements Modal {
     });
 
     const existingController = document.getElementById("controller");
-    if (document.body && !existingController) {
-      document.body.appendChild(container);
+    if (document.body) {
+      if (
+        (id === "controller-keychain" && !existingController) ||
+        id === "controller-profile"
+      ) {
+        document.body.appendChild(container);
+      }
     }
 
     this.onClose = onClose;

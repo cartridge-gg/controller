@@ -13,8 +13,8 @@ import { ControllerErrorAlert, ErrorAlert } from "./ErrorAlert";
 import { useDeploy } from "hooks/deploy";
 import { Fees } from "./Fees";
 import { ControllerError } from "utils/connection";
-import { useBalance } from "hooks/token";
 import { Policies } from "components/Policies";
+import { ETH_CONTRACT_ADDRESS, useERC20Balance } from "@cartridge/utils";
 
 export function DeployController({
   onClose,
@@ -60,7 +60,12 @@ export function DeployController({
     }
   }, [deployHash, controller]);
 
-  const { ethBalance, isLoading } = useBalance();
+  const { balance: ethBalance, isLoading } = useERC20Balance({
+    address: controller.address,
+    contractAddress: ETH_CONTRACT_ADDRESS,
+    provider: controller,
+    interval: 3000,
+  });
   useEffect(() => {
     if (!feeEstimate || accountState != "fund") return;
 
@@ -87,7 +92,7 @@ export function DeployController({
   if (isLoading) {
     return (
       <Container
-        variant="connect"
+        variant="expanded"
         title="Checking account balance..."
         icon={<Spinner />}
       />
@@ -113,7 +118,7 @@ export function DeployController({
     case "deploy":
       return (
         <Container
-          variant="connect"
+          variant="expanded"
           icon={<WandIcon fontSize="5xl" variant="line" />}
           title="Deploy Controller"
           description="This will initialize your controller on the new network"
@@ -153,7 +158,7 @@ export function DeployController({
     case "deploying":
       return (
         <Container
-          variant="connect"
+          variant="expanded"
           icon={<Spinner />}
           title="Deploying Controller"
           description={`Your controller is being deployed on ${chainName}`}
@@ -188,7 +193,7 @@ export function DeployController({
     case "deployed":
       return (
         <Container
-          variant="connect"
+          variant="expanded"
           icon={<CheckIcon fontSize="5xl" />}
           title="Success!"
           description={`Your controller has been deployed on ${chainName}`}

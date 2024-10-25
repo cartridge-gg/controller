@@ -1,9 +1,13 @@
 import { createContext, useState, ReactNode, useEffect } from "react";
 import {
+  Balance,
   ERC20,
   ERC20Metadata,
   ETH_CONTRACT_ADDRESS,
+  formatBalance,
   STRK_CONTRACT_ADDRESS,
+  useCreditBalance,
+  UseCreditBalanceReturn,
 } from "@cartridge/utils";
 import { useConnection } from "@/hooks/context";
 import { useSearchParams } from "react-router-dom";
@@ -11,15 +15,15 @@ import { ERC20 as ERC20Option } from "@cartridge/controller";
 import { getChecksumAddress } from "starknet";
 
 type ERC20Status = ERC20Metadata & {
-  balance?: number;
+  balance: Balance;
   error?: Error;
 };
 
 type AccountContextType = {
   address: string;
   username: string;
+  credit: UseCreditBalanceReturn;
   erc20: (ERC20Status & {
-    balance?: number;
     error?: Error;
   })[];
   isFetching: boolean;
@@ -28,6 +32,12 @@ type AccountContextType = {
 const initialState: AccountContextType = {
   address: "",
   username: "",
+  credit: {
+    balance: { value: 0n, formatted: "0.00" },
+    isFetching: false,
+    isLoading: true,
+    error: null,
+  },
   erc20: [],
   isFetching: false,
 };
@@ -38,6 +48,10 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const [searchParams] = useSearchParams();
   const { provider, isVisible } = useConnection();
   const [state, setState] = useState<AccountContextType>(initialState);
+  const credit = useCreditBalance({
+    address: state.address,
+    interval: isVisible ? 3000 : null,
+  });
   const [erc20, setERC20] = useState<ERC20[]>([]);
 
   useEffect(() => {
@@ -111,7 +125,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
 
     async function updateBalance() {
       if (!erc20.length) return;
-      console.log("Update balance");
 
       setState((state) => ({ ...state, isFetching: true }));
 
@@ -121,7 +134,16 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       const newValue = res.reduce<ERC20Status[]>(
         (prev, res, i) =>
           res.status === "fulfilled"
-            ? [...prev, { ...erc20[i].metadata(), balance: res.value }]
+            ? [
+                ...prev,
+                {
+                  ...erc20[i].metadata(),
+                  balance: {
+                    value: res.value,
+                    formatted: formatBalance(res.value),
+                  },
+                },
+              ]
             : prev,
         [],
       );
@@ -135,6 +157,14 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   }, [isVisible, erc20, state.address]);
 
   return (
-    <AccountContext.Provider value={state}>{children}</AccountContext.Provider>
+    <AccountContext.Provider
+      value={{
+        ...state,
+        credit,
+        isFetching: state.isFetching || credit.isFetching,
+      }}
+    >
+      {children}
+    </AccountContext.Provider>
   );
 }

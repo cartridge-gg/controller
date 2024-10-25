@@ -57,8 +57,9 @@ class ControllerAccount extends WalletAccount {
     return new Promise(async (resolve, reject) => {
       const sessionExecute = await this.keychain.execute(
         calls,
+        undefined,
+        undefined,
         false,
-        this.options?.paymaster,
       );
 
       // Session call succeeded
@@ -78,8 +79,9 @@ class ControllerAccount extends WalletAccount {
       this.modal.open();
       const manualExecute = await this.keychain.execute(
         calls,
+        undefined,
+        undefined,
         true,
-        this.options?.paymaster,
         (sessionExecute as ConnectError).error,
       );
 
@@ -106,7 +108,7 @@ class ControllerAccount extends WalletAccount {
   async signMessage(typedData: TypedData): Promise<SPEC.SIGNATURE> {
     try {
       this.modal.open();
-      const res = await this.keychain.signMessage(typedData);
+      const res = await this.keychain.signMessage(typedData, "");
       this.modal.close();
 
       if ("code" in res) {

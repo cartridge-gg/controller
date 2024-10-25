@@ -1,4 +1,3 @@
-use account_sdk::artifacts::{Version, CONTROLLERS};
 use account_sdk::controller::Controller;
 use account_sdk::errors::ControllerError;
 use account_sdk::signers::Owner;
@@ -39,6 +38,7 @@ impl CartridgeAccount {
     ///
     pub fn new(
         app_id: String,
+        class_hash: JsFelt,
         rpc_url: String,
         chain_id: JsFelt,
         address: JsFelt,
@@ -54,7 +54,7 @@ impl CartridgeAccount {
         let controller = Controller::new(
             app_id,
             username.clone(),
-            CONTROLLERS[&Version::V1_0_5].hash,
+            class_hash.0,
             rpc_url,
             Owner::Signer(signer.try_into()?),
             address.0,
@@ -85,6 +85,11 @@ impl CartridgeAccount {
     #[wasm_bindgen(js_name = address)]
     pub fn address(&self) -> String {
         self.controller.address.to_hex_string()
+    }
+
+    #[wasm_bindgen(js_name = classHash)]
+    pub fn class_hash(&self) -> String {
+        self.controller.class_hash.to_hex_string()
     }
 
     #[wasm_bindgen(js_name = rpcUrl)]
