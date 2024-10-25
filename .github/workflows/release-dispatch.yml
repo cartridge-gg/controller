@@ -29,7 +29,6 @@ jobs:
       - name: Update Workspace Packages Version
         run: |
           VERSION=${{ github.event.inputs.version }}
-          pnpm version $VERSION --no-git-tag-version
           pnpm -r exec -- bash -c "npm version $VERSION --no-git-tag-version"
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5

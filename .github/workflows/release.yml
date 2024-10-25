@@ -32,10 +32,17 @@ jobs:
 
       - name: Publish to npm
         run: |
-          if [[ $(pnpm pkg get version) == *"-alpha"* ]]; then
-            pnpm publish --tag alpha
-          else
-            pnpm publish
-          fi
+          pnpm -r exec -- bash -c '
+            if [[ $(pnpm pkg get private) != "true" ]]; then
+              VERSION=$(pnpm pkg get version)
+              if [[ $VERSION == *-* ]]; then
+                pnpm publish --tag prerelease
+              else
+                pnpm publish
+              fi
+            else
+              echo "Skipping private package"
+            fi
+          '
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
