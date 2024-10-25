@@ -10,7 +10,7 @@ import {
   Text,
   Spinner,
 } from "@chakra-ui/react";
-import { AlertIcon, TimesCircleIcon } from "./icons";
+import { TimesCircleIcon } from "./icons";
 import { forwardRef, useCallback, useState } from "react";
 
 export const Field = forwardRef(
@@ -59,7 +59,7 @@ export const Field = forwardRef(
           />
 
           {isLoading ? (
-            <InputRightElement>
+            <InputRightElement h="full">
               <Spinner color="text.secondary" size="sm" />
             </InputRightElement>
           ) : (
@@ -79,7 +79,6 @@ export const Field = forwardRef(
         <FormErrorMessage>
           {error && (
             <HStack marginY={3}>
-              <AlertIcon fontSize="xl" color="alert.foreground" />
               <Text
                 color="alert.foreground"
                 fontSize="sm"

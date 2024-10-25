@@ -1,5 +1,16 @@
-import { Field } from "@cartridge/ui";
-import { Button, useMediaQuery } from "@chakra-ui/react";
+import { TimesCircleIcon } from "@cartridge/ui";
+import {
+  Button,
+  FormControl,
+  FormErrorMessage,
+  HStack,
+  Input,
+  InputGroup,
+  InputRightElement,
+  Spinner,
+  Text,
+  useMediaQuery,
+} from "@chakra-ui/react";
 import { Container, Footer, Content } from "components/layout";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -198,6 +209,8 @@ export function Signup({
     },
   );
 
+  const [isActive, setIsActive] = useState(false);
+
   return (
     <Container
       variant={isHeightOver600 ? "expanded" : "compressed"}
@@ -213,24 +226,86 @@ export function Signup({
         }}
       >
         <Content>
-          <Field
-            {...usernameField}
-            placeholder="Username"
-            autoFocus
-            onChange={(e) => {
-              setError(undefined);
-              setUsernameField((u) => ({
-                ...u,
-                value: e.target.value.toLowerCase(),
-              }));
-            }}
-            isLoading={isValidating}
-            isDisabled={isRegistering}
-            onClear={() => {
-              setError(undefined);
-              setUsernameField((u) => ({ ...u, value: "" }));
-            }}
-          />
+          <FormControl
+            alignItems="flex-start"
+            isInvalid={!!usernameField.error}
+          >
+            <InputGroup>
+              <Input
+                placeholder="Username"
+                isDisabled={isRegistering}
+                onChange={(e) => {
+                  setError(undefined);
+                  setUsernameField((u) => ({
+                    ...u,
+                    value: e.target.value.toLowerCase(),
+                  }));
+                }}
+                onFocus={() => {
+                  setIsActive(true);
+                }}
+                onBlur={() => {
+                  setIsActive(false);
+                }}
+                isInvalid={!!usernameField.error}
+              />
+
+              {isValidating ? (
+                <InputRightElement>
+                  <Spinner color="text.secondary" size="sm" />
+                </InputRightElement>
+              ) : (
+                usernameField.value && (
+                  <InputRightElement
+                    onClick={() => {
+                      setError(undefined);
+                      setUsernameField((u) => ({ ...u, value: "" }));
+                    }}
+                    cursor={isActive ? "pointer" : "default"}
+                    opacity={isActive ? 100 : 0} // workaround for onBlur handler triggeres before onClear
+                    h="full"
+                  >
+                    <TimesCircleIcon color="text.secondary" boxSize={6} />
+                  </InputRightElement>
+                )
+              )}
+            </InputGroup>
+
+            <FormErrorMessage>
+              {usernameField.error && (
+                <HStack flex={1} marginY={3} justify="space-between">
+                  <Text
+                    color="alert.foreground"
+                    fontSize="sm"
+                    w="full"
+                    overflowWrap="anywhere"
+                  >
+                    {usernameField.error}
+                  </Text>
+
+                  {usernameField.error?.includes(
+                    `Sorry, ${usernameField.value} already exists.`,
+                  ) && (
+                    <HStack gap={1}>
+                      <Text whiteSpace="nowrap" color="text.secondary">
+                        Is this you?
+                      </Text>
+                      <Button
+                        onClick={() => onLogin(usernameField.value)}
+                        variant="ghost"
+                        textTransform="capitalize"
+                        fontFamily="Inter"
+                        size="sm"
+                        color="text.secondaryAccent"
+                      >
+                        Log In
+                      </Button>
+                    </HStack>
+                  )}
+                </HStack>
+              )}
+            </FormErrorMessage>
+          </FormControl>
         </Content>
 
         <Footer isSlot={isSlot} isSignup showCatridgeLogo>
