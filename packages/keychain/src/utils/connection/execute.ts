@@ -1,11 +1,8 @@
-import {
-  ResponseCodes,
-  ConnectError,
-  PaymasterOptions,
-} from "@cartridge/controller";
+import { ResponseCodes, ConnectError } from "@cartridge/controller";
 import { Call, InvokeFunctionResponse, num } from "starknet";
 import { ConnectionCtx, ControllerError, ExecuteCtx } from "./types";
 import { ErrorCode } from "@cartridge/account-wasm/controller";
+import Controller from "utils/controller";
 
 export const ESTIMATE_FEE_PERCENTAGE = 10;
 
@@ -34,19 +31,18 @@ export function execute({
   setContext: (context: ConnectionCtx) => void;
 }) {
   return async (
-    calls: Call[],
+    transactions: Call[],
     sync?: boolean,
-    paymaster?: PaymasterOptions,
     error?: ControllerError,
   ): Promise<InvokeFunctionResponse | ConnectError> => {
-    const account = window.controller;
+    const account: Controller = window.controller;
 
     if (sync) {
       return await new Promise((resolve, reject) => {
         setContext({
           type: "execute",
           origin,
-          calls,
+          transactions,
           error,
           resolve,
           reject,
@@ -57,11 +53,11 @@ export function execute({
     return await new Promise(async (resolve, reject) => {
       // If a session call and there is no session available
       // fallback to manual apporval flow
-      if (!account.hasSession(calls)) {
+      if (!account.hasSession(transactions)) {
         setContext({
           type: "execute",
           origin,
-          calls,
+          transactions,
           resolve,
           reject,
         } as ExecuteCtx);
@@ -73,43 +69,41 @@ export function execute({
       }
 
       // Try paymaster if it is enabled. If it fails, fallback to user pays session flow.
-      if (paymaster) {
-        try {
-          const { transaction_hash } = await account.executeFromOutsideV3(
-            calls,
-          );
+      try {
+        const { transaction_hash } = await account.executeFromOutsideV3(
+          transactions,
+        );
 
+        return resolve({
+          code: ResponseCodes.SUCCESS,
+          transaction_hash,
+        });
+      } catch (e) {
+        // User only pays if the error is ErrorCode.PaymasterNotSupported
+        if (e.code !== ErrorCode.PaymasterNotSupported) {
+          setContext({
+            type: "execute",
+            origin,
+            transactions,
+            error: parseControllerError(e),
+            resolve,
+            reject,
+          } as ExecuteCtx);
           return resolve({
-            code: ResponseCodes.SUCCESS,
-            transaction_hash,
+            code: ResponseCodes.ERROR,
+            message: e.message,
+            error: parseControllerError(e),
           });
-        } catch (e) {
-          // User only pays if the error is ErrorCode.PaymasterNotSupported
-          if (e.code !== ErrorCode.PaymasterNotSupported) {
-            setContext({
-              type: "execute",
-              origin,
-              calls,
-              error: parseControllerError(e),
-              resolve,
-              reject,
-            } as ExecuteCtx);
-            return resolve({
-              code: ResponseCodes.ERROR,
-              message: e.message,
-              error: parseControllerError(e),
-            });
-          }
         }
       }
 
       try {
-        let estimate = await account.cartridge.estimateInvokeFee(calls);
+        let estimate = await account.estimateInvokeFee(transactions);
         let maxFee = num.toHex(
           num.addPercent(estimate.overall_fee, ESTIMATE_FEE_PERCENTAGE),
         );
 
-        let { transaction_hash } = await account.execute(calls, {
+        let { transaction_hash } = await account.execute(transactions, {
           maxFee,
         });
         return resolve({
@@ -120,7 +114,7 @@ export function execute({
         setContext({
           type: "execute",
           origin,
-          calls,
+          transactions,
           error: parseControllerError(e),
           resolve,
           reject,

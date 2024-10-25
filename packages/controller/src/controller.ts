@@ -111,13 +111,16 @@ export default class ControllerProvider extends BaseProvider {
     this.iframes.keychain.open();
 
     try {
-      let response = await this.keychain.connect(this.rpc.toString());
+      let response = await this.keychain.connect(
+        this.options.policies || [],
+        this.rpc.toString(),
+      );
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
       }
 
       response = response as ConnectReply;
-      this.account = this.account = new ControllerAccount(
+      this.account = new ControllerAccount(
         this,
         response.address,
         this.keychain,

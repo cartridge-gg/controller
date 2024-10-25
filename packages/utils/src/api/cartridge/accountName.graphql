@@ -1,0 +1,10 @@
+query AccountName($address: String!) {
+  accounts(where: { hasControllersWith: { address: $address } }, first: 1) {
+    edges {
+      node {
+        id
+        name
+      }
+    }
+  }
+}
