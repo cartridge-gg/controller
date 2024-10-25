@@ -87,6 +87,7 @@ export function ErrorAlert({
                   fontSize="2xs"
                   color="inherit"
                   textTransform="uppercase"
+                  align="left"
                 >
                   {title}
                 </Text>
