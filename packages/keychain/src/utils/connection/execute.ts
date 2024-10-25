@@ -1,8 +1,16 @@
 import { ResponseCodes, ConnectError } from "@cartridge/controller";
-import { Call, InvokeFunctionResponse, num } from "starknet";
+import {
+  Abi,
+  AllowArray,
+  Call,
+  CallData,
+  InvocationsDetails,
+  InvokeFunctionResponse,
+  addAddressPadding,
+  num,
+} from "starknet";
 import { ConnectionCtx, ControllerError, ExecuteCtx } from "./types";
-import { ErrorCode } from "@cartridge/account-wasm/controller";
-import Controller from "utils/controller";
+import { ErrorCode, JsCall } from "@cartridge/account-wasm/controller";
 
 export const ESTIMATE_FEE_PERCENTAGE = 10;
 
@@ -56,12 +64,15 @@ export function execute({
   setContext: (context: ConnectionCtx) => void;
 }) {
   return async (
-    transactions: Call[],
+    transactions: AllowArray<Call>,
+    abis: Abi[],
+    transactionsDetail?: InvocationsDetails,
     sync?: boolean,
     _?: any,
     error?: ControllerError,
   ): Promise<InvokeFunctionResponse | ConnectError> => {
-    const account: Controller = window.controller;
+    const account = window.controller;
+    const calls = normalizeCalls(transactions);
 
     if (sync) {
       return await new Promise((resolve, reject) => {
@@ -69,6 +80,8 @@ export function execute({
           type: "execute",
           origin,
           transactions,
+          abis,
+          transactionsDetail,
           error,
           resolve,
           reject,
@@ -79,11 +92,13 @@ export function execute({
     return await new Promise(async (resolve, reject) => {
       // If a session call and there is no session available
       // fallback to manual apporval flow
-      if (!account.hasSession(transactions)) {
+      if (!account.hasSession(calls)) {
         setContext({
           type: "execute",
           origin,
           transactions,
+          abis,
+          transactionsDetail,
           resolve,
           reject,
         } as ExecuteCtx);
@@ -96,9 +111,7 @@ export function execute({
 
       // Try paymaster if it is enabled. If it fails, fallback to user pays session flow.
       try {
-        const { transaction_hash } = await account.executeFromOutsideV3(
-          transactions,
-        );
+        const { transaction_hash } = await account.executeFromOutsideV3(calls);
 
         return resolve({
           code: ResponseCodes.SUCCESS,
@@ -111,8 +124,8 @@ export function execute({
             type: "execute",
             origin,
             transactions,
-            abis: {},
-            transactionsDetail: {},
+            abis,
+            transactionsDetail,
             error: parseControllerError(e),
             resolve,
             reject,
@@ -127,10 +140,13 @@ export function execute({
 
       const release = await mutex.obtain();
       try {
-        let estimate = await account.estimateInvokeFee(transactions);
-        let maxFee = num.toHex(
-          num.addPercent(estimate.overall_fee, ESTIMATE_FEE_PERCENTAGE),
-        );
+        let { maxFee } = transactionsDetail;
+        if (!maxFee) {
+          let estimate = await account.cartridge.estimateInvokeFee(calls);
+          maxFee = num.toHex(
+            num.addPercent(estimate.overall_fee, ESTIMATE_FEE_PERCENTAGE),
+          );
+        }
 
         let { transaction_hash } = await account.execute(transactions, {
           maxFee,
@@ -144,6 +160,8 @@ export function execute({
           type: "execute",
           origin,
           transactions,
+          abis,
+          transactionsDetail,
           error: parseControllerError(e),
           resolve,
           reject,
@@ -159,3 +177,13 @@ export function execute({
     });
   };
 }
+
+export const normalizeCalls = (calls: AllowArray<Call>): JsCall[] => {
+  return (Array.isArray(calls) ? calls : [calls]).map((call) => {
+    return {
+      entrypoint: call.entrypoint,
+      contractAddress: addAddressPadding(call.contractAddress),
+      calldata: CallData.toHex(call.calldata),
+    };
+  });
+};
