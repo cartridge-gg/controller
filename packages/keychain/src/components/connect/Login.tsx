@@ -1,5 +1,5 @@
 import { Field } from "@cartridge/ui";
-import { Button } from "@chakra-ui/react";
+import { Button, useMediaQuery } from "@chakra-ui/react";
 import { Container, Footer, Content, useLayout } from "components/layout";
 import { useCallback, useEffect, useState } from "react";
 import Controller from "utils/controller";
@@ -13,10 +13,11 @@ import { ErrorAlert } from "components/ErrorAlert";
 
 export function Login(props: LoginProps) {
   const theme = useControllerTheme();
+  const [isHeightOver600] = useMediaQuery("(min-height: 600px)");
 
   return (
     <Container
-      variant="connect"
+      variant={isHeightOver600 ? "expanded" : "compressed"}
       title={
         theme.id === "cartridge" ? "Play with Controller" : `Play ${theme.name}`
       }
@@ -64,12 +65,15 @@ function Form({
       },
     } = await fetchAccount(usernameField.value);
 
+    const controllerNode = controllers.edges?.[0].node;
+
     try {
       const controller = new Controller({
         appId: origin,
+        classHash: controllerNode.constructorCalldata[0],
         chainId,
         rpcUrl,
-        address: controllers[0].address,
+        address: controllerNode?.address,
         username: usernameField.value,
         publicKey,
         credentialId,

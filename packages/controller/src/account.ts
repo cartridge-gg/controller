@@ -55,11 +55,7 @@ class ControllerAccount extends WalletAccount {
     calls = Array.isArray(calls) ? calls : [calls];
 
     return new Promise(async (resolve, reject) => {
-      const sessionExecute = await this.keychain.execute(
-        calls,
-        false,
-        this.options?.paymaster,
-      );
+      const sessionExecute = await this.keychain.execute(calls, false);
 
       // Session call succeeded
       if (sessionExecute.code === ResponseCodes.SUCCESS) {
@@ -79,7 +75,6 @@ class ControllerAccount extends WalletAccount {
       const manualExecute = await this.keychain.execute(
         calls,
         true,
-        this.options?.paymaster,
         (sessionExecute as ConnectError).error,
       );
 

@@ -38,7 +38,7 @@ pub struct Controller {
     pub(crate) app_id: String,
     pub address: Felt,
     pub chain_id: Felt,
-    pub(crate) class_hash: Felt,
+    pub class_hash: Felt,
     pub rpc_url: Url,
     pub username: String,
     pub(crate) salt: Felt,

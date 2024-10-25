@@ -96,7 +96,7 @@ export default function StripeCheckout({
       <Footer>
         {error && (
           <ErrorAlert
-            variant="error"
+            variant="expanded"
             title="Stripe Checkout Error"
             description={error.message}
           />

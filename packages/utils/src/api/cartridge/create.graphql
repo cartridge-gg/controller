@@ -6,9 +6,14 @@ mutation FinalizeRegistration($credentials: String!, $network: String!) {
   finalizeRegistration(credentials: $credentials, network: $network) {
     id
     controllers {
-      address
-      signers {
-        type
+      edges {
+        node {
+          address
+          constructorCalldata
+          signers {
+            type
+          }
+        }
       }
     }
     credentials {
@@ -30,9 +35,14 @@ query Account($id: ID!) {
       }
     }
     controllers {
-      address
-      signers {
-        type
+      edges {
+        node {
+          address
+          constructorCalldata
+          signers {
+            type
+          }
+        }
       }
     }
   }
