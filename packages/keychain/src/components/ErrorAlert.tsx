@@ -75,7 +75,7 @@ export function ErrorAlert({
                     case "info":
                       return <InfoIcon color="info.foreground" />;
                     case "warning":
-                      return <WarningIcon />;
+                      return <WarningIcon color="warning.foreground" />;
                     case "error":
                       return <AlertIcon color="error.foreground" />;
                     default:
