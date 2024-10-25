@@ -3,20 +3,11 @@ use std::time::Duration;
 use starknet::{
     core::types::Call,
     macros::{felt, selector},
-    signers::SigningKey,
 };
 
-use crate::{
-    abigen::{controller::OutsideExecutionV3, erc_20::Erc20},
-    account::{outside_execution::OutsideExecutionAccount, session::hash::Policy},
-    provider::CartridgeProvider,
-};
-use crate::{
-    account::outside_execution::OutsideExecution, tests::transaction_waiter::TransactionWaiter,
-};
-use crate::{
-    account::outside_execution::OutsideExecutionCaller, tests::runners::katana::KatanaRunner,
-};
+use crate::tests::runners::katana::KatanaRunner;
+use crate::tests::transaction_waiter::TransactionWaiter;
+use crate::{abigen::erc_20::Erc20, account::session::hash::Policy};
 use crate::{artifacts::Version, signers::Signer};
 use crate::{signers::Owner, tests::account::FEE_TOKEN_ADDRESS};
 use cainome::cairo_serde::{CairoSerde, ContractAddress, U256};
@@ -71,7 +62,7 @@ async fn test_execute_from_outside() {
         assert_eq!(balance, amount);
     }
 
-    for _ in 0..128 {
+    for _ in 0..129 {
         let result = controller.execute_from_outside_v3(calls.clone()).await;
         result.expect("Failed to execute from outside");
     }
@@ -96,10 +87,19 @@ async fn test_execute_from_outside_with_session() {
     ];
 
     // Create a session
-    let session_account = controller
-        .create_session(policies, u32::MAX as u64)
+    let _ = controller
+        .create_session(policies.clone(), u32::MAX as u64)
         .await
         .expect("Failed to create session");
+
+    // Check that the session is not registered initially
+    let (_, initial_metadata) = controller
+        .session_metadata(&Policy::from_calls(&[]), None)
+        .expect("Failed to get session metadata");
+    assert!(
+        !initial_metadata.is_registered,
+        "Session should not be registered initially"
+    );
 
     let recipient = ContractAddress(felt!("0x18301129"));
     let amount = U256 {
@@ -117,31 +117,10 @@ async fn test_execute_from_outside_with_session() {
         .concat(),
     };
 
-    // Create OutsideExecution
-    let outside_execution = OutsideExecutionV3 {
-        caller: OutsideExecutionCaller::Any.into(),
-        execute_after: 0,
-        execute_before: u32::MAX as u64,
-        calls: vec![call.into()],
-        nonce: (SigningKey::from_random().secret_scalar(), 1),
-    };
-
-    // Sign the outside execution with the session account
-    let signed_execution = session_account
-        .sign_outside_execution(OutsideExecution::V3(outside_execution.clone()))
-        .await
-        .expect("Failed to sign outside execution");
-
-    // Execute from outside
     let result = controller
-        .provider
-        .add_execute_outside_transaction(
-            OutsideExecution::V3(outside_execution),
-            controller.address,
-            signed_execution.signature,
-        )
+        .execute_from_outside_v3(vec![call])
         .await
-        .expect("Failed to execute from outside");
+        .expect("Execute to succeed");
 
     TransactionWaiter::new(result.transaction_hash, runner.client())
         .with_timeout(Duration::from_secs(5))
@@ -158,4 +137,10 @@ async fn test_execute_from_outside_with_session() {
         .expect("Failed to call contract");
 
     assert_eq!(balance, amount);
+
+    // Check that the session is registered
+    let (_, metadata) = controller
+        .session_metadata(&Policy::from_calls(&[]), None)
+        .expect("Failed to get session metadata");
+    assert!(metadata.is_registered, "Session should be registered");
 }

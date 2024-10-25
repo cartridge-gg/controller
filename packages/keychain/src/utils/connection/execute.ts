@@ -25,6 +25,31 @@ export function parseControllerError(
   }
 }
 
+function releaseStub() {}
+
+/**
+ * A simple mutual exclusion lock. It allows you to obtain and release a lock,
+ *  ensuring that only one task can access a critical section at a time.
+ */
+export class Mutex {
+  private m_lastPromise: Promise<void> = Promise.resolve();
+
+  /**
+   * Acquire lock
+   * @param [bypass=false] option to skip lock acquisition
+   */
+  public async obtain(bypass = false): Promise<() => void> {
+    let release = releaseStub;
+    if (bypass) return release;
+    const lastPromise = this.m_lastPromise;
+    this.m_lastPromise = new Promise<void>((resolve) => (release = resolve));
+    await lastPromise;
+    return release;
+  }
+}
+
+const mutex = new Mutex();
+
 export function execute({
   setContext,
 }: {
@@ -33,6 +58,7 @@ export function execute({
   return async (
     transactions: Call[],
     sync?: boolean,
+    _?: any,
     error?: ControllerError,
   ): Promise<InvokeFunctionResponse | ConnectError> => {
     const account: Controller = window.controller;
@@ -85,6 +111,8 @@ export function execute({
             type: "execute",
             origin,
             transactions,
+            abis: {},
+            transactionsDetail: {},
             error: parseControllerError(e),
             resolve,
             reject,
@@ -97,6 +125,7 @@ export function execute({
         }
       }
 
+      const release = await mutex.obtain();
       try {
         let estimate = await account.estimateInvokeFee(transactions);
         let maxFee = num.toHex(
@@ -124,6 +153,8 @@ export function execute({
           message: e.message,
           error: parseControllerError(e),
         });
+      } finally {
+        release();
       }
     });
   };
