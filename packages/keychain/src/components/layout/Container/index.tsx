@@ -46,7 +46,7 @@ export const FOOTER_HEIGHT = 40;
 export const PORTAL_WINDOW_HEIGHT = 600;
 
 function Wrapper({
-  variant = "default",
+  variant = "expanded",
   children,
   ...rest
 }: React.PropsWithChildren & { variant?: LayoutVariant }) {
@@ -103,7 +103,7 @@ function Wrapper({
 }
 
 const LayoutContext = createContext<LayoutContextValue>({
-  variant: "default",
+  variant: "expanded",
   footer: {
     height: 0,
     setHeight: () => {},
@@ -122,12 +122,12 @@ type LayoutContextValue = {
   };
 };
 
-type LayoutVariant = "default" | "connect" | "settings" | "error";
+export type LayoutVariant = "expanded" | "compressed";
 
 export function useLayout() {
   return useContext(LayoutContext);
 }
 
-export function useLayoutVariant() {
+export function useLayoutVariant(): LayoutVariant {
   return useLayout().variant;
 }

@@ -38,7 +38,7 @@ export function Delegate({ onBack }: { onBack: () => void }) {
 
   return (
     <Container
-      variant="connect"
+      variant="expanded"
       title="Delegate account"
       onBack={() => onBack()}
     >

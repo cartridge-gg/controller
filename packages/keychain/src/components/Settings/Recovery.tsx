@@ -38,7 +38,7 @@ export function Recovery({ onBack }: { onBack: () => void }) {
 
   return (
     <Container
-      variant="connect"
+      variant="expanded"
       title="Recovery Account(s)"
       onBack={() => onBack()}
     >

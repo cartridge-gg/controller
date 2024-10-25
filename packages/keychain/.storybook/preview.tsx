@@ -148,7 +148,6 @@ function useMockedConnection({
       },
     ],
     prefunds: [],
-    paymaster: undefined,
     hasPrefundRequest: false,
     error: undefined,
     setContext: () => {},

@@ -33,7 +33,7 @@ export function Footer({
     () =>
       !!origin &&
       !!policies.length &&
-      variant === "connect" &&
+      variant === "expanded" &&
       !isSignup &&
       !hideTxSummary,
     [origin, policies, variant, isSignup, hideTxSummary],
@@ -96,7 +96,7 @@ export function Footer({
           onClick={footer.onToggle}
           _hover={{ cursor: "pointer" }}
         >
-          {!hideTxSummary && !!policies.length && variant === "connect" && (
+          {!hideTxSummary && !!policies.length && variant === "expanded" && (
             <SessionConsent
               variant={isSlot ? "slot" : isSignup ? "signup" : undefined}
             />

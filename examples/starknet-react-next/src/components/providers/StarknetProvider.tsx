@@ -3,7 +3,7 @@
 import { Chain, mainnet, sepolia } from "@starknet-react/chains";
 import { StarknetConfig, starkscan } from "@starknet-react/core";
 import { PropsWithChildren } from "react";
-import { RpcProvider, shortString } from "starknet";
+import { RpcProvider } from "starknet";
 import ControllerConnector from "@cartridge/connector/controller";
 
 const ETH_TOKEN_ADDRESS =
@@ -61,9 +61,6 @@ const controller = new ControllerConnector({
     process.env.NEXT_PUBLIC_PROFILE_FRAME_URL,
   indexerUrl: process.env.NEXT_PUBLIC_INDEXER_URL,
   namespace: process.env.NEXT_PUBLIC_NAMESPACE,
-  paymaster: {
-    caller: shortString.encodeShortString("ANY_CALLER"),
-  },
   // theme: "dope-wars",
   // colorMode: "light"
   tokens: {

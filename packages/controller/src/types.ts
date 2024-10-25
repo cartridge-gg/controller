@@ -86,7 +86,6 @@ export interface Keychain {
   execute(
     calls: AllowArray<Call>,
     sync?: boolean,
-    paymaster?: PaymasterOptions,
     error?: ControllerError,
   ): Promise<ExecuteReply | ConnectError>;
   signMessage(typedData: TypedData): Promise<Signature | ConnectError>;
@@ -147,8 +146,6 @@ export type KeychainOptions = IFrameOptions & {
   url?: string;
   /** The origin of keychain */
   origin?: string;
-  /** Paymaster options for transaction fee management */
-  paymaster?: PaymasterOptions;
   /** Propagate transaction errors back to caller instead of showing modal */
   propagateSessionErrors?: boolean;
 };
@@ -164,22 +161,7 @@ export type ProfileOptions = IFrameOptions & {
   tokens?: Tokens;
 };
 
-export type ProfileContextTypeVariant = "trophies" | "inventory" | "history";
-
-/**
- * Options for configuring a paymaster
- */
-export type PaymasterOptions = {
-  /**
-   * The address of the account paying for the transaction.
-   * This should be a valid Starknet address or "ANY_CALLER" short string.
-   */
-  caller: string;
-  /**
-   * The URL of the paymaster. Currently not used.
-   */
-  url?: string;
-};
+export type ProfileContextTypeVariant = "trophies" | "inventory" | "activity";
 
 export type ColorMode = "light" | "dark";
 

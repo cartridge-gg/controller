@@ -1,7 +1,7 @@
 import { createContext, PropsWithChildren } from "react";
 import Controller from "utils/controller";
 import { ConnectionCtx } from "utils/connection";
-import { PaymasterOptions, Policy, Prefund } from "@cartridge/controller";
+import { Policy, Prefund } from "@cartridge/controller";
 import { UpgradeInterface } from "hooks/upgrade";
 
 export const ConnectionContext =
@@ -16,7 +16,6 @@ export type ConnectionContextValue = {
   chainName: string;
   policies: Policy[];
   prefunds: Prefund[];
-  paymaster?: PaymasterOptions;
   hasPrefundRequest: boolean;
   error?: Error;
   upgrade: UpgradeInterface;

@@ -8,7 +8,7 @@ import {
 import { Navigation } from "@/components/navigation";
 import { useAccount } from "@/hooks/context";
 
-export function History() {
+export function Activity() {
   const { address, username } = useAccount();
   const { data } = useTransferQuery({
     address,
