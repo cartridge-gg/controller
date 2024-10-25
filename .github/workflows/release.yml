@@ -27,14 +27,17 @@ jobs:
       - uses: pnpm/action-setup@v4
       - run: pnpm install
 
+      - name: Get version
+        id: get_version
+        run: |
+          echo "VERSION=$(jq -r '.version' packages/controller/package.json)" >> $GITHUB_OUTPUT
+
       - name: Publish to npm
         run: |
-          VERSION=$(pnpm --filter @cartridge/controller --silent version | tr -d '"')
-          if [[ $VERSION == *-* ]]; then
+          if [[ ${{ steps.get_version.outputs.VERSION }} == *-* ]]; then
             pnpm publish --tag prerelease
           else
             pnpm publish
           fi
-
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
