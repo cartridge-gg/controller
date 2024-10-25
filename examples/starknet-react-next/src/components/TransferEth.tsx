@@ -18,8 +18,22 @@ export const TransferEth = () => {
       if (!account) {
         return;
       }
-      setSubmitted(true);
+      //setSubmitted(true);
       setTxnHash(undefined);
+
+//       await account.estimateInvokeFee(
+// [
+//           {
+//             contractAddress: ETH_CONTRACT,
+//             entrypoint: "approve",
+//             calldata: [account?.address, amount, "0x0"],
+//           },
+//           {
+//             contractAddress: ETH_CONTRACT,
+//             entrypoint: "transfer",
+//             calldata: [account?.address, amount, "0x0"],
+//           },
+//         ]);
 
       account
         .execute([
@@ -33,10 +47,10 @@ export const TransferEth = () => {
             entrypoint: "transfer",
             calldata: [account?.address, amount, "0x0"],
           },
-        ])
-        .then(({ transaction_hash }) => setTxnHash(transaction_hash))
-        .catch((e) => console.error(e))
-        .finally(() => setSubmitted(false));
+        ]);
+        // .then(({ transaction_hash }) => setTxnHash(transaction_hash))
+        // .catch((e) => console.error(e))
+        // .finally(() => setSubmitted(false));
     },
     [account],
   );
