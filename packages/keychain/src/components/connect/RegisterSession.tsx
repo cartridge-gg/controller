@@ -68,7 +68,6 @@ export function RegisterSession({
       transactions={transactions}
       onSubmit={onRegisterSession}
       buttonText="Register Session"
-      hideTxSummary
     >
       <Content>
         <SessionConsent />

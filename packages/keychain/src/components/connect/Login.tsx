@@ -144,7 +144,7 @@ function Form({
         />
       </Content>
 
-      <Footer isSlot={isSlot} showCatridgeLogo hideTxSummary>
+      <Footer showCatridgeLogo>
         {error && (
           <ErrorAlert
             title="Login failed"
