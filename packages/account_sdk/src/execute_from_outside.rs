@@ -9,10 +9,12 @@ use crate::{
     account::{
         outside_execution::{OutsideExecution, OutsideExecutionAccount, OutsideExecutionCaller},
         outside_execution_v2::OutsideExecutionV2,
+        session::hash::Policy,
     },
     controller::Controller,
     errors::ControllerError,
     provider::CartridgeProvider,
+    storage::StorageBackend,
     utils::time::get_current_timestamp,
 };
 
@@ -84,7 +86,7 @@ impl Controller {
             caller: OutsideExecutionCaller::Any.into(),
             execute_after: 0,
             execute_before: now + 600,
-            calls: calls.into_iter().map(|call| call.into()).collect(),
+            calls: calls.clone().into_iter().map(|call| call.into()).collect(),
             nonce: (namespace, nonce_bitmask),
         };
 
@@ -101,6 +103,15 @@ impl Controller {
             )
             .await
             .map_err(ControllerError::PaymasterError)?;
+
+        // Update is_registered to true after successful execution with a session
+        if let Some((key, metadata)) = self.session_metadata(&Policy::from_calls(&calls), None) {
+            if !metadata.is_registered {
+                let mut updated_metadata = metadata;
+                updated_metadata.is_registered = true;
+                self.storage.set_session(&key, updated_metadata)?;
+            }
+        }
 
         Ok(InvokeTransactionResult {
             transaction_hash: res.transaction_hash,
