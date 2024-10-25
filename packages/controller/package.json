@@ -8,7 +8,8 @@
   "scripts": {
     "build:deps": "tsc",
     "format": "prettier --write \"src/**/*.ts\"",
-    "format:check": "prettier --check \"src/**/*.ts\""
+    "format:check": "prettier --check \"src/**/*.ts\"",
+    "version": "pnpm pkg get version"
   },
   "exports": {
     ".": "./dist/index.js",

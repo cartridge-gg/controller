@@ -26,21 +26,15 @@ jobs:
 
       - uses: pnpm/action-setup@v4
       - run: pnpm install
-      - run: pnpm build
 
       - name: Publish to npm
         run: |
-          pnpm -r exec -- bash -c '
-            if [[ $(pnpm pkg get private) != "true" ]]; then
-              VERSION=$(pnpm pkg get version)
-              if [[ $VERSION == *-* ]]; then
-                pnpm publish --tag prerelease --no-git-checks
-              else
-                pnpm publish --no-git-checks
-              fi
-            else
-              echo "Skipping private package"
-            fi
-          '
+          VERSION=$(pnpm controller version  | tr -d '"')
+          if [[ $VERSION == *-* ]]; then
+            pnpm publish --tag prerelease --no-git-checks
+          else
+            pnpm publish --no-git-checks
+          fi
+
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
