@@ -1,4 +1,4 @@
-import { ConnectReply } from "@cartridge/controller";
+import { ConnectReply, Policy } from "@cartridge/controller";
 import { ConnectCtx, ConnectionCtx } from "./types";
 
 export function connectFactory({
@@ -11,7 +11,7 @@ export function connectFactory({
   setContext: (context: ConnectionCtx) => void;
 }) {
   return (origin: string) =>
-    (rpcUrl: string): Promise<ConnectReply> => {
+    (_: Policy[], rpcUrl: string): Promise<ConnectReply> => {
       setOrigin(origin);
       setRpcUrl(rpcUrl);
 
