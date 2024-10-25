@@ -31,7 +31,6 @@ import { constants } from "starknet";
 
 export function Signup({
   prefilledName = "",
-  isSlot,
   onSuccess,
   onLogin,
 }: SignupProps) {
@@ -308,7 +307,7 @@ export function Signup({
           </FormControl>
         </Content>
 
-        <Footer isSlot={isSlot} isSignup showCatridgeLogo>
+        <Footer showCatridgeLogo>
           {error && (
             <ErrorAlert
               title="Signup failed"

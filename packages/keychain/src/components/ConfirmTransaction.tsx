@@ -16,9 +16,12 @@ export function ConfirmTransaction() {
   const account = controller;
 
   const onSubmit = async (maxFee: bigint) => {
-    let { transaction_hash } = await account.execute(ctx.calls, {
-      maxFee: num.toHex(maxFee),
-    });
+    let { transaction_hash } = await account.execute(
+      Array.isArray(ctx.transactions) ? ctx.transactions : [ctx.transactions],
+      {
+        maxFee: num.toHex(maxFee),
+      },
+    );
     ctx.resolve({
       code: ResponseCodes.SUCCESS,
       transaction_hash,
@@ -29,11 +32,14 @@ export function ConfirmTransaction() {
 
   const calls = useMemo<Policy[]>(
     () =>
-      (Array.isArray(ctx.calls) ? ctx.calls : [ctx.calls]).map((c) => ({
+      (Array.isArray(ctx.transactions)
+        ? ctx.transactions
+        : [ctx.transactions]
+      ).map((c) => ({
         target: c.contractAddress,
         method: c.entrypoint,
       })),
-    [ctx.calls],
+    [ctx.transactions],
   );
 
   const updateSession = useMemo(() => {
@@ -75,7 +81,7 @@ export function ConfirmTransaction() {
       title="Confirm Transaction"
       description={origin}
       executionError={ctx.error}
-      transactions={ctx.calls}
+      transactions={ctx.transactions}
       transactionsDetail={ctx.transactionsDetail}
       onSubmit={onSubmit}
     >

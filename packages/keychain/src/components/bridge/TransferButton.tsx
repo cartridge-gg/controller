@@ -98,7 +98,7 @@ export function TransferButton({
   }, [configError, onError, data?.hash, onTxSubmitted]);
 
   return (
-    <Button w="full" disabled={disabled || !write} onClick={() => write?.()}>
+    <Button w="full" onClick={() => write?.()}>
       Transfer
     </Button>
   );

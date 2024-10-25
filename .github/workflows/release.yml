@@ -24,18 +24,20 @@ jobs:
           node-version: "20.x"
           registry-url: "https://registry.npmjs.org/"
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install
 
-      - name: Install dependencies
-        run: pnpm install
+      - name: Get version
+        id: get_version
+        run: |
+          echo "VERSION=$(jq -r '.version' packages/controller/package.json)" >> $GITHUB_OUTPUT
 
       - name: Publish to npm
         run: |
-          if [[ $(npm pkg get version) == *"-alpha"* ]]; then
-            pnpm publish --tag alpha
+          if [[ ${{ steps.get_version.outputs.VERSION }} == *-* ]]; then
+            pnpm prerelease 
           else
-            pnpm publish
+            pnpm release
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
