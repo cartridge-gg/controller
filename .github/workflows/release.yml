@@ -35,9 +35,9 @@ jobs:
       - name: Publish to npm
         run: |
           if [[ ${{ steps.get_version.outputs.VERSION }} == *-* ]]; then
-            pnpm publish --tag prerelease
+            pnpm prerelease 
           else
-            pnpm publish
+            pnpm release
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
