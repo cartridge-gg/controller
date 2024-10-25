@@ -32,7 +32,7 @@ jobs:
 
       - name: Publish to npm
         run: |
-          if [[ $(npm pkg get version) == *"-alpha"* ]]; then
+          if [[ $(pnpm pkg get version) == *"-alpha"* ]]; then
             pnpm publish --tag alpha
           else
             pnpm publish
