@@ -16,7 +16,6 @@ export const Upgrade = () => {
       buttonText="Upgrade"
       onSubmit={upgrade.onUpgrade}
       executionError={upgrade.error}
-      hideTxSummary
     >
       <Content>
         <Text color="text.secondary" fontSize="sm" pb="10px">
