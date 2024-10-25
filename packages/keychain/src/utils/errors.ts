@@ -13,7 +13,9 @@ export function parseExecutionError(
     error: string[];
   }[];
 } {
-  let executionError: string = error.data?.execution_error;
+  let executionError: string = (
+    typeof error.data === "string" ? JSON.parse(error.data) : error.data
+  )?.execution_error;
   if (!executionError) {
     return {
       raw: JSON.stringify(error.data),

@@ -90,7 +90,7 @@ export const useUpgrade = (controller: Controller): UpgradeInterface => {
     }
 
     return [controller.cartridge.upgrade(LATEST_CONTROLLER.hash)];
-  }, [controller, LATEST_CONTROLLER]);
+  }, [controller]);
 
   const onUpgrade = useCallback(async () => {
     if (!controller || !LATEST_CONTROLLER) {
@@ -110,7 +110,7 @@ export const useUpgrade = (controller: Controller): UpgradeInterface => {
       console.log({ e });
       setError(e);
     }
-  }, [controller, LATEST_CONTROLLER, calls]);
+  }, [controller, calls]);
 
   return {
     available,
