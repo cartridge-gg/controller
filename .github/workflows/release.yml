@@ -34,9 +34,9 @@ jobs:
             if [[ $(pnpm pkg get private) != "true" ]]; then
               VERSION=$(pnpm pkg get version)
               if [[ $VERSION == *-* ]]; then
-                pnpm publish --tag prerelease
+                pnpm publish --tag prerelease --no-git-checks
               else
-                pnpm publish
+                pnpm publish --no-git-checks
               fi
             else
               echo "Skipping private package"
