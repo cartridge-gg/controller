@@ -29,11 +29,11 @@ jobs:
 
       - name: Publish to npm
         run: |
-          VERSION=$(pnpm controller version  | tr -d '"')
+          VERSION=$(pnpm --filter @cartridge/controller --silent version | tr -d '"')
           if [[ $VERSION == *-* ]]; then
-            pnpm publish --tag prerelease --no-git-checks
+            pnpm publish --tag prerelease
           else
-            pnpm publish --no-git-checks
+            pnpm publish
           fi
 
         env:
