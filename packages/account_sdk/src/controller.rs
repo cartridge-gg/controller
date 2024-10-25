@@ -180,8 +180,6 @@ impl Controller {
             .estimate_fee()
             .await;
 
-        let balance = self.eth_balance().await?;
-
         match est {
             Ok(mut fee_estimate) => {
                 if self
@@ -191,6 +189,7 @@ impl Controller {
                     fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
                 }
 
+                let balance = self.eth_balance().await?;
                 if fee_estimate.overall_fee > Felt::from(balance) {
                     Err(ControllerError::InsufficientBalance {
                         fee_estimate: Box::new(fee_estimate),
