@@ -69,7 +69,7 @@ export function ErrorAlert({
             <AccordionButton
               disabled={!description || (isExpanded && !allowToggle)}
             >
-              <HStack>
+              <HStack alignItems="flex-start">
                 {(() => {
                   switch (variant) {
                     case "info":
@@ -87,6 +87,7 @@ export function ErrorAlert({
                   fontSize="2xs"
                   color="inherit"
                   textTransform="uppercase"
+                  align="left"
                 >
                   {title}
                 </Text>

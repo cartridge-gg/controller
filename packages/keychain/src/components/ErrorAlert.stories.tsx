@@ -44,3 +44,10 @@ export const Info: Story = {
     variant: "info",
   },
 };
+
+export const LongTitle: Story = {
+  args: {
+    title:
+      "Long text should align left and blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah.",
+  },
+};
