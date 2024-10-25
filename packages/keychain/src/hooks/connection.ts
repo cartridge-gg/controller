@@ -104,6 +104,7 @@ export function useConnectionValue() {
     const connection = connectToController<ParentMethods>({
       setOrigin,
       setRpcUrl,
+      setPolicies,
       setContext,
       setController,
     });
