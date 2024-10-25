@@ -148,6 +148,10 @@ export function parseExecutionError(
       } else if (lastErrorMessage === "session/already-registered") {
         summary = "Session already registered";
         lastError[lastError.length - 1] = summary;
+      } else if (
+        /.*Class with hash.*is not declared.$/.test(lastErrorMessage)
+      ) {
+        summary = "Class hash is not declared.";
       } else {
         summary = lastErrorMessage;
         lastError[lastError.length - 1] = summary;
