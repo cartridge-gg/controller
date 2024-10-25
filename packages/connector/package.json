@@ -13,6 +13,7 @@
     "format:check": "prettier --check \"src/**/*.ts\""
   },
   "exports": {
+    ".": "./dist/index.js",
     "./controller": "./dist/controller.js",
     "./session": "./dist/session.js",
     "./telegram": "./dist/telegram.js"
