@@ -22,6 +22,7 @@ export type ConnectionCtx =
   | ExecuteCtx
   | SignMessageCtx
   | OpenSettingsCtx
+  | OpenPurchaseCreditsCtx
   | undefined;
 
 export type ConnectCtx = {
@@ -81,5 +82,12 @@ export type DeployCtx = {
   type: "deploy";
   account: string;
   resolve: (res: DeployReply | ConnectError) => void;
+  reject: (reason?: unknown) => void;
+};
+
+export type OpenPurchaseCreditsCtx = {
+  origin: string;
+  type: "open-purchase-credits";
+  resolve: (res: ConnectError) => void;
   reject: (reason?: unknown) => void;
 };
