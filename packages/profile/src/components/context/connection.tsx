@@ -1,4 +1,4 @@
-import { AsyncMethodReturns, connectToParent } from "@cartridge/penpal";
+import { connectToParent } from "@cartridge/penpal";
 import {
   createContext,
   useState,
@@ -19,10 +19,13 @@ type ConnectionContextType = {
   setIsVisible: (isVisible: boolean) => void;
 };
 
-type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
+type ParentMethods = {
+  close: () => Promise<void>;
+  openPurchaseCredits: () => Promise<void>;
+};
 
 const initialState: ConnectionContextType = {
-  parent: { close: async () => {} },
+  parent: { close: async () => {}, openPurchaseCredits: async () => {} },
   chainId: "",
   isVisible: false,
   setIsVisible: () => {},

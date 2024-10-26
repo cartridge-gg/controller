@@ -1,5 +1,10 @@
 import { Link, useParams } from "react-router-dom";
-import { LayoutContainer, LayoutContent, LayoutHeader } from "../layout";
+import {
+  LayoutContainer,
+  LayoutContent,
+  LayoutFooter,
+  LayoutHeader,
+} from "../layout";
 import {
   ArrowIcon,
   Button,
@@ -34,7 +39,9 @@ export function Token() {
 }
 
 function Credits() {
+  const { parent } = useConnection();
   const { credit } = useAccount();
+
   return (
     <LayoutContainer
       left={
@@ -61,6 +68,12 @@ function Credits() {
           </CardContent>
         </Card>
       </LayoutContent>
+
+      <LayoutFooter>
+        <Button onClick={() => parent.openPurchaseCredits().catch(() => {})}>
+          Purchase
+        </Button>
+      </LayoutFooter>
     </LayoutContainer>
   );
 }

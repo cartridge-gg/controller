@@ -47,29 +47,29 @@ jobs:
       - name: Build
         run: pnpm build:deps
       - name: Pull Vercel Environment Information (Preview)
-        if: github.ref != 'refs/heads/release'
+        if: github.ref != 'refs/heads/main'
         run:
           pnpm vercel pull --yes --environment=preview --token=${{
           secrets.VERCEL_TOKEN }}
       - name: Pull Vercel Environment Information (Production)
-        if: github.ref == 'refs/heads/release'
+        if: github.ref == 'refs/heads/main'
         run:
           pnpm vercel pull --yes --environment=production --token=${{
           secrets.VERCEL_TOKEN }}
       - name: Build Project Artifacts (Preview)
-        if: github.ref != 'refs/heads/release'
+        if: github.ref != 'refs/heads/main'
         run: pnpm vercel build --token=${{ secrets.VERCEL_TOKEN }}
       - name: Build Project Artifacts (Production)
-        if: github.ref == 'refs/heads/release'
+        if: github.ref == 'refs/heads/main'
         run: pnpm vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy to Vercel (Preview)
-        if: github.ref != 'refs/heads/release'
+        if: github.ref != 'refs/heads/main'
         run:
           echo "url=$(pnpm vercel deploy --prebuilt --token=${{
           secrets.VERCEL_TOKEN }})" > "$GITHUB_OUTPUT"
         id: deploy
       - name: Deploy to Vercel (Production)
-        if: github.ref == 'refs/heads/release'
+        if: github.ref == 'refs/heads/main'
         run:
           pnpm vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN
           }}
@@ -79,7 +79,7 @@ jobs:
           git config --global --add safe.directory '*'
           echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       - name: Assign Alias
-        if: github.ref != 'refs/heads/release'
+        if: github.ref != 'refs/heads/main'
         run:
           pnpm vercel alias set ${{ steps.deploy.outputs.url }} keychain-${{
           steps.vars.outputs.sha_short }}.preview.cartridge.gg --scope=cartridge
@@ -124,29 +124,29 @@ jobs:
       - name: Build
         run: pnpm build:deps
       - name: Pull Vercel Environment Information (Preview)
-        if: github.ref != 'refs/heads/release'
+        if: github.ref != 'refs/heads/main'
         run:
           pnpm vercel pull --yes --environment=preview --token=${{
           secrets.VERCEL_TOKEN }}
       - name: Pull Vercel Environment Information (Production)
-        if: github.ref == 'refs/heads/release'
+        if: github.ref == 'refs/heads/main'
         run:
           pnpm vercel pull --yes --environment=production --token=${{
           secrets.VERCEL_TOKEN }}
       - name: Build Project Artifacts (Preview)
-        if: github.ref != 'refs/heads/release'
+        if: github.ref != 'refs/heads/main'
         run: pnpm vercel build --token=${{ secrets.VERCEL_TOKEN }}
       - name: Build Project Artifacts (Production)
-        if: github.ref == 'refs/heads/release'
+        if: github.ref == 'refs/heads/main'
         run: pnpm vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy to Vercel (Preview)
-        if: github.ref != 'refs/heads/release'
+        if: github.ref != 'refs/heads/main'
         run:
           echo "url=$(pnpm vercel deploy --prebuilt --token=${{
           secrets.VERCEL_TOKEN }})" > "$GITHUB_OUTPUT"
         id: deploy
       - name: Deploy to Vercel (Production)
-        if: github.ref == 'refs/heads/release'
+        if: github.ref == 'refs/heads/main'
         run:
           pnpm vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN
           }}
@@ -156,7 +156,7 @@ jobs:
           git config --global --add safe.directory '*'
           echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       - name: Assign Alias
-        if: github.ref != 'refs/heads/release'
+        if: github.ref != 'refs/heads/main'
         run:
           pnpm vercel alias set ${{ steps.deploy.outputs.url }}
           keychain-storybook-${{ steps.vars.outputs.sha_short
@@ -202,29 +202,29 @@ jobs:
       - name: Build
         run: pnpm build:deps
       - name: Pull Vercel Environment Information (Preview)
-        if: github.ref != 'refs/heads/release'
+        if: github.ref != 'refs/heads/main'
         run:
           pnpm vercel pull --yes --environment=preview --token=${{
           secrets.VERCEL_TOKEN }}
       - name: Pull Vercel Environment Information (Production)
-        if: github.ref == 'refs/heads/release'
+        if: github.ref == 'refs/heads/main'
         run:
           pnpm vercel pull --yes --environment=production --token=${{
           secrets.VERCEL_TOKEN }}
       - name: Build Project Artifacts (Preview)
-        if: github.ref != 'refs/heads/release'
+        if: github.ref != 'refs/heads/main'
         run: pnpm vercel build --token=${{ secrets.VERCEL_TOKEN }}
       - name: Build Project Artifacts (Production)
-        if: github.ref == 'refs/heads/release'
+        if: github.ref == 'refs/heads/main'
         run: pnpm vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy to Vercel (Preview)
-        if: github.ref != 'refs/heads/release'
+        if: github.ref != 'refs/heads/main'
         run:
           echo "url=$(pnpm vercel deploy --prebuilt --token=${{
           secrets.VERCEL_TOKEN }})" > "$GITHUB_OUTPUT"
         id: deploy
       - name: Deploy to Vercel (Production)
-        if: github.ref == 'refs/heads/release'
+        if: github.ref == 'refs/heads/main'
         run:
           pnpm vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN
           }}
@@ -234,7 +234,7 @@ jobs:
           git config --global --add safe.directory '*'
           echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       - name: Assign Alias
-        if: github.ref != 'refs/heads/release'
+        if: github.ref != 'refs/heads/main'
         run:
           pnpm vercel alias set ${{ steps.deploy.outputs.url }} profile-${{
           steps.vars.outputs.sha_short }}.preview.cartridge.gg --scope=cartridge
@@ -279,12 +279,12 @@ jobs:
       - name: Build
         run: pnpm build:deps
       - name: Pull Vercel Environment Information (Preview)
-        if: github.ref != 'refs/heads/release'
+        if: github.ref != 'refs/heads/main'
         run:
           pnpm vercel pull --yes --environment=preview --token=${{
           secrets.VERCEL_TOKEN }}
       - name: Pull Vercel Environment Information (Production)
-        if: github.ref == 'refs/heads/release'
+        if: github.ref == 'refs/heads/main'
         run:
           pnpm vercel pull --yes --environment=production --token=${{
           secrets.VERCEL_TOKEN }}
@@ -294,19 +294,19 @@ jobs:
           git config --global --add safe.directory '*'
           echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       - name: Build Project Artifacts (Preview)
-        if: github.ref != 'refs/heads/release'
+        if: github.ref != 'refs/heads/main'
         run: |
           echo "NEXT_PUBLIC_KEYCHAIN_DEPLOYMENT_URL=https://keychain-${{ steps.vars.outputs.sha_short }}.preview.cartridge.gg" >> ./examples/starknet-react-next/.env.local
           echo "NEXT_PUBLIC_PROFILE_DEPLOYMENT_URL=https://profile-${{ steps.vars.outputs.sha_short }}.preview.cartridge.gg" >> ./examples/starknet-react-next/.env.local
           pnpm vercel build --token=${{ secrets.VERCEL_TOKEN }}
       - name: Build Project Artifacts (Production)
-        if: github.ref == 'refs/heads/release'
+        if: github.ref == 'refs/heads/main'
         run: pnpm vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy to Vercel (Preview)
-        if: github.ref != 'refs/heads/release'
+        if: github.ref != 'refs/heads/main'
         run: pnpm vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy to Vercel (Production)
-        if: github.ref == 'refs/heads/release'
+        if: github.ref == 'refs/heads/main'
         run:
           pnpm vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN
           }}

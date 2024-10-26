@@ -32,8 +32,7 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
   const variant = useLayoutVariant();
 
   switch (variant) {
-    case "connect":
-    case "error":
+    case "expanded":
       return (
         <VStack w="full" pb={6}>
           <VStack
@@ -93,7 +92,7 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
           </VStack>
         </VStack>
       );
-    case "settings":
+    case "compressed":
       return (
         <VStack w="full">
           <HStack

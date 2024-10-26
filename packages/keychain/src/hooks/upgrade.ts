@@ -16,7 +16,7 @@ export const CONTROLLER_VERSIONS: Array<ControllerVersionInfo> = [
   },
   {
     version: "1.0.6",
-    hash: "0x220fafd2163c285f26a981772d96b0ce130ae1e4502ce45cc127ab87df295b0",
+    hash: "0x59e4405accdf565112fe5bf9058b51ab0b0e63665d280b816f9fe4119554b77",
     changes: [
       "Support session key message signing",
       "Support session guardians",
@@ -24,6 +24,8 @@ export const CONTROLLER_VERSIONS: Array<ControllerVersionInfo> = [
     ],
   },
 ];
+
+const LATEST_CONTROLLER = CONTROLLER_VERSIONS[CONTROLLER_VERSIONS.length - 1];
 
 type ControllerVersionInfo = {
   version: string;
@@ -48,7 +50,6 @@ export const useUpgrade = (controller: Controller): UpgradeInterface => {
   const [isSynced, setIsSynced] = useState<boolean>(false);
   const [isUpgrading, setIsUpgrading] = useState<boolean>(false);
   const [current, setCurrent] = useState<ControllerVersionInfo>();
-  const [latest, setLatest] = useState<ControllerVersionInfo>();
 
   useEffect(() => {
     if (!controller) {
@@ -62,29 +63,37 @@ export const useUpgrade = (controller: Controller): UpgradeInterface => {
         const current = CONTROLLER_VERSIONS.find(
           (v) => addAddressPadding(v.hash) === addAddressPadding(classHash),
         );
-        const latest = CONTROLLER_VERSIONS[CONTROLLER_VERSIONS.length - 1];
 
         setCurrent(current);
-        setLatest(latest);
-        setAvailable(current?.version !== latest.version);
+        setAvailable(current?.version !== LATEST_CONTROLLER.version);
       })
       .catch((e) => {
-        console.log(e);
-        setError(e);
+        if (e.message.includes("Contract not found")) {
+          const current = CONTROLLER_VERSIONS.find(
+            (v) =>
+              addAddressPadding(v.hash) ===
+              addAddressPadding(controller.cartridge.classHash()),
+          );
+          setCurrent(current);
+          setAvailable(current?.version !== LATEST_CONTROLLER.version);
+        } else {
+          console.log(e);
+          setError(e);
+        }
       })
       .finally(() => setIsSynced(true));
   }, [controller]);
 
   const calls = useMemo(() => {
-    if (!controller || !latest) {
+    if (!controller || !LATEST_CONTROLLER) {
       return [];
     }
 
-    return [controller.cartridge.upgrade(latest.hash)];
-  }, [controller, latest]);
+    return [controller.cartridge.upgrade(LATEST_CONTROLLER.hash)];
+  }, [controller]);
 
   const onUpgrade = useCallback(async () => {
-    if (!controller || !latest) {
+    if (!controller || !LATEST_CONTROLLER) {
       return;
     }
 
@@ -101,12 +110,12 @@ export const useUpgrade = (controller: Controller): UpgradeInterface => {
       console.log({ e });
       setError(e);
     }
-  }, [controller, latest, calls]);
+  }, [controller, calls]);
 
   return {
     available,
     current,
-    latest,
+    latest: LATEST_CONTROLLER,
     calls,
     isSynced,
     isUpgrading,

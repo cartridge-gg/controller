@@ -49,9 +49,7 @@ export const TransferEth = () => {
     <div>
       <h2>Session Transfer Eth</h2>
       <p>Address: {ETH_CONTRACT}</p>
-      <Button onClick={() => execute("0x0")} disabled={submitted}>
-        Transfer 0 ETH to self
-      </Button>
+      <Button onClick={() => execute("0x0")}>Transfer 0 ETH to self</Button>
       <Button onClick={() => execute("0x1C6BF52634000")} disabled={submitted}>
         Transfer 0.005 ETH to self
       </Button>

@@ -85,6 +85,9 @@ export default class ControllerProvider extends BaseProvider {
         onConnect: (profile) => {
           this.profile = profile;
         },
+        methods: {
+          openPurchaseCredits: this.openPurchaseCredits.bind(this),
+        },
       });
     }
 
@@ -111,7 +114,10 @@ export default class ControllerProvider extends BaseProvider {
     this.iframes.keychain.open();
 
     try {
-      let response = await this.keychain.connect(this.rpc.toString());
+      let response = await this.keychain.connect(
+        this.options.policies || [],
+        this.rpc.toString(),
+      );
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
       }
@@ -204,6 +210,20 @@ export default class ControllerProvider extends BaseProvider {
     }
 
     return this.keychain.fetchControllers(contractAddresses);
+  }
+
+  openPurchaseCredits() {
+    if (!this.keychain || !this.iframes.keychain) {
+      console.error(new NotReadyToConnect().message);
+      return;
+    }
+    if (!this.iframes.profile) {
+      console.error("Profile is not ready");
+      return;
+    }
+    this.iframes.profile.close();
+    this.iframes.keychain.open();
+    this.keychain.openPurchaseCredits();
   }
 
   async delegateAccount() {

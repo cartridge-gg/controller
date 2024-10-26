@@ -1,4 +1,10 @@
-import { constants, BigNumberish, Call, AllowArray } from "starknet";
+import {
+  constants,
+  BigNumberish,
+  Call,
+  Abi,
+  InvocationsDetails,
+} from "starknet";
 import {
   AddInvokeTransactionResult,
   Signature,
@@ -77,20 +83,28 @@ export type ControllerAccounts = Record<ContractAddress, CartridgeID>;
 
 export interface Keychain {
   probe(rpcUrl: string): Promise<ProbeReply | ConnectError>;
-  connect(rpcUrl: string): Promise<ConnectReply | ConnectError>;
+  connect(
+    policies: Policy[],
+    rpcUrl: string,
+  ): Promise<ConnectReply | ConnectError>;
   disconnect(): void;
 
   reset(): void;
   revoke(origin: string): void;
 
+  deploy(): Promise<DeployReply | ConnectError>;
   execute(
-    calls: AllowArray<Call>,
+    calls: Call | Call[],
+    abis?: Abi[],
+    transactionsDetail?: InvocationsDetails,
     sync?: boolean,
-    paymaster?: PaymasterOptions,
+    paymaster?: any,
     error?: ControllerError,
   ): Promise<ExecuteReply | ConnectError>;
-  signMessage(typedData: TypedData): Promise<Signature | ConnectError>;
-
+  signMessage(
+    typedData: TypedData,
+    account: string,
+  ): Promise<Signature | ConnectError>;
   logout(): Promise<void>;
   openSettings(): Promise<void | ConnectError>;
   session(): Promise<Session>;
@@ -100,8 +114,8 @@ export interface Keychain {
   delegateAccount(): string;
   username(): string;
   fetchControllers(contractAddresses: string[]): Promise<ControllerAccounts>;
+  openPurchaseCredits(): void;
 }
-
 export interface Profile {
   navigate(tab: ProfileContextTypeVariant): void;
 }
@@ -147,8 +161,6 @@ export type KeychainOptions = IFrameOptions & {
   url?: string;
   /** The origin of keychain */
   origin?: string;
-  /** Paymaster options for transaction fee management */
-  paymaster?: PaymasterOptions;
   /** Propagate transaction errors back to caller instead of showing modal */
   propagateSessionErrors?: boolean;
 };
@@ -162,22 +174,7 @@ export type ProfileOptions = IFrameOptions & {
   tokens?: Tokens;
 };
 
-export type ProfileContextTypeVariant = "trophies" | "inventory" | "history";
-
-/**
- * Options for configuring a paymaster
- */
-export type PaymasterOptions = {
-  /**
-   * The address of the account paying for the transaction.
-   * This should be a valid Starknet address or "ANY_CALLER" short string.
-   */
-  caller: string;
-  /**
-   * The URL of the paymaster. Currently not used.
-   */
-  url?: string;
-};
+export type ProfileContextTypeVariant = "trophies" | "inventory" | "activity";
 
 export type ColorMode = "light" | "dark";
 

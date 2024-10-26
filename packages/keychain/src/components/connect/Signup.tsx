@@ -1,5 +1,5 @@
 import { Field } from "@cartridge/ui";
-import { Button } from "@chakra-ui/react";
+import { Button, useMediaQuery } from "@chakra-ui/react";
 import { Container, Footer, Content } from "components/layout";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -20,7 +20,6 @@ import { constants } from "starknet";
 
 export function Signup({
   prefilledName = "",
-  isSlot,
   onSuccess,
   onLogin,
 }: SignupProps) {
@@ -40,6 +39,7 @@ export function Signup({
     usernameField.value,
     1000,
   );
+  const [isHeightOver600] = useMediaQuery("(min-height: 600px)");
 
   // In order for Safari to open "Create Passkey" modal successfully, submit handler has to be async.
   // The workaround is to call async validation function every time when username input changes
@@ -65,12 +65,14 @@ export function Signup({
   const initController = useCallback(
     async (
       username: string,
+      classHash: string,
       address: string,
       credentialId: string,
       publicKey: string,
     ) => {
       const controller = new Controller({
         appId: origin,
+        classHash,
         chainId,
         rpcUrl,
         address,
@@ -131,8 +133,15 @@ export function Signup({
       } = data;
 
       const { id: credentialId, publicKey } = webauthn[0];
+      const controllerNode = controllers.edges?.[0].node;
 
-      initController(username, controllers[0].address, credentialId, publicKey);
+      initController(
+        username,
+        controllerNode.constructorCalldata[0],
+        controllerNode.address,
+        credentialId,
+        publicKey,
+      );
     } catch (e) {
       if (
         // Backward compat with iframes without this permission-policy
@@ -172,9 +181,12 @@ export function Signup({
             },
           } = data;
 
+          const controllerNode = controllers.edges?.[0].node;
+
           initController(
             username,
-            controllers[0].address,
+            controllerNode.constructorCalldata[0],
+            controllerNode.address,
             credentialId,
             publicKey,
           );
@@ -187,7 +199,7 @@ export function Signup({
 
   return (
     <Container
-      variant="connect"
+      variant={isHeightOver600 ? "expanded" : "compressed"}
       title={
         theme.id === "cartridge" ? "Play with Controller" : `Play ${theme.name}`
       }
@@ -220,7 +232,7 @@ export function Signup({
           />
         </Content>
 
-        <Footer isSlot={isSlot} isSignup showCatridgeLogo>
+        <Footer showCatridgeLogo>
           {error && (
             <ErrorAlert
               title="Signup failed"

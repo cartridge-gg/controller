@@ -92,7 +92,7 @@ export function DeployController({
   if (isLoading) {
     return (
       <Container
-        variant="connect"
+        variant="expanded"
         title="Checking account balance..."
         icon={<Spinner />}
       />
@@ -118,7 +118,7 @@ export function DeployController({
     case "deploy":
       return (
         <Container
-          variant="connect"
+          variant="expanded"
           icon={<WandIcon fontSize="5xl" variant="line" />}
           title="Deploy Controller"
           description="This will initialize your controller on the new network"
@@ -136,7 +136,7 @@ export function DeployController({
             />
           </Content>
 
-          <Footer hideTxSummary>
+          <Footer>
             {error ? (
               <ErrorAlert
                 title="Something went wrong"
@@ -158,7 +158,7 @@ export function DeployController({
     case "deploying":
       return (
         <Container
-          variant="connect"
+          variant="expanded"
           icon={<Spinner />}
           title="Deploying Controller"
           description={`Your controller is being deployed on ${chainName}`}
@@ -193,7 +193,7 @@ export function DeployController({
     case "deployed":
       return (
         <Container
-          variant="connect"
+          variant="expanded"
           icon={<CheckIcon fontSize="5xl" />}
           title="Success!"
           description={`Your controller has been deployed on ${chainName}`}
@@ -206,7 +206,7 @@ export function DeployController({
               />
             )}
           </Content>
-          <Footer hideTxSummary>
+          <Footer>
             {error ? (
               <ErrorAlert
                 title="Something went wrong"

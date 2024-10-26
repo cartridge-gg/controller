@@ -23,7 +23,7 @@ export function Recovery({ onBack }: { onBack: () => void }) {
   const onSetRecovery = useCallback(() => {
     setContext({
       origin: context.origin,
-      calls: [
+      transactions: [
         {
           contractAddress: controller.address,
           entrypoint: "register_external_owner",
@@ -38,7 +38,7 @@ export function Recovery({ onBack }: { onBack: () => void }) {
 
   return (
     <Container
-      variant="connect"
+      variant="expanded"
       title="Recovery Account(s)"
       onBack={() => onBack()}
     >

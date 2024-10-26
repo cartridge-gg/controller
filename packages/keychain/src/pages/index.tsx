@@ -14,6 +14,7 @@ import { LoginMode } from "components/connect/types";
 import { ErrorPage } from "components/ErrorBoundary";
 import { Settings } from "components/Settings";
 import { Upgrade } from "components/connect/Upgrade";
+import { PurchaseCredits } from "components/Funding/PurchaseCredits";
 
 function Home() {
   const { context, controller, setController, error, policies, upgrade } =
@@ -43,7 +44,7 @@ function Home() {
   switch (context.type) {
     case "connect": {
       // TODO: show missing policies if mismatch
-      if (!policies?.length || controller.session(policies)) {
+      if (!context.policies?.length || controller.session(context.policies)) {
         context.resolve({
           code: ResponseCodes.SUCCESS,
           address: controller.address,
@@ -133,7 +134,9 @@ function Home() {
         />
       );
     }
-
+    case "open-purchase-credits": {
+      return <PurchaseCredits />;
+    }
     default:
       return <>*Waves*</>;
   }

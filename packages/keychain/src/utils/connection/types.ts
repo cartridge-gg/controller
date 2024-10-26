@@ -1,4 +1,4 @@
-import { ErrorCode, JsCall } from "@cartridge/account-wasm/controller";
+import { ErrorCode } from "@cartridge/account-wasm/controller";
 import {
   ConnectReply,
   ExecuteReply,
@@ -6,7 +6,14 @@ import {
   ConnectError,
   DeployReply,
 } from "@cartridge/controller";
-import { InvocationsDetails, Signature, TypedData } from "starknet";
+import {
+  Abi,
+  Call,
+  InvocationsDetails,
+  Signature,
+  TypedData,
+  constants,
+} from "starknet";
 
 export type ConnectionCtx =
   | ConnectCtx
@@ -15,6 +22,7 @@ export type ConnectionCtx =
   | ExecuteCtx
   | SignMessageCtx
   | OpenSettingsCtx
+  | OpenPurchaseCreditsCtx
   | undefined;
 
 export type ConnectCtx = {
@@ -41,12 +49,15 @@ export type ControllerError = {
 export type ExecuteCtx = {
   origin: string;
   type: "execute";
-  calls: JsCall[];
-  transactionsDetail?: InvocationsDetails;
+  transactions: Call | Call[];
+  abis?: Abi[];
+  transactionsDetail?: InvocationsDetails & {
+    chainId?: constants.StarknetChainId;
+  };
   error?: ControllerError;
   resolve?: (res: ExecuteReply | ConnectError) => void;
   reject?: (reason?: unknown) => void;
-  onCancel?: () => void;
+  onCancel: () => void;
 };
 
 export type SignMessageCtx = {
@@ -71,5 +82,12 @@ export type DeployCtx = {
   type: "deploy";
   account: string;
   resolve: (res: DeployReply | ConnectError) => void;
+  reject: (reason?: unknown) => void;
+};
+
+export type OpenPurchaseCreditsCtx = {
+  origin: string;
+  type: "open-purchase-credits";
+  resolve: (res: ConnectError) => void;
   reject: (reason?: unknown) => void;
 };
