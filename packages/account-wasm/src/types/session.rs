@@ -5,7 +5,7 @@ use starknet::core::types::Felt;
 use tsify_next::Tsify;
 use wasm_bindgen::JsValue;
 
-use super::policy::Policy;
+use super::policy::GeneralPolicy;
 use super::EncodingError;
 
 #[allow(non_snake_case)]
@@ -42,7 +42,7 @@ impl From<account_sdk::storage::Credentials> for Credentials {
 #[tsify(into_wasm_abi, from_wasm_abi)]
 #[serde(rename_all = "camelCase")]
 pub struct Session {
-    pub policies: Vec<Policy>,
+    pub policies: Vec<GeneralPolicy>,
     pub expires_at: u64,
 }
 

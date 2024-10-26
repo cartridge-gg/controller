@@ -13,15 +13,15 @@ use super::EncodingError;
 #[allow(non_snake_case)]
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
-pub struct Policy {
-    pub call_policy: Option<CallPolicy>,
+pub struct GeneralPolicy {
+    pub call_policy: Option<Policy>,
     pub typed_data_policy: Option<TypedDataPolicy>,
 }
 
 #[allow(non_snake_case)]
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
-pub struct CallPolicy {
+pub struct Policy {
     pub target: String,
     pub method: String,
 }
@@ -33,7 +33,7 @@ pub struct TypedDataPolicy {
     pub type_hash: String,
 }
 
-impl TryFrom<JsValue> for Policy {
+impl TryFrom<JsValue> for GeneralPolicy {
     type Error = EncodingError;
 
     fn try_from(value: JsValue) -> Result<Self, Self::Error> {
@@ -41,10 +41,10 @@ impl TryFrom<JsValue> for Policy {
     }
 }
 
-impl TryFrom<Policy> for SdkPolicy {
+impl TryFrom<GeneralPolicy> for SdkPolicy {
     type Error = EncodingError;
 
-    fn try_from(value: Policy) -> Result<Self, Self::Error> {
+    fn try_from(value: GeneralPolicy) -> Result<Self, Self::Error> {
         if value.call_policy.is_some() && value.typed_data_policy.is_some() {
             return Err(EncodingError::UnexpectedOption("Policy: Both call_policy and typed_data_policy are Some when exactly one is expected".to_string()));
         }
@@ -63,11 +63,22 @@ impl TryFrom<Policy> for SdkPolicy {
     }
 }
 
-impl From<SdkPolicy> for Policy {
+impl TryFrom<Policy> for SdkPolicy {
+    type Error = EncodingError;
+
+    fn try_from(value: Policy) -> Result<Self, Self::Error> {
+        Ok(SdkPolicy::Call(SdkCallPolicy {
+            contract_address: Felt::from_str(&value.target)?,
+            selector: get_selector_from_name(&value.method).unwrap(),
+        }))
+    }
+}
+
+impl From<SdkPolicy> for GeneralPolicy {
     fn from(value: SdkPolicy) -> Self {
         match value {
             SdkPolicy::Call(call_policy) => Self {
-                call_policy: Some(CallPolicy {
+                call_policy: Some(Policy {
                     target: call_policy.contract_address.to_string(),
                     method: call_policy.selector.to_string(),
                 }),
