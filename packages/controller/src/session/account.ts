@@ -42,11 +42,11 @@ export default class SessionAccount extends WalletAccount {
       chainId,
       {
         expiresAt,
-        policies: policies.map(p => {
+        policies: policies.map((p) => {
           return {
             call_policy: p,
             typed_data_policy: null,
-          }
+          };
         }),
       },
     );
