@@ -1,7 +1,7 @@
 import { Content } from "components/layout";
 import { useCallback, useMemo, useState } from "react";
 import { useConnection } from "hooks/connection";
-import { Policies } from "components/Policies";
+import { CallPolicies } from "components/Policies";
 import { SessionConsent } from "components/connect";
 import { ExecutionContainer } from "components/ExecutionContainer";
 import {
@@ -71,7 +71,11 @@ export function RegisterSession({
     >
       <Content>
         <SessionConsent />
-        <Policies policies={policies} />
+        <CallPolicies
+          policies={policies
+            .filter((p) => p.call_policy !== null)
+            .map((p) => p.call_policy)}
+        />
       </Content>
     </ExecutionContainer>
   );

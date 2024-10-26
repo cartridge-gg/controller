@@ -13,7 +13,7 @@ import { ControllerErrorAlert, ErrorAlert } from "./ErrorAlert";
 import { useDeploy } from "hooks/deploy";
 import { Fees } from "./Fees";
 import { ControllerError } from "utils/connection";
-import { Policies } from "components/Policies";
+import { CallPolicies } from "components/Policies";
 import { ETH_CONTRACT_ADDRESS, useERC20Balance } from "@cartridge/utils";
 
 export function DeployController({
@@ -124,7 +124,7 @@ export function DeployController({
           description="This will initialize your controller on the new network"
         >
           <Content>
-            <Policies
+            <CallPolicies
               title="Transaction Details"
               policies={[
                 {

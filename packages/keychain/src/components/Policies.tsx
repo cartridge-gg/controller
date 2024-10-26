@@ -10,14 +10,14 @@ import {
   Box,
 } from "@chakra-ui/react";
 import { CopyHash, FnIcon, WedgeRightIcon } from "@cartridge/ui";
-import { Policy } from "@cartridge/controller";
+import { CallPolicy } from "@cartridge/controller";
 
-export function Policies({
+export function CallPolicies({
   title,
   policies,
 }: {
   title?: string;
-  policies: Policy[];
+  policies: CallPolicy[];
 }) {
   return (
     <Box position="relative">

@@ -11,16 +11,18 @@ const HIT_THING_ADDRESS =
 const redirectUri = encodeURIComponent("https://t.me/hitthingbot/hitthing");
 const redirectQueryName = "startapp";
 const encodedPolicies = encodeURIComponent(
-  JSON.stringify([
-    {
-      target: HIT_THING_ADDRESS,
-      method: "attack",
-    },
-    {
-      target: HIT_THING_ADDRESS,
-      method: "claim",
-    },
-  ] as Policy[]),
+  JSON.stringify(
+    [
+      {
+        target: HIT_THING_ADDRESS,
+        method: "attack",
+      },
+      {
+        target: HIT_THING_ADDRESS,
+        method: "claim",
+      },
+    ].map((p) => ({ call_policy: p, typed_data_policy: null })) as Policy[],
+  ),
 );
 
 export function RegisterSession() {

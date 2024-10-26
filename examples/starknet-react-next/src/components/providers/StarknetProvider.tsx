@@ -51,7 +51,10 @@ export function StarknetProvider({ children }: PropsWithChildren) {
 }
 
 const controller = new ControllerConnector({
-  policies,
+  policies: policies.map((p) => ({
+    call_policy: p,
+    typed_data_policy: null,
+  })),
   rpc,
   url:
     process.env.NEXT_PUBLIC_KEYCHAIN_DEPLOYMENT_URL ??

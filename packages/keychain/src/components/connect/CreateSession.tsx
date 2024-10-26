@@ -4,7 +4,7 @@ import { ControllerError } from "utils/connection";
 import { Button } from "@chakra-ui/react";
 import { useCallback, useState } from "react";
 import { useConnection } from "hooks/connection";
-import { Policies } from "components/Policies";
+import { CallPolicies } from "components/Policies";
 import { ControllerErrorAlert } from "components/ErrorAlert";
 import { SessionConsent } from "components/connect";
 import { SESSION_EXPIRATION } from "const";
@@ -52,7 +52,11 @@ export function CreateSession({
     >
       <Content>
         <SessionConsent />
-        <Policies policies={policies} />
+        <CallPolicies
+          policies={policies
+            .filter((p) => p.call_policy !== null)
+            .map((p) => p.call_policy)}
+        />
       </Content>
 
       <Footer>

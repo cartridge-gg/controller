@@ -41,10 +41,16 @@ export function useUrlPolicys(): {
     const requests = JSON.parse(policies as string) as Policy[];
     const requestDict = {};
 
-    requests.forEach((policy) => {
-      requestDict[policy.target] = requestDict[policy.target] || [];
-      requestDict[policy.target].push(policy.method);
-    });
+    // TODO: support also typed_data_policy
+    // I'm not sure what ValidPolicys is supposed to do
+    // so I'd rater leave it to someone familiar
+    requests
+      .filter((p) => p.call_policy !== null)
+      .map((p) => p.call_policy)
+      .forEach((policy) => {
+        requestDict[policy.target] = requestDict[policy.target] || [];
+        requestDict[policy.target].push(policy.method);
+      });
 
     const promises = [];
     Object.keys(requestDict).forEach((target) => {
@@ -69,7 +75,10 @@ async function getValidPolicys(
   methods: string[],
   target: string,
 ): Promise<Policy[]> {
-  return methods.map((method) => ({ method, target }));
+  return methods.map((method) => ({
+    call_policy: { method, target },
+    typed_data_policy: null,
+  }));
   // const validSelectors = await fetchSelectors(target);
 
   // // filters out invalid methods and duplicates

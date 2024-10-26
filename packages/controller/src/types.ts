@@ -28,6 +28,10 @@ export type Policy = wasm.Policy & {
   description?: string;
 };
 
+export type CallPolicy = wasm.CallPolicy & {
+  description?: string;
+};
+
 export enum ResponseCodes {
   SUCCESS = "SUCCESS",
   NOT_CONNECTED = "NOT_CONNECTED",

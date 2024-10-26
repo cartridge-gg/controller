@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
-import { Policy, ResponseCodes } from "@cartridge/controller";
+import { CallPolicy, ResponseCodes } from "@cartridge/controller";
 import { Content, FOOTER_MIN_HEIGHT } from "components/layout";
 import { TransactionDuoIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
-import { Policies } from "components/Policies";
+import { CallPolicies } from "components/Policies";
 import { ExecuteCtx } from "utils/connection";
 import { addAddressPadding, num } from "starknet";
 import { ExecutionContainer } from "components/ExecutionContainer";
@@ -30,7 +30,7 @@ export function ConfirmTransaction() {
     setContext(undefined);
   };
 
-  const calls = useMemo<Policy[]>(
+  const calls = useMemo<CallPolicy[]>(
     () =>
       (Array.isArray(ctx.transactions)
         ? ctx.transactions
@@ -46,12 +46,15 @@ export function ConfirmTransaction() {
     if (policiesUpdated) return false;
 
     const txnsApproved = calls.every((transaction) =>
-      policies.some(
-        (policy) =>
-          addAddressPadding(policy.target) ===
-            addAddressPadding(transaction.target) &&
-          policy.method === transaction.method,
-      ),
+      policies
+        .filter((p) => p.call_policy !== null)
+        .map((p) => p.call_policy)
+        .some(
+          (policy) =>
+            addAddressPadding(policy.target) ===
+              addAddressPadding(transaction.target) &&
+            policy.method === transaction.method,
+        ),
     );
 
     // If calls are approved by dapp specified policies but not stored session
@@ -61,9 +64,12 @@ export function ConfirmTransaction() {
       !account.session(
         calls.map((t) => {
           return {
-            target: t.target,
-            method: t.method,
-          } as Policy;
+            call_policy: {
+              target: t.target,
+              method: t.method,
+            },
+            typed_data_policy: null,
+          };
         }),
       )
     );
@@ -86,7 +92,7 @@ export function ConfirmTransaction() {
       onSubmit={onSubmit}
     >
       <Content pb={FOOTER_MIN_HEIGHT}>
-        <Policies title="Transaction Details" policies={calls} />
+        <CallPolicies title="Transaction Details" policies={calls} />
       </Content>
     </ExecutionContainer>
   );
