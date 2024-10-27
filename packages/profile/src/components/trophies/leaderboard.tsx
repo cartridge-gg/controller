@@ -5,7 +5,12 @@ import {
   StateIconProps,
 } from "@cartridge/ui-next";
 import { Link } from "react-router-dom";
-import { Player } from ".";
+import { Player } from "@/hooks/achievements";
+import {
+  AccountNameQuery,
+  useAccountNameQuery,
+} from "@cartridge/utils/api/cartridge";
+import { useEffect, useState } from "react";
 
 export function Leaderboard({
   players,
@@ -16,11 +21,13 @@ export function Leaderboard({
 }) {
   return (
     <div className="flex flex-col gap-y-px rounded-md overflow-hidden">
-      {players.map((player) => (
+      {players.map((player, index) => (
         <Row
           key={player.address}
           self={BigInt(player.address || 0) === BigInt(address || 1)}
-          {...player}
+          address={player.address}
+          earnings={player.earnings}
+          rank={index + 1}
         />
       ))}
     </div>
@@ -29,12 +36,31 @@ export function Leaderboard({
 
 function Row({
   self,
-  username,
   address,
   earnings,
   rank,
-  Icon,
-}: Player & { self: boolean }) {
+}: {
+  self: boolean;
+  address: string;
+  earnings: number;
+  rank: number;
+}) {
+  const [username, setUsername] = useState("");
+
+  const { refetch: fetchName } = useAccountNameQuery(
+    { address },
+    {
+      enabled: false,
+      onSuccess: async (data: AccountNameQuery) => {
+        setUsername(data.accounts?.edges?.[0]?.node?.id ?? "");
+      },
+    },
+  );
+
+  useEffect(() => {
+    fetchName();
+  }, [fetchName, address]);
+
   return (
     <Link className="flex" to={`/trophies/${address}`} key={address}>
       {self && <div className="w-[4px] bg-muted" />}
@@ -46,7 +72,11 @@ function Row({
       >
         <div className="flex items-center gap-x-4">
           <p className="text-muted-foreground w-6">{`${rank}.`}</p>
-          <User username={username} self={self} Icon={Icon} />
+          <User
+            username={!username ? address.slice(0, 9) : username}
+            self={self}
+            Icon={SpaceInvaderIcon}
+          />
         </div>
         <Earnings earnings={earnings} self={self} />
       </div>
@@ -61,15 +91,11 @@ function User({
 }: {
   username: string;
   self: boolean;
-  Icon: React.ComponentType<StateIconProps> | undefined;
+  Icon: React.ComponentType<StateIconProps>;
 }) {
   return (
     <div className="flex items-center gap-x-2">
-      {!Icon ? (
-        <SpaceInvaderIcon size="default" variant="line" />
-      ) : (
-        <Icon size="default" variant="line" />
-      )}
+      <Icon size="default" variant="line" />
       <p>{self ? `${username} (you)` : username}</p>
     </div>
   );

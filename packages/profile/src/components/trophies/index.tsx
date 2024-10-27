@@ -4,82 +4,27 @@ import {
   LayoutHeader,
 } from "@/components/layout";
 import { Link } from "react-router-dom";
-import {
-  ScrollArea,
-  StateIconProps,
-  Button,
-  ArrowIcon,
-} from "@cartridge/ui-next";
+import { ScrollArea, Button, ArrowIcon } from "@cartridge/ui-next";
 import { TrophiesTab, LeaderboardTab, Scoreboard } from "./tab";
 import { useAccount } from "@/hooks/context";
 import { CopyAddress } from "@cartridge/ui-next";
 import { Navigation } from "../navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Achievements } from "./achievements";
 import { Pinneds } from "./pinneds";
 import { Leaderboard } from "./leaderboard";
-import { items, players } from "./data";
-import {
-  AccountNameQuery,
-  useAccountNameQuery,
-} from "@cartridge/utils/api/cartridge";
-import {
-  useEventsQuery,
-} from "@cartridge/utils/api/indexer";
-import { hash, byteArray, ByteArray } from "starknet";
-
-
-// Computes dojo selector from namespace and event name
-export function getSelectorFromTag(namespace: string, event: string): string {
-  return hash.computePoseidonHashOnElements([computeByteArrayHash(namespace), computeByteArrayHash(event)]);
-}
-
-// Serializes a ByteArray to a bigint array
-function serializeByteArray(byteArray: ByteArray): bigint[] {
-  const result: bigint[] = [
-    BigInt(byteArray.data.length),
-    ...byteArray.data.map((word) => BigInt(word.toString())),
-    BigInt(byteArray.pending_word),
-    BigInt(byteArray.pending_word_len),
-  ];
-  return result;
-}
-
-// Poseidon hash of a string representated as a ByteArray
-export function computeByteArrayHash(str: string): string {
-    const bytes = byteArray.byteArrayFromString(str);
-    return hash.computePoseidonHashOnElements(serializeByteArray(bytes));
-}
-
-export interface Item {
-  id: string;
-  title: string;
-  hidden_title: string;
-  description: string;
-  hidden_description: string;
-  percentage: number;
-  earning: number;
-  timestamp: number;
-  completed: boolean;
-  hidden: boolean;
-  pinned: boolean;
-  Icon: React.ComponentType<StateIconProps> | undefined;
-}
-
-export interface Player {
-  username: string;
-  address: string;
-  earnings: number;
-  rank: number;
-  Icon: React.ComponentType<StateIconProps> | undefined;
-}
+import { useAchievements } from "@/hooks/achievements";
+import { useUsername } from "@/hooks/username";
 
 export function Trophies() {
-  const { address: self } = useAccount();
+  const { address: self, namespace } = useAccount();
   const { address } = useParams<{ address: string }>();
-  const [username, setUsername] = useState<string>("");
-  const [achievements, setAchievements] = useState<Item[]>([]);
+  const { username } = useUsername({ address: address || self || "" });
+  const { achievements, players } = useAchievements({
+    namespace,
+    address: address || self || "",
+  });
   const [activeTab, setActiveTab] = useState<"trophies" | "leaderboard">(
     "trophies",
   );
@@ -104,57 +49,17 @@ export function Trophies() {
     return !address || address === self;
   }, [address, self]);
 
-  useEffect(() => {
-    const achievements = items;
-    setAchievements(achievements);
-  }, []);
-
-  const onPin = useCallback(
-    (id: string) => {
-      const updated = achievements.map((item) => ({
-        ...item,
-        pinned: item.id === id ? !item.pinned : item.pinned,
-      }));
-      setAchievements(updated);
-    },
-    [achievements],
-  );
-
-  const { refetch: fetchName } = useAccountNameQuery(
-    { address: address || self },
-    {
-      enabled: false,
-      onSuccess: async (data: AccountNameQuery) => {
-        setUsername(data.accounts?.edges?.[0]?.node?.id ?? "Anonymous");
-      },
-    },
-  );
-
-  const { refetch: fetchAchievementCreations } = useEventsQuery(
-    { keys: [getSelectorFromTag("conquest", "AchievementCreation")], limit: 100, offset: 0 },
-    {
-      enabled: false,
-      onSuccess: (data) => {
-        console.log('creations', data);
-      },
-    }
-  );
-
-  const { refetch: fetchAchievementCompletions } = useEventsQuery(
-    { keys: [getSelectorFromTag("conquest", "AchievementCompletion")], limit: 100, offset: 0 },
-    {
-      enabled: false,
-      onSuccess: (data) => {
-        console.log('completions', data);
-      },
-    }
-  );
-
-  useEffect(() => {
-    fetchName();
-    fetchAchievementCreations();
-    fetchAchievementCompletions();
-  }, [fetchName, fetchAchievementCreations, fetchAchievementCompletions, address]);
+  // TODO: Implement pinning on server side
+  // const onPin = useCallback(
+  //   (id: string) => {
+  //     const updated = achievements.map((item) => ({
+  //       ...item,
+  //       pinned: item.id === id ? !item.pinned : item.pinned,
+  //     }));
+  //     setAchievements(updated);
+  //   },
+  //   [achievements],
+  // );
 
   return (
     <LayoutContainer
@@ -169,7 +74,7 @@ export function Trophies() {
       }
     >
       <LayoutHeader
-        title={username}
+        title={!username ? (address || self).slice(0, 9) : username}
         description={<CopyAddress address={address || self} size="sm" />}
         right={
           isSelf ? (
@@ -180,7 +85,7 @@ export function Trophies() {
         }
       />
 
-      {items.length ? (
+      {achievements.length ? (
         <LayoutContent className="pb-4">
           {isSelf && (
             <div className="flex justify-between gap-4">
@@ -206,7 +111,7 @@ export function Trophies() {
                   achievements={achievements}
                   softview={!isSelf}
                   enabled={pinneds.length < 3}
-                  onPin={onPin}
+                  onPin={() => {}}
                 />
               </div>
             </ScrollArea>

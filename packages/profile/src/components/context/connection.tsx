@@ -53,7 +53,7 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     if (searchParams.get("namespace")) {
       setNamespace(decodeURIComponent(searchParams.get("namespace")!));
     }
-  }, [searchParams, setUrl]);
+  }, [searchParams, setUrl, setNamespace]);
 
   useEffect(() => {
     updateChainId();

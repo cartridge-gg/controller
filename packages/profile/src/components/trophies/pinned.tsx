@@ -1,26 +1,15 @@
-import {
-  cn,
-  SpiderWebIcon,
-  StateIconProps,
-  TrophyIcon,
-} from "@cartridge/ui-next";
+import { cn } from "@cartridge/ui-next";
 import { Card, CardHeader, CardTitle } from "@cartridge/ui-next";
-import { useMemo } from "react";
 
 export function Pinned({
-  Icon,
+  icon,
   title,
   empty,
 }: {
-  Icon: React.ComponentType<StateIconProps> | undefined;
+  icon: string;
   title: string;
   empty?: boolean;
 }) {
-  const AchievementIcon = useMemo(() => {
-    if (Icon) return Icon;
-    return TrophyIcon;
-  }, [Icon]);
-
   return (
     <Card>
       <CardHeader
@@ -29,13 +18,16 @@ export function Pinned({
           empty && "bg-background border border-dashed border-secondary",
         )}
       >
-        <AchievementIcon
-          className={cn(
-            "min-w-12 min-h-12",
-            empty ? "opacity-10" : "text-primary",
-          )}
-          variant="solid"
-        />
+        <div className="flex justify-center items-center w-12 h-12">
+          <div
+            className={cn(
+              "w-8 h-8",
+              empty ? "opacity-10" : "text-primary",
+              !icon ? "fa-trophy" : icon,
+              empty ? "fa-thin" : "fa-solid",
+            )}
+          />
+        </div>
         <Title title={title} empty={empty} />
       </CardHeader>
     </Card>
@@ -46,7 +38,7 @@ function Title({ title, empty }: { title: string; empty?: boolean }) {
   return (
     <CardTitle
       className={cn(
-        "grow flex flex-col justify-center items-center capitalize font-normal text-xs",
+        "grow flex flex-col justify-center items-center capitalize font-normal text-sm",
         empty ? "opacity-50" : "text-secondary-foreground",
       )}
     >
@@ -58,5 +50,5 @@ function Title({ title, empty }: { title: string; empty?: boolean }) {
 }
 
 export function Empty() {
-  return <Pinned Icon={SpiderWebIcon} title="Empty" empty={true} />;
+  return <Pinned icon={"fa-spider-web"} title="Empty" empty={true} />;
 }

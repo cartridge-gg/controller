@@ -1,6 +1,6 @@
 import { cn } from "@cartridge/ui-next";
 import { Achievement } from "./achievement";
-import { Item } from ".";
+import { Item } from "@/hooks/achievements";
 import { useMemo } from "react";
 
 export function Achievements({
@@ -45,18 +45,27 @@ export function Achievements({
         .map((achievement, index) => (
           <Achievement
             key={index}
-            Icon={achievement.Icon}
+            icon={
+              achievement.hidden && !achievement.completed
+                ? "fa-trophy"
+                : achievement.icon
+            }
             title={
-              achievement.hidden ? achievement.hidden_title : achievement.title
+              achievement.hidden && !achievement.completed
+                ? "Hidden Trophy"
+                : achievement.title
             }
             description={
-              achievement.hidden
-                ? achievement.hidden_description
+              achievement.hidden && !achievement.completed
+                ? ""
                 : achievement.description
             }
             percentage={achievement.percentage}
             earning={achievement.earning}
             timestamp={achievement.timestamp}
+            count={achievement.hidden ? 0 : 1}
+            total={achievement.total}
+            hidden={achievement.hidden}
             completed={achievement.completed}
             pinned={achievement.pinned}
             id={achievement.id}
