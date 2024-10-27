@@ -41,7 +41,7 @@ export interface Completion {
 }
 
 export interface Counters {
-  [player: string]: { [quest: string]: number };
+  [player: string]: { [quest: string]: { count: number; timestamp: number }[] };
 }
 
 export interface Stats {
@@ -95,7 +95,7 @@ function parseAchievementCreation(node: EventNode): Creation {
       pending_word_len: node.data[7 + length],
     }),
     icon: shortString.decodeShortString(node.data[8 + length]),
-    timestamp: parseInt(node.data[9 + length]) * 1000,
+    timestamp: parseInt(node.data[9 + length]),
   };
 }
 
@@ -104,7 +104,7 @@ function parseAchievementCompletion(node: EventNode): Completion {
     player: node.keys[1],
     quest: shortString.decodeShortString(node.keys[2]),
     count: parseInt(node.data[0]),
-    timestamp: parseInt(node.data[1]) * 1000,
+    timestamp: parseInt(node.data[1]),
   };
 }
 
@@ -184,8 +184,11 @@ export function useAchievements({
           // Update counters
           counters[completion.player] = counters[completion.player] || {};
           counters[completion.player][completion.quest] =
-            counters[completion.player][completion.quest] || 0;
-          counters[completion.player][completion.quest] += completion.count;
+            counters[completion.player][completion.quest] || [];
+          counters[completion.player][completion.quest].push({
+            count: completion.count,
+            timestamp: completion.timestamp,
+          });
           // Push event
           completions.push(completion);
         });
@@ -209,10 +212,29 @@ export function useAchievements({
     const stats: Stats = {};
     const players: Player[] = Object.keys(counters)
       .map((playerAddress) => {
+        let timestamp = 0;
         const earnings = creations.reduce(
           (total: number, creation: Creation) => {
-            const count = counters[playerAddress]?.[creation.quest] || 0;
-            const completed = count >= creation.total;
+            // Compute at which timestamp the latest achievement was completed
+            let count = 0;
+            let completed = false;
+            counters[playerAddress]?.[creation.quest]
+              ?.sort((a, b) => a.timestamp - b.timestamp)
+              .forEach(
+                ({
+                  count: c,
+                  timestamp: t,
+                }: {
+                  count: number;
+                  timestamp: number;
+                }) => {
+                  count += c;
+                  if (!completed && count >= creation.total) {
+                    timestamp = t > timestamp ? t : timestamp;
+                    completed = true;
+                  }
+                },
+              );
             // Update stats
             stats[creation.quest] = stats[creation.quest] || 0;
             stats[creation.quest] += completed ? 1 : 0;
@@ -223,18 +245,38 @@ export function useAchievements({
         return {
           address: playerAddress,
           earnings,
-          timestamp: 0,
+          timestamp,
         };
       })
-      .sort((a, b) => b.earnings - a.earnings);
-    console.log("players", players);
+      .sort((a, b) => a.timestamp - b.timestamp) // Oldest to newest
+      .sort((a, b) => b.earnings - a.earnings); // Highest to lowest
     setPlayers(players);
 
     // Compute achievements
     const achievements: Item[] = creations
       .map((creation) => {
-        const count = counters[address]?.[creation.quest] || 0;
-        const completed = count >= creation.total;
+        // Compute at which timestamp the achievement was completed
+        let count = 0;
+        let timestamp = 0;
+        let completed = false;
+        counters[address]?.[creation.quest]
+          ?.sort((a, b) => a.timestamp - b.timestamp)
+          .forEach(
+            ({
+              count: c,
+              timestamp: t,
+            }: {
+              count: number;
+              timestamp: number;
+            }) => {
+              count += c;
+              if (!completed && count >= creation.total) {
+                timestamp = t;
+                completed = true;
+              }
+            },
+          );
+        // Compute percentage of players who completed the achievement
         const percentage = (
           (100 * stats[creation.quest]) /
           players.length
@@ -244,7 +286,7 @@ export function useAchievements({
           count,
           completed,
           percentage,
-          timestamp: 0,
+          timestamp,
           pinned: false,
         };
       })
@@ -252,7 +294,6 @@ export function useAchievements({
       .sort((a, b) => (b.hidden ? -1 : 1) - (a.hidden ? -1 : 1)) // Visible to hidden
       .sort((a, b) => b.timestamp - a.timestamp) // Newest to oldest
       .sort((a, b) => (b.completed ? 1 : 0) - (a.completed ? 1 : 0));
-    console.log("achievements", achievements);
     setAchievements(achievements);
   }, [
     address,
