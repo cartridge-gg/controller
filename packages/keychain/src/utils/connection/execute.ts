@@ -1,8 +1,16 @@
 import { ResponseCodes, ConnectError } from "@cartridge/controller";
-import { Call, InvokeFunctionResponse, num } from "starknet";
+import {
+  Abi,
+  AllowArray,
+  Call,
+  CallData,
+  InvocationsDetails,
+  InvokeFunctionResponse,
+  addAddressPadding,
+  num,
+} from "starknet";
 import { ConnectionCtx, ControllerError, ExecuteCtx } from "./types";
-import { ErrorCode } from "@cartridge/account-wasm/controller";
-import Controller from "utils/controller";
+import { ErrorCode, JsCall } from "@cartridge/account-wasm/controller";
 
 export const ESTIMATE_FEE_PERCENTAGE = 10;
 
@@ -25,24 +33,55 @@ export function parseControllerError(
   }
 }
 
+function releaseStub() {}
+
+/**
+ * A simple mutual exclusion lock. It allows you to obtain and release a lock,
+ *  ensuring that only one task can access a critical section at a time.
+ */
+export class Mutex {
+  private m_lastPromise: Promise<void> = Promise.resolve();
+
+  /**
+   * Acquire lock
+   * @param [bypass=false] option to skip lock acquisition
+   */
+  public async obtain(bypass = false): Promise<() => void> {
+    let release = releaseStub;
+    if (bypass) return release;
+    const lastPromise = this.m_lastPromise;
+    this.m_lastPromise = new Promise<void>((resolve) => (release = resolve));
+    await lastPromise;
+    return release;
+  }
+}
+
+const mutex = new Mutex();
+
 export function execute({
   setContext,
 }: {
   setContext: (context: ConnectionCtx) => void;
 }) {
   return async (
-    calls: Call[],
+    transactions: AllowArray<Call>,
+    abis: Abi[],
+    transactionsDetail?: InvocationsDetails,
     sync?: boolean,
+    _?: any,
     error?: ControllerError,
   ): Promise<InvokeFunctionResponse | ConnectError> => {
-    const account: Controller = window.controller;
+    const account = window.controller;
+    const calls = normalizeCalls(transactions);
 
     if (sync) {
       return await new Promise((resolve, reject) => {
         setContext({
           type: "execute",
           origin,
-          calls,
+          transactions,
+          abis,
+          transactionsDetail,
           error,
           resolve,
           reject,
@@ -57,7 +96,9 @@ export function execute({
         setContext({
           type: "execute",
           origin,
-          calls,
+          transactions,
+          abis,
+          transactionsDetail,
           resolve,
           reject,
         } as ExecuteCtx);
@@ -82,7 +123,9 @@ export function execute({
           setContext({
             type: "execute",
             origin,
-            calls,
+            transactions,
+            abis,
+            transactionsDetail,
             error: parseControllerError(e),
             resolve,
             reject,
@@ -95,13 +138,17 @@ export function execute({
         }
       }
 
+      const release = await mutex.obtain();
       try {
-        let estimate = await account.estimateInvokeFee(calls);
-        let maxFee = num.toHex(
-          num.addPercent(estimate.overall_fee, ESTIMATE_FEE_PERCENTAGE),
-        );
+        let { maxFee } = transactionsDetail;
+        if (!maxFee) {
+          let estimate = await account.cartridge.estimateInvokeFee(calls);
+          maxFee = num.toHex(
+            num.addPercent(estimate.overall_fee, ESTIMATE_FEE_PERCENTAGE),
+          );
+        }
 
-        let { transaction_hash } = await account.execute(calls, {
+        let { transaction_hash } = await account.execute(transactions, {
           maxFee,
         });
         return resolve({
@@ -112,7 +159,9 @@ export function execute({
         setContext({
           type: "execute",
           origin,
-          calls,
+          transactions,
+          abis,
+          transactionsDetail,
           error: parseControllerError(e),
           resolve,
           reject,
@@ -122,7 +171,19 @@ export function execute({
           message: e.message,
           error: parseControllerError(e),
         });
+      } finally {
+        release();
       }
     });
   };
 }
+
+export const normalizeCalls = (calls: AllowArray<Call>): JsCall[] => {
+  return (Array.isArray(calls) ? calls : [calls]).map((call) => {
+    return {
+      entrypoint: call.entrypoint,
+      contractAddress: addAddressPadding(call.contractAddress),
+      calldata: CallData.toHex(call.calldata),
+    };
+  });
+};

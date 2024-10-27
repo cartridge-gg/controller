@@ -55,7 +55,7 @@ export function CreateSession({
         <Policies policies={policies} />
       </Content>
 
-      <Footer hideTxSummary>
+      <Footer>
         {error && <ControllerErrorAlert error={error} />}
         <Button
           colorScheme="colorful"

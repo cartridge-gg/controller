@@ -16,7 +16,7 @@ export const CONTROLLER_VERSIONS: Array<ControllerVersionInfo> = [
   },
   {
     version: "1.0.6",
-    hash: "0x220fafd2163c285f26a981772d96b0ce130ae1e4502ce45cc127ab87df295b0",
+    hash: "0x59e4405accdf565112fe5bf9058b51ab0b0e63665d280b816f9fe4119554b77",
     changes: [
       "Support session key message signing",
       "Support session guardians",
@@ -90,7 +90,7 @@ export const useUpgrade = (controller: Controller): UpgradeInterface => {
     }
 
     return [controller.cartridge.upgrade(LATEST_CONTROLLER.hash)];
-  }, [controller, LATEST_CONTROLLER]);
+  }, [controller]);
 
   const onUpgrade = useCallback(async () => {
     if (!controller || !LATEST_CONTROLLER) {
@@ -110,7 +110,7 @@ export const useUpgrade = (controller: Controller): UpgradeInterface => {
       console.log({ e });
       setError(e);
     }
-  }, [controller, LATEST_CONTROLLER, calls]);
+  }, [controller, calls]);
 
   return {
     available,

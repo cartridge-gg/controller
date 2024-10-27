@@ -24,6 +24,16 @@ lazy_static! {
     pub static ref CONTROLLERS: HashMap<Version, ContractClass> = {
         let mut m = HashMap::new();
         m.insert(
+            Version::LATEST,
+            ContractClass {
+                content: include_str!("../artifacts/controller.latest.contract_class.json"),
+                hash: felt!("0x59e4405accdf565112fe5bf9058b51ab0b0e63665d280b816f9fe4119554b77"),
+                casm_hash: felt!(
+                    "0x7ec32f8e2fa07937a81215894f48a3c9af93dc47c88ac6d6852b3fd39f7a6af"
+                ),
+            },
+        );
+        m.insert(
             Version::V1_0_5,
             ContractClass {
                 content: include_str!("../artifacts/controller.v1.0.5.contract_class.json"),
@@ -40,16 +50,6 @@ lazy_static! {
                 hash: felt!("0x24a9edbfa7082accfceabf6a92d7160086f346d622f28741bf1c651c412c9ab"),
                 casm_hash: felt!(
                     "0x6b22de13b878ab346fa53442adaa8a40a6bd25732aa1aeb2a26375987f0be00"
-                ),
-            },
-        );
-        m.insert(
-            Version::LATEST,
-            ContractClass {
-                content: include_str!("../artifacts/controller.latest.contract_class.json"),
-                hash: felt!("0x220fafd2163c285f26a981772d96b0ce130ae1e4502ce45cc127ab87df295b0"),
-                casm_hash: felt!(
-                    "0x6a5f4deb82d267a08951ba91a8f305195110ae5119118d274f4b033217f8389"
                 ),
             },
         );

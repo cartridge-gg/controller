@@ -52,13 +52,12 @@ export const Accordion: ComponentStyleConfig = defineMultiStyleConfig({
     },
     warning: {
       container: {
-        color: "black",
-        bg: "warning.background",
+        bg: "solid.tertiary",
       },
       button: {
         _expanded: {
           _hover: {
-            bg: "warning.background",
+            bg: "solid.tertiary",
           },
         },
       },
