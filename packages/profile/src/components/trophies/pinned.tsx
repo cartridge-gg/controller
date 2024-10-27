@@ -11,7 +11,7 @@ export function Pinned({
   empty?: boolean;
 }) {
   return (
-    <Card>
+    <Card className='shadow-none'>
       <CardHeader
         className={cn(
           "flex flex-col justify-between items-center h-36 py-6",
