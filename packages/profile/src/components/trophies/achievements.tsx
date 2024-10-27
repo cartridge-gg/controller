@@ -63,7 +63,7 @@ export function Achievements({
             percentage={achievement.percentage}
             earning={achievement.earning}
             timestamp={achievement.timestamp}
-            count={achievement.hidden ? 0 : 1}
+            count={achievement.count}
             total={achievement.total}
             hidden={achievement.hidden}
             completed={achievement.completed}

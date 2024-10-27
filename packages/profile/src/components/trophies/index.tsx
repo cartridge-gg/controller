@@ -30,7 +30,10 @@ export function Trophies() {
   );
 
   const { pinneds, completed, total } = useMemo(() => {
-    const pinneds = achievements.filter((item) => item.pinned).slice(0, 3);
+    const pinneds = achievements
+      .filter((item) => item.completed)
+      .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage))
+      .slice(0, 3);
     const completed = achievements.filter((item) => item.completed).length;
     const total = achievements.length;
     return { pinneds, completed, total };
@@ -48,18 +51,6 @@ export function Trophies() {
   const isSelf = useMemo(() => {
     return !address || address === self;
   }, [address, self]);
-
-  // TODO: Implement pinning on server side
-  // const onPin = useCallback(
-  //   (id: string) => {
-  //     const updated = achievements.map((item) => ({
-  //       ...item,
-  //       pinned: item.id === id ? !item.pinned : item.pinned,
-  //     }));
-  //     setAchievements(updated);
-  //   },
-  //   [achievements],
-  // );
 
   return (
     <LayoutContainer

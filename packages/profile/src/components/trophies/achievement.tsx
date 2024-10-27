@@ -23,7 +23,7 @@ export function Achievement({
   icon: string;
   title: string;
   description: string;
-  percentage: number;
+  percentage: string;
   earning: number;
   timestamp: number;
   count: number;
@@ -68,9 +68,11 @@ export function Achievement({
           <Progress count={count} total={total} />
         )}
       </div>
-      {completed && !softview && (
-        <Track enabled={enabled} pinned={pinned} id={id} onPin={onPin} />
-      )}
+      {completed &&
+        !softview &&
+        false && ( // TODO: Enable when we can have the pinned feature on server side
+          <Track enabled={enabled} pinned={pinned} id={id} onPin={onPin} />
+        )}
     </div>
   );
 }
@@ -128,7 +130,7 @@ function Description({ description }: { description: string }) {
   );
 }
 
-function Details({ percentage }: { percentage: number }) {
+function Details({ percentage }: { percentage: string }) {
   return (
     <p className="text-[0.65rem] text-quaternary-foreground">{`${percentage}% of players earned`}</p>
   );

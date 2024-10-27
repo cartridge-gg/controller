@@ -4,31 +4,6 @@ import { hash, byteArray, ByteArray, shortString } from "starknet";
 import { EventEdge } from "@cartridge/utils/api/indexer";
 import { ACHIEVEMENT_COMPLETION, ACHIEVEMENT_CREATION } from "@/constants";
 
-// Computes dojo selector from namespace and event name
-export function getSelectorFromTag(namespace: string, event: string): string {
-  return hash.computePoseidonHashOnElements([
-    computeByteArrayHash(namespace),
-    computeByteArrayHash(event),
-  ]);
-}
-
-// Serializes a ByteArray to a bigint array
-function serializeByteArray(byteArray: ByteArray): bigint[] {
-  const result: bigint[] = [
-    BigInt(byteArray.data.length),
-    ...byteArray.data.map((word) => BigInt(word.toString())),
-    BigInt(byteArray.pending_word),
-    BigInt(byteArray.pending_word_len),
-  ];
-  return result;
-}
-
-// Poseidon hash of a string representated as a ByteArray
-export function computeByteArrayHash(str: string): string {
-  const bytes = byteArray.byteArrayFromString(str);
-  return hash.computePoseidonHashOnElements(serializeByteArray(bytes));
-}
-
 export interface Item {
   id: string;
   quest: string;
@@ -37,7 +12,7 @@ export interface Item {
   count: number;
   earning: number;
   timestamp: number;
-  percentage: number;
+  percentage: string;
   completed: boolean;
   hidden: boolean;
   pinned: boolean;
@@ -68,10 +43,39 @@ export interface Counters {
   [player: string]: { [quest: string]: number };
 }
 
+export interface Stats {
+  [quest: string]: number;
+}
+
 export interface Player {
   address: string;
   earnings: number;
   timestamp: number;
+}
+
+// Computes dojo selector from namespace and event name
+function getSelectorFromTag(namespace: string, event: string): string {
+  return hash.computePoseidonHashOnElements([
+    computeByteArrayHash(namespace),
+    computeByteArrayHash(event),
+  ]);
+}
+
+// Serializes a ByteArray to a bigint array
+function serializeByteArray(byteArray: ByteArray): bigint[] {
+  const result: bigint[] = [
+    BigInt(byteArray.data.length),
+    ...byteArray.data.map((word) => BigInt(word.toString())),
+    BigInt(byteArray.pending_word),
+    BigInt(byteArray.pending_word_len),
+  ];
+  return result;
+}
+
+// Poseidon hash of a string representated as a ByteArray
+function computeByteArrayHash(str: string): string {
+  const bytes = byteArray.byteArrayFromString(str);
+  return hash.computePoseidonHashOnElements(serializeByteArray(bytes));
 }
 
 export function useAchievements({
@@ -167,13 +171,17 @@ export function useAchievements({
   useEffect(() => {
     if (!creations.length || !address) return;
 
-    // Compute players
+    // Compute players and achievement stats
+    const stats: Stats = {};
     const players: Player[] = Object.keys(counters)
       .map((playerAddress) => {
         const earnings = creations.reduce(
           (total: number, creation: Creation) => {
             const count = counters[playerAddress]?.[creation.quest] || 0;
             const completed = count >= creation.total;
+            // Update stats
+            stats[creation.quest] = stats[creation.quest] || 0;
+            stats[creation.quest] += completed ? 1 : 0;
             return completed ? total + creation.earning : total;
           },
           0,
@@ -193,7 +201,10 @@ export function useAchievements({
       .map((creation) => {
         const count = counters[address]?.[creation.quest] || 0;
         const completed = count >= creation.total;
-        const percentage = 0;
+        const percentage = (
+          (100 * stats[creation.quest]) /
+          players.length
+        ).toFixed(0);
         return {
           ...creation,
           count,
