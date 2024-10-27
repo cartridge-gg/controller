@@ -22,6 +22,7 @@ type ERC__Token {
 
 type Event {
   edges: [EventEdge!]!
+  pageInfo: PageInfo!
   totalCount: Int!
 }
 
@@ -36,4 +37,8 @@ type EventNode {
   transactionHash: String!
   executedAt: String!
   createdAt: String!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
 }

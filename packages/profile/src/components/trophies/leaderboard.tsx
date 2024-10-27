@@ -6,11 +6,7 @@ import {
 } from "@cartridge/ui-next";
 import { Link } from "react-router-dom";
 import { Player } from "@/hooks/achievements";
-import {
-  AccountNameQuery,
-  useAccountNameQuery,
-} from "@cartridge/utils/api/cartridge";
-import { useEffect, useState } from "react";
+import { useUsername } from "@/hooks/username";
 
 export function Leaderboard({
   players,
@@ -45,21 +41,7 @@ function Row({
   earnings: number;
   rank: number;
 }) {
-  const [username, setUsername] = useState("");
-
-  const { refetch: fetchName } = useAccountNameQuery(
-    { address },
-    {
-      enabled: false,
-      onSuccess: async (data: AccountNameQuery) => {
-        setUsername(data.accounts?.edges?.[0]?.node?.id ?? "");
-      },
-    },
-  );
-
-  useEffect(() => {
-    fetchName();
-  }, [fetchName, address]);
+  const { username } = useUsername({ address });
 
   return (
     <Link className="flex" to={`/trophies/${address}`} key={address}>
