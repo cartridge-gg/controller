@@ -64,9 +64,7 @@ export function Achievement({
           </div>
         </div>
         <Description description={description} />
-        {!hidden && total > 1 && count < total && (
-          <Progress count={count} total={total} />
-        )}
+        {!hidden && count < total && <Progress count={count} total={total} />}
       </div>
       {completed &&
         !softview &&
