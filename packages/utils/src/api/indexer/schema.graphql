@@ -21,7 +21,7 @@ type ERC__Token {
 }
 
 type Event {
-  edges: [EventEdge!]
+  edges: [EventEdge!]!
   totalCount: Int!
 }
 
