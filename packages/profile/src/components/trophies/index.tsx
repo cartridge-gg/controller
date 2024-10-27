@@ -46,7 +46,7 @@ export function Trophies() {
       players.find((player) => player.address === (address || self))
         ?.earnings || 0;
     return { rank, earnings };
-  }, [address, self]);
+  }, [address, self, players]);
 
   const isSelf = useMemo(() => {
     return !address || address === self;

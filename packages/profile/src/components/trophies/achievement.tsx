@@ -70,7 +70,7 @@ export function Achievement({
       </div>
       {completed &&
         !softview &&
-        false && ( // TODO: Enable when we can have the pinned feature on server side
+        !!softview && ( // TODO: Enable when we can have the pinned feature on server side, remove !!softview
           <Track enabled={enabled} pinned={pinned} id={id} onPin={onPin} />
         )}
     </div>
