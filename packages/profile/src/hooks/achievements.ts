@@ -119,6 +119,7 @@ export function useAchievements({
   const [offsetCompletions, setOffsetCompletions] = useState(0);
   const [isFetchingCreations, setIsFetchingCreations] = useState(true);
   const [isFetchingCompletions, setIsFetchingCompletions] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [achievements, setAchievements] = useState<Item[]>([]);
   const [nodes, setNodes] = useState<{ [key: string]: boolean }>({});
   const [creations, setCreations] = useState<Creation[]>([]);
@@ -293,8 +294,10 @@ export function useAchievements({
       .sort((a, b) => (a.id > b.id ? 1 : -1)) // A to Z
       .sort((a, b) => (b.hidden ? -1 : 1) - (a.hidden ? -1 : 1)) // Visible to hidden
       .sort((a, b) => b.timestamp - a.timestamp) // Newest to oldest
-      .sort((a, b) => (b.completed ? 1 : 0) - (a.completed ? 1 : 0));
+      .sort((a, b) => (b.completed ? 1 : 0) - (a.completed ? 1 : 0)); // Completed to uncompleted
     setAchievements(achievements);
+    // Update loading state
+    setIsLoading(false);
   }, [
     address,
     creations,
@@ -312,5 +315,5 @@ export function useAchievements({
     fetchAchievementCompletions();
   }, [offsetCompletions, fetchAchievementCompletions]);
 
-  return { achievements, players };
+  return { achievements, players, isLoading };
 }

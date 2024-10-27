@@ -4,7 +4,7 @@ import {
   LayoutHeader,
 } from "@/components/layout";
 import { Link } from "react-router-dom";
-import { ScrollArea, Button, ArrowIcon } from "@cartridge/ui-next";
+import { ScrollArea, Button, ArrowIcon, SpinnerIcon } from "@cartridge/ui-next";
 import { TrophiesTab, LeaderboardTab, Scoreboard } from "./tab";
 import { useAccount } from "@/hooks/context";
 import { CopyAddress } from "@cartridge/ui-next";
@@ -21,7 +21,7 @@ export function Trophies() {
   const { address: self, namespace } = useAccount();
   const { address } = useParams<{ address: string }>();
   const { username } = useUsername({ address: address || self || "" });
-  const { achievements, players } = useAchievements({
+  const { achievements, players, isLoading } = useAchievements({
     namespace,
     address: address || self || "",
   });
@@ -112,6 +112,15 @@ export function Trophies() {
               <Leaderboard players={players} address={self} />
             </ScrollArea>
           )}
+        </LayoutContent>
+      ) : isLoading ? (
+        <LayoutContent className="pb-4">
+          <div className="flex justify-center items-center h-full border border-dashed rounded-md text-muted-foreground/10 mb-4">
+            <SpinnerIcon
+              className="animate-spin text-muted-foreground/30"
+              size="lg"
+            />
+          </div>
         </LayoutContent>
       ) : (
         <LayoutContent className="pb-4">

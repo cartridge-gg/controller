@@ -88,7 +88,7 @@ export function Tab({
   return (
     <div
       className={cn(
-        "flex justify-between items-center grow border border-secondary rounded-md px-4 py-2 cursor-pointer",
+        "h-10 flex justify-between items-center grow border border-secondary rounded-md px-4 py-2 cursor-pointer",
         active ? "opacity-100 bg-secondary" : "opacity-50 bg-background",
         hovered && (active ? "opacity-90" : "bg-secondary/50"),
       )}

@@ -24,12 +24,12 @@ export function Achievements({
 
   return (
     <div className="flex flex-col gap-y-px rounded-md overflow-hidden">
-      <div className="bg-secondary p-3">
+      <div className="h-10 bg-secondary p-3">
         <p className="uppercase text-xs text-quaternary-foreground font-semibold tracking-wider">
           Progression
         </p>
       </div>
-      <div className="bg-secondary py-2 px-3 flex gap-4">
+      <div className="h-8 bg-secondary py-2 px-3 flex gap-4">
         <div className="grow flex flex-col justify-center items-start bg-quaternary rounded-xl p-1">
           <div
             style={{ width: `${Math.floor((100 * completed) / total)}%` }}
