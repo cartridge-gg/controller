@@ -141,6 +141,9 @@ export class IFrame<CallSender extends {}> implements Modal {
 
   private resize() {
     if (!this.iframe) return;
+
+    this.iframe.style.userSelect = "none";
+
     if (window.innerWidth < 768) {
       this.iframe.style.height = "100%";
       this.iframe.style.width = "100%";
