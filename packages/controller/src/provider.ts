@@ -3,7 +3,6 @@ import {
   AddInvokeTransactionParameters,
   Errors,
   Permission,
-  RequestAccountsParameters,
   RequestFn,
   StarknetWindowObject,
   TypedData,
@@ -47,11 +46,8 @@ export default abstract class BaseProvider implements StarknetWindowObject {
           return [this.account.address];
         }
 
-        const params = call.params as RequestAccountsParameters;
-
-        if (params?.silent_mode) {
-          this.account = await this.probe();
-        } else {
+        this.account = await this.probe();
+        if (!this.account) {
           this.account = await this.connect();
         }
 
