@@ -4,61 +4,36 @@ import {
   LayoutHeader,
 } from "@/components/layout";
 import { Link } from "react-router-dom";
-import {
-  ScrollArea,
-  StateIconProps,
-  Button,
-  ArrowIcon,
-} from "@cartridge/ui-next";
+import { ScrollArea, Button, ArrowIcon, SpinnerIcon } from "@cartridge/ui-next";
 import { TrophiesTab, LeaderboardTab, Scoreboard } from "./tab";
 import { useAccount } from "@/hooks/context";
 import { CopyAddress } from "@cartridge/ui-next";
 import { Navigation } from "../navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Achievements } from "./achievements";
 import { Pinneds } from "./pinneds";
 import { Leaderboard } from "./leaderboard";
-import { items, players } from "./data";
-import {
-  AccountNameQuery,
-  useAccountNameQuery,
-} from "@cartridge/utils/api/cartridge";
-
-export interface Item {
-  id: string;
-  title: string;
-  hidden_title: string;
-  description: string;
-  hidden_description: string;
-  percentage: number;
-  earning: number;
-  timestamp: number;
-  completed: boolean;
-  hidden: boolean;
-  pinned: boolean;
-  Icon: React.ComponentType<StateIconProps> | undefined;
-}
-
-export interface Player {
-  username: string;
-  address: string;
-  earnings: number;
-  rank: number;
-  Icon: React.ComponentType<StateIconProps> | undefined;
-}
+import { useAchievements } from "@/hooks/achievements";
+import { useUsername } from "@/hooks/username";
 
 export function Trophies() {
-  const { address: self } = useAccount();
+  const { address: self, namespace } = useAccount();
   const { address } = useParams<{ address: string }>();
-  const [username, setUsername] = useState<string>("");
-  const [achievements, setAchievements] = useState<Item[]>([]);
+  const { username } = useUsername({ address: address || self || "" });
+  const { achievements, players, isLoading } = useAchievements({
+    namespace,
+    address: address || self || "",
+  });
   const [activeTab, setActiveTab] = useState<"trophies" | "leaderboard">(
     "trophies",
   );
 
   const { pinneds, completed, total } = useMemo(() => {
-    const pinneds = achievements.filter((item) => item.pinned).slice(0, 3);
+    const pinneds = achievements
+      .filter((item) => item.completed)
+      .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage))
+      .slice(0, 3);
     const completed = achievements.filter((item) => item.completed).length;
     const total = achievements.length;
     return { pinneds, completed, total };
@@ -71,41 +46,11 @@ export function Trophies() {
       players.find((player) => player.address === (address || self))
         ?.earnings || 0;
     return { rank, earnings };
-  }, [address, self]);
+  }, [address, self, players]);
 
   const isSelf = useMemo(() => {
     return !address || address === self;
   }, [address, self]);
-
-  useEffect(() => {
-    const achievements = items;
-    setAchievements(achievements);
-  }, []);
-
-  const onPin = useCallback(
-    (id: string) => {
-      const updated = achievements.map((item) => ({
-        ...item,
-        pinned: item.id === id ? !item.pinned : item.pinned,
-      }));
-      setAchievements(updated);
-    },
-    [achievements],
-  );
-
-  const { refetch: fetchName } = useAccountNameQuery(
-    { address: address || self },
-    {
-      enabled: false,
-      onSuccess: async (data: AccountNameQuery) => {
-        setUsername(data.accounts?.edges?.[0]?.node?.id ?? "Anonymous");
-      },
-    },
-  );
-
-  useEffect(() => {
-    fetchName();
-  }, [fetchName, address]);
 
   return (
     <LayoutContainer
@@ -120,7 +65,7 @@ export function Trophies() {
       }
     >
       <LayoutHeader
-        title={username}
+        title={!username ? (address || self).slice(0, 9) : username}
         description={<CopyAddress address={address || self} size="sm" />}
         right={
           isSelf ? (
@@ -131,7 +76,7 @@ export function Trophies() {
         }
       />
 
-      {items.length ? (
+      {achievements.length ? (
         <LayoutContent className="pb-4">
           {isSelf && (
             <div className="flex justify-between gap-4">
@@ -157,7 +102,7 @@ export function Trophies() {
                   achievements={achievements}
                   softview={!isSelf}
                   enabled={pinneds.length < 3}
-                  onPin={onPin}
+                  onPin={() => {}}
                 />
               </div>
             </ScrollArea>
@@ -167,6 +112,15 @@ export function Trophies() {
               <Leaderboard players={players} address={self} />
             </ScrollArea>
           )}
+        </LayoutContent>
+      ) : isLoading ? (
+        <LayoutContent className="pb-4">
+          <div className="flex justify-center items-center h-full border border-dashed rounded-md text-muted-foreground/10 mb-4">
+            <SpinnerIcon
+              className="animate-spin text-muted-foreground/30"
+              size="lg"
+            />
+          </div>
         </LayoutContent>
       ) : (
         <LayoutContent className="pb-4">

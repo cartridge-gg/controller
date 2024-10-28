@@ -1,0 +1,17 @@
+query Events($keys: [String!]!, $limit: Int!, $offset: Int!) {
+  events(keys: $keys, limit: $limit, offset: $offset) {
+    totalCount
+    pageInfo {
+      hasNextPage
+    }
+    edges {
+      node {
+        id
+        keys
+        data
+        transactionHash
+        executedAt
+      }
+    }
+  }
+}

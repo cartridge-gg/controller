@@ -60,6 +60,7 @@ const controller = new ControllerConnector({
     process.env.NEXT_PUBLIC_PROFILE_DEPLOYMENT_URL ??
     process.env.NEXT_PUBLIC_PROFILE_FRAME_URL,
   indexerUrl: process.env.NEXT_PUBLIC_INDEXER_URL,
+  namespace: process.env.NEXT_PUBLIC_NAMESPACE,
   // theme: "dope-wars",
   // colorMode: "light"
   tokens: {

@@ -170,6 +170,8 @@ export type ProfileOptions = IFrameOptions & {
   profileUrl?: string;
   /** The URL of Torii indexer. Will be mandatory once profile page is in production */
   indexerUrl?: string;
+  /** The namespace to use to fetch trophies data from indexer. Will be mandatory once profile page is in production */
+  namespace?: string;
   /** The tokens to be listed on Inventory modal */
   tokens?: Tokens;
 };

@@ -22,6 +22,7 @@ type ERC20Status = ERC20Metadata & {
 type AccountContextType = {
   address: string;
   username: string;
+  namespace: string;
   credit: UseCreditBalanceReturn;
   erc20: (ERC20Status & {
     error?: Error;
@@ -32,6 +33,7 @@ type AccountContextType = {
 const initialState: AccountContextType = {
   address: "",
   username: "",
+  namespace: "",
   credit: {
     balance: { value: 0n, formatted: "0.00" },
     isFetching: false,
@@ -64,6 +66,11 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       const usernameParam = searchParams.get("username");
       if (usernameParam) {
         state.username = decodeURIComponent(usernameParam);
+      }
+
+      const namespaceParam = searchParams.get("namespace");
+      if (namespaceParam) {
+        state.namespace = decodeURIComponent(namespaceParam);
       }
 
       return state;

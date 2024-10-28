@@ -1,22 +1,18 @@
-import {
-  cn,
-  TrackIcon,
-  CalendarIcon,
-  SparklesIcon,
-  StateIconProps,
-  TrophyIcon,
-} from "@cartridge/ui-next";
+import { cn, TrackIcon, CalendarIcon, SparklesIcon } from "@cartridge/ui-next";
 import { toast } from "sonner";
 import { useMemo, useState } from "react";
 import { useCallback } from "react";
 
 export function Achievement({
-  Icon,
+  icon,
   title,
   description,
   percentage,
   earning,
   timestamp,
+  count,
+  total,
+  hidden,
   completed,
   pinned,
   id,
@@ -24,12 +20,15 @@ export function Achievement({
   enabled,
   onPin,
 }: {
-  Icon: React.ComponentType<StateIconProps> | undefined;
+  icon: string;
   title: string;
   description: string;
-  percentage: number;
+  percentage: string;
   earning: number;
   timestamp: number;
+  count: number;
+  total: number;
+  hidden: boolean;
   completed: boolean;
   pinned: boolean;
   id: string;
@@ -37,23 +36,21 @@ export function Achievement({
   enabled: boolean;
   onPin: (id: string) => void;
 }) {
-  const AchievementIcon = useMemo(() => {
-    if (Icon) return Icon;
-    return TrophyIcon;
-  }, [Icon]);
-
   return (
     <div className="flex items-center gap-x-px">
       <div className="grow flex flex-col items-stretch gap-y-2 bg-secondary p-3">
-        <div className="flex items-center gap-2">
-          <AchievementIcon
-            className={cn(
-              "min-w-8 min-h-8",
-              completed ? "text-primary" : "text-quaternary-foreground",
-            )}
-            variant="solid"
-          />
-          <div className="grow flex flex-col gap-[2px]">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 flex items-center justify-center">
+            <div
+              className={cn(
+                "w-6 h-6",
+                completed ? "text-primary" : "text-quaternary-foreground",
+                icon,
+                "fa-solid",
+              )}
+            />
+          </div>
+          <div className="grow flex flex-col">
             <div className="flex justify-between items-center">
               <div className="flex gap-2">
                 <Title title={title} completed={completed} />
@@ -67,10 +64,13 @@ export function Achievement({
           </div>
         </div>
         <Description description={description} />
+        {!hidden && count < total && <Progress count={count} total={total} />}
       </div>
-      {completed && !softview && (
-        <Track enabled={enabled} pinned={pinned} id={id} onPin={onPin} />
-      )}
+      {completed &&
+        !softview &&
+        !!softview && ( // TODO: Enable when we can have the pinned feature on server side, remove !!softview
+          <Track enabled={enabled} pinned={pinned} id={id} onPin={onPin} />
+        )}
     </div>
   );
 }
@@ -84,7 +84,7 @@ function Title({ title, completed }: { title: string; completed: boolean }) {
   return (
     <p
       className={cn(
-        "text-xs text-accent-foreground capitalize",
+        "text-sm text-accent-foreground capitalize",
         completed && "text-foreground",
       )}
     >
@@ -128,7 +128,7 @@ function Description({ description }: { description: string }) {
   );
 }
 
-function Details({ percentage }: { percentage: number }) {
+function Details({ percentage }: { percentage: string }) {
   return (
     <p className="text-[0.65rem] text-quaternary-foreground">{`${percentage}% of players earned`}</p>
   );
@@ -164,6 +164,22 @@ function Timestamp({ timestamp }: { timestamp: number }) {
     <div className="flex items-center gap-1 text-quaternary-foreground">
       <CalendarIcon size="xs" variant="line" />
       <p className="text-[0.65rem]">{date}</p>
+    </div>
+  );
+}
+
+function Progress({ count, total }: { count: number; total: number }) {
+  return (
+    <div className="bg-secondary py-2 flex gap-4">
+      <div className="grow flex flex-col justify-center items-start bg-quaternary rounded-xl p-1">
+        <div
+          style={{ width: `${Math.floor((100 * count) / total)}%` }}
+          className={cn("grow bg-accent-foreground rounded-xl")}
+        />
+      </div>
+      <p className="text-xs text-quaternary-foreground">
+        {`${count.toLocaleString()} of ${total.toLocaleString()}`}
+      </p>
     </div>
   );
 }

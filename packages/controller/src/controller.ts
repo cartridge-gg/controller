@@ -72,12 +72,14 @@ export default class ControllerProvider extends BaseProvider {
     if (
       this.options.profileUrl &&
       this.options.indexerUrl &&
+      this.options.namespace &&
       !this.iframes.profile
     ) {
       const username = await this.keychain.username();
       this.iframes.profile = new ProfileIFrame({
         profileUrl: this.options.profileUrl,
         indexerUrl: this.options.indexerUrl,
+        namespace: this.options.namespace,
         address: this.account?.address,
         username,
         rpcUrl: this.rpc.toString(),
@@ -159,6 +161,10 @@ export default class ControllerProvider extends BaseProvider {
   openProfile(tab: ProfileContextTypeVariant = "inventory") {
     if (!this.options.indexerUrl) {
       console.error("`indexerUrl` option is required to open profile");
+      return;
+    }
+    if (!this.options.namespace) {
+      console.error("`namespace` option is required to open profile");
       return;
     }
     if (!this.profile || !this.iframes.profile) {
