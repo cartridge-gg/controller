@@ -40,12 +40,12 @@ export function Token() {
 
 function Credits() {
   const { parent } = useConnection();
-  const { credit } = useAccount();
+  const { address, credit } = useAccount();
 
   return (
     <LayoutContainer
       left={
-        <Link to="/inventory">
+        <Link to={`/account/${address}/inventory`}>
           <Button variant="icon" size="icon">
             <ArrowIcon variant="left" />
           </Button>
@@ -80,8 +80,9 @@ function Credits() {
 
 function ERC20() {
   const { chainId } = useConnection();
-  const { address } = useParams<{ address: string }>();
-  const t = useToken(address!);
+  const { address: tokenContractAddress } = useParams<{ address: string }>();
+  const t = useToken(tokenContractAddress!);
+  const { address } = useAccount();
   const { countervalue } = useCountervalue({
     balance: formatEther(t?.balance.value ?? 0n),
     quote: CurrencyQuote.Eth,
@@ -95,7 +96,7 @@ function ERC20() {
   return (
     <LayoutContainer
       left={
-        <Link to="/inventory">
+        <Link to={`/account/${address}/inventory`}>
           <Button variant="icon" size="icon">
             <ArrowIcon variant="left" />
           </Button>

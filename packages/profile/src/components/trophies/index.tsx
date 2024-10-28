@@ -56,7 +56,7 @@ export function Trophies() {
     <LayoutContainer
       left={
         !isSelf ? (
-          <Link to="/trophies">
+          <Link to={`/account/${self}/trophies`}>
             <Button variant="icon" size="icon">
               <ArrowIcon variant="left" />
             </Button>
