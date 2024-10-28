@@ -89,37 +89,74 @@ export function execute({
       });
     }
 
-    return await new Promise(async (resolve, reject) => {
-      // If a session call and there is no session available
-      // fallback to manual apporval flow
-      if (!account.hasSession(calls)) {
-        setContext({
-          type: "execute",
-          origin,
-          transactions,
-          abis,
-          transactionsDetail,
-          resolve,
-          reject,
-        } as ExecuteCtx);
+    const release = await mutex.obtain();
+    return await new Promise<InvokeFunctionResponse | ConnectError>(
+      async (resolve, reject) => {
+        // If a session call and there is no session available
+        // fallback to manual apporval flow
+        if (!account.hasSession(calls)) {
+          setContext({
+            type: "execute",
+            origin,
+            transactions,
+            abis,
+            transactionsDetail,
+            resolve,
+            reject,
+          } as ExecuteCtx);
 
-        return resolve({
-          code: ResponseCodes.USER_INTERACTION_REQUIRED,
-          message: "User interaction required",
-        });
-      }
+          return resolve({
+            code: ResponseCodes.USER_INTERACTION_REQUIRED,
+            message: "User interaction required",
+          });
+        }
 
-      // Try paymaster if it is enabled. If it fails, fallback to user pays session flow.
-      try {
-        const { transaction_hash } = await account.executeFromOutsideV3(calls);
+        // Try paymaster if it is enabled. If it fails, fallback to user pays session flow.
+        try {
+          const { transaction_hash } = await account.executeFromOutsideV3(
+            calls,
+          );
 
-        return resolve({
-          code: ResponseCodes.SUCCESS,
-          transaction_hash,
-        });
-      } catch (e) {
-        // User only pays if the error is ErrorCode.PaymasterNotSupported
-        if (e.code !== ErrorCode.PaymasterNotSupported) {
+          return resolve({
+            code: ResponseCodes.SUCCESS,
+            transaction_hash,
+          });
+        } catch (e) {
+          // User only pays if the error is ErrorCode.PaymasterNotSupported
+          if (e.code !== ErrorCode.PaymasterNotSupported) {
+            setContext({
+              type: "execute",
+              origin,
+              transactions,
+              abis,
+              transactionsDetail,
+              error: parseControllerError(e),
+              resolve,
+              reject,
+            } as ExecuteCtx);
+            return resolve({
+              code: ResponseCodes.ERROR,
+              message: e.message,
+              error: parseControllerError(e),
+            });
+          }
+        }
+
+        try {
+          let estimate = await account.cartridge.estimateInvokeFee(calls);
+          const maxFee = num.toHex(
+            num.addPercent(estimate.overall_fee, ESTIMATE_FEE_PERCENTAGE),
+          );
+
+          let { transaction_hash } = await account.execute(transactions, {
+            maxFee,
+          });
+          return resolve({
+            code: ResponseCodes.SUCCESS,
+            transaction_hash,
+          });
+        } catch (e) {
+          console.log(e);
           setContext({
             type: "execute",
             origin,
@@ -136,44 +173,9 @@ export function execute({
             error: parseControllerError(e),
           });
         }
-      }
-
-      const release = await mutex.obtain();
-      try {
-        let { maxFee } = transactionsDetail;
-        if (!maxFee) {
-          let estimate = await account.cartridge.estimateInvokeFee(calls);
-          maxFee = num.toHex(
-            num.addPercent(estimate.overall_fee, ESTIMATE_FEE_PERCENTAGE),
-          );
-        }
-
-        let { transaction_hash } = await account.execute(transactions, {
-          maxFee,
-        });
-        return resolve({
-          code: ResponseCodes.SUCCESS,
-          transaction_hash,
-        });
-      } catch (e) {
-        setContext({
-          type: "execute",
-          origin,
-          transactions,
-          abis,
-          transactionsDetail,
-          error: parseControllerError(e),
-          resolve,
-          reject,
-        } as ExecuteCtx);
-        return resolve({
-          code: ResponseCodes.ERROR,
-          message: e.message,
-          error: parseControllerError(e),
-        });
-      } finally {
-        release();
-      }
+      },
+    ).finally(() => {
+      release();
     });
   };
 }
