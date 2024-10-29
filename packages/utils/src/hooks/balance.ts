@@ -29,7 +29,7 @@ export function useERC20Balance({
       if (!m) {
         m = (
           await new ERC20({
-            address,
+            address: contractAddress,
             provider,
             // TODO logoUrl
           }).init()
