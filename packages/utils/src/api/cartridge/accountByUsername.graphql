@@ -1,0 +1,15 @@
+query AccountByUsername($username: ID!) {
+  accounts(where: { hasControllersWith: { id: $username } }, first: 1) {
+    edges {
+      node {
+        controllers(first: 1) {
+          edges {
+            node {
+              address
+            }
+          }
+        }
+      }
+    }
+  }
+}

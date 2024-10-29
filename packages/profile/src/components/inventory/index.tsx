@@ -9,20 +9,20 @@ import {
   LayoutContent,
   LayoutHeader,
 } from "@/components/layout";
-import { useAccount } from "@/hooks/context";
 // import { Collections } from "./collections";
 import { Tokens } from "./tokens";
+import { useAccountByUsernameParam } from "@/hooks/account";
 // import { Navigation } from "@/components/navigation";
 
 export function Inventory() {
-  const { username, address } = useAccount();
+  const { username, address } = useAccountByUsernameParam();
 
   return (
     <LayoutContainer>
       <LayoutHeader
         title={username}
         description={<CopyAddress address={address} size="sm" />}
-        // right={<Navigation />}
+      // right={<Navigation />}
       />
 
       <LayoutContent className="pb-4">

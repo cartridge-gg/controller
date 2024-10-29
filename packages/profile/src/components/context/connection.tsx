@@ -6,7 +6,6 @@ import {
   useEffect,
   useCallback,
 } from "react";
-import { ProfileContextTypeVariant } from "@cartridge/controller";
 import { normalize, useIndexerAPI } from "@cartridge/utils";
 import { constants, RpcProvider } from "starknet";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -88,8 +87,8 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const connection = connectToParent<ParentMethods>({
       methods: {
-        navigate: normalize(() => (tab: ProfileContextTypeVariant) => {
-          navigate(tab);
+        navigate: normalize(() => (path: string) => {
+          navigate(path);
           setIsVisible(true);
         }),
       },

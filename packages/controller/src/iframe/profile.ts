@@ -5,7 +5,6 @@ import { IFrame, IFrameOptions } from "./base";
 export type ProfileIFrameOptions = IFrameOptions<Profile> &
   ProfileOptions & {
     address: string;
-    username: string;
     indexerUrl: string;
     namespace: string;
     rpcUrl: string;
@@ -15,7 +14,6 @@ export class ProfileIFrame extends IFrame<Profile> {
   constructor({
     profileUrl,
     address,
-    username,
     indexerUrl,
     namespace,
     rpcUrl,
@@ -23,8 +21,6 @@ export class ProfileIFrame extends IFrame<Profile> {
     ...iframeOptions
   }: ProfileIFrameOptions) {
     const _url = new URL(profileUrl ?? PROFILE_URL);
-    _url.searchParams.set("address", encodeURIComponent(address));
-    _url.searchParams.set("username", encodeURIComponent(username));
     _url.searchParams.set("indexerUrl", encodeURIComponent(indexerUrl));
     _url.searchParams.set("namespace", encodeURIComponent(namespace));
     _url.searchParams.set("rpcUrl", encodeURIComponent(rpcUrl));

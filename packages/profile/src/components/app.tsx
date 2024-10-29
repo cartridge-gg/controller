@@ -1,4 +1,5 @@
-import { Route, Routes, Navigate, useSearchParams } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
+import { Account } from "@/components/account";
 import {
   Inventory,
   Collection,
@@ -10,31 +11,13 @@ import { Trophies } from "@/components/trophies";
 import { Activity } from "@/components/activity";
 
 export function App() {
-  const [searchParams] = useSearchParams();
-
   return (
     <Routes>
-      <Route
-        path="/"
-        element={
-          <Navigate
-            to={`/account/:address/inventory?${searchParams.toString()}`}
-            replace
-          />
-        }
-      />
-      <Route
-        path="/account/:address"
-        element={
-          <Navigate
-            to={`/account/:address/inventory?${searchParams.toString()}`}
-            replace
-          />
-        }
-      />
-      <Route path="/account/:address/inventory" element={<Inventory />} />
-      <Route path="/account/:address/trophies" element={<Trophies />} />
-      <Route path="/account/:address/activity" element={<Activity />} />
+      <Route path="/" element={null} />
+      <Route path="/account/:username" element={<Account />} />
+      <Route path="/account/:username/inventory" element={<Inventory />} />
+      <Route path="/account/:username/trophies" element={<Trophies />} />
+      <Route path="/account/:username/activity" element={<Activity />} />
       <Route path="/token/:address" element={<Token />} />
       <Route path="/collection/:address" element={<Collection />} />
       <Route path="/collection/:address/:tokenId" element={<Asset />} />

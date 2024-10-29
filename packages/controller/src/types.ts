@@ -117,7 +117,7 @@ export interface Keychain {
   openPurchaseCredits(): void;
 }
 export interface Profile {
-  navigate(tab: ProfileContextTypeVariant): void;
+  navigate(path: string): void;
 }
 
 export interface Modal {

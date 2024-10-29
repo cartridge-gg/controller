@@ -10,9 +10,10 @@ import {
   UseCreditBalanceReturn,
 } from "@cartridge/utils";
 import { useConnection } from "@/hooks/context";
-import { useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { ERC20 as ERC20Option } from "@cartridge/controller";
 import { getChecksumAddress } from "starknet";
+import { useAccountByUsernameQuery } from "@cartridge/utils/api/cartridge";
 
 type ERC20Status = ERC20Metadata & {
   balance: Balance;
@@ -48,8 +49,14 @@ export const AccountContext = createContext<AccountContextType>(initialState);
 
 export function AccountProvider({ children }: { children: ReactNode }) {
   const [searchParams] = useSearchParams();
+  const { username } = useParams<{ username: string }>();
   const { provider, isVisible } = useConnection();
   const [state, setState] = useState<AccountContextType>(initialState);
+
+  const { data } = useAccountByUsernameQuery(
+    { username: username ?? "" },
+    { enabled: !!username },
+  );
   const credit = useCreditBalance({
     address: state.address,
     interval: isVisible ? 3000 : null,
@@ -58,16 +65,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setState((state) => {
-      const addressParam = searchParams.get("address");
-      if (addressParam) {
-        state.address = decodeURIComponent(addressParam);
-      }
-
-      const usernameParam = searchParams.get("username");
-      if (usernameParam) {
-        state.username = decodeURIComponent(usernameParam);
-      }
-
       const namespaceParam = searchParams.get("namespace");
       if (namespaceParam) {
         state.namespace = decodeURIComponent(namespaceParam);
@@ -168,6 +165,10 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       value={{
         ...state,
         credit,
+        address:
+          data?.accounts?.edges?.[0]?.node?.controllers?.edges?.[0]?.node
+            ?.address ?? "",
+        username: username ?? "",
         isFetching: state.isFetching || credit.isFetching,
       }}
     >

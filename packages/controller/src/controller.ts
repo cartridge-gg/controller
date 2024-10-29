@@ -75,13 +75,11 @@ export default class ControllerProvider extends BaseProvider {
       this.options.namespace &&
       !this.iframes.profile
     ) {
-      const username = await this.keychain.username();
       this.iframes.profile = new ProfileIFrame({
         profileUrl: this.options.profileUrl,
         indexerUrl: this.options.indexerUrl,
         namespace: this.options.namespace,
         address: this.account?.address,
-        username,
         rpcUrl: this.rpc.toString(),
         tokens: this.options.tokens,
         onConnect: (profile) => {
@@ -158,7 +156,7 @@ export default class ControllerProvider extends BaseProvider {
     return this.keychain.disconnect();
   }
 
-  openProfile(tab: ProfileContextTypeVariant = "inventory") {
+  async openProfile(tab: ProfileContextTypeVariant = "inventory") {
     if (!this.options.indexerUrl) {
       console.error("`indexerUrl` option is required to open profile");
       return;
@@ -171,8 +169,13 @@ export default class ControllerProvider extends BaseProvider {
       console.error("Profile is not ready");
       return;
     }
+    if (!this.account) {
+      console.error("Account is not ready");
+      return;
+    }
 
-    this.profile.navigate(tab);
+    const username = await this.username();
+    this.profile.navigate(`/account/${username}/${tab}`);
     this.iframes.profile.open();
   }
 
