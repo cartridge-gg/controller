@@ -39,6 +39,14 @@ export function App() {
         }
       />
       <Route
+        path="/account/:username/trophies/:address"
+        element={
+          <LoadAccount>
+            <Trophies />
+          </LoadAccount>
+        }
+      />
+      <Route
         path="/account/:username/activity"
         element={
           <LoadAccount>
@@ -50,7 +58,6 @@ export function App() {
       <Route path="/collection/:address" element={<Collection />} />
       <Route path="/collection/:address/:tokenId" element={<Asset />} />
       <Route path="/collection/:address/send" element={<Send />} />
-      <Route path="/trophies/:address" element={<Trophies />} />
     </Routes>
   );
 }
