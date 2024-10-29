@@ -10,7 +10,8 @@ import {
   TrophyIcon,
 } from "@cartridge/ui-next";
 import { ProfileContextTypeVariant } from "@cartridge/controller";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useMatch } from "react-router-dom";
+import { useAccount } from "@/hooks/context";
 
 export function Navigation() {
   return (
@@ -29,11 +30,8 @@ function Item({
   Icon: React.ComponentType<StateIconProps>;
   variant: ProfileContextTypeVariant;
 }) {
-  const location = useLocation();
-
-  const isActive =
-    location.pathname.startsWith(`/${variant}`) ||
-    (variant === "inventory" && location.pathname === "/");
+  const { username } = useAccount();
+  const match = useMatch(`/account/:username/${variant}`);
 
   return (
     <TooltipProvider>
@@ -42,11 +40,11 @@ function Item({
           <Link
             className={cn(
               "px-4 py-3 cursor-pointer hover:opacity-[0.8]",
-              isActive ? "bg-secondary" : "bg-background",
+              match ? "bg-secondary" : "bg-background",
             )}
-            to={`/${variant}`}
+            to={`/account/${username}/${variant}`}
           >
-            <Icon size="sm" variant={isActive ? "solid" : "line"} />
+            <Icon size="sm" variant={match ? "solid" : "line"} />
           </Link>
         </TooltipTrigger>
         <TooltipContent>
