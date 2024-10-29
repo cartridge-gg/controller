@@ -1,4 +1,10 @@
-import { createContext, useState, ReactNode, useEffect } from "react";
+import {
+  createContext,
+  useState,
+  ReactNode,
+  useEffect,
+  useCallback,
+} from "react";
 import {
   Balance,
   ERC20,
@@ -10,10 +16,9 @@ import {
   UseCreditBalanceReturn,
 } from "@cartridge/utils";
 import { useConnection } from "@/hooks/context";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { ERC20 as ERC20Option } from "@cartridge/controller";
 import { getChecksumAddress } from "starknet";
-import { useAccountByUsernameQuery } from "@cartridge/utils/api/cartridge";
 
 type ERC20Status = ERC20Metadata & {
   balance: Balance;
@@ -29,6 +34,7 @@ type AccountContextType = {
     error?: Error;
   })[];
   isFetching: boolean;
+  setAccount: (account: { username: string; address: string }) => void;
 };
 
 const initialState: AccountContextType = {
@@ -43,20 +49,16 @@ const initialState: AccountContextType = {
   },
   erc20: [],
   isFetching: false,
+  setAccount: () => {},
 };
 
 export const AccountContext = createContext<AccountContextType>(initialState);
 
 export function AccountProvider({ children }: { children: ReactNode }) {
   const [searchParams] = useSearchParams();
-  const { username } = useParams<{ username: string }>();
   const { provider, isVisible } = useConnection();
   const [state, setState] = useState<AccountContextType>(initialState);
 
-  const { data } = useAccountByUsernameQuery(
-    { username: username ?? "" },
-    { enabled: !!username },
-  );
   const credit = useCreditBalance({
     address: state.address,
     interval: isVisible ? 3000 : null,
@@ -160,16 +162,24 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     }
   }, [isVisible, erc20, state.address]);
 
+  const setAccount = useCallback(
+    ({ username, address }: { username: string; address: string }) => {
+      setState((state) => ({
+        ...state,
+        address,
+        username,
+      }));
+    },
+    [],
+  );
+
   return (
     <AccountContext.Provider
       value={{
         ...state,
         credit,
-        address:
-          data?.accounts?.edges?.[0]?.node?.controllers?.edges?.[0]?.node
-            ?.address ?? "",
-        username: username ?? "",
         isFetching: state.isFetching || credit.isFetching,
+        setAccount,
       }}
     >
       {children}

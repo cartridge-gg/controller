@@ -1,5 +1,5 @@
 import { Route, Routes } from "react-router-dom";
-import { Account } from "@/components/account";
+import { Account, LoadAccount } from "@/components/account";
 import {
   Inventory,
   Collection,
@@ -14,10 +14,38 @@ export function App() {
   return (
     <Routes>
       <Route path="/" element={null} />
-      <Route path="/account/:username" element={<Account />} />
-      <Route path="/account/:username/inventory" element={<Inventory />} />
-      <Route path="/account/:username/trophies" element={<Trophies />} />
-      <Route path="/account/:username/activity" element={<Activity />} />
+      <Route
+        path="/account/:username"
+        element={
+          <LoadAccount>
+            <Account />
+          </LoadAccount>
+        }
+      />
+      <Route
+        path="/account/:username/inventory"
+        element={
+          <LoadAccount>
+            <Inventory />
+          </LoadAccount>
+        }
+      />
+      <Route
+        path="/account/:username/trophies"
+        element={
+          <LoadAccount>
+            <Trophies />
+          </LoadAccount>
+        }
+      />
+      <Route
+        path="/account/:username/activity"
+        element={
+          <LoadAccount>
+            <Activity />
+          </LoadAccount>
+        }
+      />
       <Route path="/token/:address" element={<Token />} />
       <Route path="/collection/:address" element={<Collection />} />
       <Route path="/collection/:address/:tokenId" element={<Asset />} />

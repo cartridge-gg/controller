@@ -4,7 +4,7 @@ import { IFrame, IFrameOptions } from "./base";
 
 export type ProfileIFrameOptions = IFrameOptions<Profile> &
   ProfileOptions & {
-    address: string;
+    username: string;
     indexerUrl: string;
     namespace: string;
     rpcUrl: string;
@@ -13,14 +13,14 @@ export type ProfileIFrameOptions = IFrameOptions<Profile> &
 export class ProfileIFrame extends IFrame<Profile> {
   constructor({
     profileUrl,
-    address,
+    username,
     indexerUrl,
     namespace,
     rpcUrl,
     tokens,
     ...iframeOptions
   }: ProfileIFrameOptions) {
-    const _url = new URL(profileUrl ?? PROFILE_URL);
+    const _url = new URL(`${profileUrl ?? PROFILE_URL}/account/${username}`);
     _url.searchParams.set("indexerUrl", encodeURIComponent(indexerUrl));
     _url.searchParams.set("namespace", encodeURIComponent(namespace));
     _url.searchParams.set("rpcUrl", encodeURIComponent(rpcUrl));

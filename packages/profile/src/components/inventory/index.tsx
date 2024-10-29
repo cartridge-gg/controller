@@ -11,18 +11,18 @@ import {
 } from "@/components/layout";
 // import { Collections } from "./collections";
 import { Tokens } from "./tokens";
-import { useAccountByUsernameParam } from "@/hooks/account";
+import { useAccount } from "@/hooks/context";
 // import { Navigation } from "@/components/navigation";
 
 export function Inventory() {
-  const { username, address } = useAccountByUsernameParam();
+  const { username, address } = useAccount();
 
   return (
     <LayoutContainer>
       <LayoutHeader
         title={username}
         description={<CopyAddress address={address} size="sm" />}
-      // right={<Navigation />}
+        // right={<Navigation />}
       />
 
       <LayoutContent className="pb-4">
