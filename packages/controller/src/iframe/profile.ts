@@ -28,7 +28,7 @@ export class ProfileIFrame extends IFrame<Profile> {
     if (tokens?.erc20) {
       _url.searchParams.set(
         "erc20",
-        encodeURIComponent(JSON.stringify(tokens.erc20)),
+        encodeURIComponent(tokens.erc20.toString()),
       );
     }
 

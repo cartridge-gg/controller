@@ -116,12 +116,12 @@ function ERC20() {
           ) : (
             t.balance.formatted
           )
-        } ${t.symbol}`}
+        } ${t.meta.symbol}`}
         description={`${countervalue.formatted} ${CurrencyBase.Usd}`}
         icon={
           <img
             className="w-8 h-8"
-            src={t.logoUrl ?? "/public/placeholder.svg"}
+            src={t.meta.logoUrl ?? "/public/placeholder.svg"}
           />
         }
       />
@@ -137,17 +137,17 @@ function ERC20() {
               <Link
                 to={`${StarkscanUrl(
                   chainId as constants.StarknetChainId,
-                ).contract(t.address)} `}
+                ).contract(t.meta.address)} `}
                 className="flex items-center gap-1 text-sm"
                 target="_blank"
               >
                 <div className="font-medium">
-                  {formatAddress(t.address, { size: "sm" })}
+                  {formatAddress(t.meta.address, { size: "sm" })}
                 </div>
                 <ExternalIcon size="sm" />
               </Link>
             ) : (
-              <div>{formatAddress(t.address)}</div>
+              <div>{formatAddress(t.meta.address)}</div>
             )}
           </CardContent>
 

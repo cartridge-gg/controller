@@ -13,39 +13,60 @@ export function useERC20Balance({
   interval,
 }: {
   address: string;
-  contractAddress: string;
+  contractAddress: string | string[];
   provider?: Provider;
-  interval?: number;
+  interval: number | undefined;
 }) {
   const { data: chainId } = useSWR(provider ? "chainId" : null, () =>
     provider?.getChainId(),
   );
-  const { data: meta } = useSWR(provider ? "chainId" : null, async () => {
-    if (!provider) return;
-    const erc20 = await new ERC20({
-      address: contractAddress,
-      provider,
-      // TODO logoUrl
-    }).init();
-    return erc20.metadata();
-  });
+  const { data: meta } = useSWR(
+    provider ? `erc20:metadata:${chainId}:${address}:${contractAddress}` : null,
+    async () => {
+      if (!provider) return [];
 
-  const {
-    data: value,
-    isValidating,
-    isLoading,
-    error,
-  } = useSWR(
-    chainId && meta ? `${chainId}:${contractAddress}:${address}` : null,
-    () => (meta ? meta.instance.balanceOf(address) : 0n),
-    { refreshInterval: interval, fallbackData: 0n },
+      const contractList = Array.isArray(contractAddress)
+        ? contractAddress
+        : [contractAddress];
+      const erc20List = contractList.map(
+        (address) =>
+          new ERC20({
+            address,
+            provider,
+            // TODO logoUrl
+          }),
+      );
+      await Promise.all(erc20List.map((erc20) => erc20.init()));
+
+      return erc20List.map((erc20) => erc20.metadata());
+    },
+    { fallbackData: [] },
   );
 
-  const formatted = useMemo(() => formatBalance(value), [value]);
+  const { data, isValidating, isLoading, error } = useSWR(
+    chainId && meta.length
+      ? `erc20:balance:${chainId}:${address}:${contractAddress}`
+      : null,
+    async () => {
+      if (!meta.length) return [];
+
+      const values = await Promise.all(
+        meta.map((m) => m.instance.balanceOf(address)),
+      );
+
+      return values.map((value, i) => ({
+        balance: {
+          value,
+          formatted: formatBalance(value),
+        },
+        meta: meta[i],
+      }));
+    },
+    { refreshInterval: interval, fallbackData: [] },
+  );
 
   return {
-    balance: { value, formatted },
-    meta,
+    data,
     isFetching: isValidating,
     isLoading,
     error,
