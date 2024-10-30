@@ -1,18 +1,16 @@
-import { useAccountByUsernameQuery } from "@cartridge/utils/api/cartridge";
+import { useAddressByUsernameQuery } from "@cartridge/utils/api/cartridge";
 import { useParams } from "react-router-dom";
 
-export function useAccountByUsernameParam() {
+export function useAddressByUsernameParam() {
   const params = useParams<{ username: string }>();
   const username = params.username ?? "";
-  const { data } = useAccountByUsernameQuery(
+  const { data } = useAddressByUsernameQuery(
     { username },
     { enabled: !!username },
   );
 
   return {
     username,
-    address:
-      data?.accounts?.edges?.[0]?.node?.controllers?.edges?.[0]?.node
-        ?.address ?? "",
+    address: data?.account?.controllers.edges?.[0]?.node?.address ?? "",
   };
 }

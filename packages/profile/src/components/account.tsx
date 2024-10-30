@@ -1,4 +1,4 @@
-import { useAccountByUsernameParam } from "@/hooks/account";
+import { useAddressByUsernameParam } from "@/hooks/account";
 import { useAccount } from "@/hooks/context";
 import { PropsWithChildren, useEffect } from "react";
 import { Navigate, useParams, useSearchParams } from "react-router-dom";
@@ -19,7 +19,7 @@ export function Account() {
 }
 
 export function LoadAccount({ children }: PropsWithChildren) {
-  const { username, address } = useAccountByUsernameParam();
+  const { username, address } = useAddressByUsernameParam();
   const { setAccount } = useAccount();
 
   useEffect(() => {

@@ -1,0 +1,11 @@
+query addressByUsername($username: ID!) {
+  account(id: $username) {
+    controllers(first: 1) {
+      edges {
+        node {
+          address
+        }
+      }
+    }
+  }
+}
