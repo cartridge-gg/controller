@@ -2,7 +2,7 @@ import { useInterval } from "usehooks-ts";
 import { useMemo, useState } from "react";
 import { Provider } from "starknet";
 import useSWR from "swr";
-import { ERC20 } from "../erc20";
+import { ERC20, ERC20Metadata } from "../erc20";
 import { formatBalance } from "../currency";
 import { AccountInfoQuery, useAccountInfoQuery } from "../api/cartridge";
 
@@ -28,17 +28,19 @@ export function useERC20Balance({
       const contractList = Array.isArray(contractAddress)
         ? contractAddress
         : [contractAddress];
-      const erc20List = contractList.map(
-        (address) =>
+      const erc20List = await Promise.allSettled(
+        contractList.map((address) =>
           new ERC20({
             address,
             provider,
             // TODO logoUrl
-          }),
+          }).init(),
+        ),
       );
-      await Promise.all(erc20List.map((erc20) => erc20.init()));
 
-      return erc20List.map((erc20) => erc20.metadata());
+      return erc20List
+        .filter((res) => res.status === "fulfilled")
+        .map((erc20) => erc20.value.metadata());
     },
     { fallbackData: [] },
   );
@@ -50,17 +52,28 @@ export function useERC20Balance({
     async () => {
       if (!meta.length) return [];
 
-      const values = await Promise.all(
+      const values = await Promise.allSettled(
         meta.map((m) => m.instance.balanceOf(address)),
       );
 
-      return values.map((value, i) => ({
-        balance: {
-          value,
-          formatted: formatBalance(value),
+      return meta.reduce<{ balance: Balance; meta: ERC20Metadata }[]>(
+        (prev, meta, i) => {
+          const res = values[i];
+          if (res.status === "rejected") return prev;
+
+          return [
+            ...prev,
+            {
+              balance: {
+                value: res.value,
+                formatted: formatBalance(res.value),
+              },
+              meta,
+            },
+          ];
         },
-        meta: meta[i],
-      }));
+        [],
+      );
     },
     { refreshInterval: interval, fallbackData: [] },
   );
