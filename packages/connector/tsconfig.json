@@ -5,7 +5,8 @@
     "baseUrl": ".",
     "rootDir": "./src",
     "outDir": "./dist",
-    "module": "ES2015",
+    "composite": false,
+    "incremental": false,
     "moduleResolution": "node"
   },
   "include": ["src/**/*"]

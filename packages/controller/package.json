@@ -6,24 +6,23 @@
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "build:deps": "tsc",
+    "build:deps": "tsup --dts-resolve",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
     "version": "pnpm pkg get version"
   },
   "exports": {
     ".": "./dist/index.js",
-    "./session": "./dist/session/index.js"
+    "./session": "./dist/session/index.js",
+    "./provider": "./dist/provider/index.js",
+    "./types": "./dist/types/index.js"
   },
-  "typesVersions": {
-    "*": {
-      ".": [
-        "./dist/index.d.ts"
-      ],
-      "session": [
-        "./dist/session/index.d.ts"
-      ]
-    }
+  "tsup": {
+    "entry": ["src/**"],
+    "format": ["esm"],
+    "splitting": false,
+    "sourcemap": true,
+    "clean": true
   },
   "dependencies": {
     "@cartridge/account-wasm": "workspace:^",

@@ -7,7 +7,7 @@
   "type": "module",
   "sideEffects": false,
   "scripts": {
-    "build:deps": "tsc",
+    "build:deps": "tsup --dts-resolve",
     "prepublish": "pnpm build:deps",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\""
@@ -30,6 +30,14 @@
         "./dist/telegram.d.ts"
       ]
     }
+  },
+  "tsup": {
+    "entry": ["src/controller.ts","src/index.ts"],
+    "format": ["esm"],
+    "splitting": false,
+    "sourcemap": true,
+    "clean": true,
+    "dts":"resolve"
   },
   "dependencies": {
     "@cartridge/controller": "workspace:^",

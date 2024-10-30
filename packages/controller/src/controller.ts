@@ -16,6 +16,7 @@ import {
   ProfileContextTypeVariant,
 } from "./types";
 import BaseProvider from "./provider";
+import { WalletAccount } from "starknet";
 
 export default class ControllerProvider extends BaseProvider {
   private keychain?: AsyncMethodReturns<Keychain>;
@@ -44,7 +45,7 @@ export default class ControllerProvider extends BaseProvider {
     }
   }
 
-  async probe() {
+  async probe(): Promise<WalletAccount | undefined> {
     try {
       await this.waitForKeychain();
 
@@ -96,7 +97,7 @@ export default class ControllerProvider extends BaseProvider {
     return this.account;
   }
 
-  async connect() {
+  async connect(): Promise<WalletAccount | undefined> {
     if (this.account) {
       return this.account;
     }
