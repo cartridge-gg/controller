@@ -18,7 +18,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 
 type ConnectionContextType = {
   parent: ParentMethods;
-  provider?: RpcProvider;
+  provider: RpcProvider;
   chainId: string;
   erc20: string[];
   isVisible: boolean;
@@ -32,6 +32,7 @@ type ParentMethods = {
 
 const initialState: ConnectionContextType = {
   parent: { close: async () => {}, openPurchaseCredits: async () => {} },
+  provider: new RpcProvider({ nodeUrl: import.meta.env.VITE_RPC_SEPOLIA }),
   chainId: "",
   erc20: [],
   isVisible: false,
@@ -53,7 +54,6 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
           nodeUrl: decodeURIComponent(searchParams.get("rpcUrl")!),
         });
       }
-
       return state;
     });
 

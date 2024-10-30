@@ -14,7 +14,7 @@ export function useERC20Balance({
 }: {
   address: string;
   contractAddress: string | string[];
-  provider?: Provider;
+  provider: Provider;
   interval: number | undefined;
 }) {
   const { data: chainId } = useSWR(provider ? "chainId" : null, () =>
@@ -24,9 +24,11 @@ export function useERC20Balance({
     fallbackData: [],
   });
   const { data: meta } = useSWR(
-    provider ? `erc20:metadata:${chainId}:${address}:${contractAddress}` : null,
+    chainId && provider
+      ? `erc20:metadata:${chainId}:${address}:${contractAddress}`
+      : null,
     async () => {
-      if (!provider) return [];
+      if (!provider || !ekuboMeta.length) return [];
 
       const contractList = Array.isArray(contractAddress)
         ? contractAddress
