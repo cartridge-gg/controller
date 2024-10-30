@@ -50,7 +50,8 @@ export class Trophy {
   static parse(node: EventNode): Trophy {
     const descriptionIndex = 6;
     const descriptionLength = parseInt(node.data[descriptionIndex]);
-    const taskIndex = 8 + (descriptionLength ? descriptionLength + 1 : descriptionLength);
+    const taskIndex =
+      8 + (descriptionLength ? descriptionLength + 1 : descriptionLength);
     // const tasksLength = parseInt(node.data[taskIndex]);
     const taskDescriptionIndex = taskIndex + 3;
     const taskDescriptionLength = parseInt(node.data[taskDescriptionIndex]);
@@ -63,7 +64,12 @@ export class Trophy {
       icon: shortString.decodeShortString(node.data[4]),
       title: shortString.decodeShortString(node.data[5]),
       description: byteArray.stringFromByteArray({
-        data: descriptionLength ? node.data.slice(descriptionIndex + 1, descriptionIndex + 1 + descriptionLength) : [],
+        data: descriptionLength
+          ? node.data.slice(
+              descriptionIndex + 1,
+              descriptionIndex + 1 + descriptionLength,
+            )
+          : [],
         pending_word: node.data[descriptionIndex + 1 + descriptionLength],
         pending_word_len: node.data[descriptionIndex + 2 + descriptionLength],
       }),
@@ -72,9 +78,16 @@ export class Trophy {
           id: shortString.decodeShortString(node.data[taskIndex + 1]),
           total: parseInt(node.data[taskIndex + 2]),
           description: byteArray.stringFromByteArray({
-            data: taskDescriptionLength ? node.data.slice(taskDescriptionIndex + 1, taskDescriptionIndex + 1 + taskDescriptionLength) : [],
-            pending_word: node.data[taskDescriptionIndex + 1 + taskDescriptionLength],
-            pending_word_len: node.data[taskDescriptionIndex + 2 + taskDescriptionLength],
+            data: taskDescriptionLength
+              ? node.data.slice(
+                  taskDescriptionIndex + 1,
+                  taskDescriptionIndex + 1 + taskDescriptionLength,
+                )
+              : [],
+            pending_word:
+              node.data[taskDescriptionIndex + 1 + taskDescriptionLength],
+            pending_word_len:
+              node.data[taskDescriptionIndex + 2 + taskDescriptionLength],
           }),
         },
       ],

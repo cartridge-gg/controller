@@ -85,39 +85,36 @@ export function useAchievements({
     const players: Player[] = Object.keys(counters)
       .map((playerAddress) => {
         let timestamp = 0;
-        const earnings = trophies.reduce(
-          (total: number, trophy: Trophy) => {
-            // Compute at which timestamp the latest achievement was completed
-            let completed = true;
-            trophy.tasks.forEach((task) => {
-              let count = 0;
-              let completion = false;
-              counters[playerAddress]?.[task.id]
-                ?.sort((a, b) => a.timestamp - b.timestamp)
-                .forEach(
-                  ({
-                    count: c,
-                    timestamp: t,
-                  }: {
-                    count: number;
-                    timestamp: number;
-                  }) => {
-                    count += c;
-                    if (!completion && count >= task.total) {
-                      timestamp = t > timestamp ? t : timestamp;
-                      completion = true;
-                    }
-                  },
+        const earnings = trophies.reduce((total: number, trophy: Trophy) => {
+          // Compute at which timestamp the latest achievement was completed
+          let completed = true;
+          trophy.tasks.forEach((task) => {
+            let count = 0;
+            let completion = false;
+            counters[playerAddress]?.[task.id]
+              ?.sort((a, b) => a.timestamp - b.timestamp)
+              .forEach(
+                ({
+                  count: c,
+                  timestamp: t,
+                }: {
+                  count: number;
+                  timestamp: number;
+                }) => {
+                  count += c;
+                  if (!completion && count >= task.total) {
+                    timestamp = t > timestamp ? t : timestamp;
+                    completion = true;
+                  }
+                },
               );
-              completed = completed && completion;
-            });
-            // Update stats
-            stats[trophy.id] = stats[trophy.id] || 0;
-            stats[trophy.id] += completed ? 1 : 0;
-            return completed ? total + trophy.earning : total;
-          },
-          0,
-        );
+            completed = completed && completion;
+          });
+          // Update stats
+          stats[trophy.id] = stats[trophy.id] || 0;
+          stats[trophy.id] += completed ? 1 : 0;
+          return completed ? total + trophy.earning : total;
+        }, 0);
         return {
           address: playerAddress,
           earnings,
@@ -139,28 +136,27 @@ export function useAchievements({
           let completion = false;
           counters[address]?.[task.id]
             ?.sort((a, b) => a.timestamp - b.timestamp)
-          .forEach(
-            ({
-              count: c,
-              timestamp: t,
-            }: {
-              count: number;
-              timestamp: number;
-            }) => {
-              count += c;
-              if (!completion && count >= task.total) {
-                timestamp = t;
-                completion = true;
-              }
-            },
-          );
+            .forEach(
+              ({
+                count: c,
+                timestamp: t,
+              }: {
+                count: number;
+                timestamp: number;
+              }) => {
+                count += c;
+                if (!completion && count >= task.total) {
+                  timestamp = t;
+                  completion = true;
+                }
+              },
+            );
           completed = completed && completion;
         });
         // Compute percentage of players who completed the achievement
-        const percentage = (
-          (100 * stats[trophy.id]) /
-          players.length
-        ).toFixed(0);
+        const percentage = ((100 * stats[trophy.id]) / players.length).toFixed(
+          0,
+        );
         return {
           ...trophy,
           count,
