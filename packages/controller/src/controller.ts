@@ -69,12 +69,7 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    if (
-      this.options.profileUrl &&
-      this.options.indexerUrl &&
-      this.options.namespace &&
-      !this.iframes.profile
-    ) {
+    if (this.options.profileUrl && !this.iframes.profile) {
       const username = await this.keychain.username();
       this.iframes.profile = new ProfileIFrame({
         profileUrl: this.options.profileUrl,

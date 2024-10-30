@@ -5,9 +5,9 @@ import { IFrame, IFrameOptions } from "./base";
 export type ProfileIFrameOptions = IFrameOptions<Profile> &
   ProfileOptions & {
     username: string;
-    indexerUrl: string;
-    namespace: string;
     rpcUrl: string;
+    indexerUrl?: string;
+    namespace?: string;
   };
 
 export class ProfileIFrame extends IFrame<Profile> {
@@ -21,9 +21,14 @@ export class ProfileIFrame extends IFrame<Profile> {
     ...iframeOptions
   }: ProfileIFrameOptions) {
     const _url = new URL(`${profileUrl ?? PROFILE_URL}/account/${username}`);
-    _url.searchParams.set("indexerUrl", encodeURIComponent(indexerUrl));
-    _url.searchParams.set("namespace", encodeURIComponent(namespace));
     _url.searchParams.set("rpcUrl", encodeURIComponent(rpcUrl));
+
+    if (indexerUrl) {
+      _url.searchParams.set("indexerUrl", encodeURIComponent(indexerUrl));
+    }
+    if (namespace) {
+      _url.searchParams.set("namespace", encodeURIComponent(namespace));
+    }
 
     if (tokens?.erc20) {
       _url.searchParams.set(
