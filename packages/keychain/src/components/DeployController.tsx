@@ -70,14 +70,14 @@ export function DeployController({
     interval: 3000,
   });
   useEffect(() => {
-    if (!feeEstimate || accountState != "fund") return;
+    if (!feeEstimate || accountState != "fund" || !eth?.balance.value) return;
 
     if (eth.balance.value >= BigInt(feeEstimate)) {
       setAccountState("deploy");
     } else {
       setAccountState("fund");
     }
-  }, [eth.balance.value, feeEstimate, accountState]);
+  }, [eth?.balance.value, feeEstimate, accountState]);
 
   const onDeploy = useCallback(async () => {
     try {

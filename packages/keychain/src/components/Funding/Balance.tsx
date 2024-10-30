@@ -29,7 +29,7 @@ export function Balance({ showBalances }: BalanceProps) {
     interval: 3000,
   });
   const { countervalue } = useCountervalue({
-    balance: formatEther(eth.balance.value),
+    balance: formatEther(eth?.balance.value || 0n),
     quote: CurrencyQuote.Eth,
     base: CurrencyBase.Usd,
   });
@@ -81,7 +81,7 @@ export function Balance({ showBalances }: BalanceProps) {
         >
           <HStack>
             <EthereumIcon fontSize={20} />
-            <Text>{eth.balance.formatted}</Text>
+            <Text>{eth?.balance.formatted ?? "0.00"}</Text>
             <Text color="text.secondary">${countervalue.formatted}</Text>
           </HStack>
           <Spacer />
