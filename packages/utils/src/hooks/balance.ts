@@ -2,7 +2,7 @@ import { useInterval } from "usehooks-ts";
 import { useMemo, useState } from "react";
 import { Provider } from "starknet";
 import useSWR from "swr";
-import { ERC20, ERC20Metadata } from "../erc20";
+import { ERC20 } from "../erc20";
 import { formatBalance } from "../currency";
 import { AccountInfoQuery, useAccountInfoQuery } from "../api/cartridge";
 
@@ -17,31 +17,28 @@ export function useERC20Balance({
   provider?: Provider;
   interval?: number;
 }) {
-  const [meta, setMeta] = useState<ERC20Metadata>();
+  const { data: chainId } = useSWR(provider ? "chainId" : null, () =>
+    provider?.getChainId(),
+  );
+  const { data: meta } = useSWR(provider ? "chainId" : null, async () => {
+    if (!provider) return;
+    const erc20 = await new ERC20({
+      address: contractAddress,
+      provider,
+      // TODO logoUrl
+    }).init();
+    return erc20.metadata();
+  });
 
-  const [value, setValue] = useState<bigint>(0n);
-  const { isValidating, isLoading, error } = useSWR(
-    `balance:${contractAddress}:${address}`,
-    async () => {
-      if (!provider) return;
-
-      let m = meta;
-      if (!m) {
-        m = (
-          await new ERC20({
-            address: contractAddress,
-            provider,
-            // TODO logoUrl
-          }).init()
-        ).metadata();
-        setMeta(m);
-      }
-
-      const balance = await m.instance.balanceOf(address);
-
-      setValue(balance);
-    },
-    { refreshInterval: interval },
+  const {
+    data: value,
+    isValidating,
+    isLoading,
+    error,
+  } = useSWR(
+    chainId && meta ? `${chainId}:${contractAddress}:${address}` : null,
+    () => (meta ? meta.instance.balanceOf(address) : 0n),
+    { refreshInterval: interval, fallbackData: 0n },
   );
 
   const formatted = useMemo(() => formatBalance(value), [value]);
