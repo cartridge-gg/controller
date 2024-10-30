@@ -10,13 +10,26 @@ use account_sdk::account::session::hash::{
 
 use super::EncodingError;
 
+#[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
+#[tsify(into_wasm_abi, from_wasm_abi)]
+pub struct CallPolicy {
+    pub target: String,
+    pub method: String,
+}
+
+#[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
+#[tsify(into_wasm_abi, from_wasm_abi)]
+pub struct TypedDataPolicy {
+    pub type_hash: String,
+}
+
 #[allow(non_snake_case)]
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
 #[serde(untagged)]
 pub enum Policy {
-    Call { target: String, method: String },
-    TypedData { type_hash: String },
+    Call(CallPolicy),
+    TypedData(TypedDataPolicy),
 }
 
 impl TryFrom<JsValue> for Policy {
@@ -32,13 +45,15 @@ impl TryFrom<Policy> for SdkPolicy {
 
     fn try_from(value: Policy) -> Result<Self, Self::Error> {
         match value {
-            Policy::Call { target, method } => Ok(SdkPolicy::Call(SdkCallPolicy {
+            Policy::Call(CallPolicy { target, method }) => Ok(SdkPolicy::Call(SdkCallPolicy {
                 contract_address: Felt::from_str(&target)?,
                 selector: get_selector_from_name(&method).unwrap(),
             })),
-            Policy::TypedData { type_hash } => Ok(SdkPolicy::TypedData(SdkTypedDataPolicy {
-                type_hash: Felt::from_str(&type_hash)?,
-            })),
+            Policy::TypedData(TypedDataPolicy { type_hash }) => {
+                Ok(SdkPolicy::TypedData(SdkTypedDataPolicy {
+                    type_hash: Felt::from_str(&type_hash)?,
+                }))
+            }
         }
     }
 }
@@ -46,13 +61,13 @@ impl TryFrom<Policy> for SdkPolicy {
 impl From<SdkPolicy> for Policy {
     fn from(value: SdkPolicy) -> Self {
         match value {
-            SdkPolicy::Call(call_policy) => Policy::Call {
+            SdkPolicy::Call(call_policy) => Policy::Call(CallPolicy {
                 target: call_policy.contract_address.to_string(),
                 method: call_policy.selector.to_string(),
-            },
-            SdkPolicy::TypedData(typed_data_policy) => Policy::TypedData {
+            }),
+            SdkPolicy::TypedData(typed_data_policy) => Policy::TypedData(TypedDataPolicy {
                 type_hash: typed_data_policy.type_hash.to_string(),
-            },
+            }),
         }
     }
 }

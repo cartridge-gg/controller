@@ -39,16 +39,20 @@ export function useUrlPolicys(): {
 
     setIsValidating(true);
     const requests = JSON.parse(policies as string) as Policy[];
-    const requestDict = {};
+    const requestDict = new Map<string, string[]>();
 
     requests.forEach((policy) => {
-      requestDict[policy.target] = requestDict[policy.target] || [];
-      requestDict[policy.target].push(policy.method);
+      if ("target" in policy && "method" in policy) {
+        if (!requestDict.has(policy.target)) {
+          requestDict.set(policy.target, []);
+        }
+        requestDict.get(policy.target)!.push(policy.method);
+      }
     });
 
     const promises = [];
-    Object.keys(requestDict).forEach((target) => {
-      promises.push(getValidPolicys(requestDict[target], target));
+    requestDict.forEach((methods, target) => {
+      promises.push(getValidPolicys(methods, target));
     });
 
     Promise.all(promises)
