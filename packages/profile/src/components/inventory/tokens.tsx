@@ -11,9 +11,14 @@ import { Link } from "react-router-dom";
 import {
   Balance,
   ERC20Metadata,
+  ETH_CONTRACT_ADDRESS,
+  useCountervalue,
   useCreditBalance,
   useERC20Balance,
 } from "@cartridge/utils";
+import { formatEther } from "viem";
+import { CurrencyBase, CurrencyQuote } from "@cartridge/utils/api/cartridge";
+import { getChecksumAddress } from "starknet";
 
 export function Tokens() {
   const { isVisible, provider, erc20: contractAddress } = useConnection();
@@ -70,6 +75,12 @@ function TokenCardContent({
 }: {
   token: { balance: Balance; meta: ERC20Metadata };
 }) {
+  const { countervalue } = useCountervalue({
+    balance: formatEther(token.balance.value || 0n),
+    quote: CurrencyQuote.Eth,
+    base: CurrencyBase.Usd,
+  });
+
   return (
     <CardContent className="bg-background flex items-center p-0 h-full gap-0.5">
       <div className="bg-secondary flex h-full aspect-square items-center justify-center">
@@ -84,8 +95,13 @@ function TokenCardContent({
           </div>
         </div>
 
-        {/* Disable countervalue for now */}
-        {/* <div className="text-xs text-muted-foreground">$25.23</div> */}
+        {/* TODO: Enable countervalue for currencies other than ETH */}
+        {getChecksumAddress(token.meta.address) ===
+          getChecksumAddress(ETH_CONTRACT_ADDRESS) && (
+          <div className="text-xs text-muted-foreground">
+            ${countervalue.formatted}
+          </div>
+        )}
       </div>
     </CardContent>
   );
