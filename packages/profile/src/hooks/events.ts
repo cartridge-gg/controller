@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Event, EventNode, useEventsQuery } from "@cartridge/utils/api/indexer";
-import { Creation, Completion } from "@/models";
+import { Trophy, Progress } from "@/models";
 import { hash, byteArray, ByteArray } from "starknet";
 
 // Computes dojo selector from namespace and event name
@@ -28,7 +28,7 @@ function serializeByteArray(byteArray: ByteArray): bigint[] {
   return result;
 }
 
-export function useEvents<TEvent extends Creation | Completion>({
+export function useEvents<TEvent extends Trophy | Progress>({
   namespace,
   name,
   limit,

@@ -64,7 +64,7 @@ export function Achievements({
             earning={achievement.earning}
             timestamp={achievement.timestamp}
             count={achievement.count}
-            total={achievement.total}
+            total={1}  // FIXME: update
             hidden={achievement.hidden}
             completed={achievement.completed}
             pinned={achievement.pinned}
