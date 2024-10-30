@@ -4,7 +4,6 @@ import {
   CardHeader,
   CardTitle,
   SpinnerIcon,
-  CoinsIcon,
 } from "@cartridge/ui-next";
 import { useAccount, useConnection } from "@/hooks/context";
 import { Link } from "react-router-dom";
@@ -28,7 +27,7 @@ export function Tokens() {
     interval: isVisible ? 3000 : null,
   });
 
-  const { data: erc20 } = useERC20Balance({
+  const erc20 = useERC20Balance({
     address,
     contractAddress,
     provider,
@@ -39,10 +38,11 @@ export function Tokens() {
     <Card>
       <CardHeader className="h-10 flex flex-row items-center justify-between">
         <CardTitle>Tokens</CardTitle>
-        {credit.isFetching && <SpinnerIcon className="animate-spin" />}
+        {credit.isFetching ||
+          (erc20.isFetching && <SpinnerIcon className="animate-spin" />)}
       </CardHeader>
 
-      <Link to={`/token/credit`}>
+      {/* <Link to={`/token/credit`}>
         <CardContent className="bg-background flex items-center p-0 h-full gap-0.5">
           <div className="bg-secondary flex h-full aspect-square items-center justify-center">
             <CoinsIcon variant="solid" size="sm" />
@@ -59,9 +59,9 @@ export function Tokens() {
             </div>
           </div>
         </CardContent>
-      </Link>
+      </Link> */}
 
-      {erc20.map((t) => (
+      {erc20.data.map((t) => (
         <Link key={t.meta.address} to={`/token/${t.meta.address}`}>
           <TokenCardContent token={t} />
         </Link>
