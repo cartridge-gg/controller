@@ -9,9 +9,9 @@ import {
   LayoutContent,
   LayoutHeader,
 } from "@/components/layout";
-import { useAccount } from "@/hooks/context";
 // import { Collections } from "./collections";
 import { Tokens } from "./tokens";
+import { useAccount } from "@/hooks/context";
 // import { Navigation } from "@/components/navigation";
 
 export function Inventory() {

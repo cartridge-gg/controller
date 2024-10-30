@@ -16,9 +16,11 @@ import {
   LayoutFooter,
   LayoutHeader,
 } from "@/components/layout";
+import { useAccount } from "@/hooks/context";
 
 export function Collection() {
   const { address } = useParams<{ address: string }>();
+  const { username } = useAccount();
   const [searchParams, setSearchParams] = useSearchParams();
   const c = {
     address,
@@ -43,7 +45,7 @@ export function Collection() {
   return (
     <LayoutContainer
       left={
-        <Link to="/inventory">
+        <Link to={`/account/${username}/inventory`}>
           <Button variant="icon" size="icon">
             <ArrowIcon variant="left" />
           </Button>

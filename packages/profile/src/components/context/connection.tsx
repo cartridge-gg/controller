@@ -5,16 +5,22 @@ import {
   ReactNode,
   useEffect,
   useCallback,
+  useMemo,
 } from "react";
-import { ProfileContextTypeVariant } from "@cartridge/controller";
-import { normalize, useIndexerAPI } from "@cartridge/utils";
-import { constants, RpcProvider } from "starknet";
+import {
+  ETH_CONTRACT_ADDRESS,
+  normalize,
+  STRK_CONTRACT_ADDRESS,
+  useIndexerAPI,
+} from "@cartridge/utils";
+import { constants, getChecksumAddress, RpcProvider } from "starknet";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 type ConnectionContextType = {
   parent: ParentMethods;
-  provider?: RpcProvider;
+  provider: RpcProvider;
   chainId: string;
+  erc20: string[];
   isVisible: boolean;
   setIsVisible: (isVisible: boolean) => void;
 };
@@ -26,7 +32,9 @@ type ParentMethods = {
 
 const initialState: ConnectionContextType = {
   parent: { close: async () => {}, openPurchaseCredits: async () => {} },
+  provider: new RpcProvider({ nodeUrl: import.meta.env.VITE_RPC_SEPOLIA }),
   chainId: "",
+  erc20: [],
   isVisible: false,
   setIsVisible: () => {},
 };
@@ -46,7 +54,6 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
           nodeUrl: decodeURIComponent(searchParams.get("rpcUrl")!),
         });
       }
-
       return state;
     });
 
@@ -57,6 +64,25 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
       setNamespace(decodeURIComponent(searchParams.get("namespace")!));
     }
   }, [searchParams, setUrl, setNamespace]);
+
+  const erc20 = useMemo(() => {
+    const erc20Param = searchParams.get("erc20");
+    return [
+      ETH_CONTRACT_ADDRESS,
+      STRK_CONTRACT_ADDRESS,
+      ...(erc20Param
+        ? decodeURIComponent(erc20Param)
+            .split(",")
+            .filter(
+              (address) =>
+                ![
+                  getChecksumAddress(ETH_CONTRACT_ADDRESS),
+                  getChecksumAddress(STRK_CONTRACT_ADDRESS),
+                ].includes(getChecksumAddress(address)),
+            )
+        : []),
+    ];
+  }, [searchParams]);
 
   useEffect(() => {
     updateChainId();
@@ -88,8 +114,8 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const connection = connectToParent<ParentMethods>({
       methods: {
-        navigate: normalize(() => (tab: ProfileContextTypeVariant) => {
-          navigate(tab);
+        navigate: normalize(() => (path: string) => {
+          navigate(path);
           setIsVisible(true);
         }),
       },
@@ -104,7 +130,7 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
   }, [navigate, setIsVisible]);
 
   return (
-    <ConnectionContext.Provider value={{ ...state, setIsVisible }}>
+    <ConnectionContext.Provider value={{ ...state, erc20, setIsVisible }}>
       {children}
     </ConnectionContext.Provider>
   );
