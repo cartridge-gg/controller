@@ -206,10 +206,5 @@ export type ThemeValue<T> = T | { dark: T; light: T };
 export type Prefund = { address: string; min: string };
 
 export type Tokens = {
-  erc20?: ERC20[];
-};
-
-export type ERC20 = {
-  address: string;
-  logoUrl?: string;
+  erc20?: string[];
 };

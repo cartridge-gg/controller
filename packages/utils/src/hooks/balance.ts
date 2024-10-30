@@ -1,6 +1,6 @@
 import { useInterval } from "usehooks-ts";
 import { useMemo, useState } from "react";
-import { Provider } from "starknet";
+import { getChecksumAddress, Provider } from "starknet";
 import useSWR from "swr";
 import { ERC20, ERC20Metadata } from "../erc20";
 import { formatBalance } from "../currency";
@@ -13,42 +13,79 @@ export function useERC20Balance({
   interval,
 }: {
   address: string;
-  contractAddress: string;
+  contractAddress: string | string[];
   provider?: Provider;
-  interval?: number;
+  interval: number | undefined;
 }) {
-  const [meta, setMeta] = useState<ERC20Metadata>();
-
-  const [value, setValue] = useState<bigint>(0n);
-  const { isValidating, isLoading, error } = useSWR(
-    `balance:${contractAddress}:${address}`,
+  const { data: chainId } = useSWR(provider ? "chainId" : null, () =>
+    provider?.getChainId(),
+  );
+  const { data: ekuboMeta } = useSWR("ekuboMetadata", ERC20.fetchAllMetadata, {
+    fallbackData: [],
+  });
+  const { data: meta } = useSWR(
+    provider ? `erc20:metadata:${chainId}:${address}:${contractAddress}` : null,
     async () => {
-      if (!provider) return;
+      if (!provider) return [];
 
-      let m = meta;
-      if (!m) {
-        m = (
-          await new ERC20({
-            address: contractAddress,
+      const contractList = Array.isArray(contractAddress)
+        ? contractAddress
+        : [contractAddress];
+      const erc20List = await Promise.allSettled(
+        contractList.map((address) =>
+          new ERC20({
+            address,
             provider,
-            // TODO logoUrl
-          }).init()
-        ).metadata();
-        setMeta(m);
-      }
+            logoUrl: ekuboMeta.find(
+              (m) =>
+                getChecksumAddress(m.address) === getChecksumAddress(address),
+            )?.logoUrl,
+          }).init(),
+        ),
+      );
 
-      const balance = await m.instance.balanceOf(address);
-
-      setValue(balance);
+      return erc20List
+        .filter((res) => res.status === "fulfilled")
+        .map((erc20) => erc20.value.metadata());
     },
-    { refreshInterval: interval },
+    { fallbackData: [] },
   );
 
-  const formatted = useMemo(() => formatBalance(value), [value]);
+  const { data, isValidating, isLoading, error } = useSWR(
+    chainId && meta.length
+      ? `erc20:balance:${chainId}:${address}:${contractAddress}`
+      : null,
+    async () => {
+      if (!meta.length) return [];
+
+      const values = await Promise.allSettled(
+        meta.map((m) => m.instance.balanceOf(address)),
+      );
+
+      return meta.reduce<{ balance: Balance; meta: ERC20Metadata }[]>(
+        (prev, meta, i) => {
+          const res = values[i];
+          if (res.status === "rejected") return prev;
+
+          return [
+            ...prev,
+            {
+              balance: {
+                value: res.value,
+                formatted: formatBalance(res.value),
+              },
+              meta,
+            },
+          ];
+        },
+        [],
+      );
+    },
+    { refreshInterval: interval, fallbackData: [] },
+  );
 
   return {
-    balance: { value, formatted },
-    meta,
+    data,
     isFetching: isValidating,
     isLoading,
     error,

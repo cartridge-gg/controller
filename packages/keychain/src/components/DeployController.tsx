@@ -60,21 +60,24 @@ export function DeployController({
     }
   }, [deployHash, controller]);
 
-  const { balance: ethBalance, isLoading } = useERC20Balance({
+  const {
+    data: [eth],
+    isLoading,
+  } = useERC20Balance({
     address: controller.address,
     contractAddress: ETH_CONTRACT_ADDRESS,
     provider: controller,
     interval: 3000,
   });
   useEffect(() => {
-    if (!feeEstimate || accountState != "fund") return;
+    if (!feeEstimate || accountState != "fund" || !eth?.balance.value) return;
 
-    if (ethBalance.value >= BigInt(feeEstimate)) {
+    if (eth.balance.value >= BigInt(feeEstimate)) {
       setAccountState("deploy");
     } else {
       setAccountState("fund");
     }
-  }, [ethBalance, feeEstimate, accountState]);
+  }, [eth?.balance.value, feeEstimate, accountState]);
 
   const onDeploy = useCallback(async () => {
     try {
