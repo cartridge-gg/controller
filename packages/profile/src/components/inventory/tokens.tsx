@@ -6,17 +6,23 @@ import {
   SpinnerIcon,
   CoinsIcon,
 } from "@cartridge/ui-next";
-import { useAccount } from "@/hooks/context";
+import { useAccount, useConnection } from "@/hooks/context";
 import { Link } from "react-router-dom";
+import { useCreditBalance } from "@cartridge/utils";
 
 export function Tokens() {
-  const { credit, erc20, isFetching } = useAccount();
+  const { isVisible } = useConnection();
+  const { address, erc20 } = useAccount();
+  const credit = useCreditBalance({
+    address,
+    interval: isVisible ? 3000 : null,
+  });
 
   return (
     <Card>
       <CardHeader className="h-10 flex flex-row items-center justify-between">
         <CardTitle>Token</CardTitle>
-        {isFetching && <SpinnerIcon className="animate-spin" />}
+        {credit.isFetching && <SpinnerIcon className="animate-spin" />}
       </CardHeader>
 
       <Link to={`/token/credit`}>

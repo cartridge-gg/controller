@@ -22,6 +22,7 @@ import {
   isPublicChain,
   StarkscanUrl,
   useCountervalue,
+  useCreditBalance,
 } from "@cartridge/utils";
 import { constants } from "starknet";
 import { formatEther } from "viem";
@@ -40,7 +41,12 @@ export function Token() {
 
 function Credits() {
   const { parent } = useConnection();
-  const { username, credit } = useAccount();
+  const { username, address } = useAccount();
+  const { isVisible } = useConnection();
+  const credit = useCreditBalance({
+    address,
+    interval: isVisible ? 3000 : null,
+  });
 
   return (
     <LayoutContainer
