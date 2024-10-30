@@ -1,6 +1,6 @@
 import { useInterval } from "usehooks-ts";
 import { useMemo, useState } from "react";
-import { Provider } from "starknet";
+import { getChecksumAddress, Provider } from "starknet";
 import useSWR from "swr";
 import { ERC20, ERC20Metadata } from "../erc20";
 import { formatBalance } from "../currency";
@@ -20,6 +20,9 @@ export function useERC20Balance({
   const { data: chainId } = useSWR(provider ? "chainId" : null, () =>
     provider?.getChainId(),
   );
+  const { data: ekuboMeta } = useSWR("ekuboMetadata", ERC20.fetchAllMetadata, {
+    fallbackData: [],
+  });
   const { data: meta } = useSWR(
     provider ? `erc20:metadata:${chainId}:${address}:${contractAddress}` : null,
     async () => {
@@ -33,7 +36,10 @@ export function useERC20Balance({
           new ERC20({
             address,
             provider,
-            // TODO logoUrl
+            logoUrl: ekuboMeta.find(
+              (m) =>
+                getChecksumAddress(m.address) === getChecksumAddress(address),
+            )?.logoUrl,
           }).init(),
         ),
       );
