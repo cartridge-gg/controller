@@ -64,7 +64,7 @@ impl Controller {
         let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
         let salt = cairo_short_string_to_felt(&username).unwrap();
 
-        let factory = ControllerFactory::new(salt, chain_id, owner.clone(), provider.clone());
+        let factory = ControllerFactory::new(class_hash, chain_id, owner.clone(), provider.clone());
 
         let mut controller = Self {
             app_id: app_id.clone(),
