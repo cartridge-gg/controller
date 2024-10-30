@@ -24,12 +24,10 @@ export function useERC20Balance({
     fallbackData: [],
   });
   const { data: meta } = useSWR(
-    chainId && provider
+    chainId && ekuboMeta.length
       ? `erc20:metadata:${chainId}:${address}:${contractAddress}`
       : null,
     async () => {
-      if (!provider || !ekuboMeta.length) return [];
-
       const contractList = Array.isArray(contractAddress)
         ? contractAddress
         : [contractAddress];
@@ -54,12 +52,10 @@ export function useERC20Balance({
   );
 
   const { data, isValidating, isLoading, error } = useSWR(
-    chainId && meta.length
+    meta.length
       ? `erc20:balance:${chainId}:${address}:${contractAddress}`
       : null,
     async () => {
-      if (!meta.length) return [];
-
       const values = await Promise.allSettled(
         meta.map((m) => m.instance.balanceOf(address)),
       );
