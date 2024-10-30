@@ -1,18 +1,12 @@
-import {
-  createContext,
-  useState,
-  ReactNode,
-  useEffect,
-  useCallback,
-} from "react";
-import { useSearchParams } from "react-router-dom";
+import { useAddressByUsernameQuery } from "@cartridge/utils/api/cartridge";
+import { createContext, useState, ReactNode, useCallback } from "react";
 
 type AccountContextType = {
   address: string;
   username: string;
   namespace: string;
   isFetching: boolean;
-  setAccount: (account: { username: string; address: string }) => void;
+  setUsername: (username: string) => void;
 };
 
 const initialState: AccountContextType = {
@@ -20,42 +14,33 @@ const initialState: AccountContextType = {
   username: "",
   namespace: "",
   isFetching: false,
-  setAccount: () => {},
+  setUsername: () => {},
 };
 
 export const AccountContext = createContext<AccountContextType>(initialState);
 
 export function AccountProvider({ children }: { children: ReactNode }) {
-  const [searchParams] = useSearchParams();
   const [state, setState] = useState<AccountContextType>(initialState);
 
-  useEffect(() => {
-    setState((state) => {
-      const namespaceParam = searchParams.get("namespace");
-      if (namespaceParam) {
-        state.namespace = decodeURIComponent(namespaceParam);
-      }
-
-      return state;
-    });
-  }, [searchParams]);
-
-  const setAccount = useCallback(
-    ({ username, address }: { username: string; address: string }) => {
-      setState((state) => ({
-        ...state,
-        address,
-        username,
-      }));
-    },
-    [],
+  const { data } = useAddressByUsernameQuery(
+    { username: state.username },
+    { enabled: !!state.username },
   );
+  const address = data?.account?.controllers.edges?.[0]?.node?.address ?? "";
+
+  const setUsername = useCallback((username: string) => {
+    setState((state) => ({
+      ...state,
+      username,
+    }));
+  }, []);
 
   return (
     <AccountContext.Provider
       value={{
         ...state,
-        setAccount,
+        address,
+        setUsername,
       }}
     >
       {children}

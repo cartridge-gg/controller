@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import {
   AccountContext,
   ColorSchemeContext,
@@ -22,6 +22,14 @@ export function useConnection() {
 
 export function useAccount() {
   return useContext(AccountContext);
+}
+
+export function useUsernameEffect(username: string) {
+  const { setUsername } = useAccount();
+
+  useEffect(() => {
+    setUsername(username);
+  }, [username, setUsername]);
 }
 
 export function useToken(address: string) {

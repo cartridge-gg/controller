@@ -4,19 +4,19 @@ import { IFrame, IFrameOptions } from "./base";
 
 export type ProfileIFrameOptions = IFrameOptions<Profile> &
   ProfileOptions & {
-    username: string;
     rpcUrl: string;
     indexerUrl?: string;
     namespace?: string;
+    username: string;
   };
 
 export class ProfileIFrame extends IFrame<Profile> {
   constructor({
     profileUrl,
-    username,
+    rpcUrl,
     indexerUrl,
     namespace,
-    rpcUrl,
+    username,
     tokens,
     ...iframeOptions
   }: ProfileIFrameOptions) {
