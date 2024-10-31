@@ -1,9 +1,3 @@
-* * *
-
-title: React
-
-## sidebar_position: 1
-
 ### Installation
 
 Install the necessary packages:
@@ -31,7 +25,10 @@ const connector = new ControllerConnector();
 
 ### Configuring the Connector
 
-You can customize the `ControllerConnector` by providing configuration options during instantiation. The `ControllerConnector` accepts an options object that allows you to configure various settings such as policies, RPC URLs, theme, and more.
+You can customize the `ControllerConnector` by providing configuration options
+during instantiation. The `ControllerConnector` accepts an options object that
+allows you to configure various settings such as policies, RPC URLs, theme, and
+more.
 
 Here's an example:
 
@@ -95,7 +92,8 @@ function App() {
 
 ### Connecting a Wallet
 
-Use the `useConnect`, `useDisconnect`, and `useAccount` hooks to manage wallet connections:
+Use the `useConnect`, `useDisconnect`, and `useAccount` hooks to manage wallet
+connections:
 
 ```typescript
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
