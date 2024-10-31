@@ -35,6 +35,6 @@
     "prettier": "^2.7.1",
     "turbo": "^2.0.12",
     "vercel": "^37.4.2",
-    "@types/react": "^18.2.56"
+    "@types/react": "^18.3.12"
   }
 }
