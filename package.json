@@ -19,7 +19,7 @@
     "controller": "pnpm --filter @cartridge/controller",
     "connector": "pnpm --filter @cartridge/connector",
     "account-wasm": "pnpm --filter @cartridge/account-wasm",
-    "book": "pnpm --filter @cartridge/docs",
+    "book": "pnpm --filter @cartridge/documentation",
     "ui": "pnpm --filter @cartridge/ui",
     "ui:next": "pnpm --filter @cartridge/ui-next",
     "profil": "pnpm --filter @cartridge/profile",
