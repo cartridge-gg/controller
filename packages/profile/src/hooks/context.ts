@@ -1,9 +1,5 @@
-import { useContext, useEffect } from "react";
-import {
-  AccountContext,
-  ColorSchemeContext,
-  ConnectionContext,
-} from "@/components/context";
+import { useContext } from "react";
+import { ColorSchemeContext, ConnectionContext } from "@/components/context";
 import { getChecksumAddress } from "starknet";
 import { useERC20Balance } from "@cartridge/utils";
 
@@ -18,18 +14,6 @@ export function useColorScheme() {
 
 export function useConnection() {
   return useContext(ConnectionContext);
-}
-
-export function useAccount() {
-  return useContext(AccountContext);
-}
-
-export function useUsernameEffect(username: string) {
-  const { setUsername } = useAccount();
-
-  useEffect(() => {
-    setUsername(username);
-  }, [username, setUsername]);
 }
 
 export function useToken(address: string) {

@@ -16,7 +16,7 @@ import {
   ExternalIcon,
   Skeleton,
 } from "@cartridge/ui-next";
-import { useAccount, useConnection, useToken } from "@/hooks/context";
+import { useConnection, useToken } from "@/hooks/context";
 import {
   formatAddress,
   isPublicChain,
@@ -27,6 +27,7 @@ import {
 import { constants } from "starknet";
 import { formatEther } from "viem";
 import { CurrencyBase, CurrencyQuote } from "@cartridge/utils/api/cartridge";
+import { useAccount } from "@/hooks/account";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
@@ -40,9 +41,8 @@ export function Token() {
 }
 
 function Credits() {
-  const { parent } = useConnection();
+  const { parent, isVisible } = useConnection();
   const { username } = useAccount();
-  const { isVisible } = useConnection();
   const credit = useCreditBalance({
     username,
     interval: isVisible ? 3000 : undefined,
@@ -76,7 +76,7 @@ function Credits() {
       </LayoutContent>
 
       <LayoutFooter>
-        <Button onClick={() => parent.openPurchaseCredits().catch(() => {})}>
+        <Button onClick={() => parent.openPurchaseCredits().catch(() => { })}>
           Purchase
         </Button>
       </LayoutFooter>
@@ -86,9 +86,8 @@ function Credits() {
 
 function ERC20() {
   const { chainId } = useConnection();
-  const { address } = useParams<{ address: string }>();
+  const { username, address } = useAccount();
   const t = useToken(address!);
-  const { username } = useAccount();
   const { countervalue } = useCountervalue({
     balance: formatEther(t?.balance.value ?? 0n),
     quote: CurrencyQuote.Eth,
@@ -110,13 +109,12 @@ function ERC20() {
       }
     >
       <LayoutHeader
-        title={`${
-          t.balance === undefined ? (
+        title={`${t.balance === undefined ? (
             <Skeleton className="h-[20px] w-[120px] rounded" />
           ) : (
             t.balance.formatted
           )
-        } ${t.meta.symbol}`}
+          } ${t.meta.symbol}`}
         description={`${countervalue.formatted} ${CurrencyBase.Usd}`}
         icon={
           <img

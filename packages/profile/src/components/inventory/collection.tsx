@@ -1,4 +1,4 @@
-import { useParams, Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   ArrowIcon,
   Button,
@@ -16,11 +16,10 @@ import {
   LayoutFooter,
   LayoutHeader,
 } from "@/components/layout";
-import { useAccount } from "@/hooks/context";
+import { useAccount } from "@/hooks/account";
 
 export function Collection() {
-  const { address } = useParams<{ address: string }>();
-  const { username } = useAccount();
+  const { username, address } = useAccount();
   const [searchParams, setSearchParams] = useSearchParams();
   const c = {
     address,

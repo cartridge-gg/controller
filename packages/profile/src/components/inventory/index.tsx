@@ -11,7 +11,7 @@ import {
 } from "@/components/layout";
 // import { Collections } from "./collections";
 import { Tokens } from "./tokens";
-import { useAccount } from "@/hooks/context";
+import { useAccount } from "@/hooks/account";
 // import { Navigation } from "@/components/navigation";
 
 export function Inventory() {

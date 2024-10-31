@@ -11,7 +11,7 @@ import {
 } from "@cartridge/ui-next";
 import { ProfileContextTypeVariant } from "@cartridge/controller";
 import { Link, useMatch } from "react-router-dom";
-import { useAccount } from "@/hooks/context";
+import { useAccount } from "@/hooks/account";
 
 export function Navigation() {
   return (

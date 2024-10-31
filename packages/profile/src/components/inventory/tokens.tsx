@@ -5,7 +5,6 @@ import {
   CardTitle,
   SpinnerIcon,
 } from "@cartridge/ui-next";
-import { useAccount, useConnection } from "@/hooks/context";
 import { Link } from "react-router-dom";
 import {
   Balance,
@@ -18,6 +17,8 @@ import {
 import { formatEther } from "viem";
 import { CurrencyBase, CurrencyQuote } from "@cartridge/utils/api/cartridge";
 import { getChecksumAddress } from "starknet";
+import { useConnection } from "@/hooks/context";
+import { useAccount } from "@/hooks/account";
 
 export function Tokens() {
   const { isVisible, provider, erc20: contractAddress } = useConnection();
