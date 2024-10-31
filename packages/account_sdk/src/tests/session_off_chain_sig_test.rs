@@ -38,7 +38,7 @@ pub async fn test_verify_session_off_chain_sig(owner: Owner) {
     let signature = session_account.sign_typed_data(&typed_data).await.unwrap();
     let contract_reader = ControllerReader::new(controller.address, runner.client());
     contract_reader
-        .is_session_sigature_valid(&typed_data, &signature)
+        .is_session_signature_valid(&typed_data, &signature)
         .call()
         .await
         .unwrap();
@@ -98,7 +98,7 @@ pub async fn test_verify_session_off_chain_sig_invalid_policy() {
     if let Err(cainome::cairo_serde::Error::Provider(ProviderError::StarknetError(
         StarknetError::ContractError(c),
     ))) = contract_reader
-        .is_session_sigature_valid(&typed_data, &signature)
+        .is_session_signature_valid(&typed_data, &signature)
         .call()
         .await
     {

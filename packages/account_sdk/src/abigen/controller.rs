@@ -2361,7 +2361,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
-    pub fn is_session_sigature_valid(
+    pub fn is_session_signature_valid(
         &self,
         data: &Vec<TypedData>,
         token: &SessionToken,
@@ -2372,7 +2372,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
         __calldata.extend(SessionToken::cairo_serialize(token));
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
-            entry_point_selector: starknet::macros::selector!("is_session_sigature_valid"),
+            entry_point_selector: starknet::macros::selector!("is_session_signature_valid"),
             calldata: __calldata,
         };
         cainome::cairo_serde::call::FCall::new(__call, self.provider())
@@ -3010,7 +3010,7 @@ impl<P: starknet::providers::Provider + Sync> ControllerReader<P> {
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
-    pub fn is_session_sigature_valid(
+    pub fn is_session_signature_valid(
         &self,
         data: &Vec<TypedData>,
         token: &SessionToken,
@@ -3021,7 +3021,7 @@ impl<P: starknet::providers::Provider + Sync> ControllerReader<P> {
         __calldata.extend(SessionToken::cairo_serialize(token));
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
-            entry_point_selector: starknet::macros::selector!("is_session_sigature_valid"),
+            entry_point_selector: starknet::macros::selector!("is_session_signature_valid"),
             calldata: __calldata,
         };
         cainome::cairo_serde::call::FCall::new(__call, self.provider())

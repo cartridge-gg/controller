@@ -110,7 +110,7 @@ mod session_component {
 
             self.valid_session_cache.read((guid_or_address, session_hash))
         }
-        fn is_session_sigature_valid(
+        fn is_session_signature_valid(
             self: @ComponentState<TContractState>, data: Span<TypedData>, token: SessionToken
         ) -> bool {
             let mut data = data;
