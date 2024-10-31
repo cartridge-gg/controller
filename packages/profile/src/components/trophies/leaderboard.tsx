@@ -6,7 +6,7 @@ import {
 } from "@cartridge/ui-next";
 import { Link } from "react-router-dom";
 import { Player } from "@/hooks/achievements";
-import { useUsername } from "@/hooks/username";
+import { useUsername } from "@/hooks/account";
 
 export function Leaderboard({
   players,

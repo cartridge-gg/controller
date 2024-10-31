@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/utils",
-  "version": "0.5.0-alpha.4",
+  "version": "0.5.0-alpha.5",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -22,7 +22,6 @@
     "react-query": "^3.39.2",
     "starknet": "^6.11.0",
     "swr": "^2.2.5",
-    "usehooks-ts": "^2.9.1",
     "viem": "^1.21.4"
   },
   "devDependencies": {

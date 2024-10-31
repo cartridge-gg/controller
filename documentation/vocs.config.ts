@@ -1,5 +1,7 @@
 import { defineConfig } from "vocs";
 
+import packageJson from "./package.json";
+
 export default defineConfig({
     title: "Cartridge Controller",
     description: "Cartridge | Tools for onchain development",
@@ -24,7 +26,7 @@ export default defineConfig({
     },
     topNav: [
         {
-            text: "v0.5.0-alpha.4",
+            text: packageJson.version,
             items: [
                 {
                     text: "Releases",

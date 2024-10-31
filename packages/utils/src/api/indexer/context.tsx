@@ -1,18 +1,14 @@
 import { createContext, ReactNode, useCallback, useState } from "react";
 
 type IndexerAPIContextType = {
-  url: string;
-  namespace?: string;
+  indexerUrl: string;
   headers?: RequestInit["headers"],
-  setUrl: (url: string) => void
-  setNamespace: (namespace: string) => void
+  setIndexerUrl: (url: string) => void
 };
 
 const initialState: IndexerAPIContextType = {
-  url: "",
-  namespace: undefined,
-  setUrl: () => { },
-  setNamespace: () => { }
+  indexerUrl: "",
+  setIndexerUrl: () => { }
 };
 
 export const IndexerAPIContext = createContext<IndexerAPIContextType>(initialState);
@@ -20,15 +16,11 @@ export const IndexerAPIContext = createContext<IndexerAPIContextType>(initialSta
 export function IndexerAPIProvider({ headers, children }: { headers?: RequestInit["headers"]; children: ReactNode }) {
   const [state, setState] = useState({ ...initialState, headers })
 
-  const setUrl = useCallback((url: string) => {
-    setState(state => ({ ...state, url }))
-  }, [])
-
-  const setNamespace = useCallback((namespace: string) => {
-    setState(state => ({ ...state, namespace }))
+  const setIndexerUrl = useCallback((indexerUrl: string) => {
+    setState(state => ({ ...state, indexerUrl }))
   }, [])
 
   return (
-    <IndexerAPIContext.Provider value={{ ...state, setUrl, setNamespace }}>{children}</IndexerAPIContext.Provider>
+    <IndexerAPIContext.Provider value={{ ...state, setIndexerUrl }}>{children}</IndexerAPIContext.Provider>
   );
 }

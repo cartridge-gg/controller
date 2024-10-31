@@ -59,8 +59,7 @@ const controller = new ControllerConnector({
   profileUrl:
     process.env.NEXT_PUBLIC_PROFILE_DEPLOYMENT_URL ??
     process.env.NEXT_PUBLIC_PROFILE_FRAME_URL,
-  indexerUrl: "https://api.cartridge.gg/x/ls-erc/torii/graphql",
-  namespace: process.env.NEXT_PUBLIC_NAMESPACE,
+  // namespace: "namespace",
   // theme: "dope-wars",
   // colorMode: "light"
   tokens: {
