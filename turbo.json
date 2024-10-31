@@ -4,16 +4,21 @@
   "tasks": {
     "build:deps": {
       "dependsOn": ["^build:deps"],
-      "outputs": ["dist/**", "pkg/**"]
+      "outputs": [
+        "dist/**",
+        "!dist/documentation/**",
+        "pkg/**",
+        "!pkg/documentation/**"
+      ]
     },
     "build": {
       "dependsOn": ["^build:deps", "^build"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "outputs": [".next/**", "!.next/cache/**", "!documentation/**"]
     },
     "dev": {
       "persistent": true,
       "dependsOn": ["^build:deps"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "outputs": [".next/**", "!.next/cache/**", "!documentation/**"]
     },
     "storybook": {
       "persistent": true,

@@ -1,9 +1,6 @@
----
-title: Rust
-sidebar_position: 2
----
+# Rust
 
-### Installation
+## Installation
 
 Add the `account_sdk` crate to your `Cargo.toml`:
 
