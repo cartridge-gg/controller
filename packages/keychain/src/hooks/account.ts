@@ -111,25 +111,25 @@ const onLoginFinalize = (
   });
 };
 
-const beginRegistration = async (name: string): Promise<any> => {
+const beginRegistration = async (username: string): Promise<any> => {
   return doXHR(
     JSON.stringify({
       operationName: "BeginRegistration",
       query: BeginRegistrationDocument,
       variables: {
-        id: name,
+        username,
       },
     }),
   );
 };
 
-const beginLogin = async (name: string): Promise<any> => {
+const beginLogin = async (username: string): Promise<any> => {
   return doXHR(
     JSON.stringify({
       operationName: "BeginLogin",
       query: BeginLoginDocument,
       variables: {
-        id: name,
+        username,
       },
     }),
   );

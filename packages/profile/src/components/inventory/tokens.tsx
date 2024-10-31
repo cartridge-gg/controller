@@ -21,10 +21,10 @@ import { getChecksumAddress } from "starknet";
 
 export function Tokens() {
   const { isVisible, provider, erc20: contractAddress } = useConnection();
-  const { address } = useAccount();
+  const { address, username } = useAccount();
   const credit = useCreditBalance({
-    address,
-    interval: isVisible ? 3000 : null,
+    username,
+    interval: isVisible ? 3000 : undefined,
   });
 
   const erc20 = useERC20Balance({
