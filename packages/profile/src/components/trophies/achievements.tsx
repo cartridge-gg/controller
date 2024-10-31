@@ -1,4 +1,9 @@
-import { ChevronLeftIcon, ChevronRightIcon, cn } from "@cartridge/ui-next";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  StateIconProps,
+  cn,
+} from "@cartridge/ui-next";
 import { Achievement } from "./achievement";
 import { Item } from "@/hooks/achievements";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -35,23 +40,19 @@ export function Achievements({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-col gap-y-px rounded-md overflow-hidden">
-        <div className="h-10 bg-secondary p-3">
-          <p className="uppercase text-xs text-quaternary-foreground font-semibold tracking-wider">
-            Progression
-          </p>
+      <div className="h-8 bg-secondary py-2 px-3 flex items-center justify-between gap-4 rounded-md overflow-hidden">
+        <p className="uppercase text-xs text-quaternary-foreground font-semibold tracking-wider">
+          Total
+        </p>
+        <div className="h-4 grow flex flex-col justify-center items-start bg-quaternary rounded-xl p-1">
+          <div
+            style={{ width: `${Math.floor((100 * completed) / total)}%` }}
+            className={cn("grow bg-primary rounded-xl")}
+          />
         </div>
-        <div className="h-8 bg-secondary py-2 px-3 flex gap-4">
-          <div className="grow flex flex-col justify-center items-start bg-quaternary rounded-xl p-1">
-            <div
-              style={{ width: `${Math.floor((100 * completed) / total)}%` }}
-              className={cn("grow bg-primary rounded-xl")}
-            />
-          </div>
-          <p className="text-xs text-quaternary-foreground">
-            {`${completed} of ${total}`}
-          </p>
-        </div>
+        <p className="text-xs text-quaternary-foreground">
+          {`${completed} of ${total}`}
+        </p>
       </div>
       {Object.entries(groups).map(([group, items]) => (
         <Group
@@ -80,7 +81,6 @@ function Group({
   enabled: boolean;
   onPin: (id: string) => void;
 }) {
-  const [count, setCount] = useState(0);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
 
@@ -89,8 +89,6 @@ function Group({
     // Remove 1 to get the last completed achievement if softview is enabled
     const page = items.findIndex((a) => !a.completed);
     setPage(page === -1 ? items.length - 1 : page);
-    // Set the count to the number of completed achievements for this group
-    setCount(items.filter((a) => a.completed).length);
     // Set the total to the number of achievements for this group
     setTotal(items.length);
   }, [items]);
@@ -109,9 +107,9 @@ function Group({
         <Header
           group={group}
           page={page}
-          count={count}
           total={total}
           items={items}
+          setPage={setPage}
           handleNext={handleNext}
           handlePrevious={handlePrevious}
         />
@@ -157,72 +155,133 @@ function Group({
 function Header({
   group,
   page,
-  count,
   total,
   items,
+  setPage,
   handleNext,
   handlePrevious,
 }: {
   group: string;
   page: number;
-  count: number;
   total: number;
   items: Item[];
+  setPage: (page: number) => void;
   handleNext: () => void;
   handlePrevious: () => void;
 }) {
   return (
-    <div className="flex gap-x-px items-center h-10">
-      <div className="grow h-full p-3 bg-secondary">
+    <div className="flex gap-x-px items-center h-8">
+      <div className="grow h-full p-3 bg-secondary flex items-center">
         <p className="uppercase text-xs text-quaternary-foreground font-semibold tracking-wider">
           {group}
         </p>
       </div>
-      <div
-        className={cn(
-          "flex items-center justify-center h-full p-3 bg-secondary",
-          page !== 0 && "cursor-pointer",
-        )}
+      <Pagination
+        Icon={ChevronLeftIcon}
+        total={total}
         onClick={handlePrevious}
-      >
-        <ChevronLeftIcon
-          className={cn(
-            "text-quaternary-foreground h-4 w-4",
-            page === 0 && "opacity-50",
-          )}
-        />
-      </div>
-      <div
-        className={cn(
-          "flex items-center justify-center h-full p-3 bg-secondary",
-          page !== total - 1 && "cursor-pointer",
-        )}
+        disabled={page === 0}
+      />
+      <Pagination
+        Icon={ChevronRightIcon}
+        total={total}
         onClick={handleNext}
-      >
-        <ChevronRightIcon
-          className={cn(
-            "text-quaternary-foreground h-4 w-4",
-            page === total - 1 && "opacity-50",
-          )}
-        />
-      </div>
+        disabled={page === total - 1}
+      />
       <div className="flex items-center justify-center h-full p-3 bg-secondary gap-2">
-        <div className="flex items-center justify-center rounded-xl bg-quaternary p-1">
+        <div className="flex items-center justify-center rounded-xl bg-quaternary p-[3px]">
           <div className="flex items-center justify-center rounded-xl overflow-hidden gap-x-px">
             {items.map((item, index) => (
-              <div
+              <Page
                 key={index}
-                className={cn(
-                  "bg-primary h-2 w-2",
-                  item.completed ? "bg-primary" : "bg-muted",
-                  item.index === page ? "opacity-100" : "opacity-50",
-                )}
+                index={index}
+                completed={item.completed}
+                highlighted={item.index === page}
+                setPage={setPage}
               />
             ))}
           </div>
         </div>
-        <p className="text-xs text-quaternary-foreground">{`${count} of ${total}`}</p>
       </div>
     </div>
+  );
+}
+
+function Pagination({
+  Icon,
+  onClick,
+  disabled,
+}: {
+  Icon: React.ComponentType<StateIconProps>;
+  total: number;
+  onClick: () => void;
+  disabled: boolean;
+}) {
+  const [hover, setHover] = useState(false);
+
+  const handleMouseEnter = useCallback(() => {
+    setHover(true);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setHover(false);
+  }, []);
+
+  return (
+    <div
+      className={cn(
+        "flex items-center justify-center h-8 w-8 bg-secondary",
+        !disabled && "cursor-pointer",
+        hover && !disabled && "opacity-70",
+      )}
+      onClick={onClick}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <Icon
+        className={cn(
+          "text-quaternary-foreground h-4 w-4",
+          disabled && "opacity-50",
+        )}
+        variant="solid"
+      />
+    </div>
+  );
+}
+
+function Page({
+  index,
+  completed,
+  highlighted,
+  setPage,
+}: {
+  index: number;
+  completed: boolean;
+  highlighted: boolean;
+  setPage: (page: number) => void;
+}) {
+  const [hover, setHover] = useState(false);
+
+  const handleMouseEnter = useCallback(() => {
+    if (highlighted) return;
+    setHover(true);
+  }, [highlighted]);
+
+  const handleMouseLeave = useCallback(() => {
+    setHover(false);
+  }, [highlighted]);
+
+  return (
+    <div
+      className={cn(
+        "bg-primary h-[10px] w-[10px]",
+        hover && "cursor-pointer",
+        completed ? "bg-primary" : "bg-muted",
+        highlighted || hover ? "opacity-100" : "opacity-50",
+      )}
+      onClick={() => setPage(index)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    />
   );
 }
