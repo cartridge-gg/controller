@@ -41,10 +41,10 @@ export function Token() {
 
 function Credits() {
   const { parent } = useConnection();
-  const { username, address } = useAccount();
+  const { username } = useAccount();
   const { isVisible } = useConnection();
   const credit = useCreditBalance({
-    address,
+    username,
     interval: isVisible ? 3000 : null,
   });
 

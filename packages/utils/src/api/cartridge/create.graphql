@@ -1,5 +1,5 @@
-mutation BeginRegistration($id: String!) {
-  beginRegistration(id: $id)
+mutation BeginRegistration($username: String!) {
+  beginRegistration(username: $username)
 }
 
 mutation FinalizeRegistration($credentials: String!, $network: String!) {
@@ -20,29 +20,6 @@ mutation FinalizeRegistration($credentials: String!, $network: String!) {
       webauthn {
         id
         publicKey
-      }
-    }
-  }
-}
-
-query Account($id: ID!) {
-  account(id: $id) {
-    id
-    credentials {
-      webauthn {
-        id
-        publicKey
-      }
-    }
-    controllers {
-      edges {
-        node {
-          address
-          constructorCalldata
-          signers {
-            type
-          }
-        }
       }
     }
   }

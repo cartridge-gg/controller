@@ -22,9 +22,9 @@ import { getChecksumAddress } from "starknet";
 
 export function Tokens() {
   const { isVisible, provider, erc20: contractAddress } = useConnection();
-  const { address } = useAccount();
+  const { address, username } = useAccount();
   const credit = useCreditBalance({
-    address,
+    username,
     interval: isVisible ? 3000 : null,
   });
 

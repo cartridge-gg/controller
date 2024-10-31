@@ -17,7 +17,7 @@ type BalanceProps = {
 export function Balance({ showBalances }: BalanceProps) {
   const { controller } = useController();
   const { balance: creditBalance } = useCreditBalance({
-    address: controller.address,
+    username: controller.username(),
     interval: 3000,
   });
   const {

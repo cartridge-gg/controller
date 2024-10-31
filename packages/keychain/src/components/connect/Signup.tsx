@@ -162,7 +162,7 @@ export function Signup({
 
   // for polling approach when popup
   useAccountQuery(
-    { id: usernameField.value },
+    { username: usernameField.value },
     {
       enabled: isPopup,
       refetchIntervalInBackground: true,
@@ -174,6 +174,7 @@ export function Signup({
         try {
           const {
             account: {
+              username,
               credentials: {
                 webauthn: [{ id: credentialId, publicKey }],
               },

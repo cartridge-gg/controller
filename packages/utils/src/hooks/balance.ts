@@ -1,10 +1,10 @@
 import { useInterval } from "usehooks-ts";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { getChecksumAddress, Provider } from "starknet";
 import useSWR from "swr";
 import { ERC20, ERC20Metadata } from "../erc20";
 import { formatBalance } from "../currency";
-import { AccountInfoQuery, useAccountInfoQuery } from "../api/cartridge";
+import { CreditQuery, useCreditQuery } from "../api/cartridge";
 
 export function useERC20Balance({
   address,
@@ -106,27 +106,22 @@ export type UseCreditBalanceReturn = {
 } & FetchState;
 
 export function useCreditBalance({
-  address,
+  username,
   interval,
 }: {
-  address: string;
+  username: string;
   interval: number | null;
 }): UseCreditBalanceReturn {
-  const [value, setValue] = useState<bigint>(0n);
-
-  const { refetch, isFetching, isLoading, error } = useAccountInfoQuery<
-    AccountInfoQuery,
+  const { data, refetch, isFetching, isLoading, error } = useCreditQuery<
+    CreditQuery,
     Error
   >(
-    { address },
+    { username },
     {
       enabled: false,
-      onSuccess: async (data: AccountInfoQuery) => {
-        setValue(data.accounts?.edges?.[0]?.node?.credits ?? 0);
-      },
     },
   );
-
+  const value = data?.account?.credits ?? 0n;
   const formatted = useMemo(() => formatBalance(value), [value]);
 
   useInterval(refetch, interval);
