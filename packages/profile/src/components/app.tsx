@@ -22,6 +22,20 @@ export function App() {
         element={<Trophies />}
       />
       <Route path="/account/:username/activity" element={<Activity />} />
+      <Route path="/account/:username/slot/:namespace" element={<Account />} />
+      <Route
+        path="/account/:username/slot/:namespace/inventory"
+        element={<Inventory />}
+      />
+      <Route
+        path="/account/:username/slot/:namespace/trophies"
+        element={<Trophies />}
+      />
+      <Route
+        path="/account/:username/slot/:namespace/trophies/:address"
+        element={<Trophies />}
+      />
+      <Route path="/account/:username/activity" element={<Activity />} />
       <Route path="/token/:address" element={<Token />} />
       <Route path="/collection/:address" element={<Collection />} />
       <Route path="/collection/:address/:tokenId" element={<Asset />} />

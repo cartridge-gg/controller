@@ -30,8 +30,10 @@ function Item({
   Icon: React.ComponentType<StateIconProps>;
   variant: ProfileContextTypeVariant;
 }) {
-  const { username } = useAccount();
-  const match = useMatch(`/account/:username/${variant}`);
+  const { username, namespace } = useAccount();
+  const isPublic = useMatch(`/account/:username/${variant}`);
+  const isSlot = useMatch(`/account/:username/slot/:namespace/${variant}`);
+  const isActive = namespace ? isSlot : isPublic;
 
   return (
     <TooltipProvider>
@@ -40,11 +42,15 @@ function Item({
           <Link
             className={cn(
               "px-4 py-3 cursor-pointer hover:opacity-[0.8]",
-              match ? "bg-secondary" : "bg-background",
+              isActive ? "bg-secondary" : "bg-background",
             )}
-            to={`/account/${username}/${variant}`}
+            to={
+              namespace
+                ? `/account/${username}/${variant}`
+                : `/account/${username}/slot/${namespace}/${variant}`
+            }
           >
-            <Icon size="sm" variant={match ? "solid" : "line"} />
+            <Icon size="sm" variant={isActive ? "solid" : "line"} />
           </Link>
         </TooltipTrigger>
         <TooltipContent>
