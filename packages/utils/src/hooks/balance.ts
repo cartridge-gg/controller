@@ -1,4 +1,3 @@
-import { useInterval } from "usehooks-ts";
 import { useMemo } from "react";
 import { getChecksumAddress, Provider } from "starknet";
 import useSWR from "swr";
@@ -110,21 +109,20 @@ export function useCreditBalance({
   interval,
 }: {
   username: string;
-  interval: number | null;
+  interval: number | undefined;
 }): UseCreditBalanceReturn {
-  const { data, refetch, isFetching, isLoading, error } = useCreditQuery<
+  const { data, isFetching, isLoading, error } = useCreditQuery<
     CreditQuery,
     Error
   >(
     { username },
     {
       enabled: false,
+      refetchInterval: interval,
     },
   );
   const value = data?.account?.credits ?? 0n;
   const formatted = useMemo(() => formatBalance(value), [value]);
-
-  useInterval(refetch, interval);
 
   return {
     balance: {

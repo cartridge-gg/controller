@@ -25,7 +25,7 @@ export function Tokens() {
   const { address, username } = useAccount();
   const credit = useCreditBalance({
     username,
-    interval: isVisible ? 3000 : null,
+    interval: isVisible ? 3000 : undefined,
   });
 
   const { data: erc20 } = useERC20Balance({

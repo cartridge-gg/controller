@@ -45,7 +45,7 @@ function Credits() {
   const { isVisible } = useConnection();
   const credit = useCreditBalance({
     username,
-    interval: isVisible ? 3000 : null,
+    interval: isVisible ? 3000 : undefined,
   });
 
   return (

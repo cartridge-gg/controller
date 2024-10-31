@@ -49,7 +49,7 @@ export function validateUsernameFor(type: AuthAction) {
 
 export function fetchAccount(username: string) {
   return fetchData<AccountQuery, AccountQueryVariables>(AccountDocument, {
-    id: username,
+    username: username,
   });
 }
 
