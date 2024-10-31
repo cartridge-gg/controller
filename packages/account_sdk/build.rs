@@ -119,6 +119,28 @@ lazy_static! {{
     );
 
     fs::write("./src/artifacts.rs", artifacts).unwrap();
+    // Write artifacts to JSON file
+    let json_artifacts = serde_json::json!({
+        "versions": versions,
+        "latest_version": latest_version,
+        "controllers": versions.iter().map(|v| {
+            (v.to_string(), {
+                let path = format!("./artifacts/controller.{}.contract_class.json", v);
+                let class_hash = extract_class_hash(&PathBuf::from(&path));
+                let casm_hash = extract_compiled_class_hash(v);
+                serde_json::json!({  // <-- Add json! macro here
+                    "class_hash": format!("{:#x}", class_hash),
+                    "casm_hash": format!("{:#x}", casm_hash)
+                })
+            })
+        }).collect::<HashMap<_,_>>()
+    });
+
+    fs::write(
+        "./artifacts/metadata.json",
+        serde_json::to_string_pretty(&json_artifacts).unwrap(),
+    )
+    .unwrap();
 }
 
 fn extract_compiled_class_hash(version: &str) -> Felt {
