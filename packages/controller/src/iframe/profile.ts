@@ -21,8 +21,8 @@ export class ProfileIFrame extends IFrame<Profile> {
     const _profileUrl = profileUrl || PROFILE_URL;
     const _url = new URL(
       namespace
-        ? `${_profileUrl}/account/${username}`
-        : `${_profileUrl}/account/${username}/slot/${namespace}`,
+        ? `${_profileUrl}/account/${username}/slot/${namespace}`
+        : `${_profileUrl}/account/${username}`,
     );
     _url.searchParams.set("rpcUrl", encodeURIComponent(rpcUrl));
 

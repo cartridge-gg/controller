@@ -164,8 +164,8 @@ export default class ControllerProvider extends BaseProvider {
     const username = await this.username();
     this.profile.navigate(
       this.options.namespace
-        ? `/account/${username}/${tab}`
-        : `/account/${username}/slot/${this.options.namespace}/${tab}`,
+        ? `/account/${username}/slot/${this.options.namespace}/${tab}`
+        : `/account/${username}/${tab}`,
     );
     this.iframes.profile.open();
   }
