@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { TROPHY, PROGRESS } from "@/constants";
 import { useEvents } from "./events";
 import { Trophy, Progress } from "@/models";
+import { AchievementTask } from "@/components/trophies/achievement";
 
 // Number of events to fetch at a time, could be increased if needed
 const LIMIT = 100;
@@ -15,11 +16,11 @@ export interface Item {
   icon: string;
   title: string;
   description: string;
-  count: number;
   timestamp: number;
   percentage: string;
   completed: boolean;
   pinned: boolean;
+  tasks: AchievementTask[];
 }
 
 export interface Counters {
@@ -129,10 +130,11 @@ export function useAchievements({
     const achievements: Item[] = trophies
       .map((trophy) => {
         // Compute at which timestamp the achievement was completed
-        let count = 0;
         let timestamp = 0;
         let completed = true;
+        const tasks: AchievementTask[] = [];
         trophy.tasks.forEach((task) => {
+          let count = 0;
           let completion = false;
           counters[address]?.[task.id]
             ?.sort((a, b) => a.timestamp - b.timestamp)
@@ -151,6 +153,12 @@ export function useAchievements({
                 }
               },
             );
+          tasks.push({
+            id: task.id,
+            count,
+            total: task.total,
+            description: task.description,
+          });
           completed = completed && completion;
         });
         // Compute percentage of players who completed the achievement
@@ -159,13 +167,14 @@ export function useAchievements({
         );
         return {
           ...trophy,
-          count,
           completed,
           percentage,
           timestamp,
           pinned: false,
+          tasks,
         };
       })
+      .sort((a, b) => a.index - b.index) // Lowest index to greatest
       .sort((a, b) => (a.id > b.id ? 1 : -1)) // A to Z
       .sort((a, b) => (b.hidden ? -1 : 1) - (a.hidden ? -1 : 1)) // Visible to hidden
       .sort((a, b) => b.timestamp - a.timestamp) // Newest to oldest

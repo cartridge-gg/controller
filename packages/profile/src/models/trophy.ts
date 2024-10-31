@@ -50,8 +50,7 @@ export class Trophy {
   static parse(node: EventNode): Trophy {
     const descriptionIndex = 6;
     const descriptionLength = parseInt(node.data[descriptionIndex]);
-    const taskIndex =
-      8 + (descriptionLength ? descriptionLength + 1 : descriptionLength);
+    const taskIndex = descriptionIndex + descriptionLength + 3;
     // const tasksLength = parseInt(node.data[taskIndex]);
     const taskDescriptionIndex = taskIndex + 3;
     const taskDescriptionLength = parseInt(node.data[taskDescriptionIndex]);
