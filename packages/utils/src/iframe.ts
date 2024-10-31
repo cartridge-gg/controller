@@ -55,3 +55,7 @@ export function normalizeOrigin(src: string): string {
     port && port !== DEFAULT_PORT_BY_PROTOCOL[protocol] ? `:${port}` : "";
   return `${protocol}//${hostname}${portSuffix}`;
 }
+
+export function isIframe() {
+  return typeof window !== "undefined" ? window.top !== window.self : false;
+}

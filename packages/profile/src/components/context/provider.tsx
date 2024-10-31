@@ -3,7 +3,6 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { ColorSchemeProvider } from "./colorScheme";
 import { ConnectionProvider } from "./connection";
 import { BrowserRouter } from "react-router-dom";
-import { AccountProvider } from "./account";
 import { CartridgeAPIProvider } from "@cartridge/utils/api/cartridge";
 import { IndexerAPIProvider } from "@cartridge/utils/api/indexer";
 
@@ -18,9 +17,7 @@ export function Provider({ children }: PropsWithChildren) {
         >
           <IndexerAPIProvider>
             <QueryClientProvider client={queryClient}>
-              <ConnectionProvider>
-                <AccountProvider>{children}</AccountProvider>
-              </ConnectionProvider>
+              <ConnectionProvider>{children}</ConnectionProvider>
             </QueryClientProvider>
           </IndexerAPIProvider>
         </CartridgeAPIProvider>

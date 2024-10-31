@@ -52,7 +52,3 @@ export function fetchAccount(username: string) {
     username: username,
   });
 }
-
-export function isIframe() {
-  return typeof window !== "undefined" ? window.top !== window.self : false;
-}

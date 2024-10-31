@@ -5,7 +5,6 @@ import {
   CardTitle,
   SpinnerIcon,
 } from "@cartridge/ui-next";
-import { useAccount, useConnection } from "@/hooks/context";
 import { Link } from "react-router-dom";
 import {
   Balance,
@@ -13,26 +12,22 @@ import {
   ETH_CONTRACT_ADDRESS,
   useCountervalue,
   useCreditBalance,
-  useERC20Balance,
 } from "@cartridge/utils";
 import { formatEther } from "viem";
 import { CurrencyBase, CurrencyQuote } from "@cartridge/utils/api/cartridge";
 import { getChecksumAddress } from "starknet";
+import { useConnection } from "@/hooks/context";
+import { useAccount } from "@/hooks/account";
+import { useTokens } from "@/hooks/token";
 
 export function Tokens() {
-  const { isVisible, provider, erc20: contractAddress } = useConnection();
-  const { address, username } = useAccount();
+  const { isVisible } = useConnection();
+  const { username } = useAccount();
   const credit = useCreditBalance({
     username,
     interval: isVisible ? 3000 : undefined,
   });
-
-  const erc20 = useERC20Balance({
-    address,
-    contractAddress,
-    provider,
-    interval: isVisible ? 3000 : undefined,
-  });
+  const erc20 = useTokens();
 
   return (
     <Card>
@@ -42,7 +37,7 @@ export function Tokens() {
           (erc20.isFetching && <SpinnerIcon className="animate-spin" />)}
       </CardHeader>
 
-      {/* <Link to={`/token/credit`}>
+      {/* <Link to={`${location.pathname}/token/credit`} state={{ back: location.pathname }}>
         <CardContent className="bg-background flex items-center p-0 h-full gap-0.5">
           <div className="bg-secondary flex h-full aspect-square items-center justify-center">
             <CoinsIcon variant="solid" size="sm" />
@@ -62,7 +57,10 @@ export function Tokens() {
       </Link> */}
 
       {erc20.data.map((t) => (
-        <Link key={t.meta.address} to={`/token/${t.meta.address}`}>
+        <Link
+          key={t.meta.address}
+          to={`${location.pathname}/token/${t.meta.address}`}
+        >
           <TokenCardContent token={t} />
         </Link>
       ))}

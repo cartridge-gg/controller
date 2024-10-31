@@ -168,8 +168,6 @@ export type KeychainOptions = IFrameOptions & {
 export type ProfileOptions = IFrameOptions & {
   /** The URL of profile. Mainly for internal development purpose */
   profileUrl?: string;
-  /** The URL of Torii indexer. Will be mandatory once profile page is in production */
-  indexerUrl?: string;
   /** The namespace to use to fetch trophies data from indexer. Will be mandatory once profile page is in production */
   namespace?: string;
   /** The tokens to be listed on Inventory modal */

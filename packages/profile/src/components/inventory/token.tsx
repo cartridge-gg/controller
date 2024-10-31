@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import {
   LayoutContainer,
   LayoutContent,
@@ -16,7 +16,7 @@ import {
   ExternalIcon,
   Skeleton,
 } from "@cartridge/ui-next";
-import { useAccount, useConnection, useToken } from "@/hooks/context";
+import { useConnection } from "@/hooks/context";
 import {
   formatAddress,
   isPublicChain,
@@ -27,6 +27,8 @@ import {
 import { constants } from "starknet";
 import { formatEther } from "viem";
 import { CurrencyBase, CurrencyQuote } from "@cartridge/utils/api/cartridge";
+import { useAccount } from "@/hooks/account";
+import { useToken } from "@/hooks/token";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
@@ -40,9 +42,9 @@ export function Token() {
 }
 
 function Credits() {
-  const { parent } = useConnection();
+  const { parent, isVisible } = useConnection();
+  const location = useLocation();
   const { username } = useAccount();
-  const { isVisible } = useConnection();
   const credit = useCreditBalance({
     username,
     interval: isVisible ? 3000 : undefined,
@@ -51,7 +53,7 @@ function Credits() {
   return (
     <LayoutContainer
       left={
-        <Link to={`/account/${username}/inventory`}>
+        <Link to={location.pathname.split("/").slice(0, -2).join("/")}>
           <Button variant="icon" size="icon">
             <ArrowIcon variant="left" />
           </Button>
@@ -87,8 +89,8 @@ function Credits() {
 function ERC20() {
   const { chainId } = useConnection();
   const { address } = useParams<{ address: string }>();
-  const t = useToken(address!);
-  const { username } = useAccount();
+  const location = useLocation();
+  const t = useToken({ tokenAddress: address! });
   const { countervalue } = useCountervalue({
     balance: formatEther(t?.balance.value ?? 0n),
     quote: CurrencyQuote.Eth,
@@ -102,7 +104,7 @@ function ERC20() {
   return (
     <LayoutContainer
       left={
-        <Link to={`/account/${username}/inventory`}>
+        <Link to={location.pathname.split("/").slice(0, -2).join("/")}>
           <Button variant="icon" size="icon">
             <ArrowIcon variant="left" />
           </Button>
