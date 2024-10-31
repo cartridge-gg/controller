@@ -126,7 +126,7 @@ export function Signup({
       );
       const {
         finalizeRegistration: {
-          id: username,
+          username,
           controllers,
           credentials: { webauthn },
         },
@@ -158,7 +158,7 @@ export function Signup({
       setIsRegistering(false);
       setError(e);
     }
-  }, [usernameField, chainId, initController, doPopup]);
+  }, [usernameField, initController, doPopup]);
 
   // for polling approach when popup
   useAccountQuery(

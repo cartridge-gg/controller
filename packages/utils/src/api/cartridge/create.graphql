@@ -4,7 +4,7 @@ mutation BeginRegistration($username: String!) {
 
 mutation FinalizeRegistration($credentials: String!, $network: String!) {
   finalizeRegistration(credentials: $credentials, network: $network) {
-    id
+    username
     controllers {
       edges {
         node {
