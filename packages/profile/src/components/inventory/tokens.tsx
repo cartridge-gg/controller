@@ -96,10 +96,10 @@ function TokenCardContent({
         {/* TODO: Enable countervalue for currencies other than ETH */}
         {getChecksumAddress(token.meta.address) ===
           getChecksumAddress(ETH_CONTRACT_ADDRESS) && (
-            <div className="text-xs text-muted-foreground">
-              ${countervalue.formatted}
-            </div>
-          )}
+          <div className="text-xs text-muted-foreground">
+            ${countervalue.formatted}
+          </div>
+        )}
       </div>
     </CardContent>
   );

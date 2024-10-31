@@ -53,7 +53,7 @@ function Credits() {
   return (
     <LayoutContainer
       left={
-        <Link to={location.pathname.split("/").slice(-1).join("")}>
+        <Link to={location.pathname.split("/").slice(0, -2).join("/")}>
           <Button variant="icon" size="icon">
             <ArrowIcon variant="left" />
           </Button>
@@ -78,7 +78,7 @@ function Credits() {
       </LayoutContent>
 
       <LayoutFooter>
-        <Button onClick={() => parent.openPurchaseCredits().catch(() => { })}>
+        <Button onClick={() => parent.openPurchaseCredits().catch(() => {})}>
           Purchase
         </Button>
       </LayoutFooter>
@@ -104,7 +104,7 @@ function ERC20() {
   return (
     <LayoutContainer
       left={
-        <Link to={location.pathname.split("/").slice(-1).join("")}>
+        <Link to={location.pathname.split("/").slice(0, -2).join("/")}>
           <Button variant="icon" size="icon">
             <ArrowIcon variant="left" />
           </Button>
@@ -112,12 +112,13 @@ function ERC20() {
       }
     >
       <LayoutHeader
-        title={`${t.balance === undefined ? (
-          <Skeleton className="h-[20px] w-[120px] rounded" />
-        ) : (
-          t.balance.formatted
-        )
-          } ${t.meta.symbol}`}
+        title={`${
+          t.balance === undefined ? (
+            <Skeleton className="h-[20px] w-[120px] rounded" />
+          ) : (
+            t.balance.formatted
+          )
+        } ${t.meta.symbol}`}
         description={`${countervalue.formatted} ${CurrencyBase.Usd}`}
         icon={
           <img

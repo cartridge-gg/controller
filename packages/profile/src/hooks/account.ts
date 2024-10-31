@@ -14,7 +14,7 @@ export function useUsername({ address }: { address: string }) {
     },
   );
 
-  return { username: data?.accounts?.edges?.[0]?.node?.id ?? "" };
+  return { username: data?.accounts?.edges?.[0]?.node?.username ?? "" };
 }
 
 export function useAccount() {
