@@ -22,7 +22,7 @@ export function useAccount() {
   const { setIndexerUrl } = useIndexerAPI();
   const username = params.username ?? "";
   const { data } = useAddressByUsernameQuery(
-    { username: username },
+    { username },
     { enabled: !!username },
   );
 

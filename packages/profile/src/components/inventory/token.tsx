@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import {
   LayoutContainer,
   LayoutContent,
@@ -16,7 +16,7 @@ import {
   ExternalIcon,
   Skeleton,
 } from "@cartridge/ui-next";
-import { useConnection, useToken } from "@/hooks/context";
+import { useConnection } from "@/hooks/context";
 import {
   formatAddress,
   isPublicChain,
@@ -28,6 +28,7 @@ import { constants } from "starknet";
 import { formatEther } from "viem";
 import { CurrencyBase, CurrencyQuote } from "@cartridge/utils/api/cartridge";
 import { useAccount } from "@/hooks/account";
+import { useToken } from "@/hooks/token";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
@@ -42,6 +43,7 @@ export function Token() {
 
 function Credits() {
   const { parent, isVisible } = useConnection();
+  const location = useLocation();
   const { username } = useAccount();
   const credit = useCreditBalance({
     username,
@@ -51,7 +53,7 @@ function Credits() {
   return (
     <LayoutContainer
       left={
-        <Link to={`/account/${username}/inventory`}>
+        <Link to={location.pathname.split("/").slice(-1).join("")}>
           <Button variant="icon" size="icon">
             <ArrowIcon variant="left" />
           </Button>
@@ -86,8 +88,9 @@ function Credits() {
 
 function ERC20() {
   const { chainId } = useConnection();
-  const { username, address } = useAccount();
-  const t = useToken(address!);
+  const { address } = useParams<{ address: string }>();
+  const location = useLocation();
+  const t = useToken({ tokenAddress: address! });
   const { countervalue } = useCountervalue({
     balance: formatEther(t?.balance.value ?? 0n),
     quote: CurrencyQuote.Eth,
@@ -101,7 +104,7 @@ function ERC20() {
   return (
     <LayoutContainer
       left={
-        <Link to={`/account/${username}/inventory`}>
+        <Link to={location.pathname.split("/").slice(-1).join("")}>
           <Button variant="icon" size="icon">
             <ArrowIcon variant="left" />
           </Button>
@@ -110,10 +113,10 @@ function ERC20() {
     >
       <LayoutHeader
         title={`${t.balance === undefined ? (
-            <Skeleton className="h-[20px] w-[120px] rounded" />
-          ) : (
-            t.balance.formatted
-          )
+          <Skeleton className="h-[20px] w-[120px] rounded" />
+        ) : (
+          t.balance.formatted
+        )
           } ${t.meta.symbol}`}
         description={`${countervalue.formatted} ${CurrencyBase.Usd}`}
         icon={

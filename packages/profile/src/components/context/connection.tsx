@@ -9,6 +9,7 @@ import {
 } from "react";
 import {
   ETH_CONTRACT_ADDRESS,
+  isIframe,
   normalize,
   STRK_CONTRACT_ADDRESS,
 } from "@cartridge/utils";
@@ -34,7 +35,7 @@ const initialState: ConnectionContextType = {
   provider: new RpcProvider({ nodeUrl: import.meta.env.VITE_RPC_SEPOLIA }),
   chainId: "",
   erc20: [],
-  isVisible: false,
+  isVisible: !isIframe(),
   setIsVisible: () => {},
 };
 

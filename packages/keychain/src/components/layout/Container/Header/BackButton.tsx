@@ -1,6 +1,6 @@
 import { ArrowLeftIcon } from "@cartridge/ui";
+import { isIframe } from "@cartridge/utils";
 import { IconButton } from "@chakra-ui/react";
-import { isIframe } from "components/connect/utils";
 
 export function BackButton({ onClick }: { onClick?: () => void }) {
   if (!isIframe()) {
