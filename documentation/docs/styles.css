@@ -1,0 +1,50 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
+@layer vocs_preflight {
+    @tailwind base;
+}
+@tailwind components;
+@tailwind utilities;
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: "Roboto", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+}
+
+body {
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+}
+
+.vocs_ExternalLink::after {
+    width: 0;
+    margin: 0;
+}
+
+.vocs_Sidebar_divider {
+    display: none;
+}
+
+.vocs_Header {
+    border-bottom: none;
+}
+
+.vocs_Header:not(:last-child) {
+    padding-bottom: 0;
+}
+
+:not(.vocs_Header) + .vocs_H2:not(:only-child),
+.vocs_Sidebar_navigation
+    > .vocs_Sidebar_group
+    > .vocs_Sidebar_section
+    + .vocs_Sidebar_section {
+    border-top: none;
+}

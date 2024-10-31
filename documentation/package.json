@@ -1,18 +1,23 @@
 {
-  "name": "documentation",
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vocs dev",
-    "build": "vocs build",
-    "preview": "vocs preview"
-  },
-  "dependencies": {
-    "@types/react": "latest",
-    "react": "latest",
-    "react-dom": "latest",
-    "typescript": "latest",
-    "vocs": "latest",
-    "yaml": "^2.3.4"
-  }
+    "name": "documentation",
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vocs dev",
+        "build": "vocs build",
+        "preview": "vocs preview"
+    },
+    "dependencies": {
+        "@cartridge/connector": "^0.3.46",
+        "@starknet-react/chains": "^0.1.3",
+        "@starknet-react/core": "^3.0.2",
+        "@types/react": "^18.2.21",
+        "react": "latest",
+        "react-dom": "latest",
+        "react-router-dom": "^6.27.0",
+        "starknet": "^6.11.0",
+        "typescript": "^5.4.5",
+        "vocs": "latest",
+        "yaml": "^2.3.4"
+    }
 }

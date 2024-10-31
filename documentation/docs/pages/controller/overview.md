@@ -1,31 +1,39 @@
 # Overview
 
-![Cartridge Controller Overview](/controller.png)
+### TL;DR: Cartridge Controller is:
 
-Cartridge Controller is a gaming-specific smart contract wallet designed to
-provide seamless player onboarding and game interactions while maintaining
-compatibility with other wallets that implement the plugin account architecture.
+-   A gaming-focused smart contract wallet
+-   Makes Web3 gaming accessible and fun via Session Keys
+-   Handles player onboarding and transaction management
+-   Provides identity and customization features for games
+-   Compatible with other wallets that implement the plugin account architecture
+
+![Cartridge Controller Overview](/controller.png)
 
 ## Key Features
 
 ### Simple & Secure
 
-- Utilizes Passkeys and Starter Packs for effortless player onboarding
-- Provides self-custodial embedded wallets tailored for your game
+-   Passwordless authentication using Passkeys for one-click onboarding
+-   Self-custodial embedded wallets that put players in control
+-   Built-in security features to protect player assets
 
 ### Designed for Fun
 
-- Implements session keys, allowing players to focus on gameplay
-- Securely authorizes games to submit transactions on behalf of users
-- Leverages the Cartridge Paymaster to cover execution costs
+-   Session keys eliminate transaction popups during gameplay
+-   Secure transaction delegation lets games submit actions on behalf of players
+-   Free transactions through the Cartridge Paymaster so players focus on playing
 
 ### Customizable
 
-- Adapts to your game's needs
-- Customize look and feel through themes
-- Dynamically render assets, quests, and player activity
+-   Flexible architecture adapts to your game's specific requirements
+-   Full theme customization to match your game's branding
+-   Dynamic UI components for displaying game assets, quests and achievements
+-   Extensible plugin system for adding custom functionality
 
 ### Identity and Reputation
 
-- Offers a portable identity for players across games
-- Enables quest completion, achievement earning, and reputation accrual
+-   Universal player identity that works across all Cartridge-enabled games
+-   Built-in achievement system for tracking player accomplishments
+-   Reputation system that grows as players engage with games
+-   Social features to connect players and build communities

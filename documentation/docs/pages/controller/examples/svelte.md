@@ -1,45 +1,52 @@
----
-title: Svelte
-sidebar_position: 3
----
+# Svelte
 
-### Installation
+## Installation
 
-Install the necessary packages:
+:::code-group
 
-```sh
-# Using npm
+```bash [npm]
 npm install @cartridge/controller starknet
-# Using yarn
-yarn add @cartridge/controller starknet
-# Using pnpm
-pnpm add @cartridge/controller starknet
 ```
 
-### Setting Up the Controller
+```bash [pnpm]
+pnpm install @cartridge/controller starknet
+```
+
+```bash [yarn]
+yarn add @cartridge/controller starknet
+```
+
+```bash [bun]
+bun add @cartridge/controller starknet
+```
+
+:::
+
+## Setting Up the Controller
 
 Import the `Controller` and create an instance:
 
 ```typescript
 // src/routes/+page.svelte
-import { onMount } from 'svelte';
-import Controller from '@cartridge/controller';
-import { account, username } from '../stores/account';
-import { ETH_CONTRACT } from '../constants';
+import { onMount } from "svelte";
+import Controller from "@cartridge/controller";
+import { account, username } from "../stores/account";
+import { ETH_CONTRACT } from "../constants";
 
 let controller = new Controller({
     policies: [
         {
             target: ETH_CONTRACT,
-            method: 'approve',
-            description: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.'
+            method: "approve",
+            description:
+                "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
         },
         {
             target: ETH_CONTRACT,
-            method: 'transfer'
+            method: "transfer",
         },
         // ... other policies
-    ]
+    ],
     // rpc: "https://api.cartridge.gg/x/starknet/mainnet" // sepolia, mainnet, or slot. (default sepolia)
 });
 ```
