@@ -2,4 +2,4 @@ packages:
   - examples/starknet-react-next
   - examples/svelte
   - packages/*
-  # - documentation
+  - documentation
