@@ -121,7 +121,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
 
 const controller = new ControllerConnector({
   policies,
-  rpc,
+  rpcUrl: rpc,
   url:
     process.env.NEXT_PUBLIC_KEYCHAIN_DEPLOYMENT_URL ??
     process.env.NEXT_PUBLIC_KEYCHAIN_FRAME_URL,

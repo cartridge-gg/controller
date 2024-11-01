@@ -5,6 +5,7 @@ import { KEYCHAIN_URL } from "../constants";
 import BaseProvider from "../provider";
 import { toWasmPolicies } from "../utils";
 import { SessionPolicies } from "@cartridge/presets";
+import { AddStarknetChainParameters } from "@starknet-io/types-js";
 
 interface SessionRegistration {
   username: string;
@@ -26,14 +27,15 @@ export default class SessionProvider extends BaseProvider {
   public name = "Controller Session";
 
   protected _chainId: string;
-
+  protected _rpcUrl: string;
   protected _username?: string;
   protected _redirectUrl: string;
   protected _policies: SessionPolicies;
 
   constructor({ rpc, chainId, policies, redirectUrl }: SessionOptions) {
-    super({ rpc });
+    super();
 
+    this._rpcUrl = rpc;
     this._chainId = chainId;
     this._redirectUrl = redirectUrl;
     this._policies = policies;
@@ -76,12 +78,20 @@ export default class SessionProvider extends BaseProvider {
       this._redirectUrl
     }&redirect_query_name=startapp&policies=${JSON.stringify(
       this._policies,
-    )}&rpc_url=${this.rpc}`;
+    )}&rpc_url=${this._rpcUrl}`;
 
     localStorage.setItem("lastUsedConnector", this.id);
     window.open(url, "_blank");
 
     return;
+  }
+
+  switchStarknetChain(_chainId: string): Promise<boolean> {
+    throw new Error("switchStarknetChain not implemented");
+  }
+
+  addStarknetChain(_chain: AddStarknetChainParameters): Promise<boolean> {
+    throw new Error("addStarknetChain not implemented");
   }
 
   disconnect(): Promise<void> {
@@ -127,7 +137,7 @@ export default class SessionProvider extends BaseProvider {
 
     this._username = sessionRegistration.username;
     this.account = new SessionAccount(this, {
-      rpcUrl: this.rpc.toString(),
+      rpcUrl: this._rpcUrl,
       privateKey: signer.privKey,
       address: sessionRegistration.address,
       ownerGuid: sessionRegistration.ownerGuid,
