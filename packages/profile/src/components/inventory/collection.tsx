@@ -1,4 +1,9 @@
-import { useParams, Link, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import {
   ArrowIcon,
   Button,
@@ -19,6 +24,7 @@ import {
 
 export function Collection() {
   const { address } = useParams<{ address: string }>();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const c = {
     address,
@@ -43,11 +49,13 @@ export function Collection() {
   return (
     <LayoutContainer
       left={
-        <Link to="/inventory">
-          <Button variant="icon" size="icon">
-            <ArrowIcon variant="left" />
-          </Button>
-        </Link>
+        location.state?.back && (
+          <Link to={location.state.back}>
+            <Button variant="icon" size="icon">
+              <ArrowIcon variant="left" />
+            </Button>
+          </Link>
+        )
       }
     >
       <LayoutHeader
@@ -80,6 +88,7 @@ export function Collection() {
               <Link
                 className="w-full aspect-square group"
                 to={`/collection/${c.address}/${a.tokenId}`}
+                state={location.state}
                 key={a.tokenId}
               >
                 <Card

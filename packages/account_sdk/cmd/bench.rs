@@ -97,7 +97,7 @@ async fn main() {
 
     let _ = controller
         .create_session(
-            vec![Policy::new(contract_address, selector!("flip"))],
+            vec![Policy::new_call(contract_address, selector!("flip"))],
             u32::MAX as u64,
         )
         .await

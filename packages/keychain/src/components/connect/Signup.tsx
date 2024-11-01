@@ -20,7 +20,6 @@ import { constants } from "starknet";
 
 export function Signup({
   prefilledName = "",
-  isSlot,
   onSuccess,
   onLogin,
 }: SignupProps) {
@@ -127,7 +126,7 @@ export function Signup({
       );
       const {
         finalizeRegistration: {
-          id: username,
+          username,
           controllers,
           credentials: { webauthn },
         },
@@ -159,11 +158,11 @@ export function Signup({
       setIsRegistering(false);
       setError(e);
     }
-  }, [usernameField, chainId, initController, doPopup]);
+  }, [usernameField, initController, doPopup]);
 
   // for polling approach when popup
   useAccountQuery(
-    { id: usernameField.value },
+    { username: usernameField.value },
     {
       enabled: isPopup,
       refetchIntervalInBackground: true,
@@ -175,6 +174,7 @@ export function Signup({
         try {
           const {
             account: {
+              username,
               credentials: {
                 webauthn: [{ id: credentialId, publicKey }],
               },
@@ -233,7 +233,7 @@ export function Signup({
           />
         </Content>
 
-        <Footer isSlot={isSlot} isSignup showCatridgeLogo>
+        <Footer showCatridgeLogo>
           {error && (
             <ErrorAlert
               title="Signup failed"

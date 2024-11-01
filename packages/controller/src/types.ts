@@ -114,9 +114,10 @@ export interface Keychain {
   delegateAccount(): string;
   username(): string;
   fetchControllers(contractAddresses: string[]): Promise<ControllerAccounts>;
+  openPurchaseCredits(): void;
 }
 export interface Profile {
-  navigate(tab: ProfileContextTypeVariant): void;
+  navigate(path: string): void;
 }
 
 export interface Modal {
@@ -167,8 +168,8 @@ export type KeychainOptions = IFrameOptions & {
 export type ProfileOptions = IFrameOptions & {
   /** The URL of profile. Mainly for internal development purpose */
   profileUrl?: string;
-  /** The URL of Torii indexer. Will be mandatory once profile page is in production */
-  indexerUrl?: string;
+  /** The namespace to use to fetch trophies data from indexer. Will be mandatory once profile page is in production */
+  namespace?: string;
   /** The tokens to be listed on Inventory modal */
   tokens?: Tokens;
 };
@@ -203,10 +204,5 @@ export type ThemeValue<T> = T | { dark: T; light: T };
 export type Prefund = { address: string; min: string };
 
 export type Tokens = {
-  erc20?: ERC20[];
-};
-
-export type ERC20 = {
-  address: string;
-  logoUrl?: string;
+  erc20?: string[];
 };

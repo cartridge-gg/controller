@@ -7,11 +7,10 @@ import {
   LogoutCtx,
   OpenSettingsCtx,
 } from "utils/connection";
-import { getChainName } from "@cartridge/utils";
+import { getChainName, isIframe } from "@cartridge/utils";
 import { RpcProvider, constants } from "starknet";
 import { Policy, Prefund, ResponseCodes } from "@cartridge/controller";
 import { mergeDefaultETHPrefund } from "utils/token";
-import { isIframe } from "components/connect/utils";
 import { setIsSignedUp } from "utils/cookie";
 import {
   ConnectionContext,
@@ -104,6 +103,7 @@ export function useConnectionValue() {
     const connection = connectToController<ParentMethods>({
       setOrigin,
       setRpcUrl,
+      setPolicies,
       setContext,
       setController,
     });

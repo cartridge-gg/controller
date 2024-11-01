@@ -1,13 +1,15 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@cartridge/ui-next";
 
 export function Collections() {
+  const location = useLocation();
   return (
     <div className="grid grid-cols-2 gap-2 place-items-center">
       {collections.map((c) => (
         <Link
           className="w-full aspect-square group"
           to={`/collection/${c.address}`}
+          state={{ back: location.pathname }}
           key={c.address}
         >
           <Card className="w-full h-full">

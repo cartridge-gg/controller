@@ -1,25 +1,29 @@
 export * from "./types";
 
+import { Policy } from "@cartridge/controller";
 import { connectToParent } from "@cartridge/penpal";
-import { normalize } from "@cartridge/utils";
 import Controller from "utils/controller";
 import { connectFactory } from "./connect";
 import { execute } from "./execute";
+import { estimateDeclareFee, estimateInvokeFee } from "./estimate";
 import { probeFactory } from "./probe";
 import { signMessageFactory } from "./sign";
 import { fetchControllers } from "./fetchControllers";
 import { ConnectionCtx } from "./types";
 import { deployFactory } from "./deploy";
 import { openSettingsFactory } from "./settings";
+import { normalize } from "@cartridge/utils";
 
 export function connectToController<ParentMethods extends {}>({
   setOrigin,
   setRpcUrl,
+  setPolicies,
   setContext,
   setController,
 }: {
   setOrigin: (origin: string) => void;
   setRpcUrl: (url: string) => void;
+  setPolicies: (policies: Policy[]) => void;
   setContext: (ctx: ConnectionCtx) => void;
   setController: (controller: Controller) => void;
 }) {
@@ -29,15 +33,16 @@ export function connectToController<ParentMethods extends {}>({
         connectFactory({
           setOrigin,
           setRpcUrl,
+          setPolicies,
           setContext,
         }),
       ),
       deploy: () => deployFactory(setContext),
-
       execute: () => execute({ setContext }),
-      signMessage: () => signMessageFactory(setContext),
-
+      estimateDeclareFee: () => estimateDeclareFee,
+      estimateInvokeFee: () => estimateInvokeFee,
       probe: normalize(probeFactory({ setController, setRpcUrl })),
+      signMessage: () => signMessageFactory(setContext),
       openSettings: () => openSettingsFactory(setContext),
       reset: () => () => setContext(undefined),
       fetchControllers: fetchControllers,
@@ -51,6 +56,14 @@ export function connectToController<ParentMethods extends {}>({
       },
       username: () => () => window.controller?.username(),
       delegateAccount: () => () => window.controller?.delegateAccount(),
+      openPurchaseCredits: () => () => {
+        setContext({
+          origin,
+          type: "open-purchase-credits",
+          resolve: () => Promise.resolve(),
+          reject: () => Promise.reject(),
+        });
+      },
     },
   });
 }

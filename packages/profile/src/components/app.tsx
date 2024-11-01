@@ -1,4 +1,5 @@
-import { Route, Routes, Navigate, useSearchParams } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
+import { Account } from "@/components/account";
 import {
   Inventory,
   Collection,
@@ -10,24 +11,45 @@ import { Trophies } from "@/components/trophies";
 import { Activity } from "@/components/activity";
 
 export function App() {
-  const [searchParams] = useSearchParams();
-
   return (
     <Routes>
+      <Route path="/" element={null} />
+      <Route path="/account/:username" element={<Account />} />
+      <Route path="/account/:username/inventory" element={<Inventory />} />
       <Route
-        path="/"
-        element={
-          <Navigate to={`/inventory?${searchParams.toString()}`} replace />
-        }
+        path="/account/:username/inventory/token/:address"
+        element={<Token />}
       />
-      <Route path="/inventory" element={<Inventory />} />
-      <Route path="/token/:address" element={<Token />} />
+      <Route path="/account/:username/trophies" element={<Trophies />} />
+      <Route
+        path="/account/:username/trophies/:address"
+        element={<Trophies />}
+      />
+      <Route path="/account/:username/activity" element={<Activity />} />
+      <Route path="/account/:username/slot/:namespace" element={<Account />} />
+      <Route
+        path="/account/:username/slot/:namespace/inventory"
+        element={<Inventory />}
+      />
+      <Route
+        path="/account/:username/slot/:namespace/inventory/token/:address"
+        element={<Token />}
+      />
+      <Route
+        path="/account/:username/slot/:namespace/trophies"
+        element={<Trophies />}
+      />
+      <Route
+        path="/account/:username/slot/:namespace/trophies/:address"
+        element={<Trophies />}
+      />
+      <Route
+        path="/account/:username/slot/:namespace/activity"
+        element={<Activity />}
+      />
       <Route path="/collection/:address" element={<Collection />} />
       <Route path="/collection/:address/:tokenId" element={<Asset />} />
       <Route path="/collection/:address/send" element={<Send />} />
-      <Route path="/trophies" element={<Trophies />} />
-      <Route path="/trophies/:address" element={<Trophies />} />
-      <Route path="/activity" element={<Activity />} />
     </Routes>
   );
 }

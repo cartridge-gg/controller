@@ -10,7 +10,8 @@ import {
   TrophyIcon,
 } from "@cartridge/ui-next";
 import { ProfileContextTypeVariant } from "@cartridge/controller";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useMatch } from "react-router-dom";
+import { useAccount } from "@/hooks/account";
 
 export function Navigation() {
   return (
@@ -29,11 +30,10 @@ function Item({
   Icon: React.ComponentType<StateIconProps>;
   variant: ProfileContextTypeVariant;
 }) {
-  const location = useLocation();
-
-  const isActive =
-    location.pathname.startsWith(`/${variant}`) ||
-    (variant === "inventory" && location.pathname === "/");
+  const { username, namespace } = useAccount();
+  const isPublic = useMatch(`/account/:username/${variant}`);
+  const isSlot = useMatch(`/account/:username/slot/:namespace/${variant}`);
+  const isActive = namespace ? isSlot : isPublic;
 
   return (
     <TooltipProvider>
@@ -44,7 +44,11 @@ function Item({
               "px-4 py-3 cursor-pointer hover:opacity-[0.8]",
               isActive ? "bg-secondary" : "bg-background",
             )}
-            to={`/${variant}`}
+            to={
+              namespace
+                ? `/account/${username}/${variant}`
+                : `/account/${username}/slot/${namespace}/${variant}`
+            }
           >
             <Icon size="sm" variant={isActive ? "solid" : "line"} />
           </Link>

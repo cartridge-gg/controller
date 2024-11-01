@@ -6,7 +6,7 @@ import {
   LayoutHeader,
 } from "@/components/layout";
 import { Navigation } from "@/components/navigation";
-import { useAccount } from "@/hooks/context";
+import { useAccount } from "@/hooks/account";
 
 export function Activity() {
   const { address, username } = useAccount();

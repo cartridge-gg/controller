@@ -69,21 +69,19 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    if (
-      this.options.profileUrl &&
-      this.options.indexerUrl &&
-      !this.iframes.profile
-    ) {
+    if (this.options.profileUrl && !this.iframes.profile) {
       const username = await this.keychain.username();
+
       this.iframes.profile = new ProfileIFrame({
         profileUrl: this.options.profileUrl,
-        indexerUrl: this.options.indexerUrl,
-        address: this.account?.address,
-        username,
         rpcUrl: this.rpc.toString(),
+        username,
         tokens: this.options.tokens,
         onConnect: (profile) => {
           this.profile = profile;
+        },
+        methods: {
+          openPurchaseCredits: this.openPurchaseCredits.bind(this),
         },
       });
     }
@@ -153,17 +151,22 @@ export default class ControllerProvider extends BaseProvider {
     return this.keychain.disconnect();
   }
 
-  openProfile(tab: ProfileContextTypeVariant = "inventory") {
-    if (!this.options.indexerUrl) {
-      console.error("`indexerUrl` option is required to open profile");
-      return;
-    }
+  async openProfile(tab: ProfileContextTypeVariant = "inventory") {
     if (!this.profile || !this.iframes.profile) {
       console.error("Profile is not ready");
       return;
     }
+    if (!this.account) {
+      console.error("Account is not ready");
+      return;
+    }
 
-    this.profile.navigate(tab);
+    const username = await this.username();
+    this.profile.navigate(
+      this.options.namespace
+        ? `/account/${username}/slot/${this.options.namespace}/${tab}`
+        : `/account/${username}/${tab}`,
+    );
     this.iframes.profile.open();
   }
 
@@ -207,6 +210,20 @@ export default class ControllerProvider extends BaseProvider {
     }
 
     return this.keychain.fetchControllers(contractAddresses);
+  }
+
+  openPurchaseCredits() {
+    if (!this.keychain || !this.iframes.keychain) {
+      console.error(new NotReadyToConnect().message);
+      return;
+    }
+    if (!this.iframes.profile) {
+      console.error("Profile is not ready");
+      return;
+    }
+    this.iframes.profile.close();
+    this.iframes.keychain.open();
+    this.keychain.openPurchaseCredits();
   }
 
   async delegateAccount() {

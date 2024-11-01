@@ -58,7 +58,7 @@ export const semanticTokens = {
       foreground: "#005299",
     },
     warning: {
-      background: "#fac400",
+      foreground: "#fac400",
     },
     error: {
       background: "#f9b9b9",
@@ -82,7 +82,7 @@ export const semanticTokens = {
         _light: "blueGray.300",
       },
       tertiary: {
-        default: "darkGray.500",
+        default: "darkGray.400",
         _light: "blueGray.400",
       },
       accent: {

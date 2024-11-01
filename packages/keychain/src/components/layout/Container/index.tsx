@@ -46,7 +46,7 @@ export const FOOTER_HEIGHT = 40;
 export const PORTAL_WINDOW_HEIGHT = 600;
 
 function Wrapper({
-  variant = "expanded",
+  variant = "compressed",
   children,
   ...rest
 }: React.PropsWithChildren & { variant?: LayoutVariant }) {
