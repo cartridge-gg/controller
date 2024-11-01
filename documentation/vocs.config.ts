@@ -1,12 +1,14 @@
 import { defineConfig } from "vocs";
+import svgr from "vite-plugin-svgr";
 
 import packageJson from "./package.json";
 
 export default defineConfig({
-  title: "Cartridge Controller",
-  description: "Cartridge | Tools for onchain development",
-  iconUrl: "/Cartridge.svg",
-  logoUrl: "/Cartridge.svg",
+  title: "Cartridge Documentation",
+  description:
+    "High Performance Infrastructure for Provable Games and Applications",
+  iconUrl: "/icon.svg",
+  logoUrl: "/cartridge.svg",
   ogImageUrl:
     "https://og-image.preview.cartridge.gg/api/cartridge?logo=%https://www.dojoengine.org/dojo-icon.svg&title=%title&description=%description",
 
@@ -57,11 +59,11 @@ export default defineConfig({
 
   // Banner configuration
   banner: {
-    dismissable: false,
-    backgroundColor: "red",
+    dismissable: true,
+    backgroundColor: "#ffc52a",
     content: "Join us in [Discord](https://discord.gg/cartridge)!",
-    height: "28px",
-    textColor: "white",
+    height: "35px",
+    textColor: "rgb(26, 28, 27)",
   },
   sidebar: [
     {
@@ -133,4 +135,9 @@ export default defineConfig({
       ],
     },
   ],
+
+  // Vite configuration
+  vite: {
+    plugins: [svgr()],
+  },
 });
