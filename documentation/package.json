@@ -19,5 +19,8 @@
     "starknet": "^6.11.0",
     "vocs": "1.0.0-alpha.55",
     "yaml": "^2.3.4"
+  },
+  "devDependencies": {
+    "vite-plugin-svgr": "^4.2.0"
   }
 }

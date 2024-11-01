@@ -1,0 +1,19 @@
+{
+    "redirects": [
+        {
+            "source": "/examples/telegram",
+            "destination": "/controller/examples/telegram",
+            "permanent": true
+        },
+        {
+            "source": "/controller",
+            "destination": "/controller/overview",
+            "permanent": false
+        },
+        {
+            "source": "/slot",
+            "destination": "/slot/getting-started",
+            "permanent": false
+        }
+    ]
+}
