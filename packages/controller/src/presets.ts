@@ -143,7 +143,7 @@ export const defaultPresets: ControllerThemePresets = {
     icon: "/whitelabel/zkube/icon.png",
     cover: "/whitelabel/zkube/cover.png",
     colors: {
-      primary: "##5bc3e6",
+      primary: "#5bc3e6",
     },
   },
 };
