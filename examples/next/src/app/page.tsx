@@ -1,13 +1,12 @@
 import { Transfer } from "components/Transfer";
 import { ManualTransferEth } from "components/ManualTransferEth";
-import { ConnectWallet } from "components/ConnectWallet";
 import { InvalidTxn } from "components/InvalidTxn";
 import { SignMessage } from "components/SignMessage";
 import { DelegateAccount } from "components/DelegateAccount";
 import { ColorModeToggle } from "components/ColorModeToggle";
 import { Profile } from "components/Profile";
-import { Settings } from "components/Settings";
 import { LookupControllers } from "components/LookupControllers";
+import Header from "components/Header";
 
 export default function Home() {
   return (
@@ -18,8 +17,7 @@ export default function Home() {
         </h2>
         <ColorModeToggle />
       </div>
-      <ConnectWallet />
-      <Settings />
+      <Header />
       <Profile />
       <Transfer />
       <ManualTransferEth />

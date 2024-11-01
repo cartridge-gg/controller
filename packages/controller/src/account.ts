@@ -27,12 +27,13 @@ class ControllerAccount extends WalletAccount {
 
   constructor(
     provider: BaseProvider,
+    rpcUrl: string,
     address: string,
     keychain: AsyncMethodReturns<Keychain>,
     options: KeychainOptions,
     modal: Modal,
   ) {
-    super({ nodeUrl: provider.rpc.toString() }, provider);
+    super({ nodeUrl: rpcUrl }, provider);
 
     this.address = address;
     this.keychain = keychain;

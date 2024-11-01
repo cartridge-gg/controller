@@ -7,6 +7,7 @@ import {
 } from "starknet";
 import {
   AddInvokeTransactionResult,
+  ChainId,
   Signature,
   TypedData,
 } from "@starknet-io/types-js";
@@ -17,6 +18,7 @@ import {
   Policy,
   SessionPolicies,
 } from "@cartridge/presets";
+import { RequestFn } from "@starknet-io/types-js";
 
 export type Session = {
   chainId: constants.StarknetChainId;
@@ -133,7 +135,10 @@ export interface Keychain {
   fetchControllers(contractAddresses: string[]): Promise<ControllerAccounts>;
   openPurchaseCredits(): void;
   openExecute(calls: Call[]): Promise<void>;
+
+  request: RequestFn;
 }
+
 export interface Profile {
   navigate(path: string): void;
 }
@@ -161,9 +166,13 @@ export type IFrameOptions = {
   colorMode?: ColorMode;
 };
 
+export type Chain = {
+  rpcUrl: string;
+};
+
 export type ProviderOptions = {
-  /** The URL of the RPC */
-  rpc: string;
+  defaultChainId: ChainId;
+  chains: Chain[];
 };
 
 export type KeychainOptions = IFrameOptions & {

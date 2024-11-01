@@ -13,20 +13,61 @@ import {
   Profile,
   IFrames,
   ProfileContextTypeVariant,
+  Chain,
 } from "./types";
 import BaseProvider from "./provider";
-import { WalletAccount } from "starknet";
+import { constants, WalletAccount } from "starknet";
 import { Policy } from "@cartridge/presets";
+import { AddStarknetChainParameters, ChainId } from "@starknet-io/types-js";
 
 export default class ControllerProvider extends BaseProvider {
   private keychain?: AsyncMethodReturns<Keychain>;
   private profile?: AsyncMethodReturns<Profile>;
   private options: ControllerOptions;
   private iframes: IFrames;
+  private selectedChain: ChainId;
+  private chains: Map<ChainId, Chain>;
 
   constructor(options: ControllerOptions) {
-    const { rpc } = options;
-    super({ rpc });
+    super();
+
+    const chains = new Map<ChainId, Chain>();
+
+    for (const chain of options.chains) {
+      let chainId: ChainId | undefined;
+      const url = new URL(chain.rpcUrl);
+      const parts = url.pathname.split("/");
+
+      if (parts.includes("starknet")) {
+        if (parts.includes("mainnet")) {
+          chainId = constants.StarknetChainId.SN_MAIN;
+        } else if (parts.includes("sepolia")) {
+          chainId = constants.StarknetChainId.SN_SEPOLIA;
+        }
+      } else if (parts.length >= 3) {
+        const projectName = parts[2];
+        if (parts.includes("katana")) {
+          chainId = `WP_${projectName.toUpperCase()}` as ChainId;
+        } else if (parts.includes("mainnet")) {
+          chainId = `GG_${projectName.toUpperCase()}` as ChainId;
+        }
+      }
+
+      if (!chainId) {
+        throw new Error(`Chain ${chain.rpcUrl} not supported`);
+      }
+
+      chains.set(chainId, chain);
+    }
+
+    this.chains = chains;
+    this.selectedChain = options.defaultChainId;
+
+    if (!this.chains.has(this.selectedChain)) {
+      throw new Error(
+        `Chain ${this.selectedChain} not found in configured chains`,
+      );
+    }
 
     this.iframes = {
       keychain: new KeychainIFrame({
@@ -54,12 +95,11 @@ export default class ControllerProvider extends BaseProvider {
         return;
       }
 
-      const response = (await this.keychain.probe(
-        this.rpc.toString(),
-      )) as ProbeReply;
+      const response = (await this.keychain.probe(this.rpcUrl())) as ProbeReply;
 
       this.account = new ControllerAccount(
         this,
+        this.rpcUrl(),
         response.address,
         this.keychain,
         this.options,
@@ -83,7 +123,7 @@ export default class ControllerProvider extends BaseProvider {
           openPurchaseCredits: () => this.openPurchaseCredits.bind(this),
           openExecute: () => this.openExecute.bind(this),
         },
-        rpcUrl: this.rpc.toString(),
+        rpcUrl: this.rpcUrl(),
         username,
         version: this.version,
       });
@@ -114,7 +154,7 @@ export default class ControllerProvider extends BaseProvider {
     try {
       let response = await this.keychain.connect(
         this.options.policies || [],
-        this.rpc.toString(),
+        this.rpcUrl(),
       );
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
@@ -123,6 +163,7 @@ export default class ControllerProvider extends BaseProvider {
       response = response as ConnectReply;
       this.account = new ControllerAccount(
         this,
+        this.rpcUrl(),
         response.address,
         this.keychain,
         this.options,
@@ -135,6 +176,14 @@ export default class ControllerProvider extends BaseProvider {
     } finally {
       this.iframes.keychain.close();
     }
+  }
+
+  switchStarknetChain(_chainId: string): Promise<boolean> {
+    return Promise.resolve(true);
+  }
+
+  addStarknetChain(_chain: AddStarknetChainParameters): Promise<boolean> {
+    return Promise.resolve(true);
   }
 
   async disconnect() {
@@ -195,6 +244,10 @@ export default class ControllerProvider extends BaseProvider {
     }
 
     return this.keychain.revoke(origin);
+  }
+
+  rpcUrl(): string {
+    return this.chains.get(this.selectedChain)!.rpcUrl;
   }
 
   username() {
