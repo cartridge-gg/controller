@@ -9,7 +9,7 @@ use crate::{
     account::{
         outside_execution::{OutsideExecution, OutsideExecutionAccount, OutsideExecutionCaller},
         outside_execution_v2::OutsideExecutionV2,
-        session::hash::Policy,
+        session::policy::Policy,
     },
     controller::Controller,
     errors::ControllerError,

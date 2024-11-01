@@ -9,7 +9,7 @@ use starknet_crypto::{poseidon_hash_many, Felt};
 
 use crate::{
     abigen::controller::ControllerReader,
-    account::session::{hash::Policy, TypedData},
+    account::session::{policy::Policy, TypedData},
     artifacts::Version,
     signers::{Owner, Signer},
     tests::runners::katana::KatanaRunner,

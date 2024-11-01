@@ -4,15 +4,15 @@ use starknet::core::types::{Call, Felt, InvokeTransactionResult};
 use starknet::signers::{SigningKey, VerifyingKey};
 
 use crate::abigen::controller::{Signer as AbigenSigner, SignerSignature, StarknetSigner};
-use crate::account::session::hash::{Policy, Session};
-use crate::account::session::SessionAccount;
+use crate::account::session::account::SessionAccount;
+use crate::account::session::hash::Session;
+use crate::account::session::policy::Policy;
 use crate::controller::Controller;
 use crate::errors::ControllerError;
 use crate::hash::MessageHashRev1;
 use crate::signers::{HashSigner, Signer};
 use crate::storage::StorageBackend;
 use crate::storage::{selectors::Selectors, Credentials, SessionMetadata};
-use crate::utils::time::get_current_timestamp;
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 #[path = "session_test.rs"]
@@ -44,7 +44,7 @@ impl Controller {
             guardian,
         )?;
         let hash = session
-            .raw()
+            .inner
             .get_message_hash_rev_1(self.chain_id, self.address);
         let authorization = self.owner.sign(&hash).await?;
         let authorization = Vec::<SignerSignature>::cairo_serialize(&vec![authorization.clone()]);
@@ -75,7 +75,7 @@ impl Controller {
 
     pub fn register_session_call(
         &mut self,
-        methods: Vec<Policy>,
+        policies: Vec<Policy>,
         expires_at: u64,
         public_key: Felt,
         guardian: Felt,
@@ -84,10 +84,10 @@ impl Controller {
         let signer = AbigenSigner::Starknet(StarknetSigner {
             pubkey: NonZero::new(pubkey.scalar()).unwrap(),
         });
-        let session = Session::new(methods, expires_at, &signer, guardian)?;
+        let session = Session::new(policies, expires_at, &signer, guardian)?;
         let call = self
             .contract()
-            .register_session_getcall(&session.raw(), &self.owner_guid());
+            .register_session_getcall(&session.into(), &self.owner_guid());
 
         Ok(call)
     }
@@ -111,13 +111,13 @@ impl Controller {
 
         let call = self
             .contract()
-            .register_session_getcall(&session.raw(), &self.owner_guid());
+            .register_session_getcall(&session.clone().into(), &self.owner_guid());
         let txn = self.execute(vec![call], max_fee).await?;
 
         self.storage.set_session(
             &Selectors::session(&self.address, &self.app_id, &self.chain_id),
             SessionMetadata {
-                session: session.clone(),
+                session,
                 max_fee: None,
                 credentials: None,
                 is_registered: true,
@@ -137,36 +137,8 @@ impl Controller {
             .session(&key)
             .ok()
             .flatten()
-            .and_then(|metadata| {
-                let current_timestamp = get_current_timestamp();
-
-                let session_key_guid = if let Some(public_key) = public_key {
-                    let pubkey = VerifyingKey::from_scalar(public_key);
-                    AbigenSigner::Starknet(StarknetSigner {
-                        pubkey: NonZero::new(pubkey.scalar()).unwrap(),
-                    })
-                    .into()
-                } else if let Some(credentials) = &metadata.credentials {
-                    let signer = SigningKey::from_secret_scalar(credentials.private_key);
-                    AbigenSigner::Starknet(StarknetSigner {
-                        pubkey: NonZero::new(signer.verifying_key().scalar()).unwrap(),
-                    })
-                    .into()
-                } else {
-                    return None;
-                };
-
-                if metadata.session.expires_at > current_timestamp
-                    && metadata.session.session_key_guid == session_key_guid
-                    && policies
-                        .iter()
-                        .all(|policy| metadata.session.is_authorized(policy))
-                {
-                    Some((key, metadata))
-                } else {
-                    None
-                }
-            })
+            .filter(|metadata| metadata.is_valid(policies, public_key))
+            .map(|metadata| (key, metadata))
     }
 
     pub fn session_account(&self, calls: &[Call]) -> Option<SessionAccount> {

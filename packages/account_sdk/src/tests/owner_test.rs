@@ -1,6 +1,6 @@
 use crate::{
     abigen::erc_20::Erc20,
-    account::session::hash::Policy,
+    account::session::policy::Policy,
     artifacts::{Version, CONTROLLERS},
     controller::Controller,
     signers::{
