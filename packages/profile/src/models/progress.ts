@@ -20,10 +20,10 @@ export class Progress {
 
   static parse(node: EventNode): Progress {
     return {
-      player: node.keys[1],
-      task: shortString.decodeShortString(node.keys[2]),
-      count: parseInt(node.data[0]),
-      timestamp: parseInt(node.data[1]),
+      player: node.data[1],
+      task: shortString.decodeShortString(node.data[2]),
+      count: parseInt(node.data[4]),
+      timestamp: parseInt(node.data[5]),
     };
   }
 }

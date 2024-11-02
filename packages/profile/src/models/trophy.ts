@@ -48,20 +48,22 @@ export class Trophy {
   }
 
   static parse(node: EventNode): Trophy {
-    const descriptionIndex = 6;
+    const descriptionIndex = 9;
     const descriptionLength = parseInt(node.data[descriptionIndex]);
     const taskIndex = descriptionIndex + descriptionLength + 3;
     // const tasksLength = parseInt(node.data[taskIndex]);
     const taskDescriptionIndex = taskIndex + 3;
     const taskDescriptionLength = parseInt(node.data[taskDescriptionIndex]);
+    console.log("description", descriptionIndex, descriptionLength);
+    console.log("task", taskIndex, taskDescriptionIndex, taskDescriptionLength);
     return {
-      id: shortString.decodeShortString(node.keys[1]),
-      hidden: !parseInt(node.data[0]) ? false : true,
-      index: parseInt(node.data[1]),
-      earning: parseInt(node.data[2]),
-      group: shortString.decodeShortString(node.data[3]),
-      icon: shortString.decodeShortString(node.data[4]),
-      title: shortString.decodeShortString(node.data[5]),
+      id: shortString.decodeShortString(node.data[1]),
+      hidden: !parseInt(node.data[3]) ? false : true,
+      index: parseInt(node.data[4]),
+      earning: parseInt(node.data[5]),
+      group: shortString.decodeShortString(node.data[6]),
+      icon: shortString.decodeShortString(node.data[7]),
+      title: shortString.decodeShortString(node.data[8]),
       description: byteArray.stringFromByteArray({
         data: descriptionLength
           ? node.data.slice(
