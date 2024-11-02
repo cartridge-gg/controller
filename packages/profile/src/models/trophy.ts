@@ -54,8 +54,6 @@ export class Trophy {
     // const tasksLength = parseInt(node.data[taskIndex]);
     const taskDescriptionIndex = taskIndex + 3;
     const taskDescriptionLength = parseInt(node.data[taskDescriptionIndex]);
-    console.log("description", descriptionIndex, descriptionLength);
-    console.log("task", taskIndex, taskDescriptionIndex, taskDescriptionLength);
     return {
       id: shortString.decodeShortString(node.data[1]),
       hidden: !parseInt(node.data[3]) ? false : true,
