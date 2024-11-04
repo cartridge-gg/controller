@@ -18,7 +18,11 @@ export function useUsername({ address }: { address: string }) {
 }
 
 export function useAccount() {
-  const params = useParams<{ username: string; namespace?: string }>();
+  const params = useParams<{
+    username: string;
+    project?: string;
+    namespace?: string;
+  }>();
   const { setIndexerUrl } = useIndexerAPI();
   const username = params.username ?? "";
   const { data } = useAddressByUsernameQuery(
@@ -27,19 +31,19 @@ export function useAccount() {
   );
 
   useEffect(() => {
-    if (!params.namespace) {
+    if (!params.project) {
       setIndexerUrl("");
       return;
     }
 
     const url = import.meta.env.PROD
       ? `${import.meta.env.VITE_CARTRIDGE_API_URL}/x/slot/${
-          params.namespace
+          params.project
         }/graphql`
-      : "http://localhost:8080";
+      : "http://localhost:8080/graphql";
 
     setIndexerUrl(url);
-  }, [params.namespace, setIndexerUrl]);
+  }, [params.project, setIndexerUrl]);
 
   return {
     username,

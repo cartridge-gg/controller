@@ -20,31 +20,32 @@ export function App() {
         path="/account/:username/inventory/token/:address"
         element={<Token />}
       />
-      <Route path="/account/:username/trophies" element={<Trophies />} />
-      <Route
+      {/* Trophy won't work without slot + namespace param for now */}
+      {/* <Route path="/account/:username/trophies" element={<Trophies />} /> */}
+      {/* <Route
         path="/account/:username/trophies/:address"
         element={<Trophies />}
-      />
+      /> */}
       <Route path="/account/:username/activity" element={<Activity />} />
-      <Route path="/account/:username/slot/:namespace" element={<Account />} />
+      <Route path="/account/:username/slot/:project" element={<Account />} />
       <Route
-        path="/account/:username/slot/:namespace/inventory"
+        path="/account/:username/slot/:project/inventory"
         element={<Inventory />}
       />
       <Route
-        path="/account/:username/slot/:namespace/inventory/token/:address"
+        path="/account/:username/slot/:project/inventory/token/:address"
         element={<Token />}
       />
       <Route
-        path="/account/:username/slot/:namespace/trophies"
+        path="/account/:username/slot/:project/trophies"
         element={<Trophies />}
       />
       <Route
-        path="/account/:username/slot/:namespace/trophies/:address"
+        path="/account/:username/slot/:project/trophies/:address"
         element={<Trophies />}
       />
       <Route
-        path="/account/:username/slot/:namespace/activity"
+        path="/account/:username/slot/:project/activity"
         element={<Activity />}
       />
       <Route path="/collection/:address" element={<Collection />} />

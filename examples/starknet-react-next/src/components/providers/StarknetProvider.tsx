@@ -59,15 +59,16 @@ const controller = new ControllerConnector({
   profileUrl:
     process.env.NEXT_PUBLIC_PROFILE_DEPLOYMENT_URL ??
     process.env.NEXT_PUBLIC_PROFILE_FRAME_URL,
-  // namespace: "namespace",
+  slot: "eternum-rc1",
+  namespace: "eternum",
   // theme: "dope-wars",
   // colorMode: "light"
   tokens: {
     erc20: [
       // $LORDS
-      // "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
+      "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
       // $FLIP
-      "0x01bfe97d729138fc7c2d93c77d6d1d8a24708d5060608017d9b384adf38f04c7",
+      // "0x01bfe97d729138fc7c2d93c77d6d1d8a24708d5060608017d9b384adf38f04c7",
     ],
   },
 });

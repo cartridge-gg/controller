@@ -5,8 +5,9 @@ import { IFrame, IFrameOptions } from "./base";
 export type ProfileIFrameOptions = IFrameOptions<Profile> &
   ProfileOptions & {
     rpcUrl: string;
-    namespace?: string;
     username: string;
+    slot?: string;
+    namespace?: string;
   };
 
 export class ProfileIFrame extends IFrame<Profile> {
@@ -14,16 +15,22 @@ export class ProfileIFrame extends IFrame<Profile> {
     profileUrl,
     rpcUrl,
     namespace,
+    slot,
     username,
     tokens,
     ...iframeOptions
   }: ProfileIFrameOptions) {
     const _profileUrl = profileUrl || PROFILE_URL;
     const _url = new URL(
-      namespace
-        ? `${_profileUrl}/account/${username}/slot/${namespace}`
+      slot
+        ? namespace
+          ? `${_profileUrl}/account/${username}/slot/${slot}?ns=${encodeURIComponent(
+              namespace,
+            )}`
+          : `${_profileUrl}/account/${username}/slot/${slot}`
         : `${_profileUrl}/account/${username}`,
     );
+
     _url.searchParams.set("rpcUrl", encodeURIComponent(rpcUrl));
 
     if (tokens?.erc20) {

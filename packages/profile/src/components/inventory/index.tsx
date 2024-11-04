@@ -9,20 +9,22 @@ import {
   LayoutContent,
   LayoutHeader,
 } from "@/components/layout";
+import { Navigation } from "../navigation";
 // import { Collections } from "./collections";
 import { Tokens } from "./tokens";
 import { useAccount } from "@/hooks/account";
-// import { Navigation } from "@/components/navigation";
+import { useParams } from "react-router-dom";
 
 export function Inventory() {
   const { username, address } = useAccount();
+  const { project } = useParams<{ project?: string }>();
 
   return (
     <LayoutContainer>
       <LayoutHeader
         title={username}
         description={<CopyAddress address={address} size="sm" />}
-        // right={<Navigation />}
+        right={project ? <Navigation /> : undefined}
       />
 
       <LayoutContent className="pb-4">

@@ -1,5 +1,11 @@
-import { Provider, uint256 } from "starknet";
-import { hexToString, Hex } from "viem";
+import {
+  ByteArray,
+  byteArray,
+  num,
+  Provider,
+  shortString,
+  uint256,
+} from "starknet";
 
 export type ERC20Metadata = {
   name: string;
@@ -105,12 +111,12 @@ export class ERC20 {
 
   private async callName() {
     try {
-      const name = (await this.provider.callContract({
+      const result = await this.provider.callContract({
         contractAddress: this.address,
         entrypoint: "name",
-      })) as Hex[];
+      });
 
-      return hexToString(name[0]);
+      return this.parseResult(result);
     } catch {
       throw new Error(`Failed to fetch name for token: ${this.address}`);
     }
@@ -118,12 +124,12 @@ export class ERC20 {
 
   private async callSymbol() {
     try {
-      const symbol = (await this.provider.callContract({
+      const result = await this.provider.callContract({
         contractAddress: this.address,
         entrypoint: "symbol",
-      })) as Hex[];
+      });
 
-      return hexToString(symbol[0]);
+      return this.parseResult(result);
     } catch {
       throw new Error(`Failed to fetch symbol for token: ${this.address}`);
     }
@@ -131,15 +137,28 @@ export class ERC20 {
 
   private async callDecimals() {
     try {
-      const decimals = (await this.provider.callContract({
+      const decimals = await this.provider.callContract({
         contractAddress: this.address,
         entrypoint: "decimals",
-      })) as Hex[];
+      });
 
-      return Number(decimals[0]);
+      return Number(num.toHex(decimals[0]));
     } catch {
       throw new Error(`Failed to fetch decimals for token: ${this.address}`);
     }
+  }
+
+  private parseResult(result: string[]): string {
+    if (result.length == 1) {
+      return shortString.decodeShortString(result[0]);
+    }
+
+    const symbol: ByteArray = {
+      data: result[0] != "0x0" ? result.slice(1, -2) : [],
+      pending_word: result[result.length - 2],
+      pending_word_len: result[result.length - 1],
+    };
+    return byteArray.stringFromByteArray(symbol);
   }
 
   static async fetchAllMetadata(): Promise<Omit<ERC20Metadata, "instance">[]> {

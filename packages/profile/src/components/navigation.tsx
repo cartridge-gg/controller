@@ -1,5 +1,4 @@
 import {
-  ClockIcon,
   cn,
   CoinsIcon,
   StateIconProps,
@@ -10,15 +9,16 @@ import {
   TrophyIcon,
 } from "@cartridge/ui-next";
 import { ProfileContextTypeVariant } from "@cartridge/controller";
-import { Link, useMatch } from "react-router-dom";
+import { Link, useMatch, useParams } from "react-router-dom";
 import { useAccount } from "@/hooks/account";
 
 export function Navigation() {
+  const { project } = useParams<{ project?: string }>();
   return (
     <div className="flex rounded border border-1 border-secondary overflow-hidden shrink-0 gap-[1px] bg-secondary">
       <Item Icon={CoinsIcon} variant="inventory" />
-      <Item Icon={TrophyIcon} variant="trophies" />
-      <Item Icon={ClockIcon} variant="activity" />
+      {project && <Item Icon={TrophyIcon} variant="trophies" />}
+      {/* <Item Icon={ClockIcon} variant="activity" /> */}
     </div>
   );
 }
@@ -30,10 +30,11 @@ function Item({
   Icon: React.ComponentType<StateIconProps>;
   variant: ProfileContextTypeVariant;
 }) {
-  const { username, namespace } = useAccount();
+  const { project } = useParams<{ project?: string }>();
+  const { username } = useAccount();
   const isPublic = useMatch(`/account/:username/${variant}`);
-  const isSlot = useMatch(`/account/:username/slot/:namespace/${variant}`);
-  const isActive = namespace ? isSlot : isPublic;
+  const isSlot = useMatch(`/account/:username/slot/:project/${variant}`);
+  const isActive = project ? isSlot : isPublic;
 
   return (
     <TooltipProvider>
@@ -45,9 +46,9 @@ function Item({
               isActive ? "bg-secondary" : "bg-background",
             )}
             to={
-              namespace
-                ? `/account/${username}/${variant}`
-                : `/account/${username}/slot/${namespace}/${variant}`
+              project
+                ? `/account/${username}/slot/${project}/${variant}`
+                : `/account/${username}/${variant}`
             }
           >
             <Icon size="sm" variant={isActive ? "solid" : "line"} />
