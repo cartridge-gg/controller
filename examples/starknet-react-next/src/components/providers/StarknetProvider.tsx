@@ -59,7 +59,7 @@ const controller = new ControllerConnector({
   profileUrl:
     process.env.NEXT_PUBLIC_PROFILE_DEPLOYMENT_URL ??
     process.env.NEXT_PUBLIC_PROFILE_FRAME_URL,
-  slot: "eternum-rc1",
+  slot: "eternum-rc1-1",
   namespace: "eternum",
   // theme: "dope-wars",
   // colorMode: "light"
