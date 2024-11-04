@@ -1,4 +1,4 @@
-import { Policy } from "@cartridge/controller";
+import { Policy } from "../types";
 import { ec, stark, WalletAccount } from "starknet";
 
 import SessionAccount from "./account";
@@ -29,7 +29,6 @@ export default class SessionProvider extends BaseProvider {
   protected _username?: string;
   protected _redirectUrl: string;
   protected _policies: Policy[];
-  public account?: SessionAccount;
 
   constructor({ rpc, chainId, policies, redirectUrl }: SessionOptions) {
     super({ rpc });

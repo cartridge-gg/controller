@@ -37,6 +37,16 @@
     "./pkg-controller/snippets/*",
     "./pkg-session/snippets/*"
   ],
+  "typesVersions": {
+    "*": {
+      "controller": [
+        "./pkg-controller/account_wasm.d.ts"
+      ],
+      "session": [
+        "./pkg-session/account_wasm.d.ts"
+      ]
+    }
+  },
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:^",
     "tsup": "^8.0.1",
