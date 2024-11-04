@@ -20,6 +20,7 @@ type ConnectionContextType = {
   provider: RpcProvider;
   chainId: string;
   erc20: string[];
+  namespace?: string;
   isVisible: boolean;
   setIsVisible: (isVisible: boolean) => void;
 };
@@ -48,10 +49,16 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Keep in state so searchParams only required at the beginning
     setState((state) => {
-      if (searchParams.get("rpcUrl") && !state.provider) {
+      const rpcUrlParam = searchParams.get("rpcUrl");
+      if (rpcUrlParam && !state.provider) {
         state.provider = new RpcProvider({
-          nodeUrl: decodeURIComponent(searchParams.get("rpcUrl")!),
+          nodeUrl: decodeURIComponent(rpcUrlParam),
         });
+      }
+
+      const nsParam = searchParams.get("ns");
+      if (nsParam && !state.namespace) {
+        state.namespace = decodeURIComponent(nsParam);
       }
 
       // Only update when erc20 state hasn't been set

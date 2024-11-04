@@ -32,7 +32,7 @@ function Item({
 }) {
   const { username, namespace } = useAccount();
   const isPublic = useMatch(`/account/:username/${variant}`);
-  const isSlot = useMatch(`/account/:username/slot/:namespace/${variant}`);
+  const isSlot = useMatch(`/account/:username/slot/:project/${variant}`);
   const isActive = namespace ? isSlot : isPublic;
 
   return (
