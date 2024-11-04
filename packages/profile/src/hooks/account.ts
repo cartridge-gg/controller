@@ -21,7 +21,6 @@ export function useAccount() {
   const params = useParams<{
     username: string;
     project?: string;
-    namespace?: string;
   }>();
   const { setIndexerUrl } = useIndexerAPI();
   const username = params.username ?? "";
@@ -36,11 +35,9 @@ export function useAccount() {
       return;
     }
 
-    const url = import.meta.env.PROD
-      ? `${import.meta.env.VITE_CARTRIDGE_API_URL}/x/slot/${
-          params.project
-        }/graphql`
-      : "http://localhost:8080/graphql";
+    const url = `${import.meta.env.VITE_CARTRIDGE_API_URL}/x/${
+      params.project
+    }/torii/graphql`;
 
     setIndexerUrl(url);
   }, [params.project, setIndexerUrl]);
@@ -48,6 +45,5 @@ export function useAccount() {
   return {
     username,
     address: data?.account?.controllers.edges?.[0]?.node?.address ?? "",
-    namespace: params.namespace,
   };
 }
