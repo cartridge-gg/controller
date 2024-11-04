@@ -117,9 +117,9 @@ function Group({
       {items
         .sort((a, b) => a.index - b.index)
         .filter((a) => a.index === page)
-        .map((achievement, index) => (
+        .map((achievement) => (
           <Achievement
-            key={index}
+            key={achievement.id}
             icon={
               achievement.hidden && !achievement.completed
                 ? "fa-trophy"
