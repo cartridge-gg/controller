@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/controller",
-  "version": "0.5.0-alpha.5",
+  "version": "0.5.0-alpha.6",
   "description": "Cartridge Controller",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -18,8 +18,12 @@
     "./types": "./dist/types/index.js"
   },
   "tsup": {
-    "entry": ["src/**"],
-    "format": ["esm"],
+    "entry": [
+      "src/**"
+    ],
+    "format": [
+      "esm"
+    ],
     "splitting": false,
     "sourcemap": true,
     "clean": true
