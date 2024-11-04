@@ -8,6 +8,7 @@ use std::collections::HashMap;
 pub enum Version {
     V1_0_4,
     V1_0_5,
+    V1_0_6,
     LATEST,
 }
 
@@ -27,6 +28,16 @@ lazy_static! {
             Version::LATEST,
             ContractClass {
                 content: include_str!("../artifacts/controller.latest.contract_class.json"),
+                hash: felt!("0x4342bf7fbad4f200167e9b00b3c904df99a3836ceb280c58107da96a9099f86"),
+                casm_hash: felt!(
+                    "0x6b2bb9738c29372da692b244624d37ecb8ad218b70475ebb711a39e037afdc5"
+                ),
+            },
+        );
+        m.insert(
+            Version::V1_0_6,
+            ContractClass {
+                content: include_str!("../artifacts/controller.v1.0.6.contract_class.json"),
                 hash: felt!("0x59e4405accdf565112fe5bf9058b51ab0b0e63665d280b816f9fe4119554b77"),
                 casm_hash: felt!(
                     "0x7ec32f8e2fa07937a81215894f48a3c9af93dc47c88ac6d6852b3fd39f7a6af"
@@ -56,6 +67,11 @@ lazy_static! {
         m
     };
     pub static ref DEFAULT_CONTROLLER: &'static ContractClass =
-        CONTROLLERS.get(&Version::V1_0_5).unwrap();
-    pub static ref VERSIONS: Vec<Version> = vec![Version::V1_0_4, Version::V1_0_5, Version::LATEST];
+        CONTROLLERS.get(&Version::V1_0_6).unwrap();
+    pub static ref VERSIONS: Vec<Version> = vec![
+        Version::V1_0_4,
+        Version::V1_0_5,
+        Version::V1_0_6,
+        Version::LATEST
+    ];
 }

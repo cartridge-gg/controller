@@ -31,9 +31,9 @@ pub async fn test_verify_execute(owner: Owner) {
         .await;
 
     let policies = vec![
-        Policy::new(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
-        Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfds")),
-        Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer")),
+        Policy::new_call(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
+        Policy::new_call(*FEE_TOKEN_ADDRESS, selector!("transfds")),
+        Policy::new_call(*FEE_TOKEN_ADDRESS, selector!("transfer")),
     ];
 
     let session_account = controller
@@ -100,9 +100,9 @@ async fn test_verify_execute_session_multiple() {
     let session_account = controller
         .create_session(
             vec![
-                Policy::new(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
-                Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfds")),
-                Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer")),
+                Policy::new_call(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
+                Policy::new_call(*FEE_TOKEN_ADDRESS, selector!("transfds")),
+                Policy::new_call(*FEE_TOKEN_ADDRESS, selector!("transfer")),
             ],
             u64::MAX,
         )
@@ -155,9 +155,9 @@ async fn test_verify_execute_session_registered() {
 
     let session = Session::new(
         vec![
-            Policy::new(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
-            Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfds")),
-            Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer")),
+            Policy::new_call(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
+            Policy::new_call(*FEE_TOKEN_ADDRESS, selector!("transfds")),
+            Policy::new_call(*FEE_TOKEN_ADDRESS, selector!("transfer")),
         ],
         u64::MAX,
         &session_signer.clone().into(),
@@ -220,8 +220,8 @@ async fn test_create_and_use_registered_session() {
 
     // Create policies for the session
     let policies = vec![
-        Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer")),
-        Policy::new(*FEE_TOKEN_ADDRESS, selector!("approve")),
+        Policy::new_call(*FEE_TOKEN_ADDRESS, selector!("transfer")),
+        Policy::new_call(*FEE_TOKEN_ADDRESS, selector!("approve")),
     ];
 
     // Generate a new key pair for the session
@@ -303,9 +303,9 @@ pub async fn test_verify_execute_with_guardian() {
         .await;
 
     let policies = vec![
-        Policy::new(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
-        Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfds")),
-        Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer")),
+        Policy::new_call(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
+        Policy::new_call(*FEE_TOKEN_ADDRESS, selector!("transfds")),
+        Policy::new_call(*FEE_TOKEN_ADDRESS, selector!("transfer")),
     ];
 
     let session_account = controller
@@ -345,9 +345,9 @@ pub async fn test_verify_execute_with_invalid_guardian() {
         .await;
 
     let policies = vec![
-        Policy::new(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
-        Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfds")),
-        Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer")),
+        Policy::new_call(*FEE_TOKEN_ADDRESS, selector!("tdfs")),
+        Policy::new_call(*FEE_TOKEN_ADDRESS, selector!("transfds")),
+        Policy::new_call(*FEE_TOKEN_ADDRESS, selector!("transfer")),
     ];
 
     let session_account = controller

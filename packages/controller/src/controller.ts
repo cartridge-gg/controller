@@ -69,27 +69,22 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    if (
-      this.options.profileUrl &&
-      this.options.indexerUrl &&
-      this.options.namespace &&
-      !this.iframes.profile
-    ) {
+    if (this.options.profileUrl && !this.iframes.profile) {
       const username = await this.keychain.username();
+
       this.iframes.profile = new ProfileIFrame({
-        profileUrl: this.options.profileUrl,
-        indexerUrl: this.options.indexerUrl,
-        namespace: this.options.namespace,
-        address: this.account?.address,
-        username,
-        rpcUrl: this.rpc.toString(),
-        tokens: this.options.tokens,
         onConnect: (profile) => {
           this.profile = profile;
         },
         methods: {
           openPurchaseCredits: this.openPurchaseCredits.bind(this),
         },
+        profileUrl: this.options.profileUrl,
+        rpcUrl: this.rpc.toString(),
+        username,
+        slot: this.options.slot,
+        namespace: this.options.namespace,
+        tokens: this.options.tokens,
       });
     }
 
@@ -158,21 +153,17 @@ export default class ControllerProvider extends BaseProvider {
     return this.keychain.disconnect();
   }
 
-  openProfile(tab: ProfileContextTypeVariant = "inventory") {
-    if (!this.options.indexerUrl) {
-      console.error("`indexerUrl` option is required to open profile");
-      return;
-    }
-    if (!this.options.namespace) {
-      console.error("`namespace` option is required to open profile");
-      return;
-    }
-    if (!this.profile || !this.iframes.profile) {
+  async openProfile(tab: ProfileContextTypeVariant = "inventory") {
+    if (!this.profile || !this.iframes.profile?.url) {
       console.error("Profile is not ready");
       return;
     }
+    if (!this.account) {
+      console.error("Account is not ready");
+      return;
+    }
 
-    this.profile.navigate(tab);
+    this.profile.navigate(`${this.iframes.profile.url?.pathname}/${tab}`);
     this.iframes.profile.open();
   }
 

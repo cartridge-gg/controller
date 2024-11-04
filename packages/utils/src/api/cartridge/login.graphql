@@ -1,5 +1,5 @@
-mutation BeginLogin($id: String!) {
-  beginLogin(id: $id)
+mutation BeginLogin($username: String!) {
+  beginLogin(username: $username)
 }
 
 mutation FinalizeLogin($credentials: String!) {

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Policy, ResponseCodes } from "@cartridge/controller";
+import { ResponseCodes } from "@cartridge/controller";
 import { Content, FOOTER_MIN_HEIGHT } from "components/layout";
 import { TransactionDuoIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
@@ -8,6 +8,7 @@ import { ExecuteCtx } from "utils/connection";
 import { addAddressPadding, num } from "starknet";
 import { ExecutionContainer } from "components/ExecutionContainer";
 import { CreateSession } from "./connect";
+import { CallPolicy } from "@cartridge/account-wasm";
 
 export function ConfirmTransaction() {
   const { controller, context, origin, policies, setContext } = useConnection();
@@ -30,7 +31,7 @@ export function ConfirmTransaction() {
     setContext(undefined);
   };
 
-  const calls = useMemo<Policy[]>(
+  const callPolicies = useMemo<CallPolicy[]>(
     () =>
       (Array.isArray(ctx.transactions)
         ? ctx.transactions
@@ -45,29 +46,20 @@ export function ConfirmTransaction() {
   const updateSession = useMemo(() => {
     if (policiesUpdated) return false;
 
-    const txnsApproved = calls.every((transaction) =>
+    const txnsApproved = callPolicies.every((call) =>
       policies.some(
         (policy) =>
-          addAddressPadding(policy.target) ===
-            addAddressPadding(transaction.target) &&
-          policy.method === transaction.method,
+          "target" in policy &&
+          "method" in policy &&
+          addAddressPadding(policy.target) === addAddressPadding(call.target) &&
+          policy.method === call.method,
       ),
     );
 
     // If calls are approved by dapp specified policies but not stored session
     // then prompt user to update session. This also accounts for expired sessions.
-    return (
-      txnsApproved &&
-      !account.session(
-        calls.map((t) => {
-          return {
-            target: t.target,
-            method: t.method,
-          } as Policy;
-        }),
-      )
-    );
-  }, [calls, policiesUpdated, policies, account]);
+    return txnsApproved && !account.session(callPolicies);
+  }, [callPolicies, policiesUpdated, policies, account]);
 
   if (updateSession) {
     return (
@@ -86,7 +78,7 @@ export function ConfirmTransaction() {
       onSubmit={onSubmit}
     >
       <Content pb={FOOTER_MIN_HEIGHT}>
-        <Policies title="Transaction Details" policies={calls} />
+        <Policies title="Transaction Details" policies={callPolicies} />
       </Content>
     </ExecutionContainer>
   );

@@ -1,6 +1,7 @@
 import { Button, cn, TimesIcon, Network } from "@cartridge/ui-next";
 import { PropsWithChildren, useCallback } from "react";
 import { useConnection } from "@/hooks/context";
+import { isIframe } from "@cartridge/utils";
 
 export function LayoutContainer({
   children,
@@ -18,11 +19,15 @@ export function LayoutContainer({
   return (
     <ResponsiveWrapper>
       <div className="h-16 sticky top-0 flex items-center bg-[url('https://x.cartridge.gg/whitelabel/cartridge/cover.png')] bg-center bg-cover px-3 justify-between">
-        {left ?? (
-          <Button variant="icon" size="icon" onClick={onClose}>
-            <TimesIcon />
-          </Button>
-        )}
+        <div>
+          {left ? (
+            left
+          ) : isIframe() ? (
+            <Button variant="icon" size="icon" onClick={onClose}>
+              <TimesIcon />
+            </Button>
+          ) : null}
+        </div>
 
         <div className="flex gap-2">
           <Network chainId={chainId} />

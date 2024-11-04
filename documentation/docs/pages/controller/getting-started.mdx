@@ -1,0 +1,117 @@
+# Getting Started
+
+Controller implements a standard StarkNet account interface and can be
+seamlessly integrated into your application like any other wallet.
+
+## Installation
+
+:::code-group
+
+```bash [npm]
+npm install @cartridge/controller starknet
+```
+
+```bash [pnpm]
+pnpm install @cartridge/controller starknet
+```
+
+```bash [yarn]
+yarn add @cartridge/controller starknet
+```
+
+```bash [bun]
+bun add @cartridge/controller starknet
+```
+
+:::
+
+## Basic Usage
+
+Here's a simple example of how to initialize and use the controller:
+
+```ts
+import Controller from "@cartridge/controller";
+
+// Initialize the controller
+const controller = new Controller();
+
+// Connect to get an account instance
+const account = await controller.connect();
+
+// Execute transactions
+const tx = await account.execute({
+  contractAddress: "0x...",
+  entrypoint: "my_function",
+  calldata: ["0x1", "0x2"],
+});
+```
+
+## Usage with Starknet React
+
+```tsx
+import React, { useCallback } from "react";
+
+import { sepolia, mainnet } from "@starknet-react/chains";
+import {
+  StarknetConfig,
+  publicProvider,
+  argent,
+  braavos,
+  useInjectedConnectors,
+  voyager,
+  Connector,
+  jsonRpcProvider,
+  cartridgeProvider,
+} from "@starknet-react/core";
+
+import { ControllerConnector } from "@cartridge/connector";
+
+const cartridgeConnector = new ControllerConnector({
+  rpc: cartridgeProvider().nodeUrl,
+});
+
+export function StarknetProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <StarknetConfig
+      chains={[mainnet, sepolia]}
+      provider={cartridgeProvider()}
+      connectors={[cartridgeConnector as never as Connector]}
+      explorer={voyager}
+    >
+      {children}
+    </StarknetConfig>
+  );
+}
+```
+
+## Examples
+
+For more detailed examples of how to use Cartridge Controller in different
+environments, check out our integration guides:
+
+1. [React](/controller/examples/react.md)
+
+   - Integration with `starknet-react`
+   - Hooks and components
+   - State management
+
+2. [Svelte](/controller/examples/svelte.md)
+
+   - Svelte stores and reactivity
+   - Component lifecycle
+   - Event handling
+
+3. [Rust](/controller/examples/rust.md)
+   - Native integration
+   - Error handling
+   - Async operations
+
+Each guide provides comprehensive examples and best practices for integrating
+Cartridge Controller in your preferred environment.
+
+## Next Steps
+
+- Learn about [Session Keys](/controller/sessions.md)
+- Theme your [Wallet](/controller/theming.md)
+- Set up [Usernames](/controller/usernames.md)
+- Configure [Paymaster](/controller/configuration.md)

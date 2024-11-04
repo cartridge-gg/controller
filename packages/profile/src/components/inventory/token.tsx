@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import {
   LayoutContainer,
   LayoutContent,
@@ -16,16 +16,19 @@ import {
   ExternalIcon,
   Skeleton,
 } from "@cartridge/ui-next";
-import { useAccount, useConnection, useToken } from "@/hooks/context";
+import { useConnection } from "@/hooks/context";
 import {
   formatAddress,
   isPublicChain,
   StarkscanUrl,
   useCountervalue,
+  useCreditBalance,
 } from "@cartridge/utils";
 import { constants } from "starknet";
 import { formatEther } from "viem";
 import { CurrencyBase, CurrencyQuote } from "@cartridge/utils/api/cartridge";
+import { useAccount } from "@/hooks/account";
+import { useToken } from "@/hooks/token";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
@@ -39,13 +42,18 @@ export function Token() {
 }
 
 function Credits() {
-  const { parent } = useConnection();
-  const { credit } = useAccount();
+  const { parent, isVisible } = useConnection();
+  const location = useLocation();
+  const { username } = useAccount();
+  const credit = useCreditBalance({
+    username,
+    interval: isVisible ? 3000 : undefined,
+  });
 
   return (
     <LayoutContainer
       left={
-        <Link to="/inventory">
+        <Link to={location.pathname.split("/").slice(0, -2).join("/")}>
           <Button variant="icon" size="icon">
             <ArrowIcon variant="left" />
           </Button>
@@ -81,7 +89,8 @@ function Credits() {
 function ERC20() {
   const { chainId } = useConnection();
   const { address } = useParams<{ address: string }>();
-  const t = useToken(address!);
+  const location = useLocation();
+  const t = useToken({ tokenAddress: address! });
   const { countervalue } = useCountervalue({
     balance: formatEther(t?.balance.value ?? 0n),
     quote: CurrencyQuote.Eth,
@@ -95,7 +104,7 @@ function ERC20() {
   return (
     <LayoutContainer
       left={
-        <Link to="/inventory">
+        <Link to={location.pathname.split("/").slice(0, -2).join("/")}>
           <Button variant="icon" size="icon">
             <ArrowIcon variant="left" />
           </Button>
@@ -109,12 +118,12 @@ function ERC20() {
           ) : (
             t.balance.formatted
           )
-        } ${t.symbol}`}
+        } ${t.meta.symbol}`}
         description={`${countervalue.formatted} ${CurrencyBase.Usd}`}
         icon={
           <img
             className="w-8 h-8"
-            src={t.logoUrl ?? "/public/placeholder.svg"}
+            src={t.meta.logoUrl ?? "/public/placeholder.svg"}
           />
         }
       />
@@ -130,17 +139,17 @@ function ERC20() {
               <Link
                 to={`${StarkscanUrl(
                   chainId as constants.StarknetChainId,
-                ).contract(t.address)} `}
+                ).contract(t.meta.address)} `}
                 className="flex items-center gap-1 text-sm"
                 target="_blank"
               >
                 <div className="font-medium">
-                  {formatAddress(t.address, { size: "sm" })}
+                  {formatAddress(t.meta.address, { size: "sm" })}
                 </div>
                 <ExternalIcon size="sm" />
               </Link>
             ) : (
-              <div>{formatAddress(t.address)}</div>
+              <div>{formatAddress(t.meta.address)}</div>
             )}
           </CardContent>
 

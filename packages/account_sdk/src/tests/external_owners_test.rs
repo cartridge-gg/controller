@@ -43,7 +43,7 @@ async fn test_verify_external_owner() {
 
     let session_signer = Signer::new_starknet_random();
     let session = Session::new(
-        vec![Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer"))],
+        vec![Policy::new_call(*FEE_TOKEN_ADDRESS, selector!("transfer"))],
         u64::MAX,
         &session_signer.clone().into(),
         Felt::ZERO,
@@ -104,7 +104,7 @@ async fn test_verify_constructor_external_owner() {
 
     let session_signer = Signer::new_starknet_random();
     let session = Session::new(
-        vec![Policy::new(*FEE_TOKEN_ADDRESS, selector!("transfer"))],
+        vec![Policy::new_call(*FEE_TOKEN_ADDRESS, selector!("transfer"))],
         u64::MAX,
         &session_signer.clone().into(),
         Felt::ZERO,

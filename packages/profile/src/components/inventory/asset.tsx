@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import {
   LayoutContainer,
   LayoutContent,
@@ -44,11 +44,12 @@ export function Asset() {
       { type: "property", name: "Weapon", value: "Banner of Rage" },
     ],
   };
+  const location = useLocation();
 
   return (
     <LayoutContainer
       left={
-        <Link to={`/collection/${collection.address}`}>
+        <Link to={`/collection/${collection.address}`} state={location.state}>
           <Button variant="icon" size="icon">
             <ArrowIcon variant="left" />
           </Button>

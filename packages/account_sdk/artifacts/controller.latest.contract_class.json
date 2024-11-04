@@ -23667,7 +23667,7 @@
       ],
       [
         206,
-        "function_call<user@controller::session::session::session_component::SessionComponent::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl, controller::account::CartridgeAccount::IAssertOwnerImpl, controller::account::CartridgeAccount::ContractStateDrop>::is_session_sigature_valid>"
+        "function_call<user@controller::session::session::session_component::SessionComponent::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl, controller::account::CartridgeAccount::IAssertOwnerImpl, controller::account::CartridgeAccount::ContractStateDrop>::is_session_signature_valid>"
       ],
       [
         207,
@@ -25163,7 +25163,7 @@
       ],
       [
         580,
-        "function_call<user@controller::session::session::session_component::SessionImpl::is_session_sigature_valid[expr22]>"
+        "function_call<user@controller::session::session::session_component::SessionImpl::is_session_signature_valid[expr22]>"
       ],
       [
         581,
@@ -30121,7 +30121,7 @@
       ],
       [
         10,
-        "controller::session::session::session_component::__wrapper__SessionComponent__is_session_sigature_valid::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl, controller::account::CartridgeAccount::IAssertOwnerImpl, controller::account::CartridgeAccount::ContractStateDrop, controller::account::CartridgeAccount::ContractStateSessionComponent>"
+        "controller::session::session::session_component::__wrapper__SessionComponent__is_session_signature_valid::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl, controller::account::CartridgeAccount::IAssertOwnerImpl, controller::account::CartridgeAccount::ContractStateDrop, controller::account::CartridgeAccount::ContractStateSessionComponent>"
       ],
       [
         11,
@@ -30257,7 +30257,7 @@
       ],
       [
         44,
-        "controller::session::session::session_component::SessionComponent::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl, controller::account::CartridgeAccount::IAssertOwnerImpl, controller::account::CartridgeAccount::ContractStateDrop>::is_session_sigature_valid"
+        "controller::session::session::session_component::SessionComponent::<controller::account::CartridgeAccount::ContractState, controller::account::CartridgeAccount::HasComponentImpl_session_component, controller::account::CartridgeAccount::SessionCallbackImpl, controller::account::CartridgeAccount::IAssertOwnerImpl, controller::account::CartridgeAccount::ContractStateDrop>::is_session_signature_valid"
       ],
       [
         45,
@@ -30369,7 +30369,7 @@
       ],
       [
         72,
-        "controller::session::session::session_component::SessionImpl::is_session_sigature_valid[expr22]"
+        "controller::session::session::session_component::SessionImpl::is_session_signature_valid[expr22]"
       ],
       [
         73,
@@ -30749,6 +30749,10 @@
         "function_idx": 23
       },
       {
+        "selector": "0x3559c17c650ddb543de14af25feaa22045d4470a326f9ec7f64c1efb8a984d1",
+        "function_idx": 10
+      },
+      {
         "selector": "0x36fcbf06cd96843058359e1a75928beacfac10727dab22a3972f0af8aa92895",
         "function_idx": 4
       },
@@ -30759,10 +30763,6 @@
       {
         "selector": "0x39092635a112019062c4ee4c367f7db9a22fdb8b6cde59e906f197c24ab6e35",
         "function_idx": 8
-      },
-      {
-        "selector": "0x39c995edf3026cf71b5511589cc17f194d892c6c41bf105dae8d7a785031635",
-        "function_idx": 10
       },
       {
         "selector": "0x3dbc508ba4afd040c8dc4ff8a61113a7bcaf5eae88a6ba27b3c50578b3587e3",
@@ -31356,7 +31356,7 @@
         },
         {
           "type": "function",
-          "name": "is_session_sigature_valid",
+          "name": "is_session_signature_valid",
           "inputs": [
             {
               "name": "data",

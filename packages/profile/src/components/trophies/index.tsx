@@ -6,7 +6,7 @@ import {
 import { Link } from "react-router-dom";
 import { ScrollArea, Button, ArrowIcon, SpinnerIcon } from "@cartridge/ui-next";
 import { TrophiesTab, LeaderboardTab, Scoreboard } from "./tab";
-import { useAccount } from "@/hooks/context";
+import { useAccount, useUsername } from "@/hooks/account";
 import { CopyAddress } from "@cartridge/ui-next";
 import { Navigation } from "../navigation";
 import { useMemo, useState } from "react";
@@ -15,14 +15,13 @@ import { Achievements } from "./achievements";
 import { Pinneds } from "./pinneds";
 import { Leaderboard } from "./leaderboard";
 import { useAchievements } from "@/hooks/achievements";
-import { useUsername } from "@/hooks/username";
 
 export function Trophies() {
   const { address: self, namespace } = useAccount();
   const { address } = useParams<{ address: string }>();
   const { username } = useUsername({ address: address || self || "" });
   const { achievements, players, isLoading } = useAchievements({
-    namespace,
+    namespace: namespace ?? "",
     address: address || self || "",
   });
   const [activeTab, setActiveTab] = useState<"trophies" | "leaderboard">(
@@ -56,7 +55,7 @@ export function Trophies() {
     <LayoutContainer
       left={
         !isSelf ? (
-          <Link to="/trophies">
+          <Link to={`/account/${self}/trophies`}>
             <Button variant="icon" size="icon">
               <ArrowIcon variant="left" />
             </Button>

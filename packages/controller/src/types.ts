@@ -117,7 +117,7 @@ export interface Keychain {
   openPurchaseCredits(): void;
 }
 export interface Profile {
-  navigate(tab: ProfileContextTypeVariant): void;
+  navigate(path: string): void;
 }
 
 export interface Modal {
@@ -131,10 +131,6 @@ export interface Modal {
 export type ControllerOptions = ProviderOptions &
   KeychainOptions &
   ProfileOptions;
-
-export type TokenOptions = {
-  tokens: Tokens;
-};
 
 export type IFrameOptions = {
   /** The ID of the starter pack to use */
@@ -168,15 +164,15 @@ export type KeychainOptions = IFrameOptions & {
 export type ProfileOptions = IFrameOptions & {
   /** The URL of profile. Mainly for internal development purpose */
   profileUrl?: string;
-  /** The URL of Torii indexer. Will be mandatory once profile page is in production */
-  indexerUrl?: string;
+  /** The project name of Slot instance. */
+  slot?: string;
   /** The namespace to use to fetch trophies data from indexer. Will be mandatory once profile page is in production */
   namespace?: string;
   /** The tokens to be listed on Inventory modal */
   tokens?: Tokens;
 };
 
-export type ProfileContextTypeVariant = "trophies" | "inventory" | "activity";
+export type ProfileContextTypeVariant = "inventory" | "trophies";
 
 export type ColorMode = "light" | "dark";
 
@@ -206,10 +202,5 @@ export type ThemeValue<T> = T | { dark: T; light: T };
 export type Prefund = { address: string; min: string };
 
 export type Tokens = {
-  erc20?: ERC20[];
-};
-
-export type ERC20 = {
-  address: string;
-  logoUrl?: string;
+  erc20?: string[];
 };

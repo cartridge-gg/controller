@@ -131,29 +131,37 @@ pub enum SignError {
     #[error("Device error: {0}")]
     Device(DeviceError),
 
-    #[error("NonAsciiName error: {0}")]
+    #[error("Non ascii name error: {0}")]
     NonAsciiSessionNameError(#[from] NonAsciiNameError),
 
-    #[error("NoAllowedSessionMethods error")]
+    #[error("No allowed session methods error")]
     NoAllowedSessionMethods,
 
-    /// Represents an error when trying to perform contract invocation that is not part
-    /// of a session's allowed methods.
-    #[error(
-        "Not allowed to call method selector `{selector:#x}` on contract `{contract_address:#x}`"
-    )]
-    SessionMethodNotAllowed {
-        /// The method selector that was not allowed.
-        selector: Felt,
-        /// The contract address the method was called on.
-        contract_address: Felt,
-    },
+    #[error("Session policy not allowed error{0}")]
+    SessionPolicyNotAllowed(SessionPolicyError),
 
     #[error("Invalid message provided: {0}")]
     InvalidMessageError(String),
 
     #[error("Account owner cannot sign")]
     AccountOwnerCannotSign,
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum SessionPolicyError {
+    /// Represents an error when trying to perform contract invocation that is not part
+    /// of a session's allowed methods.
+    #[error(
+        "Not allowed to call method selector `{selector:#x}` on contract `{contract_address:#x}`"
+    )]
+    MethodNotAllowed {
+        /// The method selector that was not allowed.
+        selector: Felt,
+        /// The contract address the method was called on.
+        contract_address: Felt,
+    },
+    #[error("Not allowed to sign TypedData with hash `{type_hash:#x}`")]
+    TypedDataNotAllowed { type_hash: Felt },
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
