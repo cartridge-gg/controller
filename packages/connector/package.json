@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/connector",
-  "version": "0.5.0-alpha.5",
+  "version": "0.5.0-alpha.6",
   "description": "Cartridge Controler Connector",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -32,12 +32,17 @@
     }
   },
   "tsup": {
-    "entry": ["src/controller.ts","src/index.ts"],
-    "format": ["esm"],
+    "entry": [
+      "src/controller.ts",
+      "src/index.ts"
+    ],
+    "format": [
+      "esm"
+    ],
     "splitting": false,
     "sourcemap": true,
     "clean": true,
-    "dts":"resolve"
+    "dts": "resolve"
   },
   "dependencies": {
     "@cartridge/controller": "workspace:^",
