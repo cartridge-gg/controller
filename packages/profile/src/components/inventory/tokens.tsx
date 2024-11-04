@@ -82,7 +82,10 @@ function TokenCardContent({
   return (
     <CardContent className="bg-background flex items-center p-0 h-full gap-0.5">
       <div className="bg-secondary flex h-full aspect-square items-center justify-center">
-        <img src={token.meta.logoUrl} className="w-5 h-5" />
+        <img
+          src={token.meta.logoUrl ?? "/public/placeholder.svg"}
+          className="w-5 h-5"
+        />
       </div>
 
       <div className="bg-secondary flex flex-1 gap-x-1.5 items-center justify-between p-3">
