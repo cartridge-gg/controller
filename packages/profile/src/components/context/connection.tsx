@@ -5,7 +5,6 @@ import {
   ReactNode,
   useEffect,
   useCallback,
-  useMemo,
 } from "react";
 import {
   ETH_CONTRACT_ADDRESS,
@@ -47,33 +46,35 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
 
   const [searchParams] = useSearchParams();
   useEffect(() => {
+    // Keep in state so searchParams only required at the beginning
     setState((state) => {
-      if (searchParams.get("rpcUrl")) {
+      if (searchParams.get("rpcUrl") && !state.provider) {
         state.provider = new RpcProvider({
           nodeUrl: decodeURIComponent(searchParams.get("rpcUrl")!),
         });
       }
+
+      // Only update when erc20 state hasn't been set
+      if (!state.erc20.length) {
+        const erc20Param = searchParams.get("erc20");
+        state.erc20 = [
+          ETH_CONTRACT_ADDRESS,
+          STRK_CONTRACT_ADDRESS,
+          ...(erc20Param
+            ? decodeURIComponent(erc20Param)
+                .split(",")
+                .filter(
+                  (address) =>
+                    ![
+                      getChecksumAddress(ETH_CONTRACT_ADDRESS),
+                      getChecksumAddress(STRK_CONTRACT_ADDRESS),
+                    ].includes(getChecksumAddress(address)),
+                )
+            : []),
+        ];
+      }
       return state;
     });
-  }, [searchParams]);
-
-  const erc20 = useMemo(() => {
-    const erc20Param = searchParams.get("erc20");
-    return [
-      ETH_CONTRACT_ADDRESS,
-      STRK_CONTRACT_ADDRESS,
-      ...(erc20Param
-        ? decodeURIComponent(erc20Param)
-            .split(",")
-            .filter(
-              (address) =>
-                ![
-                  getChecksumAddress(ETH_CONTRACT_ADDRESS),
-                  getChecksumAddress(STRK_CONTRACT_ADDRESS),
-                ].includes(getChecksumAddress(address)),
-            )
-        : []),
-    ];
   }, [searchParams]);
 
   useEffect(() => {
@@ -119,10 +120,10 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     return () => {
       connection.destroy();
     };
-  }, [navigate, setIsVisible]);
+  }, [navigate, setIsVisible, searchParams]);
 
   return (
-    <ConnectionContext.Provider value={{ ...state, erc20, setIsVisible }}>
+    <ConnectionContext.Provider value={{ ...state, setIsVisible }}>
       {children}
     </ConnectionContext.Provider>
   );
