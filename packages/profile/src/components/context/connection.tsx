@@ -50,7 +50,7 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     // Keep in state so searchParams only required at the beginning
     setState((state) => {
       const rpcUrlParam = searchParams.get("rpcUrl");
-      if (rpcUrlParam && !state.provider) {
+      if (rpcUrlParam) {
         state.provider = new RpcProvider({
           nodeUrl: decodeURIComponent(rpcUrlParam),
         });
@@ -88,8 +88,6 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     updateChainId();
 
     async function updateChainId() {
-      if (!state.provider) return;
-
       try {
         const timeoutPromise = new Promise((_, reject) =>
           setTimeout(() => reject(new Error("Chain ID fetch timed out")), 3000),
