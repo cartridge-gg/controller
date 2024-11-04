@@ -1,16 +1,16 @@
-import { Navigate, useParams, useSearchParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 
 export function Account() {
-  const [searchParams] = useSearchParams();
-  const { username } = useParams<{ username: string }>();
+  const { username, project } = useParams<{
+    username: string;
+    project: string;
+  }>();
 
   if (username) {
-    return (
-      <Navigate
-        to={`/account/${username}/inventory?${searchParams.toString()}`}
-        replace
-      />
-    );
+    const url = project
+      ? `/account/${username}/slot/${project}/inventory`
+      : `/account/${username}/inventory`;
+    return <Navigate to={url} replace />;
   }
   return null;
 }

@@ -172,7 +172,7 @@ export type ProfileOptions = IFrameOptions & {
   tokens?: Tokens;
 };
 
-export type ProfileContextTypeVariant = "trophies" | "inventory" | "activity";
+export type ProfileContextTypeVariant = "inventory" | "trophies";
 
 export type ColorMode = "light" | "dark";
 

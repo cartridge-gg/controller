@@ -73,16 +73,18 @@ export default class ControllerProvider extends BaseProvider {
       const username = await this.keychain.username();
 
       this.iframes.profile = new ProfileIFrame({
-        profileUrl: this.options.profileUrl,
-        rpcUrl: this.rpc.toString(),
-        username,
-        tokens: this.options.tokens,
         onConnect: (profile) => {
           this.profile = profile;
         },
         methods: {
           openPurchaseCredits: this.openPurchaseCredits.bind(this),
         },
+        profileUrl: this.options.profileUrl,
+        rpcUrl: this.rpc.toString(),
+        username,
+        slot: this.options.slot,
+        namespace: this.options.namespace,
+        tokens: this.options.tokens,
       });
     }
 
@@ -152,7 +154,7 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async openProfile(tab: ProfileContextTypeVariant = "inventory") {
-    if (!this.profile || !this.iframes.profile) {
+    if (!this.profile || !this.iframes.profile?.url) {
       console.error("Profile is not ready");
       return;
     }
@@ -161,14 +163,7 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    const username = await this.username();
-    this.profile.navigate(
-      this.options.slot
-        ? this.options.namespace
-          ? `/account/${username}/slot/${this.options.slot}/${tab}?ns=${this.options.namespace}`
-          : `/account/${username}/slot/${this.options.slot}/${tab}`
-        : `/account/${username}/${tab}`,
-    );
+    this.profile.navigate(`${this.iframes.profile.url?.pathname}/${tab}`);
     this.iframes.profile.open();
   }
 
