@@ -4,35 +4,39 @@ import { IFrame, IFrameOptions } from "./base";
 
 export type ProfileIFrameOptions = IFrameOptions<Profile> &
   ProfileOptions & {
-    address: string;
-    username: string;
-    indexerUrl: string;
-    namespace: string;
     rpcUrl: string;
+    username: string;
+    slot?: string;
+    namespace?: string;
   };
 
 export class ProfileIFrame extends IFrame<Profile> {
   constructor({
     profileUrl,
-    address,
-    username,
-    indexerUrl,
-    namespace,
     rpcUrl,
+    namespace,
+    slot,
+    username,
     tokens,
     ...iframeOptions
   }: ProfileIFrameOptions) {
-    const _url = new URL(profileUrl ?? PROFILE_URL);
-    _url.searchParams.set("address", encodeURIComponent(address));
-    _url.searchParams.set("username", encodeURIComponent(username));
-    _url.searchParams.set("indexerUrl", encodeURIComponent(indexerUrl));
-    _url.searchParams.set("namespace", encodeURIComponent(namespace));
+    const _profileUrl = profileUrl || PROFILE_URL;
+    const _url = new URL(
+      slot
+        ? namespace
+          ? `${_profileUrl}/account/${username}/slot/${slot}?ns=${encodeURIComponent(
+              namespace,
+            )}`
+          : `${_profileUrl}/account/${username}/slot/${slot}`
+        : `${_profileUrl}/account/${username}`,
+    );
+
     _url.searchParams.set("rpcUrl", encodeURIComponent(rpcUrl));
 
     if (tokens?.erc20) {
       _url.searchParams.set(
         "erc20",
-        encodeURIComponent(JSON.stringify(tokens.erc20)),
+        encodeURIComponent(tokens.erc20.toString()),
       );
     }
 

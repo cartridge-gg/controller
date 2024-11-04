@@ -5,9 +5,9 @@ export function useFetchData<TData, TVariables>(
   query: string,
   options?: RequestInit["headers"],
 ): (variables?: TVariables) => Promise<TData> {
-  const { url, headers } = useIndexerAPI();
+  const { indexerUrl, headers } = useIndexerAPI();
 
-  const fetchData = fetchDataCreator(url, {
+  const fetchData = fetchDataCreator(indexerUrl, {
     ...headers,
     ...options,
   });

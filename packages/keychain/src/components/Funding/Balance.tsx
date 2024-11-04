@@ -17,17 +17,20 @@ type BalanceProps = {
 export function Balance({ showBalances }: BalanceProps) {
   const { controller } = useController();
   const { balance: creditBalance } = useCreditBalance({
-    address: controller.address,
+    username: controller.username(),
     interval: 3000,
   });
-  const { balance: ethBalance } = useERC20Balance({
+  const {
+    data: [eth],
+  } = useERC20Balance({
     address: controller.address,
     contractAddress: ETH_CONTRACT_ADDRESS,
     provider: controller,
     interval: 3000,
+    fixed: 2,
   });
   const { countervalue } = useCountervalue({
-    balance: formatEther(ethBalance.value),
+    balance: formatEther(eth?.balance.value || 0n),
     quote: CurrencyQuote.Eth,
     base: CurrencyBase.Usd,
   });
@@ -79,7 +82,7 @@ export function Balance({ showBalances }: BalanceProps) {
         >
           <HStack>
             <EthereumIcon fontSize={20} />
-            <Text>{ethBalance.formatted}</Text>
+            <Text>{eth?.balance.formatted ?? "0.00"}</Text>
             <Text color="text.secondary">${countervalue.formatted}</Text>
           </HStack>
           <Spacer />

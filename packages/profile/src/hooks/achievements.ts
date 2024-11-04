@@ -1,25 +1,26 @@
 import { useEffect, useState } from "react";
-import { ACHIEVEMENT_COMPLETION, ACHIEVEMENT_CREATION } from "@/constants";
+import { TROPHY, PROGRESS } from "@/constants";
 import { useEvents } from "./events";
-import { Creation, Completion } from "@/models";
+import { Trophy, Progress } from "@/models";
+import { AchievementTask } from "@/components/trophies/achievement";
 
 // Number of events to fetch at a time, could be increased if needed
 const LIMIT = 100;
 
 export interface Item {
   id: string;
-  quest: string;
+  hidden: boolean;
+  index: number;
+  earning: number;
+  group: string;
+  icon: string;
   title: string;
   description: string;
-  count: number;
-  earning: number;
   timestamp: number;
   percentage: string;
   completed: boolean;
-  hidden: boolean;
   pinned: boolean;
-  total: number;
-  icon: string;
+  tasks: AchievementTask[];
 }
 
 export interface Counters {
@@ -47,37 +48,37 @@ export function useAchievements({
   const [achievements, setAchievements] = useState<Item[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
 
-  const { events: creations, isFetching: isFetchingCreations } =
-    useEvents<Creation>({
+  const { events: trophies, isFetching: isFetchingTrophiess } =
+    useEvents<Trophy>({
       namespace,
-      name: ACHIEVEMENT_CREATION,
+      name: TROPHY,
       limit: LIMIT,
-      parse: Creation.parse,
+      parse: Trophy.parse,
     });
-  const { events: completions, isFetching: isFetchingCompletions } =
-    useEvents<Completion>({
+  const { events: progresses, isFetching: isFetchingProgresses } =
+    useEvents<Progress>({
       namespace,
-      name: ACHIEVEMENT_COMPLETION,
+      name: PROGRESS,
       limit: LIMIT,
-      parse: Completion.parse,
+      parse: Progress.parse,
     });
 
   // Compute achievements and players
   useEffect(() => {
     if (
-      isFetchingCreations ||
-      isFetchingCompletions ||
-      !creations.length ||
+      isFetchingTrophiess ||
+      isFetchingProgresses ||
+      !trophies.length ||
       !address
     )
       return;
 
     // Compute counters
     const counters: Counters = {};
-    completions.forEach(({ player, quest, count, timestamp }) => {
+    progresses.forEach(({ player, task, count, timestamp }) => {
       counters[player] = counters[player] || {};
-      counters[player][quest] = counters[player][quest] || [];
-      counters[player][quest].push({ count, timestamp });
+      counters[player][task] = counters[player][task] || [];
+      counters[player][task].push({ count, timestamp });
     });
 
     // Compute players and achievement stats
@@ -85,12 +86,13 @@ export function useAchievements({
     const players: Player[] = Object.keys(counters)
       .map((playerAddress) => {
         let timestamp = 0;
-        const earnings = creations.reduce(
-          (total: number, creation: Creation) => {
-            // Compute at which timestamp the latest achievement was completed
+        const earnings = trophies.reduce((total: number, trophy: Trophy) => {
+          // Compute at which timestamp the latest achievement was completed
+          let completed = true;
+          trophy.tasks.forEach((task) => {
             let count = 0;
-            let completed = false;
-            counters[playerAddress]?.[creation.quest]
+            let completion = false;
+            counters[playerAddress]?.[task.id]
               ?.sort((a, b) => a.timestamp - b.timestamp)
               .forEach(
                 ({
@@ -101,19 +103,19 @@ export function useAchievements({
                   timestamp: number;
                 }) => {
                   count += c;
-                  if (!completed && count >= creation.total) {
+                  if (!completion && count >= task.total) {
                     timestamp = t > timestamp ? t : timestamp;
-                    completed = true;
+                    completion = true;
                   }
                 },
               );
-            // Update stats
-            stats[creation.quest] = stats[creation.quest] || 0;
-            stats[creation.quest] += completed ? 1 : 0;
-            return completed ? total + creation.earning : total;
-          },
-          0,
-        );
+            completed = completed && completion;
+          });
+          // Update stats
+          stats[trophy.id] = stats[trophy.id] || 0;
+          stats[trophy.id] += completed ? 1 : 0;
+          return completed ? total + trophy.earning : total;
+        }, 0);
         return {
           address: playerAddress,
           earnings,
@@ -125,43 +127,54 @@ export function useAchievements({
     setPlayers(players);
 
     // Compute achievements
-    const achievements: Item[] = creations
-      .map((creation) => {
+    const achievements: Item[] = trophies
+      .map((trophy) => {
         // Compute at which timestamp the achievement was completed
-        let count = 0;
         let timestamp = 0;
-        let completed = false;
-        counters[address]?.[creation.quest]
-          ?.sort((a, b) => a.timestamp - b.timestamp)
-          .forEach(
-            ({
-              count: c,
-              timestamp: t,
-            }: {
-              count: number;
-              timestamp: number;
-            }) => {
-              count += c;
-              if (!completed && count >= creation.total) {
-                timestamp = t;
-                completed = true;
-              }
-            },
-          );
+        let completed = true;
+        const tasks: AchievementTask[] = [];
+        trophy.tasks.forEach((task) => {
+          let count = 0;
+          let completion = false;
+          counters[address]?.[task.id]
+            ?.sort((a, b) => a.timestamp - b.timestamp)
+            .forEach(
+              ({
+                count: c,
+                timestamp: t,
+              }: {
+                count: number;
+                timestamp: number;
+              }) => {
+                count += c;
+                if (!completion && count >= task.total) {
+                  timestamp = t;
+                  completion = true;
+                }
+              },
+            );
+          tasks.push({
+            id: task.id,
+            count,
+            total: task.total,
+            description: task.description,
+          });
+          completed = completed && completion;
+        });
         // Compute percentage of players who completed the achievement
-        const percentage = (
-          (100 * stats[creation.quest]) /
-          players.length
-        ).toFixed(0);
+        const percentage = ((100 * stats[trophy.id]) / players.length).toFixed(
+          0,
+        );
         return {
-          ...creation,
-          count,
+          ...trophy,
           completed,
           percentage,
           timestamp,
           pinned: false,
+          tasks,
         };
       })
+      .sort((a, b) => a.index - b.index) // Lowest index to greatest
       .sort((a, b) => (a.id > b.id ? 1 : -1)) // A to Z
       .sort((a, b) => (b.hidden ? -1 : 1) - (a.hidden ? -1 : 1)) // Visible to hidden
       .sort((a, b) => b.timestamp - a.timestamp) // Newest to oldest
@@ -171,10 +184,10 @@ export function useAchievements({
     setIsLoading(false);
   }, [
     address,
-    creations,
-    completions,
-    isFetchingCreations,
-    isFetchingCompletions,
+    trophies,
+    progresses,
+    isFetchingTrophiess,
+    isFetchingProgresses,
   ]);
 
   return { achievements, players, isLoading };

@@ -1,7 +1,14 @@
 import { useEffect, useState } from "react";
 import { Event, EventNode, useEventsQuery } from "@cartridge/utils/api/indexer";
-import { Creation, Completion } from "@/models";
+import { Trophy, Progress } from "@/models";
 import { hash, byteArray, ByteArray } from "starknet";
+
+const EVENT_WRAPPER = "EventEmitted";
+
+// Computes dojo selector from namespace and event name
+function getSelectorFromName(name: string): string {
+  return `0x${hash.starknetKeccak(name).toString(16)}`.replace("0x0x", "0x");
+}
 
 // Computes dojo selector from namespace and event name
 function getSelectorFromTag(namespace: string, event: string): string {
@@ -28,7 +35,7 @@ function serializeByteArray(byteArray: ByteArray): bigint[] {
   return result;
 }
 
-export function useEvents<TEvent extends Creation | Completion>({
+export function useEvents<TEvent extends Trophy | Progress>({
   namespace,
   name,
   limit,
@@ -47,7 +54,10 @@ export function useEvents<TEvent extends Creation | Completion>({
   // Fetch achievement creations from raw events
   const { refetch: fetchEvents } = useEventsQuery(
     {
-      keys: [getSelectorFromTag(namespace, name)],
+      keys: [
+        getSelectorFromName(EVENT_WRAPPER),
+        getSelectorFromTag(namespace, name),
+      ],
       limit,
       offset,
     },

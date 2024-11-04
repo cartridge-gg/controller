@@ -1,6 +1,6 @@
 import { DotsIcon } from "@cartridge/ui";
+import { isIframe } from "@cartridge/utils";
 import { IconButton } from "@chakra-ui/react";
-import { isIframe } from "components/connect/utils";
 
 export function SettingsButton({ onClick }: { onClick?: () => void }) {
   if (!isIframe()) {

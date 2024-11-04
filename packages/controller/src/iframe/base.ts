@@ -11,6 +11,7 @@ export type IFrameOptions<CallSender> = Omit<
 };
 
 export class IFrame<CallSender extends {}> implements Modal {
+  url?: URL;
   private iframe?: HTMLIFrameElement;
   private container?: HTMLDivElement;
   private onClose?: () => void;
@@ -47,6 +48,8 @@ export class IFrame<CallSender extends {}> implements Modal {
     if (colorMode) {
       url.searchParams.set("colorMode", colorMode);
     }
+
+    this.url = url;
 
     const iframe = document.createElement("iframe");
     iframe.src = url.toString();

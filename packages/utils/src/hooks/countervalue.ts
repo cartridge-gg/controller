@@ -21,10 +21,10 @@ export function useCountervalue({
       return 0;
     }
 
-    return BigInt(parseFloat(balance) * parseFloat(data?.price.amount));
+    return parseFloat(balance) * parseFloat(data?.price.amount);
   }, [data?.price]);
 
-  const formatted = useMemo(() => formatBalance(BigInt(value)), [value]);
+  const formatted = useMemo(() => formatBalance(value.toString(), 2), [value]);
 
   return { countervalue: { value, formatted }, ...rest };
 }

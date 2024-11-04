@@ -2,15 +2,20 @@ use async_trait::async_trait;
 use cainome::cairo_serde::CairoSerde;
 use starknet::{
     accounts::{Account, ConnectedAccount, ExecutionEncoder},
-    core::types::{BlockId, BlockTag, Call, Felt},
-    macros::short_string,
+    core::{
+        types::{BlockId, BlockTag, Call, Felt},
+        utils::NonAsciiNameError,
+    },
+    macros::{selector, short_string},
 };
+use starknet_crypto::poseidon_hash_many;
 
 use crate::{
     constants::GUARDIAN_SIGNER,
+    hash::StructHashRev1,
     impl_account, impl_execution_encoder,
     provider::CartridgeJsonRpcProvider,
-    signers::{HashSigner, SignError, Signer},
+    signers::{HashSigner, SessionPolicyError, SignError, Signer},
 };
 
 use self::{
@@ -72,20 +77,45 @@ impl SessionAccount {
         )
     }
 
-    pub async fn sign(&self, hash: Felt, calls: &[Call]) -> Result<RawSessionToken, SignError> {
+    pub async fn sign_typed_data(
+        &self,
+        typed_data: &[TypedData],
+    ) -> Result<RawSessionToken, SignError> {
+        let hash = poseidon_hash_many(
+            typed_data
+                .iter()
+                .map(StructHashRev1::get_struct_hash_rev_1)
+                .collect::<Vec<_>>()
+                .iter(),
+        );
+        self.sign(
+            hash,
+            &typed_data.iter().map(Policy::from).collect::<Vec<_>>(),
+        )
+        .await
+    }
+
+    async fn sign(&self, hash: Felt, policies: &[Policy]) -> Result<RawSessionToken, SignError> {
+        let hash = self.message_hash(hash)?;
         let mut proofs = Vec::new();
 
-        for call in calls {
-            let method = Policy {
-                selector: call.selector,
-                contract_address: call.to,
-            };
-
-            let Some(proof) = self.session.single_proof(&method) else {
-                return Err(SignError::SessionMethodNotAllowed {
-                    selector: method.selector,
-                    contract_address: method.contract_address,
-                });
+        for policy in policies {
+            let Some(proof) = self.session.single_proof(policy) else {
+                return match policy {
+                    Policy::Call(method) => Err(SignError::SessionPolicyNotAllowed(
+                        SessionPolicyError::MethodNotAllowed {
+                            selector: method.selector,
+                            contract_address: method.contract_address,
+                        },
+                    )),
+                    Policy::TypedData(typed_data_policy) => {
+                        Err(SignError::SessionPolicyNotAllowed(
+                            SessionPolicyError::TypedDataNotAllowed {
+                                type_hash: typed_data_policy.type_hash,
+                            },
+                        ))
+                    }
+                };
             };
 
             proofs.push(proof);
@@ -104,6 +134,10 @@ impl SessionAccount {
     fn session_magic() -> Felt {
         short_string!("session-token")
     }
+
+    fn message_hash(&self, hash: Felt) -> Result<Felt, NonAsciiNameError> {
+        self.session.message_hash(hash, self.chain_id, self.address)
+    }
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
@@ -114,10 +148,9 @@ impl AccountHashAndCallsSigner for SessionAccount {
         hash: Felt,
         calls: &[Call],
     ) -> Result<Vec<Felt>, SignError> {
-        let tx_hash = self
-            .session
-            .message_hash(hash, self.chain_id, self.address)?;
-        let result = self.sign(tx_hash, calls).await?;
+        let result = self
+            .sign(hash, &calls.iter().map(Policy::from).collect::<Vec<_>>())
+            .await?;
         let sig = [
             vec![Self::session_magic()],
             RawSessionToken::cairo_serialize(&result),
@@ -139,5 +172,20 @@ impl ConnectedAccount for SessionAccount {
 
     fn block_id(&self) -> BlockId {
         self.block_id
+    }
+}
+
+pub type TypedData = crate::abigen::controller::TypedData;
+
+impl StructHashRev1 for TypedData {
+    const TYPE_HASH_REV_1: Felt =
+        selector!("\"Allowed Type\"(\"Type Hash\":\"felt\", \"Typed Data Hash\":\"felt\")");
+
+    fn get_struct_hash_rev_1(&self) -> Felt {
+        poseidon_hash_many([
+            &Self::TYPE_HASH_REV_1,
+            &self.type_hash,
+            &self.typed_data_hash,
+        ])
     }
 }

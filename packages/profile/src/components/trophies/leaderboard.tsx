@@ -4,9 +4,9 @@ import {
   SparklesIcon,
   StateIconProps,
 } from "@cartridge/ui-next";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Player } from "@/hooks/achievements";
-import { useUsername } from "@/hooks/username";
+import { useUsername } from "@/hooks/account";
 
 export function Leaderboard({
   players,
@@ -42,9 +42,13 @@ function Row({
   rank: number;
 }) {
   const { username } = useUsername({ address });
+  const location = useLocation();
 
   return (
-    <Link className="flex" to={`/trophies/${address}`} key={address}>
+    <Link
+      className="flex"
+      to={[...location.pathname.split("/"), address].join("/")}
+    >
       {self && <div className="w-[4px] bg-muted" />}
       <div
         className={cn(

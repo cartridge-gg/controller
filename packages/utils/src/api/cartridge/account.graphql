@@ -1,0 +1,70 @@
+query Account($username: String!) {
+  account(username: $username) {
+    username
+    credentials {
+      webauthn {
+        id
+        publicKey
+      }
+    }
+    controllers {
+      edges {
+        node {
+          address
+          constructorCalldata
+          signers {
+            type
+          }
+        }
+      }
+    }
+  }
+}
+
+query Credit($username: String!) {
+  account(username: $username) {
+    credits
+  }
+}
+
+query AccountName($address: String!) {
+  accounts(where: { hasControllersWith: { address: $address } }, first: 1) {
+    edges {
+      node {
+        username
+      }
+    }
+  }
+}
+
+query AddressByUsername($username: String!) {
+  account(username: $username) {
+    controllers(first: 1) {
+      edges {
+        node {
+          address
+        }
+      }
+    }
+  }
+}
+
+query FetchControllers($addresses: [String!]!, $first: Int) {
+  accounts(
+    where: { hasControllersWith: [{ addressIn: $addresses }] }
+    first: $first
+  ) {
+    edges {
+      node {
+        id
+        controllers {
+          edges {
+            node {
+              address
+            }
+          }
+        }
+      }
+    }
+  }
+}

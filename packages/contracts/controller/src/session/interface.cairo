@@ -36,7 +36,7 @@ trait ISession<TContractState> {
     fn is_session_registered(
         self: @TContractState, session_hash: felt252, guid_or_address: felt252,
     ) -> bool;
-    fn is_session_sigature_valid(self: @TContractState, data: Span<TypedData>, token: SessionToken) -> bool;
+    fn is_session_signature_valid(self: @TContractState, data: Span<TypedData>, token: SessionToken) -> bool;
 }
 
 #[starknet::interface]

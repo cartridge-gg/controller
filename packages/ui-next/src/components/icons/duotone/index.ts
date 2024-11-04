@@ -1,5 +1,6 @@
 export * from "./alert";
 export * from "./battery";
+export * from "./checkbox-checked";
 export * from "./coins";
 export * from "./credit-card";
 export * from "./ethereum";

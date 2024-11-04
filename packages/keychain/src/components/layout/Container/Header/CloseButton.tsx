@@ -1,6 +1,6 @@
 import { TimesIcon } from "@cartridge/ui";
+import { isIframe } from "@cartridge/utils";
 import { IconButton } from "@chakra-ui/react";
-import { isIframe } from "components/connect/utils";
 import { useConnection } from "hooks/connection";
 
 export function CloseButton() {
