@@ -28,6 +28,15 @@ export const defaultPresets: ControllerThemePresets = {
       primary: "#B0CAF8",
     },
   },
+  eternum: {
+    id: "eternum",
+    name: "Eternum",
+    icon: "/whitelabel/eternum/icon.gif",
+    cover: "/whitelabel/eternum/cover.png",
+    colors: {
+      primary: "#CE9822",
+    },
+  },
   pistols: {
     id: "pistols",
     name: "Pistols at Ten Blocks",
