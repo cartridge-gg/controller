@@ -27,6 +27,7 @@ export function Balance({ showBalances }: BalanceProps) {
     contractAddress: ETH_CONTRACT_ADDRESS,
     provider: controller,
     interval: 3000,
+    fixed: 2,
   });
   const { countervalue } = useCountervalue({
     balance: formatEther(eth?.balance.value || 0n),

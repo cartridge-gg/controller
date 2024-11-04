@@ -4,17 +4,20 @@ import useSWR from "swr";
 import { ERC20, ERC20Metadata } from "../erc20";
 import { formatBalance } from "../currency";
 import { CreditQuery, useCreditQuery } from "../api/cartridge";
+import { formatEther } from "viem";
 
 export function useERC20Balance({
   address,
   contractAddress,
   provider,
   interval,
+  fixed,
 }: {
   address: string;
   contractAddress: string | string[];
   provider: Provider;
   interval: number | undefined;
+  fixed?: number;
 }) {
   const { data: chainId } = useSWR(provider ? "chainId" : null, () =>
     provider?.getChainId(),
@@ -69,7 +72,10 @@ export function useERC20Balance({
             {
               balance: {
                 value: res.value,
-                formatted: formatBalance(res.value),
+                formatted: formatBalance(
+                  formatEther(res.value).toString(),
+                  fixed,
+                ),
               },
               meta,
             },
@@ -122,7 +128,7 @@ export function useCreditBalance({
     },
   );
   const value = data?.account?.credits ?? 0n;
-  const formatted = useMemo(() => formatBalance(value), [value]);
+  const formatted = useMemo(() => formatBalance(value, 2), [value]);
 
   return {
     balance: {
