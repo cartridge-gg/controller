@@ -1,4 +1,4 @@
-use crate::account::session::hash::Policy;
+use crate::account::session::policy::Policy;
 use crate::account::DECLARATION_SELECTOR;
 use crate::artifacts::Version;
 use crate::signers::{Owner, Signer};

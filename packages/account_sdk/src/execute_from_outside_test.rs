@@ -7,7 +7,7 @@ use starknet::{
 
 use crate::tests::runners::katana::KatanaRunner;
 use crate::tests::transaction_waiter::TransactionWaiter;
-use crate::{abigen::erc_20::Erc20, account::session::hash::Policy};
+use crate::{abigen::erc_20::Erc20, account::session::policy::Policy};
 use crate::{artifacts::Version, signers::Signer};
 use crate::{signers::Owner, tests::account::FEE_TOKEN_ADDRESS};
 use cainome::cairo_serde::{CairoSerde, ContractAddress, U256};

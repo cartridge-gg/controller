@@ -10,10 +10,7 @@ use starknet_crypto::Felt;
 
 use crate::{
     abigen::{self, erc_20::Erc20},
-    account::session::{
-        hash::{Policy, Session},
-        SessionAccount,
-    },
+    account::session::{account::SessionAccount, hash::Session, policy::Policy},
     artifacts::Version,
     constants::GUARDIAN_SIGNER,
     hash::MessageHashRev1,
@@ -168,7 +165,7 @@ async fn test_verify_execute_session_registered() {
     ensure_txn(
         controller
             .contract()
-            .register_session(&session.raw(), &owner_signer.clone().into()),
+            .register_session(&session.clone().into(), &owner_signer.clone().into()),
         controller.provider(),
     )
     .await
@@ -270,7 +267,7 @@ async fn test_create_and_use_registered_session() {
         abigen::controller::ControllerReader::new(controller.address(), runner.client())
             .is_session_registered(
                 &session
-                    .raw()
+                    .inner
                     .get_message_hash_rev_1(controller.chain_id, controller.address),
                 &owner_signer.into(),
             )

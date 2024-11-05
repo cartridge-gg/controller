@@ -2,7 +2,7 @@ use account_sdk::abigen::controller::OutsideExecutionV3;
 use account_sdk::account::outside_execution::{
     OutsideExecution, OutsideExecutionAccount, OutsideExecutionCaller,
 };
-use account_sdk::account::session::SessionAccount;
+use account_sdk::account::session::account::SessionAccount;
 use account_sdk::account::AccountHashAndCallsSigner;
 use account_sdk::provider::{CartridgeJsonRpcProvider, CartridgeProvider};
 use account_sdk::signers::Signer;

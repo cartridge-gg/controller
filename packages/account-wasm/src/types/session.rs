@@ -62,7 +62,7 @@ impl From<account_sdk::account::session::hash::Session> for Session {
                 .into_iter()
                 .map(|p| p.policy.into())
                 .collect::<Vec<_>>(),
-            expires_at: value.expires_at,
+            expires_at: value.inner.expires_at,
         }
     }
 }

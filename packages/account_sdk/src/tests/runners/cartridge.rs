@@ -19,9 +19,9 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 use url::Url;
 
-use crate::abigen::controller::SignerSignature;
+use crate::abigen::controller::{SessionToken, SignerSignature};
 use crate::account::outside_execution::OutsideExecution;
-use crate::account::session::raw_session::{RawSessionToken, SessionHash};
+use crate::account::session::hash::SessionHash;
 use crate::constants::GUARDIAN_SIGNER;
 use crate::hash::MessageHashRev1;
 use crate::provider::OutsideExecutionParams;
@@ -160,7 +160,7 @@ impl CartridgeProxy {
             }
             Err(_) => {
                 let mut session_token =
-                    <RawSessionToken as CairoSerde>::cairo_deserialize(old_signature, 1).unwrap();
+                    <SessionToken as CairoSerde>::cairo_deserialize(old_signature, 1).unwrap();
                 let session_token_hash = session_token
                     .session
                     .hash(self.chain_id, address, tx_hash)
@@ -173,15 +173,14 @@ impl CartridgeProxy {
                 let guardian_signature = GUARDIAN_SIGNER.sign(&session_token_hash).await.unwrap();
                 session_token.guardian_signature = guardian_signature;
 
-                let mut serialized =
-                    <RawSessionToken as CairoSerde>::cairo_serialize(&session_token);
+                let mut serialized = <SessionToken as CairoSerde>::cairo_serialize(&session_token);
                 serialized.insert(0, old_signature[0]);
                 serialized
             }
         }
     }
 
-    async fn add_guardian_authorization(&self, session_token: &mut RawSessionToken, address: Felt) {
+    async fn add_guardian_authorization(&self, session_token: &mut SessionToken, address: Felt) {
         if session_token.session_authorization.len() == 2 {
             // Authorization by registered
             return;

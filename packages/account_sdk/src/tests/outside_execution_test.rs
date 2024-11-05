@@ -13,7 +13,7 @@ use crate::{
     },
     account::{
         outside_execution::{OutsideExecution, OutsideExecutionAccount, OutsideExecutionCaller},
-        session::hash::Policy,
+        session::policy::Policy,
     },
     artifacts::{Version, CONTROLLERS},
     controller::Controller,
