@@ -30,7 +30,7 @@
 				method: 'allowance'
 			}
 		],
-		rpc: "https://api.cartridge.gg/x/starknet/sepolia" // sepolia, mainnet, or slot
+		rpc: 'https://api.cartridge.gg/x/starknet/sepolia' // sepolia, mainnet, or slot
 	});
 
 	let loading: boolean = true;
