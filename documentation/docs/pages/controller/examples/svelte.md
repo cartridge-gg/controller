@@ -47,7 +47,7 @@ let controller = new Controller({
         },
         // ... other policies
     ],
-    // rpc: "https://api.cartridge.gg/x/starknet/mainnet" // sepolia, mainnet, or slot. (default sepolia)
+    rpc: "https://api.cartridge.gg/x/starknet/mainnet" // sepolia, mainnet, or slot
 });
 ```
 
