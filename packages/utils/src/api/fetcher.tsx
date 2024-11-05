@@ -1,7 +1,9 @@
 export function fetchDataCreator(
   url: string,
-  credentials?: RequestInit["credentials"],
-  options?: RequestInit["headers"],
+  options?: {
+    credentials?: RequestInit["credentials"];
+    headers?: RequestInit["headers"];
+  },
 ) {
   return async <TData, TVariables>(
     query: string,
@@ -9,10 +11,10 @@ export function fetchDataCreator(
   ): Promise<TData> => {
     const res = await fetch(url, {
       method: "POST",
-      credentials: credentials || "include",
+      credentials: options?.credentials || "include",
       headers: {
         "Content-Type": "application/json",
-        ...options,
+        ...options?.headers,
       },
       body: JSON.stringify({
         query,
