@@ -18,7 +18,7 @@ import { useAchievements } from "@/hooks/achievements";
 import { useConnection } from "@/hooks/context";
 
 export function Trophies() {
-  const { address: self } = useAccount();
+  const { username: selfname, address: self } = useAccount();
   const location = useLocation();
   const { namespace } = useConnection();
   const { address } = useParams<{ address: string }>();
@@ -67,7 +67,13 @@ export function Trophies() {
       }
     >
       <LayoutHeader
-        title={!username ? (address || self).slice(0, 9) : username}
+        title={
+          isSelf
+            ? selfname
+            : username
+            ? username
+            : (address || self).slice(0, 9)
+        }
         description={<CopyAddress address={address || self} size="sm" />}
         right={
           isSelf ? (

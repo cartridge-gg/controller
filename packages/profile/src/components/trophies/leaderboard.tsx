@@ -7,6 +7,7 @@ import {
 import { Link, useLocation } from "react-router-dom";
 import { Player } from "@/hooks/achievements";
 import { useUsername } from "@/hooks/account";
+import { useMemo } from "react";
 
 export function Leaderboard({
   players,
@@ -44,11 +45,13 @@ function Row({
   const { username } = useUsername({ address });
   const location = useLocation();
 
+  const path = useMemo(() => {
+    if (self) return location.pathname;
+    return [...location.pathname.split("/"), address].join("/");
+  }, [location.pathname, address, self]);
+
   return (
-    <Link
-      className="flex"
-      to={[...location.pathname.split("/"), address].join("/")}
-    >
+    <Link className="flex" to={path}>
       {self && <div className="w-[4px] bg-muted" />}
       <div
         className={cn(

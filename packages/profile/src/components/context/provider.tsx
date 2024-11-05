@@ -15,7 +15,7 @@ export function Provider({ children }: PropsWithChildren) {
         <CartridgeAPIProvider
           url={`${import.meta.env.VITE_CARTRIDGE_API_URL!}/query`}
         >
-          <IndexerAPIProvider>
+          <IndexerAPIProvider credentials="omit">
             <QueryClientProvider client={queryClient}>
               <ConnectionProvider>{children}</ConnectionProvider>
             </QueryClientProvider>

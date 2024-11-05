@@ -1,14 +1,20 @@
-
-export function fetchDataCreator(url: string,
-  options?: RequestInit["headers"],
+export function fetchDataCreator(
+  url: string,
+  options?: {
+    credentials?: RequestInit["credentials"];
+    headers?: RequestInit["headers"];
+  },
 ) {
-  return async <TData, TVariables>(query: string, variables?: TVariables): Promise<TData> => {
+  return async <TData, TVariables>(
+    query: string,
+    variables?: TVariables,
+  ): Promise<TData> => {
     const res = await fetch(url, {
       method: "POST",
-      credentials: "include",
+      credentials: options?.credentials || "include",
       headers: {
         "Content-Type": "application/json",
-        ...options,
+        ...options?.headers,
       },
       body: JSON.stringify({
         query,
@@ -25,4 +31,4 @@ export function fetchDataCreator(url: string,
 
     return json.data;
   };
-};
+}

@@ -3,13 +3,19 @@ import { fetchDataCreator } from "../fetcher";
 
 export function useFetchData<TData, TVariables>(
   query: string,
-  options?: RequestInit["headers"],
+  options?: {
+    credentials?: RequestInit["credentials"];
+    headers?: RequestInit["headers"];
+  },
 ): (variables?: TVariables) => Promise<TData> {
-  const { url, headers } = useCartridgeAPI();
+  const { url, credentials, headers } = useCartridgeAPI();
 
   const fetchData = fetchDataCreator(url, {
-    ...headers,
-    ...options,
+    credentials: options?.credentials || credentials,
+    headers: {
+      ...headers,
+      ...options?.headers,
+    },
   });
 
   return (variables?: TVariables) => fetchData(query, variables);

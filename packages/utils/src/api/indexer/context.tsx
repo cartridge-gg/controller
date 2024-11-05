@@ -2,25 +2,37 @@ import { createContext, ReactNode, useCallback, useState } from "react";
 
 type IndexerAPIContextType = {
   indexerUrl: string;
-  headers?: RequestInit["headers"],
-  setIndexerUrl: (url: string) => void
+  credentials?: RequestInit["credentials"];
+  headers?: RequestInit["headers"];
+  setIndexerUrl: (url: string) => void;
 };
 
 const initialState: IndexerAPIContextType = {
   indexerUrl: "",
-  setIndexerUrl: () => { }
+  setIndexerUrl: () => {},
 };
 
-export const IndexerAPIContext = createContext<IndexerAPIContextType>(initialState);
+export const IndexerAPIContext =
+  createContext<IndexerAPIContextType>(initialState);
 
-export function IndexerAPIProvider({ headers, children }: { headers?: RequestInit["headers"]; children: ReactNode }) {
-  const [state, setState] = useState({ ...initialState, headers })
+export function IndexerAPIProvider({
+  credentials,
+  headers,
+  children,
+}: {
+  credentials?: RequestInit["credentials"];
+  headers?: RequestInit["headers"];
+  children: ReactNode;
+}) {
+  const [state, setState] = useState({ ...initialState, credentials, headers });
 
   const setIndexerUrl = useCallback((indexerUrl: string) => {
-    setState(state => ({ ...state, indexerUrl }))
-  }, [])
+    setState((state) => ({ ...state, indexerUrl }));
+  }, []);
 
   return (
-    <IndexerAPIContext.Provider value={{ ...state, setIndexerUrl }}>{children}</IndexerAPIContext.Provider>
+    <IndexerAPIContext.Provider value={{ ...state, setIndexerUrl }}>
+      {children}
+    </IndexerAPIContext.Provider>
   );
 }

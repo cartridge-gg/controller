@@ -3,13 +3,19 @@ import { useIndexerAPI } from "../../hooks";
 
 export function useFetchData<TData, TVariables>(
   query: string,
-  options?: RequestInit["headers"],
+  options?: {
+    credentials?: RequestInit["credentials"];
+    headers?: RequestInit["headers"];
+  },
 ): (variables?: TVariables) => Promise<TData> {
-  const { indexerUrl, headers } = useIndexerAPI();
+  const { indexerUrl, credentials, headers } = useIndexerAPI();
 
   const fetchData = fetchDataCreator(indexerUrl, {
-    ...headers,
-    ...options,
+    credentials: options?.credentials || credentials,
+    headers: {
+      ...headers,
+      ...options?.headers,
+    },
   });
 
   return (variables?: TVariables) => fetchData(query, variables);
