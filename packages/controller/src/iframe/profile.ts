@@ -20,7 +20,7 @@ export class ProfileIFrame extends IFrame<Profile> {
     tokens,
     ...iframeOptions
   }: ProfileIFrameOptions) {
-    const _profileUrl = profileUrl || PROFILE_URL;
+    const _profileUrl = (profileUrl || PROFILE_URL).replace(/\/$/, "");
     const _url = new URL(
       slot
         ? namespace
