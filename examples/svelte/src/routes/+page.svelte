@@ -54,11 +54,17 @@
 	}
 
 	onMount(async () => {
-		if (await controller.probe()) {
-			// auto connect
-			await connect();
-		}
-		loading = false;
+		const connectBtn = document.createElement("button");
+		connectBtn.style.display = "none";
+
+		connectBtn.addEventListener("click", async () => {
+			await controller.probe();
+			await controller.connect();
+		});
+
+		setTimeout(()=>{
+			connectBtn.click();
+		}, 3000)
 	});
 </script>
 
