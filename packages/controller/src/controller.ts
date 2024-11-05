@@ -74,18 +74,15 @@ export default class ControllerProvider extends BaseProvider {
       const username = await this.keychain.username();
 
       this.iframes.profile = new ProfileIFrame({
+        ...this.options,
         onConnect: (profile) => {
           this.profile = profile;
         },
         methods: {
           openPurchaseCredits: this.openPurchaseCredits.bind(this),
         },
-        profileUrl: this.options.profileUrl,
         rpcUrl: this.rpc.toString(),
         username,
-        slot: this.options.slot,
-        namespace: this.options.namespace,
-        tokens: this.options.tokens,
       });
     }
 

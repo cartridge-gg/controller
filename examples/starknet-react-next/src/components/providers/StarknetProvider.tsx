@@ -61,8 +61,8 @@ const controller = new ControllerConnector({
     process.env.NEXT_PUBLIC_PROFILE_FRAME_URL,
   slot: "eternum-rc1-1",
   namespace: "eternum",
-  // theme: "dope-wars",
-  // colorMode: "light"
+  theme: "eternum",
+  // colorMode: "light",
   tokens: {
     erc20: [
       // $LORDS

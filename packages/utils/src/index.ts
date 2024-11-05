@@ -1,4 +1,5 @@
 export * from "./account";
+export * from "./color";
 export * from "./currency";
 export * from "./api";
 export * from "./hooks";
