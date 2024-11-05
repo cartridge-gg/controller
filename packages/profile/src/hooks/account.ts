@@ -10,7 +10,7 @@ export function useUsername({ address }: { address: string }) {
   const { data } = useAccountNameQuery(
     { address },
     {
-      enabled: false,
+      enabled: true,
     },
   );
 
