@@ -20,12 +20,11 @@ export class IFrame<CallSender extends {}> implements Modal {
     id,
     url,
     theme,
-    config,
     colorMode,
     onClose,
     onConnect,
     methods = {},
-  }: Pick<ControllerOptions, "theme" | "config" | "colorMode"> & {
+  }: Pick<ControllerOptions, "theme" | "colorMode"> & {
     id: string;
     url: URL;
     onClose?: () => void;
@@ -40,7 +39,7 @@ export class IFrame<CallSender extends {}> implements Modal {
       "theme",
       encodeURIComponent(
         JSON.stringify(
-          config?.presets?.[theme ?? "cartridge"] ?? defaultPresets.cartridge,
+          defaultPresets[theme ?? "cartridge"] ?? defaultPresets.cartridge,
         ),
       ),
     );

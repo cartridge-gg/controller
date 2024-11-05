@@ -8,7 +8,6 @@ export function LayoutContainer({
   left,
 }: PropsWithChildren & { left?: React.ReactNode }) {
   const { parent, chainId, setIsVisible } = useConnection();
-
   const onClose = useCallback(() => {
     setIsVisible(false);
     parent.close().catch(() => {
@@ -18,7 +17,7 @@ export function LayoutContainer({
 
   return (
     <ResponsiveWrapper>
-      <div className="h-16 sticky top-0 flex items-center bg-[url('https://x.cartridge.gg/whitelabel/cartridge/cover.png')] bg-center bg-cover px-3 justify-between">
+      <div className="h-16 sticky top-0 flex items-center bg-[image:var(--theme-cover-url)] bg-center bg-cover px-3 justify-between">
         <div>
           {left ? (
             left
@@ -80,14 +79,7 @@ export function LayoutHeader({
           {typeof icon === "object" ? (
             icon
           ) : (
-            <div
-              className="w-full bg-cover bg-center h-full place-content-center"
-              style={{
-                backgroundImage: `url(${
-                  icon ?? "https://x.cartridge.gg/whitelabel/cartridge/icon.svg"
-                })`,
-              }}
-            />
+            <div className="w-full bg-[image:var(--theme-icon-url)] bg-cover bg-center h-full place-content-center" />
           )}
         </div>
 

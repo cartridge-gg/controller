@@ -62,7 +62,7 @@ const controller = new ControllerConnector({
   slot: "eternum-rc1-1",
   namespace: "eternum",
   theme: "eternum",
-  colorMode: "light",
+  // colorMode: "light",
   tokens: {
     erc20: [
       // $LORDS

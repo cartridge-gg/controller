@@ -1,13 +1,8 @@
 import { useContext } from "react";
-import { ColorSchemeContext, ConnectionContext } from "@/components/context";
+import { ThemeContext, ConnectionContext } from "@/components/context";
 
-export function useColorScheme() {
-  const context = useContext(ColorSchemeContext);
-
-  if (context === undefined)
-    throw new Error("useColorScheme must be used within a ColorSchemeProvider");
-
-  return context;
+export function useTheme() {
+  return useContext(ThemeContext);
 }
 
 export function useConnection() {

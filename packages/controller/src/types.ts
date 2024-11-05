@@ -139,11 +139,6 @@ export type IFrameOptions = {
   theme?: string;
   /** The color mode to use */
   colorMode?: ColorMode;
-  /** Additional configuration options */
-  config?: {
-    /** Preset themes for the controller */
-    presets?: ControllerThemePresets;
-  };
 };
 
 export type ProviderOptions = {
