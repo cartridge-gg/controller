@@ -1,11 +1,12 @@
 
 export function fetchDataCreator(url: string,
+  credentials?: RequestInit["credentials"],
   options?: RequestInit["headers"],
 ) {
   return async <TData, TVariables>(query: string, variables?: TVariables): Promise<TData> => {
     const res = await fetch(url, {
       method: "POST",
-      credentials: "include",
+      credentials: credentials || "include",
       headers: {
         "Content-Type": "application/json",
         ...options,

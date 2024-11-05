@@ -5,9 +5,9 @@ export function useFetchData<TData, TVariables>(
   query: string,
   options?: RequestInit["headers"],
 ): (variables?: TVariables) => Promise<TData> {
-  const { url, headers } = useCartridgeAPI();
+  const { url, headers, credentials } = useCartridgeAPI();
 
-  const fetchData = fetchDataCreator(url, {
+  const fetchData = fetchDataCreator(url, credentials, {
     ...headers,
     ...options,
   });

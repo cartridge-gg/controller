@@ -3,11 +3,13 @@ import { createContext, ReactNode, useCallback, useState } from "react";
 type IndexerAPIContextType = {
   indexerUrl: string;
   headers?: RequestInit["headers"],
+  credentials?: RequestInit["credentials"],
   setIndexerUrl: (url: string) => void
 };
 
 const initialState: IndexerAPIContextType = {
   indexerUrl: "",
+  credentials: "omit",
   setIndexerUrl: () => { }
 };
 

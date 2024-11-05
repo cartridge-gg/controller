@@ -5,7 +5,7 @@ import { Trophy, Progress } from "@/models";
 import { AchievementTask } from "@/components/trophies/achievement";
 
 // Number of events to fetch at a time, could be increased if needed
-const LIMIT = 100;
+const LIMIT = 1000;
 
 export interface Item {
   id: string;
