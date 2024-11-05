@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Event, EventNode, useEventsQuery } from "@cartridge/utils/api/indexer";
 import { Trophy, Progress } from "@/models";
 import { hash, byteArray, ByteArray } from "starknet";
+import { useConnection } from "./context";
 
 const EVENT_WRAPPER = "EventEmitted";
 
@@ -46,6 +47,7 @@ export function useEvents<TEvent extends Trophy | Progress>({
   limit: number;
   parse: (node: EventNode) => TEvent;
 }) {
+  const { isVisible } = useConnection();
   const [offset, setOffset] = useState(0);
   const [isFetching, setIsFetching] = useState(true);
   const [nodes, setNodes] = useState<{ [key: string]: boolean }>({});
@@ -62,6 +64,7 @@ export function useEvents<TEvent extends Trophy | Progress>({
       offset,
     },
     {
+      staleTime: Infinity,
       enabled: false,
       onSuccess: ({ events }: { events: Event }) => {
         // Update offset
@@ -86,7 +89,7 @@ export function useEvents<TEvent extends Trophy | Progress>({
 
   useEffect(() => {
     fetchEvents();
-  }, [offset, fetchEvents]);
+  }, [offset, fetchEvents, isVisible]);
 
   return { events, isFetching };
 }

@@ -16,9 +16,8 @@ import {
 import { formatEther } from "viem";
 import { CurrencyBase, CurrencyQuote } from "@cartridge/utils/api/cartridge";
 import { getChecksumAddress } from "starknet";
-import { useConnection } from "@/hooks/context";
+import { useConnection, useData } from "@/hooks/context";
 import { useAccount } from "@/hooks/account";
-import { useTokens } from "@/hooks/token";
 
 export function Tokens() {
   const { isVisible } = useConnection();
@@ -27,7 +26,7 @@ export function Tokens() {
     username,
     interval: isVisible ? 3000 : undefined,
   });
-  const erc20 = useTokens();
+  const { tokens: erc20 } = useData();
 
   return (
     <Card>

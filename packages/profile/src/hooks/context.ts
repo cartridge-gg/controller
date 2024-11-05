@@ -1,5 +1,6 @@
 import { useContext } from "react";
 import { ColorSchemeContext, ConnectionContext } from "@/components/context";
+import { DataContext } from "@/components/context/data";
 
 export function useColorScheme() {
   const context = useContext(ColorSchemeContext);
@@ -12,4 +13,8 @@ export function useColorScheme() {
 
 export function useConnection() {
   return useContext(ConnectionContext);
+}
+
+export function useData() {
+  return useContext(DataContext);
 }

@@ -9,24 +9,22 @@ import { TrophiesTab, LeaderboardTab, Scoreboard } from "./tab";
 import { useAccount, useUsername } from "@/hooks/account";
 import { CopyAddress } from "@cartridge/ui-next";
 import { Navigation } from "../navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Achievements } from "./achievements";
 import { Pinneds } from "./pinneds";
 import { Leaderboard } from "./leaderboard";
-import { useAchievements } from "@/hooks/achievements";
-import { useConnection } from "@/hooks/context";
+import { useData } from "@/hooks/context";
 
 export function Trophies() {
   const { username: selfname, address: self } = useAccount();
   const location = useLocation();
-  const { namespace } = useConnection();
   const { address } = useParams<{ address: string }>();
   const { username } = useUsername({ address: address || self || "" });
-  const { achievements, players, isLoading } = useAchievements({
-    namespace: namespace ?? "",
-    address: address || self || "",
-  });
+  const {
+    trophies: { achievements, players, isLoading },
+    setTrophiesAddress,
+  } = useData();
   const [activeTab, setActiveTab] = useState<"trophies" | "leaderboard">(
     "trophies",
   );
@@ -53,6 +51,10 @@ export function Trophies() {
   const isSelf = useMemo(() => {
     return !address || address === self;
   }, [address, self]);
+
+  useEffect(() => {
+    setTrophiesAddress(address);
+  }, [address, setTrophiesAddress]);
 
   return (
     <LayoutContainer

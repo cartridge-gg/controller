@@ -3,6 +3,8 @@ import { TROPHY, PROGRESS } from "@/constants";
 import { useEvents } from "./events";
 import { Trophy, Progress } from "@/models";
 import { AchievementTask } from "@/components/trophies/achievement";
+import { useConnection } from "./context";
+import { useAccount } from "./account";
 
 // Number of events to fetch at a time, could be increased if needed
 const LIMIT = 1000;
@@ -37,27 +39,24 @@ export interface Player {
   timestamp: number;
 }
 
-export function useAchievements({
-  namespace,
-  address,
-}: {
-  namespace: string;
-  address: string;
-}) {
+export function useAchievements(accountAddress?: string) {
+  const { namespace } = useConnection();
+  const { address } = useAccount();
+
   const [isLoading, setIsLoading] = useState(true);
   const [achievements, setAchievements] = useState<Item[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
 
   const { events: trophies, isFetching: isFetchingTrophiess } =
     useEvents<Trophy>({
-      namespace,
+      namespace: namespace || "",
       name: TROPHY,
       limit: LIMIT,
       parse: Trophy.parse,
     });
   const { events: progresses, isFetching: isFetchingProgresses } =
     useEvents<Progress>({
-      namespace,
+      namespace: namespace || "",
       name: PROGRESS,
       limit: LIMIT,
       parse: Progress.parse,
@@ -69,7 +68,7 @@ export function useAchievements({
       isFetchingTrophiess ||
       isFetchingProgresses ||
       !trophies.length ||
-      !address
+      !(accountAddress || address)
     )
       return;
 
@@ -136,7 +135,7 @@ export function useAchievements({
         trophy.tasks.forEach((task) => {
           let count = 0;
           let completion = false;
-          counters[address]?.[task.id]
+          counters[accountAddress || address]?.[task.id]
             ?.sort((a, b) => a.timestamp - b.timestamp)
             .forEach(
               ({
@@ -183,6 +182,7 @@ export function useAchievements({
     // Update loading state
     setIsLoading(false);
   }, [
+    accountAddress,
     address,
     trophies,
     progresses,
