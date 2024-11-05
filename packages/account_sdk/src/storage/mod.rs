@@ -1,8 +1,14 @@
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
-use starknet::{core::types::Felt, signers::SigningKey};
+use starknet::{
+    core::types::Felt,
+    signers::{SigningKey, VerifyingKey},
+};
 
-use crate::{account::session::hash::Session, errors::ControllerError};
+use crate::{
+    account::session::{hash::Session, policy::Policy},
+    errors::ControllerError,
+};
 
 #[cfg(feature = "webauthn")]
 use {
@@ -162,12 +168,32 @@ impl TryFrom<Owner> for crate::signers::Owner {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct SessionMetadata {
     pub session: Session,
     pub max_fee: Option<Felt>,
     pub credentials: Option<Credentials>,
     pub is_registered: bool,
+}
+
+impl SessionMetadata {
+    pub fn is_valid(&self, policies: &[Policy], public_key: Option<Felt>) -> bool {
+        let public_key = if let Some(public_key) = public_key {
+            let pubkey = VerifyingKey::from_scalar(public_key);
+            pubkey.scalar()
+        } else if let Some(credentials) = &self.credentials {
+            let signer = SigningKey::from_secret_scalar(credentials.private_key);
+            signer.verifying_key().scalar()
+        } else {
+            return false;
+        };
+
+        !self.session.is_expired()
+            && self.session.is_session_key(public_key)
+            && policies
+                .iter()
+                .all(|policy| self.session.is_authorized(policy))
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]

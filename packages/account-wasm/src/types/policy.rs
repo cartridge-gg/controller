@@ -4,7 +4,7 @@ use std::str::FromStr;
 use tsify_next::Tsify;
 use wasm_bindgen::prelude::*;
 
-use account_sdk::account::session::hash::{
+use account_sdk::account::session::policy::{
     CallPolicy as SdkCallPolicy, Policy as SdkPolicy, TypedDataPolicy as SdkTypedDataPolicy,
 };
 

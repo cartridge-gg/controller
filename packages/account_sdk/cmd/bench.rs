@@ -2,7 +2,7 @@ use account_sdk::abigen::controller::{Call, OutsideExecutionV3};
 use account_sdk::account::outside_execution::{
     OutsideExecution, OutsideExecutionAccount, OutsideExecutionCaller,
 };
-use account_sdk::account::session::hash::Policy;
+use account_sdk::account::session::policy::Policy;
 use account_sdk::artifacts::{Version, CONTROLLERS};
 use account_sdk::controller::Controller;
 use account_sdk::factory::ControllerFactory;

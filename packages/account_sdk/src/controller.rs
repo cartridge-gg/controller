@@ -1,5 +1,5 @@
 use crate::abigen::controller::SignerSignature;
-use crate::account::session::hash::Policy;
+use crate::account::session::policy::Policy;
 use crate::account::{AccountHashAndCallsSigner, CallEncoder};
 use crate::constants::{ETH_CONTRACT_ADDRESS, WEBAUTHN_GAS};
 use crate::errors::ControllerError;

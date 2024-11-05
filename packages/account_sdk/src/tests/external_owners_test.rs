@@ -8,12 +8,8 @@ use starknet::{
 use starknet_crypto::Felt;
 
 use crate::{
-    abigen::erc_20::Erc20,
-    account::session::{
-        hash::{Policy, Session},
-        raw_session::RawSession,
-        SessionAccount,
-    },
+    abigen::{self, erc_20::Erc20},
+    account::session::{account::SessionAccount, hash::Session, policy::Policy},
     artifacts::Version,
     signers::{Owner, Signer},
     tests::{account::FEE_TOKEN_ADDRESS, ensure_txn, runners::katana::KatanaRunner},
@@ -55,7 +51,9 @@ async fn test_verify_external_owner() {
             to: controller.address(),
             selector: selector!("register_session"),
             calldata: [
-                <RawSession as CairoSerde>::cairo_serialize(&session.raw()),
+                <abigen::controller::Session as CairoSerde>::cairo_serialize(
+                    &session.clone().into(),
+                ),
                 vec![external_account.address()],
             ]
             .concat(),
@@ -116,7 +114,9 @@ async fn test_verify_constructor_external_owner() {
             to: controller.address(),
             selector: selector!("register_session"),
             calldata: [
-                <RawSession as CairoSerde>::cairo_serialize(&session.raw()),
+                <abigen::controller::Session as CairoSerde>::cairo_serialize(
+                    &session.clone().into(),
+                ),
                 vec![external_account.address()],
             ]
             .concat(),
