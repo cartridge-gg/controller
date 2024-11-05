@@ -32,6 +32,8 @@ import ControllerConnector from "@cartridge/connector";
 const connector = new ControllerConnector();
 ```
 
+> ⚠️ **Important**: The `ControllerConnector` instance must be created outside of any React components. Creating it inside a component will cause the connector to be recreated on every render, which can lead to connection issues.
+
 ## Configuring the Connector
 
 You can customize the `ControllerConnector` by providing configuration options
