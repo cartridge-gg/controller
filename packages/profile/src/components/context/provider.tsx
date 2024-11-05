@@ -1,6 +1,6 @@
 import { PropsWithChildren } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { ColorSchemeProvider } from "./colorScheme";
+import { ThemeProvider } from "./theme";
 import { ConnectionProvider } from "./connection";
 import { BrowserRouter } from "react-router-dom";
 import { CartridgeAPIProvider } from "@cartridge/utils/api/cartridge";
@@ -11,7 +11,7 @@ export function Provider({ children }: PropsWithChildren) {
 
   return (
     <BrowserRouter>
-      <ColorSchemeProvider defaultScheme="system">
+      <ThemeProvider defaultScheme="system">
         <CartridgeAPIProvider
           url={`${import.meta.env.VITE_CARTRIDGE_API_URL!}/query`}
         >
@@ -21,7 +21,7 @@ export function Provider({ children }: PropsWithChildren) {
             </QueryClientProvider>
           </IndexerAPIProvider>
         </CartridgeAPIProvider>
-      </ColorSchemeProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }

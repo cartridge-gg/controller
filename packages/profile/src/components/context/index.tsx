@@ -1,3 +1,3 @@
 export { ConnectionContext } from "./connection";
-export { ColorSchemeContext } from "./colorScheme";
+export { ThemeContext } from "./theme";
 export { Provider } from "./provider";
