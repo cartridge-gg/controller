@@ -9,8 +9,16 @@ import {
 } from "@/components/inventory";
 import { Trophies } from "@/components/trophies";
 import { Activity } from "@/components/activity";
+import { useAchievements } from "@/hooks/achievements";
+import { useState } from "react";
 
 export function App() {
+  const [accountAddress, setAccountAddress] = useState<string | undefined>(
+    undefined,
+  );
+  // Info: trophies are fetch at the app level to preload them at the iframe creation to improve UX
+  const trophies = useAchievements(accountAddress);
+
   return (
     <Routes>
       <Route path="/" element={null} />
@@ -38,11 +46,15 @@ export function App() {
       />
       <Route
         path="/account/:username/slot/:project/trophies"
-        element={<Trophies />}
+        element={
+          <Trophies trophies={trophies} setAccountAddress={setAccountAddress} />
+        }
       />
       <Route
         path="/account/:username/slot/:project/trophies/:address"
-        element={<Trophies />}
+        element={
+          <Trophies trophies={trophies} setAccountAddress={setAccountAddress} />
+        }
       />
       <Route
         path="/account/:username/slot/:project/activity"
