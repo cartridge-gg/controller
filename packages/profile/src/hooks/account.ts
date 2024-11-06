@@ -7,12 +7,7 @@ import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 
 export function useUsername({ address }: { address: string }) {
-  const { data } = useAccountNameQuery(
-    { address },
-    {
-      enabled: false,
-    },
-  );
+  const { data } = useAccountNameQuery({ address });
 
   return { username: data?.accounts?.edges?.[0]?.node?.username ?? "" };
 }
