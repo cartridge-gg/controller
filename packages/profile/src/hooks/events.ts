@@ -49,12 +49,11 @@ export function useEvents<TEvent extends Trophy | Progress>({
 }) {
   const { indexerUrl } = useIndexerAPI();
   const [offset, setOffset] = useState(0);
-  const [isFetching, setIsFetching] = useState(true);
   const [nodes, setNodes] = useState<{ [key: string]: boolean }>({});
   const [events, setEvents] = useState<TEvent[]>([]);
 
   // Fetch achievement creations from raw events
-  const { refetch: fetchEvents } = useEventsQuery(
+  const { refetch: fetchEvents, isFetching } = useEventsQuery(
     {
       keys: [
         getSelectorFromName(EVENT_WRAPPER),
@@ -65,12 +64,11 @@ export function useEvents<TEvent extends Trophy | Progress>({
     },
     {
       enabled: false,
+      refetchInterval: 300_000, // Refetch every 5 minutes
       onSuccess: ({ events }: { events: Event }) => {
         // Update offset
         if (events.pageInfo.hasNextPage) {
           setOffset(offset + limit);
-        } else {
-          setIsFetching(false);
         }
         // Parse the events
         const results: TEvent[] = [];
