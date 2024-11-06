@@ -3,7 +3,7 @@ use starknet::core::types::Felt;
 use std::{collections::HashMap, fs, path::PathBuf, process::Command};
 
 fn main() {
-    println!("cargo:rerun-if-changed=./artifacts");
+    println!("cargo:rerun-if-changed=./artifacts/classes");
     generate_controller_bindings();
     generate_erc20_bindings();
     generate_artifacts();
@@ -17,7 +17,7 @@ fn generate_artifacts() {
     let mut controllers = String::new();
     let mut versions = Vec::new();
 
-    for entry in fs::read_dir("./artifacts").unwrap() {
+    for entry in fs::read_dir("./artifacts/classes").unwrap() {
         let entry = entry.unwrap();
         let path = entry.path();
         if path.is_file() && path.extension().unwrap_or_default() == "json" {
@@ -125,7 +125,7 @@ lazy_static! {{
         "latest_version": latest_version,
         "controllers": versions.iter().map(|v| {
             (v.to_string(), {
-                let path = format!("./artifacts/controller.{}.contract_class.json", v);
+                let path = format!("./artifacts/classes/controller.{}.contract_class.json", v);
                 let class_hash = extract_class_hash(&PathBuf::from(&path));
                 let casm_hash = extract_compiled_class_hash(v);
                 serde_json::json!({  // <-- Add json! macro here
@@ -149,7 +149,7 @@ fn extract_compiled_class_hash(version: &str) -> Felt {
     use std::io::BufReader;
     let compiled_class: CompiledClass = serde_json::from_reader(BufReader::new(
         File::open(format!(
-            "./artifacts/controller.{version}.compiled_contract_class.json"
+            "./artifacts/classes/controller.{version}.compiled_contract_class.json"
         ))
         .unwrap(),
     ))
@@ -169,7 +169,7 @@ fn extract_class_hash(path: &PathBuf) -> Felt {
 fn generate_controller_bindings() {
     let abigen = Abigen::new(
         "Controller",
-        "./artifacts/controller.latest.contract_class.json",
+        "./artifacts/classes/controller.latest.contract_class.json",
     )
     .with_types_aliases(HashMap::from([
         (
@@ -246,7 +246,7 @@ fn generate_controller_bindings() {
 }
 
 fn generate_erc20_bindings() {
-    let abigen = Abigen::new("Erc20", "./artifacts/erc20.contract_class.json")
+    let abigen = Abigen::new("Erc20", "./artifacts/classes/erc20.contract_class.json")
         .with_types_aliases(HashMap::from([
             (
                 String::from("openzeppelin::token::erc20::erc20::ERC20Component::Event"),
