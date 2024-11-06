@@ -269,7 +269,7 @@ function Page({
 
   const handleMouseLeave = useCallback(() => {
     setHover(false);
-  }, [highlighted]);
+  }, []);
 
   return (
     <div
