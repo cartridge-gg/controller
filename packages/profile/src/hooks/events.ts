@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Event, EventNode, useEventsQuery } from "@cartridge/utils/api/indexer";
 import { Trophy, Progress } from "@/models";
 import { hash, byteArray, ByteArray } from "starknet";
+import { useIndexerAPI } from "@cartridge/utils";
 
 const EVENT_WRAPPER = "EventEmitted";
 
@@ -46,13 +47,13 @@ export function useEvents<TEvent extends Trophy | Progress>({
   limit: number;
   parse: (node: EventNode) => TEvent;
 }) {
+  const { indexerUrl } = useIndexerAPI();
   const [offset, setOffset] = useState(0);
-  const [isFetching, setIsFetching] = useState(true);
   const [nodes, setNodes] = useState<{ [key: string]: boolean }>({});
   const [events, setEvents] = useState<TEvent[]>([]);
 
   // Fetch achievement creations from raw events
-  const { refetch: fetchEvents } = useEventsQuery(
+  const { refetch: fetchEvents, isFetching } = useEventsQuery(
     {
       keys: [
         getSelectorFromName(EVENT_WRAPPER),
@@ -63,12 +64,11 @@ export function useEvents<TEvent extends Trophy | Progress>({
     },
     {
       enabled: false,
+      refetchInterval: 300_000, // Refetch every 5 minutes
       onSuccess: ({ events }: { events: Event }) => {
         // Update offset
         if (events.pageInfo.hasNextPage) {
           setOffset(offset + limit);
-        } else {
-          setIsFetching(false);
         }
         // Parse the events
         const results: TEvent[] = [];
@@ -85,8 +85,9 @@ export function useEvents<TEvent extends Trophy | Progress>({
   );
 
   useEffect(() => {
+    if (!indexerUrl) return;
     fetchEvents();
-  }, [offset, fetchEvents]);
+  }, [offset, indexerUrl, fetchEvents]);
 
   return { events, isFetching };
 }

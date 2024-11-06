@@ -5,6 +5,7 @@ import { ConnectionProvider } from "./connection";
 import { BrowserRouter } from "react-router-dom";
 import { CartridgeAPIProvider } from "@cartridge/utils/api/cartridge";
 import { IndexerAPIProvider } from "@cartridge/utils/api/indexer";
+import { DataProvider } from "./data";
 
 export function Provider({ children }: PropsWithChildren) {
   const queryClient = new QueryClient();
@@ -17,7 +18,9 @@ export function Provider({ children }: PropsWithChildren) {
         >
           <IndexerAPIProvider credentials="omit">
             <QueryClientProvider client={queryClient}>
-              <ConnectionProvider>{children}</ConnectionProvider>
+              <ConnectionProvider>
+                <DataProvider>{children}</DataProvider>
+              </ConnectionProvider>
             </QueryClientProvider>
           </IndexerAPIProvider>
         </CartridgeAPIProvider>
