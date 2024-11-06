@@ -14,16 +14,15 @@ import { useParams } from "react-router-dom";
 import { Achievements } from "./achievements";
 import { Pinneds } from "./pinneds";
 import { Leaderboard } from "./leaderboard";
-import { useAchievements } from "@/hooks/achievements";
+import { useData } from "@/hooks/context";
 
-export function Trophies({
-  trophies: { achievements, players, isLoading },
-  setAccountAddress,
-}: {
-  trophies: ReturnType<typeof useAchievements>;
-  setAccountAddress: (address: string) => void;
-}) {
+export function Trophies() {
   const { username: selfname, address: self } = useAccount();
+  const {
+    trophies: { achievements, players, isLoading },
+    setAccountAddress,
+  } = useData();
+
   const location = useLocation();
   const { address } = useParams<{ address: string }>();
   const { username } = useUsername({ address: address || self || "" });
