@@ -6,7 +6,7 @@ config := --account katana-0 \
 build := ./target/dev/controller_
 sierra := .contract_class.json
 compiled := .compiled_contract_class.json
-store := ./packages/account_sdk/artifacts/
+store := ./packages/account_sdk/artifacts/classes/
 
 # Contract params for deploy.
 test_pubkey = 0x1234
