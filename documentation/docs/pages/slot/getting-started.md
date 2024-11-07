@@ -18,53 +18,63 @@ Authenticate with Cartridge
 slot auth login
 ```
 
-Create service deployments
+### Create service deployments
 
 ```sh
 slot deployments create <Project Name> katana
 slot deployments create <Project Name> torii --world 0x3fa481f41522b90b3684ecfab7650c259a76387fab9c380b7a959e3d4ac69f
 ```
 
-Update a service
+:::info
+When you create a service with a project name that didn't exist before, a new team is automatically created.
+:::
+
+### Update a service
 
 ```sh
-slot deployments update <Project Name> torii --version v0.3.5
+slot deployments update <Project Name> torii --version v1.0.0
 ```
 
-Delete a service
+### Delete a service
 
 ```sh
 slot deployments delete <Project Name> torii
 ```
 
-Read service logs
+### Read service logs
 
 ```sh
 slot deployments logs <Project Name> <katana | torii | saya>
 ```
 
-List all deployments
+### List all deployments
 
 ```sh
 slot deployments list
 ```
 
-View deployments configuration
+### View deployments configuration
 
 ```sh
 slot deployments describe <Project Name> <katana | torii | saya>
 ```
 
-View predeployed accounts
+### View predeployed accounts
 
 ```sh
 slot deployments accounts <Project Name> katana
 ```
 
-Manage collaborators with teams
+### Manage collaborators with teams
+
+The name of the team is the same as the project name used to create a service. A team is automatically created when you create a new project.
 
 ```sh
 slot teams <Team Name> list
 slot teams <Team Name> add <Account Name>
 slot teams <Team Name> remove <Account Name>
 ```
+
+:::info
+The account name can also be called controller username. The one used to login on controller.
+:::
