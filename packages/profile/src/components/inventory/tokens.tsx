@@ -57,10 +57,7 @@ export function Tokens() {
       </Link> */}
 
       {erc20.data.map((t) => (
-        <Link
-          key={t.meta.address}
-          to={`${location.pathname}/token/${t.meta.address}`}
-        >
+        <Link key={t.meta.address} to={`token/${t.meta.address}`}>
           <TokenCardContent token={t} />
         </Link>
       ))}

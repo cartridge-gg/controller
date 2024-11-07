@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useParams } from "react-router-dom";
 import { Account } from "@/components/account";
 import {
   Inventory,
@@ -9,48 +9,48 @@ import {
 } from "@/components/inventory";
 import { Trophies } from "@/components/trophies";
 import { Activity } from "@/components/activity";
+import { LayoutContainer } from "@/components/layout";
+import { Slot } from "@/components/slot";
 
 export function App() {
   return (
     <Routes>
-      <Route path="/" element={null} />
-      <Route path="/account/:username" element={<Account />} />
-      <Route path="/account/:username/inventory" element={<Inventory />} />
-      <Route
-        path="/account/:username/inventory/token/:address"
-        element={<Token />}
-      />
-      {/* Trophy won't work without slot + namespace param for now */}
-      {/* <Route path="/account/:username/trophies" element={<Trophies />} /> */}
-      {/* <Route
-        path="/account/:username/trophies/:address"
-        element={<Trophies />}
-      /> */}
-      <Route path="/account/:username/activity" element={<Activity />} />
-      <Route path="/account/:username/slot/:project" element={<Account />} />
-      <Route
-        path="/account/:username/slot/:project/inventory"
-        element={<Inventory />}
-      />
-      <Route
-        path="/account/:username/slot/:project/inventory/token/:address"
-        element={<Token />}
-      />
-      <Route
-        path="/account/:username/slot/:project/trophies"
-        element={<Trophies />}
-      />
-      <Route
-        path="/account/:username/slot/:project/trophies/:address"
-        element={<Trophies />}
-      />
-      <Route
-        path="/account/:username/slot/:project/activity"
-        element={<Activity />}
-      />
-      <Route path="/collection/:address" element={<Collection />} />
-      <Route path="/collection/:address/:tokenId" element={<Asset />} />
-      <Route path="/collection/:address/send" element={<Send />} />
+      <Route element={<LayoutContainer />}>
+        <Route path="account/:username" element={<Account />}>
+          <AccountRoute />
+        </Route>
+
+        <Route path="slot/:project" element={<Slot />}>
+          <AccountRoute />
+        </Route>
+      </Route>
+
+      <Route path="collection/:address" element={<Collection />}>
+        <Route path=":tokenId" element={<Asset />} />
+        <Route path="send" element={<Send />} />
+      </Route>
+
+      <Route path="*" element={<div>Page not found</div>} />
     </Routes>
+  );
+}
+
+function AccountRoute() {
+  const { project } = useParams<{
+    project: string;
+  }>();
+
+  return (
+    <>
+      <Route path="inventory" element={<Inventory />}>
+        <Route path="token/:address" element={<Token />} />
+      </Route>
+      {!project && (
+        <Route path="trophies" element={<Trophies />}>
+          <Route path=":address" element={<Trophies />} />
+        </Route>
+      )}
+      <Route path="activity" element={<Activity />} />
+    </>
   );
 }

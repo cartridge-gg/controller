@@ -2,9 +2,9 @@ import { Button, cn, TimesIcon, Network } from "@cartridge/ui-next";
 import { PropsWithChildren, useCallback } from "react";
 import { useConnection } from "@/hooks/context";
 import { isIframe } from "@cartridge/utils";
+import { Outlet } from "react-router-dom";
 
 export function LayoutContainer({
-  children,
   left,
 }: PropsWithChildren & { left?: React.ReactNode }) {
   const { parent, chainId, setIsVisible } = useConnection();
@@ -36,7 +36,7 @@ export function LayoutContainer({
         </div>
       </div>
 
-      {children}
+      <Outlet />
     </ResponsiveWrapper>
   );
 }

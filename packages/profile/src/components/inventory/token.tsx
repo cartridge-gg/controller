@@ -53,7 +53,7 @@ function Credits() {
   return (
     <LayoutContainer
       left={
-        <Link to={location.pathname.split("/").slice(0, -2).join("/")}>
+        <Link to="..">
           <Button variant="icon" size="icon">
             <ArrowIcon variant="left" />
           </Button>
