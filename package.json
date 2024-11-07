@@ -24,7 +24,8 @@
     "ui:next": "pnpm --filter @cartridge/ui-next",
     "profil": "pnpm --filter @cartridge/profile",
     "utils": "pnpm --filter @cartridge/utils",
-    "example:next": "pnpm --filter starknet-react-next",
+    "example:next": "pnpm --filter @cartridge/controller-example-next",
+    "example:svelte": "pnpm --filter @cartridge/controller-example-svelte",
     "test": "pnpm keychain test",
     "test:ci": "pnpm keychain test:ci",
     "test:storybook": "pnpm turbo build:deps test:storybook"

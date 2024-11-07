@@ -2,18 +2,33 @@
 
 # Controller
 
-Controller is a gaming specific smart contract wallet that enables seamless player onboarding and game interactions.
+Controller is a gaming specific smart contract wallet that enables seamless
+player onboarding and game interactions.
 
 It supports transaction signing using Passkeys and Session Tokens.
 
 ## Project structure
-The project consists of several subfolders located in the ```packages``` directory:
 
-- **[account_sdk](packages/account_sdk)** - a rust sdk for interacting interacting with the controller account contract.
-- **[account-wasm](packages/account-wasm)** - a wasm version of the rust account sdk for usage in the browser.
-- **[contracts](packages/contracts)** - a cairo project containing the controller account contract, signer, and session implementations.
-- **[keychain](packages/keychain)** - a sandboxed application hosted at https://x.cartridge.gg/ and responsible for sensitive operations, such as signing transactions. When an application requests to sign or execute a transaction, keychain enforces client side authorization logic and displays UI for user approval if necessary.
-- **[controller](packages/controller)** sdk. Controller implements the account interfaces required by [starknet.js](https://github.com/0xs34n/starknet.js). Underneath, the implementation communicates with an embedded sandboxed keychain iframe.
+The project consists of several subfolders located in the `packages` directory:
+
+- **[account_sdk](packages/account_sdk)** - a rust sdk for interacting
+  interacting with the controller account contract.
+- **[account-wasm](packages/account-wasm)** - a wasm version of the rust account
+  sdk for usage in the browser.
+- **[contracts](packages/contracts)** - a cairo project containing the
+  controller account contract, signer, and session implementations.
+- **[keychain](packages/keychain)** - a sandboxed application hosted at
+  https://x.cartridge.gg/ and responsible for sensitive operations, such as
+  signing transactions. When an application requests to sign or execute a
+  transaction, keychain enforces client side authorization logic and displays UI
+  for user approval if necessary.
+- **[profile](packages/profile)** - a sandboxed application hosted at
+  https://profile.cartridge.gg/ and responsible for displaying the state of
+  Controller account, such as token balances, activities, and achievement.
+- **[controller](packages/controller)** sdk. Controller implements the account
+  interfaces required by [starknet.js](https://github.com/0xs34n/starknet.js).
+  Underneath, the implementation communicates with an embedded sandboxed
+  keychain iframe.
 
 ## Development
 
@@ -31,19 +46,19 @@ Install dependencies:
 pnpm i
 ```
 
-Build dependencies:
-
-```sh
-pnpm build
-```
-
-Run `keychain` and `starknet-react-next`:
+Run Controller with examples:
 
 ```sh
 pnpm dev
 ```
 
-Open <http://localhost:3002> in your browser.
+This command builds all workspace dependencies first and start these servers:
+
+- http://localhost:3002: Controller Example (Next.js)
+- http://localhost:5174: Controller Example (Svelte)
+- http://localhost:3001: Keychain
+- http://localhost:3003: Profile
+- http://localhost:5173: Documentation
 
 The simplest way to then develop with your cartridge account is to port it over
 from the production keychain:
@@ -76,13 +91,19 @@ make
 
 in the root directory.
 
-#### Commiting changes 
+#### Commiting changes
 
-The compiled account is stored in the git repository in the `crates/account_sdk/artifacts/` folder. To make sure that the tests are run against the most reacent version of the code run `make` in the root repository. The `make` command should also be run before commiting any changes to ensure a valid state of the compiled code. 
+The compiled account is stored in the git repository in the
+`crates/account_sdk/artifacts/` folder. To make sure that the tests are run
+against the most reacent version of the code run `make` in the root repository.
+The `make` command should also be run before commiting any changes to ensure a
+valid state of the compiled code.
 
 #### Running the tests
 
-Note, that to run the tests you first have to [compile](#compiling-the-cairo-code) (to sierra and casm) the contract in the `controller` folder.
+Note, that to run the tests you first have to
+[compile](#compiling-the-cairo-code) (to sierra and casm) the contract in the
+`controller` folder.
 
 Starknet Foundry tests:
 
@@ -102,4 +123,7 @@ After the contract is compiled run the tests using `cargo`:
 cargo test
 ```
 
-The scarb builds the contract and saves the compiled code in the `controller/target` folder. The tests then fetch (at compile time) the comipled code and deploy it to the local network. Note that obviously the contract needs to be recompiled for any changes to be applied in the compiled code.
+The scarb builds the contract and saves the compiled code in the
+`controller/target` folder. The tests then fetch (at compile time) the comipled
+code and deploy it to the local network. Note that obviously the contract needs
+to be recompiled for any changes to be applied in the compiled code.
