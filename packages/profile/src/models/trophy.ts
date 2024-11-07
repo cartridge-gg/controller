@@ -56,7 +56,7 @@ export class Trophy {
   static parse(node: EventNode): Trophy {
     try {
       return Trophy.parseV0(node);
-    } catch (_e) {
+    } catch (_) {
       return Trophy.parseV1(node);
     }
   }
