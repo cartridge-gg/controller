@@ -240,10 +240,10 @@ jobs:
           steps.vars.outputs.sha_short }}.preview.cartridge.gg --scope=cartridge
           --token=${{ secrets.VERCEL_TOKEN }}
 
-  cartridge-controller-example-next:
+  controller-example-next:
     runs-on: ubuntu-latest
     env:
-      VERCEL_PROJECT_ID: "cartridge-controller-example-next"
+      VERCEL_PROJECT_ID: "controller-example-next"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
