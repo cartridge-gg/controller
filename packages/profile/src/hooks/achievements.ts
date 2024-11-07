@@ -165,7 +165,7 @@ export function useAchievements(accountAddress?: string) {
           completed = completed && completion;
         });
         // Compute percentage of players who completed the achievement
-        const percentage = ((100 * stats[trophy.id]) / players.length).toFixed(
+        const percentage = (players.length ? (100 * stats[trophy.id]) / players.length : 0).toFixed(
           0,
         );
         return {
