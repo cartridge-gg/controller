@@ -240,10 +240,10 @@ jobs:
           steps.vars.outputs.sha_short }}.preview.cartridge.gg --scope=cartridge
           --token=${{ secrets.VERCEL_TOKEN }}
 
-  cartridge-starknet-react-next:
+  controller-example-next:
     runs-on: ubuntu-latest
     env:
-      VERCEL_PROJECT_ID: "cartridge-starknet-react-next"
+      VERCEL_PROJECT_ID: "controller-example-next"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -296,8 +296,8 @@ jobs:
       - name: Build Project Artifacts (Preview)
         if: github.ref != 'refs/heads/main'
         run: |
-          echo "NEXT_PUBLIC_KEYCHAIN_DEPLOYMENT_URL=https://keychain-${{ steps.vars.outputs.sha_short }}.preview.cartridge.gg" >> ./examples/starknet-react-next/.env.local
-          echo "NEXT_PUBLIC_PROFILE_DEPLOYMENT_URL=https://profile-${{ steps.vars.outputs.sha_short }}.preview.cartridge.gg" >> ./examples/starknet-react-next/.env.local
+          echo "NEXT_PUBLIC_KEYCHAIN_DEPLOYMENT_URL=https://keychain-${{ steps.vars.outputs.sha_short }}.preview.cartridge.gg" >> ./examples/next/.env.local
+          echo "NEXT_PUBLIC_PROFILE_DEPLOYMENT_URL=https://profile-${{ steps.vars.outputs.sha_short }}.preview.cartridge.gg" >> ./examples/next/.env.local
           pnpm vercel build --token=${{ secrets.VERCEL_TOKEN }}
       - name: Build Project Artifacts (Production)
         if: github.ref == 'refs/heads/main'
