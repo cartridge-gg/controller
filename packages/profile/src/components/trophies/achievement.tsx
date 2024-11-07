@@ -66,12 +66,13 @@ export function Achievement({
           </div>
         </div>
         <Description description={description} />
-        <div className="flex flex-col gap-y-2">
-          {(!hidden || completed) &&
-            tasks.map((task) => (
+        {(!hidden || completed) && (
+          <div className="flex flex-col gap-y-2">
+            {tasks.map((task) => (
               <Task key={task.id} task={task} completed={completed} />
             ))}
-        </div>
+          </div>
+        )}
       </div>
       {completed &&
         !softview &&
