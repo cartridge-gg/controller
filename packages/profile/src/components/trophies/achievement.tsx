@@ -66,12 +66,13 @@ export function Achievement({
           </div>
         </div>
         <Description description={description} />
-        <div className="flex flex-col gap-y-2">
-          {(!hidden || completed) &&
-            tasks.map((task) => (
+        {(!hidden || completed) && (
+          <div className="flex flex-col gap-y-2">
+            {tasks.map((task) => (
               <Task key={task.id} task={task} completed={completed} />
             ))}
-        </div>
+          </div>
+        )}
       </div>
       {completed &&
         !softview &&
@@ -255,7 +256,7 @@ function Progress({
         </div>
       ) : total > 1 ? (
         <div className="flex items-center gap-1">
-          <div className="fa-solid fa-check text-xs text-quaternary-foreground" />
+          <div className="text-xs text-quaternary-foreground" />
           <p className="text-xs text-quaternary-foreground">
             {`${count.toLocaleString()} of ${total.toLocaleString()}`}
           </p>
