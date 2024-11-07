@@ -255,7 +255,7 @@ function Progress({
         </div>
       ) : total > 1 ? (
         <div className="flex items-center gap-1">
-          <div className="fa-solid fa-check text-xs text-quaternary-foreground" />
+          <div className="text-xs text-quaternary-foreground" />
           <p className="text-xs text-quaternary-foreground">
             {`${count.toLocaleString()} of ${total.toLocaleString()}`}
           </p>
