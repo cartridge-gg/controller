@@ -61,7 +61,7 @@ const controller = new ControllerConnector({
     process.env.NEXT_PUBLIC_PROFILE_FRAME_URL,
   // colorMode: "dark",
   // Dope Wars
-  // slot: "ryo2",
+  // slot: "ryo1",
   // namespace: "dopewars",
   // theme: "dope-wars",
   // Eternum
