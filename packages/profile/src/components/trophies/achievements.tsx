@@ -25,12 +25,15 @@ export function Achievements({
     const groups: { [key: string]: Item[] } = {};
     achievements.forEach((achievement) => {
       // If the achievement is hidden it should be shown in a dedicated group
-      const group = achievement.hidden
-        ? `${achievement.group}-${achievement.id}`
-        : achievement.group;
+      const group =
+        achievement.hidden && !achievement.completed
+          ? `${achievement.group}-${achievement.id}`
+          : achievement.group;
       groups[group] = groups[group] || [];
       groups[group].push(achievement);
-      groups[group].sort((a, b) => a.index - b.index);
+      groups[group]
+        .sort((a, b) => a.id.localeCompare(b.id))
+        .sort((a, b) => a.index - b.index);
     });
     setGroups(groups);
   }, [achievements]);
@@ -89,14 +92,18 @@ function Group({
   const [page, setPage] = useState(0);
   const [pages, setPages] = useState<number[]>([]);
 
+  const visibles = useMemo(() => {
+    return items.filter((a) => a.index === page || (a.hidden && !a.completed));
+  }, [items, page]);
+
   useEffect(() => {
     // Set the page to the first uncompleted achievement or 0 if there are none
-    const showns = items.filter((a) => !a.hidden);
+    const filtereds = items.filter((a) => !a.hidden);
     // Get the unique list of indexes for the achievements in this group
     const pages =
-      showns.length > 0 ? [...new Set(showns.map((a) => a.index))] : [0];
+      filtereds.length > 0 ? [...new Set(filtereds.map((a) => a.index))] : [0];
     setPages(pages);
-    const page = showns.find((a) => !a.completed);
+    const page = filtereds.find((a) => !a.completed);
     setPage(page ? page.index : pages[pages.length - 1]);
   }, [items]);
 
@@ -113,7 +120,7 @@ function Group({
     setPage(pages[index - 1]);
   }, [page, pages]);
 
-  if (items.filter((a) => a.index === page).length === 0) return null;
+  if (visibles.length === 0) return null;
 
   return (
     <div className="flex flex-col gap-y-px rounded-md overflow-hidden">
@@ -128,39 +135,37 @@ function Group({
           handlePrevious={handlePrevious}
         />
       )}
-      {items
-        .filter((a) => a.index === page)
-        .map((achievement) => (
-          <Achievement
-            key={achievement.id}
-            icon={
-              achievement.hidden && !achievement.completed
-                ? "fa-trophy"
-                : achievement.icon
-            }
-            title={
-              achievement.hidden && !achievement.completed
-                ? "Hidden Trophy"
-                : achievement.title
-            }
-            description={
-              achievement.hidden && !achievement.completed
-                ? ""
-                : achievement.description
-            }
-            percentage={achievement.percentage}
-            earning={achievement.earning}
-            timestamp={achievement.timestamp}
-            hidden={achievement.hidden}
-            completed={achievement.completed}
-            pinned={achievement.pinned}
-            id={achievement.id}
-            softview={softview}
-            enabled={enabled}
-            tasks={achievement.tasks}
-            onPin={onPin}
-          />
-        ))}
+      {visibles.map((achievement) => (
+        <Achievement
+          key={achievement.id}
+          icon={
+            achievement.hidden && !achievement.completed
+              ? "fa-trophy"
+              : achievement.icon
+          }
+          title={
+            achievement.hidden && !achievement.completed
+              ? "Hidden Trophy"
+              : achievement.title
+          }
+          description={
+            achievement.hidden && !achievement.completed
+              ? ""
+              : achievement.description
+          }
+          percentage={achievement.percentage}
+          earning={achievement.earning}
+          timestamp={achievement.timestamp}
+          hidden={achievement.hidden}
+          completed={achievement.completed}
+          pinned={achievement.pinned}
+          id={achievement.id}
+          softview={softview}
+          enabled={enabled}
+          tasks={achievement.tasks}
+          onPin={onPin}
+        />
+      ))}
     </div>
   );
 }
