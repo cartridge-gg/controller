@@ -24,8 +24,13 @@ export function Achievements({
   useEffect(() => {
     const groups: { [key: string]: Item[] } = {};
     achievements.forEach((achievement) => {
-      groups[achievement.group] = groups[achievement.group] || [];
-      groups[achievement.group].push(achievement);
+      // If the achievement is hidden it should be shown in a dedicated group
+      const group = achievement.hidden
+        ? `${achievement.group}-${achievement.id}`
+        : achievement.group;
+      groups[group] = groups[group] || [];
+      groups[group].push(achievement);
+      groups[group].sort((a, b) => a.index - b.index);
     });
     setGroups(groups);
   }, [achievements]);
@@ -101,6 +106,8 @@ function Group({
     setPage(Math.max(page - 1, 0));
   }, [page]);
 
+  if (items.filter((a) => a.index === page).length === 0) return null;
+
   return (
     <div className="flex flex-col gap-y-px rounded-md overflow-hidden">
       {items.length > 1 && (
@@ -115,7 +122,6 @@ function Group({
         />
       )}
       {items
-        .sort((a, b) => a.index - b.index)
         .filter((a) => a.index === page)
         .map((achievement) => (
           <Achievement
