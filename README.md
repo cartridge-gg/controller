@@ -58,7 +58,6 @@ This command builds all workspace dependencies first and start these servers:
 - http://localhost:5174: Controller Example (Svelte)
 - http://localhost:3001: Keychain
 - http://localhost:3003: Profile
-- http://localhost:5173: Documentation
 
 The simplest way to then develop with your cartridge account is to port it over
 from the production keychain:
