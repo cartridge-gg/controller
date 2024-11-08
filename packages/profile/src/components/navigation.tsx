@@ -11,13 +11,15 @@ import {
 import { ProfileContextTypeVariant } from "@cartridge/controller";
 import { Link, useMatch, useParams } from "react-router-dom";
 import { useAccount } from "@/hooks/account";
+import { useConnection } from "@/hooks/context";
 
 export function Navigation() {
   const { project } = useParams<{ project?: string }>();
+  const { namespace } = useConnection();
   return (
     <div className="flex rounded border border-1 border-secondary overflow-hidden shrink-0 gap-[1px] bg-secondary">
       <Item Icon={CoinsIcon} variant="inventory" />
-      {project && <Item Icon={TrophyIcon} variant="trophies" />}
+      {project && namespace && <Item Icon={TrophyIcon} variant="trophies" />}
       {/* <Item Icon={ClockIcon} variant="activity" /> */}
     </div>
   );
