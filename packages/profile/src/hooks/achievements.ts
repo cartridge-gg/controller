@@ -131,6 +131,10 @@ export function useAchievements(accountAddress?: string) {
 
     // Compute achievements
     const achievements: Item[] = trophies
+      .filter(
+        (trophy, index) =>
+          trophies.findIndex((t) => t.id === trophy.id) === index,
+      ) // Deduplicate
       .map((trophy) => {
         // Compute at which timestamp the achievement was completed
         let timestamp = 0;
