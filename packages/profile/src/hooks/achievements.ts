@@ -85,8 +85,7 @@ export function useAchievements(accountAddress?: string) {
     });
 
     // Compute players and achievement stats
-    const dedupedTrophies = trophies
-    .filter(
+    const dedupedTrophies = trophies.filter(
       (trophy, index) =>
         trophies.findIndex((t) => t.id === trophy.id) === index,
     );
@@ -94,36 +93,39 @@ export function useAchievements(accountAddress?: string) {
     const players: Player[] = Object.keys(counters)
       .map((playerAddress) => {
         let timestamp = 0;
-        const earnings = dedupedTrophies.reduce((total: number, trophy: Trophy) => {
-          // Compute at which timestamp the latest achievement was completed
-          let completed = true;
-          trophy.tasks.forEach((task) => {
-            let count = 0;
-            let completion = false;
-            counters[playerAddress]?.[task.id]
-              ?.sort((a, b) => a.timestamp - b.timestamp)
-              .forEach(
-                ({
-                  count: c,
-                  timestamp: t,
-                }: {
-                  count: number;
-                  timestamp: number;
-                }) => {
-                  count += c;
-                  if (!completion && count >= task.total) {
-                    timestamp = t > timestamp ? t : timestamp;
-                    completion = true;
-                  }
-                },
-              );
-            completed = completed && completion;
-          });
-          // Update stats
-          stats[trophy.id] = stats[trophy.id] || 0;
-          stats[trophy.id] += completed ? 1 : 0;
-          return completed ? total + trophy.earning : total;
-        }, 0);
+        const earnings = dedupedTrophies.reduce(
+          (total: number, trophy: Trophy) => {
+            // Compute at which timestamp the latest achievement was completed
+            let completed = true;
+            trophy.tasks.forEach((task) => {
+              let count = 0;
+              let completion = false;
+              counters[playerAddress]?.[task.id]
+                ?.sort((a, b) => a.timestamp - b.timestamp)
+                .forEach(
+                  ({
+                    count: c,
+                    timestamp: t,
+                  }: {
+                    count: number;
+                    timestamp: number;
+                  }) => {
+                    count += c;
+                    if (!completion && count >= task.total) {
+                      timestamp = t > timestamp ? t : timestamp;
+                      completion = true;
+                    }
+                  },
+                );
+              completed = completed && completion;
+            });
+            // Update stats
+            stats[trophy.id] = stats[trophy.id] || 0;
+            stats[trophy.id] += completed ? 1 : 0;
+            return completed ? total + trophy.earning : total;
+          },
+          0,
+        );
         return {
           address: playerAddress,
           earnings,
