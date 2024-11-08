@@ -85,11 +85,16 @@ export function useAchievements(accountAddress?: string) {
     });
 
     // Compute players and achievement stats
+    const dedupedTrophies = trophies
+    .filter(
+      (trophy, index) =>
+        trophies.findIndex((t) => t.id === trophy.id) === index,
+    );
     const stats: Stats = {};
     const players: Player[] = Object.keys(counters)
       .map((playerAddress) => {
         let timestamp = 0;
-        const earnings = trophies.reduce((total: number, trophy: Trophy) => {
+        const earnings = dedupedTrophies.reduce((total: number, trophy: Trophy) => {
           // Compute at which timestamp the latest achievement was completed
           let completed = true;
           trophy.tasks.forEach((task) => {
@@ -130,11 +135,7 @@ export function useAchievements(accountAddress?: string) {
     setPlayers(players);
 
     // Compute achievements
-    const achievements: Item[] = trophies
-      .filter(
-        (trophy, index) =>
-          trophies.findIndex((t) => t.id === trophy.id) === index,
-      ) // Deduplicate
+    const achievements: Item[] = dedupedTrophies
       .map((trophy) => {
         // Compute at which timestamp the achievement was completed
         let timestamp = 0;
