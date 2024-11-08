@@ -59,10 +59,19 @@ const controller = new ControllerConnector({
   profileUrl:
     process.env.NEXT_PUBLIC_PROFILE_DEPLOYMENT_URL ??
     process.env.NEXT_PUBLIC_PROFILE_FRAME_URL,
+  // colorMode: "dark",
+  // Dope Wars
+  // slot: "ryo2",
+  // namespace: "dopewars",
+  // theme: "dope-wars",
+  // Eternum
   slot: "eternum-rc1-1",
   namespace: "eternum",
   theme: "eternum",
-  // colorMode: "light",
+  // zKube
+  // slot: "zkube-bal",
+  // namespace: "zkube",
+  // theme: "zkube",
   tokens: {
     erc20: [
       // $LORDS

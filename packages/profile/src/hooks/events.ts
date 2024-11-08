@@ -86,7 +86,12 @@ export function useEvents<TEvent extends Trophy | Progress>({
 
   useEffect(() => {
     if (!indexerUrl) return;
-    fetchEvents();
+    try {
+      fetchEvents();
+    } catch (error) {
+      // Could happen if the indexer is down or wrong url
+      console.error(error);
+    }
   }, [offset, indexerUrl, fetchEvents]);
 
   return { events, isFetching };
