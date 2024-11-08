@@ -61,13 +61,13 @@ const controller = new ControllerConnector({
     process.env.NEXT_PUBLIC_PROFILE_FRAME_URL,
   // colorMode: "dark",
   // Dope Wars
-  // slot: "ryo2",
-  // namespace: "dopewars",
-  // theme: "dope-wars",
+  slot: "ryo1",
+  namespace: "dopewars",
+  theme: "dope-wars",
   // Eternum
-  slot: "eternum-rc1-1",
-  namespace: "eternum",
-  theme: "eternum",
+  // slot: "eternum-rc1-1",
+  // namespace: "eternum",
+  // theme: "eternum",
   // zKube
   // slot: "zkube-bal",
   // namespace: "zkube",
