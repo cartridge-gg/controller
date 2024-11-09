@@ -5,6 +5,7 @@ import {
   SparklesIcon,
   CheckboxCheckedDuoIcon,
   CheckboxUncheckedIcon,
+  Separator,
 } from "@cartridge/ui-next";
 import { toast } from "sonner";
 import { useMemo, useState } from "react";
@@ -56,11 +57,19 @@ export function Achievement({
           <div className="grow flex flex-col">
             <div className="flex justify-between items-center">
               <Title title={title} completed={completed} />
-              {completed ? (
-                <Timestamp timestamp={timestamp} />
-              ) : (
-                <Earning amount={earning.toLocaleString()} />
-              )}
+              <div className="flex items-center gap-2">
+                {completed && <Timestamp timestamp={timestamp} />}
+                {completed && (
+                  <Separator
+                    className="text-quaternary-foreground h-2"
+                    orientation="vertical"
+                  />
+                )}
+                <Earning
+                  amount={earning.toLocaleString()}
+                  completed={completed}
+                />
+              </div>
             </div>
             <Details percentage={percentage} />
           </div>
@@ -108,7 +117,7 @@ function Task({
         <p
           className={cn(
             "text-xs text-quaternary-foreground",
-            completed && "line-through",
+            completed && "line-through opacity-50",
           )}
         >
           {task.description}
@@ -141,7 +150,7 @@ function Title({ title, completed }: { title: string; completed: boolean }) {
   return (
     <p
       className={cn(
-        "text-sm text-accent-foreground capitalize",
+        "text-sm text-accent-foreground capitalize font-medium",
         completed && "text-foreground",
       )}
     >
@@ -191,11 +200,22 @@ function Details({ percentage }: { percentage: string }) {
   );
 }
 
-function Earning({ amount }: { amount: string }) {
+function Earning({
+  amount,
+  completed,
+}: {
+  amount: string;
+  completed: boolean;
+}) {
   return (
-    <div className="flex items-center gap-1 text-quaternary-foreground">
-      <SparklesIcon size="xs" variant="solid" />
-      <p className="text-xs">{amount}</p>
+    <div
+      className={cn(
+        "flex items-center gap-1 text-quaternary-foreground font-medium",
+        completed && "opacity-50",
+      )}
+    >
+      <SparklesIcon size="xs" variant={completed ? "solid" : "line"} />
+      <p className={cn("text-sm", completed && "line-through")}>{amount}</p>
     </div>
   );
 }
@@ -220,7 +240,7 @@ function Timestamp({ timestamp }: { timestamp: number }) {
   return (
     <div className="flex items-center gap-1 text-quaternary-foreground">
       <CalendarIcon size="xs" variant="line" />
-      <p className="text-[0.65rem]">{date}</p>
+      <p className="text-xs">{date}</p>
     </div>
   );
 }
@@ -250,14 +270,14 @@ function Progress({
       {completed && total > 1 ? (
         <div className="flex items-center gap-1">
           <div className="fa-solid fa-check text-xs text-quaternary-foreground" />
-          <p className="text-xs text-quaternary-foreground">
+          <p className="text-xs text-quaternary-foreground font-medium">
             {`${count.toLocaleString()}`}
           </p>
         </div>
       ) : total > 1 ? (
         <div className="flex items-center gap-1">
           <div className="text-xs text-quaternary-foreground" />
-          <p className="text-xs text-quaternary-foreground">
+          <p className="text-xs text-quaternary-foreground font-medium">
             {`${count.toLocaleString()} of ${total.toLocaleString()}`}
           </p>
         </div>
@@ -267,7 +287,7 @@ function Progress({
           <p className="text-xs text-quaternary-foreground">Completed</p>
         </div>
       ) : (
-        <p className="text-xs text-quaternary-foreground">
+        <p className="text-xs text-quaternary-foreground font-medium">
           {`${count.toLocaleString()} / ${total.toLocaleString()}`}
         </p>
       )}
