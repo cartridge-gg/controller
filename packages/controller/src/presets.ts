@@ -83,6 +83,15 @@ export const defaultPresets: ControllerThemePresets = {
       primary: "#33FF33",
     },
   },
+  "zktt": {
+    id: "zktt",
+    name: "zKTT",
+    icon: "/whitelabel/zktt/icon.png",
+    cover: "/whitelabel/zktt/cover.png",
+    colors: {
+      primary: "#FFFFFF",
+    },
+  },
   "tale-weaver": {
     id: "tale-weaver",
     name: "Tale Weaver",
