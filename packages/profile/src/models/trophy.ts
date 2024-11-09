@@ -64,10 +64,8 @@ export class Trophy {
   static parseV1(node: EventNode): Trophy {
     const descriptionIndex = 11;
     const descriptionLength = parseInt(node.data[descriptionIndex]);
-    const taskIndex = descriptionIndex + descriptionLength + 3;
-    // const tasksLength = parseInt(node.data[taskIndex]);
-    const taskDescriptionIndex = taskIndex + 3;
-    const taskDescriptionLength = parseInt(node.data[taskDescriptionIndex]);
+    let tasksIndex = descriptionIndex + descriptionLength + 3;
+    const tasksLength = parseInt(node.data[tasksIndex]);
     return {
       id: shortString.decodeShortString(node.data[1]),
       hidden: !parseInt(node.data[3]) ? false : true,
@@ -88,10 +86,14 @@ export class Trophy {
         pending_word: node.data[descriptionIndex + 1 + descriptionLength],
         pending_word_len: node.data[descriptionIndex + 2 + descriptionLength],
       }),
-      tasks: [
-        {
-          id: shortString.decodeShortString(node.data[taskIndex + 1]),
-          total: parseInt(node.data[taskIndex + 2]),
+      tasks: Array.from({ length: tasksLength }).map((_) => {
+        const index = tasksIndex;
+        const taskDescriptionIndex = index + 3;
+        const taskDescriptionLength = parseInt(node.data[taskDescriptionIndex]);
+        tasksIndex = taskDescriptionIndex + taskDescriptionLength + 2;
+        return {
+          id: shortString.decodeShortString(node.data[index + 1]),
+          total: parseInt(node.data[index + 2]),
           description: byteArray.stringFromByteArray({
             data: taskDescriptionLength
               ? node.data.slice(
@@ -104,8 +106,8 @@ export class Trophy {
             pending_word_len:
               node.data[taskDescriptionIndex + 2 + taskDescriptionLength],
           }),
-        },
-      ],
+        };
+      }),
       data: "",
     };
   }
