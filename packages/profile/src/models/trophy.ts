@@ -86,7 +86,7 @@ export class Trophy {
         pending_word: node.data[descriptionIndex + 1 + descriptionLength],
         pending_word_len: node.data[descriptionIndex + 2 + descriptionLength],
       }),
-      tasks: Array.from({ length: tasksLength }).map((_) => {
+      tasks: Array.from({ length: tasksLength }).map(() => {
         const index = tasksIndex;
         const taskDescriptionIndex = index + 3;
         const taskDescriptionLength = parseInt(node.data[taskDescriptionIndex]);
