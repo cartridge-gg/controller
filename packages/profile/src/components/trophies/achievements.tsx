@@ -8,6 +8,8 @@ import { Achievement } from "./achievement";
 import { Item } from "@/hooks/achievements";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+const HIDDEN_GROUP = "HIDDEN";
+
 export function Achievements({
   achievements,
   softview,
@@ -27,7 +29,7 @@ export function Achievements({
       // If the achievement is hidden it should be shown in a dedicated group
       const group =
         achievement.hidden && !achievement.completed
-          ? `${achievement.group}-${achievement.id}`
+          ? HIDDEN_GROUP
           : achievement.group;
       groups[group] = groups[group] || [];
       groups[group].push(achievement);
@@ -62,16 +64,26 @@ export function Achievements({
           {`${completed} of ${total}`}
         </p>
       </div>
-      {Object.entries(groups).map(([group, items]) => (
-        <Group
-          key={group}
-          group={group}
-          items={items}
-          softview={softview}
-          enabled={enabled}
-          onPin={onPin}
-        />
-      ))}
+      {Object.entries(groups)
+        .filter(([group]) => group !== HIDDEN_GROUP)
+        .map(([group, items]) => (
+          <Group
+            key={group}
+            group={group}
+            items={items}
+            softview={softview}
+            enabled={enabled}
+            onPin={onPin}
+          />
+        ))}
+      <Group
+        key={HIDDEN_GROUP}
+        group={HIDDEN_GROUP}
+        items={groups[HIDDEN_GROUP] || []}
+        softview={softview}
+        enabled={enabled}
+        onPin={onPin}
+      />
     </div>
   );
 }
@@ -124,17 +136,15 @@ function Group({
 
   return (
     <div className="flex flex-col gap-y-px rounded-md overflow-hidden">
-      {items.length > 1 && (
-        <Header
-          group={group}
-          page={page}
-          pages={pages}
-          items={items}
-          setPage={setPage}
-          handleNext={handleNext}
-          handlePrevious={handlePrevious}
-        />
-      )}
+      <Header
+        group={group}
+        page={page}
+        pages={pages}
+        items={items}
+        setPage={setPage}
+        handleNext={handleNext}
+        handlePrevious={handlePrevious}
+      />
       {visibles.map((achievement) => (
         <Achievement
           key={achievement.id}
@@ -194,33 +204,37 @@ function Header({
           {group}
         </p>
       </div>
-      <Pagination
-        Icon={ChevronLeftIcon}
-        onClick={handlePrevious}
-        disabled={page === pages[0]}
-      />
-      <Pagination
-        Icon={ChevronRightIcon}
-        onClick={handleNext}
-        disabled={page === pages[pages.length - 1]}
-      />
-      <div className="flex items-center justify-center h-full p-3 bg-secondary gap-2">
-        <div className="flex items-center justify-center rounded-xl bg-quaternary p-[3px]">
-          <div className="flex items-center justify-center rounded-xl overflow-hidden gap-x-px">
-            {pages.map((current) => (
-              <Page
-                key={current}
-                index={current}
-                completed={items
-                  .filter((a) => a.index === current)
-                  .every((a) => a.completed)}
-                highlighted={current === page}
-                setPage={setPage}
-              />
-            ))}
+      {pages.length > 1 && (
+        <>
+          <Pagination
+            Icon={ChevronLeftIcon}
+            onClick={handlePrevious}
+            disabled={page === pages[0]}
+          />
+          <Pagination
+            Icon={ChevronRightIcon}
+            onClick={handleNext}
+            disabled={page === pages[pages.length - 1]}
+          />
+          <div className="flex items-center justify-center h-full p-3 bg-secondary gap-2">
+            <div className="flex items-center justify-center rounded-xl bg-quaternary p-[3px]">
+              <div className="flex items-center justify-center rounded-xl overflow-hidden gap-x-px">
+                {pages.map((current) => (
+                  <Page
+                    key={current}
+                    index={current}
+                    completed={items
+                      .filter((a) => a.index === current)
+                      .every((a) => a.completed)}
+                    highlighted={current === page}
+                    setPage={setPage}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 }
