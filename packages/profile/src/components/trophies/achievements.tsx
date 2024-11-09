@@ -79,7 +79,9 @@ export function Achievements({
       <Group
         key={HIDDEN_GROUP}
         group={HIDDEN_GROUP}
-        items={groups[HIDDEN_GROUP] || []}
+        items={(groups[HIDDEN_GROUP] || []).sort(
+          (a, b) => a.earning - b.earning,
+        )}
         softview={softview}
         enabled={enabled}
         onPin={onPin}
