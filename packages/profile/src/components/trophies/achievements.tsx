@@ -190,7 +190,7 @@ function Header({
   return (
     <div className="flex gap-x-px items-center h-8">
       <div className="grow h-full p-3 bg-secondary flex items-center">
-        <p className="uppercase text-xs text-quaternary-foreground font-semibold tracking-wider">
+        <p className="uppercase text-xs text-quaternary-foreground font-bold tracking-wider">
           {group}
         </p>
       </div>
