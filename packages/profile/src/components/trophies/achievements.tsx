@@ -24,8 +24,16 @@ export function Achievements({
   useEffect(() => {
     const groups: { [key: string]: Item[] } = {};
     achievements.forEach((achievement) => {
-      groups[achievement.group] = groups[achievement.group] || [];
-      groups[achievement.group].push(achievement);
+      // If the achievement is hidden it should be shown in a dedicated group
+      const group =
+        achievement.hidden && !achievement.completed
+          ? `${achievement.group}-${achievement.id}`
+          : achievement.group;
+      groups[group] = groups[group] || [];
+      groups[group].push(achievement);
+      groups[group]
+        .sort((a, b) => a.id.localeCompare(b.id))
+        .sort((a, b) => a.index - b.index);
     });
     setGroups(groups);
   }, [achievements]);
@@ -81,25 +89,38 @@ function Group({
   enabled: boolean;
   onPin: (id: string) => void;
 }) {
-  const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
+  const [pages, setPages] = useState<number[]>([]);
+
+  const visibles = useMemo(() => {
+    return items.filter((a) => a.index === page || (a.hidden && !a.completed));
+  }, [items, page]);
 
   useEffect(() => {
     // Set the page to the first uncompleted achievement or 0 if there are none
-    // Remove 1 to get the last completed achievement if softview is enabled
-    const page = items.findIndex((a) => !a.completed);
-    setPage(page === -1 ? items.length - 1 : page);
-    // Set the total to the number of achievements for this group
-    setTotal(items.length);
+    const filtereds = items.filter((a) => !a.hidden);
+    // Get the unique list of indexes for the achievements in this group
+    const pages =
+      filtereds.length > 0 ? [...new Set(filtereds.map((a) => a.index))] : [0];
+    setPages(pages);
+    const page = filtereds.find((a) => !a.completed);
+    setPage(page ? page.index : pages[pages.length - 1]);
   }, [items]);
 
   const handleNext = useCallback(() => {
-    setPage(Math.min(page + 1, total - 1));
-  }, [page, total]);
+    const index = pages.indexOf(page);
+    const next = pages[index + 1];
+    if (!next) return;
+    setPage(next);
+  }, [page, pages]);
 
   const handlePrevious = useCallback(() => {
-    setPage(Math.max(page - 1, 0));
-  }, [page]);
+    const index = pages.indexOf(page);
+    if (index === 0) return;
+    setPage(pages[index - 1]);
+  }, [page, pages]);
+
+  if (visibles.length === 0) return null;
 
   return (
     <div className="flex flex-col gap-y-px rounded-md overflow-hidden">
@@ -107,47 +128,44 @@ function Group({
         <Header
           group={group}
           page={page}
-          total={total}
+          pages={pages}
           items={items}
           setPage={setPage}
           handleNext={handleNext}
           handlePrevious={handlePrevious}
         />
       )}
-      {items
-        .sort((a, b) => a.index - b.index)
-        .filter((a) => a.index === page)
-        .map((achievement) => (
-          <Achievement
-            key={achievement.id}
-            icon={
-              achievement.hidden && !achievement.completed
-                ? "fa-trophy"
-                : achievement.icon
-            }
-            title={
-              achievement.hidden && !achievement.completed
-                ? "Hidden Trophy"
-                : achievement.title
-            }
-            description={
-              achievement.hidden && !achievement.completed
-                ? ""
-                : achievement.description
-            }
-            percentage={achievement.percentage}
-            earning={achievement.earning}
-            timestamp={achievement.timestamp}
-            hidden={achievement.hidden}
-            completed={achievement.completed}
-            pinned={achievement.pinned}
-            id={achievement.id}
-            softview={softview}
-            enabled={enabled}
-            tasks={achievement.tasks}
-            onPin={onPin}
-          />
-        ))}
+      {visibles.map((achievement) => (
+        <Achievement
+          key={achievement.id}
+          icon={
+            achievement.hidden && !achievement.completed
+              ? "fa-trophy"
+              : achievement.icon
+          }
+          title={
+            achievement.hidden && !achievement.completed
+              ? "Hidden Trophy"
+              : achievement.title
+          }
+          description={
+            achievement.hidden && !achievement.completed
+              ? ""
+              : achievement.description
+          }
+          percentage={achievement.percentage}
+          earning={achievement.earning}
+          timestamp={achievement.timestamp}
+          hidden={achievement.hidden}
+          completed={achievement.completed}
+          pinned={achievement.pinned}
+          id={achievement.id}
+          softview={softview}
+          enabled={enabled}
+          tasks={achievement.tasks}
+          onPin={onPin}
+        />
+      ))}
     </div>
   );
 }
@@ -155,7 +173,7 @@ function Group({
 function Header({
   group,
   page,
-  total,
+  pages,
   items,
   setPage,
   handleNext,
@@ -163,7 +181,7 @@ function Header({
 }: {
   group: string;
   page: number;
-  total: number;
+  pages: number[];
   items: Item[];
   setPage: (page: number) => void;
   handleNext: () => void;
@@ -178,25 +196,25 @@ function Header({
       </div>
       <Pagination
         Icon={ChevronLeftIcon}
-        total={total}
         onClick={handlePrevious}
-        disabled={page === 0}
+        disabled={page === pages[0]}
       />
       <Pagination
         Icon={ChevronRightIcon}
-        total={total}
         onClick={handleNext}
-        disabled={page === total - 1}
+        disabled={page === pages[pages.length - 1]}
       />
       <div className="flex items-center justify-center h-full p-3 bg-secondary gap-2">
         <div className="flex items-center justify-center rounded-xl bg-quaternary p-[3px]">
           <div className="flex items-center justify-center rounded-xl overflow-hidden gap-x-px">
-            {items.map((item, index) => (
+            {pages.map((current) => (
               <Page
-                key={index}
-                index={index}
-                completed={item.completed}
-                highlighted={item.index === page}
+                key={current}
+                index={current}
+                completed={items
+                  .filter((a) => a.index === current)
+                  .every((a) => a.completed)}
+                highlighted={current === page}
                 setPage={setPage}
               />
             ))}
@@ -213,7 +231,6 @@ function Pagination({
   disabled,
 }: {
   Icon: React.ComponentType<StateIconProps>;
-  total: number;
   onClick: () => void;
   disabled: boolean;
 }) {

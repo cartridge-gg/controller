@@ -6,19 +6,18 @@
       "dependsOn": ["^build:deps"],
       "outputs": [
         "dist/**",
-        "!dist/documentation/**",
-        "pkg/**",
-        "!pkg/documentation/**"
+        "**/pkg-controller/**",
+        "**/pkg-session/**"
       ]
     },
     "build": {
       "dependsOn": ["^build:deps", "^build"],
-      "outputs": [".next/**", "!.next/cache/**", "!documentation/**"]
+      "outputs": [".next/**", "dist/**", "**/pkg-controller/**", "**/pkg-session/**"]
     },
     "dev": {
       "persistent": true,
       "dependsOn": ["^build:deps"],
-      "outputs": [".next/**", "!.next/cache/**", "!documentation/**"]
+      "outputs": [".next/**", "dist/**", "**/pkg-controller/**", "**/pkg-session/**"]
     },
     "storybook": {
       "persistent": true,
@@ -43,7 +42,7 @@
     "pnpm-lock.yaml",
     "Cargo.lock",
     "Cargo.toml",
-    "packages/account_sdk",
-    "packages/account-wasm"
+    "packages/account_sdk/src",
+    "packages/account-wasm/src"
   ]
 }
