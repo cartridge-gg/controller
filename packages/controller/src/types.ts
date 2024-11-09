@@ -104,6 +104,7 @@ export interface Keychain {
   signMessage(
     typedData: TypedData,
     account: string,
+    sync?: boolean,
   ): Promise<Signature | ConnectError>;
   logout(): Promise<void>;
   openSettings(): Promise<void | ConnectError>;

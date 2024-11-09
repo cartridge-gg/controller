@@ -34,6 +34,11 @@ const policies = [
     target: ETH_TOKEN_ADDRESS,
     method: "allowance",
   },
+  {
+    // The example "StarkNet Mail" message type hash
+    type_hash:
+      "0x555f72e550b308e50c1a4f8611483a174026c982a9893a05c185eeb85399657",
+  },
 ];
 
 export function StarknetProvider({ children }: PropsWithChildren) {

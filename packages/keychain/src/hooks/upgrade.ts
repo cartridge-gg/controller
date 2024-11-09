@@ -31,6 +31,12 @@ export const CONTROLLER_VERSIONS: Array<ControllerVersionInfo> = [
       "Improve paymaster nonce management",
     ],
   },
+  {
+    version: "1.0.7",
+    hash: "0x3e0a04bab386eaa51a41abe93d8035dccc96bd9d216d44201266fe0b8ea1115",
+    outsideExecutionVersion: OutsideExecutionVersion.V3,
+    changes: ["Unified message signature verification"],
+  },
 ];
 
 const LATEST_CONTROLLER = CONTROLLER_VERSIONS[CONTROLLER_VERSIONS.length - 1];

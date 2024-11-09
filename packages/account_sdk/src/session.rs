@@ -141,9 +141,9 @@ impl Controller {
             .map(|metadata| (key, metadata))
     }
 
-    pub fn session_account(&self, calls: &[Call]) -> Option<SessionAccount> {
+    pub fn session_account(&self, policies: &[Policy]) -> Option<SessionAccount> {
         // Check if there's a valid session stored
-        let (_, metadata) = self.session_metadata(&Policy::from_calls(calls), None)?;
+        let (_, metadata) = self.session_metadata(policies, None)?;
         let credentials = metadata.credentials.as_ref()?;
         let session_signer =
             Signer::Starknet(SigningKey::from_secret_scalar(credentials.private_key));

@@ -106,20 +106,26 @@ class ControllerAccount extends WalletAccount {
    * @throws {Error} if the JSON object is not a valid JSON
    */
   async signMessage(typedData: TypedData): Promise<SPEC.SIGNATURE> {
-    try {
-      this.modal.open();
-      const res = await this.keychain.signMessage(typedData, "");
-      this.modal.close();
+    return new Promise(async (resolve, reject) => {
+      const sessionSign = await this.keychain.signMessage(typedData, "", false);
 
-      if ("code" in res) {
-        throw res;
+      // Session sign succeeded
+      if (!("code" in sessionSign)) {
+        resolve(sessionSign as SPEC.SIGNATURE);
+        return;
       }
 
-      return res;
-    } catch (e) {
-      console.error(e);
-      throw e;
-    }
+      // Session not avaialble, manual flow fallback
+      this.modal.open();
+      const manualSign = await this.keychain.signMessage(typedData, "", true);
+
+      if (!("code" in manualSign)) {
+        resolve(manualSign as SPEC.SIGNATURE);
+      } else {
+        reject((manualSign as ConnectError).error);
+      }
+      this.modal.close();
+    });
   }
 }
 
