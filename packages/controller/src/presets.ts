@@ -83,7 +83,7 @@ export const defaultPresets: ControllerThemePresets = {
       primary: "#33FF33",
     },
   },
-  "zktt": {
+  zktt: {
     id: "zktt",
     name: "zKTT",
     icon: "/whitelabel/zktt/icon.png",
