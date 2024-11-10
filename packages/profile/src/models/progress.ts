@@ -1,5 +1,5 @@
 import { EventNode } from "@cartridge/utils/api/indexer";
-import { shortString } from "starknet";
+import { Reader } from "./reader";
 
 export class Progress {
   player: string;
@@ -19,11 +19,34 @@ export class Progress {
   }
 
   static parse(node: EventNode): Progress {
+    const reader = new ProgressReader(node);
     return {
-      player: node.data[1],
-      task: shortString.decodeShortString(node.data[2]),
-      count: parseInt(node.data[4]),
-      timestamp: parseInt(node.data[5]),
+      player: reader.popPlayer(),
+      task: reader.popTask(),
+      count: reader.popCount(),
+      timestamp: reader.popTimestamp(),
     };
+  }
+}
+
+class ProgressReader extends Reader {
+  constructor(node: EventNode) {
+    super(node);
+  }
+
+  popPlayer(): string {
+    return this.popValue();
+  }
+
+  popTask(): string {
+    return this.popString(2);
+  }
+
+  popCount(): number {
+    return this.popNumber();
+  }
+
+  popTimestamp(): number {
+    return this.popNumber();
   }
 }
