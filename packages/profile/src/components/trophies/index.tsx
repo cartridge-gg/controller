@@ -89,7 +89,7 @@ export function Trophies() {
       />
 
       {achievements.length ? (
-        <LayoutContent className="pb-4">
+        <LayoutContent className="pb-4 select-none">
           {isSelf && (
             <div className="flex justify-between gap-4">
               <TrophiesTab
@@ -126,7 +126,7 @@ export function Trophies() {
           )}
         </LayoutContent>
       ) : isLoading ? (
-        <LayoutContent className="pb-4">
+        <LayoutContent className="pb-4 select-none">
           <div className="flex justify-center items-center h-full border border-dashed rounded-md text-muted-foreground/10 mb-4">
             <SpinnerIcon
               className="animate-spin text-muted-foreground/30"
@@ -135,7 +135,7 @@ export function Trophies() {
           </div>
         </LayoutContent>
       ) : (
-        <LayoutContent className="pb-4">
+        <LayoutContent className="pb-4 select-none">
           <div className="flex justify-center items-center h-full border border-dashed rounded-md text-muted-foreground/10 mb-4">
             <p className="text-muted-foreground/30">No trophies available</p>
           </div>

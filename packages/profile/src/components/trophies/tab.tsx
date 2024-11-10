@@ -59,7 +59,7 @@ export function Scoreboard({
   earnings: number;
 }) {
   return (
-    <div className="flex gap-3">
+    <div className="flex gap-3 select-none">
       <div className="flex items-center border border-secondary rounded-md py-2 px-3">
         <Item
           Icon={LeaderboardIcon}
