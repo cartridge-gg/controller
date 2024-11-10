@@ -123,13 +123,14 @@ export function useCreditBalance({
   >(
     { username },
     {
-      enabled: false,
       refetchInterval: interval,
     },
   );
   const value = data?.account?.credits ?? 0n;
-  const formatted = useMemo(() => formatBalance(value, 2), [value]);
-
+  const formatted = useMemo(
+    () => formatBalance(formatEther(value).toString(), 2),
+    [value],
+  );
   return {
     balance: {
       value,

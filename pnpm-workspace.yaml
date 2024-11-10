@@ -2,4 +2,3 @@ packages:
   - examples/next
   - examples/svelte
   - packages/*
-  - documentation

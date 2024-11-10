@@ -3,20 +3,28 @@ import { addAddressPadding, BigNumberish, Call } from "starknet";
 import { ControllerError } from "utils/connection";
 import Controller from "utils/controller";
 
+enum OutsideExecutionVersion {
+  V2,
+  V3,
+}
+
 export const CONTROLLER_VERSIONS: Array<ControllerVersionInfo> = [
   {
     version: "1.0.4",
     hash: "0x24a9edbfa7082accfceabf6a92d7160086f346d622f28741bf1c651c412c9ab",
+    outsideExecutionVersion: OutsideExecutionVersion.V2,
     changes: [],
   },
   {
     version: "1.0.5",
     hash: "0x32e17891b6cc89e0c3595a3df7cee760b5993744dc8dfef2bd4d443e65c0f40",
+    outsideExecutionVersion: OutsideExecutionVersion.V2,
     changes: ["Improved session token implementation"],
   },
   {
     version: "1.0.6",
     hash: "0x59e4405accdf565112fe5bf9058b51ab0b0e63665d280b816f9fe4119554b77",
+    outsideExecutionVersion: OutsideExecutionVersion.V3,
     changes: [
       "Support session key message signing",
       "Support session guardians",
@@ -30,6 +38,7 @@ const LATEST_CONTROLLER = CONTROLLER_VERSIONS[CONTROLLER_VERSIONS.length - 1];
 type ControllerVersionInfo = {
   version: string;
   hash: string;
+  outsideExecutionVersion: OutsideExecutionVersion;
   changes: Array<string>;
 };
 
@@ -99,7 +108,15 @@ export const useUpgrade = (controller: Controller): UpgradeInterface => {
 
     try {
       setIsUpgrading(true);
-      const { transaction_hash } = await controller.executeFromOutsideV2(calls);
+
+      let transaction_hash: string;
+      if (current?.outsideExecutionVersion === OutsideExecutionVersion.V2) {
+        transaction_hash = (await controller.executeFromOutsideV2(calls))
+          .transaction_hash;
+      } else {
+        transaction_hash = (await controller.executeFromOutsideV3(calls))
+          .transaction_hash;
+      }
 
       await controller.waitForTransaction(transaction_hash, {
         retryInterval: 1000,
@@ -110,7 +127,7 @@ export const useUpgrade = (controller: Controller): UpgradeInterface => {
       console.log({ e });
       setError(e);
     }
-  }, [controller, calls]);
+  }, [controller, current, calls]);
 
   return {
     available,
