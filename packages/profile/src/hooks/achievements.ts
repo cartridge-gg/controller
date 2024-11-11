@@ -37,6 +37,7 @@ export interface Player {
   address: string;
   earnings: number;
   timestamp: number;
+  completeds: string[];
 }
 
 export function useAchievements(accountAddress?: string) {
@@ -93,6 +94,7 @@ export function useAchievements(accountAddress?: string) {
     const players: Player[] = Object.keys(counters)
       .map((playerAddress) => {
         let timestamp = 0;
+        const completeds: string[] = [];
         const earnings = dedupedTrophies.reduce(
           (total: number, trophy: Trophy) => {
             // Compute at which timestamp the latest achievement was completed
@@ -119,6 +121,8 @@ export function useAchievements(accountAddress?: string) {
                 );
               completed = completed && completion;
             });
+            // Add trophy to list if completed
+            if (completed) completeds.push(trophy.id);
             // Update stats
             stats[trophy.id] = stats[trophy.id] || 0;
             stats[trophy.id] += completed ? 1 : 0;
@@ -130,6 +134,7 @@ export function useAchievements(accountAddress?: string) {
           address: playerAddress,
           earnings,
           timestamp,
+          completeds,
         };
       })
       .sort((a, b) => a.timestamp - b.timestamp) // Oldest to newest

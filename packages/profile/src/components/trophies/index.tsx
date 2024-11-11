@@ -121,7 +121,11 @@ export function Trophies() {
           )}
           {isSelf && activeTab === "leaderboard" && (
             <ScrollArea className="overflow-auto">
-              <Leaderboard players={players} address={self} />
+              <Leaderboard
+                players={players}
+                address={self}
+                achievements={achievements}
+              />
             </ScrollArea>
           )}
         </LayoutContent>
