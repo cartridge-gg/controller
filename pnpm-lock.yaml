@@ -451,6 +451,9 @@ importers:
       '@cartridge/utils':
         specifier: workspace:^
         version: link:../utils
+      posthog-js:
+        specifier: ^1.181.0
+        version: 1.181.0
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -476,6 +479,9 @@ importers:
       '@eslint/js':
         specifier: ^9.9.0
         version: 9.12.0
+      '@types/node':
+        specifier: ^20.6.0
+        version: 20.16.11
       '@types/react':
         specifier: ^18.3.3
         version: 18.3.11
@@ -484,7 +490,7 @@ importers:
         version: 18.3.1
       '@vitejs/plugin-react-swc':
         specifier: ^3.5.0
-        version: 3.7.1(@swc/helpers@0.5.5)(vite@5.4.8(@types/node@22.7.5)(terser@5.34.1))
+        version: 3.7.1(@swc/helpers@0.5.5)(vite@5.4.8(@types/node@20.16.11)(terser@5.34.1))
       autoprefixer:
         specifier: ^10.4.18
         version: 10.4.20(postcss@8.4.47)
@@ -505,7 +511,7 @@ importers:
         version: 8.4.47
       tailwindcss:
         specifier: ^3.4.3
-        version: 3.4.13(ts-node@10.9.2(@swc/core@1.7.35(@swc/helpers@0.5.5))(@types/node@22.7.5)(typescript@5.5.4))
+        version: 3.4.13(ts-node@10.9.2(@swc/core@1.7.35(@swc/helpers@0.5.5))(@types/node@20.16.11)(typescript@5.5.4))
       typescript:
         specifier: ^5.5.3
         version: 5.5.4
@@ -514,7 +520,7 @@ importers:
         version: 8.8.1(eslint@9.12.0(jiti@2.3.3))(typescript@5.5.4)
       vite:
         specifier: ^5.4.1
-        version: 5.4.8(@types/node@22.7.5)(terser@5.34.1)
+        version: 5.4.8(@types/node@20.16.11)(terser@5.34.1)
 
   packages/tsconfig: {}
 
@@ -19550,6 +19556,13 @@ snapshots:
       json-schema-to-ts: 1.6.4
       ts-morph: 12.0.0
 
+  '@vitejs/plugin-react-swc@3.7.1(@swc/helpers@0.5.5)(vite@5.4.8(@types/node@20.16.11)(terser@5.34.1))':
+    dependencies:
+      '@swc/core': 1.7.35(@swc/helpers@0.5.5)
+      vite: 5.4.8(@types/node@20.16.11)(terser@5.34.1)
+    transitivePeerDependencies:
+      - '@swc/helpers'
+
   '@vitejs/plugin-react-swc@3.7.1(@swc/helpers@0.5.5)(vite@5.4.8(@types/node@22.7.5)(terser@5.34.1))':
     dependencies:
       '@swc/core': 1.7.35(@swc/helpers@0.5.5)
@@ -28328,6 +28341,16 @@ snapshots:
       esbuild: 0.18.20
       postcss: 8.4.47
       rollup: 3.29.5
+    optionalDependencies:
+      '@types/node': 20.16.11
+      fsevents: 2.3.3
+      terser: 5.34.1
+
+  vite@5.4.8(@types/node@20.16.11)(terser@5.34.1):
+    dependencies:
+      esbuild: 0.21.5
+      postcss: 8.4.47
+      rollup: 4.24.0
     optionalDependencies:
       '@types/node': 20.16.11
       fsevents: 2.3.3
