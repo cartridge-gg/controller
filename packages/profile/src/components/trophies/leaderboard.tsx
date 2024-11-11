@@ -120,11 +120,11 @@ function Trophies({ trophies }: { trophies: string[] }) {
         <div
           key={trophy}
           className={cn(
-            "h-6 w-6 border rounded-md p-1 flex items-center justify-center",
+            "w-6 h-6 border rounded-md flex items-center justify-center",
             self ? "border-quinary" : "border-quaternary",
           )}
         >
-          <div className={cn("fa-solid", trophy)} />
+          <div className={cn("w-4 h-4", trophy, "fa-solid")} />
         </div>
       ))}
     </div>
