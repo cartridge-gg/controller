@@ -12,7 +12,7 @@ export function CopyAddress({
   last,
 }: { address: string; className?: string } & FormatAddressOptions) {
   const onCopy = useCallback(() => {
-    navigator.clipboard.writeText(formatAddress(address, { padding: true }));
+    navigator.clipboard.writeText(address);
     toast.success("Address copied");
   }, [address]);
 
