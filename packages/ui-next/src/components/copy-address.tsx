@@ -3,6 +3,7 @@ import { formatAddress, FormatAddressOptions } from "@cartridge/utils";
 import { CopyIcon } from "./icons";
 import { toast } from "sonner";
 import { useCallback } from "react";
+import { addAddressPadding } from "starknet";
 
 export function CopyAddress({
   address,
@@ -12,7 +13,7 @@ export function CopyAddress({
   last,
 }: { address: string; className?: string } & FormatAddressOptions) {
   const onCopy = useCallback(() => {
-    navigator.clipboard.writeText(formatAddress(address, { padding: true }));
+    navigator.clipboard.writeText(addAddressPadding(address));
     toast.success("Address copied");
   }, [address]);
 
