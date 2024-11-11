@@ -84,6 +84,7 @@ export function useConnectionValue() {
       chainId: controller.chainId,
       appId: origin,
     });
+    posthog.group("company", origin);
 
     setControllerRaw(controller);
     setIsSignedUp();
