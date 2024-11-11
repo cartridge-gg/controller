@@ -69,7 +69,7 @@ const controller = new ControllerConnector({
   namespace: "eternum",
   theme: "eternum",
   // zKube
-  // slot: "zkube-bal",
+  // slot: "zkube-mainnet",
   // namespace: "zkube",
   // theme: "zkube",
   tokens: {
