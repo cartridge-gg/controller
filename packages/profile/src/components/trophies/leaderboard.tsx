@@ -81,7 +81,7 @@ function Row({
       >
         <div className="flex items-center justify-between grow">
           <div className="flex items-center gap-x-4">
-            <p className="text-muted-foreground w-6">{`${rank}.`}</p>
+            <p className="text-muted-foreground min-w-6">{`${rank}.`}</p>
             <User
               username={!username ? address.slice(0, 9) : username}
               self={self}
@@ -107,8 +107,10 @@ function User({
 }) {
   return (
     <div className="flex items-center gap-x-2">
-      <Icon size="default" variant="line" />
-      <p>{self ? `${username} (you)` : username}</p>
+      <Icon className="shrink-0" size="default" variant="line" />
+      <p className="text-ellipsis line-clamp-1 break-all">
+        {self ? `${username} (you)` : username}
+      </p>
     </div>
   );
 }
@@ -133,7 +135,7 @@ function Trophies({ trophies }: { trophies: string[] }) {
 
 function Earnings({ earnings, self }: { earnings: number; self: boolean }) {
   return (
-    <div className="flex items-center gap-x-2">
+    <div className="flex items-center justify-end gap-x-2 min-w-16">
       <SparklesIcon size="default" variant={self ? "solid" : "line"} />
       <p>{earnings}</p>
     </div>
