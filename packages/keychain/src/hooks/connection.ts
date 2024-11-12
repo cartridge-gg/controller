@@ -17,6 +17,7 @@ import {
   ConnectionContextValue,
 } from "components/Provider/connection";
 import { UpgradeInterface, useUpgrade } from "./upgrade";
+import posthog from "posthog-js";
 
 const CHAIN_ID_TIMEOUT = 3000;
 
@@ -77,6 +78,14 @@ export function useConnectionValue() {
   }, [context, parent]);
 
   const setController = useCallback((controller?: Controller) => {
+    posthog.identify(controller.cartridge.username(), {
+      address: controller.address,
+      class: controller.cartridge.classHash,
+      chainId: controller.chainId,
+      appId: origin,
+    });
+    posthog.group("company", origin);
+
     setControllerRaw(controller);
     setIsSignedUp();
   }, []);

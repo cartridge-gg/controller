@@ -39,6 +39,7 @@
     "js-cookie": "^3.0.1",
     "next": "^13.4.19",
     "p-throttle": "^6.2.0",
+    "posthog-js": "^1.181.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-query": "^3.39.2",
