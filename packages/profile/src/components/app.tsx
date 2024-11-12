@@ -1,4 +1,4 @@
-import { Route, Routes, useParams } from "react-router-dom";
+import { Outlet, Route, Routes } from "react-router-dom";
 import { Account } from "@/components/account";
 import {
   Inventory,
@@ -9,19 +9,27 @@ import {
 } from "@/components/inventory";
 import { Trophies } from "@/components/trophies";
 import { Activity } from "@/components/activity";
-import { LayoutContainer } from "@/components/layout";
 import { Slot } from "@/components/slot";
 
 export function App() {
   return (
     <Routes>
-      <Route element={<LayoutContainer />}>
+      <Route element={<Outlet />}>
         <Route path="account/:username" element={<Account />}>
-          <AccountRoute />
-        </Route>
+          <Route path="inventory" element={<Inventory />}>
+            <Route path="token/:address" element={<Token />} />
+          </Route>
+          <Route path="activity" element={<Activity />} />
 
-        <Route path="slot/:project" element={<Slot />}>
-          <AccountRoute />
+          <Route path="slot/:project" element={<Slot />}>
+            <Route path="inventory" element={<Inventory />}>
+              <Route path="token/:address" element={<Token />} />
+            </Route>
+            <Route path="trophies" element={<Trophies />}>
+              <Route path=":address" element={<Trophies />} />
+            </Route>
+            <Route path="activity" element={<Activity />} />
+          </Route>
         </Route>
       </Route>
 
@@ -32,25 +40,5 @@ export function App() {
 
       <Route path="*" element={<div>Page not found</div>} />
     </Routes>
-  );
-}
-
-function AccountRoute() {
-  const { project } = useParams<{
-    project: string;
-  }>();
-
-  return (
-    <>
-      <Route path="inventory" element={<Inventory />}>
-        <Route path="token/:address" element={<Token />} />
-      </Route>
-      {!project && (
-        <Route path="trophies" element={<Trophies />}>
-          <Route path=":address" element={<Trophies />} />
-        </Route>
-      )}
-      <Route path="activity" element={<Activity />} />
-    </>
   );
 }

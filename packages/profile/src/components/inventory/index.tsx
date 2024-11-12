@@ -4,7 +4,11 @@ export { Send } from "./send";
 export { Token } from "./token";
 
 import { CopyAddress } from "@cartridge/ui-next";
-import { LayoutContent, LayoutHeader } from "@/components/layout";
+import {
+  LayoutContainer,
+  LayoutContent,
+  LayoutHeader,
+} from "@/components/layout";
 import { Navigation } from "../navigation";
 // import { Collections } from "./collections";
 import { Tokens } from "./tokens";
@@ -13,17 +17,17 @@ import { Outlet, useParams } from "react-router-dom";
 
 export function Inventory() {
   const { username, address } = useAccount();
-  const { project, tokenId } = useParams<{
+  const { project, address: tokenContractAddress } = useParams<{
     project?: string;
-    tokenId?: string;
+    address?: string;
   }>();
 
-  if (tokenId) {
+  if (tokenContractAddress) {
     return <Outlet />;
   }
 
   return (
-    <>
+    <LayoutContainer>
       <LayoutHeader
         title={username}
         description={<CopyAddress address={address} size="sm" />}
@@ -34,6 +38,6 @@ export function Inventory() {
         <Tokens />
         {/* <Collections /> */}
       </LayoutContent>
-    </>
+    </LayoutContainer>
   );
 }
