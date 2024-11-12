@@ -13,11 +13,18 @@ import { Navigation } from "../navigation";
 // import { Collections } from "./collections";
 import { Tokens } from "./tokens";
 import { useAccount } from "@/hooks/account";
-import { useParams } from "react-router-dom";
+import { Outlet, useParams } from "react-router-dom";
 
 export function Inventory() {
   const { username, address } = useAccount();
-  const { project } = useParams<{ project?: string }>();
+  const { project, address: tokenContractAddress } = useParams<{
+    project?: string;
+    address?: string;
+  }>();
+
+  if (tokenContractAddress) {
+    return <Outlet />;
+  }
 
   return (
     <LayoutContainer>

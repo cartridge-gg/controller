@@ -3,7 +3,7 @@ import {
   LayoutContent,
   LayoutHeader,
 } from "@/components/layout";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ScrollArea, Button, ArrowIcon, SpinnerIcon } from "@cartridge/ui-next";
 import { TrophiesTab, LeaderboardTab, Scoreboard } from "./tab";
 import { useAccount, useUsername } from "@/hooks/account";
@@ -23,7 +23,6 @@ export function Achievements() {
     setAccountAddress,
   } = useData();
 
-  const location = useLocation();
   const { address } = useParams<{ address: string }>();
   const { username } = useUsername({ address: address || self || "" });
 
@@ -62,7 +61,7 @@ export function Achievements() {
     <LayoutContainer
       left={
         !isSelf ? (
-          <Link to={location.pathname.split("/").slice(0, -1).join("/")}>
+          <Link to=".">
             <Button variant="icon" size="icon">
               <ArrowIcon variant="left" />
             </Button>
