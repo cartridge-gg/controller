@@ -61,7 +61,7 @@ export function Trophies() {
     <LayoutContainer
       left={
         !isSelf ? (
-          <Link to="..">
+          <Link to=".">
             <Button variant="icon" size="icon">
               <ArrowIcon variant="left" />
             </Button>
