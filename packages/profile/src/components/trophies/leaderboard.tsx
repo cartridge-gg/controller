@@ -67,8 +67,12 @@ function Row({
       .slice(0, 3);
     return tops
       .filter((achievement) => achievement)
-      .map((achievement) => achievement.icon);
-  }, [achievements, completeds]);
+      .map((achievement) => ({
+        address,
+        id: achievement.id,
+        icon: achievement.icon,
+      }));
+  }, [achievements, completeds, address]);
 
   return (
     <Link className="flex" to={path}>
@@ -115,18 +119,22 @@ function User({
   );
 }
 
-function Trophies({ trophies }: { trophies: string[] }) {
+function Trophies({
+  trophies,
+}: {
+  trophies: { address: string; id: string; icon: string }[];
+}) {
   return (
     <div className="flex items-center gap-x-2 text-primary">
       {trophies.map((trophy) => (
         <div
-          key={trophy}
+          key={`${trophy.address}-${trophy.id}`}
           className={cn(
             "w-6 h-6 border rounded-md flex items-center justify-center",
             self ? "border-quinary" : "border-quaternary",
           )}
         >
-          <div className={cn("w-4 h-4", trophy, "fa-solid")} />
+          <div className={cn("w-4 h-4", trophy.icon, "fa-solid")} />
         </div>
       ))}
     </div>
