@@ -168,7 +168,10 @@ export type ProfileOptions = IFrameOptions & {
   tokens?: Tokens;
 };
 
-export type ProfileContextTypeVariant = "inventory" | "trophies" | "achievements";
+export type ProfileContextTypeVariant =
+  | "inventory"
+  | "trophies"
+  | "achievements";
 
 export type ColorMode = "light" | "dark";
 
