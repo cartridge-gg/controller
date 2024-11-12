@@ -20,7 +20,7 @@ const nextConfig = {
     config.experiments = { ...config.experiments, asyncWebAssembly: true };
     return config;
   },
-  redirects: async function () {
+  redirects: async () => {
     return [
       {
         source: "/slot/auth",
@@ -39,6 +39,22 @@ const nextConfig = {
       },
     ];
   },
+  rewrites: async () => [
+    {
+      source: "/ingest/static/:path*",
+      destination: `${process.env.POSTHOG_HOST}/static/:path*`,
+    },
+    {
+      source: "/ingest/:path*",
+      destination: `${process.env.POSTHOG_HOST}/:path*`,
+    },
+    {
+      source: "/ingest/decide",
+      destination: `${process.env.POSTHOG_HOST}/decide`,
+    },
+  ],
+  // This is required to support PostHog trailing slash API requests
+  skipTrailingSlashRedirect: true,
 };
 
 module.exports = nextConfig;
