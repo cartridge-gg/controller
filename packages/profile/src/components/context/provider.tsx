@@ -10,12 +10,12 @@ import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
 
 if (typeof window !== "undefined") {
-  posthog.init(process.env.VITE_POSTHOG_KEY!, {
-    api_host: process.env.VITE_POSTHOG_HOST,
+  posthog.init(import.meta.env.VITE_POSTHOG_KEY!, {
+    api_host: import.meta.env.VITE_POSTHOG_HOST,
     person_profiles: "always",
     enable_recording_console_log: true,
     loaded: (posthog) => {
-      if (process.env.NODE_ENV === "development") posthog.debug();
+      if (import.meta.env.NODE_ENV === "development") posthog.debug();
     },
   });
 }
