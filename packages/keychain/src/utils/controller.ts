@@ -158,6 +158,10 @@ export default class Controller extends Account {
     return this.cartridge.hasSession(toJsCalls(calls));
   }
 
+  hasSessionForMessage(typedData: TypedData): boolean {
+    return this.cartridge.hasSessionForMessage(JSON.stringify(typedData));
+  }
+
   session(
     policies: Policy[],
     public_key?: string,

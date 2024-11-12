@@ -169,7 +169,9 @@ async fn flip(
         calldata: vec![x.into(), y.into(), team.into()],
     };
 
-    let session_account = controller.session_account(&[flip.clone().into()]).unwrap();
+    let session_account = controller
+        .session_account(&Policy::from_calls(&[flip.clone().into()]))
+        .unwrap();
 
     let flip_execution = OutsideExecutionV3 {
         caller: OutsideExecutionCaller::Any.into(),

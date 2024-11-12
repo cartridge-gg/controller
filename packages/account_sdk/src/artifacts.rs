@@ -9,6 +9,7 @@ pub enum Version {
     V1_0_4,
     V1_0_5,
     V1_0_6,
+    V1_0_7,
     LATEST,
 }
 
@@ -28,9 +29,19 @@ lazy_static! {
             Version::LATEST,
             ContractClass {
                 content: include_str!("../artifacts/classes/controller.latest.contract_class.json"),
-                hash: felt!("0x4342bf7fbad4f200167e9b00b3c904df99a3836ceb280c58107da96a9099f86"),
+                hash: felt!("0x3e0a04bab386eaa51a41abe93d8035dccc96bd9d216d44201266fe0b8ea1115"),
                 casm_hash: felt!(
-                    "0x6b2bb9738c29372da692b244624d37ecb8ad218b70475ebb711a39e037afdc5"
+                    "0x60eda0e15a5a5962b4866793e86a074ce22490debf9449fb62d12f28a534c78"
+                ),
+            },
+        );
+        m.insert(
+            Version::V1_0_7,
+            ContractClass {
+                content: include_str!("../artifacts/classes/controller.v1.0.7.contract_class.json"),
+                hash: felt!("0x3e0a04bab386eaa51a41abe93d8035dccc96bd9d216d44201266fe0b8ea1115"),
+                casm_hash: felt!(
+                    "0x60eda0e15a5a5962b4866793e86a074ce22490debf9449fb62d12f28a534c78"
                 ),
             },
         );
@@ -67,11 +78,12 @@ lazy_static! {
         m
     };
     pub static ref DEFAULT_CONTROLLER: &'static ContractClass =
-        CONTROLLERS.get(&Version::V1_0_6).unwrap();
+        CONTROLLERS.get(&Version::V1_0_7).unwrap();
     pub static ref VERSIONS: Vec<Version> = vec![
         Version::V1_0_4,
         Version::V1_0_5,
         Version::V1_0_6,
+        Version::V1_0_7,
         Version::LATEST
     ];
 }

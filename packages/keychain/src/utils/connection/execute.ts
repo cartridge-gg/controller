@@ -11,6 +11,7 @@ import {
 } from "starknet";
 import { ConnectionCtx, ControllerError, ExecuteCtx } from "./types";
 import { ErrorCode, JsCall } from "@cartridge/account-wasm/controller";
+import { mutex } from "./sync";
 
 export const ESTIMATE_FEE_PERCENTAGE = 10;
 
@@ -32,31 +33,6 @@ export function parseControllerError(
     };
   }
 }
-
-function releaseStub() {}
-
-/**
- * A simple mutual exclusion lock. It allows you to obtain and release a lock,
- *  ensuring that only one task can access a critical section at a time.
- */
-export class Mutex {
-  private m_lastPromise: Promise<void> = Promise.resolve();
-
-  /**
-   * Acquire lock
-   * @param [bypass=false] option to skip lock acquisition
-   */
-  public async obtain(bypass = false): Promise<() => void> {
-    let release = releaseStub;
-    if (bypass) return release;
-    const lastPromise = this.m_lastPromise;
-    this.m_lastPromise = new Promise<void>((resolve) => (release = resolve));
-    await lastPromise;
-    return release;
-  }
-}
-
-const mutex = new Mutex();
 
 export function execute({
   setContext,
