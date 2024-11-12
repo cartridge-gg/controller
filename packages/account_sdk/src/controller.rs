@@ -20,7 +20,7 @@ use starknet::core::types::{
     BlockTag, Call, FeeEstimate, FunctionCall, InvokeTransactionResult, StarknetError,
 };
 use starknet::core::utils::cairo_short_string_to_felt;
-use starknet::macros::selector;
+use starknet::macros::{selector, short_string};
 use starknet::providers::{Provider, ProviderError};
 use starknet::signers::SignerInteractivityContext;
 use starknet::{
@@ -32,6 +32,8 @@ use url::Url;
 #[cfg(all(test, not(target_arch = "wasm32")))]
 #[path = "controller_test.rs"]
 mod controller_test;
+
+const SESSION_TYPED_DATA_MAGIC: Felt = short_string!("session-typed-data");
 
 #[derive(Clone)]
 pub struct Controller {
@@ -345,9 +347,30 @@ impl Controller {
     }
 
     pub async fn sign_message(&self, data: TypedData) -> Result<Vec<Felt>, SignError> {
-        let hash = data.encode(self.address)?;
-        let signature = self.owner.sign(&hash).await?;
-        Ok(Vec::<SignerSignature>::cairo_serialize(&vec![signature]))
+        let hash_parts = data.encode(self.address)?;
+
+        match self.session_account(&[Policy::new_typed_data(hash_parts.domain_separator_hash)]) {
+            Some(session_account) => {
+                let abi_typed_data = abigen::controller::TypedData {
+                    type_hash: hash_parts.domain_separator_hash,
+                    typed_data_hash: hash_parts.message_hash,
+                };
+                Ok([
+                    vec![SESSION_TYPED_DATA_MAGIC],
+                    Vec::<abigen::controller::TypedData>::cairo_serialize(&vec![
+                        abi_typed_data.clone()
+                    ]),
+                    abigen::controller::SessionToken::cairo_serialize(
+                        &session_account.sign_typed_data(&[abi_typed_data]).await?,
+                    ),
+                ]
+                .concat())
+            }
+            _ => {
+                let signature = self.owner.sign(&hash_parts.hash).await?;
+                Ok(Vec::<SignerSignature>::cairo_serialize(&vec![signature]))
+            }
+        }
     }
 
     async fn get_nonce(&self) -> Result<Felt, ProviderError> {
@@ -373,7 +396,9 @@ impl Controller {
 
 impl_account!(Controller, |account: &Controller, context| {
     if let SignerInteractivityContext::Execution { calls } = context {
-        account.session_account(calls).is_none()
+        account
+            .session_account(&Policy::from_calls(calls))
+            .is_none()
     } else {
         true
     }
@@ -405,7 +430,7 @@ impl AccountHashAndCallsSigner for Controller {
         hash: Felt,
         calls: &[Call],
     ) -> Result<Vec<Felt>, SignError> {
-        match self.session_account(calls) {
+        match self.session_account(&Policy::from_calls(calls)) {
             Some(session_account) => session_account.sign_hash_and_calls(hash, calls).await,
             _ => {
                 let signature = self.owner.sign(&hash).await?;

@@ -453,6 +453,17 @@ pub struct TypedData {
     pub message: IndexMap<String, PrimitiveType>,
 }
 
+/// Breakdown of components that make up a typed message hash.
+#[derive(Debug, Clone)]
+pub struct TypedDataHash {
+    /// The final hash of the entire message.
+    pub hash: Felt,
+    /// Hash of the `domain_separator` component.
+    pub domain_separator_hash: Felt,
+    /// Hash of the `message` component.
+    pub message_hash: Felt,
+}
+
 impl TypedData {
     pub fn new(
         types: IndexMap<String, Vec<Field>>,
@@ -468,7 +479,7 @@ impl TypedData {
         }
     }
 
-    pub fn encode(&self, account: Felt) -> Result<Felt, Error> {
+    pub fn encode(&self, account: Felt) -> Result<TypedDataHash, Error> {
         let preset_types = get_preset_types();
 
         if self.domain.revision.clone().unwrap_or("1".to_string()) != "1" {
@@ -491,9 +502,13 @@ impl TypedData {
         )?;
 
         // return full hash
-        Ok(poseidon_hash_many(
-            vec![prefix_message, domain_hash, account, message_hash].as_slice(),
-        ))
+        Ok(TypedDataHash {
+            hash: poseidon_hash_many(
+                vec![prefix_message, domain_hash, account, message_hash].as_slice(),
+            ),
+            domain_separator_hash: domain_hash,
+            message_hash,
+        })
     }
 }
 
@@ -621,7 +636,7 @@ mod tests {
 
         let typed_data: TypedData = serde_json::from_reader(reader).unwrap();
 
-        let message_hash = typed_data.encode(address).unwrap();
+        let message_hash = typed_data.encode(address).unwrap().hash;
 
         assert_eq!(
             message_hash,
@@ -633,7 +648,7 @@ mod tests {
 
         let typed_data: TypedData = serde_json::from_reader(reader).unwrap();
 
-        let message_hash = typed_data.encode(address).unwrap();
+        let message_hash = typed_data.encode(address).unwrap().hash;
 
         assert_eq!(
             message_hash,
@@ -645,7 +660,7 @@ mod tests {
 
         let typed_data: TypedData = serde_json::from_reader(reader).unwrap();
 
-        let message_hash = typed_data.encode(address).unwrap();
+        let message_hash = typed_data.encode(address).unwrap().hash;
 
         assert_eq!(
             message_hash,

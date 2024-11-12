@@ -30,6 +30,7 @@ mod CartridgeAccount {
     use core::to_byte_array::FormatAsByteArray;
     use core::array::ArrayTrait;
     use core::traits::Into;
+    use core::poseidon::poseidon_hash_span;
     use core::result::ResultTrait;
     use hash::HashStateTrait;
     use pedersen::PedersenTrait;
@@ -68,7 +69,7 @@ mod CartridgeAccount {
             is_estimate_transaction
         }
     };
-    use argent::session::interface::SessionToken;
+    use argent::session::interface::{SessionToken, TypedData};
 
     use openzeppelin::security::reentrancyguard::ReentrancyGuardComponent;
     use openzeppelin::upgrades::UpgradeableComponent;
@@ -92,6 +93,7 @@ mod CartridgeAccount {
     const TRANSACTION_VERSION: felt252 = 1;
     // 2**128 + TRANSACTION_VERSION
     const QUERY_VERSION: felt252 = 0x100000000000000000000000000000001;
+    const SESSION_TYPED_DATE_MAGIC: felt252 = 'session-typed-data';
 
     component!(path: session_component, storage: session, event: SessionEvent);
     #[abi(embed_v0)]
@@ -281,7 +283,16 @@ mod CartridgeAccount {
         fn is_valid_signature(
             self: @ContractState, hash: felt252, signature: Array<felt252>
         ) -> felt252 {
-            if self
+            if *signature[0] == SESSION_TYPED_DATE_MAGIC {
+                if self
+                    .is_valid_session_typed_data_signature(
+                        hash, signature.span().slice(1, signature.len() - 1)
+                    ) {
+                    starknet::VALIDATED
+                } else {
+                    0
+                }
+            } else if self
                 .is_valid_span_signature(
                     hash, self.parse_signature_array(signature.span()).span()
                 ) {
@@ -438,6 +449,50 @@ mod CartridgeAccount {
                 return false;
             }
             return signer_signature.is_valid_signature(hash);
+        }
+
+        #[must_use]
+        fn is_valid_session_typed_data_signature(
+            self: @ContractState, hash: felt252, mut signature: Span<felt252>
+        ) -> bool {
+            let typed_data_items: Array<TypedData> = Serde::deserialize(ref signature)
+                .expect('invalid-signature-format');
+            let session_token: SessionToken = Serde::deserialize(ref signature)
+                .expect('invalid-signature-format');
+            assert(!typed_data_items.is_empty(), 'empty-typed-data-list');
+            assert(signature.is_empty(), 'invalid-signature-length');
+
+            // compute individual message hashes
+            let contract_address: felt252 = get_contract_address().into();
+            let mut message_hashes: Array<felt252> = array![];
+            let mut items = typed_data_items.span();
+            while let Option::Some(typed_data) = items.pop_front() {
+                // assumes revision `1`
+                message_hashes
+                    .append(
+                        poseidon_hash_span(
+                            array![
+                                'StarkNet Message',
+                                *typed_data.type_hash,
+                                contract_address,
+                                *typed_data.typed_data_hash,
+                            ]
+                                .span()
+                        )
+                    );
+            };
+
+            let message_hash = if message_hashes.len() == 1 {
+                // compatible with SNIP-12
+                *message_hashes[0]
+            } else {
+                // custom extension to SNIP-12 for multiple messages
+                poseidon_hash_span(message_hashes.span())
+            };
+
+            assert(message_hash == hash, 'message-hash-mismatch');
+
+            self.is_session_signature_valid(typed_data_items.span(), session_token)
         }
 
         #[inline(always)]

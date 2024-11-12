@@ -1,6 +1,8 @@
+use account_sdk::account::session::policy::Policy as SdkPolicy;
 use account_sdk::controller::Controller;
 use account_sdk::errors::ControllerError;
 use account_sdk::signers::Owner;
+use account_sdk::typed_data::TypedData;
 use serde_wasm_bindgen::to_value;
 use starknet::accounts::ConnectedAccount;
 use starknet::core::types::Call;
@@ -254,7 +256,21 @@ impl CartridgeAccount {
             .map(TryFrom::try_from)
             .collect::<std::result::Result<_, _>>()?;
 
-        Ok(self.controller.session_account(&calls).is_some())
+        Ok(self
+            .controller
+            .session_account(&SdkPolicy::from_calls(&calls))
+            .is_some())
+    }
+
+    #[wasm_bindgen(js_name = hasSessionForMessage)]
+    pub fn has_session_for_message(&self, typed_data: String) -> Result<bool> {
+        let typed_data: TypedData = serde_json::from_str(&typed_data)?;
+        let type_hash = typed_data.domain.encode(&typed_data.types)?;
+
+        Ok(self
+            .controller
+            .session_account(&[SdkPolicy::new_typed_data(type_hash)])
+            .is_some())
     }
 
     #[wasm_bindgen(js_name = session)]
