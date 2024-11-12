@@ -42,15 +42,15 @@ const nextConfig = {
   rewrites: async () => [
     {
       source: "/ingest/static/:path*",
-      destination: `${process.env.POSTHOG_HOST}/static/:path*`,
+      destination: "https://us-assets.i.posthog.com/static/:path*",
     },
     {
       source: "/ingest/:path*",
-      destination: `${process.env.POSTHOG_HOST}/:path*`,
+      destination: "https://us.i.posthog.com/:path*",
     },
     {
       source: "/ingest/decide",
-      destination: `${process.env.POSTHOG_HOST}/decide`,
+      destination: "https://us.i.posthog.com/decide",
     },
   ],
   // This is required to support PostHog trailing slash API requests

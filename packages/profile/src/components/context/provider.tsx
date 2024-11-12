@@ -12,15 +12,17 @@ export function Provider({ children }: PropsWithChildren) {
   const queryClient = new QueryClient();
 
   return (
-    <PostHogProvider apiKey={import.meta.env.VITE_POSTHOG_KEY} options={{
-      api_host: import.meta.env.VITE_POSTHOG_HOST,
-      person_profiles: "always",
-      enable_recording_console_log: true,
-      loaded: (posthog) => {
-        if (import.meta.env.NODE_ENV === "development") posthog.debug();
-      },
-
-    }}>
+    <PostHogProvider
+      apiKey={import.meta.env.VITE_POSTHOG_KEY}
+      options={{
+        api_host: `${window.location.origin}/ingest`,
+        person_profiles: "always",
+        enable_recording_console_log: true,
+        loaded: (posthog) => {
+          if (import.meta.env.NODE_ENV === "development") posthog.debug();
+        },
+      }}
+    >
       <BrowserRouter>
         <ThemeProvider defaultScheme="system">
           <CartridgeAPIProvider
@@ -36,6 +38,6 @@ export function Provider({ children }: PropsWithChildren) {
           </CartridgeAPIProvider>
         </ThemeProvider>
       </BrowserRouter>
-    </PostHogProvider >
+    </PostHogProvider>
   );
 }

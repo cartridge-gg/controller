@@ -7,6 +7,17 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: process.env.NODE_ENV === "development" ? 3003 : undefined,
+    proxy: {
+      "/ingest/static": `https://us-assets.i.posthog.com/static`,
+      "^/ingest/.*": {
+        target: "https://us.i.posthog.com",
+        changeOrigin: true,
+      },
+      "/ingest/decide": {
+        target: "https://us.i.posthog.com/decide",
+        changeOrigin: true,
+      },
+    },
   },
   resolve: {
     alias: {
