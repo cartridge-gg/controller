@@ -107,7 +107,7 @@ class ControllerAccount extends WalletAccount {
    */
   async signMessage(typedData: TypedData): Promise<SPEC.SIGNATURE> {
     return new Promise(async (resolve, reject) => {
-      const sessionSign = await this.keychain.signMessage(typedData, "", false);
+      const sessionSign = await this.keychain.signMessage(typedData, "", true);
 
       // Session sign succeeded
       if (!("code" in sessionSign)) {
@@ -117,7 +117,7 @@ class ControllerAccount extends WalletAccount {
 
       // Session not avaialble, manual flow fallback
       this.modal.open();
-      const manualSign = await this.keychain.signMessage(typedData, "", true);
+      const manualSign = await this.keychain.signMessage(typedData, "", false);
 
       if (!("code" in manualSign)) {
         resolve(manualSign as SPEC.SIGNATURE);

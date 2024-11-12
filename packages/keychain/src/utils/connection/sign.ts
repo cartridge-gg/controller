@@ -9,11 +9,11 @@ export function signMessageFactory(setContext: (ctx: ConnectionCtx) => void) {
   return async (
     typedData: TypedData,
     account: string,
-    sync?: boolean,
+    async?: boolean,
   ): Promise<Signature | ConnectError> => {
     const controller = window.controller as Controller;
 
-    if (sync) {
+    if (!async) {
       return new Promise((resolve, reject) => {
         setContext({
           type: "sign-message",
