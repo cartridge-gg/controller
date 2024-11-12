@@ -4,9 +4,10 @@ import {
   SparklesIcon,
   StateIconProps,
 } from "@cartridge/ui-next";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Player } from "@/hooks/achievements";
 import { useUsername } from "@/hooks/account";
+import { useMemo } from "react";
 
 export function Leaderboard({
   players,
@@ -42,9 +43,15 @@ function Row({
   rank: number;
 }) {
   const { username } = useUsername({ address });
+  const location = useLocation();
+
+  const path = useMemo(() => {
+    if (self) return location.pathname;
+    return [...location.pathname.split("/"), address].join("/");
+  }, [location.pathname, address, self]);
 
   return (
-    <Link className="flex" to="..">
+    <Link className="flex" to={path}>
       {self && <div className="w-[4px] bg-muted" />}
       <div
         className={cn(
