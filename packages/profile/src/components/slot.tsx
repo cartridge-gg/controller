@@ -1,12 +1,13 @@
 import { Navigate, Outlet, useLocation, useParams } from "react-router-dom";
 
-export function Account() {
+export function Slot() {
   const location = useLocation();
-  const { username } = useParams<{
+  const { project, username } = useParams<{
+    project: string;
     username: string;
   }>();
 
-  if (location.pathname === `/account/${username}`) {
+  if (location.pathname === `/account/${username}/${project}`) {
     return <Navigate to="inventory" replace />;
   }
 
