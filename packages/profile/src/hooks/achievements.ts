@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { TROPHY, PROGRESS } from "@/constants";
 import { useEvents } from "./events";
 import { Trophy, Progress } from "@/models";
-import { AchievementTask } from "@/components/trophies/achievement";
+import { Task } from "@/components/achievements/trophy";
 import { useConnection } from "./context";
 import { useAccount } from "./account";
 
@@ -22,7 +22,7 @@ export interface Item {
   percentage: string;
   completed: boolean;
   pinned: boolean;
-  tasks: AchievementTask[];
+  tasks: Task[];
 }
 
 export interface Counters {
@@ -147,7 +147,7 @@ export function useAchievements(accountAddress?: string) {
         // Compute at which timestamp the achievement was completed
         let timestamp = 0;
         let completed = true;
-        const tasks: AchievementTask[] = [];
+        const tasks: Task[] = [];
         trophy.tasks.forEach((task) => {
           let count = 0;
           let completion = false;

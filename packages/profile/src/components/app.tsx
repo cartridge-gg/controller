@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { Account } from "@/components/account";
 import {
   Inventory,
@@ -7,10 +7,12 @@ import {
   Send,
   Token,
 } from "@/components/inventory";
-import { Trophies } from "@/components/trophies";
+import { Achievements } from "@/components/achievements";
 import { Activity } from "@/components/activity";
 
 export function App() {
+  const location = useLocation();
+
   return (
     <Routes>
       <Route path="/" element={null} />
@@ -38,11 +40,29 @@ export function App() {
       />
       <Route
         path="/account/:username/slot/:project/trophies"
-        element={<Trophies />}
+        element={
+          <Navigate
+            to={location.pathname.replace("trophies", "achievements")}
+            replace
+          />
+        }
       />
       <Route
         path="/account/:username/slot/:project/trophies/:address"
-        element={<Trophies />}
+        element={
+          <Navigate
+            to={location.pathname.replace("trophies", "achievements")}
+            replace
+          />
+        }
+      />
+      <Route
+        path="/account/:username/slot/:project/achievements"
+        element={<Achievements />}
+      />
+      <Route
+        path="/account/:username/slot/:project/achievements/:address"
+        element={<Achievements />}
       />
       <Route
         path="/account/:username/slot/:project/activity"
