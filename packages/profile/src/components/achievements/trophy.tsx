@@ -11,14 +11,14 @@ import { toast } from "sonner";
 import { useMemo, useState } from "react";
 import { useCallback } from "react";
 
-export interface AchievementTask {
+export interface Task {
   id: string;
   count: number;
   total: number;
   description: string;
 }
 
-export function Achievement({
+export function Trophy({
   icon,
   title,
   description,
@@ -46,7 +46,7 @@ export function Achievement({
   id: string;
   softview: boolean;
   enabled: boolean;
-  tasks: AchievementTask[];
+  tasks: Task[];
   onPin: (id: string) => void;
 }) {
   return (
@@ -92,13 +92,7 @@ export function Achievement({
   );
 }
 
-function Task({
-  task,
-  completed,
-}: {
-  task: AchievementTask;
-  completed: boolean;
-}) {
+function Task({ task, completed }: { task: Task; completed: boolean }) {
   const TaskIcon = useMemo(() => {
     if (completed) {
       return CheckboxCheckedDuoIcon;

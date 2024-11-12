@@ -4,13 +4,13 @@ import {
   StateIconProps,
   cn,
 } from "@cartridge/ui-next";
-import { Achievement } from "./achievement";
+import { Trophy } from "./trophy";
 import { Item } from "@/hooks/achievements";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 const HIDDEN_GROUP = "HIDDEN";
 
-export function Achievements({
+export function Trophies({
   achievements,
   softview,
   enabled,
@@ -148,7 +148,7 @@ function Group({
         handlePrevious={handlePrevious}
       />
       {visibles.map((achievement) => (
-        <Achievement
+        <Trophy
           key={achievement.id}
           icon={
             achievement.hidden && !achievement.completed
@@ -157,7 +157,7 @@ function Group({
           }
           title={
             achievement.hidden && !achievement.completed
-              ? "Hidden Trophy"
+              ? "Hidden Achievement"
               : achievement.title
           }
           description={
@@ -250,26 +250,13 @@ function Pagination({
   onClick: () => void;
   disabled: boolean;
 }) {
-  const [hover, setHover] = useState(false);
-
-  const handleMouseEnter = useCallback(() => {
-    setHover(true);
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    setHover(false);
-  }, []);
-
   return (
     <div
       className={cn(
         "flex items-center justify-center h-8 w-8 bg-secondary",
-        !disabled && "cursor-pointer",
-        hover && !disabled && "opacity-70",
+        !disabled && "cursor-pointer hover:opacity-70",
       )}
       onClick={onClick}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
     >
       <Icon
         className={cn(
@@ -293,28 +280,14 @@ function Page({
   highlighted: boolean;
   setPage: (page: number) => void;
 }) {
-  const [hover, setHover] = useState(false);
-
-  const handleMouseEnter = useCallback(() => {
-    if (highlighted) return;
-    setHover(true);
-  }, [highlighted]);
-
-  const handleMouseLeave = useCallback(() => {
-    setHover(false);
-  }, []);
-
   return (
     <div
       className={cn(
-        "bg-primary h-[10px] w-[10px]",
-        hover && "cursor-pointer",
+        "bg-primary h-[10px] w-[10px] opacity-50 hover:cursor-pointer hover:opacity-100",
         completed ? "bg-primary" : "bg-muted",
-        highlighted || hover ? "opacity-100" : "opacity-50",
+        highlighted && "opacity-100",
       )}
       onClick={() => setPage(index)}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
     />
   );
 }

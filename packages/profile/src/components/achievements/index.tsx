@@ -11,12 +11,12 @@ import { CopyAddress } from "@cartridge/ui-next";
 import { Navigation } from "../navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Achievements } from "./achievements";
+import { Trophies } from "./trophies";
 import { Pinneds } from "./pinneds";
 import { Leaderboard } from "./leaderboard";
 import { useData } from "@/hooks/context";
 
-export function Trophies() {
+export function Achievements() {
   const { username: selfname, address: self } = useAccount();
   const {
     trophies: { achievements, players, isLoading },
@@ -110,7 +110,7 @@ export function Trophies() {
             <ScrollArea className="overflow-auto">
               <div className="flex flex-col h-full flex-1 overflow-y-auto gap-4">
                 <Pinneds achievements={pinneds} />
-                <Achievements
+                <Trophies
                   achievements={achievements}
                   softview={!isSelf}
                   enabled={pinneds.length < 3}
@@ -120,13 +120,11 @@ export function Trophies() {
             </ScrollArea>
           )}
           {isSelf && activeTab === "leaderboard" && (
-            <ScrollArea className="overflow-auto">
-              <Leaderboard
-                players={players}
-                address={self}
-                achievements={achievements}
-              />
-            </ScrollArea>
+            <Leaderboard
+              players={players}
+              address={self}
+              achievements={achievements}
+            />
           )}
         </LayoutContent>
       ) : isLoading ? (
