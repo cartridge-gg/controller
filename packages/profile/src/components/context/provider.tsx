@@ -6,25 +6,21 @@ import { BrowserRouter } from "react-router-dom";
 import { CartridgeAPIProvider } from "@cartridge/utils/api/cartridge";
 import { IndexerAPIProvider } from "@cartridge/utils/api/indexer";
 import { DataProvider } from "./data";
-import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
-
-if (typeof window !== "undefined") {
-  posthog.init(import.meta.env.VITE_POSTHOG_KEY!, {
-    api_host: import.meta.env.VITE_POSTHOG_HOST,
-    person_profiles: "always",
-    enable_recording_console_log: true,
-    loaded: (posthog) => {
-      if (import.meta.env.NODE_ENV === "development") posthog.debug();
-    },
-  });
-}
 
 export function Provider({ children }: PropsWithChildren) {
   const queryClient = new QueryClient();
 
   return (
-    <PostHogProvider client={posthog}>
+    <PostHogProvider apiKey={import.meta.env.VITE_POSTHOG_KEY} options={{
+      api_host: import.meta.env.VITE_POSTHOG_HOST,
+      person_profiles: "always",
+      enable_recording_console_log: true,
+      loaded: (posthog) => {
+        if (import.meta.env.NODE_ENV === "development") posthog.debug();
+      },
+
+    }}>
       <BrowserRouter>
         <ThemeProvider defaultScheme="system">
           <CartridgeAPIProvider
@@ -40,6 +36,6 @@ export function Provider({ children }: PropsWithChildren) {
           </CartridgeAPIProvider>
         </ThemeProvider>
       </BrowserRouter>
-    </PostHogProvider>
+    </PostHogProvider >
   );
 }
