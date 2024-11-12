@@ -1,4 +1,4 @@
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import {
   LayoutContainer,
   LayoutContent,
@@ -43,7 +43,6 @@ export function Token() {
 
 function Credits() {
   const { parent, isVisible } = useConnection();
-  const location = useLocation();
   const { username } = useAccount();
   const credit = useCreditBalance({
     username,
@@ -89,7 +88,6 @@ function Credits() {
 function ERC20() {
   const { chainId } = useConnection();
   const { address } = useParams<{ address: string }>();
-  const location = useLocation();
   const t = useToken({ tokenAddress: address! });
   const { countervalue } = useCountervalue({
     balance: formatEther(t?.balance.value ?? 0n),
@@ -104,7 +102,7 @@ function ERC20() {
   return (
     <LayoutContainer
       left={
-        <Link to={location.pathname.split("/").slice(0, -2).join("/")}>
+        <Link to="..">
           <Button variant="icon" size="icon">
             <ArrowIcon variant="left" />
           </Button>
