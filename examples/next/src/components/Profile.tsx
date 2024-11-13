@@ -20,6 +20,11 @@ export function Profile() {
           Inventory
         </Button>
         <Button
+          onClick={() => ctrlConnector.controller.openProfile("achievements")}
+        >
+          Achievements
+        </Button>
+        <Button
           onClick={() => ctrlConnector.controller.openProfile("trophies")}
         >
           Trophies

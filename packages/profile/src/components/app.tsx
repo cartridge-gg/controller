@@ -1,4 +1,4 @@
-import { Outlet, Route, Routes } from "react-router-dom";
+import { Outlet, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { Account } from "@/components/account";
 import {
   Inventory,
@@ -7,7 +7,7 @@ import {
   Send,
   Token,
 } from "@/components/inventory";
-import { Trophies } from "@/components/trophies";
+import { Achievements } from "@/components/achievements";
 import { Activity } from "@/components/activity";
 import { Slot } from "@/components/slot";
 
@@ -25,8 +25,11 @@ export function App() {
             <Route path="inventory" element={<Inventory />}>
               <Route path="token/:address" element={<Token />} />
             </Route>
-            <Route path="trophies" element={<Trophies />}>
-              <Route path=":address" element={<Trophies />} />
+            <Route path="achievements" element={<Achievements />}>
+              <Route path=":address" element={<Achievements />} />
+            </Route>
+            <Route path="trophies" element={<RedirectAchievements />}>
+              <Route path=":address" element={<RedirectAchievements />} />
             </Route>
             <Route path="activity" element={<Activity />} />
           </Route>
@@ -40,5 +43,16 @@ export function App() {
 
       <Route path="*" element={<div>Page not found</div>} />
     </Routes>
+  );
+}
+
+function RedirectAchievements() {
+  // FIXME: Temporary until used in production
+  const location = useLocation();
+  return (
+    <Navigate
+      to={location.pathname.replace("trophies", "achievements")}
+      replace
+    />
   );
 }

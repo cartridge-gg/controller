@@ -19,7 +19,9 @@ export function Navigation() {
   return (
     <div className="flex rounded border border-1 border-secondary overflow-hidden shrink-0 gap-[1px] bg-secondary">
       <Item Icon={CoinsIcon} variant="inventory" />
-      {project && namespace && <Item Icon={TrophyIcon} variant="trophies" />}
+      {project && namespace && (
+        <Item Icon={TrophyIcon} variant="achievements" />
+      )}
       {/* <Item Icon={ClockIcon} variant="activity" /> */}
     </div>
   );

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { TROPHY, PROGRESS } from "@/constants";
 import { useEvents } from "./events";
 import { Trophy, Progress } from "@/models";
-import { AchievementTask } from "@/components/trophies/achievement";
+import { Task } from "@/components/achievements/trophy";
 import { useConnection } from "./context";
 import { useAccount } from "./account";
 
@@ -22,7 +22,7 @@ export interface Item {
   percentage: string;
   completed: boolean;
   pinned: boolean;
-  tasks: AchievementTask[];
+  tasks: Task[];
 }
 
 export interface Counters {
@@ -37,6 +37,7 @@ export interface Player {
   address: string;
   earnings: number;
   timestamp: number;
+  completeds: string[];
 }
 
 export function useAchievements(accountAddress?: string) {
@@ -93,6 +94,7 @@ export function useAchievements(accountAddress?: string) {
     const players: Player[] = Object.keys(counters)
       .map((playerAddress) => {
         let timestamp = 0;
+        const completeds: string[] = [];
         const earnings = dedupedTrophies.reduce(
           (total: number, trophy: Trophy) => {
             // Compute at which timestamp the latest achievement was completed
@@ -119,6 +121,8 @@ export function useAchievements(accountAddress?: string) {
                 );
               completed = completed && completion;
             });
+            // Add trophy to list if completed
+            if (completed) completeds.push(trophy.id);
             // Update stats
             stats[trophy.id] = stats[trophy.id] || 0;
             stats[trophy.id] += completed ? 1 : 0;
@@ -130,6 +134,7 @@ export function useAchievements(accountAddress?: string) {
           address: playerAddress,
           earnings,
           timestamp,
+          completeds,
         };
       })
       .sort((a, b) => a.timestamp - b.timestamp) // Oldest to newest
@@ -142,7 +147,7 @@ export function useAchievements(accountAddress?: string) {
         // Compute at which timestamp the achievement was completed
         let timestamp = 0;
         let completed = true;
-        const tasks: AchievementTask[] = [];
+        const tasks: Task[] = [];
         trophy.tasks.forEach((task) => {
           let count = 0;
           let completion = false;

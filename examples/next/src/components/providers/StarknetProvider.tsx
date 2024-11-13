@@ -66,7 +66,7 @@ const controller = new ControllerConnector({
     process.env.NEXT_PUBLIC_PROFILE_FRAME_URL,
   // colorMode: "dark",
   // Dope Wars
-  // slot: "ryo1",
+  // slot: "ryomainnet",
   // namespace: "dopewars",
   // theme: "dope-wars",
   // Eternum
@@ -74,9 +74,13 @@ const controller = new ControllerConnector({
   namespace: "eternum",
   theme: "eternum",
   // zKube
-  // slot: "zkube-bal",
+  // slot: "zkube-mainnet",
   // namespace: "zkube",
   // theme: "zkube",
+  // Summit
+  // slot: "summit-bal",
+  // namespace: "savage_summit",
+  // theme: "savage-summit",
   tokens: {
     erc20: [
       // $LORDS
