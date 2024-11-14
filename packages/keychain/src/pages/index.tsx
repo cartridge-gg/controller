@@ -15,12 +15,13 @@ import { ErrorPage } from "components/ErrorBoundary";
 import { Settings } from "components/Settings";
 import { Upgrade } from "components/connect/Upgrade";
 import { PurchaseCredits } from "components/Funding/PurchaseCredits";
-import posthog from "posthog-js";
 import { useEffect } from "react";
+import { usePostHog } from "posthog-js/react";
 
 function Home() {
   const { context, controller, setController, error, policies, upgrade } =
     useConnection();
+  const posthog = usePostHog();
 
   useEffect(() => {
     if (context?.origin) {
@@ -58,6 +59,8 @@ function Home() {
 
   switch (context.type) {
     case "connect": {
+      posthog?.capture("Call Connect");
+
       // TODO: show missing policies if mismatch
       if (!context.policies?.length || controller.session(context.policies)) {
         context.resolve({
@@ -80,6 +83,8 @@ function Home() {
       );
     }
     case "logout": {
+      posthog?.capture("Call Logout");
+
       const ctx = context as LogoutCtx;
       return (
         <Logout
@@ -102,6 +107,8 @@ function Home() {
       );
     }
     case "sign-message": {
+      posthog?.capture("Call Sign Message");
+
       const ctx = context as SignMessageCtx;
       return (
         <SignMessage
@@ -118,9 +125,13 @@ function Home() {
       );
     }
     case "execute": {
+      posthog?.capture("Call Execute");
+
       return <ConfirmTransaction />;
     }
     case "deploy": {
+      posthog?.capture("Call Deploy");
+
       const ctx = context as DeployCtx;
       return (
         <DeployController
@@ -134,6 +145,8 @@ function Home() {
       );
     }
     case "open-settings": {
+      posthog?.capture("Call Open Settings");
+
       const ctx = context as OpenSettingsCtx;
       return (
         <Settings
@@ -150,6 +163,8 @@ function Home() {
       );
     }
     case "open-purchase-credits": {
+      posthog?.capture("Call Purchase Credits");
+
       return <PurchaseCredits />;
     }
     default:
