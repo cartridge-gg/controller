@@ -30,7 +30,7 @@
     --destructive: 7 72% 65%; /* text.error */
     --destructive-foreground: 7 72% 65%; /* text.error */
 
-    --border: 0 100% 100%; /* black */
+    --border: 120 7.5% 15.69%; /* bg.secondary */
     --input: 0 100% 100%; /* black */
     --ring: 0 0% 100%; /* text.primary */
   }

@@ -451,6 +451,9 @@ importers:
       '@cartridge/utils':
         specifier: workspace:^
         version: link:../utils
+      '@hookform/resolvers':
+        specifier: ^3.9.1
+        version: 3.9.1(react-hook-form@7.53.2(react@18.3.1))
       posthog-js:
         specifier: ^1.181.0
         version: 1.181.0
@@ -460,6 +463,9 @@ importers:
       react-dom:
         specifier: ^18.3.1
         version: 18.3.1(react@18.3.1)
+      react-hook-form:
+        specifier: ^7.53.2
+        version: 7.53.2(react@18.3.1)
       react-query:
         specifier: ^3.39.2
         version: 3.39.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -475,6 +481,9 @@ importers:
       viem:
         specifier: ^2.21.32
         version: 2.21.32(typescript@5.5.4)(zod@3.23.8)
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
     devDependencies:
       '@eslint/js':
         specifier: ^9.9.0
