@@ -26,7 +26,8 @@ use webauthn_rs_proto::{
     AllowCredentials, AttestationConveyancePreference, AuthenticatorSelectionCriteria,
     CredentialProtectionPolicy, PubKeyCredParams, PublicKeyCredential,
     PublicKeyCredentialCreationOptions, PublicKeyCredentialRequestOptions,
-    RegisterPublicKeyCredential, RelyingParty, User, UserVerificationPolicy,
+    RegisterPublicKeyCredential, RelyingParty, ResidentKeyRequirement, User,
+    UserVerificationPolicy,
 };
 
 use super::{DeviceError, HashSigner, SignError};
@@ -467,6 +468,7 @@ impl WebauthnSigner {
             exclude_credentials: None,
             authenticator_selection: Some(AuthenticatorSelectionCriteria {
                 user_verification: UserVerificationPolicy::Required,
+                resident_key: Some(ResidentKeyRequirement::Preferred),
                 ..AuthenticatorSelectionCriteria::default()
             }),
             extensions: None,
