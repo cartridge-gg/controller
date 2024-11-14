@@ -15,10 +15,25 @@ import { ErrorPage } from "components/ErrorBoundary";
 import { Settings } from "components/Settings";
 import { Upgrade } from "components/connect/Upgrade";
 import { PurchaseCredits } from "components/Funding/PurchaseCredits";
+import posthog from "posthog-js";
+import { useEffect } from "react";
 
 function Home() {
   const { context, controller, setController, error, policies, upgrade } =
     useConnection();
+
+  useEffect(() => {
+    if (context?.origin) {
+      posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
+        api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+        person_profiles: "always",
+        enable_recording_console_log: true,
+        loaded: (posthog) => {
+          if (process.env.NODE_ENV === "development") posthog.debug();
+        },
+      });
+    }
+  }, [context?.origin]);
 
   if (window.self === window.top || !context?.origin) {
     return <></>;

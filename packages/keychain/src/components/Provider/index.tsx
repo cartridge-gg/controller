@@ -11,19 +11,8 @@ import { useConnectionValue } from "hooks/connection";
 import { ConnectionProvider } from "./connection";
 import { CartridgeAPIProvider } from "@cartridge/utils/api/cartridge";
 import { ENDPOINT } from "utils/graphql";
-import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
-
-if (typeof window !== "undefined") {
-  posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
-    api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
-    person_profiles: "always",
-    enable_recording_console_log: true,
-    loaded: (posthog) => {
-      if (process.env.NODE_ENV === "development") posthog.debug();
-    },
-  });
-}
+import posthog from "posthog-js";
 
 export function Provider({ children }: PropsWithChildren) {
   const preset = useControllerThemePreset();
@@ -43,19 +32,17 @@ export function Provider({ children }: PropsWithChildren) {
   const connection = useConnectionValue();
 
   return (
-    <PostHogProvider client={posthog}>
-      <ChakraProvider theme={chakraTheme}>
-        <CartridgeAPIProvider url={ENDPOINT}>
-          <QueryClientProvider client={queryClient}>
-            <ControllerThemeProvider value={controllerTheme}>
-              <ConnectionProvider value={connection}>
-                {children}
-              </ConnectionProvider>
-            </ControllerThemeProvider>
-          </QueryClientProvider>
-        </CartridgeAPIProvider>
-      </ChakraProvider>
-    </PostHogProvider>
+    <ChakraProvider theme={chakraTheme}>
+      <CartridgeAPIProvider url={ENDPOINT}>
+        <QueryClientProvider client={queryClient}>
+          <ControllerThemeProvider value={controllerTheme}>
+            <ConnectionProvider value={connection}>
+              <PostHogProvider client={posthog}>{children}</PostHogProvider>
+            </ConnectionProvider>
+          </ControllerThemeProvider>
+        </QueryClientProvider>
+      </CartridgeAPIProvider>
+    </ChakraProvider>
   );
 }
 
