@@ -1,10 +1,10 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, Outlet, useLocation, useParams } from "react-router-dom";
 import {
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
   LayoutHeader,
-} from "../layout";
+} from "@/components/layout";
 import {
   ArrowIcon,
   Button,
@@ -32,6 +32,11 @@ import { useToken } from "@/hooks/token";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
+  const location = useLocation();
+
+  if (location.pathname.endsWith("/send")) {
+    return <Outlet />;
+  }
 
   switch (address) {
     case "credit":
@@ -86,8 +91,10 @@ function Credits() {
 }
 
 function ERC20() {
-  const { chainId } = useConnection();
   const { address } = useParams<{ address: string }>();
+  // const [searchParams, setSearchParams] = useSearchParams();
+
+  const { chainId } = useConnection();
   const t = useToken({ tokenAddress: address! });
   const { countervalue } = useCountervalue({
     balance: formatEther(t?.balance.value ?? 0n),
@@ -159,14 +166,9 @@ function ERC20() {
       </LayoutContent>
 
       <LayoutFooter>
-        <Button
-          className="w-full"
-          onClick={() => {
-            console.log("send");
-          }}
-        >
-          Send
-        </Button>
+        <Link to="send">
+          <Button className="w-full">Send</Button>
+        </Link>
       </LayoutFooter>
     </LayoutContainer>
   );

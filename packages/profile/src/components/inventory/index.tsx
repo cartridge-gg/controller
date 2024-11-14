@@ -1,7 +1,5 @@
-export { Asset } from "./asset";
-export { Collection } from "./collection";
-export { Send } from "./send";
-export { Token } from "./token";
+export { Asset, Collection, SendCollection } from "./collection";
+export { Token, SendToken } from "./token";
 
 import { CopyAddress } from "@cartridge/ui-next";
 import {
@@ -11,7 +9,7 @@ import {
 } from "@/components/layout";
 import { Navigation } from "../navigation";
 // import { Collections } from "./collections";
-import { Tokens } from "./tokens";
+import { Tokens } from "./token";
 import { useAccount } from "@/hooks/account";
 import { Outlet, useParams } from "react-router-dom";
 
