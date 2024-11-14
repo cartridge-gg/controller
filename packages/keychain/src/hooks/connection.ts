@@ -78,13 +78,18 @@ export function useConnectionValue() {
   }, [context, parent]);
 
   const setController = useCallback((controller?: Controller) => {
-    posthog.identify(controller.cartridge.username(), {
-      address: controller.address,
-      class: controller.cartridge.classHash,
-      chainId: controller.chainId,
-      appId: origin,
-    });
-    posthog.group("company", origin);
+    if (controller && controller.cartridge) {
+      posthog.identify(controller.cartridge.username(), {
+        address: controller.address,
+        class: controller.cartridge.classHash,
+        chainId: controller.chainId,
+        appId: origin,
+      });
+
+      posthog.group("company", origin);
+    } else {
+      posthog.reset();
+    }
 
     setControllerRaw(controller);
     setIsSignedUp();
