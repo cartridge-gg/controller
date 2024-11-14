@@ -1,7 +1,7 @@
 import { Field } from "@cartridge/ui";
 import { Button, useMediaQuery } from "@chakra-ui/react";
 import { Container, Footer, Content } from "components/layout";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   FinalizeRegistrationMutation,
   useAccountQuery,
@@ -17,12 +17,16 @@ import { useConnection } from "hooks/connection";
 import { ErrorAlert } from "components/ErrorAlert";
 import { useDebounce } from "hooks/debounce";
 import { constants } from "starknet";
+import { usePostHog } from "posthog-js/react";
 
 export function Signup({
   prefilledName = "",
   onSuccess,
   onLogin,
 }: SignupProps) {
+  const posthog = usePostHog();
+  const hasLoggedFocus = useRef(false);
+  const hasLoggedChange = useRef(false);
   const theme = useControllerTheme();
   const { chainId, rpcUrl, setController } = useConnection();
   const [error, setError] = useState<Error>();
@@ -92,6 +96,8 @@ export function Signup({
   );
 
   const doPopup = useCallback(() => {
+    posthog?.capture("Do Signup Popup");
+
     const searchParams = new URLSearchParams(window.location.search);
     searchParams.set("name", encodeURIComponent(usernameField.value));
     searchParams.set("action", "signup");
@@ -109,6 +115,8 @@ export function Signup({
   const onSubmit = useCallback(async () => {
     setError(undefined);
     setIsRegistering(true);
+
+    posthog?.capture("Click Signup");
 
     // Safari does not allow cross origin iframe to create credentials
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
@@ -217,7 +225,17 @@ export function Signup({
             {...usernameField}
             placeholder="Username"
             autoFocus
+            onFocus={() => {
+              if (!hasLoggedFocus.current) {
+                posthog?.capture("Focus Signup Username");
+                hasLoggedFocus.current = true;
+              }
+            }}
             onChange={(e) => {
+              if (!hasLoggedChange.current) {
+                posthog?.capture("Change Signup Username");
+                hasLoggedChange.current = true;
+              }
               setError(undefined);
               setUsernameField((u) => ({
                 ...u,

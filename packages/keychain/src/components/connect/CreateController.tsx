@@ -4,6 +4,7 @@ import { Login } from "./Login";
 import { useConnection } from "hooks/connection";
 import { LoginMode } from "./types";
 import { isSignedUp } from "../../utils/cookie";
+import { usePostHog } from "posthog-js/react";
 
 export function CreateController({
   isSlot,
@@ -14,6 +15,7 @@ export function CreateController({
   loginMode?: LoginMode;
   onCreated?: () => void;
 }) {
+  const posthog = usePostHog();
   const { error } = useConnection();
   const [showSignup, setShowSignup] = useState(true);
   const [prefilledUsername, setPrefilledUsername] = useState<string>();
@@ -32,6 +34,7 @@ export function CreateController({
     <Signup
       prefilledName={prefilledUsername}
       onLogin={(username) => {
+        posthog?.capture("Toggle Login");
         setPrefilledUsername(username);
         setShowSignup(false);
         onCreated?.();
@@ -42,6 +45,7 @@ export function CreateController({
     <Login
       prefilledName={prefilledUsername}
       onSignup={(username) => {
+        posthog?.capture("Toggle Signup");
         setPrefilledUsername(username);
         setShowSignup(true);
         onCreated?.();

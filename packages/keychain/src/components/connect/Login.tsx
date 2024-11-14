@@ -1,7 +1,7 @@
 import { Field } from "@cartridge/ui";
 import { Button, useMediaQuery } from "@chakra-ui/react";
 import { Container, Footer, Content, useLayout } from "components/layout";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Controller from "utils/controller";
 import { LoginMode, LoginProps } from "./types";
 import { fetchAccount, validateUsernameFor } from "./utils";
@@ -10,6 +10,7 @@ import { useControllerTheme } from "hooks/theme";
 import { doLogin } from "hooks/account";
 import { useConnection } from "hooks/connection";
 import { ErrorAlert } from "components/ErrorAlert";
+import { usePostHog } from "posthog-js/react";
 
 export function Login(props: LoginProps) {
   const theme = useControllerTheme();
@@ -34,6 +35,9 @@ function Form({
   mode = LoginMode.Webauthn,
   onSignup,
 }: LoginProps) {
+  const posthog = usePostHog();
+  const hasLoggedFocus = useRef(false);
+  const hasLoggedChange = useRef(false);
   const { footer } = useLayout();
   const { origin, policies, chainId, rpcUrl, setController } = useConnection();
   const [isLoading, setIsLoading] = useState(false);
@@ -120,7 +124,18 @@ function Form({
         <Field
           {...usernameField}
           autoFocus
+          onFocus={() => {
+            if (!hasLoggedFocus.current) {
+              posthog?.capture("Focus Login Username");
+              hasLoggedFocus.current = true;
+            }
+          }}
           onChange={(e) => {
+            if (!hasLoggedChange.current) {
+              posthog?.capture("Change Login Username");
+              hasLoggedChange.current = true;
+            }
+
             setError(undefined);
             setUsernameField((u) => ({
               ...u,
