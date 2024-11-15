@@ -5,6 +5,7 @@ import {
   LayoutHeader,
 } from "@/components/layout";
 import { useAccount } from "@/hooks/account";
+import { useConnection } from "@/hooks/context";
 import { useToken } from "@/hooks/token";
 import {
   ArrowIcon,
@@ -25,11 +26,13 @@ import { useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useParams } from "react-router-dom";
 import { constants } from "starknet";
+import { parseEther } from "viem";
 import { z } from "zod";
 
 export function SendToken() {
   const { address: tokenAddress } = useParams<{ address: string }>();
   const { address } = useAccount();
+  const { parent } = useConnection();
   const t = useToken({ tokenAddress: tokenAddress! });
 
   const formSchema = useMemo(
@@ -37,19 +40,24 @@ export function SendToken() {
       z.object({
         to: z
           .string()
-          .startsWith("0x", { message: 'Starknet address must start with "0x"' })
+          .startsWith("0x", {
+            message: 'Starknet address must start with "0x"',
+          })
           .min(62, {
             message: "Starknet address must be at least 61 characters long",
           })
-          .refine((addr) => {
-            try {
-              return BigInt(addr) < constants.PRIME
-            } catch {
-              return false
-            }
-          }, {
-            message: "Please input a valid Starknet address",
-          }),
+          .refine(
+            (addr) => {
+              try {
+                return BigInt(addr) < constants.PRIME;
+              } catch {
+                return false;
+              }
+            },
+            {
+              message: "Please input a valid Starknet address",
+            },
+          ),
         amount: z.coerce.number({ message: "Amount is required" }).positive(),
       }),
     [],
@@ -62,9 +70,27 @@ export function SendToken() {
     },
   });
 
-  const onSubmit = useCallback((values: z.infer<typeof formSchema>) => {
-    console.log(values);
-  }, []);
+  const onSubmit = useCallback(
+    (values: z.infer<typeof formSchema>) => {
+      if (!t) return;
+
+      const amount = parseEther(values.amount.toString()).toString();
+
+      parent.openExecute([
+        {
+          contractAddress: t?.meta.address,
+          entrypoint: "increaseAllowance",
+          calldata: [values.to, amount, "0x0"],
+        },
+        {
+          contractAddress: t?.meta.address,
+          entrypoint: "transfer",
+          calldata: [values.to, amount, "0x0"],
+        },
+      ]);
+    },
+    [t, parent],
+  );
 
   const amount = form.watch("amount");
 
@@ -126,9 +152,7 @@ export function SendToken() {
                   <div className="flex items-center justify-between">
                     <FormLabel>Amount</FormLabel>
                     <div className="flex items-center gap-2">
-                      <FormLabel>
-                        Balance:
-                      </FormLabel>
+                      <FormLabel>Balance:</FormLabel>
                       <div className="text-xs">
                         {t.balance.formatted} {t.meta.symbol}
                       </div>
@@ -140,6 +164,7 @@ export function SendToken() {
                         type="number"
                         placeholder="0.01"
                         {...field}
+                        value={field.value ?? ""}
                         className="[&::-webkit-inner-spin-button]:appearance-none"
                       />
                       {countervalue && (

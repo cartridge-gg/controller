@@ -1,4 +1,5 @@
 import { AsyncMethodReturns } from "@cartridge/penpal";
+import { normalize } from "@cartridge/utils";
 
 import ControllerAccount from "./account";
 import { KeychainIFrame, ProfileIFrame } from "./iframe";
@@ -80,6 +81,7 @@ export default class ControllerProvider extends BaseProvider {
         },
         methods: {
           openPurchaseCredits: this.openPurchaseCredits.bind(this),
+          openExecute: normalize(() => this.openExecute.bind(this)),
         },
         rpcUrl: this.rpc.toString(),
         username,
@@ -219,6 +221,20 @@ export default class ControllerProvider extends BaseProvider {
     this.iframes.profile.close();
     this.iframes.keychain.open();
     this.keychain.openPurchaseCredits();
+  }
+
+  private openExecute(calls: any) {
+    if (!this.keychain || !this.iframes.keychain) {
+      console.error(new NotReadyToConnect().message);
+      return;
+    }
+    if (!this.iframes.profile) {
+      console.error("Profile is not ready");
+      return;
+    }
+    this.iframes.profile.close();
+    this.iframes.keychain.open();
+    this.keychain.execute(calls);
   }
 
   async delegateAccount() {

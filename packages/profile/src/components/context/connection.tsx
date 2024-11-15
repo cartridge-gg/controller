@@ -12,7 +12,7 @@ import {
   normalize,
   STRK_CONTRACT_ADDRESS,
 } from "@cartridge/utils";
-import { constants, getChecksumAddress, RpcProvider } from "starknet";
+import { Call, constants, getChecksumAddress, RpcProvider } from "starknet";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 type ConnectionContextType = {
@@ -26,12 +26,17 @@ type ConnectionContextType = {
 };
 
 type ParentMethods = {
-  close: () => Promise<void>;
-  openPurchaseCredits: () => Promise<void>;
+  close: () => void;
+  openPurchaseCredits: () => void;
+  openExecute: (calls: Call[]) => void;
 };
 
 const initialState: ConnectionContextType = {
-  parent: { close: async () => {}, openPurchaseCredits: async () => {} },
+  parent: {
+    close: () => {},
+    openPurchaseCredits: () => {},
+    openExecute: () => {},
+  },
   provider: new RpcProvider({ nodeUrl: import.meta.env.VITE_RPC_SEPOLIA }),
   chainId: "",
   erc20: [],

@@ -82,9 +82,7 @@ function Credits() {
       </LayoutContent>
 
       <LayoutFooter>
-        <Button onClick={() => parent.openPurchaseCredits().catch(() => {})}>
-          Purchase
-        </Button>
+        <Button onClick={() => parent.openPurchaseCredits()}>Purchase</Button>
       </LayoutFooter>
     </LayoutContainer>
   );
