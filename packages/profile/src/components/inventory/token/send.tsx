@@ -24,7 +24,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useParams } from "react-router-dom";
-import { validateChecksumAddress } from "starknet";
+import { constants } from "starknet";
 import { z } from "zod";
 
 export function SendToken() {
@@ -37,18 +37,20 @@ export function SendToken() {
       z.object({
         to: z
           .string()
-          .startsWith("0x")
-          .refine(
-            (addr) => {
-              try {
-                return validateChecksumAddress(addr);
-              } catch {
-                return false;
-              }
-            },
-            { message: "Invalid Starknet address" },
-          ),
-        amount: z.coerce.number(),
+          .startsWith("0x", { message: 'Starknet address must start with "0x"' })
+          .min(62, {
+            message: "Starknet address must be at least 61 characters long",
+          })
+          .refine((addr) => {
+            try {
+              return BigInt(addr) < constants.PRIME
+            } catch {
+              return false
+            }
+          }, {
+            message: "Please input a valid Starknet address",
+          }),
+        amount: z.coerce.number({ message: "Amount is required" }).positive(),
       }),
     [],
   );
@@ -124,7 +126,7 @@ export function SendToken() {
                   <div className="flex items-center justify-between">
                     <FormLabel>Amount</FormLabel>
                     <div className="flex items-center gap-2">
-                      <FormLabel className="text-muted-foreground">
+                      <FormLabel>
                         Balance:
                       </FormLabel>
                       <div className="text-xs">
