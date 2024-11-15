@@ -112,7 +112,7 @@ function Group({
 
   useEffect(() => {
     // Set the page to the first uncompleted achievement or 0 if there are none
-    const filtereds = items.filter((a) => !a.hidden);
+    const filtereds = items.filter((a) => !a.hidden || a.completed);
     // Get the unique list of indexes for the achievements in this group
     const pages =
       filtereds.length > 0 ? [...new Set(filtereds.map((a) => a.index))] : [0];
