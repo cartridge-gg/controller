@@ -19,6 +19,7 @@ import {
 import { useConnection } from "@/hooks/context";
 import {
   formatAddress,
+  isIframe,
   isPublicChain,
   StarkscanUrl,
   useCountervalue,
@@ -81,9 +82,11 @@ function Credits() {
         </Card>
       </LayoutContent>
 
-      <LayoutFooter>
-        <Button onClick={() => parent.openPurchaseCredits()}>Purchase</Button>
-      </LayoutFooter>
+      {isIframe() && (
+        <LayoutFooter>
+          <Button onClick={() => parent.openPurchaseCredits()}>Purchase</Button>
+        </LayoutFooter>
+      )}
     </LayoutContainer>
   );
 }
@@ -165,11 +168,13 @@ function ERC20() {
         </Card>
       </LayoutContent>
 
-      <LayoutFooter>
-        <Link to="send">
-          <Button className="w-full">Send</Button>
-        </Link>
-      </LayoutFooter>
+      {isIframe() && (
+        <LayoutFooter>
+          <Link to="send">
+            <Button className="w-full">Send</Button>
+          </Link>
+        </LayoutFooter>
+      )}
     </LayoutContainer>
   );
 }
