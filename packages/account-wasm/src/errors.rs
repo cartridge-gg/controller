@@ -194,10 +194,13 @@ impl From<ExecuteFromOutsideError> for JsControllerError {
                 ErrorCode::PaymasterRateLimitExceeded,
                 "Rate limit exceeded".to_string(),
             ),
-            ExecuteFromOutsideError::ExecuteFromOutsideNotSupported => (
-                ErrorCode::PaymasterNotSupported,
-                "Paymaster not supported".to_string(),
-            ),
+            ExecuteFromOutsideError::ExecuteFromOutsideNotSupported(data) => {
+                return JsControllerError {
+                    code: ErrorCode::PaymasterNotSupported,
+                    message: "Paymaster not supported".to_string(),
+                    data: Some(data),
+                }
+            }
             ExecuteFromOutsideError::Serialization(e) => {
                 (ErrorCode::PaymasterSerialization, e.to_string())
             }
