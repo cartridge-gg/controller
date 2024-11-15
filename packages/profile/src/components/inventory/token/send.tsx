@@ -18,10 +18,13 @@ import {
   FormMessage,
   Input,
 } from "@cartridge/ui-next";
+import { useCountervalue } from "@cartridge/utils";
+import { CurrencyBase, CurrencyQuote } from "@cartridge/utils/api/cartridge";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useParams } from "react-router-dom";
+import { validateChecksumAddress } from "starknet";
 import { z } from "zod";
 
 export function SendToken() {
@@ -32,8 +35,20 @@ export function SendToken() {
   const formSchema = useMemo(
     () =>
       z.object({
-        to: z.string(),
-        amount: z.number(),
+        to: z
+          .string()
+          .startsWith("0x")
+          .refine(
+            (addr) => {
+              try {
+                return validateChecksumAddress(addr);
+              } catch {
+                return false;
+              }
+            },
+            { message: "Invalid Starknet address" },
+          ),
+        amount: z.coerce.number(),
       }),
     [],
   );
@@ -45,9 +60,20 @@ export function SendToken() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  const onSubmit = useCallback((values: z.infer<typeof formSchema>) => {
     console.log(values);
-  }
+  }, []);
+
+  const amount = form.watch("amount");
+
+  const { countervalue } = useCountervalue(
+    {
+      balance: amount?.toString(),
+      quote: CurrencyQuote.Eth,
+      base: CurrencyBase.Usd,
+    },
+    { enabled: t?.meta.symbol === "ETH" && !!amount },
+  );
 
   if (!t) {
     return;
@@ -76,7 +102,7 @@ export function SendToken() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <LayoutContent className="pb-4">
+          <LayoutContent className="pb-4 gap-8">
             <FormField
               control={form.control}
               name="to"
@@ -95,9 +121,31 @@ export function SendToken() {
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Amount</FormLabel>
+                  <div className="flex items-center justify-between">
+                    <FormLabel>Amount</FormLabel>
+                    <div className="flex items-center gap-2">
+                      <FormLabel className="text-muted-foreground">
+                        Balance:
+                      </FormLabel>
+                      <div className="text-xs">
+                        {t.balance.formatted} {t.meta.symbol}
+                      </div>
+                    </div>
+                  </div>
                   <FormControl>
-                    <Input placeholder="0.01" {...field} />
+                    <div className="relative">
+                      <Input
+                        type="number"
+                        placeholder="0.01"
+                        {...field}
+                        className="[&::-webkit-inner-spin-button]:appearance-none"
+                      />
+                      {countervalue && (
+                        <span className="absolute right-4 top-3.5 text-sm text-muted-foreground">
+                          ~${countervalue.formatted}
+                        </span>
+                      )}
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

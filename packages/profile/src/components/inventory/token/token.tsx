@@ -124,7 +124,9 @@ function ERC20() {
             t.balance.formatted
           )
         } ${t.meta.symbol}`}
-        description={`${countervalue.formatted} ${CurrencyBase.Usd}`}
+        description={
+          countervalue && `${countervalue.formatted} ${CurrencyBase.Usd}`
+        }
         icon={
           <img
             className="w-8 h-8"

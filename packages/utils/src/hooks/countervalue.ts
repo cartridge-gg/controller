@@ -1,30 +1,46 @@
 import { useMemo } from "react";
-import { CurrencyBase, CurrencyQuote, usePriceQuery } from "../api/cartridge";
+import {
+  CurrencyBase,
+  CurrencyQuote,
+  PriceQuery,
+  usePriceQuery,
+} from "../api/cartridge";
 import { formatBalance } from "../currency";
+import { UseQueryOptions } from "react-query";
 
-export function useCountervalue({
-  balance,
-  quote,
-  base,
-}: {
-  balance: string;
-  quote: CurrencyQuote;
-  base: CurrencyBase;
-}) {
-  const { data, ...rest } = usePriceQuery({
+export function useCountervalue(
+  {
+    balance,
     quote,
     base,
-  });
+  }: {
+    balance: string;
+    quote: CurrencyQuote;
+    base: CurrencyBase;
+  },
+  options?: UseQueryOptions<PriceQuery>,
+) {
+  const { data, ...rest } = usePriceQuery(
+    {
+      quote,
+      base,
+    },
+    options,
+  );
 
-  const value = useMemo(() => {
-    if (!data?.price?.amount || !balance) {
-      return 0;
+  const countervalue = useMemo(() => {
+    if (options?.enabled === false || !data?.price?.amount) {
+      return;
     }
 
-    return parseFloat(balance) * parseFloat(data?.price.amount);
-  }, [data?.price]);
+    const value = parseFloat(balance) * parseFloat(data?.price.amount);
+    const formatted = formatBalance(value.toString(), 2);
 
-  const formatted = useMemo(() => formatBalance(value.toString(), 2), [value]);
+    return {
+      value,
+      formatted,
+    };
+  }, [options?.enabled, data?.price, balance]);
 
-  return { countervalue: { value, formatted }, ...rest };
+  return { countervalue, ...rest };
 }
