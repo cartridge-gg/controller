@@ -462,7 +462,7 @@ pub enum ExecuteFromOutsideError {
     #[error("Rate limit exceeded")]
     RateLimitExceeded,
     #[error("Paymaster not supported")]
-    ExecuteFromOutsideNotSupported,
+    ExecuteFromOutsideNotSupported(String),
 }
 
 impl From<JsonRpcError> for ExecuteFromOutsideError {
@@ -476,7 +476,9 @@ impl From<JsonRpcError> for ExecuteFromOutsideError {
             }
             err if err.message.contains("invalid caller") => ExecuteFromOutsideError::InvalidCaller,
             err if err.code == -32005 => ExecuteFromOutsideError::RateLimitExceeded,
-            err if err.code == -32003 => ExecuteFromOutsideError::ExecuteFromOutsideNotSupported,
+            err if err.code == -32003 || err.code == -32004 => {
+                ExecuteFromOutsideError::ExecuteFromOutsideNotSupported(err.message)
+            }
             _ => match TryInto::<StarknetError>::try_into(&error) {
                 Ok(starknet_error) => ExecuteFromOutsideError::ProviderError(
                     ProviderError::StarknetError(starknet_error),
