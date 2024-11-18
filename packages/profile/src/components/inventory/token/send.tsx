@@ -34,10 +34,12 @@ export function SendToken() {
   const { address } = useAccount();
   const { parent } = useConnection();
   const t = useToken({ tokenAddress: tokenAddress! });
+  console.log(t?.balance);
 
   const formSchema = useMemo(() => {
     // Avoid scientific notation in error message (e.g. `parseFloat(`1e-${decimals}`).toString() === "1e-18"`)
-    const minAmountStr = `0.${"0".repeat((t?.meta.decimals ?? 18) - 1)}1`;
+    const decimals = t?.meta.decimals ?? 18;
+    const minAmountStr = `0.${"0".repeat(decimals - 1)}1`;
 
     return z.object({
       to: z
@@ -62,11 +64,18 @@ export function SendToken() {
         ),
       amount: z.coerce
         .number({ message: "Amount is required" })
-        .gte(parseFloat(minAmountStr), { message: `Amount must be at least ${minAmountStr} ${t?.meta.symbol}` })
+        .gte(parseFloat(minAmountStr), {
+          message: `Amount must be at least ${minAmountStr} ${t?.meta.symbol}`,
+        })
+        .refine(
+          (x) => BigInt((x * 10) ^ decimals) <= (t?.balance.value ?? 0n),
+          { message: "Amount cannot exceed balance" },
+        ),
     });
-  }, [t?.meta]);
+  }, [t]);
 
   const form = useForm<z.infer<typeof formSchema>>({
+    mode: "onBlur",
     resolver: zodResolver(formSchema),
     defaultValues: {
       to: "",
