@@ -94,11 +94,11 @@ export function Trophy({
 
 function Task({ task, completed }: { task: Task; completed: boolean }) {
   const TaskIcon = useMemo(() => {
-    if (completed) {
+    if (task.count >= task.total) {
       return CheckboxCheckedDuoIcon;
     }
     return CheckboxUncheckedIcon;
-  }, [completed]);
+  }, [task.count, task.total]);
 
   return (
     <div className="flex flex-col gap-2">
@@ -111,7 +111,7 @@ function Task({ task, completed }: { task: Task; completed: boolean }) {
         <p
           className={cn(
             "text-xs text-quaternary-foreground",
-            completed && "line-through opacity-50",
+            task.count >= task.total && "line-through opacity-50",
           )}
         >
           {task.description}
@@ -261,7 +261,7 @@ function Progress({
           )}
         />
       </div>
-      {completed && total > 1 ? (
+      {count >= total && total > 1 ? (
         <div className="flex items-center gap-1">
           <div className="fa-solid fa-check text-xs text-quaternary-foreground" />
           <p className="text-xs text-quaternary-foreground font-medium">
@@ -275,7 +275,7 @@ function Progress({
             {`${count.toLocaleString()} of ${total.toLocaleString()}`}
           </p>
         </div>
-      ) : completed ? (
+      ) : count >= total ? (
         <div className="flex items-center gap-1">
           <div className="fa-solid fa-check text-xs text-quaternary-foreground" />
           <p className="text-xs text-quaternary-foreground">Completed</p>
