@@ -35,33 +35,36 @@ export function SendToken() {
   const { parent } = useConnection();
   const t = useToken({ tokenAddress: tokenAddress! });
 
-  const formSchema = useMemo(
-    () =>
-      z.object({
-        to: z
-          .string()
-          .startsWith("0x", {
-            message: 'Starknet address must start with "0x"',
-          })
-          .min(62, {
-            message: "Starknet address must be at least 61 characters long",
-          })
-          .refine(
-            (addr) => {
-              try {
-                return BigInt(addr) < constants.PRIME;
-              } catch {
-                return false;
-              }
-            },
-            {
-              message: "Please input a valid Starknet address",
-            },
-          ),
-        amount: z.coerce.number({ message: "Amount is required" }).positive(),
-      }),
-    [],
-  );
+  const formSchema = useMemo(() => {
+    // Avoid scientific notation in error message (e.g. `parseFloat(`1e-${decimals}`).toString() === "1e-18"`)
+    const minAmountStr = `0.${"0".repeat((t?.meta.decimals ?? 18) - 1)}1`;
+
+    return z.object({
+      to: z
+        .string()
+        .startsWith("0x", {
+          message: 'Starknet address must start with "0x"',
+        })
+        .min(62, {
+          message: "Starknet address must be at least 61 characters long",
+        })
+        .refine(
+          (addr) => {
+            try {
+              return BigInt(addr) < constants.PRIME;
+            } catch {
+              return false;
+            }
+          },
+          {
+            message: "Please input a valid Starknet address",
+          },
+        ),
+      amount: z.coerce
+        .number({ message: "Amount is required" })
+        .gte(parseFloat(minAmountStr), { message: `Amount must be at least ${minAmountStr} ${t?.meta.symbol}` })
+    });
+  }, [t?.meta]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
