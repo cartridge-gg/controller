@@ -10,7 +10,8 @@
     "./api/indexer": "./dist/api/indexer/index.js"
   },
   "scripts": {
-    "build:deps": "graphql-codegen --config src/api/cartridge/codegen.yaml && graphql-codegen --config src/api/indexer/codegen.yaml && tsc",
+    "build:deps": "pnpm graphql:gen && tsc",
+    "graphql:gen": "graphql-codegen --config src/api/cartridge/codegen.yaml && graphql-codegen --config src/api/indexer/codegen.yaml && pnpm tsx bin/post-graphql-gen.ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\""
   },
@@ -30,8 +31,9 @@
     "@graphql-codegen/typescript": "^2.4.8",
     "@graphql-codegen/typescript-operations": "^2.3.5",
     "@graphql-codegen/typescript-react-query": "^3.5.9",
-    "@types/node": "^20.6.0",
+    "@types/node": "^20.16.11",
     "@types/react": "^18.3.11",
+    "tsx": "^4.19.2",
     "typescript": "^5.4.5"
   }
 }
