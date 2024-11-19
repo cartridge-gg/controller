@@ -88,12 +88,11 @@ function Row({
           self && "bg-quaternary text-primary",
         )}
       >
-        <div className="flex items-center justify-between grow sticky top-0">
+        <div className="flex items-center justify-between grow sticky top-0 gap-x-3">
           <div className="flex items-center gap-x-4 sticky top-0">
             <p className="text-muted-foreground min-w-6 sticky top-0">{`${rank}.`}</p>
             <User
               username={!username ? address.slice(0, 9) : username}
-              self={self}
               Icon={SpaceInvaderIcon}
             />
           </div>
@@ -107,18 +106,16 @@ function Row({
 
 function User({
   username,
-  self,
   Icon,
 }: {
   username: string;
-  self: boolean;
   Icon: React.ComponentType<StateIconProps>;
 }) {
   return (
     <div className="flex items-center gap-x-2">
       <Icon className="shrink-0" size="default" variant="line" />
       <p className="text-ellipsis line-clamp-1 break-all">
-        {self ? `${username} (you)` : username}
+        {username}
       </p>
     </div>
   );

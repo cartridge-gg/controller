@@ -268,13 +268,6 @@ function Progress({
             {`${count.toLocaleString()}`}
           </p>
         </div>
-      ) : total > 1 ? (
-        <div className="flex items-center gap-1">
-          <div className="text-xs text-quaternary-foreground" />
-          <p className="text-xs text-quaternary-foreground font-medium">
-            {`${count.toLocaleString()} of ${total.toLocaleString()}`}
-          </p>
-        </div>
       ) : count >= total ? (
         <div className="flex items-center gap-1">
           <div className="fa-solid fa-check text-xs text-quaternary-foreground" />
@@ -282,7 +275,7 @@ function Progress({
         </div>
       ) : (
         <p className="text-xs text-quaternary-foreground font-medium">
-          {`${count.toLocaleString()} / ${total.toLocaleString()}`}
+          {`${count.toLocaleString()} of ${total.toLocaleString()}`}
         </p>
       )}
     </div>
