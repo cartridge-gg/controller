@@ -6,7 +6,7 @@ import {
   LayoutHeader,
 } from "@/components/layout";
 
-export function Send() {
+export function SendCollection() {
   const { address } = useParams<{ address: string }>();
   const [searchParams] = useSearchParams();
   const tokenIds = searchParams.getAll("tokenIds");

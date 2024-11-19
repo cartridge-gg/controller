@@ -10,9 +10,7 @@ export function LayoutContainer({
   const { parent, chainId, setIsVisible } = useConnection();
   const onClose = useCallback(() => {
     setIsVisible(false);
-    parent.close().catch(() => {
-      /* Always fails for some reason */
-    });
+    parent.close();
   }, [parent, setIsVisible]);
 
   return (

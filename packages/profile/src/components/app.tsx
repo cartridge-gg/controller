@@ -4,7 +4,8 @@ import {
   Inventory,
   Collection,
   Asset,
-  Send,
+  SendCollection,
+  SendToken,
   Token,
 } from "@/components/inventory";
 import { Achievements } from "@/components/achievements";
@@ -17,13 +18,17 @@ export function App() {
       <Route element={<Outlet />}>
         <Route path="account/:username" element={<Account />}>
           <Route path="inventory" element={<Inventory />}>
-            <Route path="token/:address" element={<Token />} />
+            <Route path="token/:address" element={<Token />}>
+              <Route path="send" element={<SendToken />} />
+            </Route>
           </Route>
           <Route path="activity" element={<Activity />} />
 
           <Route path="slot/:project" element={<Slot />}>
             <Route path="inventory" element={<Inventory />}>
-              <Route path="token/:address" element={<Token />} />
+              <Route path="token/:address" element={<Token />}>
+                <Route path="send" element={<SendToken />} />
+              </Route>
             </Route>
             <Route path="achievements" element={<Achievements />}>
               <Route path=":address" element={<Achievements />} />
@@ -38,7 +43,7 @@ export function App() {
 
       <Route path="collection/:address" element={<Collection />}>
         <Route path=":tokenId" element={<Asset />} />
-        <Route path="send" element={<Send />} />
+        <Route path="send" element={<SendCollection />} />
       </Route>
 
       <Route path="*" element={<div>Page not found</div>} />

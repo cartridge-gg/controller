@@ -1,10 +1,10 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, Outlet, useLocation, useParams } from "react-router-dom";
 import {
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
   LayoutHeader,
-} from "../layout";
+} from "@/components/layout";
 import {
   ArrowIcon,
   Button,
@@ -19,6 +19,7 @@ import {
 import { useConnection } from "@/hooks/context";
 import {
   formatAddress,
+  isIframe,
   isPublicChain,
   StarkscanUrl,
   useCountervalue,
@@ -32,6 +33,11 @@ import { useToken } from "@/hooks/token";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
+  const location = useLocation();
+
+  if (location.pathname.endsWith("/send")) {
+    return <Outlet />;
+  }
 
   switch (address) {
     case "credit":
@@ -76,18 +82,20 @@ function Credits() {
         </Card>
       </LayoutContent>
 
-      <LayoutFooter>
-        <Button onClick={() => parent.openPurchaseCredits().catch(() => {})}>
-          Purchase
-        </Button>
-      </LayoutFooter>
+      {isIframe() && (
+        <LayoutFooter>
+          <Button onClick={() => parent.openPurchaseCredits()}>Purchase</Button>
+        </LayoutFooter>
+      )}
     </LayoutContainer>
   );
 }
 
 function ERC20() {
-  const { chainId } = useConnection();
   const { address } = useParams<{ address: string }>();
+  // const [searchParams, setSearchParams] = useSearchParams();
+
+  const { chainId } = useConnection();
   const t = useToken({ tokenAddress: address! });
   const { countervalue } = useCountervalue({
     balance: formatEther(t?.balance.value ?? 0n),
@@ -117,7 +125,9 @@ function ERC20() {
             t.balance.formatted
           )
         } ${t.meta.symbol}`}
-        description={`${countervalue.formatted} ${CurrencyBase.Usd}`}
+        description={
+          countervalue && `${countervalue.formatted} ${CurrencyBase.Usd}`
+        }
         icon={
           <img
             className="w-8 h-8"
@@ -157,6 +167,14 @@ function ERC20() {
           </CardContent>
         </Card>
       </LayoutContent>
+
+      {/* {isIframe() && (
+        <LayoutFooter>
+          <Link to="send">
+            <Button className="w-full">Send</Button>
+          </Link>
+        </LayoutFooter>
+      )} */}
     </LayoutContainer>
   );
 }
