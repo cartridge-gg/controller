@@ -114,9 +114,7 @@ function User({
   return (
     <div className="flex items-center gap-x-2">
       <Icon className="shrink-0" size="default" variant="line" />
-      <p className="text-ellipsis line-clamp-1 break-all">
-        {username}
-      </p>
+      <p className="text-ellipsis line-clamp-1 break-all">{username}</p>
     </div>
   );
 }
