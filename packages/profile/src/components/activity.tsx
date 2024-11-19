@@ -1,5 +1,5 @@
 import { Card, CardContent, CheckIcon, CopyAddress } from "@cartridge/ui-next";
-import { useTransferQuery } from "@cartridge/utils/api/indexer";
+import { useTokenTransfersQuery } from "@cartridge/utils/api/indexer";
 import {
   LayoutContainer,
   LayoutContent,
@@ -10,10 +10,7 @@ import { useAccount } from "@/hooks/account";
 
 export function Activity() {
   const { address, username } = useAccount();
-  const { data } = useTransferQuery({
-    address,
-    limit: 100,
-  });
+  const { data } = useTokenTransfersQuery({ address });
 
   return (
     <LayoutContainer>
@@ -24,18 +21,27 @@ export function Activity() {
       />
 
       <LayoutContent>
-        {data?.ercTransfer ? (
+        {data?.tokenTransfers?.edges ? (
           <Card>
-            {data.ercTransfer.map((t) => (
-              <CardContent className="flex items-center gap-1">
-                <CheckIcon size="sm" />
-                <div>
-                  Send{" "}
-                  {Number(t.amount) / 10 ** Number(t.token_metadata?.decimals)}{" "}
-                  {t.token_metadata?.symbol}
-                </div>
-              </CardContent>
-            ))}
+            {data.tokenTransfers.edges.map(({ node: t }) => {
+              switch (t.tokenMetadata.__typename) {
+                case "ERC20__Token": {
+                  return (
+                    <CardContent className="flex items-center gap-1">
+                      <CheckIcon size="sm" />
+                      <div>
+                        Send{" "}
+                        {Number(t.tokenMetadata.amount) /
+                          10 ** Number(t.tokenMetadata?.decimals)}{" "}
+                        {t.tokenMetadata?.symbol}
+                      </div>
+                    </CardContent>
+                  );
+                }
+                case "ERC721__Token":
+                  return null;
+              }
+            })}
           </Card>
         ) : (
           <Card>

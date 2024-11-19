@@ -24,8 +24,8 @@ scalar Cursor
 
 type World__PageInfo {
   endCursor: Cursor
-  hasNextPage: Boolean
-  hasPreviousPage: Boolean
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
   startCursor: Cursor
 }
 
@@ -53,14 +53,14 @@ type EventNode {
 }
 
 type Token__BalanceConnection {
-  edges: [Token__BalanceEdge]
+  edges: [Token__BalanceEdge!]!
   pageInfo: World__PageInfo!
   totalCount: Int!
 }
 
 type Token__BalanceEdge {
-  cursor: Cursor
-  node: Token__Balance
+  cursor: Cursor!
+  node: Token__Balance!
 }
 
 type Token__Balance {
@@ -90,14 +90,14 @@ type ERC721__Token {
 }
 
 type Token__TransferConnection {
-  edges: [Token__TransferEdge]
+  edges: [Token__TransferEdge!]!
   pageInfo: World__PageInfo!
   totalCount: Int!
 }
 
 type Token__TransferEdge {
-  cursor: Cursor
-  node: Token__Transfer
+  cursor: Cursor!
+  node: Token__Transfer!
 }
 
 type Token__Transfer {
