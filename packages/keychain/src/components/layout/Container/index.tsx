@@ -14,7 +14,6 @@ export function Container({
   children,
   onBack,
   hideAccount,
-  showSettings,
   Icon,
   icon,
   title,
@@ -30,7 +29,6 @@ export function Container({
       <Header
         onBack={onBack}
         hideAccount={hideAccount}
-        showSettings={showSettings}
         Icon={Icon}
         icon={icon}
         title={title}
