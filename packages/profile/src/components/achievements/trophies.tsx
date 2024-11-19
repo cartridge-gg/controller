@@ -49,7 +49,7 @@ export function Trophies({
   );
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <div className="h-8 bg-secondary py-2 px-3 flex items-center justify-between gap-4 rounded-md overflow-hidden">
         <p className="uppercase text-xs text-quaternary-foreground font-semibold tracking-wider">
           Total
@@ -64,28 +64,30 @@ export function Trophies({
           {`${completed} of ${total}`}
         </p>
       </div>
-      {Object.entries(groups)
-        .filter(([group]) => group !== HIDDEN_GROUP)
-        .map(([group, items]) => (
-          <Group
-            key={group}
-            group={group}
-            items={items}
-            softview={softview}
-            enabled={enabled}
-            onPin={onPin}
-          />
-        ))}
-      <Group
-        key={HIDDEN_GROUP}
-        group={HIDDEN_GROUP}
-        items={(groups[HIDDEN_GROUP] || []).sort(
-          (a, b) => a.earning - b.earning,
-        )}
-        softview={softview}
-        enabled={enabled}
-        onPin={onPin}
-      />
+      <div className="flex flex-col gap-3">
+        {Object.entries(groups)
+          .filter(([group]) => group !== HIDDEN_GROUP)
+          .map(([group, items]) => (
+            <Group
+              key={group}
+              group={group}
+              items={items}
+              softview={softview}
+              enabled={enabled}
+              onPin={onPin}
+            />
+          ))}
+        <Group
+          key={HIDDEN_GROUP}
+          group={HIDDEN_GROUP}
+          items={(groups[HIDDEN_GROUP] || []).sort(
+            (a, b) => a.earning - b.earning,
+          )}
+          softview={softview}
+          enabled={enabled}
+          onPin={onPin}
+        />
+      </div>
     </div>
   );
 }
