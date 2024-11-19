@@ -80,6 +80,7 @@ export default class ControllerProvider extends BaseProvider {
           this.profile = profile;
         },
         methods: {
+          openSettings: this.openSettings.bind(this),
           openPurchaseCredits: this.openPurchaseCredits.bind(this),
           openExecute: normalize(() => this.openExecute.bind(this)),
         },
@@ -172,6 +173,7 @@ export default class ControllerProvider extends BaseProvider {
       console.error(new NotReadyToConnect().message);
       return null;
     }
+    this.iframes.profile?.close();
     this.iframes.keychain.open();
     const res = await this.keychain.openSettings();
     this.iframes.keychain.close();

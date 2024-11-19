@@ -1,21 +1,9 @@
-import {
-  Button,
-  VStack,
-  Text,
-  HStack,
-  UnorderedList,
-  ListItem,
-} from "@chakra-ui/react";
-import { Container, Content, Footer } from "components/layout";
-import { GearIcon, TrashIcon } from "@cartridge/ui";
-import { useConnection } from "hooks/connection";
-import { useCallback, useEffect, useState } from "react";
-import { useExternalOwners } from "hooks/external";
-import { formatAddress } from "@cartridge/utils";
+import { Button } from "@chakra-ui/react";
+import { GearIcon } from "@cartridge/ui";
+import { useState } from "react";
+import { Container, Footer } from "components/layout";
 import { Recovery } from "./Recovery";
 import { Delegate } from "./Delegate";
-import { CallData } from "starknet";
-import { ExecuteCtx } from "utils/connection";
 
 enum State {
   SETTINGS,
@@ -24,54 +12,54 @@ enum State {
 }
 
 export function Settings({ onLogout }: { onLogout: () => void }) {
-  const { controller, context, setContext } = useConnection();
+  // const { controller, context, setContext } = useConnection();
   const [state, setState] = useState<State>(State.SETTINGS);
-  const [delegateAccount, setDelegateAccount] = useState("");
+  // const [delegateAccount, setDelegateAccount] = useState("");
 
-  useEffect(() => {
-    const init = async () => {
-      const delegate = await controller.delegateAccount();
-      setDelegateAccount(delegate);
-    };
-    init();
-  }, [controller]);
+  // useEffect(() => {
+  //   const init = async () => {
+  //     const delegate = await controller.delegateAccount();
+  //     setDelegateAccount(delegate);
+  //   };
+  //   init();
+  // }, [controller]);
 
-  const { externalOwners } = useExternalOwners();
+  // const { externalOwners } = useExternalOwners();
 
-  const onRemoveExternalOwner = useCallback(
-    (externalOwnerAddress: string) => {
-      setContext({
-        origin: context.origin,
-        transactions: [
-          {
-            contractAddress: controller.address,
-            entrypoint: "remove_external_owner",
-            calldata: CallData.compile([externalOwnerAddress]),
-          },
-        ],
-        type: "execute",
-        resolve: context.resolve,
-        reject: context.reject,
-      } as ExecuteCtx);
-    },
-    [controller, context, setContext],
-  );
+  // const onRemoveExternalOwner = useCallback(
+  //   (externalOwnerAddress: string) => {
+  //     setContext({
+  //       origin: context.origin,
+  //       transactions: [
+  //         {
+  //           contractAddress: controller.address,
+  //           entrypoint: "remove_external_owner",
+  //           calldata: CallData.compile([externalOwnerAddress]),
+  //         },
+  //       ],
+  //       type: "execute",
+  //       resolve: context.resolve,
+  //       reject: context.reject,
+  //     } as ExecuteCtx);
+  //   },
+  //   [controller, context, setContext],
+  // );
 
-  const onRemoveDelegate = useCallback(() => {
-    setContext({
-      origin: context.origin,
-      transactions: [
-        {
-          contractAddress: controller.address,
-          entrypoint: "set_delegate_account",
-          calldata: CallData.compile(["0x0"]),
-        },
-      ],
-      type: "execute",
-      resolve: context.resolve,
-      reject: context.reject,
-    } as ExecuteCtx);
-  }, [controller, context, setContext]);
+  // const onRemoveDelegate = useCallback(() => {
+  //   setContext({
+  //     origin: context.origin,
+  //     transactions: [
+  //       {
+  //         contractAddress: controller.address,
+  //         entrypoint: "set_delegate_account",
+  //         calldata: CallData.compile(["0x0"]),
+  //       },
+  //     ],
+  //     type: "execute",
+  //     resolve: context.resolve,
+  //     reject: context.reject,
+  //   } as ExecuteCtx);
+  // }, [controller, context, setContext]);
 
   if (state === State.RECOVERY) {
     return <Recovery onBack={() => setState(State.SETTINGS)} />;
@@ -83,9 +71,9 @@ export function Settings({ onLogout }: { onLogout: () => void }) {
 
   return (
     <Container variant="compressed" title="Controller Settings" Icon={GearIcon}>
-      <Content>
+      {/* <Content>
         <VStack gap="30px" w="full">
-          {/* <VStack>
+          <VStack>
             {controller.cartridge.hasSession(
               controller.cartridge.session(),
             ) ? (
@@ -101,7 +89,7 @@ export function Settings({ onLogout }: { onLogout: () => void }) {
             >
               Clear Session
             </Button> 
-          </VStack> */}
+          </VStack>
 
           <VStack w="full" alignItems="flex-start">
             <Text fontWeight="bold" color="text.secondary">
@@ -169,7 +157,7 @@ export function Settings({ onLogout }: { onLogout: () => void }) {
             )}
           </VStack>
         </VStack>
-      </Content>
+      </Content> */}
       <Footer>
         <Button w="full" onClick={onLogout}>
           Log out

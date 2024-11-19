@@ -4,15 +4,20 @@ import { NetworkStatus } from "./NetworkStatus";
 import { SettingsButton } from "./SettingsButton";
 import { BackButton } from "./BackButton";
 import { useConnection } from "hooks/connection";
+import { useMemo } from "react";
 
 export type TopBarProps = {
   onBack?: () => void;
   hideAccount?: boolean;
-  showSettings?: boolean;
 };
 
-export function TopBar({ onBack, hideAccount, showSettings }: TopBarProps) {
-  const { openSettings } = useConnection();
+export function TopBar({ onBack, hideAccount }: TopBarProps) {
+  const { openSettings, context } = useConnection();
+  const showSettings = useMemo(
+    () => !context || !["connect", "open-settings"].includes(context.type),
+    [context],
+  );
+
   return (
     <HStack
       w="full"
