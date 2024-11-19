@@ -166,7 +166,7 @@ export function useConnectionValue() {
 
   const openSettings = useCallback(() => {
     setContext({
-      origin,
+      origin: context.origin || origin,
       type: "open-settings",
       resolve: context.resolve,
       reject: context.reject,

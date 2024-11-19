@@ -1,0 +1,63 @@
+query TokenBalances($address: String!) {
+  tokenBalances(accountAddress: $address) {
+    edges {
+      node {
+        tokenMetadata {
+          __typename
+          ... on ERC20__Token {
+            amount
+            contractAddress
+            decimals
+            name
+            symbol
+          }
+          ... on ERC721__Token {
+            contractAddress
+            imagePath
+            metadata
+            metadataAttributes
+            metadataDescription
+            metadataName
+            name
+            symbol
+            tokenId
+          }
+        }
+      }
+    }
+  }
+}
+
+query TokenTransfers($address: String!) {
+  tokenTransfers(accountAddress: $address) {
+    edges {
+      node {
+        from
+        to
+        tokenMetadata {
+          __typename
+          ... on ERC20__Token {
+            amount
+            contractAddress
+            decimals
+            name
+            symbol
+          }
+          ... on ERC721__Token {
+            contractAddress
+            imagePath
+            metadata
+            metadataAttributes
+            metadataDescription
+            metadataName
+            name
+            symbol
+            tokenId
+          }
+        }
+        transactionHash
+        executedAt
+      }
+    }
+  }
+}

@@ -34,7 +34,7 @@ function Home() {
         },
       });
     }
-  }, [context?.origin]);
+  }, [context?.origin, posthog]);
 
   if (window.self === window.top || !context?.origin) {
     return <></>;

@@ -27,6 +27,7 @@ type ConnectionContextType = {
 
 type ParentMethods = {
   close: () => void;
+  openSettings: () => void;
   openPurchaseCredits: () => void;
   openExecute: (calls: Call[]) => void;
 };
@@ -34,6 +35,7 @@ type ParentMethods = {
 const initialState: ConnectionContextType = {
   parent: {
     close: () => {},
+    openSettings: () => {},
     openPurchaseCredits: () => {},
     openExecute: () => {},
   },

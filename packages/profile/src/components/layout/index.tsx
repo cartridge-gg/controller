@@ -1,4 +1,4 @@
-import { Button, cn, TimesIcon, Network } from "@cartridge/ui-next";
+import { Button, cn, TimesIcon, Network, DotsIcon } from "@cartridge/ui-next";
 import { PropsWithChildren, useCallback } from "react";
 import { useConnection } from "@/hooks/context";
 import { isIframe } from "@cartridge/utils";
@@ -28,9 +28,13 @@ export function LayoutContainer({
 
         <div className="flex gap-2">
           <Network chainId={chainId} />
-          {/* <Button variant="icon" size="icon">
+          <Button
+            variant="icon"
+            size="icon"
+            onClick={() => parent.openSettings()}
+          >
             <DotsIcon />
-          </Button> */}
+          </Button>
         </div>
       </div>
 

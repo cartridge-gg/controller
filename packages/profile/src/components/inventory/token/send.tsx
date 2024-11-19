@@ -26,7 +26,6 @@ import { useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useParams } from "react-router-dom";
 import { constants } from "starknet";
-import { parseEther } from "viem";
 import { z } from "zod";
 
 export function SendToken() {
@@ -34,7 +33,6 @@ export function SendToken() {
   const { address } = useAccount();
   const { parent } = useConnection();
   const t = useToken({ tokenAddress: tokenAddress! });
-  console.log(t?.balance);
 
   const formSchema = useMemo(() => {
     // Avoid scientific notation in error message (e.g. `parseFloat(`1e-${decimals}`).toString() === "1e-18"`)
@@ -67,10 +65,9 @@ export function SendToken() {
         .gte(parseFloat(minAmountStr), {
           message: `Amount must be at least ${minAmountStr} ${t?.meta.symbol}`,
         })
-        .refine(
-          (x) => BigInt((x * 10) ^ decimals) <= (t?.balance.value ?? 0n),
-          { message: "Amount cannot exceed balance" },
-        ),
+        .refine((x) => BigInt(x * 10 ** decimals) <= (t?.balance.value ?? 0n), {
+          message: "Amount cannot exceed balance",
+        }),
     });
   }, [t]);
 
@@ -86,7 +83,7 @@ export function SendToken() {
     (values: z.infer<typeof formSchema>) => {
       if (!t) return;
 
-      const amount = parseEther(values.amount.toString()).toString();
+      const amount = (values.amount * 10 ** t.meta.decimals).toString();
 
       parent.openExecute([
         {

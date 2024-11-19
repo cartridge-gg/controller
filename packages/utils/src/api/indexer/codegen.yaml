@@ -11,3 +11,4 @@ generates:
       fetcher:
         func: ./fetcher#useFetchData
         isReactHook: true
+      addInfiniteQuery: true
