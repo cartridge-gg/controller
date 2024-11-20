@@ -9,16 +9,14 @@ import { Link } from "react-router-dom";
 import {
   Balance,
   ERC20Metadata,
-  ETH_CONTRACT_ADDRESS,
   useCountervalue,
   useCreditBalance,
 } from "@cartridge/utils";
 import { formatEther } from "viem";
-import { CurrencyBase, CurrencyQuote } from "@cartridge/utils/api/cartridge";
-import { getChecksumAddress } from "starknet";
 import { useConnection } from "@/hooks/context";
 import { useAccount } from "@/hooks/account";
 import { useTokens } from "@/hooks/token";
+import { TokenPair } from "@cartridge/utils/api/cartridge";
 
 export function Tokens() {
   const { isVisible } = useConnection();
@@ -72,8 +70,7 @@ function TokenCardContent({
 }) {
   const { countervalue } = useCountervalue({
     balance: formatEther(token.balance.value || 0n),
-    quote: CurrencyQuote.Eth,
-    base: CurrencyBase.Usd,
+    pair: `${token.meta.symbol}_USDC` as TokenPair,
   });
 
   return (
@@ -93,14 +90,11 @@ function TokenCardContent({
           </div>
         </div>
 
-        {/* TODO: Enable countervalue for currencies other than ETH */}
-        {getChecksumAddress(token.meta.address) ===
-          getChecksumAddress(ETH_CONTRACT_ADDRESS) &&
-          countervalue && (
-            <div className="text-xs text-muted-foreground">
-              ${countervalue.formatted}
-            </div>
-          )}
+        {countervalue && (
+          <div className="text-xs text-muted-foreground">
+            ${countervalue.formatted}
+          </div>
+        )}
       </div>
     </CardContent>
   );

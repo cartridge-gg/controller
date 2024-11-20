@@ -20,7 +20,7 @@ import {
   Input,
 } from "@cartridge/ui-next";
 import { useCountervalue } from "@cartridge/utils";
-import { CurrencyBase, CurrencyQuote } from "@cartridge/utils/api/cartridge";
+import { TokenPair } from "@cartridge/utils/api/cartridge";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
@@ -106,10 +106,9 @@ export function SendToken() {
   const { countervalue } = useCountervalue(
     {
       balance: amount?.toString(),
-      quote: CurrencyQuote.Eth,
-      base: CurrencyBase.Usd,
+      pair: `${t?.meta.symbol}_USDC` as TokenPair,
     },
-    { enabled: t?.meta.symbol === "ETH" && !!amount },
+    { enabled: t && ["ETH", "STRK"].includes(t.meta.symbol) && !!amount },
   );
 
   if (!t) {

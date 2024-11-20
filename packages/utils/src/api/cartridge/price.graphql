@@ -1,6 +1,8 @@
-query Price($quote: CurrencyQuote!, $base: CurrencyBase!) {
-  price(quote: $quote, base: $base) {
+query Price($pairs: [TokenPair!]!) {
+  price(pairs: $pairs) {
     amount
-    currency
+    base
+    decimals
+    quote
   }
 }
