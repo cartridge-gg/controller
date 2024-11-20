@@ -1,23 +1,21 @@
-import { useMemo } from "react";
 import { getChecksumAddress, Provider } from "starknet";
 import useSWR from "swr";
-import { ERC20, ERC20Metadata } from "../erc20";
-import { formatBalance } from "../currency";
-import { CreditQuery, useCreditQuery } from "../api/cartridge";
 import { formatEther } from "viem";
+import { ERC20, ERC20Metadata } from "../erc20";
+import { CreditQuery, useCreditQuery } from "../api/cartridge";
 
 export function useERC20Balance({
   address,
   contractAddress,
   provider,
   interval,
-  fixed,
+  decimals = 5,
 }: {
   address: string;
   contractAddress: string | string[];
   provider: Provider;
   interval: number | undefined;
-  fixed?: number;
+  decimals?: number;
 }) {
   const { data: chainId } = useSWR(provider ? "chainId" : null, () =>
     provider?.getChainId(),
@@ -67,15 +65,20 @@ export function useERC20Balance({
           const res = values[i];
           if (res.status === "rejected") return prev;
 
+          const value = res.value;
+          const factor = 10 ** meta.decimals;
+          const adjusted = parseFloat(value.toString()) / factor;
+          // Round and remove insignificant trailing zeros
+          const rounded = parseFloat(adjusted.toFixed(decimals));
+          const formatted =
+            adjusted === rounded ? adjusted.toString() : `~${rounded}`;
+
           return [
             ...prev,
             {
               balance: {
-                value: res.value,
-                formatted: formatBalance(
-                  formatEther(res.value).toString(),
-                  fixed,
-                ),
+                value,
+                formatted,
               },
               meta,
             },
@@ -127,10 +130,11 @@ export function useCreditBalance({
     },
   );
   const value = data?.account?.credits ?? 0n;
-  const formatted = useMemo(
-    () => formatBalance(formatEther(value).toString(), 2),
-    [value],
-  );
+  const adjusted = parseFloat(formatEther(value));
+  // Round and remove insignificant trailing zeros
+  const rounded = parseFloat(adjusted.toFixed(2));
+  const formatted = adjusted === rounded ? `$${adjusted}` : `~$${rounded}`;
+
   return {
     balance: {
       value,
