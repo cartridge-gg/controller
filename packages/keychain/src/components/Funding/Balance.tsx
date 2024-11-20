@@ -1,6 +1,6 @@
 import { CoinsIcon, EthereumIcon } from "@cartridge/ui";
 import { HStack, Spacer, Text, VStack } from "@chakra-ui/react";
-import { CurrencyBase, CurrencyQuote } from "@cartridge/utils/api/cartridge";
+import { TokenPair } from "@cartridge/utils/api/cartridge";
 import { formatEther } from "viem";
 import {
   ETH_CONTRACT_ADDRESS,
@@ -29,11 +29,13 @@ export function Balance({ showBalances }: BalanceProps) {
     interval: 3000,
     fixed: 2,
   });
-  const { countervalue } = useCountervalue({
-    balance: formatEther(eth?.balance.value || 0n),
-    quote: CurrencyQuote.Eth,
-    base: CurrencyBase.Usd,
-  });
+  const { countervalue } = useCountervalue(
+    {
+      balance: formatEther(eth?.balance.value ?? 0n),
+      pair: "ETH_USDC" as TokenPair,
+    },
+    { enabled: !!eth },
+  );
 
   return (
     <VStack w="full" borderRadius="base" overflow="hidden" spacing="1px">

@@ -1,39 +1,31 @@
 import { useMemo } from "react";
-import {
-  CurrencyBase,
-  CurrencyQuote,
-  PriceQuery,
-  usePriceQuery,
-} from "../api/cartridge";
+import { PriceQuery, TokenPair, usePriceQuery } from "../api/cartridge";
 import { formatBalance } from "../currency";
 import { UseQueryOptions } from "react-query";
 
 export function useCountervalue(
   {
     balance,
-    quote,
-    base,
+    pair,
   }: {
     balance: string;
-    quote: CurrencyQuote;
-    base: CurrencyBase;
+    pair: TokenPair;
   },
   options?: UseQueryOptions<PriceQuery>,
 ) {
   const { data, ...rest } = usePriceQuery(
     {
-      quote,
-      base,
+      pairs: [pair],
     },
     options,
   );
 
   const countervalue = useMemo(() => {
-    if (options?.enabled === false || !data?.price?.amount) {
+    if (options?.enabled === false || !data?.price?.[0]?.amount) {
       return;
     }
 
-    const value = parseFloat(balance) * parseFloat(data?.price.amount);
+    const value = parseFloat(balance) * parseFloat(data?.price?.[0]?.amount);
     const formatted = formatBalance(value.toString(), 2);
 
     return {

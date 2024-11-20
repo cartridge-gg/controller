@@ -27,9 +27,9 @@ import {
 } from "@cartridge/utils";
 import { constants } from "starknet";
 import { formatEther } from "viem";
-import { CurrencyBase, CurrencyQuote } from "@cartridge/utils/api/cartridge";
 import { useAccount } from "@/hooks/account";
 import { useToken } from "@/hooks/token";
+import { TokenPair } from "@cartridge/utils/api/cartridge";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
@@ -97,11 +97,13 @@ function ERC20() {
 
   const { chainId } = useConnection();
   const t = useToken({ tokenAddress: address! });
-  const { countervalue } = useCountervalue({
-    balance: formatEther(t?.balance.value ?? 0n),
-    quote: CurrencyQuote.Eth,
-    base: CurrencyBase.Usd,
-  });
+  const { countervalue } = useCountervalue(
+    {
+      balance: formatEther(t?.balance.value ?? 0n),
+      pair: `${t?.meta.symbol}_USDC` as TokenPair,
+    },
+    { enabled: t && ["ETH", "STRK"].includes(t.meta.symbol) },
+  );
 
   if (!t) {
     return;
@@ -125,9 +127,7 @@ function ERC20() {
             t.balance.formatted
           )
         } ${t.meta.symbol}`}
-        description={
-          countervalue && `${countervalue.formatted} ${CurrencyBase.Usd}`
-        }
+        description={countervalue && `${countervalue.formatted} USD`}
         icon={
           <img
             className="w-8 h-8"
