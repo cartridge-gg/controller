@@ -41,13 +41,13 @@ export function Tokens() {
             <CoinsIcon variant="solid" size="sm" />
           </div>
 
-          <div className="bg-secondary flex flex-1 gap-x-1.5 items-center justify-between p-3">
+          <div className="bg-secondary flex flex-1 gap-x-1.5 items-center justify-between p-3 text-medium">
             <div className="flex items-center gap-2">
               <div>{credit.balance.formatted}</div>
-              <div className="text-xs text-muted-foreground">CREDITS</div>
+              <div className="text-muted-foreground">CREDITS</div>
             </div>
 
-            <div className="text-xs text-muted-foreground">
+            <div className="text-muted-foreground">
               ${credit.balance.formatted}
             </div>
           </div>
@@ -82,18 +82,14 @@ function TokenCardContent({
         />
       </div>
 
-      <div className="bg-secondary flex flex-1 gap-x-1.5 items-center justify-between p-3">
+      <div className="bg-secondary flex flex-1 gap-x-1.5 items-center justify-between p-3 text-medium">
         <div className="flex items-center gap-2">
           <div>{token.balance.formatted}</div>
-          <div className="text-xs text-muted-foreground">
-            {token.meta.symbol}
-          </div>
+          <div className="text-muted-foreground">{token.meta.symbol}</div>
         </div>
 
         {countervalue && (
-          <div className="text-xs text-muted-foreground">
-            ${countervalue.formatted}
-          </div>
+          <div className="text-muted-foreground">${countervalue.formatted}</div>
         )}
       </div>
     </CardContent>
