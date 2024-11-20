@@ -19,9 +19,9 @@ export function TrophiesTab({
   onClick: () => void;
 }) {
   return (
-    <Tab active={active} onClick={onClick}>
+    <Tab priority={true} active={active} onClick={onClick}>
       <Item Icon={TrophyIcon} active={active} label={"Achievements"} />
-      <p className="bg-quinary text-xs rounded-2xl px-2 py-1 font-bold">
+      <p className="bg-quinary text-xs rounded-2xl px-1.5 py-0.5 font-bold">
         {`${completed}/${total}`}
       </p>
     </Tab>
@@ -40,7 +40,7 @@ export function LeaderboardTab({
   onClick: () => void;
 }) {
   return (
-    <Tab active={active} onClick={onClick}>
+    <Tab priority={false} active={active} onClick={onClick}>
       <Item
         Icon={LeaderboardIcon}
         active={active}
@@ -76,10 +76,12 @@ export function Scoreboard({
 
 export function Tab({
   active,
+  priority,
   onClick,
   children,
 }: {
   active: boolean;
+  priority: boolean;
   onClick: () => void;
   children: React.ReactNode;
 }) {
@@ -88,7 +90,8 @@ export function Tab({
   return (
     <div
       className={cn(
-        "h-10 flex justify-between items-center grow border border-secondary rounded-md px-4 py-2 cursor-pointer",
+        "h-10 grow w-1/2 flex justify-between items-center gap-2 border border-secondary rounded-md p-3 cursor-pointer",
+        priority && "min-w-1/2",
         active ? "opacity-100 bg-secondary" : "opacity-50 bg-background",
         hovered && (active ? "opacity-90" : "bg-secondary/50"),
       )}
@@ -111,7 +114,7 @@ export function Item({
   label: string;
 }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1">
       <Icon size="sm" variant={active ? "solid" : "line"} />
       <p className="text-sm">{label}</p>
     </div>

@@ -90,7 +90,7 @@ export function Achievements() {
       {achievements.length ? (
         <LayoutContent className="pb-4 select-none">
           {isSelf && (
-            <div className="flex justify-between gap-4">
+            <div className="flex justify-between gap-x-3 gap-y-4">
               <TrophiesTab
                 active={activeTab === "trophies"}
                 completed={completed}
