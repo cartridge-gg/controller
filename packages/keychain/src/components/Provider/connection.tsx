@@ -23,7 +23,7 @@ export type ConnectionContextValue = {
   setController: (controller: Controller) => void;
   closeModal: () => void;
   openModal: () => void;
-  logout: (context: ConnectionCtx) => void;
+  logout: () => void;
   openSettings: () => void;
 };
 

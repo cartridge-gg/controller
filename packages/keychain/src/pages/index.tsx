@@ -4,12 +4,7 @@ import { ResponseCodes } from "@cartridge/controller";
 import { DeployController, ConfirmTransaction, SignMessage } from "components";
 import { CreateController, CreateSession, Logout } from "components/connect";
 import { useConnection } from "hooks/connection";
-import {
-  DeployCtx,
-  LogoutCtx,
-  OpenSettingsCtx,
-  SignMessageCtx,
-} from "utils/connection";
+import { DeployCtx, SignMessageCtx } from "utils/connection";
 import { LoginMode } from "components/connect/types";
 import { ErrorPage } from "components/ErrorBoundary";
 import { Settings } from "components/Settings";
@@ -19,8 +14,7 @@ import { useEffect } from "react";
 import { usePostHog } from "posthog-js/react";
 
 function Home() {
-  const { context, controller, setController, error, policies, upgrade } =
-    useConnection();
+  const { context, controller, error, policies, upgrade } = useConnection();
   const posthog = usePostHog();
 
   useEffect(() => {
@@ -85,26 +79,7 @@ function Home() {
     case "logout": {
       posthog?.capture("Call Logout");
 
-      const ctx = context as LogoutCtx;
-      return (
-        <Logout
-          onConfirm={() => {
-            window.controller?.disconnect();
-            setController(undefined);
-
-            ctx.resolve({
-              code: ResponseCodes.NOT_CONNECTED,
-              message: "User logged out",
-            });
-          }}
-          onCancel={() =>
-            ctx.resolve({
-              code: ResponseCodes.CANCELED,
-              message: "User cancelled logout",
-            })
-          }
-        />
-      );
+      return <Logout />;
     }
     case "sign-message": {
       posthog?.capture("Call Sign Message");
@@ -147,20 +122,7 @@ function Home() {
     case "open-settings": {
       posthog?.capture("Call Open Settings");
 
-      const ctx = context as OpenSettingsCtx;
-      return (
-        <Settings
-          onLogout={() => {
-            window.controller?.disconnect();
-            setController(undefined);
-
-            ctx.resolve({
-              code: ResponseCodes.NOT_CONNECTED,
-              message: "User logged out",
-            });
-          }}
-        />
-      );
+      return <Settings />;
     }
     case "open-purchase-credits": {
       posthog?.capture("Call Purchase Credits");

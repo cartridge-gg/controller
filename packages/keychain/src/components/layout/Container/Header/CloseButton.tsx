@@ -2,9 +2,17 @@ import { TimesIcon } from "@cartridge/ui";
 import { isIframe } from "@cartridge/utils";
 import { IconButton } from "@chakra-ui/react";
 import { useConnection } from "hooks/connection";
+import { useCallback } from "react";
 
 export function CloseButton() {
-  const { closeModal } = useConnection();
+  const { upgrade, logout, closeModal } = useConnection();
+
+  const onClose = useCallback(() => {
+    if (upgrade.available) {
+      logout();
+    }
+    closeModal();
+  }, [upgrade.available, logout, closeModal]);
 
   if (!isIframe()) {
     return null;
@@ -19,7 +27,7 @@ export function CloseButton() {
         opacity: 0.75,
       }}
       icon={<TimesIcon fontSize={24} />}
-      onClick={closeModal}
+      onClick={onClose}
     />
   );
 }
