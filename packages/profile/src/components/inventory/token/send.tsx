@@ -177,7 +177,7 @@ export function SendToken() {
                       />
                       {countervalue && (
                         <span className="absolute right-4 top-3.5 text-sm text-muted-foreground">
-                          ~${countervalue.formatted}
+                          {countervalue.formatted}
                         </span>
                       )}
                     </div>
