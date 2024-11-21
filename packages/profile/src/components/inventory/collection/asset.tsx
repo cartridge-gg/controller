@@ -99,7 +99,7 @@ export function Asset() {
             <CardTitle>Properties</CardTitle>
           </CardHeader>
 
-          <CardContent className="bg-background grid grid-cols-3 gap-0.5 p-0">
+          <CardContent className="bg-background grid grid-cols-3 p-0">
             {asset.attributes.map((a) => (
               <div
                 key={`${a.type}-${a.name}`}

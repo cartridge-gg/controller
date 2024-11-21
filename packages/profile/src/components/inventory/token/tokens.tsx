@@ -36,7 +36,7 @@ export function Tokens() {
       </CardHeader>
 
       {/* <Link to={`${location.pathname}/token/credit`} state={{ back: location.pathname }}>
-        <CardContent className="bg-background flex items-center p-0 h-full gap-0.5">
+        <CardContent className="bg-background flex items-center p-0 h-full gap-px">
           <div className="bg-secondary flex h-full aspect-square items-center justify-center">
             <CoinsIcon variant="solid" size="sm" />
           </div>
@@ -74,7 +74,7 @@ function TokenCardContent({
   });
 
   return (
-    <CardContent className="bg-background flex items-center p-0 h-full gap-0.5">
+    <CardContent className="bg-background flex items-center p-0 h-full gap-px">
       <div className="bg-secondary flex h-full aspect-square items-center justify-center">
         <img
           src={token.meta.logoUrl ?? "/public/placeholder.svg"}
