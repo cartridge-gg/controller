@@ -68,7 +68,7 @@ export function DeployController({
     contractAddress: ETH_CONTRACT_ADDRESS,
     provider: controller,
     interval: 3000,
-    fixed: 2,
+    decimals: 2,
   });
   useEffect(() => {
     if (!feeEstimate || accountState != "fund" || !eth?.balance.value) return;

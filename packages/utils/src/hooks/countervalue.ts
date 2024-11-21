@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { PriceQuery, TokenPair, usePriceQuery } from "../api/cartridge";
-import { formatBalance } from "../currency";
 import { UseQueryOptions } from "react-query";
 
 export function useCountervalue(
@@ -26,7 +25,9 @@ export function useCountervalue(
     }
 
     const value = parseFloat(balance) * parseFloat(data?.price?.[0]?.amount);
-    const formatted = formatBalance(value.toString(), 2);
+    // Round and remove insignificant trailing zeros
+    const rounded = parseFloat(value.toFixed(2));
+    const formatted = value === rounded ? `$${value}` : `~$${rounded}`;
 
     return {
       value,

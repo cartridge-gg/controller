@@ -74,7 +74,7 @@ function TokenCardContent({
         </div>
 
         {countervalue && (
-          <div className="text-muted-foreground">${countervalue.formatted}</div>
+          <div className="text-muted-foreground">{countervalue.formatted}</div>
         )}
       </div>
     </CardContent>
