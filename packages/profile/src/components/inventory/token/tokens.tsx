@@ -1,38 +1,23 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  SpinnerIcon,
-} from "@cartridge/ui-next";
+import { Card, CardContent, CardHeader, CardTitle } from "@cartridge/ui-next";
 import { Link } from "react-router-dom";
-import {
-  Balance,
-  ERC20Metadata,
-  useCountervalue,
-  useCreditBalance,
-} from "@cartridge/utils";
+import { Balance, ERC20Metadata, useCountervalue } from "@cartridge/utils";
 import { formatEther } from "viem";
-import { useConnection } from "@/hooks/context";
-import { useAccount } from "@/hooks/account";
 import { useTokens } from "@/hooks/token";
 import { TokenPair } from "@cartridge/utils/api/cartridge";
 
 export function Tokens() {
-  const { isVisible } = useConnection();
-  const { username } = useAccount();
-  const credit = useCreditBalance({
-    username,
-    interval: isVisible ? 3000 : undefined,
-  });
+  // const { isVisible } = useConnection();
+  // const { username } = useAccount();
+  // const credit = useCreditBalance({
+  //   username,
+  //   interval: isVisible ? 3000 : undefined,
+  // });
   const erc20 = useTokens();
 
   return (
     <Card>
-      <CardHeader className="h-10 flex flex-row items-center justify-between">
+      <CardHeader>
         <CardTitle>Tokens</CardTitle>
-        {credit.isFetching ||
-          (erc20.isFetching && <SpinnerIcon className="animate-spin" />)}
       </CardHeader>
 
       {/* <Link to={`${location.pathname}/token/credit`} state={{ back: location.pathname }}>
