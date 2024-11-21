@@ -20,11 +20,13 @@ export function useCountervalue(
   );
 
   const countervalue = useMemo(() => {
-    if (options?.enabled === false || !data?.price?.[0]?.amount) {
+    const price = data?.price?.[0];
+    if (options?.enabled === false || !price) {
       return;
     }
 
-    const value = parseFloat(balance) * parseFloat(data?.price?.[0]?.amount);
+    const amount = parseFloat(data?.price?.[0]?.amount) / 10 ** price.decimals;
+    const value = parseFloat(balance) * amount;
     // Round and remove insignificant trailing zeros
     const rounded = parseFloat(value.toFixed(2));
     const formatted = value === rounded ? `$${value}` : `~$${rounded}`;

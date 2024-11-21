@@ -86,7 +86,7 @@ export function Balance({ showBalances }: BalanceProps) {
             <EthereumIcon fontSize={20} />
             <Text>{eth?.balance.formatted ?? "0.00"}</Text>
             {countervalue && (
-              <Text color="text.secondary">${countervalue.formatted}</Text>
+              <Text color="text.secondary">{countervalue.formatted}</Text>
             )}
           </HStack>
           <Spacer />
