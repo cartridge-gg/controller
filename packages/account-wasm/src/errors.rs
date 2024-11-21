@@ -95,6 +95,7 @@ pub enum ErrorCode {
     UrlParseError = 133,
     Base64DecodeError = 134,
     CoseError = 135,
+    PolicyChainIdMismatch = 136,
 }
 
 impl From<ControllerError> for JsControllerError {

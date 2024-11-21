@@ -247,6 +247,9 @@ export function ControllerErrorAlert({
     case ErrorCode.ProviderOther:
       title = "Provider Error";
       break;
+    case ErrorCode.PolicyChainIdMismatch:
+      title = "Invalid Policy";
+      break;
     // Starknet errors
     case ErrorCode.StarknetFailedToReceiveTransaction:
     case ErrorCode.StarknetContractNotFound:

@@ -10,6 +10,7 @@ import { KEYCHAIN_URL } from "src/constants";
 import { Policy } from "src/types";
 import SessionAccount from "src/session/account";
 import BaseProvider from "src/provider";
+import { toWasmPolicies } from "src/utils";
 
 interface SessionRegistration {
   username: string;
@@ -123,7 +124,7 @@ export default class TelegramProvider extends BaseProvider {
       ownerGuid: sessionRegistration.ownerGuid,
       chainId: this._chainId,
       expiresAt: parseInt(sessionRegistration.expiresAt),
-      policies: this._policies,
+      policies: toWasmPolicies(this._policies),
     });
 
     return this.account;

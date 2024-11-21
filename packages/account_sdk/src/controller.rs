@@ -27,6 +27,7 @@ use starknet::{
     accounts::{Account, ConnectedAccount, ExecutionEncoder},
     core::types::{BlockId, Felt},
 };
+use starknet_crypto::poseidon_hash;
 use url::Url;
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
@@ -348,18 +349,22 @@ impl Controller {
 
     pub async fn sign_message(&self, data: TypedData) -> Result<Vec<Felt>, SignError> {
         let hash_parts = data.encode(self.address)?;
+        let scope_hash = poseidon_hash(hash_parts.domain_separator_hash, hash_parts.type_hash);
 
-        match self.session_account(&[Policy::new_typed_data(hash_parts.domain_separator_hash)]) {
+        match self.session_account(&[Policy::new_typed_data(scope_hash)]) {
             Some(session_account) => {
+                let abi_detailed_typed_data = DetailedTypedData {
+                    domain_hash: hash_parts.domain_separator_hash,
+                    type_hash: hash_parts.type_hash,
+                    params: hash_parts.encoded_fields,
+                };
                 let abi_typed_data = abigen::controller::TypedData {
-                    type_hash: hash_parts.domain_separator_hash,
+                    scope_hash,
                     typed_data_hash: hash_parts.message_hash,
                 };
                 Ok([
                     vec![SESSION_TYPED_DATA_MAGIC],
-                    Vec::<abigen::controller::TypedData>::cairo_serialize(&vec![
-                        abi_typed_data.clone()
-                    ]),
+                    Vec::<DetailedTypedData>::cairo_serialize(&vec![abi_detailed_typed_data]),
                     abigen::controller::SessionToken::cairo_serialize(
                         &session_account.sign_typed_data(&[abi_typed_data]).await?,
                     ),
@@ -443,5 +448,29 @@ impl AccountHashAndCallsSigner for Controller {
 impl ExecutionEncoder for Controller {
     fn encode_calls(&self, calls: &[Call]) -> Vec<Felt> {
         CallEncoder::encode_calls(calls)
+    }
+}
+
+#[derive(Clone)]
+struct DetailedTypedData {
+    domain_hash: Felt,
+    type_hash: Felt,
+    params: Vec<Felt>,
+}
+
+impl CairoSerde for DetailedTypedData {
+    type RustType = Self;
+
+    fn cairo_serialize(rust: &Self::RustType) -> Vec<Felt> {
+        let mut result = vec![rust.domain_hash, rust.type_hash, rust.params.len().into()];
+        result.extend_from_slice(&rust.params);
+        result
+    }
+
+    fn cairo_deserialize(
+        _felts: &[Felt],
+        _offset: usize,
+    ) -> cainome_cairo_serde::Result<Self::RustType> {
+        unimplemented!()
     }
 }

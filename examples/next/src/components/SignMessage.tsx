@@ -33,7 +33,7 @@ const MESSAGE: TypedData = {
     name: "StarkNet Mail",
     version: "1",
     revision: "1",
-    chainId: "1",
+    chainId: "SN_SEPOLIA",
   },
   message: {
     from: {

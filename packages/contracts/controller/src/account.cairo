@@ -30,7 +30,7 @@ mod CartridgeAccount {
     use core::to_byte_array::FormatAsByteArray;
     use core::array::ArrayTrait;
     use core::traits::Into;
-    use core::poseidon::poseidon_hash_span;
+    use core::poseidon::{PoseidonTrait, hades_permutation, poseidon_hash_span};
     use core::result::ResultTrait;
     use hash::HashStateTrait;
     use pedersen::PedersenTrait;
@@ -69,7 +69,7 @@ mod CartridgeAccount {
             is_estimate_transaction
         }
     };
-    use argent::session::interface::{SessionToken, TypedData};
+    use argent::session::interface::{DetailedTypedData, SessionToken, TypedData};
 
     use openzeppelin::security::reentrancyguard::ReentrancyGuardComponent;
     use openzeppelin::upgrades::UpgradeableComponent;
@@ -455,31 +455,51 @@ mod CartridgeAccount {
         fn is_valid_session_typed_data_signature(
             self: @ContractState, hash: felt252, mut signature: Span<felt252>
         ) -> bool {
-            let typed_data_items: Array<TypedData> = Serde::deserialize(ref signature)
+            // this function assumes revision `1`
+
+            let detailed_typed_data_items: Array<DetailedTypedData> = Serde::deserialize(
+                ref signature
+            )
                 .expect('invalid-signature-format');
             let session_token: SessionToken = Serde::deserialize(ref signature)
                 .expect('invalid-signature-format');
-            assert(!typed_data_items.is_empty(), 'empty-typed-data-list');
+            assert(!detailed_typed_data_items.is_empty(), 'empty-typed-data-list');
             assert(signature.is_empty(), 'invalid-signature-length');
 
-            // compute individual message hashes
+            // reusable parts for computing individual SNIP-12 hashes
+            let snip_12_hasher = PoseidonTrait::new().update('StarkNet Message');
             let contract_address: felt252 = get_contract_address().into();
+
+            // collect individual SNIP-12 hashes
             let mut message_hashes: Array<felt252> = array![];
-            let mut items = typed_data_items.span();
-            while let Option::Some(typed_data) = items.pop_front() {
-                // assumes revision `1`
+            let mut typed_data_items: Array<TypedData> = array![];
+
+            let mut items = detailed_typed_data_items.span();
+            while let Option::Some(detailed_typed_data) = items.pop_front() {
+                // SNIP-12 message encoding
+                let mut snip_12_message_hasher = PoseidonTrait::new()
+                    .update(*detailed_typed_data.type_hash);
+                let mut params_span = detailed_typed_data.params.clone();
+                while let Option::Some(param_item) = params_span.pop_front() {
+                    snip_12_message_hasher = snip_12_message_hasher.update(*param_item);
+                };
+
+                // SNIP-12's `message` component; also used as `typed_data_hash` internally
+                let message_hash = snip_12_message_hasher.finalize();
+
                 message_hashes
                     .append(
-                        poseidon_hash_span(
-                            array![
-                                'StarkNet Message',
-                                *typed_data.type_hash,
-                                contract_address,
-                                *typed_data.typed_data_hash,
-                            ]
-                                .span()
-                        )
+                        snip_12_hasher
+                            .update(*detailed_typed_data.domain_hash)
+                            .update(contract_address)
+                            .update(message_hash)
+                            .finalize()
                     );
+
+                let (scope_hash, _, _) = hades_permutation(
+                    *detailed_typed_data.domain_hash, *detailed_typed_data.type_hash, 2
+                );
+                typed_data_items.append(TypedData { scope_hash, typed_data_hash: message_hash });
             };
 
             let message_hash = if message_hashes.len() == 1 {

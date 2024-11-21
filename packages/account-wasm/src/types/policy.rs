@@ -20,7 +20,7 @@ pub struct CallPolicy {
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
 pub struct TypedDataPolicy {
-    pub type_hash: String,
+    pub scope_hash: String,
 }
 
 #[allow(non_snake_case)]
@@ -49,9 +49,9 @@ impl TryFrom<Policy> for SdkPolicy {
                 contract_address: Felt::from_str(&target)?,
                 selector: get_selector_from_name(&method).unwrap(),
             })),
-            Policy::TypedData(TypedDataPolicy { type_hash }) => {
+            Policy::TypedData(TypedDataPolicy { scope_hash }) => {
                 Ok(SdkPolicy::TypedData(SdkTypedDataPolicy {
-                    type_hash: Felt::from_str(&type_hash)?,
+                    scope_hash: Felt::from_str(&scope_hash)?,
                 }))
             }
         }
@@ -66,7 +66,7 @@ impl From<SdkPolicy> for Policy {
                 method: call_policy.selector.to_string(),
             }),
             SdkPolicy::TypedData(typed_data_policy) => Policy::TypedData(TypedDataPolicy {
-                type_hash: typed_data_policy.type_hash.to_string(),
+                scope_hash: typed_data_policy.scope_hash.to_string(),
             }),
         }
     }

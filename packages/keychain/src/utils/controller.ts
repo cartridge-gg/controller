@@ -12,6 +12,9 @@ import {
   Abi,
   Call,
   CallData,
+  typedData,
+  TypedDataRevision,
+  hash,
 } from "starknet";
 
 import { Policy } from "@cartridge/controller";
@@ -22,6 +25,7 @@ import {
   JsFelt,
   JsInvocationsDetails,
   SessionMetadata,
+  Policy as WasmPolicy,
 } from "@cartridge/account-wasm/controller";
 
 export default class Controller extends Account {
@@ -91,7 +95,7 @@ export default class Controller extends Account {
       throw new Error("Account not found");
     }
 
-    await this.cartridge.createSession(policies, expiresAt);
+    await this.cartridge.createSession(toWasmPolicies(policies), expiresAt);
   }
 
   registerSessionCalldata(
@@ -100,7 +104,7 @@ export default class Controller extends Account {
     publicKey: string,
   ): Array<string> {
     return this.cartridge.registerSessionCalldata(
-      policies,
+      toWasmPolicies(policies),
       expiresAt,
       publicKey,
     );
@@ -117,7 +121,7 @@ export default class Controller extends Account {
     }
 
     return await this.cartridge.registerSession(
-      policies,
+      toWasmPolicies(policies),
       expiresAt,
       publicKey,
       num.toHex(maxFee),
@@ -166,7 +170,7 @@ export default class Controller extends Account {
     policies: Policy[],
     public_key?: string,
   ): SessionMetadata | undefined {
-    return this.cartridge.session(policies, public_key);
+    return this.cartridge.session(toWasmPolicies(policies), public_key);
   }
 
   async estimateInvokeFee(
@@ -248,4 +252,31 @@ function toJsCalls(calls: Call[]): JsCall[] {
     ...call,
     calldata: CallData.toHex(call.calldata),
   }));
+}
+
+function toWasmPolicies(policies: Policy[]): WasmPolicy[] {
+  return policies.map((richPolicy) => {
+    if ("target" in richPolicy) {
+      return {
+        target: richPolicy.target,
+        method: richPolicy.method,
+      };
+    } else {
+      const domainHash = typedData.getStructHash(
+        richPolicy.types,
+        "StarknetDomain",
+        richPolicy.domain,
+        TypedDataRevision.ACTIVE,
+      );
+      const typeHash = typedData.getTypeHash(
+        richPolicy.types,
+        richPolicy.primaryType,
+        TypedDataRevision.ACTIVE,
+      );
+
+      return {
+        scope_hash: hash.computePoseidonHash(domainHash, typeHash),
+      };
+    }
+  });
 }

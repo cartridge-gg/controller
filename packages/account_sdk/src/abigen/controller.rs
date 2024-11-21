@@ -769,7 +769,7 @@ impl cainome::cairo_serde::CairoSerde for TransactionExecuted {
 }
 #[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
 pub struct TypedData {
-    pub type_hash: starknet::core::types::Felt,
+    pub scope_hash: starknet::core::types::Felt,
     pub typed_data_hash: starknet::core::types::Felt,
 }
 impl cainome::cairo_serde::CairoSerde for TypedData {
@@ -778,14 +778,14 @@ impl cainome::cairo_serde::CairoSerde for TypedData {
     #[inline]
     fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
         let mut __size = 0;
-        __size += starknet::core::types::Felt::cairo_serialized_size(&__rust.type_hash);
+        __size += starknet::core::types::Felt::cairo_serialized_size(&__rust.scope_hash);
         __size += starknet::core::types::Felt::cairo_serialized_size(&__rust.typed_data_hash);
         __size
     }
     fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
         let mut __out: Vec<starknet::core::types::Felt> = vec![];
         __out.extend(starknet::core::types::Felt::cairo_serialize(
-            &__rust.type_hash,
+            &__rust.scope_hash,
         ));
         __out.extend(starknet::core::types::Felt::cairo_serialize(
             &__rust.typed_data_hash,
@@ -797,12 +797,12 @@ impl cainome::cairo_serde::CairoSerde for TypedData {
         __offset: usize,
     ) -> cainome::cairo_serde::Result<Self::RustType> {
         let mut __offset = __offset;
-        let type_hash = starknet::core::types::Felt::cairo_deserialize(__felts, __offset)?;
-        __offset += starknet::core::types::Felt::cairo_serialized_size(&type_hash);
+        let scope_hash = starknet::core::types::Felt::cairo_deserialize(__felts, __offset)?;
+        __offset += starknet::core::types::Felt::cairo_serialized_size(&scope_hash);
         let typed_data_hash = starknet::core::types::Felt::cairo_deserialize(__felts, __offset)?;
         __offset += starknet::core::types::Felt::cairo_serialized_size(&typed_data_hash);
         Ok(TypedData {
-            type_hash,
+            scope_hash,
             typed_data_hash,
         })
     }
