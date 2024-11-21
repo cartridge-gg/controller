@@ -4,7 +4,6 @@ import Controller from "utils/controller";
 import {
   connectToController,
   ConnectionCtx,
-  LogoutCtx,
   OpenSettingsCtx,
 } from "utils/connection";
 import { getChainName, isIframe } from "@cartridge/utils";
@@ -155,14 +154,15 @@ export function useConnectionValue() {
     }
   }, [rpcUrl, controller]);
 
-  const logout = useCallback((context: ConnectionCtx) => {
-    setContext({
-      origin: context.origin,
-      type: "logout",
-      resolve: context.resolve,
-      reject: context.reject,
-    } as LogoutCtx);
-  }, []);
+  const logout = useCallback(() => {
+    window.controller?.disconnect();
+    setController(undefined);
+
+    context.resolve({
+      code: ResponseCodes.NOT_CONNECTED,
+      message: "User logged out",
+    });
+  }, [context, setController]);
 
   const openSettings = useCallback(() => {
     setContext({

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Container, Footer } from "components/layout";
 import { Recovery } from "./Recovery";
 import { Delegate } from "./Delegate";
+import { useConnection } from "hooks/connection";
 
 enum State {
   SETTINGS,
@@ -11,8 +12,8 @@ enum State {
   DELEGATE,
 }
 
-export function Settings({ onLogout }: { onLogout: () => void }) {
-  // const { controller, context, setContext } = useConnection();
+export function Settings() {
+  const { logout } = useConnection();
   const [state, setState] = useState<State>(State.SETTINGS);
   // const [delegateAccount, setDelegateAccount] = useState("");
 
@@ -159,7 +160,7 @@ export function Settings({ onLogout }: { onLogout: () => void }) {
         </VStack>
       </Content> */}
       <Footer>
-        <Button w="full" onClick={onLogout}>
+        <Button w="full" onClick={logout}>
           Log out
         </Button>
       </Footer>
