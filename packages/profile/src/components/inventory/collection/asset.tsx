@@ -130,9 +130,9 @@ export function Asset() {
             <div className="text-muted-foreground">Contract</div>
             {isPublicChain(chainId) ? (
               <Link
-                to={`${StarkscanUrl(
-                  chainId as constants.StarknetChainId,
-                ).contract(collection.address)} `}
+                to={StarkscanUrl(chainId as constants.StarknetChainId).contract(
+                  collection.address,
+                )}
                 className="flex items-center gap-1 text-sm"
                 target="_blank"
               >

@@ -28,8 +28,8 @@ query TokenBalances($address: String!) {
   }
 }
 
-query TokenTransfers($address: String!) {
-  tokenTransfers(accountAddress: $address) {
+query TokenTransfers($address: String!, $first: Int!) {
+  tokenTransfers(accountAddress: $address, first: $first) {
     edges {
       node {
         from
@@ -46,7 +46,7 @@ query TokenTransfers($address: String!) {
           ... on ERC721__Token {
             contractAddress
             imagePath
-            metadata
+            # metadata
             metadataAttributes
             metadataDescription
             metadataName

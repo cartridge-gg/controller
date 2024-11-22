@@ -4,6 +4,7 @@ import {
   CardContent,
   CheckIcon,
   CopyAddress,
+  ExternalIcon,
 } from "@cartridge/ui-next";
 import { useInfiniteTokenTransfersQuery } from "@cartridge/utils/api/indexer";
 import {
@@ -15,13 +16,19 @@ import {
 } from "@/components/layout";
 import { Navigation } from "@/components/navigation";
 import { useAccount } from "@/hooks/account";
+import { Link } from "react-router-dom";
+import { StarkscanUrl } from "@cartridge/utils";
+import { useConnection } from "@/hooks/context";
+import { constants } from "starknet";
 
 export function Activity() {
   const { address, username } = useAccount();
+  const { chainId } = useConnection();
   const { status, data, hasNextPage, fetchNextPage } =
     useInfiniteTokenTransfersQuery(
       {
         address,
+        first: 30,
       },
       {
         getNextPageParam: (lastPage) =>
@@ -55,16 +62,30 @@ export function Activity() {
                         switch (t.tokenMetadata.__typename) {
                           case "ERC20__Token": {
                             return (
-                              <CardContent className="flex items-center gap-1">
-                                <CheckIcon size="sm" />
-                                <div>
-                                  Send{" "}
-                                  {Number(t.tokenMetadata.amount) /
-                                    10 **
-                                      Number(t.tokenMetadata?.decimals)}{" "}
-                                  {t.tokenMetadata?.symbol}
-                                </div>
-                              </CardContent>
+                              <Link
+                                to={StarkscanUrl(
+                                  chainId as constants.StarknetChainId,
+                                ).transaction(t.transactionHash)}
+                                target="_blank"
+                                key={t.transactionHash}
+                              >
+                                <CardContent className="flex items-center justify-between text-accent-foreground">
+                                  <div className="flex items-center gap-1">
+                                    <CheckIcon size="sm" />
+                                    <div>
+                                      Send{" "}
+                                      {Number(t.tokenMetadata.amount) /
+                                        10 **
+                                        Number(
+                                          t.tokenMetadata?.decimals,
+                                        )}{" "}
+                                      {t.tokenMetadata?.symbol}
+                                    </div>
+                                  </div>
+
+                                  <ExternalIcon />
+                                </CardContent>
+                              </Link>
                             );
                           }
                           case "ERC721__Token":
