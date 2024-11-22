@@ -59,5 +59,9 @@ query TokenTransfers($address: String!) {
         executedAt
       }
     }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
   }
 }

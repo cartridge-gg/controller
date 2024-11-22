@@ -11,7 +11,7 @@ export function useFetchData<TData, TVariables>(
   const { indexerUrl, credentials, headers } = useIndexerAPI();
 
   const fetchData = fetchDataCreator(indexerUrl, {
-    credentials: options?.credentials || credentials,
+    credentials: options?.credentials ?? credentials,
     headers: {
       ...headers,
       ...options?.headers,

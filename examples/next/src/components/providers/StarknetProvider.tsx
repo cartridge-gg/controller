@@ -70,7 +70,7 @@ const controller = new ControllerConnector({
   // namespace: "dopewars",
   // theme: "dope-wars",
   // Eternum
-  slot: "eternum-rc1-1",
+  slot: "ls-erc",
   namespace: "eternum",
   theme: "eternum",
   // zKube

@@ -1,4 +1,5 @@
 import {
+  ClockIcon,
   cn,
   CoinsIcon,
   StateIconProps,
@@ -22,7 +23,7 @@ export function Navigation() {
       {project && namespace && (
         <Item Icon={TrophyIcon} variant="achievements" />
       )}
-      {/* <Item Icon={ClockIcon} variant="activity" /> */}
+      <Item Icon={ClockIcon} variant="activity" />
     </div>
   );
 }
