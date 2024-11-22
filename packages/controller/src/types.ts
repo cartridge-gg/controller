@@ -172,7 +172,8 @@ export type ProfileOptions = IFrameOptions & {
 export type ProfileContextTypeVariant =
   | "inventory"
   | "trophies"
-  | "achievements";
+  | "achievements"
+  | "activity";
 
 export type ColorMode = "light" | "dark";
 

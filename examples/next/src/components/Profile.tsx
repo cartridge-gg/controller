@@ -29,11 +29,11 @@ export function Profile() {
         >
           Trophies
         </Button>
-        {/* <Button
+        <Button
           onClick={() => ctrlConnector.controller.openProfile("activity")}
         >
           Activity
-        </Button> */}
+        </Button>
       </div>
     </div>
   );

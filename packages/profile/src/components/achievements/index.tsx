@@ -4,7 +4,7 @@ import {
   LayoutHeader,
 } from "@/components/layout";
 import { Link } from "react-router-dom";
-import { ScrollArea, Button, ArrowIcon, SpinnerIcon } from "@cartridge/ui-next";
+import { ScrollArea, Button, ArrowIcon, Spinner } from "@cartridge/ui-next";
 import { TrophiesTab, LeaderboardTab, Scoreboard } from "./tab";
 import { useAccount, useUsername } from "@/hooks/account";
 import { CopyAddress } from "@cartridge/ui-next";
@@ -129,10 +129,7 @@ export function Achievements() {
       ) : isLoading ? (
         <LayoutContent className="pb-4 select-none">
           <div className="flex justify-center items-center h-full border border-dashed rounded-md text-muted-foreground/10 mb-4">
-            <SpinnerIcon
-              className="animate-spin text-muted-foreground/30"
-              size="lg"
-            />
+            <Spinner className="text-muted-foreground/30" size="lg" />
           </div>
         </LayoutContent>
       ) : (

@@ -1,4 +1,12 @@
-import { Button, cn, TimesIcon, Network, DotsIcon } from "@cartridge/ui-next";
+import {
+  Button,
+  cn,
+  TimesIcon,
+  Network,
+  DotsIcon,
+  Spinner,
+  ErrorImage,
+} from "@cartridge/ui-next";
 import { PropsWithChildren, useCallback } from "react";
 import { useConnection } from "@/hooks/context";
 import { isIframe } from "@cartridge/utils";
@@ -118,6 +126,25 @@ export function LayoutContent({
       )}
     >
       {children}
+    </div>
+  );
+}
+
+export function LayoutContentLoader() {
+  return (
+    <LayoutContent className="h-full flex items-center justify-center">
+      <Spinner size="lg" />
+    </LayoutContent>
+  );
+}
+
+export function LayoutContentError({
+  children = "Oops! Something went wrong.",
+}: PropsWithChildren) {
+  return (
+    <div className="h-full flex flex-col items-center gap-8 p-8">
+      <div className="text-semibold">{children}</div>
+      <ErrorImage />
     </div>
   );
 }
