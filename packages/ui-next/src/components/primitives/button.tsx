@@ -23,7 +23,7 @@ const buttonVariants = cva(
       },
       size: {
         default: "h-10 px-4 tracking-wide text-base",
-        // sm: "h-9 px-3 text-sm",
+        sm: "h-9 px-3 text-sm",
         // lg: "h-11 px-8 tracking-widest text-lg",
         icon: "h-10 w-10",
       },
