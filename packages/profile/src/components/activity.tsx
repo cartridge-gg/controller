@@ -1,8 +1,9 @@
 import {
+  ArrowFromLineIcon,
+  ArrowToLineIcon,
   Button,
   Card,
   CardContent,
-  CheckIcon,
   CopyAddress,
   ExternalIcon,
   ScrollArea,
@@ -63,6 +64,7 @@ export function Activity() {
                         p.tokenTransfers.edges.map(({ node: t }) => {
                           switch (t.tokenMetadata.__typename) {
                             case "ERC20__Token": {
+                              const isSend = t.from === address;
                               return (
                                 <Link
                                   to={StarkscanUrl(
@@ -73,9 +75,13 @@ export function Activity() {
                                 >
                                   <CardContent className="flex items-center justify-between text-accent-foreground">
                                     <div className="flex items-center gap-1">
-                                      <CheckIcon size="sm" />
+                                      {isSend ? (
+                                        <ArrowFromLineIcon variant="up" />
+                                      ) : (
+                                        <ArrowToLineIcon variant="down" />
+                                      )}
                                       <div>
-                                        Send{" "}
+                                        {isSend ? "Send" : "Receive"}{" "}
                                         {Number(t.tokenMetadata.amount) /
                                           10 **
                                             Number(
