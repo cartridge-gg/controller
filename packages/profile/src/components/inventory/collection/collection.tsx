@@ -12,7 +12,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CheckboxIcon,
   cn,
   CopyAddress,
 } from "@cartridge/ui-next";
@@ -76,7 +75,7 @@ export function Collection() {
     };
   }, [address, data, indexerUrl]);
 
-  if (tokenId) {
+  if (tokenId || location.pathname.includes("/send")) {
     return <Outlet />;
   }
 
@@ -108,7 +107,7 @@ export function Collection() {
                 />
 
                 <LayoutContent className="pb-4">
-                  <div
+                  {/* <div
                     className="flex items-center gap-2 text-sm cursor-pointer self-start"
                     onClick={() => {
                       setSearchParams({
@@ -128,7 +127,7 @@ export function Collection() {
                         ? `${tokenIds.length} selected`
                         : "Select all"}
                     </div>
-                  </div>
+                  </div> */}
 
                   <div className="grid grid-cols-2 gap-2 place-items-center">
                     {col.assets.map((a) => {
@@ -171,11 +170,11 @@ export function Collection() {
                                     });
                                   }}
                                 >
-                                  <CheckboxIcon
+                                  {/* <CheckboxIcon
                                     variant={
                                       isSelected ? "line" : "unchecked-line"
                                     }
-                                  />
+                                  /> */}
                                 </Button>
                               </div>
                             </CardHeader>
@@ -199,11 +198,7 @@ export function Collection() {
 
                 {!!tokenIds.length && (
                   <LayoutFooter>
-                    <Link
-                      to={`/collection/${
-                        col.address
-                      }/send?${searchParams.toString()}`}
-                    >
+                    <Link to={`send?${searchParams.toString()}`}>
                       <Button className="w-full">
                         Send ({tokenIds.length})
                       </Button>

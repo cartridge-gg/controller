@@ -1,4 +1,4 @@
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import {
   LayoutContainer,
   LayoutContent,
@@ -55,8 +55,6 @@ export function Asset() {
   const { status, data } = useErc721BalancesQuery({ address });
   const { indexerUrl } = useIndexerAPI();
 
-  const location = useLocation();
-
   const { collection: col, asset } = useMemo<{
     collection?: Collection;
     asset?: Asset;
@@ -98,7 +96,7 @@ export function Asset() {
   return (
     <LayoutContainer
       left={
-        <Link to=".." state={location.state}>
+        <Link to="..">
           <Button variant="icon" size="icon">
             <ArrowIcon variant="left" />
           </Button>
