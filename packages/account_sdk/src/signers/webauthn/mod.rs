@@ -26,7 +26,8 @@ use webauthn_rs_proto::{
     AllowCredentials, AttestationConveyancePreference, AuthenticatorSelectionCriteria,
     CredentialProtectionPolicy, PubKeyCredParams, PublicKeyCredential,
     PublicKeyCredentialCreationOptions, PublicKeyCredentialRequestOptions,
-    RegisterPublicKeyCredential, RelyingParty, User, UserVerificationPolicy,
+    RegisterPublicKeyCredential, RelyingParty, ResidentKeyRequirement, User,
+    UserVerificationPolicy,
 };
 
 use super::{DeviceError, HashSigner, SignError};
@@ -306,6 +307,7 @@ pub struct ClientData {
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 pub trait WebauthnOperations: std::fmt::Debug {
+    // async fn detect_resident_keys(&self) -> Result<Option<PublicKeyCredential>, DeviceError>;
     async fn get_assertion(
         &self,
         options: PublicKeyCredentialRequestOptions,
@@ -330,11 +332,7 @@ impl HashSigner for WebauthnSigner {
             challenge: Base64UrlSafeData::from(challenge),
             timeout: None,
             rp_id: self.rp_id.clone(),
-            allow_credentials: vec![AllowCredentials {
-                type_: "public-key".to_string(),
-                id: Base64UrlSafeData::from(self.credential_id.clone()),
-                transports: None,
-            }],
+            allow_credentials: vec![],
             user_verification: UserVerificationPolicy::Required,
             hints: None,
             extensions: None,
@@ -467,6 +465,8 @@ impl WebauthnSigner {
             exclude_credentials: None,
             authenticator_selection: Some(AuthenticatorSelectionCriteria {
                 user_verification: UserVerificationPolicy::Required,
+                resident_key: Some(ResidentKeyRequirement::Required),
+                require_resident_key: true,
                 ..AuthenticatorSelectionCriteria::default()
             }),
             extensions: None,

@@ -43,6 +43,12 @@ impl SoftPasskeyOperations {
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 impl WebauthnOperations for SoftPasskeyOperations {
+    // async fn detect_resident_keys(&self) -> Result<Option<PublicKeyCredential>, DeviceError> {
+    //     // For softpasskey implementation, we don't support resident keys
+    //     // This matches the browser implementation's behavior when no resident keys are found
+    //     Ok(None)
+    // }
+
     async fn get_assertion(
         &self,
         options: PublicKeyCredentialRequestOptions,

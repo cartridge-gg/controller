@@ -6,7 +6,7 @@ use wasm_bindgen_futures::{spawn_local, JsFuture};
 use web_sys::{console, Window};
 use webauthn_rs_proto::{
     auth::PublicKeyCredentialRequestOptions, CreationChallengeResponse, PublicKeyCredential,
-    PublicKeyCredentialCreationOptions, RegisterPublicKeyCredential, RequestChallengeResponse,
+    PublicKeyCredentialCreationOptions, RegisterPublicKeyCredential, RequestChallengeResponse, UserVerificationPolicy,
 };
 
 use crate::signers::{webauthn::WebauthnOperations, DeviceError};
@@ -21,6 +21,44 @@ pub struct BrowserOperations;
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send), )]
 impl WebauthnOperations for BrowserOperations {
+    // async fn detect_resident_keys(&self) -> Result<Option<PublicKeyCredential>, DeviceError> {
+    //     let (tx, rx) = oneshot::channel();
+    //     spawn_local(async move {
+    //         let credentials = window().navigator().credentials();
+
+    //         // Create minimal options for conditional UI
+    //         let options = RequestChallengeResponse {
+    //             public_key: PublicKeyCredentialRequestOptions {
+    //                 challenge: Base64UrlSafeData(vec![0u8; 32]), // dummy challenge
+    //                 timeout: Some(60000),
+    //                 rp_id: window().location().hostname().unwrap_throw(),
+    //                 allow_credentials: vec![], // empty to allow any credential
+    //                 user_verification: UserVerificationPolicy::Required,
+    //                 hints: None,
+    //                 extensions: None
+    //             },
+    //             mediation: Some("conditional".to_string()),
+    //         };
+
+    //         let promise = credentials.get_with_options(&options.into()).unwrap_throw();
+
+    //         match JsFuture::from(promise).await {
+    //             Ok(jsval) => {
+    //                 let result =
+    //                     PublicKeyCredential::from(web_sys::PublicKeyCredential::from(jsval));
+    //                 let _ = tx.send(Ok(Some(result)));
+    //             }
+    //             Err(_) => {
+    //                 let _ = tx.send(Ok(None)); // No resident key found or user cancelled
+    //             }
+    //         }
+    //     });
+
+    //     rx.await.unwrap_or(Err(DeviceError::Channel(
+    //         "detect_resident_keys receiver dropped".to_string(),
+    //     )))
+    // }
+
     async fn get_assertion(
         &self,
         options: PublicKeyCredentialRequestOptions,
