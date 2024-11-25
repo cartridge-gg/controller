@@ -8,7 +8,7 @@ type Query {
     after: Cursor
     offset: Int
     limit: Int
-  ): Token__BalanceConnection
+  ): Token__BalanceConnection!
   tokenTransfers(
     accountAddress: String!
     first: Int

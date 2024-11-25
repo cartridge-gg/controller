@@ -12,6 +12,7 @@ import { Navigation } from "../navigation";
 import { Tokens } from "./token";
 import { useAccount } from "@/hooks/account";
 import { Outlet, useParams } from "react-router-dom";
+import { Collections } from "./collection";
 
 export function Inventory() {
   const { username, address } = useAccount();
@@ -34,7 +35,7 @@ export function Inventory() {
 
       <LayoutContent className="pb-4">
         <Tokens />
-        {/* <Collections /> */}
+        {project && <Collections />}
       </LayoutContent>
     </LayoutContainer>
   );
