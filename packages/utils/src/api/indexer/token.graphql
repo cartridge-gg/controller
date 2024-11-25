@@ -1,16 +1,9 @@
-query TokenBalances($address: String!) {
+query ERC721Balances($address: String!) {
   tokenBalances(accountAddress: $address) {
     edges {
       node {
         tokenMetadata {
           __typename
-          ... on ERC20__Token {
-            amount
-            contractAddress
-            decimals
-            name
-            symbol
-          }
           ... on ERC721__Token {
             contractAddress
             imagePath
@@ -19,7 +12,7 @@ query TokenBalances($address: String!) {
             metadataDescription
             metadataName
             name
-            symbol
+            # symbol
             tokenId
           }
         }

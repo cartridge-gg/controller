@@ -29,6 +29,10 @@ export function App() {
               <Route path="token/:address" element={<Token />}>
                 <Route path="send" element={<SendToken />} />
               </Route>
+              <Route path="collection/:address" element={<Collection />}>
+                <Route path=":tokenId" element={<Asset />} />
+                <Route path="send" element={<SendCollection />} />
+              </Route>
             </Route>
             <Route path="achievements" element={<Achievements />}>
               <Route path=":address" element={<Achievements />} />
@@ -39,11 +43,6 @@ export function App() {
             <Route path="activity" element={<Activity />} />
           </Route>
         </Route>
-      </Route>
-
-      <Route path="collection/:address" element={<Collection />}>
-        <Route path=":tokenId" element={<Asset />} />
-        <Route path="send" element={<SendCollection />} />
       </Route>
 
       <Route path="*" element={<div>Page not found</div>} />
