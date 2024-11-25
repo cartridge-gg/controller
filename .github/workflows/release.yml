@@ -34,10 +34,10 @@ jobs:
 
       - name: Publish to npm
         run: |
-          if [[ ${{ steps.get_version.outputs.VERSION }} == *-* ]]; then
-            pnpm prerelease 
-          else
+          if [[ ${{ steps.get_version.outputs.VERSION }} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             pnpm release
+          else
+            pnpm prerelease 
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
