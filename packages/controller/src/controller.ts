@@ -1,5 +1,4 @@
 import { AsyncMethodReturns } from "@cartridge/penpal";
-import { normalize } from "@cartridge/utils";
 
 import ControllerAccount from "./account";
 import { KeychainIFrame, ProfileIFrame } from "./iframe";
@@ -82,7 +81,7 @@ export default class ControllerProvider extends BaseProvider {
         methods: {
           openSettings: this.openSettings.bind(this),
           openPurchaseCredits: this.openPurchaseCredits.bind(this),
-          openExecute: normalize(() => this.openExecute.bind(this)),
+          openExecute: this.openExecute.bind(this),
         },
         rpcUrl: this.rpc.toString(),
         username,
