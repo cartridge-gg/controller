@@ -37,6 +37,12 @@ export const CONTROLLER_VERSIONS: Array<ControllerVersionInfo> = [
     outsideExecutionVersion: OutsideExecutionVersion.V3,
     changes: ["Unified message signature verification"],
   },
+  {
+    version: "1.0.8",
+    hash: "0x511dd75da368f5311134dee2356356ac4da1538d2ad18aa66d57c47e3757d59",
+    outsideExecutionVersion: OutsideExecutionVersion.V3,
+    changes: ["Improved session message signature"],
+  },
 ];
 
 const LATEST_CONTROLLER = CONTROLLER_VERSIONS[3];

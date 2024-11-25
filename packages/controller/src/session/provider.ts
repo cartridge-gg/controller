@@ -4,6 +4,7 @@ import { ec, stark, WalletAccount } from "starknet";
 import SessionAccount from "./account";
 import { KEYCHAIN_URL } from "../constants";
 import BaseProvider from "../provider";
+import { toWasmPolicies } from "src/utils";
 
 interface SessionRegistration {
   username: string;
@@ -132,7 +133,7 @@ export default class SessionProvider extends BaseProvider {
       ownerGuid: sessionRegistration.ownerGuid,
       chainId: this._chainId,
       expiresAt: parseInt(sessionRegistration.expiresAt),
-      policies: this._policies,
+      policies: toWasmPolicies(this._policies),
     });
 
     return this.account;

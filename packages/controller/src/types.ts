@@ -8,10 +8,11 @@ import {
 import {
   AddInvokeTransactionResult,
   Signature,
+  StarknetDomain,
+  StarknetType,
   TypedData,
 } from "@starknet-io/types-js";
 import { KeychainIFrame, ProfileIFrame } from "./iframe";
-import wasm from "@cartridge/account-wasm/controller";
 
 export type Session = {
   chainId: constants.StarknetChainId;
@@ -24,8 +25,18 @@ export type Session = {
   };
 };
 
-export type Policy = wasm.Policy & {
+export type Policy = CallPolicy | TypedDataPolicy;
+
+export type CallPolicy = {
+  target: string;
+  method: string;
   description?: string;
+};
+
+export type TypedDataPolicy = {
+  types: Record<string, StarknetType[]>;
+  primaryType: string;
+  domain: StarknetDomain;
 };
 
 export enum ResponseCodes {

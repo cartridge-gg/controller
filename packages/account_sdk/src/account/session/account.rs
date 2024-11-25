@@ -103,7 +103,7 @@ impl SessionAccount {
                     Policy::TypedData(typed_data_policy) => {
                         Err(SignError::SessionPolicyNotAllowed(
                             SessionPolicyError::TypedDataNotAllowed {
-                                type_hash: typed_data_policy.type_hash,
+                                scope_hash: typed_data_policy.scope_hash,
                             },
                         ))
                     }

@@ -5,7 +5,7 @@ use starknet::{
     macros::{selector, short_string},
     providers::ProviderError,
 };
-use starknet_crypto::{poseidon_hash_many, Felt};
+use starknet_crypto::{poseidon_hash, poseidon_hash_many, Felt};
 
 use crate::{
     abigen::controller::ControllerReader,
@@ -26,7 +26,7 @@ pub async fn test_verify_session_off_chain_sig(owner: Owner) {
 
     let typed_data = (0..10)
         .map(|i| AbiTypedData {
-            type_hash: get_selector_from_name(&format!("Type{}", i)).unwrap(),
+            scope_hash: get_selector_from_name(&format!("Type{}", i)).unwrap(),
             typed_data_hash: poseidon_hash_many([&Felt::from(i), &Felt::from(i)]),
         })
         .collect::<Vec<_>>();
@@ -78,11 +78,11 @@ pub async fn test_verify_session_off_chain_sig_invalid_policy() {
 
     let typed_data = vec![
         AbiTypedData {
-            type_hash: selector!("Some type hash"),
+            scope_hash: selector!("Some type hash"),
             typed_data_hash: poseidon_hash_many([&Felt::ZERO, &Felt::ZERO]),
         },
         AbiTypedData {
-            type_hash: selector!("Some other type hash"),
+            scope_hash: selector!("Some other type hash"),
             typed_data_hash: poseidon_hash_many([&Felt::ZERO, &Felt::ZERO]),
         },
     ];
@@ -227,7 +227,10 @@ pub async fn test_session_off_chain_sig_via_controller() {
     let hashes = typed_data.encode(controller.address).unwrap();
     controller
         .create_session(
-            vec![Policy::new_typed_data(hashes.domain_separator_hash)],
+            vec![Policy::new_typed_data(poseidon_hash(
+                hashes.domain_separator_hash,
+                hashes.type_hash,
+            ))],
             u64::MAX,
         )
         .await

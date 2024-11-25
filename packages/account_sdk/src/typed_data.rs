@@ -46,6 +46,13 @@ pub enum PrimitiveType {
     Number(Number),
 }
 
+/// Temporary construct for collecting object-encoding parts without major refactoring.
+#[derive(Debug, Default)]
+struct Tracer {
+    type_hash: Felt,
+    encoded_params: Vec<Felt>,
+}
+
 fn get_preset_types() -> IndexMap<String, Vec<Field>> {
     let mut types = IndexMap::new();
 
@@ -269,6 +276,17 @@ impl PrimitiveType {
         preset_types: &IndexMap<String, Vec<Field>>,
         ctx: &mut Ctx,
     ) -> Result<Felt, Error> {
+        self.encode_with_tracer(r#type, types, preset_types, ctx, None)
+    }
+
+    fn encode_with_tracer(
+        &self,
+        r#type: &str,
+        types: &IndexMap<String, Vec<Field>>,
+        preset_types: &IndexMap<String, Vec<Field>>,
+        ctx: &mut Ctx,
+        mut object_tracer: Option<&mut Tracer>,
+    ) -> Result<Felt, Error> {
         match self {
             PrimitiveType::Object(obj) => {
                 ctx.is_preset = preset_types.contains_key(r#type);
@@ -305,7 +323,8 @@ impl PrimitiveType {
                                 Error::InvalidMessageError("Invalid enum variant type".to_string())
                             })?;
 
-                        let field_hash = param.encode(field_type, types, preset_types, ctx)?;
+                        let field_hash =
+                            param.encode_with_tracer(field_type, types, preset_types, ctx, None)?;
                         hashes.push(field_hash);
                     }
 
@@ -314,12 +333,17 @@ impl PrimitiveType {
 
                 let type_hash =
                     encode_type(r#type, if ctx.is_preset { preset_types } else { types })?;
-                hashes.push(get_selector_from_name(&type_hash).map_err(|e| {
+                let type_hash = get_selector_from_name(&type_hash).map_err(|e| {
                     Error::InvalidMessageError(format!(
                         "Invalid type {} for selector: {}",
                         r#type, e
                     ))
-                })?);
+                })?;
+                hashes.push(type_hash);
+
+                if let Some(tracer) = object_tracer.as_mut() {
+                    tracer.type_hash = type_hash;
+                }
 
                 for (field_name, value) in obj {
                     // recheck if we're currently in a preset type
@@ -332,9 +356,18 @@ impl PrimitiveType {
                     )?;
                     ctx.base_type = field_type.base_type;
                     ctx.parent_type = r#type.to_string();
-                    let field_hash =
-                        value.encode(field_type.r#type.as_str(), types, preset_types, ctx)?;
+                    let field_hash = value.encode_with_tracer(
+                        field_type.r#type.as_str(),
+                        types,
+                        preset_types,
+                        ctx,
+                        None,
+                    )?;
                     hashes.push(field_hash);
+
+                    if let Some(tracer) = object_tracer.as_mut() {
+                        tracer.encoded_params.push(field_hash);
+                    }
                 }
 
                 Ok(poseidon_hash_many(hashes.as_slice()))
@@ -342,7 +375,15 @@ impl PrimitiveType {
             PrimitiveType::Array(array) => Ok(poseidon_hash_many(
                 array
                     .iter()
-                    .map(|x| x.encode(r#type.trim_end_matches('*'), types, preset_types, ctx))
+                    .map(|x| {
+                        x.encode_with_tracer(
+                            r#type.trim_end_matches('*'),
+                            types,
+                            preset_types,
+                            ctx,
+                            None,
+                        )
+                    })
                     .collect::<Result<Vec<_>, _>>()?
                     .as_slice(),
             )),
@@ -460,8 +501,12 @@ pub struct TypedDataHash {
     pub hash: Felt,
     /// Hash of the `domain_separator` component.
     pub domain_separator_hash: Felt,
+    /// Primary type hash.
+    pub type_hash: Felt,
     /// Hash of the `message` component.
     pub message_hash: Felt,
+    /// Encoded object fields.
+    pub encoded_fields: Vec<Felt>,
 }
 
 impl TypedData {
@@ -493,13 +538,21 @@ impl TypedData {
         // encode domain separator
         let domain_hash = self.domain.encode(&self.types)?;
 
+        let mut tracer = Tracer::default();
+
         // encode message
-        let message_hash = PrimitiveType::Object(self.message.clone()).encode(
+        let message_hash = PrimitiveType::Object(self.message.clone()).encode_with_tracer(
             &self.primary_type,
             &self.types,
             &preset_types,
             &mut Default::default(),
+            Some(&mut tracer),
         )?;
+        if tracer.type_hash == Felt::default() {
+            return Err(Error::InvalidMessageError(
+                "Unable to collect preimage".to_string(),
+            ));
+        }
 
         // return full hash
         Ok(TypedDataHash {
@@ -507,7 +560,9 @@ impl TypedData {
                 vec![prefix_message, domain_hash, account, message_hash].as_slice(),
             ),
             domain_separator_hash: domain_hash,
+            type_hash: tracer.type_hash,
             message_hash,
+            encoded_fields: tracer.encoded_params,
         })
     }
 }

@@ -14,12 +14,12 @@ pub type TypedData = crate::abigen::controller::TypedData;
 
 impl StructHashRev1 for TypedData {
     const TYPE_HASH_REV_1: Felt =
-        selector!("\"Allowed Type\"(\"Type Hash\":\"felt\", \"Typed Data Hash\":\"felt\")");
+        selector!("\"Allowed Type\"(\"Scope Hash\":\"felt\",\"Typed Data Hash\":\"felt\")");
 
     fn get_struct_hash_rev_1(&self) -> Felt {
         poseidon_hash_many([
             &Self::TYPE_HASH_REV_1,
-            &self.type_hash,
+            &self.scope_hash,
             &self.typed_data_hash,
         ])
     }

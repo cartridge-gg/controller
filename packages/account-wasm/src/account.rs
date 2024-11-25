@@ -2,10 +2,12 @@ use account_sdk::account::session::policy::Policy as SdkPolicy;
 use account_sdk::controller::Controller;
 use account_sdk::errors::ControllerError;
 use account_sdk::signers::Owner;
-use account_sdk::typed_data::TypedData;
+use account_sdk::typed_data::{encode_type, TypedData};
 use serde_wasm_bindgen::to_value;
 use starknet::accounts::ConnectedAccount;
 use starknet::core::types::Call;
+use starknet::core::utils::starknet_keccak;
+use starknet_crypto::poseidon_hash;
 use starknet_types_core::felt::Felt;
 use url::Url;
 use wasm_bindgen::prelude::*;
@@ -265,11 +267,14 @@ impl CartridgeAccount {
     #[wasm_bindgen(js_name = hasSessionForMessage)]
     pub fn has_session_for_message(&self, typed_data: String) -> Result<bool> {
         let typed_data: TypedData = serde_json::from_str(&typed_data)?;
-        let type_hash = typed_data.domain.encode(&typed_data.types)?;
+        let domain_hash = typed_data.domain.encode(&typed_data.types)?;
+        let type_hash =
+            &starknet_keccak(encode_type(&typed_data.primary_type, &typed_data.types)?.as_bytes());
+        let scope_hash = poseidon_hash(domain_hash, *type_hash);
 
         Ok(self
             .controller
-            .session_account(&[SdkPolicy::new_typed_data(type_hash)])
+            .session_account(&[SdkPolicy::new_typed_data(scope_hash)])
             .is_some())
     }
 

@@ -26,8 +26,8 @@ impl Policy {
             selector,
         })
     }
-    pub fn new_typed_data(type_hash: Felt) -> Self {
-        Policy::TypedData(TypedDataPolicy { type_hash })
+    pub fn new_typed_data(scope_hash: Felt) -> Self {
+        Policy::TypedData(TypedDataPolicy { scope_hash })
     }
 }
 
@@ -39,7 +39,7 @@ pub struct CallPolicy {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TypedDataPolicy {
-    pub type_hash: Felt,
+    pub scope_hash: Felt,
 }
 
 impl From<&Call> for Policy {
@@ -54,7 +54,7 @@ impl From<&Call> for Policy {
 impl From<&TypedData> for Policy {
     fn from(typed_data: &TypedData) -> Self {
         Self::TypedData(TypedDataPolicy {
-            type_hash: typed_data.type_hash,
+            scope_hash: typed_data.scope_hash,
         })
     }
 }
@@ -77,10 +77,10 @@ impl StructHashRev1 for CallPolicy {
 
 impl StructHashRev1 for TypedDataPolicy {
     fn get_struct_hash_rev_1(&self) -> Felt {
-        poseidon_hash_many(&[Self::TYPE_HASH_REV_1, self.type_hash])
+        poseidon_hash_many(&[Self::TYPE_HASH_REV_1, self.scope_hash])
     }
 
-    const TYPE_HASH_REV_1: Felt = selector!("\"Allowed Type\"(\"Type Hash\":\"felt\")");
+    const TYPE_HASH_REV_1: Felt = selector!("\"Allowed Type\"(\"Scope Hash\":\"felt\")");
 }
 
 pub trait MerkleLeaf {
@@ -104,6 +104,6 @@ impl MerkleLeaf for CallPolicy {
 
 impl MerkleLeaf for TypedDataPolicy {
     fn as_merkle_leaf(&self) -> Felt {
-        poseidon_hash_many(&[Self::TYPE_HASH_REV_1, self.type_hash])
+        poseidon_hash_many(&[Self::TYPE_HASH_REV_1, self.scope_hash])
     }
 }

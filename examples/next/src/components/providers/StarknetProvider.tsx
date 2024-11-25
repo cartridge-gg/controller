@@ -5,13 +5,14 @@ import { StarknetConfig, starkscan } from "@starknet-react/core";
 import { PropsWithChildren } from "react";
 import { RpcProvider } from "starknet";
 import ControllerConnector from "@cartridge/connector/controller";
+import { Policy } from "@cartridge/controller";
 
 const ETH_TOKEN_ADDRESS =
   "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 
 const rpc = process.env.NEXT_PUBLIC_RPC_SEPOLIA!;
 
-const policies = [
+const policies: Policy[] = [
   {
     target: ETH_TOKEN_ADDRESS,
     method: "approve",
@@ -35,9 +36,30 @@ const policies = [
     method: "allowance",
   },
   {
-    // The example "StarkNet Mail" message type hash
-    type_hash:
-      "0x555f72e550b308e50c1a4f8611483a174026c982a9893a05c185eeb85399657",
+    types: {
+      StarknetDomain: [
+        { name: "name", type: "shortstring" },
+        { name: "version", type: "shortstring" },
+        { name: "chainId", type: "shortstring" },
+        { name: "revision", type: "shortstring" },
+      ],
+      Person: [
+        { name: "name", type: "felt" },
+        { name: "wallet", type: "felt" },
+      ],
+      Mail: [
+        { name: "from", type: "Person" },
+        { name: "to", type: "Person" },
+        { name: "contents", type: "felt" },
+      ],
+    },
+    primaryType: "Mail",
+    domain: {
+      name: "StarkNet Mail",
+      version: "1",
+      revision: "1",
+      chainId: "SN_SEPOLIA",
+    },
   },
 ];
 
