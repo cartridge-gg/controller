@@ -45,12 +45,12 @@
     "dts": "resolve"
   },
   "dependencies": {
-    "@cartridge/controller": "workspace:^",
+    "@cartridge/controller": "workspace:*",
     "@starknet-react/core": "^3.0.2",
     "starknet": "^6.11.0"
   },
   "devDependencies": {
-    "@cartridge/tsconfig": "workspace:^",
+    "@cartridge/tsconfig": "workspace:*",
     "typescript": "^5.4.5"
   }
 }

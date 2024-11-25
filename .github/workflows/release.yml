@@ -34,7 +34,7 @@ jobs:
 
       - name: Publish to npm
         run: |
-          if [[ ${{ steps.get_version.outputs.VERSION }} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          if echo "${{ steps.get_version.outputs.VERSION }}" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
             pnpm release
           else
             pnpm prerelease 
