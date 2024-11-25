@@ -30,6 +30,7 @@ import {
 } from "@cartridge/utils/api/indexer";
 import { useAccount } from "@/hooks/account";
 import { useMemo } from "react";
+import { Hex, hexToNumber } from "viem";
 
 type Collection = {
   address: string;
@@ -116,6 +117,9 @@ export function Asset() {
             if (!col || !asset) {
               return <LayoutContentLoader />;
             }
+            const assets = asset.attributes.filter(
+              (a) => !!(a.trait_type || a.trait) && !!a.value,
+            );
             return (
               <>
                 <LayoutHeader
@@ -162,25 +166,32 @@ export function Asset() {
                     </CardHeader>
 
                     <CardContent className="bg-background grid grid-cols-3 p-0">
-                      {/* {asset.attributes.map((a) => (
-                  <div
-                    key={`${a.type}-${a.name}`}
-                    className="bg-secondary p-3 flex flex-col gap-1"
-                  >
-                    <div className="uppercase text-muted-foreground text-2xs font-bold">
-                      {a.name}
-                    </div>
-                    <div className="text-xs font-medium">{a.value}</div>
-                  </div>
-                ))} */}
-                      {Array.from({
-                        length: 3 - (asset.attributes.length % 3),
-                      }).map((_, i) => (
-                        <div
-                          key={`placeholder-${i}`}
-                          className="bg-secondary p-3 flex flex-col gap-1"
-                        />
-                      ))}
+                      {assets.map((a) => {
+                        const trait = a.trait_type ?? a.trait;
+                        return typeof a.value === "string" ? (
+                          <div
+                            key={`${trait}-${a.value}`}
+                            className="bg-secondary p-3 flex flex-col gap-1"
+                          >
+                            {typeof trait === "string" ? (
+                              <div className="uppercase text-muted-foreground text-2xs font-bold">
+                                {trait}
+                              </div>
+                            ) : null}
+                            <div className="text-xs font-medium">
+                              {String(a.value)}
+                            </div>
+                          </div>
+                        ) : null;
+                      })}
+                      {Array.from({ length: (assets.length - 1) % 3 }).map(
+                        (_, i) => (
+                          <div
+                            key={`fill-${i}`}
+                            className="bg-secondary p-3 flex flex-col gap-1"
+                          />
+                        ),
+                      )}
                     </CardContent>
                   </Card>
 
@@ -208,9 +219,15 @@ export function Asset() {
                       )}
                     </CardContent>
 
-                    <CardContent className="flex items-center justify-between">
-                      <div className="text-muted-foreground">Token ID</div>
-                      <div className="font-medium">{asset.tokenId}</div>
+                    <CardContent className="flex items-center justify-between gap-4">
+                      <div className="text-muted-foreground whitespace-nowrap">
+                        Token ID
+                      </div>
+                      <div className="font-medium truncate">
+                        {asset.tokenId.startsWith("0x")
+                          ? hexToNumber(asset.tokenId as Hex)
+                          : asset.tokenId}
+                      </div>
                     </CardContent>
 
                     <CardContent className="flex items-center justify-between">
