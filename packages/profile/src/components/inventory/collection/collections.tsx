@@ -5,7 +5,6 @@ import {
   useErc721BalancesQuery,
 } from "@cartridge/utils/api/indexer";
 import { useAccount } from "@/hooks/account";
-import { LayoutContentError, LayoutContentLoader } from "@/components/layout";
 import { useMemo } from "react";
 import { useIndexerAPI } from "@cartridge/utils";
 
@@ -55,11 +54,9 @@ export function Collections() {
   }, [data, indexerUrl]);
 
   switch (status) {
-    case "loading": {
-      return <LayoutContentLoader />;
-    }
+    case "loading":
     case "error": {
-      return <LayoutContentError />;
+      return null;
     }
     default: {
       return (
