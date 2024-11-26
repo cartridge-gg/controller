@@ -86,23 +86,9 @@ const controller = new ControllerConnector({
   profileUrl:
     process.env.NEXT_PUBLIC_PROFILE_DEPLOYMENT_URL ??
     process.env.NEXT_PUBLIC_PROFILE_FRAME_URL,
-  // colorMode: "dark",
-  // Dope Wars
-  // slot: "ryomainnet",
-  // namespace: "dopewars",
-  // theme: "dope-wars",
-  // Eternum
-  slot: "eternum-rc1-1",
-  namespace: "eternum",
-  theme: "eternum",
-  // zKube
-  // slot: "zkube-mainnet",
-  // namespace: "zkube",
-  // theme: "zkube",
-  // Summit
-  // slot: "summit-bal",
-  // namespace: "savage_summit",
-  // theme: "savage-summit",
+  slot: "profile-example",
+  theme: "dope-wars",
+  namespace: "dopewars",
   tokens: {
     erc20: [
       // $LORDS
