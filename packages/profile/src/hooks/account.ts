@@ -3,7 +3,7 @@ import {
   useAccountNameQuery,
   useAddressByUsernameQuery,
 } from "@cartridge/utils/api/cartridge";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 
 export function useUsername({ address }: { address: string }) {
@@ -17,16 +17,16 @@ export function useAccount() {
     username: string;
     project?: string;
   }>();
-  const { setIndexerUrl } = useIndexerAPI();
+  const { setIndexerUrl, isReady } = useIndexerAPI();
   const username = params.username ?? "";
   const { data } = useAddressByUsernameQuery(
     { username },
-    { enabled: !!username },
+    { enabled: isReady && !!username },
   );
 
+  const isFirstRender = useRef(true);
   useEffect(() => {
-    if (!params.project) {
-      setIndexerUrl("");
+    if (!params.project || !isFirstRender.current) {
       return;
     }
 
@@ -35,10 +35,14 @@ export function useAccount() {
     }/torii/graphql`;
 
     setIndexerUrl(url);
+    isFirstRender.current = false;
   }, [params.project, setIndexerUrl]);
 
   return {
     username,
-    address: data?.account?.controllers.edges?.[0]?.node?.address ?? "",
+    address:
+      import.meta.env.VITE_MOCKED_ACCOUNT_ADDRESS ??
+      data?.account?.controllers.edges?.[0]?.node?.address ??
+      "",
   };
 }

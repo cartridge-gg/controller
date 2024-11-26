@@ -47,7 +47,7 @@ export function useEvents<TEvent extends Trophy | Progress>({
   limit: number;
   parse: (node: EventNode) => TEvent;
 }) {
-  const { indexerUrl } = useIndexerAPI();
+  const { isReady, indexerUrl } = useIndexerAPI();
   const [offset, setOffset] = useState(0);
   const [nodes, setNodes] = useState<{ [key: string]: boolean }>({});
   const [events, setEvents] = useState<TEvent[]>([]);
@@ -63,7 +63,7 @@ export function useEvents<TEvent extends Trophy | Progress>({
       offset,
     },
     {
-      enabled: false,
+      enabled: isReady && false,
       refetchInterval: 300_000, // Refetch every 5 minutes
       onSuccess: ({ events }: { events: Event }) => {
         // Update offset
