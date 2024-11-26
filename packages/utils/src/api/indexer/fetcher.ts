@@ -9,6 +9,9 @@ export function useFetchData<TData, TVariables>(
   },
 ): (variables?: TVariables) => Promise<TData> {
   const { indexerUrl, credentials, headers } = useIndexerAPI();
+  if (!indexerUrl) {
+    return () => Promise.reject("Indexer API is not ready");
+  }
 
   const fetchData = fetchDataCreator(indexerUrl, {
     credentials: options?.credentials ?? credentials,

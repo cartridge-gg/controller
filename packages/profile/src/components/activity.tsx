@@ -19,13 +19,14 @@ import {
 import { Navigation } from "@/components/navigation";
 import { useAccount } from "@/hooks/account";
 import { Link } from "react-router-dom";
-import { StarkscanUrl } from "@cartridge/utils";
+import { StarkscanUrl, useIndexerAPI } from "@cartridge/utils";
 import { useConnection } from "@/hooks/context";
 import { constants } from "starknet";
 
 export function Activity() {
   const { address, username } = useAccount();
   const { chainId } = useConnection();
+  const { isReady } = useIndexerAPI();
   const { status, data, hasNextPage, fetchNextPage } =
     useInfiniteTokenTransfersQuery(
       {
@@ -33,6 +34,7 @@ export function Activity() {
         first: 30,
       },
       {
+        enabled: isReady && !!address,
         getNextPageParam: (lastPage) =>
           lastPage.tokenTransfers?.pageInfo.endCursor,
       },

@@ -47,25 +47,29 @@ type Asset = {
 export function Collection() {
   const { address } = useAccount();
   const { tokenId } = useParams();
-  const { status, data } = useErc721BalancesQuery({ address });
-  const { indexerUrl } = useIndexerAPI();
+  const { indexerUrl, isReady } = useIndexerAPI();
+  const { status, data } = useErc721BalancesQuery(
+    { address },
+    { enabled: isReady && !!address },
+  );
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const tokenIds = searchParams.getAll("tokenIds");
 
-  const col = useMemo<Collection>(() => {
-    const assets: Asset[] =
-      data?.tokenBalances?.edges.map((e) => {
-        const a = e.node.tokenMetadata as Erc721__Token;
-        return {
-          address: a.contractAddress,
-          name: a.metadataName,
-          imageUrl: `${indexerUrl.replace("/graphql", "")}/static/${
-            a.imagePath
-          }`,
-          tokenId: a.tokenId,
-        };
-      }) ?? [];
+  const col = useMemo<Collection | undefined>(() => {
+    if (!indexerUrl || !data?.tokenBalances) {
+      return;
+    }
+
+    const assets: Asset[] = data.tokenBalances.edges.map((e) => {
+      const a = e.node.tokenMetadata as Erc721__Token;
+      return {
+        address: a.contractAddress,
+        name: a.metadataName,
+        imageUrl: `${indexerUrl.replace("/graphql", "")}/static/${a.imagePath}`,
+        tokenId: a.tokenId,
+      };
+    });
 
     return {
       address,
@@ -98,6 +102,10 @@ export function Collection() {
             return <LayoutContentError />;
           }
           default: {
+            if (!col) {
+              return <LayoutContentLoader />;
+            }
+
             return (
               <>
                 <LayoutHeader

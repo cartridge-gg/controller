@@ -18,11 +18,14 @@ type Collection = {
 
 export function Collections() {
   const { address } = useAccount();
-  const { status, data } = useErc721BalancesQuery({ address });
-  const { indexerUrl } = useIndexerAPI();
+  const { isReady, indexerUrl } = useIndexerAPI();
+  const { status, data } = useErc721BalancesQuery(
+    { address },
+    { enabled: isReady && !!address },
+  );
 
   const collections = useMemo(() => {
-    if (!data) return [];
+    if (!data || !indexerUrl) return [];
 
     const cols =
       data.tokenBalances?.edges.reduce<Record<string, Collection>>(
