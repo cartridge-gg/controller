@@ -185,7 +185,7 @@ importers:
   packages/connector:
     dependencies:
       '@cartridge/controller':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../controller
       '@starknet-react/core':
         specifier: ^3.0.2
@@ -195,7 +195,7 @@ importers:
         version: 6.11.0
     devDependencies:
       '@cartridge/tsconfig':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../tsconfig
       typescript:
         specifier: ^5.4.5
@@ -204,7 +204,7 @@ importers:
   packages/controller:
     dependencies:
       '@cartridge/account-wasm':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../account-wasm
       '@cartridge/penpal':
         specifier: ^6.2.3
@@ -232,7 +232,7 @@ importers:
         version: 6.11.0
     devDependencies:
       '@cartridge/tsconfig':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../tsconfig
       '@types/node':
         specifier: ^20.6.0

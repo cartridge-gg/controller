@@ -29,7 +29,7 @@
     "clean": true
   },
   "dependencies": {
-    "@cartridge/account-wasm": "workspace:^",
+    "@cartridge/account-wasm": "workspace:*",
     "@cartridge/penpal": "^6.2.3",
     "@starknet-io/types-js": "^0.7.7",
     "@telegram-apps/sdk": "^2.4.0",
@@ -40,7 +40,7 @@
     "starknet": "^6.11.0"
   },
   "devDependencies": {
-    "@cartridge/tsconfig": "workspace:^",
+    "@cartridge/tsconfig": "workspace:*",
     "@types/node": "^20.6.0",
     "typescript": "^5.4.5"
   }
