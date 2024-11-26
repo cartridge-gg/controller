@@ -52,8 +52,11 @@ export function Asset() {
   }>();
   const { address } = useAccount();
   const { chainId } = useConnection();
-  const { status, data } = useErc721BalancesQuery({ address });
-  const { indexerUrl } = useIndexerAPI();
+  const { isReady, indexerUrl } = useIndexerAPI();
+  const { status, data } = useErc721BalancesQuery(
+    { address },
+    { enabled: isReady && !!address },
+  );
 
   const { collection: col, asset } = useMemo<{
     collection?: Collection;
@@ -62,7 +65,7 @@ export function Asset() {
     const a = data?.tokenBalances?.edges.find(
       (e) => (e.node.tokenMetadata as Erc721__Token).tokenId === tokenId,
     )?.node.tokenMetadata as Erc721__Token | undefined;
-    if (!a) {
+    if (!indexerUrl || !a) {
       return {};
     }
 

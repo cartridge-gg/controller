@@ -1,15 +1,16 @@
 import { createContext, ReactNode, useState } from "react";
 
 type IndexerAPIContextType = {
-  indexerUrl: string;
+  indexerUrl?: string;
   credentials?: RequestInit["credentials"];
   headers?: RequestInit["headers"];
+  isReady: boolean;
   setIndexerUrl: (url: string) => void;
 };
 
 const initialState: IndexerAPIContextType = {
-  indexerUrl: "",
   setIndexerUrl: () => { },
+  isReady: false
 };
 
 export const IndexerAPIContext =
@@ -27,7 +28,9 @@ export function IndexerAPIProvider({
   const [indexerUrl, setIndexerUrl] = useState(initialState.indexerUrl);
 
   return (
-    <IndexerAPIContext.Provider value={{ indexerUrl, setIndexerUrl, credentials, headers }}>
+    <IndexerAPIContext.Provider value={{
+      indexerUrl, setIndexerUrl, credentials, headers, isReady: !!indexerUrl
+    }}>
       {children}
     </IndexerAPIContext.Provider>
   );
