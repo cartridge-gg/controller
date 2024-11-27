@@ -35,7 +35,7 @@ export function Provider({ children }: PropsWithChildren) {
     <ChakraProvider theme={chakraTheme}>
       <CartridgeAPIProvider url={ENDPOINT}>
         <QueryClientProvider client={queryClient}>
-          <ControllerThemeProvider value={controllerTheme}>
+          <ControllerThemeProvider value={controllerTheme} theme={preset}>
             <ConnectionProvider value={connection}>
               <PostHogProvider client={posthog}>{children}</PostHogProvider>
             </ConnectionProvider>

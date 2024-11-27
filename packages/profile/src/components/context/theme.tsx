@@ -1,12 +1,7 @@
 import { ControllerThemePreset, defaultPresets } from "@cartridge/controller";
+import { useThemeEffect } from "@cartridge/ui-next";
 import { hexToHsl } from "@cartridge/utils";
-import {
-  createContext,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { createContext, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 type ColorScheme = "dark" | "light" | "system";
@@ -64,13 +59,6 @@ export function ThemeProvider({
     },
     [storageKey],
   );
-
-  const appliedColorMode = useMemo(() => {
-    return document.documentElement.className.includes("dark")
-      ? "dark"
-      : "light";
-  }, []);
-
   const [theme, setTheme] = useState<ControllerThemePreset>(initialState.theme);
   const themeParam = searchParams.get("theme");
 
@@ -80,7 +68,13 @@ export function ThemeProvider({
     setTheme(JSON.parse(decodeURIComponent(themeParam)));
   }, [themeParam]);
 
+  useThemeEffect({ theme, assetUrl: import.meta.env.VITE_KEYCHAIN_URL });
+
   useEffect(() => {
+    const appliedColorMode = document.documentElement.className.includes("dark")
+      ? "dark"
+      : "light";
+
     document.documentElement.style.setProperty(
       "--theme-icon-url",
       `url("${import.meta.env.VITE_KEYCHAIN_URL}${theme.icon}")`,
@@ -113,7 +107,7 @@ export function ThemeProvider({
         hexToHsl(val),
       );
     }
-  }, [theme, appliedColorMode]);
+  }, [theme]);
 
   const value = {
     colorScheme,

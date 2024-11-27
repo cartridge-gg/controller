@@ -6,6 +6,8 @@ import { useEffect } from "react";
 import { Provider } from "components/Provider";
 import { ErrorBoundary } from "components/ErrorBoundary";
 
+import "../index.css";
+
 const inter = Inter({ subsets: ["latin"] });
 const ibmPlexMono = IBM_Plex_Mono({
   weight: "600",
