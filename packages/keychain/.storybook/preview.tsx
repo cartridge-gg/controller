@@ -87,7 +87,7 @@ function Provider({
   return (
     <ChakraProvider theme={chakraTheme}>
       <QueryClientProvider client={queryClient}>
-        <ControllerThemeProvider value={ctrlTheme}>
+        <ControllerThemeProvider value={ctrlTheme} theme={preset}>
           <ConnectionProvider value={connection}>{children}</ConnectionProvider>
         </ControllerThemeProvider>
       </QueryClientProvider>
@@ -155,13 +155,7 @@ function useMockedConnection({
     closeModal: () => {},
     openModal: () => {},
     logout: () => {},
-    setDelegate: () => {},
-    setDelegateTransaction: () => {},
-    setExternalOwnerTransaction: () => {},
-    removeExternalOwnerTransaction: () => {},
     openSettings: () => {},
-    openMenu: () => {},
-    setExternalOwner: () => {},
     controller: {},
     upgrade: {},
     ...rest,

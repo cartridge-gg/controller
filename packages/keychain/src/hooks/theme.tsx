@@ -5,6 +5,7 @@ import {
   defaultPresets,
 } from "@cartridge/controller";
 import { CartridgeTheme } from "@cartridge/ui";
+import { useThemeEffect } from "@cartridge/ui-next";
 import { useColorMode } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import {
@@ -18,14 +19,17 @@ import {
 const ControllerThemeContext = createContext<ControllerTheme>(undefined);
 
 export function ControllerThemeProvider({
+  theme,
   value,
   children,
-}: ProviderProps<ControllerTheme>) {
+}: ProviderProps<ControllerTheme> & { theme: ControllerThemePreset }) {
   const { setColorMode } = useColorMode();
 
   useEffect(() => {
     setColorMode(value.colorMode);
   }, [setColorMode, value.colorMode]);
+
+  useThemeEffect({ theme, assetUrl: "/" });
 
   return (
     <ControllerThemeContext.Provider value={value}>

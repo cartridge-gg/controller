@@ -18,9 +18,9 @@ export const Upgrade = () => {
       executionError={upgrade.error}
     >
       <Content>
-        <Text color="text.secondary" fontSize="sm" pb="10px">
+        <div className="text-sm text-muted-foreground pb-2">
           Install the latest to continue
-        </Text>
+        </div>
         <VStack
           w="full"
           align="left"
