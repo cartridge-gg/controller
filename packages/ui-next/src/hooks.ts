@@ -9,6 +9,8 @@ export function useThemeEffect({
   assetUrl: string;
 }) {
   useEffect(() => {
+    if (!theme) return;
+
     const appliedColorMode = document.documentElement.className.includes("dark")
       ? "dark"
       : "light";
