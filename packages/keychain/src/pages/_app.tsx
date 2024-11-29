@@ -7,6 +7,7 @@ import { Provider } from "components/Provider";
 import { ErrorBoundary } from "components/ErrorBoundary";
 
 import "../index.css";
+import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
 const ibmPlexMono = IBM_Plex_Mono({
@@ -87,6 +88,7 @@ export default function Keychain({ Component, pageProps }: AppProps) {
       <Provider>
         <ErrorBoundary>
           <Component {...pageProps} />
+          <Script src="/noflash.js" />
         </ErrorBoundary>
       </Provider>
     </>

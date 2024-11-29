@@ -29,7 +29,7 @@ export function ControllerThemeProvider({
     setColorMode(value.colorMode);
   }, [setColorMode, value.colorMode]);
 
-  useThemeEffect({ theme, assetUrl: "/" });
+  useThemeEffect({ theme, assetUrl: "" });
 
   return (
     <ControllerThemeContext.Provider value={value}>

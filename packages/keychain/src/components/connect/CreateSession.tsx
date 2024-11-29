@@ -11,6 +11,7 @@ import { SESSION_EXPIRATION } from "const";
 import { Upgrade } from "./Upgrade";
 import { TypedDataPolicy } from "@cartridge/controller";
 import { ErrorCode } from "@cartridge/account-wasm";
+import { TransactionDetails } from "components/TransactionDetails";
 
 export function CreateSession({
   onConnect,
@@ -82,6 +83,7 @@ export function CreateSession({
       <Content>
         <SessionConsent />
         <Policies policies={policies} />
+        <TransactionDetails policies={policies} />
       </Content>
 
       <Footer>

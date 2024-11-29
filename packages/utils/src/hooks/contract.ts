@@ -53,7 +53,6 @@ export function useTransactionSummary({
       const promises = Object.entries(preSummary.default).map(
         async ([addr, calls]) => {
           const contractType = await checkContractType(provider, addr);
-          console.log({ addr, contractType });
           switch (contractType) {
             case "ERC20":
               res.ERC20[addr] = calls;

@@ -1,6 +1,5 @@
 import { ControllerThemePreset, defaultPresets } from "@cartridge/controller";
 import { useThemeEffect } from "@cartridge/ui-next";
-import { hexToHsl } from "@cartridge/utils";
 import { createContext, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
@@ -69,45 +68,6 @@ export function ThemeProvider({
   }, [themeParam]);
 
   useThemeEffect({ theme, assetUrl: import.meta.env.VITE_KEYCHAIN_URL });
-
-  useEffect(() => {
-    const appliedColorMode = document.documentElement.className.includes("dark")
-      ? "dark"
-      : "light";
-
-    document.documentElement.style.setProperty(
-      "--theme-icon-url",
-      `url("${import.meta.env.VITE_KEYCHAIN_URL}${theme.icon}")`,
-    );
-    const coverUrl =
-      typeof theme.cover === "string"
-        ? `url("${import.meta.env.VITE_KEYCHAIN_URL}${theme.cover}")`
-        : `url("${import.meta.env.VITE_KEYCHAIN_URL}${
-            theme.cover[appliedColorMode]
-          }")`;
-    document.documentElement.style.setProperty("--theme-cover-url", coverUrl);
-
-    if (!theme.colors) return;
-
-    if (theme.colors?.primary) {
-      const val =
-        typeof theme.colors.primary === "string"
-          ? theme.colors?.primary
-          : theme.colors?.primary[appliedColorMode];
-      document.documentElement.style.setProperty("--primary", hexToHsl(val));
-    }
-
-    if (theme.colors?.primaryForeground) {
-      const val =
-        typeof theme.colors.primaryForeground === "string"
-          ? theme.colors?.primaryForeground
-          : theme.colors?.primaryForeground[appliedColorMode];
-      document.documentElement.style.setProperty(
-        "--primary-foreground",
-        hexToHsl(val),
-      );
-    }
-  }, [theme]);
 
   const value = {
     colorScheme,

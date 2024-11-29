@@ -5,3 +5,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  background: hsla(var(--background));
+  color: hsla(var(--foreground));
+}
