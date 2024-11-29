@@ -43,22 +43,73 @@ export function TransactionDetails({ policies }: { policies: Policy[] }) {
 
 const summary = {
   default: {
-    "0x0000000000000": [
-      { target: "0x0000000000000", method: "method 1" },
-      { target: "0x0000000000000", method: "method 2" },
+    "0x000000000000000000000000000000000000000000000000000000000000000": [
+      {
+        target:
+          "0x000000000000000000000000000000000000000000000000000000000000000",
+        method: "method 1",
+      },
+      {
+        target:
+          "0x000000000000000000000000000000000000000000000000000000000000000",
+        method: "method 2",
+      },
     ],
   },
   ERC20: {
-    "0x0000000000000": [
-      { target: "0x0000000000000", method: "approve" },
-      { target: "0x0000000000000", method: "transfer" },
+    "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7": [
+      {
+        target:
+          "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+        method: "approve",
+      },
+      {
+        target:
+          "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+        method: "transfer",
+      },
     ],
   },
   ERC721: {
-    "0x0000000000000": [
-      { target: "0x0000000000000", method: "approve" },
-      { target: "0x0000000000000", method: "transfer" },
+    "0x000000000000000000000000000000000000000000000000000000000000000": [
+      {
+        target:
+          "0x000000000000000000000000000000000000000000000000000000000000000",
+        method: "approve",
+      },
+      {
+        target:
+          "0x000000000000000000000000000000000000000000000000000000000000000",
+        method: "transfer",
+      },
     ],
   },
-  messages: [],
+  messages: [
+    {
+      types: {
+        StarknetDomain: [
+          { name: "name", type: "shortstring" },
+          { name: "version", type: "shortstring" },
+          { name: "chainId", type: "shortstring" },
+          { name: "revision", type: "shortstring" },
+        ],
+        Person: [
+          { name: "name", type: "felt" },
+          { name: "wallet", type: "felt" },
+        ],
+        Mail: [
+          { name: "from", type: "Person" },
+          { name: "to", type: "Person" },
+          { name: "contents", type: "felt" },
+        ],
+      },
+      primaryType: "Mail",
+      domain: {
+        name: "StarkNet Mail",
+        version: "1",
+        revision: "1",
+        chainId: "SN_SEPOLIA",
+      },
+    },
+  ],
 };
