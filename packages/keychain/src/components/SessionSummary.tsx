@@ -1,35 +1,23 @@
-import { Policy } from "@cartridge/controller";
+import { CallPolicy, Policy } from "@cartridge/controller";
 import { Card, CardHeader, CardTitle } from "@cartridge/ui-next";
-// import { useTransactionSummary } from "@cartridge/utils";
+// import { useSessionSummary } from "@cartridge/utils";
 
-export function TransactionDetails({ policies }: { policies: Policy[] }) {
+export function SessionSummary({ policies }: { policies: Policy[] }) {
   // const { controller } = useConnection()
-  // const { data: summary } = useTransactionSummary({ policies, provider: controller });
-  // console.log({ policies, summary })
+  // const { data: summary } = useSessionSummary({ policies, provider: controller });
+
   return (
     <div>
-      {Object.entries(summary.default).map(([addr, calls]) => (
-        <Card key={addr}>
-          <CardHeader>
-            <CardTitle>Contract: {addr}</CardTitle>
-          </CardHeader>
-        </Card>
+      {Object.entries(summary.default).map(([address, calls]) => (
+        <Contract key={address} address={address} calls={calls} />
       ))}
 
-      {Object.entries(summary.ERC20).map(([addr, calls]) => (
-        <Card key={addr}>
-          <CardHeader>
-            <CardTitle>Contract: {addr}</CardTitle>
-          </CardHeader>
-        </Card>
+      {Object.entries(summary.ERC20).map(([address, calls]) => (
+        <Contract key={address} address={address} calls={calls} />
       ))}
 
-      {Object.entries(summary.ERC721).map(([addr, calls]) => (
-        <Card key={addr}>
-          <CardHeader>
-            <CardTitle>Contract: {addr}</CardTitle>
-          </CardHeader>
-        </Card>
+      {Object.entries(summary.ERC721).map(([address, calls]) => (
+        <Contract key={address} address={address} calls={calls} />
       ))}
 
       <Card>
@@ -38,6 +26,22 @@ export function TransactionDetails({ policies }: { policies: Policy[] }) {
         </CardHeader>
       </Card>
     </div>
+  );
+}
+
+function Contract({
+  address,
+  calls,
+}: {
+  address: string;
+  calls: CallPolicy[];
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Contract: {address}</CardTitle>
+      </CardHeader>
+    </Card>
   );
 }
 

@@ -2,18 +2,18 @@ import { useMemo } from "react";
 import { Provider, StarknetDomain, StarknetType } from "starknet";
 import useSWR from "swr";
 
-type PreTransactionSummary = Omit<TransactionSummary, "ERC20" | "ERC721">;
+type PreSessionSummary = Omit<SessionSummary, "ERC20" | "ERC721">;
 
-type TransactionSummary = {
+type SessionSummary = {
   default: Record<string, CallPolicy[]>;
   ERC20: Record<string, CallPolicy[]>;
   ERC721: Record<string, CallPolicy[]>;
   messages: TypedDataPolicy[];
 };
 
-type ContractType = keyof TransactionSummary;
+type ContractType = keyof SessionSummary;
 
-export function useTransactionSummary({
+export function useSessionSummary({
   policies,
   provider,
 }: {
@@ -22,7 +22,7 @@ export function useTransactionSummary({
 }) {
   const preSummary = useMemo(
     () =>
-      policies.reduce<PreTransactionSummary>(
+      policies.reduce<PreSessionSummary>(
         (prev, p) =>
           isCallPolicy(p)
             ? {
@@ -40,7 +40,7 @@ export function useTransactionSummary({
     [policies],
   );
 
-  const res: TransactionSummary = {
+  const res: SessionSummary = {
     default: {},
     ERC20: {},
     ERC721: {},
