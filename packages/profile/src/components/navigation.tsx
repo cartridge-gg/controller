@@ -18,7 +18,7 @@ export function Navigation() {
   const { project } = useParams<{ project?: string }>();
   const { namespace } = useConnection();
   return (
-    <div className="flex rounded border border-1 border-secondary overflow-hidden shrink-0 gap-[1px] bg-secondary">
+    <div className="flex rounded border border-1 border-secondary overflow-hidden shrink-0 gap-px bg-secondary">
       <Item Icon={CoinsIcon} variant="inventory" />
       {project && namespace && (
         <Item Icon={TrophyIcon} variant="achievements" />

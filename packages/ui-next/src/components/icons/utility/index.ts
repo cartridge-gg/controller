@@ -8,6 +8,7 @@ export * from "./chess";
 export * from "./chest";
 export * from "./circle-check";
 export * from "./circle-no-check";
+export * from "./circle";
 export * from "./fn";
 export * from "./copy";
 export * from "./deployer";

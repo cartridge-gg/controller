@@ -1,5 +1,17 @@
 import { CallPolicy, Policy } from "@cartridge/controller";
-import { Card, CardHeader, CardTitle } from "@cartridge/ui-next";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+  CircleIcon,
+  InfoIcon,
+  CopyAddress,
+} from "@cartridge/ui-next";
 // import { useSessionSummary } from "@cartridge/utils";
 
 export function SessionSummary({ policies }: { policies: Policy[] }) {
@@ -7,7 +19,7 @@ export function SessionSummary({ policies }: { policies: Policy[] }) {
   // const { data: summary } = useSessionSummary({ policies, provider: controller });
 
   return (
-    <div>
+    <div className="flex flex-col gap-4">
       {Object.entries(summary.default).map(([address, calls]) => (
         <Contract key={address} address={address} calls={calls} />
       ))}
@@ -38,9 +50,40 @@ function Contract({
 }) {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Contract: {address}</CardTitle>
-      </CardHeader>
+      <div className="bg-background flex items-center h-full gap-px">
+        <div className="w-10 h-full aspect-square bg-[image:var(--theme-icon-url)] bg-cover bg-center place-content-center" />
+
+        <div className="text-sm bg-secondary flex flex-1 gap-x-1.5 items-center justify-between p-3 text-medium">
+          <div>Contract</div>
+          <CopyAddress address={address} size="xs" className="" />
+        </div>
+      </div>
+
+      <Accordion type="single" collapsible>
+        <AccordionItem value="item-1">
+          <CardContent>
+            <AccordionTrigger>
+              You are agreeing to automate{" "}
+              <span className="text-accent-foreground font-bold">
+                {calls.length} method
+                {calls.length > 1 ? "s" : ""}
+              </span>
+            </AccordionTrigger>
+          </CardContent>
+
+          <AccordionContent>
+            {calls.map((c) => (
+              <CardContent key={c.method} className="flex items-center gap-1">
+                <CircleIcon size="sm" className="text-muted-foreground" />
+                <div className="flex items-center gap-2">
+                  <div>{c.method}</div>
+                  <InfoIcon size="sm" className="text-muted-foreground" />
+                </div>
+              </CardContent>
+            ))}
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </Card>
   );
 }

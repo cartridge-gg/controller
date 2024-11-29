@@ -7,7 +7,7 @@ export type FormatAddressOptions = {
   padding?: boolean;
 };
 
-type FormatAddressSize = "sm" | "base" | "lg" | "full";
+type FormatAddressSize = "xs" | "sm" | "base" | "lg" | "full";
 
 export function formatAddress(
   addr: string,
@@ -21,11 +21,15 @@ export function formatAddress(
 
   return _first + _last === 0
     ? full
-    : full.substring(0, _first) + "..." + full.substring(full.length - _last);
+    : full.substring(0, _first + 2) +
+        "..." +
+        full.substring(full.length - _last);
 }
 
 function sizeLen(size: FormatAddressSize) {
   switch (size) {
+    case "xs":
+      return 4;
     case "sm":
       return 10;
     default:
