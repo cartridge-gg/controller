@@ -1,12 +1,22 @@
 import { useMemo } from "react";
-import { Provider, StarknetDomain, StarknetType } from "starknet";
+import {
+  getChecksumAddress,
+  Provider,
+  StarknetDomain,
+  StarknetType,
+} from "starknet";
 import useSWR from "swr";
+import { useEkuboMetadata } from "./balance";
+import { ERC20Metadata } from "../erc20";
 
 type PreSessionSummary = Omit<SessionSummary, "ERC20" | "ERC721">;
 
-type SessionSummary = {
+export type SessionSummary = {
   default: Record<string, CallPolicy[]>;
-  ERC20: Record<string, CallPolicy[]>;
+  ERC20: Record<
+    string,
+    { policies: CallPolicy[]; meta?: Omit<ERC20Metadata, "instance"> }
+  >;
   ERC721: Record<string, CallPolicy[]>;
   messages: TypedDataPolicy[];
 };
@@ -46,23 +56,30 @@ export function useSessionSummary({
     ERC721: {},
     messages: preSummary.messages,
   };
+  const { data: ekuboMeta } = useEkuboMetadata();
 
   const summary = useSWR(
-    `tx-summary`,
+    ekuboMeta ? `tx-summary` : null,
     async () => {
       const promises = Object.entries(preSummary.default).map(
-        async ([addr, calls]) => {
+        async ([addr, policies]) => {
           const contractType = await checkContractType(provider, addr);
           switch (contractType) {
             case "ERC20":
-              res.ERC20[addr] = calls;
+              res.ERC20[addr] = {
+                meta: ekuboMeta.find(
+                  (m) =>
+                    getChecksumAddress(m.address) === getChecksumAddress(addr),
+                ),
+                policies,
+              };
               return;
             case "ERC721":
-              res.ERC721[addr] = calls;
+              res.ERC721[addr] = policies;
               return;
             case "default":
             default:
-              res.default[addr] = calls;
+              res.default[addr] = policies;
               return;
           }
         },

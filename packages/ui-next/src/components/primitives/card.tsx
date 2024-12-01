@@ -9,7 +9,7 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "flex flex-col rounded overflow-hidden text-secondary-foreground shadow gap-y-px shrink-0",
+      "flex flex-col rounded overflow-hidden text-secondary-foreground gap-y-px shrink-0",
       className,
     )}
     {...props}
@@ -19,15 +19,70 @@ Card.displayName = "Card";
 
 const CardHeader = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("flex flex-col gap-y-1 p-3 bg-secondary", className)}
-    {...props}
-  />
-));
+  React.HTMLAttributes<HTMLDivElement> & { icon?: React.ReactNode }
+>(({ className, icon, ...props }, ref) =>
+  icon ? (
+    <div
+      ref={ref}
+      className={cn("h-9 flex items-center gap-x-px bg-background", className)}
+    >
+      {icon}
+      <div
+        className={cn(
+          "w-full h-full flex items-center p-3 bg-secondary",
+          className,
+        )}
+        {...props}
+      />
+    </div>
+  ) : (
+    <div
+      ref={ref}
+      className={cn("flex flex-col gap-y-1 p-3 bg-secondary", className)}
+      {...props}
+    />
+  ),
+);
 CardHeader.displayName = "CardHeader";
+
+const CardHeaderRight = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLHeadingElement>
+>(({ className, ...props }, ref) => (
+  <div ref={ref} className={cn("ml-auto", className)} {...props} />
+));
+CardHeaderRight.displayName = "CardHeaderRight";
+
+const CardIcon = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLHeadingElement> & { src?: string }
+>(
+  ({ className, src, ...props }, ref): React.ReactNode => (
+    <div
+      ref={ref}
+      className="h-full aspect-square bg-secondary flex items-center justify-center"
+    >
+      {src ? (
+        <img
+          src={src}
+          className={cn("h-8 aspect-square", className)}
+          {...props}
+        />
+      ) : props.children ? (
+        props.children
+      ) : (
+        <div
+          className={cn(
+            "h-8 aspect-square bg-[image:var(--theme-icon-url)] bg-cover bg-center place-content-center",
+            className,
+          )}
+          {...props}
+        />
+      )}
+    </div>
+  ),
+);
+CardIcon.displayName = "CardIcon";
 
 const CardTitle = React.forwardRef<
   HTMLParagraphElement,
@@ -83,6 +138,8 @@ CardFooter.displayName = "CardFooter";
 export {
   Card,
   CardHeader,
+  CardHeaderRight,
+  CardIcon,
   CardFooter,
   CardTitle,
   CardDescription,
