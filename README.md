@@ -18,7 +18,7 @@ The project consists of several subfolders located in the `packages` directory:
 - **[contracts](packages/contracts)** - a cairo project containing the
   controller account contract, signer, and session implementations.
 - **[keychain](packages/keychain)** - a sandboxed application hosted at
-  https://x.cartridge.gg/ and responsible for sensitive operations, such as
+  https://cartridge.gg/ and responsible for sensitive operations, such as
   signing transactions. When an application requests to sign or execute a
   transaction, keychain enforces client side authorization logic and displays UI
   for user approval if necessary.
