@@ -17,10 +17,17 @@ export const Default: Story = {
   },
 };
 
-export const Secondary: Story = {
+export const Primary: Story = {
   args: {
     children: "approved",
-    variant: "secondary",
+    variant: "primary",
+  },
+};
+
+export const Muted: Story = {
+  args: {
+    children: "approved",
+    variant: "muted",
   },
 };
 
@@ -28,5 +35,6 @@ export const Tab: Story = {
   args: {
     children: "100",
     className: "rounded-full",
+    vairant: "primary",
   },
 };

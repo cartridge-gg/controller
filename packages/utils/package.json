@@ -32,7 +32,7 @@
     "@graphql-codegen/typescript-operations": "^2.3.5",
     "@graphql-codegen/typescript-react-query": "^3.5.9",
     "@types/node": "^20.16.11",
-    "@types/react": "^18.3.11",
+    "@types/react": "^18.3.12",
     "tsx": "^4.19.2",
     "typescript": "^5.4.5"
   }

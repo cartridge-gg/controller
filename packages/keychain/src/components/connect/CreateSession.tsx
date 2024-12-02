@@ -4,13 +4,13 @@ import { ControllerError } from "utils/connection";
 import { Button } from "@chakra-ui/react";
 import { useCallback, useEffect, useState } from "react";
 import { useConnection } from "hooks/connection";
-import { Policies } from "components/Policies";
 import { ControllerErrorAlert } from "components/ErrorAlert";
 import { SessionConsent } from "components/connect";
 import { SESSION_EXPIRATION } from "const";
 import { Upgrade } from "./Upgrade";
 import { TypedDataPolicy } from "@cartridge/controller";
 import { ErrorCode } from "@cartridge/account-wasm";
+import { SessionSummary } from "components/SessionSummary";
 
 export function CreateSession({
   onConnect,
@@ -79,9 +79,9 @@ export function CreateSession({
         isUpdate && "The policies were updated, please update existing session"
       }
     >
-      <Content>
+      <Content gap={6}>
         <SessionConsent />
-        <Policies policies={policies} />
+        <SessionSummary policies={policies} />
       </Content>
 
       <Footer>

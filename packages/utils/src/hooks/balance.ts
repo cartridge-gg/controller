@@ -4,6 +4,12 @@ import { formatEther } from "viem";
 import { ERC20, ERC20Metadata } from "../erc20";
 import { CreditQuery, useCreditQuery } from "../api/cartridge";
 
+export function useEkuboMetadata() {
+  return useSWR("ekuboMetadata", ERC20.fetchAllMetadata, {
+    fallbackData: [],
+  });
+}
+
 export function useERC20Balance({
   address,
   contractAddress,
@@ -20,9 +26,7 @@ export function useERC20Balance({
   const { data: chainId } = useSWR(provider ? "chainId" : null, () =>
     provider?.getChainId(),
   );
-  const { data: ekuboMeta } = useSWR("ekuboMetadata", ERC20.fetchAllMetadata, {
-    fallbackData: [],
-  });
+  const { data: ekuboMeta } = useEkuboMetadata();
   const { data: meta } = useSWR(
     chainId && ekuboMeta.length
       ? `erc20:metadata:${chainId}:${address}:${contractAddress}`

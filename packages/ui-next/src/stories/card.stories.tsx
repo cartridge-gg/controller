@@ -6,8 +6,10 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
+  CardIcon,
 } from "@/components/primitives/card";
 import { Meta, StoryObj } from "@storybook/react";
+import { useEffect } from "react";
 
 const meta: Meta<typeof Card> = {
   title: "Card",
@@ -32,10 +34,33 @@ export const OnlyTitle: Story = {
   },
 };
 
-function Card({ title, description }: { title: string; description?: string }) {
+export const IconHeader: Story = {
+  args: {
+    title: "Card Title",
+    icon: <CardIcon />,
+  },
+};
+
+function Card({
+  title,
+  description,
+  icon,
+}: {
+  title: string;
+  description?: string;
+  icon?: React.ReactNode;
+}) {
+  useEffect(() => {
+    if (!icon) return;
+    document.documentElement.style.setProperty(
+      "--theme-icon-url",
+      `url("https://x.cartridge.gg/whitelabel/dope-wars/icon.png")`,
+    );
+  }, [icon]);
+
   return (
     <UICard>
-      <CardHeader>
+      <CardHeader icon={icon}>
         <CardTitle>{title}</CardTitle>
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>

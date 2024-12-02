@@ -1,5 +1,6 @@
 export * from "./achievement";
 export * from "./alert";
+export * from "./arrow-turn-down";
 export * from "./check";
 export * from "./checkbox-unchecked";
 export * from "./chevron-left";
@@ -8,6 +9,7 @@ export * from "./chess";
 export * from "./chest";
 export * from "./circle-check";
 export * from "./circle-no-check";
+export * from "./circle";
 export * from "./fn";
 export * from "./copy";
 export * from "./deployer";
