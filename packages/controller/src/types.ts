@@ -29,26 +29,31 @@ export type VerifiedConfigs = Record<string, VerifiedConfig>;
 export type VerifiedConfig = {
   origin: string;
   policies?: SessionPolicies;
-  preset?: ControllerTheme;
+  theme?: ControllerThemePreset;
 };
 
 /** It must contain one field */
 export type SessionPolicies = {
   /** The key must be the contract address */
-  call?: CallPolicies;
-  sign?: SignTypedDataPolicy[];
+  contracts?: ContractPolicies;
+  messages?: SignMessagePolicy[];
 };
 
-export type CallPolicies = Record<string, CallPolicy>;
+export type ContractPolicies = Record<string, ContractPolicy>;
 
-export type CallPolicy = {
-  contractAddress: string;
+/** Contract level policy */
+export type ContractPolicy = {
   /** It must contain one method */
-  methods: string[];
+  methods: Method | Method[];
   description?: string;
 };
 
-export type SignTypedDataPolicy = Omit<TypedData, "message">;
+export type Method = {
+  name: string;
+  description?: string;
+};
+
+export type SignMessagePolicy = Omit<TypedData, "message">;
 
 export enum ResponseCodes {
   SUCCESS = "SUCCESS",
@@ -200,7 +205,6 @@ export type ProfileContextTypeVariant =
 export type ColorMode = "light" | "dark";
 
 export type ControllerTheme = {
-  id: string;
   name: string;
   icon: string;
   cover: ThemeValue<string>;
