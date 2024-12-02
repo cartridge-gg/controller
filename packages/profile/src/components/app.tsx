@@ -17,6 +17,7 @@ export function App() {
   return (
     <Routes>
       <Route element={<Outlet />}>
+        <Route path="arcade" element={<Arcade />} />
         <Route path="account/:username" element={<Account />}>
           <Route path="inventory" element={<Inventory />}>
             <Route path="token/:address" element={<Token />}>

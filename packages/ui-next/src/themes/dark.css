@@ -33,5 +33,7 @@
     --border: 0 0% 50%;
     --input: 120 7.5% 15.69%; /* bg.secondary */
     --ring: 0 0% 100%; /* text.primary */
+
+    --spacer: 132 25% 8%; /* solid-fills/spacer */
   }
 }
