@@ -8,15 +8,13 @@ import {
 import {
   AddInvokeTransactionResult,
   Signature,
-  StarknetDomain,
-  StarknetType,
   TypedData,
 } from "@starknet-io/types-js";
 import { KeychainIFrame, ProfileIFrame } from "./iframe";
 
 export type Session = {
   chainId: constants.StarknetChainId;
-  policies: Policy[];
+  policies: SessionPolicies;
   maxFee: BigNumberish;
   expiresAt: bigint;
   credentials: {
@@ -25,19 +23,32 @@ export type Session = {
   };
 };
 
-export type Policy = CallPolicy | TypedDataPolicy;
+/** The key must be the origin */
+export type VerifiedConfigs = Record<string, VerifiedConfig>;
+
+export type VerifiedConfig = {
+  origin: string;
+  policies?: SessionPolicies;
+  preset?: ControllerTheme;
+};
+
+/** It must contain one field */
+export type SessionPolicies = {
+  /** The key must be the contract address */
+  call?: CallPolicies;
+  sign?: SignTypedDataPolicy[];
+};
+
+export type CallPolicies = Record<string, CallPolicy>;
 
 export type CallPolicy = {
-  target: string;
-  method: string;
+  contractAddress: string;
+  /** It must contain one method */
+  methods: string[];
   description?: string;
 };
 
-export type TypedDataPolicy = {
-  types: Record<string, StarknetType[]>;
-  primaryType: string;
-  domain: StarknetDomain;
-};
+export type SignTypedDataPolicy = Omit<TypedData, "message">;
 
 export enum ResponseCodes {
   SUCCESS = "SUCCESS",
@@ -62,7 +73,7 @@ export type ControllerError = {
 export type ConnectReply = {
   code: ResponseCodes.SUCCESS;
   address: string;
-  policies: Policy[];
+  policies: SessionPolicies;
 };
 
 export type ExecuteReply =
@@ -95,7 +106,7 @@ export type ControllerAccounts = Record<ContractAddress, CartridgeID>;
 export interface Keychain {
   probe(rpcUrl: string): Promise<ProbeReply | ConnectError>;
   connect(
-    policies: Policy[],
+    policies: SessionPolicies,
     rpcUrl: string,
   ): Promise<ConnectReply | ConnectError>;
   disconnect(): void;
@@ -160,7 +171,7 @@ export type ProviderOptions = {
 };
 
 export type KeychainOptions = IFrameOptions & {
-  policies?: Policy[];
+  policies?: SessionPolicies[];
   /** The URL of keychain */
   url?: string;
   /** The origin of keychain */
