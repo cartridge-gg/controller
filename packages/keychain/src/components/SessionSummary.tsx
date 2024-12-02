@@ -1,4 +1,4 @@
-import React, { PropsWithChildren } from "react";
+import React, { PropsWithChildren, useState } from "react";
 import { CallPolicy, Policy } from "@cartridge/controller";
 import {
   Card,
@@ -68,38 +68,6 @@ export function SessionSummary({}: { policies: Policy[] }) {
       ))}
 
       <SignMessages messages={summary.messages} />
-    </div>
-  );
-}
-
-function Nested(props: PropsWithChildren) {
-  return <div className="ml-5 flex flex-col gap-3" {...props} />;
-}
-
-function HeaderRow({ title }: { title: string }) {
-  return (
-    <div className="flex items-center gap-1">
-      <CheckboxIcon variant="minus-line" />
-      <div>{title}</div>
-    </div>
-  );
-}
-
-function ValueRow({
-  values,
-}: {
-  values: { name: string; value: string | number }[];
-}) {
-  return (
-    <div className="flex items-center">
-      <ArrowTurnDownIcon />
-      <div className="flex items-center gap-2">
-        {values.map((f) => (
-          <div className="flex items-center gap-1" key={f.name}>
-            name: <Badge>{f.value}</Badge>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
@@ -196,87 +164,114 @@ function SignMessages({
             {messages.map((m, i) => (
               <CardContent
                 key={i}
-                className="text-muted-foreground flex flex-col gap-3"
+                className="text-muted-foreground flex flex-col"
               >
                 {Object.values(m.domain).filter((f) => typeof f !== "undefined")
                   .length && (
-                  <div className="flex flex-col gap-3">
-                    <HeaderRow title="domain" />
-                    <Nested>
-                      {m.domain.name && (
-                        <ValueRow
-                          values={[{ name: "name", value: m.domain.name }]}
-                        />
-                      )}
-                      {m.domain.version && (
-                        <ValueRow
-                          values={[
-                            { name: "version", value: m.domain.version },
-                          ]}
-                        />
-                      )}
-                      {m.domain.chainId && (
-                        <ValueRow
-                          values={[
-                            { name: "chainId", value: m.domain.chainId },
-                          ]}
-                        />
-                      )}
-                      {m.domain.revision && (
-                        <ValueRow
-                          values={[
-                            { name: "revision", value: m.domain.revision },
-                          ]}
-                        />
-                      )}
-                    </Nested>
-                  </div>
+                  <CollapsibleRow key="domain" title="domain">
+                    {m.domain.name && (
+                      <ValueRow
+                        values={[{ name: "name", value: m.domain.name }]}
+                      />
+                    )}
+                    {m.domain.version && (
+                      <ValueRow
+                        values={[{ name: "version", value: m.domain.version }]}
+                      />
+                    )}
+                    {m.domain.chainId && (
+                      <ValueRow
+                        values={[{ name: "chainId", value: m.domain.chainId }]}
+                      />
+                    )}
+                    {m.domain.revision && (
+                      <ValueRow
+                        values={[
+                          { name: "revision", value: m.domain.revision },
+                        ]}
+                      />
+                    )}
+                  </CollapsibleRow>
                 )}
 
                 <ValueRow
                   values={[{ name: "primaryType", value: m.primaryType }]}
                 />
 
-                <div className="flex flex-col gap-3">
-                  <HeaderRow title="types" />
-
-                  <Nested>
-                    {Object.entries(m.types).map(([name, types]) => (
-                      <div key={name} className="flex flex-col gap-3">
-                        <HeaderRow title={name} />
-                        <Nested>
-                          {types.map((t) => (
-                            <ValueRow
-                              key={t.name}
-                              values={[
-                                { name: "name", value: t.name },
-                                { name: "type", value: t.type },
-                                ...(["enum", "merkletree"].includes(t.name)
-                                  ? [
-                                      {
-                                        name: "contains",
-                                        value: (
-                                          t as
-                                            | StarknetEnumType
-                                            | StarknetMerkleType
-                                        ).contains,
-                                      },
-                                    ]
-                                  : []),
-                              ]}
-                            />
-                          ))}
-                        </Nested>
-                      </div>
-                    ))}
-                  </Nested>
-                </div>
+                <CollapsibleRow title="types">
+                  {Object.entries(m.types).map(([name, types]) => (
+                    <CollapsibleRow key={name} title={name}>
+                      {types.map((t) => (
+                        <ValueRow
+                          key={t.name}
+                          values={[
+                            { name: "name", value: t.name },
+                            { name: "type", value: t.type },
+                            ...(["enum", "merkletree"].includes(t.name)
+                              ? [
+                                  {
+                                    name: "contains",
+                                    value: (
+                                      t as StarknetEnumType | StarknetMerkleType
+                                    ).contains,
+                                  },
+                                ]
+                              : []),
+                          ]}
+                        />
+                      ))}
+                    </CollapsibleRow>
+                  ))}
+                </CollapsibleRow>
               </CardContent>
             ))}
           </AccordionContent>
         </AccordionItem>
       </Accordion>
     </Card>
+  );
+}
+
+function CollapsibleRow({
+  title,
+  children,
+}: PropsWithChildren & { title: string }) {
+  const [value, setValue] = useState("");
+  console.log({ value });
+  return (
+    <Accordion type="single" collapsible value={value} onValueChange={setValue}>
+      <AccordionItem value={title} className="flex flex-col">
+        <AccordionTrigger hideIcon className="hover:bg-accent rounded-md">
+          <div className="flex items-center gap-1 py-2">
+            <CheckboxIcon variant={value ? "minus-line" : "plus-line"} />
+            <div>{title}</div>
+          </div>
+        </AccordionTrigger>
+
+        <AccordionContent className="ml-5 flex flex-col">
+          {children}
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  );
+}
+
+function ValueRow({
+  values,
+}: {
+  values: { name: string; value: string | number }[];
+}) {
+  return (
+    <div className="flex items-center py-2">
+      <ArrowTurnDownIcon />
+      <div className="flex items-center gap-2">
+        {values.map((f) => (
+          <div className="flex items-center gap-1" key={f.name}>
+            name: <Badge>{f.value}</Badge>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
