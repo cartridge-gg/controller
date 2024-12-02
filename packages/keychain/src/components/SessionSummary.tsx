@@ -19,6 +19,10 @@ import {
   ArrowTurnDownIcon,
   Badge,
   SpaceInvaderIcon,
+  TooltipProvider,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
 } from "@cartridge/ui-next";
 import { SessionSummary as SessionSummaryType } from "@cartridge/utils";
 import { StarknetEnumType, StarknetMerkleType } from "starknet";
@@ -138,7 +142,21 @@ function Contract({
                 <CircleIcon size="sm" className="text-muted-foreground" />
                 <div className="flex items-center gap-2">
                   <div>{c.method}</div>
-                  <InfoIcon size="sm" className="text-muted-foreground" />
+
+                  {c.description && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <InfoIcon
+                            size="sm"
+                            className="text-muted-foreground"
+                          />
+                        </TooltipTrigger>
+
+                        <TooltipContent>{c.description}</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
                 </div>
               </CardContent>
             ))}
@@ -163,7 +181,7 @@ function SignMessages({
           </CardIcon>
         }
       >
-        <CardTitle>Sign Messages</CardTitle>
+        <CardTitle className="text-foreground">Sign Messages</CardTitle>
       </CardHeader>
 
       <Accordion type="single" collapsible>
@@ -274,6 +292,7 @@ const summary: SessionSummaryType = {
         target:
           "0x000000000000000000000000000000000000000000000000000000000000000",
         method: "method 2",
+        description: "This is a description about method 1",
       },
     ],
   },
