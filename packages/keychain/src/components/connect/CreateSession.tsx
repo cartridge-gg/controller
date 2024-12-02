@@ -79,7 +79,7 @@ export function CreateSession({
         isUpdate && "The policies were updated, please update existing session"
       }
     >
-      <Content>
+      <Content gap={6}>
         <SessionConsent />
         <SessionSummary policies={policies} />
       </Content>

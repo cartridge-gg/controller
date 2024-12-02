@@ -12,7 +12,6 @@ import {
   AccordionTrigger,
   CircleIcon,
   InfoIcon,
-  CopyAddress,
   CardIcon,
   PencilIcon,
   CheckboxIcon,
@@ -23,9 +22,18 @@ import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
+  ExternalIcon,
+  cn,
 } from "@cartridge/ui-next";
-import { SessionSummary as SessionSummaryType } from "@cartridge/utils";
-import { StarknetEnumType, StarknetMerkleType } from "starknet";
+import {
+  formatAddress,
+  isSlotChain,
+  SessionSummary as SessionSummaryType,
+  StarkscanUrl,
+} from "@cartridge/utils";
+import { constants, StarknetEnumType, StarknetMerkleType } from "starknet";
+import Link from "next/link";
+import { useConnection } from "hooks/connection";
 // import { useSessionSummary } from "@cartridge/utils";
 
 export function SessionSummary({}: { policies: Policy[] }) {
@@ -34,11 +42,11 @@ export function SessionSummary({}: { policies: Policy[] }) {
 
   return (
     <div className="flex flex-col gap-4">
-      {Object.entries(summary.default).map(([address, policies]) => (
+      {Object.entries(summary.default).map(([address, policies], i) => (
         <Contract
           key={address}
           address={address}
-          title="Contract"
+          title={`Contract ${i + 1}`}
           policies={policies}
         />
       ))}
@@ -83,12 +91,30 @@ function Contract({
   policies: CallPolicy[];
   icon?: React.ReactNode;
 }) {
+  const { chainId } = useConnection();
+  const isSlot = isSlotChain(chainId);
+
   return (
     <Card>
       <CardHeader icon={icon}>
         <CardTitle className="text-foreground">{title}</CardTitle>
         <CardHeaderRight>
-          <CopyAddress address={address} size="xs" />
+          <Link
+            href={StarkscanUrl(chainId as constants.StarknetChainId).contract(
+              address,
+            )}
+            className={cn(
+              "text-xs text-muted-foreground flex items-center gap-1 cursor-pointer",
+              isSlot ? "pointer-events-none" : "",
+            )}
+            target="_blank"
+            aria-disabled={isSlot}
+            tabIndex={isSlot ? -1 : undefined}
+          >
+            {formatAddress(address, { size: "xs" })}
+
+            <ExternalIcon size="xs" />
+          </Link>
         </CardHeaderRight>
       </CardHeader>
 
@@ -237,7 +263,6 @@ function CollapsibleRow({
   children,
 }: PropsWithChildren & { title: string }) {
   const [value, setValue] = useState("");
-  console.log({ value });
   return (
     <Accordion type="single" collapsible value={value} onValueChange={setValue}>
       <AccordionItem value={title} className="flex flex-col">
@@ -267,7 +292,7 @@ function ValueRow({
       <div className="flex items-center gap-2">
         {values.map((f) => (
           <div className="flex items-center gap-1" key={f.name}>
-            name: <Badge>{f.value}</Badge>
+            {f.name}: <Badge>{f.value}</Badge>
           </div>
         ))}
       </div>
@@ -300,7 +325,7 @@ const summary: SessionSummaryType = {
         name: "Ether",
         decimals: 18,
         logoUrl:
-          "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/c8a721d1-07c3-46e4-ab4e-523977c30b00/logo",
+          "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo",
       },
       policies: [
         {
