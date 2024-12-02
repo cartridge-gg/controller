@@ -18,6 +18,7 @@ export function App() {
     <Routes>
       <Route element={<Outlet />}>
         <Route path="arcade" element={<Arcade />} />
+
         <Route path="account/:username" element={<Account />}>
           <Route path="inventory" element={<Inventory />}>
             <Route path="token/:address" element={<Token />}>
@@ -25,7 +26,6 @@ export function App() {
             </Route>
           </Route>
           <Route path="activity" element={<Activity />} />
-          <Route path="arcade" element={<Arcade />} />
 
           <Route path="slot/:project" element={<Slot />}>
             <Route path="inventory" element={<Inventory />}>
@@ -44,7 +44,6 @@ export function App() {
               <Route path=":address" element={<RedirectAchievements />} />
             </Route>
             <Route path="activity" element={<Activity />} />
-            <Route path="arcade" element={<Arcade />} />
           </Route>
         </Route>
       </Route>

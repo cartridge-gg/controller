@@ -13,6 +13,7 @@ import { ProfileContextTypeVariant } from "@cartridge/controller";
 import { Link, useMatch, useParams } from "react-router-dom";
 import { useAccount } from "@/hooks/account";
 import { useConnection } from "@/hooks/context";
+import { useMemo } from "react";
 
 export function Navigation() {
   const { project } = useParams<{ project?: string }>();
@@ -41,26 +42,29 @@ function Item({
   const isSlot = useMatch(`/account/:username/slot/:project/${variant}`);
   const isActive = project ? isSlot : isPublic;
 
+  const to = useMemo(() => {
+    return project
+      ? `/account/${username}/slot/${project}/${variant}`
+      : `/account/${username}/${variant}`;
+  }, [project, username, variant]);
+
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
           <Link
             className={cn(
-              "px-4 py-3 cursor-pointer hover:opacity-[0.8]",
+              "flex gap-2 px-4 py-3 justify-center items-center cursor-pointer hover:opacity-[0.8]",
               isActive ? "bg-secondary" : "bg-background",
             )}
-            to={
-              project
-                ? `/account/${username}/slot/${project}/${variant}`
-                : `/account/${username}/${variant}`
-            }
+            to={to}
           >
             <Icon size="sm" variant={isActive ? "solid" : "line"} />
+            <p className="capitalize hidden md:block">{variant}</p>
           </Link>
         </TooltipTrigger>
         <TooltipContent>
-          <p className="capitalize">{variant}</p>
+          <p className="capitalize block md:hidden">{variant}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
