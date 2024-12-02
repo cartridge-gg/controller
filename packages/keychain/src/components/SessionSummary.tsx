@@ -24,6 +24,8 @@ import {
   TooltipContent,
   ExternalIcon,
   cn,
+  Spinner,
+  CoinsIcon,
 } from "@cartridge/ui-next";
 import {
   formatAddress,
@@ -34,11 +36,26 @@ import {
 import { constants, StarknetEnumType, StarknetMerkleType } from "starknet";
 import Link from "next/link";
 import { useConnection } from "hooks/connection";
-// import { useSessionSummary } from "@cartridge/utils";
+import { useSessionSummary } from "@cartridge/utils";
 
-export function SessionSummary({}: { policies: Policy[] }) {
-  // const { controller } = useConnection()
-  // const { data: summary } = useSessionSummary({ policies, provider: controller });
+export function SessionSummary({ policies }: { policies: Policy[] }) {
+  const { controller } = useConnection();
+  const {
+    data: summary,
+    error,
+    isLoading,
+  } = useSessionSummary({
+    policies,
+    provider: controller,
+  });
+
+  if (isLoading) {
+    return <Spinner />;
+  }
+
+  if (error) {
+    return <div>error</div>;
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -55,9 +72,17 @@ export function SessionSummary({}: { policies: Policy[] }) {
         <Contract
           key={address}
           address={address}
-          title={meta.name}
+          title={meta?.name ?? "ERC-20"}
           policies={policies}
-          icon={<CardIcon src={meta.logoUrl} />}
+          icon={
+            meta?.logoUrl ? (
+              <CardIcon src={meta.logoUrl} />
+            ) : (
+              <CardIcon>
+                <CoinsIcon variant="line" />
+              </CardIcon>
+            )
+          }
         />
       ))}
 
@@ -299,88 +324,3 @@ function ValueRow({
     </div>
   );
 }
-
-const summary: SessionSummaryType = {
-  default: {
-    "0x000000000000000000000000000000000000000000000000000000000000000": [
-      {
-        target:
-          "0x000000000000000000000000000000000000000000000000000000000000000",
-        method: "method 1",
-      },
-      {
-        target:
-          "0x000000000000000000000000000000000000000000000000000000000000000",
-        method: "method 2",
-        description: "This is a description about method 1",
-      },
-    ],
-  },
-  ERC20: {
-    "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7": {
-      meta: {
-        symbol: "ETH",
-        address:
-          "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-        name: "Ether",
-        decimals: 18,
-        logoUrl:
-          "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo",
-      },
-      policies: [
-        {
-          target:
-            "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-          method: "approve",
-        },
-        {
-          target:
-            "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-          method: "transfer",
-        },
-      ],
-    },
-  },
-  ERC721: {
-    "0x000000000000000000000000000000000000000000000000000000000000000": [
-      {
-        target:
-          "0x000000000000000000000000000000000000000000000000000000000000000",
-        method: "approve",
-      },
-      {
-        target:
-          "0x000000000000000000000000000000000000000000000000000000000000000",
-        method: "transfer",
-      },
-    ],
-  },
-  messages: [
-    {
-      types: {
-        StarknetDomain: [
-          { name: "name", type: "shortstring" },
-          { name: "version", type: "shortstring" },
-          { name: "chainId", type: "shortstring" },
-          { name: "revision", type: "shortstring" },
-        ],
-        Person: [
-          { name: "name", type: "felt" },
-          { name: "wallet", type: "felt" },
-        ],
-        Mail: [
-          { name: "from", type: "Person" },
-          { name: "to", type: "Person" },
-          { name: "contents", type: "felt" },
-        ],
-      },
-      primaryType: "Mail",
-      domain: {
-        name: "StarkNet Mail",
-        version: "1",
-        revision: "1",
-        chainId: "SN_SEPOLIA",
-      },
-    },
-  ],
-};

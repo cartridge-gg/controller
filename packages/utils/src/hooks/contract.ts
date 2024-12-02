@@ -50,46 +50,43 @@ export function useSessionSummary({
     [policies],
   );
 
-  const res: SessionSummary = {
-    default: {},
-    ERC20: {},
-    ERC721: {},
-    messages: preSummary.messages,
-  };
   const { data: ekuboMeta } = useEkuboMetadata();
 
-  const summary = useSWR(
-    ekuboMeta ? `tx-summary` : null,
-    async () => {
-      const promises = Object.entries(preSummary.default).map(
-        async ([addr, policies]) => {
-          const contractType = await checkContractType(provider, addr);
-          switch (contractType) {
-            case "ERC20":
-              res.ERC20[addr] = {
-                meta: ekuboMeta.find(
-                  (m) =>
-                    getChecksumAddress(m.address) === getChecksumAddress(addr),
-                ),
-                policies,
-              };
-              return;
-            case "ERC721":
-              res.ERC721[addr] = policies;
-              return;
-            case "default":
-            default:
-              res.default[addr] = policies;
-              return;
-          }
-        },
-      );
-      await Promise.allSettled(promises);
+  const summary = useSWR(ekuboMeta ? `tx-summary` : null, async () => {
+    const res: SessionSummary = {
+      default: {},
+      ERC20: {},
+      ERC721: {},
+      messages: preSummary.messages,
+    };
 
-      return res;
-    },
-    { fallbackData: res },
-  );
+    const promises = Object.entries(preSummary.default).map(
+      async ([addr, policies]) => {
+        const contractType = await checkContractType(provider, addr);
+        switch (contractType) {
+          case "ERC20":
+            res.ERC20[addr] = {
+              meta: ekuboMeta.find(
+                (m) =>
+                  getChecksumAddress(m.address) === getChecksumAddress(addr),
+              ),
+              policies,
+            };
+            return;
+          case "ERC721":
+            res.ERC721[addr] = policies;
+            return;
+          case "default":
+          default:
+            res.default[addr] = policies;
+            return;
+        }
+      },
+    );
+    await Promise.all(promises);
+
+    return res;
+  });
 
   return summary;
 }
