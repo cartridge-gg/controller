@@ -4,7 +4,6 @@ import { ControllerError } from "utils/connection";
 import { Button } from "@chakra-ui/react";
 import { useCallback, useEffect, useState } from "react";
 import { useConnection } from "hooks/connection";
-import { Policies } from "components/Policies";
 import { ControllerErrorAlert } from "components/ErrorAlert";
 import { SessionConsent } from "components/connect";
 import { SESSION_EXPIRATION } from "const";
@@ -40,11 +39,9 @@ export function CreateSession({
     if (violatingPolicy) {
       setError({
         code: ErrorCode.PolicyChainIdMismatch,
-        message: `Policy for ${
-          (violatingPolicy as TypedDataPolicy).domain.name
-        }.${
-          (violatingPolicy as TypedDataPolicy).primaryType
-        } has mismatched chain ID.`,
+        message: `Policy for ${(violatingPolicy as TypedDataPolicy).domain.name
+          }.${(violatingPolicy as TypedDataPolicy).primaryType
+          } has mismatched chain ID.`,
       });
       setIsDisabled(true);
     } else {
@@ -82,7 +79,6 @@ export function CreateSession({
     >
       <Content>
         <SessionConsent />
-        <Policies policies={policies} />
         <SessionSummary policies={policies} />
       </Content>
 
