@@ -8,6 +8,7 @@ import { ErrorBoundary } from "components/ErrorBoundary";
 
 import "../index.css";
 import Script from "next/script";
+import { SonnerToaster } from "@cartridge/ui-next";
 
 const inter = Inter({ subsets: ["latin"] });
 const ibmPlexMono = IBM_Plex_Mono({
@@ -89,6 +90,7 @@ export default function Keychain({ Component, pageProps }: AppProps) {
         <ErrorBoundary>
           <Component {...pageProps} />
           <Script src="/noflash.js" />
+          <SonnerToaster position="bottom-right" />
         </ErrorBoundary>
       </Provider>
     </>
