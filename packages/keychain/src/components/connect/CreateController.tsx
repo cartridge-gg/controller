@@ -87,8 +87,8 @@ function StatusTray({
             {!username
               ? "Enter a username"
               : accountExists
-              ? "Welcome back! Select sign in to play"
-              : "Profile not found. Create new controller!"}
+              ? "Welcome back! Select Login to play"
+              : "Welcome! Let's create a new controller!"}
           </Text>
         </HStack>
       )}
@@ -359,7 +359,7 @@ export function CreateController({
           e.key === "Enter" && e.preventDefault();
         }}
       >
-        <Content>
+        <Content mb="2rem">
           <Field
             {...usernameField}
             autoFocus
