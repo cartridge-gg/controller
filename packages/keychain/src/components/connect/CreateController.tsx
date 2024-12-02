@@ -122,12 +122,17 @@ export function CreateController({
   const [isValidating, setIsValidating] = useState(false);
   const [accountExists, setAccountExists] = useState<boolean>();
   const checkAccountPromise = useRef<Promise<void>>();
-  const { debouncedValue: username } = useDebounce(usernameField.value, 100);
+  const validationResult = useRef<{ exists: boolean; error?: Error }>();
+  const { debouncedValue: username } = useDebounce(usernameField.value, 50);
+  const { debouncedValue: displayUsername } = useDebounce(
+    usernameField.value,
+    200,
+  );
 
   // Check if account exists when username changes
   useEffect(() => {
     if (!usernameField.value) {
-      setAccountExists(undefined);
+      validationResult.current = undefined;
       checkAccountPromise.current = undefined;
       return;
     }
@@ -137,26 +142,33 @@ export function CreateController({
       try {
         // This throws if the user doesn't exist
         await validateUsernameFor(usernameField.value);
-
-        // Only update state if the current value matches the debounced value
-        if (usernameField.value === username) {
-          setAccountExists(true);
-        }
+        validationResult.current = { exists: true };
       } catch (e) {
         if ((e as Error).message !== "ent: account not found") {
-          setError(e);
+          validationResult.current = { exists: false, error: e as Error };
+        } else {
+          validationResult.current = { exists: false };
         }
-        if (usernameField.value === username) {
-          setAccountExists(false);
-        }
-      }
-      if (usernameField.value === username) {
-        setIsValidating(false);
       }
     };
 
     checkAccountPromise.current = checkAccount();
-  }, [usernameField.value, username]);
+  }, [username]);
+
+  // Update UI state based on validation results
+  useEffect(() => {
+    if (!displayUsername || !validationResult.current) {
+      setAccountExists(undefined);
+      setIsValidating(false);
+      return;
+    }
+
+    if (validationResult.current.error) {
+      setError(validationResult.current.error);
+    }
+    setAccountExists(validationResult.current.exists);
+    setIsValidating(false);
+  }, [displayUsername]);
 
   const initController = useCallback(
     async (
@@ -379,7 +391,7 @@ export function CreateController({
           />
 
           <StatusTray
-            username={username}
+            username={displayUsername}
             isValidating={isValidating}
             accountExists={accountExists}
             error={error}
