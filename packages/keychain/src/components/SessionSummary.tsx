@@ -1,4 +1,4 @@
-import React from "react";
+import React, { PropsWithChildren } from "react";
 import { CallPolicy, Policy } from "@cartridge/controller";
 import {
   Card,
@@ -15,9 +15,13 @@ import {
   CopyAddress,
   CardIcon,
   PencilIcon,
-  ScrollIcon,
+  CheckboxIcon,
+  ArrowTurnDownIcon,
+  Badge,
+  SpaceInvaderIcon,
 } from "@cartridge/ui-next";
 import { SessionSummary as SessionSummaryType } from "@cartridge/utils";
+import { StarknetEnumType, StarknetMerkleType } from "starknet";
 // import { useSessionSummary } from "@cartridge/utils";
 
 export function SessionSummary({}: { policies: Policy[] }) {
@@ -27,13 +31,19 @@ export function SessionSummary({}: { policies: Policy[] }) {
   return (
     <div className="flex flex-col gap-4">
       {Object.entries(summary.default).map(([address, policies]) => (
-        <Contract key={address} address={address} policies={policies} />
+        <Contract
+          key={address}
+          address={address}
+          title="Contract"
+          policies={policies}
+        />
       ))}
 
       {Object.entries(summary.ERC20).map(([address, { policies, meta }]) => (
         <Contract
           key={address}
           address={address}
+          title={meta.name}
           policies={policies}
           icon={<CardIcon src={meta.logoUrl} />}
         />
@@ -43,43 +53,68 @@ export function SessionSummary({}: { policies: Policy[] }) {
         <Contract
           key={address}
           address={address}
+          title="ERC-721"
           policies={policies}
           icon={
             <CardIcon>
-              <ScrollIcon variant="line" />
+              <SpaceInvaderIcon variant="line" />
             </CardIcon>
           }
         />
       ))}
 
-      <Card>
-        <CardHeader
-          icon={
-            <CardIcon>
-              <PencilIcon variant="line" />
-            </CardIcon>
-          }
-        >
-          <CardTitle>Sign Messages</CardTitle>
-        </CardHeader>
-      </Card>
+      <SignMessages messages={summary.messages} />
+    </div>
+  );
+}
+
+function Nested(props: PropsWithChildren) {
+  return <div className="ml-5 flex flex-col gap-3" {...props} />;
+}
+
+function HeaderRow({ title }: { title: string }) {
+  return (
+    <div className="flex items-center gap-1">
+      <CheckboxIcon variant="minus-line" />
+      <div>{title}</div>
+    </div>
+  );
+}
+
+function ValueRow({
+  values,
+}: {
+  values: { name: string; value: string | number }[];
+}) {
+  return (
+    <div className="flex items-center">
+      <ArrowTurnDownIcon />
+      <div className="flex items-center gap-2">
+        {values.map((f) => (
+          <div className="flex items-center gap-1" key={f.name}>
+            name: <Badge>{f.value}</Badge>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 
 function Contract({
   address,
+  title,
   policies,
   icon = <CardIcon />,
 }: {
   address: string;
+  title: string;
   policies: CallPolicy[];
   icon?: React.ReactNode;
 }) {
   return (
     <Card>
       <CardHeader icon={icon}>
-        <CardTitle className="text-foreground">Contract</CardTitle>
+        <CardTitle className="text-foreground">{title}</CardTitle>
         <CardHeaderRight>
           <CopyAddress address={address} size="xs" />
         </CardHeaderRight>
@@ -92,7 +127,7 @@ function Contract({
               You are agreeing to automate{" "}
               <span className="text-accent-foreground font-bold">
                 {policies.length} method
-                {policies.length > 1 ? "s" : ""}
+                {policies.length > 0 ? "s" : ""}
               </span>
             </AccordionTrigger>
           </CardContent>
@@ -104,6 +139,119 @@ function Contract({
                 <div className="flex items-center gap-2">
                   <div>{c.method}</div>
                   <InfoIcon size="sm" className="text-muted-foreground" />
+                </div>
+              </CardContent>
+            ))}
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </Card>
+  );
+}
+
+function SignMessages({
+  messages,
+}: {
+  messages: SessionSummaryType["messages"];
+}) {
+  return (
+    <Card>
+      <CardHeader
+        icon={
+          <CardIcon>
+            <PencilIcon variant="line" />
+          </CardIcon>
+        }
+      >
+        <CardTitle>Sign Messages</CardTitle>
+      </CardHeader>
+
+      <Accordion type="single" collapsible>
+        <AccordionItem value="item-1">
+          <CardContent>
+            <AccordionTrigger>
+              You are agreeing to sign messages in the following format
+            </AccordionTrigger>
+          </CardContent>
+
+          <AccordionContent>
+            {messages.map((m, i) => (
+              <CardContent
+                key={i}
+                className="text-muted-foreground flex flex-col gap-3"
+              >
+                {Object.values(m.domain).filter((f) => typeof f !== "undefined")
+                  .length && (
+                  <div className="flex flex-col gap-3">
+                    <HeaderRow title="domain" />
+                    <Nested>
+                      {m.domain.name && (
+                        <ValueRow
+                          values={[{ name: "name", value: m.domain.name }]}
+                        />
+                      )}
+                      {m.domain.version && (
+                        <ValueRow
+                          values={[
+                            { name: "version", value: m.domain.version },
+                          ]}
+                        />
+                      )}
+                      {m.domain.chainId && (
+                        <ValueRow
+                          values={[
+                            { name: "chainId", value: m.domain.chainId },
+                          ]}
+                        />
+                      )}
+                      {m.domain.revision && (
+                        <ValueRow
+                          values={[
+                            { name: "revision", value: m.domain.revision },
+                          ]}
+                        />
+                      )}
+                    </Nested>
+                  </div>
+                )}
+
+                <ValueRow
+                  values={[{ name: "primaryType", value: m.primaryType }]}
+                />
+
+                <div className="flex flex-col gap-3">
+                  <HeaderRow title="types" />
+
+                  <Nested>
+                    {Object.entries(m.types).map(([name, types]) => (
+                      <div key={name} className="flex flex-col gap-3">
+                        <HeaderRow title={name} />
+                        <Nested>
+                          {types.map((t) => (
+                            <ValueRow
+                              key={t.name}
+                              values={[
+                                { name: "name", value: t.name },
+                                { name: "type", value: t.type },
+                                ...(["enum", "merkletree"].includes(t.name)
+                                  ? [
+                                      {
+                                        name: "contains",
+                                        value: (
+                                          t as
+                                            | StarknetEnumType
+                                            | StarknetMerkleType
+                                        ).contains,
+                                      },
+                                    ]
+                                  : []),
+                              ]}
+                            />
+                          ))}
+                        </Nested>
+                      </div>
+                    ))}
+                  </Nested>
                 </div>
               </CardContent>
             ))}

@@ -1,5 +1,6 @@
 export * from "./achievement";
 export * from "./alert";
+export * from "./arrow-turn-down";
 export * from "./check";
 export * from "./checkbox-unchecked";
 export * from "./chevron-left";
