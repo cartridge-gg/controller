@@ -12,10 +12,7 @@ const config: Config = {
       width: {
         desktop: "432px",
       },
-      minHeight: {
-        desktop: "475px",
-      },
-      maxHeight: {
+      height: {
         desktop: "600px",
       },
     },

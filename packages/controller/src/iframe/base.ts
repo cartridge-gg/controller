@@ -153,8 +153,7 @@ export class IFrame<CallSender extends {}> implements Modal {
       return;
     }
 
-    this.iframe.style.minHeight = "475px";
-    this.iframe.style.maxHeight = "600px";
+    this.iframe.style.height = "600px";
     this.iframe.style.width = "432px";
     this.iframe.style.borderRadius = "8px";
   }

@@ -5,7 +5,7 @@ import { Button, Text, Link, HStack, Box } from "@chakra-ui/react";
 import { useConnection } from "hooks/connection";
 import { LoginMode } from "./types";
 import { useControllerTheme } from "hooks/theme";
-import { fetchAccount } from "./utils";
+import { fetchAccount, validateUsernameFor } from "./utils";
 import { usePostHog } from "posthog-js/react";
 import { doLogin } from "hooks/account";
 import { doSignup } from "hooks/account";
@@ -136,13 +136,16 @@ export function CreateController({
       setIsValidating(true);
       try {
         // This throws if the user doesn't exist
-        await fetchAccount(usernameField.value);
+        await validateUsernameFor(usernameField.value);
 
         // Only update state if the current value matches the debounced value
         if (usernameField.value === username) {
           setAccountExists(true);
         }
-      } catch {
+      } catch (e) {
+        if ((e as Error).message !== "ent: account not found") {
+          setError(e);
+        }
         if (usernameField.value === username) {
           setAccountExists(false);
         }
