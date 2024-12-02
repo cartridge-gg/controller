@@ -59,13 +59,14 @@ export const Field = forwardRef(
           />
 
           {isLoading ? (
-            <InputRightElement>
+            <InputRightElement height={12}>
               <Spinner color="text.secondary" size="sm" />
             </InputRightElement>
           ) : (
             inputProps.value &&
             onClear && (
               <InputRightElement
+                height="48px"
                 onClick={onClear}
                 cursor={isActive ? "pointer" : "default"}
                 opacity={isActive ? 100 : 0} // workaround for onBlur handler triggeres before onClear

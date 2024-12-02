@@ -1,12 +1,11 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { Container, Footer, Content } from "components/layout";
-import { Field } from "@cartridge/ui";
-import { Button, useMediaQuery } from "@chakra-ui/react";
+import { Field, LockIcon } from "@cartridge/ui";
+import { Button, Text, Link, HStack, Box } from "@chakra-ui/react";
 import { useConnection } from "hooks/connection";
 import { LoginMode } from "./types";
 import { useControllerTheme } from "hooks/theme";
 import { fetchAccount } from "./utils";
-import { ErrorAlert } from "components/ErrorAlert";
 import { usePostHog } from "posthog-js/react";
 import { doLogin } from "hooks/account";
 import { doSignup } from "hooks/account";
@@ -16,14 +15,97 @@ import { constants } from "starknet";
 import { PopupCenter } from "utils/url";
 import { useAccountQuery } from "@cartridge/utils/api/cartridge";
 
+function StatusTray({
+  username,
+  isValidating,
+  accountExists,
+  error,
+}: {
+  username: string;
+  isValidating: boolean;
+  accountExists?: boolean;
+  error?: Error;
+}) {
+  if (error) {
+    return (
+      <Box
+        display="flex"
+        flexDirection="row"
+        alignItems="flex-start"
+        padding="8px 12px"
+        bg="#242824"
+        marginTop="-1rem"
+        paddingTop="15px"
+        borderBottomRadius="4px"
+      >
+        <Text
+          fontFamily="Inter"
+          fontSize="12px"
+          lineHeight="16px"
+          color="#E66666"
+        >
+          {error.message.includes(
+            "The operation either timed out or was not allowed",
+          )
+            ? "Passkey signing timed out or was canceled. Please try again."
+            : error.message}
+        </Text>
+      </Box>
+    );
+  }
+
+  return (
+    <Box
+      display="flex"
+      flexDirection="row"
+      alignItems="flex-start"
+      padding="8px 12px"
+      bg="#242824"
+      marginTop="-1rem"
+      paddingTop="15px"
+      borderBottomRadius="4px"
+    >
+      {isValidating ? (
+        <HStack spacing={2}>
+          <Text
+            fontFamily="Inter"
+            fontSize="12px"
+            lineHeight="16px"
+            color="#808080"
+          >
+            Checking username...
+          </Text>
+        </HStack>
+      ) : (
+        <HStack spacing={2}>
+          <Text
+            fontFamily="Inter"
+            fontSize="12px"
+            lineHeight="16px"
+            color="#808080"
+          >
+            {!username
+              ? "Enter a username"
+              : accountExists
+              ? "Welcome back! Select sign in to play"
+              : "Profile not found. Create new controller!"}
+          </Text>
+        </HStack>
+      )}
+    </Box>
+  );
+}
+
 export function CreateController({
   isSlot,
   loginMode = LoginMode.Webauthn,
   onCreated,
+  error: initialError,
 }: {
   isSlot?: boolean;
   loginMode?: LoginMode;
   onCreated?: () => void;
+  error?: Error;
 }) {
   const posthog = usePostHog();
   const hasLoggedFocus = useRef(false);
@@ -31,7 +113,7 @@ export function CreateController({
   const theme = useControllerTheme();
   const { origin, policies, chainId, rpcUrl, setController } = useConnection();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error>();
+  const [error, setError] = useState<Error | undefined>(initialError);
   const [isPopup, setIsPopup] = useState(false);
   const [usernameField, setUsernameField] = useState({
     value: "",
@@ -39,17 +121,14 @@ export function CreateController({
   });
   const [isValidating, setIsValidating] = useState(false);
   const [accountExists, setAccountExists] = useState<boolean>();
-  const [isHeightOver600] = useMediaQuery("(min-height: 600px)");
-
-  const { debouncedValue: username, debouncing } = useDebounce(
-    usernameField.value,
-    100,
-  );
+  const checkAccountPromise = useRef<Promise<void>>();
+  const { debouncedValue: username } = useDebounce(usernameField.value, 100);
 
   // Check if account exists when username changes
   useEffect(() => {
     if (!usernameField.value) {
       setAccountExists(undefined);
+      checkAccountPromise.current = undefined;
       return;
     }
 
@@ -73,7 +152,7 @@ export function CreateController({
       }
     };
 
-    checkAccount();
+    checkAccountPromise.current = checkAccount();
   }, [usernameField.value, username]);
 
   const initController = useCallback(
@@ -117,9 +196,19 @@ export function CreateController({
     );
 
     setIsPopup(true);
-  }, [usernameField]);
+  }, [posthog, usernameField]);
 
   const handleSubmit = useCallback(async () => {
+    if (!usernameField.value) {
+      setError(new Error("Enter a username"));
+      return;
+    }
+
+    // Wait for any pending account check to complete
+    if (checkAccountPromise.current) {
+      await checkAccountPromise.current;
+    }
+
     setError(undefined);
     setIsLoading(true);
 
@@ -194,6 +283,7 @@ export function CreateController({
     setIsLoading(false);
   }, [
     accountExists,
+    doPopup,
     usernameField.value,
     loginMode,
     policies,
@@ -242,11 +332,11 @@ export function CreateController({
 
   return (
     <Container
-      variant={isHeightOver600 ? "expanded" : "compressed"}
+      variant="expanded"
       title={
         theme.id === "cartridge" ? "Play with Controller" : `Play ${theme.name}`
       }
-      description="Enter your username"
+      description="Your universal player profile"
     >
       <form
         style={{ width: "100%" }}
@@ -258,7 +348,7 @@ export function CreateController({
           <Field
             {...usernameField}
             autoFocus
-            placeholder="Username"
+            placeholder="Shinobi"
             onFocus={() => {
               if (!hasLoggedFocus.current) {
                 posthog?.capture("Focus Username");
@@ -284,39 +374,54 @@ export function CreateController({
               setUsernameField((u) => ({ ...u, value: "" }));
             }}
           />
-          {username && !isValidating && !debouncing && (
-            <div style={{ marginTop: "8px", textAlign: "center" }}>
-              {accountExists
-                ? "Controller exists, sign in"
-                : "Create new controller"}
-            </div>
-          )}
+
+          <StatusTray
+            username={username}
+            isValidating={isValidating}
+            accountExists={accountExists}
+            error={error}
+          />
+
+          <HStack spacing={2} align="flex-start" mt="2rem" mb="0.5rem">
+            <LockIcon color="#808080" width="16px" height="16px" />
+            <Text
+              fontSize="12px"
+              fontWeight={500}
+              lineHeight="16px"
+              color="#808080"
+            >
+              By clicking play you are agreeing to Cartridge&apos;s{" "}
+              <Link
+                href="https://cartridge.gg/terms"
+                target="_blank"
+                color="brand.primary"
+                textDecoration="underline"
+                display="inline"
+              >
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link
+                href="https://cartridge.gg/privacy"
+                target="_blank"
+                color="brand.primary"
+                textDecoration="underline"
+                display="inline"
+              >
+                Privacy Policy
+              </Link>
+            </Text>
+          </HStack>
         </Content>
 
         <Footer showCatridgeLogo>
-          {error && (
-            <ErrorAlert
-              title={accountExists ? "Login failed" : "Signup failed"}
-              description={
-                error.message.includes(
-                  "The operation either timed out or was not allowed",
-                )
-                  ? "Passkey signing timed out or was canceled. Please try again."
-                  : error.message
-              }
-              isExpanded
-              allowToggle
-            />
-          )}
           <Button
             colorScheme="colorful"
             isLoading={isLoading}
-            isDisabled={
-              debouncing || !username || isValidating || !!usernameField.error
-            }
+            isDisabled={!!error}
             onClick={handleSubmit}
           >
-            {accountExists ? "sign in" : "create controller"}
+            {accountExists ? "login" : "sign up"}
           </Button>
         </Footer>
       </form>

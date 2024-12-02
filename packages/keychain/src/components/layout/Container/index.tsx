@@ -77,7 +77,7 @@ function Wrapper({
         <Flex w="100vw" h="100vh" p={0} align="center">
           <ChakraContainer
             w="432px"
-            h={`${PORTAL_WINDOW_HEIGHT}px`}
+            // h={`${PORTAL_WINDOW_HEIGHT}px`}
             borderWidth={1}
             borderColor="solid.primaryAccent"
             verticalAlign="middle"
@@ -100,7 +100,7 @@ function Wrapper({
   );
 }
 
-const LayoutContext = createContext<LayoutContextValue>({
+export const LayoutContext = createContext<LayoutContextValue>({
   variant: "expanded",
   footer: {
     height: 0,
@@ -110,7 +110,7 @@ const LayoutContext = createContext<LayoutContextValue>({
   },
 });
 
-type LayoutContextValue = {
+export type LayoutContextValue = {
   variant: LayoutVariant;
   footer: {
     height: number;

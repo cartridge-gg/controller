@@ -24,12 +24,14 @@ export const Input: ComponentStyleConfig = defineStyleConfig({
         color: "text.primary",
         borderWidth: 1,
         borderColor: "solid.secondary",
+        borderRadius: "4px",
         _hover: {
-          borderColor: "solid.accent",
+          bg: "solid.secondary",
+          borderColor: "solid.secondary",
         },
         _focus: {
-          bg: "solid.secondary",
-          borderColor: "solid.accent",
+          bg: "solid.primary",
+          borderColor: "solid.secondary",
         },
         // Workaround to set background color for autofill
         // ref: https://stackoverflow.com/a/71693606
