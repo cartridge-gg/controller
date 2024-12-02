@@ -4,6 +4,7 @@ export * from "./briq";
 export * from "./cartridge";
 export * from "./cartridge-face";
 export * from "./chrome";
+export * from "./controller";
 export * from "./discord";
 export * from "./dojo";
 export * from "./dope-wars";
