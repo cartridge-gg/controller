@@ -381,8 +381,10 @@ export function CreateController({
             accountExists={accountExists}
             error={error}
           />
+        </Content>
 
-          <HStack spacing={2} align="flex-start" mt="2rem" mb="0.5rem">
+        <Footer showCatridgeLogo>
+          <HStack spacing={2} align="flex-start" marginTop="auto" mb="0.5rem">
             <LockIcon color="#808080" width="16px" height="16px" />
             <Text
               fontSize="12px"
@@ -412,9 +414,7 @@ export function CreateController({
               </Link>
             </Text>
           </HStack>
-        </Content>
 
-        <Footer showCatridgeLogo>
           <Button
             colorScheme="colorful"
             isLoading={isLoading}

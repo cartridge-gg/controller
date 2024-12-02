@@ -59,6 +59,7 @@ function Wrapper({
       <Show below="md">
         <ChakraContainer
           w="100vw"
+          h="100vh"
           bg="solid.bg"
           p={0}
           as={motion.div}
