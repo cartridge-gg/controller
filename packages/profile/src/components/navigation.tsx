@@ -14,12 +14,19 @@ import { Link, useMatch, useParams } from "react-router-dom";
 import { useAccount } from "@/hooks/account";
 import { useConnection } from "@/hooks/context";
 import { useMemo } from "react";
+import { isIframe } from "@cartridge/utils";
 
 export function Navigation() {
   const { project } = useParams<{ project?: string }>();
   const { namespace } = useConnection();
   return (
-    <div className="flex rounded border border-1 border-secondary overflow-hidden shrink-0 gap-[1px] bg-secondary">
+    <div
+      className={cn(
+        "flex overflow-hidden shrink-0",
+        !isIframe() && "gap-x-4",
+        isIframe() && "rounded border border-secondary gap-x-px bg-secondary",
+      )}
+    >
       <Item Icon={CoinsIcon} variant="inventory" />
       {project && namespace && (
         <Item Icon={TrophyIcon} variant="achievements" />
@@ -54,17 +61,20 @@ function Item({
         <TooltipTrigger asChild>
           <Link
             className={cn(
-              "flex gap-2 px-4 py-3 justify-center items-center cursor-pointer hover:opacity-[0.8]",
+              "flex gap-2 px-4 py-2.5 justify-center items-center cursor-pointer hover:opacity-[0.8]",
               isActive ? "bg-secondary" : "bg-background",
+              !isIframe() && "rounded border border-secondary",
             )}
             to={to}
           >
             <Icon size="sm" variant={isActive ? "solid" : "line"} />
-            <p className="capitalize hidden md:block">{variant}</p>
+            {!isIframe() && (
+              <p className="capitalize hidden md:block">{variant}</p>
+            )}
           </Link>
         </TooltipTrigger>
         <TooltipContent>
-          <p className="capitalize block md:hidden">{variant}</p>
+          {isIframe() && <p className="capitalize">{variant}</p>}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

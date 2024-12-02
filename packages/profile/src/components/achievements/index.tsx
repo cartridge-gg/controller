@@ -15,6 +15,8 @@ import { Trophies } from "./trophies";
 import { Pinneds } from "./pinneds";
 import { Leaderboard } from "./leaderboard";
 import { useData } from "@/hooks/context";
+import { Games } from "../arcade/games";
+import { isIframe } from "@cartridge/utils";
 
 export function Achievements() {
   const { username: selfname, address: self } = useAccount();
@@ -89,42 +91,47 @@ export function Achievements() {
 
       {achievements.length ? (
         <LayoutContent className="pb-4 select-none">
-          {isSelf && (
-            <div className="flex justify-between gap-x-3 gap-y-4">
-              <TrophiesTab
-                active={activeTab === "trophies"}
-                completed={completed}
-                total={total}
-                onClick={() => setActiveTab("trophies")}
-              />
-              <LeaderboardTab
-                active={activeTab === "leaderboard"}
-                rank={rank}
-                earnings={earnings}
-                onClick={() => setActiveTab("leaderboard")}
-              />
-            </div>
-          )}
-          {(!isSelf || activeTab === "trophies") && (
-            <ScrollArea className="overflow-auto">
-              <div className="flex flex-col h-full flex-1 overflow-y-auto gap-4">
-                <Pinneds achievements={pinneds} />
-                <Trophies
+          <div className="flex justify-between h-full gap-x-8">
+            {!isIframe() && <Games />}
+            <div className="flex flex-col h-full flex-1 overflow-y-auto gap-y-4">
+              {isSelf && (
+                <div className="flex justify-between gap-x-3 gap-y-4">
+                  <TrophiesTab
+                    active={activeTab === "trophies"}
+                    completed={completed}
+                    total={total}
+                    onClick={() => setActiveTab("trophies")}
+                  />
+                  <LeaderboardTab
+                    active={activeTab === "leaderboard"}
+                    rank={rank}
+                    earnings={earnings}
+                    onClick={() => setActiveTab("leaderboard")}
+                  />
+                </div>
+              )}
+              {(!isSelf || activeTab === "trophies") && (
+                <ScrollArea className="overflow-auto">
+                  <div className="flex flex-col h-full flex-1 overflow-y-auto gap-4">
+                    <Pinneds achievements={pinneds} />
+                    <Trophies
+                      achievements={achievements}
+                      softview={!isSelf}
+                      enabled={pinneds.length < 3}
+                      onPin={() => {}}
+                    />
+                  </div>
+                </ScrollArea>
+              )}
+              {isSelf && activeTab === "leaderboard" && (
+                <Leaderboard
+                  players={players}
+                  address={self}
                   achievements={achievements}
-                  softview={!isSelf}
-                  enabled={pinneds.length < 3}
-                  onPin={() => {}}
                 />
-              </div>
-            </ScrollArea>
-          )}
-          {isSelf && activeTab === "leaderboard" && (
-            <Leaderboard
-              players={players}
-              address={self}
-              achievements={achievements}
-            />
-          )}
+              )}
+            </div>
+          </div>
         </LayoutContent>
       ) : isLoading ? (
         <LayoutContent className="pb-4 select-none">

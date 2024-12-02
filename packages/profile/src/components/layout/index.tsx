@@ -55,10 +55,8 @@ function ResponsiveWrapper({ children }: PropsWithChildren) {
   return (
     <>
       {/* for desktop */}
-      <div className="hidden md:flex h-screen flex-col items-center justify-center overflow-x-hidden">
-        <div className="w-desktop h-desktop border border-border rounded-xl overflow-hidden flex flex-col relative">
-          {children}
-        </div>
+      <div className="hidden md:flex h-screen w-screen flex-col relative">
+        {children}
       </div>
 
       {/* device smaller than desktop width */}

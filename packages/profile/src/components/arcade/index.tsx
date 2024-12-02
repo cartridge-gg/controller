@@ -1,16 +1,12 @@
 import {
   ControllerIcon,
-  JoystickIcon,
   SpaceInvaderIcon,
-  SparklesIcon,
   CopyAddress,
-  cn,
 } from "@cartridge/ui-next";
 import { Navigation } from "../navigation";
 import { LayoutContent, LayoutHeader } from "../layout";
 import { useAccount } from "@/hooks/account";
-import { data } from "./data";
-import { useState } from "react";
+import { Games } from "./games";
 
 export const Header = () => {
   const { username } = useAccount();
@@ -49,81 +45,6 @@ export const Player = () => {
       title={username}
       description={<CopyAddress address={address} size="sm" />}
       right={<Navigation />}
-    />
-  );
-};
-
-export const Games = () => {
-  const [selected, setSelected] = useState(0);
-  return (
-    <div className="flex flex-col gap-y-px w-[324px] rounded-lg overflow-hidden">
-      <Game
-        game={{
-          icon: "",
-          name: "All",
-          points: data.games.reduce((acc, game) => acc + game.points, 0),
-        }}
-        active={selected === 0}
-        onClick={() => setSelected(0)}
-      />
-      {data.games.map((game, index) => (
-        <Game
-          key={game.name}
-          game={game}
-          active={selected === index + 1}
-          onClick={() => setSelected(index + 1)}
-        />
-      ))}
-    </div>
-  );
-};
-
-export const Game = ({
-  game,
-  active,
-  onClick,
-}: {
-  game: (typeof data.games)[number];
-  active: boolean;
-  onClick: () => void;
-}) => {
-  return (
-    <div
-      className={cn(
-        "flex justify-between items-center p-2 hover:opacity-[0.8] hover:cursor-pointer",
-        active ? "bg-quaternary" : "bg-secondary",
-      )}
-      onClick={onClick}
-    >
-      <div className="flex items-center gap-x-2">
-        <div
-          className={cn(
-            "h-8 w-8 flex items-center justify-center rounded-lg",
-            active ? "bg-quinary" : "bg-quaternary",
-          )}
-        >
-          <GameIcon name={game.name} icon={game.icon} />
-        </div>
-        <p className="text-sm">{game.name}</p>
-      </div>
-      <div className="flex items-center gap-x-2">
-        <SparklesIcon className="h-4 w-4" size={"xs"} variant="line" />
-        <p className="text-sm">{game.points}</p>
-      </div>
-    </div>
-  );
-};
-
-export const GameIcon = ({ name, icon }: { name: string; icon: string }) => {
-  const [imageError, setImageError] = useState(false);
-  return imageError ? (
-    <JoystickIcon className="h-7 w-7" size="xs" variant="solid" />
-  ) : (
-    <img
-      src={icon}
-      alt={name}
-      className="h-7 w-7 object-contain"
-      onError={() => setImageError(true)}
     />
   );
 };
