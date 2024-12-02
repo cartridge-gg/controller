@@ -10,6 +10,7 @@ import {
 } from "@/components/inventory";
 import { Achievements } from "@/components/achievements";
 import { Activity } from "@/components/activity";
+import { Arcade } from "@/components/arcade";
 import { Slot } from "@/components/slot";
 
 export function App() {
@@ -23,6 +24,7 @@ export function App() {
             </Route>
           </Route>
           <Route path="activity" element={<Activity />} />
+          <Route path="arcade" element={<Arcade />} />
 
           <Route path="slot/:project" element={<Slot />}>
             <Route path="inventory" element={<Inventory />}>
@@ -41,6 +43,7 @@ export function App() {
               <Route path=":address" element={<RedirectAchievements />} />
             </Route>
             <Route path="activity" element={<Activity />} />
+            <Route path="arcade" element={<Arcade />} />
           </Route>
         </Route>
       </Route>

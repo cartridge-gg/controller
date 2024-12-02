@@ -34,6 +34,11 @@ export function Profile() {
         >
           Activity
         </Button>
+        <Button
+          onClick={() => ctrlConnector.controller.openProfile("arcade")}
+        >
+          Arcade
+        </Button>
       </div>
     </div>
   );

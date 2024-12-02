@@ -184,7 +184,8 @@ export type ProfileContextTypeVariant =
   | "inventory"
   | "trophies"
   | "achievements"
-  | "activity";
+  | "activity"
+  | "arcade";
 
 export type ColorMode = "light" | "dark";
 
