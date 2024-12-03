@@ -1,6 +1,7 @@
 export const data = {
   games: [
     {
+      id: "cartridge",
       icon: "https://raw.githubusercontent.com/cartridge-gg/controller/refs/heads/main/packages/keychain/public/whitelabel/cartridge/icon.svg",
       name: "Cartridge",
       slot: "cartridge",
@@ -8,6 +9,7 @@ export const data = {
       points: 400,
     },
     {
+      id: "loot-survivor",
       icon: "https://raw.githubusercontent.com/cartridge-gg/controller/refs/heads/main/packages/keychain/public/whitelabel/loot-survivor/icon.png",
       name: "Loot Survivor",
       slot: "lootsurvivor",
@@ -15,13 +17,15 @@ export const data = {
       points: 400,
     },
     {
+      id: "jokers-of-neon",
       icon: "https://raw.githubusercontent.com/cartridge-gg/controller/refs/heads/main/packages/keychain/public/whitelabel/jokers-of-neon/icon.png",
-      name: "Jockers of Neon",
+      name: "Jokers of Neon",
       slot: "jokersofneon",
       namespace: "jokersofneon",
       points: 400,
     },
     {
+      id: "dope-wars",
       icon: "https://raw.githubusercontent.com/cartridge-gg/controller/refs/heads/main/packages/keychain/public/whitelabel/dope-wars/icon.png",
       name: "Dope Wars",
       slot: "ryomainnet",
@@ -29,6 +33,7 @@ export const data = {
       points: 400,
     },
     {
+      id: "eternum",
       icon: "https://raw.githubusercontent.com/cartridge-gg/controller/refs/heads/main/packages/keychain/public/whitelabel/eternum/icon.gif",
       name: "Eternum",
       slot: "eternum-rc1-1",
@@ -36,6 +41,7 @@ export const data = {
       points: 400,
     },
     {
+      id: "blob-arena",
       icon: "https://raw.githubusercontent.com/cartridge-gg/controller/refs/heads/main/packages/keychain/public/whitelabel/blob-arena/icon.png",
       name: "Blob Arena",
       slot: "blobarena",
@@ -43,6 +49,7 @@ export const data = {
       points: 400,
     },
     {
+      id: "force-prime",
       icon: "https://raw.githubusercontent.com/cartridge-gg/controller/refs/heads/main/packages/keychain/public/whitelabel/force-prime/icon.png",
       name: "Force Prime",
       slot: "forceprime",
@@ -50,6 +57,7 @@ export const data = {
       points: 400,
     },
     {
+      id: "realm-of-ra",
       icon: "https://raw.githubusercontent.com/cartridge-gg/controller/refs/heads/main/packages/keychain/public/whitelabel/realm-of-ra/icon.png",
       name: "Realm of Ra",
       slot: "realmofra",
@@ -57,6 +65,7 @@ export const data = {
       points: 0,
     },
     {
+      id: "dark-shuffle",
       icon: "https://raw.githubusercontent.com/cartridge-gg/controller/refs/heads/main/packages/keychain/public/whitelabel/dark-shuffle/icon.svg",
       name: "Dark Shuffle",
       slot: "darkshuffle",
@@ -64,6 +73,7 @@ export const data = {
       points: 0,
     },
     {
+      id: "pistols",
       icon: "https://raw.githubusercontent.com/cartridge-gg/controller/refs/heads/main/packages/keychain/public/whitelabel/pistols/icon.png",
       name: "Pistols",
       slot: "pistols",
@@ -71,6 +81,7 @@ export const data = {
       points: 0,
     },
     {
+      id: "craft-island",
       icon: "invalid.png",
       name: "Craft Island",
       slot: "craftisland",
@@ -78,6 +89,7 @@ export const data = {
       points: 0,
     },
     {
+      id: "block-heroes",
       icon: "",
       name: "Block Heroes",
       slot: "blockheroes",
@@ -85,6 +97,7 @@ export const data = {
       points: 0,
     },
     {
+      id: "craft-island-bis",
       icon: "invalid.png",
       name: "Craft Island",
       slot: "craftisland",
@@ -92,6 +105,7 @@ export const data = {
       points: 0,
     },
     {
+      id: "block-heroes-bis",
       icon: "",
       name: "Block Heroes",
       slot: "blockheroes",
@@ -99,6 +113,7 @@ export const data = {
       points: 0,
     },
     {
+      id: "craft-island-ter",
       icon: "invalid.png",
       name: "Craft Island",
       slot: "craftisland",
@@ -106,6 +121,7 @@ export const data = {
       points: 0,
     },
     {
+      id: "block-heroes-ter",
       icon: "",
       name: "Block Heroes",
       slot: "blockheroes",

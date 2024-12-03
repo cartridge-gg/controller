@@ -27,11 +27,13 @@ export function Navigation() {
         isIframe() && "rounded border border-secondary gap-x-px bg-secondary",
       )}
     >
-      <Item Icon={CoinsIcon} variant="inventory" />
+      <Item Icon={CoinsIcon} variant="inventory" disabled={!isIframe()} />
       {project && namespace && (
-        <Item Icon={TrophyIcon} variant="achievements" />
+        <Item Icon={TrophyIcon} variant="achievements" disabled={false} />
       )}
-      {project && <Item Icon={ClockIcon} variant="activity" />}
+      {project && (
+        <Item Icon={ClockIcon} variant="activity" disabled={!isIframe()} />
+      )}
     </div>
   );
 }
@@ -39,9 +41,11 @@ export function Navigation() {
 function Item({
   Icon,
   variant,
+  disabled,
 }: {
   Icon: React.ComponentType<StateIconProps>;
   variant: ProfileContextTypeVariant;
+  disabled: boolean;
 }) {
   const { project } = useParams<{ project?: string }>();
   const { username } = useAccount();
@@ -55,10 +59,12 @@ function Item({
       : `/account/${username}/${variant}`;
   }, [project, username, variant]);
 
+  if (disabled) return null;
+
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger asChild>
+        <TooltipTrigger disabled={disabled} asChild>
           <Link
             className={cn(
               "flex gap-2 px-4 py-3 h-11 justify-center items-center cursor-pointer hover:opacity-[0.8]",

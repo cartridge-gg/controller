@@ -9,6 +9,9 @@ export const defaultPresets: ControllerThemePresets = {
       light: "/whitelabel/cartridge/cover-light.png",
       dark: "/whitelabel/cartridge/cover-dark.png",
     },
+    colors: {
+      primary: "#FBCB4A",
+    },
   },
   "force-prime": {
     id: "force-prime",

@@ -12,16 +12,20 @@ type ThemeProviderProps = {
   storageKey?: string;
 };
 
-type ThemeProviderContextType = {
+export type ThemeProviderContextType = {
   colorScheme: ColorScheme;
   setColorScheme: (colorMode: ColorScheme) => void;
   theme: ControllerThemePreset;
+  setTheme: (theme: ControllerThemePreset) => void;
+  resetTheme: () => void;
 };
 
-const initialState: ThemeProviderContextType = {
+export const initialState: ThemeProviderContextType = {
   colorScheme: "system",
   setColorScheme: () => null,
   theme: defaultPresets.cartridge as ControllerThemePreset,
+  setTheme: () => null,
+  resetTheme: () => null,
 };
 
 export const ThemeContext =
@@ -60,6 +64,7 @@ export function ThemeProvider({
     [storageKey],
   );
   const [theme, setTheme] = useState<ControllerThemePreset>(initialState.theme);
+  const resetTheme = () => setTheme(initialState.theme);
   const themeParam = searchParams.get("theme");
 
   useEffect(() => {
@@ -113,6 +118,8 @@ export function ThemeProvider({
     colorScheme,
     setColorScheme,
     theme,
+    setTheme,
+    resetTheme,
   };
 
   return (

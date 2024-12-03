@@ -1,13 +1,21 @@
 import { JoystickIcon, ScrollArea, SparklesIcon, cn } from "@cartridge/ui-next";
 import { data } from "./data";
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { useTheme } from "@/hooks/context";
+import {
+  ControllerThemePreset,
+  defaultPresets as presets,
+} from "@cartridge/controller";
 
 export const Games = () => {
-  const [selected, setSelected] = useState(4);
+  const [selected, setSelected] = useState(0);
+
   return (
     <div className="flex flex-col gap-y-px w-[324px] rounded-lg overflow-hidden">
       <Game
+        index={0}
         game={{
+          id: "all",
           icon: "",
           name: "All",
           slot: "",
@@ -15,15 +23,16 @@ export const Games = () => {
           points: data.games.reduce((acc, game) => acc + game.points, 0),
         }}
         active={selected === 0}
-        onClick={() => setSelected(0)}
+        setSelected={setSelected}
       />
       <ScrollArea className="overflow-auto">
         {data.games.map((game, index) => (
           <Game
-            key={game.name}
+            key={game.id}
+            index={index + 1}
             game={game}
             active={selected === index + 1}
-            onClick={() => setSelected(index + 1)}
+            setSelected={setSelected}
           />
         ))}
       </ScrollArea>
@@ -32,21 +41,41 @@ export const Games = () => {
 };
 
 export const Game = ({
+  index,
   game,
   active,
-  onClick,
+  setSelected,
 }: {
+  index: number;
   game: (typeof data.games)[number];
   active: boolean;
-  onClick: () => void;
+  setSelected: (index: number) => void;
 }) => {
+  const { theme, setTheme, resetTheme } = useTheme();
+
+  const handleClick = useCallback(() => {
+    setSelected(index);
+    const preset = presets[game.id.toLowerCase()];
+    if (!preset || !preset.colors) {
+      return resetTheme();
+    }
+    const newTheme: ControllerThemePreset = {
+      ...theme,
+      colors: {
+        ...theme.colors,
+        primary: preset.colors.primary,
+      },
+    };
+    setTheme(newTheme);
+  }, [index, theme, setSelected, setTheme]);
+
   return (
     <div
       className={cn(
         "flex justify-between items-center p-2 hover:opacity-[0.8] hover:cursor-pointer",
         active ? "bg-quaternary" : "bg-secondary",
       )}
-      onClick={onClick}
+      onClick={handleClick}
     >
       <div className="flex items-center gap-x-2">
         <div

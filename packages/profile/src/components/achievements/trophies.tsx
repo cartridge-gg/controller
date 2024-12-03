@@ -56,14 +56,6 @@ export function Trophies({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-y-1">
-        {!isIframe() && (
-          <Title
-            image={game.image}
-            title={game.title}
-            rank={game.rank}
-            earnings={game.earnings}
-          />
-        )}
         <Total completed={completed} total={total} />
       </div>
       <div className="flex flex-col gap-3">
@@ -129,11 +121,10 @@ function Total({ completed, total }: { completed: number; total: number }) {
   return (
     <div
       className={cn(
-        "h-8 py-2 flex items-center justify-between gap-4 rounded-md overflow-hidden",
-        isIframe() ? "bg-secondary px-3" : "pl-2 pr-3",
+        "h-8 py-2 flex items-center justify-between gap-4 rounded-md overflow-hidden bg-secondary px-3",
       )}
     >
-      {isIframe() && (
+      {(
         <p className="uppercase text-xs text-quaternary-foreground font-semibold tracking-wider">
           Total
         </p>

@@ -4,7 +4,7 @@ import {
   LayoutHeader,
 } from "@/components/layout";
 import { Link } from "react-router-dom";
-import { ScrollArea, Button, ArrowIcon, Spinner } from "@cartridge/ui-next";
+import { ScrollArea, Button, ArrowIcon, Spinner, cn } from "@cartridge/ui-next";
 import { TrophiesTab, LeaderboardTab, Scoreboard } from "./tab";
 import { useAccount, useUsername } from "@/hooks/account";
 import { CopyAddress } from "@cartridge/ui-next";
@@ -17,6 +17,7 @@ import { Leaderboard } from "./leaderboard";
 import { useData } from "@/hooks/context";
 import { Games } from "../arcade/games";
 import { isIframe } from "@cartridge/utils";
+import { data } from "../arcade/data";
 
 export function Achievements() {
   const { username: selfname, address: self } = useAccount();
@@ -93,9 +94,19 @@ export function Achievements() {
         <LayoutContent className="pb-4 select-none">
           <div className="flex justify-between h-full gap-x-8">
             {!isIframe() && <Games />}
-            <div className="flex flex-col h-full flex-1 overflow-y-auto gap-y-4">
+            <div
+              className={cn(
+                "flex flex-col h-full flex-1 overflow-y-auto",
+                isIframe() ? " gap-y-4" : "gap-y-6",
+              )}
+            >
               {isSelf && (
-                <div className="flex justify-between gap-x-3 gap-y-4">
+                <div
+                  className={cn(
+                    "flex justify-between gap-x-3 gap-y-4",
+                    isIframe() ? "gap-x-3" : "gap-x-4",
+                  )}
+                >
                   <TrophiesTab
                     active={activeTab === "trophies"}
                     completed={completed}
@@ -115,6 +126,12 @@ export function Achievements() {
                   <div className="flex flex-col h-full flex-1 overflow-y-auto gap-4">
                     <Pinneds achievements={pinneds} />
                     <Trophies
+                      game={{
+                        image: data.games[3].icon,
+                        title: data.games[3].name,
+                        rank,
+                        earnings,
+                      }}
                       achievements={achievements}
                       softview={!isSelf}
                       enabled={pinneds.length < 3}
