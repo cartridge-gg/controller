@@ -21,7 +21,7 @@ export function TrophiesTab({
   return (
     <Tab priority={true} active={active} onClick={onClick}>
       <Item Icon={TrophyIcon} active={active} label={"Achievements"} />
-      <p className="bg-quinary text-xs rounded-2xl px-1.5 py-0.5 font-bold">
+      <p className="bg-quinary text-xs rounded-2xl px-1.5 py-0.5 font-semibold">
         {`${completed}/${total}`}
       </p>
     </Tab>
@@ -90,7 +90,7 @@ export function Tab({
   return (
     <div
       className={cn(
-        "h-10 grow w-1/2 flex justify-between items-center gap-2 border border-secondary rounded-md p-3 cursor-pointer",
+        "h-11 grow w-1/2 flex justify-between items-center gap-2 border border-secondary rounded-md p-3 cursor-pointer",
         priority && "min-w-1/2",
         active ? "opacity-100 bg-secondary" : "opacity-50 bg-background",
         hovered && (active ? "opacity-90" : "bg-secondary/50"),

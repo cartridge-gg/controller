@@ -1,4 +1,4 @@
-import { JoystickIcon, SparklesIcon, cn } from "@cartridge/ui-next";
+import { JoystickIcon, ScrollArea, SparklesIcon, cn } from "@cartridge/ui-next";
 import { data } from "./data";
 import { useState } from "react";
 
@@ -17,14 +17,16 @@ export const Games = () => {
         active={selected === 0}
         onClick={() => setSelected(0)}
       />
-      {data.games.map((game, index) => (
-        <Game
-          key={game.name}
-          game={game}
-          active={selected === index + 1}
-          onClick={() => setSelected(index + 1)}
-        />
-      ))}
+      <ScrollArea className="overflow-auto">
+        {data.games.map((game, index) => (
+          <Game
+            key={game.name}
+            game={game}
+            active={selected === index + 1}
+            onClick={() => setSelected(index + 1)}
+          />
+        ))}
+      </ScrollArea>
     </div>
   );
 };

@@ -84,5 +84,33 @@ export const data = {
       namespace: "blockheroes",
       points: 0,
     },
+    {
+      icon: "invalid.png",
+      name: "Craft Island",
+      slot: "craftisland",
+      namespace: "craftisland",
+      points: 0,
+    },
+    {
+      icon: "",
+      name: "Block Heroes",
+      slot: "blockheroes",
+      namespace: "blockheroes",
+      points: 0,
+    },
+    {
+      icon: "invalid.png",
+      name: "Craft Island",
+      slot: "craftisland",
+      namespace: "craftisland",
+      points: 0,
+    },
+    {
+      icon: "",
+      name: "Block Heroes",
+      slot: "blockheroes",
+      namespace: "blockheroes",
+      points: 0,
+    },
   ],
 };

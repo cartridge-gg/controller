@@ -1,21 +1,26 @@
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
+  LeaderboardIcon,
+  SparklesIcon,
   StateIconProps,
   cn,
 } from "@cartridge/ui-next";
 import { Trophy } from "./trophy";
 import { Item } from "@/hooks/achievements";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { isIframe } from "@cartridge/utils";
 
 const HIDDEN_GROUP = "HIDDEN";
 
 export function Trophies({
+  game,
   achievements,
   softview,
   enabled,
   onPin,
 }: {
+  game: { image: string; title: string; rank: number; earnings: number };
   achievements: Item[];
   softview: boolean;
   enabled: boolean;
@@ -49,20 +54,17 @@ export function Trophies({
   );
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="h-8 bg-secondary py-2 px-3 flex items-center justify-between gap-4 rounded-md overflow-hidden">
-        <p className="uppercase text-xs text-quaternary-foreground font-semibold tracking-wider">
-          Total
-        </p>
-        <div className="h-4 grow flex flex-col justify-center items-start bg-quaternary rounded-xl p-1">
-          <div
-            style={{ width: `${Math.floor((100 * completed) / total)}%` }}
-            className={cn("grow bg-primary rounded-xl")}
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-y-1">
+        {!isIframe() && (
+          <Title
+            image={game.image}
+            title={game.title}
+            rank={game.rank}
+            earnings={game.earnings}
           />
-        </div>
-        <p className="text-xs text-quaternary-foreground">
-          {`${completed} of ${total}`}
-        </p>
+        )}
+        <Total completed={completed} total={total} />
       </div>
       <div className="flex flex-col gap-3">
         {Object.entries(groups)
@@ -88,6 +90,63 @@ export function Trophies({
           onPin={onPin}
         />
       </div>
+    </div>
+  );
+}
+
+function Title({
+  image,
+  title,
+  rank,
+  earnings,
+}: {
+  image: string;
+  title: string;
+  rank: number;
+  earnings: number;
+}) {
+  return (
+    <div className="flex justify-between items-center">
+      <div className="h-12 flex items-center gap-x-3 px-[9px]">
+        <img src={image} className="w-8 h-8" />
+        <p className="text-sm">{title}</p>
+      </div>
+      <div className="h-8 flex items-center gap-x-1">
+        <div className="flex items-center gap-x-1 px-2 py-1.5 text-xs text-accent-foreground">
+          <LeaderboardIcon className="w-5 h-5" size="sm" variant="solid" />
+          {`#${rank}`}
+        </div>
+        <div className="flex items-center gap-x-1 px-2 py-1.5 text-xs text-accent-foreground">
+          <SparklesIcon className="w-5 h-5" size="sm" variant="solid" />
+          {earnings}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Total({ completed, total }: { completed: number; total: number }) {
+  return (
+    <div
+      className={cn(
+        "h-8 py-2 flex items-center justify-between gap-4 rounded-md overflow-hidden",
+        isIframe() ? "bg-secondary px-3" : "pl-2 pr-3",
+      )}
+    >
+      {isIframe() && (
+        <p className="uppercase text-xs text-quaternary-foreground font-semibold tracking-wider">
+          Total
+        </p>
+      )}
+      <div className="h-4 grow flex flex-col justify-center items-start bg-quaternary rounded-xl p-1">
+        <div
+          style={{ width: `${Math.floor((100 * completed) / total)}%` }}
+          className={cn("grow bg-primary rounded-xl")}
+        />
+      </div>
+      <p className="text-xs text-quaternary-foreground">
+        {`${completed} of ${total}`}
+      </p>
     </div>
   );
 }

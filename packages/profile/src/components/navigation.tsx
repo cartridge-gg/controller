@@ -61,7 +61,7 @@ function Item({
         <TooltipTrigger asChild>
           <Link
             className={cn(
-              "flex gap-2 px-4 py-2.5 justify-center items-center cursor-pointer hover:opacity-[0.8]",
+              "flex gap-2 px-4 py-3 h-11 justify-center items-center cursor-pointer hover:opacity-[0.8]",
               isActive ? "bg-secondary" : "bg-background",
               !isIframe() && "rounded border border-secondary",
             )}
@@ -69,7 +69,9 @@ function Item({
           >
             <Icon size="sm" variant={isActive ? "solid" : "line"} />
             {!isIframe() && (
-              <p className="capitalize hidden md:block">{variant}</p>
+              <p className="capitalize text-base/[20px] hidden md:block">
+                {variant}
+              </p>
             )}
           </Link>
         </TooltipTrigger>

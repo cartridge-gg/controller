@@ -55,7 +55,7 @@ function ResponsiveWrapper({ children }: PropsWithChildren) {
   return (
     <>
       {/* for desktop */}
-      <div className="hidden md:flex h-screen w-screen flex-col relative">
+      <div className="hidden md:flex h-screen w-screen flex-col gap-y-8 relative">
         {children}
       </div>
 
@@ -81,7 +81,12 @@ export function LayoutHeader({
   right,
 }: LayoutHeaderProps) {
   return (
-    <div className="flex gap-2 px-4 py-6 sticky top-16 bg-background justify-between">
+    <div
+      className={cn(
+        "flex gap-2 sticky top-16 bg-background justify-between items-center",
+        isIframe() ? "w-full px-4 py-6" : "w-[1048px] m-auto",
+      )}
+    >
       <div className="flex min-w-0 gap-2 items-center">
         <div className="w-11 h-11 bg-secondary rounded flex shrink-0 items-center justify-center overflow-hidden">
           {typeof icon === "object" ? (
@@ -119,7 +124,8 @@ export function LayoutContent({
   return (
     <div
       className={cn(
-        "flex flex-col h-full flex-1 overflow-y-auto px-4 gap-y-4",
+        "flex flex-col h-full flex-1 overflow-y-auto",
+        isIframe() ? "w-full px-4 gap-y-4" : "w-[1048px] m-auto",
         className,
       )}
     >
