@@ -23,7 +23,7 @@ export type Session = {
   };
 };
 
-/** The key must be the origin */
+/** The key must be the id */
 export type VerifiedConfigs = Record<string, VerifiedConfig>;
 
 export type VerifiedConfig = {
