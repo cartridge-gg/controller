@@ -7,6 +7,17 @@
 @tailwind utilities;
 
 :root {
-  background: hsla(var(--background));
-  color: hsla(var(--foreground));
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+html,
+body {
+  background: hsl(var(--background));
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+
+  &::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+  }
 }
