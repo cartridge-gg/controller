@@ -57,7 +57,7 @@ export function SessionSummary({
   });
 
   useEffect(() => {
-    setError(error);
+    setError?.(error);
   }, [error, setError]);
 
   if (isLoading) {
@@ -210,6 +210,10 @@ function SignMessages({
 }: {
   messages: SessionSummaryType["messages"];
 }) {
+  if (!messages.length) {
+    return null;
+  }
+
   return (
     <Card>
       <CardHeader
@@ -238,31 +242,31 @@ function SignMessages({
               >
                 {Object.values(m.domain).filter((f) => typeof f !== "undefined")
                   .length && (
-                    <CollapsibleRow key="domain" title="domain">
-                      {m.domain.name && (
-                        <ValueRow
-                          values={[{ name: "name", value: m.domain.name }]}
-                        />
-                      )}
-                      {m.domain.version && (
-                        <ValueRow
-                          values={[{ name: "version", value: m.domain.version }]}
-                        />
-                      )}
-                      {m.domain.chainId && (
-                        <ValueRow
-                          values={[{ name: "chainId", value: m.domain.chainId }]}
-                        />
-                      )}
-                      {m.domain.revision && (
-                        <ValueRow
-                          values={[
-                            { name: "revision", value: m.domain.revision },
-                          ]}
-                        />
-                      )}
-                    </CollapsibleRow>
-                  )}
+                  <CollapsibleRow key="domain" title="domain">
+                    {m.domain.name && (
+                      <ValueRow
+                        values={[{ name: "name", value: m.domain.name }]}
+                      />
+                    )}
+                    {m.domain.version && (
+                      <ValueRow
+                        values={[{ name: "version", value: m.domain.version }]}
+                      />
+                    )}
+                    {m.domain.chainId && (
+                      <ValueRow
+                        values={[{ name: "chainId", value: m.domain.chainId }]}
+                      />
+                    )}
+                    {m.domain.revision && (
+                      <ValueRow
+                        values={[
+                          { name: "revision", value: m.domain.revision },
+                        ]}
+                      />
+                    )}
+                  </CollapsibleRow>
+                )}
 
                 <ValueRow
                   values={[{ name: "primaryType", value: m.primaryType }]}
@@ -279,13 +283,13 @@ function SignMessages({
                             { name: "type", value: t.type },
                             ...(["enum", "merkletree"].includes(t.name)
                               ? [
-                                {
-                                  name: "contains",
-                                  value: (
-                                    t as StarknetEnumType | StarknetMerkleType
-                                  ).contains,
-                                },
-                              ]
+                                  {
+                                    name: "contains",
+                                    value: (
+                                      t as StarknetEnumType | StarknetMerkleType
+                                    ).contains,
+                                  },
+                                ]
                               : []),
                           ]}
                         />
