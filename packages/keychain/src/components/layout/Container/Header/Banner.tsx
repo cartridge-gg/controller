@@ -51,7 +51,7 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
               left: 0,
               right: 0,
               bottom: 0,
-              background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, #161A17 100%)`,
+              background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, var(--chakra-colors-solid-bg) 100%)`,
               pointerEvents: "none",
             }}
           >

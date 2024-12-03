@@ -4,15 +4,20 @@ import { IconButton } from "@chakra-ui/react";
 import { useConnection } from "hooks/connection";
 import { useCallback } from "react";
 
-export function CloseButton() {
+export function CloseButton({ onClose }: { onClose?: () => void }) {
   const { upgrade, logout, closeModal } = useConnection();
 
-  const onClose = useCallback(() => {
+  const handleClose = useCallback(() => {
     if (upgrade.available) {
       logout();
     }
+
+    if (onClose) {
+      onClose();
+    }
+
     closeModal();
-  }, [upgrade.available, logout, closeModal]);
+  }, [upgrade.available, logout, closeModal, onClose]);
 
   if (!isIframe()) {
     return null;
@@ -23,11 +28,10 @@ export function CloseButton() {
       aria-label="Close Controller"
       bg="solid.bg"
       _hover={{
-        bg: "solid.bg",
-        opacity: 0.75,
+        bg: "hsl(var(solid.primary)/0.75)",
       }}
       icon={<TimesIcon fontSize={24} />}
-      onClick={onClose}
+      onClick={handleClose}
     />
   );
 }

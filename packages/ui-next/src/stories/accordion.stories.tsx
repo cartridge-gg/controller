@@ -28,7 +28,7 @@ function Accordion() {
     <UIAccordion type="single" collapsible>
       <AccordionItem value="item-1">
         <AccordionTrigger>
-          You are agreeing to automate{" "}
+          Approve{" "}
           <span className="text-accent-foreground font-bold">2 methods</span>
         </AccordionTrigger>
         <AccordionContent className="gap-px">

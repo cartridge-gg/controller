@@ -34,6 +34,31 @@ export const Default: Story = {
   },
 };
 
+export const WithLightMode: Story = {
+  parameters: {
+    colorMode: "light",
+  },
+  args: {
+    theme: {
+      id: "cartridge",
+      name: "Cartridge",
+    },
+    usernameField: {
+      value: "",
+      error: undefined,
+    },
+    validation: {
+      status: "valid",
+      exists: false,
+    },
+    isLoading: false,
+    onUsernameChange: () => {},
+    onUsernameFocus: () => {},
+    onUsernameClear: () => {},
+    onSubmit: () => {},
+  },
+};
+
 export const WithTheme: Story = {
   parameters: {
     preset: "eternum",

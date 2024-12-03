@@ -9,9 +9,10 @@ import { useMemo } from "react";
 export type TopBarProps = {
   onBack?: () => void;
   hideAccount?: boolean;
+  onClose?: () => void;
 };
 
-export function TopBar({ onBack, hideAccount }: TopBarProps) {
+export function TopBar({ onBack, hideAccount, onClose }: TopBarProps) {
   const { openSettings, context } = useConnection();
   const showSettings = useMemo(
     () => !context || !["connect", "open-settings"].includes(context.type),
@@ -31,7 +32,11 @@ export function TopBar({ onBack, hideAccount }: TopBarProps) {
       h={TOP_BAR_HEIGHT / 4}
       p={2}
     >
-      {onBack ? <BackButton onClick={onBack} /> : <CloseButton />}
+      {onBack ? (
+        <BackButton onClick={onBack} />
+      ) : (
+        <CloseButton onClose={onClose} />
+      )}
 
       <Spacer />
 

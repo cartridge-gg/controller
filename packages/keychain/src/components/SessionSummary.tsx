@@ -181,7 +181,7 @@ function Contract({
         <AccordionItem value="item-1">
           <CardContent>
             <AccordionTrigger>
-              You are agreeing to automate{" "}
+              Approve{" "}
               <span className="text-accent-foreground font-bold">
                 {policies.length} {policies.length > 1 ? "methods" : "method"}
               </span>

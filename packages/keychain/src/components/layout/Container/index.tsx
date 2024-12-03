@@ -13,6 +13,7 @@ import { Header, HeaderProps } from "./Header";
 export function Container({
   children,
   onBack,
+  onClose,
   hideAccount,
   Icon,
   icon,
@@ -28,6 +29,7 @@ export function Container({
     <Wrapper variant={variant}>
       <Header
         onBack={onBack}
+        onClose={onClose}
         hideAccount={hideAccount}
         Icon={Icon}
         icon={icon}
