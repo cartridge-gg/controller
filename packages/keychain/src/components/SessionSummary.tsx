@@ -168,8 +168,7 @@ function Contract({
             <AccordionTrigger>
               You are agreeing to automate{" "}
               <span className="text-accent-foreground font-bold">
-                {policies.length} method
-                {policies.length > 0 ? "s" : ""}
+                {policies.length} {policies.length > 1 ? "methods" : "method"}
               </span>
             </AccordionTrigger>
           </CardContent>
@@ -230,7 +229,11 @@ function SignMessages({
         <AccordionItem value="item-1">
           <CardContent>
             <AccordionTrigger>
-              You are agreeing to sign messages in the following format
+              You are agreeing to sign{" "}
+              <span className="text-accent-foreground font-bold">
+                {messages.length} {messages.length > 1 ? "messages" : "message"}
+              </span>{" "}
+              in the following format
             </AccordionTrigger>
           </CardContent>
 
