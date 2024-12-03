@@ -38,6 +38,7 @@ import { constants, StarknetEnumType, StarknetMerkleType } from "starknet";
 import Link from "next/link";
 import { useConnection } from "hooks/connection";
 import { useSessionSummary } from "@cartridge/utils";
+import { ScrollIcon } from "@cartridge/ui";
 
 export function SessionSummary({
   policies,
@@ -78,12 +79,26 @@ export function SessionSummary({
 
   return (
     <div className="flex flex-col gap-4">
+      {Object.entries(summary.dojo).map(([address, { policies, meta }]) => (
+        <Contract
+          key={address}
+          address={address}
+          title={meta.dojoName}
+          policies={policies}
+        />
+      ))}
+
       {Object.entries(summary.default).map(([address, policies], i) => (
         <Contract
           key={address}
           address={address}
           title={`Contract ${i + 1}`}
           policies={policies}
+          icon={
+            <CardIcon>
+              <ScrollIcon variant="line" />
+            </CardIcon>
+          }
         />
       ))}
 
