@@ -65,7 +65,7 @@ const CardIcon = React.forwardRef<
       {src ? (
         <img
           src={src}
-          className={cn("h-8 aspect-square", className)}
+          className={cn("h-7 aspect-square rounded-sm", className)}
           {...props}
         />
       ) : props.children ? (
