@@ -8,6 +8,7 @@ export function fetchDataCreator(
   return async <TData, TVariables>(
     query: string,
     variables?: TVariables,
+    signal?: AbortSignal,
   ): Promise<TData> => {
     const res = await fetch(url, {
       method: "POST",
@@ -20,6 +21,7 @@ export function fetchDataCreator(
         query,
         variables,
       }),
+      signal,
     });
 
     const json = await res.json();
