@@ -63,7 +63,7 @@ export function ErrorAlert({
       color="solid.bg"
       fontSize="sm"
     >
-      <AccordionItem position="relative">
+      <AccordionItem position="relative" border="none">
         {({ isExpanded: itemExpanded }) => (
           <>
             <AccordionButton

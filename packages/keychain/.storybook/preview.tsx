@@ -2,7 +2,11 @@ import React, { PropsWithChildren, useMemo } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import type { Parameters, Preview } from "@storybook/react";
 import { ChakraProvider } from "@chakra-ui/react";
-import Controller, { ControllerTheme } from "@cartridge/controller";
+import Controller, {
+  ControllerTheme,
+  ControllerThemePresets,
+  defaultPresets,
+} from "@cartridge/controller";
 import { Inter, IBM_Plex_Mono } from "next/font/google";
 import {
   ControllerThemeProvider,
@@ -35,6 +39,7 @@ const preview: Preview = {
         date: /Date$/i,
       },
     },
+    preset: "cartridge",
   },
   decorators: [
     (Story, { parameters }) => (
@@ -76,8 +81,10 @@ function Provider({
   children,
   parameters,
 }: { parameters: StoryParameters } & PropsWithChildren) {
-  const preset = useControllerThemePreset();
+  const presetId = parameters.preset || "cartridge";
+  const preset = defaultPresets[presetId];
   const chakraTheme = useChakraTheme(preset);
+  console.log(preset);
   const ctrlTheme: ControllerTheme = {
     id: preset.id,
     name: preset.name,
@@ -105,9 +112,10 @@ interface StoryParameters extends Parameters {
     chainId?: string;
     upgrade?: UpgradeInterface;
   };
+  preset?: string;
 }
 
-function useMockedConnection({
+export function useMockedConnection({
   chainId = constants.StarknetChainId.SN_SEPOLIA,
   context = {
     type: "connect",
