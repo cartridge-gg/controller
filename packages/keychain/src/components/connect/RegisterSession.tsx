@@ -1,7 +1,6 @@
 import { Content } from "components/layout";
 import { useCallback, useMemo, useState } from "react";
 import { useConnection } from "hooks/connection";
-import { Policies } from "components/Policies";
 import { SessionConsent } from "components/connect";
 import { ExecutionContainer } from "components/ExecutionContainer";
 import {
@@ -9,6 +8,7 @@ import {
   TransactionFinalityStatus,
 } from "starknet";
 import { SESSION_EXPIRATION } from "const";
+import { SessionSummary } from "components/SessionSummary";
 
 export function RegisterSession({
   onConnect,
@@ -71,7 +71,7 @@ export function RegisterSession({
     >
       <Content>
         <SessionConsent />
-        <Policies policies={policies} />
+        <SessionSummary policies={policies} />
       </Content>
     </ExecutionContainer>
   );
