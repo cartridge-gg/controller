@@ -29,7 +29,7 @@ export type VerifiedConfigs = Record<string, VerifiedConfig>;
 export type VerifiedConfig = {
   origin: string;
   policies?: SessionPolicies;
-  theme?: ControllerThemePreset;
+  theme?: ControllerTheme;
 };
 
 export type SessionPolicies = {
@@ -164,7 +164,7 @@ export type IFrameOptions = {
   /** The ID of the starter pack to use */
   starterPackId?: string;
   /** The theme to use */
-  theme?: string;
+  theme?: ControllerThemeOption;
   /** The color mode to use */
   colorMode?: ColorMode;
 };
@@ -203,16 +203,12 @@ export type ProfileContextTypeVariant =
 
 export type ColorMode = "light" | "dark";
 
+export type ControllerThemeOption = string | ControllerTheme;
+
 export type ControllerTheme = {
   name: string;
   icon: string;
   cover: ThemeValue<string>;
-  colorMode: ColorMode;
-};
-
-export type ControllerThemePresets = Record<string, ControllerThemePreset>;
-
-export type ControllerThemePreset = Omit<ControllerTheme, "colorMode"> & {
   colors?: ControllerColors;
 };
 

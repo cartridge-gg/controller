@@ -19,15 +19,17 @@ export function Provider({ children }: PropsWithChildren) {
   const chakraTheme = useChakraTheme(preset);
   const router = useRouter();
 
+  const colorMode = useMemo(
+    () => (router.query.colorMode as ColorMode) ?? "dark",
+    [router.query.colorMode],
+  );
   const controllerTheme = useMemo(
     () => ({
-      id: preset.id,
       name: preset.name,
       icon: preset.icon,
       cover: preset.cover,
-      colorMode: (router.query.colorMode as ColorMode) ?? "dark",
     }),
-    [preset, router.query],
+    [preset],
   );
   const connection = useConnectionValue();
 
@@ -35,11 +37,15 @@ export function Provider({ children }: PropsWithChildren) {
     <ChakraProvider theme={chakraTheme}>
       <CartridgeAPIProvider url={ENDPOINT}>
         <QueryClientProvider client={queryClient}>
-          <ControllerThemeProvider value={controllerTheme} theme={preset}>
-            <ConnectionProvider value={connection}>
+          <ConnectionProvider value={connection}>
+            <ControllerThemeProvider
+              value={controllerTheme}
+              colorMode={colorMode}
+              theme={preset}
+            >
               <PostHogProvider client={posthog}>{children}</PostHogProvider>
-            </ConnectionProvider>
-          </ControllerThemeProvider>
+            </ControllerThemeProvider>
+          </ConnectionProvider>
         </QueryClientProvider>
       </CartridgeAPIProvider>
     </ChakraProvider>

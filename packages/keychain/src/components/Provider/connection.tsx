@@ -1,7 +1,7 @@
 import { createContext, PropsWithChildren } from "react";
 import Controller from "utils/controller";
 import { ConnectionCtx } from "utils/connection";
-import { Policy, Prefund } from "@cartridge/controller";
+import { Prefund, SessionPolicies } from "@cartridge/controller";
 import { UpgradeInterface } from "hooks/upgrade";
 
 export const ConnectionContext =
@@ -14,7 +14,7 @@ export type ConnectionContextValue = {
   rpcUrl: string;
   chainId: string;
   chainName: string;
-  policies: Policy[];
+  policies: SessionPolicies;
   prefunds: Prefund[];
   hasPrefundRequest: boolean;
   error?: Error;

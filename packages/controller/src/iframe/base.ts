@@ -1,5 +1,4 @@
 import { AsyncMethodReturns, connectToChild } from "@cartridge/penpal";
-import { defaultTheme, verifiedConfigs } from "../verified";
 import { ControllerOptions, Modal } from "../types";
 
 export type IFrameOptions<CallSender> = Omit<
@@ -35,16 +34,14 @@ export class IFrame<CallSender extends {}> implements Modal {
       return;
     }
 
-    url.searchParams.set(
-      "theme",
-      encodeURIComponent(
-        JSON.stringify(
-          theme && theme in verifiedConfigs
-            ? verifiedConfigs[theme]
-            : defaultTheme,
+    if (theme) {
+      url.searchParams.set(
+        "theme",
+        encodeURIComponent(
+          typeof theme === "string" ? theme : JSON.stringify(theme),
         ),
-      ),
-    );
+      );
+    }
 
     if (colorMode) {
       url.searchParams.set("colorMode", colorMode);

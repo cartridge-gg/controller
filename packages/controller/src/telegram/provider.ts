@@ -8,9 +8,9 @@ import { ec, stark, WalletAccount } from "starknet";
 
 import { KEYCHAIN_URL } from "../constants";
 import { SessionPolicies } from "../types";
-import SessionAccount from "src/session/account";
-import BaseProvider from "src/provider";
-import { toWasmPolicies } from "src/utils";
+import SessionAccount from "../session/account";
+import BaseProvider from "../provider";
+import { toWasmPolicies } from "../utils";
 
 interface SessionRegistration {
   username: string;

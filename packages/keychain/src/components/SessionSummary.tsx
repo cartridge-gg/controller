@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, useEffect, useState } from "react";
-import { CallPolicy, Policy } from "@cartridge/controller";
+import { SessionPolicies } from "@cartridge/controller";
 import {
   Card,
   CardContent,
@@ -29,6 +29,7 @@ import {
   ErrorImage,
 } from "@cartridge/ui-next";
 import {
+  ContractPolicy,
   formatAddress,
   isSlotChain,
   SessionSummary as SessionSummaryType,
@@ -44,7 +45,7 @@ export function SessionSummary({
   policies,
   setError,
 }: {
-  policies: Policy[];
+  policies: SessionPolicies;
   setError?: (error: Error) => void;
 }) {
   const { controller } = useConnection();
@@ -147,9 +148,12 @@ function Contract({
 }: {
   address: string;
   title: string;
-  policies: CallPolicy[];
+  policies: ContractPolicy;
   icon?: React.ReactNode;
 }) {
+  const methods = Array.isArray(policies.methods)
+    ? policies.methods
+    : [policies.methods];
   const { chainId } = useConnection();
   const isSlot = isSlotChain(chainId);
 
@@ -183,17 +187,17 @@ function Contract({
             <AccordionTrigger>
               Approve{" "}
               <span className="text-accent-foreground font-bold">
-                {policies.length} {policies.length > 1 ? "methods" : "method"}
+                {methods.length} {methods.length > 1 ? "methods" : "method"}
               </span>
             </AccordionTrigger>
           </CardContent>
 
           <AccordionContent>
-            {policies.map((c) => (
-              <CardContent key={c.method} className="flex items-center gap-1">
+            {methods.map((c) => (
+              <CardContent key={c.name} className="flex items-center gap-1">
                 <CircleIcon size="sm" className="text-muted-foreground" />
                 <div className="flex items-center gap-2">
-                  <div>{c.method}</div>
+                  <div>{c.name}</div>
 
                   {c.description && (
                     <TooltipProvider>
