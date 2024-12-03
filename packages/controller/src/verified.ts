@@ -1,5 +1,14 @@
 import { VerifiedConfigs } from "./types";
 
+export const defaultTheme = {
+  name: "Cartridge",
+  icon: "/whitelabel/cartridge/icon.svg",
+  cover: {
+    light: "/whitelabel/cartridge/cover-light.png",
+    dark: "/whitelabel/cartridge/cover-dark.png",
+  },
+};
+
 export const verifiedConfigs: VerifiedConfigs = {
   "force-prime": {
     origin: "",
@@ -27,10 +36,10 @@ export const verifiedConfigs: VerifiedConfigs = {
     origin: "",
     theme: {
       name: "Eternum",
-      icon: "/whitelabel/eternum/icon.gif",
+      icon: "/whitelabel/eternum/icon.svg",
       cover: "/whitelabel/eternum/cover.png",
       colors: {
-        primary: "#CE9822",
+        primary: "#dc8b07",
       },
     },
   },

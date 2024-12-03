@@ -2,7 +2,7 @@ import {
   ControllerColor,
   ControllerTheme,
   ControllerThemePreset,
-  defaultPresets,
+  defaultTheme,
 } from "@cartridge/controller";
 import { CartridgeTheme } from "@cartridge/ui";
 import { useThemeEffect } from "@cartridge/ui-next";
@@ -53,7 +53,7 @@ export function useControllerThemePreset() {
   return useMemo(() => {
     const q = router.query.theme;
     if (typeof q === "undefined") {
-      return defaultPresets.cartridge;
+      return defaultTheme;
     }
 
     const str = decodeURIComponent(Array.isArray(q) ? q[q.length - 1] : q);
@@ -61,7 +61,7 @@ export function useControllerThemePreset() {
     try {
       return JSON.parse(str) as ControllerThemePreset;
     } catch {
-      return defaultPresets.cartridge;
+      return defaultTheme;
     }
   }, [router.query.theme]);
 }

@@ -1,4 +1,4 @@
-import { ControllerThemePreset, defaultPresets } from "@cartridge/controller";
+import { ControllerThemePreset, defaultTheme } from "@cartridge/controller";
 import { useThemeEffect } from "@cartridge/ui-next";
 import { createContext, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -20,7 +20,7 @@ type ThemeProviderContextType = {
 const initialState: ThemeProviderContextType = {
   colorScheme: "system",
   setColorScheme: () => null,
-  theme: defaultPresets.cartridge as ControllerThemePreset,
+  theme: defaultTheme,
 };
 
 export const ThemeContext =

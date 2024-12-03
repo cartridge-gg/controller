@@ -5,7 +5,6 @@ import { KeychainIFrame, ProfileIFrame } from "./iframe";
 import { NotReadyToConnect } from "./errors";
 import {
   Keychain,
-  Policy,
   ResponseCodes,
   ConnectReply,
   ProbeReply,
@@ -112,7 +111,7 @@ export default class ControllerProvider extends BaseProvider {
 
     try {
       let response = await this.keychain.connect(
-        this.options.policies || [],
+        this.options.policies || {},
         this.rpc.toString(),
       );
       if (response.code !== ResponseCodes.SUCCESS) {
@@ -182,7 +181,7 @@ export default class ControllerProvider extends BaseProvider {
     return true;
   }
 
-  revoke(origin: string, _policy: Policy[]) {
+  revoke(origin: string) {
     if (!this.keychain) {
       console.error(new NotReadyToConnect().message);
       return null;

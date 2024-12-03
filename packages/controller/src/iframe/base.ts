@@ -1,5 +1,5 @@
 import { AsyncMethodReturns, connectToChild } from "@cartridge/penpal";
-import { defaultPresets } from "../presets";
+import { defaultTheme, verifiedConfigs } from "../verified";
 import { ControllerOptions, Modal } from "../types";
 
 export type IFrameOptions<CallSender> = Omit<
@@ -39,7 +39,9 @@ export class IFrame<CallSender extends {}> implements Modal {
       "theme",
       encodeURIComponent(
         JSON.stringify(
-          defaultPresets[theme ?? "cartridge"] ?? defaultPresets.cartridge,
+          theme && theme in verifiedConfigs
+            ? verifiedConfigs[theme]
+            : defaultTheme,
         ),
       ),
     );

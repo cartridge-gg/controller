@@ -32,7 +32,6 @@ export type VerifiedConfig = {
   theme?: ControllerThemePreset;
 };
 
-/** It must contain one field */
 export type SessionPolicies = {
   /** The key must be the contract address */
   contracts?: ContractPolicies;
@@ -176,7 +175,7 @@ export type ProviderOptions = {
 };
 
 export type KeychainOptions = IFrameOptions & {
-  policies?: SessionPolicies[];
+  policies?: SessionPolicies;
   /** The URL of keychain */
   url?: string;
   /** The origin of keychain */
