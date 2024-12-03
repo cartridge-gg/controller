@@ -15,6 +15,7 @@ import {
 } from "../src/components/Provider/connection";
 import { constants } from "starknet";
 import { getChainName } from "@cartridge/utils";
+import Script from "next/script";
 import { ETH_CONTRACT_ADDRESS } from "../src/utils/token";
 import { ConnectCtx, ConnectionCtx } from "../src/utils/connection/types";
 import { UpgradeInterface } from "../src/hooks/upgrade";
@@ -24,6 +25,7 @@ const ibmPlexMono = IBM_Plex_Mono({
   weight: "600",
   subsets: ["latin"],
 });
+import "../src/index.css";
 
 const preview: Preview = {
   parameters: {
@@ -60,6 +62,7 @@ const preview: Preview = {
             display: none; /* Safari and Chrome */
           }
         `}</style>
+        <Script src="/noflash.js" />
 
         <Provider parameters={parameters as StoryParameters}>
           <Story />
