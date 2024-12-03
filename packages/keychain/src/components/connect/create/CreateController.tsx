@@ -108,8 +108,15 @@ export function CreateController({
     error: undefined,
   });
 
-  const { debouncedValue: username } = useDebounce(usernameField.value, 100);
-  const validation = useUsernameValidation(username);
+  // Debounce validation quickly to reduce latency
+  const { debouncedValue: validationUsername } = useDebounce(
+    usernameField.value,
+    25,
+  );
+
+  const validation = useUsernameValidation(validationUsername);
+  // Debounce the validation result rather than the input value
+  const { debouncedValue: debouncedValidation } = useDebounce(validation, 200);
 
   const { isLoading, error, setError, handleSubmit } = useCreateController({
     onCreated,
@@ -153,7 +160,7 @@ export function CreateController({
     <CreateControllerView
       theme={theme}
       usernameField={usernameField}
-      validation={validation}
+      validation={debouncedValidation}
       isLoading={isLoading}
       error={error}
       onUsernameChange={handleUsernameChange}
