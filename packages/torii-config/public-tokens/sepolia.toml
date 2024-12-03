@@ -3,9 +3,10 @@ rpc = "https://api.cartridge.gg/x/starknet/sepolia"
 
 world_address = "0x0191249cc14cd1c84f80a0e7be0661b0788f5e01a51786664e15c5693e787a5d"
 
+[indexing]
 contracts = [
   # ETH
-  { type = "ERC20", address = "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7" },
+  "erc20:0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
   # STRK
-  { type = "ERC20", address = "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d" },
+  "erc20:0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
 ]

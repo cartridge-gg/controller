@@ -3,47 +3,45 @@ rpc = "https://api.cartridge.gg/x/starknet/mainnet"
 
 world_address = "0x04f3dccb47477c087ad9c76b8067b8aadded57f8df7f2d7543e6066bcb25332c"
 
-contracts = [
-  # PAPER
-  { type = "ERC20", address = "0x07de3ab356f899b1d8fcd008a602afe2b31f6f55acb83961236b75998894755a" },
-  # FLIP
-  { type = "ERC20", address = "0x01bfe97d729138fc7c2d93c77d6d1d8a24708d5060608017d9b384adf38f04c7" },
-  # LORDS
-  { type = "ERC20", address = "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49" },
-
-  # Loot Survivor
-  { type = "ERC721", address = "0x018108b32cea514a78ef1b0e4a0753e855cdf620bc0565202c02456f618c4dc4" },
-  # Realms (for Adventurers)
-  { type = "ERC721", address = "0x07ae27a31bb6526e3de9cf02f081f6ce0615ac12a6d7b85ee58b8ad7947a2809" },
-  # Blobert
-  { type = "ERC721", address = "0x00539f522b29ae9251dbf7443c7a950cf260372e69efab3710a11bf17a9599f1" },
-  # Loot Survivor: Golden Token
-  { type = "ERC721", address = "0x04f5e296c805126637552cf3930e857f380e7c078e8f00696de4fc8545356b1d" },
-  # Loot Survivor: Beasts
-  { type = "ERC721", address = "0x0158160018d590d93528995b340260e65aedd76d28a686e9daa5c4e8fad0c5dd" },
-  # Pixel Banners (for Adventurers)
-  { type = "ERC721", address = "0x02d66679de61a5c6d57afd21e005a8c96118bd60315fd79a4521d68f5e5430d1" },
-  # The Syndicate
-  { type = "ERC721", address = "0x065a413ce0b5c169c583c7efad857913523485f1febcf5ef4f3909133f04904a" },
-  # Ducks Everywhere
-  { type = "ERC721", address = "0x04fa864a706e3403fd17ac8df307f22eafa21b778b73353abf69a622e47a2003" },
-  # Karat
-  { type = "ERC721", address = "0x07d8ea58612a5de25f29281199a4fc1f2ce42f0f207f93c3a35280605f3b8e68" },
-  # Jokers of Neon: Beasts JN_BEASTS
-  { type = "ERC721", address = "0x07268fcf96383f8691b91ba758cc8fefe0844146f0557909345b841fb1de042f" },
-
-  # Starknet.id
-  { type = "ERC721", address = "0x05dbdedc203e92749e2e746e2d40a768d966bd243df04a6b712e222bc040a9af" },
-  # Ekubo: Positions
-  { type = "ERC721", address = "0x07b696af58c967c1b14c9dde0ace001720635a660a8e90c565ea459345318b30" },
-]
-
 [indexing]
 allowed_origins = ["*"]
 index_pending = true
 index_transactions = false
 polling_interval = 1000
-contracts = []
+contracts = [
+  # PAPER
+  "erc20:0x07de3ab356f899b1d8fcd008a602afe2b31f6f55acb83961236b75998894755a",
+  # FLIP
+  "erc20:0x01bfe97d729138fc7c2d93c77d6d1d8a24708d5060608017d9b384adf38f04c7",
+  # LORDS
+  "erc20:0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
+
+  # Loot Survivor
+  "erc721:0x018108b32cea514a78ef1b0e4a0753e855cdf620bc0565202c02456f618c4dc4",
+  # Realms (for Adventurers)
+  "erc721:0x07ae27a31bb6526e3de9cf02f081f6ce0615ac12a6d7b85ee58b8ad7947a2809",
+  # Blobert
+  "erc721:0x00539f522b29ae9251dbf7443c7a950cf260372e69efab3710a11bf17a9599f1",
+  # Loot Survivor: Golden Token
+  "erc721:0x04f5e296c805126637552cf3930e857f380e7c078e8f00696de4fc8545356b1d",
+  # Loot Survivor: Beasts
+  "erc721:0x0158160018d590d93528995b340260e65aedd76d28a686e9daa5c4e8fad0c5dd",
+  # Pixel Banners (for Adventurers)
+  "erc721:0x02d66679de61a5c6d57afd21e005a8c96118bd60315fd79a4521d68f5e5430d1",
+  # The Syndicate
+  "erc721:0x065a413ce0b5c169c583c7efad857913523485f1febcf5ef4f3909133f04904a",
+  # Ducks Everywhere
+  "erc721:0x04fa864a706e3403fd17ac8df307f22eafa21b778b73353abf69a622e47a2003",
+  # Karat
+  "erc721:0x07d8ea58612a5de25f29281199a4fc1f2ce42f0f207f93c3a35280605f3b8e68",
+  # Jokers of Neon: Beasts JN_BEASTS
+  "erc721:0x07268fcf96383f8691b91ba758cc8fefe0844146f0557909345b841fb1de042f",
+
+  # Starknet.id
+  "erc721:0x05dbdedc203e92749e2e746e2d40a768d966bd243df04a6b712e222bc040a9af",
+  # Ekubo: Positions
+  "erc721:0x07b696af58c967c1b14c9dde0ace001720635a660a8e90c565ea459345318b30",
+]
 
 [events]
 raw = true    
