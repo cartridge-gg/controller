@@ -32,7 +32,7 @@ function StatusTray({
         display="flex"
         flexDirection="row"
         alignItems="flex-start"
-        padding="8px 12px"
+        padding="8px 15px"
         bg="#242824"
         marginTop="-1rem"
         paddingTop="15px"
@@ -351,7 +351,7 @@ export function CreateController({
       title={
         theme.id === "cartridge" ? "Play with Controller" : `Play ${theme.name}`
       }
-      description="Your universal player profile"
+      description="Use your Controller to seamlessly play games and earn rewards"
     >
       <form
         style={{ width: "100%" }}
@@ -409,7 +409,7 @@ export function CreateController({
             >
               By clicking play you are agreeing to Cartridge&apos;s{" "}
               <Link
-                href="https://cartridge.gg/terms"
+                href="https://cartridge.gg/legal/terms-of-service"
                 target="_blank"
                 color="brand.primary"
                 textDecoration="underline"
@@ -419,7 +419,7 @@ export function CreateController({
               </Link>{" "}
               and{" "}
               <Link
-                href="https://cartridge.gg/privacy"
+                href="https://cartridge.gg/legal/privacy-policy"
                 target="_blank"
                 color="brand.primary"
                 textDecoration="underline"

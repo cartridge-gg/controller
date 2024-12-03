@@ -1,4 +1,4 @@
-import { HStack, Text, VStack } from "@chakra-ui/react";
+import { HStack, VStack, Text } from "@chakra-ui/react";
 import { CartridgeLogo } from "@cartridge/ui";
 import React, { useEffect, useRef } from "react";
 import { FOOTER_HEIGHT, useLayout } from "components/layout";
@@ -50,6 +50,7 @@ export function Footer({
         w="full"
         align="stretch"
         p={4}
+        pb={1}
       >
         {children}
       </VStack>
@@ -59,8 +60,6 @@ export function Footer({
           justifySelf="flex-end"
           bg="solid.bg"
           w="full"
-          borderTopWidth={1}
-          borderColor="solid.spacer"
           color="text.secondary"
           alignItems="center"
           justify="center"
@@ -76,11 +75,9 @@ export function Footer({
           }}
         >
           <ControllerIcon height={22} />
-
           <Text fontSize="xs" fontWeight={500} color="currentColor">
             by
           </Text>
-
           <CartridgeLogo fontSize={100} color="currentColor" />
         </HStack>
       )}

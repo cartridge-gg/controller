@@ -58,30 +58,45 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
             <Center position="absolute" bottom={-ICON_OFFSET / 4} left={4}>
               <HStack w="full" gap={4} align="center">
                 <Flex
-                  bg="darkGray.700"
-                  borderRadius="lg"
+                  position="relative"
                   h={`${ICON_SIZE}px`}
                   w={`${ICON_SIZE}px`}
-                  justify="center"
-                  alignItems="center"
-                  borderWidth={4}
-                  borderColor="solid.bg"
+                  minW={`${ICON_SIZE}px`}
                 >
-                  {!!Icon ? (
-                    <Circle size={ICON_IMAGE_SIZE / 4} bg="solid.primary">
-                      <Icon boxSize={8} />
-                    </Circle>
-                  ) : !!icon ? (
-                    <Circle size={ICON_IMAGE_SIZE / 4} bg="solid.primary">
-                      {icon}
-                    </Circle>
-                  ) : (
-                    <Image
-                      src={theme.icon}
-                      boxSize={ICON_IMAGE_SIZE / 4}
-                      alt="Controller Icon"
-                    />
-                  )}
+                  <Flex
+                    position="absolute"
+                    inset={0}
+                    borderWidth={4}
+                    borderColor="solid.bg"
+                    borderRadius="lg"
+                  />
+                  <Flex
+                    bg="darkGray.700"
+                    borderRadius="lg"
+                    h="100%"
+                    w="100%"
+                    justify="center"
+                    alignItems="center"
+                    overflow="hidden"
+                  >
+                    {!!Icon ? (
+                      <Circle size="100%" bg="solid.primary">
+                        <Icon boxSize="100%" />
+                      </Circle>
+                    ) : !!icon ? (
+                      <Circle size="100%" bg="solid.primary">
+                        {icon}
+                      </Circle>
+                    ) : (
+                      <Image
+                        src={theme.icon}
+                        w="100%"
+                        h="100%"
+                        alt="Controller Icon"
+                        objectFit="cover"
+                      />
+                    )}
+                  </Flex>
                 </Flex>
 
                 <VStack align="flex-start" spacing={1}>
@@ -158,6 +173,6 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
       );
   }
 }
-const ICON_IMAGE_SIZE = 64;
+
 const ICON_SIZE = 80;
 const ICON_OFFSET = 40;
