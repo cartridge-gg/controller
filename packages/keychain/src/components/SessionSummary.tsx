@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, useState } from "react";
+import React, { PropsWithChildren, useEffect, useState } from "react";
 import { CallPolicy, Policy } from "@cartridge/controller";
 import {
   Card,
@@ -26,6 +26,7 @@ import {
   cn,
   Spinner,
   CoinsIcon,
+  ErrorImage,
 } from "@cartridge/ui-next";
 import {
   formatAddress,
@@ -38,7 +39,13 @@ import Link from "next/link";
 import { useConnection } from "hooks/connection";
 import { useSessionSummary } from "@cartridge/utils";
 
-export function SessionSummary({ policies }: { policies: Policy[] }) {
+export function SessionSummary({
+  policies,
+  setError,
+}: {
+  policies: Policy[];
+  setError?: (error: Error) => void;
+}) {
   const { controller } = useConnection();
   const {
     data: summary,
@@ -49,12 +56,24 @@ export function SessionSummary({ policies }: { policies: Policy[] }) {
     provider: controller,
   });
 
+  useEffect(() => {
+    setError(error);
+  }, [error, setError]);
+
   if (isLoading) {
     return <Spinner />;
   }
 
   if (error) {
-    return <div>error</div>;
+    return (
+      <div className="h-full flex flex-col items-center gap-8 p-8">
+        <div className="text-sm text-semibold text-muted-foreground flex flex-col items-center text-center gap-3">
+          <div>Oops! Something went wrong parsing session summary</div>
+          <div>Please try it again.</div>
+        </div>
+        <ErrorImage />
+      </div>
+    );
   }
 
   return (
@@ -219,31 +238,31 @@ function SignMessages({
               >
                 {Object.values(m.domain).filter((f) => typeof f !== "undefined")
                   .length && (
-                  <CollapsibleRow key="domain" title="domain">
-                    {m.domain.name && (
-                      <ValueRow
-                        values={[{ name: "name", value: m.domain.name }]}
-                      />
-                    )}
-                    {m.domain.version && (
-                      <ValueRow
-                        values={[{ name: "version", value: m.domain.version }]}
-                      />
-                    )}
-                    {m.domain.chainId && (
-                      <ValueRow
-                        values={[{ name: "chainId", value: m.domain.chainId }]}
-                      />
-                    )}
-                    {m.domain.revision && (
-                      <ValueRow
-                        values={[
-                          { name: "revision", value: m.domain.revision },
-                        ]}
-                      />
-                    )}
-                  </CollapsibleRow>
-                )}
+                    <CollapsibleRow key="domain" title="domain">
+                      {m.domain.name && (
+                        <ValueRow
+                          values={[{ name: "name", value: m.domain.name }]}
+                        />
+                      )}
+                      {m.domain.version && (
+                        <ValueRow
+                          values={[{ name: "version", value: m.domain.version }]}
+                        />
+                      )}
+                      {m.domain.chainId && (
+                        <ValueRow
+                          values={[{ name: "chainId", value: m.domain.chainId }]}
+                        />
+                      )}
+                      {m.domain.revision && (
+                        <ValueRow
+                          values={[
+                            { name: "revision", value: m.domain.revision },
+                          ]}
+                        />
+                      )}
+                    </CollapsibleRow>
+                  )}
 
                 <ValueRow
                   values={[{ name: "primaryType", value: m.primaryType }]}
@@ -260,13 +279,13 @@ function SignMessages({
                             { name: "type", value: t.type },
                             ...(["enum", "merkletree"].includes(t.name)
                               ? [
-                                  {
-                                    name: "contains",
-                                    value: (
-                                      t as StarknetEnumType | StarknetMerkleType
-                                    ).contains,
-                                  },
-                                ]
+                                {
+                                  name: "contains",
+                                  value: (
+                                    t as StarknetEnumType | StarknetMerkleType
+                                  ).contains,
+                                },
+                              ]
                               : []),
                           ]}
                         />

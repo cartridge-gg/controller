@@ -24,7 +24,7 @@ export function CreateSession({
   const [isDisabled, setIsDisabled] = useState(false);
   const [expiresAt] = useState<bigint>(SESSION_EXPIRATION);
   const [maxFee] = useState<BigNumberish>();
-  const [error, setError] = useState<ControllerError>();
+  const [error, setError] = useState<ControllerError | Error>();
 
   useEffect(() => {
     const normalizedChainId = normalizeChainId(chainId);
@@ -81,19 +81,23 @@ export function CreateSession({
     >
       <Content gap={6}>
         <SessionConsent />
-        <SessionSummary policies={policies} />
+        <SessionSummary policies={policies} setError={setError} />
       </Content>
 
       <Footer>
-        {error && <ControllerErrorAlert error={error} />}
-        <Button
-          colorScheme="colorful"
-          isDisabled={isDisabled || isConnecting}
-          isLoading={isConnecting}
-          onClick={() => onCreateSession()}
-        >
-          {isUpdate ? "update" : "create"} session
-        </Button>
+        {error && isControllerError(error) && (
+          <ControllerErrorAlert error={error} />
+        )}
+        {!error && (
+          <Button
+            colorScheme="colorful"
+            isDisabled={isDisabled || isConnecting}
+            isLoading={isConnecting}
+            onClick={() => onCreateSession()}
+          >
+            {isUpdate ? "update" : "create"} session
+          </Button>
+        )}
       </Footer>
     </Container>
   );
@@ -109,4 +113,10 @@ function normalizeChainId(chainId: number | string): string {
       return shortString.encodeShortString(chainId);
     }
   }
+}
+
+function isControllerError(
+  error: ControllerError | Error,
+): error is ControllerError {
+  return !!(error as ControllerError).code;
 }
