@@ -7,6 +7,9 @@ const config = {
   presets: [cartridgeTWPreset],
   theme: {
     extend: {
+      placeholderColor: {
+        primary: "#808080",
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },

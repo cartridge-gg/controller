@@ -25,6 +25,9 @@ export const Input: ComponentStyleConfig = defineStyleConfig({
         borderWidth: 1,
         borderColor: "solid.secondary",
         borderRadius: "4px",
+        _placeholder: {
+          color: "#808080",
+        },
         _hover: {
           bg: "solid.secondary",
           borderColor: "solid.secondary",

@@ -15,87 +15,6 @@ import { constants } from "starknet";
 import { PopupCenter } from "utils/url";
 import { useAccountQuery } from "@cartridge/utils/api/cartridge";
 
-function StatusTray({
-  username,
-  isValidating,
-  accountExists,
-  error,
-}: {
-  username: string;
-  isValidating: boolean;
-  accountExists?: boolean;
-  error?: Error;
-}) {
-  if (error) {
-    return (
-      <Box
-        display="flex"
-        flexDirection="row"
-        alignItems="flex-start"
-        padding="8px 15px"
-        bg="#242824"
-        marginTop="-1rem"
-        paddingTop="15px"
-        borderBottomRadius="4px"
-      >
-        <Text
-          fontFamily="Inter"
-          fontSize="12px"
-          lineHeight="16px"
-          color="#E66666"
-        >
-          {error.message.includes(
-            "The operation either timed out or was not allowed",
-          )
-            ? "Passkey signing timed out or was canceled. Please try again."
-            : error.message}
-        </Text>
-      </Box>
-    );
-  }
-
-  return (
-    <Box
-      display="flex"
-      flexDirection="row"
-      alignItems="flex-start"
-      padding="8px 12px"
-      bg="#242824"
-      marginTop="-1rem"
-      paddingTop="15px"
-      borderBottomRadius="4px"
-    >
-      {isValidating ? (
-        <HStack spacing={2}>
-          <Text
-            fontFamily="Inter"
-            fontSize="12px"
-            lineHeight="16px"
-            color="#808080"
-          >
-            Checking username...
-          </Text>
-        </HStack>
-      ) : (
-        <HStack spacing={2}>
-          <Text
-            fontFamily="Inter"
-            fontSize="12px"
-            lineHeight="16px"
-            color="#808080"
-          >
-            {!username
-              ? "Enter a username"
-              : accountExists
-              ? "Welcome back! Select Login to play"
-              : "Welcome! Let's create a new controller!"}
-          </Text>
-        </HStack>
-      )}
-    </Box>
-  );
-}
-
 export function CreateController({
   isSlot,
   loginMode = LoginMode.Webauthn,
@@ -363,7 +282,7 @@ export function CreateController({
           <Field
             {...usernameField}
             autoFocus
-            placeholder="Shinobi"
+            placeholder="shinobi"
             onFocus={() => {
               if (!hasLoggedFocus.current) {
                 posthog?.capture("Focus Username");
@@ -411,7 +330,7 @@ export function CreateController({
               <Link
                 href="https://cartridge.gg/legal/terms-of-service"
                 target="_blank"
-                color="brand.primary"
+                color="#808080"
                 textDecoration="underline"
                 display="inline"
               >
@@ -421,7 +340,7 @@ export function CreateController({
               <Link
                 href="https://cartridge.gg/legal/privacy-policy"
                 target="_blank"
-                color="brand.primary"
+                color="#808080"
                 textDecoration="underline"
                 display="inline"
               >
@@ -441,5 +360,86 @@ export function CreateController({
         </Footer>
       </form>
     </Container>
+  );
+}
+
+function StatusTray({
+  username,
+  isValidating,
+  accountExists,
+  error,
+}: {
+  username: string;
+  isValidating: boolean;
+  accountExists?: boolean;
+  error?: Error;
+}) {
+  if (error) {
+    return (
+      <Box
+        display="flex"
+        flexDirection="row"
+        alignItems="flex-start"
+        padding="8px 15px"
+        bg="#242824"
+        marginTop="-1rem"
+        paddingTop="15px"
+        borderBottomRadius="4px"
+      >
+        <Text
+          fontFamily="Inter"
+          fontSize="12px"
+          lineHeight="16px"
+          color="#E66666"
+        >
+          {error.message.includes(
+            "The operation either timed out or was not allowed",
+          )
+            ? "Passkey signing timed out or was canceled. Please try again."
+            : error.message}
+        </Text>
+      </Box>
+    );
+  }
+
+  return (
+    <Box
+      display="flex"
+      flexDirection="row"
+      alignItems="flex-start"
+      padding="8px 12px"
+      bg="#242824"
+      marginTop="-1rem"
+      paddingTop="15px"
+      borderBottomRadius="4px"
+    >
+      {isValidating ? (
+        <HStack spacing={2}>
+          <Text
+            fontFamily="Inter"
+            fontSize="12px"
+            lineHeight="16px"
+            color="#808080"
+          >
+            Checking username...
+          </Text>
+        </HStack>
+      ) : (
+        <HStack spacing={2}>
+          <Text
+            fontFamily="Inter"
+            fontSize="12px"
+            lineHeight="16px"
+            color="#808080"
+          >
+            {!username
+              ? "Enter a username"
+              : accountExists
+              ? "Welcome back! Select Login to play"
+              : "Welcome! Let's create a new controller!"}
+          </Text>
+        </HStack>
+      )}
+    </Box>
   );
 }

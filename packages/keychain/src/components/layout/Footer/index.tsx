@@ -50,7 +50,7 @@ export function Footer({
         w="full"
         align="stretch"
         p={4}
-        pb={1}
+        pb={showCatridgeLogo ? 1 : 4}
       >
         {children}
       </VStack>

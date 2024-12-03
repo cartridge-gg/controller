@@ -38,7 +38,8 @@ export function ErrorPage({ error }: { error: Error }) {
   return (
     <Container
       variant="expanded"
-      title="Oops! Something went wrong!"
+      title="Uh oh!"
+      description="Something went wrong"
       icon={<AlertIcon fontSize={48} />}
     >
       <Content gap={4}>
