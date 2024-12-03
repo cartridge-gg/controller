@@ -91,7 +91,7 @@ export function SessionSummary({
         <Contract
           key={address}
           address={address}
-          title={meta?.name ?? "ERC-20"}
+          title={`spend ${meta?.name ?? "ERC-20"} token`}
           policies={policies}
           icon={
             meta?.logoUrl ? (
