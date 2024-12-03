@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, useState } from "react";
+import React, { PropsWithChildren, useEffect, useState } from "react";
 import { CallPolicy, Policy } from "@cartridge/controller";
 import {
   Card,
@@ -26,6 +26,7 @@ import {
   cn,
   Spinner,
   CoinsIcon,
+  ErrorImage,
 } from "@cartridge/ui-next";
 import {
   formatAddress,
@@ -37,8 +38,15 @@ import { constants, StarknetEnumType, StarknetMerkleType } from "starknet";
 import Link from "next/link";
 import { useConnection } from "hooks/connection";
 import { useSessionSummary } from "@cartridge/utils";
+import { ScrollIcon } from "@cartridge/ui";
 
-export function SessionSummary({ policies }: { policies: Policy[] }) {
+export function SessionSummary({
+  policies,
+  setError,
+}: {
+  policies: Policy[];
+  setError?: (error: Error) => void;
+}) {
   const { controller } = useConnection();
   const {
     data: summary,
@@ -49,22 +57,48 @@ export function SessionSummary({ policies }: { policies: Policy[] }) {
     provider: controller,
   });
 
+  useEffect(() => {
+    setError?.(error);
+  }, [error, setError]);
+
   if (isLoading) {
     return <Spinner />;
   }
 
   if (error) {
-    return <div>error</div>;
+    return (
+      <div className="h-full flex flex-col items-center gap-8 p-8">
+        <div className="text-sm text-semibold text-muted-foreground flex flex-col items-center text-center gap-3">
+          <div>Oops! Something went wrong parsing session summary</div>
+          <div>Please try it again.</div>
+        </div>
+        <ErrorImage />
+      </div>
+    );
   }
 
   return (
     <div className="flex flex-col gap-4">
+      {Object.entries(summary.dojo).map(([address, { policies, meta }]) => (
+        <Contract
+          key={address}
+          address={address}
+          title={meta.dojoName}
+          policies={policies}
+        />
+      ))}
+
       {Object.entries(summary.default).map(([address, policies], i) => (
         <Contract
           key={address}
           address={address}
           title={`Contract ${i + 1}`}
           policies={policies}
+          icon={
+            <CardIcon>
+              <ScrollIcon variant="line" />
+            </CardIcon>
+          }
         />
       ))}
 
@@ -72,7 +106,7 @@ export function SessionSummary({ policies }: { policies: Policy[] }) {
         <Contract
           key={address}
           address={address}
-          title={meta?.name ?? "ERC-20"}
+          title={`spend ${meta?.name ?? "ERC-20"} token`}
           policies={policies}
           icon={
             meta?.logoUrl ? (
@@ -149,8 +183,7 @@ function Contract({
             <AccordionTrigger>
               You are agreeing to automate{" "}
               <span className="text-accent-foreground font-bold">
-                {policies.length} method
-                {policies.length > 0 ? "s" : ""}
+                {policies.length} {policies.length > 1 ? "methods" : "method"}
               </span>
             </AccordionTrigger>
           </CardContent>
@@ -191,6 +224,10 @@ function SignMessages({
 }: {
   messages: SessionSummaryType["messages"];
 }) {
+  if (!messages.length) {
+    return null;
+  }
+
   return (
     <Card>
       <CardHeader
@@ -207,7 +244,11 @@ function SignMessages({
         <AccordionItem value="item-1">
           <CardContent>
             <AccordionTrigger>
-              You are agreeing to sign messages in the following format
+              You are agreeing to sign{" "}
+              <span className="text-accent-foreground font-bold">
+                {messages.length} {messages.length > 1 ? "messages" : "message"}
+              </span>{" "}
+              in the following format
             </AccordionTrigger>
           </CardContent>
 

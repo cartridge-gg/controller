@@ -8,11 +8,13 @@ import {
 import useSWR from "swr";
 import { useEkuboMetadata } from "./balance";
 import { ERC20Metadata } from "../erc20";
+import { stringFromByteArray } from "../contract";
 
-type PreSessionSummary = Omit<SessionSummary, "ERC20" | "ERC721">;
+type PreSessionSummary = Pick<SessionSummary, "default" | "messages">;
 
 export type SessionSummary = {
   default: Record<string, CallPolicy[]>;
+  dojo: Record<string, { policies: CallPolicy[]; meta: { dojoName: string } }>;
   ERC20: Record<
     string,
     { policies: CallPolicy[]; meta?: Omit<ERC20Metadata, "instance"> }
@@ -55,31 +57,46 @@ export function useSessionSummary({
   const summary = useSWR(ekuboMeta ? `tx-summary` : null, async () => {
     const res: SessionSummary = {
       default: {},
+      dojo: {},
       ERC20: {},
       ERC721: {},
       messages: preSummary.messages,
     };
 
     const promises = Object.entries(preSummary.default).map(
-      async ([addr, policies]) => {
-        const contractType = await checkContractType(provider, addr);
+      async ([contractAddress, policies]) => {
+        const contractType = await checkContractType(provider, contractAddress);
         switch (contractType) {
           case "ERC20":
-            res.ERC20[addr] = {
+            res.ERC20[contractAddress] = {
               meta: ekuboMeta.find(
                 (m) =>
-                  getChecksumAddress(m.address) === getChecksumAddress(addr),
+                  getChecksumAddress(m.address) ===
+                  getChecksumAddress(contractAddress),
               ),
               policies,
             };
             return;
           case "ERC721":
-            res.ERC721[addr] = policies;
+            res.ERC721[contractAddress] = policies;
             return;
           case "default":
-          default:
-            res.default[addr] = policies;
+          default: {
+            try {
+              const dojoNameRes = await provider.callContract({
+                contractAddress,
+                entrypoint: "dojo_name",
+              });
+
+              res.dojo[contractAddress] = {
+                policies,
+                meta: { dojoName: stringFromByteArray(dojoNameRes) },
+              };
+            } catch {
+              res.default[contractAddress] = policies;
+            }
             return;
+          }
         }
       },
     );

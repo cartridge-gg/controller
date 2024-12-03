@@ -71,19 +71,6 @@ export default function Keychain({ Component, pageProps }: AppProps) {
           --font-inter: ${inter.style.fontFamily};
           --font-ibm-plex-mono: ${ibmPlexMono.style.fontFamily};
         }
-
-        body {
-          background: var(--chakra-colors-solid-bg);
-        }
-
-        html,
-        body {
-          -ms-overflow-style: none; /* Internet Explorer 10+ */
-          scrollbar-width: none; /* Firefox */
-        }
-        body::-webkit-scrollbar {
-          display: none; /* Safari and Chrome */
-        }
       `}</style>
 
       <Provider>

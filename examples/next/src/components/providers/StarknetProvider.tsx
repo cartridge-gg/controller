@@ -36,6 +36,11 @@ const policies: Policy[] = [
     method: "allowance",
   },
   {
+    target:
+      "0x0305f26ad19e0a10715d9f3137573d3a543de7b707967cd85d11234d6ec0fb7e",
+    method: "new_game",
+  },
+  {
     types: {
       StarknetDomain: [
         { name: "name", type: "shortstring" },
