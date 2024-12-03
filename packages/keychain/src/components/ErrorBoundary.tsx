@@ -5,22 +5,27 @@ import { Button, HStack, Link, Text } from "@chakra-ui/react";
 import { useConnection } from "hooks/connection";
 import NextLink from "next/link";
 import { CARTRIDGE_DISCORD_LINK } from "const";
+import posthog from "posthog-js";
 
 export class ErrorBoundary extends React.Component<
   PropsWithChildren,
   { error?: Error }
 > {
-  constructor(props) {
+  constructor(props: PropsWithChildren) {
     super(props);
     this.state = {};
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(error: Error) {
     return { error };
   }
 
-  componentDidCatch(error, errorInfo) {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.log({ error, errorInfo });
+    posthog?.captureException(error, {
+      info: errorInfo,
+      source: "ErrorBoundary",
+    });
   }
 
   render() {
