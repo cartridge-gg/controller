@@ -36,12 +36,12 @@ export const Default: Story = {
 
 export const WithTheme: Story = {
   parameters: {
-    preset: "loot-survivor",
+    preset: "eternum",
   },
   args: {
     theme: {
-      id: "loot-survivor",
-      name: "Loot Survivor",
+      id: "eternum",
+      name: "Eternum",
     },
     usernameField: {
       value: "",
