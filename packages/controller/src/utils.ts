@@ -9,6 +9,30 @@ import {
 import { Policies, SessionPolicies } from "./types";
 import wasm from "@cartridge/account-wasm/controller";
 
+// Whitelist of allowed property names to prevent prototype pollution
+const ALLOWED_PROPERTIES = new Set([
+  "contracts",
+  "messages",
+  "target",
+  "method",
+  "name",
+  "description",
+  "types",
+  "domain",
+  "primaryType",
+]);
+
+function validatePropertyName(prop: string): void {
+  if (!ALLOWED_PROPERTIES.has(prop)) {
+    throw new Error(`Invalid property name: ${prop}`);
+  }
+}
+
+function safeObjectAccess<T>(obj: any, prop: string): T {
+  validatePropertyName(prop);
+  return obj[prop];
+}
+
 export function normalizeCalls(calls: Call | Call[]) {
   return toArray(calls).map((call) => {
     return {
@@ -23,22 +47,37 @@ export function toSessionPolicies(policies: Policies): SessionPolicies {
   return Array.isArray(policies)
     ? policies.reduce<SessionPolicies>(
         (prev, p) => {
-          if ("target" in p) {
-            if (p.target in prev.contracts!) {
-              const methods = toArray(prev.contracts![p.target].methods);
-              prev.contracts![p.target] = {
+          if (safeObjectAccess<string>(p, "target")) {
+            const target = safeObjectAccess<string>(p, "target");
+            const contracts = safeObjectAccess<Record<string, any>>(
+              prev,
+              "contracts",
+            );
+
+            if (target in contracts) {
+              const methods = toArray(contracts[target].methods);
+              contracts[target] = {
                 methods: [
                   ...methods,
-                  { name: p.target, description: p.description },
+                  {
+                    name: target,
+                    description: safeObjectAccess<string>(p, "description"),
+                  },
                 ],
               };
             } else {
-              prev.contracts![p.target] = {
-                methods: [{ name: p.target, description: p.description }],
+              contracts[target] = {
+                methods: [
+                  {
+                    name: target,
+                    description: safeObjectAccess<string>(p, "description"),
+                  },
+                ],
               };
             }
           } else {
-            prev.messages!.push(p);
+            const messages = safeObjectAccess<any[]>(prev, "messages");
+            messages.push(p);
           }
 
           return prev;
@@ -51,21 +90,21 @@ export function toSessionPolicies(policies: Policies): SessionPolicies {
 export function toWasmPolicies(policies: Policies): wasm.Policy[] {
   if (Array.isArray(policies)) {
     return policies.map((p) => {
-      if ("target" in p) {
+      if (safeObjectAccess<string>(p, "target")) {
         return {
-          target: p.target,
-          method: p.method,
+          target: safeObjectAccess<string>(p, "target"),
+          method: safeObjectAccess<string>(p, "method"),
         };
       } else {
         const domainHash = typedData.getStructHash(
-          p.types,
+          safeObjectAccess<any>(p, "types"),
           "StarknetDomain",
-          p.domain,
+          safeObjectAccess<any>(p, "domain"),
           TypedDataRevision.ACTIVE,
         );
         const typeHash = typedData.getTypeHash(
-          p.types,
-          p.primaryType,
+          safeObjectAccess<any>(p, "types"),
+          safeObjectAccess<string>(p, "primaryType"),
           TypedDataRevision.ACTIVE,
         );
 
@@ -77,23 +116,24 @@ export function toWasmPolicies(policies: Policies): wasm.Policy[] {
   }
 
   return [
-    ...Object.entries(policies.contracts ?? {}).flatMap(
-      ([target, { methods }]) =>
-        toArray(methods).map((m) => ({
-          target,
-          method: m.name,
-        })),
+    ...Object.entries(
+      safeObjectAccess<Record<string, any>>(policies, "contracts") ?? {},
+    ).flatMap(([target, { methods }]) =>
+      toArray(methods).map((m) => ({
+        target,
+        method: safeObjectAccess<string>(m, "name"),
+      })),
     ),
-    ...(policies.messages ?? []).map((p) => {
+    ...(safeObjectAccess<any[]>(policies, "messages") ?? []).map((p) => {
       const domainHash = typedData.getStructHash(
-        p.types,
+        safeObjectAccess<any>(p, "types"),
         "StarknetDomain",
-        p.domain,
+        safeObjectAccess<any>(p, "domain"),
         TypedDataRevision.ACTIVE,
       );
       const typeHash = typedData.getTypeHash(
-        p.types,
-        p.primaryType,
+        safeObjectAccess<any>(p, "types"),
+        safeObjectAccess<string>(p, "primaryType"),
         TypedDataRevision.ACTIVE,
       );
 

@@ -55,6 +55,7 @@ export function useCreateController({
             );
           }
         } catch (e) {
+          console.error(e);
           setError(e);
         }
       },
@@ -106,10 +107,11 @@ export function useCreateController({
 
           const controllerNode = controllers.edges?.[0].node;
 
+          console.log(policies);
           if (
             loginMode === LoginMode.Webauthn ||
             Object.keys(policies.contracts ?? {}).length +
-              policies.messages.length ===
+              policies.messages?.length ===
               0
           ) {
             await doLogin({
@@ -170,6 +172,7 @@ export function useCreateController({
           );
         }
       } catch (e) {
+        console.error(e);
         setError(e as Error);
       }
 

@@ -95,7 +95,7 @@ export function useConnectionValue() {
       setControllerRaw(controller);
       setIsSignedUp();
     },
-    [origin],
+    [],
   );
 
   useEffect(() => {

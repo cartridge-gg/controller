@@ -14,7 +14,7 @@ import Script from "next/script";
 import { ETH_CONTRACT_ADDRESS } from "../src/utils/token";
 import { ConnectCtx, ConnectionCtx } from "../src/utils/connection/types";
 import { UpgradeInterface } from "../src/hooks/upgrade";
-import { defaultTheme } from "@cartridge/presets";
+import { defaultTheme, controllerConfigs } from "@cartridge/presets";
 
 const inter = Inter({ subsets: ["latin"] });
 const ibmPlexMono = IBM_Plex_Mono({
@@ -77,11 +77,14 @@ function Provider({
   parameters,
 }: { parameters: StoryParameters } & PropsWithChildren) {
   const connection = useMockedConnection(parameters.connection);
+  const theme = parameters.preset || "cartridge";
 
   return (
     <QueryClientProvider client={queryClient}>
       <ConnectionContext.Provider value={connection}>
-        <ControllerThemeProvider>{children}</ControllerThemeProvider>
+        <ControllerThemeProvider theme={theme}>
+          {children}
+        </ControllerThemeProvider>
       </ConnectionContext.Provider>
     </QueryClientProvider>
   );
@@ -160,17 +163,29 @@ const queryClient = new QueryClient();
 
 export default preview;
 
-export function ControllerThemeProvider({ children }: PropsWithChildren) {
+export function ControllerThemeProvider({
+  children,
+  theme,
+}: PropsWithChildren<{ theme?: string }>) {
+  const preset = useMemo(() => {
+    if (!theme) return defaultTheme;
+    if (theme in controllerConfigs && controllerConfigs[theme].theme) {
+      return controllerConfigs[theme].theme;
+    }
+    return defaultTheme;
+  }, [theme]);
+
   const controllerTheme = useMemo(
     () => ({
-      name: defaultTheme.name,
-      icon: defaultTheme.icon,
-      cover: defaultTheme.cover,
+      name: preset.name,
+      icon: preset.icon,
+      cover: preset.cover,
     }),
-    [defaultTheme],
+    [preset],
   );
-  useThemeEffect({ theme: defaultTheme, assetUrl: "" });
-  const chakraTheme = useChakraTheme(defaultTheme);
+
+  useThemeEffect({ theme: preset, assetUrl: "" });
+  const chakraTheme = useChakraTheme(preset);
 
   return (
     <ControllerThemeContext.Provider value={controllerTheme}>

@@ -12,9 +12,13 @@ export function connectFactory({
   setPolicies: (policies: SessionPolicies) => void;
   setContext: (context: ConnectionCtx) => void;
 }) {
-  return (origin: string) =>
-    (policies: SessionPolicies, rpcUrl: string): Promise<ConnectReply> => {
-      setOrigin(origin);
+  return (origin: string) => {
+    setOrigin(origin);
+
+    return (
+      policies: SessionPolicies,
+      rpcUrl: string,
+    ): Promise<ConnectReply> => {
       setRpcUrl(rpcUrl);
       setPolicies(policies);
 
@@ -28,4 +32,5 @@ export function connectFactory({
         } as ConnectCtx);
       });
     };
+  };
 }
