@@ -2,17 +2,9 @@ import React, { PropsWithChildren, useMemo } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import type { Parameters, Preview } from "@storybook/react";
 import { ChakraProvider } from "@chakra-ui/react";
-import Controller, {
-  ControllerTheme,
-  ControllerThemePresets,
-  defaultPresets,
-} from "@cartridge/controller";
+import Controller, { defaultTheme } from "@cartridge/controller";
 import { Inter, IBM_Plex_Mono } from "next/font/google";
-import {
-  ControllerThemeProvider,
-  useChakraTheme,
-  useControllerThemePreset,
-} from "../src/hooks/theme";
+import { ControllerThemeProvider, useChakraTheme } from "../src/hooks/theme";
 import {
   ConnectionContextValue,
   ConnectionProvider,
@@ -82,33 +74,21 @@ function Provider({
   children,
   parameters,
 }: { parameters: StoryParameters } & PropsWithChildren) {
-  const presetId = parameters.preset || "cartridge";
-  const preset = defaultPresets[presetId];
-  const chakraTheme = useChakraTheme(preset);
-  const ctrlTheme: ControllerTheme = {
-    id: preset.id,
-    name: preset.name,
-    icon: preset.icon,
-    cover: preset.cover,
-    colorMode: parameters.colorMode || "dark",
-  };
   const connection = useMockedConnection(parameters.connection);
 
   return (
-    <ChakraProvider theme={chakraTheme}>
-      <QueryClientProvider client={queryClient}>
-        <ControllerThemeProvider value={ctrlTheme} theme={preset}>
-          <ConnectionProvider value={connection}>{children}</ConnectionProvider>
-        </ControllerThemeProvider>
-      </QueryClientProvider>
-    </ChakraProvider>
+    <QueryClientProvider client={queryClient}>
+      <ConnectionProvider value={connection}>
+        <ControllerThemeProvider>{children}</ControllerThemeProvider>
+      </ConnectionProvider>
+    </QueryClientProvider>
   );
 }
 
 interface StoryParameters extends Parameters {
   connection?: {
     context?: ConnectionCtx;
-    controller?: Controller;
+    controller?: typeof Controller;
     chainId?: string;
     upgrade?: UpgradeInterface;
   };
@@ -134,30 +114,31 @@ export function useMockedConnection({
     rpcUrl: "http://api.cartridge.gg/x/sepolia",
     chainId,
     chainName,
-    policies: [
-      {
-        target: ETH_CONTRACT_ADDRESS,
-        method: "approve",
-        description:
-          "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
+    policies: {
+      contracts: {
+        [ETH_CONTRACT_ADDRESS]: {
+          methods: [
+            {
+              name: "approve",
+              description:
+                "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
+            },
+            {
+              name: "transfer",
+            },
+            {
+              name: "mint",
+            },
+            {
+              name: "burn",
+            },
+            {
+              name: "allowance",
+            },
+          ],
+        },
       },
-      {
-        target: ETH_CONTRACT_ADDRESS,
-        method: "transfer",
-      },
-      {
-        target: ETH_CONTRACT_ADDRESS,
-        method: "mint",
-      },
-      {
-        target: ETH_CONTRACT_ADDRESS,
-        method: "burn",
-      },
-      {
-        target: ETH_CONTRACT_ADDRESS,
-        method: "allowance",
-      },
-    ],
+    },
     prefunds: [],
     hasPrefundRequest: false,
     error: undefined,

@@ -106,7 +106,12 @@ export function useCreateController({
 
           const controllerNode = controllers.edges?.[0].node;
 
-          if (loginMode === LoginMode.Webauthn || policies?.length === 0) {
+          if (
+            loginMode === LoginMode.Webauthn ||
+            Object.keys(policies.contracts ?? {}).length +
+              policies.messages.length ===
+              0
+          ) {
             await doLogin({
               name: username,
               credentialId,
