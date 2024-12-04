@@ -15,7 +15,7 @@ import {
   useEffect,
   PropsWithChildren,
 } from "react";
-import { verifiedConfigs } from "../../../controller/dist/verified";
+import { verifiedConfigs } from "@cartridge/controller";
 import { useConnection } from "./connection";
 
 const ControllerThemeContext = createContext<ControllerTheme>(undefined);
