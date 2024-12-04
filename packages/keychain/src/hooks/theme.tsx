@@ -22,13 +22,6 @@ const ControllerThemeContext = createContext<ControllerTheme>(undefined);
 
 export function ControllerThemeProvider({ children }: PropsWithChildren) {
   const preset = useControllerThemePreset();
-  const chakraTheme = useChakraTheme(preset);
-  const router = useRouter();
-
-  const colorMode = useMemo(
-    () => (router.query.colorMode as ColorMode) ?? "dark",
-    [router.query.colorMode],
-  );
   const controllerTheme = useMemo(
     () => ({
       name: preset.name,
@@ -38,19 +31,30 @@ export function ControllerThemeProvider({ children }: PropsWithChildren) {
     [preset],
   );
 
+  useThemeEffect({ theme: preset, assetUrl: "" });
+  const chakraTheme = useChakraTheme(preset);
+
+  return (
+    <ControllerThemeContext.Provider value={controllerTheme}>
+      <ChakraProvider theme={chakraTheme}>
+        <ChakraTheme>{children}</ChakraTheme>
+      </ChakraProvider>
+    </ControllerThemeContext.Provider>
+  );
+}
+
+function ChakraTheme({ children }: PropsWithChildren) {
+  const router = useRouter();
+  const colorMode = useMemo(
+    () => (router.query.colorMode as ColorMode) ?? "dark",
+    [router.query.colorMode],
+  );
   const { setColorMode } = useColorMode();
 
   useEffect(() => {
     setColorMode(colorMode);
   }, [setColorMode, colorMode]);
-
-  useThemeEffect({ theme: preset, assetUrl: "" });
-
-  return (
-    <ControllerThemeContext.Provider value={controllerTheme}>
-      <ChakraProvider theme={chakraTheme}>{children}</ChakraProvider>
-    </ControllerThemeContext.Provider>
-  );
+  return children;
 }
 
 export function useControllerTheme() {
@@ -81,7 +85,7 @@ export function useControllerThemePreset() {
       typeof val === "string" &&
       val in verifiedConfigs &&
       verifiedConfigs[val].theme &&
-      (origin.startsWith("http://localhost") ||
+      (origin?.startsWith("http://localhost") ||
         toArray(verifiedConfigs[val].origin).includes(origin))
     ) {
       return verifiedConfigs[val].theme;

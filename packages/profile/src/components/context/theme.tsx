@@ -76,7 +76,7 @@ export function ThemeProvider({
       typeof val === "string" &&
       val in verifiedConfigs &&
       verifiedConfigs[val].theme &&
-      (origin.startsWith("http://localhost") ||
+      (origin?.startsWith("http://localhost") ||
         toArray(verifiedConfigs[val].origin).includes(origin))
     ) {
       setTheme(verifiedConfigs[val].theme);

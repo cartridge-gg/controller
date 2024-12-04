@@ -1,10 +1,9 @@
 import React, { PropsWithChildren, useMemo } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import type { Parameters, Preview } from "@storybook/react";
-import { ChakraProvider } from "@chakra-ui/react";
-import Controller, { defaultTheme } from "@cartridge/controller";
+import Controller from "@cartridge/controller";
 import { Inter, IBM_Plex_Mono } from "next/font/google";
-import { ControllerThemeProvider, useChakraTheme } from "../src/hooks/theme";
+import { ControllerThemeProvider } from "../src/hooks/theme";
 import {
   ConnectionContextValue,
   ConnectionProvider,
@@ -101,8 +100,8 @@ export function useMockedConnection({
     type: "connect",
     origin: "http://localhost:3002",
     policies: [],
-    resolve: () => {},
-    reject: () => {},
+    resolve: () => { },
+    reject: () => { },
   } as ConnectCtx,
   ...rest
 }: StoryParameters["connection"] = {}): ConnectionContextValue {
@@ -142,12 +141,12 @@ export function useMockedConnection({
     prefunds: [],
     hasPrefundRequest: false,
     error: undefined,
-    setContext: () => {},
-    setController: () => {},
-    closeModal: () => {},
-    openModal: () => {},
-    logout: () => {},
-    openSettings: () => {},
+    setContext: () => { },
+    setController: () => { },
+    closeModal: () => { },
+    openModal: () => { },
+    logout: () => { },
+    openSettings: () => { },
     controller: {},
     upgrade: {},
     ...rest,

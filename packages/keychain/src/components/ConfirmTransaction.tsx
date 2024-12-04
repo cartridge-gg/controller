@@ -49,7 +49,7 @@ export function ConfirmTransaction() {
 
     const txnsApproved = callPolicies.every((call) => {
       const methods = toArray(
-        policies.contracts[getChecksumAddress(call.target)].methods,
+        policies.contracts?.[getChecksumAddress(call.target)]?.methods ?? [],
       );
       return !!methods.find((m) => m.name === call.method);
     });
