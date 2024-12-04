@@ -26,7 +26,8 @@ function generateConfigs() {
       .readdirSync(whitelabelPath)
       .filter((dir) =>
         fs.statSync(path.join(whitelabelPath, dir)).isDirectory(),
-      );
+      )
+      .sort();
 
     for (const dir of directories) {
       const config = loadConfigFromJson(dir);

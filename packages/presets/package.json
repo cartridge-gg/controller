@@ -7,7 +7,7 @@
     "type": "module",
     "scripts": {
         "build:configs": "tsx scripts/generate-configs.ts",
-        "build": "pnpm build:configs && tsc",
+        "build:deps": "pnpm build:configs && tsc",
         "format": "prettier --write \"src/**/*.ts\"",
         "format:check": "prettier --check \"src/**/*.ts\""
     },

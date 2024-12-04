@@ -77,23 +77,26 @@ export function useConnectionValue() {
     }
   }, [context, parent]);
 
-  const setController = useCallback((controller?: Controller) => {
-    if (controller && controller.cartridge) {
-      posthog.identify(controller.cartridge.username(), {
-        address: controller.address,
-        class: controller.cartridge.classHash,
-        chainId: controller.chainId,
-        appId: origin,
-      });
+  const setController = useCallback(
+    (controller?: Controller) => {
+      if (controller && controller.cartridge) {
+        posthog.identify(controller.cartridge.username(), {
+          address: controller.address,
+          class: controller.cartridge.classHash,
+          chainId: controller.chainId,
+          appId: origin,
+        });
 
-      posthog.group("company", origin);
-    } else {
-      posthog.reset();
-    }
+        posthog.group("company", origin);
+      } else {
+        posthog.reset();
+      }
 
-    setControllerRaw(controller);
-    setIsSignedUp();
-  }, []);
+      setControllerRaw(controller);
+      setIsSignedUp();
+    },
+    [origin],
+  );
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
