@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, useEffect, useState } from "react";
-import { SessionPolicies } from "@cartridge/controller";
+import { SessionPolicies, toArray } from "@cartridge/controller";
 import {
   Card,
   CardContent,
@@ -151,7 +151,7 @@ function Contract({
   methods: ContractPolicy["methods"];
   icon?: React.ReactNode;
 }) {
-  const methods = Array.isArray(_methods) ? _methods : [_methods];
+  const methods = toArray(_methods);
   const { chainId } = useConnection();
   const isSlot = isSlotChain(chainId);
 

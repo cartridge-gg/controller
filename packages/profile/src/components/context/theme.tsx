@@ -1,6 +1,7 @@
 import {
   ControllerTheme,
   defaultTheme,
+  toArray,
   verifiedConfigs,
 } from "@cartridge/controller";
 import { useThemeEffect } from "@cartridge/ui-next";
@@ -76,7 +77,7 @@ export function ThemeProvider({
       val in verifiedConfigs &&
       verifiedConfigs[val].theme &&
       (origin.startsWith("http://localhost") ||
-        verifiedConfigs[val].origin === origin)
+        toArray(verifiedConfigs[val].origin).includes(origin))
     ) {
       setTheme(verifiedConfigs[val].theme);
       return;

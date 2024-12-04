@@ -1,5 +1,9 @@
 import { useMemo, useState } from "react";
-import { ResponseCodes, toSessionPolicies } from "@cartridge/controller";
+import {
+  ResponseCodes,
+  toArray,
+  toSessionPolicies,
+} from "@cartridge/controller";
 import { Content, FOOTER_MIN_HEIGHT } from "components/layout";
 import { TransactionDuoIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
@@ -18,7 +22,7 @@ export function ConfirmTransaction() {
 
   const onSubmit = async (maxFee: bigint) => {
     let { transaction_hash } = await account.execute(
-      Array.isArray(ctx.transactions) ? ctx.transactions : [ctx.transactions],
+      toArray(ctx.transactions),
       {
         maxFee: num.toHex(maxFee),
       },
@@ -33,10 +37,7 @@ export function ConfirmTransaction() {
 
   const callPolicies = useMemo<CallPolicy[]>(
     () =>
-      (Array.isArray(ctx.transactions)
-        ? ctx.transactions
-        : [ctx.transactions]
-      ).map((c) => ({
+      toArray(ctx.transactions).map((c) => ({
         target: c.contractAddress,
         method: c.entrypoint,
       })),
@@ -47,9 +48,9 @@ export function ConfirmTransaction() {
     if (policiesUpdated) return false;
 
     const txnsApproved = callPolicies.every((call) => {
-      const _methods =
-        policies.contracts[getChecksumAddress(call.target)].methods;
-      const methods = Array.isArray(_methods) ? _methods : [_methods];
+      const methods = toArray(
+        policies.contracts[getChecksumAddress(call.target)].methods,
+      );
       return !!methods.find((m) => m.name === call.method);
     });
 

@@ -27,7 +27,7 @@ export type Session = {
 export type VerifiedConfigs = Record<string, VerifiedConfig>;
 
 export type VerifiedConfig = {
-  origin: string;
+  origin: string | string[];
   policies?: SessionPolicies;
   theme?: ControllerTheme;
 };
@@ -56,6 +56,7 @@ export type ContractPolicies = Record<string, ContractPolicy>;
 export type ContractPolicy = {
   /** It must contain one method */
   methods: Method | Method[];
+  // description?: string;
 };
 
 export type Method = {

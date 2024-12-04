@@ -2,6 +2,7 @@ import {
   ControllerColor,
   ControllerTheme,
   defaultTheme,
+  toArray,
 } from "@cartridge/controller";
 import { CartridgeTheme } from "@cartridge/ui";
 import { useThemeEffect } from "@cartridge/ui-next";
@@ -81,7 +82,7 @@ export function useControllerThemePreset() {
       val in verifiedConfigs &&
       verifiedConfigs[val].theme &&
       (origin.startsWith("http://localhost") ||
-        verifiedConfigs[val].origin === origin)
+        toArray(verifiedConfigs[val].origin).includes(origin))
     ) {
       return verifiedConfigs[val].theme;
     }
@@ -91,7 +92,7 @@ export function useControllerThemePreset() {
     } catch {
       return defaultTheme;
     }
-  }, [router.query.theme]);
+  }, [router.query.theme, origin]);
 }
 
 export function useChakraTheme(preset: ControllerTheme) {

@@ -10,7 +10,7 @@ import { Policies, SessionPolicies } from "./types";
 import wasm from "@cartridge/account-wasm/controller";
 
 export function normalizeCalls(calls: Call | Call[]) {
-  return (Array.isArray(calls) ? calls : [calls]).map((call) => {
+  return toArray(calls).map((call) => {
     return {
       entrypoint: call.entrypoint,
       contractAddress: addAddressPadding(call.contractAddress),
@@ -25,8 +25,7 @@ export function toSessionPolicies(policies: Policies): SessionPolicies {
         (prev, p) => {
           if ("target" in p) {
             if (p.target in prev.contracts!) {
-              const _methods = prev.contracts![p.target].methods;
-              const methods = Array.isArray(_methods) ? _methods : [_methods];
+              const methods = toArray(prev.contracts![p.target].methods);
               prev.contracts![p.target] = {
                 methods: [
                   ...methods,
@@ -80,7 +79,7 @@ export function toWasmPolicies(policies: Policies): wasm.Policy[] {
   return [
     ...Object.entries(policies.contracts ?? {}).flatMap(
       ([target, { methods }]) =>
-        (Array.isArray(methods) ? methods : [methods]).map((m) => ({
+        toArray(methods).map((m) => ({
           target,
           method: m.name,
         })),
@@ -103,4 +102,8 @@ export function toWasmPolicies(policies: Policies): wasm.Policy[] {
       };
     }),
   ];
+}
+
+export function toArray<T>(val: T | T[]): T[] {
+  return Array.isArray(val) ? val : [val];
 }
