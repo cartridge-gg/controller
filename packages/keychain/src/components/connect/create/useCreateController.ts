@@ -87,6 +87,23 @@ export function useCreateController({
     [origin, chainId, rpcUrl, setController, onCreated],
   );
 
+  const doPopupFlow = useCallback(
+    (username: string) => {
+      const searchParams = new URLSearchParams(window.location.search);
+      searchParams.set("name", encodeURIComponent(username));
+      searchParams.set("action", "signup");
+      setPendingUsername(username);
+
+      PopupCenter(
+        `/authenticate?${searchParams.toString()}`,
+        "Cartridge Signup",
+        480,
+        640,
+      );
+    },
+    [setPendingUsername],
+  );
+
   const handleSubmit = useCallback(
     async (username: string, exists: boolean) => {
       setError(undefined);
@@ -128,18 +145,7 @@ export function useCreateController({
           );
 
           if (isSafari) {
-            const searchParams = new URLSearchParams(window.location.search);
-            searchParams.set("name", encodeURIComponent(username));
-            searchParams.set("action", "signup");
-
-            PopupCenter(
-              `/authenticate?${searchParams.toString()}`,
-              "Cartridge Signup",
-              480,
-              640,
-            );
-
-            setPendingUsername(username);
+            doPopupFlow(username);
             return;
           }
 
@@ -165,6 +171,16 @@ export function useCreateController({
           );
         }
       } catch (e) {
+        if (
+          // Bitwarden extension
+          e.message.includes("Invalid 'sameOriginWithAncestors' value") ||
+          // Other password manager
+          e.message.includes("document which is same-origin")
+        ) {
+          doPopupFlow(username);
+          return;
+        }
+
         setError(e as Error);
       }
 
