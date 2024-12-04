@@ -1,60 +1,8 @@
-import {
-  ControllerColor,
-  ControllerTheme,
-  toArray,
-} from "@cartridge/controller";
+import { ControllerColor, ControllerTheme } from "@cartridge/controller";
 import { CartridgeTheme } from "@cartridge/ui";
-import { useThemeEffect } from "@cartridge/ui-next";
-import { ChakraProvider, ColorMode, useColorMode } from "@chakra-ui/react";
-import { useRouter } from "next/router";
-import {
-  useContext,
-  createContext,
-  useMemo,
-  useEffect,
-  PropsWithChildren,
-} from "react";
-import { defaultTheme, controllerConfigs } from "@cartridge/presets";
-import { useConnection } from "./connection";
+import { useContext, createContext, useMemo } from "react";
 
-const ControllerThemeContext = createContext<ControllerTheme>(undefined);
-
-export function ControllerThemeProvider({ children }: PropsWithChildren) {
-  const preset = useControllerThemePreset();
-  const controllerTheme = useMemo(
-    () => ({
-      name: preset.name,
-      icon: preset.icon,
-      cover: preset.cover,
-    }),
-    [preset],
-  );
-
-  useThemeEffect({ theme: preset, assetUrl: "" });
-  const chakraTheme = useChakraTheme(preset);
-
-  return (
-    <ControllerThemeContext.Provider value={controllerTheme}>
-      <ChakraProvider theme={chakraTheme}>
-        <ChakraTheme>{children}</ChakraTheme>
-      </ChakraProvider>
-    </ControllerThemeContext.Provider>
-  );
-}
-
-function ChakraTheme({ children }: PropsWithChildren) {
-  const router = useRouter();
-  const colorMode = useMemo(
-    () => (router.query.colorMode as ColorMode) ?? "dark",
-    [router.query.colorMode],
-  );
-  const { setColorMode } = useColorMode();
-
-  useEffect(() => {
-    setColorMode(colorMode);
-  }, [setColorMode, colorMode]);
-  return children;
-}
+export const ControllerThemeContext = createContext<ControllerTheme>(undefined);
 
 export function useControllerTheme() {
   const ctx = useContext<ControllerTheme>(ControllerThemeContext);
@@ -63,39 +11,6 @@ export function useControllerTheme() {
   }
 
   return ctx;
-}
-
-export function useControllerThemePreset() {
-  const router = useRouter();
-  const { origin } = useConnection();
-
-  return useMemo(() => {
-    const themeParam = router.query.theme;
-    if (typeof themeParam === "undefined") {
-      return defaultTheme;
-    }
-    const val = decodeURIComponent(
-      Array.isArray(themeParam)
-        ? themeParam[themeParam.length - 1]
-        : themeParam,
-    );
-
-    if (
-      typeof val === "string" &&
-      val in controllerConfigs &&
-      controllerConfigs[val].theme &&
-      (origin?.startsWith("http://localhost") ||
-        toArray(controllerConfigs[val].origin).includes(origin))
-    ) {
-      return controllerConfigs[val].theme;
-    }
-
-    try {
-      return JSON.parse(val) as ControllerTheme;
-    } catch {
-      return defaultTheme;
-    }
-  }, [router.query.theme, origin]);
 }
 
 export function useChakraTheme(preset: ControllerTheme) {

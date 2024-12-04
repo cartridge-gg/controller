@@ -1,4 +1,4 @@
-import { createContext, PropsWithChildren } from "react";
+import { createContext } from "react";
 import Controller from "utils/controller";
 import { ConnectionCtx } from "utils/connection";
 import { Prefund, SessionPolicies } from "@cartridge/controller";
@@ -26,14 +26,3 @@ export type ConnectionContextValue = {
   logout: () => void;
   openSettings: () => void;
 };
-
-export function ConnectionProvider({
-  children,
-  value,
-}: { value: ConnectionContextValue } & PropsWithChildren) {
-  return (
-    <ConnectionContext.Provider value={value}>
-      {children}
-    </ConnectionContext.Provider>
-  );
-}

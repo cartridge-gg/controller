@@ -3,10 +3,10 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import type { Parameters, Preview } from "@storybook/react";
 import Controller from "@cartridge/controller";
 import { Inter, IBM_Plex_Mono } from "next/font/google";
-import { ControllerThemeProvider } from "../src/hooks/theme";
+import { ControllerThemeContext, useChakraTheme } from "../src/hooks/theme";
 import {
+  ConnectionContext,
   ConnectionContextValue,
-  ConnectionProvider,
 } from "../src/components/Provider/connection";
 import { constants } from "starknet";
 import { getChainName } from "@cartridge/utils";
@@ -14,6 +14,7 @@ import Script from "next/script";
 import { ETH_CONTRACT_ADDRESS } from "../src/utils/token";
 import { ConnectCtx, ConnectionCtx } from "../src/utils/connection/types";
 import { UpgradeInterface } from "../src/hooks/upgrade";
+import { defaultTheme } from "@cartridge/presets";
 
 const inter = Inter({ subsets: ["latin"] });
 const ibmPlexMono = IBM_Plex_Mono({
@@ -21,6 +22,8 @@ const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
 });
 import "../src/index.css";
+import { useThemeEffect } from "@cartridge/ui-next";
+import { ChakraProvider } from "@chakra-ui/react";
 
 const preview: Preview = {
   parameters: {
@@ -77,9 +80,9 @@ function Provider({
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ConnectionProvider value={connection}>
+      <ConnectionContext.Provider value={connection}>
         <ControllerThemeProvider>{children}</ControllerThemeProvider>
-      </ConnectionProvider>
+      </ConnectionContext.Provider>
     </QueryClientProvider>
   );
 }
@@ -87,7 +90,7 @@ function Provider({
 interface StoryParameters extends Parameters {
   connection?: {
     context?: ConnectionCtx;
-    controller?: typeof Controller;
+    controller?: Controller;
     chainId?: string;
     upgrade?: UpgradeInterface;
   };
@@ -100,8 +103,8 @@ export function useMockedConnection({
     type: "connect",
     origin: "http://localhost:3002",
     policies: [],
-    resolve: () => { },
-    reject: () => { },
+    resolve: () => {},
+    reject: () => {},
   } as ConnectCtx,
   ...rest
 }: StoryParameters["connection"] = {}): ConnectionContextValue {
@@ -141,12 +144,12 @@ export function useMockedConnection({
     prefunds: [],
     hasPrefundRequest: false,
     error: undefined,
-    setContext: () => { },
-    setController: () => { },
-    closeModal: () => { },
-    openModal: () => { },
-    logout: () => { },
-    openSettings: () => { },
+    setContext: () => {},
+    setController: () => {},
+    closeModal: () => {},
+    openModal: () => {},
+    logout: () => {},
+    openSettings: () => {},
     controller: {},
     upgrade: {},
     ...rest,
@@ -156,3 +159,22 @@ export function useMockedConnection({
 const queryClient = new QueryClient();
 
 export default preview;
+
+export function ControllerThemeProvider({ children }: PropsWithChildren) {
+  const controllerTheme = useMemo(
+    () => ({
+      name: defaultTheme.name,
+      icon: defaultTheme.icon,
+      cover: defaultTheme.cover,
+    }),
+    [defaultTheme],
+  );
+  useThemeEffect({ theme: defaultTheme, assetUrl: "" });
+  const chakraTheme = useChakraTheme(defaultTheme);
+
+  return (
+    <ControllerThemeContext.Provider value={controllerTheme}>
+      <ChakraProvider theme={chakraTheme}>{children}</ChakraProvider>
+    </ControllerThemeContext.Provider>
+  );
+}

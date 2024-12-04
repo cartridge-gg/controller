@@ -1,12 +1,12 @@
 import { PropsWithChildren } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { ControllerThemeProvider } from "hooks/theme";
 import { useConnectionValue } from "hooks/connection";
-import { ConnectionProvider } from "./connection";
 import { CartridgeAPIProvider } from "@cartridge/utils/api/cartridge";
 import { ENDPOINT } from "utils/graphql";
 import { PostHogProvider } from "posthog-js/react";
 import posthog from "posthog-js";
+import { ConnectionContext } from "./connection";
+import { ControllerThemeProvider } from "./theme";
 
 export function Provider({ children }: PropsWithChildren) {
   const connection = useConnectionValue();
@@ -14,11 +14,11 @@ export function Provider({ children }: PropsWithChildren) {
   return (
     <CartridgeAPIProvider url={ENDPOINT}>
       <QueryClientProvider client={queryClient}>
-        <ConnectionProvider value={connection}>
+        <ConnectionContext.Provider value={connection}>
           <ControllerThemeProvider>
             <PostHogProvider client={posthog}>{children}</PostHogProvider>
           </ControllerThemeProvider>
-        </ConnectionProvider>
+        </ConnectionContext.Provider>
       </QueryClientProvider>
     </CartridgeAPIProvider>
   );
