@@ -48,10 +48,11 @@ export function ConfirmTransaction() {
     if (policiesUpdated) return false;
 
     const txnsApproved = callPolicies.every((call) => {
-      const methods = toArray(
-        policies.contracts?.[getChecksumAddress(call.target)]?.methods ?? [],
-      );
-      return methods.some((m) => m.name === call.method);
+      return policies.contracts?.[
+        getChecksumAddress(call.target)
+      ]?.methods.some((m) => {
+        return m.entrypoint === call.method;
+      });
     });
 
     // If calls are approved by dapp specified policies but not stored session

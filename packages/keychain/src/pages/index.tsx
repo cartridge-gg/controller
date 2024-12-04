@@ -58,10 +58,10 @@ function Home() {
       // TODO: show missing policies if mismatch
       if (
         !(
-          Object.keys(context.policies?.contracts ?? {}).length +
-          context.policies?.messages?.length
+          Object.keys(policies?.contracts ?? {}).length +
+          policies?.messages?.length
         ) ||
-        controller.session(context.policies)
+        controller.session(policies)
       ) {
         context.resolve({
           code: ResponseCodes.SUCCESS,

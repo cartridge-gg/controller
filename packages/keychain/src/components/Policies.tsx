@@ -10,7 +10,7 @@ import {
   Box,
 } from "@chakra-ui/react";
 import { CopyHash, FnIcon, WedgeRightIcon } from "@cartridge/ui";
-import { SessionPolicies, toArray } from "@cartridge/controller";
+import { SessionPolicies } from "@cartridge/controller";
 
 export function Policies({
   title,
@@ -43,7 +43,7 @@ export function Policies({
 
       <Accordion w="full" allowMultiple overflowY="auto">
         {Object.entries(policies.contracts).map(([contractAddress, p]) =>
-          toArray(p.methods).map((m) => (
+          p.methods.map((m) => (
             <AccordionItem
               key={`${contractAddress}${m.name}`}
               // borderTopRadius={i === 0 && !title ? "base" : "none"}

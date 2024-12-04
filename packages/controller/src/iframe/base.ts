@@ -35,12 +35,7 @@ export class IFrame<CallSender extends {}> implements Modal {
     }
 
     if (theme) {
-      url.searchParams.set(
-        "theme",
-        encodeURIComponent(
-          typeof theme === "string" ? theme : JSON.stringify(theme),
-        ),
-      );
+      url.searchParams.set("theme", encodeURIComponent(theme));
     }
 
     if (colorMode) {

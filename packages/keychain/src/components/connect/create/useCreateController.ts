@@ -107,7 +107,6 @@ export function useCreateController({
 
           const controllerNode = controllers.edges?.[0].node;
 
-          console.log(policies);
           if (
             loginMode === LoginMode.Webauthn ||
             Object.keys(policies.contracts ?? {}).length +

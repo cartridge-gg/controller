@@ -124,21 +124,26 @@ export function useMockedConnection({
         [ETH_CONTRACT_ADDRESS]: {
           methods: [
             {
-              name: "approve",
+              name: "Approve",
+              entrypoint: "approve",
               description:
                 "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
             },
             {
-              name: "transfer",
+              name: "Transfer",
+              entrypoint: "transfer",
             },
             {
-              name: "mint",
+              name: "Mint",
+              entrypoint: "mint",
             },
             {
-              name: "burn",
+              name: "Burn",
+              entrypoint: "burn",
             },
             {
-              name: "allowance",
+              name: "Allowance",
+              entrypoint: "allowance",
             },
           ],
         },

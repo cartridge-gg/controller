@@ -4,7 +4,7 @@ import {
   ExecuteReply,
   ConnectError,
   DeployReply,
-  SessionPolicies,
+  Policies,
 } from "@cartridge/controller";
 import {
   Abi,
@@ -28,7 +28,7 @@ export type ConnectionCtx =
 export type ConnectCtx = {
   origin: string;
   type: "connect";
-  policies: SessionPolicies;
+  policies: Policies;
   resolve: (res: ConnectReply | ConnectError) => void;
   reject: (reason?: unknown) => void;
 };

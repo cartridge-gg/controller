@@ -13,7 +13,10 @@ const redirectQueryName = "startapp";
 const policies: SessionPolicies = {
   contracts: {
     [HIT_THING_ADDRESS]: {
-      methods: [{ name: "attack" }, { name: "cliam" }],
+      methods: [
+        { name: "Attack", entrypoint: "attack" },
+        { name: "Claim", entrypoint: "claim" },
+      ],
     },
   },
 };

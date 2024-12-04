@@ -52,19 +52,21 @@ export type SessionPolicies = {
 
 export type ContractPolicies = Record<string, ContractPolicy>;
 
-/** Contract level policy */
 export type ContractPolicy = {
-  /** It must contain one method */
-  methods: Method | Method[];
-  // description?: string;
+  methods: Method[];
+  description?: string;
 };
 
 export type Method = {
   name: string;
+  entrypoint: string;
   description?: string;
 };
 
-export type SignMessagePolicy = Omit<TypedData, "message">;
+export type SignMessagePolicy = TypedDataPolicy & {
+  name: string;
+  description?: string;
+};
 
 export enum ResponseCodes {
   SUCCESS = "SUCCESS",

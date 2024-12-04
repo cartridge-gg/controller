@@ -49,30 +49,25 @@ export function toSessionPolicies(policies: Policies): SessionPolicies {
         (prev, p) => {
           if (safeObjectAccess<string>(p, "target")) {
             const target = safeObjectAccess<string>(p, "target");
+            const entrypoint = safeObjectAccess<string>(p, "method");
             const contracts = safeObjectAccess<Record<string, any>>(
               prev,
               "contracts",
             );
+            const item = {
+              name: entrypoint,
+              entrypoint: entrypoint,
+              description: safeObjectAccess<string>(p, "description"),
+            };
 
             if (target in contracts) {
               const methods = toArray(contracts[target].methods);
               contracts[target] = {
-                methods: [
-                  ...methods,
-                  {
-                    name: target,
-                    description: safeObjectAccess<string>(p, "description"),
-                  },
-                ],
+                methods: [...methods, item],
               };
             } else {
               contracts[target] = {
-                methods: [
-                  {
-                    name: target,
-                    description: safeObjectAccess<string>(p, "description"),
-                  },
-                ],
+                methods: [item],
               };
             }
           } else {
