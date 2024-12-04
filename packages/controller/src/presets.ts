@@ -31,10 +31,10 @@ export const defaultPresets: ControllerThemePresets = {
   eternum: {
     id: "eternum",
     name: "Eternum",
-    icon: "/whitelabel/eternum/icon.gif",
+    icon: "/whitelabel/eternum/icon.svg",
     cover: "/whitelabel/eternum/cover.png",
     colors: {
-      primary: "#CE9822",
+      primary: "#dc8b07",
     },
   },
   pistols: {
