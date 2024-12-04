@@ -1,7 +1,6 @@
 import {
   ControllerColor,
   ControllerTheme,
-  defaultTheme,
   toArray,
 } from "@cartridge/controller";
 import { CartridgeTheme } from "@cartridge/ui";
@@ -15,7 +14,7 @@ import {
   useEffect,
   PropsWithChildren,
 } from "react";
-import { verifiedConfigs } from "@cartridge/controller";
+import { defaultTheme, controllerConfigs } from "@cartridge/presets";
 import { useConnection } from "./connection";
 
 const ControllerThemeContext = createContext<ControllerTheme>(undefined);
@@ -83,12 +82,12 @@ export function useControllerThemePreset() {
 
     if (
       typeof val === "string" &&
-      val in verifiedConfigs &&
-      verifiedConfigs[val].theme &&
+      val in controllerConfigs &&
+      controllerConfigs[val].theme &&
       (origin?.startsWith("http://localhost") ||
-        toArray(verifiedConfigs[val].origin).includes(origin))
+        toArray(controllerConfigs[val].origin).includes(origin))
     ) {
-      return verifiedConfigs[val].theme;
+      return controllerConfigs[val].theme;
     }
 
     try {

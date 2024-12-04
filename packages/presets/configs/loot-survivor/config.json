@@ -1,0 +1,33 @@
+{
+  "origin": "https://lootsurvivor.io",
+  "policies": {
+    "contracts": {
+      "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49": {
+        "methods": [{ "name": "approve" }, { "name": "mint_lords" }]
+      },
+      "0x0305f26ad19e0a10715d9f3137573d3a543de7b707967cd85d11234d6ec0fb7e": {
+        "methods": [
+          { "name": "attack" },
+          { "name": "drop" },
+          { "name": "equip" },
+          { "name": "explore" },
+          { "name": "flee" },
+          { "name": "new_game" },
+          { "name": "transfer_from" },
+          { "name": "upgrade" }
+        ]
+      },
+      "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7": {
+        "methods": { "name": "approve" }
+      }
+    }
+  },
+  "theme": {
+    "colors": {
+      "primary": "#33FF33"
+    },
+    "cover": "/whitelabel/loot-survivor/cover.png",
+    "icon": "/whitelabel/loot-survivor/icon.png",
+    "name": "Loot Survivor"
+  }
+}

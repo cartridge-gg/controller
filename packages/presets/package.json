@@ -1,0 +1,26 @@
+{
+    "name": "@cartridge/presets",
+    "version": "0.0.1",
+    "description": "Cartridge Presets",
+    "module": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "type": "module",
+    "scripts": {
+        "build:configs": "tsx scripts/generate-configs.ts",
+        "build": "pnpm build:configs && tsc",
+        "format": "prettier --write \"src/**/*.ts\"",
+        "format:check": "prettier --check \"src/**/*.ts\""
+    },
+    "exports": {
+        ".": "./dist/index.js"
+    },
+    "files": [
+        "dist"
+    ],
+    "devDependencies": {
+        "@cartridge/tsconfig": "workspace:*",
+        "@types/node": "^20.6.0",
+        "tsx": "^4.7.0",
+        "typescript": "^5.4.5"
+    }
+}

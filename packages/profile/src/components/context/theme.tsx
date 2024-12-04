@@ -1,9 +1,5 @@
-import {
-  ControllerTheme,
-  defaultTheme,
-  toArray,
-  verifiedConfigs,
-} from "@cartridge/controller";
+import { ControllerTheme, toArray } from "@cartridge/controller";
+import { defaultTheme, controllerConfigs } from "@cartridge/presets";
 import { useThemeEffect } from "@cartridge/ui-next";
 import { createContext, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -74,12 +70,12 @@ export function ThemeProvider({
 
     if (
       typeof val === "string" &&
-      val in verifiedConfigs &&
-      verifiedConfigs[val].theme &&
+      val in controllerConfigs &&
+      controllerConfigs[val].theme &&
       (origin?.startsWith("http://localhost") ||
-        toArray(verifiedConfigs[val].origin).includes(origin))
+        toArray(controllerConfigs[val].origin).includes(origin))
     ) {
-      setTheme(verifiedConfigs[val].theme);
+      setTheme(controllerConfigs[val].theme);
       return;
     }
 

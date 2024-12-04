@@ -7,6 +7,7 @@
   "type": "module",
   "scripts": {
     "build:deps": "tsup --dts-resolve",
+    "build": "pnpm build:deps",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
     "version": "pnpm pkg get version"
@@ -31,6 +32,7 @@
   "dependencies": {
     "@cartridge/account-wasm": "workspace:*",
     "@cartridge/penpal": "^6.2.3",
+    "@cartridge/presets": "workspace:*",
     "@starknet-io/types-js": "^0.7.7",
     "@telegram-apps/sdk": "^2.4.0",
     "base64url": "^3.0.1",
