@@ -40,6 +40,7 @@ const preview: Preview = {
       },
     },
     preset: "cartridge",
+    colorMode: "dark",
   },
   decorators: [
     (Story, { parameters }) => (
@@ -84,13 +85,12 @@ function Provider({
   const presetId = parameters.preset || "cartridge";
   const preset = defaultPresets[presetId];
   const chakraTheme = useChakraTheme(preset);
-  console.log(preset);
   const ctrlTheme: ControllerTheme = {
     id: preset.id,
     name: preset.name,
     icon: preset.icon,
     cover: preset.cover,
-    colorMode: "dark",
+    colorMode: parameters.colorMode || "dark",
   };
   const connection = useMockedConnection(parameters.connection);
 

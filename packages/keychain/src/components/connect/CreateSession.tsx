@@ -1,7 +1,7 @@
 import { Container, Content, Footer } from "components/layout";
 import { BigNumberish, shortString } from "starknet";
 import { ControllerError } from "utils/connection";
-import { Button } from "@chakra-ui/react";
+import { Button, VStack } from "@chakra-ui/react";
 import { useCallback, useEffect, useState } from "react";
 import { useConnection } from "hooks/connection";
 import { ControllerErrorAlert } from "components/ErrorAlert";
@@ -19,7 +19,7 @@ export function CreateSession({
   onConnect: (transaction_hash?: string) => void;
   isUpdate?: boolean;
 }) {
-  const { controller, policies, upgrade, chainId } = useConnection();
+  const { controller, policies, upgrade, chainId, logout } = useConnection();
   const [isConnecting, setIsConnecting] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
   const [expiresAt] = useState<bigint>(SESSION_EXPIRATION);
@@ -78,6 +78,11 @@ export function CreateSession({
       description={
         isUpdate && "The policies were updated, please update existing session"
       }
+      onClose={() => {
+        if (!isUpdate) {
+          logout();
+        }
+      }}
     >
       <Content gap={6}>
         <SessionConsent />
@@ -89,14 +94,24 @@ export function CreateSession({
           <ControllerErrorAlert error={error} />
         )}
         {!error && (
-          <Button
-            colorScheme="colorful"
-            isDisabled={isDisabled || isConnecting}
-            isLoading={isConnecting}
-            onClick={() => onCreateSession()}
-          >
-            {isUpdate ? "update" : "create"} session
-          </Button>
+          <VStack spacing={4} width="full">
+            <Button
+              colorScheme="colorful"
+              isDisabled={isDisabled || isConnecting}
+              isLoading={isConnecting}
+              onClick={() => onCreateSession()}
+              width="full"
+            >
+              {isUpdate ? "update" : "create"} session
+            </Button>
+            <Button
+              onClick={() => onConnect()}
+              isDisabled={isConnecting}
+              width="full"
+            >
+              Skip
+            </Button>
+          </VStack>
         )}
       </Footer>
     </Container>

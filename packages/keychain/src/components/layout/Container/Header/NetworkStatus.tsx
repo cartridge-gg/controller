@@ -23,14 +23,15 @@ export function NetworkStatus() {
       color="text.primary"
     >
       <Button
-        size="sm"
-        bg="solid.primary"
+        px="12px"
+        py="10px"
+        bg="solid.bg"
         fontSize="xs"
         fontFamily="Inter"
-        _hover={{ bg: "solid.primary", opacity: 0.7 }}
+        _hover={{ bg: "hsl(var(solid.primary)/0.75)" }}
         iconSpacing={1.5}
         leftIcon={
-          <Circle size={5} bg="solid.primary">
+          <Circle size={5}>
             {(() => {
               switch (chainId) {
                 case constants.StarknetChainId.SN_MAIN:

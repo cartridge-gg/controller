@@ -42,7 +42,7 @@ export function CreateControllerView({
       title={
         theme.id === "cartridge" ? "Play with Controller" : `Play ${theme.name}`
       }
-      description="Use your Controller to seamlessly play games and earn rewards"
+      description="Connect your Controller"
     >
       <form
         style={{ width: "100%" }}
