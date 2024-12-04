@@ -3,4 +3,4 @@ export * from "./errors";
 export * from "./types";
 export { toWasmPolicies } from "./utils";
 
-export { defaultTheme } from "./verified";
+export { defaultTheme, verifiedConfigs } from "./verified";

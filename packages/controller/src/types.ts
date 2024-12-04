@@ -14,7 +14,7 @@ import { KeychainIFrame, ProfileIFrame } from "./iframe";
 
 export type Session = {
   chainId: constants.StarknetChainId;
-  policies: SessionPolicies;
+  policies: Policy[];
   maxFee: BigNumberish;
   expiresAt: bigint;
   credentials: {
@@ -31,6 +31,18 @@ export type VerifiedConfig = {
   policies?: SessionPolicies;
   theme?: ControllerTheme;
 };
+
+export type Policy = CallPolicy | TypedDataPolicy;
+
+export type CallPolicy = {
+  target: string;
+  method: string;
+  description?: string;
+};
+
+export type TypedDataPolicy = Omit<TypedData, "message">;
+
+export type Policies = Policy[] | SessionPolicies;
 
 export type SessionPolicies = {
   /** The key must be the contract address */
@@ -110,7 +122,7 @@ export type ControllerAccounts = Record<ContractAddress, CartridgeID>;
 export interface Keychain {
   probe(rpcUrl: string): Promise<ProbeReply | ConnectError>;
   connect(
-    policies: SessionPolicies,
+    policies: Policies,
     rpcUrl: string,
   ): Promise<ConnectReply | ConnectError>;
   disconnect(): void;
@@ -164,7 +176,7 @@ export type IFrameOptions = {
   /** The ID of the starter pack to use */
   starterPackId?: string;
   /** The theme to use */
-  theme?: ControllerThemeOption;
+  theme?: string;
   /** The color mode to use */
   colorMode?: ColorMode;
 };
@@ -175,7 +187,7 @@ export type ProviderOptions = {
 };
 
 export type KeychainOptions = IFrameOptions & {
-  policies?: SessionPolicies;
+  policies?: Policies;
   /** The URL of keychain */
   url?: string;
   /** The origin of keychain */
@@ -202,8 +214,6 @@ export type ProfileContextTypeVariant =
   | "activity";
 
 export type ColorMode = "light" | "dark";
-
-export type ControllerThemeOption = string | ControllerTheme;
 
 export type ControllerTheme = {
   name: string;

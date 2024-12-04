@@ -14,7 +14,11 @@ import {
   CallData,
 } from "starknet";
 
-import { SessionPolicies, toWasmPolicies } from "@cartridge/controller";
+import {
+  Policies,
+  SessionPolicies,
+  toWasmPolicies,
+} from "@cartridge/controller";
 
 import {
   CartridgeAccount,
@@ -163,7 +167,7 @@ export default class Controller extends Account {
   }
 
   session(
-    policies: SessionPolicies,
+    policies: Policies,
     public_key?: string,
   ): SessionMetadata | undefined {
     return this.cartridge.session(toWasmPolicies(policies), public_key);

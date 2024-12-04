@@ -6,7 +6,7 @@ import {
   typedData,
   TypedDataRevision,
 } from "starknet";
-import { SessionPolicies } from "./types";
+import { Policies } from "./types";
 import wasm from "@cartridge/account-wasm/controller";
 
 export function normalizeCalls(calls: Call | Call[]) {
@@ -19,7 +19,34 @@ export function normalizeCalls(calls: Call | Call[]) {
   });
 }
 
-export function toWasmPolicies(policies: SessionPolicies): wasm.Policy[] {
+export function toWasmPolicies(policies: Policies): wasm.Policy[] {
+  if (Array.isArray(policies)) {
+    return policies.map((p) => {
+      if ("target" in p) {
+        return {
+          target: p.target,
+          method: p.method,
+        };
+      } else {
+        const domainHash = typedData.getStructHash(
+          p.types,
+          "StarknetDomain",
+          p.domain,
+          TypedDataRevision.ACTIVE,
+        );
+        const typeHash = typedData.getTypeHash(
+          p.types,
+          p.primaryType,
+          TypedDataRevision.ACTIVE,
+        );
+
+        return {
+          scope_hash: hash.computePoseidonHash(domainHash, typeHash),
+        };
+      }
+    });
+  }
+
   return [
     ...Object.entries(policies.contracts ?? {}).flatMap(
       ([target, { methods }]) =>
