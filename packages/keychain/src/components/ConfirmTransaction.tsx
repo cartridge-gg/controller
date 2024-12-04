@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
-import { ResponseCodes } from "@cartridge/controller";
+import { ResponseCodes, toSessionPolicies } from "@cartridge/controller";
 import { Content, FOOTER_MIN_HEIGHT } from "components/layout";
 import { TransactionDuoIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { Policies } from "components/Policies";
 import { ExecuteCtx } from "utils/connection";
-import { addAddressPadding, num } from "starknet";
+import { getChecksumAddress, num } from "starknet";
 import { ExecutionContainer } from "components/ExecutionContainer";
 import { CreateSession } from "./connect";
 import { CallPolicy } from "@cartridge/account-wasm";
@@ -46,15 +46,12 @@ export function ConfirmTransaction() {
   const updateSession = useMemo(() => {
     if (policiesUpdated) return false;
 
-    const txnsApproved = callPolicies.every((call) =>
-      policies.some(
-        (policy) =>
-          "target" in policy &&
-          "method" in policy &&
-          addAddressPadding(policy.target) === addAddressPadding(call.target) &&
-          policy.method === call.method,
-      ),
-    );
+    const txnsApproved = callPolicies.every((call) => {
+      const _methods =
+        policies.contracts[getChecksumAddress(call.target)].methods;
+      const methods = Array.isArray(_methods) ? _methods : [_methods];
+      return !!methods.find((m) => m.name === call.method);
+    });
 
     // If calls are approved by dapp specified policies but not stored session
     // then prompt user to update session. This also accounts for expired sessions.
@@ -78,7 +75,10 @@ export function ConfirmTransaction() {
       onSubmit={onSubmit}
     >
       <Content pb={FOOTER_MIN_HEIGHT}>
-        <Policies title="Transaction Details" policies={callPolicies} />
+        <Policies
+          title="Transaction Details"
+          policies={toSessionPolicies(callPolicies)}
+        />
       </Content>
     </ExecutionContainer>
   );

@@ -56,7 +56,13 @@ function Home() {
       posthog?.capture("Call Connect");
 
       // TODO: show missing policies if mismatch
-      if (!context.policies?.length || controller.session(context.policies)) {
+      if (
+        !(
+          Object.keys(context.policies?.contracts ?? {}).length +
+          context.policies?.messages?.length
+        ) ||
+        controller.session(context.policies)
+      ) {
         context.resolve({
           code: ResponseCodes.SUCCESS,
           address: controller.address,

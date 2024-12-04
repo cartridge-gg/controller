@@ -8,7 +8,13 @@ import {
 } from "utils/connection";
 import { getChainName, isIframe } from "@cartridge/utils";
 import { RpcProvider, constants } from "starknet";
-import { Prefund, ResponseCodes, SessionPolicies } from "@cartridge/controller";
+import {
+  Policies,
+  Prefund,
+  ResponseCodes,
+  SessionPolicies,
+  toSessionPolicies,
+} from "@cartridge/controller";
 import { mergeDefaultETHPrefund } from "utils/token";
 import { setIsSignedUp } from "utils/cookie";
 import {
@@ -41,11 +47,6 @@ export function useConnectionValue() {
     }
     return getChainName(chainId);
   }, [chainId]);
-
-  const parsePolicies = (policiesStr: string | null): SessionPolicies => {
-    if (!policiesStr) return {};
-    return JSON.parse(decodeURIComponent(policiesStr));
-  };
 
   const closeModal = useCallback(async () => {
     if (!parent) return;
@@ -111,7 +112,13 @@ export function useConnectionValue() {
       : [];
     setHasPrefundRequest(!!prefundParam);
     setPrefunds(mergeDefaultETHPrefund(prefunds));
-    setPolicies(parsePolicies(urlParams.get("policies")));
+    setPolicies(() => {
+      const param = urlParams.get("policies");
+      if (!param) return {};
+
+      const policies = JSON.parse(decodeURIComponent(param)) as Policies;
+      return toSessionPolicies(policies);
+    });
 
     const connection = connectToController<ParentMethods>({
       setOrigin,

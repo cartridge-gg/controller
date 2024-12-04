@@ -56,7 +56,10 @@ export function SessionConsent({
             <Text as="span" color="text.secondaryAccent" fontWeight="bold">
               {origin}
             </Text>{" "}
-            to perform the following actions ({policies.length}) on your behalf
+            to perform the following actions (
+            {Object.keys(policies.contracts ?? {}).length +
+              policies.messages.length}
+            ) on your behalf
           </Text>
         </HStack>
       ) : null;

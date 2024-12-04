@@ -56,7 +56,6 @@ export type ContractPolicies = Record<string, ContractPolicy>;
 export type ContractPolicy = {
   /** It must contain one method */
   methods: Method | Method[];
-  description?: string;
 };
 
 export type Method = {

@@ -5,40 +5,49 @@ import {
 } from "@cartridge/controller";
 import { CartridgeTheme } from "@cartridge/ui";
 import { useThemeEffect } from "@cartridge/ui-next";
-import { ColorMode, useColorMode } from "@chakra-ui/react";
+import { ChakraProvider, ColorMode, useColorMode } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import {
   useContext,
   createContext,
   useMemo,
   useEffect,
-  ProviderProps,
+  PropsWithChildren,
 } from "react";
 import { verifiedConfigs } from "../../../controller/dist/verified";
 import { useConnection } from "./connection";
 
 const ControllerThemeContext = createContext<ControllerTheme>(undefined);
 
-export function ControllerThemeProvider({
-  theme,
-  value,
-  colorMode,
-  children,
-}: ProviderProps<ControllerTheme> & {
-  colorMode: ColorMode;
-  theme: ControllerTheme;
-}) {
+export function ControllerThemeProvider({ children }: PropsWithChildren) {
+  const preset = useControllerThemePreset();
+  const chakraTheme = useChakraTheme(preset);
+  const router = useRouter();
+
+  const colorMode = useMemo(
+    () => (router.query.colorMode as ColorMode) ?? "dark",
+    [router.query.colorMode],
+  );
+  const controllerTheme = useMemo(
+    () => ({
+      name: preset.name,
+      icon: preset.icon,
+      cover: preset.cover,
+    }),
+    [preset],
+  );
+
   const { setColorMode } = useColorMode();
 
   useEffect(() => {
     setColorMode(colorMode);
   }, [setColorMode, colorMode]);
 
-  useThemeEffect({ theme, assetUrl: "" });
+  useThemeEffect({ theme: preset, assetUrl: "" });
 
   return (
-    <ControllerThemeContext.Provider value={value}>
-      {children}
+    <ControllerThemeContext.Provider value={controllerTheme}>
+      <ChakraProvider theme={chakraTheme}>{children}</ChakraProvider>
     </ControllerThemeContext.Provider>
   );
 }

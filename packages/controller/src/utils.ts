@@ -6,7 +6,7 @@ import {
   typedData,
   TypedDataRevision,
 } from "starknet";
-import { Policies } from "./types";
+import { Policies, SessionPolicies } from "./types";
 import wasm from "@cartridge/account-wasm/controller";
 
 export function normalizeCalls(calls: Call | Call[]) {
@@ -17,6 +17,36 @@ export function normalizeCalls(calls: Call | Call[]) {
       calldata: CallData.toHex(call.calldata),
     };
   });
+}
+
+export function toSessionPolicies(policies: Policies): SessionPolicies {
+  return Array.isArray(policies)
+    ? policies.reduce<SessionPolicies>(
+        (prev, p) => {
+          if ("target" in p) {
+            if (p.target in prev.contracts!) {
+              const _methods = prev.contracts![p.target].methods;
+              const methods = Array.isArray(_methods) ? _methods : [_methods];
+              prev.contracts![p.target] = {
+                methods: [
+                  ...methods,
+                  { name: p.target, description: p.description },
+                ],
+              };
+            } else {
+              prev.contracts![p.target] = {
+                methods: [{ name: p.target, description: p.description }],
+              };
+            }
+          } else {
+            prev.messages!.push(p);
+          }
+
+          return prev;
+        },
+        { contracts: {}, messages: [] },
+      )
+    : policies;
 }
 
 export function toWasmPolicies(policies: Policies): wasm.Policy[] {

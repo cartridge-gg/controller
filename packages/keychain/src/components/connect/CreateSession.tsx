@@ -29,7 +29,7 @@ export function CreateSession({
   useEffect(() => {
     const normalizedChainId = normalizeChainId(chainId);
 
-    const violatingPolicy = policies.find(
+    const violatingPolicy = policies.messages.find(
       (policy) =>
         "domain" in policy &&
         (!policy.domain.chainId ||
