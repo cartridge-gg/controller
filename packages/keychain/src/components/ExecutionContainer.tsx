@@ -90,8 +90,6 @@ export function ExecutionContainer({
   }, [executionError]);
 
   const handleSubmit = async () => {
-    console.log("handle submit");
-    debugger;
     setIsLoading(true);
     try {
       await onSubmit(maxFee === null ? undefined : maxFee);
