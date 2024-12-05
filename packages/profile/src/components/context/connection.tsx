@@ -81,10 +81,9 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
                 .split(",")
                 .filter(
                   (address) =>
-                    ![
-                      getChecksumAddress(ETH_CONTRACT_ADDRESS),
-                      getChecksumAddress(STRK_CONTRACT_ADDRESS),
-                    ].includes(getChecksumAddress(address)),
+                    ![ETH_CONTRACT_ADDRESS, STRK_CONTRACT_ADDRESS].includes(
+                      getChecksumAddress(address),
+                    ),
                 )
             : []),
         ];

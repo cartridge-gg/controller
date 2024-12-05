@@ -23,7 +23,7 @@ import {
   JsInvocationsDetails,
   SessionMetadata,
 } from "@cartridge/account-wasm/controller";
-import { Policies, SessionPolicies } from "@cartridge/presets";
+import { SessionPolicies } from "@cartridge/presets";
 
 export default class Controller extends Account {
   cartridge: CartridgeAccount;
@@ -164,7 +164,7 @@ export default class Controller extends Account {
   }
 
   session(
-    policies: Policies,
+    policies: SessionPolicies,
     public_key?: string,
   ): SessionMetadata | undefined {
     return this.cartridge.session(toWasmPolicies(policies), public_key);
