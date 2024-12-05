@@ -19,7 +19,6 @@
     "@cartridge/account-wasm": "workspace:^",
     "@cartridge/controller": "workspace:^",
     "@cartridge/penpal": "^6.2.3",
-    "@cartridge/presets": "workspace:*",
     "@cartridge/ui": "workspace:^",
     "@cartridge/ui-next": "workspace:^",
     "@cartridge/utils": "workspace:^",

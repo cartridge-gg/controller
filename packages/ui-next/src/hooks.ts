@@ -5,7 +5,7 @@ export function useThemeEffect({
   theme,
   assetUrl,
 }: {
-  theme: ControllerTheme;
+  theme: ControllerThemePreset;
   assetUrl: string;
 }) {
   useEffect(() => {
@@ -49,20 +49,25 @@ export function useThemeEffect({
 }
 
 // dup of @cartridge/controller/types
-export type ControllerThemeOption = string | ControllerTheme;
-
-export type ControllerTheme = {
+type ColorMode = "light" | "dark";
+type ControllerTheme = {
+  id: string;
   name: string;
   icon: string;
   cover: ThemeValue<string>;
+  colorMode: ColorMode;
+};
+type ControllerThemePreset = Omit<ControllerTheme, "colorMode"> & {
   colors?: ControllerColors;
 };
-
-export type ControllerColors = {
+type ControllerColors = {
   primary?: ControllerColor;
   primaryForeground?: ControllerColor;
 };
-
-export type ControllerColor = ThemeValue<string>;
-
-export type ThemeValue<T> = T | { dark: T; light: T };
+type ControllerColor = ThemeValue<string>;
+type ThemeValue<T> =
+  | T
+  | {
+      dark: T;
+      light: T;
+    };

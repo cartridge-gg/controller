@@ -1,24 +1,26 @@
-import { getChecksumAddress, Provider } from "starknet";
+import { useMemo } from "react";
+import {
+  getChecksumAddress,
+  Provider,
+  StarknetDomain,
+  StarknetType,
+} from "starknet";
 import useSWR from "swr";
 import { useEkuboMetadata } from "./balance";
 import { ERC20Metadata } from "../erc20";
 import { stringFromByteArray } from "../contract";
-import {
-  ContractPolicies,
-  ContractPolicy,
-  SessionPolicies,
-  SignMessagePolicy,
-} from "@cartridge/presets";
+
+type PreSessionSummary = Pick<SessionSummary, "default" | "messages">;
 
 export type SessionSummary = {
-  default: ContractPolicies;
-  dojo: Record<string, ContractPolicy & { meta: { dojoName: string } }>;
+  default: Record<string, CallPolicy[]>;
+  dojo: Record<string, { policies: CallPolicy[]; meta: { dojoName: string } }>;
   ERC20: Record<
     string,
-    ContractPolicy & { meta?: Omit<ERC20Metadata, "instance"> }
+    { policies: CallPolicy[]; meta?: Omit<ERC20Metadata, "instance"> }
   >;
-  ERC721: ContractPolicies;
-  messages: SignMessagePolicy[] | undefined;
+  ERC721: Record<string, CallPolicy[]>;
+  messages: TypedDataPolicy[];
 };
 
 type ContractType = keyof SessionSummary;
@@ -27,9 +29,29 @@ export function useSessionSummary({
   policies,
   provider,
 }: {
-  policies: SessionPolicies;
+  policies: Policy[];
   provider?: Provider;
 }) {
+  const preSummary = useMemo(
+    () =>
+      policies.reduce<PreSessionSummary>(
+        (prev, p) =>
+          isCallPolicy(p)
+            ? {
+                ...prev,
+                default: {
+                  ...prev.default,
+                  [p.target]: prev.default[p.target]
+                    ? [...prev.default[p.target], p]
+                    : [p],
+                },
+              }
+            : { ...prev, messages: [...prev.messages, p] },
+        { default: {}, messages: [] },
+      ),
+    [policies],
+  );
+
   const { data: ekuboMeta } = useEkuboMetadata();
 
   const res: SessionSummary = {
@@ -37,14 +59,14 @@ export function useSessionSummary({
     dojo: {},
     ERC20: {},
     ERC721: {},
-    messages: policies.messages,
+    messages: preSummary.messages,
   };
   const summary = useSWR(
     ekuboMeta && provider ? `tx-summary` : null,
     async () => {
       if (!provider) return res;
 
-      const promises = Object.entries(policies.contracts ?? []).map(
+      const promises = Object.entries(preSummary.default).map(
         async ([contractAddress, policies]) => {
           const contractType = await checkContractType(
             provider,
@@ -58,7 +80,7 @@ export function useSessionSummary({
                     getChecksumAddress(m.address) ===
                     getChecksumAddress(contractAddress),
                 ),
-                ...policies,
+                policies,
               };
               return;
             case "ERC721":
@@ -73,8 +95,8 @@ export function useSessionSummary({
                 });
 
                 res.dojo[contractAddress] = {
+                  policies,
                   meta: { dojoName: stringFromByteArray(dojoNameRes) },
-                  ...policies,
                 };
               } catch {
                 res.default[contractAddress] = policies;
@@ -155,3 +177,22 @@ async function checkContractType(
     }
   }
 }
+
+function isCallPolicy(policy: Policy): policy is CallPolicy {
+  return !!(policy as CallPolicy).target;
+}
+
+// Dup of @cartridge/controller/types
+type Policy = CallPolicy | TypedDataPolicy;
+
+type CallPolicy = {
+  target: string;
+  method: string;
+  description?: string;
+};
+
+type TypedDataPolicy = {
+  types: Record<string, StarknetType[]>;
+  primaryType: string;
+  domain: StarknetDomain;
+};

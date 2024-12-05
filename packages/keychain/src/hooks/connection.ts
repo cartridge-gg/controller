@@ -8,11 +8,7 @@ import {
 } from "utils/connection";
 import { getChainName, isIframe } from "@cartridge/utils";
 import { RpcProvider, constants } from "starknet";
-import {
-  Prefund,
-  ResponseCodes,
-  toSessionPolicies,
-} from "@cartridge/controller";
+import { Policy, Prefund, ResponseCodes } from "@cartridge/controller";
 import { mergeDefaultETHPrefund } from "utils/token";
 import { setIsSignedUp } from "utils/cookie";
 import {
@@ -21,7 +17,6 @@ import {
 } from "components/Provider/connection";
 import { UpgradeInterface, useUpgrade } from "./upgrade";
 import posthog from "posthog-js";
-import { Policies, SessionPolicies } from "@cartridge/presets";
 
 const CHAIN_ID_TIMEOUT = 3000;
 
@@ -33,7 +28,7 @@ export function useConnectionValue() {
   const [origin, setOrigin] = useState<string>();
   const [rpcUrl, setRpcUrl] = useState<string>();
   const [chainId, setChainId] = useState<string>();
-  const [policies, setPolicies] = useState<SessionPolicies>({});
+  const [policies, setPolicies] = useState<Policy[]>([]);
   const [controller, setControllerRaw] = useState<Controller | undefined>();
   const [prefunds, setPrefunds] = useState<Prefund[]>([]);
   const [hasPrefundRequest, setHasPrefundRequest] = useState<boolean>(false);
@@ -46,6 +41,11 @@ export function useConnectionValue() {
     }
     return getChainName(chainId);
   }, [chainId]);
+
+  const parsePolicies = (policiesStr: string | null): Policy[] => {
+    if (!policiesStr) return [];
+    return JSON.parse(decodeURIComponent(policiesStr));
+  };
 
   const closeModal = useCallback(async () => {
     if (!parent || !context?.resolve) return;
@@ -111,13 +111,7 @@ export function useConnectionValue() {
       : [];
     setHasPrefundRequest(!!prefundParam);
     setPrefunds(mergeDefaultETHPrefund(prefunds));
-    setPolicies(() => {
-      const param = urlParams.get("policies");
-      if (!param) return {};
-
-      const policies = JSON.parse(decodeURIComponent(param)) as Policies;
-      return toSessionPolicies(policies);
-    });
+    setPolicies(parsePolicies(urlParams.get("policies")));
 
     const connection = connectToController<ParentMethods>({
       setOrigin,

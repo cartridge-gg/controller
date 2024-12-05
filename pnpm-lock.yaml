@@ -209,9 +209,6 @@ importers:
       '@cartridge/penpal':
         specifier: ^6.2.3
         version: 6.2.3
-      '@cartridge/presets':
-        specifier: workspace:*
-        version: link:../presets
       '@starknet-io/types-js':
         specifier: ^0.7.7
         version: 0.7.7
@@ -255,9 +252,6 @@ importers:
       '@cartridge/penpal':
         specifier: ^6.2.3
         version: 6.2.3
-      '@cartridge/presets':
-        specifier: workspace:*
-        version: link:../presets
       '@cartridge/ui':
         specifier: workspace:^
         version: link:../ui
@@ -455,25 +449,6 @@ importers:
         specifier: ^8.0.1
         version: 8.0.1
 
-  packages/presets:
-    dependencies:
-      '@starknet-io/types-js':
-        specifier: 0.7.7
-        version: 0.7.7
-    devDependencies:
-      '@cartridge/tsconfig':
-        specifier: workspace:*
-        version: link:../tsconfig
-      '@types/node':
-        specifier: ^20.6.0
-        version: 20.16.11
-      tsx:
-        specifier: ^4.7.0
-        version: 4.19.2
-      typescript:
-        specifier: ^5.4.5
-        version: 5.5.4
-
   packages/profile:
     dependencies:
       '@cartridge/controller':
@@ -482,9 +457,6 @@ importers:
       '@cartridge/penpal':
         specifier: ^6.2.3
         version: 6.2.3
-      '@cartridge/presets':
-        specifier: workspace:*
-        version: link:../presets
       '@cartridge/ui-next':
         specifier: workspace:^
         version: link:../ui-next
@@ -862,9 +834,6 @@ importers:
 
   packages/utils:
     dependencies:
-      '@cartridge/presets':
-        specifier: workspace:*
-        version: link:../presets
       react:
         specifier: ^18.3.1
         version: 18.3.1

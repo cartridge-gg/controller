@@ -9,10 +9,9 @@ import { useUsernameValidation } from "./useUsernameValidation";
 import { LoginMode } from "../types";
 import { Legal, StatusTray } from ".";
 import { useCreateController } from "./useCreateController";
-import { ControllerTheme } from "@cartridge/presets";
 
 interface CreateControllerViewProps {
-  theme: ControllerTheme;
+  theme: { id: string; name: string };
   usernameField: {
     value: string;
     error?: string;
@@ -41,9 +40,7 @@ export function CreateControllerView({
     <Container
       variant="expanded"
       title={
-        theme.name === "cartridge"
-          ? "Play with Controller"
-          : `Play ${theme.name}`
+        theme.id === "cartridge" ? "Play with Controller" : `Play ${theme.name}`
       }
       description="Connect your Controller"
     >

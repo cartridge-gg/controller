@@ -26,19 +26,19 @@ export function Provider({ children }: PropsWithChildren) {
   return (
     <PostHogProvider client={posthog}>
       <BrowserRouter>
-        <CartridgeAPIProvider
-          url={`${import.meta.env.VITE_CARTRIDGE_API_URL!}/query`}
-        >
-          <IndexerAPIProvider credentials="omit">
-            <QueryClientProvider client={queryClient}>
-              <ConnectionProvider>
-                <ThemeProvider defaultScheme="system">
+        <ThemeProvider defaultScheme="system">
+          <CartridgeAPIProvider
+            url={`${import.meta.env.VITE_CARTRIDGE_API_URL!}/query`}
+          >
+            <IndexerAPIProvider credentials="omit">
+              <QueryClientProvider client={queryClient}>
+                <ConnectionProvider>
                   <DataProvider>{children}</DataProvider>
-                </ThemeProvider>
-              </ConnectionProvider>
-            </QueryClientProvider>
-          </IndexerAPIProvider>
-        </CartridgeAPIProvider>
+                </ConnectionProvider>
+              </QueryClientProvider>
+            </IndexerAPIProvider>
+          </CartridgeAPIProvider>
+        </ThemeProvider>
       </BrowserRouter>
     </PostHogProvider>
   );

@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, useEffect, useState } from "react";
-import { toArray } from "@cartridge/controller";
+import { CallPolicy, Policy } from "@cartridge/controller";
 import {
   Card,
   CardContent,
@@ -39,13 +39,12 @@ import { constants, StarknetEnumType, StarknetMerkleType } from "starknet";
 import Link from "next/link";
 import { useConnection } from "hooks/connection";
 import { useSessionSummary } from "@cartridge/utils";
-import { ContractPolicy, SessionPolicies } from "@cartridge/presets";
 
 export function SessionSummary({
   policies,
   setError,
 }: {
-  policies: SessionPolicies;
+  policies: Policy[];
   setError?: (error: Error) => void;
 }) {
   const { controller } = useConnection();
@@ -80,21 +79,21 @@ export function SessionSummary({
 
   return (
     <div className="flex flex-col gap-4">
-      {Object.entries(summary.dojo).map(([address, { methods, meta }]) => (
+      {Object.entries(summary.dojo).map(([address, { policies, meta }]) => (
         <Contract
           key={address}
           address={address}
           title={meta.dojoName}
-          methods={methods}
+          policies={policies}
         />
       ))}
 
-      {Object.entries(summary.default).map(([address, { methods }], i) => (
+      {Object.entries(summary.default).map(([address, policies], i) => (
         <Contract
           key={address}
           address={address}
           title={`Contract ${i + 1}`}
-          methods={methods}
+          policies={policies}
           icon={
             <CardIcon>
               <ScrollIcon variant="line" />
@@ -103,12 +102,12 @@ export function SessionSummary({
         />
       ))}
 
-      {Object.entries(summary.ERC20).map(([address, { methods, meta }]) => (
+      {Object.entries(summary.ERC20).map(([address, { policies, meta }]) => (
         <Contract
           key={address}
           address={address}
           title={`spend ${meta?.name ?? "ERC-20"} token`}
-          methods={methods}
+          policies={policies}
           icon={
             meta?.logoUrl ? (
               <CardIcon src={meta.logoUrl} />
@@ -121,12 +120,12 @@ export function SessionSummary({
         />
       ))}
 
-      {Object.entries(summary.ERC721).map(([address, { methods }]) => (
+      {Object.entries(summary.ERC721).map(([address, policies]) => (
         <Contract
           key={address}
           address={address}
           title="ERC-721"
-          methods={methods}
+          policies={policies}
           icon={
             <CardIcon>
               <SpaceInvaderIcon variant="line" />
@@ -143,15 +142,14 @@ export function SessionSummary({
 function Contract({
   address,
   title,
-  methods: _methods,
+  policies,
   icon = <CardIcon />,
 }: {
   address: string;
   title: string;
-  methods: ContractPolicy["methods"];
+  policies: CallPolicy[];
   icon?: React.ReactNode;
 }) {
-  const methods = toArray(_methods);
   const { chainId } = useConnection();
   const isSlot = !!chainId && isSlotChain(chainId);
 
@@ -185,20 +183,17 @@ function Contract({
             <AccordionTrigger>
               Approve{" "}
               <span className="text-accent-foreground font-bold">
-                {methods.length} {methods.length > 1 ? "methods" : "method"}
+                {policies.length} {policies.length > 1 ? "methods" : "method"}
               </span>
             </AccordionTrigger>
           </CardContent>
 
           <AccordionContent>
-            {methods.map((c) => (
-              <CardContent
-                key={c.entrypoint}
-                className="flex items-center gap-1"
-              >
+            {policies.map((c) => (
+              <CardContent key={c.method} className="flex items-center gap-1">
                 <CircleIcon size="sm" className="text-muted-foreground" />
                 <div className="flex items-center gap-2">
-                  <div>{c.name}</div>
+                  <div>{c.method}</div>
 
                   {c.description && (
                     <TooltipProvider>
@@ -229,7 +224,7 @@ function SignMessages({
 }: {
   messages: SessionSummaryType["messages"];
 }) {
-  if (!messages || !messages.length) {
+  if (!messages.length) {
     return null;
   }
 

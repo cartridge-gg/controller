@@ -48,9 +48,8 @@ export function useCreateController({
               publicKey,
             );
           }
-        } catch (e: unknown) {
-          console.error(e);
-          setError(e as Error);
+        } catch (e) {
+          setError(e as unknown as Error);
         }
       },
     },
@@ -116,14 +115,9 @@ export function useCreateController({
 
           const controllerNode = controllers?.edges?.[0]?.node;
 
-          if (!credentialId)
-            throw new Error("No credential ID found for this account");
-
           if (
-            loginMode === LoginMode.Webauthn ||
-            Object.keys(policies.contracts ?? {}).length +
-              (policies.messages?.length ?? 0) ===
-              0
+            (loginMode === LoginMode.Webauthn || policies?.length === 0) &&
+            credentialId
           ) {
             await doLogin({
               name: username,
@@ -132,7 +126,7 @@ export function useCreateController({
             });
           }
 
-          if (controllerNode && publicKey) {
+          if (controllerNode && credentialId && publicKey) {
             await initController(
               username,
               controllerNode.constructorCalldata[0],
@@ -175,17 +169,17 @@ export function useCreateController({
             publicKey,
           );
         }
-      } catch (e: unknown) {
+      } catch (e) {
         if (
-          e instanceof Error &&
-          (e.message.includes("Invalid 'sameOriginWithAncestors' value") ||
-            e.message.includes("document which is same-origin"))
+          // Bitwarden extension
+          e.message.includes("Invalid 'sameOriginWithAncestors' value") ||
+          // Other password manager
+          e.message.includes("document which is same-origin")
         ) {
           doPopupFlow(username);
           return;
         }
 
-        console.error(e);
         setError(e as Error);
       }
 

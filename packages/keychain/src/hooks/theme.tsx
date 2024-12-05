@@ -1,10 +1,44 @@
-import { ControllerColor, ControllerTheme } from "@cartridge/presets";
+import {
+  ControllerColor,
+  ControllerTheme,
+  ControllerThemePreset,
+  defaultPresets,
+} from "@cartridge/controller";
 import { CartridgeTheme } from "@cartridge/ui";
-import { useContext, createContext, useMemo } from "react";
+import { useThemeEffect } from "@cartridge/ui-next";
+import { useColorMode } from "@chakra-ui/react";
+import { useRouter } from "next/router";
+import {
+  useContext,
+  createContext,
+  useMemo,
+  useEffect,
+  ProviderProps,
+} from "react";
 
-export const ControllerThemeContext = createContext<
-  ControllerTheme | undefined
->(undefined);
+const ControllerThemeContext = createContext<ControllerTheme | undefined>(
+  undefined,
+);
+
+export function ControllerThemeProvider({
+  theme,
+  value,
+  children,
+}: ProviderProps<ControllerTheme> & { theme: ControllerThemePreset }) {
+  const { setColorMode } = useColorMode();
+
+  useEffect(() => {
+    setColorMode(value.colorMode);
+  }, [setColorMode, value.colorMode]);
+
+  useThemeEffect({ theme, assetUrl: "" });
+
+  return (
+    <ControllerThemeContext.Provider value={value}>
+      {children}
+    </ControllerThemeContext.Provider>
+  );
+}
 
 export function useControllerTheme() {
   const ctx = useContext<ControllerTheme | undefined>(ControllerThemeContext);
@@ -15,7 +49,26 @@ export function useControllerTheme() {
   return ctx;
 }
 
-export function useChakraTheme(preset: ControllerTheme) {
+export function useControllerThemePreset() {
+  const router = useRouter();
+
+  return useMemo(() => {
+    const q = router.query.theme;
+    if (typeof q === "undefined") {
+      return defaultPresets.cartridge;
+    }
+
+    const str = decodeURIComponent(Array.isArray(q) ? q[q.length - 1] : q);
+
+    try {
+      return JSON.parse(str) as ControllerThemePreset;
+    } catch {
+      return defaultPresets.cartridge;
+    }
+  }, [router.query.theme]);
+}
+
+export function useChakraTheme(preset: ControllerThemePreset) {
   return useMemo(
     () => ({
       ...CartridgeTheme,

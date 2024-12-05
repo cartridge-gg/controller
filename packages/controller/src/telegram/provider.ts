@@ -6,11 +6,11 @@ import {
 } from "@telegram-apps/sdk";
 import { ec, stark, WalletAccount } from "starknet";
 
-import { KEYCHAIN_URL } from "../constants";
-import SessionAccount from "../session/account";
-import BaseProvider from "../provider";
-import { toWasmPolicies } from "../utils";
-import { SessionPolicies } from "@cartridge/presets";
+import { KEYCHAIN_URL } from "src/constants";
+import { Policy } from "src/types";
+import SessionAccount from "src/session/account";
+import BaseProvider from "src/provider";
+import { toWasmPolicies } from "src/utils";
 
 interface SessionRegistration {
   username: string;
@@ -24,7 +24,7 @@ export default class TelegramProvider extends BaseProvider {
   private _tmaUrl: string;
   protected _chainId: string;
   protected _username?: string;
-  protected _policies: SessionPolicies;
+  protected _policies: Policy[];
 
   constructor({
     rpc,
@@ -34,7 +34,7 @@ export default class TelegramProvider extends BaseProvider {
   }: {
     rpc: string;
     chainId: string;
-    policies: SessionPolicies;
+    policies: Policy[];
     tmaUrl: string;
   }) {
     super({

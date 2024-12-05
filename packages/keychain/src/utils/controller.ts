@@ -12,9 +12,12 @@ import {
   Abi,
   Call,
   CallData,
+  typedData,
+  TypedDataRevision,
+  hash,
 } from "starknet";
 
-import { toWasmPolicies } from "@cartridge/controller";
+import { Policy } from "@cartridge/controller";
 
 import {
   CartridgeAccount,
@@ -22,8 +25,8 @@ import {
   JsFelt,
   JsInvocationsDetails,
   SessionMetadata,
+  Policy as WasmPolicy,
 } from "@cartridge/account-wasm/controller";
-import { Policies, SessionPolicies } from "@cartridge/presets";
 
 export default class Controller extends Account {
   cartridge: CartridgeAccount;
@@ -85,7 +88,7 @@ export default class Controller extends Account {
 
   async createSession(
     expiresAt: bigint,
-    policies: SessionPolicies,
+    policies: Policy[],
     _maxFee?: BigNumberish,
   ) {
     if (!this.cartridge) {
@@ -97,7 +100,7 @@ export default class Controller extends Account {
 
   registerSessionCalldata(
     expiresAt: bigint,
-    policies: SessionPolicies,
+    policies: Policy[],
     publicKey: string,
   ): Array<string> {
     return this.cartridge.registerSessionCalldata(
@@ -109,7 +112,7 @@ export default class Controller extends Account {
 
   async registerSession(
     expiresAt: bigint,
-    policies: SessionPolicies,
+    policies: Policy[],
     publicKey: string,
     maxFee: BigNumberish,
   ): Promise<InvokeFunctionResponse> {
@@ -164,7 +167,7 @@ export default class Controller extends Account {
   }
 
   session(
-    policies: Policies,
+    policies: Policy[],
     public_key?: string,
   ): SessionMetadata | undefined {
     return this.cartridge.session(toWasmPolicies(policies), public_key);
@@ -251,4 +254,31 @@ function toJsCalls(calls: Call[]): JsCall[] {
     ...call,
     calldata: CallData.toHex(call.calldata),
   }));
+}
+
+function toWasmPolicies(policies: Policy[]): WasmPolicy[] {
+  return policies.map((richPolicy) => {
+    if ("target" in richPolicy) {
+      return {
+        target: richPolicy.target,
+        method: richPolicy.method,
+      };
+    } else {
+      const domainHash = typedData.getStructHash(
+        richPolicy.types,
+        "StarknetDomain",
+        richPolicy.domain,
+        TypedDataRevision.ACTIVE,
+      );
+      const typeHash = typedData.getTypeHash(
+        richPolicy.types,
+        richPolicy.primaryType,
+        TypedDataRevision.ACTIVE,
+      );
+
+      return {
+        scope_hash: hash.computePoseidonHash(domainHash, typeHash),
+      };
+    }
+  });
 }

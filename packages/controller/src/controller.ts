@@ -5,6 +5,7 @@ import { KeychainIFrame, ProfileIFrame } from "./iframe";
 import { NotReadyToConnect } from "./errors";
 import {
   Keychain,
+  Policy,
   ResponseCodes,
   ConnectReply,
   ProbeReply,
@@ -16,7 +17,6 @@ import {
 } from "./types";
 import BaseProvider from "./provider";
 import { WalletAccount } from "starknet";
-import { Policy } from "@cartridge/presets";
 
 export default class ControllerProvider extends BaseProvider {
   private keychain?: AsyncMethodReturns<Keychain>;

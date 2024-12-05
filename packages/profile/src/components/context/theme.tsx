@@ -1,13 +1,7 @@
-import { toArray } from "@cartridge/controller";
-import {
-  defaultTheme,
-  controllerConfigs,
-  ControllerTheme,
-} from "@cartridge/presets";
+import { ControllerThemePreset, defaultPresets } from "@cartridge/controller";
 import { useThemeEffect } from "@cartridge/ui-next";
 import { createContext, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useConnection } from "@/hooks/context";
 
 type ColorScheme = "dark" | "light" | "system";
 
@@ -20,13 +14,13 @@ type ThemeProviderProps = {
 type ThemeProviderContextType = {
   colorScheme: ColorScheme;
   setColorScheme: (colorMode: ColorScheme) => void;
-  theme: ControllerTheme;
+  theme: ControllerThemePreset;
 };
 
 const initialState: ThemeProviderContextType = {
   colorScheme: "system",
   setColorScheme: () => null,
-  theme: defaultTheme,
+  theme: defaultPresets.cartridge as ControllerThemePreset,
 };
 
 export const ThemeContext =
@@ -64,27 +58,14 @@ export function ThemeProvider({
     },
     [storageKey],
   );
-  const [theme, setTheme] = useState<ControllerTheme>(initialState.theme);
+  const [theme, setTheme] = useState<ControllerThemePreset>(initialState.theme);
   const themeParam = searchParams.get("theme");
-  const { origin } = useConnection();
 
   useEffect(() => {
     if (!themeParam) return;
-    const val = decodeURIComponent(themeParam);
 
-    if (
-      typeof val === "string" &&
-      val in controllerConfigs &&
-      controllerConfigs[val].theme &&
-      (origin?.startsWith("http://localhost") ||
-        toArray(controllerConfigs[val].origin).includes(origin))
-    ) {
-      setTheme(controllerConfigs[val].theme);
-      return;
-    }
-
-    setTheme(JSON.parse(val));
-  }, [themeParam, origin]);
+    setTheme(JSON.parse(decodeURIComponent(themeParam)));
+  }, [themeParam]);
 
   useThemeEffect({ theme, assetUrl: import.meta.env.VITE_KEYCHAIN_URL });
 

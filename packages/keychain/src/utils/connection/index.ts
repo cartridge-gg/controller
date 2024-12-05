@@ -1,5 +1,6 @@
 export * from "./types";
 
+import { Policy } from "@cartridge/controller";
 import { connectToParent } from "@cartridge/penpal";
 import Controller from "utils/controller";
 import { connectFactory } from "./connect";
@@ -12,7 +13,6 @@ import { ConnectionCtx } from "./types";
 import { deployFactory } from "./deploy";
 import { openSettingsFactory } from "./settings";
 import { normalize } from "@cartridge/utils";
-import { SessionPolicies } from "@cartridge/presets";
 
 export function connectToController<ParentMethods extends {}>({
   setOrigin,
@@ -23,7 +23,7 @@ export function connectToController<ParentMethods extends {}>({
 }: {
   setOrigin: (origin: string) => void;
   setRpcUrl: (url: string) => void;
-  setPolicies: (policies: SessionPolicies) => void;
+  setPolicies: (policies: Policy[]) => void;
   setContext: (ctx: ConnectionCtx) => void;
   setController: (controller?: Controller) => void;
 }) {

@@ -17,7 +17,6 @@ import {
 } from "./types";
 import { AsyncMethodReturns } from "@cartridge/penpal";
 import BaseProvider from "./provider";
-import { toArray } from "./utils";
 
 class ControllerAccount extends WalletAccount {
   address: string;
@@ -53,7 +52,7 @@ class ControllerAccount extends WalletAccount {
    * @returns response from addTransaction
    */
   async execute(calls: AllowArray<Call>): Promise<InvokeFunctionResponse> {
-    calls = toArray(calls);
+    calls = Array.isArray(calls) ? calls : [calls];
 
     return new Promise(async (resolve, reject) => {
       const sessionExecute = await this.keychain.execute(

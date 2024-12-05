@@ -16,7 +16,6 @@ import { Call, constants, getChecksumAddress, RpcProvider } from "starknet";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 type ConnectionContextType = {
-  origin: string;
   parent: ParentMethods;
   provider: RpcProvider;
   chainId: string;
@@ -34,7 +33,6 @@ type ParentMethods = {
 };
 
 const initialState: ConnectionContextType = {
-  origin: "",
   parent: {
     close: () => {},
     openSettings: () => {},

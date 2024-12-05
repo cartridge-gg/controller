@@ -2,10 +2,10 @@ import { ErrorCode } from "@cartridge/account-wasm/controller";
 import {
   ConnectReply,
   ExecuteReply,
+  Policy,
   ConnectError,
   DeployReply,
 } from "@cartridge/controller";
-import { Policies } from "@cartridge/presets";
 import {
   Abi,
   Call,
@@ -28,7 +28,7 @@ export type ConnectionCtx =
 export type ConnectCtx = {
   origin: string;
   type: "connect";
-  policies: Policies;
+  policies: Policy[];
   resolve: (res: ConnectReply | ConnectError) => void;
   reject: (reason?: unknown) => void;
 };
