@@ -6,7 +6,7 @@
     "types": "dist/index.d.ts",
     "type": "module",
     "scripts": {
-        "build:configs": "tsx scripts/generate-configs.ts",
+        "build:configs": "tsx scripts/generate-configs.ts && prettier --write src/generated/controller-configs.ts",
         "build:deps": "pnpm build:configs && tsc",
         "format": "prettier --write \"src/**/*.ts\"",
         "format:check": "prettier --check \"src/**/*.ts\""
