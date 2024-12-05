@@ -45,7 +45,7 @@ export function Policies({
         {Object.entries(policies.contracts ?? {}).map(([contractAddress, p]) =>
           p.methods.map((m) => (
             <AccordionItem
-              key={`${contractAddress}${m.name}`}
+              key={`${contractAddress}${m.entrypoint}`}
               // borderTopRadius={i === 0 && !title ? "base" : "none"}
               // // The container already set border radius (for top & bottom), but we
               // // set the bottom radius for the last item here because for certain
@@ -62,7 +62,7 @@ export function Policies({
                   >
                     <HStack>
                       <FnIcon boxSize={5} />
-                      <Text>{m.name}</Text>
+                      <Text>{m.entrypoint}</Text>
                     </HStack>
 
                     <Spacer />

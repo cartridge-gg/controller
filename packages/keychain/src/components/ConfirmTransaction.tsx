@@ -1,10 +1,5 @@
 import { useMemo, useState } from "react";
-import {
-  Method,
-  ResponseCodes,
-  toArray,
-  toSessionPolicies,
-} from "@cartridge/controller";
+import { ResponseCodes, SessionPolicies, toArray } from "@cartridge/controller";
 import { Content, FOOTER_MIN_HEIGHT } from "components/layout";
 import { TransactionDuoIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
@@ -13,7 +8,6 @@ import { ExecuteCtx } from "utils/connection";
 import { getChecksumAddress, num } from "starknet";
 import { ExecutionContainer } from "components/ExecutionContainer";
 import { CreateSession } from "./connect";
-import { CallPolicy } from "@cartridge/account-wasm";
 
 export function ConfirmTransaction() {
   const { controller, context, origin, policies, setContext } = useConnection();
@@ -22,7 +16,7 @@ export function ConfirmTransaction() {
   const account = controller;
 
   const onSubmit = async (maxFee?: bigint) => {
-    if (!maxFee || !account) {
+    if (maxFee === undefined || !account) {
       return;
     }
 
@@ -40,24 +34,28 @@ export function ConfirmTransaction() {
     setContext(undefined);
   };
 
-  const callPolicies = useMemo<CallPolicy[]>(
-    () =>
-      toArray(ctx.transactions).map((c) => ({
-        target: c.contractAddress,
-        method: c.entrypoint,
-      })),
+  const callPolicies = useMemo<SessionPolicies>(
+    () => ({
+      contracts: Object.fromEntries(
+        toArray(ctx.transactions).map((c) => [
+          getChecksumAddress(c.contractAddress),
+          { methods: [{ entrypoint: c.entrypoint }] },
+        ]),
+      ),
+    }),
     [ctx.transactions],
   );
 
   const updateSession = useMemo(() => {
     if (policiesUpdated) return false;
 
-    const txnsApproved = callPolicies.every((call) => {
-      return policies.contracts?.[
-        getChecksumAddress(call.target)
-      ]?.methods.some((m: Method) => {
-        return m.entrypoint === call.method;
-      });
+    const entries = Object.entries(callPolicies.contracts || {});
+    const txnsApproved = entries.every(([target, policy]) => {
+      const contract = policies.contracts?.[target];
+      if (!contract) return false;
+      return policy.methods.every((method) =>
+        contract.methods.some((m) => m.entrypoint === method.entrypoint),
+      );
     });
 
     // If calls are approved by dapp specified policies but not stored session
@@ -82,10 +80,7 @@ export function ConfirmTransaction() {
       onSubmit={onSubmit}
     >
       <Content pb={FOOTER_MIN_HEIGHT}>
-        <Policies
-          title="Transaction Details"
-          policies={toSessionPolicies(callPolicies)}
-        />
+        <Policies title="Transaction Details" policies={callPolicies} />
       </Content>
     </ExecutionContainer>
   );

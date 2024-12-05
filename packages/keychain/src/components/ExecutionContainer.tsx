@@ -38,7 +38,7 @@ export function ExecutionContainer({
   children,
 }: ExecutionContainerProps & BannerProps) {
   const { controller } = useConnection();
-  const [maxFee, setMaxFee] = useState<bigint | undefined>();
+  const [maxFee, setMaxFee] = useState<bigint | null>(null);
   const [ctrlError, setCtrlError] = useState<ControllerError | undefined>(
     executionError,
   );
@@ -69,10 +69,14 @@ export function ExecutionContainer({
   );
 
   useEffect(() => {
-    if (ctrlError || maxFee !== null || !transactions.length) return;
+    if (!!ctrlError || maxFee !== null || !transactions.length) {
+      return;
+    }
 
     const estimateFeesAsync = async () => {
-      if (isEstimated.current) return;
+      if (isEstimated.current) {
+        return;
+      }
 
       isEstimated.current = true;
       await estimateFees(transactions, transactionsDetail);
@@ -86,9 +90,11 @@ export function ExecutionContainer({
   }, [executionError]);
 
   const handleSubmit = async () => {
+    console.log("handle submit");
+    debugger;
     setIsLoading(true);
     try {
-      await onSubmit(maxFee);
+      await onSubmit(maxFee === null ? undefined : maxFee);
     } catch (e) {
       const error = parseControllerError(e as unknown as ControllerError);
       onError?.(error);
@@ -188,12 +194,12 @@ export function ExecutionContainer({
               return (
                 <>
                   {ctrlError && <ControllerErrorAlert error={ctrlError} />}
-                  {maxFee && <Fees maxFee={BigInt(maxFee)} />}
+                  {maxFee !== null && <Fees maxFee={BigInt(maxFee)} />}
                   <Button
                     colorScheme="colorful"
                     onClick={handleSubmit}
                     isLoading={isLoading}
-                    isDisabled={!maxFee === null && transactions.length}
+                    isDisabled={maxFee === null && transactions.length}
                   >
                     {buttonText}
                   </Button>

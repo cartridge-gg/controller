@@ -2,6 +2,7 @@ import {
   addAddressPadding,
   Call,
   CallData,
+  getChecksumAddress,
   hash,
   typedData,
   TypedDataRevision,
@@ -48,14 +49,16 @@ export function toSessionPolicies(policies: Policies): SessionPolicies {
     ? policies.reduce<SessionPolicies>(
         (prev, p) => {
           if (safeObjectAccess<string>(p, "target")) {
-            const target = safeObjectAccess<string>(p, "target");
+            const target = getChecksumAddress(
+              safeObjectAccess<string>(p, "target"),
+            );
             const entrypoint = safeObjectAccess<string>(p, "method");
             const contracts = safeObjectAccess<Record<string, any>>(
               prev,
               "contracts",
             );
             const item = {
-              name: entrypoint,
+              name: humanizeString(entrypoint),
               entrypoint: entrypoint,
               description: safeObjectAccess<string>(p, "description"),
             };
@@ -82,53 +85,25 @@ export function toSessionPolicies(policies: Policies): SessionPolicies {
     : policies;
 }
 
-export function toWasmPolicies(policies: Policies): wasm.Policy[] {
-  if (Array.isArray(policies)) {
-    return policies.map((p) => {
-      if (safeObjectAccess<string>(p, "target")) {
-        return {
-          target: safeObjectAccess<string>(p, "target"),
-          method: safeObjectAccess<string>(p, "method"),
-        };
-      } else {
-        const domainHash = typedData.getStructHash(
-          safeObjectAccess<any>(p, "types"),
-          "StarknetDomain",
-          safeObjectAccess<any>(p, "domain"),
-          TypedDataRevision.ACTIVE,
-        );
-        const typeHash = typedData.getTypeHash(
-          safeObjectAccess<any>(p, "types"),
-          safeObjectAccess<string>(p, "primaryType"),
-          TypedDataRevision.ACTIVE,
-        );
-
-        return {
-          scope_hash: hash.computePoseidonHash(domainHash, typeHash),
-        };
-      }
-    });
-  }
-
+export function toWasmPolicies(policies: SessionPolicies): wasm.Policy[] {
   return [
-    ...Object.entries(
-      safeObjectAccess<Record<string, any>>(policies, "contracts") ?? {},
-    ).flatMap(([target, { methods }]) =>
-      toArray(methods).map((m) => ({
-        target,
-        method: safeObjectAccess<string>(m, "name"),
-      })),
+    ...Object.entries(policies.contracts ?? {}).flatMap(
+      ([target, { methods }]) =>
+        toArray(methods).map((m) => ({
+          target,
+          method: m.entrypoint,
+        })),
     ),
-    ...(safeObjectAccess<any[]>(policies, "messages") ?? []).map((p) => {
+    ...(policies.messages ?? []).map((p) => {
       const domainHash = typedData.getStructHash(
-        safeObjectAccess<any>(p, "types"),
+        p.types,
         "StarknetDomain",
-        safeObjectAccess<any>(p, "domain"),
+        p.domain,
         TypedDataRevision.ACTIVE,
       );
       const typeHash = typedData.getTypeHash(
-        safeObjectAccess<any>(p, "types"),
-        safeObjectAccess<string>(p, "primaryType"),
+        p.types,
+        p.primaryType,
         TypedDataRevision.ACTIVE,
       );
 
@@ -141,4 +116,16 @@ export function toWasmPolicies(policies: Policies): wasm.Policy[] {
 
 export function toArray<T>(val: T | T[]): T[] {
   return Array.isArray(val) ? val : [val];
+}
+
+function humanizeString(str: string): string {
+  return (
+    str
+      // Convert from camelCase or snake_case
+      .replace(/([a-z])([A-Z])/g, "$1 $2") // camelCase to spaces
+      .replace(/_/g, " ") // snake_case to spaces
+      .toLowerCase()
+      // Capitalize first letter
+      .replace(/^\w/, (c) => c.toUpperCase())
+  );
 }

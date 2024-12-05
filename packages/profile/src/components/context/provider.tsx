@@ -9,7 +9,10 @@ import { DataProvider } from "./data";
 import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
 
-if (typeof window !== "undefined") {
+if (
+  typeof window !== "undefined" &&
+  !window.location.hostname.includes("localhost")
+) {
   posthog.init(import.meta.env.VITE_POSTHOG_KEY!, {
     api_host: import.meta.env.VITE_POSTHOG_HOST,
     person_profiles: "always",
