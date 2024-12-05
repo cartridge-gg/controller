@@ -163,7 +163,7 @@ export function ControllerErrorAlert({
   let description: string | React.ReactElement = error.message;
   let isExpanded = false;
   let variant = "error";
-  let copyText: string;
+  let copyText: string | undefined;
 
   switch (error.code) {
     case ErrorCode.SignError:
@@ -333,6 +333,8 @@ function StackTraceDisplay({
   const { chainId } = useConnection();
 
   const getExplorerUrl = (type: "contract" | "class", value: string) => {
+    if (!chainId) return;
+
     const baseUrl = {
       [constants.StarknetChainId.SN_SEPOLIA]: "https://sepolia.starkscan.co",
       [constants.StarknetChainId.SN_MAIN]: "https://starkscan.co",

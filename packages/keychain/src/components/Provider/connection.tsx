@@ -1,20 +1,22 @@
-import { createContext, PropsWithChildren } from "react";
+import { createContext } from "react";
 import Controller from "utils/controller";
 import { ConnectionCtx } from "utils/connection";
-import { Policy, Prefund } from "@cartridge/controller";
+import { Prefund } from "@cartridge/controller";
 import { UpgradeInterface } from "hooks/upgrade";
+import { SessionPolicies } from "@cartridge/presets";
 
-export const ConnectionContext =
-  createContext<ConnectionContextValue>(undefined);
+export const ConnectionContext = createContext<
+  ConnectionContextValue | undefined
+>(undefined);
 
 export type ConnectionContextValue = {
   context: ConnectionCtx;
-  controller: Controller;
-  origin: string;
-  rpcUrl: string;
-  chainId: string;
-  chainName: string;
-  policies: Policy[];
+  controller?: Controller;
+  origin?: string;
+  rpcUrl?: string;
+  chainId?: string;
+  chainName?: string;
+  policies: SessionPolicies;
   prefunds: Prefund[];
   hasPrefundRequest: boolean;
   error?: Error;
@@ -26,14 +28,3 @@ export type ConnectionContextValue = {
   logout: () => void;
   openSettings: () => void;
 };
-
-export function ConnectionProvider({
-  children,
-  value,
-}: { value: ConnectionContextValue } & PropsWithChildren) {
-  return (
-    <ConnectionContext.Provider value={value}>
-      {children}
-    </ConnectionContext.Provider>
-  );
-}

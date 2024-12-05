@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, useEffect, useState } from "react";
-import { CallPolicy, Policy } from "@cartridge/controller";
+import { toArray } from "@cartridge/controller";
 import {
   Card,
   CardContent,
@@ -27,6 +27,7 @@ import {
   Spinner,
   CoinsIcon,
   ErrorImage,
+  ScrollIcon,
 } from "@cartridge/ui-next";
 import {
   formatAddress,
@@ -38,13 +39,13 @@ import { constants, StarknetEnumType, StarknetMerkleType } from "starknet";
 import Link from "next/link";
 import { useConnection } from "hooks/connection";
 import { useSessionSummary } from "@cartridge/utils";
-import { ScrollIcon } from "@cartridge/ui";
+import { ContractPolicy, SessionPolicies } from "@cartridge/presets";
 
 export function SessionSummary({
   policies,
   setError,
 }: {
-  policies: Policy[];
+  policies: SessionPolicies;
   setError?: (error: Error) => void;
 }) {
   const { controller } = useConnection();
@@ -79,21 +80,21 @@ export function SessionSummary({
 
   return (
     <div className="flex flex-col gap-4">
-      {Object.entries(summary.dojo).map(([address, { policies, meta }]) => (
+      {Object.entries(summary.dojo).map(([address, { methods, meta }]) => (
         <Contract
           key={address}
           address={address}
           title={meta.dojoName}
-          policies={policies}
+          methods={methods}
         />
       ))}
 
-      {Object.entries(summary.default).map(([address, policies], i) => (
+      {Object.entries(summary.default).map(([address, { methods }], i) => (
         <Contract
           key={address}
           address={address}
           title={`Contract ${i + 1}`}
-          policies={policies}
+          methods={methods}
           icon={
             <CardIcon>
               <ScrollIcon variant="line" />
@@ -102,12 +103,12 @@ export function SessionSummary({
         />
       ))}
 
-      {Object.entries(summary.ERC20).map(([address, { policies, meta }]) => (
+      {Object.entries(summary.ERC20).map(([address, { methods, meta }]) => (
         <Contract
           key={address}
           address={address}
           title={`spend ${meta?.name ?? "ERC-20"} token`}
-          policies={policies}
+          methods={methods}
           icon={
             meta?.logoUrl ? (
               <CardIcon src={meta.logoUrl} />
@@ -120,12 +121,12 @@ export function SessionSummary({
         />
       ))}
 
-      {Object.entries(summary.ERC721).map(([address, policies]) => (
+      {Object.entries(summary.ERC721).map(([address, { methods }]) => (
         <Contract
           key={address}
           address={address}
           title="ERC-721"
-          policies={policies}
+          methods={methods}
           icon={
             <CardIcon>
               <SpaceInvaderIcon variant="line" />
@@ -142,16 +143,17 @@ export function SessionSummary({
 function Contract({
   address,
   title,
-  policies,
+  methods: _methods,
   icon = <CardIcon />,
 }: {
   address: string;
   title: string;
-  policies: CallPolicy[];
+  methods: ContractPolicy["methods"];
   icon?: React.ReactNode;
 }) {
+  const methods = toArray(_methods);
   const { chainId } = useConnection();
-  const isSlot = isSlotChain(chainId);
+  const isSlot = !!chainId && isSlotChain(chainId);
 
   return (
     <Card>
@@ -183,17 +185,20 @@ function Contract({
             <AccordionTrigger>
               Approve{" "}
               <span className="text-accent-foreground font-bold">
-                {policies.length} {policies.length > 1 ? "methods" : "method"}
+                {methods.length} {methods.length > 1 ? "methods" : "method"}
               </span>
             </AccordionTrigger>
           </CardContent>
 
           <AccordionContent>
-            {policies.map((c) => (
-              <CardContent key={c.method} className="flex items-center gap-1">
+            {methods.map((c) => (
+              <CardContent
+                key={c.entrypoint}
+                className="flex items-center gap-1"
+              >
                 <CircleIcon size="sm" className="text-muted-foreground" />
                 <div className="flex items-center gap-2">
-                  <div>{c.method}</div>
+                  <div>{c.name}</div>
 
                   {c.description && (
                     <TooltipProvider>
@@ -224,7 +229,7 @@ function SignMessages({
 }: {
   messages: SessionSummaryType["messages"];
 }) {
-  if (!messages.length) {
+  if (!messages || !messages.length) {
     return null;
   }
 

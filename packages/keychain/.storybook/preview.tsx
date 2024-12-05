@@ -1,21 +1,12 @@
 import React, { PropsWithChildren, useMemo } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import type { Parameters, Preview } from "@storybook/react";
-import { ChakraProvider } from "@chakra-ui/react";
-import Controller, {
-  ControllerTheme,
-  ControllerThemePresets,
-  defaultPresets,
-} from "@cartridge/controller";
+import Controller from "@cartridge/controller";
 import { Inter, IBM_Plex_Mono } from "next/font/google";
+import { ControllerThemeContext, useChakraTheme } from "../src/hooks/theme";
 import {
-  ControllerThemeProvider,
-  useChakraTheme,
-  useControllerThemePreset,
-} from "../src/hooks/theme";
-import {
+  ConnectionContext,
   ConnectionContextValue,
-  ConnectionProvider,
 } from "../src/components/Provider/connection";
 import { constants } from "starknet";
 import { getChainName } from "@cartridge/utils";
@@ -23,6 +14,7 @@ import Script from "next/script";
 import { ETH_CONTRACT_ADDRESS } from "../src/utils/token";
 import { ConnectCtx, ConnectionCtx } from "../src/utils/connection/types";
 import { UpgradeInterface } from "../src/hooks/upgrade";
+import { defaultTheme, controllerConfigs } from "@cartridge/presets";
 
 const inter = Inter({ subsets: ["latin"] });
 const ibmPlexMono = IBM_Plex_Mono({
@@ -30,6 +22,8 @@ const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
 });
 import "../src/index.css";
+import { useThemeEffect } from "@cartridge/ui-next";
+import { ChakraProvider } from "@chakra-ui/react";
 
 const preview: Preview = {
   parameters: {
@@ -82,26 +76,17 @@ function Provider({
   children,
   parameters,
 }: { parameters: StoryParameters } & PropsWithChildren) {
-  const presetId = parameters.preset || "cartridge";
-  const preset = defaultPresets[presetId];
-  const chakraTheme = useChakraTheme(preset);
-  const ctrlTheme: ControllerTheme = {
-    id: preset.id,
-    name: preset.name,
-    icon: preset.icon,
-    cover: preset.cover,
-    colorMode: parameters.colorMode || "dark",
-  };
   const connection = useMockedConnection(parameters.connection);
+  const theme = parameters.preset || "cartridge";
 
   return (
-    <ChakraProvider theme={chakraTheme}>
-      <QueryClientProvider client={queryClient}>
-        <ControllerThemeProvider value={ctrlTheme} theme={preset}>
-          <ConnectionProvider value={connection}>{children}</ConnectionProvider>
+    <QueryClientProvider client={queryClient}>
+      <ConnectionContext.Provider value={connection}>
+        <ControllerThemeProvider theme={theme}>
+          {children}
         </ControllerThemeProvider>
-      </QueryClientProvider>
-    </ChakraProvider>
+      </ConnectionContext.Provider>
+    </QueryClientProvider>
   );
 }
 
@@ -134,30 +119,36 @@ export function useMockedConnection({
     rpcUrl: "http://api.cartridge.gg/x/sepolia",
     chainId,
     chainName,
-    policies: [
-      {
-        target: ETH_CONTRACT_ADDRESS,
-        method: "approve",
-        description:
-          "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
+    policies: {
+      contracts: {
+        [ETH_CONTRACT_ADDRESS]: {
+          methods: [
+            {
+              name: "Approve",
+              entrypoint: "approve",
+              description:
+                "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
+            },
+            {
+              name: "Transfer",
+              entrypoint: "transfer",
+            },
+            {
+              name: "Mint",
+              entrypoint: "mint",
+            },
+            {
+              name: "Burn",
+              entrypoint: "burn",
+            },
+            {
+              name: "Allowance",
+              entrypoint: "allowance",
+            },
+          ],
+        },
       },
-      {
-        target: ETH_CONTRACT_ADDRESS,
-        method: "transfer",
-      },
-      {
-        target: ETH_CONTRACT_ADDRESS,
-        method: "mint",
-      },
-      {
-        target: ETH_CONTRACT_ADDRESS,
-        method: "burn",
-      },
-      {
-        target: ETH_CONTRACT_ADDRESS,
-        method: "allowance",
-      },
-    ],
+    },
     prefunds: [],
     hasPrefundRequest: false,
     error: undefined,
@@ -176,3 +167,34 @@ export function useMockedConnection({
 const queryClient = new QueryClient();
 
 export default preview;
+
+export function ControllerThemeProvider({
+  children,
+  theme,
+}: PropsWithChildren<{ theme?: string }>) {
+  const preset = useMemo(() => {
+    if (!theme) return defaultTheme;
+    if (theme in controllerConfigs && controllerConfigs[theme].theme) {
+      return controllerConfigs[theme].theme;
+    }
+    return defaultTheme;
+  }, [theme]);
+
+  const controllerTheme = useMemo(
+    () => ({
+      name: preset.name,
+      icon: preset.icon,
+      cover: preset.cover,
+    }),
+    [preset],
+  );
+
+  useThemeEffect({ theme: preset, assetUrl: "" });
+  const chakraTheme = useChakraTheme(preset);
+
+  return (
+    <ControllerThemeContext.Provider value={controllerTheme}>
+      <ChakraProvider theme={chakraTheme}>{children}</ChakraProvider>
+    </ControllerThemeContext.Provider>
+  );
+}

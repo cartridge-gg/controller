@@ -8,7 +8,11 @@ import {
 } from "utils/connection";
 import { getChainName, isIframe } from "@cartridge/utils";
 import { RpcProvider, constants } from "starknet";
-import { Policy, Prefund, ResponseCodes } from "@cartridge/controller";
+import {
+  Prefund,
+  ResponseCodes,
+  toSessionPolicies,
+} from "@cartridge/controller";
 import { mergeDefaultETHPrefund } from "utils/token";
 import { setIsSignedUp } from "utils/cookie";
 import {
@@ -17,6 +21,7 @@ import {
 } from "components/Provider/connection";
 import { UpgradeInterface, useUpgrade } from "./upgrade";
 import posthog from "posthog-js";
+import { Policies, SessionPolicies } from "@cartridge/presets";
 
 const CHAIN_ID_TIMEOUT = 3000;
 
@@ -28,7 +33,7 @@ export function useConnectionValue() {
   const [origin, setOrigin] = useState<string>();
   const [rpcUrl, setRpcUrl] = useState<string>();
   const [chainId, setChainId] = useState<string>();
-  const [policies, setPolicies] = useState<Policy[]>([]);
+  const [policies, setPolicies] = useState<SessionPolicies>({});
   const [controller, setControllerRaw] = useState<Controller | undefined>();
   const [prefunds, setPrefunds] = useState<Prefund[]>([]);
   const [hasPrefundRequest, setHasPrefundRequest] = useState<boolean>(false);
@@ -42,13 +47,8 @@ export function useConnectionValue() {
     return getChainName(chainId);
   }, [chainId]);
 
-  const parsePolicies = (policiesStr: string | null): Policy[] => {
-    if (!policiesStr) return [];
-    return JSON.parse(decodeURIComponent(policiesStr));
-  };
-
   const closeModal = useCallback(async () => {
-    if (!parent) return;
+    if (!parent || !context?.resolve) return;
 
     try {
       context.resolve({
@@ -63,7 +63,7 @@ export function useConnectionValue() {
   }, [context, parent, setContext]);
 
   const openModal = useCallback(async () => {
-    if (!parent) return;
+    if (!parent || !context?.resolve) return;
 
     try {
       context.resolve({
@@ -77,7 +77,7 @@ export function useConnectionValue() {
   }, [context, parent]);
 
   const setController = useCallback((controller?: Controller) => {
-    if (controller && controller.cartridge) {
+    if (controller && controller.cartridge && origin) {
       posthog.identify(controller.cartridge.username(), {
         address: controller.address,
         class: controller.cartridge.classHash,
@@ -111,7 +111,13 @@ export function useConnectionValue() {
       : [];
     setHasPrefundRequest(!!prefundParam);
     setPrefunds(mergeDefaultETHPrefund(prefunds));
-    setPolicies(parsePolicies(urlParams.get("policies")));
+    setPolicies(() => {
+      const param = urlParams.get("policies");
+      if (!param) return {};
+
+      const policies = JSON.parse(decodeURIComponent(param)) as Policies;
+      return toSessionPolicies(policies);
+    });
 
     const connection = connectToController<ParentMethods>({
       setOrigin,
@@ -158,13 +164,15 @@ export function useConnectionValue() {
     window.controller?.disconnect();
     setController(undefined);
 
-    context.resolve({
+    context?.resolve?.({
       code: ResponseCodes.NOT_CONNECTED,
       message: "User logged out",
     });
   }, [context, setController]);
 
   const openSettings = useCallback(() => {
+    if (!context) return;
+
     setContext({
       origin: context.origin || origin,
       type: "open-settings",
@@ -195,7 +203,7 @@ export function useConnectionValue() {
 }
 
 export function useConnection() {
-  const ctx = useContext<ConnectionContextValue>(ConnectionContext);
+  const ctx = useContext<ConnectionContextValue | undefined>(ConnectionContext);
   if (!ctx) {
     throw new Error("ConnectionProvider must be placed");
   }

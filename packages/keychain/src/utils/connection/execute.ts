@@ -1,4 +1,4 @@
-import { ResponseCodes, ConnectError } from "@cartridge/controller";
+import { ResponseCodes, ConnectError, toArray } from "@cartridge/controller";
 import {
   Abi,
   AllowArray,
@@ -99,21 +99,22 @@ export function execute({
           });
         } catch (e) {
           // User only pays if the error is ErrorCode.PaymasterNotSupported
-          if (e.code !== ErrorCode.PaymasterNotSupported) {
+          const error = e as ControllerError;
+          if (error.code !== ErrorCode.PaymasterNotSupported) {
             setContext({
               type: "execute",
               origin,
               transactions,
               abis,
               transactionsDetail,
-              error: parseControllerError(e),
+              error: parseControllerError(error),
               resolve,
               reject,
             } as ExecuteCtx);
             return resolve({
               code: ResponseCodes.ERROR,
-              message: e.message,
-              error: parseControllerError(e),
+              message: error.message,
+              error: parseControllerError(error),
             });
           }
         }
@@ -139,14 +140,14 @@ export function execute({
             transactions,
             abis,
             transactionsDetail,
-            error: parseControllerError(e),
+            error: parseControllerError(e as ControllerError),
             resolve,
             reject,
           } as ExecuteCtx);
           return resolve({
             code: ResponseCodes.ERROR,
-            message: e.message,
-            error: parseControllerError(e),
+            message: (e as Error).message,
+            error: parseControllerError(e as ControllerError),
           });
         }
       },
@@ -157,7 +158,7 @@ export function execute({
 }
 
 export const normalizeCalls = (calls: AllowArray<Call>): JsCall[] => {
-  return (Array.isArray(calls) ? calls : [calls]).map((call) => {
+  return toArray(calls).map((call) => {
     return {
       entrypoint: call.entrypoint,
       contractAddress: addAddressPadding(call.contractAddress),

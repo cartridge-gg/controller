@@ -16,6 +16,7 @@ import { Call, constants, getChecksumAddress, RpcProvider } from "starknet";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 type ConnectionContextType = {
+  origin: string;
   parent: ParentMethods;
   provider: RpcProvider;
   chainId: string;
@@ -33,6 +34,7 @@ type ParentMethods = {
 };
 
 const initialState: ConnectionContextType = {
+  origin: "",
   parent: {
     close: () => {},
     openSettings: () => {},
@@ -79,10 +81,9 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
                 .split(",")
                 .filter(
                   (address) =>
-                    ![
-                      getChecksumAddress(ETH_CONTRACT_ADDRESS),
-                      getChecksumAddress(STRK_CONTRACT_ADDRESS),
-                    ].includes(getChecksumAddress(address)),
+                    ![ETH_CONTRACT_ADDRESS, STRK_CONTRACT_ADDRESS].includes(
+                      getChecksumAddress(address),
+                    ),
                 )
             : []),
         ];

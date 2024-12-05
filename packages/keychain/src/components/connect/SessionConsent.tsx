@@ -36,7 +36,7 @@ export function SessionConsent({
       return null;
     default:
     case "default":
-      return hostname ? (
+      return hostname && origin ? (
         <HStack color="text.secondary" fontSize="xs">
           {isVerified(origin) && (
             <Link
@@ -56,7 +56,10 @@ export function SessionConsent({
             <Text as="span" color="text.secondaryAccent" fontWeight="bold">
               {origin}
             </Text>{" "}
-            to perform the following actions ({policies.length}) on your behalf
+            to perform the following actions (
+            {Object.keys(policies.contracts ?? {}).length +
+              (policies.messages?.length ?? 0)}
+            ) on your behalf
           </Text>
         </HStack>
       ) : null;

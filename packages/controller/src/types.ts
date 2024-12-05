@@ -8,11 +8,15 @@ import {
 import {
   AddInvokeTransactionResult,
   Signature,
-  StarknetDomain,
-  StarknetType,
   TypedData,
 } from "@starknet-io/types-js";
 import { KeychainIFrame, ProfileIFrame } from "./iframe";
+import {
+  ColorMode,
+  Policies,
+  Policy,
+  SessionPolicies,
+} from "@cartridge/presets";
 
 export type Session = {
   chainId: constants.StarknetChainId;
@@ -23,20 +27,6 @@ export type Session = {
     authorization: string[];
     privateKey: string;
   };
-};
-
-export type Policy = CallPolicy | TypedDataPolicy;
-
-export type CallPolicy = {
-  target: string;
-  method: string;
-  description?: string;
-};
-
-export type TypedDataPolicy = {
-  types: Record<string, StarknetType[]>;
-  primaryType: string;
-  domain: StarknetDomain;
 };
 
 export enum ResponseCodes {
@@ -62,7 +52,7 @@ export type ControllerError = {
 export type ConnectReply = {
   code: ResponseCodes.SUCCESS;
   address: string;
-  policies: Policy[];
+  policies: SessionPolicies;
 };
 
 export type ExecuteReply =
@@ -109,7 +99,7 @@ export type ControllerAccounts = Record<ContractAddress, CartridgeID>;
 export interface Keychain {
   probe(rpcUrl: string): Promise<ProbeReply | ConnectError>;
   connect(
-    policies: Policy[],
+    policies: Policies,
     rpcUrl: string,
   ): Promise<ConnectReply | ConnectError>;
   disconnect(): void;
@@ -174,7 +164,7 @@ export type ProviderOptions = {
 };
 
 export type KeychainOptions = IFrameOptions & {
-  policies?: Policy[];
+  policies?: Policies;
   /** The URL of keychain */
   url?: string;
   /** The origin of keychain */
@@ -199,31 +189,6 @@ export type ProfileContextTypeVariant =
   | "trophies"
   | "achievements"
   | "activity";
-
-export type ColorMode = "light" | "dark";
-
-export type ControllerTheme = {
-  id: string;
-  name: string;
-  icon: string;
-  cover: ThemeValue<string>;
-  colorMode: ColorMode;
-};
-
-export type ControllerThemePresets = Record<string, ControllerThemePreset>;
-
-export type ControllerThemePreset = Omit<ControllerTheme, "colorMode"> & {
-  colors?: ControllerColors;
-};
-
-export type ControllerColors = {
-  primary?: ControllerColor;
-  primaryForeground?: ControllerColor;
-};
-
-export type ControllerColor = ThemeValue<string>;
-
-export type ThemeValue<T> = T | { dark: T; light: T };
 
 export type Prefund = { address: string; min: string };
 

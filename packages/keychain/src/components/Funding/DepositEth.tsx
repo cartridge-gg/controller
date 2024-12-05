@@ -76,6 +76,8 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
 
   const onConnect = useCallback(
     (c: Connector) => {
+      if (!chainId) return;
+
       connectAsync({ connector: c })
         .then(async () => {
           const connectedChain = await c.chainId();
@@ -95,6 +97,9 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
   const onFund = useCallback(async () => {
     if (!extAccount) {
       throw new Error("External account is not connected");
+    }
+    if (!ethAmount || !controller) {
+      return;
     }
 
     try {
@@ -126,23 +131,27 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
         ],
       });
 
-      onComplete(res.transaction_hash);
+      onComplete?.(res.transaction_hash);
     } catch (e) {
-      setError(e);
+      setError(e as unknown as Error);
     } finally {
       setIsLoading(false);
     }
   }, [extAccount, controller, ethAmount, onComplete]);
 
   const onCopy = useCallback(() => {
+    if (!controller?.address) return;
+
     navigator.clipboard.writeText(controller.address);
     toast("Copied");
-  }, [controller.address, toast]);
+  }, [controller?.address, toast]);
 
   return (
     <Container
       title="Deposit ETH"
-      description={<CopyAddress address={controller.address} />}
+      description={
+        controller ? <CopyAddress address={controller.address} /> : undefined
+      }
       Icon={EthereumIcon}
       onBack={onBack}
     >
@@ -247,6 +256,10 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
 function ExternalWalletProvider({ children }: PropsWithChildren) {
   const { connectors } = useInjectedConnectors({});
   const { controller } = useConnection();
+
+  if (!controller) {
+    return children;
+  }
 
   return (
     <StarknetConfig

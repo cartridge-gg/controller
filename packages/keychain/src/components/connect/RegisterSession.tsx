@@ -21,6 +21,8 @@ export function RegisterSession({
   const [expiresAt] = useState<bigint>(SESSION_EXPIRATION);
 
   const transactions = useMemo(() => {
+    if (!publicKey || !controller) return;
+
     const calldata = controller.registerSessionCalldata(
       expiresAt,
       policies,
@@ -38,7 +40,7 @@ export function RegisterSession({
 
   const onRegisterSession = useCallback(
     async (maxFee?: bigint) => {
-      if (maxFee === null) {
+      if (!maxFee || !publicKey || !controller) {
         return;
       }
 

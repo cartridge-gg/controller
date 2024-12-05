@@ -15,6 +15,7 @@ export const useDeploy = (): DeployInterface => {
 
   const deploySelf = useCallback(
     async (maxFee: string) => {
+      if (!controller) return;
       try {
         setIsDeploying(true);
         const { transaction_hash } = await controller.cartridge.deploySelf(
@@ -23,7 +24,7 @@ export const useDeploy = (): DeployInterface => {
 
         return transaction_hash;
       } catch (e) {
-        if (!e.message.includes("account already deployed")) {
+        if (!(e as Error).message?.includes("account already deployed")) {
           throw e;
         }
       }
