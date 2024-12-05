@@ -17,13 +17,13 @@ type BalanceProps = {
 export function Balance({ showBalances }: BalanceProps) {
   const { controller } = useController();
   const { balance: creditBalance } = useCreditBalance({
-    username: controller.username(),
+    username: controller?.username(),
     interval: 3000,
   });
   const {
     data: [eth],
   } = useERC20Balance({
-    address: controller.address,
+    address: controller?.address,
     contractAddress: ETH_CONTRACT_ADDRESS,
     provider: controller,
     interval: 3000,

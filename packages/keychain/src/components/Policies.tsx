@@ -42,7 +42,7 @@ export function Policies({
       )}
 
       <Accordion w="full" allowMultiple overflowY="auto">
-        {Object.entries(policies.contracts).map(([contractAddress, p]) =>
+        {Object.entries(policies.contracts ?? {}).map(([contractAddress, p]) =>
           p.methods.map((m) => (
             <AccordionItem
               key={`${contractAddress}${m.name}`}
@@ -90,7 +90,7 @@ export function Policies({
             </AccordionItem>
           )),
         )}
-        {policies.messages.map((p) => (
+        {policies.messages?.map((p) => (
           <AccordionItem
             key={`${p.domain.name}${p.primaryType}`}
             // borderTopRadius={i === 0 && !title ? "base" : "none"}

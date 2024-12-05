@@ -68,6 +68,7 @@ export function useControllerThemePreset() {
       typeof val === "string" &&
       val in controllerConfigs &&
       controllerConfigs[val].theme &&
+      origin &&
       (origin?.startsWith("http://localhost") ||
         toArray(controllerConfigs[val].origin).includes(origin))
     ) {

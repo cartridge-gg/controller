@@ -5,16 +5,17 @@ import { Prefund } from "@cartridge/controller";
 import { UpgradeInterface } from "hooks/upgrade";
 import { SessionPolicies } from "@cartridge/presets";
 
-export const ConnectionContext =
-  createContext<ConnectionContextValue>(undefined);
+export const ConnectionContext = createContext<
+  ConnectionContextValue | undefined
+>(undefined);
 
 export type ConnectionContextValue = {
   context: ConnectionCtx;
-  controller: Controller;
-  origin: string;
-  rpcUrl: string;
-  chainId: string;
-  chainName: string;
+  controller?: Controller;
+  origin?: string;
+  rpcUrl?: string;
+  chainId?: string;
+  chainName?: string;
   policies: SessionPolicies;
   prefunds: Prefund[];
   hasPrefundRequest: boolean;

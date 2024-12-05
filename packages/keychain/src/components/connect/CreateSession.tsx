@@ -27,6 +27,7 @@ export function CreateSession({
   const [error, setError] = useState<ControllerError | Error>();
 
   useEffect(() => {
+    if (!chainId) return;
     const normalizedChainId = normalizeChainId(chainId);
 
     const violatingPolicy = policies.messages?.find(
@@ -53,13 +54,14 @@ export function CreateSession({
   }, [chainId, policies]);
 
   const onCreateSession = useCallback(async () => {
+    if (!controller) return;
     try {
       setError(undefined);
       setIsConnecting(true);
       await controller.createSession(expiresAt, policies, maxFee);
       onConnect();
     } catch (e) {
-      setError(e);
+      setError(e as unknown as Error);
       setIsConnecting(false);
     }
   }, [controller, expiresAt, policies, maxFee, onConnect]);
@@ -76,7 +78,9 @@ export function CreateSession({
     <Container
       title={!isUpdate ? "Create Session" : "Update Session"}
       description={
-        isUpdate && "The policies were updated, please update existing session"
+        isUpdate
+          ? "The policies were updated, please update existing session"
+          : undefined
       }
       onClose={() => {
         if (!isUpdate) {

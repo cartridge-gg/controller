@@ -39,7 +39,7 @@ export function NetworkStatus() {
                 case constants.StarknetChainId.SN_SEPOLIA:
                   return <StarknetIcon fontSize="xl" />;
                 default:
-                  return isSlotChain(chainId) ? (
+                  return chainId && isSlotChain(chainId) ? (
                     <SlotIcon fontSize="xl" />
                   ) : (
                     <QuestionIcon fontSize="xl" />
@@ -49,6 +49,7 @@ export function NetworkStatus() {
           </Circle>
         }
         onClick={() => {
+          if (!chainId) return;
           navigator.clipboard.writeText(chainId);
           toast("Chain ID is copied");
         }}

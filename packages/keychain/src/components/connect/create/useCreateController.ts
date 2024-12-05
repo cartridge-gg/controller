@@ -33,19 +33,13 @@ export function useCreateController({
       refetchInterval: (data) => (!data ? 1000 : false),
       onSuccess: async (data) => {
         try {
-          const {
-            account: {
-              username,
-              credentials: {
-                webauthn: [{ id: credentialId, publicKey }],
-              },
-              controllers,
-            },
-          } = data;
+          const { username, credentials, controllers } = data.account ?? {};
+          const { id: credentialId, publicKey } =
+            credentials?.webauthn?.[0] ?? {};
 
-          const controllerNode = controllers.edges?.[0].node;
+          const controllerNode = controllers?.edges?.[0]?.node;
 
-          if (controllerNode) {
+          if (controllerNode && username && credentialId && publicKey) {
             await initController(
               username,
               controllerNode.constructorCalldata[0],
@@ -54,9 +48,9 @@ export function useCreateController({
               publicKey,
             );
           }
-        } catch (e) {
+        } catch (e: unknown) {
           console.error(e);
-          setError(e);
+          setError(e as Error);
         }
       },
     },
@@ -70,6 +64,8 @@ export function useCreateController({
       credentialId: string,
       publicKey: string,
     ) => {
+      if (!origin || !chainId || !rpcUrl) return;
+
       const controller = new Controller({
         appId: origin,
         classHash,
@@ -88,6 +84,23 @@ export function useCreateController({
     [origin, chainId, rpcUrl, setController, onCreated],
   );
 
+  const doPopupFlow = useCallback(
+    (username: string) => {
+      const searchParams = new URLSearchParams(window.location.search);
+      searchParams.set("name", encodeURIComponent(username));
+      searchParams.set("action", "signup");
+      setPendingUsername(username);
+
+      PopupCenter(
+        `/authenticate?${searchParams.toString()}`,
+        "Cartridge Signup",
+        480,
+        640,
+      );
+    },
+    [setPendingUsername],
+  );
+
   const handleSubmit = useCallback(
     async (username: string, exists: boolean) => {
       setError(undefined);
@@ -96,37 +109,38 @@ export function useCreateController({
       try {
         if (exists) {
           // Login flow
-          const {
-            account: {
-              credentials: {
-                webauthn: [{ id: credentialId, publicKey }],
-              },
-              controllers,
-            },
-          } = await fetchAccount(username);
+          const { account } = await fetchAccount(username);
+          const { credentials, controllers } = account ?? {};
+          const { id: credentialId, publicKey } =
+            credentials?.webauthn?.[0] ?? {};
 
-          const controllerNode = controllers.edges?.[0].node;
+          const controllerNode = controllers?.edges?.[0]?.node;
+
+          if (!credentialId)
+            throw new Error("No credential ID found for this account");
 
           if (
             loginMode === LoginMode.Webauthn ||
             Object.keys(policies.contracts ?? {}).length +
-              policies.messages?.length ===
+              (policies.messages?.length ?? 0) ===
               0
           ) {
             await doLogin({
               name: username,
               credentialId,
-              finalize: isSlot,
+              finalize: !!isSlot,
             });
           }
 
-          await initController(
-            username,
-            controllerNode.constructorCalldata[0],
-            controllerNode.address,
-            credentialId,
-            publicKey,
-          );
+          if (controllerNode && publicKey) {
+            await initController(
+              username,
+              controllerNode.constructorCalldata[0],
+              controllerNode.address,
+              credentialId,
+              publicKey,
+            );
+          }
         } else {
           // Signup flow
           const isSafari = /^((?!chrome|android).)*safari/i.test(
@@ -134,33 +148,24 @@ export function useCreateController({
           );
 
           if (isSafari) {
-            const searchParams = new URLSearchParams(window.location.search);
-            searchParams.set("name", encodeURIComponent(username));
-            searchParams.set("action", "signup");
-
-            PopupCenter(
-              `/authenticate?${searchParams.toString()}`,
-              "Cartridge Signup",
-              480,
-              640,
-            );
-
-            setPendingUsername(username);
+            doPopupFlow(username);
             return;
           }
 
           const data = await doSignup(username, constants.NetworkName.SN_MAIN);
 
           const {
-            finalizeRegistration: {
-              username: finalUsername,
-              controllers,
-              credentials: { webauthn },
-            },
-          } = data;
+            username: finalUsername,
+            controllers,
+            credentials,
+          } = data?.finalizeRegistration ?? {};
 
-          const { id: credentialId, publicKey } = webauthn[0];
-          const controllerNode = controllers.edges?.[0].node;
+          if (!credentials?.webauthn) return;
+
+          const { id: credentialId, publicKey } = credentials.webauthn?.[0];
+          const controllerNode = controllers?.edges?.[0]?.node;
+
+          if (!controllerNode || !finalUsername) return;
 
           await initController(
             finalUsername,
@@ -170,7 +175,16 @@ export function useCreateController({
             publicKey,
           );
         }
-      } catch (e) {
+      } catch (e: unknown) {
+        if (
+          e instanceof Error &&
+          (e.message.includes("Invalid 'sameOriginWithAncestors' value") ||
+            e.message.includes("document which is same-origin"))
+        ) {
+          doPopupFlow(username);
+          return;
+        }
+
         console.error(e);
         setError(e as Error);
       }

@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import {
+  Method,
   ResponseCodes,
   toArray,
   toSessionPolicies,
@@ -20,14 +21,18 @@ export function ConfirmTransaction() {
   const ctx = context as ExecuteCtx;
   const account = controller;
 
-  const onSubmit = async (maxFee: bigint) => {
+  const onSubmit = async (maxFee?: bigint) => {
+    if (!maxFee || !account) {
+      return;
+    }
+
     let { transaction_hash } = await account.execute(
       toArray(ctx.transactions),
       {
         maxFee: num.toHex(maxFee),
       },
     );
-    ctx.resolve({
+    ctx.resolve?.({
       code: ResponseCodes.SUCCESS,
       transaction_hash,
     });
@@ -50,14 +55,14 @@ export function ConfirmTransaction() {
     const txnsApproved = callPolicies.every((call) => {
       return policies.contracts?.[
         getChecksumAddress(call.target)
-      ]?.methods.some((m) => {
+      ]?.methods.some((m: Method) => {
         return m.entrypoint === call.method;
       });
     });
 
     // If calls are approved by dapp specified policies but not stored session
     // then prompt user to update session. This also accounts for expired sessions.
-    return txnsApproved && !account.session(callPolicies);
+    return txnsApproved && !account?.session(callPolicies);
   }, [callPolicies, policiesUpdated, policies, account]);
 
   if (updateSession) {

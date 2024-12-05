@@ -35,6 +35,7 @@ export function DeployController({
 
   useEffect(() => {
     if (
+      !controller ||
       controller.chainId() !== constants.StarknetChainId.SN_MAIN ||
       !hasPrefundRequest ||
       !feeEstimate
@@ -46,7 +47,7 @@ export function DeployController({
   }, [controller, hasPrefundRequest, feeEstimate]);
 
   useEffect(() => {
-    if (deployHash) {
+    if (deployHash && controller) {
       controller
         .waitForTransaction(deployHash, {
           retryInterval: 1000,
@@ -64,7 +65,7 @@ export function DeployController({
     data: [eth],
     isLoading,
   } = useERC20Balance({
-    address: controller.address,
+    address: controller?.address,
     contractAddress: ETH_CONTRACT_ADDRESS,
     provider: controller,
     interval: 3000,
@@ -81,15 +82,16 @@ export function DeployController({
   }, [eth?.balance.value, feeEstimate, accountState]);
 
   const onDeploy = useCallback(async () => {
+    if (!feeEstimate) return;
+
     try {
       const hash = await deploySelf(feeEstimate);
       setDeployHash(hash);
     } catch (e) {
-      if (e.message && e.message.includes("DuplicateTx")) {
+      if (e instanceof Error && e.message.includes("DuplicateTx")) {
         return;
       }
-
-      setError(e);
+      setError(e as Error);
     }
   }, [deploySelf, feeEstimate]);
 
@@ -110,7 +112,7 @@ export function DeployController({
           title={
             <>
               Fund{" "}
-              <b style={{ color: "brand.primary" }}>{controller.username()}</b>{" "}
+              <b style={{ color: "brand.primary" }}>{controller?.username()}</b>{" "}
               for deployment
             </>
           }
@@ -146,7 +148,7 @@ export function DeployController({
                 description={error.message}
               />
             ) : (
-              <Fees maxFee={BigInt(feeEstimate)} />
+              feeEstimate && <Fees maxFee={BigInt(feeEstimate)} />
             )}
             <Button
               colorScheme="colorful"
@@ -167,7 +169,7 @@ export function DeployController({
           description={`Your controller is being deployed on ${chainName}`}
         >
           <Content alignItems="center">
-            {deployHash && (
+            {deployHash && controller && (
               <ExplorerLink
                 chainId={controller.chainId()}
                 txHash={deployHash}
@@ -202,7 +204,7 @@ export function DeployController({
           description={`Your controller has been deployed on ${chainName}`}
         >
           <Content alignItems="center">
-            {deployHash && (
+            {deployHash && controller && (
               <ExplorerLink
                 chainId={controller.chainId()}
                 txHash={deployHash}

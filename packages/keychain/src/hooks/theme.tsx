@@ -2,10 +2,12 @@ import { ControllerColor, ControllerTheme } from "@cartridge/presets";
 import { CartridgeTheme } from "@cartridge/ui";
 import { useContext, createContext, useMemo } from "react";
 
-export const ControllerThemeContext = createContext<ControllerTheme>(undefined);
+export const ControllerThemeContext = createContext<
+  ControllerTheme | undefined
+>(undefined);
 
 export function useControllerTheme() {
-  const ctx = useContext<ControllerTheme>(ControllerThemeContext);
+  const ctx = useContext<ControllerTheme | undefined>(ControllerThemeContext);
   if (!ctx) {
     throw new Error("ControllerThemeProvider must be placed");
   }

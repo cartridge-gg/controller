@@ -27,6 +27,7 @@ import {
   Spinner,
   CoinsIcon,
   ErrorImage,
+  ScrollIcon,
 } from "@cartridge/ui-next";
 import {
   formatAddress,
@@ -38,7 +39,6 @@ import { constants, StarknetEnumType, StarknetMerkleType } from "starknet";
 import Link from "next/link";
 import { useConnection } from "hooks/connection";
 import { useSessionSummary } from "@cartridge/utils";
-import { ScrollIcon } from "@cartridge/ui";
 import { ContractPolicy, SessionPolicies } from "@cartridge/presets";
 
 export function SessionSummary({
@@ -153,7 +153,7 @@ function Contract({
 }) {
   const methods = toArray(_methods);
   const { chainId } = useConnection();
-  const isSlot = isSlotChain(chainId);
+  const isSlot = !!chainId && isSlotChain(chainId);
 
   return (
     <Card>
@@ -229,7 +229,7 @@ function SignMessages({
 }: {
   messages: SessionSummaryType["messages"];
 }) {
-  if (!messages.length) {
+  if (!messages || !messages.length) {
     return null;
   }
 

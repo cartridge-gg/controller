@@ -14,7 +14,7 @@ export function Logout() {
         </Button>
         <Button
           onClick={() => {
-            context.resolve({
+            context?.resolve?.({
               code: ResponseCodes.CANCELED,
               message: "User cancelled logout",
             });

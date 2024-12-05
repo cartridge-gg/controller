@@ -21,6 +21,7 @@ export function Recovery({ onBack }: { onBack: () => void }) {
   }, [externalOwnerAddress]);
 
   const onSetRecovery = useCallback(() => {
+    if (!context || !controller) return;
     setContext({
       origin: context.origin,
       transactions: [

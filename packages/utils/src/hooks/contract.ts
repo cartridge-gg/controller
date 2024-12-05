@@ -18,7 +18,7 @@ export type SessionSummary = {
     ContractPolicy & { meta?: Omit<ERC20Metadata, "instance"> }
   >;
   ERC721: ContractPolicies;
-  messages: SignMessagePolicy[];
+  messages: SignMessagePolicy[] | undefined;
 };
 
 type ContractType = keyof SessionSummary;
@@ -28,60 +28,70 @@ export function useSessionSummary({
   provider,
 }: {
   policies: SessionPolicies;
-  provider: Provider;
+  provider?: Provider;
 }) {
   const { data: ekuboMeta } = useEkuboMetadata();
 
-  const summary = useSWR(ekuboMeta ? `tx-summary` : null, async () => {
-    const res: SessionSummary = {
-      default: {},
-      dojo: {},
-      ERC20: {},
-      ERC721: {},
-      messages: policies.messages ?? [],
-    };
+  const res: SessionSummary = {
+    default: {},
+    dojo: {},
+    ERC20: {},
+    ERC721: {},
+    messages: policies.messages,
+  };
+  const summary = useSWR(
+    ekuboMeta && provider ? `tx-summary` : null,
+    async () => {
+      if (!provider) return res;
 
-    const promises = Object.entries(policies.contracts ?? {}).map(
-      async ([contractAddress, policies]) => {
-        const contractType = await checkContractType(provider, contractAddress);
-        switch (contractType) {
-          case "ERC20":
-            res.ERC20[contractAddress] = {
-              methods: policies.methods,
-              meta: ekuboMeta.find(
-                (m) =>
-                  getChecksumAddress(m.address) ===
-                  getChecksumAddress(contractAddress),
-              ),
-            };
-            return;
-          case "ERC721":
-            res.ERC721[contractAddress] = policies;
-            return;
-          case "default":
-          default: {
-            try {
-              const dojoNameRes = await provider.callContract({
-                contractAddress,
-                entrypoint: "dojo_name",
-              });
-
-              res.dojo[contractAddress] = {
-                methods: policies.methods,
-                meta: { dojoName: stringFromByteArray(dojoNameRes) },
+      const promises = Object.entries(policies.contracts ?? []).map(
+        async ([contractAddress, policies]) => {
+          const contractType = await checkContractType(
+            provider,
+            contractAddress,
+          );
+          switch (contractType) {
+            case "ERC20":
+              res.ERC20[contractAddress] = {
+                meta: ekuboMeta.find(
+                  (m) =>
+                    getChecksumAddress(m.address) ===
+                    getChecksumAddress(contractAddress),
+                ),
+                ...policies,
               };
-            } catch {
-              res.default[contractAddress] = policies;
-            }
-            return;
-          }
-        }
-      },
-    );
-    await Promise.all(promises);
+              return;
+            case "ERC721":
+              res.ERC721[contractAddress] = policies;
+              return;
+            case "default":
+            default: {
+              try {
+                const dojoNameRes = await provider.callContract({
+                  contractAddress,
+                  entrypoint: "dojo_name",
+                });
 
-    return res;
-  });
+                res.dojo[contractAddress] = {
+                  meta: { dojoName: stringFromByteArray(dojoNameRes) },
+                  ...policies,
+                };
+              } catch {
+                res.default[contractAddress] = policies;
+              }
+              return;
+            }
+          }
+        },
+      );
+      await Promise.all(promises);
+
+      return res;
+    },
+    {
+      fallbackData: res,
+    },
+  );
 
   return summary;
 }

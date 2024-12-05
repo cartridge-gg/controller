@@ -25,7 +25,7 @@ export function connectToController<ParentMethods extends {}>({
   setRpcUrl: (url: string) => void;
   setPolicies: (policies: SessionPolicies) => void;
   setContext: (ctx: ConnectionCtx) => void;
-  setController: (controller: Controller) => void;
+  setController: (controller?: Controller) => void;
 }) {
   return connectToParent<ParentMethods>({
     methods: {

@@ -99,21 +99,22 @@ export function execute({
           });
         } catch (e) {
           // User only pays if the error is ErrorCode.PaymasterNotSupported
-          if (e.code !== ErrorCode.PaymasterNotSupported) {
+          const error = e as ControllerError;
+          if (error.code !== ErrorCode.PaymasterNotSupported) {
             setContext({
               type: "execute",
               origin,
               transactions,
               abis,
               transactionsDetail,
-              error: parseControllerError(e),
+              error: parseControllerError(error),
               resolve,
               reject,
             } as ExecuteCtx);
             return resolve({
               code: ResponseCodes.ERROR,
-              message: e.message,
-              error: parseControllerError(e),
+              message: error.message,
+              error: parseControllerError(error),
             });
           }
         }
@@ -139,14 +140,14 @@ export function execute({
             transactions,
             abis,
             transactionsDetail,
-            error: parseControllerError(e),
+            error: parseControllerError(e as ControllerError),
             resolve,
             reject,
           } as ExecuteCtx);
           return resolve({
             code: ResponseCodes.ERROR,
-            message: e.message,
-            error: parseControllerError(e),
+            message: (e as Error).message,
+            error: parseControllerError(e as ControllerError),
           });
         }
       },

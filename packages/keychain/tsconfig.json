@@ -5,11 +5,7 @@
     "baseUrl": "./src",
     "rootDir": ".",
     "types": ["@emotion/react/types/css-prop"],
-    "noEmit": true,
-    // TODO(#262): Enable these options (too many errors for this scope)
-    "strict": false,
-    "noImplicitAny": false,
-    "strictNullChecks": false
+    "noEmit": true
   },
   "include": [
     "next-env.d.ts",

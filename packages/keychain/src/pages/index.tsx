@@ -19,7 +19,7 @@ function Home() {
 
   useEffect(() => {
     if (context?.origin) {
-      posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
+      posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
         api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
         person_profiles: "always",
         enable_recording_console_log: true,
@@ -59,7 +59,7 @@ function Home() {
       if (
         !(
           Object.keys(policies?.contracts ?? {}).length +
-          policies?.messages?.length
+          (policies?.messages?.length ?? 0)
         ) ||
         controller.session(policies)
       ) {

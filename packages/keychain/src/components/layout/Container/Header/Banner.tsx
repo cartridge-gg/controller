@@ -9,7 +9,6 @@ import {
   useColorMode,
   Square,
   HStack,
-  SpinnerProps,
 } from "@chakra-ui/react";
 import { useControllerTheme } from "hooks/theme";
 import { useMemo } from "react";
@@ -17,7 +16,7 @@ import { useLayoutVariant } from "../";
 import { TOP_BAR_HEIGHT } from "./TopBar";
 
 export type BannerProps = {
-  Icon?: React.ComponentType<IconProps | SpinnerProps>;
+  Icon?: React.ComponentType<IconProps>;
   icon?: React.ReactElement;
   title: string | React.ReactElement;
   description?: string | React.ReactElement;

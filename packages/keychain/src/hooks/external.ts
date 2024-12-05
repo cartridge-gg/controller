@@ -18,6 +18,7 @@ export function useExternalOwners() {
 
   useEffect(() => {
     const init = async () => {
+      if (!provider || !controller?.address) return;
       const events = await provider.getEvents({
         address: controller.address,
         from_block: { block_number: 0 },
@@ -41,7 +42,7 @@ export function useExternalOwners() {
 
     init();
   }, [
-    controller.address,
+    controller?.address,
     provider,
     externalOwnerRegisteredSelector,
     externalOwnerRemovedSelector,
