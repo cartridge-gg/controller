@@ -54,56 +54,72 @@ export function useSessionSummary({
 
   const { data: ekuboMeta } = useEkuboMetadata();
 
-  const summary = useSWR(ekuboMeta ? `tx-summary` : null, async () => {
-    const res: SessionSummary = {
-      default: {},
-      dojo: {},
-      ERC20: {},
-      ERC721: {},
-      messages: preSummary.messages,
-    };
+  const summary = useSWR(
+    ekuboMeta.length ? `tx-summary` : null,
+    async () => {
+      const res: SessionSummary = {
+        default: {},
+        dojo: {},
+        ERC20: {},
+        ERC721: {},
+        messages: preSummary.messages,
+      };
 
-    const promises = Object.entries(preSummary.default).map(
-      async ([contractAddress, policies]) => {
-        const contractType = await checkContractType(provider, contractAddress);
-        switch (contractType) {
-          case "ERC20":
-            res.ERC20[contractAddress] = {
-              meta: ekuboMeta.find(
+      const promises = Object.entries(preSummary.default).map(
+        async ([contractAddress, policies]) => {
+          const contractType = await checkContractType(
+            provider,
+            contractAddress,
+          );
+          switch (contractType) {
+            case "ERC20":
+              const meta = ekuboMeta.find(
                 (m) =>
                   getChecksumAddress(m.address) ===
                   getChecksumAddress(contractAddress),
-              ),
-              policies,
-            };
-            return;
-          case "ERC721":
-            res.ERC721[contractAddress] = policies;
-            return;
-          case "default":
-          default: {
-            try {
-              const dojoNameRes = await provider.callContract({
-                contractAddress,
-                entrypoint: "dojo_name",
-              });
-
-              res.dojo[contractAddress] = {
+              );
+              res.ERC20[contractAddress] = {
+                meta,
                 policies,
-                meta: { dojoName: stringFromByteArray(dojoNameRes) },
               };
-            } catch {
-              res.default[contractAddress] = policies;
-            }
-            return;
-          }
-        }
-      },
-    );
-    await Promise.all(promises);
+              return;
+            case "ERC721":
+              res.ERC721[contractAddress] = policies;
+              return;
+            case "default":
+            default: {
+              try {
+                const dojoNameRes = await provider.callContract({
+                  contractAddress,
+                  entrypoint: "dojo_name",
+                });
 
-    return res;
-  });
+                res.dojo[contractAddress] = {
+                  policies,
+                  meta: { dojoName: stringFromByteArray(dojoNameRes) },
+                };
+              } catch {
+                res.default[contractAddress] = policies;
+              }
+              return;
+            }
+          }
+        },
+      );
+      await Promise.all(promises);
+
+      return res;
+    },
+    {
+      fallbackData: {
+        default: {},
+        dojo: {},
+        ERC20: {},
+        ERC721: {},
+        messages: preSummary.messages,
+      },
+    },
+  );
 
   return summary;
 }
