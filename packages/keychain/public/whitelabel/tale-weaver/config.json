@@ -1,0 +1,11 @@
+{
+  "origin": "",
+  "theme": {
+    "colors": {
+      "primary": "#fce377"
+    },
+    "cover": "/whitelabel/tale-weaver/cover.png",
+    "icon": "/whitelabel/tale-weaver/icon.png",
+    "name": "Tale Weaver"
+  }
+}
