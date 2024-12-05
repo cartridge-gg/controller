@@ -16,14 +16,18 @@ export function ConfirmTransaction() {
   const ctx = context as ExecuteCtx;
   const account = controller;
 
-  const onSubmit = async (maxFee: bigint) => {
+  const onSubmit = async (maxFee?: bigint) => {
+    if (!maxFee || !account) {
+      return;
+    }
+
     let { transaction_hash } = await account.execute(
       Array.isArray(ctx.transactions) ? ctx.transactions : [ctx.transactions],
       {
         maxFee: num.toHex(maxFee),
       },
     );
-    ctx.resolve({
+    ctx.resolve?.({
       code: ResponseCodes.SUCCESS,
       transaction_hash,
     });
@@ -58,7 +62,7 @@ export function ConfirmTransaction() {
 
     // If calls are approved by dapp specified policies but not stored session
     // then prompt user to update session. This also accounts for expired sessions.
-    return txnsApproved && !account.session(callPolicies);
+    return txnsApproved && !account?.session(callPolicies);
   }, [callPolicies, policiesUpdated, policies, account]);
 
   if (updateSession) {

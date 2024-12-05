@@ -31,17 +31,18 @@ function Pending() {
   return (
     <Container Icon={TimerDuoIcon} title={title} description={description}>
       <Content>
-        {[...txns, { name: "name", hash: "hash" }].map((txn, idx) => (
-          <Transaction
-            key={idx}
-            name={txn.name}
-            chainId={chainId}
-            hash={txn.hash}
-            finalized={(state: TransactionState) => {
-              setTxnResults([...txnResults, state]);
-            }}
-          />
-        ))}
+        {chainId &&
+          [...txns, { name: "name", hash: "hash" }].map((txn, idx) => (
+            <Transaction
+              key={idx}
+              name={txn.name}
+              chainId={chainId}
+              hash={txn.hash}
+              finalized={(state: TransactionState) => {
+                setTxnResults([...txnResults, state]);
+              }}
+            />
+          ))}
       </Content>
     </Container>
   );

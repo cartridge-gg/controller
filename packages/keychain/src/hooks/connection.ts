@@ -48,7 +48,7 @@ export function useConnectionValue() {
   };
 
   const closeModal = useCallback(async () => {
-    if (!parent) return;
+    if (!parent || !context?.resolve) return;
 
     try {
       context.resolve({
@@ -63,7 +63,7 @@ export function useConnectionValue() {
   }, [context, parent, setContext]);
 
   const openModal = useCallback(async () => {
-    if (!parent) return;
+    if (!parent || !context?.resolve) return;
 
     try {
       context.resolve({
@@ -77,7 +77,7 @@ export function useConnectionValue() {
   }, [context, parent]);
 
   const setController = useCallback((controller?: Controller) => {
-    if (controller && controller.cartridge) {
+    if (controller && controller.cartridge && origin) {
       posthog.identify(controller.cartridge.username(), {
         address: controller.address,
         class: controller.cartridge.classHash,
@@ -158,13 +158,15 @@ export function useConnectionValue() {
     window.controller?.disconnect();
     setController(undefined);
 
-    context.resolve({
+    context?.resolve?.({
       code: ResponseCodes.NOT_CONNECTED,
       message: "User logged out",
     });
   }, [context, setController]);
 
   const openSettings = useCallback(() => {
+    if (!context) return;
+
     setContext({
       origin: context.origin || origin,
       type: "open-settings",
@@ -195,7 +197,7 @@ export function useConnectionValue() {
 }
 
 export function useConnection() {
-  const ctx = useContext<ConnectionContextValue>(ConnectionContext);
+  const ctx = useContext<ConnectionContextValue | undefined>(ConnectionContext);
   if (!ctx) {
     throw new Error("ConnectionProvider must be placed");
   }

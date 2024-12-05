@@ -33,19 +33,13 @@ export function useCreateController({
       refetchInterval: (data) => (!data ? 1000 : false),
       onSuccess: async (data) => {
         try {
-          const {
-            account: {
-              username,
-              credentials: {
-                webauthn: [{ id: credentialId, publicKey }],
-              },
-              controllers,
-            },
-          } = data;
+          const { username, credentials, controllers } = data.account ?? {};
+          const { id: credentialId, publicKey } =
+            credentials?.webauthn?.[0] ?? {};
 
-          const controllerNode = controllers.edges?.[0].node;
+          const controllerNode = controllers?.edges?.[0]?.node;
 
-          if (controllerNode) {
+          if (controllerNode && username && credentialId && publicKey) {
             await initController(
               username,
               controllerNode.constructorCalldata[0],
@@ -55,7 +49,7 @@ export function useCreateController({
             );
           }
         } catch (e) {
-          setError(e);
+          setError(e as unknown as Error);
         }
       },
     },
@@ -69,6 +63,8 @@ export function useCreateController({
       credentialId: string,
       publicKey: string,
     ) => {
+      if (!origin || !chainId || !rpcUrl) return;
+
       const controller = new Controller({
         appId: origin,
         classHash,
@@ -95,32 +91,33 @@ export function useCreateController({
       try {
         if (exists) {
           // Login flow
-          const {
-            account: {
-              credentials: {
-                webauthn: [{ id: credentialId, publicKey }],
-              },
-              controllers,
-            },
-          } = await fetchAccount(username);
+          const { account } = await fetchAccount(username);
+          const { credentials, controllers } = account ?? {};
+          const { id: credentialId, publicKey } =
+            credentials?.webauthn?.[0] ?? {};
 
-          const controllerNode = controllers.edges?.[0].node;
+          const controllerNode = controllers?.edges?.[0]?.node;
 
-          if (loginMode === LoginMode.Webauthn || policies?.length === 0) {
+          if (
+            (loginMode === LoginMode.Webauthn || policies?.length === 0) &&
+            credentialId
+          ) {
             await doLogin({
               name: username,
               credentialId,
-              finalize: isSlot,
+              finalize: !!isSlot,
             });
           }
 
-          await initController(
-            username,
-            controllerNode.constructorCalldata[0],
-            controllerNode.address,
-            credentialId,
-            publicKey,
-          );
+          if (controllerNode && credentialId && publicKey) {
+            await initController(
+              username,
+              controllerNode.constructorCalldata[0],
+              controllerNode.address,
+              credentialId,
+              publicKey,
+            );
+          }
         } else {
           // Signup flow
           const isSafari = /^((?!chrome|android).)*safari/i.test(
@@ -146,15 +143,17 @@ export function useCreateController({
           const data = await doSignup(username, constants.NetworkName.SN_MAIN);
 
           const {
-            finalizeRegistration: {
-              username: finalUsername,
-              controllers,
-              credentials: { webauthn },
-            },
-          } = data;
+            username: finalUsername,
+            controllers,
+            credentials,
+          } = data?.finalizeRegistration ?? {};
 
-          const { id: credentialId, publicKey } = webauthn[0];
-          const controllerNode = controllers.edges?.[0].node;
+          if (!credentials?.webauthn) return;
+
+          const { id: credentialId, publicKey } = credentials.webauthn?.[0];
+          const controllerNode = controllers?.edges?.[0]?.node;
+
+          if (!controllerNode || !finalUsername) return;
 
           await initController(
             finalUsername,

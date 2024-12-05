@@ -8,7 +8,6 @@ import { Fees } from "./Fees";
 import { Funding } from "./Funding";
 import { DeployController } from "./DeployController";
 import { ErrorCode } from "@cartridge/account-wasm/controller";
-import { BigNumberish } from "starknet";
 import { BannerProps } from "./layout/Container/Header/Banner";
 import { parseControllerError } from "utils/connection/execute";
 
@@ -16,7 +15,7 @@ interface ExecutionContainerProps {
   transactions: any;
   transactionsDetail?: any;
   executionError?: ControllerError;
-  onSubmit: (maxFee?: BigNumberish) => Promise<void>;
+  onSubmit: (maxFee?: bigint) => Promise<void>;
   onDeploy?: () => void;
   onFund?: () => void;
   onError?: (error: ControllerError) => void;
@@ -39,9 +38,9 @@ export function ExecutionContainer({
   children,
 }: ExecutionContainerProps & BannerProps) {
   const { controller } = useConnection();
-  const [maxFee, setMaxFee] = useState<BigNumberish | null>(null);
-  const [ctrlError, setCtrlError] = useState<ControllerError>(
-    () => executionError,
+  const [maxFee, setMaxFee] = useState<bigint | undefined>();
+  const [ctrlError, setCtrlError] = useState<ControllerError | undefined>(
+    executionError,
   );
   const [isLoading, setIsLoading] = useState(false);
   const [ctaState, setCTAState] = useState<"fund" | "deploy" | "execute">(
@@ -61,7 +60,7 @@ export function ExecutionContainer({
         );
         setMaxFee(est.suggestedMaxFee);
       } catch (e) {
-        const error = parseControllerError(e);
+        const error = parseControllerError(e as unknown as ControllerError);
         onError?.(error);
         setCtrlError(error);
       }
@@ -91,7 +90,7 @@ export function ExecutionContainer({
     try {
       await onSubmit(maxFee);
     } catch (e) {
-      const error = parseControllerError(e);
+      const error = parseControllerError(e as unknown as ControllerError);
       onError?.(error);
       setCtrlError(error);
     } finally {
@@ -159,7 +158,7 @@ export function ExecutionContainer({
                   {ctrlError ? (
                     <ControllerErrorAlert error={ctrlError} />
                   ) : (
-                    <Fees maxFee={BigInt(maxFee)} />
+                    maxFee && <Fees maxFee={BigInt(maxFee)} />
                   )}
                   <Button
                     colorScheme="colorful"
@@ -189,12 +188,12 @@ export function ExecutionContainer({
               return (
                 <>
                   {ctrlError && <ControllerErrorAlert error={ctrlError} />}
-                  {maxFee !== null && <Fees maxFee={BigInt(maxFee)} />}
+                  {maxFee && <Fees maxFee={BigInt(maxFee)} />}
                   <Button
                     colorScheme="colorful"
                     onClick={handleSubmit}
                     isLoading={isLoading}
-                    isDisabled={maxFee === null && transactions.length}
+                    isDisabled={!maxFee === null && transactions.length}
                   >
                     {buttonText}
                   </Button>

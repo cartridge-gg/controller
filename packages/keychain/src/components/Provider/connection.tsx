@@ -4,16 +4,17 @@ import { ConnectionCtx } from "utils/connection";
 import { Policy, Prefund } from "@cartridge/controller";
 import { UpgradeInterface } from "hooks/upgrade";
 
-export const ConnectionContext =
-  createContext<ConnectionContextValue>(undefined);
+export const ConnectionContext = createContext<
+  ConnectionContextValue | undefined
+>(undefined);
 
 export type ConnectionContextValue = {
   context: ConnectionCtx;
-  controller: Controller;
-  origin: string;
-  rpcUrl: string;
-  chainId: string;
-  chainName: string;
+  controller?: Controller;
+  origin?: string;
+  rpcUrl?: string;
+  chainId?: string;
+  chainName?: string;
   policies: Policy[];
   prefunds: Prefund[];
   hasPrefundRequest: boolean;

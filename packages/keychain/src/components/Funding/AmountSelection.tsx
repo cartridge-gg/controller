@@ -55,7 +55,7 @@ export default function AmountSelection({
               onClick={() => {
                 setCustom(false);
                 setSelected(value);
-                onChange(value);
+                onChange?.(value);
                 onClose();
               }}
             >
@@ -89,7 +89,7 @@ export default function AmountSelection({
               isDisabled={lockSelection}
               onChange={(e) => {
                 const amount = parseInt(e.target.value);
-                onChange(amount);
+                onChange?.(amount);
               }}
             />
             <DollarIcon

@@ -1,13 +1,13 @@
 import { Container, Content, Footer } from "components/layout";
 import { Button, Divider } from "@chakra-ui/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { CheckIcon, CoinsIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { CopyAddress } from "../CopyAddress";
 import AmountSelection, { DEFAULT_AMOUNT } from "./AmountSelection";
 import { ErrorAlert } from "components/ErrorAlert";
 import { Elements } from "@stripe/react-stripe-js";
-import { Appearance, Stripe, loadStripe } from "@stripe/stripe-js";
+import { Appearance, loadStripe } from "@stripe/stripe-js";
 import { Balance } from "./Balance";
 import CheckoutForm from "./StripeCheckout";
 
@@ -31,12 +31,8 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
   const [isLoading, setisLoading] = useState<boolean>(false);
   const [state, setState] = useState<PurchaseState>(PurchaseState.SELECTION);
   const [creditsAmount, setCreditsAmount] = useState<number>(DEFAULT_AMOUNT);
-  const [stripePromise, setStripePromise] = useState<Promise<Stripe>>();
+  const stripePromise = useMemo(() => loadStripe(STRIPE_API_PUBKEY), []);
   const [error, setError] = useState<Error>();
-
-  useEffect(() => {
-    setStripePromise(loadStripe(STRIPE_API_PUBKEY));
-  }, []);
 
   const onAmountChanged = useCallback(
     (amount: number) => setCreditsAmount(amount),
@@ -51,7 +47,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
     setisLoading(true);
 
     try {
-      const res = await fetch(process.env.NEXT_PUBLIC_STRIPE_PAYMENT, {
+      const res = await fetch(process.env.NEXT_PUBLIC_STRIPE_PAYMENT!, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -67,7 +63,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
       setClientSecret(data.clientSecret);
       setState(PurchaseState.STRIPE_CHECKOUT);
     } catch (e) {
-      setError(e);
+      setError(e as unknown as Error);
     } finally {
       setisLoading(false);
     }
@@ -121,7 +117,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
         "Purchase " +
         (state === PurchaseState.SELECTION ? "Credits" : "Complete")
       }
-      description={<CopyAddress address={controller.address} />}
+      description={controller && <CopyAddress address={controller.address} />}
       Icon={state === PurchaseState.SELECTION ? CoinsIcon : CheckIcon}
       onBack={state === PurchaseState.SELECTION ? onBack : undefined}
     >

@@ -26,7 +26,7 @@ export function SignMessage({
     // Recursively decodes all nested `felt*` types
     // to their ASCII equivalents
     const convertFeltArraysToString = (
-      initial: object,
+      initial: any,
       messageType: Array<{ name: string; type: string }>,
     ) => {
       for (const typeMember of messageType) {
@@ -52,6 +52,7 @@ export function SignMessage({
 
   const onConfirm = useCallback(async () => {
     const account = controller;
+    if (!account) return;
     const sig = await account.signMessage(typedData);
     onSign(sig);
   }, [controller, onSign, typedData]);
@@ -69,6 +70,7 @@ export function SignMessage({
             const ptName = messageData.primaryType;
             const pt = messageData.types[ptName];
             const values = (typeName: string) => {
+              // @ts-expect-error TODO: fix type
               const v = messageData.message[typeName];
               if (typeof v === "object") {
                 return Object.entries(v).map(([key, value]) => {

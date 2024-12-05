@@ -17,13 +17,13 @@ export function useERC20Balance({
   interval,
   decimals = 5,
 }: {
-  address: string;
+  address?: string;
   contractAddress: string | string[];
-  provider: Provider;
+  provider?: Provider;
   interval: number | undefined;
   decimals?: number;
 }) {
-  const { data: chainId } = useSWR(provider ? "chainId" : null, () =>
+  const { data: chainId } = useSWR(address && provider ? "chainId" : null, () =>
     provider?.getChainId(),
   );
   const { data: ekuboMeta } = useEkuboMetadata();
@@ -32,6 +32,7 @@ export function useERC20Balance({
       ? `erc20:metadata:${chainId}:${address}:${contractAddress}`
       : null,
     async () => {
+      if (!provider || !address) return [];
       const contractList = Array.isArray(contractAddress)
         ? contractAddress
         : [contractAddress];
@@ -56,10 +57,11 @@ export function useERC20Balance({
   );
 
   const { data, isValidating, isLoading, error } = useSWR(
-    meta.length
+    meta.length && address
       ? `erc20:balance:${chainId}:${address}:${contractAddress}`
       : null,
     async () => {
+      if (!address) return [];
       const values = await Promise.allSettled(
         meta.map((m) => m.instance.balanceOf(address)),
       );
@@ -121,16 +123,17 @@ export function useCreditBalance({
   username,
   interval,
 }: {
-  username: string;
+  username?: string;
   interval: number | undefined;
 }): UseCreditBalanceReturn {
   const { data, isFetching, isLoading, error } = useCreditQuery<
     CreditQuery,
     Error
   >(
-    { username },
+    { username: username! },
     {
       refetchInterval: interval,
+      enabled: !!username,
     },
   );
   const value = data?.account?.credits ?? 0n;

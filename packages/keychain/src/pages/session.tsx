@@ -59,14 +59,15 @@ export default function Session() {
 
       if (queries.callback_uri) {
         try {
-          const res = await fetch(
-            sanitizeCallbackUrl(decodeURIComponent(queries.callback_uri)),
-            {
-              body: encodedResponse,
-              headers,
-              method: "POST",
-            },
+          const url = sanitizeCallbackUrl(
+            decodeURIComponent(queries.callback_uri),
           );
+          if (!url) return;
+          const res = await fetch(url, {
+            body: encodedResponse,
+            headers,
+            method: "POST",
+          });
 
           if (res.ok) {
             return router.replace({
@@ -100,6 +101,8 @@ export default function Session() {
       if (!queries.callback_uri && !queries.redirect_uri) {
         throw new Error("Expected either callback_uri or redirect_uri");
       }
+
+      if (!controller) return;
 
       onCallback({
         username: controller.username(),
