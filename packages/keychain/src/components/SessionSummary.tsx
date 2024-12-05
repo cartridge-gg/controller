@@ -27,6 +27,7 @@ import {
   Spinner,
   CoinsIcon,
   ErrorImage,
+  ScrollIcon,
 } from "@cartridge/ui-next";
 import {
   formatAddress,
@@ -38,7 +39,6 @@ import { constants, StarknetEnumType, StarknetMerkleType } from "starknet";
 import Link from "next/link";
 import { useConnection } from "hooks/connection";
 import { useSessionSummary } from "@cartridge/utils";
-import { ScrollIcon } from "@cartridge/ui";
 
 export function SessionSummary({
   policies,
