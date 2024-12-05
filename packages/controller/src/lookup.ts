@@ -1,6 +1,6 @@
 import { LookupRequest, LookupResponse } from "./types";
 import { num } from "starknet";
-import { API_URL } from './constants';
+import { API_URL } from "./constants";
 
 const cache = new Map<string, string>();
 
