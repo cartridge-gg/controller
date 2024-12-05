@@ -168,6 +168,11 @@ export function ControllerErrorAlert({
   switch (error.code) {
     case ErrorCode.SignError:
       title = "Signing Error";
+      if (error.message.includes("Get assertion error")) {
+        description =
+          "The authentication request timed out or was cancelled. Please try again.";
+      }
+
       break;
     case ErrorCode.StorageError:
       title = "Storage Error";
