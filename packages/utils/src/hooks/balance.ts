@@ -3,11 +3,10 @@ import useSWR from "swr";
 import { formatEther } from "viem";
 import { ERC20, ERC20Metadata } from "../erc20";
 import { CreditQuery, useCreditQuery } from "../api/cartridge";
+import { erc20Metadata } from "@cartridge/presets";
 
 export function useEkuboMetadata() {
-  return useSWR("ekuboMetadata", ERC20.fetchAllMetadata, {
-    fallbackData: [],
-  });
+  return erc20Metadata;
 }
 
 export function useERC20Balance({
@@ -26,7 +25,7 @@ export function useERC20Balance({
   const { data: chainId } = useSWR(address && provider ? "chainId" : null, () =>
     provider?.getChainId(),
   );
-  const { data: ekuboMeta } = useEkuboMetadata();
+  const ekuboMeta = useEkuboMetadata();
   const { data: meta } = useSWR(
     chainId && ekuboMeta.length
       ? `erc20:metadata:${chainId}:${address}:${contractAddress}`
@@ -43,8 +42,9 @@ export function useERC20Balance({
             provider,
             logoUrl: ekuboMeta.find(
               (m) =>
-                getChecksumAddress(m.address) === getChecksumAddress(address),
-            )?.logoUrl,
+                getChecksumAddress(m.l2_token_address) ===
+                getChecksumAddress(address),
+            )?.logo_url,
           }).init(),
         ),
       );
