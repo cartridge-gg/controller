@@ -1,6 +1,5 @@
 export * from "./types";
 
-import { SessionPolicies } from "@cartridge/controller";
 import { connectToParent } from "@cartridge/penpal";
 import Controller from "utils/controller";
 import { connectFactory } from "./connect";
@@ -13,6 +12,7 @@ import { ConnectionCtx } from "./types";
 import { deployFactory } from "./deploy";
 import { openSettingsFactory } from "./settings";
 import { normalize } from "@cartridge/utils";
+import { SessionPolicies } from "@cartridge/presets";
 
 export function connectToController<ParentMethods extends {}>({
   setOrigin,

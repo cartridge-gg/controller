@@ -9,10 +9,8 @@ import {
 import { getChainName, isIframe } from "@cartridge/utils";
 import { RpcProvider, constants } from "starknet";
 import {
-  Policies,
   Prefund,
   ResponseCodes,
-  SessionPolicies,
   toSessionPolicies,
 } from "@cartridge/controller";
 import { mergeDefaultETHPrefund } from "utils/token";
@@ -23,6 +21,7 @@ import {
 } from "components/Provider/connection";
 import { UpgradeInterface, useUpgrade } from "./upgrade";
 import posthog from "posthog-js";
+import { Policies, SessionPolicies } from "@cartridge/presets";
 
 const CHAIN_ID_TIMEOUT = 3000;
 

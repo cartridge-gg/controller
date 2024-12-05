@@ -456,6 +456,10 @@ importers:
         version: 8.0.1
 
   packages/presets:
+    dependencies:
+      '@starknet-io/types-js':
+        specifier: 0.7.7
+        version: 0.7.7
     devDependencies:
       '@cartridge/tsconfig':
         specifier: workspace:*
@@ -858,6 +862,9 @@ importers:
 
   packages/utils:
     dependencies:
+      '@cartridge/presets':
+        specifier: workspace:*
+        version: link:../presets
       react:
         specifier: ^18.3.1
         version: 18.3.1

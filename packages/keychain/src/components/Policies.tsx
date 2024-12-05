@@ -10,7 +10,7 @@ import {
   Box,
 } from "@chakra-ui/react";
 import { CopyHash, FnIcon, WedgeRightIcon } from "@cartridge/ui";
-import { SessionPolicies } from "@cartridge/controller";
+import { SessionPolicies } from "@cartridge/presets";
 
 export function Policies({
   title,

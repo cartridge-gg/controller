@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, useEffect, useState } from "react";
-import { SessionPolicies, toArray } from "@cartridge/controller";
+import { toArray } from "@cartridge/controller";
 import {
   Card,
   CardContent,
@@ -29,7 +29,6 @@ import {
   ErrorImage,
 } from "@cartridge/ui-next";
 import {
-  ContractPolicy,
   formatAddress,
   isSlotChain,
   SessionSummary as SessionSummaryType,
@@ -40,6 +39,7 @@ import Link from "next/link";
 import { useConnection } from "hooks/connection";
 import { useSessionSummary } from "@cartridge/utils";
 import { ScrollIcon } from "@cartridge/ui";
+import { ContractPolicy, SessionPolicies } from "@cartridge/presets";
 
 export function SessionSummary({
   policies,
@@ -192,7 +192,10 @@ function Contract({
 
           <AccordionContent>
             {methods.map((c) => (
-              <CardContent key={c.name} className="flex items-center gap-1">
+              <CardContent
+                key={c.entrypoint}
+                className="flex items-center gap-1"
+              >
                 <CircleIcon size="sm" className="text-muted-foreground" />
                 <div className="flex items-center gap-2">
                   <div>{c.name}</div>

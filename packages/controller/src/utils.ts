@@ -6,8 +6,8 @@ import {
   typedData,
   TypedDataRevision,
 } from "starknet";
-import { Policies, SessionPolicies } from "./types";
 import wasm from "@cartridge/account-wasm/controller";
+import { Policies, SessionPolicies } from "@cartridge/presets";
 
 // Whitelist of allowed property names to prevent prototype pollution
 const ALLOWED_PROPERTIES = new Set([

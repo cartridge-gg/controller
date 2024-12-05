@@ -1,4 +1,4 @@
-import { ControllerColor, ControllerTheme } from "@cartridge/controller";
+import { ControllerColor, ControllerTheme } from "@cartridge/presets";
 import { CartridgeTheme } from "@cartridge/ui";
 import { useContext, createContext, useMemo } from "react";
 

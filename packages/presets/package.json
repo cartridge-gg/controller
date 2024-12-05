@@ -17,6 +17,9 @@
     "files": [
         "dist"
     ],
+    "dependencies": {
+        "@starknet-io/types-js": "0.7.7"
+    },
     "devDependencies": {
         "@cartridge/tsconfig": "workspace:*",
         "@types/node": "^20.6.0",

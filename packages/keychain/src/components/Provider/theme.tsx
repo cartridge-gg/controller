@@ -1,5 +1,10 @@
-import { ColorMode, ControllerTheme, toArray } from "@cartridge/controller";
-import { defaultTheme, controllerConfigs } from "@cartridge/presets";
+import { toArray } from "@cartridge/controller";
+import {
+  defaultTheme,
+  controllerConfigs,
+  ColorMode,
+  ControllerTheme,
+} from "@cartridge/presets";
 import { useThemeEffect } from "@cartridge/ui-next";
 import { ChakraProvider, useColorMode } from "@chakra-ui/react";
 import { useConnection } from "hooks/connection";

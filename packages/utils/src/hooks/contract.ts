@@ -1,8 +1,14 @@
-import { getChecksumAddress, Provider, TypedData } from "starknet";
+import { getChecksumAddress, Provider } from "starknet";
 import useSWR from "swr";
 import { useEkuboMetadata } from "./balance";
 import { ERC20Metadata } from "../erc20";
 import { stringFromByteArray } from "../contract";
+import {
+  ContractPolicies,
+  ContractPolicy,
+  SessionPolicies,
+  SignMessagePolicy,
+} from "@cartridge/presets";
 
 export type SessionSummary = {
   default: ContractPolicies;
@@ -139,26 +145,3 @@ async function checkContractType(
     }
   }
 }
-
-// Dup of @cartridge/controller/types
-export type SessionPolicies = {
-  /** The key must be the contract address */
-  contracts?: ContractPolicies;
-  messages?: SignMessagePolicy[];
-};
-
-export type ContractPolicies = Record<string, ContractPolicy>;
-
-/** Contract level policy */
-export type ContractPolicy = {
-  /** It must contain one method */
-  methods: Method | Method[];
-  description?: string;
-};
-
-export type Method = {
-  name: string;
-  description?: string;
-};
-
-export type SignMessagePolicy = Omit<TypedData, "message">;

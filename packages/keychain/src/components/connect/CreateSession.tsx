@@ -8,9 +8,9 @@ import { ControllerErrorAlert } from "components/ErrorAlert";
 import { SessionConsent } from "components/connect";
 import { SESSION_EXPIRATION } from "const";
 import { Upgrade } from "./Upgrade";
-import { TypedDataPolicy } from "@cartridge/controller";
 import { ErrorCode } from "@cartridge/account-wasm";
 import { SessionSummary } from "components/SessionSummary";
+import { TypedDataPolicy } from "@cartridge/presets";
 
 export function CreateSession({
   onConnect,

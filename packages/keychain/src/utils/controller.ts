@@ -14,11 +14,7 @@ import {
   CallData,
 } from "starknet";
 
-import {
-  Policies,
-  SessionPolicies,
-  toWasmPolicies,
-} from "@cartridge/controller";
+import { toWasmPolicies } from "@cartridge/controller";
 
 import {
   CartridgeAccount,
@@ -27,6 +23,7 @@ import {
   JsInvocationsDetails,
   SessionMetadata,
 } from "@cartridge/account-wasm/controller";
+import { Policies, SessionPolicies } from "@cartridge/presets";
 
 export default class Controller extends Account {
   cartridge: CartridgeAccount;

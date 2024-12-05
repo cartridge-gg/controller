@@ -44,7 +44,7 @@ function generateConfigs() {
 
     // Generate the TypeScript file
     const fileContent = `// This file is auto-generated. DO NOT EDIT IT MANUALLY.
-import { ControllerConfigs } from "../types";
+import { ControllerConfigs } from "../";
 
 export const configs: ControllerConfigs = ${JSON.stringify(configs, null, 2)};
 `;

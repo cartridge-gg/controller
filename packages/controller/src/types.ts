@@ -11,6 +11,12 @@ import {
   TypedData,
 } from "@starknet-io/types-js";
 import { KeychainIFrame, ProfileIFrame } from "./iframe";
+import {
+  ColorMode,
+  Policies,
+  Policy,
+  SessionPolicies,
+} from "@cartridge/presets";
 
 export type Session = {
   chainId: constants.StarknetChainId;
@@ -21,51 +27,6 @@ export type Session = {
     authorization: string[];
     privateKey: string;
   };
-};
-
-/** The key must be the id */
-export type VerifiedConfigs = Record<string, VerifiedConfig>;
-
-export type VerifiedConfig = {
-  origin: string | string[];
-  policies?: SessionPolicies;
-  theme?: ControllerTheme;
-};
-
-export type Policy = CallPolicy | TypedDataPolicy;
-
-export type CallPolicy = {
-  target: string;
-  method: string;
-  description?: string;
-};
-
-export type TypedDataPolicy = Omit<TypedData, "message">;
-
-export type Policies = Policy[] | SessionPolicies;
-
-export type SessionPolicies = {
-  /** The key must be the contract address */
-  contracts?: ContractPolicies;
-  messages?: SignMessagePolicy[];
-};
-
-export type ContractPolicies = Record<string, ContractPolicy>;
-
-export type ContractPolicy = {
-  methods: Method[];
-  description?: string;
-};
-
-export type Method = {
-  name: string;
-  entrypoint: string;
-  description?: string;
-};
-
-export type SignMessagePolicy = TypedDataPolicy & {
-  name: string;
-  description?: string;
 };
 
 export enum ResponseCodes {
@@ -214,24 +175,6 @@ export type ProfileContextTypeVariant =
   | "trophies"
   | "achievements"
   | "activity";
-
-export type ColorMode = "light" | "dark";
-
-export type ControllerTheme = {
-  name: string;
-  icon: string;
-  cover: ThemeValue<string>;
-  colors?: ControllerColors;
-};
-
-export type ControllerColors = {
-  primary?: ControllerColor;
-  primaryForeground?: ControllerColor;
-};
-
-export type ControllerColor = ThemeValue<string>;
-
-export type ThemeValue<T> = T | { dark: T; light: T };
 
 export type Prefund = { address: string; min: string };
 

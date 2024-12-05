@@ -7,10 +7,10 @@ import {
 import { ec, stark, WalletAccount } from "starknet";
 
 import { KEYCHAIN_URL } from "../constants";
-import { SessionPolicies } from "../types";
 import SessionAccount from "../session/account";
 import BaseProvider from "../provider";
 import { toWasmPolicies } from "../utils";
+import { SessionPolicies } from "@cartridge/presets";
 
 interface SessionRegistration {
   username: string;

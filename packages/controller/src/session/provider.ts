@@ -1,10 +1,10 @@
-import { SessionPolicies } from "../types";
 import { ec, stark, WalletAccount } from "starknet";
 
 import SessionAccount from "./account";
 import { KEYCHAIN_URL } from "../constants";
 import BaseProvider from "../provider";
 import { toWasmPolicies } from "../utils";
+import { SessionPolicies } from "@cartridge/presets";
 
 interface SessionRegistration {
   username: string;

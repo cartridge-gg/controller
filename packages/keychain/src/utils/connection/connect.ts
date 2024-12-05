@@ -1,10 +1,6 @@
-import {
-  ConnectReply,
-  Policies,
-  SessionPolicies,
-  toSessionPolicies,
-} from "@cartridge/controller";
+import { ConnectReply, toSessionPolicies } from "@cartridge/controller";
 import { ConnectCtx, ConnectionCtx } from "./types";
+import { Policies, SessionPolicies } from "@cartridge/presets";
 
 export function connectFactory({
   setOrigin,

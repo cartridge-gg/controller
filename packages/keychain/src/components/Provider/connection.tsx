@@ -1,8 +1,9 @@
 import { createContext } from "react";
 import Controller from "utils/controller";
 import { ConnectionCtx } from "utils/connection";
-import { Prefund, SessionPolicies } from "@cartridge/controller";
+import { Prefund } from "@cartridge/controller";
 import { UpgradeInterface } from "hooks/upgrade";
+import { SessionPolicies } from "@cartridge/presets";
 
 export const ConnectionContext =
   createContext<ConnectionContextValue>(undefined);

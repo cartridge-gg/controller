@@ -9,7 +9,7 @@ import { useUsernameValidation } from "./useUsernameValidation";
 import { LoginMode } from "../types";
 import { Legal, StatusTray } from ".";
 import { useCreateController } from "./useCreateController";
-import { ControllerTheme } from "@cartridge/controller";
+import { ControllerTheme } from "@cartridge/presets";
 
 interface CreateControllerViewProps {
   theme: ControllerTheme;

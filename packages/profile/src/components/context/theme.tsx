@@ -1,5 +1,9 @@
-import { ControllerTheme, toArray } from "@cartridge/controller";
-import { defaultTheme, controllerConfigs } from "@cartridge/presets";
+import { toArray } from "@cartridge/controller";
+import {
+  defaultTheme,
+  controllerConfigs,
+  ControllerTheme,
+} from "@cartridge/presets";
 import { useThemeEffect } from "@cartridge/ui-next";
 import { createContext, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
