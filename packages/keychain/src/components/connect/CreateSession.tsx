@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useConnection } from "hooks/connection";
 import { ControllerErrorAlert } from "components/ErrorAlert";
 import { SessionConsent } from "components/connect";
-import { DEFAULT_SESSION_DURATION, SESSION_EXPIRATION } from "const";
+import { DEFAULT_SESSION_DURATION } from "const";
 import { Upgrade } from "./Upgrade";
 import { ErrorCode } from "@cartridge/account-wasm";
 import { TypedDataPolicy } from "@cartridge/presets";
@@ -35,9 +35,10 @@ export function CreateSession({
   const [isDisabled, setIsDisabled] = useState(false);
   const [isConsent, setIsConsent] = useState(false);
   const [duration, setDuration] = useState<bigint>(DEFAULT_SESSION_DURATION);
-  const expiresAt = useMemo(() => {
-    return SESSION_EXPIRATION;
-  }, []);
+  const expiresAt = useMemo(
+    () => duration + BigInt(Math.floor(Date.now() / 1000)),
+    [duration],
+  );
   const [maxFee] = useState<BigNumberish>();
   const [error, setError] = useState<ControllerError | Error>();
 
@@ -45,8 +46,8 @@ export function CreateSession({
     if (!chainId) return;
     const normalizedChainId = normalizeChainId(chainId);
 
-    const violatingPolicy = policies?.messages?.find(
-      (policy) =>
+    const violatingPolicy = policies.messages?.find(
+      (policy: TypedDataPolicy) =>
         "domain" in policy &&
         (!policy.domain.chainId ||
           normalizeChainId(policy.domain.chainId) !== normalizedChainId),
@@ -55,11 +56,9 @@ export function CreateSession({
     if (violatingPolicy) {
       setError({
         code: ErrorCode.PolicyChainIdMismatch,
-        message: `Policy for ${
-          (violatingPolicy as TypedDataPolicy).domain.name
-        }.${
-          (violatingPolicy as TypedDataPolicy).primaryType
-        } has mismatched chain ID.`,
+        message: `Policy for ${(violatingPolicy as TypedDataPolicy).domain.name
+          }.${(violatingPolicy as TypedDataPolicy).primaryType
+          } has mismatched chain ID.`,
       });
       setIsDisabled(true);
     } else {
@@ -164,7 +163,7 @@ export function CreateSession({
               <Select
                 value={duration.toString()}
                 onValueChange={(val) => {
-                  console.log(val);
+                  setDuration(BigInt(val));
                 }}
               >
                 <SelectTrigger className="w-28">
