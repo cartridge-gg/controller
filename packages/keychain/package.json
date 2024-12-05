@@ -4,8 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "TARGET_ORIGIN=\"*\" next dev -p 3001",
-    "build": "TARGET_ORIGIN=\"https://x.cartridge.gg/\" npm run copy-assets && next build",
-    "copy-assets": "mkdir -p public/whitelabel && cp -r ../presets/configs/* public/whitelabel/",
+    "build": "TARGET_ORIGIN=\"https://x.cartridge.gg/\" next build",
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write --ignore-path .gitignore .",
