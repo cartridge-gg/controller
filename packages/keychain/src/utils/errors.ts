@@ -132,12 +132,16 @@ export function parseExecutionError(
       if (lastErrorMessage.includes("is not deployed")) {
         summary = "Contract not deployed.";
         lastError[lastError.length - 1] = summary;
-      } else if (lastErrorMessage.includes("ASSERT_EQ instruction failed")) {
-        summary = "Assertion failed in contract.";
+      } else if (
+        lastErrorMessage.includes("ERC20: transfer amount exceeds balance")
+      ) {
+        summary = "ERC20: transfer amount exceeds balance.";
       } else if (
         lastErrorMessage.includes("ERC20: amount is not a valid Uint256")
       ) {
         summary = "Invalid token amount.";
+      } else if (lastErrorMessage.includes("ASSERT_EQ instruction failed")) {
+        summary = "Assertion failed in contract.";
       } else if (
         lastErrorMessage.includes("Function not found in the contract")
       ) {

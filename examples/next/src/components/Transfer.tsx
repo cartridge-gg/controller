@@ -3,11 +3,9 @@
 import { Button } from "@cartridge/ui-next";
 import { useAccount, useExplorer } from "@starknet-react/core";
 import { useCallback, useState } from "react";
+import { STRK_CONTRACT_ADDRESS } from "./providers/StarknetProvider";
 
-const ETH_CONTRACT =
-  "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
-
-export const TransferEth = () => {
+export const Transfer = () => {
   const [submitted, setSubmitted] = useState<boolean>(false);
   const { account } = useAccount();
   const explorer = useExplorer();
@@ -24,12 +22,12 @@ export const TransferEth = () => {
       account
         .execute([
           {
-            contractAddress: ETH_CONTRACT,
+            contractAddress: STRK_CONTRACT_ADDRESS,
             entrypoint: "approve",
             calldata: [account?.address, amount, "0x0"],
           },
           {
-            contractAddress: ETH_CONTRACT,
+            contractAddress: STRK_CONTRACT_ADDRESS,
             entrypoint: "transfer",
             calldata: [account?.address, amount, "0x0"],
           },
@@ -47,17 +45,17 @@ export const TransferEth = () => {
 
   return (
     <div>
-      <h2>Session Transfer Eth</h2>
-      <p>Address: {ETH_CONTRACT}</p>
-      <Button onClick={() => execute("0x0")}>Transfer 0 ETH to self</Button>
+      <h2>Session Transfer STRK</h2>
+      <p>Address: {STRK_CONTRACT_ADDRESS}</p>
+      <Button onClick={() => execute("0x0")}>Transfer 0 STRK to self</Button>
       <Button onClick={() => execute("0x1C6BF52634000")} disabled={submitted}>
-        Transfer 0.005 ETH to self
+        Transfer 0.005 STRK to self
       </Button>
       <Button
         onClick={() => execute("1B1AE4D6E2EF500000")}
         disabled={submitted}
       >
-        Transfer 500 ETH to self
+        Transfer 500 STRK to self
       </Button>
       {txnHash && (
         <p>

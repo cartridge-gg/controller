@@ -1,4 +1,4 @@
-import { TransferEth } from "components/TransferEth";
+import { Transfer } from "components/Transfer";
 import { ManualTransferEth } from "components/ManualTransferEth";
 import { ConnectWallet } from "components/ConnectWallet";
 import { InvalidTxn } from "components/InvalidTxn";
@@ -21,7 +21,7 @@ export default function Home() {
       <ConnectWallet />
       <Settings />
       <Profile />
-      <TransferEth />
+      <Transfer />
       <ManualTransferEth />
       <DelegateAccount />
       <InvalidTxn />
