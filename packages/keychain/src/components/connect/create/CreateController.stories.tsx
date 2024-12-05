@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { CreateControllerView } from "./CreateController";
+import { ControllerTheme } from "@cartridge/presets";
 
 const meta: Meta<typeof CreateControllerView> = {
   component: CreateControllerView,
@@ -15,9 +16,8 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     theme: {
-      id: "cartridge",
       name: "Cartridge",
-    },
+    } as ControllerTheme,
     usernameField: {
       value: "",
       error: undefined,
@@ -40,9 +40,8 @@ export const WithLightMode: Story = {
   },
   args: {
     theme: {
-      id: "cartridge",
       name: "Cartridge",
-    },
+    } as ControllerTheme,
     usernameField: {
       value: "",
       error: undefined,
@@ -65,9 +64,8 @@ export const WithTheme: Story = {
   },
   args: {
     theme: {
-      id: "eternum",
       name: "Eternum",
-    },
+    } as ControllerTheme,
     usernameField: {
       value: "",
       error: undefined,
@@ -87,9 +85,8 @@ export const WithTheme: Story = {
 export const WithTimeoutError: Story = {
   args: {
     theme: {
-      id: "cartridge",
       name: "Cartridge",
-    },
+    } as ControllerTheme,
     usernameField: {
       value: "username",
       error: undefined,
@@ -110,9 +107,8 @@ export const WithTimeoutError: Story = {
 export const WithGenericError: Story = {
   args: {
     theme: {
-      id: "cartridge",
       name: "Cartridge",
-    },
+    } as ControllerTheme,
     usernameField: {
       value: "username",
       error: undefined,

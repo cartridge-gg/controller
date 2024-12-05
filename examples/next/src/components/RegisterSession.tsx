@@ -3,25 +3,24 @@
 import { useAccount } from "@starknet-react/core";
 import { Button } from "@cartridge/ui-next";
 import { ec, stark } from "starknet";
-import { Policy } from "@cartridge/controller";
 import { useCallback, useState } from "react";
+import { SessionPolicies } from "@cartridge/controller";
 
 const HIT_THING_ADDRESS =
   "0x03661Ea5946211b312e8eC71B94550928e8Fd3D3806e43c6d60F41a6c5203645";
 const redirectUri = encodeURIComponent("https://t.me/hitthingbot/hitthing");
 const redirectQueryName = "startapp";
-const encodedPolicies = encodeURIComponent(
-  JSON.stringify([
-    {
-      target: HIT_THING_ADDRESS,
-      method: "attack",
+const policies: SessionPolicies = {
+  contracts: {
+    [HIT_THING_ADDRESS]: {
+      methods: [
+        { name: "Attack", entrypoint: "attack" },
+        { name: "Claim", entrypoint: "claim" },
+      ],
     },
-    {
-      target: HIT_THING_ADDRESS,
-      method: "claim",
-    },
-  ] as Policy[]),
-);
+  },
+};
+const encodedPolicies = encodeURIComponent(JSON.stringify(policies));
 
 export function RegisterSession() {
   const { account } = useAccount();

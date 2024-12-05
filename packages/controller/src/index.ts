@@ -1,5 +1,5 @@
 export { default } from "./controller";
 export * from "./errors";
 export * from "./types";
-
-export { defaultPresets } from "./presets";
+export { toWasmPolicies, toSessionPolicies, toArray } from "./utils";
+export * from "@cartridge/presets";

@@ -1,4 +1,4 @@
-import { ResponseCodes, ConnectError } from "@cartridge/controller";
+import { ResponseCodes, ConnectError, toArray } from "@cartridge/controller";
 import {
   Abi,
   AllowArray,
@@ -158,7 +158,7 @@ export function execute({
 }
 
 export const normalizeCalls = (calls: AllowArray<Call>): JsCall[] => {
-  return (Array.isArray(calls) ? calls : [calls]).map((call) => {
+  return toArray(calls).map((call) => {
     return {
       entrypoint: call.entrypoint,
       contractAddress: addAddressPadding(call.contractAddress),

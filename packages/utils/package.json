@@ -19,6 +19,7 @@
     "dist"
   ],
   "dependencies": {
+    "@cartridge/presets": "workspace:*",
     "react": "^18.3.1",
     "react-query": "^3.39.2",
     "starknet": "^6.11.0",

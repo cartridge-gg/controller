@@ -1,5 +1,6 @@
-import { ConnectReply, Policy } from "@cartridge/controller";
+import { ConnectReply, toSessionPolicies } from "@cartridge/controller";
 import { ConnectCtx, ConnectionCtx } from "./types";
+import { Policies, SessionPolicies } from "@cartridge/presets";
 
 export function connectFactory({
   setOrigin,
@@ -9,14 +10,15 @@ export function connectFactory({
 }: {
   setOrigin: (origin: string) => void;
   setRpcUrl: (url: string) => void;
-  setPolicies: (policies: Policy[]) => void;
+  setPolicies: (policies: SessionPolicies) => void;
   setContext: (context: ConnectionCtx) => void;
 }) {
-  return (origin: string) =>
-    (policies: Policy[], rpcUrl: string): Promise<ConnectReply> => {
-      setOrigin(origin);
+  return (origin: string) => {
+    setOrigin(origin);
+
+    return (policies: Policies, rpcUrl: string): Promise<ConnectReply> => {
       setRpcUrl(rpcUrl);
-      setPolicies(policies);
+      setPolicies(toSessionPolicies(policies));
 
       return new Promise((resolve, reject) => {
         setContext({
@@ -28,4 +30,5 @@ export function connectFactory({
         } as ConnectCtx);
       });
     };
+  };
 }

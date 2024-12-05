@@ -132,13 +132,12 @@ export function DeployController({
           <Content>
             <Policies
               title="Transaction Details"
-              policies={[
-                {
-                  target:
-                    "0x24a9edbfa7082accfceabf6a92d7160086f346d622f28741bf1c651c412c9ab",
-                  method: "deploy",
+              policies={{
+                contracts: {
+                  ["0x24a9edbfa7082accfceabf6a92d7160086f346d622f28741bf1c651c412c9ab"]:
+                    { methods: [{ name: "deploy", entrypoint: "deploy" }] },
                 },
-              ]}
+              }}
             />
           </Content>
 
