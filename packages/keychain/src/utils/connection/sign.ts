@@ -1,4 +1,8 @@
-import { ConnectError, ResponseCodes } from "@cartridge/controller";
+import {
+  ConnectError,
+  ControllerError,
+  ResponseCodes,
+} from "@cartridge/controller";
 import { Signature, TypedData } from "starknet";
 import { ConnectionCtx, SignMessageCtx } from "./types";
 import { mutex } from "./sync";
@@ -53,8 +57,10 @@ export function signMessageFactory(setContext: (ctx: ConnectionCtx) => void) {
         } catch (e) {
           return resolve({
             code: ResponseCodes.ERROR,
-            message: e.message,
-            error: parseControllerError(e),
+            message: (e as Error).message,
+            error: parseControllerError(
+              e as ControllerError & { code: number },
+            ),
           });
         }
       },

@@ -28,8 +28,11 @@ export const PopupCenter = (
     targetWidth = mobile() ? null : w,
     targetHeight = mobile() ? null : h,
     V = screenX < 0 ? window.screen.width + screenX : screenX,
-    left = parseInt(String(V + (outerWidth - targetWidth) / 2), 10),
-    right = parseInt(String(screenY + (outerHeight - targetHeight) / 2.5), 10),
+    left = parseInt(String(V + (outerWidth - (targetWidth ?? 0)) / 2), 10),
+    right = parseInt(
+      String(screenY + (outerHeight - (targetHeight ?? 0)) / 2.5),
+      10,
+    ),
     features = [];
   if (targetWidth !== null) {
     features.push("width=" + targetWidth);
@@ -43,9 +46,7 @@ export const PopupCenter = (
 
   var newWindow = window.open(url, title, features.join(","));
 
-  if (window.focus) {
-    newWindow.focus();
-  }
+  newWindow?.focus();
 
   return newWindow;
 };

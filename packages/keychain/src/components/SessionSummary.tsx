@@ -151,7 +151,7 @@ function Contract({
   icon?: React.ReactNode;
 }) {
   const { chainId } = useConnection();
-  const isSlot = isSlotChain(chainId);
+  const isSlot = !!chainId && isSlotChain(chainId);
 
   return (
     <Card>

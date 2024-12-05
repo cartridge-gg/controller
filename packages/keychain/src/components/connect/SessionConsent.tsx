@@ -36,7 +36,7 @@ export function SessionConsent({
       return null;
     default:
     case "default":
-      return hostname ? (
+      return hostname && origin ? (
         <HStack color="text.secondary" fontSize="xs">
           {isVerified(origin) && (
             <Link

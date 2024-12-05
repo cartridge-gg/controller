@@ -23,7 +23,7 @@ function Consent() {
   }, [router.query.callback_uri]);
 
   useEffect(() => {
-    if (!Controller.fromStore(process.env.NEXT_PUBLIC_ORIGIN)) {
+    if (!Controller.fromStore(process.env.NEXT_PUBLIC_ORIGIN!)) {
       router.replace("/slot/auth");
     }
   }, [router]);

@@ -21,6 +21,7 @@ export function Delegate({ onBack }: { onBack: () => void }) {
   }, [delegateAddress]);
 
   const onSetDelegate = useCallback(() => {
+    if (!context || !controller) return;
     setContext({
       origin: context.origin,
       transactions: [

@@ -5,7 +5,7 @@ export function probeFactory({
   setController,
   setRpcUrl,
 }: {
-  setController: (controller: Controller) => void;
+  setController: (controller?: Controller) => void;
   setRpcUrl: (rpcUrl: string) => void;
 }) {
   return (origin: string) =>

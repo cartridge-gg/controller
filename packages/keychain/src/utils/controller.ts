@@ -61,7 +61,7 @@ export default class Controller extends Account {
       username,
       {
         webauthn: {
-          rpId: process.env.NEXT_PUBLIC_RP_ID,
+          rpId: process.env.NEXT_PUBLIC_RP_ID!,
           credentialId,
           publicKey,
         },
@@ -199,11 +199,13 @@ export default class Controller extends Account {
     hash: BigNumberish,
     signature: Signature,
   ): Promise<boolean> {
+    // @ts-expect-error TODO: fix overload type mismatch
     if (BigInt(signature[0]) === 0n) {
       return ec.starkCurve.verify(
         // @ts-expect-error TODO: fix overload type mismatch
         signature,
         BigInt(hash).toString(),
+        // @ts-expect-error TODO: fix overload type mismatch
         signature[0],
       );
     }

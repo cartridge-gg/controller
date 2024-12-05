@@ -30,7 +30,7 @@ export function useSessionSummary({
   provider,
 }: {
   policies: Policy[];
-  provider: Provider;
+  provider?: Provider;
 }) {
   const preSummary = useMemo(
     () =>
@@ -54,16 +54,17 @@ export function useSessionSummary({
 
   const { data: ekuboMeta } = useEkuboMetadata();
 
+  const res: SessionSummary = {
+    default: {},
+    dojo: {},
+    ERC20: {},
+    ERC721: {},
+    messages: preSummary.messages,
+  };
   const summary = useSWR(
-    ekuboMeta.length ? `tx-summary` : null,
+    ekuboMeta && provider ? `tx-summary` : null,
     async () => {
-      const res: SessionSummary = {
-        default: {},
-        dojo: {},
-        ERC20: {},
-        ERC721: {},
-        messages: preSummary.messages,
-      };
+      if (!provider) return res;
 
       const promises = Object.entries(preSummary.default).map(
         async ([contractAddress, policies]) => {
@@ -73,13 +74,12 @@ export function useSessionSummary({
           );
           switch (contractType) {
             case "ERC20":
-              const meta = ekuboMeta.find(
-                (m) =>
-                  getChecksumAddress(m.address) ===
-                  getChecksumAddress(contractAddress),
-              );
               res.ERC20[contractAddress] = {
-                meta,
+                meta: ekuboMeta.find(
+                  (m) =>
+                    getChecksumAddress(m.address) ===
+                    getChecksumAddress(contractAddress),
+                ),
                 policies,
               };
               return;
@@ -111,13 +111,7 @@ export function useSessionSummary({
       return res;
     },
     {
-      fallbackData: {
-        default: {},
-        dojo: {},
-        ERC20: {},
-        ERC721: {},
-        messages: preSummary.messages,
-      },
+      fallbackData: res,
     },
   );
 
