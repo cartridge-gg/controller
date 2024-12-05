@@ -31,7 +31,7 @@ export function LookupControllers() {
     } catch (e) {
       setError(e as Error);
     }
-  }, [address]);
+  }, [address, cartridgeConnector]);
 
   if (!address) return null;
 
