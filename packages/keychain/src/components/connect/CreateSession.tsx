@@ -1,19 +1,25 @@
 import { Container, Content, Footer } from "components/layout";
 import { BigNumberish, shortString } from "starknet";
 import { ControllerError } from "utils/connection";
-import { Button, HStack, Text, Checkbox } from "@chakra-ui/react";
-import { useCallback, useEffect, useState } from "react";
+import { Button, HStack, VStack, Text, Checkbox } from "@chakra-ui/react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useConnection } from "hooks/connection";
 import { ControllerErrorAlert } from "components/ErrorAlert";
 import { SessionConsent } from "components/connect";
-import { SESSION_EXPIRATION } from "const";
+import { DEFAULT_SESSION_DURATION, SESSION_EXPIRATION } from "const";
 import { Upgrade } from "./Upgrade";
 import { ErrorCode } from "@cartridge/account-wasm";
 import { TypedDataPolicy } from "@cartridge/presets";
 import { ParsedSessionPolicies } from "hooks/session";
-
 import { UnverifiedSessionSummary } from "components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "components/session/VerifiedSessionSummary";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@cartridge/ui-next";
 
 export function CreateSession({
   policies,
@@ -28,7 +34,10 @@ export function CreateSession({
   const [isConnecting, setIsConnecting] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
   const [isConsent, setIsConsent] = useState(false);
-  const [expiresAt] = useState<bigint>(SESSION_EXPIRATION);
+  const [duration, setDuration] = useState<bigint>(DEFAULT_SESSION_DURATION);
+  const expiresAt = useMemo(() => {
+    return SESSION_EXPIRATION;
+  }, []);
   const [maxFee] = useState<BigNumberish>();
   const [error, setError] = useState<ControllerError | Error>();
 
@@ -147,6 +156,57 @@ export function CreateSession({
             {isUpdate ? "update" : "create"} session
           </Button>
         </HStack>
+
+        {!error && (
+          <div className="flex flex-col">
+            <div className="flex items-center text-sm text-muted-foreground">
+              <div>Expires in </div>
+              <Select
+                value={duration.toString()}
+                onValueChange={(val) => {
+                  console.log(val);
+                }}
+              >
+                <SelectTrigger className="w-28">
+                  <SelectValue
+                    defaultValue={(60 * 60 * 24).toString()}
+                    placeholder="1 HR"
+                  />
+                </SelectTrigger>
+
+                <SelectContent>
+                  <SelectItem value={(60 * 60).toString()}>1 HR</SelectItem>
+                  <SelectItem value={(60 * 60 * 24).toString()}>
+                    24 HRS
+                  </SelectItem>
+                  <SelectItem value={(60 * 60 * 24 * 7).toString()}>
+                    1 WEEK
+                  </SelectItem>
+                  <SelectItem value={"never"}>NEVER</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <VStack spacing={4} width="full">
+              <Button
+                colorScheme="colorful"
+                isDisabled={isDisabled || isConnecting}
+                isLoading={isConnecting}
+                onClick={() => onCreateSession()}
+                width="full"
+              >
+                {isUpdate ? "update" : "create"} session
+              </Button>
+              <Button
+                onClick={() => onConnect()}
+                isDisabled={isConnecting}
+                width="full"
+              >
+                Skip
+              </Button>
+            </VStack>
+          </div>
+        )}
       </Footer>
     </Container>
   );
