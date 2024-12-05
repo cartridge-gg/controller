@@ -88,6 +88,20 @@ export type IFrames = {
   profile?: ProfileIFrame;
 };
 
+export interface LookupRequest {
+  usernames?: string[];
+  addresses?: string[];
+}
+
+export interface LookupResult {
+  username: string;
+  addresses: string[];
+}
+
+export interface LookupResponse {
+  results: LookupResult[];
+}
+
 type ContractAddress = string;
 type CartridgeID = string;
 export type ControllerAccounts = Record<ContractAddress, CartridgeID>;

@@ -7,7 +7,7 @@ import { DelegateAccount } from "components/DelegateAccount";
 import { ColorModeToggle } from "components/ColorModeToggle";
 import { Profile } from "components/Profile";
 import { Settings } from "components/Settings";
-import { FetchControllers } from "components/FetchControllers";
+import { LookupControllers } from "components/LookupControllers";
 
 export default function Home() {
   return (
@@ -26,7 +26,7 @@ export default function Home() {
       <DelegateAccount />
       <InvalidTxn />
       <SignMessage />
-      <FetchControllers />
+      <LookupControllers />
     </div>
   );
 }
