@@ -143,7 +143,9 @@ impl CartridgeSessionAccount {
             .map(TryInto::try_into)
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
-        let res = self.0.execute_v1(calls).send().await?;
+        let res = self.0.execute_v1(calls).send().await.map_err(|e| {
+            JsError::new(&format!("Execution failed: {:?}", e))
+        })?;
 
         Ok(to_value(&res)?)
     }
