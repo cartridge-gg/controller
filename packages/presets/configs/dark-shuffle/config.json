@@ -1,0 +1,11 @@
+{
+  "origin": "https://darkshuffle.dev",
+  "theme": {
+    "colors": {
+      "primary": "#F59100"
+    },
+    "cover": "/whitelabel/dark-shuffle/cover.png",
+    "icon": "/whitelabel/dark-shuffle/icon.svg",
+    "name": "Dark Shuffle"
+  }
+}

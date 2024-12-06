@@ -42,8 +42,8 @@ export function Funding({ onComplete, title }: FundingProps) {
 
   return (
     <Container
-      title={title || `Fund ${controller.username()}`}
-      description={<CopyAddress address={controller.address} />}
+      title={title || (controller ? `Fund ${controller.username()}` : "")}
+      description={controller && <CopyAddress address={controller.address} />}
       Icon={ArrowLineDownIcon}
     >
       <Content gap={6}>

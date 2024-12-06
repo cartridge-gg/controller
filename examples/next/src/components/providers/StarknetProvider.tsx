@@ -7,32 +7,56 @@ import { RpcProvider } from "starknet";
 import ControllerConnector from "@cartridge/connector/controller";
 import { Policy } from "@cartridge/controller";
 
-const ETH_TOKEN_ADDRESS =
-  "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
-
 const rpc = process.env.NEXT_PUBLIC_RPC_SEPOLIA!;
+
+export const ETH_CONTRACT_ADDRESS =
+  "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
+export const STRK_CONTRACT_ADDRESS =
+  "0x04718f5a0Fc34cC1AF16A1cdee98fFB20C31f5cD61D6Ab07201858f4287c938D";
 
 const policies: Policy[] = [
   {
-    target: ETH_TOKEN_ADDRESS,
+    target: ETH_CONTRACT_ADDRESS,
     method: "approve",
     description:
       "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
   },
   {
-    target: ETH_TOKEN_ADDRESS,
+    target: ETH_CONTRACT_ADDRESS,
     method: "transfer",
   },
   {
-    target: ETH_TOKEN_ADDRESS,
+    target: ETH_CONTRACT_ADDRESS,
     method: "mint",
   },
   {
-    target: ETH_TOKEN_ADDRESS,
+    target: ETH_CONTRACT_ADDRESS,
     method: "burn",
   },
   {
-    target: ETH_TOKEN_ADDRESS,
+    target: ETH_CONTRACT_ADDRESS,
+    method: "allowance",
+  },
+  {
+    target: STRK_CONTRACT_ADDRESS,
+    method: "approve",
+    description:
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
+  },
+  {
+    target: STRK_CONTRACT_ADDRESS,
+    method: "transfer",
+  },
+  {
+    target: STRK_CONTRACT_ADDRESS,
+    method: "mint",
+  },
+  {
+    target: STRK_CONTRACT_ADDRESS,
+    method: "burn",
+  },
+  {
+    target: STRK_CONTRACT_ADDRESS,
     method: "allowance",
   },
   {

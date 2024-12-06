@@ -1,14 +1,13 @@
 import { useMemo, useState } from "react";
-import { ResponseCodes } from "@cartridge/controller";
+import { ResponseCodes, SessionPolicies, toArray } from "@cartridge/controller";
 import { Content, FOOTER_MIN_HEIGHT } from "components/layout";
 import { TransactionDuoIcon } from "@cartridge/ui";
 import { useConnection } from "hooks/connection";
 import { Policies } from "components/Policies";
 import { ExecuteCtx } from "utils/connection";
-import { addAddressPadding, num } from "starknet";
+import { getChecksumAddress, num } from "starknet";
 import { ExecutionContainer } from "components/ExecutionContainer";
 import { CreateSession } from "./connect";
-import { CallPolicy } from "@cartridge/account-wasm";
 
 export function ConfirmTransaction() {
   const { controller, context, origin, policies, setContext } = useConnection();
@@ -16,14 +15,18 @@ export function ConfirmTransaction() {
   const ctx = context as ExecuteCtx;
   const account = controller;
 
-  const onSubmit = async (maxFee: bigint) => {
+  const onSubmit = async (maxFee?: bigint) => {
+    if (maxFee === undefined || !account) {
+      return;
+    }
+
     let { transaction_hash } = await account.execute(
-      Array.isArray(ctx.transactions) ? ctx.transactions : [ctx.transactions],
+      toArray(ctx.transactions),
       {
         maxFee: num.toHex(maxFee),
       },
     );
-    ctx.resolve({
+    ctx.resolve?.({
       code: ResponseCodes.SUCCESS,
       transaction_hash,
     });
@@ -31,34 +34,33 @@ export function ConfirmTransaction() {
     setContext(undefined);
   };
 
-  const callPolicies = useMemo<CallPolicy[]>(
-    () =>
-      (Array.isArray(ctx.transactions)
-        ? ctx.transactions
-        : [ctx.transactions]
-      ).map((c) => ({
-        target: c.contractAddress,
-        method: c.entrypoint,
-      })),
+  const callPolicies = useMemo<SessionPolicies>(
+    () => ({
+      contracts: Object.fromEntries(
+        toArray(ctx.transactions).map((c) => [
+          getChecksumAddress(c.contractAddress),
+          { methods: [{ entrypoint: c.entrypoint }] },
+        ]),
+      ),
+    }),
     [ctx.transactions],
   );
 
   const updateSession = useMemo(() => {
     if (policiesUpdated) return false;
 
-    const txnsApproved = callPolicies.every((call) =>
-      policies.some(
-        (policy) =>
-          "target" in policy &&
-          "method" in policy &&
-          addAddressPadding(policy.target) === addAddressPadding(call.target) &&
-          policy.method === call.method,
-      ),
-    );
+    const entries = Object.entries(callPolicies.contracts || {});
+    const txnsApproved = entries.every(([target, policy]) => {
+      const contract = policies.contracts?.[target];
+      if (!contract) return false;
+      return policy.methods.every((method) =>
+        contract.methods.some((m) => m.entrypoint === method.entrypoint),
+      );
+    });
 
     // If calls are approved by dapp specified policies but not stored session
     // then prompt user to update session. This also accounts for expired sessions.
-    return txnsApproved && !account.session(callPolicies);
+    return txnsApproved && !account?.session(callPolicies);
   }, [callPolicies, policiesUpdated, policies, account]);
 
   if (updateSession) {

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { addAddressPadding, BigNumberish, Call } from "starknet";
+import { addAddressPadding, Call } from "starknet";
 import { ControllerError } from "utils/connection";
 import Controller from "utils/controller";
 
@@ -56,16 +56,16 @@ type ControllerVersionInfo = {
 
 export interface UpgradeInterface {
   available: boolean;
-  current: ControllerVersionInfo;
+  current?: ControllerVersionInfo;
   latest: ControllerVersionInfo;
   calls: Call[];
   isSynced: boolean;
   isUpgrading: boolean;
   error?: ControllerError;
-  onUpgrade: (maxFee: BigNumberish) => Promise<void>;
+  onUpgrade: () => Promise<void>;
 }
 
-export const useUpgrade = (controller: Controller): UpgradeInterface => {
+export const useUpgrade = (controller?: Controller): UpgradeInterface => {
   const [available, setAvailable] = useState<boolean>(false);
   const [error, setError] = useState<ControllerError>();
   const [isSynced, setIsSynced] = useState<boolean>(false);
@@ -137,7 +137,7 @@ export const useUpgrade = (controller: Controller): UpgradeInterface => {
       setAvailable(false);
     } catch (e) {
       console.log({ e });
-      setError(e);
+      setError(e as unknown as ControllerError);
     }
   }, [controller, current, calls]);
 

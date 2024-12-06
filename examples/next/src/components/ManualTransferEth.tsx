@@ -3,9 +3,7 @@
 import { Button } from "@cartridge/ui-next";
 import { useAccount, useExplorer } from "@starknet-react/core";
 import { useCallback, useState } from "react";
-
-const ETH_CONTRACT =
-  "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
+import { ETH_CONTRACT_ADDRESS } from "./providers/StarknetProvider";
 
 export const ManualTransferEth = () => {
   const [submitted, setSubmitted] = useState<boolean>(false);
@@ -24,12 +22,12 @@ export const ManualTransferEth = () => {
       account
         .execute([
           {
-            contractAddress: ETH_CONTRACT,
+            contractAddress: ETH_CONTRACT_ADDRESS,
             entrypoint: "increaseAllowance",
             calldata: [account?.address, amount, "0x0"],
           },
           {
-            contractAddress: ETH_CONTRACT,
+            contractAddress: ETH_CONTRACT_ADDRESS,
             entrypoint: "transfer",
             calldata: [account?.address, amount, "0x0"],
           },
@@ -48,7 +46,7 @@ export const ManualTransferEth = () => {
   return (
     <div>
       <h2>Manual Transfer Eth</h2>
-      <p>Address: {ETH_CONTRACT}</p>
+      <p>Address: {ETH_CONTRACT_ADDRESS}</p>
       <Button onClick={() => execute("0x0")} disabled={submitted}>
         Transfer 0 ETH to self
       </Button>

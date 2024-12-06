@@ -163,11 +163,16 @@ export function ControllerErrorAlert({
   let description: string | React.ReactElement = error.message;
   let isExpanded = false;
   let variant = "error";
-  let copyText: string;
+  let copyText: string | undefined;
 
   switch (error.code) {
     case ErrorCode.SignError:
       title = "Signing Error";
+      if (error.message.includes("Get assertion error")) {
+        description =
+          "The authentication request timed out or was cancelled. Please try again.";
+      }
+
       break;
     case ErrorCode.StorageError:
       title = "Storage Error";
@@ -333,6 +338,8 @@ function StackTraceDisplay({
   const { chainId } = useConnection();
 
   const getExplorerUrl = (type: "contract" | "class", value: string) => {
+    if (!chainId) return;
+
     const baseUrl = {
       [constants.StarknetChainId.SN_SEPOLIA]: "https://sepolia.starkscan.co",
       [constants.StarknetChainId.SN_MAIN]: "https://starkscan.co",

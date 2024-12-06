@@ -1,10 +1,10 @@
-import { Policy } from "../types";
 import { ec, stark, WalletAccount } from "starknet";
 
 import SessionAccount from "./account";
 import { KEYCHAIN_URL } from "../constants";
 import BaseProvider from "../provider";
-import { toWasmPolicies } from "src/utils";
+import { toWasmPolicies } from "../utils";
+import { SessionPolicies } from "@cartridge/presets";
 
 interface SessionRegistration {
   username: string;
@@ -17,7 +17,7 @@ interface SessionRegistration {
 export type SessionOptions = {
   rpc: string;
   chainId: string;
-  policies: Policy[];
+  policies: SessionPolicies;
   redirectUrl: string;
 };
 
@@ -29,7 +29,7 @@ export default class SessionProvider extends BaseProvider {
 
   protected _username?: string;
   protected _redirectUrl: string;
-  protected _policies: Policy[];
+  protected _policies: SessionPolicies;
 
   constructor({ rpc, chainId, policies, redirectUrl }: SessionOptions) {
     super({ rpc });

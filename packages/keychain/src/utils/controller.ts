@@ -12,12 +12,9 @@ import {
   Abi,
   Call,
   CallData,
-  typedData,
-  TypedDataRevision,
-  hash,
 } from "starknet";
 
-import { Policy } from "@cartridge/controller";
+import { toWasmPolicies } from "@cartridge/controller";
 
 import {
   CartridgeAccount,
@@ -25,8 +22,8 @@ import {
   JsFelt,
   JsInvocationsDetails,
   SessionMetadata,
-  Policy as WasmPolicy,
 } from "@cartridge/account-wasm/controller";
+import { SessionPolicies } from "@cartridge/presets";
 
 export default class Controller extends Account {
   cartridge: CartridgeAccount;
@@ -61,7 +58,7 @@ export default class Controller extends Account {
       username,
       {
         webauthn: {
-          rpId: process.env.NEXT_PUBLIC_RP_ID,
+          rpId: process.env.NEXT_PUBLIC_RP_ID!,
           credentialId,
           publicKey,
         },
@@ -88,7 +85,7 @@ export default class Controller extends Account {
 
   async createSession(
     expiresAt: bigint,
-    policies: Policy[],
+    policies: SessionPolicies,
     _maxFee?: BigNumberish,
   ) {
     if (!this.cartridge) {
@@ -100,7 +97,7 @@ export default class Controller extends Account {
 
   registerSessionCalldata(
     expiresAt: bigint,
-    policies: Policy[],
+    policies: SessionPolicies,
     publicKey: string,
   ): Array<string> {
     return this.cartridge.registerSessionCalldata(
@@ -112,7 +109,7 @@ export default class Controller extends Account {
 
   async registerSession(
     expiresAt: bigint,
-    policies: Policy[],
+    policies: SessionPolicies,
     publicKey: string,
     maxFee: BigNumberish,
   ): Promise<InvokeFunctionResponse> {
@@ -167,7 +164,7 @@ export default class Controller extends Account {
   }
 
   session(
-    policies: Policy[],
+    policies: SessionPolicies,
     public_key?: string,
   ): SessionMetadata | undefined {
     return this.cartridge.session(toWasmPolicies(policies), public_key);
@@ -199,11 +196,13 @@ export default class Controller extends Account {
     hash: BigNumberish,
     signature: Signature,
   ): Promise<boolean> {
+    // @ts-expect-error TODO: fix overload type mismatch
     if (BigInt(signature[0]) === 0n) {
       return ec.starkCurve.verify(
         // @ts-expect-error TODO: fix overload type mismatch
         signature,
         BigInt(hash).toString(),
+        // @ts-expect-error TODO: fix overload type mismatch
         signature[0],
       );
     }
@@ -252,31 +251,4 @@ function toJsCalls(calls: Call[]): JsCall[] {
     ...call,
     calldata: CallData.toHex(call.calldata),
   }));
-}
-
-function toWasmPolicies(policies: Policy[]): WasmPolicy[] {
-  return policies.map((richPolicy) => {
-    if ("target" in richPolicy) {
-      return {
-        target: richPolicy.target,
-        method: richPolicy.method,
-      };
-    } else {
-      const domainHash = typedData.getStructHash(
-        richPolicy.types,
-        "StarknetDomain",
-        richPolicy.domain,
-        TypedDataRevision.ACTIVE,
-      );
-      const typeHash = typedData.getTypeHash(
-        richPolicy.types,
-        richPolicy.primaryType,
-        TypedDataRevision.ACTIVE,
-      );
-
-      return {
-        scope_hash: hash.computePoseidonHash(domainHash, typeHash),
-      };
-    }
-  });
 }

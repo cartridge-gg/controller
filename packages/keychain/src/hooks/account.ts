@@ -27,12 +27,15 @@ const createCredentials = async (
   beginRegistration: CredentialCreationOptions,
   hasPlatformAuthenticator: boolean,
 ) => {
-  if (!hasPlatformAuthenticator || navigator.userAgent.indexOf("Win") != -1)
-    beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
-      "cross-platform";
-  else
-    beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
-      undefined;
+  if (!beginRegistration.publicKey) return;
+  if (beginRegistration.publicKey?.authenticatorSelection) {
+    if (!hasPlatformAuthenticator || navigator.userAgent.indexOf("Win") != -1)
+      beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
+        "cross-platform";
+    else
+      beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
+        undefined;
+  }
 
   beginRegistration.publicKey.user.id = Buffer.from(name);
   beginRegistration.publicKey.challenge = base64url.toBuffer(
@@ -54,7 +57,9 @@ const createCredentials = async (
   return credentials;
 };
 
-const onCreateBegin = async (name: string): Promise<Credentials> => {
+const onCreateBegin = async (
+  name: string,
+): Promise<Credentials | undefined> => {
   const hasPlatformAuthenticator =
     await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
   const { data } = await beginRegistration(name);
@@ -159,8 +164,9 @@ const doXHR = async (json: string): Promise<any> => {
 export async function doSignup(
   name: string,
   network: string,
-): Promise<FinalizeRegistrationMutation> {
-  const credentials: Credentials = await onCreateBegin(name);
+): Promise<FinalizeRegistrationMutation | undefined> {
+  const credentials = await onCreateBegin(name);
+  if (!credentials) return;
   return onCreateFinalize(credentials, network);
 }
 

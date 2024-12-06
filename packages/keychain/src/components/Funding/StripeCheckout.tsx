@@ -31,7 +31,7 @@ export default function StripeCheckout({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<Error>();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!stripe || !elements) {
@@ -66,7 +66,7 @@ export default function StripeCheckout({
         return;
       }
 
-      setError(e);
+      setError(e as Error);
     } finally {
       setIsSubmitting(false);
     }
@@ -79,7 +79,7 @@ export default function StripeCheckout({
   return (
     <Container
       title={"Purchase $" + creditsAmount}
-      description={<CopyAddress address={controller.address} />}
+      description={controller && <CopyAddress address={controller.address} />}
       Icon={CoinsIcon}
       onBack={onBack}
     >

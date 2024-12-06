@@ -10,7 +10,7 @@ export function Footer({
 }: React.PropsWithChildren & {
   showCatridgeLogo?: boolean;
 }) {
-  const ref = useRef<HTMLDivElement>();
+  const ref = useRef<HTMLDivElement | null>(null);
   const { footer } = useLayout();
 
   useEffect(() => {

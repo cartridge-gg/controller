@@ -9,7 +9,10 @@ import { DataProvider } from "./data";
 import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
 
-if (typeof window !== "undefined") {
+if (
+  typeof window !== "undefined" &&
+  !window.location.hostname.includes("localhost")
+) {
   posthog.init(import.meta.env.VITE_POSTHOG_KEY!, {
     api_host: import.meta.env.VITE_POSTHOG_HOST,
     person_profiles: "always",
@@ -26,19 +29,19 @@ export function Provider({ children }: PropsWithChildren) {
   return (
     <PostHogProvider client={posthog}>
       <BrowserRouter>
-        <ThemeProvider defaultScheme="system">
-          <CartridgeAPIProvider
-            url={`${import.meta.env.VITE_CARTRIDGE_API_URL!}/query`}
-          >
-            <IndexerAPIProvider credentials="omit">
-              <QueryClientProvider client={queryClient}>
-                <ConnectionProvider>
+        <CartridgeAPIProvider
+          url={`${import.meta.env.VITE_CARTRIDGE_API_URL!}/query`}
+        >
+          <IndexerAPIProvider credentials="omit">
+            <QueryClientProvider client={queryClient}>
+              <ConnectionProvider>
+                <ThemeProvider defaultScheme="system">
                   <DataProvider>{children}</DataProvider>
-                </ConnectionProvider>
-              </QueryClientProvider>
-            </IndexerAPIProvider>
-          </CartridgeAPIProvider>
-        </ThemeProvider>
+                </ThemeProvider>
+              </ConnectionProvider>
+            </QueryClientProvider>
+          </IndexerAPIProvider>
+        </CartridgeAPIProvider>
       </BrowserRouter>
     </PostHogProvider>
   );

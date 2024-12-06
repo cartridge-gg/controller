@@ -21,7 +21,7 @@ export interface TransactionProps {
   name: string;
   hash: string;
   chainId: constants.StarknetChainId;
-  finalized?: (TransactionState) => void;
+  finalized?: (TransactionState: any) => void;
 }
 
 export function Transaction({
@@ -35,7 +35,7 @@ export function Transaction({
   const { controller } = useController();
 
   useEffect(() => {
-    if (chainId) {
+    if (chainId && controller) {
       let result: TransactionState = "pending";
       controller
         .waitForTransaction(hash, {
