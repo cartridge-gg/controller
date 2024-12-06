@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { Project, useAchievementsQuery } from "@cartridge/utils/api/cartridge";
-import { Trophy, getSelectorFromTag } from "@/models";
+import { RawTrophy, Trophy, getSelectorFromTag } from "@/models";
+
+interface Response {
+  items: { achievements: RawTrophy[] }[];
+}
 
 export function useTrophies({
   namespace,
@@ -26,7 +30,7 @@ export function useTrophies({
     {
       enabled: !!namespace && !!project,
       refetchInterval: 300_000, // Refetch every 5 minutes
-      onSuccess: ({ achievements }: { achievements: any }) => {
+      onSuccess: ({ achievements }: { achievements: Response }) => {
         const trophies = achievements.items[0].achievements
           .map(parser)
           .reduce((acc: { [key: string]: Trophy }, achievement: Trophy) => {

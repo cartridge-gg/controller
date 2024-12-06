@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { Project, useProgressionsQuery } from "@cartridge/utils/api/cartridge";
-import { Progress, getSelectorFromTag } from "@/models";
+import { Progress, RawProgress, getSelectorFromTag } from "@/models";
+
+interface Response {
+  items: { achievements: RawProgress[] }[];
+}
 
 export function useProgressions({
   namespace,
@@ -28,7 +32,7 @@ export function useProgressions({
     {
       enabled: !!namespace && !!project,
       refetchInterval: 30_000, // Refetch every 30 seconds
-      onSuccess: ({ playerAchievements }: { playerAchievements: any }) => {
+      onSuccess: ({ playerAchievements }: { playerAchievements: Response }) => {
         const progressions = playerAchievements.items[0].achievements
           .map(parser)
           .reduce((acc: { [key: string]: Progress }, achievement: Progress) => {

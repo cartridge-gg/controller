@@ -1,5 +1,22 @@
 import { shortString } from "starknet";
 
+export interface RawTrophy {
+  id: string;
+  hidden: number;
+  page: number;
+  points: number;
+  start: string;
+  end: string;
+  achievementGroup: string;
+  icon: string;
+  title: string;
+  description: string;
+  taskId: string;
+  taskTotal: number;
+  taskDescription: string;
+  data: string;
+}
+
 export interface Task {
   id: string;
   total: number;
@@ -51,19 +68,19 @@ export class Trophy {
     this.data = data;
   }
 
-  static from(node: any): Trophy {
+  static from(node: RawTrophy): Trophy {
     return Trophy.parse(node);
   }
 
-  static parse(node: any): Trophy {
+  static parse(node: RawTrophy): Trophy {
     return {
       key: `${node.id}-${node.taskId}`,
       id: node.id,
       hidden: node.hidden === 1,
       index: node.page,
       earning: node.points,
-      start: node.start === "0x" ? 0 : node.start,
-      end: node.end === "0x" ? 0 : node.end,
+      start: node.start === "0x" ? 0 : parseInt(node.start),
+      end: node.end === "0x" ? 0 : parseInt(node.end),
       group: shortString.decodeShortString(node.achievementGroup),
       icon: shortString.decodeShortString(node.icon),
       title: shortString.decodeShortString(node.title),

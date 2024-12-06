@@ -1,3 +1,13 @@
+export interface RawProgress {
+  achievementId: string;
+  playerId: string;
+  points: number;
+  taskId: string;
+  taskTotal: number;
+  total: number;
+  timestamp: number;
+}
+
 export class Progress {
   key: string;
   achievementId: string;
