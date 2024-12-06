@@ -15,7 +15,7 @@ export function useProgressions({
   namespace: string;
   name: string;
   project: string;
-  parser: (node: any) => Progress;
+  parser: (node: RawProgress) => Progress;
 }) {
   const [progressions, setProgressions] = useState<{ [key: string]: Progress }>(
     {},

@@ -15,7 +15,7 @@ export function useTrophies({
   namespace: string;
   name: string;
   project: string;
-  parser: (node: any) => Trophy;
+  parser: (node: RawTrophy) => Trophy;
 }) {
   const [trophies, setTrophies] = useState<{ [key: string]: Trophy }>({});
 

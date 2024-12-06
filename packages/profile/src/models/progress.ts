@@ -5,7 +5,7 @@ export interface RawProgress {
   taskId: string;
   taskTotal: number;
   total: number;
-  timestamp: number;
+  completionTime: number;
 }
 
 export class Progress {
@@ -38,11 +38,11 @@ export class Progress {
     this.timestamp = timestamp;
   }
 
-  static from(node: any): Progress {
+  static from(node: RawProgress): Progress {
     return Progress.parse(node);
   }
 
-  static parse(node: any): Progress {
+  static parse(node: RawProgress): Progress {
     return {
       key: `${node.playerId}-${node.achievementId}-${node.taskId}`,
       achievementId: node.achievementId,
