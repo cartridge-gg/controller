@@ -56,9 +56,11 @@ export function CreateSession({
     if (violatingPolicy) {
       setError({
         code: ErrorCode.PolicyChainIdMismatch,
-        message: `Policy for ${(violatingPolicy as TypedDataPolicy).domain.name
-          }.${(violatingPolicy as TypedDataPolicy).primaryType
-          } has mismatched chain ID.`,
+        message: `Policy for ${
+          (violatingPolicy as TypedDataPolicy).domain.name
+        }.${
+          (violatingPolicy as TypedDataPolicy).primaryType
+        } has mismatched chain ID.`,
       });
       setIsDisabled(true);
     } else {
@@ -136,6 +138,7 @@ export function CreateSession({
             </Text>
           </HStack>
         )}
+
         {error && isControllerError(error) && (
           <ControllerErrorAlert error={error} />
         )}
@@ -158,13 +161,11 @@ export function CreateSession({
 
         {!error && (
           <div className="flex flex-col">
-            <div className="flex items-center text-sm text-muted-foreground">
-              <div>Expires in </div>
+            <div className="flex items-center text-sm text-muted-foreground py-4 gap-2">
+              <div className="font-medium">Expires in </div>
               <Select
                 value={duration.toString()}
-                onValueChange={(val) => {
-                  setDuration(BigInt(val));
-                }}
+                onValueChange={(val) => setDuration(BigInt(val))}
               >
                 <SelectTrigger className="w-28">
                   <SelectValue
@@ -181,7 +182,6 @@ export function CreateSession({
                   <SelectItem value={(60 * 60 * 24 * 7).toString()}>
                     1 WEEK
                   </SelectItem>
-                  <SelectItem value={"never"}>NEVER</SelectItem>
                 </SelectContent>
               </Select>
             </div>
