@@ -22,6 +22,12 @@ import {
 import { UpgradeInterface, useUpgrade } from "./upgrade";
 import posthog from "posthog-js";
 import { Policies, SessionPolicies } from "@cartridge/presets";
+import {
+  defaultTheme,
+  controllerConfigs,
+  ControllerTheme,
+} from "@cartridge/presets";
+import { toArray } from "@cartridge/controller";
 
 const CHAIN_ID_TIMEOUT = 3000;
 
@@ -34,6 +40,7 @@ export function useConnectionValue() {
   const [rpcUrl, setRpcUrl] = useState<string>();
   const [chainId, setChainId] = useState<string>();
   const [policies, setPolicies] = useState<SessionPolicies>({});
+  const [theme, setTheme] = useState<ControllerTheme>(defaultTheme);
   const [controller, setControllerRaw] = useState<Controller | undefined>();
   const [prefunds, setPrefunds] = useState<Prefund[]>([]);
   const [hasPrefundRequest, setHasPrefundRequest] = useState<boolean>(false);
@@ -105,19 +112,54 @@ export function useConnectionValue() {
       );
     }
 
+    // Handle prefunds
     const prefundParam = urlParams.get("prefunds");
     const prefunds: Prefund[] = prefundParam
       ? JSON.parse(decodeURIComponent(prefundParam))
       : [];
     setHasPrefundRequest(!!prefundParam);
     setPrefunds(mergeDefaultETHPrefund(prefunds));
-    setPolicies(() => {
-      const param = urlParams.get("policies");
-      if (!param) return {};
 
-      const policies = JSON.parse(decodeURIComponent(param)) as Policies;
-      return toSessionPolicies(policies);
-    });
+    // Handle theme and policies
+    const policiesParam = urlParams.get("policies");
+    const themeParam = urlParams.get("theme");
+    const presetParam = urlParams.get("preset");
+
+    // Provides backward compatability for Controler <= v0.5.1
+    if (themeParam) {
+      const decodedPreset = decodeURIComponent(themeParam);
+      const parsedTheme = JSON.parse(decodedPreset) as ControllerTheme;
+      setTheme(parsedTheme);
+    }
+
+    // URL policies take precedence over preset policies
+    if (policiesParam) {
+      try {
+        const parsedPolicies = JSON.parse(
+          decodeURIComponent(policiesParam),
+        ) as Policies;
+        setPolicies(toSessionPolicies(parsedPolicies));
+      } catch (e) {
+        console.error("Failed to parse policies:", e);
+        setPolicies({});
+      }
+    }
+
+    // Application provided policies take precedence over preset policies.
+    if (
+      presetParam &&
+      presetParam in controllerConfigs &&
+      origin &&
+      (origin.startsWith("http://localhost") ||
+        toArray(controllerConfigs[presetParam].origin).includes(origin))
+    ) {
+      setTheme(controllerConfigs[presetParam].theme || defaultTheme);
+
+      // Set policies from preset if no URL policies
+      if (!policiesParam && controllerConfigs[presetParam].policies) {
+        setPolicies(controllerConfigs[presetParam].policies);
+      }
+    }
 
     const connection = connectToController<ParentMethods>({
       setOrigin,
@@ -131,7 +173,7 @@ export function useConnectionValue() {
     return () => {
       connection.destroy();
     };
-  }, [setController]);
+  }, [setController, origin]);
 
   useEffect(() => {
     if (rpcUrl) {
@@ -189,6 +231,7 @@ export function useConnectionValue() {
     chainId,
     chainName,
     policies,
+    theme,
     prefunds,
     hasPrefundRequest,
     error,

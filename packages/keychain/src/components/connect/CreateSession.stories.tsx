@@ -22,9 +22,9 @@ export const Default: Story = {
   },
 };
 
-export const WithTheme: Story = {
+export const WithPreset: Story = {
   parameters: {
-    preset: "loot-survivor",
+    preset: "eternum",
   },
   args: {
     onConnect: () => {},

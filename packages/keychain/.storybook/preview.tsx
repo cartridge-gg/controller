@@ -14,7 +14,12 @@ import Script from "next/script";
 import { ETH_CONTRACT_ADDRESS } from "../src/utils/token";
 import { ConnectCtx, ConnectionCtx } from "../src/utils/connection/types";
 import { UpgradeInterface } from "../src/hooks/upgrade";
-import { defaultTheme, controllerConfigs } from "@cartridge/presets";
+import {
+  defaultTheme,
+  controllerConfigs,
+  SessionPolicies,
+  ControllerTheme,
+} from "@cartridge/presets";
 
 const inter = Inter({ subsets: ["latin"] });
 const ibmPlexMono = IBM_Plex_Mono({
@@ -77,7 +82,13 @@ function Provider({
   parameters,
 }: { parameters: StoryParameters } & PropsWithChildren) {
   const connection = useMockedConnection(parameters.connection);
-  const theme = parameters.preset || "cartridge";
+
+  let theme: ControllerTheme = defaultTheme;
+  if (parameters.preset) {
+    const config = controllerConfigs[parameters.preset];
+    theme = config.theme!;
+    connection.policies = config.policies || connection.policies;
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -98,6 +109,7 @@ interface StoryParameters extends Parameters {
     upgrade?: UpgradeInterface;
   };
   preset?: string;
+  policies?: SessionPolicies;
 }
 
 export function useMockedConnection({
@@ -170,30 +182,13 @@ export default preview;
 
 export function ControllerThemeProvider({
   children,
-  theme,
-}: PropsWithChildren<{ theme?: string }>) {
-  const preset = useMemo(() => {
-    if (!theme) return defaultTheme;
-    if (theme in controllerConfigs && controllerConfigs[theme].theme) {
-      return controllerConfigs[theme].theme;
-    }
-    return defaultTheme;
-  }, [theme]);
-
-  const controllerTheme = useMemo(
-    () => ({
-      name: preset.name,
-      icon: preset.icon,
-      cover: preset.cover,
-    }),
-    [preset],
-  );
-
-  useThemeEffect({ theme: preset, assetUrl: "" });
-  const chakraTheme = useChakraTheme(preset);
+  theme = defaultTheme,
+}: PropsWithChildren<{ theme?: ControllerTheme }>) {
+  useThemeEffect({ theme, assetUrl: "" });
+  const chakraTheme = useChakraTheme(theme);
 
   return (
-    <ControllerThemeContext.Provider value={controllerTheme}>
+    <ControllerThemeContext.Provider value={theme}>
       <ChakraProvider theme={chakraTheme}>{children}</ChakraProvider>
     </ControllerThemeContext.Provider>
   );

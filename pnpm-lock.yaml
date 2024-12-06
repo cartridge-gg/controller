@@ -467,6 +467,9 @@ importers:
       '@types/node':
         specifier: ^20.11.0
         version: 20.16.11
+      starknet:
+        specifier: 6.11.0
+        version: 6.11.0
       tsx:
         specifier: ^4.7.0
         version: 4.19.2
