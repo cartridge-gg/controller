@@ -21,6 +21,7 @@ type ConnectionContextType = {
   provider: RpcProvider;
   chainId: string;
   erc20: string[];
+  project?: string;
   namespace?: string;
   isVisible: boolean;
   setIsVisible: (isVisible: boolean) => void;
@@ -34,7 +35,7 @@ type ParentMethods = {
 };
 
 const initialState: ConnectionContextType = {
-  origin: "",
+  origin: location.origin,
   parent: {
     close: () => {},
     openSettings: () => {},
@@ -63,6 +64,11 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
         state.provider = new RpcProvider({
           nodeUrl: decodeURIComponent(rpcUrlParam),
         });
+      }
+
+      const psParam = searchParams.get("ps");
+      if (psParam && !state.project) {
+        state.project = decodeURIComponent(psParam);
       }
 
       const nsParam = searchParams.get("ns");

@@ -24,10 +24,12 @@ export class ProfileIFrame extends IFrame<Profile> {
     const _url = new URL(
       slot
         ? namespace
-          ? `${_profileUrl}/account/${username}/slot/${slot}?ns=${encodeURIComponent(
-              namespace,
+          ? `${_profileUrl}/account/${username}/slot/${slot}?ps=${encodeURIComponent(
+              slot,
+            )}&ns=${encodeURIComponent(namespace)}`
+          : `${_profileUrl}/account/${username}/slot/${slot}?ps=${encodeURIComponent(
+              slot,
             )}`
-          : `${_profileUrl}/account/${username}/slot/${slot}`
         : `${_profileUrl}/account/${username}`,
     );
 
