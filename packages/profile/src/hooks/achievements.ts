@@ -161,7 +161,8 @@ export function useAchievements(accountAddress?: string) {
       (trophy: Trophy) => {
         const achievement = data[currentAddress]?.[trophy.id] || {};
         const completion =
-          Object.values(achievement).every((task) => task.completion) || false;
+          Object.values(achievement).length > 0 &&
+          Object.values(achievement).every((task) => task.completion);
         const timestamp = Math.max(
           ...Object.values(achievement).map((task) => task.timestamp),
         );
