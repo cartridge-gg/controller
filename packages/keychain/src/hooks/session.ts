@@ -1,61 +1,54 @@
-import { getChecksumAddress, Provider } from "starknet";
+import { getChecksumAddress } from "starknet";
 import {
-  ContractPolicies,
   ContractPolicy,
   erc20Metadata,
   SessionPolicies,
-  SignMessagePolicy,
 } from "@cartridge/presets";
-import { ERC20Metadata } from "@cartridge/utils";
 
-export type SessionSummary = {
-  default: ContractPolicies;
-  dojo: Record<string, ContractPolicy & { meta: { dojoName: string } }>;
-  ERC20: Record<
-    string,
-    ContractPolicy & { meta?: Omit<ERC20Metadata, "instance"> }
-  >;
-  ERC721: ContractPolicies;
-  messages: SignMessagePolicy[] | undefined;
+export type ERC20Metadata = {
+  name: string;
+  logoUrl?: string;
+  symbol: string;
+  decimals: number;
 };
 
-export function useSessionSummary({
+export type ParsedSessionPolicies = SessionPolicies & {
+  verified: boolean;
+  contracts?: Record<
+    string,
+    ContractPolicy & {
+      meta?: ERC20Metadata;
+    }
+  >;
+};
+
+export function parseSessionPolicies({
   policies,
+  verified = false,
 }: {
   policies: SessionPolicies;
-  provider?: Provider;
-}): SessionSummary {
-  const summary: SessionSummary = {
-    default: {},
-    dojo: {},
-    ERC20: {},
-    ERC721: {},
-    messages: policies.messages,
+  verified: boolean;
+}): ParsedSessionPolicies {
+  const summary: ParsedSessionPolicies = {
+    verified,
+    ...policies,
   };
 
-  Object.entries(policies.contracts ?? []).forEach(
-    ([contractAddress, policies]) => {
-      const meta = erc20Metadata.find(
-        (m) =>
-          getChecksumAddress(m.l2_token_address) ===
-          getChecksumAddress(contractAddress),
-      );
+  Object.entries(policies.contracts ?? []).forEach(([address]) => {
+    const meta = erc20Metadata.find(
+      (m) =>
+        getChecksumAddress(m.l2_token_address) === getChecksumAddress(address),
+    );
 
-      if (meta) {
-        summary.ERC20[contractAddress] = {
-          meta: {
-            address: contractAddress,
-            name: meta.name,
-            symbol: meta.symbol,
-            decimals: meta.decimals,
-          },
-          ...policies,
-        };
-      } else {
-        summary.default[contractAddress] = policies;
-      }
-    },
-  );
+    if (meta) {
+      summary.contracts![address].meta = {
+        name: meta.name,
+        symbol: meta.symbol,
+        decimals: meta.decimals,
+        logoUrl: meta.logo_url,
+      };
+    }
+  });
 
   return summary;
 }

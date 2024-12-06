@@ -21,13 +21,14 @@ import {
 } from "components/Provider/connection";
 import { UpgradeInterface, useUpgrade } from "./upgrade";
 import posthog from "posthog-js";
-import { Policies, SessionPolicies } from "@cartridge/presets";
+import { Policies } from "@cartridge/presets";
 import {
   defaultTheme,
   controllerConfigs,
   ControllerTheme,
 } from "@cartridge/presets";
 import { toArray } from "@cartridge/controller";
+import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
 
 const CHAIN_ID_TIMEOUT = 3000;
 
@@ -39,7 +40,7 @@ export function useConnectionValue() {
   const [origin, setOrigin] = useState<string>();
   const [rpcUrl, setRpcUrl] = useState<string>();
   const [chainId, setChainId] = useState<string>();
-  const [policies, setPolicies] = useState<SessionPolicies>({});
+  const [policies, setPolicies] = useState<ParsedSessionPolicies>();
   const [theme, setTheme] = useState<ControllerTheme>(defaultTheme);
   const [controller, setControllerRaw] = useState<Controller | undefined>();
   const [prefunds, setPrefunds] = useState<Prefund[]>([]);
@@ -138,10 +139,14 @@ export function useConnectionValue() {
         const parsedPolicies = JSON.parse(
           decodeURIComponent(policiesParam),
         ) as Policies;
-        setPolicies(toSessionPolicies(parsedPolicies));
+        setPolicies(
+          parseSessionPolicies({
+            verified: false,
+            policies: toSessionPolicies(parsedPolicies),
+          }),
+        );
       } catch (e) {
         console.error("Failed to parse policies:", e);
-        setPolicies({});
       }
     }
 
@@ -157,7 +162,12 @@ export function useConnectionValue() {
 
       // Set policies from preset if no URL policies
       if (!policiesParam && controllerConfigs[presetParam].policies) {
-        setPolicies(controllerConfigs[presetParam].policies);
+        setPolicies(
+          parseSessionPolicies({
+            verified: true,
+            policies: controllerConfigs[presetParam].policies,
+          }),
+        );
       }
     }
 

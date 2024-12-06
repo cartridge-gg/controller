@@ -60,7 +60,7 @@ const CardIcon = React.forwardRef<
   ({ className, src, ...props }, ref): React.ReactNode => (
     <div
       ref={ref}
-      className="h-full aspect-square bg-secondary flex items-center justify-center"
+      className="h-full p-1.5 aspect-square bg-secondary flex items-center justify-center"
     >
       {src ? (
         <img

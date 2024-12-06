@@ -11,12 +11,13 @@ import {
   CardIcon,
   PencilIcon,
 } from "@cartridge/ui-next";
-import { SessionSummary as SessionSummaryType } from "@cartridge/utils";
 import { CollapsibleRow } from "./CollapsibleRow";
 import { ArrowTurnDownIcon, Badge } from "@cartridge/ui-next";
+import { StarknetEnumType, StarknetMerkleType } from "@starknet-io/types-js";
+import { ParsedSessionPolicies } from "hooks/session";
 
 interface SignMessagesProps {
-  messages: SessionSummaryType["messages"];
+  messages: ParsedSessionPolicies["messages"];
 }
 
 export function SignMessages({ messages }: SignMessagesProps) {
@@ -84,7 +85,9 @@ export function SignMessages({ messages }: SignMessagesProps) {
                               ? [
                                   {
                                     name: "contains",
-                                    value: t.contains,
+                                    value: (
+                                      t as StarknetEnumType | StarknetMerkleType
+                                    ).contains,
                                   },
                                 ]
                               : []),

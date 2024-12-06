@@ -1,6 +1,7 @@
 import { ConnectReply, toSessionPolicies } from "@cartridge/controller";
 import { ConnectCtx, ConnectionCtx } from "./types";
-import { Policies, SessionPolicies } from "@cartridge/presets";
+import { Policies } from "@cartridge/presets";
+import { ParsedSessionPolicies, parseSessionPolicies } from "hooks/session";
 
 export function connectFactory({
   setOrigin,
@@ -10,7 +11,7 @@ export function connectFactory({
 }: {
   setOrigin: (origin: string) => void;
   setRpcUrl: (url: string) => void;
-  setPolicies: (policies: SessionPolicies) => void;
+  setPolicies: (policies: ParsedSessionPolicies) => void;
   setContext: (context: ConnectionCtx) => void;
 }) {
   return (origin: string) => {
@@ -18,7 +19,12 @@ export function connectFactory({
 
     return (policies: Policies, rpcUrl: string): Promise<ConnectReply> => {
       setRpcUrl(rpcUrl);
-      setPolicies(toSessionPolicies(policies));
+      setPolicies(
+        parseSessionPolicies({
+          verified: false,
+          policies: toSessionPolicies(policies),
+        }),
+      );
 
       return new Promise((resolve, reject) => {
         setContext({

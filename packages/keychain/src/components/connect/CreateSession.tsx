@@ -9,17 +9,22 @@ import { SessionConsent } from "components/connect";
 import { SESSION_EXPIRATION } from "const";
 import { Upgrade } from "./Upgrade";
 import { ErrorCode } from "@cartridge/account-wasm";
-import { UntrustedSessionSummary } from "components/session/UntrustedSessionSummary";
 import { TypedDataPolicy } from "@cartridge/presets";
+import { ParsedSessionPolicies } from "hooks/session";
+
+import { UnverifiedSessionSummary } from "components/session/UnverifiedSessionSummary";
+import { VerifiedSessionSummary } from "components/session/VerifiedSessionSummary";
 
 export function CreateSession({
+  policies,
   onConnect,
   isUpdate,
 }: {
+  policies: ParsedSessionPolicies;
   onConnect: (transaction_hash?: string) => void;
   isUpdate?: boolean;
 }) {
-  const { controller, policies, upgrade, chainId, logout } = useConnection();
+  const { controller, upgrade, chainId, logout } = useConnection();
   const [isConnecting, setIsConnecting] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
   const [expiresAt] = useState<bigint>(SESSION_EXPIRATION);
@@ -54,7 +59,7 @@ export function CreateSession({
   }, [chainId, policies]);
 
   const onCreateSession = useCallback(async () => {
-    if (!controller) return;
+    if (!controller || !policies) return;
     try {
       setError(undefined);
       setIsConnecting(true);
@@ -90,7 +95,11 @@ export function CreateSession({
     >
       <Content gap={6}>
         <SessionConsent />
-        <UntrustedSessionSummary policies={policies} />
+        {policies?.verified ? (
+          <VerifiedSessionSummary policies={policies} />
+        ) : (
+          <UnverifiedSessionSummary policies={policies} />
+        )}
       </Content>
 
       <Footer>

@@ -57,8 +57,8 @@ export function SessionConsent({
               {origin}
             </Text>{" "}
             to perform the following actions (
-            {Object.keys(policies.contracts ?? {}).length +
-              (policies.messages?.length ?? 0)}
+            {Object.keys(policies?.contracts ?? {}).length +
+              (policies?.messages?.length ?? 0)}
             ) on your behalf
           </Text>
         </HStack>
