@@ -35,7 +35,7 @@ type ParentMethods = {
 };
 
 const initialState: ConnectionContextType = {
-  origin: "",
+  origin: location.origin,
   parent: {
     close: () => {},
     openSettings: () => {},
