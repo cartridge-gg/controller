@@ -8,7 +8,7 @@ import {
   TransactionFinalityStatus,
 } from "starknet";
 import { SESSION_EXPIRATION } from "const";
-import { SessionSummary } from "components/SessionSummary";
+import { UntrustedSessionSummary } from "components/session/UntrustedSessionSummary";
 
 export function RegisterSession({
   onConnect,
@@ -73,7 +73,7 @@ export function RegisterSession({
     >
       <Content>
         <SessionConsent />
-        <SessionSummary policies={policies} />
+        <UntrustedSessionSummary policies={policies} />
       </Content>
     </ExecutionContainer>
   );

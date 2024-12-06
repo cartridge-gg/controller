@@ -9,7 +9,7 @@ import { SessionConsent } from "components/connect";
 import { SESSION_EXPIRATION } from "const";
 import { Upgrade } from "./Upgrade";
 import { ErrorCode } from "@cartridge/account-wasm";
-import { SessionSummary } from "components/SessionSummary";
+import { UntrustedSessionSummary } from "components/session/UntrustedSessionSummary";
 import { TypedDataPolicy } from "@cartridge/presets";
 
 export function CreateSession({
@@ -90,7 +90,7 @@ export function CreateSession({
     >
       <Content gap={6}>
         <SessionConsent />
-        <SessionSummary policies={policies} setError={setError} />
+        <UntrustedSessionSummary policies={policies} />
       </Content>
 
       <Footer>
