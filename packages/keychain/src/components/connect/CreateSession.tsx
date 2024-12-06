@@ -1,7 +1,7 @@
 import { Container, Content, Footer } from "components/layout";
 import { BigNumberish, shortString } from "starknet";
 import { ControllerError } from "utils/connection";
-import { Button, VStack } from "@chakra-ui/react";
+import { Button, HStack, VStack } from "@chakra-ui/react";
 import { useCallback, useEffect, useState } from "react";
 import { useConnection } from "hooks/connection";
 import { ControllerErrorAlert } from "components/ErrorAlert";
@@ -35,7 +35,7 @@ export function CreateSession({
     if (!chainId) return;
     const normalizedChainId = normalizeChainId(chainId);
 
-    const violatingPolicy = policies.messages?.find(
+    const violatingPolicy = policies?.messages?.find(
       (policy) =>
         "domain" in policy &&
         (!policy.domain.chainId ||
@@ -94,7 +94,7 @@ export function CreateSession({
       }}
     >
       <Content gap={6}>
-        <SessionConsent />
+        <SessionConsent isVerified={policies?.verified} />
         {policies?.verified ? (
           <VerifiedSessionSummary policies={policies} />
         ) : (
@@ -107,7 +107,14 @@ export function CreateSession({
           <ControllerErrorAlert error={error} />
         )}
         {!error && (
-          <VStack spacing={4} width="full">
+          <HStack spacing={4} width="full">
+            <Button
+              onClick={() => onConnect()}
+              isDisabled={isConnecting}
+              px={10}
+            >
+              Skip
+            </Button>
             <Button
               colorScheme="colorful"
               isDisabled={isDisabled || isConnecting}
@@ -117,14 +124,7 @@ export function CreateSession({
             >
               {isUpdate ? "update" : "create"} session
             </Button>
-            <Button
-              onClick={() => onConnect()}
-              isDisabled={isConnecting}
-              width="full"
-            >
-              Skip
-            </Button>
-          </VStack>
+          </HStack>
         )}
       </Footer>
     </Container>

@@ -33,7 +33,12 @@ interface ContractProps {
   icon?: React.ReactNode;
 }
 
-export function ContractCard({ address, title, methods: _methods, icon = <CardIcon /> }: ContractProps) {
+export function ContractCard({
+  address,
+  title,
+  methods: _methods,
+  icon = <CardIcon />,
+}: ContractProps) {
   const methods = toArray(_methods);
   const { chainId } = useConnection();
   const isSlot = !!chainId && isSlotChain(chainId);
@@ -44,7 +49,9 @@ export function ContractCard({ address, title, methods: _methods, icon = <CardIc
         <CardTitle className="text-foreground">{title}</CardTitle>
         <CardHeaderRight>
           <Link
-            href={StarkscanUrl(chainId as constants.StarknetChainId).contract(address)}
+            href={StarkscanUrl(chainId as constants.StarknetChainId).contract(
+              address,
+            )}
             className={cn(
               "text-xs text-muted-foreground flex items-center gap-1 cursor-pointer",
               isSlot ? "pointer-events-none" : "",
@@ -72,7 +79,10 @@ export function ContractCard({ address, title, methods: _methods, icon = <CardIc
 
           <AccordionContent>
             {methods.map((c) => (
-              <CardContent key={c.entrypoint} className="flex items-center gap-1">
+              <CardContent
+                key={c.entrypoint}
+                className="flex items-center gap-1"
+              >
                 <CircleIcon size="sm" className="text-muted-foreground" />
                 <div className="flex items-center gap-2">
                   <div>{c.name}</div>
@@ -80,7 +90,10 @@ export function ContractCard({ address, title, methods: _methods, icon = <CardIc
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger>
-                          <InfoIcon size="sm" className="text-muted-foreground" />
+                          <InfoIcon
+                            size="sm"
+                            className="text-muted-foreground"
+                          />
                         </TooltipTrigger>
                         <TooltipContent>{c.description}</TooltipContent>
                       </Tooltip>
@@ -94,4 +107,4 @@ export function ContractCard({ address, title, methods: _methods, icon = <CardIc
       </Accordion>
     </Card>
   );
-} 
+}

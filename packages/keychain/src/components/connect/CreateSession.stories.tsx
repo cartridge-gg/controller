@@ -27,6 +27,30 @@ export const WithPreset: Story = {
     preset: "eternum",
   },
   args: {
+    policies: {
+      verified: true,
+      contracts: {
+        "0xdeadbeef": {
+          methods: [
+            {
+              name: "transfer",
+              entrypoint: "transfer",
+              description: "Transfer",
+            },
+          ],
+        },
+        "0xdeafcafe": {
+          methods: [
+            {
+              name: "approve",
+              entrypoint: "approve",
+              description: "Approve",
+            },
+          ],
+        },
+      },
+      messages: [],
+    },
     onConnect: () => {},
   },
 };

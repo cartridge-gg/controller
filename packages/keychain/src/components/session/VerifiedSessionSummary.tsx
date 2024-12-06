@@ -19,6 +19,7 @@ export function VerifiedSessionSummary({
   const totalMethods = Object.values(policies).flatMap((contracts) =>
     Object.values(contracts).flatMap(({ methods }) => methods),
   ).length;
+
   const totalContracts = Object.values(policies).flatMap((contracts) =>
     Object.keys(contracts),
   ).length;
