@@ -1,8 +1,22 @@
 import { configs } from "./generated/controller-configs";
 import { TypedData } from "@starknet-io/types-js";
+import { metadata } from "./generated/erc20-metadata";
 
 export const controllerConfigs = configs;
+export const erc20Metadata = metadata;
 export const defaultTheme = configs["cartridge"].theme!;
+
+export type EkuboERC20Metadata = {
+  name: string;
+  symbol: string;
+  decimals: number;
+  l2_token_address: string;
+  sort_order: number;
+  total_supply: number | null;
+  logo_url?: string;
+  hidden?: boolean;
+  disabled?: boolean;
+};
 
 export type Policy = CallPolicy | TypedDataPolicy;
 

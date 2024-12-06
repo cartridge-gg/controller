@@ -17,16 +17,6 @@ export type ERC20Metadata = {
   instance: ERC20;
 };
 
-export type EkuboERC20Metadata = {
-  name: string;
-  symbol: string;
-  decimals: number;
-  l2_token_address: string;
-  sort_order: string;
-  total_supply: number;
-  logo_url: string;
-};
-
 export const ETH_CONTRACT_ADDRESS = getChecksumAddress(
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
 );
@@ -162,18 +152,5 @@ export class ERC20 {
       pending_word_len: result[result.length - 1],
     };
     return byteArray.stringFromByteArray(symbol);
-  }
-
-  static async fetchAllMetadata(): Promise<Omit<ERC20Metadata, "instance">[]> {
-    const res = await fetch("https://mainnet-api.ekubo.org/tokens");
-    const data = (await res.json()) as EkuboERC20Metadata[];
-
-    return data.map((d) => ({
-      name: d.name,
-      logoUrl: d.logo_url,
-      symbol: d.symbol,
-      decimals: d.decimals,
-      address: d.l2_token_address,
-    }));
   }
 }

@@ -30,7 +30,7 @@ export function useSessionSummary({
   policies: SessionPolicies;
   provider?: Provider;
 }) {
-  const { data: ekuboMeta } = useEkuboMetadata();
+  const ekuboMeta = useEkuboMetadata();
 
   const res: SessionSummary = {
     default: {},
@@ -52,12 +52,19 @@ export function useSessionSummary({
           );
           switch (contractType) {
             case "ERC20":
+              const meta = ekuboMeta.find(
+                (m) =>
+                  getChecksumAddress(m.l2_token_address) ===
+                  getChecksumAddress(contractAddress),
+              );
+
               res.ERC20[contractAddress] = {
-                meta: ekuboMeta.find(
-                  (m) =>
-                    getChecksumAddress(m.address) ===
-                    getChecksumAddress(contractAddress),
-                ),
+                meta: meta && {
+                  address: contractAddress,
+                  name: meta.name,
+                  symbol: meta.symbol,
+                  decimals: meta.decimals,
+                },
                 ...policies,
               };
               return;
