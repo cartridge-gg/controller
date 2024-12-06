@@ -121,7 +121,7 @@ function Group({
     setPages(pages);
     const page = filtereds.find((a) => !a.completed);
     setPage(page ? page.index : pages[pages.length - 1]);
-  }, [items]);
+  }, []);
 
   const handleNext = useCallback(() => {
     const index = pages.indexOf(page);
