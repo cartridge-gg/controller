@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/keychain",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "private": true,
   "scripts": {
     "dev": "TARGET_ORIGIN=\"*\" next dev -p 3001",
