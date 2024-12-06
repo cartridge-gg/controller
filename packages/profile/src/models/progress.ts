@@ -1,52 +1,47 @@
-import { EventNode } from "@cartridge/utils/api/indexer";
-import { Reader } from "./reader";
-
 export class Progress {
-  player: string;
-  task: string;
-  count: number;
+  key: string;
+  achievementId: string;
+  playerId: string;
+  points: number;
+  taskId: string;
+  taskTotal: number;
+  total: number;
   timestamp: number;
 
-  constructor(player: string, task: string, count: number, timestamp: number) {
-    this.player = player;
-    this.task = task;
-    this.count = count;
+  constructor(
+    key: string,
+    achievementId: string,
+    playerId: string,
+    points: number,
+    taskId: string,
+    taskTotal: number,
+    total: number,
+    timestamp: number,
+  ) {
+    this.key = key;
+    this.achievementId = achievementId;
+    this.playerId = playerId;
+    this.points = points;
+    this.taskId = taskId;
+    this.taskTotal = taskTotal;
+    this.total = total;
     this.timestamp = timestamp;
   }
 
-  static from(node: EventNode): Progress {
+  static from(node: any): Progress {
     return Progress.parse(node);
   }
 
-  static parse(node: EventNode): Progress {
-    const reader = new ProgressReader(node);
+  static parse(node: any): Progress {
     return {
-      player: reader.popPlayer(),
-      task: reader.popTask(),
-      count: reader.popCount(),
-      timestamp: reader.popTimestamp(),
+      key: `${node.playerId}-${node.achievementId}-${node.taskId}`,
+      achievementId: node.achievementId,
+      playerId: node.playerId,
+      points: node.points,
+      taskId: node.taskId,
+      taskTotal: node.taskTotal,
+      total: node.total,
+      timestamp: new Date(node.completionTime).getTime() / 1000,
     };
-  }
-}
-
-class ProgressReader extends Reader {
-  constructor(node: EventNode) {
-    super(node);
-  }
-
-  popPlayer(): string {
-    return this.popValue();
-  }
-
-  popTask(): string {
-    return this.popString(2);
-  }
-
-  popCount(): number {
-    return this.popNumber();
-  }
-
-  popTimestamp(): number {
-    return this.popNumber();
   }
 }

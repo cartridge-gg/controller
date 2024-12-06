@@ -1,13 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { TROPHY, PROGRESS } from "@/constants";
-import { useEvents } from "./events";
-import { Trophy, Progress } from "@/models";
-import { Task } from "@/components/achievements/trophy";
+import { Trophy, Progress, Task } from "@/models";
 import { useConnection } from "./context";
 import { useAccount } from "./account";
-
-// Number of events to fetch at a time, could be increased if needed
-const LIMIT = 1000;
+import { useProgressions } from "./progressions";
+import { useTrophies } from "./trophies";
+import { Task as ItemTask } from "@/components/achievements/trophy";
 
 export interface Item {
   id: string;
@@ -22,7 +20,7 @@ export interface Item {
   percentage: string;
   completed: boolean;
   pinned: boolean;
-  tasks: Task[];
+  tasks: ItemTask[];
 }
 
 export interface Counters {
@@ -41,7 +39,7 @@ export interface Player {
 }
 
 export function useAchievements(accountAddress?: string) {
-  const { namespace } = useConnection();
+  const { project, namespace } = useConnection();
   const { address } = useAccount();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -52,158 +50,159 @@ export function useAchievements(accountAddress?: string) {
     return accountAddress || address;
   }, [accountAddress, address]);
 
-  const { events: trophies, isFetching: isFetchingTrophiess } =
-    useEvents<Trophy>({
-      namespace: namespace || "",
+  const { trophies: rawTrophies, isFetching: isFetchingTrophies } = useTrophies(
+    {
+      namespace: namespace ?? "",
       name: TROPHY,
-      limit: LIMIT,
-      parse: Trophy.parse,
-    });
-  const { events: progresses, isFetching: isFetchingProgresses } =
-    useEvents<Progress>({
-      namespace: namespace || "",
+      project: project ?? "",
+      parser: Trophy.parse,
+    },
+  );
+
+  const { progressions: rawProgressions, isFetching: isFetchingProgressions } =
+    useProgressions({
+      namespace: namespace ?? "",
       name: PROGRESS,
-      limit: LIMIT,
-      parse: Progress.parse,
+      project: project ?? "",
+      parser: Progress.parse,
     });
 
   // Compute achievements and players
   useEffect(() => {
     if (
-      isFetchingTrophiess ||
-      isFetchingProgresses ||
-      !trophies.length ||
+      isFetchingTrophies ||
+      isFetchingProgressions ||
+      !rawTrophies.length ||
       !currentAddress
     )
       return;
 
-    // Compute counters
-    const counters: Counters = {};
-    progresses.forEach(({ player, task, count, timestamp }) => {
-      counters[player] = counters[player] || {};
-      counters[player][task] = counters[player][task] || [];
-      counters[player][task].push({ count, timestamp });
+    // Merge trophies
+    const trophies: { [id: string]: Trophy } = {};
+    rawTrophies.forEach((trophy) => {
+      if (Object.keys(trophies).includes(trophy.id)) {
+        trophy.tasks.forEach((task) => {
+          if (!trophies[trophy.id].tasks.find((t) => t.id === task.id)) {
+            trophies[trophy.id].tasks.push(task);
+          }
+        });
+      } else {
+        trophies[trophy.id] = trophy;
+      }
     });
 
     // Compute players and achievement stats
-    const dedupedTrophies = trophies.filter(
-      (trophy, index) =>
-        trophies.findIndex((t) => t.id === trophy.id) === index,
-    );
-    const stats: Stats = {};
-    const players: Player[] = Object.keys(counters)
-      .map((playerAddress) => {
-        let timestamp = 0;
-        const completeds: string[] = [];
-        const earnings = dedupedTrophies.reduce(
-          (total: number, trophy: Trophy) => {
-            // Compute at which timestamp the latest achievement was completed
-            let completed = true;
-            trophy.tasks.forEach((task) => {
-              let count = 0;
-              let completion = false;
-              counters[playerAddress]?.[task.id]
-                ?.sort((a, b) => a.timestamp - b.timestamp)
-                .forEach(
-                  ({
-                    count: c,
-                    timestamp: t,
-                  }: {
-                    count: number;
-                    timestamp: number;
-                  }) => {
-                    count += c;
-                    if (!completion && count >= task.total) {
-                      timestamp = t > timestamp ? t : timestamp;
-                      completion = true;
-                    }
-                  },
-                );
-              completed = completed && completion;
-            });
-            // Add trophy to list if completed
-            if (completed) completeds.push(trophy.id);
-            // Update stats
-            stats[trophy.id] = stats[trophy.id] || 0;
-            stats[trophy.id] += completed ? 1 : 0;
-            return completed ? total + trophy.earning : total;
-          },
-          0,
-        );
-        return {
-          address: playerAddress,
-          earnings,
-          timestamp,
-          completeds,
+    const data: {
+      [playerId: string]: {
+        [achievementId: string]: {
+          [taskId: string]: {
+            completion: boolean;
+            timestamp: number;
+            count: number;
+          };
         };
-      })
-      .sort((a, b) => a.timestamp - b.timestamp) // Oldest to newest
-      .sort((a, b) => b.earnings - a.earnings); // Highest to lowest
-    setPlayers(players);
+      };
+    } = {};
+    rawProgressions.forEach((progress: Progress) => {
+      const { achievementId, playerId, taskId, taskTotal, total, timestamp } =
+        progress;
+
+      // Compute player
+      const detaultTasks: { [taskId: string]: boolean } = {};
+      trophies[achievementId].tasks.forEach((task: Task) => {
+        detaultTasks[task.id] = false;
+      });
+      data[playerId] = data[playerId] || {};
+      data[playerId][achievementId] =
+        data[playerId][achievementId] || detaultTasks;
+      data[playerId][achievementId][taskId] = {
+        completion: total >= taskTotal,
+        timestamp,
+        count: total,
+      };
+    });
+
+    const stats: Stats = {};
+    const players: Player[] = [];
+    Object.keys(data).forEach((playerId) => {
+      const player = data[playerId];
+      const completeds: string[] = [];
+      let timestamp = 0;
+      const earnings = Object.keys(player).reduce((acc, achievementId) => {
+        const completion = Object.values(player[achievementId]).every(
+          (task) => task.completion,
+        );
+        timestamp = Math.max(
+          ...Object.values(player[achievementId]).map((task) => task.timestamp),
+        );
+        if (completion) {
+          completeds.push(achievementId);
+          stats[achievementId] = stats[achievementId] || 0;
+          stats[achievementId] += 1;
+        }
+        return acc + (completion ? trophies[achievementId].earning : 0);
+      }, 0);
+      players.push({
+        address: playerId,
+        earnings,
+        timestamp: timestamp,
+        completeds,
+      });
+    });
+
+    setPlayers(
+      Object.values(players)
+        .sort((a, b) => a.timestamp - b.timestamp) // Oldest to newest
+        .sort((a, b) => b.earnings - a.earnings), // Highest to lowest
+    );
 
     // Compute achievements
-    const achievements: Item[] = dedupedTrophies
-      .map((trophy) => {
-        // Compute at which timestamp the achievement was completed
-        let timestamp = 0;
-        let completed = true;
-        const tasks: Task[] = [];
-        trophy.tasks.forEach((task) => {
-          let count = 0;
-          let completion = false;
-          counters[currentAddress]?.[task.id]
-            ?.sort((a, b) => a.timestamp - b.timestamp)
-            .forEach(
-              ({
-                count: c,
-                timestamp: t,
-              }: {
-                count: number;
-                timestamp: number;
-              }) => {
-                count += c;
-                if (!completion && count >= task.total) {
-                  timestamp = t;
-                  completion = true;
-                }
-              },
-            );
-          tasks.push({
-            id: task.id,
-            count,
-            total: task.total,
-            description: task.description,
-          });
-          completed = completed && completion;
-        });
+    const achievements: Item[] = Object.values(trophies).map(
+      (trophy: Trophy) => {
+        const achievement = data[currentAddress]?.[trophy.id] || {};
+        const completion =
+          Object.values(achievement).every((task) => task.completion) || false;
+        const timestamp = Math.max(
+          ...Object.values(achievement).map((task) => task.timestamp),
+        );
         // Compute percentage of players who completed the achievement
         const percentage = (
-          players.length ? (100 * stats[trophy.id]) / players.length : 0
+          players.length ? (100 * (stats[trophy.id] ?? 0)) / players.length : 0
         ).toFixed(0);
+        const tasks: ItemTask[] = trophy.tasks.map((task) => {
+          return {
+            ...task,
+            count: achievement[task.id]?.count || 0,
+          };
+        });
         return {
-          ...trophy,
-          completed,
+          id: trophy.id,
+          hidden: trophy.hidden,
+          index: trophy.index,
+          earning: trophy.earning,
+          group: trophy.group,
+          icon: trophy.icon,
+          title: trophy.title,
+          description: trophy.description,
+          completed: completion,
           percentage,
           timestamp,
           pinned: false,
           tasks,
         };
-      })
-      .sort((a, b) => a.index - b.index) // Lowest index to greatest
-      .sort((a, b) => (a.id > b.id ? 1 : -1)) // A to Z
-      .sort((a, b) => (b.hidden ? -1 : 1) - (a.hidden ? -1 : 1)) // Visible to hidden
-      .sort((a, b) => b.timestamp - a.timestamp) // Newest to oldest
-      .sort((a, b) => (b.completed ? 1 : 0) - (a.completed ? 1 : 0)); // Completed to uncompleted
-    setAchievements(achievements);
+      },
+    );
+    setAchievements(
+      achievements
+        .sort((a, b) => a.index - b.index) // Lowest index to greatest
+        .sort((a, b) => (a.id > b.id ? 1 : -1)) // A to Z
+        .sort((a, b) => (b.hidden ? -1 : 1) - (a.hidden ? -1 : 1)) // Visible to hidden
+        .sort((a, b) => b.timestamp - a.timestamp) // Newest to oldest
+        .sort((a, b) => (b.completed ? 1 : 0) - (a.completed ? 1 : 0)), // Completed to uncompleted
+    );
     // Update loading state
     setIsLoading(false);
-  }, [
-    currentAddress,
-    trophies,
-    progresses,
-    isFetchingTrophiess,
-    isFetchingProgresses,
-  ]);
+  }, [currentAddress, isFetchingTrophies, isFetchingProgressions]);
 
   return { achievements, players, isLoading };
 }

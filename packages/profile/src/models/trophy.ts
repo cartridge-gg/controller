@@ -1,5 +1,4 @@
-import { EventNode } from "@cartridge/utils/api/indexer";
-import { Reader } from ".";
+import { shortString } from "starknet";
 
 export interface Task {
   id: string;
@@ -8,6 +7,7 @@ export interface Task {
 }
 
 export class Trophy {
+  key: string;
   id: string;
   hidden: boolean;
   index: number;
@@ -22,6 +22,7 @@ export class Trophy {
   data: string;
 
   constructor(
+    key: string,
     id: string,
     hidden: boolean,
     index: number,
@@ -35,6 +36,7 @@ export class Trophy {
     tasks: Task[],
     data: string,
   ) {
+    this.key = key;
     this.id = id;
     this.hidden = hidden;
     this.index = index;
@@ -49,105 +51,31 @@ export class Trophy {
     this.data = data;
   }
 
-  static from(node: EventNode): Trophy {
+  static from(node: any): Trophy {
     return Trophy.parse(node);
   }
 
-  static parse(node: EventNode): Trophy {
-    try {
-      return Trophy.parseV0(node);
-    } catch {
-      return Trophy.parseV1(node);
-    }
-  }
-
-  static parseV1(node: EventNode): Trophy {
-    const reader = new TrophyReader(node);
+  static parse(node: any): Trophy {
     return {
-      id: reader.popId(),
-      hidden: reader.popHidden(),
-      index: reader.popIndex(),
-      earning: reader.popEarning(),
-      start: reader.popNumber(),
-      end: reader.popNumber(),
-      group: reader.popString(),
-      icon: reader.popString(),
-      title: reader.popString(),
-      description: reader.popByteArray(),
-      tasks: reader.popTasks(),
-      data: "",
+      key: `${node.id}-${node.taskId}`,
+      id: node.id,
+      hidden: node.hidden === 1,
+      index: node.page,
+      earning: node.points,
+      start: node.start === "0x" ? 0 : node.start,
+      end: node.end === "0x" ? 0 : node.end,
+      group: shortString.decodeShortString(node.achievementGroup),
+      icon: shortString.decodeShortString(node.icon),
+      title: shortString.decodeShortString(node.title),
+      description: node.description,
+      tasks: [
+        {
+          id: node.taskId,
+          total: node.taskTotal,
+          description: node.taskDescription,
+        },
+      ],
+      data: node.data,
     };
-  }
-
-  static parseV0(node: EventNode): Trophy {
-    const reader = new TrophyReader(node);
-    return {
-      id: reader.popId(),
-      hidden: reader.popHidden(),
-      index: reader.popIndex(),
-      earning: reader.popEarning(),
-      start: 0,
-      end: 0,
-      group: reader.popGroup(),
-      icon: reader.popIcon(),
-      title: reader.popTitle(),
-      description: reader.popDescription(),
-      tasks: reader.popTasks(),
-      data: "",
-    };
-  }
-}
-
-class TrophyReader extends Reader {
-  constructor(node: EventNode) {
-    super(node);
-  }
-
-  popId(): string {
-    return this.popString(2);
-  }
-
-  popHidden(): boolean {
-    return !this.popBoolean();
-  }
-
-  popIndex(): number {
-    return this.popNumber();
-  }
-
-  popEarning(): number {
-    return this.popNumber();
-  }
-
-  popGroup(): string {
-    return this.popString();
-  }
-
-  popIcon(): string {
-    return this.popString();
-  }
-
-  popTitle(): string {
-    return this.popString();
-  }
-
-  popDescription(): string {
-    return this.popByteArray();
-  }
-
-  popTasks(): Task[] {
-    const tasks = [];
-    const length = this.popNumber();
-    for (let i = 0; i < length; i++) {
-      tasks.push(this.popTask());
-    }
-    return tasks;
-  }
-
-  popTask(): Task {
-    const id = this.popString();
-    const total = this.popNumber();
-    const description = this.popDescription();
-    return { id, total, description };
   }
 }
