@@ -69,7 +69,8 @@ export function useControllerThemePreset() {
       val in controllerConfigs &&
       controllerConfigs[val].theme &&
       origin &&
-      (origin?.startsWith("http://localhost") ||
+      (origin?.startsWith("https://profile.cartridge.gg") ||
+        origin?.startsWith("http://localhost") ||
         toArray(controllerConfigs[val].origin).includes(origin))
     ) {
       return controllerConfigs[val].theme;

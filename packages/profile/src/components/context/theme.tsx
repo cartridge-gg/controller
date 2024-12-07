@@ -76,7 +76,9 @@ export function ThemeProvider({
       typeof val === "string" &&
       val in controllerConfigs &&
       controllerConfigs[val].theme &&
-      (origin?.startsWith("http://localhost") ||
+      origin &&
+      (origin?.startsWith("https://profile.cartridge.gg") ||
+        origin?.startsWith("http://localhost") ||
         toArray(controllerConfigs[val].origin).includes(origin))
     ) {
       setTheme(controllerConfigs[val].theme);
