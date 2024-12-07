@@ -1,4 +1,3 @@
-import { toArray } from "@cartridge/controller";
 import {
   defaultTheme,
   controllerConfigs,
@@ -67,11 +66,7 @@ export function useControllerThemePreset() {
     if (
       typeof val === "string" &&
       val in controllerConfigs &&
-      controllerConfigs[val].theme &&
-      origin &&
-      (origin?.startsWith("https://profile.cartridge.gg") ||
-        origin?.startsWith("http://localhost") ||
-        toArray(controllerConfigs[val].origin).includes(origin))
+      controllerConfigs[val].theme
     ) {
       return controllerConfigs[val].theme;
     }
