@@ -33,7 +33,12 @@ export const WithPreset: Story = {
         "0xdeadbeef": {
           methods: [
             {
-              name: "transfer",
+              name: "Approve Token",
+              entrypoint: "approve",
+              description: "Approve",
+            },
+            {
+              name: "Transfer Money",
               entrypoint: "transfer",
               description: "Transfer",
             },
@@ -42,14 +47,18 @@ export const WithPreset: Story = {
         "0xdeafcafe": {
           methods: [
             {
-              name: "approve",
-              entrypoint: "approve",
-              description: "Approve",
+              name: "Attack Eneemy",
+              entrypoint: "attack",
+              description: "Attack",
+            },
+            {
+              name: "Defend Position",
+              entrypoint: "defend",
+              description: "Define",
             },
           ],
         },
       },
-      messages: [],
     },
     onConnect: () => {},
   },
