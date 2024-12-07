@@ -10,8 +10,17 @@ import {
 } from "@cartridge/ui-next";
 import { ParsedSessionPolicies } from "hooks/session";
 import { formatAddress } from "@cartridge/utils";
-import { Text } from "@chakra-ui/react";
-import { CodeIcon } from "@cartridge/ui";
+import {
+  Divider,
+  HStack,
+  Link,
+  Spacer,
+  Stack,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
+import { CodeIcon, ExternalIcon } from "@cartridge/ui";
+import { Method } from "@cartridge/presets";
 
 export function VerifiedSessionSummary({
   policies,
@@ -37,13 +46,17 @@ export function VerifiedSessionSummary({
             <AccordionTrigger>
               <Text color="text.secondary" fontSize="xs">
                 Approve{" "}
-                <Text as="span" color="text.secondary" fontWeight="bold">
+                <Text as="span" color="text.secondaryAccent" fontWeight="bold">
                   {totalMethods} methods
                 </Text>{" "}
                 {totalMessages > 0 && (
                   <>
                     and{" "}
-                    <Text as="span" color="text.secondary" fontWeight="bold">
+                    <Text
+                      as="span"
+                      color="text.secondaryAccent"
+                      fontWeight="bold"
+                    >
                       {totalMessages} messages
                     </Text>
                   </>
@@ -53,14 +66,60 @@ export function VerifiedSessionSummary({
             <AccordionContent>
               <Card>
                 {Object.entries(policies).map(([category, contracts]) =>
-                  Object.entries(contracts).map(([address, { meta }]) => (
-                    <CardContent>
-                      {meta?.name || category}{" "}
-                      <span className="text-muted-foreground ml-2">
-                        {formatAddress(address)}
-                      </span>
-                    </CardContent>
-                  )),
+                  Object.entries(contracts).map(
+                    ([address, { methods, meta }]) => (
+                      <>
+                        <HStack py={4}>
+                          <Spacer />
+                          <Text color="text.secondary">
+                            {formatAddress(address)}
+                          </Text>
+                          <Link target="_blank">
+                            <ExternalIcon color="text.secondary" />
+                          </Link>
+                        </HStack>
+                        <Stack
+                          border="1px solid"
+                          spacing={0}
+                          borderColor="darkGray.800"
+                          borderRadius="md"
+                          divider={<Divider borderColor="solid.bg" />}
+                        >
+                          {methods.map((method: Method) => (
+                            <VStack
+                              key={method.name}
+                              p={3}
+                              gap={3}
+                              align="flex-start"
+                            >
+                              <HStack w="full">
+                                <Text
+                                  fontSize="xs"
+                                  color="text.secondaryAccent"
+                                  fontWeight="bold"
+                                >
+                                  {method.name}
+                                </Text>
+                                <Spacer />
+                                <Text
+                                  fontSize="xs"
+                                  color="solid.accent"
+                                  fontWeight="bold"
+                                >
+                                  {method.entrypoint}
+                                </Text>
+                              </HStack>
+                              {method.description && (
+                                <Text fontSize="xs" color="text.secondary">
+                                  {method.description}
+                                </Text>
+                              )}
+                            </VStack>
+                          ))}
+                        </Stack>
+                      </>
+                    ),
+                  ),
                 )}
               </Card>
             </AccordionContent>

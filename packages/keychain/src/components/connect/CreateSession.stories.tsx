@@ -35,26 +35,24 @@ export const WithPreset: Story = {
             {
               name: "Approve Token",
               entrypoint: "approve",
-              description: "Approve",
             },
             {
               name: "Transfer Money",
               entrypoint: "transfer",
-              description: "Transfer",
             },
           ],
         },
         "0xdeafcafe": {
           methods: [
             {
-              name: "Attack Eneemy",
+              name: "Attack Enemy",
               entrypoint: "attack",
-              description: "Attack",
+              description: "Attack enemy",
             },
             {
               name: "Defend Position",
               entrypoint: "defend",
-              description: "Define",
+              description: "Define position",
             },
           ],
         },
