@@ -1,30 +1,42 @@
 {
-    "name": "@cartridge/presets",
-    "version": "0.5.2",
-    "description": "Cartridge Presets",
-    "module": "dist/index.js",
-    "types": "dist/index.d.ts",
-    "type": "module",
-    "scripts": {
-        "build:configs": "tsx scripts/generate-configs.ts && prettier --write src/generated/controller-configs.ts",
-        "build:deps": "pnpm build:configs && tsc",
-        "fetch:erc20": "tsx scripts/fetch-erc20.ts && prettier --write src/generated/erc20-metadata.ts",
-        "format": "prettier --write \"src/**/*.ts\"",
-        "format:check": "prettier --check \"src/**/*.ts\""
-    },
-    "exports": {
-        ".": "./dist/index.js"
-    },
-    "files": [
-        "dist"
+  "name": "@cartridge/presets",
+  "version": "0.5.2",
+  "description": "Cartridge Presets",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build:configs": "tsx scripts/generate-configs.ts && prettier --write src/generated/controller-configs.ts",
+    "build:deps": "pnpm build:configs && tsc",
+    "build": "tsup --dts-resolve",
+    "fetch:erc20": "tsx scripts/fetch-erc20.ts && prettier --write src/generated/erc20-metadata.ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\""
+  },
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "tsup": {
+    "entry": [
+      "src/**"
     ],
-    "dependencies": {
-        "@starknet-io/types-js": "0.7.7"
-    },
-    "devDependencies": {
-        "@cartridge/tsconfig": "workspace:*",
-        "@types/node": "^20.11.0",
-        "tsx": "^4.7.0",
-        "typescript": "^5.4.5"
-    }
+    "format": [
+      "esm"
+    ],
+    "splitting": false,
+    "sourcemap": true,
+    "clean": true
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@starknet-io/types-js": "0.7.7"
+  },
+  "devDependencies": {
+    "@cartridge/tsconfig": "workspace:*",
+    "@types/node": "^20.11.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.5"
+  }
 }

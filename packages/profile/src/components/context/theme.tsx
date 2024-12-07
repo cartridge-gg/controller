@@ -1,4 +1,3 @@
-import { toArray } from "@cartridge/controller";
 import {
   defaultTheme,
   controllerConfigs,
@@ -75,9 +74,7 @@ export function ThemeProvider({
     if (
       typeof val === "string" &&
       val in controllerConfigs &&
-      controllerConfigs[val].theme &&
-      (origin?.startsWith("http://localhost") ||
-        toArray(controllerConfigs[val].origin).includes(origin))
+      controllerConfigs[val].theme
     ) {
       setTheme(controllerConfigs[val].theme);
       return;
