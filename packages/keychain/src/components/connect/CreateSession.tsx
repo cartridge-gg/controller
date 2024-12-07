@@ -2,15 +2,23 @@ import { Container, Content, Footer } from "components/layout";
 import { BigNumberish, shortString } from "starknet";
 import { ControllerError } from "utils/connection";
 import { Button, VStack } from "@chakra-ui/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useConnection } from "hooks/connection";
 import { ControllerErrorAlert } from "components/ErrorAlert";
 import { SessionConsent } from "components/connect";
-import { SESSION_EXPIRATION } from "const";
+import { DEFAULT_SESSION_DURATION } from "const";
 import { Upgrade } from "./Upgrade";
 import { ErrorCode } from "@cartridge/account-wasm";
 import { SessionSummary } from "components/SessionSummary";
 import { TypedDataPolicy } from "@cartridge/presets";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Separator,
+} from "@cartridge/ui-next";
 
 export function CreateSession({
   onConnect,
@@ -22,7 +30,11 @@ export function CreateSession({
   const { controller, policies, upgrade, chainId, logout } = useConnection();
   const [isConnecting, setIsConnecting] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
-  const [expiresAt] = useState<bigint>(SESSION_EXPIRATION);
+  const [duration, setDuration] = useState<bigint>(DEFAULT_SESSION_DURATION);
+  const expiresAt = useMemo(
+    () => duration + BigInt(Math.floor(Date.now() / 1000)),
+    [duration],
+  );
   const [maxFee] = useState<BigNumberish>();
   const [error, setError] = useState<ControllerError | Error>();
 
@@ -31,7 +43,7 @@ export function CreateSession({
     const normalizedChainId = normalizeChainId(chainId);
 
     const violatingPolicy = policies.messages?.find(
-      (policy) =>
+      (policy: TypedDataPolicy) =>
         "domain" in policy &&
         (!policy.domain.chainId ||
           normalizeChainId(policy.domain.chainId) !== normalizedChainId),
@@ -94,28 +106,56 @@ export function CreateSession({
       </Content>
 
       <Footer>
+        <Separator />
         {error && isControllerError(error) && (
           <ControllerErrorAlert error={error} />
         )}
         {!error && (
-          <VStack spacing={4} width="full">
-            <Button
-              colorScheme="colorful"
-              isDisabled={isDisabled || isConnecting}
-              isLoading={isConnecting}
-              onClick={() => onCreateSession()}
-              width="full"
-            >
-              {isUpdate ? "update" : "create"} session
-            </Button>
-            <Button
-              onClick={() => onConnect()}
-              isDisabled={isConnecting}
-              width="full"
-            >
-              Skip
-            </Button>
-          </VStack>
+          <div className="flex flex-col">
+            <div className="flex items-center text-sm text-muted-foreground py-4 gap-2">
+              <div className="font-medium">Expires in </div>
+              <Select
+                value={duration.toString()}
+                onValueChange={(val) => setDuration(BigInt(val))}
+              >
+                <SelectTrigger className="w-28">
+                  <SelectValue
+                    defaultValue={(60 * 60 * 24).toString()}
+                    placeholder="1 HR"
+                  />
+                </SelectTrigger>
+
+                <SelectContent>
+                  <SelectItem value={(60 * 60).toString()}>1 HR</SelectItem>
+                  <SelectItem value={(60 * 60 * 24).toString()}>
+                    24 HRS
+                  </SelectItem>
+                  <SelectItem value={(60 * 60 * 24 * 7).toString()}>
+                    1 WEEK
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <VStack spacing={4} width="full">
+              <Button
+                colorScheme="colorful"
+                isDisabled={isDisabled || isConnecting}
+                isLoading={isConnecting}
+                onClick={() => onCreateSession()}
+                width="full"
+              >
+                {isUpdate ? "update" : "create"} session
+              </Button>
+              <Button
+                onClick={() => onConnect()}
+                isDisabled={isConnecting}
+                width="full"
+              >
+                Skip
+              </Button>
+            </VStack>
+          </div>
         )}
       </Footer>
     </Container>

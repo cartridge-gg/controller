@@ -3,13 +3,13 @@
     --background: 135 8% 9%; /* bg.background */
     --foreground: 0 0% 100%; /* text.primary */
 
-    --popover: 135 8% 9%; /* bg.background */
+    --popover: 135 6% 13%; /* bg.primary */
     --popover-foreground: 0 0% 100%; /* text.primary */
 
     --primary: 44 96% 61%; /* brand.primary */
     --primary-foreground: 135 15% 10%; /* bg.primary */
 
-    --secondary: 135 12% 13%; /* bg.primary */
+    --secondary: 135 6% 13%; /* bg.primary */
     --secondary-foreground: 0 0% 100%; /* text.primary */
 
     --tertiary: 120 57% 78%;
@@ -30,7 +30,7 @@
     --destructive: 7 72% 65%; /* text.error */
     --destructive-foreground: 7 72% 65%; /* text.error */
 
-    --border: 0 0% 50%;
+    --border: 135 8% 9%; /* bg.background */
     --input: 120 7.5% 15.69%; /* bg.secondary */
     --ring: 0 0% 100%; /* text.primary */
   }
