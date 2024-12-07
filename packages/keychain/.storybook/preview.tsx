@@ -11,7 +11,6 @@ import {
 import { constants } from "starknet";
 import { getChainName } from "@cartridge/utils";
 import Script from "next/script";
-import { ETH_CONTRACT_ADDRESS } from "../src/utils/token";
 import { ConnectCtx, ConnectionCtx } from "../src/utils/connection/types";
 import { UpgradeInterface } from "../src/hooks/upgrade";
 import {
@@ -20,6 +19,8 @@ import {
   SessionPolicies,
   ControllerTheme,
 } from "@cartridge/presets";
+import { mainnet } from "@starknet-react/chains";
+import { StarknetConfig, publicProvider, voyager } from "@starknet-react/core";
 
 const inter = Inter({ subsets: ["latin"] });
 const ibmPlexMono = IBM_Plex_Mono({
@@ -83,21 +84,26 @@ function Provider({
 }: { parameters: StoryParameters } & PropsWithChildren) {
   const connection = useMockedConnection(parameters.connection);
 
-  let theme: ControllerTheme = defaultTheme;
   if (parameters.preset) {
     const config = controllerConfigs[parameters.preset];
-    theme = config.theme!;
+    connection.theme = config.theme || connection.theme;
     connection.policies = config.policies || connection.policies;
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ConnectionContext.Provider value={connection}>
-        <ControllerThemeProvider theme={theme}>
-          {children}
-        </ControllerThemeProvider>
-      </ConnectionContext.Provider>
-    </QueryClientProvider>
+    <StarknetConfig
+      chains={[mainnet]}
+      explorer={voyager}
+      provider={publicProvider()}
+    >
+      <QueryClientProvider client={queryClient}>
+        <ConnectionContext.Provider value={connection}>
+          <ControllerThemeProvider theme={connection.theme}>
+            {children}
+          </ControllerThemeProvider>
+        </ConnectionContext.Provider>
+      </QueryClientProvider>
+    </StarknetConfig>
   );
 }
 
@@ -131,36 +137,8 @@ export function useMockedConnection({
     rpcUrl: "http://api.cartridge.gg/x/sepolia",
     chainId,
     chainName,
-    policies: {
-      contracts: {
-        [ETH_CONTRACT_ADDRESS]: {
-          methods: [
-            {
-              name: "Approve",
-              entrypoint: "approve",
-              description:
-                "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
-            },
-            {
-              name: "Transfer",
-              entrypoint: "transfer",
-            },
-            {
-              name: "Mint",
-              entrypoint: "mint",
-            },
-            {
-              name: "Burn",
-              entrypoint: "burn",
-            },
-            {
-              name: "Allowance",
-              entrypoint: "allowance",
-            },
-          ],
-        },
-      },
-    },
+    policies: {},
+    theme: defaultTheme,
     prefunds: [],
     hasPrefundRequest: false,
     error: undefined,

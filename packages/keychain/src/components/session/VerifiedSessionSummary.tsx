@@ -19,25 +19,38 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { CodeIcon, ExternalIcon } from "@cartridge/ui";
+import { CodeIcon } from "@cartridge/ui";
 import { Method } from "@cartridge/presets";
+import { useExplorer } from "@starknet-react/core";
 
 export function VerifiedSessionSummary({
+  game,
   policies,
 }: {
+  game: String;
   policies: ParsedSessionPolicies;
 }) {
-  const totalMethods = Object.values(policies).flatMap((contracts) =>
-    Object.values(contracts).flatMap(({ methods }) => methods),
-  ).length;
+  const explorer = useExplorer();
+
+  const totalMethods = Object.values(policies.contracts || {}).reduce(
+    (acc, contract) => {
+      return acc + (contract.methods?.length || 0);
+    },
+    0,
+  );
 
   const totalMessages = policies.messages?.length ?? 0;
 
   return (
     <Card>
       <CardHeader icon={<CodeIcon boxSize="24px" m={2} />}>
-        <Text color="text.primary" fontSize="xs" fontWeight="bold">
-          PLAY GAME
+        <Text
+          color="text.primary"
+          fontSize="xs"
+          fontWeight="bold"
+          textTransform="uppercase"
+        >
+          PLAY {game}
         </Text>
       </CardHeader>
       <CardContent>
@@ -65,62 +78,121 @@ export function VerifiedSessionSummary({
             </AccordionTrigger>
             <AccordionContent>
               <Card>
-                {Object.entries(policies).map(([category, contracts]) =>
-                  Object.entries(contracts).map(
-                    ([address, { methods, meta }]) => (
-                      <>
-                        <HStack py={4}>
-                          <Spacer />
-                          <Text color="text.secondary">
-                            {formatAddress(address)}
-                          </Text>
-                          <Link target="_blank">
-                            <ExternalIcon color="text.secondary" />
-                          </Link>
-                        </HStack>
-                        <Stack
-                          border="1px solid"
-                          spacing={0}
-                          borderColor="darkGray.800"
-                          borderRadius="md"
-                          divider={<Divider borderColor="solid.bg" />}
+                {Object.entries(policies.contracts || {}).map(
+                  ([address, { name, methods }]) => (
+                    <>
+                      <HStack py={4}>
+                        <Text color="text.primary" fontWeight="bold">
+                          {name}
+                        </Text>
+                        <Spacer />
+                        <Link
+                          color="text.secondary"
+                          fontSize="xs"
+                          href={explorer.contract(address)}
+                          target="_blank"
                         >
-                          {methods.map((method: Method) => (
-                            <VStack
-                              key={method.name}
-                              p={3}
-                              gap={3}
-                              align="flex-start"
-                            >
-                              <HStack w="full">
-                                <Text
-                                  fontSize="xs"
-                                  color="text.secondaryAccent"
-                                  fontWeight="bold"
-                                >
-                                  {method.name}
+                          {formatAddress(address, { first: 5, last: 5 })}
+                        </Link>
+                      </HStack>
+                      <Stack
+                        border="1px solid"
+                        spacing={0}
+                        borderColor="darkGray.800"
+                        borderRadius="md"
+                        divider={<Divider borderColor="solid.bg" />}
+                      >
+                        {methods.map((method: Method) => (
+                          <VStack
+                            key={method.name}
+                            p={3}
+                            gap={3}
+                            align="flex-start"
+                          >
+                            <HStack w="full">
+                              <Text
+                                fontSize="xs"
+                                color="text.primary"
+                                fontWeight="bold"
+                              >
+                                {method.name}
+                              </Text>
+                              <Spacer />
+                              <Text
+                                fontSize="xs"
+                                color="text.secondaryAccent"
+                                fontWeight="bold"
+                              >
+                                {method.entrypoint}
+                              </Text>
+                            </HStack>
+                            {method.description && (
+                              <Text fontSize="xs" color="text.secondary">
+                                {method.description}
+                              </Text>
+                            )}
+                          </VStack>
+                        ))}
+                      </Stack>
+                    </>
+                  ),
+                )}
+
+                {policies.messages?.map((message) => (
+                  <VStack
+                    key={message.primaryType}
+                    py={4}
+                    w="full"
+                    align="flex-start"
+                  >
+                    <Text fontSize="sm" fontWeight="bold" mb={4}>
+                      Messages
+                    </Text>
+                    <Stack
+                      border="1px solid"
+                      spacing={0}
+                      borderColor="darkGray.800"
+                      borderRadius="md"
+                      divider={<Divider borderColor="solid.bg" />}
+                      w="full"
+                    >
+                      {Object.entries(message.types).map(
+                        ([typeName, fields]) => (
+                          <VStack
+                            key={typeName}
+                            p={3}
+                            gap={3}
+                            align="flex-start"
+                          >
+                            <HStack w="full">
+                              <Text
+                                fontSize="xs"
+                                color="text.primary"
+                                fontWeight="bold"
+                              >
+                                {typeName}
+                              </Text>
+                            </HStack>
+                            {fields.map((field) => (
+                              <HStack key={field.name} w="full">
+                                <Text fontSize="xs" color="text.secondary">
+                                  {field.name}
                                 </Text>
                                 <Spacer />
                                 <Text
                                   fontSize="xs"
-                                  color="solid.accent"
-                                  fontWeight="bold"
+                                  color="text.secondaryAccent"
                                 >
-                                  {method.entrypoint}
+                                  {field.type}
                                 </Text>
                               </HStack>
-                              {method.description && (
-                                <Text fontSize="xs" color="text.secondary">
-                                  {method.description}
-                                </Text>
-                              )}
-                            </VStack>
-                          ))}
-                        </Stack>
-                      </>
-                    ),
-                  ),
-                )}
+                            ))}
+                          </VStack>
+                        ),
+                      )}
+                    </Stack>
+                  </VStack>
+                ))}
               </Card>
             </AccordionContent>
           </AccordionItem>

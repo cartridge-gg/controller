@@ -21,7 +21,7 @@ export function RegisterSession({
   onConnect: (transaction_hash?: string) => void;
   publicKey?: string;
 }) {
-  const { controller } = useConnection();
+  const { controller, theme } = useConnection();
   const [expiresAt] = useState<bigint>(SESSION_EXPIRATION);
 
   const transactions = useMemo(() => {
@@ -76,9 +76,9 @@ export function RegisterSession({
       buttonText="Register Session"
     >
       <Content>
-        <SessionConsent />
+        <SessionConsent isVerified={policies?.verified} />
         {policies?.verified ? (
-          <VerifiedSessionSummary policies={policies} />
+          <VerifiedSessionSummary game={theme.name} policies={policies} />
         ) : (
           <UnverifiedSessionSummary policies={policies} />
         )}

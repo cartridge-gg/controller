@@ -1,7 +1,7 @@
 import { Container, Content, Footer } from "components/layout";
 import { BigNumberish, shortString } from "starknet";
 import { ControllerError } from "utils/connection";
-import { Button, HStack, VStack } from "@chakra-ui/react";
+import { Button, HStack } from "@chakra-ui/react";
 import { useCallback, useEffect, useState } from "react";
 import { useConnection } from "hooks/connection";
 import { ControllerErrorAlert } from "components/ErrorAlert";
@@ -24,7 +24,7 @@ export function CreateSession({
   onConnect: (transaction_hash?: string) => void;
   isUpdate?: boolean;
 }) {
-  const { controller, upgrade, chainId, logout } = useConnection();
+  const { controller, upgrade, chainId, theme, logout } = useConnection();
   const [isConnecting, setIsConnecting] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
   const [expiresAt] = useState<bigint>(SESSION_EXPIRATION);
@@ -78,7 +78,7 @@ export function CreateSession({
   if (upgrade.available) {
     return <Upgrade />;
   }
-
+  console.log(policies);
   return (
     <Container
       title={!isUpdate ? "Create Session" : "Update Session"}
@@ -96,12 +96,11 @@ export function CreateSession({
       <Content gap={6}>
         <SessionConsent isVerified={policies?.verified} />
         {policies?.verified ? (
-          <VerifiedSessionSummary policies={policies} />
+          <VerifiedSessionSummary game={theme.name} policies={policies} />
         ) : (
           <UnverifiedSessionSummary policies={policies} />
         )}
       </Content>
-
       <Footer>
         {error && isControllerError(error) && (
           <ControllerErrorAlert error={error} />

@@ -1,5 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { CreateSession } from "./CreateSession";
+import { ETH_CONTRACT_ADDRESS } from "@cartridge/utils";
+import { parseSessionPolicies } from "hooks/session";
+import { controllerConfigs } from "@cartridge/presets";
 
 const meta: Meta<typeof CreateSession> = {
   component: CreateSession,
@@ -18,6 +21,39 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
+    policies: parseSessionPolicies({
+      verified: false,
+      policies: {
+        contracts: {
+          [ETH_CONTRACT_ADDRESS]: {
+            methods: [
+              {
+                name: "Approve",
+                entrypoint: "approve",
+                description:
+                  "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
+              },
+              {
+                name: "Transfer",
+                entrypoint: "transfer",
+              },
+              {
+                name: "Mint",
+                entrypoint: "mint",
+              },
+              {
+                name: "Burn",
+                entrypoint: "burn",
+              },
+              {
+                name: "Allowance",
+                entrypoint: "allowance",
+              },
+            ],
+          },
+        },
+      },
+    }),
     onConnect: () => {},
   },
 };
@@ -27,37 +63,10 @@ export const WithPreset: Story = {
     preset: "eternum",
   },
   args: {
-    policies: {
+    policies: parseSessionPolicies({
       verified: true,
-      contracts: {
-        "0xdeadbeef": {
-          methods: [
-            {
-              name: "Approve Token",
-              entrypoint: "approve",
-            },
-            {
-              name: "Transfer Money",
-              entrypoint: "transfer",
-            },
-          ],
-        },
-        "0xdeafcafe": {
-          methods: [
-            {
-              name: "Attack Enemy",
-              entrypoint: "attack",
-              description: "Attack enemy",
-            },
-            {
-              name: "Defend Position",
-              entrypoint: "defend",
-              description: "Define position",
-            },
-          ],
-        },
-      },
-    },
+      policies: controllerConfigs["eternum"].policies!,
+    }),
     onConnect: () => {},
   },
 };
