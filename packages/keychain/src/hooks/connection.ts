@@ -27,7 +27,6 @@ import {
   controllerConfigs,
   ControllerTheme,
 } from "@cartridge/presets";
-import { toArray } from "@cartridge/controller";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
 
 const CHAIN_ID_TIMEOUT = 3000;
@@ -153,10 +152,12 @@ export function useConnectionValue() {
     // Application provided policies take precedence over preset policies.
     if (
       presetParam &&
-      presetParam in controllerConfigs &&
-      origin &&
-      (origin.startsWith("http://localhost") ||
-        toArray(controllerConfigs[presetParam].origin).includes(origin))
+      presetParam in controllerConfigs
+      // TODO: Reenable
+      //  &&
+      // origin &&
+      // (origin.startsWith("http://localhost") ||
+      //   toArray(controllerConfigs[presetParam].origin).includes(origin))
     ) {
       setTheme(controllerConfigs[presetParam].theme || defaultTheme);
 
