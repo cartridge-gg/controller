@@ -31,7 +31,7 @@
     "storybook:build": "storybook build"
   },
   "dependencies": {
-    "@cartridge/utils": "workspace:^",
+    "@cartridge/utils": "workspace:*",
     "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-accordion": "^1.2.1",
     "@radix-ui/react-alert-dialog": "^1.0.5",
@@ -73,7 +73,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@cartridge/tsconfig": "workspace:^",
+    "@cartridge/tsconfig": "workspace:*",
     "@storybook/addon-essentials": "^8.3.2",
     "@storybook/addon-interactions": "^8.3.2",
     "@storybook/addon-links": "^8.3.2",

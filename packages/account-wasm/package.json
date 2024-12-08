@@ -48,7 +48,7 @@
     }
   },
   "devDependencies": {
-    "@cartridge/tsconfig": "workspace:^",
+    "@cartridge/tsconfig": "workspace:*",
     "tsup": "^8.0.1",
     "typescript": "^5.0.3",
     "wasm-pack": "^0.13.0"
