@@ -89,6 +89,15 @@ export function SessionSummary({
         />
       ))}
 
+      {Object.entries(summary.VRF).map(([address, { methods, meta }]) => (
+        <Contract
+          key={address}
+          address={address}
+          title={meta.name}
+          methods={methods}
+        />
+      ))}
+
       {Object.entries(summary.default).map(([address, { methods }], i) => (
         <Contract
           key={address}
