@@ -13,6 +13,7 @@ import {
 export type SessionSummary = {
   default: ContractPolicies;
   dojo: Record<string, ContractPolicy & { meta: { dojoName: string } }>;
+  VRF: Record<string, ContractPolicy & { meta: { name: string } }>;
   ERC20: Record<
     string,
     ContractPolicy & { meta?: Omit<ERC20Metadata, "instance"> }
@@ -35,6 +36,7 @@ export function useSessionSummary({
   const res: SessionSummary = {
     default: {},
     dojo: {},
+    VRF: {},
     ERC20: {},
     ERC721: {},
     messages: policies.messages,
@@ -70,6 +72,12 @@ export function useSessionSummary({
               return;
             case "ERC721":
               res.ERC721[contractAddress] = policies;
+              return;
+            case "VRF":
+              res.VRF[contractAddress] = {
+                meta: { name: "Cartridge VRF" },
+                ...policies,
+              };
               return;
             case "default":
             default: {
@@ -108,11 +116,19 @@ const IERC20_ID = "";
 const IERC721_ID =
   "0x33eb2f84c309543403fd69f0d0f363781ef06ef6faeb0131ff16ea3175bd943";
 
+const VRF_ADDRESS = getChecksumAddress(
+  "0x051Fea4450Da9D6aeE758BDEbA88B2f665bCbf549D2C61421AA724E9AC0Ced8F",
+);
+
 async function checkContractType(
   provider: Provider,
   contractAddress: string,
 ): Promise<ContractType> {
   try {
+    if (getChecksumAddress(contractAddress) === VRF_ADDRESS) {
+      return "VRF";
+    }
+
     // SNIP-5: check with via `support_interface` method
     const [erc20Res] = await provider.callContract({
       contractAddress,
