@@ -1,5 +1,398 @@
 {
-  "origin": "",
+  "origin": "eternum.realms.world",
+  "policies": {
+    "contracts": {
+      "0x047d88C65A627b38d728a783382Af648D79AED80Bf396047F9E839e8501d7F6D": {
+        "name": "Pillage",
+        "description": "Allows you raid a structure and pillage resources",
+        "methods": [
+          {
+            "name": "Battle Pillage",
+            "description": "Pillage a structure",
+            "entrypoint": "battle_pillage"
+          }
+        ]
+      },
+      "0x001cE27792b23cE379398F5468b69739e89314b2657Cfa3A9c388BDFD33DcFbf": {
+        "name": "Battle contract",
+        "description": "Required to engage in battles",
+        "methods": [
+          {
+            "name": "Battle Start",
+            "description": "Start a battle",
+            "entrypoint": "battle_start"
+          },
+          {
+            "name": "Battle Force Start",
+            "description": "Force start a battle",
+            "entrypoint": "battle_force_start"
+          },
+          {
+            "name": "Battle Join",
+            "description": "Join a battle",
+            "entrypoint": "battle_join"
+          },
+          {
+            "name": "Battle Leave",
+            "description": "Leave a battle",
+            "entrypoint": "battle_leave"
+          },
+          {
+            "name": "Battle Claim",
+            "description": "Claim a structure after a battle",
+            "entrypoint": "battle_claim"
+          }
+        ]
+      },
+      "0x03c212B90cC4f236BE2C014e0EE0D870277b2cC313217a73D41387E255e806ED": {
+        "name": "Leave battle contract",
+        "description": "Allows armies to leave a battle",
+        "methods": [
+          {
+            "name": "Leave Battle",
+            "description": "Leave a battle",
+            "entrypoint": "leave_battle"
+          },
+          {
+            "name": "Leave Battle If Ended",
+            "description": "Leave a battle if its ended",
+            "entrypoint": "leave_battle_if_ended"
+          }
+        ]
+      },
+      "0x036b82076142f07fbD8bF7B2CABF2e6B190082c0b242c6eCC5e14B2C96d1763c": {
+        "name": "Building contract",
+        "description": "Allows to manage buildings",
+        "methods": [
+          {
+            "name": "Create",
+            "description": "Create a building",
+            "entrypoint": "create"
+          },
+          {
+            "name": "Pause Production",
+            "description": "Pause the production of a building",
+            "entrypoint": "pause_production"
+          },
+          {
+            "name": "Resume Production",
+            "description": "Resume production of a building",
+            "entrypoint": "resume_production"
+          },
+          {
+            "name": "Destroy a building",
+            "description": "Destroy a building",
+            "entrypoint": "destroy"
+          }
+        ]
+      },
+      "0x012A0ca4558518d6aF296b8F393a917Bb89b3e78Ba33544814B7D9138cE4816e": {
+        "name": "Guild contract",
+        "description": "Allows guild utilities",
+        "methods": [
+          {
+            "name": "Create Guild",
+            "description": "Creates a new guild",
+            "entrypoint": "create_guild"
+          },
+          {
+            "name": "Join Guild",
+            "description": "Join an existing guild",
+            "entrypoint": "join_guild"
+          },
+          {
+            "name": "Whitelist Player",
+            "description": "Add a player to the guild's whitelist",
+            "entrypoint": "whitelist_player"
+          },
+          {
+            "name": "Leave Guild",
+            "description": "Exit the current guild",
+            "entrypoint": "leave_guild"
+          },
+          {
+            "name": "Transfer Guild Ownership",
+            "description": "Transfer ownership of the guild to another player",
+            "entrypoint": "transfer_guild_ownership"
+          },
+          {
+            "name": "Remove Guild Member",
+            "description": "Remove a member from the guild",
+            "entrypoint": "remove_guild_member"
+          },
+          {
+            "name": "Remove Player From Whitelist",
+            "description": "Remove a player from the guild's whitelist",
+            "entrypoint": "remove_player_from_whitelist"
+          }
+        ]
+      },
+      "0x03BA22B088a94093F781A968E3f82a88B2Ab5047e9C309C93066f00E37334dE6": {
+        "name": "Hyperstructure contract",
+        "description": "Handles the creation and management of hyperstructures",
+        "methods": [
+          {
+            "name": "Create",
+            "description": "Create a new hyperstructure",
+            "entrypoint": "create"
+          },
+          {
+            "name": "Contribute To Construction",
+            "description": "Contribute resources to hyperstructure construction",
+            "entrypoint": "contribute_to_construction"
+          },
+          {
+            "name": "Set Co Owners",
+            "description": "Set additional owners for the hyperstructure",
+            "entrypoint": "set_co_owners"
+          },
+          {
+            "name": "End Game",
+            "description": "Terminates the current game season once you've reached enough points",
+            "entrypoint": "end_game"
+          },
+          {
+            "name": "Set Access",
+            "description": "Configure access permissions for contributions to the hyperstructure",
+            "entrypoint": "set_access"
+          }
+        ]
+      },
+      "0x07a5e4dFaBA7AcEd9ADD65913d44311D74E12F85C55503EBF903103B102847e5": {
+        "name": "AMM liquidity contract",
+        "description": "Manages liquidity for the Automated Market Maker",
+        "methods": [
+          {
+            "name": "Add",
+            "description": "Add liquidity to the pool",
+            "entrypoint": "add"
+          },
+          {
+            "name": "Remove",
+            "description": "Remove liquidity from the pool",
+            "entrypoint": "remove"
+          }
+        ]
+      },
+      "0x00CC0C73458864B9e0e884DE532b7EBFbe757E7429fB2c736aBd5E129e5FB81A": {
+        "name": "Exploration contract",
+        "description": "Allows you to move to unexplored hexes on the map",
+        "methods": [
+          {
+            "name": "Explore",
+            "description": "Explore an uncharted hex on the game map",
+            "entrypoint": "explore"
+          }
+        ]
+      },
+      "0x027952F3C1C681790a168E5422C21278d925CD1BDD8DAf1CdE8E63aFDfD19E20": {
+        "name": "Naming contract",
+        "description": "Manages entity naming in the game",
+        "methods": [
+          {
+            "name": "Set Entity Name",
+            "description": "Assign a custom name to a game entity",
+            "entrypoint": "set_entity_name"
+          }
+        ]
+      },
+      "0x024A8AFd7523e933d37eA2c91aD629fCCde8Ce23cEFA3c324C6248Ca929e3862": {
+        "name": "Realms contract",
+        "description": "Manages realm-related actions",
+        "methods": [
+          {
+            "name": "Upgrade Level",
+            "description": "Upgrade the level of a realm",
+            "entrypoint": "upgrade_level"
+          },
+          {
+            "name": "Quest Claim",
+            "description": "Claim rewards from completed quests",
+            "entrypoint": "quest_claim"
+          }
+        ]
+      },
+      "0x0161A4CF2e207359dC7Dbf912b21e9099B7729bedE2544F849F384fCb166a109": {
+        "name": "Resource bridge contract",
+        "description": "Manages bridge transfers between L2 and Eternum",
+        "methods": [
+          {
+            "name": "Deposit Initial",
+            "description": "Initial deposit of resources for bridge transfer",
+            "entrypoint": "deposit_initial"
+          },
+          {
+            "name": "Deposit",
+            "description": "Deposit additional resources for bridge transfer",
+            "entrypoint": "deposit"
+          },
+          {
+            "name": "Start Withdraw",
+            "description": "Initiate a withdrawal process",
+            "entrypoint": "start_withdraw"
+          },
+          {
+            "name": "Finish Withdraw",
+            "description": "Finalize a withdrawal process",
+            "entrypoint": "finish_withdraw"
+          }
+        ]
+      },
+      "0x0763fa425503dB5D4bdfF040f6f7509E6eCd8e3F7E75450B9b28f8fc4cDD2877": {
+        "name": "Resource contract",
+        "description": "In-game resource management",
+        "methods": [
+          {
+            "name": "Approve",
+            "description": "Approve resource transfer",
+            "entrypoint": "approve"
+          },
+          {
+            "name": "Send",
+            "description": "Send resources to another entity",
+            "entrypoint": "send"
+          },
+          {
+            "name": "Pickup",
+            "description": "Collect available resources after approval",
+            "entrypoint": "pickup"
+          }
+        ]
+      },
+      "0x030a4A6472FF2BcFc68d709802E5A9F31F5AC01D04fa97e37D32CE7568741262": {
+        "name": "AMM swap contract",
+        "description": "Handles token swaps in the Automated Market Maker",
+        "methods": [
+          {
+            "name": "Buy",
+            "description": "Purchase tokens from the liquidity pool",
+            "entrypoint": "buy"
+          },
+          {
+            "name": "Sell",
+            "description": "Sell tokens to the liquidity pool",
+            "entrypoint": "sell"
+          }
+        ]
+      },
+      "0x0003A6bBB82F9E670c99647F3B0C4AaF1Be82Be712E1A393336B79B9DAB44cc5": {
+        "name": "Market contract",
+        "description": "Manages trading orders in the in-game market",
+        "methods": [
+          {
+            "name": "Create Order",
+            "description": "Create a new trading order",
+            "entrypoint": "create_order"
+          },
+          {
+            "name": "Accept Order",
+            "description": "Accept a trading order",
+            "entrypoint": "accept_order"
+          },
+          {
+            "name": "Accept Partial Order",
+            "description": "Accept a partial trading order",
+            "entrypoint": "accept_partial_order"
+          },
+          {
+            "name": "Cancel Order",
+            "description": "Cancel a trading order",
+            "entrypoint": "cancel_order"
+          }
+        ]
+      },
+      "0x0119Bf067E05955c0F17f1d4900977fAcBDc10e046E2319FD4d1320f5cc8Be38": {
+        "name": "Map travel contract",
+        "description": "Manages player movement across the game map",
+        "methods": [
+          {
+            "name": "Travel Hex",
+            "description": "Move to a specific hex on the map",
+            "entrypoint": "travel_hex"
+          }
+        ]
+      },
+      "0x046998418397972011E93D370c2f7ac06184AD7Ed9e0811C5c9f88C1feF9445F": {
+        "name": "Army contract",
+        "description": "Manages army-related actions",
+        "methods": [
+          {
+            "name": "Army Create",
+            "description": "Create a new army",
+            "entrypoint": "army_create"
+          },
+          {
+            "name": "Army Delete",
+            "description": "Delete an existing army",
+            "entrypoint": "army_delete"
+          },
+          {
+            "name": "Army Buy Troops",
+            "description": "Buy troops for an army",
+            "entrypoint": "army_buy_troops"
+          },
+          {
+            "name": "Army Merge Troops",
+            "description": "Merge troops from multiple armies",
+            "entrypoint": "army_merge_troops"
+          }
+        ]
+      }
+    },
+    "messages": [
+      {
+        "types": {
+          "StarknetDomain": [
+            {
+              "name": "name",
+              "type": "shortstring"
+            },
+            {
+              "name": "version",
+              "type": "shortstring"
+            },
+            {
+              "name": "chainId",
+              "type": "shortstring"
+            },
+            {
+              "name": "revision",
+              "type": "shortstring"
+            }
+          ],
+          "eternum-Message": [
+            {
+              "name": "identity",
+              "type": "ContractAddress"
+            },
+            {
+              "name": "channel",
+              "type": "shortstring"
+            },
+            {
+              "name": "content",
+              "type": "string"
+            },
+            {
+              "name": "timestamp",
+              "type": "felt"
+            },
+            {
+              "name": "salt",
+              "type": "felt"
+            }
+          ]
+        },
+        "primaryType": "eternum-Message",
+        "domain": {
+          "name": "Eternum",
+          "version": "1",
+          "chainId": "SN_SEPOLIA",
+          "revision": "1"
+        }
+      }
+    ]
+  },
   "theme": {
     "name": "Eternum",
     "icon": "/whitelabel/eternum/icon.svg",

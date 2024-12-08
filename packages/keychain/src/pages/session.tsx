@@ -119,7 +119,7 @@ export default function Session() {
   // If yes, check if the policies of the session are the same as the ones that are
   // currently being requested. Return existing session to the callback uri if policies match.
   useEffect(() => {
-    if (!controller || !origin) {
+    if (!controller || !origin || !policies) {
       return;
     }
 
@@ -148,12 +148,20 @@ export default function Session() {
     return <PageLoading />;
   }
 
+  if (!policies) {
+    return <>No Session Policies</>;
+  }
+
   return (
     <>
       {queries.public_key ? (
-        <RegisterSession onConnect={onConnect} publicKey={queries.public_key} />
+        <RegisterSession
+          policies={policies}
+          onConnect={onConnect}
+          publicKey={queries.public_key}
+        />
       ) : (
-        <CreateSession onConnect={onConnect} />
+        <CreateSession policies={policies} onConnect={onConnect} />
       )}
     </>
   );

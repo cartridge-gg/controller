@@ -55,23 +55,29 @@ function Home() {
     case "connect": {
       posthog?.capture("Call Connect");
 
-      // TODO: show missing policies if mismatch
-      if (
-        !(
-          Object.keys(policies?.contracts ?? {}).length +
-          (policies?.messages?.length ?? 0)
-        ) ||
-        controller.session(policies)
-      ) {
+      if (!policies) {
         context.resolve({
           code: ResponseCodes.SUCCESS,
           address: controller.address,
-          policies,
         });
+
+        return <></>;
       }
 
+      if (controller.session(policies)) {
+        context.resolve({
+          code: ResponseCodes.SUCCESS,
+          address: controller.address,
+          policies: policies,
+        });
+
+        return <></>;
+      }
+
+      // TODO: show missing policies if mismatch
       return (
         <CreateSession
+          policies={policies!}
           onConnect={(policies) => {
             context.resolve({
               code: ResponseCodes.SUCCESS,

@@ -4,20 +4,14 @@ import { useConnection } from "hooks/connection";
 import { useMemo } from "react";
 import Link from "next/link";
 
-const verified: { id: string; url: string }[] = [
-  { id: "flippyflop", url: "https://flippyflop.gg" },
-];
-
-function isVerified(url: string) {
-  return !!verified.find((v) => new URL(v.url).host === new URL(url).host);
-}
-
 export function SessionConsent({
+  isVerified,
   variant = "default",
 }: {
+  isVerified: boolean;
   variant?: "default" | "slot" | "signup";
 }) {
-  const { origin, policies } = useConnection();
+  const { origin } = useConnection();
   const hostname = useMemo(
     () => (origin ? new URL(origin).hostname : undefined),
     [origin],
@@ -38,7 +32,7 @@ export function SessionConsent({
     case "default":
       return hostname && origin ? (
         <HStack color="text.secondary" fontSize="xs">
-          {isVerified(origin) && (
+          {isVerified && (
             <Link
               href="https://github.com/cartridge-gg/controller/blob/main/packages/controller/src/presets.ts"
               target="_blank"
@@ -56,10 +50,10 @@ export function SessionConsent({
             <Text as="span" color="text.secondaryAccent" fontWeight="bold">
               {origin}
             </Text>{" "}
-            to perform the following actions (
-            {Object.keys(policies.contracts ?? {}).length +
-              (policies.messages?.length ?? 0)}
-            ) on your behalf
+            and allow the game to{" "}
+            <Text as="span" color="text.secondaryAccent" fontWeight="bold">
+              perform actions on your behalf
+            </Text>
           </Text>
         </HStack>
       ) : null;

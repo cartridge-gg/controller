@@ -39,18 +39,19 @@ export type SessionPolicies = {
 export type ContractPolicies = Record<string, ContractPolicy>;
 
 export type ContractPolicy = {
-  methods: Method[];
+  name?: string;
   description?: string;
+  methods: Method[];
 };
 
 export type Method = {
   name?: string;
-  entrypoint: string;
   description?: string;
+  entrypoint: string;
 };
 
 export type SignMessagePolicy = TypedDataPolicy & {
-  name: string;
+  name?: string;
   description?: string;
 };
 

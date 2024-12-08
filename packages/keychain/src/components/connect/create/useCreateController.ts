@@ -121,8 +121,8 @@ export function useCreateController({
 
           if (
             loginMode === LoginMode.Webauthn ||
-            Object.keys(policies.contracts ?? {}).length +
-              (policies.messages?.length ?? 0) ===
+            Object.keys(policies?.contracts ?? {}).length +
+              (policies?.messages?.length ?? 0) ===
               0
           ) {
             await doLogin({
