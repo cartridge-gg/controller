@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -22,6 +22,8 @@ import {
 import { CodeIcon } from "@cartridge/ui";
 import { Method } from "@cartridge/presets";
 import { useExplorer } from "@starknet-react/core";
+import { useChainId } from "hooks/connection";
+import { constants } from "starknet";
 
 export function VerifiedSessionSummary({
   game,
@@ -30,14 +32,14 @@ export function VerifiedSessionSummary({
   game: String;
   policies: ParsedSessionPolicies;
 }) {
+  const chainId = useChainId();
   const explorer = useExplorer();
 
-  const totalMethods = Object.values(policies.contracts || {}).reduce(
-    (acc, contract) => {
+  const totalMethods = useMemo(() => {
+    return Object.values(policies.contracts || {}).reduce((acc, contract) => {
       return acc + (contract.methods?.length || 0);
-    },
-    0,
-  );
+    }, 0);
+  }, [policies.contracts]);
 
   const totalMessages = policies.messages?.length ?? 0;
 
@@ -88,8 +90,12 @@ export function VerifiedSessionSummary({
                         <Spacer />
                         <Link
                           color="text.secondary"
-                          fontSize="xs"
-                          href={explorer.contract(address)}
+                          href={
+                            chainId === constants.StarknetChainId.SN_MAIN ||
+                            chainId === constants.StarknetChainId.SN_SEPOLIA
+                              ? explorer.contract(address)
+                              : `#` // TODO: Add explorer for worlds.dev
+                          }
                           target="_blank"
                         >
                           {formatAddress(address, { first: 5, last: 5 })}

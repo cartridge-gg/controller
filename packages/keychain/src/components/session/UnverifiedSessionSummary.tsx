@@ -25,12 +25,15 @@ import { toArray } from "@cartridge/controller";
 import { useExplorer } from "@starknet-react/core";
 import { ParsedSessionPolicies } from "hooks/session";
 import { SignMessages } from "./SignMessages";
+import { useChainId } from "hooks/connection";
+import { constants } from "starknet";
 
 export function UnverifiedSessionSummary({
   policies,
 }: {
   policies: ParsedSessionPolicies;
 }) {
+  const chainId = useChainId();
   const explorer = useExplorer();
 
   return (
@@ -90,7 +93,12 @@ export function UnverifiedSessionSummary({
                         <Link
                           color="text.secondary"
                           fontSize="xs"
-                          href={explorer.contract(address)}
+                          href={
+                            chainId === constants.StarknetChainId.SN_MAIN ||
+                            chainId === constants.StarknetChainId.SN_SEPOLIA
+                              ? explorer.contract(address)
+                              : `#` // TODO: Add explorer for worlds.dev
+                          }
                           target="_blank"
                         >
                           {formatAddress(address, { first: 5, last: 5 })}
