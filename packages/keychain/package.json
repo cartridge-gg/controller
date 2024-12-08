@@ -16,13 +16,13 @@
     "test:storybook": "pnpm concurrently -k -s first -n \"SB,TEST\" -c \"magenta,blue\" \"pnpm storybook:build --quiet && pnpm http-server storybook-static --port 6006 --silent\" \"pnpm wait-on tcp:6006 && pnpm test-storybook\""
   },
   "dependencies": {
-    "@cartridge/account-wasm": "workspace:^",
-    "@cartridge/controller": "workspace:^",
+    "@cartridge/account-wasm": "workspace:*",
+    "@cartridge/controller": "workspace:*",
     "@cartridge/penpal": "^6.2.3",
     "@cartridge/presets": "workspace:*",
-    "@cartridge/ui": "workspace:^",
-    "@cartridge/ui-next": "workspace:^",
-    "@cartridge/utils": "workspace:^",
+    "@cartridge/ui": "workspace:*",
+    "@cartridge/ui-next": "workspace:*",
+    "@cartridge/utils": "workspace:*",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@starknet-io/types-js": "^0.7.7",
@@ -51,7 +51,7 @@
     "wagmi": "^1.4.12"
   },
   "devDependencies": {
-    "@cartridge/tsconfig": "workspace:^",
+    "@cartridge/tsconfig": "workspace:*",
     "@chromatic-com/storybook": "^1.9.0",
     "@jest/globals": "^29.7.0",
     "@storybook/addon-essentials": "^8.2.9",

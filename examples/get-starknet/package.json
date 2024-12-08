@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@cartridge/controller": "workspace:^",
+    "@cartridge/controller": "workspace:*",
     "@emotion/react": "^11.11.1",
     "cra-template-typescript": "1.2.0",
     "get-starknet": "^3.0.1",
@@ -13,7 +13,7 @@
     "starknet": "^6.6.0"
   },
   "devDependencies": {
-    "@cartridge/tsconfig": "workspace:^"
+    "@cartridge/tsconfig": "workspace:*"
   },
   "scripts": {
     "start": "react-scripts start",
