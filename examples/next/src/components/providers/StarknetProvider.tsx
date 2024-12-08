@@ -116,7 +116,7 @@ const controller = new ControllerConnector({
     process.env.NEXT_PUBLIC_PROFILE_DEPLOYMENT_URL ??
     process.env.NEXT_PUBLIC_PROFILE_FRAME_URL,
   slot: "profile-example",
-  //theme: "dope-wars",
+  theme: "dope-wars",
   namespace: "dopewars",
   tokens: {
     erc20: [

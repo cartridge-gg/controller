@@ -128,8 +128,7 @@ export function useConnectionValue() {
     // Provides backward compatability for Controler <= v0.5.1
     if (themeParam) {
       const decodedPreset = decodeURIComponent(themeParam);
-      const parsedTheme = JSON.parse(decodedPreset) as ControllerTheme;
-      setTheme(parsedTheme);
+      setTheme(controllerConfigs[decodedPreset].theme || defaultTheme);
     }
 
     // URL policies take precedence over preset policies
