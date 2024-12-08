@@ -79,7 +79,7 @@ export function CreateSession({
   if (upgrade.available) {
     return <Upgrade />;
   }
-  console.log(policies);
+
   return (
     <Container
       title={!isUpdate ? "Create Session" : "Update Session"}
