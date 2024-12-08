@@ -1,7 +1,7 @@
 import { Container, Content, Footer } from "components/layout";
 import { BigNumberish, shortString } from "starknet";
 import { ControllerError } from "utils/connection";
-import { Button, HStack } from "@chakra-ui/react";
+import { Button, HStack, Text, Checkbox } from "@chakra-ui/react";
 import { useCallback, useEffect, useState } from "react";
 import { useConnection } from "hooks/connection";
 import { ControllerErrorAlert } from "components/ErrorAlert";
@@ -27,6 +27,7 @@ export function CreateSession({
   const { controller, upgrade, chainId, theme, logout } = useConnection();
   const [isConnecting, setIsConnecting] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
+  const [isConsent, setIsConsent] = useState(false);
   const [expiresAt] = useState<bigint>(SESSION_EXPIRATION);
   const [maxFee] = useState<BigNumberish>();
   const [error, setError] = useState<ControllerError | Error>();
@@ -102,6 +103,29 @@ export function CreateSession({
         )}
       </Content>
       <Footer>
+        {!policies?.verified && (
+          <HStack
+            p={3}
+            mb={1}
+            spacing={5}
+            border="1px solid"
+            borderRadius="md"
+            borderColor="solid.primary"
+            onClick={() => setIsConsent(!isConsent)}
+            cursor="pointer"
+          >
+            <Checkbox
+              color="red"
+              colorScheme="red"
+              borderColor="error.foreground"
+              isChecked={isConsent}
+            />
+            <Text fontSize="xs" textColor="error.foreground">
+              This session is not whitelisted. I agree to grant it permission to
+              perform the above actions on my behalf
+            </Text>
+          </HStack>
+        )}
         {error && isControllerError(error) && (
           <ControllerErrorAlert error={error} />
         )}
@@ -116,7 +140,11 @@ export function CreateSession({
             </Button>
             <Button
               colorScheme="colorful"
-              isDisabled={isDisabled || isConnecting}
+              isDisabled={
+                isDisabled ||
+                isConnecting ||
+                (!policies?.verified && !isConsent)
+              }
               isLoading={isConnecting}
               onClick={() => onCreateSession()}
               width="full"
