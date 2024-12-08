@@ -27,7 +27,7 @@
     "viem": "^1.21.4"
   },
   "devDependencies": {
-    "@cartridge/tsconfig": "workspace:^",
+    "@cartridge/tsconfig": "workspace:*",
     "@graphql-codegen/cli": "^2.6.2",
     "@graphql-codegen/typescript": "^2.4.8",
     "@graphql-codegen/typescript-operations": "^2.3.5",

@@ -12,11 +12,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@cartridge/controller": "workspace:^",
+    "@cartridge/controller": "workspace:*",
     "@cartridge/penpal": "^6.2.3",
     "@cartridge/presets": "workspace:*",
-    "@cartridge/ui-next": "workspace:^",
-    "@cartridge/utils": "workspace:^",
+    "@cartridge/ui-next": "workspace:*",
+    "@cartridge/utils": "workspace:*",
     "@hookform/resolvers": "^3.9.1",
     "posthog-js": "^1.181.0",
     "react": "^18.3.1",
