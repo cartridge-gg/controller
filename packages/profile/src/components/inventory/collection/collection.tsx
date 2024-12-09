@@ -115,7 +115,7 @@ export function Collection() {
                   icon={col.imageUrl ?? "/public/placeholder.svg"}
                 />
 
-                <LayoutContent className="pb-4">
+                <LayoutContent className="pb-0">
                   <ScrollArea>
                     {/* <div
                       className="flex items-center gap-2 text-sm cursor-pointer self-start"
@@ -139,7 +139,7 @@ export function Collection() {
                       </div>
                     </div> */}
 
-                    <div className="grid grid-cols-2 gap-2 place-items-center">
+                    <div className="grid grid-cols-2 gap-2 place-items-center pb-2">
                       {col.assets.map((a) => {
                         const isSelected = tokenIds.includes(a.tokenId);
                         return (
