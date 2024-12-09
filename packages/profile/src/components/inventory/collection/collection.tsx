@@ -149,7 +149,7 @@ export function Collection() {
                         >
                           <Card
                             className={cn(
-                              "w-full h-full border-2 border-solid transition overflow-scroll",
+                              "w-full h-full border-2 border-solid transition overflow-hidden",
                               isSelected
                                 ? "border-foreground"
                                 : "border-transparent",
