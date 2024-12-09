@@ -131,19 +131,13 @@ export function CreateSession({
           <ControllerErrorAlert error={error} />
         )}
         <HStack spacing={4} width="full">
-          <Button
-            onClick={() => onConnect()}
-            isDisabled={isConnecting}
-            px={10}
-          >
+          <Button onClick={() => onConnect()} isDisabled={isConnecting} px={10}>
             Skip
           </Button>
           <Button
             colorScheme="colorful"
             isDisabled={
-              isDisabled ||
-              isConnecting ||
-              (!policies?.verified && !isConsent)
+              isDisabled || isConnecting || (!policies?.verified && !isConsent)
             }
             isLoading={isConnecting}
             onClick={() => onCreateSession()}
