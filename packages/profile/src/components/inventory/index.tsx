@@ -8,7 +8,6 @@ import {
   LayoutHeader,
 } from "@/components/layout";
 import { Navigation } from "../navigation";
-// import { Collections } from "./collections";
 import { Tokens } from "./token";
 import { useAccount } from "@/hooks/account";
 import { Outlet, useParams } from "react-router-dom";

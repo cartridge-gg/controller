@@ -56,6 +56,9 @@ export const cartridgeTWPreset: Partial<Config> = {
         DEFAULT: "hsl(var(--popover))",
         foreground: "hsl(var(--popover-foreground))",
       },
+      spacer: {
+        DEFAULT: "hsl(var(--spacer))",
+      },
     },
     extend: {
       fontFamily: {
