@@ -51,7 +51,113 @@ export const Default: Story = {
               },
             ],
           },
+          "0x047d88C65A627b38d728a783382Af648D79AED80Bf396047F9E839e8501d7F6D":
+            {
+              name: "Pillage",
+              description: "Allows you raid a structure and pillage resources",
+              methods: [
+                {
+                  name: "Battle Pillage",
+                  description: "Pillage a structure",
+                  entrypoint: "battle_pillage",
+                },
+              ],
+            },
+          "0x001cE27792b23cE379398F5468b69739e89314b2657Cfa3A9c388BDFD33DcFbf":
+            {
+              name: "Battle contract",
+              description: "Required to engage in battles",
+              methods: [
+                {
+                  name: "Battle Start",
+                  description: "Start a battle",
+                  entrypoint: "battle_start",
+                },
+                {
+                  name: "Battle Force Start",
+                  description: "Force start a battle",
+                  entrypoint: "battle_force_start",
+                },
+                {
+                  name: "Battle Join",
+                  description: "Join a battle",
+                  entrypoint: "battle_join",
+                },
+              ],
+            },
+          "0x04718f5a0Fc34cC1AF16A1cdee98fFB20C31f5cD61D6Ab07201858f4287c938D":
+            {
+              name: "STRK Token",
+              description: "Starknet token contract",
+              methods: [
+                {
+                  name: "Mint",
+                  entrypoint: "mint",
+                },
+                {
+                  name: "Burn",
+                  entrypoint: "burn",
+                },
+                {
+                  name: "Allowance",
+                  entrypoint: "allowance",
+                },
+              ],
+            },
         },
+        messages: [
+          {
+            types: {
+              StarknetDomain: [
+                {
+                  name: "name",
+                  type: "shortstring",
+                },
+                {
+                  name: "version",
+                  type: "shortstring",
+                },
+                {
+                  name: "chainId",
+                  type: "shortstring",
+                },
+                {
+                  name: "revision",
+                  type: "shortstring",
+                },
+              ],
+              "eternum-Message": [
+                {
+                  name: "identity",
+                  type: "ContractAddress",
+                },
+                {
+                  name: "channel",
+                  type: "shortstring",
+                },
+                {
+                  name: "content",
+                  type: "string",
+                },
+                {
+                  name: "timestamp",
+                  type: "felt",
+                },
+                {
+                  name: "salt",
+                  type: "felt",
+                },
+              ],
+            },
+            primaryType: "eternum-Message",
+            domain: {
+              name: "Eternum",
+              version: "1",
+              chainId: "SN_SEPOLIA",
+              revision: "1",
+            },
+          },
+        ],
       },
     }),
     onConnect: () => {},

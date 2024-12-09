@@ -28,7 +28,7 @@ const CardHeader = React.forwardRef<
     >
       {icon}
       <div className="w-px h-full bg-background" />
-      <div className={cn("p-3", className)} {...props} />
+      <div className={cn("p-3 w-full", className)} {...props} />
     </div>
   ) : (
     <div
@@ -55,12 +55,12 @@ const CardIcon = React.forwardRef<
   ({ className, src, ...props }, ref): React.ReactNode => (
     <div
       ref={ref}
-      className="h-full p-1.5 aspect-square bg-secondary flex items-center justify-center"
+      className="h-full p-2 aspect-square bg-secondary flex items-center justify-center"
     >
       {src ? (
         <img
           src={src}
-          className={cn("h-7 aspect-square rounded-sm", className)}
+          className={cn("aspect-square rounded-sm", className)}
           {...props}
         />
       ) : props.children ? (
