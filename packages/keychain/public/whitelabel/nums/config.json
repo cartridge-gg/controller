@@ -1,61 +1,60 @@
 {
-    "origin": "https://nums.gg",
-    "policies": {
-        "contracts": {
-            "0xfe1303b2ad83a181fab64fcd8e9fca303b29b3b37d81e92ad60dd56436c417" : {
-                "name": "Game Actions",
-                "description": "Allows you to create and play games",
-                "methods": [
-                    {
-                        "name": "Create Game",
-                        "description": "Create a new game",
-                        "entrypoint": "create_game"
-                    }, 
-                    {
-                        "name": "Set Slot",
-                        "description": "Set a slot for a game",
-                        "entrypoint": "set_slot"
-                    }
-                ]
-            },
-            "0x029421f35755066424a2471acb88625292bde573e346b18b457b6ddc0a40abac" : {
-                "name": "Challenge Actions",
-                "description": "Allows you to create and manage challenges",
-                "methods": [
-                    {
-                        "name": "Create King of the Hill",
-                        "description": "Create a new king of the hill challenge",
-                        "entrypoint": "create_king_of_the_hill"
-                    },
-                    {
-                        "name": "Create Conditional Victory",
-                        "description": "Create a new conditional victory challenge",
-                        "entrypoint": "create_conditional_victory"
-                    },
-                    {
-                        "name": "King Me",
-                        "description": "Takes the throne from the current king",
-                        "entrypoint": "king_me"
-                    },
-                    {
-                        "name": "Claim Reward",
-                        "description": "Claim a reward for a challenge",
-                        "entrypoint": "claim"
-                    }
-                ]
-            }
-        }
-    },
-    "theme": {
-      "name": "Nums",
-      "colors": {
-        "primary": "#3391FF"
+  "origin": "nums.gg",
+  "policies": {
+    "contracts": {
+      "0xfe1303b2ad83a181fab64fcd8e9fca303b29b3b37d81e92ad60dd56436c417": {
+        "name": "Game Actions",
+        "description": "Allows you to create and play games",
+        "methods": [
+          {
+            "name": "Create Game",
+            "description": "Create a new game",
+            "entrypoint": "create_game"
+          },
+          {
+            "name": "Set Slot",
+            "description": "Set a slot for a game",
+            "entrypoint": "set_slot"
+          }
+        ]
       },
-      "icon": "/whitelabel/nums/icon.png",
-      "cover": {
-        "light": "/whitelabel/cartridge/cover-light.png",
-        "dark": "/whitelabel/cartridge/cover-dark.png"
+      "0x029421f35755066424a2471acb88625292bde573e346b18b457b6ddc0a40abac": {
+        "name": "Challenge Actions",
+        "description": "Allows you to create and manage challenges",
+        "methods": [
+          {
+            "name": "Create King of the Hill",
+            "description": "Create a new king of the hill challenge",
+            "entrypoint": "create_king_of_the_hill"
+          },
+          {
+            "name": "Create Conditional Victory",
+            "description": "Create a new conditional victory challenge",
+            "entrypoint": "create_conditional_victory"
+          },
+          {
+            "name": "King Me",
+            "description": "Takes the throne from the current king",
+            "entrypoint": "king_me"
+          },
+          {
+            "name": "Claim Reward",
+            "description": "Claim a reward for a challenge",
+            "entrypoint": "claim"
+          }
+        ]
       }
     }
+  },
+  "theme": {
+    "name": "Nums",
+    "colors": {
+      "primary": "#3391FF"
+    },
+    "icon": "/whitelabel/nums/icon.png",
+    "cover": {
+      "light": "/whitelabel/cartridge/cover-light.png",
+      "dark": "/whitelabel/cartridge/cover-dark.png"
+    }
   }
-  
+}

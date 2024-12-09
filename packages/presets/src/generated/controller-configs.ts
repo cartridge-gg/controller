@@ -547,7 +547,7 @@ export const configs: ControllerConfigs = {
     },
   },
   nums: {
-    origin: "https://nums.gg",
+    origin: "nums.gg",
     policies: {
       contracts: {
         "0xfe1303b2ad83a181fab64fcd8e9fca303b29b3b37d81e92ad60dd56436c417": {
@@ -595,7 +595,7 @@ export const configs: ControllerConfigs = {
       },
     },
     theme: {
-      name: "nums",
+      name: "Nums",
       colors: {
         primary: "#3391FF",
       },
