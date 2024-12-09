@@ -100,14 +100,10 @@ export function ContractCard({
                         color="text.primary"
                         fontWeight="bold"
                       >
-                        {method.name}
+                        {method.name ?? humanizeString(method.entrypoint)}
                       </Text>
                       <Spacer />
-                      <Text
-                        fontSize="xs"
-                        color="text.secondaryAccent"
-                        fontWeight="bold"
-                      >
+                      <Text fontSize="xs" color="text.secondaryAccent">
                         {method.entrypoint}
                       </Text>
                     </HStack>
@@ -124,5 +120,17 @@ export function ContractCard({
         </Accordion>
       </CardContent>
     </Card>
+  );
+}
+
+export function humanizeString(str: string): string {
+  return (
+    str
+      // Convert from camelCase or snake_case
+      .replace(/([a-z])([A-Z])/g, "$1 $2") // camelCase to spaces
+      .replace(/_/g, " ") // snake_case to spaces
+      .toLowerCase()
+      // Capitalize first letter
+      .replace(/^\w/, (c) => c.toUpperCase())
   );
 }

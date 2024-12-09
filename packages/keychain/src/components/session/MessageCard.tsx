@@ -83,7 +83,7 @@ export function MessageCard({ message }: MessageCardProps) {
         <CardTitle className="text-foreground">Sign Message</CardTitle>
       </CardHeader>
 
-      <Accordion type="single" defaultValue="message">
+      <Accordion type="single" defaultValue="message" collapsible>
         <AccordionItem value="message">
           <CardContent>
             <AccordionTrigger>

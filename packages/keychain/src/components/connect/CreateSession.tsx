@@ -122,9 +122,8 @@ export function CreateSession({
               isDisabled={isConnecting}
             />
             <Text fontSize="xs" textColor="error.foreground">
-              This session&apos;s policies have not been verified. I understand
-              and agree to grant permission for the application to execute
-              actions listed above.
+              I understand and agree to grant permission for this application to
+              execute these actions.
             </Text>
           </HStack>
         )}
