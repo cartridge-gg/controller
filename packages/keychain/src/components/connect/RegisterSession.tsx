@@ -8,16 +8,20 @@ import {
   TransactionFinalityStatus,
 } from "starknet";
 import { SESSION_EXPIRATION } from "const";
-import { SessionSummary } from "components/SessionSummary";
+import { UnverifiedSessionSummary } from "components/session/UnverifiedSessionSummary";
+import { VerifiedSessionSummary } from "components/session/VerifiedSessionSummary";
+import { ParsedSessionPolicies } from "hooks/session";
 
 export function RegisterSession({
+  policies,
   onConnect,
   publicKey,
 }: {
+  policies: ParsedSessionPolicies;
   onConnect: (transaction_hash?: string) => void;
   publicKey?: string;
 }) {
-  const { controller, policies } = useConnection();
+  const { controller, theme } = useConnection();
   const [expiresAt] = useState<bigint>(SESSION_EXPIRATION);
 
   const transactions = useMemo(() => {
@@ -72,8 +76,12 @@ export function RegisterSession({
       buttonText="Register Session"
     >
       <Content>
-        <SessionConsent />
-        <SessionSummary policies={policies} />
+        <SessionConsent isVerified={policies?.verified} />
+        {policies?.verified ? (
+          <VerifiedSessionSummary game={theme.name} policies={policies} />
+        ) : (
+          <UnverifiedSessionSummary policies={policies} />
+        )}
       </Content>
     </ExecutionContainer>
   );

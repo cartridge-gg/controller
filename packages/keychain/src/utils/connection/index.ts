@@ -12,7 +12,7 @@ import { ConnectionCtx } from "./types";
 import { deployFactory } from "./deploy";
 import { openSettingsFactory } from "./settings";
 import { normalize } from "@cartridge/utils";
-import { SessionPolicies } from "@cartridge/presets";
+import { ParsedSessionPolicies } from "hooks/session";
 
 export function connectToController<ParentMethods extends {}>({
   setOrigin,
@@ -23,7 +23,7 @@ export function connectToController<ParentMethods extends {}>({
 }: {
   setOrigin: (origin: string) => void;
   setRpcUrl: (url: string) => void;
-  setPolicies: (policies: SessionPolicies) => void;
+  setPolicies: (policies: ParsedSessionPolicies) => void;
   setContext: (ctx: ConnectionCtx) => void;
   setController: (controller?: Controller) => void;
 }) {
