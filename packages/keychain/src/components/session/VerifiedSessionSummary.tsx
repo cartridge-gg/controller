@@ -1,7 +1,7 @@
 import React from "react";
 import { ParsedSessionPolicies } from "hooks/session";
-import { CodeIcon } from "@cartridge/ui";
 import { AggregateCard } from "./AggregateCard";
+import { CodeIcon } from "@cartridge/ui-next";
 
 export function VerifiedSessionSummary({
   game,
@@ -13,7 +13,7 @@ export function VerifiedSessionSummary({
   return (
     <AggregateCard
       title={`PLAY ${game}`}
-      icon={<CodeIcon boxSize="24px" m={2} />}
+      icon={<CodeIcon variant="line" />}
       policies={policies}
     />
   );

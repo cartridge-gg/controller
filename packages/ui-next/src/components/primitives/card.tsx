@@ -26,7 +26,11 @@ const CardHeader = React.forwardRef<
       ref={ref}
       className={cn("h-9 flex items-center gap-x-px bg-secondary", className)}
     >
-      {icon}
+      {React.isValidElement(icon) ? (
+        <CardIcon>{icon}</CardIcon>
+      ) : (
+        <CardIcon src={icon as string} />
+      )}
       <div className="w-px h-full bg-background" />
       <div className={cn("p-3 w-full", className)} {...props} />
     </div>
