@@ -10,6 +10,7 @@ import { ControllerThemeProvider } from "./theme";
 import { jsonRpcProvider, StarknetConfig, voyager } from "@starknet-react/core";
 import { sepolia, mainnet, Chain } from "@starknet-react/chains";
 import { constants, num } from "starknet";
+import { STRK_CONTRACT_ADDRESS } from "@cartridge/utils";
 
 export function Provider({ children }: PropsWithChildren) {
   const connection = useConnectionValue();
@@ -32,15 +33,66 @@ export function Provider({ children }: PropsWithChildren) {
     [connection.rpcUrl],
   );
 
+  const config = useCallback(() => {
+    switch (connection.chainId) {
+      case constants.StarknetChainId.SN_MAIN:
+        return {
+          explorer: voyager,
+          chains: [mainnet],
+          provider: jsonRpcProvider({ rpc }),
+        };
+      case constants.StarknetChainId.SN_SEPOLIA:
+        return {
+          explorer: voyager,
+          chains: [sepolia],
+          provider: jsonRpcProvider({ rpc }),
+        };
+      default:
+        return {
+          explorer: undefined,
+          chains: [
+            {
+              id: connection.chainId
+                ? BigInt(parseInt(connection.chainId, 16))
+                : BigInt(0),
+              network: "slot",
+              name: "Slot",
+              nativeCurrency: {
+                address: STRK_CONTRACT_ADDRESS,
+                name: "Stark",
+                symbol: "STRK",
+                decimals: 18,
+              },
+              testnet: true,
+              rpcUrls: {
+                default: {
+                  http: [connection.rpcUrl || ""],
+                },
+                public: {
+                  http: [connection.rpcUrl || ""],
+                },
+              },
+              explorers: {
+                worldexplorer: [""],
+              },
+            },
+          ],
+          provider: jsonRpcProvider({ rpc }),
+        };
+    }
+  }, [connection.chainId, rpc]);
+
+  const { explorer, chains, provider } = config();
+
   return (
     <CartridgeAPIProvider url={ENDPOINT}>
       <QueryClientProvider client={queryClient}>
         <ConnectionContext.Provider value={connection}>
           <ControllerThemeProvider>
             <StarknetConfig
-              explorer={voyager}
-              chains={[sepolia, mainnet]}
-              provider={jsonRpcProvider({ rpc })}
+              explorer={explorer}
+              chains={chains}
+              provider={provider}
             >
               <PostHogProvider client={posthog}>{children}</PostHogProvider>
             </StarknetConfig>
