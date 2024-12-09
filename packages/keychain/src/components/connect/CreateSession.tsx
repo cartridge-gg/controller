@@ -1,7 +1,7 @@
 import { Container, Content, Footer } from "components/layout";
 import { BigNumberish, shortString } from "starknet";
 import { ControllerError } from "utils/connection";
-import { Button, VStack } from "@chakra-ui/react";
+import { Button, HStack, Text, Checkbox } from "@chakra-ui/react";
 import { useCallback, useEffect, useState } from "react";
 import { useConnection } from "hooks/connection";
 import { ControllerErrorAlert } from "components/ErrorAlert";
@@ -9,19 +9,25 @@ import { SessionConsent } from "components/connect";
 import { SESSION_EXPIRATION } from "const";
 import { Upgrade } from "./Upgrade";
 import { ErrorCode } from "@cartridge/account-wasm";
-import { SessionSummary } from "components/SessionSummary";
 import { TypedDataPolicy } from "@cartridge/presets";
+import { ParsedSessionPolicies } from "hooks/session";
+
+import { UnverifiedSessionSummary } from "components/session/UnverifiedSessionSummary";
+import { VerifiedSessionSummary } from "components/session/VerifiedSessionSummary";
 
 export function CreateSession({
+  policies,
   onConnect,
   isUpdate,
 }: {
+  policies: ParsedSessionPolicies;
   onConnect: (transaction_hash?: string) => void;
   isUpdate?: boolean;
 }) {
-  const { controller, policies, upgrade, chainId, logout } = useConnection();
+  const { controller, upgrade, chainId, theme, logout } = useConnection();
   const [isConnecting, setIsConnecting] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
+  const [isConsent, setIsConsent] = useState(false);
   const [expiresAt] = useState<bigint>(SESSION_EXPIRATION);
   const [maxFee] = useState<BigNumberish>();
   const [error, setError] = useState<ControllerError | Error>();
@@ -30,7 +36,7 @@ export function CreateSession({
     if (!chainId) return;
     const normalizedChainId = normalizeChainId(chainId);
 
-    const violatingPolicy = policies.messages?.find(
+    const violatingPolicy = policies?.messages?.find(
       (policy) =>
         "domain" in policy &&
         (!policy.domain.chainId ||
@@ -54,7 +60,7 @@ export function CreateSession({
   }, [chainId, policies]);
 
   const onCreateSession = useCallback(async () => {
-    if (!controller) return;
+    if (!controller || !policies) return;
     try {
       setError(undefined);
       setIsConnecting(true);
@@ -89,32 +95,63 @@ export function CreateSession({
       }}
     >
       <Content gap={6}>
-        <SessionConsent />
-        <SessionSummary policies={policies} setError={setError} />
+        <SessionConsent isVerified={policies?.verified} />
+        {policies?.verified ? (
+          <VerifiedSessionSummary game={theme.name} policies={policies} />
+        ) : (
+          <UnverifiedSessionSummary policies={policies} />
+        )}
       </Content>
-
       <Footer>
+        {!policies?.verified && (
+          <HStack
+            p={3}
+            mb={1}
+            spacing={5}
+            border="1px solid"
+            borderRadius="md"
+            borderColor="solid.primary"
+            onClick={() => !isConnecting && setIsConsent(!isConsent)}
+            cursor="pointer"
+          >
+            <Checkbox
+              color="red"
+              colorScheme="red"
+              borderColor="error.foreground"
+              isChecked={isConsent}
+              isDisabled={isConnecting}
+            />
+            <Text fontSize="xs" textColor="error.foreground">
+              I understand and agree to grant permission for this application to
+              execute these actions.
+            </Text>
+          </HStack>
+        )}
         {error && isControllerError(error) && (
           <ControllerErrorAlert error={error} />
         )}
-        <VStack spacing={4} width="full">
+        <HStack spacing={4} width="full">
+          <Button
+            onClick={() => onConnect()}
+            isDisabled={isConnecting}
+            px={10}
+          >
+            Skip
+          </Button>
           <Button
             colorScheme="colorful"
-            isDisabled={isDisabled || isConnecting}
+            isDisabled={
+              isDisabled ||
+              isConnecting ||
+              (!policies?.verified && !isConsent)
+            }
             isLoading={isConnecting}
             onClick={() => onCreateSession()}
             width="full"
           >
             {isUpdate ? "update" : "create"} session
           </Button>
-          <Button
-            onClick={() => onConnect()}
-            isDisabled={isConnecting}
-            width="full"
-          >
-            Skip
-          </Button>
-        </VStack>
+        </HStack>
       </Footer>
     </Container>
   );

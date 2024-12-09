@@ -255,7 +255,7 @@ export const metadata: EkuboERC20Metadata[] = [
       "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/516c435e-f89a-4a88-aff0-fdcc6e218900/logo",
   },
   {
-    name: "StarkNet Token",
+    name: "Starknet",
     symbol: "STRK",
     decimals: 18,
     l2_token_address:
@@ -266,7 +266,7 @@ export const metadata: EkuboERC20Metadata[] = [
       "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/1b126320-367c-48ed-cf5a-ba7580e49600/logo",
   },
   {
-    name: "zkLend Token",
+    name: "zkLend",
     symbol: "ZEND",
     decimals: 18,
     l2_token_address:
@@ -466,7 +466,7 @@ export const metadata: EkuboERC20Metadata[] = [
       "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/c1f44170-c1b0-4531-3d3b-5f0bacfe1300/logo",
   },
   {
-    name: "Staked Starknet Token",
+    name: "Staked Starknet",
     symbol: "sSTRK",
     decimals: 18,
     l2_token_address:
@@ -964,7 +964,7 @@ export const metadata: EkuboERC20Metadata[] = [
     hidden: true,
   },
   {
-    name: "Hey Jude official token",
+    name: "Hey Jude official",
     symbol: "JUDE",
     decimals: 18,
     l2_token_address:
@@ -2456,7 +2456,7 @@ export const metadata: EkuboERC20Metadata[] = [
     hidden: true,
   },
   {
-    name: "SithSwap Token",
+    name: "SithSwap",
     symbol: "SITH",
     decimals: 18,
     l2_token_address:
@@ -2908,7 +2908,7 @@ export const metadata: EkuboERC20Metadata[] = [
     hidden: true,
   },
   {
-    name: "Starknet Voting Token",
+    name: "Starknet Voting",
     symbol: "vSTRK",
     decimals: 18,
     l2_token_address:
@@ -3068,7 +3068,7 @@ export const metadata: EkuboERC20Metadata[] = [
     hidden: true,
   },
   {
-    name: "worthless token",
+    name: "worthless",
     symbol: "ESHR",
     decimals: 18,
     l2_token_address:
@@ -3714,7 +3714,7 @@ export const metadata: EkuboERC20Metadata[] = [
     hidden: true,
   },
   {
-    name: "Cool Meme Token",
+    name: "Cool Meme",
     symbol: "CMT",
     decimals: 18,
     l2_token_address:
@@ -3826,7 +3826,7 @@ export const metadata: EkuboERC20Metadata[] = [
     hidden: true,
   },
   {
-    name: "TEST TOKEN",
+    name: "TEST",
     symbol: "TESTT",
     decimals: 18,
     l2_token_address:
@@ -4400,7 +4400,7 @@ export const metadata: EkuboERC20Metadata[] = [
     hidden: true,
   },
   {
-    name: "Ruggable Token",
+    name: "Ruggable",
     symbol: "RT",
     decimals: 18,
     l2_token_address:
@@ -4794,7 +4794,7 @@ export const metadata: EkuboERC20Metadata[] = [
     hidden: true,
   },
   {
-    name: "DUMMY TEST TOKEN",
+    name: "DUMMY TEST",
     symbol: "DUMMY",
     decimals: 18,
     l2_token_address:
@@ -5980,7 +5980,7 @@ export const metadata: EkuboERC20Metadata[] = [
     hidden: true,
   },
   {
-    name: "Tehran Token",
+    name: "Tehran",
     symbol: "TEHRAN",
     decimals: 18,
     l2_token_address:
@@ -6190,7 +6190,7 @@ export const metadata: EkuboERC20Metadata[] = [
     hidden: true,
   },
   {
-    name: "Community Token",
+    name: "Community",
     symbol: "SRAK",
     decimals: 18,
     l2_token_address:
@@ -7090,7 +7090,7 @@ export const metadata: EkuboERC20Metadata[] = [
     hidden: true,
   },
   {
-    name: "BlueFalcon Token",
+    name: "BlueFalcon",
     symbol: "FALCON",
     decimals: 18,
     l2_token_address:
@@ -7320,7 +7320,7 @@ export const metadata: EkuboERC20Metadata[] = [
     hidden: true,
   },
   {
-    name: "Woofy Token",
+    name: "Woofy",
     symbol: "WOOF",
     decimals: 18,
     l2_token_address:
@@ -8230,7 +8230,7 @@ export const metadata: EkuboERC20Metadata[] = [
     hidden: true,
   },
   {
-    name: "Rudolph Token",
+    name: "Rudolph",
     symbol: "RUDOLPH",
     decimals: 18,
     l2_token_address:

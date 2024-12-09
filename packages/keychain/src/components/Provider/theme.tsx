@@ -1,9 +1,4 @@
-import {
-  defaultTheme,
-  controllerConfigs,
-  ColorMode,
-  ControllerTheme,
-} from "@cartridge/presets";
+import { ColorMode } from "@cartridge/presets";
 import { useThemeEffect } from "@cartridge/ui-next";
 import { ChakraProvider, useColorMode } from "@chakra-ui/react";
 import { useConnection } from "hooks/connection";
@@ -12,21 +7,13 @@ import { useRouter } from "next/router";
 import { PropsWithChildren, useEffect, useMemo } from "react";
 
 export function ControllerThemeProvider({ children }: PropsWithChildren) {
-  const preset = useControllerThemePreset();
-  const controllerTheme = useMemo(
-    () => ({
-      name: preset.name,
-      icon: preset.icon,
-      cover: preset.cover,
-    }),
-    [preset],
-  );
+  const { theme } = useConnection();
 
-  useThemeEffect({ theme: preset, assetUrl: "" });
-  const chakraTheme = useChakraTheme(preset);
+  useThemeEffect({ theme, assetUrl: "" });
+  const chakraTheme = useChakraTheme(theme);
 
   return (
-    <ControllerThemeContext.Provider value={controllerTheme}>
+    <ControllerThemeContext.Provider value={theme}>
       <ChakraProvider theme={chakraTheme}>
         <ChakraTheme>{children}</ChakraTheme>
       </ChakraProvider>
@@ -45,36 +32,6 @@ function ChakraTheme({ children }: PropsWithChildren) {
   useEffect(() => {
     setColorMode(colorMode);
   }, [setColorMode, colorMode]);
+
   return children;
-}
-
-export function useControllerThemePreset() {
-  const router = useRouter();
-  const { origin } = useConnection();
-
-  return useMemo(() => {
-    const themeParam = router.query.theme;
-    if (typeof themeParam === "undefined") {
-      return defaultTheme;
-    }
-    const val = decodeURIComponent(
-      Array.isArray(themeParam)
-        ? themeParam[themeParam.length - 1]
-        : themeParam,
-    );
-
-    if (
-      typeof val === "string" &&
-      val in controllerConfigs &&
-      controllerConfigs[val].theme
-    ) {
-      return controllerConfigs[val].theme;
-    }
-
-    try {
-      return JSON.parse(val) as ControllerTheme;
-    } catch {
-      return defaultTheme;
-    }
-  }, [router.query.theme, origin]);
 }
