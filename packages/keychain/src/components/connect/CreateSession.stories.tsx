@@ -104,6 +104,14 @@ export const Default: Story = {
                 },
               ],
             },
+          "0x051Fea4450Da9D6aeE758BDEbA88B2f665bCbf549D2C61421AA724E9AC0Ced8F":
+            {
+              methods: [
+                {
+                  entrypoint: "request_random",
+                },
+              ],
+            },
         },
         messages: [
           {

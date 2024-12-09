@@ -6,7 +6,7 @@ export const CartridgeIcon = memo(
   forwardRef<SVGSVGElement, IconProps>(
     ({ className, size, ...props }, forwardedRef) => (
       <svg
-        viewBox="0 0 24 24"
+        viewBox="0 0 20 24"
         className={iconVariants({ size, className })}
         ref={forwardedRef}
         {...props}
