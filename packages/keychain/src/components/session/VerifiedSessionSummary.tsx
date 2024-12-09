@@ -13,7 +13,7 @@ export function VerifiedSessionSummary({
   return (
     <AggregateCard
       title={`PLAY ${game}`}
-      icon={<CodeIcon variant="line" />}
+      icon={<CodeIcon variant="solid" />}
       policies={policies}
     />
   );

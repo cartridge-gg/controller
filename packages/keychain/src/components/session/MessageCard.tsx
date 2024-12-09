@@ -76,7 +76,7 @@ export function MessageCard({ message }: MessageCardProps) {
       <CardHeader
         icon={
           <CardIcon>
-            <PencilIcon variant="line" />
+            <PencilIcon variant="solid" />
           </CardIcon>
         }
       >

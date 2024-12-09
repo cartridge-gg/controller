@@ -24,7 +24,7 @@ export function UnverifiedSessionSummary({
           (contract.meta ? (
             <CoinsIcon variant="line" />
           ) : (
-            <CodeIcon variant="line" />
+            <CodeIcon size="lg" variant="solid" />
           ));
 
         return (
