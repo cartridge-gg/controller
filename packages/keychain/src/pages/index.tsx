@@ -55,7 +55,12 @@ function Home() {
     case "connect": {
       posthog?.capture("Call Connect");
 
-      if (!policies) {
+      // if no policies, we can connect immediately
+      if (
+        !policies ||
+        !policies.contracts ||
+        Object.keys(policies.contracts).length === 0
+      ) {
         context.resolve({
           code: ResponseCodes.SUCCESS,
           address: controller.address,
@@ -78,11 +83,10 @@ function Home() {
       return (
         <CreateSession
           policies={policies!}
-          onConnect={(policies) => {
+          onConnect={() => {
             context.resolve({
               code: ResponseCodes.SUCCESS,
               address: controller.address,
-              policies,
             } as any);
           }}
         />
