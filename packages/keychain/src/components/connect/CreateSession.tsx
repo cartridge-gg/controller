@@ -130,30 +130,22 @@ export function CreateSession({
         {error && isControllerError(error) && (
           <ControllerErrorAlert error={error} />
         )}
-        {!error && (
-          <HStack spacing={4} width="full">
-            <Button
-              onClick={() => onConnect()}
-              isDisabled={isConnecting}
-              px={10}
-            >
-              Skip
-            </Button>
-            <Button
-              colorScheme="colorful"
-              isDisabled={
-                isDisabled ||
-                isConnecting ||
-                (!policies?.verified && !isConsent)
-              }
-              isLoading={isConnecting}
-              onClick={() => onCreateSession()}
-              width="full"
-            >
-              {isUpdate ? "update" : "create"} session
-            </Button>
-          </HStack>
-        )}
+        <HStack spacing={4} width="full">
+          <Button onClick={() => onConnect()} isDisabled={isConnecting} px={10}>
+            Skip
+          </Button>
+          <Button
+            colorScheme="colorful"
+            isDisabled={
+              isDisabled || isConnecting || (!policies?.verified && !isConsent)
+            }
+            isLoading={isConnecting}
+            onClick={() => onCreateSession()}
+            width="full"
+          >
+            {isUpdate ? "update" : "create"} session
+          </Button>
+        </HStack>
       </Footer>
     </Container>
   );
