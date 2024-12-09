@@ -51,7 +51,7 @@ export function ConfirmTransaction() {
 
     const entries = Object.entries(callPolicies.contracts || {});
     const txnsApproved = entries.every(([target, policy]) => {
-      const contract = policies.contracts?.[target];
+      const contract = policies?.contracts?.[target];
       if (!contract) return false;
       return policy.methods.every((method) =>
         contract.methods.some((m) => m.entrypoint === method.entrypoint),
@@ -63,9 +63,13 @@ export function ConfirmTransaction() {
     return txnsApproved && !account?.session(callPolicies);
   }, [callPolicies, policiesUpdated, policies, account]);
 
-  if (updateSession) {
+  if (updateSession && policies) {
     return (
-      <CreateSession isUpdate onConnect={() => setIsPoliciesUpdated(true)} />
+      <CreateSession
+        policies={policies}
+        isUpdate
+        onConnect={() => setIsPoliciesUpdated(true)}
+      />
     );
   }
 

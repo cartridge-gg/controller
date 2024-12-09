@@ -21,7 +21,13 @@ import {
 } from "components/Provider/connection";
 import { UpgradeInterface, useUpgrade } from "./upgrade";
 import posthog from "posthog-js";
-import { Policies, SessionPolicies } from "@cartridge/presets";
+import { Policies } from "@cartridge/presets";
+import {
+  defaultTheme,
+  controllerConfigs,
+  ControllerTheme,
+} from "@cartridge/presets";
+import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
 
 const CHAIN_ID_TIMEOUT = 3000;
 
@@ -33,7 +39,8 @@ export function useConnectionValue() {
   const [origin, setOrigin] = useState<string>();
   const [rpcUrl, setRpcUrl] = useState<string>();
   const [chainId, setChainId] = useState<string>();
-  const [policies, setPolicies] = useState<SessionPolicies>({});
+  const [policies, setPolicies] = useState<ParsedSessionPolicies>();
+  const [theme, setTheme] = useState<ControllerTheme>(defaultTheme);
   const [controller, setControllerRaw] = useState<Controller | undefined>();
   const [prefunds, setPrefunds] = useState<Prefund[]>([]);
   const [hasPrefundRequest, setHasPrefundRequest] = useState<boolean>(false);
@@ -105,19 +112,69 @@ export function useConnectionValue() {
       );
     }
 
+    // Handle prefunds
     const prefundParam = urlParams.get("prefunds");
     const prefunds: Prefund[] = prefundParam
       ? JSON.parse(decodeURIComponent(prefundParam))
       : [];
     setHasPrefundRequest(!!prefundParam);
     setPrefunds(mergeDefaultETHPrefund(prefunds));
-    setPolicies(() => {
-      const param = urlParams.get("policies");
-      if (!param) return {};
 
-      const policies = JSON.parse(decodeURIComponent(param)) as Policies;
-      return toSessionPolicies(policies);
-    });
+    // Handle theme and policies
+    const policiesParam = urlParams.get("policies");
+    const themeParam = urlParams.get("theme");
+    const presetParam = urlParams.get("preset");
+
+    // Provides backward compatability for Controler <= v0.5.1
+    if (themeParam) {
+      const decodedPreset = decodeURIComponent(themeParam);
+      try {
+        const parsedTheme = JSON.parse(decodedPreset) as ControllerTheme;
+        setTheme(parsedTheme);
+      } catch (e) {
+        setTheme(controllerConfigs[decodedPreset].theme || defaultTheme);
+      }
+    }
+
+    // URL policies take precedence over preset policies
+    if (policiesParam) {
+      try {
+        const parsedPolicies = JSON.parse(
+          decodeURIComponent(policiesParam),
+        ) as Policies;
+        setPolicies(
+          parseSessionPolicies({
+            verified: false,
+            policies: toSessionPolicies(parsedPolicies),
+          }),
+        );
+      } catch (e) {
+        console.error("Failed to parse policies:", e);
+      }
+    }
+
+    // Application provided policies take precedence over preset policies.
+    if (
+      presetParam &&
+      presetParam in controllerConfigs
+      // TODO: Reenable
+      //  &&
+      // origin &&
+      // (origin.startsWith("http://localhost") ||
+      //   toArray(controllerConfigs[presetParam].origin).includes(origin))
+    ) {
+      setTheme(controllerConfigs[presetParam].theme || defaultTheme);
+
+      // Set policies from preset if no URL policies
+      if (!policiesParam && controllerConfigs[presetParam].policies) {
+        setPolicies(
+          parseSessionPolicies({
+            verified: true,
+            policies: controllerConfigs[presetParam].policies,
+          }),
+        );
+      }
+    }
 
     const connection = connectToController<ParentMethods>({
       setOrigin,
@@ -131,6 +188,8 @@ export function useConnectionValue() {
     return () => {
       connection.destroy();
     };
+
+    // `origin` intentionally omitted
   }, [setController]);
 
   useEffect(() => {
@@ -189,6 +248,7 @@ export function useConnectionValue() {
     chainId,
     chainName,
     policies,
+    theme,
     prefunds,
     hasPrefundRequest,
     error,

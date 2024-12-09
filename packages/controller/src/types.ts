@@ -52,7 +52,7 @@ export type ControllerError = {
 export type ConnectReply = {
   code: ResponseCodes.SUCCESS;
   address: string;
-  policies: SessionPolicies;
+  policies?: SessionPolicies;
 };
 
 export type ExecuteReply =
