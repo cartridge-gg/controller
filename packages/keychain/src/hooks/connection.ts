@@ -188,7 +188,9 @@ export function useConnectionValue() {
     return () => {
       connection.destroy();
     };
-  }, [setController, origin]);
+
+    // `origin` intentionally omitted
+  }, [setController]);
 
   useEffect(() => {
     if (rpcUrl) {

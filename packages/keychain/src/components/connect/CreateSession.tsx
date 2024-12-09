@@ -121,9 +121,9 @@ export function CreateSession({
               isChecked={isConsent}
             />
             <Text fontSize="xs" textColor="error.foreground">
-              This session's policies have not been verified. I understand and
-              agree to grant permission for the application to execute actions
-              listed above.
+              This session&apos;s policies have not been verified. I understand
+              and agree to grant permission for the application to execute
+              actions listed above.
             </Text>
           </HStack>
         )}
