@@ -97,26 +97,24 @@ export function CreateSession({
         {error && isControllerError(error) && (
           <ControllerErrorAlert error={error} />
         )}
-        {!error && (
-          <VStack spacing={4} width="full">
-            <Button
-              colorScheme="colorful"
-              isDisabled={isDisabled || isConnecting}
-              isLoading={isConnecting}
-              onClick={() => onCreateSession()}
-              width="full"
-            >
-              {isUpdate ? "update" : "create"} session
-            </Button>
-            <Button
-              onClick={() => onConnect()}
-              isDisabled={isConnecting}
-              width="full"
-            >
-              Skip
-            </Button>
-          </VStack>
-        )}
+        <VStack spacing={4} width="full">
+          <Button
+            colorScheme="colorful"
+            isDisabled={isDisabled || isConnecting}
+            isLoading={isConnecting}
+            onClick={() => onCreateSession()}
+            width="full"
+          >
+            {isUpdate ? "update" : "create"} session
+          </Button>
+          <Button
+            onClick={() => onConnect()}
+            isDisabled={isConnecting}
+            width="full"
+          >
+            Skip
+          </Button>
+        </VStack>
       </Footer>
     </Container>
   );

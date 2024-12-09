@@ -80,7 +80,7 @@ export function CreateControllerView({
           <Button
             colorScheme="colorful"
             isLoading={isLoading}
-            isDisabled={validation.status !== "valid" || !!error}
+            isDisabled={validation.status !== "valid"}
             onClick={onSubmit}
           >
             {validation.exists ? "login" : "sign up"}
