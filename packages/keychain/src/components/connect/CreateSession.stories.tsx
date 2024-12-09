@@ -174,12 +174,12 @@ export const Default: Story = {
 
 export const WithPreset: Story = {
   parameters: {
-    preset: "eternum",
+    preset: "dope-wars",
   },
   args: {
     policies: parseSessionPolicies({
       verified: true,
-      policies: controllerConfigs["eternum"].policies!,
+      policies: controllerConfigs["dope-wars"].policies!,
     }),
     onConnect: () => {},
   },
