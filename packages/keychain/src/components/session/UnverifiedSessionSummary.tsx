@@ -1,5 +1,5 @@
 import React from "react";
-import { CardIcon, CoinsIcon, ScrollIcon } from "@cartridge/ui-next";
+import { CodeIcon, CoinsIcon } from "@cartridge/ui-next";
 import { toArray } from "@cartridge/controller";
 import { ParsedSessionPolicies } from "hooks/session";
 
@@ -18,17 +18,14 @@ export function UnverifiedSessionSummary({
         const title = !contract.meta
           ? "Contract"
           : `${contract.meta.name} token`;
-        const icon = !contract.meta ? (
-          <CardIcon>
-            <ScrollIcon variant="line" />
-          </CardIcon>
-        ) : contract.meta.logoUrl ? (
-          <CardIcon src={contract.meta.logoUrl} />
-        ) : (
-          <CardIcon>
+
+        const icon =
+          contract.meta?.logoUrl ||
+          (contract.meta ? (
             <CoinsIcon variant="line" />
-          </CardIcon>
-        );
+          ) : (
+            <CodeIcon size="lg" variant="solid" />
+          ));
 
         return (
           <ContractCard
