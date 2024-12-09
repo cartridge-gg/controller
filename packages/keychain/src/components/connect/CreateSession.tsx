@@ -111,7 +111,7 @@ export function CreateSession({
             border="1px solid"
             borderRadius="md"
             borderColor="solid.primary"
-            onClick={() => setIsConsent(!isConsent)}
+            onClick={() => !isConnecting && setIsConsent(!isConsent)}
             cursor="pointer"
           >
             <Checkbox
@@ -119,6 +119,7 @@ export function CreateSession({
               colorScheme="red"
               borderColor="error.foreground"
               isChecked={isConsent}
+              isDisabled={isConnecting}
             />
             <Text fontSize="xs" textColor="error.foreground">
               This session&apos;s policies have not been verified. I understand
