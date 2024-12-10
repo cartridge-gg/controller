@@ -120,6 +120,7 @@ export function CreateSession({
               borderColor="error.foreground"
               isChecked={isConsent}
               isDisabled={isConnecting}
+              pointerEvents="none"
             />
             <Text fontSize="xs" textColor="error.foreground">
               I understand and agree to grant permission for this application to
