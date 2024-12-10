@@ -1,5 +1,7 @@
-import { Box, Text, HStack } from "@chakra-ui/react";
+import { Text, HStack, Link, Spacer, VStack, Divider } from "@chakra-ui/react";
 import { ValidationState } from "./useUsernameValidation";
+import { ExternalIcon } from "@cartridge/ui-next";
+import { useMemo } from "react";
 
 export function StatusTray({
   username,
@@ -10,63 +12,77 @@ export function StatusTray({
   validation: ValidationState;
   error?: Error;
 }) {
-  if (error) {
-    return (
-      <Box
-        display="flex"
-        flexDirection="row"
-        alignItems="flex-start"
-        padding="8px 15px"
-        bg="solid.secondary"
-        marginTop="-1rem"
-        paddingTop="15px"
-        borderBottomRadius="4px"
-      >
-        <Text
-          fontFamily="Inter"
-          fontSize="12px"
-          lineHeight="16px"
-          color="#E66666"
-        >
-          {error.message.includes(
-            "The operation either timed out or was not allowed",
-          )
-            ? "Passkey signing timed out or was canceled. Please try again."
-            : error.message}
-        </Text>
-      </Box>
-    );
-  }
+  const isError = validation.status === "invalid" || error;
+  const isTimeoutError = error?.message?.includes(
+    "The operation either timed out or was not allowed",
+  );
+  const errorMessage = useMemo(() => {
+    if (validation.error) {
+      return validation.error.message;
+    }
+
+    if (isTimeoutError) {
+      return "Passkey signing timed out or was canceled. Please try again.";
+    }
+
+    return error?.message;
+  }, [validation, error, isTimeoutError]);
 
   return (
-    <Box
-      display="flex"
-      flexDirection="row"
+    <VStack
       alignItems="flex-start"
-      padding="8px 12px"
       bg="solid.secondary"
+      py="8px"
       marginTop="-1rem"
       paddingTop="15px"
+      backgroundColor={isError ? "red.500" : "solid.secondary"}
       borderBottomRadius="4px"
+      divider={<Divider borderColor="darkGray.800" opacity="0.1" />}
     >
-      <HStack spacing={2}>
-        <Text
-          fontFamily="Inter"
-          fontSize="12px"
-          lineHeight="16px"
-          color="#808080"
-        >
-          {!username
-            ? "Enter a username"
-            : validation.status === "validating"
-            ? "Checking username..."
-            : validation.status === "valid"
-            ? validation.exists
-              ? "Welcome back! Select Login to play"
-              : "Welcome! Let's create a new controller!"
-            : validation.error?.message || "Enter a username"}
-        </Text>
-      </HStack>
-    </Box>
+      <Text
+        fontFamily="Inter"
+        fontSize="12px"
+        px="15px"
+        lineHeight="16px"
+        color={isError ? "darkGray.500" : "text.secondary"}
+      >
+        {isError ? (
+          errorMessage
+        ) : (
+          <>
+            {!username
+              ? "Enter a username"
+              : validation.status === "validating"
+              ? "Checking username..."
+              : validation.status === "valid"
+              ? validation.exists
+                ? "Welcome back! Select Login to play"
+                : "Welcome! Let's create a new controller!"
+              : validation.error?.message || "Enter a username"}
+          </>
+        )}
+      </Text>
+      {isTimeoutError && (
+        <HStack fontSize="xs" w="full" px="15px">
+          <Text color="darkGray.800" fontWeight="bold">
+            Having trouble signing up?
+          </Text>
+          <Spacer />
+          <HStack
+            color="darkGray.800"
+            cursor="pointer"
+            onClick={() => {
+              window.open(
+                "https://docs.cartridge.gg/controller/passkey-support",
+                "_blank",
+              );
+            }}
+          >
+            <Link>Controller Docs</Link>
+            <ExternalIcon size="sm" />
+          </HStack>
+        </HStack>
+      )}
+    </VStack>
   );
 }
