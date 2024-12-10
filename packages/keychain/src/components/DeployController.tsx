@@ -15,6 +15,7 @@ import { Fees } from "./Fees";
 import { ControllerError } from "utils/connection";
 import { Policies } from "components/Policies";
 import { ETH_CONTRACT_ADDRESS, useERC20Balance } from "@cartridge/utils";
+import { useExplorer } from "@starknet-react/core";
 
 export function DeployController({
   onClose,
@@ -236,6 +237,8 @@ function ExplorerLink({
   txHash: string;
   chainId: string;
 }) {
+  const explorer = useExplorer();
+
   if (
     ![
       constants.StarknetChainId.SN_SEPOLIA,
@@ -246,12 +249,7 @@ function ExplorerLink({
   }
 
   return (
-    <Link
-      href={`https://${
-        chainId === constants.StarknetChainId.SN_SEPOLIA ? "sepolia." : ""
-      }starkscan.co/tx/${txHash}`}
-      isExternal
-    >
+    <Link href={explorer.transaction(txHash)} isExternal>
       <Button
         variant="goast"
         mt={10}
@@ -261,7 +259,7 @@ function ExplorerLink({
         fontSize="sm"
         fontFamily="Inter"
       >
-        View on Starkscan
+        View on Explorer
       </Button>
     </Link>
   );
