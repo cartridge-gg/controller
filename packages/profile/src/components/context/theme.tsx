@@ -83,7 +83,7 @@ export function ThemeProvider({
     setTheme(JSON.parse(val));
   }, [themeParam, origin]);
 
-  useThemeEffect({ theme });
+  useThemeEffect({ theme, assetUrl: import.meta.env.VITE_KEYCHAIN_URL });
 
   const value = {
     colorScheme,
