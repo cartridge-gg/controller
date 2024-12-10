@@ -6,7 +6,7 @@ import {
 import { Container, Footer, Content } from "@/components/layout";
 import { useCallback, useEffect, useState } from "react";
 import { Button, Link, Spinner } from "@chakra-ui/react";
-import { CheckIcon, ExternalIcon, WandIcon } from "@cartridge/ui";
+import { CheckIcon, ExternalIcon, WandIcon } from "@cartridge/ui-next";
 import { Funding } from "./Funding";
 import { useConnection } from "@/hooks/connection";
 import { ControllerErrorAlert, ErrorAlert } from "./ErrorAlert";
