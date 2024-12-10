@@ -3,7 +3,7 @@ import { ConnectCtx, ConnectionCtx } from "./types";
 import { Policies } from "@cartridge/presets";
 import { ParsedSessionPolicies, parseSessionPolicies } from "hooks/session";
 
-export function connectFactory({
+export function connect({
   setOrigin,
   setRpcUrl,
   setPolicies,
@@ -19,12 +19,17 @@ export function connectFactory({
 
     return (policies: Policies, rpcUrl: string): Promise<ConnectReply> => {
       setRpcUrl(rpcUrl);
-      setPolicies(
-        parseSessionPolicies({
-          verified: false,
-          policies: toSessionPolicies(policies),
-        }),
-      );
+
+      if (
+        Array.isArray(policies) ? policies.length : Object.keys(policies).length
+      ) {
+        setPolicies(
+          parseSessionPolicies({
+            verified: false,
+            policies: toSessionPolicies(policies),
+          }),
+        );
+      }
 
       return new Promise((resolve, reject) => {
         setContext({

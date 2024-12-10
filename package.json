@@ -22,7 +22,7 @@
     "book": "pnpm --filter @cartridge/documentation",
     "ui": "pnpm --filter @cartridge/ui",
     "ui:next": "pnpm --filter @cartridge/ui-next",
-    "profil": "pnpm --filter @cartridge/profile",
+    "profile": "pnpm --filter @cartridge/profile",
     "utils": "pnpm --filter @cartridge/utils",
     "example:next": "pnpm --filter @cartridge/controller-example-next",
     "example:svelte": "pnpm --filter @cartridge/controller-example-svelte",
