@@ -40,9 +40,8 @@ export function useAccount() {
 
   return {
     username,
-    address:
-      import.meta.env.VITE_MOCKED_ACCOUNT_ADDRESS ??
+    address: (import.meta.env.VITE_MOCKED_ACCOUNT_ADDRESS ??
       data?.account?.controllers.edges?.[0]?.node?.address ??
-      "",
+      "") as string,
   };
 }

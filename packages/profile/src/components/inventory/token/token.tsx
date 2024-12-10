@@ -24,11 +24,12 @@ import {
   StarkscanUrl,
   useCountervalue,
   useCreditBalance,
+  useEkuboMetadata,
 } from "@cartridge/utils";
-import { constants } from "starknet";
+import { constants, getChecksumAddress } from "starknet";
 import { formatEther } from "viem";
 import { useAccount } from "@/hooks/account";
-import { useToken } from "@/hooks/token";
+import { useBalance } from "@/hooks/token";
 import { TokenPair } from "@cartridge/utils/api/cartridge";
 
 export function Token() {
@@ -96,16 +97,24 @@ function ERC20() {
   // const [searchParams, setSearchParams] = useSearchParams();
 
   const { chainId } = useConnection();
-  const t = useToken({ tokenAddress: address! });
+  const balance = useBalance({ tokenAddress: address! });
   const { countervalue } = useCountervalue(
     {
-      balance: formatEther(t?.balance.value ?? 0n),
-      pair: `${t?.meta.symbol}_USDC` as TokenPair,
+      balance: formatEther(BigInt(balance?.raw ?? 0)),
+      pair: `${balance?.meta.symbol}_USDC` as TokenPair,
     },
-    { enabled: t && ["ETH", "STRK"].includes(t.meta.symbol) },
+    { enabled: balance && ["ETH", "STRK"].includes(balance.meta.symbol) },
   );
+  const ekuboMetaList = useEkuboMetadata();
+  const ekuboMeta = balance
+    ? ekuboMetaList.find(
+        (m) =>
+          getChecksumAddress(m.l2_token_address) ===
+          getChecksumAddress(balance.meta.contractAddress),
+      )
+    : undefined;
 
-  if (!t) {
+  if (!balance) {
     return;
   }
 
@@ -120,18 +129,18 @@ function ERC20() {
       }
     >
       <LayoutHeader
-        title={`${
-          t.balance === undefined ? (
+        title={
+          balance === undefined ? (
             <Skeleton className="h-[20px] w-[120px] rounded" />
           ) : (
-            t.balance.formatted
+            `${balance.amount} ${balance.meta.symbol}`
           )
-        } ${t.meta.symbol}`}
+        }
         description={countervalue && `${countervalue.formatted} (USD)`}
         icon={
           <img
             className="w-8 h-8"
-            src={t.meta.logoUrl ?? "/public/placeholder.svg"}
+            src={ekuboMeta?.logo_url ?? "/public/placeholder.svg"}
           />
         }
       />
@@ -147,17 +156,17 @@ function ERC20() {
               <Link
                 to={`${StarkscanUrl(
                   chainId as constants.StarknetChainId,
-                ).contract(t.meta.address)} `}
+                ).contract(balance.meta.contractAddress)} `}
                 className="flex items-center gap-1 text-sm"
                 target="_blank"
               >
                 <div className="font-medium">
-                  {formatAddress(t.meta.address, { size: "sm" })}
+                  {formatAddress(balance.meta.contractAddress, { size: "sm" })}
                 </div>
                 <ExternalIcon size="sm" />
               </Link>
             ) : (
-              <div>{formatAddress(t.meta.address)}</div>
+              <div>{formatAddress(balance.meta.contractAddress)}</div>
             )}
           </CardContent>
 

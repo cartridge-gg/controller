@@ -1,0 +1,16 @@
+query ERC20Balances($projects: [String!]!, $accountAddress: String!) {
+  balances(projects: $projects, accountAddress: $accountAddress) {
+    edges {
+      node {
+        amount
+        raw
+        meta {
+          contractAddress
+          decimals
+          name
+          symbol
+        }
+      }
+    }
+  }
+}

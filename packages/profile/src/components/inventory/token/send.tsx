@@ -6,7 +6,7 @@ import {
 } from "@/components/layout";
 import { useAccount } from "@/hooks/account";
 import { useConnection } from "@/hooks/context";
-import { useToken } from "@/hooks/token";
+import { useBalance } from "@/hooks/token";
 import {
   ArrowIcon,
   Button,
@@ -19,24 +19,24 @@ import {
   FormMessage,
   Input,
 } from "@cartridge/ui-next";
-import { useCountervalue } from "@cartridge/utils";
+import { useCountervalue, useEkuboMetadata } from "@cartridge/utils";
 import { TokenPair } from "@cartridge/utils/api/cartridge";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useParams } from "react-router-dom";
-import { constants } from "starknet";
+import { constants, getChecksumAddress } from "starknet";
 import { z } from "zod";
 
 export function SendToken() {
   const { address: tokenAddress } = useParams<{ address: string }>();
   const { address } = useAccount();
   const { parent } = useConnection();
-  const t = useToken({ tokenAddress: tokenAddress! });
+  const balance = useBalance({ tokenAddress: tokenAddress! });
 
   const formSchema = useMemo(() => {
     // Avoid scientific notation in error message (e.g. `parseFloat(`1e-${decimals}`).toString() === "1e-18"`)
-    const decimals = t?.meta.decimals ?? 18;
+    const decimals = balance?.meta.decimals ?? 18;
     const minAmountStr = `0.${"0".repeat(decimals - 1)}1`;
 
     return z.object({
@@ -63,13 +63,16 @@ export function SendToken() {
       amount: z.coerce
         .number({ message: "Amount is required" })
         .gte(parseFloat(minAmountStr), {
-          message: `Amount must be at least ${minAmountStr} ${t?.meta.symbol}`,
+          message: `Amount must be at least ${minAmountStr} ${balance?.meta.symbol}`,
         })
-        .refine((x) => BigInt(x * 10 ** decimals) <= (t?.balance.value ?? 0n), {
-          message: "Amount cannot exceed balance",
-        }),
+        .refine(
+          (x) => BigInt(x * 10 ** decimals) <= BigInt(balance?.raw ?? 0),
+          {
+            message: "Amount cannot exceed balance",
+          },
+        ),
     });
-  }, [t]);
+  }, [balance]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     mode: "onBlur",
@@ -81,24 +84,24 @@ export function SendToken() {
 
   const onSubmit = useCallback(
     (values: z.infer<typeof formSchema>) => {
-      if (!t) return;
+      if (!balance) return;
 
-      const amount = (values.amount * 10 ** t.meta.decimals).toString();
+      const amount = (values.amount * 10 ** balance.meta.decimals).toString();
 
       parent.openExecute([
         {
-          contractAddress: t?.meta.address,
+          contractAddress: balance.meta.contractAddress,
           entrypoint: "increaseAllowance",
           calldata: [values.to, amount, "0x0"],
         },
         {
-          contractAddress: t?.meta.address,
+          contractAddress: balance.meta.contractAddress,
           entrypoint: "transfer",
           calldata: [values.to, amount, "0x0"],
         },
       ]);
     },
-    [t, parent],
+    [balance, parent],
   );
 
   const amount = form.watch("amount");
@@ -106,12 +109,23 @@ export function SendToken() {
   const { countervalue } = useCountervalue(
     {
       balance: amount?.toString(),
-      pair: `${t?.meta.symbol}_USDC` as TokenPair,
+      pair: `${balance?.meta.symbol}_USDC` as TokenPair,
     },
-    { enabled: t && ["ETH", "STRK"].includes(t.meta.symbol) && !!amount },
+    {
+      enabled:
+        balance && ["ETH", "STRK"].includes(balance.meta.symbol) && !!amount,
+    },
   );
+  const ekuboMetaList = useEkuboMetadata();
+  const ekuboMeta = balance
+    ? ekuboMetaList.find(
+        (m) =>
+          getChecksumAddress(m.l2_token_address) ===
+          getChecksumAddress(balance.meta.contractAddress),
+      )
+    : undefined;
 
-  if (!t) {
+  if (!balance) {
     return;
   }
 
@@ -126,12 +140,12 @@ export function SendToken() {
       }
     >
       <LayoutHeader
-        title={`Send ${t.meta.name}`}
+        title={`Send ${balance.meta.name}`}
         description={<CopyAddress address={address} />}
         icon={
           <img
             className="w-8 h-8"
-            src={t.meta.logoUrl ?? "/public/placeholder.svg"}
+            src={ekuboMeta?.logo_url ?? "/public/placeholder.svg"}
           />
         }
       />
@@ -162,7 +176,7 @@ export function SendToken() {
                     <div className="flex items-center gap-2">
                       <FormLabel>Balance:</FormLabel>
                       <div className="text-xs">
-                        {t.balance.formatted} {t.meta.symbol}
+                        {balance.amount} {balance.meta.symbol}
                       </div>
                     </div>
                   </div>
