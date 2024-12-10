@@ -2,7 +2,7 @@ export * from "./types";
 
 import { connectToParent } from "@cartridge/penpal";
 import Controller from "utils/controller";
-import { connectFactory } from "./connect";
+import { connect } from "./connect";
 import { execute } from "./execute";
 import { estimateDeclareFee, estimateInvokeFee } from "./estimate";
 import { probeFactory } from "./probe";
@@ -30,7 +30,7 @@ export function connectToController<ParentMethods extends {}>({
   return connectToParent<ParentMethods>({
     methods: {
       connect: normalize(
-        connectFactory({
+        connect({
           setOrigin,
           setRpcUrl,
           setPolicies,

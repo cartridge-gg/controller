@@ -142,6 +142,7 @@ export function useConnectionValue() {
         const parsedPolicies = JSON.parse(
           decodeURIComponent(policiesParam),
         ) as Policies;
+
         setPolicies(
           parseSessionPolicies({
             verified: false,
@@ -175,7 +176,9 @@ export function useConnectionValue() {
         );
       }
     }
+  }, [setTheme, setPolicies, setHasPrefundRequest, setOrigin, setPrefunds]);
 
+  useEffect(() => {
     const connection = connectToController<ParentMethods>({
       setOrigin,
       setRpcUrl,
@@ -188,9 +191,7 @@ export function useConnectionValue() {
     return () => {
       connection.destroy();
     };
-
-    // `origin` intentionally omitted
-  }, [setController]);
+  }, []); // Empty dependency array to run only once
 
   useEffect(() => {
     if (rpcUrl) {
