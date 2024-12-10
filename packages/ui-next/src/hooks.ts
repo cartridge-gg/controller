@@ -1,7 +1,13 @@
 import { useEffect } from "react";
 import { hexToHsl } from "@cartridge/utils";
 
-export function useThemeEffect({ theme }: { theme: ControllerTheme }) {
+export function useThemeEffect({
+  theme,
+  assetUrl,
+}: {
+  theme: ControllerTheme;
+  assetUrl: string;
+}) {
   useEffect(() => {
     if (!theme) return;
 
@@ -11,12 +17,10 @@ export function useThemeEffect({ theme }: { theme: ControllerTheme }) {
 
     document.documentElement.style.setProperty(
       "--theme-icon-url",
-      `url("${theme.icon}")`,
+      theme.icon.startsWith('http') ? `url("${theme.icon}")` : `url("${assetUrl}${theme.icon}")`,
     );
-    const coverUrl =
-      typeof theme.cover === "string"
-        ? `url("${theme.cover}")`
-        : `url("${theme.cover[appliedColorMode]}")`;
+    const coverValue = typeof theme.cover === "string" ? theme.cover : theme.cover[appliedColorMode];
+    const coverUrl = coverValue.startsWith('http') ? `url("${coverValue}")` : `url("${assetUrl}${coverValue}")`;
     document.documentElement.style.setProperty("--theme-cover-url", coverUrl);
 
     if (!theme.colors) return;
@@ -39,7 +43,7 @@ export function useThemeEffect({ theme }: { theme: ControllerTheme }) {
         hexToHsl(val),
       );
     }
-  }, [theme]);
+  }, [theme, assetUrl]);
 }
 
 // dup of @cartridge/controller/types

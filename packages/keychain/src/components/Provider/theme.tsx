@@ -9,7 +9,7 @@ import { PropsWithChildren, useEffect, useMemo } from "react";
 export function ControllerThemeProvider({ children }: PropsWithChildren) {
   const { theme } = useConnection();
 
-  useThemeEffect({ theme });
+  useThemeEffect({ theme, assetUrl: "" });
   const chakraTheme = useChakraTheme(theme);
 
   return (
