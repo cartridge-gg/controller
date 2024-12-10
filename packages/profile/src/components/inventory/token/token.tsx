@@ -168,13 +168,13 @@ function ERC20() {
         </Card>
       </LayoutContent>
 
-      {/* {isIframe() && (
+      {isIframe() && (
         <LayoutFooter>
           <Link to="send">
             <Button className="w-full">Send</Button>
           </Link>
         </LayoutFooter>
-      )} */}
+      )}
     </LayoutContainer>
   );
 }
