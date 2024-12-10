@@ -28,14 +28,15 @@ import {
   useCountervalue,
   useCreditBalance,
 } from "@cartridge/utils";
-import { constants } from "starknet";
+import { constants, getChecksumAddress } from "starknet";
 import { formatEther } from "viem";
 import { useAccount } from "@/hooks/account";
-import { useToken } from "@/hooks/token";
+import { useBalance } from "@/hooks/token";
 import { TokenPair } from "@cartridge/utils/api/cartridge";
 import { useMemo } from "react";
 import { compare } from "compare-versions";
 import { formatBalance } from "./helper";
+import { erc20Metadata } from "@cartridge/presets";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
@@ -97,21 +98,28 @@ function ERC20() {
   const navigate = useNavigate();
   const { address } = useParams<{ address: string }>();
   const { chainId, version } = useConnection();
-  const t = useToken({ tokenAddress: address! });
+  const balance = useBalance({ tokenAddress: address! });
   const { countervalue } = useCountervalue(
     {
-      balance: formatEther(t?.balance.value ?? 0n),
-      pair: `${t?.meta.symbol}_USDC` as TokenPair,
+      balance: formatEther(BigInt(balance?.raw ?? 0)),
+      pair: `${balance?.meta.symbol}_USDC` as TokenPair,
     },
-    { enabled: t && ["ETH", "STRK"].includes(t.meta.symbol) },
+    { enabled: balance && ["ETH", "STRK"].includes(balance.meta.symbol) },
   );
+  const ekuboMeta = balance
+    ? erc20Metadata.find(
+        (m) =>
+          getChecksumAddress(m.l2_token_address) ===
+          getChecksumAddress(balance.meta.contractAddress),
+      )
+    : undefined;
 
   const compatibility = useMemo(() => {
     if (!version) return false;
     return compare(version, "0.5.6", ">=");
   }, [version]);
 
-  if (!t) {
+  if (!balance) {
     return;
   }
 
@@ -119,12 +127,12 @@ function ERC20() {
     <LayoutContainer>
       <LayoutHeader
         title={`${
-          t.balance === undefined ? (
+          balance === undefined ? (
             <Skeleton className="h-[20px] w-[120px] rounded" />
           ) : (
-            formatBalance(t.balance.formatted, ["~"])
+            formatBalance(balance.amount.toString(), ["~"])
           )
-        } ${t.meta.symbol}`}
+        } ${balance.meta.symbol}`}
         description={
           countervalue && `${formatBalance(countervalue.formatted, ["~"])}`
         }
@@ -132,7 +140,7 @@ function ERC20() {
           <div className="rounded-full size-11 bg-background-300 flex items-center justify-center">
             <img
               className="w-10 h-10"
-              src={t.meta.logoUrl ?? "/public/placeholder.svg"}
+              src={ekuboMeta?.logo_url ?? "/public/placeholder.svg"}
             />
           </div>
         }
@@ -152,17 +160,17 @@ function ERC20() {
               <Link
                 to={`${StarkscanUrl(
                   chainId as constants.StarknetChainId,
-                ).contract(t.meta.address)} `}
+                ).contract(balance.meta.contractAddress)} `}
                 className="flex items-center gap-1 text-sm"
                 target="_blank"
               >
                 <div className="font-medium">
-                  {formatAddress(t.meta.address, { size: "sm" })}
+                  {formatAddress(balance.meta.contractAddress, { size: "sm" })}
                 </div>
                 <ExternalIcon size="sm" />
               </Link>
             ) : (
-              <div>{formatAddress(t.meta.address)}</div>
+              <div>{formatAddress(balance.meta.contractAddress)}</div>
             )}
           </CardContent>
 

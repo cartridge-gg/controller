@@ -1,38 +1,33 @@
-import { useToken } from "@/hooks/token";
 import { Amount } from "@cartridge/ui-next";
 import { useCountervalue } from "@cartridge/utils";
-import { TokenPair } from "@cartridge/utils/api/cartridge";
+import { Erc20BalancesQuery, TokenPair } from "@cartridge/utils/api/cartridge";
 import { useCallback } from "react";
-import { useParams } from "react-router-dom";
 
 export function SendAmount({
-  amount,
+  balance,
   setAmount,
   setError,
 }: {
-  amount: number | undefined;
+  balance: Erc20BalancesQuery["balances"]["edges"][0]["node"];
   setAmount: (amount: number | undefined) => void;
   setError: (error: Error | undefined) => void;
 }) {
-  const { address: tokenAddress } = useParams<{ address: string }>();
-  const token = useToken({ tokenAddress: tokenAddress! });
-
   const handleMax = useCallback(
     (e: React.MouseEvent<HTMLDivElement | HTMLButtonElement>) => {
       e.preventDefault();
-      if (!token) return;
-      setAmount(parseFloat(token.balance.formatted.replace("~", "")));
+      setAmount(balance.amount);
     },
-    [token, setAmount],
+    [balance, setAmount],
   );
 
   const { countervalue } = useCountervalue(
     {
-      balance: amount?.toString() ?? "0",
-      pair: `${token?.meta.symbol}_USDC` as TokenPair,
+      balance: balance.amount.toString() ?? "0",
+      pair: `${balance.meta.symbol}_USDC` as TokenPair,
     },
     {
-      enabled: token && ["ETH", "STRK"].includes(token.meta.symbol) && !!amount,
+      enabled:
+        ["ETH", "STRK"].includes(balance.meta.symbol) && !!balance.amount,
     },
   );
 
@@ -44,17 +39,13 @@ export function SendAmount({
     [setAmount],
   );
 
-  if (!token) {
-    return null;
-  }
-
   return (
     <Amount
-      amount={amount}
+      amount={balance.amount}
       conversion={countervalue?.formatted}
-      balance={parseFloat(token.balance.formatted.replace("~", ""))}
-      symbol={token.meta.symbol}
-      decimals={token.meta.decimals ?? 18}
+      balance={balance.amount}
+      symbol={balance.meta.symbol}
+      decimals={balance.meta.decimals ?? 18}
       setError={setError}
       onChange={handleChange}
       onMax={handleMax}

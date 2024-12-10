@@ -1,6 +1,6 @@
 import { useAccount } from "@/hooks/account";
 import { useConnection } from "@/hooks/context";
-import { useToken } from "@/hooks/token";
+import { useBalance } from "@/hooks/token";
 import {
   LayoutContainer,
   LayoutContent,
@@ -18,6 +18,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Call, uint256 } from "starknet";
 import { SendRecipient } from "@/components/modules/recipient";
 import { SendAmount } from "./amount";
+import { erc20Metadata } from "@cartridge/presets";
+import { getChecksumAddress } from "starknet";
 
 export function SendToken() {
   const { address: tokenAddress } = useParams<{ address: string }>();
@@ -25,7 +27,7 @@ export function SendToken() {
   const { parent } = useConnection();
   const [validated, setValidated] = useState(false);
   const [warning, setWarning] = useState<string>();
-  const token = useToken({ tokenAddress: tokenAddress! });
+  const balance = useBalance({ tokenAddress: tokenAddress! });
   const navigate = useNavigate();
 
   const [to, setTo] = useState("");
@@ -44,15 +46,15 @@ export function SendToken() {
 
   const onSubmit = useCallback(
     async (to: string, amount: number) => {
-      if (!token) return;
+      if (!balance) return;
 
       const formattedAmount = uint256.bnToUint256(
-        BigInt(amount * 10 ** token.meta.decimals),
+        BigInt(amount * 10 ** balance.meta.decimals),
       );
 
       const calls: Call[] = [
         {
-          contractAddress: token.meta.address,
+          contractAddress: balance.meta.contractAddress,
           entrypoint: "transfer",
           calldata: [to, formattedAmount],
         },
@@ -60,23 +62,29 @@ export function SendToken() {
       await parent.openExecute(calls);
       navigate("../../..");
     },
-    [token, parent, navigate],
+    [balance, parent, navigate],
   );
 
-  if (!token) {
+  if (!balance) {
     return null;
   }
 
   return (
     <LayoutContainer>
       <LayoutHeader
-        title={`Send ${token.meta.symbol}`}
+        title={`Send ${balance.meta.symbol}`}
         description={<CopyAddress address={address} size="sm" />}
         icon={
           <div className="rounded-full size-11 bg-foreground-100 flex items-center justify-center">
             <img
               className="w-10 h-10"
-              src={token.meta.logoUrl ?? "/public/placeholder.svg"}
+              src={
+                erc20Metadata.find(
+                  (m) =>
+                    getChecksumAddress(m.l2_token_address) ===
+                    getChecksumAddress(balance.meta.contractAddress),
+                )?.logo_url ?? "/public/placeholder.svg"
+              }
             />
           </div>
         }
@@ -86,7 +94,11 @@ export function SendToken() {
       />
       <LayoutContent className="pb-4 gap-6">
         <SendRecipient to={to} setTo={setTo} setWarning={setWarning} />
-        <SendAmount amount={amount} setAmount={setAmount} setError={setError} />
+        <SendAmount
+          balance={balance}
+          setAmount={setAmount}
+          setError={setError}
+        />
       </LayoutContent>
 
       <LayoutFooter>

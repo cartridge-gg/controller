@@ -6,11 +6,13 @@ import {
   CardTitle,
 } from "@cartridge/ui-next";
 import { Link } from "react-router-dom";
-import { Balance, ERC20Metadata, useCountervalue } from "@cartridge/utils";
+import { useCountervalue } from "@cartridge/utils";
 import { formatEther } from "viem";
-import { useTokens } from "@/hooks/token";
-import { TokenPair } from "@cartridge/utils/api/cartridge";
+import { useBalances } from "@/hooks/token";
+import { Erc20BalancesQuery, TokenPair } from "@cartridge/utils/api/cartridge";
+import { getChecksumAddress } from "starknet";
 import { formatBalance } from "./helper";
+import { erc20Metadata } from "@cartridge/presets";
 
 export function Tokens() {
   // const { isVisible } = useConnection();
@@ -19,7 +21,7 @@ export function Tokens() {
   //   username,
   //   interval: isVisible ? 3000 : undefined,
   // });
-  const erc20 = useTokens();
+  const balancesQuery = useBalances();
 
   return (
     <Card>
@@ -37,8 +39,8 @@ export function Tokens() {
       </Link> */}
 
       <CardListContent>
-        {erc20.data.map((t) => (
-          <TokenCardContent token={t} key={t.meta.address} />
+        {balancesQuery.data?.balances.edges.map(({ node }) => (
+          <TokenCardContent balance={node} key={node.meta.contractAddress} />
         ))}
       </CardListContent>
     </Card>
@@ -46,24 +48,29 @@ export function Tokens() {
 }
 
 function TokenCardContent({
-  token,
+  balance,
 }: {
-  token: { balance: Balance; meta: ERC20Metadata };
+  balance: Erc20BalancesQuery["balances"]["edges"][0]["node"];
 }) {
   const { countervalue } = useCountervalue({
-    balance: formatEther(token.balance.value || 0n),
-    pair: `${token.meta.symbol}_USDC` as TokenPair,
+    balance: formatEther(BigInt(balance.raw) || 0n),
+    pair: `${balance.meta.symbol}_USDC` as TokenPair,
   });
+  const ekuboMeta = erc20Metadata.find(
+    (m) =>
+      getChecksumAddress(m.l2_token_address) ===
+      getChecksumAddress(balance.meta.contractAddress),
+  );
 
   return (
-    <Link to={`token/${token.meta.address}`}>
+    <Link to={`token/${balance.meta.contractAddress}`}>
       <CardListItem
-        icon={token.meta.logoUrl ?? "/public/placeholder.svg"}
+        icon={ekuboMeta?.logo_url ?? "/public/placeholder.svg"}
         className="hover:opacity-80"
       >
         <div className="flex items-center gap-2">
-          {formatBalance(token.balance.formatted, ["~"])}
-          <span className="text-foreground-400">{token.meta.symbol}</span>
+          {formatBalance(balance.amount.toString(), ["~"])}
+          <span className="text-foreground-400">{balance.meta.symbol}</span>
         </div>
 
         {countervalue && (
