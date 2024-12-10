@@ -1,5 +1,4 @@
 import React from "react";
-import { CodeIcon, CoinsIcon } from "@cartridge/ui-next";
 import { toArray } from "@cartridge/controller";
 import { ParsedSessionPolicies } from "hooks/session";
 
@@ -15,17 +14,8 @@ export function UnverifiedSessionSummary({
     <div className="flex flex-col gap-4">
       {Object.entries(policies.contracts ?? {}).map(([address, contract]) => {
         const methods = toArray(contract.methods);
-        const title = !contract.meta
-          ? "Contract"
-          : `${contract.meta.name} token`;
-
-        const icon =
-          contract.meta?.logoUrl ||
-          (contract.meta ? (
-            <CoinsIcon variant="line" />
-          ) : (
-            <CodeIcon size="lg" variant="solid" />
-          ));
+        const title = !contract.meta?.name ? "Contract" : contract.meta.name;
+        const icon = contract.meta?.icon;
 
         return (
           <ContractCard

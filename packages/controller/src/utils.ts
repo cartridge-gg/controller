@@ -118,7 +118,7 @@ export function toArray<T>(val: T | T[]): T[] {
   return Array.isArray(val) ? val : [val];
 }
 
-function humanizeString(str: string): string {
+export function humanizeString(str: string): string {
   return (
     str
       // Convert from camelCase or snake_case

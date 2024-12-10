@@ -17,12 +17,17 @@ export function useThemeEffect({
 
     document.documentElement.style.setProperty(
       "--theme-icon-url",
-      `url("${assetUrl}${theme.icon}")`,
+      theme.icon.startsWith("http")
+        ? `url("${theme.icon}")`
+        : `url("${assetUrl}${theme.icon}")`,
     );
-    const coverUrl =
+    const coverValue =
       typeof theme.cover === "string"
-        ? `url("${assetUrl}${theme.cover}")`
-        : `url("${assetUrl}${theme.cover[appliedColorMode]}")`;
+        ? theme.cover
+        : theme.cover[appliedColorMode];
+    const coverUrl = coverValue.startsWith("http")
+      ? `url("${coverValue}")`
+      : `url("${assetUrl}${coverValue}")`;
     document.documentElement.style.setProperty("--theme-cover-url", coverUrl);
 
     if (!theme.colors) return;

@@ -120,41 +120,33 @@ export function CreateSession({
               borderColor="error.foreground"
               isChecked={isConsent}
               isDisabled={isConnecting}
+              pointerEvents="none"
             />
             <Text fontSize="xs" textColor="error.foreground">
-              This session&apos;s policies have not been verified. I understand
-              and agree to grant permission for the application to execute
-              actions listed above.
+              I understand and agree to grant permission for this application to
+              execute these actions.
             </Text>
           </HStack>
         )}
         {error && isControllerError(error) && (
           <ControllerErrorAlert error={error} />
         )}
-        {!error && (
-          <HStack spacing={4} width="full">
-            <Button
-              onClick={() => onConnect()}
-              isDisabled={isConnecting}
-              px={10}
-            >
-              Skip
-            </Button>
-            <Button
-              colorScheme="colorful"
-              isDisabled={
-                isDisabled ||
-                isConnecting ||
-                (!policies?.verified && !isConsent)
-              }
-              isLoading={isConnecting}
-              onClick={() => onCreateSession()}
-              width="full"
-            >
-              {isUpdate ? "update" : "create"} session
-            </Button>
-          </HStack>
-        )}
+        <HStack spacing={4} width="full">
+          <Button onClick={() => onConnect()} isDisabled={isConnecting} px={10}>
+            Skip
+          </Button>
+          <Button
+            colorScheme="colorful"
+            isDisabled={
+              isDisabled || isConnecting || (!policies?.verified && !isConsent)
+            }
+            isLoading={isConnecting}
+            onClick={() => onCreateSession()}
+            width="full"
+          >
+            {isUpdate ? "update" : "create"} session
+          </Button>
+        </HStack>
       </Footer>
     </Container>
   );
