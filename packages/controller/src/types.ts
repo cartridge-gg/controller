@@ -154,6 +154,8 @@ export type IFrameOptions = {
   starterPackId?: string;
   /** The theme to use */
   theme?: string;
+  /** The preset to use */
+  preset?: string;
   /** The color mode to use */
   colorMode?: ColorMode;
 };

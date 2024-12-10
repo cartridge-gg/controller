@@ -58,8 +58,9 @@ function Home() {
       // if no policies, we can connect immediately
       if (
         !policies ||
-        !policies.contracts ||
-        Object.keys(policies.contracts).length === 0
+        ((!policies.contracts ||
+          Object.keys(policies.contracts).length === 0) &&
+          policies.messages?.length === 0)
       ) {
         context.resolve({
           code: ResponseCodes.SUCCESS,

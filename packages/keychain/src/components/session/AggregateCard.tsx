@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { Fragment, useMemo } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -81,7 +81,7 @@ export function AggregateCard({ title, icon, policies }: AggregateCardProps) {
               <Card>
                 {Object.entries(policies.contracts || {}).map(
                   ([address, { name, methods }]) => (
-                    <>
+                    <Fragment key={address}>
                       <HStack py={4}>
                         <Text color="text.primary" fontWeight="bold">
                           {name}
@@ -139,7 +139,7 @@ export function AggregateCard({ title, icon, policies }: AggregateCardProps) {
                           </VStack>
                         ))}
                       </Stack>
-                    </>
+                    </Fragment>
                   ),
                 )}
 
