@@ -9,8 +9,9 @@ import {
   AccordionPanel,
   Box,
 } from "@chakra-ui/react";
-import { CopyHash, FnIcon, WedgeRightIcon } from "@cartridge/ui";
+import { FnIcon, WedgeRightIcon } from "@cartridge/ui";
 import { SessionPolicies } from "@cartridge/presets";
+import { CopyAddress } from "./CopyAddress";
 
 export function Policies({
   title,
@@ -77,7 +78,7 @@ export function Policies({
 
                   <AccordionPanel>
                     <VStack align="flex-start" w="full" p={3}>
-                      <CopyHash hash={contractAddress} />
+                      <CopyAddress address={contractAddress} />
                       {m.description && (
                         <Text w="full" color="inherit">
                           {m.description}
