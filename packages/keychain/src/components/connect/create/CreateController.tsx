@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Container, Footer, Content } from "components/layout";
 import { Field } from "@cartridge/ui";
-import { Button } from "@chakra-ui/react";
+import { Box, Button } from "@chakra-ui/react";
 import { useControllerTheme } from "hooks/theme";
 import { usePostHog } from "posthog-js/react";
 import { useDebounce } from "hooks/debounce";
@@ -54,18 +54,26 @@ export function CreateControllerView({
         }}
       >
         <Content mb="2rem">
-          <Field
-            {...usernameField}
-            autoFocus
-            placeholder="shinobi"
-            onFocus={onUsernameFocus}
-            onChange={(e) => {
-              onUsernameChange(e.target.value.toLowerCase());
-            }}
-            isLoading={validation.status === "validating"}
-            isDisabled={isLoading}
-            onClear={onUsernameClear}
-          />
+          <Box
+            border={
+              validation.status === "invalid" || error ? "1px solid" : "0px"
+            }
+            borderColor="red.500"
+            borderRadius="base"
+          >
+            <Field
+              {...usernameField}
+              autoFocus
+              placeholder="shinobi"
+              onFocus={onUsernameFocus}
+              onChange={(e) => {
+                onUsernameChange(e.target.value.toLowerCase());
+              }}
+              isLoading={validation.status === "validating"}
+              isDisabled={isLoading}
+              onClear={onUsernameClear}
+            />
+          </Box>
 
           <StatusTray
             username={usernameField.value}
