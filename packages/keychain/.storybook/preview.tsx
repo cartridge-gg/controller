@@ -162,7 +162,7 @@ export function ControllerThemeProvider({
   children,
   theme = defaultTheme,
 }: PropsWithChildren<{ theme?: ControllerTheme }>) {
-  useThemeEffect({ theme, assetUrl: "" });
+  useThemeEffect({ theme });
   const chakraTheme = useChakraTheme(theme);
 
   return (
