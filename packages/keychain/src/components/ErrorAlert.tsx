@@ -28,6 +28,7 @@ import { useConnection } from "hooks/connection";
 import { constants } from "starknet";
 import { parseExecutionError, parseValidationError } from "utils/errors";
 import { formatAddress } from "@cartridge/utils";
+import { useExplorer } from "@starknet-react/core";
 
 export function ErrorAlert({
   title,
@@ -336,17 +337,7 @@ function StackTraceDisplay({
   stackTrace: ReturnType<typeof parseExecutionError>["stack"];
 }) {
   const { chainId } = useConnection();
-
-  const getExplorerUrl = (type: "contract" | "class", value: string) => {
-    if (!chainId) return;
-
-    const baseUrl = {
-      [constants.StarknetChainId.SN_SEPOLIA]: "https://sepolia.starkscan.co",
-      [constants.StarknetChainId.SN_MAIN]: "https://starkscan.co",
-    }[chainId];
-
-    return baseUrl ? `${baseUrl}/${type}/${value}` : undefined;
-  };
+  const explorer = useExplorer();
 
   const isExternalLink = [
     constants.StarknetChainId.SN_SEPOLIA,
@@ -377,10 +368,11 @@ function StackTraceDisplay({
                     </Text>
                     {key === "address" || key === "class" ? (
                       <Link
-                        href={getExplorerUrl(
-                          key === "address" ? "contract" : "class",
-                          value as string,
-                        )}
+                        href={
+                          key === "address"
+                            ? explorer.contract(value as string)
+                            : explorer.class(value as string)
+                        }
                         isExternal={isExternalLink}
                         wordBreak="break-all"
                         textAlign="left"

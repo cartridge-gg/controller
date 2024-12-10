@@ -14,7 +14,6 @@ import {
   toSessionPolicies,
 } from "@cartridge/controller";
 import { mergeDefaultETHPrefund } from "utils/token";
-import { setIsSignedUp } from "utils/cookie";
 import {
   ConnectionContext,
   ConnectionContextValue,
@@ -98,7 +97,6 @@ export function useConnectionValue() {
     }
 
     setControllerRaw(controller);
-    setIsSignedUp();
   }, []);
 
   useEffect(() => {
