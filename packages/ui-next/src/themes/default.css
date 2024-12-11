@@ -35,5 +35,7 @@
     --ring: 0 0% 0%;
 
     --radius: 0.5rem;
+
+    --spacer: 0 0% 0%; /* solid-fills/spacer */
   }
 }
