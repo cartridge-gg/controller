@@ -104,6 +104,27 @@ export const WithTimeoutError: Story = {
   },
 };
 
+export const WithValidationError: Story = {
+  args: {
+    theme: {
+      name: "Cartridge",
+    } as ControllerTheme,
+    usernameField: {
+      value: "@#$!",
+    },
+    validation: {
+      status: "invalid",
+      exists: false,
+    },
+    isLoading: false,
+    error: new Error("Username can only contain letters, numbers, and hyphens"),
+    onUsernameChange: () => {},
+    onUsernameFocus: () => {},
+    onUsernameClear: () => {},
+    onSubmit: () => {},
+  },
+};
+
 export const WithGenericError: Story = {
   args: {
     theme: {
