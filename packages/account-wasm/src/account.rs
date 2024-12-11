@@ -9,6 +9,7 @@ use starknet::core::types::Call;
 use starknet::core::utils::starknet_keccak;
 use starknet_crypto::poseidon_hash;
 use starknet_types_core::felt::Felt;
+use std::cell::RefCell;
 use url::Url;
 use wasm_bindgen::prelude::*;
 
@@ -25,7 +26,7 @@ type Result<T> = std::result::Result<T, JsError>;
 
 #[wasm_bindgen]
 pub struct CartridgeAccount {
-    controller: Controller,
+    controller: RefCell<Controller>,
 }
 
 #[wasm_bindgen]
@@ -65,7 +66,9 @@ impl CartridgeAccount {
             chain_id.0,
         );
 
-        Ok(CartridgeAccount { controller })
+        Ok(CartridgeAccount {
+            controller: RefCell::new(controller),
+        })
     }
 
     #[wasm_bindgen(js_name = fromStorage)]
@@ -76,51 +79,54 @@ impl CartridgeAccount {
             Controller::from_storage(app_id).map_err(|e| JsError::new(&e.to_string()))?;
 
         match controller {
-            Some(c) => Ok(Some(CartridgeAccount { controller: c })),
+            Some(c) => Ok(Some(CartridgeAccount {
+                controller: RefCell::new(c),
+            })),
             None => Ok(None),
         }
     }
 
     #[wasm_bindgen(js_name = username)]
     pub fn username(&self) -> String {
-        self.controller.username.clone()
+        self.controller.borrow().username.clone()
     }
 
     #[wasm_bindgen(js_name = address)]
     pub fn address(&self) -> String {
-        self.controller.address.to_hex_string()
+        self.controller.borrow().address.to_hex_string()
     }
 
     #[wasm_bindgen(js_name = classHash)]
     pub fn class_hash(&self) -> String {
-        self.controller.class_hash.to_hex_string()
+        self.controller.borrow().class_hash.to_hex_string()
     }
 
     #[wasm_bindgen(js_name = rpcUrl)]
     pub fn rpc_url(&self) -> String {
-        self.controller.rpc_url.to_string()
+        self.controller.borrow().rpc_url.to_string()
     }
 
     #[wasm_bindgen(js_name = chainId)]
     pub fn chain_id(&self) -> String {
-        self.controller.chain_id.to_string()
+        self.controller.borrow().chain_id.to_string()
     }
 
     #[wasm_bindgen(js_name = disconnect)]
-    pub fn disconnect(&mut self) -> std::result::Result<(), JsControllerError> {
+    pub fn disconnect(&self) -> std::result::Result<(), JsControllerError> {
         self.controller
+            .borrow_mut()
             .disconnect()
             .map_err(JsControllerError::from)
     }
 
     #[wasm_bindgen(js_name = ownerGuid)]
     pub fn owner_guid(&self) -> JsFelt {
-        JsFelt(self.controller.owner_guid())
+        JsFelt(self.controller.borrow().owner_guid())
     }
 
     #[wasm_bindgen(js_name = registerSession)]
     pub async fn register_session(
-        &mut self,
+        &self,
         policies: Vec<Policy>,
         expires_at: u64,
         public_key: JsFelt,
@@ -133,6 +139,7 @@ impl CartridgeAccount {
 
         let res = self
             .controller
+            .borrow_mut()
             .register_session(methods, expires_at, public_key.0, Felt::ZERO, max_fee.0)
             .await
             .map_err(JsControllerError::from)?;
@@ -142,7 +149,7 @@ impl CartridgeAccount {
 
     #[wasm_bindgen(js_name = registerSessionCalldata)]
     pub fn register_session_calldata(
-        &mut self,
+        &self,
         policies: Vec<Policy>,
         expires_at: u64,
         public_key: JsFelt,
@@ -151,9 +158,12 @@ impl CartridgeAccount {
             .into_iter()
             .map(TryFrom::try_from)
             .collect::<std::result::Result<Vec<_>, _>>()?;
-        let call =
-            self.controller
-                .register_session_call(methods, expires_at, public_key.0, Felt::ZERO)?;
+        let call = self.controller.borrow_mut().register_session_call(
+            methods,
+            expires_at,
+            public_key.0,
+            Felt::ZERO,
+        )?;
 
         Ok(to_value(&call.calldata)?)
     }
@@ -163,7 +173,7 @@ impl CartridgeAccount {
         &self,
         new_class_hash: JsFelt,
     ) -> std::result::Result<JsCall, JsControllerError> {
-        let call = self.controller.upgrade(new_class_hash.0);
+        let call = self.controller.borrow().upgrade(new_class_hash.0);
         Ok(JsCall {
             contract_address: call.to,
             entrypoint: "upgrade".to_string(),
@@ -172,7 +182,7 @@ impl CartridgeAccount {
     }
 
     #[wasm_bindgen(js_name = createSession)]
-    pub async fn create_session(&mut self, policies: Vec<Policy>, expires_at: u64) -> Result<()> {
+    pub async fn create_session(&self, policies: Vec<Policy>, expires_at: u64) -> Result<()> {
         set_panic_hook();
 
         let methods = policies
@@ -180,7 +190,10 @@ impl CartridgeAccount {
             .map(TryFrom::try_from)
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
-        self.controller.create_session(methods, expires_at).await?;
+        self.controller
+            .borrow_mut()
+            .create_session(methods, expires_at)
+            .await?;
 
         Ok(())
     }
@@ -197,13 +210,13 @@ impl CartridgeAccount {
             .map(TryFrom::try_from)
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
-        let fee_estimate = self.controller.estimate_invoke_fee(calls).await?;
+        let fee_estimate = self.controller.borrow().estimate_invoke_fee(calls).await?;
         Ok(to_value(&fee_estimate)?)
     }
 
     #[wasm_bindgen(js_name = execute)]
     pub async fn execute(
-        &mut self,
+        &self,
         calls: Vec<JsCall>,
         details: JsInvocationsDetails,
     ) -> std::result::Result<JsValue, JsControllerError> {
@@ -214,14 +227,15 @@ impl CartridgeAccount {
             .map(TryFrom::try_from)
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
-        let result = Controller::execute(&mut self.controller, calls, details.max_fee).await?;
+        let result =
+            Controller::execute(&mut self.controller.borrow_mut(), calls, details.max_fee).await?;
 
         Ok(to_value(&result)?)
     }
 
     #[wasm_bindgen(js_name = executeFromOutsideV2)]
     pub async fn execute_from_outside_v2(
-        &mut self,
+        &self,
         calls: Vec<JsCall>,
     ) -> std::result::Result<JsValue, JsControllerError> {
         set_panic_hook();
@@ -231,13 +245,17 @@ impl CartridgeAccount {
             .map(TryInto::try_into)
             .collect::<std::result::Result<_, _>>()?;
 
-        let response = self.controller.execute_from_outside_v2(calls).await?;
+        let response = self
+            .controller
+            .borrow_mut()
+            .execute_from_outside_v2(calls)
+            .await?;
         Ok(to_value(&response)?)
     }
 
     #[wasm_bindgen(js_name = executeFromOutsideV3)]
     pub async fn execute_from_outside_v3(
-        &mut self,
+        &self,
         calls: Vec<JsCall>,
     ) -> std::result::Result<JsValue, JsControllerError> {
         set_panic_hook();
@@ -247,7 +265,11 @@ impl CartridgeAccount {
             .map(TryInto::try_into)
             .collect::<std::result::Result<_, _>>()?;
 
-        let response = self.controller.execute_from_outside_v3(calls).await?;
+        let response = self
+            .controller
+            .borrow_mut()
+            .execute_from_outside_v3(calls)
+            .await?;
         Ok(to_value(&response)?)
     }
 
@@ -260,6 +282,7 @@ impl CartridgeAccount {
 
         Ok(self
             .controller
+            .borrow()
             .session_account(&SdkPolicy::from_calls(&calls))
             .is_some())
     }
@@ -274,6 +297,7 @@ impl CartridgeAccount {
 
         Ok(self
             .controller
+            .borrow()
             .session_account(&[SdkPolicy::new_typed_data(scope_hash)])
             .is_some())
     }
@@ -291,6 +315,7 @@ impl CartridgeAccount {
 
         Ok(self
             .controller
+            .borrow()
             .session_metadata(&policies, public_key.map(|f| f.0))
             .map(|(_, metadata)| SessionMetadata::from(metadata)))
     }
@@ -306,6 +331,7 @@ impl CartridgeAccount {
 
         let signature = self
             .controller
+            .borrow()
             .sign_message(serde_json::from_str(&typed_data)?)
             .await
             .map_err(|e| JsControllerError::from(ControllerError::SignError(e)))?;
@@ -317,6 +343,7 @@ impl CartridgeAccount {
     pub async fn get_nonce(&self) -> std::result::Result<JsValue, JsControllerError> {
         let nonce = self
             .controller
+            .borrow()
             .get_nonce()
             .await
             .map_err(|e| JsControllerError::from(ControllerError::ProviderError(e)))?;
@@ -330,6 +357,7 @@ impl CartridgeAccount {
 
         let res = self
             .controller
+            .borrow()
             .deploy()
             .max_fee(max_fee.0)
             .send()
@@ -345,6 +373,7 @@ impl CartridgeAccount {
 
         let res = self
             .controller
+            .borrow()
             .delegate_account()
             .await
             .map_err(JsControllerError::from)?;
