@@ -34,10 +34,6 @@ jobs:
 
       - name: Publish to npm
         run: |
-          if echo "${{ steps.get_version.outputs.VERSION }}" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
-            pnpm release
-          else
-            pnpm prerelease 
-          fi
+          pnpm release
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

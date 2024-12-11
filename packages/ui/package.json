@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/ui",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
