@@ -1,0 +1,12 @@
+{
+    "origin": "https://dragark.net",
+    "theme": {
+      "colors": {
+        "primary": "#ED1138"
+      },
+      "cover": "/whitelabel/dragark/cover.png",
+      "icon": "/whitelabel/dragark/icon.png",
+      "name": "Dragark"
+    }
+  }
+  
