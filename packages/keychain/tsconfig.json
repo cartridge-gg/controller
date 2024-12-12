@@ -5,7 +5,10 @@
     "baseUrl": "./src",
     "rootDir": ".",
     "types": ["@emotion/react/types/css-prop"],
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    },
   },
   "include": [
     "next-env.d.ts",

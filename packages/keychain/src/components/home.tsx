@@ -1,20 +1,20 @@
 import dynamic from "next/dynamic";
 import { Signature } from "starknet";
-import { ResponseCodes } from "@cartridge/controller";
-import { DeployController, ConfirmTransaction, SignMessage } from "components";
-import { CreateController, CreateSession, Logout } from "components/connect";
-import { useConnection } from "hooks/connection";
-import { DeployCtx, SignMessageCtx } from "utils/connection";
-import { LoginMode } from "components/connect/types";
-import { ErrorPage } from "components/ErrorBoundary";
-import { Settings } from "components/Settings";
-import { Upgrade } from "components/connect/Upgrade";
-import { PurchaseCredits } from "components/Funding/PurchaseCredits";
 import { useEffect, useState } from "react";
 import { usePostHog } from "posthog-js/react";
-import { PageLoading } from "components/Loading";
+import { ResponseCodes } from "@cartridge/controller";
+import { useConnection } from "@/hooks/connection";
+import { DeployCtx, SignMessageCtx } from "@/utils/connection";
+import { SignMessage } from "./SignMessage";
+import { ConfirmTransaction } from "./ConfirmTransaction";
+import { DeployController } from "./DeployController"
+import { CreateController, CreateSession, Logout, Upgrade } from "./connect";
+import { LoginMode } from "./connect/types";
+import { ErrorPage } from "./ErrorBoundary";
+import { Settings } from "./Settings";
+import { PurchaseCredits } from "./Funding/PurchaseCredits";
 
-function Home() {
+export function Home() {
   const { context, controller, error, policies, upgrade } = useConnection();
   const [hasSessionForPolicies, setHasSessionForPolicies] = useState<
     boolean | undefined
