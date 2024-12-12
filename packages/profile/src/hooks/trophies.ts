@@ -29,7 +29,7 @@ export function useTrophies({
     },
     {
       enabled: !!namespace && !!project,
-      refetchInterval: 300_000, // Refetch every 5 minutes
+      refetchInterval: 600_000, // Refetch every 10 minutes
       onSuccess: ({ achievements }: { achievements: Response }) => {
         const trophies = achievements.items[0].achievements
           .map(parser)
