@@ -6,7 +6,7 @@ import {
 import { Signature, TypedData } from "starknet";
 import { ConnectionCtx, SignMessageCtx } from "./types";
 import { mutex } from "./sync";
-import Controller from "utils/controller";
+import Controller from "@/utils/controller";
 import { parseControllerError } from "./execute";
 
 export function signMessageFactory(setContext: (ctx: ConnectionCtx) => void) {

@@ -1,7 +1,7 @@
 export * from "./types";
 
 import { connectToParent } from "@cartridge/penpal";
-import Controller from "utils/controller";
+import Controller from "@/utils/controller";
 import { connect } from "./connect";
 import { execute } from "./execute";
 import { estimateDeclareFee, estimateInvokeFee } from "./estimate";
@@ -12,7 +12,7 @@ import { ConnectionCtx } from "./types";
 import { deployFactory } from "./deploy";
 import { openSettingsFactory } from "./settings";
 import { normalize } from "@cartridge/utils";
-import { ParsedSessionPolicies } from "hooks/session";
+import { ParsedSessionPolicies } from "@/hooks/session";
 
 export function connectToController<ParentMethods extends {}>({
   setOrigin,

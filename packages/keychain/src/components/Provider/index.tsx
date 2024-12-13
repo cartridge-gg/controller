@@ -1,8 +1,8 @@
 import { PropsWithChildren, useCallback, useMemo } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { useConnectionValue } from "hooks/connection";
+import { useConnectionValue } from "@/hooks/connection";
 import { CartridgeAPIProvider } from "@cartridge/utils/api/cartridge";
-import { ENDPOINT } from "utils/graphql";
+import { ENDPOINT } from "@/utils/graphql";
 import { PostHogProvider } from "posthog-js/react";
 import posthog from "posthog-js";
 import { ConnectionContext } from "./connection";

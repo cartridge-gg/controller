@@ -3,17 +3,17 @@ import {
   TransactionExecutionStatus,
   TransactionFinalityStatus,
 } from "starknet";
-import { Container, Footer, Content } from "components/layout";
+import { Container, Footer, Content } from "@/components/layout";
 import { useCallback, useEffect, useState } from "react";
 import { Button, Link, Spinner } from "@chakra-ui/react";
 import { CheckIcon, ExternalIcon, WandIcon } from "@cartridge/ui";
 import { Funding } from "./Funding";
-import { useConnection } from "hooks/connection";
+import { useConnection } from "@/hooks/connection";
 import { ControllerErrorAlert, ErrorAlert } from "./ErrorAlert";
-import { useDeploy } from "hooks/deploy";
+import { useDeploy } from "@/hooks/deploy";
 import { Fees } from "./Fees";
-import { ControllerError } from "utils/connection";
-import { Policies } from "components/Policies";
+import { ControllerError } from "@/utils/connection";
+import { Policies } from "@/components/Policies";
 import { ETH_CONTRACT_ADDRESS, useERC20Balance } from "@cartridge/utils";
 
 export function DeployController({

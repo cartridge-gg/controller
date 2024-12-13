@@ -13,7 +13,7 @@ import {
   EthL2BridgeSepolia,
 } from "./constants";
 import EthL1BridgeABI from "./abis/EthL1Bridge.json";
-import Controller from "utils/controller";
+import Controller from "@/utils/controller";
 
 export function TransferButton({
   account,

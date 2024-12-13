@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button, Flex, Text } from "@chakra-ui/react";
 import { shortString, Signature, TypedData } from "starknet";
-import { Container, Footer, Content } from "components/layout";
+import { Container, Footer, Content } from "@/components/layout";
 import { TransferDuoIcon } from "@cartridge/ui";
-import { useController } from "hooks/controller";
+import { useController } from "@/hooks/controller";
 
 export function SignMessage({
   origin,

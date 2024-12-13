@@ -5,14 +5,14 @@ import { usePostHog } from "posthog-js/react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { DeployCtx, SignMessageCtx } from "@/utils/connection";
-import { SignMessage } from "./SignMessage";
 import { ConfirmTransaction } from "./ConfirmTransaction";
-import { DeployController } from "./DeployController"
 import { CreateController, CreateSession, Logout, Upgrade } from "./connect";
 import { LoginMode } from "./connect/types";
+import { DeployController } from "./DeployController";
 import { ErrorPage } from "./ErrorBoundary";
-import { Settings } from "./Settings";
 import { PurchaseCredits } from "./Funding/PurchaseCredits";
+import { Settings } from "./Settings";
+import { SignMessage } from "./SignMessage";
 
 export function Home() {
   const { context, controller, error, policies, upgrade } = useConnection();

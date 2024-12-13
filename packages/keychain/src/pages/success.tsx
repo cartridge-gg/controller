@@ -1,6 +1,6 @@
 "use client";
 
-import { Container } from "components/layout";
+import { Container } from "@/components/layout";
 import { SparklesDuoIcon } from "@cartridge/ui";
 import { useRouter } from "next/router";
 

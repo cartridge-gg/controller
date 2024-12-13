@@ -13,7 +13,6 @@ import {
   Call,
   CallData,
 } from "starknet";
-
 import { toWasmPolicies } from "@cartridge/controller";
 
 import {

@@ -6,7 +6,7 @@ import {
 import { ControllerAccounts } from "@cartridge/controller";
 import pThrottle from "p-throttle";
 import { addAddressPadding, validateAndParseAddress } from "starknet";
-import { fetchData } from "utils/graphql";
+import { fetchData } from "@/utils/graphql";
 
 const MAX_ADDRESSES = 1000;
 const RATE_LIMIT = 1; // 1 requests per second

@@ -1,5 +1,8 @@
 import { useRouter } from "next/router";
-import { AuthAction, Authenticate as AuthComponent } from "components/connect";
+import {
+  AuthAction,
+  Authenticate as AuthComponent,
+} from "@/components/connect";
 import dynamic from "next/dynamic";
 import { constants } from "starknet";
 import { useEffect, useState } from "react";

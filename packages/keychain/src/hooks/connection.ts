@@ -1,11 +1,11 @@
 import { AsyncMethodReturns } from "@cartridge/penpal";
 import { useContext, useState, useEffect, useCallback, useMemo } from "react";
-import Controller from "utils/controller";
+import Controller from "@/utils/controller";
 import {
   connectToController,
   ConnectionCtx,
   OpenSettingsCtx,
-} from "utils/connection";
+} from "@/utils/connection";
 import { getChainName, isIframe } from "@cartridge/utils";
 import { RpcProvider } from "starknet";
 import {
@@ -13,12 +13,12 @@ import {
   ResponseCodes,
   toSessionPolicies,
 } from "@cartridge/controller";
-import { mergeDefaultETHPrefund } from "utils/token";
-import { setIsSignedUp } from "utils/cookie";
+import { mergeDefaultETHPrefund } from "@/utils/token";
+import { setIsSignedUp } from "@/utils/cookie";
 import {
   ConnectionContext,
   ConnectionContextValue,
-} from "components/Provider/connection";
+} from "@/components/Provider/connection";
 import { UpgradeInterface, useUpgrade } from "./upgrade";
 import posthog from "posthog-js";
 import { Policies } from "@cartridge/presets";

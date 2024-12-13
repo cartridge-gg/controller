@@ -1,8 +1,8 @@
 import { ColorMode } from "@cartridge/presets";
 import { useThemeEffect } from "@cartridge/ui-next";
 import { ChakraProvider, useColorMode } from "@chakra-ui/react";
-import { useConnection } from "hooks/connection";
-import { ControllerThemeContext, useChakraTheme } from "hooks/theme";
+import { useConnection } from "@/hooks/connection";
+import { ControllerThemeContext, useChakraTheme } from "@/hooks/theme";
 import { useRouter } from "next/router";
 import { PropsWithChildren, useEffect, useMemo } from "react";
 

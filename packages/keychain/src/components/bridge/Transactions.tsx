@@ -13,7 +13,7 @@ import { constants } from "starknet";
 import { mainnet, useWaitForTransaction } from "wagmi";
 import { sepolia } from "wagmi/chains";
 import { CheckIcon, ExternalIcon, TransferDuoIcon } from "@cartridge/ui";
-import { Container, Content } from "components/layout";
+import { Container, Content } from "@/components/layout";
 
 enum CardState {
   PENDING = "PENDING",

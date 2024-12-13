@@ -1,10 +1,10 @@
 import { AlertIcon } from "@cartridge/ui";
 import { Button, VStack, Text, HStack, Input } from "@chakra-ui/react";
-import { Container, Content, Footer } from "components/layout";
-import { useConnection } from "hooks/connection";
+import { Container, Content, Footer } from "@/components/layout";
+import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useState } from "react";
 import { CallData, num } from "starknet";
-import { ExecuteCtx } from "utils/connection";
+import { ExecuteCtx } from "@/utils/connection";
 
 export function Recovery({ onBack }: { onBack: () => void }) {
   const { controller, context, setContext } = useConnection();

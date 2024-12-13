@@ -1,7 +1,7 @@
 import { CopyIcon } from "@cartridge/ui";
 import { HStack, Text } from "@chakra-ui/react";
 import { formatAddress } from "@cartridge/utils";
-import { useToast } from "hooks/toast";
+import { useToast } from "@/hooks/toast";
 import { addAddressPadding } from "starknet";
 
 export function CopyAddress({ address }: { address: string }) {

@@ -1,7 +1,7 @@
 import { Button } from "@chakra-ui/react";
-import { Container, Footer } from "components/layout";
+import { Container, Footer } from "@/components/layout";
 import { LogoutDuoIcon } from "@cartridge/ui";
-import { useConnection } from "hooks/connection";
+import { useConnection } from "@/hooks/connection";
 import { ResponseCodes } from "@cartridge/controller";
 
 export function Logout() {

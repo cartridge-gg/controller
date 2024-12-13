@@ -1,18 +1,18 @@
-import { Container, Content, Footer } from "components/layout";
+import { Container, Content, Footer } from "@/components/layout";
 import { BigNumberish, shortString } from "starknet";
-import { ControllerError } from "utils/connection";
+import { ControllerError } from "@/utils/connection";
 import { Button, HStack, Text, Checkbox } from "@chakra-ui/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useConnection } from "hooks/connection";
-import { ControllerErrorAlert } from "components/ErrorAlert";
-import { SessionConsent } from "components/connect";
-import { DEFAULT_SESSION_DURATION } from "const";
+import { useConnection } from "@/hooks/connection";
+import { ControllerErrorAlert } from "@/components/ErrorAlert";
+import { SessionConsent } from "@/components/connect";
 import { Upgrade } from "./Upgrade";
 import { ErrorCode } from "@cartridge/account-wasm";
 import { TypedDataPolicy } from "@cartridge/presets";
-import { ParsedSessionPolicies } from "hooks/session";
-import { UnverifiedSessionSummary } from "components/session/UnverifiedSessionSummary";
-import { VerifiedSessionSummary } from "components/session/VerifiedSessionSummary";
+import { ParsedSessionPolicies } from "@/hooks/session";
+import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
+import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
+import { DEFAULT_SESSION_DURATION } from "@/const";
 import {
   Select,
   SelectContent,

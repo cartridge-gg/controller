@@ -1,6 +1,6 @@
 import { HStack, Text } from "@chakra-ui/react";
 import { VerifiedIcon } from "@cartridge/ui";
-import { useConnection } from "hooks/connection";
+import { useConnection } from "@/hooks/connection";
 import { useMemo } from "react";
 import Link from "next/link";
 

@@ -7,8 +7,8 @@ import {
 } from "@starknet-react/core";
 import { useCallback, useMemo, useState } from "react";
 import { cairo, uint256 } from "starknet";
-import { ConnectWallet } from "components/ConnectWallet";
-import { useTokenContract } from "hooks/token";
+import { ConnectWallet } from "@/components/ConnectWallet";
+import { useTokenContract } from "@/hooks/token";
 import { Abi } from "starknet";
 import Erc20Abi from "abi/erc20.json";
 import { Button, Input } from "@cartridge/ui-next";

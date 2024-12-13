@@ -1,4 +1,4 @@
-import { Container, Content, Footer } from "components/layout";
+import { Container, Content, Footer } from "@/components/layout";
 import { Button, HStack, Text, VStack, Divider } from "@chakra-ui/react";
 import { PropsWithChildren, useCallback, useState } from "react";
 import { mainnet, sepolia } from "@starknet-react/chains";
@@ -25,11 +25,11 @@ import {
   EthereumIcon,
   StarknetColorIcon,
 } from "@cartridge/ui";
-import { useConnection } from "hooks/connection";
-import { useToast } from "hooks/toast";
-import { ETH_CONTRACT_ADDRESS } from "utils/token";
+import { useConnection } from "@/hooks/connection";
+import { useToast } from "@/hooks/toast";
+import { ETH_CONTRACT_ADDRESS } from "@/utils/token";
 import { ErrorAlert } from "../ErrorAlert";
-import { CopyAddress } from "components/CopyAddress";
+import { CopyAddress } from "@/components/CopyAddress";
 import { parseEther } from "viem";
 import AmountSelection, { DEFAULT_AMOUNT } from "./AmountSelection";
 import { Balance } from "./Balance";

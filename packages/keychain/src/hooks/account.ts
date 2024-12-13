@@ -7,7 +7,7 @@ import {
   FinalizeRegistrationMutation,
 } from "@cartridge/utils/api/cartridge";
 
-import { client, ENDPOINT } from "utils/graphql";
+import { client, ENDPOINT } from "@/utils/graphql";
 import base64url from "base64url";
 
 type RawAssertion = PublicKeyCredential & {

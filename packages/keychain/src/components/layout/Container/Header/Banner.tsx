@@ -10,7 +10,7 @@ import {
   Square,
   HStack,
 } from "@chakra-ui/react";
-import { useControllerTheme } from "hooks/theme";
+import { useControllerTheme } from "@/hooks/theme";
 import { useMemo } from "react";
 import { useLayoutVariant } from "../";
 import { TOP_BAR_HEIGHT } from "./TopBar";

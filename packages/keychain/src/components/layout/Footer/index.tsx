@@ -1,7 +1,7 @@
 import { HStack, VStack, Text } from "@chakra-ui/react";
 import { CartridgeLogo } from "@cartridge/ui";
 import React, { useEffect, useRef } from "react";
-import { FOOTER_HEIGHT, useLayout } from "components/layout";
+import { FOOTER_HEIGHT, useLayout } from "@/components/layout";
 import NextLink from "next/link";
 
 export function Footer({

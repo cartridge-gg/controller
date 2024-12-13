@@ -4,14 +4,14 @@ import {
   CreateController,
   CreateSession,
   RegisterSession,
-} from "components/connect";
+} from "@/components/connect";
 
-import { useConnection } from "hooks/connection";
+import { useConnection } from "@/hooks/connection";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
-import { LoginMode } from "components/connect/types";
+import { LoginMode } from "@/components/connect/types";
 import { SESSION_EXPIRATION } from "const";
-import { PageLoading } from "components/Loading";
+import { PageLoading } from "@/components/Loading";
 
 type SessionResponse = {
   username: string;

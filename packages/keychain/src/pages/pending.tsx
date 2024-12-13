@@ -1,9 +1,9 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { useUrlTxns } from "hooks/transaction";
-import { Transaction, TransactionState } from "components/Transaction";
+import { useUrlTxns } from "@/hooks/transaction";
+import { Transaction, TransactionState } from "@/components/Transaction";
 import { TimerDuoIcon } from "@cartridge/ui";
-import { Container, Content } from "components/layout";
+import { Container, Content } from "@/components/layout";
 
 function Pending() {
   const [txnResults, setTxnResults] = useState<TransactionState[]>([]);

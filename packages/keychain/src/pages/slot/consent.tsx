@@ -1,6 +1,6 @@
-import Controller from "utils/controller";
+import Controller from "@/utils/controller";
 import { Button, Text } from "@chakra-ui/react";
-import { Container, Footer } from "components/layout";
+import { Container, Footer } from "@/components/layout";
 import { useRouter } from "next/router";
 import { useCallback, useEffect } from "react";
 import dynamic from "next/dynamic";

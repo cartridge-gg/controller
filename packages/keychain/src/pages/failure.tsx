@@ -1,6 +1,6 @@
 "use client";
 
-import { Container } from "components/layout";
+import { Container } from "@/components/layout";
 import { AlertIcon, ExternalIcon } from "@cartridge/ui";
 import { Link, Text } from "@chakra-ui/react";
 import NextLink from "next/link";
