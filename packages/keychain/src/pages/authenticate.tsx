@@ -47,7 +47,7 @@ function Authenticate() {
           return window.close();
         }
 
-        router.replace(`${process.env.NEXT_PUBLIC_ADMIN_URL}/profile`);
+        router.replace(`${import.meta.env.VITE_ADMIN_URL}/profile`);
       }}
     />
   );

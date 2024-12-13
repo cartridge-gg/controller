@@ -47,7 +47,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
     setisLoading(true);
 
     try {
-      const res = await fetch(process.env.NEXT_PUBLIC_STRIPE_PAYMENT!, {
+      const res = await fetch(import.meta.env.VITE_STRIPE_PAYMENT!, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -60,7 +60,7 @@ export default class Controller extends Account {
       username,
       {
         webauthn: {
-          rpId: process.env.NEXT_PUBLIC_RP_ID!,
+          rpId: import.meta.env.VITE_RP_ID!,
           credentialId,
           publicKey,
         },

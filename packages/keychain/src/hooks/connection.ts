@@ -107,10 +107,8 @@ export function useConnectionValue() {
 
     // Set rpc and origin if we're not embedded (eg Slot auth/session)
     if (!isIframe()) {
-      setOrigin(urlParams.get("origin") || process.env.NEXT_PUBLIC_ORIGIN);
-      setRpcUrl(
-        urlParams.get("rpc_url") || process.env.NEXT_PUBLIC_RPC_SEPOLIA,
-      );
+      setOrigin(urlParams.get("origin") || import.meta.env.VITE_ORIGIN);
+      setRpcUrl(urlParams.get("rpc_url") || import.meta.env.VITE_RPC_SEPOLIA);
     }
 
     // Handle prefunds

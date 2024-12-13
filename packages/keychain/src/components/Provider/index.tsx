@@ -17,10 +17,10 @@ export function Provider({ children }: PropsWithChildren) {
     let nodeUrl;
     switch (connection.chainId) {
       case constants.StarknetChainId.SN_MAIN:
-        nodeUrl = process.env.NEXT_PUBLIC_RPC_MAINNET;
+        nodeUrl = import.meta.env.VITE_RPC_MAINNET;
         break;
       case constants.StarknetChainId.SN_SEPOLIA:
-        nodeUrl = process.env.NEXT_PUBLIC_RPC_SEPOLIA;
+        nodeUrl = import.meta.env.VITE_RPC_SEPOLIA;
         break;
       default:
         nodeUrl = connection.rpcUrl;
