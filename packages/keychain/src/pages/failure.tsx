@@ -4,7 +4,7 @@ import { Container } from "@/components/layout";
 import { AlertIcon, ExternalIcon } from "@cartridge/ui";
 import { Link, Text } from "@chakra-ui/react";
 import NextLink from "next/link";
-import { CARTRIDGE_DISCORD_LINK } from "const";
+import { CARTRIDGE_DISCORD_LINK } from "@/const";
 
 export default function Failure() {
   return (

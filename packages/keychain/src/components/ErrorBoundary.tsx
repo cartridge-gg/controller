@@ -4,7 +4,7 @@ import { AlertIcon, ExternalIcon } from "@cartridge/ui";
 import { Button, HStack, Link, Text } from "@chakra-ui/react";
 import { useConnection } from "@/hooks/connection";
 import NextLink from "next/link";
-import { CARTRIDGE_DISCORD_LINK } from "const";
+import { CARTRIDGE_DISCORD_LINK } from "@/const";
 import { usePostHog } from "posthog-js/react";
 
 export class ErrorBoundary extends React.Component<

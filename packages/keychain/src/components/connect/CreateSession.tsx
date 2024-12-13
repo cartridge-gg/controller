@@ -56,11 +56,9 @@ export function CreateSession({
     if (violatingPolicy) {
       setError({
         code: ErrorCode.PolicyChainIdMismatch,
-        message: `Policy for ${
-          (violatingPolicy as TypedDataPolicy).domain.name
-        }.${
-          (violatingPolicy as TypedDataPolicy).primaryType
-        } has mismatched chain ID.`,
+        message: `Policy for ${(violatingPolicy as TypedDataPolicy).domain.name
+          }.${(violatingPolicy as TypedDataPolicy).primaryType
+          } has mismatched chain ID.`,
       });
       setIsDisabled(true);
     } else {

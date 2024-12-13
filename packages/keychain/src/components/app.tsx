@@ -1,9 +1,10 @@
 import { Outlet, Route, Routes, Navigate } from "react-router-dom";
+import { Home } from "./home";
 
 export function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/slot" replace />} />
+      <Route path="/" element={<Home />} />
       <Route path="/slot" element={<Outlet />}>
         <Route path="auth" element={<Navigate to="/slot" replace />} />
         <Route

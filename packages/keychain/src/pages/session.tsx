@@ -10,7 +10,7 @@ import { useConnection } from "@/hooks/connection";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 import { LoginMode } from "@/components/connect/types";
-import { SESSION_EXPIRATION } from "const";
+import { SESSION_EXPIRATION } from "@/const";
 import { PageLoading } from "@/components/Loading";
 
 type SessionResponse = {
