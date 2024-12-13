@@ -1,12 +1,13 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import process from "node:process";
+import wasm from "vite-plugin-wasm";
+import topLevelAwait from "vite-plugin-top-level-await";
 
-// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [wasm(), topLevelAwait(), react()],
   server: {
-    port: process.env.NODE_ENV === "development" ? 3003 : undefined,
+    port: process.env.NODE_ENV === "development" ? 3001 : undefined,
   },
   resolve: {
     alias: {

@@ -1,4 +1,4 @@
-import { Providers } from "@/components/providers";
+import { Providers } from "components/providers";
 import { Metadata } from "next";
 import { PropsWithChildren } from "react";
 

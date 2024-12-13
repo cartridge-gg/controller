@@ -2,8 +2,9 @@
   "name": "@cartridge/keychain",
   "version": "0.5.6",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "TARGET_ORIGIN=\"*\" vite -p 3001",
+    "dev": "TARGET_ORIGIN=\"*\" vite",
     "build": "TARGET_ORIGIN=\"https://x.cartridge.gg/\" vite build",
     "preview": "vite preview",
     "lint": "eslint .",
@@ -84,6 +85,8 @@
     "tailwindcss": "^3.4.3",
     "typescript": "^5.4.5",
     "vite": "^6.0.3",
+    "vite-plugin-top-level-await": "^1.4.4",
+    "vite-plugin-wasm": "^3.3.0",
     "wait-on": "^8.0.1"
   },
   "peerDependencies": {

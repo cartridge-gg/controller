@@ -1,13 +1,13 @@
-import { Transfer } from "@/components/Transfer";
-import { ManualTransferEth } from "@/components/ManualTransferEth";
-import { ConnectWallet } from "@/components/ConnectWallet";
-import { InvalidTxn } from "@/components/InvalidTxn";
-import { SignMessage } from "@/components/SignMessage";
-import { DelegateAccount } from "@/components/DelegateAccount";
-import { ColorModeToggle } from "@/components/ColorModeToggle";
-import { Profile } from "@/components/Profile";
-import { Settings } from "@/components/Settings";
-import { LookupControllers } from "@/components/LookupControllers";
+import { Transfer } from "components/Transfer";
+import { ManualTransferEth } from "components/ManualTransferEth";
+import { ConnectWallet } from "components/ConnectWallet";
+import { InvalidTxn } from "components/InvalidTxn";
+import { SignMessage } from "components/SignMessage";
+import { DelegateAccount } from "components/DelegateAccount";
+import { ColorModeToggle } from "components/ColorModeToggle";
+import { Profile } from "components/Profile";
+import { Settings } from "components/Settings";
+import { LookupControllers } from "components/LookupControllers";
 
 export default function Home() {
   return (
