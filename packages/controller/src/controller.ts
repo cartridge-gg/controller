@@ -172,11 +172,15 @@ export default class ControllerProvider extends BaseProvider {
       console.error(new NotReadyToConnect().message);
       return null;
     }
-    this.iframes.profile?.sendBackward();
+    if (this.iframes.profile?.sendBackward) {
+      this.iframes.profile?.sendBackward();
+    } else {
+      this.iframes.profile?.close();
+    }
     this.iframes.keychain.open();
     const res = await this.keychain.openSettings();
     this.iframes.keychain.close();
-    this.iframes.profile?.sendForward();
+    this.iframes.profile?.sendForward?.();
     if (res && (res as ConnectError).code === ResponseCodes.NOT_CONNECTED) {
       return false;
     }
@@ -234,12 +238,15 @@ export default class ControllerProvider extends BaseProvider {
       console.error("Profile is not ready");
       return;
     }
-    this.iframes.profile.sendBackward();
+    if (this.iframes.profile?.sendBackward) {
+      this.iframes.profile?.sendBackward();
+    } else {
+      this.iframes.profile?.close();
+    }
     this.iframes.keychain.open();
     const res = await this.keychain.execute(calls, undefined, undefined, true);
     this.iframes.keychain.close();
-    this.iframes.profile.sendForward();
-
+    this.iframes.profile?.sendForward?.();
     if (res && (res as ConnectError).code === ResponseCodes.NOT_CONNECTED) {
       return false;
     }
