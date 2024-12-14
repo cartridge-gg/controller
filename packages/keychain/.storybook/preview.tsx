@@ -1,5 +1,6 @@
 import React from "react";
-import type { Preview } from "@storybook/react";
+import type { Preview, ReactRenderer } from "@storybook/react";
+import { withThemeByClassName } from "@storybook/addon-themes";
 import { StoryParameters } from "./mock";
 import { Provider } from "./provider";
 
@@ -30,6 +31,13 @@ const preview: Preview = {
     },
   },
   decorators: [
+    withThemeByClassName<ReactRenderer>({
+      themes: {
+        light: "light",
+        dark: "dark",
+      },
+      defaultTheme: "dark",
+    }),
     (Story, { parameters }) => (
       <Provider parameters={parameters as StoryParameters}>
         <Story />
