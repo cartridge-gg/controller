@@ -3,12 +3,11 @@ import {
   AuthAction,
   Authenticate as AuthComponent,
 } from "@/components/connect";
-import dynamic from "next/dynamic";
 import { constants } from "starknet";
 import { useEffect, useState } from "react";
 
 // auth page used for externally embedded keychain
-function Authenticate() {
+export function Authenticate() {
   const router = useRouter();
   const [params, setParams] = useState<{
     name: string;
@@ -52,5 +51,3 @@ function Authenticate() {
     />
   );
 }
-
-export default dynamic(() => Promise.resolve(Authenticate), { ssr: false });

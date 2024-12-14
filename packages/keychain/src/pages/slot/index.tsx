@@ -2,11 +2,10 @@ import { PageLoading } from "@/components/Loading";
 import { CreateController } from "@/components/connect";
 import { useMeQuery } from "@cartridge/utils/api/cartridge";
 import { useController } from "@/hooks/controller";
-import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 
-function Auth() {
+export function Auth() {
   const router = useRouter();
   const { controller } = useController();
   const { data: user, isFetched } = useMeQuery();
@@ -29,5 +28,3 @@ function Auth() {
 
   return <CreateController isSlot={true} />;
 }
-
-export default dynamic(() => Promise.resolve(Auth), { ssr: false });

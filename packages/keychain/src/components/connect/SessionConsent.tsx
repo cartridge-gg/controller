@@ -2,7 +2,7 @@ import { HStack, Text } from "@chakra-ui/react";
 import { VerifiedIcon } from "@cartridge/ui";
 import { useConnection } from "@/hooks/connection";
 import { useMemo } from "react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 
 export function SessionConsent({
   isVerified,
@@ -34,7 +34,7 @@ export function SessionConsent({
         <HStack color="text.secondary" fontSize="xs">
           {isVerified && (
             <Link
-              href="https://github.com/cartridge-gg/controller/blob/main/packages/controller/src/presets.ts"
+              to="https://github.com/cartridge-gg/controller/blob/main/packages/controller/src/presets.ts"
               target="_blank"
             >
               <VerifiedIcon

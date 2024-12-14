@@ -1,4 +1,3 @@
-import dynamic from "next/dynamic";
 import { Signature } from "starknet";
 import { useEffect, useState } from "react";
 import { usePostHog } from "posthog-js/react";
@@ -170,5 +169,3 @@ export function Home() {
       return <>*Waves*</>;
   }
 }
-
-export default dynamic(() => Promise.resolve(Home), { ssr: false });

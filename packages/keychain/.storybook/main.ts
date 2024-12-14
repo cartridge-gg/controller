@@ -1,5 +1,5 @@
-import type { StorybookConfig } from "@storybook/nextjs";
-import { join, dirname, resolve } from "path";
+import type { StorybookConfig } from "@storybook/react-vite";
+import { join, dirname } from "path";
 
 /**
  * This function is used to resolve the absolute path of a package.
@@ -17,25 +17,8 @@ const config: StorybookConfig = {
     getAbsolutePath("@storybook/addon-interactions"),
   ],
   framework: {
-    name: getAbsolutePath("@storybook/nextjs"),
+    name: getAbsolutePath("@storybook/react-vite"),
     options: {},
-  },
-  webpackFinal: (config) => {
-    // config.output = {
-    //   ...config.output,
-    //   webassemblyModuleFilename: "../static/wasm/webauthn.wasm",
-    // };
-    config.experiments = {
-      ...config.experiments,
-      asyncWebAssembly: true,
-    };
-    config.resolve = {
-      ...config.resolve,
-      alias: {
-        react: resolve("node_modules/react"),
-      },
-    };
-    return config;
   },
   staticDirs: ["../public"],
 };
