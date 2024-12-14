@@ -5,7 +5,6 @@ export * from "./CreditCard";
 export * from "./Ethereum";
 export * from "./Battery";
 export * from "./FaceID";
-export * from "./Fingerprint";
 export * from "./Gem";
 export * from "./LayerDetails";
 export * from "./Logout";

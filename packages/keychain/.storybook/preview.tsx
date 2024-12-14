@@ -3,7 +3,7 @@ import type { Preview } from "@storybook/react";
 import { StoryParameters } from "./mock";
 import { Provider } from "./provider";
 
-import "../src/index.css"
+import "../src/index.css";
 
 const preview: Preview = {
   parameters: {
@@ -15,6 +15,19 @@ const preview: Preview = {
     },
     preset: "cartridge",
     colorMode: "dark",
+    backgrounds: {
+      default: "dark",
+      values: [
+        {
+          name: "dark",
+          value: "hsl(var(--background))",
+        },
+        {
+          name: "light",
+          value: "hsl(var(--background))",
+        },
+      ],
+    },
   },
   decorators: [
     (Story, { parameters }) => (

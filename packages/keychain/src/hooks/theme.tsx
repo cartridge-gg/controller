@@ -1,10 +1,7 @@
+import { ControllerThemeContext } from "@/context/theme";
 import { ControllerColor, ControllerTheme } from "@cartridge/presets";
 import { CartridgeTheme } from "@cartridge/ui";
-import { useContext, createContext, useMemo } from "react";
-
-export const ControllerThemeContext = createContext<
-  ControllerTheme | undefined
->(undefined);
+import { useContext, useMemo } from "react";
 
 export function useControllerTheme() {
   const ctx = useContext<ControllerTheme | undefined>(ControllerThemeContext);

@@ -1,6 +1,5 @@
 import React, { PropsWithChildren } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { ControllerThemeContext, useChakraTheme } from "../src/hooks/theme";
 import { ConnectionContext } from "../src/components/Provider/connection";
 import {
   defaultTheme,
@@ -10,8 +9,10 @@ import {
 import { mainnet } from "@starknet-react/chains";
 import { StarknetConfig, publicProvider, voyager } from "@starknet-react/core";
 import { useThemeEffect } from "@cartridge/ui-next";
-import { ChakraProvider } from "@chakra-ui/react";
 import { StoryParameters, useMockedConnection } from "./mock";
+import { ControllerThemeContext } from "../src/context/theme";
+import { ChakraProvider } from "@chakra-ui/react";
+import { CartridgeTheme } from "@cartridge/ui";
 
 export function Provider({
   children,
@@ -49,11 +50,9 @@ function ControllerThemeProvider({
   theme = defaultTheme,
 }: PropsWithChildren<{ theme?: ControllerTheme }>) {
   useThemeEffect({ theme, assetUrl: "" });
-  const chakraTheme = useChakraTheme(theme);
-
   return (
     <ControllerThemeContext.Provider value={theme}>
-      <ChakraProvider theme={chakraTheme}>{children}</ChakraProvider>
+      <ChakraProvider theme={CartridgeTheme}>{children}</ChakraProvider>
     </ControllerThemeContext.Provider>
   );
 }
