@@ -162,7 +162,8 @@ export function useCreateController({
 
           if (!credentials?.webauthn) return;
 
-          const { id: credentialId, publicKey } = credentials.webauthn?.[0];
+          const { id: credentialId, publicKey } =
+            credentials.webauthn?.[0] ?? {};
           const controllerNode = controllers?.edges?.[0]?.node;
 
           if (!controllerNode || !finalUsername) return;

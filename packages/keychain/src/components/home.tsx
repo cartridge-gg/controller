@@ -108,7 +108,7 @@ export function Home() {
             context.resolve({
               code: ResponseCodes.SUCCESS,
               address: controller.address,
-            } as any);
+            });
           }}
         />
       );

@@ -8,12 +8,12 @@ export function VerifiedSessionSummary({
   game,
   policies,
 }: {
-  game: String;
+  game: string;
   policies: ParsedSessionPolicies;
 }) {
   // Extract token and VRF contracts
   const individual = Object.entries(policies.contracts ?? {}).filter(
-    ([_, contract]) => {
+    ([, contract]) => {
       return contract.meta?.type === "ERC20" || contract.meta?.type === "VRF";
     },
   );
@@ -22,7 +22,7 @@ export function VerifiedSessionSummary({
   const aggregate = {
     ...policies,
     contracts: Object.fromEntries(
-      Object.entries(policies.contracts ?? {}).filter(([_, contract]) => {
+      Object.entries(policies.contracts ?? {}).filter(([, contract]) => {
         return contract.meta?.type !== "ERC20" && contract.meta?.type !== "VRF";
       }),
     ),

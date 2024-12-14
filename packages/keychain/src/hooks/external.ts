@@ -28,7 +28,7 @@ export function useExternalOwners() {
 
       const external = new Set<string>();
 
-      for (let event of events.events) {
+      for (const event of events.events) {
         if (event.keys[0] === externalOwnerRegisteredSelector) {
           external.add(event.data[0]);
         }

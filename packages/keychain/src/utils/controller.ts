@@ -13,22 +13,22 @@ import {
   Call,
   CallData,
 } from "starknet";
+import { Mutex } from "@/utils/mutex";
 import { toWasmPolicies } from "@cartridge/controller";
+
+const mutex = new Mutex();
 
 import {
   CartridgeAccount,
-  CartridgeAccountMeta,
   JsCall,
   JsFelt,
   JsInvocationsDetails,
   SessionMetadata,
 } from "@cartridge/account-wasm/controller";
 import { SessionPolicies } from "@cartridge/presets";
-import { DeployedAccountTransaction } from "@starknet-io/types-js";
 
 export default class Controller extends Account {
-  private cartridge: CartridgeAccount;
-  private cartridgeMeta: CartridgeAccountMeta;
+  cartridge: CartridgeAccount;
 
   constructor({
     appId,
@@ -51,7 +51,7 @@ export default class Controller extends Account {
   }) {
     super({ nodeUrl: rpcUrl }, address, "");
 
-    const accountWithMeta = CartridgeAccount.new(
+    this.cartridge = CartridgeAccount.new(
       appId,
       classHash,
       rpcUrl,
@@ -66,54 +66,49 @@ export default class Controller extends Account {
         },
       },
     );
-
-    this.cartridgeMeta = accountWithMeta.meta();
-    this.cartridge = accountWithMeta.intoAccount();
   }
 
   username() {
-    return this.cartridgeMeta.username();
-  }
-
-  classHash() {
-    return this.cartridgeMeta.classHash();
-  }
-
-  ownerGuid() {
-    return this.cartridgeMeta.ownerGuid();
+    return this.cartridge.username();
   }
 
   rpcUrl() {
-    return this.cartridgeMeta.rpcUrl();
+    return this.cartridge.rpcUrl();
   }
 
   chainId() {
-    return this.cartridgeMeta.chainId();
+    return this.cartridge.chainId();
   }
 
-  async disconnect() {
-    await this.cartridge.disconnect();
+  disconnect() {
+    this.cartridge.disconnect();
     delete window.controller;
   }
 
   async createSession(
     expiresAt: bigint,
     policies: SessionPolicies,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _maxFee?: BigNumberish,
   ) {
     if (!this.cartridge) {
       throw new Error("Account not found");
     }
 
-    await this.cartridge.createSession(toWasmPolicies(policies), expiresAt);
+    const release = await mutex.obtain();
+    try {
+      await this.cartridge.createSession(toWasmPolicies(policies), expiresAt);
+    } finally {
+      release();
+    }
   }
 
-  async registerSessionCalldata(
+  registerSessionCalldata(
     expiresAt: bigint,
     policies: SessionPolicies,
     publicKey: string,
-  ): Promise<Array<string>> {
-    return await this.cartridge.registerSessionCalldata(
+  ): Array<string> {
+    return this.cartridge.registerSessionCalldata(
       toWasmPolicies(policies),
       expiresAt,
       publicKey,
@@ -130,24 +125,39 @@ export default class Controller extends Account {
       throw new Error("Account not found");
     }
 
-    return await this.cartridge.registerSession(
-      toWasmPolicies(policies),
-      expiresAt,
-      publicKey,
-      num.toHex(maxFee),
-    );
+    const release = await mutex.obtain();
+    try {
+      return await this.cartridge.registerSession(
+        toWasmPolicies(policies),
+        expiresAt,
+        publicKey,
+        num.toHex(maxFee),
+      );
+    } finally {
+      release();
+    }
   }
 
-  async upgrade(new_class_hash: JsFelt): Promise<JsCall> {
-    return await this.cartridge.upgrade(new_class_hash);
+  upgrade(new_class_hash: JsFelt): JsCall {
+    return this.cartridge.upgrade(new_class_hash);
   }
 
   async executeFromOutsideV2(calls: Call[]): Promise<InvokeFunctionResponse> {
-    return await this.cartridge.executeFromOutsideV2(toJsCalls(calls));
+    const release = await mutex.obtain();
+    try {
+      return await this.cartridge.executeFromOutsideV2(toJsCalls(calls));
+    } finally {
+      release();
+    }
   }
 
   async executeFromOutsideV3(calls: Call[]): Promise<InvokeFunctionResponse> {
-    return await this.cartridge.executeFromOutsideV3(toJsCalls(calls));
+    const release = await mutex.obtain();
+    try {
+      return await this.cartridge.executeFromOutsideV3(toJsCalls(calls));
+    } finally {
+      release();
+    }
   }
 
   async execute(
@@ -162,47 +172,58 @@ export default class Controller extends Account {
       executionDetails.maxFee = num.toHex(executionDetails.maxFee);
     }
 
-    return await this.cartridge.execute(
-      toJsCalls(calls),
-      executionDetails as JsInvocationsDetails,
-    );
+    const release = await mutex.obtain();
+    try {
+      return await this.cartridge.execute(
+        toJsCalls(calls),
+        executionDetails as JsInvocationsDetails,
+      );
+    } finally {
+      release();
+    }
   }
 
-  async hasSession(calls: Call[]): Promise<boolean> {
-    return await this.cartridge.hasSession(toJsCalls(calls));
+  hasSession(calls: Call[]): boolean {
+    return this.cartridge.hasSession(toJsCalls(calls));
   }
 
-  async hasSessionForMessage(typedData: TypedData): Promise<boolean> {
-    return await this.cartridge.hasSessionForMessage(JSON.stringify(typedData));
+  hasSessionForMessage(typedData: TypedData): boolean {
+    return this.cartridge.hasSessionForMessage(JSON.stringify(typedData));
   }
 
-  async session(
+  session(
     policies: SessionPolicies,
     public_key?: string,
-  ): Promise<SessionMetadata | undefined> {
-    return await this.cartridge.session(toWasmPolicies(policies), public_key);
+  ): SessionMetadata | undefined {
+    return this.cartridge.session(toWasmPolicies(policies), public_key);
   }
 
   async estimateInvokeFee(
     calls: Call[],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _: EstimateFeeDetails = {},
   ): Promise<EstimateFee> {
-    const res = await this.cartridge.estimateInvokeFee(toJsCalls(calls));
+    const release = await mutex.obtain();
+    try {
+      const res = await this.cartridge.estimateInvokeFee(toJsCalls(calls));
 
-    // The reason why we set the multiplier unseemingly high is to account
-    // for the fact that the estimation above is done without validation (ie SKIP_VALIDATE).
-    //
-    // Setting it lower might cause the actual transaction to fail due to
-    // insufficient max fee.
-    const MULTIPLIER_PERCENTAGE = 170; // x1.7
+      // The reason why we set the multiplier unseemingly high is to account
+      // for the fact that the estimation above is done without validation (ie SKIP_VALIDATE).
+      //
+      // Setting it lower might cause the actual transaction to fail due to
+      // insufficient max fee.
+      const MULTIPLIER_PERCENTAGE = 170; // x1.7
 
-    // This will essentially multiply the estimated fee by 1.7
-    const suggestedMaxFee = num.addPercent(
-      BigInt(res.overall_fee),
-      MULTIPLIER_PERCENTAGE,
-    );
+      // This will essentially multiply the estimated fee by 1.7
+      const suggestedMaxFee = num.addPercent(
+        BigInt(res.overall_fee),
+        MULTIPLIER_PERCENTAGE,
+      );
 
-    return { suggestedMaxFee, ...res };
+      return { suggestedMaxFee, ...res };
+    } finally {
+      release();
+    }
   }
 
   async verifyMessageHash(
@@ -224,43 +245,52 @@ export default class Controller extends Account {
   }
 
   async signMessage(typedData: TypedData): Promise<Signature> {
-    return this.cartridge.signMessage(JSON.stringify(typedData));
+    const release = await mutex.obtain();
+    try {
+      return await this.cartridge.signMessage(JSON.stringify(typedData));
+    } finally {
+      release();
+    }
   }
 
-  async getNonce(_?: any): Promise<string> {
+  async getNonce(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+    _?: any,
+  ): Promise<string> {
     return await this.cartridge.getNonce();
   }
 
-  async selfDeploy(maxFee: BigNumberish): Promise<DeployedAccountTransaction> {
-    return await this.cartridge.deploySelf(num.toHex(maxFee));
-  }
-
   async delegateAccount(): Promise<string> {
-    return this.cartridge.delegateAccount();
+    const release = await mutex.obtain();
+    try {
+      return await this.cartridge.delegateAccount();
+    } finally {
+      release();
+    }
   }
 
-  revoke(_origin: string) {
+  revoke(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _origin: string,
+  ) {
     // TODO: Cartridge Account SDK to implement revoke session tokens
     console.error("revoke unimplemented");
   }
 
   static fromStore(appId: string) {
-    const cartridgeWithMeta = CartridgeAccount.fromStorage(appId);
-    if (!cartridgeWithMeta) {
+    const cartridge = CartridgeAccount.fromStorage(appId);
+    if (!cartridge) {
       return;
     }
 
-    const meta = cartridgeWithMeta.meta();
-
     const controller = new Account(
-      { nodeUrl: meta.rpcUrl() },
-      meta.address(),
+      { nodeUrl: cartridge.rpcUrl() },
+      cartridge.address(),
       "",
     ) as Controller;
 
     Object.setPrototypeOf(controller, Controller.prototype);
-    controller.cartridge = cartridgeWithMeta.intoAccount();
-    controller.cartridgeMeta = meta;
+    controller.cartridge = cartridge;
     return controller;
   }
 }

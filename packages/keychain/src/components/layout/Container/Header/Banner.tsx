@@ -78,11 +78,11 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
                     alignItems="center"
                     overflow="hidden"
                   >
-                    {!!Icon ? (
+                    {Icon ? (
                       <Circle size="100%" bg="solid.primary">
                         <Icon boxSize="100%" />
                       </Circle>
-                    ) : !!icon ? (
+                    ) : icon ? (
                       <Circle size="100%" bg="solid.primary">
                         {icon}
                       </Circle>
@@ -128,11 +128,11 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
           />
 
           <HStack w="full" p={4} gap={4} minW={0}>
-            {!!Icon ? (
+            {Icon ? (
               <Square size="44px" bg="solid.primary" borderRadius="md">
                 <Icon boxSize={8} />
               </Square>
-            ) : !!icon ? (
+            ) : icon ? (
               <Square size="44px" bg="solid.primary" borderRadius="md">
                 {icon}
               </Square>

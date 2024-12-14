@@ -21,7 +21,7 @@ export function ConfirmTransaction() {
       return;
     }
 
-    let { transaction_hash } = await account.execute(
+    const { transaction_hash } = await account.execute(
       toArray(ctx.transactions),
       {
         maxFee: num.toHex(maxFee),

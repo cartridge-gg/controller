@@ -8,6 +8,7 @@
     "build": "TARGET_ORIGIN=\"https://x.cartridge.gg/\" vite build",
     "preview": "vite preview",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "format": "prettier --write --ignore-path .gitignore .",
     "format:check": "prettier --check --ignore-path .gitignore .",
     "test": "jest --watch",

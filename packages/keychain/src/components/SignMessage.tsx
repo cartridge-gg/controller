@@ -26,6 +26,7 @@ export function SignMessage({
     // Recursively decodes all nested `felt*` types
     // to their ASCII equivalents
     const convertFeltArraysToString = (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       initial: any,
       messageType: Array<{ name: string; type: string }>,
     ) => {

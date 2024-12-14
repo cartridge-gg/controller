@@ -21,7 +21,7 @@ export interface TransactionProps {
   name: string;
   hash: string;
   chainId: constants.StarknetChainId;
-  finalized?: (TransactionState: any) => void;
+  finalized?: (transactionState: TransactionState) => void;
 }
 
 export function Transaction({

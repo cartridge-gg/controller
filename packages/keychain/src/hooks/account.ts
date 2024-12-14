@@ -116,7 +116,15 @@ const onLoginFinalize = (
   });
 };
 
-const beginRegistration = async (username: string): Promise<any> => {
+type BeginREgistrationTypedJson = {
+  data: {
+    beginRegistration: CredentialCreationOptions;
+  };
+};
+
+const beginRegistration = async (
+  username: string,
+): Promise<BeginREgistrationTypedJson> => {
   return doXHR(
     JSON.stringify({
       operationName: "BeginRegistration",
@@ -128,7 +136,17 @@ const beginRegistration = async (username: string): Promise<any> => {
   );
 };
 
-const beginLogin = async (username: string): Promise<any> => {
+type BeginLoginReturn = {
+  data: {
+    beginLogin: {
+      publicKey: {
+        challenge: string;
+      };
+    };
+  };
+};
+
+const beginLogin = async (username: string): Promise<BeginLoginReturn> => {
   return doXHR(
     JSON.stringify({
       operationName: "BeginLogin",
@@ -141,7 +159,7 @@ const beginLogin = async (username: string): Promise<any> => {
 };
 
 // We use XHR since fetch + webauthn causes issues with safari
-const doXHR = async (json: string): Promise<any> => {
+const doXHR = async <T>(json: string): Promise<T> => {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.withCredentials = true;

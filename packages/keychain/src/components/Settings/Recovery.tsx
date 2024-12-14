@@ -15,7 +15,7 @@ export function Recovery({ onBack }: { onBack: () => void }) {
     try {
       CallData.compile([externalOwnerAddress]);
       setIsValid(num.isHex(externalOwnerAddress));
-    } catch (e: any) {
+    } catch {
       setIsValid(false);
     }
   }, [externalOwnerAddress]);

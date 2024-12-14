@@ -51,7 +51,7 @@ export function CreateControllerView({
       <form
         style={{ width: "100%" }}
         onKeyDown={(e) => {
-          e.key === "Enter" && e.preventDefault();
+          if (e.key === "Enter") e.preventDefault();
         }}
       >
         <Content mb="2rem">

@@ -59,7 +59,7 @@ export function Authenticate({
     ) : (
       <>Please click continue.</>
     );
-  const cta = "signup" ? "Create Passkey" : "continue";
+  const cta = action === "signup" ? "Create Passkey" : "continue";
 
   return (
     <Container

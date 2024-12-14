@@ -15,7 +15,7 @@ export function Delegate({ onBack }: { onBack: () => void }) {
     try {
       CallData.compile([delegateAddress]);
       setIsValid(num.isHex(delegateAddress));
-    } catch (e: any) {
+    } catch {
       setIsValid(false);
     }
   }, [delegateAddress]);

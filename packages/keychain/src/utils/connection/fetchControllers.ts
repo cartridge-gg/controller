@@ -26,7 +26,7 @@ const throttledFetchData = pThrottle({
   ),
 );
 
-export function fetchControllers(_: string) {
+export function fetchControllers() {
   return async (contractAddresses: string[]): Promise<ControllerAccounts> => {
     if (contractAddresses.length > MAX_ADDRESSES) {
       throw new Error(
@@ -39,7 +39,7 @@ export function fetchControllers(_: string) {
 
     // Check cache and collect addresses that need to be fetched
     for (const addr of contractAddresses) {
-      let validatedAddr = validateAndParseAddress(addr);
+      const validatedAddr = validateAndParseAddress(addr);
       if (validatedAddr in cache) {
         result[validatedAddr] = cache[validatedAddr];
       } else {

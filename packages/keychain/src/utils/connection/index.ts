@@ -14,7 +14,7 @@ import { openSettingsFactory } from "./settings";
 import { normalize } from "@cartridge/utils";
 import { ParsedSessionPolicies } from "@/hooks/session";
 
-export function connectToController<ParentMethods extends {}>({
+export function connectToController<ParentMethods extends object>({
   setOrigin,
   setRpcUrl,
   setPolicies,
@@ -45,7 +45,7 @@ export function connectToController<ParentMethods extends {}>({
       signMessage: () => signMessageFactory(setContext),
       openSettings: () => openSettingsFactory(setContext),
       reset: () => () => setContext(undefined),
-      fetchControllers: fetchControllers,
+      fetchControllers,
       disconnect: () => () => {
         window.controller?.disconnect().then(() => {
           setController(undefined);

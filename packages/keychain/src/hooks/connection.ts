@@ -62,7 +62,7 @@ export function useConnectionValue() {
       });
       setContext(undefined); // clears context
       await parent.close();
-    } catch (e) {
+    } catch {
       // Always fails for some reason
     }
   }, [context, parent, setContext]);
@@ -76,7 +76,7 @@ export function useConnectionValue() {
         message: "User interaction required",
       });
       await parent.close();
-    } catch (e) {
+    } catch {
       // Always fails for some reason
     }
   }, [context, parent]);
@@ -130,7 +130,7 @@ export function useConnectionValue() {
       try {
         const parsedTheme = JSON.parse(decodedPreset) as ControllerTheme;
         setTheme(parsedTheme);
-      } catch (e) {
+      } catch {
         setTheme(controllerConfigs[decodedPreset].theme || defaultTheme);
       }
     }
@@ -196,7 +196,7 @@ export function useConnectionValue() {
     if (rpcUrl) {
       const update = async () => {
         try {
-          let provider = new RpcProvider({ nodeUrl: rpcUrl });
+          const provider = new RpcProvider({ nodeUrl: rpcUrl });
           const chainId = await provider.getChainId();
           setChainId(chainId);
         } catch (e) {

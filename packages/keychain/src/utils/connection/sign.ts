@@ -32,6 +32,7 @@ export function signMessageFactory(setContext: (ctx: ConnectionCtx) => void) {
 
     const release = await mutex.obtain();
     return await new Promise<Signature | ConnectError>(
+      // eslint-disable-next-line no-async-promise-executor
       async (resolve, reject) => {
         // If a session call and there is no session available
         // fallback to manual apporval flow

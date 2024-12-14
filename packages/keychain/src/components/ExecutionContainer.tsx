@@ -12,7 +12,9 @@ import { BannerProps } from "./layout/Container/Header/Banner";
 import { parseControllerError } from "@/utils/connection/execute";
 
 interface ExecutionContainerProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   transactions: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   transactionsDetail?: any;
   executionError?: ControllerError;
   onSubmit: (maxFee?: bigint) => Promise<void>;
@@ -49,6 +51,7 @@ export function ExecutionContainer({
   const isEstimated = useRef(false);
 
   const estimateFees = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async (transactions: any, transactionsDetail?: any) => {
       if (!controller) {
         return;
