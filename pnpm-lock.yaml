@@ -613,9 +613,6 @@ importers:
       '@emotion/babel-plugin':
         specifier: ^11.11.0
         version: 11.12.0
-      '@next/font':
-        specifier: ^13.4.19
-        version: 13.5.7
       '@storybook/addon-essentials':
         specifier: ^7.1.1
         version: 7.6.20(@types/react-dom@18.3.1)(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(webpack-sources@3.2.3)
@@ -15831,7 +15828,8 @@ snapshots:
     dependencies:
       glob: 7.1.7
 
-  '@next/font@13.5.7': {}
+  '@next/font@13.5.7':
+    optional: true
 
   '@next/swc-darwin-arm64@14.2.15':
     optional: true

@@ -12,7 +12,7 @@ import { useThemeEffect } from "@cartridge/ui-next";
 import { StoryParameters, useMockedConnection } from "./mock";
 import { ControllerThemeContext } from "../src/context/theme";
 import { ChakraProvider } from "@chakra-ui/react";
-import { CartridgeTheme } from "@cartridge/ui";
+import { useChakraTheme } from "../src/hooks/theme";
 
 export function Provider({
   children,
@@ -50,9 +50,11 @@ function ControllerThemeProvider({
   theme = defaultTheme,
 }: PropsWithChildren<{ theme?: ControllerTheme }>) {
   useThemeEffect({ theme, assetUrl: "" });
+  const chakraTheme = useChakraTheme(theme);
+
   return (
     <ControllerThemeContext.Provider value={theme}>
-      <ChakraProvider theme={CartridgeTheme}>{children}</ChakraProvider>
+      <ChakraProvider theme={chakraTheme}>{children}</ChakraProvider>
     </ControllerThemeContext.Provider>
   );
 }
