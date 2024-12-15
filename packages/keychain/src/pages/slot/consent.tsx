@@ -1,33 +1,33 @@
 import Controller from "@/utils/controller";
 import { Button, Text } from "@chakra-ui/react";
 import { Container, Footer } from "@/components/layout";
-import { useRouter } from "next/router";
 import { useCallback, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export function Consent() {
-  const router = useRouter();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const callback_uri = searchParams.get("callback_uri")!;
 
   const onSubmit = useCallback(async () => {
-    const redirect_uri = encodeURIComponent(
-      router.query.callback_uri as string,
-    );
+    const redirect_uri = encodeURIComponent(callback_uri);
     const url = `${
       import.meta.env.VITE_CARTRIDGE_API_URL
     }/oauth2/auth?client_id=cartridge&redirect_uri=${redirect_uri}`;
 
     window.location.href = url;
-  }, [router.query.callback_uri]);
+  }, [callback_uri]);
 
   const onDeny = useCallback(async () => {
-    const url = decodeURIComponent(router.query.callback_uri as string);
+    const url = decodeURIComponent(callback_uri);
     window.location.href = url;
-  }, [router.query.callback_uri]);
+  }, [callback_uri]);
 
   useEffect(() => {
     if (!Controller.fromStore(import.meta.env.VITE_ORIGIN!)) {
-      router.replace("/slot/auth");
+      navigate("/slot/auth");
     }
-  }, [router]);
+  }, [navigate]);
 
   return (
     <Container

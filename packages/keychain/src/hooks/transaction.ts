@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useRouter } from "next/router";
 import { constants } from "starknet";
+import { useSearchParams } from "react-router-dom";
 
 export type Transaction = {
   name: string;
@@ -11,20 +11,20 @@ export function useUrlTxns(): {
   chainId?: constants.StarknetChainId;
   txns: Transaction[];
 } {
-  const router = useRouter();
+  const [searchParams] = useSearchParams();
   const [chainId, setChainId] = useState<constants.StarknetChainId>();
   const [txns, setTxns] = useState<Transaction[]>([]);
 
   useEffect(() => {
-    const { chainId, txns: raw } = router.query;
-    if (!router.isReady) {
-      return;
+    const chainId = searchParams.get("chainId");
+    const raw = searchParams.get("txns");
+    if (chainId) {
+      setChainId(
+        chainId
+          ? (chainId as constants.StarknetChainId)
+          : constants.StarknetChainId.SN_SEPOLIA,
+      );
     }
-    setChainId(
-      chainId
-        ? (chainId as constants.StarknetChainId)
-        : constants.StarknetChainId.SN_SEPOLIA,
-    );
 
     if (!raw) {
       return;
@@ -32,7 +32,7 @@ export function useUrlTxns(): {
 
     const res = JSON.parse(raw as string) as Transaction[];
     setTxns(res);
-  }, [router.isReady, router.query]);
+  }, [searchParams]);
 
   return {
     chainId,

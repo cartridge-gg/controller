@@ -2,25 +2,26 @@ import { PageLoading } from "@/components/Loading";
 import { CreateController } from "@/components/connect";
 import { useMeQuery } from "@cartridge/utils/api/cartridge";
 import { useController } from "@/hooks/controller";
-import { useRouter } from "next/router";
 import { useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export function Auth() {
-  const router = useRouter();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { controller } = useController();
   const { data: user, isFetched } = useMeQuery();
 
   useEffect(() => {
     if (user && controller) {
-      const query = Object.entries(router.query).reduce(
+      const query = Array.from(searchParams.entries()).reduce(
         (prev, [key, val], i) =>
           i === 0 ? `?${key}=${val}` : `${prev}&${key}=${val}`,
         "",
       );
 
-      router.replace(`/slot/consent${query}`);
+      navigate(`/slot/consent${query}`);
     }
-  }, [user, controller, router]);
+  }, [user, controller, navigate, searchParams]);
 
   if (!isFetched) {
     return <PageLoading />;

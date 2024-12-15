@@ -1,36 +1,35 @@
-import { useRouter } from "next/router";
 import {
   AuthAction,
   Authenticate as AuthComponent,
 } from "@/components/connect";
 import { constants } from "starknet";
 import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 // auth page used for externally embedded keychain
 export function Authenticate() {
-  const router = useRouter();
+  const [searchParams] = useSearchParams();
   const [params, setParams] = useState<{
     name: string;
     action: string;
-    network?: string;
+    network: string | null;
   }>();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (router.isReady && !params) {
-      const { name, action, network } = router.query as {
-        name: string;
-        action: string;
-        network?: string;
-      };
-
-      if (name && action) {
-        setParams({ name, action, network });
-
-        // Remove query params to avoid issues with password managers
-        router.replace(router.pathname, undefined, { shallow: true });
-      }
+    if (params) {
+      return;
     }
-  }, [router.isReady, params]);
+    const name = searchParams.get("name");
+    const action = searchParams.get("action");
+    const network = searchParams.get("network");
+    if (name && action) {
+      setParams({ name, action, network });
+
+      // Remove query params to avoid issues with password managers
+      navigate(".");
+    }
+  }, [params, searchParams, navigate]);
 
   if (!params) {
     return null;
@@ -46,7 +45,7 @@ export function Authenticate() {
           return window.close();
         }
 
-        router.replace(`${import.meta.env.VITE_ADMIN_URL}/profile`);
+        navigate(`${import.meta.env.VITE_ADMIN_URL}/profile`);
       }}
     />
   );
