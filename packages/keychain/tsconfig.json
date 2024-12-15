@@ -10,8 +10,5 @@
   },
   "include": [
     "src",
-    // "global.d.ts",
-    "../ui/src/components/icons/StarknetGray.tsx"
   ],
-  "exclude": ["node_modules"]
 }

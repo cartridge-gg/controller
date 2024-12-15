@@ -7,11 +7,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { Meta, StoryObj } from "@storybook/react";
-import {
-  DopeWarsIcon,
-  MirrorWedgeIcon,
-  SpaceInvaderIcon,
-} from "src/components";
+import { DopeWarsIcon, MirrorWedgeIcon, SpaceInvaderIcon } from "@/components";
 
 const meta: Meta<typeof Menu> = {
   title: "Menu",

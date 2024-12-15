@@ -8,7 +8,7 @@ import {
   stateIcons,
   utilityIcons,
 } from "../components/icons";
-import { StateIconProps } from "src/components/icons/state/types";
+import { StateIconProps } from "@/components/icons/state/types";
 
 const iconList = {
   brand: brandIcons,
