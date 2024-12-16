@@ -102,9 +102,9 @@ export function SendToken() {
       ];
       await parent.openExecute(calls);
       // Remove 3 sub routes from the path
-      navigate(location.pathname.split("/").slice(0, -3).join("/"));
+      navigate("../../..");
     },
-    [t, parent],
+    [t, parent, navigate],
   );
 
   const amount = form.watch("amount");
