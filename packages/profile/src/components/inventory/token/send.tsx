@@ -24,8 +24,8 @@ import { TokenPair } from "@cartridge/utils/api/cartridge";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
-import { Link, useParams } from "react-router-dom";
-import { constants } from "starknet";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { Call, constants, uint256 } from "starknet";
 import { z } from "zod";
 
 export function SendToken() {
@@ -33,6 +33,7 @@ export function SendToken() {
   const { address } = useAccount();
   const { parent } = useConnection();
   const t = useToken({ tokenAddress: tokenAddress! });
+  const navigate = useNavigate();
 
   const formSchema = useMemo(() => {
     // Avoid scientific notation in error message (e.g. `parseFloat(`1e-${decimals}`).toString() === "1e-18"`)
@@ -80,25 +81,25 @@ export function SendToken() {
   });
 
   const onSubmit = useCallback(
-    (values: z.infer<typeof formSchema>) => {
+    async (values: z.infer<typeof formSchema>) => {
       if (!t) return;
 
-      const amount = (values.amount * 10 ** t.meta.decimals).toString();
+      const amount = uint256.bnToUint256(
+        BigInt(values.amount * 10 ** t.meta.decimals),
+      );
 
-      parent.openExecute([
+      const calls: Call[] = [
         {
-          contractAddress: t?.meta.address,
-          entrypoint: "increaseAllowance",
-          calldata: [values.to, amount, "0x0"],
-        },
-        {
-          contractAddress: t?.meta.address,
+          contractAddress: t.meta.address,
           entrypoint: "transfer",
-          calldata: [values.to, amount, "0x0"],
+          calldata: [values.to, amount],
         },
-      ]);
+      ];
+      await parent.openExecute(calls);
+      // Remove 3 sub routes from the path
+      navigate("../../..");
     },
-    [t, parent],
+    [t, parent, navigate],
   );
 
   const amount = form.watch("amount");
@@ -112,7 +113,7 @@ export function SendToken() {
   );
 
   if (!t) {
-    return;
+    return null;
   }
 
   return (

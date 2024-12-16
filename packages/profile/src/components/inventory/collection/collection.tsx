@@ -14,6 +14,7 @@ import {
   CardTitle,
   cn,
   CopyAddress,
+  ScrollArea,
 } from "@cartridge/ui-next";
 import {
   LayoutContainer,
@@ -114,94 +115,97 @@ export function Collection() {
                   icon={col.imageUrl ?? "/public/placeholder.svg"}
                 />
 
-                <LayoutContent className="pb-4">
-                  {/* <div
-                    className="flex items-center gap-2 text-sm cursor-pointer self-start"
-                    onClick={() => {
-                      setSearchParams({
-                        tokenIds: tokenIds.length
-                          ? []
-                          : col.assets.map((a) => a.tokenId),
-                      });
-                    }}
-                  >
-                    <CheckboxIcon
-                      variant={
-                        tokenIds.length ? "minus-line" : "unchecked-line"
-                      }
-                    />
-                    <div className="text-muted-foreground font-semibold uppercase">
-                      {tokenIds.length
-                        ? `${tokenIds.length} selected`
-                        : "Select all"}
-                    </div>
-                  </div> */}
+                <LayoutContent className="pb-0">
+                  <ScrollArea>
+                    {/* <div
+                      className="flex items-center gap-2 text-sm cursor-pointer self-start"
+                      onClick={() => {
+                        setSearchParams({
+                          tokenIds: tokenIds.length
+                            ? []
+                            : col.assets.map((a) => a.tokenId),
+                        });
+                      }}
+                    >
+                      <CheckboxIcon
+                        variant={
+                          tokenIds.length ? "minus-line" : "unchecked-line"
+                        }
+                      />
+                      <div className="text-muted-foreground font-semibold uppercase">
+                        {tokenIds.length
+                          ? `${tokenIds.length} selected`
+                          : "Select all"}
+                      </div>
+                    </div> */}
 
-                  <div className="grid grid-cols-2 gap-2 place-items-center">
-                    {col.assets.map((a) => {
-                      const isSelected = tokenIds.includes(a.tokenId);
-                      return (
-                        <Link
-                          className="w-full aspect-square group"
-                          to={a.tokenId}
-                          state={location.state}
-                          key={a.tokenId}
-                        >
-                          <Card
-                            className={cn(
-                              "w-full h-full border-2 border-solid transition overflow-scroll",
-                              isSelected
-                                ? "border-foreground"
-                                : "border-transparent",
-                            )}
+                    <div className="grid grid-cols-2 gap-2 place-items-center pb-2">
+                      {col.assets.map((a) => {
+                        const isSelected = tokenIds.includes(a.tokenId);
+                        return (
+                          <Link
+                            className="w-full aspect-square group"
+                            to={a.tokenId}
+                            state={location.state}
+                            key={a.tokenId}
                           >
-                            <CardHeader className="flex flex-row items-center group-hover:opacity-70 p-0 justify-between">
-                              <CardTitle className="truncate p-3">
-                                {a.name}
-                              </CardTitle>
-
-                              <div className="h-full place-content-center">
-                                <Button
-                                  size="icon"
-                                  variant="icon"
-                                  className="h-full w-auto aspect-square bg-transparent hover:bg-transparent"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-
-                                    setSearchParams({
-                                      tokenIds: isSelected
-                                        ? tokenIds.filter(
-                                            (tokenId) => tokenId !== a.tokenId,
-                                          )
-                                        : [...tokenIds, a.tokenId],
-                                    });
-                                  }}
-                                >
-                                  {/* <CheckboxIcon
-                                    variant={
-                                      isSelected ? "line" : "unchecked-line"
-                                    }
-                                  /> */}
-                                </Button>
-                              </div>
-                            </CardHeader>
-                            <CardContent
-                              className="bg-cover bg-center flex py-4 h-full place-content-center overflow-hidden"
-                              style={{
-                                backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${a.imageUrl})`,
-                              }}
+                            <Card
+                              className={cn(
+                                "w-full h-full border-2 border-solid transition overflow-hidden rounded-lg",
+                                isSelected
+                                  ? "border-foreground"
+                                  : "border-transparent",
+                              )}
                             >
-                              <img
-                                className="object-contain transition group-hover:scale-110"
-                                src={a.imageUrl}
-                              />
-                            </CardContent>
-                          </Card>
-                        </Link>
-                      );
-                    })}
-                  </div>
+                              <CardHeader className="flex flex-row items-center group-hover:opacity-70 p-0 justify-between">
+                                <CardTitle className="truncate p-3">
+                                  {a.name}
+                                </CardTitle>
+
+                                <div className="h-full place-content-center">
+                                  <Button
+                                    size="icon"
+                                    variant="icon"
+                                    className="h-full w-auto aspect-square bg-transparent hover:bg-transparent"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+
+                                      setSearchParams({
+                                        tokenIds: isSelected
+                                          ? tokenIds.filter(
+                                              (tokenId) =>
+                                                tokenId !== a.tokenId,
+                                            )
+                                          : [...tokenIds, a.tokenId],
+                                      });
+                                    }}
+                                  >
+                                    {/* <CheckboxIcon
+                                      variant={
+                                        isSelected ? "line" : "unchecked-line"
+                                      }
+                                    /> */}
+                                  </Button>
+                                </div>
+                              </CardHeader>
+                              <CardContent
+                                className="bg-cover bg-center flex py-4 h-full place-content-center overflow-hidden"
+                                style={{
+                                  backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${a.imageUrl})`,
+                                }}
+                              >
+                                <img
+                                  className="object-contain transition group-hover:scale-110"
+                                  src={a.imageUrl}
+                                />
+                              </CardContent>
+                            </Card>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </ScrollArea>
                 </LayoutContent>
 
                 {!!tokenIds.length && (

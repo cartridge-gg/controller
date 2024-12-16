@@ -1,14 +1,13 @@
 export { Asset, Collection, SendCollection } from "./collection";
 export { Token, SendToken } from "./token";
 
-import { CopyAddress } from "@cartridge/ui-next";
+import { CopyAddress, ScrollArea } from "@cartridge/ui-next";
 import {
   LayoutContainer,
   LayoutContent,
   LayoutHeader,
 } from "@/components/layout";
 import { Navigation } from "../navigation";
-// import { Collections } from "./collections";
 import { Tokens } from "./token";
 import { useAccount } from "@/hooks/account";
 import { Outlet, useParams } from "react-router-dom";
@@ -34,8 +33,10 @@ export function Inventory() {
       />
 
       <LayoutContent className="pb-4">
-        <Tokens />
-        {project && <Collections />}
+        <ScrollArea>
+          <Tokens />
+          {project && <Collections />}
+        </ScrollArea>
       </LayoutContent>
     </LayoutContainer>
   );

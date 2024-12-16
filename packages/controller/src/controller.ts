@@ -79,9 +79,9 @@ export default class ControllerProvider extends BaseProvider {
           this.profile = profile;
         },
         methods: {
-          openSettings: this.openSettings.bind(this),
-          openPurchaseCredits: this.openPurchaseCredits.bind(this),
-          openExecute: this.openExecute.bind(this),
+          openSettings: () => this.openSettings.bind(this),
+          openPurchaseCredits: () => this.openPurchaseCredits.bind(this),
+          openExecute: () => this.openExecute.bind(this),
         },
         rpcUrl: this.rpc.toString(),
         username,
@@ -172,10 +172,15 @@ export default class ControllerProvider extends BaseProvider {
       console.error(new NotReadyToConnect().message);
       return null;
     }
-    this.iframes.profile?.close();
+    if (this.iframes.profile?.sendBackward) {
+      this.iframes.profile?.sendBackward();
+    } else {
+      this.iframes.profile?.close();
+    }
     this.iframes.keychain.open();
     const res = await this.keychain.openSettings();
     this.iframes.keychain.close();
+    this.iframes.profile?.sendForward?.();
     if (res && (res as ConnectError).code === ResponseCodes.NOT_CONNECTED) {
       return false;
     }
@@ -224,7 +229,7 @@ export default class ControllerProvider extends BaseProvider {
     this.keychain.openPurchaseCredits();
   }
 
-  private openExecute(calls: any) {
+  async openExecute(calls: any) {
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
@@ -233,9 +238,16 @@ export default class ControllerProvider extends BaseProvider {
       console.error("Profile is not ready");
       return;
     }
-    this.iframes.profile.close();
+    if (this.iframes.profile?.sendBackward) {
+      this.iframes.profile?.sendBackward();
+    } else {
+      this.iframes.profile?.close();
+    }
     this.iframes.keychain.open();
-    this.keychain.execute(calls);
+    const res = await this.keychain.execute(calls, undefined, undefined, true);
+    this.iframes.keychain.close();
+    this.iframes.profile?.sendForward?.();
+    return !(res && (res as ConnectError).code === ResponseCodes.NOT_CONNECTED);
   }
 
   async delegateAccount() {

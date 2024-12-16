@@ -31,7 +31,7 @@ type ParentMethods = {
   close: () => void;
   openSettings: () => void;
   openPurchaseCredits: () => void;
-  openExecute: (calls: Call[]) => void;
+  openExecute: (calls: Call[]) => Promise<void>;
 };
 
 const initialState: ConnectionContextType = {
@@ -40,7 +40,7 @@ const initialState: ConnectionContextType = {
     close: () => {},
     openSettings: () => {},
     openPurchaseCredits: () => {},
-    openExecute: () => {},
+    openExecute: async () => {},
   },
   provider: new RpcProvider({ nodeUrl: import.meta.env.VITE_RPC_SEPOLIA }),
   chainId: "",

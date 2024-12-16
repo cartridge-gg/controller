@@ -93,7 +93,6 @@ function Credits() {
 
 function ERC20() {
   const { address } = useParams<{ address: string }>();
-  // const [searchParams, setSearchParams] = useSearchParams();
 
   const { chainId } = useConnection();
   const t = useToken({ tokenAddress: address! });
@@ -168,13 +167,13 @@ function ERC20() {
         </Card>
       </LayoutContent>
 
-      {/* {isIframe() && (
+      {isIframe() && (
         <LayoutFooter>
           <Link to="send">
             <Button className="w-full">Send</Button>
           </Link>
         </LayoutFooter>
-      )} */}
+      )}
     </LayoutContainer>
   );
 }

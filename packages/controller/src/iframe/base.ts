@@ -140,6 +140,16 @@ export class IFrame<CallSender extends {}> implements Modal {
     this.container.style.opacity = "0";
   }
 
+  sendBackward() {
+    if (!this.container) return;
+    this.container.style.zIndex = "9999";
+  }
+
+  sendForward() {
+    if (!this.container) return;
+    this.container.style.zIndex = "10000";
+  }
+
   private resize() {
     if (!this.iframe) return;
 

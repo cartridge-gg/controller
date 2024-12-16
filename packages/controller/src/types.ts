@@ -131,7 +131,7 @@ export interface Keychain {
   username(): string;
   fetchControllers(contractAddresses: string[]): Promise<ControllerAccounts>;
   openPurchaseCredits(): void;
-  openExecute(): void;
+  openExecute(calls: Call[]): Promise<void>;
 }
 export interface Profile {
   navigate(path: string): void;
