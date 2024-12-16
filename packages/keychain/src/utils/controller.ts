@@ -13,10 +13,8 @@ import {
   Call,
   CallData,
 } from "starknet";
-import { Mutex } from "utils/mutex";
-import { toWasmPolicies } from "@cartridge/controller";
 
-const mutex = new Mutex();
+import { toWasmPolicies } from "@cartridge/controller";
 
 import {
   CartridgeAccount,
@@ -103,12 +101,7 @@ export default class Controller extends Account {
       throw new Error("Account not found");
     }
 
-    const release = await mutex.obtain();
-    try {
-      await this.cartridge.createSession(toWasmPolicies(policies), expiresAt);
-    } finally {
-      release();
-    }
+    await this.cartridge.createSession(toWasmPolicies(policies), expiresAt);
   }
 
   registerSessionCalldata(
@@ -133,17 +126,12 @@ export default class Controller extends Account {
       throw new Error("Account not found");
     }
 
-    const release = await mutex.obtain();
-    try {
-      return await this.cartridge.registerSession(
-        toWasmPolicies(policies),
-        expiresAt,
-        publicKey,
-        num.toHex(maxFee),
-      );
-    } finally {
-      release();
-    }
+    return await this.cartridge.registerSession(
+      toWasmPolicies(policies),
+      expiresAt,
+      publicKey,
+      num.toHex(maxFee),
+    );
   }
 
   upgrade(new_class_hash: JsFelt): JsCall {
@@ -151,21 +139,11 @@ export default class Controller extends Account {
   }
 
   async executeFromOutsideV2(calls: Call[]): Promise<InvokeFunctionResponse> {
-    const release = await mutex.obtain();
-    try {
-      return await this.cartridge.executeFromOutsideV2(toJsCalls(calls));
-    } finally {
-      release();
-    }
+    return await this.cartridge.executeFromOutsideV2(toJsCalls(calls));
   }
 
   async executeFromOutsideV3(calls: Call[]): Promise<InvokeFunctionResponse> {
-    const release = await mutex.obtain();
-    try {
-      return await this.cartridge.executeFromOutsideV3(toJsCalls(calls));
-    } finally {
-      release();
-    }
+    return await this.cartridge.executeFromOutsideV3(toJsCalls(calls));
   }
 
   async execute(
@@ -180,15 +158,10 @@ export default class Controller extends Account {
       executionDetails.maxFee = num.toHex(executionDetails.maxFee);
     }
 
-    const release = await mutex.obtain();
-    try {
-      return await this.cartridge.execute(
-        toJsCalls(calls),
-        executionDetails as JsInvocationsDetails,
-      );
-    } finally {
-      release();
-    }
+    return await this.cartridge.execute(
+      toJsCalls(calls),
+      executionDetails as JsInvocationsDetails,
+    );
   }
 
   hasSession(calls: Call[]): boolean {
@@ -210,27 +183,22 @@ export default class Controller extends Account {
     calls: Call[],
     _: EstimateFeeDetails = {},
   ): Promise<EstimateFee> {
-    const release = await mutex.obtain();
-    try {
-      const res = await this.cartridge.estimateInvokeFee(toJsCalls(calls));
+    const res = await this.cartridge.estimateInvokeFee(toJsCalls(calls));
 
-      // The reason why we set the multiplier unseemingly high is to account
-      // for the fact that the estimation above is done without validation (ie SKIP_VALIDATE).
-      //
-      // Setting it lower might cause the actual transaction to fail due to
-      // insufficient max fee.
-      const MULTIPLIER_PERCENTAGE = 170; // x1.7
+    // The reason why we set the multiplier unseemingly high is to account
+    // for the fact that the estimation above is done without validation (ie SKIP_VALIDATE).
+    //
+    // Setting it lower might cause the actual transaction to fail due to
+    // insufficient max fee.
+    const MULTIPLIER_PERCENTAGE = 170; // x1.7
 
-      // This will essentially multiply the estimated fee by 1.7
-      const suggestedMaxFee = num.addPercent(
-        BigInt(res.overall_fee),
-        MULTIPLIER_PERCENTAGE,
-      );
+    // This will essentially multiply the estimated fee by 1.7
+    const suggestedMaxFee = num.addPercent(
+      BigInt(res.overall_fee),
+      MULTIPLIER_PERCENTAGE,
+    );
 
-      return { suggestedMaxFee, ...res };
-    } finally {
-      release();
-    }
+    return { suggestedMaxFee, ...res };
   }
 
   async verifyMessageHash(
@@ -252,39 +220,19 @@ export default class Controller extends Account {
   }
 
   async signMessage(typedData: TypedData): Promise<Signature> {
-    const release = await mutex.obtain();
-    try {
-      return await this.cartridge.signMessage(JSON.stringify(typedData));
-    } finally {
-      release();
-    }
+    return this.cartridge.signMessage(JSON.stringify(typedData));
   }
 
   async getNonce(_?: any): Promise<string> {
-    const release = await mutex.obtain();
-    try {
-      return await this.cartridge.getNonce();
-    } finally {
-      release();
-    }
+    return await this.cartridge.getNonce();
   }
 
   async selfDeploy(maxFee: BigNumberish): Promise<DeployedAccountTransaction> {
-    const release = await mutex.obtain();
-    try {
-      return await this.cartridge.deploySelf(num.toHex(maxFee));
-    } finally {
-      release();
-    }
+    return await this.cartridge.deploySelf(num.toHex(maxFee));
   }
 
   async delegateAccount(): Promise<string> {
-    const release = await mutex.obtain();
-    try {
-      return await this.cartridge.delegateAccount();
-    } finally {
-      release();
-    }
+    return this.cartridge.delegateAccount();
   }
 
   revoke(_origin: string) {

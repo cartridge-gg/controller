@@ -11,6 +11,7 @@ import {
 } from "starknet";
 import { ConnectionCtx, ControllerError, ExecuteCtx } from "./types";
 import { ErrorCode, JsCall } from "@cartridge/account-wasm/controller";
+import { mutex } from "./sync";
 
 export const ESTIMATE_FEE_PERCENTAGE = 10;
 
@@ -64,6 +65,7 @@ export function execute({
       });
     }
 
+    const release = await mutex.obtain();
     return await new Promise<InvokeFunctionResponse | ConnectError>(
       async (resolve, reject) => {
         if (!account) {
@@ -158,7 +160,9 @@ export function execute({
           });
         }
       },
-    );
+    ).finally(() => {
+      release();
+    });
   };
 }
 
