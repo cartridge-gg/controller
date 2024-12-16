@@ -92,8 +92,8 @@ export default class Controller extends Account {
     return this.cartridgeMeta.chainId();
   }
 
-  disconnect() {
-    this.cartridge.disconnect();
+  async disconnect() {
+    await this.cartridge.disconnect();
     delete window.controller;
   }
 
@@ -109,12 +109,12 @@ export default class Controller extends Account {
     await this.cartridge.createSession(toWasmPolicies(policies), expiresAt);
   }
 
-  registerSessionCalldata(
+  async registerSessionCalldata(
     expiresAt: bigint,
     policies: SessionPolicies,
     publicKey: string,
-  ): Array<string> {
-    return this.cartridge.registerSessionCalldata(
+  ): Promise<Array<string>> {
+    return await this.cartridge.registerSessionCalldata(
       toWasmPolicies(policies),
       expiresAt,
       publicKey,
@@ -139,8 +139,8 @@ export default class Controller extends Account {
     );
   }
 
-  upgrade(new_class_hash: JsFelt): JsCall {
-    return this.cartridge.upgrade(new_class_hash);
+  async upgrade(new_class_hash: JsFelt): Promise<JsCall> {
+    return await this.cartridge.upgrade(new_class_hash);
   }
 
   async executeFromOutsideV2(calls: Call[]): Promise<InvokeFunctionResponse> {
@@ -169,19 +169,19 @@ export default class Controller extends Account {
     );
   }
 
-  hasSession(calls: Call[]): boolean {
-    return this.cartridge.hasSession(toJsCalls(calls));
+  async hasSession(calls: Call[]): Promise<boolean> {
+    return await this.cartridge.hasSession(toJsCalls(calls));
   }
 
-  hasSessionForMessage(typedData: TypedData): boolean {
-    return this.cartridge.hasSessionForMessage(JSON.stringify(typedData));
+  async hasSessionForMessage(typedData: TypedData): Promise<boolean> {
+    return await this.cartridge.hasSessionForMessage(JSON.stringify(typedData));
   }
 
-  session(
+  async session(
     policies: SessionPolicies,
     public_key?: string,
-  ): SessionMetadata | undefined {
-    return this.cartridge.session(toWasmPolicies(policies), public_key);
+  ): Promise<SessionMetadata | undefined> {
+    return await this.cartridge.session(toWasmPolicies(policies), public_key);
   }
 
   async estimateInvokeFee(

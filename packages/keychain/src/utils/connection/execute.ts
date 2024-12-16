@@ -76,7 +76,7 @@ export function execute({
 
         // If a session call and there is no session available
         // fallback to manual apporval flow
-        if (!account.hasSession(calls)) {
+        if (!(await account.hasSession(calls))) {
           setContext({
             type: "execute",
             origin,

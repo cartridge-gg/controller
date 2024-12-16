@@ -125,19 +125,21 @@ export default function Session() {
 
     // If the requested policies has no mismatch with existing policies and public key already
     // registered then return the exising session
-    if (controller.session(policies, queries.public_key)) {
-      onCallback({
-        username: controller.username(),
-        address: controller.address,
-        ownerGuid: controller.ownerGuid(),
-        alreadyRegistered: true,
-        expiresAt: String(SESSION_EXPIRATION),
-      });
+    controller.session(policies, queries.public_key).then((session) => {
+      if (session) {
+        onCallback({
+          username: controller.username(),
+          address: controller.address,
+          ownerGuid: controller.ownerGuid(),
+          alreadyRegistered: true,
+          expiresAt: String(SESSION_EXPIRATION),
+        });
 
-      return;
-    }
+        return;
+      }
 
-    setIsLoading(false);
+      setIsLoading(false);
+    });
   }, [controller, origin, policies, queries.public_key, onCallback]);
 
   if (!controller) {

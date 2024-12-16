@@ -224,12 +224,13 @@ export function useConnectionValue() {
   }, [rpcUrl, controller]);
 
   const logout = useCallback(() => {
-    window.controller?.disconnect();
-    setController(undefined);
+    window.controller?.disconnect().then(() => {
+      setController(undefined);
 
-    context?.resolve?.({
-      code: ResponseCodes.NOT_CONNECTED,
-      message: "User logged out",
+      context?.resolve?.({
+        code: ResponseCodes.NOT_CONNECTED,
+        message: "User logged out",
+      });
     });
   }, [context, setController]);
 

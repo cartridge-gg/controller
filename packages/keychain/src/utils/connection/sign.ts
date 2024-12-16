@@ -35,7 +35,7 @@ export function signMessageFactory(setContext: (ctx: ConnectionCtx) => void) {
       async (resolve, reject) => {
         // If a session call and there is no session available
         // fallback to manual apporval flow
-        if (!controller.hasSessionForMessage(typedData)) {
+        if (!(await controller.hasSessionForMessage(typedData))) {
           setContext({
             type: "sign-message",
             origin,
