@@ -30,10 +30,16 @@ import { formatEther } from "viem";
 import { useAccount } from "@/hooks/account";
 import { useToken } from "@/hooks/token";
 import { TokenPair } from "@cartridge/utils/api/cartridge";
+import { usePostHog } from "posthog-js/react";
+import { useEffect } from "react";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
   const location = useLocation();
+  const posthog = usePostHog();
+  useEffect(() => {
+    posthog.setPersonPropertiesForFlags({ address });
+  }, [posthog, address]);
 
   if (location.pathname.endsWith("/send")) {
     return <Outlet />;
@@ -93,7 +99,6 @@ function Credits() {
 
 function ERC20() {
   const { address } = useParams<{ address: string }>();
-  // const [searchParams, setSearchParams] = useSearchParams();
 
   const { chainId } = useConnection();
   const t = useToken({ tokenAddress: address! });
@@ -104,7 +109,7 @@ function ERC20() {
     },
     { enabled: t && ["ETH", "STRK"].includes(t.meta.symbol) },
   );
-
+  const posthog = usePostHog();
   if (!t) {
     return;
   }
@@ -168,7 +173,7 @@ function ERC20() {
         </Card>
       </LayoutContent>
 
-      {isIframe() && (
+      {posthog.isFeatureEnabled("erc20-send") && isIframe() && (
         <LayoutFooter>
           <Link to="send">
             <Button className="w-full">Send</Button>
