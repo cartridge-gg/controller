@@ -1,11 +1,10 @@
 import { useCallback, useState } from "react";
-import { num } from "starknet";
 import { useConnection } from "./connection";
 
 type TransactionHash = string;
 
 interface DeployInterface {
-  deploySelf: (maxFee: string) => Promise<TransactionHash>;
+  deploySelf: (maxFee: string) => Promise<TransactionHash | undefined>;
   isDeploying: boolean;
 }
 
@@ -18,9 +17,7 @@ export const useDeploy = (): DeployInterface => {
       if (!controller) return;
       try {
         setIsDeploying(true);
-        const { transaction_hash } = await controller.cartridge.deploySelf(
-          num.toHex(maxFee),
-        );
+        const { transaction_hash } = await controller.selfDeploy(maxFee);
 
         return transaction_hash;
       } catch (e) {

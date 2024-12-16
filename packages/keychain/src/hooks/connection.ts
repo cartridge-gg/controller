@@ -84,10 +84,10 @@ export function useConnectionValue() {
   }, [context, parent]);
 
   const setController = useCallback((controller?: Controller) => {
-    if (controller && controller.cartridge && origin) {
-      posthog.identify(controller.cartridge.username(), {
+    if (controller && origin) {
+      posthog.identify(controller.username(), {
         address: controller.address,
-        class: controller.cartridge.classHash,
+        class: controller.classHash(),
         chainId: controller.chainId,
         appId: origin,
       });

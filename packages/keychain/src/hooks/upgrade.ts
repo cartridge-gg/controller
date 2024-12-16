@@ -93,7 +93,7 @@ export const useUpgrade = (controller?: Controller): UpgradeInterface => {
           const current = CONTROLLER_VERSIONS.find(
             (v) =>
               addAddressPadding(v.hash) ===
-              addAddressPadding(controller.cartridge.classHash()),
+              addAddressPadding(controller.classHash()),
           );
           setCurrent(current);
           setAvailable(current?.version !== LATEST_CONTROLLER.version);
@@ -110,7 +110,7 @@ export const useUpgrade = (controller?: Controller): UpgradeInterface => {
       return [];
     }
 
-    return [controller.cartridge.upgrade(LATEST_CONTROLLER.hash)];
+    return [controller.upgrade(LATEST_CONTROLLER.hash)];
   }, [controller]);
 
   const onUpgrade = useCallback(async () => {
