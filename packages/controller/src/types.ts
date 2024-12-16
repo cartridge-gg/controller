@@ -76,6 +76,7 @@ export type DeployReply = {
 export type IFrames = {
   keychain: KeychainIFrame;
   profile?: ProfileIFrame;
+  version?: number;
 };
 
 export interface LookupRequest {

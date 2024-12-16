@@ -85,6 +85,7 @@ export default class ControllerProvider extends BaseProvider {
         },
         rpcUrl: this.rpc.toString(),
         username,
+        version: this.version,
       });
     }
 

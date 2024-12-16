@@ -30,6 +30,8 @@ import { formatEther } from "viem";
 import { useAccount } from "@/hooks/account";
 import { useToken } from "@/hooks/token";
 import { TokenPair } from "@cartridge/utils/api/cartridge";
+import { useMemo } from "react";
+import { compare } from "compare-versions";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
@@ -93,7 +95,7 @@ function Credits() {
 
 function ERC20() {
   const { address } = useParams<{ address: string }>();
-
+  const { version } = useConnection();
   const { chainId } = useConnection();
   const t = useToken({ tokenAddress: address! });
   const { countervalue } = useCountervalue(
@@ -103,6 +105,11 @@ function ERC20() {
     },
     { enabled: t && ["ETH", "STRK"].includes(t.meta.symbol) },
   );
+
+  const compatibility = useMemo(() => {
+    if (!version) return false;
+    return compare(version, "0.4.0", ">=");
+  }, [version]);
 
   if (!t) {
     return;
@@ -167,7 +174,7 @@ function ERC20() {
         </Card>
       </LayoutContent>
 
-      {isIframe() && (
+      {isIframe() && compatibility && (
         <LayoutFooter>
           <Link to="send">
             <Button className="w-full">Send</Button>

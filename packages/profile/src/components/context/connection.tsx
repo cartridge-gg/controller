@@ -23,6 +23,7 @@ type ConnectionContextType = {
   erc20: string[];
   project?: string;
   namespace?: string;
+  version?: string;
   isVisible: boolean;
   setIsVisible: (isVisible: boolean) => void;
 };
@@ -64,6 +65,11 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
         state.provider = new RpcProvider({
           nodeUrl: decodeURIComponent(rpcUrlParam),
         });
+      }
+
+      const versionParam = searchParams.get("v");
+      if (versionParam) {
+        state.version = decodeURIComponent(versionParam);
       }
 
       const psParam = searchParams.get("ps");
