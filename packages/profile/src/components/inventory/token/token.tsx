@@ -31,15 +31,10 @@ import { useAccount } from "@/hooks/account";
 import { useToken } from "@/hooks/token";
 import { TokenPair } from "@cartridge/utils/api/cartridge";
 import { usePostHog } from "posthog-js/react";
-import { useEffect } from "react";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
   const location = useLocation();
-  const posthog = usePostHog();
-  useEffect(() => {
-    posthog.setPersonPropertiesForFlags({ address });
-  }, [posthog, address]);
 
   if (location.pathname.endsWith("/send")) {
     return <Outlet />;

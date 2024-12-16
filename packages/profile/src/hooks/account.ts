@@ -3,7 +3,8 @@ import {
   useAccountNameQuery,
   useAddressByUsernameQuery,
 } from "@cartridge/utils/api/cartridge";
-import { useEffect, useRef } from "react";
+import { usePostHog } from "posthog-js/react";
+import { useEffect, useMemo, useRef } from "react";
 import { useParams } from "react-router-dom";
 
 export function useUsername({ address }: { address: string }) {
@@ -38,11 +39,21 @@ export function useAccount() {
     isFirstRender.current = false;
   }, [params.project, setIndexerUrl]);
 
-  return {
-    username,
-    address:
+  const address = useMemo(
+    () =>
       import.meta.env.VITE_MOCKED_ACCOUNT_ADDRESS ??
       data?.account?.controllers.edges?.[0]?.node?.address ??
       "",
+    [data],
+  );
+
+  const posthog = usePostHog();
+  useEffect(() => {
+    posthog.setPersonPropertiesForFlags({ address });
+  }, [posthog, address]);
+
+  return {
+    username,
+    address,
   };
 }
