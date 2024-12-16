@@ -84,15 +84,12 @@ export function useConnectionValue() {
   }, [context, parent]);
 
   const setController = useCallback((controller?: Controller) => {
-    if (controller && controller.cartridge && origin) {
-      posthog.identify(controller.cartridge.username(), {
+    if (controller) {
+      posthog.identify(controller.username(), {
         address: controller.address,
         class: controller.cartridge.classHash,
         chainId: controller.chainId,
-        appId: origin,
       });
-
-      posthog.group("company", origin);
     } else {
       posthog.reset();
     }
@@ -100,6 +97,12 @@ export function useConnectionValue() {
     setControllerRaw(controller);
     setIsSignedUp();
   }, []);
+
+  useEffect(() => {
+    if (origin) {
+      posthog.group("company", origin);
+    }
+  }, [origin]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
