@@ -91,11 +91,6 @@ export function SendToken() {
       const calls: Call[] = [
         {
           contractAddress: t.meta.address,
-          entrypoint: "increaseAllowance",
-          calldata: [values.to, amount],
-        },
-        {
-          contractAddress: t.meta.address,
           entrypoint: "transfer",
           calldata: [values.to, amount],
         },

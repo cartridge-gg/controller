@@ -1,9 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@cartridge/ui-next";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  cn,
+} from "@cartridge/ui-next";
 import { Link } from "react-router-dom";
 import { Balance, ERC20Metadata, useCountervalue } from "@cartridge/utils";
 import { formatEther } from "viem";
 import { useTokens } from "@/hooks/token";
 import { TokenPair } from "@cartridge/utils/api/cartridge";
+import { useState } from "react";
 
 export function Tokens() {
   // const { isVisible } = useConnection();
@@ -53,13 +60,21 @@ function TokenCardContent({
 }: {
   token: { balance: Balance; meta: ERC20Metadata };
 }) {
+  const [hover, setHover] = useState(false);
   const { countervalue } = useCountervalue({
     balance: formatEther(token.balance.value || 0n),
     pair: `${token.meta.symbol}_USDC` as TokenPair,
   });
 
   return (
-    <CardContent className="bg-background flex items-center p-0 h-11 gap-px">
+    <CardContent
+      className={cn(
+        "bg-background flex items-center p-0 h-11 gap-px",
+        hover && "opacity-80",
+      )}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+    >
       <div className="bg-secondary flex w-11 aspect-square items-center justify-center">
         <img
           src={token.meta.logoUrl ?? "/public/placeholder.svg"}
