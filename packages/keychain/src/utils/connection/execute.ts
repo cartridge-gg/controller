@@ -66,6 +66,12 @@ export function execute({
 
     return await new Promise<InvokeFunctionResponse | ConnectError>(
       async (resolve, reject) => {
+        if (!account) {
+          return reject({
+            message: "Controller context not available",
+          });
+        }
+
         // If a session call and there is no session available
         // fallback to manual apporval flow
         if (!account.hasSession(calls)) {
@@ -123,9 +129,12 @@ export function execute({
             num.addPercent(estimate.overall_fee, ESTIMATE_FEE_PERCENTAGE),
           );
 
-          let { transaction_hash } = await account.execute(transactions, {
-            maxFee,
-          });
+          let { transaction_hash } = await account.execute(
+            transactions as Call[],
+            {
+              maxFee,
+            },
+          );
           return resolve({
             code: ResponseCodes.SUCCESS,
             transaction_hash,
