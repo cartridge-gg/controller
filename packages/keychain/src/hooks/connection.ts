@@ -87,7 +87,7 @@ export function useConnectionValue() {
     if (controller) {
       posthog.identify(controller.username(), {
         address: controller.address,
-        class: controller.cartridge.classHash,
+        class: controller.classHash(),
         chainId: controller.chainId,
       });
     } else {

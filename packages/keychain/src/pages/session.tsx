@@ -107,7 +107,7 @@ export default function Session() {
       onCallback({
         username: controller.username(),
         address: controller.address,
-        ownerGuid: controller.cartridge.ownerGuid(),
+        ownerGuid: controller.ownerGuid(),
         transactionHash: transaction_hash,
         expiresAt: String(SESSION_EXPIRATION),
       });
@@ -129,7 +129,7 @@ export default function Session() {
       onCallback({
         username: controller.username(),
         address: controller.address,
-        ownerGuid: controller.cartridge.ownerGuid(),
+        ownerGuid: controller.ownerGuid(),
         alreadyRegistered: true,
         expiresAt: String(SESSION_EXPIRATION),
       });

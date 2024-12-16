@@ -26,9 +26,10 @@ import {
   SessionMetadata,
 } from "@cartridge/account-wasm/controller";
 import { SessionPolicies } from "@cartridge/presets";
+import { DeployedAccountTransaction } from "@starknet-io/types-js";
 
 export default class Controller extends Account {
-  cartridge: CartridgeAccount;
+  private cartridge: CartridgeAccount;
 
   constructor({
     appId,
@@ -70,6 +71,14 @@ export default class Controller extends Account {
 
   username() {
     return this.cartridge.username();
+  }
+
+  classHash() {
+    return this.cartridge.classHash();
+  }
+
+  ownerGuid() {
+    return this.cartridge.ownerGuid();
   }
 
   rpcUrl() {
@@ -255,6 +264,15 @@ export default class Controller extends Account {
     const release = await mutex.obtain();
     try {
       return await this.cartridge.getNonce();
+    } finally {
+      release();
+    }
+  }
+
+  async selfDeploy(maxFee: BigNumberish): Promise<DeployedAccountTransaction> {
+    const release = await mutex.obtain();
+    try {
+      return await this.cartridge.deploySelf(num.toHex(maxFee));
     } finally {
       release();
     }

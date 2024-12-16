@@ -124,7 +124,7 @@ export function execute({
         }
 
         try {
-          let estimate = await account.cartridge.estimateInvokeFee(calls);
+          let estimate = await account.estimateInvokeFee(calls);
           const maxFee = num.toHex(
             num.addPercent(estimate.overall_fee, ESTIMATE_FEE_PERCENTAGE),
           );
