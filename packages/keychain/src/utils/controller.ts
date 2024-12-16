@@ -18,6 +18,7 @@ import { toWasmPolicies } from "@cartridge/controller";
 
 import {
   CartridgeAccount,
+  CartridgeAccountMeta,
   JsCall,
   JsFelt,
   JsInvocationsDetails,
@@ -28,6 +29,7 @@ import { DeployedAccountTransaction } from "@starknet-io/types-js";
 
 export default class Controller extends Account {
   private cartridge: CartridgeAccount;
+  private cartridgeMeta: CartridgeAccountMeta;
 
   constructor({
     appId,
@@ -50,7 +52,7 @@ export default class Controller extends Account {
   }) {
     super({ nodeUrl: rpcUrl }, address, "");
 
-    this.cartridge = CartridgeAccount.new(
+    const accountWithMeta = CartridgeAccount.new(
       appId,
       classHash,
       rpcUrl,
@@ -65,26 +67,29 @@ export default class Controller extends Account {
         },
       },
     );
+
+    this.cartridgeMeta = accountWithMeta.meta();
+    this.cartridge = accountWithMeta.intoAccount();
   }
 
   username() {
-    return this.cartridge.username();
+    return this.cartridgeMeta.username();
   }
 
   classHash() {
-    return this.cartridge.classHash();
+    return this.cartridgeMeta.classHash();
   }
 
   ownerGuid() {
-    return this.cartridge.ownerGuid();
+    return this.cartridgeMeta.ownerGuid();
   }
 
   rpcUrl() {
-    return this.cartridge.rpcUrl();
+    return this.cartridgeMeta.rpcUrl();
   }
 
   chainId() {
-    return this.cartridge.chainId();
+    return this.cartridgeMeta.chainId();
   }
 
   disconnect() {
@@ -241,19 +246,22 @@ export default class Controller extends Account {
   }
 
   static fromStore(appId: string) {
-    let cartridge = CartridgeAccount.fromStorage(appId);
-    if (!cartridge) {
+    const cartridgeWithMeta = CartridgeAccount.fromStorage(appId);
+    if (!cartridgeWithMeta) {
       return;
     }
 
+    const meta = cartridgeWithMeta.meta();
+
     const controller = new Account(
-      { nodeUrl: cartridge.rpcUrl() },
-      cartridge.address(),
+      { nodeUrl: meta.rpcUrl() },
+      meta.address(),
       "",
     ) as Controller;
 
     Object.setPrototypeOf(controller, Controller.prototype);
-    controller.cartridge = cartridge;
+    controller.cartridge = cartridgeWithMeta.intoAccount();
+    controller.cartridgeMeta = meta;
     return controller;
   }
 }

@@ -40,6 +40,7 @@ impl CartridgeAccount {
     /// - `username`: Username associated with the account.
     /// - `signer`: A Signer struct containing the signer type and associated data.
     ///
+    #[allow(clippy::new_ret_no_self)]
     pub fn new(
         app_id: String,
         class_hash: JsFelt,
@@ -48,7 +49,7 @@ impl CartridgeAccount {
         address: JsFelt,
         username: String,
         signer: Signer,
-    ) -> Result<CartridgeAccount> {
+    ) -> Result<CartridgeAccountWithMeta> {
         set_panic_hook();
 
         let rpc_url = Url::parse(&rpc_url)?;
@@ -65,45 +66,20 @@ impl CartridgeAccount {
             chain_id.0,
         );
 
-        Ok(CartridgeAccount { controller })
+        Ok(CartridgeAccountWithMeta::new(controller))
     }
 
     #[wasm_bindgen(js_name = fromStorage)]
-    pub fn from_storage(app_id: String) -> Result<Option<CartridgeAccount>> {
+    pub fn from_storage(app_id: String) -> Result<Option<CartridgeAccountWithMeta>> {
         set_panic_hook();
 
         let controller =
             Controller::from_storage(app_id).map_err(|e| JsError::new(&e.to_string()))?;
 
         match controller {
-            Some(c) => Ok(Some(CartridgeAccount { controller: c })),
+            Some(c) => Ok(Some(CartridgeAccountWithMeta::new(c))),
             None => Ok(None),
         }
-    }
-
-    #[wasm_bindgen(js_name = username)]
-    pub fn username(&self) -> String {
-        self.controller.username.clone()
-    }
-
-    #[wasm_bindgen(js_name = address)]
-    pub fn address(&self) -> String {
-        self.controller.address.to_hex_string()
-    }
-
-    #[wasm_bindgen(js_name = classHash)]
-    pub fn class_hash(&self) -> String {
-        self.controller.class_hash.to_hex_string()
-    }
-
-    #[wasm_bindgen(js_name = rpcUrl)]
-    pub fn rpc_url(&self) -> String {
-        self.controller.rpc_url.to_string()
-    }
-
-    #[wasm_bindgen(js_name = chainId)]
-    pub fn chain_id(&self) -> String {
-        self.controller.chain_id.to_string()
     }
 
     #[wasm_bindgen(js_name = disconnect)]
@@ -111,11 +87,6 @@ impl CartridgeAccount {
         self.controller
             .disconnect()
             .map_err(JsControllerError::from)
-    }
-
-    #[wasm_bindgen(js_name = ownerGuid)]
-    pub fn owner_guid(&self) -> JsFelt {
-        JsFelt(self.controller.owner_guid())
     }
 
     #[wasm_bindgen(js_name = registerSession)]
@@ -350,5 +321,107 @@ impl CartridgeAccount {
             .map_err(JsControllerError::from)?;
 
         Ok(JsFelt(res))
+    }
+}
+
+/// A type for accessing fixed attributes of `CartridgeAccount`.
+///
+/// This type exists as concurrent mutable and immutable calls to `CartridgeAccount` are guarded
+/// with `WasmMutex`, which only operates under an `async` context. If these getters were directly
+/// implemented under `CartridgeAccount`:
+///
+/// - calls to them would unnecessarily have to be `async` as well;
+/// - there would be excessive locking.
+///
+/// This type is supposed to only ever be borrowed immutably. So no concurrent access control would
+/// be needed.
+#[wasm_bindgen]
+#[derive(Clone)]
+pub struct CartridgeAccountMeta {
+    username: String,
+    address: String,
+    class_hash: String,
+    rpc_url: String,
+    chain_id: String,
+    owner_guid: JsFelt,
+}
+
+impl CartridgeAccountMeta {
+    fn new(controller: &Controller) -> Self {
+        Self {
+            username: controller.username.clone(),
+            address: controller.address.to_hex_string(),
+            class_hash: controller.class_hash.to_hex_string(),
+            rpc_url: controller.rpc_url.to_string(),
+            chain_id: controller.chain_id.to_string(),
+            owner_guid: JsFelt(controller.owner_guid()),
+        }
+    }
+}
+
+#[wasm_bindgen]
+impl CartridgeAccountMeta {
+    #[wasm_bindgen(js_name = username)]
+    pub fn username(&self) -> String {
+        self.username.clone()
+    }
+
+    #[wasm_bindgen(js_name = address)]
+    pub fn address(&self) -> String {
+        self.address.clone()
+    }
+
+    #[wasm_bindgen(js_name = classHash)]
+    pub fn class_hash(&self) -> String {
+        self.class_hash.clone()
+    }
+
+    #[wasm_bindgen(js_name = rpcUrl)]
+    pub fn rpc_url(&self) -> String {
+        self.rpc_url.clone()
+    }
+
+    #[wasm_bindgen(js_name = chainId)]
+    pub fn chain_id(&self) -> String {
+        self.chain_id.clone()
+    }
+
+    #[wasm_bindgen(js_name = ownerGuid)]
+    pub fn owner_guid(&self) -> JsFelt {
+        self.owner_guid.clone()
+    }
+}
+
+/// A type used as the return type for constructing `CartridgeAccount` to provide an extra,
+/// separately borrowable `meta` field for synchronously accessing fixed fields.
+///
+/// This type exists instead of simply having `CartridgeAccount::new()` return a tuple as tuples
+/// don't implement `IntoWasmAbi` which is needed for crossing JS-WASM boundary.
+#[wasm_bindgen]
+pub struct CartridgeAccountWithMeta {
+    account: CartridgeAccount,
+    meta: CartridgeAccountMeta,
+}
+
+impl CartridgeAccountWithMeta {
+    fn new(controller: Controller) -> Self {
+        let meta = CartridgeAccountMeta::new(&controller);
+        Self {
+            account: CartridgeAccount { controller },
+            meta,
+        }
+    }
+}
+
+#[wasm_bindgen]
+impl CartridgeAccountWithMeta {
+    #[wasm_bindgen(js_name = meta)]
+    pub fn meta(&self) -> CartridgeAccountMeta {
+        self.meta.clone()
+    }
+
+    #[wasm_bindgen(js_name = intoAccount)]
+    pub fn into_account(self) -> CartridgeAccount {
+        self.account
     }
 }
