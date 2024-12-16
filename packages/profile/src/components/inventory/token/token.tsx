@@ -104,7 +104,6 @@ function ERC20() {
     },
     { enabled: t && ["ETH", "STRK"].includes(t.meta.symbol) },
   );
-  const isERC20SendEnabled = useFeatureFlagEnabled("erc20-send");
 
   if (!t) {
     return;
@@ -169,7 +168,7 @@ function ERC20() {
         </Card>
       </LayoutContent>
 
-      {isERC20SendEnabled && isIframe() && (
+      {isIframe() && (
         <LayoutFooter>
           <Link to="send">
             <Button className="w-full">Send</Button>
