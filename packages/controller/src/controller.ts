@@ -247,10 +247,7 @@ export default class ControllerProvider extends BaseProvider {
     const res = await this.keychain.execute(calls, undefined, undefined, true);
     this.iframes.keychain.close();
     this.iframes.profile?.sendForward?.();
-    if (res && (res as ConnectError).code === ResponseCodes.NOT_CONNECTED) {
-      return false;
-    }
-    return true;
+    return !(res && (res as ConnectError).code === ResponseCodes.NOT_CONNECTED);
   }
 
   async delegateAccount() {
