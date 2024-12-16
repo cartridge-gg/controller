@@ -30,7 +30,7 @@ import { formatEther } from "viem";
 import { useAccount } from "@/hooks/account";
 import { useToken } from "@/hooks/token";
 import { TokenPair } from "@cartridge/utils/api/cartridge";
-import { usePostHog } from "posthog-js/react";
+import { useFeatureFlagEnabled } from "posthog-js/react";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
@@ -104,7 +104,8 @@ function ERC20() {
     },
     { enabled: t && ["ETH", "STRK"].includes(t.meta.symbol) },
   );
-  const posthog = usePostHog();
+  const isERC20SendEnabled = useFeatureFlagEnabled("erc20-send");
+
   if (!t) {
     return;
   }
@@ -168,7 +169,7 @@ function ERC20() {
         </Card>
       </LayoutContent>
 
-      {posthog.isFeatureEnabled("erc20-send") && isIframe() && (
+      {isERC20SendEnabled && isIframe() && (
         <LayoutFooter>
           <Link to="send">
             <Button className="w-full">Send</Button>
