@@ -3,7 +3,6 @@ import {
   useAccountNameQuery,
   useAddressByUsernameQuery,
 } from "@cartridge/utils/api/cartridge";
-import { usePostHog } from "posthog-js/react";
 import { useEffect, useMemo, useRef } from "react";
 import { useParams } from "react-router-dom";
 
@@ -46,11 +45,6 @@ export function useAccount() {
       "",
     [data],
   );
-
-  const posthog = usePostHog();
-  useEffect(() => {
-    posthog.setPersonPropertiesForFlags({ address });
-  }, [posthog, address]);
 
   return {
     username,
