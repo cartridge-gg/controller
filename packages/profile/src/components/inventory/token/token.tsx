@@ -30,7 +30,6 @@ import { formatEther } from "viem";
 import { useAccount } from "@/hooks/account";
 import { useToken } from "@/hooks/token";
 import { TokenPair } from "@cartridge/utils/api/cartridge";
-import { useFeatureFlagEnabled } from "posthog-js/react";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
