@@ -106,6 +106,21 @@ function ERC20() {
     { enabled: t && ["ETH", "STRK"].includes(t.meta.symbol) },
   );
 
+  const countervalueFormatted = useMemo(() => {
+    if (!countervalue) return undefined;
+    // Catch prefix until number
+    let prefix = "";
+    for (const char of countervalue.formatted) {
+      if (!isNaN(parseInt(char))) {
+        break;
+      }
+      prefix += char;
+    }
+    return `${prefix}${parseFloat(
+      countervalue.formatted.replace(prefix, ""),
+    ).toLocaleString()}`;
+  }, [countervalue]);
+
   const compatibility = useMemo(() => {
     if (!version) return false;
     return compare(version, "0.4.0", ">=");
@@ -130,10 +145,10 @@ function ERC20() {
           t.balance === undefined ? (
             <Skeleton className="h-[20px] w-[120px] rounded" />
           ) : (
-            t.balance.formatted
+            parseFloat(t.balance.formatted).toLocaleString()
           )
         } ${t.meta.symbol}`}
-        description={countervalue && `${countervalue.formatted} (USD)`}
+        description={countervalueFormatted && `$${countervalueFormatted} (USD)`}
         icon={
           <img
             className="w-8 h-8"

@@ -10,7 +10,7 @@ import { Balance, ERC20Metadata, useCountervalue } from "@cartridge/utils";
 import { formatEther } from "viem";
 import { useTokens } from "@/hooks/token";
 import { TokenPair } from "@cartridge/utils/api/cartridge";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 export function Tokens() {
   // const { isVisible } = useConnection();
@@ -66,6 +66,21 @@ function TokenCardContent({
     pair: `${token.meta.symbol}_USDC` as TokenPair,
   });
 
+  const countervalueFormatted = useMemo(() => {
+    if (!countervalue) return undefined;
+    // Catch prefix until number
+    let prefix = "";
+    for (const char of countervalue.formatted) {
+      if (!isNaN(parseInt(char))) {
+        break;
+      }
+      prefix += char;
+    }
+    return `${prefix}${parseFloat(
+      countervalue.formatted.replace(prefix, ""),
+    ).toLocaleString()}`;
+  }, [countervalue]);
+
   return (
     <CardContent
       className={cn(
@@ -84,12 +99,12 @@ function TokenCardContent({
 
       <div className="bg-secondary flex flex-1 gap-x-1.5 items-center justify-between p-3 text-medium">
         <div className="flex items-center gap-2">
-          <div>{token.balance.formatted}</div>
-          <div className="text-muted-foreground">{token.meta.symbol}</div>
+          <p>{parseFloat(token.balance.formatted).toLocaleString()}</p>
+          <span className="text-muted-foreground">{token.meta.symbol}</span>
         </div>
 
-        {countervalue && (
-          <div className="text-muted-foreground">{countervalue.formatted}</div>
+        {countervalueFormatted && (
+          <span className="text-muted-foreground">{countervalueFormatted}</span>
         )}
       </div>
     </CardContent>
