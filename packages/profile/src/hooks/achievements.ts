@@ -132,13 +132,16 @@ export function useAchievements(accountAddress?: string) {
         const completion = Object.values(player[achievementId]).every(
           (task) => task.completion,
         );
-        timestamp = Math.max(
-          ...Object.values(player[achievementId]).map((task) => task.timestamp),
-        );
         if (completion) {
           completeds.push(achievementId);
           stats[achievementId] = stats[achievementId] || 0;
           stats[achievementId] += 1;
+          timestamp = Math.max(
+            timestamp,
+            ...Object.values(player[achievementId]).map(
+              (task) => task.timestamp,
+            ),
+          );
         }
         return acc + (completion ? trophies[achievementId].earning : 0);
       }, 0);
