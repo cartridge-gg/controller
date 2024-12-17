@@ -135,7 +135,7 @@ function ERC20() {
           )
         } ${t.meta.symbol}`}
         description={
-          countervalue && `$${formatBalance(countervalue.formatted)} (USD)`
+          countervalue && `${formatBalance(countervalue.formatted)} (USD)`
         }
         icon={
           <img
