@@ -32,6 +32,7 @@ import { useToken } from "@/hooks/token";
 import { TokenPair } from "@cartridge/utils/api/cartridge";
 import { useMemo } from "react";
 import { compare } from "compare-versions";
+import { formatBalance } from "./helper";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
@@ -106,21 +107,6 @@ function ERC20() {
     { enabled: t && ["ETH", "STRK"].includes(t.meta.symbol) },
   );
 
-  const countervalueFormatted = useMemo(() => {
-    if (!countervalue) return undefined;
-    // Catch prefix until number
-    let prefix = "";
-    for (const char of countervalue.formatted) {
-      if (!isNaN(parseInt(char))) {
-        break;
-      }
-      prefix += char;
-    }
-    return `${prefix}${parseFloat(
-      countervalue.formatted.replace(prefix, ""),
-    ).toLocaleString()}`;
-  }, [countervalue]);
-
   const compatibility = useMemo(() => {
     if (!version) return false;
     return compare(version, "0.4.0", ">=");
@@ -145,10 +131,12 @@ function ERC20() {
           t.balance === undefined ? (
             <Skeleton className="h-[20px] w-[120px] rounded" />
           ) : (
-            parseFloat(t.balance.formatted).toLocaleString()
+            formatBalance(t.balance.formatted)
           )
         } ${t.meta.symbol}`}
-        description={countervalueFormatted && `$${countervalueFormatted} (USD)`}
+        description={
+          countervalue && `$${formatBalance(countervalue.formatted)} (USD)`
+        }
         icon={
           <img
             className="w-8 h-8"

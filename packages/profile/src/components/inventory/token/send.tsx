@@ -27,6 +27,7 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Call, constants, uint256 } from "starknet";
 import { z } from "zod";
+import { formatBalance } from "./helper";
 
 export function SendToken() {
   const { address: tokenAddress } = useParams<{ address: string }>();
@@ -112,21 +113,6 @@ export function SendToken() {
     { enabled: t && ["ETH", "STRK"].includes(t.meta.symbol) && !!amount },
   );
 
-  const countervalueFormatted = useMemo(() => {
-    if (!countervalue) return undefined;
-    // Catch prefix until number
-    let prefix = "";
-    for (const char of countervalue.formatted) {
-      if (!isNaN(parseInt(char))) {
-        break;
-      }
-      prefix += char;
-    }
-    return `${prefix}${parseFloat(
-      countervalue.formatted.replace(prefix, ""),
-    ).toLocaleString()}`;
-  }, [countervalue]);
-
   if (!t) {
     return null;
   }
@@ -186,8 +172,7 @@ export function SendToken() {
                           )
                         }
                       >
-                        {parseFloat(t.balance.formatted).toLocaleString()}{" "}
-                        {t.meta.symbol}
+                        {formatBalance(t.balance.formatted)} {t.meta.symbol}
                       </div>
                     </div>
                   </div>
@@ -202,7 +187,7 @@ export function SendToken() {
                       />
                       {countervalue && (
                         <span className="absolute right-4 top-3.5 text-sm text-muted-foreground">
-                          {countervalueFormatted}
+                          {formatBalance(countervalue.formatted)}
                         </span>
                       )}
                     </div>
