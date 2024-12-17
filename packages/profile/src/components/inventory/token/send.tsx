@@ -116,6 +116,21 @@ export function SendToken() {
     return null;
   }
 
+  const countervalueFormatted = useMemo(() => {
+    if (!countervalue) return undefined;
+    // Catch prefix until number
+    let prefix = "";
+    for (const char of countervalue.formatted) {
+      if (!isNaN(parseInt(char))) {
+        break;
+      }
+      prefix += char;
+    }
+    return `${prefix}${parseFloat(
+      countervalue.formatted.replace(prefix, ""),
+    ).toLocaleString()}`;
+  }, [countervalue]);
+
   return (
     <LayoutContainer
       left={
@@ -127,7 +142,7 @@ export function SendToken() {
       }
     >
       <LayoutHeader
-        title={`Send ${t.meta.name}`}
+        title={`Send ${t.meta.symbol}`}
         description={<CopyAddress address={address} />}
         icon={
           <img
@@ -163,7 +178,7 @@ export function SendToken() {
                     <div className="flex items-center gap-2">
                       <FormLabel>Balance:</FormLabel>
                       <div
-                        className="text-xs cursor-pointer hover:underline"
+                        className="text-xs cursor-pointer hover:opacity-90"
                         onClick={() =>
                           form.setValue(
                             "amount",
@@ -180,14 +195,14 @@ export function SendToken() {
                     <div className="relative">
                       <Input
                         type="number"
-                        placeholder="0.01"
+                        placeholder={(0.01).toLocaleString()}
                         {...field}
                         value={field.value ?? ""}
                         className="[&::-webkit-inner-spin-button]:appearance-none"
                       />
                       {countervalue && (
                         <span className="absolute right-4 top-3.5 text-sm text-muted-foreground">
-                          {countervalue.formatted}
+                          {countervalueFormatted}
                         </span>
                       )}
                     </div>

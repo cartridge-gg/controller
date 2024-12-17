@@ -10,7 +10,7 @@ import { Balance, ERC20Metadata, useCountervalue } from "@cartridge/utils";
 import { formatEther } from "viem";
 import { useTokens } from "@/hooks/token";
 import { TokenPair } from "@cartridge/utils/api/cartridge";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 export function Tokens() {
   // const { isVisible } = useConnection();
@@ -66,6 +66,21 @@ function TokenCardContent({
     pair: `${token.meta.symbol}_USDC` as TokenPair,
   });
 
+  const countervalueFormatted = useMemo(() => {
+    if (!countervalue) return undefined;
+    // Catch prefix until number
+    let prefix = "";
+    for (const char of countervalue.formatted) {
+      if (!isNaN(parseInt(char))) {
+        break;
+      }
+      prefix += char;
+    }
+    return `${prefix}${parseFloat(
+      countervalue.formatted.replace(prefix, ""),
+    ).toLocaleString()}`;
+  }, [countervalue]);
+
   return (
     <CardContent
       className={cn(
@@ -88,10 +103,8 @@ function TokenCardContent({
           <span className="text-muted-foreground">{token.meta.symbol}</span>
         </div>
 
-        {countervalue && (
-          <span className="text-muted-foreground">
-            {countervalue.formatted}
-          </span>
+        {countervalueFormatted && (
+          <span className="text-muted-foreground">{countervalueFormatted}</span>
         )}
       </div>
     </CardContent>
