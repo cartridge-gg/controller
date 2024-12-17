@@ -130,7 +130,7 @@ function ERC20() {
           t.balance === undefined ? (
             <Skeleton className="h-[20px] w-[120px] rounded" />
           ) : (
-            t.balance.formatted
+            parseFloat(t.balance.formatted).toLocaleString()
           )
         } ${t.meta.symbol}`}
         description={countervalue && `${countervalue.formatted} (USD)`}
