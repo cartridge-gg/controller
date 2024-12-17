@@ -206,7 +206,13 @@ export function useAchievements(accountAddress?: string) {
     );
     // Update loading state
     setIsLoading(false);
-  }, [currentAddress, isFetchingTrophies, isFetchingProgressions]);
+  }, [
+    currentAddress,
+    isFetchingTrophies,
+    isFetchingProgressions,
+    rawTrophies,
+    rawProgressions,
+  ]);
 
   return { achievements, players, isLoading };
 }
