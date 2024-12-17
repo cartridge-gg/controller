@@ -84,12 +84,14 @@ function TokenCardContent({
 
       <div className="bg-secondary flex flex-1 gap-x-1.5 items-center justify-between p-3 text-medium">
         <div className="flex items-center gap-2">
-          <div>{token.balance.formatted}</div>
-          <div className="text-muted-foreground">{token.meta.symbol}</div>
+          <p>{parseFloat(token.balance.formatted).toLocaleString()}</p>
+          <span className="text-muted-foreground">{token.meta.symbol}</span>
         </div>
 
         {countervalue && (
-          <div className="text-muted-foreground">{countervalue.formatted}</div>
+          <span className="text-muted-foreground">
+            {countervalue.formatted}
+          </span>
         )}
       </div>
     </CardContent>

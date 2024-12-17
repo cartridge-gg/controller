@@ -162,8 +162,17 @@ export function SendToken() {
                     <FormLabel>Amount</FormLabel>
                     <div className="flex items-center gap-2">
                       <FormLabel>Balance:</FormLabel>
-                      <div className="text-xs">
-                        {t.balance.formatted} {t.meta.symbol}
+                      <div
+                        className="text-xs cursor-pointer hover:underline"
+                        onClick={() =>
+                          form.setValue(
+                            "amount",
+                            parseFloat(t.balance.formatted),
+                          )
+                        }
+                      >
+                        {parseFloat(t.balance.formatted).toLocaleString()}{" "}
+                        {t.meta.symbol}
                       </div>
                     </div>
                   </div>
