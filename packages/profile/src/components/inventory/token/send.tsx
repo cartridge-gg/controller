@@ -131,6 +131,21 @@ export function SendToken() {
     return null;
   }
 
+  const countervalueFormatted = useMemo(() => {
+    if (!countervalue) return undefined;
+    // Catch prefix until number
+    let prefix = "";
+    for (const char of countervalue.formatted) {
+      if (!isNaN(parseInt(char))) {
+        break;
+      }
+      prefix += char;
+    }
+    return `${prefix}${parseFloat(
+      countervalue.formatted.replace(prefix, ""),
+    ).toLocaleString()}`;
+  }, [countervalue]);
+
   return (
     <LayoutContainer
       left={

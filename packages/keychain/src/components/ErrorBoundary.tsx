@@ -1,11 +1,11 @@
-import React, { PropsWithChildren } from "react";
+import React, { PropsWithChildren, useEffect } from "react";
 import { Container, Content, Footer } from "./layout";
 import { AlertIcon, ExternalIcon } from "@cartridge/ui";
 import { Button, HStack, Link, Text } from "@chakra-ui/react";
 import { useConnection } from "hooks/connection";
 import NextLink from "next/link";
 import { CARTRIDGE_DISCORD_LINK } from "const";
-import posthog from "posthog-js";
+import { usePostHog } from "posthog-js/react";
 
 export class ErrorBoundary extends React.Component<
   PropsWithChildren,
@@ -20,14 +20,6 @@ export class ErrorBoundary extends React.Component<
     return { error };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.log({ error, errorInfo });
-    posthog?.captureException(error, {
-      info: errorInfo,
-      source: "ErrorBoundary",
-    });
-  }
-
   render() {
     if (this.state.error) {
       return <ErrorPage error={this.state.error} />;
@@ -39,6 +31,14 @@ export class ErrorBoundary extends React.Component<
 
 export function ErrorPage({ error }: { error: Error }) {
   const { closeModal } = useConnection();
+
+  const posthog = usePostHog();
+
+  useEffect(() => {
+    posthog?.captureException(error, {
+      source: "ErrorPage",
+    });
+  }, [error, posthog]);
 
   return (
     <Container
