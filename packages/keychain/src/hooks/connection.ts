@@ -215,7 +215,9 @@ export function useConnectionValue() {
           setChainId(chainId);
         } catch (e) {
           console.error(e);
-          setError(new Error("Unable to fetch Chain ID from provided RPC URL"));
+          setError(
+            new Error(`Unable to fetch Chain ID from provided RPC URL: ${e}`),
+          );
         }
       };
 
