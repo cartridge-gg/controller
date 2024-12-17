@@ -112,10 +112,6 @@ export function SendToken() {
     { enabled: t && ["ETH", "STRK"].includes(t.meta.symbol) && !!amount },
   );
 
-  if (!t) {
-    return null;
-  }
-
   const countervalueFormatted = useMemo(() => {
     if (!countervalue) return undefined;
     // Catch prefix until number
@@ -130,6 +126,10 @@ export function SendToken() {
       countervalue.formatted.replace(prefix, ""),
     ).toLocaleString()}`;
   }, [countervalue]);
+
+  if (!t) {
+    return null;
+  }
 
   return (
     <LayoutContainer
