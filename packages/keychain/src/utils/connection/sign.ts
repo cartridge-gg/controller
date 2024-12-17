@@ -5,6 +5,7 @@ import {
 } from "@cartridge/controller";
 import { Signature, TypedData } from "starknet";
 import { ConnectionCtx, SignMessageCtx } from "./types";
+import { mutex } from "./sync";
 import Controller from "utils/controller";
 import { parseControllerError } from "./execute";
 
@@ -29,11 +30,12 @@ export function signMessageFactory(setContext: (ctx: ConnectionCtx) => void) {
       });
     }
 
+    const release = await mutex.obtain();
     return await new Promise<Signature | ConnectError>(
       async (resolve, reject) => {
         // If a session call and there is no session available
         // fallback to manual apporval flow
-        if (!controller.hasSessionForMessage(typedData)) {
+        if (!(await controller.hasSessionForMessage(typedData))) {
           setContext({
             type: "sign-message",
             origin,
@@ -62,6 +64,8 @@ export function signMessageFactory(setContext: (ctx: ConnectionCtx) => void) {
           });
         }
       },
-    );
+    ).finally(() => {
+      release();
+    });
   };
 }

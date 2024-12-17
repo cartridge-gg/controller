@@ -18,8 +18,9 @@ export function probeFactory({
       }
 
       if (rpcUrl !== controller.rpcUrl()) {
-        controller.disconnect();
-        setController(undefined);
+        controller.disconnect().then(() => {
+          setController(undefined);
+        });
         return Promise.reject({
           code: ResponseCodes.NOT_CONNECTED,
         });

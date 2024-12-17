@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { JsCall } from "@cartridge/account-wasm";
+import { useCallback, useEffect, useState } from "react";
 import { addAddressPadding, Call } from "starknet";
 import { ControllerError } from "utils/connection";
 import Controller from "utils/controller";
@@ -71,6 +72,7 @@ export const useUpgrade = (controller?: Controller): UpgradeInterface => {
   const [isSynced, setIsSynced] = useState<boolean>(false);
   const [isUpgrading, setIsUpgrading] = useState<boolean>(false);
   const [current, setCurrent] = useState<ControllerVersionInfo>();
+  const [calls, setCalls] = useState<JsCall[]>([]);
 
   useEffect(() => {
     if (!controller) {
@@ -93,7 +95,7 @@ export const useUpgrade = (controller?: Controller): UpgradeInterface => {
           const current = CONTROLLER_VERSIONS.find(
             (v) =>
               addAddressPadding(v.hash) ===
-              addAddressPadding(controller.cartridge.classHash()),
+              addAddressPadding(controller.classHash()),
           );
           setCurrent(current);
           setAvailable(current?.version !== LATEST_CONTROLLER.version);
@@ -105,12 +107,14 @@ export const useUpgrade = (controller?: Controller): UpgradeInterface => {
       .finally(() => setIsSynced(true));
   }, [controller]);
 
-  const calls = useMemo(() => {
+  useEffect(() => {
     if (!controller || !LATEST_CONTROLLER) {
-      return [];
+      setCalls([]);
+    } else {
+      controller.upgrade(LATEST_CONTROLLER.hash).then((call) => {
+        setCalls([call]);
+      });
     }
-
-    return [controller.cartridge.upgrade(LATEST_CONTROLLER.hash)];
   }, [controller]);
 
   const onUpgrade = useCallback(async () => {

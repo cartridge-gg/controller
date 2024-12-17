@@ -1,5 +1,5 @@
 import { Content } from "components/layout";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useConnection } from "hooks/connection";
 import { SessionConsent } from "components/connect";
 import { ExecutionContainer } from "components/ExecutionContainer";
@@ -23,23 +23,31 @@ export function RegisterSession({
 }) {
   const { controller, theme } = useConnection();
   const [expiresAt] = useState<bigint>(SESSION_EXPIRATION);
+  const [transactions, setTransactions] = useState<
+    | {
+        contractAddress: string;
+        entrypoint: string;
+        calldata: string[];
+      }[]
+    | undefined
+  >(undefined);
 
-  const transactions = useMemo(() => {
-    if (!publicKey || !controller) return;
-
-    const calldata = controller.registerSessionCalldata(
-      expiresAt,
-      policies,
-      publicKey,
-    );
-
-    return [
-      {
-        contractAddress: controller.address,
-        entrypoint: "register_session",
-        calldata,
-      },
-    ];
+  useEffect(() => {
+    if (!publicKey || !controller) {
+      setTransactions(undefined);
+    } else {
+      controller
+        .registerSessionCalldata(expiresAt, policies, publicKey)
+        .then((calldata) => {
+          setTransactions([
+            {
+              contractAddress: controller.address,
+              entrypoint: "register_session",
+              calldata,
+            },
+          ]);
+        });
+    }
   }, [controller, expiresAt, policies, publicKey]);
 
   const onRegisterSession = useCallback(

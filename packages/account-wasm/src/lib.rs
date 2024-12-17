@@ -5,5 +5,6 @@ pub mod account;
 pub mod session;
 
 mod errors;
+mod sync;
 mod types;
 mod utils;

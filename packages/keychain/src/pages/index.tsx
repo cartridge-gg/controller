@@ -10,11 +10,15 @@ import { ErrorPage } from "components/ErrorBoundary";
 import { Settings } from "components/Settings";
 import { Upgrade } from "components/connect/Upgrade";
 import { PurchaseCredits } from "components/Funding/PurchaseCredits";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePostHog } from "posthog-js/react";
+import { PageLoading } from "components/Loading";
 
 function Home() {
   const { context, controller, error, policies, upgrade } = useConnection();
+  const [hasSessionForPolicies, setHasSessionForPolicies] = useState<
+    boolean | undefined
+  >(undefined);
   const posthog = usePostHog();
 
   useEffect(() => {
@@ -32,6 +36,16 @@ function Home() {
       });
     }
   }, [context?.origin, posthog]);
+
+  useEffect(() => {
+    if (controller && policies) {
+      controller.session(policies).then((session) => {
+        setHasSessionForPolicies(!!session);
+      });
+    } else {
+      setHasSessionForPolicies(undefined);
+    }
+  }, [controller, policies]);
 
   if (window.self === window.top || !context?.origin) {
     return <></>;
@@ -73,7 +87,10 @@ function Home() {
         return <></>;
       }
 
-      if (controller.session(policies)) {
+      if (hasSessionForPolicies === undefined) {
+        // This is likely never observable in a real application but just in case.
+        return <PageLoading />;
+      } else if (hasSessionForPolicies) {
         context.resolve({
           code: ResponseCodes.SUCCESS,
           address: controller.address,
