@@ -87,7 +87,7 @@ export function useConnectionValue() {
     if (controller) {
       posthog.identify(controller.username(), {
         address: controller.address,
-        class: controller.cartridge.classHash,
+        class: controller.classHash(),
         chainId: controller.chainId,
       });
     } else {
@@ -224,12 +224,13 @@ export function useConnectionValue() {
   }, [rpcUrl, controller]);
 
   const logout = useCallback(() => {
-    window.controller?.disconnect();
-    setController(undefined);
+    window.controller?.disconnect().then(() => {
+      setController(undefined);
 
-    context?.resolve?.({
-      code: ResponseCodes.NOT_CONNECTED,
-      message: "User logged out",
+      context?.resolve?.({
+        code: ResponseCodes.NOT_CONNECTED,
+        message: "User logged out",
+      });
     });
   }, [context, setController]);
 

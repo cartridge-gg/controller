@@ -11,6 +11,7 @@ import {
 } from "starknet";
 import { ConnectionCtx, ControllerError, ExecuteCtx } from "./types";
 import { ErrorCode, JsCall } from "@cartridge/account-wasm/controller";
+import { mutex } from "./sync";
 
 export const ESTIMATE_FEE_PERCENTAGE = 10;
 
@@ -64,6 +65,7 @@ export function execute({
       });
     }
 
+    const release = await mutex.obtain();
     return await new Promise<InvokeFunctionResponse | ConnectError>(
       async (resolve, reject) => {
         if (!account) {
@@ -74,7 +76,7 @@ export function execute({
 
         // If a session call and there is no session available
         // fallback to manual apporval flow
-        if (!account.hasSession(calls)) {
+        if (!(await account.hasSession(calls))) {
           setContext({
             type: "execute",
             origin,
@@ -124,7 +126,7 @@ export function execute({
         }
 
         try {
-          let estimate = await account.cartridge.estimateInvokeFee(calls);
+          let estimate = await account.estimateInvokeFee(calls);
           const maxFee = num.toHex(
             num.addPercent(estimate.overall_fee, ESTIMATE_FEE_PERCENTAGE),
           );
@@ -158,7 +160,9 @@ export function execute({
           });
         }
       },
-    );
+    ).finally(() => {
+      release();
+    });
   };
 }
 
