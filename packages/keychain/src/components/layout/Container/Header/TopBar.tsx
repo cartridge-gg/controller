@@ -9,10 +9,16 @@ import { useMemo } from "react";
 export type TopBarProps = {
   onBack?: () => void;
   hideAccount?: boolean;
+  hideNetwork?: boolean;
   onClose?: () => void;
 };
 
-export function TopBar({ onBack, hideAccount, onClose }: TopBarProps) {
+export function TopBar({
+  onBack,
+  hideAccount,
+  hideNetwork,
+  onClose,
+}: TopBarProps) {
   const { openSettings, context } = useConnection();
   const showSettings = useMemo(
     () => !context || !["connect", "open-settings"].includes(context.type),
@@ -40,9 +46,10 @@ export function TopBar({ onBack, hideAccount, onClose }: TopBarProps) {
 
       <Spacer />
 
+      {!hideNetwork && <NetworkStatus />}
+
       {!hideAccount && (
         <>
-          <NetworkStatus />
           {/* {!!address && (
             <>
               <EthBalance chainId={chainId} address={address} />

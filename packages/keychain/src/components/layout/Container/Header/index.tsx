@@ -6,6 +6,7 @@ export type HeaderProps = TopBarProps & BannerProps;
 
 export function Header({
   onBack,
+  hideNetwork,
   hideAccount,
   onClose,
   ...bannerProps
@@ -13,7 +14,12 @@ export function Header({
   return (
     <Box position="sticky" top={0} w="full" zIndex={1} bg="solid.bg">
       <Banner {...bannerProps} />
-      <TopBar onBack={onBack} onClose={onClose} hideAccount={hideAccount} />
+      <TopBar
+        onBack={onBack}
+        onClose={onClose}
+        hideAccount={hideAccount}
+        hideNetwork={hideNetwork}
+      />
     </Box>
   );
 }
