@@ -12,11 +12,13 @@ import { Upgrade } from "components/connect/Upgrade";
 import { PurchaseCredits } from "components/Funding/PurchaseCredits";
 import { useEffect, useState } from "react";
 import { usePostHog } from "posthog-js/react";
+import { PageLoading } from "components/Loading";
 
 function Home() {
   const { context, controller, error, policies, upgrade } = useConnection();
-  const [hasSessionForPolicies, setHasSessionForPolicies] =
-    useState<boolean>(false);
+  const [hasSessionForPolicies, setHasSessionForPolicies] = useState<
+    boolean | undefined
+  >(undefined);
   const posthog = usePostHog();
 
   useEffect(() => {
@@ -41,7 +43,7 @@ function Home() {
         setHasSessionForPolicies(!!session);
       });
     } else {
-      setHasSessionForPolicies(false);
+      setHasSessionForPolicies(undefined);
     }
   }, [controller, policies]);
 
@@ -85,7 +87,10 @@ function Home() {
         return <></>;
       }
 
-      if (hasSessionForPolicies) {
+      if (hasSessionForPolicies === undefined) {
+        // This is likely never observable in a real application but just in case.
+        return <PageLoading />;
+      } else if (hasSessionForPolicies) {
         context.resolve({
           code: ResponseCodes.SUCCESS,
           address: controller.address,
