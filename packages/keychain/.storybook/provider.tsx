@@ -13,6 +13,7 @@ import { StoryParameters, useMockedConnection } from "./mock";
 import { ControllerThemeContext } from "../src/context/theme";
 import { ChakraProvider } from "@chakra-ui/react";
 import { useChakraTheme } from "../src/hooks/theme";
+import { BrowserRouter } from "react-router-dom";
 
 export function Provider({
   children,
@@ -35,7 +36,7 @@ export function Provider({
       <QueryClientProvider client={queryClient}>
         <ConnectionContext.Provider value={connection}>
           <ControllerThemeProvider theme={connection.theme}>
-            {children}
+            <BrowserRouter>{children}</BrowserRouter>
           </ControllerThemeProvider>
         </ConnectionContext.Provider>
       </QueryClientProvider>

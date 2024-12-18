@@ -10,6 +10,7 @@ import { ControllerThemeProvider } from "./theme";
 import { jsonRpcProvider, StarknetConfig, voyager } from "@starknet-react/core";
 import { sepolia, mainnet } from "@starknet-react/chains";
 import { constants, num } from "starknet";
+import { BrowserRouter } from "react-router-dom";
 
 export function Provider({ children }: PropsWithChildren) {
   const connection = useConnectionValue();
@@ -36,16 +37,18 @@ export function Provider({ children }: PropsWithChildren) {
     <CartridgeAPIProvider url={ENDPOINT}>
       <QueryClientProvider client={queryClient}>
         <ConnectionContext.Provider value={connection}>
-          <ControllerThemeProvider>
-            <StarknetConfig
-              explorer={voyager}
-              chains={[sepolia, mainnet]}
-              defaultChainId={defaultChainId}
-              provider={jsonRpcProvider({ rpc })}
-            >
-              <PostHogProvider client={posthog}>{children}</PostHogProvider>
-            </StarknetConfig>
-          </ControllerThemeProvider>
+          <BrowserRouter>
+            <ControllerThemeProvider>
+              <StarknetConfig
+                explorer={voyager}
+                chains={[sepolia, mainnet]}
+                defaultChainId={defaultChainId}
+                provider={jsonRpcProvider({ rpc })}
+              >
+                <PostHogProvider client={posthog}>{children}</PostHogProvider>
+              </StarknetConfig>
+            </ControllerThemeProvider>
+          </BrowserRouter>
         </ConnectionContext.Provider>
       </QueryClientProvider>
     </CartridgeAPIProvider>
